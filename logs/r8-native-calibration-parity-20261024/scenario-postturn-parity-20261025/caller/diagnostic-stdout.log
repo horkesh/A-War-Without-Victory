@@ -1,0 +1,11 @@
+
+ RUN  v2.1.9 C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory
+
+ ✓ tests/current-scenario-postturn-boundary.test.ts (1 test) 8410ms
+   ✓ captures exact per-turn A/B/C boundaries for two canonical weeks 8409ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  22:32:22
+   Duration  17.63s (transform 3.17s, setup 15ms, collect 8.62s, tests 8.41s, environment 0ms, prepare 78ms)
+

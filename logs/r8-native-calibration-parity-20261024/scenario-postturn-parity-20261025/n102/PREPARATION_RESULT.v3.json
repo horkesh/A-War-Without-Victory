@@ -1,0 +1,70 @@
+{
+  "schema": "awwv.scenario-osid-repair-regression-preparation-result.v3",
+  "status": "READY_FOR_INDEPENDENT_TARGETED_VERIFICATION__NO_CAMPAIGN_EXECUTED",
+  "head": "b30597f49aad99032781c251b41a9de886cce3be",
+  "expected_candidate": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n102",
+  "expected_candidate_absent": true,
+  "campaign_attempt_absent": true,
+  "corrections": [
+    "The exact launch argv supplies the external LAUNCH_MANIFEST.v3.json SHA-256 as a literal; qualification verifies that hash plus the manifest-bound current entry and CONFIG.bound.v3.json bytes before every mode.",
+    "The complete frozen config contract is fail-closed: Node path/version, scenario, 188-week horizon, save weeks, checkpoint weeks, minimum-floor values and semantics, candidate/baseline/comparison paths, retained roots, diagnostic environment, and all 27 bound files.",
+    "Graph qualification validates assigned, reserve, and optional rear rosters sector-to-formation and formation-to-roster; missing formations, wrong sectors, duplicates across roles/sectors, malformed required arrays, and dangling assignments fail.",
+    "Rear roster absence remains valid because CorpsFrontSector.rear_brigade_ids is optional; assigned_brigade_ids and reserve_brigade_ids remain required arrays."
+  ],
+  "frozen": {
+    "qualification": { "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/regression-v1/qualification.mts", "bytes": 30034, "sha256": "87ffab6fc6b1309dec1130ed1a6edb255c34c45b8ef1efebd1009edaf9f30ee6" },
+    "config": { "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/regression-v1/CONFIG.bound.v3.json", "bytes": 10786, "sha256": "bce575f6a324d8ec4bc002a4ead81c0f99309953023498e7f3f78133afe2012a" },
+    "manifest": { "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/regression-v1/LAUNCH_MANIFEST.v3.json", "bytes": 3448, "sha256": "2972b66f46d668d02e046d9e584337c21a9bb98b29d56bd9f2d6d129886e3d71" },
+    "wrapper": { "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/regression-v1/WRAPPER_CONFIG.v3.json", "bytes": 3636, "sha256": "9b5da00e3c250a0fa0e6dee01971e3580dac5b920ce2d085739c62724b1e7cd5" },
+    "finalized": { "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/regression-v1/FINALIZED.v3.json", "bytes": 11370, "sha256": "f9ba7370be61568e160f2aaee64f0ce06414a02d4f3e557484d36fc8aae74a73" }
+  },
+  "checks": {
+    "typescript": { "exit": 0 },
+    "finalizer_syntax": { "exit": 0 },
+    "bound_preflight": {
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract": true,
+      "bindings": 27,
+      "manifest_sha256": "2972b66f46d668d02e046d9e584337c21a9bb98b29d56bd9f2d6d129886e3d71",
+      "receipt": { "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/regression-v1/preflight-v3-01/receipt.json", "bytes": 4177, "sha256": "19db01115600f6cf399d1998dd6d540e89ed303ea220e120139b2289a4448d5c" },
+      "result": { "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/regression-v1/preflight-v3-01/preflight-result.json", "bytes": 541, "sha256": "4ab6c55fab712e2c4bb810d2636977613455b83d80b728e647e8cba49bd63b75" }
+    },
+    "selftest": {
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract": true,
+      "assertions": 16,
+      "simulation_executed": false,
+      "receipt": { "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/regression-v1/selftest-v3-01/receipt.json", "bytes": 4171, "sha256": "a10ab3bea941decb6bc9cebe1a05518b5b4192acc86950becb86712c72bad6f8" },
+      "result": { "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/regression-v1/selftest-v3-01/selftest-result.json", "bytes": 780, "sha256": "a7e835c2188954d4b0e44f4e228d82e89f53513f1d6544955f4cf5285c310e2b" }
+    }
+  },
+  "obsolete_evidence_preserved": [
+    "PREPARATION_RESULT.json and FINALIZED.json",
+    "CONFIG.bound.json and WRAPPER_CONFIG.json",
+    "preflight-01 and selftest-01",
+    "CONFIG.bound.v2.json, LAUNCH_MANIFEST.v2.json, WRAPPER_CONFIG.v2.json, and FINALIZED.v2.json",
+    "preflight-v2-01 and selftest-v2-01",
+    "INDEPENDENT_PRELAUNCH_REVIEW.json"
+  ],
+  "campaign": {
+    "executed": false,
+    "attempts": 0,
+    "planned_attempts": 1,
+    "retries": 0,
+    "expected_cost": "3-8 minutes",
+    "cap_ms": 2100000,
+    "closing_reserve_ms": 120000,
+    "allowed_artifacts": 63,
+    "exact_command_source": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/regression-v1/FINALIZED.v3.json#exact_command"
+  },
+  "criteria_unchanged": {
+    "minimum_checkpoint_floors": [707, 707, 706, 706],
+    "formerly_correct_n91_n92_losses_at_all_four_checkpoints": 0,
+    "protected_anchors": 16,
+    "state_and_control_deltas": "DIAGNOSTIC_ONLY",
+    "all_existing_outcome_history_provenance_health_consistency_protected_enclave_movement_and_producer_gates": "REQUIRED"
+  },
+  "stop": "HOLD until a new independent targeted verification GO. No campaign, full suite, package, build, native run, retained-root inventory, tuning, adoption, pin/threshold change, or retry was performed."
+}

@@ -1,0 +1,32 @@
+{
+  "schema": "awwv.current-boundary-two-week-preexecution-checks.v1",
+  "head": "b30597f49aad99032781c251b41a9de886cce3be",
+  "plan_sha256": "a6b9f03b1e3fb799fafed81a956eff7d7ca083f56ad3e73097fd228ff7579ecf",
+  "hash_file_exact": true,
+  "plan_decision": "PREPARED_ONLY_INDEPENDENT_REVIEW_REQUIRED_BEFORE_EXECUTION",
+  "exact_argv_count": 58,
+  "argv_executable": "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+  "argv_placeholder_count": 1,
+  "argv_entry_script_values": [
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/current-boundary-diagnostic-v2/launch.cjs",
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/current-boundary-diagnostic-v2/launch.cjs"
+  ],
+  "allowed_artifact_count": 23,
+  "planned_write_count": 23,
+  "allowlist_missing": [],
+  "allowlist_extra": [],
+  "binding_count": 12,
+  "binding_hash_mismatches": [],
+  "maintained_test_sha256": "afdd7df3ba33237d23fc5162c589a4a5ac56abf28e430e496341d14765f176cb",
+  "preserved_prior_test_sha256": "3582cedff44ad5fb1b3bc918fab9f51f5a6b2840e8d34f5b4c00148cacec925a",
+  "launcher_sha256": "452daf014f8b129027e9b67fdb0a642dfbbcfeb236542886deacf9791bd4bef5",
+  "attempt_exists": false,
+  "scenario_output_exists": false,
+  "scenario_executed": false,
+  "vitest_list_exit": 0,
+  "launcher_syntax_exit": 0,
+  "argv_probe_syntax_exit": 0,
+  "powershell_parse_errors": 0,
+  "literal_argv_probe": "[\"{evidenceDir}\"]",
+  "git_diff_check_exit": 0
+}

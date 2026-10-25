@@ -1,0 +1,100 @@
+{
+  "schema": "awwv.postturn-gate.retention-correction-independent-postexecution-review.v1",
+  "decision": "GO_FOCUSED_ONLY__AUTHORITATIVE_GATES_PENDING",
+  "review_scope": "Targeted verification of the once-executed frozen retained-output focused test and conditional typecheck. Prior source/canon review and the unchanged six-contract evidence are reused; no general review or rerun was performed.",
+  "base_head": "b30597f49aad99032781c251b41a9de886cce3be",
+  "bindings": {
+    "frozen_commands_sha256": "47cd2d9a0b9ccd43a4abd6e7a03f83a8b52b01f4cecac426fee4089ab203e247",
+    "launcher_sha256": "de73b3e5feb3d359b55e24635c8c7ea34ccd9a052f274cd9e15dee032321b914",
+    "frozen_executor_sha256": "491233cf16677c644f55127d6bd429536dba1bf28398c8f92ad46a33418e32a2",
+    "production_source_sha256": "b811a55f165a1664e87b48be28008ada9fec7486ddb5c049b2013fbf78bd0972",
+    "maintained_test_sha256": "246259561471affbaa7617f4c92ef6f67a6101abf1aa64b669e18c6acd5b61e3",
+    "gap_record_sha256": "b054efee5dd6d4641dd8832bf22ab6790dd5f627e2362617497c3e1d84f77991"
+  },
+  "focused_green": {
+    "attempt": "attempt-06-focused-green",
+    "receipt_sha256": "21506017d747e792d8385fa3dfdc1a7f3bf552283556ad8225ef185006a8b852",
+    "child_result_sha256": "199ac411d420cc3daf80f33391a4ddba3bed9afdb52ebe0cbc0c06120cd4a6f9",
+    "wrapper_exit": 0,
+    "child_exit": 0,
+    "signal": null,
+    "timed_out": false,
+    "spawn_error": null,
+    "artifact_contract_pass": true,
+    "tests": "3 passed (3); 1 test file passed",
+    "stdout": {
+      "bytes": 804,
+      "sha256": "d558061c4009416e7dcd6f99c5e8d10f79b635fdf7c6b7f868f3fe7486126c86",
+      "authenticated_by_receipt": true
+    },
+    "stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "authenticated_by_receipt": true
+    },
+    "entry_script_unchanged_during_wrapper": true
+  },
+  "retained_tree": {
+    "root": "attempt-06-focused-green-scenario-artifacts",
+    "root_exists_after_test_cleanup": true,
+    "registry_sha256": "ed133eb37b8bfedab247d2c407860fa56d11bc6bc1e96530bd1df8811d0cc95a",
+    "manifest_sha256": "2324554287871f90361346a3f0acf9a97dfb963ae57df19d7dcd9426090f24d4",
+    "registry_labels_in_order": [
+      "zero-flip-run-a",
+      "zero-flip-run-b",
+      "positive-flip-run",
+      "remaining-peace-fixture",
+      "remaining-peace-run"
+    ],
+    "registered_directories_exist": true,
+    "coverage": {
+      "scenario_runs": 4,
+      "peace_fixtures": 1
+    },
+    "manifest_declared_artifact_count": 68,
+    "manifest_entry_count": 68,
+    "actual_file_count_excluding_manifest": 68,
+    "missing_or_unlisted_files": 0,
+    "size_or_sha256_mismatches": 0,
+    "recursive_hash_coverage_pass": true,
+    "child_result_binds_registry_and_manifest": true
+  },
+  "typecheck": {
+    "attempt": "attempt-07-typecheck",
+    "started_after_focused_green_completed": true,
+    "receipt_sha256": "b7fb48e66db93d656a59f3307ea7a6ca1a638d8e145a9733b850cdc7bbcb7aaf",
+    "child_result_sha256": "02d41e053e1321657bbaa1dcefdc316d3b0a592b4d4fcfffd44b44ae9ba83383",
+    "wrapper_exit": 0,
+    "child_exit": 0,
+    "signal": null,
+    "timed_out": false,
+    "spawn_error": null,
+    "artifact_contract_pass": true,
+    "stdout_bytes": 0,
+    "stderr_bytes": 0,
+    "raw_stream_hashes_authenticated_by_receipt": true,
+    "entry_script_unchanged_during_wrapper": true
+  },
+  "preservation": {
+    "production_source_matches_preapproved_sha256": true,
+    "maintained_test_matches_frozen_sha256": true,
+    "retained_output_root_was_not_deleted": true,
+    "no_retry_observed": true,
+    "earlier_gap_unwaived": true,
+    "gap_statement": "The earlier RED/GREEN scenario states remain unavailable. GAP.json records that they were deleted by the old test cleanup, were not reconstructed, and are not replaced by this later retained run."
+  },
+  "reused_evidence": [
+    "Prior authoritative source/canon/systems review of production source SHA b811a55f165a1664e87b48be28008ada9fec7486ddb5c049b2013fbf78bd0972.",
+    "Prior unchanged existing-contract result: 6/6 passing."
+  ],
+  "limits": [
+    "This verdict closes only the retained-output focused correction and its conditional typecheck.",
+    "It does not qualify the authoritative 188-week score gate or the full balanced suite.",
+    "No source, test, simulation, campaign, native run, package build, or broad suite was executed by this reviewer."
+  ],
+  "reviewer_changes": {
+    "production_source": false,
+    "test_source": false,
+    "only_this_review_artifact": true
+  }
+}

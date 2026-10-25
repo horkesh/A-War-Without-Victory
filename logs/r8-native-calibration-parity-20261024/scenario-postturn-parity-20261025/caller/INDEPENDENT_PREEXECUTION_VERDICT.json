@@ -1,0 +1,34 @@
+{
+  "schema": "awwv.current-boundary-two-week-preexecution-review.v1",
+  "reviewed_at": "2026-10-25",
+  "head": "b30597f49aad99032781c251b41a9de886cce3be",
+  "decision": "GO_EXACT_FROZEN_COMMAND_ONCE",
+  "simulation_executed_by_reviewer": false,
+  "plan": {
+    "path": "FROZEN_RUN_PLAN.json",
+    "sha256": "a6b9f03b1e3fb799fafed81a956eff7d7ca083f56ad3e73097fd228ff7579ecf"
+  },
+  "verified": {
+    "per_turn_reset": "Before each delegated real runTurn, scenarioIndex is reset to -1 and engineIndex is set to the new call index. Only after a successful return is A cloned and scenarioIndex assigned to that call. Engine displacements/reconciliations therefore cannot be mistaken for scenario helper entries.",
+    "b_capture": "B[n] is captured only at the first post-return displacement whose stack contains repairScenarioArtifactState, before the real displacement function executes.",
+    "c_capture": "C[n] is captured only after B[n] exists and the following reconcileFinalSectorTruth call has no session. Each turn asserts exactly one verified helper entry and one such reconciliation.",
+    "observer_capture": "The existing observer writes its state/report into the matching zero-based week index; each turn independently records C-to-observer diffs.",
+    "topology_projection": [
+      "formation identity, faction, kind, status, readiness, location_osid, assignment, assigned_sub_segment_id, and corps_id",
+      "political_controllers",
+      "war_front_edges_osid",
+      "corps_front_sectors",
+      "unresolved_sector_brigades"
+    ],
+    "topology_decision": "T2 topology_clean requires exact projected A2/B2 identity and every scenario control-flip receipt to have applied=0 with no changed controller. Created/removed formation IDs are also retained explicitly. Baseline displacement/exhaustion and other paths are classified separately rather than treated as topology.",
+    "retained_b1_validation": "The authentic retained B1 is cloned. Existing shape, operation-lifecycle, friendly-territory, and sector-truth validators run on the clone with operational edges. The source B1 hash, all issues/counts, created-formation fields, and before/after clone hashes are retained; the test requires exact hash equality. Control-event consistency is accurately marked unmeasured because its required turn-start snapshot is absent.",
+    "capture_completeness": "All A/B/C/observer runtime states, canonical persisted states, per-turn reports and diffs, mutator/session receipts, validator result, binding file, and summary report are written with exclusive creation and exactly match the 23-item wrapper allowlist.",
+    "launch_contract": "Exact argv uses one literal {evidenceDir}, the preserved wrapper, 180000 ms timeout, one attempt, and zero retries. The PowerShell runner passes the JSON argv as an argument array without command-text evaluation.",
+    "bindings": "12/12 current hashes match the frozen plan, including test, launcher, runner, wrapper, production sources, validators, and retained A1/B1 inputs.",
+    "freshness": "attempt-01 and the actual scenario-output directory are absent.",
+    "source_state": "Production source is unchanged at HEAD b30597f49aad99032781c251b41a9de886cce3be. The predecessor diagnostic bytes are retained at SHA-256 3582cedff44ad5fb1b3bc918fab9f51f5a6b2840e8d34f5b4c00148cacec925a."
+  },
+  "authorization": "Execute only FROZEN_RUN_PLAN.json exact_command_argv once. Preserve all evidence and stop on any failure; do not retry or change gameplay.",
+  "interpretation_limit": "A successful run authorizes evidence interpretation only. It does not authorize the caller change until T2 satisfies the stated clean-topology predicates and retained B1 validation is reviewed.",
+  "reviewer_source_or_test_changes": false
+}

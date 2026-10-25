@@ -1,0 +1,106 @@
+{
+  "schema": "awwv.scenario-postturn-parity.preimplementation-review.v1",
+  "reviewed_at": "2026-10-25",
+  "head": "b30597f49aad99032781c251b41a9de886cce3be",
+  "decision": "NO_GO_IMPLEMENTATION_PENDING_CURRENT_BOUNDARY_CAPTURE",
+  "supported_direction_after_gate": "NARROW_SCENARIO_CALLER_ONLY",
+  "decision_summary": "The successful public runTurn.nextState is the authoritative settled turn boundary. The scenario runner must not unconditionally rebuild and mutate that live state after success. A broad deletion is also unsupported because the scenario harness can create formations or apply control changes after runTurn and the retained project decision requires a final repair for those explicit topology-changing paths. Preserve the helper API and the dedicated final-save geometry projection; gate the scenario helper call only on a proven post-run topology invalidation.",
+  "immutable_public_turn_boundary": {
+    "owner": "src/sim/turn_pipeline.ts::runTurn",
+    "contract": "A success result is returned only after the public war pipeline refreshes the front snapshot and passes the post-turn invariant barrier. Scenario, native, and desktop consumers must treat that successful nextState as settled unless a caller performs an explicit, separately-owned mutation.",
+    "canon_bindings": [
+      "docs/20_engineering/CODE_CANON.md:148",
+      "src/sim/turn_pipeline.ts:183-222",
+      "docs/20_engineering/DETERMINISM_TEST_MATRIX.md:38"
+    ]
+  },
+  "established_findings": [
+    {
+      "id": "NON_IDENTITY",
+      "finding": "On a cloned retained sealed T1 with correct operational edges, the current helper changes 190 leaves on its first pass and two on its second. The persisted changes are HVO sector threat_ratio and rs_22nd_krajina_infantry location_osid; the repeat pass moves the formation back. This is a live gameplay mutation, not artifact-only cleanup.",
+      "evidence": "native-scenario-repair-audit-v1/OFFLINE_IDENTITY_PROBE.v2.json"
+    },
+    {
+      "id": "PERSISTED_SECTOR_CONTRACT",
+      "finding": "corps_front_sectors, formation sector assignment, assigned_sub_segment_id, and formation location are persisted gameplay state. Only the five named caches, including sector_combat_ratings, are disposable.",
+      "evidence": "docs/20_engineering/ADR/ADR-0006-sectors-as-standing-operational-groups.md:29-33"
+    },
+    {
+      "id": "SCENARIO_POST_TURN_MUTATIONS_EXIST",
+      "finding": "After runTurn, the scenario runner resolves headless opportunities, can create OOB formations, can apply control-flip proposals, and can apply baseline displacement before the repair call. OOB creation and applied political-control changes can invalidate formation/front/sector topology, so deleting the repair call for every path would be blind.",
+      "evidence": "src/scenario/scenario_runner.ts:2982-3007,3202-3248"
+    },
+    {
+      "id": "FINAL_SAVE_SEPARATE",
+      "finding": "Final save uses a separate operational-edge projection, an explicit final-save reconciliation session, and a seal. That path is outside this proposal and must remain unchanged.",
+      "evidence": "src/scenario/scenario_runner.ts:3548-3602"
+    },
+    {
+      "id": "PUBLIC_PIPELINE_NOT_BROKEN",
+      "finding": "No evidence shows a public runTurn invariant defect. The public war pipeline already performs session-owned reconciliation/distribution/sealing and the post-turn barrier. Moving the scenario helper into runTurn would change native and desktop behavior without an established engine defect.",
+      "evidence": "src/sim/turn_pipeline.ts:183-222; src/sim/turn_phases/war_phase_reconciliation_steps.ts"
+    }
+  ],
+  "why_retained_capture_is_insufficient": [
+    "The retained actual capture is from predecessor head 295d5f7290b1085dc76bbebb41df72386cd6b705, not current b30597f49aad99032781c251b41a9de886cce3be.",
+    "It captured PRE_REPAIR after scenario-owned handlers, not the immediate runTurn.nextState, so it cannot attribute pre-helper changes to the caller layer.",
+    "Its postcheck failed FINAL_NOT_EXACT_TO_COMPOSITE_AND_OBSERVER and ENTRY_EXACTNESS_FLAGS_FALSE. The retained state remains useful for the offline non-identity proof but cannot approve a current runtime boundary change.",
+    "The current diagnostic attempt selected no test and loaded no state; it is not boundary evidence."
+  ],
+  "mandatory_preimplementation_gate": {
+    "scope": "One current-head, exact one-week, real scenario-harness capture; one attempt; no campaign, replay, native, package, full suite, or retry.",
+    "capture_points": [
+      "A: successful runTurn.nextState immediately after assertTurnSuccess and before any scenario-only mutation",
+      "B: the same live state immediately before repairScenarioArtifactState after all scenario-only handlers",
+      "C: the same live state immediately after repairScenarioArtifactState"
+    ],
+    "required_receipts": [
+      "HEAD, exact argv/selectors, operational graph identity/hash, child/wrapper exits, timeout status",
+      "canonical persisted-state hashes and runtime-state hashes at A/B/C",
+      "complete deterministic leaf diffs A->B and B->C, with disposable-cache paths separately classified",
+      "runTurn success/invariant status and final-sector reconciliation session/seal diagnostics",
+      "explicit counts/results for OOB creation and control-flip application"
+    ],
+    "pass_condition": "For an ordinary week with zero topology-changing scenario mutations, A and B are equal on persisted gameplay fields, and B->C demonstrates only the currently suspected unwanted rebuild effects. If A->B contains a topology mutation, the capture must identify its owning caller and the proposal must gate repair on that explicit mutation result rather than on week number or artifact emission.",
+    "stop_condition": "Any selector/startup/capture-integrity failure stops the attempt; preserve it and do not treat it as proof or retry without a corrected, newly justified selector."
+  },
+  "smallest_supported_implementation_after_gate": [
+    "Keep repairScenarioArtifactState exported and keep its focused synthetic explicit-use coverage.",
+    "At the scenario call site only, replace the unconditional invocation with an explicit deterministic topology-dirty condition derived from actual post-run mutation results. Formation creation and applied control flips are candidate dirty owners; the boundary capture and function contracts must establish the final set.",
+    "When the condition is false, weekly reports, replay/checkpoint output, weekly saves, and the diagnostic observer consume the successful public nextState without another displacement/reconciliation pass.",
+    "When the condition is true, retain operational OSID edges and perform the scenario-owned repair before artifacts; do not change mechanics, data, thresholds, graph domains, or sector algorithms.",
+    "Leave the dedicated final-save geometry projection/session/seal unchanged."
+  ],
+  "forbidden_regressions": [
+    "No change inside runTurn, war-phase reconciliation, displacement mechanics, sector construction, public native/desktop behavior, or save schema.",
+    "No broad removal of the helper, its explicit artifact use, or the final-save projection.",
+    "No sessionless clean-path rebuild of an already settled public nextState.",
+    "No stale or empty operational fronts/sectors, enemy-territory active formation, observer/save divergence, wrong SID/OSID graph, or canonical serialization of disposable caches.",
+    "No coefficient, threshold, authored data, baseline, acceptance criterion, or calibration tuning change."
+  ],
+  "required_postimplementation_verification": [
+    "Focused RED/GREEN characterization of the A/B/C boundary on current head.",
+    "Clean-path one-week parity: persisted gameplay state at artifact boundary equals the successful public nextState; weekly save, observer, replay/checkpoint state agree.",
+    "Dirty-path tests for actual OOB formation creation and applied control flips: repair occurs once, with operational edges, and yields valid persisted sectors/assignments.",
+    "Existing explicit helper displacement test remains green; repeated repair is not invoked on the clean path.",
+    "Final-save operational projection/session/seal and save-load validation remain green.",
+    "Affected scenario-harness, turn-invariant, sector persistence, serialization, determinism, and TypeScript checks pass before any calibration run.",
+    "Because this changes a territory/calibration trajectory, a final qualifying candidate still requires the authorized 188-week calibration gate and full suite under the existing acceptance criteria; focused proof cannot waive them."
+  ],
+  "review_panels": {
+    "required_for_narrow_change": [
+      "engine/systems and canon-compliance review of the public boundary and persisted sector/location contract",
+      "scenario-harness/QA and determinism independent review"
+    ],
+    "scope_escalation_triggers": [
+      "Any edit to runTurn, war phases, displacement, sector construction, public native/desktop consumers, save schema, or final-save projection requires a new engine/systems proposal and owner approval.",
+      "Any gameplay rule, coefficient, threshold, authored data, historical anchor, or acceptance-criterion change requires the applicable canon/calibration/history authority.",
+      "Any FORAWWV or sensitive-history change triggers its mandated panel; none is justified by this proposal."
+    ]
+  },
+  "evidence_hashes_sha256": {
+    "native-scenario-repair-audit-v1/AUDIT.md": "b55a2085d5b210cf825f42fed04e23896fa9c8da1e8bdd100c14882f5854192",
+    "native-scenario-repair-audit-v1/OFFLINE_IDENTITY_PROBE.v2.json": "b3d7c21121594eab22da9afc809e2f54837479822798e225498b7b2d1ff9f0fd",
+    "pre-t6-causal-capture-v4/ACTUAL_FAILURE_REVIEW.json": "0169d075ce3f4087685ee2de87df4d1b9da51b0c137ebcfdc25b061700205c0b"
+  }
+}

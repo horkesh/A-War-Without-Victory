@@ -1,0 +1,25 @@
+{
+  "schema": "awwv.postturn-gate.artifact-registry.v1",
+  "paths": [
+    {
+      "label": "zero-flip-run-a",
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/implementation-v1/retention-correction-v1/attempt-06-focused-green-scenario-artifacts/01-zero-flip-run-a"
+    },
+    {
+      "label": "zero-flip-run-b",
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/implementation-v1/retention-correction-v1/attempt-06-focused-green-scenario-artifacts/02-zero-flip-run-b"
+    },
+    {
+      "label": "positive-flip-run",
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/implementation-v1/retention-correction-v1/attempt-06-focused-green-scenario-artifacts/03-positive-flip-run"
+    },
+    {
+      "label": "remaining-peace-fixture",
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/implementation-v1/retention-correction-v1/attempt-06-focused-green-scenario-artifacts/04-remaining-peace-fixture"
+    },
+    {
+      "label": "remaining-peace-run",
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/implementation-v1/retention-correction-v1/attempt-06-focused-green-scenario-artifacts/05-remaining-peace-run"
+    }
+  ]
+}

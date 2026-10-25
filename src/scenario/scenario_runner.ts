@@ -2910,6 +2910,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             }
 
             let turnReport: Awaited<ReturnType<typeof runTurn>>['report'];
+            let consumedSuccessfulPublicWarTurn = false;
             if (state.meta.phase === 'peace') {
                 const phaseBeforeTurn = state.meta.phase;
                 const result = runOneTurn(state, { seed: state.meta.seed });
@@ -2980,6 +2981,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 });
                 assertTurnSuccess(runResult);
                 state = runResult.nextState;
+                consumedSuccessfulPublicWarTurn = true;
                 turnReport = runResult.report;
                 autoResolveOpportunityProposalReviews(
                     state,
@@ -3199,11 +3201,12 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 weeklyControlChangeAttributionForReport = weeklyControlChangeAttribution;
             }
 
+            let appliedScenarioControlFlips = 0;
             if (shouldApplyBreaches && adjacencyMap && state.meta.phase === 'war') {
                 const derivedFrontEdges = computeFrontEdges(state, graph.edges);
                 let breaches = computeFrontBreaches(state, derivedFrontEdges);
                 const proposalsFile = computeControlFlipProposals(state, derivedFrontEdges, breaches, adjacencyMap);
-                applyControlFlipProposals(state, proposalsFile);
+                appliedScenarioControlFlips = applyControlFlipProposals(state, proposalsFile).applied;
             }
             if (botManager) {
                 botControlTimeline.push({
@@ -3240,12 +3243,14 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 ops = { enabled: true, level };
             }
 
-            repairScenarioArtifactState(
-                state,
-                operationalSettlementGraph.edges,
-                operationalData?.operationalToCanonical ?? null,
-                operationalCentroids,
-            );
+            if (!consumedSuccessfulPublicWarTurn || appliedScenarioControlFlips > 0) {
+                repairScenarioArtifactState(
+                    state,
+                    operationalSettlementGraph.edges,
+                    operationalData?.operationalToCanonical ?? null,
+                    operationalCentroids,
+                );
+            }
             timingAdd(timingTotals, 'simulation', weekSimulationStart);
 
             const weeklyDiagnosticsStart = timingStart(emitTimingJson);

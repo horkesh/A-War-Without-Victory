@@ -1,0 +1,210 @@
+{
+  "schema": "awwv.current-boundary-two-week-diagnostic-plan.v1",
+  "head": "b30597f49aad99032781c251b41a9de886cce3be",
+  "decision": "PREPARED_ONLY_INDEPENDENT_REVIEW_REQUIRED_BEFORE_EXECUTION",
+  "question": "After the one-time T1 OOB creation, does canonical T2 have zero A-to-B topology mutation while the same sessionless repair still changes persisted gameplay state? Is retained T1 B already valid under existing read-only state, operation, friendly-territory, and sector-truth validators?",
+  "scope": {
+    "simulations": 1,
+    "weeks": 2,
+    "attempts": 1,
+    "retries": 0,
+    "production_changes": 0,
+    "campaign": false,
+    "native": false,
+    "full_suite": false
+  },
+  "expected_cost": "under one minute",
+  "cap_ms": 180000,
+  "stop_rule": "Any harness, selector, capture-integrity, or runtime failure: retain evidence and stop without correction, retry, alternate fixture, wider run, or gameplay change.",
+  "capture_contract": [
+    "A[n]: clone of successful delegated real public runTurn.nextState before returning to scenario code",
+    "B[n]: clone at the first repairScenarioArtifactState displacement entry before delegating the real displacement function",
+    "C[n]: clone immediately after the sole sessionless reconciliation following verified B[n]",
+    "observer[n]: clone from the existing diagnosticTurnBoundaryObserver",
+    "two public runTurn calls, two verified helper entries, and one sessionless repair reconciliation per turn"
+  ],
+  "t2_topology_projection": [
+    "formation ID",
+    "formation status/readiness",
+    "formation location_osid",
+    "formation assignment and assigned_sub_segment_id",
+    "formation corps_id",
+    "political controllers",
+    "war_front_edges_osid",
+    "corps_front_sectors",
+    "unresolved_sector_brigades"
+  ],
+  "b1_read_only_validation": [
+    "validateGameStateShape",
+    "assertOperationLifecycle",
+    "assertFormationsInFriendlyTerritory",
+    "auditSectorTruth with operational edges",
+    "explicit retained T1-created formation readiness/status/location/assignment fields",
+    "before/after clone hash equality; record failures without repair",
+    "control-event consistency explicitly unmeasured because retained B1 lacks required turn-start control snapshot"
+  ],
+  "exact_command_argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tools/diagnostics/run_preserved_preflight.cjs",
+    "--attempt-dir",
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/current-boundary-diagnostic-v2/attempt-01",
+    "--entry-script",
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/current-boundary-diagnostic-v2/launch.cjs",
+    "--timeout-ms",
+    "180000",
+    "--allow-artifact",
+    "BINDING.json",
+    "--allow-artifact",
+    "RETAINED_B1_READ_ONLY_VALIDATION.json",
+    "--allow-artifact",
+    "T1_FULL_A_RUNTIME.json",
+    "--allow-artifact",
+    "T1_FULL_B_RUNTIME.json",
+    "--allow-artifact",
+    "T1_FULL_C_RUNTIME.json",
+    "--allow-artifact",
+    "T1_FULL_OBSERVER_RUNTIME.json",
+    "--allow-artifact",
+    "T1_A_PERSISTED.json",
+    "--allow-artifact",
+    "T1_B_PERSISTED.json",
+    "--allow-artifact",
+    "T1_C_PERSISTED.json",
+    "--allow-artifact",
+    "T1_OBSERVER_PERSISTED.json",
+    "--allow-artifact",
+    "T1_TURN_REPORT.json",
+    "--allow-artifact",
+    "T2_FULL_A_RUNTIME.json",
+    "--allow-artifact",
+    "T2_FULL_B_RUNTIME.json",
+    "--allow-artifact",
+    "T2_FULL_C_RUNTIME.json",
+    "--allow-artifact",
+    "T2_FULL_OBSERVER_RUNTIME.json",
+    "--allow-artifact",
+    "T2_A_PERSISTED.json",
+    "--allow-artifact",
+    "T2_B_PERSISTED.json",
+    "--allow-artifact",
+    "T2_C_PERSISTED.json",
+    "--allow-artifact",
+    "T2_OBSERVER_PERSISTED.json",
+    "--allow-artifact",
+    "T2_TURN_REPORT.json",
+    "--allow-artifact",
+    "PER_TURN_DIFFS.json",
+    "--allow-artifact",
+    "MUTATOR_RECEIPTS.json",
+    "--allow-artifact",
+    "REPORT.json",
+    "--",
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/current-boundary-diagnostic-v2/launch.cjs",
+    "{evidenceDir}"
+  ],
+  "allowed_artifacts": [
+    "BINDING.json",
+    "RETAINED_B1_READ_ONLY_VALIDATION.json",
+    "T1_FULL_A_RUNTIME.json",
+    "T1_FULL_B_RUNTIME.json",
+    "T1_FULL_C_RUNTIME.json",
+    "T1_FULL_OBSERVER_RUNTIME.json",
+    "T1_A_PERSISTED.json",
+    "T1_B_PERSISTED.json",
+    "T1_C_PERSISTED.json",
+    "T1_OBSERVER_PERSISTED.json",
+    "T1_TURN_REPORT.json",
+    "T2_FULL_A_RUNTIME.json",
+    "T2_FULL_B_RUNTIME.json",
+    "T2_FULL_C_RUNTIME.json",
+    "T2_FULL_OBSERVER_RUNTIME.json",
+    "T2_A_PERSISTED.json",
+    "T2_B_PERSISTED.json",
+    "T2_C_PERSISTED.json",
+    "T2_OBSERVER_PERSISTED.json",
+    "T2_TURN_REPORT.json",
+    "PER_TURN_DIFFS.json",
+    "MUTATOR_RECEIPTS.json",
+    "REPORT.json"
+  ],
+  "bindings": [
+    {
+      "path": "tests/current-scenario-postturn-boundary.test.ts",
+      "sha256": "afdd7df3ba33237d23fc5162c589a4a5ac56abf28e430e496341d14765f176cb"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/current-boundary-diagnostic-v2/launch.cjs",
+      "sha256": "452daf014f8b129027e9b67fdb0a642dfbbcfeb236542886deacf9791bd4bef5"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/current-boundary-diagnostic-v2/run_from_frozen_plan.ps1",
+      "sha256": "4f722e86ba32a6919d8f030222505f538ca320b32e79eb85c7afe9a513629d36"
+    },
+    {
+      "path": "tools/diagnostics/run_preserved_preflight.cjs",
+      "sha256": "3933e010daf15938d026692e732e401d5ce50e1e0656d546e4697723e9a7779e"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/current-boundary-diagnostic-v2/current-scenario-postturn-boundary.before-v2.test.ts",
+      "sha256": "3582cedff44ad5fb1b3bc918fab9f51f5a6b2840e8d34f5b4c00148cacec925a"
+    },
+    {
+      "path": "src/scenario/scenario_runner.ts",
+      "sha256": "209effd648d90f7f0b64e5b36f7e4b868f5a3a603786bf50e812298e987dc63c"
+    },
+    {
+      "path": "src/sim/turn_pipeline.ts",
+      "sha256": "6ef907e1835cbddba5a5faa550e7ad47dc934ff1e9720a5344b7a142fe2c2e9d"
+    },
+    {
+      "path": "src/sim/combat/sector_truth_audit.ts",
+      "sha256": "ab1734a49684d1ad3d41588bc4f670a764f3b525383d7b8194d2996182574152"
+    },
+    {
+      "path": "src/sim/combat/assert_formation_territory.ts",
+      "sha256": "ac7033139f252e9d587965cbb8d1659f7dd212f383496894cf67d2d5fbb82aa3"
+    },
+    {
+      "path": "src/sim/combat/assert_operation_lifecycle.ts",
+      "sha256": "717ddb38d9dc4e6e7030a3b0cf4c70ea376982626c5088cad0dd343c0b05abea"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/current-boundary-diagnostic-v1/attempt-03/FULL_A_RUNTIME.json",
+      "sha256": "29d24b4357dc6527dd9c2e7f2f0f84798b96a7f91fed61e7bbf4d23d88502d3e"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/current-boundary-diagnostic-v1/attempt-03/FULL_B_RUNTIME.json",
+      "sha256": "d35da4cf8c5dfad984a0d6761849d4e832a141cca182f8c99cb90f4dd1ad46a6"
+    }
+  ],
+  "cheap_checks": {
+    "vitest_list_exit": 0,
+    "discovered_exact_test": "captures exact per-turn A/B/C boundaries for two canonical weeks",
+    "imports_transformed_and_resolved": true,
+    "test_body_executed": false,
+    "dummy_paths_created": false,
+    "launcher_node_check_exit": 0,
+    "argv_probe_node_check_exit": 0,
+    "powershell_plan_runner_parse_errors": 0,
+    "literal_os_argv_probe_exit": 0,
+    "literal_os_argv_probe_output": "[\"{evidenceDir}\"]",
+    "git_diff_check_exit": 0,
+    "fixture_exists": true,
+    "retained_a1_exists": true,
+    "retained_b1_exists": true,
+    "attempt_path_absent": true,
+    "scenario_output_absent": true,
+    "current_test_bytes_preserved_sha256": "3582cedff44ad5fb1b3bc918fab9f51f5a6b2840e8d34f5b4c00148cacec925a"
+  },
+  "pass_criteria": [
+    "wrapper and child exit 0 without timeout or spawn error",
+    "exact maintained test selector runs once",
+    "public runTurn call count is exactly two and both statuses are success",
+    "each turn has exact A/B/C/observer capture and graph/session receipts",
+    "retained B1 validators leave clone hash unchanged and retain every issue",
+    "T2 topology cleanliness is decided only from the explicit projection plus actual formation/control receipts",
+    "full runtime and canonical persisted states and diffs for T1 and T2 are retained",
+    "C equals observer is reported independently for each turn"
+  ]
+}

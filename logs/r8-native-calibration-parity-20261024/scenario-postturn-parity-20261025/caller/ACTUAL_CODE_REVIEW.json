@@ -1,0 +1,73 @@
+{
+  "schema": "awwv.scenario-postturn-parity.actual-code-review.v1",
+  "reviewed_at": "2026-10-25",
+  "base_head": "b30597f49aad99032781c251b41a9de886cce3be",
+  "verdict": "GO_FOCUSED_IMPLEMENTATION__AUTHORITATIVE_GATES_PENDING",
+  "blocking_findings": [],
+  "reviewed_hashes_sha256": {
+    "src/scenario/scenario_runner.ts": "b811a55f165a1664e87b48be28008ada9fec7486ddb5c049b2013fbf78bd0972",
+    "tests/current-scenario-postturn-boundary.test.ts": "e8aee8edf75ca336aa98f76bf98872aa4587dc9452e5a8a51ee2c442f84d0c34",
+    "diagnostic-test-preservation/current-scenario-postturn-boundary.diagnostic.test.ts": "afdd7df3ba33237d23fc5162c589a4a5ac56abf28e430e496341d14765f176cb"
+  },
+  "code_review": {
+    "scope_match": "The production diff changes only src/scenario/scenario_runner.ts. It adds two deterministic local scalars and replaces the unconditional weekly helper call with the approved branch-scoped predicate.",
+    "branch_ownership": "consumedSuccessfulPublicWarTurn initializes false before the branch and is set true only after assertTurnSuccess(runResult) and assignment of runResult.nextState. The runOneTurn peace path cannot set it, so every non-public week retains the prior shared repair call.",
+    "control_owner": "appliedScenarioControlFlips initializes to zero each week and receives the actual applyControlFlipProposals(...).applied return value. The public branch invokes repair only for a positive applied count; proposal presence, breach mode alone, OOB occurrence, baseline activity, week number, and generic state differences do not trigger it.",
+    "canonical_boundary": "Successful public runTurn state is no longer displaced/reconciled a second time on zero-flip weeks. This preserves the public pipeline's session-owned reconciliation/seal and removes the proven scenario-only persisted threat/location rewrite.",
+    "legacy_boundary": "The dormant municipality-controller/OOB transition block is byte-unchanged. Actual remaining-peace weeks still reach the shared call and rely on repairScenarioArtifactState's existing non-war guard. No lifecycle behavior was added or claimed.",
+    "save_state_ownership": "Weekly reports, observers, and saves now share the post-handler public state on zero-flip weeks. The dedicated final-save operational projection, final-save reconciliation session, seal, serialization, and write path are unchanged.",
+    "helper_contract": "repairScenarioArtifactState remains exported and unchanged. Existing direct artifact/enemy-territory coverage remains applicable.",
+    "determinism": "The predicate depends only on deterministic branch control and an integer returned by deterministic control application. It adds no iteration, time, randomness, or serialization field."
+  },
+  "test_review": {
+    "zero_flip_public": "Runs the canonical definitive scenario for two weeks twice. It proves two successful public turns, zero applied flips, zero helper entries, observer/weekly-save equality, preservation of controller/front/sector and all pre-existing formation topology, focused validators green, byte-stable observer states, and equal final hashes.",
+    "positive_flip_public": "The test synthesizes one deterministic proposal but routes it through the real production applyControlFlipProposals. It proves applied=1, exactly one repair entry, nonempty operational-only OSID edges, the requested controller write, save/observer equality, and focused validators green. This tests caller routing and repair integration; it does not claim a naturally emergent historical breach.",
+    "remaining_peace": "Uses real runOneTurn with an authentic peace fixture. It proves zero public turns, one legacy turn, phase remains peace, turn advances to one, no controller-map transition, no displacement/reconciliation helper entry through the non-war guard, observer equals legacy result, weekly save equality, and final save existence. It does not fabricate or claim coverage of the unreachable peace-to-war block.",
+    "cleanup": "Every temporary output/fixture directory is removed in finally blocks.",
+    "meaningfulness": "The zero-flip test would fail the predecessor because the unconditional helper enters twice; the retained RED receipt records that failure. The topology assertions include rs_22nd_krajina_infantry location, while direct helper-entry counting detects the formerly unwanted rebuild independently of filtered disposable/threat fields."
+  },
+  "retained_validation": {
+    "preflight": {
+      "exit": 0,
+      "receipt_sha256": "38d6ebffd67dde8e8c17a0797071f4506485b35aa0b669ef7df0a653adb728c3"
+    },
+    "red": {
+      "exit": 1,
+      "source_sha256": "209effd648d90f7f0b64e5b36f7e4b868f5a3a603786bf50e812298e987dc63c",
+      "meaning": "predecessor unconditional repair violated the zero-flip expectation",
+      "receipt_sha256": "3d97543dc1e1331ec8233e6e6245a171b83330b3424c2b65122e58ede7869a6d"
+    },
+    "green": {
+      "command_scope": "new maintained test only",
+      "result": "3/3 passed, exit 0",
+      "elapsed_seconds": 26.3317355,
+      "receipt_sha256": "222a1eaa06fc677577a5efc55a09f7787f7a5fc3b8598a2cc62231e122203f96"
+    },
+    "existing_contracts": {
+      "scope": [
+        "tests/scenario_runner_artifact_repair.test.ts",
+        "tests/scenario_runner_final_seal_contract.test.ts",
+        "tests/scenario_turn_boundary_observer.test.ts"
+      ],
+      "result": "6/6 passed, exit 0",
+      "elapsed_seconds": 30.3982871,
+      "receipt_sha256": "64956ebc2e602fa716d94bc8c0e7fa0bfaa46c9d430dbd51ce05e9c44a463d7d"
+    },
+    "typescript": {
+      "command": "node node_modules/typescript/bin/tsc --noEmit -p tsconfig.json",
+      "exit": 0,
+      "elapsed_seconds": 51.6427964,
+      "receipt_sha256": "0477f76bb651d15bd3107653629580dcba68c48b849dcc5df8884b42b2972b07"
+    },
+    "diff_check_exit": 0,
+    "diagnostic_preservation_manifest_sha256": "78d18df719c3647d903ef6e12b1ed83e9537243b3e10bc1eb92ccd280d4a6fc9"
+  },
+  "limits_and_remaining_gates": [
+    "The focused receipts are compact command/exit summaries; raw stdout/stderr were not retained in implementation-v1. The code and assertions were reviewed directly, and this is recorded as an evidence-format limitation rather than a correctness failure.",
+    "The positive control uses a synthetic deterministic proposal with the real production apply function; it establishes routing, not natural proposal frequency or historical calibration.",
+    "The unreachable peace-to-war legacy block remains unexecuted and unchanged, as required. No lifecycle claim is made.",
+    "No authoritative 188-week qualifier, full suite, native run, package/build, or campaign was reviewed here.",
+    "Before acceptance, the changed trajectory must pass the already-authorized authoritative 188-week gates, all existing preservation/provenance/anchor criteria, and then the required full suite. No tuning, baseline adoption, or criterion waiver is authorized by this review."
+  ],
+  "reviewer_source_or_test_changes": false
+}

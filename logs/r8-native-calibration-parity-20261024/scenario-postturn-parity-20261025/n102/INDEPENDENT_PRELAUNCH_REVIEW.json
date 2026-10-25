@@ -1,0 +1,134 @@
+{
+  "schema": "awwv.scenario-osid-repair-regression-independent-prelaunch-review.v1",
+  "reviewed_at": "2026-10-25",
+  "reviewer_role": "independent QA/scenario-harness/determinism reviewer",
+  "verdict": "NO_GO",
+  "campaign_authorized_by_this_review": false,
+  "campaign_executed": false,
+  "new_preflight_executed": false,
+  "new_selftest_executed": false,
+  "stop_reason": "A cheap static gate failed before execution. Per the frozen stop rule, no current-config preflight, mock rerun, 188-week campaign, full suite, package, native run, tuning, adoption, pin change, threshold change, or retry was started.",
+  "scope": {
+    "worktree": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+    "head": "b30597f49aad99032781c251b41a9de886cce3be",
+    "parent": "295d5f7290b1085dc76bbebb41df72386cd6b705",
+    "tracked_worktree_clean": true,
+    "node": "v22.23.2",
+    "expected_candidate": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n102",
+    "expected_candidate_absent": true,
+    "campaign_attempt_dir": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/regression-v1/campaign-01",
+    "campaign_attempt_dir_absent": true,
+    "allowed_artifact_count": 63
+  },
+  "reviewed_hashes": {
+    "qualification_mts": "0178260c02aea566f0695eb09934c051c47d35bb7a75c1e46a608a6d01f8521d",
+    "config_bound_json": "8aa28a8efe5e62f38bc0924b5a31def2adb1cffb63713350b6322f66fa98a89d",
+    "wrapper_config_json": "7d51473a01d12771ec41aafa430793e9abfb53b24196aaf07d23c3bdf196008d",
+    "finalized_json": "bea4e0667f5a6284585b5fd26cbeaa1b806d57669c3ad4abdff499567f0dd28b",
+    "preparation_result_json": "5a5a499f78b143c1102d08ad943cdb9d7e8f0142ae9ac2a5125d0b09ed2c23bf",
+    "source_scenario_runner_ts": "209effd648d90f7f0b64e5b36f7e4b868f5a3a603786bf50e812298e987dc63c",
+    "test_scenario_runner_artifact_repair_ts": "45af607c3a1e865b8659dab1c5837482eb698585788e7b1e287043c3426dda63"
+  },
+  "source_test_review": {
+    "verdict": "GO_FOCUSED_SOURCE_AND_TEST_ONLY",
+    "findings": [],
+    "evidence": [
+      "The committed production delta at src/scenario/scenario_runner.ts:3245 changes only the weekly repair input from canonical SID graph edges to operational OSID graph edges.",
+      "The repair helper consumes OSID-keyed controller and sector truth, so the operational graph is the correct domain.",
+      "The focused real one-week test covers observer and serialized save boundaries, nonempty OSID fronts/sectors, and retained HVO assignments.",
+      "Retained RED/GREEN/type/diff receipts and the independent code review are hash-bound in CONFIG.bound.json at their existing scopes.",
+      "No nondeterministic API, ordering change, save schema change, coefficient, data, reference, threshold, control, supply, enclave, package, or native-runtime change is introduced by the one-line source delta."
+    ],
+    "limits": "This source/test GO is not campaign acceptance and does not waive the packet findings below."
+  },
+  "findings": [
+    {
+      "id": "P1-FINALIZED-CONFIG-BINDING-STALE-AND-UNENFORCED",
+      "severity": "BLOCKING",
+      "stage": "finalization_and_runtime_binding",
+      "evidence": {
+        "actual_config": {
+          "bytes": 10361,
+          "sha256": "8aa28a8efe5e62f38bc0924b5a31def2adb1cffb63713350b6322f66fa98a89d"
+        },
+        "finalized_files_config": {
+          "bytes": 10240,
+          "sha256": "19138cdfd97996cd67114cced81209b0a25986d7719b7beec4a9caaa8d8c3dac"
+        },
+        "preparation_declared_config_sha256": "8aa28a8efe5e62f38bc0924b5a31def2adb1cffb63713350b6322f66fa98a89d",
+        "qualification_validate_config_lines": "qualification.mts:51-58",
+        "campaign_preflight_lines": "qualification.mts:75-86"
+      },
+      "impact": "FINALIZED.json does not describe the current floor-schema config. More broadly, the executable preflight never reads FINALIZED.json or compares CONFIG.bound.json to an external reviewed hash. Because the packet is ignored by Git, clean-HEAD validation cannot detect later config mutation. validateConfig checks only a subset of the frozen config and does not enforce checkpoint_score_semantics, exact scenario, exact save-week list, comparison/baseline paths, retained roots, diagnostic environment, or node.path. The claimed exact frozen input is therefore not fail-closed at launch.",
+      "required_correction": "Regenerate FINALIZED.json from the final config and make the executed path verify the reviewed CONFIG.bound.json hash (and entry/wrapper hashes or an equivalent immutable manifest) before any campaign work. Validate the complete frozen config contract, including minimum-floor semantics and all exact paths/lists/environment values."
+    },
+    {
+      "id": "P1-GRAPH-ROSTER-CONSISTENCY-INCOMPLETE",
+      "severity": "BLOCKING",
+      "stage": "postrun_graph_producer_gate",
+      "evidence": {
+        "implementation_lines": "qualification.mts:143-158",
+        "selftest_lines": "qualification.mts:173-178"
+      },
+      "impact": "The required graph gate checks sector-to-formation assignment only for assigned_brigade_ids. rear_brigade_ids and reserve_brigade_ids are included only in the opposite formation-to-roster lookup. A stale, nonexistent, or wrong-sector rear/reserve roster member can therefore pass, despite the plan requiring sector roster and formation assignments to be mutually consistent at all four checkpoints. The five-control selftest has no mutation proving these cases fail.",
+      "required_correction": "Validate every formation ID in assigned_brigade_ids, rear_brigade_ids, and reserve_brigade_ids against formations[id].assignment.sector_id, reject missing formations and duplicate/multi-roster membership as applicable, and add negative controls for rear and reserve mismatches plus malformed or partial sector shapes."
+    },
+    {
+      "id": "P1-CURRENT-FINAL-CONFIG-HAS-NO-EXECUTED-CHEAP-PROOF",
+      "severity": "BLOCKING_UNTIL_PRIOR_FINDINGS_FIXED",
+      "stage": "cheap_prelaunch_evidence",
+      "evidence": {
+        "preparation_status": "READY_FOR_INDEPENDENT_PACKET_REVIEW__NO_CAMPAIGN_EXECUTED",
+        "retained_preflight_status": "SUPERSEDED_BY_MINIMUM_FLOOR_SCHEMA_CLARIFICATION__RETAINED_NOT_CURRENT",
+        "retained_selftest_status": "SUPERSEDED_BY_MINIMUM_FLOOR_SCHEMA_CLARIFICATION__RETAINED_NOT_CURRENT"
+      },
+      "impact": "No executed receipt proves the current final config and clarified floor schema. This review intentionally did not create one after the earlier static failures triggered the stop rule.",
+      "required_correction": "After correcting and refinalizing the packet, run one fresh preserved current-config preflight and the minimal mock controls for the changed schema/binding and graph-roster predicates. Require child/wrapper 0/0, the expected binding count, no simulation execution, and a fresh leaf. Do not reuse or overwrite the superseded attempts."
+    }
+  ],
+  "contracts_confirmed": {
+    "minimum_checkpoint_floors": [707, 707, 706, 706],
+    "minimum_semantics_present_in_current_config": true,
+    "evaluation_reader_uses_greater_than_or_equal_floors": true,
+    "zero_n91_n92_formerly_correct_losses_at_all_four_checkpoints": true,
+    "protected_anchor_count": 16,
+    "toljenak_behar_and_hvo_capture_provenance_gated": true,
+    "required_external_readers_fail_via_nonzero_exit": true,
+    "diagnostic_state_deltas_do_not_gate_acceptance": true,
+    "direct_file_descriptor_capture": true,
+    "null_status_signal_spawn_error_and_timeout_recorded": true,
+    "unreached_campaign_failure_distinct_from_deadline": true,
+    "opening_closing_retained_root_inventory_comparison_present": true,
+    "one_attempt_no_retry_and_35_minute_cap_present": true,
+    "full_suite_deferred_until_qualifying_scenario": true
+  },
+  "determinism_review": {
+    "verdict": "NO_DETERMINISM_RISK_IN_FOCUSED_SOURCE_DELTA; PACKET_BINDING_IS_NOT_FAIL_CLOSED",
+    "authorities": [
+      "docs/10_canon/Engine_Invariants_v0_9_0.md",
+      "docs/20_engineering/DETERMINISM_TEST_MATRIX.md",
+      "docs/20_engineering/CODE_CANON.md",
+      "docs/10_canon/Phase_Specifications_v0_9_0.md"
+    ],
+    "notes": "The source substitution supplies the already-loaded operational graph and adds no randomness, wall-clock state, unstable iteration, or serialization field. Deterministic evidence provenance remains insufficient until the executable launch binds the final config immutably."
+  },
+  "commands_and_checks": [
+    {
+      "command": "git rev-parse HEAD; git rev-parse HEAD^; git status --porcelain=v1 --untracked-files=normal",
+      "result": "HEAD and parent exact; tracked status clean"
+    },
+    {
+      "command": "Get-FileHash SHA256 and byte counts for PLAN/PREPARATION/FINALIZED/CONFIG/WRAPPER/qualification/source/test",
+      "result": "Detected the FINALIZED-to-CONFIG mismatch; other recorded entry/wrapper hashes matched"
+    },
+    {
+      "command": "Static inspection of qualification.mts, finalize.cjs, run_preserved_preflight.cjs, source/test diff, and every bound acceptance reader",
+      "result": "Confirmed source correctness and most gate/failure contracts; found incomplete config binding and roster validation"
+    },
+    {
+      "command": "Test-Path expected n102 and campaign-01 leaves; count wrapper allowlist",
+      "result": "Both leaves absent; allowlist count 63"
+    }
+  ],
+  "next_eligible_action": "Correct the two packet contracts, regenerate the finalized hashes, then perform one fresh preserved cheap preflight plus targeted mock controls. Only a subsequent independent GO may release the single authoritative 188-week command."
+}

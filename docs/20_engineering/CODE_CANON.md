@@ -1,10 +1,16 @@
 # Code Canon (AWWV)
 
-## Scenario-runner OSID graph domain (2026-10-25 source candidate)
+## Scenario post-turn artifact repair boundary (2026-10-25 source candidate)
+
+The weekly scenario runner records whether it consumed a successful public war `runTurn` and how many scenario control-flip proposals were actually applied. After a successful public war turn, it calls `repairScenarioArtifactState(...)` only when `appliedScenarioControlFlips > 0`; after the legacy peace/transition `runOneTurn` branch it preserves the existing repair call. The helper, export, final-save repair, native/public turn pipelines, schemas, control mechanics and graph inputs are unchanged. Current stub transition handlers make the legacy transition branch unreachable in the tested fixture, so remaining-peace coverage and source review preserve its contract without claiming a live transition execution.
+
+Focused current-source proof passes 3/3 production-path cases: two zero-flip war runs retain exact public-turn topology, while one applied-flip run performs the scenario repair; the authentic remaining-peace fixture remains unchanged. Existing scenario contracts pass 6/6 and TypeScript exits 0. Independent post-execution verification checks 68 files with zero mismatches and confirms five registered artifact directories covering four scenarios plus the peace fixture. The earlier temporary RED/GREEN scenario-output directories were removed by default cleanup before preservation and remain an explicit unwaived evidence gap; the retained wrapper/child receipts and corrected retained-mode GREEN do not reconstruct them. [Portable proof](../../logs/r8-native-calibration-parity-20261024/scenario-postturn-parity-20261025/MANIFEST.json)
+
+## Scenario-runner OSID graph domain (2026-10-25 retained candidate)
 
 The reviewed candidate based on clean local commit `295d5f729` corrects one weekly `runScenario` call: OSID front reconstruction receives `operationalSettlementGraph.edges`, matching the final-save path, instead of canonical SID `graph.edges`. Passing SID endpoints into OSID controller/front functions yields null controllers, skips every edge, produces zero fronts and lets fresh reconciliation erase every corps sector. The correction changes no native/desktop pipeline, combat, movement, supply, enclave policy, thresholds, data, save schema or final-save graph.
 
-One-week definitive public-`runScenario` RED records 0 fronts/0 sectors; GREEN records 587 fronts/157 sectors, preserves the two named HVO assignments in sector 0 and passes observer/save checks. The final focused result is 2/2 with TypeScript and diff checks at exit 0; preimplementation canon review and independent code review are GO. This is a source candidate only: authoritative 188-week, complete-suite, package and native qualification remain open, and retained n101 cannot prove production parity because its producer contained the now-known domain defect. [Portable proof](../../logs/r8-native-calibration-parity-20261024/scenario-osid-graph-20261025/MANIFEST.json)
+One-week definitive public-`runScenario` RED records 0 fronts/0 sectors; GREEN records 587 fronts/157 sectors, preserves the two named HVO assignments in sector 0 and passes observer/save checks. The final focused result is 2/2 with TypeScript and diff checks at exit 0; preimplementation canon review and independent code review are GO. The sole graph-corrected n102 campaign later completed 188 weeks but failed 705/704/703/686 against 707/707/706/706, lost 2/3/3/20 formerly-correct n91/n92 cells, met 10/16 final anchors and missed one final RS sector floor. No retry, full suite, package or native qualification followed. [Graph proof](../../logs/r8-native-calibration-parity-20261024/scenario-osid-graph-20261025/MANIFEST.json) · [n102 and caller proof](../../logs/r8-native-calibration-parity-20261024/scenario-postturn-parity-20261025/MANIFEST.json)
 
 ## REQUEST-OP directive selector (2026-10-25 source candidate)
 
@@ -12,7 +18,7 @@ The reviewed REQUEST-OP candidate based on source head `a3063366a` shares one pu
 
 Focused tests pass 34/34, `npm run typecheck` exits 0, and independent canon, historian and code review are GO for this exact selector correction. The later bounded Bukvik source-runtime diagnostic proves delivery and capture; Obadi remains a negative result. Gameplay-188, full-suite, package and native qualification remain open, with no player-parity or baseline-adoption claim. [Focused proof](../../logs/r8-native-calibration-parity-20261024/directive-selector-20261025/MANIFEST.v2.json) · [Delivery evidence](../../logs/r8-native-calibration-parity-20261024/scenario-osid-graph-20261025/MANIFEST.json)
 
-## Current parity qualification boundary (2026-10-25)
+## Retained pre-n102 parity qualification boundary (2026-10-25)
 
 The fractional-fatigue source at `a3063366a` is qualified by n101 (`runs/apr1992_definitive_188w__6deb5845c150c196__w188_n101`) at **707/707/706/706**, with zero n91/n92 formerly-correct losses and all 16 anchors, plus the complete suite at 15,094 passed, 0 failed, 33 skipped across 1,452 passed and 4 skipped files. Package 03 is separately qualified for all three faction cold-load/next-state/report equality and native turn-0 Save/load. These proofs predate the REQUEST-OP selector patch and do not qualify it. CI Event System is green; Baseline Pins still reports two hash failures and remains an advisory, non-blocking conditional-admission result. No pin adoption or all-green claim follows.
 

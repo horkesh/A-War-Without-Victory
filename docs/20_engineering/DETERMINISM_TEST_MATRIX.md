@@ -1,12 +1,18 @@
 # Determinism Test Matrix (AWWV)
 
-## Scenario OSID graph correction boundary (2026-10-25 candidate)
+## Scenario post-turn repair caller boundary (2026-10-25 candidate)
+
+- `tests/current-scenario-postturn-boundary.test.ts` covers the real weekly caller: two successful public war turns with zero applied scenario flips preserve the public result without the extra repair, a positive applied-flip case still repairs scenario artifacts, and an authentic remaining-peace fixture preserves the legacy `runOneTurn` behavior. Focused retained-mode proof passes 3/3, existing contracts pass 6/6, and TypeScript exits 0.
+- The guard depends only on the successful public-war-turn branch and the existing `applyControlFlipProposals(...).applied` count. It changes no ordering inside either canonical turn pipeline, no helper/export/final-save/native path, no schema and no mechanics. Independent verification compares 68 retained files with zero mismatches and validates five artifact directories/four scenarios plus the peace fixture.
+- Evidence limitation: default cleanup removed the earlier temporary RED/GREEN scenario outputs before preservation. `GAP.json` keeps that loss explicit and unwaived; retained receipts and the fresh retained-mode GREEN do not recreate the missing bytes. No new 188, full suite, package or native qualification exists. [Portable proof](../../logs/r8-native-calibration-parity-20261024/scenario-postturn-parity-20261025/MANIFEST.json)
+
+## Scenario OSID graph correction boundary (2026-10-25 retained candidate)
 
 - Retained canonical-shadow evidence localizes the earliest concrete divergence to weekly reconciliation: SID graph endpoints yield no OSID controllers, zero fronts and empty sectors; the input-correct operational graph reproduces both HVO sector erasures at `RECONCILE` without changing fatigue or location at that boundary. The earlier V4 shadow used the wrong graph and remains FAILED/unwaived.
 - The bounded production correction changes one scenario-runner argument to `operationalSettlementGraph.edges`. A real one-week definitive public-runner RED (1 failed/1 passed) becomes GREEN (2 passed): fronts 0→587, sectors 0→157, both HVO formations assigned to sector 0, observer/save 1. TypeScript and diff checks exit 0; independent code review is GO.
-- This does not qualify a new 188-week trajectory, full suite, package, native run or parity result. n101, its suite and Package 03 remain retained evidence at their exact source/producer scopes; the known n101 graph defect prevents using it as production-parity proof. The unchanged qualifier requires 707/707/706/706, zero n91/n92 formerly-correct losses and all 16 anchors. [Portable proof](../../logs/r8-native-calibration-parity-20261024/scenario-osid-graph-20261025/MANIFEST.json)
+- The sole graph-corrected n102 completed 188 weeks but failed: 705/704/703/686 versus 707/707/706/706, 2/3/3/20 formerly-correct n91/n92 losses, 10/16 final anchors and one missed final RS sector floor. Graph production, health, movement, provenance and evidence preservation pass at that run's scope. No retry, full suite, package or native successor followed. [Portable proof](../../logs/r8-native-calibration-parity-20261024/scenario-postturn-parity-20261025/MANIFEST.json)
 
-## Current player-parity evidence boundary (2026-10-25)
+## Retained pre-n102 player-parity evidence boundary (2026-10-25)
 
 - n101 (`runs/apr1992_definitive_188w__6deb5845c150c196__w188_n101`) qualifies the fractional-fatigue source at `a3063366a`: 707/707/706/706, zero n91/n92 formerly-correct losses, all 16 anchors, and no unrelated comparator loss. The full suite records 15,094 passed, 0 failed and 33 skipped tests across 1,452 passed and 4 skipped files.
 - Package 03 qualifies all three factions for exact cold-load next-state/report equality and native turn-0 Save/load. It does not supply a native week-104/156/188 result.

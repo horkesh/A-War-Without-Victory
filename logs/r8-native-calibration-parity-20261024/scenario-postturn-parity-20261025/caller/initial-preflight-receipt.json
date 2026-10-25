@@ -1,0 +1,13 @@
+{
+  "command": "node node_modules/vitest/vitest.mjs list tests/current-scenario-postturn-boundary.test.ts",
+  "exit_code": 0,
+  "checks": {
+    "node_version": "v22.23.2",
+    "scenario_exists": true,
+    "operational_edges_exists": true,
+    "operational_reverse_map_exists": true,
+    "oob_brigades_exists": true,
+    "oob_corps_exists": true,
+    "municipality_hq_exists": true
+  }
+}

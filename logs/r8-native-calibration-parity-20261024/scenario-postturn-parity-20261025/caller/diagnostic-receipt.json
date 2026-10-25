@@ -1,0 +1,202 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T21:32:21.123Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/current-boundary-diagnostic-v2/attempt-01",
+  "timeout_ms": 180000,
+  "original_argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/current-boundary-diagnostic-v2/launch.cjs",
+    "{evidenceDir}"
+  ],
+  "argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/current-boundary-diagnostic-v2/launch.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-package-v6\\scenario-postturn-parity-repair-v1\\current-boundary-diagnostic-v2\\attempt-01"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "BINDING.json",
+    "RETAINED_B1_READ_ONLY_VALIDATION.json",
+    "T1_FULL_A_RUNTIME.json",
+    "T1_FULL_B_RUNTIME.json",
+    "T1_FULL_C_RUNTIME.json",
+    "T1_FULL_OBSERVER_RUNTIME.json",
+    "T1_A_PERSISTED.json",
+    "T1_B_PERSISTED.json",
+    "T1_C_PERSISTED.json",
+    "T1_OBSERVER_PERSISTED.json",
+    "T1_TURN_REPORT.json",
+    "T2_FULL_A_RUNTIME.json",
+    "T2_FULL_B_RUNTIME.json",
+    "T2_FULL_C_RUNTIME.json",
+    "T2_FULL_OBSERVER_RUNTIME.json",
+    "T2_A_PERSISTED.json",
+    "T2_B_PERSISTED.json",
+    "T2_C_PERSISTED.json",
+    "T2_OBSERVER_PERSISTED.json",
+    "T2_TURN_REPORT.json",
+    "PER_TURN_DIFFS.json",
+    "MUTATOR_RECEIPTS.json",
+    "REPORT.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/current-boundary-diagnostic-v2/launch.cjs",
+    "bytes": 989,
+    "raw_sha256": "452daf014f8b129027e9b67fdb0a642dfbbcfeb236542886deacf9791bd4bef5",
+    "normalized_text_sha256": "452daf014f8b129027e9b67fdb0a642dfbbcfeb236542886deacf9791bd4bef5",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 989,
+      "sha256": "452daf014f8b129027e9b67fdb0a642dfbbcfeb236542886deacf9791bd4bef5"
+    }
+  },
+  "end_utc": "2026-10-25T21:32:39.897Z",
+  "pid": 21600,
+  "child_exit": 0,
+  "wrapper_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/current-boundary-diagnostic-v2/launch.cjs",
+    "bytes": 989,
+    "raw_sha256": "452daf014f8b129027e9b67fdb0a642dfbbcfeb236542886deacf9791bd4bef5",
+    "normalized_text_sha256": "452daf014f8b129027e9b67fdb0a642dfbbcfeb236542886deacf9791bd4bef5",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 433,
+    "sha256": "852fc1173a97844c8eba3b8fcf50f8572ca0aac1db97ef407f24d7f473108c53"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "BINDING.json",
+      "bytes": 2725,
+      "sha256": "afcd9178d1e9527762967849cdd1e79b2fcb727ade412d93c4698e65070939ec"
+    },
+    {
+      "path": "RETAINED_B1_READ_ONLY_VALIDATION.json",
+      "bytes": 1756,
+      "sha256": "897f5ab2b1efeb4e9308306d8a8ea1738f01af872e3bbdeee347172bea8ca831"
+    },
+    {
+      "path": "T1_FULL_A_RUNTIME.json",
+      "bytes": 3540710,
+      "sha256": "29d24b4357dc6527dd9c2e7f2f0f84798b96a7f91fed61e7bbf4d23d88502d3e"
+    },
+    {
+      "path": "T1_FULL_B_RUNTIME.json",
+      "bytes": 3616193,
+      "sha256": "d35da4cf8c5dfad984a0d6761849d4e832a141cca182f8c99cb90f4dd1ad46a6"
+    },
+    {
+      "path": "T1_FULL_C_RUNTIME.json",
+      "bytes": 3616234,
+      "sha256": "0c85ccf4e597c42d4634245faa2e962c74894e702c0c986959d5ffd6f8d19756"
+    },
+    {
+      "path": "T1_FULL_OBSERVER_RUNTIME.json",
+      "bytes": 3616234,
+      "sha256": "0c85ccf4e597c42d4634245faa2e962c74894e702c0c986959d5ffd6f8d19756"
+    },
+    {
+      "path": "T1_A_PERSISTED.json",
+      "bytes": 3469516,
+      "sha256": "979d76ae8af1f23b8c381325e4be5aa3e6c8ed02f632c797d224237f536403df"
+    },
+    {
+      "path": "T1_B_PERSISTED.json",
+      "bytes": 3545417,
+      "sha256": "c3884c4abc43da2d3fe0d704450e7c779ddf1c675683e92a4852d10325841fd4"
+    },
+    {
+      "path": "T1_C_PERSISTED.json",
+      "bytes": 3545423,
+      "sha256": "a6e8b5171af63502df61962a7b39c2f7589739b4c32ff991759a4635767cf9dd"
+    },
+    {
+      "path": "T1_OBSERVER_PERSISTED.json",
+      "bytes": 3545423,
+      "sha256": "a6e8b5171af63502df61962a7b39c2f7589739b4c32ff991759a4635767cf9dd"
+    },
+    {
+      "path": "T1_TURN_REPORT.json",
+      "bytes": 560836,
+      "sha256": "bb69e28904a6ca2b6aa9a3d8216496535ab39bd01373beefe5f1c72d1201fbf3"
+    },
+    {
+      "path": "T2_FULL_A_RUNTIME.json",
+      "bytes": 3708801,
+      "sha256": "5eca879cf41d4bb43f7764b74c40de49a98b641948a3cc48470c18b9c6e2fece"
+    },
+    {
+      "path": "T2_FULL_B_RUNTIME.json",
+      "bytes": 3710544,
+      "sha256": "a4953275aa83c6ac34412b4c9c8208df50ee5e6a3a36a700a930efee757b3cc6"
+    },
+    {
+      "path": "T2_FULL_C_RUNTIME.json",
+      "bytes": 3710581,
+      "sha256": "17052dff5e4188a5fa9c39e33dd568b6926e4ad0e04ee9f6d9d8a54094961517"
+    },
+    {
+      "path": "T2_FULL_OBSERVER_RUNTIME.json",
+      "bytes": 3710581,
+      "sha256": "17052dff5e4188a5fa9c39e33dd568b6926e4ad0e04ee9f6d9d8a54094961517"
+    },
+    {
+      "path": "T2_A_PERSISTED.json",
+      "bytes": 3642415,
+      "sha256": "d30fd09270f89333557520954231793f88bf3defab4abcf19ce7c85573578031"
+    },
+    {
+      "path": "T2_B_PERSISTED.json",
+      "bytes": 3644158,
+      "sha256": "8ed7e4b140caf2a8bca387735b05c2d1daefa453a26a40722ea54240c1f7e046"
+    },
+    {
+      "path": "T2_C_PERSISTED.json",
+      "bytes": 3644164,
+      "sha256": "ca80925281f3c7739dca02c61a9fd98cc797b6c81665665b2a1fa59ccfb529c8"
+    },
+    {
+      "path": "T2_OBSERVER_PERSISTED.json",
+      "bytes": 3644164,
+      "sha256": "ca80925281f3c7739dca02c61a9fd98cc797b6c81665665b2a1fa59ccfb529c8"
+    },
+    {
+      "path": "T2_TURN_REPORT.json",
+      "bytes": 573222,
+      "sha256": "45916b2690bcb225ac8ab2d0f89a246edaaa43b16eac3b425885aad8e1b65c84"
+    },
+    {
+      "path": "PER_TURN_DIFFS.json",
+      "bytes": 2016611,
+      "sha256": "c15b75d52c1b963fc0223e9afedef71353170fab069e97b3f333be0fc0a0b51c"
+    },
+    {
+      "path": "MUTATOR_RECEIPTS.json",
+      "bytes": 17374,
+      "sha256": "164c74ef5334e0b262a31b3a64fcf39b833db3d1a2712b9bcd6cf7d121bcc626"
+    },
+    {
+      "path": "REPORT.json",
+      "bytes": 388344,
+      "sha256": "6603145cc775151ccc8bb0770ded15e55cef87417d752d93d065f848070a7a83"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

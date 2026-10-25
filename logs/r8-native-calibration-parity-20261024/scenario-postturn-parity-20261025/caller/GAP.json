@@ -1,0 +1,32 @@
+{
+  "schema": "awwv.postturn-gate.retention-gap.v1",
+  "recorded_at": "2026-10-25",
+  "scope": "Focused TDD attempts completed before retained-output mode was added to tests/current-scenario-postturn-boundary.test.ts.",
+  "missing_artifacts": [
+    {
+      "attempt": "attempt-02-red",
+      "missing": "Two canonical two-week runScenario output directories.",
+      "reason": "The test allocated OS temporary directories and removed them in its finally block."
+    },
+    {
+      "attempt": "attempt-03-green",
+      "missing": "Two canonical two-week zero-flip outputs, one canonical one-week positive-flip output, one remaining-peace output, and the generated remaining-peace scenario fixture.",
+      "reason": "The test allocated OS temporary directories and removed them in its finally blocks."
+    }
+  ],
+  "retained_evidence": [
+    "attempt-02-red/receipt.json",
+    "attempt-02-red/vitest.log",
+    "attempt-03-green/receipt.json",
+    "attempt-03-green/vitest.log",
+    "attempt-04-existing-contracts/receipt.json",
+    "attempt-04-existing-contracts/vitest.log",
+    "attempt-05-typecheck/receipt.json",
+    "attempt-05-typecheck/tsc.log"
+  ],
+  "limitations": [
+    "The retained vitest.log files merge the child console streams and are not raw, separately captured stdout and stderr.",
+    "The prior scenario states and run artifacts were not retained.",
+    "No recovery or reconstruction was attempted, and later evidence must not be presented as the missing earlier artifacts."
+  ]
+}

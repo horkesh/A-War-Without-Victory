@@ -1,0 +1,48 @@
+{
+  "schema": "awwv.scenario-postturn-parity.implementation-applicability-correction.v2",
+  "reviewed_at": "2026-10-25",
+  "head": "b30597f49aad99032781c251b41a9de886cce3be",
+  "corrects": {
+    "path": "IMPLEMENTATION_DECISION_APPLICABILITY_AMENDMENT.v1.json",
+    "sha256": "9fda16c83122e4e8bd53c11a62f7c4ad9845b720383996a56f9fa5d0cf160ee4",
+    "section": "required_focused_legacy_coverage only"
+  },
+  "decision": "GO_IMPLEMENT_BRANCH_SCOPED_GATE_WITH_REAL_PEACE_COVERAGE",
+  "factual_correction": {
+    "finding": "The requested real peace-to-war transition fixture is impossible under current production code and must not be fabricated.",
+    "source_evidence": [
+      "src/state/turn_pipeline.ts:61-72 clones the input and rejects war input.",
+      "src/state/turn_pipeline.ts:74-76 runs the eight handlers from src/state/turn_phases.ts; every current handler is a stub that returns state unchanged.",
+      "src/state/turn_pipeline.ts:78-90 changes meta.turn and seed only; it never changes meta.phase.",
+      "Therefore src/scenario/scenario_runner.ts:2917-2949 cannot currently enter its phaseBeforeTurn=peace/state.phase=war controller/OOB block through the real runOneTurn callee."
+    ],
+    "scope_effect": "This reachability fact changes the verification fixture, not the approved caller condition. The dormant transition code and existing non-public repair behavior remain byte-for-byte preserved. Lifecycle implementation is outside scope."
+  },
+  "approved_condition_unchanged": {
+    "condition": "Invoke repairScenarioArtifactState when !consumedSuccessfulPublicWarTurn || appliedScenarioControlFlips > 0.",
+    "meaning": [
+      "Every actual non-public runOneTurn week follows the legacy repair call path. In current production this is a remaining-peace week, so the helper immediately returns through its existing non-war guard.",
+      "Any future or externally enabled legacy peace-to-war state still follows the repair call path by construction; this is a source-preservation guarantee, not a claimed current runtime test.",
+      "Successful public runTurn weeks skip only when appliedScenarioControlFlips is zero."
+    ]
+  },
+  "corrected_focused_verification_contract": [
+    "Use a real maintained remaining-peace scenario/fixture. Prove runOneTurn executes, public runTurn does not, meta.phase remains peace, meta.turn advances exactly once, and the resulting artifacts/state remain identical to existing behavior. The helper's non-war guard must prevent displacement/reconciliation mutation.",
+    "Inspect the implemented branch condition directly and independently: consumedSuccessfulPublicWarTurn initializes false before the branch, becomes true only after assertTurnSuccess on public runTurn, and the shared call condition is exactly !consumedSuccessfulPublicWarTurn || appliedScenarioControlFlips > 0. This proves the non-public branch retains the call without manufacturing a transition.",
+    "Keep the existing scenario_runner peace-to-war municipality-controller and OOB block unchanged. Do not delete it, rewrite it, claim it executed, or add phase-changing behavior to reach it.",
+    "Keep public-path focused tests: zero applied control flips yields zero helper calls; positive applied control flips yields exactly one helper call with operational OSID edges.",
+    "Keep final-save projection/session/seal coverage distinct and unchanged."
+  ],
+  "forbidden_test_or_scope_expansion": [
+    "No mocked or stubbed fake phase transition presented as production coverage.",
+    "No edit to src/state/turn_pipeline.ts or src/state/turn_phases.ts.",
+    "No new lifecycle mechanic, phase mutation, controller policy, OOB behavior, or acceptance-criterion change.",
+    "No claim that the dormant peace-to-war block has current runtime coverage."
+  ],
+  "authorization": "GO remains for the exact branch-scoped caller-only gate with the corrected real-peace and source-condition verification above.",
+  "source_hashes_sha256": {
+    "src/state/turn_pipeline.ts": "984fbe661220387b3f65f275989a365dfa90f1823fe2ee7594fcb6db7e5371ae",
+    "src/scenario/scenario_runner.ts": "209effd648d90f7f0b64e5b36f7e4b868f5a3a603786bf50e812298e987dc63c"
+  },
+  "reviewer_source_or_test_changes": false
+}

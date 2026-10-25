@@ -1,0 +1,52 @@
+{
+  "schema": "awwv.scenario-postturn-parity.implementation-applicability-amendment.v1",
+  "reviewed_at": "2026-10-25",
+  "head": "b30597f49aad99032781c251b41a9de886cce3be",
+  "amends": {
+    "path": "INDEPENDENT_ACTUAL_IMPLEMENTATION_DECISION.json",
+    "sha256": "ff2d4ce8501805a2af87f4cd23072b5b787e48b1f16db80b6c8519116e0c093f"
+  },
+  "decision": "GO_IMPLEMENT_BRANCH_SCOPED_APPLIED_CONTROL_FLIP_GATE",
+  "reason": "The original exact flip-count gate is valid only for weeks that successfully consume public runTurn.nextState. The scenario loop also has a peace/transition branch that calls legacy runOneTurn and can write controllers and create OOB afterward. That state has not passed the public war pipeline's reconciliation, session seal, and post-turn invariant barrier, so its existing scenario repair must remain.",
+  "source_evidence": [
+    {
+      "location": "src/scenario/scenario_runner.ts:2912-2950",
+      "finding": "When state.meta.phase is peace, the runner calls runOneTurn, replaces state from result.state, may call applyMunicipalityControllersFromMun1990Only on peace-to-war transition, synthesizes a report, and may create OOB formations. This branch does not call or assert success from public runTurn."
+    },
+    {
+      "location": "src/scenario/scenario_runner.ts:2951-3008",
+      "finding": "Only the else branch calls public runTurn, assertTurnSuccess, and consumes runResult.nextState. The T1/T2 A/B/C evidence covers this branch."
+    },
+    {
+      "location": "src/scenario/scenario_runner.ts:3202-3248",
+      "finding": "The optional breach-control writer and the shared repair call occur after both branches. A global flip-count-only condition would therefore skip repair after an unsealed legacy transition whose controller/OOB writers are not represented by applyControlFlipProposals.applied."
+    }
+  ],
+  "exact_amended_scope": {
+    "owner": "src/scenario/scenario_runner.ts weekly loop only",
+    "required_state": [
+      "Initialize a deterministic per-week boolean, for example consumedSuccessfulPublicWarTurn, to false before the peace/public branch.",
+      "Set it true only in the public runTurn branch after assertTurnSuccess(runResult) succeeds and the successful nextState is accepted.",
+      "Initialize a deterministic per-week appliedScenarioControlFlips count to zero before the optional breach-control block and capture applyControlFlipProposals(...).applied when invoked."
+    ],
+    "call_condition": "Invoke repairScenarioArtifactState exactly once when !consumedSuccessfulPublicWarTurn || appliedScenarioControlFlips > 0.",
+    "behavior_by_branch": [
+      "Legacy peace/transition runOneTurn week: preserve the existing repair invocation. If the state remains peace, the helper's existing phase guard keeps it a no-op; if it transitions to war after municipality controller/OOB writes, repair remains available exactly as before.",
+      "Successful public runTurn week with appliedScenarioControlFlips === 0: skip the extra repair.",
+      "Successful public runTurn week with appliedScenarioControlFlips > 0: invoke repair once with operational OSID edges."
+    ],
+    "unchanged_exclusions": [
+      "Do not trigger the public-branch repair from OOB occurrence, created-formation count, baseline activity, generic A-to-B differences, week number, or opportunity presence.",
+      "Do not change runOneTurn, runTurn, the helper algorithm/export, native/desktop consumers, final-save projection/session/seal, mechanics, data, thresholds, schema, or saves."
+    ]
+  },
+  "required_focused_legacy_coverage": [
+    "A real or maintained focused peace-to-war scenario test must prove the legacy branch calls runOneTurn, applies its configured municipality-controller path when present, performs OOB creation as configured, and still invokes repair exactly once with operational OSID edges after those writes.",
+    "The resulting war state must pass existing state-shape, friendly-territory, operation-lifecycle, front/sector-truth, and save/observer consistency checks.",
+    "A peace week that remains peace must preserve behavior; the shared call may occur but repairScenarioArtifactState must return through its existing non-war guard without state mutation.",
+    "Public runTurn tests must separately pin zero-applied => zero helper calls and positive-applied => exactly one helper call.",
+    "Final-save projection/session/seal coverage remains distinct and unchanged."
+  ],
+  "authorization": "GO for the branch-scoped caller-only implementation above. The unamended global flip-count-only condition is not approved.",
+  "reviewer_source_or_test_changes": false
+}

@@ -1,0 +1,27 @@
+{
+  "schema": "awwv.native-scenario-repair-audit-command-receipt.v1",
+  "head": "b30597f49aad99032781c251b41a9de886cce3be",
+  "simulation_executed": false,
+  "state_advanced": false,
+  "commands": [
+    {
+      "purpose": "offline clone-only identity probe, initial harness attempt",
+      "command": "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe node_modules/tsx/dist/cli.mjs tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/native-scenario-repair-audit-v1/offline_identity_probe.mts",
+      "exit": 1,
+      "result": "ERR_MODULE_NOT_FOUND before state load; import climbed one directory too far; no output artifact created"
+    },
+    {
+      "purpose": "offline clone-only identity probe after import-path correction",
+      "command": "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe node_modules/tsx/dist/cli.mjs tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/native-scenario-repair-audit-v1/offline_identity_probe.mts",
+      "exit": 0,
+      "result": "OFFLINE_IDENTITY_PROBE.json; first repair non-identity (190 leaf diffs), second repair non-identity (2 leaf diffs)"
+    },
+    {
+      "purpose": "same offline helper probe with exact second location transition retained",
+      "command": "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe node_modules/tsx/dist/cli.mjs tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/native-scenario-repair-audit-v1/offline_identity_probe.mts",
+      "exit": 0,
+      "result": "OFFLINE_IDENTITY_PROBE.v2.json; SHA256 b3d7c21121594eab22da9afc809e2f54837479822798e225498b7b2d1ff9f0fd"
+    }
+  ],
+  "output_root_ignored_by": ".gitignore:215:/tmp/player-bot-capability-parity-20261024/"
+}

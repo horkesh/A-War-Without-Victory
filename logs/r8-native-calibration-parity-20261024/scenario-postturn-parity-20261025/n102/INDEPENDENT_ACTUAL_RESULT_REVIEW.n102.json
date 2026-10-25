@@ -1,0 +1,292 @@
+{
+  "schema": "independent-actual-result-review-v1",
+  "reviewed_at_utc": "2026-10-25T21:00:24Z",
+  "review_scope": "Retained-only independent review of the sole frozen n102 campaign. No code changes, campaign, build, suite, retry, tuning, baseline adoption, or active-profile mutation was performed.",
+  "verdict": "NO_GO_STOP_NO_RETRY",
+  "release_decision": {
+    "candidate_qualifies": false,
+    "full_balanced_suite_authorized": false,
+    "automatic_retry_authorized": false,
+    "reason": "The repaired graph producer is valid at every reference checkpoint, but the sole measured canonical trajectory fails every calibration floor, loses formerly correct OSIDs against both protected references at every checkpoint, fails six of sixteen required final anchors, fails one final consistency floor despite an identified legal donor, and retains formal exact-timing proxy failures. Passing health, producer, movement, provenance, preservation, and artifact-contract checks does not waive these acceptance failures."
+  },
+  "frozen_identity": {
+    "source_head": "b30597f49aad99032781c251b41a9de886cce3be",
+    "source_parent": "295d5f7290b1085dc76bbebb41df72386cd6b705",
+    "source_tracked_clean_after_campaign": true,
+    "qualification_sha256": "87ffab6fc6b1309dec1130ed1a6edb255c34c45b8ef1efebd1009edaf9f30ee6",
+    "config_bound_v3_sha256": "bce575f6a324d8ec4bc002a4ead81c0f99309953023498e7f3f78133afe2012a",
+    "launch_manifest_v3_sha256": "2972b66f46d668d02e046d9e584337c21a9bb98b29d56bd9f2d6d129886e3d71",
+    "wrapper_config_v3_sha256": "9b5da00e3c250a0fa0e6dee01971e3580dac5b920ce2d085739c62724b1e7cd5",
+    "finalized_v3_sha256": "f9ba7370be61568e160f2aaee64f0ce06414a02d4f3e557484d36fc8aae74a73",
+    "preparation_result_v3_sha256": "6de497e2b09ef131ad5e209783bf73ffeedc5c016ac5a07aff195c6c3a0e4fa3",
+    "candidate_run": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n102",
+    "candidate_final_turn": 188,
+    "campaign_attempts": 1,
+    "retry_count": 0
+  },
+  "execution_and_preservation": {
+    "campaign_child_exit": 0,
+    "campaign_timed_out": false,
+    "campaign_spawn_error": null,
+    "campaign_signal": null,
+    "qualification_entry_exit": 2,
+    "wrapper_exit": 2,
+    "result_status": "STOP_NO_RETRY",
+    "artifact_contract_pass": true,
+    "expected_artifact_count": 63,
+    "missing_artifacts": [],
+    "unexpected_artifacts": [],
+    "opening_preservation_sha256": "82701b4f525ed5c35763d034144a66007a457496e9fcb1a8a0bfa8da490f05b7",
+    "closing_preservation_sha256": "82701b4f525ed5c35763d034144a66007a457496e9fcb1a8a0bfa8da490f05b7",
+    "preservation_equal": true,
+    "full_suite_run": false
+  },
+  "required_reader_results": {
+    "evaluation": { "status": "FAIL", "exit": 2 },
+    "checkpoints": { "status": "FAIL", "exit": 1 },
+    "consistency": { "status": "FAIL", "exit": 1 },
+    "health": { "status": "PASS", "exit": 0 },
+    "protected_vs_n91": { "status": "FAIL", "exit": 2 },
+    "protected_vs_n92": { "status": "FAIL", "exit": 2 },
+    "producer": { "status": "PASS", "exit": 0 },
+    "movement": { "status": "PASS", "exit": 0 },
+    "graph_producer": { "status": "PASS", "exit": 0 }
+  },
+  "calibration_acceptance": {
+    "denominator": 712,
+    "reference_checkpoints": [
+      { "week": 39, "score": 705, "minimum": 707, "lost_vs_n91": 2, "lost_vs_n92": 2, "pass": false },
+      { "week": 104, "score": 704, "minimum": 707, "lost_vs_n91": 3, "lost_vs_n92": 3, "pass": false },
+      { "week": 156, "score": 703, "minimum": 706, "lost_vs_n91": 3, "lost_vs_n92": 3, "pass": false },
+      { "week": 188, "score": 686, "minimum": 706, "lost_vs_n91": 20, "lost_vs_n92": 20, "pass": false }
+    ],
+    "zero_formerly_correct_loss_at_all_four_checkpoints": false,
+    "lost_osids": {
+      "week_39": ["op:foca:donje_zesce", "op:trnovo:tosici"],
+      "week_104": ["op:srebrenica:obadi", "op:srebrenica:sulice_2", "op:trnovo:trnovo"],
+      "week_156": ["op:srebrenica:obadi", "op:srebrenica:sulice_2", "op:trnovo:trnovo"],
+      "week_188": [
+        "op:bihac:trubar",
+        "op:bosanski_novi:krslje_2",
+        "op:bosanski_novi:matavazi_2",
+        "op:bosanski_samac:domaljevac_2",
+        "op:bosansko_grahovo:bosansko_grahovo_2",
+        "op:bosansko_grahovo:crni_lug",
+        "op:bosansko_grahovo:malesevci",
+        "op:bosansko_grahovo:ugarci",
+        "op:kljuc:donji_vrbljani_2",
+        "op:kljuc:krasulje_2",
+        "op:mrkonjic_grad:baljvine_2",
+        "op:mrkonjic_grad:bjelajce_2",
+        "op:mrkonjic_grad:mrkonjic_grad_2",
+        "op:mrkonjic_grad:podrasnica_2",
+        "op:orasje:ostra_luka",
+        "op:sanski_most:ilidza_2",
+        "op:sanski_most:kljevci",
+        "op:titov_drvar:drvar_2",
+        "op:titov_drvar:sipovljani_2",
+        "op:trnovo:trnovo"
+      ]
+    },
+    "final_anchor_summary": {
+      "required": 16,
+      "passed": 10,
+      "failed": 6,
+      "failures": [
+        { "osid": "op:bosanski_novi:krslje_2", "expected": "RBiH", "actual": "RS" },
+        { "osid": "op:bosanski_novi:matavazi_2", "expected": "RBiH", "actual": "RS" },
+        { "osid": "op:mrkonjic_grad:podrasnica_2", "expected": "HRHB", "actual": "RS" },
+        { "osid": "op:mrkonjic_grad:mrkonjic_grad_2", "expected": "HRHB", "actual": "RS" },
+        { "osid": "op:mrkonjic_grad:bjelajce_2", "expected": "HRHB", "actual": "RS" },
+        { "osid": "op:mrkonjic_grad:baljvine_2", "expected": "HRHB", "actual": "RS" }
+      ]
+    },
+    "western_bosnia_cascade": {
+      "actual": 35,
+      "baseline": 41,
+      "difference": -6,
+      "allowed_difference": -2,
+      "pass": false,
+      "municipality_counts": {
+        "Bosansko Grahovo": "0/4",
+        "Sipovo": "5/5",
+        "Glamoc": "6/6",
+        "Drvar": "1/3",
+        "Petrovac": "8/8",
+        "Mrkonjic Grad": "2/6",
+        "Kljuc": "5/7",
+        "Sanski Most": "8/10"
+      }
+    },
+    "other_checkpoint_findings": {
+      "enclave_holds": "7/7 passed; scheduled Srebrenica and Zepa falls passed",
+      "eastern_capture_provenance": "Clean; Seher was never captured and remains a calibration failure",
+      "farz_objectives": "4/4 passed with operation ownership; 2nd Corps participation was not recorded",
+      "universal_guard_captures": 0
+    }
+  },
+  "exact_timing_proxy_classification": {
+    "formal_gate_status": "FAIL",
+    "waived": false,
+    "toljenak": {
+      "classification": "Obsolete exact-week and exact-roster proxy over a genuine normal combat capture; remains a formal required-gate failure until the owner changes the criterion.",
+      "actual_controller": "RBiH",
+      "actual_capture_turn": 134,
+      "actual_battle_id": "134:op:vares:toljenak:arbih_162nd_mountain:rs_ilidza_brigade",
+      "actual_mechanism": "combat",
+      "actual_operation": "arbih_1st_corps:Operation Behar-I:t133",
+      "actual_aar": "Started 133, ended 135, success, logged_capture, one attack, Toljenak captured and logged.",
+      "proxy_mismatch": "Evaluator requires RS through turn 134 and an exact turn-135 battle/event/diagnostic shape with two eligible attackers. The retained run captured at turn 134 with one eligible attacker, so the evaluator reports retention and native_capture failures despite normal provenance."
+    },
+    "prisoje": {
+      "classification": "Obsolete exact-week proxy over a genuine normal combat capture; remains a formal required-gate failure until the owner changes the criterion.",
+      "actual_controller": "HRHB",
+      "actual_capture_turn": 187,
+      "actual_battle_id": "187:op:jajce:prisoje:hv_1st_hgz_1995:rs_1st_armored",
+      "actual_mechanism": "combat",
+      "actual_operation": "hvo_tomislavgrad:Operation Mistral 2:t175",
+      "proxy_mismatch": "Evaluator requires exact turn 188, so its battle/event arrays are empty even though final control and turn-187 combat provenance are present."
+    },
+    "donji_vrbljani": {
+      "classification": "Genuine outcome failure, not an exact-timing proxy.",
+      "actual_controller": "RS",
+      "expected_controller": "HRHB",
+      "battles": 0,
+      "control_events": 0,
+      "operation_diagnostics": 0,
+      "aar_present": false
+    }
+  },
+  "graph_producer": {
+    "pass": true,
+    "schema": "graph-producer-v1",
+    "checkpoints": [
+      { "week": 39, "fronts": 289, "sectors": 71, "rostered_formations": 233 },
+      { "week": 104, "fronts": 259, "sectors": 60, "rostered_formations": 225 },
+      { "week": 156, "fronts": 252, "sectors": 61, "rostered_formations": 232 },
+      { "week": 188, "fronts": 242, "sectors": 52, "rostered_formations": 218 }
+    ],
+    "all_checkpoint_error_counts": {
+      "invalid_endpoints": 0,
+      "duplicate_edges": 0,
+      "missing_sector_edges": 0,
+      "roster_mismatches": 0,
+      "malformed_sectors": 0,
+      "duplicate_roster_membership": 0
+    },
+    "conclusion": "The OSID graph repair is genuinely exercised and produces valid, nonempty fronts, sectors, and rosters at all four reference checkpoints. This establishes the producer repair but does not establish acceptable calibration."
+  },
+  "measured_semantic_impact_vs_n101": {
+    "classification": "Large state cascade; not fatigue-only.",
+    "week_39": { "total": 21940, "sector": 418, "fatigue": 227, "operation": 1871, "control": 290, "other": 19134 },
+    "week_104": { "total": 34680, "sector": 377, "fatigue": 215, "operation": 3044, "control": 538, "other": 30506 },
+    "week_156": { "total": 38874, "sector": 394, "fatigue": 221, "operation": 4115, "control": 599, "other": 33545 },
+    "week_188": { "total": 56151, "sector": 2454, "fatigue": 229, "operation": 5466, "control": 1153, "other": 46849 }
+  },
+  "consistency": {
+    "pass": false,
+    "failure_count": 1,
+    "failure": {
+      "sector": "sector:vrs_east_bosnian:1",
+      "actual_brigades": 1,
+      "minimum_brigades": 3,
+      "legal_donor": "rs_1st_bijeljina_light_infantry_panthers",
+      "donor_sector": "sector:vrs_east_bosnian:3",
+      "same_front": true,
+      "distance_hops": 2
+    },
+    "other_final_checks": {
+      "ghost_assignments": 0,
+      "assignment_sync_errors": 0,
+      "reserve_cap_failures": 0,
+      "physical_owner_failures": 0,
+      "faction_side_coverage": "exact",
+      "geometry_disconnections": 0,
+      "empty_contested_sector_missed_donors": 0,
+      "undefended_subsegment_failures": 0,
+      "adjacent_uncontested_actionable_failures": 0,
+      "trubar_note": "One exposed Trubar position had no legal same-corps donor."
+    }
+  },
+  "travnik_stderr": {
+    "classification": "Two retained transient sector-pipeline fall-through warnings. They are genuine diagnostics but are not proven to be a final unresolved assignment or a cause of the map losses.",
+    "lines": [
+      "[brigade_assignment] UNRESOLVED hrhb_travnik_brigade (1357 pers): fell through sector pipeline, corps=hvo_central_bosnia",
+      "[brigade_assignment] UNRESOLVED hrhb_travnik_brigade (1426 pers): fell through sector pipeline, corps=hvo_central_bosnia"
+    ],
+    "retained_timeline_context": "Personnel 1357 occurs at turn 65; 1426 occurs from turn 66. The brigade is active in final state at op:gornji_vakuf:vaganjac with 1500 personnel, hvo_central_bosnia corps, and null assignment.",
+    "limitation": "The consistency artifact does not contain an unresolved_sector_brigades field, so closure is not established by the retained final reader. Causation is also not established."
+  },
+  "passing_evidence_that_does_not_waive_failures": {
+    "health": {
+      "pass": true,
+      "advisories": "12/68 operations and 14/101 axes had zero attacks; all 299 probe and 31/71 sector_attack planning deaths were retained as advisories."
+    },
+    "producer": {
+      "pass": true,
+      "schema": "262-native-proof-v1",
+      "weekly_rows": 188,
+      "producer_anchors_passed": "31/31",
+      "limitation": "The producer's 31-anchor contract is different from the required sixteen final calibration anchors and cannot waive their 6/16 failure."
+    },
+    "movement": {
+      "pass": true,
+      "receipts_seen": 35720,
+      "week_coverage": "188/188",
+      "active_window": "80-188 (109 weeks)",
+      "inactive_window": "1-79 (79 weeks)",
+      "inconsistencies": 0,
+      "missing_weeks": 0,
+      "causal_proof": false
+    },
+    "provenance": {
+      "git_commit": "b30597f49aad99032781c251b41a9de886cce3be",
+      "git_dirty": false,
+      "input_rows": 32,
+      "recorded_input_digest": "88cf2d9ad4913bc62dde684d71465a28622c28b559713e4d0f13124ad8031c69",
+      "recomputed_input_digest": "88cf2d9ad4913bc62dde684d71465a28622c28b559713e4d0f13124ad8031c69",
+      "current_input_mismatches": 0
+    }
+  },
+  "diagnostic_reference_comparisons": {
+    "event_timeline": {
+      "n91": { "changed_osids": 25, "regressed_osids": 24, "reader_status": "PASS" },
+      "n92": { "changed_osids": 24, "regressed_osids": 24, "reader_status": "PASS" },
+      "n94": { "changed_osids": 24, "regressed_osids": 24, "reader_status": "PASS" },
+      "n98": { "changed_osids": 24, "regressed_osids": 24, "reader_status": "PASS" }
+    },
+    "causal_boundary": {
+      "source": "UNMEASURED",
+      "decision": "UNMEASURED",
+      "interpretation": "The retained comparison readers establish divergent outcomes but do not localize the first causal decision or source event."
+    },
+    "input_difference_note": "n94 and n98 have no consumed input differences. n91 and n92 differ in the painted_control_apr1995 input hash and historical dirty-head metadata."
+  },
+  "evidence_hashes": {
+    "campaign_result_json": "9c121f9ceff68e7d74a68d4be5e5915baaf545876f50ab20d28b4c170a361326",
+    "campaign_receipt_json": "85f24dd15082d4925fe1f6508313b6a7fe66bc0a527ff9b7df2a9fc060b0e577",
+    "campaign_execution_json": "7de5809041dbea5ba3cc7fd053d71a0374021ded3f781ca4160127d3d69281ef",
+    "campaign_stdout_log": "0804388225da7c0cae38a483022a260528874582bf71391deab43fe51664a910",
+    "campaign_stderr_log": "5f80c8cca4034e500ed21ba27fdbacf5a010fe442dc1939744aa1547111be105",
+    "evaluation_json": "51982d682cef772cebebdf0b9f6485d562f418e8efab97be350540c28b63e9ab",
+    "evaluation_stdout_log": "a75326b0a276ee03ae7d1db170cd287c83dd12b8e0de694bf5d0d591153b708c",
+    "checkpoints_stdout_log": "20e9145a98dbc04ac58fb77b1f39ae027e6a7e016ff2d2751d3c0b345cae0072",
+    "consistency_stdout_log": "fa016563ab3ba50cf287b416cae8ce2c8e39c07f5a4c5c38070e31629eb201c6",
+    "health_stdout_log": "7fee48a32a88e91a8c26dd5163a27d6ca52cfd5f5b0f1546ef6eaefbe8a7e0cc",
+    "producer_stdout_log": "d94eb20aa53647dbdb8aec44cb0af97c08ddf5ef6705acf5f5ccbaf92b027cac",
+    "movement_stdout_log": "1ae4d5d9623a4d22d4d9c2b6f7ac8a0c6d4878c15ffed75b9df01a38d1b9f5e0",
+    "graph_producer_json": "bf177df44aec1f551f5c22654a39331bf2db8671c6a7182ff512c2317c8c31ae",
+    "graph_producer_stdout_log": "d6bb012b070b00ffbafbab57375d76a4796084b5b0db1ad188f19290c1451274",
+    "protected_vs_n91_json": "7dd65636f3ebfc6b7290b6bfb713a17673eef4c6f640c436ce24bd67714fca26",
+    "protected_vs_n92_json": "aab1c3d4a52d808b011f69e1b72b70cc0d6b872d74c1c1acd3e1a23f30869e08",
+    "weekly_aar_jsonl": "a09dc09a8fa7e10ee8db353db69f432c228e0d72b48545e9d1ebc1e5760502a6",
+    "final_save_json": "d1795393d1843c3ced45ea74b113f40ee94e078687e8bf4772d0b9e9c6277499",
+    "run_summary_json": "c70664a5f1c35ef82474b3b6680bba25212caddd8c6ea87f634e5a069f822ffc"
+  },
+  "minimal_next_retained_only_question": {
+    "question": "Using only retained n102 and clean n94/n98 (or n101 where its matching artifact exists), what is the earliest sector-assignment, operation, battle, or control-event divergence that causes the week-39 Donje Zesce and Tosici losses, and what later retained divergence begins the six-objective western-Bosnia shortfall?",
+    "scope": "One bounded event-and-sector timeline comparator over retained artifacts; begin at week 1 and stop after identifying the first causally relevant divergence for the early loss and the first boundary for the late western collapse.",
+    "stop_condition": "Stop if the retained artifacts cannot expose a source decision or causal boundary; report UNMEASURED without campaign, retry, tuning, code change, or baseline adoption."
+  },
+  "reviewer_conclusion": "The one-week graph repair corrected the scenario harness producer defect and generated structurally valid OSID graphs. Its actual canonical 188-week calibration impact is unacceptable under the frozen criteria: all four floors fail, formerly correct losses occur at all four checkpoints against both protected references, six required final anchors fail, and one final sector floor remains underfilled despite a legal donor. Toljenak and Prisoje demonstrate real normal combat captures at turns 134 and 187 respectively, so their exact-week proxy failures should be presented accurately rather than mistaken for missing combat; they nevertheless remain unwaived formal failures. Donji Vrbljani and the western-Bosnia shortfall are genuine outcome failures. The candidate remains NO_GO with no retry and no full-suite expansion."
+}
