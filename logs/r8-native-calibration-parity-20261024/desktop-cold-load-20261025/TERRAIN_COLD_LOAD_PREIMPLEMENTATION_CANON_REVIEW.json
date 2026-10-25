@@ -1,0 +1,147 @@
+{
+  "schema": "awwv.terrain-cold-load.preimplementation-canon-review.v1",
+  "verdict": "GO",
+  "independent": true,
+  "reviewerIdentity": "/root/desktop_terrain_canon_review",
+  "reviewedAt": "2026-10-25T09:07:00.000Z",
+  "expectedHead": "2ca7d7bcdf795f20c5c15f0004b3c72019f98337",
+  "scope": "Canon and determinism review of explicit-root terrain priming during desktop save load; no implementation, engine run, package build, campaign, suite, or native execution.",
+  "decision": {
+    "implementationAuthorizedByThisReview": true,
+    "qualificationAuthorizedByThisReview": false,
+    "nativeRetryAuthorizedByThisReview": false,
+    "summary": "The repair is canon-conformant when it reconstructs the disposable sector_combat_ratings projection from the caller's explicit terrain-data root and leaves advanceTurn behavior unchanged. The mandatory caller, ordering, fallback, and focused-equivalence conditions below are part of this GO.",
+    "classification": "desktop cold-load reconstruction and observer correction, not a combat-rule or calibration change",
+    "new188Required": false,
+    "newFullSuiteRequired": false,
+    "evidenceReuseRule": "The completed n98 and full-suite gameplay evidence may be reused at its original immutable scope because the scenario-runner inputs, terrain data, combat rules, serialization, and advanceTurn semantics are unchanged. A new candidate/package authority must compose that old-head evidence with the reviewed source delta and focused equivalence evidence; it must not relabel the old artifacts as having run at the new HEAD."
+  },
+  "actualEvidence": {
+    "retainedOpeningFailureAudit": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/ACTUAL_OPENING_FAILURE_RESIDUAL_AUDIT.json",
+      "bytes": 12776,
+      "sha256": "6f193c7547de4c1cf9a3ddc4e4352b65bf07500fb4bf099104e2eb817ee73eb6",
+      "verdict": "FAILED"
+    },
+    "retainedNativeResult": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/native-opening-01/child/result.json",
+      "bytes": 1860459,
+      "sha256": "59d9e5658ca7dfd7f6e36df8ed1c302c1a69b854c99b2c0d1ed0cfbe3bb34457"
+    },
+    "retainedHarnessStderr": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/native-opening-01/child/harness.stderr.log",
+      "bytes": 827,
+      "sha256": "4cad583969341b3ebfe91fb8b996266394887e704d902d42e16db062fd62b961",
+      "observedProjectionHashes": {
+        "expected": "aa303ec49896c9e8d7b044c4dfb3356947282aa3588a3f5085e33c42ddaaaccf",
+        "actual": "a641db55bf56b06d551bd6f539014994303c429490932d929be198c893bd0c65"
+      }
+    },
+    "diagnosisAttribution": {
+      "owner": "/root/native_terrain_saveload_diagnosis",
+      "reportedFinding": "Canonical save identity succeeds; the only projection differences are defensive_power and defense_per_edge for ten RBiH sectors, caused by a fresh load computing ratings before terrain sets are primed.",
+      "reviewLimit": "This preimplementation review accepts the bounded diagnosis as an input and independently verifies that the proposed call-graph repair satisfies canon and determinism. It does not re-run or duplicate the diagnosis."
+    }
+  },
+  "reviewedSource": [
+    {
+      "path": "src/desktop/desktop_sim.ts",
+      "bytes": 59344,
+      "sha256": "db0f4b31bf51b23ca85197ea81509b122ebd26b053e93671884014a5755cb5fd",
+      "finding": "loadStateFromPath currently computes sector ratings without terrain priming; advanceTurn replaces both terrain globals from explicit baseDir before BotManager, prediction, and runTurn."
+    },
+    {
+      "path": "src/sim/combat/combat_terrain_sets_node.ts",
+      "bytes": 695,
+      "sha256": "a9b367adf78e8b18d5a626427d7746e8a32f988b53896be16aec4a984658e091",
+      "finding": "The existing loaders accept baseDir and retain deterministic empty-set fallback for missing or malformed files."
+    },
+    {
+      "path": "src/desktop/electron-main.cjs",
+      "bytes": 185043,
+      "sha256": "3d68cf41fc91e27876d3c8191907e4ba6bfb58557b93f5733353e3c8f0ee2345",
+      "finding": "Both production save-load routes call loadStateFromPath without getBaseDir."
+    },
+    {
+      "path": "tools/ui/paradox_local_qa.cjs",
+      "bytes": 364760,
+      "sha256": "52b6537caa3f147deca68fef752a39884c7da5f8ca4d23ac46fc0a3a9baf671f",
+      "finding": "The authoritative loaded-projection builder selects a source or packaged desktop bundle but calls loadStateFromPath without the corresponding explicit data root."
+    },
+    {
+      "path": "tools/ai_play/desktop_calibration_compare.ts",
+      "bytes": 34747,
+      "sha256": "a112a43408ea7df23d387cbacd1a47c17ea553a76474b7baf0674c55e34cea55",
+      "finding": "Two additional loadStateFromPath callers already possess baseDir and must pass it if the loader signature becomes explicit-root."
+    }
+  ],
+  "canonBindings": [
+    {
+      "document": "docs/10_canon/Engine_Invariants_v0_9_0.md",
+      "sha256": "445c3a78304c8a84db9ba7c94403f183882d6128947a3da5ec2e9235287c7227",
+      "clauses": ["11.1 deterministic execution", "11.3 stable ordering", "11.4 save/load full reconstruction and identical-input identity", "13.1 derived state is not serialized", "13.2 derived state is recomputed"],
+      "application": "A fresh load must reconstruct the same runtime combat-rating projection from the same save and explicit terrain root, independent of prior process history."
+    },
+    {
+      "document": "docs/10_canon/Systems_Manual_v0_9_0.md",
+      "sha256": "3735d8a6e1d3d89b6070f686bb463c28ba8acca2acf55f0f5c74fb6f1af1236b",
+      "clauses": ["combat defender power includes terrain effects", "deterministic save/load reconstruction", "sector_combat_ratings is one of five disposable non-serialized military caches"],
+      "application": "Loading without the canonical urban and forest sets produces a non-canonical derived defense projection; explicit-root recomputation restores the specified terrain contribution without changing persisted state."
+    },
+    {
+      "document": "docs/20_engineering/DETERMINISM_TEST_MATRIX.md",
+      "sha256": "5fd06edcb3ce4e6dd9801b310953b00a7f99444c78eb64c8ab255f97d082b9e3",
+      "clauses": ["desktop terrain prerequisite explicit data root", "stale-global replacement", "missing/malformed compatibility", "complete canonical/urban/forest root", "derived state excluded from serialization"],
+      "application": "The load path must meet the same explicit-root and stale-process protections already required for the desktop advance path."
+    },
+    {
+      "document": "docs/20_engineering/AGENT_WORKFLOW.md",
+      "sha256": "109dd4f6aa44b4bbe48f672fac5f3f8b32150aba97f4ad9368a6e3dadb7293f4",
+      "clauses": ["reuse unaffected evidence", "after unexpected failure prove the correction cheaply before another expensive run"],
+      "application": "Focused cold-load and next-advance equivalence is the rejection gate before package02 or one corrected native opening."
+    }
+  ],
+  "mandatoryImplementationBounds": [
+    "Create one idempotent primeCombatTerrain(baseDir) operation that loads and replaces both urban and forest global sets on every call. It must not union with, retain, or conditionally reuse ambient process state.",
+    "Call primeCombatTerrain(baseDir) in loadStateFromPath after deserialization and before computeSectorCombatRatings.",
+    "Call the same helper in advanceTurn at its current ordering point before BotManager construction, operation prediction, combat prediction, or runTurn. Moving it later is outside this approval.",
+    "Make loadStateFromPath's data root explicit. All repository callers must pass the correct root. The reviewed call inventory is two Electron routes, the native authoritative projection builder, two desktop_calibration_compare calls, and three tracked tests. A default process.cwd fallback on the production load path would preserve the process-history defect and is not approved.",
+    "Electron's two load routes must pass getBaseDir(). The native expected builder must pass repository root for the source bundle and packaged resources root for the packaged bundle, derived from the selected bundle rather than ambient CWD.",
+    "Preserve existing missing/malformed terrain-file behavior: both globals are replaced with the loader result, including empty sets. Do not silently retain a previous valid root.",
+    "Do not add GameState fields, serialize sector_combat_ratings, alter canonical save bytes, modify terrain assets/multipliers/combat formulas, change cache ordering beyond prerequisite priming, or change player controls, thresholds, policy, history, or geometry.",
+    "The harness must use the production loadStateFromPath implementation. Duplicating terrain or rating logic in the observer is outside this approval."
+  ],
+  "requiredFocusedValidation": {
+    "beforePackageOrNative": true,
+    "checks": [
+      "RED/GREEN reproduction of the retained mismatch using a fresh process or reset module state and a complete explicit root containing canonical map, urban, and forest inputs.",
+      "Cold load and warm load of the same canonical save and root yield exactly equal runtime sector_combat_ratings and player-visible projection.",
+      "Prime root A, then load using distinct root B; the result equals a fresh root-B process and proves both globals were replaced rather than merged or reused.",
+      "Missing and malformed root cases deterministically install empty sets and cannot inherit stale values from an earlier valid root.",
+      "serializeState of every loaded state remains byte-identical to the input canonical save.",
+      "From the same save and complete root, cold-load-plus-next-advance and warm-load-plus-next-advance produce byte-identical canonical state and report, including operations, battles, and controls.",
+      "Production caller tests bind both Electron load sites to getBaseDir, both desktop_calibration_compare sites to baseDir, and source/package expected-builder roots to the selected bundle location.",
+      "Existing desktop terrain-prerequisite and persisted-sector-continuity tests remain green; run the focused desktop load/terrain/caller tests and TypeScript typecheck."
+    ],
+    "passCriteria": "All focused checks pass with zero failed tests and zero type errors; canonical save bytes are unchanged; next-advance state/report are byte-identical; no caller relies on CWD or prior globals.",
+    "stopCondition": "Any next-advance difference, save-byte difference, terrain-data or multiplier change, new serialized field, or scenario-runner change invalidates the desktop-only classification. Stop before package/native and require a new canon review plus fresh full suite and 188-week qualification."
+  },
+  "evidenceReuseAndInvalidation": {
+    "reuse": [
+      "Actual n98 188-week scenario qualification at 2ca7d7bcdf795f20c5c15f0004b3c72019f98337, provided the focused next-advance proof is exact.",
+      "Actual full-suite V5 result at that same immutable candidate scope, provided the new package authority explicitly records reuse and binds the reviewed delta.",
+      "Unchanged terrain assets, combat rules, calibration scores, source/package one-turn parity inputs, and prior preservation evidence at their original scopes."
+    ],
+    "invalidated": [
+      "Package01 as the corrected deliverable, because its compiled desktop bundle still contains the cold-load defect.",
+      "The failed native opening as acceptance evidence; it remains retained failure evidence and is never rewritten or waived.",
+      "Any source/package compiled-consumer, inventory, terminal binding, or native preparation artifact whose authority requires exact candidate HEAD or changed-file hashes; these require a fresh package02 chain or an explicit reviewed composition, not hash substitution."
+    ],
+    "nextExpensiveStep": "Only after focused GREEN evidence and independent postimplementation review: create fresh package02, prove the changed compiled consumer/inventory and cold source/package load parity, then run one corrected opening under a newly bound no-retry authority."
+  },
+  "residuals": [
+    "This review does not certify the reported twenty-field diagnosis independently; it reviews the proposed correction against retained failure evidence and the current production call graph.",
+    "The original failed opening also had a CDP URL-path cap violation and incomplete terminal fields recorded by the residual audit. Those remain separate gates for the corrected opening and are not waived by fixing save/load.",
+    "No package, native opening, turn-39 run, full suite, or campaign is authorized by this artifact."
+  ]
+}

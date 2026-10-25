@@ -15,7 +15,7 @@ paused or RE is blocked, they are describing 2026-08-28, not today.
 
 **Last updated:** 2026-10-25 — owner prioritizes player capability to achieve bot calibration and access the same operations; diagnose and repair proven gaps before divergence experiments. n94 remains the no-player benchmark.
 
-**Player parity:** n97 retains707/707/706/706 and zero n91/n92 losses. Player39/raw703 remains failed. Reviewed desktop terrain repair reproduces the primed one-turn persisted state/report exactly;52/52 focused checks pass. Restore regression-tool safeguards before188/full-suite/new package/native. Resume fidelity remains open. See the [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md).
+**Player parity:** n98 qualifies707/707/706/706 and zero n91/n92 losses; suite15082/0/33. Package01/compiled proof pass; real opening fails derived load projection and CDP cap. Reviewed correction passes170/170+54/54. Next package02/cold-load proof/opening, then39; later checkpoints/resume/all-faction gates remain open. Preserve n91–n98; no tuning/adoption. [Plan](2026-07-31-full-campaign-electron-validation-plan.md).
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
@@ -79,7 +79,7 @@ The execution-branch paragraph below records the earlier January checkpoint.
 
 **Authority:** This file is the sole source of truth for unfinished product work.
 
-**Current R8 — player capability before divergence.** n97 clean188 and its15062/0/33 suite remain qualified at their no-player scope. Player39/raw703 remains failed. Explicit-choice23 supplies all four early flips and n94 Kolovarice RS; Tosici receives Circle and attacks but faces standing defenders where n94 used militia. Its page-bound CDP collection also fails. Frame-observer159/159 and correction review pass; no native retry. A reviewed n94 suffix probe failed before turns because its private inputs omitted a startup map; next is a zero-turn startup/resume gate, then faithful suffix diagnosis. Preserve n91–n97; no tuning/adoption. Later checkpoints, all-faction, replay and release gates remain open.
+**Current R8 — player capability before divergence.** n98 and suite qualify at2ca7d7b, explicitly reused with the reviewed cold-load/observer delta. Package01/compiled proof pass; real opening fails derived hydration equality and CDP path-recording cap. Canonical saves match. Explicit-root load and protocol-first observer pass170/170+54/54; actual package02/native remain gates. Old703/700, explicit-choice23 and every failure remain retained. Later checkpoints, all-faction, replay and release stay open.
 
 **Execution view:** [COMMAND_BOARD.md](COMMAND_BOARD.md) is a derived convenience view; this roadmap wins if they differ.
 

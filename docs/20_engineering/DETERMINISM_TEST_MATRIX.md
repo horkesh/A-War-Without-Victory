@@ -1,15 +1,8 @@
 # Determinism Test Matrix (AWWV)
 
-## Desktop terrain prerequisite (2026-10-25 candidate)
+## Desktop terrain prerequisites (2026-10-25)
 
-`tests/desktop_combat_terrain_prerequisite.test.ts` exercises the actual desktop Advance caller
-with real urban/forest lookups at its first bot and turn consumers. It covers all three faction
-metadata values, explicit data root despite a conflicting working directory, alternate roots,
-stale-global replacement, missing/malformed input compatibility, input immutability and unchanged
-result shape. Existing loader callers retain the working-directory default. Recorded-state proof
-must bind the complete explicit root, including canonical map and both terrain assets; the older
-consumed-input inventory alone is insufficient. Focused tests do not replace the required 188-week,
-full-suite, compiled-package or native player gates.
+The real desktop Advance and Load callers must prime urban/forest sets from their explicit roots. `desktop_combat_terrain_prerequisite.test.ts`, `desktop_load_sector_ratings.test.ts` and persistence/caller tests cover cold, warm, stale, missing/malformed roots, canonical save identity and exact next-advance state/report equality. The CDP collector classifies protocol before HTTP path bounds: non-HTTP retains bounded protocol/length/SHA only; over-cap HTTP remains fatal. Focused170/170, final collector54/54 and static checks pass. n98 and the15082/0/33 suite remain immutable evidence at2ca7d7b, composed with the independently reviewed cold-load/observer delta; they are not new-head executions. Any next-advance difference stops reuse and requires fresh188/full-suite qualification. Package02 and native parity remain unmeasured. [selected proof](../../logs/r8-native-calibration-parity-20261024/desktop-cold-load-20261025/MANIFEST.json)
 
 ## Ordinary-player startup and retained regression boundary (2026-10-25 candidate)
 

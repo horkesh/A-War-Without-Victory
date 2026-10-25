@@ -1,0 +1,285 @@
+{
+  "schema": "awwv.terrain-parity.actual-full-suite-independent-review.v1",
+  "reviewedAt": "2026-10-25T07:37:54.025Z",
+  "reviewerIdentity": "desktop-terrain-canon-review",
+  "independent": true,
+  "expectedHead": "2ca7d7bcdf795f20c5c15f0004b3c72019f98337",
+  "verdict": "GO",
+  "scope": "Actual terminal terrain full-suite v5 evidence only. This accepts the one retained suite attempt as the required terminal suite gate; it does not qualify a package, compiled consumer, native opening, calibration result, or release.",
+  "candidate": {
+    "head": "2ca7d7bcdf795f20c5c15f0004b3c72019f98337",
+    "trackedCleanAtReview": true,
+    "candidateBindingSha256": "8271c9939e1546103b4d73811b02a1ed6ba7245989af2a68c158c8232059d92f",
+    "baseHead": "86b693a9423de6a2be13174c36f96ee6a8430801"
+  },
+  "attempt": {
+    "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-full-suite-v5/full-suite-01",
+    "attemptCount": 1,
+    "automaticRetry": false,
+    "receipt": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-full-suite-v5/full-suite-01/receipt.json",
+      "bytes": 4490,
+      "sha256": "1940af1f51294b3d31b4a5670ebc779081e1db9f12ee58b68ea1209ec7cb4d48",
+      "schema": "awwv.preserved-preflight.receipt.v1",
+      "wrapper_exit": 0,
+      "child_exit": 0,
+      "timed_out": false,
+      "spawn_error": null,
+      "artifact_contract_pass": true,
+      "retained_artifacts": 7,
+      "exactPreservedReceiptVerification": true,
+      "timeout_ms": 2100000,
+      "entry_script_sha256": "0325ce1a4fcc6d1204ccd5197ba7dbd80981445440d268557c781ab06c7f4a66"
+    },
+    "result": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-full-suite-v5/full-suite-01/child/result.json",
+      "bytes": 617420,
+      "sha256": "eaa005ac6f6568e6a13bed466a716a70b1207ad79185d9b065acda897cadb196",
+      "schema": "awwv.t3-routing-full-suite.result.v1",
+      "pass": true,
+      "checks": 15,
+      "allChecksTrue": true,
+      "child_exit": 0,
+      "timed_out": false,
+      "source_stable": true,
+      "finalization_error": null
+    },
+    "opening": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-full-suite-v5/full-suite-01/child/opening.json",
+      "bytes": 2111203,
+      "sha256": "2c970dbe966c6354eb41c520932d2b658adb187c0088b8ae1fdd4e921ebec824",
+      "schema": "awwv.t3-routing-full-suite.opening.v1",
+      "archiveExact": true
+    },
+    "closing": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-full-suite-v5/full-suite-01/child/closing.json",
+      "bytes": 1926535,
+      "sha256": "fcd96a61f771efdad779944960aa280dc66a35b4517f9a6dc714b11d337f46f8",
+      "schema": "awwv.t3-routing-full-suite.closing.v1",
+      "archiveExact": true,
+      "readiness_stable": true,
+      "source_stable": true,
+      "preserved_runs_exact": true,
+      "finalization_error": null
+    },
+    "childExit": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-full-suite-v5/full-suite-01/child/child-exit.json",
+      "bytes": 374,
+      "sha256": "c531ca09496e95ec73d58144a31fb5a0cb7348fe3e882a7eca1cbb0ab98e7e09",
+      "child_exit": 0,
+      "native_code": 0,
+      "timed_out": false,
+      "spawn_error": null
+    },
+    "stdout": {
+      "bytes": 144874,
+      "sha256": "13de54a1e21aea4a0757525ae8a937ad67f86d52da4f1c471a5f363670b08cb7"
+    },
+    "stderr": {
+      "bytes": 6133,
+      "sha256": "35e082da674512265f180bfa937e4c5df8481ae8cfba5d220686c18b1d2ed3d6",
+      "assessment": "Contains expected deliberate nested failure-control output and line-ending warnings. Top-level five summaries, receipt coverage, child exit, and finalization all remain passing."
+    }
+  },
+  "suite": {
+    "nativeSummaries": {
+      "pass": true,
+      "count": 5,
+      "files": {
+        "pass": 1450,
+        "fail": 0,
+        "skip": 4,
+        "todo": 0,
+        "total": 1454
+      },
+      "tests": {
+        "pass": 15082,
+        "fail": 0,
+        "skip": 33,
+        "todo": 0,
+        "total": 15115
+      },
+      "eachSummaryZeroFailTodo": true
+    },
+    "receiptCoverage": {
+      "pass": true,
+      "run_count": 1,
+      "matching_run_count": 1,
+      "lane_count": 5,
+      "allLanesExactIdentityOrderedTerminal": true,
+      "aggregate": {
+        "pass": 1450,
+        "fail": 0,
+        "skip": 4,
+        "incomplete": 0,
+        "total": 1454
+      },
+      "failed_files": [],
+      "skipped_files": [
+        "tests/scenario_golden_baselines_h2_3.test.ts",
+        "tests/sector_drina_frontline_integrity.test.ts",
+        "tests/sector_front_role_truth_real_save.test.ts",
+        "tests/supply_sensitive_history_smoke.test.ts"
+      ]
+    },
+    "scratch": {
+      "pass": true,
+      "rootCount": 11,
+      "differences": []
+    }
+  },
+  "authority": {
+    "beforeAfterStablePredicate": true,
+    "beforeAfterRawDifference": [
+      {
+        "path": "/campaign/telemetry/0/actual/bytes",
+        "before": 137582113,
+        "after": 140043927
+      },
+      {
+        "path": "/campaign/telemetry/0/actual/sha256",
+        "before": "ffcba176a1e673b5ddb8d4f44c03c67f71faa1cf13849353550366e9168926a0",
+        "after": "05b49ba743304dda94ec324716f40289147d83269164bfb62fc275d11d33fde9"
+      }
+    ],
+    "rawDifferenceAssessment": "Only the authorized C-lane telemetry append changed. Candidate binding, candidate HEAD, source/tool aggregate, v5 manifest/binding, n98 receipt/result/summary, and n98 candidate-run aggregate remained exact.",
+    "v5ManifestSha256": "63fd501a6e2ae81330a2dbfb7f423dc40607c7e23dfec1cef6a4d0c4a3a3a00a",
+    "v5BindingSha256": "70cbb1bdc8ca4dda83ba070886dc58a68b3605dfe0a31ec4e2b119d924342841"
+  },
+  "n98": {
+    "candidate": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n98",
+    "receiptSha256": "d7eb5c724c1904e999d4931ba368a88bb2ad22b48df0ced7e2d04a3f5ce088c1",
+    "resultSha256": "1bf5a2cedcdc6f29824bb40c056d1d2de2d1575bdb73e60a992529d15cb51b6e",
+    "postrunSha256": "39dccc5a8f5954a34b2ce8d775b684ab19de003a07d91a109c2b43ff8e8b192a",
+    "candidateRunAggregateSha256": "fb4ae50125051a332e41171ba45eb766eef5cc28c66fae9d5190407c0ecac594",
+    "independentReview": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/ACTUAL_N98_QUALIFICATION_REVIEW.json",
+      "sha256": "d34bd6b45154ed5b87da46caedaf995949070077eb02d3336880b028f93c512a",
+      "qualification": "GO",
+      "containsExactReceiptResultAndPostrunHashes": true
+    }
+  },
+  "preservation": {
+    "openingClosingRunsDeepEqual": true,
+    "sourcePinsDeepEqual": true,
+    "scratchExact": true,
+    "runs": [
+      {
+        "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n91",
+        "count": 31,
+        "aggregate_sha256": "c666b9edb78f8b879d8ecb517b1cef7188b5b7238df3666b03421e84f245525f"
+      },
+      {
+        "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n92",
+        "count": 38,
+        "aggregate_sha256": "78f71918ef9bad61acfae4f9d0503aa2ff9483d2288c207a81d90591144231cd"
+      },
+      {
+        "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n93",
+        "count": 40,
+        "aggregate_sha256": "3a8e9ba3a0c8f9da7c4840143084d472f719e787818bf332f720e6a009827b9e"
+      },
+      {
+        "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n94",
+        "count": 40,
+        "aggregate_sha256": "5cddb9dbad0458fb66ee0647213808298f9614a7cb919e40239af9348562d2e8"
+      },
+      {
+        "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n95",
+        "count": 40,
+        "aggregate_sha256": "24a600ca4a3e0ea3160ada13e5c561d8e12ef1603519ab8821729d606c3858a3"
+      },
+      {
+        "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n96",
+        "count": 40,
+        "aggregate_sha256": "2a7a689010342342890451e2521d58e1371c82e33bb55990e4b8c6a2762887eb"
+      },
+      {
+        "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n97",
+        "count": 40,
+        "aggregate_sha256": "11a7bb0c107c51e9f8f16d49ab86d377c5040868251f491d792ce796d9ba03ed"
+      },
+      {
+        "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n98",
+        "count": 40,
+        "aggregate_sha256": "fb4ae50125051a332e41171ba45eb766eef5cc28c66fae9d5190407c0ecac594"
+      }
+    ],
+    "telemetry": [
+      {
+        "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+        "before_bytes": 137582113,
+        "before_sha256": "ffcba176a1e673b5ddb8d4f44c03c67f71faa1cf13849353550366e9168926a0",
+        "after_bytes": 140043927,
+        "after_sha256": "05b49ba743304dda94ec324716f40289147d83269164bfb62fc275d11d33fde9",
+        "prefix_exact": true,
+        "liveAfterExact": true
+      },
+      {
+        "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+        "before_bytes": 1041,
+        "before_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+        "after_bytes": 1041,
+        "after_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+        "prefix_exact": true,
+        "liveAfterExact": true
+      }
+    ]
+  },
+  "checks": [
+    {
+      "name": "authentic-terminal-wrapper",
+      "pass": true
+    },
+    {
+      "name": "result-schema-and-15-checks",
+      "pass": true
+    },
+    {
+      "name": "five-summary-zero-fail-todo-aggregate",
+      "pass": true
+    },
+    {
+      "name": "per-file-receipt-coverage",
+      "pass": true
+    },
+    {
+      "name": "opening-closing-and-scratch-exact",
+      "pass": true
+    },
+    {
+      "name": "n91-n98-preserved-exact",
+      "pass": true
+    },
+    {
+      "name": "telemetry-prefixes-and-live-after-exact",
+      "pass": true
+    },
+    {
+      "name": "candidate-source-v5-authority-stable",
+      "pass": true
+    },
+    {
+      "name": "accepted-n98-bound",
+      "pass": true
+    },
+    {
+      "name": "clean-exact-head-at-review",
+      "pass": true
+    }
+  ],
+  "limits": [
+    "This review accepts only the one actual terminal full-suite-v5 attempt.",
+    "The package-v2 and native-v2 shared typed-validator defect remains open and is not waived by this valid suite.",
+    "Package build, compiled consumer proof, package binding, native opening, and turn-39 calibration remain unauthorized."
+  ],
+  "actionsNotPerformed": [
+    "test or suite rerun",
+    "engine or native invocation",
+    "package build",
+    "campaign invocation",
+    "source or tracked edit",
+    "commit or push",
+    "automatic retry"
+  ]
+}

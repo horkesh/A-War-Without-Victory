@@ -459,7 +459,7 @@ function writeCanonicalCurrentState(sim, state, excludeSender, metadata, options
 
 async function loadStatePathIntoDesktop(filePath, excludeSender) {
   const sim = getDesktopSim();
-  const { state } = await sim.loadStateFromPath(filePath);
+  const { state } = await sim.loadStateFromPath(filePath, getBaseDir());
   const manifestJson = readReplaySaveManifestSidecar(filePath);
   const sequenceJson = manifestJson ? null : readReplaySaveSequenceSidecar(filePath);
   persistCurrentStateSnapshots(sim, state);
@@ -2377,7 +2377,7 @@ app.whenReady().then(() => {
         return { ok: false, error: 'Save record is unavailable.' };
       }
       const sim = getDesktopSim();
-      const { state } = await sim.loadStateFromPath(resolveSaveRecordPath(getSavesDir(), filename));
+      const { state } = await sim.loadStateFromPath(resolveSaveRecordPath(getSavesDir(), filename), getBaseDir());
       setCurrentStateSnapshots(sim, state);
       liveReplayManifestFrames = [];
       return { ok: true, stateJson: projectCurrentGameStateForRenderer() };

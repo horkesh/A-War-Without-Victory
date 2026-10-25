@@ -1,0 +1,96 @@
+{
+  "scope": "Clean source checkpoint before corrected package02/native; n98 and suite retain true 2ca base provenance; failed opening remains failed.",
+  "baseHead": "2ca7d7bcdf795f20c5c15f0004b3c72019f98337",
+  "files": [
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/ACTUAL_N98_QUALIFICATION_REVIEW.json",
+      "path": "logs/r8-native-calibration-parity-20261024/desktop-cold-load-20261025/ACTUAL_N98_QUALIFICATION_REVIEW.json",
+      "bytes": 22612,
+      "sha256": "d34bd6b45154ed5b87da46caedaf995949070077eb02d3336880b028f93c512a"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/ACTUAL_TERRAIN_FULL_SUITE_REVIEW.json",
+      "path": "logs/r8-native-calibration-parity-20261024/desktop-cold-load-20261025/ACTUAL_TERRAIN_FULL_SUITE_REVIEW.json",
+      "bytes": 10757,
+      "sha256": "f1fb7edc82294608d171d2b26a6d6e614cc396994009d17e8035ec30ef1b34c4"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/PACKAGE_V6_ACTUAL_POSTBUILD_REVIEW.json",
+      "path": "logs/r8-native-calibration-parity-20261024/desktop-cold-load-20261025/PACKAGE_V6_ACTUAL_POSTBUILD_REVIEW.json",
+      "bytes": 5568,
+      "sha256": "25ca799d2e4e3b1b07aeef60022333884c75ebaa605aa7cbed6841e72bfed39e"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/PACKAGE_V6_ACTUAL_COMPILED_REVIEW.json",
+      "path": "logs/r8-native-calibration-parity-20261024/desktop-cold-load-20261025/PACKAGE_V6_ACTUAL_COMPILED_REVIEW.json",
+      "bytes": 6262,
+      "sha256": "bb9e05d6a3f8bcbbb1b3969605d1e45d58ac95eabee0373a8a7900e6bd43c785"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/TERRAIN_COLD_LOAD_PREIMPLEMENTATION_CANON_REVIEW.json",
+      "path": "logs/r8-native-calibration-parity-20261024/desktop-cold-load-20261025/TERRAIN_COLD_LOAD_PREIMPLEMENTATION_CANON_REVIEW.json",
+      "bytes": 12737,
+      "sha256": "0f017fc03c1274f1cac46a8385c7e6a87c674e0b236059b116ab83ba4643d0ba"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/TERRAIN_COLD_LOAD_POSTIMPLEMENTATION_REVIEW.json",
+      "path": "logs/r8-native-calibration-parity-20261024/desktop-cold-load-20261025/TERRAIN_COLD_LOAD_POSTIMPLEMENTATION_REVIEW.json",
+      "bytes": 13790,
+      "sha256": "1ff29d05020f214a1356dda88e131381b3be00989b5a1facbee53bbc006ec715"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/ACTUAL_OPENING_FAILURE_RESIDUAL_AUDIT.json",
+      "path": "logs/r8-native-calibration-parity-20261024/desktop-cold-load-20261025/ACTUAL_OPENING_FAILURE_RESIDUAL_AUDIT.json",
+      "bytes": 12776,
+      "sha256": "6f193c7547de4c1cf9a3ddc4e4352b65bf07500fb4bf099104e2eb817ee73eb6"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/cold-load-cdp-red.json",
+      "path": "logs/r8-native-calibration-parity-20261024/desktop-cold-load-20261025/cold-load-cdp-red.json",
+      "bytes": 19413,
+      "sha256": "4f6c722d1542bd3f05e7f743f75e89a7b01d561039d5c72d306f45cbda401887"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/cold-load-cdp-green-01.json",
+      "path": "logs/r8-native-calibration-parity-20261024/desktop-cold-load-20261025/cold-load-cdp-green-01.json",
+      "bytes": 16314,
+      "sha256": "78676bae7b474aa99bf2f4760e1564fd073f0a342d7884e07f6425ae1aa51353"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/cold-load-focused-green-01.json",
+      "path": "logs/r8-native-calibration-parity-20261024/desktop-cold-load-20261025/cold-load-focused-green-01.json",
+      "bytes": 57304,
+      "sha256": "a1bf59457424950af301ea7e2654d8ab44d54b5d809d53628e6ceecc5772877b"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/cdp-green-02.json",
+      "path": "logs/r8-native-calibration-parity-20261024/desktop-cold-load-20261025/cdp-green-02.json",
+      "bytes": 15315,
+      "sha256": "08cf3bc7bf90cbf46bc9974e3a36f976058e85e46f72ad574cdbbe7d742198bd"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/cold-load-retained-replay-proof.json",
+      "path": "logs/r8-native-calibration-parity-20261024/desktop-cold-load-20261025/cold-load-retained-replay-proof.json",
+      "bytes": 423,
+      "sha256": "b7314626347f59027009a21537a8ba94665204c1be841bda4f2fed72ceb76b76"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/cold-load-static-checks.log",
+      "path": "logs/r8-native-calibration-parity-20261024/desktop-cold-load-20261025/cold-load-static-checks.log",
+      "bytes": 171,
+      "sha256": "ae135c9d815840529b3df6ecb24b2882317793265e703b344d6443f73a98b292"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/native-opening-01/receipt.json",
+      "path": "logs/r8-native-calibration-parity-20261024/desktop-cold-load-20261025/native-opening-receipt.json",
+      "bytes": 5508,
+      "sha256": "e4975d7d5c63edae8533b89a3267e7d811311524b081287dc9aaf46321975768"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/root/TERRAIN_NATIVE_OPENING_PRESERVATION_01.json",
+      "path": "logs/r8-native-calibration-parity-20261024/desktop-cold-load-20261025/TERRAIN_NATIVE_OPENING_PRESERVATION_01.json",
+      "bytes": 325943,
+      "sha256": "0a5762504325293f057b3be193ca735eac35fdc328bb556a8c8f4fd393d0e17b"
+    }
+  ]
+}

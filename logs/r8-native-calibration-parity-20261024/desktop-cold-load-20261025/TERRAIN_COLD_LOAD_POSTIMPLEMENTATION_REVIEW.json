@@ -1,0 +1,144 @@
+{
+  "schema": "awwv.terrain-cold-load.postimplementation-review.v1",
+  "verdict": "GO",
+  "independent": true,
+  "reviewerIdentity": "/root/desktop_terrain_canon_review",
+  "reviewedAt": "2026-10-25T08:58:33.1869055Z",
+  "baseHead": "2ca7d7bcdf795f20c5c15f0004b3c72019f98337",
+  "workingTreeState": "uncommitted frozen reviewed delta",
+  "scope": "Correctness, canon, determinism, and observer review of the twelve-file cold-load terrain and bounded non-HTTP CDP projection delta. No package, native, campaign, full-suite, or commit action was performed.",
+  "authority": {
+    "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/TERRAIN_COLD_LOAD_PREIMPLEMENTATION_CANON_REVIEW.json",
+    "bytes": 12737,
+    "sha256": "0f017fc03c1274f1cac46a8385c7e6a87c674e0b236059b116ab83ba4643d0ba",
+    "verdict": "GO"
+  },
+  "reviewedDelta": {
+    "fileCount": 12,
+    "insertions": 173,
+    "deletions": 19,
+    "binaryGitDiffBytes": 22681,
+    "binaryGitDiffSha256": "09c5cf3161b3ce824bfd366f97253858b30f8f58ddbe3630fe7f9f949f96c02e",
+    "diffCheckExit": 0,
+    "files": [
+      { "path": "src/desktop/desktop_sim.ts", "bytes": 59490, "sha256": "91e3163da0aeddca169deabf0b73c47216800f0e6dee0ddc63de5d98f7416954" },
+      { "path": "src/desktop/electron-main.cjs", "bytes": 185071, "sha256": "8b5e218e6b6f0ccede988bb2f68c782468e8001b1957030ed889c2ada914c258" },
+      { "path": "tests/cdp_network_collector.test.ts", "bytes": 40629, "sha256": "67bbc4e58582d6d82abf0305ad1ac49a50568fa93051919d130f0cbb1683f7d0" },
+      { "path": "tests/desktop_load_sector_ratings.test.ts", "bytes": 6709, "sha256": "c501019402f40d642b34dcd3edc357dba83a5822c8cdf9a7392beb163115ff35" },
+      { "path": "tests/desktop_persisted_sector_continuity.test.ts", "bytes": 3553, "sha256": "a93bff72940f911aaeb718c987c01917fa81c4376326dfe6023dcb0993dd56e7" },
+      { "path": "tests/desktop_persistence_contract.test.ts", "bytes": 22745, "sha256": "fe78eca0667228969e81fe0d445a2cbe915bdbc3f1d51eabf6500295f1639549" },
+      { "path": "tests/desktop_player_visible_state.test.ts", "bytes": 37428, "sha256": "ee48d698468feaf4b7228fb512ba1ec114055c2b01f38643c00d0b0bcffb68d6" },
+      { "path": "tests/desktop_start_campaign_authorization.test.ts", "bytes": 11646, "sha256": "60d736041bcd6609e9ecf4cf49f06aea2a8af3e6096b2e597db5220662672a48" },
+      { "path": "tests/paradox_local_qa_harness.test.ts", "bytes": 224014, "sha256": "182310a40e7a89da27d347c7d3654847525905b05983d1a0eb1e1d16aa86fe2f" },
+      { "path": "tools/ai_play/desktop_calibration_compare.ts", "bytes": 34765, "sha256": "3dad2f1463cb05ec8fab092522781b7179e61ac3ed424fb9e820d35105d2afdc" },
+      { "path": "tools/ui/cdp_network_collector.cjs", "bytes": 30559, "sha256": "74dd518319567cbb1b04aa62e6cf37a6c9370ef504bdd75ea9982e09ccdfee36" },
+      { "path": "tools/ui/paradox_local_qa.cjs", "bytes": 364872, "sha256": "771410a733e4ebc8d821ded0bc44bf6f3719f0dabf275aa5432ad00445938484" }
+    ]
+  },
+  "findings": [],
+  "correctnessReview": [
+    "primeCombatTerrain(baseDir) replaces both urban and forest global sets using the already reviewed loaders. loadStateFromPath calls it after deserialize and immediately before computeSectorCombatRatings.",
+    "advanceTurn calls the same helper at the exact former two-setter location, before its asynchronous data loads, BotManager construction, prediction, combat, and runTurn. This is a refactor of the previously qualified prerequisite order.",
+    "loadStateFromPath requires baseDir. Every maintained repository caller found under src, tools, and tests passes an explicit root: both Electron load routes use getBaseDir; both desktop_calibration_compare calls use their existing baseDir; the source/package harness selects repository root or packaged resources root with its selected simulation bundle; tracked tests pass explicit roots.",
+    "The obsolete immutable logs/r8-runtime-integrity/baseline-one-turn.cjs script is not a maintained caller and remains untouched, as required.",
+    "The missing and malformed terrain cases replace globals with deterministic empty sets. The tests prove a prior valid or stale set is not inherited, and canonical serializeState output remains unchanged.",
+    "The persisted-sector focused test compares cold and warm runtime state, then proves next-advance canonical state and report equality. This directly satisfies the preimplementation stop condition; no operation, battle, control, or report delta was observed.",
+    "The native authoritative expected builder still uses production loadStateFromPath and now supplies the data root paired with the selected source or packaged bundle. It does not duplicate combat-rating logic.",
+    "The CDP collector still applies the 16,384-character raw URL cap and bounded protocol before classification. Non-HTTP URLs retain only protocol, length, and SHA-256 and are deterministically disqualified as wrong-protocol; HTTP and HTTPS retain all prior hostname, port, path-component, projection, and target-candidate caps. The change does not weaken HTTP target admission or claim the historical non-HTTP asset identity."
+  ],
+  "canonAndDeterminism": {
+    "status": "PASS",
+    "bindings": [
+      "Engine Invariants 11.1 and 11.3: explicit-root inputs and unchanged prerequisite order remove ambient-process dependence and preserve stable deterministic execution.",
+      "Engine Invariants 11.4: the same save and terrain root now reconstruct the same runtime player projection in cold and warm processes.",
+      "Engine Invariants 13.1 and 13.2: sector_combat_ratings remains disposable and non-serialized, and is recomputed from canonical inputs.",
+      "Systems Manual terrain defense and disposable-cache clauses: urban and forest inputs contribute to the derived defense ratings without changing terrain data, multipliers, combat formulas, state schema, or canonical save bytes.",
+      "Determinism Test Matrix desktop-terrain clauses: explicit root, stale replacement, complete root, missing/malformed compatibility, and byte identity are covered."
+    ],
+    "stateOwnershipChange": false,
+    "serializationChange": false,
+    "combatRuleChange": false,
+    "terrainDataChange": false,
+    "calibrationChange": false,
+    "controlOrPolicyChange": false
+  },
+  "evidence": {
+    "red": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/cold-load-cdp-red.json",
+      "bytes": 19413,
+      "sha256": "4f6c722d1542bd3f05e7f743f75e89a7b01d561039d5c72d306f45cbda401887",
+      "result": "54 passed, 2 failed: new explicit-root terrain test and non-HTTP CDP test"
+    },
+    "greenCombined": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/cold-load-cdp-green-01.json",
+      "bytes": 16314,
+      "sha256": "78676bae7b474aa99bf2f4760e1564fd073f0a342d7884e07f6425ae1aa51353",
+      "result": "56/56 passed"
+    },
+    "focused": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/cold-load-focused-green-01.json",
+      "bytes": 57304,
+      "sha256": "a1bf59457424950af301ea7e2654d8ab44d54b5d809d53628e6ceecc5772877b",
+      "result": "170/170 tests passed across 16 suites; includes exact next-advance canonical state and report equality"
+    },
+    "cdpFinal": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/cdp-green-02.json",
+      "bytes": 15315,
+      "sha256": "08cf3bc7bf90cbf46bc9974e3a36f976058e85e46f72ad574cdbbe7d742198bd",
+      "result": "54/54 passed"
+    },
+    "retainedReplay": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/cold-load-retained-replay-proof.json",
+      "bytes": 423,
+      "sha256": "b7314626347f59027009a21537a8ba94665204c1be841bda4f2fed72ceb76b76",
+      "result": "corrected source load projected through the retained packaged projector equals the native observed a641db55bf56b06d551bd6f539014994303c429490932d929be198c893bd0c65; canonical save remains 35f9adabc947cb67bf0e0d288bf3aae273be2f668f609cd164b2c0abca3411c9",
+      "scope": "offline diagnostic composition; fresh package02 remains required"
+    },
+    "static": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/cold-load-static-checks.log",
+      "bytes": 171,
+      "sha256": "ae135c9d815840529b3df6ecb24b2882317793265e703b344d6443f73a98b292",
+      "result": "TypeScript typecheck 0; node --check for CDP collector, native harness, and Electron main all 0"
+    }
+  },
+  "qualificationDecision": {
+    "reuseN98": true,
+    "reuseFullSuiteV5": true,
+    "new188Required": false,
+    "newFullSuiteRequired": false,
+    "basis": "The exact next-advance state/report proof passed and the implementation does not change scenario-runner inputs, terrain assets, combat rules, serialization, calibration, or turn semantics. The immutable n98 and full-suite artifacts remain evidence for base HEAD 2ca7d7bcdf795f20c5c15f0004b3c72019f98337. New authority must compose them with this exact reviewed delta and must not claim they ran at the future commit.",
+    "invalidatedEvidence": [
+      "package01 as the corrected executable",
+      "package01 compiled desktop-consumer and package-terminal bindings for the corrected source",
+      "the failed native opening as acceptance evidence",
+      "old exact-source, exact-HEAD, harness-hash, package-inventory, and native-preparation bindings where their bound inputs changed"
+    ],
+    "nextAllowedExpensiveWork": "After committing the exact reviewed delta and obtaining required candidate CI, one fresh package02 build and one fresh corrected native opening under new exact bindings. No retry of package01 or mutation of the failed opening."
+  },
+  "minimalFreshPackageAndNativeContract": {
+    "principle": "Use the repository's generic prescribed preserved runner with a small fresh manifest/config. Preserve the practical gates; do not clone the six historical preparation versions or reuse their head-specific envelopes.",
+    "beforeBuild": [
+      "Bind the new clean commit HEAD, this review, the preimplementation authority, the exact twelve reviewed file hashes or reviewed-delta digest, focused 170/170, CDP 54/54, static checks, and terminal CI for the new commit.",
+      "Bind the old immutable n98 qualification, full-suite V5 result, and their independent reviews with their true base HEAD plus an explicit evidence-reuse record citing exact next-advance equality.",
+      "Open preservation over n91 through n98, all prior failed attempts including native-opening-01, raw profiles, telemetry prefixes, package01, and current source evidence. Verify fresh package02/build/native output paths are absent.",
+      "Run the generic runner's check-only/startup contract and enforce one build, bounded runtime, no retry, child/wrapper success, no timeout, exact entry snapshot/argv, and retained receipt hashes."
+    ],
+    "afterBuildBeforeNative": [
+      "Inventory package02 and compare it with package01. Expected production differences are resources/dist/desktop/desktop_sim.cjs and resources/app.asar containing the reviewed Electron-main change; all other packaged files, including executable, terrain assets, UI assets, and unrelated ASAR content, must satisfy the existing exact inventory/source-map checks.",
+      "Independently review the actual package inventory and compiled source mapping. Bind the fresh desktop bundle, ASAR, executable, terrain assets, package root, build receipt, clean commit, and source hashes.",
+      "Run the preserved cold source/package consumer proof with the same retained save and explicit source/package roots. Require canonical-save byte identity, exact runtime/player projection equality, no external pre-priming, and exact next-advance state/report equality where the existing consumer supports it.",
+      "Close and verify preservation before composing the fresh package binding. Bind the new native harness hash separately because the harness is outside the packaged application."
+    ],
+    "nativeOpening": [
+      "Use a new check-only native preflight tied to package02 inventory, executable/ASAR/bundle hashes, fresh package binding, new harness hash, and the original player choices: RBiH Historical, civic identity, always_allow paramilitary policy, and historical officer succession.",
+      "Run one fresh opening only, with the existing three-minute expectation/ten-minute cap and no retry. Retain child/wrapper receipts and all external evidence.",
+      "Carry forward the practical opening gates: zero-to-one turn route; exact save/load canonical identity and authoritative loaded projection; CDP v3 complete with zero cap violations, inconsistencies, pending bodies, and target-like failures; zero console/page/network failures and normalized unexpected main-process stderr; visible choices and exact receipts; archives/provisional/settled/manual-save identities; audio lifecycle diagnostics; package/harness/source provenance; preservation; and independent postcheck/review.",
+      "The corrected opening answers both previously unresolved facts: terrain-aware cold-load projection and bounded non-HTTP CDP observation. Do not infer the discarded historical URL identity or waive any unrelated gate."
+    ]
+  },
+  "residuals": [
+    "The offline retained replay proof is not fresh packaged execution; package02 and the single corrected opening remain required.",
+    "The former native failure and CDP over-cap remain preserved facts. This review approves the correction, not those old results.",
+    "Any package02 cold-consumer or next-advance mismatch stops before native and invalidates n98/full-suite reuse under this decision."
+  ]
+}

@@ -1,0 +1,350 @@
+{
+  "schema": "awwv.terrain-native.opening-failure-residual-audit.v1",
+  "verdict": "FAILED",
+  "independent": true,
+  "reviewerIdentity": "/root/desktop_terrain_canon_review",
+  "reviewedAt": "2026-10-25T08:45:59.356Z",
+  "expectedHead": "2ca7d7bcdf795f20c5c15f0004b3c72019f98337",
+  "bindings": {
+    "attemptReceipt": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/native-opening-01/receipt.json",
+      "bytes": 5508,
+      "sha256": "e4975d7d5c63edae8533b89a3267e7d811311524b081287dc9aaf46321975768"
+    },
+    "result": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/native-opening-01/child/result.json",
+      "bytes": 1860459,
+      "sha256": "59d9e5658ca7dfd7f6e36df8ed1c302c1a69b854c99b2c0d1ed0cfbe3bb34457"
+    },
+    "progress": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/native-opening-01/child/progress.json",
+      "bytes": 1859518,
+      "sha256": "2a687197837782e99814b04f9250aea76c56828d586b01cb57411ce848b26ccc"
+    },
+    "netlog": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/native-opening-01/child/netlog.json",
+      "bytes": 3897291,
+      "sha256": "891466682dc7754bea4ef76ad36e93e639a039aff89332eb1833c4d322599c41"
+    },
+    "externalInventory": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/native-opening-01/child/external-inventory.json",
+      "bytes": 1181,
+      "sha256": "615dcefc8d0f74883ca633d2fcd85ce2ee0ef37a7db4ee891d2f1ca747cdf164"
+    },
+    "childExit": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/native-opening-01/child/exit.json",
+      "bytes": 548,
+      "sha256": "971c86e850909cbc5b56136f80f1172efb1edf103a489c2fcfe4b997f8d0b582"
+    },
+    "harnessStderr": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/native-opening-01/child/harness.stderr.log",
+      "bytes": 827,
+      "sha256": "4cad583969341b3ebfe91fb8b996266394887e704d902d42e16db062fd62b961"
+    },
+    "postcheckBinding": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/native-opening-failure-audit-01/binding.json",
+      "bytes": 1803,
+      "sha256": "f2eefc7b4fb717532a98c7cf3ef3b0a9838673d92bee9670d495cdaa7fc9a5c1"
+    },
+    "postcheck": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/native-opening-failure-audit-01/POSTCHECK.json",
+      "bytes": 5437,
+      "sha256": "e262d51178b9be83e96fcc0c3eb047ab6a59f1d08c95cbe8b69fb8154c212d0a"
+    }
+  },
+  "attempt": {
+    "childExit": 1,
+    "wrapperExit": 1,
+    "timedOut": false,
+    "spawnError": null,
+    "artifactContractPass": true,
+    "retainedArtifactCount": 8,
+    "primaryKnownFailure": "save_load_projection_mismatch_owned_by_separate_diagnosis"
+  },
+  "postcheck": {
+    "pass": false,
+    "totalChecks": 25,
+    "passed": [
+      "bound-config-copy",
+      "bound-package-suite-probe",
+      "bound-harness",
+      "bound-harness-tests-and-frame-observer",
+      "preflight-entry-chain",
+      "external-inventory-live",
+      "progress-bound",
+      "netlog-bound",
+      "fresh-zero-start",
+      "exact-target",
+      "settled-target-authentic",
+      "normal-historical-player",
+      "no-blockers",
+      "zero-consoleMessages",
+      "zero-pageErrors",
+      "zero-networkFailures",
+      "visible-civic-and-explicit-allow-choices",
+      "explicit-allow-applied",
+      "archives"
+    ],
+    "failed": [
+      "wrapper-authentic",
+      "child-exit-and-preflight",
+      "result-label-scope",
+      "frame-cdp-v3-complete",
+      "zero-unexpectedMainProcessStderr",
+      "save-load"
+    ],
+    "classification": {
+      "knownPrimary": [
+        "save-load"
+      ],
+      "directConsequences": [
+        "wrapper-authentic",
+        "child-exit-and-preflight",
+        "result-label-scope"
+      ],
+      "independentResidual": [
+        "frame-cdp-v3-complete"
+      ],
+      "unestablishedBecauseFailureFinalizationDidNotComplete": [
+        "zero-unexpectedMainProcessStderr"
+      ]
+    }
+  },
+  "cdp": {
+    "schema": "awwv.r8-warroom.cdp-network-collection.v3",
+    "status": "over-cap",
+    "nonAdmitting": true,
+    "setup": {
+      "state": "ready",
+      "primary_error": null,
+      "cleanup_error": null
+    },
+    "summary": {
+      "rows_by_kind": {
+        "request": 1,
+        "response": 1,
+        "failure": 0,
+        "finish": 1
+      },
+      "target_like_failures": 0,
+      "body_attempts_by_state": {
+        "captured": 0,
+        "unavailable": 0,
+        "error": 0,
+        "pending": 0,
+        "truncated": 0
+      },
+      "inconsistencies": 0,
+      "cap_violations": 1,
+      "pending_at_flush": 0,
+      "complete_through_stop_only": true
+    },
+    "overflowReceipts": [
+      {
+        "observer_session_id": "cdp-observer-c526cc5cb6c136fea7b34046",
+        "sequence": 4,
+        "code": "url-path-component",
+        "limit": 256,
+        "observed": 278
+      }
+    ],
+    "flush": {
+      "state": "closed",
+      "pending_at_deadline": 0,
+      "detach": "detached"
+    },
+    "boundArtifact": {
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\terrain-native-fresh-rbih-t1-20261025-01\\rbih\\cdp-network-collection-v3.json",
+      "sha256": "f1aebc43f1da593f7fbecc11d2d3a8899609b21f92967361debd8f4c0804e5d0",
+      "schema": "awwv.r8-warroom.cdp-network-collection.v3",
+      "status": "over-cap",
+      "summary": {
+        "rows_by_kind": {
+          "request": 1,
+          "response": 1,
+          "failure": 0,
+          "finish": 1
+        },
+        "target_like_failures": 0,
+        "body_attempts_by_state": {
+          "captured": 0,
+          "unavailable": 0,
+          "error": 0,
+          "pending": 0,
+          "truncated": 0
+        },
+        "inconsistencies": 0,
+        "cap_violations": 1,
+        "pending_at_flush": 0,
+        "complete_through_stop_only": true
+      }
+    }
+  },
+  "runtime": {
+    "consoleMessages": 0,
+    "pageErrors": 0,
+    "rawNetworkFailures": 0,
+    "networkFailures": 0,
+    "unexpectedMainProcessStderrFieldPresent": false,
+    "mainProcessStderr": [
+      "Debugger ending on ws://127.0.0.1:58298/eaaa039b-9b97-42d3-ae41-11f304e00181",
+      "For help, see: https://nodejs.org/en/docs/inspector"
+    ],
+    "completedAtPresent": false
+  },
+  "audioDiagnostics": {
+    "formalAcceptanceClaim": false,
+    "signals": 62,
+    "kinds": {
+      "play": 10,
+      "waiting": 7,
+      "request-start": 2,
+      "progress": 4,
+      "suspend": 4,
+      "loadedmetadata": 2,
+      "loadeddata": 2,
+      "canplay": 7,
+      "playing": 10,
+      "pause": 4,
+      "seeking": 5,
+      "seeked": 5
+    },
+    "urls": [
+      "http://127.0.0.1:58302/assets/ambient_warroom-CO4FPnyV.ogg",
+      "http://127.0.0.1:58302/assets/ambient_field-5Mv-hV7p.ogg"
+    ],
+    "mediaErrorSignals": 0,
+    "expectedAmbientLifecycleAborts": 0,
+    "playingSignals": 10
+  },
+  "playerPath": {
+    "initialTurn": 0,
+    "finalTurn": 1,
+    "maxObservedTurn": 1,
+    "playerFaction": "RBiH",
+    "decisionMode": "historical",
+    "paramilitaryPolicy": "always_allow",
+    "blockerInventory": {
+      "eventDecisions": 0,
+      "proposals": 0,
+      "paramilitary": 0,
+      "reserves": 0,
+      "convoys": 0,
+      "officerEvents": 0,
+      "peacePlan": 0,
+      "counterOffers": 0,
+      "dayton": 0,
+      "operationOpportunities": 0
+    },
+    "choices": {
+      "rbih_state_identity": {
+        "responseId": "civic",
+        "playerInput": true,
+        "status": "applied",
+        "basis": "authored_historical_default",
+        "historicityClaim": null,
+        "receipt": {
+          "eventId": "rbih_state_identity",
+          "responseId": "civic",
+          "decisionSource": "player",
+          "faction": "RBiH",
+          "turn": 0
+        }
+      },
+      "rbih_paramilitary_policy_1992": {
+        "responseId": "always_allow",
+        "playerInput": true,
+        "status": "applied",
+        "basis": "player_selected_counterfactual",
+        "historicityClaim": "none_counterfactual_player_choice",
+        "receipt": {
+          "eventId": "rbih_paramilitary_policy_1992",
+          "responseId": "always_allow",
+          "decisionSource": "player",
+          "faction": "RBiH",
+          "turn": 0
+        }
+      }
+    },
+    "officerSuccessionPolicy": {
+      "requested": "historical",
+      "version": 1,
+      "explicit": true
+    }
+  },
+  "archives": {
+    "externalInventorySchema": "awwv.terrain-native.external-inventory.v1",
+    "externalInventoryCount": 6,
+    "allInventoryFilesLive": true,
+    "settled": {
+      "turn": 1,
+      "kind": "settled",
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\terrain-native-fresh-rbih-t1-20261025-01\\rbih\\turn-autosaves\\turn-001.json",
+      "sha256": "35f9adabc947cb67bf0e0d288bf3aae273be2f668f609cd164b2c0abca3411c9",
+      "bytes": 3475986
+    },
+    "provisional": {
+      "turn": 1,
+      "kind": "provisional",
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\terrain-native-fresh-rbih-t1-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-001.json",
+      "sha256": "35f9adabc947cb67bf0e0d288bf3aae273be2f668f609cd164b2c0abca3411c9",
+      "bytes": 3475986
+    },
+    "final": {
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\terrain-native-fresh-rbih-t1-20261025-01\\rbih\\final-autosave.json",
+      "sha256": "35f9adabc947cb67bf0e0d288bf3aae273be2f668f609cd164b2c0abca3411c9",
+      "bytes": 3475986
+    },
+    "manualQuicksave": {
+      "path": "rbih/manual-quicksave.json",
+      "bytes": 3475986,
+      "sha256": "35f9adabc947cb67bf0e0d288bf3aae273be2f668f609cd164b2c0abca3411c9"
+    },
+    "settledAndProvisionalIdentical": true
+  },
+  "provenance": {
+    "harnessSha256": "52b6537caa3f147deca68fef752a39884c7da5f8ca4d23ac46fc0a3a9baf671f",
+    "harnessSnapshotPath": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\harness-snapshots\\terrain-native-fresh-rbih-t1-20261025-01-52b6537caa3f147deca68fef752a39884c7da5f8ca4d23ac46fc0a3a9baf671f.cjs",
+    "gitHead": "2ca7d7bcdf795f20c5c15f0004b3c72019f98337",
+    "workingTreeStatusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "workingTreeContentSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "workingTreeContentFileCount": 0,
+    "workingTreeContentExcludedGeneratedPrefixes": [
+      "tmp-paradox-qa-20260710/",
+      "tmp-playtest-rs-10turn/",
+      "tmp-zepa-trace/"
+    ],
+    "resumeSaveSha256": null,
+    "packagedExecutablePath": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\dist-packaged\\desktop-terrain-prerequisite-20261025-01\\win-unpacked\\A War Without Victory.exe",
+    "packagedExecutableSha256": "3d0a4cecdaa5b647eda0882a2867ba6da1092d77d91602f67f03ddab6938d7de",
+    "packagedAsarSha256": "f4b01445048ec8df0108218f3b83ba201d1cd0ebdc1e032bc417b2b503529e59",
+    "requiredMapOrigin": null,
+    "officerSuccessionPolicy": {
+      "requested": "historical",
+      "version": 1,
+      "explicit": true
+    },
+    "rbihParamilitaryPolicyOverride": {
+      "requested": "always_allow",
+      "version": 1,
+      "provenance": "explicit_visible_player_policy_selector",
+      "eventId": "rbih_paramilitary_policy_1992"
+    },
+    "electronMainSha256": "3d68cf41fc91e27876d3c8191907e4ba6bfb58557b93f5733353e3c8f0ee2345",
+    "warroomIndexSha256": "0d06b2de6344dd55911d01815101c7a30bce02c656b3bfecc4bd14b8ea6a78ac",
+    "tacticalMapIndexSha256": "22c5d4b543b6faaefd86cdf9c96d8016720ab25737e78ac30e60948fad772d6f"
+  },
+  "unreachedOrUnestablished": [
+    "exact Save/Load success",
+    "CDP v3 complete status",
+    "zero unexpected main-process stderr normalized field",
+    "terminal successful result/completedAt",
+    "independent opening approval",
+    "turn-39 launch and all turn-39 gates"
+  ],
+  "limits": [
+    "Does not diagnose or approve the known loaded-projection mismatch.",
+    "Positive audio lifecycle rows are diagnostic evidence only; the formal CDP acceptance gate failed over-cap.",
+    "The failed opening does not authorize a retry or any turn-39 execution."
+  ]
+}

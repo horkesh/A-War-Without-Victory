@@ -6219,3 +6219,8 @@ Before a historical-input replay, test a zero-turn startup/resume roundtrip: the
 ## 2026-10-25 — Rebuild desktop terrain at its first consumer
 
 Scenario startup can initialize process globals that baked New Campaign and Load State bypass. Rebuild authoritative derived terrain sets from the Advance call's explicit data root before prediction/combat; replace stale sets when switching roots and bind omitted terrain dependencies alongside standard input provenance. A copied historical input inventory is not automatically a complete runtime root. Compare retained JSON outputs at serialized semantics: own undefined properties disappear in JSON, so a runtime-object versus parsed-object deep check can fail despite byte-identical persisted state and report. Preserve the failed check and establish any narrower conclusion through a separate reviewed offline audit; do not rerun the engine for this observer error. See the [dated ledger entry](PROJECT_LEDGER.md#2026-10-25--desktop-terrain-prerequisite-candidate-and-retained-replay-diagnosis).
+
+
+## 2026-10-25 — Terrain-aware load and protocol-first diagnostic projection
+
+Desktop load hydration computes terrain-dependent sector ratings. Prime both existing sets from the selected explicit root before hydration, independently of prior Advance. Warm-game versus cold-observer comparison can disagree only in ratings while canonical save bytes match. Test cold/warm/stale/missing/malformed roots and exact next-advance equality. Classify non-HTTP CDP URLs before HTTP pathname bounds; record bounded protocol/length/hash, keep HTTP caps fatal, and never infer the discarded overflow value as fact. [selected proof](../logs/r8-native-calibration-parity-20261024/desktop-cold-load-20261025/MANIFEST.json)

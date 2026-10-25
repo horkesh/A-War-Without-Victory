@@ -475,7 +475,7 @@ async function loadElectronReplayBinding(
     const [logPayload, autosavePayload, autosaveResult] = await Promise.all([
         readFile(logPath, 'utf8'),
         readFile(autosavePath, 'utf8'),
-        loadStateFromPath(autosavePath),
+        loadStateFromPath(autosavePath, baseDir),
     ]);
     const log = requireRecord(JSON.parse(logPayload) as unknown, 'Electron log');
     const command = requireArray(log.command, 'Electron log.command')
@@ -654,7 +654,7 @@ async function runComparison(baseDir: string, options: CliOptions) {
     const scenario = JSON.parse(scenarioPayload) as { scenario_id?: string };
     const scenarioId = scenario.scenario_id ?? 'unknown';
 
-    let headlessState = (await loadStateFromPath(snapshotPath)).state;
+    let headlessState = (await loadStateFromPath(snapshotPath, baseDir)).state;
     const electronReplay = await loadElectronReplayBinding(
         baseDir,
         options,

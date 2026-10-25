@@ -360,6 +360,43 @@ test('first overflow stops observation with one bounded receipt and no tail clai
     assert.equal(artifact.summary.complete_through_stop_only, true);
 });
 
+test('long non-http data URLs are bounded noncandidates without weakening HTTP URL caps', async () => {
+    const dataSession = new FakeSession();
+    const dataCollector = await readyCollector(dataSession, 'run/RS/data-url.json');
+    const dataUrl = `data:image/svg+xml,${'x'.repeat(278)}`;
+    dataSession.emit('Network.requestWillBeSent', requestEvent({
+        request: { url: dataUrl, method: 'GET', headers: {} },
+        type: 'Image',
+    }));
+    dataSession.emit('Network.loadingFinished', { requestId: 'cdp-request-1', timestamp: 11, encodedDataLength: 278 });
+    const dataArtifact = await dataCollector.closeAndFlush();
+
+    assert.equal(dataArtifact.status, 'complete');
+    assert.deepEqual(dataArtifact.events[0].url, {
+        status: 'non-http',
+        protocol: 'data:',
+        length: dataUrl.length,
+        sha256: require('node:crypto').createHash('sha256').update(dataUrl).digest('hex'),
+    });
+    assert.equal(Object.prototype.hasOwnProperty.call(dataArtifact.events[0].url, 'path'), false);
+    assert.equal(dataArtifact.summary.target_like_failures, 0);
+
+    const httpSession = new FakeSession();
+    const httpCollector = await readyCollector(httpSession, 'run/RS/long-http.json');
+    httpSession.emit('Network.requestWillBeSent', requestEvent({
+        request: {
+            url: `http://127.0.0.1:64245/${'x'.repeat(278)}`,
+            method: 'GET',
+            headers: {},
+        },
+        type: 'Image',
+    }));
+    const httpArtifact = await httpCollector.closeAndFlush();
+    assert.equal(httpArtifact.status, 'over-cap');
+    assert.equal(httpArtifact.overflow_receipts[0].code, 'url-path-component');
+    assert.equal(httpArtifact.overflow_receipts[0].observed, 278);
+});
+
 test('pending body settles explicitly under the shared close deadline and late completion cannot mutate the snapshot', async () => {
     const session = new FakeSession();
     let resolveBody: (value: any) => void = () => {};

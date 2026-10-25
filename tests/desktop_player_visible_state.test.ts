@@ -564,6 +564,7 @@ describe('desktop player-visible state projection', () => {
     const recordHandler = source.slice(recordStart, recordEnd);
     expect(recordStart).toBeGreaterThanOrEqual(0);
     expect(recordEnd).toBeGreaterThan(recordStart);
+    expect(recordHandler).toContain('loadStateFromPath(resolveSaveRecordPath(getSavesDir(), filename), getBaseDir())');
     expect(recordHandler).toContain('stateJson: projectCurrentGameStateForRenderer()');
     expect(recordHandler).not.toContain('stateJson: currentGameStateJson');
   });

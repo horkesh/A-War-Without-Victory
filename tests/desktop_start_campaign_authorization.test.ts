@@ -135,7 +135,7 @@ describe('desktop startNewCampaign historical operation authorization', () => {
 
   it('gives accepted and preserved staged opening operations the same first-advance planning credit', async () => {
     const startupPath = `${process.cwd()}/data/derived/startup/apr_1992_initial_save.json`;
-    const preserved = (await loadStateFromPath(startupPath)).state;
+    const preserved = (await loadStateFromPath(startupPath, process.cwd())).state;
     preserved.meta.player_faction = 'RS';
     preserved.meta.headless_scenario_auto_control = false;
     preserved.meta.decision_mode = 'emergent';

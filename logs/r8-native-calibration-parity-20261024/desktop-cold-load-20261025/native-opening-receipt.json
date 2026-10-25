@@ -1,0 +1,124 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T08:40:42.490Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/native-opening-01",
+  "timeout_ms": 600000,
+  "original_argv": [
+    "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/native_entry.cjs",
+    "{evidenceDir}/child",
+    "tmp/player-bot-capability-parity-20261024/root/TERRAIN_NATIVE_OPENING_CONFIG_V5.json",
+    "297e0dd3faa33f45027f0512d95364280f47d8628886da37fa578be3768099b8",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/native-opening-preflight-01/NATIVE_PREFLIGHT.json",
+    "01f0fbfee967bcdd3356a85f76e127507f3242c252616cee84fbab7c74bd4178",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/native-opening-preflight-01/receipt.json",
+    "9938379862214ac1634f8775037ec5263262de2592aadbb13fd3a8c06864c6f1"
+  ],
+  "argv": [
+    "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/native_entry.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\terrain-native-prep-v5\\native-opening-01/child",
+    "tmp/player-bot-capability-parity-20261024/root/TERRAIN_NATIVE_OPENING_CONFIG_V5.json",
+    "297e0dd3faa33f45027f0512d95364280f47d8628886da37fa578be3768099b8",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/native-opening-preflight-01/NATIVE_PREFLIGHT.json",
+    "01f0fbfee967bcdd3356a85f76e127507f3242c252616cee84fbab7c74bd4178",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/native-opening-preflight-01/receipt.json",
+    "9938379862214ac1634f8775037ec5263262de2592aadbb13fd3a8c06864c6f1"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "child/config.json",
+    "child/result.json",
+    "child/progress.json",
+    "child/netlog.json",
+    "child/harness.stdout.log",
+    "child/harness.stderr.log",
+    "child/external-inventory.json",
+    "child/exit.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/native_entry.cjs",
+    "bytes": 2703,
+    "raw_sha256": "6d0b151d403861b957789b492b167103814b25e6c400b4f8148b1eb89a2137f4",
+    "normalized_text_sha256": "6d0b151d403861b957789b492b167103814b25e6c400b4f8148b1eb89a2137f4",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 2703,
+      "sha256": "6d0b151d403861b957789b492b167103814b25e6c400b4f8148b1eb89a2137f4"
+    }
+  },
+  "end_utc": "2026-10-25T08:43:48.320Z",
+  "pid": 9992,
+  "child_exit": 1,
+  "wrapper_exit": 1,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/terrain-native-prep-v5/native_entry.cjs",
+    "bytes": 2703,
+    "raw_sha256": "6d0b151d403861b957789b492b167103814b25e6c400b4f8148b1eb89a2137f4",
+    "normalized_text_sha256": "6d0b151d403861b957789b492b167103814b25e6c400b4f8148b1eb89a2137f4",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "child/config.json",
+      "bytes": 4809,
+      "sha256": "297e0dd3faa33f45027f0512d95364280f47d8628886da37fa578be3768099b8"
+    },
+    {
+      "path": "child/result.json",
+      "bytes": 1860459,
+      "sha256": "59d9e5658ca7dfd7f6e36df8ed1c302c1a69b854c99b2c0d1ed0cfbe3bb34457"
+    },
+    {
+      "path": "child/progress.json",
+      "bytes": 1859518,
+      "sha256": "2a687197837782e99814b04f9250aea76c56828d586b01cb57411ce848b26ccc"
+    },
+    {
+      "path": "child/netlog.json",
+      "bytes": 3897291,
+      "sha256": "891466682dc7754bea4ef76ad36e93e639a039aff89332eb1833c4d322599c41"
+    },
+    {
+      "path": "child/harness.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "child/harness.stderr.log",
+      "bytes": 827,
+      "sha256": "4cad583969341b3ebfe91fb8b996266394887e704d902d42e16db062fd62b961"
+    },
+    {
+      "path": "child/external-inventory.json",
+      "bytes": 1181,
+      "sha256": "615dcefc8d0f74883ca633d2fcd85ce2ee0ef37a7db4ee891d2f1ca747cdf164"
+    },
+    {
+      "path": "child/exit.json",
+      "bytes": 548,
+      "sha256": "971c86e850909cbc5b56136f80f1172efb1edf103a489c2fcfe4b997f8d0b582"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

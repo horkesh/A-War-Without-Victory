@@ -7068,11 +7068,13 @@ function assertExactExpectedLoadedProjection(actualProjection, expectedProjectio
 async function buildAuthoritativeExpectedLoadedProjection(savePath, payloadDir) {
   const localProjectorPath = path.join(repo, 'src', 'desktop', 'player_visible_state.cjs');
   let simBundlePath = path.join(repo, 'dist', 'desktop', 'desktop_sim.cjs');
+  let simulationBaseDir = repo;
   let projectorPath = localProjectorPath;
   let packagedProjectorHash = null;
   if (packagedExecutablePath) {
     const resourcesDir = path.join(path.dirname(packagedExecutablePath), 'resources');
     simBundlePath = path.join(resourcesDir, 'dist', 'desktop', 'desktop_sim.cjs');
+    simulationBaseDir = resourcesDir;
     const asar = require('@electron/asar');
     const packagedProjector = asar.extractFile(
       path.join(resourcesDir, 'app.asar'),
@@ -7089,7 +7091,7 @@ async function buildAuthoritativeExpectedLoadedProjection(savePath, payloadDir) 
   const sim = require(simBundlePath);
   const projector = require(projectorPath);
   const sourceBytes = fs.readFileSync(savePath);
-  const { state } = await sim.loadStateFromPath(savePath);
+  const { state } = await sim.loadStateFromPath(savePath, simulationBaseDir);
   const canonicalAfterHydration = sim.serializeState(state);
   if (!sourceBytes.equals(Buffer.from(canonicalAfterHydration))) {
     throw new Error('Authoritative load hydration changed canonical save bytes');
@@ -7105,6 +7107,7 @@ async function buildAuthoritativeExpectedLoadedProjection(savePath, payloadDir) 
     canonicalHash: crypto.createHash('sha256').update(sourceBytes).digest('hex'),
     simBundlePath,
     simBundleHash: fileSha256(simBundlePath),
+    simulationBaseDir,
     projectorPath,
     projectorHash: fileSha256(projectorPath),
     packagedProjectorHash,

@@ -2113,6 +2113,11 @@ test('save menu inspection emits deterministic exact projected-state and canonic
     assert.match(inspect, /before-canonical-autosave\.json/);
     assert.match(inspect, /after-canonical-autosave\.json/);
     assert.match(inspect, /structural-diff\.json/);
+
+    const expected = extractFunctionSource(harness, 'buildAuthoritativeExpectedLoadedProjection');
+    assert.match(expected, /let simulationBaseDir = repo/);
+    assert.match(expected, /simulationBaseDir = resourcesDir/);
+    assert.match(expected, /sim\.loadStateFromPath\(savePath, simulationBaseDir\)/);
 });
 
 test('save menu payload directory creates a missing parent and refuses to overwrite a retained attempt', () => {

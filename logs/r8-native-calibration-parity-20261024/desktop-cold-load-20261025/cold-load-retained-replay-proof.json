@@ -1,0 +1,8 @@
+{
+  "sourceSave": "before-canonical-autosave.json",
+  "projector": "packaged-player-visible-state.cjs",
+  "projectionSha256": "a641db55bf56b06d551bd6f539014994303c429490932d929be198c893bd0c65",
+  "retainedNativeProjectionSha256": "a641db55bf56b06d551bd6f539014994303c429490932d929be198c893bd0c65",
+  "projectionByteIdentical": true,
+  "canonicalSha256": "35f9adabc947cb67bf0e0d288bf3aae273be2f668f609cd164b2c0abca3411c9"
+}

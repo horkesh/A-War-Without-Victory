@@ -141,8 +141,9 @@ describe('desktop persistence contract', () => {
       return { loadStatePathIntoDesktop, ledger: () => liveReplayManifestFrames };
     })()`, {
       getDesktopSim: () => ({
-        loadStateFromPath: async (filePath: string) => { order.push('load:' + filePath); return { state: { id: 'loaded' } }; },
+        loadStateFromPath: async (filePath: string, baseDir: string) => { order.push(`load:${filePath}:${baseDir}`); return { state: { id: 'loaded' } }; },
       }),
+      getBaseDir: () => 'explicit-root',
       readReplaySaveManifestSidecar: () => { order.push('read-manifest'); return 'manifest-json'; },
       readReplaySaveSequenceSidecar: () => { order.push('read-sequence'); return 'sequence-json'; },
       persistCurrentStateSnapshots: () => { order.push('persist-autosave'); },
@@ -158,7 +159,7 @@ describe('desktop persistence contract', () => {
 
     await expect(subject.loadStatePathIntoDesktop('resume.json', 'initiating-renderer')).resolves.toEqual({ ok: true, stateJson: 'projected-json' });
     expect(order).toEqual([
-      'load:resume.json',
+      'load:resume.json:explicit-root',
       'read-manifest',
       'persist-autosave',
       'send-manifest',
@@ -184,6 +185,7 @@ describe('desktop persistence contract', () => {
       return { loadStatePathIntoDesktop, ledger: () => liveReplayManifestFrames };
     })()`, {
       getDesktopSim: () => ({ loadStateFromPath: async () => ({ state: { id: 'loaded' } }) }),
+      getBaseDir: () => 'explicit-root',
       readReplaySaveManifestSidecar: () => 'manifest-json',
       readReplaySaveSequenceSidecar: () => null,
       persistCurrentStateSnapshots: () => { throw new Error('disk-full'); },

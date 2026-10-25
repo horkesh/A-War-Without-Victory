@@ -363,9 +363,15 @@ export async function startNewCampaign(
 }
 
 /** Load a saved state file (final_save.json or any GameState JSON). */
-export async function loadStateFromPath(statePath: string): Promise<{ state: GameState }> {
+export function primeCombatTerrain(baseDir: string): void {
+    setUrbanOsidSet(loadUrbanOsidSet(baseDir));
+    setForestOsidSet(loadForestOsidSet(baseDir));
+}
+
+export async function loadStateFromPath(statePath: string, baseDir: string): Promise<{ state: GameState }> {
     const content = await readFile(statePath, 'utf8');
     const state = deserializeState(content);
+    primeCombatTerrain(baseDir);
     computeSectorCombatRatings(state, null);
     return { state };
 }
@@ -378,8 +384,7 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
     const phase = state.meta?.phase ?? 'war';
     const seed = state.meta?.seed ?? 'desktop-seed';
 
-    setUrbanOsidSet(loadUrbanOsidSet(baseDir));
-    setForestOsidSet(loadForestOsidSet(baseDir));
+    primeCombatTerrain(baseDir);
 
     const [graph, operationalSettlementGraph, operationalData, operationalCentroids] = await Promise.all([
         loadSettlementGraph(settlementGraphOptions(baseDir)),

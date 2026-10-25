@@ -206,6 +206,27 @@ function startCdpNetworkCollection(options) {
       return { ok: false, projection: { status: 'invalid' } };
     }
     const protocol = exactBoundedString(parsed.protocol, caps.valueChars, 'url-protocol');
+    if (!protocol.ok) return { ok: false, projection: { status: 'over-cap' } };
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return {
+        ok: true,
+        projection: {
+          status: 'non-http',
+          protocol: protocol.value,
+          length: raw.length,
+          sha256: sha256(raw),
+        },
+        facts: {
+          isHttp: false,
+          isLoopback: false,
+          validPort: false,
+          ambientPath: false,
+          hadUserinfo: parsed.username.length > 0 || parsed.password.length > 0,
+          hadQuery: parsed.search.length > 0,
+          hadFragment: parsed.hash.length > 0,
+        },
+      };
+    }
     const hostname = exactBoundedString(parsed.hostname, caps.valueChars, 'url-hostname');
     const port = exactBoundedString(parsed.port, caps.valueChars, 'url-port');
     const components = parsed.pathname.split('/');
@@ -219,7 +240,7 @@ function startCdpNetworkCollection(options) {
       if (!bounded.ok) return { ok: false, projection: { status: bounded.reason } };
       path.push(bounded.value);
     }
-    if (!protocol.ok || !hostname.ok || !port.ok) return { ok: false, projection: { status: 'over-cap' } };
+    if (!hostname.ok || !port.ok) return { ok: false, projection: { status: 'over-cap' } };
     const projection = {
       status: 'present',
       protocol: protocol.value,
