@@ -1,0 +1,124 @@
+{
+  "turn": 25,
+  "pendingConsumed": true,
+  "operation": {
+    "operationId": "arbih_2nd_corps:Presidential Directive — op:srebrenica:obadi:t21",
+    "name": "Presidential Directive — op:srebrenica:obadi",
+    "type": "sector_attack",
+    "phase": "recovery",
+    "startedTurn": 21,
+    "requestedByPresident": true,
+    "forced": true,
+    "commanderOfficerId": "arbih_mesic",
+    "roster": [
+      "arbih_1st_cerska",
+      "arbih_1st_kamenica",
+      "arbih_246th_vitezka_mountain",
+      "arbih_281st_east_bosnian_light",
+      "arbih_282nd_east_bosnian_light",
+      "arbih_283rd_east_bosnian_light",
+      "arbih_284th_east_bosnian_light"
+    ],
+    "axes": [
+      {
+        "axisId": "main",
+        "stagingOsid": "op:srebrenica:donji_potocari_2",
+        "objectives": [
+          "op:srebrenica:obadi"
+        ],
+        "assignedBrigades": [
+          "arbih_1st_cerska",
+          "arbih_1st_kamenica",
+          "arbih_246th_vitezka_mountain",
+          "arbih_281st_east_bosnian_light",
+          "arbih_282nd_east_bosnian_light",
+          "arbih_283rd_east_bosnian_light",
+          "arbih_284th_east_bosnian_light"
+        ]
+      }
+    ],
+    "rosterState": [
+      {
+        "formationId": "arbih_1st_cerska",
+        "status": "active",
+        "personnel": 448,
+        "locationOsid": "op:srebrenica:donji_potocari_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_1st_kamenica",
+        "status": "active",
+        "personnel": 452,
+        "locationOsid": "op:bratunac:jezestica_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_246th_vitezka_mountain",
+        "status": "active",
+        "personnel": 443,
+        "locationOsid": "op:bratunac:pobudje_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_281st_east_bosnian_light",
+        "status": "active",
+        "personnel": 600,
+        "locationOsid": "op:srebrenica:donji_potocari_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_282nd_east_bosnian_light",
+        "status": "active",
+        "personnel": 600,
+        "locationOsid": "op:srebrenica:ljeskovik_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_283rd_east_bosnian_light",
+        "status": "active",
+        "personnel": 600,
+        "locationOsid": "op:srebrenica:ljeskovik_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_284th_east_bosnian_light",
+        "status": "active",
+        "personnel": 600,
+        "locationOsid": "op:srebrenica:ljeskovik_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      }
+    ]
+  },
+  "movement": {
+    "turn": 25,
+    "locationChanges": [],
+    "summaryMovements": []
+  },
+  "combat": {
+    "allBattleCount": 6,
+    "ownedBattles": []
+  },
+  "controller": {
+    "targetOsid": "op:srebrenica:obadi",
+    "before": "RS",
+    "after": "RS",
+    "controlEvents": [],
+    "captureProvenance": "not_captured"
+  },
+  "aar": null,
+  "canonical": {
+    "bytes": 5175634,
+    "sha256": "e759d4e83ba215362bcd57fd085714e32e2390b7fef82f05c50ddd8235fb7266"
+  },
+  "runtime": {
+    "bytes": 5218529,
+    "sha256": "91954ee7e7ea56dc5fe6fafcb186690e9e54e59526fb2f0b3ec777e5f9f25e13"
+  }
+}

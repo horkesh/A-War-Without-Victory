@@ -981,6 +981,8 @@ Institutional inertia and command degradation delay or distort execution.
 
 All state variables are serializable.
 
+**Implementation note — scenario graph domain (2026-10-25):** Weekly headless scenario front reconstruction uses operational OSID graph edges, matching its OSID control/front consumers and the existing final-save path. Canonical settlement-ID edges are a different domain and must not be substituted. This correction changes no front rule, controller, combat, movement, supply, enclave, threshold, data or save contract.
+
 The simulation is strictly non-random. Reproducibility is achieved by deterministic state updates, stable ordering, canonical IDs, and timestamp-free derived artifacts.
 
 Save/load must fully reconstruct world, faction, municipality, MCZ, formation, and front states.

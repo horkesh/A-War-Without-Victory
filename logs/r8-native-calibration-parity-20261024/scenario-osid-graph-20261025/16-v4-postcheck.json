@@ -1,0 +1,276 @@
+{
+  "schema": "awwv.pre-t6-causal-capture.postcheck.v4",
+  "pass": false,
+  "status": "INTEGRITY_FAILURE",
+  "causal_go": false,
+  "failures": [
+    "FINAL_NOT_EXACT_TO_COMPOSITE_AND_OBSERVER",
+    "ENTRY_EXACTNESS_FLAGS_FALSE"
+  ],
+  "reference": [
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/pre-t6-causal-prefix-v2/attempts/off-01/run/initial_save.json",
+      "actual_rel": "run/initial_save.json",
+      "bytes": 1373722,
+      "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+      "exact": true
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/pre-t6-causal-prefix-v2/attempts/off-01/run/save_w1.json",
+      "actual_rel": "run/save_w1.json",
+      "bytes": 3032693,
+      "sha256": "417a9f24b42f1bfa8d41507528ddd0b5f34a84eb0a3213ff6b3128212e995afb",
+      "exact": true
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/pre-t6-causal-prefix-v2/attempts/off-01/run/save_w2.json",
+      "actual_rel": "run/save_w2.json",
+      "bytes": 3154922,
+      "sha256": "66a7ed6d8b4801d3625bd09ac2b12d172955c6cd203a1c53853eae7d5716db0f",
+      "exact": true
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/pre-t6-causal-prefix-v2/attempts/off-01/run/final_save.json",
+      "actual_rel": "run/final_save.json",
+      "bytes": 3647235,
+      "sha256": "e51454971bd7d93ec6d6860cd60d57247d27dd68fb3764622f41bb3010424694",
+      "exact": true
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/pre-t6-causal-prefix-v2/attempts/off-01/run/weekly_report.jsonl",
+      "actual_rel": "run/weekly_report.jsonl",
+      "bytes": 44654,
+      "sha256": "1036f9ab5b9ff0505e86a700851102a5059874fb1c31f497c78e2ca1963d19d4",
+      "exact": true
+    }
+  ],
+  "ordered_target_tuples": [
+    {
+      "step": "input",
+      "targets": {
+        "turn": 1,
+        "formations": {
+          "hv_113th_brigade_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1988,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [
+              "sector:hvo_southeast_herzegovina:0"
+            ],
+            "engaged_this_turn": false
+          },
+          "hv_4th_guards_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1989,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [
+              "sector:hvo_southeast_herzegovina:0"
+            ],
+            "engaged_this_turn": false
+          }
+        }
+      }
+    },
+    {
+      "step": "after_displace",
+      "targets": {
+        "turn": 1,
+        "formations": {
+          "hv_113th_brigade_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1988,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [
+              "sector:hvo_southeast_herzegovina:0"
+            ],
+            "engaged_this_turn": false
+          },
+          "hv_4th_guards_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1989,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [
+              "sector:hvo_southeast_herzegovina:0"
+            ],
+            "engaged_this_turn": false
+          }
+        }
+      }
+    },
+    {
+      "step": "after_front_edges",
+      "targets": {
+        "turn": 1,
+        "formations": {
+          "hv_113th_brigade_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1988,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [
+              "sector:hvo_southeast_herzegovina:0"
+            ],
+            "engaged_this_turn": false
+          },
+          "hv_4th_guards_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1989,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [
+              "sector:hvo_southeast_herzegovina:0"
+            ],
+            "engaged_this_turn": false
+          }
+        }
+      }
+    },
+    {
+      "step": "after_reconcile",
+      "targets": {
+        "turn": 1,
+        "formations": {
+          "hv_113th_brigade_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1988,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [
+              "sector:hvo_southeast_herzegovina:0"
+            ],
+            "engaged_this_turn": false
+          },
+          "hv_4th_guards_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1989,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [
+              "sector:hvo_southeast_herzegovina:0"
+            ],
+            "engaged_this_turn": false
+          }
+        }
+      }
+    }
+  ],
+  "actual_pre_targets": {
+    "turn": 1,
+    "formations": {
+      "hv_113th_brigade_tg": {
+        "present": true,
+        "fatigue": 0.5,
+        "location_osid": "op:capljina:capljina_2",
+        "personnel": 1988,
+        "cohesion": 85,
+        "morale": 90,
+        "disrupted_turns": null,
+        "sector_ids": [
+          "sector:hvo_southeast_herzegovina:0"
+        ],
+        "engaged_this_turn": false
+      },
+      "hv_4th_guards_tg": {
+        "present": true,
+        "fatigue": 0.5,
+        "location_osid": "op:capljina:capljina_2",
+        "personnel": 1989,
+        "cohesion": 85,
+        "morale": 90,
+        "disrupted_turns": null,
+        "sector_ids": [
+          "sector:hvo_southeast_herzegovina:0"
+        ],
+        "engaged_this_turn": false
+      }
+    }
+  },
+  "actual_observer_targets": {
+    "turn": 1,
+    "formations": {
+      "hv_113th_brigade_tg": {
+        "present": true,
+        "fatigue": 0.5,
+        "location_osid": "op:capljina:capljina_2",
+        "personnel": 1988,
+        "cohesion": 85,
+        "morale": 90,
+        "disrupted_turns": null,
+        "sector_ids": [],
+        "engaged_this_turn": false
+      },
+      "hv_4th_guards_tg": {
+        "present": true,
+        "fatigue": 0.5,
+        "location_osid": "op:capljina:capljina_2",
+        "personnel": 1989,
+        "cohesion": 85,
+        "morale": 90,
+        "disrupted_turns": null,
+        "sector_ids": [],
+        "engaged_this_turn": false
+      }
+    }
+  },
+  "composite_targets": {
+    "turn": 1,
+    "formations": {
+      "hv_113th_brigade_tg": {
+        "present": true,
+        "fatigue": 0.5,
+        "location_osid": "op:capljina:capljina_2",
+        "personnel": 1988,
+        "cohesion": 85,
+        "morale": 90,
+        "disrupted_turns": null,
+        "sector_ids": [
+          "sector:hvo_southeast_herzegovina:0"
+        ],
+        "engaged_this_turn": false
+      },
+      "hv_4th_guards_tg": {
+        "present": true,
+        "fatigue": 0.5,
+        "location_osid": "op:capljina:capljina_2",
+        "personnel": 1989,
+        "cohesion": 85,
+        "morale": 90,
+        "disrupted_turns": null,
+        "sector_ids": [
+          "sector:hvo_southeast_herzegovina:0"
+        ],
+        "engaged_this_turn": false
+      }
+    }
+  },
+  "predicate_status": "PREDICATE_NOT_EXPOSED_BY_PUBLIC_DIAGNOSTICS",
+  "claim_limit": "Integrity and complete capture only. Human independent review must identify any erasure and subcall; this result makes no causal classification or repair recommendation."
+}

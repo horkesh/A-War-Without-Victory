@@ -1,10 +1,16 @@
 # Code Canon (AWWV)
 
+## Scenario-runner OSID graph domain (2026-10-25 source candidate)
+
+The reviewed candidate based on clean local commit `295d5f729` corrects one weekly `runScenario` call: OSID front reconstruction receives `operationalSettlementGraph.edges`, matching the final-save path, instead of canonical SID `graph.edges`. Passing SID endpoints into OSID controller/front functions yields null controllers, skips every edge, produces zero fronts and lets fresh reconciliation erase every corps sector. The correction changes no native/desktop pipeline, combat, movement, supply, enclave policy, thresholds, data, save schema or final-save graph.
+
+One-week definitive public-`runScenario` RED records 0 fronts/0 sectors; GREEN records 587 fronts/157 sectors, preserves the two named HVO assignments in sector 0 and passes observer/save checks. The final focused result is 2/2 with TypeScript and diff checks at exit 0; preimplementation canon review and independent code review are GO. This is a source candidate only: authoritative 188-week, complete-suite, package and native qualification remain open, and retained n101 cannot prove production parity because its producer contained the now-known domain defect. [Portable proof](../../logs/r8-native-calibration-parity-20261024/scenario-osid-graph-20261025/MANIFEST.json)
+
 ## REQUEST-OP directive selector (2026-10-25 source candidate)
 
 The reviewed REQUEST-OP candidate based on source head `a3063366a` shares one pure selector between objection preview and injection. It requires 3–12 available, uncommitted, active corps brigades; keeps the existing objective/enclave eligibility predicate; requires physical connectivity to an own-controlled target-adjacent staging OSID through ordinary friendly/allied territory; prefers the first strict-sorted staging candidate that has enough legal formations; ranks the selected force by the existing sector-attack equipment priority with strict ID ties; and stores a canonical ID roster. A forced request cannot bypass a hard selector or slot rejection. The existing authored-operation two-formation floor, bot selectors, movement, supply, combat, control, save shape, command-authority cost and enclave policy are unchanged.
 
-Focused tests pass 34/34, `npm run typecheck` exits 0, and independent canon, historian and code review are GO for this exact selector correction. It has no delivery, capture, gameplay-188, full-suite, package or native qualification yet and supplies no player-parity or baseline-adoption claim. [Portable proof](../../logs/r8-native-calibration-parity-20261024/directive-selector-20261025/MANIFEST.v2.json)
+Focused tests pass 34/34, `npm run typecheck` exits 0, and independent canon, historian and code review are GO for this exact selector correction. The later bounded Bukvik source-runtime diagnostic proves delivery and capture; Obadi remains a negative result. Gameplay-188, full-suite, package and native qualification remain open, with no player-parity or baseline-adoption claim. [Focused proof](../../logs/r8-native-calibration-parity-20261024/directive-selector-20261025/MANIFEST.v2.json) · [Delivery evidence](../../logs/r8-native-calibration-parity-20261024/scenario-osid-graph-20261025/MANIFEST.json)
 
 ## Current parity qualification boundary (2026-10-25)
 

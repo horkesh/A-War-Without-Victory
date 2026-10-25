@@ -1,0 +1,292 @@
+{
+  "turn": 26,
+  "pendingConsumed": true,
+  "operation": null,
+  "movement": {
+    "turn": 26,
+    "locationChanges": [],
+    "summaryMovements": []
+  },
+  "combat": {
+    "allBattleCount": 1,
+    "ownedBattles": []
+  },
+  "controller": {
+    "targetOsid": "op:srebrenica:obadi",
+    "before": "RS",
+    "after": "RS",
+    "controlEvents": [],
+    "captureProvenance": "not_captured"
+  },
+  "aar": {
+    "axis_summaries": [
+      {
+        "axis_id": "main",
+        "axis_name": "Main Advance",
+        "brigades": [
+          "arbih_1st_cerska",
+          "arbih_1st_kamenica",
+          "arbih_246th_vitezka_mountain",
+          "arbih_281st_east_bosnian_light",
+          "arbih_282nd_east_bosnian_light",
+          "arbih_283rd_east_bosnian_light",
+          "arbih_284th_east_bosnian_light"
+        ],
+        "casualties_inflicted": {
+          "killed": 0,
+          "wounded": 0
+        },
+        "casualties_suffered": {
+          "killed": 0,
+          "wounded": 0
+        },
+        "equipment_captured": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "equipment_destroyed": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "equipment_lost": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "launch_blocker": "zero_eligible_axis",
+        "objectives_captured": [],
+        "objectives_targeted": [
+          "op:srebrenica:obadi"
+        ],
+        "staging_osid": "op:srebrenica:donji_potocari_2",
+        "total_attacks": 0
+      }
+    ],
+    "ca_cost_at_launch": 15,
+    "capture_provenance": "no_objectives_held",
+    "casualties_inflicted": {
+      "killed": 0,
+      "wounded": 0
+    },
+    "casualties_suffered": {
+      "killed": 0,
+      "wounded": 0
+    },
+    "commander_assessment_at_launch": "abort",
+    "commander_name": "Hajrudin Mešić",
+    "commander_officer_id": "arbih_mesic",
+    "commander_rank": "corps_commander",
+    "corps_id": "arbih_2nd_corps",
+    "duration_turns": 5,
+    "ended_turn": 26,
+    "equipment_captured": {
+      "artillery": 0,
+      "tanks": 0
+    },
+    "equipment_destroyed": {
+      "artillery": 0,
+      "tanks": 0
+    },
+    "equipment_lost": {
+      "artillery": 0,
+      "tanks": 0
+    },
+    "faction": "RBiH",
+    "final_strength": 3743,
+    "force_launched": true,
+    "force_ratio_estimate": 3,
+    "grade": {
+      "factors": {
+        "exchange_ratio": 0,
+        "objective_completion": 0,
+        "preservation": 98.29306722689076,
+        "tempo": 0
+      },
+      "stars": 1,
+      "verdict": "No Assault Attempted"
+    },
+    "initial_strength": 3808,
+    "objectives_captured": [],
+    "objectives_held_without_logged_capture": [],
+    "objectives_logged_captured": [],
+    "objectives_targeted": [
+      "op:srebrenica:obadi"
+    ],
+    "operation_id": "arbih_2nd_corps:Presidential Directive — op:srebrenica:obadi:t21",
+    "operation_name": "Presidential Directive — op:srebrenica:obadi",
+    "outcome": "failure",
+    "participating_brigades": [
+      "arbih_1st_cerska",
+      "arbih_1st_kamenica",
+      "arbih_246th_vitezka_mountain",
+      "arbih_281st_east_bosnian_light",
+      "arbih_282nd_east_bosnian_light",
+      "arbih_283rd_east_bosnian_light",
+      "arbih_284th_east_bosnian_light"
+    ],
+    "recovery_reason": "zero_eligible_axis",
+    "requested_by_president": true,
+    "started_turn": 21,
+    "total_attacks": 0,
+    "type": "sector_attack",
+    "weekly_log": [
+      {
+        "attacks_this_turn": 0,
+        "brigade_count": 7,
+        "casualties_inflicted": {
+          "killed": 0,
+          "wounded": 0
+        },
+        "casualties_suffered": {
+          "killed": 0,
+          "wounded": 0
+        },
+        "equipment_captured": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "equipment_destroyed": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "equipment_lost": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "momentum": 0,
+        "notable_events": [],
+        "objectives_captured_this_turn": [],
+        "objectives_lost_this_turn": [],
+        "phase": "planning",
+        "turn": 21
+      },
+      {
+        "attacks_this_turn": 0,
+        "brigade_count": 7,
+        "casualties_inflicted": {
+          "killed": 0,
+          "wounded": 0
+        },
+        "casualties_suffered": {
+          "killed": 0,
+          "wounded": 0
+        },
+        "equipment_captured": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "equipment_destroyed": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "equipment_lost": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "momentum": 0,
+        "notable_events": [],
+        "objectives_captured_this_turn": [],
+        "objectives_lost_this_turn": [],
+        "phase": "planning",
+        "turn": 22
+      },
+      {
+        "attacks_this_turn": 0,
+        "brigade_count": 7,
+        "casualties_inflicted": {
+          "killed": 0,
+          "wounded": 0
+        },
+        "casualties_suffered": {
+          "killed": 0,
+          "wounded": 0
+        },
+        "equipment_captured": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "equipment_destroyed": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "equipment_lost": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "momentum": 0,
+        "notable_events": [],
+        "objectives_captured_this_turn": [],
+        "objectives_lost_this_turn": [],
+        "phase": "planning",
+        "turn": 23
+      },
+      {
+        "attacks_this_turn": 0,
+        "brigade_count": 7,
+        "casualties_inflicted": {
+          "killed": 0,
+          "wounded": 0
+        },
+        "casualties_suffered": {
+          "killed": 0,
+          "wounded": 0
+        },
+        "equipment_captured": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "equipment_destroyed": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "equipment_lost": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "momentum": 0,
+        "notable_events": [],
+        "objectives_captured_this_turn": [],
+        "objectives_lost_this_turn": [],
+        "phase": "planning",
+        "turn": 24
+      },
+      {
+        "attacks_this_turn": 0,
+        "brigade_count": 7,
+        "casualties_inflicted": {
+          "killed": 0,
+          "wounded": 0
+        },
+        "casualties_suffered": {
+          "killed": 0,
+          "wounded": 0
+        },
+        "equipment_captured": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "equipment_destroyed": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "equipment_lost": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "momentum": 0,
+        "notable_events": [],
+        "objectives_captured_this_turn": [],
+        "objectives_lost_this_turn": [],
+        "phase": "recovery",
+        "turn": 25
+      }
+    ]
+  },
+  "canonical": {
+    "bytes": 5176092,
+    "sha256": "620e3bfb363d1260c8289327f90800bb19a5c543070d6d7e65d3305d625a76cf"
+  },
+  "runtime": {
+    "bytes": 5219048,
+    "sha256": "c78b829edb93c9f3dd18fc74631c9e62651fe10f35e480ffdda894af520a135d"
+  }
+}

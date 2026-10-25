@@ -1,0 +1,6 @@
+{
+  "schema": "awwv.directive-obadi-diagnostic-v1_1.failure.v1",
+  "pass": false,
+  "verdict": "ROSTER_NOT_ENCLAVE_FORCE",
+  "error": "ROSTER_NOT_ENCLAVE_FORCE:arbih_1st_cerska"
+}

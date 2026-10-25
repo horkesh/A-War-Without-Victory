@@ -3242,7 +3242,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
 
             repairScenarioArtifactState(
                 state,
-                graph.edges,
+                operationalSettlementGraph.edges,
                 operationalData?.operationalToCanonical ?? null,
                 operationalCentroids,
             );

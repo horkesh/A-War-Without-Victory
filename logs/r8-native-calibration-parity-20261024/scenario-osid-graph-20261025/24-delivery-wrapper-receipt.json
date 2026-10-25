@@ -1,0 +1,10 @@
+{
+  "schema": "awwv.directive-delivery-diagnostic-v2.wrapper.v1",
+  "kind": "production",
+  "wrapperExit": 0,
+  "childExit": 0,
+  "timedOut": false,
+  "signal": null,
+  "elapsedMs": 8523,
+  "noRetry": true
+}

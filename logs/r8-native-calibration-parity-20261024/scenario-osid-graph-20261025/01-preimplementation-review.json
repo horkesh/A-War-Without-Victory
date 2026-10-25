@@ -1,0 +1,134 @@
+{
+  "schema": "awwv.preimplementation-canon-systems-review.v1",
+  "review_date": "2026-10-25",
+  "verdict": "GO_EXACT_SCOPE",
+  "head": "295d5f7290b1085dc76bbebb41df72386cd6b705",
+  "review_mode": "read_only_except_this_review_artifact",
+  "implementation_authorized_by_review": false,
+  "finding": {
+    "classification": "unambiguous_graph_domain_code_defect",
+    "owner_design_choice_required": false,
+    "summary": "The weekly scenario-only artifact repair passes canonical SID settlement_edges to three consumers whose contract is operational OSID edges. The resulting empty OSID front graph causes final sector reconciliation to erase the materialized standing-OG snapshot. The already-loaded operationalSettlementGraph is the correct input and is already used by the canonical runTurn path and by the final-save geometry pass.",
+    "wrong_call": "src/scenario/scenario_runner.ts:3243-3248 passes graph.edges loaded at 1559-1563 from data/derived/settlement_edges.json.",
+    "consumer_contract": [
+      "src/map/front_edges.ts:106-118 explicitly accepts OSID adjacency; lines 125-127 resolve each endpoint with getPoliticalControllerOSID and skip null controllers.",
+      "src/sim/combat/attack_retreat_displacement.ts:461-485 builds OSID adjacency and evaluates location_osid through the operational-to-canonical reverse map.",
+      "src/sim/combat/final_sector_truth_reconciliation.ts:399-423 forwards the same edge domain into the full geometry rebuild."
+    ],
+    "correct_existing_owners": [
+      "src/scenario/scenario_runner.ts:2626-2634 loads operationalSettlementGraph before the weekly loop.",
+      "src/scenario/scenario_runner.ts:2952-2963 passes operationalSettlementGraph and its edges to canonical runTurn.",
+      "src/sim/turn_phases/war_phase_reconciliation_steps.ts:59-111 computes OSID fronts and final sectors from operational data edges.",
+      "src/scenario/scenario_runner.ts:3548-3591 already uses loadOperationalEdges for final-save OSID front and sector geometry."
+    ]
+  },
+  "retained_evidence": {
+    "failure_review": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/pre-t6-causal-capture-v4/ACTUAL_FAILURE_REVIEW.json",
+    "offline_shadow": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/pre-t6-causal-capture-v4/attempts/retained-canonical-graph-shadow-01/CANONICAL_GRAPH_SHADOW.json",
+    "shadow_result": "pass=true; canonical SID graph reproduced exact post-repair target erasure; operational graph preserved both target assignments; canonical sequential and composite paths matched actual post-repair.",
+    "target_tuple": [
+      "hv_113th_brigade_tg at op:capljina:capljina_2, fatigue 0.5, loses sector:hvo_southeast_herzegovina:0 only at reconciliation",
+      "hv_4th_guards_tg at op:capljina:capljina_2, fatigue 0.5, loses sector:hvo_southeast_herzegovina:0 only at reconciliation"
+    ],
+    "claim_limit": "The retained offline shadow establishes this domain mismatch and exact local erasure. It does not qualify a repaired campaign or prove historical causality."
+  },
+  "authority": [
+    {
+      "source": "docs/10_canon/Engine_Invariants_v0_9_0.md:51-55",
+      "rule": "Fronts exist on hostile OSID adjacency."
+    },
+    {
+      "source": "docs/10_canon/Engine_Invariants_v0_9_0.md:236-250",
+      "rule": "War formation location and OSID-keyed state use OSIDs, stable ordering, deterministic replay and serialization."
+    },
+    {
+      "source": "docs/10_canon/Systems_Manual_v0_9_0.md:29-37",
+      "rule": "War deployment and hostile front boundaries are OSID-based; corps sectors are recomputed at turn boundaries and serialized as the materialized current-turn standing order."
+    },
+    {
+      "source": "docs/10_canon/Systems_Manual_v0_9_0.md:1049-1050,1107",
+      "rule": "war_front_edges_osid feeds the persisted corps-front-sector snapshot; save load preserves that snapshot rather than rebuilding it."
+    },
+    {
+      "source": "docs/20_engineering/ADR/ADR-0006-sectors-as-standing-operational-groups.md, Persistence contract",
+      "rule": "corps_front_sectors and formation sector assignments are persisted materialized current-turn truth; only listed transient caches are disposable. This accepted ADR already supplies the design decision, so this repair needs no new mechanic or ADR."
+    },
+    {
+      "source": "docs/20_engineering/CODE_CANON.md:77-93,141-143,279-290",
+      "rule": "Engine invariants and Systems Manual outrank code; deterministic derived state and canonical entrypoint ownership are protected; code contradiction is resolved in code rather than by rewriting canon."
+    },
+    {
+      "source": "docs/20_engineering/AGENT_WORKFLOW.md:29-35,45-60",
+      "rule": "Preserve ordering, serialization, GameState ownership, save compatibility, provenance and acceptance criteria; calibration-affecting behavior requires scenario-first authoritative validation and then the full suite only for a qualifying candidate."
+    }
+  ],
+  "exact_implementation_scope": {
+    "required_source_change": "At src/scenario/scenario_runner.ts:3243-3248, pass operationalSettlementGraph.edges to repairScenarioArtifactState instead of graph.edges.",
+    "allowed_clarity_only": "Within repairScenarioArtifactState, rename the local parameter edges to operationalEdges and update its three local uses. This is a runtime-neutral semantic label, not a required behavior change.",
+    "required_test_change": "Extend tests/scenario_runner_artifact_repair.test.ts or add one narrowly named scenario-runner regression test that crosses the real one-week scenario loop call site.",
+    "max_behavior_files": [
+      "src/scenario/scenario_runner.ts",
+      "tests/scenario_runner_artifact_repair.test.ts or one new focused scenario-runner test"
+    ],
+    "explicitly_out_of_scope": [
+      "No change to buildScenarioStartupState's canonical SID graph or settlementGraph input.",
+      "No change to computeFrontEdgesOsid, displaceFormationsInEnemyTerritory, reconcileFinalSectorTruth, sector construction, roster distribution, fatigue, movement, combat, control, enclave rules, bot policy, or final-save ordering.",
+      "No copy of scenario artifact repair into desktop/native/public runTurn paths; those already consume operational edges.",
+      "No save schema/version/migration change, API field change, data edit, baseline/reference/pin adoption, target-floor change, tuning, threshold change, or forced result.",
+      "Do not remove, narrow, reorder, or reinterpret the existing repair sequence in this patch."
+    ]
+  },
+  "first_red_fixture": {
+    "command": "npx vitest run tests/scenario_runner_artifact_repair.test.ts --reporter=dot",
+    "fixture": "Run data/scenarios/apr1992_4w.json for exactly one week through runScenario with diagnosticTurnBoundaryObserver and a fresh test output directory.",
+    "pre_fix_expected_failure": "At completed turn 1, the observer/weekly save has an empty war_front_edges_osid and/or no sector membership for hv_113th_brigade_tg and hv_4th_guards_tg because the real weekly caller supplies SID edges.",
+    "post_fix_pass": [
+      "war_front_edges_osid is nonempty and every endpoint is an op: OSID present in the operational reverse-map domain.",
+      "corps_front_sectors is nonempty.",
+      "Both retained HVO formations remain members of sector:hvo_southeast_herzegovina:0 at the post-repair turn boundary and in save_w1.",
+      "Their location_osid, personnel, cohesion, morale and fatigue values match the ordinary pre-repair turn state; the test must not hand-author pending sectors or call only the helper."
+    ],
+    "meaning": "This test exercises the production caller and serialized boundary. The existing helper-only test already proves operational-edge displacement/front behavior but cannot detect the wrong caller argument."
+  },
+  "validation_gates": [
+    {
+      "order": 1,
+      "question": "Does the production weekly caller preserve real OSID front and sector truth with the correct graph domain?",
+      "commands": [
+        "npx vitest run tests/scenario_runner_artifact_repair.test.ts --reporter=dot",
+        "npm run typecheck",
+        "git diff --check"
+      ],
+      "pass": "Focused semantic regression green, TypeScript exit 0, diff check exit 0, and diff confined to approved files plus required closeout records.",
+      "stop": "Any failure, unexpected mutation, or expanded source surface stops before a campaign."
+    },
+    {
+      "order": 2,
+      "question": "Does the corrected materialized sector state qualify in the authoritative campaign without losing accepted history or provenance?",
+      "command": "npx tsx tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_188w.json --unique --map --out <fresh-explicit-attempt-root>",
+      "pass": "Use the unchanged active acceptance contract: current checkpoint floors, every formerly-correct n91/n92 cell retained, all 16 protected anchors, clean provenance, exact requested horizon, artifact/state consistency and no unexplained integrity regression. Do not replace this with the prior exact-output V2 check, because the established defect is expected to change outputs.",
+      "expected_cost": "One authoritative 188-week scenario attempt after cheap gates; no automatic retry.",
+      "stop": "If the run misses any current floor, formerly-correct cell, anchor, provenance or artifact gate, retain evidence and stop. Do not tune, adopt baselines, lower thresholds, or run the full suite."
+    },
+    {
+      "order": 3,
+      "question": "Does the qualifying candidate preserve the complete repository contract?",
+      "command": "npm run test:vitest:balanced",
+      "pass": "Complete discovered suite exits 0 with no unexplained failures and with receipt/inventory checks intact.",
+      "expected_cost": "One full balanced suite only after Gate 2 qualifies.",
+      "stop": "Do not repeat unless a later correction invalidates this evidence."
+    }
+  ],
+  "determinism_save_and_ownership": {
+    "determinism": "The fix substitutes an already-loaded immutable operational edge array and introduces no iteration, random source, clock, or ordering rule. Existing OSID consumers sort/canonicalize within their established ownership. Campaign artifacts will intentionally differ from the defective producer, so fresh determinism/provenance evidence is required.",
+    "save_compatibility": "No field, schema, migration or serializer shape changes. The change restores the existing persisted turn-boundary sector projection mandated by Systems Manual and ADR-0006.",
+    "headless_boundary": "The scenario runner remains the sole changed owner. Public desktop runTurn already receives operationalSettlementGraph.edges; final-save geometry already reloads operational edges. No native/desktop mutation is authorized.",
+    "calibration_status": "Source candidate remains unqualified until the fresh authoritative 188-week gate and qualifying full suite complete. Prior n101/source/package/native evidence does not automatically qualify this behavior change."
+  },
+  "review_seats": {
+    "independent_implementation_review": "required after implementation; one reviewer may cover code, canon, systems, determinism, save and evidence linkage",
+    "historian_or_sensitive_history_panel": "not required for this exact graph-domain correction because it changes no historical data, enclave rule, operation attribution, authored roster, target or protected control reference. Historical/calibration acceptance remains enforced by the authoritative 188-week anchors and formerly-correct-cell gates.",
+    "escalation_trigger": "Require the applicable historian/canon panel before altering any historical/enclave rule, authored roster, protected reference, attribution, target floor or acceptance criterion in response to a campaign result."
+  },
+  "final_claim_limit": "GO authorizes only the exact code-domain correction and its tests under the parent's existing implementation authority. It is not a GO for adoption, package/native qualification, historical causality, calibration success, or baseline/reference changes."
+}

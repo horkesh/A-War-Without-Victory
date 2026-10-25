@@ -1,0 +1,15 @@
+{
+  "schema": "awwv.directive-delivery-diagnostic-v2.command.v1",
+  "kind": "production",
+  "executable": "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+  "args": [
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\node_modules\\tsx\\dist\\cli.mjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-package-v6\\directive-obadi-diagnostic-v2\\directive_obadi_entry.ts",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-package-v6\\directive-obadi-diagnostic-v2\\CONFIG.json",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-package-v6\\directive-obadi-diagnostic-v2\\attempts\\production-01",
+    "--root-review-go",
+    "ROOT_REVIEW_GO_DIRECTIVE_OBADI_V2"
+  ],
+  "cwd": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory",
+  "timeoutMs": 300000
+}

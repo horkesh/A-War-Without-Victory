@@ -1,5 +1,11 @@
 # Repo Map (AWWV)
 
+## Scenario graph-domain repair and evidence (2026-10-25)
+
+- Weekly headless scenario execution: `src/scenario/scenario_runner.ts`. OSID front builders/reconcilers consume `operationalSettlementGraph.edges`; canonical SID `graph.edges` is not an interchangeable topology.
+- Focused contract: `tests/scenario_runner_artifact_repair.test.ts` runs the real definitive public runner for one week and checks fronts, sectors, the two HVO assignments, observer and saved output.
+- The source candidate has RED/GREEN/typecheck/diff and independent review only. Its compact evidence, the failed V4 shadow, canonical graph shadow, positive Bukvik diagnostic and negative Obadi diagnostic are indexed by [scenario-osid-graph-20261025/MANIFEST.json](../../logs/r8-native-calibration-parity-20261024/scenario-osid-graph-20261025/MANIFEST.json).
+
 ## Current R8 selector and proof locations (2026-10-25)
 
 - Presidential REQUEST-OP planning and consumption: `planDirectiveOperation` / `injectOpDirectives` in `src/sim/turn_phases/war_phases.ts`; objection preview calls the same planner from `src/desktop/desktop_sim.ts`. Focused contracts live in `tests/op_directive_objection.test.ts` and `tests/op_directive_injection.test.ts`.

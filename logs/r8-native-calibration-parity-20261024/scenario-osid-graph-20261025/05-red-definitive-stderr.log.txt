@@ -1,0 +1,14 @@
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/scenario_runner_artifact_repair.test.ts > scenario runner artifact repair > preserves operational front and HVO sector truth at the real one-week artifact boundary
+AssertionError: expected 0 to be greater than 0
+ ❯ tests/scenario_runner_artifact_repair.test.ts:92:69
+     90| 
+     91|             for (const state of [observedState!, weeklySave]) {
+     92|                 expect(state.military.war_front_edges_osid?.length).to…
+       |                                                                     ^
+     93|                 for (const edge of state.military.war_front_edges_osid…
+     94|                     expect(operationalData.operationalToCanonical.has(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

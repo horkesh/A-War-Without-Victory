@@ -1,0 +1,238 @@
+{
+  "schema": "awwv.directive-delivery-diagnostic-v2.actual-review.v1",
+  "date": "2026-10-25",
+  "head_reviewed": "295d5f7290b1085dc76bbebb41df72386cd6b705",
+  "review_mode": "independent read-only review of the single retained production attempt; no simulation rerun, source edit, build, native run, package run, or expanded campaign",
+  "verdict": "GO",
+  "claim": "The one frozen source-runtime diagnostic proves that an actual ordinary 25-CA RBiH player REQUEST-OP for arbih_2nd_corps against op:brcko:bukvik_gornji_2 passed the public objection/staging/runtime path, was consumed into the exact normal requested operation, physically moved its roster, entered exact operation-owned target combat, won, and changed the target controller from RS to RBiH at turn 5.",
+  "scope": "GO only for this fixed counterfactual source-runtime player order, input, head, target, corps, and T1-to-T5 observed execution. It is not a historical-capture claim, packaged Electron UI proof, native/package qualification, bot-calibration result, checkpoint-39 result, checkpoint-707 result, full-suite result, authoritative 188-week result, or release admission.",
+  "attempt": {
+    "path": "attempts/production-01",
+    "attempt_count": 1,
+    "wrapper_exit": 0,
+    "child_exit": 0,
+    "timed_out": false,
+    "signal": null,
+    "elapsed_ms": 8523,
+    "no_retry": true,
+    "advances": 4,
+    "maximum_advances": 6,
+    "input_turn": 1,
+    "stopped_at_turn": 5,
+    "stderr_bytes": 0,
+    "artifact_file_count_before_review": 18,
+    "artifact_total_bytes_before_review": 17542993
+  },
+  "frozen_provenance": {
+    "head_matches_config_and_result": true,
+    "input": {
+      "path": "tmp-paradox-qa-20260710/evidence/historical-default-p03-rbih-t39-01/rbih/turn-autosaves/turn-001.json",
+      "bytes": 3479116,
+      "sha256": "b30c7c14b250d61fd51b1a695fc5ce256b4cd6705792557b54f36bdfe6cf8c54",
+      "matches_config_and_result": true
+    },
+    "node": {
+      "path": "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+      "version": "v22.23.2",
+      "bytes": 86997320,
+      "sha256": "0d0f5e39f9f3d9587bc19f73eab3c2c9c4903fd02d6dbf9c853dd81b3d95fad4",
+      "matches_config_and_result": true
+    },
+    "source_bindings": {
+      "count": 6,
+      "all_match_config_and_result": true
+    },
+    "command": {
+      "kind": "production",
+      "timeout_ms": 300000,
+      "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+      "entry": "directive-delivery-diagnostic-v2/directive_delivery_entry.ts",
+      "authorization_flag_present": true
+    }
+  },
+  "request_and_stage": {
+    "query": {
+      "force_ratio": 0,
+      "estimated_casualties": 0,
+      "recommended_action": "abort",
+      "rejection_reason_present": false,
+      "classification": "soft commander objection, forceable through the ordinary request confirmation contract"
+    },
+    "stage_payload": {
+      "corpsId": "arbih_2nd_corps",
+      "targetOsid": "op:brcko:bukvik_gornji_2",
+      "forced_over_objection": true
+    },
+    "stage_options_serialized": {},
+    "stage_options_interpretation": "unbuildableReason was undefined because the real query returned no hard rejection; JSON therefore serialized the options object as empty",
+    "stage_result": "ok",
+    "command_authority": {
+      "before": {
+        "current": 100,
+        "spent_this_turn": 0,
+        "lifetime_spent": 0
+      },
+      "after": {
+        "current": 75,
+        "spent_this_turn": 25,
+        "lifetime_spent": 25
+      }
+    },
+    "pending_receipt": {
+      "target_osid": "op:brcko:bukvik_gornji_2",
+      "turn": 1,
+      "ca_cost": 25,
+      "forced_over_objection": true
+    },
+    "hard_guard_review": "No hard selector or slot guard was bypassed: rejectionReason was absent before staging, the same source-bound planner consumed the request, and the operation passed the runtime roster/axis validators. This was the REQUEST-OP forced-over-soft-objection branch, not a separate force_launch action."
+  },
+  "operation": {
+    "operation_id": "arbih_2nd_corps:Presidential Directive — op:brcko:bukvik_gornji_2:t2",
+    "name": "Presidential Directive — op:brcko:bukvik_gornji_2",
+    "type": "sector_attack",
+    "started_turn": 2,
+    "requested_by_president": true,
+    "forced_over_objection_effect_recorded": true,
+    "commander_officer_id": "arbih_mesic",
+    "commander_name": "Hajrudin Mešić",
+    "commander_record": {
+      "faction": "RBiH",
+      "home_corps_id": "arbih_2nd_corps",
+      "rank": "corps_commander",
+      "status": "active",
+      "assigned_operation_matches": true
+    },
+    "roster_count": 11,
+    "roster": [
+      "arbih_213th_vitezka_mountain",
+      "arbih_215th_vitezka_mountain",
+      "arbih_217th_vitezka_mountain",
+      "arbih_221st_mountain",
+      "arbih_222nd_liberation",
+      "arbih_246th_vitezka_mountain",
+      "arbih_250th_liberation",
+      "arbih_252nd_slavna_mountain",
+      "arbih_253rd_mountain",
+      "arbih_2nd_tuzla",
+      "hrhb_108th_brko_brigade"
+    ],
+    "roster_checks": {
+      "within_3_to_12": true,
+      "canonical_unique_order": true,
+      "all_existed_in_frozen_input": true,
+      "all_kind_brigade": true,
+      "all_status_active": true,
+      "all_faction_RBiH": true,
+      "all_corps_id_arbih_2nd_corps": true,
+      "all_had_physical_locations": true,
+      "none_initially_committed_to_any_active_operation": true,
+      "each_owned_by_exactly_this_operation_at_turns_2_3_4_5": true,
+      "no_later_duplicate_or_diverted_operation_commitment": true
+    },
+    "prefix_exception": "Despite its hrhb_ prefix, hrhb_108th_brko_brigade is stored in the frozen input as faction RBiH, corps_id arbih_2nd_corps, kind brigade, status active, with the same corps tag. Its inclusion is data-consistent and not an allied-faction ownership leak.",
+    "axis": {
+      "count": 1,
+      "axis_id": "main",
+      "staging_osid": "op:brcko:bijela_2",
+      "objective": "op:brcko:bukvik_gornji_2",
+      "assigned_brigades_exactly_equal_operation_roster": true
+    }
+  },
+  "raw_turn_chain": [
+    {
+      "turn": 2,
+      "source": "state-turn-002.json and report-turn-002.json",
+      "operation_phase": "planning",
+      "pending_consumed": true,
+      "roster_movement_rows": 0,
+      "owned_target_battles": 0,
+      "target_controller": "RS"
+    },
+    {
+      "turn": 3,
+      "source": "state-turn-003.json and report-turn-003.json",
+      "operation_phase": "planning",
+      "roster_movement_rows": 0,
+      "owned_target_battles": 0,
+      "target_controller": "RS"
+    },
+    {
+      "turn": 4,
+      "source": "state-turn-004.json and report-turn-004.json",
+      "operation_phase": "planning",
+      "roster_movement_rows": 7,
+      "movement_summary_matches_physical_location_changes": true,
+      "owned_target_battles": 0,
+      "target_controller": "RS",
+      "staging_evidence": "arbih_217th_vitezka_mountain and arbih_221st_mountain arrived at op:brcko:bijela_2; other roster formations moved into the Brcko approach area"
+    },
+    {
+      "turn": 5,
+      "source": "state-turn-005.json and report-turn-005.json",
+      "operation_phase": "recovery",
+      "roster_movement_rows": 5,
+      "movement_summary_matches_physical_location_changes": true,
+      "owned_target_battles": 1,
+      "target_controller_before": "RS",
+      "target_controller_after": "RBiH",
+      "matching_control_events": 1,
+      "capture_provenance": "attack_backed_controller_change"
+    }
+  ],
+  "raw_turn_5_combat": {
+    "battle_id": "5:op:brcko:bukvik_gornji_2:arbih_213th_vitezka_mountain:null",
+    "target_osid": "op:brcko:bukvik_gornji_2",
+    "operation_id": "arbih_2nd_corps:Presidential Directive — op:brcko:bukvik_gornji_2:t2",
+    "contributing_operation_ids_include_exact_instance": true,
+    "attacker_faction": "RBiH",
+    "defender_faction": "RS",
+    "attacker_won": true,
+    "outcome": "decisive_victory",
+    "power_ratio": 4.76475042748863,
+    "attacker_casualties": 116,
+    "defender_casualties": 96,
+    "attacking_roster_intersection_count": 9,
+    "lead_attacker": "arbih_213th_vitezka_mountain",
+    "lead_attacker_physical_destination": "op:brcko:bukvik_gornji_2",
+    "control_event": {
+      "same_battle_id": true,
+      "turn": 5,
+      "mechanism": "combat",
+      "from": "RS",
+      "to": "RBiH",
+      "settlement_id": "op:brcko:bukvik_gornji_2"
+    },
+    "raw_shape_review": "All critical fields required by the v2 parser are present in report-turn-005.json and state-turn-005.json; the capture conclusion does not rely only on RESULT.json or derived receipt proxies."
+  },
+  "runtime_integrity": {
+    "public_source_path": "loadStateFromPath -> serializeRuntimeState/deserializeState -> queryDirectiveObjection -> stageOpDirective -> serializeRuntimeState/deserializeState -> advanceTurn",
+    "query_nonmutation_assertion_passed": true,
+    "advance_input_nonmutation_assertions_passed": 4,
+    "canonical_runtime_handoff_assertions_passed": 4,
+    "observer_nonmutation_assertions_passed": 4,
+    "raw_state_hashes_match_recorded_receipts": true,
+    "recorded_state_sha256": {
+      "turn_2": "83400ecc443aa06a9777f4dc50fa39db624317a367e85d0bf34126b2b4a32297",
+      "turn_3": "559842095785add5e62eb46b5deeac2c3a24f65aa8d303ad2dfa2adaf9a63f55",
+      "turn_4": "31e55fe156a65736dd66a0453319f64eb180c70aca2dc3f99522d9e3fdb27755",
+      "turn_5": "a696f0090cb81335a9970bf7d3d2e923c772c011dced9afce53f0068e2b4449c"
+    }
+  },
+  "evidence_hashes": {
+    "RESULT.json": "3a61a057c837dc27815c582bb3f2fe02e04fae7d426500e3b12761f0867dece0",
+    "wrapper-receipt.json": "4639e654fc363611236062802d8cba1d1af25c4c80257d9b8cb8cca6f579c898",
+    "stage-receipt.json": "48f9a33efa20ff044891075f4fc97bb93fbe3d61569b9101851e3a0b831f6878"
+  },
+  "result": {
+    "pass": true,
+    "verdict": "DELIVERY_COMBAT_PROVED",
+    "captureClaim": true,
+    "review_conclusion": "SUPPORTED_BY_RAW_EVIDENCE"
+  },
+  "limitations": [
+    "This was a counterfactual player-issued order. The turn-5 Bukvik Gornji capture is a result of this simulation instance and is not asserted as a documented historical capture or a new canon fact.",
+    "The diagnostic used public source-runtime functions and the IPC-equivalent staging helper directly. It did not click through or prove the packaged Electron UI, preload bridge, renderer, native executable, or packaged bundle.",
+    "The four-turn delivery proof does not establish 39-turn calibration, bot capability parity, checkpoint 707, full-suite health, deterministic repeatability, authoritative 188-week acceptance, or release readiness.",
+    "No second attempt was run. This review makes no reproducibility claim beyond the preserved single attempt and its internally joined evidence."
+  ]
+}

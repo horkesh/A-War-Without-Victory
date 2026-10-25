@@ -1,0 +1,83 @@
+{
+  "schema": "awwv.directive-obadi-diagnostic-v2.actual-failure-diagnosis.v1",
+  "date": "2026-10-25",
+  "head": "295d5f7290b1085dc76bbebb41df72386cd6b705",
+  "mode": "read-only consolidated diagnosis of the single retained v1.1 attempt; no retry, advance, staging, query, build, native run, package run, or campaign",
+  "verdict": "HARNESS_FALSE_REJECTION_WITH_POST_ADVANCE_TELEMETRY_GAP",
+  "rootCause": {
+    "failingGate": "ROSTER_NOT_ENCLAVE_FORCE:arbih_1st_cerska",
+    "inventedConstraint": "v1.1 required every selected brigade to carry the enclave tag",
+    "productionSsoT": "isBrigadeEligibleForOperationObjectives returns true for non-enclave brigades and confines only enclave-tagged brigades to objectives in their own enclave",
+    "assessment": "1st Cerska is an active, uncommitted RBiH 2nd Corps brigade physically at Donji Potocari. The production planner legally selected it for Obadi. The harness rejected a legal roster after advanceTurn returned."
+  },
+  "attempt": {
+    "path": "directive-obadi-diagnostic-v1_1/attempts/production-01",
+    "fileCount": 6,
+    "totalBytes": 4263,
+    "wrapperExit": 2,
+    "childExit": 2,
+    "timedOut": false,
+    "signal": null,
+    "elapsedMs": 3599,
+    "noRetry": true,
+    "resultPass": false,
+    "resultVerdict": "ROSTER_NOT_ENCLAVE_FORCE"
+  },
+  "staging": {
+    "publicObjectionQueryCompleted": true,
+    "hardRejection": false,
+    "recommendedAction": "delay",
+    "softOverride": true,
+    "target": "op:srebrenica:obadi",
+    "corps": "arbih_2nd_corps",
+    "caBefore": { "current": 100, "spentThisTurn": 0, "lifetimeSpent": 25 },
+    "caAfter": { "current": 75, "spentThisTurn": 25, "lifetimeSpent": 50 },
+    "pendingRecorded": true
+  },
+  "advanceBoundary": {
+    "advanceInvoked": true,
+    "evidence": [
+      "entry line 133 awaits advanceTurn before roster validation at line 147",
+      "stdout contains brigade-assignment turn-21 FINAL_SEAL"
+    ],
+    "exactCompletedAdvanceCount": 1,
+    "returnedTurn": 21,
+    "reasonCountKnown": "The roster validator was reached only after advanceTurn returned and the exact expected-turn assertion passed; its throw stopped the first loop iteration before any second invocation.",
+    "rawStateRetained": false,
+    "rawReportRetained": false,
+    "turnReceiptRetained": false,
+    "telemetryGapCause": "v1.1 wrote state/report/receipt only after validateObadiConsumedOperation",
+    "recoverableFromCurrentEvidence": false
+  },
+  "unresolvedFailureCategories": {
+    "fullConsumedRoster": "unknown beyond the first rejected member arbih_1st_cerska",
+    "operationInstanceAndCommander": "not retained",
+    "physicalMovement": "not retained",
+    "operationOwnedCombat": "not retained",
+    "aar": "not retained",
+    "controllerChangeAndCaptureLineage": "not retained",
+    "deliveryCapabilityVerdict": "UNMET_FROM_THIS_ATTEMPT; harness failure prevents interpretation"
+  },
+  "retainedFileBindings": [
+    { "name": "command.json", "bytes": 1206, "sha256": "6b50c2e1694dd16c610f59347a680edc0054859ea7bc92e248ac701c6f804e32" },
+    { "name": "RESULT.json", "bytes": 180, "sha256": "93ad67e2bc83a87b1642a5c6667460c7729f6bb48eb7fe0647fd051f6bc5b170" },
+    { "name": "stage-receipt.json", "bytes": 935, "sha256": "6386e7de33e47b74ae29f1847d7abf9366b0809ac4d93601699859461b2810ff" },
+    { "name": "stderr.log", "bytes": 42, "sha256": "457d53b68b7ac5c0f56c642e0f73c3fee6972445b743a3c53a860b7871b0d20a" },
+    { "name": "stdout.log", "bytes": 1693, "sha256": "2a30631fd8e2a54d0ca46c033c28e35bbf31649e9f1c099906706e651043818b" },
+    { "name": "wrapper-receipt.json", "bytes": 207, "sha256": "a54d71b349498cf5772e2b0304daf325f1dad9eaf53e2cf3da9e3f171cdc348f" }
+  ],
+  "correction": {
+    "contract": "remove the all-roster enclave-tag requirement; require the unchanged production objective-eligibility predicate for every selected formation",
+    "guardsRetained": [
+      "active brigade",
+      "RBiH ownership",
+      "arbih_2nd_corps membership",
+      "location present",
+      "not precommitted to any active operation or movement order",
+      "canonical exact roster and axis identity",
+      "production objective eligibility"
+    ],
+    "telemetry": "write exclusive raw advance state and report immediately after advanceTurn returns and before semantic assertions",
+    "nextAttemptAuthorized": false
+  }
+}
