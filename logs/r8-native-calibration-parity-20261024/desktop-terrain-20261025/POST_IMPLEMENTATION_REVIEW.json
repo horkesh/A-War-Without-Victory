@@ -1,0 +1,168 @@
+{
+  "schema": "awwv.desktop-terrain-parity.postimplementation-review.v1",
+  "reviewer": "/root/desktop_terrain_canon_review",
+  "reviewed_at_local_date": "2026-10-25",
+  "review_kind": "independent_code_canon_determinism_postimplementation",
+  "verdict": "GO_TO_POSTFIX_STATE_PROOF",
+  "source_candidate_approved": true,
+  "gameplay_qualified": false,
+  "blockers": [],
+  "findings": [],
+  "bound_repository": {
+    "base_head": "86b693a9423de6a2be13174c36f96ee6a8430801",
+    "implementation_is_uncommitted": true,
+    "tracked_preedit_plan_outside_code_scope": "docs/plans/2026-07-31-full-campaign-electron-validation-plan.md"
+  },
+  "approval_binding": {
+    "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/PREIMPLEMENTATION_CANON_REVIEW.json",
+    "sha256": "ce2283e74a0801cf973aa2e29f9a1fc3520df688b9184409db5d392376aebaf8",
+    "conditions_satisfied_by_source_and_focused_tests": true
+  },
+  "reviewed_files": [
+    {
+      "path": "src/desktop/desktop_sim.ts",
+      "sha256": "db0f4b31bf51b23ca85197ea81509b122ebd26b053e93671884014a5755cb5fd",
+      "assessment": "Both existing production terrain sets are loaded from the call's explicit baseDir and replace the globals before graph/input loading, BotManager construction, BotManager.runBots, and runTurn. No GameState or serialization shape changes."
+    },
+    {
+      "path": "src/sim/combat/combat_terrain_sets_node.ts",
+      "sha256": "a9b367adf78e8b18d5a626427d7746e8a32f988b53896be16aec4a984658e091",
+      "assessment": "Each loader accepts an optional baseDir, retains process.cwd() when omitted, resolves only its fixed terrain path, and retains the existing catch-to-empty-Set policy."
+    },
+    {
+      "path": "tests/desktop_combat_terrain_prerequisite.test.ts",
+      "sha256": "6ddf6526ce794ead58a01d49d7471365a455a2de47c5f84aca875b5a1286a8fd",
+      "assessment": "The CI-contained fixture observes actual getUrbanMult/getForestMult results at the first bot and turn consumers; covers all three player-faction metadata values, explicit-root precedence over cwd, default cwd compatibility, complete and alternate roots, missing and malformed roots, stale-global clearing, input immutability, output shape, and cleanup."
+    }
+  ],
+  "scope_assessment": {
+    "approved_code_files_only": true,
+    "terrain_data_changed": false,
+    "multipliers_or_thresholds_changed": false,
+    "operation_or_control_rules_changed": false,
+    "state_or_save_schema_changed": false,
+    "history_or_authored_inputs_changed": false,
+    "cache_or_preview_design_changed": false,
+    "default_scenario_loader_behavior_changed": false,
+    "explanation": "The only production behavior change is deterministic initialization of already-authoritative process-global terrain membership before desktop turn consumers. Scenario callers that omit baseDir retain their prior cwd behavior."
+  },
+  "canon_review": {
+    "verdict": "COMPLIANT",
+    "mapping": [
+      {
+        "behavior": "Rebuild non-serialized terrain membership from the explicit desktop input root on every advance.",
+        "authority": [
+          "docs/10_canon/Engine_Invariants_v0_9_0.md section 11.4",
+          "docs/10_canon/Engine_Invariants_v0_9_0.md sections 13.1-13.2",
+          "docs/10_canon/Game_Bible_v0_9_0.md sections 17.2 and 19 Determinism",
+          "docs/20_engineering/CODE_CANON.md Determinism Contract"
+        ],
+        "assessment": "Restores identical-input reproducibility across fresh, loaded, and previously primed desktop processes without serializing derived runtime state."
+      },
+      {
+        "behavior": "Use unchanged urban and forest memberships and existing production combat readers.",
+        "authority": [
+          "docs/10_canon/Systems_Manual_v0_9_0.md section 7.4",
+          "docs/10_canon/Engine_Invariants_v0_9_0.md section 12.1",
+          "docs/10_canon/Game_Bible_v0_9_0.md sections 5 and 7"
+        ],
+        "assessment": "Initializes an existing terrain mechanic; it adds no mechanic, multiplier, exception, control writer, or historical outcome."
+      }
+    ],
+    "foraWWV_or_canon_edit_required": false
+  },
+  "determinism_review": {
+    "verdict": "No determinism risks found",
+    "citations": [
+      "docs/10_canon/Engine_Invariants_v0_9_0.md sections 11.1-11.4, 13.1-13.2, and 14.2",
+      "docs/20_engineering/DETERMINISM_TEST_MATRIX.md sections Stable ordering, Derived state not serialized, Byte-identical reruns, and Full vitest suite required on code-path PRs",
+      "docs/20_engineering/CODE_CANON.md Determinism Contract"
+    ],
+    "reasoning": [
+      "No randomness, clock, ID generation, file enumeration, or serialization was added.",
+      "Both Sets are replaced on every desktop advance before any tested consumer, so prior roots cannot leak terrain membership.",
+      "Membership queries are order-insensitive and the Sets do not enter GameState or save output.",
+      "The selected root is explicit for desktop and the existing cwd default remains for scenario startup."
+    ]
+  },
+  "evidence": {
+    "summary": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/implementation/SUMMARY.json",
+      "sha256": "0057c2244c54ab60141edb366c55194c49822d6a7101cad6d826b4855bdfa5c0"
+    },
+    "red": {
+      "receipt_sha256": "6904c5858a2fa2312e090a33f3541c1a4f15d55dab0fb28d9b47e486210cd13e",
+      "vitest_sha256": "0d386cf46b10c05b0481c12bf9cd83f66ece37f6e88a2ab8aa2d059e17447bcc",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "tests": 6,
+      "passed": 0,
+      "failed": 6,
+      "assessment": "Meaningful RED: explicit-root selection, missing/malformed compatibility, each faction consumer-order case, and stale-root replacement all rejected the pre-fix source."
+    },
+    "green": {
+      "receipt_sha256": "b9b95111034462deb7494330fbcc06564641dad986b14ddf3a7d5f99cae4cd1a",
+      "vitest_sha256": "48a67c18bec61e7b1550fb2bb446c43a29b3cdc299c1e0951c7464a839a75813",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "tests": 6,
+      "passed": 6,
+      "failed": 0
+    },
+    "focused": {
+      "receipt_sha256": "c5a6f5c07fe81057d1c91b26f481a928b513b055cafacf22ac78e511e7f081dc",
+      "vitest_sha256": "b58c1a930c7dd0469b4a56f5a530246c4b78cfd73d646c1a4d695c722aef3271",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "tests": 52,
+      "passed": 52,
+      "failed": 0,
+      "covered_files": [
+        "tests/desktop_combat_terrain_prerequisite.test.ts",
+        "tests/turn_result_production_callers.test.ts",
+        "tests/desktop_calibration_compare.test.ts",
+        "tests/operation_launch_feasibility_defender_aware.test.ts",
+        "tests/operation_preparation_force_ratio.test.ts",
+        "tests/stupcanica_defender_stack_shape_b.test.ts"
+      ]
+    },
+    "typecheck": {
+      "first_attempt_receipt_sha256": "9bca79a3516afff4bdc686cba6b7616751436e4d12d228c0c2c94cb48ed438c1",
+      "first_attempt_child_exit": 1,
+      "first_attempt_assessment": "Preserved harness-command failure: TS5023 invalid equals-form spelling; compilation did not start and is not treated as a source failure.",
+      "corrected_receipt_sha256": "fa7f0de81065f10d9d6d89a21cf24ecd827abb5a3718e252135516f3f57f2ab5",
+      "corrected_child_exit": 0,
+      "corrected_wrapper_exit": 0,
+      "corrected_diagnostic_bytes": 0,
+      "command_contract": "tsc --noEmit -p tsconfig.json --incremental false --tsBuildInfoFile <evidenceDir>/unused.tsbuildinfo"
+    },
+    "diff_check": {
+      "record_sha256": "59d9d95f8c58036138751a4799e2916732f29eef834ee1b4f98ad4d4effe38ab",
+      "exit": 0,
+      "note": "The retained git diff --check covered tracked edits; the reviewer separately inspected the full untracked test source."
+    }
+  },
+  "required_next_gate": {
+    "name": "independent actual post-fix recorded-state proof",
+    "status": "OPEN",
+    "requirements": [
+      "Bind these exact reviewed source hashes or restart review if any reviewed file changes.",
+      "Use a fresh complete explicit root containing urban_osids.json and forest_osids.json; never treat the retained incomplete V4 33-input shadow as a complete post-fix root.",
+      "Record explicit path, byte count, and SHA-256 for both terrain files actually consumed.",
+      "Prove the implemented baseDir consumer itself, not the old pre-priming probe intervention, restores the bound operation, canonical battle, and control result while preserving input state.",
+      "Preserve the exact attempt script, argv, stdout, stderr, child outputs, terminal receipt, one-attempt stop rule, and all previous evidence."
+    ]
+  },
+  "open_qualification_gates": [
+    "clean frozen authoritative 188-week regression at floors 707/707/706/706 with zero formerly-correct losses and all protected/health/provenance/telemetry gates",
+    "required complete balanced Vitest suite after a qualifying final candidate",
+    "new immutable package with compiled-consumer and both-terrain-file inventory proof",
+    "cheap packaged native opening before any authorized full native measurement",
+    "remaining native/player acceptance work including Tošići RBiH"
+  ],
+  "limitations": [
+    "This verdict approves the reviewed source candidate for the next proof gate only.",
+    "No engine, build, package, native, browser, campaign, or full-suite execution was performed by this reviewer.",
+    "No gameplay qualification, baseline adoption, tuning, forced control, native retry, or fresh-player parity claim follows from this review."
+  ]
+}

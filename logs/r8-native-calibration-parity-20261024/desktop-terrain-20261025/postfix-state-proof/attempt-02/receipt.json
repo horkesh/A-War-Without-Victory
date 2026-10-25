@@ -1,0 +1,152 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T06:50:00.405Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/attempt-02",
+  "timeout_ms": 15000,
+  "original_argv": [
+    "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "node_modules\\tsx\\dist\\cli.mjs",
+    "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\postfix-state-proof\\n97-w17-desktop-terrain-postfix-proof.mts",
+    "--evidence-dir",
+    "{evidenceDir}"
+  ],
+  "argv": [
+    "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "node_modules\\tsx\\dist\\cli.mjs",
+    "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\postfix-state-proof\\n97-w17-desktop-terrain-postfix-proof.mts",
+    "--evidence-dir",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\postfix-state-proof\\attempt-02"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "launch.json",
+    "result.json",
+    "postfix-state.json",
+    "postfix-report.json",
+    "canonical-state.json",
+    "canonical-report.json",
+    "state-diff-vs-primed.json",
+    "report-diff-vs-primed.json",
+    "state-diff-vs-retained-a.json",
+    "report-diff-vs-retained-a.json",
+    "operation-diff-vs-v4.json",
+    "battle-diff-vs-v4.json",
+    "operation-diff-vs-retained-a.json",
+    "battle-diff-vs-retained-a.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/n97-w17-desktop-terrain-postfix-proof.mts",
+    "bytes": 30780,
+    "raw_sha256": "d7ccae50ab8395964bf53975cdd60f6341277391f860a2c41eb4b48b3c91f920",
+    "normalized_text_sha256": "d7ccae50ab8395964bf53975cdd60f6341277391f860a2c41eb4b48b3c91f920",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 30780,
+      "sha256": "d7ccae50ab8395964bf53975cdd60f6341277391f860a2c41eb4b48b3c91f920"
+    }
+  },
+  "end_utc": "2026-10-25T06:50:04.190Z",
+  "pid": 27480,
+  "child_exit": 1,
+  "wrapper_exit": 1,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/n97-w17-desktop-terrain-postfix-proof.mts",
+    "bytes": 30780,
+    "raw_sha256": "d7ccae50ab8395964bf53975cdd60f6341277391f860a2c41eb4b48b3c91f920",
+    "normalized_text_sha256": "d7ccae50ab8395964bf53975cdd60f6341277391f860a2c41eb4b48b3c91f920",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 505,
+    "sha256": "5d0c56226f74f0e44ca015c6191b2f6776120c79ecdd415feba213484a0a001a"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 745,
+    "sha256": "95ddffefd30dca0d9bb79ec46c8f9c6ba8cc6e1a1a2d88c6f10103d0932f421b"
+  },
+  "retained_artifacts": [
+    {
+      "path": "launch.json",
+      "bytes": 23003,
+      "sha256": "85ad0574204f9c56433b5b8c4fc99d9e2c770a404e039d6f02f4efee316a238f"
+    },
+    {
+      "path": "result.json",
+      "bytes": 37952,
+      "sha256": "0d978a2b8d50ee3398e2012067adde07fec809f0f0f04244a1203e5f62d30599"
+    },
+    {
+      "path": "postfix-state.json",
+      "bytes": 4895623,
+      "sha256": "0ce35ee15a27708bc873f81f56a0d6f4af0ccc3f8032ab4682ff6da4e38f666e"
+    },
+    {
+      "path": "postfix-report.json",
+      "bytes": 627214,
+      "sha256": "328b28120bdeeff11e2c913a5e6409040e6def1c5f99986e141e5e563db01bd7"
+    },
+    {
+      "path": "canonical-state.json",
+      "bytes": 4853143,
+      "sha256": "c64e0ae18a47135250aa5e45b07eb889754a805f4d2771c3fe503086f6cc483b"
+    },
+    {
+      "path": "canonical-report.json",
+      "bytes": 627027,
+      "sha256": "26a00bcd4f8265b4c190a47f03425c5c9191b744fdb61b82d6a2bb9524e15169"
+    },
+    {
+      "path": "state-diff-vs-primed.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "report-diff-vs-primed.json",
+      "bytes": 1038,
+      "sha256": "83082d6d1f8c6fc3a873c5042f2b434b1cb445fb68cc307a5be72d826653bde1"
+    },
+    {
+      "path": "state-diff-vs-retained-a.json",
+      "bytes": 40735,
+      "sha256": "073b7f0baebfac6b1ec4bdcf652f229aa318a76491d811dbb5cbc82425bf30c1"
+    },
+    {
+      "path": "report-diff-vs-retained-a.json",
+      "bytes": 2609,
+      "sha256": "0de552b2042f58bc763b1f6620a229637166216e87b00b96aa4f50ce2a19f861"
+    },
+    {
+      "path": "operation-diff-vs-v4.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "battle-diff-vs-v4.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "operation-diff-vs-retained-a.json",
+      "bytes": 212,
+      "sha256": "8a6f320a069dcc6167ae99e37bf34ff2f7909442b7e9fe59b1d48b61b36ba9e0"
+    },
+    {
+      "path": "battle-diff-vs-retained-a.json",
+      "bytes": 267,
+      "sha256": "d19164fdb3415c117cd38f105feacd11ef367ff752eda4e2ed7ec579ebb0b017"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

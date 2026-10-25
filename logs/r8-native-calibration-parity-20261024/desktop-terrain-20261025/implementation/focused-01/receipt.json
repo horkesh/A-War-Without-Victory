@@ -1,0 +1,86 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T06:37:48.915Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/implementation/focused-01",
+  "timeout_ms": 180000,
+  "original_argv": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "tests/desktop_combat_terrain_prerequisite.test.ts",
+    "tests/turn_result_production_callers.test.ts",
+    "tests/desktop_calibration_compare.test.ts",
+    "tests/operation_launch_feasibility_defender_aware.test.ts",
+    "tests/operation_preparation_force_ratio.test.ts",
+    "tests/stupcanica_defender_stack_shape_b.test.ts",
+    "--reporter=json",
+    "--outputFile={evidenceDir}/vitest.json"
+  ],
+  "argv": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "tests/desktop_combat_terrain_prerequisite.test.ts",
+    "tests/turn_result_production_callers.test.ts",
+    "tests/desktop_calibration_compare.test.ts",
+    "tests/operation_launch_feasibility_defender_aware.test.ts",
+    "tests/operation_preparation_force_ratio.test.ts",
+    "tests/stupcanica_defender_stack_shape_b.test.ts",
+    "--reporter=json",
+    "--outputFile=C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\focused-01/vitest.json"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "vitest.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/node_modules/vitest/vitest.mjs",
+    "bytes": 43,
+    "raw_sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6",
+    "normalized_text_sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    }
+  },
+  "end_utc": "2026-10-25T06:38:49.441Z",
+  "pid": 27580,
+  "child_exit": 0,
+  "wrapper_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/node_modules/vitest/vitest.mjs",
+    "bytes": 43,
+    "raw_sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6",
+    "normalized_text_sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 209,
+    "sha256": "847cab3000d78de0b5a81441adc3ee29f8bf1a5ce654dff94bb4ee529637e617"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "vitest.json",
+      "bytes": 21383,
+      "sha256": "b58c1a930c7dd0469b4a56f5a530246c4b78cfd73d646c1a4d695c722aef3271"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

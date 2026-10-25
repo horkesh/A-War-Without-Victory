@@ -1,5 +1,17 @@
 # Code Canon (AWWV)
 
+## Desktop combat terrain prerequisites (2026-10-25 candidate)
+
+`desktop_sim.advanceTurn(state, baseDir)` reloads the existing urban and forest OSID sets
+from its explicit data root before constructing BotManager or advancing the production turn.
+The Node loaders accept an optional base directory and retain `process.cwd()` for existing
+callers. Each call replaces both sets, including empty results for missing or malformed input,
+so a previous campaign's process globals cannot supply terrain for the selected root.
+The existing terrain assets, multipliers, rules and save schemas are unchanged. Baked New
+Campaign and Load State do not pass through the scenario initializer; the Advance boundary
+therefore owns this prerequisite. Full campaign, compiled-package and native player parity
+remain separate gates. See the active Electron validation plan for candidate evidence.
+
 ## Physical column route versus assignment footprint (2026-10-25 bounded qualification)
 
 `processOsidColumnMovement` retains destination/authority validation and routes permitted orders

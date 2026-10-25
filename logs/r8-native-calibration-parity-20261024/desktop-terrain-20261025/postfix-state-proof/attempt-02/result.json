@@ -1,0 +1,1081 @@
+{
+  "schema": "awwv.desktop-terrain-postfix-recorded-state-proof.v1",
+  "prerequisite_restored": false,
+  "interpretation_allowed": false,
+  "input_mutation": false,
+  "checks": {
+    "input_unmutated": true,
+    "exact_primed_canonical_serialized_state": true,
+    "exact_primed_canonical_report": false,
+    "exact_v4_operation_envelope": true,
+    "target_probe_absent_as_in_v4": true,
+    "exact_v4_canonical_battle_rows": true,
+    "exact_n97_canonical_battle_rows": true,
+    "exact_v4_control_row": true,
+    "exact_n97_control_row": true,
+    "differs_from_retained_a_operations": true,
+    "differs_from_retained_a_battles": true,
+    "required_forest_members_in_consumed_asset": true
+  },
+  "compared_output": {
+    "canonical_state": {
+      "bytes": 4853142,
+      "sha256": "7b668a000a8e85a77b4874564b9ade6949abe6d71082a56805a8779f89d7889c"
+    },
+    "canonical_report": {
+      "bytes": 387364,
+      "sha256": "c55a404672d7c4896ee9a7ef193ce797fa07e196f0f303da98361753a3cd6452"
+    },
+    "report_exclusions": [
+      {
+        "pointer": "/observer_threshold_flags",
+        "rationale": "Observer-only diagnostic bookkeeping is not a gameplay input, decision, battle, control, or serialized-state field."
+      }
+    ],
+    "gameplay_fields_excluded": []
+  },
+  "postfix_branch": {
+    "control_counts": {
+      "HRHB": 93,
+      "RBiH": 261,
+      "RS": 358
+    },
+    "battles": [
+      {
+        "attacker_brigade": "arbih_444th_mountain",
+        "attacker_casualties": 336,
+        "attacker_faction": "RBiH",
+        "attacker_won": false,
+        "battle_id": "17:op:konjic:bijela_2:arbih_444th_mountain:rs_kalinovik_brigade",
+        "defender_brigade": "rs_kalinovik_brigade",
+        "defender_casualties": 21,
+        "defender_faction": "RS",
+        "equipment": {
+          "attacker_artillery_lost": 1,
+          "attacker_tanks_lost": 0,
+          "captured_artillery": 0,
+          "captured_by": "RS",
+          "captured_tanks": 0,
+          "defender_artillery_lost": 1,
+          "defender_tanks_lost": 0,
+          "scavenged_artillery": 0,
+          "scavenged_tanks": 0
+        },
+        "execution_friction": {
+          "attacker_confidence_band": "medium",
+          "labels": [
+            "stale_intel"
+          ]
+        },
+        "operation_id": "arbih_4th_corps:probe_arbih_4th_corps_t16:t16",
+        "operation_name": "probe_arbih_4th_corps_t16",
+        "outcome": "catastrophic",
+        "power_ratio": 0.1,
+        "target_osid": "op:konjic:bijela_2"
+      },
+      {
+        "attacker_brigade": "arbih_254th_mountain",
+        "attacker_casualties": 441,
+        "attacker_faction": "RBiH",
+        "attacker_won": false,
+        "battle_id": "17:op:lopare:koraj_4:arbih_254th_mountain:rs_1st_bijeljina_light_infantry_panthers",
+        "defender_brigade": "rs_1st_bijeljina_light_infantry_panthers",
+        "defender_casualties": 34,
+        "defender_faction": "RS",
+        "equipment": {
+          "attacker_artillery_lost": 1,
+          "attacker_tanks_lost": 0,
+          "captured_artillery": 0,
+          "captured_by": "RS",
+          "captured_tanks": 0,
+          "defender_artillery_lost": 1,
+          "defender_tanks_lost": 0,
+          "scavenged_artillery": 0,
+          "scavenged_tanks": 0
+        },
+        "execution_friction": {
+          "attacker_confidence_band": "low",
+          "labels": [
+            "stale_intel"
+          ]
+        },
+        "operation_id": "arbih_2nd_corps:probe_arbih_2nd_corps_t16:t16",
+        "operation_name": "probe_arbih_2nd_corps_t16",
+        "outcome": "catastrophic",
+        "power_ratio": 0.22,
+        "target_osid": "op:lopare:koraj_4"
+      },
+      {
+        "attacker_brigade": "rs_2nd_krajina_infantry",
+        "attacker_casualties": 248,
+        "attacker_faction": "RS",
+        "attacker_won": true,
+        "battle_id": "17:op:travnik:gluha_bukovica:rs_2nd_krajina_infantry:arbih_17th_vitezka_mountain",
+        "defender_brigade": "arbih_17th_vitezka_mountain",
+        "defender_casualties": 175,
+        "defender_faction": "RBiH",
+        "equipment": {
+          "attacker_artillery_lost": 1,
+          "attacker_tanks_lost": 0,
+          "captured_artillery": 0,
+          "captured_by": "RS",
+          "captured_tanks": 0,
+          "defender_artillery_lost": 1,
+          "defender_tanks_lost": 0,
+          "scavenged_artillery": 0,
+          "scavenged_tanks": 0
+        },
+        "execution_friction": {
+          "attacker_confidence_band": "low",
+          "labels": [
+            "stale_intel"
+          ]
+        },
+        "operation_id": "vrs_1st_krajina:probe_vrs_1st_krajina_t16:t16",
+        "operation_name": "probe_vrs_1st_krajina_t16",
+        "outcome": "costly_victory",
+        "power_ratio": 1.14,
+        "target_osid": "op:travnik:gluha_bukovica"
+      }
+    ],
+    "operation_envelope": [
+      {
+        "corps_id": "arbih_1st_corps",
+        "faction_id": "RBiH",
+        "operation_name": "Operation Circle",
+        "operation_type": "sector_attack",
+        "operation_phase": "planning",
+        "current_objective": "op:foca:donje_zesce",
+        "current_objectives": [
+          "op:foca:donje_zesce",
+          "op:gorazde:glamoc",
+          "op:trnovo:tosici"
+        ],
+        "participating_brigades": [
+          "arbih_109th_mountain",
+          "arbih_801st_light",
+          "arbih_802nd_light",
+          "arbih_843rd_light",
+          "arbih_851st_vitezka_liberation"
+        ],
+        "eligible_attacker_count": 0,
+        "attack_attempt_count": 0,
+        "objective_attempt_count": 0,
+        "objective_capture_count": 0,
+        "movement_order_count": 2,
+        "movement_only_execution_turns": 0,
+        "idle_execution_turn_streak": 0,
+        "battle_count": 0,
+        "current_objective_attack_count": 0,
+        "current_objective_battle_count": 0,
+        "attack_order_targets": [],
+        "participant_attack_orders": [],
+        "skipped_attack_orders": [],
+        "recovery_reason": null,
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": []
+      },
+      {
+        "corps_id": "arbih_2nd_corps",
+        "faction_id": "RBiH",
+        "operation_name": "probe_arbih_2nd_corps_t16",
+        "operation_type": "probe",
+        "operation_phase": "recovery",
+        "current_objective": "op:lopare:koraj_4",
+        "current_objectives": [
+          "op:lopare:koraj_4"
+        ],
+        "participating_brigades": [
+          "arbih_120th_liberation_black_swans",
+          "arbih_254th_mountain"
+        ],
+        "eligible_attacker_count": 1,
+        "attack_attempt_count": 1,
+        "objective_attempt_count": 1,
+        "objective_capture_count": 0,
+        "movement_order_count": 1,
+        "movement_only_execution_turns": 0,
+        "idle_execution_turn_streak": 0,
+        "battle_count": 1,
+        "current_objective_attack_count": 1,
+        "current_objective_battle_count": 1,
+        "attack_order_targets": [
+          {
+            "target_osid": "op:lopare:koraj_4",
+            "order_count": 1,
+            "battle_count": 1,
+            "current_objective": true
+          }
+        ],
+        "participant_attack_orders": [
+          {
+            "brigade_id": "arbih_254th_mountain",
+            "location_osid": "op:lopare:celic_3",
+            "target_osid": "op:lopare:koraj_4",
+            "target_is_current_objective": true,
+            "resolver_seen_target_osid": "op:lopare:koraj_4",
+            "battle_count": 1
+          }
+        ],
+        "skipped_attack_orders": [],
+        "recovery_reason": "probe_complete",
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": []
+      },
+      {
+        "corps_id": "arbih_3rd_corps",
+        "faction_id": "RBiH",
+        "operation_name": "Maglaj Local Counterattack",
+        "operation_type": "sector_attack",
+        "operation_phase": "planning",
+        "current_objective": "op:maglaj:jablanica",
+        "current_objectives": [
+          "op:maglaj:jablanica"
+        ],
+        "participating_brigades": [
+          "arbih_327th_vitezka_mountain",
+          "arbih_328th_mountain",
+          "arbih_372nd_vitezka_mountain"
+        ],
+        "eligible_attacker_count": 0,
+        "attack_attempt_count": 0,
+        "objective_attempt_count": 0,
+        "objective_capture_count": 0,
+        "movement_order_count": 0,
+        "movement_only_execution_turns": 0,
+        "idle_execution_turn_streak": 0,
+        "battle_count": 0,
+        "current_objective_attack_count": 0,
+        "current_objective_battle_count": 0,
+        "attack_order_targets": [],
+        "participant_attack_orders": [],
+        "skipped_attack_orders": [],
+        "recovery_reason": null,
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": []
+      },
+      {
+        "corps_id": "arbih_4th_corps",
+        "faction_id": "RBiH",
+        "operation_name": "probe_arbih_4th_corps_t16",
+        "operation_type": "probe",
+        "operation_phase": "recovery",
+        "current_objective": "op:konjic:bijela_2",
+        "current_objectives": [
+          "op:konjic:bijela_2"
+        ],
+        "participating_brigades": [
+          "arbih_444th_mountain"
+        ],
+        "eligible_attacker_count": 1,
+        "attack_attempt_count": 1,
+        "objective_attempt_count": 1,
+        "objective_capture_count": 0,
+        "movement_order_count": 0,
+        "movement_only_execution_turns": 0,
+        "idle_execution_turn_streak": 0,
+        "battle_count": 1,
+        "current_objective_attack_count": 1,
+        "current_objective_battle_count": 1,
+        "attack_order_targets": [
+          {
+            "target_osid": "op:konjic:bijela_2",
+            "order_count": 1,
+            "battle_count": 1,
+            "current_objective": true
+          }
+        ],
+        "participant_attack_orders": [
+          {
+            "brigade_id": "arbih_444th_mountain",
+            "location_osid": "op:konjic:celebici_2",
+            "target_osid": "op:konjic:bijela_2",
+            "target_is_current_objective": true,
+            "resolver_seen_target_osid": "op:konjic:bijela_2",
+            "battle_count": 1
+          }
+        ],
+        "skipped_attack_orders": [],
+        "recovery_reason": "probe_complete",
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": []
+      },
+      {
+        "corps_id": "hvo_southeast_herzegovina",
+        "faction_id": "HRHB",
+        "operation_name": "Operation Jackal",
+        "operation_type": "sector_attack",
+        "operation_phase": "recovery",
+        "current_objective": null,
+        "current_objectives": [],
+        "participating_brigades": [
+          "hrhb_1st_brigade_mostar",
+          "hrhb_1st_herzegovina_brigade_knez_domagoj",
+          "hrhb_2nd_brigade_mostar",
+          "hrhb_mostar_brigade",
+          "hrhb_stolac_units",
+          "hv_113th_brigade_tg",
+          "hv_116th_brigade_tg",
+          "hv_1st_guards_tg"
+        ],
+        "eligible_attacker_count": 0,
+        "attack_attempt_count": 0,
+        "objective_attempt_count": 5,
+        "objective_capture_count": 5,
+        "movement_order_count": 0,
+        "movement_only_execution_turns": 0,
+        "idle_execution_turn_streak": 0,
+        "battle_count": 0,
+        "current_objective_attack_count": 0,
+        "current_objective_battle_count": 0,
+        "attack_order_targets": [],
+        "participant_attack_orders": [],
+        "skipped_attack_orders": [],
+        "recovery_reason": "completed",
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": []
+      },
+      {
+        "corps_id": "vrs_1st_krajina",
+        "faction_id": "RS",
+        "operation_name": "Operation Corridor",
+        "operation_type": "sector_attack",
+        "operation_phase": "recovery",
+        "current_objective": null,
+        "current_objectives": [],
+        "participating_brigades": [
+          "rs_1st_doboj_light_infantry",
+          "rs_1st_krnjin_light_infantry",
+          "rs_1st_prnjavor_light_infantry",
+          "rs_1st_trebava_infantry",
+          "rs_27th_derventa_motorized",
+          "rs_3rd_ozren_light_infantry"
+        ],
+        "eligible_attacker_count": 0,
+        "attack_attempt_count": 0,
+        "objective_attempt_count": 10,
+        "objective_capture_count": 10,
+        "movement_order_count": 2,
+        "movement_only_execution_turns": 0,
+        "idle_execution_turn_streak": 0,
+        "battle_count": 0,
+        "current_objective_attack_count": 0,
+        "current_objective_battle_count": 0,
+        "attack_order_targets": [],
+        "participant_attack_orders": [],
+        "skipped_attack_orders": [],
+        "recovery_reason": "completed",
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": []
+      },
+      {
+        "corps_id": "vrs_1st_krajina",
+        "faction_id": "RS",
+        "operation_name": "probe_vrs_1st_krajina_t16",
+        "operation_type": "probe",
+        "operation_phase": "recovery",
+        "current_objective": "op:travnik:gluha_bukovica",
+        "current_objectives": [
+          "op:travnik:gluha_bukovica"
+        ],
+        "participating_brigades": [
+          "rs_2nd_krajina_infantry"
+        ],
+        "eligible_attacker_count": 1,
+        "attack_attempt_count": 1,
+        "objective_attempt_count": 1,
+        "objective_capture_count": 0,
+        "movement_order_count": 0,
+        "movement_only_execution_turns": 0,
+        "idle_execution_turn_streak": 0,
+        "battle_count": 1,
+        "current_objective_attack_count": 1,
+        "current_objective_battle_count": 1,
+        "attack_order_targets": [
+          {
+            "target_osid": "op:travnik:gluha_bukovica",
+            "order_count": 1,
+            "battle_count": 1,
+            "current_objective": true
+          }
+        ],
+        "participant_attack_orders": [
+          {
+            "brigade_id": "rs_2nd_krajina_infantry",
+            "location_osid": "op:teslic:blatnica_2",
+            "target_osid": "op:travnik:gluha_bukovica",
+            "target_is_current_objective": true,
+            "resolver_seen_target_osid": "op:travnik:gluha_bukovica",
+            "battle_count": 1
+          }
+        ],
+        "skipped_attack_orders": [],
+        "recovery_reason": "probe_complete",
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": []
+      },
+      {
+        "corps_id": "vrs_2nd_krajina",
+        "faction_id": "RS",
+        "operation_name": "Operacija Vijak",
+        "operation_type": "sector_attack",
+        "operation_phase": "planning",
+        "current_objective": "op:bosanska_krupa:arapusa_2",
+        "current_objectives": [
+          "op:bosanska_krupa:arapusa_2"
+        ],
+        "participating_brigades": [
+          "rs_15th_biha_infantry",
+          "rs_17th_klju_light_infantry",
+          "rs_3rd_petrovac_light_infantry"
+        ],
+        "eligible_attacker_count": 0,
+        "attack_attempt_count": 0,
+        "objective_attempt_count": 0,
+        "objective_capture_count": 0,
+        "movement_order_count": 1,
+        "movement_only_execution_turns": 0,
+        "idle_execution_turn_streak": 0,
+        "battle_count": 0,
+        "current_objective_attack_count": 0,
+        "current_objective_battle_count": 0,
+        "attack_order_targets": [],
+        "participant_attack_orders": [],
+        "skipped_attack_orders": [],
+        "recovery_reason": null,
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": []
+      },
+      {
+        "corps_id": "vrs_drina",
+        "faction_id": "RS",
+        "operation_name": "Operation Podrinje Sweep",
+        "operation_type": "sector_attack",
+        "operation_phase": "recovery",
+        "current_objective": null,
+        "current_objectives": [],
+        "participating_brigades": [
+          "rs_1st_birac",
+          "rs_1st_bratunac",
+          "rs_1st_milii",
+          "rs_1st_podrinje",
+          "rs_1st_vlasenica",
+          "rs_5th_podrinje"
+        ],
+        "eligible_attacker_count": 0,
+        "attack_attempt_count": 0,
+        "objective_attempt_count": 5,
+        "objective_capture_count": 5,
+        "movement_order_count": 1,
+        "movement_only_execution_turns": 0,
+        "idle_execution_turn_streak": 0,
+        "battle_count": 0,
+        "current_objective_attack_count": 0,
+        "current_objective_battle_count": 0,
+        "attack_order_targets": [],
+        "participant_attack_orders": [],
+        "skipped_attack_orders": [],
+        "recovery_reason": "completed",
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": []
+      },
+      {
+        "corps_id": "vrs_herzegovina",
+        "faction_id": "RS",
+        "operation_name": "Operation Herzegovina Consolidation",
+        "operation_type": "sector_attack",
+        "operation_phase": "recovery",
+        "current_objective": "op:konjic:glavaticevo_2",
+        "current_objectives": [
+          "op:konjic:glavaticevo_2",
+          "op:mostar:blagaj_2"
+        ],
+        "participating_brigades": [
+          "rs_bilea_brigade",
+          "rs_nevesinje_brigade"
+        ],
+        "eligible_attacker_count": 0,
+        "attack_attempt_count": 0,
+        "objective_attempt_count": 0,
+        "objective_capture_count": 0,
+        "movement_order_count": 2,
+        "movement_only_execution_turns": 0,
+        "idle_execution_turn_streak": 0,
+        "battle_count": 0,
+        "current_objective_attack_count": 0,
+        "current_objective_battle_count": 0,
+        "attack_order_targets": [],
+        "participant_attack_orders": [],
+        "skipped_attack_orders": [],
+        "recovery_reason": "defender_power_too_high",
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": []
+      },
+      {
+        "corps_id": "vrs_sarajevo_romanija",
+        "faction_id": "RS",
+        "operation_name": "probe_vrs_sarajevo_romanija_t17",
+        "operation_type": "probe",
+        "operation_phase": "planning",
+        "current_objective": "op:hadzici:lokve",
+        "current_objectives": [
+          "op:hadzici:lokve"
+        ],
+        "participating_brigades": [
+          "rs_1st_sarajevo_mechanized"
+        ],
+        "eligible_attacker_count": 0,
+        "attack_attempt_count": 0,
+        "objective_attempt_count": 0,
+        "objective_capture_count": 0,
+        "movement_order_count": 0,
+        "movement_only_execution_turns": 0,
+        "idle_execution_turn_streak": 0,
+        "battle_count": 0,
+        "current_objective_attack_count": 0,
+        "current_objective_battle_count": 0,
+        "attack_order_targets": [],
+        "participant_attack_orders": [],
+        "skipped_attack_orders": [],
+        "recovery_reason": null,
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": []
+      }
+    ]
+  },
+  "retained_a": {
+    "battles": [
+      {
+        "attacker_brigade": "arbih_444th_mountain",
+        "attacker_casualties": 336,
+        "attacker_faction": "RBiH",
+        "attacker_won": false,
+        "battle_id": "17:op:konjic:bijela_2:arbih_444th_mountain:rs_kalinovik_brigade",
+        "defender_brigade": "rs_kalinovik_brigade",
+        "defender_casualties": 21,
+        "defender_faction": "RS",
+        "equipment": {
+          "attacker_artillery_lost": 1,
+          "attacker_tanks_lost": 0,
+          "captured_artillery": 0,
+          "captured_by": "RS",
+          "captured_tanks": 0,
+          "defender_artillery_lost": 1,
+          "defender_tanks_lost": 0,
+          "scavenged_artillery": 0,
+          "scavenged_tanks": 0
+        },
+        "execution_friction": {
+          "attacker_confidence_band": "medium",
+          "labels": [
+            "stale_intel"
+          ]
+        },
+        "operation_id": "arbih_4th_corps:probe_arbih_4th_corps_t16:t16",
+        "operation_name": "probe_arbih_4th_corps_t16",
+        "outcome": "catastrophic",
+        "power_ratio": 0.1,
+        "target_osid": "op:konjic:bijela_2"
+      },
+      {
+        "attacker_brigade": "arbih_254th_mountain",
+        "attacker_casualties": 441,
+        "attacker_faction": "RBiH",
+        "attacker_won": false,
+        "battle_id": "17:op:lopare:koraj_4:arbih_254th_mountain:rs_1st_bijeljina_light_infantry_panthers",
+        "defender_brigade": "rs_1st_bijeljina_light_infantry_panthers",
+        "defender_casualties": 34,
+        "defender_faction": "RS",
+        "equipment": {
+          "attacker_artillery_lost": 1,
+          "attacker_tanks_lost": 0,
+          "captured_artillery": 0,
+          "captured_by": "RS",
+          "captured_tanks": 0,
+          "defender_artillery_lost": 1,
+          "defender_tanks_lost": 0,
+          "scavenged_artillery": 0,
+          "scavenged_tanks": 0
+        },
+        "execution_friction": {
+          "attacker_confidence_band": "low",
+          "labels": [
+            "stale_intel"
+          ]
+        },
+        "operation_id": "arbih_2nd_corps:probe_arbih_2nd_corps_t16:t16",
+        "operation_name": "probe_arbih_2nd_corps_t16",
+        "outcome": "catastrophic",
+        "power_ratio": 0.22,
+        "target_osid": "op:lopare:koraj_4"
+      },
+      {
+        "attacker_brigade": "rs_2nd_krajina_infantry",
+        "attacker_casualties": 243,
+        "attacker_faction": "RS",
+        "attacker_won": true,
+        "battle_id": "17:op:travnik:gluha_bukovica:rs_2nd_krajina_infantry:arbih_17th_vitezka_mountain",
+        "defender_brigade": "arbih_17th_vitezka_mountain",
+        "defender_casualties": 179,
+        "defender_faction": "RBiH",
+        "equipment": {
+          "attacker_artillery_lost": 1,
+          "attacker_tanks_lost": 0,
+          "captured_artillery": 0,
+          "captured_by": "RS",
+          "captured_tanks": 0,
+          "defender_artillery_lost": 1,
+          "defender_tanks_lost": 0,
+          "scavenged_artillery": 0,
+          "scavenged_tanks": 0
+        },
+        "execution_friction": {
+          "attacker_confidence_band": "low",
+          "labels": [
+            "stale_intel"
+          ]
+        },
+        "operation_id": "vrs_1st_krajina:probe_vrs_1st_krajina_t16:t16",
+        "operation_name": "probe_vrs_1st_krajina_t16",
+        "outcome": "costly_victory",
+        "power_ratio": 1.21,
+        "target_osid": "op:travnik:gluha_bukovica"
+      }
+    ],
+    "operation_envelope": [
+      {
+        "corps_id": "arbih_1st_corps",
+        "faction_id": "RBiH",
+        "operation_name": "Operation Circle",
+        "operation_type": "sector_attack",
+        "operation_phase": "planning",
+        "current_objective": "op:foca:donje_zesce",
+        "current_objectives": [
+          "op:foca:donje_zesce",
+          "op:gorazde:glamoc",
+          "op:trnovo:tosici"
+        ],
+        "participating_brigades": [
+          "arbih_109th_mountain",
+          "arbih_801st_light",
+          "arbih_802nd_light",
+          "arbih_843rd_light",
+          "arbih_851st_vitezka_liberation"
+        ],
+        "eligible_attacker_count": 0,
+        "attack_attempt_count": 0,
+        "objective_attempt_count": 0,
+        "objective_capture_count": 0,
+        "movement_order_count": 2,
+        "movement_only_execution_turns": 0,
+        "idle_execution_turn_streak": 0,
+        "battle_count": 0,
+        "current_objective_attack_count": 0,
+        "current_objective_battle_count": 0,
+        "attack_order_targets": [],
+        "participant_attack_orders": [],
+        "skipped_attack_orders": [],
+        "recovery_reason": null,
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": []
+      },
+      {
+        "corps_id": "arbih_2nd_corps",
+        "faction_id": "RBiH",
+        "operation_name": "probe_arbih_2nd_corps_t16",
+        "operation_type": "probe",
+        "operation_phase": "recovery",
+        "current_objective": "op:lopare:koraj_4",
+        "current_objectives": [
+          "op:lopare:koraj_4"
+        ],
+        "participating_brigades": [
+          "arbih_120th_liberation_black_swans",
+          "arbih_254th_mountain"
+        ],
+        "eligible_attacker_count": 1,
+        "attack_attempt_count": 1,
+        "objective_attempt_count": 1,
+        "objective_capture_count": 0,
+        "movement_order_count": 1,
+        "movement_only_execution_turns": 0,
+        "idle_execution_turn_streak": 0,
+        "battle_count": 1,
+        "current_objective_attack_count": 1,
+        "current_objective_battle_count": 1,
+        "attack_order_targets": [
+          {
+            "target_osid": "op:lopare:koraj_4",
+            "order_count": 1,
+            "battle_count": 1,
+            "current_objective": true
+          }
+        ],
+        "participant_attack_orders": [
+          {
+            "brigade_id": "arbih_254th_mountain",
+            "location_osid": "op:lopare:celic_3",
+            "target_osid": "op:lopare:koraj_4",
+            "target_is_current_objective": true,
+            "resolver_seen_target_osid": "op:lopare:koraj_4",
+            "battle_count": 1
+          }
+        ],
+        "skipped_attack_orders": [],
+        "recovery_reason": "probe_complete",
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": []
+      },
+      {
+        "corps_id": "arbih_3rd_corps",
+        "faction_id": "RBiH",
+        "operation_name": "Maglaj Local Counterattack",
+        "operation_type": "sector_attack",
+        "operation_phase": "planning",
+        "current_objective": "op:maglaj:jablanica",
+        "current_objectives": [
+          "op:maglaj:jablanica"
+        ],
+        "participating_brigades": [
+          "arbih_327th_vitezka_mountain",
+          "arbih_328th_mountain",
+          "arbih_372nd_vitezka_mountain"
+        ],
+        "eligible_attacker_count": 0,
+        "attack_attempt_count": 0,
+        "objective_attempt_count": 0,
+        "objective_capture_count": 0,
+        "movement_order_count": 0,
+        "movement_only_execution_turns": 0,
+        "idle_execution_turn_streak": 0,
+        "battle_count": 0,
+        "current_objective_attack_count": 0,
+        "current_objective_battle_count": 0,
+        "attack_order_targets": [],
+        "participant_attack_orders": [],
+        "skipped_attack_orders": [],
+        "recovery_reason": null,
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": []
+      },
+      {
+        "corps_id": "arbih_4th_corps",
+        "faction_id": "RBiH",
+        "operation_name": "probe_arbih_4th_corps_t16",
+        "operation_type": "probe",
+        "operation_phase": "recovery",
+        "current_objective": "op:konjic:bijela_2",
+        "current_objectives": [
+          "op:konjic:bijela_2"
+        ],
+        "participating_brigades": [
+          "arbih_444th_mountain"
+        ],
+        "eligible_attacker_count": 1,
+        "attack_attempt_count": 1,
+        "objective_attempt_count": 1,
+        "objective_capture_count": 0,
+        "movement_order_count": 0,
+        "movement_only_execution_turns": 0,
+        "idle_execution_turn_streak": 0,
+        "battle_count": 1,
+        "current_objective_attack_count": 1,
+        "current_objective_battle_count": 1,
+        "attack_order_targets": [
+          {
+            "target_osid": "op:konjic:bijela_2",
+            "order_count": 1,
+            "battle_count": 1,
+            "current_objective": true
+          }
+        ],
+        "participant_attack_orders": [
+          {
+            "brigade_id": "arbih_444th_mountain",
+            "location_osid": "op:konjic:celebici_2",
+            "target_osid": "op:konjic:bijela_2",
+            "target_is_current_objective": true,
+            "resolver_seen_target_osid": "op:konjic:bijela_2",
+            "battle_count": 1
+          }
+        ],
+        "skipped_attack_orders": [],
+        "recovery_reason": "probe_complete",
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": []
+      },
+      {
+        "corps_id": "hvo_southeast_herzegovina",
+        "faction_id": "HRHB",
+        "operation_name": "Operation Jackal",
+        "operation_type": "sector_attack",
+        "operation_phase": "recovery",
+        "current_objective": null,
+        "current_objectives": [],
+        "participating_brigades": [
+          "hrhb_1st_brigade_mostar",
+          "hrhb_1st_herzegovina_brigade_knez_domagoj",
+          "hrhb_2nd_brigade_mostar",
+          "hrhb_mostar_brigade",
+          "hrhb_stolac_units",
+          "hv_113th_brigade_tg",
+          "hv_116th_brigade_tg",
+          "hv_1st_guards_tg"
+        ],
+        "eligible_attacker_count": 0,
+        "attack_attempt_count": 0,
+        "objective_attempt_count": 5,
+        "objective_capture_count": 5,
+        "movement_order_count": 0,
+        "movement_only_execution_turns": 0,
+        "idle_execution_turn_streak": 0,
+        "battle_count": 0,
+        "current_objective_attack_count": 0,
+        "current_objective_battle_count": 0,
+        "attack_order_targets": [],
+        "participant_attack_orders": [],
+        "skipped_attack_orders": [],
+        "recovery_reason": "completed",
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": []
+      },
+      {
+        "corps_id": "vrs_1st_krajina",
+        "faction_id": "RS",
+        "operation_name": "Operation Corridor",
+        "operation_type": "sector_attack",
+        "operation_phase": "recovery",
+        "current_objective": null,
+        "current_objectives": [],
+        "participating_brigades": [
+          "rs_1st_doboj_light_infantry",
+          "rs_1st_krnjin_light_infantry",
+          "rs_1st_prnjavor_light_infantry",
+          "rs_1st_trebava_infantry",
+          "rs_27th_derventa_motorized",
+          "rs_3rd_ozren_light_infantry"
+        ],
+        "eligible_attacker_count": 0,
+        "attack_attempt_count": 0,
+        "objective_attempt_count": 10,
+        "objective_capture_count": 10,
+        "movement_order_count": 2,
+        "movement_only_execution_turns": 0,
+        "idle_execution_turn_streak": 0,
+        "battle_count": 0,
+        "current_objective_attack_count": 0,
+        "current_objective_battle_count": 0,
+        "attack_order_targets": [],
+        "participant_attack_orders": [],
+        "skipped_attack_orders": [],
+        "recovery_reason": "completed",
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": []
+      },
+      {
+        "corps_id": "vrs_1st_krajina",
+        "faction_id": "RS",
+        "operation_name": "probe_vrs_1st_krajina_t16",
+        "operation_type": "probe",
+        "operation_phase": "recovery",
+        "current_objective": "op:travnik:gluha_bukovica",
+        "current_objectives": [
+          "op:travnik:gluha_bukovica"
+        ],
+        "participating_brigades": [
+          "rs_2nd_krajina_infantry"
+        ],
+        "eligible_attacker_count": 1,
+        "attack_attempt_count": 1,
+        "objective_attempt_count": 1,
+        "objective_capture_count": 0,
+        "movement_order_count": 0,
+        "movement_only_execution_turns": 0,
+        "idle_execution_turn_streak": 0,
+        "battle_count": 1,
+        "current_objective_attack_count": 1,
+        "current_objective_battle_count": 1,
+        "attack_order_targets": [
+          {
+            "target_osid": "op:travnik:gluha_bukovica",
+            "order_count": 1,
+            "battle_count": 1,
+            "current_objective": true
+          }
+        ],
+        "participant_attack_orders": [
+          {
+            "brigade_id": "rs_2nd_krajina_infantry",
+            "location_osid": "op:teslic:blatnica_2",
+            "target_osid": "op:travnik:gluha_bukovica",
+            "target_is_current_objective": true,
+            "resolver_seen_target_osid": "op:travnik:gluha_bukovica",
+            "battle_count": 1
+          }
+        ],
+        "skipped_attack_orders": [],
+        "recovery_reason": "probe_complete",
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": []
+      },
+      {
+        "corps_id": "vrs_2nd_krajina",
+        "faction_id": "RS",
+        "operation_name": "Operacija Vijak",
+        "operation_type": "sector_attack",
+        "operation_phase": "planning",
+        "current_objective": "op:bosanska_krupa:arapusa_2",
+        "current_objectives": [
+          "op:bosanska_krupa:arapusa_2"
+        ],
+        "participating_brigades": [
+          "rs_15th_biha_infantry",
+          "rs_17th_klju_light_infantry",
+          "rs_3rd_petrovac_light_infantry"
+        ],
+        "eligible_attacker_count": 0,
+        "attack_attempt_count": 0,
+        "objective_attempt_count": 0,
+        "objective_capture_count": 0,
+        "movement_order_count": 1,
+        "movement_only_execution_turns": 0,
+        "idle_execution_turn_streak": 0,
+        "battle_count": 0,
+        "current_objective_attack_count": 0,
+        "current_objective_battle_count": 0,
+        "attack_order_targets": [],
+        "participant_attack_orders": [],
+        "skipped_attack_orders": [],
+        "recovery_reason": null,
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": []
+      },
+      {
+        "corps_id": "vrs_drina",
+        "faction_id": "RS",
+        "operation_name": "Operation Podrinje Sweep",
+        "operation_type": "sector_attack",
+        "operation_phase": "recovery",
+        "current_objective": null,
+        "current_objectives": [],
+        "participating_brigades": [
+          "rs_1st_birac",
+          "rs_1st_bratunac",
+          "rs_1st_milii",
+          "rs_1st_podrinje",
+          "rs_1st_vlasenica",
+          "rs_5th_podrinje"
+        ],
+        "eligible_attacker_count": 0,
+        "attack_attempt_count": 0,
+        "objective_attempt_count": 5,
+        "objective_capture_count": 5,
+        "movement_order_count": 1,
+        "movement_only_execution_turns": 0,
+        "idle_execution_turn_streak": 0,
+        "battle_count": 0,
+        "current_objective_attack_count": 0,
+        "current_objective_battle_count": 0,
+        "attack_order_targets": [],
+        "participant_attack_orders": [],
+        "skipped_attack_orders": [],
+        "recovery_reason": "completed",
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": []
+      },
+      {
+        "corps_id": "vrs_herzegovina",
+        "faction_id": "RS",
+        "operation_name": "Operation Herzegovina Consolidation",
+        "operation_type": "sector_attack",
+        "operation_phase": "planning",
+        "current_objective": "op:konjic:glavaticevo_2",
+        "current_objectives": [
+          "op:konjic:glavaticevo_2",
+          "op:mostar:blagaj_2"
+        ],
+        "participating_brigades": [
+          "rs_bilea_brigade",
+          "rs_nevesinje_brigade"
+        ],
+        "eligible_attacker_count": 0,
+        "attack_attempt_count": 0,
+        "objective_attempt_count": 0,
+        "objective_capture_count": 0,
+        "movement_order_count": 2,
+        "movement_only_execution_turns": 0,
+        "idle_execution_turn_streak": 0,
+        "battle_count": 0,
+        "current_objective_attack_count": 0,
+        "current_objective_battle_count": 0,
+        "attack_order_targets": [],
+        "participant_attack_orders": [],
+        "skipped_attack_orders": [],
+        "recovery_reason": null,
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": []
+      },
+      {
+        "corps_id": "vrs_sarajevo_romanija",
+        "faction_id": "RS",
+        "operation_name": "probe_vrs_sarajevo_romanija_t17",
+        "operation_type": "probe",
+        "operation_phase": "planning",
+        "current_objective": "op:hadzici:lokve",
+        "current_objectives": [
+          "op:hadzici:lokve"
+        ],
+        "participating_brigades": [
+          "rs_1st_sarajevo_mechanized"
+        ],
+        "eligible_attacker_count": 0,
+        "attack_attempt_count": 0,
+        "objective_attempt_count": 0,
+        "objective_capture_count": 0,
+        "movement_order_count": 0,
+        "movement_only_execution_turns": 0,
+        "idle_execution_turn_streak": 0,
+        "battle_count": 0,
+        "current_objective_attack_count": 0,
+        "current_objective_battle_count": 0,
+        "attack_order_targets": [],
+        "participant_attack_orders": [],
+        "skipped_attack_orders": [],
+        "recovery_reason": null,
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": []
+      }
+    ]
+  },
+  "diff_counts": {
+    "state_vs_retained_a": 291,
+    "report_vs_retained_a": 22,
+    "operations_vs_v4": 0,
+    "battles_vs_v4": 0,
+    "canonical_state_vs_primed": 0,
+    "canonical_report_vs_primed": 10,
+    "operations_vs_retained_a": 2,
+    "battles_vs_retained_a": 3
+  },
+  "retained_outputs": [
+    "postfix-state.json",
+    "postfix-report.json",
+    "canonical-state.json",
+    "canonical-report.json",
+    "state-diff-vs-primed.json",
+    "report-diff-vs-primed.json",
+    "state-diff-vs-retained-a.json",
+    "report-diff-vs-retained-a.json",
+    "operation-diff-vs-v4.json",
+    "battle-diff-vs-v4.json",
+    "operation-diff-vs-retained-a.json",
+    "battle-diff-vs-retained-a.json"
+  ],
+  "limits": [
+    "One direct desktop engine advance from exact canonical n97 save 16; retained branch A and the successful primed branch are read-only comparators and are not rerun.",
+    "The proof performs no terrain loader or setter call outside production desktop.advanceTurn; the complete root is a byte-bound copy of the retained 33-file root plus the two reviewed terrain assets.",
+    "State equality is over production serializeState output. Report equality excludes exactly /observer_threshold_flags, whose observer-only bookkeeping cannot affect gameplay state, decisions, battles, operations, or control.",
+    "A pass proves this recorded-state desktop consumer only; it is not a campaign, package, native-runtime, fresh-player, or calibration-parity qualification.",
+    "Any mismatch rejects the post-fix proof and stops without retry."
+  ]
+}

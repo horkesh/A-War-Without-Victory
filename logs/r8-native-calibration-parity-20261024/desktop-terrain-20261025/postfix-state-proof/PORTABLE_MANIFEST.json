@@ -1,0 +1,32 @@
+{
+  "schema": "awwv.desktop-terrain-postfix-proof.portable-manifest.v1",
+  "created_at_local_date": "2026-10-25",
+  "portable_files": [
+    { "path": "n97-w17-desktop-terrain-postfix-proof.mts", "bytes": 30780, "sha256": "d7ccae50ab8395964bf53975cdd60f6341277391f860a2c41eb4b48b3c91f920" },
+    { "path": "contract-check.json", "bytes": 17585, "sha256": "1c6e689db722a726d972744d5dce7207a3fcfdfc2beaa022056d27b16da61686" },
+    { "path": "CONTRACT_REVIEW.json", "bytes": 2179, "sha256": "6daa8bff54a2f041e9cc045dc282744e5cc161189432f371f89a535223cb9250" },
+    { "path": "PRESTART_REFUSAL.json", "bytes": 2213, "sha256": "82858c2fe09dcb1725352b5b2c7fe3bb7d56717b053e450bfe330b062c06e2a8" },
+    { "path": "LAUNCHER_CORRECTION_REVIEW.json", "bytes": 1184, "sha256": "86f181ac7627071a0738c1b325f6eb57220adc5a513177e42d79ec4000d5b484" },
+    { "path": "attempt-01/receipt.json", "bytes": 3871, "sha256": "ed1b32367ad5074fc37916098d281321841b685c0326b1339a1ed6eeb199eea4" },
+    { "path": "attempt-02/launch.json", "bytes": 23003, "sha256": "85ad0574204f9c56433b5b8c4fc99d9e2c770a404e039d6f02f4efee316a238f" },
+    { "path": "attempt-02/receipt.json", "bytes": 5701, "sha256": "78c24959c8760ffb89929d12c4b59731ce7345e15160af528f1046642ada4a66" },
+    { "path": "attempt-02/result.json", "bytes": 37952, "sha256": "0d978a2b8d50ee3398e2012067adde07fec809f0f0f04244a1203e5f62d30599" },
+    { "path": "attempt-02/state-diff-vs-primed.json", "bytes": 3, "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570" },
+    { "path": "attempt-02/report-diff-vs-primed.json", "bytes": 1038, "sha256": "83082d6d1f8c6fc3a873c5042f2b434b1cb445fb68cc307a5be72d826653bde1" },
+    { "path": "attempt-02/operation-diff-vs-v4.json", "bytes": 3, "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570" },
+    { "path": "attempt-02/battle-diff-vs-v4.json", "bytes": 3, "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570" }
+  ],
+  "local_only_bound_evidence": {
+    "complete_input_root": { "file_count": 35, "total_bytes": 12563528, "manifest_sha256": "194dd8164edd95f0c37fafe48390e411a3e31fb01f8fb03e7e35f70fae78242d" },
+    "postfix_state": { "path": "attempt-02/postfix-state.json", "bytes": 4895623, "sha256": "0ce35ee15a27708bc873f81f56a0d6f4af0ccc3f8032ab4682ff6da4e38f666e" },
+    "postfix_report": { "path": "attempt-02/postfix-report.json", "bytes": 627214, "sha256": "328b28120bdeeff11e2c913a5e6409040e6def1c5f99986e141e5e563db01bd7" },
+    "forest_consumed": { "path": "complete-input-root/data/derived/operational/forest_osids.json", "bytes": 2796, "sha256": "f458666662a072c65b7d5c5e4b89c261399fca0f10476736b83fd914e651fa49" },
+    "urban_consumed": { "path": "complete-input-root/data/derived/operational/urban_osids.json", "bytes": 641, "sha256": "6c5fbdf22a7b837917422b11eb53a975bb855c027cd4c92cb7158fafd9c42e4c" }
+  },
+  "post_run_source_hashes": {
+    "src/desktop/desktop_sim.ts": "db0f4b31bf51b23ca85197ea81509b122ebd26b053e93671884014a5755cb5fd",
+    "src/sim/combat/combat_terrain_sets_node.ts": "a9b367adf78e8b18d5a626427d7746e8a32f988b53896be16aec4a984658e091",
+    "tests/desktop_combat_terrain_prerequisite.test.ts": "6ddf6526ce794ead58a01d49d7471365a455a2de47c5f84aca875b5a1286a8fd"
+  },
+  "excluded_from_portable_copy": "Multi-megabyte state, report, and input-root files remain local and are bound here by path, byte count, and SHA-256. Original inputs and earlier evidence were neither copied into a portable package nor deleted."
+}

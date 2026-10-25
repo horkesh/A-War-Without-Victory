@@ -15,7 +15,7 @@ paused or RE is blocked, they are describing 2026-08-28, not today.
 
 **Last updated:** 2026-10-25 — owner prioritizes player capability to achieve bot calibration and access the same operations; diagnose and repair proven gaps before divergence experiments. n94 remains the no-player benchmark.
 
-**Player parity:** n97 retains707/707/706/706 and zero n91/n92 losses. Player39/raw703 remains failed. Explicit-choice23 matches n94 Kolovarice RS; Tosici and CDP finalization fail. Observer repair and a zero-turn n94 resume prerequisite precede further diagnosis. See the [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md).
+**Player parity:** n97 retains707/707/706/706 and zero n91/n92 losses. Player39/raw703 remains failed. Reviewed desktop terrain repair reproduces the primed one-turn persisted state/report exactly;52/52 focused checks pass. Restore regression-tool safeguards before188/full-suite/new package/native. Resume fidelity remains open. See the [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md).
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted

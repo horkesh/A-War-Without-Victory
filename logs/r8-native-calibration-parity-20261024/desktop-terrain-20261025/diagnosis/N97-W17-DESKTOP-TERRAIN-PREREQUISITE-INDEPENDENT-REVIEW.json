@@ -1,0 +1,87 @@
+{
+  "schema": "awwv.native703.desktop-terrain-prerequisite-independent-review.v1",
+  "reviewer": "/root/offensive_cache_causal_probe/terrain_probe_review",
+  "reviewed_at_local_date": "2026-10-25",
+  "verdict": "GO",
+  "reviewed_script": {
+    "path": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/n97-w17-desktop-terrain-prerequisite-probe.mts",
+    "sha256": "3b90b69148c232295e3fdbc4c49cd5bc41743896759d14fd8c1565b00e9d8444"
+  },
+  "reviewed_source_audit": {
+    "path": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/N97-W17-DESKTOP-TERRAIN-PREREQUISITE-SOURCE-AUDIT.md",
+    "sha256": "c66d2a1d238250c750ba0a4a3329a1bbc41ade2cc9189419c5997a34a54f10c2"
+  },
+  "bound_repository": {
+    "head": "86b693a9423de6a2be13174c36f96ee6a8430801",
+    "historical_terrain_commit": "a913286803a095b6dc3f57a44175081d6ae4b8eb",
+    "tracked_worktree_clean_at_review": true
+  },
+  "execution_performed": {
+    "engine_advance": false,
+    "native": false,
+    "runScenario": false,
+    "browser": false,
+    "build": false,
+    "campaign": false,
+    "tracked_files_modified": false,
+    "contract_check_only": true,
+    "contract_check_command": ".\\node_modules\\.bin\\tsx.cmd tmp\\player-bot-capability-parity-20261024\\native703-capability-diagnosis\\n97-w17-desktop-terrain-prerequisite-probe.mts --contract-check",
+    "contract_check_exit": 0,
+    "contract_check_wall_seconds": 1.7678957
+  },
+  "checks": {
+    "exact_bindings": {
+      "pass": true,
+      "evidence": "The contract check bound the exact save 16, n97 and V4 weekly references, V4 launch manifest, retained branch-A state/report/result/receipt, eight production source files, current urban and forest files, and all 33 V4 historical-input manifest entries."
+    },
+    "terrain_bytes_and_membership": {
+      "pass": true,
+      "evidence": "Current urban and forest bytes hash exactly to the corresponding a913 git blobs; forest contains op:travnik:gluha_bukovica and op:konjic:glavaticevo_2."
+    },
+    "single_advance": {
+      "pass": true,
+      "evidence": "The evidence path contains exactly one direct call to production desktop.advanceTurn. Contract validation, terrain loading, retained-baseline reconstruction, report projection, and diff generation do not advance simulation state."
+    },
+    "intervention_scope": {
+      "pass": true,
+      "evidence": "The sole pre-advance intervention calls production loadUrbanOsidSet/loadForestOsidSet and passes those returned sets directly to production setUrbanOsidSet/setForestOsidSet. The probe copies no terrain array, terrain-membership rule, defense multiplier, cache phase, or turn formula."
+    },
+    "comparison_and_projection": {
+      "pass": true,
+      "evidence": "Operation diagnostics use the same buildOperationCombatDiagnostics call and post-turn state/report inputs as scenario reporting. Battle comparison uses the V4 row shape, production two-decimal power_ratio normalization, and removal of only the three opt-in debug fields. Controls use production buildWeeklyReport. Exact V4 operation, canonical battle, and control equality are the decisive restoration comparisons; n97 equality and retained-A difference checks are redundant consequences of separately bound preconditions."
+    },
+    "mutation_and_retention": {
+      "pass": true,
+      "evidence": "The deserialized source and branch are isolated clones and are deep-compared after advance. All 33 historical inputs and both terrain files are rehashed after advance. Full new terrain state/report and complete state, report, operation, and battle diffs are retained with fresh-file semantics before result evaluation."
+    },
+    "failure_and_exit_semantics": {
+      "pass": true,
+      "evidence": "A mismatch writes result.json with prerequisite_restored:false and interpretation_allowed:false, then exits nonzero. A success writes the full result before asserting and exits zero. Fresh writes reject collisions. Early failures retain launch plus a failure result when result.json is still available."
+    },
+    "artifact_contract_feasibility": {
+      "pass": true,
+      "evidence": "The existing preserved-preflight wrapper can provide a fresh attempt directory, exact entry snapshot, stdout/stderr, 15000 ms cap, terminal receipt, and no retry. Its child allowlist must contain exactly launch.json, result.json, terrain-state.json, terrain-report.json, state-diff-vs-retained-a.json, report-diff-vs-retained-a.json, operation-diff-vs-v4.json, battle-diff-vs-v4.json, operation-diff-vs-retained-a.json, and battle-diff-vs-retained-a.json."
+    },
+    "ambient_global_contamination": {
+      "pass": true,
+      "evidence": "Production terrain sets are module globals, but no imported module initializes them at module load. The preserved wrapper starts a fresh child, the probe explicitly initializes both sets before its sole advance, and no baseline branch is rerun in that process. The process-global mutation therefore is the measured prerequisite and is isolated to the child."
+    },
+    "source_audit_accuracy": {
+      "pass": true,
+      "evidence": "Static call-site tracing confirms the only production setter calls under src are in buildScenarioStartupState; runScenario initializes before replacing state with a resume save; loadScenarioFromPath reaches that builder; apr_1992 startNewCampaign reads a serialized startup snapshot; loadStateFromPath only reads, deserializes, and recomputes sector ratings; direct advanceTurn does not initialize terrain. query-combat-estimate reaches estimateAttackCost, whose defender power is zero and which does not read the production urban/forest globals. The audit's new-campaign, load-state, runScenario, ambient-history, and preview-risk descriptions are accurate at the bound HEAD."
+    }
+  },
+  "required_execution_conditions": [
+    "Run from the bound repository root so the cwd-bound production terrain loaders resolve the reviewed files.",
+    "Use one fresh preserved-preflight wrapper attempt with timeout_ms=15000 and the exact ten-child-artifact allowlist recorded above.",
+    "Do not retry after a timeout, process failure, artifact-contract failure, or comparison mismatch.",
+    "Accept a positive claim only when child and wrapper exit zero, no timeout or spawn error occurred, the entry script hash remained exact, the artifact contract passed, and result.json records prerequisite_restored:true and interpretation_allowed:true."
+  ],
+  "required_corrections": [],
+  "limitations": [
+    "This review authorizes exactly one direct desktop save16-to-week17 prerequisite probe. It does not authorize another branch-A run, a runScenario replay, a native or packaged-runtime run, a browser run, a build, or a campaign.",
+    "A passing probe establishes only that priming the existing production terrain globals restores the bound V4 week-17 operation, canonical battle, and control outputs on this direct desktop path.",
+    "A pass does not establish active-offensives-cache causality, n97 resume causality, uninterrupted or fresh-player behavior, native-runtime qualification, calibration parity, or a production fix.",
+    "The source-audit path table describes whether each entry point itself primes the globals. Because the globals persist for the process lifetime, a snapshot new campaign or save load can inherit priming from an earlier scenario load in the same process; that ambient-history dependence is the seam being tested."
+  ]
+}

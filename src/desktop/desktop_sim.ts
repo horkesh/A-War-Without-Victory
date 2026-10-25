@@ -23,6 +23,8 @@ import { shortestPathThroughFriendly } from '../sim/combat/brigade_movement.js';
 import { isSrkStranglePostureEnabled } from '../sim/combat/contain_posture_gate.js';
 import { buildAdjacencyFromEdges, isSettlementSetContiguous } from '../sim/combat/war_adjacency.js';
 import { estimateAttackCost, type AttackEstimate } from '../sim/combat/combat_estimate.js';
+import { setForestOsidSet, setUrbanOsidSet } from '../sim/combat/combat_math.js';
+import { loadForestOsidSet, loadUrbanOsidSet } from '../sim/combat/combat_terrain_sets_node.js';
 import { computeFrontWidthMetrics } from '../sim/combat/front_width_metrics.js';
 import { computeSectorCombatRatings } from '../sim/combat/sector_combat_rating.js';
 import { applyRecruitment, evaluateRecruitmentEligibility, initializeRecruitmentResources, recruitBrigade } from '../sim/recruitment_engine.js';
@@ -375,6 +377,9 @@ export async function loadStateFromPath(statePath: string): Promise<{ state: Gam
 export async function advanceTurn(state: GameState, baseDir: string): Promise<DesktopSimAdvanceResult> {
     const phase = state.meta?.phase ?? 'war';
     const seed = state.meta?.seed ?? 'desktop-seed';
+
+    setUrbanOsidSet(loadUrbanOsidSet(baseDir));
+    setForestOsidSet(loadForestOsidSet(baseDir));
 
     const [graph, operationalSettlementGraph, operationalData, operationalCentroids] = await Promise.all([
         loadSettlementGraph(settlementGraphOptions(baseDir)),

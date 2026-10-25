@@ -1,9 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-function loadOsidSet(relativePath: string): Set<string> {
+function loadOsidSet(relativePath: string, baseDir?: string): Set<string> {
     try {
-        const filePath = resolve(process.cwd(), relativePath);
+        const filePath = resolve(baseDir ?? process.cwd(), relativePath);
         const ids = JSON.parse(readFileSync(filePath, 'utf8')) as string[];
         return new Set(ids);
     } catch {
@@ -11,10 +11,10 @@ function loadOsidSet(relativePath: string): Set<string> {
     }
 }
 
-export function loadUrbanOsidSet(): Set<string> {
-    return loadOsidSet('data/derived/operational/urban_osids.json');
+export function loadUrbanOsidSet(baseDir?: string): Set<string> {
+    return loadOsidSet('data/derived/operational/urban_osids.json', baseDir);
 }
 
-export function loadForestOsidSet(): Set<string> {
-    return loadOsidSet('data/derived/operational/forest_osids.json');
+export function loadForestOsidSet(baseDir?: string): Set<string> {
+    return loadOsidSet('data/derived/operational/forest_osids.json', baseDir);
 }

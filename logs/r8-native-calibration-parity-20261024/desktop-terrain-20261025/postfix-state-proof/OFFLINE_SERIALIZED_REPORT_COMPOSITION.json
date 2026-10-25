@@ -1,0 +1,76 @@
+{
+  "schema": "awwv.desktop-terrain-postfix-proof.offline-serialized-report-composition.v1",
+  "author": "/root/terrain_postfix_proof",
+  "composed_at_local_date": "2026-10-25",
+  "engine_execution": false,
+  "attempt_02_status_preserved": "FAILED_CHILD_EXIT_1",
+  "attempt_02_result_relabelled": false,
+  "question": "Do the preserved post-fix and retained primed JSON-serialized outputs match at the approved canonical scope despite the attempt-02 in-memory own-property comparison failure?",
+  "candidate_verdict": "SERIALIZED_OUTPUT_MATCH_ESTABLISHED_PENDING_INDEPENDENT_REVIEW",
+  "inputs": {
+    "postfix_state": {
+      "path": "attempt-02/postfix-state.json",
+      "bytes": 4895623,
+      "sha256": "0ce35ee15a27708bc873f81f56a0d6f4af0ccc3f8032ab4682ff6da4e38f666e"
+    },
+    "primed_state": {
+      "path": "../../native703-capability-diagnosis/n97-w17-desktop-terrain-prerequisite-probe-01/terrain-state.json",
+      "bytes": 4895623,
+      "sha256": "0ce35ee15a27708bc873f81f56a0d6f4af0ccc3f8032ab4682ff6da4e38f666e"
+    },
+    "postfix_report": {
+      "path": "attempt-02/postfix-report.json",
+      "bytes": 627214,
+      "sha256": "328b28120bdeeff11e2c913a5e6409040e6def1c5f99986e141e5e563db01bd7"
+    },
+    "primed_report": {
+      "path": "../../native703-capability-diagnosis/n97-w17-desktop-terrain-prerequisite-probe-01/terrain-report.json",
+      "bytes": 627214,
+      "sha256": "328b28120bdeeff11e2c913a5e6409040e6def1c5f99986e141e5e563db01bd7"
+    }
+  },
+  "comparisons": {
+    "full_json_serialized_state_bytes_equal": true,
+    "full_json_serialized_report_bytes_equal_before_normalization": true,
+    "report_equal_after_same_single_exclusion": true,
+    "report_exclusion": {
+      "pointer": "/observer_threshold_flags",
+      "rationale": "Observer-only diagnostic bookkeeping is not a gameplay input, decision, battle, operation, control, or serialized-state field."
+    },
+    "normalized_compact_report_sha256": "c55a404672d7c4896ee9a7ef193ce797fa07e196f0f303da98361753a3cd6452",
+    "gameplay_fields_excluded": []
+  },
+  "attempt_02_comparator_failure": {
+    "cause": "The actual in-memory report owned ten properties whose values were undefined. The retained comparator was parsed from JSON, where object properties with undefined values are omitted. Node deep equality therefore rejected the runtime object shapes even though JSON serialization omitted every one of those properties and the complete persisted report bytes were identical.",
+    "runtime_undefined_own_property_paths": [
+      "/attack_resolution_osid/battles/0/equipment/scavenged_by",
+      "/attack_resolution_osid/battles/1/equipment/scavenged_by",
+      "/attack_resolution_osid/battles/2/defender_contributions",
+      "/attack_resolution_osid/battles/2/equipment/scavenged_by",
+      "/preparation_events/0/commander_assessment",
+      "/preparation_events/0/probe_ordered",
+      "/preparation_events/1/commander_assessment",
+      "/preparation_events/1/probe_ordered",
+      "/preparation_events/2/probe_ordered",
+      "/preparation_events/3/commander_assessment"
+    ],
+    "serializability_proof": "Each retained diff row records baseline_present:false and omits a terrain value because JSON.stringify omits object properties whose value is undefined. The separately written postfix-report.json is the JSON serialization of the actual report and is byte-identical to the retained primed terrain-report.json.",
+    "gameplay_difference_count": 0
+  },
+  "additional_preserved_checks": {
+    "canonical_serializeState_exact": true,
+    "canonical_state_diff_count": 0,
+    "v4_operation_diff_count": 0,
+    "v4_canonical_battle_diff_count": 0,
+    "v4_and_n97_control_exact": true,
+    "input_unmutated": true,
+    "complete_root_files_rehashed_post_advance": 35,
+    "required_consumed_forest_members_present": true
+  },
+  "limitations": [
+    "This offline composition does not change attempt-02 child or wrapper exit 1 and does not relabel its result.json.",
+    "It uses only already-preserved attempt-02 and primed JSON artifacts; it performs no engine execution.",
+    "Acceptance of the serialized-report prerequisite requires independent review.",
+    "No campaign, package, native-runtime, fresh-player, or calibration qualification follows."
+  ]
+}

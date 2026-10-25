@@ -1,0 +1,34 @@
+{
+  "schema": "awwv.desktop-terrain-postfix-proof.contract-review.v1",
+  "reviewer": "/root",
+  "reviewed_at_local_date": "2026-10-25",
+  "verdict": "GO_FOR_EXACTLY_ONE_PRESERVED_ATTEMPT",
+  "reviewed_script": {
+    "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/n97-w17-desktop-terrain-postfix-proof.mts",
+    "sha256": "d7ccae50ab8395964bf53975cdd60f6341277391f860a2c41eb4b48b3c91f920"
+  },
+  "reviewed_contract_check": {
+    "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/contract-check.json",
+    "sha256": "1c6e689db722a726d972744d5dce7207a3fcfdfc2beaa022056d27b16da61686",
+    "exit": 0
+  },
+  "approved_execution": {
+    "attempt": "attempt-01",
+    "timeout_ms": 15000,
+    "retry_allowed": false,
+    "engine_advances": 1,
+    "scope": "actual production desktop.advanceTurn from exact canonical n97 save 16 using the fresh complete explicit 35-file root"
+  },
+  "review_findings": {
+    "external_terrain_priming": false,
+    "production_advance_calls": 1,
+    "decisive_state_comparison": "exact production serializeState text equality against retained successful primed state",
+    "decisive_report_comparison": "exact full report equality against retained successful primed report after deleting only /observer_threshold_flags from both operands",
+    "report_exclusion_reviewed": true,
+    "report_exclusion_rationale": "observer_threshold_flags is observer-only diagnostic bookkeeping and is not a gameplay input, decision, battle, operation, control, or serialized-state field",
+    "gameplay_fields_excluded": [],
+    "diagnostic_only_checks": "V4 operation, canonical battle, and control projections are additional diagnostics and do not replace decisive state/report equality"
+  },
+  "pass": "Wrapper and child exit 0; no timeout or spawn error; entry source matches; artifact contract passes; every result check is true; all bound input and complete-root files remain immutable.",
+  "stop": "Run exactly one attempt. On any timeout, process failure, artifact failure, mutation, or comparison mismatch, stop without retry. No campaign, suite, native run, or build."
+}

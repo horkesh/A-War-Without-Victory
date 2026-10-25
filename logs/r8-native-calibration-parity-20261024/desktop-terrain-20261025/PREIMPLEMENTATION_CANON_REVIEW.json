@@ -1,0 +1,141 @@
+{
+  "schema": "awwv.desktop-terrain-parity.preimplementation-canon-review.v1",
+  "reviewer": "/root/desktop_terrain_canon_review",
+  "reviewed_at_local_date": "2026-10-25",
+  "review_kind": "independent_actual-evidence_canon_determinism_preimplementation",
+  "verdict": "GO",
+  "verdict_scope": "Authorize only the proposed desktop terrain prerequisite repair and its stated qualification. This is not gameplay qualification, native calibration parity, tuning, baseline adoption, forced control, or approval of any broader cache, preview, startup, schema, geometry, policy, threshold, or authored-data change.",
+  "bound_repository": {
+    "head": "86b693a9423de6a2be13174c36f96ee6a8430801",
+    "tracked_worktree_clean_at_review": true
+  },
+  "bindings": {
+    "proposal": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/PROPOSAL.md",
+      "sha256": "12e32bd9c72cd0546a82e5535bb2eb1bb0d55ea9fd832cec253ffe675ac6765b"
+    },
+    "source_audit": {
+      "path": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/N97-W17-DESKTOP-TERRAIN-PREREQUISITE-SOURCE-AUDIT.md",
+      "sha256": "c66d2a1d238250c750ba0a4a3329a1bbc41ade2cc9189419c5997a34a54f10c2"
+    },
+    "preprobe_independent_review": {
+      "path": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/N97-W17-DESKTOP-TERRAIN-PREREQUISITE-INDEPENDENT-REVIEW.json",
+      "sha256": "b9a182530760cf03730fa17257c6715d09e0303ac9383ba79b12d497e399a911"
+    },
+    "actual_probe": {
+      "attempt": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/n97-w17-desktop-terrain-prerequisite-probe-01",
+      "receipt_sha256": "043eddfb3ea42071371360873900013be8865b00e53ec3ff99704ced117c75c8",
+      "result_sha256": "9fabc32097bbb87d4058ab0f4d88f20efa488f447c78e630693a95f005e8690e",
+      "terrain_state_sha256": "0ce35ee15a27708bc873f81f56a0d6f4af0ccc3f8032ab4682ff6da4e38f666e",
+      "terrain_report_sha256": "328b28120bdeeff11e2c913a5e6409040e6def1c5f99986e141e5e563db01bd7",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "wall_seconds": 3.442,
+      "artifact_contract_pass": true,
+      "prerequisite_restored": true,
+      "interpretation_allowed": true,
+      "input_mutation": false,
+      "exact_v4_operations": true,
+      "exact_v4_canonical_battles": true,
+      "exact_v4_controls": true
+    },
+    "terrain_inputs": {
+      "urban": {
+        "path": "data/derived/operational/urban_osids.json",
+        "sha256": "6c5fbdf22a7b837917422b11eb53a975bb855c027cd4c92cb7158fafd9c42e4c",
+        "count": 19
+      },
+      "forest": {
+        "path": "data/derived/operational/forest_osids.json",
+        "sha256": "f458666662a072c65b7d5c5e4b89c261399fca0f10476736b83fd914e651fa49",
+        "count": 106
+      }
+    }
+  },
+  "established_facts": [
+    "At the bound HEAD, buildScenarioStartupState is the only production owner that primes both module-global combat terrain sets.",
+    "runScenario and desktop Load Scenario reach that initializer; baked apr_1992 New Campaign, desktop Load State, and direct desktop advanceTurn do not.",
+    "The same save can therefore advance differently according to earlier process history, contrary to the reproducibility boundary.",
+    "The retained one-turn probe changed only the existing terrain load/set prerequisite before one production desktop advanceTurn and exactly restored the scenario-resume V4 operation diagnostics, canonical battle rows, and control counts.",
+    "The current Electron getBaseDir returns the repository root in development and process.resourcesPath in a package; package.json extraResources copies data/derived to process.resourcesPath/data/derived, which is the correct root for the proposed baseDir-relative loaders.",
+    "The existing loader policy catches missing, unreadable, or malformed input and returns an empty set. The proposal preserves that compatibility behavior and overwrites both globals on every desktop advance, preventing inheritance from a prior root."
+  ],
+  "change_to_canon_mapping": [
+    {
+      "change": "Load both existing static terrain sets from the explicit desktop baseDir before BotManager and runTurn on every desktop advance.",
+      "canon": [
+        "docs/10_canon/Engine_Invariants_v0_9_0.md section 11.4 (identical inputs produce identical outputs; save/load reconstructs the world)",
+        "docs/10_canon/Engine_Invariants_v0_9_0.md sections 13.1-13.2 (derived runtime state is not serialized and is recomputed each turn)",
+        "docs/10_canon/Game_Bible_v0_9_0.md sections 17.2 and 19 Determinism (derived state is recomputed, and systems remain deterministic, auditable, and replayable)",
+        "docs/20_engineering/CODE_CANON.md Determinism Contract (byte-identical reruns from identical inputs; derived state is not serialized as source of truth)"
+      ],
+      "assessment": "Required compatibility repair. It removes ambient process history from a simulation input without adding persisted state."
+    },
+    {
+      "change": "Reuse the existing urban and forest files, memberships, setters, and multipliers without changing combat formulas or authored data.",
+      "canon": [
+        "docs/10_canon/Systems_Manual_v0_9_0.md section 7.4 combat power (terrain applies to defender OSID, including forest and urban multipliers)",
+        "docs/10_canon/Systems_Manual_v0_9_0.md section 13/System 6 and docs/10_canon/Engine_Invariants_v0_9_0.md section 12.1 (Sarajevo urban defense behavior)",
+        "docs/10_canon/Game_Bible_v0_9_0.md sections 5 and 7 (geography affects operations; combat follows the existing resolution formula)"
+      ],
+      "assessment": "Canon-preserving initialization of existing mechanics. No new terrain mechanic or historical outcome is introduced."
+    },
+    {
+      "change": "Add optional baseDir parameters to the Node loaders while retaining process.cwd() as the default for scenario callers.",
+      "canon": [
+        "docs/10_canon/Engine_Invariants_v0_9_0.md section 11.4",
+        "docs/20_engineering/DETERMINISM_TEST_MATRIX.md sections No timestamps / wall-clock values, Stable ordering, Derived state not serialized, and Byte-identical reruns"
+      ],
+      "assessment": "Compatible API refinement. Explicit roots eliminate cwd dependence for desktop while preserving existing scenario behavior."
+    }
+  ],
+  "determinism_findings": {
+    "verdict": "No determinism risks found in the bounded proposal when the required conditions below are met.",
+    "reasoning": [
+      "The inputs are fixed JSON files selected by an explicit root; no randomness, timestamps, unstable enumeration, or serialized derived field is added.",
+      "Both sets are replaced before simulation consumers on every desktop advance, so alternating roots cannot inherit stale membership.",
+      "Set membership lookup does not depend on iteration order, and the proposal does not serialize either Set.",
+      "Default-cwd scenario callers retain their current behavior, while desktop execution becomes independent of ambient cwd and prior entry points."
+    ],
+    "citations": [
+      "docs/10_canon/Engine_Invariants_v0_9_0.md sections 11.1-11.4, 13.1-13.2, and 14.2",
+      "docs/20_engineering/DETERMINISM_TEST_MATRIX.md sections No timestamps / wall-clock values, Stable ordering, Derived state not serialized, Byte-identical reruns, and Full vitest suite required on code-path PRs",
+      "docs/20_engineering/CODE_CANON.md Determinism Contract"
+    ]
+  },
+  "required_implementation_conditions": [
+    "Keep the change limited to src/sim/combat/combat_terrain_sets_node.ts, src/desktop/desktop_sim.ts, and focused tests unless a separately justified correction is required.",
+    "The optional loader baseDir must resolve data/derived/operational/urban_osids.json and forest_osids.json beneath that root; omission must continue to use process.cwd().",
+    "Preserve the current missing, unreadable, and malformed-file policy: return an empty Set rather than throw. Test this policy explicitly. Desktop advance must still set both globals from those results so a missing file clears stale data from a prior root.",
+    "Prime both sets before constructing or running BotManager and before runTurn. Do not add GameState/save fields or derive terrain from player metadata.",
+    "Do not change terrain files, memberships, multipliers, thresholds, operation catalogs, control data, movement, alliances, supply, enclave rules, prediction/preview design, or cache ordering.",
+    "Do not modify scenario startup semantics beyond the compatible optional-loader signature."
+  ],
+  "required_verification": {
+    "cheap_first": [
+      "A RED-then-green production-caller fixture must prove both actual terrain lookups are initialized before BotManager and runTurn, explicit baseDir wins over ambient cwd, alternating and missing/malformed roots clear stale sets, default loader calls remain compatible, all RBiH/RS/HRHB player metadata paths work, and input/save shapes are unchanged.",
+      "Every positive candidate fixture must use a complete explicit root containing both terrain files. The retained V4 33-input historical shadow root intentionally omits urban_osids.json and forest_osids.json because the old loaders read ambient cwd; it must not be reused as a positive post-repair root unless those exact bound files are added to a fresh copy.",
+      "Run focused terrain/desktop production-caller suites, nonincremental TypeScript, and applicable syntax/static checks before any campaign, build, or package run.",
+      "Independent post-implementation review must inspect actual source and test evidence; this pre-implementation GO cannot substitute for it."
+    ],
+    "scenario_and_suite": [
+      "Freeze the exact command, candidate commit, clean-tree status, evidence directory, pass criteria, 35-minute cap, one-attempt/no-automatic-retry rule, and Node/runtime prerequisites before the scenario run.",
+      "The qualification packet must supplement the existing production-input fingerprint with explicit path, byte count, and SHA-256 bindings for urban_osids.json and forest_osids.json at the root actually consumed. This bounded supplement does not require redesigning the unrelated historical-input manifest.",
+      "Run one clean scenario-first authoritative 188-week regression and require floors 707/707/706/706, zero formerly correct cells lost at every checkpoint, and all protected, health, provenance, and telemetry gates. Preserve all n91-n97 and new evidence.",
+      "Only after a qualifying final candidate, run the required complete balanced Vitest suite. Do not rerun unaffected broad evidence for reassurance."
+    ],
+    "package_and_native": [
+      "Build a new immutable package. Inventory must prove both terrain JSON files exist at process.resourcesPath/data/derived/operational and that compiled desktop_sim uses the explicit packaged baseDir before simulation consumers.",
+      "Run the cheap packaged production opening/one-advance probe before any full native run. A successful advance alone is insufficient if the inventory or compiled-consumer assertions are absent.",
+      "Native proof remains bound to the existing player-acceptance contract: normal visible always_allow is explicit counterfactual input; Kolovarice RS may reuse its qualified scope, while Tošići RBiH remains required."
+    ]
+  },
+  "blockers": [],
+  "limitations": [
+    "The actual probe proves the prerequisite only for the bound direct-desktop save16-to-week17 comparison. It does not prove a fresh native campaign, uninterrupted Foča behavior, save/resume equivalence, full-campaign neutrality, or package correctness.",
+    "This review does not approve tuning, a baseline change, a forced control event, a new historical claim, or a FORAWWV/canon edit.",
+    "The stale-cache hypothesis remains rejected and outside this repair.",
+    "The canon-compliance-reviewer skill names docs/V0_4_CANON_ALIGNMENT.md and docs/PHASE_A_INVARIANTS.md, but neither file exists in this bound worktree; active v0.9 canon, CODE_CANON, and DETERMINISM_TEST_MATRIX govern this review."
+  ]
+}

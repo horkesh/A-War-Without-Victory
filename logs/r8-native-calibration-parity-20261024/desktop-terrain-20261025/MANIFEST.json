@@ -1,0 +1,348 @@
+{
+  "schema": "awwv.desktop-terrain.selected-proof.v1",
+  "scope": "Selected portable evidence only. Full runs, reports, profiles and telemetry remain local. All original failed verdicts retained.",
+  "files": [
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/PROPOSAL.md",
+      "path": "PROPOSAL.md",
+      "bytes": 4188,
+      "sha256": "12e32bd9c72cd0546a82e5535bb2eb1bb0d55ea9fd832cec253ffe675ac6765b"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/PREIMPLEMENTATION_CANON_REVIEW.json",
+      "path": "PREIMPLEMENTATION_CANON_REVIEW.json",
+      "bytes": 12153,
+      "sha256": "ce2283e74a0801cf973aa2e29f9a1fc3520df688b9184409db5d392376aebaf8"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/POST_IMPLEMENTATION_REVIEW.json",
+      "path": "POST_IMPLEMENTATION_REVIEW.json",
+      "bytes": 9485,
+      "sha256": "4e8a46f8554a91a4abe4a9f022c48658f7b3200222a7ab9eccc7e02ab8b01119"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/ACTUAL_POSTFIX_OFFLINE_REVIEW.json",
+      "path": "ACTUAL_POSTFIX_OFFLINE_REVIEW.json",
+      "bytes": 10292,
+      "sha256": "b878b8be0422f245151c9b9dbcb8e625da8e4dfbede7dc13c9b3528dfa4a6c0b"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/TOOLING_REVIEW.json",
+      "path": "TOOLING_REVIEW.json",
+      "bytes": 16818,
+      "sha256": "b2577bc99313fee304121c856e1a6af3dad9a788867cb884e1f6ba37ceb8763e"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\diff-check.json",
+      "path": "implementation/diff-check.json",
+      "bytes": 75,
+      "sha256": "59d9d95f8c58036138751a4799e2916732f29eef834ee1b4f98ad4d4effe38ab"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\diff-check.log",
+      "path": "implementation/diff-check.log",
+      "bytes": 157,
+      "sha256": "aca8ca77db2c599e1e0129fcb376fd5fcd86933612a0fe7d448c08ff55668337"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\focused-01\\entry-script.snapshot",
+      "path": "implementation/focused-01/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\focused-01\\receipt.json",
+      "path": "implementation/focused-01/receipt.json",
+      "bytes": 3329,
+      "sha256": "c5a6f5c07fe81057d1c91b26f481a928b513b055cafacf22ac78e511e7f081dc"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\focused-01\\start.json",
+      "path": "implementation/focused-01/start.json",
+      "bytes": 2159,
+      "sha256": "93cc88db988889b112ad779f84edc7b939378845727b9a6825c754c1587feda8"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\focused-01\\stderr.log",
+      "path": "implementation/focused-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\focused-01\\stdout.log",
+      "path": "implementation/focused-01/stdout.log",
+      "bytes": 209,
+      "sha256": "847cab3000d78de0b5a81441adc3ee29f8bf1a5ce654dff94bb4ee529637e617"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\focused-01\\vitest.json",
+      "path": "implementation/focused-01/vitest.json",
+      "bytes": 21383,
+      "sha256": "b58c1a930c7dd0469b4a56f5a530246c4b78cfd73d646c1a4d695c722aef3271"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\green-01\\entry-script.snapshot",
+      "path": "implementation/green-01/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\green-01\\receipt.json",
+      "path": "implementation/green-01/receipt.json",
+      "bytes": 2772,
+      "sha256": "b9b95111034462deb7494330fbcc06564641dad986b14ddf3a7d5f99cae4cd1a"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\green-01\\start.json",
+      "path": "implementation/green-01/start.json",
+      "bytes": 1603,
+      "sha256": "19162ec7c8fa442aa61b05d97259bc4e71e332a127e27b7828de2dd67bfd8da4"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\green-01\\stderr.log",
+      "path": "implementation/green-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\green-01\\stdout.log",
+      "path": "implementation/green-01/stdout.log",
+      "bytes": 207,
+      "sha256": "af3f86f8406ec2b72f01e95f3e1a4964e0ec3f34959496cd250d372f586eebc7"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\green-01\\vitest.json",
+      "path": "implementation/green-01/vitest.json",
+      "bytes": 2840,
+      "sha256": "48a67c18bec61e7b1550fb2bb446c43a29b3cdc299c1e0951c7464a839a75813"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\red-01\\entry-script.snapshot",
+      "path": "implementation/red-01/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\red-01\\receipt.json",
+      "path": "implementation/red-01/receipt.json",
+      "bytes": 2769,
+      "sha256": "6904c5858a2fa2312e090a33f3541c1a4f15d55dab0fb28d9b47e486210cd13e"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\red-01\\start.json",
+      "path": "implementation/red-01/start.json",
+      "bytes": 1599,
+      "sha256": "7a3b50b007c1293cf1449f93c03e5df195e4785e5d509a61b0d494454f9377c5"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\red-01\\stderr.log",
+      "path": "implementation/red-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\red-01\\stdout.log",
+      "path": "implementation/red-01/stdout.log",
+      "bytes": 205,
+      "sha256": "139a32f8b9653110a79d49cb5569bae46bae62eaf229782b08fe1e3655f29eea"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\red-01\\vitest.json",
+      "path": "implementation/red-01/vitest.json",
+      "bytes": 12016,
+      "sha256": "0d386cf46b10c05b0481c12bf9cd83f66ece37f6e88a2ab8aa2d059e17447bcc"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\SUMMARY.json",
+      "path": "implementation/SUMMARY.json",
+      "bytes": 1839,
+      "sha256": "0057c2244c54ab60141edb366c55194c49822d6a7101cad6d826b4855bdfa5c0"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\typecheck-01\\entry-script.snapshot",
+      "path": "implementation/typecheck-01/entry-script.snapshot",
+      "bytes": 45,
+      "sha256": "8d5fa5bd883fec0979fc2004f1fe1d99aef40570155d550eadc0b03b55513bf0"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\typecheck-01\\receipt.json",
+      "path": "implementation/typecheck-01/receipt.json",
+      "bytes": 2619,
+      "sha256": "9bca79a3516afff4bdc686cba6b7616751436e4d12d228c0c2c94cb48ed438c1"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\typecheck-01\\start.json",
+      "path": "implementation/typecheck-01/start.json",
+      "bytes": 1597,
+      "sha256": "4344c947fc0ff2ad30265028d18f15643e6f29d6ab354a90d8fa3d7951639d9e"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\typecheck-01\\stderr.log",
+      "path": "implementation/typecheck-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\typecheck-01\\stdout.log",
+      "path": "implementation/typecheck-01/stdout.log",
+      "bytes": 255,
+      "sha256": "5bf9bb8a4bf4ac02257c3c1b2e84469a650afb9005ae4fdce1a16da2da2f2ef4"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\typecheck-02\\entry-script.snapshot",
+      "path": "implementation/typecheck-02/entry-script.snapshot",
+      "bytes": 45,
+      "sha256": "8d5fa5bd883fec0979fc2004f1fe1d99aef40570155d550eadc0b03b55513bf0"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\typecheck-02\\receipt.json",
+      "path": "implementation/typecheck-02/receipt.json",
+      "bytes": 2630,
+      "sha256": "fa7f0de81065f10d9d6d89a21cf24ecd827abb5a3718e252135516f3f57f2ab5"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\typecheck-02\\start.json",
+      "path": "implementation/typecheck-02/start.json",
+      "bytes": 1611,
+      "sha256": "64bbf1dfb8cde5ce1dca23d787ed3ae8384efe79c9d6fb608fc895058bed2b8e"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\typecheck-02\\stderr.log",
+      "path": "implementation/typecheck-02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\typecheck-02\\stdout.log",
+      "path": "implementation/typecheck-02/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/n97-w17-desktop-terrain-postfix-proof.mts",
+      "path": "postfix-state-proof/n97-w17-desktop-terrain-postfix-proof.mts",
+      "bytes": 30780,
+      "sha256": "d7ccae50ab8395964bf53975cdd60f6341277391f860a2c41eb4b48b3c91f920"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/contract-check.json",
+      "path": "postfix-state-proof/contract-check.json",
+      "bytes": 17585,
+      "sha256": "1c6e689db722a726d972744d5dce7207a3fcfdfc2beaa022056d27b16da61686"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/CONTRACT_REVIEW.json",
+      "path": "postfix-state-proof/CONTRACT_REVIEW.json",
+      "bytes": 2179,
+      "sha256": "6daa8bff54a2f041e9cc045dc282744e5cc161189432f371f89a535223cb9250"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/PRESTART_REFUSAL.json",
+      "path": "postfix-state-proof/PRESTART_REFUSAL.json",
+      "bytes": 2213,
+      "sha256": "82858c2fe09dcb1725352b5b2c7fe3bb7d56717b053e450bfe330b062c06e2a8"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/LAUNCHER_CORRECTION_REVIEW.json",
+      "path": "postfix-state-proof/LAUNCHER_CORRECTION_REVIEW.json",
+      "bytes": 1184,
+      "sha256": "86f181ac7627071a0738c1b325f6eb57220adc5a513177e42d79ec4000d5b484"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/attempt-01/receipt.json",
+      "path": "postfix-state-proof/attempt-01/receipt.json",
+      "bytes": 3871,
+      "sha256": "ed1b32367ad5074fc37916098d281321841b685c0326b1339a1ed6eeb199eea4"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/attempt-02/launch.json",
+      "path": "postfix-state-proof/attempt-02/launch.json",
+      "bytes": 23003,
+      "sha256": "85ad0574204f9c56433b5b8c4fc99d9e2c770a404e039d6f02f4efee316a238f"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/attempt-02/receipt.json",
+      "path": "postfix-state-proof/attempt-02/receipt.json",
+      "bytes": 5701,
+      "sha256": "78c24959c8760ffb89929d12c4b59731ce7345e15160af528f1046642ada4a66"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/attempt-02/result.json",
+      "path": "postfix-state-proof/attempt-02/result.json",
+      "bytes": 37952,
+      "sha256": "0d978a2b8d50ee3398e2012067adde07fec809f0f0f04244a1203e5f62d30599"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/attempt-02/state-diff-vs-primed.json",
+      "path": "postfix-state-proof/attempt-02/state-diff-vs-primed.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/attempt-02/report-diff-vs-primed.json",
+      "path": "postfix-state-proof/attempt-02/report-diff-vs-primed.json",
+      "bytes": 1038,
+      "sha256": "83082d6d1f8c6fc3a873c5042f2b434b1cb445fb68cc307a5be72d826653bde1"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/attempt-02/operation-diff-vs-v4.json",
+      "path": "postfix-state-proof/attempt-02/operation-diff-vs-v4.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/attempt-02/battle-diff-vs-v4.json",
+      "path": "postfix-state-proof/attempt-02/battle-diff-vs-v4.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/PORTABLE_MANIFEST.json",
+      "path": "postfix-state-proof/PORTABLE_MANIFEST.json",
+      "bytes": 3503,
+      "sha256": "cf3e59175ba1294342c0134c7efe945ac386530d62e4e5d16a25976e7c8b66e3"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/OFFLINE_SERIALIZED_REPORT_COMPOSITION.json",
+      "path": "postfix-state-proof/OFFLINE_SERIALIZED_REPORT_COMPOSITION.json",
+      "bytes": 4274,
+      "sha256": "530e7bd618c4bded26ef902674392be3352707c54faab34df915629bf8595644"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/N97-W17-DESKTOP-TERRAIN-PREREQUISITE-SOURCE-AUDIT.md",
+      "path": "diagnosis/N97-W17-DESKTOP-TERRAIN-PREREQUISITE-SOURCE-AUDIT.md",
+      "bytes": 4468,
+      "sha256": "c66d2a1d238250c750ba0a4a3329a1bbc41ade2cc9189419c5997a34a54f10c2"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/N97-W17-DESKTOP-TERRAIN-PREREQUISITE-INDEPENDENT-REVIEW.json",
+      "path": "diagnosis/N97-W17-DESKTOP-TERRAIN-PREREQUISITE-INDEPENDENT-REVIEW.json",
+      "bytes": 7476,
+      "sha256": "b9a182530760cf03730fa17257c6715d09e0303ac9383ba79b12d497e399a911"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/V4-RETAINED-DIAGNOSIS.md",
+      "path": "diagnosis/V4-RETAINED-DIAGNOSIS.md",
+      "bytes": 7796,
+      "sha256": "f1be3ebee5656c536a9be5480438dcd54fb7516a74210b3185ddc5388b6fd316"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/N97-W17-ACTIVE-OFFENSIVES-FAILED-PROBE-OFFLINE-DIAGNOSIS.md",
+      "path": "diagnosis/N97-W17-ACTIVE-OFFENSIVES-FAILED-PROBE-OFFLINE-DIAGNOSIS.md",
+      "bytes": 8226,
+      "sha256": "51b8447ce34c7387119c6423c506b558fe225a3d7099565df92469c7da1ce6f3"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/root/preservation-after-terrain-proof-01/PRESERVATION.json",
+      "path": "preservation/PRESERVATION.json",
+      "bytes": 2161,
+      "sha256": "ef0c6d18896af10cfc2c1f1e972a05ab04f9ccd30303e8798213069dc696726a"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/root/preservation-after-terrain-proof-01/RETAINED_RUN_PACKAGE_NATIVE23.json",
+      "path": "preservation/RETAINED_RUN_PACKAGE_NATIVE23.json",
+      "bytes": 1462,
+      "sha256": "be495b2f1629a23fa5857b3a3216d0b419239405ffb2c65b01e59deffef1fe41"
+    }
+  ]
+}

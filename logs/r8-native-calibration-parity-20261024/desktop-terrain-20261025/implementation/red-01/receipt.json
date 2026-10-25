@@ -1,0 +1,76 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T06:36:39.313Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/implementation/red-01",
+  "timeout_ms": 120000,
+  "original_argv": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "tests/desktop_combat_terrain_prerequisite.test.ts",
+    "--reporter=json",
+    "--outputFile={evidenceDir}/vitest.json"
+  ],
+  "argv": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "tests/desktop_combat_terrain_prerequisite.test.ts",
+    "--reporter=json",
+    "--outputFile=C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\implementation\\red-01/vitest.json"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "vitest.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/node_modules/vitest/vitest.mjs",
+    "bytes": 43,
+    "raw_sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6",
+    "normalized_text_sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    }
+  },
+  "end_utc": "2026-10-25T06:36:47.878Z",
+  "pid": 10668,
+  "child_exit": 1,
+  "wrapper_exit": 1,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/node_modules/vitest/vitest.mjs",
+    "bytes": 43,
+    "raw_sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6",
+    "normalized_text_sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 205,
+    "sha256": "139a32f8b9653110a79d49cb5569bae46bae62eaf229782b08fe1e3655f29eea"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "vitest.json",
+      "bytes": 12016,
+      "sha256": "0d386cf46b10c05b0481c12bf9cd83f66ece37f6e88a2ab8aa2d059e17447bcc"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

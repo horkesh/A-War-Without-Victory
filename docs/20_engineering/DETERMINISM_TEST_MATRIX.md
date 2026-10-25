@@ -1,5 +1,16 @@
 # Determinism Test Matrix (AWWV)
 
+## Desktop terrain prerequisite (2026-10-25 candidate)
+
+`tests/desktop_combat_terrain_prerequisite.test.ts` exercises the actual desktop Advance caller
+with real urban/forest lookups at its first bot and turn consumers. It covers all three faction
+metadata values, explicit data root despite a conflicting working directory, alternate roots,
+stale-global replacement, missing/malformed input compatibility, input immutability and unchanged
+result shape. Existing loader callers retain the working-directory default. Recorded-state proof
+must bind the complete explicit root, including canonical map and both terrain assets; the older
+consumed-input inventory alone is insufficient. Focused tests do not replace the required 188-week,
+full-suite, compiled-package or native player gates.
+
 ## Ordinary-player startup and retained regression boundary (2026-10-25 candidate)
 
 The shared fill-only initializer is characterized against immutable `b371adc3e0935825649e5eda4e6bbd45a44a359d` compute source: complete canonical pre-update and final states for absent, empty, complete, missing-entry, sentinel, extra-key and partial-dimension shapes; malformed containers fail closed. Observer startup and the baked artifact remain exact. Production adapter fixtures cover all factions/options, opening policy consent, effects, serialization and first Advance; their latest receipts and independent verdict must be bound before qualification.
