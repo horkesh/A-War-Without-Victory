@@ -1,0 +1,16 @@
+{
+  "schema": "awwv.cold-load-validation.comparison.v2",
+  "pass": true,
+  "head": "12a4680f04fc3e4cbd8b2fb5f5133b472afd1fd6",
+  "configSha256": "3440441d753e47827dd0ab0f8075719668bedffcdbb75415b0ad2ecb42b2ee56",
+  "packageBindingSha256": "d336895a95e03be095ae76e7b654d152beae008ce93497a48ad8bb6cdf78051b",
+  "sourceReceiptSha256": "f4ccf494776ce1111b8c245a7634638edfc207a5262293c5cdc2243479ef9e37",
+  "sourceResultSha256": "a1a20738dc019841af80b4a7b66190e16e37d3ed9776289c659edadb584186e2",
+  "packageReceiptSha256": "c832e75e13dfc45c9b337485434bfa376d3ed39b2b1b6467dc045a95ffc4ddcb",
+  "packageResultSha256": "1f9589c49fdec79f1982e921ef7c552c72aa6063d16cedc1dc28f32a25fc25be",
+  "canonicalByteIdentity": true,
+  "runtimeProjectionByteExact": true,
+  "nextStateByteExact": true,
+  "nextReportByteExact": true,
+  "externalPriming": false
+}

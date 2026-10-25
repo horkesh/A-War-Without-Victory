@@ -622,18 +622,65 @@ test.each([
     assert.deepEqual(session.sends.map((row) => row.method), ['Network.enable']);
 });
 
-test.each([
-    ['missing request', false, true],
-    ['missing response', true, false],
-])('%s state blocks body capture', async (_name, includeRequest, includeResponse) => {
+test('failure without a request remains inconsistent and blocks body capture', async () => {
     const session = new FakeSession();
     const collector = await readyCollector(session);
-    if (includeRequest) session.emit('Network.requestWillBeSent', requestEvent());
-    if (includeResponse) session.emit('Network.responseReceived', responseEvent());
+    session.emit('Network.responseReceived', responseEvent());
     session.emit('Network.loadingFailed', failureEvent());
     const artifact = await collector.closeAndFlush();
     assert.deepEqual(session.sends.map((row) => row.method), ['Network.enable']);
     assert.notEqual(artifact.status, 'complete');
+});
+
+test('canceled PMTiles fetch before response is a lawful terminal chain and cannot trigger body capture', async () => {
+    const session = new FakeSession();
+    const collector = await readyCollector(session);
+    for (const [requestId, requestTimestamp, failureTimestamp, range] of [
+        ['2504.13828', 311468.035391, 311468.047686, 'bytes=9726509-9806118'],
+        ['2504.13829', 311468.035742, 311468.047775, 'bytes=9806119-9885319'],
+    ] as const) {
+        session.emit('Network.requestWillBeSent', requestEvent({
+            requestId,
+            frameId: '8778EA545EB90912FB9054284B55427C',
+            loaderId: '287E1352FE37E449F3D155424B3AF1D4',
+            timestamp: requestTimestamp,
+            type: 'Fetch',
+            request: {
+                url: 'http://127.0.0.1:52168/data/derived/tiles/hillshade.pmtiles',
+                method: 'GET',
+                headers: { Range: range },
+            },
+        }));
+        session.emit('Network.loadingFailed', failureEvent({ requestId, timestamp: failureTimestamp, type: 'Fetch' }));
+    }
+    const artifact = await collector.closeAndFlush();
+
+    assert.equal(artifact.status, 'complete');
+    assert.deepEqual(artifact.inconsistencies, []);
+    assert.deepEqual(artifact.events.map((row: any) => row.kind), ['request', 'failure', 'request', 'failure']);
+    assert.deepEqual(artifact.events[1].disqualification_reasons, [
+        'wrong-path',
+        'wrong-resource-type',
+        'wrong-range',
+        'response-count',
+        'missing-response-timestamp',
+    ]);
+    assert.equal(artifact.summary.target_like_failures, 0);
+    assert.deepEqual(session.sends.map((row) => row.method), ['Network.enable']);
+});
+
+test('target-shaped failure before response remains non-candidate and cannot trigger body capture', async () => {
+    const session = new FakeSession();
+    const collector = await readyCollector(session);
+    session.emit('Network.requestWillBeSent', requestEvent());
+    session.emit('Network.loadingFailed', failureEvent());
+    const artifact = await collector.closeAndFlush();
+
+    assert.equal(artifact.status, 'complete');
+    assert.deepEqual(artifact.inconsistencies, []);
+    assert.deepEqual(artifact.events[1].disqualification_reasons, ['response-count', 'missing-response-timestamp']);
+    assert.equal(artifact.summary.target_like_failures, 0);
+    assert.deepEqual(session.sends.map((row) => row.method), ['Network.enable']);
 });
 
 test('duplicate response and duplicate terminal are retained as fatal inconsistencies', async () => {

@@ -1,0 +1,245 @@
+{
+  "schema": "awwv.cold-load-validation.native-failure-residual-audit.v1",
+  "verdict": "FAILED_NATIVE_CDP_GATE_UNMET",
+  "independent": true,
+  "reviewerIdentity": "/root/desktop_terrain_canon_review",
+  "reviewedAt": "2026-10-25T11:42:00+01:00",
+  "scope": "Independent read-only audit of every non-CDP-root-cause practical gate and preservation category in the single failed package02 native opening. The exact two-event CDP inconsistency diagnosis is owned separately and is not duplicated here. No game, build, native retry, engine, campaign, or suite was run.",
+  "candidateHead": "12a4680f04fc3e4cbd8b2fb5f5133b472afd1fd6",
+  "packageBindingSha256": "d336895a95e03be095ae76e7b654d152beae008ce93497a48ad8bb6cdf78051b",
+  "attempt": {
+    "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native-opening-actual-01",
+    "receipt": {
+      "sha256": "a0221be2d6f0181076940f5b4f4eb6165b96bd495c4643d4664b56b86abd35ff",
+      "childExit": 1,
+      "wrapperExit": 1,
+      "timedOut": false,
+      "signal": null,
+      "spawnError": null,
+      "artifactContractPass": true,
+      "attempt": 1,
+      "retry": false
+    },
+    "artifacts": {
+      "result": {
+        "bytes": 1945801,
+        "sha256": "3d51bac94a9110a1b7dc083218913dd18f312ae751ca10aa486c20c26d674d4e"
+      },
+      "progress": {
+        "bytes": 1945373,
+        "sha256": "0db7f0703f13cf8649dcb17801b3da5cd77cd22faef31d15fa5417d2a2d465eb"
+      },
+      "netlog": {
+        "bytes": 3878523,
+        "sha256": "9b3ccb1d675ee66190ec17e286c6100104a46897bbbbb34041dc1ed8b676c417"
+      },
+      "externalInventory": {
+        "bytes": 44914,
+        "sha256": "4d10d9d98d9cc64fc2baa6c2162a1a52465189ab57d9b17583a8bcfbf922e836",
+        "files": 136
+      },
+      "exit": {
+        "bytes": 593,
+        "sha256": "e6af1cb6593c7398dde9c431060bd4fb28df02e90fe5679a66d9ac535682b1e2",
+        "elapsedMs": 179771
+      }
+    }
+  },
+  "nativePreflight": {
+    "receiptSha256": "7f22bf81b619c63a2b7deedc7e1eaae311a8d228927559e5dd5521ccdad80177",
+    "readySha256": "0a37df7f89f230442c3e679955b69db1f425a09fb6e6c300c312b95cca430013",
+    "childExit": 0,
+    "wrapperExit": 0,
+    "pass": true,
+    "boundPackageReceiptSha256": "28e5fc15644482c6ad8abc42cb66e47868e765f15140f7ecaf8561b9ecc5723e",
+    "boundComparisonSha256": "a34e490b4aaceb3926b8988b5084f8c9c03aa55fc405de7e2d617d48d9f0acdc",
+    "boundClosingSha256": "b99d18be4b05025f90538d4fbaa2d677ba0b940973a67259f717e4c2aa5da144",
+    "boundIndependentPackageReviewSha256": "2286b240b1eba39f7d1030ff148fbcf6f22592502031f3cf3bd1cf6841e2a99f"
+  },
+  "formalReadOnlyEvaluation": {
+    "source": "The exported v2 evaluateNative function was invoked read-only over the exact retained result, progress, netlog, external inventory, exit, NATIVE_READY, and package-binding artifacts. wrapperPass was false because the retained wrapper exit is 1; artifactsBound was true because all eight receipt artifacts match their live bytes.",
+    "pass": false,
+    "passedCount": 19,
+    "failedCount": 6,
+    "passed": [
+      "candidate-clean-provenance",
+      "package-provenance",
+      "harness-provenance",
+      "observer-provenance",
+      "historical-officer-provenance",
+      "package-comparison-closing-chain",
+      "external-inventory-live",
+      "progress-bound",
+      "fresh-zero-start",
+      "exact-target",
+      "exact-archive-identity",
+      "normal-historical-player",
+      "no-blockers",
+      "zero-consoleMessages",
+      "zero-pageErrors",
+      "zero-networkFailures",
+      "visible-player-choices",
+      "explicit-policy-applied",
+      "save-load-exact"
+    ],
+    "failed": [
+      {
+        "name": "wrapper-and-artifacts-authentic",
+        "classification": "OUTCOME_CONSEQUENCE",
+        "detail": "All eight artifacts are authentic and receipt-bound, but the wrapper correctly preserves the child failure as exit 1."
+      },
+      {
+        "name": "child-and-native-preflight",
+        "classification": "OUTCOME_CONSEQUENCE",
+        "detail": "Native preflight is exact and passed, but the child exit is 1 solely after CDP finalization returned inconsistent."
+      },
+      {
+        "name": "result-label-scope",
+        "classification": "OUTCOME_CONSEQUENCE",
+        "detail": "The result contains exactly one RBiH faction but correctly records failed=true and the CDP inconsistency error; completedAt is not established."
+      },
+      {
+        "name": "netlog-and-audio-lifecycle",
+        "classification": "FORMAL_FIELD_UNESTABLISHED_AFTER_FINALIZATION_THROW",
+        "detail": "The success-only ambientLifecycleSignals field is not assigned because CDP finalization throws before the success entry is built. The retained failureAmbientLifecycleSignals fallback contains 57 rows and independently satisfies the same underlying predicate: 10 play rows, 9 playing rows, zero media-state read errors, and zero invalid ambient URLs."
+      },
+      {
+        "name": "cdp-v3-complete",
+        "classification": "SOLE_SUBSTANTIVE_RUNTIME_FAILURE",
+        "detail": "Status is inconsistent with two inconsistencies. Root-cause analysis is intentionally delegated and not reproduced in this audit."
+      },
+      {
+        "name": "zero-unexpectedMainProcessStderr",
+        "classification": "FORMAL_FIELD_UNESTABLISHED_AFTER_FINALIZATION_THROW",
+        "detail": "The success-only unexpectedMainProcessStderr field is not assigned because the CDP throw exits before post-finally classification. The retained mainProcessStderr has exactly two lines, and both match the existing isExpectedInspectorTeardownLine predicates; derived unexpected count is zero."
+      }
+    ]
+  },
+  "saveLoadAndArchives": {
+    "route": "Pause -> Save Game -> Main Menu -> opening splash -> Field Records -> Resume quicksave",
+    "canonicalSave": {
+      "bytes": 3475986,
+      "sha256": "35f9adabc947cb67bf0e0d288bf3aae273be2f668f609cd164b2c0abca3411c9"
+    },
+    "archiveIdentity": {
+      "provisionalCountAtTurn1": 1,
+      "settledCountAtTurn1": 1,
+      "provisionalSettledFinalAndManualByteIdentity": true,
+      "allFourLiveInExternalInventory": true
+    },
+    "hashProof": {
+      "beforeStateHash": "748a84f040e44b7ac40c0061c0800e0683f578a9cf14f56672f02ead40345cce",
+      "expectedLoadedProjectionHash": "a641db55bf56b06d551bd6f539014994303c429490932d929be198c893bd0c65",
+      "actualLoadedProjectionHash": "a641db55bf56b06d551bd6f539014994303c429490932d929be198c893bd0c65",
+      "loadedProjectionExactBytes": true,
+      "beforeAutosaveHash": "35f9adabc947cb67bf0e0d288bf3aae273be2f668f609cd164b2c0abca3411c9",
+      "afterAutosaveHash": "35f9adabc947cb67bf0e0d288bf3aae273be2f668f609cd164b2c0abca3411c9",
+      "canonicalBytesEqual": true
+    },
+    "finding": "The previously failing cold-load projection now matches the packaged expected projection exactly, and the complete save/archive identity gate passes."
+  },
+  "provenanceAndPlayerIntent": {
+    "cleanHead": true,
+    "packagedExecutableSha256": "c97f9aee446b2931d01bfb5b5a4ac9d802500fcacb734ea3a00523ba236c9539",
+    "packagedAsarSha256": "ba64264b9611870214490cb433e9698fd82862fdf2cfd5c2c8272d51a2d1ed9f",
+    "harnessSha256": "771410a733e4ebc8d821ded0bc44bf6f3719f0dabf275aa5432ad00445938484",
+    "officerSuccessionPolicy": {
+      "requested": "historical",
+      "version": 1,
+      "explicit": true
+    },
+    "stateIdentity": {
+      "response": "civic",
+      "playerInput": true
+    },
+    "paramilitaryPolicy": {
+      "response": "always_allow",
+      "basis": "player_selected_counterfactual",
+      "playerInput": true,
+      "finalApplied": "always_allow"
+    },
+    "finalState": {
+      "turn": 1,
+      "playerFaction": "RBiH",
+      "decisionMode": "historical",
+      "allBlockerCountsZero": true
+    }
+  },
+  "runtimeDiagnostics": {
+    "consoleMessages": 0,
+    "pageErrors": 0,
+    "failureRawNetworkFailures": 0,
+    "networkFailuresAfterExpectedAbortAttribution": 0,
+    "expectedTileFetchAborts": 8,
+    "failureTileFetchAbortSignals": 8,
+    "expectedAmbientLifecycleAborts": 0,
+    "audioFallbackRows": 57,
+    "audioPredicateSatisfiedByFallback": true,
+    "mainProcessStderrRows": 2,
+    "expectedInspectorTeardownRows": 2,
+    "derivedUnexpectedMainProcessStderrRows": 0,
+    "formalAudioAndUnexpectedStderrFieldsEstablished": false
+  },
+  "cdpBoundary": {
+    "rawArtifact": {
+      "path": "tmp-paradox-qa-20260710/evidence/terrain-native-cold-load-rbih-t1-20261025-02/rbih/cdp-network-collection-v3.json",
+      "bytes": 462770,
+      "sha256": "d5f5ca3e3bac88fb1fc0ae17a284b1df8183f216b4584dc8749bde54e0f0b999",
+      "liveInventoryBound": true
+    },
+    "schema": "awwv.r8-warroom.cdp-network-collection.v3",
+    "status": "inconsistent",
+    "requests": 213,
+    "responses": 211,
+    "failures": 8,
+    "finishes": 205,
+    "targetLikeFailures": 0,
+    "capViolations": 0,
+    "pendingAtFlush": 0,
+    "inconsistencies": 2,
+    "bodyAttempts": {
+      "captured": 0,
+      "unavailable": 0,
+      "error": 0,
+      "pending": 0,
+      "truncated": 0
+    },
+    "rootCauseClaimedHere": false
+  },
+  "preservation": {
+    "failedAttemptPreserved": true,
+    "allEightAllowedArtifactsRetained": true,
+    "legacyClosingBeforeNativeStillValid": true,
+    "n91ThroughN98AndHistoricalEvidenceUnaffected": true,
+    "telemetry": [
+      {
+        "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+        "bytes": 140097015,
+        "sha256": "40e25ae15966d04006287209632c5b9db95fefb6eb9ada2eb203a46fc1d2627c",
+        "unchangedFromAfterColdProof": true,
+        "preBuildBytesRemainExactPrefix": true
+      },
+      {
+        "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+        "bytes": 1041,
+        "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+        "unchanged": true
+      }
+    ]
+  },
+  "decision": {
+    "nativeAcceptanceMet": false,
+    "saveLoadRepairProvedInNative": true,
+    "soleSubstantiveRuntimeFailureOutsideOutcomeAndFinalizationFields": "cdp-v3-complete",
+    "audioUnderlyingEvidencePasses": true,
+    "unexpectedStderrUnderlyingEvidencePasses": true,
+    "observerCorrectionAuthorizedByThisAudit": false,
+    "retryAuthorized": false,
+    "nextReview": "Only a separately proven, observer-only correction for the retained CDP inconsistency may be reviewed. It must preserve this failed attempt and must not weaken the CDP acceptance criteria."
+  },
+  "limits": [
+    "This is not a successful native result and does not waive the CDP gate.",
+    "The missing success-only audio and unexpected-stderr fields are recorded as formally unestablished even though their retained fallback/raw evidence satisfies the same underlying predicates.",
+    "No t39, calibration, baseline adoption, tuning, or gameplay claim is made."
+  ]
+}

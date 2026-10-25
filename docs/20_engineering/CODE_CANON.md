@@ -26,9 +26,12 @@ Startup/intro/resume traffic is outside this window. Exact-frame or unexpected s
 fatal through flush until owned detach; setup failure recording cannot overwrite an existing
 runtime-error or over-cap. Completed playtest evidence survives a later observer failure by identity;
 an unreached manifest or rejected playtest is never reconstructed. Disabled output remains inert.
-Focused159/159, TypeScript/syntax0 and independent correction reviews qualify this observer scope
-only. Existing classifiers, admission, GameState, package and gameplay remain unchanged. The failed
-native23 and703 attempts remain failed. See the active Electron plan and portable observer inventory.
+The earlier159/159 proof retains its original observer scope. A known request may end with
+`loadingFailed` before response headers; its failure stays recorded without a false completeness
+inconsistency. Missing response count/timestamp still blocks body capture. Requestless failures,
+response orphans, duplicates and frame/session loss remain guarded. Current focused55/55, static
+checks and independent review pass; the native opening that exposed this defect remains failed.
+No primary classifier, gameplay, save or package change follows. See the active Electron plan.
 
 ## Operation-completion ownership handoff (2026-10-23, focused candidate)
 

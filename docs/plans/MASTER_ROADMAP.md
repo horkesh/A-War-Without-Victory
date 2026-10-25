@@ -15,7 +15,7 @@ paused or RE is blocked, they are describing 2026-08-28, not today.
 
 **Last updated:** 2026-10-25 — owner prioritizes player capability to achieve bot calibration and access the same operations; diagnose and repair proven gaps before divergence experiments. n94 remains the no-player benchmark.
 
-**Player parity:** n98 qualifies707/707/706/706 and zero n91/n92 losses; suite15082/0/33. Package01/compiled proof pass; real opening fails derived load projection and CDP cap. Reviewed correction passes170/170+54/54. Next package02/cold-load proof/opening, then39; later checkpoints/resume/all-faction gates remain open. Preserve n91–n98; no tuning/adoption. [Plan](2026-07-31-full-campaign-electron-validation-plan.md).
+**Player parity:** n98/suite qualify; package02 cold compiled proof and real Save/load pass. Opening remains failed on CDP request→failure completeness. Reviewed observer-only repair55/55 needs new CI/provenance and one opening before39. Preserve n91–n98; no tuning/adoption. Later checkpoints/resume/all-faction remain open. [Plan](2026-07-31-full-campaign-electron-validation-plan.md).
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
@@ -79,7 +79,7 @@ The execution-branch paragraph below records the earlier January checkpoint.
 
 **Authority:** This file is the sole source of truth for unfinished product work.
 
-**Current R8 — player capability before divergence.** n98 and suite qualify at2ca7d7b, explicitly reused with the reviewed cold-load/observer delta. Package01/compiled proof pass; real opening fails derived hydration equality and CDP path-recording cap. Canonical saves match. Explicit-root load and protocol-first observer pass170/170+54/54; actual package02/native remain gates. Old703/700, explicit-choice23 and every failure remain retained. Later checkpoints, all-faction, replay and release stay open.
+**Current R8 — player capability before divergence.** n98/suite retain2ca provenance. Package02/code12a is independently qualified with exact cold source/package state/report and integrity-bound EXE/ASAR changes. Real opening passes Save/load but fails two false CDP request→failure inconsistencies. Reviewed observer-only repair55/55 retains strict body/runtime admission; new observer commit/CI and one opening precede39. No package rebuild or new188/suite. All old failures, later checkpoints, resume/all-faction/release gates remain open.
 
 **Execution view:** [COMMAND_BOARD.md](COMMAND_BOARD.md) is a derived convenience view; this roadmap wins if they differ.
 

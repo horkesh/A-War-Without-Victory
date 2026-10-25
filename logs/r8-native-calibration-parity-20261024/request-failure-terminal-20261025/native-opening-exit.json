@@ -1,0 +1,15 @@
+{
+  "schema": "awwv.cold-load-validation.native-exit.v2",
+  "head": "12a4680f04fc3e4cbd8b2fb5f5133b472afd1fd6",
+  "configSha256": "3440441d753e47827dd0ab0f8075719668bedffcdbb75415b0ad2ecb42b2ee56",
+  "readyReceiptSha256": "7f22bf81b619c63a2b7deedc7e1eaae311a8d228927559e5dd5521ccdad80177",
+  "readySha256": "0a37df7f89f230442c3e679955b69db1f425a09fb6e6c300c312b95cca430013",
+  "exit": 1,
+  "signal": null,
+  "errorCode": null,
+  "timedOut": false,
+  "elapsedMs": 179771,
+  "attempt": 1,
+  "retry": false,
+  "harnessSha256": "771410a733e4ebc8d821ded0bc44bf6f3719f0dabf275aa5432ad00445938484"
+}

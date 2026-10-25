@@ -11957,3 +11957,12 @@ n98 independently passes707/707/706/706, zero n91/n92 losses and protected/prove
 The reviewed12-file delta primes terrain before load ratings, updates every maintained explicit-root caller, and shares the unchanged Advance prerequisite. Non-HTTP CDP retains bounded protocol/length/SHA; HTTP caps/classification remain strict. RED54/56 becomes56/56; focused170/170, collector54/54, TypeScript/CJS/diff0. Offline hydration matches native projection; canonical bytes and next-advance state/report are exact. Genuine canon/determinism and implementation reviews permit n98/suite reuse only at true2ca scope plus this delta. No new188/full suite, tuning, reference/pin adoption or forced state.
 
 This clean-source checkpoint precedes CI, one package02 build, inventory/ASAR/source-map/compiled proof, then one corrected native opening. Player calibration, resume fidelity, all-faction and release remain unmet. [selected proof](../logs/r8-native-calibration-parity-20261024/desktop-cold-load-20261025/MANIFEST.json)
+
+
+## 2026-10-25 — Package02 qualified, real Save/load fixed, collector terminal correction
+
+Package02 at12a4680 independently proves1228 paths/1225 unchanged files, reviewed desktop/ASAR-main changes and EXE-only ASAR-integrity update. Original rejected postbuild and adapter NO_GOs remain retained. The reviewed data-only materializer and actual cold source/package runs establish canonical byte identity, exact loaded projection and next-turn state/report without external priming; preservation and old telemetry prefixes pass.
+
+The normal native opening now passes Save/load and four exact archives but remains FAILED for two known hillshade request→loadingFailed chains without response headers. All error arrays are empty; audio/stderr success-only fields remain formally unestablished, with positive fallback evidence kept diagnostic. The collector removes only the false failure-without-response inconsistency; missing-response body eligibility and requestless/orphan/duplicate/frame/session guards remain strict. RED53/2, GREEN55/55, static checks0 and genuine postimplementation review GO. No gameplay/package change, campaign/full-suite rerun, tuning or baseline adoption.
+
+Next clean observer provenance/CI and a newly bound single opening (3minutes expected,10-minute cap,no retry) reuse package02 honestly at its12a code head. Player39/104/156/188, resume, all-faction and release remain unmet. [selected proof](../logs/r8-native-calibration-parity-20261024/request-failure-terminal-20261025/MANIFEST.json)

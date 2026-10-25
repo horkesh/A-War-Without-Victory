@@ -506,7 +506,6 @@ function startCdpNetworkCollection(options) {
     const state = requests.get(requestId);
     if (!state) pushInconsistency('failure-without-request', requestId);
     else if (state.terminal) pushInconsistency('terminal-after-terminal', requestId);
-    else if (state.responseCount === 0) pushInconsistency('failure-without-response', requestId);
     const rawErrorText = event?.errorText;
     const errorText = privacySafeFailure(rawErrorText);
     const blockedReason = event?.blockedReason == null ? null : privacySafeBlockedReason(event.blockedReason);

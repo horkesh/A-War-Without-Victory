@@ -6224,3 +6224,8 @@ Scenario startup can initialize process globals that baked New Campaign and Load
 ## 2026-10-25 — Terrain-aware load and protocol-first diagnostic projection
 
 Desktop load hydration computes terrain-dependent sector ratings. Prime both existing sets from the selected explicit root before hydration, independently of prior Advance. Warm-game versus cold-observer comparison can disagree only in ratings while canonical save bytes match. Test cold/warm/stale/missing/malformed roots and exact next-advance equality. Classify non-HTTP CDP URLs before HTTP pathname bounds; record bounded protocol/length/hash, keep HTTP caps fatal, and never infer the discarded overflow value as fact. [selected proof](../logs/r8-native-calibration-parity-20261024/desktop-cold-load-20261025/MANIFEST.json)
+
+
+## 2026-10-25 — Failed request is a lawful observed terminal sequence
+
+CDP loadingFailed can follow a known request before response headers. Preserve the failure row without inventing a completeness error; require response count/timestamp for body admission, and keep requestless failures inconsistent. Zero body attempts is expected when observed OGG requests finish206 and body retrieval is failure-triggered. A failure before finalization does not manufacture success-only normalized audio/stderr fields. Package EXE integrity metadata must be proved against actual ASAR-header hashes, not dismissed as build noise. [selected proof](../logs/r8-native-calibration-parity-20261024/request-failure-terminal-20261025/MANIFEST.json)

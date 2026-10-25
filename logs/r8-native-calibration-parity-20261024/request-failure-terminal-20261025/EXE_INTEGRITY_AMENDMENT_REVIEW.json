@@ -1,0 +1,109 @@
+{
+  "schema": "awwv.cold-load-validation.exe-integrity-amendment-review.v1",
+  "verdict": "GO_FOR_TARGETED_POSTBUILD_ADAPTER_REVIEW",
+  "independent": true,
+  "reviewerIdentity": "/root/desktop_terrain_canon_review",
+  "reviewedAt": "2026-10-25T10:02:00+01:00",
+  "scope": "Independent read-only review of the unexpected package02 executable delta and whether a postbuild-only integrity amendment is lawful. This review does not approve an adapter implementation, relabel the retained postbuild failure, authorize a rebuild, or authorize native execution.",
+  "candidate": {
+    "head": "12a4680f04fc3e4cbd8b2fb5f5133b472afd1fd6",
+    "referencePackage": "dist-packaged/desktop-terrain-prerequisite-20261025-01/win-unpacked",
+    "candidatePackage": "dist-packaged/desktop-cold-load-20261025-02/win-unpacked"
+  },
+  "diagnosisAuthority": {
+    "report": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/exe-integrity-diagnosis-01/DIAGNOSIS.json",
+      "sha256": "f0ecf937754cef6b0755d99c461f87c45a6e39fc6ec566776f622b64909c4547"
+    },
+    "readme": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/exe-integrity-diagnosis-01/README.md",
+      "sha256": "3d8fe9f2b3af8284daced3051d2c53ff876585f9c3f6c20ab7318725b022faa2"
+    },
+    "successfulBuild": {
+      "receiptSha256": "592fcdecabc9eb48846cb44b33e14f6ad08b27c495ab011e0f8b7054db66f6a5",
+      "resultSha256": "ac38879cdcdad6de285d8dc28d33f0d82acb3f87674dcbc17d4b33baab47e08f",
+      "childExit": 0,
+      "wrapperExit": 0,
+      "timedOut": false
+    },
+    "retainedFailedPostbuild": {
+      "receiptSha256": "40385ca3f7855a0c7e0dbd5a4fa7f6475057536cb7cf2c5a61655f6833642a79",
+      "stderrSha256": "47196c567d23b5090bb866d859a325f15f13e2f2c02075b3fd75f9c15948714c",
+      "childExit": 1,
+      "wrapperExit": 126,
+      "artifactContractPass": false,
+      "missingArtifact": "PACKAGE_BINDING.json"
+    }
+  },
+  "independentReadOnlyVerification": {
+    "executableBytes": {
+      "reference": 222836736,
+      "candidate": 222836736
+    },
+    "executableSha256": {
+      "reference": "3d0a4cecdaa5b647eda0882a2867ba6da1092d77d91602f67f03ddab6938d7de",
+      "candidate": "c97f9aee446b2931d01bfb5b5a4ac9d802500fcacb734ea3a00523ba236c9539"
+    },
+    "rawDiff": {
+      "differingBytes": 62,
+      "minimumOffset": 221668783,
+      "maximumOffset": 221668846,
+      "bytesOutsideFullIntegrityValue": 0
+    },
+    "embeddedIntegrityValues": {
+      "reference": "d009c76bc23107088f217ce4c234823c03987d5a9bd6055cd5b8aa70d1680e9f",
+      "candidate": "3653af1289f5b9ad5ceb27cf77373b7649715fa4e77014f078af329c2558fbc3"
+    },
+    "installedBuilderComputeData": {
+      "module": "node_modules/app-builder-lib/out/asar/integrity.js",
+      "electronBuilderVersion": "25.1.8",
+      "referenceAsarHeaderSha256": "d009c76bc23107088f217ce4c234823c03987d5a9bd6055cd5b8aa70d1680e9f",
+      "candidateAsarHeaderSha256": "3653af1289f5b9ad5ceb27cf77373b7649715fa4e77014f078af329c2558fbc3",
+      "embeddedValuesMatchComputedHeaders": true
+    }
+  },
+  "findings": [
+    {
+      "id": "EXE-DELTA-EXACTLY-INTEGRITY-RESOURCE",
+      "status": "PROVED",
+      "finding": "The two equal-length executables differ in 62 bytes, and every differing byte lies within the full 64-character integrity value at offsets 221668783 through 221668846. The diagnosis additionally parses the surrounding 122-byte PE INTEGRITY/ELECTRONASAR resource, proves 51 of 52 PE resources byte-identical, and proves replacing only the old complete integrity value yields the candidate executable byte-for-byte."
+    },
+    {
+      "id": "EXE-INTEGRITY-VALUE-DERIVED-FROM-AUTHORIZED-ASAR",
+      "status": "PROVED",
+      "finding": "The independently recomputed ASAR-header SHA-256 values from installed app-builder-lib 25.1.8 exactly equal the respective embedded PE values. The ASAR inventories have identical 14,818-entry topology and 12,252 of 12,253 file bytes identical; the sole changed ASAR file is reviewed src/desktop/electron-main.cjs at the candidate source hash."
+    },
+    {
+      "id": "PACKAGE-DELTA-BOUNDED",
+      "status": "PROVED",
+      "finding": "Both packages contain the same 1,228 relative paths, with 1,225 byte-identical files. The exact three changed paths are the executable, resources/app.asar, and resources/dist/desktop/desktop_sim.cjs. The packaged desktop bundle equals the local reviewed build, its source map embeds reviewed desktop_sim.ts exactly, and all enumerated UI, media, terrain, and remaining package files are unchanged."
+    },
+    {
+      "id": "ORIGINAL-FAILURE-VALID",
+      "status": "PRESERVED",
+      "finding": "The original postbuild correctly rejected a third path outside its two-path assumption. That failure remains truthful. The new evidence revises the assumption by proving the executable is a deterministic derivative of the authorized ASAR header; it does not waive or overwrite the failure."
+    }
+  ],
+  "decision": {
+    "executableDeltaIsLawfulDerivedOutput": true,
+    "twoPathAssumptionRevised": true,
+    "rebuildRequired": false,
+    "nativeAuthorized": false,
+    "adapterExecutionAuthorized": false,
+    "targetedAdapterReviewAuthorized": true,
+    "minimumAcceptableAdapter": [
+      "Remain in an excluded new subdirectory and leave the frozen v2 config, validator, packages, successful build receipt, and failed postbuild receipt unchanged.",
+      "Consume the exact v2 config and original successful build receipt/result and revalidate the clean exact candidate and fixed authority before reading package outputs.",
+      "Require the exact 1,228-path inventory, 1,225 byte-identical files, and exactly the three measured changed paths.",
+      "Require the exact ASAR topology and only reviewed electron-main.cjs changed; require the candidate desktop bundle equal the local bundle and the source map equal reviewed desktop_sim.ts.",
+      "Recompute both ASAR-header hashes with the installed builder algorithm, parse both PE resource tables, require 51 of 52 resources identical and only INTEGRITY/ELECTRONASAR changed, and require full executable equality after replacing only the old 64-byte value.",
+      "Emit EXE_INTEGRITY_PROOF.json plus the existing awwv.cold-load-validation.package-binding.v2 shape. Keep the downstream consumer receipt allowlist at the single PACKAGE_BINDING.json artifact by running this adapter under an explicit two-artifact postbuild receipt and passing its package binding artifact to the unchanged consumers.",
+      "Prove the frozen adapter and its negative controls in a separate targeted independent review before actual execution."
+    ]
+  },
+  "limits": [
+    "No source, package, executable, build receipt, failed receipt, gameplay artifact, or tracked file was changed by this review.",
+    "No rebuild, cold consumer, engine, native process, campaign, or suite was run.",
+    "Actual package acceptance and native authorization remain pending."
+  ]
+}

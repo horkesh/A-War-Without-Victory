@@ -1,0 +1,204 @@
+{
+  "schema": "awwv.cold-load-validation.cdp-observer-postimplementation-review.v1",
+  "reviewer": "desktop_terrain_canon_review",
+  "independent": true,
+  "verdict": "GO",
+  "reviewScope": "Observer-only correction to CDP stream completeness and admission accounting after the retained package02 native opening. This review does not reclassify that failed opening and does not authorize another native attempt.",
+  "candidate": {
+    "head": "12a4680f04fc3e4cbd8b2fb5f5133b472afd1fd6",
+    "files": [
+      {
+        "path": "tools/ui/cdp_network_collector.cjs",
+        "headSha256": "74dd518319567cbb1b04aa62e6cf37a6c9370ef504bdd75ea9982e09ccdfee36",
+        "reviewedSha256": "b8c957b337ba81d375a471c4b0d84f1a0fda1a0c2a4f9c52d0a84b0b3b6a7259",
+        "change": "Removed only the failure-without-response fatal inconsistency from onFailure."
+      },
+      {
+        "path": "tests/cdp_network_collector.test.ts",
+        "headSha256": "67bbc4e58582d6d82abf0305ad1ac49a50568fa93051919d130f0cbb1683f7d0",
+        "reviewedSha256": "2df81fcfc198ac9421548c3ef9986bdf059fcf10ab0e933bc0f3360d5e3371e9",
+        "change": "Added exact retained PMTiles request-to-failure coverage, retained requestless-failure rejection, and proved a target-shaped response-less failure remains body-ineligible."
+      }
+    ],
+    "diffCheckExit": 0,
+    "otherTrackedChangesObserved": false
+  },
+  "retainedFailureEvidence": {
+    "nativeOpeningRemainsFailed": true,
+    "allOtherGatesAudit": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native-opening-failure-audit-02/ALL_OTHER_GATES_AUDIT.json",
+      "bytes": 10815,
+      "sha256": "fbcb9c640443c9dc85af3506cb13d9ef30292d89dad8ab2bec663cbdb31287e0"
+    },
+    "rawCdpArtifact": {
+      "path": "tmp-paradox-qa-20260710/evidence/terrain-native-cold-load-rbih-t1-20261025-02/rbih/cdp-network-collection-v3.json",
+      "bytes": 462770,
+      "sha256": "d5f5ca3e3bac88fb1fc0ae17a284b1df8183f216b4584dc8749bde54e0f0b999",
+      "status": "inconsistent",
+      "counts": {
+        "requests": 213,
+        "responses": 211,
+        "failures": 8,
+        "finishes": 205,
+        "targetLikeFailures": 0,
+        "bodyAttempts": 0,
+        "inconsistencies": 2,
+        "capViolations": 0,
+        "pendingAtFlush": 0
+      }
+    },
+    "disputedChains": [
+      {
+        "requestId": "2504.13828",
+        "requestSequence": 255,
+        "failureSequence": 267,
+        "requestTimestamp": 311468.035391,
+        "failureTimestamp": 311468.047686,
+        "resourceType": "Fetch",
+        "path": "/data/derived/tiles/hillshade.pmtiles",
+        "range": "bytes=9726509-9806118",
+        "error": "net::ERR_ABORTED",
+        "canceled": true,
+        "candidate": false
+      },
+      {
+        "requestId": "2504.13829",
+        "requestSequence": 256,
+        "failureSequence": 269,
+        "requestTimestamp": 311468.035742,
+        "failureTimestamp": 311468.047775,
+        "resourceType": "Fetch",
+        "path": "/data/derived/tiles/hillshade.pmtiles",
+        "range": "bytes=9806119-9885319",
+        "error": "net::ERR_ABORTED",
+        "canceled": true,
+        "candidate": false
+      }
+    ],
+    "commonTarget": {
+      "frameId": "8778EA545EB90912FB9054284B55427C",
+      "loaderId": "287E1352FE37E449F3D155424B3AF1D4"
+    },
+    "unchangedDisqualificationReasons": [
+      "wrong-path",
+      "wrong-resource-type",
+      "wrong-range",
+      "response-count",
+      "missing-response-timestamp"
+    ]
+  },
+  "protocolAuthority": [
+    {
+      "authority": "repository-vendored Chrome DevTools Protocol",
+      "path": "node_modules/devtools-protocol/json/browser_protocol.json",
+      "packageVersion": "0.0.1566079",
+      "bytes": 1371369,
+      "sha256": "5415853ce01b5224f952d075ae23a73dc66033458351ddc5e839b2a95293b5e8",
+      "finding": "Network.loadingFailed is an independent failed-load event with requestId, timestamp, type, errorText and optional canceled; it declares no responseReceived prerequisite. The same authority explicitly documents failed requests for which no responseReceived event is triggered."
+    },
+    {
+      "authority": "repository-vendored Playwright protocol typing",
+      "path": "node_modules/playwright-core/types/protocol.d.ts",
+      "packageVersion": "1.60.0",
+      "bytes": 812393,
+      "sha256": "681cf9768031b874fafdd81a20e8a20ca6c92a5cbf12e86532a69182e315b065",
+      "finding": "The loadingFailed payload has no response-presence field or response dependency."
+    },
+    {
+      "authority": "official Chrome DevTools Protocol Network domain",
+      "url": "https://chromedevtools.github.io/devtools-protocol/tot/Network/#event-loadingFailed"
+    },
+    {
+      "authority": "primary Blink Network protocol definition",
+      "url": "https://chromium.googlesource.com/devtools/devtools-frontend/+/main/third_party/blink/public/devtools_protocol/domains/Network.pdl"
+    }
+  ],
+  "correctnessFindings": [
+    {
+      "id": "protocol-completeness",
+      "result": "PASS",
+      "detail": "A requestWillBeSent followed by loadingFailed without responseReceived is a lawful terminal CDP chain. Treating it as globally inconsistent was stricter than the protocol authority."
+    },
+    {
+      "id": "candidate-admission-preserved",
+      "result": "PASS",
+      "detail": "candidateReasons still requires the ambient path, Media resource type, bytes=0- range, exactly one request and response, and finite request/response/failure timestamps. A response-less target-shaped request remains non-candidate due to response-count and missing-response-timestamp and cannot start Network.getResponseBody."
+    },
+    {
+      "id": "raw-evidence-preserved",
+      "result": "PASS",
+      "detail": "The failure row, canceled flag, privacy-safe error, disqualification reasons, sequence, target binding and summary counts remain observable. Only the invalid derived fatal inconsistency is removed."
+    },
+    {
+      "id": "strict-guards-preserved",
+      "result": "PASS",
+      "detail": "failure-without-request, response-without-request, reused request ID, duplicate response, duplicate terminal, session/frame lifecycle, timestamp, cap, redirect-taint and body-settlement guards are unchanged."
+    },
+    {
+      "id": "retained-trace-classification",
+      "result": "PASS",
+      "detail": "All eight failures are noncandidate canceled hillshade PMTiles range fetches. The two response-less chains fail five independent admission predicates. Three OGG Media requests have request-to-206-response-to-finish chains; therefore zero target-like failures and zero body attempts are the correct retained classification."
+    }
+  ],
+  "canonAndDeterminism": {
+    "result": "PASS",
+    "references": [
+      "docs/20_engineering/AGENT_WORKFLOW.md: observer-only diagnostics reuse unaffected broad checks at their actual scope",
+      "docs/20_engineering/CODE_CANON.md:66-77 determinism contract",
+      "docs/20_engineering/DETERMINISM_TEST_MATRIX.md:5 cold-load and CDP collector evidence boundary",
+      "docs/10_canon/Engine_Invariants_v0_9_0.md:285-301 determinism invariants"
+    ],
+    "detail": "The correction changes only external observer completeness classification. It adds no GameState, save, report, gameplay rule, package resource, random source, clock input, iteration-order dependency or serialization field. The same ordered CDP stream produces a stable ordered artifact. No gameplay canon panel or new n98/full-suite/campaign run is required for this observer-only delta."
+  },
+  "focusedEvidence": {
+    "diagnosis": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/frame-inconsistency-diagnosis-01/DIAGNOSIS.md",
+      "bytes": 5802,
+      "sha256": "54d84ef3095b4d27c27803d5b4f9126fc49329a8664e687091a57c9200cff36b"
+    },
+    "red": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/frame-inconsistency-diagnosis-01/red-focused-test.log",
+      "sha256": "85fae10b206b3daae74c6bde62cb70279e4ecc294517f9009c94525ef1713494",
+      "exit": 1,
+      "passed": 53,
+      "failed": 2,
+      "meaning": "Before the collector correction, the exact two-chain PMTiles fixture and target-shaped response-less fixture were rejected as inconsistent."
+    },
+    "green": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/frame-inconsistency-diagnosis-01/green-focused-test.log",
+      "sha256": "4954fb2e68858a23d7c5681d364956efa594633adb5ce2d248d418b3b2bce325",
+      "exit": 0,
+      "passed": 55,
+      "failed": 0
+    },
+    "nodeCheck": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/frame-inconsistency-diagnosis-01/node-check.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit": 0
+    },
+    "diffCheck": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/frame-inconsistency-diagnosis-01/git-diff-check.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit": 0
+    }
+  },
+  "authorization": {
+    "observerImplementationApproved": true,
+    "nativeRetryAuthorized": false,
+    "nextRequiredBeforeNative": [
+      "Bind the exact reviewed two-file hashes to clean candidate provenance.",
+      "Obtain terminal CI for that exact candidate.",
+      "Preserve the failed native opening and its raw CDP artifact unchanged.",
+      "Run the existing cheap preflight/check-only gates against the exact candidate and package02 before any new opening."
+    ],
+    "noRebuildRequired": true,
+    "reasonNoRebuild": "The collector and its tests are external observer/harness code and are not inside package02; package02 gameplay and compiled consumer bytes are unchanged."
+  },
+  "limits": [
+    "The retained package02 native opening remains FAILED because its recorded collector status is inconsistent; evidence is never rewritten or reinterpreted as a pass.",
+    "This review does not establish a corrected native opening, t39, calibration, native parity, or player acceptance.",
+    "The two success-only finalization fields from the failed opening remain formally unestablished; their underlying retained evidence is not a substitute for a successful result record.",
+    "No engine, browser, native, build, package, campaign or full-suite execution was performed by this review."
+  ],
+  "blockers": []
+}
