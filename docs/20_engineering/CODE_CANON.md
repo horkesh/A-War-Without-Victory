@@ -1,5 +1,9 @@
 # Code Canon (AWWV)
 
+## Fractional formation fatigue persistence (2026-10-25 candidate)
+
+Formation `ops.fatigue` is persisted finite nonnegative gameplay state and supports the existing half-point writer. The v9 migration and formation validator preserve that domain rather than erasing nonintegers. Invalid/nonfinite/negative and missing legacy defaults stay unchanged; militia-pool fatigue is outside this change. No writer, coefficient, cap, recovery, schema version or operation changes. Tests: `tests/formation_fatigue_persistence.test.ts`, `tests/formations_validate.test.ts`. Canonical/runtime source→load→advance state/report fidelity is required; focused evidence is not calibration qualification.
+
 ## Diagnostic scenario turn-boundary observer (2026-10-25)
 
 `RunScenarioOptions.diagnosticTurnBoundaryObserver` is an optional synchronous evidence-only observer after ordinary checkpoint capture and before loop close. It receives direct `structuredClone` copies of state and report, including own undefined properties. Absence performs no observer clone/callback; mutation stays detached and clone/callback errors propagate. It exposes no state transform, CLI, save schema or gameplay writer. A raw state snapshot does not supply the next iteration's BotManager/orders/context and cannot by itself prove a turn17 causal fork. `tests/scenario_turn_boundary_observer.test.ts` covers default byte neutrality, boundary/count, copy fidelity and failure honesty.

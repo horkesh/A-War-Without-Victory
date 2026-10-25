@@ -1,0 +1,198 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T11:57:31.656Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm-capture-02",
+  "timeout_ms": 180000,
+  "original_argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "node_modules/tsx/dist/cli.mjs",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm_turn16_snapshot_v2.mts",
+    "--evidence-dir",
+    "{evidenceDir}",
+    "--expected-head",
+    "f7c40a0d1e28fde596f217b2c297b0734ec67470"
+  ],
+  "argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "node_modules/tsx/dist/cli.mjs",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm_turn16_snapshot_v2.mts",
+    "--evidence-dir",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\cold-load-validation-v2\\native39-validation-v1\\warm-normalization-probe-v1\\warm-capture-02",
+    "--expected-head",
+    "f7c40a0d1e28fde596f217b2c297b0734ec67470"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "prerequisites.json",
+    "raw-turn16.NOT_GAME_SAVE.v8",
+    "diagnostic.json",
+    "result.json",
+    "run/activity_summary.json",
+    "run/brigade_temporal_log.jsonl",
+    "run/control_delta.json",
+    "run/destroyed_brigades.json",
+    "run/displacement_event_log.jsonl",
+    "run/end_report.md",
+    "run/final_save.json",
+    "run/formation_delta.json",
+    "run/initial_save.json",
+    "run/operation_aars.json",
+    "run/replay_save_manifest.json",
+    "run/run_meta.json",
+    "run/run_summary.json",
+    "run/save_w15.json",
+    "run/save_w16.json",
+    "run/watched_operations.json",
+    "run/weekly_report.jsonl"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm_turn16_snapshot_v2.mts",
+    "bytes": 20226,
+    "raw_sha256": "220bb66d4aacb1452b91650be0fad7a79013e7b6d3bdd15f86ac39a4ca33028b",
+    "normalized_text_sha256": "220bb66d4aacb1452b91650be0fad7a79013e7b6d3bdd15f86ac39a4ca33028b",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 20226,
+      "sha256": "220bb66d4aacb1452b91650be0fad7a79013e7b6d3bdd15f86ac39a4ca33028b"
+    }
+  },
+  "end_utc": "2026-10-25T11:57:48.527Z",
+  "pid": 25668,
+  "child_exit": 0,
+  "wrapper_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm_turn16_snapshot_v2.mts",
+    "bytes": 20226,
+    "raw_sha256": "220bb66d4aacb1452b91650be0fad7a79013e7b6d3bdd15f86ac39a4ca33028b",
+    "normalized_text_sha256": "220bb66d4aacb1452b91650be0fad7a79013e7b6d3bdd15f86ac39a4ca33028b",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 52337,
+    "sha256": "63db048dd9c43784e15578855d675eb968101a387de9f0aa4f7bd301bc8c10a1"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "prerequisites.json",
+      "bytes": 16383,
+      "sha256": "315278506f74caf934d7ad2d5a89f73a6ea1f02026f2b08cec27c77f355db0e0"
+    },
+    {
+      "path": "raw-turn16.NOT_GAME_SAVE.v8",
+      "bytes": 2917513,
+      "sha256": "dc7f155e8ace4bdffa173701186f69e40d06b833b1331e54d468b0bdb3c1f63e"
+    },
+    {
+      "path": "diagnostic.json",
+      "bytes": 22080915,
+      "sha256": "4ace77267dc108e95a39f1f3f1982bb63a5b4535f8e80030e7c7f057d08e11f5"
+    },
+    {
+      "path": "result.json",
+      "bytes": 566,
+      "sha256": "b0693b42638ad890318a39d2541f9fd32746892308e0d671cad3e8dbc1b16137"
+    },
+    {
+      "path": "run/activity_summary.json",
+      "bytes": 441,
+      "sha256": "c083dda5fe28468dcb8041e2d8b8c2007d68fa687e79bc95d9697a2cf47dd091"
+    },
+    {
+      "path": "run/brigade_temporal_log.jsonl",
+      "bytes": 1789514,
+      "sha256": "4376e6a29ee275cc6834c37bf4f86853bc830f50efe147f0dbbfc94c3e7f6de4"
+    },
+    {
+      "path": "run/control_delta.json",
+      "bytes": 17638,
+      "sha256": "7549f86b4afc7c7a8b5cc5d41975b4f76397a677aaee897d2c747c8a463f0632"
+    },
+    {
+      "path": "run/destroyed_brigades.json",
+      "bytes": 336,
+      "sha256": "d3cb259989ba8373247cf2e3acf1aa0321d4c076e63cef74457ce050eaf5923b"
+    },
+    {
+      "path": "run/displacement_event_log.jsonl",
+      "bytes": 1873784,
+      "sha256": "21d046997b0388e932df08a9cf488347d0050bd6a43f61998c50ede9a2b8c2ca"
+    },
+    {
+      "path": "run/end_report.md",
+      "bytes": 35776,
+      "sha256": "c338c308f4edfe44fc1aaf2e68afd9ea73476c61b9532a5a016533a26e7d6191"
+    },
+    {
+      "path": "run/final_save.json",
+      "bytes": 4812075,
+      "sha256": "fbd0ac2df5f916dc77244a765832dc04bb835b25e7d549808aa1aeef60256e91"
+    },
+    {
+      "path": "run/formation_delta.json",
+      "bytes": 2815,
+      "sha256": "e164b939d7f3334085a847c67d171647cfe9b303a270d526c9c8ffa8513547e1"
+    },
+    {
+      "path": "run/initial_save.json",
+      "bytes": 1373722,
+      "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+    },
+    {
+      "path": "run/operation_aars.json",
+      "bytes": 146738,
+      "sha256": "de64cc0cf616eaeb5468f23df2571e3de33bce97170b53f7cc5cc3c91a9490e9"
+    },
+    {
+      "path": "run/replay_save_manifest.json",
+      "bytes": 3199,
+      "sha256": "47a189f53b622c4910ad524c139cdabfa074b923bd6e0945bc2d47004c3aafba"
+    },
+    {
+      "path": "run/run_meta.json",
+      "bytes": 10291,
+      "sha256": "6f7093a84764b7b4cd5cca7535cc2759d3aa56697799304b070d63a9f96551c2"
+    },
+    {
+      "path": "run/run_summary.json",
+      "bytes": 99246,
+      "sha256": "f2ac097c7c8a61354111978b541351318d8737d36c3417d06879952ac0e8f7f8"
+    },
+    {
+      "path": "run/save_w15.json",
+      "bytes": 4373149,
+      "sha256": "dfe2ec1dc13ef286eaea2d51c3bbe9505b3d11afb2c6e5e3bb5922586838cb97"
+    },
+    {
+      "path": "run/save_w16.json",
+      "bytes": 4493938,
+      "sha256": "22ef518bb1f894d0afb450643a21d4a628f8f5c1462a80ebda498f81ece943ca"
+    },
+    {
+      "path": "run/watched_operations.json",
+      "bytes": 696,
+      "sha256": "4f84ccf9f7c5b36cb9839ffe6993bdd83f744ff62d8f24b59dd7b0c6959a59c9"
+    },
+    {
+      "path": "run/weekly_report.jsonl",
+      "bytes": 306306,
+      "sha256": "91abdaa52b9b1e6f4e5cdeeb111836e90eebb02d5c6ebc6cd0dfb754a95ef91e"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

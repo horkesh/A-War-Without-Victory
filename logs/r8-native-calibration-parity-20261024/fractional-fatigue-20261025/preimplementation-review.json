@@ -1,0 +1,199 @@
+{
+  "schema": "awwv.fatigue-repair-preimplementation-review.v1",
+  "reviewer": "desktop_terrain_canon_review",
+  "independent": true,
+  "verdict": "GO",
+  "scope": "Preimplementation canon, determinism, formation-state ownership, save compatibility, and validation review of the proved fractional formation-fatigue persistence defect. No source, test, gameplay, package, scenario, native, build, baseline, or canon document was changed by this review.",
+  "authority": {
+    "head": "f7c40a0d1e28fde596f217b2c297b0734ec67470",
+    "clean_tree": true,
+    "diagnosis": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/ACTUAL_NORMALIZATION_DIAGNOSIS.json",
+      "bytes": 13799,
+      "sha256": "37a16a2de1eb9983fd621ca5914fdececfd96ce8967e6bf4462244ad99dd3925",
+      "verdict": "CONFIRMED_PERSISTED_FRACTIONAL_FATIGUE_LOSS_AT_SERIALIZATION_MIGRATION_BOUNDARY"
+    },
+    "diagnosis_narrative": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/ACTUAL_NORMALIZATION_DIAGNOSIS.md",
+      "bytes": 6032,
+      "sha256": "6d4e2da24d5257ce9c70850fd133a69364b2a7e1557127cec9c17adaa3768b04"
+    },
+    "actual_warm_capture_review": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/ACTUAL_WARM_CAPTURE_REVIEW.json",
+      "bytes": 10300,
+      "sha256": "ca0a59b0242b344fc3d575d285a0f2d6c87a10219b6f027eae4d89670c9789f4",
+      "verdict": "GO",
+      "qualification": "TURN16_SERIALIZATION_SEAM_DIAGNOSTIC_QUALIFIED_ONLY"
+    },
+    "actual_raw_snapshot": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm-capture-02/raw-turn16.NOT_GAME_SAVE.v8",
+      "bytes": 2917513,
+      "sha256": "dc7f155e8ace4bdffa173701186f69e40d06b833b1331e54d468b0bdb3c1f63e",
+      "classification": "NOT_GAME_SAVE",
+      "week_index": 15,
+      "state_turn": 16
+    }
+  },
+  "established_facts": {
+    "live_writer": "src/state/formation_fatigue.ts:254-260,303-334 deliberately stores half-point formation.ops.fatigue values.",
+    "lossy_boundary": "src/state/serialize.ts:13-37 deep-clones then reapplies migrations from schema_version 0; src/state/save_migration.ts:186-215 resets every non-integer formation fatigue to 0.",
+    "desktop_effect": "The desktop serializes runtime state after each Advance and deserializes it before the next Advance, so the integer-only migration commits the loss between turns.",
+    "headless_effect": "The scenario runner carries the live nextState between weeks, so its in-memory fractional value survives even though emitted saves pass through serialization.",
+    "actual_turn16_observation": "Foča fatigue 10.5 and Gacko fatigue 2.5 become 0 at the seam; Nevesinje 4 and Čajniče 8 remain unchanged. The retained characterization found 25 fractional fatigue reset paths overall.",
+    "consumer_relevance": "Commander force evaluation reads fatigue as a continuous numeric multiplier. The retained evidence proves an operand change, not an actual week-17 rank, selected brigade, map change, or 705 causation.",
+    "unrelated_fields": "The relevant four formations had no accompanying personnel, cohesion, morale, readiness, kind, activation, or location change."
+  },
+  "canon_mapping": [
+    {
+      "change": "Preserve finite non-negative fractional formation.ops.fatigue through migration, canonical serialization, runtime serialization, and load.",
+      "authority": "docs/10_canon/Engine_Invariants_v0_9_0.md section 11.4, lines 299-301",
+      "mapping": "Save/load must fully reconstruct formation state; resetting 10.5 or 2.5 to zero violates this requirement."
+    },
+    {
+      "change": "Keep desktop state durable without changing its value at the serialization boundary.",
+      "authority": "docs/10_canon/Engine_Invariants_v0_9_0.md section 11.5, lines 303-305",
+      "mapping": "The serialized/autosaved desktop state must be the successful mutation's actual state, including persisted fatigue."
+    },
+    {
+      "change": "Treat formation fatigue as persisted gameplay truth rather than a derived cache.",
+      "authority": "docs/10_canon/Systems_Manual_v0_9_0.md lines 1093, 1101, and 1105; docs/10_canon/Engine_Invariants_v0_9_0.md section 13.1",
+      "mapping": "The manual names formation state and a fractional frontline-fatigue mechanism, while enumerating the five disposable military caches; formations/ops are not in that transient list."
+    },
+    {
+      "change": "Retain deterministic serializer behavior while accepting valid fractions.",
+      "authority": "docs/20_engineering/CODE_CANON.md lines 73-79; docs/20_engineering/DETERMINISM_TEST_MATRIX.md lines 97-107; docs/10_canon/Engine_Invariants_v0_9_0.md sections 11.1-11.4",
+      "mapping": "Finite IEEE-754 values are deterministic JSON inputs; this predicate correction adds no time, randomness, collection iteration, or ordering change."
+    }
+  ],
+  "approved_production_scope": [
+    {
+      "path": "src/state/save_migration.ts",
+      "current_bytes": 37291,
+      "current_sha256": "9b9f6d6c22cb246e6f4b683b2b1afbbc011cc33bf5e665cbb6a1082061e3d45d",
+      "required_change": "In defaultFormations only, replace the integer-only fatigue guard with an explicit number, finite, non-negative guard. Preserve every typeof-number value for which Number.isFinite(value) and value >= 0; default missing, non-number, NaN, positive or negative infinity, and negative values to 0. Do not round, clamp, rescale, or create a new state field."
+    },
+    {
+      "path": "src/state/game_state.ts",
+      "current_bytes": 184567,
+      "current_sha256": "7031fe1b94dc5d6702476068678aa7ed1bcd72373f039cff51f7227e5a093828",
+      "required_change": "Correct only the stale FormationOpsState.fatigue annotation so it states finite non-negative persisted numeric fatigue and permits fractional values. Do not alter the interface shape."
+    },
+    {
+      "path": "src/validate/formations.ts",
+      "current_bytes": 18271,
+      "current_sha256": "0aa65662e370549f8914d16844d7fba4dd53dc57d8377ba37a74a3e547763d4e",
+      "required_change": "Align formations.ops.fatigue validation with the migration and writer: accept finite numbers >= 0, including fractions; reject non-number, NaN, infinities, and negative values. Update the diagnostic message accordingly without changing issue ordering or code."
+    }
+  ],
+  "explicit_exclusions": [
+    "No change to src/state/formation_fatigue.ts, FRONTLINE_FATIGUE_PER_TURN, FATIGUE_RECOVERY_INTERVAL, FATIGUE_MAX, combat fatigue deltas, recovery, supply, or ordering.",
+    "No change to militia-pool fatigue, src/state/militia_fatigue.ts, defaultMilitiaPools, or MilitiaPoolState's integer contract.",
+    "No change to commander thresholds, force evaluation formulas, candidate eligibility, selection, control, terrain, battles, operations, cohesion, morale, formation creation, or player policy.",
+    "No change to schema version, serialized field shape, state ownership, transient-field list, save format, or canonical key ordering.",
+    "No change to front_posture_commitment.ts or integer-only scenario/CLI reporting guards in this repair; those are separate consumer-contract questions and cannot be silently bundled.",
+    "No baseline adoption, threshold relaxation, map acceptance waiver, tuning, or claim that this defect caused the retained 705 result."
+  ],
+  "save_compatibility": {
+    "new_schema_version_required": false,
+    "reason": "The field already exists as number and the live producer already writes fractions. The repair corrects an invalid normalization predicate without changing shape or adding a field.",
+    "legacy_missing_ops": "Still defaults to { fatigue: 0, last_supplied_turn: null }.",
+    "legacy_missing_or_malformed_fatigue": "Still defaults to 0 for absent, non-number, non-finite, or negative values.",
+    "legacy_integer_fatigue": "Must serialize and deserialize byte-identically to the current implementation.",
+    "valid_fractional_fatigue": "Must survive canonical and runtime serialization/deserialization exactly.",
+    "old_save_effect": "A legacy/current save that already contains a valid finite non-negative fraction must retain it instead of losing it; a save already written with a lossy zero cannot reconstruct the lost historical value."
+  },
+  "determinism_review": {
+    "no_new_iteration": true,
+    "no_order_change": true,
+    "no_randomness_or_time": true,
+    "canonical_key_order_unchanged": true,
+    "finite_number_requirement_preserves_nonfinite_rejection": true,
+    "repeated_serialization_must_be_byte_identical": true,
+    "serializer_must_not_mutate_input": true,
+    "risk": "Expected canonical/runtime bytes change only where the old migration erased valid fractional fatigue. Every changed byte must be attributable to the authorized values or directly derived provenance/hash metadata."
+  },
+  "focused_red_green_requirements": {
+    "production_test_files": [
+      "tests/formation_fatigue_persistence.test.ts (preferred new focused contract suite)",
+      "tests/formations_validate.test.ts (validator acceptance/rejection alignment)"
+    ],
+    "red": [
+      "Under the unmodified predicate, prove 10.5 and 2.5 become 0 across the real canonical/runtime preparation path and that validateFormations rejects them.",
+      "Retain the RED receipt/result separately; do not rewrite it after GREEN."
+    ],
+    "green": [
+      "For RBiH, RS, and HRHB formations, preserve representative 0.5, 2.5, and 10.5 values exactly through deserializeState(serializeState(state)) and deserializeState(serializeRuntimeState(state)).",
+      "Exercise applyFatigueRecovery on the real front-assigned path from an integer value so production creates a half point, then require exact canonical and runtime round-trip preservation.",
+      "Require repeated canonical and runtime serialization to be byte-identical and require serialization not to mutate the input object.",
+      "Require existing integer values, including 0, 4, and 8, to retain existing serialized bytes and validation behavior.",
+      "Require absent ops and missing fatigue to default to 0; require strings, objects, null where invalid, NaN, positive infinity, negative infinity, and negative numbers to retain fail-closed migration behavior and validator rejection where directly validated.",
+      "Prove militia-pool fractional fatigue remains rejected/defaulted under its existing integer-only contract.",
+      "Use loadStateFromPath with a real current-shape save containing fractional formation fatigue, then compare a production advance from the loaded/runtime-roundtripped state against the same valid source state under identical baseDir and inputs: full resulting state and report must match exactly.",
+      "Exercise all three factions in the persistence and next-advance fixtures; do not infer all-faction coverage from one RBiH player label."
+    ],
+    "actual_retained_snapshot_proof": [
+      "Run a separate ignored evidence check against raw-turn16.NOT_GAME_SAVE.v8; tracked CI tests must not depend on the private ignored packet path.",
+      "Require all 25 observed fractional formation-fatigue reset paths to retain their exact raw values through canonical and runtime round trips.",
+      "Require Foča 10.5 and Gacko 2.5 exact, with Nevesinje 4 and Čajniče 8 unchanged; inventory any remaining state-path changes rather than hiding them behind aggregate equality."
+    ],
+    "static_gates": [
+      "Focused Vitest RED then GREEN with exact test and assertion counts.",
+      "Repository noEmit/typecheck exit 0.",
+      "node --check for any changed/generated CJS evidence helpers only.",
+      "git diff --check exit 0 and independent postimplementation source/test review."
+    ]
+  },
+  "bounded_prefix_gate": {
+    "required_before_expensive_qualification": true,
+    "scope": "One authentic observer-backed 0-to-16 prefix at the reviewed candidate; no week 17.",
+    "pass_conditions": [
+      "Same scenario, input digest, terrain bindings, clean HEAD, source bindings, turn count, and 16 callbacks.",
+      "Exact initial state fidelity and unchanged ordinary control, battle, operation, and report semantics through turn 16.",
+      "All 25 fractional fatigue resets disappear; exact Foča/Gacko fractions survive and the two named integer controls remain unchanged.",
+      "No unrelated state presence/value difference appears across the serialization seam.",
+      "Decoded old/new canonical and runtime output differences are confined to authorized persisted formation-fatigue values and directly derived hash/provenance metadata."
+    ],
+    "expected_hash_policy": "The old turn-16 canonical hash encoded lossy zeroes and is expected to move. Preserve the old artifact and its old-scope byte-identity claim; record a new candidate hash and prove the semantic diff instead of waiving or relabeling the old claim.",
+    "stop": "Stop on any unrelated state, gameplay, control, battle, operation, report, input, or artifact drift. A pass does not prove week-17 or 707 causation."
+  },
+  "qualification_gates": {
+    "unaffected_evidence_reuse": [
+      "The retained diagnosis, canon mapping, historical/map authority, old failures, and old candidate evidence remain valid at their stated heads and scopes.",
+      "Old package/native evidence remains historical evidence only and cannot qualify binaries containing this source delta."
+    ],
+    "new_candidate_required": [
+      "After focused GREEN, typecheck, bounded prefix, and independent implementation review, create a clean committed/pushed candidate with terminal CI.",
+      "Run the authoritative 188-week scenario first under the existing one-attempt/fail-closed contract. Require 707/707/706/706, zero formerly-correct n91/n92 losses at all four checkpoints, protected anchors, provenance, telemetry, preservation, and all existing acceptance gates.",
+      "Only a qualifying scenario candidate proceeds to the required full suite. The old 2ca scenario/full-suite results do not qualify the gameplay-affecting serialization delta, though their unaffected diagnostic history remains reusable.",
+      "Build a fresh package from the qualifying candidate and prove inventory, compiled-source mapping, save/load preservation, cold source/package consumer equality, and independent package approval.",
+      "Run a fresh normal native opening prerequisite and then the single authorized native39 qualification under existing practical gates, preservation, no-retry, and provenance rules."
+    ],
+    "final_acceptance": [
+      "Headless checkpoint maps and all protected calibration gates remain required; no expected save-hash movement waives a map or score loss.",
+      "The repair may be accepted as the persistence correction only after its semantic and broad regression gates pass.",
+      "The ordinary-player capability goal remains unmet unless the fresh normal native39 proof reaches 707 and retains every formerly-correct cell and practical gate. A continued 705 or any new loss is a failed qualification, not evidence for tuning or baseline adoption."
+    ]
+  },
+  "known_nonblocking_canon_residual": {
+    "issue": "Systems Manual line 1105 currently names +1.5 per-turn frontline fatigue while src/state/formation_fatigue.ts currently defines 0.5.",
+    "disposition": "This pre-existing coefficient mismatch is not resolved or approved here. It does not block the coefficient-agnostic persistence repair because both values are fractional and the repair changes neither writer nor mechanic. Any future coefficient reconciliation is a separate canon/tuning decision with its own evidence."
+  },
+  "required_postimplementation_review": {
+    "independent": true,
+    "must_verify": [
+      "Exact three-file production scope and no hidden consumer/tuning changes.",
+      "Migration and validator predicates are identical in accepted domain and malformed rejection.",
+      "Militia-pool fatigue remains untouched.",
+      "Focused RED/GREEN evidence, all-faction coverage, retained raw snapshot proof, desktop load/next-advance equality, typecheck, and diff cleanliness.",
+      "No claim that the repair caused or fixed the native39 score before the fresh native proof."
+    ]
+  },
+  "blockers": [],
+  "authorization": {
+    "implement_exact_approved_scope": true,
+    "focused_tests_and_cheap_checks": true,
+    "bounded_turn16_prefix_after_independent_implementation_review": true,
+    "scenario_fullsuite_package_native_only_in_the_order_and_on_the_conditions_above": true,
+    "tuning_baseline_adoption_forced_control_or_acceptance_waiver": false
+  }
+}

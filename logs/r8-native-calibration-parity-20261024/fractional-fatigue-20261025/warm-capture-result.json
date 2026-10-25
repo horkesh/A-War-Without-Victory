@@ -1,0 +1,12 @@
+{
+  "schema": "awwv.warm-turn16-snapshot-result.v1",
+  "pass": true,
+  "status": "PASS_FIDELITY_CHARACTERIZED",
+  "observer_count": 16,
+  "boundary_week_index": 15,
+  "boundary_turn": 16,
+  "state_path_difference_count": 386,
+  "formation_count": 279,
+  "formation_difference_count": 107,
+  "output_dir": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\cold-load-validation-v2\\native39-validation-v1\\warm-normalization-probe-v1\\warm-capture-02\\run"
+}

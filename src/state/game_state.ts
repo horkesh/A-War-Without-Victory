@@ -1222,7 +1222,7 @@ export interface FormationAssignment {
 }
 
 export interface FormationOpsState {
-    fatigue: number; // integer >= 0, irreversible in Phase 10
+    fatigue: number; // finite number >= 0; persisted operational fatigue may be fractional
     last_supplied_turn: number | null; // null or <= current turn
 }
 

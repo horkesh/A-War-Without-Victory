@@ -204,7 +204,7 @@ function defaultFormations(state: GameState): void {
         if (!form.ops || typeof form.ops !== 'object' || Array.isArray(form.ops)) {
             form.ops = { fatigue: 0, last_supplied_turn: null };
         } else {
-            if (!Number.isInteger(form.ops.fatigue) || form.ops.fatigue < 0) form.ops.fatigue = 0;
+            if (typeof form.ops.fatigue !== 'number' || !Number.isFinite(form.ops.fatigue) || form.ops.fatigue < 0) form.ops.fatigue = 0;
             if (form.ops.last_supplied_turn !== null && (!Number.isInteger(form.ops.last_supplied_turn) || form.ops.last_supplied_turn > turn)) {
                 form.ops.last_supplied_turn = null;
             }

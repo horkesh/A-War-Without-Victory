@@ -1,0 +1,183 @@
+{
+  "schema": "awwv.fatigue-repair-postimplementation-review.v1",
+  "reviewer": "desktop_terrain_canon_review",
+  "independent": true,
+  "verdict": "NO_GO_TARGETED_TEST_CORRECTION_REQUIRED",
+  "scope": "Independent review of the frozen five-file fractional formation-fatigue repair and its focused evidence. No source, test, scenario, suite, build, package, native run, or broad validation was executed or edited by this review.",
+  "authority": {
+    "base_head": "f7c40a0d1e28fde596f217b2c297b0734ec67470",
+    "preimplementation_review_sha256": "7cbd418d92daa950d3e706b34d6a2952a4eb10440db2d157725983f87ca204e5",
+    "freeze": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-repair-20261025/FINAL_SOURCE_TEST_FREEZE.json",
+      "bytes": 3876,
+      "sha256": "49aecf847753865068609a4d98b62affb2df3328da2c5ae9fc46539491285309"
+    }
+  },
+  "source_review": {
+    "verdict": "GO",
+    "exact_approved_scope": true,
+    "files": [
+      {
+        "path": "src/state/save_migration.ts",
+        "bytes": 37330,
+        "sha256": "1afdc7dafe9f84d65338bac8ecf693f608ffea7460a9d9c14c5f6c55a21870b4",
+        "finding": "defaultFormations now preserves exactly typeof-number, finite, non-negative fatigue and retains the old zero fallback for missing, non-number, non-finite, or negative values. It does not round, clamp, rescale, or touch militia-pool fatigue."
+      },
+      {
+        "path": "src/state/game_state.ts",
+        "bytes": 184596,
+        "sha256": "87595a7300faf4e1f8d3fb84e022d11a62c61e6aa63fa8cef5d596ec7c9a671f",
+        "finding": "Only the stale FormationOpsState annotation changed; state shape and ownership are unchanged."
+      },
+      {
+        "path": "src/validate/formations.ts",
+        "bytes": 18275,
+        "sha256": "2b11179f4175cd25e547e9d3f4a4125c8c45b510ac92ae2a6987d1491f766864",
+        "finding": "Validator accepted domain exactly matches the migration predicate and retains the existing issue code, path, and deterministic issue order."
+      }
+    ],
+    "excluded_behavior_unchanged": [
+      "formation fatigue writer, coefficient, cap, recovery, supply, and ordering",
+      "militia-pool fatigue migration and validation",
+      "commander evaluation, eligibility, thresholds, and selection",
+      "control, terrain, battles, operations, cohesion, morale, schema version, serialization keys, and transient-field policy"
+    ],
+    "canon_and_determinism": "The implementation conforms to Engine Invariants 11.4/11.5 and the persisted-formation/fractional-fatigue authority reviewed preimplementation. It introduces no new iteration, ordering, randomness, time, or serialization-shape behavior."
+  },
+  "test_review": {
+    "files": [
+      {
+        "path": "tests/formation_fatigue_persistence.test.ts",
+        "bytes": 8761,
+        "sha256": "57049b783b8baa308ca7def51112ed165825c950b026a4d065cf198424225f51"
+      },
+      {
+        "path": "tests/formations_validate.test.ts",
+        "bytes": 8997,
+        "sha256": "8fac517aefbce8e5144182842daf79e535a5caf91ce1c6fb54ae04af7214483b"
+      }
+    ],
+    "covered": [
+      "RBiH, RS, and HRHB representative fractions 0.5, 2.5, and 10.5 survive canonical and runtime round trips.",
+      "Repeated canonical/runtime bytes are stable and serializer input is not mutated.",
+      "Integer values 0, 4, and 8 remain idempotent; the unchanged test passed under both RED and GREEN source predicates.",
+      "Absent ops and missing fatigue default to zero; string, object, null, NaN, both infinities, and negative fraction retain fail-closed migration behavior.",
+      "Militia-pool fractional fatigue remains on its independent integer-only contract and defaults to zero.",
+      "The real applyFatigueRecovery frontline path produces 0.5 and both serializers preserve it.",
+      "validateFormations accepts finite non-negative fractions and rejects malformed/non-finite/negative values with the unchanged issue code.",
+      "The tracked tests use repository data and OS temporary directories only; they do not depend on ignored C-worktree evidence, locale, prior attempts, or protected output roots."
+    ]
+  },
+  "retained_evidence": {
+    "red": {
+      "receipt_sha256": "a3cab9cbd36a5487bf049dc400f446f144ae89e34effddc0a57257e44784bade",
+      "vitest_sha256": "0a8ee3ccfc2dc4ea23770b20c4f598751a90b8ad0cc07a110b0a3f6f77b248e1",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "tests": 8,
+      "passed": 4,
+      "expected_failed": 4,
+      "artifact_contract_pass": true
+    },
+    "green": {
+      "receipt_sha256": "27b1bbb2420e95aa968f9ba5d9f1002447001dcf92841dc98dc57f16a69d7b4e",
+      "vitest_sha256": "daa00287e0bdefa5f282cd8c633bf36ee05b1afa329a4b2244b3fcc700110c47",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "tests": 8,
+      "passed": 8,
+      "failed": 0,
+      "explicit_assertions": 57,
+      "artifact_contract_pass": true
+    },
+    "typecheck": {
+      "receipt_sha256": "42089f5c64d32c8e347fd00874bfc0f434c9dbb4aceaca1a592d3792d866f40e",
+      "child_exit": 0,
+      "wrapper_exit": 0
+    },
+    "diff_check": {
+      "receipt_sha256": "c749db6a31dc3cd6e7c8ce66b21cea7a63a502cd61f54ce48078484225716188",
+      "child_exit": 0,
+      "wrapper_exit": 0
+    },
+    "preserved_refinements": [
+      {
+        "receipt_sha256": "c12d48318d5adca393d63b5179facf201e0986eb3a51e73b8999acd96a6f9e7e",
+        "reason": "initial test-fixture typing failure",
+        "child_exit": 2
+      },
+      {
+        "receipt_sha256": "4560a0201412ab3bf66ec93effd72c2536a53ba1bba16b9722753971c7988d45",
+        "reason": "initial raw proof misclassified two approved missing-fatigue defaults",
+        "child_exit": 1,
+        "wrapper_exit": 126
+      }
+    ]
+  },
+  "actual_snapshot_review": {
+    "verdict": "GO",
+    "helper_sha256": "1499d7cf8f8b520904b3631c72f0bebdbefb7baa4568a568b08d74c91bf706bb",
+    "receipt_sha256": "a698f5d0a386fae2f828ffc3c92aa2dff041a69df62824a547f9cb203b668468",
+    "result_sha256": "fa771460ccf59dd55af949be8ed09a057e4d1a886662043d55005fb0fa56841c",
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "artifact_contract_pass": true,
+    "source_snapshot_sha256": "dc7f155e8ace4bdffa173701186f69e40d06b833b1331e54d468b0bdb3c1f63e",
+    "formation_count": 279,
+    "fractional_fatigue_path_count": 25,
+    "fatigue_path_difference_count_after_repair": 0,
+    "named_values": {
+      "rs_foa_brigade": 10.5,
+      "rs_gacko_brigade": 2.5,
+      "rs_nevesinje_brigade": 4,
+      "rs_ajnie_brigade": 8
+    },
+    "approved_missing_fatigue_defaults": 2,
+    "canonical_remaining_normalization_difference_count": 365,
+    "runtime_remaining_normalization_difference_count": 361,
+    "remaining_fatigue_differences": 0,
+    "complete_remaining_difference_inventory_retained": true,
+    "canonical_repeat_identical": true,
+    "runtime_repeat_identical": true,
+    "input_mutation_difference_count": 0,
+    "scope_note": "The remaining inventories are pre-existing undefined/absence and canonical transient normalization classes; this proof does not waive or claim repair of them."
+  },
+  "blocking_finding": {
+    "severity": "P1_EVIDENCE_CONTRACT",
+    "file": "tests/formation_fatigue_persistence.test.ts",
+    "test": "loads and advances a real fractional save identically after a runtime round trip",
+    "problem": "The test advances loaded and runtimeLoaded. Both states have already passed through loadStateFromPath, so their equality cannot establish that loading the valid pre-load source preserves next-turn behavior. It also compares resulting states with serializeState, which excludes runtime projections and therefore does not satisfy the approved full-resulting-state comparison.",
+    "required_correction": [
+      "Advance the valid pre-load source state under the same baseDir and inputs in addition to loaded and runtimeLoaded.",
+      "Require all three advances to succeed.",
+      "Compare full resulting state using deep equality or serializeRuntimeState, and compare full reports exactly, for source versus loaded and source versus runtimeLoaded.",
+      "Retain the existing explicit all-three-faction fractional assertions before advance."
+    ],
+    "why_material": "The production defect is specifically a serialization/load boundary divergence. Comparing only two post-load states proves deterministic reloading, not neutrality of that boundary into the next production turn."
+  },
+  "targeted_correction_gate": {
+    "production_source_changes_allowed": false,
+    "test_scope": "Only the stated next-advance assertion correction in tests/formation_fatigue_persistence.test.ts, unless that check exposes a real source discrepancy requiring a new diagnosis.",
+    "rerun_required": [
+      "Focused two-file Vitest with actual pass/assertion counts and preserved receipt.",
+      "NoEmit typecheck and git diff --check after the test correction.",
+      "Fresh five-file freeze and targeted independent verification."
+    ],
+    "rerun_not_required": [
+      "Actual raw-snapshot proof, because the three production files are approved and must remain hash-exact.",
+      "Bounded prefix, 188-week scenario, full suite, build, package, or native proof before this focused blocker is closed."
+    ]
+  },
+  "broad_gate_status": {
+    "bounded_turn16_prefix": "PENDING_AFTER_TARGETED_GO",
+    "authoritative_188_week": "NOT_RUN",
+    "full_suite": "NOT_RUN",
+    "build_package_native": "NOT_RUN",
+    "native39_707": "UNMET",
+    "no_acceptance_criterion_waived": true
+  },
+  "findings": [
+    "The three production edits are correct and ready to retain unchanged.",
+    "One focused next-advance evidence gap blocks postimplementation GO."
+  ]
+}

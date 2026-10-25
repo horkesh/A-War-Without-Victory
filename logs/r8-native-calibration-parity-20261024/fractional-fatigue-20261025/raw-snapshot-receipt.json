@@ -1,0 +1,78 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T12:14:44.743Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-repair-20261025/actual-snapshot-02",
+  "timeout_ms": 180000,
+  "original_argv": [
+    "node",
+    "node_modules\\tsx\\dist\\cli.mjs",
+    "tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-repair-20261025\\actual-snapshot-fatigue-proof.ts",
+    "--evidence-dir",
+    "{evidenceDir}",
+    "--snapshot",
+    "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\cold-load-validation-v2\\native39-validation-v1\\warm-normalization-probe-v1\\warm-capture-02\\raw-turn16.NOT_GAME_SAVE.v8"
+  ],
+  "argv": [
+    "node",
+    "node_modules\\tsx\\dist\\cli.mjs",
+    "tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-repair-20261025\\actual-snapshot-fatigue-proof.ts",
+    "--evidence-dir",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-repair-20261025\\actual-snapshot-02",
+    "--snapshot",
+    "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\cold-load-validation-v2\\native39-validation-v1\\warm-normalization-probe-v1\\warm-capture-02\\raw-turn16.NOT_GAME_SAVE.v8"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "result.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-repair-20261025/actual-snapshot-fatigue-proof.ts",
+    "bytes": 7896,
+    "raw_sha256": "1499d7cf8f8b520904b3631c72f0bebdbefb7baa4568a568b08d74c91bf706bb",
+    "normalized_text_sha256": "1499d7cf8f8b520904b3631c72f0bebdbefb7baa4568a568b08d74c91bf706bb",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 7896,
+      "sha256": "1499d7cf8f8b520904b3631c72f0bebdbefb7baa4568a568b08d74c91bf706bb"
+    }
+  },
+  "end_utc": "2026-10-25T12:14:45.675Z",
+  "pid": 16332,
+  "child_exit": 0,
+  "wrapper_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-repair-20261025/actual-snapshot-fatigue-proof.ts",
+    "bytes": 7896,
+    "raw_sha256": "1499d7cf8f8b520904b3631c72f0bebdbefb7baa4568a568b08d74c91bf706bb",
+    "normalized_text_sha256": "1499d7cf8f8b520904b3631c72f0bebdbefb7baa4568a568b08d74c91bf706bb",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 151,
+    "sha256": "645e5158243ac8b75ab1b2a2259a0f4113a3d1fab53149bc684576d21e136407"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "result.json",
+      "bytes": 194015,
+      "sha256": "fa771460ccf59dd55af949be8ed09a057e4d1a886662043d55005fb0fa56841c"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

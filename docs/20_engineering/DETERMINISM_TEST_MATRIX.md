@@ -1,5 +1,9 @@
 # Determinism Test Matrix (AWWV)
 
+## Fractional formation fatigue (2026-10-25 candidate)
+
+Focused8/8 with60 assertions covers the real fractional writer, all3 factions, malformed/nonfinite/negative/default and integer compatibility, validator parity, canonical/runtime round trips and pre-load source versus loaded next-advance full runtime state/report equality. The authentic279-formation raw snapshot preserves25 fractional paths exactly. The new188 comparator may permit only prior0→restored finite fractional `/military/formations/*/ops/fatigue` values; unrelated or integer changes, added/removed paths and all map/score losses remain fatal. Old full-byte proofs remain scoped to their actual heads.
+
 ## Raw scenario observation (2026-10-25)
 
 The optional `diagnosticTurnBoundaryObserver` receives direct structured clones after checkpoint capture. Focused3/3 proves zero observer work when absent, exact ordinary artifact bytes, correct boundary/count, detached state/report mutation, own undefined preservation, and clone/callback failure propagation. No default gameplay/order/artifact change follows. Canonical replay fidelity failed before native comparison; raw snapshot normalization evidence must not be promoted to uninterrupted turn17 causality without matching context.

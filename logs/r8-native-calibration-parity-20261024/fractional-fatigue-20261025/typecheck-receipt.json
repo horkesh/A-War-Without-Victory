@@ -1,0 +1,76 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T12:20:03.733Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-repair-20261025/targeted-typecheck-01",
+  "timeout_ms": 180000,
+  "original_argv": [
+    "node",
+    "tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-repair-20261025\\run-command.cjs",
+    "{evidenceDir}",
+    "node",
+    "node_modules\\typescript\\bin\\tsc",
+    "--noEmit",
+    "--incremental",
+    "false",
+    "-p",
+    "tsconfig.json"
+  ],
+  "argv": [
+    "node",
+    "tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-repair-20261025\\run-command.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-repair-20261025\\targeted-typecheck-01",
+    "node",
+    "node_modules\\typescript\\bin\\tsc",
+    "--noEmit",
+    "--incremental",
+    "false",
+    "-p",
+    "tsconfig.json"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-repair-20261025/run-command.cjs",
+    "bytes": 574,
+    "raw_sha256": "b62d0e0a0e511ffa68996f7a35308023b92ef07320583c7e96321abec161ff3f",
+    "normalized_text_sha256": "b62d0e0a0e511ffa68996f7a35308023b92ef07320583c7e96321abec161ff3f",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 574,
+      "sha256": "b62d0e0a0e511ffa68996f7a35308023b92ef07320583c7e96321abec161ff3f"
+    }
+  },
+  "end_utc": "2026-10-25T12:20:34.561Z",
+  "pid": 7568,
+  "child_exit": 0,
+  "wrapper_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-repair-20261025/run-command.cjs",
+    "bytes": 574,
+    "raw_sha256": "b62d0e0a0e511ffa68996f7a35308023b92ef07320583c7e96321abec161ff3f",
+    "normalized_text_sha256": "b62d0e0a0e511ffa68996f7a35308023b92ef07320583c7e96321abec161ff3f",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}
