@@ -1,15 +1,25 @@
 # Code Canon (AWWV)
 
-## Physical column route versus assignment footprint (2026-10-25 candidate)
+## Physical column route versus assignment footprint (2026-10-25 bounded qualification)
 
 `processOsidColumnMovement` retains destination/authority validation and routes permitted orders
 through the existing friendly/allied weighted Dijkstra without a corps-sector intermediate-node
 mask. It preserves hostile-node rejection, deterministic weights/ties, transit ownership, travel
 time and physical arrival. The generic pathfinder and offensive-launch consumers are unchanged.
 The existing routing-scope diagnostic keys remain present with `null` values when no mask applies.
-See `MOVEMENT_AUTHORITY.md` section 2a. Focused production proof and independent review qualify
-the bounded implementation; a new 188-week regression and full suite remain required before
-gameplay qualification. The last packaged January result remains 700/712, not accepted parity.
+See `MOVEMENT_AUTHORITY.md` section 2a. Focused production proof, source QA and independent review
+qualify the bounded routing implementation; n97 clean188 and the required suite preserve the no-player
+reference, while fresh39 fails the strict media/runtime gate after Save/load with measured703/712 and four losses.
+This is a bounded routing qualification only: no player campaign parity,703 floor or baseline adoption
+is claimed. Keep failure diagnostics and normal UI policy evidence separate from canon-sensitive history.
+Missing final-result artifacts on a strict nonzero wrapper must remain an explicit failed-result receipt;
+do not infer Save/load failure from the missing result, and retain the child/wrapper exit plus authenticated archives.
+
+The current QA harness repair is observer/choice capture only: focused101/101, private capture6/6,
+syntax0/0, TypeScript0/0 and independent review `69bf95d…`/`be871…`. `--rbih-paramilitary-policy=always_allow` selects a
+normal visible counterfactual for sole RBiH with the Historical selector; default behavior and
+provenance remain unchanged. The Object.hasOwn compatibility finding was test-only and corrected;
+focused101/101 was rerun, the failed type01 attempt remains preserved, and the source harness is unchanged.
 
 ## Operation-completion ownership handoff (2026-10-23, focused candidate)
 

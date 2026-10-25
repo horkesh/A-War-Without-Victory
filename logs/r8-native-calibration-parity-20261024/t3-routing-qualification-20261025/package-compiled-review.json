@@ -1,0 +1,103 @@
+{
+  "schema": "awwv.t3-routing-package.independent-compiled-review.v1",
+  "verdict": "GO",
+  "independent": true,
+  "reviewerIdentity": "receipt-integration-review",
+  "reviewedAt": "2026-10-25T03:47:29.8262609Z",
+  "expectedHead": "fd061e898ad3de942d62c016547a5e453ddd9422",
+  "conditionSha256": "d10cb84d0428c86fac40bf3c37349eaa0f4e36c6f88d6de4ef8298498ce897c4",
+  "fullSuiteResultSha256": "aa786b7a54d207a775d9b1d774403ec93351c47c524dcdbcf2ecd1a329127945",
+  "referencePackageBindingSha256": "6e71e4a16a837f2d73f5b8c5c1aa50ecac95f982abc21f82d5fa5c8080c920e0",
+  "compiledRuntimeProbeResultSha256": "313661400417974fd0b47488b60ee6115d2af1e59ce17fbb8045a94b6ba85226",
+  "binderVersion": "postbuild-binding-v2",
+  "sourceComparisonPolicySha256": "f255579a9f97fc55b2bdd66e1590cfaed59ad91967248521c28955198d26711e",
+  "postbuildAdmissionManifestSha256": "37f04dba97b4245087f58e636e01a7644d10bd603deaaf1cb4f4a8508abe34fb",
+  "reviewedArtifacts": [
+    {
+      "id": "A War Without Victory.exe",
+      "path": "dist-packaged/player-column-routing-20261025-01/win-unpacked/A War Without Victory.exe",
+      "bytes": 222836736,
+      "sha256": "3d0a4cecdaa5b647eda0882a2867ba6da1092d77d91602f67f03ddab6938d7de"
+    },
+    {
+      "id": "resources/app.asar",
+      "path": "dist-packaged/player-column-routing-20261025-01/win-unpacked/resources/app.asar",
+      "bytes": 196688692,
+      "sha256": "f4b01445048ec8df0108218f3b83ba201d1cd0ebdc1e032bc417b2b503529e59"
+    },
+    {
+      "id": "resources/dist/desktop/desktop_sim.cjs",
+      "path": "dist-packaged/player-column-routing-20261025-01/win-unpacked/resources/dist/desktop/desktop_sim.cjs",
+      "bytes": 4487693,
+      "sha256": "af676459d15888e67821284d7e546ccc0e96925767f6764149aa0ecd21163c69"
+    },
+    {
+      "id": "dist/desktop/desktop_sim.cjs.map",
+      "path": "dist/desktop/desktop_sim.cjs.map",
+      "bytes": 11616337,
+      "sha256": "60d03fc529b0a4bf65c06dd3fb923f2beaaccfe3d41c7be48abeb4e7bc973a80"
+    },
+    {
+      "id": "src/sim/combat/osid_column_movement.ts",
+      "path": "src/sim/combat/osid_column_movement.ts",
+      "bytes": 32035,
+      "sha256": "31de47a728a2382a23f4eb9a7f665f6c6f1fe5cbcef8d6da59d8221ec7d29c73"
+    },
+    {
+      "id": "compiled runtime probe result",
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/compiled-probe-01/result.json",
+      "bytes": 1354,
+      "sha256": "313661400417974fd0b47488b60ee6115d2af1e59ce17fbb8045a94b6ba85226"
+    },
+    {
+      "id": "T3 full-suite result",
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-full-suite/full-suite-01/child/result.json",
+      "bytes": 290781,
+      "sha256": "aa786b7a54d207a775d9b1d774403ec93351c47c524dcdbcf2ecd1a329127945"
+    },
+    {
+      "id": "immutable 29b package binding",
+      "path": "tmp/player-bot-capability-parity-20261024/policy-package-player-prep-20261025/package-bind-policy-05/PACKAGE_BINDING.json",
+      "bytes": 1764888,
+      "sha256": "6e71e4a16a837f2d73f5b8c5c1aa50ecac95f982abc21f82d5fa5c8080c920e0"
+    },
+    {
+      "id": "postbuild binder v2",
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/postbuild-binding-v2/bind_package_v2.cjs",
+      "bytes": 19189,
+      "sha256": "284898571a1af2ed9a7abc8a397d65d4447275608c7098ec818653e8c5f09d72"
+    },
+    {
+      "id": "source comparison policy v2",
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/postbuild-binding-v2/source_comparison_policy.cjs",
+      "bytes": 1751,
+      "sha256": "f255579a9f97fc55b2bdd66e1590cfaed59ad91967248521c28955198d26711e"
+    },
+    {
+      "id": "postbuild admission manifest v2",
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/postbuild-binding-v2/CONTRACT_MANIFEST.json",
+      "bytes": 1500,
+      "sha256": "37f04dba97b4245087f58e636e01a7644d10bd603deaaf1cb4f4a8508abe34fb"
+    }
+  ],
+  "findings": [
+    "The fresh package contains a valid real PE and complete 1228-file inventory.",
+    "The packaged simulation equals the fresh compiled simulation byte-for-byte.",
+    "The fresh source map binds the compiled simulation to the reviewed T3 source bytes.",
+    "The packaged compiled simulation itself executes the retained turn-2 T3 proof with the exact seven-node route, owner, ticks, location, consumed order, no rejection, and controls.",
+    "The immutable old package is reference inventory only and does not qualify the gameplay delta.",
+    "Only the compiled simulation differs from the immutable package inventory.",
+    "All 857 data files, 77 audio/font files, 218 UI files, app.asar sources, dependencies, and other resources are exact.",
+    "No telemetry, debug, dump, or crash-report payload is packaged.",
+    "The postbuild-binding-v2 binder and source-comparison policy are exact manifest-bound artifacts: 22 non-package.json entries equal workspace bytes, transformed package.json equals the immutable reference ASAR bytes, and package.json rawSourceExact is explicitly false and is not claimed as raw workspace equality.",
+    "Package preflight 02, build check-only 01, package build 01, and compiled probe 01 have authentic retained receipts with terminal zero exits, no timeout, reviewed entry scripts, and the exact authorized command chain.",
+    "The retained full-suite result remains GO with N91-N97, telemetry-prefix, scratch-preservation, source-stability, and aggregate 15062 pass, 0 fail, 33 skip, 0 todo evidence unchanged."
+  ],
+  "reviewEvidence": {
+    "path": "tmp/player-bot-capability-parity-20261024/receipt-integration-independent-review-04/COMPILED_REVIEW_CHECK_04.json",
+    "sha256": "f8179ad14e8161d17511bca485d2aecd02a2dc7e76f4f496fbe954b30bc012f3"
+  },
+  "limits": [
+    "Package binding only; no native-player, calibration, baseline-adoption, tuning, release, signing, upload, or publication claim."
+  ]
+}

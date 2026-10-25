@@ -1,0 +1,34 @@
+{
+  "schema": "awwv.t3-routing-package.compiled-runtime-result.v1",
+  "pass": true,
+  "status": "PACKAGED_COMPILED_T3_TRANSIT_PASS",
+  "turnsRun": 1,
+  "expectedHead": "fd061e898ad3de942d62c016547a5e453ddd9422",
+  "packageRoot": "dist-packaged/player-column-routing-20261025-01/win-unpacked",
+  "packageResourcesRoot": "dist-packaged/player-column-routing-20261025-01/win-unpacked/resources",
+  "compiledBundle": {
+    "path": "dist-packaged/player-column-routing-20261025-01/win-unpacked/resources/dist/desktop/desktop_sim.cjs",
+    "bytes": 4487693,
+    "sha256": "af676459d15888e67821284d7e546ccc0e96925767f6764149aa0ecd21163c69"
+  },
+  "input": {
+    "path": "tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/player-only-preserved-01/player-post-turn.json",
+    "bytes": 3475995,
+    "sha256": "3d26c58a606e6eba06391366df3d41dc05b447018926b6f3e9b2a9a344bf08d1"
+  },
+  "checks": {
+    "completedTurn2": true,
+    "columnPhaseExecuted": true,
+    "sevenNodePathExact": true,
+    "transitStarted": true,
+    "ownerPreserved": true,
+    "ticksExact": true,
+    "physicalLocationExact": true,
+    "orderConsumed": true,
+    "noColumnRejection": true,
+    "controlsExact": true
+  },
+  "limits": [
+    "One retained player turn against the packaged compiled simulation; no native, calibration, baseline, or release claim."
+  ]
+}

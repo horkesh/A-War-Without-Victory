@@ -15,7 +15,7 @@ paused or RE is blocked, they are describing 2026-08-28, not today.
 
 **Last updated:** 2026-10-25 — owner prioritizes player capability to achieve bot calibration and access the same operations; diagnose and repair proven gaps before divergence experiments. n94 remains the no-player benchmark.
 
-**Player parity:** n96 retains the benchmark; native39 remains700/712. Reviewed T3 routing/delivery passes;188, suite and packaged proof remain open. Preserve all runs. See the [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md).
+**Player parity:** n97 is clean188 and exact n94 at707/707/706/706 with zero n91/n92 losses. T3 routing and 0→1 opening pass at bounded scope. Fresh39 fails the strict media/runtime gate after Save/load, measured703/712 with four losses; older700/seven-loss remains retained and no703 qualification is claimed. See the [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md).
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
@@ -79,16 +79,14 @@ The execution-branch paragraph below records the earlier January checkpoint.
 
 **Authority:** This file is the sole source of truth for unfinished product work.
 
-**Current R8 — player capability before divergence.** The latest owner priority requires normal
-gameplay to reach accepted707/707/706/706 calibration with the same operations available. Different
-choices need not reproduce bot save bytes. Retained player700 and seven n91/n92 losses remain
-unmet; no700 floor or baseline adoption. [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md)
-governs player authority, identical-input determinism, all-faction Save/load, protected/canon/supply/
-enclave gates and strict runtime/audio. The delegated HQ repair's n95 exactly reproduces n94;
-its suite had15,020 passes but overall126 from36 new fixture outputs, now isolated by a reviewed
-test-only repair. Startup policy/substrate and legacy-save focused94/94/type0/independent GO; next
-clean188 qualification and required suite, then a new package and real turn1→fresh39 measurement.
-Later player checkpoints, Behar-I delivery, RS/HRHB and replay remain unproved; old failures remain.
+**Current R8 — player capability before divergence.** n97 clean188 is exact n94 at707/707/706/706 with
+zero n91/n92 losses; required suite is15062 pass/0 fail/33 skip with preservation pass. The T3
+candidate is qualified only at bounded routing scope and its compiled package passes the 0→1 opening
+with22/22 gates plus independent Save/load. Fresh39 fails the strict media/runtime gate after Save/load
+(`event126`, ambient-network `ERR_ABORTED`), despite39+39 authenticated archives and exact
+canonical/loaded-projection Save/load; measured703/712 has
+four losses, so no703 qualification. Next is one explicit normal-UI `always_allow` turn23 run, then
+stop and diagnose before39. Later checkpoints, all-faction, replay and release gates remain open.
 
 **Execution view:** [COMMAND_BOARD.md](COMMAND_BOARD.md) is a derived convenience view; this roadmap wins if they differ.
 

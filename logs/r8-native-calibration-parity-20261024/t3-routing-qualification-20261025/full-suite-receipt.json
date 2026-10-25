@@ -1,0 +1,112 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T03:03:19.436Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/t3-routing-full-suite/full-suite-01",
+  "timeout_ms": 2100000,
+  "original_argv": [
+    "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\t3-routing-full-suite\\full_suite_entry.cjs",
+    "{evidenceDir}/child",
+    "--owner-authorized-after-campaign-go",
+    "--expected-head",
+    "fd061e898ad3de942d62c016547a5e453ddd9422"
+  ],
+  "argv": [
+    "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\t3-routing-full-suite\\full_suite_entry.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\t3-routing-full-suite\\full-suite-01/child",
+    "--owner-authorized-after-campaign-go",
+    "--expected-head",
+    "fd061e898ad3de942d62c016547a5e453ddd9422"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "child/opening.json",
+    "child/suite.stdout.log",
+    "child/suite.stderr.log",
+    "child/child-exit.json",
+    "child/closing.json",
+    "child/result.json",
+    "child/wrapper-error.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/t3-routing-full-suite/full_suite_entry.cjs",
+    "bytes": 21966,
+    "raw_sha256": "ca44ff4b338ad48925502bfbbe3cb2f982d51e4d849be668cf09053756ad1db4",
+    "normalized_text_sha256": "ca44ff4b338ad48925502bfbbe3cb2f982d51e4d849be668cf09053756ad1db4",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 21966,
+      "sha256": "ca44ff4b338ad48925502bfbbe3cb2f982d51e4d849be668cf09053756ad1db4"
+    }
+  },
+  "end_utc": "2026-10-25T03:17:15.741Z",
+  "pid": 20808,
+  "child_exit": 0,
+  "wrapper_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/t3-routing-full-suite/full_suite_entry.cjs",
+    "bytes": 21966,
+    "raw_sha256": "ca44ff4b338ad48925502bfbbe3cb2f982d51e4d849be668cf09053756ad1db4",
+    "normalized_text_sha256": "ca44ff4b338ad48925502bfbbe3cb2f982d51e4d849be668cf09053756ad1db4",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 429,
+    "sha256": "5ccfd03bdd16cdfef9ab2fa401cfcdf54b8406dbe324a1ab66dc078c8b37f212"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "child/opening.json",
+      "bytes": 1787865,
+      "sha256": "95d234474df41d3afae5e90be014cf66d718612801c72e1e35f8e43c9fc52ab2"
+    },
+    {
+      "path": "child/suite.stdout.log",
+      "bytes": 143555,
+      "sha256": "498bb503f0e4ff1d964a92c06237ff66649b8d890bf65a2a796216d42fd44a00"
+    },
+    {
+      "path": "child/suite.stderr.log",
+      "bytes": 6133,
+      "sha256": "9bb79feb4a698e1690346d63e097f0edf3dab663f54f36584978b6d6a7abb398"
+    },
+    {
+      "path": "child/child-exit.json",
+      "bytes": 373,
+      "sha256": "b122b74f28f6da699f56d909a36233b16e3f7d2733ec1d3394143b633afe38b7"
+    },
+    {
+      "path": "child/closing.json",
+      "bytes": 1762940,
+      "sha256": "c0dd2b1729ea766fe016d89b159fdde06be8e4e7bc7e2926f9010738ae7a233a"
+    },
+    {
+      "path": "child/result.json",
+      "bytes": 290781,
+      "sha256": "aa786b7a54d207a775d9b1d774403ec93351c47c524dcdbcf2ecd1a329127945"
+    },
+    {
+      "path": "child/wrapper-error.json",
+      "bytes": 61,
+      "sha256": "716a4db58082d18f780c286729a091a996b682d9df78c06e97f3a9628699d123"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

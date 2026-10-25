@@ -1,0 +1,35 @@
+{
+  "schema": "awwv.independent-t3-full-suite-actual-review.v1",
+  "verdict": "GO_TO_PACKAGE_PREFLIGHT",
+  "expectedHead": "fd061e898ad3de942d62c016547a5e453ddd9422",
+  "terminal": {
+    "childExit": 0,
+    "wrapperExit": 0,
+    "nativeExit": 0,
+    "timedOut": false,
+    "artifactContract": true,
+    "receiptSha256": "aedc51e114fb6a416b03a1c3a8da8b852a4454bf351078115c10fd3d17cf27b2",
+    "resultSha256": "aa786b7a54d207a775d9b1d774403ec93351c47c524dcdbcf2ecd1a329127945"
+  },
+  "counts": {
+    "selectedNativeSummaries": 5,
+    "testsPassed": 15062,
+    "testsFailed": 0,
+    "testsSkipped": 33,
+    "testsTodo": 0,
+    "fileExecutions": 1453,
+    "filesPassed": 1449,
+    "filesFailed": 0,
+    "filesSkipped": 4
+  },
+  "checks": {
+    "all15ResultChecks": true,
+    "exactReceiptCoverage": true,
+    "sourceStable": true,
+    "n91N97Exact": true,
+    "telemetryPrefixesExact": true,
+    "scratchUnionExact": true,
+    "finalizationClean": true
+  },
+  "residualGates": ["package build and binding", "compiled-package review", "native-player calibration", "signing/release/publication"]
+}

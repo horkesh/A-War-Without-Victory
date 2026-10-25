@@ -1,0 +1,108 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T03:39:08.506Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/compiled-probe-01",
+  "timeout_ms": 180000,
+  "original_argv": [
+    "node",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/compiled_runtime_probe.cjs",
+    "{evidenceDir}",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/package-launch-config.json",
+    "a1130567b2e1fd7e4eb5f584bb83c9c8ee30b4b2ad643d3330e04df52aa09d91",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/package-build-01/receipt.json",
+    "95e4d6d5d6b4bf407b02a11073a7ce58063b906da45404f6e41ea517d3a1d492"
+  ],
+  "argv": [
+    "node",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/compiled_runtime_probe.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\t3-routing-package-prep\\compiled-probe-01",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/package-launch-config.json",
+    "a1130567b2e1fd7e4eb5f584bb83c9c8ee30b4b2ad643d3330e04df52aa09d91",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/package-build-01/receipt.json",
+    "95e4d6d5d6b4bf407b02a11073a7ce58063b906da45404f6e41ea517d3a1d492"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "boundary.json",
+    "dependencies.json",
+    "player-post-turn.json",
+    "player-turn-report.json",
+    "precheck.json",
+    "result.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/compiled_runtime_probe.cjs",
+    "bytes": 11626,
+    "raw_sha256": "d8035000b1ba91eb506eeeab4dc32828d6e9e48aa886432616b402476dfd8b8e",
+    "normalized_text_sha256": "d8035000b1ba91eb506eeeab4dc32828d6e9e48aa886432616b402476dfd8b8e",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 11626,
+      "sha256": "d8035000b1ba91eb506eeeab4dc32828d6e9e48aa886432616b402476dfd8b8e"
+    }
+  },
+  "end_utc": "2026-10-25T03:39:23.253Z",
+  "pid": 2224,
+  "child_exit": 0,
+  "wrapper_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/compiled_runtime_probe.cjs",
+    "bytes": 11626,
+    "raw_sha256": "d8035000b1ba91eb506eeeab4dc32828d6e9e48aa886432616b402476dfd8b8e",
+    "normalized_text_sha256": "d8035000b1ba91eb506eeeab4dc32828d6e9e48aa886432616b402476dfd8b8e",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 3263,
+    "sha256": "472c0eedfda797f42d7830875028d98a4fd4c6e4b1bfc5f0a46f8691d23c15f6"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "boundary.json",
+      "bytes": 14036,
+      "sha256": "98345ecb0fe5f5238250a3aa1e3964bcd0c47c6289ee5ea50b97bffa5010b590"
+    },
+    {
+      "path": "dependencies.json",
+      "bytes": 2035,
+      "sha256": "8aff10d8da87fa7dd44ab52c1731c2070bcbc95b4dd6f0a468a3f73c27e4f58e"
+    },
+    {
+      "path": "player-post-turn.json",
+      "bytes": 3570912,
+      "sha256": "33d14f1a1ec9de7b98231132b0006a2539487d8c56ffee68a1589e9b1dac1688"
+    },
+    {
+      "path": "player-turn-report.json",
+      "bytes": 3584205,
+      "sha256": "90c53b809a2c78802e597b851edcb4b16a22513bd3b3fe43241b841c030c8b76"
+    },
+    {
+      "path": "precheck.json",
+      "bytes": 755,
+      "sha256": "0df83f267b760b780ebdfb2b3ac1902cf01d32925c6a4cc801329e64a9d83c24"
+    },
+    {
+      "path": "result.json",
+      "bytes": 1354,
+      "sha256": "313661400417974fd0b47488b60ee6115d2af1e59ce17fbb8045a94b6ba85226"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

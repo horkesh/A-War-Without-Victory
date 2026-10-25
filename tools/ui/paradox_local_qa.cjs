@@ -66,6 +66,28 @@ function selectHistoricalEventChoice(decision) {
   throw new Error('No ranked authored historical default or explicit staff recommendation');
 }
 
+function parseRbihParamilitaryPolicyOverride(argv, historical, selectedFactions) {
+  const prefix = '--rbih-paramilitary-policy=';
+  const optionArgs = argv.filter((arg) => arg === '--rbih-paramilitary-policy' || arg.startsWith(prefix));
+  const values = optionArgs.map((arg) => arg === '--rbih-paramilitary-policy' ? '' : arg.slice(prefix.length));
+  if (values.length === 0) return null;
+  if (values.length !== 1) throw new Error('--rbih-paramilitary-policy must be provided exactly once');
+  const requested = values[0];
+  if (requested !== 'always_allow') {
+    throw new Error(`Unknown --rbih-paramilitary-policy option: ${requested || 'empty'}`);
+  }
+  if (!historical) throw new Error('--rbih-paramilitary-policy requires --historical-choice');
+  if (selectedFactions.length !== 1 || selectedFactions[0] !== 'RBiH') {
+    throw new Error('--rbih-paramilitary-policy is available for RBiH only');
+  }
+  return {
+    requested,
+    version: 1,
+    provenance: 'explicit_visible_player_policy_selector',
+    eventId: 'rbih_paramilitary_policy_1992',
+  };
+}
+
 function hasMeaningfulSourceContent(value, prefix) {
   if (typeof value !== 'string') return false;
   const labelIndex = value.toLocaleLowerCase('en-US').lastIndexOf(prefix.toLocaleLowerCase('en-US'));
@@ -91,7 +113,29 @@ async function policyEventResponseControl(surface) {
   });
   const decision = (raw.military?.pending_event_decisions ?? []).find(row => row.event_id === eventId && row.faction === raw.meta?.player_faction);
   if (!decision) throw new Error(`Historical-choice surface lacks exact player event: ${eventId}`);
-  const selected = selectHistoricalEventChoice(decision);
+  let selected = selectHistoricalEventChoice(decision);
+  if (rbihParamilitaryPolicyOverride && eventId === rbihParamilitaryPolicyOverride.eventId) {
+    if (raw.meta?.player_faction !== 'RBiH' || decision.faction !== 'RBiH') {
+      throw new Error(`RBiH paramilitary override reached mismatched player: ${raw.meta?.player_faction ?? 'missing'}`);
+    }
+    const matchingOptions = (decision.response_options ?? [])
+      .filter((option) => option.id === rbihParamilitaryPolicyOverride.requested);
+    if (matchingOptions.length === 0) {
+      throw new Error(`RBiH paramilitary override is missing option ${rbihParamilitaryPolicyOverride.requested}`);
+    }
+    if (matchingOptions.length !== 1) {
+      throw new Error(`RBiH paramilitary override has ambiguous option ${rbihParamilitaryPolicyOverride.requested}`);
+    }
+    if (matchingOptions[0].historical_marker !== 'counterfactual') {
+      throw new Error(`RBiH paramilitary override option is not explicitly counterfactual: ${rbihParamilitaryPolicyOverride.requested}`);
+    }
+    selected = {
+      ...matchingOptions[0],
+      basis: 'player_selected_counterfactual',
+      historicityClaim: 'none_counterfactual_player_choice',
+      requestedOverride: { ...rbihParamilitaryPolicyOverride },
+    };
+  }
   const labels = await controls.evaluateAll(nodes => nodes.map(node => node.firstElementChild?.firstElementChild?.textContent?.trim() ?? ''));
   const matching = labels.map((label, index) => label === selected.label ? index : -1).filter(index => index >= 0);
   if (matching.length !== 1) throw new Error(`Historical-choice control is absent or ambiguous: ${eventId}/${selected.id}`);
@@ -124,7 +168,7 @@ async function policyEventResponseControl(surface) {
       }
     }
   }
-  return { loc, choice: { eventId, responseId: selected.id, responseLabel: selected.label, basis: selected.basis, source, sourceLocation, turn: raw.meta.turn, faction: raw.meta.player_faction, options: decision.response_options.map(option => ({ id: option.id, label: option.label })), playerInput: true } };
+  return { loc, choice: { eventId, responseId: selected.id, responseLabel: selected.label, basis: selected.basis, source, sourceLocation, turn: raw.meta.turn, faction: raw.meta.player_faction, options: decision.response_options.map(option => ({ id: option.id, label: option.label })), playerInput: true, ...(selected.basis === 'player_selected_counterfactual' ? { historicityClaim: selected.historicityClaim, requestedOverride: selected.requestedOverride } : {}) } };
 }
 
 function selectCheckpointTurns(raw, targetTurn, skip) {
@@ -199,6 +243,11 @@ let canonicalAutosavePersistenceAtResumeLoad = null;
 const factions = args.has('--all-factions')
   ? ['RS', 'RBiH', 'HRHB']
   : [process.argv.find((arg) => arg.startsWith('--faction='))?.split('=')[1] ?? 'RS'];
+const rbihParamilitaryPolicyOverride = parseRbihParamilitaryPolicyOverride(
+  process.argv,
+  historicalChoice,
+  factions,
+);
 
 function requiredRsEventReceiptIds(faction, targetTurn, isResume) {
   if (faction !== 'RS' || targetTurn < 52 || isResume) return [];
@@ -764,6 +813,7 @@ const provenance = {
   packagedAsarSha256: packagedExecutablePath ? fileSha256(path.join(path.dirname(packagedExecutablePath), 'resources', 'app.asar')) : null,
   requiredMapOrigin,
   officerSuccessionPolicy,
+  ...(rbihParamilitaryPolicyOverride ? { rbihParamilitaryPolicyOverride } : {}),
   electronMainSha256: fileSha256(path.join(repo, 'src', 'desktop', 'electron-main.cjs')),
   warroomIndexSha256: fileSha256(path.join(repo, 'dist', 'warroom', 'index.html')),
   tacticalMapIndexSha256: fileSha256(path.join(repo, 'dist', 'tactical-map', 'index.html')),
@@ -7540,8 +7590,17 @@ async function runFaction(faction, result) {
   return entry;
 }
 
+function finalizeFailedRunResult(result, error, failedAt) {
+  delete result.completedAt;
+  result.failed = true;
+  result.error = String(error?.stack ?? error);
+  result.failedAt = failedAt;
+  return result;
+}
+
+let result = null;
 (async () => {
-  const result = { startedAt: new Date().toISOString(), command: process.argv.slice(2), provenance, factions: [] };
+  result = { startedAt: new Date().toISOString(), command: process.argv.slice(2), provenance, factions: [] };
   for (const faction of factions) {
     await runFaction(faction, result);
   }
@@ -7558,6 +7617,7 @@ async function runFaction(faction, result) {
     })),
   }, null, 2));
 })().catch((error) => {
+  if (result) writeJsonAtomic(logPath, finalizeFailedRunResult(result, error, new Date().toISOString()));
   writeTextAtomic(path.join(outDir, `paradox-local-qa-error-${runSlug}.txt`), String(error?.stack ?? error));
   console.error(error);
   process.exitCode = 1;

@@ -1,10 +1,10 @@
 # AWWV Command Board
 
-**Status:** Derived dispatch view, synchronized 2026-10-25. Toljenak validated; global NO-GO. [Calibration](../40_reports/CALIBRATION_MASTER.md).
+**Status:** Derived dispatch view, synchronized 2026-10-25. n97 clean188 reference-equivalent; global NO-GO pending player/runtime gates. [Calibration](../40_reports/CALIBRATION_MASTER.md).
 
 **Authority:** [MASTER_ROADMAP.md](MASTER_ROADMAP.md) is the sole authority for unfinished work and wins if this board differs.
 
-**Parity — 2026-10-25:** native39 remains700/712. T3 routing/delivery reviewed;188, suite and package proof pending. Preserve n91–n96. [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md).
+**Parity — 2026-10-25:** n97 clean188 is exact n94 707/707/706/706 with zero n91/n92 losses. Fresh player39 failed strict finalization at Save/load; measured703/712 with four losses, while older700/seven-loss remains retained. T3 is qualified only at bounded routing scope; preserve n91–n97. [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md).
 
 **Open gates:** [open_gates.yml](../open_gates.yml) enumerates every named gate and the evidence that would close it — `npm run gates` lists the open rows, and `tests/open_gates_register.test.ts` fails if a gate is claimed closed without evidence that exists. It is derived like this board; the roadmap still wins.
 
@@ -29,7 +29,7 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE -- CLOSED 2026-08-15** | None. V3 selection plus reversible D-shape is retained; D-topology is reserved post-1.0. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) |
 | 7 | R7 | **WR01/PIN REFRESH LANDED; AUDIO/ACCEPTANCE OPEN** | Finish offline audio and ten-cue disposition; human listening waits for owner inspection. WR01 closed in #517 and pins refreshed in #518; April combined-source acceptance is separate. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [accepted functional opening](2026-08-23-opening-screens-implementation-plan.md) / [cinematic opening and typography amendment](2026-08-28-cinematic-opening-typography-implementation-plan.md) / [presentation and English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md) |
 | 7.5 | RE | **CLOSED — owner, 2026-09-01** | None. RE gates nothing; engine-health defects are still fixed before tuning. | [Closed recovery record](2026-08-28-packaged-probe-recovery-plan.md) / [closed RE contract](2026-08-26-engine-integrity-plan.md) |
-| 8 | R8 | **PLAYER/BOT CAPABILITY PARITY ACTIVE — 2026-10-25.** | HQ-only n95 reproduces n94 exactly; suite15,020 passing but overall126 from36 added scratch outputs, preserved. Reviewed test-only relocation retained. Startup/policy and legacy-save focused94/94/type0/independent GO; next clean188/full-suite qualification and newly bound real turn1→fresh39 measurement. Player700 remains unmet; later operations/all factions/replay remain unproved. Preserve n91–n95, telemetry and all gates; no tuning/adoption. | [Player acceptance contract](2026-07-31-full-campaign-electron-validation-plan.md#player-campaign-acceptance-contract--owner-decision-2026-10-24) |
+| 8 | R8 | **PLAYER/BOT CAPABILITY PARITY ACTIVE — 2026-10-25.** | n97 exact n94 clean188; suite15,062/0/33 and preservation pass. T3 bounded proof and 0→1 pass. Fresh39 fails strict media/runtime after Save/load at703/712 with four losses; no703 qualification. Next turn23 `always_allow`, then diagnose. Preserve n91–n97 and all gates. | [Player acceptance contract](2026-07-31-full-campaign-electron-validation-plan.md#player-campaign-acceptance-contract--owner-decision-2026-10-24) |
 | 9 | R9 | **FREEZE WAITING ON R8; LIMITED PREPARATION AT §4.2** | Freeze an immutable RC, produce reproducible clean-machine evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
 
 **Full-duration campaign evidence (188w) — `ac3e5e152`, 2026-09-16:** all 20 April commits, the Jajce

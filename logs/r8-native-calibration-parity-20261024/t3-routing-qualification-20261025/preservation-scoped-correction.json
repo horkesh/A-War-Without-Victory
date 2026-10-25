@@ -1,0 +1,25 @@
+{
+  "scope": "Targeted correction of screenshot namespace comparison only; prior failure preserved",
+  "prior": {
+    "path": "tmp/player-bot-capability-parity-20261024/root/preservation-after-native703-01/RETAINED_RUN_PACKAGE_NATIVE.json",
+    "sha256": "d09a6c2d743ce2cae183253c66d44cb13c3eb04c46b5f29f6f5c94932fcfe17a",
+    "pass": false
+  },
+  "reason": "Reviewer inventory intentionally selects this run prefix from a shared screenshot root; comparing against every other retained run was an observer error",
+  "screenshots": {
+    "prefix": "player-column-fresh-rbih-t39-20261025-01-",
+    "expectedCount": 132,
+    "actualCount": 132,
+    "exactScopedNames": true,
+    "previouslyRehashedMismatches": []
+  },
+  "reusedUnaffected": {
+    "runs": true,
+    "package": true,
+    "otherNativeTrees": true,
+    "standalone": true,
+    "absence": true,
+    "oldBindingsTelemetryClassifiers": true
+  },
+  "pass": true
+}

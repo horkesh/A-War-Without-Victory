@@ -1,0 +1,175 @@
+{
+  "schema": "awwv.t3-routing-native.postcheck.v1",
+  "kind": "opening",
+  "pass": true,
+  "checks": [
+    {
+      "name": "wrapper-authentic",
+      "pass": true,
+      "details": {
+        "failures": [],
+        "argvExact": true
+      }
+    },
+    {
+      "name": "bound-config-copy",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "bound-package-suite-probe",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "bound-harness",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "child-exit-and-preflight",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "external-inventory-live",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "result-label-scope",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "progress-bound",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "netlog-bound",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "fresh-zero-start",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "exact-target",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "settled-target-authentic",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "normal-historical-player",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "no-blockers",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "zero-consoleMessages",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "zero-pageErrors",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "zero-networkFailures",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "zero-unexpectedMainProcessStderr",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "visible-historical-author-choices",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "unchanged-historical-denial",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "archives",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "save-load",
+      "pass": true,
+      "details": null
+    }
+  ],
+  "bindings": {
+    "binding": {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-opening-postcheck-binding.actual-01.json",
+      "bytes": 1658,
+      "sha256": "da8eabf4e2a22b64faab7a81347bde75ecee6ad29ed316aa66f743bbad27511a"
+    },
+    "config": {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-opening-config.actual-02.json",
+      "bytes": 4205,
+      "sha256": "e36a5265a66dcafc35b31f1e5cdd6fa3cad975c7237b0299cfa7cf5e9a87c1c2"
+    },
+    "packageBinding": {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/package-bind-v2-02/PACKAGE_BINDING.json",
+      "bytes": 265002,
+      "sha256": "762b801c75652b653cb887006e8dbc7eb6ec6432e86cd913b8d8fba85f6308e8"
+    },
+    "preflight": {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-opening-preflight-02/NATIVE_PREFLIGHT.json",
+      "bytes": 3424,
+      "sha256": "a3b5b12ca88cbeae5a56bd3a9e0a0daee004d05c94185154df185fce7984a50d"
+    },
+    "preflightReceipt": {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-opening-preflight-02/receipt.json",
+      "bytes": 3307,
+      "sha256": "9f3160425502003d31667cdf07c20e49415f0e8121d5e1e0587d40c947eb8bda"
+    },
+    "nativeEntry": {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native_entry.cjs",
+      "bytes": 2689,
+      "sha256": "66da59e80de498a34549007a36acfb6e6c6711b8245967142861f3785d017cfc"
+    },
+    "result": {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-opening-01/child/result.json",
+      "bytes": 1927270,
+      "sha256": "827ec518f2073234e8a1bdfa68e9dda9765eaac2cd4e994035a0a794ef7c440a"
+    },
+    "progress": {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-opening-01/child/progress.json",
+      "bytes": 1926988,
+      "sha256": "66d15cc62ffefb1cc6f8cfd3e7736e15534940e2b98baed435b2a28eafe3ddec"
+    },
+    "netlog": {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-opening-01/child/netlog.json",
+      "bytes": 3833807,
+      "sha256": "35d2a1be4d55b1aadb71b7eb717b812851335295215311d7981618b7cacca688"
+    },
+    "receipt": {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-opening-01/receipt.json",
+      "bytes": 5341,
+      "sha256": "4dacf1b80a601e76aba75f01dc599230331f6b6da8c0f10b3469e71d31253d74"
+    }
+  },
+  "limits": [
+    "Fresh New War RBiH 0→1 prerequisite only"
+  ]
+}

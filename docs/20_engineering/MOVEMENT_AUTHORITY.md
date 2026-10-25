@@ -84,13 +84,15 @@ targets is scoped by **adjacency** to a legally occupiable cell, never by inters
 every evaluator's output alike, so it distinguishes bot orders from authored ones and nothing
 more. Authority exemptions, not the tag, decide whether the T3 revalidation applies.
 
-**Physical column routing (2026-10-25 candidate).** After the existing destination and authority
+**Physical column routing (2026-10-25 qualified at bounded scope).** After the existing destination and authority
 checks, T3 uses the normal friendly/allied weighted pathfinder without a corps-sector node mask.
 Sector footprints describe assignments, not territorial transit permissions. Hostile intermediate
 nodes remain illegal; travel costs, movement ownership and arrival timing remain unchanged.
 The retained normal-player Delijaš order exposed the defect: its destination was authorized, but
 three friendly intermediate cells fell outside the corps footprint. Routing-scope diagnostics are
-`null` when no such mask is applied. This correction does not broaden offensive admission.
+`null` when no such mask is applied. This correction does not broaden offensive admission. The compiled
+package and retained 0→1/turn6 proof qualify the routing correction only; fresh39 fails the strict
+media/runtime gate after Save/load with four measured losses, so no campaign parity or703 floor is qualified.
 
 **Operation movement authority is type-agnostic; the sector-attack evaluator flag is not.**
 `isActiveSectorOperationParticipant` means "this formation's attack behaviour is owned by the

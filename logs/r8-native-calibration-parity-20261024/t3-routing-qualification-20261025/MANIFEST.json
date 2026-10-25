@@ -1,0 +1,270 @@
+{
+  "schema": "awwv.player-t3-qualification.evidence-inventory.v1",
+  "scope": "Selected exact-byte qualification/failed-native/QA receipts; complete raw runs, profiles, screenshots, archives, all rejected packets and telemetry remain local, not a remote backup.",
+  "gameplayHead": "fd061e898ad3de942d62c016547a5e453ddd9422",
+  "noPlayer": {
+    "run": "n97",
+    "scores": [
+      707,
+      707,
+      706,
+      706
+    ]
+  },
+  "nativeHistorical39": {
+    "status": "FAILED_RUNTIME",
+    "rawDiagnosticScore": 703,
+    "required": 707,
+    "denominator": 712,
+    "losses": 4,
+    "qualified": false
+  },
+  "files": [
+    {
+      "path": "campaign-result.json",
+      "bytes": 138518,
+      "sha256": "17435d1970f926e723922affd7996480fbb3113921f3507d6e960b124125b154",
+      "source": "tmp/player-bot-capability-parity-20261024/t3-routing-qualification/campaign-01/child/result.json"
+    },
+    {
+      "path": "campaign-receipt.json",
+      "bytes": 14326,
+      "sha256": "fbc66f977d8458a51ef29be73922bbbcacd8c1227c340d4ba03adc430ccd5c19",
+      "source": "tmp/player-bot-capability-parity-20261024/t3-routing-qualification/campaign-01/receipt.json"
+    },
+    {
+      "path": "campaign-review.json",
+      "bytes": 971,
+      "sha256": "ca8091ba003e710699220b801f9cbb0732e423305f280bb19212f36d6f732fb7",
+      "source": "tmp/player-bot-capability-parity-20261024/t3-routing-qualification-independent-actual-review-01/result.json"
+    },
+    {
+      "path": "full-suite-result.json",
+      "bytes": 290781,
+      "sha256": "aa786b7a54d207a775d9b1d774403ec93351c47c524dcdbcf2ecd1a329127945",
+      "source": "tmp/player-bot-capability-parity-20261024/t3-routing-full-suite/full-suite-01/child/result.json"
+    },
+    {
+      "path": "full-suite-receipt.json",
+      "bytes": 4448,
+      "sha256": "aedc51e114fb6a416b03a1c3a8da8b852a4454bf351078115c10fd3d17cf27b2",
+      "source": "tmp/player-bot-capability-parity-20261024/t3-routing-full-suite/full-suite-01/receipt.json"
+    },
+    {
+      "path": "full-suite-review.json",
+      "bytes": 1092,
+      "sha256": "f380dea0cbdcc68bf6e394b0eef98a22ff9a75569f6883e17f9dac9c29c86ff7",
+      "source": "tmp/player-bot-capability-parity-20261024/t3-routing-full-suite-independent-actual-review-01/result.json"
+    },
+    {
+      "path": "package-binding.json",
+      "bytes": 265002,
+      "sha256": "762b801c75652b653cb887006e8dbc7eb6ec6432e86cd913b8d8fba85f6308e8",
+      "source": "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/package-bind-v2-02/PACKAGE_BINDING.json"
+    },
+    {
+      "path": "package-build-receipt.json",
+      "bytes": 4937,
+      "sha256": "95e4d6d5d6b4bf407b02a11073a7ce58063b906da45404f6e41ea517d3a1d492",
+      "source": "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/package-build-01/receipt.json"
+    },
+    {
+      "path": "package-compiled-player-turn2.json",
+      "bytes": 1354,
+      "sha256": "313661400417974fd0b47488b60ee6115d2af1e59ce17fbb8045a94b6ba85226",
+      "source": "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/compiled-probe-01/result.json"
+    },
+    {
+      "path": "package-compiled-probe-receipt.json",
+      "bytes": 4377,
+      "sha256": "1142e27d228ffdad89b9dd5ee0591846a5445abb3057f1edc4c1331b9c2f3db6",
+      "source": "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/compiled-probe-01/receipt.json"
+    },
+    {
+      "path": "package-compiled-review.json",
+      "bytes": 5887,
+      "sha256": "d0382cab1b71866986675011d4073782e37eda2e69825c8da36bf793aafddc39",
+      "source": "tmp/player-bot-capability-parity-20261024/t3-routing-package-compiled-independent-review-01/result.json"
+    },
+    {
+      "path": "native-opening-receipt.json",
+      "bytes": 5341,
+      "sha256": "4dacf1b80a601e76aba75f01dc599230331f6b6da8c0f10b3469e71d31253d74",
+      "source": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-opening-01/receipt.json"
+    },
+    {
+      "path": "native-opening-postcheck.json",
+      "bytes": 4805,
+      "sha256": "f2536f6a04cc6b47a42b03712deb3c689afa3f78d009b12732fa73fd2e37fc19",
+      "source": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-opening-postcheck-01.json"
+    },
+    {
+      "path": "native-opening-review.json",
+      "bytes": 2279,
+      "sha256": "685990b50162ea600b0167a333167b08402f02588ce1586267b17fc0b95b0a05",
+      "source": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/opening-independent-approval-01.json"
+    },
+    {
+      "path": "native-historical39-failed-receipt.json",
+      "bytes": 4747,
+      "sha256": "461f68e562b3e9d44eb5eed586b80c36b57908d352a3d79ca13c5f269ff7aad0",
+      "source": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-01/receipt.json"
+    },
+    {
+      "path": "native-historical39-failed-start.json",
+      "bytes": 3048,
+      "sha256": "14185d158e8627bf2f3a0ebcb1c0adcc0305abac4c42aef37aacb7796d775428",
+      "source": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-01/start.json"
+    },
+    {
+      "path": "native-historical39-wrapper-stderr.log",
+      "bytes": 3102,
+      "sha256": "2f10866667835ea969907dc3a57dc8e2aa506574652af1c73d9d565d3578fbde",
+      "source": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-01/stderr.log"
+    },
+    {
+      "path": "native-historical39-harness-stderr.log",
+      "bytes": 414,
+      "sha256": "76632e547cae983daa15ce63f2367eb53a993e1c745d4e9fa35cbbd50c4f2591",
+      "source": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-01/child/harness.stderr.log"
+    },
+    {
+      "path": "native-historical39-failure-review.json",
+      "bytes": 10665,
+      "sha256": "4d0cad6f3b9a0482d5e505549d450483b7eb8fbffe0f8cd14ee90a29fec30ef6",
+      "source": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-failure-independent-audit-01.json"
+    },
+    {
+      "path": "native-historical39-failure-inventory.json",
+      "bytes": 77421,
+      "sha256": "f28829ebfca4d924945f49e3c60f6f5fc2c52010fd4003625f77bb1414cffcc3",
+      "source": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-failure-independent-inventory-01.json"
+    },
+    {
+      "path": "native-historical39-raw-diagnostic.json",
+      "bytes": 1025,
+      "sha256": "f9e2d58ab2aa0091e11791319b9663539d0662fbf1a438d9dfea7a5070fc1653",
+      "source": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/FAILED_NATIVE39_RAW_DIAGNOSTIC_01.json"
+    },
+    {
+      "path": "native703-diagnosis.md",
+      "bytes": 10544,
+      "sha256": "88c5ebe834e89880d42097cf400d053af3beed862d9f0921dc316af15e09aab5",
+      "source": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/RESULT.md"
+    },
+    {
+      "path": "native703-diagnosis-review.json",
+      "bytes": 7614,
+      "sha256": "5d8bf27528683e1308bad9870858a7a3f39fecf18878a62a843d1e0ffcc09c26",
+      "source": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/INDEPENDENT_REVIEW.json"
+    },
+    {
+      "path": "qa-harness-green.log",
+      "bytes": 359,
+      "sha256": "59f6d1858650d33b6e5f9d91175aa97359e13c0c4a7f7b04ca58e68c48465ee7",
+      "source": "tmp/player-bot-capability-parity-20261024/native-capture-repair/evidence/green-harness-final-2.log"
+    },
+    {
+      "path": "qa-capture-green.log",
+      "bytes": 513,
+      "sha256": "6c0418a9ba34bb42d3c5c644a470290c5a052d1ce86c41cf0364d9832cb321c6",
+      "source": "tmp/player-bot-capability-parity-20261024/native-capture-repair/evidence/green-capture-final-3.log"
+    },
+    {
+      "path": "qa-implementation-review.json",
+      "bytes": 4976,
+      "sha256": "be871686e895c9454c25754dce9ae02b9c6d654f33c9e7458777c03014490410",
+      "source": "tmp/player-bot-capability-parity-20261024/native-capture-repair/INDEPENDENT_REVIEW.json"
+    },
+    {
+      "path": "qa-final-hashes.txt",
+      "bytes": 1665,
+      "sha256": "f900d71deff3f6fa9cce87da7301441c6b071840cd1d504d9212a7247320f07a",
+      "source": "tmp/player-bot-capability-parity-20261024/native-capture-repair/evidence/final-hashes.txt"
+    },
+    {
+      "path": "preservation-history-telemetry.json",
+      "bytes": 2161,
+      "sha256": "73ea38ac40e0d1c5d2da49c9edda5ae16c0a964ec1f08aa6fc08c8acdeccafde",
+      "source": "tmp/player-bot-capability-parity-20261024/root/preservation-after-native703-01/PRESERVATION.json"
+    },
+    {
+      "path": "preservation-observer-failure.json",
+      "bytes": 3988,
+      "sha256": "d09a6c2d743ce2cae183253c66d44cb13c3eb04c46b5f29f6f5c94932fcfe17a",
+      "source": "tmp/player-bot-capability-parity-20261024/root/preservation-after-native703-01/RETAINED_RUN_PACKAGE_NATIVE.json"
+    },
+    {
+      "path": "preservation-scoped-correction.json",
+      "bytes": 920,
+      "sha256": "3c958a36f3dbcefe1d1a9c1a52648611367d69a14e538cb5b9d04e0c821b4844",
+      "source": "tmp/player-bot-capability-parity-20261024/root/preservation-after-native703-01/SCOPED_SCREENSHOT_CORRECTION.json"
+    },
+    {
+      "path": "source-ci-terminal.json",
+      "bytes": 356,
+      "sha256": "4efc84dcd71c36d089ce28e78f9e8b44d95f6de2a298492f4a896a88d6e10e11",
+      "source": "tmp/player-bot-capability-parity-20261024/root/CI_FD061_PUSH_TERMINAL.json"
+    },
+    {
+      "path": "pre-typecheck-manifest.json",
+      "bytes": 9418,
+      "sha256": "85ad543084a19c45132fc38bf350cfbb5d1d28ed739968726384ab0190cb9d6a",
+      "source": "tmp/player-bot-capability-parity-20261024/root/PORTABLE_MANIFEST_BEFORE_TYPECHECK.json"
+    },
+    {
+      "path": "qa-typecheck-failed-receipt.json",
+      "bytes": 2896,
+      "sha256": "8154358f18de7256a4c847526d5a0857a80e48ccdc671ac490b6d630d7d56cc6",
+      "source": "tmp/player-bot-capability-parity-20261024/native-capture-repair/typecheck-01/receipt.json"
+    },
+    {
+      "path": "qa-typecheck-failed-stdout.log",
+      "bytes": 261,
+      "sha256": "40b41ca43bc48084725713a02904cccb8f409114e998b2446fe693e34017b24b",
+      "source": "tmp/player-bot-capability-parity-20261024/native-capture-repair/typecheck-01/stdout.log"
+    },
+    {
+      "path": "qa-typecheck-passed-receipt.json",
+      "bytes": 2896,
+      "sha256": "31d3ce08680e758bf59ec116b3bc91e8814b3c5a02e3f90f49f577cb4d6fc0f2",
+      "source": "tmp/player-bot-capability-parity-20261024/native-capture-repair/typecheck-02/receipt.json"
+    },
+    {
+      "path": "qa-typecheck-passed-stdout.log",
+      "bytes": 31,
+      "sha256": "91e0225603863bff7bfba2454b7ae4eb8d4ec8722f9ffa08fc263bf857e4f9af",
+      "source": "tmp/player-bot-capability-parity-20261024/native-capture-repair/typecheck-02/stdout.log"
+    },
+    {
+      "path": "qa-typefix-focused-green.log",
+      "bytes": 359,
+      "sha256": "1194c0ed210dd7063a59088a94fecf8bfca6db48f8601bf02734786abf3f3121",
+      "source": "tmp/player-bot-capability-parity-20261024/native-capture-repair/evidence/green-harness-typefix-01.log"
+    },
+    {
+      "path": "qa-final-hashes-v2.txt",
+      "bytes": 1830,
+      "sha256": "123a16c559594991b76d8f2f93ce376196cdf4b52096337ac9c700bf30eeaf4d",
+      "source": "tmp/player-bot-capability-parity-20261024/native-capture-repair/evidence/final-hashes-v2.txt"
+    },
+    {
+      "path": "qa-typefix-review.json",
+      "bytes": 2231,
+      "sha256": "69bf95d3a6cbec4b6edd6710054b2c0ae333ec510dcc03115f56d47a4cd9e14d",
+      "source": "tmp/player-bot-capability-parity-20261024/native-capture-repair/TARGETED_TYPECHECK_VERIFICATION.json"
+    }
+  ],
+  "qaOnlyRepair": {
+    "productionHarnessSha256": "71a9bbb675d4c33d290e92e97c7e3780211e5ce3c500f37c637bf46ef8e32503",
+    "focusedPassed": 101,
+    "privateCapturePassed": 6,
+    "typecheck": {
+      "failedAttempt": "01",
+      "correctedAttempt": "02",
+      "child": 0,
+      "wrapper": 0
+    },
+    "gameplayQualificationReusedAtScope": true
+  }
+}

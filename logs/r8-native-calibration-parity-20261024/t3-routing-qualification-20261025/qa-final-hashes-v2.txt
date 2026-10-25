@@ -1,0 +1,12 @@
+71a9bbb675d4c33d290e92e97c7e3780211e5ce3c500f37c637bf46ef8e32503 361860 tools/ui/paradox_local_qa.cjs
+d4976d34beb002dd847682154886c8bed5b1f2c4412e1ff3ce97de5535fa2d53 215705 tests/paradox_local_qa_harness.test.ts
+1194c0ed210dd7063a59088a94fecf8bfca6db48f8601bf02734786abf3f3121 359 tmp/player-bot-capability-parity-20261024/native-capture-repair/evidence/green-harness-typefix-01.log
+2fffc10faad5b875feebc6100bc4acf970dc6503b2797cf9c638a23b30a6bb9a 160 tmp/player-bot-capability-parity-20261024/native-capture-repair/typecheck-config.json
+e4d12456e2dda69d59fbc1f99f6da5e5353c75e6e1ef12dcf784e0abded22933 242 tmp/player-bot-capability-parity-20261024/native-capture-repair/typecheck-invocation-rejected-01.json
+8154358f18de7256a4c847526d5a0857a80e48ccdc671ac490b6d630d7d56cc6 2896 tmp/player-bot-capability-parity-20261024/native-capture-repair/typecheck-01/receipt.json
+716b4453dd88d3904dfcd3b68e671ae36f8cea52e1aa2fc7cdfc22535bf03e65 1711 tmp/player-bot-capability-parity-20261024/native-capture-repair/typecheck-02/start.json
+2fffc10faad5b875feebc6100bc4acf970dc6503b2797cf9c638a23b30a6bb9a 160 tmp/player-bot-capability-parity-20261024/native-capture-repair/typecheck-02/command.json
+91e0225603863bff7bfba2454b7ae4eb8d4ec8722f9ffa08fc263bf857e4f9af 31 tmp/player-bot-capability-parity-20261024/native-capture-repair/typecheck-02/stdout.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0 tmp/player-bot-capability-parity-20261024/native-capture-repair/typecheck-02/stderr.log
+31d3ce08680e758bf59ec116b3bc91e8814b3c5a02e3f90f49f577cb4d6fc0f2 2896 tmp/player-bot-capability-parity-20261024/native-capture-repair/typecheck-02/receipt.json
+f900d71deff3f6fa9cce87da7301441c6b071840cd1d504d9212a7247320f07a 1665 tmp/player-bot-capability-parity-20261024/native-capture-repair/evidence/final-hashes.txt

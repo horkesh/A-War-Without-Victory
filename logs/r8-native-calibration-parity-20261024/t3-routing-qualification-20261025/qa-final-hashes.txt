@@ -1,0 +1,11 @@
+71a9bbb675d4c33d290e92e97c7e3780211e5ce3c500f37c637bf46ef8e32503 361860 tools/ui/paradox_local_qa.cjs
+a99e082264f586128dbe8c8d476bbfced16777c1deb073cb652c0f5f84dae33c 215682 tests/paradox_local_qa_harness.test.ts
+dc06b3ce9e51f318c46ce96b73e5abecfbc9142d6497b21322d61b7ec0e22ee6 1210 tmp/player-bot-capability-parity-20261024/native-capture-repair/PLAN.md
+efc2bd9764e67a70923ded95349adef1f38cdd8e80611b4e2c5635b04e7cccd1 786 tmp/player-bot-capability-parity-20261024/native-capture-repair/v1/PACKET.json
+97825da3f5beee5cf96a3be85d934e8ff67a8b48fa352fe60ee918e8323a4f86 4161 tmp/player-bot-capability-parity-20261024/native-capture-repair/v1/native_capture.cjs
+10485374cc166beae03ac421da10ea2ef48a4131231fa58c6834aae22f2efa98 2237 tmp/player-bot-capability-parity-20261024/native-capture-repair/v1/native_entry.cjs
+767eb70a167e8e12157e1088aa08f27e362c3b1e1b130d4113e85c416f2a71db 6033 tmp/player-bot-capability-parity-20261024/native-capture-repair/v1/capture_selftest.cjs
+59f6d1858650d33b6e5f9d91175aa97359e13c0c4a7f7b04ca58e68c48465ee7 359 tmp/player-bot-capability-parity-20261024/native-capture-repair/evidence/green-harness-final-2.log
+6c0418a9ba34bb42d3c5c644a470290c5a052d1ce86c41cf0364d9832cb321c6 513 tmp/player-bot-capability-parity-20261024/native-capture-repair/evidence/green-capture-final-3.log
+66da59e80de498a34549007a36acfb6e6c6711b8245967142861f3785d017cfc 2689 tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native_entry.cjs
+4d0cad6f3b9a0482d5e505549d450483b7eb8fbffe0f8cd14ee90a29fec30ef6 10665 tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-failure-independent-audit-01.json

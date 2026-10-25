@@ -160,6 +160,7 @@ test('historical event policy accepts exact visible tooltip or same-modal dossie
     const hasMeaningfulSourceContent = loadFunction<(value: unknown, prefix: string) => boolean>(harness, 'hasMeaningfulSourceContent');
     const policy = loadAsyncFunction<(surface: any) => Promise<any>>(harness, 'policyEventResponseControl', {
         historicalChoice: true,
+        rbihParamilitaryPolicyOverride: null,
         selectHistoricalEventChoice,
         hasMeaningfulSourceContent,
     });
@@ -185,6 +186,7 @@ test('historical event policy rejects absent, empty, hidden, foreign, or ambiguo
     const hasMeaningfulSourceContent = loadFunction<(value: unknown, prefix: string) => boolean>(harness, 'hasMeaningfulSourceContent');
     const policy = loadAsyncFunction<(surface: any) => Promise<any>>(harness, 'policyEventResponseControl', {
         historicalChoice: true,
+        rbihParamilitaryPolicyOverride: null,
         selectHistoricalEventChoice,
         hasMeaningfulSourceContent,
     });
@@ -3868,6 +3870,160 @@ test('runtime diagnostics ignore only the Playwright inspector teardown footer',
         false,
     );
     assert.equal(isExpectedInspectorTeardownLine('Error: renderer failed'), false);
+});
+
+test('top-level failure finalization preserves the exact in-memory result without success metadata', () => {
+    const harness = readHarness();
+    const finalizeFailedRunResult = loadFunction<(
+        result: Record<string, any>,
+        error: Error,
+        failedAt: string,
+    ) => Record<string, any>>(harness, 'finalizeFailedRunResult');
+    const faction = {
+        faction: 'RBiH',
+        failed: false,
+        events: [{ turn: 39, label: 'save-load-post-save/end' }],
+        playtest: { finalState: { meta: { turn: 39 } } },
+    };
+    const result = {
+        startedAt: '2026-10-25T04:05:22.697Z',
+        completedAt: 'must-not-survive',
+        command: ['--turns=39'],
+        provenance: { harnessSha256: 'abc' },
+        factions: [faction],
+    };
+    const error = new Error('Runtime diagnostics detected: {"networkFailures":1}');
+
+    const finalized = finalizeFailedRunResult(result, error, '2026-10-25T04:17:45.886Z');
+
+    assert.equal(finalized, result, 'failure finalization must retain the exact in-memory object');
+    assert.equal(finalized.factions[0], faction, 'nested evidence must not be reconstructed');
+    assert.equal(finalized.failed, true);
+    assert.equal(finalized.error, String(error.stack));
+    assert.equal(finalized.failedAt, '2026-10-25T04:17:45.886Z');
+    assert.equal(Object.prototype.hasOwnProperty.call(finalized, 'completedAt'), false);
+    assert.match(harness, /let result = null;/);
+    assert.match(harness, /writeJsonAtomic\(logPath, finalizeFailedRunResult\(result, error,/);
+    assert.match(harness, /writeTextAtomic\(path\.join\(outDir, `paradox-local-qa-error-\$\{runSlug\}\.txt`\), String\(error\?\.stack \?\? error\)\)/);
+});
+
+test('RBiH paramilitary override accepts only an explicit Historical RBiH always-allow request', () => {
+    const harness = readHarness();
+    const parse = loadFunction<(
+        argv: string[],
+        historical: boolean,
+        factions: string[],
+    ) => Record<string, unknown> | null>(harness, 'parseRbihParamilitaryPolicyOverride');
+
+    assert.equal(parse(['node', 'qa.cjs', '--historical-choice', '--faction=RBiH'], true, ['RBiH']), null);
+    assert.deepEqual(JSON.parse(JSON.stringify(parse([
+        'node',
+        'qa.cjs',
+        '--historical-choice',
+        '--faction=RBiH',
+        '--rbih-paramilitary-policy=always_allow',
+    ], true, ['RBiH']))), {
+        requested: 'always_allow',
+        version: 1,
+        provenance: 'explicit_visible_player_policy_selector',
+        eventId: 'rbih_paramilitary_policy_1992',
+    });
+    assert.throws(() => parse([
+        '--rbih-paramilitary-policy=always_allow',
+        '--rbih-paramilitary-policy=always_allow',
+    ], true, ['RBiH']), /exactly once/i);
+    assert.throws(() => parse(['--rbih-paramilitary-policy'], true, ['RBiH']), /unknown.*empty/i);
+    assert.throws(() => parse(['--rbih-paramilitary-policy='], true, ['RBiH']), /unknown.*empty/i);
+    assert.throws(() => parse(['--rbih-paramilitary-policy=always_deny'], true, ['RBiH']), /unknown.*always_deny/i);
+    assert.throws(() => parse(['--rbih-paramilitary-policy=always_allow'], false, ['RBiH']), /historical-choice/i);
+    assert.throws(() => parse(['--rbih-paramilitary-policy=always_allow'], true, ['RS']), /RBiH only/i);
+    assert.throws(() => parse(['--rbih-paramilitary-policy=always_allow'], true, ['RBiH', 'RS']), /RBiH only/i);
+    assert.ok(
+        harness.indexOf('const rbihParamilitaryPolicyOverride = parseRbihParamilitaryPolicyOverride(')
+            < harness.indexOf('reserveEvidenceDirectory();'),
+        'invalid selector requests must fail before any native launch preparation',
+    );
+    assert.match(
+        harness,
+        /\.\.\.\(rbihParamilitaryPolicyOverride \? \{ rbihParamilitaryPolicyOverride \} : \{\}\)/,
+        'default Historical provenance shape must remain unchanged when no override was requested',
+    );
+});
+
+test('RBiH paramilitary override chooses only the existing visible counterfactual control and canonical receipt path', async () => {
+    const harness = readHarness();
+    const selectHistoricalEventChoice = loadFunction<(decision: any) => any>(harness, 'selectHistoricalEventChoice');
+    const policyEventResponseControl = loadAsyncFunction<(surface: any) => Promise<any>>(
+        harness,
+        'policyEventResponseControl',
+        {
+            historicalChoice: true,
+            rbihParamilitaryPolicyOverride: {
+                requested: 'always_allow',
+                version: 1,
+                provenance: 'explicit_visible_player_policy_selector',
+                eventId: 'rbih_paramilitary_policy_1992',
+            },
+            selectHistoricalEventChoice,
+            hasMeaningfulSourceContent: () => false,
+        },
+    );
+    const controls = [
+        { id: 'deny-control', label: 'Refuse paramilitary deployment' },
+        { id: 'allow-control', label: 'Authorize paramilitary standing orders' },
+    ];
+    const responseList = {
+        nth: (index: number) => controls[index],
+        evaluateAll: async (callback: (nodes: any[]) => unknown) => callback(controls.map((control) => ({
+            firstElementChild: { firstElementChild: { textContent: control.label } },
+        }))),
+    };
+    const rail = { getAttribute: async () => 'rbih_paramilitary_policy_1992' };
+    const modal = { locator: (selector: string) => selector.includes('rail')
+        ? { count: async () => 1, first: () => rail }
+        : responseList };
+    const surface = (playerFaction = 'RBiH', options = [
+        { id: 'always_deny', label: controls[0].label, historical_marker: 'historical_default' },
+        { id: 'always_allow', label: controls[1].label, historical_marker: 'counterfactual' },
+    ]) => ({
+        locator: () => ({ count: async () => 1, first: () => modal }),
+        evaluate: async () => ({
+            meta: { turn: 0, player_faction: playerFaction },
+            military: {
+                pending_event_decisions: [{
+                    event_id: 'rbih_paramilitary_policy_1992',
+                    faction: 'RBiH',
+                    response_options: options,
+                }],
+            },
+        }),
+    });
+
+    const selected = await policyEventResponseControl(surface());
+    assert.equal(selected.loc.id, 'allow-control');
+    assert.equal(selected.choice.responseId, 'always_allow');
+    assert.equal(selected.choice.basis, 'player_selected_counterfactual');
+    assert.equal(selected.choice.historicityClaim, 'none_counterfactual_player_choice');
+    assert.deepEqual(JSON.parse(JSON.stringify(selected.choice.requestedOverride)), {
+        requested: 'always_allow',
+        version: 1,
+        provenance: 'explicit_visible_player_policy_selector',
+        eventId: 'rbih_paramilitary_policy_1992',
+    });
+    await assert.rejects(policyEventResponseControl(surface('HRHB')), /exact player event/i);
+    await assert.rejects(policyEventResponseControl(surface('RBiH', [
+        { id: 'always_deny', label: controls[0].label, historical_marker: 'historical_default' },
+    ])), /missing.*always_allow/i);
+    await assert.rejects(policyEventResponseControl(surface('RBiH', [
+        { id: 'always_deny', label: controls[0].label, historical_marker: 'historical_default' },
+        { id: 'always_allow', label: controls[1].label, historical_marker: 'counterfactual' },
+        { id: 'always_allow', label: controls[1].label, historical_marker: 'counterfactual' },
+    ])), /ambiguous.*always_allow/i);
+
+    const clickSource = extractFunctionSource(harness, 'clickTestId');
+    assert.match(clickSource, /policyEventResponseControl/);
+    assert.match(clickSource, /assertExactEventDecisionReceipt/);
+    assert.match(clickSource, /receipt\.responseId !== transcriptRow\.responseId/);
 });
 
 test('readability gate includes tiny text, ancestor clipping, inaccessible truncation, contrast, and occlusion', () => {

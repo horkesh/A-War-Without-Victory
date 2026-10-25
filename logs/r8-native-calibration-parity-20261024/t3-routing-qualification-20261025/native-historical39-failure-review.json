@@ -1,0 +1,199 @@
+{
+  "schema": "awwv.t3-routing-native.failed-run-independent-audit.v1",
+  "reviewerIdentity": "receipt-integration-independent-reviewer",
+  "scope": "Read-only retained-failure audit of the single native Historical RBiH 0-to-39 attempt. This is not a qualification result, score waiver, gameplay diagnosis, or retry authorization.",
+  "verdict": "NO_GO",
+  "runStatus": {
+    "wrapperReceipt": {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-01/receipt.json",
+      "bytes": 4747,
+      "sha256": "461f68e562b3e9d44eb5eed586b80c36b57908d352a3d79ca13c5f269ff7aad0"
+    },
+    "start": {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-01/start.json",
+      "bytes": 3048,
+      "sha256": "14185d158e8627bf2f3a0ebcb1c0adcc0305abac4c42aef37aacb7796d775428"
+    },
+    "config": {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-config.actual-01.json",
+      "bytes": 3676,
+      "sha256": "32a8607ce115323672b954431bb9ec351b35d1365ddbf39ee94bc2a78935470d"
+    },
+    "terminal": {
+      "childExit": 1,
+      "wrapperExit": 126,
+      "timedOut": false,
+      "signal": null,
+      "spawnError": null,
+      "startUtc": "2026-10-25T04:05:22.697Z",
+      "endUtc": "2026-10-25T04:17:45.886Z"
+    },
+    "entry": {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native_entry.cjs",
+      "bytes": 2689,
+      "sha256": "66da59e80de498a34549007a36acfb6e6c6711b8245967142861f3785d017cfc",
+      "snapshotMatchesStartAndEnd": true
+    },
+    "exactCommand": {
+      "turns": 39,
+      "faction": "RBiH",
+      "historicalChoice": true,
+      "officerSuccessionPolicy": "historical",
+      "packagedExecutable": "dist-packaged/player-column-routing-20261025-01/win-unpacked/A War Without Victory.exe"
+    },
+    "sourceProvenance": {
+      "gitHead": "fd061e898ad3de942d62c016547a5e453ddd9422",
+      "runStartTrackedContentFileCount": 0,
+      "runStartStatusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "runStartContentSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "currentTrackedDiffEmpty": true,
+      "currentUntrackedDiagnosticWorkExists": true
+    }
+  },
+  "strictRuntimeFailure": {
+    "harnessStderr": {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-01/child/harness.stderr.log",
+      "bytes": 414,
+      "sha256": "76632e547cae983daa15ce63f2367eb53a993e1c745d4e9fa35cbbd50c4f2591"
+    },
+    "categories": {
+      "consoleMessages": 0,
+      "pageErrors": 0,
+      "networkFailures": 1,
+      "unexpectedMainProcessStderr": 0,
+      "mainProcessErrors": 0
+    },
+    "expectedDiagnostics": {
+      "startupAborts": 0,
+      "teardownAborts": 0,
+      "navigationAborts": 0,
+      "tileFetchAborts": 7,
+      "ambientLifecycleAborts": 0,
+      "expectedInspectorTeardownLines": 2
+    },
+    "onlyFailure": {
+      "kind": "requestfailed",
+      "method": "GET",
+      "url": "http://127.0.0.1:63326/assets/ambient_field-5Mv-hV7p.ogg",
+      "resourceType": "media",
+      "isMainFrame": false,
+      "errorText": "net::ERR_ABORTED",
+      "eventCount": 126,
+      "teardownStarted": false,
+      "requestInitiatedAtMs": 1792901865369,
+      "observedAtMs": 1792901865370,
+      "range": "bytes=0-",
+      "stage": "save-load-post-save/end"
+    }
+  },
+  "ambientEvidenceAssessment": {
+    "strictConclusion": "The one media request remains an actual unclassified runtime failure under the existing contract. It cannot be waived or reclassified as an expected ambient lifecycle abort.",
+    "supportingObservations": [
+      "The same ambient element was playing before the failure and reached its 30-second loop boundary: seeking and waiting at currentTime 0 occurred 86 ms before the failure, followed by progress, suspend, seeked, canplay, and playing at readyState 4 with no mediaError 84 ms before the failure.",
+      "The matching final Chromium netlog request source 1157 read the full cached 196084 bytes, recorded no net error, and ended normally. Earlier sources 411 and 1004 also ended without net errors after reading 196084 and 97780 bytes.",
+      "The retained lifecycle stream has two request-start signals overall but no matching request-start plus browser-abort pair for this final request and element/source epoch within the classifier window. expectedAmbientLifecycleAborts is therefore empty.",
+      "Earlier retained warroom/audio investigations reached the same boundary: successful cached reads and nearby playback signals make lifecycle behavior plausible, but without the exact causal pair they did not prove a benign abort."
+    ],
+    "unsupportedClaims": [
+      "The evidence does not prove that loop playback caused the Playwright requestfailed event.",
+      "The evidence does not prove a product audio defect.",
+      "The evidence does not authorize treating ERR_ABORTED as benign based only on URL, bytes read, timing, or resumed playing."
+    ]
+  },
+  "completedRawEvidence": {
+    "progress": {
+      "path": "tmp-paradox-qa-20260710/paradox-local-qa-progress-player-column-fresh-rbih-t39-20261025-01.json",
+      "bytes": 24006001,
+      "sha256": "29e92380e926eaa38801b39450712dbf2138dcb81fc7a08831c27016a7f0884f"
+    },
+    "netlog": {
+      "path": "tmp-paradox-qa-20260710/paradox-local-qa-netlog-player-column-fresh-rbih-t39-20261025-01.json",
+      "bytes": 4387577,
+      "sha256": "b834da4c4d47efa44e7f0cff147380a774d15441e3a9d2918dca19e7ce8e98cd"
+    },
+    "eventCount": 126,
+    "maxObservedTurn": 39,
+    "provisionalTurnArchives": 39,
+    "settledTurnArchives": 39,
+    "archiveEvidenceRowsRehashed": 80,
+    "archiveEvidenceMismatches": 0,
+    "finalAutosave": {
+      "bytes": 5302172,
+      "sha256": "a983480115319876428342cbd040ebc91c40766d544930ba075c4185bffd9d73"
+    },
+    "saveLoadProof": {
+      "canonicalBytesEqual": true,
+      "beforeAutosaveSha256": "a983480115319876428342cbd040ebc91c40766d544930ba075c4185bffd9d73",
+      "afterAutosaveSha256": "a983480115319876428342cbd040ebc91c40766d544930ba075c4185bffd9d73",
+      "loadedProjectionExactBytes": true,
+      "loadedProjectionActualSha256": "29eb183cb8cc2410ec0b2e9803364962944ea22443b20c49041dc026bfa9d77b",
+      "loadedProjectionExpectedSha256": "29eb183cb8cc2410ec0b2e9803364962944ea22443b20c49041dc026bfa9d77b"
+    },
+    "rawGameplayDiagnostic": {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/FAILED_NATIVE39_RAW_DIAGNOSTIC_01.json",
+      "bytes": 1025,
+      "sha256": "f9e2d58ab2aa0091e11791319b9663539d0662fbf1a438d9dfea7a5070fc1653",
+      "qualificationStatus": "diagnostic-only"
+    }
+  },
+  "captureLoss": {
+    "wrapperStderr": {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-01/stderr.log",
+      "bytes": 3102,
+      "sha256": "2f10866667835ea969907dc3a57dc8e2aa506574652af1c73d9d565d3578fbde"
+    },
+    "cause": "native_entry.cjs checks result.json first and throws immediately when the strict harness exits before writing its final result. That throw occurs before the entry copies the already-existing progress and netlog, inventories the external evidence tree, or writes child/exit.json.",
+    "retainedWrapperFiles": [
+      "child/config.json",
+      "child/harness.stdout.log",
+      "child/harness.stderr.log"
+    ],
+    "missingWrapperFiles": [
+      "child/result.json",
+      "child/progress.json",
+      "child/netlog.json",
+      "child/external-inventory.json",
+      "child/exit.json"
+    ],
+    "rawExternalFilesRemainAvailable": true,
+    "impact": "The wrapper correctly fails and preserves its own failure receipt, but its child directory is not a closed copy of the raw external evidence. The raw progress, netlog, archive, profile, screenshots, and main-process stream must be referenced by their fresh supplemental inventory."
+  },
+  "supplementalInventory": {
+    "path": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-failure-independent-inventory-01.json",
+    "bytes": 77421,
+    "sha256": "f28829ebfca4d924945f49e3c60f6f5fc2c52010fd4003625f77bb1414cffcc3",
+    "archiveEvidence": {
+      "files": 82,
+      "bytes": 382709806,
+      "treeSha256": "230ade1b26628245e7f1a6ceaa0a1e8b7249c08dd25dab843662774d0ac8ce5d"
+    },
+    "screenshots": {
+      "files": 132,
+      "bytes": 273306645,
+      "treeSha256": "4f94b5701361f7b2c0e661607506e2ee98eb1d47615127c067ebe015cfdf8e5d"
+    },
+    "userProfile": {
+      "files": 137,
+      "bytes": 46653156,
+      "treeSha256": "d71c7cb736f33534e851f9f44705e4532f36798470a27cea42a3570f8ee77c7a"
+    },
+    "failedWrapperAttempt": {
+      "files": 8,
+      "bytes": 17676,
+      "treeSha256": "39828c31e5bd74bb8c41aebeec57bf0d8b2a347e049964a0bfa5df36d993b76e"
+    }
+  },
+  "smallestDiagnosticRepairRecommendation": {
+    "target": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native_entry.cjs in a new separately reviewed packet; preserve this frozen attempt and packet.",
+    "change": "After spawnSync, always write child/exit.json, copy every external artifact that exists, record every missing artifact, and inventory an existing external evidence root before returning the child's nonzero status. Defer the missing-result failure until capture is complete.",
+    "unchangedGate": "A missing result.json, any runtime diagnostic, child exit 1, wrapper exit 126, or incomplete artifact contract remains a hard NO-GO. The repair only preserves evidence and does not reclassify the ambient abort.",
+    "cheapVerification": "Use a no-spawn fixture where result.json is absent but progress.json, netlog.json, and an evidence root exist. Require the entry to retain those files plus exit and inventory, report the missing result, and exit nonzero.",
+    "runtimeFollowup": "Before any native retry, use a focused audio lifecycle diagnostic that can produce or reject the exact request-start/browser-abort causal pair for loop-boundary requests. Do not add a URL-only, timing-only, bytes-read-only, or resumed-playing allowance."
+  },
+  "limits": [
+    "The actual native39 run failed strict runtime diagnostics and does not qualify.",
+    "The existing opening approval remains limited to Historical RBiH 0-to-1.",
+    "The raw score and territory projection belong to the separate gameplay diagnosis and do not waive the failed runtime gate.",
+    "No retry, source edit, package rebuild, native relaunch, score tuning, or adoption was performed by this review."
+  ]
+}

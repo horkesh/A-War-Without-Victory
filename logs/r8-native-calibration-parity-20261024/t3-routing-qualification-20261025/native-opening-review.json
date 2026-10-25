@@ -1,0 +1,31 @@
+{
+  "schema": "awwv.t3-routing-native.independent-opening-approval.v1",
+  "verdict": "GO",
+  "independent": true,
+  "reviewerIdentity": "receipt-integration-review",
+  "implementerIdentity": "t3-routing-native-operator",
+  "reviewedAt": "2026-10-25T04:03:36.8794783Z",
+  "expectedHead": "fd061e898ad3de942d62c016547a5e453ddd9422",
+  "openingPostcheckSha256": "f2536f6a04cc6b47a42b03712deb3c689afa3f78d009b12732fa73fd2e37fc19",
+  "bindings": {
+    "configSha256": "e36a5265a66dcafc35b31f1e5cdd6fa3cad975c7237b0299cfa7cf5e9a87c1c2",
+    "preflightResultSha256": "a3b5b12ca88cbeae5a56bd3a9e0a0daee004d05c94185154df185fce7984a50d",
+    "preflightReceiptSha256": "9f3160425502003d31667cdf07c20e49415f0e8121d5e1e0587d40c947eb8bda",
+    "nativeReceiptSha256": "4dacf1b80a601e76aba75f01dc599230331f6b6da8c0f10b3469e71d31253d74",
+    "resultSha256": "827ec518f2073234e8a1bdfa68e9dda9765eaac2cd4e994035a0a794ef7c440a",
+    "postcheckBindingSha256": "da8eabf4e2a22b64faab7a81347bde75ecee6ad29ed316aa66f743bbad27511a",
+    "packageBindingSha256": "762b801c75652b653cb887006e8dbc7eb6ec6432e86cd913b8d8fba85f6308e8"
+  },
+  "findings": [
+    "The preserved native wrapper is authentic, terminal 0/0 without timeout, and retained exactly its eight declared child artifacts.",
+    "The run uses the reviewed package executable and app.asar at clean HEAD fd061e898ad3de942d62c016547a5e453ddd9422 with the exact bound harness.",
+    "The visible normal RBiH Historical opening starts fresh at turn 0 and settles exactly at turn 1 with no unresolved blockers.",
+    "The authored civic state-identity and always-deny paramilitary choices were visibly applied through player input; the Historical denial contract is unchanged.",
+    "Console messages, page errors, network failures, and unexpected main-process stderr are all zero.",
+    "The settled and provisional turn-1 archives are present, the six-file external inventory remains exact, and canonical Save/Load plus loaded-projection byte proofs pass.",
+    "All 22 frozen opening postcheck gates pass with live config, package, suite, compiled-probe, preflight, result, progress, netlog, archive, and Save/Load bindings."
+  ],
+  "limits": [
+    "Approves only the fresh normal RBiH 0-to-1 prerequisite; no turn-39 or calibration claim."
+  ]
+}
