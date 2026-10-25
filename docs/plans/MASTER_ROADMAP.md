@@ -15,6 +15,8 @@ paused or RE is blocked, they are describing 2026-08-28, not today.
 
 **Last updated:** 2026-10-25 — owner prioritizes player capability to achieve bot calibration and access the same operations; diagnose and repair proven gaps before divergence experiments. n94 remains the no-player benchmark.
 
+**Player parity:** n96 retains the benchmark; native39 remains700/712. Reviewed T3 routing/delivery passes;188, suite and packaged proof remain open. Preserve all runs. See the [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md).
+
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
 validation/correction and integration against unchanged criteria. Routine

@@ -1,0 +1,10 @@
+
+ RUN  v2.1.9 C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory
+
+ ✓ tests/osid_column_movement.test.ts (32 tests) 22ms
+
+ Test Files  1 passed (1)
+      Tests  32 passed (32)
+   Start at  03:40:51
+   Duration  1.66s (transform 426ms, setup 13ms, collect 1.11s, tests 22ms, environment 0ms, prepare 75ms)
+

@@ -4,6 +4,7 @@ import type { GameState, FactionId, FormationState } from '../src/state/game_sta
 import type { EdgeRecord } from '../src/map/settlements.js';
 import type { TerrainScalarsData, TerrainScalars } from '../src/map/terrain_scalars.js';
 import type { OperationalToCanonicalReverseMap } from '../src/data/operational_data.js';
+import { deserializeState, serializeState } from '../src/state/serialize.js';
 import {
     averageTerrainForOsid,
     dijkstraFriendlyPath,
@@ -267,6 +268,10 @@ describe('processOsidColumnMovement', () => {
                         sector_stance: 'defend',
                         stance_source: 'bot',
                     },
+                    'sector:other_corps:0': {
+                        sector_id: 'sector:other_corps:0',
+                        corps_id: 'other_corps',
+                    },
                 },
                 brigade_movement_orders: {
                     brig1: { destination_sids: ['C'], stance: 'column', owner: 'bot_discretionary' },
@@ -283,6 +288,153 @@ describe('processOsidColumnMovement', () => {
         expect(state.military.brigade_movement_state?.brig1?.owner).toBe('bot_discretionary');
         expect(state.military.formations?.brig1?.location_osid).toBe('A');
         expect(state.military.brigade_movement_orders?.brig1).toBeUndefined();
+    });
+
+    it('routes through friendly intermediate OSIDs outside the corps frontage', () => {
+        const state = makeState([
+            makeFormation('brig1', 'RS', 'A', { corps_id: 'corps_1' as any }),
+        ], {
+            military: {
+                corps_front_sectors: {
+                    'sector:corps_1:0': {
+                        sector_id: 'sector:corps_1:0',
+                        corps_id: 'corps_1',
+                        faction: 'RS',
+                        opposing_factions: ['RBiH'],
+                        edge_ids: ['A__E'],
+                        sub_segments: [{
+                            sub_segment_id: 'subseg:0',
+                            edge_ids: ['A__E'],
+                            friendly_osids: ['A', 'D'],
+                            enemy_osids: ['E'],
+                            primary_brigade_ids: ['brig1'],
+                            length_edges: 1,
+                        }],
+                        length_edges: 1,
+                        territory_osids: ['A', 'D'],
+                        assigned_brigade_ids: ['brig1'],
+                        reserve_brigade_ids: [],
+                        density: 1,
+                        threat_ratio: 1,
+                        defensive_power: 100,
+                        sector_stance: 'defend',
+                        stance_source: 'bot',
+                    },
+                },
+                brigade_movement_orders: {
+                    brig1: { destination_sids: ['D'], stance: 'column', owner: 'bot_discretionary' },
+                },
+            } as any,
+        });
+        const reversedState = structuredClone(state);
+        reversedState.military.corps_front_sectors = Object.fromEntries(
+            Object.entries(reversedState.military.corps_front_sectors ?? {}).reverse(),
+        ) as any;
+
+        const report = processOsidColumnMovement(
+            state,
+            makeLinearEdges(),
+            mockReverseMap(['A', 'B', 'C', 'D', 'E']),
+            flatTerrain(),
+        );
+        const reversedReport = processOsidColumnMovement(
+            reversedState,
+            makeLinearEdges().reverse(),
+            mockReverseMap(['E', 'D', 'C', 'B', 'A']),
+            flatTerrain(),
+        );
+
+        expect(report.column_starts).toBe(1);
+        expect(report.column_blocked).toBe(0);
+        expect(reversedReport).toEqual(report);
+        expect(reversedState.military.brigade_movement_state?.brig1)
+            .toEqual(state.military.brigade_movement_state?.brig1);
+        expect(state.military.brigade_movement_state?.brig1).toEqual(expect.objectContaining({
+            status: 'in_transit',
+            destination_sids: ['D'],
+            path: ['A', 'B', 'C', 'D'],
+            owner: 'bot_discretionary',
+        }));
+        expect(state.military.formations?.brig1?.location_osid).toBe('A');
+        expect(deserializeState(serializeState(state)).military.brigade_movement_state?.brig1)
+            .toEqual(state.military.brigade_movement_state?.brig1);
+    });
+
+    it('still rejects a corps-assigned column when the required intermediate OSID is hostile', () => {
+        process.env.AWWV_DEBUG_REASON_CODES = 'movement_reject';
+        resetReasonCodeTopicCacheForTests();
+        const state = makeState([
+            makeFormation('brig1', 'RS', 'A', { corps_id: 'corps_1' as any }),
+        ], {
+            military: {
+                corps_front_sectors: {
+                    'sector:corps_1:0': {
+                        sector_id: 'sector:corps_1:0',
+                        corps_id: 'corps_1',
+                        faction: 'RS',
+                        opposing_factions: ['RBiH'],
+                        edge_ids: ['A__E'],
+                        sub_segments: [],
+                        length_edges: 1,
+                        territory_osids: ['A', 'D'],
+                        assigned_brigade_ids: ['brig1'],
+                        reserve_brigade_ids: [],
+                        density: 1,
+                        threat_ratio: 1,
+                        defensive_power: 100,
+                        sector_stance: 'defend',
+                        stance_source: 'bot',
+                    },
+                },
+                brigade_movement_orders: {
+                    brig1: { destination_sids: ['D'], stance: 'column', owner: 'bot_discretionary' },
+                },
+            } as any,
+            political: {
+                political_controllers: { A: 'RS', B: 'RS', C: 'RBiH', D: 'RS', E: 'RBiH' },
+            } as any,
+        });
+
+        const report = processOsidColumnMovement(
+            state,
+            makeLinearEdges(),
+            mockReverseMap(['A', 'B', 'C', 'D', 'E']),
+            flatTerrain(),
+        );
+
+        expect(report.column_starts).toBe(0);
+        expect(report.column_blocked).toBe(1);
+        expect(state.military.brigade_movement_state?.brig1).toBeUndefined();
+        expect(report.column_rejections).toEqual([expect.objectContaining({
+            formation_id: 'brig1',
+            reason: 'no_friendly_path',
+            routing_scope_osid_count: null,
+            source_in_routing_scope: null,
+            destination_in_routing_scope: null,
+        })]);
+    });
+
+    it('keeps faction-wide routing when the formation corps has no sectors', () => {
+        const state = makeState([
+            makeFormation('orphan_brigade', 'RS', 'A', { corps_id: 'corps_without_sectors' as any }),
+        ], {
+            military: {
+                corps_front_sectors: {},
+                brigade_movement_orders: {
+                    orphan_brigade: { destination_sids: ['D'], stance: 'column' },
+                },
+            } as any,
+        });
+
+        const report = processOsidColumnMovement(
+            state,
+            makeLinearEdges(),
+            mockReverseMap(['A', 'B', 'C', 'D', 'E']),
+            flatTerrain(),
+        );
+
+        expect(report.column_starts).toBe(1);
+        expect(state.military.brigade_movement_state?.orphan_brigade?.path).toEqual(['A', 'B', 'C', 'D']);
     });
 
     it('starts column transit for an active HV expeditionary phantom', () => {

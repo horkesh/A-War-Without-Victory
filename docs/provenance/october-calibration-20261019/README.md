@@ -271,3 +271,7 @@ C103894385/00d6d7e65832a45e4b8ddc34e077c228b9496ca8f1068a6b9633571b4bae5557 and 
 Evidence: pool-flow-826-result/final-receipt/closed-inventory, pool-flow-827-review and pool-flow-828-result/raw-inventory under docs/provenance/october-calibration-20261019. Raw evidence stays LOCAL with pushed inventory, including all failed attempts; the inventory is not a remote backup.
 
 The later targeted documentation review is preserved in [two-hvo-883-documentation-review.json](two-hvo-883-documentation-review.json): 3,290 bytes, SHA-256 `b6d82efdaaa999f1d360c70adc415fc79f40a00010373efd4a2a8b19ebb7d651`. It approves all four wording corrections for the source/docs preservation commit. This review postdates the raw-inventory snapshot; the original review and its 0/0 freeze receipt remain local.
+
+## 2026-10-25 normal-player physical routing candidate
+
+[Portable T3 proof inventory](../../../logs/r8-native-calibration-parity-20261024/t3-routing-20261025/MANIFEST.json) preserves exact source/canon review, focused tests, rejected/corrected delivery-fixture review and the actual four-turn delivery result. Ordinary movement delivers the182nd toDelijas at6 and restores the observed181st/109th bot positions. The copied native39 comparison remains failed700/712; this is a candidate implementation proof, not calibration acceptance. n91–n96 and all raw telemetry/failed attempts remain preserved locally. New188, required suite and fresh packaged measurement remain open.

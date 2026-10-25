@@ -1,0 +1,29 @@
+{
+  "schema": "awwv.player-turn2-to6-routing-delivery.v2",
+  "verdict": "PASS_PLAYER_T3_TO_T6_COLUMN_DELIVERY",
+  "turns_run": 4,
+  "qualification_claim": false,
+  "transit_boundaries_pass": true,
+  "final_delivery_pass": true,
+  "controls_pass": true,
+  "blockers_pass": true,
+  "metadata_pass": true,
+  "phase37_181_109_reported": true,
+  "location_comparison_not_a_pass_prediction": {
+    "arbih_182nd_vitezka_light": {
+      "repaired_player_turn6": "op:trnovo:delijas",
+      "retained_bot_turn6": "op:trnovo:delijas",
+      "old_always_allow_turn6": "op:hadzici:luke"
+    },
+    "arbih_181st_mountain": {
+      "repaired_player_turn6": "op:trnovo:kijevo_2",
+      "retained_bot_turn6": "op:trnovo:kijevo_2",
+      "old_always_allow_turn6": "op:hadzici:lokve"
+    },
+    "arbih_109th_mountain": {
+      "repaired_player_turn6": "op:hadzici:lokve",
+      "retained_bot_turn6": "op:hadzici:lokve",
+      "old_always_allow_turn6": "op:hadzici:hadzici"
+    }
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T02:49:43.250Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/t3-routing-repair-delivery-turns3-6-02",
+  "timeout_ms": 60000,
+  "original_argv": [
+    "node",
+    "node_modules/tsx/dist/cli.mjs",
+    "tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/run-player-turn2-to6-routing-delivery-v2.mjs",
+    "{evidenceDir}"
+  ],
+  "argv": [
+    "node",
+    "node_modules/tsx/dist/cli.mjs",
+    "tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/run-player-turn2-to6-routing-delivery-v2.mjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\paired-turn1-182-boundary-20261025\\t3-routing-repair-delivery-turns3-6-02"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "dependencies.json",
+    "precheck.json",
+    "delivery.json",
+    "turn-reports.json",
+    "final-state.json",
+    "result.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/run-player-turn2-to6-routing-delivery-v2.mjs",
+    "bytes": 16850,
+    "raw_sha256": "4167b26bfe6595d109fe9c2ffdc769f2f3fe66a607a3459c26e4e9cc1805ccb5",
+    "normalized_text_sha256": "4167b26bfe6595d109fe9c2ffdc769f2f3fe66a607a3459c26e4e9cc1805ccb5",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 16850,
+      "sha256": "4167b26bfe6595d109fe9c2ffdc769f2f3fe66a607a3459c26e4e9cc1805ccb5"
+    }
+  },
+  "end_utc": "2026-10-25T02:49:48.848Z",
+  "pid": 27272,
+  "child_exit": 0,
+  "wrapper_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/run-player-turn2-to6-routing-delivery-v2.mjs",
+    "bytes": 16850,
+    "raw_sha256": "4167b26bfe6595d109fe9c2ffdc769f2f3fe66a607a3459c26e4e9cc1805ccb5",
+    "normalized_text_sha256": "4167b26bfe6595d109fe9c2ffdc769f2f3fe66a607a3459c26e4e9cc1805ccb5",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 19709,
+    "sha256": "04e52617b78db49ef52fb0abe34c4a8d6eba307e4946b9ce12e77d9c2b52df6f"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "dependencies.json",
+      "bytes": 3517,
+      "sha256": "2040d13723ee0283969941c2a7d41df3a50602db7ffdc47bfd4b87a87a68684c"
+    },
+    {
+      "path": "precheck.json",
+      "bytes": 44793,
+      "sha256": "861416449071729698c89f3105b67fd6632f06aeff29a3f4555e43920f357026"
+    },
+    {
+      "path": "delivery.json",
+      "bytes": 5458295,
+      "sha256": "745ee972d82e105d8e8e4994c7d0d349b76c231d33d52ab9073f180c95ced9fd"
+    },
+    {
+      "path": "turn-reports.json",
+      "bytes": 9561732,
+      "sha256": "ce7d42b4fa8fd0f182913883ca076c3844b94abe333a581ef24404041d3e7a1a"
+    },
+    {
+      "path": "final-state.json",
+      "bytes": 4009716,
+      "sha256": "a2f9dd3eb8b5e4e7a63b576ac49ed1c5c1e7164e7051123ab821f1b58f4e6477"
+    },
+    {
+      "path": "result.json",
+      "bytes": 966,
+      "sha256": "17c59acc02ec0925857205d5dc877867b18b31f647788ff4ad3333c296802edd"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

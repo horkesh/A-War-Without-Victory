@@ -1,0 +1,69 @@
+{
+  "schema": "awwv.independent-player-turn2-canon-review.v1",
+  "head": "29b2cf9b67a9bf9e3529d3c684f0e3a25495abc0",
+  "actual_proof_verdict": "PASS_BOUNDED_PLAYER_T2_CONSUMER_BOUNDARY",
+  "canon_verdict": "GO_IN_PRINCIPLE_NARROW_T3_FACTION_FRIENDLY_ROUTING",
+  "qualification_claim": false,
+  "acceptance_gate_waived": false,
+  "proven": [
+    "canonical player turn-1 order survived load and adapter unchanged",
+    "osid-column-movement was the first named phase to mutate the order/state boundary",
+    "the phase rejected the order as no_friendly_path with source and destination both inside the 83-OSID routing scope",
+    "the later brigade generator reissued the same Delijas order",
+    "the sector intermediate-node mask conflicts with the destination-only movement authority rule"
+  ],
+  "not_proven": [
+    "that the bot's unseen turn-2 phase input had zero sectors",
+    "that the repair moves brigade 109 or restores the seven historical losses",
+    "that normal player play reaches 707/712",
+    "that sector_offensive_launch_helpers has the same defect"
+  ],
+  "implementation_boundary": {
+    "change": "At T3 column execution only, route over the existing terrain-weighted faction-friendly/allied graph without using corps_front_sectors as an intermediate-node allow-list.",
+    "retain": [
+      "destination scope revalidation",
+      "operation, player, owner, loan, reassignment, priority and reinforce authority",
+      "T1/T2 destination and assignment",
+      "enclave destination and donor guards",
+      "political friendly/allied traversal",
+      "deterministic terrain cost and strict OSID tie-breaking",
+      "no-path rejection for genuinely unfriendly routes"
+    ],
+    "exclude": [
+      "sector_offensive_launch_helpers",
+      "supply policy changes",
+      "political-policy substitution",
+      "direct location or political-control writes",
+      "historical-mode relabeling"
+    ]
+  },
+  "required_review": {
+    "generic_change": [
+      "gameplay/systems implementation review",
+      "independent canon and determinism review"
+    ],
+    "conditional_sensitive_history": "Gameplay-programmer plus historian only if enclave legality or Srebrenica/Zepa mechanics are changed rather than proven unchanged."
+  },
+  "historical_gate": {
+    "required_t39_minimum": 707,
+    "required_formerly_correct_losses": 0,
+    "current_qualified_score": 700,
+    "current_losses": 7,
+    "status": "UNMET"
+  },
+  "bindings": {
+    "turn2_entry_sha256": "5e4ca0429e8f06e2da1f2f155da29043af7f467e05394af5e44f87c846a9f765",
+    "turn2_receipt_sha256": "9ab5f34e03dc654c8d85b8148bceec67bb0d30a9fabf468a7441f5dcf6c0216a",
+    "dependencies_sha256": "1aff208ef60ae9762b99cb150ca247ddaa35e404e1d2837444a75d2c544a8d8f",
+    "boundary_sha256": "ed16ee8aa7814224765c1cc74906581ae2776a7046615effaecbb364fa7cda84",
+    "result_sha256": "3fb0bb7679f93a004e473bcbcda497851c4f4bdd39075927a26bf07ffe84a3f1",
+    "route_reader_result_sha256": "39743b98af25fa89931059de656c5bff2e26b3a9cb4990666961893a1e96d7a9",
+    "movement_authority_sha256": "de0cbdb5ddc8a1378c9de07a69e105a9c3ee2ba137583c90db762f3e5da33a42",
+    "rulebook_sha256": "3af8cbc4dab090d307ada0d5b72cf96aed4a0dd367aabeae8a137ea9c4858772",
+    "systems_manual_sha256": "3735d8a6e1d3d89b6070f686bb463c28ba8acca2acf55f0f5c74fb6f1af1236b",
+    "engine_invariants_sha256": "445c3a78304c8a84db9ba7c94403f183882d6128947a3da5ec2e9235287c7227",
+    "adr0006_sha256": "68db00e15a2df359037c72876d0b608d6c31e98fe4ef09f93b386aa962a4f921",
+    "osid_column_movement_sha256": "a3600a86885ecd34bb976dd92e784c0f01fe8c1796d66bd2039cf5bae46a6489",
+    "sector_offensive_launch_helpers_sha256": "7c86a56bda1dfbca6894eaa64059f7c030b37ee8db140d41ad931b221aa01e19"
+  }
+}

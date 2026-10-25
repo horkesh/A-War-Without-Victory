@@ -1,0 +1,513 @@
+{
+  "schema": "awwv.player-turn2-182-routing-repair-boundary.v2",
+  "input": {
+    "formation": {
+      "activation_gated": false,
+      "activation_turn": null,
+      "assignment": {
+        "kind": "sector",
+        "role": "reserve",
+        "sector_id": "sector:arbih_1st_corps:16"
+      },
+      "brigade_history": {
+        "battles_as_attacker": 0,
+        "battles_as_defender": 0,
+        "battles_fought": 0,
+        "current_defense_streak": 0,
+        "current_victory_streak": 0,
+        "defeats": 0,
+        "engagements": [],
+        "first_battle_osid": null,
+        "first_battle_turn": null,
+        "longest_defense_streak": 0,
+        "longest_victory_streak": 0,
+        "nadir_personnel": 500,
+        "peak_personnel": 500,
+        "stalemates": 0,
+        "total_casualties_inflicted": 0,
+        "total_casualties_taken": 0,
+        "total_equipment_captured": {
+          "aa_systems": 0,
+          "artillery": 0,
+          "tanks": 0
+        },
+        "total_equipment_destroyed": {
+          "aa_systems": 0,
+          "artillery": 0,
+          "tanks": 0
+        },
+        "total_osids_captured": 0,
+        "total_osids_lost": 0,
+        "turns_under_siege": 0,
+        "victories": 0,
+        "worst_single_battle_casualties": 0,
+        "worst_single_battle_turn": null
+      },
+      "cohesion": 44.9,
+      "composition": {
+        "aa_systems": 0,
+        "artillery": 1,
+        "artillery_condition": {
+          "degraded": 0,
+          "non_operational": 0,
+          "operational": 1
+        },
+        "infantry": 800,
+        "tank_condition": {
+          "degraded": 0.009499999999999998,
+          "non_operational": 0.0014999999999999987,
+          "operational": 0.989
+        },
+        "tanks": 0
+      },
+      "corps_id": "arbih_1st_corps",
+      "created_turn": 0,
+      "decorations": [],
+      "doctrine_state": {
+        "active": null,
+        "active_turns": 0,
+        "eligible": {
+          "ARTILLERY_COUNTER": false,
+          "ATTACK": false,
+          "COORDINATED_STRIKE": false,
+          "DEFEND": false,
+          "INFILTRATE": false,
+          "STATIC_DEFENSE": false
+        }
+      },
+      "entrenchment_turns": 1.2,
+      "equipment_class": "light_infantry",
+      "equipment_state": {
+        "degraded_heavy": 0,
+        "last_maintenance": 1,
+        "maintenance_deficit": 0.9315648,
+        "non_operational_heavy": 0,
+        "operational_heavy": 6,
+        "total_heavy": 6
+      },
+      "faction": "RBiH",
+      "force_label": "ARBiH",
+      "home_defense_active": true,
+      "home_osid": "op:hadzici:luke",
+      "hq_sid": "op:hadzici:binjezevo",
+      "id": "arbih_182nd_vitezka_light",
+      "kind": "brigade",
+      "last_reachable_turn": 1,
+      "location_osid": "op:hadzici:luke",
+      "max_personnel": 1800,
+      "morale": 65,
+      "name": "182nd Light",
+      "officer_quality": 0.15,
+      "ops": {
+        "fatigue": 0,
+        "last_supplied_turn": 1
+      },
+      "origin_mun": "hadzici",
+      "personnel": 500,
+      "readiness": "active",
+      "status": "active",
+      "tags": [
+        "corps:arbih_1st_corps",
+        "equip:light_infantry",
+        "mun:hadzici",
+        "placement:fixed_home_osid"
+      ],
+      "war_story": {
+        "arc": "garrison",
+        "corps_id": "arbih_1st_corps",
+        "faction": "RBiH",
+        "formation_id": "arbih_182nd_vitezka_light",
+        "formation_name": "182nd Light",
+        "narrative": "The 182nd Light has held its ground. With only 0 engagements, its war has been one of patience, not blood. It currently fields 500 personnel.",
+        "notable_moments": [],
+        "stats": {
+          "battles_fought": 0,
+          "defeats": 0,
+          "final_personnel": 500,
+          "nadir_personnel": 500,
+          "peak_personnel": 500,
+          "total_casualties_inflicted": 0,
+          "total_casualties_taken": 0,
+          "victories": 0
+        }
+      }
+    },
+    "movement_order": {
+      "destination_sids": [
+        "op:trnovo:delijas"
+      ],
+      "owner": "bot_discretionary",
+      "stance": "column"
+    },
+    "movement_state": null
+  },
+  "column_phase": {
+    "completed_turn": 2,
+    "phase_name": "osid-column-movement",
+    "phase_group": "war",
+    "phase_index": 34,
+    "disposition": "executed",
+    "skip_reason": null,
+    "formation_id": "arbih_182nd_vitezka_light",
+    "before": {
+      "formation": {
+        "presence": "present_value",
+        "value": {
+          "faction": {
+            "presence": "present_value",
+            "value": "RBiH"
+          },
+          "status": {
+            "presence": "present_value",
+            "value": "active"
+          },
+          "location_osid": {
+            "presence": "present_value",
+            "value": "op:hadzici:luke"
+          },
+          "corps_id": {
+            "presence": "present_value",
+            "value": "arbih_1st_corps"
+          }
+        }
+      },
+      "movement_state": {
+        "presence": "absent"
+      },
+      "movement_order": {
+        "presence": "present_value",
+        "value": {
+          "destination_sids": [
+            "op:trnovo:delijas"
+          ],
+          "owner": "bot_discretionary",
+          "stance": "column"
+        }
+      }
+    },
+    "after": {
+      "formation": {
+        "presence": "present_value",
+        "value": {
+          "faction": {
+            "presence": "present_value",
+            "value": "RBiH"
+          },
+          "status": {
+            "presence": "present_value",
+            "value": "active"
+          },
+          "location_osid": {
+            "presence": "present_value",
+            "value": "op:hadzici:luke"
+          },
+          "corps_id": {
+            "presence": "present_value",
+            "value": "arbih_1st_corps"
+          }
+        }
+      },
+      "movement_state": {
+        "presence": "present_value",
+        "value": {
+          "status": "in_transit",
+          "stance": "column",
+          "destination_sids": [
+            "op:trnovo:delijas"
+          ],
+          "path": [
+            "op:hadzici:luke",
+            "op:hadzici:budmolici",
+            "op:konjic:dzepi_2",
+            "op:trnovo:tusila",
+            "op:trnovo:trnovo",
+            "op:trnovo:kijevo_2",
+            "op:trnovo:delijas"
+          ],
+          "turns_remaining": 4,
+          "owner": "bot_discretionary"
+        }
+      },
+      "movement_order": {
+        "presence": "absent"
+      }
+    }
+  },
+  "column_rejection": null,
+  "later_generator": {
+    "completed_turn": 2,
+    "phase_name": "generate-bot-brigade-orders",
+    "phase_group": "war",
+    "phase_index": 84,
+    "disposition": "executed",
+    "skip_reason": null,
+    "formation_id": "arbih_182nd_vitezka_light",
+    "before": {
+      "formation": {
+        "presence": "present_value",
+        "value": {
+          "faction": {
+            "presence": "present_value",
+            "value": "RBiH"
+          },
+          "status": {
+            "presence": "present_value",
+            "value": "active"
+          },
+          "location_osid": {
+            "presence": "present_value",
+            "value": "op:hadzici:luke"
+          },
+          "corps_id": {
+            "presence": "present_value",
+            "value": "arbih_1st_corps"
+          }
+        }
+      },
+      "movement_state": {
+        "presence": "present_value",
+        "value": {
+          "status": "in_transit",
+          "stance": "column",
+          "destination_sids": [
+            "op:trnovo:delijas"
+          ],
+          "path": [
+            "op:hadzici:luke",
+            "op:hadzici:budmolici",
+            "op:konjic:dzepi_2",
+            "op:trnovo:tusila",
+            "op:trnovo:trnovo",
+            "op:trnovo:kijevo_2",
+            "op:trnovo:delijas"
+          ],
+          "turns_remaining": 4,
+          "owner": "bot_discretionary"
+        }
+      },
+      "movement_order": {
+        "presence": "absent"
+      }
+    },
+    "after": {
+      "formation": {
+        "presence": "present_value",
+        "value": {
+          "faction": {
+            "presence": "present_value",
+            "value": "RBiH"
+          },
+          "status": {
+            "presence": "present_value",
+            "value": "active"
+          },
+          "location_osid": {
+            "presence": "present_value",
+            "value": "op:hadzici:luke"
+          },
+          "corps_id": {
+            "presence": "present_value",
+            "value": "arbih_1st_corps"
+          }
+        }
+      },
+      "movement_state": {
+        "presence": "present_value",
+        "value": {
+          "status": "in_transit",
+          "stance": "column",
+          "destination_sids": [
+            "op:trnovo:delijas"
+          ],
+          "path": [
+            "op:hadzici:luke",
+            "op:hadzici:budmolici",
+            "op:konjic:dzepi_2",
+            "op:trnovo:tusila",
+            "op:trnovo:trnovo",
+            "op:trnovo:kijevo_2",
+            "op:trnovo:delijas"
+          ],
+          "turns_remaining": 4,
+          "owner": "bot_discretionary"
+        }
+      },
+      "movement_order": {
+        "presence": "absent"
+      }
+    }
+  },
+  "post": {
+    "formation": {
+      "activation_gated": false,
+      "activation_turn": null,
+      "assignment": {
+        "kind": "sector",
+        "sector_id": "sector:arbih_1st_corps:2",
+        "role": "reserve"
+      },
+      "brigade_history": {
+        "battles_as_attacker": 0,
+        "battles_as_defender": 0,
+        "battles_fought": 0,
+        "current_defense_streak": 0,
+        "current_victory_streak": 0,
+        "defeats": 0,
+        "engagements": [],
+        "first_battle_osid": null,
+        "first_battle_turn": null,
+        "longest_defense_streak": 0,
+        "longest_victory_streak": 0,
+        "nadir_personnel": 500,
+        "peak_personnel": 500,
+        "stalemates": 0,
+        "total_casualties_inflicted": 0,
+        "total_casualties_taken": 0,
+        "total_equipment_captured": {
+          "aa_systems": 0,
+          "artillery": 0,
+          "tanks": 0
+        },
+        "total_equipment_destroyed": {
+          "aa_systems": 0,
+          "artillery": 0,
+          "tanks": 0
+        },
+        "total_osids_captured": 0,
+        "total_osids_lost": 0,
+        "turns_under_siege": 0,
+        "victories": 0,
+        "worst_single_battle_casualties": 0,
+        "worst_single_battle_turn": null
+      },
+      "cohesion": 44.8,
+      "composition": {
+        "aa_systems": 0,
+        "artillery": 1,
+        "artillery_condition": {
+          "degraded": 0,
+          "non_operational": 0,
+          "operational": 1
+        },
+        "infantry": 800,
+        "tank_condition": {
+          "degraded": 0.018999999999999993,
+          "non_operational": 0.0029999999999999966,
+          "operational": 0.978
+        },
+        "tanks": 0
+      },
+      "corps_id": "arbih_1st_corps",
+      "created_turn": 0,
+      "decorations": [],
+      "doctrine_state": {
+        "active": null,
+        "active_turns": 0,
+        "eligible": {
+          "ARTILLERY_COUNTER": false,
+          "ATTACK": false,
+          "COORDINATED_STRIKE": false,
+          "DEFEND": false,
+          "INFILTRATE": false,
+          "STATIC_DEFENSE": false
+        }
+      },
+      "entrenchment_turns": 2.4,
+      "equipment_class": "light_infantry",
+      "equipment_state": {
+        "degraded_heavy": 0,
+        "last_maintenance": 2,
+        "maintenance_deficit": 0.9315648,
+        "non_operational_heavy": 0,
+        "operational_heavy": 6,
+        "total_heavy": 6
+      },
+      "faction": "RBiH",
+      "force_label": "ARBiH",
+      "home_defense_active": true,
+      "home_osid": "op:hadzici:luke",
+      "hq_sid": "op:hadzici:binjezevo",
+      "id": "arbih_182nd_vitezka_light",
+      "kind": "brigade",
+      "last_reachable_turn": 2,
+      "location_osid": "op:hadzici:luke",
+      "max_personnel": 1800,
+      "morale": 67,
+      "name": "182nd Light",
+      "officer_quality": 0.15,
+      "ops": {
+        "fatigue": 0,
+        "last_supplied_turn": 2
+      },
+      "origin_mun": "hadzici",
+      "personnel": 500,
+      "readiness": "active",
+      "status": "active",
+      "tags": [
+        "corps:arbih_1st_corps",
+        "equip:light_infantry",
+        "mun:hadzici",
+        "placement:fixed_home_osid"
+      ],
+      "war_story": {
+        "formation_id": "arbih_182nd_vitezka_light",
+        "formation_name": "182nd Light",
+        "faction": "RBiH",
+        "corps_id": "arbih_1st_corps",
+        "arc": "garrison",
+        "narrative": "The 182nd Light has held its ground. With only 0 engagements, its war has been one of patience, not blood. It currently fields 500 personnel.",
+        "notable_moments": [],
+        "stats": {
+          "battles_fought": 0,
+          "victories": 0,
+          "defeats": 0,
+          "total_casualties_taken": 0,
+          "total_casualties_inflicted": 0,
+          "final_personnel": 500,
+          "peak_personnel": 500,
+          "nadir_personnel": 500
+        }
+      }
+    },
+    "movement_order": null,
+    "movement_state": {
+      "status": "in_transit",
+      "stance": "column",
+      "destination_sids": [
+        "op:trnovo:delijas"
+      ],
+      "path": [
+        "op:hadzici:luke",
+        "op:hadzici:budmolici",
+        "op:konjic:dzepi_2",
+        "op:trnovo:tusila",
+        "op:trnovo:trnovo",
+        "op:trnovo:kijevo_2",
+        "op:trnovo:delijas"
+      ],
+      "turns_remaining": 4,
+      "owner": "bot_discretionary"
+    }
+  },
+  "controls": {
+    "op:brcko:bukvik_gornji_2": "RBiH",
+    "op:kakanj:biljesevo": "RBiH",
+    "op:kladanj:olovci_2": "RBiH",
+    "op:srebrenica:obadi": "RBiH"
+  },
+  "expected_controls": {
+    "op:brcko:bukvik_gornji_2": "RBiH",
+    "op:kakanj:biljesevo": "RBiH",
+    "op:kladanj:olovci_2": "RBiH",
+    "op:srebrenica:obadi": "RBiH"
+  },
+  "exact_expected_path": [
+    "op:hadzici:luke",
+    "op:hadzici:budmolici",
+    "op:konjic:dzepi_2",
+    "op:trnovo:tusila",
+    "op:trnovo:trnovo",
+    "op:trnovo:kijevo_2",
+    "op:trnovo:delijas"
+  ]
+}

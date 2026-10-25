@@ -452,7 +452,6 @@ export function processOsidColumnMovement(
         formation: FormationState | undefined,
         locationOsid: string | null,
         destinationOsid: string | null,
-        allowedOsids?: Set<string>,
     ): void => {
         if (!report.column_rejections) return;
         const corpsId = formation?.corps_id ?? null;
@@ -466,9 +465,9 @@ export function processOsidColumnMovement(
                 ? formation.elite_loan_state.loaned_to_corps ?? null
                 : null,
             routing_corps_id: corpsId,
-            routing_scope_osid_count: allowedOsids?.size ?? null,
-            source_in_routing_scope: allowedOsids && locationOsid ? allowedOsids.has(locationOsid) : null,
-            destination_in_routing_scope: allowedOsids && destinationOsid ? allowedOsids.has(destinationOsid) : null,
+            routing_scope_osid_count: null,
+            source_in_routing_scope: null,
+            destination_in_routing_scope: null,
         });
     };
 
@@ -617,17 +616,12 @@ export function processOsidColumnMovement(
 
         const factionId = f.faction;
 
-        // Corps boundary guard: build the allowed OSID set for this brigade's corps so
-        // that Dijkstra cannot route through another corps' territory.
-        // Falls back to undefined (faction-wide BFS) for orphan brigades or corps with no sectors.
-        const corpsId = (f as { corps_id?: string | null }).corps_id;
-        const allowedOsids = corpsId ? buildCorpsAllowedOsids(corpsId, state) : undefined;
-
-        // Compute terrain-weighted path through friendly territory (corps-restricted)
-        const result = dijkstraFriendlyPath(loc, destOsid, factionId, adjacency, state, reverseMap, terrainData, allowedOsids);
+        // Compute a terrain-weighted path through friendly territory. Corps sectors constrain
+        // routine destinations above; they are frontage context, not physical route ownership.
+        const result = dijkstraFriendlyPath(loc, destOsid, factionId, adjacency, state, reverseMap, terrainData);
         if (!result || result.path.length <= 1) {
             report.column_blocked += 1;
-            recordRejection(formationId, 'no_friendly_path', f, loc, destOsid, allowedOsids);
+            recordRejection(formationId, 'no_friendly_path', f, loc, destOsid);
             delete movementOrders[formationId];
             continue;
         }

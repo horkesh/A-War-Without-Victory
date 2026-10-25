@@ -4,6 +4,8 @@
 
 **Authority:** [MASTER_ROADMAP.md](MASTER_ROADMAP.md) is the sole authority for unfinished work and wins if this board differs.
 
+**Parity — 2026-10-25:** native39 remains700/712. T3 routing/delivery reviewed;188, suite and package proof pending. Preserve n91–n96. [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md).
+
 **Open gates:** [open_gates.yml](../open_gates.yml) enumerates every named gate and the evidence that would close it — `npm run gates` lists the open rows, and `tests/open_gates_register.test.ts` fails if a gate is claimed closed without evidence that exists. It is derived like this board; the roadmap still wins.
 
 ## Activation

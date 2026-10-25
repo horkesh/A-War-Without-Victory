@@ -1,0 +1,120 @@
+{
+  "schema": "awwv.t3-routing-portable-proof.v1",
+  "files": [
+    {
+      "path": "canon-review.json",
+      "source": "tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/independent-turn2-canon-review-01/result.json",
+      "bytes": 3725,
+      "sha256": "f24ed672e3c39dbead254abba12e80a84b7ff424fa4ca9d8ccefd5250db8287e"
+    },
+    {
+      "path": "canon-review.md",
+      "source": "tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/independent-turn2-canon-review-01/REVIEW.md",
+      "bytes": 7861,
+      "sha256": "9e417e57281e545be54cec61f32abf3c58ccbb23b58386d874d76cb9780b5985"
+    },
+    {
+      "path": "delivery-entry-v2.mjs",
+      "source": "tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/run-player-turn2-to6-routing-delivery-v2.mjs",
+      "bytes": 16850,
+      "sha256": "4167b26bfe6595d109fe9c2ffdc769f2f3fe66a607a3459c26e4e9cc1805ccb5"
+    },
+    {
+      "path": "delivery-plan-v2.md",
+      "source": "tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/T3_ROUTING_DELIVERY_PLAN_V2.md",
+      "bytes": 1808,
+      "sha256": "4d8eaf36dacfa32248f44a7cc46f05ffd4a08ade9d9b22907b60ae223b3ab5b6"
+    },
+    {
+      "path": "delivery-receipt.json",
+      "source": "tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/t3-routing-repair-delivery-turns3-6-02/receipt.json",
+      "bytes": 3919,
+      "sha256": "cd4045a2c14d268054fb8a4b804dbc6bf874de5fc0fbfd1e5b981d859e89d944"
+    },
+    {
+      "path": "delivery-result.json",
+      "source": "tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/t3-routing-repair-delivery-turns3-6-02/result.json",
+      "bytes": 966,
+      "sha256": "17c59acc02ec0925857205d5dc877867b18b31f647788ff4ad3333c296802edd"
+    },
+    {
+      "path": "delivery-review-v1.md",
+      "source": "tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/independent-delivery-fixture-review-01/REVIEW.md",
+      "bytes": 3549,
+      "sha256": "038b42ecfd81571a747e2217949988bbb1eb5bd60abe46b0d6dc88ad23ee2038"
+    },
+    {
+      "path": "delivery-review-v2.md",
+      "source": "tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/independent-delivery-fixture-review-02/REVIEW.md",
+      "bytes": 1670,
+      "sha256": "d207d6984ab21e17e91982979a85f7012d3b77e0d81f79edc789d7dac7bd3d76"
+    },
+    {
+      "path": "delivery.json",
+      "source": "tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/t3-routing-repair-delivery-turns3-6-02/delivery.json",
+      "bytes": 5458295,
+      "sha256": "745ee972d82e105d8e8e4994c7d0d349b76c231d33d52ab9073f180c95ced9fd"
+    },
+    {
+      "path": "determinism-save-focused.log",
+      "source": "tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/t3-physical-column-routing-repair/determinism-save-focused.log",
+      "bytes": 350,
+      "sha256": "a64e3f72b5df9f4f2e3b882a2f6826814a3a15a7a93073b93958981a245106ef"
+    },
+    {
+      "path": "focused-tests.log",
+      "source": "tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/t3-physical-column-routing-repair/focused-tests.log",
+      "bytes": 598,
+      "sha256": "41d9c61e8320d6c975eda18d7ba55165564544d70fd259038b27f79c92b759e7"
+    },
+    {
+      "path": "native39-auditor.json",
+      "source": "tmp/player-bot-capability-parity-20261024/policy-package-player-prep-20261025/native-calibration-auditor-policy-01.json",
+      "bytes": 46242,
+      "sha256": "d6be0fd499fe74197f92ad356e9194de06a3171caad4767534d2eeca5da24bce"
+    },
+    {
+      "path": "native39-comparison.json",
+      "source": "tmp/player-bot-capability-parity-20261024/policy-package-player-prep-20261025/native39-comparison-policy-01.json",
+      "bytes": 37506,
+      "sha256": "b4e202a49479f7931270258dae5ca1003509b42fc6f52655a398a1abf79681d9"
+    },
+    {
+      "path": "red-tests.log",
+      "source": "tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/t3-physical-column-routing-repair/red-osid-column-movement.log",
+      "bytes": 7349,
+      "sha256": "ea4497c8bce372789d9e11d26061d420f320e8a5c2b4b8a7ae8d4a92cde7aae6"
+    },
+    {
+      "path": "source-review.json",
+      "source": "tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/independent-t3-routing-implementation-review-01/result.json",
+      "bytes": 2685,
+      "sha256": "ac249fa6a379e65cfc95a9bcd34db638d677c210f658018d28aaee7fc50d9e40"
+    },
+    {
+      "path": "source-review.md",
+      "source": "tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/independent-t3-routing-implementation-review-01/REVIEW.md",
+      "bytes": 5872,
+      "sha256": "f61b0f20b842d592dc5c2e8019e8db1e0ffd7a74b37d38f809ea37574638d006"
+    },
+    {
+      "path": "turn2-boundary.json",
+      "source": "tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/t3-routing-repair-player-turn2-01/boundary.json",
+      "bytes": 14032,
+      "sha256": "4e9eb753f9bab5281ada7f8f61b5c88ce4054a1c425684091b3c4ed614699d7d"
+    },
+    {
+      "path": "turn2-result.json",
+      "source": "tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/t3-routing-repair-player-turn2-01/result.json",
+      "bytes": 407,
+      "sha256": "d147a6e1046b71c03172c9c8c7f20c6779a0a1a1b64dbd96743c6293a1c10687"
+    },
+    {
+      "path": "typecheck.log",
+      "source": "tmp/player-bot-capability-parity-20261024/paired-turn1-182-boundary-20261025/t3-physical-column-routing-repair/typecheck-after-test-tightening.log",
+      "bytes": 68,
+      "sha256": "025017ea5dc29eb540825da9ff5c7b5c7d6db81cfd98633b026692edf3831584"
+    }
+  ],
+  "raw_evidence_policy": "Raw saves, turn reports, profiles, all failed attempts and telemetry remain preserved locally; these copied proof artifacts are not remote backups of those bytes."
+}

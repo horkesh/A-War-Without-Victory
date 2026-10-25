@@ -1,0 +1,1149 @@
+{
+  "schema": "awwv.native-segment-observation.v1",
+  "from": 0,
+  "to": 39,
+  "faction": "RBiH",
+  "gates": [
+    {
+      "name": "wrapper",
+      "pass": true,
+      "details": {
+        "child": 0,
+        "wrapper": 0,
+        "timeout": false
+      }
+    },
+    {
+      "name": "successful-result",
+      "pass": true,
+      "details": {
+        "completedAt": "2026-10-25T01:27:54.575Z",
+        "count": 1
+      }
+    },
+    {
+      "name": "start-binding",
+      "pass": true,
+      "details": {
+        "path": "tmp-paradox-qa-20260710/evidence/player-policy-fresh-rbih-t39-20261025-01/rbih/initial-autosave.json",
+        "sha256": "c98ef45d7c4343154a7300d27b7b6277e25ea001a3018bf9fd6898be75d68f04",
+        "turn": 0
+      }
+    },
+    {
+      "name": "initial-real-load",
+      "pass": true,
+      "details": {
+        "turn": 0,
+        "faction": "RBiH",
+        "initialFile": {
+          "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\initial-autosave.json",
+          "sha256": "c98ef45d7c4343154a7300d27b7b6277e25ea001a3018bf9fd6898be75d68f04",
+          "bytes": 1461595
+        }
+      }
+    },
+    {
+      "name": "target-and-blockers",
+      "pass": true,
+      "details": {
+        "turn": 39,
+        "max": 39,
+        "blockers": {
+          "eventDecisions": 0,
+          "proposals": 0,
+          "paramilitary": 0,
+          "reserves": 0,
+          "convoys": 0,
+          "officerEvents": 0,
+          "peacePlan": 0,
+          "counterOffers": 0,
+          "dayton": 0,
+          "operationOpportunities": 0
+        }
+      }
+    },
+    {
+      "name": "consoleMessages",
+      "pass": true,
+      "details": {
+        "count": 0
+      }
+    },
+    {
+      "name": "pageErrors",
+      "pass": true,
+      "details": {
+        "count": 0
+      }
+    },
+    {
+      "name": "networkFailures",
+      "pass": true,
+      "details": {
+        "count": 0
+      }
+    },
+    {
+      "name": "unexpectedMainProcessStderr",
+      "pass": true,
+      "details": {
+        "count": 0
+      }
+    },
+    {
+      "name": "settled-archive-coverage",
+      "pass": true,
+      "details": {
+        "expected": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39
+        ],
+        "actual": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39
+        ]
+      }
+    },
+    {
+      "name": "provisional-archive-coverage",
+      "pass": true,
+      "details": {
+        "expected": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39
+        ],
+        "actual": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39
+        ]
+      }
+    },
+    {
+      "name": "canonical-final-player",
+      "pass": true,
+      "details": {
+        "meta": {
+          "autonomy_level": 2,
+          "decision_mode": "historical",
+          "firepower_deficit_penalty_enabled": true,
+          "game_over": false,
+          "headless_scenario_auto_control": false,
+          "peace_scheduled_referendum_turn": null,
+          "peace_scheduled_war_start_turn": null,
+          "peace_war_start_control_path": null,
+          "pending_proposal_reviews": [
+            {
+              "accepted": true,
+              "current_value": "awaiting_authorization",
+              "description": "Maglaj Local Counterattack - staff proceeded under standing authorization.",
+              "domain": "ops",
+              "faction": "RBiH",
+              "id": "PROP_14_historical_op_preplanned_arbih_3rd_corps_maglaj_local_counterattack",
+              "proposed_action": "HISTORICAL_OP:preplanned:arbih_3rd_corps:Maglaj Local Counterattack",
+              "proposed_value": "authorize",
+              "resolved_turn": 14,
+              "turn": 14
+            },
+            {
+              "accepted": true,
+              "current_value": "awaiting_authorization",
+              "description": "Operation Circle - staff proceeded under standing authorization.",
+              "domain": "ops",
+              "faction": "RBiH",
+              "id": "PROP_16_historical_op_preplanned_arbih_1st_corps_operation_circle",
+              "proposed_action": "HISTORICAL_OP:preplanned:arbih_1st_corps:Operation Circle",
+              "proposed_value": "authorize",
+              "resolved_turn": 16,
+              "turn": 16
+            },
+            {
+              "accepted": true,
+              "current_value": "awaiting_authorization",
+              "description": "Srebrenica–Cerska Link-Up - staff proceeded under standing authorization.",
+              "domain": "ops",
+              "faction": "RBiH",
+              "id": "PROP_4_historical_op_preplanned_arbih_2nd_corps_srebrenica_cerska_link_up",
+              "proposed_action": "HISTORICAL_OP:preplanned:arbih_2nd_corps:Srebrenica–Cerska Link-Up",
+              "proposed_value": "authorize",
+              "resolved_turn": 4,
+              "turn": 4
+            },
+            {
+              "accepted": true,
+              "current_value": "awaiting_authorization",
+              "description": "Visoko–Breza Line Clearing - staff proceeded under standing authorization.",
+              "domain": "ops",
+              "faction": "RBiH",
+              "id": "PROP_8_historical_op_preplanned_arbih_1st_corps_visoko_breza_line_clearing",
+              "proposed_action": "HISTORICAL_OP:preplanned:arbih_1st_corps:Visoko–Breza Line Clearing",
+              "proposed_value": "authorize",
+              "resolved_turn": 8,
+              "turn": 8
+            }
+          ],
+          "phase": "war",
+          "player_faction": "RBiH",
+          "rbih_hrhb_war_earliest_turn": 40,
+          "recruitment_mode": "player_choice",
+          "referendum_deadline_turn": null,
+          "referendum_eligible_turn": null,
+          "referendum_held": true,
+          "referendum_turn": 0,
+          "scenario_start_date": {
+            "day": 6,
+            "month": 3,
+            "year": 1992
+          },
+          "seed": "harness-seed",
+          "turn": 39,
+          "war_force_transition_after_turns": 52,
+          "war_start_turn": 0
+        }
+      }
+    },
+    {
+      "name": "save-load-canonical-and-loaded-projection",
+      "pass": true,
+      "details": {
+        "route": "Pause -> Save Game -> Main Menu -> opening splash -> Field Records -> Resume quicksave",
+        "hashProof": {
+          "beforeStateHash": "d28f8b5a7d5d444556461c3887f6f579d13339f1c9ba1b9240a0b7ccc875ff97",
+          "expectedStateHash": "e9d95827a25af94ac2849a510552c4cfc838a9d6ebabcb56e730b7adfd78b885",
+          "afterStateHash": "e9d95827a25af94ac2849a510552c4cfc838a9d6ebabcb56e730b7adfd78b885",
+          "beforeAutosaveHash": "244aa78243af8ba17620a28246a629b1b9ccbd08d4b5cf1577475ef6600635d3",
+          "afterAutosaveHash": "244aa78243af8ba17620a28246a629b1b9ccbd08d4b5cf1577475ef6600635d3",
+          "loadedProjectionProof": {
+            "actualHash": "e9d95827a25af94ac2849a510552c4cfc838a9d6ebabcb56e730b7adfd78b885",
+            "expectedHash": "e9d95827a25af94ac2849a510552c4cfc838a9d6ebabcb56e730b7adfd78b885",
+            "exactBytes": true
+          },
+          "canonicalBytesEqual": true
+        },
+        "savedEvidence": {
+          "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\manual-quicksave.json",
+          "sha256": "244aa78243af8ba17620a28246a629b1b9ccbd08d4b5cf1577475ef6600635d3",
+          "bytes": 5252756
+        }
+      }
+    },
+    {
+      "name": "manifest-file",
+      "pass": true,
+      "details": {
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\manifest.json",
+        "sha256": "9f03d60eba38fb2f991539b962a1eac60106a54343b798e53465b55918e9b50a"
+      }
+    },
+    {
+      "name": "main-stream-contiguous",
+      "pass": true,
+      "details": {
+        "records": 1188
+      }
+    },
+    {
+      "name": "assignment-seals",
+      "pass": true,
+      "details": {
+        "expected": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39
+        ],
+        "seals": [
+          {
+            "turn": 1,
+            "unresolved": 0
+          },
+          {
+            "turn": 2,
+            "unresolved": 0
+          },
+          {
+            "turn": 3,
+            "unresolved": 0
+          },
+          {
+            "turn": 4,
+            "unresolved": 0
+          },
+          {
+            "turn": 5,
+            "unresolved": 0
+          },
+          {
+            "turn": 6,
+            "unresolved": 0
+          },
+          {
+            "turn": 7,
+            "unresolved": 0
+          },
+          {
+            "turn": 8,
+            "unresolved": 0
+          },
+          {
+            "turn": 9,
+            "unresolved": 0
+          },
+          {
+            "turn": 10,
+            "unresolved": 0
+          },
+          {
+            "turn": 11,
+            "unresolved": 0
+          },
+          {
+            "turn": 12,
+            "unresolved": 0
+          },
+          {
+            "turn": 13,
+            "unresolved": 0
+          },
+          {
+            "turn": 14,
+            "unresolved": 0
+          },
+          {
+            "turn": 15,
+            "unresolved": 0
+          },
+          {
+            "turn": 16,
+            "unresolved": 0
+          },
+          {
+            "turn": 17,
+            "unresolved": 0
+          },
+          {
+            "turn": 18,
+            "unresolved": 0
+          },
+          {
+            "turn": 19,
+            "unresolved": 0
+          },
+          {
+            "turn": 20,
+            "unresolved": 0
+          },
+          {
+            "turn": 21,
+            "unresolved": 0
+          },
+          {
+            "turn": 22,
+            "unresolved": 0
+          },
+          {
+            "turn": 23,
+            "unresolved": 0
+          },
+          {
+            "turn": 24,
+            "unresolved": 0
+          },
+          {
+            "turn": 25,
+            "unresolved": 0
+          },
+          {
+            "turn": 26,
+            "unresolved": 0
+          },
+          {
+            "turn": 27,
+            "unresolved": 0
+          },
+          {
+            "turn": 28,
+            "unresolved": 0
+          },
+          {
+            "turn": 29,
+            "unresolved": 0
+          },
+          {
+            "turn": 30,
+            "unresolved": 0
+          },
+          {
+            "turn": 31,
+            "unresolved": 0
+          },
+          {
+            "turn": 32,
+            "unresolved": 0
+          },
+          {
+            "turn": 33,
+            "unresolved": 0
+          },
+          {
+            "turn": 34,
+            "unresolved": 0
+          },
+          {
+            "turn": 35,
+            "unresolved": 0
+          },
+          {
+            "turn": 36,
+            "unresolved": 0
+          },
+          {
+            "turn": 37,
+            "unresolved": 0
+          },
+          {
+            "turn": 38,
+            "unresolved": 0
+          },
+          {
+            "turn": 39,
+            "unresolved": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "stderr-classification",
+      "pass": true,
+      "details": {
+        "recorded": 2,
+        "classified": 2
+      }
+    }
+  ],
+  "limits": [
+    "Measured infrastructure/Save-load scope only, not full canonical engine-health or unconditional-anchor qualification",
+    "Resumed segment does not replace fresh full188/all-faction qualification",
+    "Different player choices are not identical-input determinism proof",
+    "Map differences are reported separately; January700/707 remains unmet"
+  ],
+  "archives": {
+    "settled": [
+      {
+        "turn": 1,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-001.json",
+        "sha256": "e836f379504ebbd539298187ff38df4c7cc71f7a2a9a2bf78c2c220a8449f159",
+        "pass": true
+      },
+      {
+        "turn": 2,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-002.json",
+        "sha256": "5b1671919df857ae8b8c14291ecce3c3d5b8927ba84f8f6dfe988e343d732386",
+        "pass": true
+      },
+      {
+        "turn": 3,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-003.json",
+        "sha256": "a346b60d2c12f3144b6a2b43f7ef2f6b869321d3584396d8344f694f8be4758e",
+        "pass": true
+      },
+      {
+        "turn": 4,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-004.json",
+        "sha256": "ce3d941fcba457fa1447f1a7cef951fb42823b4223260cc9282446567576dba7",
+        "pass": true
+      },
+      {
+        "turn": 5,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-005.json",
+        "sha256": "5bfaedd5937d0e6146b73986b3cdf406ed1e4f4e7a768b927e4a50cb16fefa20",
+        "pass": true
+      },
+      {
+        "turn": 6,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-006.json",
+        "sha256": "a84af7e2dec108a1270a30453f801fa5c7726951cca59ffa054421e6ada86576",
+        "pass": true
+      },
+      {
+        "turn": 7,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-007.json",
+        "sha256": "a98b43527592bc3267e9dcc5c0c04f77bb3889aee2c0e88abd35a45f70593caa",
+        "pass": true
+      },
+      {
+        "turn": 8,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-008.json",
+        "sha256": "6ce3b9cbc0aa4a8e6ec65409d51f0be78e22bd4535a022eddb2ca9d224627b2f",
+        "pass": true
+      },
+      {
+        "turn": 9,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-009.json",
+        "sha256": "97a1acf2698abef1ec38587d9ce590d9f9de7f6869b138810d1044fc26d38158",
+        "pass": true
+      },
+      {
+        "turn": 10,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-010.json",
+        "sha256": "e3710b57ed74eb3fa2150e795724e931f7ef1fdc663fa34a31a7eb0b838bb8e8",
+        "pass": true
+      },
+      {
+        "turn": 11,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-011.json",
+        "sha256": "fecc4f2297b2763ed3cbe715c204027a3e0b6ca4226d23b82c64cd9dc2d95ee0",
+        "pass": true
+      },
+      {
+        "turn": 12,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-012.json",
+        "sha256": "05a4433d0b9a6d82a837d2edcaf44c7ac690407dec59c6f6f7e2f049065fde8c",
+        "pass": true
+      },
+      {
+        "turn": 13,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-013.json",
+        "sha256": "6419bd22f332cb45e0c381c6e06076d26a619fe0d0274e6c81792b2134a40431",
+        "pass": true
+      },
+      {
+        "turn": 14,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-014.json",
+        "sha256": "4ec78c3b448e217b5b33bd444bfd06c9eed9d9f3494d84cd36de8f60fe056367",
+        "pass": true
+      },
+      {
+        "turn": 15,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-015.json",
+        "sha256": "efe6e2dbb89bb7638b4c707e7f41194a8be6f9cec82a6ee3c6ed20b13b6c9095",
+        "pass": true
+      },
+      {
+        "turn": 16,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-016.json",
+        "sha256": "522857950a01c4853d8a565da121e5c85e07a4306206f6051e38b5a348b6419e",
+        "pass": true
+      },
+      {
+        "turn": 17,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-017.json",
+        "sha256": "0ff44657ba8194f572712f3229b0a46818c08420dea88d927d95bb0d3ff1e8e3",
+        "pass": true
+      },
+      {
+        "turn": 18,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-018.json",
+        "sha256": "59aabecc39c20a526e6531b03f36c25fe3ab3c768e402198338fbe521e27922d",
+        "pass": true
+      },
+      {
+        "turn": 19,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-019.json",
+        "sha256": "5ce0814cc4642a2f4b87fcc0d7a07f80179b326e67e9a8095ce0431f47abef83",
+        "pass": true
+      },
+      {
+        "turn": 20,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-020.json",
+        "sha256": "850b4492ad67b94b024b63141d32dfddb812c6ce537ddea48319e782293f1251",
+        "pass": true
+      },
+      {
+        "turn": 21,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-021.json",
+        "sha256": "3abdb10db6f739f6aab6017c2d4c94abfb9ea493857096bc87fe1ff2c95837e9",
+        "pass": true
+      },
+      {
+        "turn": 22,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-022.json",
+        "sha256": "fb3857b6e1686085598aeed80334074132405f8ba2ebb98f53d26f6cc9140862",
+        "pass": true
+      },
+      {
+        "turn": 23,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-023.json",
+        "sha256": "d19c5c09a54370d1d41d740b3350d84bbbb01a83e08ee1a8a5ea5c751badab2b",
+        "pass": true
+      },
+      {
+        "turn": 24,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-024.json",
+        "sha256": "96f03be1a009275cd5cea48328624bb9f2450b2753e2c835607ba8873dfa0cef",
+        "pass": true
+      },
+      {
+        "turn": 25,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-025.json",
+        "sha256": "cfe74f443e12d0f7cd911bf0573e5b758386d79b536469b22b9d98840566527a",
+        "pass": true
+      },
+      {
+        "turn": 26,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-026.json",
+        "sha256": "0d0c3c5ec06755aa6f57cb518b1ef96193f298532e309eb2288c8ee89f8f5bc5",
+        "pass": true
+      },
+      {
+        "turn": 27,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-027.json",
+        "sha256": "7cf76f772be3f337ba9a12a03acd7a4d69afd7c6866ac9d9e2267882dcdc68ac",
+        "pass": true
+      },
+      {
+        "turn": 28,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-028.json",
+        "sha256": "1dfdb0257713835ca589f0229ddfe84e04e625fae1ba1e44ae711e3abdc5e328",
+        "pass": true
+      },
+      {
+        "turn": 29,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-029.json",
+        "sha256": "1184b4b0268fa1a263c85d657ca1295289e1fe1f385dd2b048ca38150e62dfbf",
+        "pass": true
+      },
+      {
+        "turn": 30,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-030.json",
+        "sha256": "bfafc99a355a812c8f627621e924856a5bbfadfa32ebcbc8a3b695310f92eab8",
+        "pass": true
+      },
+      {
+        "turn": 31,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-031.json",
+        "sha256": "cdba3eb637bfa176a20c259b48c53a83fdc16364c437a08dacfd4cffa0e14b17",
+        "pass": true
+      },
+      {
+        "turn": 32,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-032.json",
+        "sha256": "1b0680e83dc8e50b053a7f0f22335ca728c1f3ccf55a4a8480382ab6b53993e2",
+        "pass": true
+      },
+      {
+        "turn": 33,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-033.json",
+        "sha256": "0a0ce8496cd898db71cd89d570695ae0a46b41b6d829279236aa2222aef848ad",
+        "pass": true
+      },
+      {
+        "turn": 34,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-034.json",
+        "sha256": "b56139cd3481f769b11917cf36ff7fa5693bbe653b533077c4983fa0296aca9c",
+        "pass": true
+      },
+      {
+        "turn": 35,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-035.json",
+        "sha256": "30e1151ad4efe9b0ea87f0e822ac8688e08b6409429b3e7d9562e3ed180d8bc1",
+        "pass": true
+      },
+      {
+        "turn": 36,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-036.json",
+        "sha256": "3bcd6d8418055dc49d76c3537cbc165e9e8054d17e90c7c201f32f670e18f0e9",
+        "pass": true
+      },
+      {
+        "turn": 37,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-037.json",
+        "sha256": "e7dcb7c8f157d8d3841f04b5ab57d04169880261f472481d8925e6adfd3dad66",
+        "pass": true
+      },
+      {
+        "turn": 38,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-038.json",
+        "sha256": "911050a9b664e842b79408f369bf1b99d7fd20387b22732e5461133dd19b6372",
+        "pass": true
+      },
+      {
+        "turn": 39,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-039.json",
+        "sha256": "244aa78243af8ba17620a28246a629b1b9ccbd08d4b5cf1577475ef6600635d3",
+        "pass": true
+      }
+    ],
+    "provisional": [
+      {
+        "turn": 1,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-001.json",
+        "sha256": "e836f379504ebbd539298187ff38df4c7cc71f7a2a9a2bf78c2c220a8449f159",
+        "pass": true
+      },
+      {
+        "turn": 2,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-002.json",
+        "sha256": "5b1671919df857ae8b8c14291ecce3c3d5b8927ba84f8f6dfe988e343d732386",
+        "pass": true
+      },
+      {
+        "turn": 3,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-003.json",
+        "sha256": "a346b60d2c12f3144b6a2b43f7ef2f6b869321d3584396d8344f694f8be4758e",
+        "pass": true
+      },
+      {
+        "turn": 4,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-004.json",
+        "sha256": "ce3d941fcba457fa1447f1a7cef951fb42823b4223260cc9282446567576dba7",
+        "pass": true
+      },
+      {
+        "turn": 5,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-005.json",
+        "sha256": "5bfaedd5937d0e6146b73986b3cdf406ed1e4f4e7a768b927e4a50cb16fefa20",
+        "pass": true
+      },
+      {
+        "turn": 6,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-006.json",
+        "sha256": "a84af7e2dec108a1270a30453f801fa5c7726951cca59ffa054421e6ada86576",
+        "pass": true
+      },
+      {
+        "turn": 7,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-007.json",
+        "sha256": "a98b43527592bc3267e9dcc5c0c04f77bb3889aee2c0e88abd35a45f70593caa",
+        "pass": true
+      },
+      {
+        "turn": 8,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-008.json",
+        "sha256": "6ce3b9cbc0aa4a8e6ec65409d51f0be78e22bd4535a022eddb2ca9d224627b2f",
+        "pass": true
+      },
+      {
+        "turn": 9,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-009.json",
+        "sha256": "97a1acf2698abef1ec38587d9ce590d9f9de7f6869b138810d1044fc26d38158",
+        "pass": true
+      },
+      {
+        "turn": 10,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-010.json",
+        "sha256": "e3710b57ed74eb3fa2150e795724e931f7ef1fdc663fa34a31a7eb0b838bb8e8",
+        "pass": true
+      },
+      {
+        "turn": 11,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-011.json",
+        "sha256": "fecc4f2297b2763ed3cbe715c204027a3e0b6ca4226d23b82c64cd9dc2d95ee0",
+        "pass": true
+      },
+      {
+        "turn": 12,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-012.json",
+        "sha256": "7560d5b0f651e84a01d56b78f64f93f1459bee9f3cf91c596928074ae68fb81d",
+        "pass": true
+      },
+      {
+        "turn": 13,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-013.json",
+        "sha256": "6419bd22f332cb45e0c381c6e06076d26a619fe0d0274e6c81792b2134a40431",
+        "pass": true
+      },
+      {
+        "turn": 14,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-014.json",
+        "sha256": "4ec78c3b448e217b5b33bd444bfd06c9eed9d9f3494d84cd36de8f60fe056367",
+        "pass": true
+      },
+      {
+        "turn": 15,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-015.json",
+        "sha256": "9a586a972763874f9177319df955cc902d895a17edd6678f5e93ab6a421a3eba",
+        "pass": true
+      },
+      {
+        "turn": 16,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-016.json",
+        "sha256": "522857950a01c4853d8a565da121e5c85e07a4306206f6051e38b5a348b6419e",
+        "pass": true
+      },
+      {
+        "turn": 17,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-017.json",
+        "sha256": "0ff44657ba8194f572712f3229b0a46818c08420dea88d927d95bb0d3ff1e8e3",
+        "pass": true
+      },
+      {
+        "turn": 18,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-018.json",
+        "sha256": "59aabecc39c20a526e6531b03f36c25fe3ab3c768e402198338fbe521e27922d",
+        "pass": true
+      },
+      {
+        "turn": 19,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-019.json",
+        "sha256": "5ce0814cc4642a2f4b87fcc0d7a07f80179b326e67e9a8095ce0431f47abef83",
+        "pass": true
+      },
+      {
+        "turn": 20,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-020.json",
+        "sha256": "9f5ec4480e0d178a50dfdf57d2a142c9140e5e967f1b915de2bc32fb3ac22739",
+        "pass": true
+      },
+      {
+        "turn": 21,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-021.json",
+        "sha256": "3abdb10db6f739f6aab6017c2d4c94abfb9ea493857096bc87fe1ff2c95837e9",
+        "pass": true
+      },
+      {
+        "turn": 22,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-022.json",
+        "sha256": "6eecd9d2d0bc235b3e95f609209e72bea5f005f2d00cc1ccc6262aabfb1b7eef",
+        "pass": true
+      },
+      {
+        "turn": 23,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-023.json",
+        "sha256": "d19c5c09a54370d1d41d740b3350d84bbbb01a83e08ee1a8a5ea5c751badab2b",
+        "pass": true
+      },
+      {
+        "turn": 24,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-024.json",
+        "sha256": "e8fc6213a1a3c08895e9d91278b1fd9cd630b643809a6fc9bd936e6bca280781",
+        "pass": true
+      },
+      {
+        "turn": 25,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-025.json",
+        "sha256": "cfe74f443e12d0f7cd911bf0573e5b758386d79b536469b22b9d98840566527a",
+        "pass": true
+      },
+      {
+        "turn": 26,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-026.json",
+        "sha256": "0d0c3c5ec06755aa6f57cb518b1ef96193f298532e309eb2288c8ee89f8f5bc5",
+        "pass": true
+      },
+      {
+        "turn": 27,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-027.json",
+        "sha256": "7cf76f772be3f337ba9a12a03acd7a4d69afd7c6866ac9d9e2267882dcdc68ac",
+        "pass": true
+      },
+      {
+        "turn": 28,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-028.json",
+        "sha256": "1dfdb0257713835ca589f0229ddfe84e04e625fae1ba1e44ae711e3abdc5e328",
+        "pass": true
+      },
+      {
+        "turn": 29,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-029.json",
+        "sha256": "1184b4b0268fa1a263c85d657ca1295289e1fe1f385dd2b048ca38150e62dfbf",
+        "pass": true
+      },
+      {
+        "turn": 30,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-030.json",
+        "sha256": "bfafc99a355a812c8f627621e924856a5bbfadfa32ebcbc8a3b695310f92eab8",
+        "pass": true
+      },
+      {
+        "turn": 31,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-031.json",
+        "sha256": "cdba3eb637bfa176a20c259b48c53a83fdc16364c437a08dacfd4cffa0e14b17",
+        "pass": true
+      },
+      {
+        "turn": 32,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-032.json",
+        "sha256": "1b0680e83dc8e50b053a7f0f22335ca728c1f3ccf55a4a8480382ab6b53993e2",
+        "pass": true
+      },
+      {
+        "turn": 33,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-033.json",
+        "sha256": "0a0ce8496cd898db71cd89d570695ae0a46b41b6d829279236aa2222aef848ad",
+        "pass": true
+      },
+      {
+        "turn": 34,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-034.json",
+        "sha256": "b56139cd3481f769b11917cf36ff7fa5693bbe653b533077c4983fa0296aca9c",
+        "pass": true
+      },
+      {
+        "turn": 35,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-035.json",
+        "sha256": "30e1151ad4efe9b0ea87f0e822ac8688e08b6409429b3e7d9562e3ed180d8bc1",
+        "pass": true
+      },
+      {
+        "turn": 36,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-036.json",
+        "sha256": "3bcd6d8418055dc49d76c3537cbc165e9e8054d17e90c7c201f32f670e18f0e9",
+        "pass": true
+      },
+      {
+        "turn": 37,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-037.json",
+        "sha256": "e7dcb7c8f157d8d3841f04b5ab57d04169880261f472481d8925e6adfd3dad66",
+        "pass": true
+      },
+      {
+        "turn": 38,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-038.json",
+        "sha256": "bcc2294fd7ba03419503119b9f793889905f1b914dd17881d81c03baa3758a1a",
+        "pass": true
+      },
+      {
+        "turn": 39,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves-pre-settlement\\turn-039.json",
+        "sha256": "826fe47e27c6b5bf40daf54932895283a39a74f1d47b1fb007251a2569ed67f5",
+        "pass": true
+      }
+    ]
+  },
+  "finalCanonical": {
+    "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-policy-fresh-rbih-t39-20261025-01\\rbih\\turn-autosaves\\turn-039.json",
+    "sha256": "244aa78243af8ba17620a28246a629b1b9ccbd08d4b5cf1577475ef6600635d3"
+  },
+  "operations": {
+    "authorizationReceipts": [
+      {
+        "accepted": true,
+        "current_value": "awaiting_authorization",
+        "description": "Maglaj Local Counterattack - staff proceeded under standing authorization.",
+        "domain": "ops",
+        "faction": "RBiH",
+        "id": "PROP_14_historical_op_preplanned_arbih_3rd_corps_maglaj_local_counterattack",
+        "proposed_action": "HISTORICAL_OP:preplanned:arbih_3rd_corps:Maglaj Local Counterattack",
+        "proposed_value": "authorize",
+        "resolved_turn": 14,
+        "turn": 14
+      },
+      {
+        "accepted": true,
+        "current_value": "awaiting_authorization",
+        "description": "Operation Circle - staff proceeded under standing authorization.",
+        "domain": "ops",
+        "faction": "RBiH",
+        "id": "PROP_16_historical_op_preplanned_arbih_1st_corps_operation_circle",
+        "proposed_action": "HISTORICAL_OP:preplanned:arbih_1st_corps:Operation Circle",
+        "proposed_value": "authorize",
+        "resolved_turn": 16,
+        "turn": 16
+      },
+      {
+        "accepted": true,
+        "current_value": "awaiting_authorization",
+        "description": "Srebrenica–Cerska Link-Up - staff proceeded under standing authorization.",
+        "domain": "ops",
+        "faction": "RBiH",
+        "id": "PROP_4_historical_op_preplanned_arbih_2nd_corps_srebrenica_cerska_link_up",
+        "proposed_action": "HISTORICAL_OP:preplanned:arbih_2nd_corps:Srebrenica–Cerska Link-Up",
+        "proposed_value": "authorize",
+        "resolved_turn": 4,
+        "turn": 4
+      },
+      {
+        "accepted": true,
+        "current_value": "awaiting_authorization",
+        "description": "Visoko–Breza Line Clearing - staff proceeded under standing authorization.",
+        "domain": "ops",
+        "faction": "RBiH",
+        "id": "PROP_8_historical_op_preplanned_arbih_1st_corps_visoko_breza_line_clearing",
+        "proposed_action": "HISTORICAL_OP:preplanned:arbih_1st_corps:Visoko–Breza Line Clearing",
+        "proposed_value": "authorize",
+        "resolved_turn": 8,
+        "turn": 8
+      }
+    ],
+    "opportunities": []
+  },
+  "resultIdentity": {
+    "path": "tmp/player-bot-capability-parity-20261024/policy-package-player-prep-20261025/native-calibration-policy-01/child/result.json",
+    "sha256": "1b5f234f6463148a65bf237cae2c4577feb107502d745d2a0542702e0ab09059"
+  },
+  "pass": true
+}

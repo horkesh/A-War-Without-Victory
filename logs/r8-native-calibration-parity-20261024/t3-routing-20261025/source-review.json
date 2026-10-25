@@ -1,0 +1,58 @@
+{
+  "schema": "awwv.independent-t3-routing-implementation-review.v1",
+  "verdict": "GO_NO_BLOCKING_FINDINGS",
+  "qualification_claim": false,
+  "acceptance_gate_waived": false,
+  "review_findings": [],
+  "scope_verified": {
+    "production_change": "T3 processOsidColumnMovement omits the corps-sector intermediate-node allow-list only",
+    "unchanged": [
+      "dijkstraFriendlyPath implementation",
+      "buildCorpsAllowedOsids helper",
+      "sector_offensive_launch_helpers",
+      "routine destination authority",
+      "operation and player order authority",
+      "political friendly/allied traversal",
+      "terrain cost and deterministic tie-breaking",
+      "owner and transit-duration semantics",
+      "T2 enclave destination guards",
+      "supply and political control writers"
+    ]
+  },
+  "evidence": {
+    "red": "2 failed, 30 passed",
+    "green": "5 files, 163 passed",
+    "final_unit": "32 passed",
+    "typecheck": 0,
+    "diff_check": 0,
+    "production_turn": "PASS_PLAYER_TURN2_T3_FACTION_FRIENDLY_TRANSIT",
+    "production_child_exit": 0,
+    "production_wrapper_exit": 0
+  },
+  "limits": [
+    "No claim that brigade 109 moves at turn 6.",
+    "No historical score or qualification claim.",
+    "Full suite, 188-week campaign, package/build/native checks, and final docs remain pending.",
+    "The existing enclave sector-march observer should be included in broader validation; no new T3 enclave rule is indicated."
+  ],
+  "historical_gate": {
+    "required_t39_minimum": 707,
+    "required_formerly_correct_losses": 0,
+    "current_qualified_score": 700,
+    "current_losses": 7,
+    "status": "UNMET"
+  },
+  "bindings": {
+    "head_baseline": "29b2cf9b67a9bf9e3529d3c684f0e3a25495abc0",
+    "source_sha256": "31de47a728a2382a23f4eb9a7f665f6c6f1fe5cbcef8d6da59d8221ec7d29c73",
+    "test_sha256": "e7276027be9ff0ae1888143d3e6fdeaeb1436d11ca6c384d44e0c1d2aa0f88d3",
+    "red_log_sha256": "ea4497c8bce372789d9e11d26061d420f320e8a5c2b4b8a7ae8d4a92cde7aae6",
+    "green_log_sha256": "41d9c61e8320d6c975eda18d7ba55165564544d70fd259038b27f79c92b759e7",
+    "final_unit_log_sha256": "a64e3f72b5df9f4f2e3b882a2f6826814a3a15a7a93073b93958981a245106ef",
+    "typecheck_log_sha256": "025017ea5dc29eb540825da9ff5c7b5c7d6db81cfd98633b026692edf3831584",
+    "production_receipt_sha256": "3fdcaa95e90ebade5127133b0a452f184569947188dcac22865bd1127a769b9e",
+    "production_dependencies_sha256": "1af43fc05cbb6c081e0a2b7f2db549f42a6b73d64f2b3bfe06b74c30d880be57",
+    "production_boundary_sha256": "4e9eb753f9bab5281ada7f8f61b5c88ce4054a1c425684091b3c4ed614699d7d",
+    "production_result_sha256": "d147a6e1046b71c03172c9c8c7f20c6779a0a1a1b64dbd96743c6293a1c10687"
+  }
+}
