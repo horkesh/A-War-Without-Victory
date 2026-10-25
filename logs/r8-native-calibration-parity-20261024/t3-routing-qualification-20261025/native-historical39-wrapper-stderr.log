@@ -1,0 +1,15 @@
+C:\Users\User\.codex\worktrees\october-calibration-checkpoint\A-War-Without-Victory\tmp\player-bot-capability-parity-20261024\t3-routing-native-prep-v2\native_entry.cjs:5
+fs.mkdirSync(out,{recursive:false});fs.copyFileSync(configPath,path.join(out,'config.json'),fs.constants.COPYFILE_EXCL);const started=new Date().toISOString(),child=cp.spawnSync(c.command,c.args,{cwd:process.cwd(),env:{...process.env,...c.env},encoding:'utf8',timeout:c.timeoutMs,windowsHide:true});fs.writeFileSync(path.join(out,'harness.stdout.log'),child.stdout??'',{flag:'wx'});fs.writeFileSync(path.join(out,'harness.stderr.log'),child.stderr??'',{flag:'wx'});for(const [name,source] of Object.entries(c.externalArtifacts)){if(!fs.statSync(source,{throwIfNoEntry:false})?.isFile())throw Error(`missing native artifact ${name}: ${source}`);fs.copyFileSync(source,path.join(out,name),fs.constants.COPYFILE_EXCL)}if(!fs.statSync(c.externalEvidenceRoot,{throwIfNoEntry:false})?.isDirectory())throw Error(`missing evidence root ${c.externalEvidenceRoot}`);const inventory=C.walkFiles(c.externalEvidenceRoot).map(f=>C.fileRecord(f,c.externalEvidenceRoot));C.writeJsonExclusive(path.join(out,'external-inventory.json'),{schema:'awwv.t3-routing-native.external-inventory.v1',root:c.externalEvidenceRoot,files:inventory});C.writeJsonExclusive(path.join(out,'exit.json'),{schema:'awwv.t3-routing-native.child-exit.v2',started,ended:new Date().toISOString(),exit:child.status,signal:child.signal,timedOut:child.error?.code==='ETIMEDOUT',configSha256:configSha,preflightResultSha256:preflightSha,preflightReceiptSha256:receiptSha,harnessSha256:C.sha256File('tools/ui/paradox_local_qa.cjs')});process.exitCode=child.status??1;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ^
+
+Error: missing native artifact result.json: tmp-paradox-qa-20260710/paradox-local-qa-player-column-fresh-rbih-t39-20261025-01.json
+    at Object.<anonymous> (C:\Users\User\.codex\worktrees\october-calibration-checkpoint\A-War-Without-Victory\tmp\player-bot-capability-parity-20261024\t3-routing-native-prep-v2\native_entry.cjs:5:593)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49
+
+Node.js v22.23.2
