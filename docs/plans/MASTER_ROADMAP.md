@@ -15,7 +15,7 @@ paused or RE is blocked, they are describing 2026-08-28, not today.
 
 **Last updated:** 2026-10-25 — owner prioritizes player capability to achieve bot calibration and access the same operations; diagnose and repair proven gaps before divergence experiments. n94 remains the no-player benchmark.
 
-**Player parity:** n97 is clean188 and exact n94 at707/707/706/706 with zero n91/n92 losses. T3 routing and 0→1 opening pass at bounded scope. Fresh39 fails the strict media/runtime gate after Save/load, measured703/712 with four losses; older700/seven-loss remains retained and no703 qualification is claimed. See the [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md).
+**Player parity:** n97 retains707/707/706/706 and zero n91/n92 losses. Player39/raw703 remains failed. Explicit-choice23 matches n94 Kolovarice RS; Tosici and CDP finalization fail. Observer repair and a zero-turn n94 resume prerequisite precede further diagnosis. See the [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md).
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
@@ -79,14 +79,7 @@ The execution-branch paragraph below records the earlier January checkpoint.
 
 **Authority:** This file is the sole source of truth for unfinished product work.
 
-**Current R8 — player capability before divergence.** n97 clean188 is exact n94 at707/707/706/706 with
-zero n91/n92 losses; required suite is15062 pass/0 fail/33 skip with preservation pass. The T3
-candidate is qualified only at bounded routing scope and its compiled package passes the 0→1 opening
-with22/22 gates plus independent Save/load. Fresh39 fails the strict media/runtime gate after Save/load
-(`event126`, ambient-network `ERR_ABORTED`), despite39+39 authenticated archives and exact
-canonical/loaded-projection Save/load; measured703/712 has
-four losses, so no703 qualification. Next is one explicit normal-UI `always_allow` turn23 run, then
-stop and diagnose before39. Later checkpoints, all-faction, replay and release gates remain open.
+**Current R8 — player capability before divergence.** n97 clean188 and its15062/0/33 suite remain qualified at their no-player scope. Player39/raw703 remains failed. Explicit-choice23 supplies all four early flips and n94 Kolovarice RS; Tosici receives Circle and attacks but faces standing defenders where n94 used militia. Its page-bound CDP collection also fails. Frame-observer159/159 and correction review pass; no native retry. A reviewed n94 suffix probe failed before turns because its private inputs omitted a startup map; next is a zero-turn startup/resume gate, then faithful suffix diagnosis. Preserve n91–n97; no tuning/adoption. Later checkpoints, all-faction, replay and release gates remain open.
 
 **Execution view:** [COMMAND_BOARD.md](COMMAND_BOARD.md) is a derived convenience view; this roadmap wins if they differ.
 

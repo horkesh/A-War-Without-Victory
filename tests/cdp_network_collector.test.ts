@@ -12,6 +12,7 @@ afterEach(() => {
 type Collector = {
     awaitReady(): Promise<void>;
     closeAndFlush(): Promise<any>;
+    failClosed(code: string): void;
 };
 
 type StartCollector = (options: Record<string, unknown>) => Collector;
@@ -30,6 +31,15 @@ class FakeSession extends EventEmitter {
     failDetach: Error | null = null;
     failOnEvent: string | null = null;
     listenerError: Error | null = null;
+    targetInfo: any = {
+        targetInfo: {
+            targetId: 'gameplay-target-1',
+            type: 'iframe',
+            url: 'http://127.0.0.1:64245/index.html?embedded=1',
+        },
+    };
+    targetInfoPromise: Promise<any> | null = null;
+    emitDisconnectedOnDetach = false;
     bodyByRequestId = new Map<string, Promise<any>>();
 
     override on(event: string, listener: (...args: any[]) => void): this {
@@ -44,6 +54,7 @@ class FakeSession extends EventEmitter {
             if (this.enablePromise) return this.enablePromise;
             return {};
         }
+        if (method === 'Target.getTargetInfo') return this.targetInfoPromise ?? this.targetInfo;
         if (method === 'Network.getResponseBody') {
             const requestId = (params as any)?.requestId;
             if (this.bodyByRequestId.has(requestId)) return this.bodyByRequestId.get(requestId);
@@ -56,6 +67,7 @@ class FakeSession extends EventEmitter {
 
     async detach(): Promise<void> {
         this.detachCalls += 1;
+        if (this.emitDisconnectedOnDetach) this.emit('close');
         if (this.failDetach) throw this.failDetach;
     }
 }
@@ -119,6 +131,133 @@ async function readyCollector(session: FakeSession, artifactIdentity = 'run/RS/c
     await collector.awaitReady();
     return collector;
 }
+
+test('binds provenance to the selected gameplay frame target before enabling the declared window', async () => {
+    const session = new FakeSession();
+    const selectedFrameUrl = session.targetInfo.targetInfo.url;
+    const collector = await readyCollector(session, 'run/RS/frame-target.json', { expectedTargetUrl: selectedFrameUrl });
+    const artifact = await collector.closeAndFlush();
+
+    assert.deepEqual(session.sends.slice(0, 2).map((row) => row.method), ['Target.getTargetInfo', 'Network.enable']);
+    assert.equal(artifact.status, 'complete');
+    assert.equal(artifact.session.target.target_id, 'gameplay-target-1');
+    assert.equal(artifact.session.target.type, 'iframe');
+    assert.equal(artifact.session.target.selected_frame_url.status, 'present');
+    assert.equal(artifact.session.target.reported_url.status, 'present');
+    assert.equal(artifact.session.coverage_window.begins_after, 'selected-gameplay-frame-network-enable');
+    assert.deepEqual(artifact.session.coverage_window.excludes, [
+        'outer-page-load',
+        'campaign-bootstrap',
+        'intro-or-resume-routing',
+        'pre-attachment-frame-traffic',
+    ]);
+});
+
+test('rejects a session that cannot establish the selected gameplay frame target identity', async () => {
+    const session = new FakeSession();
+    session.targetInfo.targetInfo.url = 'http://127.0.0.1:64245/outer.html';
+    const collector = loadCollector()({
+        artifactIdentity: 'run/RS/wrong-target.json',
+        expectedTargetUrl: 'http://127.0.0.1:64245/index.html?embedded=1',
+        createSession: async () => session,
+        closeTimeoutMs: 100,
+    });
+
+    await assert.rejects(() => collector.awaitReady(), /setup failed/i);
+    const artifact = await collector.closeAndFlush();
+    assert.equal(artifact.status, 'setup-error');
+    assert.equal(artifact.setup.primary_error.includes('outer.html'), false);
+});
+
+test('unexpected session close is fatal while collector-owned detach is expected and idempotent', async () => {
+    const unexpectedSession = new FakeSession();
+    const unexpected = await readyCollector(unexpectedSession);
+    unexpectedSession.emit('close');
+    const failed = await unexpected.closeAndFlush();
+    assert.equal(failed.status, 'runtime-error');
+    assert.equal(failed.inconsistencies.some((row: any) => row.code === 'unexpected-session-close'), true);
+
+    const ownedSession = new FakeSession();
+    ownedSession.emitDisconnectedOnDetach = true;
+    const owned = await readyCollector(ownedSession);
+    const first = await owned.closeAndFlush();
+    const second = await owned.closeAndFlush();
+    assert.equal(first.status, 'complete');
+    assert.equal(first.inconsistencies.some((row: any) => row.code === 'unexpected-session-close'), false);
+    assert.strictEqual(second, first);
+    assert.equal(ownedSession.detachCalls, 1);
+});
+
+test('session close and external target loss stay fatal while finalization waits for a body settlement', async () => {
+    for (const failure of ['session-close', 'external-frame-loss'] as const) {
+        const session = new FakeSession();
+        let resolveBody: (value: any) => void = () => {};
+        session.bodyPromise = new Promise((resolve) => { resolveBody = resolve; });
+        const collector = await readyCollector(session, `run/RS/flush-${failure}.json`);
+        session.emit('Network.requestWillBeSent', requestEvent());
+        session.emit('Network.responseReceived', responseEvent());
+        session.emit('Network.loadingFailed', failureEvent());
+        const closing = collector.closeAndFlush();
+        await Promise.resolve();
+        await Promise.resolve();
+        if (failure === 'session-close') session.emit('close');
+        else collector.failClosed('observed-frame-detached');
+        resolveBody({ body: 'settled', base64Encoded: false });
+        const artifact = await closing;
+        assert.equal(artifact.status, 'runtime-error', failure);
+        const expectedCode = failure === 'session-close' ? 'unexpected-session-close' : 'observed-frame-detached';
+        assert.equal(artifact.inconsistencies.some((row: any) => row.code === expectedCode), true, failure);
+    }
+});
+
+test('session close during setup retains the primary runtime error classification', async () => {
+    const session = new FakeSession();
+    let resolveTargetInfo: (value: any) => void = () => {};
+    session.targetInfoPromise = new Promise((resolve) => { resolveTargetInfo = resolve; });
+    const collector = loadCollector()({
+        artifactIdentity: 'run/RS/setup-close.json',
+        expectedTargetUrl: session.targetInfo.targetInfo.url,
+        createSession: async () => session,
+        closeTimeoutMs: 100,
+    });
+    for (let attempt = 0; attempt < 10 && !session.sends.some((row) => row.method === 'Target.getTargetInfo'); attempt += 1) {
+        await Promise.resolve();
+    }
+    assert.equal(session.sends.some((row) => row.method === 'Target.getTargetInfo'), true);
+    session.emit('close');
+    resolveTargetInfo(session.targetInfo);
+    await assert.rejects(() => collector.awaitReady(), /setup failed/i);
+    const artifact = await collector.closeAndFlush();
+    assert.equal(artifact.status, 'runtime-error');
+    assert.equal(artifact.inconsistencies.some((row: any) => row.code === 'unexpected-session-close'), true);
+});
+
+test('setup timeout preserves an already recorded runtime target loss', async () => {
+    for (const failure of ['session-close', 'external-frame-loss'] as const) {
+        const session = new FakeSession();
+        session.targetInfoPromise = new Promise(() => {});
+        const collector = loadCollector()({
+            artifactIdentity: `run/RS/setup-timeout-${failure}.json`,
+            expectedTargetUrl: session.targetInfo.targetInfo.url,
+            createSession: async () => session,
+            closeTimeoutMs: 15,
+        });
+        for (let attempt = 0; attempt < 10 && !session.sends.some((row) => row.method === 'Target.getTargetInfo'); attempt += 1) {
+            await Promise.resolve();
+        }
+        assert.equal(session.sends.some((row) => row.method === 'Target.getTargetInfo'), true);
+        if (failure === 'session-close') session.emit('close');
+        else collector.failClosed('observed-frame-detached');
+
+        await assert.rejects(() => collector.awaitReady(), /setup timed out/i);
+        const artifact = await collector.closeAndFlush();
+        assert.equal(artifact.setup.state, 'timeout');
+        assert.equal(artifact.setup.primary_error, 'CDP collection setup timed out');
+        assert.equal(artifact.status, 'runtime-error');
+        const expectedCode = failure === 'session-close' ? 'unexpected-session-close' : 'observed-frame-detached';
+        assert.equal(artifact.inconsistencies.some((row: any) => row.code === expectedCode), true);
+    }
+});
 
 test('collects one exact CDP failure and hashes only the direct same-session body result', async () => {
     const session = new FakeSession();

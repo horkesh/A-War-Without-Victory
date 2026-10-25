@@ -1,0 +1,1 @@
+tests/cdp_network_collector.test.ts(203,24): error TS2339: Property 'failClosed' does not exist on type 'Collector'.

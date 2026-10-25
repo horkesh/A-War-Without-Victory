@@ -1,5 +1,9 @@
 # October calibration preservation checkpoint — 2026-10-19
 
+## 2026-10-25 frame observer and player23 diagnosis
+
+[Selected exact-byte proof](../../../logs/r8-native-calibration-parity-20261024/frame-observer-20261025/MANIFEST.json) records the failed explicit-choice23 attempt, corrected Kolovarice proxy, generic Frame fixture, observer repair159/159 and composed independent correction reviews, and failed n94 resume prerequisite. Native23 remains failed; Tosici's defender branch is unresolved. Next is a zero-turn startup/resume proof before any faithful suffix diagnostic, not a native retry. n91–n97 exact trees, all1228 package files,176 native23 bindings,3226 earlier bindings, classifiers and telemetry preservation pass. n97/full-suite/package evidence remains valid only at unaffected scope; player calibration and later/all-faction gates remain open. Raw profiles, archives, screenshots and telemetry stay local; this index is no remote backup. No gameplay tuning or baseline adoption.
+
 ## 2026-10-23 Toljenak owner-approved April repaint
 
 [Portable Toljenak result](toljenak-20261023-owner-repaint-result.json) records the exact one-cell April RS→RBiH correction, old/new reference hashes, unchanged historical run provenance and n92's corrected707/707/706/706 evaluation. Toljenak is captured by ordinary Behar-I combat at135 and held through188; zero formerly correct losses or unrelated control changes, with n91/HVO outcomes preserved. The paint has only post-simulation scoring/diagnostic consumers, so no second campaign ran.

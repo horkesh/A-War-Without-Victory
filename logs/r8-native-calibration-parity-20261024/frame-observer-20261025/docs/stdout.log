@@ -1,0 +1,15 @@
+
+ RUN  v2.1.9 C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory
+
+ ✓ tests/open_gates_register.test.ts (18 tests) 510ms
+   ✓ open gates register > --json wins over --list rather than being order-dependent 317ms
+ ✓ tests/plan_index.test.ts (13 tests) 150ms
+ ✓ tests/docs_desktop_v09_truth.test.ts (7 tests) 17ms
+ ✓ tests/docs_truth_no_skip_guard.test.ts (2 tests) 4ms
+
+ Test Files  4 passed (4)
+      Tests  40 passed (40)
+   Start at  06:44:22
+   Duration  1.92s (transform 54ms, setup 15ms, collect 143ms, tests 681ms, environment 1ms, prepare 285ms)
+
+{"child_exit":0,"signal":null}

@@ -15,11 +15,16 @@ is claimed. Keep failure diagnostics and normal UI policy evidence separate from
 Missing final-result artifacts on a strict nonzero wrapper must remain an explicit failed-result receipt;
 do not infer Save/load failure from the missing result, and retain the child/wrapper exit plus authenticated archives.
 
-The current QA harness repair is observer/choice capture only: focused101/101, private capture6/6,
-syntax0/0, TypeScript0/0 and independent review `69bf95d…`/`be871…`. `--rbih-paramilitary-policy=always_allow` selects a
-normal visible counterfactual for sole RBiH with the Historical selector; default behavior and
-provenance remain unchanged. The Object.hasOwn compatibility finding was test-only and corrected;
-focused101/101 was rerun, the failed type01 attempt remains preserved, and the source harness is unchanged.
+The QA harness retains explicit visible `--rbih-paramilitary-policy=always_allow` for sole RBiH
+with the Historical selector. Its opt-in CDP observer now attaches to the resolved gameplay Frame
+after fresh/resume routing, verifies target identity, and declares coverage only after readiness.
+Startup/intro/resume traffic is outside this window. Exact-frame or unexpected session loss remains
+fatal through flush until owned detach; setup failure recording cannot overwrite an existing
+runtime-error or over-cap. Completed playtest evidence survives a later observer failure by identity;
+an unreached manifest or rejected playtest is never reconstructed. Disabled output remains inert.
+Focused159/159, TypeScript/syntax0 and independent correction reviews qualify this observer scope
+only. Existing classifiers, admission, GameState, package and gameplay remain unchanged. The failed
+native23 and703 attempts remain failed. See the active Electron plan and portable observer inventory.
 
 ## Operation-completion ownership handoff (2026-10-23, focused candidate)
 

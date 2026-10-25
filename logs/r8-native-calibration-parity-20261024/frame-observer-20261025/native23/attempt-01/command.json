@@ -1,0 +1,83 @@
+{
+  "schema": "awwv.explicit-allow-native23.config.v2",
+  "label": "player-explicit-allow-t23-20261025-01",
+  "command": "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+  "args": [
+    "tools/ui/paradox_local_qa.cjs",
+    "--turns=23",
+    "--faction=RBiH",
+    "--label=player-explicit-allow-t23-20261025-01",
+    "--historical-choice",
+    "--rbih-paramilitary-policy=always_allow",
+    "--officer-succession-policy=historical",
+    "--skip-initial-tour",
+    "--no-checkpoint-tour",
+    "--archive-turn-autosaves",
+    "--save-load-proof",
+    "--cdp-network-collection-v3",
+    "--packaged-executable=dist-packaged/player-column-routing-20261025-01/win-unpacked/A War Without Victory.exe"
+  ],
+  "env": {
+    "DO_NOT_TRACK": "1",
+    "NO_UPDATE_NOTIFIER": "1"
+  },
+  "timeoutMs": 2100000,
+  "oneAttemptOnly": true,
+  "noAutomaticRetry": true,
+  "source": {
+    "observerHead": "bff97de7af9406dc2cb907674e2463fccb43052a",
+    "gameplayAndPackageSourceHead": "fd061e898ad3de942d62c016547a5e453ddd9422",
+    "harnessSha256": "71a9bbb675d4c33d290e92e97c7e3780211e5ce3c500f37c637bf46ef8e32503",
+    "testSha256": "d4976d34beb002dd847682154886c8bed5b1f2c4412e1ff3ce97de5535fa2d53"
+  },
+  "packageBinding": {
+    "path": "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/package-bind-v2-02/PACKAGE_BINDING.json",
+    "sha256": "762b801c75652b653cb887006e8dbc7eb6ec6432e86cd913b8d8fba85f6308e8"
+  },
+  "wrapper": {
+    "entryScript": "tmp/r8-shakedown-20261023/root/run-command.cjs",
+    "entrySha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584",
+    "allowedChildArtifacts": [
+      "command.json"
+    ],
+    "ownedArtifacts": [
+      "entry-script.snapshot",
+      "start.json",
+      "stdout.log",
+      "stderr.log",
+      "receipt.json"
+    ]
+  },
+  "externalArtifacts": {
+    "result": "tmp-paradox-qa-20260710/paradox-local-qa-player-explicit-allow-t23-20261025-01.json",
+    "progress": "tmp-paradox-qa-20260710/paradox-local-qa-progress-player-explicit-allow-t23-20261025-01.json",
+    "netlog": "tmp-paradox-qa-20260710/paradox-local-qa-netlog-player-explicit-allow-t23-20261025-01.json",
+    "error": "tmp-paradox-qa-20260710/paradox-local-qa-error-player-explicit-allow-t23-20261025-01.txt",
+    "saveInspection": "tmp-paradox-qa-20260710/paradox-local-qa-save-menu-inspection-player-explicit-allow-t23-20261025-01.json",
+    "screenshotsPrefix": "tmp-paradox-qa-20260710/screenshots/player-explicit-allow-t23-20261025-01-",
+    "profile": "tmp-paradox-qa-20260710/user-data/player-explicit-allow-t23-20261025-01-rbih",
+    "mainProcessStream": "tmp-paradox-qa-20260710/main-process-output/player-explicit-allow-t23-20261025-01-rbih.jsonl",
+    "evidenceRoot": "tmp-paradox-qa-20260710/evidence/player-explicit-allow-t23-20261025-01",
+    "cdpSidecar": "tmp-paradox-qa-20260710/evidence/player-explicit-allow-t23-20261025-01/rbih/cdp-network-collection-v3.json"
+  },
+  "stagePaths": {
+    "preflightAttempt": "tmp/player-bot-capability-parity-20261024/explicit-allow-native23-20261025/preflight-02",
+    "nativeAttempt": "tmp/player-bot-capability-parity-20261024/explicit-allow-native23-20261025/native-attempt-01",
+    "postcheck": "tmp/player-bot-capability-parity-20261024/explicit-allow-native23-20261025/postcheck-01.json"
+  },
+  "phaseOwnership": {
+    "nativeAttempt": "must_be_absent_before_wrapper_then_created_by_wrapper",
+    "requireAbsent": "evaluated_by_child_launcher_after_wrapper_creation"
+  },
+  "requireAbsent": [
+    "tmp-paradox-qa-20260710/paradox-local-qa-player-explicit-allow-t23-20261025-01.json",
+    "tmp-paradox-qa-20260710/paradox-local-qa-progress-player-explicit-allow-t23-20261025-01.json",
+    "tmp-paradox-qa-20260710/paradox-local-qa-netlog-player-explicit-allow-t23-20261025-01.json",
+    "tmp-paradox-qa-20260710/paradox-local-qa-error-player-explicit-allow-t23-20261025-01.txt",
+    "tmp-paradox-qa-20260710/paradox-local-qa-save-menu-inspection-player-explicit-allow-t23-20261025-01.json",
+    "tmp-paradox-qa-20260710/user-data/player-explicit-allow-t23-20261025-01-rbih",
+    "tmp-paradox-qa-20260710/main-process-output/player-explicit-allow-t23-20261025-01-rbih.jsonl",
+    "tmp-paradox-qa-20260710/evidence/player-explicit-allow-t23-20261025-01",
+    "tmp/player-bot-capability-parity-20261024/explicit-allow-native23-20261025/postcheck-01.json"
+  ]
+}

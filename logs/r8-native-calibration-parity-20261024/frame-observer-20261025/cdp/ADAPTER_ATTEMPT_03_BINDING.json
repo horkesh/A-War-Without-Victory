@@ -1,0 +1,161 @@
+{
+  "schema": "awwv.native23-cdp-installed-adapter-attempt-binding.v2",
+  "created_utc": "2026-10-25T05:20:08.6620714Z",
+  "repository_head": "bff97de7af9406dc2cb907674e2463fccb43052a",
+  "scope": "generic Frame attachment completeness; excludes ambient classifier and abort body eligibility",
+  "question": "Can Playwright 1.60.0 newCDPSession(actual embedded Frame) capture a complete post-attach loopback request/response/finish chain and exact direct body compared with the outer Page, while the strict response-only orphan control still rejects?",
+  "correction_to_attempt_02": "Attempt 02 discarded terminal rows because it filtered url-null terminal projections by asset URL; its output did not prove loadingFinished was absent.",
+  "preflight": {
+    "syntax_check": {
+      "command": "node --check installed_adapter_fixture_v3.cjs",
+      "exit": 0
+    },
+    "resolved_collector": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tools/ui/cdp_network_collector.cjs",
+    "prior_fixtures_preserved": true,
+    "browser": {
+      "path": "C:/Users/User/AppData/Local/ms-playwright/chromium-1223/chrome-win64/chrome.exe",
+      "bytes": 4011008,
+      "sha256": "290fa7018fda22c52ada5eddb0113baf3ebc41fd0fde6085eddb19793606c635"
+    }
+  },
+  "execution": {
+    "wrapper": "tools/diagnostics/run_preserved_preflight.cjs",
+    "timeout_ms": 120000,
+    "event_wait_timeout_ms": 5000,
+    "attempts": 1,
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "timed_out": false,
+    "launch_count": 1,
+    "artifact_contract_pass": true
+  },
+  "observed": {
+    "outer_target": {
+      "ok": true,
+      "target_id": "A74C68C9A8198C760106389760E09268",
+      "type": "page",
+      "url": "http://localhost:55201/outer.html"
+    },
+    "frame_target": {
+      "ok": true,
+      "target_id": "57315C37D322FA486C4D34903C6289EE",
+      "type": "iframe",
+      "url": "http://127.0.0.1:55200/frame.html"
+    },
+    "terminal_wait": {
+      "outcome": "terminal",
+      "terminal_kind": "Network.loadingFinished",
+      "request_id": "18480.2",
+      "response_seen": true
+    },
+    "outer_matching_event_counts": {
+      "Network.requestWillBeSent": 0,
+      "Network.responseReceived": 0,
+      "Network.loadingFinished": 0,
+      "Network.loadingFailed": 0
+    },
+    "frame_matching_event_counts": {
+      "Network.requestWillBeSent": 1,
+      "Network.responseReceived": 1,
+      "Network.loadingFinished": 1,
+      "Network.loadingFailed": 0
+    },
+    "browser_body": {
+      "status": 206,
+      "bytes": 26,
+      "sha256": "3910462cf065a7e2dd8305280146b3221d0f449105a2bd3299263b5549238824"
+    },
+    "direct_same_session_body": {
+      "bytes": 26,
+      "sha256": "3910462cf065a7e2dd8305280146b3221d0f449105a2bd3299263b5549238824",
+      "base64_encoded": true
+    },
+    "fake_midflight": {
+      "pass": true,
+      "status": "inconsistent",
+      "rows_by_kind": {
+        "request": 0,
+        "response": 1,
+        "failure": 0,
+        "finish": 0
+      },
+      "inconsistency": {
+        "sequence": 1,
+        "code": "response-without-request",
+        "request_id": "fixture-midflight-request"
+      },
+      "sends": [
+        {
+          "method": "Network.enable",
+          "params": {}
+        }
+      ]
+    }
+  },
+  "verdict": {
+    "fixture_pass": true,
+    "complete_generic_frame_chain_proven": true,
+    "exact_direct_same_frame_session_body_proven": true,
+    "outer_page_observed_matching_chain": false,
+    "outer_page_full_coverage_proven": false,
+    "ambient_classifier_or_abort_body_eligibility_proven": false,
+    "strict_orphan_rejection_proven": true
+  },
+  "files": [
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/installed_adapter_fixture.cjs",
+      "bytes": 9695,
+      "sha256": "ade69c4df452439f63d7c94e633f8de48a48bf8f26968a2491ba84b07884c184"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/installed_adapter_fixture_v2.cjs",
+      "bytes": 9692,
+      "sha256": "05eb133820853f60b7b93b5fa0c00b50674b7a53b7c23ae5cccb4f8b449f8f73"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/installed_adapter_fixture_v3.cjs",
+      "bytes": 12283,
+      "sha256": "ad76ae67887a674b12f23564bc52d6da9898c2937aa235b1ca6da7b6f5345080"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-03/entry-script.snapshot",
+      "bytes": 12283,
+      "sha256": "ad76ae67887a674b12f23564bc52d6da9898c2937aa235b1ca6da7b6f5345080"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-03/start.json",
+      "bytes": 1755,
+      "sha256": "bbec516311c9ad1bd4cf0a2ee5260975eac3aec936626d20cf40991efadc882a"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-03/receipt.json",
+      "bytes": 3000,
+      "sha256": "216a4030183cf0bd546c4163453db088e59f323f4cc31ee30d0c74444a7002d7"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-03/RESULT.json",
+      "bytes": 6065,
+      "sha256": "1b36e6631ba2c1bc99bf917ee6b26fdf3d6f679c530d41ca73f09b8a7b00dc14"
+    },
+    {
+      "path": "tools/ui/cdp_network_collector.cjs",
+      "bytes": 26866,
+      "sha256": "02e5d8306a0f8e3ac082a56d33e12898d9d88bc54f9a0023d79ccf9af82c6607"
+    },
+    {
+      "path": "tools/ui/paradox_local_qa.cjs",
+      "bytes": 361860,
+      "sha256": "71a9bbb675d4c33d290e92e97c7e3780211e5ce3c500f37c637bf46ef8e32503"
+    },
+    {
+      "path": "node_modules/playwright-core/types/types.d.ts",
+      "bytes": 1013672,
+      "sha256": "e5b810845dedef5aa0d682efa61be20dcb2e28c27a64ff5cc4cfc122f3f3980f"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/ADAPTER_ATTEMPT_03_REPORT.md",
+      "bytes": 3880,
+      "sha256": "7e83a86f5a9d2caa20266aab77ea4d95d5e48dcae478b891c0f90cffd408ec68"
+    }
+  ]
+}

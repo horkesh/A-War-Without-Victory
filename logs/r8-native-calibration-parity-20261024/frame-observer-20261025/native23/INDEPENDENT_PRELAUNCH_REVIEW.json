@@ -1,0 +1,113 @@
+{
+  "schema": "awwv.explicit-allow-native23.independent-prelaunch-review.v1",
+  "reviewer": {
+    "identity": "receipt-integration-independent-reviewer",
+    "role": "independent actual prelaunch reviewer",
+    "distinctFromPreparer": true
+  },
+  "reviewedAt": "2026-10-25T05:52:00+01:00",
+  "verdict": "GO",
+  "findings": [],
+  "authorizationScope": {
+    "question": "One fresh normal-player RBiH 0-to-settled-23 run using the existing visible civic plus always_allow counterfactual choice.",
+    "attempt": "tmp/player-bot-capability-parity-20261024/explicit-allow-native23-20261025/native-attempt-01",
+    "oneAttemptOnly": true,
+    "noAutomaticRetry": true,
+    "timeoutMs": 2100000,
+    "turn39Authorized": false
+  },
+  "bindings": {
+    "observerHead": "bff97de7af9406dc2cb907674e2463fccb43052a",
+    "gameplayAndPackageSourceHead": "fd061e898ad3de942d62c016547a5e453ddd9422",
+    "plan": {
+      "path": "tmp/player-bot-capability-parity-20261024/explicit-allow-native23-20261025/PLAN-v2.md",
+      "bytes": 2228,
+      "sha256": "0e47bfb627d91059278f87627b1c045cf0d60a9d569176035a9eee8f6c86c438"
+    },
+    "config": {
+      "path": "tmp/player-bot-capability-parity-20261024/explicit-allow-native23-20261025/run-config-v2.json",
+      "bytes": 4322,
+      "sha256": "82748a0dadedf305b00bee0b7df52c89a55b21e8792672f55a84331e630019f2"
+    },
+    "launcher": {
+      "path": "tmp/r8-shakedown-20261023/root/run-command.cjs",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    "packageBinding": {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/package-bind-v2-02/PACKAGE_BINDING.json",
+      "bytes": 265002,
+      "sha256": "762b801c75652b653cb887006e8dbc7eb6ec6432e86cd913b8d8fba85f6308e8"
+    },
+    "harnessSha256": "71a9bbb675d4c33d290e92e97c7e3780211e5ce3c500f37c637bf46ef8e32503",
+    "testSha256": "d4976d34beb002dd847682154886c8bed5b1f2c4412e1ff3ce97de5535fa2d53"
+  },
+  "checks": {
+    "sourceAndCi": {
+      "pass": true,
+      "detail": "HEAD was exact and clean at review. The observer commit preserves the fd061 gameplay/data/package source, and both recorded CI runs 40162904222 and 40162904185 completed successfully.",
+      "ciTerminalSha256": "555e9d23a0022b20eef569699bcb6bb321b0bd3d38de50abf87c8154319f2465"
+    },
+    "exactChildTuple": {
+      "pass": true,
+      "detail": "The pinned Node 22.23.2 command has exactly 13 harness arguments: turn23, sole RBiH, fresh label, Historical visible choice mode, explicit always_allow, historical officer succession, normal non-headless skip-tour path, archived autosaves, SaveLoad, CDP v3, and the qualified packaged executable. No hidden state, preseed, target selector, gameplay override, or new engine path is present."
+    },
+    "visibleChoiceContract": {
+      "pass": true,
+      "detail": "The live authored catalog remains exactly always_deny/ask/always_allow, with always_deny historical and always_allow counterfactual. The reviewed harness requires the exact player event, unique authored option id and visible label, UI click, and matching canonical player-input receipt."
+    },
+    "package": {
+      "pass": true,
+      "detail": "A fresh read-only verifyPackage call authenticated all 1228 files, fd061 expected head, real PE, ASAR/source comparison policy, compiled simulation consumer/source map, 857 data, 77 audio/font, 218 UI, and no forbidden payload. All 16 binding checks remain true."
+    },
+    "phaseOwnershipCorrection": {
+      "pass": true,
+      "detail": "The original self-rejecting preparation remains preserved. V2 removes only wrapper-owned nativeAttempt from the child launcher's requireAbsent list while retaining its required absence before wrapper creation. The actual unchanged wrapper/launcher positive control completed child/wrapper 0/0 and proved the attempt directory exists when the child evaluates freshness.",
+      "controlReceiptSha256": "1a1d6c4264006b7257cb8c6309ef14b4a509219e87f3038df6625f0f7684b3d5"
+    },
+    "preflightReceipts": {
+      "pass": true,
+      "originalChecks": "18/18",
+      "correctedChecks": "7/7",
+      "correctedResultSha256": "6c705c698c6984ddedeb788dba0369fdb92e240cca547d5ee57433e8d2331c80",
+      "correctedReceiptSha256": "91be2816bb590232060be2662bca35ebafccd1ee71c8e893b60386bf59988cbf",
+      "detail": "The corrected receipt is child/wrapper 0/0, no timeout, empty stderr, immutable entry snapshot, and an exact artifact contract. FINAL_HASHES-v2 contains 22 rows and every row matched at review."
+    },
+    "freshnessAtReview": {
+      "pass": true,
+      "exactAbsentPaths": 9,
+      "screenshotPrefixMatches": 0,
+      "nativeAttemptAbsent": true,
+      "postcheckAbsent": true,
+      "applicationProcessCount": 0
+    },
+    "wrapperAndCapture": {
+      "pass": true,
+      "detail": "The existing preserved wrapper invokes the existing run-command launcher with {evidenceDir}; only command.json is child-owned and the five standard wrapper files are wrapper-owned. The source harness binds and snapshots its own reviewed bytes and writes external raw result/progress/netlog/error/save/screenshots/profile/main-process/CDP evidence for post-close inventory. No old native-entry 8/52 artifact shape is imposed."
+    },
+    "postCloseQuestion": {
+      "pass": true,
+      "hardGates": [
+        "canonical player receipt for civic plus rbih_paramilitary_policy_1992=always_allow through the visible counterfactual control",
+        "exact 712-controller cardinality",
+        "the four exact known early policy flips through turn 2",
+        "normal 109th Operation Circle participation and retained attack records",
+        "RBiH control of Kolovarice and Tosici by settled turn 23",
+        "strict runtime diagnostics and SaveLoad"
+      ],
+      "supportingObservationsOnly": [
+        "109th at Lokve on turn 8",
+        "109th at Kijevo on turn 9"
+      ],
+      "detail": "CDP coverage remains separate and cannot waive a strict network failure. A non-match falsifies policy-alone sufficiency under this fixed path, not every causal contribution; a match establishes bounded current-path sufficiency, not unique history, desirability, reward, qualification, or adoption."
+    }
+  },
+  "precision": [
+    "The plan phrase 'no historicity claim' is read as no claim that always_allow is historical. The expected transcript field is exactly historicityClaim=none_counterfactual_player_choice, alongside basis=player_selected_counterfactual.",
+    "The configuration is manually one-use and review-hash bound. The launch must use this exact config SHA and recheck its absent paths, screenshot prefix, native attempt, postcheck path, application count, clean HEAD, harness/test hashes, and package binding immediately before invocation."
+  ],
+  "limits": [
+    "This review launched no application, engine turn, build, package, test suite, probe, or campaign.",
+    "GO authorizes only the fixed 0-to-23 attempt. It does not authorize retry, turn39, score-floor change, gameplay qualification, tuning, or baseline adoption."
+  ]
+}

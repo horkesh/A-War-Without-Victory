@@ -1,0 +1,77 @@
+[op-validation] 76 issue(s) at injection: 14 error(s), 62 warning(s)
+  [WARN] Operation Koridor [brcko_corridor]: all_objectives_owned — All 2 objectives already controlled by RS
+  [WARN] Operation Koridor [brcko_corridor]: axis_empty — Axis would be empty: 0 valid objectives
+  [WARN] Operation Koridor [posavina_flank]: all_objectives_owned — All 5 objectives already controlled by RS
+  [WARN] Operation Koridor [posavina_flank]: axis_empty — Axis would be empty: 0 valid objectives
+  [ERROR] Operation Koridor: op_empty — All 2 axes would be dropped — operation cannot execute
+  [WARN] Operation Majevica [majevica_trnova]: all_objectives_owned — All 2 objectives already controlled by RS
+  [WARN] Operation Majevica [majevica_trnova]: axis_empty — Axis would be empty: 0 valid objectives
+  [ERROR] Operation Majevica: op_empty — All 1 axes would be dropped — operation cannot execute
+  [WARN] Operation Drina [zvornik_sweep]: all_objectives_owned — All 4 objectives already controlled by RS
+  [WARN] Operation Drina [zvornik_sweep]: axis_empty — Axis would be empty: 0 valid objectives
+  [WARN] Operation Drina [bratunac_vlasenica]: all_objectives_owned — All 3 objectives already controlled by RS
+  [WARN] Operation Drina [bratunac_vlasenica]: axis_empty — Axis would be empty: 0 valid objectives
+  [WARN] Operation Drina [upper_drina_approaches]: all_objectives_owned — All 2 objectives already controlled by RS
+  [WARN] Operation Drina [upper_drina_approaches]: axis_empty — Axis would be empty: 0 valid objectives
+  [ERROR] Operation Drina: op_empty — All 3 axes would be dropped — operation cannot execute
+  [WARN] Operation Podrinje Sweep [rogatica_sokolac]: all_objectives_owned — All 7 objectives already controlled by RS
+  [WARN] Operation Podrinje Sweep [rogatica_sokolac]: axis_empty — Axis would be empty: 0 valid objectives
+  [WARN] Operation Podrinje Sweep [srebrenica_ring]: all_objectives_owned — All 4 objectives already controlled by RS
+  [WARN] Operation Podrinje Sweep [srebrenica_ring]: axis_empty — Axis would be empty: 0 valid objectives
+  [ERROR] Operation Podrinje Sweep: op_empty — All 2 axes would be dropped — operation cannot execute
+  [WARN] Operation Visegrad [visegrad_seizure]: all_objectives_owned — All 2 objectives already controlled by RS
+  [WARN] Operation Visegrad [visegrad_seizure]: axis_empty — Axis would be empty: 0 valid objectives
+  [ERROR] Operation Visegrad: op_empty — All 1 axes would be dropped — operation cannot execute
+  [WARN] Operation Prsten [western_sarajevo]: all_objectives_owned — All 2 objectives already controlled by RS
+  [WARN] Operation Prsten [western_sarajevo]: axis_empty — Axis would be empty: 0 valid objectives
+  [WARN] Operation Prsten [northern_ring]: all_objectives_owned — All 1 objectives already controlled by RS
+  [WARN] Operation Prsten [northern_ring]: axis_empty — Axis would be empty: 0 valid objectives
+  [WARN] Operation Prsten [ilijas_ring]: all_objectives_owned — All 3 objectives already controlled by RS
+  [WARN] Operation Prsten [ilijas_ring]: axis_empty — Axis would be empty: 0 valid objectives
+  [ERROR] Operation Prsten: op_empty — All 3 axes would be dropped — operation cannot execute
+  [WARN] Operation Herzegovina [mostar_heights]: all_objectives_owned — All 2 objectives already controlled by RS
+  [WARN] Operation Herzegovina [mostar_heights]: axis_empty — Axis would be empty: 0 valid objectives
+  [WARN] Operation Herzegovina [konjic_south]: all_objectives_owned — All 2 objectives already controlled by RS
+  [WARN] Operation Herzegovina [konjic_south]: axis_empty — Axis would be empty: 0 valid objectives
+  [ERROR] Operation Herzegovina: op_empty — All 2 axes would be dropped — operation cannot execute
+  [WARN] Operation Foca [foca_valley]: all_objectives_owned — All 4 objectives already controlled by RS
+  [WARN] Operation Foca [foca_valley]: axis_empty — Axis would be empty: 0 valid objectives
+  [WARN] Operation Foca [foca_south]: all_objectives_owned — All 4 objectives already controlled by RS
+  [WARN] Operation Foca [foca_south]: axis_empty — Axis would be empty: 0 valid objectives
+  [WARN] Operation Foca [cajnice_south]: all_objectives_owned — All 3 objectives already controlled by RS
+  [WARN] Operation Foca [cajnice_south]: axis_empty — Axis would be empty: 0 valid objectives
+  [WARN] Operation Foca [kalinovik]: all_objectives_owned — All 3 objectives already controlled by RS
+  [WARN] Operation Foca [kalinovik]: axis_empty — Axis would be empty: 0 valid objectives
+  [ERROR] Operation Foca: op_empty — All 4 axes would be dropped — operation cannot execute
+  [WARN] Bosanska Krupa Takeover [krupa_town]: all_objectives_owned — All 1 objectives already controlled by RS
+  [WARN] Bosanska Krupa Takeover [krupa_town]: axis_empty — Axis would be empty: 0 valid objectives
+  [WARN] Bosanska Krupa Takeover [orasac]: all_objectives_owned — All 1 objectives already controlled by RS
+  [WARN] Bosanska Krupa Takeover [orasac]: axis_empty — Axis would be empty: 0 valid objectives
+  [ERROR] Bosanska Krupa Takeover: op_empty — All 2 axes would be dropped — operation cannot execute
+  [WARN] Operation Prijedor [prijedor_clean]: all_objectives_owned — All 4 objectives already controlled by RS
+  [WARN] Operation Prijedor [prijedor_clean]: axis_empty — Axis would be empty: 0 valid objectives
+  [WARN] Operation Prijedor [sanski_most]: all_objectives_owned — All 3 objectives already controlled by RS
+  [WARN] Operation Prijedor [sanski_most]: axis_empty — Axis would be empty: 0 valid objectives
+  [WARN] Operation Prijedor [kljuc]: all_objectives_owned — All 3 objectives already controlled by RS
+  [WARN] Operation Prijedor [kljuc]: axis_empty — Axis would be empty: 0 valid objectives
+  [ERROR] Operation Prijedor: op_empty — All 3 axes would be dropped — operation cannot execute
+  [WARN] Operation Corridor [corridor_east]: all_objectives_owned — All 6 objectives already controlled by RS
+  [WARN] Operation Corridor [corridor_east]: axis_empty — Axis would be empty: 0 valid objectives
+  [WARN] Operation Corridor [derventa_pocket]: all_objectives_owned — All 1 objectives already controlled by RS
+  [WARN] Operation Corridor [derventa_pocket]: axis_empty — Axis would be empty: 0 valid objectives
+  [WARN] Operation Corridor [corridor_south]: all_objectives_owned — All 3 objectives already controlled by RS
+  [WARN] Operation Corridor [corridor_south]: axis_empty — Axis would be empty: 0 valid objectives
+  [ERROR] Operation Corridor: op_empty — All 3 axes would be dropped — operation cannot execute
+  [WARN] Operation Jajce [vrbas_west]: all_objectives_owned — All 3 objectives already controlled by RS
+  [WARN] Operation Jajce [vrbas_west]: axis_empty — Axis would be empty: 0 valid objectives
+  [WARN] Operation Jajce [vrbas_south]: all_objectives_owned — All 2 objectives already controlled by RS
+  [WARN] Operation Jajce [vrbas_south]: axis_empty — Axis would be empty: 0 valid objectives
+  [ERROR] Operation Jajce: op_empty — All 2 axes would be dropped — operation cannot execute
+  [WARN] Operation Donji Vakuf [donji_vakuf_sweep]: all_objectives_owned — All 6 objectives already controlled by RS
+  [WARN] Operation Donji Vakuf [donji_vakuf_sweep]: axis_empty — Axis would be empty: 0 valid objectives
+  [WARN] Operation Donji Vakuf [vlasic_pocket]: all_objectives_owned — All 1 objectives already controlled by RS
+  [WARN] Operation Donji Vakuf [vlasic_pocket]: axis_empty — Axis would be empty: 0 valid objectives
+  [ERROR] Operation Donji Vakuf: op_empty — All 2 axes would be dropped — operation cannot execute
+  [WARN] Operation Bosanski Novi [novi_grad]: all_objectives_owned — All 3 objectives already controlled by RS
+  [WARN] Operation Bosanski Novi [novi_grad]: axis_empty — Axis would be empty: 0 valid objectives
+  [ERROR] Operation Bosanski Novi: op_empty — All 1 axes would be dropped — operation cannot execute

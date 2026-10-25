@@ -1,0 +1,251 @@
+{
+  "schema": "awwv.native703.n94-resume-power-seam.v2",
+  "question": "Can current production runScenario faithfully reproduce n94 weeks 17-39 from immutable w16 and expose the T18 Tosici militia-fallback power operands?",
+  "source_head": "bff97de7af9406dc2cb907674e2463fccb43052a",
+  "original_head": "a913286803a095b6dc3f57a44175081d6ae4b8eb",
+  "source_bindings": {
+    "data/scenarios/apr1992_definitive_188w.json": {
+      "path": "data/scenarios/apr1992_definitive_188w.json",
+      "bytes": 2843,
+      "sha256": "4257b039f5b1dbb7f21d940ec656b2d0b787856f27e7c26b6f3f57f256d82ecf"
+    },
+    "src/scenario/scenario_runner.ts": {
+      "path": "src/scenario/scenario_runner.ts",
+      "bytes": 209522,
+      "sha256": "74125b6227ab10516466621a66b55e1fd698f7e6abdbe3e5468947a510684a86"
+    },
+    "src/sim/turn_phases/war_phases.ts": {
+      "path": "src/sim/turn_phases/war_phases.ts",
+      "bytes": 231586,
+      "sha256": "0d11a7c5fbf73f19e1a30256218a48c482a76042d620b8107fd1f7b06b799d2d"
+    },
+    "src/sim/combat/attack_resolution_osid.ts": {
+      "path": "src/sim/combat/attack_resolution_osid.ts",
+      "bytes": 100791,
+      "sha256": "5b0d61371b7d0d828ed2b06ffd5d11354629ded288632f26cbfe9d22c1ce2f16"
+    },
+    "src/sim/combat/reason_code_debug.ts": {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "bytes": 20310,
+      "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd"
+    },
+    "src/state/serialize.ts": {
+      "path": "src/state/serialize.ts",
+      "bytes": 14624,
+      "sha256": "c5d0b1c6d265c188d5380702fd4b6c55bedf8b5b750c5d4d87151e59edf483e6"
+    },
+    "src/state/serializeGameState.ts": {
+      "path": "src/state/serializeGameState.ts",
+      "bytes": 8579,
+      "sha256": "a4010315c439eb0901a53d8166a8c44cb08427aff5d994e51e05ddb64657be97"
+    },
+    "original_run_meta": {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n94/run_meta.json",
+      "bytes": 10645,
+      "sha256": "0bb77fb1bf4b50456265f4839d934fd837d7ff5a569a590887d32e4cfa41b5b0"
+    },
+    "original_weekly_report": {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n94/weekly_report.jsonl",
+      "bytes": 33185387,
+      "sha256": "08b8e8cc74f7945ac4066edbce6cddfce74c40180c6fa013a6cb6c9997637669"
+    },
+    "input_save_w16": {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n94/save_w16.json",
+      "bytes": 4493938,
+      "sha256": "22ef518bb1f894d0afb450643a21d4a628f8f5c1462a80ebda498f81ece943ca"
+    },
+    "original_save_w39": {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n94/save_w39.json",
+      "bytes": 5105717,
+      "sha256": "e51224ac22a839d4c1af35a0ea828afb79b62f0ed56559c3b47dcda45578eec5"
+    }
+  },
+  "current_input_drifts": [
+    {
+      "path": "data/derived/operational/operational_settlements.geojson",
+      "original": "c03cc9ce4286b779139ce460e5f515d67415fe633e4ed2dbda1764b9440338c8",
+      "current": "03713c8e80ba7111ff64ad0bd69b70db4c7e2b30e22f23b8c4e2c11be60baa1a"
+    }
+  ],
+  "input_boundary": {
+    "turn": 16,
+    "seed": "harness-seed",
+    "corps_front_sector_count": 0,
+    "war_front_edge_count": 0
+  },
+  "shadow_manifest": [
+    {
+      "path": "data/derived/census_rolled_up_wgs84.json",
+      "source": "current-exact",
+      "sha256": "6653e75d9dd695bc2b676b1a49635bd51eecf228ec8c58b37ed1ecb773f1e3b2"
+    },
+    {
+      "path": "data/derived/municipality_hq_settlement.json",
+      "source": "current-exact",
+      "sha256": "7ff0af467f4b1fedbe7e2515fc9ca96dde9f3c825724c0bf6333653a08a1801b"
+    },
+    {
+      "path": "data/derived/municipality_political_controllers_1990.json",
+      "source": "current-exact",
+      "sha256": "5fb60e0d3b7ec22da487c720c5256a58c3c8a95c2114c3ecaa2d13ed8cccfdd4"
+    },
+    {
+      "path": "data/derived/municipality_population_1991.json",
+      "source": "current-exact",
+      "sha256": "b475f88f15b130a626d1699f9d3064a2e64c70e816b67b608d734b10763a7c7b"
+    },
+    {
+      "path": "data/derived/operational/operational_contact_graph.json",
+      "source": "current-exact",
+      "sha256": "f7f9aaeea51710fda376234d79945b51dfea31a16ebca948ffd8dc54f3ce0c46"
+    },
+    {
+      "path": "data/derived/operational/operational_political_control.json",
+      "source": "current-exact",
+      "sha256": "309af26381cb36126f5c80b2327035865b4ac9c467cda66211f35516949a0a3d"
+    },
+    {
+      "path": "data/derived/operational/operational_settlements.geojson",
+      "source": "historical-git-blob",
+      "sha256": "c03cc9ce4286b779139ce460e5f515d67415fe633e4ed2dbda1764b9440338c8"
+    },
+    {
+      "path": "data/derived/settlement_edges.json",
+      "source": "current-exact",
+      "sha256": "69073545ddac46395019b63295cd0de3a79920771b417178eb06cc38aa9a7cb7"
+    },
+    {
+      "path": "data/derived/settlement_ethnicity_data.json",
+      "source": "current-exact",
+      "sha256": "ca1e986d7f1c5e6662c7629a6f970441d1fb5474a48271bb0626194455674104"
+    },
+    {
+      "path": "data/scenarios/apr1992_definitive_188w.json",
+      "source": "current-exact",
+      "sha256": "4257b039f5b1dbb7f21d940ec656b2d0b787856f27e7c26b6f3f57f256d82ecf"
+    },
+    {
+      "path": "data/scenarios/events/consequences.json",
+      "source": "current-exact",
+      "sha256": "17ee0a0aaaf9162e550db85081a513c4b764ee042a50a0f663198de884300b0b"
+    },
+    {
+      "path": "data/scenarios/events/war_1992.json",
+      "source": "current-exact",
+      "sha256": "7596df56b934be4334ab8bffe51cf92f439c1fec238d6b82c21e68f25c61162a"
+    },
+    {
+      "path": "data/scenarios/events/war_1992_hrhb_summer.json",
+      "source": "current-exact",
+      "sha256": "de9bfc484847caa911d6921424b80ddcf8754219fffc016bdd346f80028d99e2"
+    },
+    {
+      "path": "data/scenarios/events/war_1993.json",
+      "source": "current-exact",
+      "sha256": "d31a781fc2479546a217f8cc82f958783c283345a1e1122c68d7b9dfd1bc46d2"
+    },
+    {
+      "path": "data/scenarios/events/war_1994.json",
+      "source": "current-exact",
+      "sha256": "aef6d5321f41224953c311b2194ac71eb8b42e6e63c3a501fdacd79d1ce29449"
+    },
+    {
+      "path": "data/scenarios/events/war_1995.json",
+      "source": "current-exact",
+      "sha256": "b16b52e0a25c4312c2dc146e824c46fe3b5d8b567907d443304bb8dbb4958dc4"
+    },
+    {
+      "path": "data/scenarios/initial_formations/initial_formations_apr1992.json",
+      "source": "current-exact",
+      "sha256": "37832ee7aad72e8a99aaf21ec66d92d0161477902e8db42bf1579d77314008f4"
+    },
+    {
+      "path": "data/scenarios/officers/apr1992_officers.json",
+      "source": "current-exact",
+      "sha256": "1a4565169fc90b119da7bd5624587078a42b935dd16d241ecb93b8e0a29524d0"
+    },
+    {
+      "path": "data/scenarios/political_leader_data.json",
+      "source": "current-exact",
+      "sha256": "6affed383f92f9786fa112c1fedc2b6a9c4dc5193c750c822c1ccf114b643474"
+    },
+    {
+      "path": "data/scenarios/presidential_initiatives/apr1992.json",
+      "source": "current-exact",
+      "sha256": "f26279f708514b5b237ba71f915d43131db2663660de44d27b23684f5f415cfb"
+    },
+    {
+      "path": "data/scenarios/timelines/apr1992.json",
+      "source": "current-exact",
+      "sha256": "3674a0cfc0c2062a0c0a5390a53cdfe2a7704628199ce60d9ff7148c55699a9d"
+    },
+    {
+      "path": "data/source/calibration/painted_control_apr1994.json",
+      "source": "current-exact",
+      "sha256": "24f6e8923afa6a5ceaf7e4148cd119f2952f48c99544b5e50e994836dc863dba"
+    },
+    {
+      "path": "data/source/calibration/painted_control_apr1995.json",
+      "source": "current-exact",
+      "sha256": "5ea9bc9a00ebfb80eb7611468340e604e155f24b225f39b06f7178c0937293ff"
+    },
+    {
+      "path": "data/source/calibration/painted_control_jan1993.json",
+      "source": "current-exact",
+      "sha256": "6a64300a599aa0b75833d5232bf9f08a1ab97085746337e622d54fb1a4a0ddc7"
+    },
+    {
+      "path": "data/source/calibration/painted_control_oct1995.json",
+      "source": "current-exact",
+      "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b"
+    },
+    {
+      "path": "data/source/formation_lifecycle_events.json",
+      "source": "current-exact",
+      "sha256": "f70b3f5b48196eedda02602b2a454dbfba83e2d3de7147854143e0b75247f90b"
+    },
+    {
+      "path": "data/source/municipalities_1990_initial_political_controllers_apr1992.json",
+      "source": "current-exact",
+      "sha256": "dcbf9ec5a73a0d8b86588851e5ca7a83fab7f37aa9f1513e27eebb11b5802f6d"
+    },
+    {
+      "path": "data/source/municipalities_1990_registry_110.json",
+      "source": "current-exact",
+      "sha256": "8ede3d014b0b8694021b79e77e58f07266f647682b23fcd2a793417f16d433cc"
+    },
+    {
+      "path": "data/source/oob_brigades.json",
+      "source": "current-exact",
+      "sha256": "e01b58c71b0d51daadf1796ba21a02d0cca04509add1ef706f3b8a350f7c513d"
+    },
+    {
+      "path": "data/source/oob_corps.json",
+      "source": "current-exact",
+      "sha256": "bce056408d0b7fcaeda20c3f847c4cc36f054ae2355d740708c83f139d76149c"
+    },
+    {
+      "path": "data/source/settlement_political_controllers_overrides.json",
+      "source": "current-exact",
+      "sha256": "0eb42921290f1812adc5fc4a008113483840d7d2ab2e2d382ea7582ca4659a33"
+    },
+    {
+      "path": "data/source/settlements_initial_master.json",
+      "source": "current-exact",
+      "sha256": "0a4fa946436ed525e38d94df0d3afe98ad2cfdd1e0f26f4cad2ae32bc894535d"
+    }
+  ],
+  "options": {
+    "weeksOverride": 39,
+    "emitSaveAtWeeks": [
+      18,
+      39
+    ],
+    "resumeFromWeekIndex": 16,
+    "harness": "headless",
+    "replayPayloadMode": "manifest_only",
+    "debug": "battle_stack,battle_power"
+  },
+  "pass": "Exact save_w39 bytes and exact weekly rows 17-39 after only three declared debug-field removals.",
+  "stop": "One attempt; preserved wrapper cap 120 seconds; any mismatch fails closed."
+}

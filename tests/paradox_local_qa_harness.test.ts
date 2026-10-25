@@ -1234,8 +1234,163 @@ test('disabled CDP collection lifecycle is inert and the harness wiring is opt-i
     assert.deepEqual(await lifecycle.finalize(), { receipt: null, error: null });
     assert.equal(starts, 0);
     assert.match(harness, /args\.has\('--cdp-network-collection-v3'\)/);
-    assert.match(harness, /newCDPSession\(page\)/);
+    assert.match(harness, /newCDPSession\(frame\)/);
     assert.match(harness, /await cdpCollectionLifecycle\.finalize\(\)/);
+});
+
+test('gameplay-frame CDP lifecycle is inert when disabled and fails closed on exact target lifecycle loss', async () => {
+    const harness = readHarness();
+    const createBaseLifecycle = loadFunction<(options: any) => any>(
+        harness,
+        'createCdpNetworkCollectionLifecycle',
+        { Error, Promise },
+    );
+    const createGameplayLifecycle = loadFunction<(options: any) => any>(
+        harness,
+        'createGameplayFrameCdpNetworkCollectionLifecycle',
+        { createCdpNetworkCollectionLifecycle: createBaseLifecycle, Error },
+    );
+    const makePage = () => {
+        const handlers = new Map<string, (...args: any[]) => void>();
+        const frame = { url: () => 'http://127.0.0.1:3002/index.html?embedded=1', isDetached: () => false };
+        const unrelated = { url: () => 'http://127.0.0.1:3002/other.html', isDetached: () => false };
+        const session = { detach: async () => {}, on: () => {}, off: () => {}, send: async () => ({}) };
+        const page = {
+            frames: () => [frame, unrelated],
+            on: (event: string, handler: (...args: any[]) => void) => handlers.set(event, handler),
+            off: (event: string) => handlers.delete(event),
+            context: () => ({ newCDPSession: async (target: any) => { assert.strictEqual(target, frame); return session; } }),
+        };
+        return { page, frame, unrelated, handlers };
+    };
+
+    const disabledFixture = makePage();
+    let disabledStarts = 0;
+    const disabled = createGameplayLifecycle({
+        enabled: false,
+        page: disabledFixture.page,
+        frame: disabledFixture.frame,
+        startCollector: () => { disabledStarts += 1; throw new Error('must stay disabled'); },
+        collectorOptions: {},
+    });
+    await disabled.awaitReady();
+    assert.deepEqual(await disabled.finalize(), { receipt: null, error: null });
+    assert.equal(disabledStarts, 0);
+    assert.equal(disabledFixture.handlers.size, 0);
+
+    for (const [event, emitted, expectedCode] of [
+        ['framenavigated', 'exact', 'observed-frame-navigated'],
+        ['framedetached', 'exact', 'observed-frame-detached'],
+        ['framenavigated', 'replacement', 'observed-frame-replaced'],
+        ['close', 'none', 'observed-frame-owner-lost'],
+    ] as const) {
+        const fixture = makePage();
+        const fatalCodes: string[] = [];
+        const lifecycle = createGameplayLifecycle({
+            enabled: true,
+            page: fixture.page,
+            frame: fixture.frame,
+            startCollector: (collectorOptions: any) => ({
+                awaitReady: async () => { await collectorOptions.createSession(); },
+                failClosed: (code: string) => fatalCodes.push(code),
+                closeAndFlush: async () => ({ schema: 'v3', status: fatalCodes.length ? 'runtime-error' : 'complete', summary: {} }),
+            }),
+            collectorOptions: {},
+            sidecarPath: 'sidecar.json',
+            writeSidecar: () => {},
+            digestSidecar: () => 'a'.repeat(64),
+        });
+        await lifecycle.awaitReady();
+        if (emitted === 'exact') fixture.handlers.get(event)?.(fixture.frame);
+        else if (emitted === 'replacement') {
+            const replacement = { url: fixture.frame.url, isDetached: () => false };
+            fixture.handlers.get(event)?.(replacement);
+        } else fixture.handlers.get(event)?.();
+        const result = await lifecycle.finalize();
+        assert.equal(fatalCodes.includes(expectedCode), true, `${event}/${emitted}`);
+        assert.match(result.error, /incomplete.*runtime-error/i);
+    }
+
+    const unrelatedFixture = makePage();
+    const unrelatedCodes: string[] = [];
+    const unrelatedLifecycle = createGameplayLifecycle({
+        enabled: true,
+        page: unrelatedFixture.page,
+        frame: unrelatedFixture.frame,
+        startCollector: (collectorOptions: any) => ({
+            awaitReady: async () => { await collectorOptions.createSession(); },
+            failClosed: (code: string) => unrelatedCodes.push(code),
+            closeAndFlush: async () => ({ schema: 'v3', status: 'complete', summary: {} }),
+        }),
+        collectorOptions: {}, sidecarPath: 'sidecar.json', writeSidecar: () => {}, digestSidecar: () => 'a'.repeat(64),
+    });
+    await unrelatedLifecycle.awaitReady();
+    unrelatedFixture.handlers.get('framenavigated')?.(unrelatedFixture.unrelated);
+    unrelatedFixture.handlers.get('framedetached')?.(unrelatedFixture.unrelated);
+    assert.deepEqual(unrelatedCodes, []);
+    assert.equal((await unrelatedLifecycle.finalize()).error, null);
+});
+
+test('runFaction starts frame collection after fresh or resume resolution and before initial evidence or play', () => {
+    const source = extractFunctionSource(readHarness(), 'runFaction');
+    const orchestration = source.indexOf('await resolveGameplayFrameAndStartCdpCollection');
+    const initial = source.indexOf('const initialAutosavePath', orchestration);
+    const tour = source.indexOf('surfaceTour(', orchestration);
+    const play = source.indexOf('await playTurns(', orchestration);
+    assert.ok(orchestration > 0 && initial > orchestration && tour > orchestration && play > orchestration);
+    assert.match(source, /resolveResumeFrame:[\s\S]*resumeThroughObservedMainMenu/);
+    assert.match(source, /resolveFreshFrame: \(\) => startCampaign/);
+    assert.match(source, /createLifecycle:[\s\S]*createGameplayFrameCdpNetworkCollectionLifecycle/);
+    assert.match(source, /newCDPSession\(resolvedFrame\)/);
+});
+
+test.each(['fresh', 'resume'] as const)('%s frame orchestration awaits collector readiness before returning to actions', async (mode) => {
+    const resolveAndStart = loadAsyncFunction<(options: any) => Promise<any>>(
+        readHarness(),
+        'resolveGameplayFrameAndStartCdpCollection',
+    );
+    const calls: string[] = [];
+    const freshFrame = { id: 'fresh-frame' };
+    const resumeFrame = { id: 'resume-frame' };
+    const result = await resolveAndStart({
+        resumeSavePath: mode === 'resume' ? 'resume.json' : null,
+        resolveFreshFrame: async () => { calls.push('fresh-resolved'); return freshFrame; },
+        resolveResumeFrame: async () => {
+            calls.push('resume-resolved');
+            return { frame: resumeFrame, receipt: { route: 'observed' } };
+        },
+        createLifecycle: (frame: any) => {
+            calls.push(`collector-created:${frame.id}`);
+            return {
+                awaitReady: async () => { calls.push('collector-ready'); },
+                finalize: async () => ({ receipt: null, error: null }),
+            };
+        },
+    });
+    calls.push('first-action');
+
+    assert.deepEqual(calls, mode === 'resume'
+        ? ['resume-resolved', 'collector-created:resume-frame', 'collector-ready', 'first-action']
+        : ['fresh-resolved', 'collector-created:fresh-frame', 'collector-ready', 'first-action']);
+    assert.strictEqual(result.frame, mode === 'resume' ? resumeFrame : freshFrame);
+    assert.deepEqual(result.resumeReceipt, mode === 'resume' ? { route: 'observed' } : null);
+    assert.equal(calls.some((call) => /advance|turn/i.test(call)), false);
+});
+
+test('completed playtest evidence keeps exact identity on later failure without inventing partial proof', () => {
+    const preserve = loadFunction<(playtest: any) => Record<string, unknown>>(
+        readHarness(),
+        'completedPlaytestFailureEvidence',
+    );
+    const completed = { finalState: { turn: 23 } };
+    assert.strictEqual((preserve(completed) as any).playtest, completed);
+    assert.deepEqual(preserve(null), {});
+    const runFaction = extractFunctionSource(readHarness(), 'runFaction');
+    assert.match(runFaction, /let playtest = null;/);
+    assert.match(runFaction, /playtest = await playTurns\(/);
+    assert.match(runFaction, /\.\.\.completedPlaytestFailureEvidence\(playtest\)/);
+    const catchSource = runFaction.slice(runFaction.indexOf('} catch (error) {'));
+    assert.doesNotMatch(catchSource, /evidenceManifest/);
 });
 
 test.each(['write', 'digest'])('CDP collection lifecycle makes a %s sidecar failure independently fatal', async (failurePoint) => {
@@ -1714,7 +1869,7 @@ test('tile AbortSignal observer is installed as an init script and attributed af
     const diagnosticsSource = extractFunctionSource(harness, 'attachPageDiagnostics');
     assert.match(diagnosticsSource, /headerValue\('x-awwv-qa-tile-request-id'\)/);
     assert.match(diagnosticsSource, /headerValue\('range'\)/);
-    const playIndex = harness.indexOf('const playtest = await playTurns(');
+    const playIndex = harness.indexOf('playtest = await playTurns(');
     const saveLoadIndex = harness.indexOf('playtest.saveLoadProof = await exerciseFinalSaveLoad(', playIndex);
     const tileReadIndex = harness.indexOf('await readTileFetchAbortSignals(frame)', playIndex);
     const tileAttributeIndex = harness.indexOf('attributeTileFetchAborts(', tileReadIndex);
@@ -1726,7 +1881,7 @@ test('ambient lifecycle observer starts before campaign and attribution runs aft
     assert.match(harness, /page\.addInitScript\(installAmbientLifecycleObserver/);
     assert.match(harness, /\['abort', 'browser-abort'\]/);
     assert.match(harness, /document\.addEventListener\(binding\.eventKind, binding\.listener, true\)/);
-    const playIndex = harness.indexOf('const playtest = await playTurns(');
+    const playIndex = harness.indexOf('playtest = await playTurns(');
     const saveLoadIndex = harness.indexOf('playtest.saveLoadProof = await exerciseFinalSaveLoad(', playIndex);
     const readSignalsIndex = harness.indexOf('await readAmbientLifecycleSignals(frame)', playIndex);
     assert.ok(playIndex >= 0 && saveLoadIndex > playIndex);

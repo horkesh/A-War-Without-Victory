@@ -1,0 +1,79 @@
+{
+  "schema": "awwv.frame-observer-repair.result.v2",
+  "starting_head": "bff97de7af9406dc2cb907674e2463fccb43052a",
+  "verdict": "corrected-focused-checks-pass",
+  "tracked_diff": {
+    "files": 4,
+    "insertions": 457,
+    "deletions": 53,
+    "paths": [
+      "tools/ui/cdp_network_collector.cjs",
+      "tools/ui/paradox_local_qa.cjs",
+      "tests/cdp_network_collector.test.ts",
+      "tests/paradox_local_qa_harness.test.ts"
+    ]
+  },
+  "checks": {
+    "focused_tests": {
+      "attempt": "final-focused-01",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "passed": 158,
+      "failed": 0,
+      "receipt": "final-focused-01/receipt.json",
+      "result": "final-focused-01/vitest.json"
+    },
+    "typecheck": {
+      "attempt": "final-typecheck-01",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "receipt": "final-typecheck-01/receipt.json"
+    },
+    "syntax": {
+      "attempt": "correction-syntax-01",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "receipt": "correction-syntax-01/receipt.json"
+    },
+    "diff_check_exit": 0
+  },
+  "independent_review": {
+    "path": "INDEPENDENT_REVIEW.json",
+    "sha256": "ee02707c3e02be5088eefd580f481e0bd657de10bc24bfdde7d66b623223c6ba",
+    "original_verdict": "CORRECTION_REQUIRED",
+    "findings_addressed": [
+      "lifecycle loss during async flush",
+      "setup session-close runtime classification",
+      "executed fresh/resume readiness ordering"
+    ]
+  },
+  "retained_failed_attempts": [
+    "red-01",
+    "green-01",
+    "typecheck-01",
+    "correction-red-01",
+    "correction-green-01",
+    "correction-typecheck-01"
+  ],
+  "sha256": {
+    "tools/ui/cdp_network_collector.cjs": "bf4e97c25229ac0feb11e7fb379ef273171fe216bf3017bae919b5d49ee494b0",
+    "tools/ui/paradox_local_qa.cjs": "52b6537caa3f147deca68fef752a39884c7da5f8ca4d23ac46fc0a3a9baf671f",
+    "tests/cdp_network_collector.test.ts": "a7de91a75710a5c640b5327a6ecc51f7ffff8c3fe1111d19ad9005c4f4b6c835",
+    "tests/paradox_local_qa_harness.test.ts": "65974985ab9c233ac1ff77020fb30ea5c68287b70f9ace1cd06297dd249e7f86",
+    "final-focused-01/receipt.json": "9ff4cf91d523a213076173de3b6f3748f0202b5ce18fce46f70052bc545aa50e",
+    "final-typecheck-01/receipt.json": "7a5321e05fffd1aac7dcf2ec89d65c3cf622039200d60933f87695676706b6b9",
+    "correction-syntax-01/receipt.json": "d5836a0c2d34c4c3244aa8382d67c9e0b5ac8a6d6e8d794c259e6e29730b3dc0"
+  },
+  "excluded_runs": [
+    "native",
+    "browser",
+    "build",
+    "package",
+    "campaign",
+    "gameplay",
+    "calibration",
+    "baseline"
+  ],
+  "commit_created": false,
+  "push_performed": false
+}

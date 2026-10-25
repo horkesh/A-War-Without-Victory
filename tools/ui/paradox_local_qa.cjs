@@ -916,12 +916,14 @@ function createCdpNetworkCollectionLifecycle(options) {
     return {
       awaitReady: async () => {},
       finalize: async () => disabled,
+      failClosed: () => {},
     };
   }
   const collector = options.startCollector(options.collectorOptions);
   let finalization = null;
   return {
     awaitReady: () => collector.awaitReady(),
+    failClosed: (code) => collector.failClosed(code),
     finalize: () => {
       if (finalization) return finalization;
       finalization = (async () => {
@@ -951,6 +953,74 @@ function createCdpNetworkCollectionLifecycle(options) {
       return finalization;
     },
   };
+}
+
+function createGameplayFrameCdpNetworkCollectionLifecycle(options) {
+  if (!options.enabled) return createCdpNetworkCollectionLifecycle(options);
+  const { page, frame } = options;
+  const selectedFrameUrl = frame.url();
+  const collectorOptions = {
+    ...options.collectorOptions,
+    expectedTargetUrl: selectedFrameUrl,
+    createSession: () => page.context().newCDPSession(frame),
+  };
+  const lifecycle = createCdpNetworkCollectionLifecycle({ ...options, collectorOptions });
+  let finalized = false;
+
+  const frameStillOwned = () => !frame.isDetached() && page.frames().includes(frame);
+  const fail = (code) => lifecycle.failClosed(code);
+  const onFrameNavigated = (candidate) => {
+    if (candidate === frame) fail('observed-frame-navigated');
+    else if (candidate.url() === selectedFrameUrl) fail('observed-frame-replaced');
+  };
+  const onFrameDetached = (candidate) => {
+    if (candidate === frame) fail('observed-frame-detached');
+  };
+  const onPageClose = () => fail('observed-frame-owner-lost');
+  page.on('framenavigated', onFrameNavigated);
+  page.on('framedetached', onFrameDetached);
+  page.on('close', onPageClose);
+
+  const removeGuards = () => {
+    page.off('framenavigated', onFrameNavigated);
+    page.off('framedetached', onFrameDetached);
+    page.off('close', onPageClose);
+  };
+  return {
+    awaitReady: async () => {
+      if (!frameStillOwned()) fail('observed-frame-owner-lost');
+      await lifecycle.awaitReady();
+      if (!frameStillOwned()) fail('observed-frame-owner-lost');
+    },
+    finalize: async () => {
+      if (!finalized && !frameStillOwned()) fail('observed-frame-owner-lost');
+      const result = await lifecycle.finalize();
+      if (!finalized) {
+        finalized = true;
+        removeGuards();
+      }
+      return result;
+    },
+  };
+}
+
+function completedPlaytestFailureEvidence(playtest) {
+  return playtest == null ? {} : { playtest };
+}
+
+async function resolveGameplayFrameAndStartCdpCollection(options) {
+  let frame;
+  let resumeReceipt = null;
+  if (options.resumeSavePath) {
+    const resumed = await options.resolveResumeFrame();
+    frame = resumed.frame;
+    resumeReceipt = resumed.receipt;
+  } else {
+    frame = await options.resolveFreshFrame();
+  }
+  const lifecycle = options.createLifecycle(frame);
+  await lifecycle.awaitReady();
+  return { frame, resumeReceipt, lifecycle };
 }
 
 function writeProgress(result) {
@@ -7352,51 +7422,60 @@ async function runFaction(faction, result) {
   let cdpCollectionLifecycle = null;
   let cdpNetworkCollection = null;
   let cdpNetworkCollectionError = null;
+  let playtest = null;
   try {
     const page = await waitForGamePage(app);
     attachDiagnostics(page);
     const cdpSidecarPath = path.join(evidenceDir, safeName(faction), 'cdp-network-collection-v3.json');
-    cdpCollectionLifecycle = createCdpNetworkCollectionLifecycle({
-      enabled: collectCdpNetworkV3,
-      startCollector: startCdpNetworkCollection,
-      collectorOptions: {
-        artifactIdentity: `${runSlug}/${safeName(faction)}/cdp-network-collection-v3.json`,
-        createSession: () => page.context().newCDPSession(page),
-      },
-      sidecarPath: cdpSidecarPath,
-      writeSidecar: (filePath, artifact) => {
-        fs.mkdirSync(path.dirname(filePath), { recursive: true });
-        writeJsonExclusive(filePath, artifact);
-      },
-      digestSidecar: fileSha256,
-    });
-    await cdpCollectionLifecycle.awaitReady();
     await installTileFetchAbortObserverBeforeStartup(page);
     await installAmbientLifecycleObserverBeforeStartup(page);
-    if (resumeSavePath) {
-      if (!fs.existsSync(resumeSavePath)) throw new Error(`Resume save not found: ${resumeSavePath}`);
-      await app.evaluate(({ dialog }, filePath) => {
-        dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [filePath] });
-      }, resumeSavePath);
-      const resumed = await resumeThroughObservedMainMenu(page, faction, resumeSavePath, {
-        failureEvidence: {
-          consoleMessages,
-          pageErrors,
-          networkFailures,
-          mainProcessOutputEvidencePath,
-          mainProcessStdout,
-          mainProcessStderr,
+    const resolvedGameplay = await resolveGameplayFrameAndStartCdpCollection({
+      resumeSavePath,
+      resolveResumeFrame: async () => {
+        if (!fs.existsSync(resumeSavePath)) throw new Error(`Resume save not found: ${resumeSavePath}`);
+        await app.evaluate(({ dialog }, filePath) => {
+          dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [filePath] });
+        }, resumeSavePath);
+        const resumed = await resumeThroughObservedMainMenu(page, faction, resumeSavePath, {
+          failureEvidence: {
+            consoleMessages,
+            pageErrors,
+            networkFailures,
+            mainProcessOutputEvidencePath,
+            mainProcessStdout,
+            mainProcessStderr,
+          },
+        });
+        canonicalAutosavePersistenceAtResumeLoad = filePersistenceFingerprint(canonicalAutosavePath);
+        return resumed;
+      },
+      resolveFreshFrame: () => startCampaign(page, faction, events),
+      createLifecycle: (resolvedFrame) => createGameplayFrameCdpNetworkCollectionLifecycle({
+        enabled: collectCdpNetworkV3,
+        page,
+        frame: resolvedFrame,
+        startCollector: startCdpNetworkCollection,
+        collectorOptions: {
+          artifactIdentity: `${runSlug}/${safeName(faction)}/cdp-network-collection-v3.json`,
+          createSession: () => page.context().newCDPSession(resolvedFrame),
         },
-      });
-      frame = resumed.frame;
-      canonicalAutosavePersistenceAtResumeLoad = filePersistenceFingerprint(canonicalAutosavePath);
+        sidecarPath: cdpSidecarPath,
+        writeSidecar: (filePath, artifact) => {
+          fs.mkdirSync(path.dirname(filePath), { recursive: true });
+          writeJsonExclusive(filePath, artifact);
+        },
+        digestSidecar: fileSha256,
+      }),
+    });
+    frame = resolvedGameplay.frame;
+    cdpCollectionLifecycle = resolvedGameplay.lifecycle;
+    const resumeReceipt = resolvedGameplay.resumeReceipt;
+    if (resumeSavePath) {
       await snapshot(page, frame, faction, events, 'resume-save-loaded', {
         resumeSavePath,
         loaded: true,
-        resumeRoute: resumed.receipt,
+        resumeRoute: resumeReceipt,
       });
-    } else {
-      frame = await startCampaign(page, faction, events);
     }
     const initialAutosavePath = resolveDecisionReceiptAutosavePath(
       canonicalAutosavePath,
@@ -7473,7 +7552,7 @@ async function runFaction(faction, result) {
         throw new Error(`Command Authority lever exercise failed: ${JSON.stringify(strategicCommandAuthority)}`);
       }
     }
-    const playtest = await playTurns(page, frame, faction, events, maxTurns);
+    playtest = await playTurns(page, frame, faction, events, maxTurns);
     if (saveLoadProof) {
       playtest.saveLoadProof = await exerciseFinalSaveLoad(page, frame, faction, events, userDataDir, maxTurns);
     }
@@ -7561,6 +7640,7 @@ async function runFaction(faction, result) {
       mainProcessStdout,
       mainProcessStderr,
       events,
+      ...completedPlaytestFailureEvidence(playtest),
     });
     writeProgress(result);
     throw error;

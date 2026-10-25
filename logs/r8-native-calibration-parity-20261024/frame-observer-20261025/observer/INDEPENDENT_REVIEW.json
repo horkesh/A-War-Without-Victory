@@ -1,0 +1,101 @@
+{
+  "schema": "awwv.frame-observer-repair.independent-review.v1",
+  "reviewed_head": "bff97de7af9406dc2cb907674e2463fccb43052a",
+  "review_scope": [
+    "tools/ui/cdp_network_collector.cjs",
+    "tools/ui/paradox_local_qa.cjs",
+    "tests/cdp_network_collector.test.ts",
+    "tests/paradox_local_qa_harness.test.ts"
+  ],
+  "approved_contract": {
+    "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/INDEPENDENT_CONTRACT_REVIEW.json",
+    "sha256": "f479be76bb54251933c875da33f5a831daaff62af661d898ef528a3a932f4641",
+    "verdict": "GO"
+  },
+  "verdict": "CORRECTION_REQUIRED",
+  "decision": "Do not accept the frame-observer repair yet. The attachment identity, declared observation window, disabled shape, preserved playtest failure evidence, and unchanged ambient admission are directionally correct, but lifecycle loss is not fail-closed throughout the required asynchronous setup/finalization boundaries.",
+  "findings": [
+    {
+      "severity": "critical",
+      "title": "Lifecycle loss is silently ignored after finalization begins but before collector-owned detach",
+      "evidence": [
+        "tools/ui/cdp_network_collector.cjs:273 makes failClosed return when closed is true.",
+        "tools/ui/cdp_network_collector.cjs:617-629 sets closed=true and removes every installed listener before waiting for setup and pending body work.",
+        "tools/ui/cdp_network_collector.cjs:639 starts collector-owned detach only after those asynchronous waits.",
+        "tools/ui/paradox_local_qa.cjs:995-1001 keeps the frame/page guards installed while awaiting lifecycle.finalize, but their failClosed calls are ineffective because the collector is already closed."
+      ],
+      "impact": "Exact-frame navigation, frame detach/replacement, owner-page loss, or an unexpected CDPSession close during the flush-before-detach interval can still yield a complete sidecar. The approved contract exempts only collector-owned detach, so this is a false acceptance window at the exact async boundary the repair must close.",
+      "required_correction": "Keep lifecycle-loss reporting effective until collector-owned detach starts, and keep the CDPSession close observer active through that boundary while stopping ordinary network ingestion separately. Add a production-helper test that holds pending body settlement open, injects each relevant loss during finalize, and proves a retained fatal result; separately prove the close caused by owned detach remains nonfatal and finalization stays idempotent."
+    },
+    {
+      "severity": "critical",
+      "title": "Unexpected CDPSession close during setup is reclassified as setup-error",
+      "evidence": [
+        "tools/ui/cdp_network_collector.cjs:280-283 marks unexpected-session-close as runtime-error.",
+        "tools/ui/cdp_network_collector.cjs:592 detects a close during setup and throws.",
+        "tools/ui/cdp_network_collector.cjs:597-601 unconditionally overwrites the status with setup-error."
+      ],
+      "impact": "The event is fatal, but the retained artifact does not satisfy the approved requirement that an unexpected session close before collector-owned detach be a runtime error.",
+      "required_correction": "Preserve runtime-error for an observed unexpected-session-close and add a production-helper test that delays Target.getTargetInfo or Network.enable, emits close, and checks the retained status and inconsistency code."
+    },
+    {
+      "severity": "suggestion",
+      "title": "Fresh/resume ordering coverage remains partly source-text based",
+      "evidence": [
+        "tests/paradox_local_qa_harness.test.ts:1334-1344 proves runFaction ordering with substring positions and a regex.",
+        "The lifecycle and collector tests execute extracted production helpers, and the existing resume helper fixture proves its route has no Advance dispatch, but no fixture executes the fresh/resume-to-readiness orchestration boundary requested by the contract."
+      ],
+      "impact": "A refactor can preserve the expected strings while changing actual awaited ordering. This does not establish the required fixture proof that both paths resolve the actual frame and dispatch no engine turn before readiness.",
+      "required_correction": "Add the smallest extracted production orchestration helper or injected-dependency seam that executes both branches and records call order through collector readiness and the first evidence/play action."
+    }
+  ],
+  "verified_evidence": {
+    "focused_tests": {
+      "receipt": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/green-03/receipt.json",
+      "receipt_sha256": "95fca678dccaa5c5bddeaa696dbfde7d228561ad058858f54eca881b89222bb1",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "passed": 154,
+      "failed": 0,
+      "test_files": 2
+    },
+    "typecheck": {
+      "receipt": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/typecheck-02/receipt.json",
+      "receipt_sha256": "9d53fb49b833d1380d3d24b56634f5fc1e3eda34d76821518afaddfb25680664",
+      "child_exit": 0,
+      "wrapper_exit": 0
+    },
+    "syntax": {
+      "receipt": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/syntax-01/receipt.json",
+      "receipt_sha256": "6015a6dd42087cf8b0ccbe1eb9d97056ce620985f01f8d0340aaf8551cf8d690",
+      "child_exit": 0,
+      "wrapper_exit": 0
+    },
+    "diff_check_exit": 0,
+    "tracked_diff": {
+      "files": 4,
+      "insertions": 324,
+      "deletions": 23
+    }
+  },
+  "actual_sha256": {
+    "tools/ui/cdp_network_collector.cjs": "a69d9bfbf1be50cd5877e7a323dbfaf9f2183e74d26f9977466bbd33d3976eee",
+    "tools/ui/paradox_local_qa.cjs": "afb42cfc6d5fe38c08f1b631dce132d07ba10e26b4f2e66ff805debaa231698c",
+    "tests/cdp_network_collector.test.ts": "ee1c7601bf76cb00887f7074708168e5c0ff0a2d07e7aa8bdd61c4375dd14fbf",
+    "tests/paradox_local_qa_harness.test.ts": "fbd3455bbb3e39dfa26e9a9a2e00775ae903e9e05b0f6288cb2150249d58b493"
+  },
+  "preserved_boundaries": {
+    "gameplay_or_calibration_source_changed": false,
+    "gameplay_data_or_baseline_changed": false,
+    "ambient_abort_admission_changed": false,
+    "disabled_mode_observed_shape_changed": false,
+    "new_nonadmitting_sidecar_target_and_window_fields_are_intentional": true,
+    "broad_gameplay_full_suite_package_evidence_reused_at_unaffected_scope": true
+  },
+  "material_residual": "The generic frame fixture establishes attachment capability and the current tests establish the ordinary pre-finalize path, but no browser/native run was authorized here and no current evidence proves fail-closed behavior during setup or the flush-before-owned-detach interval. This verdict does not admit any ambient abort and does not alter n91-n97, telemetry, calibration acceptance, or tuning-baseline policy.",
+  "review_actions": {
+    "source_modified": false,
+    "browser_build_package_campaign_run": false,
+    "commit_created": false
+  }
+}

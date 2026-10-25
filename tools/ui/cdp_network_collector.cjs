@@ -40,6 +40,10 @@ function startCdpNetworkCollection(options) {
   if (typeof options.artifactIdentity !== 'string' || options.artifactIdentity.length === 0 || options.artifactIdentity.length > 400) {
     throw new Error('CDP collection requires a bounded artifact identity');
   }
+  if (options.expectedTargetUrl != null
+    && (typeof options.expectedTargetUrl !== 'string' || options.expectedTargetUrl.length === 0 || options.expectedTargetUrl.length > 16384)) {
+    throw new Error('CDP collection requires a bounded expected target URL');
+  }
 
   const caps = {
     ...DEFAULT_CAPS,
@@ -68,6 +72,16 @@ function startCdpNetworkCollection(options) {
       network_enable_parameters: {},
       body_method: 'Network.getResponseBody',
       cross_stream_mapping: 'none',
+      target: null,
+      coverage_window: {
+        begins_after: 'selected-gameplay-frame-network-enable',
+        excludes: [
+          'outer-page-load',
+          'campaign-bootstrap',
+          'intro-or-resume-routing',
+          'pre-attachment-frame-traffic',
+        ],
+      },
     },
     caps: { ...caps, closeTimeoutMs },
     setup: { state: 'pending', primary_error: null, cleanup_error: null },
@@ -85,11 +99,13 @@ function startCdpNetworkCollection(options) {
   let sessionOwned = false;
   let setupCancelled = false;
   let closed = false;
+  let acceptingNetworkEvents = true;
   let acceptingSettlements = true;
   let snapshot = null;
   let closePromise = null;
   let activeCloseDeadline = null;
   let detachStarted = false;
+  let unexpectedSessionClosed = false;
   const installed = [];
   const requests = new Map();
   const chains = new Map();
@@ -124,10 +140,12 @@ function startCdpNetworkCollection(options) {
     return known.has(bounded.value) ? bounded.value : '[redacted]';
   }
 
-  function removeListeners() {
+  function removeListeners(predicate = () => true) {
     if (!session) return;
-    while (installed.length > 0) {
-      const { event, handler } = installed.pop();
+    for (let index = installed.length - 1; index >= 0; index -= 1) {
+      const { event, handler } = installed[index];
+      if (!predicate(event)) continue;
+      installed.splice(index, 1);
       try {
         session.off(event, handler);
       } catch (error) {
@@ -135,6 +153,8 @@ function startCdpNetworkCollection(options) {
       }
     }
   }
+
+  const removeNetworkListeners = () => removeListeners((event) => NETWORK_EVENTS.includes(event));
 
   async function detachOnce(deadline = Infinity) {
     if (!sessionOwned || !session || detachStarted) return;
@@ -164,7 +184,7 @@ function startCdpNetworkCollection(options) {
       observed,
     });
     artifact.observation_stopped_at_sequence = overflowSequence;
-    removeListeners();
+    removeNetworkListeners();
   }
 
   function exactBoundedString(value, limit, overflowCode) {
@@ -254,8 +274,21 @@ function startCdpNetworkCollection(options) {
     if (artifact.status === 'collecting' || artifact.status === 'initializing') artifact.status = 'inconsistent';
   }
 
+  function failClosed(code) {
+    if (detachStarted || snapshot || artifact.status === 'over-cap') return;
+    pushInconsistency(code);
+    artifact.status = 'runtime-error';
+    removeNetworkListeners();
+  }
+
+  function onDisconnected() {
+    if (closed || detachStarted) return;
+    unexpectedSessionClosed = true;
+    failClosed('unexpected-session-close');
+  }
+
   function pushEvent(row) {
-    if (closed || artifact.status === 'over-cap') return false;
+    if (closed || !acceptingNetworkEvents || artifact.status === 'over-cap') return false;
     if (artifact.events.length >= caps.eventRows) {
       stopForOverflow('event-rows', caps.eventRows, artifact.events.length + 1);
       return false;
@@ -511,19 +544,25 @@ function startCdpNetworkCollection(options) {
   };
 
   function guardHandler(action) {
-    if (closed || artifact.status === 'over-cap') return;
+    if (closed || !acceptingNetworkEvents || artifact.status === 'over-cap') return;
     try {
       action();
     } catch (error) {
       artifact.status = 'runtime-error';
       artifact.inconsistencies.push({ sequence: nextSequence(), code: 'listener-error', error: boundedError(error) });
-      removeListeners();
+      removeNetworkListeners();
     }
   }
 
   async function cleanupAfterSetupFailure() {
     removeListeners();
     await detachOnce(activeCloseDeadline ?? now() + closeTimeoutMs);
+  }
+
+  function recordSetupFailure(state, primaryError) {
+    artifact.setup.state = state;
+    artifact.setup.primary_error = primaryError;
+    if (artifact.status !== 'runtime-error' && artifact.status !== 'over-cap') artifact.status = 'setup-error';
   }
 
   const setupPromise = Promise.resolve()
@@ -535,30 +574,49 @@ function startCdpNetworkCollection(options) {
         await detachOnce(activeCloseDeadline ?? now() + closeTimeoutMs);
         throw new Error('CDP collection setup completed after cancellation');
       }
+      session.on('close', onDisconnected);
+      installed.push({ event: 'close', handler: onDisconnected });
+      if (options.expectedTargetUrl != null) {
+        const targetResult = await session.send('Target.getTargetInfo', {});
+        const targetInfo = targetResult?.targetInfo;
+        const targetId = exactBoundedString(targetInfo?.targetId, caps.idChars, 'target-id');
+        const targetType = exactBoundedString(targetInfo?.type, caps.valueChars, 'target-type');
+        const reportedUrl = exactBoundedString(targetInfo?.url, 16384, 'target-url');
+        const selectedUrl = projectUrl(options.expectedTargetUrl);
+        const reportedProjection = reportedUrl.ok ? projectUrl(reportedUrl.value) : { ok: false, projection: { status: reportedUrl.reason } };
+        if (!targetId.ok || !targetType.ok || !reportedUrl.ok || !selectedUrl.ok || !reportedProjection.ok
+          || targetType.value !== 'iframe' || reportedUrl.value !== options.expectedTargetUrl) {
+          throw new Error('CDP session target identity did not match selected gameplay frame');
+        }
+        artifact.session.target = {
+          target_id: targetId.value,
+          type: targetType.value,
+          selected_frame_url: selectedUrl.projection,
+          reported_url: reportedProjection.projection,
+        };
+      }
       for (const event of NETWORK_EVENTS) {
         session.on(event, handlers[event]);
         installed.push({ event, handler: handlers[event] });
       }
       await session.send('Network.enable', {});
+      if (unexpectedSessionClosed) throw new Error('CDP session closed during setup');
       if (setupCancelled) throw new Error('CDP collection setup canceled');
       artifact.setup.state = 'ready';
       if (artifact.status === 'initializing') artifact.status = 'collecting';
     })
     .catch(async (error) => {
-      artifact.setup.state = 'error';
-      artifact.setup.primary_error = boundedError(error);
-      artifact.status = 'setup-error';
+      const primaryError = boundedError(error);
+      recordSetupFailure('error', primaryError);
       await cleanupAfterSetupFailure();
-      throw new Error(`CDP collection setup failed: ${boundedError(error)}`);
+      throw new Error(`CDP collection setup failed: ${primaryError}`);
     });
 
   async function awaitReady() {
     const result = await settleWithin(setupPromise, closeTimeoutMs);
     if (result.timedOut) {
       setupCancelled = true;
-      artifact.setup.state = 'timeout';
-      artifact.setup.primary_error = 'CDP collection setup timed out';
-      artifact.status = 'setup-error';
+      recordSetupFailure('timeout', 'CDP collection setup timed out');
       throw new Error(artifact.setup.primary_error);
     }
     if (result.error) throw result.error;
@@ -567,27 +625,29 @@ function startCdpNetworkCollection(options) {
   async function closeAndFlush() {
     if (closePromise) return closePromise;
     closePromise = (async () => {
-      closed = true;
-      removeListeners();
+      acceptingNetworkEvents = false;
+      removeNetworkListeners();
       const deadline = now() + closeTimeoutMs;
       activeCloseDeadline = deadline;
       const setupResult = await settleUntil(setupPromise, deadline, now);
       if (setupResult.timedOut) {
         setupCancelled = true;
-        if (artifact.status !== 'over-cap' && artifact.status !== 'setup-error') artifact.status = 'flush-timeout';
+        if (artifact.status !== 'over-cap' && artifact.status !== 'setup-error' && artifact.status !== 'runtime-error') artifact.status = 'flush-timeout';
       }
-      removeListeners();
+      removeNetworkListeners();
       const pendingResult = await settleUntil(Promise.allSettled([...pending]), deadline, now);
       if (pendingResult.timedOut) {
         artifact.flush.pending_at_deadline = [...artifact.body_attempts].filter((row) => row.state === 'pending').length;
         for (const attempt of artifact.body_attempts) {
           if (attempt.state === 'pending') attempt.settled_sequence = nextSequence();
         }
-        if (artifact.status !== 'over-cap' && artifact.status !== 'setup-error') artifact.status = 'flush-timeout';
+        if (artifact.status !== 'over-cap' && artifact.status !== 'setup-error' && artifact.status !== 'runtime-error') artifact.status = 'flush-timeout';
       }
       acceptingSettlements = false;
       await detachOnce(deadline);
-      if (artifact.flush.detach === 'detach-timeout' && artifact.status !== 'over-cap' && artifact.status !== 'setup-error') artifact.status = 'flush-timeout';
+      closed = true;
+      removeListeners();
+      if (artifact.flush.detach === 'detach-timeout' && artifact.status !== 'over-cap' && artifact.status !== 'setup-error' && artifact.status !== 'runtime-error') artifact.status = 'flush-timeout';
       if (artifact.flush.detach === 'detach-error' && artifact.status !== 'over-cap' && artifact.status !== 'setup-error') artifact.status = 'runtime-error';
       if (artifact.status === 'collecting' || artifact.status === 'initializing') artifact.status = 'complete';
       artifact.flush.state = 'closed';
@@ -610,7 +670,7 @@ function startCdpNetworkCollection(options) {
     return closePromise;
   }
 
-  return { awaitReady, closeAndFlush };
+  return { awaitReady, closeAndFlush, failClosed };
 }
 
 function settleWithin(promise, timeoutMs) {

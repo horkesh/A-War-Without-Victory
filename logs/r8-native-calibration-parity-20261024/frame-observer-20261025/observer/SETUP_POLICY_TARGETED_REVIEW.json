@@ -1,0 +1,119 @@
+{
+  "schema": "awwv.frame-observer-repair.setup-policy-targeted-review.v1",
+  "reviewed_head": "bff97de7af9406dc2cb907674e2463fccb43052a",
+  "review_scope": "recordSetupFailure, both production callers, unresolved setup timeout fixtures, and finalized frozen result behavior only",
+  "prior_reviews_preserved": [
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/INDEPENDENT_REVIEW.json",
+      "sha256": "ee02707c3e02be5088eefd580f481e0bd657de10bc24bfdde7d66b623223c6ba",
+      "verdict": "CORRECTION_REQUIRED"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/TARGETED_CORRECTION_VERIFICATION.json",
+      "sha256": "8379941dd3160d7f5624b825919f208e74101fa0865fd7c07cd202c80f84fd09",
+      "verdict": "NO_GO",
+      "preservation": "The old NO_GO remains retained as the evidence that required this revised setup-policy approach; this review does not rewrite or delete it."
+    }
+  ],
+  "verdict": "GO",
+  "decision": "The revised setup-failure policy resolves the single persistent NO_GO cause. Both setup failure paths use one status-precedence helper; runtime-error and over-cap survive setup rejection or timeout while setup metadata remains exact. The bounded setup-policy correction is accepted without reopening the previously resolved observer review areas.",
+  "policy_review": {
+    "helper": {
+      "location": "tools/ui/cdp_network_collector.cjs:562-566",
+      "finding": "recordSetupFailure always records setup state and primary error, promotes ordinary setup failures to setup-error, and preserves an existing runtime-error or over-cap without depending on the unexpected-session-close flag."
+    },
+    "callers": [
+      {
+        "location": "tools/ui/cdp_network_collector.cjs:608-612",
+        "path": "setupPromise rejection",
+        "finding": "The bounded primary error is computed once, recorded through recordSetupFailure, and reused in the thrown setup-failed error."
+      },
+      {
+        "location": "tools/ui/cdp_network_collector.cjs:615-620",
+        "path": "awaitReady timeout",
+        "finding": "The timeout sets cancellation, records timeout metadata through recordSetupFailure, and throws the recorded primary error without overwriting prior runtime-error or over-cap."
+      }
+    ],
+    "exhaustiveness": "Repository search found exactly the helper definition and these two production call sites for setup failure recording; the ready-state assignment remains a success path rather than a failure recorder."
+  },
+  "targeted_runtime_fixtures": {
+    "location": "tests/cdp_network_collector.test.ts:235-260",
+    "production_helper_executed": true,
+    "unresolved_operation": "Target.getTargetInfo remains pending past closeTimeoutMs",
+    "cases": [
+      {
+        "trigger": "actual FakeSession close event",
+        "expected": "setup.state=timeout, timeout primary_error, status=runtime-error, unexpected-session-close inconsistency",
+        "result": "passed"
+      },
+      {
+        "trigger": "actual collector.failClosed observed-frame-detached call",
+        "expected": "setup.state=timeout, timeout primary_error, status=runtime-error, observed-frame-detached inconsistency",
+        "result": "passed"
+      }
+    ],
+    "finalization_and_freeze": "Both new cases call closeAndFlush and assert the retained finalized artifact. Production closeAndFlush deep-clones and freezeDeep-freezes the result at tools/ui/cdp_network_collector.cjs:667. Existing focused guards at tests/cdp_network_collector.test.ts:443-458 and 675-682 prove late setup settlement and post-close events cannot mutate returned snapshots."
+  },
+  "verified_evidence": {
+    "correction_report": {
+      "path": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/SETUP_POLICY_CORRECTION_REPORT.md",
+      "sha256": "2b859d9bcd8e0592bcf6408db201e905e3faad73da4207ee8811097f57739a9a"
+    },
+    "result": {
+      "path": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/SETUP_POLICY_RESULT.json",
+      "sha256": "da47f4d71174c7bfd65e98211138b87e52d0aad526c8ceb5fb48efe28f7e66ca"
+    },
+    "red": {
+      "receipt": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-red-01/receipt.json",
+      "receipt_sha256": "901f37860798edae76aa700bb0a7222ccdee3e1cf0ec0a2e5c60cbbd2d3d12d0",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "observed": "The exact new test failed because the old implementation returned setup-error where runtime-error was required."
+    },
+    "focused_tests": {
+      "receipt": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-green-01/receipt.json",
+      "receipt_sha256": "ed293a8858b2b9ff16d6c86ffed85741490b3b1efd498ad3a43fff0cda8c880c",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "passed": 159,
+      "failed": 0,
+      "test_files": 2
+    },
+    "typecheck": {
+      "receipt": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-typecheck-01/receipt.json",
+      "receipt_sha256": "8f2329d76b43dd416b3c6d0a532459256c31fdf82aff87dcf203f94accb8260a",
+      "child_exit": 0,
+      "wrapper_exit": 0
+    },
+    "syntax": {
+      "receipt": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-syntax-01/receipt.json",
+      "receipt_sha256": "5861e7594416c26502f02a79f10912f29d0d438aa81ba574e780992f349aac5b",
+      "child_exit": 0,
+      "wrapper_exit": 0
+    },
+    "diff_check_exit": 0,
+    "tracked_diff": {
+      "files": 4,
+      "insertions": 493,
+      "deletions": 59
+    }
+  },
+  "actual_sha256": {
+    "tools/ui/cdp_network_collector.cjs": "6ad87757ab33345bcae9f9d00d294e06ffd7141068bb50e3e64acb0570a2a5ca",
+    "tools/ui/paradox_local_qa.cjs": "52b6537caa3f147deca68fef752a39884c7da5f8ca4d23ac46fc0a3a9baf671f",
+    "tests/cdp_network_collector.test.ts": "f24afafe20d563958efaab2e773b22e8d48a1d15aed63fc6cf94895466a60cd6",
+    "tests/paradox_local_qa_harness.test.ts": "65974985ab9c233ac1ff77020fb30ea5c68287b70f9ace1cd06297dd249e7f86"
+  },
+  "reused_resolved_findings": [
+    "flush-before-owned-detach lifecycle loss",
+    "collector-owned close and disabled-mode behavior",
+    "fresh/resume readiness-before-action orchestration"
+  ],
+  "scope_and_residual": {
+    "native_browser_build_package_campaign_rerun": false,
+    "source_modified_by_reviewer": false,
+    "gameplay_calibration_baseline_or_ambient_admission_changed": false,
+    "broad_evidence_reused": true,
+    "environment_note": "The focused checks used the worktree's pre-existing node_modules junction to the april-1995-glamoc dependency installation; the test inputs and production files were loaded from this reviewed worktree, and the junction was not modified or removed."
+  }
+}

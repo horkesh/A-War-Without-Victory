@@ -1,0 +1,52 @@
+{
+  "schema": "awwv.native703.n94-resume-power-seam-independent-review.v1",
+  "verdict": "GO",
+  "reviewed_head": "bff97de7af9406dc2cb907674e2463fccb43052a",
+  "reviewed_contract": {
+    "path": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/RESUME-PROBE-CONTRACT.md",
+    "bytes": 5581,
+    "sha256": "3761c90c61edc7fabb08f620cc55e0e7df02bee8c43e1fe3baf26038eb14791e"
+  },
+  "reviewed_entry_script": {
+    "path": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/replay-n94-power-seam.mts",
+    "bytes": 17967,
+    "sha256": "4ce5cd903c00f9fc1a89f0cc4b03b48f511e4e574572c8f7f872b2ce93bcffd6"
+  },
+  "decision": "The exact reviewed command may run once under tools/diagnostics/run_preserved_preflight.cjs. There is no static cheap reject. Any wrapper, runtime, provenance, fidelity, target-selection, or comparator failure stops without retry and forbids interpretation of the turn-18 payload.",
+  "review_findings": {
+    "process_boundary": "The existing preserved-preflight wrapper owns exact argv, entry-script snapshot, stdout/stderr, 120-second cap, child and wrapper exits, artifact allowlist, and terminal receipt. The child launches no subprocess and calls runScenario exactly once.",
+    "freshness": "At review time, n94-resume-power-seam-wrapper-01 and n94-resume-power-seam-run-01 were both absent. The child also rejects an existing inner run directory, creates it exclusively, and writes launch.json/result.json exclusively.",
+    "source_binding": "The child requires clean HEAD bff97de7af9406dc2cb907674e2463fccb43052a and exact hashes for the scenario runner, turn phases, resolver, reason-code owner, serializers, and scenario file before execution. Clean HEAD binds the remaining tracked source.",
+    "retained_binding": "The original run_meta, weekly_report, save_w16, and save_w39 are byte/hash bound. The input save must be turn 16 with seed harness-seed and exactly zero persisted corps_front_sectors and war_front_edges_osid.",
+    "private_inputs": "The child checks the retained 32-row consumed-input inventory against the current tree, requires exactly one drift, obtains operational_settlements.geojson from Git object a913286803a095b6dc3f57a44175081d6ae4b8eb, verifies its historical hash, and materializes every input into a fresh private root without changing project data.",
+    "production_path": "runScenario receives the private scenario/baseDir, immutable n94 save_w16, resumeFromWeekIndex 16, weeksOverride 39, headless harness, manifest-only replay, and fresh outDirOverride. The scenario itself supplies smart bots and medium difficulty; the default seed is harness-seed. Collapse and S6 grade flags are removed immediately before the call.",
+    "transient_boundary": "The probe uses the retained empty turn-16 boundary exactly and does not reconstruct sectors or front edges from a later save. Production scenario repair and next-turn rebuilding remain owned by runScenario.",
+    "fidelity_gate": "Interpretation is reached only after save_w39 matches 5,105,717 bytes and SHA-256 e51224ac22a839d4c1af35a0ea828afb79b62f0ed56559c3b47dcda45578eec5, and exactly 23 indexed weekly rows 17-39 compare with no difference after deleting only attacker_brigades, defender_contributions, and power_breakdown under each battle on both sides.",
+    "target_gate": "Only after full fidelity, the script requires one exact turn-18 Tosici battle ID, militia defender kind, null defender brigade, and a present power_breakdown object, then retains the full target row including enabled battle-stack fields.",
+    "failure_contract": "Any mismatch throws, writes faithful=false and interpretation_allowed=false when possible, preserves the inner run directory, and exits nonzero for the wrapper receipt. There is no automatic retry."
+  },
+  "interpretation_limits": [
+    "A pass proves that current bff97de production code reproduces the retained n94 suffix under its exact save/input boundary and exposes the current diagnostic operands. The original a913 run did not record those debug fields, so the pass does not directly observe or prove every historical internal transient predicate from that old process.",
+    "The probe is resumed headless evidence. It is not native-runtime qualification, does not execute the actual-player branch, does not establish player/bot parity, and does not show that the empty-boundary seam alone caused the later native difference.",
+    "The diagnostic fields are observer-only and excluded from the fidelity comparison; no gameplay tuning, baseline adoption, classifier waiver, or source change follows from the run by itself."
+  ],
+  "non_blocking_hardening": [
+    "The resumed provenance comparator could additionally assert consumed_inputs.digest equals 88cf2d9ad4913bc62dde684d71465a28622c28b559713e4d0f13124ad8031c69 and that resumed paths form the exact unique original set. Current buildRunProvenance already creates a sorted Set and the child checks equal row count plus every row hash, so this is defense in depth rather than a blocker for the frozen one-shot probe.",
+    "Future reusable probes may assert attacker_brigades and defender_contributions shapes explicitly. For this frozen question, exact non-debug replay plus the required militia identity and power_breakdown are sufficient; the full target row is retained for review."
+  ],
+  "authorized_command_scope": {
+    "attempt_dir": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/n94-resume-power-seam-wrapper-01",
+    "inner_run_dir": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/n94-resume-power-seam-run-01",
+    "timeout_ms": 120000,
+    "expected_cost": "one resumed headless run, 23 advances, expected under 60 seconds",
+    "stopping_rule": "Run once. On timeout or any nonzero/fidelity failure, preserve evidence and stop; do not retry unchanged and do not launch a native campaign."
+  },
+  "review_checks": {
+    "hashes_match_frozen_values": true,
+    "tracked_worktree_clean": true,
+    "attempt_paths_absent": true,
+    "runtime_or_engine_advance_performed_by_reviewer": false,
+    "source_or_project_data_edited_by_reviewer": false,
+    "note": "An ad hoc standalone TypeScript compile was not an applicable probe gate and exited 1 on existing repository-wide type/dependency diagnostics; it did not execute the entry script or engine and does not alter this contract verdict. The contract's already-recorded --contract-check is the relevant cheap preflight."
+  }
+}

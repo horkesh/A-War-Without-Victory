@@ -1,0 +1,16 @@
+{
+  "schema": "awwv.native23.raw-diagnostic-correction.v1",
+  "preserved_original": "RAW_FAILED_NATIVE23_DIAGNOSTIC.json",
+  "correction": "The authored native23 proxy incorrectly required Kolovarice RBiH. The governing n94 benchmark requires RS. This corrects the diagnostic interpretation; it does not qualify the failed native attempt or relax campaign acceptance.",
+  "read_only_source_projection": {
+    "n94_save_w39_sha256": "e51224ac22a839d4c1af35a0ea828afb79b62f0ed56559c3b47dcda45578eec5",
+    "actual_player_turn23_sha256": "f9ce535068c8ba374068995c8f43a620cda313567f3052d22ec621034331b237",
+    "op:gorazde:kolovarice": { "n94": "RS", "actual_player_turn23": "RS", "matches": true },
+    "op:trnovo:tosici": { "n94": "RBiH", "actual_player_turn23": "RS", "matches": false }
+  },
+  "remaining_failures": [
+    "Tošići remains RS rather than the n94 RBiH result.",
+    "CDP collection finalized inconsistent; this is a failed diagnostic, not native qualification."
+  ],
+  "unchanged_campaign_requirement": "707/707/706/706 at accepted checkpoints with zero formerly correct reference losses, protected gates, and runtime/save/provenance evidence."
+}

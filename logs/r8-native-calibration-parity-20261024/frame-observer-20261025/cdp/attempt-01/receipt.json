@@ -1,0 +1,66 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T05:13:19.968Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-01",
+  "timeout_ms": 120000,
+  "original_argv": [
+    "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/installed_adapter_fixture.cjs",
+    "{evidenceDir}"
+  ],
+  "argv": [
+    "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/installed_adapter_fixture.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\native23-cdp-failure-diagnosis\\adapter-attempt-01"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "RESULT.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/installed_adapter_fixture.cjs",
+    "bytes": 9695,
+    "raw_sha256": "ade69c4df452439f63d7c94e633f8de48a48bf8f26968a2491ba84b07884c184",
+    "normalized_text_sha256": "ade69c4df452439f63d7c94e633f8de48a48bf8f26968a2491ba84b07884c184",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 9695,
+      "sha256": "ade69c4df452439f63d7c94e633f8de48a48bf8f26968a2491ba84b07884c184"
+    }
+  },
+  "end_utc": "2026-10-25T05:13:20.264Z",
+  "pid": 24124,
+  "child_exit": 1,
+  "wrapper_exit": 126,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/installed_adapter_fixture.cjs",
+    "bytes": 9695,
+    "raw_sha256": "ade69c4df452439f63d7c94e633f8de48a48bf8f26968a2491ba84b07884c184",
+    "normalized_text_sha256": "ade69c4df452439f63d7c94e633f8de48a48bf8f26968a2491ba84b07884c184",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 1448,
+    "sha256": "35141caf04bd6ad2fa6755df814fed31d77f51d88c164e9ad102ce3ef0c54ca8"
+  },
+  "retained_artifacts": [],
+  "artifact_contract": {
+    "pass": false,
+    "unexpected": [],
+    "missing_allowed": [
+      "RESULT.json"
+    ]
+  }
+}

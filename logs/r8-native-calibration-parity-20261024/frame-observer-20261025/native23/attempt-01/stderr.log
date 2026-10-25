@@ -1,0 +1,3 @@
+Error: CDP network collection v3 incomplete: inconsistent
+    at runFaction (C:\Users\User\.codex\worktrees\october-calibration-checkpoint\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:7494:42)
+    at async C:\Users\User\.codex\worktrees\october-calibration-checkpoint\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:7605:5
