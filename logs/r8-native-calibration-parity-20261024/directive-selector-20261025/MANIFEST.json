@@ -1,0 +1,30 @@
+{
+  "schema": "awwv.portable-directive-selector-proof.v1",
+  "created": "2026-10-25",
+  "purpose": "Compact byte-exact copies for the n101 prefix, ordinary Historical player39 result, and reviewed REQUEST-OP selector source candidate. These files do not qualify a new campaign, package, native run, or calibration baseline.",
+  "source_root": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6",
+  "files": [
+    { "copy": "01-headless-actual-review.json", "source": "headless-probe-prefix-v1/ACTUAL_REVIEW.json", "bytes": 11534, "sha256": "be931865f9ae74072a115158fffdc26b0186d879206b5e5c2c465f460a9a34c8" },
+    { "copy": "02-headless-postcheck.json", "source": "headless-probe-prefix-v1/attempts/postcheck-v3-01/POSTCHECK.json", "bytes": 10738, "sha256": "04556c53aadcaefcca950db786565eea619296000bc816af1a0dcdef795f49db" },
+    { "copy": "03-prefix-result.json", "source": "headless-probe-prefix-v1/attempts/prefix-01/RESULT.json", "bytes": 562, "sha256": "d26a4ed0a7019a7057a6c886ba4754655d7f81dccee6f7fb00d5ad7bab12499c" },
+    { "copy": "04-prefix-observer-binding.json", "source": "headless-probe-prefix-v1/attempts/prefix-01/OBSERVER_BINDING.json", "bytes": 1406, "sha256": "8e45a34feb32c2c3515378dbd84299335acc32531b3a687e08c9740968dbc548" },
+    { "copy": "05-prefix-receipt.json", "source": "headless-probe-prefix-v1/attempts/prefix-01/receipt.json", "bytes": 7211, "sha256": "52e78ac80c02d221e07a8344c844a4b5dc2aa289d267123436212ab62ed33ba6" },
+    { "copy": "06-preimplementation-canon-review.json", "source": "directive-selector-repair-v1/PREIMPLEMENTATION_CANON_REVIEW.json", "bytes": 10931, "sha256": "cb9d7d8815cdefae376aedfc8e03701c0d5189bf0d791ef6e14b6b62d0053596" },
+    { "copy": "07-historian-review.json", "source": "directive-selector-repair-v1/HISTORIAN_REVIEW.json", "bytes": 10043, "sha256": "1d70074af24d49b9894eb4a7ed408a3e2256df7fcea71d48d55b6822028db720" },
+    { "copy": "08-actual-code-review.json", "source": "directive-selector-repair-v1/ACTUAL_CODE_REVIEW.json", "bytes": 9120, "sha256": "10c95fe3c7a934ae65dc1bfb312ba2ca2880796164f205e758a39d24e398a011" },
+    { "copy": "09-red-command.txt", "source": "directive-selector-repair-v1/implementation-v1/red-attempt-01/command.txt", "bytes": 153, "sha256": "ae9ca6cd4296a9ed84b61160489ed06483d8d5219e166018d963fa56cf75c79a" },
+    { "copy": "10-red-exit.json", "source": "directive-selector-repair-v1/implementation-v1/red-attempt-01/exit.json", "bytes": 82, "sha256": "d4dfb197203684b4e4ee8f94e1f10faa8e44ce38eb5932579691205e5b359e8c" },
+    { "copy": "11-red-stdout.log.txt", "source": "directive-selector-repair-v1/implementation-v1/red-attempt-01/stdout.log", "bytes": 654, "sha256": "39da45a5545fdd084e76dfcaf8a6c11fc87e956fc6248388b4561febd122a609" },
+    { "copy": "12-red-stderr.log.txt", "source": "directive-selector-repair-v1/implementation-v1/red-attempt-01/stderr.log", "bytes": 925, "sha256": "1915255fc44e131c63fcb314257b4584b74848eaa33d10bc4ccf36927ae0a826" },
+    { "copy": "13-green-command.txt", "source": "directive-selector-repair-v1/implementation-v1/green-focused-attempt-01/command.txt", "bytes": 104, "sha256": "582f942efcc00944f12bf91abb7160bdf8abf952c1dc5a4f2a3ab7bdddbee3a0" },
+    { "copy": "14-green-exit.json", "source": "directive-selector-repair-v1/implementation-v1/green-focused-attempt-01/exit.json", "bytes": 54, "sha256": "3fce533134bad1ff6fea77f927d08279c9edff9fc463525e53e515e742acc101" },
+    { "copy": "15-green-stdout.log.txt", "source": "directive-selector-repair-v1/implementation-v1/green-focused-attempt-01/stdout.log", "bytes": 401, "sha256": "0496ea626346b0b0e4706fbf6f01bf43848b7318c183a071ce5532b995fa08de" },
+    { "copy": "16-green-stderr.log.txt", "source": "directive-selector-repair-v1/implementation-v1/green-focused-attempt-01/stderr.log", "bytes": 0, "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" },
+    { "copy": "17-typecheck-command.txt", "source": "directive-selector-repair-v1/implementation-v1/typecheck-attempt-01/command.txt", "bytes": 18, "sha256": "5bd319875d2e2af9cf583fbf41264ade30f65089c0c933f841be454d0bb822e5" },
+    { "copy": "18-typecheck-exit.json", "source": "directive-selector-repair-v1/implementation-v1/typecheck-attempt-01/exit.json", "bytes": 54, "sha256": "3fce533134bad1ff6fea77f927d08279c9edff9fc463525e53e515e742acc101" },
+    { "copy": "19-typecheck-stdout.log.txt", "source": "directive-selector-repair-v1/implementation-v1/typecheck-attempt-01/stdout.log", "bytes": 64, "sha256": "ad26f101dea593e022fc76afa42842e903522b5bd95e8432c6f31b3e6bf16b21" },
+    { "copy": "20-typecheck-stderr.log.txt", "source": "directive-selector-repair-v1/implementation-v1/typecheck-attempt-01/stderr.log", "bytes": 0, "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" },
+    { "copy": "21-historical-actual39-review.json", "source": "historical-default-native39-v1/ACTUAL39_REVIEW.json", "bytes": 6047, "sha256": "44b9ab9988a318598b8847ceb1a6edaf092c9056fa3a366e287fb47ec054c2b5" },
+    { "copy": "22-historical-postcheck.json", "source": "historical-default-native39-v1/postcheck-01/POSTCHECK.json", "bytes": 10858, "sha256": "2397578bf07f7b98a832993e585403b8589eb3bfc2510c43529e40fd42583edb" }
+  ]
+}

@@ -1,0 +1,315 @@
+{
+  "schema": "awwv.headless-probe-prefix-v1.postcheck.v3",
+  "pass": true,
+  "status": "PASS",
+  "interpretation_allowed": true,
+  "checks": {
+    "turn7_focused_row_exact": true,
+    "turn7_selected_brigade_sector_exact": true,
+    "turn7_bancici_selected": true,
+    "jackal8_bucket_cardinality_and_linkage_exact": true,
+    "reason_topics_covered": true
+  },
+  "reference": {
+    "run": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n101",
+    "initial": {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n101/initial_save.json",
+      "bytes": 1373722,
+      "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+    },
+    "week16": {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n101/save_w16.json",
+      "bytes": 4493991,
+      "sha256": "d78371940401a11d56b975c45f0181b72ae4fe6f78a662533c0859235576dadd"
+    }
+  },
+  "actual": {
+    "initial": {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/headless-probe-prefix-v1/attempts/prefix-01/run/initial_save.json",
+      "present": true,
+      "bytes": 1373722,
+      "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+    },
+    "week16": {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/headless-probe-prefix-v1/attempts/prefix-01/run/save_w16.json",
+      "present": true,
+      "bytes": 4493991,
+      "sha256": "d78371940401a11d56b975c45f0181b72ae4fe6f78a662533c0859235576dadd"
+    },
+    "saves": [
+      {
+        "week": 6,
+        "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/headless-probe-prefix-v1/attempts/prefix-01/run/save_w6.json",
+        "present": true,
+        "bytes": 3619260,
+        "sha256": "34a452dfef93493eda7cd4eced49bd0467af5837521abab05727f3ffa544b7a7",
+        "meta_turn": 6,
+        "phase": "war"
+      },
+      {
+        "week": 7,
+        "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/headless-probe-prefix-v1/attempts/prefix-01/run/save_w7.json",
+        "present": true,
+        "bytes": 3680345,
+        "sha256": "245b81c2ac3f66caf6de14a67b18643f2e1bed69a23c2d173ebf5fdbdae2b19c",
+        "meta_turn": 7,
+        "phase": "war"
+      },
+      {
+        "week": 8,
+        "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/headless-probe-prefix-v1/attempts/prefix-01/run/save_w8.json",
+        "present": true,
+        "bytes": 3773380,
+        "sha256": "eef0563bfd48e08217aea5bbc63e6d12c991ba7cd911161343ceea286030d7bd",
+        "meta_turn": 8,
+        "phase": "war"
+      },
+      {
+        "week": 16,
+        "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/headless-probe-prefix-v1/attempts/prefix-01/run/save_w16.json",
+        "present": true,
+        "bytes": 4493991,
+        "sha256": "d78371940401a11d56b975c45f0181b72ae4fe6f78a662533c0859235576dadd",
+        "meta_turn": 16,
+        "phase": "war"
+      }
+    ]
+  },
+  "turn7": {
+    "selected_brigade_id": "hv_4th_guards_tg",
+    "selected_brigade_location": "op:neum:gornje_hrasno_2",
+    "derived_sector_id": "sector:hvo_southeast_herzegovina:0",
+    "matched_candidate_count": 1,
+    "matched_candidate": {
+      "actual_fitness": 0.8464399649999997,
+      "brigade_id": "hv_4th_guards_tg",
+      "combat_ready": true,
+      "disrupted_and_effective": true,
+      "elite_available": true,
+      "historical_queue_free": true,
+      "original_ordinal": 11,
+      "selected": true,
+      "sorted_rank": 0
+    },
+    "probe_objective_ids": [
+      "op:ljubinje:bancici"
+    ],
+    "enemy_candidate_ids": [
+      "op:capljina:tasovcici_2",
+      "op:ljubinje:bancici",
+      "op:stolac:pjesivac_kula_2",
+      "op:stolac:rotimlja_2",
+      "op:stolac:stolac_2",
+      "op:trebinje:velicani"
+    ],
+    "direct_candidate_ids": [
+      "op:ljubinje:bancici",
+      "op:trebinje:velicani"
+    ],
+    "survivor_ids": [
+      "op:ljubinje:bancici",
+      "op:trebinje:velicani"
+    ],
+    "ranked_objective_ids": [
+      "op:ljubinje:bancici"
+    ],
+    "brigade_candidates": [
+      {
+        "actual_fitness": 0.7393385999999998,
+        "brigade_id": "hrhb_1st_brigade_mostar",
+        "combat_ready": true,
+        "disrupted_and_effective": true,
+        "elite_available": true,
+        "historical_queue_free": true,
+        "original_ordinal": 0,
+        "selected": false,
+        "sorted_rank": 2
+      },
+      {
+        "actual_fitness": 0.3817125,
+        "brigade_id": "hrhb_1st_herzegovina_brigade_knez_domagoj",
+        "combat_ready": true,
+        "disrupted_and_effective": true,
+        "elite_available": true,
+        "historical_queue_free": true,
+        "original_ordinal": 1,
+        "selected": false,
+        "sorted_rank": 8
+      },
+      {
+        "actual_fitness": 0.7330199999999998,
+        "brigade_id": "hrhb_2nd_brigade_mostar",
+        "combat_ready": true,
+        "disrupted_and_effective": true,
+        "elite_available": true,
+        "historical_queue_free": true,
+        "original_ordinal": 2,
+        "selected": false,
+        "sorted_rank": 3
+      },
+      {
+        "actual_fitness": 0.40286849999999996,
+        "brigade_id": "hrhb_6th_brigade_ranko_boban",
+        "combat_ready": true,
+        "disrupted_and_effective": true,
+        "elite_available": true,
+        "historical_queue_free": true,
+        "original_ordinal": 3,
+        "selected": false,
+        "sorted_rank": 5
+      },
+      {
+        "actual_fitness": 0.20384999999999992,
+        "brigade_id": "hrhb_herceg_stjepan_brigade",
+        "combat_ready": true,
+        "disrupted_and_effective": true,
+        "elite_available": true,
+        "historical_queue_free": true,
+        "original_ordinal": 4,
+        "selected": false,
+        "sorted_rank": 11
+      },
+      {
+        "actual_fitness": 0.3560505,
+        "brigade_id": "hrhb_itluk_brigade",
+        "combat_ready": true,
+        "disrupted_and_effective": true,
+        "elite_available": true,
+        "historical_queue_free": true,
+        "original_ordinal": 5,
+        "selected": false,
+        "sorted_rank": 9
+      },
+      {
+        "actual_fitness": 0.38418974999999994,
+        "brigade_id": "hrhb_ljubuki_brigade",
+        "combat_ready": true,
+        "disrupted_and_effective": true,
+        "elite_available": true,
+        "historical_queue_free": true,
+        "original_ordinal": 6,
+        "selected": false,
+        "sorted_rank": 7
+      },
+      {
+        "actual_fitness": 0.38937499999999986,
+        "brigade_id": "hrhb_mario_hrka_ikota_brigade",
+        "combat_ready": true,
+        "disrupted_and_effective": true,
+        "elite_available": true,
+        "historical_queue_free": true,
+        "original_ordinal": 7,
+        "selected": false,
+        "sorted_rank": 6
+      },
+      {
+        "actual_fitness": 0.6846822,
+        "brigade_id": "hrhb_mostar_brigade",
+        "combat_ready": true,
+        "disrupted_and_effective": true,
+        "elite_available": true,
+        "historical_queue_free": true,
+        "original_ordinal": 8,
+        "selected": false,
+        "sorted_rank": 4
+      },
+      {
+        "actual_fitness": 0.21973949999999998,
+        "brigade_id": "hrhb_stolac_units",
+        "combat_ready": true,
+        "disrupted_and_effective": true,
+        "elite_available": true,
+        "historical_queue_free": true,
+        "original_ordinal": 9,
+        "selected": false,
+        "sorted_rank": 10
+      },
+      {
+        "actual_fitness": 0.8433127499999999,
+        "brigade_id": "hv_113th_brigade_tg",
+        "combat_ready": true,
+        "disrupted_and_effective": true,
+        "elite_available": true,
+        "historical_queue_free": true,
+        "original_ordinal": 10,
+        "selected": false,
+        "sorted_rank": 1
+      },
+      {
+        "actual_fitness": 0.8464399649999997,
+        "brigade_id": "hv_4th_guards_tg",
+        "combat_ready": true,
+        "disrupted_and_effective": true,
+        "elite_available": true,
+        "historical_queue_free": true,
+        "original_ordinal": 11,
+        "selected": true,
+        "sorted_rank": 0
+      },
+      {
+        "actual_fitness": 0.20119999999999993,
+        "brigade_id": "hvo_posusje_brigade",
+        "combat_ready": true,
+        "disrupted_and_effective": true,
+        "elite_available": true,
+        "historical_queue_free": true,
+        "original_ordinal": 12,
+        "selected": false,
+        "sorted_rank": 12
+      }
+    ]
+  },
+  "jackal_turn8": {
+    "invocation": {
+      "invocation_key": "queued_injection:8:hvo_southeast_herzegovina:Operation Jackal",
+      "caller": "queued_injection",
+      "linkage": "contiguous_unsequenced",
+      "turn": 8,
+      "corps_id": "hvo_southeast_herzegovina",
+      "operation_name": "Operation Jackal"
+    },
+    "bucket_counts": {
+      "caller_start": 1,
+      "caller_terminal": 1
+    },
+    "start": {
+      "caller": "queued_injection",
+      "corps_id": "hvo_southeast_herzegovina",
+      "invocation_key": "queued_injection:8:hvo_southeast_herzegovina:Operation Jackal",
+      "kind": "caller_start",
+      "linkage": "contiguous_unsequenced",
+      "operation_name": "Operation Jackal",
+      "schema_version": 1,
+      "turn": 8
+    },
+    "terminal": {
+      "actual_exit": "admitted",
+      "admitted": true,
+      "build_reached": true,
+      "build_returned": true,
+      "caller": "queued_injection",
+      "corps_id": "hvo_southeast_herzegovina",
+      "invocation_key": "queued_injection:8:hvo_southeast_herzegovina:Operation Jackal",
+      "kind": "caller_terminal",
+      "linkage": "contiguous_unsequenced",
+      "operation_name": "Operation Jackal",
+      "ordinary_return": true,
+      "schema_version": 1,
+      "stored_operation": {
+        "name": "Operation Jackal",
+        "phase": "planning",
+        "started_turn": 8
+      },
+      "turn": 8
+    },
+    "actual_exit": "admitted",
+    "build_reached": true,
+    "ordinary_return": true
+  },
+  "coverage": {
+    "commander_records": 354,
+    "preplanned_records": 420
+  },
+  "scope_limit": "Diagnostic prefix only; no score, calibration, baseline, package, native, or release verdict.",
+  "retry": false
+}

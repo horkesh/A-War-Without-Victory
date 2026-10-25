@@ -1,5 +1,15 @@
 # Code Canon (AWWV)
 
+## REQUEST-OP directive selector (2026-10-25 source candidate)
+
+The reviewed REQUEST-OP candidate based on source head `a3063366a` shares one pure selector between objection preview and injection. It requires 3–12 available, uncommitted, active corps brigades; keeps the existing objective/enclave eligibility predicate; requires physical connectivity to an own-controlled target-adjacent staging OSID through ordinary friendly/allied territory; prefers the first strict-sorted staging candidate that has enough legal formations; ranks the selected force by the existing sector-attack equipment priority with strict ID ties; and stores a canonical ID roster. A forced request cannot bypass a hard selector or slot rejection. The existing authored-operation two-formation floor, bot selectors, movement, supply, combat, control, save shape, command-authority cost and enclave policy are unchanged.
+
+Focused tests pass 34/34, `npm run typecheck` exits 0, and independent canon, historian and code review are GO for this exact selector correction. It has no delivery, capture, gameplay-188, full-suite, package or native qualification yet and supplies no player-parity or baseline-adoption claim. [Portable proof](../../logs/r8-native-calibration-parity-20261024/directive-selector-20261025/MANIFEST.v2.json)
+
+## Current parity qualification boundary (2026-10-25)
+
+The fractional-fatigue source at `a3063366a` is qualified by n101 (`runs/apr1992_definitive_188w__6deb5845c150c196__w188_n101`) at **707/707/706/706**, with zero n91/n92 formerly-correct losses and all 16 anchors, plus the complete suite at 15,094 passed, 0 failed, 33 skipped across 1,452 passed and 4 skipped files. Package 03 is separately qualified for all three faction cold-load/next-state/report equality and native turn-0 Save/load. These proofs predate the REQUEST-OP selector patch and do not qualify it. CI Event System is green; Baseline Pins still reports two hash failures and remains an advisory, non-blocking conditional-admission result. No pin adoption or all-green claim follows.
+
 ## Fractional formation fatigue persistence (2026-10-25 candidate)
 
 Formation `ops.fatigue` is persisted finite nonnegative gameplay state and supports the existing half-point writer. The v9 migration and formation validator preserve that domain rather than erasing nonintegers. Invalid/nonfinite/negative and missing legacy defaults stay unchanged; militia-pool fatigue is outside this change. No writer, coefficient, cap, recovery, schema version or operation changes. Tests: `tests/formation_fatigue_persistence.test.ts`, `tests/formations_validate.test.ts`. Canonical/runtime source→load→advance state/report fidelity is required; focused evidence is not calibration qualification.

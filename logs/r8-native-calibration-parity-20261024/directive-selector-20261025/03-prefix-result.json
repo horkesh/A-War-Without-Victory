@@ -1,0 +1,17 @@
+{
+  "schema": "awwv.headless-probe-prefix-v1.result.v1",
+  "pass": true,
+  "head": "a3063366ae094468fbb2ede143f9ced3a1ed2f68",
+  "run_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/headless-probe-prefix-v1/attempts/prefix-01/run",
+  "weeks": 16,
+  "emitted_save_weeks": [
+    6,
+    7,
+    8,
+    16
+  ],
+  "final_state_hash": "1eb99a8e83eaa5d1",
+  "observer_binding": "OBSERVER_BINDING.json",
+  "actual_simulation_run": true,
+  "retry": false
+}

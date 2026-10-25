@@ -1,5 +1,11 @@
 # Repo Map (AWWV)
 
+## Current R8 selector and proof locations (2026-10-25)
+
+- Presidential REQUEST-OP planning and consumption: `planDirectiveOperation` / `injectOpDirectives` in `src/sim/turn_phases/war_phases.ts`; objection preview calls the same planner from `src/desktop/desktop_sim.ts`. Focused contracts live in `tests/op_directive_objection.test.ts` and `tests/op_directive_injection.test.ts`.
+- The selector source candidate keeps the existing 3–12 regular-operation bounds, equipment priority, friendly/allied physical route rule and enclave/objective eligibility. It is focused/typecheck/review qualified only; campaign, full-suite, package and native qualification remain open.
+- Compact retained proof is indexed by [directive-selector-20261025/MANIFEST.v2.json](../../logs/r8-native-calibration-parity-20261024/directive-selector-20261025/MANIFEST.v2.json). The original evidence stays under `tmp/player-bot-capability-parity-20261024/` and was not rewritten.
+
 ## Repository Map (High-Level)
 This doc is a minimal, code-facing map of the repo. It is not a design doc.
 

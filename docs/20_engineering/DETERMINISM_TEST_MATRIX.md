@@ -1,5 +1,13 @@
 # Determinism Test Matrix (AWWV)
 
+## Current player-parity evidence boundary (2026-10-25)
+
+- n101 (`runs/apr1992_definitive_188w__6deb5845c150c196__w188_n101`) qualifies the fractional-fatigue source at `a3063366a`: 707/707/706/706, zero n91/n92 formerly-correct losses, all 16 anchors, and no unrelated comparator loss. The full suite records 15,094 passed, 0 failed and 33 skipped tests across 1,452 passed and 4 skipped files.
+- Package 03 qualifies all three factions for exact cold-load next-state/report equality and native turn-0 Save/load. It does not supply a native week-104/156/188 result.
+- The ordinary Historical `always_deny` RBiH run `historical-default-p03-rbih-t39-01` passes every runtime gate but scores 702/712 versus 707 and loses Bukvik Gornji (2), Donje Žešće, Baljvine (2), Obadi and Tosići. The counterfactual Package 03 `always_allow` run scores 704; the older 705 result remains a retained failure. No ordinary player campaign meets the accepted calibration criterion.
+- The new headless prefix16 probe passes and matches n101 exactly at initial state and week 16. At turn 8, headless admits Operation Jackal while native records a rejected noncapturing overlap; this is an admission-outcome comparison, not an admitted-formation-count proof. At the leading week-6 HVO brigades the compared state is exact except fatigue: bot 2.5/1.5 versus native 3/3. Retained diagnosis finds no fractional-to-integer conversion: differing sector-assignment state feeds the normal recovery writer. The first assignment writer is unknown; the smallest next check is a bounded T0→T2 two-formation diagnostic.
+- The reviewed REQUEST-OP selector candidate passes 34/34 focused tests and TypeScript with independent GO. No full suite, 188-week, delivery/capture, Package 03 rebuild or native qualification exists for that source patch. CI Event System is green; Baseline Pins has two advisory non-blocking hash failures under conditional admission. [Portable proof](../../logs/r8-native-calibration-parity-20261024/directive-selector-20261025/MANIFEST.v2.json)
+
 ## Fractional formation fatigue (2026-10-25 candidate)
 
 Focused8/8 with60 assertions covers the real fractional writer, all3 factions, malformed/nonfinite/negative/default and integer compatibility, validator parity, canonical/runtime round trips and pre-load source versus loaded next-advance full runtime state/report equality. The authentic279-formation raw snapshot preserves25 fractional paths exactly. The new188 comparator may permit only prior0→restored finite fractional `/military/formations/*/ops/fatigue` values; unrelated or integer changes, added/removed paths and all map/score losses remain fatal. Old full-byte proofs remain scoped to their actual heads.
@@ -8,7 +16,7 @@ Focused8/8 with60 assertions covers the real fractional writer, all3 factions, m
 
 The optional `diagnosticTurnBoundaryObserver` receives direct structured clones after checkpoint capture. Focused3/3 proves zero observer work when absent, exact ordinary artifact bytes, correct boundary/count, detached state/report mutation, own undefined preservation, and clone/callback failure propagation. No default gameplay/order/artifact change follows. Canonical replay fidelity failed before native comparison; raw snapshot normalization evidence must not be promoted to uninterrupted turn17 causality without matching context.
 
-## Desktop terrain prerequisites (2026-10-25)
+## Earlier desktop terrain prerequisites (2026-10-25 retained scope)
 
 The desktop terrain and cold-load proof remains qualified at12a, composed with no-player n98/suite at2ca. Collector55/55 and terminal77a CI precede an independently qualified native opening25/25. Fresh normal-player39 passes runtime/Save-load but fails705/712, losing Donje Zesce/Tosici against the707 criterion; it is not accepted calibration. [selected proof](../../logs/r8-native-calibration-parity-20261024/native-player39-20261025/MANIFEST.json)
 

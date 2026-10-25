@@ -1,0 +1,198 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T19:29:40.652Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/headless-probe-prefix-v1/attempts/prefix-01",
+  "timeout_ms": 180000,
+  "original_argv": [
+    "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "node_modules/tsx/dist/cli.mjs",
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/headless-probe-prefix-v1/entry.mts",
+    "--config",
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/headless-probe-prefix-v1/CONFIG.json",
+    "--evidence-dir",
+    "{evidenceDir}"
+  ],
+  "argv": [
+    "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "node_modules/tsx/dist/cli.mjs",
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/headless-probe-prefix-v1/entry.mts",
+    "--config",
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/headless-probe-prefix-v1/CONFIG.json",
+    "--evidence-dir",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-package-v6\\headless-probe-prefix-v1\\attempts\\prefix-01"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "OBSERVER_BINDING.json",
+    "RESULT.json",
+    "run/activity_summary.json",
+    "run/brigade_temporal_log.jsonl",
+    "run/control_delta.json",
+    "run/destroyed_brigades.json",
+    "run/displacement_event_log.jsonl",
+    "run/end_report.md",
+    "run/final_save.json",
+    "run/formation_delta.json",
+    "run/initial_save.json",
+    "run/operation_aars.json",
+    "run/replay_save_manifest.json",
+    "run/run_meta.json",
+    "run/run_summary.json",
+    "run/save_w6.json",
+    "run/save_w7.json",
+    "run/save_w8.json",
+    "run/save_w16.json",
+    "run/watched_operations.json",
+    "run/weekly_report.jsonl"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/headless-probe-prefix-v1/entry.mts",
+    "bytes": 4959,
+    "raw_sha256": "fae52084967560f6ebeba91d6636913783f5ee5816fe54b83992833e6142f3d8",
+    "normalized_text_sha256": "fae52084967560f6ebeba91d6636913783f5ee5816fe54b83992833e6142f3d8",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 4959,
+      "sha256": "fae52084967560f6ebeba91d6636913783f5ee5816fe54b83992833e6142f3d8"
+    }
+  },
+  "end_utc": "2026-10-25T19:30:09.474Z",
+  "pid": 23408,
+  "child_exit": 0,
+  "wrapper_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/headless-probe-prefix-v1/entry.mts",
+    "bytes": 4959,
+    "raw_sha256": "fae52084967560f6ebeba91d6636913783f5ee5816fe54b83992833e6142f3d8",
+    "normalized_text_sha256": "fae52084967560f6ebeba91d6636913783f5ee5816fe54b83992833e6142f3d8",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 1154422,
+    "sha256": "e14d41b1c27f8fafaea674ef12651902c21fe84e20319e19a892cfef6c963d09"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "OBSERVER_BINDING.json",
+      "bytes": 1406,
+      "sha256": "8e45a34feb32c2c3515378dbd84299335acc32531b3a687e08c9740968dbc548"
+    },
+    {
+      "path": "RESULT.json",
+      "bytes": 562,
+      "sha256": "d26a4ed0a7019a7057a6c886ba4754655d7f81dccee6f7fb00d5ad7bab12499c"
+    },
+    {
+      "path": "run/activity_summary.json",
+      "bytes": 441,
+      "sha256": "c083dda5fe28468dcb8041e2d8b8c2007d68fa687e79bc95d9697a2cf47dd091"
+    },
+    {
+      "path": "run/brigade_temporal_log.jsonl",
+      "bytes": 1789514,
+      "sha256": "4376e6a29ee275cc6834c37bf4f86853bc830f50efe147f0dbbfc94c3e7f6de4"
+    },
+    {
+      "path": "run/control_delta.json",
+      "bytes": 17638,
+      "sha256": "7549f86b4afc7c7a8b5cc5d41975b4f76397a677aaee897d2c747c8a463f0632"
+    },
+    {
+      "path": "run/destroyed_brigades.json",
+      "bytes": 336,
+      "sha256": "d3cb259989ba8373247cf2e3acf1aa0321d4c076e63cef74457ce050eaf5923b"
+    },
+    {
+      "path": "run/displacement_event_log.jsonl",
+      "bytes": 1873784,
+      "sha256": "21d046997b0388e932df08a9cf488347d0050bd6a43f61998c50ede9a2b8c2ca"
+    },
+    {
+      "path": "run/end_report.md",
+      "bytes": 35776,
+      "sha256": "c338c308f4edfe44fc1aaf2e68afd9ea73476c61b9532a5a016533a26e7d6191"
+    },
+    {
+      "path": "run/final_save.json",
+      "bytes": 4812128,
+      "sha256": "1eb99a8e83eaa5d1358b76b4dc59fa7ccde0d7a112f14d5ecaea4bc6842f0a5a"
+    },
+    {
+      "path": "run/formation_delta.json",
+      "bytes": 2815,
+      "sha256": "e164b939d7f3334085a847c67d171647cfe9b303a270d526c9c8ffa8513547e1"
+    },
+    {
+      "path": "run/initial_save.json",
+      "bytes": 1373722,
+      "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+    },
+    {
+      "path": "run/operation_aars.json",
+      "bytes": 146738,
+      "sha256": "de64cc0cf616eaeb5468f23df2571e3de33bce97170b53f7cc5cc3c91a9490e9"
+    },
+    {
+      "path": "run/replay_save_manifest.json",
+      "bytes": 3199,
+      "sha256": "47a189f53b622c4910ad524c139cdabfa074b923bd6e0945bc2d47004c3aafba"
+    },
+    {
+      "path": "run/run_meta.json",
+      "bytes": 10251,
+      "sha256": "9dce6a69709a187ae4ae9a62af1cb41cfbb2d003cfc191e0a465de10fc49b2a3"
+    },
+    {
+      "path": "run/run_summary.json",
+      "bytes": 99246,
+      "sha256": "22d897929e9b156ce73be90d1f80f1d0e7ea809700f22291bf66da2b440d446a"
+    },
+    {
+      "path": "run/save_w6.json",
+      "bytes": 3619260,
+      "sha256": "34a452dfef93493eda7cd4eced49bd0467af5837521abab05727f3ffa544b7a7"
+    },
+    {
+      "path": "run/save_w7.json",
+      "bytes": 3680345,
+      "sha256": "245b81c2ac3f66caf6de14a67b18643f2e1bed69a23c2d173ebf5fdbdae2b19c"
+    },
+    {
+      "path": "run/save_w8.json",
+      "bytes": 3773380,
+      "sha256": "eef0563bfd48e08217aea5bbc63e6d12c991ba7cd911161343ceea286030d7bd"
+    },
+    {
+      "path": "run/save_w16.json",
+      "bytes": 4493991,
+      "sha256": "d78371940401a11d56b975c45f0181b72ae4fe6f78a662533c0859235576dadd"
+    },
+    {
+      "path": "run/watched_operations.json",
+      "bytes": 696,
+      "sha256": "4f84ccf9f7c5b36cb9839ffe6993bdd83f744ff62d8f24b59dd7b0c6959a59c9"
+    },
+    {
+      "path": "run/weekly_report.jsonl",
+      "bytes": 306306,
+      "sha256": "91abdaa52b9b1e6f4e5cdeeb111836e90eebb02d5c6ebc6cd0dfb754a95ef91e"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

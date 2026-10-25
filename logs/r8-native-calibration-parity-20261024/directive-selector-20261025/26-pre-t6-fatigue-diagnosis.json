@@ -1,0 +1,92 @@
+{
+  "schema": "awwv.pre-t6-fatigue-retained-diagnosis.v1",
+  "date": "2026-10-25",
+  "source_head": "a3063366ae094468fbb2ede143f9ced3a1ed2f68",
+  "scope": "Retained evidence only; exactly hv_113th_brigade_tg and hv_4th_guards_tg through turn 6. No simulation, native run, campaign, test, build, package, or gameplay/source edit.",
+  "verdict": "NO_FRACTION_TO_INTEGER_CONVERSION_OBSERVED; EARLIEST FATIGUE WRITER INPUT IS NOT FULLY OBSERVED",
+  "answer": {
+    "integer_conversion": "Not supported. Native retained states preserve half-point fatigue at T1, T2, T4, and T5, and the qualified package-03 runtime/canonical round-trip evidence already establishes fractional preservation. The public desktop handoff uses serializeRuntimeState -> currentGameStateJson -> deserializeState, while headless assigns runResult.nextState directly; retained cold qualification says those serialization paths preserve fractions after a306.",
+    "different_legal_action": "Both paths execute the same relevant legal combat actions: hv_4th_guards_tg plans at T3 and attacks Bancici at T4; hv_113th_brigade_tg plans at T5 and attacks Tasovcici at T6. Combat choice therefore does not explain the pre-T6 fatigue difference.",
+    "nearest_supported_cause": "The only identified non-combat writer capable of the observed 0.5 increments is applyFatigueRecovery. It reads buildFrontlineAssignedFormationSet(state), whose sole input is corps_front_sectors[*].assigned_brigade_ids. Native end-turn archives place both formations in a sector at every T1-T6 boundary. Headless T6 places neither in any sector. This proves differing sector-assignment state by T6 and identifies the writer/consumer seam, but the retained headless artifacts do not expose that membership at the earlier update-formation-fatigue phase, so the exact first assignment mutation cannot be named honestly.",
+    "earliest_fatigue_divergence": {
+      "directly_observed": "T6: headless fatigue is 2.5 / 1.5 and native fatigue is 3 / 3 for 113th / 4th Guards; all other fields inside those two formation objects are exact per the qualified review.",
+      "strong_inference_not_direct_snapshot": "At commander turn 3 (which evaluates the post-T2 state), headless fitness values equal the zero-fatigue reconstruction using the corresponding native T2 personnel/cohesion/equipment/supply operands: 0.8826825 for 113th and 0.883575 for 4th Guards, while native T2 stores 0.5 for both. The retained headless run has no T1 or T2 state save and its brigade_temporal_log omits these TG IDs, so this cannot be promoted to a byte-exact T2 state claim.",
+      "first_known_upstream_difference": "At T1 the Historical player path has RS control of Bukvik Gornji and Obadi because always_deny suppresses two RBiH paramilitary captures; n101 has RBiH control. That input-timing delta is exact, but retained evidence does not connect those remote controller changes to the southeast-Herzegovina sector membership mutation."
+    }
+  },
+  "two_formation_trace": {
+    "native_exact_end_turn": [
+      {"turn": 1, "hv_113th_brigade_tg": {"fatigue": 0.5, "sector": "sector:hvo_southeast_herzegovina:0"}, "hv_4th_guards_tg": {"fatigue": 0.5, "sector": "sector:hvo_southeast_herzegovina:0"}},
+      {"turn": 2, "hv_113th_brigade_tg": {"fatigue": 0.5, "sector": "sector:hvo_southeast_herzegovina:0"}, "hv_4th_guards_tg": {"fatigue": 0.5, "sector": "sector:hvo_southeast_herzegovina:0"}},
+      {"turn": 3, "hv_113th_brigade_tg": {"fatigue": 1, "sector": "sector:hvo_southeast_herzegovina:0"}, "hv_4th_guards_tg": {"fatigue": 1, "sector": "sector:hvo_southeast_herzegovina:0", "operation": "probe_hvo_southeast_herzegovina_t3 planning"}},
+      {"turn": 4, "hv_113th_brigade_tg": {"fatigue": 0.5, "sector": "sector:hvo_southeast_herzegovina:1"}, "hv_4th_guards_tg": {"fatigue": 3, "sector": "sector:hvo_southeast_herzegovina:0", "operation": "probe_hvo_southeast_herzegovina_t3 attack Bancici"}},
+      {"turn": 5, "hv_113th_brigade_tg": {"fatigue": 1, "sector": "sector:hvo_southeast_herzegovina:1", "operation": "probe_hvo_southeast_herzegovina_t5 planning"}, "hv_4th_guards_tg": {"fatigue": 3.5, "sector": "sector:hvo_southeast_herzegovina:0"}},
+      {"turn": 6, "hv_113th_brigade_tg": {"fatigue": 3, "sector": "sector:hvo_southeast_herzegovina:1", "operation": "probe_hvo_southeast_herzegovina_t5 attack Tasovcici"}, "hv_4th_guards_tg": {"fatigue": 3, "sector": "sector:hvo_southeast_herzegovina:0"}}
+    ],
+    "headless_retained": [
+      {"evaluation_turn": 3, "state_boundary": "post-T2", "hv_113th_brigade_tg": {"fitness": 0.8826825, "fatigue_inference": 0}, "hv_4th_guards_tg": {"fitness": 0.883575, "fatigue_inference": 0}, "qualification": "inference from fitness, not a retained state snapshot"},
+      {"evaluation_turn": 5, "state_boundary": "post-T4", "hv_113th_brigade_tg": {"fitness": 0.87420375, "fatigue_inference": 0}, "hv_4th_guards_tg": {"fitness": 0.8464034250000001, "fatigue_inference": 2.5}, "qualification": "inference from fitness, not a retained state snapshot"},
+      {"turn": 6, "state_boundary": "exact save_w6", "hv_113th_brigade_tg": {"fatigue": 2.5, "sector_membership": []}, "hv_4th_guards_tg": {"fatigue": 1.5, "sector_membership": []}}
+    ],
+    "same_relevant_actions": [
+      "T3 hv_4th_guards_tg selected for probe_hvo_southeast_herzegovina_t3 against Bancici in both paths",
+      "T4 hv_4th_guards_tg attacks Bancici in both paths",
+      "T5 hv_113th_brigade_tg selected for probe_hvo_southeast_herzegovina_t5 against Tasovcici in both paths",
+      "T6 hv_113th_brigade_tg attacks Tasovcici in both paths"
+    ]
+  },
+  "writer_consumer_boundary": {
+    "fatigue_writer": "src/state/formation_fatigue.ts applyFatigueRecovery: recovery -1 on even turns unless engaged, then +0.5 when buildFrontlineAssignedFormationSet contains the formation",
+    "membership_consumer": "src/sim/combat/front_assignment.ts buildFrontlineAssignedFormationSet: unions corps_front_sectors[*].assigned_brigade_ids",
+    "combat_writer": "recordFormationFatigue / attack resource aftermath adds combat fatigue; retained weekly/native operation evidence shows the same two relevant attacks",
+    "desktop_runtime_boundary": "src/desktop/electron-main.cjs readCanonicalCurrentState/setCurrentStateSnapshots/advance-turn: deserializeState(currentGameStateJson), advanceTurn, then serializeRuntimeState and serializeState",
+    "headless_boundary": "src/scenario/scenario_runner.ts assigns runResult.nextState directly before its next loop",
+    "classification": "The retained evidence points to a sector-assignment-history difference consumed by the normal fatigue writer, not rounding. It does not identify which sector builder/assignment branch first changed membership."
+  },
+  "missing_observability": [
+    "No headless T1-T5 saves for these two TGs; only T6 is retained.",
+    "brigade_temporal_log.jsonl excludes both TG IDs.",
+    "No retained pre/post update-formation-fatigue receipt records fatigue, engaged status, isFrontAssigned, recovery eligibility, and sector membership for these IDs.",
+    "End-turn corps_front_sectors is rebuilt later in the turn and cannot prove membership at the earlier fatigue phase.",
+    "No retained sector-assignment writer receipt identifies the exact branch that adds/removes either TG."
+  ],
+  "smallest_next_check": {
+    "question": "At which first T1-T2 named phase does either TG's corps_front_sectors membership differ, and what exact fatigue operands reach applyFatigueRecovery?",
+    "scope": "One bounded T0-to-T2 headless replay from the qualified n101 initial state plus read-only comparison to retained native turn-001/002; only the two TG IDs.",
+    "required_observations": [
+      "pre/post update-formation-fatigue: turn, id, fatigue_before, engaged, recovery_turn, isFrontAssigned, fatigue_after",
+      "every T1-T2 write affecting corps_front_sectors membership for either ID: phase, writer branch, before sectors, after sectors",
+      "exact post-T1 and post-T2 state snapshots for the two formation objects and their containing sector rows"
+    ],
+    "pass_or_stop": "Stop after the first exact membership/fatigue divergence is bound to one writer branch. Do not run beyond T2, tune gameplay, or rerun the native campaign."
+  },
+  "claim_limits": [
+    "This diagnosis does not prove that the T1 controller delta causes the sector-assignment delta.",
+    "It does not authorize a gameplay patch, baseline change, package rebuild, or calibration acceptance.",
+    "It does not replace the existing Jackal causal chain; it only narrows its pre-T6 fatigue antecedent."
+  ],
+  "evidence": [
+    {"path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/headless-probe-prefix-v1/ACTUAL_REVIEW.json", "bytes": 11534, "sha256": "be931865f9ae74072a115158fffdc26b0186d879206b5e5c2c465f460a9a34c8"},
+    {"path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/headless-probe-prefix-v1/attempts/prefix-01/stdout.log", "bytes": 1154422, "sha256": "e14d41b1c27f8fafaea674ef12651902c21fe84e20319e19a892cfef6c963d09"},
+    {"path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/headless-probe-prefix-v1/attempts/prefix-01/run/weekly_report.jsonl", "bytes": 306306, "sha256": "91abdaa52b9b1e6f4e5cdeeb111836e90eebb02d5c6ebc6cd0dfb754a95ef91e"},
+    {"path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/headless-probe-prefix-v1/attempts/prefix-01/run/save_w6.json", "bytes": 3619260, "sha256": "34a452dfef93493eda7cd4eced49bd0467af5837521abab05727f3ffa544b7a7"},
+    {"path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/jackal-boundary-replay-v3/ACTUAL_REVIEW.json", "bytes": 7447, "sha256": "24dae04b35bf747319d3c2a2b47b788aa72ea280cf01d559a3a6ed5209c7cccf"},
+    {"path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/historical-default-native39-v1/ACTUAL39_REVIEW.json", "bytes": 6047, "sha256": "44b9ab9988a318598b8847ceb1a6edaf092c9056fa3a366e287fb47ec054c2b5"},
+    {"path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/native-successor-v3/postchecks/calibration39-01/diagnosis/historical-input-v1/actual-t1-diagnosis-v1/DIAGNOSIS.json", "bytes": 9007, "sha256": "aa8d4ec019bf9c626c7b1de7909302e821d09dd1bee52fee1aacb1223304d426"},
+    {"path": "tmp-paradox-qa-20260710/evidence/historical-default-p03-rbih-t39-01/rbih/turn-autosaves/turn-001.json", "bytes": 3479116, "sha256": "b30c7c14b250d61fd51b1a695fc5ce256b4cd6705792557b54f36bdfe6cf8c54"},
+    {"path": "tmp-paradox-qa-20260710/evidence/historical-default-p03-rbih-t39-01/rbih/turn-autosaves/turn-002.json", "bytes": 3586200, "sha256": "d54cc663a3729a1dd236119389465fe9ad6880caa1b8c9fc91f7d73678f3ca47"},
+    {"path": "tmp-paradox-qa-20260710/evidence/historical-default-p03-rbih-t39-01/rbih/turn-autosaves/turn-003.json", "bytes": 3668975, "sha256": "6f62fccf69df8d3613f39603c3dbee90ed60e22ca89e7c1a88653d5fe57c70ed"},
+    {"path": "tmp-paradox-qa-20260710/evidence/historical-default-p03-rbih-t39-01/rbih/turn-autosaves/turn-004.json", "bytes": 3757389, "sha256": "463dd3c938dd1d7692350e3806cb45cca92ade7020bcf9da6dfe3872a7e9e6a6"},
+    {"path": "tmp-paradox-qa-20260710/evidence/historical-default-p03-rbih-t39-01/rbih/turn-autosaves/turn-005.json", "bytes": 4011398, "sha256": "79b8057943a2b3989db90b1f9622c2b5b2fb2e120f780443460e2b2ee73561ef"},
+    {"path": "tmp-paradox-qa-20260710/evidence/historical-default-p03-rbih-t39-01/rbih/turn-autosaves/turn-006.json", "bytes": 4039882, "sha256": "b6ace00db48f50d75bab986e03392d7095f487f8cdfb88fc153df9fd8d7777ba"}
+  ],
+  "source_evidence": [
+    {"path": "src/state/formation_fatigue.ts", "sha256": "198d9ba9f44194ff6242d03f98c8aa01a8c5a619c2d6d7488acad36f28feef9d"},
+    {"path": "src/sim/combat/front_assignment.ts", "sha256": "f15d109ff602916ff6c4b7449c32eb284d7f021a4646f774ed5e0470821fa543"},
+    {"path": "src/state/serialize.ts", "sha256": "c5d0b1c6d265c188d5380702fd4b6c55bedf8b5b750c5d4d87151e59edf483e6"},
+    {"path": "src/state/serializeGameState.ts", "sha256": "a4010315c439eb0901a53d8166a8c44cb08427aff5d994e51e05ddb64657be97"},
+    {"path": "src/desktop/electron-main.cjs", "sha256": "8b5e218e6b6f0ccede988bb2f68c782468e8001b1957030ed889c2ada914c258"},
+    {"path": "src/scenario/scenario_runner.ts", "sha256": "0003f3b39df003302ffbb8cfaca6709b6f58be40eca447cf9fd2d94b579d2b2c"}
+  ],
+  "determinism_assessment": "No nondeterministic API or unstable traversal was implicated. The differing persisted/derived sector-assignment state is deterministically consumed. Engine_Invariants_v0_9_0 section 13 and DETERMINISM_TEST_MATRIX save/serialization rules remain relevant; no determinism-risk change was made."
+}

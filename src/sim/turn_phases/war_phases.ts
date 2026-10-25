@@ -84,11 +84,13 @@ import { updateSarajevoState, refreshSarajevoLifelineCache } from '../../state/s
 import { updateSustainability } from '../../state/sustainability.js';
 import { updateLossOfControlTrends } from '../../state/loss_of_control_trends.js';
 import { isFriendlyFaction } from '../early_war/alliance_update.js';
+import { buildFriendlyComponents } from '../combat/sector_utils.js';
 import { calculateFactionProductionBonus, ensureProductionFacilities } from '../../state/production_facilities.js';
 import { computeSupplyReachability } from '../../state/supply_reachability.js';
 import { computeSupplyReachabilityOsid, type SupplyReachabilityOsidReport } from '../../state/supply_reachability_osid.js';
 import { buildContainDiagnostic } from '../combat/contain_diagnostic.js';
-import { computeContainedOsidsForFaction } from '../combat/enclave_resilience.js';
+import { computeContainedOsidsForFaction, isBrigadeEligibleForOperationObjectives } from '../combat/enclave_resilience.js';
+import { getEquipmentOffensivePriority, resolveEquipmentClass } from '../combat/sector_offensive_launch_helpers.js';
 import { isVrsContainPostureEnabled, isArbihContainPostureEnabled, isSrkStranglePostureEnabled } from '../combat/contain_posture_gate.js';
 import { computeSrkStrangleOsids } from '../combat/srk_strangle.js';
 import {
@@ -263,6 +265,10 @@ interface WarPhaseContextExtensions {
  *  pre_planned_operations.ts / triggered_operations.ts (kept as a local const because
  *  the engine constant is not exported). */
 const AUTHORED_OP_MIN_PARTICIPANTS = 2;
+
+/** Regular sector-attack bounds for presidential REQUEST-OP directives. */
+const DIRECTIVE_OP_MIN_PARTICIPANTS = 3;
+const DIRECTIVE_OP_MAX_PARTICIPANTS = 12;
 
 /**
  * Consume player-authored operations staged on cc.pending_authored_op (Free War
@@ -741,13 +747,14 @@ export type DirectivePlanResult =
  * plan; the staged directive only carries a target OSID).
  *
  * Identical selection to the consume path (`injectOpDirectives`):
- *  1. AUTO-SELECT participant brigades: this corps's subordinates (getCorpsSubordinates)
- *     that are available in their own corps (getAvailableBrigades), not committed in ANY
- *     corps (findBrigadeOperationAnywhere), and eligible (isEligibleOperationFormation).
- *     Require ≥ AUTHORED_OP_MIN_PARTICIPANTS.
- *  2. BUILD a reachable axis toward target_osid: the smallest FRIENDLY OSID adjacent to
- *     the target (controller === corps faction) as staging (deterministic).
- *  3. Validate via validateOpAtInjection (blocking errors reject).
+ *  1. Build the legal pool from this corps's available, uncommitted, active brigades,
+ *     applying the shared enclave/objective guard.
+ *  2. For each own-controlled target-adjacent staging OSID in strict order, retain pool
+ *     brigades connected to it through normal friendly/allied territory. Choose the first
+ *     staging OSID with at least three candidates.
+ *  3. Rank by the ordinary sector-attack equipment priority, cap at 12, then canonicalize
+ *     participant IDs with strictCompare.
+ *  4. Validate via validateOpAtInjection (blocking errors reject).
  *
  * Returns a discriminated plan; NEVER mutates `state` or `cmd`. The mutation (push op,
  * assign commander, set stance, clear staged field) lives ONLY in the consume step so
@@ -770,35 +777,76 @@ export function planDirectiveOperation(
     if (targetController === null) return { ok: false, reason: 'objective_uncontrolled' };
     if (targetController === corpsFaction) return { ok: false, reason: 'objective_already_owned' };
 
-    // 1. AUTO-SELECT the force — the commander picks brigades, not the president.
-    //    Eligible + available in own corps + not committed anywhere.
+    // A graph is required to prove both staging adjacency and formation reachability.
+    if (!adjacency) return { ok: false, reason: 'no_adjacency' };
+
+    // 1. Build the legal force pool — the commander picks brigades, not the president.
+    //    Eligibility includes availability, state-wide non-commitment, live formation
+    //    status, and the shared enclave/objective boundary.
     const corpsBrigadeIds = new Set(
         getCorpsSubordinates(state, corpsId).map((f) => f.id),
     );
     const available = new Set(getAvailableBrigades(cmd, [...corpsBrigadeIds]));
-    const participants = [...corpsBrigadeIds]
+    const legalPool = [...corpsBrigadeIds]
         .filter((bid) => {
             if (!available.has(bid)) return false;                       // free in own corps
             if (findBrigadeOperationAnywhere(state, bid)) return false;   // not committed in ANY corps
             const f = formations[bid];
-            return !!f && isEligibleOperationFormation(f);                // brigade-only, active
+            return !!f
+                && isEligibleOperationFormation(f)                       // brigade-only, active
+                && isBrigadeEligibleForOperationObjectives(f, [targetOsid]);
         })
-        .sort(strictCompare);
+        .map((bid) => formations[bid]!);
 
-    if (participants.length < AUTHORED_OP_MIN_PARTICIPANTS) {
-        return { ok: false, reason: 'no_available_force' };
-    }
-
-    // 2. BUILD the axis — find a FRIENDLY OSID adjacent to the target through the
-    //    static adjacency graph. That neighbor is the staging zone; the target is the
-    //    single objective. Smallest friendly neighbor (deterministic). With no
-    //    adjacency graph available we cannot prove reachability → reject.
-    if (!adjacency) return { ok: false, reason: 'no_adjacency' };
+    // 2. Candidate staging remains own-controlled. Route feasibility may traverse the
+    //    faction's own or currently allied territory under the existing alliance rule.
     const neighbors = adjacency.get(targetOsid) ?? [];
-    const stagingOsid = [...neighbors]
+    const stagingCandidates = [...neighbors]
         .filter((n) => getPoliticalControllerOSID(state, n, undefined) === corpsFaction)
-        .sort(strictCompare)[0];
-    if (!stagingOsid) return { ok: false, reason: 'objective_unreachable' };
+        .sort(strictCompare);
+    if (stagingCandidates.length === 0) return { ok: false, reason: 'objective_unreachable' };
+
+    const graphOsids = new Set<string>();
+    for (const [osid, adjacent] of adjacency) {
+        graphOsids.add(osid);
+        for (const neighbor of adjacent) graphOsids.add(neighbor);
+    }
+    const friendlyOsids = new Set(
+        [...graphOsids].filter((osid) => isFriendlyFaction(
+            getPoliticalControllerOSID(state, osid, undefined),
+            corpsFaction,
+            state,
+        )),
+    );
+    const componentOf = buildFriendlyComponents(adjacency, friendlyOsids);
+
+    let stagingOsid: string | undefined;
+    let reachablePool: FormationState[] = [];
+    for (const candidate of stagingCandidates) {
+        const stagingComponent = componentOf.get(candidate);
+        if (stagingComponent === undefined) continue;
+        const reachable = legalPool.filter((formation) => {
+            const location = formation.location_osid;
+            return location !== undefined && componentOf.get(location) === stagingComponent;
+        });
+        if (reachable.length < DIRECTIVE_OP_MIN_PARTICIPANTS) continue;
+        stagingOsid = candidate;
+        reachablePool = reachable;
+        break;
+    }
+    if (!stagingOsid) return { ok: false, reason: 'no_available_force' };
+
+    // 3. Reuse the ordinary sector-attack commander preference, then cap and store a
+    //    canonical ID roster independent of object insertion order.
+    const participants = reachablePool
+        .sort((a, b) => {
+            const priorityDelta = getEquipmentOffensivePriority(resolveEquipmentClass(b))
+                - getEquipmentOffensivePriority(resolveEquipmentClass(a));
+            return priorityDelta !== 0 ? priorityDelta : strictCompare(a.id, b.id);
+        })
+        .slice(0, DIRECTIVE_OP_MAX_PARTICIPANTS)
+        .map((formation) => formation.id)
+        .sort(strictCompare);
 
     const axes: OperationAxis[] = [createSingleAxis(participants, [targetOsid], stagingOsid, formations)];
 

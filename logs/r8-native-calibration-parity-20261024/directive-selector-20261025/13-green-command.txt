@@ -1,0 +1,1 @@
+npx vitest run tests/op_directive_objection.test.ts tests/op_directive_injection.test.ts --reporter=dot

@@ -1,0 +1,12 @@
+
+ RUN  v2.1.9 C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory
+
+ ❯ tests/op_directive_objection.test.ts (16 tests | 1 failed | 15 skipped) 11ms
+   × planDirectiveOperation — pure auto-selection shared with injectOpDirectives > selects only objective-legal brigades connected to staging and remains JSON-pure 10ms
+     → expected [ 'rbih_b1', 'rbih_b2', …(3) ] to deeply equal [ 'rbih_b1', 'rbih_b2', 'rbih_b3' ]
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 skipped (16)
+   Start at  20:31:27
+   Duration  8.39s (transform 2.61s, setup 28ms, collect 7.21s, tests 11ms, environment 0ms, prepare 499ms)
+

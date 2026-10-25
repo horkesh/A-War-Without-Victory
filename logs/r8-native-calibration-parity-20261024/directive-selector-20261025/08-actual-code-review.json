@@ -1,0 +1,126 @@
+{
+  "schema": "awwv.directive-selector-repair.actual-code-review.v1",
+  "date": "2026-10-25",
+  "head_reviewed": "a3063366a",
+  "seat": "independent code review with gameplay, canon, systems, and determinism lenses",
+  "review_mode": "read-only source and retained-evidence review; this review artifact is the only write",
+  "verdict": "GO",
+  "decision": "GO for the exact regular presidential REQUEST-OP selector correction. The implementation conforms to PREIMPLEMENTATION_CANON_REVIEW.json and HISTORIAN_REVIEW.json, with no blocking correctness, canon, determinism, save-compatibility, or protected-ownership finding. This is not a global capability, delivery, attack-resolution, capture, calibration, package, native-runtime, or checkpoint-707 GO.",
+  "scope_reviewed": {
+    "production": "src/sim/turn_phases/war_phases.ts",
+    "tests": [
+      "tests/op_directive_objection.test.ts",
+      "tests/op_directive_injection.test.ts"
+    ],
+    "diff_summary": "329 insertions and 34 deletions across exactly the three expected tracked files",
+    "source_scope_result": "PASS: no authored-operation, bot, generic sector-offensive, global cap, UI brigade-picking, save-schema, control, movement, supply, combat-resolution, or CA-cost implementation changed"
+  },
+  "authority": [
+    {
+      "artifact": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/directive-selector-repair-v1/PREIMPLEMENTATION_CANON_REVIEW.json",
+      "application": "Approved the pure shared planner, unchanged enclave predicate, ordinary friendly/allied route feasibility, first strict-sorted viable staging, regular REQUEST-OP minimum 3 and ceiling 12, established equipment priority with strict ID tie-break, final canonical roster, and hard rejection behavior."
+    },
+    {
+      "artifact": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/directive-selector-repair-v1/HISTORIAN_REVIEW.json",
+      "application": "GO for unchanged same-enclave eligibility and remote-objective exclusion; forbids weakening or bypassing isBrigadeEligibleForOperationObjectives."
+    },
+    {
+      "source": "docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md section 6",
+      "application": "Historian seat was required and supplied because the selector applies the settled Srebrenica/Zepa enclave boundary."
+    }
+  ],
+  "findings": [],
+  "nonblocking_observations": [
+    {
+      "severity": "P3 editorial",
+      "location": "src/sim/turn_phases/war_phases.ts:755-757 and 839-853",
+      "observation": "The planner comment labels both roster selection and validation as step 3. Renumber validation to step 4 when convenient; runtime behavior and evidence are unaffected."
+    },
+    {
+      "severity": "limitation",
+      "observation": "The existing createSingleAxis path can backfill sparse formation composition. The focused purity fixture intentionally supplies complete composition and therefore proves that the new selector logic is JSON-pure for its representative state, not that every pre-existing createSingleAxis input is mutation-free. The desktop objection query operates on a freshly deserialized state, and the headless no-directive path returns before invoking the planner, so this pre-existing behavior does not invalidate this bounded correction."
+    }
+  ],
+  "review_checks": [
+    {
+      "area": "single plan for objection and consume",
+      "result": "PASS",
+      "evidence": "src/desktop/desktop_sim.ts:925-951 calls planDirectiveOperation and applies the same slot gate; src/sim/turn_phases/war_phases.ts:905-935 consumes the same plan and rejects before operation construction. The injection parity fixture compares consumed participants, staging, and axis assignment to the accepted pure plan."
+    },
+    {
+      "area": "availability and protected ownership",
+      "result": "PASS",
+      "evidence": "src/sim/turn_phases/war_phases.ts:786-799 restricts selection to getCorpsSubordinates, getAvailableBrigades, state-wide findBrigadeOperationAnywhere exclusion, and isEligibleOperationFormation. Existing cross-operation commitment coverage remains in tests/op_directive_injection.test.ts."
+    },
+    {
+      "area": "enclave boundary",
+      "result": "PASS",
+      "evidence": "src/sim/turn_phases/war_phases.ts:795-798 calls isBrigadeEligibleForOperationObjectives unchanged before feasibility. Focused fixtures exclude a remote enclave formation and retain conditional same-perimeter Obadi eligibility. No enclave definition or predicate changed."
+    },
+    {
+      "area": "shared staging and friendly route",
+      "result": "PASS",
+      "evidence": "src/sim/turn_phases/war_phases.ts:801-837 strict-sorts own-controlled adjacent staging candidates, reuses isFriendlyFaction and buildFriendlyComponents, and accepts only a candidate whose single friendly/allied component contains at least three legal formations. Fixtures cover first-candidate insufficiency followed by a viable candidate and allied-versus-hostile corridor behavior."
+    },
+    {
+      "area": "roster doctrine and determinism",
+      "result": "PASS",
+      "evidence": "src/sim/turn_phases/war_phases.ts:266-271 leaves AUTHORED_OP_MIN_PARTICIPANTS at 2 and adds REQUEST-OP-local bounds 3/12. Lines 839-849 reuse getEquipmentOffensivePriority(resolveEquipmentClass), strictCompare ties, slice to 12, and strictCompare-sort stored IDs. Forward/reverse insertion fixtures assert identical plans and the priority ceiling."
+    },
+    {
+      "area": "hard rejection and forced requests",
+      "result": "PASS",
+      "evidence": "src/sim/turn_phases/war_phases.ts:929-935 rejects planner or slot failure before build, push, commander assignment, override recording, or force consequence. The forced hard-rejection fixture asserts no operation, no override count, and no friction record."
+    },
+    {
+      "area": "headless early-out and save compatibility",
+      "result": "PASS",
+      "evidence": "src/sim/turn_phases/war_phases.ts:905-911 retains the no-corps/no-pending early return before planner invocation or mutation; the byte-comparison early-out fixture remains green. No GameState field, serializer, migration, or save-shape file changed."
+    },
+    {
+      "area": "rejection honesty",
+      "result": "PASS",
+      "evidence": "The planner returns objective_unreachable only when no own-controlled adjacent staging exists and no_available_force when staging exists but fewer than three legal route-capable formations share it. A focused fixture distinguishes those outcomes."
+    }
+  ],
+  "retained_evidence": [
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/directive-selector-repair-v1/implementation-v1/red-attempt-01",
+      "command": "npx vitest run tests/op_directive_objection.test.ts -t \"selects only objective-legal brigades connected to staging and remains JSON-pure\" --reporter=dot",
+      "exit_code": 1,
+      "result": "EXPECTED RED: baseline selected both disconnected remote and enclave-ineligible formations; 1 failed, 15 skipped."
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/directive-selector-repair-v1/implementation-v1/green-focused-attempt-01",
+      "command": "npx vitest run tests/op_directive_objection.test.ts tests/op_directive_injection.test.ts --reporter=dot",
+      "exit_code": 0,
+      "result": "2 files passed; 34 tests passed."
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/directive-selector-repair-v1/implementation-v1/typecheck-attempt-01",
+      "command": "npm run typecheck",
+      "exit_code": 0,
+      "result": "TypeScript no-emit check passed."
+    },
+    {
+      "path": "reviewer command",
+      "command": "git diff --check",
+      "exit_code": 0,
+      "result": "No whitespace errors."
+    }
+  ],
+  "test_quality": {
+    "verdict": "MEANINGFUL_AND_SUFFICIENT_FOR_BOUNDED_SELECTOR_CHANGE",
+    "reasoning": [
+      "The RED fixture fails on the actual pre-fix behavior by observing the wrongly selected remote and enclave participants.",
+      "The GREEN fixtures exercise selection outputs, rejection reasons, allied-route state changes, reversed insertion order, cap and priority, planner purity, consume parity, and forced-rejection side effects rather than checking only object construction.",
+      "No campaign, package, native runtime, delivery, or combat-resolution claim is derived from these unit tests."
+    ]
+  },
+  "preservation_and_limits": [
+    "No source or test correction was made by this reviewer.",
+    "No test suite, campaign, package, native executable, or simulation was rerun; retained focused evidence was inspected once as instructed.",
+    "This review does not prove physical force delivery, attack execution, territorial capture, bot parity, checkpoint 707, or historical calibration success.",
+    "Any later change to enclave geometry or predicate, REQUEST-OP bounds or priority, authored/bot/global selection, control, movement, supply, combat resolution, save schema, or forced hard-guard behavior requires renewed review."
+  ]
+}

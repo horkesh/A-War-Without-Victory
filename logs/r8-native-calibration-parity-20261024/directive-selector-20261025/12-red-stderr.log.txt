@@ -1,0 +1,26 @@
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/op_directive_objection.test.ts > planDirectiveOperation — pure auto-selection shared with injectOpDirectives > selects only objective-legal brigades connected to staging and remains JSON-pure
+AssertionError: expected [ 'rbih_b1', 'rbih_b2', …(3) ] to deeply equal [ 'rbih_b1', 'rbih_b2', 'rbih_b3' ]
+
+- Expected
++ Received
+
+  Array [
+    "rbih_b1",
+    "rbih_b2",
+    "rbih_b3",
++   "rbih_enclave",
++   "rbih_remote",
+  ]
+
+ ❯ tests/op_directive_objection.test.ts:236:33
+    234|     expect(plan.ok).toBe(true);
+    235|     if (plan.ok) {
+    236|       expect(plan.participants).toEqual(['rbih_b1', 'rbih_b2', 'rbih_b…
+       |                                 ^
+    237|       expect(plan.stagingOsid).toBe('bihac_2');
+    238|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

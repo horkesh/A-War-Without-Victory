@@ -1,0 +1,109 @@
+{
+  "schema": "awwv.fractional-fatigue-full-suite-v5-actual-independent-review.v1",
+  "verdict": "GO",
+  "independent": true,
+  "candidateHead": "a3063366ae094468fbb2ede143f9ced3a1ed2f68",
+  "candidateRun": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n101",
+  "scope": "OFFLINE_QUALIFIED_PUBLIC_SUITE",
+  "originalWrapperOutcome": {
+    "resultPass": false,
+    "childExit": 0,
+    "derivedWrapperExit": 126,
+    "timedOut": false,
+    "relabelled": false
+  },
+  "bindings": {
+    "receipt": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-full-suite-v6/full-suite-01/child-exit.json",
+      "bytes": 133,
+      "sha256": "7ad35a531054c4cf50fc0a05024b61e19357f80801a66c8219ff50196b2feb66"
+    },
+    "result": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-full-suite-v6/full-suite-01/result.json",
+      "bytes": 15680,
+      "sha256": "8592b3df746a2c433b0aecad79be2c3dd15853c06f8d50962af90dd1687449f5"
+    },
+    "closing": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-full-suite-v6/full-suite-01/closing.json",
+      "bytes": 18638,
+      "sha256": "e3fdc6aa56092a6f5f66e4677b0cc4ffe90392a252ac37179eeea11776fa6672"
+    },
+    "manifest": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-full-suite-v1/CURRENT_COMPLETE_FILE_MANIFEST_V2.json",
+      "bytes": 233438,
+      "sha256": "69a24e7ff7d5d44b1a8c88bba7347e5c3b58ec7c6234b328e9f66b0a3a3dee8f"
+    },
+    "toolFreeze": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-full-suite-v6/SUCCESSOR_TOOL_FREEZE_FINAL.json",
+      "bytes": 5480,
+      "sha256": "c5b48fd0766fbf3410b3f86cb96eaccb6de2c60580b0a14f65e4e20f13854326"
+    },
+    "entry": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-full-suite-v6/full_suite_entry.cjs",
+      "bytes": 10460,
+      "sha256": "e1ff03157b7f50f390e0516b6a734c09f5cee9772fd54234cfdecc13f97a4e5a"
+    },
+    "guard": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-full-suite-v6/admission_guard.cjs",
+      "bytes": 15209,
+      "sha256": "b1ba8d423b9aa65eaa9ee3c4e2f8f36011927b3423974d40409f95b8248fc51b"
+    },
+    "contract": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-full-suite-v6/ACTUAL_BOUND_CONTRACT.json",
+      "bytes": 4072,
+      "sha256": "d90351ef3d8e1f3d3ff392b87afc05954755dfdaacd4524f5756aa8f076fb64e"
+    },
+    "offlineAmendment": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-full-suite-v6/offline-reader-amendment-v1/actual-replay-03/result.json",
+      "bytes": 4133,
+      "sha256": "490efdb5b123988ba4eebf34cf9b7f85e173fbab0a85590c9f13e38750efa54c"
+    },
+    "offlineAmendmentReview": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-full-suite-v6/offline-reader-amendment-v1/independent-offline-amendment-review-01/review.json",
+      "bytes": 5172,
+      "sha256": "7d728d38243785fc8c7553afa533a20fa5496543215ffedb177c27aebd5f8444"
+    }
+  },
+  "terminalEvidence": {
+    "uniqueFiles": 1453,
+    "fileExecutions": 1456,
+    "lanes": 5,
+    "files": {
+      "pass": 1452,
+      "fail": 0,
+      "skip": 4,
+      "todo": 0,
+      "total": 1456
+    },
+    "tests": {
+      "pass": 15094,
+      "fail": 0,
+      "skip": 33,
+      "todo": 0,
+      "total": 15127
+    },
+    "allExecutionsTerminal": true,
+    "closingPass": true,
+    "sharedDeadlinePass": true,
+    "sourceAndEvidencePreservationPass": true
+  },
+  "qualification": {
+    "status": "OFFLINE_QUALIFIED_PUBLIC_SUITE",
+    "exactCanonicalWholeFileSkips": 4,
+    "exactDeclaredSkippedTests": 33,
+    "skipSignatureMatchesPriorAcceptedTerrainSuite": true,
+    "newSkipAllowance": false,
+    "genericFalseCheckAllowance": false
+  },
+  "claimLimitations": [
+    "The original suite result remains pass=false and the original derived wrapper exit remains 126.",
+    "Qualification depends on the exact independently reviewed offline amendment and exact four-file/33-test signature bound here.",
+    "Any future skip, failure, incomplete execution, evidence change, or source change invalidates this review.",
+    "The current package gate does not yet recognize this offline-qualified branch and must receive its own explicit amendment and independent review before build admission."
+  ],
+  "authorization": {
+    "onePackageBuild": true,
+    "automaticRetry": false,
+    "requiresSeparatelyReviewedPackageContract": true
+  }
+}
