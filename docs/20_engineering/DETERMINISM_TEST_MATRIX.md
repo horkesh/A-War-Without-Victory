@@ -329,3 +329,7 @@ Real production-function stdout fixtures qualify schema 2 ordered close manifest
 # Combat fatigue single-owner correction (2026-10-26)
 
 Fatigue is updated once per resolved battle by the existing aftermath helper; stable attacker traversal, deltas, initialization, and cap are preserved. Focused evidence covers defended, shared-attacker and undefended resolver cases, but contains no direct controller-change assertion. This source-only result does not satisfy calibration or broad release gates. [Report and limits](../40_reports/implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md).
+
+## Zero-drift morale floor/consequence path (2026-10-26)
+
+Removing the early return for zero computed morale drift makes the existing ordered floor and critical-consequence path run for those formations. No new iteration, state, randomness, time source, schema, or serialization path is introduced; sorted formation traversal and all existing order remain. Focused source evidence: RED 23/25 (two expected), GREEN 25/25, 69/69 across six files, TypeScript 0, independent GO. This does not establish runtime campaign behavior or health resolution; candidate health remains 13>3. [Report](../40_reports/implemented/20261026_CORRECTED_ENGINE_CALIBRATION_PACKET.md) · [Proof manifest](../../logs/r8-native-calibration-parity-20261026/initial-calibration-packet/MANIFEST.json).

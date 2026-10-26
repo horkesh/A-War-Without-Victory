@@ -1,0 +1,78 @@
+{
+  "schema": "hvo-precursor-source-consumer-bindings-v1",
+  "sources": [
+    {
+      "path": "data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0446.json",
+      "sha256": "7670501c951d6023e42d420e46f8b884ad0eb60da07f5ace2ec03ca62a256664",
+      "page": 446,
+      "bindings": ["Ban HQ Kiseljak", "Established 20 December 1992", "Formed from Kiseljak, Kresevo, Fojnica municipal HVO headquarters", "Later split into 94th and 95th Home Defense Regiments"]
+    },
+    {
+      "path": "data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0460.json",
+      "sha256": "27606c27e3c56190a7f6014ebc18a3a07b85773e10da8a654e809d1f280acc22",
+      "page": 460,
+      "bindings": ["OG2 command relationship", "Ban later split into 94th/95th", "Kotromanic incorporated after June 1993; not part of this implementation scope"]
+    },
+    {
+      "path": "data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0437.json",
+      "sha256": "837b5c16c5de079f301d64af5641e4bf368bc53f2d1e6345028199f04da51e9d",
+      "page": 437,
+      "bindings": ["Vitez brigade and Vitezovi PPN are distinct"]
+    },
+    {
+      "path": "data/source/oob_brigades.json",
+      "sha256": "e01b58c71b0d51daadf1796ba21a02d0cca04509add1ef706f3b8a350f7c513d",
+      "bindings": ["five scoped rows all available_from 0, mandatory, 700 personnel", "no separate HRHB Fojnica row"]
+    },
+    {
+      "path": "data/source/oob_brigade_designations.json",
+      "sha256": "f87cca946faa12bf1853ea743328850131bdef222e8b67a8bfdc663ab7120a36",
+      "bindings": ["all five IDs catalogued independently; no alias relation"]
+    },
+    {
+      "path": "data/source/formation_lifecycle_events.json",
+      "sha256": "f70b3f5b48196eedda02602b2a454dbfba83e2d3de7147854143e0b75247f90b",
+      "bindings": ["no scoped lifecycle events"]
+    }
+  ],
+  "consumers": [
+    {
+      "path": "src/scenario/oob_early_war_entry.ts",
+      "sha256": "52d0a5a517a3e857cd8f7e8d4576b9d6e3d92e84e4b0eff5c046391218bb5888",
+      "binding": "creates mandatory available_from 0 rows at opening"
+    },
+    {
+      "path": "src/sim/turn_pipeline.ts",
+      "sha256": "6ef907e1835bcdba5a5faa550e7ad47dc934ff1e9720a5344b7a142fe2c2e9d",
+      "binding": "increments meta.turn before lifecycle phase"
+    },
+    {
+      "path": "src/sim/formation_lifecycle_events.ts",
+      "sha256": "4192fb2dc830defb4328e891e51d1ab04ace44fbf2b2268bfed790cec9de92a3",
+      "binding": "rename is display-only; merge transfers personnel only to existing target and removes active-operation references only"
+    },
+    {
+      "path": "src/sim/recruitment_engine.ts",
+      "sha256": "c657b778736fe9599395b48968702e45ca4d1141de6112990942ce3a744ae4d9",
+      "binding": "existing-recruit matching is exact ID or oob tag; no identity aliases"
+    },
+    {
+      "path": "data/scenarios/apr1992_definitive_188w.json",
+      "sha256": "4257b039f5b1dbb7f21d940ec656b2d0b787856f27e7c26b6f3f57f256d82ecf",
+      "binding": "war-start, player_choice, init_formations_oob scenario"
+    }
+  ],
+  "static_reference_search": {
+    "roots": ["data/source", "data/scenarios", "src", "tests", "docs/10_canon", "docs/20_engineering", "docs/knowledge"],
+    "scoped_id_files": ["data/source/oob_brigades.json", "data/source/oob_brigade_designations.json", "src/ui/map/data/formationNameLocalizations.ts"],
+    "authored_operation_or_commitment_files": []
+  },
+  "runtime_reference_classes_requiring_transition_contract": [
+    "active operation participating_brigades and axes",
+    "brigade attack orders",
+    "movement/order state",
+    "sector and corps assignments",
+    "recruitment provenance",
+    "serialized formation identity/history"
+  ]
+}

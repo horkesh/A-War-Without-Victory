@@ -330,3 +330,7 @@ Code changes are implemented either during day shift (user + Claude interactive)
   - How to verify: Use the discovery checklist in `docs/20_engineering/REPO_MAP.md`.
 - Assumption: Derived state is not serialized as source of truth.
   - How to verify: Inspect serialization code and compare to derived list.
+
+## Zero-drift morale invariant correction (2026-10-26)
+
+`src/sim/combat/morale_drift.ts` no longer skips existing home/existential floors and critical morale consequences when the computed net drift is zero. The correction preserves deterministic traversal, floor/consequence ordering, constants, thresholds, eligibility, supply, dissolution, schemas and serialization. Focused evidence is RED 23/25 with two expected failures, GREEN 25/25, 69/69 across six focused files, TypeScript exit 0 and independent GO. It corrects an invariant only; it does not resolve the retained 13>3 health failure or qualify calibration. [Report](../40_reports/implemented/20261026_CORRECTED_ENGINE_CALIBRATION_PACKET.md) · [Proof manifest](../../logs/r8-native-calibration-parity-20261026/initial-calibration-packet/MANIFEST.json).

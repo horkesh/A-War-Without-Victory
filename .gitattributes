@@ -28,3 +28,5 @@ data/derived/startup/*.json text eol=lf
 logs/branch-hygiene/20260924-parallel-audit/r8-uncommitted.patch -text -diff
 *.pmtiles filter=lfs diff=lfs merge=lfs -text
 *.osm.pbf filter=lfs diff=lfs merge=lfs -text
+
+logs/r8-native-calibration-parity-20261026/initial-calibration-packet/** -text -diff

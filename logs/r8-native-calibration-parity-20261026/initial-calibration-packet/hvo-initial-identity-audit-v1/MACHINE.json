@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "head": "6b36ba312b88c431088856743437aaf643f7243a",
+  "verdict": "TEN_DISTINCT_ACTIVE_APRIL_FORMATIONS_NOT_SUPPORTED",
+  "runtime": {
+    "scenario_mode": "player_choice",
+    "init_formations_oob": true,
+    "nine_initial_rows": "active at created_turn 0",
+    "nikola": "created_turn 1 at fallback op:busovaca:busovaca_2; authored home op:busovaca:buselji_2",
+    "alias_canonicalization": false,
+    "lifecycle_events_for_ids": 0
+  },
+  "formations": {
+    "hrhb_94th_brigade": "PROVEN_LATER_LINEAGE_DUPLICATION_AND_PREMATURE",
+    "hrhb_95th_brigade": "PROVEN_LATER_LINEAGE_DUPLICATION_AND_PREMATURE",
+    "hrhb_ban_jelai_brigade": "PROVEN_PREMATURE_ESTABLISHED_20_DEC_1992",
+    "hrhb_kiseljak_brigade": "UNRESOLVED_POSSIBLE_PRECURSOR_ABSTRACTION",
+    "hrhb_kreevo_brigade": "UNRESOLVED_POSSIBLE_PRECURSOR_ABSTRACTION",
+    "hrhb_vitezovi_brigade_vitez": "PROVEN_IDENTITY_CONFLATION_APRIL_ACTIVE_STATUS_UNSUPPORTED",
+    "hrhb_jure_franceti_brigade": "APRIL_UNSUPPORTED_EXACT_DATE_UNRESOLVED",
+    "hrhb_stjepan_tomaevi_brigade": "APRIL_UNSUPPORTED_EXACT_DATE_UNRESOLVED",
+    "hrhb_travnik_brigade": "APRIL_UNSUPPORTED_EXACT_DATE_AND_LOCATION_UNRESOLVED",
+    "hvo_nikola_subic_zrinski_brigade": "APRIL_UNSUPPORTED_EXACT_DATE_REQUIRES_PRIMARY_CONFIRMATION"
+  },
+  "exact_supported_small_change": {
+    "field": "hrhb_ban_jelai_brigade.available_from",
+    "current": 0,
+    "supported_earliest_turn_approx": 36,
+    "implementation_authorized": false,
+    "blocking_identity_question": "timed precursor-to-Ban-to-94th/95th lineage model"
+  },
+  "engine_advanced": false,
+  "campaign_run": false,
+  "repository_source_edits": false
+}

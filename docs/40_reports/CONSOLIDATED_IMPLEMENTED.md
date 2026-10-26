@@ -1024,3 +1024,7 @@ R3 now has one authoritative offensive-operation clock, deterministic TG exhaust
 [20261026_COMBAT_FATIGUE_SINGLE_OWNER.md](implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md) — OSID combat fatigue now has one writer per resolved battle, with focused 21/21 and 51/51 results, nonincremental TypeScript success, and independent bounded-scope GO. Its one authorized prefix39 run is STOP_NO_RETRY at703/712 with four n91/n92 losses and health13>3; global gates remain open. Attempt008's missing original streams and the absence of a direct controller-change assertion remain explicit limitations.
 
 ---
+
+## 2026-10-26 Corrected-engine calibration packet
+
+[20261026_CORRECTED_ENGINE_CALIBRATION_PACKET.md](implemented/20261026_CORRECTED_ENGINE_CALIBRATION_PACKET.md) records the retained Circle-delivery and stranded-health audits, HVO identity/lifecycle review, and zero-drift morale invariant correction with RED/GREEN, focused 69/69, TypeScript and independent GO. The permanent Circle duration proposal is blocked; the prepared counterfactual is unbound/unrun; no HVO edit is supported. The source correction does not qualify runtime behavior or clear the retained 703/712, four formerly-correct losses, health13>3 result. No campaign was run.

@@ -263,8 +263,6 @@ export function runMoraleDrift(
             delete (f as { recent_battle_outcome?: string }).recent_battle_outcome;
         }
 
-        if (drift === 0) continue;
-
         // LANE-NIGHTSHIFT-KRIVAJA-PHASE-1-POINT-5-IMPLEMENTATION (SHAPE δ,
         // 2026-05-06): per-turn cap on the absolute magnitude of NEGATIVE
         // drift. Faction-symmetric mechanism — same min(|drift|, cap) clamp

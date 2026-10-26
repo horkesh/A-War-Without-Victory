@@ -224,3 +224,7 @@ state, or establish full-save equality. Gates: `tests/paradox_local_qa_harness.t
 # Combat fatigue ownership reference (2026-10-26)
 
 OSID combat fatigue ownership and its current focused proof are recorded in [CODE_CANON](CODE_CANON.md#combat-fatigue-single-owner-2026-10-26) and the [implementation report](../40_reports/implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md). This does not qualify controller capture or calibration.
+
+## Corrected-engine calibration packet — 2026-10-26
+
+The retained Circle delivery/health audits, independent HVO identity review, zero-drift morale source proof, and output-boundary incident are indexed in [the packet manifest](../../logs/r8-native-calibration-parity-20261026/initial-calibration-packet/MANIFEST.json). The morale correction is source-qualified by focused tests and independent GO only; it does not clear the retained 703/712, four-loss, 13>3 candidate failure. No campaign ran in this packet. Current authorized phase and next prelaunch requirements are in the [active Electron validation plan](../plans/2026-07-31-full-campaign-electron-validation-plan.md) and [calibration master](../40_reports/CALIBRATION_MASTER.md).

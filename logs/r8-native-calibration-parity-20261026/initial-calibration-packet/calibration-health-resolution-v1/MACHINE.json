@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "head": "6b36ba312b88c431088856743437aaf643f7243a",
+  "verdict": "NO_DEMONSTRATED_LAWFUL_W39_RESOLUTION",
+  "health": { "observed": 13, "maximum": 3, "met": false },
+  "resolution_owners": {
+    "classification_and_reconnection": "src/sim/combat/stranded_brigade_lifecycle.ts",
+    "removal": "src/sim/combat/brigade_dissolution.ts",
+    "external_reinforcement_eligibility": "src/state/formation_constants.ts",
+    "scripted_merge_disband": "src/sim/formation_lifecycle_events.ts"
+  },
+  "week39_classes": {
+    "low_personnel_only": ["arbih_1st_cerska", "arbih_1st_kamenica", "arbih_246th_vitezka_mountain", "hrhb_vitezovi_brigade_vitez"],
+    "low_morale_only": ["hrhb_travnik_brigade", "hvo_nikola_subic_zrinski_brigade"],
+    "no_dissolution_criterion": ["hrhb_94th_brigade", "hrhb_95th_brigade", "hrhb_ban_jelai_brigade", "hrhb_jure_franceti_brigade", "hrhb_kiseljak_brigade", "hrhb_kreevo_brigade", "hrhb_stjepan_tomaevi_brigade"],
+    "eligible_for_dissolution": []
+  },
+  "new_defect": {
+    "formation": "hrhb_travnik_brigade",
+    "state_at_week39": { "personnel": 700, "cohesion": 40, "morale": 0, "morale_low_streak": 12, "supply": "strained", "home_defense_active": true },
+    "cause": "zero net drift returns before home-floor and collapse/desertion processing",
+    "source": "src/sim/combat/morale_drift.ts:266",
+    "count_effect": "does_not_resolve_cap"
+  },
+  "movement": {
+    "formation": "hrhb_vitezovi_brigade_vitez",
+    "trajectory": "Vitez to Bugojno by turn 37; recalled home turn 38; in transit again at turn 39",
+    "week39_status": "holding",
+    "anchor_preserving_causal_proof": false
+  },
+  "smallest_new_question": "Do governing April-1992 OOB/availability sources support the ten HVO formations holding by turns 1-2 being active at their exact fixed-home OSIDs before a lawful withdrawal window existed?",
+  "mutations": "none",
+  "engine_advanced": false,
+  "campaign_run": false,
+  "retained_extraction": "C:/tmp/player-bot-capability-parity-20261026/calibration-health-resolution-v1/retained-extraction.json"
+}

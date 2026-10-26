@@ -1,3 +1,4 @@
+**Latest implementation report — corrected-engine calibration packet (2026-10-26):** [Report](implemented/20261026_CORRECTED_ENGINE_CALIBRATION_PACKET.md) records retained audits, the focused zero-drift morale correction, the blocked Circle/HVO proposals, and the unchanged 703/712, four-loss, health13>3 failure.
 # docs/40_reports — Master Index and Structure
 
 **Latest implementation report — combat fatigue single owner (2026-10-26):** [Report](implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md) records focused RED/GREEN results, independent source GO, and the 703/712 STOP_NO_RETRY prefix result with four protected losses, health13>3 and open global gates.

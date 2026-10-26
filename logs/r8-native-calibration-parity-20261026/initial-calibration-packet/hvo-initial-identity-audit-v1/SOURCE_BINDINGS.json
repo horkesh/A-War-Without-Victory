@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "head": "6b36ba312b88c431088856743437aaf643f7243a",
+  "bindings": [
+    {"path":"data/source/oob_brigades.json","sha256":"e01b58c71b0d51daadf1796ba21a02d0cca04509add1ef706f3b8a350f7c513d","lines":"3204-3384, 3559-3572"},
+    {"path":"data/source/oob_brigade_designations.json","sha256":"f87cca946faa12bf1853ea743328850131bdef222e8b67a8bfdc663ab7120a36","lines":"1366-1535, 1596-1605"},
+    {"path":"data/source/formation_lifecycle_events.json","sha256":"f70b3f5b48196eedda02602b2a454dbfba83e2d3de7147854143e0b75247f90b","finding":"none of ten IDs"},
+    {"path":"data/scenarios/apr1992_definitive_188w.json","sha256":"4257b039f5b1dbb7f21d940ec656b2d0b787856f27e7c26b6f3f57f256d82ecf","lines":"40, 50"},
+    {"path":"src/scenario/oob_early_war_entry.ts","sha256":"52d0a5a517a3e857cd8f7e8d4576b9d6e3d92e84e4b0eff5c046391218bb5888","lines":"247-387"},
+    {"path":"src/sim/recruitment_engine.ts","sha256":"c657b778736fe9599395b48968702e45ca4d1141de6112990942ce3a744ae4d9","lines":"729-744, 858-904, 1021-1068"},
+    {"path":"docs/knowledge/SCENARIO_01_APRIL_1992.md","sha256":"2f44989d89d2f7b3cd3a9d2db746357ddc998c0aa449fcc1bee63ab6887fd26a","lines":"330-360, 816-829"},
+    {"path":"docs/knowledge/HVO_ORDER_OF_BATTLE_MASTER.md","sha256":"9c3c33cda2e7b14354fdded9e5f295827d5817187f1aa15388a85b2a3161cb0b","lines":"134, 181-224"},
+    {"path":"docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md","sha256":"5c14cca71ab72711732588f769597949291dbfea39c9fa4f88162987a3e82d5c","lines":"406-420, 477-482, 593-615","tier":"secondary cross-reference; dates require authoritative confirmation"},
+    {"path":"docs/40_reports/proposals/20260619_VITEZOVI_IDENTITY_MODELING_DECISION.md","sha256":"7b45af692f8ee90952e49995612806af8695017174fc41000acc687970ec4547","lines":"10-25, 35-56"},
+    {"path":"data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0437.json","sha256":"837b5c16c5de079f301d64af5641e4bf368bc53f2d1e6345028199f04da51e9d","citation":"BB2 p.437","claim":"Vitez territorial brigade distinct from company-sized PPN Vitezovi; PPN formed late 1992/early 1993"},
+    {"path":"data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0446.json","sha256":"7670501c951d6023e42d420e46f8b884ad0eb60da07f5ace2ec03ca62a256664","citation":"BB2 p.446","claim":"Ban established 20 Dec 1992 from municipal HVO HQs; later split into 94th and 95th"},
+    {"path":"data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0460.json","sha256":"27606c27e3c56190a7f6014ebc18a3a07b85773e10da8a654e809d1f280acc22","citation":"BB2 p.460","claim":"Ban-to-94th/95th lineage repeated"},
+    {"path":"data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0520.json","sha256":"e92f0206f4c1901234e9aee756593a260b3d8db669000470b69eb0d8f9272825","citation":"BB1 p.520","claim":"later Vitez Corps OOB; not April proof"},
+    {"path":"runs/player-parity-fatigue-owner-39-20261026-01/apr1992_definitive_188w__2272e1011ba35428__w39_n0/initial_save.json","sha256":"413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"},
+    {"path":"runs/player-parity-fatigue-owner-39-20261026-01/apr1992_definitive_188w__2272e1011ba35428__w39_n0/save_w15.json","sha256":"dae65bd362a14bcc2d3733657e0125d424725e7d226cf0f92b6a58a01a16c6cb"},
+    {"path":"runs/player-parity-fatigue-owner-39-20261026-01/apr1992_definitive_188w__2272e1011ba35428__w39_n0/brigade_temporal_log.jsonl","sha256":"83b3fa2544c420961cbb42808dde8da9cdf42ba250b005c1a7c30f09d2225a86"}
+  ]
+}

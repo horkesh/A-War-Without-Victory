@@ -1,0 +1,33 @@
+{
+  "schema": "hvo-precursor-lifecycle-proposal-v1",
+  "scope_ids": [
+    "hrhb_ban_jelai_brigade",
+    "hrhb_94th_brigade",
+    "hrhb_95th_brigade",
+    "hrhb_kiseljak_brigade",
+    "hrhb_kreevo_brigade"
+  ],
+  "verdict": "engine_and_history_gap_blocks_direct_data_only_fix",
+  "source_supported": {
+    "ban_established": "1992-12-20",
+    "ban_sources": ["Kiseljak municipal HVO headquarters", "Kresevo municipal HVO headquarters", "Fojnica municipal HVO headquarters"],
+    "successors": ["94th Ban Josip Jelacic Home Defense Regiment", "95th Marinko Bosnjak Home Defense Regiment"],
+    "split_date": null,
+    "april_fojnica_counter": null
+  },
+  "turn_semantics": {
+    "epoch": "1992-04-06",
+    "meta_month_is_zero_based": true,
+    "turn_36_boundary": "1992-12-14",
+    "turn_37_boundary": "1992-12-21",
+    "lifecycle_observes_post_increment_turn": true,
+    "ban_trigger_turn": null,
+    "required_ruling": "turn 36 effective-during-week versus turn 37 not-before-formal-date"
+  },
+  "opening_personnel_total_five_rows": 3500,
+  "authored_operation_id_references": [],
+  "existing_lifecycle_supports_coherent_transition": false,
+  "required_event_shape": ["many_to_one", "one_to_many", "full_resource_conservation", "reference_remap", "location_validation", "idempotent_receipt"],
+  "implementation_authorized": false,
+  "required_review": ["independent_historian", "canon"]
+}
