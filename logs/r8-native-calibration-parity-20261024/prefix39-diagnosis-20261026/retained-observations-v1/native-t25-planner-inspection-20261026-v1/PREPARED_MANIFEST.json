@@ -1,0 +1,47 @@
+{
+  "schema": "awwv.native-t25-request-op-planner-prepared-manifest.v1",
+  "status": "prepared_not_run",
+  "exclusive_root": "tmp/player-bot-capability-parity-20261024/native-t25-planner-inspection-20261026-v1",
+  "attempt_directory": "tmp/player-bot-capability-parity-20261024/native-t25-planner-inspection-20261026-v1/attempt-001",
+  "attempt_directory_exists": false,
+  "prepared_files": [
+    {
+      "path": "inspect_t25_planner.ts",
+      "bytes": 11505,
+      "sha256": "f08fc9b43021caba98b0d02ab09cef39b37af5e6cc9e5213c186814acfaffcea"
+    },
+    {
+      "path": "inspection.config.json",
+      "bytes": 2487,
+      "sha256": "8b6c151b30aaf5b4d2a447fb7ccd8cd42a6780e1bb68a6a0bf8b4287c89d3e29"
+    },
+    {
+      "path": "PRECHECK.json",
+      "bytes": 2182,
+      "sha256": "5920587a238ba571528036ae19f270efedbe3f59e42ef8e218bb1566b936fd6f"
+    },
+    {
+      "path": "RUN_COMMAND.txt",
+      "bytes": 585,
+      "sha256": "c378f2a1fab06e0e376953f2ad5ef2225c20bc4e5034ab9fa4b3c26ddd339947"
+    },
+    {
+      "path": "STOPPING_CRITERIA.md",
+      "bytes": 1179,
+      "sha256": "2a24ea86c8b246a27ba54cc55cb394655892433278c54a40211ad160496ab145"
+    }
+  ],
+  "preservation_wrapper": {
+    "path": "tools/diagnostics/run_preserved_preflight.cjs",
+    "bytes": 9536,
+    "sha256": "3933e010daf15938d026692e732e401d5ce50e1e0656d546e4697723e9a7779e"
+  },
+  "launch_contract": {
+    "review_required_before_launch": true,
+    "one_attempt_only": true,
+    "timeout_ms": 60000,
+    "expected_planner_call_count": 2,
+    "expected_artifact": "result.json",
+    "automatic_retry": false
+  }
+}

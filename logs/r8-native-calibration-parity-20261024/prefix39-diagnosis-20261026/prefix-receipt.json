@@ -1,0 +1,228 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T22:19:37.089Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/prefix39-validation-v1/actual-attempt-02",
+  "timeout_ms": 300000,
+  "original_argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/prefix39-validation-v1/qualification.cjs",
+    "--mode",
+    "campaign",
+    "--config",
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/prefix39-validation-v1/CONFIG.bound.v2.json",
+    "--config-sha256",
+    "14b6b016cba954c9ce4a300b20cb958ab1199fa45d1fa155ccc25ca032163bab",
+    "--evidence",
+    "{evidenceDir}"
+  ],
+  "argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/prefix39-validation-v1/qualification.cjs",
+    "--mode",
+    "campaign",
+    "--config",
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/prefix39-validation-v1/CONFIG.bound.v2.json",
+    "--config-sha256",
+    "14b6b016cba954c9ce4a300b20cb958ab1199fa45d1fa155ccc25ca032163bab",
+    "--evidence",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-package-v6\\scenario-postturn-parity-repair-v1\\prefix39-validation-v1\\actual-attempt-02"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "opening-preservation.json",
+    "preflight.json",
+    "launch.json",
+    "campaign.stdout.log",
+    "campaign.stderr.log",
+    "campaign.execution.json",
+    "postrun/evaluation-candidate.json",
+    "postrun/evaluation-positive.json",
+    "postrun/evaluation-negative.json",
+    "postrun/scoring.json",
+    "postrun/consistency.stdout.log",
+    "postrun/consistency.stderr.log",
+    "postrun/consistency.execution.json",
+    "postrun/health.stdout.log",
+    "postrun/health.stderr.log",
+    "postrun/health.execution.json",
+    "postrun/movement.stdout.log",
+    "postrun/movement.stderr.log",
+    "postrun/movement.execution.json",
+    "postrun/graph-roster.json",
+    "postrun/save-provenance.json",
+    "postrun/control-attribution.json",
+    "postrun/horizon-status.json",
+    "closing-preservation.json",
+    "result.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/prefix39-validation-v1/qualification.cjs",
+    "bytes": 28058,
+    "raw_sha256": "08aaad07c6a0e72b3c43a18af31d0827e03b55b3a269204e602213aab71564fc",
+    "normalized_text_sha256": "08aaad07c6a0e72b3c43a18af31d0827e03b55b3a269204e602213aab71564fc",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 28058,
+      "sha256": "08aaad07c6a0e72b3c43a18af31d0827e03b55b3a269204e602213aab71564fc"
+    }
+  },
+  "end_utc": "2026-10-25T22:20:47.446Z",
+  "pid": 11788,
+  "child_exit": 2,
+  "wrapper_exit": 2,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/prefix39-validation-v1/qualification.cjs",
+    "bytes": 28058,
+    "raw_sha256": "08aaad07c6a0e72b3c43a18af31d0827e03b55b3a269204e602213aab71564fc",
+    "normalized_text_sha256": "08aaad07c6a0e72b3c43a18af31d0827e03b55b3a269204e602213aab71564fc",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "opening-preservation.json",
+      "bytes": 3014,
+      "sha256": "ef660fe60a6ab37b537044116c039d5db93a6ffe58571df593c9f405dbd2c614"
+    },
+    {
+      "path": "preflight.json",
+      "bytes": 3062,
+      "sha256": "655324f2e999107374cad5e133d9a605d64f16cc4c49040f837585374bff07ce"
+    },
+    {
+      "path": "launch.json",
+      "bytes": 797,
+      "sha256": "7689934d1594f8f1e2304187abdf508c5fee471c8d2a0daf6bcc922400ce2e96"
+    },
+    {
+      "path": "campaign.stdout.log",
+      "bytes": 3344572,
+      "sha256": "786fd61bfcca552e088bb3c0212b71b89e1aac3e666ca75f9756385251f2677a"
+    },
+    {
+      "path": "campaign.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "campaign.execution.json",
+      "bytes": 564,
+      "sha256": "c33e97312c1c0d82b2301c979b3fb29a6ab7c44eeb68ac578adfa0d84eb2657f"
+    },
+    {
+      "path": "postrun/evaluation-candidate.json",
+      "bytes": 1858,
+      "sha256": "5db1ef794f74ee49a0c0af9a71cf4f15f20be27db3d651cc1323c987b9258cd2"
+    },
+    {
+      "path": "postrun/evaluation-positive.json",
+      "bytes": 790,
+      "sha256": "6370db73fc9364844d84bb70c89d57e1ab836d6ca945848dbd4eaa71272ee094"
+    },
+    {
+      "path": "postrun/evaluation-negative.json",
+      "bytes": 1495,
+      "sha256": "5a667e3687b84ed4e39a6e01a5585d9ad08a9ad983a9c32054134deda56369a0"
+    },
+    {
+      "path": "postrun/scoring.json",
+      "bytes": 4607,
+      "sha256": "b0168c5e0280cd76b2eb8e879a0da9414c3c920fbcf63ace53b798b21bd2f3bc"
+    },
+    {
+      "path": "postrun/consistency.stdout.log",
+      "bytes": 2328,
+      "sha256": "97f601695b58b2d33c375031771f99f3a0c638fbf07eeea98e0fcc3adedb43db"
+    },
+    {
+      "path": "postrun/consistency.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "postrun/consistency.execution.json",
+      "bytes": 499,
+      "sha256": "ab310eece8945c9d405af3087fa7a8d6d24cd319ddfcf5a02681225bbc11c572"
+    },
+    {
+      "path": "postrun/health.stdout.log",
+      "bytes": 1871,
+      "sha256": "dab05bbd4d333d7917e78da4d3c33f3497e23049fc627558b7c54484ddfc6bf5"
+    },
+    {
+      "path": "postrun/health.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "postrun/health.execution.json",
+      "bytes": 547,
+      "sha256": "525c5092c52b449d42058f1919b50a09ef6237cca792ed4e104c9ef366802257"
+    },
+    {
+      "path": "postrun/movement.stdout.log",
+      "bytes": 1930,
+      "sha256": "c3e825748139214dca04df6a891223aa1f2ec45d406b3068e9835bbcf0bc6cf6"
+    },
+    {
+      "path": "postrun/movement.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "postrun/movement.execution.json",
+      "bytes": 2930,
+      "sha256": "742e66e571203c140a067b2fd1f6bb4190ae34f092a3a954575f575e84da6752"
+    },
+    {
+      "path": "postrun/graph-roster.json",
+      "bytes": 254,
+      "sha256": "bb904c2246f7ae8d42404db87b2b8a32df72da673299a29fbff5fc022e372890"
+    },
+    {
+      "path": "postrun/save-provenance.json",
+      "bytes": 298,
+      "sha256": "b1dc8670c03f4abc86899388e2a5c3af7a9f14ecfe56e0760cd590d3d54fb178"
+    },
+    {
+      "path": "postrun/control-attribution.json",
+      "bytes": 438,
+      "sha256": "b651340b133cd07a17c3364bdc7b526246bdf4f9c73d7952ca91d99de023e888"
+    },
+    {
+      "path": "postrun/horizon-status.json",
+      "bytes": 1138,
+      "sha256": "e1a136646e02e586199b54d04569bcc8673718a79ced406b9c6979f5a9becf00"
+    },
+    {
+      "path": "closing-preservation.json",
+      "bytes": 3014,
+      "sha256": "ef660fe60a6ab37b537044116c039d5db93a6ffe58571df593c9f405dbd2c614"
+    },
+    {
+      "path": "result.json",
+      "bytes": 1485,
+      "sha256": "37bc539a86c120b65e17f4a1f681adf948b2e60f21c7b92340c24dcefd54e369"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "queryPurity": {
+    "pass": true,
+    "beforeSha256": "f06fd4570bebf6aa29bcc7c7621468d7234859493996d973d292baa1475f8582",
+    "afterSha256": "f06fd4570bebf6aa29bcc7c7621468d7234859493996d973d292baa1475f8582"
+  },
+  "objection": {
+    "forceRatio": 0,
+    "estimatedCasualties": 0,
+    "recommendedAction": "delay"
+  },
+  "forced": true,
+  "payload": {
+    "corpsId": "arbih_4th_corps",
+    "targetOsid": "op:trnovo:tosici",
+    "forced_over_objection": true
+  },
+  "stageResult": {
+    "ok": true
+  },
+  "caBefore": {
+    "current": 94,
+    "last_recovery": 4,
+    "last_recovery_source": "quiet_front_restraint",
+    "lifetime_spent": 25,
+    "max": 100,
+    "reserve": 0,
+    "reserve_max": 15,
+    "spent_this_turn": 0
+  },
+  "caAfter": {
+    "current": 69,
+    "last_recovery": 4,
+    "last_recovery_source": "quiet_front_restraint",
+    "lifetime_spent": 50,
+    "max": 100,
+    "reserve": 0,
+    "reserve_max": 15,
+    "spent_this_turn": 25
+  },
+  "pending": {
+    "target_osid": "op:trnovo:tosici",
+    "turn": 16,
+    "ca_cost": 25,
+    "forced_over_objection": true
+  },
+  "eligibleRoster": [
+    "arbih_441st_vitezka_mountain",
+    "arbih_442nd_mountain",
+    "arbih_443rd_mountain",
+    "arbih_444th_mountain",
+    "arbih_445th_mountain",
+    "arbih_447th_liberation",
+    "arbih_448th_liberation",
+    "arbih_449th_eastern_herzegovina_mountain",
+    "arbih_450th_light",
+    "arbih_4th_muslim_light"
+  ],
+  "stagedState": {
+    "bytes": 4756863,
+    "sha256": "f7a6930d8e15c28fc0756e0c0622315a4a06b8d53cec9981c374908e52b8d771"
+  },
+  "crossCorpsOverlap": {
+    "corpsId": "arbih_1st_corps",
+    "operationName": "Operation Circle",
+    "targetOsid": "op:trnovo:tosici",
+    "ordinaryGuardScope": "same CorpsCommandState passed as cmd to validateOpAtInjection",
+    "disposition": "disclosed lawful cross-corps duplicate target under ordinary same-corps overlap guard; no exemption"
+  }
+}

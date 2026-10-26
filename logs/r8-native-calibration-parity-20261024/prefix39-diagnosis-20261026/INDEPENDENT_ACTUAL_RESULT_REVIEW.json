@@ -1,0 +1,165 @@
+{
+  "schema": "awwv.scenario-postturn-prefix39.independent-actual-result-review.v1",
+  "verdict": "NO_GO__STOP_NO_RETRY",
+  "scope": "Independent review of the sole exact v2 first-39 attempt plus a read-only full controller-map comparison to the retained Package03 native39 cohort. No run, retry, source change, suite, native execution, build, or health-brigade causal diagnosis was performed.",
+  "attempt": {
+    "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/prefix39-validation-v1/actual-attempt-02",
+    "receipt_sha256": "70c115d47da52972e645a5733a4a15caae50d3e8801b608f960c79df05c671d4",
+    "result_sha256": "37bc539a86c120b65e17f4a1f681adf948b2e60f21c7b92340c24dcefd54e369",
+    "scoring_sha256": "b0168c5e0280cd76b2eb8e879a0da9414c3c920fbcf63ace53b798b21bd2f3bc",
+    "entry_sha256": "08aaad07c6a0e72b3c43a18af31d0827e03b55b3a269204e602213aab71564fc",
+    "entry_unchanged": true,
+    "wrapper_exit": 2,
+    "child_exit": 2,
+    "signal": null,
+    "timed_out": false,
+    "spawn_error": null,
+    "artifact_contract_pass": true,
+    "elapsed_ms": 70249,
+    "cap_ms": 300000,
+    "retries": 0,
+    "simulation_count": 1,
+    "campaign": {
+      "exit": 0,
+      "process_status": 0,
+      "signal": null,
+      "timed_out": false,
+      "spawn_error": null,
+      "stderr_bytes": 0
+    },
+    "candidate": "runs/player-parity-postturn-39-20261025-01/apr1992_definitive_188w__2272e1011ba35428__w39_n0"
+  },
+  "rejecting_categories": [
+    {
+      "gate": "scoring",
+      "actual": 704,
+      "denominator": 712,
+      "minimum": 707,
+      "n91_losses": [
+        "op:donji_vakuf:korenici",
+        "op:foca:donje_zesce",
+        "op:trnovo:tosici"
+      ],
+      "n92_losses": [
+        "op:donji_vakuf:korenici",
+        "op:foca:donje_zesce",
+        "op:trnovo:tosici"
+      ]
+    },
+    {
+      "gate": "health",
+      "reader_exit": 1,
+      "failed_checks": [
+        {
+          "name": "stranded_brigades",
+          "actual": 13,
+          "maximum": 3,
+          "horizon_band": "40w",
+          "run_weeks": 39
+        }
+      ],
+      "other_health_checks_passed": [
+        "zero_eligible_ops",
+        "invalid_op_weeks",
+        "ghost_destroyed",
+        "matched_osids",
+        "consistency_failures",
+        "kw_ratio"
+      ],
+      "stderr_bytes": 0,
+      "causal_diagnosis": null
+    }
+  ],
+  "passing_categories": {
+    "campaign": true,
+    "positive_control": "n101 707/712, n91/n92 losses 0/0",
+    "negative_control": "n102 705/712, exact n91/n92 losses 2/2 at Donje Zesce and Tosici",
+    "consistency": true,
+    "movement": true,
+    "graph_roster": {
+      "pass": true,
+      "front_edges": 290,
+      "sectors": 69,
+      "rostered_formations": 233,
+      "all_issue_arrays_empty": true
+    },
+    "save_provenance": {
+      "pass": true,
+      "turns": "final=39, save_w15=15, save_w16=16",
+      "weekly_rows": 39,
+      "weekly_ordered": true,
+      "git_commit": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+      "git_dirty": false,
+      "consumed_inputs": 29,
+      "current_input_mismatches": 0
+    },
+    "control_attribution": {
+      "pass": true,
+      "weekly_rows": 39,
+      "failures": 0,
+      "summary": {
+        "total_changes": 144,
+        "combat": 87,
+        "paramilitary": 33,
+        "consolidation": 0,
+        "abandoned": 0,
+        "init_overrides": 23,
+        "other": 1
+      }
+    },
+    "preservation": {
+      "pass": true,
+      "retained_roots": 14,
+      "opening_sha256": "ef660fe60a6ab37b537044116c039d5db93a6ffe58571df593c9f405dbd2c614",
+      "closing_sha256": "ef660fe60a6ab37b537044116c039d5db93a6ffe58571df593c9f405dbd2c614"
+    }
+  },
+  "source_after_attempt": {
+    "head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+    "clean": true,
+    "scenario_runner_sha256": "b811a55f165a1664e87b48be28008ada9fec7486ddb5c049b2013fbf78bd0972",
+    "maintained_test_sha256": "246259561471affbaa7617f4c92ef6f67a6101abf1aa64b669e18c6acd5b61e3"
+  },
+  "native39_controller_comparison": {
+    "prefix39": {
+      "path": "runs/player-parity-postturn-39-20261025-01/apr1992_definitive_188w__2272e1011ba35428__w39_n0/final_save.json",
+      "bytes": 5459089,
+      "sha256": "54145050851f1fc0293f3cddb0d4cfa8576cf99fd901a498869ca68aee5c91b9",
+      "turn": 39,
+      "controller_count": 712,
+      "controller_map_sha256": "6ed89306d4adff552116a38dd616154cc76e0af41f9c565e730f5df26ed5c30e",
+      "runtime": "Node v22.23.2 headless run_scenario_with_preflight",
+      "head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+      "policy_state": "military.event_flags.rbih_paramilitary_policy=always_deny; rbih_paramilitary_refused=true"
+    },
+    "native39": {
+      "path": "tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/final-autosave.json",
+      "bytes": 5364177,
+      "sha256": "623cbaed0e6186bc5f2c4a18fd5e9b22836db9343df0e4122316c92e5c9902e8",
+      "turn": 39,
+      "controller_count": 712,
+      "controller_map_sha256": "6ed89306d4adff552116a38dd616154cc76e0af41f9c565e730f5df26ed5c30e",
+      "runtime": "retained packaged Electron Package03 native successor",
+      "head": "a3063366ae094468fbb2ede143f9ced3a1ed2f68",
+      "packaged_executable_sha256": "c97f9aee446b2931d01bfb5b5a4ac9d802500fcacb734ea3a00523ba236c9539",
+      "packaged_asar_sha256": "ba64264b9611870214490cb433e9698fd82862fdf2cfd5c2c8272d51a2d1ed9f",
+      "policy_input": "explicit visible player choice rbih-paramilitary-policy=always_allow; officer-succession-policy=historical",
+      "policy_state": "military.event_flags.rbih_paramilitary_policy=always_allow; rbih_paramilitary_authorized=true",
+      "retained_authority_result_sha256": "82e5b0c8cfd2547ce8d584a32c85595bbbf5646934bc8a22bd3e048320016739",
+      "retained_postcheck_sha256": "be3688757d130e71397a4fc78e3068c0c16356b1a28b9e784149796aca57bbc0"
+    },
+    "painted_reference_ids": 712,
+    "painted_map_differences": 0,
+    "full_controller_union_ids": 712,
+    "full_union_differences": 0,
+    "prefix_only_keys": 0,
+    "native_only_keys": 0,
+    "conclusion": "The corrected headless and retained native39 cohorts have byte-canonically equal sorted controller maps at turn 39. This is genuine complete map equality, not an inference from their equal 704 scores or shared three-loss list."
+  },
+  "comparison_limits": [
+    "The cohorts have different source heads, runtimes, and RBiH paramilitary policy inputs/states. Controller-map equality does not prove policy equivalence.",
+    "This comparison does not establish full-save byte equality, turn-by-turn timeline equality, operation/capture-chain equality, native/headless general equivalence, 188-week parity, or n94 target closure.",
+    "The first-39 acceptance gate remains failed. No score, loss, or health criterion is waived."
+  ],
+  "stop": "Preserve all evidence. Do not retry this attempt or proceed to the 188-week run, full suite, native run, package, or build."
+}

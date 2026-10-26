@@ -1,0 +1,11 @@
+Error: root
+    at ok (C:\Users\User\.codex\worktrees\october-calibration-checkpoint\A-War-Without-Victory\tmp\player-bot-capability-parity-20261024\later-native-force-query-20261026-v1\query_only.cjs:5:371)
+    at main (C:\Users\User\.codex\worktrees\october-calibration-checkpoint\A-War-Without-Victory\tmp\player-bot-capability-parity-20261024\later-native-force-query-20261026-v1\query_only.cjs:6:63)
+    at Object.<anonymous> (C:\Users\User\.codex\worktrees\october-calibration-checkpoint\A-War-Without-Victory\tmp\player-bot-capability-parity-20261024\later-native-force-query-20261026-v1\query_only.cjs:6:3905)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object.transformer (C:\Users\User\.codex\worktrees\april-1995-glamoc\A-War-Without-Victory\node_modules\tsx\dist\register-D46fvsV_.cjs:3:1104)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at loadCJSModuleWithModuleLoad (node:internal/modules/esm/translators:335:3)
+    at ModuleWrap.<anonymous> (node:internal/modules/esm/translators:235:7)

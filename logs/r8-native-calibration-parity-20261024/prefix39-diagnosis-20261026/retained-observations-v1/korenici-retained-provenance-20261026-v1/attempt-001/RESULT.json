@@ -1,0 +1,4593 @@
+{
+  "schema": "awwv.korenici-retained-provenance.v1",
+  "scope": "retained artifacts only; no engine import, advance, query, stage, mutation, or source edit",
+  "ids": {
+    "osid": "op:donji_vakuf:korenici",
+    "actual_attacker": "rs_16th_krajina_motorized",
+    "helper_hypothesis": "rs_22nd_krajina_infantry"
+  },
+  "provenance": {
+    "current_p03_manifest": {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\manifest.json",
+      "sha256": "5fe20c64fcdb651f576a1078e02a1ad1b1d9bf31f46a9ac305f168964be94fc5",
+      "data": {
+        "schemaVersion": 1,
+        "runSlug": "fractional-fatigue-p03-rbih-t39-01",
+        "faction": "RBiH",
+        "harnessSha256": "771410a733e4ebc8d821ded0bc44bf6f3719f0dabf275aa5432ad00445938484",
+        "gitHead": "a3063366ae094468fbb2ede143f9ced3a1ed2f68",
+        "workingTreeContentSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "workingTreeContentFileCount": 0,
+        "initialScenarioProvenance": {
+          "sourceKind": "new_campaign",
+          "scenarioKey": "apr_1992",
+          "scenarioId": "apr1992_definitive_188w",
+          "scenarioSeed": "harness-seed",
+          "requestedFaction": "RBiH",
+          "calibrationScenario": true,
+          "decisionMode": "historical",
+          "autonomyLevel": 2,
+          "headless": false,
+          "scenarioSourcePath": "data/scenarios/apr1992_definitive_188w.json",
+          "scenarioSourceSha256": "4257b039f5b1dbb7f21d940ec656b2d0b787856f27e7c26b6f3f57f256d82ecf",
+          "startupSnapshotPath": "data/derived/startup/apr_1992_initial_save.json",
+          "startupSnapshotSha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+          "initialAutosaveSha256": "c98ef45d7c4343154a7300d27b7b6277e25ea001a3018bf9fd6898be75d68f04"
+        },
+        "initialStateHash": "e194049cfb1a5f99f0c1c7d58a9e2a4db108ccd951338ef6342c67a703fce8f7",
+        "initialAutosaveHash": "c98ef45d7c4343154a7300d27b7b6277e25ea001a3018bf9fd6898be75d68f04",
+        "finalStateHash": "f62f305fd803c9e1229db58629e368c9eb0632ae382c789ea4282fa551fb4d8b",
+        "finalAutosaveHash": "623cbaed0e6186bc5f2c4a18fd5e9b22836db9343df0e4122316c92e5c9902e8",
+        "initial": {
+          "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\initial-autosave.json",
+          "sha256": "c98ef45d7c4343154a7300d27b7b6277e25ea001a3018bf9fd6898be75d68f04",
+          "bytes": 1461595,
+          "verifiedSha256": "c98ef45d7c4343154a7300d27b7b6277e25ea001a3018bf9fd6898be75d68f04",
+          "verifiedBytes": 1461595
+        },
+        "final": {
+          "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\final-autosave.json",
+          "sha256": "623cbaed0e6186bc5f2c4a18fd5e9b22836db9343df0e4122316c92e5c9902e8",
+          "bytes": 5364177,
+          "verifiedSha256": "623cbaed0e6186bc5f2c4a18fd5e9b22836db9343df0e4122316c92e5c9902e8",
+          "verifiedBytes": 5364177
+        }
+      }
+    },
+    "rejected_older_705_manifest": {
+      "path": "tmp-paradox-qa-20260710\\evidence\\player-parity-rbih-t39-20261025-04\\rbih\\manifest.json",
+      "sha256": "57f69507af056b1454c425aed1af5fb0ce91d55668967848d78e7454845b2579",
+      "data": {
+        "schemaVersion": 1,
+        "runSlug": "player-parity-rbih-t39-20261025-04",
+        "faction": "RBiH",
+        "harnessSha256": "771410a733e4ebc8d821ded0bc44bf6f3719f0dabf275aa5432ad00445938484",
+        "gitHead": "77a2cc8e6b270474d0c3beef48b655c2903192e8",
+        "workingTreeContentSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "workingTreeContentFileCount": 0,
+        "initialScenarioProvenance": {
+          "sourceKind": "new_campaign",
+          "scenarioKey": "apr_1992",
+          "scenarioId": "apr1992_definitive_188w",
+          "scenarioSeed": "harness-seed",
+          "requestedFaction": "RBiH",
+          "calibrationScenario": true,
+          "decisionMode": "historical",
+          "autonomyLevel": 2,
+          "headless": false,
+          "scenarioSourcePath": "data/scenarios/apr1992_definitive_188w.json",
+          "scenarioSourceSha256": "4257b039f5b1dbb7f21d940ec656b2d0b787856f27e7c26b6f3f57f256d82ecf",
+          "startupSnapshotPath": "data/derived/startup/apr_1992_initial_save.json",
+          "startupSnapshotSha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+          "initialAutosaveSha256": "c98ef45d7c4343154a7300d27b7b6277e25ea001a3018bf9fd6898be75d68f04"
+        },
+        "initialStateHash": "e194049cfb1a5f99f0c1c7d58a9e2a4db108ccd951338ef6342c67a703fce8f7",
+        "initialAutosaveHash": "c98ef45d7c4343154a7300d27b7b6277e25ea001a3018bf9fd6898be75d68f04",
+        "finalStateHash": "9b6cdf8b8c9937fa799e380f4f8a40cfb5d34cc4a815f241ce9b52ffd5477fc9",
+        "finalAutosaveHash": "e58b94766763a10f80dc9bb69a2cb0a8ddde6436f22b12465b4035da63f38340",
+        "initial": {
+          "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-parity-rbih-t39-20261025-04\\rbih\\initial-autosave.json",
+          "sha256": "c98ef45d7c4343154a7300d27b7b6277e25ea001a3018bf9fd6898be75d68f04",
+          "bytes": 1461595,
+          "verifiedSha256": "c98ef45d7c4343154a7300d27b7b6277e25ea001a3018bf9fd6898be75d68f04",
+          "verifiedBytes": 1461595
+        },
+        "final": {
+          "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-parity-rbih-t39-20261025-04\\rbih\\final-autosave.json",
+          "sha256": "e58b94766763a10f80dc9bb69a2cb0a8ddde6436f22b12465b4035da63f38340",
+          "bytes": 5328576,
+          "verifiedSha256": "e58b94766763a10f80dc9bb69a2cb0a8ddde6436f22b12465b4035da63f38340",
+          "verifiedBytes": 5328576
+        }
+      }
+    },
+    "n101_run_meta": {
+      "path": "runs\\apr1992_definitive_188w__6deb5845c150c196__w188_n101\\run_meta.json",
+      "sha256": "7765ad56b5ae787964715270d4fa3d99bb7b6a5166569fd38fa09c36eea5cdc0",
+      "git_commit": "a3063366ae094468fbb2ede143f9ced3a1ed2f68"
+    },
+    "n102_run_meta": {
+      "path": "runs\\apr1992_definitive_188w__6deb5845c150c196__w188_n102\\run_meta.json",
+      "sha256": "dff4dae0792e02e5b6a75a7a0b460ecae0384b4560df38c6a1dc3741f18d2077",
+      "git_commit": "b30597f49aad99032781c251b41a9de886cce3be"
+    },
+    "boundary_decision": {
+      "path": "tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-package-v6\\scenario-postturn-parity-repair-v1\\current-boundary-diagnostic-v2\\INDEPENDENT_ACTUAL_IMPLEMENTATION_DECISION.json",
+      "sha256": "ff2d4ce8501805a2af87f4cd23072b5b787e48b1f16db80b6c8519116e0c093f",
+      "persisted_helper_delta": null
+    }
+  },
+  "reference_snapshots": {
+    "n101": [
+      {
+        "path": "runs\\apr1992_definitive_188w__6deb5845c150c196__w188_n101\\save_w15.json",
+        "sha256": "ffcc51b3ed922208e5863ec099c1fa94ba225663d3b0bb702e4c85357b6f39d6",
+        "turn": 15,
+        "week_date_from_scenario_start": "1992-06-19",
+        "korenici_controller": "RBiH",
+        "attacker": {
+          "id": "rs_16th_krajina_motorized",
+          "faction": "RS",
+          "corps_id": "vrs_1st_krajina",
+          "location_osid": "op:celinac:josavka_donja_2",
+          "personnel": 2200,
+          "morale": 70,
+          "cohesion": 53.44999999999998,
+          "readiness": "active",
+          "posture": "defend",
+          "assignment": {
+            "kind": "sector",
+            "role": "rear",
+            "sector_id": "sector:vrs_1st_krajina:7"
+          },
+          "assigned_sub_segment_id": null,
+          "fatigue": 0,
+          "order": {
+            "owner": "bot_discretionary",
+            "stance": "column",
+            "destination_sids": [
+              "op:teslic:blatnica_2"
+            ]
+          },
+          "movement_state": null,
+          "operation_commitment": null
+        },
+        "helper": {
+          "id": "rs_22nd_krajina_infantry",
+          "faction": "RS",
+          "corps_id": "vrs_1st_krajina",
+          "location_osid": "op:donji_vakuf:kutanja",
+          "personnel": 1114,
+          "morale": 60,
+          "cohesion": 45.349999999999994,
+          "readiness": "active",
+          "posture": "dig_in",
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:vrs_1st_krajina:2"
+          },
+          "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:2:0",
+          "fatigue": 0,
+          "order": null,
+          "movement_state": null,
+          "operation_commitment": null
+        },
+        "korenici_battle_this_turn": [],
+        "relevant_movements_this_turn": [
+          {
+            "formation_id": "rs_16th_krajina_motorized",
+            "formation_name": "16th Krajina Motorized",
+            "from_osid": "op:bosanska_dubica:medjedja_2",
+            "to_osid": "op:celinac:josavka_donja_2"
+          },
+          {
+            "formation_id": "rs_22nd_krajina_infantry",
+            "formation_name": "22nd Krajina Infantry",
+            "from_osid": "op:jajce:bravnice",
+            "to_osid": "op:donji_vakuf:kutanja"
+          }
+        ]
+      },
+      {
+        "path": "runs\\apr1992_definitive_188w__6deb5845c150c196__w188_n101\\save_w16.json",
+        "sha256": "d78371940401a11d56b975c45f0181b72ae4fe6f78a662533c0859235576dadd",
+        "turn": 16,
+        "week_date_from_scenario_start": "1992-06-26",
+        "korenici_controller": "RBiH",
+        "attacker": {
+          "id": "rs_16th_krajina_motorized",
+          "faction": "RS",
+          "corps_id": "vrs_1st_krajina",
+          "location_osid": "op:celinac:josavka_donja_2",
+          "personnel": 2200,
+          "morale": 72,
+          "cohesion": 51.99999999999998,
+          "readiness": "active",
+          "posture": "defend",
+          "assignment": {
+            "kind": "sector",
+            "role": "rear",
+            "sector_id": "sector:vrs_1st_krajina:1"
+          },
+          "assigned_sub_segment_id": null,
+          "fatigue": 0,
+          "order": null,
+          "movement_state": {
+            "destination_osid": null,
+            "path": [
+              "op:celinac:josavka_donja_2",
+              "op:celinac:snjegotina_srednja",
+              "op:teslic:buletic_2",
+              "op:teslic:blatnica_2"
+            ],
+            "progress": null
+          },
+          "operation_commitment": null
+        },
+        "helper": {
+          "id": "rs_22nd_krajina_infantry",
+          "faction": "RS",
+          "corps_id": "vrs_1st_krajina",
+          "location_osid": "op:donji_vakuf:kutanja",
+          "personnel": 1131,
+          "morale": 60,
+          "cohesion": 44.349999999999994,
+          "readiness": "active",
+          "posture": "dig_in",
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:vrs_1st_krajina:7"
+          },
+          "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:7:0",
+          "fatigue": 0,
+          "order": null,
+          "movement_state": null,
+          "operation_commitment": null
+        },
+        "korenici_battle_this_turn": [],
+        "relevant_movements_this_turn": []
+      },
+      {
+        "path": "runs\\apr1992_definitive_188w__6deb5845c150c196__w188_n101\\save_w39.json",
+        "sha256": "f459cd050e55e764092010ef79c23a7c629487e3c6a8ea5d3aaf33082dc053e3",
+        "turn": 39,
+        "week_date_from_scenario_start": "1992-12-04",
+        "korenici_controller": "RS",
+        "attacker": {
+          "id": "rs_16th_krajina_motorized",
+          "faction": "RS",
+          "corps_id": "vrs_1st_krajina",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 2200,
+          "morale": 97,
+          "cohesion": 35,
+          "readiness": "overextended",
+          "posture": "defend",
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:vrs_1st_krajina:7"
+          },
+          "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:7:0",
+          "fatigue": 14.5,
+          "order": null,
+          "movement_state": null,
+          "operation_commitment": null
+        },
+        "helper": {
+          "id": "rs_22nd_krajina_infantry",
+          "faction": "RS",
+          "corps_id": "vrs_1st_krajina",
+          "location_osid": "op:donji_vakuf:jemanlici",
+          "personnel": 1560,
+          "morale": 76,
+          "cohesion": 35,
+          "readiness": "active",
+          "posture": "defend",
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:vrs_1st_krajina:7"
+          },
+          "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:7:0",
+          "fatigue": 0,
+          "order": null,
+          "movement_state": null,
+          "operation_commitment": null
+        },
+        "korenici_battle_this_turn": [],
+        "relevant_movements_this_turn": []
+      }
+    ],
+    "n102": [
+      {
+        "path": "runs\\apr1992_definitive_188w__6deb5845c150c196__w188_n102\\save_w15.json",
+        "sha256": "a58ceed98b0b8d1ad9e2328f8a9286d452502be1b7404b26ee630e2b1dcca573",
+        "turn": 15,
+        "week_date_from_scenario_start": "1992-06-19",
+        "korenici_controller": "RBiH",
+        "attacker": {
+          "id": "rs_16th_krajina_motorized",
+          "faction": "RS",
+          "corps_id": "vrs_1st_krajina",
+          "location_osid": "op:celinac:josavka_donja_2",
+          "personnel": 2200,
+          "morale": 70,
+          "cohesion": 53.44999999999998,
+          "readiness": "active",
+          "posture": "defend",
+          "assignment": {
+            "kind": "sector",
+            "role": "rear",
+            "sector_id": "sector:vrs_1st_krajina:6"
+          },
+          "assigned_sub_segment_id": null,
+          "fatigue": 0,
+          "order": {
+            "owner": "bot_discretionary",
+            "stance": "column",
+            "destination_sids": [
+              "op:kotor_varos:prisocka_2"
+            ]
+          },
+          "movement_state": null,
+          "operation_commitment": null
+        },
+        "helper": {
+          "id": "rs_22nd_krajina_infantry",
+          "faction": "RS",
+          "corps_id": "vrs_1st_krajina",
+          "location_osid": "op:donji_vakuf:babin_potok_2",
+          "personnel": 1135,
+          "morale": 62,
+          "cohesion": 48.849999999999994,
+          "readiness": "active",
+          "posture": "dig_in",
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:vrs_1st_krajina:6"
+          },
+          "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:6:0",
+          "fatigue": 1,
+          "order": null,
+          "movement_state": null,
+          "operation_commitment": null
+        },
+        "korenici_battle_this_turn": [],
+        "relevant_movements_this_turn": [
+          {
+            "formation_id": "rs_16th_krajina_motorized",
+            "formation_name": "16th Krajina Motorized",
+            "from_osid": "op:bosanska_dubica:medjedja_2",
+            "to_osid": "op:celinac:josavka_donja_2"
+          }
+        ]
+      },
+      {
+        "path": "runs\\apr1992_definitive_188w__6deb5845c150c196__w188_n102\\save_w16.json",
+        "sha256": "28c149186ac842ea55ce75ab697ff5c672065f3e532153df14401fcee99b3c33",
+        "turn": 16,
+        "week_date_from_scenario_start": "1992-06-26",
+        "korenici_controller": "RBiH",
+        "attacker": {
+          "id": "rs_16th_krajina_motorized",
+          "faction": "RS",
+          "corps_id": "vrs_1st_krajina",
+          "location_osid": "op:celinac:josavka_donja_2",
+          "personnel": 2200,
+          "morale": 72,
+          "cohesion": 51.99999999999998,
+          "readiness": "active",
+          "posture": "defend",
+          "assignment": {
+            "kind": "sector",
+            "role": "rear",
+            "sector_id": "sector:vrs_1st_krajina:1"
+          },
+          "assigned_sub_segment_id": null,
+          "fatigue": 0,
+          "order": null,
+          "movement_state": {
+            "destination_osid": null,
+            "path": [
+              "op:celinac:josavka_donja_2",
+              "op:kotor_varos:kotor_varos_2",
+              "op:kotor_varos:vrbanjci_2",
+              "op:kotor_varos:prisocka_2"
+            ],
+            "progress": null
+          },
+          "operation_commitment": null
+        },
+        "helper": {
+          "id": "rs_22nd_krajina_infantry",
+          "faction": "RS",
+          "corps_id": "vrs_1st_krajina",
+          "location_osid": "op:donji_vakuf:babin_potok_2",
+          "personnel": 1153,
+          "morale": 62,
+          "cohesion": 47.849999999999994,
+          "readiness": "active",
+          "posture": "dig_in",
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:vrs_1st_krajina:1"
+          },
+          "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:1:0",
+          "fatigue": 0.5,
+          "order": null,
+          "movement_state": null,
+          "operation_commitment": null
+        },
+        "korenici_battle_this_turn": [],
+        "relevant_movements_this_turn": []
+      },
+      {
+        "path": "runs\\apr1992_definitive_188w__6deb5845c150c196__w188_n102\\save_w39.json",
+        "sha256": "12ae79ebac55cf1287605d3da7f1360e67fafbc0dcb3703bba4ee2537039e628",
+        "turn": 39,
+        "week_date_from_scenario_start": "1992-12-04",
+        "korenici_controller": "RS",
+        "attacker": {
+          "id": "rs_16th_krajina_motorized",
+          "faction": "RS",
+          "corps_id": "vrs_1st_krajina",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 2200,
+          "morale": 97,
+          "cohesion": 35,
+          "readiness": "overextended",
+          "posture": "defend",
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:vrs_1st_krajina:7"
+          },
+          "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:7:0",
+          "fatigue": 23,
+          "order": null,
+          "movement_state": null,
+          "operation_commitment": {
+            "operation": "probe_vrs_1st_krajina_t39",
+            "phase": "planning",
+            "started_turn": 39,
+            "sector_id": "sector:vrs_1st_krajina:7",
+            "participating_brigades": [
+              "rs_16th_krajina_motorized"
+            ],
+            "axis": {
+              "axis_id": "probe_vrs_1st_krajina_t39",
+              "status": "executing",
+              "assigned_brigades": [
+                "rs_16th_krajina_motorized"
+              ],
+              "current_objective_index": 0,
+              "objectives": [
+                "op:bugojno:prijaci"
+              ]
+            }
+          }
+        },
+        "helper": {
+          "id": "rs_22nd_krajina_infantry",
+          "faction": "RS",
+          "corps_id": "vrs_1st_krajina",
+          "location_osid": "op:donji_vakuf:jemanlici",
+          "personnel": 1445,
+          "morale": 77,
+          "cohesion": 35.05,
+          "readiness": "active",
+          "posture": "attack",
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:vrs_1st_krajina:7"
+          },
+          "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:7:0",
+          "fatigue": 4,
+          "order": null,
+          "movement_state": null,
+          "operation_commitment": null
+        },
+        "korenici_battle_this_turn": [],
+        "relevant_movements_this_turn": [
+          {
+            "formation_id": "rs_22nd_krajina_infantry",
+            "formation_name": "22nd Krajina Infantry",
+            "from_osid": "op:donji_vakuf:donji_vakuf_2",
+            "to_osid": "op:donji_vakuf:jemanlici"
+          }
+        ]
+      }
+    ]
+  },
+  "capture_histories": {
+    "n101": {
+      "label": "n101 formerly-correct reference",
+      "provenance": {
+        "git_commit": "a3063366ae094468fbb2ede143f9ced3a1ed2f68",
+        "mode": "headless all-AI"
+      },
+      "path": "runs\\apr1992_definitive_188w__6deb5845c150c196__w188_n101\\save_w39.json",
+      "sha256": "f459cd050e55e764092010ef79c23a7c629487e3c6a8ea5d3aaf33082dc053e3",
+      "final_controller": "RS",
+      "capture_events": [
+        {
+          "attacker_brigade": "rs_16th_krajina_motorized",
+          "battle_id": "34:op:donji_vakuf:korenici:rs_16th_krajina_motorized:arbih_707th_slavna_mountain",
+          "from": "RBiH",
+          "mechanism": "combat",
+          "mun_id": "donji_vakuf",
+          "settlement_id": "op:donji_vakuf:korenici",
+          "to": "RS",
+          "turn": 34
+        }
+      ],
+      "korenici_battles": [
+        {
+          "turn": 34,
+          "all_attacker_ids": [
+            "rs_16th_krajina_motorized"
+          ],
+          "attacker_casualties": 186,
+          "attacker_faction": "RS",
+          "defender_casualties": 655,
+          "defender_contributions": [
+            {
+              "brigade_id": "arbih_705th_slavna_mountain",
+              "casualties_taken": 237,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 149.78
+            },
+            {
+              "brigade_id": "arbih_707th_slavna_mountain",
+              "casualties_taken": 277,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 175.2
+            },
+            {
+              "brigade_id": "arbih_708th_mountain",
+              "casualties_taken": 105,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 66.27
+            },
+            {
+              "brigade_id": "arbih_770th_slavna_mountain",
+              "casualties_taken": 36,
+              "distance_hops": 0,
+              "is_home_municipality": true,
+              "reactive_weight": 22.94
+            }
+          ],
+          "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
+          "mun_id": "donji_vakuf",
+          "osid": "op:donji_vakuf:korenici",
+          "outcome": "decisive_victory",
+          "primary_attacker_id": "rs_16th_krajina_motorized",
+          "primary_defender_id": "arbih_707th_slavna_mountain",
+          "territory_flipped": true,
+          "was_concentrated": false
+        }
+      ],
+      "attacker_movements": [
+        {
+          "turn": 34,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:donji_vakuf:donji_vakuf_2",
+          "to_osid": "op:donji_vakuf:korenici"
+        },
+        {
+          "turn": 33,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:donji_vakuf:oborci_2",
+          "to_osid": "op:donji_vakuf:donji_vakuf_2"
+        },
+        {
+          "turn": 32,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:donji_vakuf:torlakovac_2",
+          "to_osid": "op:donji_vakuf:oborci_2"
+        },
+        {
+          "turn": 29,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:teslic:blatnica_2",
+          "to_osid": "op:donji_vakuf:torlakovac_2"
+        },
+        {
+          "turn": 19,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:celinac:josavka_donja_2",
+          "to_osid": "op:teslic:blatnica_2"
+        },
+        {
+          "turn": 15,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:bosanska_dubica:medjedja_2",
+          "to_osid": "op:celinac:josavka_donja_2"
+        }
+      ],
+      "helper_movements": [
+        {
+          "turn": 36,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:donji_vakuf:babin_potok_2",
+          "to_osid": "op:donji_vakuf:jemanlici"
+        },
+        {
+          "turn": 34,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:sipovo:pribeljci_2",
+          "to_osid": "op:donji_vakuf:babin_potok_2"
+        },
+        {
+          "turn": 31,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:skender_vakuf:javorani_2",
+          "to_osid": "op:sipovo:pribeljci_2"
+        },
+        {
+          "turn": 24,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:donji_vakuf:kutanja",
+          "to_osid": "op:skender_vakuf:javorani_2"
+        },
+        {
+          "turn": 15,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:jajce:bravnice",
+          "to_osid": "op:donji_vakuf:kutanja"
+        },
+        {
+          "turn": 13,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:sipovo:pribeljci_2",
+          "to_osid": "op:jajce:bravnice"
+        },
+        {
+          "turn": 10,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:jajce:bravnice",
+          "to_osid": "op:sipovo:pribeljci_2"
+        },
+        {
+          "turn": 6,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:sipovo:pribeljci_2",
+          "to_osid": "op:jajce:bravnice"
+        },
+        {
+          "turn": 5,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:donji_vakuf:babin_potok_2",
+          "to_osid": "op:sipovo:pribeljci_2"
+        },
+        {
+          "turn": 3,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:donji_vakuf:komar_2",
+          "to_osid": "op:donji_vakuf:babin_potok_2"
+        },
+        {
+          "turn": 2,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:travnik:varosluk",
+          "to_osid": "op:donji_vakuf:komar_2"
+        },
+        {
+          "turn": 1,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:travnik:paklarevo",
+          "to_osid": "op:travnik:varosluk"
+        }
+      ],
+      "final_attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:korenici",
+        "personnel": 2200,
+        "morale": 97,
+        "cohesion": 35,
+        "readiness": "overextended",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:7"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:7:0",
+        "fatigue": 14.5,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": null
+      },
+      "final_helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:jemanlici",
+        "personnel": 1560,
+        "morale": 76,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:7"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:7:0",
+        "fatigue": 0,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": null
+      }
+    },
+    "n102": {
+      "label": "n102 formerly-correct reference",
+      "provenance": {
+        "git_commit": "b30597f49aad99032781c251b41a9de886cce3be",
+        "mode": "headless all-AI"
+      },
+      "path": "runs\\apr1992_definitive_188w__6deb5845c150c196__w188_n102\\save_w39.json",
+      "sha256": "12ae79ebac55cf1287605d3da7f1360e67fafbc0dcb3703bba4ee2537039e628",
+      "final_controller": "RS",
+      "capture_events": [
+        {
+          "attacker_brigade": "rs_16th_krajina_motorized",
+          "battle_id": "37:op:donji_vakuf:korenici:rs_16th_krajina_motorized:arbih_708th_mountain",
+          "from": "RBiH",
+          "mechanism": "combat",
+          "mun_id": "donji_vakuf",
+          "settlement_id": "op:donji_vakuf:korenici",
+          "to": "RS",
+          "turn": 37
+        }
+      ],
+      "korenici_battles": [
+        {
+          "turn": 37,
+          "all_attacker_ids": [
+            "rs_16th_krajina_motorized"
+          ],
+          "attacker_casualties": 304,
+          "attacker_faction": "RS",
+          "defender_casualties": 337,
+          "defender_contributions": [
+            {
+              "brigade_id": "arbih_708th_mountain",
+              "casualties_taken": 164,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 93.64
+            },
+            {
+              "brigade_id": "arbih_770th_slavna_mountain",
+              "casualties_taken": 173,
+              "distance_hops": 0,
+              "is_home_municipality": true,
+              "reactive_weight": 99.09
+            }
+          ],
+          "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
+          "mun_id": "donji_vakuf",
+          "osid": "op:donji_vakuf:korenici",
+          "outcome": "decisive_victory",
+          "primary_attacker_id": "rs_16th_krajina_motorized",
+          "primary_defender_id": "arbih_708th_mountain",
+          "territory_flipped": true,
+          "was_concentrated": false
+        },
+        {
+          "turn": 36,
+          "all_attacker_ids": [
+            "rs_16th_krajina_motorized"
+          ],
+          "attacker_casualties": 238,
+          "attacker_faction": "RS",
+          "defender_casualties": 221,
+          "defender_contributions": [
+            {
+              "brigade_id": "arbih_330th_liberation",
+              "casualties_taken": 155,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 450.97
+            },
+            {
+              "brigade_id": "arbih_708th_mountain",
+              "casualties_taken": 32,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 94.78
+            },
+            {
+              "brigade_id": "arbih_770th_slavna_mountain",
+              "casualties_taken": 34,
+              "distance_hops": 0,
+              "is_home_municipality": true,
+              "reactive_weight": 100.38
+            }
+          ],
+          "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
+          "osid": "op:donji_vakuf:korenici",
+          "outcome": "stalemate",
+          "primary_attacker_id": "rs_16th_krajina_motorized",
+          "primary_defender_id": "arbih_330th_liberation",
+          "territory_flipped": false,
+          "was_concentrated": false
+        },
+        {
+          "turn": 35,
+          "all_attacker_ids": [
+            "rs_16th_krajina_motorized"
+          ],
+          "attacker_casualties": 219,
+          "attacker_faction": "RS",
+          "defender_casualties": 328,
+          "defender_contributions": [
+            {
+              "brigade_id": "arbih_330th_liberation",
+              "casualties_taken": 203,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 409.03
+            },
+            {
+              "brigade_id": "arbih_705th_slavna_mountain",
+              "casualties_taken": 44,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 88.89
+            },
+            {
+              "brigade_id": "arbih_708th_mountain",
+              "casualties_taken": 40,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 80.66
+            },
+            {
+              "brigade_id": "arbih_770th_slavna_mountain",
+              "casualties_taken": 41,
+              "distance_hops": 0,
+              "is_home_municipality": true,
+              "reactive_weight": 83.35
+            }
+          ],
+          "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
+          "osid": "op:donji_vakuf:korenici",
+          "outcome": "stalemate",
+          "primary_attacker_id": "rs_16th_krajina_motorized",
+          "primary_defender_id": "arbih_330th_liberation",
+          "territory_flipped": false,
+          "was_concentrated": false
+        }
+      ],
+      "attacker_movements": [
+        {
+          "turn": 37,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:donji_vakuf:donji_vakuf_2",
+          "to_osid": "op:donji_vakuf:korenici"
+        },
+        {
+          "turn": 34,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:donji_vakuf:oborci_2",
+          "to_osid": "op:donji_vakuf:donji_vakuf_2"
+        },
+        {
+          "turn": 33,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:donji_vakuf:torlakovac_2",
+          "to_osid": "op:donji_vakuf:oborci_2"
+        },
+        {
+          "turn": 30,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:sipovo:pribeljci_2",
+          "to_osid": "op:donji_vakuf:torlakovac_2"
+        },
+        {
+          "turn": 29,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:kotor_varos:prisocka_2",
+          "to_osid": "op:sipovo:pribeljci_2"
+        },
+        {
+          "turn": 19,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:celinac:josavka_donja_2",
+          "to_osid": "op:kotor_varos:prisocka_2"
+        },
+        {
+          "turn": 15,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:bosanska_dubica:medjedja_2",
+          "to_osid": "op:celinac:josavka_donja_2"
+        }
+      ],
+      "helper_movements": [
+        {
+          "turn": 39,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:donji_vakuf:donji_vakuf_2",
+          "to_osid": "op:donji_vakuf:jemanlici"
+        },
+        {
+          "turn": 37,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:donji_vakuf:babin_potok_2",
+          "to_osid": "op:donji_vakuf:donji_vakuf_2"
+        },
+        {
+          "turn": 35,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:sipovo:pribeljci_2",
+          "to_osid": "op:donji_vakuf:babin_potok_2"
+        },
+        {
+          "turn": 32,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:jajce:barevo_2",
+          "to_osid": "op:sipovo:pribeljci_2"
+        },
+        {
+          "turn": 28,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:skender_vakuf:javorani_2",
+          "to_osid": "op:jajce:barevo_2"
+        },
+        {
+          "turn": 25,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:donji_vakuf:babin_potok_2",
+          "to_osid": "op:skender_vakuf:javorani_2"
+        },
+        {
+          "turn": 3,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:donji_vakuf:komar_2",
+          "to_osid": "op:donji_vakuf:babin_potok_2"
+        },
+        {
+          "turn": 2,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:donji_vakuf:komar_2",
+          "to_osid": "op:travnik:varosluk"
+        },
+        {
+          "turn": 1,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:travnik:paklarevo",
+          "to_osid": "op:travnik:varosluk"
+        }
+      ],
+      "final_attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:korenici",
+        "personnel": 2200,
+        "morale": 97,
+        "cohesion": 35,
+        "readiness": "overextended",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:7"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:7:0",
+        "fatigue": 23,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": {
+          "operation": "probe_vrs_1st_krajina_t39",
+          "phase": "planning",
+          "started_turn": 39,
+          "sector_id": "sector:vrs_1st_krajina:7",
+          "participating_brigades": [
+            "rs_16th_krajina_motorized"
+          ],
+          "axis": {
+            "axis_id": "probe_vrs_1st_krajina_t39",
+            "status": "executing",
+            "assigned_brigades": [
+              "rs_16th_krajina_motorized"
+            ],
+            "current_objective_index": 0,
+            "objectives": [
+              "op:bugojno:prijaci"
+            ]
+          }
+        }
+      },
+      "final_helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:jemanlici",
+        "personnel": 1445,
+        "morale": 77,
+        "cohesion": 35.05,
+        "readiness": "active",
+        "posture": "attack",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:7"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:7:0",
+        "fatigue": 4,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": null
+      }
+    },
+    "older_705": {
+      "label": "rejected older 705 cohort; comparison/provenance only",
+      "provenance": {
+        "git_head": "77a2cc8e6b270474d0c3beef48b655c2903192e8",
+        "mode": "native RBiH player"
+      },
+      "path": "tmp-paradox-qa-20260710\\evidence\\player-parity-rbih-t39-20261025-04\\rbih\\turn-autosaves\\turn-039.json",
+      "sha256": "e58b94766763a10f80dc9bb69a2cb0a8ddde6436f22b12465b4035da63f38340",
+      "final_controller": "RS",
+      "capture_events": [
+        {
+          "attacker_brigade": "rs_16th_krajina_motorized",
+          "battle_id": "37:op:donji_vakuf:korenici:rs_16th_krajina_motorized:arbih_330th_liberation",
+          "from": "RBiH",
+          "mechanism": "combat",
+          "mun_id": "donji_vakuf",
+          "settlement_id": "op:donji_vakuf:korenici",
+          "to": "RS",
+          "turn": 37
+        }
+      ],
+      "korenici_battles": [
+        {
+          "turn": 37,
+          "all_attacker_ids": [
+            "rs_16th_krajina_motorized"
+          ],
+          "attacker_casualties": 288,
+          "attacker_faction": "RS",
+          "defender_casualties": 634,
+          "defender_contributions": [
+            {
+              "brigade_id": "arbih_330th_liberation",
+              "casualties_taken": 441,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 152.85
+            },
+            {
+              "brigade_id": "arbih_708th_mountain",
+              "casualties_taken": 192,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 81.08
+            },
+            {
+              "brigade_id": "arbih_770th_slavna_mountain",
+              "casualties_taken": 1,
+              "distance_hops": 0,
+              "is_home_municipality": true,
+              "reactive_weight": 33.7
+            }
+          ],
+          "defender_faction": "RBiH",
+          "mun_id": "donji_vakuf",
+          "osid": "op:donji_vakuf:korenici",
+          "outcome": "decisive_victory",
+          "primary_attacker_id": "rs_16th_krajina_motorized",
+          "primary_defender_id": "arbih_330th_liberation",
+          "territory_flipped": true,
+          "was_concentrated": false
+        },
+        {
+          "turn": 36,
+          "all_attacker_ids": [
+            "rs_16th_krajina_motorized"
+          ],
+          "attacker_casualties": 414,
+          "attacker_faction": "RS",
+          "defender_casualties": 516,
+          "defender_contributions": [
+            {
+              "brigade_id": "arbih_330th_liberation",
+              "casualties_taken": 329,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 318.14
+            },
+            {
+              "brigade_id": "arbih_708th_mountain",
+              "casualties_taken": 135,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 131.62
+            },
+            {
+              "brigade_id": "arbih_770th_slavna_mountain",
+              "casualties_taken": 52,
+              "distance_hops": 0,
+              "is_home_municipality": true,
+              "reactive_weight": 52.24
+            }
+          ],
+          "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
+          "osid": "op:donji_vakuf:korenici",
+          "outcome": "victory",
+          "primary_attacker_id": "rs_16th_krajina_motorized",
+          "primary_defender_id": "arbih_330th_liberation",
+          "territory_flipped": false,
+          "was_concentrated": false
+        },
+        {
+          "turn": 35,
+          "all_attacker_ids": [
+            "rs_16th_krajina_motorized"
+          ],
+          "attacker_casualties": 280,
+          "attacker_faction": "RS",
+          "defender_casualties": 261,
+          "defender_contributions": [
+            {
+              "brigade_id": "arbih_330th_liberation",
+              "casualties_taken": 154,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 302.51
+            },
+            {
+              "brigade_id": "arbih_708th_mountain",
+              "casualties_taken": 81,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 159.95
+            },
+            {
+              "brigade_id": "arbih_770th_slavna_mountain",
+              "casualties_taken": 26,
+              "distance_hops": 0,
+              "is_home_municipality": true,
+              "reactive_weight": 50.43
+            }
+          ],
+          "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
+          "osid": "op:donji_vakuf:korenici",
+          "outcome": "costly_victory",
+          "primary_attacker_id": "rs_16th_krajina_motorized",
+          "primary_defender_id": "arbih_330th_liberation",
+          "territory_flipped": false,
+          "was_concentrated": false
+        },
+        {
+          "turn": 34,
+          "all_attacker_ids": [
+            "rs_16th_krajina_motorized"
+          ],
+          "attacker_casualties": 216,
+          "attacker_faction": "RS",
+          "defender_casualties": 564,
+          "defender_contributions": [
+            {
+              "brigade_id": "arbih_330th_liberation",
+              "casualties_taken": 389,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 399.46
+            },
+            {
+              "brigade_id": "arbih_708th_mountain",
+              "casualties_taken": 159,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 163.42
+            },
+            {
+              "brigade_id": "arbih_770th_slavna_mountain",
+              "casualties_taken": 16,
+              "distance_hops": 0,
+              "is_home_municipality": true,
+              "reactive_weight": 16.85
+            }
+          ],
+          "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
+          "osid": "op:donji_vakuf:korenici",
+          "outcome": "victory",
+          "primary_attacker_id": "rs_16th_krajina_motorized",
+          "primary_defender_id": "arbih_330th_liberation",
+          "territory_flipped": false,
+          "was_concentrated": false
+        }
+      ],
+      "attacker_movements": [
+        {
+          "turn": 37,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:donji_vakuf:donji_vakuf_2",
+          "to_osid": "op:donji_vakuf:korenici"
+        },
+        {
+          "turn": 33,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:donji_vakuf:oborci_2",
+          "to_osid": "op:donji_vakuf:donji_vakuf_2"
+        },
+        {
+          "turn": 32,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:donji_vakuf:torlakovac_2",
+          "to_osid": "op:donji_vakuf:oborci_2"
+        },
+        {
+          "turn": 29,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:teslic:blatnica_2",
+          "to_osid": "op:donji_vakuf:torlakovac_2"
+        },
+        {
+          "turn": 19,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:celinac:josavka_donja_2",
+          "to_osid": "op:teslic:blatnica_2"
+        },
+        {
+          "turn": 15,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:bosanska_dubica:medjedja_2",
+          "to_osid": "op:celinac:josavka_donja_2"
+        }
+      ],
+      "helper_movements": [
+        {
+          "turn": 39,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:donji_vakuf:donji_vakuf_2",
+          "to_osid": "op:donji_vakuf:jemanlici"
+        },
+        {
+          "turn": 36,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:donji_vakuf:babin_potok_2",
+          "to_osid": "op:donji_vakuf:donji_vakuf_2"
+        },
+        {
+          "turn": 34,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:sipovo:pribeljci_2",
+          "to_osid": "op:donji_vakuf:babin_potok_2"
+        },
+        {
+          "turn": 31,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:skender_vakuf:javorani_2",
+          "to_osid": "op:sipovo:pribeljci_2"
+        },
+        {
+          "turn": 24,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:donji_vakuf:kutanja",
+          "to_osid": "op:skender_vakuf:javorani_2"
+        },
+        {
+          "turn": 15,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:jajce:bravnice",
+          "to_osid": "op:donji_vakuf:kutanja"
+        },
+        {
+          "turn": 13,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:sipovo:pribeljci_2",
+          "to_osid": "op:jajce:bravnice"
+        },
+        {
+          "turn": 10,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:jajce:bravnice",
+          "to_osid": "op:sipovo:pribeljci_2"
+        },
+        {
+          "turn": 6,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:sipovo:pribeljci_2",
+          "to_osid": "op:jajce:bravnice"
+        },
+        {
+          "turn": 5,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:donji_vakuf:babin_potok_2",
+          "to_osid": "op:sipovo:pribeljci_2"
+        },
+        {
+          "turn": 3,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:donji_vakuf:komar_2",
+          "to_osid": "op:donji_vakuf:babin_potok_2"
+        },
+        {
+          "turn": 2,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:travnik:varosluk",
+          "to_osid": "op:donji_vakuf:komar_2"
+        },
+        {
+          "turn": 1,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:travnik:paklarevo",
+          "to_osid": "op:travnik:varosluk"
+        }
+      ],
+      "final_attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:korenici",
+        "personnel": 2200,
+        "morale": 100,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:5"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:5:0",
+        "fatigue": 0,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": {
+          "operation": "probe_vrs_1st_krajina_t39",
+          "phase": "planning",
+          "started_turn": 39,
+          "sector_id": "sector:vrs_1st_krajina:5",
+          "participating_brigades": [
+            "rs_16th_krajina_motorized"
+          ],
+          "axis": {
+            "axis_id": "probe_vrs_1st_krajina_t39",
+            "status": "executing",
+            "assigned_brigades": [
+              "rs_16th_krajina_motorized"
+            ],
+            "current_objective_index": 0,
+            "objectives": [
+              "op:bugojno:prijaci"
+            ]
+          }
+        }
+      },
+      "final_helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:jemanlici",
+        "personnel": 1015,
+        "morale": 84,
+        "cohesion": 35.05,
+        "readiness": "active",
+        "posture": "attack",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:5"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:5:0",
+        "fatigue": 0,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": null
+      }
+    },
+    "current_p03": {
+      "label": "current native P03 RBiH",
+      "provenance": {
+        "git_head": "a3063366ae094468fbb2ede143f9ced3a1ed2f68",
+        "mode": "native RBiH player"
+      },
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-039.json",
+      "sha256": "623cbaed0e6186bc5f2c4a18fd5e9b22836db9343df0e4122316c92e5c9902e8",
+      "final_controller": "RBiH",
+      "capture_events": [],
+      "korenici_battles": [
+        {
+          "turn": 37,
+          "all_attacker_ids": [
+            "rs_16th_krajina_motorized"
+          ],
+          "attacker_casualties": 607,
+          "attacker_faction": "RS",
+          "defender_casualties": 151,
+          "defender_contributions": [
+            {
+              "brigade_id": "arbih_330th_liberation",
+              "casualties_taken": 109,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 522.44
+            },
+            {
+              "brigade_id": "arbih_708th_mountain",
+              "casualties_taken": 29,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 142.05
+            },
+            {
+              "brigade_id": "arbih_770th_slavna_mountain",
+              "casualties_taken": 13,
+              "distance_hops": 0,
+              "is_home_municipality": true,
+              "reactive_weight": 64.14
+            }
+          ],
+          "defender_faction": "RBiH",
+          "osid": "op:donji_vakuf:korenici",
+          "outcome": "repulsed",
+          "primary_attacker_id": "rs_16th_krajina_motorized",
+          "primary_defender_id": "arbih_330th_liberation",
+          "territory_flipped": false,
+          "was_concentrated": false
+        },
+        {
+          "turn": 36,
+          "all_attacker_ids": [
+            "rs_16th_krajina_motorized"
+          ],
+          "attacker_casualties": 466,
+          "attacker_faction": "RS",
+          "defender_casualties": 278,
+          "defender_contributions": [
+            {
+              "brigade_id": "arbih_330th_liberation",
+              "casualties_taken": 184,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 510.8
+            },
+            {
+              "brigade_id": "arbih_708th_mountain",
+              "casualties_taken": 69,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 189.41
+            },
+            {
+              "brigade_id": "arbih_770th_slavna_mountain",
+              "casualties_taken": 25,
+              "distance_hops": 0,
+              "is_home_municipality": true,
+              "reactive_weight": 67.86
+            }
+          ],
+          "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
+          "osid": "op:donji_vakuf:korenici",
+          "outcome": "stalemate",
+          "primary_attacker_id": "rs_16th_krajina_motorized",
+          "primary_defender_id": "arbih_330th_liberation",
+          "territory_flipped": false,
+          "was_concentrated": false
+        },
+        {
+          "turn": 35,
+          "all_attacker_ids": [
+            "rs_16th_krajina_motorized"
+          ],
+          "attacker_casualties": 383,
+          "attacker_faction": "RS",
+          "defender_casualties": 137,
+          "defender_contributions": [
+            {
+              "brigade_id": "arbih_330th_liberation",
+              "casualties_taken": 84,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 407.38
+            },
+            {
+              "brigade_id": "arbih_708th_mountain",
+              "casualties_taken": 40,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 196.72
+            },
+            {
+              "brigade_id": "arbih_770th_slavna_mountain",
+              "casualties_taken": 13,
+              "distance_hops": 0,
+              "is_home_municipality": true,
+              "reactive_weight": 64.34
+            }
+          ],
+          "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
+          "osid": "op:donji_vakuf:korenici",
+          "outcome": "repulsed",
+          "primary_attacker_id": "rs_16th_krajina_motorized",
+          "primary_defender_id": "arbih_330th_liberation",
+          "territory_flipped": false,
+          "was_concentrated": false
+        },
+        {
+          "turn": 34,
+          "all_attacker_ids": [
+            "rs_16th_krajina_motorized"
+          ],
+          "attacker_casualties": 291,
+          "attacker_faction": "RS",
+          "defender_casualties": 360,
+          "defender_contributions": [
+            {
+              "brigade_id": "arbih_330th_liberation",
+              "casualties_taken": 248,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 399.46
+            },
+            {
+              "brigade_id": "arbih_708th_mountain",
+              "casualties_taken": 101,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 163.42
+            },
+            {
+              "brigade_id": "arbih_770th_slavna_mountain",
+              "casualties_taken": 11,
+              "distance_hops": 0,
+              "is_home_municipality": true,
+              "reactive_weight": 17.56
+            }
+          ],
+          "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
+          "osid": "op:donji_vakuf:korenici",
+          "outcome": "costly_victory",
+          "primary_attacker_id": "rs_16th_krajina_motorized",
+          "primary_defender_id": "arbih_330th_liberation",
+          "territory_flipped": false,
+          "was_concentrated": false
+        }
+      ],
+      "attacker_movements": [
+        {
+          "turn": 33,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:donji_vakuf:oborci_2",
+          "to_osid": "op:donji_vakuf:donji_vakuf_2"
+        },
+        {
+          "turn": 32,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:donji_vakuf:torlakovac_2",
+          "to_osid": "op:donji_vakuf:oborci_2"
+        },
+        {
+          "turn": 29,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:teslic:blatnica_2",
+          "to_osid": "op:donji_vakuf:torlakovac_2"
+        },
+        {
+          "turn": 19,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:celinac:josavka_donja_2",
+          "to_osid": "op:teslic:blatnica_2"
+        },
+        {
+          "turn": 15,
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:bosanska_dubica:medjedja_2",
+          "to_osid": "op:celinac:josavka_donja_2"
+        }
+      ],
+      "helper_movements": [
+        {
+          "turn": 36,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:donji_vakuf:babin_potok_2",
+          "to_osid": "op:donji_vakuf:donji_vakuf_2"
+        },
+        {
+          "turn": 34,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:sipovo:pribeljci_2",
+          "to_osid": "op:donji_vakuf:babin_potok_2"
+        },
+        {
+          "turn": 31,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:skender_vakuf:javorani_2",
+          "to_osid": "op:sipovo:pribeljci_2"
+        },
+        {
+          "turn": 24,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:donji_vakuf:kutanja",
+          "to_osid": "op:skender_vakuf:javorani_2"
+        },
+        {
+          "turn": 15,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:jajce:bravnice",
+          "to_osid": "op:donji_vakuf:kutanja"
+        },
+        {
+          "turn": 13,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:sipovo:pribeljci_2",
+          "to_osid": "op:jajce:bravnice"
+        },
+        {
+          "turn": 10,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:jajce:bravnice",
+          "to_osid": "op:sipovo:pribeljci_2"
+        },
+        {
+          "turn": 6,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:sipovo:pribeljci_2",
+          "to_osid": "op:jajce:bravnice"
+        },
+        {
+          "turn": 5,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:donji_vakuf:babin_potok_2",
+          "to_osid": "op:sipovo:pribeljci_2"
+        },
+        {
+          "turn": 3,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:donji_vakuf:komar_2",
+          "to_osid": "op:donji_vakuf:babin_potok_2"
+        },
+        {
+          "turn": 2,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:travnik:varosluk",
+          "to_osid": "op:donji_vakuf:komar_2"
+        },
+        {
+          "turn": 1,
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:travnik:paklarevo",
+          "to_osid": "op:travnik:varosluk"
+        }
+      ],
+      "final_attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 1978,
+        "morale": 77,
+        "cohesion": 35,
+        "readiness": "overextended",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:4:0",
+        "fatigue": 27,
+        "order": {
+          "owner": "bot_discretionary",
+          "stance": "column",
+          "destination_sids": [
+            "op:donji_vakuf:jemanlici"
+          ]
+        },
+        "movement_state": null,
+        "operation_commitment": null
+      },
+      "final_helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 910,
+        "morale": 66,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:4:0",
+        "fatigue": 9.5,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": null
+      }
+    }
+  },
+  "current_p03_turns_16_to_39": [
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-016.json",
+      "sha256": "861d4e34a4b4c22c15db6fa857449c7f5bd68deb352edbb2a0059c6960ac07e3",
+      "turn": 16,
+      "week_date_from_scenario_start": "1992-06-26",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:celinac:josavka_donja_2",
+        "personnel": 2200,
+        "morale": 72,
+        "cohesion": 51.99999999999998,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "rear",
+          "sector_id": "sector:vrs_1st_krajina:1"
+        },
+        "assigned_sub_segment_id": null,
+        "fatigue": 0,
+        "order": null,
+        "movement_state": {
+          "destination_osid": null,
+          "path": [
+            "op:celinac:josavka_donja_2",
+            "op:celinac:snjegotina_srednja",
+            "op:teslic:buletic_2",
+            "op:teslic:blatnica_2"
+          ],
+          "progress": null
+        },
+        "operation_commitment": null
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:kutanja",
+        "personnel": 1131,
+        "morale": 60,
+        "cohesion": 44.349999999999994,
+        "readiness": "active",
+        "posture": "dig_in",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:7"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:7:0",
+        "fatigue": 0.5,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": null
+      },
+      "korenici_battle_this_turn": [],
+      "relevant_movements_this_turn": []
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-017.json",
+      "sha256": "32d5b1bbcdb74bb2f7a2c5dbc9bca40bd5237cab318052c90c0abe9c0f184cf1",
+      "turn": 17,
+      "week_date_from_scenario_start": "1992-07-03",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:celinac:josavka_donja_2",
+        "personnel": 2200,
+        "morale": 74,
+        "cohesion": 50.549999999999976,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "rear",
+          "sector_id": "sector:vrs_1st_krajina:1"
+        },
+        "assigned_sub_segment_id": null,
+        "fatigue": 0,
+        "order": null,
+        "movement_state": {
+          "destination_osid": null,
+          "path": [
+            "op:celinac:josavka_donja_2",
+            "op:celinac:snjegotina_srednja",
+            "op:teslic:buletic_2",
+            "op:teslic:blatnica_2"
+          ],
+          "progress": null
+        },
+        "operation_commitment": null
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:kutanja",
+        "personnel": 1149,
+        "morale": 60,
+        "cohesion": 43.349999999999994,
+        "readiness": "active",
+        "posture": "dig_in",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:7"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:7:0",
+        "fatigue": 1,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": null
+      },
+      "korenici_battle_this_turn": [],
+      "relevant_movements_this_turn": []
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-018.json",
+      "sha256": "7181489183b90311ace6be29448c226231e0614976e40a709caf6e1cbc56a1d1",
+      "turn": 18,
+      "week_date_from_scenario_start": "1992-07-10",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:celinac:josavka_donja_2",
+        "personnel": 2200,
+        "morale": 76,
+        "cohesion": 49.09999999999997,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "rear",
+          "sector_id": "sector:vrs_1st_krajina:1"
+        },
+        "assigned_sub_segment_id": null,
+        "fatigue": 0,
+        "order": null,
+        "movement_state": {
+          "destination_osid": null,
+          "path": [
+            "op:celinac:josavka_donja_2",
+            "op:celinac:snjegotina_srednja",
+            "op:teslic:buletic_2",
+            "op:teslic:blatnica_2"
+          ],
+          "progress": null
+        },
+        "operation_commitment": null
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:kutanja",
+        "personnel": 1167,
+        "morale": 60,
+        "cohesion": 42.349999999999994,
+        "readiness": "active",
+        "posture": "dig_in",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:7"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:7:0",
+        "fatigue": 0.5,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": null
+      },
+      "korenici_battle_this_turn": [],
+      "relevant_movements_this_turn": []
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-019.json",
+      "sha256": "5989598cd6c4a017592a60549d529c7f78d8f53eb988a2542da984ff9572a1ac",
+      "turn": 19,
+      "week_date_from_scenario_start": "1992-07-17",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:teslic:blatnica_2",
+        "personnel": 2187,
+        "morale": 76,
+        "cohesion": 48.15,
+        "readiness": "active",
+        "posture": "dig_in",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:6"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:6:0",
+        "fatigue": 0,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": null
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:kutanja",
+        "personnel": 1185,
+        "morale": 60,
+        "cohesion": 39.849999999999994,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "reserve",
+          "sector_id": "sector:vrs_1st_krajina:5"
+        },
+        "assigned_sub_segment_id": null,
+        "fatigue": 1,
+        "order": {
+          "owner": "bot_discretionary",
+          "stance": "column",
+          "destination_sids": [
+            "op:skender_vakuf:javorani_2"
+          ]
+        },
+        "movement_state": null,
+        "operation_commitment": {
+          "operation": "Operation Jajce",
+          "phase": "planning",
+          "started_turn": 19,
+          "sector_id": "sector:vrs_1st_krajina:7",
+          "staging_osid": "op:mrkonjic_grad:bjelajce_2",
+          "participating_brigades": [
+            "rs_11th_mrkonji_light_infantry",
+            "rs_1st_sipovo_light_infantry",
+            "rs_22nd_krajina_infantry"
+          ],
+          "axis": {
+            "axis_id": "vrbas_west",
+            "status": "executing",
+            "main_brigade": "rs_11th_mrkonji_light_infantry",
+            "support_brigades": [
+              "rs_22nd_krajina_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_11th_mrkonji_light_infantry",
+              "rs_22nd_krajina_infantry"
+            ],
+            "current_objective_index": 0,
+            "objectives": [
+              "op:jajce:divicani_2",
+              "op:jajce:barevo_2",
+              "op:jajce:jajce_3"
+            ]
+          }
+        }
+      },
+      "korenici_battle_this_turn": [],
+      "relevant_movements_this_turn": [
+        {
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:celinac:josavka_donja_2",
+          "to_osid": "op:teslic:blatnica_2"
+        }
+      ]
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-020.json",
+      "sha256": "f8606bccb085ab727b7a463f587543b2cd0111de92fa27e7189d9a8708785430",
+      "turn": 20,
+      "week_date_from_scenario_start": "1992-07-24",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:teslic:blatnica_2",
+        "personnel": 2200,
+        "morale": 76,
+        "cohesion": 47.25,
+        "readiness": "active",
+        "posture": "dig_in",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:6"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:6:0",
+        "fatigue": 0.5,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": null
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:kutanja",
+        "personnel": 1204,
+        "morale": 60,
+        "cohesion": 37.349999999999994,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:1"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:1:0",
+        "fatigue": 0,
+        "order": null,
+        "movement_state": {
+          "destination_osid": null,
+          "path": [
+            "op:donji_vakuf:kutanja",
+            "op:sipovo:pribeljci_2",
+            "op:sipovo:sipovo_2",
+            "op:mrkonjic_grad:majdan_2",
+            "op:mrkonjic_grad:bjelajce_2",
+            "op:banja_luka:rekavice_2",
+            "op:skender_vakuf:javorani_2"
+          ],
+          "progress": null
+        },
+        "operation_commitment": {
+          "operation": "Operation Jajce",
+          "phase": "planning",
+          "started_turn": 19,
+          "sector_id": "sector:vrs_1st_krajina:7",
+          "staging_osid": "op:mrkonjic_grad:bjelajce_2",
+          "participating_brigades": [
+            "rs_11th_mrkonji_light_infantry",
+            "rs_1st_sipovo_light_infantry",
+            "rs_22nd_krajina_infantry"
+          ],
+          "axis": {
+            "axis_id": "vrbas_west",
+            "status": "executing",
+            "main_brigade": "rs_11th_mrkonji_light_infantry",
+            "support_brigades": [
+              "rs_22nd_krajina_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_11th_mrkonji_light_infantry",
+              "rs_22nd_krajina_infantry"
+            ],
+            "current_objective_index": 0,
+            "objectives": [
+              "op:jajce:divicani_2",
+              "op:jajce:barevo_2",
+              "op:jajce:jajce_3"
+            ]
+          }
+        }
+      },
+      "korenici_battle_this_turn": [],
+      "relevant_movements_this_turn": []
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-021.json",
+      "sha256": "166e7ce1cfe873740d9ac7a773ce4beabf896e869f17c96ec91b9869b9edaacb",
+      "turn": 21,
+      "week_date_from_scenario_start": "1992-07-31",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:teslic:blatnica_2",
+        "personnel": 2188,
+        "morale": 76,
+        "cohesion": 44.849999999999994,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:3"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:3:0",
+        "fatigue": 1,
+        "order": null,
+        "movement_state": {
+          "destination_osid": null,
+          "path": [
+            "op:teslic:blatnica_2",
+            "op:teslic:buletic_2",
+            "op:kotor_varos:kotor_varos_2",
+            "op:kotor_varos:vagani_2",
+            "op:skender_vakuf:javorani_2",
+            "op:banja_luka:rekavice_2",
+            "op:mrkonjic_grad:bjelajce_2",
+            "op:mrkonjic_grad:majdan_2",
+            "op:sipovo:sipovo_2",
+            "op:sipovo:pribeljci_2"
+          ],
+          "progress": null
+        },
+        "operation_commitment": null
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:kutanja",
+        "personnel": 1224,
+        "morale": 60,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:8"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:8:0",
+        "fatigue": 0.5,
+        "order": null,
+        "movement_state": {
+          "destination_osid": null,
+          "path": [
+            "op:donji_vakuf:kutanja",
+            "op:sipovo:pribeljci_2",
+            "op:sipovo:sipovo_2",
+            "op:mrkonjic_grad:majdan_2",
+            "op:mrkonjic_grad:bjelajce_2",
+            "op:banja_luka:rekavice_2",
+            "op:skender_vakuf:javorani_2"
+          ],
+          "progress": null
+        },
+        "operation_commitment": {
+          "operation": "Operation Jajce",
+          "phase": "planning",
+          "started_turn": 19,
+          "sector_id": "sector:vrs_1st_krajina:1",
+          "staging_osid": "op:mrkonjic_grad:bjelajce_2",
+          "participating_brigades": [
+            "rs_11th_mrkonji_light_infantry",
+            "rs_1st_sipovo_light_infantry",
+            "rs_22nd_krajina_infantry"
+          ],
+          "axis": {
+            "axis_id": "vrbas_west",
+            "status": "executing",
+            "main_brigade": "rs_11th_mrkonji_light_infantry",
+            "support_brigades": [
+              "rs_22nd_krajina_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_11th_mrkonji_light_infantry",
+              "rs_22nd_krajina_infantry"
+            ],
+            "current_objective_index": 0,
+            "objectives": [
+              "op:jajce:divicani_2",
+              "op:jajce:barevo_2",
+              "op:jajce:jajce_3"
+            ]
+          }
+        }
+      },
+      "korenici_battle_this_turn": [],
+      "relevant_movements_this_turn": []
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-022.json",
+      "sha256": "185798ec56e650544e8c76a7b0a278bcf361aa850544bcebda768e3bbd351ac5",
+      "turn": 22,
+      "week_date_from_scenario_start": "1992-08-07",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:teslic:blatnica_2",
+        "personnel": 2177,
+        "morale": 76,
+        "cohesion": 42.349999999999994,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:4:0",
+        "fatigue": 0.5,
+        "order": null,
+        "movement_state": {
+          "destination_osid": null,
+          "path": [
+            "op:teslic:blatnica_2",
+            "op:teslic:buletic_2",
+            "op:kotor_varos:kotor_varos_2",
+            "op:kotor_varos:vagani_2",
+            "op:skender_vakuf:javorani_2",
+            "op:banja_luka:rekavice_2",
+            "op:mrkonjic_grad:bjelajce_2",
+            "op:mrkonjic_grad:majdan_2",
+            "op:sipovo:sipovo_2",
+            "op:sipovo:pribeljci_2"
+          ],
+          "progress": null
+        },
+        "operation_commitment": null
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:kutanja",
+        "personnel": 1219,
+        "morale": 60,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:3"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:3:0",
+        "fatigue": 0.5,
+        "order": null,
+        "movement_state": {
+          "destination_osid": null,
+          "path": [
+            "op:donji_vakuf:kutanja",
+            "op:sipovo:pribeljci_2",
+            "op:sipovo:sipovo_2",
+            "op:mrkonjic_grad:majdan_2",
+            "op:mrkonjic_grad:bjelajce_2",
+            "op:banja_luka:rekavice_2",
+            "op:skender_vakuf:javorani_2"
+          ],
+          "progress": null
+        },
+        "operation_commitment": {
+          "operation": "Operation Jajce",
+          "phase": "planning",
+          "started_turn": 19,
+          "sector_id": "sector:vrs_1st_krajina:1",
+          "staging_osid": "op:mrkonjic_grad:bjelajce_2",
+          "participating_brigades": [
+            "rs_11th_mrkonji_light_infantry",
+            "rs_1st_sipovo_light_infantry",
+            "rs_22nd_krajina_infantry"
+          ],
+          "axis": {
+            "axis_id": "vrbas_west",
+            "status": "executing",
+            "main_brigade": "rs_11th_mrkonji_light_infantry",
+            "support_brigades": [
+              "rs_22nd_krajina_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_11th_mrkonji_light_infantry",
+              "rs_22nd_krajina_infantry"
+            ],
+            "current_objective_index": 0,
+            "objectives": [
+              "op:jajce:divicani_2",
+              "op:jajce:barevo_2",
+              "op:jajce:jajce_3"
+            ]
+          }
+        }
+      },
+      "korenici_battle_this_turn": [],
+      "relevant_movements_this_turn": []
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-023.json",
+      "sha256": "4684464fc2b63f841ff050bf4df4e9a5524e61fb492ac3d87a343cc74202cf78",
+      "turn": 23,
+      "week_date_from_scenario_start": "1992-08-14",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:teslic:blatnica_2",
+        "personnel": 2200,
+        "morale": 76,
+        "cohesion": 39.849999999999994,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:6"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:6:0",
+        "fatigue": 1,
+        "order": null,
+        "movement_state": {
+          "destination_osid": null,
+          "path": [
+            "op:teslic:blatnica_2",
+            "op:teslic:buletic_2",
+            "op:kotor_varos:kotor_varos_2",
+            "op:kotor_varos:vagani_2",
+            "op:skender_vakuf:javorani_2",
+            "op:banja_luka:rekavice_2",
+            "op:mrkonjic_grad:bjelajce_2",
+            "op:mrkonjic_grad:majdan_2",
+            "op:sipovo:sipovo_2",
+            "op:sipovo:pribeljci_2"
+          ],
+          "progress": null
+        },
+        "operation_commitment": null
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:kutanja",
+        "personnel": 1240,
+        "morale": 60,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:7"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:7:0",
+        "fatigue": 1,
+        "order": null,
+        "movement_state": {
+          "destination_osid": null,
+          "path": [
+            "op:donji_vakuf:kutanja",
+            "op:sipovo:pribeljci_2",
+            "op:sipovo:sipovo_2",
+            "op:mrkonjic_grad:majdan_2",
+            "op:mrkonjic_grad:bjelajce_2",
+            "op:banja_luka:rekavice_2",
+            "op:skender_vakuf:javorani_2"
+          ],
+          "progress": null
+        },
+        "operation_commitment": {
+          "operation": "Operation Jajce",
+          "phase": "execution",
+          "started_turn": 19,
+          "sector_id": "sector:vrs_1st_krajina:4",
+          "staging_osid": "op:mrkonjic_grad:bjelajce_2",
+          "participating_brigades": [
+            "rs_11th_mrkonji_light_infantry",
+            "rs_1st_sipovo_light_infantry",
+            "rs_22nd_krajina_infantry"
+          ],
+          "axis": {
+            "axis_id": "vrbas_west",
+            "status": "executing",
+            "main_brigade": "rs_11th_mrkonji_light_infantry",
+            "support_brigades": [
+              "rs_22nd_krajina_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_11th_mrkonji_light_infantry",
+              "rs_22nd_krajina_infantry"
+            ],
+            "current_objective_index": 1,
+            "objectives": [
+              "op:jajce:divicani_2",
+              "op:jajce:barevo_2",
+              "op:jajce:jajce_3"
+            ],
+            "last_result": "captured"
+          }
+        }
+      },
+      "korenici_battle_this_turn": [],
+      "relevant_movements_this_turn": []
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-024.json",
+      "sha256": "988cacedfe02ab692c137cad7826715322fe5a6bd421b30eba9c908aeb49b174",
+      "turn": 24,
+      "week_date_from_scenario_start": "1992-08-21",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:teslic:blatnica_2",
+        "personnel": 2200,
+        "morale": 76,
+        "cohesion": 37.349999999999994,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:2"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:2:0",
+        "fatigue": 0.5,
+        "order": null,
+        "movement_state": {
+          "destination_osid": null,
+          "path": [
+            "op:teslic:blatnica_2",
+            "op:teslic:buletic_2",
+            "op:kotor_varos:kotor_varos_2",
+            "op:kotor_varos:vagani_2",
+            "op:skender_vakuf:javorani_2",
+            "op:banja_luka:rekavice_2",
+            "op:mrkonjic_grad:bjelajce_2",
+            "op:mrkonjic_grad:majdan_2",
+            "op:sipovo:sipovo_2",
+            "op:sipovo:pribeljci_2"
+          ],
+          "progress": null
+        },
+        "operation_commitment": null
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:skender_vakuf:javorani_2",
+        "personnel": 1246,
+        "morale": 63,
+        "cohesion": 34,
+        "readiness": "active",
+        "posture": "attack",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:9"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:9:0",
+        "fatigue": 3,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": {
+          "operation": "Operation Jajce",
+          "phase": "execution",
+          "started_turn": 19,
+          "sector_id": "sector:vrs_1st_krajina:9",
+          "staging_osid": "op:mrkonjic_grad:bjelajce_2",
+          "participating_brigades": [
+            "rs_11th_mrkonji_light_infantry",
+            "rs_1st_sipovo_light_infantry",
+            "rs_22nd_krajina_infantry"
+          ],
+          "axis": {
+            "axis_id": "vrbas_west",
+            "status": "executing",
+            "main_brigade": "rs_11th_mrkonji_light_infantry",
+            "support_brigades": [
+              "rs_22nd_krajina_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_11th_mrkonji_light_infantry",
+              "rs_22nd_krajina_infantry"
+            ],
+            "current_objective_index": 2,
+            "objectives": [
+              "op:jajce:divicani_2",
+              "op:jajce:barevo_2",
+              "op:jajce:jajce_3"
+            ],
+            "last_result": "captured"
+          }
+        }
+      },
+      "korenici_battle_this_turn": [],
+      "relevant_movements_this_turn": [
+        {
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:donji_vakuf:kutanja",
+          "to_osid": "op:skender_vakuf:javorani_2"
+        }
+      ]
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-025.json",
+      "sha256": "d384bd9f7f24ebd044fd13bc3b123ad05f51aa074c0d44faedbe99075ac6adcc",
+      "turn": 25,
+      "week_date_from_scenario_start": "1992-08-28",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:teslic:blatnica_2",
+        "personnel": 2200,
+        "morale": 76,
+        "cohesion": 35.849999999999994,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:3"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:3:0",
+        "fatigue": 1,
+        "order": null,
+        "movement_state": {
+          "destination_osid": null,
+          "path": [
+            "op:teslic:blatnica_2",
+            "op:teslic:buletic_2",
+            "op:kotor_varos:kotor_varos_2",
+            "op:kotor_varos:vagani_2",
+            "op:skender_vakuf:javorani_2",
+            "op:banja_luka:rekavice_2",
+            "op:mrkonjic_grad:bjelajce_2",
+            "op:mrkonjic_grad:majdan_2",
+            "op:sipovo:sipovo_2",
+            "op:sipovo:pribeljci_2"
+          ],
+          "progress": null
+        },
+        "operation_commitment": null
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:skender_vakuf:javorani_2",
+        "personnel": 1265,
+        "morale": 67,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:9"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:9:0",
+        "fatigue": 3.5,
+        "order": {
+          "owner": "bot_discretionary",
+          "stance": "column",
+          "destination_sids": [
+            "op:jajce:barevo_2"
+          ]
+        },
+        "movement_state": null,
+        "operation_commitment": {
+          "operation": "Operation Jajce",
+          "phase": "execution",
+          "started_turn": 19,
+          "sector_id": "sector:vrs_1st_krajina:9",
+          "staging_osid": "op:mrkonjic_grad:bjelajce_2",
+          "participating_brigades": [
+            "rs_11th_mrkonji_light_infantry",
+            "rs_1st_sipovo_light_infantry",
+            "rs_22nd_krajina_infantry"
+          ],
+          "axis": {
+            "axis_id": "vrbas_west",
+            "status": "complete",
+            "main_brigade": "rs_11th_mrkonji_light_infantry",
+            "support_brigades": [
+              "rs_22nd_krajina_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_11th_mrkonji_light_infantry",
+              "rs_22nd_krajina_infantry"
+            ],
+            "current_objective_index": 3,
+            "objectives": [
+              "op:jajce:divicani_2",
+              "op:jajce:barevo_2",
+              "op:jajce:jajce_3"
+            ],
+            "last_result": "captured"
+          }
+        }
+      },
+      "korenici_battle_this_turn": [],
+      "relevant_movements_this_turn": []
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-026.json",
+      "sha256": "8fe86a5dfc2dac18c935c1bda367f7f4c4bfb6dffda26d4fbf9b8a1dc18f9209",
+      "turn": 26,
+      "week_date_from_scenario_start": "1992-09-04",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:teslic:blatnica_2",
+        "personnel": 2200,
+        "morale": 76,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:7"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:7:0",
+        "fatigue": 0.5,
+        "order": null,
+        "movement_state": {
+          "destination_osid": null,
+          "path": [
+            "op:teslic:blatnica_2",
+            "op:teslic:buletic_2",
+            "op:kotor_varos:kotor_varos_2",
+            "op:kotor_varos:vagani_2",
+            "op:skender_vakuf:javorani_2",
+            "op:banja_luka:rekavice_2",
+            "op:mrkonjic_grad:bjelajce_2",
+            "op:mrkonjic_grad:majdan_2",
+            "op:sipovo:sipovo_2",
+            "op:sipovo:pribeljci_2"
+          ],
+          "progress": null
+        },
+        "operation_commitment": null
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:skender_vakuf:javorani_2",
+        "personnel": 1285,
+        "morale": 67,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:2"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:2:0",
+        "fatigue": 3,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": {
+          "operation": "Operation Jajce",
+          "phase": "recovery",
+          "started_turn": 19,
+          "sector_id": "sector:vrs_1st_krajina:6",
+          "staging_osid": "op:mrkonjic_grad:bjelajce_2",
+          "participating_brigades": [
+            "rs_11th_mrkonji_light_infantry",
+            "rs_1st_sipovo_light_infantry",
+            "rs_22nd_krajina_infantry"
+          ],
+          "axis": {
+            "axis_id": "vrbas_west",
+            "status": "complete",
+            "main_brigade": "rs_11th_mrkonji_light_infantry",
+            "support_brigades": [
+              "rs_22nd_krajina_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_11th_mrkonji_light_infantry",
+              "rs_22nd_krajina_infantry"
+            ],
+            "current_objective_index": 3,
+            "objectives": [
+              "op:jajce:divicani_2",
+              "op:jajce:barevo_2",
+              "op:jajce:jajce_3"
+            ],
+            "last_result": "captured"
+          }
+        }
+      },
+      "korenici_battle_this_turn": [],
+      "relevant_movements_this_turn": []
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-027.json",
+      "sha256": "eb3e8c7cc2508a80ade002a6a00484d50a09ee09c9cfcecfd8dc27e4d97fe795",
+      "turn": 27,
+      "week_date_from_scenario_start": "1992-09-11",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:teslic:blatnica_2",
+        "personnel": 2200,
+        "morale": 76,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:7"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:7:0",
+        "fatigue": 1,
+        "order": null,
+        "movement_state": {
+          "destination_osid": null,
+          "path": [
+            "op:teslic:blatnica_2",
+            "op:teslic:buletic_2",
+            "op:kotor_varos:kotor_varos_2",
+            "op:kotor_varos:vagani_2",
+            "op:skender_vakuf:javorani_2",
+            "op:banja_luka:rekavice_2",
+            "op:mrkonjic_grad:bjelajce_2",
+            "op:mrkonjic_grad:majdan_2",
+            "op:sipovo:sipovo_2",
+            "op:sipovo:pribeljci_2"
+          ],
+          "progress": null
+        },
+        "operation_commitment": null
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:skender_vakuf:javorani_2",
+        "personnel": 1305,
+        "morale": 67,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:2"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:2:0",
+        "fatigue": 3.5,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": {
+          "operation": "Operation Jajce",
+          "phase": "recovery",
+          "started_turn": 19,
+          "sector_id": "sector:vrs_1st_krajina:6",
+          "staging_osid": "op:mrkonjic_grad:bjelajce_2",
+          "participating_brigades": [
+            "rs_11th_mrkonji_light_infantry",
+            "rs_1st_sipovo_light_infantry",
+            "rs_22nd_krajina_infantry"
+          ],
+          "axis": {
+            "axis_id": "vrbas_west",
+            "status": "complete",
+            "main_brigade": "rs_11th_mrkonji_light_infantry",
+            "support_brigades": [
+              "rs_22nd_krajina_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_11th_mrkonji_light_infantry",
+              "rs_22nd_krajina_infantry"
+            ],
+            "current_objective_index": 3,
+            "objectives": [
+              "op:jajce:divicani_2",
+              "op:jajce:barevo_2",
+              "op:jajce:jajce_3"
+            ],
+            "last_result": "captured"
+          }
+        }
+      },
+      "korenici_battle_this_turn": [],
+      "relevant_movements_this_turn": []
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-028.json",
+      "sha256": "c6eefaaac08dbd7c9f8c04cba54e75c986fdcec93f8bbc77eb8e44e762bc74c4",
+      "turn": 28,
+      "week_date_from_scenario_start": "1992-09-18",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:teslic:blatnica_2",
+        "personnel": 2200,
+        "morale": 79,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:7"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:7:0",
+        "fatigue": 0.5,
+        "order": null,
+        "movement_state": {
+          "destination_osid": null,
+          "path": [
+            "op:teslic:blatnica_2",
+            "op:teslic:buletic_2",
+            "op:kotor_varos:kotor_varos_2",
+            "op:kotor_varos:vagani_2",
+            "op:skender_vakuf:javorani_2",
+            "op:banja_luka:rekavice_2",
+            "op:mrkonjic_grad:bjelajce_2",
+            "op:mrkonjic_grad:majdan_2",
+            "op:sipovo:sipovo_2",
+            "op:sipovo:pribeljci_2"
+          ],
+          "progress": null
+        },
+        "operation_commitment": null
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:skender_vakuf:javorani_2",
+        "personnel": 1325,
+        "morale": 70,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:2"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:2:0",
+        "fatigue": 3,
+        "order": {
+          "owner": "bot_discretionary",
+          "stance": "column",
+          "destination_sids": [
+            "op:jajce:vinac_2"
+          ]
+        },
+        "movement_state": null,
+        "operation_commitment": {
+          "operation": "Operation Donji Vakuf",
+          "phase": "planning",
+          "started_turn": 28,
+          "sector_id": "sector:vrs_1st_krajina:2",
+          "staging_osid": "op:sipovo:pribeljci_2",
+          "participating_brigades": [
+            "rs_1st_banja_luka_light_infantry",
+            "rs_22nd_krajina_infantry",
+            "rs_5th_kozara_light_infantry"
+          ],
+          "axis": {
+            "axis_id": "donji_vakuf_sweep",
+            "status": "executing",
+            "main_brigade": "rs_22nd_krajina_infantry",
+            "support_brigades": [
+              "rs_5th_kozara_light_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_22nd_krajina_infantry",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "current_objective_index": 0,
+            "objectives": [
+              "op:donji_vakuf:torlakovac_2",
+              "op:donji_vakuf:oborci_2",
+              "op:donji_vakuf:donji_vakuf_2",
+              "op:donji_vakuf:korenici"
+            ]
+          }
+        }
+      },
+      "korenici_battle_this_turn": [],
+      "relevant_movements_this_turn": []
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-029.json",
+      "sha256": "92da97c1ba32e88864f3f54bb3c4266813f715237a7ca3a8d5c9d68b2f54226d",
+      "turn": 29,
+      "week_date_from_scenario_start": "1992-09-25",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:torlakovac_2",
+        "personnel": 2159,
+        "morale": 82,
+        "cohesion": 34,
+        "readiness": "active",
+        "posture": "attack",
+        "assignment": {
+          "kind": "sector",
+          "role": "reserve",
+          "sector_id": "sector:vrs_1st_krajina:3"
+        },
+        "assigned_sub_segment_id": null,
+        "fatigue": 3.5,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": {
+          "operation": "Operation Donji Vakuf",
+          "phase": "execution",
+          "started_turn": 28,
+          "sector_id": "sector:vrs_1st_krajina:6",
+          "staging_osid": "op:sipovo:pribeljci_2",
+          "participating_brigades": [
+            "rs_16th_krajina_motorized",
+            "rs_1st_banja_luka_light_infantry",
+            "rs_22nd_krajina_infantry",
+            "rs_5th_kozara_light_infantry"
+          ],
+          "axis": {
+            "axis_id": "donji_vakuf_sweep",
+            "status": "executing",
+            "main_brigade": "rs_22nd_krajina_infantry",
+            "support_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_22nd_krajina_infantry",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "current_objective_index": 1,
+            "objectives": [
+              "op:donji_vakuf:torlakovac_2",
+              "op:donji_vakuf:oborci_2",
+              "op:donji_vakuf:donji_vakuf_2",
+              "op:donji_vakuf:korenici"
+            ],
+            "last_result": "captured"
+          }
+        }
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:skender_vakuf:javorani_2",
+        "personnel": 1345,
+        "morale": 70,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:6"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:6:0",
+        "fatigue": 3.5,
+        "order": null,
+        "movement_state": {
+          "destination_osid": null,
+          "path": [
+            "op:skender_vakuf:javorani_2",
+            "op:jajce:barevo_2",
+            "op:jajce:bravnice",
+            "op:sipovo:pribeljci_2"
+          ],
+          "progress": null
+        },
+        "operation_commitment": {
+          "operation": "Operation Donji Vakuf",
+          "phase": "execution",
+          "started_turn": 28,
+          "sector_id": "sector:vrs_1st_krajina:6",
+          "staging_osid": "op:sipovo:pribeljci_2",
+          "participating_brigades": [
+            "rs_16th_krajina_motorized",
+            "rs_1st_banja_luka_light_infantry",
+            "rs_22nd_krajina_infantry",
+            "rs_5th_kozara_light_infantry"
+          ],
+          "axis": {
+            "axis_id": "donji_vakuf_sweep",
+            "status": "executing",
+            "main_brigade": "rs_22nd_krajina_infantry",
+            "support_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_22nd_krajina_infantry",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "current_objective_index": 1,
+            "objectives": [
+              "op:donji_vakuf:torlakovac_2",
+              "op:donji_vakuf:oborci_2",
+              "op:donji_vakuf:donji_vakuf_2",
+              "op:donji_vakuf:korenici"
+            ],
+            "last_result": "captured"
+          }
+        }
+      },
+      "korenici_battle_this_turn": [],
+      "relevant_movements_this_turn": [
+        {
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:teslic:blatnica_2",
+          "to_osid": "op:donji_vakuf:torlakovac_2"
+        }
+      ]
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-030.json",
+      "sha256": "2cf9f899f9287f5eeffd631a641f0446449d03fa7b01721a75ebc1ace2588c4f",
+      "turn": 30,
+      "week_date_from_scenario_start": "1992-10-02",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:torlakovac_2",
+        "personnel": 2200,
+        "morale": 86,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "attack",
+        "assignment": {
+          "kind": "sector",
+          "role": "reserve",
+          "sector_id": "sector:vrs_1st_krajina:3"
+        },
+        "assigned_sub_segment_id": null,
+        "fatigue": 3.5,
+        "order": {
+          "owner": "bot_discretionary",
+          "stance": "column",
+          "destination_sids": [
+            "op:donji_vakuf:babin_potok_2"
+          ]
+        },
+        "movement_state": null,
+        "operation_commitment": {
+          "operation": "Operation Donji Vakuf",
+          "phase": "execution",
+          "started_turn": 28,
+          "sector_id": "sector:vrs_1st_krajina:6",
+          "staging_osid": "op:sipovo:pribeljci_2",
+          "participating_brigades": [
+            "rs_16th_krajina_motorized",
+            "rs_1st_banja_luka_light_infantry",
+            "rs_22nd_krajina_infantry",
+            "rs_5th_kozara_light_infantry"
+          ],
+          "axis": {
+            "axis_id": "donji_vakuf_sweep",
+            "status": "executing",
+            "main_brigade": "rs_22nd_krajina_infantry",
+            "support_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_22nd_krajina_infantry",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "current_objective_index": 1,
+            "objectives": [
+              "op:donji_vakuf:torlakovac_2",
+              "op:donji_vakuf:oborci_2",
+              "op:donji_vakuf:donji_vakuf_2",
+              "op:donji_vakuf:korenici"
+            ],
+            "last_result": "approach"
+          }
+        }
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:skender_vakuf:javorani_2",
+        "personnel": 1367,
+        "morale": 70,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:6"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:6:0",
+        "fatigue": 3,
+        "order": null,
+        "movement_state": {
+          "destination_osid": null,
+          "path": [
+            "op:skender_vakuf:javorani_2",
+            "op:jajce:barevo_2",
+            "op:jajce:bravnice",
+            "op:sipovo:pribeljci_2"
+          ],
+          "progress": null
+        },
+        "operation_commitment": {
+          "operation": "Operation Donji Vakuf",
+          "phase": "execution",
+          "started_turn": 28,
+          "sector_id": "sector:vrs_1st_krajina:6",
+          "staging_osid": "op:sipovo:pribeljci_2",
+          "participating_brigades": [
+            "rs_16th_krajina_motorized",
+            "rs_1st_banja_luka_light_infantry",
+            "rs_22nd_krajina_infantry",
+            "rs_5th_kozara_light_infantry"
+          ],
+          "axis": {
+            "axis_id": "donji_vakuf_sweep",
+            "status": "executing",
+            "main_brigade": "rs_22nd_krajina_infantry",
+            "support_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_22nd_krajina_infantry",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "current_objective_index": 1,
+            "objectives": [
+              "op:donji_vakuf:torlakovac_2",
+              "op:donji_vakuf:oborci_2",
+              "op:donji_vakuf:donji_vakuf_2",
+              "op:donji_vakuf:korenici"
+            ],
+            "last_result": "approach"
+          }
+        }
+      },
+      "korenici_battle_this_turn": [],
+      "relevant_movements_this_turn": []
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-031.json",
+      "sha256": "19413076600234e8aff236517ea50b3b330075de45bd82b390e48b00c6db9ab8",
+      "turn": 31,
+      "week_date_from_scenario_start": "1992-10-09",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:torlakovac_2",
+        "personnel": 2200,
+        "morale": 86,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "attack",
+        "assignment": {
+          "kind": "sector",
+          "role": "reserve",
+          "sector_id": "sector:vrs_1st_krajina:7"
+        },
+        "assigned_sub_segment_id": null,
+        "fatigue": 3.5,
+        "order": null,
+        "movement_state": {
+          "destination_osid": null,
+          "path": [
+            "op:donji_vakuf:torlakovac_2",
+            "op:donji_vakuf:babin_potok_2"
+          ],
+          "progress": null
+        },
+        "operation_commitment": {
+          "operation": "Operation Donji Vakuf",
+          "phase": "execution",
+          "started_turn": 28,
+          "sector_id": "sector:vrs_1st_krajina:8",
+          "staging_osid": "op:sipovo:pribeljci_2",
+          "participating_brigades": [
+            "rs_16th_krajina_motorized",
+            "rs_1st_banja_luka_light_infantry",
+            "rs_22nd_krajina_infantry",
+            "rs_43rd_prijedor_motorized",
+            "rs_5th_kozara_light_infantry"
+          ],
+          "axis": {
+            "axis_id": "donji_vakuf_sweep",
+            "status": "executing",
+            "main_brigade": "rs_22nd_krajina_infantry",
+            "support_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_22nd_krajina_infantry",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "current_objective_index": 1,
+            "objectives": [
+              "op:donji_vakuf:torlakovac_2",
+              "op:donji_vakuf:oborci_2",
+              "op:donji_vakuf:donji_vakuf_2",
+              "op:donji_vakuf:korenici"
+            ],
+            "last_result": "approach"
+          }
+        }
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:sipovo:pribeljci_2",
+        "personnel": 1394,
+        "morale": 72,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "reserve",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "assigned_sub_segment_id": null,
+        "fatigue": 3.5,
+        "order": {
+          "owner": "bot_discretionary",
+          "stance": "column",
+          "destination_sids": [
+            "op:donji_vakuf:babin_potok_2"
+          ]
+        },
+        "movement_state": null,
+        "operation_commitment": {
+          "operation": "Operation Donji Vakuf",
+          "phase": "execution",
+          "started_turn": 28,
+          "sector_id": "sector:vrs_1st_krajina:8",
+          "staging_osid": "op:sipovo:pribeljci_2",
+          "participating_brigades": [
+            "rs_16th_krajina_motorized",
+            "rs_1st_banja_luka_light_infantry",
+            "rs_22nd_krajina_infantry",
+            "rs_43rd_prijedor_motorized",
+            "rs_5th_kozara_light_infantry"
+          ],
+          "axis": {
+            "axis_id": "donji_vakuf_sweep",
+            "status": "executing",
+            "main_brigade": "rs_22nd_krajina_infantry",
+            "support_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_22nd_krajina_infantry",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "current_objective_index": 1,
+            "objectives": [
+              "op:donji_vakuf:torlakovac_2",
+              "op:donji_vakuf:oborci_2",
+              "op:donji_vakuf:donji_vakuf_2",
+              "op:donji_vakuf:korenici"
+            ],
+            "last_result": "approach"
+          }
+        }
+      },
+      "korenici_battle_this_turn": [],
+      "relevant_movements_this_turn": [
+        {
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:skender_vakuf:javorani_2",
+          "to_osid": "op:sipovo:pribeljci_2"
+        }
+      ]
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-032.json",
+      "sha256": "2903d7cb8505a64e1741cc6a198c0f6db96660ee5b34bf0dbadf02459f8d61c8",
+      "turn": 32,
+      "week_date_from_scenario_start": "1992-10-16",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:oborci_2",
+        "personnel": 2200,
+        "morale": 89,
+        "cohesion": 34,
+        "readiness": "active",
+        "posture": "attack",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:7"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:7:0",
+        "fatigue": 6.5,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": {
+          "operation": "Operation Donji Vakuf",
+          "phase": "execution",
+          "started_turn": 28,
+          "sector_id": "sector:vrs_1st_krajina:7",
+          "staging_osid": "op:sipovo:pribeljci_2",
+          "participating_brigades": [
+            "rs_16th_krajina_motorized",
+            "rs_1st_banja_luka_light_infantry",
+            "rs_22nd_krajina_infantry",
+            "rs_43rd_prijedor_motorized",
+            "rs_5th_kozara_light_infantry"
+          ],
+          "axis": {
+            "axis_id": "donji_vakuf_sweep",
+            "status": "executing",
+            "main_brigade": "rs_22nd_krajina_infantry",
+            "support_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_22nd_krajina_infantry",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "current_objective_index": 2,
+            "objectives": [
+              "op:donji_vakuf:torlakovac_2",
+              "op:donji_vakuf:oborci_2",
+              "op:donji_vakuf:donji_vakuf_2",
+              "op:donji_vakuf:korenici"
+            ],
+            "last_result": "captured"
+          }
+        }
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:sipovo:pribeljci_2",
+        "personnel": 1416,
+        "morale": 74,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:8"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:8:0",
+        "fatigue": 2.5,
+        "order": null,
+        "movement_state": {
+          "destination_osid": null,
+          "path": [
+            "op:sipovo:pribeljci_2",
+            "op:donji_vakuf:torlakovac_2",
+            "op:donji_vakuf:babin_potok_2"
+          ],
+          "progress": null
+        },
+        "operation_commitment": {
+          "operation": "Operation Donji Vakuf",
+          "phase": "execution",
+          "started_turn": 28,
+          "sector_id": "sector:vrs_1st_krajina:7",
+          "staging_osid": "op:sipovo:pribeljci_2",
+          "participating_brigades": [
+            "rs_16th_krajina_motorized",
+            "rs_1st_banja_luka_light_infantry",
+            "rs_22nd_krajina_infantry",
+            "rs_43rd_prijedor_motorized",
+            "rs_5th_kozara_light_infantry"
+          ],
+          "axis": {
+            "axis_id": "donji_vakuf_sweep",
+            "status": "executing",
+            "main_brigade": "rs_22nd_krajina_infantry",
+            "support_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_22nd_krajina_infantry",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "current_objective_index": 2,
+            "objectives": [
+              "op:donji_vakuf:torlakovac_2",
+              "op:donji_vakuf:oborci_2",
+              "op:donji_vakuf:donji_vakuf_2",
+              "op:donji_vakuf:korenici"
+            ],
+            "last_result": "captured"
+          }
+        }
+      },
+      "korenici_battle_this_turn": [],
+      "relevant_movements_this_turn": [
+        {
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:donji_vakuf:torlakovac_2",
+          "to_osid": "op:donji_vakuf:oborci_2"
+        }
+      ]
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-033.json",
+      "sha256": "d381cd1cde5001bdb9f48a9d5dd7f70de5359a810150b6a6c1abdb083f0418f4",
+      "turn": 33,
+      "week_date_from_scenario_start": "1992-10-23",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 2200,
+        "morale": 92,
+        "cohesion": 33,
+        "readiness": "active",
+        "posture": "attack",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:6"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:6:0",
+        "fatigue": 11,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": {
+          "operation": "Operation Donji Vakuf",
+          "phase": "execution",
+          "started_turn": 28,
+          "sector_id": "sector:vrs_1st_krajina:6",
+          "staging_osid": "op:sipovo:pribeljci_2",
+          "participating_brigades": [
+            "rs_16th_krajina_motorized",
+            "rs_1st_banja_luka_light_infantry",
+            "rs_22nd_krajina_infantry",
+            "rs_43rd_prijedor_motorized",
+            "rs_5th_kozara_light_infantry"
+          ],
+          "axis": {
+            "axis_id": "donji_vakuf_sweep",
+            "status": "executing",
+            "main_brigade": "rs_22nd_krajina_infantry",
+            "support_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_22nd_krajina_infantry",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "current_objective_index": 3,
+            "objectives": [
+              "op:donji_vakuf:torlakovac_2",
+              "op:donji_vakuf:oborci_2",
+              "op:donji_vakuf:donji_vakuf_2",
+              "op:donji_vakuf:korenici"
+            ],
+            "last_result": "captured"
+          }
+        }
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:sipovo:pribeljci_2",
+        "personnel": 1438,
+        "morale": 76,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "reserve",
+          "sector_id": "sector:vrs_1st_krajina:8"
+        },
+        "assigned_sub_segment_id": null,
+        "fatigue": 3,
+        "order": null,
+        "movement_state": {
+          "destination_osid": null,
+          "path": [
+            "op:sipovo:pribeljci_2",
+            "op:donji_vakuf:torlakovac_2",
+            "op:donji_vakuf:babin_potok_2"
+          ],
+          "progress": null
+        },
+        "operation_commitment": {
+          "operation": "Operation Donji Vakuf",
+          "phase": "execution",
+          "started_turn": 28,
+          "sector_id": "sector:vrs_1st_krajina:6",
+          "staging_osid": "op:sipovo:pribeljci_2",
+          "participating_brigades": [
+            "rs_16th_krajina_motorized",
+            "rs_1st_banja_luka_light_infantry",
+            "rs_22nd_krajina_infantry",
+            "rs_43rd_prijedor_motorized",
+            "rs_5th_kozara_light_infantry"
+          ],
+          "axis": {
+            "axis_id": "donji_vakuf_sweep",
+            "status": "executing",
+            "main_brigade": "rs_22nd_krajina_infantry",
+            "support_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_22nd_krajina_infantry",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "current_objective_index": 3,
+            "objectives": [
+              "op:donji_vakuf:torlakovac_2",
+              "op:donji_vakuf:oborci_2",
+              "op:donji_vakuf:donji_vakuf_2",
+              "op:donji_vakuf:korenici"
+            ],
+            "last_result": "captured"
+          }
+        }
+      },
+      "korenici_battle_this_turn": [],
+      "relevant_movements_this_turn": [
+        {
+          "formation_id": "rs_16th_krajina_motorized",
+          "formation_name": "16th Krajina Motorized",
+          "from_osid": "op:donji_vakuf:oborci_2",
+          "to_osid": "op:donji_vakuf:donji_vakuf_2"
+        }
+      ]
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-034.json",
+      "sha256": "2cfe77c02018c34e32f9b9ac99e0c81e310351485355ae502b95b4a1d93c4805",
+      "turn": 34,
+      "week_date_from_scenario_start": "1992-10-30",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 1947,
+        "morale": 92,
+        "cohesion": 25,
+        "readiness": "active",
+        "posture": "attack",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:6"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:6:0",
+        "fatigue": 14.5,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": {
+          "operation": "Operation Donji Vakuf",
+          "phase": "execution",
+          "started_turn": 28,
+          "sector_id": "sector:vrs_1st_krajina:6",
+          "staging_osid": "op:sipovo:pribeljci_2",
+          "participating_brigades": [
+            "rs_16th_krajina_motorized",
+            "rs_1st_banja_luka_light_infantry",
+            "rs_22nd_krajina_infantry",
+            "rs_43rd_prijedor_motorized",
+            "rs_5th_kozara_light_infantry"
+          ],
+          "axis": {
+            "axis_id": "donji_vakuf_sweep",
+            "status": "executing",
+            "main_brigade": "rs_22nd_krajina_infantry",
+            "support_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_22nd_krajina_infantry",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "current_objective_index": 3,
+            "objectives": [
+              "op:donji_vakuf:torlakovac_2",
+              "op:donji_vakuf:oborci_2",
+              "op:donji_vakuf:donji_vakuf_2",
+              "op:donji_vakuf:korenici"
+            ],
+            "last_result": "approach"
+          }
+        }
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:babin_potok_2",
+        "personnel": 1465,
+        "morale": 76,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "reserve",
+          "sector_id": "sector:vrs_1st_krajina:6"
+        },
+        "assigned_sub_segment_id": null,
+        "fatigue": 2,
+        "order": {
+          "owner": "bot_discretionary",
+          "stance": "column",
+          "destination_sids": [
+            "op:donji_vakuf:donji_vakuf_2"
+          ]
+        },
+        "movement_state": null,
+        "operation_commitment": {
+          "operation": "Operation Donji Vakuf",
+          "phase": "execution",
+          "started_turn": 28,
+          "sector_id": "sector:vrs_1st_krajina:6",
+          "staging_osid": "op:sipovo:pribeljci_2",
+          "participating_brigades": [
+            "rs_16th_krajina_motorized",
+            "rs_1st_banja_luka_light_infantry",
+            "rs_22nd_krajina_infantry",
+            "rs_43rd_prijedor_motorized",
+            "rs_5th_kozara_light_infantry"
+          ],
+          "axis": {
+            "axis_id": "donji_vakuf_sweep",
+            "status": "executing",
+            "main_brigade": "rs_22nd_krajina_infantry",
+            "support_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_22nd_krajina_infantry",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "current_objective_index": 3,
+            "objectives": [
+              "op:donji_vakuf:torlakovac_2",
+              "op:donji_vakuf:oborci_2",
+              "op:donji_vakuf:donji_vakuf_2",
+              "op:donji_vakuf:korenici"
+            ],
+            "last_result": "approach"
+          }
+        }
+      },
+      "korenici_battle_this_turn": [
+        {
+          "all_attacker_ids": [
+            "rs_16th_krajina_motorized"
+          ],
+          "attacker_casualties": 291,
+          "attacker_faction": "RS",
+          "defender_casualties": 360,
+          "defender_contributions": [
+            {
+              "brigade_id": "arbih_330th_liberation",
+              "casualties_taken": 248,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 399.46
+            },
+            {
+              "brigade_id": "arbih_708th_mountain",
+              "casualties_taken": 101,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 163.42
+            },
+            {
+              "brigade_id": "arbih_770th_slavna_mountain",
+              "casualties_taken": 11,
+              "distance_hops": 0,
+              "is_home_municipality": true,
+              "reactive_weight": 17.56
+            }
+          ],
+          "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
+          "osid": "op:donji_vakuf:korenici",
+          "outcome": "costly_victory",
+          "primary_attacker_id": "rs_16th_krajina_motorized",
+          "primary_defender_id": "arbih_330th_liberation",
+          "territory_flipped": false,
+          "was_concentrated": false
+        }
+      ],
+      "relevant_movements_this_turn": [
+        {
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:sipovo:pribeljci_2",
+          "to_osid": "op:donji_vakuf:babin_potok_2"
+        }
+      ]
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-035.json",
+      "sha256": "1f251832d5ad1669ac0e8b35821451ae65c6d6f8d5aaa58ccc04e661f52c2bc4",
+      "turn": 35,
+      "week_date_from_scenario_start": "1992-11-06",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 1956,
+        "morale": 87,
+        "cohesion": 14,
+        "readiness": "overextended",
+        "posture": "hold",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:4:0",
+        "fatigue": 19,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": {
+          "operation": "Operation Donji Vakuf",
+          "phase": "execution",
+          "started_turn": 28,
+          "sector_id": "sector:vrs_1st_krajina:4",
+          "staging_osid": "op:sipovo:pribeljci_2",
+          "participating_brigades": [
+            "rs_16th_krajina_motorized",
+            "rs_1st_banja_luka_light_infantry",
+            "rs_22nd_krajina_infantry",
+            "rs_43rd_prijedor_motorized",
+            "rs_5th_kozara_light_infantry"
+          ],
+          "axis": {
+            "axis_id": "donji_vakuf_sweep",
+            "status": "executing",
+            "main_brigade": "rs_22nd_krajina_infantry",
+            "support_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_22nd_krajina_infantry",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "current_objective_index": 3,
+            "objectives": [
+              "op:donji_vakuf:torlakovac_2",
+              "op:donji_vakuf:oborci_2",
+              "op:donji_vakuf:donji_vakuf_2",
+              "op:donji_vakuf:korenici"
+            ],
+            "last_result": "failed"
+          }
+        }
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:babin_potok_2",
+        "personnel": 1492,
+        "morale": 76,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "reserve",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "assigned_sub_segment_id": null,
+        "fatigue": 2,
+        "order": null,
+        "movement_state": {
+          "destination_osid": null,
+          "path": [
+            "op:donji_vakuf:babin_potok_2",
+            "op:donji_vakuf:donji_vakuf_2"
+          ],
+          "progress": null
+        },
+        "operation_commitment": {
+          "operation": "Operation Donji Vakuf",
+          "phase": "execution",
+          "started_turn": 28,
+          "sector_id": "sector:vrs_1st_krajina:4",
+          "staging_osid": "op:sipovo:pribeljci_2",
+          "participating_brigades": [
+            "rs_16th_krajina_motorized",
+            "rs_1st_banja_luka_light_infantry",
+            "rs_22nd_krajina_infantry",
+            "rs_43rd_prijedor_motorized",
+            "rs_5th_kozara_light_infantry"
+          ],
+          "axis": {
+            "axis_id": "donji_vakuf_sweep",
+            "status": "executing",
+            "main_brigade": "rs_22nd_krajina_infantry",
+            "support_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_22nd_krajina_infantry",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "current_objective_index": 3,
+            "objectives": [
+              "op:donji_vakuf:torlakovac_2",
+              "op:donji_vakuf:oborci_2",
+              "op:donji_vakuf:donji_vakuf_2",
+              "op:donji_vakuf:korenici"
+            ],
+            "last_result": "failed"
+          }
+        }
+      },
+      "korenici_battle_this_turn": [
+        {
+          "all_attacker_ids": [
+            "rs_16th_krajina_motorized"
+          ],
+          "attacker_casualties": 383,
+          "attacker_faction": "RS",
+          "defender_casualties": 137,
+          "defender_contributions": [
+            {
+              "brigade_id": "arbih_330th_liberation",
+              "casualties_taken": 84,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 407.38
+            },
+            {
+              "brigade_id": "arbih_708th_mountain",
+              "casualties_taken": 40,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 196.72
+            },
+            {
+              "brigade_id": "arbih_770th_slavna_mountain",
+              "casualties_taken": 13,
+              "distance_hops": 0,
+              "is_home_municipality": true,
+              "reactive_weight": 64.34
+            }
+          ],
+          "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
+          "osid": "op:donji_vakuf:korenici",
+          "outcome": "repulsed",
+          "primary_attacker_id": "rs_16th_krajina_motorized",
+          "primary_defender_id": "arbih_330th_liberation",
+          "territory_flipped": false,
+          "was_concentrated": false
+        }
+      ],
+      "relevant_movements_this_turn": []
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-036.json",
+      "sha256": "23dec1ebed50cebb4c2fab30ff1a2c2cfed72bad61f10b1ac450526b88e72cdf",
+      "turn": 36,
+      "week_date_from_scenario_start": "1992-11-13",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 1813,
+        "morale": 85,
+        "cohesion": 12,
+        "readiness": "degraded",
+        "posture": "hold",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:4:0",
+        "fatigue": 22.5,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": {
+          "operation": "Operation Donji Vakuf",
+          "phase": "execution",
+          "started_turn": 28,
+          "sector_id": "sector:vrs_1st_krajina:4",
+          "staging_osid": "op:sipovo:pribeljci_2",
+          "participating_brigades": [
+            "rs_16th_krajina_motorized",
+            "rs_1st_banja_luka_light_infantry",
+            "rs_22nd_krajina_infantry",
+            "rs_43rd_prijedor_motorized",
+            "rs_5th_kozara_light_infantry"
+          ],
+          "axis": {
+            "axis_id": "donji_vakuf_sweep",
+            "status": "executing",
+            "main_brigade": "rs_22nd_krajina_infantry",
+            "support_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_22nd_krajina_infantry",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "current_objective_index": 3,
+            "objectives": [
+              "op:donji_vakuf:torlakovac_2",
+              "op:donji_vakuf:oborci_2",
+              "op:donji_vakuf:donji_vakuf_2",
+              "op:donji_vakuf:korenici"
+            ],
+            "last_result": "failed"
+          }
+        }
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 1250,
+        "morale": 74,
+        "cohesion": 29,
+        "readiness": "active",
+        "posture": "attack",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:4:0",
+        "fatigue": 5,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": {
+          "operation": "Operation Donji Vakuf",
+          "phase": "execution",
+          "started_turn": 28,
+          "sector_id": "sector:vrs_1st_krajina:4",
+          "staging_osid": "op:sipovo:pribeljci_2",
+          "participating_brigades": [
+            "rs_16th_krajina_motorized",
+            "rs_1st_banja_luka_light_infantry",
+            "rs_22nd_krajina_infantry",
+            "rs_43rd_prijedor_motorized",
+            "rs_5th_kozara_light_infantry"
+          ],
+          "axis": {
+            "axis_id": "donji_vakuf_sweep",
+            "status": "executing",
+            "main_brigade": "rs_22nd_krajina_infantry",
+            "support_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_22nd_krajina_infantry",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "current_objective_index": 3,
+            "objectives": [
+              "op:donji_vakuf:torlakovac_2",
+              "op:donji_vakuf:oborci_2",
+              "op:donji_vakuf:donji_vakuf_2",
+              "op:donji_vakuf:korenici"
+            ],
+            "last_result": "failed"
+          }
+        }
+      },
+      "korenici_battle_this_turn": [
+        {
+          "all_attacker_ids": [
+            "rs_16th_krajina_motorized"
+          ],
+          "attacker_casualties": 466,
+          "attacker_faction": "RS",
+          "defender_casualties": 278,
+          "defender_contributions": [
+            {
+              "brigade_id": "arbih_330th_liberation",
+              "casualties_taken": 184,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 510.8
+            },
+            {
+              "brigade_id": "arbih_708th_mountain",
+              "casualties_taken": 69,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 189.41
+            },
+            {
+              "brigade_id": "arbih_770th_slavna_mountain",
+              "casualties_taken": 25,
+              "distance_hops": 0,
+              "is_home_municipality": true,
+              "reactive_weight": 67.86
+            }
+          ],
+          "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
+          "osid": "op:donji_vakuf:korenici",
+          "outcome": "stalemate",
+          "primary_attacker_id": "rs_16th_krajina_motorized",
+          "primary_defender_id": "arbih_330th_liberation",
+          "territory_flipped": false,
+          "was_concentrated": false
+        }
+      ],
+      "relevant_movements_this_turn": [
+        {
+          "formation_id": "rs_22nd_krajina_infantry",
+          "formation_name": "22nd Krajina Infantry",
+          "from_osid": "op:donji_vakuf:babin_potok_2",
+          "to_osid": "op:donji_vakuf:donji_vakuf_2"
+        }
+      ]
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-037.json",
+      "sha256": "ac5c05feecd41b39e267745e08367474c8df2214abe55c363b8630148e94b104",
+      "turn": 37,
+      "week_date_from_scenario_start": "1992-11-20",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 1588,
+        "morale": 80,
+        "cohesion": 5,
+        "readiness": "degraded",
+        "posture": "hold",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:4:0",
+        "fatigue": 27,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": {
+          "operation": "Operation Donji Vakuf",
+          "phase": "recovery",
+          "started_turn": 28,
+          "sector_id": "sector:vrs_1st_krajina:4",
+          "staging_osid": "op:sipovo:pribeljci_2",
+          "participating_brigades": [
+            "rs_16th_krajina_motorized",
+            "rs_1st_banja_luka_light_infantry",
+            "rs_22nd_krajina_infantry",
+            "rs_43rd_prijedor_motorized",
+            "rs_5th_kozara_light_infantry"
+          ],
+          "axis": {
+            "axis_id": "donji_vakuf_sweep",
+            "status": "complete",
+            "main_brigade": "rs_22nd_krajina_infantry",
+            "support_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_22nd_krajina_infantry",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "current_objective_index": 4,
+            "objectives": [
+              "op:donji_vakuf:torlakovac_2",
+              "op:donji_vakuf:oborci_2",
+              "op:donji_vakuf:donji_vakuf_2",
+              "op:donji_vakuf:korenici"
+            ],
+            "last_result": "failed"
+          }
+        }
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 888,
+        "morale": 69,
+        "cohesion": 18,
+        "readiness": "overextended",
+        "posture": "attack",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:4:0",
+        "fatigue": 9.5,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": {
+          "operation": "Operation Donji Vakuf",
+          "phase": "recovery",
+          "started_turn": 28,
+          "sector_id": "sector:vrs_1st_krajina:4",
+          "staging_osid": "op:sipovo:pribeljci_2",
+          "participating_brigades": [
+            "rs_16th_krajina_motorized",
+            "rs_1st_banja_luka_light_infantry",
+            "rs_22nd_krajina_infantry",
+            "rs_43rd_prijedor_motorized",
+            "rs_5th_kozara_light_infantry"
+          ],
+          "axis": {
+            "axis_id": "donji_vakuf_sweep",
+            "status": "complete",
+            "main_brigade": "rs_22nd_krajina_infantry",
+            "support_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_22nd_krajina_infantry",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "current_objective_index": 4,
+            "objectives": [
+              "op:donji_vakuf:torlakovac_2",
+              "op:donji_vakuf:oborci_2",
+              "op:donji_vakuf:donji_vakuf_2",
+              "op:donji_vakuf:korenici"
+            ],
+            "last_result": "failed"
+          }
+        }
+      },
+      "korenici_battle_this_turn": [
+        {
+          "all_attacker_ids": [
+            "rs_16th_krajina_motorized"
+          ],
+          "attacker_casualties": 607,
+          "attacker_faction": "RS",
+          "defender_casualties": 151,
+          "defender_contributions": [
+            {
+              "brigade_id": "arbih_330th_liberation",
+              "casualties_taken": 109,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 522.44
+            },
+            {
+              "brigade_id": "arbih_708th_mountain",
+              "casualties_taken": 29,
+              "distance_hops": 0,
+              "is_home_municipality": false,
+              "reactive_weight": 142.05
+            },
+            {
+              "brigade_id": "arbih_770th_slavna_mountain",
+              "casualties_taken": 13,
+              "distance_hops": 0,
+              "is_home_municipality": true,
+              "reactive_weight": 64.14
+            }
+          ],
+          "defender_faction": "RBiH",
+          "osid": "op:donji_vakuf:korenici",
+          "outcome": "repulsed",
+          "primary_attacker_id": "rs_16th_krajina_motorized",
+          "primary_defender_id": "arbih_330th_liberation",
+          "territory_flipped": false,
+          "was_concentrated": false
+        }
+      ],
+      "relevant_movements_this_turn": []
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-038.json",
+      "sha256": "532de3c7a3453fff1cfbefb1f72414e5f27c7e0bdfef1f9d79b44e7af3e25104",
+      "turn": 38,
+      "week_date_from_scenario_start": "1992-11-27",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 1583,
+        "morale": 77,
+        "cohesion": 35,
+        "readiness": "degraded",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:4:0",
+        "fatigue": 26.5,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": {
+          "operation": "Operation Donji Vakuf",
+          "phase": "recovery",
+          "started_turn": 28,
+          "sector_id": "sector:vrs_1st_krajina:4",
+          "staging_osid": "op:sipovo:pribeljci_2",
+          "participating_brigades": [
+            "rs_16th_krajina_motorized",
+            "rs_1st_banja_luka_light_infantry",
+            "rs_22nd_krajina_infantry",
+            "rs_43rd_prijedor_motorized",
+            "rs_5th_kozara_light_infantry"
+          ],
+          "axis": {
+            "axis_id": "donji_vakuf_sweep",
+            "status": "complete",
+            "main_brigade": "rs_22nd_krajina_infantry",
+            "support_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_22nd_krajina_infantry",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "current_objective_index": 4,
+            "objectives": [
+              "op:donji_vakuf:torlakovac_2",
+              "op:donji_vakuf:oborci_2",
+              "op:donji_vakuf:donji_vakuf_2",
+              "op:donji_vakuf:korenici"
+            ],
+            "last_result": "failed"
+          }
+        }
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 913,
+        "morale": 66,
+        "cohesion": 35,
+        "readiness": "overextended",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:4:0",
+        "fatigue": 9,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": {
+          "operation": "Operation Donji Vakuf",
+          "phase": "recovery",
+          "started_turn": 28,
+          "sector_id": "sector:vrs_1st_krajina:4",
+          "staging_osid": "op:sipovo:pribeljci_2",
+          "participating_brigades": [
+            "rs_16th_krajina_motorized",
+            "rs_1st_banja_luka_light_infantry",
+            "rs_22nd_krajina_infantry",
+            "rs_43rd_prijedor_motorized",
+            "rs_5th_kozara_light_infantry"
+          ],
+          "axis": {
+            "axis_id": "donji_vakuf_sweep",
+            "status": "complete",
+            "main_brigade": "rs_22nd_krajina_infantry",
+            "support_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "assigned_brigades": [
+              "rs_16th_krajina_motorized",
+              "rs_22nd_krajina_infantry",
+              "rs_5th_kozara_light_infantry"
+            ],
+            "current_objective_index": 4,
+            "objectives": [
+              "op:donji_vakuf:torlakovac_2",
+              "op:donji_vakuf:oborci_2",
+              "op:donji_vakuf:donji_vakuf_2",
+              "op:donji_vakuf:korenici"
+            ],
+            "last_result": "failed"
+          }
+        }
+      },
+      "korenici_battle_this_turn": [],
+      "relevant_movements_this_turn": []
+    },
+    {
+      "path": "tmp-paradox-qa-20260710\\evidence\\fractional-fatigue-p03-rbih-t39-01\\rbih\\turn-autosaves\\turn-039.json",
+      "sha256": "623cbaed0e6186bc5f2c4a18fd5e9b22836db9343df0e4122316c92e5c9902e8",
+      "turn": 39,
+      "week_date_from_scenario_start": "1992-12-04",
+      "korenici_controller": "RBiH",
+      "attacker": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 1978,
+        "morale": 77,
+        "cohesion": 35,
+        "readiness": "overextended",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:4:0",
+        "fatigue": 27,
+        "order": {
+          "owner": "bot_discretionary",
+          "stance": "column",
+          "destination_sids": [
+            "op:donji_vakuf:jemanlici"
+          ]
+        },
+        "movement_state": null,
+        "operation_commitment": null
+      },
+      "helper": {
+        "id": "rs_22nd_krajina_infantry",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 910,
+        "morale": 66,
+        "cohesion": 35,
+        "readiness": "active",
+        "posture": "defend",
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "assigned_sub_segment_id": "subseg:sector:vrs_1st_krajina:4:0",
+        "fatigue": 9.5,
+        "order": null,
+        "movement_state": null,
+        "operation_commitment": null
+      },
+      "korenici_battle_this_turn": [],
+      "relevant_movements_this_turn": []
+    }
+  ],
+  "causal_assessment": {
+    "missing_normal_movement_or_admission": false,
+    "basis": "Current P03 records RS 16th as an assigned participant/support brigade in Operation Donji Vakuf, its normal multi-turn movement to Donji Vakuf, and four Korenici attacks on turns 34-37.",
+    "helper_hypothesis_supported": false,
+    "helper_basis": "All recorded Korenici attacks in n101, n102, older-705, and current-P03 name only RS 16th as attacker. RS 22nd is operation main brigade but is not in all_attacker_ids or the capture event; the retained helper delta alone cannot establish battle causation.",
+    "first_meaningful_boundary": "At turn 34, n101 captures Korenici on RS 16th first attack; current P03 reaches and attacks Korenici with RS 16th on the same turn but records costly_victory without a flip. Older-705 likewise attacks on turn 34 but does not flip until turn 37; n102 first attacks on turn 35 and flips on turn 37.",
+    "classification": "recorded combat-outcome/model-cohort divergence after normal admission and movement; exact lower-level cause is not recorded in retained state",
+    "smallest_next_question": "Before any player fork, compare the turn-34 combat inputs and resolved combat trace for RS 16th versus the recorded defenders between current P03 and the older-705/current-source cohorts; do not alter orders or state."
+  }
+}

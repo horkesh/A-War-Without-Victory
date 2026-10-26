@@ -1,0 +1,17 @@
+{
+  "schema": "awwv.player-order-fidelity-v3.result.v1",
+  "pass": true,
+  "verdict": "CURRENT_SOURCE_T16_TO_T17_BYTE_EXACT",
+  "scope": "offline current-source public-production-API fork; not native campaign qualification or same-input full-campaign proof",
+  "head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+  "mode": "fidelity-only",
+  "expected": {
+    "path": "tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/turn-autosaves/turn-017.json",
+    "bytes": 4790188,
+    "sha256": "32d5b1bbcdb74bb2f7a2c5dbc9bca40bd5237cab318052c90c0abe9c0f184cf1"
+  },
+  "actual": {
+    "bytes": 4790188,
+    "sha256": "32d5b1bbcdb74bb2f7a2c5dbc9bca40bd5237cab318052c90c0abe9c0f184cf1"
+  }
+}

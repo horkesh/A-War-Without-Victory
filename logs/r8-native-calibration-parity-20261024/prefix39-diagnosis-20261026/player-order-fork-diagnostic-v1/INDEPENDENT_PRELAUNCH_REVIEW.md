@@ -1,0 +1,25 @@
+# Independent prelaunch review
+
+Status: **BLOCK — DO NOT LAUNCH v1**  
+Reviewer scope: canon, determinism, production-diagnostic fidelity, and evidence preservation. No engine, test, build, package, native, or scenario command was run.
+
+## Findings by pipeline stage
+
+- **Question and bounds:** PASS. `PLAN.md` freezes one exact T16→T17 baseline advance, one immutable-T16 request fork, at most 23 candidate advances, a 180-second cap, no retry or alternate target, and unchanged 707/712 plus zero formerly-correct-loss acceptance.
+- **Inputs and provenance:** PASS. HEAD, Node, T16/T17/native-T39, reference, n91/n92, staging owner, selector source, replay proof, and supplement are hash-bound. The supplied T16, T17, selector-source, desktop-source, staging-owner, and supplement hashes independently match.
+- **Canon and ordinary capability:** PASS with a disclosed limitation. The president requests only Tošići; the production selector owns force, staging, and axis. The existing overlap check reads only the selected 4th Corps `CorpsCommandState`, so the concurrent 1st Corps Circle target is permitted ordinary production behavior. This remains a cross-corps duplicate target; later evidence must preserve operation-owned movement/combat/control causality and cannot attribute a Circle capture to the requested operation.
+- **Runtime binding:** **BLOCK.** `diagnostic_entry.cjs` requires `dist/desktop/desktop_sim.cjs` (lines 192–197), but that frozen bundle is stale relative to current source `33f99fc5`. Its bundled `planDirectiveOperation` still uses `AUTHORED_OP_MIN_PARTICIPANTS` (two), selects all available brigades, and lacks the current enclave/objective guard, friendly/allied component reachability, 3–12 bound, equipment ranking, and canonical roster construction. The harness would measure the pre-correction selector even if this fixture happened to return ten brigades and Delijaš.
+- **Retained baseline scoring:** **BLOCK.** Applying the harness's own `scoreCandidate` formula to its bound native T39 (`e58b9476…`) and bound January reference (`6a64300a…`) yields **705/712**, not configured `retainedNativeBaselineScore: 704`. The fixed assertion at line 327 would therefore fail after all 23 candidate advances regardless of the candidate result. The retained 704 claim must be reconciled to its actual state/scoring contract; it may not be silently rewritten.
+- **Baseline and fail-closed ordering:** PASS in the harness. The baseline byte gate writes the produced state/report and stops before query/staging on mismatch. A passing gate reloads immutable T16. Query rejection, malformed recommendation, non-finite physics, staging failure, CA mismatch, missing consumption, event mismatch, and unresolved blockers all fail before dependent claims.
+- **Query purity proof:** **BLOCK.** The query receives an inline deserialized clone, but the post-query assertion compares the untouched original state. Capture the queried clone and compare its own pre/post runtime serialization before staging.
+- **Failure detail:** **BLOCK.** `diffPaths` stops at 5,000 rows while the plan promises full differing JSON-pointer paths. Remove the cap or record an explicit truncation/count contract and retain the complete machine-readable difference elsewhere.
+- **Launch-time freeze:** **BLOCK.** The entry verifies HEAD and selected bindings, but mutable `CONFIG.json` controls those bindings and no launch-time rule rejects newly dirty tracked `src`/`data` or altered transitive runtime files. The corrected launcher must verify the reviewed config/entry/current-source/runtime hashes and the entry must reject unreviewed production-source drift before module load.
+- **Evidence preservation:** PASS with a reporting caveat. The preserved wrapper retains entry snapshot, argv, stdout, stderr, child artifacts, and receipt. Because its allowlist is also a required-artifact list, an early baseline or candidate failure will additionally produce wrapper exit 126 for missing later artifacts; `receipt.json.child_exit` and `RESULT.json` still preserve the primary failure. The final reader must report both categories, or the corrected launcher should avoid obscuring the intended stop reason.
+
+## Required correction before launch
+
+Execute the current `src/desktop/desktop_sim.ts` public API through a frozen existing TypeScript runtime/loader (or another exact current-source path) without changing source, building a package, or running native. Bind and verify that runtime and every consumed entry/source file; update `CONFIG.json`, `diagnostic_entry`, `FREEZE.json`, static checks, plan, and launch command. Reconcile the 704-versus-705 retained-baseline contradiction, repair the query-purity and full-diff evidence, and reject post-review source/config drift. The corrected preflight must prove that the consumed selector is the 3–12/current-source implementation before the one allowed attempt exists.
+
+## Output format changes
+
+- None. This review authorizes no output-format, source, gameplay, data, schema, threshold, baseline, or acceptance change.

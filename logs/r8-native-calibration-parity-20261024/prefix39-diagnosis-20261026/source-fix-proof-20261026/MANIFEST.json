@@ -1,0 +1,208 @@
+{
+  "schema": "source-fix-proof.v1",
+  "created": "2026-10-26",
+  "purpose": "Compact byte-exact proof curation for REQUEST-OP personnel-floor correction",
+  "source_head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+  "production_source": {
+    "path": "src/sim/turn_phases/war_phases.ts",
+    "sha256": "8a085a37835541f4dc267e5c1f7f75a714bafc596e21d43b1467cb8ee62d7fcd"
+  },
+  "tests": [
+    {
+      "path": "tests/op_directive_objection.test.ts",
+      "sha256": "892242ebe14ac935581cf218877fa466ca8f1f218e0d97ed9c21f34acc83902f"
+    },
+    {
+      "path": "tests/op_directive_injection.test.ts",
+      "sha256": "add227b78c06141a2ee501972907dad52caf4edd5069b5244b6f2d6020a01115"
+    }
+  ],
+  "independent_review": {
+    "path": "runs/request-op-personnel-floor-20261026/review-001/INDEPENDENT_REVIEW.md",
+    "sha256": "4d5752ccc5b4a14183b9b6bf26c3fd4f83fc40c6df9d4cac228fafcff6ccce9a"
+  },
+  "copied_files": [
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-001-red\\receipt.json",
+      "bytes": 2961,
+      "sha256": "09ff0b1103485085ee98496f7b47e26d97251e16e6b7c5ddbbb6f3b9f403b72e"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-001-red\\stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-001-red\\stdout.log",
+      "bytes": 176,
+      "sha256": "612d5a29678adbf11a95e62809535cd61625b78fe089fd12160760245a54931f"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-001-red\\vitest.json",
+      "bytes": 20658,
+      "sha256": "a82e3b0d4b412a4c746a3ac0802e2a1687ca262398ac80878c5265b2f3c5ae7a"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-002-green\\receipt.json",
+      "bytes": 2965,
+      "sha256": "f0e264c60e5a6517f02b943b3efb39d781a11c7fa6555a60430dd1457ca72fce"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-002-green\\stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-002-green\\stdout.log",
+      "bytes": 178,
+      "sha256": "4be21b283f57f756954f8f2e623acca1bc9d746a9d8e4fe6949a2b278a4dfcaa"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-002-green\\vitest.json",
+      "bytes": 16109,
+      "sha256": "c893f959060d6a009abef9fcd0f28d0707d30d47f1e0bb72aeedbe9fa4aa94a1"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-003-typecheck\\receipt.json",
+      "bytes": 2749,
+      "sha256": "8b6cb58463ae87a79160cce6f96d308be686a58c5d1b790eeb25720ae2d6a0aa"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-003-typecheck\\stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-003-typecheck\\stdout.log",
+      "bytes": 198,
+      "sha256": "e83e77d18fdb3d80b9b31706ed79fc9c94febf3e5867cbe7530b6cd4154de8e3"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-004-typecheck-corrected\\receipt.json",
+      "bytes": 2780,
+      "sha256": "d60b28bb6401fc708f63f877d3f78df28f4bc791048283ced9fd9caa95a6439a"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-004-typecheck-corrected\\stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-004-typecheck-corrected\\stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-005-public-turn-green\\receipt.json",
+      "bytes": 2988,
+      "sha256": "fee23a9e21c7895200b6460e9db8de004ea9461a99f10abf3ad111341684aab6"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-005-public-turn-green\\stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-005-public-turn-green\\stdout.log",
+      "bytes": 190,
+      "sha256": "22a23c90d4894ef537a8284d48e5932c84576a4c0745e6d4817cd4cccdaf6d32"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-005-public-turn-green\\vitest.json",
+      "bytes": 18067,
+      "sha256": "17fd86a03018ebece0b0c4eac6d755144424e1c0840c07939e24f7045688f680"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-006-public-turn-green-corrected\\receipt.json",
+      "bytes": 3009,
+      "sha256": "662013ebe22bcad7437d81d4e0678e1015cf7fda01f62088d194d79a6f939865"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-006-public-turn-green-corrected\\stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-006-public-turn-green-corrected\\stdout.log",
+      "bytes": 200,
+      "sha256": "94afb0cba375ccc338ab5bc7ed8bc9223d23c71e85e48f2ede6bb72faf9b40e2"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-006-public-turn-green-corrected\\vitest.json",
+      "bytes": 18111,
+      "sha256": "75e0f2df1a263960389593a632fa6613d540197dd3f156db11646d94d68ae2e2"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-007-public-turn-targeted-green\\receipt.json",
+      "bytes": 2979,
+      "sha256": "e6905baf8200f58775a45508cdf45f51705c76167c48b42f6f6e85ae72832166"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-007-public-turn-targeted-green\\stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-007-public-turn-targeted-green\\stdout.log",
+      "bytes": 199,
+      "sha256": "bfc2697eda06d3bd2076f0528425ccb66d3996e155b76e8aebb7a5b6bd61a6da"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-007-public-turn-targeted-green\\vitest.json",
+      "bytes": 6450,
+      "sha256": "c9a626f1a1f6e3e80e0db4d40f5b862feaf98d6c43c78fa6a80e5e970485833f"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-008-typecheck-final\\receipt.json",
+      "bytes": 2773,
+      "sha256": "8e51a818cd7bdfb9651cc8a6811515c59099405bb28a6db85f92309e61e16582"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-008-typecheck-final\\stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\attempt-008-typecheck-final\\stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\source-fix-proof-20261026\\INDEPENDENT_REVIEW.md",
+      "bytes": 4921,
+      "sha256": "4d5752ccc5b4a14183b9b6bf26c3fd4f83fc40c6df9d4cac228fafcff6ccce9a"
+    }
+  ],
+  "attempts": [
+    "attempt-001-red",
+    "attempt-002-green",
+    "attempt-003-typecheck",
+    "attempt-004-typecheck-corrected",
+    "attempt-005-public-turn-green",
+    "attempt-006-public-turn-green-corrected",
+    "attempt-007-public-turn-targeted-green",
+    "attempt-008-typecheck-final"
+  ],
+  "caveats": [
+    "Copies are byte-exact and do not replace original attempts.",
+    "Attempt 003 is the failed CLI setup; corrected typecheck is attempt 004.",
+    "Attempts 005 and 006 are preserved fixture failures; attempt 007 is the targeted 1/1 public-turn proof.",
+    "No combined 38-test pass or 37-test coverage claim.",
+    "No full suite, 188-week campaign, package, native qualification, baseline adoption, or all-green claim.",
+    "Original pre-freeze receipt was recovered before freeze; the original path was touched and recovery is recorded in the retained negative-diagnosis directory."
+  ],
+  "handoff_receipts": [
+    {
+      "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-negative-diagnosis-v1/REQUEST_OP_MOVEMENT_HANDOFF_RECEIPT.pre-freeze-recovered-fb0fc7.json",
+      "bytes": 10596,
+      "sha256": "fb0fc726ce6ff088bf619552348ceb9fb041699ce82de210707b84c7985b2bf3"
+    },
+    {
+      "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-negative-diagnosis-v1/REQUEST_OP_MOVEMENT_HANDOFF_RECEIPT.json",
+      "bytes": 10834,
+      "sha256": "c3a3ff0fa29bf614121bea8ff53d06bbb0d73b33218735074a9704371a4928f5"
+    }
+  ],
+  "note": "Existing PROOF/MANIFEST.json and selected-results-v2/MANIFEST.json remain untouched; ignored attempts/outer-launch trees and large retained states stay in place.",
+  "copied_bytes": 108661
+}

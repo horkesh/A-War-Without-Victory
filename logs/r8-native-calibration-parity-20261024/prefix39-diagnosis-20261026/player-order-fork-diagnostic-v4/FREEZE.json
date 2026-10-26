@@ -1,0 +1,59 @@
+{
+  "schema": "awwv.player-order-fork-diagnostic-v4.freeze.v1",
+  "status": "FROZEN_HOLD_FOR_INDEPENDENT_PRELAUNCH_GO",
+  "root": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+  "packet": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4",
+  "files": [
+    { "path": "CONFIG.json", "bytes": 11831, "sha256": "3a7d5da59090d9a2dbadbe74b15650a7e02af1deb5b561766f3b66b0026a9e04" },
+    { "path": "diagnostic_entry_v4.cjs", "bytes": 21168, "sha256": "44f8ab993d3a2da913679b7386f1485062bf01e27882cb5cf356356c94b0ecd5" },
+    { "path": "LAUNCH_COMMANDS.md", "bytes": 1009, "sha256": "f75c3efbb1d4246543cc06a0130ebf83f7e137ec8ebd7d0509ad43dc8d7bbf84" },
+    { "path": "launch_fork_v4.cjs", "bytes": 5370, "sha256": "2375a655c56de59853d29531f9196dea792d3e3ec5e0e8d121097dcae76dbb51" },
+    { "path": "PLAN.md", "bytes": 4399, "sha256": "99ba2b6a202ac9812f1c1abe4fb125f8f287689ea6b27a1c3dbcfdf8fea0244c" },
+    { "path": "PRELAUNCH_REVIEW_HISTORY.md", "bytes": 775, "sha256": "cb5dc059f561a42d4eedf9381e2ed0b4b575773ae7196eb859e5af3cb5944579" },
+    { "path": "PRELAUNCH_STATIC_CHECKS.json", "bytes": 4130, "sha256": "1856f91897423149abe858baea19253586de209e9e55082adc145e1a55db3e84" }
+  ],
+  "outerArgv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/launch_fork_v4.cjs"
+  ],
+  "childArgv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "--import",
+    "file:///C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/node_modules/tsx/dist/loader.mjs",
+    "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/diagnostic_entry_v4.cjs",
+    "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/CONFIG.json",
+    "{evidenceDir}",
+    "fork-only"
+  ],
+  "run": {
+    "attempt": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01",
+    "timeoutMs": 180000,
+    "expectedUnderMs": 120000,
+    "retry": false,
+    "acceptedMode": "fork-only",
+    "maximumAdvances": 23,
+    "baselineAdvanceRepeated": false,
+    "queryCount": 1,
+    "stageCount": 1
+  },
+  "runtimeClosure": {
+    "loaderAbsolutePathEqualsAuthorizedRootPath": true,
+    "loaderPath": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/node_modules/tsx/dist/loader.mjs",
+    "aggregatePackagePaths": ["node_modules/tsx", "node_modules/esbuild", "node_modules/get-tsconfig", "node_modules/resolve-pkg-maps", "node_modules/@esbuild/win32-x64"]
+  },
+  "reusedFidelity": {
+    "v3FreezeSha256": "0b978915642590a9c6457c4395f875206afd93407c2f96cfcd777c7adc4e9dbd",
+    "receiptSha256": "75edc31c43c9710608a10448e19d8ff99aa1a020a12453b4d1c8f0345de6a5aa",
+    "resultSha256": "244603b9406f4fd3ea4d4840f00c075db2ba133246ab0c8bf42b1b273c727f6b",
+    "actualReviewSha256": "c4604af9987fd77634e0b11cefdf31239437697b858578e2d7fb28d9c20a3a92",
+    "t17Sha256": "32d5b1bbcdb74bb2f7a2c5dbc9bca40bd5237cab318052c90c0abe9c0f184cf1",
+    "differingPathCount": 0
+  },
+  "prelaunch": {
+    "engineOrTestExecutedDuringPreparation": false,
+    "diagnosticAttemptCreated": false,
+    "attemptLeafAbsent": true,
+    "attemptParentPresent": true
+  }
+}

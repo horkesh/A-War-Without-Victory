@@ -1,0 +1,138 @@
+{
+  "schema": "awwv.independent-actual-fidelity-review.v1",
+  "reviewed_utc": "2026-10-26T00:16:36.668Z",
+  "reviewer": "independent-canon-determinism-production-diagnostic-review",
+  "verdict": "GO_FIDELITY_ONLY",
+  "pass": true,
+  "scope": {
+    "approved_result": "The single preserved current-source T16-to-T17 no-directive advance is byte-exact to the independently bound retained native T17.",
+    "fork_enabled": false,
+    "full_campaign_enabled": false,
+    "retry_authorized": false,
+    "engine_or_test_run_by_reviewer": false
+  },
+  "identity": {
+    "root": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+    "head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+    "packet": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3",
+    "freeze_sha256": "0b978915642590a9c6457c4395f875206afd93407c2f96cfcd777c7adc4e9dbd",
+    "config_sha256": "172ec9c13db0f87402929dc99ff6642947a957265fba9c5030180d70c6506e21",
+    "entry_sha256": "61e0182cd3a86df2bc2c31631723d4fda5e3d60eff1e612f40d9cc0fb90cfd74",
+    "launcher_sha256": "84f6b950dc338db7ede78c1565e6a0d4599ff68a47d747e1a80007a435498dc4"
+  },
+  "execution_receipt": {
+    "attempt": "attempts/fidelity-current-source-01",
+    "outer_evidence": "outer-launch-fidelity-01",
+    "outer_exit": 0,
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "timed_out": false,
+    "signal": null,
+    "spawn_error": null,
+    "automatic_retry": false,
+    "maximum_advances": 1,
+    "start_utc": "2026-10-26T00:14:06.178Z",
+    "end_utc": "2026-10-26T00:14:17.365Z",
+    "receipt_elapsed_ms": 11187,
+    "receipt_elapsed_source": "end_utc minus start_utc; the receipt has no dedicated elapsed field",
+    "dedicated_elapsed_field_present": false,
+    "allowed_child_artifact_count": 5,
+    "retained_child_artifact_count": 5,
+    "wrapper_reserved_artifact_count": 5,
+    "attempt_file_count": 10,
+    "unexpected_artifact_count": 0,
+    "missing_allowed_artifact_count": 0,
+    "stdout_bytes": 568,
+    "stdout_sha256": "66b900d152ac5bb7e591edffdec3bfbf1247927d990d907e8b08212bc6736d16",
+    "stderr_bytes": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "fidelity_result": {
+    "result_verdict": "CURRENT_SOURCE_T16_TO_T17_BYTE_EXACT",
+    "input_turn": 16,
+    "produced_turn": 17,
+    "report_turn": 17,
+    "advance_count": 1,
+    "expected_t17": {
+      "path": "tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/turn-autosaves/turn-017.json",
+      "bytes": 4790188,
+      "sha256": "32d5b1bbcdb74bb2f7a2c5dbc9bca40bd5237cab318052c90c0abe9c0f184cf1"
+    },
+    "produced_t17": {
+      "path": "attempts/fidelity-current-source-01/baseline-produced-turn-017.json",
+      "bytes": 4790188,
+      "sha256": "32d5b1bbcdb74bb2f7a2c5dbc9bca40bd5237cab318052c90c0abe9c0f184cf1"
+    },
+    "differing_json_path_count": 0,
+    "canonical_identity": "raw byte length and SHA-256 match the independently frozen retained T17; no projection or lossy normalizer was used as the acceptance gate"
+  },
+  "retained_artifacts": [
+    {
+      "path": "attempts/fidelity-current-source-01/RUNTIME_PROVENANCE.json",
+      "bytes": 6516,
+      "sha256": "f77be6cb16087b6f02ed73d73ee11eeedd8c1434ef2b103d64368ed419d1b40e"
+    },
+    {
+      "path": "attempts/fidelity-current-source-01/baseline-report-turn-017.json",
+      "bytes": 654362,
+      "sha256": "70806e56205b993fc441e553eb70782c78c5cb488808241ca6cd2169184669f4"
+    },
+    {
+      "path": "attempts/fidelity-current-source-01/baseline-produced-turn-017.json",
+      "bytes": 4790188,
+      "sha256": "32d5b1bbcdb74bb2f7a2c5dbc9bca40bd5237cab318052c90c0abe9c0f184cf1"
+    },
+    {
+      "path": "attempts/fidelity-current-source-01/BASELINE_FIDELITY.json",
+      "bytes": 332,
+      "sha256": "5905bd16df7d20a70666833e787f8a2ce2a57d8f0eca83e73b7d01cb600e7d79"
+    },
+    {
+      "path": "attempts/fidelity-current-source-01/RESULT.json",
+      "bytes": 704,
+      "sha256": "244603b9406f4fd3ea4d4840f00c075db2ba133246ab0c8bf42b1b273c727f6b"
+    }
+  ],
+  "freeze_and_preservation": {
+    "frozen_packet_file_count": 7,
+    "frozen_packet_files_unchanged": true,
+    "retained_child_artifacts_match_receipt": true,
+    "entry_snapshot_matches_start_and_post_run": true,
+    "entry_sha256_before_equals_after": true,
+    "head_unchanged": true,
+    "source_and_data_git_status_empty": true,
+    "consumed_binding_count": 13,
+    "consumed_bindings_match_config": true,
+    "turn16_sha256": "861d4e34a4b4c22c15db6fa857449c7f5bd68deb352edbb2a0059c6960ac07e3",
+    "turn17_sha256": "32d5b1bbcdb74bb2f7a2c5dbc9bca40bd5237cab318052c90c0abe9c0f184cf1",
+    "retained_native_turn39_sha256": "623cbaed0e6186bc5f2c4a18fd5e9b22836db9343df0e4122316c92e5c9902e8",
+    "reference_sha256": "6a64300a599aa0b75833d5232bf9f08a1ab97085746337e622d54fb1a4a0ddc7",
+    "n91_sha256": "e51224ac22a839d4c1af35a0ea828afb79b62f0ed56559c3b47dcda45578eec5",
+    "n92_sha256": "e51224ac22a839d4c1af35a0ea828afb79b62f0ed56559c3b47dcda45578eec5",
+    "literal_loader_path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/node_modules/tsx/dist/loader.mjs",
+    "literal_loader_sha256": "0b1c5b86192772fe9257710e739959cee5947c11ae1f93b61abfaa9b80c6def1",
+    "runtime_package_aggregate_count": 5,
+    "runtime_packages_all_under_authorized_root": true,
+    "stale_dist_bundle_excluded": true,
+    "global_preservation_claim": "No global clean-worktree claim is made. This review proves the frozen packet, receipt-bound artifacts, consumed bindings, named inputs, HEAD, and src/data status at this run's scope; unrelated pre-existing docs and proof diffs are outside that claim."
+  },
+  "proof_limits": [
+    "This result proves only current-source no-directive T16-to-T17 fidelity for one advance.",
+    "It does not execute or validate a player REQUEST_OPERATION query, staging, force selection, command-authority debit, operation launch, retained event replay, T39 scoring, or loss preservation.",
+    "It does not qualify a native package, 188-turn campaign, full same-input campaign, or baseline adoption.",
+    "It does not change or retire the 707-of-712 target, the zero-formerly-correct-loss requirement, or the retained 704 comparator."
+  ],
+  "minimum_requirements_before_one_fork_launch_can_be_enabled": [
+    "Prepare and freeze a separate fork-only packet and launcher rooted at this exact checkout and HEAD. V3 intentionally contains no fork launcher.",
+    "Bind this review and the preserved v3 receipt, exact original argv, entry snapshot, five retained artifact hashes, and byte-exact produced T17. Reuse the fidelity pass and do not repeat T16-to-T17.",
+    "Use a fresh immutable T16 restart for the candidate fork, a fixed absent attempt leaf, a 180000 ms hard cap, an expected duration below 120000 ms, at most 23 normal advances, one attempt, and no automatic retry, alternate input, native run, package build, or 188-turn campaign.",
+    "Use the current-source public REQUEST_OPERATION query on a dedicated clone. Require an accepted, finite-physics result; prove query purity against the complete clone; and fail closed on rejection, missing physics, invalid ownership, missing force, or any requestless path.",
+    "Stage exactly once through the real production staging path with 4th Corps ownership, Tosici target, Delijas staging, cost 25, and command-authority transition RBiH 94/0/25 to 69/25/50. Preserve president request versus corps-command force/axis/launch ownership.",
+    "Derive the force only from the actual query result and production selector. Require 3 through 12 canonical same-corps, active, statewide-uncommitted, non-enclave, reachable brigades from the frozen T16 pool; do not inject, override, replace, or tune the roster.",
+    "Disclose the concurrent 1st Corps Operation Circle target at Tosici. The production overlap guard is same-corps, so this cross-corps overlap is an ordinary permitted input condition; no scenario exemption may be added.",
+    "Consume the staged request through the production turn advance and preserve operation-owned movement, combat, and control lineage. Replay only retained player-event inputs through the production consumer at their actual T20, T38, and T39 timing; fail closed on any blocker.",
+    "Preserve the actual Package03 704 comparator, reference, n91, n92, and the three retained loss IDs. At T39 require at least 707 of 712 and zero formerly-correct losses; report a partial delivery distinctly and make no full-parity or baseline-adoption claim.",
+    "Freeze the exact fork source, runtime, inputs, selectors, wrapper, allowlist, and provenance before launch. Retain complete stdout, stderr, receipt, reports, state files, query/stage/force/CA/lineage/event evidence, score/loss evidence, hashes, exits, and preservation checks.",
+    "Obtain a targeted independent prelaunch GO on the actual frozen fork-only files and an explicit owner launch decision. This fidelity review alone does not authorize the fork."
+  ]
+}

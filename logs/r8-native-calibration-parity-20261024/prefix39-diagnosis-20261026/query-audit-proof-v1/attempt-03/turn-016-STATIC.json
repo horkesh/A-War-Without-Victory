@@ -1,0 +1,116 @@
+{
+  "snapshot": "turn-016",
+  "turn": 16,
+  "blockers": [],
+  "corps": [
+    {
+      "corpsId": "arbih_1st_corps",
+      "activeOperations": 2,
+      "commandSpan": 5,
+      "normalAvailableActiveUncommittedCount": 28,
+      "normalAvailableActiveUncommittedPersonnelGe500Count": 13,
+      "normalAvailableActiveUncommittedPersonnelGe500Ids": [
+        "arbih_101st_mountain",
+        "arbih_102nd_motorized",
+        "arbih_105th_motorized",
+        "arbih_10th_mountain",
+        "arbih_115th_mountain",
+        "arbih_124th_light_king_tvrtko",
+        "arbih_141st_light",
+        "arbih_143rd_light",
+        "arbih_146th_light",
+        "arbih_165th_mountain",
+        "arbih_2nd_mountain",
+        "arbih_808th_liberation",
+        "arbih_hvo_kralj_tvrtko"
+      ],
+      "normalAvailableActiveUncommittedPersonnelTotal": 18726
+    },
+    {
+      "corpsId": "arbih_2nd_corps",
+      "activeOperations": 1,
+      "commandSpan": 5,
+      "normalAvailableActiveUncommittedCount": 36,
+      "normalAvailableActiveUncommittedPersonnelGe500Count": 28,
+      "normalAvailableActiveUncommittedPersonnelGe500Ids": [
+        "arbih_116th_mountain",
+        "arbih_1st_cerska",
+        "arbih_1st_kamenica",
+        "arbih_1st_olovo",
+        "arbih_211th_liberation",
+        "arbih_212th_mountain",
+        "arbih_213th_vitezka_mountain",
+        "arbih_217th_vitezka_mountain",
+        "arbih_221st_mountain",
+        "arbih_222nd_liberation",
+        "arbih_223rd_mountain",
+        "arbih_224th_mountain",
+        "arbih_225th_muslim_mountain",
+        "arbih_240th_muslim_mountain",
+        "arbih_241st_spreca_muslim_light_gazije",
+        "arbih_242nd_zvornik_muslim_light",
+        "arbih_243rd_muslimpodrinje_mountain",
+        "arbih_244th_mountain",
+        "arbih_250th_liberation",
+        "arbih_252nd_slavna_mountain",
+        "arbih_253rd_mountain",
+        "arbih_280th_east_bosnian_light",
+        "arbih_281st_east_bosnian_light",
+        "arbih_282nd_east_bosnian_light",
+        "arbih_286th_mountain",
+        "arbih_287th_mountain",
+        "arbih_2nd_tuzla",
+        "hrhb_108th_brko_brigade"
+      ],
+      "normalAvailableActiveUncommittedPersonnelTotal": 26227
+    },
+    {
+      "corpsId": "arbih_3rd_corps",
+      "activeOperations": 2,
+      "commandSpan": 5,
+      "normalAvailableActiveUncommittedCount": 14,
+      "normalAvailableActiveUncommittedPersonnelGe500Count": 10,
+      "normalAvailableActiveUncommittedPersonnelGe500Ids": [
+        "arbih_17th_vitezka_mountain",
+        "arbih_303rd_vitezka_mountain",
+        "arbih_329th_mountain",
+        "arbih_330th_liberation",
+        "arbih_373rd_slavna_mountain",
+        "arbih_705th_slavna_mountain",
+        "arbih_712th_mountain",
+        "arbih_727th_slavna",
+        "arbih_737th_muslim_light",
+        "arbih_7th_vitezka_muslim_liberation"
+      ],
+      "normalAvailableActiveUncommittedPersonnelTotal": 12524
+    },
+    {
+      "corpsId": "arbih_4th_corps",
+      "activeOperations": 0,
+      "commandSpan": 5,
+      "normalAvailableActiveUncommittedCount": 10,
+      "normalAvailableActiveUncommittedPersonnelGe500Count": 2,
+      "normalAvailableActiveUncommittedPersonnelGe500Ids": [
+        "arbih_441st_vitezka_mountain",
+        "arbih_443rd_mountain"
+      ],
+      "normalAvailableActiveUncommittedPersonnelTotal": 6237
+    },
+    {
+      "corpsId": "arbih_5th_corps",
+      "activeOperations": 1,
+      "commandSpan": 5,
+      "normalAvailableActiveUncommittedCount": 7,
+      "normalAvailableActiveUncommittedPersonnelGe500Count": 6,
+      "normalAvailableActiveUncommittedPersonnelGe500Ids": [
+        "arbih_501st_slavna_mountain",
+        "arbih_503rd_slavna_mountain",
+        "arbih_505th_vitezka_mountain",
+        "arbih_506th_mountain",
+        "arbih_510th_bosnian_liberation",
+        "arbih_517th_light"
+      ],
+      "normalAvailableActiveUncommittedPersonnelTotal": 6719
+    }
+  ]
+}

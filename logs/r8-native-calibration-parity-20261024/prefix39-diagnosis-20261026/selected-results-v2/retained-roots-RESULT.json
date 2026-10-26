@@ -1,0 +1,223 @@
+{
+  "schema": "awwv.retained-roots-post-forks-preservation.v1",
+  "reference": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/prefix-closing-preservation.json",
+  "reference_sha256": "ef660fe60a6ab37b537044116c039d5db93a6ffe58571df593c9f405dbd2c614",
+  "method": "Exact prior Node22 localeCompare recursive file order and path\\0length\\0SHA256\\n digest, matching retained first39 entry snapshot.",
+  "scope": "14 recorded retained roots, including complete n91-n102; does not claim all workspace files or repair the earlier temporary-test cleanup gap.",
+  "pass": true,
+  "roots": 14,
+  "files": 1178,
+  "bytes": 2970032653,
+  "rows": [
+    {
+      "expected": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n91",
+        "count": 31,
+        "bytes": 211174391,
+        "aggregate_sha256": "fac9375f265a3c89478766a7a1f9bafcc10a73d403f98d741de4b8a3892d1c32"
+      },
+      "actual": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n91",
+        "count": 31,
+        "bytes": 211174391,
+        "aggregate_sha256": "fac9375f265a3c89478766a7a1f9bafcc10a73d403f98d741de4b8a3892d1c32"
+      },
+      "pass": true
+    },
+    {
+      "expected": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n92",
+        "count": 38,
+        "bytes": 262006649,
+        "aggregate_sha256": "285d5ebd24062dd4150674022a5ec2837851fc2673fe755f9671d86d3b96bc90"
+      },
+      "actual": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n92",
+        "count": 38,
+        "bytes": 262006649,
+        "aggregate_sha256": "285d5ebd24062dd4150674022a5ec2837851fc2673fe755f9671d86d3b96bc90"
+      },
+      "pass": true
+    },
+    {
+      "expected": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n93",
+        "count": 40,
+        "bytes": 270873605,
+        "aggregate_sha256": "3bd2bc44aec4a405dc52fcef428fae9de03122f382f79644b35db9b13f5c54f1"
+      },
+      "actual": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n93",
+        "count": 40,
+        "bytes": 270873605,
+        "aggregate_sha256": "3bd2bc44aec4a405dc52fcef428fae9de03122f382f79644b35db9b13f5c54f1"
+      },
+      "pass": true
+    },
+    {
+      "expected": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n94",
+        "count": 40,
+        "bytes": 270873606,
+        "aggregate_sha256": "11fdee36fc76f13395cc631edbe160d0b2ea2461aebe0352de74a37bbfd0c699"
+      },
+      "actual": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n94",
+        "count": 40,
+        "bytes": 270873606,
+        "aggregate_sha256": "11fdee36fc76f13395cc631edbe160d0b2ea2461aebe0352de74a37bbfd0c699"
+      },
+      "pass": true
+    },
+    {
+      "expected": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n95",
+        "count": 40,
+        "bytes": 270873606,
+        "aggregate_sha256": "18dcbcc47c05c4d2e746e1c04b7ba48d99ea793b596c5c929cd66880447affcd"
+      },
+      "actual": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n95",
+        "count": 40,
+        "bytes": 270873606,
+        "aggregate_sha256": "18dcbcc47c05c4d2e746e1c04b7ba48d99ea793b596c5c929cd66880447affcd"
+      },
+      "pass": true
+    },
+    {
+      "expected": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n96",
+        "count": 40,
+        "bytes": 270873606,
+        "aggregate_sha256": "1672efa42319ade7ae97e56f7e5effaa898b658657f31047459e6b7c3ba6f031"
+      },
+      "actual": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n96",
+        "count": 40,
+        "bytes": 270873606,
+        "aggregate_sha256": "1672efa42319ade7ae97e56f7e5effaa898b658657f31047459e6b7c3ba6f031"
+      },
+      "pass": true
+    },
+    {
+      "expected": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n97",
+        "count": 40,
+        "bytes": 270873606,
+        "aggregate_sha256": "9489fc50f21ff336d399ae0053af6c839417e8389171617dee43ec2cb3a7580a"
+      },
+      "actual": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n97",
+        "count": 40,
+        "bytes": 270873606,
+        "aggregate_sha256": "9489fc50f21ff336d399ae0053af6c839417e8389171617dee43ec2cb3a7580a"
+      },
+      "pass": true
+    },
+    {
+      "expected": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n98",
+        "count": 40,
+        "bytes": 270873606,
+        "aggregate_sha256": "3e6b7c3899bf722697c96c9f0abe25a1e9834d4b8cb117840c5b3dd0bafe454f"
+      },
+      "actual": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n98",
+        "count": 40,
+        "bytes": 270873606,
+        "aggregate_sha256": "3e6b7c3899bf722697c96c9f0abe25a1e9834d4b8cb117840c5b3dd0bafe454f"
+      },
+      "pass": true
+    },
+    {
+      "expected": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n99",
+        "count": 40,
+        "bytes": 239697610,
+        "aggregate_sha256": "76613160b6ac048739ced8c0f558dbb20788206acd9365c7de283a5d5362e8f1"
+      },
+      "actual": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n99",
+        "count": 40,
+        "bytes": 239697610,
+        "aggregate_sha256": "76613160b6ac048739ced8c0f558dbb20788206acd9365c7de283a5d5362e8f1"
+      },
+      "pass": true
+    },
+    {
+      "expected": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n100",
+        "count": 5,
+        "bytes": 6120071,
+        "aggregate_sha256": "d8f31a83fc2319ccd61077217a18d383afc6ac0726250080789872c642ff4cca"
+      },
+      "actual": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n100",
+        "count": 5,
+        "bytes": 6120071,
+        "aggregate_sha256": "d8f31a83fc2319ccd61077217a18d383afc6ac0726250080789872c642ff4cca"
+      },
+      "pass": true
+    },
+    {
+      "expected": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n101",
+        "count": 40,
+        "bytes": 270874276,
+        "aggregate_sha256": "9a8482a6ef6be15cc3991ad0bbceb09ddbdc1eae33b55dde503b66bfa53d2100"
+      },
+      "actual": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n101",
+        "count": 40,
+        "bytes": 270874276,
+        "aggregate_sha256": "9a8482a6ef6be15cc3991ad0bbceb09ddbdc1eae33b55dde503b66bfa53d2100"
+      },
+      "pass": true
+    },
+    {
+      "expected": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n102",
+        "count": 40,
+        "bytes": 281398121,
+        "aggregate_sha256": "79ff2f3076f6386c8608fb54ce051d846f796424f12157abe1b6db766428cc9e"
+      },
+      "actual": {
+        "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n102",
+        "count": 40,
+        "bytes": 281398121,
+        "aggregate_sha256": "79ff2f3076f6386c8608fb54ce051d846f796424f12157abe1b6db766428cc9e"
+      },
+      "pass": true
+    },
+    {
+      "expected": {
+        "root": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-validation-v1",
+        "count": 725,
+        "bytes": 73178571,
+        "aggregate_sha256": "f35c3ccfc91a06ecc99678bd13e198c0f65bf3877c45fbf708fff2aa445458bf"
+      },
+      "actual": {
+        "root": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-validation-v1",
+        "count": 725,
+        "bytes": 73178571,
+        "aggregate_sha256": "f35c3ccfc91a06ecc99678bd13e198c0f65bf3877c45fbf708fff2aa445458bf"
+      },
+      "pass": true
+    },
+    {
+      "expected": {
+        "root": "logs/r8-native-calibration-parity-20261024/fractional-fatigue-20261025",
+        "count": 19,
+        "bytes": 341329,
+        "aggregate_sha256": "9733055653fc0353a41d68f6e4e2d702c3ab0ac75bc6b5976b8dfb32d08da06c"
+      },
+      "actual": {
+        "root": "logs/r8-native-calibration-parity-20261024/fractional-fatigue-20261025",
+        "count": 19,
+        "bytes": 341329,
+        "aggregate_sha256": "9733055653fc0353a41d68f6e4e2d702c3ab0ac75bc6b5976b8dfb32d08da06c"
+      },
+      "pass": true
+    }
+  ]
+}

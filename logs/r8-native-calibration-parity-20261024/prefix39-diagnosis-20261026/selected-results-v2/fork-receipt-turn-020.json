@@ -1,0 +1,67 @@
+{
+  "turn": 20,
+  "operation": {
+    "operationId": "arbih_4th_corps:Presidential Directive — op:trnovo:tosici:t17",
+    "name": "Presidential Directive — op:trnovo:tosici",
+    "type": "sector_attack",
+    "phase": "planning",
+    "startedTurn": 17,
+    "requestedByPresident": true,
+    "forced": true,
+    "commanderOfficerId": "arbih_malkic",
+    "roster": [
+      "arbih_441st_vitezka_mountain",
+      "arbih_442nd_mountain",
+      "arbih_443rd_mountain",
+      "arbih_444th_mountain",
+      "arbih_445th_mountain",
+      "arbih_447th_liberation",
+      "arbih_448th_liberation",
+      "arbih_449th_eastern_herzegovina_mountain",
+      "arbih_450th_light",
+      "arbih_4th_muslim_light"
+    ],
+    "axes": [
+      {
+        "axisId": "main",
+        "stagingOsid": "op:trnovo:delijas",
+        "objectives": [
+          "op:trnovo:tosici"
+        ],
+        "assignedBrigades": [
+          "arbih_441st_vitezka_mountain",
+          "arbih_442nd_mountain",
+          "arbih_443rd_mountain",
+          "arbih_444th_mountain",
+          "arbih_445th_mountain",
+          "arbih_447th_liberation",
+          "arbih_448th_liberation",
+          "arbih_449th_eastern_herzegovina_mountain",
+          "arbih_450th_light",
+          "arbih_4th_muslim_light"
+        ]
+      }
+    ]
+  },
+  "lineage": {
+    "turn": 20,
+    "moves": [],
+    "ownedBattles": [],
+    "beforeController": "RS",
+    "afterController": "RS",
+    "controlEvents": []
+  },
+  "event": {
+    "turn": 20,
+    "eventId": "london_conference_1992",
+    "responseId": "accept_principles"
+  },
+  "canonical": {
+    "bytes": 5019829,
+    "sha256": "a097add0d3b6617d2236007fc87443d9698c759575331beacfa5678f3cd82c95"
+  },
+  "report": {
+    "bytes": 661543,
+    "sha256": "2b7efbadd8fccaafbf83884185021bf475fd9290c3576f04f67aac5e8429b435"
+  }
+}

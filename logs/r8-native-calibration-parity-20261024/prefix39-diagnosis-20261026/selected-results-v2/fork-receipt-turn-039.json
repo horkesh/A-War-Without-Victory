@@ -1,0 +1,25 @@
+{
+  "turn": 39,
+  "operation": null,
+  "lineage": {
+    "turn": 39,
+    "moves": [],
+    "ownedBattles": [],
+    "beforeController": "RS",
+    "afterController": "RS",
+    "controlEvents": []
+  },
+  "event": {
+    "turn": 39,
+    "eventId": "vance_owen_plan_1993",
+    "responseId": "accept"
+  },
+  "canonical": {
+    "bytes": 5409065,
+    "sha256": "222c45c7dfc5c91c30c197cc0083c3b31bac29f5d20d39e72999cf03fe243547"
+  },
+  "report": {
+    "bytes": 658859,
+    "sha256": "ed33db16e947217a4a28985aec9663f39e26ce725e7286631d77b9ea39c76a63"
+  }
+}

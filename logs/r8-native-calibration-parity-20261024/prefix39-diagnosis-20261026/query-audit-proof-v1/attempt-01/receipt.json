@@ -1,0 +1,80 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-26T00:52:07.350Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/later-native-force-query-20261026-v1/attempt-01",
+  "timeout_ms": 60000,
+  "original_argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "--import",
+    "file:///C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/node_modules/tsx/dist/loader.mjs",
+    "tmp/player-bot-capability-parity-20261024/later-native-force-query-20261026-v1/query_only.cjs",
+    "{evidenceDir}"
+  ],
+  "argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "--import",
+    "file:///C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/node_modules/tsx/dist/loader.mjs",
+    "tmp/player-bot-capability-parity-20261024/later-native-force-query-20261026-v1/query_only.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\later-native-force-query-20261026-v1\\attempt-01"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "PRECHECK.json",
+    "turn-016-STATIC.json",
+    "turn-025-STATIC.json",
+    "turn-030-STATIC.json",
+    "final-039-STATIC.json",
+    "RESULT.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/later-native-force-query-20261026-v1/query_only.cjs",
+    "bytes": 5476,
+    "raw_sha256": "918f90a37ef6fd8976b057ee7150b7036ca313f52ca9afe52ea744b3764f4ae4",
+    "normalized_text_sha256": "e1c067808f4ed1f6e4f6c053c1d2ede3082b3d4905f7d76f8db1124d1fe43b8e",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 5476,
+      "sha256": "918f90a37ef6fd8976b057ee7150b7036ca313f52ca9afe52ea744b3764f4ae4"
+    }
+  },
+  "end_utc": "2026-10-26T00:52:07.542Z",
+  "pid": 20200,
+  "child_exit": 2,
+  "wrapper_exit": 126,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/later-native-force-query-20261026-v1/query_only.cjs",
+    "bytes": 5476,
+    "raw_sha256": "918f90a37ef6fd8976b057ee7150b7036ca313f52ca9afe52ea744b3764f4ae4",
+    "normalized_text_sha256": "e1c067808f4ed1f6e4f6c053c1d2ede3082b3d4905f7d76f8db1124d1fe43b8e",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 1182,
+    "sha256": "01b5670f6fa2a5ce5cf161eb49ffdffcb87a97f2edc0cd51cbf6e77ef9d97331"
+  },
+  "retained_artifacts": [],
+  "artifact_contract": {
+    "pass": false,
+    "unexpected": [],
+    "missing_allowed": [
+      "PRECHECK.json",
+      "turn-016-STATIC.json",
+      "turn-025-STATIC.json",
+      "turn-030-STATIC.json",
+      "final-039-STATIC.json",
+      "RESULT.json"
+    ]
+  }
+}

@@ -1,5 +1,11 @@
 # Repo Map (AWWV)
 
+## REQUEST-OP personnel-floor proof (2026-10-26)
+
+- Selector and consumer: `planDirectiveOperation` / `injectOpDirectives` in `src/sim/turn_phases/war_phases.ts`; objection preview reuses the same planner from `src/desktop/desktop_sim.ts`.
+- The bounded correction applies canonical `MIN_ATTACK_PERSONNEL = 500` before physical reachability and minimum-three selection. Retained T16 evidence leaves two eligible brigades and fails closed as `no_available_force`; movement ownership, assembly timing and combat are outside this correction.
+- Eight preserved attempts, raw receipts/logs and available Vitest JSON are curated under [source-fix-proof-20261026](../../logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/source-fix-proof-20261026/); [MANIFEST.v4.json](../../logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/MANIFEST.v4.json) records hashes and scope.
+
 ## Scenario graph-domain repair and evidence (2026-10-25)
 
 - Weekly headless scenario execution: `src/scenario/scenario_runner.ts`. OSID front builders/reconcilers consume `operationalSettlementGraph.edges`; canonical SID `graph.edges` is not an interchangeable topology.

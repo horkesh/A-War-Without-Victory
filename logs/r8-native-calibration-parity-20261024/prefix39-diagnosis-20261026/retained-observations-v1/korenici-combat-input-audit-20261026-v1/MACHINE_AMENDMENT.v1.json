@@ -1,0 +1,25 @@
+{
+  "schema": "awwv.korenici-combat-input-audit.amendment.v1",
+  "status": "complete_read_only_scope_correction",
+  "supersedes_summary_claims_only": "REPORT.md and MACHINE_RECEIPT.json remain preserved evidence; use REPORT.v2.md for the reviewed finding.",
+  "bindings": {
+    "original_report": { "path": "REPORT.md", "bytes": 3402, "sha256": "37607371f27c2f11f0fa4d42eba5f182c7dd8c94c1b524132cecdb28125850c2" },
+    "original_machine_receipt": { "path": "MACHINE_RECEIPT.json", "bytes": 1417, "sha256": "c110bbde48209983774aa2f1fdb76fdea046b1362420eee3b3af40776f957ba1" },
+    "independent_review": { "path": "review-001/INDEPENDENT_RETAINED_COMBAT_REVIEW.md", "bytes": 5898, "sha256": "0038bacb1ab5f87d673bbc12609f80325e7c535c04c5d20631da43464ff06645" },
+    "retained_result": { "path": "attempt-001/RESULT.json", "bytes": 146433, "sha256": "5ed380101c6231ee11da316ebd0917cebcdbacc4517b86a3ee0579b48b103077" }
+  },
+  "corrected_finding": "The retained records establish lawful admission, movement, and deterministic combat and show no affirmative evidence of a new combat defect. The pre-turn T33 fatigue difference and its reconstructed multiplier are a plausible material contributor, but missing full effective-power equality and observed defender-fatigue/personnel differences prevent isolated causality.",
+  "evidence_boundary": {
+    "observed": "RS 16th fatigue is 11 in the current retained pre-turn T33 state feeding T34 and 0 in the older retained comparison; current-formula attack multipliers reconstruct to 0.8533333 and 1.0.",
+    "not_recorded": "The actual phase-local T34 precombat state, complete attacker and defender power terms, exact powers, and exact ratio.",
+    "determinism": "Outcome classification is deterministic; no missing random roll is claimed."
+  },
+  "acceptance": {
+    "new_combat_defect_evidenced": false,
+    "fatigue_isolated_as_cause": false,
+    "acceptance_707_waived": false,
+    "korenici_mismatch_waived": false,
+    "tuning_authorized": false
+  },
+  "new_execution": { "engine_imports": 0, "api_calls": 0, "queries": 0, "turn_advances": 0, "extractions": 0, "retries": 0 }
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "awwv.player-order-fork-diagnostic-v1.freeze.v1",
+  "status": "HOLD_FOR_INDEPENDENT_PRELAUNCH_REVIEW_AND_ROOT_LAUNCH",
+  "head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+  "packet": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v1",
+  "files": [
+    { "path": "CONFIG.json", "bytes": 5303, "sha256": "66f194acd4a4a11eb4a92cddb37007e3a3319eb1f3891b4286ab5801cff5128d" },
+    { "path": "diagnostic_entry.cjs", "bytes": 25109, "sha256": "e967777a92f3a7c06904688a9a9cf1079e35fe4dc94dcca85a60a4b5fc9d1f34" },
+    { "path": "launch.cjs", "bytes": 1725, "sha256": "6c23c910bb631541e50e023e6ba6a65ea03f42dd8713513bae30dc2b591ccdf1" },
+    { "path": "LAUNCH_COMMANDS.md", "bytes": 700, "sha256": "a6d6a0ad977c082db55cebee4e751839157cb5b610a894557960d75d43e8c5ac" },
+    { "path": "PLAN.md", "bytes": 3139, "sha256": "e28ba019092a11f31744b7edd105d84b00d2c43bb0547fb6af6d9ccbd396b2b9" }
+  ],
+  "frozenCommand": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v1/launch.cjs"
+  ],
+  "resolvedChild": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v1/diagnostic_entry.cjs",
+    "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v1/CONFIG.json",
+    "{evidenceDir}"
+  ],
+  "attempt": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v1/attempts/player-order-fork-01",
+  "timeoutMs": 180000,
+  "retry": false,
+  "engineExecutedDuringPreparation": false,
+  "testsExecutedDuringPreparation": false
+}

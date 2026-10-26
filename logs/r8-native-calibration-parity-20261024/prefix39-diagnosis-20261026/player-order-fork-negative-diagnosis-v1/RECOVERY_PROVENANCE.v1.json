@@ -1,0 +1,18 @@
+{
+  "schema": "receipt-recovery-provenance.v1",
+  "recorded": "2026-10-26",
+  "attribution": "Method reported by /root/request_personnel_floor_fix to root; this record does not claim an independently retained terminal transcript of recovery.",
+  "original_path_was_rewritten": true,
+  "reported_method": "Parsed final receipt; deleted only workspace_root, diagnosis.candidate_verified and diagnosis.candidate_status; serialized with JSON.stringify(value,null,2) plus LF; verified the known original byte length and SHA-256 before exclusive wx write to recovered filename.",
+  "final_receipt": {
+    "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-negative-diagnosis-v1/REQUEST_OP_MOVEMENT_HANDOFF_RECEIPT.json",
+    "bytes": 10834,
+    "sha256": "c3a3ff0fa29bf614121bea8ff53d06bbb0d73b33218735074a9704371a4928f5"
+  },
+  "recovered_original": {
+    "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-negative-diagnosis-v1/REQUEST_OP_MOVEMENT_HANDOFF_RECEIPT.pre-freeze-recovered-fb0fc7.json",
+    "bytes": 10596,
+    "sha256": "fb0fc726ce6ff088bf619552348ceb9fb041699ce82de210707b84c7985b2bf3"
+  },
+  "limits": "Metadata recovery only. Original-path rewrite remains disclosed. No engine state or attempt output was changed by this recovery."
+}

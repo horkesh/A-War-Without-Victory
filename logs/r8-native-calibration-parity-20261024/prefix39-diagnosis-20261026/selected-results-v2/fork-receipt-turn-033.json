@@ -1,0 +1,21 @@
+{
+  "turn": 33,
+  "operation": null,
+  "lineage": {
+    "turn": 33,
+    "moves": [],
+    "ownedBattles": [],
+    "beforeController": "RS",
+    "afterController": "RS",
+    "controlEvents": []
+  },
+  "event": null,
+  "canonical": {
+    "bytes": 5315193,
+    "sha256": "7e69769d2eca3cb1292d2ff11450776bf7544ec899e7183a4a6b8cd6c306aa5e"
+  },
+  "report": {
+    "bytes": 662837,
+    "sha256": "cdfac2ef4328752f1134f0c0454253fb5e8f58e6d293524b0dd9c91829174490"
+  }
+}

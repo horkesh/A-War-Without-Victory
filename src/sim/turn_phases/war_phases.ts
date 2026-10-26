@@ -186,7 +186,7 @@ import { createSingleAxis } from '../combat/sector_offensive_axis_helpers.js';
 import { getCorpsSubordinates } from '../combat/bot_corps_helpers.js';
 import { assignOperationCommander, releaseOperationCommander, releaseTacticalCommander } from '../combat/officer_system.js';
 import { completeOperationLifecycle, enterOperationRecovery } from '../combat/tactical_group_lifecycle.js';
-import { isEligibleOperationFormation } from '../../state/formation_constants.js';
+import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import {
     checkTriggeredOperations,
@@ -782,7 +782,8 @@ export function planDirectiveOperation(
 
     // 1. Build the legal force pool — the commander picks brigades, not the president.
     //    Eligibility includes availability, state-wide non-commitment, live formation
-    //    status, and the shared enclave/objective boundary.
+    //    status, the canonical attack-personnel floor, and the shared enclave/objective
+    //    boundary.
     const corpsBrigadeIds = new Set(
         getCorpsSubordinates(state, corpsId).map((f) => f.id),
     );
@@ -794,6 +795,7 @@ export function planDirectiveOperation(
             const f = formations[bid];
             return !!f
                 && isEligibleOperationFormation(f)                       // brigade-only, active
+                && (f.personnel ?? 0) >= MIN_ATTACK_PERSONNEL
                 && isBrigadeEligibleForOperationObjectives(f, [targetOsid]);
         })
         .map((bid) => formations[bid]!);

@@ -1,0 +1,35 @@
+{
+  "turn": 28,
+  "operation": null,
+  "lineage": {
+    "turn": 28,
+    "moves": [
+      {
+        "formationId": "arbih_443rd_mountain",
+        "from": "op:konjic:glavaticevo_2",
+        "to": "op:konjic:dzepi_2",
+        "receipts": [
+          {
+            "formation_id": "arbih_443rd_mountain",
+            "formation_name": "443rd Mountain",
+            "from_osid": "op:konjic:glavaticevo_2",
+            "to_osid": "op:konjic:dzepi_2"
+          }
+        ]
+      }
+    ],
+    "ownedBattles": [],
+    "beforeController": "RS",
+    "afterController": "RS",
+    "controlEvents": []
+  },
+  "event": null,
+  "canonical": {
+    "bytes": 5240736,
+    "sha256": "1112dae224398b0b0b5ddf81cf87941404d7bbb8b834b1736677d022943b38f3"
+  },
+  "report": {
+    "bytes": 660542,
+    "sha256": "ea81d3833b9cec23a79d710024e922d8f506efecc19f5179b72686ae9ee46835"
+  }
+}

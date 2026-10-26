@@ -19,6 +19,8 @@
  */
 import { describe, it, expect } from 'vitest';
 import { planDirectiveOperation, warPhases } from '../src/sim/turn_phases/war_phases.js';
+import { runTurn } from '../src/sim/turn_pipeline.js';
+import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
 const STEP = warPhases.find((p) => p.name === 'inject-op-directive')!;
 
@@ -151,6 +153,85 @@ describe('REQUEST-OP inject step (inject-op-directive)', () => {
     expect(cc.active_operations).toHaveLength(0);
     expect(cc.op_directive_rejection).toEqual({ target_osid: 'bihac_1', reason: 'no_available_force', turn: 14 });
     expect(cc.pending_op_directive).toBeUndefined();
+  });
+
+  it('consumes a normal pending directive with two usable and eight understrength brigades without creating operation attack ownership', () => {
+    const brigades: Record<string, any> = {};
+    for (let index = 1; index <= 10; index += 1) {
+      brigades[`rbih_b${index}`] = {
+        id: `rbih_b${index}`,
+        faction: 'RBiH',
+        kind: 'brigade',
+        status: 'active',
+        corps_id: 'rbih_1st_corps',
+        personnel: index <= 2 ? 500 : 499,
+        location_osid: 'bihac_2',
+      };
+    }
+    const state = makeState({
+      brigades,
+      pendingDirective: { target_osid: 'bihac_1', turn: 14, ca_cost: 25 },
+    });
+    const cc = state.military.corps_command.rbih_1st_corps;
+
+    runStep(state, ADJ);
+
+    expect(cc.pending_op_directive).toBeUndefined();
+    expect(cc.op_directive_rejection).toEqual({ target_osid: 'bihac_1', reason: 'no_available_force', turn: 14 });
+    expect(cc.active_operations).toEqual([]);
+    expect(state.military.brigade_attack_order_owners).toBeUndefined();
+  });
+
+  it('public runTurn rejects and consumes the same understrength normal directive without operation attack ownership', async () => {
+    const target = 'op:banja_luka:dragocaj';
+    const staging = 'op:banja_luka:banja_luka_2';
+    const brigades: Record<string, any> = {};
+    for (let index = 1; index <= 10; index += 1) {
+      brigades[`rbih_b${index}`] = {
+        id: `rbih_b${index}`,
+        faction: 'RBiH',
+        kind: 'brigade',
+        status: 'active',
+        corps_id: 'rbih_1st_corps',
+        personnel: index <= 2 ? 500 : 499,
+        location_osid: staging,
+      };
+    }
+    const state = makeState({
+      brigades,
+      controllers: { [target]: 'RS', [staging]: 'RBiH' },
+      pendingDirective: { target_osid: target, turn: 14, ca_cost: 25 },
+    });
+    state.schema_version = CURRENT_SCHEMA_VERSION;
+    state.meta = {
+      ...state.meta,
+      seed: 'request-op-personnel-floor-public-turn',
+      referendum_held: true,
+      referendum_turn: 0,
+      war_start_turn: 0,
+    };
+    state.factions = [
+      { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
+      { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
+      { id: 'HRHB', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
+    ];
+    Object.assign(state.military, {
+      front_segments: {},
+      front_posture: {},
+      front_posture_regions: {},
+      front_pressure: {},
+      militia_pools: {},
+    });
+    state.military.corps_command.rbih_1st_corps.active_ogs = [];
+    state.displacement = {};
+
+    const { nextState } = await runTurn(state, { seed: 'request-op-personnel-floor-public-turn' });
+    const cc = nextState.military.corps_command!.rbih_1st_corps!;
+
+    expect(cc.pending_op_directive).toBeUndefined();
+    expect(cc.op_directive_rejection).toEqual({ target_osid: target, reason: 'no_available_force', turn: 15 });
+    expect(cc.active_operations).toEqual([]);
+    expect(nextState.military.brigade_attack_order_owners).toBeUndefined();
   });
 
   it('rejects when no adjacency graph is available (cannot prove reachability)', () => {

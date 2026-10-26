@@ -14,6 +14,7 @@
 import { describe, it, expect } from 'vitest';
 import { buildDirectiveObjection } from '../src/ui/map/data/opDirectiveObjection.js';
 import { planDirectiveOperation } from '../src/sim/turn_phases/war_phases.js';
+import { queryDirectiveObjection } from '../src/desktop/desktop_sim.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Part A — buildDirectiveObjection disposition tinting
@@ -197,6 +198,100 @@ function makeState(opts: { controllers?: Record<string, string>; ops?: any[] } =
 }
 
 describe('planDirectiveOperation — pure auto-selection shared with injectOpDirectives', () => {
+  it('applies the 500-person attack floor equally to on-front, off-front, and reserve brigades', () => {
+    const state = makeState({ controllers: { target: 'RS', staging: 'RBiH', origin: 'RBiH' } });
+    const corps = state.military.formations.rbih_1st_corps;
+    state.military.formations = { rbih_1st_corps: corps };
+    const placements = [
+      { name: 'on_front', location_osid: 'staging', role: 'front' },
+      { name: 'off_front', location_osid: 'origin', role: 'front' },
+      { name: 'reserve', location_osid: 'staging', role: 'reserve' },
+    ];
+    for (const placement of placements) {
+      state.military.formations[`rbih_${placement.name}_499`] = {
+        ...brigade(`rbih_${placement.name}_499`),
+        ...placement,
+        personnel: 499,
+      };
+      state.military.formations[`rbih_${placement.name}_500`] = {
+        ...brigade(`rbih_${placement.name}_500`),
+        ...placement,
+        personnel: 500,
+      };
+    }
+    state.military.corps_front_sectors = {
+      sector: {
+        sector_id: 'sector', corps_id: 'rbih_1st_corps', faction: 'RBiH',
+        assigned_brigade_ids: ['rbih_on_front_499', 'rbih_on_front_500', 'rbih_off_front_499', 'rbih_off_front_500'],
+        reserve_brigade_ids: ['rbih_reserve_499', 'rbih_reserve_500'],
+      },
+    };
+    const adjacency = new Map<string, string[]>([
+      ['target', ['staging']],
+      ['staging', ['target', 'origin']],
+      ['origin', ['staging']],
+    ]);
+
+    const plan = planDirectiveOperation(
+      state,
+      state.military.corps_command.rbih_1st_corps,
+      'rbih_1st_corps',
+      'target',
+      adjacency,
+    );
+
+    expect(plan.ok).toBe(true);
+    if (plan.ok) {
+      expect(plan.participants).toEqual([
+        'rbih_off_front_500',
+        'rbih_on_front_500',
+        'rbih_reserve_500',
+      ]);
+    }
+  });
+
+  it('fails closed when only two connected brigades meet the floor and eight are understrength', async () => {
+    const target = 'op:banja_luka:dragocaj';
+    const staging = 'op:banja_luka:banja_luka_2';
+    const state = makeState({ controllers: { [target]: 'RS', [staging]: 'RBiH' } });
+    const corps = state.military.formations.rbih_1st_corps;
+    state.military.formations = { rbih_1st_corps: corps };
+    for (let index = 1; index <= 10; index += 1) {
+      state.military.formations[`rbih_b${index}`] = {
+        ...brigade(`rbih_b${index}`),
+        personnel: index <= 2 ? 500 : 499,
+        location_osid: staging,
+      };
+    }
+    const adjacency = new Map<string, string[]>([
+      [target, [staging]],
+      [staging, [target]],
+    ]);
+    const before = JSON.stringify(state);
+
+    const plan = planDirectiveOperation(
+      state,
+      state.military.corps_command.rbih_1st_corps,
+      'rbih_1st_corps',
+      target,
+      adjacency,
+    );
+    const query = await queryDirectiveObjection(
+      state,
+      { corpsId: 'rbih_1st_corps', targetOsid: target },
+      process.cwd(),
+    );
+
+    expect(plan).toEqual({ ok: false, reason: 'no_available_force' });
+    expect(query).toEqual({
+      rejectionReason: 'no_available_force',
+      forceRatio: 0,
+      estimatedCasualties: 0,
+      recommendedAction: 'abort',
+    });
+    expect(JSON.stringify(state)).toBe(before);
+  });
+
   it('selects only objective-legal brigades connected to staging and remains JSON-pure', () => {
     const state = makeState({
       controllers: {

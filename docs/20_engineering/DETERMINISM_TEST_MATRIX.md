@@ -1,5 +1,9 @@
 # Determinism Test Matrix (AWWV)
 
+## REQUEST-OP personnel-floor admission (2026-10-26)
+
+The shared REQUEST-OP planner applies the existing scalar `MIN_ATTACK_PERSONNEL = 500` floor before reachability and minimum-three selection. The correction adds no state, iteration, time, randomness, serialization, ordering, timer, movement or combat behavior. Preserved evidence records RED 34/37 with three expected failures, GREEN 37/37, targeted public-turn 1/1 with 14 filtered, and final TypeScript 0; attempts 003 and 005/006 remain failures. No combined 38-test or 37-test coverage claim is valid. [Proof](../../logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/MANIFEST.v4.json)
+
 ## Scenario post-turn repair caller boundary (2026-10-25 candidate)
 
 - `tests/current-scenario-postturn-boundary.test.ts` covers the real weekly caller: two successful public war turns with zero applied scenario flips preserve the public result without the extra repair, a positive applied-flip case still repairs scenario artifacts, and an authentic remaining-peace fixture preserves the legacy `runOneTurn` behavior. Focused retained-mode proof passes 3/3, existing contracts pass 6/6, and TypeScript exits 0.

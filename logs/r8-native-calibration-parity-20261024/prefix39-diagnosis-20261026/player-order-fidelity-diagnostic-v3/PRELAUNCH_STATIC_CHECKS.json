@@ -1,0 +1,85 @@
+{
+  "schema": "awwv.player-order-fidelity-diagnostic-v3.prelaunch-static.v1",
+  "checkedDate": "2026-10-26",
+  "verdict": "PASS_STATIC_ONLY_HOLD_FOR_INDEPENDENT_GO",
+  "engineOrTestExecuted": false,
+  "diagnosticAttemptCreated": false,
+  "head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+  "authorizedRoot": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "checks": {
+    "jsonParse": "pass",
+    "entrySyntax": "pass",
+    "launcherSyntax": "pass",
+    "tsxLoaderDryLoadWithoutEngineImport": "pass",
+    "runtimePackageAggregateBindings": "pass",
+    "sourceAndDataStatusAtHead": "clean",
+    "packetDiffCheck": "pass",
+    "fixedFidelityAttemptLeafAbsent": true,
+    "attemptParentPresent": true
+  },
+  "cohort": {
+    "turn16": { "turn": 16, "sha256": "861d4e34a4b4c22c15db6fa857449c7f5bd68deb352edbb2a0059c6960ac07e3" },
+    "turn17": { "turn": 17, "sha256": "32d5b1bbcdb74bb2f7a2c5dbc9bca40bd5237cab318052c90c0abe9c0f184cf1" },
+    "retainedTurn39": { "turn": 39, "sha256": "623cbaed0e6186bc5f2c4a18fd5e9b22836db9343df0e4122316c92e5c9902e8", "score": 704 },
+    "nativeSourceHead": "a3063366ae094468fbb2ede143f9ced3a1ed2f68",
+    "controllerMapSha256": "6ed89306d4adff552116a38dd616154cc76e0af41f9c565e730f5df26ed5c30e",
+    "retainedN91LossIds": ["op:donji_vakuf:korenici", "op:foca:donje_zesce", "op:trnovo:tosici"],
+    "retainedN92LossIds": ["op:donji_vakuf:korenici", "op:foca:donje_zesce", "op:trnovo:tosici"],
+    "rejectedV1Comparator": { "sha256": "e58b94766763a10f80dc9bb69a2cb0a8ddde6436f22b12465b4035da63f38340", "score": 705, "usedByV3": false }
+  },
+  "turn16Facts": {
+    "playerFaction": "RBiH",
+    "autonomyLevel": 2,
+    "target": "op:trnovo:tosici",
+    "targetController": "RS",
+    "commandAuthority": { "current": 94, "spent_this_turn": 0, "lifetime_spent": 25 },
+    "fourthCorpsActiveOperations": 0,
+    "fourthCorpsPendingDirective": false,
+    "activeUncommittedSameCorpsBrigades": 10,
+    "nonEnclaveBrigades": 10,
+    "allianceValue": 0.4,
+    "friendlyAlliedComponentSizeFromDelijas": 308,
+    "reachableEligibleBrigades": 10,
+    "sortedOwnTargetAdjacentStagingCandidates": ["op:trnovo:delijas", "op:trnovo:kijevo_2", "op:trnovo:trnovo"],
+    "selectedFirstStaging": "op:trnovo:delijas",
+    "circleOverlap": {
+      "corpsId": "arbih_1st_corps",
+      "operationName": "Operation Circle",
+      "staging": "op:trnovo:delijas",
+      "target": "op:trnovo:tosici",
+      "ordinaryGuard": "validateOpAtInjection receives the requested 4th Corps command state and checks overlap within that command only",
+      "exemptionUsed": false
+    }
+  },
+  "retainedPostTurn16PlayerEvents": [
+    { "turn": 20, "eventId": "london_conference_1992", "responseId": "accept_principles" },
+    { "turn": 38, "eventId": "ic_pressure_vopp_engagement", "responseId": "acknowledge_pressure" },
+    { "turn": 39, "eventId": "vance_owen_plan_1993", "responseId": "accept" }
+  ],
+  "failClosed": [
+    "baseline mismatch stops before query/stage and preserves uncapped full diff paths",
+    "missing input, blocker, handoff mismatch, advance error, wrong turn, or artifact drift exits failure",
+    "the only accepted mode is fidelity-only; query/stage/fork paths are unreachable and no fork launcher exists"
+  ],
+  "preparationCorrections": [
+    "A loader-only dry check rejected a Windows drive path for --import; frozen argv now uses the equivalent file:/// URL.",
+    "The runtime package aggregate values were regenerated with the exact algorithm embedded in entry and launcher.",
+    "Independent review rejected an external-worktree loader path; v3 child argv and loader binding use the authorized October worktree path whose transitive package trees are the same trees aggregate-verified by the launcher."
+  ],
+  "launchTimeCheapChecksBeforeEngineImport": [
+    "hardcoded CONFIG and entry hashes",
+    "literal root, exact Node binary/version/hash, exact HEAD",
+    "no tracked or untracked src/data drift",
+    "all source/evidence/provenance bindings",
+    "TSX loader and five aggregate runtime package trees",
+    "fixed attempt leaf absent and parent present"
+  ],
+  "phaseBoundary": {
+    "firstLauncher": "launch_fidelity_v3.cjs",
+    "firstMode": "fidelity-only",
+    "firstAdvanceLimit": 1,
+    "queryOrStageReachable": false,
+    "forkLauncherPresent": false,
+    "futureFork": "DISABLED_UNREVIEWED"
+  }
+}

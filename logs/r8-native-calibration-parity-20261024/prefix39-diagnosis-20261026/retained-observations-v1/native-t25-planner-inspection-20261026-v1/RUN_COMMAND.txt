@@ -1,0 +1,6 @@
+$root = 'tmp\player-bot-capability-parity-20261024\native-t25-planner-inspection-20261026-v1'
+$node = 'C:\Users\User\AppData\Local\Volta\tools\image\node\22.23.2\node.exe'
+$entry = (Resolve-Path "$root\inspect_t25_planner.ts").Path
+$config = (Resolve-Path "$root\inspection.config.json").Path
+$tsx = (Resolve-Path 'node_modules\tsx\dist\cli.mjs').Path
+& $node tools\diagnostics\run_preserved_preflight.cjs --attempt-dir "$root\attempt-001" --entry-script $entry --timeout-ms 60000 --allow-artifact result.json -- $node $tsx $entry --config $config --output '{evidenceDir}\result.json'

@@ -1,0 +1,44 @@
+{
+  "schema": "awwv.preserved-preflight.start.v1",
+  "start_utc": "2026-10-26T00:14:06.178Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/attempts/fidelity-current-source-01",
+  "timeout_ms": 180000,
+  "original_argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "--import",
+    "file:///C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/node_modules/tsx/dist/loader.mjs",
+    "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/diagnostic_entry_v3.cjs",
+    "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/CONFIG.json",
+    "{evidenceDir}",
+    "fidelity-only"
+  ],
+  "argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "--import",
+    "file:///C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/node_modules/tsx/dist/loader.mjs",
+    "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/diagnostic_entry_v3.cjs",
+    "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/CONFIG.json",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\player-order-fidelity-diagnostic-v3\\attempts\\fidelity-current-source-01",
+    "fidelity-only"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "RUNTIME_PROVENANCE.json",
+    "baseline-report-turn-017.json",
+    "baseline-produced-turn-017.json",
+    "BASELINE_FIDELITY.json",
+    "RESULT.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/diagnostic_entry_v3.cjs",
+    "bytes": 22125,
+    "raw_sha256": "61e0182cd3a86df2bc2c31631723d4fda5e3d60eff1e612f40d9cc0fb90cfd74",
+    "normalized_text_sha256": "61e0182cd3a86df2bc2c31631723d4fda5e3d60eff1e612f40d9cc0fb90cfd74",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 22125,
+      "sha256": "61e0182cd3a86df2bc2c31631723d4fda5e3d60eff1e612f40d9cc0fb90cfd74"
+    }
+  }
+}

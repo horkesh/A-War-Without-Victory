@@ -1,0 +1,69 @@
+{
+  "schema": "awwv.native-t25-request-op-planner-inspection-config.v1",
+  "workspace": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "runtime": {
+    "node_version": "v22.23.2",
+    "node_exec_path": "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "files": [
+      {
+        "path": "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+        "sha256": "0d0f5e39f9f3d9587bc19f73eab3c2c9c4903fd02d6dbf9c853dd81b3d95fad4"
+      },
+      {
+        "path": "node_modules/tsx/dist/cli.mjs",
+        "sha256": "8729ecfb90d9d568939e4190e6f1d3317c946583b7d37a776e0c23a21c021cf8"
+      }
+    ]
+  },
+  "sources": [
+    {
+      "path": "src/sim/turn_phases/war_phases.ts",
+      "sha256": "8a085a37835541f4dc267e5c1f7f75a714bafc596e21d43b1467cb8ee62d7fcd"
+    },
+    {
+      "path": "src/data/operational_data.ts",
+      "sha256": "9156b352188b2ecec91ae3451da73cd6cdea1f51a3a802042bfecb15b34d4cd9"
+    },
+    {
+      "path": "src/sim/combat/osid_adjacency.ts",
+      "sha256": "61860301594e9dc6d982a45d909176158a50ac9b67eea1b77fff0019ec3d0eb5"
+    },
+    {
+      "path": "src/sim/early_war/alliance_update.ts",
+      "sha256": "57835c7b4a0f61916f4568c9d0aa2c71af4c725b0d6948fa5cb9df765bb18849"
+    },
+    {
+      "path": "src/sim/combat/sector_utils.ts",
+      "sha256": "4abb513284b2e43998146452edd9a673611aad71c8079ba002454eea9802d2cc"
+    }
+  ],
+  "input": {
+    "path": "tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/turn-autosaves/turn-025.json",
+    "sha256": "d384bd9f7f24ebd044fd13bc3b123ad05f51aa074c0d44faedbe99075ac6adcc"
+  },
+  "graph": {
+    "path": "data/derived/operational/operational_contact_graph.json",
+    "sha256": "f7f9aaeea51710fda376234d79945b51dfea31a16ebca948ffd8dc54f3ce0c46",
+    "endpoint_count": 712,
+    "controller_key_count": 712
+  },
+  "target_osid": "op:trnovo:tosici",
+  "corps_ids": [
+    "arbih_1st_corps",
+    "arbih_4th_corps"
+  ],
+  "expected": {
+    "turn": 25,
+    "phase": "war",
+    "player_faction": "RBiH",
+    "target_controller": "RS",
+    "target_neighbors": [
+      { "id": "op:kalinovik:golubici_2", "controller": "RS" },
+      { "id": "op:kalinovik:varos_2", "controller": "RS" },
+      { "id": "op:kalinovik:vlaholje", "controller": "RS" },
+      { "id": "op:trnovo:delijas", "controller": "RBiH" },
+      { "id": "op:trnovo:kijevo_2", "controller": "RS" },
+      { "id": "op:trnovo:trnovo", "controller": "RBiH" }
+    ]
+  }
+}

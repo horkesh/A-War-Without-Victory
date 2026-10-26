@@ -1,0 +1,70 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-26T00:26:03.624Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/retained-roots-post-forks-20261026-v1/attempt-01",
+  "timeout_ms": 60000,
+  "original_argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/verify_retained_roots.cjs",
+    "{evidenceDir}"
+  ],
+  "argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/verify_retained_roots.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\retained-roots-post-forks-20261026-v1\\attempt-01"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "RESULT.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/verify_retained_roots.cjs",
+    "bytes": 2310,
+    "raw_sha256": "bf3672ca69b4cb9b89b9a062521818e34a20a488dc5684007c68a53f0044bc05",
+    "normalized_text_sha256": "bf3672ca69b4cb9b89b9a062521818e34a20a488dc5684007c68a53f0044bc05",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 2310,
+      "sha256": "bf3672ca69b4cb9b89b9a062521818e34a20a488dc5684007c68a53f0044bc05"
+    }
+  },
+  "end_utc": "2026-10-26T00:26:14.278Z",
+  "pid": 13484,
+  "child_exit": 0,
+  "wrapper_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/verify_retained_roots.cjs",
+    "bytes": 2310,
+    "raw_sha256": "bf3672ca69b4cb9b89b9a062521818e34a20a488dc5684007c68a53f0044bc05",
+    "normalized_text_sha256": "bf3672ca69b4cb9b89b9a062521818e34a20a488dc5684007c68a53f0044bc05",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 57,
+    "sha256": "db5e0a8e5b38c7326aa7ff8e4d5b26e7ba53bfc6bbb96335eb21256132e81c99"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "RESULT.json",
+      "bytes": 8119,
+      "sha256": "117cc0a3cc9cd236083df34016c3eaa6e51f6b76691717101fb4cc7472cecfb4"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

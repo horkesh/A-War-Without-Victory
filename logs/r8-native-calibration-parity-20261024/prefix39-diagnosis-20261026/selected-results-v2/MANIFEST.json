@@ -1,0 +1,240 @@
+{
+  "schema": "awwv.byte-exact-diagnostic-results.v1",
+  "files": [
+    {
+      "path": "fidelity-RESULT.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/attempts/fidelity-current-source-01/RESULT.json",
+      "bytes": 704,
+      "sha256": "244603b9406f4fd3ea4d4840f00c075db2ba133246ab0c8bf42b1b273c727f6b"
+    },
+    {
+      "path": "fidelity-BASELINE_FIDELITY.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/attempts/fidelity-current-source-01/BASELINE_FIDELITY.json",
+      "bytes": 332,
+      "sha256": "5905bd16df7d20a70666833e787f8a2ce2a57d8f0eca83e73b7d01cb600e7d79"
+    },
+    {
+      "path": "fidelity-receipt.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/attempts/fidelity-current-source-01/receipt.json",
+      "bytes": 4560,
+      "sha256": "75edc31c43c9710608a10448e19d8ff99aa1a020a12453b4d1c8f0345de6a5aa"
+    },
+    {
+      "path": "fidelity-start.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/attempts/fidelity-current-source-01/start.json",
+      "bytes": 2641,
+      "sha256": "2aa32e62c5663c0fe03d485172d33799fa420bdfd82f0d30eefa6fb214410b9b"
+    },
+    {
+      "path": "fidelity-RUNTIME_PROVENANCE.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/attempts/fidelity-current-source-01/RUNTIME_PROVENANCE.json",
+      "bytes": 6516,
+      "sha256": "f77be6cb16087b6f02ed73d73ee11eeedd8c1434ef2b103d64368ed419d1b40e"
+    },
+    {
+      "path": "fidelity-outer-start.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/outer-launch-fidelity-01/start.json",
+      "bytes": 488,
+      "sha256": "0822269048d8240f59c79928da196a9b0249756f9302193bd166350c3f4a3bfd"
+    },
+    {
+      "path": "fidelity-outer-exit.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/outer-launch-fidelity-01/exit.json",
+      "bytes": 48,
+      "sha256": "05a1f52ccd913d357cb36c791dbef36e1ca733ffe6e780340284ff18040498b9"
+    },
+    {
+      "path": "fork-RESULT.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/RESULT.json",
+      "bytes": 40205,
+      "sha256": "2557bee230ed5d478e2be116988995e5d79d6e1dd6479f7ae3c039b623137c70"
+    },
+    {
+      "path": "fork-QUERY_AND_STAGE.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/QUERY_AND_STAGE.json",
+      "bytes": 1905,
+      "sha256": "207ce456016899f833a88a4fc91d296f2c12228f03e256013251f9763e4c125a"
+    },
+    {
+      "path": "fork-receipt.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt.json",
+      "bytes": 17054,
+      "sha256": "9bbb1973b6e1a113e302ee90c5f01c654069a042f59c0a3e72075fea6dd97ad8"
+    },
+    {
+      "path": "fork-start.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/start.json",
+      "bytes": 4511,
+      "sha256": "37eba1d4017aaacae41e7261c632682ba60c2257d194304f170aeca49a25bd43"
+    },
+    {
+      "path": "fork-RUNTIME_PROVENANCE.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/RUNTIME_PROVENANCE.json",
+      "bytes": 10227,
+      "sha256": "1201cd8a7faab5cc602c847eef108bc1f07b44018fced70884b03e3c830c3085"
+    },
+    {
+      "path": "fork-receipt-turn-017.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-017.json",
+      "bytes": 1713,
+      "sha256": "82ecbf3df0da9ec5e531271baf41615cbf7de4dde40ff49e16d61c3b52a017ae"
+    },
+    {
+      "path": "fork-receipt-turn-018.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-018.json",
+      "bytes": 1713,
+      "sha256": "afcd8031c2c89144125ce1a8ebf03c63ab05443f6532080d57eaa28fb1b881a4"
+    },
+    {
+      "path": "fork-receipt-turn-019.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-019.json",
+      "bytes": 1713,
+      "sha256": "5e733f3547a9fa466286ed02a4a87b91536a679889d37273693113ffb7cbbe83"
+    },
+    {
+      "path": "fork-receipt-turn-020.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-020.json",
+      "bytes": 1809,
+      "sha256": "81b7ecd364331c8f1a977f3e347081c9d1ee560c98610694d01fe499fb611b0a"
+    },
+    {
+      "path": "fork-receipt-turn-021.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-021.json",
+      "bytes": 3172,
+      "sha256": "a2eefe160b2f5c62236dd3714d8b930705d1ac6ebc5f17d9210a364ba32c6430"
+    },
+    {
+      "path": "fork-receipt-turn-022.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-022.json",
+      "bytes": 3693,
+      "sha256": "d82a2ac280d4662efe10769a8784bdb9eba8f67489bb9a5aa5fa909c59b87134"
+    },
+    {
+      "path": "fork-receipt-turn-023.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-023.json",
+      "bytes": 4333,
+      "sha256": "4b389c58eba58777020857904088c1823a9cdffed344c59a1953e56500656e1d"
+    },
+    {
+      "path": "fork-receipt-turn-024.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-024.json",
+      "bytes": 1713,
+      "sha256": "2b9e59e9ae2d2e90bdf8e22712f38d7be8394343fbead373bffac1396ea855ed"
+    },
+    {
+      "path": "fork-receipt-turn-025.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-025.json",
+      "bytes": 461,
+      "sha256": "41f79407256a4c600c0ad71c082b790b9c5290c0351b0706833a9ef44a563ffa"
+    },
+    {
+      "path": "fork-receipt-turn-026.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-026.json",
+      "bytes": 858,
+      "sha256": "fb3089a501274c5b1d8c7d54ad49c2b4556598bb042f394b9e944325bc3285fa"
+    },
+    {
+      "path": "fork-receipt-turn-027.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-027.json",
+      "bytes": 856,
+      "sha256": "b114b97315d9ed447825602f745af1993165de4e373bf6782bdaddbb2c30b41e"
+    },
+    {
+      "path": "fork-receipt-turn-028.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-028.json",
+      "bytes": 858,
+      "sha256": "54d1f069d9d18b0c55023fc181dbf507d64187dc40bc400ee29a3f24fcf4e758"
+    },
+    {
+      "path": "fork-receipt-turn-029.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-029.json",
+      "bytes": 461,
+      "sha256": "e625941c1c11c26e51c8c692676c1c2869b8677974665c417e3337595896eb73"
+    },
+    {
+      "path": "fork-receipt-turn-030.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-030.json",
+      "bytes": 461,
+      "sha256": "2b3c96cc6f147dd253e02df1883f2078e5e9ee90df8a42c3de84347816a14187"
+    },
+    {
+      "path": "fork-receipt-turn-031.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-031.json",
+      "bytes": 461,
+      "sha256": "f40e5e81e0d5458a7138e252bf640335a20f2f9a30b3d6c510485a40c5bf3c53"
+    },
+    {
+      "path": "fork-receipt-turn-032.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-032.json",
+      "bytes": 461,
+      "sha256": "bb6d3c7a3128ab8353dab2a44b1fdb5cc695ce25d5e9fd828eb69b7c5a9c1cdd"
+    },
+    {
+      "path": "fork-receipt-turn-033.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-033.json",
+      "bytes": 461,
+      "sha256": "9bf2d8348b4e6d954ca5367ddf712c40f16d307047e5e8c95645cc0778591935"
+    },
+    {
+      "path": "fork-receipt-turn-034.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-034.json",
+      "bytes": 461,
+      "sha256": "217e43e646e9aec27b6fa32cfe0c999ff6aa8671b3fa58a111a3895bd417f085"
+    },
+    {
+      "path": "fork-receipt-turn-035.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-035.json",
+      "bytes": 461,
+      "sha256": "23f561cd6233e86c91728050b32034e6e29fb9b7b1f342b504fadac934d917c7"
+    },
+    {
+      "path": "fork-receipt-turn-036.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-036.json",
+      "bytes": 461,
+      "sha256": "d761a66a672242dcba9dee43de439a872b291d0b597a6c07c0d87224df2395f6"
+    },
+    {
+      "path": "fork-receipt-turn-037.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-037.json",
+      "bytes": 461,
+      "sha256": "f8b10d8ea7d1d58870f2ff2117d277ebfd59d69985d1f5de6542b32903437cd9"
+    },
+    {
+      "path": "fork-receipt-turn-038.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-038.json",
+      "bytes": 565,
+      "sha256": "85173eb2ada4d0393fc415f494c426d4daaacacaa0c912be63c019ad9ced43db"
+    },
+    {
+      "path": "fork-receipt-turn-039.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/receipt-turn-039.json",
+      "bytes": 544,
+      "sha256": "7a888515c79fab6837eee29e31a5917d3b6e686ca0b3ecb0e675013eb3445df9"
+    },
+    {
+      "path": "fork-outer-start.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/outer-launch-fork-01/start.json",
+      "bytes": 481,
+      "sha256": "f3fd108c6965b34f4a3da269a0cfd83759d068c6b92b18fbf6c02e756d814263"
+    },
+    {
+      "path": "fork-outer-exit.json",
+      "source": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/outer-launch-fork-01/exit.json",
+      "bytes": 48,
+      "sha256": "c706b0174849a3a347d94fb2cab00ec7059dd986b23391be78a83e15a4273429"
+    },
+    {
+      "path": "retained-roots-RESULT.json",
+      "source": "tmp/player-bot-capability-parity-20261024/retained-roots-post-forks-20261026-v1/attempt-01/RESULT.json",
+      "bytes": 8119,
+      "sha256": "117cc0a3cc9cd236083df34016c3eaa6e51f6b76691717101fb4cc7472cecfb4"
+    },
+    {
+      "path": "retained-roots-receipt.json",
+      "source": "tmp/player-bot-capability-parity-20261024/retained-roots-post-forks-20261026-v1/attempt-01/receipt.json",
+      "bytes": 2939,
+      "sha256": "82d9dbe93d95d6f5cd612f26575f5eae77c7234125fe633f5a29d3b6b8b0b97a"
+    }
+  ],
+  "large_originals": "All states/reports/streams remain in their original attempt directories; no originals moved, deleted or rewritten."
+}

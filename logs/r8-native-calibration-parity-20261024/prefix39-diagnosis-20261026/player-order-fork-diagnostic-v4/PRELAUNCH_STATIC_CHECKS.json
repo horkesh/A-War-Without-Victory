@@ -1,0 +1,90 @@
+{
+  "schema": "awwv.player-order-fork-diagnostic-v4.prelaunch-static.v1",
+  "checkedDate": "2026-10-26",
+  "verdict": "PASS_STATIC_ONLY_HOLD_FOR_INDEPENDENT_GO",
+  "engineOrTestExecutedDuringPreparation": false,
+  "diagnosticAttemptCreated": false,
+  "root": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+  "checks": {
+    "configJsonParse": "pass",
+    "entrySyntax": "pass",
+    "launcherSyntax": "pass",
+    "localTsxLoaderDryLoadWithoutEngineImport": "pass",
+    "fiveRuntimePackageAggregates": "pass",
+    "v3ReceiptAndFiveArtifacts": "pass",
+    "v3ExactArgvAndEntrySnapshot": "pass",
+    "v3ActualIndependentReview": "pass",
+    "retained704StaticScore": "pass",
+    "sourceAndDataStatusAtHead": "clean",
+    "packetDiffCheck": "pass",
+    "fixedAttemptLeafAbsent": true,
+    "attemptParentPresent": true
+  },
+  "reusedFidelity": {
+    "receiptSha256": "75edc31c43c9710608a10448e19d8ff99aa1a020a12453b4d1c8f0345de6a5aa",
+    "resultSha256": "244603b9406f4fd3ea4d4840f00c075db2ba133246ab0c8bf42b1b273c727f6b",
+    "actualReviewSha256": "c4604af9987fd77634e0b11cefdf31239437697b858578e2d7fb28d9c20a3a92",
+    "outerChildWrapperExit": [0, 0, 0],
+    "advanceCount": 1,
+    "elapsedMsFromReceipt": 11187,
+    "expectedAndActualT17Bytes": 4790188,
+    "expectedAndActualT17Sha256": "32d5b1bbcdb74bb2f7a2c5dbc9bca40bd5237cab318052c90c0abe9c0f184cf1",
+    "differingJsonPathCount": 0,
+    "baselineAdvanceRepeatedByV4": false
+  },
+  "actual704Cohort": {
+    "turn16Sha256": "861d4e34a4b4c22c15db6fa857449c7f5bd68deb352edbb2a0059c6960ac07e3",
+    "turn17Sha256": "32d5b1bbcdb74bb2f7a2c5dbc9bca40bd5237cab318052c90c0abe9c0f184cf1",
+    "turn39Sha256": "623cbaed0e6186bc5f2c4a18fd5e9b22836db9343df0e4122316c92e5c9902e8",
+    "turn39Score": 704,
+    "n91LossIds": ["op:donji_vakuf:korenici", "op:foca:donje_zesce", "op:trnovo:tosici"],
+    "n92LossIds": ["op:donji_vakuf:korenici", "op:foca:donje_zesce", "op:trnovo:tosici"]
+  },
+  "turn16Facts": {
+    "playerFaction": "RBiH",
+    "autonomyLevel": 2,
+    "target": "op:trnovo:tosici",
+    "targetController": "RS",
+    "commandAuthorityBefore": { "current": 94, "spent_this_turn": 0, "lifetime_spent": 25 },
+    "commandAuthorityRequiredAfterStage": { "current": 69, "spent_this_turn": 25, "lifetime_spent": 50 },
+    "fourthCorpsActiveOperations": 0,
+    "fourthCorpsPendingDirective": false,
+    "activeUncommittedSameCorpsNonEnclaveBrigades": 10,
+    "friendlyAlliedComponentSizeFromDelijas": 308,
+    "reachableEligibleBrigades": 10,
+    "sortedOwnTargetAdjacentStagingCandidates": ["op:trnovo:delijas", "op:trnovo:kijevo_2", "op:trnovo:trnovo"],
+    "expectedFirstStaging": "op:trnovo:delijas",
+    "crossCorpsOverlap": {
+      "corpsId": "arbih_1st_corps",
+      "operationName": "Operation Circle",
+      "target": "op:trnovo:tosici",
+      "ordinaryGuard": "same-corps command state passed to validateOpAtInjection",
+      "exemptionOrBypass": false
+    }
+  },
+  "orderedPlayerEvents": [
+    { "turn": 20, "eventId": "london_conference_1992", "responseId": "accept_principles" },
+    { "turn": 38, "eventId": "ic_pressure_vopp_engagement", "responseId": "acknowledge_pressure" },
+    { "turn": 39, "eventId": "vance_owen_plan_1993", "responseId": "accept" }
+  ],
+  "codeReachability": {
+    "acceptedMode": "fork-only",
+    "baselineAdvancePathPresent": false,
+    "queryCountInFrozenFlow": 1,
+    "stageCountInFrozenFlow": 1,
+    "maximumCandidateAdvances": 23,
+    "queryPurityComparesQueriedClone": true,
+    "forceFlagDerivedOnlyFromDelayOrAbort": true,
+    "productionQueryAndStageOwners": true,
+    "missingPhysicsRejectionBlockerEventOrLineageFailsClosed": true
+  },
+  "launchTimeChecksBeforeEngineImport": [
+    "hardcoded CONFIG and entry hashes",
+    "literal authorized root, exact Node binary/version/hash, exact HEAD",
+    "no tracked or untracked src/data drift",
+    "all source, input, score, provenance, fidelity receipt/artifact/review bindings",
+    "local TSX loader and five package aggregate hashes",
+    "fixed attempt leaf absent and parent present"
+  ]
+}

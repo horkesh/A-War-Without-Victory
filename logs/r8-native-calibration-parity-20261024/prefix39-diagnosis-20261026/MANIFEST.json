@@ -1,0 +1,100 @@
+{
+  "schema": "awwv.retained-prefix39-diagnosis.selected-proof.v1",
+  "source_head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+  "qualification": "NO_GO__STOP_NO_RETRY",
+  "files": [
+    {
+      "path": "prefix-result.json",
+      "source": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/prefix39-validation-v1/actual-attempt-02/result.json",
+      "bytes": 1485,
+      "sha256": "37bc539a86c120b65e17f4a1f681adf948b2e60f21c7b92340c24dcefd54e369"
+    },
+    {
+      "path": "prefix-receipt.json",
+      "source": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/prefix39-validation-v1/actual-attempt-02/receipt.json",
+      "bytes": 8557,
+      "sha256": "70c115d47da52972e645a5733a4a15caae50d3e8801b608f960c79df05c671d4"
+    },
+    {
+      "path": "prefix-start.json",
+      "source": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/prefix39-validation-v1/actual-attempt-02/start.json",
+      "bytes": 3424,
+      "sha256": "d3c8dfbee5808c5f86d5e7d1b3c3f539998ee03b3bf8f4fbedf7aefe711558dc"
+    },
+    {
+      "path": "prefix-campaign-execution.json",
+      "source": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/prefix39-validation-v1/actual-attempt-02/campaign.execution.json",
+      "bytes": 564,
+      "sha256": "c33e97312c1c0d82b2301c979b3fb29a6ab7c44eeb68ac578adfa0d84eb2657f"
+    },
+    {
+      "path": "prefix-closing-preservation.json",
+      "source": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/prefix39-validation-v1/actual-attempt-02/closing-preservation.json",
+      "bytes": 3014,
+      "sha256": "ef660fe60a6ab37b537044116c039d5db93a6ffe58571df593c9f405dbd2c614"
+    },
+    {
+      "path": "prefix-opening-preservation.json",
+      "source": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/prefix39-validation-v1/actual-attempt-02/opening-preservation.json",
+      "bytes": 3014,
+      "sha256": "ef660fe60a6ab37b537044116c039d5db93a6ffe58571df593c9f405dbd2c614"
+    },
+    {
+      "path": "INDEPENDENT_ACTUAL_RESULT_REVIEW.json",
+      "source": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/prefix39-validation-v1/INDEPENDENT_ACTUAL_RESULT_REVIEW.json",
+      "bytes": 6960,
+      "sha256": "3adb1440757d3b135b51bdf5eca5c36ed35fd45cbe55aecd873685430258ba98"
+    },
+    {
+      "path": "WEEKS_OVERRIDE_FIDELITY_SUPPLEMENT.json",
+      "source": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/prefix39-validation-v1/WEEKS_OVERRIDE_FIDELITY_SUPPLEMENT.json",
+      "bytes": 3306,
+      "sha256": "fe92266a86aec4ee953ad07a46730092115d5e987b5d42cc16211090e0de1ab0"
+    },
+    {
+      "path": "FINDING.md",
+      "source": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/first39-stranded-diagnosis-v1/FINDING.md",
+      "bytes": 2998,
+      "sha256": "d2f46e7a2a9f9293e37c32e20cc119b445dc53aef9495c1354d546a9c2d94269"
+    },
+    {
+      "path": "CANON_SYSTEMS_SUPPLEMENT.md",
+      "source": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/first39-stranded-diagnosis-v1/CANON_SYSTEMS_SUPPLEMENT.md",
+      "bytes": 3751,
+      "sha256": "b90315f2a4849e0d45811b0d2ec4b0cf918f1692818917b305ff672e25f8ae6f"
+    },
+    {
+      "path": "SUPPLY_PROVENANCE_SUPPLEMENT.md",
+      "source": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/first39-stranded-diagnosis-v1/SUPPLY_PROVENANCE_SUPPLEMENT.md",
+      "bytes": 3698,
+      "sha256": "c86e2ef1d18965d2259d309b33644fba240d1312c5aec677785290d902a06504"
+    },
+    {
+      "path": "baseline-ops-authority-report.md",
+      "source": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/baseline-ops-native-authority-audit-v1/report.md",
+      "bytes": 3755,
+      "sha256": "2deae46b989f9dbe3fe1348b6c185a9c3d87a07586316156216eebd3c20771f8"
+    },
+    {
+      "path": "baseline-scalar0-feasibility.md",
+      "source": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/baseline-ops-native-authority-audit-v1/supplement-scalar0-feasibility.md",
+      "bytes": 3291,
+      "sha256": "8d97dd7aaad8ea790d7abfe12f35e3c61ebc331ab7e3003b8d6187776f7eb6ed"
+    },
+    {
+      "path": ".gitattributes",
+      "bytes": 14,
+      "sha256": "85e48d232edc7b02f6cecf8fbbf905f3b126c467b594d8dd16c4f8fa283a8320"
+    }
+  ],
+  "retained_roots": [
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/prefix39-validation-v1",
+    "runs/player-parity-postturn-39-20261025-01/apr1992_definitive_188w__2272e1011ba35428__w39_n0"
+  ],
+  "limits": [
+    "Selected compact originals only; full original runs, streams and inventories stay at their original paths.",
+    "Map equality at turn39 is not policy, input, full-state, source, timeline or 188-week parity.",
+    "Earlier deleted temporary RED/GREEN outputs remain an unrecovered, unwaived preservation gap.",
+    "No target, reference, pin or baseline adoption."
+  ]
+}

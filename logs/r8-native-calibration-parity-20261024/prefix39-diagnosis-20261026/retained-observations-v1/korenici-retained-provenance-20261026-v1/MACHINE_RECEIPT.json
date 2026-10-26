@@ -1,0 +1,36 @@
+{
+  "schema": "awwv.korenici-retained-provenance.receipt.v1",
+  "status": "complete_read_only",
+  "workspace": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "scope": "retained artifacts only; zero engine/API calls, advances, queries, stages, or state/source/test mutations",
+  "attempt": {
+    "path": "attempt-001",
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "timed_out": false,
+    "receipt_sha256": "6edf18fc21ee1fdc53d757f33fa9a4f20527a78531840a5f290606d0a153a010",
+    "result_sha256": "3944d63c399a00be38a1a374d301bdd2dc861401d1542ce4ba2025749dbbe606",
+    "stdout_sha256": "89e84af891d68f599e25d50ea9b4a9d4fa98009ebaa75dad657d6879cb06e6d5",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "authored_files": {
+    "extract_retained_provenance.cjs": "27d6b0ed64f3353569530784781ce2c65ec44225811de3c46cfcdfaaeab887a1",
+    "RUN_COMMAND.txt": "f82f8bb58bce726969de25b6e8def82c833a8aa984f8e9a0d47162d7ec7732c4",
+    "REPORT.md": "7922385ae25f9fd8cb48603e345c38cb9def35826361ca92a86e1ce9ca3295f5"
+  },
+  "source_and_review_anchors": {
+    "war_phases_sha256": "8a085a37835541f4dc267e5c1f7f75a714bafc596e21d43b1467cb8ee62d7fcd",
+    "planner_review_001_sha256": "65ae0836bb7f7951164da17ea59216e5acf4bdc7b748582b11738fc5d3aa62fd",
+    "planner_review_002_sha256": "eb306d1bd57f33df458043b0b603f34ab6ca3295b85f8410ec5d2a12022e0722",
+    "boundary_decision_sha256": "ff2d4ce8501805a2af87f4cd23072b5b787e48b1f16db80b6c8519116e0c093f"
+  },
+  "pre_node_pin_preparation": {
+    "separate_original_bytes_retained": false,
+    "unchanged_original_file_retained": "STOPPING_CRITERIA.md",
+    "unchanged_original_sha256": "2a24ea86c8b246a27ba54cc55cb394655892433278c54a40211ad160496ab145",
+    "other_original_hashes_preserved_in": "native-t25-planner-inspection-20261026-v1/review-001/INDEPENDENT_PRELAUNCH_REVIEW.md",
+    "classification": "prelaunch configuration revision before any planner/API call; no reconstruction"
+  },
+  "projection_note": "RESULT.json's boundary_decision.persisted_helper_delta is null because the extractor looked under an obsolete projection key. The authoritative retained boundary-decision file, frozen above, records findings.t1 and findings.t2 with rs_22nd_krajina_infantry location_osid op:travnik:varosluk -> op:donji_vakuf:komar_2. REPORT.md uses the authoritative record and does not treat that delta as Korenici causality.",
+  "verdict": "normal RS 16th operation admission and movement are recorded; divergence begins at Korenici combat outcomes; RS 22nd helper causality is unsupported"
+}

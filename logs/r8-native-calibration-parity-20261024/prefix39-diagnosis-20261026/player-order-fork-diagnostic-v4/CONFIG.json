@@ -1,0 +1,77 @@
+{
+  "schema": "awwv.player-order-fork-diagnostic-v4.config.v1",
+  "status": "HOLD_FOR_INDEPENDENT_PRELAUNCH_REVIEW_AND_ROOT_LAUNCH",
+  "root": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+  "scope": "offline current-source public-production-API fork; not native campaign qualification or same-input full-campaign proof",
+  "node": { "path": "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe", "version": "v22.23.2", "bytes": 86997320, "sha256": "0d0f5e39f9f3d9587bc19f73eab3c2c9c4903fd02d6dbf9c853dd81b3d95fad4" },
+  "baseV1": {
+    "config": { "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v1/CONFIG.json", "bytes": 5303, "sha256": "66f194acd4a4a11eb4a92cddb37007e3a3319eb1f3891b4286ab5801cff5128d" },
+    "helpers": { "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v1/diagnostic_entry.cjs", "bytes": 25109, "sha256": "e967777a92f3a7c06904688a9a9cf1079e35fe4dc94dcca85a60a4b5fc9d1f34" },
+    "reviewVerdict": "NO_GO_STALE_DIST_SELECTOR_AND_WRONG_705_COHORT"
+  },
+  "fidelityActualReview": { "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/INDEPENDENT_ACTUAL_FIDELITY_REVIEW.v1.json", "bytes": 9082, "sha256": "c4604af9987fd77634e0b11cefdf31239437697b858578e2d7fb28d9c20a3a92" },
+  "currentSource": "src/desktop/desktop_sim.ts",
+  "loader": { "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/node_modules/tsx/dist/loader.mjs", "bytes": 729, "sha256": "0b1c5b86192772fe9257710e739959cee5947c11ae1f93b61abfaa9b80c6def1" },
+  "runtimePackages": [
+    { "name": "tsx", "path": "node_modules/tsx", "files": 50, "bytes": 432652, "sha256": "23e2d62473a5a4a86c772101eb0b6deaf8d7597cc864069c54a945542fe2027e" },
+    { "name": "esbuild", "path": "node_modules/esbuild", "files": 7, "bytes": 135307, "sha256": "055ba8e42be2811161f48a5c6d71e0115f34368aa3d588a685ad6f895da81c39" },
+    { "name": "get-tsconfig", "path": "node_modules/get-tsconfig", "files": 7, "bytes": 153998, "sha256": "3cefb94c1a0ea289dddc2d3ff3b44096e3062fce6ef8215683a5d583226d9f1f" },
+    { "name": "resolve-pkg-maps", "path": "node_modules/resolve-pkg-maps", "files": 7, "bytes": 15037, "sha256": "b16d4199f3a4303a8edce9159bf7a099a2845e531d4bab03f6a9ae4b602964f4" },
+    { "name": "@esbuild/win32-x64", "path": "node_modules/@esbuild/win32-x64", "files": 3, "bytes": 11376133, "sha256": "72118c3f69639cc61527e1728349314bee29b3ea3de6390f76d5fb70ac7f4157" }
+  ],
+  "run": { "fidelityAttempt": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/attempts/fidelity-current-source-01", "attempt": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01", "mode": "fork-only", "wrapperCapMs": 180000, "expectedUnderMs": 120000, "maxCandidateAdvances": 23, "retry": false, "alternateTarget": false, "nativeRun": false, "packageRun": false, "campaign188": false },
+  "input": {
+    "turn16": { "path": "tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/turn-autosaves/turn-016.json", "bytes": 4756685, "sha256": "861d4e34a4b4c22c15db6fa857449c7f5bd68deb352edbb2a0059c6960ac07e3" },
+    "turn17": { "path": "tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/turn-autosaves/turn-017.json", "bytes": 4790188, "sha256": "32d5b1bbcdb74bb2f7a2c5dbc9bca40bd5237cab318052c90c0abe9c0f184cf1" },
+    "retainedNativeTurn39": { "path": "tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/final-autosave.json", "bytes": 5364177, "sha256": "623cbaed0e6186bc5f2c4a18fd5e9b22836db9343df0e4122316c92e5c9902e8" },
+    "playerFaction": "RBiH", "autonomyLevel": 2,
+    "nativeSourceHead": "a3063366ae094468fbb2ede143f9ced3a1ed2f68",
+    "retainedControllerMapSha256": "6ed89306d4adff552116a38dd616154cc76e0af41f9c565e730f5df26ed5c30e"
+  },
+  "request": {
+    "corpsId": "arbih_4th_corps", "targetOsid": "op:trnovo:tosici", "targetController": "RS", "expectedStagingOsid": "op:trnovo:delijas", "requestCost": 25, "minimumRoster": 3, "maximumRoster": 12, "expectedInitialEligible": 10,
+    "expectedCommandAuthority": { "before": { "current": 94, "spent_this_turn": 0, "lifetime_spent": 25 }, "afterStage": { "current": 69, "spent_this_turn": 25, "lifetime_spent": 50 } },
+    "crossCorpsOverlap": { "corpsId": "arbih_1st_corps", "operationName": "Operation Circle", "targetOsid": "op:trnovo:tosici", "ordinaryGuardScope": "same CorpsCommandState passed as cmd to validateOpAtInjection", "disposition": "disclosed lawful cross-corps duplicate target under ordinary same-corps overlap guard; no exemption" }
+  },
+  "events": [
+    { "turn": 20, "eventId": "london_conference_1992", "responseId": "accept_principles" },
+    { "turn": 38, "eventId": "ic_pressure_vopp_engagement", "responseId": "acknowledge_pressure" },
+    { "turn": 39, "eventId": "vance_owen_plan_1993", "responseId": "accept" }
+  ],
+  "score": {
+    "reference": { "path": "data/source/calibration/painted_control_jan1993.json", "bytes": 34371, "sha256": "6a64300a599aa0b75833d5232bf9f08a1ab97085746337e622d54fb1a4a0ddc7" },
+    "denominator": 712, "minimum": 707, "formerlyCorrectMaxLosses": 0,
+    "n91": { "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n91/save_w39.json", "bytes": 5105717, "sha256": "e51224ac22a839d4c1af35a0ea828afb79b62f0ed56559c3b47dcda45578eec5" },
+    "n92": { "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n92/save_w39.json", "bytes": 5105717, "sha256": "e51224ac22a839d4c1af35a0ea828afb79b62f0ed56559c3b47dcda45578eec5" },
+    "retainedNativeBaselineScore": 704,
+    "retainedNativeExpectedLossIds": ["op:donji_vakuf:korenici", "op:foca:donje_zesce", "op:trnovo:tosici"],
+    "rejectedV1WrongCohort": { "path": "tmp-paradox-qa-20260710/evidence/player-parity-rbih-t39-20261025-04/rbih/turn-autosaves/turn-039.json", "bytes": 5328576, "sha256": "e58b94766763a10f80dc9bb69a2cb0a8ddde6436f22b12465b4035da63f38340", "score": 705, "use": "provenance only; never baseline or fork input" }
+  },
+  "bindings": [
+    { "path": "package-lock.json", "bytes": 721879, "sha256": "3bed66fe10b593a7889e90863c3fcb0990bb1ae244dc559ef30e21232c5d8ca5" },
+    { "path": "src/desktop/desktop_sim.ts", "bytes": 59490, "sha256": "91e3163da0aeddca169deabf0b73c47216800f0e6dee0ddc63de5d98f7416954" },
+    { "path": "src/desktop/op_directive_staging.cjs", "bytes": 6784, "sha256": "cfd1deb864063153cbe128af3a0297c4f2f73b3baed39e4ec97894cc92bb344c" },
+    { "path": "src/sim/turn_phases/war_phases.ts", "bytes": 233809, "sha256": "d9ec4ee736cf5ac2c05508bddc5a94bcda0897a9fbe0e09d63dfaa7dfe6cd456" },
+    { "path": "src/sim/combat/operation_validation.ts", "bytes": 14068, "sha256": "55d376b10f41fa671f559175c033ce2070e96dc78dcf14aeb71c4a5d6468734c" },
+    { "path": "tools/diagnostics/run_preserved_preflight.cjs", "bytes": 9536, "sha256": "3933e010daf15938d026692e732e401d5ce50e1e0656d546e4697723e9a7779e" },
+    { "path": "tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/manifest.json", "bytes": 2398, "sha256": "5fe20c64fcdb651f576a1078e02a1ad1b1d9bf31f46a9ac305f168964be94fc5" },
+    { "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/native-successor-v3/attempts/rbih-t39-01/result.json", "bytes": 24419960, "sha256": "82e5b0c8cfd2547ce8d584a32c85595bbbf5646934bc8a22bd3e048320016739" },
+    { "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/native-successor-v3/postchecks/calibration39-01/POSTCHECK.json", "bytes": 4808, "sha256": "be3688757d130e71397a4fc78e3068c0c16356b1a28b9e784149796aca57bbc0" },
+    { "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/native-successor-v3/postchecks/calibration39-01/review/INDEPENDENT_ACTUAL39_REVIEW.json", "bytes": 10567, "sha256": "a794ca11cb9b4bb972b5776bd7f0cc878f0df5b0d5a30e4b6220c8199efe1b73" },
+    { "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/INDEPENDENT_ACTUAL_RESULT_REVIEW.json", "bytes": 6960, "sha256": "3adb1440757d3b135b51bdf5eca5c36ed35fd45cbe55aecd873685430258ba98" },
+    { "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/jackal-boundary-replay-v3/attempts/postcheck-01/POSTCHECK.json", "bytes": 4159, "sha256": "cdc4267af0150df9e414ac124a4dcfc95fc4360a136347bf2284d3f859a305ab" },
+    { "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/native-successor-v3/postchecks/calibration39-01/diagnosis/PLAYER_INPUT_FEASIBILITY_SUPPLEMENT.md", "bytes": 4293, "sha256": "103fc6217edfb46b22b030cfb0325f383d7d5b2914dbae0aaec67015ed1bd1ba" }
+    ,{ "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/FREEZE.json", "bytes": 3251, "sha256": "0b978915642590a9c6457c4395f875206afd93407c2f96cfcd777c7adc4e9dbd" }
+    ,{ "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/INDEPENDENT_PRELAUNCH_REVIEW.md", "bytes": 3682, "sha256": "012b82566650ecffe204cd0f5de3d6fcbf6d1f6f9ed82615a4d8851cbc41e620" }
+    ,{ "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/diagnostic_entry_v3.cjs", "bytes": 22125, "sha256": "61e0182cd3a86df2bc2c31631723d4fda5e3d60eff1e612f40d9cc0fb90cfd74" }
+    ,{ "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/INDEPENDENT_ACTUAL_FIDELITY_REVIEW.v1.json", "bytes": 9082, "sha256": "c4604af9987fd77634e0b11cefdf31239437697b858578e2d7fb28d9c20a3a92" }
+    ,{ "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/attempts/fidelity-current-source-01/receipt.json", "bytes": 4560, "sha256": "75edc31c43c9710608a10448e19d8ff99aa1a020a12453b4d1c8f0345de6a5aa" }
+    ,{ "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/attempts/fidelity-current-source-01/RESULT.json", "bytes": 704, "sha256": "244603b9406f4fd3ea4d4840f00c075db2ba133246ab0c8bf42b1b273c727f6b" }
+    ,{ "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/attempts/fidelity-current-source-01/BASELINE_FIDELITY.json", "bytes": 332, "sha256": "5905bd16df7d20a70666833e787f8a2ce2a57d8f0eca83e73b7d01cb600e7d79" }
+    ,{ "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/attempts/fidelity-current-source-01/baseline-produced-turn-017.json", "bytes": 4790188, "sha256": "32d5b1bbcdb74bb2f7a2c5dbc9bca40bd5237cab318052c90c0abe9c0f184cf1" }
+    ,{ "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/attempts/fidelity-current-source-01/baseline-report-turn-017.json", "bytes": 654362, "sha256": "70806e56205b993fc441e553eb70782c78c5cb488808241ca6cd2169184669f4" }
+    ,{ "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/attempts/fidelity-current-source-01/RUNTIME_PROVENANCE.json", "bytes": 6516, "sha256": "f77be6cb16087b6f02ed73d73ee11eeedd8c1434ef2b103d64368ed419d1b40e" }
+  ],
+  "excludedDirtyPaths": ["docs/40_reports/CALIBRATION_MASTER.md", "docs/PROJECT_LEDGER.md", "docs/plans/2026-07-31-full-campaign-electron-validation-plan.md", "docs/plans/COMMAND_BOARD.md", "docs/plans/MASTER_ROADMAP.md", "docs/plans/plan_index.yml"]
+}

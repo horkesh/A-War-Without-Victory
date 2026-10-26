@@ -1,0 +1,26 @@
+{
+  "schema": "source-fix-proof-amendment.v2",
+  "recorded": "2026-10-26",
+  "preceding_manifest": {
+    "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/source-fix-proof-20261026/MANIFEST.json",
+    "bytes": 11097,
+    "sha256": "21e6c0d5c178399a5a859f668672474800d0c14fc680138497badff3db015daa"
+  },
+  "correction": "The preceding note says Existing PROOF/MANIFEST.json. The actual retained prior manifest is ../MANIFEST.json relative to this directory.",
+  "retained_prior_manifest": {
+    "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/MANIFEST.json",
+    "bytes": 5479,
+    "sha256": "3762894bbe16ef0a32547ac06ea0e57448a4ecba1c309efc51f74b9de7fbc290"
+  },
+  "retained_selected_manifest": {
+    "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/selected-results-v2/MANIFEST.json",
+    "bytes": 13453,
+    "sha256": "c1dcbe302ef4c7ec794cf5241774e52acbd339125f07d06fd8b1710a08e38f4b"
+  },
+  "recovery_provenance": {
+    "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-negative-diagnosis-v1/RECOVERY_PROVENANCE.v1.json",
+    "bytes": 1340,
+    "sha256": "2b789a85556fe998cbdf75f9c64b13096ace1aeddbe14cd1ac2e3c68ee954df1"
+  },
+  "scope": "Amendment only; original manifests and copied attempt evidence remain unchanged. Source-fix proof is focused qualification, not calibration or native acceptance."
+}

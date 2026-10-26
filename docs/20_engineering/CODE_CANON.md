@@ -1,5 +1,9 @@
 # Code Canon (AWWV)
 
+## REQUEST-OP personnel-floor admission (2026-10-26)
+
+`planDirectiveOperation` and its shared objection/injection path reuse the canonical `MIN_ATTACK_PERSONNEL = 500` predicate before physical reachability and the existing minimum-three gate. This closes the selector/consumer mismatch: the retained T16 4th Corps request has only the 441st and 443rd above the floor, so the ordinary request returns `no_available_force` without mutation, operation creation or attack-order ownership. Existing 3–12 bounds, sorting/equipment priority, routes, commitments, enclave/objective guards, consumption and deterministic ordering remain unchanged. The source correction is review-GO at its focused scope; calibration, full suite, 188-week, package and native qualification remain open. [Proof](../../logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/MANIFEST.v4.json)
+
 ## Scenario post-turn artifact repair boundary (2026-10-25 source candidate)
 
 The weekly scenario runner records whether it consumed a successful public war `runTurn` and how many scenario control-flip proposals were actually applied. After a successful public war turn, it calls `repairScenarioArtifactState(...)` only when `appliedScenarioControlFlips > 0`; after the legacy peace/transition `runOneTurn` branch it preserves the existing repair call. The helper, export, final-save repair, native/public turn pipelines, schemas, control mechanics and graph inputs are unchanged. Current stub transition handlers make the legacy transition branch unreachable in the tested fixture, so remaining-peace coverage and source review preserve its contract without claiming a live transition execution.
