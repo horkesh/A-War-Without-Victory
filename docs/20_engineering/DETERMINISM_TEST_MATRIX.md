@@ -1,5 +1,16 @@
 # Determinism Test Matrix (AWWV)
 
+## Joint casualty host ownership — 2026-10-26
+
+The casualty consumer now reuses the existing strict-sorted state-wide operation
+lookup and actual host identity. Focused66/66 and nonincremental TypeScript0 prove
+primary/secondary exact-once credit, per-axis ownership, unrelated-operation and
+nonparticipant negatives, missing commands, deterministic duplicate-owner fallback,
+and pending-record round trips. No random, clock, schema or arithmetic change.
+Independent source review is GO. This is focused source evidence: no campaign,
+full-suite,188-week or native qualification was repeated after this repair.
+The last measured675b6c7 run remains701/712 with six former-cell losses and health14>3.
+
 ## Latest combat-fatigue candidate — 2026-10-26
 
 The clean committed source `0278c956d3fce3cdb62161a282f3936eaa0c66c1` ran once through week 39 and returned a valid `STOP_NO_RETRY`: 703/712, four formerly-correct losses against both n91 and n92, health 13 above the unchanged maximum 3. The five other required gates passed, and the 14 configured protected roots are byte-identical at opening/closing; this does not waive older evidence gaps. This is a failed calibration candidate, not a determinism pass or baseline adoption. No further campaign is authorized by this result. [Report](../40_reports/implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md) · [Evidence manifest](../../logs/r8-native-calibration-parity-20261024/combat-fatigue-prefix39-20261026/PORTABLE_MANIFEST.json).

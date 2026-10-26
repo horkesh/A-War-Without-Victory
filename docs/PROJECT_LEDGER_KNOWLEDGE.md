@@ -1,3 +1,15 @@
+## 2026-10-26 — Follow exact operation participation across command and projection boundaries
+
+A brigade's own corps may differ from the corps hosting its joint operation.
+Use the existing deterministic state-wide owner lookup for casualty/AAR credit;
+do not infer absence of an operation from a corps-local miss. Conversely, a generic
+movement-owner label and absence from the direct attacker array do not prove a
+handoff failure: exact producer and tactical-group donor receipts can establish
+lawful assembly and indirect combat participation. Krug's31st lineage contributed
+540/533/7 through its exact tactical-group/battle chain. The suspected movement
+bug was disproved, while the independent secondary-corps casualty drop was
+reproduced and repaired. [Dated evidence](PROJECT_LEDGER.md#2026-10-26--joint-casualty-host-ownership-source-repair).
+
 ## 2026-10-23 — Treat operation completion as an ownership handoff
 
 An already disconnected participant can be exempt while its operation remains in recovery, then become genuinely unresolved when completion removes that owner after the sole stranded pass. A friendly controller at the current OSID does not prove reachability to same-corps sectors. Inspect raw pre/post-completion saves and final-seal output; load-time rebuilding can mask the gap. A repair must classify released participants using final topology, preserve surviving operation/movement owners and avoid a second attrition tick. Lighter UI observation can also change recruitment success: identical flags and initial bytes do not prove identical trajectories. See [Ajnie diagnostic](PROJECT_LEDGER.md#2026-10-23--ajnie-diagnostic-02-operation-release-gap-reproduced).

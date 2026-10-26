@@ -98,7 +98,19 @@ neutrality or adoption; authoritative 188-week, full-suite and protected provena
 
 Actual n92 confirms lawful split delivery:164th columns to Budoželje while162nd attacks over direct Ravne adjacency. An authored staging anchor is not a mandatory physical waypoint for an already-adjacent participant. The resolver produces contributor IDs, but the weekly projection omits that field; exact native operation ID, attackers, battle/control-event join, `operation_diagnostics` and AAR establish `operation_owned` through the existing provenance classifier. There is no `operation_execution_records` artifact. These are corrected proof descriptions, not new engine behavior. The owner resolved the April-reference conflict by repainting only Toljenak RBiH. Paint is scoring/diagnostic data; native campaign provenance is retained, with an explicit one-file reference exception in re-evaluation, not rewritten as a new run stamp.
 
+## Joint-operation casualty host ownership (2026-10-26)
+
+`operation_casualty_attribution.ts` resolves a participant's active operation with
+`findBrigadeOperationAnywhere` and credits its actual host corps and assigned axis.
+A secondary corps must not lose resolver-backed casualty or attack credit because
+the shared operation is stored elsewhere. The existing strict-sorted owner lookup,
+formation/type guards, exact-once aggregated battle total, and all casualty math
+remain authoritative; no new state/save field or combat rule is introduced.
+Focused coverage is `tests/operation_aar.test.ts` plus the existing multi-corps
+visibility contract. [Evidence and qualification limits](../40_reports/implemented/20261026_CORRECTED_ENGINE_CALIBRATION_PACKET.md#historical-correction--krug-roster-2026-10-26).
+
 ## Canon Precedence for Code
+
 The codebase follows the same precedence rules as canonical docs:
 - Engine invariants: `docs/10_canon/Engine_Invariants_v0_9_0.md`
 - Rulebook: `docs/10_canon/Rulebook_v0_9_0.md`
