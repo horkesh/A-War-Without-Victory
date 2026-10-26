@@ -66,22 +66,34 @@ import {
 } from './bot_brigade_ai_osid.js'; // Will need to export these from bot_brigade_ai_osid.ts
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { countAxisConcentrationSupport, getConvergingOperationBrigades, getSynchronizedOperationBrigadesAtObjective } from './corps_operation_helpers.js';
-import { isReasonCodeTopicEnabled } from './reason_code_debug.js';
+import { emitAxisOrderTraceRecord, isReasonCodeTopicEnabled } from './reason_code_debug.js';
 
 export function recordAxisOrderGenerationDetail(
     activeOp: CorpsOperation,
     brigadeId: FormationId,
     detail: Omit<AxisOrderGenerationDetail, 'brigade_id'>,
 ): void {
-    if (!isReasonCodeTopicEnabled('axis_reject')) return;
+    const persistLegacyDetail = isReasonCodeTopicEnabled('axis_reject');
+    const emitTrace = isReasonCodeTopicEnabled('axis_order_trace');
+    if (!persistLegacyDetail && !emitTrace) return;
     const axis = getBrigadeAxis(activeOp, brigadeId);
     if (!axis) return;
+    const fact = { brigade_id: brigadeId, ...detail };
+    if (emitTrace) {
+        emitAxisOrderTraceRecord({
+            operation_name: activeOp.name,
+            operation_started_turn: activeOp.started_turn,
+            operation_phase: activeOp.phase,
+            axis_id: axis.axis_id,
+            ...fact,
+        });
+    }
+    if (!persistLegacyDetail) return;
     if (axis.order_generation_details?.[0]?.turn !== detail.turn) {
         axis.order_generation_details = [];
     }
     const facts = axis.order_generation_details ??= [];
     const existing = facts.findIndex((fact) => fact.brigade_id === brigadeId);
-    const fact = { brigade_id: brigadeId, ...detail };
     if (existing >= 0) facts[existing] = fact;
     else facts.push(fact);
     facts.sort((a, b) => strictCompare(a.brigade_id, b.brigade_id));

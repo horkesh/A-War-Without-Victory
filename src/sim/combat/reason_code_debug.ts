@@ -82,6 +82,9 @@ import { stableStringify } from '../../utils/stable_json.js';
  *                      stronger, or did the sector get repartitioned?
  *  axis_reject       — item 3. WHICH predicate rejected each candidate brigade behind
  *                      a `zero_eligible_axis`, on the artifact rather than on stdout.
+ *  axis_order_trace  — stdout-only copy of actual operation-axis order decisions.
+ *                      Unlike legacy `axis_reject`, never writes the operation or
+ *                      canonical GameState.
  *  formation_refusal — item 4. Why `canFormEmergentBrigade` / in-run `recruitBrigade`
  *                      said no, for the in-run passes that have no counter today.
  *  brigade_state     — item 5. `disrupted_turns` on the brigade temporal row.
@@ -113,6 +116,7 @@ export type ReasonCodeTopic =
     | 'battle_stack'
     | 'battle_power'
     | 'axis_reject'
+    | 'axis_order_trace'
     | 'formation_refusal'
     | 'brigade_state'
     | 'formation_lifecycle'
@@ -140,6 +144,7 @@ export type ReasonCodeTopic =
 
 const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'axis_reject',
+    'axis_order_trace',
     'battle_power',
     'battle_stack',
     'brigade_state',
@@ -223,6 +228,17 @@ export function whenReasonCodeTopic<T extends Record<string, unknown>>(
     build: () => T,
 ): T | Record<string, never> {
     return isReasonCodeTopicEnabled(topic) ? build() : {};
+}
+
+/** Stdout-only operation-axis order decision. Never writes GameState or reports. */
+export const AXIS_ORDER_TRACE_PREFIX = '[axis_order_trace]';
+export function emitAxisOrderTraceRecord(record: Record<string, unknown>): void {
+    if (!isReasonCodeTopicEnabled('axis_order_trace')) return;
+    try {
+        console.log(`${AXIS_ORDER_TRACE_PREFIX} ${stableStringify({ schema_version: 1, ...record })}`);
+    } catch {
+        // Observation and stdout failures cannot affect order generation.
+    }
 }
 
 /**

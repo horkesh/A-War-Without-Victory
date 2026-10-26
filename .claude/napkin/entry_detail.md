@@ -189,3 +189,7 @@ no longer session-start reading.
    Do instead: flag design insights for a Pyrrhic panel; only edit canon with explicit approval.
 3. **[2026-06-26] Packaging remains paused until owner satisfaction**
    Do instead: use release checks/probes as verification, but do not create installer/release artifacts as product work before D2/D3 gates.
+
+## Canonical-state parity and diagnostic topics
+
+**Verified 2026-10-26:** `axis_reject` writes order-generation details into canonical operation axes; it is not suitable for an unfiltered save/state-equality control. Use the distinct stdout-only `axis_order_trace` topic when collecting existing decision facts without those writes, and leave `axis_reject`/`all` disabled. Its focused source proof is not a campaign-neutrality claim. Compare whole canonical state and ordinary reports against the exact bound control, preserve every unexpected difference, and keep missing upstream receipts unreported. See [CODE_CANON](../../docs/20_engineering/CODE_CANON.md#axis-order-stdout-trace-2026-10-26).
