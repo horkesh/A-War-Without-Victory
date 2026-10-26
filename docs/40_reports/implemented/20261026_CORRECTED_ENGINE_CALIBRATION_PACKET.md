@@ -2,7 +2,33 @@
 
 **Date:** 2026-10-26
 **Baseline:** The retained clean-source week-39 candidate scored 703/712 and failed health at 13 > 3.
-**Result:** The bounded zero-drift morale source correction has focused evidence and independent GO. The 703/712 result, four formerly-correct losses, health failure, and all global acceptance gates remain unchanged.
+**Current result:** The experimental Circle duration-seven candidate reaches week 39 at **704/712**, below the required707. Three formerly-correct cells and health13>3 still fail. Calibration is not restored; current native-game reproduction has not been attempted. No baseline/reference adoption or remote push occurred.
+
+## Current checkpoint — owner report
+
+The local experimental source commit is `38670ba64bb2c9c7d8dec0174064b021cb1661d1`. Its production diff is only Circle `planning_duration:4 -> 7`, with maintained tests and the required ledger entry. Focused proof passes103/103 and nonincremental TypeScript exits0. The affected selector expanded to1420 files and timed out at180seconds after120 completed files/1574 passing tests/2 skipped; it remains incomplete, and the required final full suite has not passed on this candidate.
+
+The completed continuous scenario attempt took69.656seconds, with child/wrapper exits2 because qualification failed, no timeout and a passing artifact contract. The 102nd was admitted through the normal consumer, moved from Hadžići, captured Tošići in combat atT21 and held it throughT39. Korenići, Donje Žešće and Kolovarice remain wrong against both n91/n92. All712 controller comparisons differ from the retained703 run only at Tošići, but that older run predates both the morale correction and Circle7; there is no same-source duration-four T39 control, so this is not an isolated whole-campaign causal estimate.
+
+| Gate | Current evidence |
+|---|---|
+| January score | **FAIL:**704/712, floor707 |
+| Formerly-correct/protected cells | **FAIL:** the same three cells against both n91/n92 |
+| Engine health | **FAIL:**13 stranded, maximum3; other hard health checks pass |
+| Consistency, movement, graph/roster, control attribution | PASS |
+| Preservation | PASS for all21 frozen roots, including the earlier failed attempt |
+| Save provenance | Original FAIL retained; independent amendment proves all29 path/hash rows match. The validator used locale ordering instead of the bound UTF-8 ordering, swapping two event-catalog rows. |
+| Later checkpoints, final anchors,188/full suite/package/native | UNREACHED; no qualification claimed |
+
+Time was also spent repairing validation defects. An earlier candidate attempt stopped atT1 because raw JSON strings compared object-key insertion order: full T1 state and all seven brigade histories were actually equal. A153-check retained-artifact replay demonstrated the canonical comparison repair, including84 negative mutations. The replacement passed all early T0/T15/history/T16/T18 guards and reachedT39. These failures and the original false provenance report were preserved, not overwritten. The separate earlier F-path incident and missing transient bytes remain disclosed below; preservation of this run does not waive that gap.
+
+The13 health IDs are exactly the previously audited cohort: three RBiH and ten HRHB. A new source-authority audit found no demonstrated omission that permits adding Central Bosnia supply heads or allied supply rights. Nine HRHB holders are genuinely critical under the current rules; factories mitigate production but canon says they do not replace corridor supply. No supported small fix has cleared this gate, and it has not been relaxed.
+
+Retained-only diagnosis supports two possible coordination probes, neither executed: hold Circle's premature Foča solo assault until its two existing brigades are forward, or hold the Donji Vakuf sweep's solo attacks until two forward brigades are available. Both use an existing parameter and need actual-order/resolver proof; adjacent positions alone cannot prove combat participation. The VRS packet is blocked by five preflight findings. Exact tactical-graph replay confirms the hypothesis remains feasible but does not close missing within-turn evidence. No further source change or campaign is justified by feasibility alone.
+
+The next bounded work is one corrected and independently reviewed coordination diagnostic, not an188-week run or native attempt. All707/707/706/706, zero formerly-correct losses, anchor, health and provenance requirements remain unchanged.
+
+Local evidence roots (retained outside the earlier portable bundle): `circle7-continuous-prefix39-v2/review-003/` contains the actual review (`f575801f...`), provenance amendment (`b2e6f1ec...`) and outcome analysis; production output is `runs/player-parity-circle7-continuous-39-20261026-02`. Both diagnostic roots are under `tmp/player-bot-capability-parity-20261026/`: `vrs-current-candidate-diagnosis-v1` and `donje-coordination-feasibility-v1`; the supply audit is `hvo-supply-authority-audit-v1`. No subsequent full campaign, package or native execution followed the failed prefix.
 
 ## Latest diagnostic — current-source Circle control
 

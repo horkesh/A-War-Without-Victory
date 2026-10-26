@@ -1,5 +1,7 @@
 # A War Without Victory — Master Roadmap
 
+**Current owner report — 2026-10-26:** The Circle7 experiment reaches39 at **704/712**, not707; three n91/n92 formerly-correct losses and health13>3 remain. Tošići is capturedT21/heldT39; current native reproduction is unattempted. Focused103/103/TypeScript0 do not waive the timed-out affected run or later188/full-suite/package/native gates. All21 preservation roots pass; a validator row-ordering defect is separately amended without overwriting the original false result. Retained-only coordination feasibility is not a source adoption or run authorization; preflight/review precedes any probe. The supply audit supports no small source/right change to clear health. No baseline/reference adoption or push. This is the latest status; older control-only statements below are retained history. [Full checkpoint](../40_reports/implemented/20261026_CORRECTED_ENGINE_CALIBRATION_PACKET.md#current-checkpoint--owner-report).
+
 **Status:** IN AUTONOMOUS EXECUTION. **Engine health is sacrosanct, and calibration works on top
 of it** (owner, 2026-08-26, restated 2026-09-01). Engine-health defects are fixed before tuning;
 calibration builds on a healthy engine rather than compensating for a sick one.
