@@ -1,0 +1,66 @@
+{
+  "schema": "awwv.scenario-postturn-prefix39.cheap-checks.v2",
+  "status": "RUN_BEFORE_TARGETED_INDEPENDENT_GO",
+  "simulation_executed": false,
+  "retained_full_inventory_deferred": true,
+  "commands": [
+    {
+      "name": "selftest",
+      "expected_exit": 0,
+      "argv": [
+        "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+        "tools/diagnostics/run_preserved_preflight.cjs",
+        "--attempt-dir",
+        "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/selftest-02",
+        "--entry-script",
+        "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/qualification.cjs",
+        "--timeout-ms",
+        "90000",
+        "--allow-artifact",
+        "selftest-result.json",
+        "--allow-artifact",
+        "evaluation-positive.json",
+        "--allow-artifact",
+        "evaluation-negative.json",
+        "--",
+        "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+        "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/qualification.cjs",
+        "--mode",
+        "selftest",
+        "--config",
+        "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/CONFIG.bound.v2.json",
+        "--config-sha256",
+        "790ed05f9676d3c85d7c593a9226d87c8e0ee10ac82c0b52e66fb1a33831b16c",
+        "--evidence",
+        "{evidenceDir}"
+      ]
+    },
+    {
+      "name": "preflight",
+      "expected_exit": 0,
+      "argv": [
+        "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+        "tools/diagnostics/run_preserved_preflight.cjs",
+        "--attempt-dir",
+        "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/preflight-02",
+        "--entry-script",
+        "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/qualification.cjs",
+        "--timeout-ms",
+        "30000",
+        "--allow-artifact",
+        "preflight-result.json",
+        "--",
+        "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+        "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/qualification.cjs",
+        "--mode",
+        "preflight",
+        "--config",
+        "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/CONFIG.bound.v2.json",
+        "--config-sha256",
+        "790ed05f9676d3c85d7c593a9226d87c8e0ee10ac82c0b52e66fb1a33831b16c",
+        "--evidence",
+        "{evidenceDir}"
+      ]
+    }
+  ]
+}

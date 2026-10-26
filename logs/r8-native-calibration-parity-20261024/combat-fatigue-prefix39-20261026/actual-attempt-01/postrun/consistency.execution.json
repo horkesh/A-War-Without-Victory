@@ -1,0 +1,15 @@
+{
+  "name": "consistency",
+  "status": "PASS",
+  "pass": true,
+  "exit": 0,
+  "process_status": 0,
+  "signal": null,
+  "spawn_error": null,
+  "timed_out": false,
+  "argv": [
+    "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "tools/validate_run_consistency.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\runs\\player-parity-fatigue-owner-39-20261026-01\\apr1992_definitive_188w__2272e1011ba35428__w39_n0"
+  ]
+}

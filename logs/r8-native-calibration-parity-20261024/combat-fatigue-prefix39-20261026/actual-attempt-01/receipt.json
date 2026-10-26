@@ -1,0 +1,228 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-26T01:58:55.528Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01",
+  "timeout_ms": 300000,
+  "original_argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/qualification.cjs",
+    "--mode",
+    "campaign",
+    "--config",
+    "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/CONFIG.bound.v2.json",
+    "--config-sha256",
+    "790ed05f9676d3c85d7c593a9226d87c8e0ee10ac82c0b52e66fb1a33831b16c",
+    "--evidence",
+    "{evidenceDir}"
+  ],
+  "argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/qualification.cjs",
+    "--mode",
+    "campaign",
+    "--config",
+    "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/CONFIG.bound.v2.json",
+    "--config-sha256",
+    "790ed05f9676d3c85d7c593a9226d87c8e0ee10ac82c0b52e66fb1a33831b16c",
+    "--evidence",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\combat-fatigue-prefix39-20261026-v1\\actual-attempt-01"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "opening-preservation.json",
+    "preflight.json",
+    "launch.json",
+    "campaign.stdout.log",
+    "campaign.stderr.log",
+    "campaign.execution.json",
+    "postrun/evaluation-candidate.json",
+    "postrun/evaluation-positive.json",
+    "postrun/evaluation-negative.json",
+    "postrun/scoring.json",
+    "postrun/consistency.stdout.log",
+    "postrun/consistency.stderr.log",
+    "postrun/consistency.execution.json",
+    "postrun/health.stdout.log",
+    "postrun/health.stderr.log",
+    "postrun/health.execution.json",
+    "postrun/movement.stdout.log",
+    "postrun/movement.stderr.log",
+    "postrun/movement.execution.json",
+    "postrun/graph-roster.json",
+    "postrun/save-provenance.json",
+    "postrun/control-attribution.json",
+    "postrun/horizon-status.json",
+    "closing-preservation.json",
+    "result.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/qualification.cjs",
+    "bytes": 28271,
+    "raw_sha256": "97019c6d0a133c9d54ef99574b052ebfb0d954da17f5de79b235af226cd9f6f3",
+    "normalized_text_sha256": "97019c6d0a133c9d54ef99574b052ebfb0d954da17f5de79b235af226cd9f6f3",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 28271,
+      "sha256": "97019c6d0a133c9d54ef99574b052ebfb0d954da17f5de79b235af226cd9f6f3"
+    }
+  },
+  "end_utc": "2026-10-26T01:59:53.759Z",
+  "pid": 2968,
+  "child_exit": 2,
+  "wrapper_exit": 2,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/qualification.cjs",
+    "bytes": 28271,
+    "raw_sha256": "97019c6d0a133c9d54ef99574b052ebfb0d954da17f5de79b235af226cd9f6f3",
+    "normalized_text_sha256": "97019c6d0a133c9d54ef99574b052ebfb0d954da17f5de79b235af226cd9f6f3",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "opening-preservation.json",
+      "bytes": 3014,
+      "sha256": "ef660fe60a6ab37b537044116c039d5db93a6ffe58571df593c9f405dbd2c614"
+    },
+    {
+      "path": "preflight.json",
+      "bytes": 3062,
+      "sha256": "10fc1f56a34a9e2cba4b1d9f65446718ee82bccb7e8bf0fad59db59144efd9c4"
+    },
+    {
+      "path": "launch.json",
+      "bytes": 821,
+      "sha256": "5ac2953c0f67b63cfdfcec218a67bbb7cfe5f92354eecbfff035a5e9f3d86ece"
+    },
+    {
+      "path": "campaign.stdout.log",
+      "bytes": 3474700,
+      "sha256": "6a994a49efa29f9be8a945832ea23c071bf927c8b6747f3db5a42adfb4550814"
+    },
+    {
+      "path": "campaign.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "campaign.execution.json",
+      "bytes": 575,
+      "sha256": "c0a997c1f315d22392737c6746433b7fad7912a9d5018dcbd45c7e0b65bddfbb"
+    },
+    {
+      "path": "postrun/evaluation-candidate.json",
+      "bytes": 2212,
+      "sha256": "8f088fd6118f6995e9eed20be8729f6aa5116aba94cba020b2eae419c7cac021"
+    },
+    {
+      "path": "postrun/evaluation-positive.json",
+      "bytes": 790,
+      "sha256": "7a7a4ac384b9fb38473a2db5bb739823d82a519f9500dd17df02d4328ce0f7d4"
+    },
+    {
+      "path": "postrun/evaluation-negative.json",
+      "bytes": 1495,
+      "sha256": "df241e07b1d88f6d7d14eda2c452f808fbda77f244424faf81344ad461526078"
+    },
+    {
+      "path": "postrun/scoring.json",
+      "bytes": 4989,
+      "sha256": "09f3ec2bd87e8e3922012ebcdc907c84e208ee594ff8146d5b2a9f70a8c6c3c5"
+    },
+    {
+      "path": "postrun/consistency.stdout.log",
+      "bytes": 2229,
+      "sha256": "9e3224785b8642f62550538b73c1085c861fd8ed64815864e3d445708ff8cad9"
+    },
+    {
+      "path": "postrun/consistency.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "postrun/consistency.execution.json",
+      "bytes": 504,
+      "sha256": "c7092fd949575e1072b0390c68825ecbdb9f913b33abb21ba4a2d1903bf9a82e"
+    },
+    {
+      "path": "postrun/health.stdout.log",
+      "bytes": 1871,
+      "sha256": "682bc8f747ca30032310a558710995d52597b0180e99e8b1dcf59d15cb251c8e"
+    },
+    {
+      "path": "postrun/health.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "postrun/health.execution.json",
+      "bytes": 552,
+      "sha256": "8d4a855c5a31aa6d58b5ab116aff0b3d736a180ab2554b0af136537772c21a2d"
+    },
+    {
+      "path": "postrun/movement.stdout.log",
+      "bytes": 1930,
+      "sha256": "c3e825748139214dca04df6a891223aa1f2ec45d406b3068e9835bbcf0bc6cf6"
+    },
+    {
+      "path": "postrun/movement.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "postrun/movement.execution.json",
+      "bytes": 2935,
+      "sha256": "dd44ded933829a024c9a537e5ae974b047f22819b6b07eef147c47b1d744a0b8"
+    },
+    {
+      "path": "postrun/graph-roster.json",
+      "bytes": 254,
+      "sha256": "696a08878ef0eb207a49bfd34b62f96b5572971a95855c6714587afed4b36ffb"
+    },
+    {
+      "path": "postrun/save-provenance.json",
+      "bytes": 338,
+      "sha256": "857ca4d8f9a15d7de548331d07951e9f1c4dd4465b934be495fb2308b2a7d856"
+    },
+    {
+      "path": "postrun/control-attribution.json",
+      "bytes": 438,
+      "sha256": "4f4077a6848a8d3bc71d618bc079564edc8802d6654976ee4cc70229cad23d65"
+    },
+    {
+      "path": "postrun/horizon-status.json",
+      "bytes": 1138,
+      "sha256": "e1a136646e02e586199b54d04569bcc8673718a79ced406b9c6979f5a9becf00"
+    },
+    {
+      "path": "closing-preservation.json",
+      "bytes": 3014,
+      "sha256": "ef660fe60a6ab37b537044116c039d5db93a6ffe58571df593c9f405dbd2c614"
+    },
+    {
+      "path": "result.json",
+      "bytes": 1501,
+      "sha256": "cb1ffb514bed77ccb1f9380601687687a55231afb08c549b8741c2b327ac8f00"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

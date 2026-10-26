@@ -1,6 +1,6 @@
 # docs/40_reports — Master Index and Structure
 
-**Latest implementation report — combat fatigue single owner (2026-10-26):** [Report](implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md) records focused RED/GREEN results, independent source GO, retained evidence boundaries and open global gates.
+**Latest implementation report — combat fatigue single owner (2026-10-26):** [Report](implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md) records focused RED/GREEN results, independent source GO, and the 703/712 STOP_NO_RETRY prefix result with four protected losses, health13>3 and open global gates.
 
 **2026-10-23 Toljenak-only Behar-I n92:** [Implementation and measured evidence](implemented/20261023_BEHAR_I_TOLJENAK_CANDIDATE.md) proves November capture, October retention and707/707/706/706 after the owner's April repaint. Zero formerly correct losses; full-suite coverage and targeted documentation corrections retained. n91 remains unchanged. Global standing: [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md).
 

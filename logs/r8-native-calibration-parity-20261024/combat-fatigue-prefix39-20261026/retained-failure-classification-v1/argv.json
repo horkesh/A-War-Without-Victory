@@ -1,0 +1,14 @@
+{
+  "executable": "C:\\Users\\User\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+  "args": [
+    "-NoProfile",
+    "-File",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\combat-fatigue-prefix39-20261026-v1\\retained-failure-classification-v1\\extract-retained.ps1",
+    "-RepoRoot",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory"
+  ],
+  "timeout_ms": 60000,
+  "attempts": 1,
+  "retries": 0,
+  "retained_only": true
+}

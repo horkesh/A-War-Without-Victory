@@ -1021,6 +1021,6 @@ R3 now has one authoritative offensive-operation clock, deterministic TG exhaust
 
 ## 2026-10-26 Combat Fatigue Single Owner
 
-[20261026_COMBAT_FATIGUE_SINGLE_OWNER.md](implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md) — OSID combat fatigue now has one writer per resolved battle, with focused 21/21 and 51/51 results, nonincremental TypeScript success, and independent bounded-scope GO. Attempt 008's missing original streams, the absence of a direct controller-change assertion, and all calibration/full-suite/package/native gates remain explicit limitations.
+[20261026_COMBAT_FATIGUE_SINGLE_OWNER.md](implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md) — OSID combat fatigue now has one writer per resolved battle, with focused 21/21 and 51/51 results, nonincremental TypeScript success, and independent bounded-scope GO. Its one authorized prefix39 run is STOP_NO_RETRY at703/712 with four n91/n92 losses and health13>3; global gates remain open. Attempt008's missing original streams and the absence of a direct controller-change assertion remain explicit limitations.
 
 ---

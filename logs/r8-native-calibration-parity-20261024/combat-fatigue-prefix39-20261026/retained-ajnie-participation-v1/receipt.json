@@ -1,0 +1,12 @@
+{
+  "attempt": 1,
+  "started_utc": "2026-10-26T02:09:30.5936222Z",
+  "ended_utc": "2026-10-26T02:09:33.6219689Z",
+  "elapsed_ms": 3028.0,
+  "timeout_ms": 60000,
+  "timed_out": false,
+  "exit_code": 0,
+  "stdout_path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\combat-fatigue-prefix39-20261026-v1\\retained-ajnie-participation-v1\\stdout.log",
+  "stderr_path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\combat-fatigue-prefix39-20261026-v1\\retained-ajnie-participation-v1\\stderr.log",
+  "evidence_path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\combat-fatigue-prefix39-20261026-v1\\retained-ajnie-participation-v1\\MACHINE_EVIDENCE.v1.json"
+}

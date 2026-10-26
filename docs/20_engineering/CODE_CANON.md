@@ -1,5 +1,9 @@
 # Code Canon (AWWV)
 
+## Latest fatigue-candidate qualification — 2026-10-26
+
+The committed single-owner fatigue candidate at `0278c956d3fce3cdb62161a282f3936eaa0c66c1` completed its one allowed week-39 trajectory and was rejected `STOP_NO_RETRY`: 703/712 versus the unchanged 707 floor, with four n91/n92 losses. The implementation remains reviewed at source scope; this trajectory is not calibration acceptance. Scoring and health failed (`13 > 3`); other five required gates passed. The read-only Circle admission audit found the late-July launch timing consistent with the cited regional offensive but could not verify named units or the two settlements. No calendar/content/OOB error is evidenced. The next authorized activity is a read-only primary-source search; no further campaign follows this result. See the [result report](../40_reports/implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md) and [portable evidence](../../logs/r8-native-calibration-parity-20261024/combat-fatigue-prefix39-20261026/PORTABLE_MANIFEST.json).
+
 ## Combat fatigue single owner (2026-10-26)
 
 The OSID resolver delegates each resolved battle's fatigue writes to `applyCombatFatigue` once: attackers receive `+2` when defended or `+0.5` when undefended, and the primary defender receives `+1`, subject to the existing cap and initialization. Do not reintroduce resolver-local duplicate writes. Focused test and typecheck evidence is source-scoped; it does not establish controller changes or calibration qualification. [Implementation report](../40_reports/implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md) · [Portable packet](../../logs/r8-native-calibration-parity-20261024/combat-fatigue-owner-20261026/PORTABLE_MANIFEST.v2.json).

@@ -1,5 +1,9 @@
 # Repo Map (AWWV)
 
+## Latest fatigue-candidate result and evidence
+
+The source commit `0278c956d3fce3cdb62161a282f3936eaa0c66c1` has one retained prefix39 attempt, rejected at 703/712 and health 13>3 with `STOP_NO_RETRY`. The portable packet is indexed at [combat-fatigue-prefix39-20261026/PORTABLE_MANIFEST.json](../../logs/r8-native-calibration-parity-20261024/combat-fatigue-prefix39-20261026/PORTABLE_MANIFEST.json); it binds every copied artifact and separately hashes the excluded original campaign stdout. Its `historical-audit-v1/` subfolder preserves the cited read-only Circle date/OOB finding; settlement and named-brigade claims remain unresolved pending authorized primary-source search.
+
 ## REQUEST-OP personnel-floor proof (2026-10-26)
 
 - Selector and consumer: `planDirectiveOperation` / `injectOpDirectives` in `src/sim/turn_phases/war_phases.ts`; objection preview reuses the same planner from `src/desktop/desktop_sim.ts`.

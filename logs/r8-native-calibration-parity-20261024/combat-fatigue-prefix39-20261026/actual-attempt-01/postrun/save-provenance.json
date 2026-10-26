@@ -1,0 +1,17 @@
+{
+  "pass": true,
+  "missing": [],
+  "turns": {
+    "final": 39,
+    "save_w15": 15,
+    "save_w16": 16,
+    "save_w33": 33,
+    "save_w34": 34
+  },
+  "weekly_rows": 39,
+  "weekly_ordered": true,
+  "git_commit": "0278c956d3fce3cdb62161a282f3936eaa0c66c1",
+  "git_dirty": false,
+  "consumed_inputs": 29,
+  "current_input_mismatches": []
+}

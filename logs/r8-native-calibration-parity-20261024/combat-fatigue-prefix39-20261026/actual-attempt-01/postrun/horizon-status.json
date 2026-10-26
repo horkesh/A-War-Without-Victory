@@ -1,0 +1,55 @@
+{
+  "pass": true,
+  "gating": false,
+  "horizon": 39,
+  "items": [
+    {
+      "name": "apr1994_checkpoint",
+      "status": "UNREACHED_HORIZON",
+      "pass": null,
+      "retired": false
+    },
+    {
+      "name": "apr1995_checkpoint",
+      "status": "UNREACHED_HORIZON",
+      "pass": null,
+      "retired": false
+    },
+    {
+      "name": "oct1995_checkpoint",
+      "status": "UNREACHED_HORIZON",
+      "pass": null,
+      "retired": false
+    },
+    {
+      "name": "toljenak_turn135_capture",
+      "status": "UNREACHED_HORIZON",
+      "pass": null,
+      "retired": false
+    },
+    {
+      "name": "prisoje_turn188_capture",
+      "status": "UNREACHED_HORIZON",
+      "pass": null,
+      "retired": false
+    },
+    {
+      "name": "donji_vrbljani_turn188_capture",
+      "status": "UNREACHED_HORIZON",
+      "pass": null,
+      "retired": false
+    },
+    {
+      "name": "protected_late_outcomes",
+      "status": "UNREACHED_HORIZON",
+      "pass": null,
+      "retired": false
+    },
+    {
+      "name": "full_188_operation_gates",
+      "status": "UNREACHED_HORIZON",
+      "pass": null,
+      "retired": false
+    }
+  ]
+}

@@ -1,0 +1,574 @@
+{
+  "schema": "awwv.combat-fatigue-prefix39-portable-proof.v1",
+  "created": "2026-10-26",
+  "candidate_commit": "0278c956d3fce3cdb62161a282f3936eaa0c66c1",
+  "source_packet": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1",
+  "status": "STOP_NO_RETRY",
+  "source_file_count": 87,
+  "exact_copies": 86,
+  "copied_bytes": 515889.0,
+  "inventory": [
+    {
+      "path": "CHEAP_CHECK_COMMANDS.v2.json",
+      "bytes": 2548,
+      "sha256": "7460912d9a9c6bb6958e67a92e001eee026de9fdaa55cc18fbce3e75cd298f55",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/CHEAP_CHECK_COMMANDS.v2.json"
+    },
+    {
+      "path": "CONFIG.bound.v2.json",
+      "bytes": 11272,
+      "sha256": "790ed05f9676d3c85d7c593a9226d87c8e0ee10ac82c0b52e66fb1a33831b16c",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/CONFIG.bound.v2.json"
+    },
+    {
+      "path": "CONFIG.template.json",
+      "bytes": 2647,
+      "sha256": "d0f00ea1c24a1a55fb0ad681f1089d1d2e526046baa83ca37d1ec4f9874f994e",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/CONFIG.template.json"
+    },
+    {
+      "path": "CONTROL_FIXTURE_MANIFEST.v2.json",
+      "bytes": 1704,
+      "sha256": "60814b13684919e58b877e717ad50ff0d4b888f7342c0c6d02b4672a50d5a079",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/CONTROL_FIXTURE_MANIFEST.v2.json"
+    },
+    {
+      "path": "finalize.cjs",
+      "bytes": 9391,
+      "sha256": "60d4143bcdc4b31b0b4b59cec7e673eafc0e3c31e726001434bef2fd6e81036a",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/finalize.cjs"
+    },
+    {
+      "path": "FINALIZED.v2.json",
+      "bytes": 6150,
+      "sha256": "80bd02f87f5dfe68610aa80bc5b5cc192225d6ea8f724ceeb2db2b37c68247a0",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/FINALIZED.v2.json"
+    },
+    {
+      "path": "FROZEN_LAUNCH_COMMAND.v2.json",
+      "bytes": 6924,
+      "sha256": "c94bee01db6f698080473afb2247457d9c53e80f111885854790d3970b0dfe81",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/FROZEN_LAUNCH_COMMAND.v2.json"
+    },
+    {
+      "path": "PLAN.md",
+      "bytes": 4591,
+      "sha256": "06adf843ef9856e50ca44ab5daf5c66d67783ef63c4e0a674022327b51e26e38",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/PLAN.md"
+    },
+    {
+      "path": "qualification.cjs",
+      "bytes": 28271,
+      "sha256": "97019c6d0a133c9d54ef99574b052ebfb0d954da17f5de79b235af226cd9f6f3",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/qualification.cjs"
+    },
+    {
+      "path": "WORKSPACE_BOUNDARY_INCIDENT.v1.json",
+      "bytes": 5258,
+      "sha256": "115b0696982c32274cbdcbfc02b7f740d5fd9dd221b990ba6c926927be85ae7a",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/WORKSPACE_BOUNDARY_INCIDENT.v1.json"
+    },
+    {
+      "path": "actual-attempt-01/campaign.execution.json",
+      "bytes": 575,
+      "sha256": "c0a997c1f315d22392737c6746433b7fad7912a9d5018dcbd45c7e0b65bddfbb",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/campaign.execution.json"
+    },
+    {
+      "path": "actual-attempt-01/campaign.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/campaign.stderr.log"
+    },
+    {
+      "path": "actual-attempt-01/closing-preservation.json",
+      "bytes": 3014,
+      "sha256": "ef660fe60a6ab37b537044116c039d5db93a6ffe58571df593c9f405dbd2c614",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/closing-preservation.json"
+    },
+    {
+      "path": "actual-attempt-01/entry-script.snapshot",
+      "bytes": 28271,
+      "sha256": "97019c6d0a133c9d54ef99574b052ebfb0d954da17f5de79b235af226cd9f6f3",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/entry-script.snapshot"
+    },
+    {
+      "path": "actual-attempt-01/launch.json",
+      "bytes": 821,
+      "sha256": "5ac2953c0f67b63cfdfcec218a67bbb7cfe5f92354eecbfff035a5e9f3d86ece",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/launch.json"
+    },
+    {
+      "path": "actual-attempt-01/opening-preservation.json",
+      "bytes": 3014,
+      "sha256": "ef660fe60a6ab37b537044116c039d5db93a6ffe58571df593c9f405dbd2c614",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/opening-preservation.json"
+    },
+    {
+      "path": "actual-attempt-01/preflight.json",
+      "bytes": 3062,
+      "sha256": "10fc1f56a34a9e2cba4b1d9f65446718ee82bccb7e8bf0fad59db59144efd9c4",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/preflight.json"
+    },
+    {
+      "path": "actual-attempt-01/receipt.json",
+      "bytes": 8138,
+      "sha256": "951084e9f8064fa2ab6e6e896ff63d78e9f0260f7073baa29615675303ac42a6",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/receipt.json"
+    },
+    {
+      "path": "actual-attempt-01/result.json",
+      "bytes": 1501,
+      "sha256": "cb1ffb514bed77ccb1f9380601687687a55231afb08c549b8741c2b327ac8f00",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/result.json"
+    },
+    {
+      "path": "actual-attempt-01/start.json",
+      "bytes": 3058,
+      "sha256": "f0460657b05fa1a072ae1565c490a4847dc6539a1e5cbfdb76da804e6ae00b11",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/start.json"
+    },
+    {
+      "path": "actual-attempt-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/stderr.log"
+    },
+    {
+      "path": "actual-attempt-01/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/stdout.log"
+    },
+    {
+      "path": "actual-attempt-01/postrun/consistency.execution.json",
+      "bytes": 504,
+      "sha256": "c7092fd949575e1072b0390c68825ecbdb9f913b33abb21ba4a2d1903bf9a82e",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/postrun/consistency.execution.json"
+    },
+    {
+      "path": "actual-attempt-01/postrun/consistency.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/postrun/consistency.stderr.log"
+    },
+    {
+      "path": "actual-attempt-01/postrun/consistency.stdout.log",
+      "bytes": 2229,
+      "sha256": "9e3224785b8642f62550538b73c1085c861fd8ed64815864e3d445708ff8cad9",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/postrun/consistency.stdout.log"
+    },
+    {
+      "path": "actual-attempt-01/postrun/control-attribution.json",
+      "bytes": 438,
+      "sha256": "4f4077a6848a8d3bc71d618bc079564edc8802d6654976ee4cc70229cad23d65",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/postrun/control-attribution.json"
+    },
+    {
+      "path": "actual-attempt-01/postrun/evaluation-candidate.json",
+      "bytes": 2212,
+      "sha256": "8f088fd6118f6995e9eed20be8729f6aa5116aba94cba020b2eae419c7cac021",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/postrun/evaluation-candidate.json"
+    },
+    {
+      "path": "actual-attempt-01/postrun/evaluation-negative.json",
+      "bytes": 1495,
+      "sha256": "df241e07b1d88f6d7d14eda2c452f808fbda77f244424faf81344ad461526078",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/postrun/evaluation-negative.json"
+    },
+    {
+      "path": "actual-attempt-01/postrun/evaluation-positive.json",
+      "bytes": 790,
+      "sha256": "7a7a4ac384b9fb38473a2db5bb739823d82a519f9500dd17df02d4328ce0f7d4",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/postrun/evaluation-positive.json"
+    },
+    {
+      "path": "actual-attempt-01/postrun/graph-roster.json",
+      "bytes": 254,
+      "sha256": "696a08878ef0eb207a49bfd34b62f96b5572971a95855c6714587afed4b36ffb",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/postrun/graph-roster.json"
+    },
+    {
+      "path": "actual-attempt-01/postrun/health.execution.json",
+      "bytes": 552,
+      "sha256": "8d4a855c5a31aa6d58b5ab116aff0b3d736a180ab2554b0af136537772c21a2d",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/postrun/health.execution.json"
+    },
+    {
+      "path": "actual-attempt-01/postrun/health.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/postrun/health.stderr.log"
+    },
+    {
+      "path": "actual-attempt-01/postrun/health.stdout.log",
+      "bytes": 1871,
+      "sha256": "682bc8f747ca30032310a558710995d52597b0180e99e8b1dcf59d15cb251c8e",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/postrun/health.stdout.log"
+    },
+    {
+      "path": "actual-attempt-01/postrun/horizon-status.json",
+      "bytes": 1138,
+      "sha256": "e1a136646e02e586199b54d04569bcc8673718a79ced406b9c6979f5a9becf00",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/postrun/horizon-status.json"
+    },
+    {
+      "path": "actual-attempt-01/postrun/movement.execution.json",
+      "bytes": 2935,
+      "sha256": "dd44ded933829a024c9a537e5ae974b047f22819b6b07eef147c47b1d744a0b8",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/postrun/movement.execution.json"
+    },
+    {
+      "path": "actual-attempt-01/postrun/movement.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/postrun/movement.stderr.log"
+    },
+    {
+      "path": "actual-attempt-01/postrun/movement.stdout.log",
+      "bytes": 1930,
+      "sha256": "c3e825748139214dca04df6a891223aa1f2ec45d406b3068e9835bbcf0bc6cf6",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/postrun/movement.stdout.log"
+    },
+    {
+      "path": "actual-attempt-01/postrun/save-provenance.json",
+      "bytes": 338,
+      "sha256": "857ca4d8f9a15d7de548331d07951e9f1c4dd4465b934be495fb2308b2a7d856",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/postrun/save-provenance.json"
+    },
+    {
+      "path": "actual-attempt-01/postrun/scoring.json",
+      "bytes": 4989,
+      "sha256": "09f3ec2bd87e8e3922012ebcdc907c84e208ee594ff8146d5b2a9f70a8c6c3c5",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/postrun/scoring.json"
+    },
+    {
+      "path": "actual-outer-01/argv.json",
+      "bytes": 2253,
+      "sha256": "2ba582bc79004bec7a48d4d9e4575e22743a5c9ec74cd019140686d1a094ea6c",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-outer-01/argv.json"
+    },
+    {
+      "path": "actual-outer-01/exit.txt",
+      "bytes": 1,
+      "sha256": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-outer-01/exit.txt"
+    },
+    {
+      "path": "actual-outer-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-outer-01/stderr.log"
+    },
+    {
+      "path": "actual-outer-01/stdout.log",
+      "bytes": 255,
+      "sha256": "f00fb2bd274dee54dfbc37cdd38737dac47b48630bea23bb7ecb9e1af2c12810",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-outer-01/stdout.log"
+    },
+    {
+      "path": "cheap-outer-01/preflight.exit.txt",
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/cheap-outer-01/preflight.exit.txt"
+    },
+    {
+      "path": "cheap-outer-01/preflight.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/cheap-outer-01/preflight.stderr.log"
+    },
+    {
+      "path": "cheap-outer-01/preflight.stdout.log",
+      "bytes": 250,
+      "sha256": "fca3b4e1c7fa45d08086d0f3715240f3d02835fc9e2d138ce246f7c30dd37ec1",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/cheap-outer-01/preflight.stdout.log"
+    },
+    {
+      "path": "cheap-outer-01/selftest.exit.txt",
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/cheap-outer-01/selftest.exit.txt"
+    },
+    {
+      "path": "cheap-outer-01/selftest.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/cheap-outer-01/selftest.stderr.log"
+    },
+    {
+      "path": "cheap-outer-01/selftest.stdout.log",
+      "bytes": 249,
+      "sha256": "081d986a33ee5c12b97647598701eb2d093e1e8b180f6adb397da63af51ebf59",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/cheap-outer-01/selftest.stdout.log"
+    },
+    {
+      "path": "finalize-outer-01/exit.txt",
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/finalize-outer-01/exit.txt"
+    },
+    {
+      "path": "finalize-outer-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/finalize-outer-01/stderr.log"
+    },
+    {
+      "path": "finalize-outer-01/stdout.log",
+      "bytes": 230,
+      "sha256": "3d6bf1f2aab6d2e0bb3f108897e16e19050612b23bf09a8142b358353cc67b38",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/finalize-outer-01/stdout.log"
+    },
+    {
+      "path": "preflight-02/entry-script.snapshot",
+      "bytes": 28271,
+      "sha256": "97019c6d0a133c9d54ef99574b052ebfb0d954da17f5de79b235af226cd9f6f3",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/preflight-02/entry-script.snapshot"
+    },
+    {
+      "path": "preflight-02/preflight-result.json",
+      "bytes": 3062,
+      "sha256": "10fc1f56a34a9e2cba4b1d9f65446718ee82bccb7e8bf0fad59db59144efd9c4",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/preflight-02/preflight-result.json"
+    },
+    {
+      "path": "preflight-02/receipt.json",
+      "bytes": 3488,
+      "sha256": "21a2ffc680f311ee1e03a5e9be69f269f970977c821620d08c847361b1f5cf5c",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/preflight-02/receipt.json"
+    },
+    {
+      "path": "preflight-02/start.json",
+      "bytes": 2244,
+      "sha256": "74894d80fed1a715788fc0c9c60a71073d9aa42fefd509685596052f68397a5d",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/preflight-02/start.json"
+    },
+    {
+      "path": "preflight-02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/preflight-02/stderr.log"
+    },
+    {
+      "path": "preflight-02/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/preflight-02/stdout.log"
+    },
+    {
+      "path": "retained-ajnie-participation-v1/argv.json",
+      "bytes": 968,
+      "sha256": "c2aca9fd1f4b6347522f46ce9cd6d5a4074dcb4ddd1b57318dc9e1f125479b68",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/retained-ajnie-participation-v1/argv.json"
+    },
+    {
+      "path": "retained-ajnie-participation-v1/extract-retained.ps1",
+      "bytes": 8155,
+      "sha256": "0f84173fa7a4aa78863c53e21fcd8843ba0791e61f2790f96e4a345de26b05a7",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/retained-ajnie-participation-v1/extract-retained.ps1"
+    },
+    {
+      "path": "retained-ajnie-participation-v1/FINDING.md",
+      "bytes": 2480,
+      "sha256": "fce0faceb7bcc7532c83613640b221b76eb32ae6c32846f818c6edddeabd75c7",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/retained-ajnie-participation-v1/FINDING.md"
+    },
+    {
+      "path": "retained-ajnie-participation-v1/HASHES.v1.json",
+      "bytes": 1190,
+      "sha256": "cd6510c19d7fdf070bab4363e31fcd03147020ff60e86cb073f00bf5bd372a56",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/retained-ajnie-participation-v1/HASHES.v1.json"
+    },
+    {
+      "path": "retained-ajnie-participation-v1/MACHINE_EVIDENCE.v1.json",
+      "bytes": 189755,
+      "sha256": "db0395bc85b1603519a2d70617e4774f9b2118a729eb329186248acff47fd331",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/retained-ajnie-participation-v1/MACHINE_EVIDENCE.v1.json"
+    },
+    {
+      "path": "retained-ajnie-participation-v1/receipt.json",
+      "bytes": 938,
+      "sha256": "12a37a09c4c366fdf8b2e2764287a67be68215f29798f846546d07983e7e6f79",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/retained-ajnie-participation-v1/receipt.json"
+    },
+    {
+      "path": "retained-ajnie-participation-v1/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/retained-ajnie-participation-v1/stderr.log"
+    },
+    {
+      "path": "retained-ajnie-participation-v1/stdout.log",
+      "bytes": 226,
+      "sha256": "70280b864709fe4ddc8668af6712a8f8404d2a6a2929e74e27e82b8620a7ea0a",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/retained-ajnie-participation-v1/stdout.log"
+    },
+    {
+      "path": "retained-failure-classification-v1/argv.json",
+      "bytes": 621,
+      "sha256": "4d480c4428a65a51205e23b1336f2018addd0c2bf35602c9b280f761756df878",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/retained-failure-classification-v1/argv.json"
+    },
+    {
+      "path": "retained-failure-classification-v1/extract-retained.ps1",
+      "bytes": 11108,
+      "sha256": "d3b3b427f0181654006f61c399797fa52ea41cc8fe4edcfefb3077bf7adde017",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/retained-failure-classification-v1/extract-retained.ps1"
+    },
+    {
+      "path": "retained-failure-classification-v1/FINDING.md",
+      "bytes": 2225,
+      "sha256": "d6d8466441e3a37dbbb188a5e0fb76c022c67fa5f014685008b6738b367fd2d7",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/retained-failure-classification-v1/FINDING.md"
+    },
+    {
+      "path": "retained-failure-classification-v1/MACHINE_EVIDENCE.v1.json",
+      "bytes": 12866,
+      "sha256": "4c99b2825b010b2075cc63bb6ff937a083ee59630b496eec5f46d46a7bba2720",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/retained-failure-classification-v1/MACHINE_EVIDENCE.v1.json"
+    },
+    {
+      "path": "retained-failure-classification-v1/receipt.json",
+      "bytes": 1004,
+      "sha256": "45a86acb556ccac61987a80ccc4f5bdf058b55624126b8720f94f5894d4429cc",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/retained-failure-classification-v1/receipt.json"
+    },
+    {
+      "path": "retained-failure-classification-v1/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/retained-failure-classification-v1/stderr.log"
+    },
+    {
+      "path": "retained-failure-classification-v1/stdout.json",
+      "bytes": 22169,
+      "sha256": "df911352684d3707ab00036b561504a6e2fc2715fad2bca4bb71df34fd5c7c7a",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/retained-failure-classification-v1/stdout.json"
+    },
+    {
+      "path": "review-001/PRELIMINARY_STATIC_PRELAUNCH_REVIEW.md",
+      "bytes": 6984,
+      "sha256": "73899f940db09e5efe20e65401c7502b51164bb38abcdcf910d028a0837a9144",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/review-001/PRELIMINARY_STATIC_PRELAUNCH_REVIEW.md"
+    },
+    {
+      "path": "review-002/FINAL_PRELAUNCH_BINDING_VERIFICATION.md",
+      "bytes": 6031,
+      "sha256": "f67e6103ef9fb8230777139bc550fd8ac290d6f9503c595840dc9d4b8b7c0993",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/review-002/FINAL_PRELAUNCH_BINDING_VERIFICATION.md"
+    },
+    {
+      "path": "review-003/INDEPENDENT_ACTUAL_RESULT_REVIEW.md",
+      "bytes": 6133,
+      "sha256": "f760aeff2ab2d5351320a1c7bc329415327ba7ed21d5060fb164ea58c21fc783",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/review-003/INDEPENDENT_ACTUAL_RESULT_REVIEW.md"
+    },
+    {
+      "path": "selftest-02/entry-script.snapshot",
+      "bytes": 28271,
+      "sha256": "97019c6d0a133c9d54ef99574b052ebfb0d954da17f5de79b235af226cd9f6f3",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/selftest-02/entry-script.snapshot"
+    },
+    {
+      "path": "selftest-02/evaluation-negative.json",
+      "bytes": 1495,
+      "sha256": "df241e07b1d88f6d7d14eda2c452f808fbda77f244424faf81344ad461526078",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/selftest-02/evaluation-negative.json"
+    },
+    {
+      "path": "selftest-02/evaluation-positive.json",
+      "bytes": 790,
+      "sha256": "7a7a4ac384b9fb38473a2db5bb739823d82a519f9500dd17df02d4328ce0f7d4",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/selftest-02/evaluation-positive.json"
+    },
+    {
+      "path": "selftest-02/receipt.json",
+      "bytes": 3864,
+      "sha256": "3c18253fec90f810e978e4fe4cc74243f25d321e6f66c3ed2c48972fc3394afd",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/selftest-02/receipt.json"
+    },
+    {
+      "path": "selftest-02/selftest-result.json",
+      "bytes": 6259,
+      "sha256": "5c5956c817b415eaafd6149925b12312e3bcea75b064fa4ea3bc502fbf9657fb",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/selftest-02/selftest-result.json"
+    },
+    {
+      "path": "selftest-02/start.json",
+      "bytes": 2303,
+      "sha256": "5bf6eef4b75f5e8a4dba4d8acf340e6ffff7ab17b9b73602f9ded337b5ffa8f5",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/selftest-02/start.json"
+    },
+    {
+      "path": "selftest-02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/selftest-02/stderr.log"
+    },
+    {
+      "path": "selftest-02/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/selftest-02/stdout.log"
+    },
+    {
+      "path": "historical-audit-v1/finding.md",
+      "bytes": 3685,
+      "sha256": "665778f3fdf0bec081bbc2f2933056b85df3cbaeb6c5ec75492a295a37a84127",
+      "original_path": "tmp/player-bot-capability-parity-20261024/circle-historical-admission-audit-20261026-v1/finding.md"
+    },
+    {
+      "path": "historical-audit-v1/citations.json",
+      "bytes": 4178,
+      "sha256": "1593b46c40a888e9f1db01d97f5281e8d5199d1f6f164f792f1dd8b0f0c77e4c",
+      "original_path": "tmp/player-bot-capability-parity-20261024/circle-historical-admission-audit-20261026-v1/citations.json"
+    }
+  ],
+  "excluded_large_artifact": {
+    "path": "actual-attempt-01/campaign.stdout.log",
+    "original_path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/campaign.stdout.log",
+    "bytes": 3474700,
+    "sha256": "6a994a49efa29f9be8a945832ea23c071bf927c8b6747f3db5a42adfb4550814",
+    "reason": "Original 3,474,700-byte campaign stdout retained at source path; excluded from portable packet by instruction."
+  },
+  "generated_files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 15,
+      "sha256": "50b8945a29c1090ea744b8f1b761eb4af6136f91203cf5850bc9a915270532eb",
+      "method": "Generated for portable proof packet: * -text -diff"
+    }
+  ],
+  "final_fatigue_source_test_bindings": [
+    {
+      "path": "src/sim/combat/attack_resolution_osid.ts",
+      "bytes": 100392,
+      "sha256": "ff8992ab13f54f7f5b2aea79adc1c2a2a6a4d1f9cb58acd21ed27726ea6069ab"
+    },
+    {
+      "path": "src/sim/combat/attack_resource_aftermath.ts",
+      "bytes": 5622,
+      "sha256": "0cad82788378de0c6d1a82d5228eb5c8deac9d5b79263c7cfd860e63f3eab4b4"
+    },
+    {
+      "path": "tests/attack_resource_aftermath.test.ts",
+      "bytes": 15518,
+      "sha256": "61f76235330d2c6dcda189d0f7761e7ca78101a885abc1bd11b60eea8e3a534b"
+    },
+    {
+      "path": "tests/combat_fatigue_owner.test.ts",
+      "bytes": 7927,
+      "sha256": "3125267ee44e1695ef41ca3b948e523c37cf950b8f07f85068b5fa2ea2f15901"
+    }
+  ],
+  "qualifier_source_file_count": 85,
+  "historical_audit_source_file_count": 2,
+  "generated_file_count": 1,
+  "historical_audit": {
+    "verdict": "UNRESOLVED_SETTLEMENT_OOB_GRANULARITY_NO_EVIDENCED_AUTHOR_ERROR",
+    "finding": "historical-audit-v1/finding.md",
+    "citations": "historical-audit-v1/citations.json",
+    "next_action": "Authorized read-only primary-source search for July 1992 Goražde–Trnovo operation, participating units, and localities; no content, timing, or OOB change follows absent direct evidence."
+  }
+}

@@ -1,0 +1,11 @@
+# Retained failure classification
+
+The candidate is rejected: `703 / 712`, four formerly-correct losses against both n91 and n92, and health `13 > 3`. Consistency, movement, graph/roster, save provenance, control attribution, and all 14 opening/closing preservation inventories passed.
+
+Across all 712 painted IDs, Kolovarice is the only new parent-to-candidate controller difference. The parent scored 704 and ended Kolovarice RS; the new run scored 703 and ended it RBiH. There is no compensating controller change. Both began Kolovarice RBiH. The parent records a lawful turn-14 combat capture by RS formation `rs_ajnie_brigade`, battle `14:op:gorazde:kolovarice:rs_ajnie_brigade:null`, under `vrs_herzegovina:Operation Foca:t4`; the battle used `rs_ajnie_brigade` and `rs_foa_brigade`, won at ratio 1.56, and changed RBiH→RS. The new run records no Kolovarice control event. Its turn-14 Operation Foca attack used `rs_foa_brigade`, produced a 0.90 stalemate (attacker 77.64063368535002, raw 91.34192198276475; defender 86.13595), and left the initial RBiH controller in place. This is an absent RS capture under changed combat state, not an illegal RBiH capture inferred from the painted RS expectation.
+
+The exact 13 stranded IDs are identical in the new run, parent, n101, and n102. This confirms the owner-provided reviewed-lawful baseline is unchanged; no fresh supply-lawfulness investigation was performed. The raw final-formation lookup reports the same 12 early JNA actor absences in new and parent, with zero new-only entries and zero malformed required control-event records. Those final-state lookup absences do not establish illegal actors. No new malformed production boundary is evidenced.
+
+The retained campaign stderr is zero bytes, and stdout contains zero `[battle_power]` records. Therefore no Korenici turn-34 power, ratio, or actor is claimed from that diagnostic. No substitute all-powers reconstruction was made.
+
+No retained evidence supports a code correction, threshold change, painted-reference change, or baseline adoption. The remaining owner decision is whether to abandon this fatigue candidate or authorize a separately scoped causal investigation of the lawful Kolovarice outcome drift.

@@ -1,0 +1,138 @@
+{
+  "schema": "awwv.scenario-postturn-prefix39.finalized.v2",
+  "status": "HOLD_FOR_TARGETED_INDEPENDENT_GO__DO_NOT_EXECUTE",
+  "head": "0278c956d3fce3cdb62161a282f3936eaa0c66c1",
+  "production_bindings": {
+    "src/scenario/scenario_runner.ts": {
+      "path": "src/scenario/scenario_runner.ts",
+      "bytes": 210791,
+      "sha256": "b811a55f165a1664e87b48be28008ada9fec7486ddb5c049b2013fbf78bd0972"
+    },
+    "tests/current-scenario-postturn-boundary.test.ts": {
+      "path": "tests/current-scenario-postturn-boundary.test.ts",
+      "bytes": 19158,
+      "sha256": "246259561471affbaa7617f4c92ef6f67a6101abf1aa64b669e18c6acd5b61e3"
+    },
+    "src/sim/combat/attack_resolution_osid.ts": {
+      "path": "src/sim/combat/attack_resolution_osid.ts",
+      "bytes": 100392,
+      "sha256": "ff8992ab13f54f7f5b2aea79adc1c2a2a6a4d1f9cb58acd21ed27726ea6069ab"
+    },
+    "src/sim/combat/attack_resource_aftermath.ts": {
+      "path": "src/sim/combat/attack_resource_aftermath.ts",
+      "bytes": 5622,
+      "sha256": "0cad82788378de0c6d1a82d5228eb5c8deac9d5b79263c7cfd860e63f3eab4b4"
+    },
+    "src/sim/turn_phases/war_phases.ts": {
+      "path": "src/sim/turn_phases/war_phases.ts",
+      "bytes": 233941,
+      "sha256": "8a085a37835541f4dc267e5c1f7f75a714bafc596e21d43b1467cb8ee62d7fcd"
+    },
+    "tests/attack_resource_aftermath.test.ts": {
+      "path": "tests/attack_resource_aftermath.test.ts",
+      "bytes": 15518,
+      "sha256": "61f76235330d2c6dcda189d0f7761e7ca78101a885abc1bd11b60eea8e3a534b"
+    },
+    "tests/combat_fatigue_owner.test.ts": {
+      "path": "tests/combat_fatigue_owner.test.ts",
+      "bytes": 7927,
+      "sha256": "3125267ee44e1695ef41ca3b948e523c37cf950b8f07f85068b5fa2ea2f15901"
+    },
+    "tests/op_directive_injection.test.ts": {
+      "path": "tests/op_directive_injection.test.ts",
+      "bytes": 20144,
+      "sha256": "add227b78c06141a2ee501972907dad52caf4edd5069b5244b6f2d6020a01115"
+    },
+    "tests/op_directive_objection.test.ts": {
+      "path": "tests/op_directive_objection.test.ts",
+      "bytes": 22079,
+      "sha256": "892242ebe14ac935581cf218877fa466ca8f1f218e0d97ed9c21f34acc83902f"
+    },
+    "tools/scenario_runner/run_scenario_with_preflight.ts": {
+      "path": "tools/scenario_runner/run_scenario_with_preflight.ts",
+      "bytes": 8261,
+      "sha256": "1329bd3d611c40c5ff24536dc02e5a84845786c1e9627fc76a1073fd00399992"
+    },
+    "tools/diagnostics/run_preserved_preflight.cjs": {
+      "path": "tools/diagnostics/run_preserved_preflight.cjs",
+      "bytes": 9536,
+      "sha256": "3933e010daf15938d026692e732e401d5ce50e1e0656d546e4697723e9a7779e"
+    },
+    "tools/validate_run_consistency.cjs": {
+      "path": "tools/validate_run_consistency.cjs",
+      "bytes": 62077,
+      "sha256": "741bdd0285d171242e9de1bc250621558f3d468423f09f768b40332ea522e093"
+    },
+    "tools/engine_health_gate.cjs": {
+      "path": "tools/engine_health_gate.cjs",
+      "bytes": 35801,
+      "sha256": "2c56657c5b8da6145ff88525a8b062366061addeed161391ca115e4a91c2b612"
+    },
+    "tools/diagnostics/movement_phase_coverage.cjs": {
+      "path": "tools/diagnostics/movement_phase_coverage.cjs",
+      "bytes": 12579,
+      "sha256": "0407299a7078eabe83dcb3892aaa4829f9e8647a7dd39b318ed0697bd432fecc"
+    },
+    "data/scenarios/apr1992_definitive_188w.json": {
+      "path": "data/scenarios/apr1992_definitive_188w.json",
+      "bytes": 2843,
+      "sha256": "4257b039f5b1dbb7f21d940ec656b2d0b787856f27e7c26b6f3f57f256d82ecf"
+    },
+    "data/source/calibration/painted_control_jan1993.json": {
+      "path": "data/source/calibration/painted_control_jan1993.json",
+      "bytes": 34371,
+      "sha256": "6a64300a599aa0b75833d5232bf9f08a1ab97085746337e622d54fb1a4a0ddc7"
+    },
+    "data/calibration/engine_health_thresholds.json": {
+      "path": "data/calibration/engine_health_thresholds.json",
+      "bytes": 3775,
+      "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d"
+    },
+    "src/scenario/control_change_attribution.ts": {
+      "path": "src/scenario/control_change_attribution.ts",
+      "bytes": 2620,
+      "sha256": "0dc838cfd725a21e48b63568ae9fd22da0298aae9090012a2bc43b572e74796f"
+    },
+    "tests/scenario_control_change_attribution_contract.test.ts": {
+      "path": "tests/scenario_control_change_attribution_contract.test.ts",
+      "bytes": 5463,
+      "sha256": "bb605f4c75000fb1ca2ea1c7119af6e700ea15e8d3fb9f710a7a4b6e01ecd8e5"
+    }
+  },
+  "plan": {
+    "path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/PLAN.md",
+    "bytes": 4591,
+    "sha256": "06adf843ef9856e50ca44ab5daf5c66d67783ef63c4e0a674022327b51e26e38"
+  },
+  "finalizer": {
+    "path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/finalize.cjs",
+    "bytes": 9391,
+    "sha256": "60d4143bcdc4b31b0b4b59cec7e673eafc0e3c31e726001434bef2fd6e81036a"
+  },
+  "config": {
+    "path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/CONFIG.bound.v2.json",
+    "bytes": 11272,
+    "sha256": "790ed05f9676d3c85d7c593a9226d87c8e0ee10ac82c0b52e66fb1a33831b16c"
+  },
+  "qualification": {
+    "path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/qualification.cjs",
+    "bytes": 28271,
+    "sha256": "97019c6d0a133c9d54ef99574b052ebfb0d954da17f5de79b235af226cd9f6f3"
+  },
+  "control_fixture_manifest": {
+    "path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/CONTROL_FIXTURE_MANIFEST.v2.json",
+    "bytes": 1704,
+    "sha256": "60814b13684919e58b877e717ad50ff0d4b888f7342c0c6d02b4672a50d5a079"
+  },
+  "cheap_commands": {
+    "path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/CHEAP_CHECK_COMMANDS.v2.json",
+    "bytes": 2548,
+    "sha256": "7460912d9a9c6bb6958e67a92e001eee026de9fdaa55cc18fbce3e75cd298f55"
+  },
+  "launch_manifest": {
+    "path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/FROZEN_LAUNCH_COMMAND.v2.json",
+    "bytes": 6924,
+    "sha256": "c94bee01db6f698080473afb2247457d9c53e80f111885854790d3970b0dfe81"
+  },
+  "simulation_executed": false
+}
