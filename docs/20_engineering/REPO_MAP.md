@@ -217,3 +217,6 @@ is a read-only diagnostic comparator over accepted initial state plus ordered co
 native t0/settled saves. It does not invoke `desktop_sim`, synthesize run summaries, normalize player
 state, or establish full-save equality. Gates: `tests/paradox_local_qa_harness.test.ts` and
 `tests/native_calibration_outcome_compare.test.ts`. [Measured limits](../../logs/r8-native-calibration-parity-20261024/RESULT.json).
+# Combat fatigue ownership reference (2026-10-26)
+
+OSID combat fatigue ownership and its current focused proof are recorded in [CODE_CANON](CODE_CANON.md#combat-fatigue-single-owner-2026-10-26) and the [implementation report](../40_reports/implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md). This does not qualify controller capture or calibration.

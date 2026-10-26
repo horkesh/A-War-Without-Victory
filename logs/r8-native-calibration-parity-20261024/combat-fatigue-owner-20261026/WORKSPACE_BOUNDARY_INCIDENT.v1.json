@@ -1,0 +1,61 @@
+{
+  "schema": "awwv.workspace-boundary-incident.v1",
+  "incident_date": "2026-10-26",
+  "status": "RECORDED_BEFORE_FINALIZATION_OR_REVIEW",
+  "summary": "The initial apply_patch operation that added four new qualifier-packet files used the task default workspace and created them beneath F:/A-War-Without-Victory instead of the explicitly required C: worktree. The mistake was detected before any packet script, selftest, preflight, trajectory, finalizer, package, native run, full suite, or campaign executed.",
+  "intended_workspace": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "accidental_packet_root": "F:/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1",
+  "intended_packet_root": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1",
+  "exact_four_accidental_paths": [
+    "F:/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/CONFIG.template.json",
+    "F:/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/finalize.cjs",
+    "F:/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/PLAN.md",
+    "F:/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/qualification.cjs"
+  ],
+  "sequence_directly_recorded_in_tool_transcript": [
+    "The add-file patch reported success for exactly CONFIG.template.json, finalize.cjs, PLAN.md, and qualification.cjs under the relative packet path.",
+    "A follow-up patch changed the qualification config-schema assertion before the location error was detected.",
+    "Node --check attempts against the intended C: paths returned MODULE_NOT_FOUND for qualification.cjs and finalize.cjs; an rg of the intended C: packet root also reported that the directory did not exist. These outputs detected the boundary error without executing either packet script.",
+    "The relocation command resolved the accidental source directory and compared it with the exact expected F: packet root, required the intended C: destination to be absent, enumerated exactly four files, and required their sorted names to equal CONFIG.template.json, finalize.cjs, PLAN.md, qualification.cjs.",
+    "The relocation command created the exact intended C: packet directory, moved each of the four files individually, verified that the accidental directory was empty, and removed that empty directory.",
+    "The relocation receipt reported moved_files=4, the exact C: destination, and source_removed=True.",
+    "A later already-completed verification reported f_accidental_absent=True and packet_files=4. No fresh F: access was performed while writing this incident record."
+  ],
+  "execution_boundary": {
+    "packet_code_executed_from_f": false,
+    "packet_code_executed_before_detection": false,
+    "finalizer_executed": false,
+    "selftest_executed": false,
+    "preflight_executed": false,
+    "trajectory_or_campaign_executed": false
+  },
+  "existing_f_files_statement": {
+    "direct_observation": "At relocation time, the newly created accidental packet directory contained exactly the four named new files. The operation targeted only that new directory and those four files, then removed the directory after it was verified empty.",
+    "scope_limit": "No broader F: worktree diff or inventory was taken, so this record does not claim that no existing F: source file was changed by any actor or process. There is no direct evidence in this task transcript that an existing F: source file was changed by these packet operations, and no existing F: source path was targeted by them."
+  },
+  "known_c_packet_hashes_after_relocation_and_schema_correction": {
+    "CONFIG.template.json": {
+      "bytes": 2647,
+      "sha256": "d0f00ea1c24a1a55fb0ad681f1089d1d2e526046baa83ca37d1ec4f9874f994e"
+    },
+    "finalize.cjs": {
+      "bytes": 9391,
+      "sha256": "60d4143bcdc4b31b0b4b59cec7e673eafc0e3c31e726001434bef2fd6e81036a"
+    },
+    "PLAN.md": {
+      "bytes": 4591,
+      "sha256": "06adf843ef9856e50ca44ab5daf5c66d67783ef63c4e0a674022327b51e26e38"
+    },
+    "qualification.cjs": {
+      "bytes": 28271,
+      "sha256": "97019c6d0a133c9d54ef99574b052ebfb0d954da17f5de79b235af226cd9f6f3"
+    }
+  },
+  "evidence_provenance": {
+    "directly_recorded": "The tool calls and outputs described above are present in the current chat tool transcript.",
+    "reported_by_agent": "The concise incident summary previously sent to the parent agent reported the accidental F: creation, detection before execution, exact-four-file relocation to C:, removal of the empty F: packet directory, and later absence verification.",
+    "standalone_raw_log": null,
+    "limitation": "No standalone transcript file was created, and this JSON is a faithful incident record rather than a reconstruction of unavailable filesystem state."
+  },
+  "followup_boundary": "All later packet writes must use absolute paths under the intended C: packet root. This incident record itself was written directly to that absolute C: path without accessing F:."
+}

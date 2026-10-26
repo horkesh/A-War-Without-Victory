@@ -1,0 +1,12 @@
+{
+  "schema": "awwv.combat-fatigue-owner-diagnosis.maintained-red-precheck.v1",
+  "attempt_001_preserved": true,
+  "attempt_002_preserved": true,
+  "attempt_003_exists_before_run": false,
+  "maintained_test": { "path": "tests/combat_fatigue_owner.test.ts", "bytes": 6208, "sha256": "3042d0b140ecae6270be076eed402fa03282933d8d1e3f73f8b3558a1c1ff07f", "status_before_red": "untracked" },
+  "selection": { "tool": "tools/test/discover_test_files.mjs", "exit": 0, "discovered_in_vitest_files": true, "vitest_file_count": 1455 },
+  "readability": { "production_import_paths": true, "local_node": true, "local_tsx": true, "local_vitest": true },
+  "syntax": { "esbuild_transform_exit": 0 },
+  "fixture": { "copied_from_frozen_tmp_sha256": "5078ba027029675d714bb69ddfb79c8bc3cba828d29cf12e9a29c0abed586d3e", "changes": ["imports changed from ../../../src to ../src", "two fatigue assertions use expect.soft so actual attacker and defender deltas are both retained"] },
+  "attempt": { "path": "attempt-003", "maximum_invocations": 1, "timeout_ms": 60000, "retry": false }
+}

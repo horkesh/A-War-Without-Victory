@@ -184,3 +184,6 @@ Do not add a competing active queue. Route new findings through [Master Roadmap 
 ## Completion
 
 This board becomes all green only when R1-R9, RC, and RE satisfy the [master definition of program completion](MASTER_ROADMAP.md#12-definition-of-program-completion). Prepared for publication and published are separate states.
+# 2026-10-26 source correction note
+
+Combat fatigue now has one OSID resolver owner per resolved battle; focused proof and its limits are recorded in [the implementation report](../40_reports/implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md). This bounded source correction does not close the current calibration, full-suite, package or native gates.

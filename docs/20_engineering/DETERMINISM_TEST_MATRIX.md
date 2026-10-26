@@ -322,3 +322,6 @@ Real production-function stdout fixtures qualify schema 2 ordered close manifest
 ### Army HQ delegated-staff routing — 2026-10-24
 
 `tests/army_hq_gathering_phase_routing.test.ts` exercises the exported production phase with its real producer and plan consumer: selected-player autonomy0/1/2/3, null-player and selected-player headless paths; fixed RS→RBiH→HRHB mutation order; and no implicit operation launch or level1 authorization. The repair reuses existing staff selection and adds no persisted fields. Required188-week regression and full-suite evidence are recorded in the active Electron-validation plan; focused routing proof does not establish calibration or engine health.
+# Combat fatigue single-owner correction (2026-10-26)
+
+Fatigue is updated once per resolved battle by the existing aftermath helper; stable attacker traversal, deltas, initialization, and cap are preserved. Focused evidence covers defended, shared-attacker and undefended resolver cases, but contains no direct controller-change assertion. This source-only result does not satisfy calibration or broad release gates. [Report and limits](../40_reports/implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md).

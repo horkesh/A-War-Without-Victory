@@ -1,0 +1,12 @@
+{
+  "schema": "awwv.combat-fatigue-owner-diagnosis.corrected-red-manifest.v1",
+  "status": "CORRECTED_RED_READY_ATTEMPT_001_PRESERVED",
+  "attempt_002_exists": false,
+  "files": [
+    { "path": "combat_fatigue_owner.red.test.ts", "bytes": 6222, "sha256": "5078ba027029675d714bb69ddfb79c8bc3cba828d29cf12e9a29c0abed586d3e" },
+    { "path": "run_red_once_v2.cjs", "bytes": 3193, "sha256": "766563ed127dde851bb3db2a902b44cea42ca6fd0235ca8e56e26af7ad6fd23b" },
+    { "path": "RUN_COMMAND.v2.txt", "bytes": 576, "sha256": "b2676a0aff8daf8760c6110497b1c9d71c9032903cae96b4fbde25ab49921737" },
+    { "path": "PRECHECK.v2.json", "bytes": 951, "sha256": "16962942112dc1f4805c458d1de01bb8d761dc0a6cc227367e8b799b56b413c6" },
+    { "path": "review-001/PREIMPLEMENTATION_CANON_DETERMINISM_REVIEW.md", "bytes": 4912, "sha256": "bf5b2ec78618c278a8faeb2f88eb362ff70bbf5501e4d6cc5850192e17a7c4ad" }
+  ]
+}

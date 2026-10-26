@@ -85,7 +85,8 @@ export function applyFacilityCombatDamage(params: {
 
 /**
  * Apply combat fatigue to all participating formations.
- * Attackers accumulate +2 fatigue per battle; defender +1.
+ * Attackers accumulate +2 fatigue in defended combat or +0.5 when sweeping an
+ * undefended target; defender +1.
  * Fatigue is capped at FATIGUE_MAX. Initializes ops if missing.
  *
  * Exact reproduction of the inline block formerly at attack_resolution_osid.ts "COMBAT FATIGUE".
@@ -98,9 +99,10 @@ export function applyCombatFatigue(params: {
         attackerFormations,
         defenderFormation,
     } = params;
+    const attackerFatigue = defenderFormation ? FATIGUE_ATTACKER : 0.5;
     for (const af of attackerFormations) {
         if (!af.ops) af.ops = { fatigue: 0, last_supplied_turn: null };
-        af.ops.fatigue = Math.min(FATIGUE_MAX, (af.ops.fatigue ?? 0) + FATIGUE_ATTACKER);
+        af.ops.fatigue = Math.min(FATIGUE_MAX, (af.ops.fatigue ?? 0) + attackerFatigue);
     }
     if (defenderFormation) {
         if (!defenderFormation.ops) defenderFormation.ops = { fatigue: 0, last_supplied_turn: null };

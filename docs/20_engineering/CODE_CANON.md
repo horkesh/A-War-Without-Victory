@@ -1,5 +1,9 @@
 # Code Canon (AWWV)
 
+## Combat fatigue single owner (2026-10-26)
+
+The OSID resolver delegates each resolved battle's fatigue writes to `applyCombatFatigue` once: attackers receive `+2` when defended or `+0.5` when undefended, and the primary defender receives `+1`, subject to the existing cap and initialization. Do not reintroduce resolver-local duplicate writes. Focused test and typecheck evidence is source-scoped; it does not establish controller changes or calibration qualification. [Implementation report](../40_reports/implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md) · [Portable packet](../../logs/r8-native-calibration-parity-20261024/combat-fatigue-owner-20261026/PORTABLE_MANIFEST.v2.json).
+
 ## REQUEST-OP personnel-floor admission (2026-10-26)
 
 `planDirectiveOperation` and its shared objection/injection path reuse the canonical `MIN_ATTACK_PERSONNEL = 500` predicate before physical reachability and the existing minimum-three gate. This closes the selector/consumer mismatch: the retained T16 4th Corps request has only the 441st and 443rd above the floor, so the ordinary request returns `no_available_force` without mutation, operation creation or attack-order ownership. Existing 3–12 bounds, sorting/equipment priority, routes, commitments, enclave/objective guards, consumption and deterministic ordering remain unchanged. The source correction is review-GO at its focused scope; calibration, full suite, 188-week, package and native qualification remain open. [Proof](../../logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/MANIFEST.v4.json)

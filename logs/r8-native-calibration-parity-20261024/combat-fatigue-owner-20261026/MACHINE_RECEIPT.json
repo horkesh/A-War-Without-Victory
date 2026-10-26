@@ -1,0 +1,14 @@
+{
+  "schema": "awwv.combat-fatigue-owner-diagnosis.receipt.v1",
+  "status": "stopped_before_real_resolver_red",
+  "head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+  "canon": { "attacker_defended": 2, "attacker_undefended": 0.5, "primary_defender": 1, "cap": 30 },
+  "static_finding": "The resolver writes attacker/primary-defender fatigue inline and later calls applyCombatFatigue for the same participants.",
+  "review": { "path": "review-001/PREIMPLEMENTATION_CANON_DETERMINISM_REVIEW.md", "bytes": 4912, "sha256": "bf5b2ec78618c278a8faeb2f88eb362ff70bbf5501e4d6cc5850192e17a7c4ad", "verdict": "GO" },
+  "attempts": [
+    { "path": "attempt-001", "child_exit": 1, "wrapper_exit": 1, "timed_out": false, "resolver_invocations": 0, "cause": "unnormalized slash-style mismatch in launcher authorized-root check", "receipt_sha256": "632e2bd7482c109b83ab2431dc0060a3a43c39f06a9449fd9eb6ec5a9a2b3cb5", "stderr_sha256": "a1ba0bf3fae7cbce85790d4cd6ce8228ed15eab3c9995732e3757bc8df5b77fd" },
+    { "path": "attempt-002", "child_exit": 1, "wrapper_exit": 1, "timed_out": false, "resolver_invocations": 0, "cause": "Vitest fixed include list rejected tmp test path: No test files found", "receipt_sha256": "477289a02aceabf36afe10ea898f6d4ef3965b4183e346a13879db1b9c58cf58", "stdout_sha256": "0527369ad633d0d5f8f17669c2f6583488a5048c6d8603afdffa4b5bc074c530", "stderr_sha256": "de948db6992ec3871c7146cefc087cc62dccb7661d4adc22c3aff58763ad9b2c" }
+  ],
+  "mutations": { "production_source": 0, "maintained_tests": 0, "state": 0 },
+  "next_question": "May the reviewed RED fixture be added as a maintained tests/ file so the configured runner includes it?"
+}

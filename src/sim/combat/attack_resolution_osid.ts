@@ -37,7 +37,6 @@ import {
     initializeCasualtyLedger,
     recordBattleCasualties,
 } from '../../state/casualty_ledger.js';
-import { recordFormationFatigue } from '../../state/formation_fatigue.js';
 import type {
     ControlEvent,
     FactionId,
@@ -1284,10 +1283,6 @@ export function resolveAttackOrdersOsid(
                 }
             }
 
-            // Sweeping undefended territory is less exhausting than real combat but not free —
-            // logistics, occupation duties, scattered resistance, and advance tempo take a toll.
-            recordFormationFatigue(a, defenderFormation ? 2 : 0.5);
-
             // Record battle outcome for morale drift (victory boost / defeat penalty).
             (a as { recent_battle_outcome?: string }).recent_battle_outcome = outcome;
 
@@ -1320,8 +1315,6 @@ export function resolveAttackOrdersOsid(
                 turn: state.meta?.turn ?? 0,
                 warTimeline: state.military.war_timeline,
             });
-            recordFormationFatigue(defenderFormation, 1);
-
             // Record battle outcome for morale drift — defender's perspective is inverted
             // Defender equipment losses (extracted to attack_equipment_effects.ts)
             for (const defender of defenderAftermathFormations) {

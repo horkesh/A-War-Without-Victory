@@ -1,0 +1,13 @@
+{
+  "schema": "awwv.combat-fatigue-owner-diagnosis.maintained-red-manifest.v1",
+  "status": "ATTEMPT_003_READY_PREVIOUS_ATTEMPTS_PRESERVED",
+  "attempt_003_exists": false,
+  "files": [
+    { "path": "../../../tests/combat_fatigue_owner.test.ts", "bytes": 6208, "sha256": "3042d0b140ecae6270be076eed402fa03282933d8d1e3f73f8b3558a1c1ff07f" },
+    { "path": "run_red_once_v3.cjs", "bytes": 3130, "sha256": "eeac9cf82e864cd2fab937f1762fb534283ec56eea86c0abe37ea55509b974f8" },
+    { "path": "RUN_COMMAND.v3.txt", "bytes": 570, "sha256": "639823330547bfc7842d79210efc2185b1af25fc965d3e78492dce2a25e476a1" },
+    { "path": "PRECHECK.v3.json", "bytes": 1066, "sha256": "ba6f05243e1dc24feb2c496afa8b0afefe54cd73d9fd7d0366cd4413d6b7a556" },
+    { "path": "review-001/PREIMPLEMENTATION_CANON_DETERMINISM_REVIEW.md", "bytes": 4912, "sha256": "bf5b2ec78618c278a8faeb2f88eb362ff70bbf5501e4d6cc5850192e17a7c4ad" }
+  ],
+  "discovery_tool": { "path": "tools/test/discover_test_files.mjs", "bytes": 3118, "sha256": "c8259a1e4fadbe3ef97eaa9e97c64992d57b62a19d67193eab54cedff967f9bb" }
+}

@@ -1019,4 +1019,8 @@ Report: `docs/40_reports/implemented/20260731_OPERATIONAL_TACTICAL_GROUP_CLOSEOU
 
 R3 now has one authoritative offensive-operation clock, deterministic TG exhaustion and Army-HQ recovery cost, exact terminal donor telemetry, compatibility-only legacy OG handling, explicit historical promotion mappings, and Standing-OG doctrine aligned to the shipped narrower combat model. Phase 5 passed 6 files / 165 tests; parent integrated focused proof passed 26 files / 330 tests, and typecheck, canon, strict baselines, scenario determinism, audit, and engine health are green. The final full fast slice exited 0 in 1,502.2 seconds on 2026-08-01 after focused repair of one optional-state inventory ratchet and one stale static source boundary; R3 is complete.
 
+## 2026-10-26 Combat Fatigue Single Owner
+
+[20261026_COMBAT_FATIGUE_SINGLE_OWNER.md](implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md) — OSID combat fatigue now has one writer per resolved battle, with focused 21/21 and 51/51 results, nonincremental TypeScript success, and independent bounded-scope GO. Attempt 008's missing original streams, the absence of a direct controller-change assertion, and all calibration/full-suite/package/native gates remain explicit limitations.
+
 ---

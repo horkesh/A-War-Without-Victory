@@ -565,3 +565,6 @@ Next workstream:
 ```
 
 At program close, append one final ledger entry, link the R8 diaries and R9 manifest, mark R1–R9 and RE complete here and on the command board, and run the full verification set. Do not publish implicitly.
+# 2026-10-26 bounded combat-fatigue correction
+
+The OSID combat fatigue single-owner source correction has focused 21/21 and 51/51 test evidence, nonincremental TypeScript success and independent bounded-scope GO. It has no direct controller-change assertion; current188, full-suite, package and native qualification remain open. Details: [implementation report](../40_reports/implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md) and [portable proof packet](../../logs/r8-native-calibration-parity-20261024/combat-fatigue-owner-20261026/PORTABLE_MANIFEST.v2.json).
