@@ -1,0 +1,84 @@
+{
+  "schema": "circle-historical-admission-audit-v1",
+  "head": "0278c956d3fce3cdb62161a282f3936eaa0c66c1",
+  "verdict": "UNRESOLVED_SETTLEMENT_OOB_GRANULARITY_NO_EVIDENCED_AUTHOR_ERROR",
+  "sources": [
+    {
+      "id": "bb1-regional-offensive",
+      "path": "data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0187.json",
+      "sha256": "b16a9b86107210ee4eef0531ac1259c78452803d329010ebb56171e7873716b9",
+      "edition_page": "Balkan Battlegrounds, vol. I, PDF p.187 / printed p.151",
+      "supports": ["late-July 1992 government offensive", "passage to Gorazde seized", "VRS pushed from Trnovo", "route held against mid-November cuts"],
+      "does_not_support": ["Operation Circle name", "named participating brigades", "Donje Zesce aggregate", "Tosici aggregate"]
+    },
+    {
+      "id": "bb1-oob-date",
+      "path": "data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0506.json",
+      "sha256": "bbd7cc82dc0ab97278cc5e6dcab59ae792a8a8813d85afc75c6d1ae875f57881",
+      "edition_page": "Balkan Battlegrounds, vol. I, Appendix H, PDF p.506",
+      "supports": ["appendix title is Skeleton Bosnian Army Order of Battle, October 1995"]
+    },
+    {
+      "id": "bb1-fourth-corps-oob-a",
+      "path": "data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0511.json",
+      "sha256": "e8f1eb56192858bf8a690ad70996d5842db804b2243d12b565b72d356635b126",
+      "edition_page": "Balkan Battlegrounds, vol. I, PDF p.511 / printed p.474",
+      "supports": ["4th Corps HQ Jablanica", "443rd Mountain Brigade HQ Konjic"]
+    },
+    {
+      "id": "bb1-fourth-corps-oob-b",
+      "path": "data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0512.json",
+      "sha256": "00b7432c063d523dac09cf6cbe5de6d15a144d97e9a3c1fadf471b9dd8e9cacc",
+      "edition_page": "Balkan Battlegrounds, vol. I, PDF p.512 / printed p.475",
+      "supports": ["446th HQ Prozor", "450th HQ Bjelimici", "441st HQ Mostar"]
+    },
+    {
+      "id": "authored-operation",
+      "path": "src/sim/combat/pre_planned_operations.ts",
+      "sha256": "5ea85b79e0a2df80bfed1702c7fcceaaf44df5cdc66b661ce6296d0e3e9c392a",
+      "lines": [1309, 1313, 1319, 1322, 1329, 1336],
+      "supports": ["operation timing", "brigade pools", "staging", "objectives"]
+    },
+    {
+      "id": "production-date-helper",
+      "path": "src/ui/map/utils/formatters.ts",
+      "sha256": "9c8f86536487663f447fbaafb752ecdf89f730a50d4e6c182a372178a8ed7745",
+      "lines": [13, 14, 115, 116],
+      "supports": ["turn 0 is 1992-04-06 UTC", "one turn is seven days", "Date.UTC month 3 means April"]
+    },
+    {
+      "id": "scenario-start",
+      "path": "data/scenarios/apr1992_definitive_188w.json",
+      "sha256": "4257b039f5b1dbb7f21d940ec656b2d0b787856f27e7c26b6f3f57f256d82ecf",
+      "lines": [4, 5],
+      "supports": ["scenario_start_week 0", "war lifecycle at start"]
+    },
+    {
+      "id": "bounded-event-source-note",
+      "path": "data/scenarios/events/war_1992.json",
+      "sha256": "7596df56b934be4334ab8bffe51cf92f439c1fec238d6b82c21e68f25c61162a",
+      "lines": [5025, 5030, 5064, 5066],
+      "supports": ["August consolidation window", "repo explicitly disclaims unverified unit and settlement specificity"]
+    },
+    {
+      "id": "aggregate-geometry",
+      "path": "data/derived/operational/operational_settlements.geojson",
+      "sha256": "03713c8e80ba7111ff64ad0bd69b70db4c7e2b30e22f23b8c4e2c11be60baa1a",
+      "supports": ["Donje Zesce six-constituent 71.838 km2 aggregate", "Tosici twelve-constituent 86.669 km2 aggregate"]
+    },
+    {
+      "id": "constituent-names",
+      "path": "data/source/settlements_initial_master.json",
+      "sha256": "0a4fa946436ed525e38d94df0d3afe98ad2cfdd1e0f26f4cad2ae32bc894535d",
+      "supports": ["constituent SID-to-name mapping"]
+    },
+    {
+      "id": "january-calibration-target",
+      "path": "data/source/calibration/painted_control_jan1993.json",
+      "sha256": "6a64300a599aa0b75833d5232bf9f08a1ab97085746337e622d54fb1a4a0ddc7",
+      "lines": [334, 754],
+      "supports": ["both aggregates painted RBiH at January 1993"],
+      "qualification": "calibration reference, not independent historical proof"
+    }
+  ]
+}

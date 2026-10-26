@@ -2,7 +2,7 @@
 
 ## Latest fatigue-candidate result and evidence
 
-The source commit `0278c956d3fce3cdb62161a282f3936eaa0c66c1` has one retained prefix39 attempt, rejected at 703/712 and health 13>3 with `STOP_NO_RETRY`. The portable packet is indexed at [combat-fatigue-prefix39-20261026/PORTABLE_MANIFEST.json](../../logs/r8-native-calibration-parity-20261024/combat-fatigue-prefix39-20261026/PORTABLE_MANIFEST.json); it binds every copied artifact and separately hashes the excluded original campaign stdout. Its `historical-audit-v1/` subfolder preserves the cited read-only Circle date/OOB finding; settlement and named-brigade claims remain unresolved pending authorized primary-source search.
+The source commit `0278c956d3fce3cdb62161a282f3936eaa0c66c1` has one retained prefix39 attempt, rejected at 703/712 and health 13>3 with `STOP_NO_RETRY`. The result packet is [here](../../logs/r8-native-calibration-parity-20261024/combat-fatigue-prefix39-20261026/PORTABLE_MANIFEST.json). The completed Circle historical reviews support no amendment; exact July OOB, formal chain and settlement/control remain unresolved. Their compact inventory is [here](../../logs/r8-native-calibration-parity-20261024/circle-historical-admission-20261026/PORTABLE_MANIFEST.v2.json). Calibration-scope clarification on the standing no-tuning boundary remains pending.
 
 ## REQUEST-OP personnel-floor proof (2026-10-26)
 

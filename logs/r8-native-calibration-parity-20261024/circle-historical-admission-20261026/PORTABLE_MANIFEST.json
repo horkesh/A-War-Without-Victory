@@ -1,0 +1,103 @@
+{
+  "schema": "awwv.circle-historical-review-portable.v1",
+  "created": "2026-10-26",
+  "status": "UNRESOLVED_NO_CONTENT_CHANGE",
+  "decision": "No supported timing, unit-pool, or content amendment. Historical identity/formal chain and settlement/control claims remain unresolved.",
+  "source_roots": [
+    "circle-historical-admission-primary-search-20261026-v1",
+    "circle-cited-wartime-artifacts-20261026-v1",
+    "circle-formation-allocation-audit-20261026-v1",
+    "circle-historical-admission-audit-20261026-v1"
+  ],
+  "source_file_count": 10,
+  "exact_copies": 10,
+  "copied_bytes": 36523.0,
+  "inventory": [
+    {
+      "path": "circle-historical-admission-primary-search-20261026-v1/citations.json",
+      "original_path": "tmp/player-bot-capability-parity-20261024/circle-historical-admission-primary-search-20261026-v1/citations.json",
+      "bytes": 4186,
+      "sha256": "4793e77a51f6f2174d0ed07bb3ff13cf89ef1e00d0616782afd3fcbf5cf2d57a",
+      "copy_method": "byte-preserving filesystem copy"
+    },
+    {
+      "path": "circle-historical-admission-primary-search-20261026-v1/CLARIFICATION.v1.json",
+      "original_path": "tmp/player-bot-capability-parity-20261024/circle-historical-admission-primary-search-20261026-v1/CLARIFICATION.v1.json",
+      "bytes": 3307,
+      "sha256": "9bd732284133fc664850cc2ebfa2ccc214bbedb7d77c06c7b790c16048ebb526",
+      "copy_method": "byte-preserving filesystem copy"
+    },
+    {
+      "path": "circle-historical-admission-primary-search-20261026-v1/CLARIFICATION.v1.md",
+      "original_path": "tmp/player-bot-capability-parity-20261024/circle-historical-admission-primary-search-20261026-v1/CLARIFICATION.v1.md",
+      "bytes": 3709,
+      "sha256": "5562bea0e134e4e21b459b12e84aa8bf504a9117dc5e6d2e8081c787b2eb5042",
+      "copy_method": "byte-preserving filesystem copy"
+    },
+    {
+      "path": "circle-historical-admission-primary-search-20261026-v1/finding.md",
+      "original_path": "tmp/player-bot-capability-parity-20261024/circle-historical-admission-primary-search-20261026-v1/finding.md",
+      "bytes": 3430,
+      "sha256": "7d23ef2b9f6433fa026f1df8d80d21634da1bc813bb1c16ee2c9d6f3f6ed12bc",
+      "copy_method": "byte-preserving filesystem copy"
+    },
+    {
+      "path": "circle-cited-wartime-artifacts-20261026-v1/artifact-inventory.json",
+      "original_path": "tmp/player-bot-capability-parity-20261024/circle-cited-wartime-artifacts-20261026-v1/artifact-inventory.json",
+      "bytes": 4220,
+      "sha256": "8ea39a1efe59f81088f6b0c8ebfa2e21ce07da451eb0cd3ee37564fa5faa38f0",
+      "copy_method": "byte-preserving filesystem copy"
+    },
+    {
+      "path": "circle-cited-wartime-artifacts-20261026-v1/finding.md",
+      "original_path": "tmp/player-bot-capability-parity-20261024/circle-cited-wartime-artifacts-20261026-v1/finding.md",
+      "bytes": 2683,
+      "sha256": "e874c49c9ff915b34658767d89beea33a97693b3c3a761347b40280e63ebc7aa",
+      "copy_method": "byte-preserving filesystem copy"
+    },
+    {
+      "path": "circle-formation-allocation-audit-20261026-v1/finding.md",
+      "original_path": "tmp/player-bot-capability-parity-20261024/circle-formation-allocation-audit-20261026-v1/finding.md",
+      "bytes": 2964,
+      "sha256": "3323a215a40233c0aa94e0e97ca7c42ccce64f1fce4d63f947b09fdc3690f55b",
+      "copy_method": "byte-preserving filesystem copy"
+    },
+    {
+      "path": "circle-formation-allocation-audit-20261026-v1/source-bindings.json",
+      "original_path": "tmp/player-bot-capability-parity-20261024/circle-formation-allocation-audit-20261026-v1/source-bindings.json",
+      "bytes": 4161,
+      "sha256": "7e1c68745a1d4596eefa11a9e6458b4bca4afb87a6808dbce7ccb893fc789d5f",
+      "copy_method": "byte-preserving filesystem copy"
+    },
+    {
+      "path": "circle-historical-admission-audit-20261026-v1/citations.json",
+      "original_path": "tmp/player-bot-capability-parity-20261024/circle-historical-admission-audit-20261026-v1/citations.json",
+      "bytes": 4178,
+      "sha256": "1593b46c40a888e9f1db01d97f5281e8d5199d1f6f164f792f1dd8b0f0c77e4c",
+      "copy_method": "byte-preserving filesystem copy"
+    },
+    {
+      "path": "circle-historical-admission-audit-20261026-v1/finding.md",
+      "original_path": "tmp/player-bot-capability-parity-20261024/circle-historical-admission-audit-20261026-v1/finding.md",
+      "bytes": 3685,
+      "sha256": "665778f3fdf0bec081bbc2f2933056b85df3cbaeb6c5ec75492a295a37a84127",
+      "copy_method": "byte-preserving filesystem copy"
+    }
+  ],
+  "generated_files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 14,
+      "sha256": "85e48d232edc7b02f6cecf8fbbf905f3b126c467b594d8dd16c4f8fa283a8320",
+      "method": "Generated portability attribute: * -text -diff"
+    }
+  ],
+  "limitations": [
+    "No external books or scans copied.",
+    "Witness-name correction: the cited witness is Husein Alić, not Alija. The earlier incorrect name remains identified as an error, not repeated as fact.",
+    "The 1st Corps Goražde/Igman seven-unit pool is a geographically coherent model allocation, not proven exact July 1992 OOB.",
+    "The separate 4th Corps REQUEST fork was manual and is not the authored Circle operation.",
+    "Primary-source search does not authenticate Circle identity/formal chain or settlement aggregate captures; non-exhaustive negative testimony does not license a complete roster.",
+    "Exhibit 23 is an orientation map, not dated control proof; full scan/UCR account access was not attempted."
+  ]
+}

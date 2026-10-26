@@ -1,0 +1,65 @@
+{
+  "schema": "circle-historical-admission-clarification-v1",
+  "date": "2026-10-26",
+  "supersedes": [],
+  "preserves": ["finding.md", "citations.json"],
+  "verdict": "UNRESOLVED_NAMED_OPERATION_AND_AGGREGATE_CONTROL",
+  "clarifications": [
+    {
+      "topic": "Tactical Group II on 1992-07-31",
+      "direct_facts": [
+        "Alija Alic testified that he was Tactical Group II chief of staff.",
+        "He testified that Serb forces controlled Rogoj in July 1992.",
+        "He testified that Tactical Group II attacked Trnovo simultaneously with its effort against Rogoj Pass on 1992-07-31.",
+        "Separate testimony says the Army of Bosnia-Herzegovina took over Trnovo on 1992-07-31."
+      ],
+      "source": {
+        "case": "Prosecutor v. Kunarac et al., IT-96-23-T & IT-96-23/1-T",
+        "urls": [
+          "https://www.icty.org/x/cases/kunarac/trans/en/000524it.htm",
+          "https://www.icty.org/x/cases/kunarac/trans/en/000320it.htm"
+        ],
+        "pages": ["4023-4027", "392-393"],
+        "short_quote": "We started the attack simultaneously"
+      },
+      "limited_inferences": [
+        "The cited evidence strongly places Tactical Group II on the Bosnian-government side but does not state its exact formal chain-of-command label.",
+        "The same-date statements do not prove Tactical Group II alone captured Trnovo.",
+        "1992-07-31 lies within the seven-day span beginning at the t16 label 1992-07-27, so chronology is compatible but identity with authored Operation Circle is unproven."
+      ],
+      "excluded_inferences": [
+        "brigade participation",
+        "Donje Zesce or Tosici aggregate capture chain",
+        "Operation Circle or Krug name"
+      ]
+    },
+    {
+      "topic": "Foca Tactical Group order of 1992-07-07",
+      "direct_facts": [
+        "The order came from Foca Tactical Group commander Colonel Marko Kovac.",
+        "The transcript translates its objective as breaking the siege of Gorazde.",
+        "The exhibit bore the stamp of the Territorial Defence of the Serbian Autonomous District of Herzegovina.",
+        "The Mladic judgment places Foca Tactical Group in the VRS reporting structure and names Serbian-side formations ordered by Kovac."
+      ],
+      "sources": [
+        {
+          "case": "Prosecutor v. Kunarac et al., IT-96-23-T & IT-96-23/1-T",
+          "url": "https://www.icty.org/x/cases/kunarac/trans/en/000320it.htm",
+          "pages": "394-395",
+          "short_quote": "order to break the siege of Gorazde"
+        },
+        {
+          "case": "Prosecutor v. Ratko Mladic, IT-09-92-T",
+          "url": "https://www.icty.org/x/cases/mladic/tjug/en/171122-1of5_1.pdf",
+          "edition": "Trial Judgment, Volume I, 22 November 2017",
+          "pinpoint": "paragraph 181, page 97"
+        }
+      ],
+      "limited_inference": "It is a Serbian-side offensive order.",
+      "ambiguity": "The cited English wording does not identify besieger, besieged force, intended beneficiary, or whether the order aimed to end a siege of the RBiH-held city.",
+      "safe_description": "Serbian-side Foca Tactical Group order whose translated objective was to break the siege of Gorazde.",
+      "excluded_inference": "ARBiH order of battle or authorship"
+    }
+  ],
+  "content_change_supported": false
+}

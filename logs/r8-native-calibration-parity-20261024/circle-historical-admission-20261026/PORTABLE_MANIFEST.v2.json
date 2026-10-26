@@ -1,0 +1,16 @@
+{
+  "schema": "awwv.circle-historical-review-portable-amendment.v2",
+  "recorded": "2026-10-26",
+  "preceding_manifest": {
+    "path": "logs/r8-native-calibration-parity-20261024/circle-historical-admission-20261026/PORTABLE_MANIFEST.json",
+    "bytes": 5596,
+    "sha256": "c93368c31b05caa376b320dda83bbfe3621afd39fd01da8fc4df20bbecb1989b"
+  },
+  "calendar_correction": {
+    "path": "logs/r8-native-calibration-parity-20261024/circle-historical-admission-20261026/CALENDAR_CORRECTION.v1.json",
+    "bytes": 2317,
+    "sha256": "6752544259315be3120af7ee489aea5ab27ce3727fa248f229d8151835e173cb"
+  },
+  "status": "UNRESOLVED_NO_CONTENT_CHANGE",
+  "scope": "Retains all ten original historical copies; adds explicit correction of earlier Korenici report calendar conversion. Existing decisions and pending owner scope question remain unchanged."
+}

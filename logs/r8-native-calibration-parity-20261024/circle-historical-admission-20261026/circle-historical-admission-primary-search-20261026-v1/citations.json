@@ -1,0 +1,86 @@
+{
+  "schema": "circle-historical-admission-primary-search-v1",
+  "date": "2026-10-26",
+  "verdict": "UNRESOLVED_NAMED_OPERATION_AND_AGGREGATE_CONTROL",
+  "content_amendment_supported": false,
+  "production_calendar": {
+    "scenario_start": "1992-04-06",
+    "days_per_turn": 7,
+    "turn_16": "1992-07-27",
+    "source": "src/ui/map/utils/formatters.ts"
+  },
+  "sources": [
+    {
+      "id": "ICTY-KUNARAC-2000-05-24",
+      "authority": "official ICTY trial transcript; sworn witness evidence",
+      "case": "Prosecutor v. Kunarac et al., IT-96-23-T & IT-96-23/1-T",
+      "date": "2000-05-24",
+      "pages": "4023-4034",
+      "url": "https://www.icty.org/x/cases/kunarac/trans/en/000524it.htm",
+      "supports": [
+        "Tactical Group II zone and Rogoj operational purpose",
+        "simultaneous Trnovo/Rogoj attack on 1992-07-31",
+        "Rogoj loss 1992-08-02 and recapture overnight 2-3 August"
+      ],
+      "short_excerpt": "the main effort of Tactical Group II was to take the Rogoj Pass"
+    },
+    {
+      "id": "ICTY-KUNARAC-2000-03-20",
+      "authority": "official ICTY trial transcript; witness evidence",
+      "case": "Prosecutor v. Kunarac et al., IT-96-23-T & IT-96-23/1-T",
+      "date": "2000-03-20",
+      "pages": "392-395",
+      "url": "https://www.icty.org/x/cases/kunarac/trans/en/000320it.htm",
+      "supports": [
+        "Army of BiH takeover of Trnovo dated 1992-07-31 in testimony",
+        "separate VRS Foča Tactical Group order dated 1992-07-07"
+      ]
+    },
+    {
+      "id": "ICTY-MLADIC-JUDGMENT-V1-2017",
+      "authority": "ICTY Trial Chamber judgment",
+      "case": "Prosecutor v. Ratko Mladić, IT-09-92-T",
+      "edition": "Volume I, 22 November 2017",
+      "pages": "97-98",
+      "pinpoint": "paragraph 181 and footnote 663",
+      "url": "https://www.icty.org/x/cases/mladic/tjug/en/171122-1of5_1.pdf",
+      "supports": [
+        "VRS Foča Tactical Group deblocking order of 1992-07-07",
+        "VRS units named in that opposing operation"
+      ]
+    },
+    {
+      "id": "ICTY-KRAJISNIK-2004-10-18",
+      "authority": "official ICTY trial transcript; witness evidence",
+      "case": "Prosecutor v. Momčilo Krajišnik, IT-00-39-T",
+      "date": "2004-10-18",
+      "page": "7057",
+      "url": "https://www.icty.org/x/cases/krajisnik/trans/en/041018ED.htm",
+      "supports": [
+        "Tošići named as a refuge direction before the 1992-05-31 Trnovo attack"
+      ],
+      "does_not_support": [
+        "post-July controller",
+        "capture or retention of the twelve-settlement Tošići OSID aggregate"
+      ]
+    }
+  ],
+  "queries": [
+    {"q":"site:icty.org Goražde Trnovo July 1992 operation","responsive_urls":["https://www.icty.org/x/cases/kunarac/trans/en/000524it.htm","https://www.icty.org/x/cases/kunarac/trans/en/000320it.htm"]},
+    {"q":"site:irmct.org Goražde Trnovo 1992 operation Krug","responsive_urls":["https://ucr.irmct.org/LegalRef/CMSDocStore/Public/English/Brief/NotIndexable/IT-97-25/MSC1181R2000028239.pdf"],"note":"party brief; lower evidentiary weight and not relied on for verdict"},
+    {"q":"site:icty.org \"Donje Žešće\" OR \"Donje Zesce\"","responsive_urls":[]},
+    {"q":"site:icty.org Tošići Trnovo Bosnia 1992","responsive_urls":["https://www.icty.org/x/cases/krajisnik/trans/en/041018ED.htm"]},
+    {"q":"site:icty.org \"Operation Circle\" Gorazde 1992","responsive_urls":[]},
+    {"q":"site:icty.org \"Operacija Krug\" Goražde","responsive_urls":[]},
+    {"q":"site:icty.org \"Donje Zesce\" Gorazde","responsive_urls":[]},
+    {"q":"site:icty.org \"Tošići\" \"31st of July, 1992\" Trnovo","responsive_urls":[]},
+    {"q":"site:icty.org (Buncici OR \"Donje Zesce\" OR Kolakovici OR Mravljaca OR Podgrade OR Previla) Foca","responsive_urls":[]},
+    {"q":"site:icty.org (\"Cesina Strana\" OR Lisovici OR Sisici OR Bistrocaj OR Vrbovnik OR \"Rajski Do\") Trnovo","responsive_urls":[]}
+  ],
+  "scope_limits": {
+    "queries": 10,
+    "official_sources_opened": 4,
+    "source_copy": "No local full-source copy made; stable official URLs and page pinpoints retained.",
+    "absence_caveat": "Site-index nonresponse is not proof that no archival source exists."
+  }
+}

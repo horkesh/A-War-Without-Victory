@@ -1,0 +1,55 @@
+{
+  "schema": "observational-report-calendar-correction.v1",
+  "recorded": "2026-10-26",
+  "cause": "The retained provenance extractor used Date.UTC(d.year,d.month-1,...), but meta.scenario_start_date.month is zero-based. This moved human-formatted dates one month early.",
+  "raw_start": {
+    "day": 6,
+    "month": 3,
+    "year": 1992
+  },
+  "month_semantics": "month3 is April; use Date.UTC(year,month,day+7*turn).",
+  "rows": [
+    {
+      "turn": 34,
+      "incorrect_report_boundary": "1992-10-30",
+      "correct_turn_boundary": "1992-11-30",
+      "completed_interval_start": "1992-11-23",
+      "completed_interval_end": "1992-11-30"
+    },
+    {
+      "turn": 37,
+      "incorrect_report_boundary": "1992-11-20",
+      "correct_turn_boundary": "1992-12-21",
+      "completed_interval_start": "1992-12-14",
+      "completed_interval_end": "1992-12-21"
+    }
+  ],
+  "sources": [
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n101/save_w39.json",
+      "bytes": 5105750,
+      "sha256": "f459cd050e55e764092010ef79c23a7c629487e3c6a8ea5d3aaf33082dc053e3"
+    },
+    {
+      "path": "src/ui/map/utils/formatters.ts",
+      "bytes": 6108,
+      "sha256": "9c8f86536487663f447fbaafb752ecdf89f730a50d4e6c182a372178a8ed7745"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/korenici-retained-provenance-20261026-v1/extract_retained_provenance.cjs",
+      "bytes": 9458,
+      "sha256": "27d6b0ed64f3353569530784781ce2c65ec44225811de3c46cfcdfaaeab887a1"
+    },
+    {
+      "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-negative-diagnosis-v1/FINDING.md",
+      "bytes": 2641,
+      "sha256": "b4e3c690a06d0ff91a960e0c852d208a6cd87068b69cc1e4118dfdea6b6e3f4e"
+    }
+  ],
+  "affected_report": {
+    "path": "tmp/player-bot-capability-parity-20261024/korenici-retained-provenance-20261026-v1/REPORT.md",
+    "bytes": 3172,
+    "sha256": "7922385ae25f9fd8cb48603e345c38cb9def35826361ca92a86e1ce9ca3295f5"
+  },
+  "scope": "Corrects observational human date labels only. Original reports/extractor/receipts remain unchanged. Turn34/37 battle and control provenance remains valid. Turn boundaries are not independently recorded historical capture dates. No game code, state, timetable, reference, score or gate changed."
+}
