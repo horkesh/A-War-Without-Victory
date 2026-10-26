@@ -1316,7 +1316,7 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         // pocket brigades. Preserve that operational advantage as combat quality,
         // not scripted control; the Foča axis remains too weak to win at this value.
         execution_attack_power_mult: 1.35,
-        planning_duration: 4,
+        planning_duration: 7,
         axes: [
             {
                 axis_id: 'gorazde_perimeter',

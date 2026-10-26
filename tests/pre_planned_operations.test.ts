@@ -13,6 +13,7 @@ import {
     _ALL_PRE_PLANNED,
 } from '../src/sim/combat/pre_planned_operations.js';
 import { warPhases } from '../src/sim/turn_phases/war_phases.js';
+import { createInitialGameState } from '../src/scenario/scenario_runner.js';
 import { getSectorOffensiveApproachOsids } from '../src/sim/combat/bot_brigade_ai_osid.js';
 import { advanceSectorOffensives } from '../src/sim/combat/sector_offensive.js';
 import { hasMinimumAssembledParticipants } from '../src/sim/combat/sector_offensive_launch_helpers.js';
@@ -26,6 +27,7 @@ import type {
     FormationState,
     GameState,
 } from '../src/state/game_state.js';
+import { deserializeState, serializeState } from '../src/state/serialize.js';
 import { stableStringify } from '../src/utils/stable_json.js';
 import { resetReasonCodeTopicCacheForTests } from '../src/sim/combat/reason_code_debug.js';
 
@@ -112,6 +114,68 @@ function makeMinimalState(): GameState {
             political_controllers: politicalControllers,
         } as any,
     } as unknown as GameState;
+}
+
+function makeCircleReachState(queued = true): { state: GameState; adjacency: Map<string, string[]> } {
+    const state = makeMinimalState();
+    state.meta.turn = 16;
+    const command = state.military.corps_command!.arbih_1st_corps!;
+    command.active_operations = [];
+    command.queued_operations = queued ? ['Operation Circle'] : undefined;
+    state.political.political_controllers!['op:visoko:gornja_vratnica_2'] = 'RBiH';
+
+    const route = [
+        'op:test:circle_remote',
+        'op:test:circle_hop_1',
+        'op:test:circle_hop_2',
+        'op:test:circle_hop_3',
+        'op:test:circle_hop_4',
+        'op:trnovo:delijas',
+    ];
+    const adjacency = new Map<string, string[]>();
+    for (let index = 0; index < route.length; index++) {
+        adjacency.set(route[index]!, [route[index - 1], route[index + 1]]
+            .filter((osid): osid is string => osid !== undefined));
+        state.political.political_controllers![route[index]!] = 'RBiH';
+    }
+    state.military.formations!.arbih_102nd_motorized!.location_osid = route[0];
+
+    state.military.corps_command!.arbih_2nd_corps!.active_operations = [{
+        name: 'Existing commitment',
+        type: 'sector_attack',
+        phase: 'planning',
+        started_turn: 15,
+        phase_started_turn: 15,
+        participating_brigades: ['arbih_808th_liberation'],
+        objectives: ['op:test:existing_commitment'],
+    } as CorpsOperation];
+
+    return { state, adjacency };
+}
+
+async function makeSerializableQueuedCircleState(): Promise<GameState> {
+    const state = await createInitialGameState('circle-duration-save-contract');
+    const fixture = makeMinimalState();
+    const circle = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
+    assert.ok(circle);
+    const circleBrigades = new Set(circle.axes.flatMap((axis) => axis.brigades));
+    state.meta.turn = 16;
+    state.military.formations = Object.fromEntries(
+        Object.entries(fixture.military.formations ?? {})
+            .filter(([brigadeId]) => circleBrigades.has(brigadeId)),
+    );
+    state.military.corps_command = {
+        arbih_1st_corps: fixture.military.corps_command!.arbih_1st_corps!,
+        arbih_2nd_corps: fixture.military.corps_command!.arbih_2nd_corps!,
+    };
+    Object.assign(
+        state.political.political_controllers ??= {},
+        fixture.political.political_controllers,
+    );
+    const command = state.military.corps_command!.arbih_1st_corps!;
+    command.active_operations = [];
+    command.queued_operations = ['Operation Circle'];
+    return state;
 }
 
 /**
@@ -1024,6 +1088,81 @@ describe('pre-planned operations', () => {
         const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
         assert.ok(operation);
         assert.equal(operation.execution_attack_power_mult, 1.35);
+    });
+
+    it('uses Circle duration seven to admit a five-hop brigade without stealing an existing commitment', () => {
+        const circle = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
+        assert.ok(circle);
+        const sourceDuration = circle.planning_duration;
+
+        let controlParticipants: string[] = [];
+        try {
+            circle.planning_duration = 4;
+            const control = makeCircleReachState(false);
+            injectPrePlannedOperations(control.state, control.adjacency as any, { faction: 'RBiH' });
+            controlParticipants = control.state.military.corps_command!.arbih_1st_corps!
+                .active_operations.find((operation) => operation.name === 'Operation Circle')!
+                .participating_brigades;
+        } finally {
+            circle.planning_duration = sourceDuration;
+        }
+
+        const candidate = makeCircleReachState(false);
+        injectPrePlannedOperations(candidate.state, candidate.adjacency as any, { faction: 'RBiH' });
+        const operation = candidate.state.military.corps_command!.arbih_1st_corps!
+            .active_operations.find((active) => active.name === 'Operation Circle');
+        assert.ok(operation);
+
+        assert.equal(sourceDuration, 7);
+        assert.equal(controlParticipants.includes('arbih_102nd_motorized'), false);
+        assert.deepEqual(
+            operation!.participating_brigades.filter((brigadeId) => controlParticipants.includes(brigadeId)),
+            controlParticipants,
+            'the five duration-four participants keep their catalogue order',
+        );
+        assert.equal(operation!.participating_brigades.includes('arbih_102nd_motorized'), true);
+        assert.equal(operation!.planning_duration, 7);
+        assert.equal(operation!.participating_brigades.includes('arbih_808th_liberation'), false);
+        assert.deepEqual(
+            candidate.state.military.corps_command!.arbih_2nd_corps!.active_operations![0]!.participating_brigades,
+            ['arbih_808th_liberation'],
+            'the pre-existing commitment remains owned by its original operation',
+        );
+        assert.equal(circle.planning_duration, sourceDuration, 'the shared catalogue definition is restored');
+    });
+
+    it('keeps an active duration-four Circle across save/load while a queued name consumes source duration seven deterministically', async () => {
+        const circle = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
+        assert.ok(circle);
+        const sourceDuration = circle.planning_duration;
+        const queuedPayload = serializeState(await makeSerializableQueuedCircleState());
+
+        let legacyPayload: string;
+        try {
+            circle.planning_duration = 4;
+            const legacy = deserializeState(queuedPayload);
+            assert.equal(injectQueuedOperation(legacy, 'arbih_1st_corps'), true);
+            legacyPayload = serializeState(legacy);
+        } finally {
+            circle.planning_duration = sourceDuration;
+        }
+
+        const loadedLegacy = deserializeState(legacyPayload!);
+        const legacyCircle = loadedLegacy.military.corps_command!.arbih_1st_corps!.active_operations
+            .find((operation) => operation.name === 'Operation Circle');
+        assert.equal(legacyCircle?.planning_duration, 4);
+
+        const first = deserializeState(queuedPayload);
+        const second = deserializeState(queuedPayload);
+        assert.equal(injectQueuedOperation(first, 'arbih_1st_corps'), true);
+        assert.equal(injectQueuedOperation(second, 'arbih_1st_corps'), true);
+        const firstCircle = first.military.corps_command!.arbih_1st_corps!.active_operations
+            .find((operation) => operation.name === 'Operation Circle');
+        assert.equal(sourceDuration, 7);
+        assert.equal(firstCircle?.planning_duration, 7);
+        assert.equal(serializeState(first), serializeState(second));
+        assert.equal(serializeState(deserializeState(serializeState(first))), serializeState(first));
+        assert.equal(circle.planning_duration, sourceDuration, 'the shared catalogue definition is restored');
     });
 
     it('lets the link-up claim its assembly area with one viable participant', () => {
@@ -2553,7 +2692,7 @@ describe('pre-planned operations', () => {
         assert.equal(circle!.faction, 'RBiH');
         assert.equal(circle!.corps, 'arbih_1st_corps');
         assert.equal(circle!.available_from, 8);
-        assert.equal(circle!.planning_duration, 4);
+        assert.equal(circle!.planning_duration, 7);
         assert.deepEqual(
             circle!.axes.map((axis) => ({
                 id: axis.axis_id,
