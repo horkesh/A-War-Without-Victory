@@ -4,7 +4,19 @@
 **Baseline:** The retained clean-source week-39 candidate scored 703/712 and failed health at 13 > 3.
 **Result:** The bounded zero-drift morale source correction has focused evidence and independent GO. The 703/712 result, four formerly-correct losses, health failure, and all global acceptance gates remain unchanged.
 
-## Summary
+## Latest diagnostic — current-source Circle control
+
+The owner authorized one corrected T0–T18 control after the first launcher stopped before the wrapper on an unrelated inherited notification setting (zero turns). The replacement completed once on clean `d7b1edbc6c3cdd9f912c0f78c4467b11d74f2bf4`: outer/child/wrapper exits 0, 29.544 seconds, no timeout, retry or gameplay edit. Independent actual review is **VALID CONTROL COMPLETE**. Circle remains duration 4; five brigades were admitted at T16, 808th/102nd were rejected as `staging_unreachable`, and three operation-owned battles began at T18. All 18 observations and T0/T15–T18 saves are retained; 29 consumed inputs and all 43 artifact-manifest rows (126,060,498 bytes) authenticate.
+
+The current T15 is byte-identical to old `0278...` T15 (`dae65bd...`, zero path differences), now established by an actual current-source control rather than assumed. Current T18 differs from the earlier warm resumed duration-4 checkpoint by 596 state leaves, with no political-control differences. Each observer matches its own canonical save; the difference is real state divergence, not a final-save projection. The warm run used a resume and additional flags. No single cause is established, and its full trajectory or duration-7 capture result is not inherited as a current-source prediction.
+
+The earlier warm pairs did execute, superseding the initial prepared/unrun status below: T15–T18, then T18–T24, each once. Duration 7 admitted two additional authored brigades through ordinary movement; 102nd captured Tošići at **T21**, while 808th's two later catastrophic attacks did not capture Donje Žešće. Coupled casualties, substitutions, commitments and lifecycle changes remain material. Four retained mini-panel reads permit considering a bounded experiment only; permanent adoption remains blocked. No source candidate, new score qualification, 188-week run, full suite, package or native retry follows from this control.
+
+Local retained evidence is under `tmp/player-bot-capability-parity-20261026/circle-current-source-control-v2/`: `actual-attempt-01/control-result.json` (`c080f436...`), `actual-attempt-01/receipt.json`, `actual-attempt-01-artifacts/artifact-manifest.json` (`b7205938...`) and `review-002/ACTUAL_REVIEW.v1.md` (`ebd3a653...`). These local artifacts are outside the earlier portable 43-copy packet. The separate `BOUNDARY_INCIDENT.v1.md` discloses six transient F-path diagnostic files created and deleted before byte preservation; no existing file is known to have changed, no broad F audit is claimed, and the gap remains unwaived. No further F access occurred in this control.
+
+The next candidate must use this continuous current-source control, match its T0/T15 bytes and creation/combat chronology, and prove the real admission/save consumers with focused tests before any separately frozen trajectory. The retained 703/712, four formerly-correct losses, health 13>3 and every global acceptance gate remain unmet. No baseline/reference adoption or tuning occurred in this control.
+
+## Initial packet summary — retained history
 
 - The owner authorized historical calibration on the corrected engine (“Begin it”), with the 707/707/706/706 checkpoint floors, zero formerly-correct losses, protected anchors, health, provenance, and preservation gates unchanged.
 - Retained Circle delivery and HVO lifecycle reviews produced no supported Circle timing/OOB edit and no safe HVO data-only correction. The proposed permanent Circle planning-duration change is blocked because it also changes launch/recovery deadlines and movement ownership.

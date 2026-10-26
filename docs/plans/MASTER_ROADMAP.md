@@ -5,6 +5,8 @@ of it** (owner, 2026-08-26, restated 2026-09-01). Engine-health defects are fixe
 calibration builds on a healthy engine rather than compensating for a sick one.
 
 **RE — 1.0 Engine Integrity is CLOSED (owner, 2026-09-01), and calibration is OPEN and ONGOING.**
+
+**Latest diagnostic — 2026-10-26:** One owner-authorized corrected current-source T0–T18 control is independently **VALID CONTROL COMPLETE** (29.544 seconds, exits0, no retry/gameplay change). Circle forms T16 and first fights T18 with five participants; current T15 is byte-identical to the old reference save. Current T18 has 596 state-leaf differences from the warm resumed control, with no political-control differences: its full trajectory cannot be inherited. Next is the separately tested/reviewed candidate using this continuous control. No calibration acceptance, source-duration edit or baseline adoption follows; 703/712, four former-cell losses, health13>3 and later 188/suite/package/native gates remain open. This supersedes older next-action and prepared/unrun statements below. [Evidence and limits](../40_reports/implemented/20261026_CORRECTED_ENGINE_CALIBRATION_PACKET.md#latest-diagnostic--current-source-circle-control).
 The accepted January-1993 slice remains landed evidence. RE no longer gates calibration, R7 or R8,
 and the P2B packaged-proof blocker is history rather than a live constraint. The original probe
 channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 follows R8.
