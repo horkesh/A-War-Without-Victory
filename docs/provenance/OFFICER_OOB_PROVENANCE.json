@@ -1385,7 +1385,7 @@
       "court_record_citation": null,
       "conflict_note": "The playable row represents the 1992 31st Drina predecessor lineage while reserving the later 831 lineage in its immutable ID. It does not claim that the numbered 831st existed in August 1992.",
       "disposition": "supported",
-      "notes": "The 900 personnel are a conservative authored model allocation at the sourced lower bound for early Goražde brigades, not a sourced 31st Drina August strength and not a score target. Turn 7 derives from the sourced 25 May 1992 formation date against the 6 April weekly scenario epoch. Ordinary recruitment defaults supply the 800 manpower cost; no enclave or bespoke admission exception applies."
+      "notes": "The 900 personnel are a conservative authored model allocation at the sourced lower bound for early Goražde brigades, not a sourced 31st Drina August strength and not a score target. Turn 7 derives from the sourced 25 May 1992 formation date against the 6 April weekly scenario epoch. Priority 49 is an authored model scheduler allocation that places this source-dated row ahead of the ordinary priority-50 backlog; it is not a sourced strength, combat result, or capture claim. Ordinary recruitment defaults supply the 800 manpower cost; no enclave or bespoke admission exception applies."
     },
     "brigade:arbih_803rd_light": {
       "source": "Balkan Battlegrounds: A Military History of the Yugoslav Conflict, 1990-1995, Volume I",

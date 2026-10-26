@@ -1676,6 +1676,7 @@
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
     "available_from": 7,
+    "priority": 49,
     "mandatory": true,
     "initial_personnel": 900
   },
