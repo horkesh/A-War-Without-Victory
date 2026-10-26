@@ -1666,6 +1666,20 @@
     ]
   },
   {
+    "id": "arbih_831st_drina_lineage",
+    "faction": "RBiH",
+    "name": "31st Drina Lineage",
+    "corps": "arbih_1st_corps",
+    "home_mun": "gorazde",
+    "home_settlement": "Goražde",
+    "home_osid": "op:gorazde:gorazde_2",
+    "kind": "brigade",
+    "default_equipment_class": "light_infantry",
+    "available_from": 7,
+    "mandatory": true,
+    "initial_personnel": 900
+  },
+  {
     "id": "arbih_803rd_light",
     "faction": "RBiH",
     "name": "803rd Light",

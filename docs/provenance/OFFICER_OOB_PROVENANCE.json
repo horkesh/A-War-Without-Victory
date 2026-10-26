@@ -1352,28 +1352,40 @@
       "notes": "Exact formation identity and command attribution only; gameplay personnel, timing, and combat statistics are separately authored."
     },
     "brigade:arbih_801st_light": {
-      "source": "Balkan Battlegrounds: A Military History of the Yugoslav Conflict, 1990-1995, Volume I",
-      "source_url": "https://books.google.ba/books?id=it1IAQAAIAAJ&printsec=frontcover",
-      "citation": "Volume I, Appendix H, Skeleton Bosnian Army Order of Battle, October 1995, PDF pp. 506-515.",
+      "source": "Nedim Kapidžija, Odbrana Goražda 1992-1995",
+      "source_url": "https://fpn.unsa.ba/b/wp-content/uploads/2020/01/MAGISTARSKI-Odbrana-Gora%C5%BEda-1992-1995-Nedim-Kapid%C5%BEija-SIMS-597.pdf",
+      "citation": "University of Sarajevo master's thesis, printed p. 34 / PDF p. 37: the 801st Light Brigade was formed on 18 October 1994 from the 1st, 3rd, and 7th battalions of the former 1st Drina Brigade; printed p. 30 / PDF p. 33 dates the 1st Drina's formation to 18 May 1992.",
       "source_tier": "scholarly",
       "confidence": "exact",
       "identity_relation": null,
       "court_record_citation": null,
-      "conflict_note": null,
+      "conflict_note": "For the August 1992 KRUG model, this later descendant is one battalion-group proxy for the single 1st Drina parent lineage. It must not be described as a separate historical August brigade or coexist with a separate playable 1st Drina parent allocation.",
       "disposition": "supported",
-      "notes": "Exact formation identity and command attribution only; gameplay personnel, timing, and combat statistics are separately authored."
+      "notes": "The 801st and 802nd slots together are an explicit 2,200-person current-model allocation for one 1992 parent lineage. Their individual 1,100 personnel, turn-zero availability, timing, and combat statistics are authored gameplay values, not sourced August strengths."
     },
     "brigade:arbih_802nd_light": {
-      "source": "Balkan Battlegrounds: A Military History of the Yugoslav Conflict, 1990-1995, Volume I",
-      "source_url": "https://books.google.ba/books?id=it1IAQAAIAAJ&printsec=frontcover",
-      "citation": "Volume I, Appendix H, Skeleton Bosnian Army Order of Battle, October 1995, PDF pp. 506-515.",
+      "source": "Nedim Kapidžija, Odbrana Goražda 1992-1995",
+      "source_url": "https://fpn.unsa.ba/b/wp-content/uploads/2020/01/MAGISTARSKI-Odbrana-Gora%C5%BEda-1992-1995-Nedim-Kapid%C5%BEija-SIMS-597.pdf",
+      "citation": "University of Sarajevo master's thesis, printed p. 34 / PDF p. 37: the 802nd Light Brigade was formed on 18 October 1994 from the 2nd, 4th, 5th, and 6th battalions of the former 1st Drina Brigade; printed p. 30 / PDF p. 33 dates the 1st Drina's formation to 18 May 1992.",
       "source_tier": "scholarly",
       "confidence": "exact",
       "identity_relation": null,
       "court_record_citation": null,
-      "conflict_note": null,
+      "conflict_note": "For the August 1992 KRUG model, this later descendant is one battalion-group proxy for the single 1st Drina parent lineage. It must not be described as a separate historical August brigade or coexist with a separate playable 1st Drina parent allocation.",
       "disposition": "supported",
-      "notes": "Exact formation identity and command attribution only; gameplay personnel, timing, and combat statistics are separately authored."
+      "notes": "The 801st and 802nd slots together are an explicit 2,200-person current-model allocation for one 1992 parent lineage. Their individual 1,100 personnel, turn-zero availability, timing, and combat statistics are authored gameplay values, not sourced August strengths."
+    },
+    "brigade:arbih_831st_drina_lineage": {
+      "source": "Nedim Kapidžija, Odbrana Goražda 1992-1995",
+      "source_url": "https://fpn.unsa.ba/b/wp-content/uploads/2020/01/MAGISTARSKI-Odbrana-Gora%C5%BEda-1992-1995-Nedim-Kapid%C5%BEija-SIMS-597.pdf",
+      "citation": "University of Sarajevo master's thesis, printed p. 30 / PDF p. 33: the 31st Drina Shock Brigade was formed on 25 May 1992; printed p. 34 / PDF p. 37: the 831st Light Brigade was formed from the 31st Drina Brigade on 18 October 1994.",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": "The playable row represents the 1992 31st Drina predecessor lineage while reserving the later 831 lineage in its immutable ID. It does not claim that the numbered 831st existed in August 1992.",
+      "disposition": "supported",
+      "notes": "The 900 personnel are a conservative authored model allocation at the sourced lower bound for early Goražde brigades, not a sourced 31st Drina August strength and not a score target. Turn 7 derives from the sourced 25 May 1992 formation date against the 6 April weekly scenario epoch. Ordinary recruitment defaults supply the 800 manpower cost; no enclave or bespoke admission exception applies."
     },
     "brigade:arbih_803rd_light": {
       "source": "Balkan Battlegrounds: A Military History of the Yugoslav Conflict, 1990-1995, Volume I",

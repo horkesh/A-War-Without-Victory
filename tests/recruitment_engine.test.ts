@@ -1,5 +1,6 @@
 import assert from 'node:assert';
 import { describe, expect, test } from 'vitest';
+import { loadOobBrigades } from '../src/scenario/oob_loader.js';
 import type { OobBrigade, OobCorps } from '../src/scenario/oob_loader.js';
 import { createOobFormations } from '../src/scenario/oob_early_war_entry.js';
 import {
@@ -62,6 +63,69 @@ describe('mandatory historical formation timing', () => {
             6,
         )).toBe(true);
         expect(canFormMandatoryHistoricalBrigade([], 5, 6)).toBe(false);
+    });
+
+    test('loads and fields the 31st Drina lineage through the ordinary mandatory pool path at turn 7', async () => {
+        const brigades = await loadOobBrigades(process.cwd());
+        const lineage = brigades.find((brigade) => brigade.id === 'arbih_831st_drina_lineage');
+        expect(lineage).toBeDefined();
+        expect(lineage).toMatchObject({
+            name: '31st Drina Lineage',
+            faction: 'RBiH',
+            corps: 'arbih_1st_corps',
+            home_mun: 'gorazde',
+            home_osid: 'op:gorazde:gorazde_2',
+            mandatory: true,
+            available_from: 7,
+            initial_personnel: 900,
+            manpower_cost: 800,
+        });
+        expect(lineage!.tags ?? []).not.toContain('enclave');
+
+        const poolKey = militiaPoolKey('gorazde', 'RBiH');
+        const state = makeState({
+            meta: { turn: 6, seed: 'krug-31st-lineage' },
+            military: {
+                militia_pools: {
+                    [poolKey]: {
+                        mun_id: 'gorazde', faction: 'RBiH', available: 2000,
+                        committed: 0, exhausted: 0, updated_turn: 6,
+                    },
+                },
+            } as never,
+            political: {
+                political_controllers: { 'op:gorazde:gorazde_2': 'RBiH' },
+            } as never,
+        });
+        const resources = initializeRecruitmentResources(['RBiH'], { RBiH: 0 }, { RBiH: 0 });
+        state.military.recruitment_state = resources;
+        const sidToMun = new Map([['op:gorazde:gorazde_2', 'gorazde']]);
+
+        const before = runBotRecruitment(
+            state, [], [lineage!], resources, sidToMun,
+            { gorazde: 'op:gorazde:gorazde_2' },
+            { includeCorps: false, includeMandatory: true, factionIds: ['RBiH'] },
+        );
+        expect(before.mandatory_recruited).toBe(0);
+        expect(state.military.formations.arbih_831st_drina_lineage).toBeUndefined();
+
+        state.meta.turn = 7;
+        const due = runBotRecruitment(
+            state, [], [lineage!], resources, sidToMun,
+            { gorazde: 'op:gorazde:gorazde_2' },
+            { includeCorps: false, includeMandatory: true, factionIds: ['RBiH'] },
+        );
+        expect(due.mandatory_recruited).toBe(1);
+        expect(state.military.formations.arbih_831st_drina_lineage).toMatchObject({
+            personnel: 900,
+            corps_id: 'arbih_1st_corps',
+            location_osid: 'op:gorazde:gorazde_2',
+        });
+        expect(state.military.militia_pools?.[poolKey]).toMatchObject({
+            available: 1100,
+            committed: 900,
+            updated_turn: 7,
+        });
     });
 });
 

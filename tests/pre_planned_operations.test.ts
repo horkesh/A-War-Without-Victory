@@ -116,50 +116,13 @@ function makeMinimalState(): GameState {
     } as unknown as GameState;
 }
 
-function makeCircleReachState(queued = true): { state: GameState; adjacency: Map<string, string[]> } {
-    const state = makeMinimalState();
-    state.meta.turn = 16;
-    const command = state.military.corps_command!.arbih_1st_corps!;
-    command.active_operations = [];
-    command.queued_operations = queued ? ['Operation Circle'] : undefined;
-    state.political.political_controllers!['op:visoko:gornja_vratnica_2'] = 'RBiH';
-
-    const route = [
-        'op:test:circle_remote',
-        'op:test:circle_hop_1',
-        'op:test:circle_hop_2',
-        'op:test:circle_hop_3',
-        'op:test:circle_hop_4',
-        'op:trnovo:delijas',
-    ];
-    const adjacency = new Map<string, string[]>();
-    for (let index = 0; index < route.length; index++) {
-        adjacency.set(route[index]!, [route[index - 1], route[index + 1]]
-            .filter((osid): osid is string => osid !== undefined));
-        state.political.political_controllers![route[index]!] = 'RBiH';
-    }
-    state.military.formations!.arbih_102nd_motorized!.location_osid = route[0];
-
-    state.military.corps_command!.arbih_2nd_corps!.active_operations = [{
-        name: 'Existing commitment',
-        type: 'sector_attack',
-        phase: 'planning',
-        started_turn: 15,
-        phase_started_turn: 15,
-        participating_brigades: ['arbih_808th_liberation'],
-        objectives: ['op:test:existing_commitment'],
-    } as CorpsOperation];
-
-    return { state, adjacency };
-}
-
 async function makeSerializableQueuedCircleState(): Promise<GameState> {
     const state = await createInitialGameState('circle-duration-save-contract');
     const fixture = makeMinimalState();
     const circle = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
     assert.ok(circle);
     const circleBrigades = new Set(circle.axes.flatMap((axis) => axis.brigades));
-    state.meta.turn = 16;
+    state.meta.turn = 18;
     state.military.formations = Object.fromEntries(
         Object.entries(fixture.military.formations ?? {})
             .filter(([brigadeId]) => circleBrigades.has(brigadeId)),
@@ -1084,73 +1047,136 @@ describe('pre-planned operations', () => {
         ]);
     });
 
-    it('authors Circle with a bounded local execution advantage', () => {
+    it('keeps KRUG on ordinary operation readiness and combat strength', () => {
         const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
         assert.ok(operation);
-        assert.equal(operation.execution_attack_power_mult, 1.35);
+        assert.equal(operation.min_attack_outcome, undefined);
+        assert.equal(operation.execution_attack_power_mult, undefined);
     });
 
-    it('uses Circle duration seven to admit a five-hop brigade without stealing an existing commitment', () => {
+    it('owns the approved KRUG lineage roster under 1st Corps without rejected participants', () => {
         const circle = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
         assert.ok(circle);
-        const sourceDuration = circle.planning_duration;
-
-        let controlParticipants: string[] = [];
-        try {
-            circle.planning_duration = 4;
-            const control = makeCircleReachState(false);
-            injectPrePlannedOperations(control.state, control.adjacency as any, { faction: 'RBiH' });
-            controlParticipants = control.state.military.corps_command!.arbih_1st_corps!
-                .active_operations.find((operation) => operation.name === 'Operation Circle')!
-                .participating_brigades;
-        } finally {
-            circle.planning_duration = sourceDuration;
-        }
-
-        const candidate = makeCircleReachState(false);
-        injectPrePlannedOperations(candidate.state, candidate.adjacency as any, { faction: 'RBiH' });
-        const operation = candidate.state.military.corps_command!.arbih_1st_corps!
+        const state = makeMinimalState();
+        state.meta.turn = 18;
+        const command = state.military.corps_command!.arbih_1st_corps!;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Circle'];
+        assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), true);
+        const operation = state.military.corps_command!.arbih_1st_corps!
             .active_operations.find((active) => active.name === 'Operation Circle');
         assert.ok(operation);
-
-        assert.equal(sourceDuration, 7);
-        assert.equal(controlParticipants.includes('arbih_102nd_motorized'), false);
         assert.deepEqual(
-            operation!.participating_brigades.filter((brigadeId) => controlParticipants.includes(brigadeId)),
-            controlParticipants,
-            'the five duration-four participants keep their catalogue order',
+            operation!.participating_brigades,
+            ['arbih_801st_light', 'arbih_802nd_light', 'arbih_831st_drina_lineage'],
         );
-        assert.equal(operation!.participating_brigades.includes('arbih_102nd_motorized'), true);
-        assert.equal(operation!.planning_duration, 7);
-        assert.equal(operation!.participating_brigades.includes('arbih_808th_liberation'), false);
-        assert.deepEqual(
-            candidate.state.military.corps_command!.arbih_2nd_corps!.active_operations![0]!.participating_brigades,
-            ['arbih_808th_liberation'],
-            'the pre-existing commitment remains owned by its original operation',
-        );
-        assert.equal(circle.planning_duration, sourceDuration, 'the shared catalogue definition is restored');
+        assert.equal(operation!.planning_duration, 4);
+        for (const brigadeId of operation!.participating_brigades) {
+            assert.equal(state.military.formations![brigadeId]!.corps_id, 'arbih_1st_corps');
+        }
+        const rejected = new Set([
+            'arbih_843rd_light',
+            'arbih_808th_liberation',
+            'arbih_851st_vitezka_liberation',
+            'arbih_102nd_motorized',
+            'arbih_109th_mountain',
+        ]);
+        assert.equal(operation!.participating_brigades.some((brigadeId) => rejected.has(brigadeId)), false);
     });
 
-    it('keeps an active duration-four Circle across save/load while a queued name consumes source duration seven deterministically', async () => {
+    it('keeps an active legacy Circle roster across save/load while a queued name consumes the current KRUG definition deterministically', async () => {
         const circle = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
         assert.ok(circle);
         const sourceDuration = circle.planning_duration;
         const queuedPayload = serializeState(await makeSerializableQueuedCircleState());
 
-        let legacyPayload: string;
-        try {
-            circle.planning_duration = 4;
-            const legacy = deserializeState(queuedPayload);
-            assert.equal(injectQueuedOperation(legacy, 'arbih_1st_corps'), true);
-            legacyPayload = serializeState(legacy);
-        } finally {
-            circle.planning_duration = sourceDuration;
-        }
+        const legacy = deserializeState(queuedPayload);
+        assert.equal(injectQueuedOperation(legacy, 'arbih_1st_corps'), true);
+        const serializedLegacy = legacy.military.corps_command!.arbih_1st_corps!.active_operations
+            .find((operation) => operation.name === 'Operation Circle');
+        assert.ok(serializedLegacy);
+        serializedLegacy!.planning_duration = 7;
+        serializedLegacy!.min_attack_outcome = 'repulsed';
+        serializedLegacy!.execution_attack_power_mult = 1.35;
+        serializedLegacy!.participating_brigades = [
+            'arbih_102nd_motorized',
+            'arbih_109th_mountain',
+            'arbih_801st_light',
+            'arbih_802nd_light',
+            'arbih_808th_liberation',
+            'arbih_843rd_light',
+            'arbih_851st_vitezka_liberation',
+        ];
+        serializedLegacy!.objectives = [
+            'op:gorazde:glamoc',
+            'op:gorazde:kamen',
+            'op:gorazde:sopotnica',
+            'op:foca:donje_zesce',
+            'op:trnovo:tosici',
+        ];
+        const activeAxisTemplate = structuredClone(serializedLegacy!.axes![0]!);
+        const legacyAxis = (
+            axis_id: string,
+            name: string,
+            assigned_brigades: string[],
+            objectives: string[],
+            staging_osid: string,
+        ) => ({
+            ...structuredClone(activeAxisTemplate),
+            axis_id,
+            name,
+            assigned_brigades,
+            main_brigade: assigned_brigades[0],
+            support_brigades: assigned_brigades.slice(1),
+            objectives,
+            staging_osid,
+            current_objective_index: 0,
+        });
+        serializedLegacy!.axes = [
+            legacyAxis(
+                'gorazde_perimeter',
+                'Goražde Perimeter',
+                ['arbih_801st_light', 'arbih_802nd_light', 'arbih_851st_vitezka_liberation'],
+                ['op:gorazde:glamoc', 'op:gorazde:kamen', 'op:gorazde:sopotnica'],
+                'op:gorazde:gorazde_2',
+            ),
+            legacyAxis(
+                'foca_corridor',
+                'Foča Corridor',
+                ['arbih_843rd_light', 'arbih_808th_liberation'],
+                ['op:foca:donje_zesce'],
+                'op:gorazde:faocici_2',
+            ),
+            legacyAxis(
+                'trnovo_corridor',
+                'Trnovo Corridor',
+                ['arbih_102nd_motorized', 'arbih_109th_mountain'],
+                ['op:trnovo:tosici'],
+                'op:trnovo:delijas',
+            ),
+        ];
+        const legacyPayload = serializeState(legacy);
 
         const loadedLegacy = deserializeState(legacyPayload!);
         const legacyCircle = loadedLegacy.military.corps_command!.arbih_1st_corps!.active_operations
             .find((operation) => operation.name === 'Operation Circle');
-        assert.equal(legacyCircle?.planning_duration, 4);
+        assert.equal(legacyCircle?.planning_duration, 7);
+        assert.equal(legacyCircle?.min_attack_outcome, 'repulsed');
+        assert.equal(legacyCircle?.execution_attack_power_mult, 1.35);
+        assert.deepEqual(legacyCircle?.axes?.map((axis) => axis.axis_id), [
+            'gorazde_perimeter',
+            'foca_corridor',
+            'trnovo_corridor',
+        ]);
+        assert.deepEqual(legacyCircle?.participating_brigades, [
+            'arbih_102nd_motorized',
+            'arbih_109th_mountain',
+            'arbih_801st_light',
+            'arbih_802nd_light',
+            'arbih_808th_liberation',
+            'arbih_843rd_light',
+            'arbih_851st_vitezka_liberation',
+        ]);
 
         const first = deserializeState(queuedPayload);
         const second = deserializeState(queuedPayload);
@@ -1158,8 +1184,16 @@ describe('pre-planned operations', () => {
         assert.equal(injectQueuedOperation(second, 'arbih_1st_corps'), true);
         const firstCircle = first.military.corps_command!.arbih_1st_corps!.active_operations
             .find((operation) => operation.name === 'Operation Circle');
-        assert.equal(sourceDuration, 7);
-        assert.equal(firstCircle?.planning_duration, 7);
+        assert.equal(sourceDuration, 4);
+        assert.equal(firstCircle?.planning_duration, 4);
+        assert.equal(firstCircle?.min_attack_outcome, undefined);
+        assert.equal(firstCircle?.execution_attack_power_mult, undefined);
+        assert.deepEqual(firstCircle?.participating_brigades, [
+            'arbih_801st_light',
+            'arbih_802nd_light',
+            'arbih_831st_drina_lineage',
+        ]);
+        assert.deepEqual(firstCircle?.objectives, ['op:gorazde:sopotnica']);
         assert.equal(serializeState(first), serializeState(second));
         assert.equal(serializeState(deserializeState(serializeState(first))), serializeState(first));
         assert.equal(circle.planning_duration, sourceDuration, 'the shared catalogue definition is restored');
@@ -2686,13 +2720,14 @@ describe('pre-planned operations', () => {
         );
     });
 
-    it('authors the late-July Goražde counteroffensive as three combat axes', () => {
+    it('authors KRUG as the reviewed two-lineage model allocation on one objective', () => {
         const circle = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
         assert.ok(circle);
         assert.equal(circle!.faction, 'RBiH');
         assert.equal(circle!.corps, 'arbih_1st_corps');
-        assert.equal(circle!.available_from, 8);
-        assert.equal(circle!.planning_duration, 7);
+        assert.equal(circle!.available_from, 18);
+        assert.equal(circle!.planning_duration, 4);
+        assert.equal(circle!.staging_osid, 'op:gorazde:gorazde_2');
         assert.deepEqual(
             circle!.axes.map((axis) => ({
                 id: axis.axis_id,
@@ -2702,22 +2737,10 @@ describe('pre-planned operations', () => {
             })),
             [
                 {
-                    id: 'gorazde_perimeter',
-                    staging: 'op:gorazde:gorazde_2',
-                    objectives: ['op:gorazde:glamoc', 'op:gorazde:kamen', 'op:gorazde:sopotnica'],
-                    brigades: ['arbih_801st_light', 'arbih_802nd_light', 'arbih_851st_vitezka_liberation'],
-                },
-                {
-                    id: 'foca_corridor',
-                    staging: 'op:gorazde:faocici_2',
-                    objectives: ['op:foca:donje_zesce'],
-                    brigades: ['arbih_843rd_light', 'arbih_808th_liberation'],
-                },
-                {
-                    id: 'trnovo_corridor',
-                    staging: 'op:trnovo:delijas',
-                    objectives: ['op:trnovo:tosici'],
-                    brigades: ['arbih_102nd_motorized', 'arbih_109th_mountain'],
+                    id: 'krug_gorazde_jabuka',
+                    staging: 'op:gorazde:osjecani_2',
+                    objectives: ['op:gorazde:sopotnica'],
+                    brigades: ['arbih_801st_light', 'arbih_802nd_light', 'arbih_831st_drina_lineage'],
                 },
             ],
         );

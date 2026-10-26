@@ -1299,45 +1299,36 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
-        // BB1 p.187: after early fighting on the Čajniče approaches, Bosnian TO/Army
-        // forces launched a major late-July counteroffensive, expanded the Goražde
-        // pocket, and opened the thread-like route through Trnovo. Political control
-        // remains battle-owned: this definition only supplies named formations,
-        // staging points, and connected objectives to the ordinary operation resolver.
+        // Operation KRUG, 15-29 August 1992. The retained historical review identifies
+        // the 1st and 31st Drina brigades as its roster and Goražde Jabuka as part of
+        // its route. This current-model allocation represents the single 1st Drina
+        // parent with its later 801/802 descendant battalion-group slots (2,200 men
+        // combined) and the 31st Drina predecessor with the 831-lineage slot. These
+        // are lineage proxies, not claims that the later numbered brigades existed in
+        // August. No separate parent rows coexist with them.
+        //
+        // Kapidžija, Odbrana Goražda 1992-1995, printed p. 30 / PDF p. 33
+        // (1st/31st formation dates) and printed p. 34 / PDF p. 37 (801/802 split;
+        // 31st -> 831); integrated decision:
+        // docs/40_reports/implemented/20261026_CORRECTED_ENGINE_CALIBRATION_PACKET.md#historical-correction--krug-roster-2026-10-26.
         corps: 'arbih_1st_corps',
         faction: 'RBiH',
         name: 'Operation Circle',
         staging_osid: 'op:gorazde:gorazde_2',
-        // The offensive begins only once its available enclave brigades can assemble;
-        // the combat window remains inside the August-November series in BB1 p.187.
-        available_from: 8,
-        min_attack_outcome: 'repulsed',
-        // The late-July enclave counteroffensive used local routes and converging
-        // pocket brigades. Preserve that operational advantage as combat quality,
-        // not scripted control; the Foča axis remains too weak to win at this value.
-        execution_attack_power_mult: 1.35,
-        planning_duration: 7,
+        // Turn 18 is the week beginning 10 August from the canonical 6 April epoch,
+        // allowing ordinary assembly before KRUG's 15 August opening. Four turns is
+        // the pre-experiment local planning budget; readiness and reachability remain
+        // ordinary CorpsOperation gates.
+        available_from: 18,
+        planning_duration: 4,
         axes: [
             {
-                axis_id: 'gorazde_perimeter',
-                name: 'Goražde Perimeter',
-                brigades: ['arbih_801st_light', 'arbih_802nd_light', 'arbih_851st_vitezka_liberation'],
-                objectives: ['op:gorazde:glamoc', 'op:gorazde:kamen', 'op:gorazde:sopotnica'],
-                staging_osid: 'op:gorazde:gorazde_2',
-            },
-            {
-                axis_id: 'foca_corridor',
-                name: 'Foča Corridor',
-                brigades: ['arbih_843rd_light', 'arbih_808th_liberation'],
-                objectives: ['op:foca:donje_zesce'],
-                staging_osid: 'op:gorazde:faocici_2',
-            },
-            {
-                axis_id: 'trnovo_corridor',
-                name: 'Trnovo Corridor',
-                brigades: ['arbih_102nd_motorized', 'arbih_109th_mountain'],
-                objectives: ['op:trnovo:tosici'],
-                staging_osid: 'op:trnovo:delijas',
+                axis_id: 'krug_gorazde_jabuka',
+                name: 'KRUG: Goražde Jabuka',
+                brigades: ['arbih_801st_light', 'arbih_802nd_light', 'arbih_831st_drina_lineage'],
+                objectives: ['op:gorazde:sopotnica'],
+                // Coarse local model anchor, not a claim about the precise march route.
+                staging_osid: 'op:gorazde:osjecani_2',
             },
         ],
     },
