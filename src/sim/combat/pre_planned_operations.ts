@@ -1315,11 +1315,14 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         faction: 'RBiH',
         name: 'Operation Circle',
         staging_osid: 'op:gorazde:gorazde_2',
-        // Turn 18 is the week beginning 10 August from the canonical 6 April epoch,
-        // allowing ordinary assembly before KRUG's 15 August opening. Four turns is
-        // the pre-experiment local planning budget; readiness and reachability remain
-        // ordinary CorpsOperation gates.
-        available_from: 18,
+        // Turn 19 is the week beginning 17 August from the canonical 6 April epoch:
+        // an unadopted one-week-later earliest planning experiment, not a newly
+        // sourced historical opening date. With Foča at 3000 the current model
+        // completes Circle/Sopotnica on turn 19, whereas the preserved baseline
+        // completes it on turn 20 before Sabur/Znak/Kamen; this tests lawful later
+        // follow-on sequencing. Four turns is the pre-experiment local planning
+        // budget; readiness and reachability remain ordinary CorpsOperation gates.
+        available_from: 19,
         planning_duration: 4,
         axes: [
             {

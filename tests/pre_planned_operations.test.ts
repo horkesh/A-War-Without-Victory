@@ -122,7 +122,7 @@ async function makeSerializableQueuedCircleState(): Promise<GameState> {
     const circle = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
     assert.ok(circle);
     const circleBrigades = new Set(circle.axes.flatMap((axis) => axis.brigades));
-    state.meta.turn = 18;
+    state.meta.turn = circle.available_from;
     state.military.formations = Object.fromEntries(
         Object.entries(fixture.military.formations ?? {})
             .filter(([brigadeId]) => circleBrigades.has(brigadeId)),
@@ -1062,6 +1062,9 @@ describe('pre-planned operations', () => {
         const command = state.military.corps_command!.arbih_1st_corps!;
         command.active_operations = [];
         command.queued_operations = ['Operation Circle'];
+        assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), false);
+        assert.deepEqual(command.queued_operations, ['Operation Circle']);
+        state.meta.turn = 19;
         assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), true);
         const operation = state.military.corps_command!.arbih_1st_corps!
             .active_operations.find((active) => active.name === 'Operation Circle');
@@ -2725,7 +2728,7 @@ describe('pre-planned operations', () => {
         assert.ok(circle);
         assert.equal(circle!.faction, 'RBiH');
         assert.equal(circle!.corps, 'arbih_1st_corps');
-        assert.equal(circle!.available_from, 18);
+        assert.equal(circle!.available_from, 19);
         assert.equal(circle!.planning_duration, 4);
         assert.equal(circle!.staging_osid, 'op:gorazde:gorazde_2');
         assert.deepEqual(
