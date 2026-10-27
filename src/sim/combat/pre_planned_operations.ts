@@ -1327,6 +1327,7 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                 name: 'KRUG: Goražde Jabuka',
                 brigades: ['arbih_801st_light', 'arbih_802nd_light', 'arbih_831st_drina_lineage'],
                 objectives: ['op:gorazde:sopotnica'],
+                minimum_forward_brigades: 3,
                 // Coarse local model anchor, not a claim about the precise march route.
                 staging_osid: 'op:gorazde:osjecani_2',
             },
