@@ -1,3 +1,4 @@
+import { getAttackIntelConfidence } from './attack_intel_context.js';
 import { collectSectorDefenseBrigades } from './sector_defense_roster.js';
 /**
  * OSID-native combat outcome predictor — read-only.
@@ -60,6 +61,7 @@ import {
     COHESION_ATTACKER,
     COHESION_DEFENDER,
     getArtillerySuppression,
+    getIntelExecutionFrictionMultipliers,
     classifyOutcome,
     computeAttackerPower,
     computeDefenderPower,
@@ -308,6 +310,7 @@ export function predictCombatOutcome(
     let sectorDefBrigades: FormationState[] | null = null;
     // Phase B: sub-segment responsible for defending this OSID
     let defendingSubSegmentId: string | undefined;
+    let defendingSectorId: string | undefined;
     const artSuppression = predictorPerfTime(
         profilePrefix,
         '.artSuppression',
@@ -334,6 +337,7 @@ export function predictCombatOutcome(
             () => findSectorForEnemyOsid(state, targetOsid, controller),
         );
         // Phase B: identify which sub-segment is responsible for this OSID
+        defendingSectorId = sector?.sector_id;
         const defendingSubSeg = sector ? findSubSegmentForOsid(sector, targetOsid) : undefined;
         defendingSubSegmentId = defendingSubSeg?.sub_segment_id;
         const physicalDefenders = getDefenderFormations();
@@ -480,13 +484,19 @@ export function predictCombatOutcome(
     // Resolver default: 'defend' (formation.posture is always set for ordered brigades).
     const effectivePosture = attackerPosture ?? 'attack';
     const targetTerrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
+    // Known own-force execution friction is not enemy fog. Keep the latter's
+    // existing discount and do not inspect hidden defender OPSEC here.
+    const ownExecutionMult = getIntelExecutionFrictionMultipliers(
+        getAttackIntelConfidence(state, attackerLoc, defendingSectorId, targetOsid),
+        false,
+    ).attackerPowerMult;
     const attackerPower = predictorPerfTime(
         profilePrefix,
         '.attackerPower',
         () => attackerFormations.reduce(
             (s, a) => s + computeAttackerPower(state, a, supplyStateByOsid, effectivePosture, targetTerrainMult, targetOsid)
                 * getBrigadeExecutionAttackPowerMult(state, a.id), 0
-        ) * coordPenalty * seasonal.attack_mult,
+        ) * coordPenalty * seasonal.attack_mult * ownExecutionMult,
     );
     defenderPower *= seasonal.defense_mult;
 

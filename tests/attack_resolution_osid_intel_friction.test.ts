@@ -1,3 +1,5 @@
+import {predictCombatOutcome} from '../src/sim/combat/combat_predictor.js';
+import {buildOsidAdjacency} from '../src/sim/combat/osid_adjacency.js';
 import { describe, expect, it } from 'vitest';
 
 import { resolveAttackOrdersOsid } from '../src/sim/combat/attack_resolution_osid.js';
@@ -909,5 +911,33 @@ describe('attack resolution intel execution friction', () => {
             labels: ['stale_intel', 'defender_opsec', 'ambush_risk'],
             attacker_confidence_band: 'low',
         });
+    });
+});
+
+
+describe('predictor known own execution friction', () => {
+    function prediction(confidence: number, targetConfidence?: number, opsec = false) {
+        const {state, edges} = makeScenario();
+        seedIntel(state, confidence);
+        if (targetConfidence !== undefined) state.military.sector_intel!['sector:vrs_1st:0'][0].osid_confidence![0].confidence = targetConfidence;
+        if (opsec) state.military.opsec_sectors = ['sector:rbih_defense:0'];
+        const before = JSON.stringify(state);
+        const result = predictCombatOutcome(state, 'brig_rs_1', 'op:rbih:target', buildOsidAdjacency(edges), new Map(), {}, 'attack');
+        expect(JSON.stringify(state)).toBe(before);
+        expect(result).not.toBeNull();
+        return result!;
+    }
+    it('models the known own-force penalty while preserving the enemy fog discount', () => {
+        const fresh = prediction(1), blind = prediction(0);
+        expect(blind.attacker_power / fresh.attacker_power).toBeCloseTo(getIntelExecutionFrictionMultipliers(0, false).attackerPowerMult, 12);
+        expect(blind.defender_power / fresh.defender_power).toBeCloseTo(0.70 / 0.95, 12);
+    });
+    it('uses the target-specific own-confidence override exactly as resolution does', () => {
+        const fresh = prediction(1), locallyBlind = prediction(1, 0);
+        expect(locallyBlind.attacker_power / fresh.attacker_power).toBeCloseTo(0.85, 12);
+        expect(locallyBlind.defender_power).toBe(fresh.defender_power);
+    });
+    it('does not expose hidden enemy OPSEC through prediction', () => {
+        expect(prediction(0, undefined, true)).toEqual(prediction(0));
     });
 });
