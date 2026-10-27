@@ -1,3 +1,4 @@
+import { initializeMilitiaPoolDefaults } from '../../state/militia_pool_defaults.js';
 /**
  * War phase: Per-turn pool growth from conscription, displacement, and cross-ethnic contributions.
  * Runs before phase-ii-brigade-reinforcement so freshly mobilized manpower is available same turn.
@@ -381,6 +382,7 @@ export function runOngoingMobilization(
         const key = militiaPoolKey(munId, poolFaction);
         if (!pools[key]) {
             pools[key] = { mun_id: munId, faction: poolFaction, available: 0, committed: 0, exhausted: 0, updated_turn: currentTurn };
+            initializeMilitiaPoolDefaults(pools[key]);
         }
         const pool = pools[key];
 
@@ -426,6 +428,7 @@ export function runOngoingMobilization(
                 const key = militiaPoolKey(target, 'RBiH');
                 if (!pools[key]) {
                     pools[key] = { mun_id: target, faction: 'RBiH', available: 0, committed: 0, exhausted: 0, updated_turn: currentTurn };
+                    initializeMilitiaPoolDefaults(pools[key]);
                 }
                 pools[key].available += perTarget;
                 pools[key].updated_turn = currentTurn;

@@ -1,3 +1,10 @@
+import {execFile} from 'node:child_process';
+import {promisify,isDeepStrictEqual} from 'node:util';
+import {mkdtemp,writeFile,readFile} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {deserialize as deserializeV8} from 'node:v8';
+import {serializeState,deserializeState} from '../src/state/serialize.js';
 /**
  * HV (Croatian Army) Integration tests.
  *
@@ -427,3 +434,25 @@ describe('Washington patron override (Path B)', () => {
         assert.strictEqual(state.political.rbih_hrhb_state!.ceasefire_since_turn, currentTurn);
     });
 });
+
+test('canonical cold reload preserves actual HV constructor values and authored stats',async()=>{
+    const root=process.cwd(),dir=await mkdtemp(join(tmpdir(),'hv-constructor-reload-'));
+    const turn=100+HV_PREPARATION_DELAY;
+    // Normalize only the surrounding fixture before invoking the real constructor.
+    const state=deserializeState(serializeState(makeWashingtonSignedState(100,turn)));
+    const report=tickHvIntegration(state);
+    assert.strictEqual(report.spawned_this_turn,true);
+    assert.strictEqual(report.spawned_brigade_ids.length,4);
+    const save=join(dir,'hv-save.json'),output=join(dir,'loaded-formations.v8');
+    await writeFile(save,serializeState(state));
+    const child=await promisify(execFile)(process.execPath,['--import','tsx',join(root,'tests/_helpers/read_canonical_formations.ts'),root,save,output],{cwd:root,timeout:30_000,maxBuffer:1024*1024});
+    await writeFile(join(dir,'child.stdout.log'),child.stdout);await writeFile(join(dir,'child.stderr.log'),child.stderr);
+    const loaded=deserializeV8(await readFile(output));assert.notStrictEqual(loaded.pid,process.pid);
+    for(const def of HV_BRIGADE_DEFS){
+        const actual=state.military.formations[def.id];
+        assert.ok(isDeepStrictEqual(actual,loaded.formations[def.id]),`${def.id} initialized before save; artifacts=${dir}`);
+        assert.strictEqual(actual.morale,def.morale);assert.strictEqual(actual.cohesion,def.cohesion);
+        assert.strictEqual(actual.personnel,def.personnel);assert.deepStrictEqual(actual.composition,def.composition);
+    }
+    await writeFile(join(dir,'receipt.json'),JSON.stringify({parentPid:process.pid,childPid:loaded.pid,spawned:report.spawned_brigade_ids,equalFormationValues:true},null,2));
+},45_000);

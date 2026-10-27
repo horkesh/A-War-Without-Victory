@@ -1,3 +1,4 @@
+import { initializeFormationDefaults } from '../../state/formation_defaults.js';
 /**
  * HV (Croatian Army) Integration — Post-Washington Agreement brigade spawning.
  *
@@ -215,6 +216,7 @@ function spawnHvBrigade(state: GameState, def: HvBrigadeDef, locationOsid: strin
         formation.is_elite = true;
     }
 
+    initializeFormationDefaults(formation, turn);
     state.military.formations[def.id] = formation;
 }
 

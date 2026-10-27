@@ -1,3 +1,4 @@
+import { initializeMilitiaPoolDefaults } from '../../state/militia_pool_defaults.js';
 /**
  * Peace phase: Militia pool population from war_militia_strength and displacement.
  * Plan: militia_and_brigade_formation_system.
@@ -243,6 +244,7 @@ export function runDisplacedAndCrossEthnicContributions(
                         exhausted: 0,
                         updated_turn: currentTurn
                     };
+                    initializeMilitiaPoolDefaults(pools[key]);
                     report.displaced_contributions += 1;
                 }
             }
@@ -274,6 +276,7 @@ export function runDisplacedAndCrossEthnicContributions(
                     exhausted: 0,
                     updated_turn: currentTurn
                 };
+                initializeMilitiaPoolDefaults(pools[key]);
                 report.displaced_contributions += 1;
             }
         }
@@ -312,6 +315,7 @@ export function runDisplacedAndCrossEthnicContributions(
                     exhausted: 0,
                     updated_turn: currentTurn
                 };
+                initializeMilitiaPoolDefaults(pools[key]);
             }
             rbih10pctTotal += contribution;
         }
@@ -403,6 +407,7 @@ export function runPoolPopulation(
                     exhausted: 0,
                     updated_turn: currentTurn
                 };
+                initializeMilitiaPoolDefaults(pools[key]);
                 report.pools_created += 1;
             }
         }

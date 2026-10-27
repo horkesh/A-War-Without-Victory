@@ -1,3 +1,4 @@
+import { initializeFormationDefaults } from '../../state/formation_defaults.js';
 /**
  * Peace-phase Overhaul Phase C: Phased corps activation.
  *
@@ -109,6 +110,7 @@ export function activateCorpsForTurn(
             ...(hq_osid ? { hq_osid } : {})
             // Corps/army HQ formations are command structures, not map entities.
         };
+        initializeFormationDefaults(formation, currentTurn);
         state.military.formations[c.id] = formation;
         report.corps_activated += 1;
         report.corps_ids.push(c.id);

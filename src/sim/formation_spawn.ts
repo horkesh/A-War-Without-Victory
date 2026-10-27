@@ -1,3 +1,4 @@
+import { initializeFormationDefaults } from '../state/formation_defaults.js';
 /**
  * Shared formation spawn from militia pools (plan: militia_and_brigade_formation_system).
  * Used by CLI sim_generate_formations and by turn pipeline when formation_spawn_directive is active.
@@ -701,6 +702,7 @@ export function spawnFormationsFromPools(
             report.pools_touched += 1;
 
             if (applyChanges) {
+                initializeFormationDefaults(formation, currentTurn);
                 formations[formationId] = formation;
                 pool.available -= MIN_DETACHMENT_SPAWN;
                 pool.committed += MIN_DETACHMENT_SPAWN;
@@ -781,6 +783,7 @@ export function spawnFormationsFromPools(
                     ...(dispLocationOsid != null ? { location_osid: dispLocationOsid } : {})
                 };
 
+                initializeFormationDefaults(dispFormation, currentTurn);
                 formations[dispFormationId] = dispFormation;
                 pool.available -= MIN_DETACHMENT_SPAWN;
                 pool.committed += MIN_DETACHMENT_SPAWN;
@@ -899,6 +902,7 @@ export function spawnFormationsFromPools(
             createdInPool += 1;
 
             if (applyChanges) {
+                initializeFormationDefaults(formation, currentTurn);
                 formations[formationId] = formation;
                 pool.available -= batchSize;
                 pool.committed += batchSize;

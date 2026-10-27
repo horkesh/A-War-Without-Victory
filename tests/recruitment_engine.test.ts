@@ -221,6 +221,7 @@ describe('recruitBrigade', () => {
         assert.strictEqual(result.success, true);
         assert.ok(result.formation);
         assert.strictEqual(result.formation!.name, '7th Muslim');
+        expect(result.formation).toMatchObject({ force_label: 'ARBiH', morale: 60, ops: { fatigue: 0, last_supplied_turn: null }, activation_gated: false, activation_turn: null });
         assert.ok(result.formation!.composition);
         assert.strictEqual(result.formation!.composition!.artillery, 2); // mountain template
         assert.strictEqual(result.action!.equipment_spent, 5); // mountain cost

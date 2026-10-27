@@ -805,3 +805,40 @@ describe('final consumer inspects EVERY held-axis membership (probe overlap)', (
         expect(report.battles).toHaveLength(1);
     });
 });
+
+describe('terminal operation axis order authority', () => {
+    it.each(['stalled', 'complete'] as const)('%s axis holds while an executing sibling keeps its attack', (status) => {
+        const { state, edges, operation, adjacency } = makeScenario({ gated: false, ownMain: false });
+        operation.axes![0]!.status = status;
+        generateAllBotOrdersOsid(state, ['RS'], { edges, adjacency, reverseMap: new Map() });
+        expect(state.military.brigade_attack_orders?.brig_main).toBeUndefined();
+        expect(state.military.brigade_movement_orders?.brig_main).toBeUndefined();
+        expect(state.military.brigade_movement_state?.brig_main).toBeUndefined();
+        expect(state.military.brigade_posture_orders).toContainEqual({ brigade_id: 'brig_main', posture: 'defend' });
+        expect(state.military.brigade_attack_orders?.brig_held).toBe(HELD_TARGET);
+        expect(operation.axes![0]!.status).toBe(status);
+    });
+
+    it('stalled approach axis cannot keep marching toward its abandoned objective', () => {
+        const { state, edges, operation, adjacency } = makeScenario({ gated: false, ownMain: false });
+        operation.axes![0]!.status = 'stalled';
+        state.military.formations!.brig_main!.location_osid = 'op:rs:hq';
+        adjacency.get('op:rs:hq')!.push('op:rs:staging');
+        adjacency.get('op:rs:staging')!.push('op:rs:hq');
+        edges.push({ edge_id: 'friendly_approach', a: 'op:rs:hq', b: 'op:rs:staging' } as EdgeRecord);
+        generateAllBotOrdersOsid(state, ['RS'], { edges, adjacency, reverseMap: new Map() });
+        expect(state.military.brigade_attack_orders?.brig_main).toBeUndefined();
+        expect(state.military.brigade_movement_orders?.brig_main).toBeUndefined();
+        expect(state.military.brigade_movement_state?.brig_main).toBeUndefined();
+        expect(state.military.brigade_attack_orders?.brig_held).toBe(HELD_TARGET);
+    });
+
+    it('executing and legacy flat operations retain their direct attack authority', () => {
+        for (const flat of [false, true]) {
+            const { state, edges, operation, adjacency } = makeScenario({ gated: false, ownMain: false });
+            if (flat) delete operation.axes;
+            generateAllBotOrdersOsid(state, ['RS'], { edges, adjacency, reverseMap: new Map() });
+            expect(state.military.brigade_attack_orders?.brig_main).toBe(MAIN_TARGET);
+        }
+    });
+});

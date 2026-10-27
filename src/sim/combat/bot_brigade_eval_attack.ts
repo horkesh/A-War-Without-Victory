@@ -307,6 +307,14 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
         }
 
         if (activeOp.phase === 'execution') {
+            const assignedAxis = getBrigadeAxis(activeOp, brigade.id);
+            // Terminal axes no longer own fresh attack or approach orders. Their
+            // result updater intentionally skips them while executing siblings
+            // continue; issuing orders here would create untracked assaults.
+            if (assignedAxis && assignedAxis.status !== 'executing') {
+                result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                return true;
+            }
             const currentObjective = getSectorOffensiveCurrentObjective(activeOp, brigade.id);
             // Skip objective if controlled by own faction OR by an allied faction.
             // Allied capture counts as mission success — advance to next objective.

@@ -1,3 +1,5 @@
+import { initializeMilitiaPoolDefaults } from '../state/militia_pool_defaults.js';
+import { initializeFormationDefaults } from '../state/formation_defaults.js';
 /**
  * Recruitment engine: setup-phase brigade activation from OOB catalog.
  *
@@ -268,6 +270,7 @@ function buildRecruitedFormation(
         max_personnel: brigade.max_personnel ?? deriveMaxPersonnel(equipClass, brigade.faction),
         home_osid: exactHomeOsid ?? locationOsid
     };
+    initializeFormationDefaults(formation, currentTurn);
     initializeEquipmentStateForFormation(formation, brigade.faction, state);
     initializeDoctrineStateForFormation(formation);
     return formation;
@@ -842,6 +845,7 @@ export function runBotRecruitment(
                 // Corps/army HQ formations are command structures, not map entities.
                 // No location_osid — BFS seeding uses subordinate brigade positions.
             };
+            initializeFormationDefaults(state.military.formations[c.id], currentTurn);
         }
     }
 
@@ -980,6 +984,7 @@ export function runBotRecruitment(
                             exhausted: 0,
                             updated_turn: state.meta.turn,
                         };
+                        initializeMilitiaPoolDefaults(pools[poolKey]);
                     }
                     const seededPool = pools[poolKey];
                     pool = seededPool;
@@ -1235,6 +1240,7 @@ export function reroutePoolSurplus(
                     exhausted: 0,
                     updated_turn: state.meta?.turn ?? 0,
                 };
+                initializeMilitiaPoolDefaults(pools[deficit.poolKey]);
             }
             pools[deficit.poolKey].available += amount;
             deficit.needed -= amount;

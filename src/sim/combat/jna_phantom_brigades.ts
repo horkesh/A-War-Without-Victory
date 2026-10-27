@@ -1,3 +1,4 @@
+import { initializeFormationDefaults } from '../../state/formation_defaults.js';
 /**
  * JNA Phantom Brigades — temporary formations representing JNA assets
  * that fought alongside VRS in the first weeks of the war.
@@ -623,6 +624,7 @@ export function spawnJnaPhantomBrigades(state: GameState, options: SpawnJnaPhant
             },
         } as FormationState;
 
+        initializeFormationDefaults(formation, turn);
         state.military.formations[def.id] = formation;
         // Mark as spawned so subsequent turns of the war-phase phantom-spawn
         // step skip this def even after the formation is removed on withdrawal.

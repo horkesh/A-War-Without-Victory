@@ -1,3 +1,4 @@
+import { initializeFormationDefaults } from '../state/formation_defaults.js';
 /**
  * Peace phase entry: OOB slot creation and eligibility.
  * OOB formations (brigades, corps) are created once when entering Peace phase, gated by
@@ -286,6 +287,7 @@ export function createOobFormations(
             ...(c.initial_cohesion != null ? { cohesion: c.initial_cohesion } : {}),
             ...(c.initial_morale != null ? { morale: c.initial_morale } : {}),
         };
+        initializeFormationDefaults(formation, currentTurn);
         state.military.formations[c.id] = formation;
         report.corps_created += 1;
     }
@@ -378,6 +380,7 @@ export function createOobFormations(
         formation.officer_quality = b.initial_officer_quality ?? getFactionDefaultOfficerQuality(b.faction, currentTurn);
         // Distinction potential: historical units that earned glory — reduced decoration thresholds
         if (b.distinction_potential) formation.distinction_potential = b.distinction_potential;
+        initializeFormationDefaults(formation, currentTurn);
         state.military.formations[b.id] = formation;
         report.brigades_created += 1;
 
