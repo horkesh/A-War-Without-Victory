@@ -1,3 +1,4 @@
+import { collectSectorDefenseBrigades } from './sector_defense_roster.js';
 /**
  * OSID-native combat outcome predictor — read-only.
  *
@@ -82,10 +83,6 @@ import { getEnclaveGarrisonPower } from './enclave_resilience.js';
 import { getSectorPairIntelConfidence } from './sector_intel.js';
 import { getBrigadeExecutionAttackPowerMult } from './corps_operation_helpers.js';
 import { buildLocalFrontDensityModifierByFormationIdForSector } from './local_front_defense.js';
-import {
-    getStandingOgDefenseBrigadeIds,
-    isStandingOgDefenseBrigadeAvailable,
-} from './standing_og_defense.js';
 
 // Backward-compat re-export
 export type PredictedOutcome = CombatOutcome;
@@ -339,26 +336,14 @@ export function predictCombatOutcome(
         // Phase B: identify which sub-segment is responsible for this OSID
         const defendingSubSeg = sector ? findSubSegmentForOsid(sector, targetOsid) : undefined;
         defendingSubSegmentId = defendingSubSeg?.sub_segment_id;
+        const physicalDefenders = getDefenderFormations();
         const sectorBrigades = predictorPerfTime(
             profilePrefix,
             '.sectorBrigades',
-            () => sector
-                ? getStandingOgDefenseBrigadeIds(sector)
-                    .map(id => state.military.formations?.[id])
-                    .filter((f): f is FormationState =>
-                        f != null
-                        && f.status === 'active'
-                        && isStandingOgDefenseBrigadeAvailable(state, f.id)
-                    )
-                : [],
+            () => collectSectorDefenseBrigades(
+                state, sector, targetOsid, controller!, adjacency, physicalDefenders,
+            ),
         );
-        const physicalDefenders = getDefenderFormations();
-        for (const physicalDefender of physicalDefenders) {
-            if (!sectorBrigades.some((brigade) => brigade.id === physicalDefender.id)) {
-                sectorBrigades.push(physicalDefender);
-            }
-        }
-        sectorBrigades.sort((a, b) => strictCompare(a.id, b.id));
         if (sectorBrigades.length > 0) {
             defenderHasBrigade = true;
             const { primary, totalPower, powerByFormationId } = predictorPerfTime(

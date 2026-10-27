@@ -1,0 +1,206 @@
+{
+  "scope": "Direct helper comparison on copied postT3 state with turn4, T4 trace-observed attacker arrival projected, and isolated attack orders. NOT exact in-turn T4 replay. Supply/population/ethnicity/officer inputs omitted equally; no turn/campaign executed.",
+  "input": "tmp/player-bot-capability-parity-20261026/krug-normal-combat39-v2/actual-artifacts-01/observations/turn-03.json",
+  "input_sha256": "674427053da1008f5b234e771d8badde40f4bab27443ba6861788bb03b5c6bed",
+  "rows": [
+    {
+      "remove808": false,
+      "sector": "sector:arbih_1st_corps:12",
+      "sector_defenders": [
+        "arbih_802nd_light"
+      ],
+      "flat": {
+        "attacker_power": 113.98714332676693,
+        "defender_power": 96.12703868477922,
+        "power_ratio": 1.1857968880176861,
+        "predicted_outcome": "stalemate",
+        "expected_attacker_casualties": 71,
+        "expected_defender_casualties": 87,
+        "attacker_casualty_percent": 0.09137709137709138,
+        "defender_casualty_percent": 0.0821529745042493,
+        "net_cohesion_attacker": -3,
+        "net_cohesion_defender": -1,
+        "defender_entrenchment": 3.5999999999999996,
+        "defender_terrain_mult": 1,
+        "is_counter_attack_opportunity": false,
+        "overextension_risk": 3,
+        "friendly_neighbors_after_capture": 4,
+        "defender_has_brigade": true,
+        "defender_has_reachable_brigade": true,
+        "defender_disrupted": false,
+        "defender_cohesion": 73.2,
+        "defending_sub_segment_id": "subseg:sector:arbih_1st_corps:12:0"
+      },
+      "terrain": {
+        "attacker_power": 113.98714332676693,
+        "defender_power": 142.1010201282897,
+        "power_ratio": 0.8021557003873626,
+        "predicted_outcome": "stalemate",
+        "expected_attacker_casualties": 80,
+        "expected_defender_casualties": 77,
+        "attacker_casualty_percent": 0.10296010296010295,
+        "defender_casualty_percent": 0.07271010387157696,
+        "net_cohesion_attacker": -3,
+        "net_cohesion_defender": -1,
+        "defender_entrenchment": 3.5999999999999996,
+        "defender_terrain_mult": 1.596,
+        "is_counter_attack_opportunity": false,
+        "overextension_risk": 3,
+        "friendly_neighbors_after_capture": 4,
+        "defender_has_brigade": true,
+        "defender_has_reachable_brigade": true,
+        "defender_disrupted": false,
+        "defender_cohesion": 73.2,
+        "defending_sub_segment_id": "subseg:sector:arbih_1st_corps:12:0"
+      },
+      "battle": {
+        "battle_id": "4:op:cajnice:miljeno_2:rs_visegrad_brigade:arbih_808th_liberation",
+        "attacker_brigade": "rs_visegrad_brigade",
+        "attacker_brigades": [
+          "rs_visegrad_brigade"
+        ],
+        "contributing_operation_ids": [
+          "vrs_drina:Operation Drina:t0"
+        ],
+        "attacker_faction": "RS",
+        "defender_faction": "RBiH",
+        "target_osid": "op:cajnice:miljeno_2",
+        "outcome": "catastrophic",
+        "power_ratio": 0.4772826417304807,
+        "attacker_won": false,
+        "defender_brigade": "arbih_808th_liberation",
+        "defender_kind": "formation",
+        "snap_events": [
+          {
+            "snap_type": "ammo_crisis",
+            "trigger_phase": "post_battle",
+            "attacker_brigade": "rs_visegrad_brigade",
+            "target_osid": "op:cajnice:miljeno_2",
+            "affected_formation": "rs_visegrad_brigade",
+            "description": "Attack force suffered ammunition/sustainment collapse after failed assault.",
+            "effects": {
+              "forced_posture": "defend",
+              "attacker_cohesion_delta": -10
+            }
+          }
+        ],
+        "attacker_casualties": 240,
+        "defender_casualties": 45,
+        "execution_friction": {
+          "labels": [
+            "stale_intel"
+          ],
+          "attacker_confidence_band": "low"
+        },
+        "defending_sub_segment_id": "subseg:sector:arbih_1st_corps:12:0",
+        "equipment": {
+          "attacker_tanks_lost": 0,
+          "attacker_artillery_lost": 1,
+          "defender_tanks_lost": 0,
+          "defender_artillery_lost": 1,
+          "scavenged_tanks": 0,
+          "scavenged_artillery": 0,
+          "captured_tanks": 0,
+          "captured_artillery": 1,
+          "captured_by": "RBiH"
+        },
+        "operation_id": "vrs_drina:Operation Drina:t0",
+        "operation_name": "Operation Drina"
+      }
+    },
+    {
+      "remove808": true,
+      "sector": "sector:arbih_1st_corps:12",
+      "sector_defenders": [
+        "arbih_802nd_light"
+      ],
+      "flat": {
+        "attacker_power": 113.98714332676693,
+        "defender_power": 62.5,
+        "power_ratio": 1.823794293228271,
+        "predicted_outcome": "victory",
+        "expected_attacker_casualties": 71,
+        "expected_defender_casualties": 43,
+        "attacker_casualty_percent": 0.09137709137709138,
+        "defender_casualty_percent": 0.172,
+        "net_cohesion_attacker": 1,
+        "net_cohesion_defender": -8,
+        "defender_entrenchment": 0,
+        "defender_terrain_mult": 1,
+        "is_counter_attack_opportunity": false,
+        "overextension_risk": 3,
+        "friendly_neighbors_after_capture": 4,
+        "defender_has_brigade": false,
+        "defender_has_reachable_brigade": false,
+        "defender_disrupted": false,
+        "defender_cohesion": 60,
+        "defending_sub_segment_id": "subseg:sector:arbih_1st_corps:12:0"
+      },
+      "terrain": {
+        "attacker_power": 113.98714332676693,
+        "defender_power": 62.5,
+        "power_ratio": 1.823794293228271,
+        "predicted_outcome": "victory",
+        "expected_attacker_casualties": 71,
+        "expected_defender_casualties": 43,
+        "attacker_casualty_percent": 0.09137709137709138,
+        "defender_casualty_percent": 0.172,
+        "net_cohesion_attacker": 1,
+        "net_cohesion_defender": -8,
+        "defender_entrenchment": 0,
+        "defender_terrain_mult": 1.596,
+        "is_counter_attack_opportunity": false,
+        "overextension_risk": 3,
+        "friendly_neighbors_after_capture": 4,
+        "defender_has_brigade": false,
+        "defender_has_reachable_brigade": false,
+        "defender_disrupted": false,
+        "defender_cohesion": 60,
+        "defending_sub_segment_id": "subseg:sector:arbih_1st_corps:12:0"
+      },
+      "battle": {
+        "battle_id": "4:op:cajnice:miljeno_2:rs_visegrad_brigade:null",
+        "attacker_brigade": "rs_visegrad_brigade",
+        "attacker_brigades": [
+          "rs_visegrad_brigade"
+        ],
+        "contributing_operation_ids": [
+          "vrs_drina:Operation Drina:t0"
+        ],
+        "attacker_faction": "RS",
+        "defender_faction": "RBiH",
+        "target_osid": "op:cajnice:miljeno_2",
+        "outcome": "victory",
+        "power_ratio": 1.5502251492440302,
+        "attacker_won": true,
+        "defender_brigade": null,
+        "defender_kind": "militia",
+        "defender_militia_pool_key": "cajnice:RBiH",
+        "snap_events": [],
+        "attacker_casualties": 23,
+        "defender_casualties": 41,
+        "execution_friction": {
+          "labels": [
+            "stale_intel"
+          ],
+          "attacker_confidence_band": "low"
+        },
+        "defending_sub_segment_id": "subseg:sector:arbih_1st_corps:12:0",
+        "equipment": {
+          "attacker_tanks_lost": 0,
+          "attacker_artillery_lost": 1,
+          "defender_tanks_lost": 0,
+          "defender_artillery_lost": 0,
+          "scavenged_tanks": 0,
+          "scavenged_artillery": 0,
+          "captured_tanks": 0,
+          "captured_artillery": 0
+        },
+        "operation_id": "vrs_drina:Operation Drina:t0",
+        "operation_name": "Operation Drina"
+      }
+    }
+  ],
+  "real_terrain": 1.596,
+  "checks": 4
+}

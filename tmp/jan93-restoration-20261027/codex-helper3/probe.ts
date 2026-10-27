@@ -1,0 +1,44 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import assert from 'node:assert/strict';
+import {loadOperationalData,loadOperationalEdges} from '../../../src/data/operational_data.js';
+import {loadTerrainScalars} from '../../../src/map/terrain_scalars_node.js';
+import {buildOsidAdjacency} from '../../../src/sim/combat/osid_adjacency.js';
+import {predictCombatOutcome,buildTerrainCache} from '../../../src/sim/combat/combat_predictor.js';
+import {resolveAttackOrdersOsid} from '../../../src/sim/combat/attack_resolution_osid.js';
+import {findSectorForEnemyOsid} from '../../../src/sim/combat/corps_front_sectors.js';
+import {getStandingOgDefenseBrigadeIds} from '../../../src/sim/combat/standing_og_defense.js';
+
+const input='tmp/player-bot-capability-parity-20261026/krug-normal-combat39-v2/actual-artifacts-01/observations/turn-03.json';
+const bytes=fs.readFileSync(input), hash=(b:any)=>crypto.createHash('sha256').update(b).digest('hex');
+const original=JSON.parse(bytes.toString()).state;
+const od=await loadOperationalData(),edges=await loadOperationalEdges(),adj=buildOsidAdjacency(edges);
+const terrain=await loadTerrainScalars();
+const attacker='rs_visegrad_brigade',target='op:cajnice:miljeno_2',defender='arbih_808th_liberation';
+const rows=[];
+for(const remove808 of [false,true]) {
+ const state=structuredClone(original);
+ state.meta.turn=4;
+ // Retained T4 axis trace records this arrival before evaluating Miljeno.
+ // Project only this observed location; do not call this a full turn replay.
+ state.military.formations[attacker].location_osid='op:rudo:gornja_strmica';
+ delete state.military.brigade_movement_state?.[attacker];
+ if(remove808) delete state.military.formations[defender];
+ const before=JSON.stringify(state);
+ const sector=findSectorForEnemyOsid(state,target,'RBiH');
+ const flat=predictCombatOutcome(state,attacker,target,adj,od.operationalToCanonical,buildTerrainCache(od.operationalToCanonical),'attack');
+ const real=predictCombatOutcome(state,attacker,target,adj,od.operationalToCanonical,buildTerrainCache(od.operationalToCanonical,terrain),'attack');
+ assert.equal(JSON.stringify(state),before,'predictor must not mutate frozen fixture');
+ const resolutionState=structuredClone(state);
+ resolutionState.military.brigade_attack_orders={[attacker]:target};
+ const result=resolveAttackOrdersOsid(resolutionState,edges,od.operationalToCanonical,terrain,undefined,undefined,undefined,adj);
+ const battle=result.battles.find((b:any)=>b.target_osid===target);
+ assert.ok(flat && real && battle,'positive/negative controls must resolve actual production helpers');
+ rows.push({remove808,sector:sector?.sector_id,sector_defenders:sector?getStandingOgDefenseBrigadeIds(sector):[],flat,terrain:real,battle});
+}
+assert.equal(hash(fs.readFileSync(input)),hash(bytes),'retained input unchanged');
+const output={scope:'Direct helper comparison on copied postT3 state with turn4, T4 trace-observed attacker arrival projected, and isolated attack orders. NOT exact in-turn T4 replay. Supply/population/ethnicity/officer inputs omitted equally; no turn/campaign executed.',input,input_sha256:hash(bytes),rows,flat_terrain:buildTerrainCache(od.operationalToCanonical)[target],real_terrain:buildTerrainCache(od.operationalToCanonical,terrain)[target],checks:4};
+fs.writeFileSync(path.join(process.argv[2],'probe-result.json'),JSON.stringify(output,null,2)+'\n',{flag:'wx'});
+console.log(JSON.stringify({checks:4,flat_terrain:output.flat_terrain,real_terrain:output.real_terrain,rows:rows.map(r=>({remove808:r.remove808,flat_ratio:r.flat.power_ratio,terrain_ratio:r.terrain.power_ratio,resolved_ratio:r.battle.power_ratio,defender:r.battle.defender_brigade}))}));
+assert.notEqual(rows[0].flat.defender_power,rows[1].flat.defender_power,'808 removal must be detected by predictor');

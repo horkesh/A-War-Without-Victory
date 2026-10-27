@@ -1,3 +1,4 @@
+import { collectSectorDefenseBrigades } from './sector_defense_roster.js';
 /**
  * ═══════════════════════════════════════════════════════════════
  * OWNERSHIP: Execution-Only
@@ -111,7 +112,6 @@ import {
     DEFENDER_CASUALTY_ENGAGEMENT_CAP,
     bfsDistanceFriendly,
     getReactiveDistanceWeight,
-    ANCHOR_GARRISON_LOAN_MAX_HOPS,
     HOME_DEFENSE_REACTIVE_BONUS,
     SECTOR_STANCE_REACTIVE_BONUS,
     getWarExhaustionTempoMult,
@@ -131,9 +131,7 @@ import { emitOperationCaptureOwnershipRecord, isReasonCodeTopicEnabled, whenReas
 import { ENABLE_TG_COMBAT_SYNTHESIS } from './tactical_group_config.js';
 import { distributeCasualtiesAcrossTg } from './tactical_group_casualties.js';
 import {
-    getStandingOgDefenseBrigadeIds,
     getStandingOgEngagedDefenseBrigadeIds,
-    isStandingOgDefenseBrigadeAvailable,
 } from './standing_og_defense.js';
 // ADR-0005 v2.2c #2: Hard Invariant #6 — immediate dissolution on anchor destruction.
 import { dissolveTacticalGroup, TG_ANCHOR_DISSOLVE_COHESION_FLOOR } from './tactical_group_lifecycle.js';
@@ -371,40 +369,6 @@ function getAttackIntelConfidence(
         ?.find(entry => entry.osid === targetOsid)
         ?.confidence;
     return osidConfidence ?? record.confidence;
-}
-
-function formationBelongsToCorps(formation: FormationState, corpsId: string): boolean {
-    if ((formation as { corps_id?: string }).corps_id === corpsId) return true;
-    return (formation.tags ?? []).includes(`corps:${corpsId}`);
-}
-
-function findEmptySectorAdjacentDefenders(
-    state: GameState,
-    sector: NonNullable<GameState['military']['corps_front_sectors']>[string] | undefined,
-    targetOsid: string,
-    controller: FactionId,
-    adjacency: Map<string, string[]>,
-): FormationState[] {
-    if (!sector) return [];
-    const territory = new Set<string>(sector.territory_osids ?? []);
-    for (const segment of sector.sub_segments ?? []) {
-        for (const osid of segment.friendly_osids ?? []) territory.add(osid);
-    }
-
-    return Object.values(state.military.formations ?? {})
-        .filter((formation): formation is FormationState => {
-            if (!formation || formation.status !== 'active') return false;
-            if (formation.faction !== controller) return false;
-            if (!formationBelongsToCorps(formation, sector.corps_id)) return false;
-            if (!isStandingOgDefenseBrigadeAvailable(state, formation.id)) return false;
-            if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) return false;
-            const locOsid = (formation as { location_osid?: string }).location_osid;
-            if (!locOsid || locOsid === targetOsid) return false;
-            if (!territory.has(locOsid)) return false;
-            if (getPoliticalControllerOSID(state, locOsid, undefined) !== controller) return false;
-            return bfsDistanceFriendly(locOsid, targetOsid, adjacency, state.political?.political_controllers ?? {}, controller) === 1;
-        })
-        .sort((a, b) => strictCompare(a.id, b.id));
 }
 
 function getIntelConfidenceBand(confidence: number): IntelConfidenceBand {
@@ -801,44 +765,9 @@ export function resolveAttackOrdersOsid(
             // Phase B: identify which sub-segment is responsible for this OSID
             const defendingSubSeg = sector ? findSubSegmentForOsid(sector, targetOsid) : undefined;
             defendingSubSegmentId = defendingSubSeg?.sub_segment_id;
-            // Anchor-garrison guard: a brigade standing on its own corps's scenario-authored
-            // must-hold OSID is that anchor's dedicated garrison. It remains fully available
-            // to defend its own OSID, and may still reactively help a genuinely nearby fight
-            // (within ANCHOR_GARRISON_LOAN_MAX_HOPS), but is not loaned out as a distance-
-            // weighted contributor (and casualty-share recipient) to a DISTANT OSID under
-            // attack elsewhere in the sector — that grinds down the very unit the anchor
-            // depends on, by proxy, before its own position is ever directly assaulted.
-            const corpsMustHoldOsids = sector ? (state.military.must_hold_osids_by_corps?.[sector.corps_id] ?? []) : [];
-            const sectorBrigades = sector
-                ? getStandingOgDefenseBrigadeIds(sector)
-                    .map(id => state.military.formations?.[id])
-                    .filter((f): f is FormationState =>
-                        f != null
-                        && f.status === 'active'
-                        && isStandingOgDefenseBrigadeAvailable(state, f.id)
-                    )
-                    .filter((f) => {
-                        const bLoc = (f as { location_osid?: string }).location_osid;
-                        if (!bLoc || !corpsMustHoldOsids.includes(bLoc) || bLoc === targetOsid) return true;
-                        const loanHops = bfsDistanceFriendly(bLoc, targetOsid, adjacency, pc, controller!);
-                        return loanHops <= ANCHOR_GARRISON_LOAN_MAX_HOPS;
-                    })
-                : [];
-            for (const physicalDefender of defenderFormations) {
-                if (!sectorBrigades.some((brigade) => brigade.id === physicalDefender.id)) {
-                    sectorBrigades.push(physicalDefender);
-                }
-            }
-            if (sectorBrigades.length === 0 && sector) {
-                sectorBrigades.push(...findEmptySectorAdjacentDefenders(
-                    state,
-                    sector,
-                    targetOsid,
-                    controller!,
-                    adjacency,
-                ));
-            }
-            sectorBrigades.sort((a, b) => strictCompare(a.id, b.id));
+            const sectorBrigades = collectSectorDefenseBrigades(
+                state, sector, targetOsid, controller!, adjacency, defenderFormations,
+            );
             if (sectorBrigades.length > 0) {
                 const { primary, totalPower } = rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
                 const avgBrigadePower = totalPower / sectorBrigades.length;
