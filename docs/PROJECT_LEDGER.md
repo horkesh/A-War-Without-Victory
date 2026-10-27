@@ -9,6 +9,37 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-27 — Zero-sector rescue honors donor commitments
+
+Diagnosis: exact same-source runtime/report replay turn19→20 traced the
+partition-corps-front-sectors → ensureMinimumSectorCoverage zero-assigned rescue to
+moveBrigadeToFrontTarget moving an active operation participant away from assembly. The four early
+physical rescue paths (promote-reserve, promote-rear, pull-rear, pull-reserve) lacked the commitment
+eligibility already enforced by isSectorUnstaffableByFaction. This was a missing selector guard, not
+emergency-defense authority. Systems Manual line 207 keeps active participants on operation
+objectives and permits donor commitments to leave fronts understaffed.
+
+Fix: local isZeroAssignedRescueEligible predicate inside ensureMinimumSectorCoverage, reusing
+buildOperationParticipantSet and existing state fields, applied only to those four paths. Excludes
+operation participants, disrupted units, current/pending dig_in, loaned units, any pending movement
+order (ownerless/manual included), and non-deployed movement (packing/transit). Sorting, thresholds,
+reachability, home-distance, enclave/occupancy behavior, legal-donor contracts, and all other
+selectors unchanged. No history/roster/objectives/physics or calibration edits; no canon rewrite.
+
+Tests: new describe 'zero-sector rescue ownership' in
+tests/sector_severe_undercoverage_rebalance.test.ts covers all four paths, planning/execution
+operation ownership under both occupancy strategies, current/pending dig_in, disruption, loans,
+manual orders, and packing/transit, with uncommitted positive controls and unchanged protected
+location/placement/orders. RED before source edit: 6 failed / 0 passed / 17 skipped. After patch:
+new 6/6 pass, existing 17/17 pass, the other seven targeted suites pass, tsc clean.
+
+Limitations/gaps: official startup --check still reports apr_1992 artifact drift; the official
+regeneration command exited 1 and left data/derived/startup/apr_1992_initial_save.json unchanged
+(git diff --stat empty), so startup_snapshot_contract remains 17/19 (2 drift assertions). It was not
+hand-edited or forced. This bounded fix preserves the pre-existing direct relocation of uncommitted
+donors; it does not introduce delayed movement. That direct-relocation behavior is narrower than the
+Systems Manual delayed-movement text and remains a separate pre-existing gap.
+
 ## 2026-10-05 — Original dirty517 source provenance requested; criterion remains open
 
 097 six primary receipts0; first top-level-only metadata view preserved with the

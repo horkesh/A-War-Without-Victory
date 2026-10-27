@@ -6151,7 +6151,7 @@
         "territory_osids": [
           "op:bihac:orasac_2"
         ],
-        "threat_ratio": 9999,
+        "threat_ratio": 0,
         "unstaffed_front": true
       },
       "sector:arbih_5th_corps:1": {
@@ -7924,7 +7924,7 @@
           "op:prozor:prozor_2",
           "op:prozor:rumboci_2"
         ],
-        "threat_ratio": 187.9465672569121
+        "threat_ratio": 129.21326498912705
       },
       "sector:vrs_1st_krajina:0": {
         "assigned_brigade_ids": [
@@ -9807,12 +9807,10 @@
         "threat_ratio": 0
       },
       "sector:vrs_2nd_krajina:0": {
-        "assigned_brigade_ids": [
-          "rs_1st_drvar_light_infantry"
-        ],
+        "assigned_brigade_ids": [],
         "corps_id": "vrs_2nd_krajina",
-        "defensive_power": 80.4,
-        "density": 0.25,
+        "defensive_power": 0,
+        "density": 0,
         "edge_ids": [
           "op:bihac:orasac_2__op:bihac:racic",
           "op:bihac:orasac_2__op:bihac:trubar",
@@ -9825,7 +9823,9 @@
           "RBiH"
         ],
         "rear_brigade_ids": [],
-        "reserve_brigade_ids": [],
+        "reserve_brigade_ids": [
+          "rs_1st_drvar_light_infantry"
+        ],
         "sector_id": "sector:vrs_2nd_krajina:0",
         "sector_stance": "defend",
         "stance_source": "bot",
@@ -9861,7 +9861,8 @@
           "op:bosansko_grahovo:ugarci",
           "op:titov_drvar:drvar_2"
         ],
-        "threat_ratio": 0
+        "threat_ratio": 0,
+        "unstaffed_front": true
       },
       "sector:vrs_2nd_krajina:1": {
         "assigned_brigade_ids": [
@@ -9918,12 +9919,11 @@
       },
       "sector:vrs_2nd_krajina:2": {
         "assigned_brigade_ids": [
-          "rs_7th_krajina_motorized",
-          "rs_9th_grahovo_light_infantry"
+          "rs_7th_krajina_motorized"
         ],
         "corps_id": "vrs_2nd_krajina",
-        "defensive_power": 37.58034602076125,
-        "density": 0.11764705882352941,
+        "defensive_power": 19.731487889273353,
+        "density": 0.058823529411764705,
         "edge_ids": [
           "op:bugojno:vesela_2__op:kupres:goravci",
           "op:bugojno:vesela_2__op:kupres:kupres_2",
@@ -10011,7 +10011,7 @@
           "op:kupres:kupres_2",
           "op:livno:gubin_2"
         ],
-        "threat_ratio": 32.995970801199185
+        "threat_ratio": 62.84371492704827
       },
       "sector:vrs_2nd_krajina:3": {
         "assigned_brigade_ids": [
@@ -10218,11 +10218,12 @@
       },
       "sector:vrs_2nd_krajina:7": {
         "assigned_brigade_ids": [
-          "rs_17th_klju_light_infantry"
+          "rs_17th_klju_light_infantry",
+          "rs_9th_grahovo_light_infantry"
         ],
         "corps_id": "vrs_2nd_krajina",
-        "defensive_power": 30.770370370370372,
-        "density": 0.1111111111111111,
+        "defensive_power": 69.48148148148148,
+        "density": 0.2222222222222222,
         "edge_ids": [
           "op:bosanski_petrovac:jasenovac_2__op:kljuc:hadzici",
           "op:kljuc:donje_ratkovo_2__op:kljuc:kljuc_2",
@@ -23274,7 +23275,7 @@
         "activation_turn": null,
         "assignment": {
           "kind": "sector",
-          "role": "front",
+          "role": "reserve",
           "sector_id": "sector:vrs_2nd_krajina:0"
         },
         "cohesion": 67,
@@ -23308,7 +23309,6 @@
             "STATIC_DEFENSE": false
           }
         },
-        "entrenchment_turns": 0,
         "equipment_class": "mountain",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -23324,7 +23324,7 @@
         "hq_sid": "op:titov_drvar:drvar_2",
         "id": "rs_1st_drvar_light_infantry",
         "kind": "brigade",
-        "location_osid": "op:bihac:trubar",
+        "location_osid": "op:titov_drvar:drvar_2",
         "max_personnel": 2000,
         "morale": 60,
         "name": "1st Drvar Light Infantry",
@@ -27074,7 +27074,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_2nd_krajina:2"
+          "sector_id": "sector:vrs_2nd_krajina:7"
         },
         "cohesion": 67,
         "composition": {
@@ -27123,7 +27123,7 @@
         "hq_sid": "op:bosansko_grahovo:bosansko_grahovo_2",
         "id": "rs_9th_grahovo_light_infantry",
         "kind": "brigade",
-        "location_osid": "op:livno:gubin_2",
+        "location_osid": "op:bosanski_petrovac:jasenovac_2",
         "max_personnel": 2000,
         "morale": 60,
         "name": "9th Grahovo Light Infantry",

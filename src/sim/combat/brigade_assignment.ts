@@ -1581,6 +1581,27 @@ export function ensureMinimumSectorCoverage(
     const opParticipants = buildOperationParticipantSet(state);
     const brigadeMovementState = state?.military.brigade_movement_state;
     const brigadeMovementOrders = state?.military.brigade_movement_orders;
+    const pendingDigIn = new Set<FormationId>(
+        (state?.military.brigade_posture_orders ?? [])
+            .filter((order) => order.posture === 'dig_in')
+            .map((order) => order.brigade_id),
+    );
+    // A zero-assigned physical rescue may only move a brigade with no standing
+    // commitment. This mirrors isSectorUnstaffableByFaction's legal-donor contract:
+    // operation participants follow their operation, and disrupted, digging-in,
+    // loaned, or already-moving units are not free reserves.
+    const isZeroAssignedRescueEligible = (bid: FormationId): boolean => {
+        const formation = formations[bid];
+        if (!formation?.location_osid) return false;
+        if (opParticipants.has(bid)) return false;
+        if ((formation.disrupted_turns ?? 0) > 0 || formation.disrupted === true) return false;
+        if (formation.posture === 'dig_in' || pendingDigIn.has(bid)) return false;
+        if (formation.elite_loan_state?.on_loan) return false;
+        if (brigadeMovementOrders?.[bid]) return false;
+        const movementState = brigadeMovementState?.[bid];
+        if (movementState && movementState.status !== 'deployed') return false;
+        return true;
+    };
     const LOCAL_FRONT_RELIEF_MAX_HOPS = 3;
     const FRONT_DONOR_HOME_DISTANCE_MAX_HOPS = 4;
 
@@ -1882,6 +1903,7 @@ export function ensureMinimumSectorCoverage(
                 const activeCounts = freshActiveCounts();
                 for (let ri = 0; ri < sector.reserve_brigade_ids.length; ri++) {
                     const bid = sector.reserve_brigade_ids[ri]!;
+                    if (!isZeroAssignedRescueEligible(bid)) continue;
                     const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, activeCounts);
                     if (target) {
                         if (!targetPreservesHomeDistance(bid, target.target)) continue;
@@ -1902,6 +1924,7 @@ export function ensureMinimumSectorCoverage(
                 const rearCandidates = [...(sector.rear_brigade_ids ?? [])]
                     .sort(strictCompare)
                     .map((bid) => {
+                        if (!isZeroAssignedRescueEligible(bid)) return null;
                         const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, activeCounts);
                         if (target && !targetPreservesHomeDistance(bid, target.target)) return null;
                         return target ? { bid, dist: target.dist, target: target.target } : null;
@@ -1928,6 +1951,7 @@ export function ensureMinimumSectorCoverage(
                         return [...(donor.rear_brigade_ids ?? [])]
                             .sort(strictCompare)
                             .map((bid) => {
+                                if (!isZeroAssignedRescueEligible(bid)) return null;
                                 const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, activeCounts);
                                 if (target && !targetPreservesHomeDistance(bid, target.target)) return null;
                                 return target ? { donor, bid, dist: target.dist, target: target.target } : null;
@@ -1961,6 +1985,7 @@ export function ensureMinimumSectorCoverage(
                         return [...donor.reserve_brigade_ids]
                             .sort(strictCompare)
                             .map((bid) => {
+                                if (!isZeroAssignedRescueEligible(bid)) return null;
                                 const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, activeCounts);
                                 if (target && !targetPreservesHomeDistance(bid, target.target)) return null;
                                 return target ? { donor, bid, dist: target.dist, target: target.target } : null;

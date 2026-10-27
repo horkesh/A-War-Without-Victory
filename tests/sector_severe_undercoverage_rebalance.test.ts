@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { ensureMinimumSectorCoverage } from '../src/sim/combat/brigade_assignment.js';
+import {
+    ensureMinimumSectorCoverage,
+    type EnsureMinimumSectorCoverageOccupancyStrategy,
+} from '../src/sim/combat/brigade_assignment.js';
 import type {
     CorpsFrontSector,
     CorpsFrontSubSegment,
@@ -8,6 +11,14 @@ import type {
     FormationState,
 } from '../src/state/game_state.js';
 import type { Osid } from '../src/sim/combat/osid_adjacency.js';
+import type {
+    SectorTopologyNarrowBrigadeMovementOrder,
+    SectorTopologyNarrowBrigadeMovementState,
+    SectorTopologyNarrowBrigadePostureOrder,
+    SectorTopologyNarrowOperation,
+    SectorTopologyNarrowReadState,
+} from '../src/sim/combat/sector_topology_narrow_reads.js';
+import type { SectorTopologyWorkingFormation } from '../src/sim/combat/sector_topology_narrow_formation.js';
 
 function makeSubSegment(id: string, friendlyOsids: string[]): CorpsFrontSubSegment {
     return {
@@ -1188,4 +1199,324 @@ describe('ensureMinimumSectorCoverage severe undercoverage rebalance', () => {
         expect(formations.brig_donor_a.location_osid).toBe('op:donor:f1');
         expect(formations.brig_donor_reserve.location_osid).toBe('op:donor:rear_1');
     });
+});
+
+describe('zero-sector rescue ownership', () => {
+    const componentMap = (friendlyOsids: Set<string>): Map<string, number> => new Map(
+        [...friendlyOsids].map((osid) => [osid, 0] as const),
+    );
+
+    const makeState = (input: {
+        formations: Record<FormationId, SectorTopologyWorkingFormation>;
+        movementState?: Record<FormationId, SectorTopologyNarrowBrigadeMovementState>;
+        movementOrders?: Record<FormationId, SectorTopologyNarrowBrigadeMovementOrder>;
+        postureOrders?: SectorTopologyNarrowBrigadePostureOrder[];
+        activeOperations?: SectorTopologyNarrowOperation[];
+    }): SectorTopologyNarrowReadState => ({
+        meta: { turn: 7 },
+        political: {},
+        factions: [{ id: 'RS' }],
+        military: {
+            formations: input.formations,
+            brigade_movement_state: input.movementState,
+            brigade_movement_orders: input.movementOrders,
+            brigade_posture_orders: input.postureOrders,
+            corps_command: input.activeOperations
+                ? { corps_a: { active_operations: input.activeOperations } }
+                : undefined,
+        },
+    });
+
+    const run = (
+        sectors: CorpsFrontSector[],
+        formations: Record<FormationId, SectorTopologyWorkingFormation>,
+        adjacency: Map<Osid, Osid[]>,
+        friendlyOsids: Set<string>,
+        state?: SectorTopologyNarrowReadState,
+        occupancyStrategy: EnsureMinimumSectorCoverageOccupancyStrategy = 'dense-index',
+    ): void => {
+        ensureMinimumSectorCoverage(
+            sectors,
+            formations,
+            adjacency,
+            friendlyOsids,
+            componentMap(friendlyOsids),
+            state,
+            (_label, fn) => fn(),
+            occupancyStrategy,
+        );
+    };
+
+    it('promotes only an uncommitted own-sector reserve when commitments cover every other candidate', () => {
+        const recipient = makeSector({
+            sectorId: 'sector:corps_a:recipient',
+            frontOsids: ['op:recipient:f1', 'op:recipient:f2', 'op:recipient:f3'],
+            assigned: [],
+            threatRatio: 900,
+        });
+        const protectedIds = [
+            'brig_op_planning',
+            'brig_op_execution',
+            'brig_disrupted',
+            'brig_dig_current',
+            'brig_dig_pending',
+            'brig_loaned',
+            'brig_pending_order',
+            'brig_packing',
+            'brig_transit',
+        ];
+        recipient.reserve_brigade_ids = [...protectedIds, 'brig_reserve_ok'];
+
+        const formations: Record<FormationId, SectorTopologyWorkingFormation> = {};
+        for (const bid of [...protectedIds, 'brig_reserve_ok']) {
+            formations[bid] = makeFormation(bid, 'op:recipient:rear_1');
+        }
+        formations.brig_disrupted.disrupted_turns = 2;
+        formations.brig_dig_current.posture = 'dig_in';
+        formations.brig_loaned.elite_loan_state = {
+            on_loan: true,
+            loaned_to_corps: 'corps_b',
+            loan_start_turn: 1,
+        };
+
+        const movementState: Record<FormationId, SectorTopologyNarrowBrigadeMovementState> = {
+            brig_packing: { status: 'packing', destination_sids: ['op:recipient:f2'] },
+            brig_transit: { status: 'in_transit', stance: 'combat', destination_sids: ['op:recipient:f2'] },
+        };
+        const movementOrders: Record<FormationId, SectorTopologyNarrowBrigadeMovementOrder> = {
+            brig_pending_order: { destination_sids: ['op:recipient:f2'], stance: 'combat' },
+        };
+        const postureOrders: SectorTopologyNarrowBrigadePostureOrder[] = [
+            { brigade_id: 'brig_dig_pending', posture: 'dig_in' },
+        ];
+        const state = makeState({
+            formations,
+            movementState,
+            movementOrders,
+            postureOrders,
+            activeOperations: [
+                { type: 'attack', phase: 'planning', participating_brigades: ['brig_op_planning'] },
+                { type: 'attack', phase: 'execution', participating_brigades: ['brig_op_execution'] },
+            ],
+        });
+
+        const adjacency = makeAdjacency([
+            ['op:recipient:rear_1', 'op:recipient:f2'],
+        ]);
+        const friendlyOsids = new Set<string>([
+            ...recipient.territory_osids,
+            'op:recipient:rear_1',
+        ]);
+
+        run([recipient], formations, adjacency, friendlyOsids, state);
+
+        expect(recipient.assigned_brigade_ids).toEqual(['brig_reserve_ok']);
+        expect(recipient.reserve_brigade_ids).toEqual(protectedIds);
+        expect(formations.brig_reserve_ok.location_osid).toBe('op:recipient:f2');
+        for (const bid of protectedIds) {
+            expect(formations[bid]?.location_osid).toBe('op:recipient:rear_1');
+        }
+        expect(state.military.brigade_movement_orders).toEqual(movementOrders);
+        expect(state.military.brigade_movement_state).toEqual(movementState);
+        expect(state.military.brigade_posture_orders).toEqual(postureOrders);
+    });
+
+    it('promotes only an uncommitted own-sector rear when the rear group holds an operation participant', () => {
+        const recipient = makeSector({
+            sectorId: 'sector:corps_a:recipient',
+            frontOsids: ['op:recipient:f1', 'op:recipient:f2', 'op:recipient:f3'],
+            assigned: [],
+            threatRatio: 900,
+        });
+        recipient.rear_brigade_ids = ['brig_op_rear_planning', 'brig_rear_ok'];
+
+        const formations: Record<FormationId, SectorTopologyWorkingFormation> = {
+            brig_op_rear_planning: makeFormation('brig_op_rear_planning', 'op:recipient:rear_1'),
+            brig_rear_ok: makeFormation('brig_rear_ok', 'op:recipient:rear_1'),
+        };
+        const state = makeState({
+            formations,
+            activeOperations: [
+                { type: 'attack', phase: 'planning', participating_brigades: ['brig_op_rear_planning'] },
+            ],
+        });
+
+        const adjacency = makeAdjacency([
+            ['op:recipient:rear_1', 'op:recipient:f2'],
+        ]);
+        const friendlyOsids = new Set<string>([
+            ...recipient.territory_osids,
+            'op:recipient:rear_1',
+        ]);
+
+        run([recipient], formations, adjacency, friendlyOsids, state);
+
+        expect(recipient.assigned_brigade_ids).toEqual(['brig_rear_ok']);
+        expect(recipient.rear_brigade_ids).toEqual(['brig_op_rear_planning']);
+        expect(formations.brig_op_rear_planning.location_osid).toBe('op:recipient:rear_1');
+        expect(formations.brig_rear_ok.location_osid).toBe('op:recipient:f2');
+    });
+
+    it('pulls only an uncommitted sibling rear onto the recipient front', () => {
+        const recipient = makeSector({
+            sectorId: 'sector:corps_a:recipient',
+            frontOsids: ['op:recipient:f1', 'op:recipient:f2', 'op:recipient:f3'],
+            assigned: [],
+            threatRatio: 900,
+        });
+        const donor = makeSector({
+            sectorId: 'sector:corps_a:donor',
+            frontOsids: ['op:donor:f1', 'op:donor:f2'],
+            assigned: ['brig_donor_front'],
+            threatRatio: 40,
+        });
+        donor.rear_brigade_ids = ['brig_op_rear_execution', 'brig_rear_ok'];
+
+        const formations: Record<FormationId, SectorTopologyWorkingFormation> = {
+            brig_donor_front: makeFormation('brig_donor_front', 'op:donor:f1'),
+            brig_op_rear_execution: makeFormation('brig_op_rear_execution', 'op:donor:rear_1'),
+            brig_rear_ok: makeFormation('brig_rear_ok', 'op:donor:rear_1'),
+        };
+        const state = makeState({
+            formations,
+            activeOperations: [
+                { type: 'attack', phase: 'execution', participating_brigades: ['brig_op_rear_execution'] },
+            ],
+        });
+
+        const adjacency = makeAdjacency([
+            ['op:donor:rear_1', 'op:recipient:f2'],
+            ['op:donor:f1', 'op:donor:rear_1'],
+        ]);
+        const friendlyOsids = new Set<string>([
+            ...recipient.territory_osids,
+            ...donor.territory_osids,
+            'op:donor:rear_1',
+        ]);
+
+        run([recipient, donor], formations, adjacency, friendlyOsids, state);
+
+        expect(recipient.assigned_brigade_ids).toEqual(['brig_rear_ok']);
+        expect(donor.assigned_brigade_ids).toEqual(['brig_donor_front']);
+        expect(donor.rear_brigade_ids).toEqual(['brig_op_rear_execution']);
+        expect(formations.brig_op_rear_execution.location_osid).toBe('op:donor:rear_1');
+        expect(formations.brig_rear_ok.location_osid).toBe('op:recipient:f2');
+        expect(formations.brig_donor_front.location_osid).toBe('op:donor:f1');
+    });
+
+    it('pulls only an uncommitted sibling reserve onto the recipient front', () => {
+        const recipient = makeSector({
+            sectorId: 'sector:corps_a:recipient',
+            frontOsids: ['op:recipient:f1', 'op:recipient:f2', 'op:recipient:f3'],
+            assigned: [],
+            threatRatio: 900,
+        });
+        const donor = makeSector({
+            sectorId: 'sector:corps_a:donor',
+            frontOsids: ['op:donor:f1', 'op:donor:f2'],
+            assigned: ['brig_donor_front'],
+            threatRatio: 40,
+        });
+        donor.reserve_brigade_ids = [
+            'brig_op_reserve_execution',
+            'brig_dig_pending_reserve',
+            'brig_reserve_ok',
+        ];
+
+        const formations: Record<FormationId, SectorTopologyWorkingFormation> = {
+            brig_donor_front: makeFormation('brig_donor_front', 'op:donor:f1'),
+            brig_op_reserve_execution: makeFormation('brig_op_reserve_execution', 'op:donor:rear_1'),
+            brig_dig_pending_reserve: makeFormation('brig_dig_pending_reserve', 'op:donor:rear_1'),
+            brig_reserve_ok: makeFormation('brig_reserve_ok', 'op:donor:rear_1'),
+        };
+        const state = makeState({
+            formations,
+            postureOrders: [
+                { brigade_id: 'brig_dig_pending_reserve', posture: 'dig_in' },
+            ],
+            activeOperations: [
+                { type: 'attack', phase: 'execution', participating_brigades: ['brig_op_reserve_execution'] },
+            ],
+        });
+
+        const adjacency = makeAdjacency([
+            ['op:donor:rear_1', 'op:recipient:f2'],
+            ['op:donor:f1', 'op:donor:rear_1'],
+        ]);
+        const friendlyOsids = new Set<string>([
+            ...recipient.territory_osids,
+            ...donor.territory_osids,
+            'op:donor:rear_1',
+        ]);
+
+        run([recipient, donor], formations, adjacency, friendlyOsids, state);
+
+        expect(recipient.assigned_brigade_ids).toEqual(['brig_reserve_ok']);
+        expect(donor.assigned_brigade_ids).toEqual(['brig_donor_front']);
+        expect(donor.reserve_brigade_ids).toEqual([
+            'brig_op_reserve_execution',
+            'brig_dig_pending_reserve',
+        ]);
+        expect(formations.brig_op_reserve_execution.location_osid).toBe('op:donor:rear_1');
+        expect(formations.brig_dig_pending_reserve.location_osid).toBe('op:donor:rear_1');
+        expect(formations.brig_reserve_ok.location_osid).toBe('op:recipient:f2');
+        expect(formations.brig_donor_front.location_osid).toBe('op:donor:f1');
+    });
+
+    it.each(['dense-index', 'test-only-legacy-scan'] as const)(
+        'keeps planning and execution operation participants out of the zero-sector pull (%s occupancy)',
+        (occupancyStrategy) => {
+            const recipient = makeSector({
+                sectorId: 'sector:corps_a:recipient',
+                frontOsids: ['op:recipient:f1', 'op:recipient:f2', 'op:recipient:f3'],
+                assigned: [],
+                threatRatio: 900,
+            });
+            const donor = makeSector({
+                sectorId: 'sector:corps_a:donor',
+                frontOsids: ['op:donor:f1', 'op:donor:f2'],
+                assigned: ['brig_donor_front'],
+                threatRatio: 40,
+            });
+            donor.reserve_brigade_ids = [
+                'brig_a_planning',
+                'brig_a_execution',
+                'brig_z_free',
+            ];
+
+            const formations: Record<FormationId, SectorTopologyWorkingFormation> = {
+                brig_donor_front: makeFormation('brig_donor_front', 'op:donor:f1'),
+                brig_a_planning: makeFormation('brig_a_planning', 'op:donor:rear_1'),
+                brig_a_execution: makeFormation('brig_a_execution', 'op:donor:rear_1'),
+                brig_z_free: makeFormation('brig_z_free', 'op:donor:rear_1'),
+            };
+            const state = makeState({
+                formations,
+                activeOperations: [
+                    { type: 'attack', phase: 'planning', participating_brigades: ['brig_a_planning'] },
+                    { type: 'attack', phase: 'execution', participating_brigades: ['brig_a_execution'] },
+                ],
+            });
+
+            const adjacency = makeAdjacency([
+                ['op:donor:rear_1', 'op:recipient:f2'],
+                ['op:donor:f1', 'op:donor:rear_1'],
+            ]);
+            const friendlyOsids = new Set<string>([
+                ...recipient.territory_osids,
+                ...donor.territory_osids,
+                'op:donor:rear_1',
+            ]);
+
+            run([recipient, donor], formations, adjacency, friendlyOsids, state, occupancyStrategy);
+
+            expect(recipient.assigned_brigade_ids).toEqual(['brig_z_free']);
+            expect(donor.assigned_brigade_ids).toEqual(['brig_donor_front']);
+            expect(donor.reserve_brigade_ids).toEqual(['brig_a_planning', 'brig_a_execution']);
+            expect(formations.brig_a_planning.location_osid).toBe('op:donor:rear_1');
+            expect(formations.brig_a_execution.location_osid).toBe('op:donor:rear_1');
+            expect(formations.brig_z_free.location_osid).toBe('op:recipient:f2');
+            expect(formations.brig_donor_front.location_osid).toBe('op:donor:f1');
+        },
+    );
 });

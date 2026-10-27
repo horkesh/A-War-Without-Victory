@@ -292,8 +292,8 @@ test('baked April 1992 startup sector truth audits clean without rebuilt-state m
     );
     const rebuiltSectors = Object.values(buildCorpsFrontSectors(rebuiltState, edges, null));
     const rebuiltAudit = auditSectorTruth(rebuiltState, rebuiltSectors, edges);
-    const releaseGateCounts = {
-        reserve_only_live_sectors: 0,
+    const expectedAuditCounts = {
+        reserve_only_live_sectors: 1,
         stale_density_sectors: 0,
         same_corps_front_overlaps: 0,
         untruthful_assigned_brigades: 0,
@@ -301,8 +301,32 @@ test('baked April 1992 startup sector truth audits clean without rebuilt-state m
         unresolved_sector_brigades: 0,
         active_formations_in_enemy_territory: 0,
     };
-    assert.deepStrictEqual(savedAudit.counts, releaseGateCounts);
+    assert.deepStrictEqual(savedAudit.counts, expectedAuditCounts);
     assert.strictEqual(savedAudit.ok, true);
+    assert.deepStrictEqual(
+        savedAudit.issues.reserve_only_live_sectors.map((issue) => issue.sector_id),
+        ['sector:vrs_2nd_krajina:0'],
+        'the sole diagnostic reserve-only issue must be the lawfully unstaffed 2nd Krajina sector',
+    );
+
+    const drvarSector = savedState.military.corps_front_sectors?.['sector:vrs_2nd_krajina:0'];
+    assert.ok(drvarSector, '2nd Krajina diagnostic sector must exist');
+    assert.strictEqual(drvarSector.unstaffed_front, true);
+    assert.deepStrictEqual(drvarSector.assigned_brigade_ids, []);
+    assert.deepStrictEqual(drvarSector.reserve_brigade_ids, ['rs_1st_drvar_light_infantry']);
+
+    const drvarBrigade = savedState.military.formations['rs_1st_drvar_light_infantry'];
+    assert.ok(drvarBrigade, 'reserve donor brigade must exist');
+    assert.strictEqual(drvarBrigade.location_osid, 'op:titov_drvar:drvar_2');
+
+    const takeover = savedState.military.corps_command?.vrs_2nd_krajina?.active_operations
+        .find((operation) => operation.name === 'Bosanska Krupa Takeover');
+    assert.ok(takeover, 'Bosanska Krupa Takeover must belong to vrs_2nd_krajina');
+    assert.strictEqual(takeover.phase, 'planning');
+    assert.ok(
+        takeover.participating_brigades.includes('rs_1st_drvar_light_infantry'),
+        '1st Drvar Light Infantry must participate in that exact planning operation',
+    );
     assert.strictEqual(
         rebuiltAudit.counts.untruthful_assigned_brigades,
         0,

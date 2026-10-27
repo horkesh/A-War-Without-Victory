@@ -8,6 +8,13 @@ import { DIMENSION_WEIGHTS, initializeStrategicDimensions } from '../src/sim/eve
 import { deserializeState, serializeState } from '../src/state/serialize.js';
 import type { GameState } from '../src/state/game_state.js';
 
+// Immutable provenance fixture: exact bytes copied from commit
+// b371adc3e0935825649e5eda4e6bbd45a44a359d at
+// data/derived/startup/apr_1992_initial_save.json (the mutable derived startup
+// must not feed these historical byte expectations).
+const NEGOTIATION_FIXTURE_PATH = 'tests/fixtures/negotiation/b371_apr1992_initial_save.json';
+const NEGOTIATION_FIXTURE_SHA256 = '413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1';
+
 function makeState(overrides: Partial<GameState> = {}): GameState {
     return {
         meta: { turn: 10, phase: 'war', seed: 1, date: '1992-06-15', ...(overrides.meta ?? {}) },
@@ -31,7 +38,9 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
 
 describe('Negotiation Capital', () => {
     it('matches the immutable b371 legacy prelude and final canonical-byte matrix', () => {
-        const startup = readFileSync('data/derived/startup/apr_1992_initial_save.json', 'utf8');
+        const startupBytes = readFileSync(NEGOTIATION_FIXTURE_PATH);
+        expect(createHash('sha256').update(startupBytes).digest('hex')).toBe(NEGOTIATION_FIXTURE_SHA256);
+        const startup = startupBytes.toString('utf8');
         const digest = (value: string) => createHash('sha256').update(value).digest('hex');
         const complete = () => ({
             capital: { RBiH: createEmptyCapital(), RS: createEmptyCapital(), HRHB: createEmptyCapital() },
