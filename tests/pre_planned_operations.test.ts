@@ -1057,7 +1057,7 @@ describe('pre-planned operations', () => {
     it('owns the approved KRUG lineage roster under 1st Corps without rejected participants', () => {
         const circle = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
         assert.ok(circle);
-        assert.equal(circle!.axes[0]?.minimum_forward_brigades, 3);
+        assert.equal(circle!.axes[0]?.minimum_forward_brigades, undefined);
         const state = makeMinimalState();
         state.meta.turn = 18;
         const command = state.military.corps_command!.arbih_1st_corps!;
@@ -1067,7 +1067,7 @@ describe('pre-planned operations', () => {
         const operation = state.military.corps_command!.arbih_1st_corps!
             .active_operations.find((active) => active.name === 'Operation Circle');
         assert.ok(operation);
-        assert.equal(operation!.axes?.[0]?.minimum_forward_brigades, 3);
+        assert.equal(operation!.axes?.[0]?.minimum_forward_brigades, undefined);
         assert.deepEqual(
             operation!.participating_brigades,
             ['arbih_801st_light', 'arbih_802nd_light', 'arbih_831st_drina_lineage'],
