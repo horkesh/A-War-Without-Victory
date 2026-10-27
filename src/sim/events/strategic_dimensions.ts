@@ -1,6 +1,7 @@
 import type { DimensionId } from './event_types.js';
 import { clamp } from '../../utils/math.js';
 import { CANONICAL_FACTIONS } from '../../state/game_state.js';
+import { strictCompare } from '../../state/validateGameState.js';
 
 export const DIMENSION_IDS: DimensionId[] = [
     'military_credibility',
@@ -102,7 +103,8 @@ export function computeDimensionBaseValues(store: DimensionStore, state: any, fa
     // internal_cohesion: alliance + avg cohesion - exhaustion
     const alliance = state.political?.war_alliance_rbih_hrhb ?? 1;
     const allianceVal = (faction === 'RBiH' || faction === 'HRHB') ? alliance * 40 : 20;
-    const fmns = Object.values(state.military?.formations ?? {});
+    const formations = state.military?.formations ?? {};
+    const fmns = Object.keys(formations).sort(strictCompare).map((id: string) => formations[id]);
     const factionBrigades = fmns.filter((f: any) => f.faction === faction && f.kind === 'brigade' && f.status === 'active');
     const avgCohesion = factionBrigades.length > 0
         ? factionBrigades.reduce((s: number, b: any) => s + (b.cohesion ?? 50), 0) / factionBrigades.length
