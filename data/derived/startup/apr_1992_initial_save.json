@@ -11471,7 +11471,7 @@
           "rs_bilea_brigade"
         ],
         "corps_id": "vrs_herzegovina",
-        "defensive_power": 61.104,
+        "defensive_power": 183.312,
         "density": 0.2,
         "edge_ids": [
           "op:bileca:bileca_2__op:bileca:zausje",
@@ -27272,7 +27272,7 @@
         "id": "rs_bilea_brigade",
         "kind": "brigade",
         "location_osid": "op:bileca:bileca_2",
-        "max_personnel": 2000,
+        "max_personnel": 3000,
         "morale": 60,
         "name": "Bileća Brigade",
         "officer_quality": 0.55,
@@ -27281,7 +27281,7 @@
           "last_supplied_turn": null
         },
         "origin_mun": "bileca",
-        "personnel": 1000,
+        "personnel": 3000,
         "readiness": "active",
         "status": "active",
         "tags": [
@@ -28204,7 +28204,7 @@
       },
       "bileca:RS": {
         "available": 0,
-        "committed": 1000,
+        "committed": 3000,
         "exhausted": 0,
         "faction": "RS",
         "fatigue": 0,
