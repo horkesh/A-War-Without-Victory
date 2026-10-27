@@ -2749,7 +2749,7 @@
           "op:gorazde:kola",
           "op:gorazde:kolovarice"
         ],
-        "threat_ratio": 77.7000777000777
+        "threat_ratio": 103.60010360010361
       },
       "sector:arbih_1st_corps:3": {
         "assigned_brigade_ids": [
@@ -12043,7 +12043,7 @@
           "rs_foa_brigade"
         ],
         "corps_id": "vrs_herzegovina",
-        "defensive_power": 24.496875,
+        "defensive_power": 32.6625,
         "density": 0.0625,
         "edge_ids": [
           "op:cajnice:batotici__op:foca:prevrac",
@@ -12123,7 +12123,7 @@
           "op:foca:velenici_2",
           "op:foca:zavait_3"
         ],
-        "threat_ratio": 44.90368669473147
+        "threat_ratio": 33.6777650210486
       },
       "sector:vrs_herzegovina:9": {
         "assigned_brigade_ids": [],
@@ -27355,7 +27355,7 @@
           "last_supplied_turn": null
         },
         "origin_mun": "foca",
-        "personnel": 1500,
+        "personnel": 2000,
         "readiness": "active",
         "status": "active",
         "tags": [
@@ -28944,7 +28944,7 @@
       },
       "foca:RS": {
         "available": 0,
-        "committed": 1500,
+        "committed": 2000,
         "exhausted": 0,
         "faction": "RS",
         "fatigue": 0,
