@@ -303,3 +303,5 @@ All former single-topic backlog docs are archived to **docs/_old/40_reports/back
 ---
 
 *For implemented work, see [CONSOLIDATED_IMPLEMENTED.md](CONSOLIDATED_IMPLEMENTED.md). For lessons learned, see [CONSOLIDATED_LESSONS_LEARNED.md](CONSOLIDATED_LESSONS_LEARNED.md).*
+
+**2026-10-27 execution consistency — calibration HOLD:** [Candidate coverage and unresolved contracts](audits/20261027_EXECUTION_CONSISTENCY_CONTRACT.md) records known-input/authority/root repairs, owner-ratified fatigue rates, actual adapter/cold-reload checks and unresolved garrison/definitive-harness equivalence. Source review and aggregate acceptance remain required.

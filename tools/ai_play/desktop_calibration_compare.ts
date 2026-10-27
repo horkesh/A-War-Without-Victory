@@ -651,8 +651,15 @@ async function runComparison(baseDir: string, options: CliOptions) {
         readFile(snapshotPath, 'utf8'),
         readFile(sourcePath, 'utf8'),
     ]);
-    const scenario = JSON.parse(scenarioPayload) as { scenario_id?: string };
+    const scenario = JSON.parse(scenarioPayload) as { scenario_id?: string; use_harness_bots?: boolean };
     const scenarioId = scenario.scenario_id ?? 'unknown';
+    // These hashes bind the declared entrypoints only. Full qualification also
+    // requires the separately retained complete candidate/source manifest.
+    const entrypointPaths = ['src/desktop/desktop_sim.ts', 'src/sim/turn_pipeline.ts', 'tools/ai_play/desktop_calibration_compare.ts'];
+    const entrypointSourceSha256 = Object.fromEntries(await Promise.all(entrypointPaths.map(async path =>
+        [path, sha256(await readFile(resolve(baseDir, path), 'utf8'))] as const)));
+    const historicalEntrypointSha256 = sha256(await readFile(resolve(baseDir, 'src/scenario/scenario_runner.ts'), 'utf8'));
+
 
     let headlessState = (await loadStateFromPath(snapshotPath, baseDir)).state;
     const electronReplay = await loadElectronReplayBinding(
@@ -714,6 +721,27 @@ async function runComparison(baseDir: string, options: CliOptions) {
     const baseOutput = {
         schema_version: 1,
         comparison_kind: 'player_choice_vs_headless',
+        execution_profiles: {
+            gameplay: {
+                profile_id: 'live-equivalent-desktop-v1',
+                entrypoint: 'src/desktop/desktop_sim.ts#advanceTurn',
+                baseline_ops_applied: false,
+                scenario_source_sha256: sha256(scenarioPayload),
+                entrypoint_source_sha256: entrypointSourceSha256,
+                source_binding_scope: 'listed_entrypoints_only',
+                full_candidate_manifest_required: true,
+                qualification: 'evidence_only',
+            },
+            historical_regression: {
+                profile_id: 'definitive-harness-regression-v1',
+                entrypoint: 'src/scenario/scenario_runner.ts#runScenario',
+                entrypoint_source_sha256: historicalEntrypointSha256,
+                scenario_source_sha256: sha256(scenarioPayload),
+                source_scenario_use_harness_bots: scenario.use_harness_bots === true,
+                benchmark_authority: 'retained_original_targets_and_receipts',
+                qualifies_gameplay: false,
+            },
+        },
         scenario: {
             key,
             scenario_id: scenarioId,

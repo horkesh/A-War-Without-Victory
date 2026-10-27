@@ -392,6 +392,14 @@ describe('attack resolution intel execution friction', () => {
         };
         const alone = makeMultiAxis(false);
         const together = makeMultiAxis(true);
+        // Single-target forecasts intentionally do not assume another axis will execute.
+        // Test that the reserve estimate stays exclusive while real batch resolution
+        // divides mobile response; enemy fog remains a separate approximation.
+        const singleForecast = predictCombatOutcome(alone.state, 'brig_rs_1', 'op:rbih:target_a', buildOsidAdjacency(alone.edges), new Map(), {});
+        const batchForecast = predictCombatOutcome(together.state, 'brig_rs_1', 'op:rbih:target_a', buildOsidAdjacency(together.edges), new Map(), {});
+        expect(singleForecast).not.toBeNull();expect(batchForecast).not.toBeNull();
+        expect(batchForecast!.defender_power).toBe(singleForecast!.defender_power);
+        expect(batchForecast!.attacker_power).toBe(singleForecast!.attacker_power);
         const aloneBattle = resolveAttackOrdersOsid(alone.state, alone.edges, new Map<string, string[]>())
             .battles.find(b => b.target_osid === 'op:rbih:target_a');
         const togetherBattle = resolveAttackOrdersOsid(together.state, together.edges, new Map<string, string[]>())

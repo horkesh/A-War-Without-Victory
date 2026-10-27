@@ -1,7 +1,8 @@
+import {SimpleGeneralBot} from '../src/sim/bot/simple_general_bot.js';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { GameState } from '../src/state/game_state.js';
 import {
@@ -60,21 +61,25 @@ vi.mock('../src/map/front_edges.js', () => ({
     computeFrontEdges: vi.fn(() => []),
 }));
 
-vi.mock('../src/sim/bot/bot_manager.js', () => ({
-    BotManager: class {
-        constructor() {
+vi.mock('../src/sim/bot/bot_manager.js', async importOriginal => {
+    const {BotManager: Actual}=await importOriginal<typeof import('../src/sim/bot/bot_manager.js')>();
+    return {BotManager: class extends Actual {
+        constructor(...args: ConstructorParameters<typeof Actual>) {
+            super(...args);
             terrainProbe.observe('BotManager.constructor');
         }
 
-        runBots(): void {
+        runBots(...args: Parameters<InstanceType<typeof Actual>['runBots']>) {
             terrainProbe.observe('BotManager.runBots');
+            return super.runBots(...args);
         }
-    },
-}));
+    }};
+});
 
 vi.mock('../src/sim/turn_pipeline.js', () => ({
     assertTurnSuccess: vi.fn(),
-    runTurn: vi.fn(async (state: GameState) => {
+    runTurn: vi.fn(async (state: GameState, input: {dataBaseDir?:string}) => {
+        expect(input.dataBaseDir).toBeDefined();
         terrainProbe.observe('runTurn');
         const nextState = structuredClone(state);
         nextState.meta.turn += 1;
@@ -83,12 +88,15 @@ vi.mock('../src/sim/turn_pipeline.js', () => ({
 }));
 
 import { advanceTurn } from '../src/desktop/desktop_sim.js';
+import {runTurn} from '../src/sim/turn_pipeline.js';
 import { loadForestOsidSet, loadUrbanOsidSet } from '../src/sim/combat/combat_terrain_sets_node.js';
 
 terrainProbe.read = () => ({
     urban: getUrbanMult(terrainProbe.urbanOsid),
     forest: getForestMult(terrainProbe.forestOsid),
 });
+
+beforeEach(()=>{vi.spyOn(SimpleGeneralBot.prototype,'makeDecisions').mockReturnValue({});});
 
 const tempRoots: string[] = [];
 
@@ -137,6 +145,7 @@ function observedAtEveryConsumer(urban: number, forest: number): void {
 }
 
 afterEach(() => {
+    vi.restoreAllMocks();
     setUrbanOsidSet(new Set());
     setForestOsidSet(new Set());
     terrainProbe.observations = [];
@@ -237,4 +246,20 @@ describe('desktop combat terrain prerequisite', () => {
             expect(getForestMult('second:forest')).toBe(1);
         }
     });
+});
+
+describe('actual desktop smart-bot prepass authority',()=>{
+ it.each([0,1,2,3] as const)('respects player autonomy %s before the shared turn',async level=>{
+  const root=makeTempRoot();writeTerrainRoot(root,[],[]);
+  const state=makeDesktopState('RS');state.meta.autonomy_level=level;
+  state.military.formations={manual:{id:'manual',faction:'RS',status:'active',assignment:{kind:'sector',sector_id:'manual-sector'}},npc:{id:'npc',faction:'RBiH',status:'active',assignment:null}} as any;
+  state.military.front_posture={RS:{assignments:{edge:{edge_id:'edge',posture:'hold',weight:1}}}} as any;
+  vi.spyOn(SimpleGeneralBot.prototype,'makeDecisions').mockImplementation(function(this: SimpleGeneralBot){const assignments:Record<string,string>={};if(this.factionId==='RS')assignments.manual='edge';if(this.factionId==='RBiH')assignments.npc='edge';return {posture_assignments:{edge:'push'},formation_assignments:assignments};});
+  const original=JSON.stringify(state);const result=await advanceTurn(state,root);
+  expect(result.error).toBeUndefined();expect(JSON.stringify(state)).toBe(original);
+  expect(vi.mocked(runTurn).mock.lastCall?.[1]).toMatchObject({dataBaseDir:root});
+  expect(result.state.military.formations.manual.assignment).toEqual(level===0?{kind:'sector',sector_id:'manual-sector'}:{kind:'edge',edge_id:'edge'});
+  expect(result.state.military.front_posture?.RS?.assignments.edge.posture).toBe(level===0?'hold':'push');
+  expect(result.state.military.formations.npc.assignment).toEqual({kind:'edge',edge_id:'edge'});
+ });
 });

@@ -1,3 +1,5 @@
+import { isSupportBrigadeOnActiveOp } from './sector_offensive_axis_helpers.js';
+import {computeAttackForcePower, findTgForAnchor} from './attack_force_power.js';
 import { getAttackIntelConfidence } from './attack_intel_context.js';
 import { collectSectorDefenseBrigades } from './sector_defense_roster.js';
 /**
@@ -46,7 +48,6 @@ import type {
     FormationState,
     GameState,
     CorpsOperation,
-    TacticalGroup,
 } from '../../state/game_state.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
@@ -74,7 +75,7 @@ import {
 } from './ethnic_defense.js';
 import { isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
 import { getPostWashingtonJointPressureMultiplier } from '../early_war/washington_agreement.js';
-import { findBrigadeOperationAnywhere, countAxisConcentrationSupport, getBrigadeExecutionAttackPowerMult } from './corps_operation_helpers.js';
+import { findBrigadeOperationAnywhere } from './corps_operation_helpers.js';
 import { getBrigadeAxis } from './bot_brigade_ai_osid.js';
 import { resolveLinkedPreparationProbeBattle } from './operation_preparation.js';
 import { evacuateFormationsSeveredByCapture } from './salient_withdrawal.js';
@@ -85,19 +86,14 @@ import {
     // Constants used directly in resolver
     MILITIA_DEFENSE_RATIO,
     computeMilitiaDefensePower,
-    COORDINATION_PENALTY_2,
-    COORDINATION_PENALTY_3PLUS,
     STACKING_DEFENDER_SUPPORT,
-    POSTURE_ATTACK,
     COHESION_ATTACKER,
     // Functions (getMoraleResistFloor moved to attack_morale_absorption.ts)
-    getConcentrationBonus,
     getArtillerySuppression,
     getBombardmentCasualtyMult,
     getDefensiveFireMult,
     getSupplyMult,
     classifyOutcome,
-    computeAttackerPower,
     computeDefenderPower,
     getAttackerFirepowerDeficitMult,
     buildTerrainMultByOsid,
@@ -115,7 +111,6 @@ import {
     getReactiveDistanceWeight,
     HOME_DEFENSE_REACTIVE_BONUS,
     SECTOR_STANCE_REACTIVE_BONUS,
-    getWarExhaustionTempoMult,
     getIntelAmbushAttackerCasualtyMult,
     getIntelAmbushDefenderCasualtyMult,
     getIntelExecutionFrictionMultipliers,
@@ -124,8 +119,6 @@ import {
 // Nested default-OFF ambush-DEPTH amplifier (packet 20260605_INTEL_AMBUSH_FRICTION_DESIGN).
 import { isIntelAmbushDepthEnabled } from './intel_ambush_depth_gate.js';
 import { getAmbushDepthFactor } from './intel_ambush_depth.js';
-import { isSupportBrigadeOnActiveOp } from './sector_offensive_axis_helpers.js';
-import { SUPPORT_POWER_MULT } from './bot_constants.js';
 // REASON-CODE INSTRUMENTATION: env-gated, inert by default. See reason_code_debug.ts.
 import { emitOperationCaptureOwnershipRecord, isReasonCodeTopicEnabled, whenReasonCodeTopic } from './reason_code_debug.js';
 // ADR-0005 v2.2b: TG combat-power synthesis + casualty distribution. Flag-gated.
@@ -231,15 +224,6 @@ export { _displaceFormationsInEnemyTerritory as displaceFormationsInEnemyTerrito
  * Returns null when no TG matches — caller treats the attacker as a solo
  * physical brigade (v1 behavior).
  */
-function findTgForAnchor(state: GameState, brigadeId: string): TacticalGroup | null {
-    const tgs = state.military?.tactical_groups;
-    if (!tgs) return null;
-    for (const id of Object.keys(tgs).sort(strictCompare)) {
-        const tg = tgs[id];
-        if (tg && tg.anchor_brigade_id === brigadeId && tg.status !== 'dissolved') return tg;
-    }
-    return null;
-}
 
 /**
  * ADR-0005 Phase 4 (Fix 4) — territory-revert support. True if a friendly NON-TG
@@ -285,59 +269,6 @@ export function hasFriendlyNonTgHolder(
         return true;
     }
     return false;
-}
-
-/**
- * ADR-0005 v2.2c: aggregate donor combat power for all TG anchors in an attack,
- * using each donor's OWN stats (true per-donor power).
- *
- * For each donor of a TG anchored on an attacker, the contribution is the donor's
- * full-force power — `computeAttackerPower(donor, ...)`, which bakes in the donor's
- * equipment ratio (basePower), supply, disruption, fatigue, officer quality,
- * heavy-weapons-vs-target-terrain, home-distance (≈1.0 since donors stay home),
- * and morale — scaled by the donated fraction `personnel_lent / donor.personnel`.
- * The donated element fights at the ANCHOR's effective posture against the target's
- * terrain (it reinforces the anchor's assault), but is NOT a physical brigade, so it
- * does not receive the concentration multiplier (applied by the caller to physical
- * brigades only, per ADR-0005 §Battle resolution).
- *
- * This replaces the v2.2b proxy (which scaled the ANCHOR's per-personnel power by the
- * total donated fraction); v2.2c reflects donor-specific equipment/supply/cohesion so a
- * well-equipped donor lends more punch than a militia donor of equal headcount.
- *
- * Returned value is the SUM of donor contributions across all TG anchors in
- * `attackerFormations`. Caller multiplies by coordPenalty × seasonal × tempo.
- */
-function computeTgDonorPower(
-    state: GameState,
-    attackerFormations: FormationState[],
-    supplyStateByOsid: SupplyStateByOsidReport | null | undefined,
-    targetTerrainMult: number,
-    targetOsid: string,
-): number {
-    const formations = state.military?.formations ?? {};
-    let total = 0;
-    for (const a of attackerFormations) {
-        const tg = findTgForAnchor(state, a.id);
-        if (!tg) continue;
-        const anchorPosture = a.posture ?? 'defend';
-        const atkMult = POSTURE_ATTACK[anchorPosture] ?? 0;
-        const effectivePosture = atkMult > 0 ? anchorPosture : 'attack';
-        for (const d of tg.donor_contributions) {
-            const lent = d.personnel_lent;
-            if (lent <= 0) continue;
-            const donor = formations[d.brigade_id];
-            if (!donor) continue;
-            const donorPersonnel = donor.personnel ?? 0;
-            if (donorPersonnel <= 0) continue;
-            const donorRaw = computeAttackerPower(state, donor, supplyStateByOsid, effectivePosture, targetTerrainMult, targetOsid);
-            // Cap the lent fraction at 1.0: donor.personnel can drop below personnel_lent
-            // mid-op via the donor's own attrition; a donor never lends more than its current force.
-            const lentFraction = Math.min(1, lent / donorPersonnel);
-            total += donorRaw * lentFraction;
-        }
-    }
-    return total;
 }
 
 function getIntelConfidenceBand(confidence: number): IntelConfidenceBand {
@@ -927,60 +858,18 @@ export function resolveAttackOrdersOsid(
             }
         }
 
-        const coordPenalty = attackerFormations.length >= 3 ? COORDINATION_PENALTY_3PLUS : attackerFormations.length === 2 ? COORDINATION_PENALTY_2 : 1.0;
         const targetSlope = slopeByOsid[targetOsid] ?? 0;
         const seasonal = getSeasonalModifiers(currentTurn, startDate, targetSlope);
         const targetTerrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
-        // R13b op-level concentration mirror: amplify the concentration bonus
-        // when same-axis op-mates are within 2 hops of the target (theater
-        // coordination). Capped at 4 effective via Math.min to stay within
-        // the existing CONCENTRATION_BONUS_CAP=0.30. Same-axis (not whole op)
-        // scope prevents cross-axis amplification on Sarajevo ring / Drina.
-        let effectiveAttackerCount = attackerFormations.length;
         const opMatch = attackerOperationMatches.get(firstAttacker.id);
-        if (opMatch) {
-            const axis = getBrigadeAxis(opMatch.op, firstAttacker.id);
-            const sameAxisBrigades = axis?.assigned_brigades ?? opMatch.op.participating_brigades ?? [];
-            const attackerIds = new Set<FormationId>(attackerFormations.map(a => a.id));
-            effectiveAttackerCount += countAxisConcentrationSupport(
-                state,
-                sameAxisBrigades,
-                attackerIds,
-                adjacency,
-                targetOsid,
-            );
-        }
-        const concentrationBonus = getConcentrationBonus(Math.min(4, effectiveAttackerCount));
-        // Formations with attack orders attack at their posture — but postures with
-        // zero attack mult (defend, hold, dig_in) use 'attack' as minimum, since the
-        // attack order itself implies attack intent. Preserves 'assault' (1.2×) bonus.
-        const physicalPower = attackerFormations.reduce((s, a) => {
-            const posture = a.posture ?? 'defend';
-            const atkMult = POSTURE_ATTACK[posture] ?? 0;
-            const effectivePosture = atkMult > 0 ? posture : 'attack';
-            const rawPower = computeAttackerPower(state, a, supplyStateByOsid, effectivePosture, targetTerrainMult, targetOsid);
-            // Support brigades contribute reduced power — main brigade carries the assault
-            const supportMult = isSupportBrigadeOnActiveOp(state, a.id, a.corps_id) ? SUPPORT_POWER_MULT : 1.0;
-            const executionMult = getBrigadeExecutionAttackPowerMult(state, a.id);
-            return s + rawPower * supportMult * executionMult;
-        }, 0);
-        const tempoMult = getWarExhaustionTempoMult(state, attackerFaction); // P7: war exhaustion → attack tempo penalty
-        // Attacker firepower-deficit penalty: no-op (1.0) unless
-        // firepower_deficit_penalty_enabled and the defender has real heavy
-        // weapons the attacker cannot match. See getAttackerFirepowerDeficitMult doc.
         const firepowerDeficitMult = getAttackerFirepowerDeficitMult(
-            state,
-            attackerFormations,
+            state, attackerFormations,
             sectorDefenseBrigades ?? (defenderFormation ? [defenderFormation] : []),
         );
-        let attackerPower = physicalPower * coordPenalty * seasonal.attack_mult * concentrationBonus * tempoMult * firepowerDeficitMult;
-        // ADR-0005 v2.2b: TG donor personnel scales anchor combat output. Donors are
-        // NOT physical brigades sharing frontage; they do NOT get concentrationBonus.
-        // Flag-off: donor branch dead; attackerPower equals the original expression.
-        if (ENABLE_TG_COMBAT_SYNTHESIS) {
-            const donorPower = computeTgDonorPower(state, attackerFormations, supplyStateByOsid, targetTerrainMult, targetOsid);
-            attackerPower += donorPower * coordPenalty * seasonal.attack_mult * tempoMult;
-        }
+        const attackerPower = computeAttackForcePower(
+            state, attackerFormations, targetOsid, adjacency, targetTerrainMult,
+            seasonal.attack_mult, supplyStateByOsid, undefined, firepowerDeficitMult,
+        );
         defenderPower *= seasonal.defense_mult;
         const attackerIntelConfidence = getAttackIntelConfidence(
             state,

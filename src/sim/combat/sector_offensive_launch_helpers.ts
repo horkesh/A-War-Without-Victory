@@ -64,6 +64,7 @@ export interface OpeningAttackPredictionContext {
     adjacency: Map<string, string[]>;
     reverseMap: OperationalToCanonicalReverseMap;
     terrainMultByOsid: Record<string, number>;
+    slopeByOsid?: Record<string, number>;
     supplyStateByOsid?: SupplyStateByOsidReport | null;
     osidPopulationMap?: OsidPopulationMap | null;
     ethnicComposition?: OsidEthnicComposition | null;
@@ -853,7 +854,7 @@ export function axisHasExecutableOpeningAttack(
                 stagedSupportingBrigades,
                 predictionContext.supplyStateByOsid,
                 predictionContext.osidPopulationMap,
-                undefined,
+                predictionContext.slopeByOsid,
                 predictionContext.ethnicComposition,
                 undefined,
                 predictionContext.officerLookup,

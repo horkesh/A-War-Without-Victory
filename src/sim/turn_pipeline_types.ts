@@ -110,6 +110,8 @@ export type MunicipalityPopulation1991 = Record<
 
 export interface TurnInput {
     seed: string;
+    /** Explicit caller root for combat scalar/census files and fallback OSID data; omitted means CWD. */
+    dataBaseDir?: string;
     settlementEdges?: EdgeRecord[];
     /** Canonical SID graph used by campaign/peace mechanics. Its edge identity is deep-frozen at the turn boundary. */
     settlementGraph?: LoadedSettlementGraph;
@@ -426,7 +428,15 @@ export function setOperationalData(context: TurnContext, data: OperationalDataCa
     (context as OperationalDataContext).operationalData = data;
 }
 
-function operationalDataBaseDir(): string | undefined {
+/** Resolve a caller-owned combat data file without importing Node path in browser types. */
+export function turnDataFilePath(context: TurnContext, relativePath: string): string | undefined {
+    return context.input.dataBaseDir
+        ? `${context.input.dataBaseDir.replace(/[/\\]+$/, '')}/${relativePath}`
+        : undefined;
+}
+
+function operationalDataBaseDir(context: TurnContext): string | undefined {
+    if (context.input.dataBaseDir) return context.input.dataBaseDir;
     const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function'
         ? process.cwd()
         : '';
@@ -439,7 +449,7 @@ export function getOrLoadOperationalMapping(context: TurnContext): Promise<Opera
     if (existing) return Promise.resolve(existing.opData);
 
     const cachedContext = context as OperationalDataContext;
-    cachedContext.operationalMappingPromise ??= loadOperationalData(operationalDataBaseDir());
+    cachedContext.operationalMappingPromise ??= loadOperationalData(operationalDataBaseDir(context));
     return cachedContext.operationalMappingPromise;
 }
 
@@ -449,7 +459,7 @@ export function getOrLoadOperationalEdges(context: TurnContext): Promise<Operati
     if (existing) return Promise.resolve(existing.edges);
 
     const cachedContext = context as OperationalDataContext;
-    cachedContext.operationalEdgesPromise ??= loadOperationalEdges(operationalDataBaseDir());
+    cachedContext.operationalEdgesPromise ??= loadOperationalEdges(operationalDataBaseDir(context));
     return cachedContext.operationalEdgesPromise;
 }
 
@@ -459,7 +469,7 @@ export function getOrLoadOperationalCentroids(context: TurnContext): Promise<Ope
     if (existing) return Promise.resolve(existing.centroids);
 
     const cachedContext = context as OperationalDataContext;
-    cachedContext.operationalCentroidsPromise ??= loadOperationalCentroids(operationalDataBaseDir());
+    cachedContext.operationalCentroidsPromise ??= loadOperationalCentroids(operationalDataBaseDir(context));
     return cachedContext.operationalCentroidsPromise;
 }
 
@@ -676,19 +686,19 @@ export interface RecruitmentCatalogCache {
 
 let recruitmentCatalogCache: RecruitmentCatalogCache | null = null;
 
-export async function loadRecruitmentCatalog(): Promise<RecruitmentCatalogCache | null> {
-    const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
-    if (!baseDir) return null;
-    if (recruitmentCatalogCache && recruitmentCatalogCache.base_dir === baseDir) {
+export async function loadRecruitmentCatalog(baseDir?: string): Promise<RecruitmentCatalogCache | null> {
+    const selectedBaseDir = baseDir ?? (typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '');
+    if (!selectedBaseDir) return null;
+    if (recruitmentCatalogCache && recruitmentCatalogCache.base_dir === selectedBaseDir) {
         return recruitmentCatalogCache;
     }
     try {
         const [brigades, corps, municipality_hq_settlement] = await Promise.all([
-            loadOobBrigades(baseDir),
-            loadOobCorps(baseDir),
-            loadMunicipalityHqSettlement(baseDir)
+            loadOobBrigades(selectedBaseDir),
+            loadOobCorps(selectedBaseDir),
+            loadMunicipalityHqSettlement(selectedBaseDir)
         ]);
-        recruitmentCatalogCache = { base_dir: baseDir, brigades, corps, municipality_hq_settlement };
+        recruitmentCatalogCache = { base_dir: selectedBaseDir, brigades, corps, municipality_hq_settlement };
         return recruitmentCatalogCache;
     } catch {
         return null;

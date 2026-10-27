@@ -277,6 +277,7 @@ describe('war-phase step ordering', () => {
         // 190 at base commit e24ec2e15 as well.
         // +1 from prestage-deferred-historical-elites: emits the dated Main Staff
         // concentration march before column movement consumes it.
-        expect(stepNames.length).toBe(190);
+        // +1: current-turn-aware fatigue recovery runs after attack resolution.
+        expect(stepNames.length).toBe(191);
     });
 });

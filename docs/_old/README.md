@@ -20,3 +20,7 @@ Ignored/untracked legacy doc folders that were visible in the working tree but n
 ## 2026-06-15 Plan Archive Batch
 
 Archived 32 tracked `docs/plans/` artifacts with no detected inbound tracked references to `docs/_old/plans/superseded/`, plus the tracked legacy `docs/30_planning/_legacy/ART_DIRECTION_OIL_PAINT_EVENTS.md` file that surfaced during local legacy-folder quarantine. This first batch intentionally avoids files still linked from canon, engineering, reports, backlog, or project-ledger docs.
+
+## 2026-10-27 Roadmap status history
+
+[Superseded dated roadmap status paragraphs](plans/superseded/2026-10-27-master-roadmap-status-history.md) preserve the previous calibration measurements, branch references and owner instructions. The active MASTER_ROADMAP scope boundary now records the execution-consistency hold; no target or acceptance gate changed.

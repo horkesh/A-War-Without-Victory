@@ -1,3 +1,4 @@
+import {buildSlopeByOsid} from '../attack_retreat_displacement.js';
 /**
  * emit.ts — EMIT phase for v0.8 Corps Commander Intelligence.
  *
@@ -295,6 +296,7 @@ function predictDirectEnemyTargets(
     adjacency: Map<any, any>,
     terrainCache: Record<string, number> | null,
     osidPopulationMap?: CommanderBriefing['osid_population_map'],
+    slopeByOsid?: Record<string, number>,
 ): PredictedProbeTarget[] {
     if (directEnemyTargets.size === 0 || !briefing.state_ref || !briefing.reverse_map) {
         return [];
@@ -330,7 +332,7 @@ function predictDirectEnemyTargets(
             undefined,
             briefing.supply_by_osid ?? undefined,
             osidPopulationMap,
-            undefined,
+            slopeByOsid,
             briefing.ethnic_map ?? undefined,
             profilePrefix,
             officerCombatLookup,
@@ -788,7 +790,8 @@ function findLocalOccupationCandidateImpl(
         .filter((sector) => sector.corps_id === briefing.corps_id)
         .sort((left, right) => strictCompare(left.sector_id, right.sector_id));
     const formationById = Object.fromEntries(briefing.brigades.map((brigade) => [brigade.id, brigade]));
-    const terrainCache = buildTerrainCache(reverseMap);
+    const terrainCache = buildTerrainCache(reverseMap, briefing.terrain_data);
+    const slopeByOsid = buildSlopeByOsid(reverseMap, briefing.terrain_data);
     const candidates = (observation
         ? allocation.surplus_pool
         .filter((evaluation) => observeLocalOccupationSurplusPredicate(
@@ -957,6 +960,7 @@ function findLocalOccupationCandidateImpl(
                     briefing.spatial.adjacency as Map<any, any>,
                     terrainCache,
                     briefing.osid_population_map,
+                    slopeByOsid,
                 )[0]?.prediction;
                 const presentPrediction = prediction ?? null;
                 if (!observeLocalOccupationPredicate(predicates, 'prediction_present', presentPrediction != null)) {
@@ -1316,7 +1320,7 @@ function findLocalOccupationCandidateImpl(
                     participants.slice(1).sort(strictCompare),
                     briefing.supply_by_osid,
                     briefing.osid_population_map,
-                    undefined,
+                    slopeByOsid,
                     briefing.ethnic_map,
                     options.suppress_profile
                         ? undefined
@@ -2998,8 +3002,9 @@ function buildOperationsImpl(
                             const probeBrigLoc = briefing.brigades.find(b => b.id === probeBrigade.brigade_id)?.location_osid;
                             const terrainCache = botOrdersPerfTime(
                                 `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.terrainCache`,
-                                () => briefing.reverse_map ? buildTerrainCache(briefing.reverse_map) : null,
+                                () => briefing.reverse_map ? buildTerrainCache(briefing.reverse_map, briefing.terrain_data) : null,
                             );
+                            const slopeByOsid = briefing.reverse_map ? buildSlopeByOsid(briefing.reverse_map, briefing.terrain_data) : undefined;
                             if (adjacency && friendlySet && probeBrigLoc) {
                                 const enemyTargets = botOrdersPerfTime(
                                     `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.enemyTargets`,
@@ -3078,6 +3083,8 @@ function buildOperationsImpl(
                                         directEnemyTargets,
                                         adjacency as Map<any, any>,
                                         terrainCache,
+                                        briefing.osid_population_map,
+                                        slopeByOsid,
                                     ),
                                 );
                                 const predictedTargetByOsid = botOrdersPerfTime(

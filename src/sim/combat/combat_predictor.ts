@@ -1,3 +1,5 @@
+import {getPostWashingtonJointPressureMultiplier} from '../early_war/washington_agreement.js';
+import {computeAttackForcePower} from './attack_force_power.js';
 import { getAttackIntelConfidence } from './attack_intel_context.js';
 import { collectSectorDefenseBrigades } from './sector_defense_roster.js';
 /**
@@ -52,8 +54,6 @@ import {
     BASE_DEFENDER_LOSS_RATE,
     MILITIA_DEFENSE_RATIO,
     computeMilitiaDefensePower,
-    COORDINATION_PENALTY_2,
-    COORDINATION_PENALTY_3PLUS,
     STACKING_DEFENDER_SUPPORT,
     MAX_ENTRENCHMENT,
     OUTCOME_ATTACKER_MOD,
@@ -63,7 +63,6 @@ import {
     getArtillerySuppression,
     getIntelExecutionFrictionMultipliers,
     classifyOutcome,
-    computeAttackerPower,
     computeDefenderPower,
     type OfficerCombatLookup,
     buildTerrainMultByOsid,
@@ -83,7 +82,6 @@ import {
 import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sectors.js';
 import { getEnclaveGarrisonPower } from './enclave_resilience.js';
 import { getSectorPairIntelConfidence } from './sector_intel.js';
-import { getBrigadeExecutionAttackPowerMult } from './corps_operation_helpers.js';
 import { buildLocalFrontDensityModifierByFormationIdForSector } from './local_front_defense.js';
 
 // Backward-compat re-export
@@ -105,6 +103,14 @@ const FOG_BASE = 0.70;
 const FOG_INTEL_SCALE = 0.25;
 /** After retreat, local intel is always good — cap applies. */
 const FOG_AFTER_RETREAT_CAP = 0.95;
+
+/** Same uncertainty for organized defenders and enemy dynamic garrison estimates. */
+function defenderEstimateFog(state: GameState, attackerOsid: string, sectorId: string | undefined, learned: boolean): number {
+    const confidence = sectorId ? getSectorPairIntelConfidence(state, attackerOsid, sectorId) : 0;
+    const fog = FOG_BASE + FOG_INTEL_SCALE * confidence;
+    return learned ? Math.max(fog, FOG_AFTER_RETREAT_CAP) : fog;
+}
+
 
 /** Predicted outcome → numeric score for bot target scoring. */
 export const OUTCOME_SCORE: Record<CombatOutcome, number> = {
@@ -277,10 +283,11 @@ export function predictCombatOutcome(
 
     const attackerFaction = attacker.faction;
 
-    const allAttackerIds = [attackerId, ...(additionalAttackers ?? [])];
+    const allAttackerIds = [...new Set([attackerId, ...(additionalAttackers ?? [])])].sort(strictCompare);
     const attackerFormations = allAttackerIds
         .map(id => state.military.formations?.[id])
-        .filter((f): f is FormationState => f != null && f.status === 'active');
+        .filter((f): f is FormationState => f != null && f.status === 'active'
+            && !!f.location_osid && getTacticalAdjacentOsids(state, f.location_osid, adjacency).includes(targetOsid));
     if (attackerFormations.length === 0) return null;
 
     let defenderFormations: FormationState[] | null = null;
@@ -356,7 +363,7 @@ export function predictCombatOutcome(
                 () => rankDefendersByPowerWithEntries(sectorBrigades, sector, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus, profilePrefix, officerLookup),
             );
             const avgBrigadePower = totalPower / sectorBrigades.length;
-            const attackerCount = 1 + (additionalAttackers?.length ?? 0);
+            const attackerCount = attackerFormations.length;
             const targetMun = munFromOsid(targetOsid);
             const pc = state.political?.political_controllers ?? {};
 
@@ -409,10 +416,7 @@ export function predictCombatOutcome(
             const baseDef = physicalPower + reactiveResponse;
             const minFloor = avgReactivePower * MIN_DEFENSE_FLOOR_FRACTION;
             // Intel-scaled fog: look up sector-pair confidence for this attacker vs defender sector
-            const sectorConf = sector ? getSectorPairIntelConfidence(state, attackerLoc, sector.sector_id) : 0;
-            const intelFog = FOG_BASE + FOG_INTEL_SCALE * sectorConf;
-            // After retreat/repulse, brigade has direct combat intel — fog is at least FOG_AFTER_RETREAT_CAP
-            const fogMult = learnedFromTarget ? Math.max(intelFog, FOG_AFTER_RETREAT_CAP) : intelFog;
+            const fogMult = defenderEstimateFog(state, attackerLoc, sector?.sector_id, learnedFromTarget);
             const localMilitiaDefensePower = computeMilitiaDefensePower(osidPopulationMap?.get(targetOsid));
             const sectorDefenderPower = applyMinimumSectorDefenseFloor(
                 baseDef,
@@ -422,11 +426,19 @@ export function predictCombatOutcome(
             const defenderFloor = physicalDefenders.length === 0
                 ? Math.max(sectorDefenderPower, localMilitiaDefensePower)
                 : sectorDefenderPower;
-            defenderPower = defenderFloor * fogMult;
-            defenderFormation = primary;
-            sectorDefBrigades = sectorBrigades;
-            defenderDisrupted = ((defenderFormation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true;
-            defenderCohesion = defenderFormation.cohesion ?? 60;
+            // A noncontributing roster is the same militia path as no roster.
+            // Do not give its militia a brigade-confidence discount.
+            defenderPower = contributingBrigadeCount > 0
+                ? defenderFloor * fogMult
+                : localMilitiaDefensePower;
+            // A paper roster with no physically/reactively contributing brigade
+            // resolves as militia. Its remote morale, entrenchment and casualty base
+            // cannot supply organized-defender metadata to the forecast.
+            defenderHasBrigade = contributingBrigadeCount > 0;
+            defenderFormation = defenderHasBrigade ? primary : null;
+            sectorDefBrigades = defenderHasBrigade ? sectorBrigades : null;
+            defenderDisrupted = defenderFormation != null && ((defenderFormation.disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true);
+            defenderCohesion = defenderFormation?.cohesion ?? 60;
         } else {
             const fallbackDefenders = getDefenderFormations();
             if (fallbackDefenders.length > 0) {
@@ -439,7 +451,7 @@ export function predictCombatOutcome(
                     '.rankDefendersByPower',
                     () => rankDefendersByPower(fallbackDefenders, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus),
                 );
-                const noSectorFog = learnedFromTarget ? FOG_AFTER_RETREAT_CAP : FOG_BASE;
+                const noSectorFog = defenderEstimateFog(state, attackerLoc, undefined, learnedFromTarget);
                 defenderPower = totalPower * noSectorFog;
                 defenderFormation = primary;
                 defenderDisrupted = ((defenderFormation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true;
@@ -460,7 +472,7 @@ export function predictCombatOutcome(
                 '.rankDefendersByPower',
                 () => rankDefendersByPower(fallbackDefenders, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus),
             );
-            const noSectorFog2 = learnedFromTarget ? FOG_AFTER_RETREAT_CAP : FOG_BASE;
+            const noSectorFog2 = defenderEstimateFog(state, attackerLoc, undefined, learnedFromTarget);
             defenderPower = totalPower * noSectorFog2;
             defenderFormation = primary;
             defenderDisrupted = ((defenderFormation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true;
@@ -474,29 +486,32 @@ export function predictCombatOutcome(
     const garrisonPower = getEnclaveGarrisonPower(
         state, targetOsid, osidPopulationMap?.get(targetOsid) ?? 0
     );
-    defenderPower += garrisonPower;
+    // The owner extended the existing confidence rule to this enemy estimate.
+    // Apply it once to the full garrison estimate; actual battle power is unchanged.
+    const garrisonFog = isEnemyControlled && garrisonPower > 0
+        ? defenderEstimateFog(state, attackerLoc, defendingSectorId, learnedFromTarget)
+        : 1;
+    defenderPower += garrisonPower * garrisonFog;
+    // Coalition geography is public; this is not hidden enemy OPSEC.
+    defenderPower *= getPostWashingtonJointPressureMultiplier(state, controller, attackerFaction, targetOsid);
 
-    const coordPenalty = attackerFormations.length >= 3 ? COORDINATION_PENALTY_3PLUS
-        : attackerFormations.length === 2 ? COORDINATION_PENALTY_2 : 1.0;
     const targetSlope = slopeByOsid?.[targetOsid] ?? 0;
     const seasonal = getSeasonalModifiers(currentTurn, state.meta?.scenario_start_date, targetSlope);
-    // Predictor default: 'attack' posture (if no override provided, assume attack intent).
-    // Resolver default: 'defend' (formation.posture is always set for ordered brigades).
-    const effectivePosture = attackerPosture ?? 'attack';
     const targetTerrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
     // Known own-force execution friction is not enemy fog. Keep the latter's
     // existing discount and do not inspect hidden defender OPSEC here.
     const ownExecutionMult = getIntelExecutionFrictionMultipliers(
-        getAttackIntelConfidence(state, attackerLoc, defendingSectorId, targetOsid),
+        getAttackIntelConfidence(state, attackerFormations[0]?.location_osid ?? attackerLoc, defendingSectorId, targetOsid),
         false,
     ).attackerPowerMult;
     const attackerPower = predictorPerfTime(
         profilePrefix,
         '.attackerPower',
-        () => attackerFormations.reduce(
-            (s, a) => s + computeAttackerPower(state, a, supplyStateByOsid, effectivePosture, targetTerrainMult, targetOsid)
-                * getBrigadeExecutionAttackPowerMult(state, a.id), 0
-        ) * coordPenalty * seasonal.attack_mult * ownExecutionMult,
+        () => computeAttackForcePower(
+            state, attackerFormations, targetOsid, adjacency, targetTerrainMult,
+            seasonal.attack_mult, supplyStateByOsid,
+            attackerPosture ? new Map([[attackerId, attackerPosture]]) : undefined,
+        ) * ownExecutionMult,
     );
     defenderPower *= seasonal.defense_mult;
 
@@ -506,7 +521,7 @@ export function predictCombatOutcome(
     // Morale resistance: downgrade costly_victory to stalemate if defender morale is high
     const defenderMorale = defenderFormation?.morale ?? 60;
     const defenderFactionId = defenderFormation?.faction as string ?? '';
-    if (predicted === 'costly_victory' && defenderMorale >= getMoraleResistFloor(defenderFactionId)) {
+    if (defenderFormation && predicted === 'costly_victory' && defenderMorale >= getMoraleResistFloor(defenderFactionId)) {
         predicted = 'stalemate';
     }
 

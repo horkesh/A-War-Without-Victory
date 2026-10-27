@@ -17,6 +17,7 @@
     "start": "npm run desktop",
     "test": "npm run test:vitest:fast",
     "test:engine": "npm run test:vitest:fast",
+    "test:execution-contract": "node tools/test/run_execution_contract.mjs",
     "test:all": "npm run test:vitest",
     "test:coverage": "vitest run --coverage",
     "test:node:progress": "npm run test:vitest:fast",

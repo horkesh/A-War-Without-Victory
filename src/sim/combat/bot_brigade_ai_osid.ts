@@ -1,3 +1,4 @@
+import {buildSlopeByOsid} from './attack_retreat_displacement.js';
 /**
  * OSID-native bot brigade AI — directive-based execution (HoI-style).
  *
@@ -576,6 +577,7 @@ function executeFactionDirectives(
     ethnicMap?: OsidEthnicComposition,
     osidPopulationMap?: OsidPopulationMap,
     dispatcherDetails?: BotDispatcherDecisionDetail[],
+    slopeByOsid?: Record<string, number>,
 ): OsidBotOrdersResult {
     return botOrdersPerfTime('bot_orders.executeFactionDirectives.total', () => executeFactionDirectivesImpl(
         state,
@@ -589,6 +591,7 @@ function executeFactionDirectives(
         ethnicMap,
         osidPopulationMap,
         dispatcherDetails,
+        slopeByOsid,
     ));
 }
 
@@ -640,6 +643,7 @@ function executeFactionDirectivesImpl(
     ethnicMap?: OsidEthnicComposition,
     osidPopulationMap?: OsidPopulationMap,
     dispatcherDetails?: BotDispatcherDecisionDetail[],
+    slopeByOsid?: Record<string, number>,
 ): OsidBotOrdersResult {
     const result: OsidBotOrdersResult = {
         posture_orders: [],
@@ -825,6 +829,7 @@ function executeFactionDirectivesImpl(
             adjacency,
             reverseMap,
             terrainCache,
+            slopeByOsid,
             graphAnalysis,
             supplyStateByOsid,
             ethnicMap,
@@ -927,6 +932,7 @@ export function generateAllBotOrdersOsid(
 ): BotOrderGenerationDiagnostics {
     const adjacency = (ctx.adjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(ctx.edges);
     const terrainCache = buildTerrainCache(ctx.reverseMap, ctx.terrainData);
+    const slopeByOsid = buildSlopeByOsid(ctx.reverseMap, ctx.terrainData);
     const sortedFactions = [...botFactions].sort(strictCompare);
 
     const allAttackOrders: Record<FormationId, Osid> = {};
@@ -983,6 +989,7 @@ export function generateAllBotOrdersOsid(
             terrainCache, graphAnalysis,
             ctx.supplyStateByOsid, ctx.ethnicCompositionByOsid, ctx.osidPopulationMap,
             dispatcherDetails,
+            slopeByOsid,
         );
 
         // Per-corps attack share cap: each corps gets attack slots proportional to its size.

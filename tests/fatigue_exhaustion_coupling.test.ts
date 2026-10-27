@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { test } from 'vitest';
 
-import { applyFatigueRecovery } from '../src/state/formation_fatigue.js';
+import { applyFatigueRecovery, applyFrontlineDutyFatigue } from '../src/state/formation_fatigue.js';
 import { CURRENT_SCHEMA_VERSION, type GameState } from '../src/state/game_state.js';
 
 function makeFormation(id: string, overrides: Record<string, unknown> = {}): Record<string, unknown> {
@@ -89,9 +89,10 @@ function makeState(): GameState {
 test('late-war exhaustion preserves a small fatigue residue for recently combat-engaged formations', () => {
     const state = makeState();
 
+    applyFrontlineDutyFatigue(state);
     applyFatigueRecovery(state, new Set(['engaged_this_turn']));
 
-    assert.strictEqual(state.military.formations.front_quiet.ops?.fatigue, 0.5);
+    assert.strictEqual(state.military.formations.front_quiet.ops?.fatigue, 0);
     assert.strictEqual(state.military.formations.reserve_recent_combat.ops?.fatigue, 1);
     assert.strictEqual(state.military.formations.reserve_old_combat.ops?.fatigue, 0);
     assert.strictEqual(state.military.formations.engaged_this_turn.ops?.fatigue, 2.5);

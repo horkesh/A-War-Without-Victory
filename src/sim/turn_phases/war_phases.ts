@@ -1,3 +1,7 @@
+import {buildSlopeByOsid} from '../combat/attack_retreat_displacement.js';
+import {selectStaffControlledFactions as selectBotBrigadeOrderFactions} from '../bot/staff_control.js';
+export {selectStaffControlledFactions as selectBotBrigadeOrderFactions} from '../bot/staff_control.js';
+import {turnDataFilePath} from '../turn_pipeline_types.js';
 /** War-phase pipeline steps. Extracted from turn_pipeline.ts (R7). */
 
 // --- Domain imports (paths adjusted: one directory deeper than turn_pipeline.ts) ---
@@ -51,7 +55,7 @@ import { getDoctrineTempoMultiplier, updateDoctrineState } from '../../state/doc
 import { updateEmbargoProfiles } from '../../state/embargo.js';
 import { updateEnclaveIntegrity, computeEnclaveResilienceFallbackPressure } from '../../state/enclave_integrity.js';
 import { accumulateExhaustion } from '../../state/exhaustion.js';
-import { applyFatigueRecovery, updateFormationFatigue } from '../../state/formation_fatigue.js';
+import { applyFatigueRecovery, applyFrontlineDutyFatigue, updateFormationFatigue } from '../../state/formation_fatigue.js';
 import { deriveMunicipalityAuthorityMap, updateFormationLifecycle } from '../../state/formation_lifecycle.js';
 import { normalizeFrontPosture } from '../../state/front_posture.js';
 import { applyFormationCommitment } from '../../state/front_posture_commitment.js';
@@ -994,18 +998,6 @@ function getRoutineEquipmentOperationalFloor(state: GameState, formation: Format
     return timelineDecay?.floor ?? VRS_EQUIPMENT_DECAY_FLOOR;
 }
 
-export function selectBotBrigadeOrderFactions(state: GameState): FactionId[] {
-    const playerFaction = state.meta.headless_scenario_auto_control
-        ? null
-        : state.meta.player_faction ?? null;
-    const assistedExecutionActive = (state.meta.autonomy_level ?? 0) >= 1;
-    return (state.factions ?? [])
-        .map(f => f.id)
-        .filter((fid): fid is FactionId =>
-            playerFaction == null || assistedExecutionActive || fid !== playerFaction
-        )
-        .sort(strictCompare);
-}
 
 function isPlayerHistoricalOperationAssistOperation(
     state: GameState,
@@ -1201,10 +1193,9 @@ export const warPhases: NamedPhase[] = [
     {
         name: 'update-formation-fatigue',
         run: (context) => {
-            // Apply per-turn recovery first (combat fatigue accumulated during attack resolution).
-            // Pass engaged formation IDs so recovery is blocked for brigades that fought this turn.
-            const engagedIds = new Set<string>(context.report.attack_resolution_osid?.engaged_formation_ids ?? []);
-            applyFatigueRecovery(context.state, engagedIds);
+            // Duty belongs to the state planners and combat will read, even in
+            // explicit fixtures without a settlement supply graph.
+            applyFrontlineDutyFatigue(context.state);
             const edges = context.input.settlementEdges;
             if (!edges) return;
             const derivedFrontEdges = computeFrontEdges(context.state, edges);
@@ -1336,7 +1327,7 @@ export const warPhases: NamedPhase[] = [
             // Key case: hvo_central_bosnia (available_from:10) — peace-phase activate-corps
             // never runs when scenario starts directly in war phase.
             // Idempotent: skips corps that already exist.
-            const catalog = await loadRecruitmentCatalog();
+            const catalog = await loadRecruitmentCatalog(context.input.dataBaseDir);
             if (!catalog?.corps?.length) return;
             const { activateCorpsForTurn } = await import('../early_war/activate_corps.js');
             activateCorpsForTurn(
@@ -1611,7 +1602,7 @@ export const warPhases: NamedPhase[] = [
             );
             let terrainData;
             try {
-                terrainData = await loadTerrainScalars();
+                terrainData = await loadTerrainScalars(turnDataFilePath(context, 'data/derived/terrain/settlements_terrain_scalars.json'));
             } catch {
                 terrainData = { by_sid: {} };
             }
@@ -1806,7 +1797,7 @@ export const warPhases: NamedPhase[] = [
             const { edges } = await getGraphAndEdges(context);
             let terrainData;
             try {
-                terrainData = await loadTerrainScalars();
+                terrainData = await loadTerrainScalars(turnDataFilePath(context, 'data/derived/terrain/settlements_terrain_scalars.json'));
             } catch {
                 terrainData = { by_sid: {} };
             }
@@ -1893,22 +1884,24 @@ export const warPhases: NamedPhase[] = [
             // LANE-2026-05-02: build defender terrain multiplier cache (mirrors
             // combat_predictor.buildTerrainCache call shape used elsewhere).
             let terrainMultByOsid: Record<string, number> | undefined;
+            let slopeByOsid: Record<string, number> | undefined;
             const od = getOperationalData(context);
             if (od?.opData?.operationalToCanonical) {
                 let terrainData;
                 try {
-                    terrainData = await loadTerrainScalars();
+                    terrainData = await loadTerrainScalars(turnDataFilePath(context, 'data/derived/terrain/settlements_terrain_scalars.json'));
                 } catch {
                     terrainData = { by_sid: {} };
                 }
                 terrainMultByOsid = buildTerrainCache(od.opData.operationalToCanonical, terrainData);
+                slopeByOsid = buildSlopeByOsid(od.opData.operationalToCanonical, terrainData);
             }
             const staticAdjacency = od?.edges ? buildStaticOsidAdjacency(od.edges) : undefined;
             let openingAttackPredictionContext;
             if (od?.opData?.operationalToCanonical) {
                 let ethnicComposition;
                 try {
-                    const ethnicityData = await loadSettlementEthnicityData();
+                    const ethnicityData = await loadSettlementEthnicityData(turnDataFilePath(context, 'data/derived/settlement_ethnicity_data.json'));
                     ethnicComposition = computeOsidEthnicComposition(
                         od.opData.operationalToCanonical,
                         ethnicityData,
@@ -1924,6 +1917,7 @@ export const warPhases: NamedPhase[] = [
                     // Reuse the loaded terrain substrate for preparation, opening
                     // admission and brigade execution prediction.
                     terrainMultByOsid: terrainMultByOsid ?? {},
+                    slopeByOsid,
                     supplyStateByOsid: supplyByOsid,
                     osidPopulationMap: context.input.municipalityPopulation1991
                         ? computeOsidPopulation(
@@ -2521,7 +2515,7 @@ export const warPhases: NamedPhase[] = [
             let corpsEthnicMap;
             if (od?.opData?.operationalToCanonical) {
                 try {
-                    const ethnicityData = await loadSettlementEthnicityData();
+                    const ethnicityData = await loadSettlementEthnicityData(turnDataFilePath(context, 'data/derived/settlement_ethnicity_data.json'));
                     corpsEthnicMap = computeOsidEthnicComposition(od.opData.operationalToCanonical, ethnicityData);
                 } catch {
                     // Non-fatal: ethnic intelligence is a bonus, not a requirement
@@ -2538,7 +2532,7 @@ export const warPhases: NamedPhase[] = [
             // step uses. Non-fatal — falls back to default terrain.
             let corpsTerrainData;
             try {
-                corpsTerrainData = await loadTerrainScalars();
+                corpsTerrainData = await loadTerrainScalars(turnDataFilePath(context, 'data/derived/terrain/settlements_terrain_scalars.json'));
             } catch {
                 corpsTerrainData = { by_sid: {} };
             }
@@ -2729,7 +2723,7 @@ export const warPhases: NamedPhase[] = [
                 // Load ethnic composition data for co-ethnic attack/defend scoring
                 let ethnicCompositionByOsid;
                 try {
-                    const ethnicityData = await loadSettlementEthnicityData();
+                    const ethnicityData = await loadSettlementEthnicityData(turnDataFilePath(context, 'data/derived/settlement_ethnicity_data.json'));
                     ethnicCompositionByOsid = computeOsidEthnicComposition(od.opData.operationalToCanonical, ethnicityData);
                 } catch {
                     // Non-fatal: ethnic scoring is a bonus, not a requirement
@@ -2740,7 +2734,7 @@ export const warPhases: NamedPhase[] = [
                 const spatialCache = getSpatialContextCache(context);
                 let botTerrainData: Awaited<ReturnType<typeof loadTerrainScalars>>;
                 try {
-                    botTerrainData = await loadTerrainScalars();
+                    botTerrainData = await loadTerrainScalars(turnDataFilePath(context, 'data/derived/terrain/settlements_terrain_scalars.json'));
                 } catch {
                     botTerrainData = { by_sid: {} };
                 }
@@ -3035,7 +3029,7 @@ export const warPhases: NamedPhase[] = [
             if (od?.opData?.operationalToCanonical && od?.edges?.length) {
                 let terrainData: Awaited<ReturnType<typeof loadTerrainScalars>> | undefined;
                 try {
-                    terrainData = await loadTerrainScalars();
+                    terrainData = await loadTerrainScalars(turnDataFilePath(context, 'data/derived/terrain/settlements_terrain_scalars.json'));
                 } catch {
                     terrainData = { by_sid: {} };
                 }
@@ -3045,7 +3039,7 @@ export const warPhases: NamedPhase[] = [
                 // Ethnic composition for homeland defense bonus in combat resolution
                 let ethnicComp;
                 try {
-                    const ethnicityData = await loadSettlementEthnicityData();
+                    const ethnicityData = await loadSettlementEthnicityData(turnDataFilePath(context, 'data/derived/settlement_ethnicity_data.json'));
                     ethnicComp = computeOsidEthnicComposition(od.opData.operationalToCanonical, ethnicityData);
                 } catch {
                     // Non-fatal: ethnic defense bonus simply not applied
@@ -3085,7 +3079,7 @@ export const warPhases: NamedPhase[] = [
 
             let terrainData;
             try {
-                terrainData = await loadTerrainScalars();
+                terrainData = await loadTerrainScalars(turnDataFilePath(context, 'data/derived/terrain/settlements_terrain_scalars.json'));
             } catch {
                 terrainData = { by_sid: {} };
             }
@@ -3095,6 +3089,15 @@ export const warPhases: NamedPhase[] = [
             context.report.resolve_attack_orders = resolveAttackOrders(
                 context.state, edges, terrainData, settlementToMun
             );
+        }
+    },
+    {
+        name: 'recover-formation-fatigue',
+        run: (context) => {
+            // Current-turn engagements exist only after the actual battle consumer.
+            // Duty already ran before planning; preserve the exact-once battle fatigue owner.
+            const engagedIds = new Set(context.report.attack_resolution_osid?.engaged_formation_ids ?? []);
+            applyFatigueRecovery(context.state, engagedIds);
         }
     },
     {
@@ -3499,7 +3502,7 @@ export const warPhases: NamedPhase[] = [
             const recruited_by_faction: Record<FactionId, number> = {} as Record<FactionId, number>;
             for (const factionId of factions) recruited_by_faction[factionId] = 0;
 
-            const catalog = await loadRecruitmentCatalog();
+            const catalog = await loadRecruitmentCatalog(context.input.dataBaseDir);
             if (catalog) {
                 const opDataCache = getOperationalData(context);
                 const recruitmentContext = buildRecruitmentContext(
@@ -3585,7 +3588,7 @@ export const warPhases: NamedPhase[] = [
         name: 'reroute-pool-surplus',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const catalog = await loadRecruitmentCatalog();
+            const catalog = await loadRecruitmentCatalog(context.input.dataBaseDir);
             if (!catalog?.brigades?.length) return;
             const activeIds = new Set(Object.keys(context.state.military.formations ?? {}));
             for (const faction of ['HRHB', 'RBiH', 'RS'] as const) {

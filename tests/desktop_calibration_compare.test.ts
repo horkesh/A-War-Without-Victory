@@ -1,5 +1,6 @@
+import {createHash} from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
@@ -171,6 +172,14 @@ describe('desktop calibration comparison provenance', () => {
       startup_snapshot_path: 'data/derived/startup/apr_1992_initial_save.json',
     });
     expect(output.scenario.startup_snapshot_sha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(output.execution_profiles.gameplay).toMatchObject({profile_id:'live-equivalent-desktop-v1',entrypoint:'src/desktop/desktop_sim.ts#advanceTurn',baseline_ops_applied:false,source_binding_scope:'listed_entrypoints_only',full_candidate_manifest_required:true,qualification:'evidence_only'});
+    expect(output.execution_profiles.gameplay.scenario_source_sha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(Object.keys(output.execution_profiles.gameplay.entrypoint_source_sha256)).toEqual(['src/desktop/desktop_sim.ts','src/sim/turn_pipeline.ts','tools/ai_play/desktop_calibration_compare.ts']);
+    for(const [path,hash] of Object.entries(output.execution_profiles.gameplay.entrypoint_source_sha256))expect(hash).toBe(createHash('sha256').update(readFileSync(resolve(process.cwd(),path))).digest('hex'));
+    expect(output.execution_profiles.gameplay.scenario_source_sha256).toBe(createHash('sha256').update(readFileSync(resolve(process.cwd(),output.scenario.source_path))).digest('hex'));
+    expect(output.execution_profiles.historical_regression).toMatchObject({profile_id:'definitive-harness-regression-v1',entrypoint:'src/scenario/scenario_runner.ts#runScenario',source_scenario_use_harness_bots:true,benchmark_authority:'retained_original_targets_and_receipts',qualifies_gameplay:false});
+    expect(output.execution_profiles.historical_regression.scenario_source_sha256).toBe(output.execution_profiles.gameplay.scenario_source_sha256);
+
     expect(output.player_policy).toEqual({
       autonomy_level: 1,
       event_decisions: 'defer',

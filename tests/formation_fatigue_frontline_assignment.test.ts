@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { test } from 'vitest';
 
-import { applyFatigueRecovery } from '../src/state/formation_fatigue.js';
+import { applyFrontlineDutyFatigue } from '../src/state/formation_fatigue.js';
 import { CURRENT_SCHEMA_VERSION, type GameState } from '../src/state/game_state.js';
 
 function makeState(): GameState {
@@ -47,7 +47,7 @@ function makeState(): GameState {
     } as GameState;
 }
 
-test('applyFatigueRecovery treats sector-assigned brigades as frontline formations', () => {
+test('applyFrontlineDutyFatigue treats sector-assigned brigades as frontline formations', () => {
     const state = makeState();
     state.military.corps_front_sectors = {
         sector_1: {
@@ -66,13 +66,13 @@ test('applyFatigueRecovery treats sector-assigned brigades as frontline formatio
         },
     } as any;
 
-    applyFatigueRecovery(state);
+    applyFrontlineDutyFatigue(state);
 
     assert.strictEqual(state.military.formations.b1.ops?.fatigue, 0.5);
     assert.strictEqual(state.military.formations.b2.ops?.fatigue, 0);
 });
 
-test('applyFatigueRecovery does not treat sector reserves as frontline formations', () => {
+test('applyFrontlineDutyFatigue does not treat sector reserves as frontline formations', () => {
     const state = makeState();
     state.military.corps_front_sectors = {
         sector_1: {
@@ -91,13 +91,13 @@ test('applyFatigueRecovery does not treat sector reserves as frontline formation
         },
     } as any;
 
-    applyFatigueRecovery(state);
+    applyFrontlineDutyFatigue(state);
 
     assert.strictEqual(state.military.formations.b1.ops?.fatigue, 0);
     assert.strictEqual(state.military.formations.b2.ops?.fatigue, 0);
 });
 
-test('applyFatigueRecovery does not revive legacy front assignments when sector truth is absent', () => {
+test('applyFrontlineDutyFatigue does not revive legacy front assignments when sector truth is absent', () => {
     const state = makeState();
     state.military.brigade_front_assignment = { b2: 'RBiH__RS__S1__S2' };
     state.military.assignable_front_segments = [
@@ -110,7 +110,7 @@ test('applyFatigueRecovery does not revive legacy front assignments when sector 
         },
     ] as any;
 
-    applyFatigueRecovery(state);
+    applyFrontlineDutyFatigue(state);
 
     assert.strictEqual(state.military.formations.b1.ops?.fatigue, 0);
     assert.strictEqual(state.military.formations.b2.ops?.fatigue, 0);

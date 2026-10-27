@@ -82,6 +82,7 @@ describe('bot-orders perf profile instrumentation', () => {
         const commanderLoop = readFileSync(resolve('src/sim/combat/commander/commander_loop.ts'), 'utf8');
         const commanderAssess = readFileSync(resolve('src/sim/combat/commander/assess.ts'), 'utf8');
         const combatPredictor = readFileSync(resolve('src/sim/combat/combat_predictor.ts'), 'utf8');
+        const sectorDefenseRoster = readFileSync(resolve('src/sim/combat/sector_defense_roster.ts'), 'utf8');
         const combatMath = readFileSync(resolve('src/sim/combat/combat_math.ts'), 'utf8');
         const brigadeEvalFront = readFileSync(resolve('src/sim/combat/bot_brigade_eval_front.ts'), 'utf8');
         const brigadeEvalAttack = readFileSync(resolve('src/sim/combat/bot_brigade_eval_attack.ts'), 'utf8');
@@ -258,8 +259,9 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(combatPredictor).toContain('rankDefendersByPowerWithEntries');
         expect(combatPredictor).toContain('powerByFormationId');
         expect(combatPredictor).toContain('powerByFormationId.get(b.id)');
-        expect(combatPredictor).toContain('getStandingOgDefenseBrigadeIds(sector)');
-        expect(combatPredictor).toContain('isStandingOgDefenseBrigadeAvailable(state, f.id)');
+        expect(combatPredictor).toContain('collectSectorDefenseBrigades');
+        expect(sectorDefenseRoster).toContain('getStandingOgDefenseBrigadeIds(sector)');
+        expect(sectorDefenseRoster).toContain('isStandingOgDefenseBrigadeAvailable(state, f.id)');
         expect(combatPredictor).toContain('const avgReactivePower = avgBrigadePower');
         expect(combatPredictor).toContain('attackerCount * avgReactivePower * REACTIVE_DEFENSE_RATIO');
         expect(combatPredictor).toContain('collectDefenderFormationsAtTarget');

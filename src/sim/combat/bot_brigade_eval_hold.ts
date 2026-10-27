@@ -74,7 +74,7 @@ export function evaluateReserve(ctx: BrigadeEvaluationContext): boolean {
 }
 
 export function evaluateHold(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, directive, loc, counterAttackTarget, adjEnemy, state, reverseMap, terrainCache, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, corpsStance, result, adjacency } = ctx;
+    const { brigade, directive, loc, counterAttackTarget, adjEnemy, state, reverseMap, terrainCache, slopeByOsid, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, corpsStance, result, adjacency } = ctx;
 
     // --- Rule 2: Hold OSID — defend by default, but offensive corps can attack from hold ---
     // Chokepoints are important to hold, but during a corps offensive the brigade should
@@ -84,7 +84,7 @@ export function evaluateHold(ctx: BrigadeEvaluationContext): boolean {
     if (directive && directive.hold_osids.includes(loc)) {
         // Counter-attack exception: if THIS brigade retreated from an adjacent OSID last turn, counter-attack
         if (counterAttackTarget && adjEnemy.includes(counterAttackTarget)) {
-            const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap);
+            const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, slopeByOsid, ethnicMap);
             const counter = targets.find(t => t.osid === counterAttackTarget &&
                 isOutcomeSufficientForAttack(t.prediction.predicted_outcome, 'costly_victory'));
             if (counter && (chosenTargets.get(counter.osid) ?? 0) < (directive.max_attackers_per_target)) {

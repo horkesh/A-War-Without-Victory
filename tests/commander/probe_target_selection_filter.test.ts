@@ -1,3 +1,6 @@
+import {isOutcomeSufficientForAttack} from '../../src/sim/combat/bot_brigade_targeting.js';
+import * as combatPredictor from '../../src/sim/combat/combat_predictor.js';
+import type {TerrainScalarsData} from '../../src/map/terrain_scalars.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -19,6 +22,7 @@ const SECOND_TARGET = 'op:test:target-z';
 const DEPTHS = Array.from({ length: 6 }, (_, index) => `op:test:depth-${index}`);
 
 interface HarnessOptions {
+    terrainData?: TerrainScalarsData;
     defenderPersonnel?: number;
     brigadeLocation?: string;
     cooldownUntilTurn?: number;
@@ -214,6 +218,7 @@ function runHarness(options: HarnessOptions = {}) {
         brigades: [attacker],
         state_ref: state,
         reverse_map: reverseMap,
+        terrain_data: options.terrainData ?? null,
         osid_population_map: options.localOccupationBypass ? new Map([[TARGET, 1]]) : null,
         supply_by_osid: null,
         ethnic_map: null,
@@ -359,11 +364,12 @@ describe('fallback probe target production filters', () => {
         const bothFail = runHarness({ targetController: 'HRHB', cooldownUntilTurn: 179 });
         const political = bothFail.receipt!.probe_gate_receipt.target_selection_detail.targets[0];
 
-        expect(bothFail.prediction).toBe('victory');
+        expect(bothFail.prediction).not.toBeNull();
+        expect(isOutcomeSufficientForAttack(bothFail.prediction!, 'stalemate')).toBe(true);
         expect(political).toMatchObject({
             politically_blocked: true,
             prediction_present: true,
-            prediction_outcome: 'victory',
+            prediction_outcome: bothFail.prediction,
             predicted_viable: true,
             cooldown_filter_reached: true,
             cooldown_filter_passed: false,
@@ -598,8 +604,9 @@ describe('fallback probe target production filters', () => {
         const blocked = runHarness({ targetController: 'HRHB' });
 
         expect(selectedObjectives({ targetController: 'RS' })).toEqual([TARGET]);
-        // Victory clears the unchanged stalemate admission floor, so only the political block rejects it.
-        expect(blocked.prediction).toBe('victory');
+        // The forecast clears the unchanged probe admission floor; politics rejects it.
+        expect(blocked.prediction).not.toBeNull();
+        expect(isOutcomeSufficientForAttack(blocked.prediction!, 'stalemate')).toBe(true);
         expect(blocked.output.operations).toHaveLength(0);
     });
 
@@ -724,4 +731,15 @@ describe('producer-bound commander target-selection reader', () => {
             expect(reader.detailErrors(row, name), name).not.toEqual([]);
         }
     });
+});
+
+
+describe('commander forecast input forwarding',()=>{
+ it.each([false,true])('forwards real terrain and slope for occupation=%s',localOccupationBypass=>{
+  const spy=vi.spyOn(combatPredictor,'predictCombatOutcome');
+  runHarness({localOccupationBypass,terrainData:{by_sid:{S2:{road_access_index:.1,river_crossing_penalty:.2,elevation_mean_m:1200,elevation_stddev_m:200,slope_index:.7,terrain_friction_index:.8}}}});
+  const calls=spy.mock.calls.filter(args=>typeof args[12]==='string'&&args[12].includes('.predictDirectTargets.predictCombatOutcome'));
+  expect(calls.length).toBeGreaterThan(0);
+  for(const args of calls){expect(args[5][TARGET]).toBeGreaterThan(1);expect(args[10]?.[TARGET]).toBe(.7);}
+ });
 });

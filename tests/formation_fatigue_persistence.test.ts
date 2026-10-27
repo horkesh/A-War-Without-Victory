@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { advanceTurn, loadStateFromPath, startNewCampaign } from '../src/desktop/desktop_sim.js';
-import { applyFatigueRecovery } from '../src/state/formation_fatigue.js';
+import { applyFrontlineDutyFatigue } from '../src/state/formation_fatigue.js';
 import type { FactionId, GameState } from '../src/state/game_state.js';
 import { deserializeState, serializeRuntimeState, serializeState } from '../src/state/serialize.js';
 import { serializeGameState } from '../src/state/serializeGameState.js';
@@ -157,7 +157,7 @@ describe('fractional formation fatigue persistence', () => {
             },
         } as unknown as GameState['military']['corps_front_sectors'];
 
-        applyFatigueRecovery(state);
+        applyFrontlineDutyFatigue(state);
         state.military.corps_front_sectors = originalSectors;
 
         expect(state.military.formations[id]?.ops?.fatigue).toBe(0.5);

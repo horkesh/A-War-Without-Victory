@@ -1,3 +1,4 @@
+import {makeAttackFormation} from './_helpers/combat.js';
 import * as terrainLoader from '../src/map/terrain_scalars_node.js';
 import * as ethnicityLoader from '../src/data/settlement_ethnicity.js';
 import * as sectorOffensive from '../src/sim/combat/sector_offensive.js';
@@ -24,13 +25,13 @@ it('explicit minimal fixtures retain the absent-terrain fallback',()=>{
  expect(spy.mock.results[0].value).toEqual({});
 });
 
-it('loaded terrain makes opening admission and execution agree across a real threshold',async()=>{
+it.each([false,true])('loaded terrain and slope make launch/execution agree, winter=%s',async(winter)=>{
  const loadSpy=vi.spyOn(terrainLoader,'loadTerrainScalars').mockResolvedValue(terrain);
  vi.spyOn(ethnicityLoader,'loadSettlementEthnicityData').mockRejectedValue(new Error('explicit minimal ethnic fixture'));
  const advance=vi.spyOn(sectorOffensive,'advanceSectorOffensives').mockReturnValue([]);
  const reverseMap=new Map([['op:test:t',['S']]]);
  const adjacency=new Map([['op:test:s',['op:test:t']],['op:test:t',['op:test:s']]]);
- const state={meta:{phase:'war',turn:4},factions:[],political:{political_controllers:{'op:test:s':'RS','op:test:t':'RBiH'}},military:{corps_command:{},formations:{
+ const state={meta:{phase:'war',turn:4,scenario_start_date:{year:1992,month:winter?0:5,day:1}},factions:[],political:{political_controllers:{'op:test:s':'RS','op:test:t':'RBiH'}},military:{corps_command:{},formations:{
   A:{id:'A',faction:'RS',kind:'brigade',status:'active',location_osid:'op:test:s',personnel:1000,cohesion:70,morale:70},
   D:{id:'D',faction:'RBiH',kind:'brigade',status:'active',location_osid:'op:test:t',personnel:1000,cohesion:70,morale:70},
  }}} as unknown as GameState;
@@ -39,6 +40,7 @@ it('loaded terrain makes opening admission and execution agree across a real thr
  expect(loadSpy).toHaveBeenCalled();
  const opening=advance.mock.calls[0][4]!;
  expect(opening.terrainMultByOsid['op:test:t']).toBeGreaterThan(1);
+ expect(opening.slopeByOsid).toEqual({'op:test:t':0.7});
  // Obtain execution cache through its actual public API, rather than reconstructing it.
  const cacheSpy=vi.spyOn(predictor,'buildTerrainCache');
  generateAllBotOrdersOsid(structuredClone(state),[],{edges:[],reverseMap,adjacency,terrainData:terrain});
@@ -46,8 +48,8 @@ it('loaded terrain makes opening admission and execution agree across a real thr
  let witnessed=false;
  for(let personnel=500;personnel<=5000;personnel+=50){
   state.military.formations!.A.personnel=personnel;
-  const direct=predictor.predictCombatOutcome(state,'A','op:test:t',adjacency,reverseMap,executionCache,'attack')!;
-  const flat=predictor.predictCombatOutcome(state,'A','op:test:t',adjacency,reverseMap,{},'attack')!;
+  const direct=predictor.predictCombatOutcome(state,'A','op:test:t',adjacency,reverseMap,executionCache,'attack',undefined,undefined,undefined,opening.slopeByOsid)!;
+  const flat=predictor.predictCombatOutcome(state,'A','op:test:t',adjacency,reverseMap,{},'attack',undefined,undefined,undefined,opening.slopeByOsid)!;
   if(!isOutcomeSufficientForAttack(flat.predicted_outcome,'costly_victory') || isOutcomeSufficientForAttack(direct.predicted_outcome,'costly_victory'))continue;
   const launch=axisHasExecutableOpeningAttack(state,'RS','op:test:t',['A'],adjacency,'costly_victory',undefined,undefined,opening);
   const stripped=axisHasExecutableOpeningAttack(state,'RS','op:test:t',['A'],adjacency,'costly_victory',undefined,undefined,{...opening,terrainMultByOsid:{}});
@@ -57,4 +59,56 @@ it('loaded terrain makes opening admission and execution agree across a real thr
   witnessed=true;break;
  }
  expect(witnessed).toBe(true);
+});
+
+
+it('forwards nonempty winter slope alone across the actual opening threshold',()=>{
+ const source='op:test:s',target='op:test:t';
+ const adjacency=new Map([[source,[target]],[target,[source]]]);
+ const state={meta:{phase:'war',turn:4,scenario_start_date:{year:1992,month:0,day:1}},political:{political_controllers:{[source]:'RS',[target]:'RBiH'}},military:{corps_command:{},formations:{
+  A:{id:'A',faction:'RS',kind:'brigade',status:'active',location_osid:source,personnel:1000,cohesion:70,morale:70},
+  D:{id:'D',faction:'RBiH',kind:'brigade',status:'active',location_osid:target,personnel:1000,cohesion:70,morale:70},
+ }}} as unknown as GameState;
+ const slopes={[target]:.7},reverseMap=new Map<string,string[]>();
+ let witness=false;
+ for(let n=500;n<=10000;n+=25){
+  state.military.formations!.A.personnel=n;
+  const lowland=predictor.predictCombatOutcome(state,'A',target,adjacency,reverseMap,{},'attack',undefined,undefined,undefined,{})!;
+  const mountain=predictor.predictCombatOutcome(state,'A',target,adjacency,reverseMap,{},'attack',undefined,undefined,undefined,slopes)!;
+  if(!isOutcomeSufficientForAttack(lowland.predicted_outcome,'costly_victory')||isOutcomeSufficientForAttack(mountain.predicted_outcome,'costly_victory'))continue;
+  const spy=vi.spyOn(predictor,'predictCombatOutcome');
+  const flat={adjacency,reverseMap,terrainMultByOsid:{},slopeByOsid:{}};
+  expect(axisHasExecutableOpeningAttack(state,'RS',target,['A'],adjacency,'costly_victory',undefined,undefined,flat)).toBe(true);
+  expect(axisHasExecutableOpeningAttack(state,'RS',target,['A'],adjacency,'costly_victory',undefined,undefined,{...flat,slopeByOsid:slopes})).toBe(false);
+  expect(spy.mock.lastCall?.[10]).toEqual(slopes);witness=true;break;
+ }
+ expect(witness).toBe(true);
+});
+
+
+it('nonempty brigade counterattack execution forwards winter slope across its admission threshold',()=>{
+ const source='op:test:s',target='op:test:t',rear='op:test:r';
+ const reverseMap=new Map([[target,['S']]]),edges=[{a:source,b:target},{a:target,b:rear}];
+ const A=makeAttackFormation({id:'A',faction:'RS',corps_id:'C',location_osid:source,cohesion:70,morale:70});
+ (A as any).last_retreat_from={osid:target,turn:3};
+ const state={meta:{turn:4,phase:'war',scenario_start_date:{year:1992,month:0,day:1}},factions:[{id:'RS'},{id:'RBiH'}],political:{political_controllers:{[source]:'RS',[target]:'RBiH',[rear]:'RBiH'}},military:{formations:{A,D:makeAttackFormation({id:'D',faction:'RBiH',location_osid:target,morale:0})},corps_command:{C:{stance:'defensive',active_operations:[]}}},displacement:{}} as unknown as GameState;
+ const real=predictor.predictAllAdjacentTargets;
+ let stripSlope=false;
+ const spy=vi.spyOn(predictor,'predictAllAdjacentTargets').mockImplementation((...args)=>{
+  expect(args[8]).toEqual({[target]:0.7});
+  const actual=[...args] as Parameters<typeof real>;if(stripSlope)actual[8]={};
+  return real(...actual);
+ });
+ const execute=(personnel:number,flat:boolean)=>{
+  const copy=structuredClone(state);copy.military.formations.A.personnel=personnel;stripSlope=flat;
+  generateAllBotOrdersOsid(copy,['RS'],{edges,reverseMap,terrainData:terrain} as any);
+  return copy.military.brigade_attack_orders?.A===target;
+ };
+ let witness:number|undefined;
+ for(let personnel=300;personnel<=6000;personnel+=25){
+  const flat=execute(personnel,true),sloped=execute(personnel,false);
+  if(flat&&!sloped){witness=personnel;break;}
+ }
+ expect(spy.mock.calls.length).toBeGreaterThan(0);expect(witness).toBeDefined();
+ expect(execute(witness!,true)).toBe(true);expect(execute(witness!,false)).toBe(false);
 });

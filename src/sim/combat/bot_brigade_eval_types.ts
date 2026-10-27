@@ -117,6 +117,7 @@ export interface BrigadeEvaluationContext {
     adjacency: Map<Osid, Osid[]>;
     reverseMap: OperationalToCanonicalReverseMap;
     terrainCache: Record<string, number>;
+    slopeByOsid?: Record<string, number>;
     graphAnalysis: FactionGraphAnalysis;
     supplyStateByOsid?: SupplyStateByOsidReport | null;
     ethnicMap?: OsidEthnicComposition;

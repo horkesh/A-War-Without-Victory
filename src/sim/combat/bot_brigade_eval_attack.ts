@@ -221,7 +221,7 @@ function wasRecentlyRepulsedFromTarget(
 }
 
 export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, activeOp, isActiveSectorOperationParticipant, loc, faction, adjacency, state, reverseMap, terrainCache, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result, officerCombatLookup, getOfficerCombatLookup } = ctx;
+    const { brigade, activeOp, isActiveSectorOperationParticipant, loc, faction, adjacency, state, reverseMap, terrainCache, slopeByOsid, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result, officerCombatLookup, getOfficerCombatLookup } = ctx;
 
     // Combat ineffective gate: brigades below minimum personnel (500) defend only.
     // A sub-battalion unit cannot execute an attack — it needs to reconstitute.
@@ -386,7 +386,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                                 undefined,
                                 supplyStateByOsid,
                                 osidPopulationMap,
-                                undefined,
+                                slopeByOsid,
                                 ethnicMap,
                                 SECTOR_ATTACK_DIRECT_OBJECTIVE_PREDICT_PROFILE_PREFIX,
                                 combatOfficerLookup,
@@ -574,7 +574,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                     'attack',
                     supplyStateByOsid,
                     osidPopulationMap,
-                    undefined,
+                    slopeByOsid,
                     ethnicMap
                 )
             );
@@ -712,7 +712,7 @@ export function getEnemyOsidsWithinHops(
 }
 
 export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, corpsStance, counterAttackTarget, adjEnemy, directive, faction, isAlliedWithRBiH, state, reverseMap, terrainCache, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result, adjacency, loc, graphAnalysis, sectorRecentRetreats, sectorCounterAttackCount } = ctx;
+    const { brigade, corpsStance, counterAttackTarget, adjEnemy, directive, faction, isAlliedWithRBiH, state, reverseMap, terrainCache, slopeByOsid, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result, adjacency, loc, graphAnalysis, sectorRecentRetreats, sectorCounterAttackCount } = ctx;
 
     // --- Rule 4: Defensive stance → defend, with retreat-based counter-attack only ---
 
@@ -740,7 +740,7 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
         if (counterAttackTarget && adjEnemy.includes(counterAttackTarget) && disruptedTurns === 0) {
             const targets = defensiveProfileTime(
                 '.defensive.selfRetreatPredictTargets',
-                () => predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap)
+                () => predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, slopeByOsid, ethnicMap)
             );
             const counter = targets.find(t => t.osid === counterAttackTarget &&
                 (chosenTargets.get(t.osid) ?? 0) < maxAtt &&
@@ -803,7 +803,7 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
                             '.defensive.sectorCounterAttackPredictTargets',
                             () => predictAllAdjacentTargets(
                                 state, brigade.id, adjacency, reverseMap, terrainCache,
-                                'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap,
+                                'attack', supplyStateByOsid, osidPopulationMap, slopeByOsid, ethnicMap,
                             )
                         );
 

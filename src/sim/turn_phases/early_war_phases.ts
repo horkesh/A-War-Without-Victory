@@ -176,7 +176,7 @@ export const earlyWarPhases: NamedPhase[] = [
             if (_phase2 !== 'war') return;
             if (context.state.meta.recruitment_mode !== 'bottom_up') return;
             const currentTurn = context.state.meta.turn ?? 0;
-            const catalog = await loadRecruitmentCatalog();
+            const catalog = await loadRecruitmentCatalog(context.input.dataBaseDir);
             if (!catalog) return;
             activateCorpsForTurn(
                 context.state,
@@ -194,7 +194,7 @@ export const earlyWarPhases: NamedPhase[] = [
             if (_phase3 !== 'war') return;
             if (context.state.meta.recruitment_mode !== 'bottom_up') return;
             const currentTurn = context.state.meta.turn ?? 0;
-            const catalog = await loadRecruitmentCatalog();
+            const catalog = await loadRecruitmentCatalog(context.input.dataBaseDir);
             if (!catalog) return;
             promoteFormations(context.state, currentTurn, catalog.brigades);
         },

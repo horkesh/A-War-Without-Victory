@@ -1,3 +1,4 @@
+import {selectStaffControlledFactions} from './staff_control.js';
 import { FrontEdge } from '../../map/front_edges.js';
 import type { GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -73,7 +74,9 @@ export class BotManager {
     public runBots(state: GameState, frontEdges: FrontEdge[], consolidationContext?: ConsolidationContext): BotRunDiagnostics {
         const allDecisions: { bot: SimpleGeneralBot; decision: BotDecisions }[] = [];
         const ordered = [...this.bots].sort((a, b) => strictCompare(a.bot.id, b.bot.id));
+        const controlled = new Set(selectStaffControlledFactions(state));
         for (const entry of ordered) {
+            if (!controlled.has(entry.bot.factionId)) continue;
             allDecisions.push({
                 bot: entry.bot,
                 decision: entry.bot.makeDecisions(state, frontEdges, {

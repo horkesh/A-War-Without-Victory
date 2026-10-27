@@ -1576,8 +1576,8 @@ export async function buildScenarioStartupState(
     // Initialize data-driven terrain classification sets before combat runs.
     // Keep Node-only file loading out of combat_math so browser map bundles can
     // safely import the combat helpers without pulling in fs/path.
-    setUrbanOsidSet(loadUrbanOsidSet());
-    setForestOsidSet(loadForestOsidSet());
+    setUrbanOsidSet(loadUrbanOsidSet(baseDir));
+    setForestOsidSet(loadForestOsidSet(baseDir));
     const needsHistoricalOob = Boolean(
         scenario.init_formations_oob ||
         scenario.recruitment_mode === 'player_choice' ||
@@ -2951,6 +2951,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 }
             } else {
                 const runResult = await runTurn(state, {
+                dataBaseDir: baseDir,
                     seed: state.meta.seed,
                     settlementGraph: graph,
                     operationalSettlementGraph,

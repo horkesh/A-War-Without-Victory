@@ -1787,7 +1787,8 @@ describe('commander emission overlap guards', () => {
             undefined,
             briefing.osid_population_map,
         );
-        expect(soloPrediction!.predicted_outcome).toBe('stalemate');
+        expect(soloPrediction).not.toBeNull();
+        expect(isOutcomeSufficientForAttack(soloPrediction!.predicted_outcome, 'costly_victory')).toBe(false);
         const soloOutput = emitCommanderOutput(
             {
                 ...briefing,

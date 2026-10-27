@@ -59,3 +59,23 @@ some other non-default branches) produces a non-finite
 shape validation. The authored historical-default playthrough does not hit this.
 This is an event-effects data defect in a counterfactual branch and is out of
 scope for this prototype (no engine changes); flagged for follow-up.
+
+
+## Calibration execution profiles (owner-approved 2026-10-27)
+
+| Profile | Execution and interpretation |
+|---|---|
+| `definitive-harness-regression-v1` | Original definitive scenario through `scenario_runner.runScenario`, retaining generated baseline_ops and original targets/receipts. Historical regression evidence; its score alone does not qualify native gameplay. |
+| `live-equivalent-desktop-v1` | Actual `desktop_sim.advanceTurn`, with production startup/canonical load and explicit autonomy, event, authorization and order policy. No harness-only exhaustion/displacement overlays. Basis for gameplay calibration after consistency gates pass. |
+
+`desktop_calibration_compare.ts` emits both profile identities, the scenario hash, startup hash and hashes of declared entrypoints. It explicitly requires a complete source/candidate manifest separately; listed entrypoint hashes alone are insufficient provenance. Its default player/headless decision policies differ, so the artifact remains divergence evidence. Native equivalence requires matched source, input identities, horizon, decisions and mode, plus actual applicable production/native checks.
+
+Retain historical benchmark configuration and references. Never transfer baseline_ops into desktop (FORAWWV H1.9), silently disable it in the historical profile, rebless a target from a new result, or call unmatched-input scores equivalent. Keep canon/determinism, protected cells, health, preservation, independent review, full-suite and native gates. Work incrementally: January1993 first; later checkpoints only after that phase is established. Calibration remains paused until the consistency candidate clears its gates.
+
+Zero-turn provenance inspection (no trajectory):
+
+```bash
+node --import tsx tools/ai_play/desktop_calibration_compare.ts --turns 0 --faction RS
+```
+
+Nonzero horizons require the approved phase/source-bound run brief after consistency review. Evidence_only output is never automatic baseline adoption or qualification.
