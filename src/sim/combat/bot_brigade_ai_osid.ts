@@ -926,7 +926,7 @@ export function generateAllBotOrdersOsid(
     options: BotOrderGenerationOptions = {},
 ): BotOrderGenerationDiagnostics {
     const adjacency = (ctx.adjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(ctx.edges);
-    const terrainCache = buildTerrainCache(ctx.reverseMap);
+    const terrainCache = buildTerrainCache(ctx.reverseMap, ctx.terrainData);
     const sortedFactions = [...botFactions].sort(strictCompare);
 
     const allAttackOrders: Record<FormationId, Osid> = {};

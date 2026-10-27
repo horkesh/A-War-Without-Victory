@@ -1,5 +1,8 @@
 # Corrected-engine historical calibration packet — retained audits and source correction
 
+**January restoration measurement — 2026-10-27:** Independently reviewed shared-defender source81f29bd47 completed one clean39-week definitive-scenario run in75.932s, child/wrapper0/0, no timeout/retry,37 preservation roots unchanged. January remains701/712 with the same six formerly-correct losses versus n91/n92/n101; health14>3 FAIL, consistency PASS. No improvement,188/full-suite/native qualification or baseline adoption. A separate uncommitted candidate now passes the resolver terrain substrate to bot prediction; terrain-sensitive launch/execution/readiness tests40/40 and TypeScript0, focused source rereview pending. Evidence: `tmp/player-bot-capability-parity-20261026/jan93-shared-defense39-v1/`.
+
+
 **Date:** 2026-10-26
 **Baseline:** The retained clean-source week-39 candidate scored 703/712 and failed health at 13 > 3.
 **Last measured result:** The priority-corrected Krug source675b6c7 reaches week39 at **701/712**, below707, with six formerly-correct losses and health14>3. The bounded historical proxy roster now materializes/admitted normally and captures Sopotnica through direct801/802 and indirect31st tactical-group participation. July implementation and calibration/native qualification remain open. Every prior run is retained; no baseline/reference adoption or remote push.

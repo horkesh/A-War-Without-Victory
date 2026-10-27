@@ -1921,11 +1921,9 @@ export const warPhases: NamedPhase[] = [
                         ?? staticAdjacency
                         ?? new Map()) as Map<string, string[]>,
                     reverseMap: od.opData.operationalToCanonical,
-                    // Must match generateAllBotOrdersOsid exactly. Preparation's
-                    // separately-loaded terrain cache remains authoritative for
-                    // force-ratio preparation, but launch and brigade orders must
-                    // judge the same tactical attack with the same predictor inputs.
-                    terrainMultByOsid: buildTerrainCache(od.opData.operationalToCanonical),
+                    // Reuse the loaded terrain substrate for preparation, opening
+                    // admission and brigade execution prediction.
+                    terrainMultByOsid: terrainMultByOsid ?? {},
                     supplyStateByOsid: supplyByOsid,
                     osidPopulationMap: context.input.municipalityPopulation1991
                         ? computeOsidPopulation(
@@ -2740,7 +2738,14 @@ export const warPhases: NamedPhase[] = [
                     ? computeOsidPopulation(od.opData.operationalToCanonical, context.input.municipalityPopulation1991)
                     : undefined;
                 const spatialCache = getSpatialContextCache(context);
+                let botTerrainData: Awaited<ReturnType<typeof loadTerrainScalars>>;
+                try {
+                    botTerrainData = await loadTerrainScalars();
+                } catch {
+                    botTerrainData = { by_sid: {} };
+                }
                 const osidCtx: OsidBotContext = {
+                    terrainData: botTerrainData,
                     edges: od.edges,
                     reverseMap: od.opData.operationalToCanonical,
                     adjacency: spatialCache?.preCombat.adjacency,
