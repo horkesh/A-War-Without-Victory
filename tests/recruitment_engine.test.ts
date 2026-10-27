@@ -65,7 +65,7 @@ describe('mandatory historical formation timing', () => {
         expect(canFormMandatoryHistoricalBrigade([], 5, 6)).toBe(false);
     });
 
-    test('loads and fields the 31st Drina lineage through the ordinary mandatory pool path at turn 7', async () => {
+    test('loads the calibrated 31st Drina seed at turn 0 while the retained delayed fixture fields at turn 7', async () => {
         const brigades = await loadOobBrigades(process.cwd());
         const lineage = brigades.find((brigade) => brigade.id === 'arbih_831st_drina_lineage');
         expect(lineage).toBeDefined();
@@ -76,11 +76,12 @@ describe('mandatory historical formation timing', () => {
             home_mun: 'gorazde',
             home_osid: 'op:gorazde:gorazde_2',
             mandatory: true,
-            available_from: 7,
+            available_from: 0,
             initial_personnel: 900,
             manpower_cost: 800,
         });
         expect(lineage!.tags ?? []).not.toContain('enclave');
+        const delayedLineage = { ...lineage!, available_from: 7 };
 
         const poolKey = militiaPoolKey('gorazde', 'RBiH');
         const state = makeState({
@@ -102,7 +103,7 @@ describe('mandatory historical formation timing', () => {
         const sidToMun = new Map([['op:gorazde:gorazde_2', 'gorazde']]);
 
         const before = runBotRecruitment(
-            state, [], [lineage!], resources, sidToMun,
+            state, [], [delayedLineage], resources, sidToMun,
             { gorazde: 'op:gorazde:gorazde_2' },
             { includeCorps: false, includeMandatory: true, factionIds: ['RBiH'] },
         );
@@ -111,7 +112,7 @@ describe('mandatory historical formation timing', () => {
 
         state.meta.turn = 7;
         const due = runBotRecruitment(
-            state, [], [lineage!], resources, sidToMun,
+            state, [], [delayedLineage], resources, sidToMun,
             { gorazde: 'op:gorazde:gorazde_2' },
             { includeCorps: false, includeMandatory: true, factionIds: ['RBiH'] },
         );

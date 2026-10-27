@@ -1171,7 +1171,7 @@
           "Operation Circle"
         ],
         "stance": "balanced",
-        "subordinate_count": 34
+        "subordinate_count": 35
       },
       "arbih_2nd_corps": {
         "active_ogs": [],
@@ -2041,10 +2041,10 @@
       "sector:arbih_1st_corps:1": {
         "assigned_brigade_ids": [
           "arbih_802nd_light",
-          "arbih_851st_vitezka_liberation"
+          "arbih_831st_drina_lineage"
         ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 41.58,
+        "defensive_power": 37.3275,
         "density": 0.125,
         "edge_ids": [
           "op:gorazde:bacci__op:gorazde:glamoc",
@@ -2070,7 +2070,9 @@
           "RS"
         ],
         "rear_brigade_ids": [],
-        "reserve_brigade_ids": [],
+        "reserve_brigade_ids": [
+          "arbih_851st_vitezka_liberation"
+        ],
         "sector_id": "sector:arbih_1st_corps:1",
         "sector_stance": "defend",
         "stance_source": "bot",
@@ -2130,7 +2132,7 @@
           "op:pale:podgrab",
           "op:pale:praca"
         ],
-        "threat_ratio": 28.860028860028862
+        "threat_ratio": 32.14788024914607
       },
       "sector:arbih_1st_corps:10": {
         "assigned_brigade_ids": [],
@@ -12777,7 +12779,7 @@
           "op:pale:vrazalice",
           "op:rogatica:varosiste_2"
         ],
-        "threat_ratio": 230.64909944190768
+        "threat_ratio": 216.6703661423981
       },
       "sector:vrs_sarajevo_romanija:8": {
         "assigned_brigade_ids": [],
@@ -18488,6 +18490,80 @@
           "placement:fixed_home_osid"
         ]
       },
+      "arbih_831st_drina_lineage": {
+        "activation_gated": false,
+        "activation_turn": null,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:arbih_1st_corps:1"
+        },
+        "cohesion": 70,
+        "composition": {
+          "aa_systems": 0,
+          "artillery": 1,
+          "artillery_condition": {
+            "degraded": 0,
+            "non_operational": 0,
+            "operational": 1
+          },
+          "infantry": 800,
+          "tank_condition": {
+            "degraded": 0,
+            "non_operational": 0,
+            "operational": 1
+          },
+          "tanks": 0
+        },
+        "corps_id": "arbih_1st_corps",
+        "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
+        "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
+        "faction": "RBiH",
+        "force_label": "ARBiH",
+        "home_osid": "op:gorazde:gorazde_2",
+        "hq_sid": "op:gorazde:bacci",
+        "id": "arbih_831st_drina_lineage",
+        "kind": "brigade",
+        "location_osid": "op:gorazde:gorazde_2",
+        "max_personnel": 1800,
+        "morale": 60,
+        "name": "31st Drina Lineage",
+        "officer_quality": 0.05,
+        "ops": {
+          "fatigue": 0,
+          "last_supplied_turn": null
+        },
+        "origin_mun": "gorazde",
+        "personnel": 900,
+        "readiness": "active",
+        "status": "active",
+        "tags": [
+          "corps:arbih_1st_corps",
+          "equip:light_infantry",
+          "mun:gorazde",
+          "placement:fixed_home_osid"
+        ]
+      },
       "arbih_843rd_light": {
         "activation_gated": false,
         "activation_turn": null,
@@ -18570,7 +18646,7 @@
         "activation_turn": null,
         "assignment": {
           "kind": "sector",
-          "role": "front",
+          "role": "reserve",
           "sector_id": "sector:arbih_1st_corps:1"
         },
         "cohesion": 72,
@@ -18605,7 +18681,6 @@
             "STATIC_DEFENSE": false
           }
         },
-        "entrenchment_turns": 0,
         "equipment_class": "light_infantry",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -18621,7 +18696,7 @@
         "hq_sid": "op:gorazde:bacci",
         "id": "arbih_851st_vitezka_liberation",
         "kind": "brigade",
-        "location_osid": "op:gorazde:citluk_2",
+        "location_osid": "op:gorazde:semihova_2",
         "max_personnel": 1800,
         "morale": 60,
         "name": "851st Liberation",
@@ -29054,7 +29129,7 @@
       },
       "gorazde:RBiH": {
         "available": 0,
-        "committed": 5500,
+        "committed": 6400,
         "exhausted": 0,
         "faction": "RBiH",
         "fatigue": 0,
@@ -34452,6 +34527,7 @@
         "hrhb_vitezovi_brigade_vitez",
         "hvo_posusje_brigade",
         "hvo_rama_brigade",
+        "arbih_831st_drina_lineage",
         "arbih_101st_mountain",
         "arbih_102nd_motorized",
         "arbih_104th_vitezka_motorized",

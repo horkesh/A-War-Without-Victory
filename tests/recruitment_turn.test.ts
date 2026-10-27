@@ -110,11 +110,13 @@ describe('accrueRecruitmentResources', () => {
 });
 
 describe('runOngoingRecruitment', () => {
-    test('prioritizes the source-dated 31st Drina lineage within the real cap-2 mandatory queue', async () => {
-        const loaded = await loadOobBrigades(process.cwd());
-        const lineage = loaded.find((brigade) => brigade.id === 'arbih_831st_drina_lineage');
-        expect(lineage).toBeDefined();
-        expect(lineage!.priority).toBe(49);
+    test('prioritizes the retained delayed 31st Drina lineage within the real cap-2 mandatory queue', async () => {
+        const catalogLineages = await loadOobBrigades(process.cwd());
+        const catalogLineage = catalogLineages.find((brigade) => brigade.id === 'arbih_831st_drina_lineage');
+        expect(catalogLineage).toBeDefined();
+        expect(catalogLineage!.available_from).toBe(0);
+        expect(catalogLineage!.priority).toBe(49);
+        const lineage = { ...catalogLineage!, available_from: 7 };
 
         const queuePeer = (id: string): OobBrigade => ({
             id,
