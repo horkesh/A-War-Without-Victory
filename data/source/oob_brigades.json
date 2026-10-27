@@ -2903,7 +2903,8 @@
     "default_equipment_class": "mountain",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 2000,
+    "initial_personnel": 3000,
+    "max_personnel": 3000,
     "initial_cohesion": 67,
     "distinction_potential": "tier_1",
     "initial_officer_quality": 0.6
