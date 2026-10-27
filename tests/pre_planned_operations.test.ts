@@ -1594,6 +1594,18 @@ describe('pre-planned operations', () => {
         assert.equal(operation.axes.find((axis) => axis.axis_id === 'prusac_local'), undefined);
     });
 
+    it('requires two forward brigades before the Donji Vakuf sweep assault begins', () => {
+        const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Donji Vakuf');
+        assert.ok(operation);
+        const sweep = operation.axes.find((axis) => axis.axis_id === 'donji_vakuf_sweep');
+        assert.ok(sweep);
+        assert.equal(sweep.minimum_forward_brigades, 2);
+
+        // The authored floor must survive queuing/instantiation unchanged.
+        const queued = injectExecutingDonjiVakufMissing16th(makeMinimalState());
+        assert.equal(queued.sweepAxis.minimum_forward_brigades, 2);
+    });
+
     it('uses a separate Pracha River axis to reduce the Visegrad bridgehead', () => {
         const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Pracha River');
         assert.ok(operation);

@@ -1116,6 +1116,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 // pribeljci_2 (RS) is adjacent to torlakovac_2 — valid staging → first obj chain.
                 // torlakovac_2 → babin_potok_2 → oborci_2 → donji_vakuf_2 → korenici → jemanlici.
                 // Prusac is intentionally absent (2026-09-29 CALIBRATION_MASTER hypothesis).
+                minimum_forward_brigades: 2,
                 objectives: [
                     'op:donji_vakuf:torlakovac_2',
                     'op:donji_vakuf:babin_potok_2',
