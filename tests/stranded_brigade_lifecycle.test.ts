@@ -321,6 +321,119 @@ describe('stranded_brigade_lifecycle', () => {
         });
     });
 
+    describe('allied reachability through canonical movement predicate', () => {
+        it('reconnects a noncritical brigade through an allied bridge and clears next tick', () => {
+            const formations = {
+                brig_1: makeBrigade('brig_1', 'RBiH', 'corps_5', 'op:mun:start', {
+                    stranded_status: 'holding',
+                    stranded_since_turn: 5,
+                }),
+            };
+            const sectors = {
+                'sector:corps_5': makeSector('corps_5', 'RBiH', ['op:mun:front']),
+            };
+            const controllers: Record<string, string | null> = {
+                'op:mun:start': 'RBiH',
+                'op:mun:bridge': 'HRHB',
+                'op:mun:front': 'RBiH',
+            };
+            const adj = chainAdj(['op:mun:start', 'op:mun:bridge', 'op:mun:front']);
+            const state = makeState({
+                formations,
+                corps_front_sectors: sectors,
+                political_controllers: controllers,
+                last_supply_state_by_osid: {
+                    'op:mun:start': 'adequate',
+                    'op:mun:bridge': 'adequate',
+                    'op:mun:front': 'adequate',
+                },
+                turn: 10,
+            });
+            state.political.war_alliance_rbih_hrhb = 0.75;
+
+            const report = updateStrandedBrigadeLifecycle(state, adj);
+
+            expect(report.reconnected).toEqual(['brig_1']);
+            expect(formations.brig_1.stranded_status).toBe('reconnected');
+            expect(formations.brig_1.location_osid).toBe('op:mun:start');
+
+            const nextReport = updateStrandedBrigadeLifecycle(state, adj);
+
+            expect(nextReport.reconnected).toEqual([]);
+            expect(formations.brig_1.stranded_status).toBe('none');
+            expect(formations.brig_1.stranded_since_turn).toBeUndefined();
+        });
+
+        it('keeps a noncritical brigade holding when the bridge is not allied', () => {
+            const formations = {
+                brig_1: makeBrigade('brig_1', 'RBiH', 'corps_5', 'op:mun:start', {
+                    stranded_status: 'holding',
+                    stranded_since_turn: 5,
+                }),
+            };
+            const sectors = {
+                'sector:corps_5': makeSector('corps_5', 'RBiH', ['op:mun:front']),
+            };
+            const controllers: Record<string, string | null> = {
+                'op:mun:start': 'RBiH',
+                'op:mun:bridge': 'HRHB',
+                'op:mun:front': 'RBiH',
+            };
+            const adj = chainAdj(['op:mun:start', 'op:mun:bridge', 'op:mun:front']);
+            const state = makeState({
+                formations,
+                corps_front_sectors: sectors,
+                political_controllers: controllers,
+                last_supply_state_by_osid: {
+                    'op:mun:start': 'adequate',
+                    'op:mun:bridge': 'adequate',
+                    'op:mun:front': 'adequate',
+                },
+                turn: 10,
+            });
+            state.political.war_alliance_rbih_hrhb = 0;
+
+            const report = updateStrandedBrigadeLifecycle(state, adj);
+
+            expect(report.reconnected).toEqual([]);
+            expect(formations.brig_1.stranded_status).toBe('holding');
+            expect(formations.brig_1.location_osid).toBe('op:mun:start');
+        });
+
+        it('keeps a critical origin holding even with a legal allied route to a same-corps sector', () => {
+            const formations = {
+                brig_1: makeBrigade('brig_1', 'RBiH', 'corps_5', 'op:mun:pocket'),
+            };
+            const sectors = {
+                'sector:corps_5': makeSector('corps_5', 'RBiH', ['op:mun:front']),
+            };
+            const controllers: Record<string, string | null> = {
+                'op:mun:pocket': 'RBiH',
+                'op:mun:bridge': 'HRHB',
+                'op:mun:front': 'RBiH',
+            };
+            const adj = chainAdj(['op:mun:pocket', 'op:mun:bridge', 'op:mun:front']);
+            const state = makeState({
+                formations,
+                corps_front_sectors: sectors,
+                political_controllers: controllers,
+                last_supply_state_by_osid: {
+                    'op:mun:pocket': 'critical',
+                    'op:mun:bridge': 'adequate',
+                    'op:mun:front': 'adequate',
+                },
+                turn: 5,
+            });
+            state.political.war_alliance_rbih_hrhb = 0.75;
+
+            const report = updateStrandedBrigadeLifecycle(state, adj);
+
+            expect(report.newly_stranded).toEqual(['brig_1']);
+            expect(formations.brig_1.stranded_status).toBe('holding');
+            expect(formations.brig_1.location_osid).toBe('op:mun:pocket');
+        });
+    });
+
     describe('canonical dissolution ownership', () => {
         it('keeps Travnik Brigade active when stranded decay meets only the cohesion criterion', () => {
             const formations = {

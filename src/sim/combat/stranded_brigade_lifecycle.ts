@@ -164,9 +164,9 @@ function canReachCorpsSectorFront(
             const neighbors = adjacency.get(osid as Osid) ?? [];
             for (const neighbor of neighbors) {
                 if (visited.has(neighbor)) continue;
-                // Only traverse through friendly-controlled territory
-                const controller = politicalControllers[neighbor];
-                if (controller !== faction) continue;
+                // Traverse the same territory ordinary movement permits: own control
+                // plus allied RBiH<->HRHB bridges (canonical isFriendlyFaction).
+                if (!isFriendlyFaction(politicalControllers[neighbor], faction, state)) continue;
                 visited.add(neighbor);
                 if (targetOsids.has(neighbor)) return true;
                 nextFrontier.push(neighbor);
