@@ -2828,7 +2828,7 @@
           "arbih_808th_liberation"
         ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 48.48979591836735,
+        "defensive_power": 44.08163265306122,
         "density": 0.14285714285714285,
         "edge_ids": [
           "op:cajnice:batotici__op:gorazde:podkozara_donja_2",
@@ -11940,7 +11940,7 @@
           "op:cajnice:zaborak",
           "op:rudo:gornja_strmica"
         ],
-        "threat_ratio": 31.27221037668799
+        "threat_ratio": 28.429282160625448
       },
       "sector:vrs_herzegovina:6": {
         "assigned_brigade_ids": [],
@@ -12779,7 +12779,7 @@
           "op:pale:vrazalice",
           "op:rogatica:varosiste_2"
         ],
-        "threat_ratio": 216.6703661423981
+        "threat_ratio": 209.68099949264334
       },
       "sector:vrs_sarajevo_romanija:8": {
         "assigned_brigade_ids": [],
@@ -18479,7 +18479,7 @@
           "last_supplied_turn": null
         },
         "origin_mun": "gorazde",
-        "personnel": 1100,
+        "personnel": 1000,
         "readiness": "active",
         "status": "active",
         "tags": [
@@ -29129,7 +29129,7 @@
       },
       "gorazde:RBiH": {
         "available": 0,
-        "committed": 6400,
+        "committed": 6300,
         "exhausted": 0,
         "faction": "RBiH",
         "fatigue": 0,
