@@ -1605,7 +1605,7 @@
     "available_from": 0,
     "mandatory": true,
     "manpower_cost": 40,
-    "initial_personnel": 1100,
+    "initial_personnel": 1350,
     "initial_cohesion": 72,
     "initial_morale": 55,
     "initial_officer_quality": 0.08,
