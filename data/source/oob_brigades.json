@@ -311,7 +311,7 @@
     "corps": "arbih_1st_corps",
     "home_mun": "hadzici",
     "home_settlement": "Pazarić",
-    "home_osid": "op:hadzici:lokve",
+    "home_osid": "op:hadzici:pazaric",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
     "available_from": 0,

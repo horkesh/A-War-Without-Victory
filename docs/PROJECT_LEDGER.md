@@ -9,6 +9,21 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — January 181st Mountain home-OSID placement, Lokve→Pazarić — NOT ADOPTED
+
+Trial: one semantic field only, `arbih_181st_mountain.home_osid` `op:hadzici:lokve`→
+`op:hadzici:pazaric` (the named home already `home_settlement` Pazarić, `home_mun` hadzici).
+`initial_personnel` 500, cohesion 45, `available_from` 0, corps, equipment, and all other
+fields/rows unchanged (including 851st at 1250 and the Foča/Ljuta axis). No cap, roster,
+bonus, withdrawal, or health exemption added; no retreat/movement/health/canon rule or
+criterion touched. Calibrated assembly choice within a named home, not an attested
+historical deployment or an old-data error claim. Measured parent 83339 cold pair 707/712,
+31 anchors, no new painted loss vs 706, raw health 4 FAIL (inactivation/deletion is NOT
+health recovery). Old 4510387 1200-seed trial and prior failed trials/evidence kept; seed
+stays 500 here, existing retreat contract kept. The 28 screen must preserve Ljuta/Kamen
+and all painted gains and keep 181st active/alive with viable supply; 39 pair, full
+health, and gates pending. Official startup/test/build/screen still to run.
+
 ## 2026-10-28 — January 851st staffing seed trial, 1100→1250 — NOT ADOPTED
 
 Trial: raise only `initial_personnel` 1100→1250 on `arbih_851st_vitezka_liberation`
