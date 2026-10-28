@@ -9,6 +9,19 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — Čajniče Operation Foca staging moved to Miljeno (NOT ADOPTED)
+
+Calibrated allocation hypothesis, not historical fact: Operation Foca's `cajnice_south` axis
+staging moves from `op:cajnice:cajnice_2` to `op:cajnice:miljeno_2` (sole `rs_ajnie_brigade`;
+objectives and every other axis/brigade/date/duration/threshold unchanged). The retained
+turn-4 own-held route from post-Višegrad Okrugla reaches Miljeno in two edges via Gornja
+Strmica, versus three edges back to Čajniče town via Zaborak, aiming to save one arrival turn
+so Čajniče can reach Kolovarice jointly with Foča. Outcome is not guaranteed.
+
+Test: catalog and real `injectQueuedOperation` runtime axis both assert Miljeno staging, the
+unchanged lone brigade and all three objectives, with `require_all_axes_ready` absent.
+NOT ADOPTED; no trajectory result yet.
+
 ## 2026-10-27 — Zero-sector rescue honors donor commitments
 
 Diagnosis: exact same-source runtime/report replay turn19→20 traced the

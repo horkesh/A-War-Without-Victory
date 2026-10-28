@@ -2728,6 +2728,48 @@ describe('pre-planned operations', () => {
         assert.equal(focaSouth!.main_brigade, 'rs_bilea_brigade');
     });
 
+    it('stages the Operation Foca Cajnice axis at Miljeno and injects it at runtime', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 4;
+        const command = state.military.corps_command!.vrs_herzegovina!;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Foca'];
+        state.political.political_controllers!['op:cajnice:miljeno_2'] = 'RS';
+
+        const foca = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Foca');
+        assert.ok(foca);
+        const catalogAxis = foca.axes.find((axis) => axis.axis_id === 'cajnice_south');
+        assert.ok(catalogAxis);
+        assert.equal(catalogAxis.staging_osid, 'op:cajnice:miljeno_2');
+        assert.deepEqual(catalogAxis.brigades, ['rs_ajnie_brigade']);
+        assert.deepEqual(catalogAxis.objectives, [
+            'op:cajnice:batotici',
+            'op:foca:brusna_2',
+            'op:gorazde:kolovarice',
+        ]);
+
+        for (const axis of foca.axes) {
+            for (const brigadeId of axis.brigades) {
+                state.military.formations[brigadeId]!.location_osid =
+                    axis.staging_osid ?? foca.staging_osid;
+            }
+        }
+
+        assert.equal(injectQueuedOperation(state, 'vrs_herzegovina'), true);
+        const injected = command.active_operations.find((op) => op.name === 'Operation Foca');
+        assert.ok(injected);
+        assert.equal((injected as any).require_all_axes_ready, undefined);
+        const runtimeAxis = injected.axes?.find((axis) => axis.axis_id === 'cajnice_south');
+        assert.ok(runtimeAxis);
+        assert.equal(runtimeAxis.staging_osid, 'op:cajnice:miljeno_2');
+        assert.deepEqual(runtimeAxis.assigned_brigades, ['rs_ajnie_brigade']);
+        assert.deepEqual(runtimeAxis.objectives, [
+            'op:cajnice:batotici',
+            'op:foca:brusna_2',
+            'op:gorazde:kolovarice',
+        ]);
+    });
+
     it('excludes queued Operation Foca brigades that cannot reach the authored axis staging area', () => {
         const state = makeMinimalState();
         state.meta.turn = 8;
@@ -2882,7 +2924,7 @@ describe('pre-planned operations', () => {
             [
                 {
                     id: 'cajnice_south',
-                    staging: 'op:cajnice:cajnice_2',
+                    staging: 'op:cajnice:miljeno_2',
                     objectives: ['op:cajnice:batotici', 'op:foca:brusna_2', 'op:gorazde:kolovarice'],
                 },
             ],
@@ -3057,10 +3099,17 @@ describe('pre-planned eligibility observer', () => {
             && row.caller === 'direct_preplanned'));
 
         log.mockRestore();
-        vi.spyOn(console, 'log').mockImplementation(() => { throw new Error('sink failed'); });
+        let observerSinkFailures = 0;
+        vi.spyOn(console, 'log').mockImplementation((...args: any[]) => {
+            if (String(args[0]).startsWith('[preplanned_eligibility] ')) {
+                observerSinkFailures += 1;
+                throw new Error('sink failed');
+            }
+        });
         const sinkState = makeMinimalState();
         sinkState.meta.turn = 0;
         assert.doesNotThrow(() => injectPrePlannedOperations(sinkState, undefined, { faction: 'RS' }));
+        assert.ok(observerSinkFailures > 0, 'the observer sink failure branch must be exercised');
     });
 
     it.each([

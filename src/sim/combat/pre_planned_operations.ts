@@ -794,7 +794,10 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'op:foca:brusna_2',
                     'op:gorazde:kolovarice',
                 ],
-                staging_osid: 'op:cajnice:cajnice_2',
+                // Calibrated allocation hypothesis, not historical fact: the retained turn-4
+                // own-held route from post-Višegrad Okrugla reaches Miljeno in two edges through
+                // Gornja Strmica, one turn sooner than the three-edge return via Zaborak.
+                staging_osid: 'op:cajnice:miljeno_2',
             },
             {
                 axis_id: 'kalinovik',
