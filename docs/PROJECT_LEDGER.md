@@ -9,6 +9,30 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — Gorazde Local Counterattack (Model): joint 831st/851st concentration — NOT ADOPTED
+
+Calibrated existing-force allocation variant, not attested history: raise the
+Gorazde local model to two participating/assembled minima and assign the
+existing `arbih_831st_drina_lineage` alongside `arbih_851st_vitezka_liberation`
+on the sole Kamen then Donje Žešće axis. No seed, cap, date, initial-personnel,
+combat-power, or engine-rule changes beyond those allocation minima; no
+hostile-route, donor, manual, retreat, OOB/startup, or engine changes.
+
+Why the prior attempt was rejected: the sole-851st candidate reproduced the
+actual ratio 0.366 under strict replay and did not attack. Existing 831st
+evidence: 1800 men, cohesion 74.8 at Osječani on turn 22, Circle recovery
+already finished with no other active owner; still free, undisrupted, and in
+the same 1st corps at turn 23; two friendly hops via Glamoč to Bacci. It later
+loses strength in Prača on turn 26. This variant tests whether concentrating
+the existing 831st with the 851st is sufficient rather than adding forces.
+
+Known side effect: the future-TG reservation may change the earlier Circle-19
+allocation; earlier pre-23 parity is explicitly not claimed without measurement
+and must be screened. The original Circle 801/802/831 roster is preserved.
+
+Status: NOT ADOPTED. No pass or adoption claim. Real-prefix, painted-control,
+health, 39-repeat, aggregate, and native-pending proofs remain pending.
+
 ## 2026-10-28 — Gorazde Local Counterattack (Model): Donje Žešće follow-on — NOT ADOPTED
 
 Calibrated-sequence trial, not attested history: append `op:foca:donje_zesce`

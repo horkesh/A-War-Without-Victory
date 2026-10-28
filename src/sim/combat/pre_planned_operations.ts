@@ -1342,26 +1342,30 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
     },
     {
         // Owner-authorized UNADOPTED model action. Timing, roster, and axis are
-        // inference, not an attested 851st action or a historically named
-        // operation; BB1 printed p. 151 / PDF p. 187 is regional context only.
-        // Turn 23 (14 September 1992) is a model due point after Operation Circle,
-        // not a sourced capture date. The existing future-TG donor reservation
-        // applies to the 851st and is unchanged. Actual initial, pre-23 parity,
-        // normal-combat, full-painted, and health proofs remain pending; capture
-        // is not guaranteed.
+        // inference, not an attested joint 831st/851st action or a historically
+        // named operation; BB1 printed p. 151 / PDF p. 187 is regional context
+        // only. Turn 23 (14 September 1992) is a model due point after Operation
+        // Circle, not a sourced capture date. This variant concentrates the
+        // existing 831st (free after Circle's turn-22 recovery) with the 851st
+        // instead of letting the 851st attempt the axis alone; that allocation is
+        // a calibration assumption, not attested history. The existing future-TG
+        // donor reservation still applies and may alter the earlier Circle-19
+        // allocation, so pre-23 parity is not claimed without measurement.
+        // Actual initial, normal-combat, full-painted, and health proofs remain
+        // pending; capture is not guaranteed.
         corps: 'arbih_1st_corps',
         faction: 'RBiH',
         name: 'Gorazde Local Counterattack (Model)',
         staging_osid: 'op:gorazde:bacci',
         available_from: 23,
         enqueue_from: 23,
-        minimum_viable_participants: 1,
-        minimum_assembled_participants: 1,
+        minimum_viable_participants: 2,
+        minimum_assembled_participants: 2,
         axes: [
             {
                 axis_id: 'gorazde_local_counterattack',
                 name: 'Local Gorazde Counterattack',
-                brigades: ['arbih_851st_vitezka_liberation'],
+                brigades: ['arbih_831st_drina_lineage', 'arbih_851st_vitezka_liberation'],
                 // Follow-on calibrated model inference, not attested history:
                 // continue along the same axis to the adjacent RS-held corridor gap.
                 objectives: ['op:gorazde:kamen', 'op:foca:donje_zesce'],
