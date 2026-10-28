@@ -5043,7 +5043,7 @@
           "op:novi_travnik:senkovici_2",
           "op:novi_travnik:trenica_2"
         ],
-        "threat_ratio": 34.50496871549503
+        "threat_ratio": 69.00993743099006
       },
       "sector:arbih_3rd_corps:17": {
         "assigned_brigade_ids": [],
@@ -8379,7 +8379,7 @@
           "rs_19th_krajina_light_infantry"
         ],
         "corps_id": "vrs_1st_krajina",
-        "defensive_power": 49.133333333333326,
+        "defensive_power": 98.26666666666665,
         "density": 0.16666666666666666,
         "edge_ids": [
           "op:bugojno:kula_2__op:donji_vakuf:jemanlici",
@@ -8429,7 +8429,7 @@
         "territory_osids": [
           "op:donji_vakuf:jemanlici"
         ],
-        "threat_ratio": 17.910447761194032
+        "threat_ratio": 8.955223880597016
       },
       "sector:vrs_1st_krajina:16": {
         "assigned_brigade_ids": [
@@ -22741,7 +22741,7 @@
           "last_supplied_turn": null
         },
         "origin_mun": "donji_vakuf",
-        "personnel": 1000,
+        "personnel": 2000,
         "readiness": "active",
         "status": "active",
         "tags": [
@@ -28884,7 +28884,7 @@
       },
       "donji_vakuf:RS": {
         "available": 0,
-        "committed": 2000,
+        "committed": 3000,
         "exhausted": 0,
         "faction": "RS",
         "fatigue": 0,

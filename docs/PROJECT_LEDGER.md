@@ -9,6 +9,28 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — January 19th Krajina seed trial, 1000→2000 — NOT ADOPTED
+
+Assumption: raise only `initial_personnel` 1000→2000 on `rs_19th_krajina_light_infantry`
+(RS, VRS 1st Krajina, home Donji Vakuf / Babin Potok). 2000 is the existing implicit
+effective-force cap used as a modeling assumption, not a sourced historical headcount; no
+`max_personnel` was added or changed, and no cap raise or strengths sweep is implied. All
+other row fields, the Čajniče 1800, the 147th/185th 650 seeds, the 851st local-operation
+definition, and prior correctness fixes and rules are unchanged; no cohesion, equipment,
+threshold, control, or date changes.
+
+Retained cause: the same formation stayed at Jemanlići — 859 at T27, 851 at T29, cohesion 35,
+dug in 12 turns, zero prior battles. Candidate 3rd Corps gained 1 main_effort unit (7th Vitezka)
+versus fallback 0, so the actual readiness gate permits a balanced stance and the new
+3-brigade Plamičak attack (T30 attackers 705th+708th+770th, decisive 2.68603); fallback T27
+has only the 330th probe. No diversion or resolver bug was demonstrated. This authored
+underfilled-brigade test deliberately changes early state; it is not exact pre-23 parity to
+the old seed and does not guarantee a hold.
+
+Next: Codex will officially generate and check, running the 32-turn preservation screen before
+any January pair. No passing status yet; the 707 target, painted, anchors, raw health, full
+aggregate, and native gates plus original receipts remain. No commit, push, or adoption.
+
 ## 2026-10-28 — January Čajniče seed trial, 1000→1800 — NOT ADOPTED
 
 Assumption: raise only `initial_personnel` 1000→1800 on existing `rs_ajnie_brigade`
