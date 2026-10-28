@@ -9,6 +9,21 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — January Trnovo joint 181st/831st turn-34 model — NOT ADOPTED
+
+One bounded revision of the authored Trnovo Local Counterattack (Model): `available_from` and
+`enqueue_from` 28→34, both participant floors 1→2, and axis brigades exactly
+`['arbih_181st_mountain', 'arbih_831st_drina_lineage']` (sorted). Name, corps, faction, staging
+Trnovo, axis identity, and objective Tošići are unchanged; no prestage, planning, power, coordination,
+forward/staged-axis, helper, policy, catalog 32, OOB, or startup fields change. Basis: after the
+turn-33 recruitment/reaction window, 181st 509 and 831st 1032 were both observed active, adequately
+supplied, undisrupted, and at Trnovo with no existing owners. The joint cohort is a source-backed
+model allocation and sequencing inference, not sourced history. The current future TG reservation of
+new actors before turn 34 is a KNOWN broader allocation effect, including 831st Circle 19 TG donation
+changes; no pre-34 or late-only parity claim. Current Pazaric 1200, seed-only, and solo turn-28
+831st 0.680/0.397 failures are retained; ordinary rules and the 500-man floor apply. No capture or result
+claim.
+
 ## 2026-10-28 — January 181st Mountain opening OSID Lokve→Pazarić — NOT ADOPTED
 
 One bounded authored opening-distribution experiment on the retained 181st Mountain seed trial:
@@ -16,7 +31,8 @@ only `arbih_181st_mountain.home_osid` changes `op:hadzici:lokve`→`op:hadzici:p
 `home_mun` `hadzici`, `home_settlement` `Pazarić`, HQ, date 0, cohesion 45, equipment, corps,
 personnel 1200, and every other field and unit are unchanged. No Tošići operation, no new
 placement machinery; roster and b325/catalog 31 unchanged. Basis: the 500→1200 trial did not make
-the unit a partner; at T28 it was only 225 (<500) at Kijevo RS with no new painted losses. Actual
+the unit a partner; at T28 the 181st was only 225 (<500) at Trnovo, while Kijevo was RS-controlled
+(not a unit at Kijevo), with no new painted losses. Actual
 T1 Prsten/Ilidža lost 686 on the 181st as a reactive distance-1 defender from Lokve (1200→508),
 not a clamp/cap bug; the 26 Kijevo battle then reduced the rest. Raising the seed further would
 stay blind. The existing row already names Pazarić; official `operational_settlements` has distinct
@@ -26,7 +42,7 @@ This is a calibrated opening assembly choice within the existing named home — 
 old forward placement was a historical error and not an exact attested deployment; no historical
 source is claimed beyond the current row/map, and gameplay must still qualify. Actual movement or
 army allocation may override; no engine machinery is added if it does. Codex will officially
-generate/check and verify actual native initial position and T1 non-reaction/survival, then the 28
+generate/check and verify production backend initial position and T1 non-reaction/survival, then the 28
 availability/Kijevo/preservation screen. Gate: >=500 active/supplied surviving local force and
 Kijevo RS before any new mission/January. No initial or pre-28 parity claim; the distribution
 intentionally changes T1 and may affect other defenders. Retains the failed 500→1200 seed trial,

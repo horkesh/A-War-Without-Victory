@@ -1364,6 +1364,38 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
+        // Owner-authorized UNADOPTED joint model action: after the turn-33
+        // recruitment/reaction window the 181st Mountain (509) and 831st Drina
+        // (1032) were both available, recovered, and at Trnovo, supporting a joint
+        // turn-34 due point (30 November 1992 on the canonical 6 April epoch). The
+        // joint cohort is an explicit calibration allocation and sequencing
+        // inference, not an attested historical action/date or a sourced capture
+        // claim. The current future TG reservation of new actors before turn 34 is
+        // a KNOWN broader allocation effect, including 831st Circle 19 TG donation
+        // changes; no pre-34 or late-only parity is claimed. The historical Circle
+        // 801/802/831 roster is unchanged, and no physics, rules, power, or staging
+        // overrides are added. Ordinary authorization, movement, launch, and combat
+        // apply; full-painted control and health qualification remain required, and
+        // capture is not guaranteed.
+        corps: 'arbih_1st_corps',
+        faction: 'RBiH',
+        name: 'Trnovo Local Counterattack (Model)',
+        staging_osid: 'op:trnovo:trnovo',
+        available_from: 34,
+        enqueue_from: 34,
+        minimum_viable_participants: 2,
+        minimum_assembled_participants: 2,
+        axes: [
+            {
+                axis_id: 'trnovo_local_counterattack',
+                name: 'Local Trnovo Counterattack',
+                brigades: ['arbih_181st_mountain', 'arbih_831st_drina_lineage'],
+                objectives: ['op:trnovo:tosici'],
+                staging_osid: 'op:trnovo:trnovo',
+            },
+        ],
+    },
+    {
         // Owner-directed chronology: the Cerska/Srebrenica contact is established
         // during summer 1992 and must still be present at the January checkpoint.
         // This is deliberately an ordinary operation: no scripted control change,
