@@ -1292,7 +1292,8 @@
               },
               {
                 "assigned_brigades": [
-                  "jna_konjic_south_tg"
+                  "jna_konjic_south_tg",
+                  "rs_nevesinje_brigade"
                 ],
                 "attack_attempt_count": 0,
                 "axis_id": "konjic_south",
@@ -1309,7 +1310,10 @@
                   "op:konjic:glavaticevo_2"
                 ],
                 "staging_osid": "op:konjic:sitnik",
-                "status": "executing"
+                "status": "executing",
+                "support_brigades": [
+                  "rs_nevesinje_brigade"
+                ]
               }
             ],
             "commander_officer_id": "vrs_lisica",
@@ -1327,7 +1331,8 @@
             ],
             "participating_brigades": [
               "jna_konjic_south_tg",
-              "jna_nevesinje_garrison"
+              "jna_nevesinje_garrison",
+              "rs_nevesinje_brigade"
             ],
             "phase": "planning",
             "phase_started_turn": 0,
@@ -5880,7 +5885,7 @@
           "op:trnovo:kijevo_2",
           "op:trnovo:trnovo"
         ],
-        "threat_ratio": 212.36391373691143
+        "threat_ratio": 424.72782747382286
       },
       "sector:arbih_4th_corps:1": {
         "assigned_brigade_ids": [],
@@ -6101,7 +6106,7 @@
           "op:prozor:paros",
           "op:prozor:ustirama_3"
         ],
-        "threat_ratio": 0
+        "threat_ratio": 81.55719878207917
       },
       "sector:arbih_5th_corps:0": {
         "assigned_brigade_ids": [],
@@ -11582,7 +11587,164 @@
         ],
         "threat_ratio": 0
       },
+      "sector:vrs_herzegovina:10": {
+        "assigned_brigade_ids": [
+          "rs_nevesinje_brigade"
+        ],
+        "corps_id": "vrs_herzegovina",
+        "defensive_power": 27.335999999999995,
+        "density": 0.1,
+        "edge_ids": [
+          "op:kalinovik:sela_2__op:konjic:sitnik",
+          "op:konjic:bijela_2__op:konjic:celebici_2",
+          "op:konjic:bijela_2__op:konjic:dzepi_2",
+          "op:konjic:bijela_2__op:konjic:glavaticevo_2",
+          "op:konjic:bijela_2__op:konjic:konjic_2",
+          "op:konjic:bijela_2__op:konjic:turija",
+          "op:konjic:bijela_2__op:mostar:kruzanj_2",
+          "op:konjic:bijela_2__op:mostar:potoci",
+          "op:konjic:glavaticevo_2__op:konjic:sitnik",
+          "op:konjic:ljuta__op:konjic:sitnik"
+        ],
+        "faction": "RS",
+        "length_edges": 10,
+        "opposing_factions": [
+          "HRHB",
+          "RBiH"
+        ],
+        "rear_brigade_ids": [],
+        "reserve_brigade_ids": [],
+        "sector_id": "sector:vrs_herzegovina:10",
+        "sector_stance": "defend",
+        "stance_source": "bot",
+        "sub_segments": [
+          {
+            "edge_ids": [
+              "op:kalinovik:sela_2__op:konjic:sitnik",
+              "op:konjic:bijela_2__op:konjic:celebici_2",
+              "op:konjic:bijela_2__op:konjic:dzepi_2",
+              "op:konjic:bijela_2__op:konjic:glavaticevo_2",
+              "op:konjic:bijela_2__op:konjic:konjic_2",
+              "op:konjic:bijela_2__op:konjic:turija",
+              "op:konjic:bijela_2__op:mostar:kruzanj_2",
+              "op:konjic:bijela_2__op:mostar:potoci",
+              "op:konjic:glavaticevo_2__op:konjic:sitnik",
+              "op:konjic:ljuta__op:konjic:sitnik"
+            ],
+            "enemy_osids": [
+              "op:kalinovik:sela_2",
+              "op:konjic:celebici_2",
+              "op:konjic:dzepi_2",
+              "op:konjic:glavaticevo_2",
+              "op:konjic:konjic_2",
+              "op:konjic:ljuta",
+              "op:konjic:turija",
+              "op:mostar:kruzanj_2",
+              "op:mostar:potoci"
+            ],
+            "friendly_osids": [
+              "op:konjic:bijela_2",
+              "op:konjic:sitnik"
+            ],
+            "length_edges": 10,
+            "primary_brigade_ids": [],
+            "sub_segment_id": "subseg:sector:vrs_herzegovina:10:0"
+          }
+        ],
+        "territory_osids": [
+          "op:konjic:bijela_2",
+          "op:konjic:sitnik"
+        ],
+        "threat_ratio": 16.095990635059998
+      },
       "sector:vrs_herzegovina:2": {
+        "assigned_brigade_ids": [
+          "rs_foa_brigade"
+        ],
+        "corps_id": "vrs_herzegovina",
+        "defensive_power": 48.99375,
+        "density": 0.0625,
+        "edge_ids": [
+          "op:cajnice:batotici__op:foca:prevrac",
+          "op:foca:brod_3__op:foca:izbisno",
+          "op:foca:brod_3__op:foca:kosman",
+          "op:foca:brod_3__op:foca:miljevina_2",
+          "op:foca:brod_3__op:foca:patkovina",
+          "op:foca:brod_3__op:foca:tjentiste_2",
+          "op:foca:brusna_2__op:foca:foca_3",
+          "op:foca:brusna_2__op:foca:prevrac",
+          "op:foca:brusna_2__op:foca:velenici_2",
+          "op:foca:brusna_2__op:foca:zavait_3",
+          "op:foca:foca_3__op:foca:patkovina",
+          "op:foca:kosman__op:foca:zavait_3",
+          "op:foca:patkovina__op:foca:prevrac",
+          "op:foca:patkovina__op:foca:zavait_3",
+          "op:foca:prevrac__op:foca:ustikolina",
+          "op:foca:prevrac__op:gorazde:kolovarice"
+        ],
+        "faction": "RS",
+        "length_edges": 16,
+        "opposing_factions": [
+          "RBiH"
+        ],
+        "rear_brigade_ids": [],
+        "reserve_brigade_ids": [],
+        "sector_id": "sector:vrs_herzegovina:2",
+        "sector_stance": "defend",
+        "stance_source": "bot",
+        "sub_segments": [
+          {
+            "edge_ids": [
+              "op:cajnice:batotici__op:foca:prevrac",
+              "op:foca:brod_3__op:foca:izbisno",
+              "op:foca:brod_3__op:foca:kosman",
+              "op:foca:brod_3__op:foca:miljevina_2",
+              "op:foca:brod_3__op:foca:patkovina",
+              "op:foca:brod_3__op:foca:tjentiste_2",
+              "op:foca:brusna_2__op:foca:foca_3",
+              "op:foca:brusna_2__op:foca:prevrac",
+              "op:foca:brusna_2__op:foca:velenici_2",
+              "op:foca:brusna_2__op:foca:zavait_3",
+              "op:foca:foca_3__op:foca:patkovina",
+              "op:foca:kosman__op:foca:zavait_3",
+              "op:foca:patkovina__op:foca:prevrac",
+              "op:foca:patkovina__op:foca:zavait_3",
+              "op:foca:prevrac__op:foca:ustikolina",
+              "op:foca:prevrac__op:gorazde:kolovarice"
+            ],
+            "enemy_osids": [
+              "op:cajnice:batotici",
+              "op:foca:brusna_2",
+              "op:foca:izbisno",
+              "op:foca:kosman",
+              "op:foca:miljevina_2",
+              "op:foca:patkovina",
+              "op:foca:tjentiste_2",
+              "op:foca:ustikolina",
+              "op:gorazde:kolovarice"
+            ],
+            "friendly_osids": [
+              "op:foca:brod_3",
+              "op:foca:foca_3",
+              "op:foca:prevrac",
+              "op:foca:velenici_2",
+              "op:foca:zavait_3"
+            ],
+            "length_edges": 16,
+            "primary_brigade_ids": [],
+            "sub_segment_id": "subseg:sector:vrs_herzegovina:2:0"
+          }
+        ],
+        "territory_osids": [
+          "op:foca:brod_3",
+          "op:foca:foca_3",
+          "op:foca:prevrac",
+          "op:foca:velenici_2",
+          "op:foca:zavait_3"
+        ],
+        "threat_ratio": 22.451843347365735
+      },
+      "sector:vrs_herzegovina:3": {
         "assigned_brigade_ids": [
           "rs_kalinovik_brigade"
         ],
@@ -11612,7 +11774,7 @@
         ],
         "rear_brigade_ids": [],
         "reserve_brigade_ids": [],
-        "sector_id": "sector:vrs_herzegovina:2",
+        "sector_id": "sector:vrs_herzegovina:3",
         "sector_stance": "defend",
         "stance_source": "bot",
         "sub_segments": [
@@ -11654,7 +11816,7 @@
             ],
             "length_edges": 14,
             "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:vrs_herzegovina:2:0"
+            "sub_segment_id": "subseg:sector:vrs_herzegovina:3:0"
           }
         ],
         "territory_osids": [
@@ -11669,7 +11831,7 @@
         ],
         "threat_ratio": 0
       },
-      "sector:vrs_herzegovina:3": {
+      "sector:vrs_herzegovina:4": {
         "assigned_brigade_ids": [],
         "corps_id": "vrs_herzegovina",
         "defensive_power": 0,
@@ -11701,7 +11863,7 @@
         ],
         "rear_brigade_ids": [],
         "reserve_brigade_ids": [],
-        "sector_id": "sector:vrs_herzegovina:3",
+        "sector_id": "sector:vrs_herzegovina:4",
         "sector_stance": "defend",
         "stance_source": "bot",
         "sub_segments": [
@@ -11748,7 +11910,7 @@
             ],
             "length_edges": 17,
             "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:vrs_herzegovina:3:0"
+            "sub_segment_id": "subseg:sector:vrs_herzegovina:4:0"
           }
         ],
         "territory_osids": [
@@ -11764,13 +11926,11 @@
         "threat_ratio": 9999,
         "unstaffed_front": true
       },
-      "sector:vrs_herzegovina:4": {
-        "assigned_brigade_ids": [
-          "rs_nevesinje_brigade"
-        ],
+      "sector:vrs_herzegovina:5": {
+        "assigned_brigade_ids": [],
         "corps_id": "vrs_herzegovina",
-        "defensive_power": 12.214965986394557,
-        "density": 0.047619047619047616,
+        "defensive_power": 0,
+        "density": 0,
         "edge_ids": [
           "op:gacko:gradina__op:kalinovik:sela_2",
           "op:kalinovik:golubici_2__op:kalinovik:obalj",
@@ -11779,30 +11939,20 @@
           "op:kalinovik:obalj__op:kalinovik:sela_2",
           "op:kalinovik:obalj__op:konjic:ljuta",
           "op:kalinovik:sela_2__op:kalinovik:tomislja",
-          "op:kalinovik:sela_2__op:konjic:sitnik",
           "op:kalinovik:sela_2__op:nevesinje:hrusta_2",
           "op:kalinovik:sela_2__op:nevesinje:krekovi_2",
           "op:kalinovik:sela_2__op:nevesinje:sopilja",
-          "op:konjic:bijela_2__op:konjic:celebici_2",
-          "op:konjic:bijela_2__op:konjic:dzepi_2",
-          "op:konjic:bijela_2__op:konjic:glavaticevo_2",
-          "op:konjic:bijela_2__op:konjic:konjic_2",
-          "op:konjic:bijela_2__op:konjic:turija",
-          "op:konjic:bijela_2__op:mostar:kruzanj_2",
-          "op:konjic:bijela_2__op:mostar:potoci",
-          "op:konjic:glavaticevo_2__op:konjic:sitnik",
-          "op:konjic:ljuta__op:konjic:sitnik",
           "op:trnovo:tosici__op:trnovo:trnovo"
         ],
         "faction": "RS",
-        "length_edges": 21,
+        "length_edges": 11,
         "opposing_factions": [
           "HRHB",
           "RBiH"
         ],
         "rear_brigade_ids": [],
         "reserve_brigade_ids": [],
-        "sector_id": "sector:vrs_herzegovina:4",
+        "sector_id": "sector:vrs_herzegovina:5",
         "sector_stance": "defend",
         "stance_source": "bot",
         "sub_segments": [
@@ -11815,32 +11965,15 @@
               "op:kalinovik:obalj__op:kalinovik:sela_2",
               "op:kalinovik:obalj__op:konjic:ljuta",
               "op:kalinovik:sela_2__op:kalinovik:tomislja",
-              "op:kalinovik:sela_2__op:konjic:sitnik",
               "op:kalinovik:sela_2__op:nevesinje:hrusta_2",
               "op:kalinovik:sela_2__op:nevesinje:krekovi_2",
               "op:kalinovik:sela_2__op:nevesinje:sopilja",
-              "op:konjic:bijela_2__op:konjic:celebici_2",
-              "op:konjic:bijela_2__op:konjic:dzepi_2",
-              "op:konjic:bijela_2__op:konjic:glavaticevo_2",
-              "op:konjic:bijela_2__op:konjic:konjic_2",
-              "op:konjic:bijela_2__op:konjic:turija",
-              "op:konjic:bijela_2__op:mostar:kruzanj_2",
-              "op:konjic:bijela_2__op:mostar:potoci",
-              "op:konjic:glavaticevo_2__op:konjic:sitnik",
-              "op:konjic:ljuta__op:konjic:sitnik",
               "op:trnovo:tosici__op:trnovo:trnovo"
             ],
             "enemy_osids": [
               "op:kalinovik:golubici_2",
               "op:kalinovik:sela_2",
-              "op:konjic:celebici_2",
-              "op:konjic:dzepi_2",
-              "op:konjic:glavaticevo_2",
-              "op:konjic:konjic_2",
               "op:konjic:ljuta",
-              "op:konjic:turija",
-              "op:mostar:kruzanj_2",
-              "op:mostar:potoci",
               "op:trnovo:trnovo"
             ],
             "friendly_osids": [
@@ -11848,16 +11981,14 @@
               "op:kalinovik:obalj",
               "op:kalinovik:tomislja",
               "op:kalinovik:vlaholje",
-              "op:konjic:bijela_2",
-              "op:konjic:sitnik",
               "op:nevesinje:hrusta_2",
               "op:nevesinje:krekovi_2",
               "op:nevesinje:sopilja",
               "op:trnovo:tosici"
             ],
-            "length_edges": 21,
+            "length_edges": 11,
             "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:vrs_herzegovina:4:0"
+            "sub_segment_id": "subseg:sector:vrs_herzegovina:5:0"
           }
         ],
         "territory_osids": [
@@ -11865,17 +11996,16 @@
           "op:kalinovik:obalj",
           "op:kalinovik:tomislja",
           "op:kalinovik:vlaholje",
-          "op:konjic:bijela_2",
-          "op:konjic:sitnik",
           "op:nevesinje:hrusta_2",
           "op:nevesinje:krekovi_2",
           "op:nevesinje:nevesinje_2",
           "op:nevesinje:sopilja",
           "op:trnovo:tosici"
         ],
-        "threat_ratio": 108.0641568278013
+        "threat_ratio": 9999,
+        "unstaffed_front": true
       },
-      "sector:vrs_herzegovina:5": {
+      "sector:vrs_herzegovina:6": {
         "assigned_brigade_ids": [
           "rs_ajnie_brigade"
         ],
@@ -11899,7 +12029,7 @@
         ],
         "rear_brigade_ids": [],
         "reserve_brigade_ids": [],
-        "sector_id": "sector:vrs_herzegovina:5",
+        "sector_id": "sector:vrs_herzegovina:6",
         "sector_stance": "defend",
         "stance_source": "bot",
         "sub_segments": [
@@ -11929,7 +12059,7 @@
             ],
             "length_edges": 8,
             "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:vrs_herzegovina:5:0"
+            "sub_segment_id": "subseg:sector:vrs_herzegovina:6:0"
           }
         ],
         "territory_osids": [
@@ -11939,7 +12069,7 @@
         ],
         "threat_ratio": 17.373450209271105
       },
-      "sector:vrs_herzegovina:6": {
+      "sector:vrs_herzegovina:7": {
         "assigned_brigade_ids": [],
         "corps_id": "vrs_herzegovina",
         "defensive_power": 0,
@@ -11956,7 +12086,7 @@
         ],
         "rear_brigade_ids": [],
         "reserve_brigade_ids": [],
-        "sector_id": "sector:vrs_herzegovina:6",
+        "sector_id": "sector:vrs_herzegovina:7",
         "sector_stance": "defend",
         "stance_source": "bot",
         "sub_segments": [
@@ -11976,7 +12106,7 @@
             ],
             "length_edges": 3,
             "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:vrs_herzegovina:6:0"
+            "sub_segment_id": "subseg:sector:vrs_herzegovina:7:0"
           }
         ],
         "territory_osids": [
@@ -11987,144 +12117,7 @@
         "threat_ratio": 0,
         "unstaffed_front": true
       },
-      "sector:vrs_herzegovina:7": {
-        "assigned_brigade_ids": [
-          "rs_trebinje_brigade"
-        ],
-        "corps_id": "vrs_herzegovina",
-        "defensive_power": 116.13333333333334,
-        "density": 0.3333333333333333,
-        "edge_ids": [
-          "op:trebinje:ivanica__op:trebinje:trebimlja_2",
-          "op:trebinje:trebimlja_2__op:trebinje:velicani",
-          "op:trebinje:trebimlja_2__op:trebinje:zakovo_2"
-        ],
-        "faction": "RS",
-        "length_edges": 3,
-        "opposing_factions": [
-          "HRHB"
-        ],
-        "rear_brigade_ids": [],
-        "reserve_brigade_ids": [],
-        "sector_id": "sector:vrs_herzegovina:7",
-        "sector_stance": "defend",
-        "stance_source": "bot",
-        "sub_segments": [
-          {
-            "edge_ids": [
-              "op:trebinje:ivanica__op:trebinje:trebimlja_2",
-              "op:trebinje:trebimlja_2__op:trebinje:velicani",
-              "op:trebinje:trebimlja_2__op:trebinje:zakovo_2"
-            ],
-            "enemy_osids": [
-              "op:trebinje:trebimlja_2"
-            ],
-            "friendly_osids": [
-              "op:trebinje:ivanica",
-              "op:trebinje:velicani",
-              "op:trebinje:zakovo_2"
-            ],
-            "length_edges": 3,
-            "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:vrs_herzegovina:7:0"
-          }
-        ],
-        "territory_osids": [
-          "op:trebinje:bihovo_2",
-          "op:trebinje:ivanica",
-          "op:trebinje:velicani",
-          "op:trebinje:zakovo_2"
-        ],
-        "threat_ratio": 7.74971297359357
-      },
       "sector:vrs_herzegovina:8": {
-        "assigned_brigade_ids": [
-          "rs_foa_brigade"
-        ],
-        "corps_id": "vrs_herzegovina",
-        "defensive_power": 48.99375,
-        "density": 0.0625,
-        "edge_ids": [
-          "op:cajnice:batotici__op:foca:prevrac",
-          "op:foca:brod_3__op:foca:izbisno",
-          "op:foca:brod_3__op:foca:kosman",
-          "op:foca:brod_3__op:foca:miljevina_2",
-          "op:foca:brod_3__op:foca:patkovina",
-          "op:foca:brod_3__op:foca:tjentiste_2",
-          "op:foca:brusna_2__op:foca:foca_3",
-          "op:foca:brusna_2__op:foca:prevrac",
-          "op:foca:brusna_2__op:foca:velenici_2",
-          "op:foca:brusna_2__op:foca:zavait_3",
-          "op:foca:foca_3__op:foca:patkovina",
-          "op:foca:kosman__op:foca:zavait_3",
-          "op:foca:patkovina__op:foca:prevrac",
-          "op:foca:patkovina__op:foca:zavait_3",
-          "op:foca:prevrac__op:foca:ustikolina",
-          "op:foca:prevrac__op:gorazde:kolovarice"
-        ],
-        "faction": "RS",
-        "length_edges": 16,
-        "opposing_factions": [
-          "RBiH"
-        ],
-        "rear_brigade_ids": [],
-        "reserve_brigade_ids": [],
-        "sector_id": "sector:vrs_herzegovina:8",
-        "sector_stance": "defend",
-        "stance_source": "bot",
-        "sub_segments": [
-          {
-            "edge_ids": [
-              "op:cajnice:batotici__op:foca:prevrac",
-              "op:foca:brod_3__op:foca:izbisno",
-              "op:foca:brod_3__op:foca:kosman",
-              "op:foca:brod_3__op:foca:miljevina_2",
-              "op:foca:brod_3__op:foca:patkovina",
-              "op:foca:brod_3__op:foca:tjentiste_2",
-              "op:foca:brusna_2__op:foca:foca_3",
-              "op:foca:brusna_2__op:foca:prevrac",
-              "op:foca:brusna_2__op:foca:velenici_2",
-              "op:foca:brusna_2__op:foca:zavait_3",
-              "op:foca:foca_3__op:foca:patkovina",
-              "op:foca:kosman__op:foca:zavait_3",
-              "op:foca:patkovina__op:foca:prevrac",
-              "op:foca:patkovina__op:foca:zavait_3",
-              "op:foca:prevrac__op:foca:ustikolina",
-              "op:foca:prevrac__op:gorazde:kolovarice"
-            ],
-            "enemy_osids": [
-              "op:cajnice:batotici",
-              "op:foca:brusna_2",
-              "op:foca:izbisno",
-              "op:foca:kosman",
-              "op:foca:miljevina_2",
-              "op:foca:patkovina",
-              "op:foca:tjentiste_2",
-              "op:foca:ustikolina",
-              "op:gorazde:kolovarice"
-            ],
-            "friendly_osids": [
-              "op:foca:brod_3",
-              "op:foca:foca_3",
-              "op:foca:prevrac",
-              "op:foca:velenici_2",
-              "op:foca:zavait_3"
-            ],
-            "length_edges": 16,
-            "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:vrs_herzegovina:8:0"
-          }
-        ],
-        "territory_osids": [
-          "op:foca:brod_3",
-          "op:foca:foca_3",
-          "op:foca:prevrac",
-          "op:foca:velenici_2",
-          "op:foca:zavait_3"
-        ],
-        "threat_ratio": 22.451843347365735
-      },
-      "sector:vrs_herzegovina:9": {
         "assigned_brigade_ids": [],
         "corps_id": "vrs_herzegovina",
         "defensive_power": 0,
@@ -12145,7 +12138,7 @@
         ],
         "rear_brigade_ids": [],
         "reserve_brigade_ids": [],
-        "sector_id": "sector:vrs_herzegovina:9",
+        "sector_id": "sector:vrs_herzegovina:8",
         "sector_stance": "defend",
         "stance_source": "bot",
         "sub_segments": [
@@ -12173,7 +12166,7 @@
             ],
             "length_edges": 7,
             "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:vrs_herzegovina:9:0"
+            "sub_segment_id": "subseg:sector:vrs_herzegovina:8:0"
           }
         ],
         "territory_osids": [
@@ -12181,6 +12174,56 @@
         ],
         "threat_ratio": 9999,
         "unstaffed_front": true
+      },
+      "sector:vrs_herzegovina:9": {
+        "assigned_brigade_ids": [
+          "rs_trebinje_brigade"
+        ],
+        "corps_id": "vrs_herzegovina",
+        "defensive_power": 116.13333333333334,
+        "density": 0.3333333333333333,
+        "edge_ids": [
+          "op:trebinje:ivanica__op:trebinje:trebimlja_2",
+          "op:trebinje:trebimlja_2__op:trebinje:velicani",
+          "op:trebinje:trebimlja_2__op:trebinje:zakovo_2"
+        ],
+        "faction": "RS",
+        "length_edges": 3,
+        "opposing_factions": [
+          "HRHB"
+        ],
+        "rear_brigade_ids": [],
+        "reserve_brigade_ids": [],
+        "sector_id": "sector:vrs_herzegovina:9",
+        "sector_stance": "defend",
+        "stance_source": "bot",
+        "sub_segments": [
+          {
+            "edge_ids": [
+              "op:trebinje:ivanica__op:trebinje:trebimlja_2",
+              "op:trebinje:trebimlja_2__op:trebinje:velicani",
+              "op:trebinje:trebimlja_2__op:trebinje:zakovo_2"
+            ],
+            "enemy_osids": [
+              "op:trebinje:trebimlja_2"
+            ],
+            "friendly_osids": [
+              "op:trebinje:ivanica",
+              "op:trebinje:velicani",
+              "op:trebinje:zakovo_2"
+            ],
+            "length_edges": 3,
+            "primary_brigade_ids": [],
+            "sub_segment_id": "subseg:sector:vrs_herzegovina:9:0"
+          }
+        ],
+        "territory_osids": [
+          "op:trebinje:bihovo_2",
+          "op:trebinje:ivanica",
+          "op:trebinje:velicani",
+          "op:trebinje:zakovo_2"
+        ],
+        "threat_ratio": 7.74971297359357
       },
       "sector:vrs_sarajevo_romanija:0": {
         "assigned_brigade_ids": [],
@@ -27147,7 +27190,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_herzegovina:5"
+          "sector_id": "sector:vrs_herzegovina:6"
         },
         "cohesion": 67,
         "composition": {
@@ -27295,7 +27338,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_herzegovina:8"
+          "sector_id": "sector:vrs_herzegovina:2"
         },
         "cohesion": 67,
         "composition": {
@@ -27443,7 +27486,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_herzegovina:2"
+          "sector_id": "sector:vrs_herzegovina:3"
         },
         "cohesion": 67,
         "composition": {
@@ -27517,7 +27560,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_herzegovina:4"
+          "sector_id": "sector:vrs_herzegovina:10"
         },
         "cohesion": 67,
         "composition": {
@@ -27561,11 +27604,11 @@
         },
         "faction": "RS",
         "force_label": "VRS",
-        "home_osid": "op:nevesinje:krekovi_2",
+        "home_osid": "op:konjic:sitnik",
         "hq_sid": "op:nevesinje:hrusta_2",
         "id": "rs_nevesinje_brigade",
         "kind": "brigade",
-        "location_osid": "op:nevesinje:krekovi_2",
+        "location_osid": "op:konjic:sitnik",
         "max_personnel": 2000,
         "morale": 60,
         "name": "Nevesinje Brigade",
@@ -27666,7 +27709,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_herzegovina:7"
+          "sector_id": "sector:vrs_herzegovina:9"
         },
         "cohesion": 67,
         "composition": {

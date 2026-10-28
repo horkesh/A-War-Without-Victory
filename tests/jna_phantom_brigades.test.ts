@@ -497,7 +497,7 @@ describe('Konjic south limited Glavatičevo TO axis', () => {
         assert.ok(operation);
         const axis = operation!.axes!.find((entry) => entry.axis_id === 'konjic_south');
         assert.ok(axis);
-        assert.deepEqual(axis!.brigades, ['jna_konjic_south_tg']);
+        assert.deepEqual(axis!.brigades, ['jna_konjic_south_tg', 'rs_nevesinje_brigade']);
         assert.equal(axis!.staging_osid, 'op:konjic:sitnik');
         assert.deepEqual(axis!.objectives, ['op:konjic:glavaticevo_2']);
 
@@ -513,9 +513,37 @@ describe('Konjic south limited Glavatičevo TO axis', () => {
         const startup = JSON.parse(readFileSync(
             join(process.cwd(), 'data/derived/startup/apr_1992_initial_save.json'),
             'utf8',
-        )) as { political: { political_controllers: Record<string, string> } };
+        )) as {
+            political: { political_controllers: Record<string, string> };
+            military: {
+                formations: Record<string, {
+                    location_osid: string;
+                    personnel: number;
+                    corps_id: string;
+                    status: string;
+                }>;
+                corps_command: Record<string, {
+                    active_operations: Array<{
+                        name: string;
+                        participating_brigades: string[];
+                    }>;
+                }>;
+            };
+        };
         assert.equal(startup.political.political_controllers['op:konjic:sitnik'], 'RS');
         assert.equal(startup.political.political_controllers['op:konjic:glavaticevo_2'], 'RBiH');
+
+        const nevesinje = startup.military.formations['rs_nevesinje_brigade']!;
+        assert.equal(nevesinje.location_osid, 'op:konjic:sitnik');
+        assert.equal(nevesinje.personnel, 1000);
+        assert.equal(nevesinje.status, 'active');
+        assert.equal(nevesinje.corps_id, 'vrs_herzegovina');
+
+        const startupOperation = startup.military.corps_command['jna_herzegovina_command']!
+            .active_operations.find((entry) => entry.name === 'Operation Herzegovina');
+        assert.ok(startupOperation);
+        assert.ok(startupOperation!.participating_brigades.includes('jna_konjic_south_tg'));
+        assert.ok(startupOperation!.participating_brigades.includes('rs_nevesinje_brigade'));
     });
 
     it('withdraws the Konjic TO at turn 6 without forcing capture', () => {

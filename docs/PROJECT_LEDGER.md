@@ -9,6 +9,24 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — Konjic limited TO axis + existing Nevesinje concentration — NOT ADOPTED
+
+Baseline unchanged: the prior 800-strong limited Konjic TO axis is retained, not
+replaced or strengthened. Two semantic edits only: `rs_nevesinje_brigade.home_osid`
+moves from Krekovi to `op:konjic:sitnik` as an initial assembly anchor (home
+municipality Nevesinje, settlement, corps, 1000 personnel, cap, equipment,
+cohesion 67, availability 0 and all other fields unchanged), and that same
+existing brigade is appended after `jna_konjic_south_tg` on
+`OperationHerzegovina.konjic_south.brigades`, keeping the TO primary. No new
+troops, army strength, cap, rule, threshold, withdrawal, controller, corps
+reassignment, or staging changes.
+
+History is uncertain: the concentration is a calibrated model assumption, not an
+attested Sitnik deployment; BB2 PDF p.514 / printed p.495 describes the 1994
+Serb-held Konjic/Glavatičevo front only. Startup generation, the actual six-screen
+run with normal joint combat, Mostar and all painted-control preservation, and the
+39 health/preservation gates remain pending. No pass or adoption is claimed.
+
 ## 2026-10-28 — Konjic-Glavatičevo limited TO axis trial — NOT ADOPTED
 
 Baseline unchanged: b325c68 (preserved 706/health3). The existing Konjic TO
