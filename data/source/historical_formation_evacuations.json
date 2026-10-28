@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "formation_id": "hrhb_102nd_brigade",
+      "faction": "HRHB",
+      "corps_id": "hvo_northwest_bosnia",
+      "from_municipalities": ["odzak", "bosanski_samac", "modrica", "derventa", "bosanski_brod", "orasje"],
+      "destination_osids": [
+        "op:orasje:orasje",
+        "op:orasje:donja_mahala",
+        "op:orasje:ostra_luka",
+        "op:bosanski_samac:domaljevac_2"
+      ],
+      "route_kind": "authored_external_evacuation",
+      "authority": "owner_2026_10_28_102nd_odzak_orasje"
+    }
+  ]
+}

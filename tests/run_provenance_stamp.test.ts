@@ -160,7 +160,7 @@ describe('the consumed set is the set a headless run actually reads', () => {
      * recomputes it from the live fixed set plus the live derivation, so adding an input
      * turns it RED and forces the header to be updated in the same change.
      */
-    it('★ the 188w stamp is exactly 32 named rows, derived not remembered', async () => {
+    it('★ the 188w stamp is exactly 33 named rows, derived not remembered', async () => {
         const fsp = await import('node:fs/promises');
         const { checkpointsForScenario } =
             await import('../src/scenario/scenario_runner.js');
@@ -181,8 +181,8 @@ describe('the consumed set is the set a headless run actually reads', () => {
             collapseEnabled: false,
         });
         const paths = p.consumed_inputs.files.map(f => f.path);
-        expect(paths.length, `32 = ${HEADLESS_CONSUMED_INPUTS.length} fixed + scenario + 4 declared + ${EVENT_FILES.length} events + 4 painted`)
-            .toBe(32);
+        expect(paths.length, `33 = ${HEADLESS_CONSUMED_INPUTS.length} fixed + scenario + 4 declared + ${EVENT_FILES.length} events + 4 painted`)
+            .toBe(33);
         // Cross-check the arithmetic rather than the literal, so the two cannot drift apart.
         expect(paths.length).toBe(HEADLESS_CONSUMED_INPUTS.length + 5 + EVENT_FILES.length + 4);
         // ★ EVERY SCORING REFERENCE is stamped, not just the terminal one. A 188w run scores
@@ -292,6 +292,30 @@ describe('the stamp records rows, not just a digest', () => {
         expect(paths).toContain('data/scenarios/apr1992_definitive_188w.json');
         for (const f of p.consumed_inputs.files) {
             expect(f.sha256, `${f.path} must hash`).toMatch(/^[0-9a-f]{64}$/);
+        }
+    });
+
+    it('★ the authored evacuation table is a hashed row whose content moves the digest for headless and desktop', async () => {
+        const TABLE = 'data/source/historical_formation_evacuations.json';
+        const payloadA = '{"version":1,"rules":[{"formation_id":"hrhb_102nd_brigade","faction":"HRHB","corps_id":"hvo_northwest_bosnia","from_municipalities":["odzak"],"destination_osids":["op:orasje:orasje"],"route_kind":"authored_external_evacuation","authority":"owner_2026_10_28_102nd_odzak_orasje"}]}\n';
+        // One destination differs; every other byte is identical.
+        const payloadB = payloadA.replace('op:orasje:orasje', 'op:orasje:donja_mahala');
+        for (const harness of ['headless', 'desktop'] as const) {
+            const { root, scenarioPath } = seedFullTree({ [TABLE]: payloadA });
+            const a = await buildRunProvenance({ baseDir: root, scenarioPath, harness, collapseEnabled: false });
+            // Only the freshly generated fixture root is mutated; the authored table is untouched.
+            writeFileSync(join(root, TABLE), payloadB, 'utf8');
+            const b = await buildRunProvenance({ baseDir: root, scenarioPath, harness, collapseEnabled: false });
+
+            const rowA = a.consumed_inputs.files.find(f => f.path === TABLE);
+            const rowB = b.consumed_inputs.files.find(f => f.path === TABLE);
+            expect(rowA?.sha256, `${TABLE} must be a named nonnull row`).toMatch(/^[0-9a-f]{64}$/);
+            expect(rowB?.sha256, `${TABLE} must be a named nonnull row`).toMatch(/^[0-9a-f]{64}$/);
+            // Normalised content hash: the row is the sha256 of the file bytes, not a marker.
+            expect(rowA?.sha256).toBe(createHash('sha256').update(payloadA).digest('hex'));
+            expect(rowB?.sha256).toBe(createHash('sha256').update(payloadB).digest('hex'));
+            expect(rowA?.sha256).not.toBe(rowB?.sha256);
+            expect(a.consumed_inputs.digest).not.toBe(b.consumed_inputs.digest);
         }
     });
 

@@ -212,6 +212,17 @@ sector wrapped around that isolated pocket does not make its brigade connected t
 front. The stranded-brigade lifecycle therefore treats the location as unreachable and invokes
 the ordinary deterministic emergency-retreat/lifecycle path when combat removes the pocket.
 
+**Owner-directed 102nd Odžak→Orašje evacuation (2026-10-28):** when the capture-triggered
+salient lifecycle would evacuate `hrhb_102nd_brigade` from the Odžak/Bosanski Šamac neck, the
+brigade is placed in its own held Orašje pocket and retains `hvo_northwest_bosnia` rather than
+following the generic graph to central Bosnia. This is explicit owner-directed historical/scenario
+placement authority whose actual travel route is unmodeled: it
+applies only to that formation, faction, organic corps and departure municipalities, only when
+ordinary evacuation would otherwise occur, and only to a destination still held by the faction
+and claimed by its own corps sector. It is not ordinary enemy-territory traversal, does not flip
+control, and grants no generalized movement or exemption; other formations keep the existing
+graph path.
+
 **Operation-completion ownership handoff (2026-10-23, focused candidate):** operations
 completing in the current `advance-sector-offensives` invocation publish released participant
 IDs on transient turn context after return handling and operation removal. Immediately before

@@ -19,7 +19,7 @@
  * `init_officers` — resolved through the same functions the runner uses, plus the event
  * catalogue's own `EVENT_FILES` list imported from its loader, plus one painted-control
  * SCORING REFERENCE PER HISTORICAL CHECKPOINT the run reaches. For the definitive 188w
- * scenario that is **32 rows** = 17 fixed + scenario + 4 declared keys + 6 `EVENT_FILES`
+ * scenario that is **33 rows** = 18 fixed + scenario + 4 declared keys + 6 `EVENT_FILES`
  * + 4 painted maps (jan1993, apr1994, apr1995, oct1995 — the run scores at every one).
  *
  * DO NOT TRUST THAT NUMBER FROM THIS COMMENT. Three earlier drafts said 20, 24 and 28, and all
@@ -171,6 +171,9 @@ export const HEADLESS_FIXED_CONSUMED_INPUTS: readonly string[] = [
     // difference: swapping this file without a rebuild changes nothing.
     'data/scenarios/presidential_initiatives/apr1992.json',
     'data/source/formation_lifecycle_events.json',
+    // STATIC ESM IMPORT (salient_withdrawal.ts:16), not a runtime read — bundled, but its
+    // content still selects the authored evacuation destination, so it applies to desktop too.
+    'data/source/historical_formation_evacuations.json',
     'data/source/municipalities_1990_registry_110.json',
     'data/source/oob_brigades.json',
     'data/source/oob_corps.json',

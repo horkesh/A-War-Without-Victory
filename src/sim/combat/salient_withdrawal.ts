@@ -13,9 +13,77 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { isFriendlyFaction } from '../early_war/alliance_update.js';
 import { isEnclaveBrigade } from './enclave_resilience.js';
 import { emitSalientEvacuationRecord, isReasonCodeTopicEnabled } from './reason_code_debug.js';
+import historicalFormationEvacuations from '../../../data/source/historical_formation_evacuations.json';
 
 export interface SalientWithdrawalReport {
     evacuated_formation_ids: string[];
+}
+
+interface HistoricalEvacuationRule {
+    formation_id: string;
+    faction: string;
+    corps_id: string;
+    from_municipalities: string[];
+    destination_osids: string[];
+    route_kind: string;
+    authority: string;
+}
+
+const historicalEvacuationTable = historicalFormationEvacuations as {
+    version: number;
+    rules: HistoricalEvacuationRule[];
+};
+
+function municipalityOfOsid(osid: string): string | null {
+    const [prefix, municipality] = osid.split(':');
+    return prefix === 'op' && municipality ? municipality : null;
+}
+
+/**
+ * Owner-directed historical relocation: the 102nd evacuated Odzak into the
+ * Orasje pocket. The real route is unmodeled, so this is explicit authored
+ * placement authority, not ordinary movement through enemy territory.
+ */
+function historicalEvacuationRuleFor(formation: FormationState, start: string): HistoricalEvacuationRule | null {
+    const municipality = municipalityOfOsid(start);
+    if (!municipality || !formation.corps_id) return null;
+    for (const rule of historicalEvacuationTable.rules) {
+        if (rule.formation_id !== formation.id) continue;
+        if (rule.faction !== formation.faction) continue;
+        if (rule.corps_id !== formation.corps_id) continue;
+        if (!rule.from_municipalities.includes(municipality)) continue;
+        return rule;
+    }
+    return null;
+}
+
+function corpsSectorTerritory(state: GameState, corpsId: string, faction: FactionId): Set<string> {
+    const territory = new Set<string>();
+    const sectors = state.military.corps_front_sectors ?? {};
+    for (const sectorId of Object.keys(sectors).sort(strictCompare)) {
+        const sector = sectors[sectorId];
+        if (!sector || sector.corps_id !== corpsId) continue;
+        if (sector.faction !== faction) continue;
+        for (const osid of sector.territory_osids ?? []) territory.add(osid);
+    }
+    return territory;
+}
+
+function authoredEvacuationDestination(
+    state: GameState,
+    faction: FactionId,
+    rule: HistoricalEvacuationRule,
+    capturedOsid: string,
+): string | null {
+    const controllers = state.political.political_controllers ?? {};
+    const claimed = corpsSectorTerritory(state, rule.corps_id, faction);
+    for (const osid of rule.destination_osids) {
+        if (osid === capturedOsid) continue;
+        if (controllers[osid] !== faction) continue;
+        if (!claimed.has(osid)) continue;
+        return osid;
+    }
+    return null;
 }
 
 function operationPocketHolders(state: GameState, faction: FactionId): {
@@ -247,14 +315,56 @@ export function evacuateFormationsSeveredByCapture(
         // evacuation must not silently cancel that deliberate pocket defense.
         if (operationHolders.participants.has(id)) { terminal('ineligible_operation_participant', { start_osid: start }); continue; }
         if (operationHolders.stagingOsids.has(start)) { terminal('ineligible_operation_staging', { start_osid: start }); continue; }
-        const trace: SalientReachTrace | undefined = selected ? {} : undefined;
-        const destination = findEvacuationDestination(
-            state, start, capturedOsid, displacedFaction, main, adjacency, trace,
+        const historicalRule = historicalEvacuationRuleFor(formation, start);
+        const trace: SalientReachTrace | undefined = selected && !historicalRule ? {} : undefined;
+        const genericDestination = findEvacuationDestination(
+            state, start, capturedOsid, displacedFaction, main, adjacency,
+            historicalRule ? undefined : trace,
         );
-        if (!destination) {
+        if (!genericDestination) {
             terminal(trace?.without_neck_terminal === 'reached_main' ? 'already_connected_to_main' : 'no_route', { start_osid: start, ...trace });
             continue;
         }
+        // The authored relocation is an external placement authority, not an
+        // ordinary graph path. It only applies when the generic lifecycle would
+        // actually evacuate, and it never falls back to the graph destination.
+        let destination = genericDestination;
+        let externalAuthority: {
+            route_kind: string;
+            authority: string;
+            declined_graph_destination_osid: string;
+        } | null = null;
+        if (historicalRule) {
+            const claimed = corpsSectorTerritory(state, historicalRule.corps_id, displacedFaction);
+            if (historicalRule.destination_osids.includes(start) && claimed.has(start)) {
+                terminal('historical_destination_already_held', {
+                    start_osid: start, route_kind: historicalRule.route_kind, authority: historicalRule.authority,
+                });
+                continue;
+            }
+            const authored = authoredEvacuationDestination(state, displacedFaction, historicalRule, capturedOsid);
+            if (!authored) {
+                terminal('historical_destination_unavailable', {
+                    start_osid: start, declined_graph_destination_osid: genericDestination,
+                    route_kind: historicalRule.route_kind, authority: historicalRule.authority,
+                });
+                continue;
+            }
+            destination = authored;
+            externalAuthority = {
+                route_kind: historicalRule.route_kind,
+                authority: historicalRule.authority,
+                declined_graph_destination_osid: genericDestination,
+            };
+        }
+
+        if (observation && externalAuthority) emitSalientEvacuationRecord({
+            kind: 'historical_external_evacuation', turn: state.meta.turn,
+            formation_id: id, start_osid: start, destination_osid: destination,
+            route_kind: externalAuthority.route_kind, authority: externalAuthority.authority,
+            declined_graph_destination_osid: externalAuthority.declined_graph_destination_osid,
+            graph_path_reported: false,
+        });
 
         const orderBefore = state.military.brigade_movement_orders?.[id];
         const movementStateBefore = state.military.brigade_movement_state?.[id];
@@ -271,7 +381,11 @@ export function evacuateFormationsSeveredByCapture(
         delete state.military.brigade_movement_orders?.[id];
         delete state.military.brigade_movement_state?.[id];
         report.evacuated_formation_ids.push(id);
-        terminal('evacuated', { start_osid: start, destination_osid: destination, ...trace,
+        terminal('evacuated', { start_osid: start, destination_osid: destination,
+            ...(externalAuthority
+                ? { external_route: externalAuthority.route_kind, historical_authority: externalAuthority.authority,
+                    declined_graph_destination_osid: externalAuthority.declined_graph_destination_osid }
+                : trace),
             corps_id_before: corpsIdBefore, corps_id_after: formation.corps_id ?? null,
             order_present_before: orderBefore !== undefined, order_before: orderBefore ?? null,
             order_present_after: state.military.brigade_movement_orders?.[id] !== undefined,
