@@ -1623,6 +1623,21 @@ describe('pre-planned operations', () => {
             'rs_1st_banja_luka_light_infantry',
             'rs_43rd_prijedor_motorized',
         ]);
+        assert.equal(axis.minimum_forward_brigades, 2);
+
+        const state = makeMinimalState();
+        state.meta.turn = 30;
+        const command = state.military.corps_command!.vrs_1st_krajina!;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Donji Vakuf'];
+        assert.equal(injectQueuedOperation(state, 'vrs_1st_krajina'), true);
+
+        const injected = command.active_operations
+            .find((candidate) => candidate.name === 'Operation Donji Vakuf');
+        assert.ok(injected);
+        const injectedAxis = injected.axes!.find((candidate) => candidate.axis_id === 'vlasic_pocket');
+        assert.ok(injectedAxis);
+        assert.equal(injectedAxis.minimum_forward_brigades, 2);
     });
 
     it('does not spend the 1992 Podrinje Sweep on the January Srebrenica high-water cell at Obadi', () => {

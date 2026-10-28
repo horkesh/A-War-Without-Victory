@@ -1140,6 +1140,8 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 ],
                 objectives: ['op:travnik:gornje_krcevine'],
                 staging_osid: 'op:travnik:varosluk',
+                // Supply-corrected coordination experiment: wait for both already-assigned brigades.
+                minimum_forward_brigades: 2,
             },
         ],
     },
