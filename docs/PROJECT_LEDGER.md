@@ -9,6 +9,30 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — Unadopted Foča all-axes-ready trial (source 11ef62)
+
+Unadopted calibration trial from source 11ef62 (retained 24-turn prefix): the Foča valley attacks
+Kolovarice alone on turn 9 with rs_foa_brigade; the costly victory (1.06869) is correctly absorbed
+by the existing ARBiH homeland last stand (no flip). The Čajniče southern column is still clearing
+Brusna on turn 9 and joins on turn 10, after the Foča force has suffered 558 casualties and cohesion
+loss. Both axes rosters hold only one brigade, so minimum_forward_brigades:2 was deliberately not set
+on a one-brigade axis.
+
+Hypothesis: the existing CorpsOperation.require_all_axes_ready gate — already implemented by the
+launch helper and copied by buildCorpsOperation — aligns the four authored columns before piecemeal
+initial assaults. Unlike coordinated_advance it only holds launch until all live axes have an
+executable opening attack. This is a calibrated coordination assumption, not a historical assertion
+or a new engine feature.
+
+Change: optional PrePlannedOp.require_all_axes_ready, set true only on Operation Foca. Builder, launch
+helper, and resolver untouched; no coordinated_advance or multiplier. Rosters, targets, dates,
+planning_duration 6, prestage_from 0, source-ownership fixes, Circle 14/queue fallback, Orašje/allied
+supply, health, OOB, and references kept exact.
+
+Status: unmeasured at turn 39; fallback bb705 and health 3 verified but NOT fully qualified. Reject
+cheaply at 15/24 first; run the 39-turn pair only if promising. All painted/health/final aggregate/
+native checks pending. No adoption.
+
 ## 2026-10-27 — Zero-sector rescue honors donor commitments
 
 Diagnosis: exact same-source runtime/report replay turn19→20 traced the

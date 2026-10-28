@@ -190,6 +190,7 @@ describe('pre-planned operations', () => {
         const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Foca');
         assert.ok(operation);
         assert.equal(operation.prestage_from, 0);
+        assert.equal(operation.require_all_axes_ready, true);
         const valleyAxis = operation.axes.find((candidate) => candidate.axis_id === 'foca_valley');
         assert.ok(valleyAxis);
         assert.equal(valleyAxis.staging_osid, 'op:foca:foca_3');
@@ -211,6 +212,34 @@ describe('pre-planned operations', () => {
             'op:foca:izbisno',
             'op:foca:kosman',
         ]);
+    });
+
+    it('propagates the calibrated all-axes-ready gate to the runtime Operation Foca', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 4;
+        const foca = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Foca');
+        assert.ok(foca);
+        const command = state.military.corps_command!.vrs_herzegovina!;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Foca'];
+        for (const axis of foca.axes) {
+            for (const brigadeId of axis.brigades) {
+                const formation = state.military.formations![brigadeId];
+                assert.ok(formation);
+                formation.location_osid = axis.staging_osid ?? foca.staging_osid;
+            }
+        }
+
+        assert.equal(injectQueuedOperation(state, 'vrs_herzegovina', new Map()), true);
+
+        const runtimeOperation = state.military.corps_command!.vrs_herzegovina!.active_operations
+            .find((candidate) => candidate.name === 'Operation Foca');
+        assert.ok(runtimeOperation);
+        assert.equal(runtimeOperation.require_all_axes_ready, true);
+
+        const circle = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
+        assert.ok(circle);
+        assert.equal(circle.require_all_axes_ready, undefined);
     });
 
     it('authors Lukavac 93 as the Main Staff operation that severs the Trnovo–Goražde corridor', () => {

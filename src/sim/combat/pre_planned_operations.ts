@@ -95,6 +95,11 @@ export interface PrePlannedOp {
     minimum_viable_participants?: number;
     /** Active, attack-capable authored formations required before planning may transition to execution. */
     minimum_assembled_participants?: number;
+    /**
+     * Hold the launch transition until every live axis has an executable opening attack.
+     * Calibrated coordination assumption; not a historical claim or new engine feature.
+     */
+    require_all_axes_ready?: boolean;
     execution_attack_power_mult?: number;
     coordinated_advance?: boolean;
     sync_operation_name?: string;
@@ -750,6 +755,10 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         // 1 turn before brigades arrive → zero_eligible_axis. Extending to 6 shifts anti-paralysis
         // to elapsed=6 (t11=w10) when kalinovik_brigade is already at vlaholje. n93 regression.
         planning_duration: 6,
+        // Calibrated coordination assumption (not a historical assertion): the existing
+        // require_all_axes_ready launch gate holds the opening assault until all four authored
+        // columns have an executable opening attack, instead of the Foča valley attacking alone.
+        require_all_axes_ready: true,
         axes: [
             {
                 axis_id: 'foca_valley',
