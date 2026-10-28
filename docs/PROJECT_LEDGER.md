@@ -19,6 +19,12 @@ clock evidence and bounded `buffered`/`seekable` snapshots without gate waiver,
 classifier/allowlist changes, or gameplay/package changes. Tests and fresh native
 proof remain pending; no pass claim.
 
+Correction: our observation parser wrongly rejected signed media timelines by
+requiring nonnegative starts/ends. It now preserves finite, ordered TimeRanges
+exactly, including signed values, with no network waiver or playback change. RED
+118/1 and GREEN/fresh native proof remain pending. No actual negative native
+bounds are claimed until captured.
+
 ## 2026-10-28 — Gorazde model restored to healthy 851st-only Kamen ablation — NOT ADOPTED
 
 Separate the verified committed-support correctness repair (badcb3774) from the rejected

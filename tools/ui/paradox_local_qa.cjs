@@ -6370,7 +6370,7 @@ function installAmbientLifecycleObserver() {
       for (let index = 0; index < length; index += 1) {
         const start = raw.start(index);
         const end = raw.end(index);
-        if (!Number.isFinite(start) || !Number.isFinite(end) || start < 0 || end < 0) return undefined;
+        if (!Number.isFinite(start) || !Number.isFinite(end)) return undefined;
         if (end < start || start < previousEnd) return undefined;
         ranges.push([start, end]);
         previousEnd = end;

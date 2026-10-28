@@ -1075,6 +1075,36 @@ test('ambient lifecycle observer captures exact full, partial, and disjoint buff
     assert.strictEqual(calls.load, 0);
 });
 
+test('ambient lifecycle observer preserves exact signed WHATWG TimeRanges without clamping or inventing coverage', () => {
+    const calls = { play: 0, pause: 0, load: 0 };
+    const { window, ambient } = createObservedAmbient({
+        buffered: { configurable: true, value: mediaTimeRanges([[-0.0065, 30]]) },
+        seekable: { configurable: true, value: mediaTimeRanges([[-2, -1]]) },
+        currentTime: { configurable: true, value: 12 },
+    }, (observedWindow) => {
+        Object.defineProperties(observedWindow.HTMLMediaElement.prototype, {
+            play: { configurable: true, writable: true, value: () => { calls.play += 1; return Promise.resolve(); } },
+            pause: { configurable: true, writable: true, value: () => { calls.pause += 1; } },
+            load: { configurable: true, writable: true, value: () => { calls.load += 1; } },
+        });
+    });
+
+    ambient.dispatchEvent(new window.Event('progress'));
+
+    const signals = ambientSignals(window);
+    assert.strictEqual(signals.length, 1);
+    assert.deepStrictEqual(normalizeTimeRangePairs(signals[0].mediaState.buffered), [[-0.0065, 30]]);
+    assert.deepStrictEqual(normalizeTimeRangePairs(signals[0].mediaState.seekable), [[-2, -1]]);
+    assert.strictEqual(signals[0].mediaStateUnavailable.includes('buffered'), false);
+    assert.strictEqual(signals[0].mediaStateUnavailable.includes('seekable'), false);
+    assert.strictEqual(Object.prototype.hasOwnProperty.call(signals[0].mediaStateReadErrors, 'buffered'), false);
+    assert.strictEqual(Object.prototype.hasOwnProperty.call(signals[0].mediaStateReadErrors, 'seekable'), false);
+    assert.strictEqual(ambient.currentTime, 12);
+    assert.strictEqual(calls.play, 0);
+    assert.strictEqual(calls.pause, 0);
+    assert.strictEqual(calls.load, 0);
+});
+
 test('ambient lifecycle observer preserves valid empty and sixteen-range TimeRanges exactly', () => {
     const sixteen = Array.from({ length: 16 }, (_value, index) => [index * 2, index * 2 + 1] as [number, number]);
     const { window, ambient } = createObservedAmbient({
@@ -1098,8 +1128,7 @@ test.each([
     ['more than sixteen ranges', { length: 17, start: (index: number) => wellFormedRangeAt(index)[0], end: (index: number) => wellFormedRangeAt(index)[1] }],
     ['non-finite start', mediaTimeRanges([[Number.NaN, 1]])],
     ['non-finite end', mediaTimeRanges([[0, Number.POSITIVE_INFINITY]])],
-    ['negative start', mediaTimeRanges([[-1, 1]])],
-    ['negative end', mediaTimeRanges([[0, -1]])],
+    ['reversed bounds crossing zero', mediaTimeRanges([[0, -1]])],
     ['reversed bounds', mediaTimeRanges([[5, 4]])],
     ['overlapping ranges', mediaTimeRanges([[0, 2], [1, 3]])],
 ])('invalid %s TimeRanges stay unknown instead of being normalized', (_name, ranges) => {
