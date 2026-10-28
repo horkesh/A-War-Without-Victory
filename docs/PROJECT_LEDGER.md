@@ -9,6 +9,33 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — Konjic South ordinary-march orientation — NOT ADOPTED
+
+Calibration trial only; no result claim, build, commit, push, or adoption. One production
+field changes: `jna_konjic_south_tg.location_osid` `op:konjic:sitnik` →
+`op:konjic:bijela_2`, restoring the original assembly point. Operation Herzegovina
+`konjic_south` keeps `staging_osid` `op:konjic:sitnik` and objectives
+`['op:konjic:ljuta', 'op:konjic:glavaticevo_2']`; actor, corps, profile 800,
+light_infantry, cohesion 60, morale 60, experience 0.25, withdrawal turn 6, no handoff, and
+all references are unchanged. No spawn_turn, delay flag, planning override, threshold,
+bonus, troop cap, handoff, roster, or helper feature was added.
+
+Prior ordinary-route trial (withdrawn, not adopted) gained Ljuta (ratio 2.976) and
+Glavatičevo (ratio 3.949) from the same 800-man TO but opened with the Mostar loss. The
+hypothesis is native ordinary movement: assembling at original Bijela forces the owned
+one-edge march to Sitnik before the hostile Ljuta attack, delaying that attack (hypothesis:
+not before turn 2) and retaining the prior Mostar opening, after which the Konjic gains may
+follow. This is observed coupling, not a proven bug, and no timing or parity is guaranteed;
+the six actual turns must prove the prefix before any adoption.
+
+Source limits: BB2 PDF 514 / printed 495 describes the 1994 Serb-held Konjic/Glavatičevo
+line; it does not document this specific April 1992 TO route or prove the area held
+throughout. Sitnik concentration and the Ljuta-first sequence are explicit calibrated model
+inference, not attested historical capture. Real contact-graph edges are
+Bijela→Sitnik→Ljuta→Glavatičevo; Bijela→Ljuta does not exist. No painted references or
+history repaint. The constructor/staging contract is asserted as an owned march, not an
+identity, and no capture or movement is fabricated in tests.
+
 ## 2026-10-28 — Konjic South east-axis route orientation trial — NOT ADOPTED
 
 Calibration trial only; no result claim, build, commit, push, or adoption. Three fields

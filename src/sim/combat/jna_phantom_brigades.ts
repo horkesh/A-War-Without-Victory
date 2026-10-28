@@ -255,14 +255,16 @@ const JNA_PHANTOM_DEFS: PhantomDef[] = [
     },
     {
         // Local Serb TO mobilized by JNA for southern Konjic/Kalinovik seizure.
-        // Route orientation is calibrated model inference: the local TO opens from
-        // Sitnik, which is adjacent to Ljuta and Glavatičevo in the real contact
-        // graph. BB2 PDF 514 / printed 495 describes the 1994 Serb-held Konjic/
-        // Glavatičevo line only and does not attest this April 1992 TO route.
+        // The local TO assembles at its original Bijela start and must march the
+        // owned Bijela→Sitnik edge to concentrate at Sitnik before attacking Ljuta
+        // first, then Glavatičevo. That Sitnik concentration and Ljuta-first
+        // sequence are calibrated model route inference. BB2 PDF 514 / printed 495
+        // describes the 1994 Serb-held Konjic/Glavatičevo line only and does not
+        // attest this April 1992 TO route.
         id: 'jna_konjic_south_tg' as FormationId,
         name: 'Konjic-South Serb TO',
         corps_id: 'jna_herzegovina_command' as FormationId,
-        location_osid: 'op:konjic:sitnik',
+        location_osid: 'op:konjic:bijela_2',
         withdrawal_turn: 6,
         tanks: 0, artillery: 0, apcs: 0,
         no_equipment_handoff: true,

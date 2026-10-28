@@ -466,10 +466,12 @@ describe('equipment ceilings', () => {
     });
 });
 
-// Cross-consumer regression for the Konjic South route-orientation trial:
-// the phantom constructor and the Operation Herzegovina axis must agree on the
-// Sitnik opening, and that opening must follow real contact-graph edges.
-describe('Konjic South route orientation', () => {
+// Cross-consumer regression for the Konjic South ordinary-march trial: the phantom
+// constructor assembles at original Bijela, the Operation Herzegovina axis keeps
+// Sitnik with Ljuta first, and the real contact graph supplies the owned
+// Bijela-Sitnik march before the hostile Sitnik-Ljuta-Glavaticevo axis. No capture
+// or forced movement is fabricated here.
+describe('Konjic South ordinary march', () => {
     const repoRoot = process.cwd();
 
     function hasEdge(edges: Array<{ a: string; b: string }>, first: string, second: string): boolean {
@@ -477,7 +479,7 @@ describe('Konjic South route orientation', () => {
             (edge.a === first && edge.b === second) || (edge.a === second && edge.b === first));
     }
 
-    it('opens from Sitnik along the real Sitnik-Ljuta-Glavaticevo edges', () => {
+    it('assembles at Bijela and opens from Sitnik along the real owned march', () => {
         const state = makeState(0);
         spawnJnaPhantomBrigades(state);
         const phantom = state.military.formations!['jna_konjic_south_tg']!;
@@ -487,8 +489,8 @@ describe('Konjic South route orientation', () => {
         const axis = operation!.axes.find((candidate) => candidate.axis_id === 'konjic_south');
         assert.ok(axis, 'Konjic South axis must remain in Operation Herzegovina');
 
-        assert.equal(phantom.location_osid, 'op:konjic:sitnik');
-        assert.equal(phantom.location_osid, axis!.staging_osid);
+        assert.equal(phantom.location_osid, 'op:konjic:bijela_2');
+        assert.equal(axis!.staging_osid, 'op:konjic:sitnik');
         assert.deepEqual(axis!.brigades, ['jna_konjic_south_tg']);
         assert.deepEqual(axis!.objectives, ['op:konjic:ljuta', 'op:konjic:glavaticevo_2']);
 
@@ -506,6 +508,7 @@ describe('Konjic South route orientation', () => {
 
         const graphPath = join(repoRoot, 'data', 'derived', 'operational', 'operational_contact_graph.json');
         const graph = JSON.parse(readFileSync(graphPath, 'utf8')) as { edges: Array<{ a: string; b: string }> };
+        assert.ok(hasEdge(graph.edges, 'op:konjic:bijela_2', 'op:konjic:sitnik'), 'real graph must contain the owned Bijela-Sitnik march');
         assert.ok(hasEdge(graph.edges, 'op:konjic:sitnik', 'op:konjic:ljuta'), 'real graph must contain Sitnik-Ljuta adjacency');
         assert.ok(hasEdge(graph.edges, 'op:konjic:ljuta', 'op:konjic:glavaticevo_2'), 'real graph must contain Ljuta-Glavaticevo adjacency');
         assert.ok(!hasEdge(graph.edges, 'op:konjic:bijela_2', 'op:konjic:ljuta'), 'real graph must not contain Bijela-Ljuta adjacency');
@@ -514,6 +517,7 @@ describe('Konjic South route orientation', () => {
         const startup = JSON.parse(readFileSync(startupPath, 'utf8')) as {
             political: { political_controllers: Record<string, string> };
         };
+        assert.equal(startup.political.political_controllers['op:konjic:bijela_2'], 'RS');
         assert.equal(startup.political.political_controllers['op:konjic:sitnik'], 'RS');
 
         const withdrawalState = makeState(0);

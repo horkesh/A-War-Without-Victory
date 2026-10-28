@@ -21766,7 +21766,7 @@
         "force_label": "VRS",
         "id": "jna_konjic_south_tg",
         "kind": "jna_phantom",
-        "location_osid": "op:konjic:sitnik",
+        "location_osid": "op:konjic:bijela_2",
         "morale": 60,
         "name": "Konjic-South Serb TO",
         "ops": {
