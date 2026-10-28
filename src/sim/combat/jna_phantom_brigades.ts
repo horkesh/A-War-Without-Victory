@@ -258,7 +258,7 @@ const JNA_PHANTOM_DEFS: PhantomDef[] = [
         id: 'jna_konjic_south_tg' as FormationId,
         name: 'Konjic-South Serb TO',
         corps_id: 'jna_herzegovina_command' as FormationId,
-        location_osid: 'op:konjic:bijela_2',
+        location_osid: 'op:konjic:sitnik',
         withdrawal_turn: 6,
         tanks: 0, artillery: 0, apcs: 0,
         no_equipment_handoff: true,

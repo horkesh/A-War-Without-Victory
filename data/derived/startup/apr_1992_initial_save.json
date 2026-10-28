@@ -1306,10 +1306,9 @@
                 "name": "Konjic South",
                 "objective_capture_count": 0,
                 "objectives": [
-                  "op:konjic:glavaticevo_2",
-                  "op:konjic:ljuta"
+                  "op:konjic:glavaticevo_2"
                 ],
-                "staging_osid": "op:konjic:bijela_2",
+                "staging_osid": "op:konjic:sitnik",
                 "status": "executing"
               }
             ],
@@ -1324,8 +1323,7 @@
             "objectives": [
               "op:mostar:vranjevici_2",
               "op:mostar:kruzanj_2",
-              "op:konjic:glavaticevo_2",
-              "op:konjic:ljuta"
+              "op:konjic:glavaticevo_2"
             ],
             "participating_brigades": [
               "jna_konjic_south_tg",
@@ -21766,7 +21764,7 @@
         "force_label": "VRS",
         "id": "jna_konjic_south_tg",
         "kind": "jna_phantom",
-        "location_osid": "op:konjic:bijela_2",
+        "location_osid": "op:konjic:sitnik",
         "morale": 60,
         "name": "Konjic-South Serb TO",
         "ops": {

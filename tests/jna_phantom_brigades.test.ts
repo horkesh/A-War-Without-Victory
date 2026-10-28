@@ -2,6 +2,8 @@
  * Tests for JNA/HV phantom brigade spawn, withdrawal, and equipment handoff.
  */
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, it } from 'vitest';
 
 import {
@@ -13,6 +15,7 @@ import {
     _ALL_PHANTOM_DEFS,
     _EQUIPMENT_CEILINGS,
 } from '../src/sim/combat/jna_phantom_brigades.js';
+import { _ALL_PRE_PLANNED } from '../src/sim/combat/pre_planned_operations.js';
 import { CURRENT_SCHEMA_VERSION, type FormationId, type FormationState, type FactionId, type GameState } from '../src/state/game_state.js';
 
 function makeState(turn: number): GameState {
@@ -460,5 +463,73 @@ describe('equipment ceilings', () => {
 
     it('still gives mechanized formations the highest tank ceiling', () => {
         assert.ok(_EQUIPMENT_CEILINGS['mechanized']!.max_tanks > _EQUIPMENT_CEILINGS['light_infantry']!.max_tanks);
+    });
+});
+
+describe('Konjic south limited Glavatičevo TO axis', () => {
+    it('assembles the existing Konjic TO at Sitnik with an unchanged force profile', () => {
+        const state = makeState(0);
+        spawnJnaPhantomBrigades(state);
+
+        const konjicTo = state.military.formations!['jna_konjic_south_tg']!;
+        assert.equal(konjicTo.kind, 'jna_phantom');
+        assert.equal(konjicTo.location_osid, 'op:konjic:sitnik');
+        assert.equal(konjicTo.personnel, 800);
+        assert.equal(konjicTo.composition!.infantry, 800);
+        assert.equal(konjicTo.composition!.tanks, 0);
+        assert.equal(konjicTo.composition!.artillery, 0);
+        assert.equal(konjicTo.equipment_class, 'light_infantry');
+        assert.equal(konjicTo.cohesion, 60);
+        assert.equal(konjicTo.morale, 60);
+        assert.equal(konjicTo.withdrawal_turn, 6);
+
+        const def = _JNA_PHANTOM_DEFS.find((entry) => entry.id === 'jna_konjic_south_tg');
+        assert.ok(def);
+        assert.equal(def!.withdrawal_turn, 6);
+        assert.equal(def!.no_equipment_handoff, true);
+        assert.equal(def!.tanks, 0);
+        assert.equal(def!.artillery, 0);
+        assert.equal(def!.apcs, 0);
+    });
+
+    it('runs one limited Glavatičevo objective from Sitnik on the real contact edge', () => {
+        const operation = _ALL_PRE_PLANNED.find((entry) => entry.name === 'Operation Herzegovina');
+        assert.ok(operation);
+        const axis = operation!.axes!.find((entry) => entry.axis_id === 'konjic_south');
+        assert.ok(axis);
+        assert.deepEqual(axis!.brigades, ['jna_konjic_south_tg']);
+        assert.equal(axis!.staging_osid, 'op:konjic:sitnik');
+        assert.deepEqual(axis!.objectives, ['op:konjic:glavaticevo_2']);
+
+        const graph = JSON.parse(readFileSync(
+            join(process.cwd(), 'data/derived/operational/operational_contact_graph.json'),
+            'utf8',
+        )) as { edges: Array<{ a: string; b: string }> };
+        assert.ok(graph.edges.some((edge) => (
+            (edge.a === 'op:konjic:sitnik' && edge.b === 'op:konjic:glavaticevo_2')
+            || (edge.a === 'op:konjic:glavaticevo_2' && edge.b === 'op:konjic:sitnik')
+        )), 'Sitnik-Glavatičevo contact edge must exist');
+
+        const startup = JSON.parse(readFileSync(
+            join(process.cwd(), 'data/derived/startup/apr_1992_initial_save.json'),
+            'utf8',
+        )) as { political: { political_controllers: Record<string, string> } };
+        assert.equal(startup.political.political_controllers['op:konjic:sitnik'], 'RS');
+        assert.equal(startup.political.political_controllers['op:konjic:glavaticevo_2'], 'RBiH');
+    });
+
+    it('withdraws the Konjic TO at turn 6 without forcing capture', () => {
+        const state = makeState(6);
+        state.political.political_controllers = {
+            'op:konjic:glavaticevo_2': 'RBiH' as FactionId,
+        };
+        spawnJnaPhantomBrigades(state);
+        keepOnlyPhantoms(state, ['jna_konjic_south_tg']);
+
+        const events = processJnaWithdrawals(state);
+        assert.equal(events.length, 1);
+        assert.equal(events[0]!.phantom_id, 'jna_konjic_south_tg');
+        assert.equal(state.military.formations!['jna_konjic_south_tg'], undefined);
+        assert.equal(state.political.political_controllers['op:konjic:glavaticevo_2'], 'RBiH');
     });
 });

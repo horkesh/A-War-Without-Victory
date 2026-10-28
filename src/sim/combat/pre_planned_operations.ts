@@ -702,8 +702,13 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 staging_osid: 'op:nevesinje:sopilja',
             },
             {
-                // Southern Konjic — local Serb TO takes Glavatičevo/Ljuta salient
-                // (BB2 p.514: VRS held this area throughout). JNA phantom only.
+                // Southern Konjic — limited TO axis toward Glavatičevo only; Ljuta
+                // is deliberately outside this axis rather than forcing bad
+                // logistics onto it. The narrow assembly and remit are calibrated
+                // model inference, not an attested April 1992 operation. BB2 PDF
+                // p.514 / printed p.495 describes the 1994 Serb-held
+                // Konjic-Glavatičevo front, not the exact 1992 TO deployment.
+                // JNA phantom only; JNA column exclusion is intentional.
                 axis_id: 'konjic_south',
                 name: 'Konjic South',
                 brigades: [
@@ -711,9 +716,8 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 ],
                 objectives: [
                     'op:konjic:glavaticevo_2',
-                    'op:konjic:ljuta',
                 ],
-                staging_osid: 'op:konjic:bijela_2',
+                staging_osid: 'op:konjic:sitnik',
             },
         ],
     },

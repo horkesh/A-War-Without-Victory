@@ -9,6 +9,21 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — Konjic-Glavatičevo limited TO axis trial — NOT ADOPTED
+
+Baseline unchanged: b325c68 (preserved 706/health3). The existing Konjic TO
+(`jna_konjic_south_tg`; 800 light infantry, cohesion/morale 60, no heavy
+equipment, no handoff, withdraw 6) now assembles at Sitnik and runs one
+limited axis toward `op:konjic:glavaticevo_2`; Ljuta is outside this axis.
+No force, lifecycle, rule, reference, or date changes. JNA column exclusion
+and the neighbor/OSID retreat choice remain intentional. History is
+uncertain: the narrow assembly/remit is calibrated model inference, not an
+attested April 1992 operation, and BB2 PDF p.514 / printed p.495 describes
+the 1994 Serb-held Konjic/Glavatičevo front only.
+The trial requires the actual six-screen run with normal capture, Mostar, and
+all painted-control preservation to pass; then the 39-pair, health, and all
+gates follow. No pass or adoption is claimed.
+
 ## 2026-10-28 — January 19th Krajina seed trial, 1000→2000 — NOT ADOPTED
 
 Assumption: raise only `initial_personnel` 1000→2000 on `rs_19th_krajina_light_infantry`
