@@ -9,6 +9,28 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — January 851st staffing seed trial, 1100→1250 — NOT ADOPTED
+
+Trial: raise only `initial_personnel` 1100→1250 on `arbih_851st_vitezka_liberation`
+(RBiH, 1st Corps, home Goražde). `composition.infantry` stays 1100; this is a staffing
+authoring seed, not an equipment or strength claim. No `max_personnel`/cap field added or
+changed (the implicit 1800 cap stands), and morale 55, cohesion 72, availability 0, corps,
+home, equipment, operations, and every other row are unchanged. One seed plus a modest
++150 loss buffer only; the derived composition, pools and deployment effects remain with
+the official startup generator, which validates them. No historical headcount or capture
+is claimed and no guaranteed behavior is implied.
+
+Parent (Kalinovik axis extended to Ljuta; 11 normal captures; cold pair 706 / 31 anchors /
+health 5 FAIL): gains Ljuta but loses Kamen. First 851st difference is turn-15 reactive
+defense at Mazlina, +97 casualties (base 548 men / coh 64.9 vs candidate 451 / coh 55.1);
+base had a Kamen battle 25 decisive 3.125, candidate did not attack. The old 1800 trial on
+the much older base 2fe4788 (rejected 700) is not repeated here. Current best b325
+706 / health 3 is preserved.
+
+Pending: Codex startup generation and checks, prefix 26 on actual Kamen/Ljuta outcomes,
+painted-control preservation and health, then the January pair. No passing status yet;
+no commit, push, or adoption.
+
 ## 2026-10-28 — January Operation Foca Kalinovik axis extended to Ljuta — NOT ADOPTED
 
 Trial: append `op:konjic:ljuta` after `op:kalinovik:sela_2` on the existing Operation

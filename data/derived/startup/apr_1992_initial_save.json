@@ -2044,7 +2044,7 @@
           "arbih_851st_vitezka_liberation"
         ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 41.58,
+        "defensive_power": 44.415,
         "density": 0.125,
         "edge_ids": [
           "op:gorazde:bacci__op:gorazde:glamoc",
@@ -2130,7 +2130,7 @@
           "op:pale:podgrab",
           "op:pale:praca"
         ],
-        "threat_ratio": 28.860028860028862
+        "threat_ratio": 27.01789935832489
       },
       "sector:arbih_1st_corps:10": {
         "assigned_brigade_ids": [],
@@ -12778,7 +12778,7 @@
           "op:pale:vrazalice",
           "op:rogatica:varosiste_2"
         ],
-        "threat_ratio": 230.64909944190768
+        "threat_ratio": 241.13314941653985
       },
       "sector:vrs_sarajevo_romanija:8": {
         "assigned_brigade_ids": [],
@@ -18632,7 +18632,7 @@
           "last_supplied_turn": null
         },
         "origin_mun": "gorazde",
-        "personnel": 1100,
+        "personnel": 1250,
         "readiness": "active",
         "status": "active",
         "tags": [
@@ -29054,7 +29054,7 @@
       },
       "gorazde:RBiH": {
         "available": 0,
-        "committed": 5500,
+        "committed": 5650,
         "exhausted": 0,
         "faction": "RBiH",
         "fatigue": 0,
