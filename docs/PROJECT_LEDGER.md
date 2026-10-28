@@ -28,6 +28,21 @@ Result: none yet. Codex independently verifies generated 650/1800 personnel, rec
 accounting, exact collateral fields, then a cheap 24-screen for actual 851st availability,
 delivery, and preservation.
 
+## 2026-10-28 — Gorazde 851st local counterattack model, turn 23 — NOT ADOPTED
+
+Added one model `PrePlannedOp`, `Gorazde Local Counterattack (Model)` (RBiH, 1st Corps,
+Bacci staging, sole 851st axis toward Kamen, enqueue/available turn 23, viable and assembled
+floors 1, no combat/planning overrides). This is not an attested 851st action or a named
+historic operation. BB1 printed p. 151 / PDF p. 187 supports regional context only; turn 23
+(14 September 1992) is a model due point after Operation Circle, not a sourced capture date.
+The existing future-TG donor reservation for the 851st is unchanged.
+
+Preconditions proved by exact 22→23 full-state/report replay: the 851st has 684 personnel at
+friendly Bacci, is surplus/active/undisrupted/without another operation, and the normal
+forecast is costly_victory at 1.012412. Initial/pre-23 parity, actual normal combat, and the
+full painted/Orajsje/raw-health screens remain pending. No capture is guaranteed. The seed
+650 trial above also remains unadopted.
+
 ## 2026-10-27 — Zero-sector rescue honors donor commitments
 
 Diagnosis: exact same-source runtime/report replay turn19→20 traced the

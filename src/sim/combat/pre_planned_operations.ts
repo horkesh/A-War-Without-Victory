@@ -1337,6 +1337,33 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
+        // Owner-authorized UNADOPTED model action. Timing, roster, and axis are
+        // inference, not an attested 851st action or a historically named
+        // operation; BB1 printed p. 151 / PDF p. 187 is regional context only.
+        // Turn 23 (14 September 1992) is a model due point after Operation Circle,
+        // not a sourced capture date. The existing future-TG donor reservation
+        // applies to the 851st and is unchanged. Actual initial, pre-23 parity,
+        // normal-combat, full-painted, and health proofs remain pending; capture
+        // is not guaranteed.
+        corps: 'arbih_1st_corps',
+        faction: 'RBiH',
+        name: 'Gorazde Local Counterattack (Model)',
+        staging_osid: 'op:gorazde:bacci',
+        available_from: 23,
+        enqueue_from: 23,
+        minimum_viable_participants: 1,
+        minimum_assembled_participants: 1,
+        axes: [
+            {
+                axis_id: 'gorazde_local_counterattack',
+                name: 'Local Gorazde Counterattack',
+                brigades: ['arbih_851st_vitezka_liberation'],
+                objectives: ['op:gorazde:kamen'],
+                staging_osid: 'op:gorazde:bacci',
+            },
+        ],
+    },
+    {
         // Owner-directed chronology: the Cerska/Srebrenica contact is established
         // during summer 1992 and must still be present at the January checkpoint.
         // This is deliberately an ordinary operation: no scripted control change,

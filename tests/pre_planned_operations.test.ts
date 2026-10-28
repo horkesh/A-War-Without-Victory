@@ -814,7 +814,7 @@ describe('pre-planned operations', () => {
     });
 
     it('defines the current pre-planned operation catalog', () => {
-        assert.equal(_ALL_PRE_PLANNED.length, 30);
+        assert.equal(_ALL_PRE_PLANNED.length, 31);
         assert.deepEqual(
             _ALL_PRE_PLANNED.map((def) => def.name),
             [
@@ -846,6 +846,7 @@ describe('pre-planned operations', () => {
                 'Prozor–Rama Line Counterattack',
                 'Visoko–Breza Line Clearing',
                 'Operation Circle',
+                'Gorazde Local Counterattack (Model)',
                 'Srebrenica–Cerska Link-Up',
                 'Maglaj Local Counterattack',
                 'Central Bosnia Counteroffensive',
@@ -3125,5 +3126,125 @@ describe('pre-planned eligibility observer', () => {
         assert.deepEqual(secondLines, firstLines);
         assert.deepEqual(second, first);
         assert.equal(stableStringify(second), stableStringify(first));
+    });
+});
+
+describe('Gorazde Local Counterattack (Model)', () => {
+    const name = 'Gorazde Local Counterattack (Model)';
+    const brigadeId = 'arbih_851st_vitezka_liberation';
+
+    it('authors the exact unadopted 851st model definition without overrides', () => {
+        const operation = _ALL_PRE_PLANNED.find((def) => def.name === name);
+        assert.ok(operation);
+        assert.equal(operation.corps, 'arbih_1st_corps');
+        assert.equal(operation.faction, 'RBiH');
+        assert.equal(operation.staging_osid, 'op:gorazde:bacci');
+        assert.equal(operation.available_from, 23);
+        assert.equal(operation.enqueue_from, 23);
+        assert.equal(operation.minimum_viable_participants, 1);
+        assert.equal(operation.minimum_assembled_participants, 1);
+        assert.equal(operation.axes.length, 1);
+        assert.equal(operation.axes[0]?.axis_id, 'gorazde_local_counterattack');
+        assert.equal(operation.axes[0]?.name, 'Local Gorazde Counterattack');
+        assert.deepEqual(operation.axes[0]?.brigades, [brigadeId]);
+        assert.deepEqual(operation.axes[0]?.objectives, ['op:gorazde:kamen']);
+        assert.equal(operation.axes[0]?.staging_osid, 'op:gorazde:bacci');
+        for (const excluded of [
+            'prestage_from',
+            'planning_duration',
+            'min_attack_outcome',
+            'execution_attack_power_mult',
+            'coordinated_advance',
+        ]) {
+            assert.equal((operation as any)[excluded], undefined);
+        }
+        assert.equal(operation.axes[0]?.minimum_forward_brigades, undefined);
+        assert.equal(operation.axes[0]?.minimum_staged_brigades, undefined);
+    });
+
+    it('stays unqueued and unmoved at turn 22, then injects the sole 851st axis at turn 23', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 22;
+        const command = state.military.corps_command!.arbih_1st_corps!;
+        command.active_operations = [];
+        delete command.queued_operations;
+        const formation = state.military.formations![brigadeId]!;
+        formation.personnel = 684;
+        formation.location_osid = 'op:gorazde:bacci';
+        state.political.political_controllers!['op:gorazde:bacci'] = 'RBiH';
+        state.political.political_controllers!['op:gorazde:kamen'] = 'RS';
+
+        prestageDeferredPrePlannedElites(state);
+
+        assert.ok(!state.military.corps_command?.arbih_1st_corps?.queued_operations?.includes(name));
+        assert.ok(!getHeadQueuedPrePlannedBrigadeIds(state).has(brigadeId));
+        assert.ok(!getQueuedDatedPrestageBrigadeIds(state).has(brigadeId));
+        assert.equal(formation.location_osid, 'op:gorazde:bacci');
+
+        state.meta.turn = 23;
+        prestageDeferredPrePlannedElites(state);
+        assert.ok(state.military.corps_command?.arbih_1st_corps?.queued_operations?.includes(name));
+        const positionBeforeInjection = formation.location_osid;
+
+        assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), true);
+        const operation = command.active_operations.find((active) => active.name === name);
+        assert.ok(operation);
+        assert.deepEqual(operation!.participating_brigades, [brigadeId]);
+        assert.equal(operation!.axes?.length, 1);
+        assert.deepEqual(operation!.axes?.[0]?.assigned_brigades, [brigadeId]);
+        assert.deepEqual(operation!.axes?.[0]?.objectives, ['op:gorazde:kamen']);
+        assert.equal(operation!.axes?.[0]?.staging_osid, 'op:gorazde:bacci');
+        for (const circleBrigade of [
+            'arbih_801st_light',
+            'arbih_802nd_light',
+            'arbih_831st_drina_lineage',
+        ]) {
+            assert.ok(!operation!.participating_brigades.includes(circleBrigade));
+        }
+        assert.equal(formation.location_osid, positionBeforeInjection);
+    });
+
+    it('refuses a fresh turn-23 queue when the 851st is below the 500-man attack floor', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 23;
+        const command = state.military.corps_command!.arbih_1st_corps!;
+        command.active_operations = [];
+        command.queued_operations = [name];
+        const formation = state.military.formations![brigadeId]!;
+        formation.personnel = 499;
+        formation.location_osid = 'op:gorazde:bacci';
+        state.political.political_controllers!['op:gorazde:bacci'] = 'RBiH';
+        state.political.political_controllers!['op:gorazde:kamen'] = 'RS';
+
+        assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), false);
+        assert.equal(command.active_operations.length, 0);
+        assert.equal(state.political.political_controllers!['op:gorazde:kamen'], 'RS');
+    });
+
+    it('still honours an explicit RBiH decline and withholds the model operation', () => {
+        const state = makeMinimalState();
+        state.meta.player_faction = 'RBiH' as FactionId;
+        state.meta.turn = 23;
+        const command = state.military.corps_command!.arbih_1st_corps!;
+        command.active_operations = [];
+        command.queued_operations = [name];
+        state.political.political_controllers!['op:gorazde:bacci'] = 'RBiH';
+        state.political.political_controllers!['op:gorazde:kamen'] = 'RS';
+        state.meta.pending_proposal_reviews = [{
+            id: 'PROP_0_historical_op_preplanned_arbih_1st_corps_gorazde_local_counterattack',
+            turn: state.meta.turn,
+            faction: 'RBiH' as FactionId,
+            domain: 'ops',
+            description: 'Gorazde Local Counterattack (Model) - declined by the president.',
+            proposed_action: 'HISTORICAL_OP:preplanned:arbih_1st_corps:Gorazde Local Counterattack (Model)',
+            current_value: 'awaiting_authorization',
+            proposed_value: 'authorize',
+            accepted: false,
+            resolved_turn: state.meta.turn,
+        } as never];
+
+        assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), false);
+        assert.equal(command.active_operations.length, 0);
+        assert.equal(state.political.political_controllers!['op:gorazde:kamen'], 'RS');
     });
 });
