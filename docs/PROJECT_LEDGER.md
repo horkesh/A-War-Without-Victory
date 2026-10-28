@@ -9,6 +9,29 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — January 181st Mountain personnel 500→1200 — NOT ADOPTED
+
+One bounded authored availability experiment: only `arbih_181st_mountain.initial_personnel`
+500→1200 (RBiH, 1st Corps, home Hadžići / Lokve, date 0, cohesion 45, light infantry). 1200 is
+one effective-available-manpower assumption below the existing actual cap 1800, not a sourced
+historical headcount; no `max_personnel` was added or changed. All other fields and units
+(19th 2000, Čajniče 1800, 650 seeds), controls, operations, thresholds, roster, dates, and
+history are unchanged. Basis: at T28 native Trnovo had 831st 1034, 181st 100, 182nd 119; the
+latter two sit below the 500 attack floor. The 831st solo trial failed normal combat at
+0.680/0.397 with no admission bug, so no blind 831st power increase. The 181st starts 500 and
+has no recorded direct battle until Kijevo 26, where the depleted formation loses 85 men to a
+13.744 decisive attack. The prior 182nd 1200 trial is a different unit/path and is not repeated.
+This first test covers only availability/survival and Kijevo preservation, not a new capture
+mission; Codex will officially generate/check then run the short 28 screen. Requirement: 181st
+≥500 adequately supplied/eligible and Kijevo RS, with no guaranteed result. No new operation or
+39 until evidence justifies it; no pre-28 parity claim because opening force changes. Historical
+scope: same existing 181st, Hadžići home/corps/available 0; a calibrated readiness manpower
+assumption, no claim of a new formation or attested Tošići assignment. Leverage comparison:
+Donje Žešće adjacent RBiH forces are depleted/committed, and the four other mismatches lack a
+new historical/force cause, so one bounded existing local-force trial addresses the actual
+deficit. Preserve 706/health 3, own origin/allied/Orašje/anchors/painted reference, and all
+receipts. No passing claim, commit, push, or adoption.
+
 ## 2026-10-28 — January 19th Krajina seed trial, 1000→2000 — NOT ADOPTED
 
 Assumption: raise only `initial_personnel` 1000→2000 on `rs_19th_krajina_light_infantry`
