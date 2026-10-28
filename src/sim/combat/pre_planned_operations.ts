@@ -1321,6 +1321,8 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         // allowing ordinary assembly before KRUG's 15 August opening. Four turns is
         // the pre-experiment local planning budget; readiness and reachability remain
         // ordinary CorpsOperation gates.
+        // Calibrated assembly timing: walk the same approved roster in two weeks early.
+        prestage_from: 16,
         available_from: 18,
         planning_duration: 4,
         axes: [

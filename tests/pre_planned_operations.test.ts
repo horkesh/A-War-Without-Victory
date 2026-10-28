@@ -1057,6 +1057,7 @@ describe('pre-planned operations', () => {
     it('owns the approved KRUG lineage roster under 1st Corps without rejected participants', () => {
         const circle = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
         assert.ok(circle);
+        assert.equal(circle!.prestage_from, 16);
         assert.equal(circle!.axes[0]?.minimum_forward_brigades, undefined);
         const state = makeMinimalState();
         state.meta.turn = 18;
@@ -2474,6 +2475,40 @@ describe('pre-planned operations', () => {
             ['op:test:other_authored_commitment'],
             'a live non-discretionary movement commitment must not be stolen',
         );
+    });
+
+    it('pre-stages the existing KRUG roster only from turn 16 without teleporting', () => {
+        const state = makeMinimalState();
+        state.meta.player_faction = 'RS';
+        state.meta.turn = 15;
+        const command = state.military.corps_command!.arbih_1st_corps!;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Circle'];
+        state.military.formations!.arbih_801st_light!.location_osid = 'op:test:circle_remote';
+
+        prestageDeferredPrePlannedElites(state);
+        assert.equal(state.military.brigade_movement_orders?.arbih_801st_light, undefined);
+
+        state.meta.turn = 16;
+        prestageDeferredPrePlannedElites(state);
+
+        const definition = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
+        assert.equal(definition?.prestage_from, 16);
+        assert.equal(
+            state.military.formations!.arbih_801st_light!.location_osid,
+            'op:test:circle_remote',
+            'pre-staging must issue a march rather than teleporting the formation',
+        );
+        assert.deepEqual(
+            state.military.brigade_movement_orders?.arbih_801st_light,
+            {
+                destination_sids: ['op:gorazde:osjecani_2'],
+                stance: 'column',
+                owner: 'authored_preplanned',
+            },
+        );
+        assert.equal(command.active_operations.some((active) => active.name === 'Operation Circle'), false);
+        assert.equal(definition?.available_from, 18);
     });
 
     it('does not pre-stage a Donji Vakuf brigade away from another active operation', () => {
