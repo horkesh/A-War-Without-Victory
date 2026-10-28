@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it, vi } from 'vitest';
 
 import { checkTriggeredOperations, injectArmyHqOperations, _TRIGGERED_OPS } from '../src/sim/combat/triggered_operations.js';
+import { getReservedPrePlannedBrigadeIds } from '../src/sim/combat/pre_planned_operations.js';
 import { warPhases } from '../src/sim/turn_phases/war_phases.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import type {
@@ -114,6 +115,38 @@ async function applyAutonomyTransition(state: GameState): Promise<void> {
     await step.run({ state, input: {}, report: {} } as any);
 }
 
+function makeGorazdeFollowOnState(turn: number): GameState {
+    const state = makeState(turn);
+    const def = _TRIGGERED_OPS.find((candidate) => candidate.name === 'Gorazde Perimeter Follow-On')!;
+    const participants = ['arbih_801st_light', 'arbih_802nd_light'];
+    for (const brigadeId of participants) {
+        state.military.formations![brigadeId] = makeFormation(brigadeId, 'arbih_1st_corps', {
+            faction: 'RBiH' as FactionId,
+            location_osid: def.staging_osid,
+        });
+    }
+    state.military.corps_front_sectors!['sector:arbih_1st_corps:0'] = makeSector({
+        sector_id: 'sector:arbih_1st_corps:0',
+        corps_id: 'arbih_1st_corps',
+        faction: 'RBiH' as FactionId,
+        opposing_factions: ['RS' as FactionId],
+        edge_ids: ['edge:gorazde_perimeter'],
+        friendly_osids: [def.staging_osid],
+        assigned_brigade_ids: participants,
+        reserve_brigade_ids: [],
+        length_edges: 1,
+        territory_osids: [def.staging_osid],
+    });
+    state.political.political_controllers![def.staging_osid] = 'RBiH';
+    state.political.political_controllers!['op:foca:donje_zesce'] = 'RS';
+    (state as any).factions = [...(state.factions ?? []), { id: 'RBiH' as FactionId }];
+    state.operation_history = [{
+        corps_id: 'arbih_1st_corps',
+        operation_name: 'Operation Circle',
+    } as any];
+    return state;
+}
+
 describe('triggered operations definitions', () => {
     it('defines the current triggered operation catalog', () => {
         // Operation Sana migrated to the opportunity catalog (LANE B Phase 3,
@@ -124,10 +157,11 @@ describe('triggered operations definitions', () => {
         // step when ENABLE_TG_ARMY_HQ_OPS is on). Inserted after Krivaja-95, before
         // Stupčanica-95. The fabricated "Lukavac 93" RBiH def was dropped because the
         // historical VRS operation is represented by the pre-planned Operation Trnovo.
-        assert.equal(_TRIGGERED_OPS.length, 7);
+        assert.equal(_TRIGGERED_OPS.length, 8);
         assert.deepEqual(
             _TRIGGERED_OPS.map((def) => def.name),
             [
+                'Gorazde Perimeter Follow-On',
                 'Operation Posavina Corridor',
                 'Operation Herzegovina Consolidation',
                 'Operation Kotor Varos',
@@ -860,5 +894,129 @@ describe('checkTriggeredOperations', () => {
         assert.ok(injected.includes('Operation Herzegovina Consolidation'));
         const warnings = state.military.op_injection_warnings ?? [];
         assert.equal(warnings.some((warning: any) => warning.op_name === 'Operation Herzegovina Consolidation' && warning.check === 'brigade_missing'), false);
+    });
+});
+
+describe('Gorazde Perimeter Follow-On due-time trigger', () => {
+    const findDef = () => _TRIGGERED_OPS.find((def) => def.name === 'Gorazde Perimeter Follow-On')!;
+
+    it('is inert before turn 26 even with Operation Circle recorded', () => {
+        const state = makeGorazdeFollowOnState(25);
+        const def = findDef();
+
+        assert.equal(def.trigger(state, 25), false);
+        assert.ok(!checkTriggeredOperations(state).includes(def.name));
+    });
+
+    it('requires the recorded Operation Circle completion', () => {
+        const state = makeGorazdeFollowOnState(26);
+        state.operation_history = [];
+        const def = findDef();
+
+        assert.equal(def.trigger(state, 26), false);
+        assert.ok(!checkTriggeredOperations(state).includes(def.name));
+    });
+
+    it('withholds while Operation Circle is active or recovering', () => {
+        for (const phase of ['execution', 'recovery']) {
+            const state = makeGorazdeFollowOnState(26);
+            state.military.corps_command!['arbih_1st_corps']!.active_operations = [{
+                name: 'Operation Circle',
+                type: 'sector_attack',
+                phase,
+                participating_brigades: [],
+            } as any];
+            const def = findDef();
+
+            assert.equal(def.trigger(state, 26), false, `Circle phase ${phase}`);
+            assert.ok(!checkTriggeredOperations(state).includes(def.name));
+        }
+    });
+
+    it('waits until both participants are released from other active operations', () => {
+        for (const committed of ['arbih_801st_light', 'arbih_802nd_light']) {
+            const state = makeGorazdeFollowOnState(26);
+            state.military.corps_command!['arbih_1st_corps']!.active_operations = [{
+                name: 'Unrelated Sweep',
+                type: 'sector_attack',
+                phase: 'execution',
+                participating_brigades: [committed],
+            } as any];
+            const def = findDef();
+
+            assert.equal(def.trigger(state, 26), false, `${committed} is committed`);
+            assert.ok(!checkTriggeredOperations(state).includes(def.name));
+        }
+    });
+
+    it('injects once at turn 26 through the ordinary triggered path and stages participants', () => {
+        const state = makeGorazdeFollowOnState(26);
+        const def = findDef();
+
+        assert.equal(def.prestage_from, undefined);
+        assert.equal(def.army_hq_op_id, undefined);
+        assert.equal(def.army_hq_only, undefined);
+        assert.equal(def.trigger(state, 26), true);
+
+        assert.equal(getReservedPrePlannedBrigadeIds(19).has('arbih_801st_light'), false);
+        assert.equal(getReservedPrePlannedBrigadeIds(19).has('arbih_802nd_light'), false);
+        assert.equal(getReservedPrePlannedBrigadeIds(25).has('arbih_801st_light'), false);
+        assert.equal(getReservedPrePlannedBrigadeIds(25).has('arbih_802nd_light'), false);
+
+        // Participants start away from staging to prove the existing path emits
+        // ordinary concentration orders during the planning window.
+        state.military.formations!['arbih_801st_light']!.location_osid = 'op:gorazde:gorazde_2';
+        state.military.formations!['arbih_802nd_light']!.location_osid = 'op:gorazde:gorazde_2';
+
+        const first = checkTriggeredOperations(state);
+        assert.ok(first.includes(def.name));
+
+        const command = state.military.corps_command!['arbih_1st_corps']!;
+        const operations = command.active_operations.filter((op) => op.name === def.name);
+        assert.equal(operations.length, 1);
+        const op = operations[0]!;
+        const axis = op.axes?.[0] as any;
+
+        assert.equal(op.type, 'sector_attack');
+        assert.equal(op.is_pre_planned ?? false, false);
+        assert.equal(op.occupies_on_victory ?? true, true);
+        assert.equal(op.planning_duration, 6);
+        assert.equal(op.min_attack_outcome, 'victory');
+        assert.equal(op.execution_attack_power_mult, undefined);
+        assert.equal(def.planning_duration, 6);
+        assert.equal(def.min_attack_outcome, 'victory');
+        assert.equal(op.participating_brigades.includes('arbih_801st_light'), true);
+        assert.equal(op.participating_brigades.includes('arbih_802nd_light'), true);
+        assert.equal(op.participating_brigades.length, 2);
+        assert.equal(def.axes[0]!.minimum_staged_brigades, 2);
+        assert.equal(def.axes[0]!.minimum_forward_brigades, 2);
+        assert.equal(axis.minimum_staged_brigades, 2);
+        assert.equal(axis.minimum_forward_brigades, 2);
+        assert.equal(axis.staging_osid, 'op:gorazde:hrancici');
+
+        assert.deepEqual(state.military.brigade_movement_orders?.['arbih_801st_light'], {
+            destination_sids: ['op:gorazde:hrancici'],
+            stance: 'column',
+        });
+        assert.deepEqual(state.military.brigade_movement_orders?.['arbih_802nd_light'], {
+            destination_sids: ['op:gorazde:hrancici'],
+            stance: 'column',
+        });
+
+        const second = checkTriggeredOperations(state);
+        assert.ok(!second.includes(def.name));
+        assert.equal(command.active_operations.filter((candidate) => candidate.name === def.name).length, 1);
+    });
+
+    it('does not inject or flip an already friendly target', () => {
+        const state = makeGorazdeFollowOnState(26);
+        const def = findDef();
+        state.political.political_controllers!['op:foca:donje_zesce'] = 'RBiH';
+
+        assert.equal(def.trigger(state, 26), true);
+        assert.ok(!checkTriggeredOperations(state).includes(def.name));
+        assert.equal(state.military.corps_command!['arbih_1st_corps']!.active_operations.length, 0);
+        assert.equal(state.political.political_controllers!['op:foca:donje_zesce'], 'RBiH');
+        assert.equal(state.military.triggered_operations_accepted?.[def.name], undefined);
     });
 });

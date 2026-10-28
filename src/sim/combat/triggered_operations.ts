@@ -44,6 +44,7 @@ import type { ValidatableOpDef } from './operation_validation.js';
 import {
     buildCorpsOperation,
     derivePrimarySectorForBrigades,
+    getAvailableBrigades,
     hasActiveOperation,
     hasAvailableSlot,
 } from './corps_operation_helpers.js';
@@ -178,6 +179,32 @@ function zepaFallReceiptFired(state: GameState): boolean {
 // ═══════════════════════════════════════════════════════════════════════════
 
 const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
+    {
+        // Calibration-authored local intent, not a newly claimed historical operation.
+        // No pre-due staging: preserve KRUG and all ordinary donor/commitment gates.
+        name: 'Gorazde Perimeter Follow-On',
+        faction: 'RBiH',
+        primary_corps: 'arbih_1st_corps',
+        staging_osid: 'op:gorazde:hrancici',
+        planning_duration: 6,
+        min_attack_outcome: 'victory',
+        trigger: (state, turn) => {
+            if (turn < 26 || !corpsCompletedOp(state, 'arbih_1st_corps', 'Operation Circle')) return false;
+            const command = state.military.corps_command?.arbih_1st_corps;
+            if (!command || command.active_operations.some(op => op.name === 'Operation Circle')) return false;
+            return getAvailableBrigades(command, ['arbih_801st_light', 'arbih_802nd_light']).length === 2;
+        },
+        axes: [{
+            axis_id: 'gorazde_foca_perimeter',
+            name: 'Gorazde-Foca Perimeter',
+            corps: 'arbih_1st_corps',
+            brigades: ['arbih_801st_light', 'arbih_802nd_light'],
+            objectives: ['op:foca:donje_zesce'],
+            staging_osid: 'op:gorazde:hrancici',
+            minimum_staged_brigades: 2,
+            minimum_forward_brigades: 2,
+        }],
+    },
     {
         // Operation Posavina Corridor — 1KK contracts the surviving HVO Orašje
         // bridgehead without overrunning its two-cell core (~w31+; BB1 pp.182-184).
