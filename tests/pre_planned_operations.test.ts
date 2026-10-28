@@ -1018,7 +1018,6 @@ describe('pre-planned operations', () => {
                 axis_id: 'srebrenica_cerska_link',
                 name: 'Cerska Column',
                 brigades: [
-                    'arbih_246th_vitezka_mountain',
                     'arbih_1st_cerska',
                     'arbih_1st_kamenica',
                 ],
@@ -1211,7 +1210,7 @@ describe('pre-planned operations', () => {
         for (const brigadeId of authoredIds) {
             state.military.formations![brigadeId]!.personnel = 100;
         }
-        state.military.formations!.arbih_246th_vitezka_mountain!.personnel = 1000;
+        state.military.formations!.arbih_1st_cerska!.personnel = 1000;
 
         injectPrePlannedOperations(state);
 
@@ -1220,6 +1219,11 @@ describe('pre-planned operations', () => {
         assert.ok(operation);
         assert.deepEqual([...operation.participating_brigades].sort(), [...authoredIds].sort());
         assert.equal(operation.minimum_assembled_participants, 6);
+        assert.equal(operation.participating_brigades.includes('arbih_246th_vitezka_mountain'), false);
+        assert.ok(operation.axes && operation.axes.length === definition.axes.length);
+        const participatingAcrossAxes = operation.axes.flatMap((axis) => axis.assigned_brigades);
+        assert.deepEqual([...participatingAcrossAxes].sort(), [...authoredIds].sort());
+        assert.equal(participatingAcrossAxes.includes('arbih_246th_vitezka_mountain'), false);
     });
 
     it('admits an authored mandatory brigade that forms at the staging area during planning', () => {
@@ -1464,6 +1468,9 @@ describe('pre-planned operations', () => {
         state.military.formations!.arbih_1st_kamenica!.personnel = 400;
         state.military.formations!.arbih_283rd_east_bosnian_light!.status = 'active';
         state.military.formations!.arbih_284th_east_bosnian_light!.disrupted_turns = 0;
+        assert.equal(hasMinimumAssembledParticipants(state, operation), false, 'recovered formations must be admitted before counting toward assembly');
+        assert.ok(admitAuthoredPrePlannedReinforcements(state) > 0);
+        assert.deepEqual([...operation.participating_brigades].sort(), [...authoredIds].sort());
         assert.equal(hasMinimumAssembledParticipants(state, operation), true);
     });
 

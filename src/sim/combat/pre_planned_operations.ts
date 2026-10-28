@@ -1370,8 +1370,9 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
             {
                 axis_id: 'srebrenica_cerska_link',
                 name: 'Cerska Column',
+                // Unadopted calibrated allocation choice: retain the Sapna formation for
+                // ordinary home-front allocation instead of diverting it into this pocket.
                 brigades: [
-                    'arbih_246th_vitezka_mountain',
                     'arbih_1st_cerska',
                     'arbih_1st_kamenica',
                 ],
