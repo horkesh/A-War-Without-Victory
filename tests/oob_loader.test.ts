@@ -67,6 +67,22 @@ test('loadOobBrigades preserves elite commander metadata from source rows', asyn
     );
 });
 
+test('loadOobBrigades keeps Vareš outer-garrison seeds at 650 with unchanged collateral fields', async () => {
+    const brigades = await loadOobBrigades(process.cwd());
+    const byId = new Map(brigades.map((brigade) => [brigade.id, brigade]));
+
+    for (const id of ['arbih_147th_light', 'arbih_185th_light']) {
+        const brigade = byId.get(id);
+        assert.ok(brigade, `missing ${id}`);
+        assert.strictEqual(brigade.initial_personnel, 650);
+        assert.strictEqual(brigade.corps, 'arbih_1st_corps');
+        assert.strictEqual(brigade.home_osid, 'op:vares:budozelje_2');
+        assert.strictEqual(brigade.available_from, 0);
+        assert.strictEqual(brigade.initial_cohesion, 35);
+        assert.strictEqual(brigade.max_personnel, undefined);
+    }
+});
+
 test('loadOobCorps returns stable order (faction then name) and valid hq_mun', async () => {
     const baseDir = process.cwd();
     const corps = await loadOobCorps(baseDir);

@@ -2556,7 +2556,7 @@
           "arbih_185th_light"
         ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 30.912,
+        "defensive_power": 50.232000000000006,
         "density": 0.4,
         "edge_ids": [
           "op:breza:podgora__op:ilijas:podlugovi",
@@ -14028,7 +14028,7 @@
           "last_supplied_turn": null
         },
         "origin_mun": "vares",
-        "personnel": 400,
+        "personnel": 650,
         "readiness": "active",
         "status": "active",
         "tags": [
@@ -14844,7 +14844,7 @@
           "last_supplied_turn": null
         },
         "origin_mun": "vares",
-        "personnel": 400,
+        "personnel": 650,
         "readiness": "active",
         "status": "active",
         "tags": [
@@ -30934,7 +30934,7 @@
       },
       "vares:RBiH": {
         "available": 0,
-        "committed": 1200,
+        "committed": 1700,
         "exhausted": 0,
         "faction": "RBiH",
         "fatigue": 0,

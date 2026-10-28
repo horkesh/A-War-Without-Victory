@@ -9,6 +9,25 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — January outer-garrison seed trial, 400→650 — NOT ADOPTED
+
+Assumption: raise `initial_personnel` 400→650 for existing `arbih_147th_light` and
+`arbih_185th_light` (Vareš / Budoželje, 1st Corps). 650 is a calibrated assumption within
+existing capacity, not a sourced historical count. Home, corps, availability 0, cohesion 35,
+equipment, implicit max 1800, and all other rows are unchanged; no caps, dates, thresholds,
+operations, allocation rules, or health targets changed.
+
+Evidence: repaired-source 24-outer-zone screen (70 edges / 19 brigades / 11 garrison slots)
+keeps 801/802/831 locked. All reachable surplus is below the 500 attack floor, and strong
+Sarajevo surplus is trapped in a 5-OSID city pocket. Conditional snapshot ranking with these
+two 650 seeds and unchanged holding budget 11 releases existing 851st (750, Baccia-adjacent
+Kamen) while keeping 801/802/831 locked — weaker defense replaced by stronger defense. This
+is a snapshot, not a trajectory prediction; release/control and allocation rules were not forced.
+
+Result: none yet. Codex independently verifies generated 650/1800 personnel, recruitment
+accounting, exact collateral fields, then a cheap 24-screen for actual 851st availability,
+delivery, and preservation.
+
 ## 2026-10-27 — Zero-sector rescue honors donor commitments
 
 Diagnosis: exact same-source runtime/report replay turn19→20 traced the
