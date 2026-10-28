@@ -9,6 +9,31 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — Operation Foca: Glavatičevo follow-on on the ordinary Kalinovik axis — NOT ADOPTED
+
+Calibrated-sequence trial, not an attested historical order or date: append
+`op:konjic:glavaticevo_2` to the existing `kalinovik` axis of `Operation Foca`,
+after `op:kalinovik:sela_2`. That one appended objective is the entire production
+change; the axis's first three objectives and their order, roster
+(`rs_gacko_brigade`, `rs_kalinovik_brigade`, `jna_kalinovik_to_tg`), staging
+`op:kalinovik:kalinovik_2`, Operation Foca's prestage 0 / planning 6, and every
+other axis and operation, the JNA Konjic TO (Bijela/Glava + original Ljuta axis),
+OOB, retreat and movement rules are unchanged. No new objective, operation,
+minimum, threshold, force, date, controller or helper. Intent: after Selo the
+same ordinary force follows on through already-owned Sitnik toward Glavatičevo
+(model inference; history uncertain), without a Ljuta capture that would shift
+the Trnovo retreat tie or health. Two earlier synthetic-TO trials were rejected
+and are retained: an 800-strong Sitnik TO alone cannot take Glava, and adding a
+different-corps Nevesinje brigade to the synthetic JNA operation was admitted but
+the actual 6-brigade run showed no real contribution. None of those branches'
+startup/home/roster/strength changes are carried into this base. Existing b325
+evidence: ordinary Gacko/Kalinovik captures Golubici 9 / Sela 10, Gacko 811 at
+Sela and Kalinovik 963 at Obalj 10; owned route after Selo is
+Sela–Sitnik(RS)–Glavatičevo(enemy), plus Obalj–Sela–Sitnik. No rules, forces or
+reference data changed. Pending: Codex-run actual-prefix 16 must show lawful
+march, the actual ordinary attack/capture, and preservation before January, then
+the 39-week health/painted/gate checks. No pass or adoption is claimed.
+
 ## 2026-10-28 — January 19th Krajina seed trial, 1000→2000 — NOT ADOPTED
 
 Assumption: raise only `initial_personnel` 1000→2000 on `rs_19th_krajina_light_infantry`

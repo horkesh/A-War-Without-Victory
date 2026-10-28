@@ -804,7 +804,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'rs_kalinovik_brigade',
                     'jna_kalinovik_to_tg',
                 ],
-                // kalinovik_2 → vlaholje (RS waypoint) → golubici_2 → sela_2.
+                // kalinovik_2 → vlaholje (RS waypoint) → golubici_2 → sela_2 → glavaticevo_2.
                 // R20 2026-05-25: removed varos_2 — varos_2 adj golubici_2 = FALSE (broken link).
                 // vlaholje adj golubici_2 = TRUE (verified in operational_contact_graph.json).
                 // varos_2 is already RS-controlled (stripped anyway); its removal has no
@@ -815,6 +815,10 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'op:kalinovik:vlaholje',         // RS waypoint (kalinovik_2-adjacent); stripped
                     'op:kalinovik:golubici_2',       // painted RS, currently RBiH — correct target
                     'op:kalinovik:sela_2',           // painted RS, currently RBiH — follow-on
+                    // Calibrated sequence, not an attested order/date: after Sela the same
+                    // ordinary force follows on via owned Sitnik toward Glavatičevo on this
+                    // axis. Model inference; history uncertain. No Ljuta objective.
+                    'op:konjic:glavaticevo_2',
                 ],
                 staging_osid: 'op:kalinovik:kalinovik_2',
             },
