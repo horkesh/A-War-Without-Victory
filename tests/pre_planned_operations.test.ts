@@ -1057,6 +1057,7 @@ describe('pre-planned operations', () => {
         const circle = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
         assert.ok(circle);
         assert.equal(circle!.prestage_from, 14);
+        assert.equal(circle!.enqueue_from, undefined);
         assert.equal(circle!.axes[0]?.minimum_forward_brigades, undefined);
         const state = makeMinimalState();
         state.meta.turn = 18;
@@ -2528,6 +2529,49 @@ describe('pre-planned operations', () => {
         }
         assert.equal(command.active_operations.some((active) => active.name === 'Operation Circle'), false);
         assert.equal(definition?.available_from, 18);
+    });
+
+    it('retains a bot-prestaged arrived roster while its unchanged queue waits', () => {
+        const state = makeMinimalState();
+        state.meta.player_faction = 'RS';
+        for (const corpsId of Object.keys(state.military.corps_command ?? {})) {
+            state.military.corps_command![corpsId]!.queued_operations = [];
+        }
+        const command = state.military.corps_command!.arbih_1st_corps!;
+        command.queued_operations = ['Operation Circle'];
+        const arrived = ['arbih_801st_light', 'arbih_802nd_light', 'arbih_831st_drina_lineage'];
+        for (const brigadeId of arrived) {
+            state.military.formations![brigadeId]!.location_osid = 'op:gorazde:osjecani_2';
+        }
+        state.military.brigade_movement_orders = {};
+        state.military.brigade_movement_state = {};
+
+        // The hold must work without changing startup queue chronology.
+        const definition = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
+        assert.equal(definition?.enqueue_from, undefined);
+        assert.equal(definition?.prestage_from, 14);
+
+        state.meta.turn = 13;
+        assert.deepEqual([...getQueuedDatedPrestageBrigadeIds(state)].sort(), []);
+
+        state.meta.turn = 14;
+        const reserved = [...getQueuedDatedPrestageBrigadeIds(state)].sort();
+        assert.deepEqual(reserved, [...arrived].sort());
+        for (const brigadeId of arrived) {
+            assert.equal(state.military.formations![brigadeId]!.location_osid, 'op:gorazde:osjecani_2');
+            assert.equal(state.military.brigade_movement_orders?.[brigadeId], undefined);
+        }
+
+        // A manual player faction is never implicitly reserved: the real prestage helper
+        // returns early for it, so this reservation must not appear either.
+        state.meta.player_faction = 'RBiH';
+        assert.deepEqual([...getQueuedDatedPrestageBrigadeIds(state)].sort(), []);
+        state.meta.player_faction = 'RS';
+        assert.deepEqual([...getQueuedDatedPrestageBrigadeIds(state)].sort(), [...arrived].sort());
+
+        // Releasing the queue releases the reservation with it.
+        command.queued_operations = [];
+        assert.deepEqual([...getQueuedDatedPrestageBrigadeIds(state)].sort(), []);
     });
 
     it('does not pre-stage a Donji Vakuf brigade away from another active operation', () => {

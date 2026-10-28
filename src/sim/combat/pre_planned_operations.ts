@@ -2984,7 +2984,7 @@ export function getHeadQueuedPrePlannedBrigadeIds(
  * leave these formations at their authored staging area until injection. */
 export function getQueuedDatedPrestageBrigadeIds(
     state: {
-        readonly meta: { readonly turn: number };
+        readonly meta: { readonly turn: number; readonly player_faction?: FactionId | null };
         readonly military: { readonly corps_command?: Record<string, { readonly queued_operations?: readonly string[] } | undefined> };
     },
 ): Set<FormationId> {
@@ -2993,7 +2993,13 @@ export function getQueuedDatedPrestageBrigadeIds(
         const operationName = state.military.corps_command?.[corpsId]?.queued_operations?.[0];
         if (!operationName) continue;
         const def = ALL_PRE_PLANNED.find((candidate) => candidate.corps === corpsId && candidate.name === operationName);
-        if (def?.enqueue_from == null || state.meta.turn < def.enqueue_from) continue;
+        if (!def) continue;
+        // Explicit enqueue dates take precedence even for player factions; the prestage
+        // fallback covers bot-controlled prestaging only, so a selected player is never
+        // implicitly reserved. Arrival ownership holds while the head queue waits.
+        const reserveFrom = def.enqueue_from ?? def.prestage_from;
+        if (reserveFrom == null || state.meta.turn < reserveFrom) continue;
+        if (def.enqueue_from == null && state.meta.player_faction === def.faction) continue;
         for (const axis of def.axes) for (const brigadeId of axis.brigades) reserved.add(brigadeId);
     }
     return reserved;
