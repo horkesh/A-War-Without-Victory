@@ -14770,7 +14770,7 @@
           "last_supplied_turn": null
         },
         "origin_mun": "hadzici",
-        "personnel": 500,
+        "personnel": 1200,
         "readiness": "active",
         "status": "active",
         "tags": [
@@ -29194,7 +29194,7 @@
       },
       "hadzici:RBiH": {
         "available": 0,
-        "committed": 3900,
+        "committed": 4600,
         "exhausted": 0,
         "faction": "RBiH",
         "fatigue": 0,
