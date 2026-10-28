@@ -22582,7 +22582,7 @@
         "id": "rs_16th_krajina_motorized",
         "kind": "brigade",
         "location_osid": "op:bosanska_dubica:medjedja_2",
-        "max_personnel": 2200,
+        "max_personnel": 3000,
         "morale": 60,
         "name": "16th Krajina Motorized",
         "officer_quality": 0.55,
