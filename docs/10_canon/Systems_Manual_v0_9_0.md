@@ -212,6 +212,14 @@ sector wrapped around that isolated pocket does not make its brigade connected t
 front. The stranded-brigade lifecycle therefore treats the location as unreachable and invokes
 the ordinary deterministic emergency-retreat/lifecycle path when combat removes the pocket.
 
+**Own-origin salient retention (2026-10-28):** automatic capture-triggered salient withdrawal
+retains any component holding the displaced faction's OWN configured, currently held supply
+origin. Being separate from a larger component is not by itself sufficient grounds for automatic
+abandonment. Friendly territory may provide transit toward such an origin, but allied depots
+never seed it, and captured, uncontrolled or missing origins offer no protection. This does not
+grant adequate supply, weaken the critical-supply stranded rule, change ordinary combat retreat,
+or protect control that combat actually lost.
+
 **Owner-directed 102nd Odžak→Orašje evacuation (2026-10-28):** when the capture-triggered
 salient lifecycle would evacuate `hrhb_102nd_brigade` from the Odžak/Bosanski Šamac neck, the
 brigade is placed in its own held Orašje pocket and retains `hvo_northwest_bosnia` rather than

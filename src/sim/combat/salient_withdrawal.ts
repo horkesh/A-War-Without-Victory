@@ -14,6 +14,7 @@ import { isFriendlyFaction } from '../early_war/alliance_update.js';
 import { isEnclaveBrigade } from './enclave_resilience.js';
 import { emitSalientEvacuationRecord, isReasonCodeTopicEnabled } from './reason_code_debug.js';
 import historicalFormationEvacuations from '../../../data/source/historical_formation_evacuations.json';
+import type { OperationalToCanonicalReverseMap } from '../../data/operational_data_types.js';
 
 export interface SalientWithdrawalReport {
     evacuated_formation_ids: string[];
@@ -249,6 +250,7 @@ export function evacuateFormationsSeveredByCapture(
     capturedOsid: string,
     displacedFaction: FactionId,
     adjacency: ReadonlyMap<string, readonly string[]>,
+    reverseMap?: OperationalToCanonicalReverseMap,
 ): SalientWithdrawalReport {
     const report: SalientWithdrawalReport = { evacuated_formation_ids: [] };
     const controllers = state.political.political_controllers ?? {};
@@ -284,6 +286,21 @@ export function evacuateFormationsSeveredByCapture(
         return strictCompare(a[0]!, b[0]!);
     });
     const main = new Set(components[0]!);
+    // Own independent bases: a component is supplied if any currently owned OSID reverse-maps
+    // to one of this faction's configured canonical source SIDs. Friendly transit may connect
+    // to such a base; allied depots never seed one. Smaller size alone is not abandonment.
+    if (reverseMap) {
+        const configuredSources = new Set(
+            state.factions.find(faction => faction.id === displacedFaction)?.supply_sources ?? [],
+        );
+        if (configuredSources.size > 0) {
+            for (const component of components) {
+                const holdsOwnOrigin = component.some(osid =>
+                    (reverseMap.get(osid) ?? []).some(source => configuredSources.has(source)));
+                if (holdsOwnOrigin) for (const osid of component) main.add(osid);
+            }
+        }
+    }
     const operationHolders = operationPocketHolders(state, displacedFaction);
     if (observation) {
         emitSalientEvacuationRecord({ kind: 'component_rank', turn: state.meta.turn,

@@ -1414,6 +1414,7 @@ export function resolveAttackOrdersOsid(
                         targetOsid,
                         prevController,
                         adjacency,
+                        reverseMap,
                     );
                 }
                 emitCascadePenaltiesOnFlip(state, targetOsid, prevController, adjacency);

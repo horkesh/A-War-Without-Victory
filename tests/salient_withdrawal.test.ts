@@ -395,3 +395,122 @@ describe('owner-directed 102nd evacuation from the Odzak pocket', () => {
         expect(state.military.formations.hrhb_102nd_brigade.location_osid).toBe(NOVO_SELO);
     });
 });
+
+describe('owned supply-origin components keep a supplied pocket connected', () => {
+    function configureOwnSources(state: GameState, factionId: string, sources: string[]): void {
+        const faction = state.factions.find((candidate) => candidate.id === factionId) as any;
+        faction.supply_sources = sources;
+    }
+
+    const reverse = (entries: Array<[string, string[]]>): Map<string, string[]> => new Map(entries);
+
+    it('keeps a critical-supply pocket that holds its owned supply-origin component in place', () => {
+        const state = stateWith({ pocket_brigade: brigade('pocket_brigade', 'pocket') });
+        configureOwnSources(state, 'RBiH', ['own-p']);
+        const before = structuredClone(state);
+
+        const report = evacuateFormationsSeveredByCapture(
+            state, 'neck', 'RBiH', adjacency, reverse([['pocket', ['own-p']]]),
+        );
+
+        // Critical supply suppresses voluntary activity, but it must not erase the
+        // pocket's own configured origin and sever it from the owned component.
+        expect(report.evacuated_formation_ids).toEqual([]);
+        expect(state.military.formations.pocket_brigade).toEqual(before.military.formations.pocket_brigade);
+        expect(state.political.political_controllers?.pocket).toBe('RBiH');
+    });
+
+    it('produces the same owned supply-origin result regardless of reverse-map insertion order', () => {
+        const build = (): GameState => {
+            const state = stateWith({ pocket_brigade: brigade('pocket_brigade', 'pocket') });
+            configureOwnSources(state, 'RBiH', ['own-p', 'rear-src']);
+            return state;
+        };
+        const first = build();
+        const second = build();
+        const beforeFirst = structuredClone(first);
+        const beforeSecond = structuredClone(second);
+
+        const reportFirst = evacuateFormationsSeveredByCapture(
+            first, 'neck', 'RBiH', adjacency,
+            reverse([['pocket', ['own-p']], ['rear', ['rear-src']]]),
+        );
+        const reportSecond = evacuateFormationsSeveredByCapture(
+            second, 'neck', 'RBiH', adjacency,
+            reverse([['rear', ['rear-src']], ['pocket', ['own-p']]]),
+        );
+
+        expect(reportFirst).toEqual(reportSecond);
+        expect(reportFirst.evacuated_formation_ids).toEqual([]);
+        expect(first).toEqual(second);
+        expect(first).toEqual(beforeFirst);
+        expect(second).toEqual(beforeSecond);
+    });
+
+    it('does not treat an allied corridor configured source as an owned supply-origin component', () => {
+        const state = stateWith({ pocket_brigade: brigade('pocket_brigade', 'pocket') });
+        configureOwnSources(state, 'RBiH', ['own-corridor']);
+
+        const report = evacuateFormationsSeveredByCapture(
+            state, 'neck', 'RBiH', adjacency, reverse([['corridor', ['own-corridor']]]),
+        );
+
+        expect(report.evacuated_formation_ids).toEqual(['pocket_brigade']);
+        expect(state.military.formations.pocket_brigade.location_osid).toBe('rear');
+    });
+
+    it('does not treat the captured neck as an owned supply-origin component', () => {
+        const state = stateWith({ pocket_brigade: brigade('pocket_brigade', 'pocket') });
+        configureOwnSources(state, 'RBiH', ['captured-src']);
+
+        const report = evacuateFormationsSeveredByCapture(
+            state, 'neck', 'RBiH', adjacency, reverse([['neck', ['captured-src']]]),
+        );
+
+        expect(report.evacuated_formation_ids).toEqual(['pocket_brigade']);
+        expect(state.military.formations.pocket_brigade.location_osid).toBe('rear');
+    });
+
+    it('does not borrow an allied faction configured source for an owned supply-origin component', () => {
+        const state = stateWith({ pocket_brigade: brigade('pocket_brigade', 'pocket') });
+        configureOwnSources(state, 'HRHB', ['ally-p']);
+
+        const report = evacuateFormationsSeveredByCapture(
+            state, 'neck', 'RBiH', adjacency, reverse([['pocket', ['ally-p']]]),
+        );
+
+        expect(report.evacuated_formation_ids).toEqual(['pocket_brigade']);
+        expect(state.military.formations.pocket_brigade.location_osid).toBe('rear');
+    });
+
+    it('does not extend an owned supply-origin component to a source in another component', () => {
+        const state = stateWith({ pocket_brigade: brigade('pocket_brigade', 'pocket') });
+        configureOwnSources(state, 'RBiH', ['own-rear']);
+
+        const report = evacuateFormationsSeveredByCapture(
+            state, 'neck', 'RBiH', adjacency, reverse([['rear', ['own-rear']]]),
+        );
+
+        expect(report.evacuated_formation_ids).toEqual(['pocket_brigade']);
+        expect(state.military.formations.pocket_brigade.location_osid).toBe('rear');
+    });
+
+    it('retains a pocket that reaches another owned supply-origin cell through an allied corridor', () => {
+        const state = stateWith({ pocket_brigade: brigade('pocket_brigade', 'pocket') });
+        const ownAdjacency = new Map(adjacency);
+        ownAdjacency.set('corridor', ['neck', 'pocket', 'local-root']);
+        ownAdjacency.set('local-root', ['corridor']);
+        (state.political.political_controllers as Record<string, string>)['local-root'] = 'RBiH';
+        configureOwnSources(state, 'RBiH', ['own-local']);
+        const before = structuredClone(state);
+
+        const report = evacuateFormationsSeveredByCapture(
+            state, 'neck', 'RBiH', ownAdjacency, reverse([['local-root', ['own-local']]]),
+        );
+
+        // The friendly route runs pocket -> allied corridor -> own local-root; no captured
+        // neck traversal is needed, so the pocket is not automatically abandoned.
+        expect(report.evacuated_formation_ids).toEqual([]);
+        expect(state.military.formations.pocket_brigade).toEqual(before.military.formations.pocket_brigade);
+    });
+});
