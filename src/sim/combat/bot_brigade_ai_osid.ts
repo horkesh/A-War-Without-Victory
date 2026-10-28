@@ -28,6 +28,7 @@ import type {
     BrigadeMovementOrder,
     BrigadePosture,
     CorpsFrontSector,
+    CorpsOperation,
     CorpsStance,
     FactionId,
     FormationId,
@@ -36,11 +37,12 @@ import type {
 } from '../../state/game_state.js';
 import { getFormationTier, isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
-import { operationInstanceId, syncAttackOrderOwners } from './operation_phase_gate.js';
+import { operationInstanceId, syncAttackOrderOwners, isGatedObjectiveHeld } from './operation_phase_gate.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { OperationalToCanonicalReverseMap, OsidPopulationMap } from '../../data/operational_data.js';
 import {
     predictAllAdjacentTargets,
+    predictCombatOutcome,
     buildTerrainCache,
     type PredictedOutcome
 } from './combat_predictor.js';
@@ -548,6 +550,87 @@ function isPartOfNamedOperation(state: GameState, formation: FormationState): bo
     return op.phase === 'execution' && isOperationParticipant(op, formation.id);
 }
 
+interface GeneratedDirectOperationAttackIdentity {
+    objective: Osid;
+    threshold: PredictedOutcome;
+}
+
+/**
+ * Resolve the operation that currently commands this brigade, using the same
+ * effective lookup as the execution loop: loaned receiving corps first, then a
+ * state-wide fallback for multi-corps operations.
+ */
+function resolveExecutionOperationForBrigade(
+    state: GameState,
+    brigadeId: FormationId,
+): CorpsOperation | null {
+    const brigade = state.military.formations?.[brigadeId];
+    if (!brigade) return null;
+    const loanedTo = brigade.elite_loan_state?.on_loan ? brigade.elite_loan_state.loaned_to_corps : null;
+    const corpsId = loanedTo ?? brigade.corps_id;
+    const cmd = corpsId ? state.military.corps_command?.[corpsId] : null;
+    let activeOp = cmd ? findBrigadeOperation(cmd, brigadeId) : null;
+    if (!activeOp) activeOp = findBrigadeOperationAnywhere(state, brigadeId)?.op ?? null;
+    return activeOp;
+}
+
+/**
+ * Identify a generated attack order as a direct current-objective attack of an
+ * executing sector_attack/probe operation. Terminal axes and held gates are not
+ * direct-operation orders.
+ */
+function getGeneratedDirectOperationAttackIdentity(
+    state: GameState,
+    brigadeId: FormationId,
+    target: string,
+): GeneratedDirectOperationAttackIdentity | null {
+    const brigade = state.military.formations?.[brigadeId];
+    if (!brigade || brigade.status !== 'active') return null;
+    const activeOp = resolveExecutionOperationForBrigade(state, brigadeId);
+    if (!activeOp || activeOp.phase !== 'execution') return null;
+    if (activeOp.type !== 'sector_attack' && activeOp.type !== 'probe') return null;
+    if (!isOperationParticipant(activeOp, brigadeId)) return null;
+    const axis = getBrigadeAxis(activeOp, brigadeId);
+    if (axis && axis.status !== 'executing') return null;
+    const objective = getSectorOffensiveCurrentObjective(activeOp, brigadeId);
+    if (!objective || objective !== target) return null;
+    if (isGatedObjectiveHeld(axis, objective)) return null;
+    return {
+        objective,
+        threshold: getSectorOffensiveProbeThreshold(activeOp, brigadeId),
+    };
+}
+
+/**
+ * Actual committed same-faction attackers for one target in the projected final
+ * order map. A supporter must be physically able to join this turn: active,
+ * same faction, at least MIN_ATTACK_PERSONNEL, tactically adjacent, and not in
+ * transit. Deterministic: sorted by brigade id.
+ */
+function collectCommittedSameTargetSupporters(
+    state: GameState,
+    faction: FactionId,
+    target: string,
+    brigadeId: FormationId,
+    projectedAttackOrders: Readonly<Record<string, string>>,
+    adjacency: Map<Osid, Osid[]>,
+): FormationId[] {
+    const supporters: FormationId[] = [];
+    for (const peerId of Object.keys(projectedAttackOrders).sort(strictCompare)) {
+        if (peerId === brigadeId) continue;
+        if (projectedAttackOrders[peerId] !== target) continue;
+        const formation = state.military.formations?.[peerId];
+        if (!formation || formation.status !== 'active' || formation.faction !== faction) continue;
+        if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
+        const peerLoc = formation.location_osid;
+        if (!peerLoc) continue;
+        if (state.military.brigade_movement_state?.[peerId]?.status === 'in_transit') continue;
+        if (!getTacticalAdjacentOsids(state, peerLoc as Osid, adjacency).includes(target as Osid)) continue;
+        supporters.push(peerId as FormationId);
+    }
+    return supporters;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Directive-based brigade execution (HoI-style: corps decides, brigade executes)
 // ═══════════════════════════════════════════════════════════════════════════
@@ -578,6 +661,7 @@ function executeFactionDirectives(
     osidPopulationMap?: OsidPopulationMap,
     dispatcherDetails?: BotDispatcherDecisionDetail[],
     slopeByOsid?: Record<string, number>,
+    authoritativePriorAttackOrders?: Readonly<Record<string, string>>,
 ): OsidBotOrdersResult {
     return botOrdersPerfTime('bot_orders.executeFactionDirectives.total', () => executeFactionDirectivesImpl(
         state,
@@ -592,6 +676,7 @@ function executeFactionDirectives(
         osidPopulationMap,
         dispatcherDetails,
         slopeByOsid,
+        authoritativePriorAttackOrders,
     ));
 }
 
@@ -644,6 +729,7 @@ function executeFactionDirectivesImpl(
     osidPopulationMap?: OsidPopulationMap,
     dispatcherDetails?: BotDispatcherDecisionDetail[],
     slopeByOsid?: Record<string, number>,
+    authoritativePriorAttackOrders?: Readonly<Record<string, string>>,
 ): OsidBotOrdersResult {
     const result: OsidBotOrdersResult = {
         posture_orders: [],
@@ -653,6 +739,7 @@ function executeFactionDirectivesImpl(
         column_march_orders: {},
         eligible_attackers_by_corps: {}
     };
+    const processedBrigadeIds = [...new Set(brigades.map((brigade) => brigade.id))].sort(strictCompare);
     const chosenTargets = new Map<Osid, number>();
     const columnAssignments = new Map<Osid, number>();
     const sectorAssignmentByBrigade = buildSectorAssignmentByBrigade(state);
@@ -821,6 +908,10 @@ function executeFactionDirectivesImpl(
             corpsTerritoryOsidsByCorps,
             officerCombatLookup,
             getOfficerCombatLookup,
+            processedBrigadeIds,
+            ...(authoritativePriorAttackOrders === undefined ? {} : {
+                authoritativePriorAttackOrders,
+            }),
             ...(dispatcherDetail === undefined ? {} : {
                 sectorMarchObserver: (observation: SectorMarchObservation) => {
                     dispatcherDetail.sector_march = { ...observation };
@@ -984,12 +1075,21 @@ export function generateAllBotOrdersOsid(
 
         const graphAnalysis = analyzeFactionGraphCached(state, faction, adjacency, ctx.reverseMap);
 
+        const priorAttackOrdersForForecast: Readonly<Record<string, string>> | undefined =
+            options.mergeWithExistingOrders
+                ? Object.fromEntries(
+                    Object.entries(state.military.brigade_attack_orders ?? {})
+                        .filter((entry): entry is [string, string] => entry[1] != null),
+                )
+                : undefined;
+
         const result = executeFactionDirectives(
             state, faction, brigades, adjacency, ctx.reverseMap,
             terrainCache, graphAnalysis,
             ctx.supplyStateByOsid, ctx.ethnicCompositionByOsid, ctx.osidPopulationMap,
             dispatcherDetails,
             slopeByOsid,
+            priorAttackOrdersForForecast,
         );
 
         // Per-corps attack share cap: each corps gets attack slots proportional to its size.
@@ -1184,6 +1284,140 @@ export function generateAllBotOrdersOsid(
         const faction = state.military.formations?.[brigadeId]?.faction;
         return faction != null && !processedFactions.has(faction);
     };
+    const existingAttackOrdersBefore = state.military.brigade_attack_orders ?? {};
+    const preservedAttackOrders: Record<FormationId, Osid> = {};
+    if (!options.mergeWithExistingOrders) {
+        for (const [bid, target] of Object.entries(state.military.brigade_attack_orders ?? {})) {
+            if (target != null && isUnprocessedFactionOrder(bid)) {
+                preservedAttackOrders[bid as FormationId] = target as Osid;
+            }
+        }
+    }
+    const generatedOrderWonMerge = (brigadeId: string): boolean =>
+        !options.mergeWithExistingOrders || !existingAttackOrdersBefore[brigadeId];
+    const buildProjectedAttackOrders = (): Record<string, string> => {
+        const projected: Record<string, string> = {};
+        if (!options.mergeWithExistingOrders) {
+            for (const [bid, target] of Object.entries(preservedAttackOrders)) {
+                if (target != null) projected[bid] = target;
+            }
+        }
+        for (const [bid, target] of Object.entries(allAttackOrders)) {
+            if (target != null) projected[bid] = target;
+        }
+        if (options.mergeWithExistingOrders) {
+            for (const [bid, target] of Object.entries(existingAttackOrdersBefore)) {
+                if (target != null) projected[bid] = target;
+            }
+        }
+        return projected;
+    };
+
+    // ── Last consistency check: generated direct-operation attacks must be
+    // supported by the attack orders that actually survive caps, friction,
+    // Graz, and the manual merge. Only generated orders that win the merge may
+    // be vetoed; authoritative/manual/unprocessed orders are never removed or
+    // retargeted. Monotone removal, sorted, bounded by the candidate count.
+    const generatedDirectCandidates = Object.keys(allAttackOrders)
+        .sort(strictCompare)
+        .map((bid) => bid as FormationId)
+        .filter((bid) => {
+            if (!generatedOrderWonMerge(bid)) return false;
+            const target = allAttackOrders[bid];
+            return target != null
+                && getGeneratedDirectOperationAttackIdentity(state, bid, target) !== null;
+        });
+    if (generatedDirectCandidates.length > 0) {
+        let reconciliationOfficerCombatLookup: ReturnType<typeof buildOfficerCombatLookup> | undefined;
+        let reconciliationOfficerCombatLookupBuilt = false;
+        const getReconciliationOfficerCombatLookup = (): ReturnType<typeof buildOfficerCombatLookup> | undefined => {
+            if (!state.military.named_officers || !state.military.named_officer_data) return undefined;
+            if (!reconciliationOfficerCombatLookupBuilt) {
+                reconciliationOfficerCombatLookupBuilt = true;
+                reconciliationOfficerCombatLookup = buildOfficerCombatLookup(state);
+            }
+            return reconciliationOfficerCombatLookup;
+        };
+        const officerLookup = getReconciliationOfficerCombatLookup();
+        for (let pass = 0; pass <= generatedDirectCandidates.length; pass += 1) {
+            const projectedAttackOrders = buildProjectedAttackOrders();
+            let vetoedThisPass = false;
+            for (const brigadeId of generatedDirectCandidates) {
+                const target = allAttackOrders[brigadeId];
+                if (target == null) continue;
+                const identity = getGeneratedDirectOperationAttackIdentity(state, brigadeId, target);
+                if (!identity) continue;
+                const brigade = state.military.formations?.[brigadeId];
+                if (!brigade) continue;
+                const supporters = collectCommittedSameTargetSupporters(
+                    state,
+                    brigade.faction,
+                    identity.objective,
+                    brigadeId,
+                    projectedAttackOrders,
+                    adjacency,
+                );
+                const prediction = predictCombatOutcome(
+                    state,
+                    brigadeId,
+                    identity.objective,
+                    adjacency,
+                    ctx.reverseMap,
+                    terrainCache,
+                    'attack',
+                    supporters.length > 0 ? supporters : undefined,
+                    ctx.supplyStateByOsid,
+                    ctx.osidPopulationMap,
+                    slopeByOsid,
+                    ctx.ethnicCompositionByOsid,
+                    undefined,
+                    officerLookup,
+                );
+                if (prediction && isOutcomeSufficientForAttack(prediction.predicted_outcome, identity.threshold)) {
+                    continue;
+                }
+                delete allAttackOrders[brigadeId];
+                delete allAttackOrderOwners[brigadeId];
+                let replacedPosture = false;
+                for (const order of allPostureOrders) {
+                    if (order.brigade_id === brigadeId
+                        && (order.posture === 'attack' || order.posture === 'assault')) {
+                        order.posture = 'defend';
+                        replacedPosture = true;
+                    }
+                }
+                if (!replacedPosture) {
+                    allPostureOrders.push({ brigade_id: brigadeId, posture: 'defend' });
+                }
+                const detail = dispatcherByFormation.get(brigadeId);
+                if (detail) {
+                    detail.final_generated_output = {
+                        ...detail.final_generated_output,
+                        attack_target_osid: null,
+                        postures: allPostureOrders
+                            .filter((order) => order.brigade_id === brigadeId)
+                            .map((order) => order.posture),
+                    };
+                }
+                vetoedThisPass = true;
+                break;
+            }
+            if (!vetoedThisPass) break;
+        }
+    }
+
+    // Keep the diagnostic tied to generated orders that actually survive the
+    // merge. Manual/authoritative prior orders are not new generated attacks.
+    for (const corpsId of Object.keys(allEligibleAttackersByCorps)) {
+        delete allEligibleAttackersByCorps[corpsId as FormationId];
+    }
+    for (const bid of Object.keys(allAttackOrders).sort(strictCompare)) {
+        if (!generatedOrderWonMerge(bid)) continue;
+        const brig = state.military.formations?.[bid as FormationId];
+        const corpsId = brig?.corps_id;
+        if (!corpsId) continue;
+        allEligibleAttackersByCorps[corpsId] = (allEligibleAttackersByCorps[corpsId] ?? 0) + 1;
+    }
 
     if (!state.military.brigade_posture_orders) state.military.brigade_posture_orders = [];
     const postureOrdersToWrite = options.mergeWithExistingOrders
@@ -1194,16 +1428,7 @@ export function generateAllBotOrdersOsid(
     state.military.brigade_posture_orders.push(...postureOrdersToWrite);
 
     if (Object.keys(allAttackOrders).length > 0 || !options.mergeWithExistingOrders) {
-        const existingAttackOrdersBefore = state.military.brigade_attack_orders ?? {};
         const priorAttackOrderOwners = state.military.brigade_attack_order_owners ?? {};
-        const preservedAttackOrders: Record<FormationId, Osid> = {};
-        if (!options.mergeWithExistingOrders) {
-            for (const [bid, target] of Object.entries(state.military.brigade_attack_orders ?? {})) {
-                if (target != null && isUnprocessedFactionOrder(bid)) {
-                    preservedAttackOrders[bid as FormationId] = target as Osid;
-                }
-            }
-        }
         state.military.brigade_attack_orders = options.mergeWithExistingOrders
             ? { ...allAttackOrders, ...(state.military.brigade_attack_orders ?? {}) }
             : { ...preservedAttackOrders, ...allAttackOrders };
@@ -1218,9 +1443,7 @@ export function generateAllBotOrdersOsid(
         );
         for (const brigadeId of Object.keys(allAttackOrders).sort(strictCompare)) {
             const target = allAttackOrders[brigadeId as FormationId];
-            const generatedOrderWonMerge = !options.mergeWithExistingOrders
-                || !existingAttackOrdersBefore[brigadeId];
-            if (generatedOrderWonMerge
+            if (generatedOrderWonMerge(brigadeId)
                 && target !== undefined
                 && state.military.brigade_attack_orders?.[brigadeId as FormationId] === target) {
                 recordLinkedPreparationProbeOrderOpportunity(state, brigadeId as FormationId, target);

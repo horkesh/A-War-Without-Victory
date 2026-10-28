@@ -9,6 +9,32 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — Coordination committed-support forecast and emitted-order veto — NOT ADOPTED
+
+Correctness repair, not history, strength, force-data, damage, or threshold change.
+Observed witness: the real 831st/851st unsupported forecast emitted a direct-objective
+attack although actual joint power was below its operator threshold; separately, a
+manual other-target witness left `{b1:X,b2:Y}` and a synchronized-peer-declines
+witness left b1 ordering against a peer that never committed. Actual-ID
+`predictCombatOutcome` additional attackers now provide the forecast, and a final
+pre-write check uses the actual projected merged same-faction/target cohort after
+caps, friction, Graz, and manual precedence with the same physical eligibility and
+known supply/population/slope/ethnicity/officer/terrain inputs. It only vetoes
+generated direct executing sector_attack/probe current-objective orders that win
+the merge; joining is never forced, higher thresholds are never lowered, and
+manual/unprocessed/authoritative orders, forces, data, and canon are unchanged.
+Original RED 9 pass / 1 fail became the same 10/10 GREEN; corrected additional
+controls moved 20 pass / 2 real RED (manual other-target, synchronized peer
+decline) to 22/22 GREEN. Test-helper API-error receipts and timeouts are retained;
+code was all OpenCode. Initial TC 2 mechanical issues were corrected, but fresh TC,
+affected runtime, prefix, full aggregate, and native checks remain pending at entry
+time. Healthy 95379e33d707 / 31 anchors / health-3 exact pair, 822d6543a test-fix
+fallback, and failed calibration branches are retained. No adoption or campaign
+qualification claim. Affected 253-pass / 2-fail receipts are retained; the legacy
+count-implementation text guard was retired in favor of the 22 behavioral consent/joint
+cases, and actual participant collection restores the stable perf measurement label,
+with fresh affected and type checks pending.
+
 ## 2026-10-28 — Gorazde Local Counterattack (Model): joint 831st/851st concentration — NOT ADOPTED
 
 Calibrated existing-force allocation variant, not attested history: raise the

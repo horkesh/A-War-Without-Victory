@@ -1,6 +1,4 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { test } from 'vitest';
 
 import {
@@ -8,12 +6,6 @@ import {
     generateAllBotOrdersOsid
 } from '../src/sim/combat/bot_brigade_ai_osid.js';
 import type { CorpsDirective, CorpsOperation, GameState } from '../src/state/game_state.js';
-
-test('execution concentration treats one adjacent axis-mate as one additional attacker', () => {
-    const source = readFileSync(resolve('src/sim/combat/bot_brigade_eval_attack.ts'), 'utf8');
-    assert.match(source, /const additionalAttackers = Math\.max\(alreadyAssigned, adjacentOperationParticipants\)/);
-    assert.doesNotMatch(source, /adjacentOperationParticipants > 1/);
-});
 
 test('execution-phase sector offensive narrows brigade directive to current objective', () => {
     const directive: CorpsDirective = {

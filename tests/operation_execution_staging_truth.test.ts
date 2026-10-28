@@ -2,6 +2,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { evaluateSectorAttack } from '../src/sim/combat/bot_brigade_eval_attack.js';
 import type { BrigadeEvaluationContext } from '../src/sim/combat/bot_brigade_eval_types.js';
 import { advanceSectorOffensives } from '../src/sim/combat/sector_offensive.js';
+import * as combatPredictor from '../src/sim/combat/combat_predictor.js';
+import { generateAllBotOrdersOsid } from '../src/sim/combat/bot_brigade_ai_osid.js';
+import type { BotOrderGenerationOptions } from '../src/sim/combat/bot_brigade_ai_osid.js';
 import type { CorpsOperation, GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { stableStringify } from '../src/utils/stable_json.js';
@@ -690,5 +693,418 @@ describe('operation execution staging truth', () => {
         expect(ctx.result.column_march_orders.b1).toBe('op:front:approach');
         expect(ctx.result.column_march_orders.b1).not.toBe('op:rear:mid');
         expect(ctx.result.posture_orders).toContainEqual({ brigade_id: 'b1', posture: 'defend' });
+    });
+
+    it('does not authorize a strong solo attack from an unsupported nearby weak mate', () => {
+        const { state, activeOp } = makeAxisOrderTraceFixture();
+        (activeOp as any).is_pre_planned = true;
+        (activeOp as any).min_attack_outcome = 'costly_victory';
+        state.military.formations!.b1!.personnel = 1781;
+        state.military.formations!.b2!.personnel = 580;
+
+        const actualRatioByBrigadeId: Record<string, number> = {
+            b1: 0.7031346438781837,
+            b2: 0.18852921906789138,
+        };
+        const idOf = (value: any): string | null => {
+            if (typeof value === 'string') return value;
+            if (value && typeof value === 'object') {
+                return value.brigade_id ?? value.brigadeId ?? value.id ?? null;
+            }
+            return null;
+        };
+        const classify = (ratio: number): string => {
+            if (ratio >= 2) return 'decisive_victory';
+            if (ratio >= 1.5) return 'victory';
+            if (ratio >= 1) return 'costly_victory';
+            if (ratio >= 0.7) return 'stalemate';
+            if (ratio >= 0.5) return 'repulsed';
+            return 'catastrophic';
+        };
+
+        const spy = vi.spyOn(combatPredictor, 'predictCombatOutcome').mockImplementation(((...args: any[]) => {
+            const attackerId = idOf(args[1]);
+            const additionalAttackers = Array.isArray(args[7]) ? args[7] : [];
+            const ids = new Set<string>();
+            if (attackerId) ids.add(attackerId);
+            for (const value of additionalAttackers) {
+                const id = idOf(value);
+                if (id) ids.add(id);
+            }
+            const knownIds = [...ids].filter((id) => actualRatioByBrigadeId[id] !== undefined);
+            const summedRatio = knownIds.reduce((total, id) => total + actualRatioByBrigadeId[id]!, 0);
+            const powerRatio = knownIds.length === 2 ? summedRatio * 0.9 : summedRatio;
+            return {
+                power_ratio: powerRatio,
+                predicted_outcome: classify(powerRatio),
+            } as unknown as ReturnType<typeof combatPredictor.predictCombatOutcome>;
+        }) as any);
+
+        try {
+            generateAllBotOrdersOsid(
+                state,
+                ['RS'],
+                {
+                    edges: [{ a: 'op:front:approach_a', b: 'op:target:objective' }] as any,
+                    reverseMap: new Map(),
+                    supplyStateByOsid: {} as any,
+                    osidPopulationMap: new Map(),
+                },
+                {},
+            );
+
+            expect(state.military.brigade_attack_orders ?? {}).toEqual({});
+            expect(state.political.political_controllers!['op:target:objective']).toBe('RBiH');
+        } finally {
+            spy.mockRestore();
+        }
+    });
+});
+
+const CONTROL_APPROACH = 'op:front:approach_a';
+const CONTROL_X = 'op:target:objective';
+const CONTROL_MANUAL = 'op:target:manual';
+const CONTROL_TRANSIT = 'op:front:transit';
+
+type AxisControlRun = {
+    state: GameState;
+    activeOp: CorpsOperation;
+    diagnostics: any;
+};
+
+type AxisControlConfig = {
+    ratios: Record<string, number>;
+    filteredBrigadeIds?: string[];
+    mergeWithExistingOrders?: boolean;
+    configure?: (state: GameState, activeOp: CorpsOperation) => void;
+};
+
+function controlIdOf(value: any): string | null {
+    if (typeof value === 'string') return value;
+    if (value && typeof value === 'object') {
+        return value.brigade_id ?? value.brigadeId ?? value.id ?? null;
+    }
+    return null;
+}
+
+function controlClassify(ratio: number): string {
+    if (ratio >= 2) return 'decisive_victory';
+    if (ratio >= 1.5) return 'victory';
+    if (ratio >= 1) return 'costly_victory';
+    if (ratio >= 0.7) return 'stalemate';
+    if (ratio >= 0.5) return 'repulsed';
+    return 'catastrophic';
+}
+
+function controlOptions(config: AxisControlConfig): { graph: any; call: BotOrderGenerationOptions } {
+    const graph: any = {
+        edges: [
+            { a: CONTROL_APPROACH, b: CONTROL_X },
+            { a: CONTROL_APPROACH, b: CONTROL_MANUAL },
+            { a: CONTROL_APPROACH, b: CONTROL_TRANSIT },
+        ],
+        reverseMap: new Map(),
+        supplyStateByOsid: {},
+        osidPopulationMap: new Map(),
+    };
+    const call: BotOrderGenerationOptions = {};
+    if (config.filteredBrigadeIds) {
+        const excluded = new Set(config.filteredBrigadeIds);
+        call.brigadeFilter = (formation) => !excluded.has(formation.id);
+    }
+    if (config.mergeWithExistingOrders !== undefined) {
+        call.mergeWithExistingOrders = config.mergeWithExistingOrders;
+    }
+    return { graph, call };
+}
+
+function runAxisControl(config: AxisControlConfig): AxisControlRun {
+    const { state, activeOp } = makeAxisOrderTraceFixture();
+    (activeOp as any).is_pre_planned = true;
+    (activeOp as any).min_attack_outcome = 'costly_victory';
+
+    const controllers: any = (state.political as any).political_controllers;
+    controllers[CONTROL_MANUAL] = 'RBiH';
+    controllers[CONTROL_TRANSIT] = 'RS';
+
+    for (const brigadeId of ['b1', 'b2']) {
+        const formation: any = (state.military.formations as any)[brigadeId];
+        formation.status = 'active';
+        formation.kind = 'brigade';
+        formation.corps_id = 'rs_corps';
+        formation.disrupted_turns = 0;
+    }
+
+    config.configure?.(state, activeOp);
+
+    const ratios = config.ratios;
+    const spy = vi.spyOn(combatPredictor, 'predictCombatOutcome').mockImplementation(((...args: any[]) => {
+        const attackerId = controlIdOf(args[1]);
+        const additionalAttackers = Array.isArray(args[7]) ? args[7] : [];
+        const ids = new Set<string>();
+        if (attackerId) ids.add(attackerId);
+        for (const value of additionalAttackers) {
+            const id = controlIdOf(value);
+            if (id) ids.add(id);
+        }
+        const knownIds = [...ids].filter((id) => ratios[id] !== undefined);
+        const summedRatio = knownIds.reduce((total, id) => total + ratios[id]!, 0);
+        const cooperationFactor = knownIds.length >= 3 ? 0.8 : knownIds.length === 2 ? 0.9 : 1;
+        const powerRatio = summedRatio * cooperationFactor;
+        return {
+            power_ratio: powerRatio,
+            predicted_outcome: controlClassify(powerRatio),
+        } as unknown as ReturnType<typeof combatPredictor.predictCombatOutcome>;
+    }) as any);
+
+    const { graph, call } = controlOptions(config);
+    let diagnostics: any;
+    try {
+        diagnostics = generateAllBotOrdersOsid(state, ['RS'], graph, call);
+    } finally {
+        spy.mockRestore();
+    }
+    return { state, activeOp, diagnostics };
+}
+
+function controlEligibleSummary(diagnostics: any): string {
+    return stableStringify(diagnostics?.eligible_attackers_by_corps ?? {});
+}
+
+function expectControlObjectiveHeld(state: GameState): void {
+    expect((state.political as any).political_controllers[CONTROL_X]).toBe('RBiH');
+}
+
+function configureSynchronizedSplit(peerMinOutcome: string) {
+    return (state: GameState, activeOp: CorpsOperation): void => {
+        const peer: any = JSON.parse(JSON.stringify(activeOp));
+        peer.name = 'Joint Contract Peer Push';
+        peer.participating_brigades = ['b2'];
+        peer.objectives = [CONTROL_X];
+        peer.current_objective_index = 0;
+        peer.sync_operation_name = 'joint-contract';
+        peer.min_attack_outcome = peerMinOutcome;
+        peer.axes = [{
+            ...(peer.axes?.[0] ?? {}),
+            assigned_brigades: ['b2'],
+            objectives: [CONTROL_X],
+            current_objective_index: 0,
+            status: 'executing',
+        }];
+        (activeOp as any).participating_brigades = ['b1'];
+        (activeOp as any).sync_operation_name = 'joint-contract';
+        (activeOp as any).axes = [{
+            ...((activeOp as any).axes?.[0] ?? {}),
+            assigned_brigades: ['b1'],
+            objectives: [CONTROL_X],
+            current_objective_index: 0,
+            status: 'executing',
+        }];
+        (state.military.corps_command as any).rs_corps.active_operations.push(peer);
+    };
+}
+
+function reverseControlFormationOrder(state: GameState): void {
+    const formations: Record<string, any> = (state.military as any).formations;
+    (state.military as any).formations = Object.fromEntries(Object.entries(formations).reverse());
+}
+
+function reverseControlAxisOrder(activeOp: CorpsOperation): void {
+    const axis: any = activeOp.axes![0]!;
+    axis.assigned_brigades = [...axis.assigned_brigades].reverse();
+}
+
+describe('operation execution staging order controls', () => {
+    it('mixed viable pair keeps genuine coordinated attack and emits both targets', () => {
+        const { state, diagnostics } = runAxisControl({ ratios: { b1: 0.9, b2: 0.3 } });
+
+        expect((state.military as any).brigade_attack_orders).toEqual({ b1: CONTROL_X, b2: CONTROL_X });
+        expect(diagnostics.eligible_attackers_by_corps).toEqual({ rs_corps: 2 });
+        expectControlObjectiveHeld(state);
+    });
+
+    it('balanced pair emits both targets as a positive control', () => {
+        const { state } = runAxisControl({ ratios: { b1: 0.65, b2: 0.65 } });
+
+        expect((state.military as any).brigade_attack_orders).toEqual({ b1: CONTROL_X, b2: CONTROL_X });
+        expectControlObjectiveHeld(state);
+    });
+
+    it('caller brigade filter excludes the weak mate without forcing a filtered order', () => {
+        const { state } = runAxisControl({
+            ratios: { b1: 0.9, b2: 0.3 },
+            filteredBrigadeIds: ['b2'],
+        });
+
+        expect((state.military as any).brigade_attack_orders ?? {}).toEqual({});
+        expectControlObjectiveHeld(state);
+    });
+
+    it('preserves an existing manual order for a filtered brigade and does not force an attack', () => {
+        const { state } = runAxisControl({
+            ratios: { b1: 0.9, b2: 0.3 },
+            filteredBrigadeIds: ['b2'],
+            mergeWithExistingOrders: true,
+            configure: (fixtureState) => {
+                const military: any = fixtureState.military;
+                military.brigade_attack_orders = { b2: CONTROL_MANUAL };
+                military.brigade_posture_orders = [{ brigade_id: 'b2', posture: 'hold' }];
+                (military.formations.b2 as any).posture = 'hold';
+            },
+        });
+
+        expect((state.military as any).brigade_attack_orders).toEqual({ b2: CONTROL_MANUAL });
+        expect((state.military as any).brigade_posture_orders.filter((entry: any) => entry.brigade_id === 'b2'))
+            .toEqual([{ brigade_id: 'b2', posture: 'hold' }]);
+        expect((state.military.formations!.b2 as any).posture).toBe('hold');
+        expectControlObjectiveHeld(state);
+    });
+
+    it('keeps an existing manual order instead of treating it as support at the objective', () => {
+        const { state } = runAxisControl({
+            ratios: { b1: 0.9, b2: 0.3 },
+            mergeWithExistingOrders: true,
+            configure: (fixtureState) => {
+                (fixtureState.military as any).brigade_attack_orders = { b2: CONTROL_MANUAL };
+            },
+        });
+
+        expect((state.military as any).brigade_attack_orders).toEqual({ b2: CONTROL_MANUAL });
+        expect((state.military as any).brigade_attack_orders).not.toHaveProperty('b1');
+        expectControlObjectiveHeld(state);
+    });
+
+    it('counts already committed manual support at the objective but never invents it', () => {
+        const { state } = runAxisControl({
+            ratios: { b1: 0.9, b2: 0.3 },
+            filteredBrigadeIds: ['b2'],
+            mergeWithExistingOrders: true,
+            configure: (fixtureState) => {
+                (fixtureState.military as any).brigade_attack_orders = { b2: CONTROL_X };
+            },
+        });
+
+        expect((state.military as any).brigade_attack_orders).toEqual({ b1: CONTROL_X, b2: CONTROL_X });
+        expectControlObjectiveHeld(state);
+    });
+
+    it('does not count a column in transit as available support and leaves transit state unchanged', () => {
+        const { state } = runAxisControl({
+            ratios: { b1: 0.9, b2: 0.3 },
+            configure: (fixtureState) => {
+                const b2: any = fixtureState.military.formations!.b2;
+                const transit = {
+                    status: 'in_transit',
+                    path: [CONTROL_APPROACH, CONTROL_TRANSIT],
+                    turns_remaining: 1,
+                };
+                b2.status = 'in_transit';
+                b2.transit = { ...transit, path: [...transit.path] };
+                b2.column = { ...transit, path: [...transit.path] };
+                b2.column_transit = { ...transit, path: [...transit.path] };
+                b2.movement = { ...transit, path: [...transit.path] };
+                b2.transit_path = [...transit.path];
+                b2.transit_turns_remaining = 1;
+            },
+        });
+
+        const b2: any = state.military.formations!.b2;
+        expect((state.military as any).brigade_attack_orders ?? {}).toEqual({});
+        expect(stableStringify({
+            status: b2.status,
+            transit: b2.transit,
+            column: b2.column,
+            column_transit: b2.column_transit,
+            movement: b2.movement,
+            transit_path: b2.transit_path,
+            transit_turns_remaining: b2.transit_turns_remaining,
+        })).toBe(stableStringify({
+            status: 'in_transit',
+            transit: { status: 'in_transit', path: [CONTROL_APPROACH, CONTROL_TRANSIT], turns_remaining: 1 },
+            column: { status: 'in_transit', path: [CONTROL_APPROACH, CONTROL_TRANSIT], turns_remaining: 1 },
+            column_transit: { status: 'in_transit', path: [CONTROL_APPROACH, CONTROL_TRANSIT], turns_remaining: 1 },
+            movement: { status: 'in_transit', path: [CONTROL_APPROACH, CONTROL_TRANSIT], turns_remaining: 1 },
+            transit_path: [CONTROL_APPROACH, CONTROL_TRANSIT],
+            transit_turns_remaining: 1,
+        }));
+        expect((state.political as any).political_controllers[CONTROL_TRANSIT]).toBe('RS');
+        expectControlObjectiveHeld(state);
+    });
+
+    it('does not count a brigade below the existing personnel floor as support', () => {
+        const { state } = runAxisControl({
+            ratios: { b1: 0.9, b2: 0.3 },
+            configure: (fixtureState) => {
+                (fixtureState.military.formations!.b2 as any).personnel = 499;
+            },
+        });
+
+        expect((state.military as any).brigade_attack_orders ?? {}).toEqual({});
+        expect((state.military.formations!.b2 as any).personnel).toBe(499);
+        expectControlObjectiveHeld(state);
+    });
+
+    it('does not count an inactive brigade as support', () => {
+        const { state } = runAxisControl({
+            ratios: { b1: 0.9, b2: 0.3 },
+            configure: (fixtureState) => {
+                const b2: any = fixtureState.military.formations!.b2;
+                b2.status = 'inactive';
+            },
+        });
+
+        expect((state.military as any).brigade_attack_orders ?? {}).toEqual({});
+        expect((state.military.formations!.b2 as any).status).toBe('inactive');
+        expectControlObjectiveHeld(state);
+    });
+
+    it('synchronized peer declines its own threshold so the main brigade cannot borrow it', () => {
+        const { state } = runAxisControl({
+            ratios: { b1: 0.9, b2: 0.3 },
+            configure: configureSynchronizedSplit('victory'),
+        });
+
+        expect((state.military as any).brigade_attack_orders ?? {}).toEqual({});
+        expectControlObjectiveHeld(state);
+    });
+
+    it('synchronized peer with the same costly threshold emits both targets', () => {
+        const { state } = runAxisControl({
+            ratios: { b1: 0.9, b2: 0.3 },
+            configure: configureSynchronizedSplit('costly_victory'),
+        });
+
+        expect((state.military as any).brigade_attack_orders).toEqual({ b1: CONTROL_X, b2: CONTROL_X });
+        expectControlObjectiveHeld(state);
+    });
+
+    it('emits the same viable orders and eligible counts regardless of processing order or strong id', () => {
+        const variants: Array<{ ratios: Record<string, number>; reverse: boolean }> = [
+            { ratios: { b1: 0.9, b2: 0.3 }, reverse: false },
+            { ratios: { b1: 0.9, b2: 0.3 }, reverse: true },
+            { ratios: { b1: 0.3, b2: 0.9 }, reverse: false },
+            { ratios: { b1: 0.3, b2: 0.9 }, reverse: true },
+        ];
+        const runs = variants.map((variant) => runAxisControl({
+            ratios: variant.ratios,
+            configure: variant.reverse
+                ? (fixtureState, fixtureOp) => {
+                    reverseControlFormationOrder(fixtureState);
+                    reverseControlAxisOrder(fixtureOp);
+                }
+                : undefined,
+        }));
+
+        for (const run of runs) {
+            expect((run.state.military as any).brigade_attack_orders).toEqual({ b1: CONTROL_X, b2: CONTROL_X });
+            expectControlObjectiveHeld(run.state);
+        }
+
+        const baselineOrders = stableStringify((runs[0]!.state.military as any).brigade_attack_orders);
+        const baselineEligible = controlEligibleSummary(runs[0]!.diagnostics);
+        for (const run of runs.slice(1)) {
+            expect(stableStringify((run.state.military as any).brigade_attack_orders)).toBe(baselineOrders);
+            expect(controlEligibleSummary(run.diagnostics)).toBe(baselineEligible);
+        }
     });
 });

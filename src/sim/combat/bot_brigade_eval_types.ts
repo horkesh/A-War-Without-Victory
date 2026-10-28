@@ -108,6 +108,17 @@ export interface BrigadeEvaluationContext {
     /** Lazily builds the officer combat lookup on first predictor use in this faction-order pass. */
     getOfficerCombatLookup?: () => OfficerCombatLookup | undefined;
     /**
+     * Actual accepted caller brigades for this faction-order pass (caller brigadeFilter
+     * already applied), sorted and deduped by the caller. Absent in direct-evaluator use;
+     * when present, joint forecasts may only use these real caller-visible brigades.
+     */
+    processedBrigadeIds?: readonly FormationId[];
+    /**
+     * Prior authored attack orders that win the upcoming merge for this pass (merge mode
+     * only). Absent when replacement mode invalidates prior processed-faction orders.
+     */
+    authoritativePriorAttackOrders?: Readonly<Record<string, string>>;
+    /**
      * Opt-in `dispatcher_decision` observation callback, supplied only when the topic is on. Called once per
      * `evaluateSectorMarch` call with a fresh detached record; absent => no observation work at all.
      */
