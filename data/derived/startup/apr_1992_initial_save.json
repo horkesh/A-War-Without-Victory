@@ -10401,7 +10401,7 @@
           "rs_visegrad_brigade"
         ],
         "corps_id": "vrs_drina",
-        "defensive_power": 52.800000000000004,
+        "defensive_power": 66,
         "density": 0.25,
         "edge_ids": [
           "op:visegrad:donji_dobrun_2__op:visegrad:velji_lug",
@@ -27802,7 +27802,7 @@
           "last_supplied_turn": null
         },
         "origin_mun": "visegrad",
-        "personnel": 800,
+        "personnel": 1000,
         "readiness": "active",
         "status": "active",
         "tags": [
@@ -30994,7 +30994,7 @@
       },
       "visegrad:RS": {
         "available": 0,
-        "committed": 800,
+        "committed": 1000,
         "exhausted": 0,
         "faction": "RS",
         "fatigue": 0,
