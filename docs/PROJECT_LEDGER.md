@@ -9,6 +9,29 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — January Čajniče seed trial, 1000→1800 — NOT ADOPTED
+
+Assumption: raise only `initial_personnel` 1000→1800 on existing `rs_ajnie_brigade`
+(RS, VRS Herzegovina, home Čajniče). 1800 is a calibrated effective-force assumption within
+the existing implicit 2000 cap, not a sourced historical headcount. No `max_personnel` was
+added or changed; home, corps, availability 0, mandatory, cohesion 67, equipment, and all
+other rows — including the two seed-650 ARBiH rows and the 851st local-operation definition —
+are unchanged. No owned-origin/allied/Orašje/health/preservation gates, operations, controls,
+thresholds, or dates changed.
+
+Evidence: matched parent 19328 versus Kamen child dba differs only at Kamen; Baljvine/Kolovarice
+gaps are inherited. In retained exact T7 the first Kolovarice-chain divergence is the Batotici
+defender: old bb705 militia/decisive 2.128, corrected source 808th present/costly
+1.1579527153151503 plus homeland-morale absorption, delaying Čajniče so Foča attacks Kolovarice
+alone 9. That correct defender/stand rule is kept. Simple constant-input scaling of 1000→1800
+yields 2.084, but the actual early campaign must test it; this is a conditional estimate, not a
+trajectory prediction or promise.
+
+Next: one hypothesis only, no strength sweep. Run the cheap 12-turn real-battle rejection check
+first; no 39/full campaign, no adoption, no push, and no result claim yet. The new force
+intentionally changes early trajectory; dba→193 pre-23 parity remains retained evidence, and if
+the candidate looks promising the same-baseline 851st no-early-effect pair must be verified.
+
 ## 2026-10-28 — January outer-garrison seed trial, 400→650 — NOT ADOPTED
 
 Assumption: raise `initial_personnel` 400→650 for existing `arbih_147th_light` and

@@ -11882,7 +11882,7 @@
           "rs_ajnie_brigade"
         ],
         "corps_id": "vrs_herzegovina",
-        "defensive_power": 35.175,
+        "defensive_power": 63.315,
         "density": 0.125,
         "edge_ids": [
           "op:cajnice:batotici__op:cajnice:cajnice_2",
@@ -11939,7 +11939,7 @@
           "op:cajnice:zaborak",
           "op:rudo:gornja_strmica"
         ],
-        "threat_ratio": 31.27221037668799
+        "threat_ratio": 17.373450209271105
       },
       "sector:vrs_herzegovina:6": {
         "assigned_brigade_ids": [],
@@ -27207,7 +27207,7 @@
           "last_supplied_turn": null
         },
         "origin_mun": "cajnice",
-        "personnel": 1000,
+        "personnel": 1800,
         "readiness": "active",
         "status": "active",
         "tags": [
@@ -28644,7 +28644,7 @@
       },
       "cajnice:RS": {
         "available": 0,
-        "committed": 1000,
+        "committed": 1800,
         "exhausted": 0,
         "faction": "RS",
         "fatigue": 0,
