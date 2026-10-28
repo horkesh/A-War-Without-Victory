@@ -211,6 +211,21 @@ describe('pre-planned operations', () => {
             'op:foca:izbisno',
             'op:foca:kosman',
         ]);
+
+        const kalinovikAxis = operation.axes.find((candidate) => candidate.axis_id === 'kalinovik');
+        assert.ok(kalinovikAxis);
+        assert.equal(kalinovikAxis.staging_osid, 'op:kalinovik:kalinovik_2');
+        assert.deepEqual(kalinovikAxis.brigades, [
+            'rs_gacko_brigade',
+            'rs_kalinovik_brigade',
+            'jna_kalinovik_to_tg',
+        ]);
+        assert.deepEqual(kalinovikAxis.objectives, [
+            'op:kalinovik:vlaholje',
+            'op:kalinovik:golubici_2',
+            'op:kalinovik:sela_2',
+            'op:konjic:ljuta',
+        ]);
     });
 
     it('authors Lukavac 93 as the Main Staff operation that severs the Trnovo–Goražde corridor', () => {
@@ -2129,6 +2144,7 @@ describe('pre-planned operations', () => {
                 'op:kalinovik:vlaholje',
                 'op:kalinovik:golubici_2',
                 'op:kalinovik:sela_2',
+                'op:konjic:ljuta',
             ],
             current_objective_index: 0,
         } as any];
@@ -2712,6 +2728,12 @@ describe('pre-planned operations', () => {
         const command = state.military.corps_command!.vrs_herzegovina!;
         command.active_operations = [];
         command.queued_operations = ['Operation Foca'];
+        Object.assign(state.political.political_controllers ??= {}, {
+            'op:kalinovik:vlaholje': 'RBiH',
+            'op:kalinovik:golubici_2': 'RBiH',
+            'op:kalinovik:sela_2': 'RBiH',
+            'op:konjic:ljuta': 'RBiH',
+        });
 
         const injected = injectQueuedOperation(state, 'vrs_herzegovina');
 
@@ -2727,6 +2749,15 @@ describe('pre-planned operations', () => {
         assert.ok(focaSouth);
         assert.deepEqual(focaSouth!.assigned_brigades, ['rs_bilea_brigade']);
         assert.equal(focaSouth!.main_brigade, 'rs_bilea_brigade');
+
+        const focaKalinovik = foca!.axes?.find((axis) => axis.axis_id === 'kalinovik');
+        assert.ok(focaKalinovik);
+        assert.deepEqual(focaKalinovik!.objectives, [
+            'op:kalinovik:vlaholje',
+            'op:kalinovik:golubici_2',
+            'op:kalinovik:sela_2',
+            'op:konjic:ljuta',
+        ]);
     });
 
     it('excludes queued Operation Foca brigades that cannot reach the authored axis staging area', () => {

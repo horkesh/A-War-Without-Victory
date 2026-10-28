@@ -9,6 +9,22 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — January Operation Foca Kalinovik axis extended to Ljuta — NOT ADOPTED
+
+Trial: append `op:konjic:ljuta` after `op:kalinovik:sela_2` on the existing Operation
+Foca `kalinovik` axis only. Same brigades (Gacko, Kalinovik, JNA Kalinovik TG), staging,
+prestage/planning and every other axis unchanged; no engine, movement, force, roster,
+threshold, bonus or controller edits. The deliberate JNA column restriction is preserved
+(see `osid_column_movement` test); eligibility is untouched.
+
+Rationale: actual T10 retained baseline leaves 811 Gacko at `op:kalinovik:sela_2` and 963
+Kalinovik at `op:kalinovik:obalj` — adjacent friendly approaches supporting one immediate
+follow-on before depletion. This Ljuta sequencing is modeled from that Sela/Obalj adjacency,
+not an attested historical Ljuta operation or date, and makes no capture claim.
+
+Verification pending: Codex startup, tests, build, prefix 14, January scenario, health,
+painted-control, and qualifications.
+
 ## 2026-10-28 — January 19th Krajina seed trial, 1000→2000 — NOT ADOPTED
 
 Assumption: raise only `initial_personnel` 1000→2000 on `rs_19th_krajina_light_infantry`
