@@ -1,6 +1,7 @@
 import { AdjacencyMap } from '../map/adjacency_map.js';
 import { GameState } from './game_state.js';
 import { getSettlementControlStatus } from './settlement_control.js';
+import { isFriendlyFaction } from '../sim/early_war/alliance_update.js';
 import { strictCompare } from './validateGameState.js';
 
 
@@ -189,8 +190,15 @@ export function computeSupplyReachability(
     const factionResults: FactionSupplyReachability[] = [];
 
     for (const faction of factions) {
-        // Get controlled settlements (unique, sorted)
-        const controlled = [...new Set(faction.areasOfResponsibility ?? [])].sort();
+        // Get controlled settlements (unique, sorted). A stale AoR claim on a
+        // node that is now known-owned by another faction is foreign territory,
+        // not beneficiary membership. Unknown control remains an isolated claim.
+        const controlled = [...new Set(faction.areasOfResponsibility ?? [])]
+            .filter((node) => {
+                const status = getSettlementControlStatus(state, node);
+                return status.kind !== 'known' || status.side === faction.id;
+            })
+            .sort();
 
         // Get sources (unique, sorted)
         const sourcesRaw = faction.supply_sources ?? [];
@@ -212,11 +220,21 @@ export function computeSupplyReachability(
             }
         }
 
-        // Traversal check: AoR membership + political control
-        const isTraversable = (node: string): boolean => {
+        // Source eligibility is stricter than transit: an origin must be in the
+        // faction's own controlled domain AND politically owned. Allied depots
+        // are never borrowed as supply origins.
+        const isOwnControlled = (node: string): boolean => {
             if (!controlledSet.has(node)) return false;
             const status = getSettlementControlStatus(state, node);
             return status.kind === 'known' && status.side === faction.id;
+        };
+        const ownedSources = sources.filter(isOwnControlled);
+
+        // Normal transit consults the current controller for ALL nodes,
+        // independent of old AoR membership. Unknown control never traverses.
+        const isTraversable = (node: string): boolean => {
+            const status = getSettlementControlStatus(state, node);
+            return status.kind === 'known' && isFriendlyFaction(status.side, faction.id, state);
         };
 
         // Corridor traversal adapter (Phase 12C.3 supply rights)
@@ -229,7 +247,7 @@ export function computeSupplyReachability(
 
         const bfs = runSupplyBfs({
             controlled,
-            sources,
+            sources: ownedSources,
             isTraversable,
             getNeighbors: (node) => adjacencyMap[node] ?? [],
             canTraverseCorridor: corridorCheck,

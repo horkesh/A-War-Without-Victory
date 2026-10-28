@@ -47,6 +47,25 @@ function setFingerprint(values: ReadonlySet<string>): string {
     return [...values].sort(strictCompare).join(',');
 }
 
+/**
+ * Reachable network = owned reachable nodes plus endpoints of edges actually
+ * traversed by the BFS. Allied transit nodes therefore remain in the corridor
+ * and heartland topology without entering owned report membership.
+ */
+function collectReachableNetwork(
+    reachable: readonly string[],
+    edgesUsed: readonly string[],
+): Set<string> {
+    const network = new Set<string>(reachable);
+    for (const edgeId of edgesUsed) {
+        const [a, b] = edgeId.split('__');
+        if (!a || !b) continue;
+        network.add(a);
+        network.add(b);
+    }
+    return network;
+}
+
 /** Supply state levels per canon (Systems Manual §14). */
 export type SupplyStateLevel = 'adequate' | 'strained' | 'critical';
 
@@ -174,7 +193,8 @@ export function deriveCorridors(
     for (const fac of supplyReport.factions) {
         const controlledSet = new Set(fac.controlled);
         const edgesUsed = new Set(fac.edges_used ?? []);
-        const reachableSet = new Set(fac.reachable_controlled);
+        // Bridge network includes allied transit endpoints of traversed edges.
+        const reachableSet = collectReachableNetwork(fac.reachable_controlled, fac.edges_used ?? []);
 
         // Potential corridor edges: edges (a,b) with both a,b in controlled
         const potentialEdges = new Set<string>();
@@ -588,13 +608,9 @@ function computeFactionCorridors(
     adjacency: Map<string, string[]>
 ): DerivedCorridor[] {
     const controlledSet = new Set(fac.controlled);
-    const reachableSet = new Set(fac.reachable_osids);
+    const reachableSet = collectReachableNetwork(fac.reachable_osids, fac.edges_used);
 
-    // Build full set of edges between reachable controlled OSIDs.
-    // Bridge detection must operate on the actual subgraph topology, not the
-    // BFS spanning tree (edges_used). The BFS tree has zero cycles, so every
-    // edge is trivially a bridge — producing 100% brittle, 0% open.
-    const reachableEdges = new Set<string>();
+    // Potential cut edges remain owned-only (report membership unchanged).
     const potentialEdges = new Set<string>();
     for (const osid of fac.controlled) {
         const neighbors = adjacency.get(osid) ?? [];
@@ -602,9 +618,19 @@ function computeFactionCorridors(
             if (!controlledSet.has(n)) continue;
             const eid = osid < n ? `${osid}__${n}` : `${n}__${osid}`;
             potentialEdges.add(eid);
-            if (reachableSet.has(osid) && reachableSet.has(n)) {
-                reachableEdges.add(eid);
-            }
+        }
+    }
+
+    // Build the full adjacency subgraph of the visited network (owned
+    // reachable nodes + allied transit endpoints), not the BFS tree and not
+    // owned nodes alone. Redundancy mathematics stays full-graph.
+    const reachableEdges = new Set<string>();
+    for (const osid of [...reachableSet].sort(strictCompare)) {
+        const neighbors = adjacency.get(osid) ?? [];
+        for (const n of neighbors) {
+            if (!reachableSet.has(n)) continue;
+            const eid = osid < n ? `${osid}__${n}` : `${n}__${osid}`;
+            reachableEdges.add(eid);
         }
     }
 
@@ -615,11 +641,11 @@ function computeFactionCorridors(
     const bridgeSet = findBridgesInSubgraphOsidWithParity(reachableEdges, reachableSet, adjacency);
 
     const out: DerivedCorridor[] = [];
-    for (const edgeId of reachableEdges) {
+    for (const edgeId of [...reachableEdges].sort(strictCompare)) {
         const isBridge = bridgeSet.has(edgeId);
         out.push({ edge_id: edgeId, faction_id: fac.faction_id, state: isBridge ? 'brittle' : 'open' });
     }
-    for (const edgeId of potentialEdges) {
+    for (const edgeId of [...potentialEdges].sort(strictCompare)) {
         if (reachableEdges.has(edgeId)) continue;
         out.push({ edge_id: edgeId, faction_id: fac.faction_id, state: 'cut' });
     }
@@ -722,14 +748,22 @@ function computeFactionSupplyState(
     perFactionOpenEdges: Set<string>
 ): FactionSupplyStateByOsidEntry {
     const reachableSet = new Set(fac.reachable_osids);
+    const controlledSet = new Set(fac.controlled);
     const isolatedSet = new Set(fac.isolated_osids);
+    // Heartland/adequate BFS uses the full visited network (owned reachable
+    // plus allied transit endpoints), while seeding stays owned-source-only.
+    const networkSet = collectReachableNetwork(fac.reachable_osids, fac.edges_used);
 
     // Isolated source detection: only seed adequate BFS from sources in
     // the heartland (largest connected component of reachable set).
     // Sources in disconnected pockets → their OSIDs are strained, not adequate.
-    const heartland = findHeartlandComponent(reachableSet, adjacency);
+    // A configured-but-allied-owned origin is not in the controlled set and
+    // therefore never seeds adequate supply.
+    const heartland = findHeartlandComponent(networkSet, adjacency);
     const sources = new Set(
-        fac.sources.filter((osid) => reachableSet.has(osid) && heartland.has(osid))
+        fac.sources.filter((osid) =>
+            controlledSet.has(osid) && reachableSet.has(osid) && heartland.has(osid)
+        )
     );
     const adequateVisited = new Set<string>();
     const queue: string[] = [...sources];
