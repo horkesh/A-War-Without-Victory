@@ -1364,6 +1364,32 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
+        // Owner-authorized UNADOPTED model action: the actual retained deployment
+        // and recovery of the 831st at Trnovo supports a turn-28 due point
+        // (19 October 1992 on the canonical 6 April epoch). This is an explicit
+        // inference, not an attested 831st action or a historic capture claim.
+        // Ordinary authorization, movement, launch, and combat apply; full-painted
+        // control and health qualification remain required, and capture is not
+        // guaranteed.
+        corps: 'arbih_1st_corps',
+        faction: 'RBiH',
+        name: 'Trnovo Local Counterattack (Model)',
+        staging_osid: 'op:trnovo:trnovo',
+        available_from: 28,
+        enqueue_from: 28,
+        minimum_viable_participants: 1,
+        minimum_assembled_participants: 1,
+        axes: [
+            {
+                axis_id: 'trnovo_local_counterattack',
+                name: 'Local Trnovo Counterattack',
+                brigades: ['arbih_831st_drina_lineage'],
+                objectives: ['op:trnovo:tosici'],
+                staging_osid: 'op:trnovo:trnovo',
+            },
+        ],
+    },
+    {
         // Owner-directed chronology: the Cerska/Srebrenica contact is established
         // during summer 1992 and must still be present at the January checkpoint.
         // This is deliberately an ordinary operation: no scripted control change,

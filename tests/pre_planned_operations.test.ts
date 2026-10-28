@@ -814,7 +814,7 @@ describe('pre-planned operations', () => {
     });
 
     it('defines the current pre-planned operation catalog', () => {
-        assert.equal(_ALL_PRE_PLANNED.length, 31);
+        assert.equal(_ALL_PRE_PLANNED.length, 32);
         assert.deepEqual(
             _ALL_PRE_PLANNED.map((def) => def.name),
             [
@@ -847,6 +847,7 @@ describe('pre-planned operations', () => {
                 'Visoko–Breza Line Clearing',
                 'Operation Circle',
                 'Gorazde Local Counterattack (Model)',
+                'Trnovo Local Counterattack (Model)',
                 'Srebrenica–Cerska Link-Up',
                 'Maglaj Local Counterattack',
                 'Central Bosnia Counteroffensive',
@@ -3246,5 +3247,196 @@ describe('Gorazde Local Counterattack (Model)', () => {
         assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), false);
         assert.equal(command.active_operations.length, 0);
         assert.equal(state.political.political_controllers!['op:gorazde:kamen'], 'RS');
+    });
+});
+
+describe('Trnovo Local Counterattack (Model)', () => {
+    const name = 'Trnovo Local Counterattack (Model)';
+    const brigadeId = 'arbih_831st_drina_lineage';
+    const staging = 'op:trnovo:trnovo';
+    const objective = 'op:trnovo:tosici';
+
+    function prepareTurn28(disruptedTurns: number, personnel = 1034): GameState {
+        const state = makeMinimalState();
+        state.meta.turn = 28;
+        const command = state.military.corps_command!.arbih_1st_corps!;
+        command.active_operations = [];
+        command.queued_operations = [name];
+        const formation = state.military.formations![brigadeId]!;
+        formation.personnel = personnel;
+        formation.cohesion = 50.923;
+        formation.morale = 84;
+        formation.disrupted_turns = disruptedTurns;
+        formation.location_osid = staging;
+        state.political.political_controllers![staging] = 'RBiH';
+        state.political.political_controllers![objective] = 'RS';
+        return state;
+    }
+
+    it('authors the exact unadopted Trnovo model definition without overrides', () => {
+        const operation = _ALL_PRE_PLANNED.find((def) => def.name === name);
+        assert.ok(operation);
+        assert.equal(operation.corps, 'arbih_1st_corps');
+        assert.equal(operation.faction, 'RBiH');
+        assert.equal(operation.staging_osid, staging);
+        assert.equal(operation.available_from, 28);
+        assert.equal(operation.enqueue_from, 28);
+        assert.equal(operation.minimum_viable_participants, 1);
+        assert.equal(operation.minimum_assembled_participants, 1);
+        assert.equal(operation.axes.length, 1);
+        assert.equal(operation.axes[0]?.axis_id, 'trnovo_local_counterattack');
+        assert.equal(operation.axes[0]?.name, 'Local Trnovo Counterattack');
+        assert.deepEqual(operation.axes[0]?.brigades, [brigadeId]);
+        assert.deepEqual(operation.axes[0]?.objectives, [objective]);
+        assert.equal(operation.axes[0]?.staging_osid, staging);
+        for (const excluded of [
+            'prestage_from',
+            'planning_duration',
+            'min_attack_outcome',
+            'execution_attack_power_mult',
+            'coordinated_advance',
+        ]) {
+            assert.equal((operation as any)[excluded], undefined);
+        }
+        assert.equal(operation.axes[0]?.minimum_forward_brigades, undefined);
+        assert.equal(operation.axes[0]?.minimum_staged_brigades, undefined);
+    });
+
+    it('stays unqueued and unmoved at turn 27, then injects the sole 831st axis at turn 28', () => {
+        const state = makeMinimalState();
+        state.meta.player_faction = 'RBiH' as FactionId;
+        state.meta.turn = 27;
+        const command = state.military.corps_command!.arbih_1st_corps!;
+        command.active_operations = [];
+        delete command.queued_operations;
+        const formation = state.military.formations![brigadeId]!;
+        formation.personnel = 1027;
+        formation.cohesion = 50.923;
+        formation.morale = 84;
+        formation.disrupted_turns = 1;
+        formation.location_osid = staging;
+        state.political.political_controllers![staging] = 'RBiH';
+        state.political.political_controllers![objective] = 'RS';
+
+        prestageDeferredPrePlannedElites(state);
+
+        assert.ok(!state.military.corps_command?.arbih_1st_corps?.queued_operations?.includes(name));
+        assert.ok(!getHeadQueuedPrePlannedBrigadeIds(state).has(brigadeId));
+        assert.ok(!getQueuedDatedPrestageBrigadeIds(state).has(brigadeId));
+        assert.equal(formation.location_osid, staging);
+
+        state.meta.turn = 28;
+        formation.personnel = 1034;
+        formation.disrupted_turns = 0;
+        prestageDeferredPrePlannedElites(state);
+        assert.ok(state.military.corps_command?.arbih_1st_corps?.queued_operations?.includes(name));
+
+        command.queued_operations = [name];
+        const positionBeforeInjection = formation.location_osid;
+        assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), true);
+        const operation = command.active_operations.find((active) => active.name === name);
+        assert.ok(operation);
+        assert.deepEqual(operation!.participating_brigades, [brigadeId]);
+        assert.equal(operation!.axes?.length, 1);
+        assert.deepEqual(operation!.axes?.[0]?.assigned_brigades, [brigadeId]);
+        assert.deepEqual(operation!.axes?.[0]?.objectives, [objective]);
+        assert.equal(operation!.axes?.[0]?.staging_osid, staging);
+        for (const borrowedBrigade of [
+            'arbih_801st_light',
+            'arbih_802nd_light',
+            'arbih_851st_vitezka_liberation',
+        ]) {
+            assert.ok(!operation!.participating_brigades.includes(borrowedBrigade));
+        }
+        assert.equal(formation.location_osid, positionBeforeInjection);
+    });
+
+    it('refuses a fresh turn-28 queue while the 831st is disrupted', () => {
+        const state = prepareTurn28(2);
+        const command = state.military.corps_command!.arbih_1st_corps!;
+        const formation = state.military.formations![brigadeId]!;
+
+        assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), false);
+        assert.equal(command.active_operations.length, 0);
+        assert.deepEqual(command.queued_operations, [name]);
+        assert.equal(formation.location_osid, staging);
+        assert.equal(state.political.political_controllers![objective], 'RS');
+    });
+
+    it('refuses a fresh turn-28 queue below the 500-man attack floor', () => {
+        const state = prepareTurn28(0, 499);
+        const command = state.military.corps_command!.arbih_1st_corps!;
+        const formation = state.military.formations![brigadeId]!;
+
+        assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), false);
+        assert.equal(command.active_operations.length, 0);
+        assert.deepEqual(command.queued_operations, [name]);
+        assert.equal(formation.location_osid, staging);
+        assert.equal(state.political.political_controllers![objective], 'RS');
+    });
+
+    it('injects a recovered 1034-man 831st without changing the objective controller', () => {
+        const state = prepareTurn28(0);
+        const command = state.military.corps_command!.arbih_1st_corps!;
+
+        assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), true);
+        const operation = command.active_operations.find((active) => active.name === name);
+        assert.ok(operation);
+        assert.deepEqual(operation!.participating_brigades, [brigadeId]);
+        assert.equal(state.political.political_controllers![objective], 'RS');
+    });
+
+    it('yields when a competing active operation already owns the 831st', () => {
+        const state = prepareTurn28(0);
+        const command = state.military.corps_command!.arbih_1st_corps!;
+        command.active_operations = [{
+            name: 'Competing Corps Task',
+            type: 'sector_attack',
+            phase: 'planning',
+            is_pre_planned: true,
+            participating_brigades: [brigadeId],
+            objectives: ['op:trnovo:other_front'],
+        } as any];
+
+        assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), false);
+        assert.equal(command.active_operations.length, 1);
+        assert.equal(command.active_operations[0]?.name, 'Competing Corps Task');
+        assert.deepEqual(command.queued_operations, [name]);
+        assert.equal(state.political.political_controllers![objective], 'RS');
+    });
+
+    it('still honours an explicit RBiH decline, with standing authorization accepted by default', () => {
+        const declined = prepareTurn28(0);
+        declined.meta.player_faction = 'RBiH' as FactionId;
+        const declinedCommand = declined.military.corps_command!.arbih_1st_corps!;
+        declined.meta.pending_proposal_reviews = [{
+            id: 'PROP_0_historical_op_preplanned_arbih_1st_corps_trnovo_local_counterattack',
+            turn: declined.meta.turn,
+            faction: 'RBiH' as FactionId,
+            domain: 'ops',
+            description: 'Trnovo Local Counterattack (Model) - declined by the president.',
+            proposed_action: 'HISTORICAL_OP:preplanned:arbih_1st_corps:Trnovo Local Counterattack (Model)',
+            current_value: 'awaiting_authorization',
+            proposed_value: 'authorize',
+            accepted: false,
+            resolved_turn: declined.meta.turn,
+        } as never];
+
+        assert.equal(injectQueuedOperation(declined, 'arbih_1st_corps'), false);
+        assert.equal(declinedCommand.active_operations.length, 0);
+        assert.equal(declined.political.political_controllers![objective], 'RS');
+
+        const authorized = prepareTurn28(0);
+        authorized.meta.player_faction = 'RBiH' as FactionId;
+        const authorizedCommand = authorized.military.corps_command!.arbih_1st_corps!;
+
+        assert.equal(injectQueuedOperation(authorized, 'arbih_1st_corps'), true);
+        assert.ok(authorizedCommand.active_operations.some((active) => active.name === name));
+        const review = authorized.meta.pending_proposal_reviews?.find((proposal) =>
+            proposal.proposed_action === 'HISTORICAL_OP:preplanned:arbih_1st_corps:Trnovo Local Counterattack (Model)'
+        );
+        assert.ok(review);
+        assert.equal(review.accepted, true);
+        assert.equal(authorized.political.political_controllers![objective], 'RS');
     });
 });

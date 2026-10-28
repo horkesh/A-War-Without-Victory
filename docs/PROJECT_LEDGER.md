@@ -9,6 +9,16 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — Trnovo Local Counterattack (Model), turn 28 — NOT ADOPTED
+
+Model assumption only: author one existing-path operation for the 831st at Trnovo, due
+turn 28 (19 October 1992 on the canonical 6 April epoch), waiting on disruption recovery.
+This is an explicit inference from the retained deployment and recovery, not a historically
+attested 831st action, date, or capture claim. No roster, bonus, threshold, exemption,
+source, cap, or personnel change. Exactly one authored definition is added; ordinary
+authorization, movement, launch, combat, and full-painted/health qualification remain; no
+result, adoption, or gate change is claimed.
+
 ## 2026-10-28 — January 19th Krajina seed trial, 1000→2000 — NOT ADOPTED
 
 Assumption: raise only `initial_personnel` 1000→2000 on `rs_19th_krajina_light_infantry`
