@@ -1056,7 +1056,7 @@ describe('pre-planned operations', () => {
     it('owns the approved KRUG lineage roster under 1st Corps without rejected participants', () => {
         const circle = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
         assert.ok(circle);
-        assert.equal(circle!.prestage_from, 16);
+        assert.equal(circle!.prestage_from, 14);
         assert.equal(circle!.axes[0]?.minimum_forward_brigades, undefined);
         const state = makeMinimalState();
         state.meta.turn = 18;
@@ -2484,36 +2484,48 @@ describe('pre-planned operations', () => {
         );
     });
 
-    it('pre-stages the existing KRUG roster only from turn 16 without teleporting', () => {
+    it('pre-stages the existing KRUG roster only from turn 14 without teleporting', () => {
         const state = makeMinimalState();
         state.meta.player_faction = 'RS';
-        state.meta.turn = 15;
+        state.meta.turn = 13;
         const command = state.military.corps_command!.arbih_1st_corps!;
         command.active_operations = [];
         command.queued_operations = ['Operation Circle'];
-        state.military.formations!.arbih_801st_light!.location_osid = 'op:test:circle_remote';
+        const remoteLocations: Record<string, string> = {
+            arbih_801st_light: 'op:test:circle_remote_801',
+            arbih_802nd_light: 'op:test:circle_remote_802',
+            arbih_831st_drina_lineage: 'op:test:circle_remote_831',
+        };
+        state.military.formations!.arbih_801st_light!.location_osid = 'op:test:circle_remote_801';
+        state.military.formations!.arbih_802nd_light!.location_osid = 'op:test:circle_remote_802';
+        state.military.formations!.arbih_831st_drina_lineage!.location_osid = 'op:test:circle_remote_831';
 
         prestageDeferredPrePlannedElites(state);
-        assert.equal(state.military.brigade_movement_orders?.arbih_801st_light, undefined);
+        for (const brigadeId of Object.keys(remoteLocations).sort()) {
+            assert.equal(state.military.brigade_movement_orders?.[brigadeId], undefined);
+            assert.equal(state.military.formations![brigadeId]!.location_osid, remoteLocations[brigadeId]);
+        }
 
-        state.meta.turn = 16;
+        state.meta.turn = 14;
         prestageDeferredPrePlannedElites(state);
 
         const definition = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
-        assert.equal(definition?.prestage_from, 16);
-        assert.equal(
-            state.military.formations!.arbih_801st_light!.location_osid,
-            'op:test:circle_remote',
-            'pre-staging must issue a march rather than teleporting the formation',
-        );
-        assert.deepEqual(
-            state.military.brigade_movement_orders?.arbih_801st_light,
-            {
-                destination_sids: ['op:gorazde:osjecani_2'],
-                stance: 'column',
-                owner: 'authored_preplanned',
-            },
-        );
+        assert.equal(definition?.prestage_from, 14);
+        for (const brigadeId of Object.keys(remoteLocations).sort()) {
+            assert.equal(
+                state.military.formations![brigadeId]!.location_osid,
+                remoteLocations[brigadeId],
+                'pre-staging must issue a march rather than teleporting the formation',
+            );
+            assert.deepEqual(
+                state.military.brigade_movement_orders?.[brigadeId],
+                {
+                    destination_sids: ['op:gorazde:osjecani_2'],
+                    stance: 'column',
+                    owner: 'authored_preplanned',
+                },
+            );
+        }
         assert.equal(command.active_operations.some((active) => active.name === 'Operation Circle'), false);
         assert.equal(definition?.available_from, 18);
     });
