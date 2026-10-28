@@ -9,6 +9,27 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — Konjic South east-axis route orientation trial — NOT ADOPTED
+
+Calibration trial only; no result claim, build, commit, push, or adoption. Three fields
+change: `jna_konjic_south_tg.location_osid` and Operation Herzegovina `konjic_south`
+`staging_osid` move `op:konjic:bijela_2` → `op:konjic:sitnik`, and the axis objectives
+reverse to `['op:konjic:ljuta', 'op:konjic:glavaticevo_2']` (Ljuta first). Roster remains
+the only actor `jna_konjic_south_tg`; same local TO region, no new troops.
+
+Source limits: BB2 PDF 514 / printed 495 describes the 1994 Serb-held Konjic/Glavatičevo
+line; it does not document this specific April 1992 TO route or prove the area held
+throughout. The alternate Sitnik opening allocation and sequence are explicit calibrated
+model inference, not attested historical capture. Real contact-graph edges Sitnik→Ljuta
+and Ljuta→Glavatičevo exist; Bijela→Ljuta does not. No painted references or history
+repaint.
+
+Unchanged: personnel 800 / infantry 800 / cohesion 60 / morale 60 / experience 0.25 /
+light_infantry, cap, `getPhantomSpawnProfile`, withdrawal turn 6, no equipment handoff,
+target terrain/slope, approach power, defender/last-stand physics, and all other
+definitions, axes, actors, dates, and references. First six actual turns must be checked
+for capture or preservation before any adoption.
+
 ## 2026-10-28 — January 19th Krajina seed trial, 1000→2000 — NOT ADOPTED
 
 Assumption: raise only `initial_personnel` 1000→2000 on `rs_19th_krajina_light_infantry`

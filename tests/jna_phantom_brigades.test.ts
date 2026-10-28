@@ -2,6 +2,8 @@
  * Tests for JNA/HV phantom brigade spawn, withdrawal, and equipment handoff.
  */
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, it } from 'vitest';
 
 import {
@@ -13,6 +15,7 @@ import {
     _ALL_PHANTOM_DEFS,
     _EQUIPMENT_CEILINGS,
 } from '../src/sim/combat/jna_phantom_brigades.js';
+import { _ALL_PRE_PLANNED } from '../src/sim/combat/pre_planned_operations.js';
 import { CURRENT_SCHEMA_VERSION, type FormationId, type FormationState, type FactionId, type GameState } from '../src/state/game_state.js';
 
 function makeState(turn: number): GameState {
@@ -460,5 +463,73 @@ describe('equipment ceilings', () => {
 
     it('still gives mechanized formations the highest tank ceiling', () => {
         assert.ok(_EQUIPMENT_CEILINGS['mechanized']!.max_tanks > _EQUIPMENT_CEILINGS['light_infantry']!.max_tanks);
+    });
+});
+
+// Cross-consumer regression for the Konjic South route-orientation trial:
+// the phantom constructor and the Operation Herzegovina axis must agree on the
+// Sitnik opening, and that opening must follow real contact-graph edges.
+describe('Konjic South route orientation', () => {
+    const repoRoot = process.cwd();
+
+    function hasEdge(edges: Array<{ a: string; b: string }>, first: string, second: string): boolean {
+        return edges.some((edge) =>
+            (edge.a === first && edge.b === second) || (edge.a === second && edge.b === first));
+    }
+
+    it('opens from Sitnik along the real Sitnik-Ljuta-Glavaticevo edges', () => {
+        const state = makeState(0);
+        spawnJnaPhantomBrigades(state);
+        const phantom = state.military.formations!['jna_konjic_south_tg']!;
+
+        const operation = _ALL_PRE_PLANNED.find((op) => op.name === 'Operation Herzegovina');
+        assert.ok(operation, 'Operation Herzegovina must remain in the pre-planned catalog');
+        const axis = operation!.axes.find((candidate) => candidate.axis_id === 'konjic_south');
+        assert.ok(axis, 'Konjic South axis must remain in Operation Herzegovina');
+
+        assert.equal(phantom.location_osid, 'op:konjic:sitnik');
+        assert.equal(phantom.location_osid, axis!.staging_osid);
+        assert.deepEqual(axis!.brigades, ['jna_konjic_south_tg']);
+        assert.deepEqual(axis!.objectives, ['op:konjic:ljuta', 'op:konjic:glavaticevo_2']);
+
+        const definition = _JNA_PHANTOM_DEFS.find((def) => def.id === 'jna_konjic_south_tg');
+        assert.ok(definition, 'Konjic South phantom definition must remain in the JNA catalog');
+        assert.equal(definition!.no_equipment_handoff, true);
+
+        assert.equal(phantom.personnel, 800);
+        assert.equal(phantom.composition!.infantry, 800);
+        assert.equal(phantom.equipment_class, 'light_infantry');
+        assert.equal(phantom.composition!.tanks, 0);
+        assert.equal(phantom.composition!.artillery, 0);
+        assert.equal(definition!.apcs, 0);
+        assert.equal(phantom.withdrawal_turn, 6);
+
+        const graphPath = join(repoRoot, 'data', 'derived', 'operational', 'operational_contact_graph.json');
+        const graph = JSON.parse(readFileSync(graphPath, 'utf8')) as { edges: Array<{ a: string; b: string }> };
+        assert.ok(hasEdge(graph.edges, 'op:konjic:sitnik', 'op:konjic:ljuta'), 'real graph must contain Sitnik-Ljuta adjacency');
+        assert.ok(hasEdge(graph.edges, 'op:konjic:ljuta', 'op:konjic:glavaticevo_2'), 'real graph must contain Ljuta-Glavaticevo adjacency');
+        assert.ok(!hasEdge(graph.edges, 'op:konjic:bijela_2', 'op:konjic:ljuta'), 'real graph must not contain Bijela-Ljuta adjacency');
+
+        const startupPath = join(repoRoot, 'data', 'derived', 'startup', 'apr_1992_initial_save.json');
+        const startup = JSON.parse(readFileSync(startupPath, 'utf8')) as {
+            political: { political_controllers: Record<string, string> };
+        };
+        assert.equal(startup.political.political_controllers['op:konjic:sitnik'], 'RS');
+
+        const withdrawalState = makeState(0);
+        spawnJnaPhantomBrigades(withdrawalState);
+        keepOnlyPhantoms(withdrawalState, ['jna_konjic_south_tg']);
+        addReceivingBrigade(withdrawalState, {
+            corps_id: 'jna_herzegovina_command' as FormationId,
+            location_osid: 'op:konjic:sitnik',
+        });
+        const brigadeBefore = JSON.stringify(withdrawalState.military.formations!['rs_foa_brigade']!.composition);
+        withdrawalState.meta.turn = 6;
+        const events = processJnaWithdrawals(withdrawalState);
+
+        assert.equal(events.length, 1);
+        assert.equal(withdrawalState.military.formations!['jna_konjic_south_tg'], undefined);
+        assert.equal(withdrawalState.military.corps_equipment_reserve, undefined);
+        assert.equal(JSON.stringify(withdrawalState.military.formations!['rs_foa_brigade']!.composition), brigadeBefore);
     });
 });

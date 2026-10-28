@@ -702,18 +702,22 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 staging_osid: 'op:nevesinje:sopilja',
             },
             {
-                // Southern Konjic — local Serb TO takes Glavatičevo/Ljuta salient
-                // (BB2 p.514: VRS held this area throughout). JNA phantom only.
+                // Southern Konjic — local Serb TO opens east from Sitnik toward
+                // Ljuta, then Glavatičevo. Route orientation and sequence are
+                // calibrated model inference: BB2 PDF 514 / printed 495 describes
+                // the 1994 Serb-held Konjic/Glavatičevo line, not this April 1992
+                // TO axis. Real contact-graph edges are Sitnik→Ljuta→Glavatičevo
+                // (there is no Bijela→Ljuta edge). JNA phantom only.
                 axis_id: 'konjic_south',
                 name: 'Konjic South',
                 brigades: [
                     'jna_konjic_south_tg',
                 ],
                 objectives: [
-                    'op:konjic:glavaticevo_2',
                     'op:konjic:ljuta',
+                    'op:konjic:glavaticevo_2',
                 ],
-                staging_osid: 'op:konjic:bijela_2',
+                staging_osid: 'op:konjic:sitnik',
             },
         ],
     },
