@@ -9,6 +9,30 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — January 181st Mountain opening OSID Lokve→Pazarić — NOT ADOPTED
+
+One bounded authored opening-distribution experiment on the retained 181st Mountain seed trial:
+only `arbih_181st_mountain.home_osid` changes `op:hadzici:lokve`→`op:hadzici:pazaric`. Name,
+`home_mun` `hadzici`, `home_settlement` `Pazarić`, HQ, date 0, cohesion 45, equipment, corps,
+personnel 1200, and every other field and unit are unchanged. No Tošići operation, no new
+placement machinery; roster and b325/catalog 31 unchanged. Basis: the 500→1200 trial did not make
+the unit a partner; at T28 it was only 225 (<500) at Kijevo RS with no new painted losses. Actual
+T1 Prsten/Ilidža lost 686 on the 181st as a reactive distance-1 defender from Lokve (1200→508),
+not a clamp/cap bug; the 26 Kijevo battle then reduced the rest. Raising the seed further would
+stay blind. The existing row already names Pazarić; official `operational_settlements` has distinct
+Pazarić (+12) `op:hadzici:pazaric` (representative S142620, municipality Hadžići) while Lokve (+3)
+is S142522 without Pazarić. Contact graph: Lokve→Ilidža is one edge; Pazarić→Lokve→Ilidža is two.
+This is a calibrated opening assembly choice within the existing named home — not a claim that the
+old forward placement was a historical error and not an exact attested deployment; no historical
+source is claimed beyond the current row/map, and gameplay must still qualify. Actual movement or
+army allocation may override; no engine machinery is added if it does. Codex will officially
+generate/check and verify actual native initial position and T1 non-reaction/survival, then the 28
+availability/Kijevo/preservation screen. Gate: >=500 active/supplied surviving local force and
+Kijevo RS before any new mission/January. No initial or pre-28 parity claim; the distribution
+intentionally changes T1 and may affect other defenders. Retains the failed 500→1200 seed trial,
+the original target, all correctness/origin/allied/Orašje evidence, and the b325/706/health-3/31
+anchors.
+
 ## 2026-10-28 — January 181st Mountain personnel 500→1200 — NOT ADOPTED
 
 One bounded authored availability experiment: only `arbih_181st_mountain.initial_personnel`
