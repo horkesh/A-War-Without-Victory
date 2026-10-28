@@ -9,6 +9,14 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — Gorazde model restored to healthy 851st-only Kamen ablation — NOT ADOPTED
+
+Separate the verified committed-support correctness repair (badcb3774) from the rejected
+joint 831st/851st and Donje-follow-on authored trials. Restored the healthy 851st-only
+Kamen-only block, minima 1, same date 23 / Bacci; rejected receipts preserved. This is an
+unadopted authored-data ablation only. Tests, January health, and final qualification remain
+pending; no success claim.
+
 ## 2026-10-28 — Coordination committed-support forecast and emitted-order veto — NOT ADOPTED
 
 Correctness repair, not history, strength, force-data, damage, or threshold change.
