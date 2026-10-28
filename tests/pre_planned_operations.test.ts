@@ -1056,7 +1056,7 @@ describe('pre-planned operations', () => {
     it('owns the approved KRUG lineage roster under 1st Corps without rejected participants', () => {
         const circle = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
         assert.ok(circle);
-        assert.equal(circle!.prestage_from, 14);
+        assert.equal(circle!.prestage_from, 16);
         assert.equal(circle!.enqueue_from, undefined);
         assert.equal(circle!.axes[0]?.minimum_forward_brigades, undefined);
         const state = makeMinimalState();
@@ -2485,10 +2485,10 @@ describe('pre-planned operations', () => {
         );
     });
 
-    it('pre-stages the existing KRUG roster only from turn 14 without teleporting', () => {
+    it('pre-stages the existing KRUG roster only from turn 16 without teleporting', () => {
         const state = makeMinimalState();
         state.meta.player_faction = 'RS';
-        state.meta.turn = 13;
+        state.meta.turn = 15;
         const command = state.military.corps_command!.arbih_1st_corps!;
         command.active_operations = [];
         command.queued_operations = ['Operation Circle'];
@@ -2507,11 +2507,11 @@ describe('pre-planned operations', () => {
             assert.equal(state.military.formations![brigadeId]!.location_osid, remoteLocations[brigadeId]);
         }
 
-        state.meta.turn = 14;
+        state.meta.turn = 16;
         prestageDeferredPrePlannedElites(state);
 
         const definition = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
-        assert.equal(definition?.prestage_from, 14);
+        assert.equal(definition?.prestage_from, 16);
         for (const brigadeId of Object.keys(remoteLocations).sort()) {
             assert.equal(
                 state.military.formations![brigadeId]!.location_osid,
@@ -2549,12 +2549,12 @@ describe('pre-planned operations', () => {
         // The hold must work without changing startup queue chronology.
         const definition = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
         assert.equal(definition?.enqueue_from, undefined);
-        assert.equal(definition?.prestage_from, 14);
+        assert.equal(definition?.prestage_from, 16);
 
-        state.meta.turn = 13;
+        state.meta.turn = 15;
         assert.deepEqual([...getQueuedDatedPrestageBrigadeIds(state)].sort(), []);
 
-        state.meta.turn = 14;
+        state.meta.turn = 16;
         const reserved = [...getQueuedDatedPrestageBrigadeIds(state)].sort();
         assert.deepEqual(reserved, [...arrived].sort());
         for (const brigadeId of arrived) {

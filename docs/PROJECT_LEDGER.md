@@ -9,6 +9,24 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — Circle prestage timing ablation at turn 16
+
+Unadopted calibration ablation (branch codex/january-circle16-hold-11ef62 at 11ef62e).
+Operation Circle `prestage_from` moves 14 -> 16, with its adjacent timing comment changed from
+four turns early to two. `available_from` 18, `planning_duration` 4, objectives, the approved
+801/802/831 roster, and all other definitions and engine behavior unchanged. Ownership repair
+preserved: `getQueuedDatedPrestageBrigadeIds` still excludes manual player factions and releases
+the reservation with the queue; no `enqueue_from`/all-ready field and no source fix.
+
+Reason: retained-source turn19->20 full-state/report replay showed the lawful
+distribute-brigades-to-front pass moving 802nd Osjecani->Citluk after Circle completes, leaving
+it unowned; the measured 705 fallback pre-staged at 16 while the 802nd later reached Osjecani and
+captured Kamen. Regression expectations move to the turn-16 boundary (before 16 no reserve or
+march; from 16 the arrived bot roster stays reserved while the queue waits), with player and
+queue-release controls retained. No legal redistribution disabled and no control forced. No
+trajectory/adoption claim yet; Codex runs the affected tests, type/startup checks, then the
+24-turn screen.
+
 ## 2026-10-27 — Zero-sector rescue honors donor commitments
 
 Diagnosis: exact same-source runtime/report replay turn19→20 traced the
