@@ -45,12 +45,33 @@ function activeAssignedDefenseCount(
     return count;
 }
 
+function hasPhysicalCombatDefender(
+    sector: Pick<CorpsFrontSector, 'assigned_brigade_ids'>,
+    targetOsid: string,
+    formations?: Record<FormationId, FormationState>,
+): boolean {
+    if (!formations) return false;
+    for (const brigadeId of sector.assigned_brigade_ids) {
+        const formation = formations[brigadeId];
+        if (formation?.status !== 'active') continue;
+        if (formation.kind !== 'brigade') continue;
+        const lifecycleStatus = (formation as FormationState & { lifecycle_status?: string }).lifecycle_status;
+        if (lifecycleStatus === 'forming' || lifecycleStatus === 'destroyed') continue;
+        if (formation.location_osid === targetOsid) return true;
+    }
+    return false;
+}
+
 function preferLiveDefendedSector(
     current: CorpsFrontSector | undefined,
     candidate: CorpsFrontSector,
+    targetOsid: string,
     formations?: Record<FormationId, FormationState>,
 ): CorpsFrontSector {
     if (!current) return candidate;
+    const currentPhysical = hasPhysicalCombatDefender(current, targetOsid, formations);
+    const candidatePhysical = hasPhysicalCombatDefender(candidate, targetOsid, formations);
+    if (currentPhysical !== candidatePhysical) return candidatePhysical ? candidate : current;
     const currentCount = activeAssignedDefenseCount(current, formations);
     const candidateCount = activeAssignedDefenseCount(candidate, formations);
     if (currentCount === 0 && candidateCount > 0) return candidate;
@@ -113,7 +134,9 @@ export function getSectorFrontOsids(sector: CorpsFrontSector): Set<string> {
  * sector instead of the defender's — making the predictor treat the attacker's
  * own brigades as defenders (blocking attacks against truly undefended OSIDs).
  *
- * Returns the first matching sector in deterministic sector_id order, or null.
+ * Returns the matching sector, preferring one with an eligible active assigned
+ * combat brigade physically at the target, then falling back to deterministic
+ * sector_id order, or null.
  */
 export function findSectorForEnemyOsid(
     state: GameState,
@@ -130,7 +153,7 @@ export function findSectorForEnemyOsid(
         if (defenderFaction && sector.faction !== defenderFaction) continue;
         for (const sub of sector.sub_segments) {
             if (sub.friendly_osids.includes(targetOsid)) {
-                match = preferLiveDefendedSector(match, sector, formations);
+                match = preferLiveDefendedSector(match, sector, targetOsid, formations);
             }
         }
     }
@@ -141,7 +164,7 @@ export function findSectorForEnemyOsid(
         const sector = sectors[sid]!;
         if (defenderFaction && sector.faction !== defenderFaction) continue;
         if (sector.territory_osids?.includes(targetOsid)) {
-            match = preferLiveDefendedSector(match, sector, formations);
+            match = preferLiveDefendedSector(match, sector, targetOsid, formations);
         }
     }
     return match ?? null;
@@ -151,6 +174,7 @@ export function buildSectorDefenseByFactionAndOsid(state: GameState): SectorDefe
     const sectors = state.military.corps_front_sectors;
     const byFaction: SectorDefenseByFactionAndOsid = new Map();
     if (!sectors) return byFaction;
+    const frontClaimed = new Map<string, Set<string>>();
 
     const setBest = (sector: CorpsFrontSector, osid: string): void => {
         if (!sector.faction) return;
@@ -159,18 +183,30 @@ export function buildSectorDefenseByFactionAndOsid(state: GameState): SectorDefe
             byOsid = new Map();
             byFaction.set(sector.faction, byOsid);
         }
-        byOsid.set(osid, preferLiveDefendedSector(byOsid.get(osid), sector, state.military.formations));
+        byOsid.set(osid, preferLiveDefendedSector(byOsid.get(osid), sector, osid, state.military.formations));
     };
 
     for (const sid of Object.keys(sectors).sort(strictCompare)) {
         const sector = sectors[sid]!;
         for (const sub of sector.sub_segments) {
-            for (const osid of sub.friendly_osids) setBest(sector, osid);
+            for (const osid of sub.friendly_osids) {
+                setBest(sector, osid);
+                if (!sector.faction) continue;
+                let claimed = frontClaimed.get(sector.faction);
+                if (!claimed) {
+                    claimed = new Set();
+                    frontClaimed.set(sector.faction, claimed);
+                }
+                claimed.add(osid);
+            }
         }
     }
     for (const sid of Object.keys(sectors).sort(strictCompare)) {
         const sector = sectors[sid]!;
-        for (const osid of sector.territory_osids ?? []) setBest(sector, osid);
+        for (const osid of sector.territory_osids ?? []) {
+            if (sector.faction && frontClaimed.get(sector.faction)?.has(osid)) continue;
+            setBest(sector, osid);
+        }
     }
 
     return byFaction;
