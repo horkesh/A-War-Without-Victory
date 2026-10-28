@@ -9,6 +9,24 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — Kalinovik Brigade initial staffing 1000→1500 — NOT ADOPTED
+
+Trial: one semantic field only, `rs_kalinovik_brigade.initial_personnel` 1000→1500.
+Cap 2000 (max/default), cohesion 67, `available_from` 0, home/corps/equipment/composition
+unchanged; 851st at 1250, 181st seed 500 at Pazarić, and the Foča/Ljuta axis stay as parent.
+No new cap field, bonus, controller override, threshold, or unit. Staffing bracket is model
+calibration, not an attested historical strength.
+
+Evidence: 60a rejected Ljuta with no new painted loss at 28 but health 4 after the 181st
+recovered to Delijaši; the 500 seed kept the 181st alive and supplied at Trnovo 28, while
+broader native allocation put a stronger 4th Muslim defender at Ljuta. Actual T11 Gacko/
+Kalinovik combined 1774 men produced only ratio 1.730 with no capture, then losses and a
+450-man defender prevented gain. Hypothesis: one 500 staffing bracket for the existing
+Kalinovik concentration restores normal capture with margin via engine basePower scaling
+rather than weakened rules; no guaranteed ratio claimed. Cheap-28 screen must preserve
+Kamen/Ljuta/all painted plus an active, viable-supply 181st; 39 and full health remain
+mandatory. No successor claim.
+
 ## 2026-10-28 — January 181st Mountain home-OSID placement, Lokve→Pazarić — NOT ADOPTED
 
 Trial: one semantic field only, `arbih_181st_mountain.home_osid` `op:hadzici:lokve`→

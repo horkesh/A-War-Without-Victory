@@ -5882,7 +5882,7 @@
           "op:trnovo:kijevo_2",
           "op:trnovo:trnovo"
         ],
-        "threat_ratio": 212.36391373691143
+        "threat_ratio": 318.5458706053671
       },
       "sector:arbih_4th_corps:1": {
         "assigned_brigade_ids": [],
@@ -11589,7 +11589,7 @@
           "rs_kalinovik_brigade"
         ],
         "corps_id": "vrs_herzegovina",
-        "defensive_power": 18.869387755102043,
+        "defensive_power": 28.304081632653062,
         "density": 0.07142857142857142,
         "edge_ids": [
           "op:foca:izbisno__op:kalinovik:varos_2",
@@ -27505,7 +27505,7 @@
           "last_supplied_turn": null
         },
         "origin_mun": "kalinovik",
-        "personnel": 1000,
+        "personnel": 1500,
         "readiness": "active",
         "status": "active",
         "tags": [
@@ -29436,7 +29436,7 @@
       },
       "kalinovik:RS": {
         "available": 0,
-        "committed": 1000,
+        "committed": 1500,
         "exhausted": 0,
         "faction": "RS",
         "fatigue": 0,
