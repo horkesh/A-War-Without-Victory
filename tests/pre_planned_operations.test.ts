@@ -814,7 +814,7 @@ describe('pre-planned operations', () => {
     });
 
     it('defines the current pre-planned operation catalog', () => {
-        assert.equal(_ALL_PRE_PLANNED.length, 30);
+        assert.equal(_ALL_PRE_PLANNED.length, 31);
         assert.deepEqual(
             _ALL_PRE_PLANNED.map((def) => def.name),
             [
@@ -846,6 +846,7 @@ describe('pre-planned operations', () => {
                 'Prozor–Rama Line Counterattack',
                 'Visoko–Breza Line Clearing',
                 'Operation Circle',
+                'Gorazde Perimeter Follow-On',
                 'Srebrenica–Cerska Link-Up',
                 'Maglaj Local Counterattack',
                 'Central Bosnia Counteroffensive',
@@ -1084,6 +1085,102 @@ describe('pre-planned operations', () => {
             'arbih_109th_mountain',
         ]);
         assert.equal(operation!.participating_brigades.some((brigadeId) => rejected.has(brigadeId)), false);
+    });
+
+    it('queues the Goražde follow-on from turn 26 without reserving it early', () => {
+        const definition = _ALL_PRE_PLANNED.find((def) => def.name === 'Gorazde Perimeter Follow-On');
+        assert.ok(definition);
+        assert.equal(definition!.corps, 'arbih_1st_corps');
+        assert.equal(definition!.faction, 'RBiH');
+        assert.equal(definition!.available_from, 26);
+        assert.equal(definition!.enqueue_from, 26);
+        assert.equal(definition!.staging_osid, 'op:gorazde:hrancici');
+        assert.equal(definition!.min_attack_outcome, 'victory');
+        assert.equal(definition!.planning_duration, 6);
+        assert.equal(definition!.execution_attack_power_mult, undefined);
+        assert.deepEqual(definition!.axes, [{
+            axis_id: 'gorazde_foca_perimeter',
+            name: 'Gorazde-Foca Perimeter',
+            brigades: ['arbih_801st_light', 'arbih_802nd_light'],
+            objectives: ['op:foca:donje_zesce'],
+            staging_osid: 'op:gorazde:hrancici',
+            minimum_staged_brigades: 2,
+            minimum_forward_brigades: 2,
+        }]);
+
+        const state = makeMinimalState();
+        const command = state.military.corps_command!.arbih_1st_corps!;
+        command.active_operations = [];
+        state.meta.turn = 25;
+        prestageDeferredPrePlannedElites(state);
+        assert.equal(command.queued_operations?.includes(definition!.name) ?? false, false);
+
+        // The dated entry is not a head reservation before enqueue_from.
+        command.queued_operations = [definition!.name];
+        assert.ok(!getHeadQueuedPrePlannedBrigadeIds(state).has('arbih_801st_light'));
+        assert.ok(!getHeadQueuedPrePlannedBrigadeIds(state).has('arbih_802nd_light'));
+
+        // Force the dated consumer to create the entry from nothing at turn 26.
+        delete command.queued_operations;
+
+        state.meta.turn = 26;
+        prestageDeferredPrePlannedElites(state);
+        prestageDeferredPrePlannedElites(state);
+        assert.equal(command.queued_operations!.filter((name) => name === definition!.name).length, 1);
+        const reserved = getHeadQueuedPrePlannedBrigadeIds(state);
+        assert.ok(reserved.has('arbih_801st_light'));
+        assert.ok(reserved.has('arbih_802nd_light'));
+    });
+
+    it('injects the follow-on through the real queue phase only after Circle releases slot 0', async () => {
+        const definition = _ALL_PRE_PLANNED.find((def) => def.name === 'Gorazde Perimeter Follow-On');
+        assert.ok(definition);
+        const state = makeMinimalState();
+        const command = state.military.corps_command!.arbih_1st_corps!;
+        state.meta.turn = 18;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Circle'];
+        assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), true);
+        assert.ok(command.active_operations.some((operation) => operation.name === 'Operation Circle'));
+
+        state.meta.turn = 26;
+        command.queued_operations = [definition!.name];
+        const step = warPhases.find((phase) => phase.name === 'inject-queued-operations');
+        assert.ok(step);
+        await step.run({ state, input: {}, report: {} } as any);
+
+        // An active Circle in slot 0 is not bypassed, even at the follow-on's date.
+        assert.equal(command.active_operations.some((operation) => operation.name === definition!.name), false);
+        assert.deepEqual(command.queued_operations, [definition!.name]);
+
+        // Simulated lifecycle-removal boundary: phase='recovery' alone must not
+        // release slot 0, and does not claim to. The old is_pre_planned entry is
+        // removed explicitly below, as the lifecycle would remove it.
+        const circle = command.active_operations.find((operation) => operation.name === 'Operation Circle');
+        assert.ok(circle);
+        circle!.phase = 'recovery';
+        await step.run({ state, input: {}, report: {} } as any);
+        assert.equal(command.active_operations.some((operation) => operation.name === definition!.name), false);
+        assert.deepEqual(command.queued_operations, [definition!.name]);
+
+        command.active_operations.splice(command.active_operations.indexOf(circle!), 1);
+        await step.run({ state, input: {}, report: {} } as any);
+
+        const followOn = command.active_operations.find((operation) => operation.name === definition!.name);
+        assert.ok(followOn);
+        assert.equal(command.queued_operations, undefined);
+        assert.equal(followOn!.type, 'sector_attack');
+        assert.equal(followOn!.occupies_on_victory ?? true, true);
+        assert.equal(followOn!.min_attack_outcome, 'victory');
+        assert.equal(followOn!.execution_attack_power_mult, undefined);
+        assert.equal(followOn!.planning_duration, 6);
+        assert.deepEqual(followOn!.participating_brigades, ['arbih_801st_light', 'arbih_802nd_light']);
+        assert.deepEqual(followOn!.axes?.[0]?.assigned_brigades, ['arbih_801st_light', 'arbih_802nd_light']);
+        assert.equal(followOn!.axes?.[0]?.minimum_staged_brigades, 2);
+        assert.equal(followOn!.axes?.[0]?.minimum_forward_brigades, 2);
+        assert.deepEqual(followOn!.objectives, ['op:foca:donje_zesce']);
+        assert.equal(state.military.formations!.arbih_801st_light!.corps_id, 'arbih_1st_corps');
+        assert.equal(state.military.formations!.arbih_802nd_light!.corps_id, 'arbih_1st_corps');
     });
 
     it('keeps an active legacy Circle roster across save/load while a queued name consumes the current KRUG definition deterministically', async () => {

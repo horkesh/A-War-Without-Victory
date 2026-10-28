@@ -1333,6 +1333,27 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
+        // Calibration-authored local follow-on, not a newly claimed historical operation.
+        // Keep KRUG's roster, date and objective unchanged; queue only after its window.
+        corps: 'arbih_1st_corps',
+        faction: 'RBiH',
+        name: 'Gorazde Perimeter Follow-On',
+        available_from: 26,
+        enqueue_from: 26,
+        staging_osid: 'op:gorazde:hrancici',
+        min_attack_outcome: 'victory',
+        planning_duration: 6,
+        axes: [{
+            axis_id: 'gorazde_foca_perimeter',
+            name: 'Gorazde-Foca Perimeter',
+            brigades: ['arbih_801st_light', 'arbih_802nd_light'],
+            objectives: ['op:foca:donje_zesce'],
+            staging_osid: 'op:gorazde:hrancici',
+            minimum_staged_brigades: 2,
+            minimum_forward_brigades: 2,
+        }],
+    },
+    {
         // Owner-directed chronology: the Cerska/Srebrenica contact is established
         // during summer 1992 and must still be present at the January checkpoint.
         // This is deliberately an ordinary operation: no scripted control change,
