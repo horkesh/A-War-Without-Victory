@@ -1362,7 +1362,9 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                 axis_id: 'gorazde_local_counterattack',
                 name: 'Local Gorazde Counterattack',
                 brigades: ['arbih_851st_vitezka_liberation'],
-                objectives: ['op:gorazde:kamen'],
+                // Follow-on calibrated model inference, not attested history:
+                // continue along the same axis to the adjacent RS-held corridor gap.
+                objectives: ['op:gorazde:kamen', 'op:foca:donje_zesce'],
                 staging_osid: 'op:gorazde:bacci',
             },
         ],

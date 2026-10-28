@@ -3180,7 +3180,10 @@ describe('Gorazde Local Counterattack (Model)', () => {
         assert.equal(operation.axes[0]?.axis_id, 'gorazde_local_counterattack');
         assert.equal(operation.axes[0]?.name, 'Local Gorazde Counterattack');
         assert.deepEqual(operation.axes[0]?.brigades, [brigadeId]);
-        assert.deepEqual(operation.axes[0]?.objectives, ['op:gorazde:kamen']);
+        assert.deepEqual(operation.axes[0]?.objectives, [
+            'op:gorazde:kamen',
+            'op:foca:donje_zesce',
+        ]);
         assert.equal(operation.axes[0]?.staging_osid, 'op:gorazde:bacci');
         for (const excluded of [
             'prestage_from',
@@ -3206,6 +3209,7 @@ describe('Gorazde Local Counterattack (Model)', () => {
         formation.location_osid = 'op:gorazde:bacci';
         state.political.political_controllers!['op:gorazde:bacci'] = 'RBiH';
         state.political.political_controllers!['op:gorazde:kamen'] = 'RS';
+        state.political.political_controllers!['op:foca:donje_zesce'] = 'RS';
 
         prestageDeferredPrePlannedElites(state);
 
@@ -3225,7 +3229,10 @@ describe('Gorazde Local Counterattack (Model)', () => {
         assert.deepEqual(operation!.participating_brigades, [brigadeId]);
         assert.equal(operation!.axes?.length, 1);
         assert.deepEqual(operation!.axes?.[0]?.assigned_brigades, [brigadeId]);
-        assert.deepEqual(operation!.axes?.[0]?.objectives, ['op:gorazde:kamen']);
+        assert.deepEqual(operation!.axes?.[0]?.objectives, [
+            'op:gorazde:kamen',
+            'op:foca:donje_zesce',
+        ]);
         assert.equal(operation!.axes?.[0]?.staging_osid, 'op:gorazde:bacci');
         for (const circleBrigade of [
             'arbih_801st_light',
@@ -3248,10 +3255,12 @@ describe('Gorazde Local Counterattack (Model)', () => {
         formation.location_osid = 'op:gorazde:bacci';
         state.political.political_controllers!['op:gorazde:bacci'] = 'RBiH';
         state.political.political_controllers!['op:gorazde:kamen'] = 'RS';
+        state.political.political_controllers!['op:foca:donje_zesce'] = 'RS';
 
         assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), false);
         assert.equal(command.active_operations.length, 0);
         assert.equal(state.political.political_controllers!['op:gorazde:kamen'], 'RS');
+        assert.equal(state.political.political_controllers!['op:foca:donje_zesce'], 'RS');
     });
 
     it('still honours an explicit RBiH decline and withholds the model operation', () => {
@@ -3263,6 +3272,7 @@ describe('Gorazde Local Counterattack (Model)', () => {
         command.queued_operations = [name];
         state.political.political_controllers!['op:gorazde:bacci'] = 'RBiH';
         state.political.political_controllers!['op:gorazde:kamen'] = 'RS';
+        state.political.political_controllers!['op:foca:donje_zesce'] = 'RS';
         state.meta.pending_proposal_reviews = [{
             id: 'PROP_0_historical_op_preplanned_arbih_1st_corps_gorazde_local_counterattack',
             turn: state.meta.turn,
@@ -3279,5 +3289,6 @@ describe('Gorazde Local Counterattack (Model)', () => {
         assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), false);
         assert.equal(command.active_operations.length, 0);
         assert.equal(state.political.political_controllers!['op:gorazde:kamen'], 'RS');
+        assert.equal(state.political.political_controllers!['op:foca:donje_zesce'], 'RS');
     });
 });

@@ -9,6 +9,22 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — Gorazde Local Counterattack (Model): Donje Žešće follow-on — NOT ADOPTED
+
+Calibrated-sequence trial, not attested history: append `op:foca:donje_zesce`
+after `op:gorazde:kamen` on the sole `gorazde_local_counterattack` axis. That
+appended objective is the entire production change; the 851st roster, 1st Corps,
+Bacci staging, turn-23 timing, minimum viable/assembled 1, and every other
+operation (including Foca/Glavatičevo and Ljuta) are unchanged. Rationale is the
+owner-prioritized corridor gap: after the retained 95379 Kamen capture the
+existing force already sits on a normal route adjacent to Donje Žešće, making a
+follow-on with the same operation the cheapest lawful sequence hypothesis. This
+is inference, not a sourced 851st action, headcount, or date. Current 95379
+production cold 39-pair 707/712, 31 anchors, health PASS 3, all 9 artifacts
+exact are preserved expectations, not yet re-proven. Actual 32+39 painted,
+health, anchor, determinism, aggregate, and native proofs still required; no
+qualification claim and no guaranteed capture.
+
 ## 2026-10-28 — Operation Foca: Glavatičevo follow-on on the ordinary Kalinovik axis — NOT ADOPTED
 
 Calibrated-sequence trial, not an attested historical order or date: append
