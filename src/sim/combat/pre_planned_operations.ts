@@ -680,6 +680,10 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         faction: 'RS',
         name: 'Operation Herzegovina',
         staging_osid: 'op:nevesinje:krekovi_2',
+        // Calibrated initial concentration: let the existing planning-time prestage
+        // order the authored columns along their owned edge before execution. Model
+        // inference only — not an attested historical route.
+        prestage_from: 0,
         min_attack_outcome: 'repulsed',
         axes: [
             {

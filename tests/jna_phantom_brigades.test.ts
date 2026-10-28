@@ -15,7 +15,7 @@ import {
     _ALL_PHANTOM_DEFS,
     _EQUIPMENT_CEILINGS,
 } from '../src/sim/combat/jna_phantom_brigades.js';
-import { _ALL_PRE_PLANNED } from '../src/sim/combat/pre_planned_operations.js';
+import { _ALL_PRE_PLANNED, prestageDeferredPrePlannedElites } from '../src/sim/combat/pre_planned_operations.js';
 import { CURRENT_SCHEMA_VERSION, type FormationId, type FormationState, type FactionId, type GameState } from '../src/state/game_state.js';
 
 function makeState(turn: number): GameState {
@@ -488,6 +488,7 @@ describe('Konjic South ordinary march', () => {
         assert.ok(operation, 'Operation Herzegovina must remain in the pre-planned catalog');
         const axis = operation!.axes.find((candidate) => candidate.axis_id === 'konjic_south');
         assert.ok(axis, 'Konjic South axis must remain in Operation Herzegovina');
+        assert.equal((operation as { prestage_from?: number }).prestage_from, 0);
 
         assert.equal(phantom.location_osid, 'op:konjic:bijela_2');
         assert.equal(axis!.staging_osid, 'op:konjic:sitnik');
@@ -519,6 +520,27 @@ describe('Konjic South ordinary march', () => {
         };
         assert.equal(startup.political.political_controllers['op:konjic:bijela_2'], 'RS');
         assert.equal(startup.political.political_controllers['op:konjic:sitnik'], 'RS');
+
+        // Turn-0 prestage: with the owning edge held and both objectives still
+        // hostile, the authored Konjic South column is ordered to Sitnik without
+        // any capture or relocation of the actor.
+        state.political.political_controllers!['op:konjic:bijela_2'] = 'RS' as FactionId;
+        state.political.political_controllers!['op:konjic:sitnik'] = 'RS' as FactionId;
+        state.political.political_controllers!['op:konjic:ljuta'] = 'RBiH' as FactionId;
+        state.political.political_controllers!['op:konjic:glavaticevo_2'] = 'RBiH' as FactionId;
+        state.political.political_controllers!['op:mostar:vranjevici_2'] = 'RBiH' as FactionId;
+        state.political.political_controllers!['op:mostar:kruzanj_2'] = 'RBiH' as FactionId;
+
+        prestageDeferredPrePlannedElites(state);
+
+        const movementOrders = state.military.brigade_movement_orders ?? {};
+        assert.deepEqual(movementOrders['jna_konjic_south_tg'], {
+            destination_sids: ['op:konjic:sitnik'],
+            stance: 'column',
+            owner: 'authored_preplanned',
+        });
+        assert.equal(state.military.formations!['jna_konjic_south_tg']!.location_osid, 'op:konjic:bijela_2');
+        assert.equal(movementOrders['jna_nevesinje_garrison'], undefined);
 
         const withdrawalState = makeState(0);
         spawnJnaPhantomBrigades(withdrawalState);

@@ -9,6 +9,18 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — Konjic South prestage-from-zero trial — NOT ADOPTED
+
+Calibration trial only; no result claim, build, commit, push, or adoption. The rejected d27
+ordinary-march orientation produced no assault and preserved Mostar. One production field
+is added: Operation Herzegovina parent `prestage_from: 0` (before the unchanged
+`min_attack_outcome`), letting the existing prestage machinery emit the authored Konjic
+South column order along its owned Bijela→Sitnik edge at planning time. Both axes, rosters,
+stages, Ljuta-first route, original Bijela spawn, 800 / withdraw 6 / no handoff, and every
+engine threshold are unchanged. The test pins the exact turn-0 order and that the actor is
+not teleported. The hypothesis still needs the actual 6-turn screen, the January run, and
+the gates.
+
 ## 2026-10-28 — Konjic South ordinary-march orientation — NOT ADOPTED
 
 Calibration trial only; no result claim, build, commit, push, or adoption. One production

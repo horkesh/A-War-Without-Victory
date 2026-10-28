@@ -1135,6 +1135,13 @@
     "bot_priority_shifts": [],
     "brigade_front_assignment": {},
     "brigade_movement_orders": {
+      "jna_konjic_south_tg": {
+        "destination_sids": [
+          "op:konjic:sitnik"
+        ],
+        "owner": "authored_preplanned",
+        "stance": "column"
+      },
       "rs_bilea_brigade": {
         "destination_sids": [
           "op:gacko:izgori"
