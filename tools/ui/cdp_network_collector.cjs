@@ -314,7 +314,14 @@ function startCdpNetworkCollection(options) {
       stopForOverflow('event-rows', caps.eventRows, artifact.events.length + 1);
       return false;
     }
-    artifact.events.push({ observer_session_id: observerSessionId, sequence: nextSequence(), ...row });
+    const sequenceNumber = nextSequence();
+    const observedAtMs = now();
+    artifact.events.push({
+      observer_session_id: observerSessionId,
+      sequence: sequenceNumber,
+      ...row,
+      observed_at_ms: Number.isFinite(observedAtMs) ? observedAtMs : null,
+    });
     return true;
   }
 
@@ -369,6 +376,7 @@ function startCdpNetworkCollection(options) {
       request_id: requestId,
       generation,
       timestamp: Number.isFinite(event?.timestamp) ? event.timestamp : null,
+      wall_time_s: Number.isFinite(event?.wallTime) ? event.wallTime : null,
       url: url.projection,
       method,
       resource_type: resourceType,

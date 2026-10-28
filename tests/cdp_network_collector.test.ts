@@ -838,3 +838,81 @@ test('permanent request ID history stops at the existing event-row bound', async
     assert.equal(artifact.overflow_receipts[0].limit, 2);
 });
 
+test('request rows expose wall_time_s from their own wallTime and every evidence row exposes injected observed_at_ms', async () => {
+    const session = new FakeSession();
+    let clock = 1_700_000_000_000;
+    const collector = await readyCollector(session, 'run/RS/evidence-clock.json', { now: () => clock });
+    const emitAt = (event: string, payload: unknown, observedAtMs: number) => {
+        clock = observedAtMs;
+        session.emit(event, payload);
+    };
+
+    emitAt('Network.requestWillBeSent', requestEvent({ requestId: 'cdp-request-1', timestamp: 10, wallTime: 1_700_000_000.25 }), 1_700_000_000_000);
+    emitAt('Network.responseReceived', responseEvent({ requestId: 'cdp-request-1', timestamp: 11 }), 1_700_000_000_001);
+    emitAt('Network.loadingFailed', failureEvent({ requestId: 'cdp-request-1', timestamp: 12 }), 1_700_000_000_002);
+    emitAt('Network.requestWillBeSent', requestEvent({ requestId: 'cdp-request-2', timestamp: 20, wallTime: 1_700_000_002.5 }), 1_700_000_000_003);
+    emitAt('Network.loadingFinished', { requestId: 'cdp-request-2', timestamp: 21, encodedDataLength: 7 }, 1_700_000_000_004);
+    clock = 1_700_000_000_100;
+    const artifact = await collector.closeAndFlush();
+
+    assert.strictEqual(artifact.status, 'complete');
+    assert.strictEqual(artifact.non_admitting, true);
+    assert.strictEqual(artifact.session.cross_stream_mapping, 'none');
+    assert.deepStrictEqual(artifact.events.map((row: any) => row.kind), ['request', 'response', 'failure', 'request', 'finish']);
+    assert.deepStrictEqual(artifact.events.map((row: any) => row.timestamp), [10, 11, 12, 20, 21]);
+    assert.deepStrictEqual(artifact.events.map((row: any) => row.observed_at_ms), [
+        1_700_000_000_000,
+        1_700_000_000_001,
+        1_700_000_000_002,
+        1_700_000_000_003,
+        1_700_000_000_004,
+    ]);
+    const requests = artifact.events.filter((row: any) => row.kind === 'request');
+    assert.deepStrictEqual(requests.map((row: any) => row.wall_time_s), [1_700_000_000.25, 1_700_000_002.5]);
+    assert.strictEqual(artifact.events[0].request_id, 'cdp-request-1');
+    assert.strictEqual(artifact.events[3].request_id, 'cdp-request-2');
+    assert.strictEqual(
+        artifact.events.every((row: any) => row.observer_session_id === artifact.session.observer_session_id),
+        true,
+    );
+});
+
+test.each([
+    ['missing', { wallTime: undefined }],
+    ['NaN', { wallTime: Number.NaN }],
+    ['infinite', { wallTime: Number.POSITIVE_INFINITY }],
+    ['non-number', { wallTime: '1700000000.5' }],
+    ['null', { wallTime: null }],
+])('%s wallTime becomes null and is never inferred from the monotonic timestamp', async (_name, overrides) => {
+    const session = new FakeSession();
+    const collector = await readyCollector(session, `run/RS/wall-time-${_name}.json`);
+    session.emit('Network.requestWillBeSent', requestEvent({ timestamp: 10, ...overrides }));
+    const artifact = await collector.closeAndFlush();
+
+    const row = artifact.events[0];
+    assert.strictEqual(row.kind, 'request');
+    assert.strictEqual(row.timestamp, 10);
+    assert.strictEqual(row.wall_time_s, null);
+    assert.notStrictEqual(row.wall_time_s, row.timestamp);
+});
+
+test('non-finite or non-numeric injected now cannot invent observed_at_ms on any evidence row', async () => {
+    for (const unknownNow of [Number.NaN, Number.POSITIVE_INFINITY, '1700000000000'] as const) {
+        const session = new FakeSession();
+        let clock: unknown = unknownNow;
+        const collector = await readyCollector(session, `run/RS/observed-${String(unknownNow)}.json`, { now: () => clock });
+        session.emit('Network.requestWillBeSent', requestEvent({ timestamp: 10, wallTime: 1_700_000_000.25 }));
+        session.emit('Network.responseReceived', responseEvent({ timestamp: 11 }));
+        session.emit('Network.loadingFailed', failureEvent({ timestamp: 12 }));
+        session.emit('Network.requestWillBeSent', requestEvent({ requestId: 'cdp-request-2', timestamp: 20 }));
+        session.emit('Network.loadingFinished', { requestId: 'cdp-request-2', timestamp: 21, encodedDataLength: 1 });
+        clock = 1_700_000_000_000;
+        const artifact = await collector.closeAndFlush();
+
+        assert.deepStrictEqual(artifact.events.map((row: any) => row.kind), ['request', 'response', 'failure', 'request', 'finish']);
+        for (const row of artifact.events) {
+            assert.strictEqual(row.observed_at_ms, null);
+        }
+    }
+});
+

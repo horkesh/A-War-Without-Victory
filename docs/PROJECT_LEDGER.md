@@ -9,6 +9,16 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-28 — Native-audio/CDP evidence metadata diagnostic — NOT ADOPTED
+
+Observation-only diagnostic. The old RS134-event save/resume bytes and projection
+remain exact, but the native network gate fails with 3 ambient request aborts; the focused
+CDP reproduction fails 1 of those. The cached-206/canceled request has an
+unavailable body, so it is not proven benign. Added `wall_time_s`/`observed_at_ms`
+clock evidence and bounded `buffered`/`seekable` snapshots without gate waiver,
+classifier/allowlist changes, or gameplay/package changes. Tests and fresh native
+proof remain pending; no pass claim.
+
 ## 2026-10-28 — Gorazde model restored to healthy 851st-only Kamen ablation — NOT ADOPTED
 
 Separate the verified committed-support correctness repair (badcb3774) from the rejected

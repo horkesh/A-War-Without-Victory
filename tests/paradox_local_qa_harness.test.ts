@@ -931,6 +931,52 @@ test('ambient abort attribution requires one exact element/source epoch and cons
     assert.equal(wrongOriginExpected.length, 0);
 });
 
+function mediaTimeRanges(pairs: Array<[number, number]>) {
+    return {
+        length: pairs.length,
+        start(index: number): number {
+            return pairs[index][0];
+        },
+        end(index: number): number {
+            return pairs[index][1];
+        },
+    };
+}
+
+function normalizeTimeRangePairs(value: unknown): unknown {
+    if (!Array.isArray(value)) return value;
+    return Array.from(value, (pair) => (Array.isArray(pair) ? Array.from(pair) : pair));
+}
+
+function createObservedAmbient(
+    overrides: Record<string, PropertyDescriptor> = {},
+    beforeInstall?: (window: Window & typeof globalThis) => void,
+) {
+    const dom = new JSDOM(`
+        <audio id="ambient" src="http://127.0.0.1:3002/assets/ambient_field-D4f9a2.ogg"></audio>
+    `);
+    const { window } = dom;
+    const ambient = window.document.querySelector<HTMLAudioElement>('#ambient')!;
+    Object.defineProperties(ambient, {
+        currentSrc: { configurable: true, value: ambient.src },
+        ...overrides,
+    });
+    beforeInstall?.(window);
+    const install = loadFunction<() => void>(readHarness(), 'installAmbientLifecycleObserver', {
+        window,
+        document: window.document,
+        HTMLMediaElement: window.HTMLMediaElement,
+        Date: { now: () => 1_000 },
+    });
+    install();
+    install();
+    return { window, ambient };
+}
+
+function ambientSignals(window: Window & typeof globalThis): any[] {
+    return (window as any).__AWWV_QA_AMBIENT_LIFECYCLE_SIGNALS__;
+}
+
 test('ambient lifecycle observer records browser media progress with exact element state and ignores other audio', () => {
     const dom = new JSDOM(`
         <audio id="ambient" src="http://127.0.0.1:3002/assets/ambient_field-D4f9a2.ogg"></audio>
@@ -986,6 +1032,8 @@ test('ambient lifecycle observer records browser media progress with exact eleme
         currentTime: 12.5,
         duration: 88,
         loop: true,
+        buffered: [],
+        seekable: [],
         mediaError: null,
     });
     assert.deepEqual(signals[0].mediaStateUnavailable, ['mediaError']);
@@ -995,6 +1043,118 @@ test('ambient lifecycle observer records browser media progress with exact eleme
     assert.deepEqual(signals[4].mediaState.mediaError, { code: 3, message: 'decode failed' });
     assert.deepEqual(signals[4].mediaStateUnavailable, ['seeking']);
     assert.match(signals[4].mediaStateReadErrors.currentTime, /currentTime blocked/);
+});
+
+test('ambient lifecycle observer captures exact full, partial, and disjoint buffered/seekable ranges without mutating playback', () => {
+    const calls = { play: 0, pause: 0, load: 0 };
+    const { window, ambient } = createObservedAmbient({
+        buffered: { configurable: true, value: mediaTimeRanges([[0, 1.5], [3, 4.25]]) },
+        seekable: { configurable: true, value: mediaTimeRanges([[0, 88]]) },
+        currentTime: { configurable: true, value: 3.5 },
+    }, (observedWindow) => {
+        Object.defineProperties(observedWindow.HTMLMediaElement.prototype, {
+            play: { configurable: true, writable: true, value: () => { calls.play += 1; return Promise.resolve(); } },
+            pause: { configurable: true, writable: true, value: () => { calls.pause += 1; } },
+            load: { configurable: true, writable: true, value: () => { calls.load += 1; } },
+        });
+    });
+
+    ambient.dispatchEvent(new window.Event('progress'));
+
+    const signals = ambientSignals(window);
+    assert.strictEqual(signals.length, 1);
+    assert.deepStrictEqual(normalizeTimeRangePairs(signals[0].mediaState.buffered), [[0, 1.5], [3, 4.25]]);
+    assert.deepStrictEqual(normalizeTimeRangePairs(signals[0].mediaState.seekable), [[0, 88]]);
+    assert.strictEqual(signals[0].mediaStateUnavailable.includes('buffered'), false);
+    assert.strictEqual(signals[0].mediaStateUnavailable.includes('seekable'), false);
+    assert.strictEqual(Object.prototype.hasOwnProperty.call(signals[0].mediaStateReadErrors, 'buffered'), false);
+    assert.strictEqual(Object.prototype.hasOwnProperty.call(signals[0].mediaStateReadErrors, 'seekable'), false);
+    assert.strictEqual(ambient.currentTime, 3.5);
+    assert.strictEqual(calls.play, 0);
+    assert.strictEqual(calls.pause, 0);
+    assert.strictEqual(calls.load, 0);
+});
+
+test('ambient lifecycle observer preserves valid empty and sixteen-range TimeRanges exactly', () => {
+    const sixteen = Array.from({ length: 16 }, (_value, index) => [index * 2, index * 2 + 1] as [number, number]);
+    const { window, ambient } = createObservedAmbient({
+        buffered: { configurable: true, value: mediaTimeRanges([]) },
+        seekable: { configurable: true, value: mediaTimeRanges(sixteen) },
+    });
+
+    ambient.dispatchEvent(new window.Event('progress'));
+
+    const signal = ambientSignals(window)[0];
+    assert.deepStrictEqual(normalizeTimeRangePairs(signal.mediaState.buffered), []);
+    assert.deepStrictEqual(normalizeTimeRangePairs(signal.mediaState.seekable), sixteen);
+});
+
+const wellFormedRangeAt = (index: number): [number, number] => [index * 2, index * 2 + 1];
+
+test.each([
+    ['non-integer length', { length: 1.5, start: (index: number) => wellFormedRangeAt(index)[0], end: (index: number) => wellFormedRangeAt(index)[1] }],
+    ['non-numeric length', { length: '2', start: (index: number) => wellFormedRangeAt(index)[0], end: (index: number) => wellFormedRangeAt(index)[1] }],
+    ['negative length', { length: -1, start: (index: number) => wellFormedRangeAt(index)[0], end: (index: number) => wellFormedRangeAt(index)[1] }],
+    ['more than sixteen ranges', { length: 17, start: (index: number) => wellFormedRangeAt(index)[0], end: (index: number) => wellFormedRangeAt(index)[1] }],
+    ['non-finite start', mediaTimeRanges([[Number.NaN, 1]])],
+    ['non-finite end', mediaTimeRanges([[0, Number.POSITIVE_INFINITY]])],
+    ['negative start', mediaTimeRanges([[-1, 1]])],
+    ['negative end', mediaTimeRanges([[0, -1]])],
+    ['reversed bounds', mediaTimeRanges([[5, 4]])],
+    ['overlapping ranges', mediaTimeRanges([[0, 2], [1, 3]])],
+])('invalid %s TimeRanges stay unknown instead of being normalized', (_name, ranges) => {
+    for (const field of ['buffered', 'seekable'] as const) {
+        const otherField = field === 'buffered' ? 'seekable' : 'buffered';
+        const { window, ambient } = createObservedAmbient({ [field]: { configurable: true, value: ranges } });
+        ambient.dispatchEvent(new window.Event('progress'));
+
+        const signal = ambientSignals(window)[0];
+        const mediaState = signal.mediaState;
+        assert.strictEqual(mediaState[field], null, `${field} must be unknown for ${_name}`);
+        assert.strictEqual(
+            signal.mediaStateUnavailable.includes(field)
+                || Object.prototype.hasOwnProperty.call(signal.mediaStateReadErrors, field),
+            true,
+            `${field} must be recorded as unavailable or unreadable for ${_name}`,
+        );
+        assert.deepStrictEqual(normalizeTimeRangePairs(mediaState[otherField]), [], `${otherField} must stay valid for ${_name}`);
+    }
+});
+
+test('missing or throwing buffered/seekable accessors stay unknown with an availability or read-error marker', () => {
+    for (const field of ['buffered', 'seekable'] as const) {
+        const missing = createObservedAmbient({ [field]: { configurable: true, value: undefined } });
+        missing.ambient.dispatchEvent(new missing.window.Event('progress'));
+        const missingSignal = ambientSignals(missing.window)[0];
+        assert.strictEqual(missingSignal.mediaState[field], null, `missing ${field} must be unknown`);
+        assert.strictEqual(
+            missingSignal.mediaStateUnavailable.includes(field)
+                || Object.prototype.hasOwnProperty.call(missingSignal.mediaStateReadErrors, field),
+            true,
+            `missing ${field} must be recorded`,
+        );
+
+        const throwing = createObservedAmbient({
+            [field]: {
+                configurable: true,
+                get() {
+                    throw new Error(`${field} blocked`);
+                },
+            },
+        });
+        throwing.ambient.dispatchEvent(new throwing.window.Event('progress'));
+        const throwingSignal = ambientSignals(throwing.window)[0];
+        assert.strictEqual(throwingSignal.mediaState[field], null, `throwing ${field} must be unknown`);
+        assert.strictEqual(
+            throwingSignal.mediaStateUnavailable.includes(field)
+                || Object.prototype.hasOwnProperty.call(throwingSignal.mediaStateReadErrors, field),
+            true,
+            `throwing ${field} must be recorded`,
+        );
+        if (Object.prototype.hasOwnProperty.call(throwingSignal.mediaStateReadErrors, field)) {
+            assert.match(String(throwingSignal.mediaStateReadErrors[field]), new RegExp(`${field} blocked`));
+        }
+    }
 });
 
 test('ambient lifecycle observer follows detached Audio elements created by the production audio bus exactly once', async () => {

@@ -6344,7 +6344,14 @@ function installAmbientLifecycleObserver() {
         mediaStateReadErrors[field] = String(error?.message ?? error).slice(0, 400);
         return;
       }
-      const accepted = accept(raw);
+      let accepted;
+      try {
+        accepted = accept(raw);
+      } catch (error) {
+        mediaState[field] = null;
+        mediaStateReadErrors[field] = String(error?.message ?? error).slice(0, 400);
+        return;
+      }
       if (accepted === undefined) {
         mediaState[field] = null;
         mediaStateUnavailable.push(field);
@@ -6354,6 +6361,22 @@ function installAmbientLifecycleObserver() {
     };
     const finiteNumber = (value) => Number.isFinite(value) ? value : undefined;
     const boolean = (value) => typeof value === 'boolean' ? value : undefined;
+    const timeRanges = (raw) => {
+      if (raw === null || typeof raw !== 'object') return undefined;
+      const length = raw.length;
+      if (!Number.isInteger(length) || length < 0 || length > 16) return undefined;
+      const ranges = [];
+      let previousEnd = -Infinity;
+      for (let index = 0; index < length; index += 1) {
+        const start = raw.start(index);
+        const end = raw.end(index);
+        if (!Number.isFinite(start) || !Number.isFinite(end) || start < 0 || end < 0) return undefined;
+        if (end < start || start < previousEnd) return undefined;
+        ranges.push([start, end]);
+        previousEnd = end;
+      }
+      return ranges;
+    };
     read('networkState', finiteNumber);
     read('readyState', finiteNumber);
     read('paused', boolean);
@@ -6362,6 +6385,8 @@ function installAmbientLifecycleObserver() {
     read('currentTime', finiteNumber);
     read('duration', finiteNumber);
     read('loop', boolean);
+    read('buffered', timeRanges);
+    read('seekable', timeRanges);
     try {
       const mediaError = element.error;
       if (mediaError === null) {
