@@ -2238,7 +2238,7 @@
           "arbih_181st_mountain"
         ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 28.5,
+        "defensive_power": 55.176,
         "density": 0.2,
         "edge_ids": [
           "op:hadzici:lokve__op:trnovo:gornja_presjenica",
@@ -2304,7 +2304,7 @@
           "op:trnovo:trnovo",
           "op:trnovo:tusila"
         ],
-        "threat_ratio": 136.8421052631579
+        "threat_ratio": 70.68290561113527
       },
       "sector:arbih_1st_corps:14": {
         "assigned_brigade_ids": [
@@ -12555,7 +12555,7 @@
           "op:trnovo:gornja_presjenica",
           "op:vogosca:vogosca_3"
         ],
-        "threat_ratio": 259.1758049171298
+        "threat_ratio": 285.2135596615092
       },
       "sector:vrs_sarajevo_romanija:5": {
         "assigned_brigade_ids": [],
@@ -14696,7 +14696,7 @@
           "last_supplied_turn": null
         },
         "origin_mun": "hadzici",
-        "personnel": 500,
+        "personnel": 1800,
         "readiness": "active",
         "status": "active",
         "tags": [
@@ -29194,7 +29194,7 @@
       },
       "hadzici:RBiH": {
         "available": 0,
-        "committed": 3900,
+        "committed": 5200,
         "exhausted": 0,
         "faction": "RBiH",
         "fatigue": 0,
