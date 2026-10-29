@@ -669,7 +669,7 @@ export function resolveAttackOrdersOsid(
                 state, sector, targetOsid, controller!, adjacency, defenderFormations,
             );
             if (sectorBrigades.length > 0) {
-                const { primary, totalPower } = rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
+                const { primary, totalPower, rankedDefenders } = rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
                 const avgBrigadePower = totalPower / sectorBrigades.length;
                 const targetMun = munFromOsid(targetOsid);
 
@@ -742,7 +742,14 @@ export function resolveAttackOrdersOsid(
                 // zero weighted contribution must not make them the physical
                 // defender or route militia casualties into remote brigades.
                 if (contributingBrigadeCount > 0) {
-                    defenderFormation = primary;
+                    // Power/caps/floors above still use the nominal full roster.
+                    // Only a positive contributor may carry primary-defender
+                    // effects; pick it with the existing nominal power ranking
+                    // (stable tie order) rather than introducing a new score.
+                    const eligiblePrimary = rankedDefenders
+                        .map((entry) => sectorBrigades.find((b) => b.id === entry.id))
+                        .find((b): b is FormationState => b !== undefined && (brigadeWeights.get(b.id) ?? 0) > 0);
+                    defenderFormation = eligiblePrimary ?? primary;
                     isSectorCoverageDefense = true;
                     sectorDefenseBrigades = sectorBrigades;
                     sectorBrigadeWeights = brigadeWeights;
@@ -941,8 +948,15 @@ export function resolveAttackOrdersOsid(
         // personnel — applied unconditionally (was previously skipped for single-brigade sectors,
         // allowing 109 attackers to generate 900+ defender casualties from an uncapped 3,000-person
         // brigade, producing 0.07:1 att:def ratios).
-        const rawPersonnelDefender = sectorDefenseBrigades && sectorDefenseBrigades.length > 0
-            ? sectorDefenseBrigades.reduce((s, b) => s + (b.personnel ?? 0), 0)
+        // Only positive contributors form the engaged casualty base. The full
+        // roster remains on sectorDefenseBrigades for diagnostics and nominal
+        // power; zero-weight entries cannot inflate defender casualties.
+        const engagementWeights = sectorBrigadeWeights;
+        const engagedDefenseBrigades = sectorDefenseBrigades && engagementWeights
+            ? sectorDefenseBrigades.filter((b) => (engagementWeights.get(b.id) ?? 0) > 0)
+            : sectorDefenseBrigades;
+        const rawPersonnelDefender = engagedDefenseBrigades && engagedDefenseBrigades.length > 0
+            ? engagedDefenseBrigades.reduce((s, b) => s + (b.personnel ?? 0), 0)
             : defenderFormation ? (defenderFormation.personnel ?? 0) : 5000 * MILITIA_DEFENSE_RATIO;
         const personnelDefender = Math.min(rawPersonnelDefender, personnelAttacker * DEFENDER_CASUALTY_ENGAGEMENT_CAP);
         const bombardmentMult = getBombardmentCasualtyMult(attackerFormations, attackerFaction, state);
@@ -1579,7 +1593,7 @@ export function resolveAttackOrdersOsid(
         recordBattleHistory({
             attackerFormations,
             defenderFormation,
-            sectorDefenseBrigades,
+            sectorDefenseBrigades: engagedDefenseBrigades,
             sectorBrigadeWeights,
             currentTurn,
             targetOsid,

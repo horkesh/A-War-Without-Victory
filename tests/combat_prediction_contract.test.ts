@@ -10,6 +10,8 @@ import {buildOsidAdjacency} from '../src/sim/combat/osid_adjacency.js';
 import {predictCombatOutcome} from '../src/sim/combat/combat_predictor.js';
 import {resolveAttackOrdersOsid} from '../src/sim/combat/attack_resolution_osid.js';
 import {resetReasonCodeTopicCacheForTests} from '../src/sim/combat/reason_code_debug.js';
+import {DEFENDER_CASUALTY_ENGAGEMENT_CAP} from '../src/sim/combat/combat_math.js';
+import {MIN_COMBAT_PERSONNEL} from '../src/state/formation_constants.js';
 
 const S='op:test:stage', T='op:test:target', R='op:test:rear', P='op:test:remote';
 function fixture(faction: FactionId='RS') {
@@ -184,4 +186,84 @@ it('adding a wholly unreachable paper roster does not change the militia forecas
  expect(a.pred.predicted_outcome).toBe('stalemate');
  expect(b.report.battles[0].defender_kind).toBe('militia');
  expect(b.pred).toEqual(a.pred);
+});
+
+
+// Mixed enemy sector: D physically holds the target; G is a stronger nominal
+// roster entry parked beyond any friendly BFS route. Only D is an actual
+// contributor, so G cannot supply the primary defender or take casualties even
+// though it outguns D on paper; it remains only as a zero-weight diagnostic row.
+it('ignores a stronger unreachable Ghost for casualties and defender metadata while keeping D primary',()=>{
+ const f=fixture();
+ f.state.political.political_controllers![P]='RBiH';
+ const A=f.state.military.formations!.A,D=f.state.military.formations!.D;
+ D.personnel=385;D.cohesion=42;D.entrenchment_turns=3;D.morale=60;
+ const G=makeAttackFormation({id:'G',faction:'RBiH',corps_id:'E',location_osid:P,personnel:968});
+ G.cohesion=60;G.morale=100;G.entrenchment_turns=0;
+ f.state.military.formations!.G=G;
+ A.personnel=2000;A.posture='assault';
+ f.state.military.corps_front_sectors={enemy:{sector_id:'enemy',corps_id:'E',faction:'RBiH',territory_osids:[T,R],assigned_brigade_ids:['D','G'],reserve_brigade_ids:[],sector_stance:'defend',sub_segments:[{friendly_osids:[T,R],enemy_osids:[S],edge_ids:[],primary_brigade_ids:['D','G']}]}} as any;
+ const raw=structuredClone(f.state);
+ const ghostBefore=structuredClone(G);
+
+ const adjacency=buildOsidAdjacency(f.edges);
+ G.morale=0;
+ const low=predictCombatOutcome(f.state,'A',T,adjacency,new Map(),{})!;
+ G.morale=100;
+ const high=predictCombatOutcome(f.state,'A',T,adjacency,new Map(),{})!;
+ expect(low.defender_has_reachable_brigade).toBe(true);
+ expect(high.defender_cohesion).toBe(42);expect(low.defender_cohesion).toBe(42);
+ expect(high.defender_entrenchment).toBe(3);expect(low.defender_entrenchment).toBe(3);
+
+ const resolved=structuredClone(raw);
+ const report=resolveAttackOrdersOsid(resolved,f.edges,new Map());
+ const resolvedAgain=structuredClone(raw);
+ const reportAgain=resolveAttackOrdersOsid(resolvedAgain,f.edges,new Map());
+ expect(JSON.stringify(reportAgain)).toBe(JSON.stringify(report));
+ expect(JSON.stringify(resolvedAgain)).toBe(JSON.stringify(resolved));
+
+ expect(report.battles).toHaveLength(1);
+ const battle=report.battles[0];
+ expect(battle.defender_kind).toBe('formation');
+ expect(battle.defender_brigade).toBe('D');
+ expect(report.engaged_formation_ids).not.toContain('G');
+ const dRow=battle.defender_contributions!.find(c=>c.brigade_id==='D')!;
+ const ghostRow=battle.defender_contributions!.find(c=>c.brigade_id==='G')!;
+ expect(dRow.reactive_weight).toBeGreaterThan(0);
+ expect(ghostRow).toMatchObject({reactive_weight:0,casualties_taken:0});
+
+ const ghostAfter=resolved.military.formations!.G;
+ expect(ghostAfter).toEqual(ghostBefore);
+ expect(battle.defender_casualties).toBe(385-resolved.military.formations!.D.personnel!);
+});
+
+
+it.each([100,2000])('forecast engaged base and resolver casualties use only positive D with attacker %s',attackerPersonnel=>{
+ const f=fixture();
+ f.state.political.political_controllers![P]='RBiH';
+ const A=f.state.military.formations!.A,D=f.state.military.formations!.D;
+ D.personnel=385;D.cohesion=42;D.entrenchment_turns=3;D.morale=60;
+ const G=makeAttackFormation({id:'G',faction:'RBiH',corps_id:'E',location_osid:P,personnel:968});
+ G.cohesion=60;G.morale=100;G.entrenchment_turns=0;
+ f.state.military.formations!.G=G;
+ A.personnel=attackerPersonnel;A.posture='assault';
+ f.state.military.corps_front_sectors={enemy:{sector_id:'enemy',corps_id:'E',faction:'RBiH',territory_osids:[T,R],assigned_brigade_ids:['D','G'],reserve_brigade_ids:[],sector_stance:'defend',sub_segments:[{friendly_osids:[T,R],enemy_osids:[S],edge_ids:[],primary_brigade_ids:['D','G']}]}} as any;
+ const raw=structuredClone(f.state);
+ const adjacency=buildOsidAdjacency(f.edges);
+ const pred=predictCombatOutcome(f.state,'A',T,adjacency,new Map(),{})!;
+ expect(pred.expected_defender_casualties).toBeGreaterThan(0);
+ expect(pred.defender_casualty_percent).toBeGreaterThan(0);
+ const engagedBase=pred.expected_defender_casualties/pred.defender_casualty_percent;
+ expect(engagedBase).toBeCloseTo(Math.min(385,attackerPersonnel*DEFENDER_CASUALTY_ENGAGEMENT_CAP),6);
+
+ const resolved=structuredClone(raw);
+ const report=resolveAttackOrdersOsid(resolved,f.edges,new Map());
+ expect(report.battles).toHaveLength(1);
+ const battle=report.battles[0];
+ expect(battle.defender_brigade).toBe('D');
+ expect(report.engaged_formation_ids).not.toContain('G');
+ expect(battle.defender_casualties).toBeLessThanOrEqual(385-MIN_COMBAT_PERSONNEL);
+ expect(report.casualty_defender).toBeLessThanOrEqual(385-MIN_COMBAT_PERSONNEL);
+ const ghostRow=battle.defender_contributions!.find(c=>c.brigade_id==='G')!;
+ expect(ghostRow).toMatchObject({reactive_weight:0,casualties_taken:0});
 });

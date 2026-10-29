@@ -101,6 +101,74 @@ export function computeAttackerCasualtyShares(
     return result;
 }
 
+/**
+ * Deterministic bounded allocation for explicit defender weights.
+ *
+ * An eligible supplied primary keeps the existing proportional/remainder
+ * policy. When the supplied primary is ineligible (zero/non-positive weight)
+ * or absent, any rounding difference is assigned through the stable id order
+ * of the eligible contributors, never to a noncontributor and never beyond
+ * their removable personnel.
+ */
+function allocateExplicitWeightShares(
+    defBrigades: FormationState[],
+    sectorBrigadeWeights: Map<FormationId, number>,
+    finalDefenderCas: number,
+    primaryId?: FormationId,
+): Map<FormationId, number> {
+    const shares = new Map<FormationId, number>();
+    for (const b of defBrigades) shares.set(b.id, 0);
+    if (primaryId && !shares.has(primaryId)) shares.set(primaryId, 0);
+
+    let totalWeight = 0;
+    for (const b of defBrigades) totalWeight += Math.max(0, sectorBrigadeWeights.get(b.id) ?? 0);
+    if (totalWeight <= 0) return shares;
+
+    const removableById = new Map<FormationId, number>();
+    for (const b of defBrigades) removableById.set(b.id, removablePersonnel(b));
+
+    // Select one effective remainder owner: the supplied primary when it is a
+    // positive contributor, otherwise the first positive contributor in stable
+    // id order. The same proportional/remainder algorithm then applies.
+    const eligibleIds = defBrigades
+        .filter((b) => (sectorBrigadeWeights.get(b.id) ?? 0) > 0)
+        .map((b) => b.id)
+        .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+    const effectivePrimaryId = primaryId
+        && (sectorBrigadeWeights.get(primaryId) ?? 0) > 0
+        && defBrigades.some((b) => b.id === primaryId)
+        ? primaryId
+        : eligibleIds[0];
+
+    let primaryShare = 0;
+    let cappedRemainder = 0;
+    let primaryIsEligible = false;
+    for (const b of defBrigades) {
+        const w = sectorBrigadeWeights.get(b.id) ?? 0;
+        if (w <= 0) continue;
+        const rawShare = Math.round(finalDefenderCas * (w / totalWeight));
+        if (effectivePrimaryId && b.id === effectivePrimaryId) {
+            primaryIsEligible = true;
+            primaryShare += rawShare;
+            continue;
+        }
+        const cappedShare = Math.min(rawShare, removableById.get(b.id) ?? 0);
+        shares.set(b.id, cappedShare);
+        cappedRemainder += rawShare - cappedShare;
+    }
+
+    if (primaryIsEligible && effectivePrimaryId) {
+        const primaryCapacity = removableById.get(effectivePrimaryId) ?? 0;
+        shares.set(effectivePrimaryId, Math.min(primaryShare + cappedRemainder, primaryCapacity));
+        const roundedTotal = [...shares.values()].reduce((sum, cas) => sum + cas, 0);
+        if (roundedTotal !== finalDefenderCas) {
+            const adjustedPrimaryShare = (shares.get(effectivePrimaryId) ?? 0) + finalDefenderCas - roundedTotal;
+            shares.set(effectivePrimaryId, Math.max(0, Math.min(adjustedPrimaryShare, primaryCapacity)));
+        }
+    }
+    return shares;
+}
+
 export function computeDefenderCasualtyShares(params: {
     defenderFormation: FormationState;
     sectorDefenseBrigades: FormationState[] | null;
@@ -111,35 +179,25 @@ export function computeDefenderCasualtyShares(params: {
     const defBrigades = sectorDefenseBrigades && sectorDefenseBrigades.length > 1
         ? sectorDefenseBrigades
         : [defenderFormation];
-    const shares = new Map<FormationId, number>();
 
-    if (!sectorBrigadeWeights || defBrigades.length <= 1) {
-        shares.set(defenderFormation.id, finalDefenderCas);
-        return shares;
+    // No weights: retain the single-primary allocation, but never record more
+    // than the formation can actually lose.
+    if (!sectorBrigadeWeights) {
+        return new Map<FormationId, number>([[
+            defenderFormation.id,
+            Math.min(Math.max(0, finalDefenderCas), removablePersonnel(defenderFormation)),
+        ]]);
     }
 
-    const totalWeight = defBrigades.reduce((s, b) => s + (sectorBrigadeWeights.get(b.id) ?? 0), 0);
-    let primaryShare = 0;
-    let cappedRemainder = 0;
-    for (const b of defBrigades) {
-        const w = sectorBrigadeWeights.get(b.id) ?? 0;
-        const frac = totalWeight > 0 ? w / totalWeight : 1 / defBrigades.length;
-        const rawShare = Math.round(finalDefenderCas * frac);
-        if (b.id === defenderFormation.id) {
-            primaryShare += rawShare;
-            continue;
-        }
-        const cappedShare = Math.min(rawShare, removablePersonnel(b));
-        shares.set(b.id, cappedShare);
-        cappedRemainder += rawShare - cappedShare;
-    }
-    shares.set(defenderFormation.id, Math.min(primaryShare + cappedRemainder, removablePersonnel(defenderFormation)));
-    const roundedTotal = [...shares.values()].reduce((sum, cas) => sum + cas, 0);
-    if (roundedTotal !== finalDefenderCas) {
-        const adjustedPrimaryShare = (shares.get(defenderFormation.id) ?? 0) + finalDefenderCas - roundedTotal;
-        shares.set(defenderFormation.id, Math.max(0, Math.min(adjustedPrimaryShare, removablePersonnel(defenderFormation))));
-    }
-    return shares;
+    // Explicit weights are contributions, not merely a distribution key.
+    // Zero/non-positive entries are ineligible for casualties, including the
+    // primary; zero entries stay in the map so diagnostic rows are truthful.
+    return allocateExplicitWeightShares(
+        defBrigades,
+        sectorBrigadeWeights,
+        finalDefenderCas,
+        defenderFormation.id,
+    );
 }
 
 export function distributeDefenderCasualties(params: {
@@ -188,7 +246,7 @@ export function buildDefenderContributions(params: {
     primaryDefenderId?: FormationId;
 }): DefenderContribution[] {
     const { sectorDefenseBrigades, sectorBrigadeWeights, sectorBrigadeMeta, finalDefenderCas, primaryDefenderId } = params;
-    const totalWeight = sectorDefenseBrigades.reduce((s, b) => s + (sectorBrigadeWeights.get(b.id) ?? 0), 0);
+    const totalWeight = sectorDefenseBrigades.reduce((s, b) => s + Math.max(0, sectorBrigadeWeights.get(b.id) ?? 0), 0);
     const primaryDefender = primaryDefenderId
         ? sectorDefenseBrigades.find((b) => b.id === primaryDefenderId)
         : undefined;
@@ -200,11 +258,23 @@ export function buildDefenderContributions(params: {
             finalDefenderCas,
         })
         : undefined;
+
+    // Without a primary id there is no remainder sink, but explicit weights
+    // still gate eligibility and capacity. Reuse the same bounded allocator so
+    // odd rounding can never overreport or fall back to an equal split.
+    const fallbackShares = cappedShares
+        ? undefined
+        : allocateExplicitWeightShares(
+            sectorDefenseBrigades,
+            sectorBrigadeWeights,
+            finalDefenderCas,
+        );
+
     const contributions: DefenderContribution[] = [];
     for (const b of sectorDefenseBrigades) {
         const w = sectorBrigadeWeights.get(b.id) ?? 0;
         const meta = sectorBrigadeMeta.get(b.id);
-        const frac = totalWeight > 0 ? w / totalWeight : 1 / sectorDefenseBrigades.length;
+        const frac = totalWeight > 0 ? Math.max(0, w) / totalWeight : 0;
         const rawHops = meta?.hops ?? 0;
         contributions.push({
             brigade_id: b.id,
@@ -212,7 +282,7 @@ export function buildDefenderContributions(params: {
             distance_hops: Number.isFinite(rawHops) ? rawHops : DEFENDER_DISTANCE_UNREACHABLE_HOPS,
             is_home_municipality: meta?.isHome ?? false,
             reactive_weight: Math.round(w * 100) / 100,
-            casualties_taken: cappedShares?.get(b.id) ?? Math.round(finalDefenderCas * frac),
+            casualties_taken: cappedShares?.get(b.id) ?? fallbackShares?.get(b.id) ?? Math.round(finalDefenderCas * frac),
         });
     }
     return contributions;

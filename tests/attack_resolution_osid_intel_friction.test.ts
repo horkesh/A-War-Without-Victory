@@ -11,6 +11,7 @@ import {
 } from '../src/sim/combat/combat_math.js';
 import { compileTurnSummary } from '../src/sim/compile_turn_summary.js';
 import { initializeCasualtyLedger } from '../src/state/casualty_ledger.js';
+import { MIN_COMBAT_PERSONNEL } from '../src/state/formation_constants.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
 import type { AARSnapshot, TurnReport } from '../src/sim/turn_pipeline_types.js';
 import type {
@@ -907,14 +908,18 @@ describe('attack resolution intel execution friction', () => {
     it('applies low-confidence OPSEC ambush friction as reduced defender losses', () => {
         const staleOnly = makeScenario();
         seedIntel(staleOnly.state, 0);
+        staleOnly.state.military.formations!['brig_rbih_1'].personnel = 3000;
         const staleOnlyReport = resolveAttackOrdersOsid(staleOnly.state, staleOnly.edges, new Map<string, string[]>());
 
         const ambush = makeScenario();
         seedIntel(ambush.state, 0);
         ambush.state.military.opsec_sectors = ['sector:rbih_defense:0'];
+        ambush.state.military.formations!['brig_rbih_1'].personnel = 3000;
         const ambushReport = resolveAttackOrdersOsid(ambush.state, ambush.edges, new Map<string, string[]>());
 
         expect(ambushReport.casualty_defender).toBeLessThan(staleOnlyReport.casualty_defender);
+        expect(staleOnlyReport.casualty_defender).toBeLessThan(3000 - MIN_COMBAT_PERSONNEL);
+        expect(ambushReport.casualty_defender).toBeLessThan(3000 - MIN_COMBAT_PERSONNEL);
         expect(ambushReport.battles[0]!.execution_friction).toEqual({
             labels: ['stale_intel', 'defender_opsec', 'ambush_risk'],
             attacker_confidence_band: 'low',

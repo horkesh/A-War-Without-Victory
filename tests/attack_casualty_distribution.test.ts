@@ -402,7 +402,10 @@ describe('distributeDefenderCasualties', () => {
         expect(shares.get(reserve.id)).toBe(200);
     });
 
-    it('uses deterministic equal fallback shares when shared defender weights sum to zero', () => {
+    // Intentional contract correction (positive-contributor eligibility): a
+    // zero-weight roster has no contributors, so the deterministic entries are
+    // zero rather than an equal split. No casualties may be invented for it.
+    it('yields deterministic zero shares when shared defender weights sum to zero', () => {
         const primary = makeFormation({ id: 'primary', faction: 'RS', personnel: 1000 });
         const reserve = makeFormation({ id: 'reserve', faction: 'RS', personnel: 1000 });
         const weights = new Map<string, number>([
@@ -418,8 +421,8 @@ describe('distributeDefenderCasualties', () => {
         });
 
         expect([...shares.entries()].sort(([a], [b]) => a.localeCompare(b))).toEqual([
-            [primary.id, 50],
-            [reserve.id, 50],
+            [primary.id, 0],
+            [reserve.id, 0],
         ]);
     });
 
@@ -634,5 +637,277 @@ describe('buildDefenderContributions', () => {
             [reserve.id, 20],
         ]);
         expect(contributions.reduce((sum, c) => sum + c.casualties_taken, 0)).toBe(100);
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Positive-contributor eligibility (defender casualty allocation)
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('defender casualty eligibility with mixed reachable and zero-weight brigades', () => {
+    it('does not charge a stronger zero-weight primary: only the reachable contributor absorbs the bounded loss', () => {
+        const primary = makeFormation({ id: 'unreachable_primary', faction: 'RS', personnel: 968 });
+        const reachable = makeFormation({ id: 'reachable_reserve', faction: 'RS', personnel: 385 });
+        const weights = new Map<string, number>([
+            [primary.id, 0],
+            [reachable.id, 15.36],
+        ]);
+        const removable = 385 - MIN_COMBAT_PERSONNEL;
+
+        const shares = computeDefenderCasualtyShares({
+            defenderFormation: primary,
+            sectorDefenseBrigades: [primary, reachable],
+            sectorBrigadeWeights: weights,
+            finalDefenderCas: 766,
+        });
+
+        expect(shares.get(primary.id) ?? 0).toBe(0);
+        expect(shares.get(reachable.id) ?? 0).toBe(removable);
+
+        // Build the report rows from the PRE-loss roster. Distribution mutates
+        // personnel, so constructing contributions afterwards would recompute
+        // shares against zero remaining capacity and invalidate the comparison.
+        const meta = new Map<string, { hops: number; isHome: boolean }>([
+            [primary.id, { hops: Infinity, isHome: false }],
+            [reachable.id, { hops: 2, isHome: false }],
+        ]);
+        const contributions = buildDefenderContributions({
+            sectorDefenseBrigades: [primary, reachable],
+            sectorBrigadeWeights: weights,
+            sectorBrigadeMeta: meta,
+            finalDefenderCas: 766,
+            primaryDefenderId: primary.id,
+        });
+
+        const ledger = makeLedger();
+        distributeDefenderCasualties({
+            defenderFormation: primary,
+            sectorDefenseBrigades: [primary, reachable],
+            sectorBrigadeWeights: weights,
+            finalDefenderCas: 766,
+            casualtyLedger: ledger,
+        });
+        const applied = (968 - primary.personnel!) + (385 - reachable.personnel!);
+        expect(primary.personnel).toBe(968);
+        expect(reachable.personnel).toBe(MIN_COMBAT_PERSONNEL);
+        expect(applied).toBe(removable);
+        const factionLedger = ledger['RS']!;
+        expect(factionLedger.killed + factionLedger.wounded + factionLedger.missing_captured).toBe(applied);
+
+        const primaryRow = contributions.find((c) => c.brigade_id === primary.id)!;
+        const reachableRow = contributions.find((c) => c.brigade_id === reachable.id)!;
+        // The zero-weight diagnostic row stays truthful instead of inheriting overflow.
+        expect(primaryRow).toMatchObject({
+            casualties_taken: 0,
+            reactive_weight: 0,
+            distance_hops: DEFENDER_DISTANCE_UNREACHABLE_HOPS,
+        });
+        expect(reachableRow.casualties_taken).toBe(applied);
+        expect(contributions.reduce((sum, c) => sum + c.casualties_taken, 0)).toBe(applied);
+    });
+
+    it('applies no casualties and records no ledger entries when every roster weight is zero', () => {
+        const primary = makeFormation({ id: 'primary', faction: 'RS', personnel: 1000 });
+        const reserve = makeFormation({ id: 'reserve', faction: 'RS', personnel: 800 });
+        const weights = new Map<string, number>([
+            [primary.id, 0],
+            [reserve.id, 0],
+        ]);
+
+        const shares = computeDefenderCasualtyShares({
+            defenderFormation: primary,
+            sectorDefenseBrigades: [primary, reserve],
+            sectorBrigadeWeights: weights,
+            finalDefenderCas: 100,
+        });
+        expect([...shares.values()].every((cas) => cas === 0)).toBe(true);
+
+        const ledger = makeLedger();
+        distributeDefenderCasualties({
+            defenderFormation: primary,
+            sectorDefenseBrigades: [primary, reserve],
+            sectorBrigadeWeights: weights,
+            finalDefenderCas: 100,
+            casualtyLedger: ledger,
+        });
+        expect(primary.personnel).toBe(1000);
+        expect(reserve.personnel).toBe(800);
+        const factionLedger = ledger['RS']!;
+        expect(factionLedger.killed + factionLedger.wounded + factionLedger.missing_captured).toBe(0);
+        expect(Object.keys(factionLedger.per_formation)).toHaveLength(0);
+    });
+
+    it('keeps capped remainder on positive contributors instead of transferring it to zero-weight units', () => {
+        const primary = makeFormation({ id: 'zero_primary', faction: 'RS', personnel: 968 });
+        const zeroReserve = makeFormation({ id: 'zero_reserve', faction: 'RS', personnel: 700 });
+        const positive = makeFormation({ id: 'positive', faction: 'RS', personnel: 385 });
+        const weights = new Map<string, number>([
+            [primary.id, 0],
+            [zeroReserve.id, 0],
+            [positive.id, 15.36],
+        ]);
+        const removable = 385 - MIN_COMBAT_PERSONNEL;
+
+        const shares = computeDefenderCasualtyShares({
+            defenderFormation: primary,
+            sectorDefenseBrigades: [primary, zeroReserve, positive],
+            sectorBrigadeWeights: weights,
+            finalDefenderCas: 766,
+        });
+        expect(shares.get(primary.id) ?? 0).toBe(0);
+        expect(shares.get(zeroReserve.id) ?? 0).toBe(0);
+        expect(shares.get(positive.id) ?? 0).toBe(removable);
+        expect([...shares.values()].reduce((sum, cas) => sum + cas, 0)).toBe(removable);
+
+        const ledger = makeLedger();
+        distributeDefenderCasualties({
+            defenderFormation: primary,
+            sectorDefenseBrigades: [primary, zeroReserve, positive],
+            sectorBrigadeWeights: weights,
+            finalDefenderCas: 766,
+            casualtyLedger: ledger,
+        });
+        expect(primary.personnel).toBe(968);
+        expect(zeroReserve.personnel).toBe(700);
+        expect(positive.personnel).toBe(MIN_COMBAT_PERSONNEL);
+        const factionLedger = ledger['RS']!;
+        expect(factionLedger.killed + factionLedger.wounded + factionLedger.missing_captured).toBe(removable);
+    });
+
+    it('distributes an odd total without routing the remainder to a zero-weight primary', () => {
+        const zeroPrimary = makeFormation({ id: 'zero_primary', faction: 'RS', personnel: 1000 });
+        const positiveA = makeFormation({ id: 'positive_a', faction: 'RS', personnel: 1000 });
+        const positiveB = makeFormation({ id: 'positive_b', faction: 'RS', personnel: 1000 });
+        const weights = new Map<string, number>([
+            [zeroPrimary.id, 0],
+            [positiveA.id, 1],
+            [positiveB.id, 1],
+        ]);
+        const allocate = (brigades: (typeof zeroPrimary)[]) => computeDefenderCasualtyShares({
+            defenderFormation: zeroPrimary,
+            sectorDefenseBrigades: brigades,
+            sectorBrigadeWeights: weights,
+            finalDefenderCas: 7,
+        });
+
+        const first = allocate([zeroPrimary, positiveA, positiveB]);
+        expect(first.get(zeroPrimary.id) ?? 0).toBe(0);
+        const aCas = first.get(positiveA.id) ?? 0;
+        const bCas = first.get(positiveB.id) ?? 0;
+        for (const cas of [aCas, bCas]) {
+            expect(cas).toBeGreaterThanOrEqual(0);
+            expect(cas).toBeLessThanOrEqual(1000 - MIN_COMBAT_PERSONNEL);
+        }
+        expect(aCas + bCas).toBe(7);
+
+        const repeat = allocate([zeroPrimary, positiveA, positiveB]);
+        expect([...repeat.entries()]).toEqual([...first.entries()]);
+
+        // The recipient of the odd remainder is not prescribed here, but the
+        // allocation for each id must not depend on roster iteration order.
+        const reversed = allocate([positiveB, positiveA, zeroPrimary]);
+        expect(reversed.get(zeroPrimary.id) ?? 0).toBe(0);
+        expect(reversed.get(positiveA.id) ?? 0).toBe(aCas);
+        expect(reversed.get(positiveB.id) ?? 0).toBe(bCas);
+        expect([...reversed.values()].reduce((sum, cas) => sum + cas, 0)).toBe(7);
+
+        const meta = new Map<string, { hops: number; isHome: boolean }>([
+            [zeroPrimary.id, { hops: Infinity, isHome: false }],
+            [positiveA.id, { hops: 1, isHome: false }],
+            [positiveB.id, { hops: 2, isHome: false }],
+        ]);
+        const contributions = buildDefenderContributions({
+            sectorDefenseBrigades: [zeroPrimary, positiveA, positiveB],
+            sectorBrigadeWeights: weights,
+            sectorBrigadeMeta: meta,
+            finalDefenderCas: 7,
+        });
+        expect(contributions.find((c) => c.brigade_id === zeroPrimary.id)?.casualties_taken).toBe(0);
+        expect(contributions.reduce((sum, c) => sum + c.casualties_taken, 0)).toBe(7);
+        const reversedContributions = buildDefenderContributions({
+            sectorDefenseBrigades: [positiveB, positiveA, zeroPrimary],
+            sectorBrigadeWeights: weights,
+            sectorBrigadeMeta: meta,
+            finalDefenderCas: 7,
+        });
+        for (const id of [zeroPrimary.id, positiveA.id, positiveB.id]) {
+            expect(reversedContributions.find((c) => c.brigade_id === id)?.casualties_taken)
+                .toBe(contributions.find((c) => c.brigade_id === id)?.casualties_taken);
+        }
+    });
+
+    it('does not maximize into reserve capacity when the stable eligible fallback owner is saturated', () => {
+        const zeroPrimary = makeFormation({ id: 'zero_primary', faction: 'RS', personnel: 1000 });
+        const saturatedOwner = makeFormation({ id: 'a_owner', faction: 'RS', personnel: MIN_COMBAT_PERSONNEL });
+        const reserve = makeFormation({ id: 'b_reserve', faction: 'RS', personnel: 1000 });
+        const weights = new Map<string, number>([
+            [zeroPrimary.id, 0],
+            [saturatedOwner.id, 1],
+            [reserve.id, 1],
+        ]);
+
+        const shares = computeDefenderCasualtyShares({
+            defenderFormation: zeroPrimary,
+            sectorDefenseBrigades: [zeroPrimary, saturatedOwner, reserve],
+            sectorBrigadeWeights: weights,
+            finalDefenderCas: 100,
+        });
+        expect(shares.get(zeroPrimary.id) ?? 0).toBe(0);
+        expect(shares.get(saturatedOwner.id) ?? 0).toBe(0);
+        expect(shares.get(reserve.id) ?? 0).toBe(50);
+        expect([...shares.values()].reduce((sum, cas) => sum + cas, 0)).toBe(50);
+
+        const meta = new Map<string, { hops: number; isHome: boolean }>([
+            [zeroPrimary.id, { hops: Infinity, isHome: false }],
+            [saturatedOwner.id, { hops: 1, isHome: false }],
+            [reserve.id, { hops: 2, isHome: false }],
+        ]);
+        const contributions = buildDefenderContributions({
+            sectorDefenseBrigades: [zeroPrimary, saturatedOwner, reserve],
+            sectorBrigadeWeights: weights,
+            sectorBrigadeMeta: meta,
+            finalDefenderCas: 100,
+        });
+        expect(contributions.find((c) => c.brigade_id === zeroPrimary.id)?.casualties_taken).toBe(0);
+        expect(contributions.find((c) => c.brigade_id === saturatedOwner.id)?.casualties_taken).toBe(0);
+        expect(contributions.find((c) => c.brigade_id === reserve.id)?.casualties_taken).toBe(50);
+        expect(contributions.reduce((sum, c) => sum + c.casualties_taken, 0)).toBe(50);
+    });
+
+    it('yields zero for a single defender with an explicit zero weight entry', () => {
+        const solo = makeFormation({ id: 'solo_zero', faction: 'RS', personnel: 1000 });
+        const shares = computeDefenderCasualtyShares({
+            defenderFormation: solo,
+            sectorDefenseBrigades: [solo],
+            sectorBrigadeWeights: new Map<string, number>([[solo.id, 0]]),
+            finalDefenderCas: 50,
+        });
+        expect(shares.get(solo.id) ?? 0).toBe(0);
+        expect([...shares.values()].reduce((sum, cas) => sum + cas, 0)).toBe(0);
+    });
+
+    it('bounds a lone defender share and ledger record at removable personnel', () => {
+        const defender = makeFormation({ id: 'solo', faction: 'RS', personnel: 180 });
+        const removable = 180 - MIN_COMBAT_PERSONNEL;
+
+        const shares = computeDefenderCasualtyShares({
+            defenderFormation: defender,
+            sectorDefenseBrigades: null,
+            sectorBrigadeWeights: null,
+            finalDefenderCas: 150,
+        });
+        expect(shares.get(defender.id)).toBe(removable);
+
+        const ledger = makeLedger();
+        distributeDefenderCasualties({
+            defenderFormation: defender,
+            sectorDefenseBrigades: null,
+            sectorBrigadeWeights: null,
+            finalDefenderCas: 150,
+            casualtyLedger: ledger,
+        });
+        expect(defender.personnel).toBe(MIN_COMBAT_PERSONNEL);
+        const factionLedger = ledger['RS']!;
+        expect(factionLedger.killed + factionLedger.wounded + factionLedger.missing_captured).toBe(removable);
     });
 });

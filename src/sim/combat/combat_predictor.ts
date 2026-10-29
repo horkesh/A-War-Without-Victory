@@ -315,6 +315,9 @@ export function predictCombatOutcome(
     let defenderDisrupted = false;
     let defenderCohesion = 60;
     let sectorDefBrigades: FormationState[] | null = null;
+    // Positive-contributor membership for the engaged personnel base and
+    // primary metadata. Nominal full-roster power remains unchanged.
+    let sectorEligibleBrigadeIds: Set<string> | null = null;
     // Phase B: sub-segment responsible for defending this OSID
     let defendingSubSegmentId: string | undefined;
     let defendingSectorId: string | undefined;
@@ -368,13 +371,14 @@ export function predictCombatOutcome(
             const pc = state.political?.political_controllers ?? {};
 
             // Per-brigade distance-weighted contribution
-            const { physicalPower, effectiveReserves, contributingBrigadeCount } = predictorPerfTime(
+            const { physicalPower, effectiveReserves, contributingBrigadeCount, eligibleBrigadeIds } = predictorPerfTime(
                 profilePrefix,
                 '.sectorDefensePower',
                 () => {
                     let physicalPower = 0;
                     let effectiveReserves = 0;
                     let contributingBrigadeCount = 0;
+                    const eligibleBrigadeIds = new Set<string>();
                     for (const b of sectorBrigades) {
                         const locOsid = (b as { location_osid?: string }).location_osid ?? '';
                         const bPower = powerByFormationId.get(b.id) ?? computeDefenderPower(
@@ -390,19 +394,34 @@ export function predictCombatOutcome(
                         const homeBonus = (homeMun && homeMun === targetMun) ? HOME_DEFENSE_REACTIVE_BONUS : 1.0;
                         if (locOsid === targetOsid) {
                             physicalPower += bPower;
-                            if (bPower * homeBonus > 0) contributingBrigadeCount += 1;
+                            if (bPower * homeBonus > 0) {
+                                contributingBrigadeCount += 1;
+                                eligibleBrigadeIds.add(b.id);
+                            }
                         } else {
                             const hops = bfsDistanceFriendly(locOsid, targetOsid, adjacency, pc, controller!);
                             const distWeight = getReactiveDistanceWeight(hops);
                             const contribution = bPower * distWeight * homeBonus;
                             effectiveReserves += contribution;
-                            if (contribution > 0) contributingBrigadeCount += 1;
+                            if (contribution > 0) {
+                                contributingBrigadeCount += 1;
+                                eligibleBrigadeIds.add(b.id);
+                            }
                         }
                     }
-                    return { physicalPower, effectiveReserves, contributingBrigadeCount };
+                    return { physicalPower, effectiveReserves, contributingBrigadeCount, eligibleBrigadeIds };
                 }
             );
+            sectorEligibleBrigadeIds = eligibleBrigadeIds;
             defenderHasReachableBrigade = contributingBrigadeCount > 0;
+            // Existing nominal scored powers and stable sort order pick the
+            // eligible primary. Membership is filtered only after distance/home
+            // contributions, so aggregate power/caps/floors stay unchanged.
+            const eligiblePrimary = contributingBrigadeCount > 0
+                ? [...sectorBrigades]
+                    .filter((b) => eligibleBrigadeIds.has(b.id))
+                    .sort((a, b) => (powerByFormationId.get(b.id) ?? 0) - (powerByFormationId.get(a.id) ?? 0))[0]
+                : undefined;
 
             // Apply sector stance reactive bonus (Layer B)
             const stanceReactiveBonus = SECTOR_STANCE_REACTIVE_BONUS[sector?.sector_stance ?? 'defend'];
@@ -435,7 +454,7 @@ export function predictCombatOutcome(
             // resolves as militia. Its remote morale, entrenchment and casualty base
             // cannot supply organized-defender metadata to the forecast.
             defenderHasBrigade = contributingBrigadeCount > 0;
-            defenderFormation = defenderHasBrigade ? primary : null;
+            defenderFormation = defenderHasBrigade ? (eligiblePrimary ?? primary) : null;
             sectorDefBrigades = defenderHasBrigade ? sectorBrigades : null;
             defenderDisrupted = defenderFormation != null && ((defenderFormation.disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true);
             defenderCohesion = defenderFormation?.cohesion ?? 60;
@@ -532,14 +551,18 @@ export function predictCombatOutcome(
         expectedDefCas,
     } = predictorPerfTime(profilePrefix, '.casualties', () => {
         const personnelAttacker = attackerFormations.reduce((s, a) => s + (a.personnel ?? 0), 0);
-        // Sector defense: use total sector personnel as casualty base (mirrors resolver fix n590)
-        // n647 fix: cap engaged defender personnel at DEFENDER_CASUALTY_ENGAGEMENT_CAP x attacker
-        const rawPersonnelDefender = sectorDefBrigades && sectorDefBrigades.length > 1
-            ? sectorDefBrigades.reduce((s, b) => s + (b.personnel ?? 0), 0)
+        // Only positive contributors form the engaged casualty base. The full
+        // roster remains available for nominal power/diagnostics.
+        const eligibleIdsForCasualties = sectorEligibleBrigadeIds;
+        const engagedDefenders = sectorDefBrigades && eligibleIdsForCasualties
+            ? sectorDefBrigades.filter((b) => eligibleIdsForCasualties.has(b.id))
+            : sectorDefBrigades;
+        const rawPersonnelDefender = engagedDefenders && engagedDefenders.length > 0
+            ? engagedDefenders.reduce((s, b) => s + (b.personnel ?? 0), 0)
             : defenderFormation ? (defenderFormation.personnel ?? 0) : 5000 * MILITIA_DEFENSE_RATIO;
-        const personnelDefender = sectorDefBrigades && sectorDefBrigades.length > 1
-            ? Math.min(rawPersonnelDefender, personnelAttacker * DEFENDER_CASUALTY_ENGAGEMENT_CAP)
-            : rawPersonnelDefender;
+        // The resolver applies this engagement cap unconditionally (single
+        // defender and militia included); mirror that here.
+        const personnelDefender = Math.min(rawPersonnelDefender, personnelAttacker * DEFENDER_CASUALTY_ENGAGEMENT_CAP);
         const bombardmentMult = getBombardmentCasualtyMult(attackerFormations, attackerFaction, state);
         const [attCasMult, defCasMult] = getPowerRatioCasualtyMult(powerRatio);
         const baseAttCas = personnelAttacker * BASE_ATTACKER_LOSS_RATE * (OUTCOME_ATTACKER_MOD[predicted] ?? 1) * attCasMult;
