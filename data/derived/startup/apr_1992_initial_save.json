@@ -1171,7 +1171,7 @@
           "Operation Circle"
         ],
         "stance": "balanced",
-        "subordinate_count": 34
+        "subordinate_count": 33
       },
       "arbih_2nd_corps": {
         "active_ogs": [],
@@ -2234,11 +2234,11 @@
       },
       "sector:arbih_1st_corps:13": {
         "assigned_brigade_ids": [
-          "arbih_104th_vitezka_motorized",
-          "arbih_181st_mountain"
+          "arbih_102nd_motorized",
+          "arbih_104th_vitezka_motorized"
         ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 55.176,
+        "defensive_power": 34.656,
         "density": 0.2,
         "edge_ids": [
           "op:hadzici:lokve__op:trnovo:gornja_presjenica",
@@ -2304,7 +2304,7 @@
           "op:trnovo:trnovo",
           "op:trnovo:tusila"
         ],
-        "threat_ratio": 70.68290561113527
+        "threat_ratio": 112.53462603878117
       },
       "sector:arbih_1st_corps:14": {
         "assigned_brigade_ids": [
@@ -2753,13 +2753,12 @@
       },
       "sector:arbih_1st_corps:3": {
         "assigned_brigade_ids": [
-          "arbih_102nd_motorized",
           "arbih_109th_mountain",
           "arbih_17th_muslim_light"
         ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 78.31102040816326,
-        "density": 0.42857142857142855,
+        "defensive_power": 43.25142857142856,
+        "density": 0.2857142857142857,
         "edge_ids": [
           "op:hadzici:binjezevo__op:hadzici:misevici_2",
           "op:hadzici:hadzici__op:hadzici:misevici_2",
@@ -12555,7 +12554,7 @@
           "op:trnovo:gornja_presjenica",
           "op:vogosca:vogosca_3"
         ],
-        "threat_ratio": 285.2135596615092
+        "threat_ratio": 265.18451755044816
       },
       "sector:vrs_sarajevo_romanija:5": {
         "assigned_brigade_ids": [],
@@ -12930,7 +12929,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:arbih_1st_corps:3"
+          "sector_id": "sector:arbih_1st_corps:13"
         },
         "cohesion": 45,
         "composition": {
@@ -12964,6 +12963,7 @@
             "STATIC_DEFENSE": false
           }
         },
+        "entrenchment_turns": 0,
         "equipment_class": "motorized",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -12979,7 +12979,7 @@
         "hq_sid": "op:hadzici:binjezevo",
         "id": "arbih_102nd_motorized",
         "kind": "brigade",
-        "location_osid": "op:hadzici:binjezevo",
+        "location_osid": "op:hadzici:lokve",
         "max_personnel": 2200,
         "morale": 60,
         "name": "102nd Motorized",
@@ -13055,7 +13055,7 @@
         "hq_sid": "op:hadzici:binjezevo",
         "id": "arbih_104th_vitezka_motorized",
         "kind": "brigade",
-        "location_osid": "op:ilidza:sarajevo_dio_ilidza_2",
+        "location_osid": "op:trnovo:tusila",
         "max_personnel": 2200,
         "morale": 60,
         "name": "104th Motorized",
@@ -14629,80 +14629,6 @@
           "corps:arbih_3rd_corps",
           "equip:light_infantry",
           "mun:travnik",
-          "placement:fixed_home_osid"
-        ]
-      },
-      "arbih_181st_mountain": {
-        "activation_gated": false,
-        "activation_turn": null,
-        "assignment": {
-          "kind": "sector",
-          "role": "front",
-          "sector_id": "sector:arbih_1st_corps:13"
-        },
-        "cohesion": 45,
-        "composition": {
-          "aa_systems": 0,
-          "artillery": 1,
-          "artillery_condition": {
-            "degraded": 0,
-            "non_operational": 0,
-            "operational": 1
-          },
-          "infantry": 800,
-          "tank_condition": {
-            "degraded": 0,
-            "non_operational": 0,
-            "operational": 1
-          },
-          "tanks": 0
-        },
-        "corps_id": "arbih_1st_corps",
-        "created_turn": 0,
-        "doctrine_state": {
-          "active": null,
-          "active_turns": 0,
-          "eligible": {
-            "ARTILLERY_COUNTER": false,
-            "ATTACK": false,
-            "COORDINATED_STRIKE": false,
-            "DEFEND": false,
-            "INFILTRATE": false,
-            "STATIC_DEFENSE": false
-          }
-        },
-        "equipment_class": "light_infantry",
-        "equipment_state": {
-          "degraded_heavy": 0,
-          "last_maintenance": null,
-          "maintenance_deficit": 0,
-          "non_operational_heavy": 0,
-          "operational_heavy": 6,
-          "total_heavy": 6
-        },
-        "faction": "RBiH",
-        "force_label": "ARBiH",
-        "home_osid": "op:hadzici:lokve",
-        "hq_sid": "op:hadzici:binjezevo",
-        "id": "arbih_181st_mountain",
-        "kind": "brigade",
-        "location_osid": "op:hadzici:lokve",
-        "max_personnel": 1800,
-        "morale": 60,
-        "name": "181st Mountain",
-        "officer_quality": 0.05,
-        "ops": {
-          "fatigue": 0,
-          "last_supplied_turn": null
-        },
-        "origin_mun": "hadzici",
-        "personnel": 1800,
-        "readiness": "active",
-        "status": "active",
-        "tags": [
-          "corps:arbih_1st_corps",
-          "equip:light_infantry",
-          "mun:hadzici",
           "placement:fixed_home_osid"
         ]
       },
@@ -29194,7 +29120,7 @@
       },
       "hadzici:RBiH": {
         "available": 0,
-        "committed": 5200,
+        "committed": 3400,
         "exhausted": 0,
         "faction": "RBiH",
         "fatigue": 0,
@@ -34476,7 +34402,6 @@
         "arbih_165th_mountain",
         "arbih_17th_muslim_light",
         "arbih_17th_vitezka_mountain",
-        "arbih_181st_mountain",
         "arbih_182nd_vitezka_light",
         "arbih_185th_light",
         "arbih_1st_mountain",
