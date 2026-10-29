@@ -3414,6 +3414,64 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         assert.equal(state.political.political_controllers![objectiveOsid], 'RS');
     });
 
+    it('does not create bot prestaging reservations for a selected manual player under an explicit queue date', () => {
+        const state = makeMinimalState();
+        const command = state.military.corps_command!.arbih_1st_corps!;
+        command.active_operations = [];
+        command.queued_operations = [name];
+        const main = state.military.formations![brigadeId]!;
+        main.location_osid = mainApproachOsid;
+        const support = positionExisting102nd(state);
+        state.military.brigade_movement_orders = {};
+        state.military.brigade_movement_state = {};
+        state.political.political_controllers![stagingOsid] = 'RBiH';
+        state.political.political_controllers![objectiveOsid] = 'RS';
+
+        // The real prestage producer refuses to marshal the selected manual
+        // player, so an explicit queue date must not imply a bot reservation.
+        state.meta.player_faction = 'RBiH' as FactionId;
+        state.meta.turn = 7;
+        assert.deepEqual([...getQueuedDatedPrestageBrigadeIds(state)].sort(), []);
+
+        state.meta.turn = 8;
+        prestageDeferredPrePlannedElites(state);
+        assert.equal(main.location_osid, mainApproachOsid);
+        assert.equal(support.location_osid, supportApproachOsid);
+        assert.equal(state.military.brigade_movement_orders?.[brigadeId], undefined);
+        assert.equal(state.military.brigade_movement_orders?.[supportBrigadeId], undefined);
+        assert.deepEqual(
+            [...getQueuedDatedPrestageBrigadeIds(state)].sort(),
+            [],
+            'a selected manual player must not be reserved for bot prestaging',
+        );
+
+        // Any other selected faction keeps the bot reservation and marches.
+        state.meta.player_faction = 'RS' as FactionId;
+        prestageDeferredPrePlannedElites(state);
+        const authoredIds = [brigadeId, supportBrigadeId].sort();
+        assert.deepEqual([...getQueuedDatedPrestageBrigadeIds(state)].sort(), authoredIds);
+        for (const [authoredId, location] of [
+            [brigadeId, mainApproachOsid],
+            [supportBrigadeId, supportApproachOsid],
+        ] as const) {
+            assert.equal(state.military.formations![authoredId]!.location_osid, location, 'no teleport');
+            assert.deepEqual(state.military.brigade_movement_orders?.[authoredId], {
+                destination_sids: [stagingOsid],
+                stance: 'column',
+                owner: 'authored_preplanned',
+            });
+        }
+
+        // Headless (no selected player) preserves the same bot reservation.
+        delete state.meta.player_faction;
+        prestageDeferredPrePlannedElites(state);
+        assert.deepEqual([...getQueuedDatedPrestageBrigadeIds(state)].sort(), authoredIds);
+
+        // Releasing the queue releases the reservation with it.
+        command.queued_operations = [];
+        assert.deepEqual([...getQueuedDatedPrestageBrigadeIds(state)].sort(), []);
+    });
+
     it('injects at turn 16 only with the exact 831st main / 102nd support axis, no teleport or control flip', () => {
         const state = makeMinimalState();
         state.meta.turn = 15;
