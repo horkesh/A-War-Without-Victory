@@ -4,6 +4,7 @@ const crypto = require('node:crypto');
 const { execFileSync } = require('node:child_process');
 const { _electron: electron } = require('playwright');
 const { startCdpNetworkCollection } = require('./cdp_network_collector.cjs');
+const { attributeBufferedAmbientLoopAborts } = require('./ambient_buffered_loop_proof.cjs');
 
 const repo = path.resolve(__dirname, '..', '..');
 const outDir = path.join(repo, 'tmp-paradox-qa-20260710');
@@ -6505,6 +6506,24 @@ async function readAmbientLifecycleSignals(frame) {
   return frame.evaluate(() => [...(window.__AWWV_QA_AMBIENT_LIFECYCLE_SIGNALS__ ?? [])]);
 }
 
+function attributeBufferedAmbientLoopAbortsThroughProof({
+  enabled,
+  networkFailures,
+  lifecycleSignals,
+  receipt,
+  expectedSidecarPath,
+}) {
+  if (!enabled || !receipt) return [];
+  const result = attributeBufferedAmbientLoopAborts({
+    networkFailures,
+    lifecycleSignals,
+    cdpReceipt: receipt,
+    expectedSidecarPath,
+  });
+  networkFailures.splice(0, networkFailures.length, ...result.remaining);
+  return result.expected;
+}
+
 function classifyExpectedAmbientLifecycleAbort(record, lifecycleSignals) {
   if (record.failure?.errorText !== 'net::ERR_ABORTED'
     || record.method !== 'GET'
@@ -7390,6 +7409,7 @@ async function runFaction(faction, result) {
   officerSuccessionChoiceTranscript = [];
   canonicalAutosavePersistenceAtResumeLoad = null;
   activeMapNavigationAbortWindow = null;
+  const expectedCdpSidecarPath = path.join(evidenceDir, safeName(faction), 'cdp-network-collection-v3.json');
   const userDataDir = path.join(userDataRoot, safeName(`${runSlug}-${faction}`));
   canonicalAutosavePath = packagedExecutablePath
     ? path.join(userDataDir, 'saves', 'autosave.json')
@@ -7403,6 +7423,7 @@ async function runFaction(faction, result) {
   const expectedNavigationAborts = [];
   const expectedTileFetchAborts = [];
   const expectedAmbientLifecycleAborts = [];
+  const expectedBufferedAmbientLoopAborts = [];
   const pageErrors = [];
   const mainProcessStdout = [];
   const mainProcessStderr = [];
@@ -7454,7 +7475,6 @@ async function runFaction(faction, result) {
   try {
     const page = await waitForGamePage(app);
     attachDiagnostics(page);
-    const cdpSidecarPath = path.join(evidenceDir, safeName(faction), 'cdp-network-collection-v3.json');
     await installTileFetchAbortObserverBeforeStartup(page);
     await installAmbientLifecycleObserverBeforeStartup(page);
     const resolvedGameplay = await resolveGameplayFrameAndStartCdpCollection({
@@ -7487,7 +7507,7 @@ async function runFaction(faction, result) {
           artifactIdentity: `${runSlug}/${safeName(faction)}/cdp-network-collection-v3.json`,
           createSession: () => page.context().newCDPSession(resolvedFrame),
         },
-        sidecarPath: cdpSidecarPath,
+        sidecarPath: expectedCdpSidecarPath,
         writeSidecar: (filePath, artifact) => {
           fs.mkdirSync(path.dirname(filePath), { recursive: true });
           writeJsonExclusive(filePath, artifact);
@@ -7584,6 +7604,7 @@ async function runFaction(faction, result) {
     if (saveLoadProof) {
       playtest.saveLoadProof = await exerciseFinalSaveLoad(page, frame, faction, events, userDataDir, maxTurns);
     }
+    const rawNetworkFailures = structuredClone(networkFailures);
     const tileFetchAbortSignals = await readTileFetchAbortSignals(frame);
     attributeTileFetchAborts(networkFailures, tileFetchAbortSignals, expectedTileFetchAborts);
     const ambientLifecycleSignals = await readAmbientLifecycleSignals(frame);
@@ -7599,12 +7620,22 @@ async function runFaction(faction, result) {
     cdpNetworkCollection = cdpFinalization.receipt;
     cdpNetworkCollectionError = cdpFinalization.error;
     if (cdpNetworkCollectionError) throw new Error(cdpNetworkCollectionError);
+    if (collectCdpNetworkV3) {
+      expectedBufferedAmbientLoopAborts.push(...attributeBufferedAmbientLoopAbortsThroughProof({
+        enabled: collectCdpNetworkV3,
+        networkFailures,
+        lifecycleSignals: ambientLifecycleSignals,
+        receipt: cdpNetworkCollection,
+        expectedSidecarPath: expectedCdpSidecarPath,
+      }));
+    }
     const evidenceManifest = finalizeEvidenceManifest(faction, initialEvidence, playtest);
     entry = {
       faction,
       userDataDir,
       consoleMessages,
       pageErrors,
+      rawNetworkFailures,
       networkFailures,
       expectedStartupAborts,
       expectedTeardownAborts,
@@ -7612,6 +7643,7 @@ async function runFaction(faction, result) {
       expectedTileFetchAborts,
       tileFetchAbortSignals,
       expectedAmbientLifecycleAborts,
+      expectedBufferedAmbientLoopAborts,
       ambientLifecycleSignals,
       mainProcessOutputEvidencePath,
       mainProcessStdout,

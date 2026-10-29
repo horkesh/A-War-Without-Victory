@@ -1,4 +1,5 @@
 import assert from 'node:assert';
+import { createHash } from 'node:crypto';
 import * as nodeFs from 'node:fs';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -4475,4 +4476,167 @@ test('short-tour setup can drain the full RS opening decision inventory', () => 
     const harness = readHarness();
 
     assert.match(harness, /'initial-post-map-probe', 40/);
+});
+
+type NativeAudioLoopAdapterInput = {
+    enabled: boolean;
+    networkFailures: any[];
+    lifecycleSignals: any[];
+    receipt: any;
+    expectedSidecarPath: string;
+};
+
+function writeNativeAudioLoopSidecar(artifact: any): { dir: string; path: string; sha256: string } {
+    const dir = mkdtempSync(join(tmpdir(), 'awwv-native-audio-loop-'));
+    const sidecarPath = join(dir, 'cdp-network-collection-v3.json');
+    const bytes = Buffer.from(JSON.stringify(artifact, null, 2), 'utf8');
+    writeFileSync(sidecarPath, bytes);
+    return { dir, path: sidecarPath, sha256: createHash('sha256').update(bytes).digest('hex') };
+}
+
+function nativeAudioLoopFixture(): any {
+    return JSON.parse(readFileSync(join(process.cwd(), 'tests', 'fixtures', 'native_audio_loop_case.json'), 'utf8'));
+}
+
+function loadNativeAudioLoopAdapter(): (input: NativeAudioLoopAdapterInput) => any[] {
+    const checker = nodeRequire('../tools/ui/ambient_buffered_loop_proof.cjs').attributeBufferedAmbientLoopAborts;
+    return loadFunction<(input: NativeAudioLoopAdapterInput) => any[]>(
+        readHarness(),
+        'attributeBufferedAmbientLoopAbortsThroughProof',
+        { attributeBufferedAmbientLoopAborts: checker },
+    );
+}
+
+test('native buffered-loop proof adapter admits a proven ambient abort with full proof and raw evidence intact', () => {
+    const fixture = nativeAudioLoopFixture();
+    const sidecar = writeNativeAudioLoopSidecar(fixture.artifact);
+    try {
+        const adapter = loadNativeAudioLoopAdapter();
+        const rawFailure = structuredClone(fixture.failures[0]);
+        const failures = [rawFailure];
+        const signals = structuredClone(fixture.signals);
+        const signalsBefore = structuredClone(signals);
+        const expected = adapter({
+            enabled: true,
+            networkFailures: failures,
+            lifecycleSignals: signals,
+            receipt: {
+                path: sidecar.path,
+                sha256: sidecar.sha256,
+                schema: fixture.artifact.schema,
+                status: fixture.artifact.status,
+            },
+            expectedSidecarPath: sidecar.path,
+        });
+
+        assert.equal(expected.length, 1, 'the actual checker must admit the retained proven case');
+        assert.equal(failures.length, 0, 'the admitted failure must leave the remaining output array');
+        assert.equal(expected[0].allowlist, 'ambient-buffered-loop-proof-v1');
+        assert.equal(expected[0].url, rawFailure.url);
+        assert.ok(expected[0].bufferedLoopProof, 'the separate expected record must carry the full proof');
+        assert.equal(expected[0].bufferedLoopProof.artifact.path, sidecar.path);
+        assert.equal(expected[0].bufferedLoopProof.artifact.sha256, sidecar.sha256);
+        assert.equal(expected[0].bufferedLoopProof.body.sha256, null);
+        assert.equal(expected[0].bufferedLoopProof.elementId, 'media:1');
+        assert.equal(expected[0].bufferedLoopProof.requestId, '24304.18835');
+        assert.deepEqual(structuredClone(rawFailure), fixture.failures[0], 'raw failure fields must stay byte-identical');
+        assert.equal(Object.prototype.hasOwnProperty.call(rawFailure, 'allowlist'), false);
+        assert.equal(Object.prototype.hasOwnProperty.call(rawFailure, 'bufferedLoopProof'), false);
+        assert.deepEqual(signals, signalsBefore, 'lifecycle signals must not be mutated');
+    } finally {
+        rmSync(sidecar.dir, { recursive: true, force: true });
+    }
+});
+
+test('native buffered-loop proof adapter rejects tampered or absent receipts and leaves unrelated failures raw', () => {
+    const fixture = nativeAudioLoopFixture();
+    const sidecar = writeNativeAudioLoopSidecar(fixture.artifact);
+    try {
+        const adapter = loadNativeAudioLoopAdapter();
+        const validReceipt = {
+            path: sidecar.path,
+            sha256: sidecar.sha256,
+            schema: fixture.artifact.schema,
+            status: fixture.artifact.status,
+        };
+        const run = (failures: any[], receipt: any, expectedSidecarPath: string, enabled = true) => adapter({
+            enabled,
+            networkFailures: failures,
+            lifecycleSignals: structuredClone(fixture.signals),
+            receipt,
+            expectedSidecarPath,
+        });
+
+        const tamperedFailures = [structuredClone(fixture.failures[0])];
+        assert.deepEqual(run(tamperedFailures, { ...validReceipt, sha256: '0'.repeat(64) }, sidecar.path), []);
+        assert.equal(tamperedFailures.length, 1, 'a tampered hash must not remove the raw failure');
+
+        const absentFailures = [structuredClone(fixture.failures[0])];
+        assert.deepEqual(run(absentFailures, null, sidecar.path), []);
+        assert.equal(absentFailures.length, 1, 'an absent receipt must not remove the raw failure');
+
+        const absentPath = join(sidecar.dir, 'absent-sidecar.json');
+        const missingFileFailures = [structuredClone(fixture.failures[0])];
+        assert.deepEqual(run(missingFileFailures, { ...validReceipt, path: absentPath }, absentPath), []);
+        assert.equal(missingFileFailures.length, 1, 'a missing sidecar file must not remove the raw failure');
+
+        const noExpectedPathFailures = [structuredClone(fixture.failures[0])];
+        assert.deepEqual(run(noExpectedPathFailures, validReceipt, undefined as any), []);
+        assert.equal(noExpectedPathFailures.length, 1, 'the receipt path must never stand in for the expected path');
+
+        const disabledFailures = [structuredClone(fixture.failures[0])];
+        assert.deepEqual(run(disabledFailures, validReceipt, sidecar.path, false), []);
+        assert.equal(disabledFailures.length, 1, 'disabled collection must leave every failure raw');
+        assert.equal(disabledFailures[0].url, fixture.failures[0].url);
+
+        const unrelated = { kind: 'http-error', status: 503, url: 'http://127.0.0.1:3002/api/status' };
+        const mixedFailures = [structuredClone(unrelated), structuredClone(fixture.failures[0])];
+        const mixedExpected = run(mixedFailures, validReceipt, sidecar.path);
+        assert.equal(mixedExpected.length, 1);
+        assert.deepEqual(mixedFailures, [unrelated], 'unrelated raw failures must remain untouched');
+    } finally {
+        rmSync(sidecar.dir, { recursive: true, force: true });
+    }
+});
+
+test('runFaction binds native proof after finalize and before publication with an independent sidecar path', () => {
+    const harness = readHarness();
+    const runFaction = extractFunctionSource(harness, 'runFaction');
+
+    const pathDefinition = runFaction.indexOf("const expectedCdpSidecarPath = path.join(evidenceDir, safeName(faction), 'cdp-network-collection-v3.json')");
+    const collectorStart = runFaction.indexOf('await resolveGameplayFrameAndStartCdpCollection');
+    const rawSnapshot = runFaction.indexOf('const rawNetworkFailures = structuredClone(networkFailures)');
+    const tileAttribution = runFaction.indexOf('attributeTileFetchAborts(networkFailures, tileFetchAbortSignals, expectedTileFetchAborts)');
+    const ambientAttribution = runFaction.indexOf('attributeAmbientLifecycleAborts(');
+    const finalize = runFaction.indexOf('const cdpFinalization = await cdpCollectionLifecycle.finalize()');
+    const errorCheck = runFaction.indexOf('if (cdpNetworkCollectionError) throw new Error(cdpNetworkCollectionError)');
+    const adapterCall = runFaction.indexOf('attributeBufferedAmbientLoopAbortsThroughProof(');
+    const manifest = runFaction.indexOf('const evidenceManifest = finalizeEvidenceManifest');
+    const entry = runFaction.indexOf('entry = {');
+    const strictGate = runFaction.indexOf('if (Object.values(runtimeDiagnostics).some');
+
+    assert.ok(pathDefinition >= 0 && pathDefinition < collectorStart, 'the expected sidecar path must be derived before collector startup');
+    assert.ok(rawSnapshot >= 0 && rawSnapshot < tileAttribution, 'raw failures must be snapshotted before tile attribution');
+    assert.ok(rawSnapshot < ambientAttribution, 'raw failures must be snapshotted before ambient attribution');
+    assert.ok(finalize >= 0 && errorCheck > finalize && adapterCall > errorCheck, 'proof must run only after awaited finalize and its fatal error check');
+    assert.ok(manifest > adapterCall && entry > adapterCall, 'proof must precede manifest creation and result publication');
+    assert.ok(strictGate > entry, 'the final runtime gate must run after the proof is published');
+
+    assert.match(runFaction, /sidecarPath: expectedCdpSidecarPath/);
+    assert.match(runFaction, /expectedSidecarPath: expectedCdpSidecarPath/);
+    assert.doesNotMatch(runFaction, /expectedSidecarPath: cdpNetworkCollection\.path/);
+    assert.match(runFaction, /rawNetworkFailures,\s+networkFailures,/);
+    assert.match(runFaction, /expectedAmbientLifecycleAborts,\s+expectedBufferedAmbientLoopAborts,/);
+
+    const catchSource = runFaction.slice(runFaction.indexOf('} catch (error) {'));
+    assert.doesNotMatch(catchSource, /attributeBufferedAmbientLoopAbortsThroughProof/);
+    assert.match(catchSource, /failureRawNetworkFailures/);
+    assert.match(catchSource, /error: String\(error\?\.stack \?\? error\)/);
+    assert.match(catchSource, /throw error;/);
+
+    const adapterSource = extractFunctionSource(harness, 'attributeBufferedAmbientLoopAbortsThroughProof');
+    assert.match(adapterSource, /!enabled \|\| !receipt/);
+    assert.match(adapterSource, /networkFailures\.splice/);
+    assert.doesNotMatch(adapterSource, /receipt\.path/);
+    assert.doesNotMatch(adapterSource, /catch/);
 });
