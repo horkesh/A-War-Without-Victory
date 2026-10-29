@@ -3335,10 +3335,10 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         assert.equal(operation.corps, 'arbih_1st_corps');
         assert.equal(operation.faction, 'RBiH');
         assert.equal(operation.staging_osid, stagingOsid);
-        assert.equal(operation.available_from, 16);
+        assert.equal(operation.available_from, 13);
         assert.equal(operation.enqueue_from, undefined);
         assert.equal(operation.prestage_from, 8);
-        assert.equal(operation.planning_duration, 3);
+        assert.equal(operation.planning_duration, 1);
         assert.equal(operation.minimum_viable_participants, 2);
         assert.equal(operation.minimum_assembled_participants, 2);
         assert.equal(operation.axes.length, 1);
@@ -3432,9 +3432,9 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         assert.ok(getQueuedDatedPrestageBrigadeIds(state).has(supportBrigadeId));
     });
 
-    it('injects at turn 16 only with the exact 831st main / 102nd support axis, no teleport or control flip', () => {
+    it('injects at turn 13 only with the exact 831st main / 102nd support axis, no teleport or control flip', () => {
         const state = makeMinimalState();
-        state.meta.turn = 15;
+        state.meta.turn = 12;
         const command = state.military.corps_command!.arbih_1st_corps!;
         command.active_operations = [];
         command.queued_operations = [name];
@@ -3448,16 +3448,17 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         const mainPosition = main.location_osid;
         const supportPosition = support.location_osid;
 
-        // Turn 15 is still before the authored availability boundary.
+        // Turn 12 is still before the authored availability boundary.
         assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), false);
         assert.equal(command.active_operations.length, 0);
         assert.ok((command as CorpsCommandState).queued_operations?.includes(name));
 
-        state.meta.turn = 16;
+        state.meta.turn = 13;
 
         assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), true);
         const operation = command.active_operations.find((active) => active.name === name);
         assert.ok(operation);
+        assert.equal(operation!.phase, 'planning');
         assert.deepEqual(
             [...operation!.participating_brigades].sort(),
             [brigadeId, supportBrigadeId].sort(),
@@ -3471,7 +3472,7 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         assert.deepEqual(operation!.axes?.[0]?.support_brigades, [supportBrigadeId]);
         assert.deepEqual(operation!.axes?.[0]?.objectives, [objectiveOsid, 'op:foca:donje_zesce']);
         assert.equal(operation!.axes?.[0]?.staging_osid, stagingOsid);
-        assert.equal(operation!.planning_duration, 3);
+        assert.equal(operation!.planning_duration, 1);
         assert.equal(main.location_osid, mainPosition);
         assert.equal(support.location_osid, supportPosition);
         assert.notEqual(main.location_osid, stagingOsid);

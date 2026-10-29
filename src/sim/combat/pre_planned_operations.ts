@@ -1311,17 +1311,17 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         // context only; the exact 102nd assignment, date, and equipment quantities
         // are an explicit model assumption and do not attest a redeployment or
         // stock claim. Startup catalog priority places this undated queue ahead of
-        // Operation Circle; ordinary concentration begins at turn 8 while injection
-        // remains gated at turn 16. Scope stays calibrated and historically unproved.
-        // Control can change only through ordinary combat, so capture is not
-        // guaranteed.
+        // Operation Circle; ordinary concentration begins at turn 8. Earliest actual
+        // physical assembly is turn 13, plus one normal preparation turn; this is
+        // unproved model sequencing, not a historical date claim. Control can change
+        // only through ordinary combat, so capture is not guaranteed.
         corps: 'arbih_1st_corps',
         faction: 'RBiH',
         name: 'Trnovo Eastern Counterattack (Model)',
         staging_osid: 'op:trnovo:delijas',
-        available_from: 16,
+        available_from: 13,
         prestage_from: 8,
-        planning_duration: 3,
+        planning_duration: 1,
         minimum_viable_participants: 2,
         minimum_assembled_participants: 2,
         axes: [
