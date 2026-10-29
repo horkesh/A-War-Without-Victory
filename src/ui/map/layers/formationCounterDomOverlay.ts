@@ -184,8 +184,9 @@ export function renderFormationCounterDomOverlay(args: {
   container.dataset.awwvFormationCounterVisible = args.formationsVisible ? 'true' : 'false';
   container.dataset.awwvCounterRovingKey = rovingKey ?? '';
 
+  let previousButton: HTMLButtonElement | null = null;
   for (const control of controls) {
-    const button = existing.get(control.key) ?? container.ownerDocument.createElement('button');
+    const button: HTMLButtonElement = existing.get(control.key) ?? container.ownerDocument.createElement('button');
     existing.delete(control.key);
     button.type = 'button';
     button.dataset.awwvCounterRovingKey = control.key;
@@ -279,7 +280,10 @@ export function renderFormationCounterDomOverlay(args: {
       badge.style.pointerEvents = 'none';
       button.appendChild(badge);
     }
-    container.appendChild(button);
+    if (button.parentNode !== container || button.previousSibling !== previousButton) {
+      container.insertBefore(button, previousButton ? previousButton.nextSibling : container.firstChild);
+    }
+    previousButton = button;
   }
 
   for (const stale of existing.values()) stale.remove();
