@@ -31,6 +31,7 @@ import { deserializeState, serializeState } from '../src/state/serialize.js';
 import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
 import { turnToISODate } from '../src/ui/map/utils/formatters.js';
 import { resolveCorpsCommanderDisplay } from '../src/ui/map/utils/officerUtils.js';
+import { deriveMaxPersonnel } from '../src/state/formation_constants.js';
 
 test('baked April 1992 startup artifact matches canonical builder truth after checkout normalization', async () => {
     const baseDir = process.cwd();
@@ -537,4 +538,54 @@ test('desktop new campaign preserves default-on SRK strangle containment at birt
 test('startup snapshot validator reports the committed artifact as current', async () => {
     const result = await validateStartupSnapshot(process.cwd(), 'apr_1992');
     assert.strictEqual(result.matches, true);
+}, 120_000);
+
+test('April 1992 RBiH 102nd Motorized carries the bounded 2000-personnel calibration', async () => {
+    const baseDir = process.cwd();
+    const [sourceRaw, artifactState, builderPayload] = await Promise.all([
+        readFile(resolve(baseDir, 'data/source/oob_brigades.json'), 'utf8'),
+        loadStartupSnapshotState(baseDir, 'apr_1992'),
+        buildStartupSnapshotPayload(baseDir, 'apr_1992'),
+    ]);
+    const sourceRows = JSON.parse(sourceRaw) as Array<{
+        id: string;
+        faction?: string;
+        default_equipment_class?: string;
+        initial_personnel?: number;
+        composition?: {
+            infantry?: number;
+            tanks?: number;
+            artillery?: number;
+            aa_systems?: number;
+            tank_condition?: { operational?: number; degraded?: number; non_operational?: number };
+            artillery_condition?: { operational?: number; degraded?: number; non_operational?: number };
+        };
+    }>;
+    const sourceRow = sourceRows.find((row) => row.id === 'arbih_102nd_motorized');
+    assert.ok(sourceRow, 'source OOB should contain arbih_102nd_motorized');
+    assert.strictEqual(sourceRow.faction, 'RBiH');
+    assert.strictEqual(sourceRow.default_equipment_class, 'motorized');
+    assert.strictEqual(sourceRow.initial_personnel, 2000);
+    assert.deepStrictEqual(sourceRow.composition, {
+        infantry: 850,
+        tanks: 8,
+        artillery: 8,
+        aa_systems: 1,
+        tank_condition: { operational: 1, degraded: 0, non_operational: 0 },
+        artillery_condition: { operational: 1, degraded: 0, non_operational: 0 },
+    });
+
+    const builderState = deserializeState(builderPayload);
+    for (const [label, state] of [['artifact', artifactState], ['builder', builderState]] as const) {
+        const formation = state.military.formations['arbih_102nd_motorized'];
+        assert.ok(formation, `${label}: startup should contain arbih_102nd_motorized`);
+        assert.strictEqual(formation.personnel, 2000, `${label}: initial personnel`);
+        assert.strictEqual(formation.composition?.tanks, 8, `${label}: tanks`);
+        assert.strictEqual(formation.composition?.artillery, 8, `${label}: artillery`);
+        assert.strictEqual(formation.equipment_class, 'motorized', `${label}: equipment class`);
+        assert.strictEqual(formation.corps_id, 'arbih_1st_corps', `${label}: corps`);
+        assert.strictEqual(formation.location_osid, 'op:hadzici:binjezevo', `${label}: location`);
+    }
+
+    assert.strictEqual(deriveMaxPersonnel('motorized', 'RBiH'), 2200);
 }, 120_000);

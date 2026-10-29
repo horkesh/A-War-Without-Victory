@@ -2759,7 +2759,7 @@
           "arbih_17th_muslim_light"
         ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 114.67836734693877,
+        "defensive_power": 121.95183673469387,
         "density": 0.42857142857142855,
         "edge_ids": [
           "op:hadzici:binjezevo__op:hadzici:misevici_2",
@@ -12990,7 +12990,7 @@
           "last_supplied_turn": null
         },
         "origin_mun": "hadzici",
-        "personnel": 1800,
+        "personnel": 2000,
         "readiness": "active",
         "status": "active",
         "tags": [
@@ -29195,7 +29195,7 @@
       },
       "hadzici:RBiH": {
         "available": 0,
-        "committed": 4900,
+        "committed": 5100,
         "exhausted": 0,
         "faction": "RBiH",
         "fatigue": 0,
