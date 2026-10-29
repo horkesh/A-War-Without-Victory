@@ -31,6 +31,7 @@ const { attributeBufferedAmbientLoopAborts } = require('../tools/ui/ambient_buff
 };
 
 const ALLOWLIST = 'ambient-buffered-loop-proof-v1';
+const ALLOWLIST_CACHED_RESPONSE = 'ambient-buffered-cached-response-proof-v2';
 const FIXTURE_PATH = join(process.cwd(), 'tests', 'fixtures', 'native_audio_loop_case.json');
 
 type Fixture = {
@@ -269,6 +270,7 @@ function appendSyntheticCycle(parts: Parts, options: {
     timeOffsetMs: number;
     copySignals?: boolean;
     playingDelayMs?: number;
+    sourceSignals?: any[];
 }): { request: any; response: any; failure: any; body: any; signals: any[] } {
     const source = chainOf(parts.artifact, 0);
     const timeOffsetS = options.timeOffsetMs / 1000;
@@ -302,7 +304,7 @@ function appendSyntheticCycle(parts: Parts, options: {
 
     const signals = options.copySignals === false
         ? []
-        : caseSignals(parts).map((signal: any) => {
+        : (options.sourceSignals ?? caseSignals(parts)).map((signal: any) => {
             const copy = clone(signal);
             copy.signalSequence += options.sequenceOffset;
             copy.observedAtMs += options.timeOffsetMs;
@@ -331,6 +333,136 @@ function appendSameAssetFailure(parts: Parts, timeOffsetMs: number): void {
     duplicate.observedAtMs += timeOffsetMs;
     duplicate.requestInitiatedAtMs += timeOffsetMs;
     parts.failures.push(duplicate);
+}
+
+// Retained diagnostic shape of the seventh RBiH media cancellation: the
+// browser received the cached 206 headers 243.233ms after the request and the
+// DOM completed the zero seek 0.027ms after that projected response. These are
+// synthetic unit facts; no value here is a native qualification receipt.
+const SLOW_RESPONSE_LATENCY_MS = 243.233;
+const SLOW_RESPONSE_ALIGN_MS = 0.027;
+
+// Same arithmetic as the checker: browser-projected request epoch plus the
+// ordered protocol request->response delta. Boundary tests derive their target
+// from this value rather than from a decimal constant so float representation of
+// the epoch cannot move the intended 20ms fence.
+function projectedResponseMsOf(chain: any): number {
+    const requestProjectedAtMs = chain.request.wall_time_s * 1000;
+    return requestProjectedAtMs + (chain.response.timestamp - chain.request.timestamp) * 1000;
+}
+
+function alignPostSeekSignals(signals: any[], responseProjectedMs: number, seekedAlignMs: number, playingAlignMs: number): {
+    seeking: any;
+    seeked: any;
+    playing: any;
+} {
+    const seeking = signals.find((signal: any) => signal.kind === 'seeking'
+        && signal.mediaState?.currentTime === 0
+        && signal.mediaState?.seeking === true);
+    const seeked = signals.find((signal: any) => signal.kind === 'seeked'
+        && signal.mediaState?.currentTime === 0);
+    assert.ok(seeking && seeked, 'slow cycle must expose one seeking0/seeked0 pair');
+    const playing = signals.find((signal: any) => signal.kind === 'playing'
+        && signal.mediaState?.currentTime === 0
+        && signal.signalSequence > seeked.signalSequence);
+    assert.ok(playing, 'slow cycle must expose one playing0 after seeked0');
+
+    const deltaMs = responseProjectedMs + seekedAlignMs - seeked.observedAtMs;
+    for (const signal of signals) {
+        if (signal.signalSequence >= seeked.signalSequence) signal.observedAtMs += deltaMs;
+    }
+    seeked.observedAtMs = responseProjectedMs + seekedAlignMs;
+    playing.observedAtMs = responseProjectedMs + playingAlignMs;
+    return { seeking, seeked, playing };
+}
+
+// Convert one retained cycle into the slow cached-response shape in place.
+function slowify(parts: Parts, options: {
+    responseLatencyMs?: number;
+    seekedFromResponseMs?: number;
+    playingFromResponseMs?: number;
+} = {}): { chain: any; seeking: any; seeked: any; playing: any; responseProjectedMs: number } {
+    const latencyMs = options.responseLatencyMs ?? SLOW_RESPONSE_LATENCY_MS;
+    const seekedAlignMs = options.seekedFromResponseMs ?? SLOW_RESPONSE_ALIGN_MS;
+    const playingAlignMs = options.playingFromResponseMs ?? SLOW_RESPONSE_ALIGN_MS;
+    const chain = chainOf(parts.artifact, parts.index);
+    const latencyS = latencyMs / 1000;
+
+    chain.response.timestamp = chain.request.timestamp + latencyS;
+    chain.response.observed_at_ms = chain.request.observed_at_ms + latencyMs;
+    chain.failure.timestamp = chain.response.timestamp + 0.0005;
+    chain.failure.observed_at_ms = chain.response.observed_at_ms + 1;
+    parts.failures[0].observedAtMs = chain.failure.observed_at_ms;
+
+    const responseProjectedMs = projectedResponseMsOf(chain);
+    const aligned = alignPostSeekSignals(caseSignals(parts), responseProjectedMs, seekedAlignMs, playingAlignMs);
+    return { chain, ...aligned, responseProjectedMs };
+}
+
+// Move the completion lifecycle (seeked and everything after it) to a chosen
+// delay measured from the actual seeking event, preserving relative order.
+function setCompletionDelay(parts: Parts, delayMs: number): { seeking: any; seeked: any; playing: any } {
+    const signals = caseSignals(parts);
+    const seeking = signals.find((signal: any) => signal.kind === 'seeking'
+        && signal.mediaState?.currentTime === 0
+        && signal.mediaState?.seeking === true);
+    const seeked = signals.find((signal: any) => signal.kind === 'seeked'
+        && signal.mediaState?.currentTime === 0);
+    const playing = signals.find((signal: any) => signal.kind === 'playing'
+        && signal.mediaState?.currentTime === 0
+        && signal.signalSequence > seeked.signalSequence);
+    assert.ok(seeking && seeked && playing, 'cycle must expose one seeking0/seeked0/playing0');
+    const targetMs = seeking.observedAtMs + delayMs;
+    const deltaMs = targetMs - seeked.observedAtMs;
+    for (const signal of signals) {
+        if (signal.signalSequence >= seeked.signalSequence) signal.observedAtMs += deltaMs;
+    }
+    seeked.observedAtMs = targetMs;
+    playing.observedAtMs = targetMs;
+    return { seeking, seeked, playing };
+}
+
+// Append a separate same-asset slow cycle with its own raw failure.
+function appendSlowCycle(parts: Parts, options: {
+    requestId: string;
+    sequenceOffset: number;
+    timeOffsetMs: number;
+    sourceSignals?: any[];
+    responseLatencyMs?: number;
+    seekedFromResponseMs?: number;
+    playingFromResponseMs?: number;
+}): { request: any; response: any; failure: any; body: any; signals: any[]; rawFailure: any; chain: any } {
+    const latencyMs = options.responseLatencyMs ?? SLOW_RESPONSE_LATENCY_MS;
+    const seekedAlignMs = options.seekedFromResponseMs ?? SLOW_RESPONSE_ALIGN_MS;
+    const playingAlignMs = options.playingFromResponseMs ?? SLOW_RESPONSE_ALIGN_MS;
+    const cycle = appendSyntheticCycle(parts, {
+        requestId: options.requestId,
+        sequenceOffset: options.sequenceOffset,
+        timeOffsetMs: options.timeOffsetMs,
+        sourceSignals: options.sourceSignals,
+    });
+    const latencyS = latencyMs / 1000;
+
+    cycle.response.timestamp = cycle.request.timestamp + latencyS;
+    cycle.response.observed_at_ms = cycle.request.observed_at_ms + latencyMs;
+    cycle.failure.timestamp = cycle.response.timestamp + 0.0005;
+    cycle.failure.observed_at_ms = cycle.response.observed_at_ms + 1;
+
+    const responseProjectedMs = projectedResponseMsOf(cycle);
+    alignPostSeekSignals(cycle.signals, responseProjectedMs, seekedAlignMs, playingAlignMs);
+
+    const rawFailure = clone(fixture.failures[0]);
+    rawFailure.observedAtMs = cycle.failure.observed_at_ms + 1;
+    rawFailure.requestInitiatedAtMs = cycle.request.observed_at_ms;
+    parts.failures.push(rawFailure);
+
+    const chain = {
+        request: cycle.request,
+        response: cycle.response,
+        failure: cycle.failure,
+        body: cycle.body,
+    };
+    return { ...cycle, chain, rawFailure };
 }
 
 function retainOnlyChain(parts: Parts, requestId: string): void {
@@ -1864,6 +1996,341 @@ test('rejects ambiguous mapping when two CDP chains compete in the same request 
     });
     expectNoAdmission(built);
 });
+
+// ---------------------------------------------------------------------------
+// Slow cached-response correlation (v2), outside the 100ms fast completion window
+// ---------------------------------------------------------------------------
+
+function expectedByRequestId(result: AttributionResult, requestId: string): any {
+    return result.expected.find((entry: any) => entry.bufferedLoopProof?.requestId === requestId);
+}
+
+test('admits the slow cached-response loop when seeked/playing align with the projected response', () => {
+    const built = build(0, {
+        mutate: (parts) => {
+            const sourceSignals = caseSignals(parts).filter((signal: any) => signal.signalSequence < 1000);
+            appendSlowCycle(parts, {
+                requestId: '24304.19028',
+                sequenceOffset: 2000,
+                timeOffsetMs: 200000,
+                sourceSignals,
+            });
+        },
+    });
+    const failuresBefore = clone(built.input.networkFailures);
+    const signalsBefore = clone(built.input.lifecycleSignals);
+
+    const result = attributeBufferedAmbientLoopAborts(built.input);
+
+    assert.deepEqual(result.remaining, [], 'both genuinely correlated cycles must be admitted');
+    assert.equal(result.expected.length, 2);
+    const fast = expectedByRequestId(result, '24304.18835');
+    const slow = expectedByRequestId(result, '24304.19028');
+    assert.ok(fast && slow, 'both the fast and slow cycles must be admitted one-to-one');
+    assert.equal(fast.allowlist, ALLOWLIST, 'the fast response keeps the v1 label');
+    assert.equal(fast.bufferedLoopProof.path, 'fast-100ms');
+    assert.equal(slow.allowlist, ALLOWLIST_CACHED_RESPONSE, 'the slow response needs a distinct v2 label');
+    assert.equal(slow.bufferedLoopProof.criterion, ALLOWLIST_CACHED_RESPONSE);
+    assert.equal(slow.bufferedLoopProof.path, 'slow-cached-response');
+
+    const alignment = slow.bufferedLoopProof.responseAlignment;
+    const selected = new Map<number, any>(
+        (built.input.lifecycleSignals as any[]).map((signal: any) => [signal.signalSequence, signal]),
+    );
+    const selectedSeeking = selected.get(slow.bufferedLoopProof.wrap.seekingSequence);
+    const selectedSeeked = selected.get(slow.bufferedLoopProof.wrap.seekedSequence);
+    const selectedPlaying = selected.get(slow.bufferedLoopProof.wrap.playingSequence);
+    assert.ok(selectedSeeking && selectedSeeked && selectedPlaying, 'selected lifecycle sequence IDs must resolve');
+    assert.equal(
+        alignment.latencyMs,
+        slow.bufferedLoopProof.clocks.projectedObservedAtMs.response - slow.bufferedLoopProof.clocks.projectedObservedAtMs.request,
+        'response latency is derived from projected browser clocks',
+    );
+    assert.equal(
+        alignment.seekedFromResponseMs,
+        selectedSeeked.observedAtMs - slow.bufferedLoopProof.clocks.projectedObservedAtMs.response,
+    );
+    assert.equal(
+        alignment.playingFromResponseMs,
+        selectedPlaying.observedAtMs - slow.bufferedLoopProof.clocks.projectedObservedAtMs.response,
+    );
+    assert.equal(
+        alignment.seekedLatencyMs,
+        selectedSeeked.observedAtMs - selectedSeeking.observedAtMs,
+        'total seek latency is measured from the actual seeking event',
+    );
+    assert.equal(
+        alignment.playingLatencyMs,
+        selectedPlaying.observedAtMs - selectedSeeking.observedAtMs,
+        'total playing latency is measured from the actual seeking event',
+    );
+    assert.match(slow.bufferedLoopProof.evidenceScope.statement, /cached 206 headers/);
+    assert.match(slow.bufferedLoopProof.evidenceScope.statement, /does NOT prove/);
+    assert.ok(slow.bufferedLoopProof.selectedSequenceIds.lifecycle.includes(slow.bufferedLoopProof.wrap.seekedSequence));
+    assert.ok(slow.bufferedLoopProof.selectedSequenceIds.lifecycle.includes(slow.bufferedLoopProof.wrap.playingSequence));
+    assert.ok(slow.bufferedLoopProof.selectedSequenceIds.request > 0);
+    assert.equal(typeof slow.bufferedLoopProof.body.state, 'string');
+    assert.equal(slow.bufferedLoopProof.body.sha256, null, 'body evidence must stay honest');
+    assert.deepEqual(built.input.networkFailures, failuresBefore, 'raw failures must stay immutable');
+    assert.deepEqual(built.input.lifecycleSignals, signalsBefore, 'raw signals must stay immutable');
+});
+
+test('keeps legacy fast completion in v1 when cached response headers arrive after 100ms', () => {
+    const built = build(0, {
+        mutate: (parts) => {
+            slowify(parts, { responseLatencyMs: 130 });
+            const completion = setCompletionDelay(parts, 2);
+            assert.ok(completion.seeked.observedAtMs - completion.seeking.observedAtMs <= 100);
+        },
+    });
+    const failuresBefore = clone(built.input.networkFailures);
+    const signalsBefore = clone(built.input.lifecycleSignals);
+
+    const result = attributeBufferedAmbientLoopAborts(built.input);
+
+    assert.deepEqual(result.remaining, []);
+    assert.equal(result.expected.length, 1);
+    assert.equal(result.expected[0].allowlist, ALLOWLIST, 'completion delays select legacy v1 before response latency');
+    const proof = result.expected[0].bufferedLoopProof;
+    assert.equal(proof.path, 'fast-100ms');
+    assert.ok(proof.responseAlignment.latencyMs > 100, 'the cached response really arrived after 100ms');
+    const seeked = (built.input.lifecycleSignals as any[])
+        .find((signal: any) => signal.signalSequence === proof.wrap.seekedSequence);
+    assert.ok(Math.abs(seeked.observedAtMs - proof.clocks.projectedObservedAtMs.response) > 20,
+        'the fast completion is not response-aligned, so v1 cannot be a v2 relabel');
+    assert.deepEqual(built.input.networkFailures, failuresBefore, 'raw failures must stay immutable');
+    assert.deepEqual(built.input.lifecycleSignals, signalsBefore, 'raw signals must stay immutable');
+});
+
+test('keeps a 90ms completion with a 105ms cached response in v1 instead of relabelling v2', () => {
+    const built = build(0, {
+        mutate: (parts) => {
+            slowify(parts, { responseLatencyMs: 105 });
+            const completion = setCompletionDelay(parts, 90);
+            assert.ok(completion.seeked.observedAtMs - completion.seeking.observedAtMs <= 100);
+        },
+    });
+
+    const result = attributeBufferedAmbientLoopAborts(built.input);
+
+    assert.deepEqual(result.remaining, []);
+    assert.equal(result.expected.length, 1);
+    const proof = result.expected[0].bufferedLoopProof;
+    assert.equal(result.expected[0].allowlist, ALLOWLIST, 'a 90ms completion remains legacy v1');
+    assert.equal(proof.path, 'fast-100ms');
+    assert.ok(Math.abs(proof.responseAlignment.seekedFromResponseMs) <= 20, 'the old fast completion is response-eligible but must not be relabelled');
+});
+
+test('pins the signed 20ms response fence for slow cached-response completion', () => {
+    const outside = 20 + 1 / 1024;
+    const cases: Array<{ label: string; seeked: number; playing: number; admit: boolean }> = [
+        { label: 'seeked and playing at +20ms', seeked: 20, playing: 20, admit: true },
+        { label: 'seeked and playing at -20ms', seeked: -20, playing: -20, admit: true },
+        { label: 'seeked and playing just outside +20ms', seeked: outside, playing: outside, admit: false },
+        { label: 'seeked and playing just outside -20ms', seeked: -outside, playing: -outside, admit: false },
+        { label: 'playing just outside +20ms with seeked aligned', seeked: 0, playing: outside, admit: false },
+        { label: 'seeked just outside -20ms with playing inside', seeked: -outside, playing: -20, admit: false },
+    ];
+
+    for (const scenario of cases) {
+        const built = build(0, {
+            mutate: (parts) => {
+                slowify(parts, {
+                    responseLatencyMs: 130,
+                    seekedFromResponseMs: scenario.seeked,
+                    playingFromResponseMs: scenario.playing,
+                });
+            },
+        });
+        const failuresBefore = clone(built.input.networkFailures);
+        const signalsBefore = clone(built.input.lifecycleSignals);
+
+        if (!scenario.admit) {
+            expectNoAdmission(built);
+            continue;
+        }
+
+        const result = attributeBufferedAmbientLoopAborts(built.input);
+        assert.deepEqual(result.remaining, [], scenario.label);
+        assert.equal(result.expected.length, 1, scenario.label);
+        assert.equal(result.expected[0].allowlist, ALLOWLIST_CACHED_RESPONSE, scenario.label);
+        const alignment = result.expected[0].bufferedLoopProof.responseAlignment;
+        assert.equal(alignment.seekedFromResponseMs, scenario.seeked, scenario.label);
+        assert.equal(alignment.playingFromResponseMs, scenario.playing, scenario.label);
+        assert.deepEqual(built.input.networkFailures, failuresBefore, 'raw failures must stay immutable');
+        assert.deepEqual(built.input.lifecycleSignals, signalsBefore, 'raw signals must stay immutable');
+    }
+});
+
+test('admits the slow cached-response loop when only Node delivery clocks shift by 28ms', () => {
+    const built = build(0, {
+        mutate: (parts) => {
+            const slow = slowify(parts);
+            slow.chain.response.observed_at_ms += 28;
+            slow.chain.failure.observed_at_ms += 28;
+            parts.failures[0].observedAtMs += 28;
+        },
+    });
+
+    const result = attributeBufferedAmbientLoopAborts(built.input);
+
+    assert.deepEqual(result.remaining, []);
+    assert.equal(result.expected.length, 1, 'callback lag is not an event-clock disagreement');
+    const proof = result.expected[0].bufferedLoopProof;
+    assert.equal(result.expected[0].allowlist, ALLOWLIST_CACHED_RESPONSE);
+    assert.ok(proof.clocks.deliveryLagMs.response >= 20, 'response delivery lag stays explicit');
+    assert.ok(Math.abs(proof.responseAlignment.latencyMs - SLOW_RESPONSE_LATENCY_MS) < 0.01, 'browser response latency is unchanged by Node delivery');
+});
+
+test('evaluates fast, slow and invalid slow cycles together without inheriting proof', () => {
+    let invalidRaw: any;
+    const built = build(0, {
+        mutate: (parts) => {
+            const sourceSignals = caseSignals(parts).filter((signal: any) => signal.signalSequence < 1000);
+            appendSlowCycle(parts, {
+                requestId: '24304.19028',
+                sequenceOffset: 2000,
+                timeOffsetMs: 200000,
+                sourceSignals,
+            });
+            const invalid = appendSlowCycle(parts, {
+                requestId: '24304.19030',
+                sequenceOffset: 3000,
+                timeOffsetMs: 400000,
+                sourceSignals,
+                playingFromResponseMs: 30,
+            });
+            invalidRaw = invalid.rawFailure;
+        },
+    });
+
+    const result = attributeBufferedAmbientLoopAborts(built.input);
+
+    assert.equal(result.expected.length, 2, 'only the fast and aligned slow cycles may be admitted');
+    assert.equal(expectedByRequestId(result, '24304.18835')?.allowlist, ALLOWLIST);
+    assert.equal(expectedByRequestId(result, '24304.19028')?.allowlist, ALLOWLIST_CACHED_RESPONSE);
+    assert.equal(expectedByRequestId(result, '24304.19030'), undefined, 'the misaligned cycle must not inherit another proof');
+    assert.deepEqual(result.remaining, [invalidRaw], 'the invalid cycle stays raw');
+});
+
+test('rejects a slow window made ambiguous by a second same-asset correlated chain', () => {
+    const built = build(0, {
+        mutate: (parts) => {
+            const sourceSignals = caseSignals(parts).filter((signal: any) => signal.signalSequence < 1000);
+            const slow = appendSlowCycle(parts, {
+                requestId: '24304.19028',
+                sequenceOffset: 2000,
+                timeOffsetMs: 200000,
+                sourceSignals,
+            });
+            const duplicate = appendSyntheticCycle(parts, {
+                requestId: '24304.19029',
+                sequenceOffset: 3000,
+                timeOffsetMs: 200000,
+                copySignals: false,
+            });
+            // Genuine temporal competitor: same request window, same projected
+            // response and the same terminal failure clock as the slow chain.
+            duplicate.failure.observed_at_ms = slow.chain.failure.observed_at_ms;
+        },
+    });
+
+    const result = attributeBufferedAmbientLoopAborts(built.input);
+
+    assert.equal(result.expected.length, 1, 'only the fast cycle is unambiguous');
+    assert.equal(result.expected[0].bufferedLoopProof.requestId, '24304.18835');
+    assert.deepEqual(result.remaining, [built.input.networkFailures[1]], 'the ambiguous slow request stays raw');
+});
+
+defineNegatives([
+    {
+        name: 'rejects a fast response whose seeked/playing completion lands after the 100ms window',
+        mutate: (parts) => {
+            const seeking = seekSignal(parts);
+            const seeked = seekedOf(parts);
+            const canplay = caseSignals(parts, 'canplay')[0];
+            const playing = playAfterSeek(parts);
+            seeked.observedAtMs = seeking.observedAtMs + 150;
+            canplay.observedAtMs = seeking.observedAtMs + 150;
+            playing.observedAtMs = seeking.observedAtMs + 150;
+            assert.ok(seekedOf(parts).observedAtMs > seeking.observedAtMs);
+        },
+    },
+    {
+        name: 'rejects slow-response seeked/playing landing 25ms after the projected response',
+        mutate: (parts) => {
+            slowify(parts, { seekedFromResponseMs: 25, playingFromResponseMs: 25 });
+        },
+    },
+    {
+        name: 'rejects slow-response seeked/playing landing 25ms before the projected response',
+        mutate: (parts) => {
+            slowify(parts, { seekedFromResponseMs: -25, playingFromResponseMs: -25 });
+        },
+    },
+    {
+        name: 'rejects a slow response with no projected response timestamp',
+        mutate: (parts) => {
+            slowify(parts);
+            delete chainOf(parts.artifact, parts.index).response.timestamp;
+        },
+    },
+    {
+        name: 'rejects a slow response with a non-finite browser-projected clock',
+        mutate: (parts) => {
+            slowify(parts);
+            chainOf(parts.artifact, parts.index).response.timestamp = Number.POSITIVE_INFINITY;
+        },
+    },
+    {
+        name: 'rejects a slow response projected before its own request',
+        mutate: (parts) => {
+            slowify(parts);
+            const chain = chainOf(parts.artifact, parts.index);
+            chain.response.timestamp = chain.request.timestamp - 0.2;
+        },
+    },
+    {
+        name: 'rejects a slow window with a sourceEpoch change after the seek',
+        mutate: (parts) => {
+            slowify(parts);
+            seekedOf(parts).sourceEpoch = 2;
+        },
+    },
+    {
+        name: 'rejects a slow window with a gapped buffered range',
+        mutate: (parts) => {
+            slowify(parts);
+            setRanges(parts, 'buffered', [[-0.002667, 10], [20, 30]]);
+        },
+    },
+    {
+        name: 'rejects a slow window interrupted by a media error',
+        mutate: (parts) => {
+            slowify(parts);
+            const playing = playAfterSeek(parts);
+            playing.kind = 'error';
+            playing.mediaState.mediaError = { code: 2, message: 'MEDIA_ERR_NETWORK' };
+        },
+    },
+    {
+        name: 'rejects a slow window whose confirmation never advances',
+        mutate: (parts) => {
+            slowify(parts);
+            finalSample(parts).mediaState.currentTime = 0;
+        },
+    },
+    {
+        name: 'rejects a slow window closed before the projected response',
+        mutate: (parts) => {
+            slowify(parts);
+        },
+        windowMutate: (parts) => {
+            const seeked = seekedOf(parts);
+            parts.artifact.observation_window.closed_at_ms = seeked.observedAtMs - 30;
+        },
+    },
+]);
 
 test('a rejected retained case leaves the unrelated raw failure and fixture provenance untouched', () => {
     const built = build(1, {

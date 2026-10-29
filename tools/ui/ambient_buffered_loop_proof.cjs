@@ -12,6 +12,13 @@ const fs = require('node:fs');
 const crypto = require('node:crypto');
 
 const ALLOWLIST = 'ambient-buffered-loop-proof-v1';
+// Separately named acceptance for cancellations whose cached 206 response
+// arrives after the 100ms fast completion window. It proves only that the
+// expected cached-loop cancellation is response-correlated; it never claims a
+// completed transfer or gap-free audio.
+const ALLOWLIST_CACHED_RESPONSE = 'ambient-buffered-cached-response-proof-v2';
+const FAST_PATH = 'fast-100ms';
+const SLOW_CACHED_RESPONSE_PATH = 'slow-cached-response';
 const COLLECTOR_SCHEMA = 'awwv.r8-warroom.cdp-network-collection.v3';
 const SHA256_HEX = /^[0-9a-f]{64}$/;
 const ASSET_PATH = /^\/assets\/ambient_(?:warroom|field|archive)-[A-Za-z0-9_-]+\.ogg$/;
@@ -667,12 +674,46 @@ function buildProof(rawFailure, chain, signals, sidecar, clockProjection) {
     const seekAlignmentMs = seeking.observedAtMs - clockProjection.projectedObservedAtMs.request;
     if (Math.abs(seekAlignmentMs) > CLOCK_FENCE_MS) return null;
 
+    // The browser-projected cached-response latency decides which of the two
+    // criteria applies. It is derived only from the protocol request wall clock
+    // and protocol response timestamp; Node delivery clocks never participate.
+    const responseLatencyMs = clockProjection.projectedObservedAtMs.response
+        - clockProjection.projectedObservedAtMs.request;
+    if (!isFiniteNumber(responseLatencyMs) || responseLatencyMs < 0) return null;
+
     const seekedDelayMs = seeked.observedAtMs - seeking.observedAtMs;
-    if (seekedDelayMs < 0 || seekedDelayMs > SEEK_EVENT_MS) return null;
-    // Both seeked0 and playing0 must land inside one 100ms window measured from
-    // the correlated seeking0, not 100ms from each other.
     const playingDelayMs = playing.observedAtMs - seeking.observedAtMs;
-    if (playingDelayMs < 0 || playingDelayMs > SEEK_EVENT_MS) return null;
+    if (!isFiniteNumber(seekedDelayMs) || seekedDelayMs < 0) return null;
+    if (!isFiniteNumber(playingDelayMs) || playingDelayMs < 0) return null;
+
+    let acceptancePath;
+    let seekedFromResponseMs = null;
+    let playingFromResponseMs = null;
+    if (seekedDelayMs <= SEEK_EVENT_MS && playingDelayMs <= SEEK_EVENT_MS) {
+        // Legacy fast path, selected first by completion delay alone: both
+        // seeked0 and playing0 must land inside one 100ms window measured from
+        // the correlated seeking0, not 100ms from each other. A later cached
+        // response header arrival must not relabel an otherwise valid v1 proof.
+        acceptancePath = FAST_PATH;
+    } else {
+        // Slow cached-response path is available only outside the fast
+        // completion window. A fast response with late completion stays
+        // rejected rather than being rescued by response correlation.
+        if (responseLatencyMs <= SEEK_EVENT_MS) return null;
+        // The completion must be uniquely correlated with the exact projected
+        // response, signed within the existing 20ms fence in either direction.
+        seekedFromResponseMs = seeked.observedAtMs - clockProjection.projectedObservedAtMs.response;
+        playingFromResponseMs = playing.observedAtMs - clockProjection.projectedObservedAtMs.response;
+        if (!isFiniteNumber(seekedFromResponseMs)) return null;
+        if (!isFiniteNumber(playingFromResponseMs)) return null;
+        if (Math.abs(seekedFromResponseMs) > CLOCK_FENCE_MS) return null;
+        if (Math.abs(playingFromResponseMs) > CLOCK_FENCE_MS) return null;
+        acceptancePath = SLOW_CACHED_RESPONSE_PATH;
+    }
+
+    const allowlist = acceptancePath === SLOW_CACHED_RESPONSE_PATH
+        ? ALLOWLIST_CACHED_RESPONSE
+        : ALLOWLIST;
 
     const continuationElapsedS = (confirmation.observedAtMs - seeked.observedAtMs) / 1000;
     if (!isFiniteNumber(continuationElapsedS) || continuationElapsedS < 0) return null;
@@ -698,6 +739,24 @@ function buildProof(rawFailure, chain, signals, sidecar, clockProjection) {
         sourceEpoch,
         url: rawFailure.url,
         origin,
+        // The acceptance path and allowlist are explicit, so a slow cached
+        // response can never be relabelled as the legacy fast proof.
+        path: acceptancePath,
+        criterion: allowlist,
+        allowlist,
+        responseAlignment: {
+            latencyMs: responseLatencyMs,
+            seekedLatencyMs: seekedDelayMs,
+            playingLatencyMs: playingDelayMs,
+            seekedFromResponseMs,
+            playingFromResponseMs,
+        },
+        evidenceScope: {
+            receivedCachedHeaders: true,
+            completedTransfer: false,
+            gapFreeAudio: false,
+            statement: 'The browser received cached 206 headers for the correlated loop request; this does NOT prove a completed transfer or uninterrupted, gap-free audio.',
+        },
         selectedSequenceIds: {
             request: request.sequence,
             response: response.sequence,
@@ -729,6 +788,9 @@ function buildProof(rawFailure, chain, signals, sidecar, clockProjection) {
             wrapElapsedS: elapsedToSeekS,
             wrapPredictedRemainingS: predictedRemainingS,
             wrapDeltaS: elapsedToSeekS - predictedRemainingS,
+            responseLatencyMs,
+            seekedFromResponseMs,
+            playingFromResponseMs,
             seekedDelayMs,
             playingDelayMs,
             continuationElapsedS,
@@ -870,7 +932,7 @@ function attributeBufferedAmbientLoopAborts(input = {}) {
         if (attribution && claims.get(attribution.requestId) === 1) {
             expected.push({
                 ...decision.rawFailure,
-                allowlist: ALLOWLIST,
+                allowlist: attribution.proof.allowlist,
                 bufferedLoopProof: attribution.proof,
             });
         } else {
