@@ -1400,6 +1400,38 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
+        // Owner-authorized UNADOPTED model sequencing experiment. This is a
+        // late-force assembly after the earlier actual commitments, not an
+        // attested historical operation, date, redeployment, or stock claim.
+        // The 102nd is the axis main; the 831st and 851st are support. No
+        // scheduler, gate, purchase, or front-allocation behavior is added.
+        // Capture remains ordinary-combat contingent and is not guaranteed.
+        corps: 'arbih_1st_corps',
+        faction: 'RBiH',
+        name: 'Late Corridor Concentration (Model)',
+        staging_osid: 'op:foca:mazlina',
+        available_from: 32,
+        enqueue_from: 32,
+        prestage_from: 32,
+        planning_duration: 3,
+        minimum_viable_participants: 3,
+        minimum_assembled_participants: 3,
+        axes: [
+            {
+                axis_id: 'late_corridor_concentration',
+                name: 'Late Corridor Concentration',
+                brigades: [
+                    'arbih_102nd_motorized',
+                    'arbih_831st_drina_lineage',
+                    'arbih_851st_vitezka_liberation',
+                ],
+                objectives: ['op:foca:donje_zesce'],
+                staging_osid: 'op:foca:mazlina',
+                minimum_forward_brigades: 3,
+            },
+        ],
+    },
+    {
         // Owner-directed chronology: the Cerska/Srebrenica contact is established
         // during summer 1992 and must still be present at the January checkpoint.
         // This is deliberately an ordinary operation: no scripted control change,

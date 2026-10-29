@@ -829,7 +829,7 @@ describe('pre-planned operations', () => {
     });
 
     it('defines the current pre-planned operation catalog', () => {
-        assert.equal(_ALL_PRE_PLANNED.length, 32);
+        assert.equal(_ALL_PRE_PLANNED.length, 33);
         assert.deepEqual(
             _ALL_PRE_PLANNED.map((def) => def.name),
             [
@@ -863,6 +863,7 @@ describe('pre-planned operations', () => {
                 'Trnovo Eastern Counterattack (Model)',
                 'Operation Circle',
                 'Gorazde Local Counterattack (Model)',
+                'Late Corridor Concentration (Model)',
                 'Srebrenica–Cerska Link-Up',
                 'Maglaj Local Counterattack',
                 'Central Bosnia Counteroffensive',
@@ -3292,6 +3293,156 @@ describe('Gorazde Local Counterattack (Model)', () => {
         assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), false);
         assert.equal(command.active_operations.length, 0);
         assert.equal(state.political.political_controllers!['op:gorazde:kamen'], 'RS');
+    });
+});
+
+describe('Late Corridor Concentration (Model)', () => {
+    const name = 'Late Corridor Concentration (Model)';
+    const mainId = 'arbih_102nd_motorized';
+    const supportIds = ['arbih_831st_drina_lineage', 'arbih_851st_vitezka_liberation'];
+    const stagingOsid = 'op:foca:mazlina';
+    const objectiveOsid = 'op:foca:donje_zesce';
+
+    function preparedState(turn = 32) {
+        const state = makeMinimalState();
+        state.meta.turn = turn;
+        const command = state.military.corps_command!.arbih_1st_corps!;
+        command.active_operations = [];
+        command.queued_operations = [name];
+        for (const brigadeId of [mainId, ...supportIds]) {
+            const formation = state.military.formations![brigadeId]!;
+            formation.personnel = 1000;
+            formation.status = 'active';
+            formation.location_osid = stagingOsid;
+            formation.disrupted_turns = 0;
+        }
+        state.political.political_controllers![stagingOsid] = 'RBiH';
+        state.political.political_controllers![objectiveOsid] = 'RS';
+        return { state, command };
+    }
+
+    it('authors the exact unadopted dates, roster, and minima without combat overrides', () => {
+        const operation = _ALL_PRE_PLANNED.find((def) => def.name === name);
+        assert.ok(operation);
+        assert.equal(operation.corps, 'arbih_1st_corps');
+        assert.equal(operation.faction, 'RBiH');
+        assert.equal(operation.staging_osid, stagingOsid);
+        assert.equal(operation.available_from, 32);
+        assert.equal(operation.enqueue_from, 32);
+        assert.equal(operation.prestage_from, 32);
+        assert.equal(operation.planning_duration, 3);
+        assert.equal(operation.minimum_viable_participants, 3);
+        assert.equal(operation.minimum_assembled_participants, 3);
+        assert.deepEqual(operation.axes, [
+            {
+                axis_id: 'late_corridor_concentration',
+                name: 'Late Corridor Concentration',
+                brigades: [mainId, ...supportIds],
+                objectives: [objectiveOsid],
+                staging_osid: stagingOsid,
+                minimum_forward_brigades: 3,
+            },
+        ]);
+        for (const excluded of [
+            'min_attack_outcome',
+            'execution_attack_power_mult',
+            'coordinated_advance',
+            'sync_operation_name',
+        ]) {
+            assert.equal((operation as any)[excluded], undefined);
+        }
+    });
+
+    it('stays unqueued and unmoved at turn 31, then injects the three-brigade axis at turn 32', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 31;
+        const command = state.military.corps_command!.arbih_1st_corps!;
+        command.active_operations = [];
+        // Keep an explicit empty queue: makeMinimalState's pre-existing undated
+        // Trnovo concentration is not a new Late Corridor enrollment. Existing
+        // plans may still own their pre-turn-32 marching behavior.
+        command.queued_operations = [];
+        const main = state.military.formations![mainId]!;
+        main.personnel = 1000;
+        state.political.political_controllers![stagingOsid] = 'RBiH';
+        state.political.political_controllers![objectiveOsid] = 'RS';
+
+        prestageDeferredPrePlannedElites(state);
+
+        assert.ok(!command.queued_operations?.includes(name));
+        assert.ok(!command.active_operations.some((operation) => operation.name === name));
+        assert.ok(!getHeadQueuedPrePlannedBrigadeIds(state).has(mainId));
+        assert.ok(!getQueuedDatedPrestageBrigadeIds(state).has(mainId));
+        assert.equal(state.military.brigade_movement_orders?.[mainId], undefined);
+
+        state.meta.turn = 32;
+        prestageDeferredPrePlannedElites(state);
+        assert.ok(command.queued_operations?.includes(name));
+        command.queued_operations = [name];
+        const controllersBefore = {
+            staging: state.political.political_controllers![stagingOsid],
+            objective: state.political.political_controllers![objectiveOsid],
+        };
+        const positionsBefore = new Map(
+            [mainId, ...supportIds].map((brigadeId) => [
+                brigadeId,
+                state.military.formations![brigadeId]!.location_osid,
+            ]),
+        );
+
+        assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), true);
+        const operation = command.active_operations.find((active) => active.name === name);
+        assert.ok(operation);
+        assert.deepEqual(
+            [...operation.participating_brigades].sort(),
+            [mainId, ...supportIds].sort(),
+        );
+        assert.equal(operation.axes?.length, 1);
+        assert.deepEqual(operation.axes?.[0]?.assigned_brigades, [mainId, ...supportIds]);
+        assert.equal(operation.axes?.[0]?.main_brigade, mainId);
+        assert.deepEqual(operation.axes?.[0]?.support_brigades, supportIds);
+        assert.deepEqual(operation.axes?.[0]?.objectives, [objectiveOsid]);
+        assert.equal(operation.axes?.[0]?.staging_osid, stagingOsid);
+        assert.equal(operation.axes?.[0]?.minimum_forward_brigades, 3);
+        assert.equal(operation.planning_duration, 3);
+        assert.equal(state.political.political_controllers![stagingOsid], controllersBefore.staging);
+        assert.equal(state.political.political_controllers![objectiveOsid], controllersBefore.objective);
+        for (const brigadeId of [mainId, ...supportIds]) {
+            assert.equal(state.military.formations![brigadeId]!.location_osid, positionsBefore.get(brigadeId));
+        }
+    });
+
+    it('refuses admission when the third viable participant is missing', () => {
+        const { state, command } = preparedState(32);
+        state.military.formations![supportIds[1]!]!.personnel = 0;
+
+        assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), false);
+        assert.equal(command.active_operations.length, 0);
+        assert.ok(command.queued_operations?.includes(name));
+        assert.equal(state.political.political_controllers![objectiveOsid], 'RS');
+        assert.equal(state.political.political_controllers![stagingOsid], 'RBiH');
+    });
+
+    it('honours an explicit RBiH decline and withholds the late concentration', () => {
+        const { state, command } = preparedState(32);
+        state.meta.player_faction = 'RBiH' as FactionId;
+        state.meta.pending_proposal_reviews = [{
+            id: 'PROP_0_historical_op_preplanned_arbih_1st_corps_late_corridor_concentration',
+            turn: state.meta.turn,
+            faction: 'RBiH' as FactionId,
+            domain: 'ops',
+            description: 'Late Corridor Concentration (Model) - declined by the president.',
+            proposed_action: 'HISTORICAL_OP:preplanned:arbih_1st_corps:Late Corridor Concentration (Model)',
+            current_value: 'awaiting_authorization',
+            proposed_value: 'authorize',
+            accepted: false,
+            resolved_turn: state.meta.turn,
+        } as never];
+
+        assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), false);
+        assert.equal(command.active_operations.length, 0);
+        assert.equal(state.political.political_controllers![objectiveOsid], 'RS');
+        assert.equal(state.political.political_controllers![stagingOsid], 'RBiH');
     });
 });
 
