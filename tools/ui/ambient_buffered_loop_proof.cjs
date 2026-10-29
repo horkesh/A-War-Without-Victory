@@ -792,12 +792,18 @@ function attributeFailure(rawFailure, chains, signals, target, sidecar, observat
     if (asset.url.hostname !== target.hostname) return null;
     if (asset.url.port !== target.port) return null;
 
+    // One asset may be observed by many otherwise valid CDP chains across the
+    // capture. Correlate each URL-matching chain with this raw request's clocks
+    // first, then require exactly one such chain. Zero or multiple correlated
+    // chains stay raw, even if only one of them would later pass buildProof.
     const candidates = chains.filter((chain) => chain.url === asset.canonical);
-    if (candidates.length !== 1) return null;
-    const chain = candidates[0];
-
-    const clockProjection = projectClocks(chain, rawFailure, observationWindow);
-    if (!clockProjection) return null;
+    const correlated = [];
+    for (const candidate of candidates) {
+        const clockProjection = projectClocks(candidate, rawFailure, observationWindow);
+        if (clockProjection) correlated.push({ chain: candidate, clockProjection });
+    }
+    if (correlated.length !== 1) return null;
+    const { chain, clockProjection } = correlated[0];
 
     const proof = buildProof(rawFailure, chain, signals, sidecar, clockProjection);
     if (!proof) return null;

@@ -259,6 +259,85 @@ function historySignal(options: {
     };
 }
 
+// Synthetic unit-only same-asset cycle. It clones the first retained chain and
+// its lifecycle signals, then translates both onto a separate well-formed
+// clock interval. This is test-local data only; the portable fixture JSON stays
+// byte-exact and no real capture is relabelled with these timestamps.
+function appendSyntheticCycle(parts: Parts, options: {
+    requestId: string;
+    sequenceOffset: number;
+    timeOffsetMs: number;
+    copySignals?: boolean;
+    playingDelayMs?: number;
+}): { request: any; response: any; failure: any; body: any; signals: any[] } {
+    const source = chainOf(parts.artifact, 0);
+    const timeOffsetS = options.timeOffsetMs / 1000;
+
+    const request = clone(source.request);
+    request.request_id = options.requestId;
+    request.sequence = source.request.sequence + options.sequenceOffset;
+    request.timestamp = source.request.timestamp + timeOffsetS;
+    request.wall_time_s = source.request.wall_time_s + timeOffsetS;
+    request.observed_at_ms = source.request.observed_at_ms + options.timeOffsetMs;
+
+    const response = clone(source.response);
+    response.request_id = options.requestId;
+    response.sequence = source.response.sequence + options.sequenceOffset;
+    response.timestamp = source.response.timestamp + timeOffsetS;
+    response.observed_at_ms = source.response.observed_at_ms + options.timeOffsetMs;
+
+    const failure = clone(source.failure);
+    failure.request_id = options.requestId;
+    failure.sequence = source.failure.sequence + options.sequenceOffset;
+    failure.timestamp = source.failure.timestamp + timeOffsetS;
+    failure.observed_at_ms = source.failure.observed_at_ms + options.timeOffsetMs;
+
+    const body = clone(source.body);
+    body.request_id = options.requestId;
+    body.trigger_sequence = failure.sequence;
+    body.settled_sequence = source.body.settled_sequence + options.sequenceOffset;
+
+    parts.artifact.events.push(request, response, failure);
+    parts.artifact.body_attempts.push(body);
+
+    const signals = options.copySignals === false
+        ? []
+        : caseSignals(parts).map((signal: any) => {
+            const copy = clone(signal);
+            copy.signalSequence += options.sequenceOffset;
+            copy.observedAtMs += options.timeOffsetMs;
+            return copy;
+        });
+
+    if (options.playingDelayMs !== undefined && signals.length > 0) {
+        const seeking = signals.find((signal: any) => signal.kind === 'seeking'
+            && signal.mediaState?.currentTime === 0
+            && signal.mediaState?.seeking === true);
+        const playing = seeking
+            ? signals.find((signal: any) => signal.kind === 'playing'
+                && signal.mediaState?.currentTime === 0
+                && signal.signalSequence > seeking.signalSequence)
+            : undefined;
+        assert.ok(seeking && playing, 'synthetic cycle must expose one seeking0/playing0 pair');
+        playing.observedAtMs = seeking.observedAtMs + options.playingDelayMs;
+    }
+
+    parts.signals.push(...signals);
+    return { request, response, failure, body, signals };
+}
+
+function appendSameAssetFailure(parts: Parts, timeOffsetMs: number): void {
+    const duplicate = clone(parts.failures[0]);
+    duplicate.observedAtMs += timeOffsetMs;
+    duplicate.requestInitiatedAtMs += timeOffsetMs;
+    parts.failures.push(duplicate);
+}
+
+function retainOnlyChain(parts: Parts, requestId: string): void {
+    parts.artifact.events = parts.artifact.events.filter((event: any) => event.request_id === requestId);
+    parts.artifact.body_attempts = parts.artifact.body_attempts.filter((attempt: any) => attempt.request_id === requestId);
+}
+
 function build(index: number, options: {
     mutate?: (parts: Parts) => void;
     windowMutate?: (parts: Parts) => void;
@@ -1625,6 +1704,126 @@ defineNegatives([
 ]);
 
 // ---------------------------------------------------------------------------
+// Per-request same-asset cycle correlation
+// ---------------------------------------------------------------------------
+
+test('admits two distinct same-asset cycles one-to-one under their request clocks', () => {
+    const built = build(0, {
+        mutate: (parts) => {
+            appendSyntheticCycle(parts, {
+                requestId: '24304.30001',
+                sequenceOffset: 1000,
+                timeOffsetMs: 100000,
+            });
+            appendSameAssetFailure(parts, 100000);
+        },
+    });
+    const failuresBefore = clone(built.input.networkFailures);
+    const signalsBefore = clone(built.input.lifecycleSignals);
+    const eventsBefore = clone(built.parts.artifact.events);
+
+    const result = attributeBufferedAmbientLoopAborts(built.input);
+
+    assert.deepEqual(result.remaining, []);
+    assert.equal(result.expected.length, 2);
+    const requestIds = result.expected
+        .map((entry: any) => entry.bufferedLoopProof.requestId)
+        .sort();
+    assert.deepEqual(requestIds, ['24304.18835', '24304.30001']);
+    for (const entry of result.expected) {
+        assert.equal(entry.allowlist, ALLOWLIST);
+        assert.equal(entry.bufferedLoopProof.artifact.sha256, built.sha256);
+        assert.equal(entry.bufferedLoopProof.elementId, 'media:1');
+        assert.equal(entry.bufferedLoopProof.sourceEpoch, 1);
+    }
+    assert.deepEqual(built.input.networkFailures, failuresBefore, 'raw failures must stay immutable');
+    assert.deepEqual(built.input.lifecycleSignals, signalsBefore, 'signals must stay immutable');
+    assert.deepEqual(built.parts.artifact.events, eventsBefore, 'sidecar events must stay immutable');
+
+    // Reversing the raw failures must not change which request each one maps to.
+    const [baseFailure, shiftedFailure] = built.input.networkFailures;
+    const reversed = clone(built.input);
+    reversed.networkFailures = [clone(shiftedFailure), clone(baseFailure)];
+    const reversedResult = attributeBufferedAmbientLoopAborts(reversed);
+    assert.equal(reversedResult.expected.length, 2);
+    const mapping = new Map<number, string>(reversedResult.expected.map((entry: any) => [
+        entry.observedAtMs,
+        entry.bufferedLoopProof.requestId,
+    ]));
+    assert.equal(mapping.get(baseFailure.observedAtMs), '24304.18835');
+    assert.equal(mapping.get(shiftedFailure.observedAtMs), '24304.30001');
+});
+
+test('rejects two individually eligible same-asset chains in one request window', () => {
+    const addCompeting = (parts: Parts): void => {
+        appendSyntheticCycle(parts, {
+            requestId: '24304.30003',
+            sequenceOffset: 1000,
+            timeOffsetMs: 0,
+            copySignals: false,
+        });
+    };
+
+    const both = build(0, { mutate: addCompeting });
+    expectNoAdmission(both);
+
+    const firstOnly = build(0, {
+        mutate: (parts) => {
+            addCompeting(parts);
+            retainOnlyChain(parts, '24304.18835');
+        },
+    });
+    const firstResult = attributeBufferedAmbientLoopAborts(firstOnly.input);
+    assert.equal(firstResult.expected.length, 1, 'first chain must be individually eligible');
+    assert.equal(firstResult.expected[0].bufferedLoopProof.requestId, '24304.18835');
+
+    const secondOnly = build(0, {
+        mutate: (parts) => {
+            addCompeting(parts);
+            retainOnlyChain(parts, '24304.30003');
+        },
+    });
+    const secondResult = attributeBufferedAmbientLoopAborts(secondOnly.input);
+    assert.equal(secondResult.expected.length, 1, 'second chain must be individually eligible');
+    assert.equal(secondResult.expected[0].bufferedLoopProof.requestId, '24304.30003');
+});
+
+test('rejects both duplicate failures that claim one eligible chain', () => {
+    const built = build(0, {
+        mutate: (parts) => {
+            parts.failures.push(clone(parts.failures[0]));
+        },
+    });
+
+    const result = expectNoAdmission(built);
+
+    assert.equal(result.remaining.length, 2, 'neither duplicate claim may be admitted');
+});
+
+test('keeps an over-100ms same-asset cycle raw while admitting the unrelated proven cycle', () => {
+    const built = build(0, {
+        mutate: (parts) => {
+            appendSyntheticCycle(parts, {
+                requestId: '24304.30004',
+                sequenceOffset: 1000,
+                timeOffsetMs: 100000,
+                playingDelayMs: 150,
+            });
+            appendSameAssetFailure(parts, 100000);
+        },
+    });
+    const baseFailure = clone(built.input.networkFailures[0]);
+    const badFailure = clone(built.input.networkFailures[1]);
+
+    const result = attributeBufferedAmbientLoopAborts(built.input);
+
+    assert.equal(result.expected.length, 1, 'only the fully proven cycle may be admitted');
+    assert.equal(result.expected[0].bufferedLoopProof.requestId, '24304.18835');
+    assert.deepEqual(result.remaining, [badFailure], 'the 150ms cycle must stay raw');
+    assert.deepEqual(built.input.networkFailures, [baseFailure, badFailure], 'both raw failures must stay immutable');
+});
+
+// ---------------------------------------------------------------------------
 // Cross-failure mapping: ambiguous reuse and unrelated survival
 // ---------------------------------------------------------------------------
 
@@ -1642,7 +1841,7 @@ test('rejects a CDP chain reused across two retained failures so neither is admi
     expectNoAdmission(built);
 });
 
-test('rejects ambiguous mapping when two CDP chains project onto the same retained asset', () => {
+test('rejects ambiguous mapping when two CDP chains compete in the same request window', () => {
     const built = build(0, {
         failures: 'both',
         mutate: (parts) => {
@@ -1650,6 +1849,16 @@ test('rejects ambiguous mapping when two CDP chains project onto the same retain
             const second = chainOf(parts.artifact, 1);
             second.request.url = clone(first.request.url);
             second.response.url = clone(first.response.url);
+            // URL multiplicity alone is not temporal ambiguity. Project the
+            // second chain onto the first chain's browser and Node clocks so
+            // both are genuine competing request-window candidates.
+            second.request.wall_time_s = first.request.wall_time_s;
+            second.request.timestamp = first.request.timestamp;
+            second.request.observed_at_ms = first.request.observed_at_ms;
+            second.response.timestamp = first.response.timestamp;
+            second.response.observed_at_ms = first.response.observed_at_ms;
+            second.failure.timestamp = first.failure.timestamp;
+            second.failure.observed_at_ms = first.failure.observed_at_ms;
             assert.notEqual(first.request.request_id, second.request.request_id);
         },
     });
