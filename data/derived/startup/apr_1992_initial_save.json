@@ -12935,7 +12935,7 @@
         "cohesion": 45,
         "composition": {
           "aa_systems": 1,
-          "artillery": 4,
+          "artillery": 8,
           "artillery_condition": {
             "degraded": 0,
             "non_operational": 0,
@@ -12947,7 +12947,7 @@
             "non_operational": 0,
             "operational": 1
           },
-          "tanks": 4
+          "tanks": 8
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
@@ -13010,7 +13010,7 @@
         "cohesion": 50,
         "composition": {
           "aa_systems": 1,
-          "artillery": 4,
+          "artillery": 0,
           "artillery_condition": {
             "degraded": 0,
             "non_operational": 0,
@@ -13022,7 +13022,7 @@
             "non_operational": 0,
             "operational": 1
           },
-          "tanks": 4
+          "tanks": 0
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
