@@ -1538,7 +1538,9 @@ describe('pre-planned operations', () => {
         assert.ok(operation);
         assert.equal(operation.corps, 'hvo_tomislavgrad');
         assert.equal(operation.faction, 'HRHB');
+        assert.equal(operation.staging_osid, 'op:prozor:prozor_2');
         assert.equal(operation.available_from, 71);
+        assert.equal(operation.prestage_from, 60);
         assert.equal(operation.minimum_viable_participants, 1);
         assert.equal(operation.minimum_assembled_participants, 1);
         assert.equal(operation.execution_attack_power_mult, 1.8);
@@ -1557,13 +1559,13 @@ describe('pre-planned operations', () => {
                 axis_id: 'prozor_lug',
                 brigades: ['hrhb_kralj_tomislav_brigade'],
                 objectives: ['op:prozor:lug_2'],
-                staging_osid: 'op:prozor:prozor_2',
+                staging_osid: 'op:duvno:tomislavgrad_2',
             },
             {
                 axis_id: 'prozor_paros',
                 brigades: ['hvo_rama_brigade'],
                 objectives: ['op:prozor:paros'],
-                staging_osid: 'op:prozor:jaklici',
+                staging_osid: 'op:prozor:ljubunci_2',
             },
         ]);
     });
@@ -1592,9 +1594,54 @@ describe('pre-planned operations', () => {
         assert.equal(op?.name, 'Prozor–Rama Line Counterattack');
         assert.equal(op?.is_pre_planned, true);
         assert.deepEqual(op?.axes?.map((axis) => [axis.axis_id, axis.assigned_brigades, axis.staging_osid]), [
-            ['prozor_lug', ['F_HRHB_0001'], 'op:prozor:prozor_2'],
-            ['prozor_paros', ['hvo_rama_brigade'], 'op:prozor:jaklici'],
+            ['prozor_lug', ['F_HRHB_0001'], 'op:duvno:tomislavgrad_2'],
+            ['prozor_paros', ['hvo_rama_brigade'], 'op:prozor:ljubunci_2'],
         ]);
+    });
+
+    it('prestages the Rama forward defense at turn 60 without ordering Kralj off Tomislavgrad', () => {
+        // CALIBRATION ASSUMPTION (UNADOPTED): ordinary concentration may begin at
+        // turn 60, but injection still waits for turn 71 and its four planning
+        // turns. Only the local Rama column moves; Kralj stays the home/front
+        // defender at Tomislavgrad. No physical location or control changes here.
+        const state = makeMinimalState();
+        const kralj = state.military.formations.hrhb_kralj_tomislav_brigade!;
+        const rama = state.military.formations.hvo_rama_brigade!;
+        kralj.location_osid = 'op:duvno:tomislavgrad_2';
+        rama.location_osid = 'op:prozor:rumboci_2';
+
+        injectPrePlannedOperations(state);
+
+        const command = state.military.corps_command!.hvo_tomislavgrad!;
+        assert.deepEqual(command.queued_operations, ['Prozor–Rama Line Counterattack']);
+        assert.equal(state.political.political_controllers!['op:duvno:tomislavgrad_2'], 'HRHB');
+        assert.equal(state.political.political_controllers!['op:prozor:ljubunci_2'], 'HRHB');
+        assert.equal(kralj.location_osid, 'op:duvno:tomislavgrad_2');
+        assert.equal(rama.location_osid, 'op:prozor:rumboci_2');
+
+        state.meta.turn = 59;
+        prestageDeferredPrePlannedElites(state);
+
+        assert.deepEqual(command.queued_operations, ['Prozor–Rama Line Counterattack']);
+        assert.equal(state.military.brigade_movement_orders?.hrhb_kralj_tomislav_brigade, undefined);
+        assert.equal(state.military.brigade_movement_orders?.hvo_rama_brigade, undefined);
+        assert.equal(kralj.location_osid, 'op:duvno:tomislavgrad_2');
+        assert.equal(rama.location_osid, 'op:prozor:rumboci_2');
+
+        state.meta.turn = 60;
+        prestageDeferredPrePlannedElites(state);
+
+        assert.deepEqual(command.queued_operations, ['Prozor–Rama Line Counterattack']);
+        assert.equal(state.military.brigade_movement_orders?.hrhb_kralj_tomislav_brigade, undefined);
+        assert.deepEqual(state.military.brigade_movement_orders?.hvo_rama_brigade, {
+            destination_sids: ['op:prozor:ljubunci_2'],
+            stance: 'column',
+            owner: 'authored_preplanned',
+        });
+        assert.equal(kralj.location_osid, 'op:duvno:tomislavgrad_2');
+        assert.equal(rama.location_osid, 'op:prozor:rumboci_2');
+        assert.equal(state.political.political_controllers!['op:duvno:tomislavgrad_2'], 'HRHB');
+        assert.equal(state.political.political_controllers!['op:prozor:ljubunci_2'], 'HRHB');
     });
 
     it('extends the Donji Vakuf sweep to Jemanlići and authors no Prusac objective', () => {

@@ -1233,11 +1233,22 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
         // it is not permission for a general HVO offensive in Herzegovina.
         // SCENARIO INFERENCE, owner-approved measurement 2026-09-27; no dated
         // source places an HVO Lug/Paroš counterattack in Aug–Sep 1993.
+        //
+        // UNADOPTED April-only local defensive-distribution experiment.
+        // CALIBRATION ASSUMPTION, not an attested historical action or date and
+        // not a route-bug fix. Ordinary concentration begins at turn 60 while
+        // the operation still opens at turn 71 with its four planning turns.
+        // Kralj remains the home/front defender at Tomislavgrad; only the local
+        // Rama Brigade moves forward to the friendly Ljubunci shoulder before
+        // its turn-65 loss. This tests whether actual local presence prevents
+        // that earlier undefended loss; it does not claim earlier arrival alone
+        // strengthens the weak Lug assault.
         corps: 'hvo_tomislavgrad',
         faction: 'HRHB',
         name: 'Prozor–Rama Line Counterattack',
         staging_osid: 'op:prozor:prozor_2',
         available_from: 71,
+        prestage_from: 60,
         min_attack_outcome: 'repulsed',
         execution_attack_power_mult: 1.8,
         planning_duration: 4,
@@ -1248,22 +1259,31 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
                 // BB1 printed p.159 describes the 23 October 1992 Prozor shelling
                 // (t29), not this inferred action. The authored Lug axis meets
                 // an entrenched 4th Corps brigade at a 0.49 power ratio.
+                // CALIBRATION ASSUMPTION (UNADOPTED): stage at Kralj's existing
+                // Tomislavgrad home assembly so the home/front defender is not
+                // pulled toward Prozor during early prestaging. The operation's
+                // main staging at Prozor2 remains unchanged. No source dates or
+                // orders this local distribution.
                 axis_id: 'prozor_lug',
                 name: 'Prozor Lug',
                 brigades: ['hrhb_kralj_tomislav_brigade'],
                 objectives: ['op:prozor:lug_2'],
-                staging_osid: 'op:prozor:prozor_2',
+                staging_osid: 'op:duvno:tomislavgrad_2',
             },
             {
                 // The local Rama Brigade takes Paroš from its own headquarters, so
                 // the Tomislavgrad reinforcement does not end on the Jablanica
                 // shoulder next to Doljani. This is tactical operation authoring; no
                 // source assigns each village to a named unit.
+                // CALIBRATION ASSUMPTION (UNADOPTED): begin the ordinary column
+                // toward the friendly Ljubunci shoulder while it is still HRHB,
+                // before its turn-65 loss, to test forward local defense. This is
+                // not an attested movement/date and not a route fix.
                 axis_id: 'prozor_paros',
                 name: 'Prozor Paroš',
                 brigades: ['hvo_rama_brigade'],
                 objectives: ['op:prozor:paros'],
-                staging_osid: 'op:prozor:jaklici',
+                staging_osid: 'op:prozor:ljubunci_2',
             },
         ],
     },
