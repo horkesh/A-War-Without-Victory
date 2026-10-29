@@ -431,6 +431,12 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         // The formations pre-stage before the Drina command slot opens; the
         // preparation budget lets both converging columns assemble.
         planning_duration: 10,
+        // UNADOPTED calibrated modeling assumption: the still-open northern
+        // shoulder and strong Ustiprača cutoff are reduced by the existing
+        // Army-HQ pair before Slatina, while the local Drina brigades turn on
+        // the earlier Višegrad bridgehead. This is inference, not an attested
+        // exact operation/date or a guaranteed capture. Ordinary authority,
+        // readiness, routes, and combat remain binding.
         axes: [
             {
                 axis_id: 'gorazde_encirclement',
@@ -441,12 +447,15 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'rs_65th_protection_motorized_regiment',
                     'rs_5th_podrinje',
                 ],
-                // The northern shoulder presses south through Sopotnica to
-                // Slatina instead of routing the Army-HQ reserve around the
-                // eastern side of the enclave before the attack begins.
+                // The northern shoulder presses south through Sopotnica, clears
+                // the still-enemy Brcigovo shoulder and Ustipraca cutoff, then
+                // contracts on Slatina. The Army-HQ reserve is not routed around
+                // the eastern side of the enclave before the attack begins.
                 objectives: [
-                    'op:gorazde:sopotnica',   // RBiH-painted; adj slatina_2 — pocket tightener
-                    'op:gorazde:slatina_2',   // RBiH-painted; adj gorazde_2 — encirclement chokepoint
+                    'op:gorazde:sopotnica',   // RBiH-painted; first northern contraction
+                    'op:rogatica:brcigovo',   // still enemy after failed Pracha
+                    'op:gorazde:ustipraca_2', // strong cut-off position
+                    'op:gorazde:slatina_2',   // RBiH-painted; adj gorazde_2 — chokepoint
                 ],
                 // The current failed Pracha leaves Brcigovo enemy. This UNADOPTED
                 // calibration staging on the existing friendly Rogatica shoulder is
@@ -459,17 +468,19 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
             },
             {
                 axis_id: 'ustipraca_cutoff',
-                name: 'Ustiprača Cutoff',
+                name: 'Visegrad Bridgehead',
                 brigades: [
                     'rs_1st_bratunac',
                     'rs_1st_podrinje',
                     'rs_visegrad_brigade',
                 ],
+                // BB2 p.390 supports reducing the earlier Visegrad bridgehead;
+                // this exact dated roster and route are a calibrated inference.
                 objectives: [
-                    'op:gorazde:ustipraca_2',
-                    'op:gorazde:kolovarice',
+                    'op:visegrad:medjedja_2',
+                    'op:visegrad:drinsko',
                 ],
-                staging_osid: 'op:rogatica:varosiste_2',
+                staging_osid: 'op:rogatica:stara_gora',
                 minimum_staged_brigades: 1,
                 minimum_forward_brigades: 1,
             },

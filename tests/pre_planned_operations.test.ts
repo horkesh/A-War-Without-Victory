@@ -891,19 +891,22 @@ describe('pre-planned operations', () => {
         assert.equal(zvezda.axes[0]?.staging_osid, 'op:rogatica:varosiste_2');
         assert.deepEqual(zvezda.axes[0]?.objectives, [
             'op:gorazde:sopotnica',
+            'op:rogatica:brcigovo',
+            'op:gorazde:ustipraca_2',
             'op:gorazde:slatina_2',
         ]);
         assert.equal(zvezda.axes.length, 3);
+        assert.equal(zvezda.axes[1]?.name, 'Visegrad Bridgehead');
         assert.deepEqual(zvezda.axes[1]?.objectives, [
-            'op:gorazde:ustipraca_2',
-            'op:gorazde:kolovarice',
+            'op:visegrad:medjedja_2',
+            'op:visegrad:drinsko',
         ]);
         assert.deepEqual(zvezda.axes[1]?.brigades, [
             'rs_1st_bratunac',
             'rs_1st_podrinje',
             'rs_visegrad_brigade',
         ]);
-        assert.equal(zvezda.axes[1]?.staging_osid, 'op:rogatica:varosiste_2');
+        assert.equal(zvezda.axes[1]?.staging_osid, 'op:rogatica:stara_gora');
         assert.deepEqual(zvezda.axes[0]?.brigades, [
             'rs_65th_protection_motorized_regiment',
             'rs_5th_podrinje',
@@ -920,24 +923,30 @@ describe('pre-planned operations', () => {
 
         const varosiste = 'op:rogatica:varosiste_2';
         const brcigovo = 'op:rogatica:brcigovo';
+        const staraGora = 'op:rogatica:stara_gora';
         const izbisno = 'op:foca:izbisno';
         for (const [osid, controller] of [
             [varosiste, 'RS'],
             ['op:rogatica:rogatica_2', 'RS'],
+            [staraGora, 'RS'],
             [izbisno, 'RS'],
             [brcigovo, 'RBiH'],
             ['op:gorazde:sopotnica', 'RBiH'],
             ['op:gorazde:slatina_2', 'RBiH'],
             ['op:gorazde:ustipraca_2', 'RBiH'],
             ['op:gorazde:kolovarice', 'RBiH'],
+            ['op:visegrad:medjedja_2', 'RBiH'],
+            ['op:visegrad:drinsko', 'RBiH'],
             ['op:foca:donje_zesce', 'RBiH'],
         ] as const) {
             state.political.political_controllers![osid] = controller;
         }
 
-        const northernBrigades = [
+        const varosisteBrigades = [
             'rs_65th_protection_motorized_regiment',
             'rs_5th_podrinje',
+        ];
+        const staraGoraBrigades = [
             'rs_1st_bratunac',
             'rs_1st_podrinje',
             'rs_visegrad_brigade',
@@ -948,8 +957,11 @@ describe('pre-planned operations', () => {
             'rs_1st_zvornik',
             'rs_1st_milii',
         ];
-        for (const brigadeId of northernBrigades) {
+        for (const brigadeId of varosisteBrigades) {
             state.military.formations![brigadeId]!.location_osid = varosiste;
+        }
+        for (const brigadeId of staraGoraBrigades) {
+            state.military.formations![brigadeId]!.location_osid = staraGora;
         }
         for (const brigadeId of southernBrigades) {
             state.military.formations![brigadeId]!.location_osid = izbisno;
@@ -959,7 +971,10 @@ describe('pre-planned operations', () => {
             formation.personnel = brigadeId === 'rs_5th_podrinje' ? 585 : 2000;
             assert.equal(formation.corps_id, 'vrs_drina');
             assert.ok((formation.personnel ?? 0) >= 500);
-            assert.equal(formation.location_osid, varosiste);
+            assert.equal(
+                formation.location_osid,
+                brigadeId === 'rs_5th_podrinje' ? varosiste : staraGora,
+            );
         }
 
         const positionsBefore = Object.fromEntries(
@@ -969,11 +984,14 @@ describe('pre-planned operations', () => {
         const controllersBefore = structuredClone(state.political.political_controllers);
 
         const adjacency = new Map<string, string[]>([
-            [varosiste, ['op:gorazde:sopotnica', 'op:gorazde:ustipraca_2']],
-            ['op:gorazde:sopotnica', [varosiste, 'op:gorazde:slatina_2']],
+            [varosiste, ['op:gorazde:sopotnica', 'op:gorazde:ustipraca_2', brcigovo]],
+            ['op:gorazde:sopotnica', [varosiste, 'op:gorazde:slatina_2', brcigovo]],
             ['op:gorazde:slatina_2', ['op:gorazde:sopotnica']],
-            ['op:gorazde:ustipraca_2', [varosiste, 'op:gorazde:kolovarice']],
-            ['op:gorazde:kolovarice', ['op:gorazde:ustipraca_2']],
+            ['op:gorazde:ustipraca_2', [varosiste]],
+            [brcigovo, [varosiste, 'op:gorazde:sopotnica']],
+            [staraGora, ['op:visegrad:medjedja_2', 'op:visegrad:drinsko']],
+            ['op:visegrad:medjedja_2', [staraGora, 'op:visegrad:drinsko']],
+            ['op:visegrad:drinsko', [staraGora, 'op:visegrad:medjedja_2']],
             [izbisno, ['op:foca:donje_zesce']],
             ['op:foca:donje_zesce', [izbisno]],
         ]);
@@ -991,15 +1009,27 @@ describe('pre-planned operations', () => {
         assert.ok(encirclement);
         assert.ok(cutoff);
         assert.equal(encirclement!.staging_osid, varosiste);
-        assert.equal(cutoff!.staging_osid, varosiste);
-        assert.deepEqual(
-            [...encirclement!.assigned_brigades].sort(),
-            ['rs_65th_protection_motorized_regiment', 'rs_5th_podrinje'].sort(),
-        );
-        assert.deepEqual(
-            [...cutoff!.assigned_brigades].sort(),
-            ['rs_1st_bratunac', 'rs_1st_podrinje', 'rs_visegrad_brigade'].sort(),
-        );
+        assert.equal(cutoff!.staging_osid, staraGora);
+        assert.equal(cutoff!.name, 'Visegrad Bridgehead');
+        assert.deepEqual(encirclement!.objectives, [
+            'op:gorazde:sopotnica',
+            'op:rogatica:brcigovo',
+            'op:gorazde:ustipraca_2',
+            'op:gorazde:slatina_2',
+        ]);
+        assert.deepEqual(cutoff!.objectives, [
+            'op:visegrad:medjedja_2',
+            'op:visegrad:drinsko',
+        ]);
+        assert.deepEqual(encirclement!.assigned_brigades, [
+            'rs_65th_protection_motorized_regiment',
+            'rs_5th_podrinje',
+        ]);
+        assert.deepEqual(cutoff!.assigned_brigades, [
+            'rs_1st_bratunac',
+            'rs_1st_podrinje',
+            'rs_visegrad_brigade',
+        ]);
 
         assert.equal(state.political.political_controllers![brcigovo], 'RBiH');
         assert.deepEqual(state.political.political_controllers, controllersBefore);
