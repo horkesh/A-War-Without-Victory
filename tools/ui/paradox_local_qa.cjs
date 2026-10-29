@@ -6457,6 +6457,7 @@ function installAmbientLifecycleObserver() {
     ['stalled', 'stalled'],
     ['seeking', 'seeking'],
     ['seeked', 'seeked'],
+    ['timeupdate', 'timeupdate'],
   ].map(([eventKind, signalKind]) => ({
     eventKind,
     listener: (event) => {

@@ -1046,6 +1046,91 @@ test('ambient lifecycle observer records browser media progress with exact eleme
     assert.match(signals[4].mediaStateReadErrors.currentTime, /currentTime blocked/);
 });
 
+test('ambient lifecycle observer records passive timeupdate observations with exact advancing element state', () => {
+    const calls = { play: 0, pause: 0, load: 0 };
+    const assignments: string[] = [];
+    let currentTime = 0.25;
+    let now = 3_000;
+    const dom = new JSDOM(`
+        <audio id="ambient" src="http://127.0.0.1:3002/assets/ambient_warroom-D4f9a2.ogg"></audio>
+        <audio id="ui" src="http://127.0.0.1:3002/assets/ui_click-D4f9a2.ogg"></audio>
+    `);
+    const { window } = dom;
+    const ambient = window.document.querySelector<HTMLAudioElement>('#ambient')!;
+    const ui = window.document.querySelector<HTMLAudioElement>('#ui')!;
+    Object.defineProperties(ambient, {
+        currentSrc: { configurable: true, value: ambient.src },
+        networkState: { configurable: true, value: 2 },
+        readyState: { configurable: true, value: 4 },
+        paused: { configurable: true, get: () => false, set: () => { assignments.push('paused'); } },
+        ended: { configurable: true, get: () => false, set: () => { assignments.push('ended'); } },
+        seeking: { configurable: true, get: () => false, set: () => { assignments.push('seeking'); } },
+        currentTime: { configurable: true, get: () => currentTime, set: () => { assignments.push('currentTime'); } },
+        duration: { configurable: true, get: () => 30, set: () => { assignments.push('duration'); } },
+        loop: { configurable: true, get: () => true, set: () => { assignments.push('loop'); } },
+        buffered: { configurable: true, value: mediaTimeRanges([[0, 0.5]]) },
+        seekable: { configurable: true, value: mediaTimeRanges([[0, 30]]) },
+        error: { configurable: true, value: null },
+    });
+    Object.defineProperties(ui, {
+        currentSrc: { configurable: true, value: ui.src },
+    });
+    Object.defineProperties(window.HTMLMediaElement.prototype, {
+        play: { configurable: true, writable: true, value: () => { calls.play += 1; return Promise.resolve(); } },
+        pause: { configurable: true, writable: true, value: () => { calls.pause += 1; } },
+        load: { configurable: true, writable: true, value: () => { calls.load += 1; } },
+    });
+    const install = loadFunction<() => void>(readHarness(), 'installAmbientLifecycleObserver', {
+        window,
+        document: window.document,
+        HTMLMediaElement: window.HTMLMediaElement,
+        Date: { now: () => ++now },
+    });
+    install();
+    install();
+
+    ambient.dispatchEvent(new window.Event('timeupdate'));
+    currentTime = 0.5;
+    Object.defineProperties(ambient, {
+        buffered: { configurable: true, value: mediaTimeRanges([[0, 0.75]]) },
+    });
+    ambient.dispatchEvent(new window.Event('timeupdate'));
+    ui.dispatchEvent(new window.Event('timeupdate'));
+
+    const signals = ambientSignals(window);
+    assert.deepEqual(signals.map((signal: any) => signal.kind), ['timeupdate', 'timeupdate']);
+    assert.deepEqual(signals.map((signal: any) => signal.signalSequence), [1, 2]);
+    assert.deepEqual(signals.map((signal: any) => signal.observedAtMs), [3_001, 3_002]);
+    assert.deepEqual(signals.map((signal: any) => signal.elementId), ['media:1', 'media:1']);
+    assert.deepEqual(signals.map((signal: any) => signal.sourceEpoch), [1, 1]);
+    assert.deepEqual(signals.map((signal: any) => signal.url), [ambient.src, ambient.src]);
+    assert.deepEqual(signals[0].mediaState, {
+        networkState: 2,
+        readyState: 4,
+        paused: false,
+        ended: false,
+        seeking: false,
+        currentTime: 0.25,
+        duration: 30,
+        loop: true,
+        buffered: [[0, 0.5]],
+        seekable: [[0, 30]],
+        mediaError: null,
+    });
+    assert.deepEqual(signals[0].mediaStateUnavailable, []);
+    assert.deepEqual(signals[0].mediaStateReadErrors, {});
+    assert.strictEqual(signals[1].mediaState.currentTime, 0.5);
+    assert.deepStrictEqual(normalizeTimeRangePairs(signals[1].mediaState.buffered), [[0, 0.75]]);
+    assert.deepEqual(signals[1].mediaStateUnavailable, []);
+    assert.deepEqual(signals[1].mediaStateReadErrors, {});
+    assert.deepStrictEqual(assignments, []);
+    assert.strictEqual(ambient.currentTime, 0.5);
+    assert.strictEqual(ambient.paused, false);
+    assert.strictEqual(calls.play, 0);
+    assert.strictEqual(calls.pause, 0);
+    assert.strictEqual(calls.load, 0);
+});
+
 test('ambient lifecycle observer captures exact full, partial, and disjoint buffered/seekable ranges without mutating playback', () => {
     const calls = { play: 0, pause: 0, load: 0 };
     const { window, ambient } = createObservedAmbient({
