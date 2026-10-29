@@ -448,7 +448,12 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'op:gorazde:sopotnica',   // RBiH-painted; adj slatina_2 — pocket tightener
                     'op:gorazde:slatina_2',   // RBiH-painted; adj gorazde_2 — encirclement chokepoint
                 ],
-                staging_osid: 'op:rogatica:brcigovo',
+                // The current failed Pracha leaves Brcigovo enemy. This UNADOPTED
+                // calibration staging on the existing friendly Rogatica shoulder is
+                // modeling inference, not an attested exact stage or date. Ordinary
+                // routes, elite-loan/authority, readiness, defensive obligations, and
+                // actual combat remain binding.
+                staging_osid: 'op:rogatica:varosiste_2',
                 minimum_staged_brigades: 1,
                 minimum_forward_brigades: 1,
             },
@@ -464,7 +469,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'op:gorazde:ustipraca_2',
                     'op:gorazde:kolovarice',
                 ],
-                staging_osid: 'op:rogatica:brcigovo',
+                staging_osid: 'op:rogatica:varosiste_2',
                 minimum_staged_brigades: 1,
                 minimum_forward_brigades: 1,
             },

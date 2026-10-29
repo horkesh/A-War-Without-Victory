@@ -888,7 +888,7 @@ describe('pre-planned operations', () => {
         assert.ok(roster.includes('rs_65th_protection_motorized_regiment'));
         assert.equal(zvezda.axes[0]?.minimum_staged_brigades, 1);
         assert.equal(zvezda.axes[0]?.minimum_forward_brigades, 1);
-        assert.equal(zvezda.axes[0]?.staging_osid, 'op:rogatica:brcigovo');
+        assert.equal(zvezda.axes[0]?.staging_osid, 'op:rogatica:varosiste_2');
         assert.deepEqual(zvezda.axes[0]?.objectives, [
             'op:gorazde:sopotnica',
             'op:gorazde:slatina_2',
@@ -903,11 +903,113 @@ describe('pre-planned operations', () => {
             'rs_1st_podrinje',
             'rs_visegrad_brigade',
         ]);
-        assert.equal(zvezda.axes[1]?.staging_osid, 'op:rogatica:brcigovo');
+        assert.equal(zvezda.axes[1]?.staging_osid, 'op:rogatica:varosiste_2');
         assert.deepEqual(zvezda.axes[0]?.brigades, [
             'rs_65th_protection_motorized_regiment',
             'rs_5th_podrinje',
         ]);
+    });
+
+    it('queues Zvezda at the friendly Rogatica shoulder and admits both northern axes without moving anyone', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 93;
+        delete state.meta.player_faction;
+        const command = state.military.corps_command!.vrs_drina!;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Zvezda 94'];
+
+        const varosiste = 'op:rogatica:varosiste_2';
+        const brcigovo = 'op:rogatica:brcigovo';
+        const izbisno = 'op:foca:izbisno';
+        for (const [osid, controller] of [
+            [varosiste, 'RS'],
+            ['op:rogatica:rogatica_2', 'RS'],
+            [izbisno, 'RS'],
+            [brcigovo, 'RBiH'],
+            ['op:gorazde:sopotnica', 'RBiH'],
+            ['op:gorazde:slatina_2', 'RBiH'],
+            ['op:gorazde:ustipraca_2', 'RBiH'],
+            ['op:gorazde:kolovarice', 'RBiH'],
+            ['op:foca:donje_zesce', 'RBiH'],
+        ] as const) {
+            state.political.political_controllers![osid] = controller;
+        }
+
+        const northernBrigades = [
+            'rs_65th_protection_motorized_regiment',
+            'rs_5th_podrinje',
+            'rs_1st_bratunac',
+            'rs_1st_podrinje',
+            'rs_visegrad_brigade',
+        ];
+        const southernBrigades = [
+            'rs_1st_guards_motorized',
+            'rs_1st_birac',
+            'rs_1st_zvornik',
+            'rs_1st_milii',
+        ];
+        for (const brigadeId of northernBrigades) {
+            state.military.formations![brigadeId]!.location_osid = varosiste;
+        }
+        for (const brigadeId of southernBrigades) {
+            state.military.formations![brigadeId]!.location_osid = izbisno;
+        }
+        for (const brigadeId of ['rs_5th_podrinje', 'rs_1st_podrinje']) {
+            const formation = state.military.formations![brigadeId]!;
+            formation.personnel = brigadeId === 'rs_5th_podrinje' ? 585 : 2000;
+            assert.equal(formation.corps_id, 'vrs_drina');
+            assert.ok((formation.personnel ?? 0) >= 500);
+            assert.equal(formation.location_osid, varosiste);
+        }
+
+        const positionsBefore = Object.fromEntries(
+            Object.entries(state.military.formations ?? {})
+                .map(([brigadeId, formation]) => [brigadeId, formation.location_osid]),
+        );
+        const controllersBefore = structuredClone(state.political.political_controllers);
+
+        const adjacency = new Map<string, string[]>([
+            [varosiste, ['op:gorazde:sopotnica', 'op:gorazde:ustipraca_2']],
+            ['op:gorazde:sopotnica', [varosiste, 'op:gorazde:slatina_2']],
+            ['op:gorazde:slatina_2', ['op:gorazde:sopotnica']],
+            ['op:gorazde:ustipraca_2', [varosiste, 'op:gorazde:kolovarice']],
+            ['op:gorazde:kolovarice', ['op:gorazde:ustipraca_2']],
+            [izbisno, ['op:foca:donje_zesce']],
+            ['op:foca:donje_zesce', [izbisno]],
+        ]);
+
+        assert.equal(
+            injectQueuedOperation(state, 'vrs_drina', adjacency as Map<any, any>),
+            true,
+        );
+
+        assert.equal(command.active_operations.length, 1);
+        const operation = command.active_operations.find((active) => active.name === 'Operation Zvezda 94');
+        assert.ok(operation);
+        const encirclement = operation!.axes?.find((axis) => axis.axis_id === 'gorazde_encirclement');
+        const cutoff = operation!.axes?.find((axis) => axis.axis_id === 'ustipraca_cutoff');
+        assert.ok(encirclement);
+        assert.ok(cutoff);
+        assert.equal(encirclement!.staging_osid, varosiste);
+        assert.equal(cutoff!.staging_osid, varosiste);
+        assert.deepEqual(
+            [...encirclement!.assigned_brigades].sort(),
+            ['rs_65th_protection_motorized_regiment', 'rs_5th_podrinje'].sort(),
+        );
+        assert.deepEqual(
+            [...cutoff!.assigned_brigades].sort(),
+            ['rs_1st_bratunac', 'rs_1st_podrinje', 'rs_visegrad_brigade'].sort(),
+        );
+
+        assert.equal(state.political.political_controllers![brcigovo], 'RBiH');
+        assert.deepEqual(state.political.political_controllers, controllersBefore);
+        assert.deepEqual(
+            Object.fromEntries(
+                Object.entries(state.military.formations ?? {})
+                    .map(([brigadeId, formation]) => [brigadeId, formation.location_osid]),
+            ),
+            positionsBefore,
+        );
     });
 
     it('does not reserve a distant head operation roster against new commander operations', () => {
@@ -1362,7 +1464,7 @@ describe('pre-planned operations', () => {
             kind: 'brigade',
             status: 'active',
             personnel: 800,
-            location_osid: 'op:rogatica:brcigovo',
+            location_osid: 'op:rogatica:varosiste_2',
             elite_loan_state: {
                 on_loan: false,
                 loaned_to_corps: null,
