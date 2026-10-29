@@ -829,7 +829,7 @@ describe('pre-planned operations', () => {
     });
 
     it('defines the current pre-planned operation catalog', () => {
-        assert.equal(_ALL_PRE_PLANNED.length, 32);
+        assert.equal(_ALL_PRE_PLANNED.length, 33);
         assert.deepEqual(
             _ALL_PRE_PLANNED.map((def) => def.name),
             [
@@ -857,6 +857,7 @@ describe('pre-planned operations', () => {
                 'Operation Jajce',
                 'Operation Donji Vakuf',
                 'Operation Bosanski Novi',
+                'Brcko Corridor Counterpressure (Model)',
                 'Operation Jackal',
                 'Prozor–Rama Line Counterattack',
                 'Visoko–Breza Line Clearing',
@@ -4005,5 +4006,226 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
             );
         }
         assert.equal(main.location_osid, stagingOsid);
+    });
+});
+
+describe('Brcko Corridor Counterpressure (Model)', () => {
+    const name = 'Brcko Corridor Counterpressure (Model)';
+    const brigadeId = 'rs_2nd_posavina_light_infantry';
+    const stagingOsid = 'op:brcko:donji_rahic';
+    const objectiveOsid = 'op:brcko:potocari_2';
+
+    function makeCounterpressureFixture(turn: number): {
+        state: GameState;
+        command: CorpsCommandState;
+        formation: FormationState;
+    } {
+        const state = makeMinimalState();
+        state.meta.turn = turn;
+        delete state.meta.player_faction;
+        const command = state.military.corps_command!.vrs_east_bosnian!;
+        command.active_operations = [];
+        delete command.queued_operations;
+        state.military.brigade_movement_orders = {};
+        state.military.brigade_movement_state = {};
+        const formation = state.military.formations![brigadeId]!;
+        formation.personnel = 750;
+        formation.location_osid = stagingOsid;
+        state.political.political_controllers![stagingOsid] = 'RS';
+        state.political.political_controllers![objectiveOsid] = 'RBiH';
+        return { state, command, formation };
+    }
+
+    it('authors the exact unadopted local counterpressure model without overrides', () => {
+        const operation = _ALL_PRE_PLANNED.find((def) => def.name === name);
+        assert.ok(operation);
+        assert.equal(operation.corps, 'vrs_east_bosnian');
+        assert.equal(operation.faction, 'RS');
+        assert.equal(operation.staging_osid, stagingOsid);
+        assert.equal(operation.enqueue_from, 82);
+        assert.equal(operation.prestage_from, 82);
+        assert.equal(operation.available_from, 91);
+        assert.equal(operation.planning_duration, 2);
+        assert.equal(operation.minimum_viable_participants, 1);
+        assert.equal(operation.minimum_assembled_participants, 1);
+        assert.equal(operation.axes.length, 1);
+        assert.equal(operation.axes[0]?.axis_id, 'brcko_local_counterpressure');
+        assert.equal(operation.axes[0]?.name, 'Local Brcko Counterpressure');
+        assert.deepEqual(operation.axes[0]?.brigades, [brigadeId]);
+        assert.deepEqual(operation.axes[0]?.objectives, [objectiveOsid]);
+        assert.equal(operation.axes[0]?.staging_osid, stagingOsid);
+        for (const excluded of [
+            'min_attack_outcome',
+            'execution_attack_power_mult',
+            'coordinated_advance',
+            'sync_operation_name',
+            'army_hq_op_id',
+            'force_launch',
+        ]) {
+            assert.equal((operation as any)[excluded], undefined);
+        }
+        for (const axis of operation.axes) {
+            assert.equal(axis.minimum_forward_brigades, undefined);
+            assert.equal(axis.minimum_staged_brigades, undefined);
+            assert.equal((axis as any).force_launch, undefined);
+        }
+    });
+
+    it('stays unqueued at turn 81 and takes dated DonjiRahic ownership at turn 82 without moving the formation', () => {
+        const { state, command, formation } = makeCounterpressureFixture(81);
+        const controllersBefore = structuredClone(state.political.political_controllers);
+        const positionBefore = formation.location_osid;
+        assert.equal(positionBefore, stagingOsid);
+
+        prestageDeferredPrePlannedElites(state);
+
+        assert.ok(
+            !command.queued_operations?.includes(name),
+            'turn 81 is before the authored enqueue date',
+        );
+        assert.ok(
+            !getQueuedDatedPrestageBrigadeIds(state).has(brigadeId),
+            'the future-dated plan must not reserve the 2nd Posavina at turn 81',
+        );
+        assert.equal(formation.location_osid, positionBefore);
+        assert.equal(state.military.brigade_movement_orders?.[brigadeId], undefined);
+        assert.equal(command.active_operations.some((operation) => operation.name === name), false);
+        assert.deepEqual(state.political.political_controllers, controllersBefore);
+
+        state.meta.turn = 82;
+        prestageDeferredPrePlannedElites(state);
+
+        assert.ok(command.queued_operations?.includes(name));
+        // Isolate this dated queue head so the reservation assertions cannot pass
+        // because some other plan happens to hold the slot.
+        command.queued_operations = [name];
+        assert.ok(
+            getQueuedDatedPrestageBrigadeIds(state).has(brigadeId),
+            'the dated queue head reserves the 2nd Posavina from turn 82',
+        );
+        assert.ok(getHeadQueuedPrePlannedBrigadeIds(state).has(brigadeId));
+        assert.equal(formation.location_osid, positionBefore, 'dated ownership must not teleport');
+        assert.equal(stagingOsid, positionBefore);
+        assert.equal(state.military.brigade_movement_orders?.[brigadeId], undefined);
+        assert.equal(command.active_operations.length, 0);
+        assert.deepEqual(state.political.political_controllers, controllersBefore);
+        assert.equal(state.political.political_controllers![stagingOsid], 'RS');
+        assert.equal(state.political.political_controllers![objectiveOsid], 'RBiH');
+
+        state.meta.turn = 90;
+        assert.equal(injectQueuedOperation(state, 'vrs_east_bosnian'), false);
+        assert.equal(command.active_operations.length, 0);
+        assert.ok(command.queued_operations?.includes(name));
+        assert.equal(state.political.political_controllers![objectiveOsid], 'RBiH');
+    });
+
+    it('injects at turn 91 the exact sole roster and axis through the normal builder without moving or flipping control', () => {
+        const { state, command, formation } = makeCounterpressureFixture(91);
+        command.queued_operations = [name];
+        const controllersBefore = structuredClone(state.political.political_controllers);
+        const positionBefore = formation.location_osid;
+
+        assert.equal(injectQueuedOperation(state, 'vrs_east_bosnian'), true);
+
+        const operation = command.active_operations.find((active) => active.name === name);
+        assert.ok(operation);
+        assert.equal(operation!.is_pre_planned, true);
+        assert.equal(operation!.phase, 'planning');
+        assert.equal(operation!.planning_duration, 2);
+        assert.deepEqual(operation!.participating_brigades, [brigadeId]);
+        assert.equal(operation!.axes?.length, 1);
+        const axis = operation!.axes?.[0];
+        assert.ok(axis);
+        assert.equal(axis!.axis_id, 'brcko_local_counterpressure');
+        assert.equal(axis!.name, 'Local Brcko Counterpressure');
+        assert.deepEqual(axis!.assigned_brigades, [brigadeId]);
+        assert.equal(axis!.main_brigade, brigadeId);
+        assert.equal(axis!.support_brigades, undefined);
+        assert.deepEqual(axis!.objectives, [objectiveOsid]);
+        assert.equal(axis!.staging_osid, stagingOsid);
+        assert.equal(command.queued_operations, undefined);
+        assert.equal(formation.location_osid, positionBefore);
+        assert.equal(formation.location_osid, stagingOsid);
+        assert.deepEqual(state.political.political_controllers, controllersBefore);
+        assert.equal(state.political.political_controllers![stagingOsid], 'RS');
+        assert.equal(state.political.political_controllers![objectiveOsid], 'RBiH');
+    });
+
+    it('refuses a fresh turn-91 queue when the 2nd Posavina is below the 500-man attack floor', () => {
+        const { state, command, formation } = makeCounterpressureFixture(91);
+        command.queued_operations = [name];
+        formation.personnel = 499;
+
+        assert.equal(injectQueuedOperation(state, 'vrs_east_bosnian'), false);
+        assert.equal(command.active_operations.length, 0);
+        assert.ok(command.queued_operations?.includes(name));
+        assert.equal(formation.location_osid, stagingOsid);
+        assert.equal(state.political.political_controllers![objectiveOsid], 'RBiH');
+    });
+
+    it('honours an explicit RS decline and withholds the model counterpressure', () => {
+        const { state, command } = makeCounterpressureFixture(91);
+        state.meta.player_faction = 'RS' as FactionId;
+        command.queued_operations = [name];
+        state.meta.pending_proposal_reviews = [{
+            id: 'PROP_91_historical_op_preplanned_vrs_east_bosnian_brcko_corridor_counterpressure_model',
+            turn: state.meta.turn,
+            faction: 'RS' as FactionId,
+            domain: 'ops',
+            description: 'Brcko Corridor Counterpressure (Model) - declined by the president.',
+            proposed_action: 'HISTORICAL_OP:preplanned:vrs_east_bosnian:Brcko Corridor Counterpressure (Model)',
+            current_value: 'awaiting_authorization',
+            proposed_value: 'authorize',
+            accepted: false,
+            resolved_turn: state.meta.turn,
+        } as never];
+
+        assert.equal(injectQueuedOperation(state, 'vrs_east_bosnian'), false);
+        assert.equal(command.active_operations.length, 0);
+        assert.equal(state.political.political_controllers![objectiveOsid], 'RBiH');
+    });
+
+    it('releases a friendly objective without re-queueing, reserving, or moving the brigade', () => {
+        const { state, command, formation } = makeCounterpressureFixture(91);
+        command.queued_operations = [name];
+        state.political.political_controllers![objectiveOsid] = 'RS';
+        const controllersBefore = structuredClone(state.political.political_controllers);
+        const positionBefore = formation.location_osid;
+
+        assert.ok(
+            getQueuedDatedPrestageBrigadeIds(state).has(brigadeId),
+            'the dated queue head initially reserves the brigade',
+        );
+
+        assert.equal(injectQueuedOperation(state, 'vrs_east_bosnian'), false);
+        assert.equal(command.active_operations.some((active) => active.name === name), false);
+        assert.equal(command.queued_operations, undefined);
+        assert.ok(!getQueuedDatedPrestageBrigadeIds(state).has(brigadeId));
+        assert.ok(!getHeadQueuedPrePlannedBrigadeIds(state).has(brigadeId));
+        assert.equal(formation.location_osid, positionBefore);
+        assert.equal(formation.location_osid, stagingOsid);
+        assert.deepEqual(state.political.political_controllers, controllersBefore);
+        assert.equal(state.political.political_controllers![objectiveOsid], 'RS');
+        assert.deepEqual(
+            state.military.preplanned_operations_satisfied_by_start,
+            [{
+                corps_id: 'vrs_east_bosnian',
+                operation_name: name,
+                faction: 'RS',
+                turn: 91,
+                objective_count: 1,
+            }],
+        );
+
+        state.meta.turn = 92;
+        prestageDeferredPrePlannedElites(state);
+
+        assert.ok(!(command as CorpsCommandState).queued_operations?.includes(name));
+        assert.ok(!getQueuedDatedPrestageBrigadeIds(state).has(brigadeId));
+        assert.ok(!getHeadQueuedPrePlannedBrigadeIds(state).has(brigadeId));
+        assert.equal(formation.location_osid, positionBefore);
+        assert.equal(state.military.brigade_movement_orders?.[brigadeId], undefined);
+        assert.equal(command.active_operations.some((active) => active.name === name), false);
+        assert.deepEqual(state.political.political_controllers, controllersBefore);
     });
 });

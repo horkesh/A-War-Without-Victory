@@ -1171,6 +1171,31 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
             },
         ],
     },
+    {
+        // UNADOPTED owner-authorized model of local reserve concentration and
+        // contingent ordinary counterpressure, not an attested operation or date.
+        // No free-surplus claim: donor-front/Jan39/health preservation remains
+        // to be measured.
+        corps: 'vrs_east_bosnian',
+        faction: 'RS',
+        name: 'Brcko Corridor Counterpressure (Model)',
+        staging_osid: 'op:brcko:donji_rahic',
+        enqueue_from: 82,
+        prestage_from: 82,
+        available_from: 91,
+        planning_duration: 2,
+        minimum_viable_participants: 1,
+        minimum_assembled_participants: 1,
+        axes: [
+            {
+                axis_id: 'brcko_local_counterpressure',
+                name: 'Local Brcko Counterpressure',
+                brigades: ['rs_2nd_posavina_light_infantry'],
+                objectives: ['op:brcko:potocari_2'],
+                staging_osid: 'op:brcko:donji_rahic',
+            },
+        ],
+    },
 ];
 
 const HRHB_PRE_PLANNED: PrePlannedOp[] = [
