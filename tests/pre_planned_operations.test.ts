@@ -1074,7 +1074,7 @@ describe('pre-planned operations', () => {
         const circle = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
         assert.ok(circle);
         assert.equal(circle!.prestage_from, 14);
-        assert.equal(circle!.enqueue_from, undefined);
+        assert.equal(circle!.enqueue_from, 14);
         assert.equal(circle!.axes[0]?.minimum_forward_brigades, undefined);
         const state = makeMinimalState();
         state.meta.turn = 18;
@@ -2558,7 +2558,7 @@ describe('pre-planned operations', () => {
         assert.equal(definition?.available_from, 18);
     });
 
-    it('retains a bot-prestaged arrived roster while its unchanged queue waits', () => {
+    it('retains a bot-prestaged arrived roster while its queue waits', () => {
         const state = makeMinimalState();
         state.meta.player_faction = 'RS';
         for (const corpsId of Object.keys(state.military.corps_command ?? {})) {
@@ -2575,7 +2575,7 @@ describe('pre-planned operations', () => {
 
         // The hold must work without changing startup queue chronology.
         const definition = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
-        assert.equal(definition?.enqueue_from, undefined);
+        assert.equal(definition?.enqueue_from, 14);
         assert.equal(definition?.prestage_from, 14);
 
         state.meta.turn = 13;
@@ -3386,6 +3386,8 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         prestageDeferredPrePlannedElites(state);
 
         assert.ok((command as CorpsCommandState).queued_operations?.includes(name));
+        assert.deepEqual(command.queued_operations, [name]);
+        assert.ok(!command.queued_operations?.includes('Operation Circle'));
         assert.ok(getHeadQueuedPrePlannedBrigadeIds(state).has(brigadeId));
         assert.ok(getHeadQueuedPrePlannedBrigadeIds(state).has(supportBrigadeId));
         assert.ok(getQueuedDatedPrestageBrigadeIds(state).has(brigadeId));
@@ -3409,6 +3411,13 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), false);
         assert.equal(command.active_operations.length, 0);
         assert.ok((command as CorpsCommandState).queued_operations?.includes(name));
+        assert.equal(main.location_osid, mainApproachOsid);
+        assert.equal(support.location_osid, supportApproachOsid);
+        assert.equal(state.political.political_controllers![objectiveOsid], 'RS');
+
+        state.meta.turn = 14;
+        prestageDeferredPrePlannedElites(state);
+        assert.deepEqual(command.queued_operations, [name, 'Operation Circle']);
         assert.equal(main.location_osid, mainApproachOsid);
         assert.equal(support.location_osid, supportApproachOsid);
         assert.equal(state.political.political_controllers![objectiveOsid], 'RS');

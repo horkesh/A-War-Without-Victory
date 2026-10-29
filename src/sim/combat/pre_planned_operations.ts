@@ -1327,6 +1327,7 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         // ordinary CorpsOperation gates.
         // Calibrated assembly timing: walk the same approved roster four turns early.
         prestage_from: 14,
+        enqueue_from: 14,
         available_from: 18,
         planning_duration: 4,
         axes: [
