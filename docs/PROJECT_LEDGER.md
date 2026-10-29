@@ -12514,3 +12514,9 @@ OpenCode added actual injected observer open/close timestamps to the raw non-adm
 - Fixed keyed DOM overlay reconciliation to leave correctly ordered controls attached during identical and coordinate-only refreshes. This preserves trusted mouse activation across refresh without changing selection priority, authority, combat, or QA detail-panel assertions.
 - Evidence: retained native100ms press showed same-node removal/reinsertion between pointerdown/up, no click; separate keyboard control opened the exact detail. Existing failures remain failures.
 - Validation: test-first6passed/1failed DOM-mutation regression, then7/7green and independent7/7; focused source reviewGO. Changed-set ordering, stale cleanup, focus, identity and current callbacks covered. Rebuilt native held-press, strict faction routes and24/188 qualification remain pending; no qualification/adoption claim. Gameplay source da78e3006 unchanged.
+
+## 2026-10-29 — Restore native Advance owner after checkpoint inspection
+
+- Fixed the QA harness to restore the existing public Warroom Advance surface after a settled-turn checkpoint tour and before fresh-state prerequisites and dispatch. Held Advance confirmation ownership, archive/blocker checks, and the exact toolbar assertion remain unchanged.
+- Evidence: the retained RBiH 24-turn attempt stopped at turn 1 after its legitimate Show Chronicle review action; the final screenshot shows Chronicle and the strict toolbar count was zero. This is harness ordering, not missing gameplay capability.
+- Validation: test-first 121 passed / 1 failed, then 122/122 and independent 122/122; syntax and lint pass, focused source review GO. Affected/type checks and a fresh native RBiH shakedown remain pending. The ca0a42b84 package and strict RS/save-resume pass are retained; no gameplay change or qualification/adoption claim.

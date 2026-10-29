@@ -2170,6 +2170,9 @@ async function prepareAdvanceDispatch({
   if ((before?.turn ?? 0) > 0) {
     await archiveSettledTurn(before.turn);
     await runCheckpointTourAfterSettlement(before.turn);
+    if (!heldAdvanceModal && !await ensureAdvanceSurface()) {
+      throw new Error(`Campaign advance surface was unreachable after checkpoint tour at turn ${before.turn}`);
+    }
   }
   const state = await readState(frame);
   const prerequisites = assertAdvanceDispatchPrerequisites(

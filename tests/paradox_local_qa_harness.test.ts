@@ -1830,12 +1830,21 @@ test('advance dispatch prerequisites reject unresolved blockers and missing sett
     const prepareSource = extractFunctionSource(readHarness(), 'prepareAdvanceDispatch');
     let archiveCalls = 0;
     let surfaceCalls = 0;
+    let readStateCalls = 0;
+    let publicSurface = 'warroom';
+    let validationSurface: string | null = null;
     let readStateResult = { turn: 15, blockerInventory: { decisions: 1 } };
     const prepare = runInNewContext(
         `(async ${prepareSource})`,
         {
-            readState: async () => readStateResult,
-            assertAdvanceDispatchPrerequisites: assertReady,
+            readState: async () => {
+                readStateCalls += 1;
+                return readStateResult;
+            },
+            assertAdvanceDispatchPrerequisites: (state: any, archivesRequired: boolean, settledTurns: Map<number, unknown>) => {
+                validationSurface = publicSurface;
+                return assertReady(state, archivesRequired, settledTurns);
+            },
         },
     ) as (input: Record<string, unknown>) => Promise<unknown>;
     await assert.rejects(() => prepare({
@@ -1855,6 +1864,9 @@ test('advance dispatch prerequisites reject unresolved blockers and missing sett
     const order: string[] = [];
     const normalSettled = new Map<number, unknown>();
     readStateResult = { turn: 15, blockerInventory: { decisions: 0 } };
+    publicSurface = 'warroom';
+    validationSurface = null;
+    readStateCalls = 0;
     const prepared: any = await prepare({
         frame: {},
         before: readStateResult,
@@ -1862,16 +1874,84 @@ test('advance dispatch prerequisites reject unresolved blockers and missing sett
         unresolvedStateBlocker: false,
         archiveTurnAutosaves: true,
         turnAutosaveEvidenceByTurn: normalSettled,
-        ensureAdvanceSurface: async () => { order.push('surface'); return true; },
+        ensureAdvanceSurface: async () => {
+            order.push('surface');
+            publicSurface = 'warroom';
+            return true;
+        },
         archiveSettledTurn: async (turn: number) => {
             order.push(`archive:${turn}`);
             normalSettled.set(turn, { turn, kind: 'settled' });
         },
-        runCheckpointTourAfterSettlement: async (turn: number) => { order.push(`checkpoint:${turn}`); },
+        runCheckpointTourAfterSettlement: async (turn: number) => {
+            order.push(`checkpoint:${turn}`);
+            publicSurface = 'chronicle';
+        },
     });
-    assert.deepEqual(order, ['surface', 'archive:15', 'checkpoint:15']);
+    assert.deepEqual(
+        order,
+        ['surface', 'archive:15', 'checkpoint:15', 'surface'],
+        'the checkpoint tour may leave Chronicle public, so normal Advance preparation must recover the Advance surface again',
+    );
+    assert.equal(validationSurface, 'warroom', 'post-tour recovery must complete before fresh state validation');
+    assert.equal(readStateCalls, 1);
     assert.equal(prepared.prerequisites.boundary, 'settled-turn');
     assert.equal(prepared.state.turn, 15);
+
+    const heldOrder: string[] = [];
+    const heldSettled = new Map<number, unknown>();
+    let heldSurfaceCalls = 0;
+    readStateResult = { turn: 15, blockerInventory: { decisions: 0 } };
+    publicSurface = 'warroom';
+    validationSurface = null;
+    const heldPrepared: any = await prepare({
+        frame: {},
+        before: readStateResult,
+        handledAction: 'advance-turn-modal-held-for-checkpoint',
+        unresolvedStateBlocker: false,
+        archiveTurnAutosaves: true,
+        turnAutosaveEvidenceByTurn: heldSettled,
+        ensureAdvanceSurface: async () => {
+            heldSurfaceCalls += 1;
+            publicSurface = 'warroom';
+            return true;
+        },
+        archiveSettledTurn: async (turn: number) => {
+            heldOrder.push(`archive:${turn}`);
+            heldSettled.set(turn, { turn, kind: 'settled' });
+        },
+        runCheckpointTourAfterSettlement: async (turn: number) => {
+            heldOrder.push(`checkpoint:${turn}`);
+            publicSurface = 'chronicle';
+        },
+    });
+    assert.equal(heldSurfaceCalls, 0, 'a held Advance confirmation owner must never be navigated away by surface recovery');
+    assert.deepEqual(heldOrder, ['archive:15', 'checkpoint:15']);
+    assert.equal(heldPrepared.heldAdvanceModal, true);
+    assert.equal(heldPrepared.state.turn, 15);
+
+    readStateResult = { turn: 15, blockerInventory: { decisions: 0 } };
+    publicSurface = 'warroom';
+    validationSurface = null;
+    readStateCalls = 0;
+    let failClosedSurfaceCalls = 0;
+    await assert.rejects(() => prepare({
+        frame: {},
+        before: readStateResult,
+        handledAction: 'none',
+        unresolvedStateBlocker: false,
+        archiveTurnAutosaves: true,
+        turnAutosaveEvidenceByTurn: new Map(),
+        ensureAdvanceSurface: async () => {
+            failClosedSurfaceCalls += 1;
+            return failClosedSurfaceCalls === 1;
+        },
+        archiveSettledTurn: async () => {},
+        runCheckpointTourAfterSettlement: async () => { publicSurface = 'chronicle'; },
+    }), /unreachable|advance surface/i);
+    assert.equal(failClosedSurfaceCalls, 2);
+    assert.equal(readStateCalls, 0, 'failed post-tour recovery must not read fresh state or reach dispatch');
+    assert.equal(validationSurface, null, 'failed post-tour recovery must not reach prerequisite validation');
 
     const playSource = extractFunctionSource(readHarness(), 'playTurns');
     const prerequisiteIndex = playSource.indexOf('await prepareAdvanceDispatch(');
