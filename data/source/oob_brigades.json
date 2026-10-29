@@ -128,6 +128,22 @@
     "default_equipment_class": "motorized",
     "available_from": 0,
     "mandatory": true,
+    "composition": {
+      "infantry": 850,
+      "tanks": 8,
+      "artillery": 8,
+      "aa_systems": 1,
+      "tank_condition": {
+        "operational": 1,
+        "degraded": 0,
+        "non_operational": 0
+      },
+      "artillery_condition": {
+        "operational": 1,
+        "degraded": 0,
+        "non_operational": 0
+      }
+    },
     "initial_personnel": 800,
     "initial_cohesion": 45
   },
@@ -252,6 +268,22 @@
     "default_equipment_class": "motorized",
     "available_from": 0,
     "mandatory": true,
+    "composition": {
+      "infantry": 850,
+      "tanks": 0,
+      "artillery": 0,
+      "aa_systems": 1,
+      "tank_condition": {
+        "operational": 1,
+        "degraded": 0,
+        "non_operational": 0
+      },
+      "artillery_condition": {
+        "operational": 1,
+        "degraded": 0,
+        "non_operational": 0
+      }
+    },
     "initial_personnel": 800,
     "initial_cohesion": 50,
     "distinction_potential": "tier_2",
