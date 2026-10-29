@@ -1559,7 +1559,7 @@ describe('pre-planned operations', () => {
                 axis_id: 'prozor_lug',
                 brigades: ['hrhb_kralj_tomislav_brigade'],
                 objectives: ['op:prozor:lug_2'],
-                staging_osid: 'op:duvno:tomislavgrad_2',
+                staging_osid: 'op:prozor:ljubunci_2',
             },
             {
                 axis_id: 'prozor_paros',
@@ -1594,21 +1594,27 @@ describe('pre-planned operations', () => {
         assert.equal(op?.name, 'Prozor–Rama Line Counterattack');
         assert.equal(op?.is_pre_planned, true);
         assert.deepEqual(op?.axes?.map((axis) => [axis.axis_id, axis.assigned_brigades, axis.staging_osid]), [
-            ['prozor_lug', ['F_HRHB_0001'], 'op:duvno:tomislavgrad_2'],
+            ['prozor_lug', ['F_HRHB_0001'], 'op:prozor:ljubunci_2'],
             ['prozor_paros', ['hvo_rama_brigade'], 'op:prozor:ljubunci_2'],
         ]);
     });
 
-    it('prestages the Rama forward defense at turn 60 without ordering Kralj off Tomislavgrad', () => {
+    it('prestages both Kralj and Rama toward Ljubunci at turn 60 without moving either physically', () => {
         // CALIBRATION ASSUMPTION (UNADOPTED): ordinary concentration may begin at
         // turn 60, but injection still waits for turn 71 and its four planning
-        // turns. Only the local Rama column moves; Kralj stays the home/front
-        // defender at Tomislavgrad. No physical location or control changes here.
+        // turns. This second assumption brings the existing heavy Kralj force
+        // alongside Rama; no historical movement or date is attested. Physical
+        // locations and controls stay unchanged, and ordinary authority, route,
+        // retreat, and donor-front preservation rules must still be measured.
         const state = makeMinimalState();
         const kralj = state.military.formations.hrhb_kralj_tomislav_brigade!;
         const rama = state.military.formations.hvo_rama_brigade!;
         kralj.location_osid = 'op:duvno:tomislavgrad_2';
         rama.location_osid = 'op:prozor:rumboci_2';
+        state.political.political_controllers!['op:duvno:tomislavgrad_2'] = 'HRHB';
+        state.political.political_controllers!['op:prozor:rumboci_2'] = 'HRHB';
+        state.political.political_controllers!['op:prozor:jaklici'] = 'HRHB';
+        state.political.political_controllers!['op:prozor:prozor_2'] = 'HRHB';
 
         injectPrePlannedOperations(state);
 
@@ -1632,7 +1638,11 @@ describe('pre-planned operations', () => {
         prestageDeferredPrePlannedElites(state);
 
         assert.deepEqual(command.queued_operations, ['Prozor–Rama Line Counterattack']);
-        assert.equal(state.military.brigade_movement_orders?.hrhb_kralj_tomislav_brigade, undefined);
+        assert.deepEqual(state.military.brigade_movement_orders?.hrhb_kralj_tomislav_brigade, {
+            destination_sids: ['op:prozor:ljubunci_2'],
+            stance: 'column',
+            owner: 'authored_preplanned',
+        });
         assert.deepEqual(state.military.brigade_movement_orders?.hvo_rama_brigade, {
             destination_sids: ['op:prozor:ljubunci_2'],
             stance: 'column',

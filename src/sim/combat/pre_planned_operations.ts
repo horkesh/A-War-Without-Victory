@@ -1238,11 +1238,10 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
         // CALIBRATION ASSUMPTION, not an attested historical action or date and
         // not a route-bug fix. Ordinary concentration begins at turn 60 while
         // the operation still opens at turn 71 with its four planning turns.
-        // Kralj remains the home/front defender at Tomislavgrad; only the local
-        // Rama Brigade moves forward to the friendly Ljubunci shoulder before
-        // its turn-65 loss. This tests whether actual local presence prevents
-        // that earlier undefended loss; it does not claim earlier arrival alone
-        // strengthens the weak Lug assault.
+        // This second unadopted calibration assumption brings the existing heavy
+        // Kralj force alongside the local Rama Brigade before the defense window;
+        // no historical movement or date is attested. Ordinary authority, route,
+        // and retreat rules remain, and donor-front preservation must be measured.
         corps: 'hvo_tomislavgrad',
         faction: 'HRHB',
         name: 'Prozor–Rama Line Counterattack',
@@ -1259,16 +1258,18 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
                 // BB1 printed p.159 describes the 23 October 1992 Prozor shelling
                 // (t29), not this inferred action. The authored Lug axis meets
                 // an entrenched 4th Corps brigade at a 0.49 power ratio.
-                // CALIBRATION ASSUMPTION (UNADOPTED): stage at Kralj's existing
-                // Tomislavgrad home assembly so the home/front defender is not
-                // pulled toward Prozor during early prestaging. The operation's
-                // main staging at Prozor2 remains unchanged. No source dates or
-                // orders this local distribution.
+                // CALIBRATION ASSUMPTION (UNADOPTED): stage at the friendly
+                // Ljubunci shoulder alongside Rama before its turn-65 loss, to
+                // test the existing heavy concentration rather than more Rama
+                // personnel. The operation's main staging at Prozor2 remains
+                // unchanged. No source dates or orders this movement. Ordinary
+                // authority/route/retreat rules stay, and preserving the
+                // Tomislavgrad donor front must be measured, not assumed.
                 axis_id: 'prozor_lug',
                 name: 'Prozor Lug',
                 brigades: ['hrhb_kralj_tomislav_brigade'],
                 objectives: ['op:prozor:lug_2'],
-                staging_osid: 'op:duvno:tomislavgrad_2',
+                staging_osid: 'op:prozor:ljubunci_2',
             },
             {
                 // The local Rama Brigade takes Paroš from its own headquarters, so
