@@ -3335,7 +3335,7 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         assert.equal(operation.corps, 'arbih_1st_corps');
         assert.equal(operation.faction, 'RBiH');
         assert.equal(operation.staging_osid, stagingOsid);
-        assert.equal(operation.available_from, 20);
+        assert.equal(operation.available_from, 16);
         assert.equal(operation.enqueue_from, 8);
         assert.equal(operation.prestage_from, 8);
         assert.equal(operation.planning_duration, 3);
@@ -3414,9 +3414,9 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         assert.equal(state.political.political_controllers![objectiveOsid], 'RS');
     });
 
-    it('injects at turn 20 only with the exact 831st main / 102nd support axis, no teleport or control flip', () => {
+    it('injects at turn 16 only with the exact 831st main / 102nd support axis, no teleport or control flip', () => {
         const state = makeMinimalState();
-        state.meta.turn = 20;
+        state.meta.turn = 15;
         const command = state.military.corps_command!.arbih_1st_corps!;
         command.active_operations = [];
         command.queued_operations = [name];
@@ -3428,6 +3428,13 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         state.political.political_controllers![objectiveOsid] = 'RS';
         const mainPosition = main.location_osid;
         const supportPosition = support.location_osid;
+
+        // Turn 15 is still before the authored availability boundary.
+        assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), false);
+        assert.equal(command.active_operations.length, 0);
+        assert.ok((command as CorpsCommandState).queued_operations?.includes(name));
+
+        state.meta.turn = 16;
 
         assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), true);
         const operation = command.active_operations.find((active) => active.name === name);

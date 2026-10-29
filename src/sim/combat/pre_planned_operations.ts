@@ -1347,13 +1347,13 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         // context only; the exact 102nd assignment, date, and equipment quantities
         // are an explicit model assumption and do not attest a redeployment or
         // stock claim. The turn-8 queue starts an ordinary earlier concentration;
-        // injection remains gated at turn 20. Control can change only through
+        // injection remains gated at turn 16. Control can change only through
         // ordinary combat, so capture is not guaranteed.
         corps: 'arbih_1st_corps',
         faction: 'RBiH',
         name: 'Trnovo Eastern Counterattack (Model)',
         staging_osid: 'op:trnovo:delijas',
-        available_from: 20,
+        available_from: 16,
         enqueue_from: 8,
         prestage_from: 8,
         planning_duration: 3,
