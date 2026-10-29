@@ -293,9 +293,15 @@ describe('pre-planned operations', () => {
         assert.equal(operation.available_from, 93);
         const flank = operation.axes.find((axis) => axis.axis_id === 'foca_southern_flank');
         assert.ok(flank);
-        assert.ok(flank.brigades.includes('rs_1st_guards_motorized'));
-        assert.ok(flank.brigades.includes('rs_1st_birac'));
+        assert.deepEqual(flank.brigades, [
+            'rs_1st_birac',
+            'rs_1st_zvornik',
+            'rs_1st_milii',
+        ]);
         assert.deepEqual(flank.objectives, ['op:foca:donje_zesce']);
+        const northern = operation.axes.find((axis) => axis.axis_id === 'gorazde_encirclement');
+        assert.ok(northern);
+        assert.ok(northern.brigades.includes('rs_1st_guards_motorized'));
     });
 
     it('concentrates the Main Staff Guards for the May 1993 Prača assault', () => {
@@ -542,7 +548,7 @@ describe('pre-planned operations', () => {
 
         assert.equal(state.military.brigade_movement_state[brigadeId], undefined);
         assert.deepEqual(state.military.brigade_movement_orders[brigadeId], {
-            destination_sids: ['op:foca:izbisno'],
+            destination_sids: ['op:rogatica:varosiste_2'],
             stance: 'column',
             owner: 'authored_preplanned',
         });
@@ -910,7 +916,22 @@ describe('pre-planned operations', () => {
         assert.deepEqual(zvezda.axes[0]?.brigades, [
             'rs_65th_protection_motorized_regiment',
             'rs_5th_podrinje',
+            'rs_1st_guards_motorized',
         ]);
+        assert.deepEqual(zvezda.axes[2]?.brigades, [
+            'rs_1st_birac',
+            'rs_1st_zvornik',
+            'rs_1st_milii',
+        ]);
+        assert.deepEqual(zvezda.axes[2]?.objectives, ['op:foca:donje_zesce']);
+        assert.equal(zvezda.axes[2]?.staging_osid, 'op:foca:izbisno');
+        assert.equal(zvezda.axes[2]?.minimum_staged_brigades, 2);
+        assert.equal(zvezda.axes[2]?.minimum_forward_brigades, 2);
+        assert.equal(new Set(roster).size, 9);
+        assert.equal(
+            roster.filter((brigadeId) => brigadeId === 'rs_1st_guards_motorized').length,
+            1,
+        );
     });
 
     it('queues Zvezda at the friendly Rogatica shoulder and admits both northern axes without moving anyone', () => {
@@ -945,6 +966,7 @@ describe('pre-planned operations', () => {
         const varosisteBrigades = [
             'rs_65th_protection_motorized_regiment',
             'rs_5th_podrinje',
+            'rs_1st_guards_motorized',
         ];
         const staraGoraBrigades = [
             'rs_1st_bratunac',
@@ -952,7 +974,6 @@ describe('pre-planned operations', () => {
             'rs_visegrad_brigade',
         ];
         const southernBrigades = [
-            'rs_1st_guards_motorized',
             'rs_1st_birac',
             'rs_1st_zvornik',
             'rs_1st_milii',
@@ -1006,10 +1027,13 @@ describe('pre-planned operations', () => {
         assert.ok(operation);
         const encirclement = operation!.axes?.find((axis) => axis.axis_id === 'gorazde_encirclement');
         const cutoff = operation!.axes?.find((axis) => axis.axis_id === 'ustipraca_cutoff');
+        const southernFlank = operation!.axes?.find((axis) => axis.axis_id === 'foca_southern_flank');
         assert.ok(encirclement);
         assert.ok(cutoff);
+        assert.ok(southernFlank);
         assert.equal(encirclement!.staging_osid, varosiste);
         assert.equal(cutoff!.staging_osid, staraGora);
+        assert.equal(southernFlank!.staging_osid, izbisno);
         assert.equal(cutoff!.name, 'Visegrad Bridgehead');
         assert.deepEqual(encirclement!.objectives, [
             'op:gorazde:sopotnica',
@@ -1021,15 +1045,23 @@ describe('pre-planned operations', () => {
             'op:visegrad:medjedja_2',
             'op:visegrad:drinsko',
         ]);
+        assert.deepEqual(southernFlank!.objectives, ['op:foca:donje_zesce']);
         assert.deepEqual(encirclement!.assigned_brigades, [
             'rs_65th_protection_motorized_regiment',
             'rs_5th_podrinje',
+            'rs_1st_guards_motorized',
         ]);
         assert.deepEqual(cutoff!.assigned_brigades, [
             'rs_1st_bratunac',
             'rs_1st_podrinje',
             'rs_visegrad_brigade',
         ]);
+        assert.deepEqual(southernFlank!.assigned_brigades, [
+            'rs_1st_birac',
+            'rs_1st_zvornik',
+            'rs_1st_milii',
+        ]);
+        assert.ok(!southernFlank!.assigned_brigades.includes('rs_1st_guards_motorized'));
 
         assert.equal(state.political.political_controllers![brcigovo], 'RBiH');
         assert.deepEqual(state.political.political_controllers, controllersBefore);
@@ -1570,7 +1602,7 @@ describe('pre-planned operations', () => {
         state.political.political_controllers!['op:foca:izbisno'] = 'RS';
         const elite = state.military.formations.rs_1st_guards_motorized!;
         elite.corps_id = 'vrs_main_staff';
-        elite.location_osid = 'op:foca:izbisno';
+        elite.location_osid = 'op:rogatica:varosiste_2';
         elite.personnel = 1000;
         elite.status = 'active';
         elite.elite_loan_state = {

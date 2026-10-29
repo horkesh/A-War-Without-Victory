@@ -441,11 +441,15 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
             {
                 axis_id: 'gorazde_encirclement',
                 name: 'Goražde Encirclement',
+                // UNADOPTED model assumption: moving the existing Guards to the
+                // northern contraction is not an exact historical attribution
+                // and does not guarantee capture. No other term changes.
                 brigades: [
                     // Main Staff allocation for scenario balance. BB2 supports
                     // higher-HQ concentration at Zvezda, not these exact unit names.
                     'rs_65th_protection_motorized_regiment',
                     'rs_5th_podrinje',
+                    'rs_1st_guards_motorized',
                 ],
                 // The northern shoulder presses south through Sopotnica, clears
                 // the still-enemy Brcigovo shoulder and Ustipraca cutoff, then
@@ -488,7 +492,6 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 axis_id: 'foca_southern_flank',
                 name: 'Foča Southern Flank',
                 brigades: [
-                    'rs_1st_guards_motorized',
                     'rs_1st_birac',
                     'rs_1st_zvornik',
                     'rs_1st_milii',
