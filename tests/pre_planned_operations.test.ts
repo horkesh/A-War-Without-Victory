@@ -3612,4 +3612,263 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
             'Operation Circle must retain the 831st',
         );
     });
+
+    const osjecaniOsid = 'op:gorazde:osjecani_2';
+    const gorazdeOsid = 'op:gorazde:gorazde_2';
+    const circleBrigadeIds = ['arbih_801st_light', 'arbih_802nd_light'];
+
+    /**
+     * Small local fixture for the direct writer. Only existing authored units are
+     * used: the 831st main and 102nd support plus Circle's nonshared 801st/802nd.
+     * Clearing every corps keeps unrelated startup queues from masking the writer
+     * contract under test.
+     */
+    function makeQueuedHeadFixture(queue: readonly string[], mainLocation: string) {
+        const state = makeMinimalState();
+        state.meta.turn = 14;
+        delete state.meta.player_faction;
+        for (const corps of Object.values(state.military.corps_command!)) {
+            corps.active_operations = [];
+            corps.queued_operations = [];
+        }
+        const command = state.military.corps_command!.arbih_1st_corps!;
+        command.queued_operations = [...queue];
+        state.military.brigade_movement_orders = {};
+        state.military.brigade_movement_state = {};
+        const main = state.military.formations![brigadeId]!;
+        main.personnel = 2000;
+        main.location_osid = mainLocation as any;
+        const support = positionExisting102nd(state);
+        support.location_osid = stagingOsid as any;
+        for (const circleBrigade of circleBrigadeIds) {
+            state.military.formations![circleBrigade]!.location_osid = gorazdeOsid as any;
+        }
+        state.political.political_controllers![stagingOsid] = 'RBiH';
+        state.political.political_controllers![osjecaniOsid] = 'RBiH';
+        state.political.political_controllers![objectiveOsid] = 'RS';
+        return { state, command, main, support };
+    }
+
+    it('holds an already-arrived queued head at Delijas instead of letting lower Operation Circle retask the shared 831st', () => {
+        const { state, main, support } = makeQueuedHeadFixture([name, 'Operation Circle'], stagingOsid);
+
+        assert.ok(
+            getQueuedDatedPrestageBrigadeIds(state).has(brigadeId),
+            'the already-arrived head owns the shared 831st before the writer runs',
+        );
+        assert.ok(getQueuedDatedPrestageBrigadeIds(state).has(supportBrigadeId));
+
+        prestageDeferredPrePlannedElites(state);
+
+        assert.equal(main.location_osid, stagingOsid, 'the arrived head must not teleport');
+        assert.equal(
+            state.military.brigade_movement_orders?.[brigadeId],
+            undefined,
+            'lower Operation Circle must not order the queued head 831st away from Delijas',
+        );
+        assert.equal(support.location_osid, stagingOsid, 'the arrived 102nd must not teleport');
+        assert.equal(
+            state.military.brigade_movement_orders?.[supportBrigadeId],
+            undefined,
+            'the 102nd is already at its authored head staging area',
+        );
+
+        for (const circleBrigade of circleBrigadeIds) {
+            assert.equal(
+                state.military.formations![circleBrigade]!.location_osid,
+                gorazdeOsid,
+                `${circleBrigade} must not teleport when ordered forward`,
+            );
+            assert.deepEqual(
+                state.military.brigade_movement_orders?.[circleBrigade],
+                {
+                    destination_sids: [osjecaniOsid],
+                    stance: 'column',
+                    owner: 'authored_preplanned',
+                },
+                `${circleBrigade} is not shared with the queued head and must still march`,
+            );
+        }
+        assert.equal(state.political.political_controllers![stagingOsid], 'RBiH');
+        assert.equal(state.political.political_controllers![osjecaniOsid], 'RBiH');
+        assert.equal(state.political.political_controllers![objectiveOsid], 'RS');
+    });
+
+    it('lets the queued head march its own 831st to Delijas and keeps lower Operation Circle from replacing that order', () => {
+        const { state, main, support } = makeQueuedHeadFixture([name, 'Operation Circle'], mainApproachOsid);
+
+        prestageDeferredPrePlannedElites(state);
+
+        assert.equal(main.location_osid, mainApproachOsid, 'authored march must not teleport');
+        assert.deepEqual(
+            state.military.brigade_movement_orders?.[brigadeId],
+            {
+                destination_sids: [stagingOsid],
+                stance: 'column',
+                owner: 'authored_preplanned',
+            },
+            'the queued head must keep its own Delijas march against lower Circle',
+        );
+        assert.equal(support.location_osid, stagingOsid);
+        assert.equal(state.military.brigade_movement_orders?.[supportBrigadeId], undefined);
+        for (const circleBrigade of circleBrigadeIds) {
+            assert.deepEqual(state.military.brigade_movement_orders?.[circleBrigade], {
+                destination_sids: [osjecaniOsid],
+                stance: 'column',
+                owner: 'authored_preplanned',
+            });
+        }
+    });
+
+    it('does not freeze the 831st for a future-dated queued head before Operation Circle prestages', () => {
+        const { state, main } = makeQueuedHeadFixture(['Operation Circle', name], mainApproachOsid);
+        state.meta.turn = 8;
+
+        assert.equal(
+            getQueuedDatedPrestageBrigadeIds(state).has(brigadeId),
+            false,
+            'the future-dated head does not reserve the 831st at turn 8',
+        );
+
+        prestageDeferredPrePlannedElites(state);
+
+        assert.equal(main.location_osid, mainApproachOsid);
+        assert.deepEqual(
+            state.military.brigade_movement_orders?.[brigadeId],
+            {
+                destination_sids: [stagingOsid],
+                stance: 'column',
+                owner: 'authored_preplanned',
+            },
+            'the lower dated Trnovo plan may still start its own march before head prestage',
+        );
+        for (const circleBrigade of circleBrigadeIds) {
+            assert.equal(
+                state.military.brigade_movement_orders?.[circleBrigade],
+                undefined,
+                'Operation Circle has not reached its prestage date',
+            );
+        }
+    });
+
+    it('lets an active queued head Operation Circle order its own 831st to Osjecani at its prestage date', () => {
+        const { state, main } = makeQueuedHeadFixture(['Operation Circle', name], stagingOsid);
+
+        assert.ok(getQueuedDatedPrestageBrigadeIds(state).has(brigadeId));
+
+        prestageDeferredPrePlannedElites(state);
+
+        assert.equal(main.location_osid, stagingOsid);
+        assert.deepEqual(
+            state.military.brigade_movement_orders?.[brigadeId],
+            {
+                destination_sids: [osjecaniOsid],
+                stance: 'column',
+                owner: 'authored_preplanned',
+            },
+            'the active queued head may still march its own 831st to Osjecani',
+        );
+    });
+
+    it('generates no queued prestage orders for a selected RBiH player on the fresh fixture', () => {
+        const { state, main, support } = makeQueuedHeadFixture([name, 'Operation Circle'], mainApproachOsid);
+        state.meta.player_faction = 'RBiH' as FactionId;
+
+        assert.deepEqual([...getQueuedDatedPrestageBrigadeIds(state)].sort(), []);
+
+        prestageDeferredPrePlannedElites(state);
+
+        for (const authoredId of [brigadeId, supportBrigadeId, ...circleBrigadeIds]) {
+            assert.equal(
+                state.military.brigade_movement_orders?.[authoredId],
+                undefined,
+                `${authoredId} must not be implicitly ordered for a selected player`,
+            );
+        }
+        assert.equal(main.location_osid, mainApproachOsid);
+        assert.equal(support.location_osid, stagingOsid);
+    });
+
+    it('releases the 831st to the normal Osjecani march when the head leaves the queue', () => {
+        const { state, main } = makeQueuedHeadFixture(['Operation Circle'], stagingOsid);
+
+        prestageDeferredPrePlannedElites(state);
+
+        assert.equal(main.location_osid, stagingOsid);
+        assert.deepEqual(
+            state.military.brigade_movement_orders?.[brigadeId],
+            {
+                destination_sids: [osjecaniOsid],
+                stance: 'column',
+                owner: 'authored_preplanned',
+            },
+            'without the queued head hold, the 831st joins the normal Circle march',
+        );
+        for (const circleBrigade of circleBrigadeIds) {
+            assert.deepEqual(state.military.brigade_movement_orders?.[circleBrigade], {
+                destination_sids: [osjecaniOsid],
+                stance: 'column',
+                owner: 'authored_preplanned',
+            });
+        }
+    });
+
+    it('does not retask the 831st owned by another active operation while nonshared Circle brigades still march', () => {
+        const { state, command, main } = makeQueuedHeadFixture(['Operation Circle'], stagingOsid);
+        command.active_operations.push({
+            name: 'Other Held Operation',
+            type: 'sector_attack',
+            phase: 'execution',
+            started_turn: 10,
+            phase_started_turn: 10,
+            participating_brigades: [brigadeId],
+            objectives: [objectiveOsid],
+            current_objective_index: 0,
+            momentum: 0,
+            failure_count: 0,
+            consecutive_failures_on_current: 0,
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 0,
+            idle_execution_turn_streak: 0,
+        } as unknown as CorpsOperation);
+        const manualOrder = {
+            destination_sids: [stagingOsid],
+            stance: 'column' as const,
+        };
+        state.military.brigade_movement_orders![brigadeId] = manualOrder;
+        const supportTransit = {
+            status: 'in_transit' as const,
+            stance: 'column' as const,
+            destination_sids: [stagingOsid],
+            path: [stagingOsid],
+            turns_remaining: 1,
+        };
+        state.military.brigade_movement_state![supportBrigadeId] = supportTransit as any;
+
+        prestageDeferredPrePlannedElites(state);
+
+        assert.deepEqual(
+            state.military.brigade_movement_orders?.[brigadeId],
+            manualOrder,
+            'an active operation owns the 831st; the queued writer must not retask it',
+        );
+        assert.deepEqual(
+            state.military.brigade_movement_state?.[supportBrigadeId],
+            supportTransit,
+            'existing in-transit movement must be preserved',
+        );
+        for (const circleBrigade of circleBrigadeIds) {
+            assert.deepEqual(
+                state.military.brigade_movement_orders?.[circleBrigade],
+                {
+                    destination_sids: [osjecaniOsid],
+                    stance: 'column',
+                    owner: 'authored_preplanned',
+                },
+                `${circleBrigade} is not owned by the other operation and must still march`,
+            );
+        }
+        assert.equal(main.location_osid, stagingOsid);
+    });
 });

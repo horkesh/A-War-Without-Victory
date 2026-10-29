@@ -2320,6 +2320,30 @@ function hasConflictingOperationCommitment(
     return false;
 }
 
+/**
+ * Actual brigade IDs held by the dated head (queued_operations[0]) of this corps.
+ * The head is identified by corps + operation identity, so the current definition
+ * never blocks itself. The existing queued-prestage helper supplies the exact
+ * enqueue/prestage date and selected-player policy, and authored head IDs are
+ * resolved so aliases cannot bypass the hold.
+ */
+function getQueuedHeadHeldBrigadeIds(state: GameState, def: PrePlannedOp): Set<FormationId> {
+    const command = state.military.corps_command?.[def.corps];
+    const headOperationName = command?.queued_operations?.[0];
+    if (!headOperationName || headOperationName === def.name) return new Set<FormationId>();
+    const reserved = getQueuedDatedPrestageBrigadeIds({
+        meta: state.meta,
+        military: { corps_command: { [def.corps]: command } },
+    });
+    const formations = state.military.formations ?? {};
+    const held = new Set<FormationId>();
+    for (const authoredFormationId of reserved) {
+        const resolved = resolveOperationFormation(formations, authoredFormationId);
+        if (resolved.formation_id) held.add(resolved.formation_id);
+    }
+    return held;
+}
+
 function prestageReservedPrePlannedElites(state: GameState, def: PrePlannedOp, turn: number): void {
     if (def.prestage_from == null || turn < def.prestage_from) return;
     if (state.meta.player_faction === def.faction) return;
@@ -2329,6 +2353,7 @@ function prestageReservedPrePlannedElites(state: GameState, def: PrePlannedOp, t
     if (prePlannedOperationAlreadyResolved(state, def)) return;
     const formations = state.military.formations ?? {};
     const movementState = state.military.brigade_movement_state ?? {};
+    const headHeldBrigadeIds = getQueuedHeadHeldBrigadeIds(state, def);
     for (const axis of def.axes) {
         if (!axis.staging_osid) continue;
         for (const authoredFormationId of [...axis.brigades].sort(strictCompare)) {
@@ -2336,6 +2361,9 @@ function prestageReservedPrePlannedElites(state: GameState, def: PrePlannedOp, t
             const brigadeId = resolved.formation_id;
             const formation = resolved.formation;
             if (!brigadeId || !formation) continue;
+            // A lower queued plan must not retask a brigade the head is already
+            // marshaling; its own nonshared brigades continue below.
+            if (headHeldBrigadeIds.has(brigadeId)) continue;
             if (hasConflictingOperationCommitment(state, brigadeId, def.name)) continue;
             // A Main Staff loan may pass directly from one completed dated
             // operation to another in the same receiving corps. The active-op
