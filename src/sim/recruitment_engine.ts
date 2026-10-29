@@ -220,6 +220,7 @@ function buildRecruitedFormation(
     state: GameState,
     brigade: OobBrigade,
     equipClass: EquipmentClass,
+    composition: BrigadeComposition,
     personnel: number,
     currentTurn: number,
     hqSid: string | undefined,
@@ -252,7 +253,7 @@ function buildRecruitedFormation(
         personnel: effectivePersonnel,
         readiness: isMandatory ? 'active' : 'forming',
         cohesion: effectiveCohesion,
-        composition: buildBrigadeComposition(equipClass, brigade.faction, true),
+        composition: structuredClone(composition),
         corps_id: (brigade.corps as FormationId) ?? null,
         origin_mun: brigade.home_mun,
         officer_quality: brigade.initial_officer_quality ?? getFactionDefaultOfficerQuality(brigade.faction, currentTurn),
@@ -657,7 +658,7 @@ export function recruitBrigade(
     // they don't inherit JNA heavy equipment. Only initial OOB brigades get JNA kit.
     const composition = buildBrigadeComposition(chosenClass, faction, false);
     const formation = buildRecruitedFormation(
-        state, brigade, chosenClass, composition.infantry, state.meta.turn, hq_sid, brigade.mandatory, location_osid
+        state, brigade, chosenClass, composition, composition.infantry, state.meta.turn, hq_sid, brigade.mandatory, location_osid
     );
 
     const action: RecruitmentAction = {
@@ -995,8 +996,12 @@ export function runBotRecruitment(
             }
 
             // Build formation directly for mandatory (bypass normal cost checks)
+            // Explicit authored composition wins; otherwise retain the historical
+            // initial-OOB profile (RS JNA heavy/mountain override included).
+            const composition = brigade.composition
+                ?? buildBrigadeComposition(brigade.default_equipment_class, brigade.faction, true);
             const formation = buildRecruitedFormation(
-                state, brigade, brigade.default_equipment_class, effectiveManpower, currentTurn, hq_sid, true, location_osid
+                state, brigade, brigade.default_equipment_class, composition, effectiveManpower, currentTurn, hq_sid, true, location_osid
             );
 
             state.military.formations[brigade.id] = formation;

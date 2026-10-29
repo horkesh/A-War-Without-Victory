@@ -15720,13 +15720,13 @@
           "artillery_condition": {
             "degraded": 0,
             "non_operational": 0,
-            "operational": 1
+            "operational": 0
           },
-          "infantry": 500,
+          "infantry": 900,
           "tank_condition": {
             "degraded": 0,
             "non_operational": 0,
-            "operational": 1
+            "operational": 0
           },
           "tanks": 0
         },
@@ -15791,17 +15791,17 @@
         "cohesion": 48,
         "composition": {
           "aa_systems": 0,
-          "artillery": 1,
+          "artillery": 0,
           "artillery_condition": {
             "degraded": 0,
             "non_operational": 0,
-            "operational": 1
+            "operational": 0
           },
-          "infantry": 800,
+          "infantry": 600,
           "tank_condition": {
             "degraded": 0,
             "non_operational": 0,
-            "operational": 1
+            "operational": 0
           },
           "tanks": 0
         },
@@ -18272,17 +18272,17 @@
         "cohesion": 72,
         "composition": {
           "aa_systems": 0,
-          "artillery": 1,
+          "artillery": 0,
           "artillery_condition": {
             "degraded": 0,
             "non_operational": 0,
-            "operational": 1
+            "operational": 0
           },
-          "infantry": 800,
+          "infantry": 1100,
           "tank_condition": {
             "degraded": 0,
             "non_operational": 0,
-            "operational": 1
+            "operational": 0
           },
           "tanks": 0
         },
@@ -18348,17 +18348,17 @@
         "cohesion": 72,
         "composition": {
           "aa_systems": 0,
-          "artillery": 1,
+          "artillery": 0,
           "artillery_condition": {
             "degraded": 0,
             "non_operational": 0,
-            "operational": 1
+            "operational": 0
           },
-          "infantry": 800,
+          "infantry": 1100,
           "tank_condition": {
             "degraded": 0,
             "non_operational": 0,
-            "operational": 1
+            "operational": 0
           },
           "tanks": 0
         },
@@ -18423,17 +18423,17 @@
         "cohesion": 72,
         "composition": {
           "aa_systems": 0,
-          "artillery": 1,
+          "artillery": 0,
           "artillery_condition": {
             "degraded": 0,
             "non_operational": 0,
-            "operational": 1
+            "operational": 0
           },
-          "infantry": 800,
+          "infantry": 1100,
           "tank_condition": {
             "degraded": 0,
             "non_operational": 0,
-            "operational": 1
+            "operational": 0
           },
           "tanks": 0
         },
@@ -18500,17 +18500,17 @@
         "cohesion": 72,
         "composition": {
           "aa_systems": 0,
-          "artillery": 1,
+          "artillery": 0,
           "artillery_condition": {
             "degraded": 0,
             "non_operational": 0,
-            "operational": 1
+            "operational": 0
           },
-          "infantry": 800,
+          "infantry": 1100,
           "tank_condition": {
             "degraded": 0,
             "non_operational": 0,
-            "operational": 1
+            "operational": 0
           },
           "tanks": 0
         },
@@ -18577,17 +18577,17 @@
         "cohesion": 72,
         "composition": {
           "aa_systems": 0,
-          "artillery": 1,
+          "artillery": 0,
           "artillery_condition": {
             "degraded": 0,
             "non_operational": 0,
-            "operational": 1
+            "operational": 0
           },
-          "infantry": 800,
+          "infantry": 1100,
           "tank_condition": {
             "degraded": 0,
             "non_operational": 0,
-            "operational": 1
+            "operational": 0
           },
           "tanks": 0
         },
