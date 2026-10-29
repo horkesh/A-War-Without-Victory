@@ -1678,7 +1678,8 @@
     "available_from": 7,
     "priority": 49,
     "mandatory": true,
-    "initial_personnel": 900
+    "initial_personnel": 900,
+    "max_personnel": 2000
   },
   {
     "id": "arbih_803rd_light",
