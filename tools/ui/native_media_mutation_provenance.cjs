@@ -21,6 +21,7 @@ function installNativeMediaMutationProvenance(priorApi) {
     const SENTINEL_SCHEMA = 'awwv.native-media-seek-sentinel.v1';
     const SENTINEL_ACTIONS = ['seekto', 'seekforward', 'seekbackward'];
     const SCHEMA = 'awwv.native-media-mutation-provenance.v1';
+    const ABSENCE_SCHEMA = 'awwv.native-media-optional-absence-audit.v1';
     const MARKER = 'awwv-native-media-mutation-provenance-api-v1';
     const LABEL = 'ALTERED CONTROLLED-QA PROFILE: exact same-realm Audio-constructor provenance and explicit mutation evidence only. This is not acceptance, production/default-control coverage, universal provenance, playback-quality proof, natural-loop proof, or tamper resistance.';
     const AMBIENT_PATH = /^\/assets\/ambient_(?:warroom|field|archive)-[A-Za-z0-9_-]+\.ogg$/;
@@ -37,6 +38,7 @@ function installNativeMediaMutationProvenance(priorApi) {
         'loop',
         'controls',
         'autoplay',
+        'preload',
     ];
     const OPTIONAL_SETTERS = ['srcObject'];
     const ATTRIBUTE_REFLECTION = {
@@ -44,8 +46,9 @@ function installNativeMediaMutationProvenance(priorApi) {
         loop: 'loop',
         controls: 'controls',
         autoplay: 'autoplay',
+        preload: 'preload',
     };
-    const CAPTURED_ATTRIBUTES = ['src', 'loop', 'controls', 'autoplay'];
+    const CAPTURED_ATTRIBUTES = ['src', 'loop', 'controls', 'autoplay', 'preload'];
 
     if (typeof window === 'undefined' || !window || typeof window !== 'object') {
         return { installed: false, idempotent: false, diagnosticValid: false, reason: 'missing-window' };
@@ -79,6 +82,7 @@ function installNativeMediaMutationProvenance(priorApi) {
     let methodCoverage = {};
     let setterCoverage = {};
     let missingOptionalApis = [];
+    const absentOptionalApis = [];
     let api = null;
     let trustRegistry = null;
     let playLayerBindAttempted = false;
@@ -187,6 +191,7 @@ function installNativeMediaMutationProvenance(priorApi) {
             loop: safeRead(errors, 'loop', () => element.loop, null),
             controls: safeRead(errors, 'controls', () => element.controls, null),
             autoplay: safeRead(errors, 'autoplay', () => element.autoplay, null),
+            preload: safeRead(errors, 'preload', () => element.preload, null),
             currentTime: safeRead(errors, 'currentTime', () => element.currentTime, null),
             duration: safeRead(errors, 'duration', () => element.duration, null),
             paused: safeRead(errors, 'paused', () => element.paused, null),
@@ -401,6 +406,7 @@ function installNativeMediaMutationProvenance(priorApi) {
     function validateEntry(entry, element) {
         drainEntry(entry);
         auditOwnShadows(entry, element);
+        auditOptionalAbsenceForEntry(entry, element);
         if (!(element instanceof window.HTMLMediaElement)) {
             invalidateEntry(entry, 'identity-mismatch');
             return { captured: null, ownShadows: entry.ownShadows.slice() };
@@ -529,6 +535,7 @@ function installNativeMediaMutationProvenance(priorApi) {
             if (!descriptorMatches(audioDescriptor, installedAudioDescriptor)) {
                 markInvalid('constructor-descriptor-tampered');
             }
+            auditOptionalAbsenceGlobally();
             for (const method of wrappedMethods) {
                 if (method.name === 'play' && playLayerBinding) continue;
                 const descriptor = Object.getOwnPropertyDescriptor(method.owner, method.name);
@@ -760,6 +767,7 @@ function installNativeMediaMutationProvenance(priorApi) {
                 methods: { ...methodCoverage },
                 setters: { ...setterCoverage },
                 unsupportedOptionalApis: missingOptionalApis.slice(),
+                absenceAudit: absenceAuditReport(),
                 apiFrozen: Object.isFrozen(api),
             },
             invalidReasons: [...invalidReasons],
@@ -926,6 +934,7 @@ function installNativeMediaMutationProvenance(priorApi) {
             methods: { ...methodCoverage },
             setters: { ...setterCoverage },
             missingOptionalApis: missingOptionalApis.slice(),
+            absenceAudit: absenceAuditReport(),
             sourceEpoch: {
                 semantics: 'monotonic-per-object',
                 initialNonEmptySourceEpoch: 1,
@@ -966,6 +975,78 @@ function installNativeMediaMutationProvenance(priorApi) {
             current = Object.getPrototypeOf(current);
         }
         return null;
+    }
+
+    function inspectOptionalAbsence(start, record) {
+        let current = start;
+        while (current) {
+            const descriptor = Object.getOwnPropertyDescriptor(current, record.name);
+            if (descriptor) {
+                const wrapped = record.kind === 'method'
+                    ? typeof descriptor.value === 'function'
+                    : typeof descriptor.set === 'function';
+                return { status: wrapped ? 'present' : 'present-unwrapped', owner: current };
+            }
+            current = Object.getPrototypeOf(current);
+        }
+        return { status: 'absent', owner: null };
+    }
+
+    function absenceAuditReport() {
+        return {
+            schema: ABSENCE_SCHEMA,
+            recordedAt: 'installation',
+            recheckedOnEveryValidation: true,
+            prototypeChain: 'all',
+            instanceShadows: 'rejected',
+            readFailure: 'fail-closed',
+            laterAppearance: 'reject',
+            presentButUnwrapped: 'reject',
+            entries: absentOptionalApis.map((record) => ({
+                name: record.name,
+                kind: record.kind,
+                status: 'absent',
+            })),
+        };
+    }
+
+    function auditOptionalAbsenceGlobally() {
+        for (const record of absentOptionalApis) {
+            let inspection;
+            try {
+                inspection = inspectOptionalAbsence(mediaPrototype, record);
+            } catch {
+                markInvalid(`optional-api-absence-read-failed:${record.name}`, {
+                    stage: 'prototype',
+                });
+                continue;
+            }
+            if (inspection.status === 'present') {
+                markInvalid(`optional-api-appeared:${record.name}`, { stage: 'prototype' });
+            } else if (inspection.status === 'present-unwrapped') {
+                markInvalid(`optional-api-present-unwrapped:${record.name}`, { stage: 'prototype' });
+            }
+        }
+    }
+
+    function auditOptionalAbsenceForEntry(entry, element) {
+        for (const record of absentOptionalApis) {
+            let inspection;
+            try {
+                inspection = inspectOptionalAbsence(Object.getPrototypeOf(element), record);
+            } catch {
+                invalidateEntry(entry, 'optional-api-absence-read-failed', { name: record.name });
+                markInvalid(`optional-api-absence-read-failed:${record.name}`, { id: entry.id });
+                continue;
+            }
+            if (inspection.status === 'present') {
+                invalidateEntry(entry, 'optional-api-appeared', { name: record.name });
+                markInvalid(`optional-api-appeared:${record.name}`, { id: entry.id });
+            } else if (inspection.status === 'present-unwrapped') {
+                invalidateEntry(entry, 'optional-api-present-unwrapped', { name: record.name });
+                markInvalid(`optional-api-present-unwrapped:${record.name}`, { id: entry.id });
+            }
+        }
     }
 
     function wrapMethod(found, name) {
@@ -1464,6 +1545,7 @@ function installNativeMediaMutationProvenance(priorApi) {
         if (!found || typeof found.descriptor.value !== 'function') {
             methodCoverage[name] = 'unavailable';
             missingOptionalApis.push(name);
+            absentOptionalApis.push({ name, kind: 'method' });
         } else {
             methodFindings[name] = found;
         }
@@ -1483,6 +1565,7 @@ function installNativeMediaMutationProvenance(priorApi) {
         if (!found || typeof found.descriptor.set !== 'function') {
             setterCoverage[name] = 'unavailable';
             missingOptionalApis.push(name);
+            absentOptionalApis.push({ name, kind: 'setter' });
         } else {
             setterFindings[name] = found;
         }
@@ -1548,6 +1631,7 @@ function installNativeMediaMutationProvenance(priorApi) {
         methods: { ...methodCoverage },
         setters: { ...setterCoverage },
         missingOptionalApis: missingOptionalApis.slice(),
+        absenceAudit: absenceAuditReport(),
     });
 
     const diagnosticValid = computeValid();

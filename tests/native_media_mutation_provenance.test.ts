@@ -95,6 +95,7 @@ function createRealm(options: {
         fastSeekBehavior: null as Behavior | null,
         playCalls: [] as Array<{ receiver: any; args: any[] }>,
         currentTimeThrow: null as any,
+        preloadThrow: null as any,
     };
 
     const observers: BaseMutationObserver[] = [];
@@ -155,6 +156,7 @@ function createRealm(options: {
         _loop = false;
         _controls = false;
         _autoplay = false;
+        _preload = 'auto';
         _playbackRate = 1;
         _defaultPlaybackRate = 1;
         _srcObject: any = null;
@@ -270,6 +272,17 @@ function createRealm(options: {
 
         get playbackRate() {
             return this._playbackRate;
+        }
+
+        get preload() {
+            return this._preload;
+        }
+
+        set preload(value: any) {
+            if (state.preloadThrow) throw state.preloadThrow;
+            const text = String(value);
+            this._preload = text;
+            this.setAttribute('preload', text);
         }
 
         set playbackRate(value: any) {
@@ -401,6 +414,7 @@ function createRealm(options: {
         'loop',
         'controls',
         'autoplay',
+        'preload',
     ]) {
         const descriptor = Object.getOwnPropertyDescriptor(mediaPrototype, name);
         originals.setters[name] = descriptor?.set;
@@ -421,6 +435,7 @@ function createRealm(options: {
         Date: window.Date,
         performance: window.performance,
     };
+    const realmObject = vm.runInNewContext('Object', context);
     const install = vm.runInNewContext(`(${installerSource()})`, context);
     const sentinelInstall = vm.runInNewContext(`(${sentinelInstallerSource()})`, context);
     let report: any;
@@ -442,6 +457,7 @@ function createRealm(options: {
         originals,
         HTMLMediaElement: FakeHTMLMediaElement,
         Audio: window.Audio,
+        realmObject,
         install,
         sentinelInstall,
         report,
@@ -489,6 +505,7 @@ test('installs a frozen diagnostic API and describes initial ambient constructio
         loop: null,
         controls: null,
         autoplay: null,
+        preload: null,
     });
     expect(description.provenance.rateAttributes).toEqual({
         playbackRate: null,
@@ -536,6 +553,7 @@ test('installs a frozen diagnostic API and describes initial ambient constructio
         loop: 'wrapped',
         controls: 'wrapped',
         autoplay: 'wrapped',
+        preload: 'wrapped',
     });
     expect(snapshot.coverage.sourceEpoch).toMatchObject({
         semantics: 'monotonic-per-object',
@@ -549,7 +567,7 @@ test('installs a frozen diagnostic API and describes initial ambient constructio
         'srcObject-setter-success',
         'load-success',
     ]);
-    expect(snapshot.coverage.attributesCaptured).toEqual(['src', 'loop', 'controls', 'autoplay']);
+    expect(snapshot.coverage.attributesCaptured).toEqual(['src', 'loop', 'controls', 'autoplay', 'preload']);
     expect(snapshot.coverage.rateProperties.attributeReflection).toBe(false);
     expect(snapshot.coverage.srcObject.attributeReflection).toBe(false);
     expect(snapshot.coverage.autoplay).toBe('rejected');
@@ -751,6 +769,110 @@ test('does not pre-coerce setter arguments and preserves setter exceptions exact
     expect(JSON.stringify(snapshot.events.records)).not.toContain('exact-currentTime-error');
 });
 
+test('accepts the actual startup preload auto, loop true and play composition', () => {
+    const realm = createRealm();
+    const element = new realm.Audio(AMBIENT_WARROOM);
+    element.preload = 'auto';
+    element.loop = true;
+    expect(element.play()).toBe('play-return');
+
+    const description = realm.api.describe(element);
+    expect(description.valid).toBe(true);
+    expect(description.provenance.attributes).toMatchObject({
+        src: AMBIENT_WARROOM,
+        preload: 'auto',
+        loop: '',
+    });
+    expect(description.mutationCounts.byName.preload).toBe(1);
+    expect(description.mutationCounts.byName.loop).toBe(1);
+    expect(description.mutationCounts.byName.play).toBe(1);
+
+    const records = realm.api.snapshot().events.records;
+    expect(records.filter((record: any) =>
+        record.kind === 'mutation-attempt' && record.name === 'preload')).toHaveLength(1);
+    expect(records.filter((record: any) =>
+        record.kind === 'mutation-result'
+        && record.name === 'preload'
+        && record.outcome === 'success')).toHaveLength(1);
+    expect(realm.api.snapshot().coverage.setters.preload).toBe('wrapped');
+});
+
+test('records same-value preload writes and preserves preload coercion and exceptions', () => {
+    const sameValue = createRealm();
+    const sameElement = new sameValue.Audio(AMBIENT_WARROOM);
+    sameElement.preload = 'auto';
+    sameElement.preload = 'auto';
+    const sameDescription = sameValue.api.describe(sameElement);
+    expect(sameDescription.valid).toBe(true);
+    expect(sameDescription.provenance.attributes.preload).toBe('auto');
+    expect(sameDescription.mutationCounts.byName.preload).toBe(2);
+    const sameRecords = sameValue.api.snapshot().events.records;
+    expect(sameRecords.filter((record: any) =>
+        record.kind === 'mutation-attempt' && record.name === 'preload')).toHaveLength(2);
+    expect(sameRecords.filter((record: any) =>
+        record.kind === 'mutation-result' && record.name === 'preload')).toHaveLength(2);
+
+    const coercing = createRealm();
+    const coercingElement = new coercing.Audio(AMBIENT_WARROOM);
+    let coercions = 0;
+    const argument = {
+        toString() {
+            coercions += 1;
+            return 'metadata';
+        },
+    };
+    coercingElement.preload = argument as any;
+    expect(coercions).toBe(1);
+    expect(coercingElement.preload).toBe('metadata');
+    expect(coercing.api.describe(coercingElement).valid).toBe(true);
+
+    const throwing = createRealm();
+    const throwingElement = new throwing.Audio(AMBIENT_WARROOM);
+    const thrown = new Error('exact-preload-error');
+    throwing.state.preloadThrow = thrown;
+    let caught: any = null;
+    try {
+        throwingElement.preload = 'none';
+    } catch (error) {
+        caught = error;
+    }
+    expect(caught).toBe(thrown);
+    expect(throwingElement.preload).toBe('auto');
+    const throwingSnapshot = throwing.api.snapshot();
+    expect(throwingSnapshot.valid).toBe(true);
+    expect(throwingSnapshot.events.records.some((record: any) =>
+        record.kind === 'mutation-result'
+        && record.name === 'preload'
+        && record.outcome === 'threw')).toBe(true);
+    expect(JSON.stringify(throwingSnapshot.events.records)).not.toContain('exact-preload-error');
+});
+
+test('rejects unexplained direct, NamedNodeMap and asynchronous preload mutations', () => {
+    const direct = createRealm();
+    const directElement = new direct.Audio(AMBIENT_WARROOM);
+    directElement.setAttribute('preload', 'none');
+    expect(direct.api.describe(directElement).valid).toBe(false);
+    expect(direct.api.describe(directElement).reason).toBe('unexplained-attribute-mutation');
+    expect(direct.api.snapshot().invalidReasons).toContain('unexplained-mutation');
+
+    const named = createRealm();
+    const namedElement = new named.Audio(AMBIENT_WARROOM);
+    namedElement.attributes.setNamedItem({ name: 'preload', value: 'none' });
+    expect(named.api.describe(namedElement).reason).toBe('unexplained-attribute-mutation');
+
+    const asynchronous = createRealm();
+    const asynchronousElement = new asynchronous.Audio(AMBIENT_WARROOM);
+    asynchronousElement.preload = 'metadata';
+    expect(asynchronous.api.describe(asynchronousElement).valid).toBe(true);
+    asynchronous.observers[0].callback(
+        [{ type: 'attributes', target: asynchronousElement, attributeName: 'preload' }],
+        asynchronous.observers[0],
+    );
+    const asynchronousDescription = asynchronous.api.describe(asynchronousElement);
+    expect(asynchronousDescription.valid).toBe(false);
+    expect(asynchronousDescription.reason).toBe('unexplained-attribute-mutation');
+});
+
 test('logs non-ambient, query/hash/cross-origin, parser and missing sources without admitting them', () => {
     const realm = createRealm();
     for (const source of [
@@ -884,7 +1006,7 @@ test('rejects autoplay-enabled changes for the controlled profile', () => {
     expect(realm.api.describe(element).reason).toBe('autoplay-enabled');
 });
 
-test('reports missing optional APIs explicitly while still installing', () => {
+test('reports recorded and rechecked optional API absence while still installing', () => {
     const realm = createRealm({ noFastSeek: true, missingSetters: ['srcObject'] });
     expect(realm.report).toMatchObject({ installed: true, diagnosticValid: true });
     const snapshot = realm.api.snapshot();
@@ -893,8 +1015,75 @@ test('reports missing optional APIs explicitly while still installing', () => {
     expect(snapshot.coverage.missingOptionalApis).toEqual(
         expect.arrayContaining(['fastSeek', 'srcObject']),
     );
+    expect(snapshot.install.unsupportedOptionalApis).toEqual(
+        expect.arrayContaining(['fastSeek', 'srcObject']),
+    );
+    expect(snapshot.install.absenceAudit).toMatchObject({
+        schema: 'awwv.native-media-optional-absence-audit.v1',
+        recordedAt: 'installation',
+        recheckedOnEveryValidation: true,
+        prototypeChain: 'all',
+        instanceShadows: 'rejected',
+        readFailure: 'fail-closed',
+        laterAppearance: 'reject',
+        presentButUnwrapped: 'reject',
+    });
+    expect(snapshot.install.absenceAudit.entries).toEqual(expect.arrayContaining([
+        { name: 'fastSeek', kind: 'method', status: 'absent' },
+        { name: 'srcObject', kind: 'setter', status: 'absent' },
+    ]));
+    expect(snapshot.coverage.absenceAudit).toEqual(snapshot.install.absenceAudit);
     const element = new realm.Audio(AMBIENT_WARROOM);
     expect(realm.api.describe(element).valid).toBe(true);
+
+    const stillAbsent = realm.api.describe(element);
+    expect(stillAbsent.provenance.readErrors).toEqual({});
+    expect(realm.api.snapshot().valid).toBe(true);
+});
+
+test('rejects later optional appearance, instance shadows, unwrapped presence and absence read failure', () => {
+    const appeared = createRealm({ noFastSeek: true });
+    const appearedElement = new appeared.Audio(AMBIENT_WARROOM);
+    (appeared.Audio.prototype as any).fastSeek = function laterFastSeek() {
+        return 'later';
+    };
+    const appearedDescription = appeared.api.describe(appearedElement);
+    expect(appearedDescription.valid).toBe(false);
+    expect(appearedDescription.reason).toBe('optional-api-appeared');
+    expect(appeared.api.snapshot().invalidReasons).toContain('optional-api-appeared:fastSeek');
+
+    const shadowed = createRealm({ noFastSeek: true });
+    const shadowedElement = new shadowed.Audio(AMBIENT_WARROOM);
+    (shadowedElement as any).fastSeek = () => 'shadow';
+    const shadowedDescription = shadowed.api.describe(shadowedElement);
+    expect(shadowedDescription.valid).toBe(false);
+    expect(shadowedDescription.reason).toBe('own-shadow');
+    expect(shadowedDescription.provenance.ownShadows).toContain('fastSeek');
+
+    const unwrapped = createRealm({ noFastSeek: true });
+    const unwrappedElement = new unwrapped.Audio(AMBIENT_WARROOM);
+    Object.defineProperty(unwrapped.Audio.prototype, 'fastSeek', {
+        configurable: true,
+        value: 42,
+    });
+    const unwrappedDescription = unwrapped.api.describe(unwrappedElement);
+    expect(unwrappedDescription.valid).toBe(false);
+    expect(unwrappedDescription.reason).toBe('optional-api-present-unwrapped');
+    expect(unwrapped.api.snapshot().invalidReasons)
+        .toContain('optional-api-present-unwrapped:fastSeek');
+
+    const unreadable = createRealm({ noFastSeek: true });
+    const unreadableElement = new unreadable.Audio(AMBIENT_WARROOM);
+    const originalDescriptor = unreadable.realmObject.getOwnPropertyDescriptor;
+    unreadable.realmObject.getOwnPropertyDescriptor = function patchedDescriptor(target: any, name: any) {
+        if (name === 'fastSeek') throw new Error('absence audit read failed');
+        return originalDescriptor.call(this, target, name);
+    };
+    const unreadableDescription = unreadable.api.describe(unreadableElement);
+    expect(unreadableDescription.valid).toBe(false);
+    expect(unreadableDescription.reason).toBe('optional-api-absence-read-failed');
+    expect(unreadable.api.snapshot().invalidReasons)
+        .toContain('optional-api-absence-read-failed:fastSeek');
 });
 
 test('fails closed on missing required APIs', () => {
@@ -909,6 +1098,12 @@ test('fails closed on missing required APIs', () => {
     expect(noCurrentTime.report).toMatchObject({
         installed: false,
         reason: 'unsupported-setter-currentTime',
+    });
+
+    const noPreload = createRealm({ missingSetters: ['preload'] });
+    expect(noPreload.report).toMatchObject({
+        installed: false,
+        reason: 'unsupported-setter-preload',
     });
 
     const noWeakRef = createRealm({ noWeakRef: true });
