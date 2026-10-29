@@ -860,8 +860,8 @@ describe('pre-planned operations', () => {
                 'Operation Jackal',
                 'Prozor–Rama Line Counterattack',
                 'Visoko–Breza Line Clearing',
-                'Operation Circle',
                 'Trnovo Eastern Counterattack (Model)',
+                'Operation Circle',
                 'Gorazde Local Counterattack (Model)',
                 'Srebrenica–Cerska Link-Up',
                 'Maglaj Local Counterattack',
@@ -3336,7 +3336,7 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         assert.equal(operation.faction, 'RBiH');
         assert.equal(operation.staging_osid, stagingOsid);
         assert.equal(operation.available_from, 16);
-        assert.equal(operation.enqueue_from, 8);
+        assert.equal(operation.enqueue_from, undefined);
         assert.equal(operation.prestage_from, 8);
         assert.equal(operation.planning_duration, 3);
         assert.equal(operation.minimum_viable_participants, 2);
@@ -3359,12 +3359,12 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         assert.equal(operation.axes[0]?.minimum_staged_brigades, undefined);
     });
 
-    it('queues and starts the ordinary authored concentration at turn 8 without moving or injecting', () => {
+    it('marshals the undated startup roster at turn 8 without injecting', () => {
         const state = makeMinimalState();
         state.meta.turn = 7;
         const command = state.military.corps_command!.arbih_1st_corps!;
         command.active_operations = [];
-        delete command.queued_operations;
+        command.queued_operations = [name, 'Operation Circle'];
         const main = state.military.formations![brigadeId]!;
         main.personnel = 2000;
         main.location_osid = mainApproachOsid;
@@ -3374,7 +3374,10 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
 
         prestageDeferredPrePlannedElites(state);
 
-        assert.ok(!(command as CorpsCommandState).queued_operations?.includes(name));
+        assert.deepEqual(
+            (command as CorpsCommandState).queued_operations,
+            [name, 'Operation Circle'],
+        );
         assert.ok(!getHeadQueuedPrePlannedBrigadeIds(state).has(brigadeId));
         assert.ok(!getQueuedDatedPrestageBrigadeIds(state).has(brigadeId));
         assert.equal(main.location_osid, mainApproachOsid);
@@ -3385,9 +3388,12 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         state.meta.turn = 8;
         prestageDeferredPrePlannedElites(state);
 
-        assert.ok((command as CorpsCommandState).queued_operations?.includes(name));
-        assert.ok(getHeadQueuedPrePlannedBrigadeIds(state).has(brigadeId));
-        assert.ok(getHeadQueuedPrePlannedBrigadeIds(state).has(supportBrigadeId));
+        assert.deepEqual(
+            (command as CorpsCommandState).queued_operations,
+            [name, 'Operation Circle'],
+        );
+        assert.ok(!getHeadQueuedPrePlannedBrigadeIds(state).has(brigadeId));
+        assert.ok(!getHeadQueuedPrePlannedBrigadeIds(state).has(supportBrigadeId));
         assert.ok(getQueuedDatedPrestageBrigadeIds(state).has(brigadeId));
         assert.ok(getQueuedDatedPrestageBrigadeIds(state).has(supportBrigadeId));
         for (const [authoredId, location] of [
@@ -3412,6 +3418,18 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         assert.equal(main.location_osid, mainApproachOsid);
         assert.equal(support.location_osid, supportApproachOsid);
         assert.equal(state.political.political_controllers![objectiveOsid], 'RS');
+
+        state.meta.player_faction = 'RBiH';
+        assert.ok(!getQueuedDatedPrestageBrigadeIds(state).has(brigadeId));
+        assert.ok(!getQueuedDatedPrestageBrigadeIds(state).has(supportBrigadeId));
+
+        state.meta.player_faction = 'RS';
+        assert.ok(getQueuedDatedPrestageBrigadeIds(state).has(brigadeId));
+        assert.ok(getQueuedDatedPrestageBrigadeIds(state).has(supportBrigadeId));
+
+        delete state.meta.player_faction;
+        assert.ok(getQueuedDatedPrestageBrigadeIds(state).has(brigadeId));
+        assert.ok(getQueuedDatedPrestageBrigadeIds(state).has(supportBrigadeId));
     });
 
     it('injects at turn 16 only with the exact 831st main / 102nd support axis, no teleport or control flip', () => {

@@ -1305,6 +1305,38 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
+        // Owner-authorized UNADOPTED concentration experiment using the existing
+        // in-game 831st and 102nd Motorized assets, not a historical plan and not an
+        // invented stock. BB1 printed p. 151 / PDF p. 187 is regional corridor
+        // context only; the exact 102nd assignment, date, and equipment quantities
+        // are an explicit model assumption and do not attest a redeployment or
+        // stock claim. Startup catalog priority places this undated queue ahead of
+        // Operation Circle; ordinary concentration begins at turn 8 while injection
+        // remains gated at turn 16. Scope stays calibrated and historically unproved.
+        // Control can change only through ordinary combat, so capture is not
+        // guaranteed.
+        corps: 'arbih_1st_corps',
+        faction: 'RBiH',
+        name: 'Trnovo Eastern Counterattack (Model)',
+        staging_osid: 'op:trnovo:delijas',
+        available_from: 16,
+        prestage_from: 8,
+        planning_duration: 3,
+        minimum_viable_participants: 2,
+        minimum_assembled_participants: 2,
+        axes: [
+            {
+                axis_id: 'trnovo_eastern_counterattack',
+                name: 'Eastern Trnovo Counterattack',
+                // Array order is intentional and deterministic: the 831st remains
+                // main and the existing 102nd Motorized is support.
+                brigades: ['arbih_831st_drina_lineage', 'arbih_102nd_motorized'],
+                objectives: ['op:trnovo:tosici'],
+                staging_osid: 'op:trnovo:delijas',
+            },
+        ],
+    },
+    {
         // Operation KRUG, 15-29 August 1992. The retained historical review identifies
         // the 1st and 31st Drina brigades as its roster and Goražde Jabuka as part of
         // its route. This current-model allocation represents the single 1st Drina
@@ -1337,37 +1369,6 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                 objectives: ['op:gorazde:sopotnica'],
                 // Coarse local model anchor, not a claim about the precise march route.
                 staging_osid: 'op:gorazde:osjecani_2',
-            },
-        ],
-    },
-    {
-        // Owner-authorized UNADOPTED concentration experiment using the existing
-        // in-game 831st and 102nd Motorized assets, not a historical plan and not an
-        // invented stock. BB1 printed p. 151 / PDF p. 187 is regional corridor
-        // context only; the exact 102nd assignment, date, and equipment quantities
-        // are an explicit model assumption and do not attest a redeployment or
-        // stock claim. The turn-8 queue starts an ordinary earlier concentration;
-        // injection remains gated at turn 16. Control can change only through
-        // ordinary combat, so capture is not guaranteed.
-        corps: 'arbih_1st_corps',
-        faction: 'RBiH',
-        name: 'Trnovo Eastern Counterattack (Model)',
-        staging_osid: 'op:trnovo:delijas',
-        available_from: 16,
-        enqueue_from: 8,
-        prestage_from: 8,
-        planning_duration: 3,
-        minimum_viable_participants: 2,
-        minimum_assembled_participants: 2,
-        axes: [
-            {
-                axis_id: 'trnovo_eastern_counterattack',
-                name: 'Eastern Trnovo Counterattack',
-                // Array order is intentional and deterministic: the 831st remains
-                // main and the existing 102nd Motorized is support.
-                brigades: ['arbih_831st_drina_lineage', 'arbih_102nd_motorized'],
-                objectives: ['op:trnovo:tosici'],
-                staging_osid: 'op:trnovo:delijas',
             },
         ],
     },
