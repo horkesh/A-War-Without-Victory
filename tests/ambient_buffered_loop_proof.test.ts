@@ -68,9 +68,49 @@ type Mutation = {
     name: string;
     caseIndex?: number;
     mutate?: (parts: Parts) => void;
+    windowMutate?: (parts: Parts) => void;
     afterWrite?: (built: Built) => void;
     failures?: 'single' | 'both';
 };
+
+// SYNTHETIC unit-test-only observation bounds. These are computed from the
+// cloned temp artifact and its cloned signals so the portable fixture JSON
+// stays byte-exact and is never retrofitted with invented real capture bounds.
+function syntheticObservationWindow(parts: Parts): { clock: string; opened_at_ms: number; closed_at_ms: number } {
+    const values: number[] = [];
+    for (const signal of parts.signals) {
+        if (typeof signal?.observedAtMs === 'number' && Number.isFinite(signal.observedAtMs)) values.push(signal.observedAtMs);
+    }
+    for (const event of parts.artifact.events) {
+        if (typeof event?.observed_at_ms === 'number' && Number.isFinite(event.observed_at_ms)) values.push(event.observed_at_ms);
+        if (event?.kind === 'request' && typeof event.wall_time_s === 'number' && Number.isFinite(event.wall_time_s)) {
+            values.push(event.wall_time_s * 1000);
+        }
+    }
+    for (const failure of parts.failures) {
+        if (typeof failure?.observedAtMs === 'number' && Number.isFinite(failure.observedAtMs)) values.push(failure.observedAtMs);
+        if (typeof failure?.requestInitiatedAtMs === 'number' && Number.isFinite(failure.requestInitiatedAtMs)) {
+            values.push(failure.requestInitiatedAtMs);
+        }
+    }
+    if (values.length === 0) return { clock: 'node-epoch-ms', opened_at_ms: 0, closed_at_ms: 0 };
+    return {
+        clock: 'node-epoch-ms',
+        opened_at_ms: Math.min(...values) - 1,
+        closed_at_ms: Math.max(...values) + 1,
+    };
+}
+
+const FIXTURE_OBSERVATION_WINDOW = (() => {
+    const observed = (fixture.signals as any[])
+        .map((signal) => signal.observedAtMs)
+        .filter((value) => typeof value === 'number' && Number.isFinite(value));
+    return {
+        clock: 'node-epoch-ms',
+        opened_at_ms: Math.min(...observed) - 1,
+        closed_at_ms: Math.max(...observed) + 1,
+    };
+})();
 
 const ownedDirs: string[] = [];
 
@@ -219,7 +259,11 @@ function historySignal(options: {
     };
 }
 
-function build(index: number, options: { mutate?: (parts: Parts) => void; failures?: 'single' | 'both' } = {}): Built {
+function build(index: number, options: {
+    mutate?: (parts: Parts) => void;
+    windowMutate?: (parts: Parts) => void;
+    failures?: 'single' | 'both';
+} = {}): Built {
     const artifact = clone(fixture.artifact);
     const signals = clone(fixture.signals);
     const failures = options.failures === 'both'
@@ -232,6 +276,10 @@ function build(index: number, options: { mutate?: (parts: Parts) => void; failur
     if (options.mutate && before === after) {
         throw new Error(`mutation for retained case ${index} did not change the fixture`);
     }
+    // Only the cloned temporary artifact is augmented. The fixture JSON itself
+    // remains byte-exact and no real capture is ever retrofitted with bounds.
+    parts.artifact.observation_window = syntheticObservationWindow(parts);
+    options.windowMutate?.(parts);
 
     const dir = mkdtempSync(join(tmpdir(), 'awwv-ambient-loop-'));
     ownedDirs.push(dir);
@@ -268,7 +316,11 @@ function expectNoAdmission(built: Built): AttributionResult {
 function defineNegatives(mutations: Mutation[]): void {
     for (const mutation of mutations) {
         test(mutation.name, () => {
-            const built = build(mutation.caseIndex ?? 0, { mutate: mutation.mutate, failures: mutation.failures });
+            const built = build(mutation.caseIndex ?? 0, {
+                mutate: mutation.mutate,
+                windowMutate: mutation.windowMutate,
+                failures: mutation.failures,
+            });
             mutation.afterWrite?.(built);
             expectNoAdmission(built);
         });
@@ -340,6 +392,60 @@ for (const retained of POSITIVE_CASES) {
         assert.deepEqual(built.input.lifecycleSignals, fixture.signals, 'raw lifecycle signals must stay immutable');
     });
 }
+
+test('admits a genuine same-session abort whose Node callbacks are delivered 28ms after the browser events', () => {
+    const built = build(0, {
+        mutate: (parts) => {
+            for (const event of parts.artifact.events) event.observed_at_ms += 28;
+            for (const failure of parts.failures) {
+                failure.requestInitiatedAtMs += 28;
+                failure.observedAtMs += 28;
+            }
+        },
+    });
+    const expectedFailure = clone(built.input.networkFailures[0]);
+    const expectedSignals = clone(built.input.lifecycleSignals);
+
+    const result = attributeBufferedAmbientLoopAborts(built.input);
+
+    assert.equal(result.expected.length, 1, 'a delayed but genuine delivery inside the window must be admitted');
+    assert.deepEqual(result.remaining, []);
+    const proof = result.expected[0].bufferedLoopProof;
+    assert.ok(proof.clocks.deliveryLagMs.request >= 20, 'request delivery lag must remain explicit evidence');
+    assert.ok(proof.clocks.deliveryLagMs.failure >= 20, 'failure delivery lag must remain explicit evidence');
+    assert.equal(proof.clocks.requestAlignmentMs, -1, 'same-domain Node request callbacks must still agree');
+    assert.equal(proof.clocks.failureAlignmentMs, -1, 'same-domain Node failure callbacks must still agree');
+    assert.ok(Math.abs(proof.clocks.seekAlignmentMs) <= 20, 'DOM seeking still correlates with the browser request epoch');
+    assert.equal(proof.clocks.observationWindow.clock, 'node-epoch-ms');
+    assert.ok(proof.clocks.observationWindow.openedAtMs <= proof.clocks.nodeObservedAtMs.request);
+    assert.ok(proof.clocks.observationWindow.closedAtMs >= proof.clocks.nodeObservedAtMs.failure);
+    assert.deepEqual(built.input.networkFailures, [expectedFailure], 'raw failure input must stay immutable');
+    assert.deepEqual(built.input.lifecycleSignals, expectedSignals, 'lifecycle signals must stay immutable');
+});
+
+test('admits seeked and playing exactly at the finite 100ms boundary from seeking', () => {
+    const built = build(0, {
+        mutate: (parts) => {
+            const seeking = seekSignal(parts);
+            const seeked = seekedOf(parts);
+            const playing = playAfterSeek(parts);
+            seeked.observedAtMs = seeking.observedAtMs + 40;
+            for (const signal of caseSignals(parts)) {
+                if (signal.signalSequence > seeked.signalSequence && signal.signalSequence < playing.signalSequence) {
+                    signal.observedAtMs = seeking.observedAtMs + 40;
+                }
+            }
+            playing.observedAtMs = seeking.observedAtMs + 100;
+        },
+    });
+
+    const result = attributeBufferedAmbientLoopAborts(built.input);
+
+    assert.equal(result.expected.length, 1, 'exactly 100ms from seeking remains inside the finite boundary');
+    const proof = result.expected[0].bufferedLoopProof;
+    assert.equal(proof.wrap.seekedDelayMs, 40);
+    assert.equal(proof.wrap.playingDelayMs, 100);
+});
 
 // ---------------------------------------------------------------------------
 // Receipt path, bytes, schema and status
@@ -866,7 +972,10 @@ defineNegatives([
         },
     },
     {
-        name: 'rejects a wall_time_s outside the 20ms Playwright alignment fence',
+        // Retargeted: this is no longer a browser-vs-Node alignment test. A
+        // browser request epoch 21ms later than the CDP Node delivery would
+        // mean delivery preceded its own event by more than the 20ms fence.
+        name: 'rejects a browser request epoch that Node delivery precedes by more than 20ms',
         mutate: (parts) => {
             const request = chainOf(parts.artifact, parts.index).request;
             request.wall_time_s += 0.021;
@@ -892,10 +1001,19 @@ defineNegatives([
         },
     },
     {
-        name: 'rejects observed_at_ms more than 20ms from the protocol timestamp',
+        // Retargeted: the old +500 mutation compared Node delivery with the
+        // browser protocol epoch, which is not a meaningful pair. The genuine
+        // same-domain defect is delivery arriving before its own browser event
+        // epoch. All Node clocks move together so ordering and Node/PW pairing
+        // stay intact and only the delivery direction is wrong.
+        name: 'rejects Node delivery more than 20ms before its corresponding browser epoch',
         mutate: (parts) => {
-            const request = chainOf(parts.artifact, parts.index).request;
-            request.observed_at_ms += 500;
+            const chain = chainOf(parts.artifact, parts.index);
+            chain.request.observed_at_ms -= 25;
+            chain.response.observed_at_ms -= 25;
+            chain.failure.observed_at_ms -= 25;
+            parts.failures[0].requestInitiatedAtMs -= 25;
+            parts.failures[0].observedAtMs -= 25;
         },
     },
     {
@@ -921,6 +1039,115 @@ defineNegatives([
         name: 'rejects a signal with no observation clock',
         mutate: (parts) => {
             delete preSeekSample(parts).observedAtMs;
+        },
+    },
+]);
+
+// ---------------------------------------------------------------------------
+// Observation window and clock-domain separation
+// ---------------------------------------------------------------------------
+
+defineNegatives([
+    {
+        name: 'rejects a sidecar with no observation window',
+        windowMutate: (parts) => {
+            delete parts.artifact.observation_window;
+        },
+    },
+    {
+        name: 'rejects an observation window with the wrong clock domain',
+        windowMutate: (parts) => {
+            parts.artifact.observation_window.clock = 'browser-performance-ms';
+        },
+    },
+    {
+        name: 'rejects string observation window bounds',
+        windowMutate: (parts) => {
+            parts.artifact.observation_window.opened_at_ms = String(parts.artifact.observation_window.opened_at_ms);
+        },
+    },
+    {
+        name: 'rejects non-finite observation window bounds',
+        windowMutate: (parts) => {
+            parts.artifact.observation_window.closed_at_ms = null;
+        },
+    },
+    {
+        name: 'rejects inverted observation window bounds',
+        windowMutate: (parts) => {
+            const window = parts.artifact.observation_window;
+            const opened = window.opened_at_ms;
+            window.opened_at_ms = window.closed_at_ms;
+            window.closed_at_ms = opened;
+        },
+    },
+    {
+        name: 'rejects browser-derived request epochs outside the observation window',
+        mutate: (parts) => {
+            const request = chainOf(parts.artifact, parts.index).request;
+            request.wall_time_s += 120;
+        },
+    },
+    {
+        name: 'rejects a protocol failure epoch projected outside the observation window',
+        mutate: (parts) => {
+            const chain = chainOf(parts.artifact, parts.index);
+            chain.failure.timestamp += 120;
+        },
+    },
+    {
+        name: 'rejects a selected DOM lifecycle sample outside the observation window',
+        windowMutate: (parts) => {
+            parts.artifact.observation_window.closed_at_ms = finalSample(parts).observedAtMs - 30;
+        },
+    },
+    {
+        name: 'rejects Node callbacks outside the observation window even when delivery ordering is lawful',
+        mutate: (parts) => {
+            const chain = chainOf(parts.artifact, parts.index);
+            chain.request.observed_at_ms -= 15;
+            chain.response.observed_at_ms -= 15;
+            chain.failure.observed_at_ms -= 15;
+            parts.failures[0].requestInitiatedAtMs -= 15;
+            parts.failures[0].observedAtMs -= 15;
+        },
+        windowMutate: (parts) => {
+            const request = chainOf(parts.artifact, parts.index).request;
+            const projected = request.wall_time_s * 1000;
+            parts.artifact.observation_window.opened_at_ms = projected + 19;
+        },
+    },
+    {
+        name: 'rejects mismatched CDP Node request and Playwright request callback clocks',
+        mutate: (parts) => {
+            parts.failures[0].requestInitiatedAtMs += 25;
+        },
+    },
+    {
+        name: 'rejects mismatched CDP Node failure and Playwright failure callback clocks',
+        mutate: (parts) => {
+            parts.failures[0].observedAtMs += 25;
+        },
+    },
+    {
+        name: 'rejects DOM seeking more than 20ms from the browser request epoch',
+        mutate: (parts) => {
+            seekSignal(parts).observedAtMs += 25;
+        },
+    },
+    {
+        // The whole browser timeline is stale relative to the actual recorded
+        // window while Node callbacks remain current. A delayed (but genuine)
+        // Node delivery is admissible; stale browser evidence is not.
+        name: 'rejects a stale browser timeline outside the fresh observation window',
+        mutate: (parts) => {
+            for (const signal of parts.signals) signal.observedAtMs -= 3000;
+            for (const event of parts.artifact.events) {
+                if (event.kind === 'request') event.wall_time_s -= 3;
+            }
+        },
+        windowMutate: (parts) => {
+            parts.artifact.observation_window = { ...FIXTURE_OBSERVATION_WINDOW };
         },
     },
 ]);
@@ -1210,7 +1437,10 @@ defineNegatives([
 
 defineNegatives([
     {
-        name: 'rejects a protocol timeline that no longer projects onto the observed clocks',
+        // Retargeted: the browser protocol timeline may now be delayed relative
+        // to Node delivery, but it must still project inside the actual
+        // observation window. This failure epoch lands an hour outside it.
+        name: 'rejects a protocol failure epoch projected outside the observation window',
         mutate: (parts) => {
             const chain = chainOf(parts.artifact, parts.index);
             chain.failure.timestamp += 3600;
@@ -1406,6 +1636,20 @@ test('rejects a CDP chain reused across two retained failures so neither is admi
             const second = chainOf(parts.artifact, 1);
             second.failure.request_id = first.request.request_id;
             second.body.request_id = first.request.request_id;
+            assert.notEqual(first.request.request_id, second.request.request_id);
+        },
+    });
+    expectNoAdmission(built);
+});
+
+test('rejects ambiguous mapping when two CDP chains project onto the same retained asset', () => {
+    const built = build(0, {
+        failures: 'both',
+        mutate: (parts) => {
+            const first = chainOf(parts.artifact, 0);
+            const second = chainOf(parts.artifact, 1);
+            second.request.url = clone(first.request.url);
+            second.response.url = clone(first.response.url);
             assert.notEqual(first.request.request_id, second.request.request_id);
         },
     });

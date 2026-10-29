@@ -98,9 +98,33 @@ function verifyReceipt(input) {
 // Collector health
 // ---------------------------------------------------------------------------
 
+function readObservationWindow(artifact) {
+    if (!isPlainObject(artifact)) return null;
+    const window = artifact.observation_window;
+    if (!isPlainObject(window)) return null;
+    if (window.clock !== 'node-epoch-ms') return null;
+    if (!isFiniteNumber(window.opened_at_ms) || !isFiniteNumber(window.closed_at_ms)) return null;
+    if (!(window.opened_at_ms <= window.closed_at_ms)) return null;
+    return {
+        clock: window.clock,
+        openedAtMs: window.opened_at_ms,
+        closedAtMs: window.closed_at_ms,
+    };
+}
+
+// The observation window is an actual observer-clock interval. The existing
+// 20ms fence is retained only as a boundary allowance for clock projections;
+// it is never used to excuse missing, stale or future evidence.
+function withinObservationWindow(window, value) {
+    if (!window || !isFiniteNumber(value)) return false;
+    return value >= window.openedAtMs - CLOCK_FENCE_MS
+        && value <= window.closedAtMs + CLOCK_FENCE_MS;
+}
+
 function verifyCollector(artifact) {
     if (!isPlainObject(artifact)) return false;
     if (artifact.non_admitting !== true) return false;
+    if (!readObservationWindow(artifact)) return false;
     if (!Array.isArray(artifact.inconsistencies) || artifact.inconsistencies.length !== 0) return false;
     if (!Array.isArray(artifact.overflow_receipts) || artifact.overflow_receipts.length !== 0) return false;
     if (artifact.observation_stopped_at_sequence !== null) return false;
@@ -369,32 +393,64 @@ function validateRawFailure(rawFailure) {
     return true;
 }
 
-function projectClocks(chain, rawFailure) {
+function projectClocks(chain, rawFailure, observationWindow) {
     const wallTimeS = chain.request.wall_time_s;
     if (!isFiniteNumber(wallTimeS)) return null;
 
-    // Project the CDP protocol timeline onto epoch milliseconds using the
-    // request wall clock as the only anchor. Every row must then agree with its
-    // own observer clock and, where Playwright recorded one, with the matching
-    // raw request/failure clock inside the same 20ms fence.
+    // Project the finite, ordered CDP protocol timeline onto browser epoch
+    // milliseconds using the request wall clock as the only anchor. These are
+    // browser-domain times and may only be correlated with browser-domain
+    // evidence. Node callback clocks are a separate domain.
     const requestProjectedAtMs = wallTimeS * 1000;
     const responseProjectedAtMs = requestProjectedAtMs + (chain.response.timestamp - chain.request.timestamp) * 1000;
     const failureProjectedAtMs = requestProjectedAtMs + (chain.failure.timestamp - chain.request.timestamp) * 1000;
     if (!isFiniteNumber(requestProjectedAtMs)) return null;
     if (!isFiniteNumber(responseProjectedAtMs)) return null;
     if (!isFiniteNumber(failureProjectedAtMs)) return null;
+    if (!(chain.request.timestamp <= chain.response.timestamp
+        && chain.response.timestamp <= chain.failure.timestamp)) return null;
     if (!(requestProjectedAtMs <= responseProjectedAtMs && responseProjectedAtMs <= failureProjectedAtMs)) return null;
 
-    if (Math.abs(requestProjectedAtMs - chain.request.observed_at_ms) > CLOCK_FENCE_MS) return null;
-    if (Math.abs(responseProjectedAtMs - chain.response.observed_at_ms) > CLOCK_FENCE_MS) return null;
-    if (Math.abs(failureProjectedAtMs - chain.failure.observed_at_ms) > CLOCK_FENCE_MS) return null;
+    // Every browser-derived epoch must fall inside the actual, recorded
+    // collection window. Missing or stale windows are never reconstructed.
+    if (!withinObservationWindow(observationWindow, requestProjectedAtMs)) return null;
+    if (!withinObservationWindow(observationWindow, responseProjectedAtMs)) return null;
+    if (!withinObservationWindow(observationWindow, failureProjectedAtMs)) return null;
 
-    if (Math.abs(requestProjectedAtMs - rawFailure.requestInitiatedAtMs) > CLOCK_FENCE_MS) return null;
+    // Every Node callback clock must also fall inside the same recorded window.
+    const nodeClocks = [
+        chain.request.observed_at_ms,
+        chain.response.observed_at_ms,
+        chain.failure.observed_at_ms,
+        rawFailure.requestInitiatedAtMs,
+        rawFailure.observedAtMs,
+    ];
+    for (const value of nodeClocks) {
+        if (!withinObservationWindow(observationWindow, value)) return null;
+    }
+
+    // Node delivery may never precede the corresponding browser event epoch by
+    // more than the existing 20ms clock fence. A later delivery is explicit
+    // evidence and stays admissible as long as it remains inside the window.
+    const deliveryLagMs = {
+        request: chain.request.observed_at_ms - requestProjectedAtMs,
+        response: chain.response.observed_at_ms - responseProjectedAtMs,
+        failure: chain.failure.observed_at_ms - failureProjectedAtMs,
+    };
+    for (const lag of Object.values(deliveryLagMs)) {
+        if (lag < -CLOCK_FENCE_MS) return null;
+    }
+
+    // The 20ms pairwise fence applies only to like-domain timestamps: CDP Node
+    // observations against Playwright Node callbacks. Browser epochs are never
+    // compared with Node delivery times here.
     if (Math.abs(chain.request.observed_at_ms - rawFailure.requestInitiatedAtMs) > CLOCK_FENCE_MS) return null;
-    if (Math.abs(failureProjectedAtMs - rawFailure.observedAtMs) > CLOCK_FENCE_MS) return null;
+    if (Math.abs(chain.failure.observed_at_ms - rawFailure.observedAtMs) > CLOCK_FENCE_MS) return null;
+    if (!(rawFailure.requestInitiatedAtMs <= rawFailure.observedAtMs)) return null;
 
     return {
         requestWallTimeS: wallTimeS,
+        observationWindow,
         protocolTimestamps: {
             request: chain.request.timestamp,
             response: chain.response.timestamp,
@@ -405,6 +461,14 @@ function projectClocks(chain, rawFailure) {
             response: responseProjectedAtMs,
             failure: failureProjectedAtMs,
         },
+        nodeObservedAtMs: {
+            request: chain.request.observed_at_ms,
+            response: chain.response.observed_at_ms,
+            failure: chain.failure.observed_at_ms,
+            rawRequestCallback: rawFailure.requestInitiatedAtMs,
+            rawFailureCallback: rawFailure.observedAtMs,
+        },
+        deliveryLagMs,
         projectedDeltaMs: {
             request: requestProjectedAtMs - chain.request.observed_at_ms,
             response: responseProjectedAtMs - chain.response.observed_at_ms,
@@ -481,7 +545,10 @@ function buildProof(rawFailure, chain, signals, sidecar, clockProjection) {
         if (!isPlainObject(signal.mediaState)) continue;
         if (signal.mediaState.currentTime !== 0) continue;
         if (signal.mediaState.seeking !== true) continue;
-        if (Math.abs(signal.observedAtMs - chain.request.observed_at_ms) > CLOCK_FENCE_MS) continue;
+        // DOM signals are browser-domain times. Correlate them only with the
+        // browser request epoch projected from wall_time_s, never with the
+        // Node callback delivery clock.
+        if (Math.abs(signal.observedAtMs - clockProjection.projectedObservedAtMs.request) > CLOCK_FENCE_MS) continue;
         seekingIndices.push(index);
     }
     if (seekingIndices.length !== 1) return null;
@@ -560,6 +627,10 @@ function buildProof(rawFailure, chain, signals, sidecar, clockProjection) {
     const intervalSequences = [];
     for (let index = preSeekIndex; index <= confirmationIndex; index += 1) {
         const signal = assetSignals[index];
+        // The selected lifecycle interval is browser-derived evidence and must
+        // fall inside the actual collection window; stale capture history does
+        // not become proof merely because it is internally ordered.
+        if (!withinObservationWindow(clockProjection.observationWindow, signal.observedAtMs)) return null;
         if (signal.elementId !== elementId || signal.sourceEpoch !== sourceEpoch) return null;
         if (!Array.isArray(signal.mediaStateUnavailable) || signal.mediaStateUnavailable.length !== 0) return null;
         if (!isPlainObject(signal.mediaStateReadErrors)) return null;
@@ -590,9 +661,11 @@ function buildProof(rawFailure, chain, signals, sidecar, clockProjection) {
     if (confirmation.mediaState.currentTime >= duration) return null;
     if (Math.abs(elapsedToSeekS - predictedRemainingS) > WRAP_PREDICTION_S) return null;
 
-    const seekAlignmentMs = seeking.observedAtMs - chain.request.observed_at_ms;
+    // DOM seeking and the CDP request wall clock are both browser-domain
+    // epochs, so their 20ms correlation stays meaningful. The Node delivery
+    // clock is deliberately not part of this comparison.
+    const seekAlignmentMs = seeking.observedAtMs - clockProjection.projectedObservedAtMs.request;
     if (Math.abs(seekAlignmentMs) > CLOCK_FENCE_MS) return null;
-    if (Math.abs(seeking.observedAtMs - chain.request.wall_time_s * 1000) > CLOCK_FENCE_MS) return null;
 
     const seekedDelayMs = seeked.observedAtMs - seeking.observedAtMs;
     if (seekedDelayMs < 0 || seekedDelayMs > SEEK_EVENT_MS) return null;
@@ -634,14 +707,20 @@ function buildProof(rawFailure, chain, signals, sidecar, clockProjection) {
             lifecycle: intervalSequences,
         },
         clocks: {
+            observationWindow: clockProjection.observationWindow,
             requestWallTimeS: clockProjection.requestWallTimeS,
             requestInitiatedAtMs: rawFailure.requestInitiatedAtMs,
             requestObservedAtMs: request.observed_at_ms,
+            responseObservedAtMs: response.observed_at_ms,
             failureObservedAtMs: failure.observed_at_ms,
             rawFailureObservedAtMs: rawFailure.observedAtMs,
-            requestAlignmentMs: clockProjection.projectedObservedAtMs.request - rawFailure.requestInitiatedAtMs,
+            // Like-domain Node callback correlation only. Delivery lag itself
+            // is retained as evidence rather than required to be zero.
+            requestAlignmentMs: request.observed_at_ms - rawFailure.requestInitiatedAtMs,
             requestObserverAlignmentMs: clockProjection.projectedDeltaMs.request,
-            failureAlignmentMs: clockProjection.projectedObservedAtMs.failure - rawFailure.observedAtMs,
+            failureAlignmentMs: failure.observed_at_ms - rawFailure.observedAtMs,
+            nodeObservedAtMs: clockProjection.nodeObservedAtMs,
+            deliveryLagMs: clockProjection.deliveryLagMs,
             protocolTimestamps: clockProjection.protocolTimestamps,
             projectedObservedAtMs: clockProjection.projectedObservedAtMs,
             projectedDeltaMs: clockProjection.projectedDeltaMs,
@@ -703,8 +782,9 @@ function buildProof(rawFailure, chain, signals, sidecar, clockProjection) {
 // Attribution
 // ---------------------------------------------------------------------------
 
-function attributeFailure(rawFailure, chains, signals, target, sidecar) {
+function attributeFailure(rawFailure, chains, signals, target, sidecar, observationWindow) {
     if (!validateRawFailure(rawFailure)) return null;
+    if (!observationWindow) return null;
 
     const asset = parseAssetUrl(rawFailure.url);
     if (!asset) return null;
@@ -716,7 +796,7 @@ function attributeFailure(rawFailure, chains, signals, target, sidecar) {
     if (candidates.length !== 1) return null;
     const chain = candidates[0];
 
-    const clockProjection = projectClocks(chain, rawFailure);
+    const clockProjection = projectClocks(chain, rawFailure, observationWindow);
     if (!clockProjection) return null;
 
     const proof = buildProof(rawFailure, chain, signals, sidecar, clockProjection);
@@ -735,8 +815,10 @@ function attributeBufferedAmbientLoopAborts(input = {}) {
     let chains = [];
     let target = null;
     let sidecar = null;
+    let observationWindow = null;
 
     if (verified && verifyCollector(verified.artifact)) {
+        observationWindow = readObservationWindow(verified.artifact);
         target = readTarget(verified.artifact);
         if (target) {
             const groups = collectChains(verified.artifact);
@@ -756,10 +838,10 @@ function attributeBufferedAmbientLoopAborts(input = {}) {
     }
 
     const decisions = networkFailures.map((rawFailure) => {
-        if (!target || !sidecar) return { rawFailure, attribution: null };
+        if (!target || !sidecar || !observationWindow) return { rawFailure, attribution: null };
         let attribution = null;
         try {
-            attribution = attributeFailure(rawFailure, chains, lifecycleSignals, target, sidecar);
+            attribution = attributeFailure(rawFailure, chains, lifecycleSignals, target, sidecar, observationWindow);
         } catch {
             attribution = null;
         }

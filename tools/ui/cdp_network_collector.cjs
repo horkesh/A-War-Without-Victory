@@ -65,6 +65,13 @@ function startCdpNetworkCollection(options) {
     schema: 'awwv.r8-warroom.cdp-network-collection.v3',
     status: 'initializing',
     non_admitting: true,
+    // Raw observer clock bounds, not game state. Unknown injected clocks are
+    // recorded as null rather than as a fabricated or inferred epoch.
+    observation_window: {
+      clock: 'node-epoch-ms',
+      opened_at_ms: null,
+      closed_at_ms: null,
+    },
     session: {
       observer_session_id: observerSessionId,
       producer: 'playwright-public-context-newCDPSession',
@@ -627,6 +634,8 @@ function startCdpNetworkCollection(options) {
         session.on(event, handlers[event]);
         installed.push({ event, handler: handlers[event] });
       }
+      const openedAtMs = now();
+      artifact.observation_window.opened_at_ms = Number.isFinite(openedAtMs) ? openedAtMs : null;
       await session.send('Network.enable', {});
       if (unexpectedSessionClosed) throw new Error('CDP session closed during setup');
       if (setupCancelled) throw new Error('CDP collection setup canceled');
@@ -692,6 +701,8 @@ function startCdpNetworkCollection(options) {
         complete_through_stop_only: artifact.status === 'over-cap',
       };
       delete artifact.summaryTargetCount;
+      const closedAtMs = now();
+      artifact.observation_window.closed_at_ms = Number.isFinite(closedAtMs) ? closedAtMs : null;
       snapshot = freezeDeep(JSON.parse(JSON.stringify(artifact)));
       return snapshot;
     })();

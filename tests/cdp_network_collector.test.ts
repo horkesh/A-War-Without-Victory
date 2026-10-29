@@ -858,6 +858,11 @@ test('request rows expose wall_time_s from their own wallTime and every evidence
     assert.strictEqual(artifact.status, 'complete');
     assert.strictEqual(artifact.non_admitting, true);
     assert.strictEqual(artifact.session.cross_stream_mapping, 'none');
+    assert.deepStrictEqual(artifact.observation_window, {
+        clock: 'node-epoch-ms',
+        opened_at_ms: 1_700_000_000_000,
+        closed_at_ms: 1_700_000_000_100,
+    });
     assert.deepStrictEqual(artifact.events.map((row: any) => row.kind), ['request', 'response', 'failure', 'request', 'finish']);
     assert.deepStrictEqual(artifact.events.map((row: any) => row.timestamp), [10, 11, 12, 20, 21]);
     assert.deepStrictEqual(artifact.events.map((row: any) => row.observed_at_ms), [
@@ -913,6 +918,62 @@ test('non-finite or non-numeric injected now cannot invent observed_at_ms on any
         for (const row of artifact.events) {
             assert.strictEqual(row.observed_at_ms, null);
         }
+        assert.strictEqual(artifact.observation_window.clock, 'node-epoch-ms');
+        assert.strictEqual(artifact.observation_window.opened_at_ms, null);
+        assert.strictEqual(artifact.observation_window.closed_at_ms, 1_700_000_000_000);
     }
+});
+
+test('repeated close retains the same stamped observation window instead of regenerating it', async () => {
+    const session = new FakeSession();
+    let clock = 1_700_000_000_000;
+    const collector = await readyCollector(session, 'run/RS/observation-window-repeat.json', { now: () => clock });
+    clock = 1_700_000_000_500;
+    const first = await collector.closeAndFlush();
+    assert.deepStrictEqual(first.observation_window, {
+        clock: 'node-epoch-ms',
+        opened_at_ms: 1_700_000_000_000,
+        closed_at_ms: 1_700_000_000_500,
+    });
+
+    clock = 1_700_000_100_000;
+    const second = await collector.closeAndFlush();
+    assert.strictEqual(second, first);
+    assert.deepStrictEqual(second.observation_window, first.observation_window);
+    assert.strictEqual(second.observation_window.closed_at_ms, 1_700_000_000_500);
+});
+
+test('unknown injected observer clocks leave observation window bounds null rather than fabricating zero', async () => {
+    for (const unknownNow of [Number.NaN, '1700000000000'] as const) {
+        const session = new FakeSession();
+        const collector = await readyCollector(session, `run/RS/observation-unknown-${String(unknownNow)}.json`, {
+            now: () => unknownNow,
+        });
+        const artifact = await collector.closeAndFlush();
+
+        assert.deepStrictEqual(artifact.observation_window, {
+            clock: 'node-epoch-ms',
+            opened_at_ms: null,
+            closed_at_ms: null,
+        });
+    }
+});
+
+test('observation window opens only after the owned network handlers are installed and before Network.enable', async () => {
+    const session = new FakeSession();
+    let installedAtEnable = -1;
+    const originalSend = session.send.bind(session);
+    session.send = async (method: string, params: unknown = {}) => {
+        if (method === 'Network.enable') installedAtEnable = session.listenerCount('Network.requestWillBeSent');
+        return originalSend(method, params);
+    };
+    const collector = await readyCollector(session, 'run/RS/observation-order.json');
+    const artifact = await collector.closeAndFlush();
+
+    assert.strictEqual(installedAtEnable, 1);
+    assert.deepStrictEqual(session.sends.map((row) => row.method), ['Network.enable']);
+    assert.strictEqual(Number.isFinite(artifact.observation_window.opened_at_ms), true);
+    assert.strictEqual(Number.isFinite(artifact.observation_window.closed_at_ms), true);
+    assert.ok(artifact.observation_window.opened_at_ms <= artifact.observation_window.closed_at_ms);
 });
 

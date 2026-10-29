@@ -4486,10 +4486,29 @@ type NativeAudioLoopAdapterInput = {
     expectedSidecarPath: string;
 };
 
-function writeNativeAudioLoopSidecar(artifact: any): { dir: string; path: string; sha256: string } {
+function writeNativeAudioLoopSidecar(artifact: any, signals: any[] = []): { dir: string; path: string; sha256: string } {
     const dir = mkdtempSync(join(tmpdir(), 'awwv-native-audio-loop-'));
     const sidecarPath = join(dir, 'cdp-network-collection-v3.json');
-    const bytes = Buffer.from(JSON.stringify(artifact, null, 2), 'utf8');
+    // SYNTHETIC unit-test-only observation bounds. Only this owned copy is
+    // augmented; the portable fixture JSON stays byte-exact and real captures
+    // are never retrofitted with invented bounds.
+    const copy = structuredClone(artifact);
+    const observed: number[] = [];
+    for (const signal of signals) {
+        if (typeof signal?.observedAtMs === 'number' && Number.isFinite(signal.observedAtMs)) observed.push(signal.observedAtMs);
+    }
+    for (const event of copy.events) {
+        if (typeof event?.observed_at_ms === 'number' && Number.isFinite(event.observed_at_ms)) observed.push(event.observed_at_ms);
+        if (event?.kind === 'request' && typeof event.wall_time_s === 'number' && Number.isFinite(event.wall_time_s)) {
+            observed.push(event.wall_time_s * 1000);
+        }
+    }
+    copy.observation_window = {
+        clock: 'node-epoch-ms',
+        opened_at_ms: Math.min(...observed) - 1,
+        closed_at_ms: Math.max(...observed) + 1,
+    };
+    const bytes = Buffer.from(JSON.stringify(copy, null, 2), 'utf8');
     writeFileSync(sidecarPath, bytes);
     return { dir, path: sidecarPath, sha256: createHash('sha256').update(bytes).digest('hex') };
 }
@@ -4509,7 +4528,7 @@ function loadNativeAudioLoopAdapter(): (input: NativeAudioLoopAdapterInput) => a
 
 test('native buffered-loop proof adapter admits a proven ambient abort with full proof and raw evidence intact', () => {
     const fixture = nativeAudioLoopFixture();
-    const sidecar = writeNativeAudioLoopSidecar(fixture.artifact);
+    const sidecar = writeNativeAudioLoopSidecar(fixture.artifact, fixture.signals);
     try {
         const adapter = loadNativeAudioLoopAdapter();
         const rawFailure = structuredClone(fixture.failures[0]);
@@ -4550,7 +4569,7 @@ test('native buffered-loop proof adapter admits a proven ambient abort with full
 
 test('native buffered-loop proof adapter rejects tampered or absent receipts and leaves unrelated failures raw', () => {
     const fixture = nativeAudioLoopFixture();
-    const sidecar = writeNativeAudioLoopSidecar(fixture.artifact);
+    const sidecar = writeNativeAudioLoopSidecar(fixture.artifact, fixture.signals);
     try {
         const adapter = loadNativeAudioLoopAdapter();
         const validReceipt = {
