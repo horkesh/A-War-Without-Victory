@@ -1341,25 +1341,31 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
-        // Owner-authorized UNADOPTED model concentration, not a historical plan.
-        // BB1 printed p. 151 / PDF p. 187 is regional corridor context only; the
-        // precise 831st assignment and turn-20 date are unproved. Control can
-        // change only through ordinary combat, so capture is not guaranteed.
+        // Owner-authorized UNADOPTED concentration experiment using the existing
+        // in-game 831st and 102nd Motorized assets, not a historical plan and not an
+        // invented stock. BB1 printed p. 151 / PDF p. 187 is regional corridor
+        // context only; the exact 102nd assignment, date, and equipment quantities
+        // are an explicit model assumption and do not attest a redeployment or
+        // stock claim. The turn-8 queue starts an ordinary earlier concentration;
+        // injection remains gated at turn 20. Control can change only through
+        // ordinary combat, so capture is not guaranteed.
         corps: 'arbih_1st_corps',
         faction: 'RBiH',
         name: 'Trnovo Eastern Counterattack (Model)',
         staging_osid: 'op:trnovo:delijas',
         available_from: 20,
-        enqueue_from: 20,
-        prestage_from: 20,
+        enqueue_from: 8,
+        prestage_from: 8,
         planning_duration: 3,
-        minimum_viable_participants: 1,
-        minimum_assembled_participants: 1,
+        minimum_viable_participants: 2,
+        minimum_assembled_participants: 2,
         axes: [
             {
                 axis_id: 'trnovo_eastern_counterattack',
                 name: 'Eastern Trnovo Counterattack',
-                brigades: ['arbih_831st_drina_lineage'],
+                // Array order is intentional and deterministic: the 831st remains
+                // main and the existing 102nd Motorized is support.
+                brigades: ['arbih_831st_drina_lineage', 'arbih_102nd_motorized'],
                 objectives: ['op:trnovo:tosici'],
                 staging_osid: 'op:trnovo:delijas',
             },

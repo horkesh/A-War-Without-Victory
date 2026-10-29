@@ -2510,6 +2510,15 @@ describe('pre-planned operations', () => {
         const command = state.military.corps_command!.arbih_1st_corps!;
         command.active_operations = [];
         command.queued_operations = ['Operation Circle'];
+        // The Trnovo concentration experiment now queues from turn 8 and shares
+        // the 831st. Mark it resolved so this KRUG timing test isolates Circle's
+        // own prestage window instead of testing two overlapping plans.
+        state.operation_history = [{
+            corps_id: 'arbih_1st_corps',
+            operation_name: 'Trnovo Eastern Counterattack (Model)',
+            ended_turn: 0,
+            outcome: 'success',
+        } as any];
         const remoteLocations: Record<string, string> = {
             arbih_801st_light: 'op:test:circle_remote_801',
             arbih_802nd_light: 'op:test:circle_remote_802',
@@ -3289,8 +3298,36 @@ describe('Gorazde Local Counterattack (Model)', () => {
 describe('Trnovo Eastern Counterattack (Model)', () => {
     const name = 'Trnovo Eastern Counterattack (Model)';
     const brigadeId = 'arbih_831st_drina_lineage';
+    const supportBrigadeId = 'arbih_102nd_motorized';
     const stagingOsid = 'op:trnovo:delijas';
     const objectiveOsid = 'op:trnovo:tosici';
+    const mainApproachOsid = 'op:trnovo:gornja_presjenica';
+    const supportApproachOsid = 'op:trnovo:kijevo_2';
+
+    /**
+     * makeMinimalState derives formations from the authored catalog. Until this
+     * experiment names the existing 102nd, the RED fixture must supply that
+     * formation explicitly instead of dereferencing missing fixture data. This
+     * is test setup for an existing in-game unit, not a new production formation.
+     */
+    function positionExisting102nd(state: GameState): FormationState {
+        const formation = {
+            id: supportBrigadeId,
+            name: '102nd Motorized Brigade',
+            faction: 'RBiH' as FactionId,
+            kind: 'brigade',
+            status: 'active',
+            personnel: 778,
+            corps_id: 'arbih_1st_corps',
+            location_osid: supportApproachOsid,
+        } as FormationState;
+        state.military.formations![supportBrigadeId] = formation;
+        const sector = state.military.corps_front_sectors?.['sector:arbih_1st_corps:0'];
+        if (sector && !sector.assigned_brigade_ids.includes(supportBrigadeId)) {
+            sector.assigned_brigade_ids.push(supportBrigadeId);
+        }
+        return formation;
+    }
 
     it('authors the exact unadopted 831st model concentration without overrides', () => {
         const operation = _ALL_PRE_PLANNED.find((def) => def.name === name);
@@ -3299,21 +3336,22 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         assert.equal(operation.faction, 'RBiH');
         assert.equal(operation.staging_osid, stagingOsid);
         assert.equal(operation.available_from, 20);
-        assert.equal(operation.enqueue_from, 20);
-        assert.equal(operation.prestage_from, 20);
+        assert.equal(operation.enqueue_from, 8);
+        assert.equal(operation.prestage_from, 8);
         assert.equal(operation.planning_duration, 3);
-        assert.equal(operation.minimum_viable_participants, 1);
-        assert.equal(operation.minimum_assembled_participants, 1);
+        assert.equal(operation.minimum_viable_participants, 2);
+        assert.equal(operation.minimum_assembled_participants, 2);
         assert.equal(operation.axes.length, 1);
         assert.equal(operation.axes[0]?.axis_id, 'trnovo_eastern_counterattack');
         assert.equal(operation.axes[0]?.name, 'Eastern Trnovo Counterattack');
-        assert.deepEqual(operation.axes[0]?.brigades, [brigadeId]);
+        assert.deepEqual(operation.axes[0]?.brigades, [brigadeId, supportBrigadeId]);
         assert.deepEqual(operation.axes[0]?.objectives, [objectiveOsid]);
         assert.equal(operation.axes[0]?.staging_osid, stagingOsid);
         for (const excluded of [
             'min_attack_outcome',
             'execution_attack_power_mult',
             'coordinated_advance',
+            'sync_operation_name',
         ]) {
             assert.equal((operation as any)[excluded], undefined);
         }
@@ -3321,59 +3359,174 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         assert.equal(operation.axes[0]?.minimum_staged_brigades, undefined);
     });
 
-    it('stays unqueued and unmoved at turn 19, then injects the sole 831st axis at turn 20', () => {
+    it('queues and starts the ordinary authored concentration at turn 8 without moving or injecting', () => {
         const state = makeMinimalState();
-        state.meta.turn = 19;
+        state.meta.turn = 7;
         const command = state.military.corps_command!.arbih_1st_corps!;
         command.active_operations = [];
         delete command.queued_operations;
-        const formation = state.military.formations![brigadeId]!;
-        formation.personnel = 1000;
-        formation.location_osid = stagingOsid;
+        const main = state.military.formations![brigadeId]!;
+        main.personnel = 2000;
+        main.location_osid = mainApproachOsid;
+        const support = positionExisting102nd(state);
         state.political.political_controllers![stagingOsid] = 'RBiH';
         state.political.political_controllers![objectiveOsid] = 'RS';
 
         prestageDeferredPrePlannedElites(state);
 
-        assert.ok(!state.military.corps_command?.arbih_1st_corps?.queued_operations?.includes(name));
+        assert.ok(!(command as CorpsCommandState).queued_operations?.includes(name));
         assert.ok(!getHeadQueuedPrePlannedBrigadeIds(state).has(brigadeId));
         assert.ok(!getQueuedDatedPrestageBrigadeIds(state).has(brigadeId));
-        assert.equal(formation.location_osid, stagingOsid);
-        assert.ok(!state.military.brigade_movement_orders?.[brigadeId]?.destination_sids?.includes(stagingOsid));
+        assert.equal(main.location_osid, mainApproachOsid);
+        assert.equal(support.location_osid, supportApproachOsid);
+        assert.equal(state.military.brigade_movement_orders?.[brigadeId], undefined);
+        assert.equal(state.military.brigade_movement_orders?.[supportBrigadeId], undefined);
 
-        state.meta.turn = 20;
+        state.meta.turn = 8;
         prestageDeferredPrePlannedElites(state);
-        assert.ok(state.military.corps_command?.arbih_1st_corps?.queued_operations?.includes(name));
-        const positionBeforeInjection = formation.location_osid;
 
-        assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), true);
-        const operation = command.active_operations.find((active) => active.name === name);
-        assert.ok(operation);
-        assert.deepEqual(operation!.participating_brigades, [brigadeId]);
-        assert.equal(operation!.axes?.length, 1);
-        assert.deepEqual(operation!.axes?.[0]?.assigned_brigades, [brigadeId]);
-        assert.deepEqual(operation!.axes?.[0]?.objectives, [objectiveOsid]);
-        assert.equal(operation!.axes?.[0]?.staging_osid, stagingOsid);
-        assert.equal(operation!.planning_duration, 3);
-        assert.equal(formation.location_osid, positionBeforeInjection);
-        assert.equal(formation.location_osid, stagingOsid);
+        assert.ok((command as CorpsCommandState).queued_operations?.includes(name));
+        assert.ok(getHeadQueuedPrePlannedBrigadeIds(state).has(brigadeId));
+        assert.ok(getHeadQueuedPrePlannedBrigadeIds(state).has(supportBrigadeId));
+        assert.ok(getQueuedDatedPrestageBrigadeIds(state).has(brigadeId));
+        assert.ok(getQueuedDatedPrestageBrigadeIds(state).has(supportBrigadeId));
+        for (const [authoredId, location] of [
+            [brigadeId, mainApproachOsid],
+            [supportBrigadeId, supportApproachOsid],
+        ] as const) {
+            assert.equal(state.military.formations![authoredId]!.location_osid, location);
+            assert.deepEqual(
+                state.military.brigade_movement_orders?.[authoredId],
+                {
+                    destination_sids: [stagingOsid],
+                    stance: 'column',
+                    owner: 'authored_preplanned',
+                },
+            );
+        }
+
+        // The queue date starts the march; available_from still forbids injection.
+        assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), false);
+        assert.equal(command.active_operations.length, 0);
+        assert.ok((command as CorpsCommandState).queued_operations?.includes(name));
+        assert.equal(main.location_osid, mainApproachOsid);
+        assert.equal(support.location_osid, supportApproachOsid);
+        assert.equal(state.political.political_controllers![objectiveOsid], 'RS');
     });
 
-    it('refuses a fresh turn-20 queue when the 831st is below the 500-man attack floor', () => {
+    it('injects at turn 20 only with the exact 831st main / 102nd support axis, no teleport or control flip', () => {
         const state = makeMinimalState();
         state.meta.turn = 20;
         const command = state.military.corps_command!.arbih_1st_corps!;
         command.active_operations = [];
         command.queued_operations = [name];
-        const formation = state.military.formations![brigadeId]!;
-        formation.personnel = 499;
-        formation.location_osid = stagingOsid;
+        const main = state.military.formations![brigadeId]!;
+        main.personnel = 2000;
+        main.location_osid = mainApproachOsid;
+        const support = positionExisting102nd(state);
         state.political.political_controllers![stagingOsid] = 'RBiH';
         state.political.political_controllers![objectiveOsid] = 'RS';
+        const mainPosition = main.location_osid;
+        const supportPosition = support.location_osid;
 
-        assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), false);
-        assert.equal(command.active_operations.length, 0);
+        assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), true);
+        const operation = command.active_operations.find((active) => active.name === name);
+        assert.ok(operation);
+        assert.deepEqual(
+            [...operation!.participating_brigades].sort(),
+            [brigadeId, supportBrigadeId].sort(),
+        );
+        assert.equal(operation!.axes?.length, 1);
+        assert.deepEqual(
+            operation!.axes?.[0]?.assigned_brigades,
+            [brigadeId, supportBrigadeId],
+        );
+        assert.equal(operation!.axes?.[0]?.main_brigade, brigadeId);
+        assert.deepEqual(operation!.axes?.[0]?.support_brigades, [supportBrigadeId]);
+        assert.deepEqual(operation!.axes?.[0]?.objectives, [objectiveOsid]);
+        assert.equal(operation!.axes?.[0]?.staging_osid, stagingOsid);
+        assert.equal(operation!.planning_duration, 3);
+        assert.equal(main.location_osid, mainPosition);
+        assert.equal(support.location_osid, supportPosition);
+        assert.notEqual(main.location_osid, stagingOsid);
+        assert.notEqual(support.location_osid, stagingOsid);
         assert.equal(state.political.political_controllers![objectiveOsid], 'RS');
+        assert.equal(state.political.political_controllers![stagingOsid], 'RBiH');
+        assert.equal(hasMinimumAssembledParticipants(state, operation!), true);
+    });
+
+    it('refuses admission when either actual brigade is below the 500-man attack floor', () => {
+        for (const depletedBrigadeId of [brigadeId, supportBrigadeId]) {
+            const state = makeMinimalState();
+            state.meta.turn = 20;
+            const command = state.military.corps_command!.arbih_1st_corps!;
+            command.active_operations = [];
+            command.queued_operations = [name];
+            const main = state.military.formations![brigadeId]!;
+            main.personnel = 2000;
+            main.location_osid = stagingOsid;
+            const support = positionExisting102nd(state);
+            support.location_osid = stagingOsid;
+            state.military.formations![depletedBrigadeId]!.personnel = 499;
+            state.political.political_controllers![stagingOsid] = 'RBiH';
+            state.political.political_controllers![objectiveOsid] = 'RS';
+
+            assert.equal(
+                injectQueuedOperation(state, 'arbih_1st_corps'),
+                false,
+                `${depletedBrigadeId} below floor must not admit the operation`,
+            );
+            assert.equal(command.active_operations.length, 0);
+            assert.equal(state.political.political_controllers![objectiveOsid], 'RS');
+        }
+    });
+
+    it('withholds admission when either brigade is disrupted or unavailable', () => {
+        const controls: Array<{
+            label: string;
+            target: string;
+            mutate: (formation: FormationState) => void;
+        }> = [
+            {
+                label: '831st disrupted',
+                target: brigadeId,
+                mutate: (formation) => { formation.disrupted_turns = 1; },
+            },
+            {
+                label: '831st unavailable',
+                target: brigadeId,
+                mutate: (formation) => { formation.status = 'destroyed' as FormationState['status']; },
+            },
+            {
+                label: '102nd disrupted',
+                target: supportBrigadeId,
+                mutate: (formation) => { formation.disrupted_turns = 1; },
+            },
+            {
+                label: '102nd unavailable',
+                target: supportBrigadeId,
+                mutate: (formation) => { formation.status = 'destroyed' as FormationState['status']; },
+            },
+        ];
+        for (const control of controls) {
+            const state = makeMinimalState();
+            state.meta.turn = 20;
+            const command = state.military.corps_command!.arbih_1st_corps!;
+            command.active_operations = [];
+            command.queued_operations = [name];
+            const main = state.military.formations![brigadeId]!;
+            main.personnel = 2000;
+            main.location_osid = stagingOsid;
+            const support = positionExisting102nd(state);
+            support.location_osid = stagingOsid;
+            state.political.political_controllers![stagingOsid] = 'RBiH';
+            state.political.political_controllers![objectiveOsid] = 'RS';
+            control.mutate(state.military.formations![control.target]!);
+
+            assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), false, control.label);
+            assert.equal(command.active_operations.length, 0, control.label);
+            assert.equal(state.political.political_controllers![objectiveOsid], 'RS', control.label);
+        }
     });
 
     it('still honours an explicit RBiH decline and withholds the model operation', () => {
