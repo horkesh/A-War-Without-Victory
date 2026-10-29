@@ -3354,6 +3354,8 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
     const supportBrigadeId = 'arbih_102nd_motorized';
     const stagingOsid = 'op:trnovo:delijas';
     const objectiveOsid = 'op:trnovo:tosici';
+    const supportStagingOsid = 'op:foca:mazlina';
+    const supportObjectiveOsid = 'op:foca:donje_zesce';
     const mainApproachOsid = 'op:trnovo:gornja_presjenica';
     const supportApproachOsid = 'op:trnovo:kijevo_2';
 
@@ -3394,12 +3396,18 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         assert.equal(operation.planning_duration, 1);
         assert.equal(operation.minimum_viable_participants, 2);
         assert.equal(operation.minimum_assembled_participants, 2);
-        assert.equal(operation.axes.length, 1);
-        assert.equal(operation.axes[0]?.axis_id, 'trnovo_eastern_counterattack');
-        assert.equal(operation.axes[0]?.name, 'Eastern Trnovo Counterattack');
-        assert.deepEqual(operation.axes[0]?.brigades, [brigadeId, supportBrigadeId]);
-        assert.deepEqual(operation.axes[0]?.objectives, [objectiveOsid, 'op:foca:donje_zesce']);
-        assert.equal(operation.axes[0]?.staging_osid, stagingOsid);
+        assert.equal(operation.axes.length, 2);
+        const [mainAxis, supportAxis] = operation.axes;
+        assert.equal(mainAxis?.axis_id, 'trnovo_eastern_counterattack');
+        assert.equal(mainAxis?.name, 'Eastern Trnovo Counterattack');
+        assert.deepEqual(mainAxis?.brigades, [brigadeId]);
+        assert.deepEqual(mainAxis?.objectives, [objectiveOsid]);
+        assert.equal(mainAxis?.staging_osid, stagingOsid);
+        assert.equal(supportAxis?.axis_id, 'trnovo_donje_concentration');
+        assert.equal(supportAxis?.name, 'Donje Zesce Concentration');
+        assert.deepEqual(supportAxis?.brigades, [supportBrigadeId]);
+        assert.deepEqual(supportAxis?.objectives, [supportObjectiveOsid]);
+        assert.equal(supportAxis?.staging_osid, supportStagingOsid);
         for (const excluded of [
             'min_attack_outcome',
             'execution_attack_power_mult',
@@ -3408,8 +3416,10 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         ]) {
             assert.equal((operation as any)[excluded], undefined);
         }
-        assert.equal(operation.axes[0]?.minimum_forward_brigades, undefined);
-        assert.equal(operation.axes[0]?.minimum_staged_brigades, undefined);
+        for (const axis of operation.axes) {
+            assert.equal(axis.minimum_forward_brigades, undefined);
+            assert.equal(axis.minimum_staged_brigades, undefined);
+        }
     });
 
     it('marshals the undated startup roster at turn 8 without injecting', () => {
@@ -3449,15 +3459,15 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         assert.ok(!getHeadQueuedPrePlannedBrigadeIds(state).has(supportBrigadeId));
         assert.ok(getQueuedDatedPrestageBrigadeIds(state).has(brigadeId));
         assert.ok(getQueuedDatedPrestageBrigadeIds(state).has(supportBrigadeId));
-        for (const [authoredId, location] of [
-            [brigadeId, mainApproachOsid],
-            [supportBrigadeId, supportApproachOsid],
+        for (const [authoredId, location, destination] of [
+            [brigadeId, mainApproachOsid, stagingOsid],
+            [supportBrigadeId, supportApproachOsid, supportStagingOsid],
         ] as const) {
             assert.equal(state.military.formations![authoredId]!.location_osid, location);
             assert.deepEqual(
                 state.military.brigade_movement_orders?.[authoredId],
                 {
-                    destination_sids: [stagingOsid],
+                    destination_sids: [destination],
                     stance: 'column',
                     owner: 'authored_preplanned',
                 },
@@ -3485,7 +3495,7 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         assert.ok(getQueuedDatedPrestageBrigadeIds(state).has(supportBrigadeId));
     });
 
-    it('injects at turn 13 only with the exact 831st main / 102nd support axis, no teleport or control flip', () => {
+    it('injects at turn 13 only with the exact two independent axes, no teleport or control flip', () => {
         const state = makeMinimalState();
         state.meta.turn = 12;
         const command = state.military.corps_command!.arbih_1st_corps!;
@@ -3496,8 +3506,9 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         main.location_osid = mainApproachOsid;
         const support = positionExisting102nd(state);
         state.political.political_controllers![stagingOsid] = 'RBiH';
+        state.political.political_controllers![supportStagingOsid] = 'RBiH';
         state.political.political_controllers![objectiveOsid] = 'RS';
-        state.political.political_controllers!['op:foca:donje_zesce'] = 'RS';
+        state.political.political_controllers![supportObjectiveOsid] = 'RS';
         const mainPosition = main.location_osid;
         const supportPosition = support.location_osid;
 
@@ -3516,23 +3527,34 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
             [...operation!.participating_brigades].sort(),
             [brigadeId, supportBrigadeId].sort(),
         );
-        assert.equal(operation!.axes?.length, 1);
-        assert.deepEqual(
-            operation!.axes?.[0]?.assigned_brigades,
-            [brigadeId, supportBrigadeId],
+        assert.equal(operation!.axes?.length, 2);
+        const runtimeMainAxis = operation!.axes?.find(
+            (axis) => axis.axis_id === 'trnovo_eastern_counterattack',
         );
-        assert.equal(operation!.axes?.[0]?.main_brigade, brigadeId);
-        assert.deepEqual(operation!.axes?.[0]?.support_brigades, [supportBrigadeId]);
-        assert.deepEqual(operation!.axes?.[0]?.objectives, [objectiveOsid, 'op:foca:donje_zesce']);
-        assert.equal(operation!.axes?.[0]?.staging_osid, stagingOsid);
+        const runtimeSupportAxis = operation!.axes?.find(
+            (axis) => axis.axis_id === 'trnovo_donje_concentration',
+        );
+        assert.ok(runtimeMainAxis);
+        assert.ok(runtimeSupportAxis);
+        assert.deepEqual(runtimeMainAxis!.assigned_brigades, [brigadeId]);
+        assert.equal(runtimeMainAxis!.main_brigade, brigadeId);
+        assert.equal(runtimeMainAxis!.support_brigades, undefined);
+        assert.deepEqual(runtimeMainAxis!.objectives, [objectiveOsid]);
+        assert.equal(runtimeMainAxis!.staging_osid, stagingOsid);
+        assert.deepEqual(runtimeSupportAxis!.assigned_brigades, [supportBrigadeId]);
+        assert.equal(runtimeSupportAxis!.main_brigade, supportBrigadeId);
+        assert.equal(runtimeSupportAxis!.support_brigades, undefined);
+        assert.deepEqual(runtimeSupportAxis!.objectives, [supportObjectiveOsid]);
+        assert.equal(runtimeSupportAxis!.staging_osid, supportStagingOsid);
         assert.equal(operation!.planning_duration, 1);
         assert.equal(main.location_osid, mainPosition);
         assert.equal(support.location_osid, supportPosition);
         assert.notEqual(main.location_osid, stagingOsid);
-        assert.notEqual(support.location_osid, stagingOsid);
+        assert.notEqual(support.location_osid, supportStagingOsid);
         assert.equal(state.political.political_controllers![objectiveOsid], 'RS');
-        assert.equal(state.political.political_controllers!['op:foca:donje_zesce'], 'RS');
+        assert.equal(state.political.political_controllers![supportObjectiveOsid], 'RS');
         assert.equal(state.political.political_controllers![stagingOsid], 'RBiH');
+        assert.equal(state.political.political_controllers![supportStagingOsid], 'RBiH');
         assert.equal(hasMinimumAssembledParticipants(state, operation!), true);
     });
 
@@ -3547,7 +3569,7 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
             main.personnel = 2000;
             main.location_osid = stagingOsid;
             const support = positionExisting102nd(state);
-            support.location_osid = stagingOsid;
+            support.location_osid = supportStagingOsid;
             state.military.formations![depletedBrigadeId]!.personnel = 499;
             state.political.political_controllers![stagingOsid] = 'RBiH';
             state.political.political_controllers![objectiveOsid] = 'RS';
@@ -3599,7 +3621,7 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
             main.personnel = 2000;
             main.location_osid = stagingOsid;
             const support = positionExisting102nd(state);
-            support.location_osid = stagingOsid;
+            support.location_osid = supportStagingOsid;
             state.political.political_controllers![stagingOsid] = 'RBiH';
             state.political.political_controllers![objectiveOsid] = 'RS';
             control.mutate(state.military.formations![control.target]!);
@@ -3695,7 +3717,7 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         main.personnel = 2000;
         main.location_osid = mainLocation as any;
         const support = positionExisting102nd(state);
-        support.location_osid = stagingOsid as any;
+        support.location_osid = supportStagingOsid as any;
         for (const circleBrigade of circleBrigadeIds) {
             state.military.formations![circleBrigade]!.location_osid = gorazdeOsid as any;
         }
@@ -3705,7 +3727,7 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         return { state, command, main, support };
     }
 
-    it('holds an already-arrived queued head at Delijas instead of letting lower Operation Circle retask the shared 831st', () => {
+    it('holds an already-arrived queued head at its authored staging areas instead of letting lower Operation Circle retask the shared 831st', () => {
         const { state, main, support } = makeQueuedHeadFixture([name, 'Operation Circle'], stagingOsid);
 
         assert.ok(
@@ -3722,7 +3744,7 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
             undefined,
             'lower Operation Circle must not order the queued head 831st away from Delijas',
         );
-        assert.equal(support.location_osid, stagingOsid, 'the arrived 102nd must not teleport');
+        assert.equal(support.location_osid, supportStagingOsid, 'the arrived 102nd must not teleport');
         assert.equal(
             state.military.brigade_movement_orders?.[supportBrigadeId],
             undefined,
@@ -3765,7 +3787,7 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
             },
             'the queued head must keep its own Delijas march against lower Circle',
         );
-        assert.equal(support.location_osid, stagingOsid);
+        assert.equal(support.location_osid, supportStagingOsid);
         assert.equal(state.military.brigade_movement_orders?.[supportBrigadeId], undefined);
         for (const circleBrigade of circleBrigadeIds) {
             assert.deepEqual(state.military.brigade_movement_orders?.[circleBrigade], {
@@ -3842,7 +3864,7 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
             );
         }
         assert.equal(main.location_osid, mainApproachOsid);
-        assert.equal(support.location_osid, stagingOsid);
+        assert.equal(support.location_osid, supportStagingOsid);
     });
 
     it('releases the 831st to the normal Osjecani march when the head leaves the queue', () => {
@@ -3896,8 +3918,8 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         const supportTransit = {
             status: 'in_transit' as const,
             stance: 'column' as const,
-            destination_sids: [stagingOsid],
-            path: [stagingOsid],
+            destination_sids: [supportStagingOsid],
+            path: [supportStagingOsid],
             turns_remaining: 1,
         };
         state.military.brigade_movement_state![supportBrigadeId] = supportTransit as any;

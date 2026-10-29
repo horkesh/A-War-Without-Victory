@@ -1325,14 +1325,24 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         minimum_viable_participants: 2,
         minimum_assembled_participants: 2,
         axes: [
+            // Owner-authorized CALIBRATION ASSUMPTION, not a historical operation
+            // claim and not adopted: separate the two routes so each existing
+            // brigade is the ordinary main of its own axis. This moves no unit and
+            // invents no brigade. Ordinary launch, authority, admission, manual and
+            // retreat rules are unchanged, and capture is not guaranteed.
             {
                 axis_id: 'trnovo_eastern_counterattack',
                 name: 'Eastern Trnovo Counterattack',
-                // Array order is intentional and deterministic: the 831st remains
-                // main and the existing 102nd Motorized is support.
-                brigades: ['arbih_831st_drina_lineage', 'arbih_102nd_motorized'],
-                objectives: ['op:trnovo:tosici', 'op:foca:donje_zesce'],
+                brigades: ['arbih_831st_drina_lineage'],
+                objectives: ['op:trnovo:tosici'],
                 staging_osid: 'op:trnovo:delijas',
+            },
+            {
+                axis_id: 'trnovo_donje_concentration',
+                name: 'Donje Zesce Concentration',
+                brigades: ['arbih_102nd_motorized'],
+                objectives: ['op:foca:donje_zesce'],
+                staging_osid: 'op:foca:mazlina',
             },
         ],
     },
