@@ -1366,7 +1366,12 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                 axis_id: 'krug_gorazde_jabuka',
                 name: 'KRUG: Goražde Jabuka',
                 brigades: ['arbih_801st_light', 'arbih_802nd_light', 'arbih_831st_drina_lineage'],
-                objectives: ['op:gorazde:sopotnica'],
+                // Owner-authorized calibration assumption, unadopted: append the
+                // graph-adjacent Glamoc pocket as an ordinary follow-on. This is not
+                // a sourced historical capture or a guaranteed outcome; roster,
+                // timing, attack strength, damage, retreat, and manual gates are
+                // unchanged.
+                objectives: ['op:gorazde:sopotnica', 'op:gorazde:glamoc'],
                 // Coarse local model anchor, not a claim about the precise march route.
                 staging_osid: 'op:gorazde:osjecani_2',
             },

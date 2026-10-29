@@ -1213,7 +1213,7 @@ describe('pre-planned operations', () => {
             'arbih_802nd_light',
             'arbih_831st_drina_lineage',
         ]);
-        assert.deepEqual(firstCircle?.objectives, ['op:gorazde:sopotnica']);
+        assert.deepEqual(firstCircle?.objectives, ['op:gorazde:sopotnica', 'op:gorazde:glamoc']);
         assert.equal(serializeState(first), serializeState(second));
         assert.equal(serializeState(deserializeState(serializeState(first))), serializeState(first));
         assert.equal(circle.planning_duration, sourceDuration, 'the shared catalogue definition is restored');
@@ -2879,7 +2879,7 @@ describe('pre-planned operations', () => {
         );
     });
 
-    it('authors KRUG as the reviewed two-lineage model allocation on one objective', () => {
+    it('authors KRUG as the reviewed two-lineage model allocation with an ordinary Glamoc follow-on', () => {
         const circle = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
         assert.ok(circle);
         assert.equal(circle!.faction, 'RBiH');
@@ -2898,11 +2898,64 @@ describe('pre-planned operations', () => {
                 {
                     id: 'krug_gorazde_jabuka',
                     staging: 'op:gorazde:osjecani_2',
-                    objectives: ['op:gorazde:sopotnica'],
+                    objectives: ['op:gorazde:sopotnica', 'op:gorazde:glamoc'],
                     brigades: ['arbih_801st_light', 'arbih_802nd_light', 'arbih_831st_drina_lineage'],
                 },
             ],
         );
+    });
+
+    it('injects Circle with the exact Sopotnica-then-Glamoc sequence, keeping the roster in place and control unchanged', () => {
+        const circle = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
+        assert.ok(circle);
+        assert.equal(circle!.available_from, 18);
+        assert.equal(circle!.prestage_from, 14);
+        assert.equal(circle!.planning_duration, 4);
+        assert.deepEqual(circle!.axes[0]?.objectives, [
+            'op:gorazde:sopotnica',
+            'op:gorazde:glamoc',
+        ]);
+
+        const participantIds = [
+            'arbih_801st_light',
+            'arbih_802nd_light',
+            'arbih_831st_drina_lineage',
+        ];
+        const staging = 'op:gorazde:osjecani_2';
+        const firstObjective = 'op:gorazde:sopotnica';
+        const followOnObjective = 'op:gorazde:glamoc';
+        const state = makeMinimalState();
+        state.meta.turn = 18;
+        const command = state.military.corps_command!.arbih_1st_corps!;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Circle'];
+        state.political.political_controllers![staging] = 'RBiH';
+        state.political.political_controllers![firstObjective] = 'RS';
+        state.political.political_controllers![followOnObjective] = 'RS';
+        const positionsBefore = new Map(
+            participantIds.map((brigadeId) => [
+                brigadeId,
+                state.military.formations![brigadeId]!.location_osid,
+            ]),
+        );
+
+        assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), true);
+        const operation = command.active_operations.find((active) => active.name === 'Operation Circle');
+        assert.ok(operation);
+        assert.deepEqual(operation!.axes?.[0]?.objectives, [
+            firstObjective,
+            followOnObjective,
+        ]);
+        assert.deepEqual(operation!.participating_brigades, participantIds);
+        assert.equal(operation!.planning_duration, 4);
+        assert.equal(operation!.min_attack_outcome, undefined);
+        assert.equal(operation!.execution_attack_power_mult, undefined);
+        for (const brigadeId of participantIds) {
+            assert.equal(state.military.formations![brigadeId]!.location_osid, positionsBefore.get(brigadeId));
+        }
+        assert.equal(state.political.political_controllers![staging], 'RBiH');
+        assert.equal(state.political.political_controllers![firstObjective], 'RS');
+        assert.equal(state.political.political_controllers![followOnObjective], 'RS');
     });
 
     it('authors the ordinary-combat VRS approach seizures around Goražde', () => {
