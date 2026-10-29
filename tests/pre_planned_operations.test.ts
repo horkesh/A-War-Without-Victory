@@ -3345,7 +3345,7 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         assert.equal(operation.axes[0]?.axis_id, 'trnovo_eastern_counterattack');
         assert.equal(operation.axes[0]?.name, 'Eastern Trnovo Counterattack');
         assert.deepEqual(operation.axes[0]?.brigades, [brigadeId, supportBrigadeId]);
-        assert.deepEqual(operation.axes[0]?.objectives, [objectiveOsid]);
+        assert.deepEqual(operation.axes[0]?.objectives, [objectiveOsid, 'op:foca:donje_zesce']);
         assert.equal(operation.axes[0]?.staging_osid, stagingOsid);
         for (const excluded of [
             'min_attack_outcome',
@@ -3444,6 +3444,7 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         const support = positionExisting102nd(state);
         state.political.political_controllers![stagingOsid] = 'RBiH';
         state.political.political_controllers![objectiveOsid] = 'RS';
+        state.political.political_controllers!['op:foca:donje_zesce'] = 'RS';
         const mainPosition = main.location_osid;
         const supportPosition = support.location_osid;
 
@@ -3468,7 +3469,7 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         );
         assert.equal(operation!.axes?.[0]?.main_brigade, brigadeId);
         assert.deepEqual(operation!.axes?.[0]?.support_brigades, [supportBrigadeId]);
-        assert.deepEqual(operation!.axes?.[0]?.objectives, [objectiveOsid]);
+        assert.deepEqual(operation!.axes?.[0]?.objectives, [objectiveOsid, 'op:foca:donje_zesce']);
         assert.equal(operation!.axes?.[0]?.staging_osid, stagingOsid);
         assert.equal(operation!.planning_duration, 3);
         assert.equal(main.location_osid, mainPosition);
@@ -3476,6 +3477,7 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         assert.notEqual(main.location_osid, stagingOsid);
         assert.notEqual(support.location_osid, stagingOsid);
         assert.equal(state.political.political_controllers![objectiveOsid], 'RS');
+        assert.equal(state.political.political_controllers!['op:foca:donje_zesce'], 'RS');
         assert.equal(state.political.political_controllers![stagingOsid], 'RBiH');
         assert.equal(hasMinimumAssembledParticipants(state, operation!), true);
     });

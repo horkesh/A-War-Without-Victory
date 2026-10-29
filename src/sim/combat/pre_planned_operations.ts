@@ -1331,7 +1331,7 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                 // Array order is intentional and deterministic: the 831st remains
                 // main and the existing 102nd Motorized is support.
                 brigades: ['arbih_831st_drina_lineage', 'arbih_102nd_motorized'],
-                objectives: ['op:trnovo:tosici'],
+                objectives: ['op:trnovo:tosici', 'op:foca:donje_zesce'],
                 staging_osid: 'op:trnovo:delijas',
             },
         ],
