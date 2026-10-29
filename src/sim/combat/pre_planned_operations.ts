@@ -1341,6 +1341,31 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
+        // Owner-authorized UNADOPTED model concentration, not a historical plan.
+        // BB1 printed p. 151 / PDF p. 187 is regional corridor context only; the
+        // precise 831st assignment and turn-20 date are unproved. Control can
+        // change only through ordinary combat, so capture is not guaranteed.
+        corps: 'arbih_1st_corps',
+        faction: 'RBiH',
+        name: 'Trnovo Eastern Counterattack (Model)',
+        staging_osid: 'op:trnovo:delijas',
+        available_from: 20,
+        enqueue_from: 20,
+        prestage_from: 20,
+        planning_duration: 3,
+        minimum_viable_participants: 1,
+        minimum_assembled_participants: 1,
+        axes: [
+            {
+                axis_id: 'trnovo_eastern_counterattack',
+                name: 'Eastern Trnovo Counterattack',
+                brigades: ['arbih_831st_drina_lineage'],
+                objectives: ['op:trnovo:tosici'],
+                staging_osid: 'op:trnovo:delijas',
+            },
+        ],
+    },
+    {
         // Owner-authorized UNADOPTED model action. Timing, roster, and axis are
         // inference, not an attested 851st action or a historically named
         // operation; BB1 printed p. 151 / PDF p. 187 is regional context only.
