@@ -202,13 +202,20 @@ function parseUtcCreated(value) {
     return valueMs;
 }
 
-function validateClockPair(value, timeOrigin, reason) {
+function validateEventClockShape(value, reason) {
     requirePlain(value, reason);
     const dateNow = requireFinite(value.dateNow, reason);
     const performanceNow = requireFinite(value.performanceNow, reason);
     if (dateNow <= 0 || performanceNow < 0) reject(reason);
-    if (Math.abs(dateNow - (timeOrigin + performanceNow)) > CLOCK_FENCE_MS) reject(reason);
     return { dateNow, performanceNow };
+}
+
+function validateClockPair(value, timeOrigin, reason) {
+    const clocks = validateEventClockShape(value, reason);
+    if (Math.abs(clocks.dateNow - (timeOrigin + clocks.performanceNow)) > CLOCK_FENCE_MS) {
+        reject(reason);
+    }
+    return clocks;
 }
 
 function validateBinding(binding) {
@@ -539,7 +546,7 @@ function validateProvenance(provenance, binding) {
         }
         previousSequence = sequence;
         previousSequences.add(sequence);
-        const clocks = validateClockPair(event.at, binding.timeOrigin, 'provenance.events.clock');
+        const clocks = validateEventClockShape(event.at, 'provenance.events.clock');
         normalizedEvents.push({ event, index, clocks });
     }
 
@@ -669,6 +676,25 @@ function validateProvenance(provenance, binding) {
         attempts,
         installEvent: installEvents[0].event,
     };
+}
+
+function validateProvenanceEventClocks(provenance, binding, lifecycle) {
+    const confirmationMs = lifecycle.selected.confirmation.observedAtMs;
+    if (!isFiniteNumber(confirmationMs) || confirmationMs <= 0) {
+        reject('provenance.events.clock');
+    }
+    const lateBoundaryMs = confirmationMs + CLOCK_FENCE_MS;
+    for (const entry of provenance.events) {
+        const { dateNow, performanceNow } = entry.clocks;
+        const projectedByPerformance = binding.timeOrigin + performanceNow;
+        if (!isFiniteNumber(projectedByPerformance)) reject('provenance.events.clock');
+        const dateLate = dateNow > lateBoundaryMs;
+        const performanceLate = projectedByPerformance > lateBoundaryMs;
+        if (dateLate !== performanceLate) reject('provenance.events.clock.membership');
+        if (!dateLate && Math.abs(dateNow - projectedByPerformance) > CLOCK_FENCE_MS) {
+            reject('provenance.events.clock');
+        }
+    }
 }
 
 function validateSentinel(sentinel, binding) {
@@ -1473,6 +1499,7 @@ function verify(input) {
         }
     }
     const lifecycle = validateLifecycleAndSelect(input, binding, provenance, projection);
+    validateProvenanceEventClocks(provenance, binding, lifecycle);
     const cycle = correlateCycle(media, lifecycle, binding, projection);
     validateInterference(provenance, lifecycle);
     const evidence = buildEvidence(

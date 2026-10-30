@@ -792,6 +792,31 @@ function mediaPlayerEvents(input: any): any[] {
         .params.events;
 }
 
+function driftedAt(epochMs: number, wallDriftMs: number) {
+    return {
+        dateNow: epochMs + wallDriftMs,
+        performanceNow: epochMs - TIME_ORIGIN,
+    };
+}
+
+function appendProvenanceHistory(
+    input: any,
+    epochMs: number,
+    options: { driftMs?: number; at?: any; kind?: string } = {},
+): any {
+    const events = input.provenance.snapshot.events.records;
+    const event = {
+        sequence: Math.max(...events.map((entry: any) => entry.sequence)) + 1,
+        kind: options.kind ?? 'history',
+        at: Object.prototype.hasOwnProperty.call(options, 'at')
+            ? options.at
+            : driftedAt(epochMs, options.driftMs ?? 0),
+    };
+    events.push(event);
+    input.provenance.snapshot.events.count = events.length;
+    return event;
+}
+
 function addMutation(input: any, name: string, outcome = 'success'): void {
     const events = input.provenance.snapshot.events.records;
     const sequence = Math.max(...events.map((event: any) => event.sequence)) + 1;
@@ -1452,5 +1477,71 @@ describe('verifyControlledNativeLoopCycle', () => {
         const input = baseInput();
         input.clockProjection.protocolTimestamps.response = Number.NaN;
         expectRejected(input);
+    });
+
+    test('accepts coherent in-order later provenance history beyond the clock fence after the selected cycle', () => {
+        const input = baseInput();
+        const appended = [];
+        for (let index = 0; index < 16; index += 1) {
+            appended.push(appendProvenanceHistory(
+                input,
+                CONFIRMATION_MS + 20000 + index * 10000,
+                { driftMs: 28.0999 },
+            ));
+        }
+        const events = input.provenance.snapshot.events;
+        expect(events.records).toHaveLength(4 + appended.length);
+        expect(events.count).toBe(events.records.length);
+        for (const event of appended) {
+            expect(Math.abs(event.at.dateNow - (TIME_ORIGIN + event.at.performanceNow)))
+                .toBeGreaterThan(20);
+            expect(event.at.dateNow).toBeGreaterThan(CONFIRMATION_MS);
+            expect(TIME_ORIGIN + event.at.performanceNow).toBeGreaterThan(CONFIRMATION_MS);
+        }
+        const before = JSON.stringify(input);
+        const result = verify(input);
+        expect(result.ok).toBe(true);
+        expect(JSON.stringify(input)).toBe(before);
+    });
+
+    test('rejects the same wall drift inside the selected interval', () => {
+        const input = baseInput();
+        const insideMs = input.lifecycleSignals[1].observedAtMs + 100;
+        appendProvenanceHistory(input, insideMs, { driftMs: 28.0999 });
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('provenance.events.clock');
+    });
+
+    test('rejects conflicting late-history clock-domain membership at the selected boundary', () => {
+        const input = baseInput();
+        const confirmationMs = input.lifecycleSignals[5].observedAtMs;
+        appendProvenanceHistory(input, confirmationMs + 5, { driftMs: 28.0999 });
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('provenance.events.clock.membership');
+    });
+
+    test('rejects malformed, nonfinite or incomplete late provenance history', () => {
+        const lateEpochMs = CONFIRMATION_MS + 50000;
+        const valid = driftedAt(lateEpochMs, 28.0999);
+        const cases: any[] = [
+            { ...valid, dateNow: Number.NaN },
+            { ...valid, performanceNow: Number.POSITIVE_INFINITY },
+            { ...valid, dateNow: 0 },
+            { ...valid, performanceNow: -1 },
+            { dateNow: valid.dateNow },
+            { performanceNow: valid.performanceNow },
+            {},
+            null,
+        ];
+        for (const at of cases) {
+            const input = baseInput();
+            appendProvenanceHistory(input, lateEpochMs, { at });
+            const result = verify(input);
+            expect(result.ok).toBe(false);
+            expect(result.reasons).toContain('provenance.events.clock');
+            expect(input.provenance.snapshot.events.records).toHaveLength(5);
+        }
     });
 });
