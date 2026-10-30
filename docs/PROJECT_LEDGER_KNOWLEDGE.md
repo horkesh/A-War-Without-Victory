@@ -6297,3 +6297,7 @@ Zero bus volume still creates, preloads and plays media. A reversible category-s
 
 ## 2026-10-30 - A modal must cover its actual opener
 A valid canonical z-index token can still be the wrong tier for a component. Check relative sibling stacking and DOM order against the actual opener; preserving the token table does not prove physical reachability. The Settings8500/MainMenu9000 regression passed old isolated controls tests but failed native unforced clicks. Keep a relative-order regression and require the real rendered route. See the [dated repair](PROJECT_LEDGER.md#2026-10-30---settings-above-its-main-menu-opener).
+
+
+## 2026-10-30 - Audit semantic palettes at their actual surface
+Small outcome badges can fail contrast even when unrelated canonical palette tokens pass. Import the real semantic palette, pin all keys and check both actual dark backgrounds; do not fix a rendered failure by weakening the native readability guard. Existing audited good/danger colors can repair presentation without altering outcome classifications or simulation. See [dated repair](PROJECT_LEDGER.md#2026-10-30---readable-native-army-hq-outcome-badges).

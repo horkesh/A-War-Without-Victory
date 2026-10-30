@@ -77,8 +77,13 @@ export function getCohesionColor(cohesion: number): string {
   return cohesion >= 70 ? '#4a9a55' : cohesion >= 40 ? '#c4a35a' : '#c24040';
 }
 
-/** Battle outcome → hex color for badges and labels. */
+/**
+ * Battle outcome → hex color for badges and labels.
+ * These render as small text/borders on dark panel surfaces, so the outer
+ * outcome colors use the audited status-good/status-danger values for AA
+ * contrast; classification and the other four values remain unchanged.
+ */
 export const OUTCOME_COLORS: Record<string, string> = {
-  decisive_victory: '#2d7a3a', victory: '#4a9a55', costly_victory: '#8a9a40',
-  stalemate: '#c7b88e', repulsed: '#c28040', catastrophic_defeat: '#c24040',
+  decisive_victory: '#56d364', victory: '#4a9a55', costly_victory: '#8a9a40',
+  stalemate: '#c7b88e', repulsed: '#c28040', catastrophic_defeat: '#f47068',
 };

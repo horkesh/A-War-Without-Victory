@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { OUTCOME_COLORS } from '../../src/ui/map/utils/theme';
 
 const repoRoot = resolve(__dirname, '../..');
 
@@ -38,6 +39,16 @@ const TOKENS = {
   'faction-hrhb-subtle': '#6d99c3',
 } as const;
 
+/** Exact battle-outcome keys; classification is fixed and none may disappear. */
+const OUTCOME_KEYS = [
+  'decisive_victory',
+  'victory',
+  'costly_victory',
+  'stalemate',
+  'repulsed',
+  'catastrophic_defeat',
+] as const;
+
 describe('accessibility P0 contrast tokens', () => {
   it('pins WCAG AA text contrast for canonical map palette pairs', () => {
     const pairs: Array<[keyof typeof TOKENS, keyof typeof TOKENS]> = [
@@ -65,6 +76,20 @@ describe('accessibility P0 contrast tokens', () => {
     const config = readFileSync(resolve(repoRoot, 'src/ui/map/tailwind.config.ts'), 'utf8');
     for (const [name, value] of Object.entries(TOKENS)) {
       expect(config).toContain(`'${name}': '${value}'`);
+    }
+  });
+
+  it('outcome palette keeps exactly the six classified keys', () => {
+    expect(Object.keys(OUTCOME_COLORS).sort()).toEqual([...OUTCOME_KEYS].sort());
+  });
+
+  it('pins WCAG AA contrast for every outcome color on both dark panel surfaces', () => {
+    for (const key of OUTCOME_KEYS) {
+      const hex = OUTCOME_COLORS[key];
+      expect(hex, `${key} must be a hex color`).toMatch(/^#[0-9a-f]{6}$/i);
+      for (const bg of ['panel-bg', 'panel-card'] as const) {
+        expect(contrast(hex, TOKENS[bg]), `${key} (${hex}) on ${bg}`).toBeGreaterThanOrEqual(4.5);
+      }
     }
   });
 });
