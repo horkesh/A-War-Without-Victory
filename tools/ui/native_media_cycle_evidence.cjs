@@ -1031,6 +1031,81 @@ function validateMedia(media, binding, source) {
     };
 }
 
+// Exact signed-range coverage used only for the in-progress waiting sample.
+// It matches the existing checker's coverage semantics: no epsilon, no sort,
+// merge or normalization; a negative first start is retained as recorded.
+function signedCoverageOk(ranges, duration) {
+    if (!Array.isArray(ranges) || ranges.length === 0) return false;
+    if (!isFiniteNumber(duration) || duration <= 0) return false;
+    let previousEnd = null;
+    for (const range of ranges) {
+        if (!Array.isArray(range) || range.length !== 2) return false;
+        const start = range[0];
+        const end = range[1];
+        if (!isFiniteNumber(start) || !isFiniteNumber(end)) return false;
+        if (!(start <= end)) return false;
+        if (previousEnd === null) {
+            if (start > 0) return false;
+        } else if (start !== previousEnd) {
+            return false;
+        }
+        previousEnd = end;
+    }
+    return previousEnd !== null && previousEnd >= duration;
+}
+
+// One narrow exception to the general `waiting` rejection: a waiting sample is
+// admitted only while the browser is still completing the already-selected
+// zero seek, strictly between the uniquely selected seeking and seeked
+// sequences and inside their timestamps. The sample must keep the exact
+// selected identity and the recorded readyState 1 / zero / seeking state,
+// with complete annotations and full signed buffered/seekable coverage. Any
+// other waiting sample remains interference.
+function isAdmissibleInProgressZeroSeekWaiting(
+    entry,
+    selected,
+    source,
+    binding,
+    qaElementId,
+    qaSourceEpoch,
+) {
+    const { signal } = entry;
+    if (signal.kind !== 'waiting') return false;
+    if (!(entry.signalSequence > selected.seeking.signalSequence
+        && entry.signalSequence < selected.seeked.signalSequence)) return false;
+    if (!(entry.observedAtMs >= selected.seeking.observedAtMs
+        && entry.observedAtMs < selected.seeked.observedAtMs)) return false;
+    if (signal.elementId !== qaElementId
+        || signal.sourceEpoch !== qaSourceEpoch
+        || signal.url !== source
+        || signal.origin !== binding.origin) return false;
+    if (!Array.isArray(signal.mediaStateUnavailable) || signal.mediaStateUnavailable.length !== 0) {
+        return false;
+    }
+    if (!isPlainObject(signal.mediaStateReadErrors)
+        || Object.keys(signal.mediaStateReadErrors).length !== 0) {
+        return false;
+    }
+    const state = signal.mediaState;
+    if (!isPlainObject(state)) return false;
+    if (state.currentTime !== 0
+        || state.seeking !== true
+        || state.readyState !== 1
+        || state.paused !== false
+        || state.ended !== false
+        || state.loop !== true
+        || state.controls !== false
+        || state.mediaError !== null) {
+        return false;
+    }
+    if (!isFiniteNumber(state.duration) || state.duration <= 0) return false;
+    if (state.duration !== selected.seeking.state.duration
+        || state.duration !== selected.seeked.state.duration) return false;
+    if (!signedCoverageOk(state.buffered, state.duration)) return false;
+    if (!signedCoverageOk(state.seekable, state.duration)) return false;
+    return true;
+}
+
 function validateLifecycleAndSelect(input, binding, provenance, projection) {
     if (!Array.isArray(input.lifecycleSignals)) reject('lifecycle');
     const selectionFloorMs = Math.max(
@@ -1182,7 +1257,20 @@ function validateLifecycleAndSelect(input, binding, provenance, projection) {
         if (entry.signal.elementId !== qaElementId) continue;
         if (entry.observedAtMs < selected.preSeek.observedAtMs
             || entry.observedAtMs > selected.confirmation.observedAtMs) continue;
-        if (disallowed.has(entry.signal.kind)) reject('selected.interference');
+        if (disallowed.has(entry.signal.kind)) {
+            if (entry.signal.kind === 'waiting'
+                && isAdmissibleInProgressZeroSeekWaiting(
+                    entry,
+                    selected,
+                    source,
+                    binding,
+                    qaElementId,
+                    qaSourceEpoch,
+                )) {
+                continue;
+            }
+            reject('selected.interference');
+        }
         if (entry.signal.kind === 'seeking'
             && entry.signalSequence !== selected.seeking.signalSequence) {
             reject('selected.seeking.ambiguity');

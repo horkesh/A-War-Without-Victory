@@ -1863,4 +1863,232 @@ describe('verifyControlledNativeLoopCycle', () => {
         stalled.lifecycleSignals[5].mediaState.currentTime = 0;
         expect(verify(stalled).reasons).toContain('selected.confirmation');
     });
+
+    /*
+     * Retained actual three-case replay, first case. The in-progress zero seek
+     * is reported as `waiting` between the uniquely selected seeking and seeked
+     * samples while the browser still exposes readyState 1. Every sample keeps
+     * its signed buffered/seekable values verbatim and nothing is rewritten.
+     * The original rejection of waiting generally remains pinned above.
+     */
+    function inProgressWaitingInput(): any {
+        const input = baseInput();
+        input.lifecycleSignals = [
+            lifecycleSignal(536, 'playing', START_MS + 5, recordedCancellationState({ currentTime: 0 })),
+            lifecycleSignal(537, 'timeupdate', PRE_SEEK_MS, recordedCancellationState({
+                currentTime: CANCELLATION_PRE_SEEK_TIME,
+            })),
+            lifecycleSignal(538, 'seeking', SEEK_MS + 2, recordedCancellationState({
+                readyState: 1,
+                currentTime: 0,
+                seeking: true,
+            })),
+            lifecycleSignal(539, 'waiting', SEEK_MS + 2.5, recordedCancellationState({
+                readyState: 1,
+                currentTime: 0,
+                seeking: true,
+            })),
+            lifecycleSignal(540, 'progress', SEEK_MS + 2.6, recordedCancellationState({
+                readyState: 1,
+                currentTime: 0,
+                seeking: true,
+            })),
+            lifecycleSignal(541, 'suspend', SEEK_MS + 2.7, recordedCancellationState({
+                readyState: 1,
+                currentTime: 0,
+                seeking: true,
+            })),
+            lifecycleSignal(542, 'timeupdate', SEEK_MS + 3, recordedCancellationState({
+                currentTime: 0,
+                seeking: false,
+            })),
+            lifecycleSignal(543, 'seeked', SEEK_MS + 5, recordedCancellationState({ currentTime: 0 })),
+            lifecycleSignal(544, 'canplay', SEEK_MS + 6, recordedCancellationState({ currentTime: 0 })),
+            lifecycleSignal(545, 'playing', POST_PLAY_MS + 3, recordedCancellationState({ currentTime: 0 })),
+            lifecycleSignal(546, 'timeupdate', POST_PLAY_MS + 80, recordedCancellationState({
+                currentTime: CANCELLATION_CONFIRMATION_TIME,
+            })),
+        ];
+        input.selected = {
+            preSeek: { signalSequence: 537 },
+            seeking: { signalSequence: 538 },
+            seeked: { signalSequence: 543 },
+            playing: { signalSequence: 545 },
+            confirmation: { signalSequence: 546 },
+        };
+        return input;
+    }
+
+    function waitingOf(input: any): any {
+        return input.lifecycleSignals.find((signal: any) => signal.kind === 'waiting');
+    }
+
+    function expectWaitingRejected(input: any, reason = 'selected.interference'): void {
+        const before = JSON.stringify(input);
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain(reason);
+        expect(JSON.stringify(input)).toBe(before);
+    }
+
+    test('accepts the retained in-progress zero-seek waiting interval with readyState 1 then 4', () => {
+        const input = inProgressWaitingInput();
+        const before = JSON.stringify(input);
+        const result = verify(input);
+        expect(result.ok).toBe(true);
+        expect(result.evidence.lifecycle.preSeek.signalSequence).toBe(537);
+        expect(result.evidence.lifecycle.seeking.signalSequence).toBe(538);
+        expect(result.evidence.lifecycle.seeked.signalSequence).toBe(543);
+        expect(result.evidence.lifecycle.playing.signalSequence).toBe(545);
+        expect(result.evidence.lifecycle.confirmation.signalSequence).toBe(546);
+        const retained = result.evidence.rawReferences.lifecycleSignals;
+        expect(retained).toEqual(input.lifecycleSignals);
+        const waiting = retained.find((signal: any) => signal.kind === 'waiting');
+        expect(waiting.signalSequence).toBe(539);
+        expect(waiting.observedAtMs).toBe(SEEK_MS + 2.5);
+        expect(waiting.mediaState).toMatchObject({
+            readyState: 1,
+            currentTime: 0,
+            seeking: true,
+            duration: CANCELLATION_DURATION,
+            mediaError: null,
+            loop: true,
+            controls: false,
+            paused: false,
+            ended: false,
+            buffered: [[-0.002667, CANCELLATION_DURATION]],
+            seekable: [[0, CANCELLATION_DURATION]],
+        });
+        expect(JSON.stringify(input)).toBe(before);
+    });
+
+    test('rejects waiting before the uniquely selected seeking sample', () => {
+        const input = inProgressWaitingInput();
+        waitingOf(input).observedAtMs = SEEK_MS;
+        expectWaitingRejected(input);
+    });
+
+    test('rejects waiting at or after the uniquely selected seeked sample', () => {
+        for (const offset of [0, 1, 2]) {
+            const input = inProgressWaitingInput();
+            waitingOf(input).observedAtMs = SEEK_MS + 5 + offset;
+            expectWaitingRejected(input);
+        }
+    });
+
+    test('rejects waiting moved into the post-seek continuation', () => {
+        const input = inProgressWaitingInput();
+        const waiting = waitingOf(input);
+        waiting.signalSequence = 547;
+        waiting.observedAtMs = POST_PLAY_MS + 10;
+        expectWaitingRejected(input);
+    });
+
+    test('rejects waiting with a sequence outside the selected seeking/seeked bracket', () => {
+        const input = inProgressWaitingInput();
+        waitingOf(input).signalSequence = 547;
+        expectWaitingRejected(input);
+    });
+
+    test('rejects waiting that keeps the selected asset but claims a competing identity', () => {
+        const element = inProgressWaitingInput();
+        waitingOf(element).elementId = 'qa-ambient-competing';
+        expectWaitingRejected(element, 'lifecycle.competing-element');
+
+        const epoch = inProgressWaitingInput();
+        waitingOf(epoch).sourceEpoch = 2;
+        expectWaitingRejected(epoch, 'lifecycle.competing-element');
+    });
+
+    test('rejects waiting that claims the selected object for a different source', () => {
+        const input = inProgressWaitingInput();
+        const waiting = waitingOf(input);
+        waiting.url = AMBIENT_OTHER;
+        waiting.controlledProvenance.element.source = AMBIENT_OTHER;
+        waiting.controlledProvenance.provenance.attributes.src = AMBIENT_OTHER;
+        expectWaitingRejected(input, 'lifecycle.source-reset');
+    });
+
+    test('rejects an advancing, non-seeking or differently ready waiting sample', () => {
+        for (const overrides of [
+            { currentTime: 0.1 },
+            { seeking: false },
+            { readyState: 0 },
+            { readyState: 2 },
+            { readyState: 3 },
+            { readyState: 4 },
+        ]) {
+            const input = inProgressWaitingInput();
+            Object.assign(waitingOf(input).mediaState, overrides);
+            expectWaitingRejected(input);
+        }
+    });
+
+    test('rejects waiting without an unchanged finite actual duration', () => {
+        const missing = inProgressWaitingInput();
+        delete waitingOf(missing).mediaState.duration;
+        expectWaitingRejected(missing);
+
+        for (const duration of [null, 0, -1, 29.999, 30.001, 31, Number.NaN, Number.POSITIVE_INFINITY, '30']) {
+            const input = inProgressWaitingInput();
+            waitingOf(input).mediaState.duration = duration;
+            expectWaitingRejected(input);
+        }
+    });
+
+    test('rejects waiting with incomplete state annotations', () => {
+        const unavailable = inProgressWaitingInput();
+        waitingOf(unavailable).mediaStateUnavailable = ['buffered'];
+        expectWaitingRejected(unavailable, 'lifecycle.mediaStateUnavailable');
+
+        const unreadable = inProgressWaitingInput();
+        waitingOf(unreadable).mediaStateReadErrors = { buffered: 'read-threw' };
+        expectWaitingRejected(unreadable, 'lifecycle.mediaStateReadErrors');
+    });
+
+    test('rejects waiting without full signed buffered and seekable coverage', () => {
+        const cases: Array<[string, any]> = [
+            ['buffered', []],
+            ['buffered', [[0, 5]]],
+            ['buffered', [[-0.002667, 10], [11, 30]]],
+            ['buffered', [[10, 30], [0, 10]]],
+            ['buffered', [[-0.002667]]],
+            ['buffered', [['-0.002667', 30]]],
+            ['buffered', [[-0.002667, Number.NaN]]],
+            ['buffered', [[-0.002667, Number.POSITIVE_INFINITY]]],
+            ['buffered', [[0.5, 30]]],
+            ['buffered', [[10, 0]]],
+            ['seekable', []],
+            ['seekable', [[0, 29.999]]],
+            ['seekable', [[0, 10], [10.5, 30]]],
+            ['seekable', [[1, 30]]],
+            ['seekable', [[0, 30, 31]]],
+            ['seekable', [[0, Number.NaN]]],
+        ];
+        for (const [field, value] of cases) {
+            const input = inProgressWaitingInput();
+            waitingOf(input).mediaState[field] = value;
+            expectWaitingRejected(input);
+        }
+    });
+
+    test('rejects waiting with a media error or changed loop, control, pause and end state', () => {
+        for (const overrides of [
+            { mediaError: { code: 2, message: 'synthetic' } },
+            { loop: false },
+            { controls: true },
+            { paused: true },
+            { ended: true },
+        ]) {
+            const input = inProgressWaitingInput();
+            Object.assign(waitingOf(input).mediaState, overrides);
+            expectWaitingRejected(input);
+        }
+    });
+
+    test('rejects a stalled zero-state sample masquerading as waiting', () => {
+        const input = inProgressWaitingInput();
+        waitingOf(input).kind = 'stalled';
+        expectWaitingRejected(input);
+    });
 });
