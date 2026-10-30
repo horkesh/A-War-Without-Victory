@@ -1145,7 +1145,8 @@ function validateLifecycleAndSelect(input, binding, provenance, projection) {
             || entry.state.loop !== true
             || entry.state.controls !== false
             || entry.state.paused !== false
-            || entry.state.readyState !== 4
+            || !(entry.state.readyState === 4
+                || (name === 'seeking' && entry.state.readyState === 1))
             || !isFiniteNumber(entry.state.duration)
             || entry.state.duration <= 0) {
             reject(`selected.${name}.state`);

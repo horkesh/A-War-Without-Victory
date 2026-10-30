@@ -684,6 +684,54 @@ function baseInput(): any {
     };
 }
 
+const CANCELLATION_DURATION = 30;
+const CANCELLATION_PRE_SEEK_TIME = 29.748984;
+const CANCELLATION_CONFIRMATION_TIME = 0.19293;
+
+/*
+ * The recorded RBiH4 cancellation cycle reports the exact signed buffered
+ * start from the raw evidence. Fixtures below keep it verbatim; the correlator
+ * must neither normalize nor rewrite it.
+ */
+function recordedCancellationState(overrides: Record<string, unknown> = {}) {
+    return lifecycleState({
+        readyState: 4,
+        currentTime: 0,
+        duration: CANCELLATION_DURATION,
+        buffered: [[-0.002667, CANCELLATION_DURATION]],
+        seekable: [[0, CANCELLATION_DURATION]],
+        ...overrides,
+    });
+}
+
+function cancellationInput(): any {
+    const input = baseInput();
+    input.lifecycleSignals = [
+        lifecycleSignal(1, 'playing', START_MS + 5, recordedCancellationState({ currentTime: 0 })),
+        lifecycleSignal(2, 'timeupdate', PRE_SEEK_MS, recordedCancellationState({
+            currentTime: CANCELLATION_PRE_SEEK_TIME,
+        })),
+        lifecycleSignal(3, 'seeking', SEEK_MS + 2, recordedCancellationState({
+            readyState: 1,
+            currentTime: 0,
+            seeking: true,
+        })),
+        lifecycleSignal(4, 'seeked', SEEK_MS + 5, recordedCancellationState({ currentTime: 0 })),
+        lifecycleSignal(5, 'playing', POST_PLAY_MS + 3, recordedCancellationState({ currentTime: 0 })),
+        lifecycleSignal(6, 'timeupdate', POST_PLAY_MS + 80, recordedCancellationState({
+            currentTime: CANCELLATION_CONFIRMATION_TIME,
+        })),
+    ];
+    input.selected = {
+        preSeek: { signalSequence: 2 },
+        seeking: { signalSequence: 3 },
+        seeked: { signalSequence: 4 },
+        playing: { signalSequence: 5 },
+        confirmation: { signalSequence: 6 },
+    };
+    return input;
+}
+
 function capturedSequenceInput(): any {
     const input = baseInput();
     const capturedSeek = CAPTURED_SEQUENCE[1];
@@ -1667,5 +1715,152 @@ describe('verifyControlledNativeLoopCycle', () => {
             expect(result.reasons).toContain('provenance.events.clock');
             expect(input.provenance.snapshot.events.records).toHaveLength(5);
         }
+    });
+
+    test('accepts the recorded cancellation cycle with readyState 1 only at the zero seeking sample', () => {
+        const input = cancellationInput();
+        const before = JSON.stringify(input);
+        const result = verify(input);
+        expect(result.ok).toBe(true);
+        expect(input.lifecycleSignals.map((signal: any) => signal.mediaState.readyState))
+            .toEqual([4, 4, 1, 4, 4, 4]);
+        expect(input.lifecycleSignals[2].mediaState.currentTime).toBe(0);
+        expect(input.lifecycleSignals[2].mediaState.seeking).toBe(true);
+        expect(input.lifecycleSignals[2].signalSequence).toBe(3);
+        expect(input.lifecycleSignals[2].mediaState.buffered).toEqual([[-0.002667, 30]]);
+        expect(input.lifecycleSignals[2].mediaState.seekable).toEqual([[0, 30]]);
+        expect(input.lifecycleSignals[5].mediaState.currentTime).toBe(CANCELLATION_CONFIRMATION_TIME);
+        expect(result.evidence.lifecycle.seeking.signalSequence).toBe(3);
+        expect(result.evidence.lifecycle.confirmation.signalSequence).toBe(6);
+        const retained = result.evidence.rawReferences.lifecycleSignals;
+        expect(retained).toHaveLength(input.lifecycleSignals.length);
+        expect(retained[2].mediaState.readyState).toBe(1);
+        expect(retained[2].mediaState.buffered).toEqual([[-0.002667, 30]]);
+        expect(retained[2].mediaState.seekable).toEqual([[0, 30]]);
+        expect(JSON.stringify(input)).toBe(before);
+    });
+
+    test('retains readyState 4 acceptance at the selected seeking sample', () => {
+        const input = cancellationInput();
+        input.lifecycleSignals[2].mediaState.readyState = 4;
+        const before = JSON.stringify(input);
+        expect(verify(input).ok).toBe(true);
+        expect(JSON.stringify(input)).toBe(before);
+    });
+
+    test('rejects readyState 0 at the selected zero seeking sample', () => {
+        const input = cancellationInput();
+        input.lifecycleSignals[2].mediaState.readyState = 0;
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('selected.seeking.state');
+    });
+
+    test('rejects readiness other than 1 or 4 at the selected seeking sample', () => {
+        for (const readyState of [2, 3, 5]) {
+            const input = cancellationInput();
+            input.lifecycleSignals[2].mediaState.readyState = readyState;
+            const result = verify(input);
+            expect(result.ok).toBe(false);
+            expect(result.reasons).toContain('selected.seeking.state');
+        }
+    });
+
+    test('rejects readyState 1 at every selected stage other than seeking', () => {
+        const stages: Array<[number, string]> = [
+            [1, 'selected.preSeek.state'],
+            [3, 'selected.seeked.state'],
+            [4, 'selected.playing.state'],
+            [5, 'selected.confirmation.state'],
+        ];
+        for (const [index, reason] of stages) {
+            const input = cancellationInput();
+            input.lifecycleSignals[index].mediaState.readyState = 1;
+            const result = verify(input);
+            expect(result.ok).toBe(false);
+            expect(result.reasons).toContain(reason);
+        }
+    });
+
+    test('rejects a readyState 1 sample that is not the zero seeking stage', () => {
+        const advancing = cancellationInput();
+        advancing.lifecycleSignals[2].mediaState.currentTime = 0.5;
+        expect(verify(advancing).reasons).toContain('selected.seeking');
+
+        const notSeeking = cancellationInput();
+        notSeeking.lifecycleSignals[2].mediaState.seeking = false;
+        expect(verify(notSeeking).reasons).toContain('selected.seeking');
+
+        const wrongKind = cancellationInput();
+        wrongKind.lifecycleSignals[2].kind = 'seeked';
+        expect(verify(wrongKind).reasons).toContain('selected.seeking');
+    });
+
+    test('rejects missing or malformed duration metadata at the readyState 1 seeking sample', () => {
+        const missing = cancellationInput();
+        delete missing.lifecycleSignals[2].mediaState.duration;
+        expect(verify(missing).reasons).toContain('selected.seeking.state');
+
+        const cases: any[] = [null, 0, -1, Number.POSITIVE_INFINITY, Number.NaN, '30'];
+        for (const duration of cases) {
+            const input = cancellationInput();
+            input.lifecycleSignals[2].mediaState.duration = duration;
+            expect(verify(input).reasons).toContain('selected.seeking.state');
+        }
+    });
+
+    test('rejects read errors and partially annotated ranges at the readyState 1 seeking sample', () => {
+        const unreadable = cancellationInput();
+        unreadable.lifecycleSignals[2].mediaStateReadErrors = { buffered: 'read-threw' };
+        expect(verify(unreadable).reasons).toContain('lifecycle.mediaStateReadErrors');
+
+        for (const field of ['buffered', 'seekable']) {
+            const unavailable = cancellationInput();
+            unavailable.lifecycleSignals[2].mediaStateUnavailable = [field];
+            const result = verify(unavailable);
+            expect(result.ok).toBe(false);
+            expect(result.reasons).toContain('lifecycle.mediaStateUnavailable');
+        }
+    });
+
+    test('rejects a media element error at the readyState 1 seeking sample and at confirmation', () => {
+        const cases: Array<[number, string]> = [
+            [2, 'selected.seeking.state'],
+            [5, 'selected.confirmation.state'],
+        ];
+        for (const [index, reason] of cases) {
+            const input = cancellationInput();
+            input.lifecycleSignals[index].mediaState.mediaError = {
+                code: 2,
+                message: 'MEDIA_ERR_NETWORK',
+            };
+            const result = verify(input);
+            expect(result.ok).toBe(false);
+            expect(result.reasons).toContain(reason);
+        }
+    });
+
+    test('rejects interference and a failed continuation in the readyState 1 cycle', () => {
+        const waiting = cancellationInput();
+        waiting.lifecycleSignals.push(lifecycleSignal(
+            7,
+            'waiting',
+            SEEK_MS + 3,
+            recordedCancellationState({ readyState: 1, currentTime: 0, seeking: true }),
+        ));
+        expect(verify(waiting).reasons).toContain('selected.interference');
+
+        const duplicateSeeking = cancellationInput();
+        duplicateSeeking.lifecycleSignals.push(lifecycleSignal(
+            7,
+            'seeking',
+            SEEK_MS + 4,
+            recordedCancellationState({ readyState: 1, currentTime: 0, seeking: true }),
+        ));
+        expect(verify(duplicateSeeking).reasons).toContain('selected.seeking.ambiguity');
+
+        const stalled = cancellationInput();
+        stalled.lifecycleSignals[5].mediaState.currentTime = 0;
+        expect(verify(stalled).reasons).toContain('selected.confirmation');
     });
 });
