@@ -43,15 +43,19 @@
 //
 // Explicit controlled-QA contract extension: when no fresh zero start exists,
 // the most recent fresh DOM `playing` anchor may be a positive-position resume.
-// That separately labelled `observed-resume` mode additionally requires one
-// unique application play attempt with a successful recorded call return, one
-// unique native kPlay correlated inside the retained 20ms fence, both
-// application attempt and result leads inside that same 20ms fence, settled
-// prior pause/seek activity, uninterrupted observed progression to the same
-// fresh kEnded, unique zero seek, post-seek pipeline kPlaying and advancing
-// zero completion. It proves only the observed resume-to-end segment and reset;
-// it is not an entirely observed cycle, not interrupted-sound proof, and it
-// never substitutes kPlay for the post-seek pipeline kPlaying or DOM completion.
+// That separately labelled `observed-resume` mode additionally requires the DOM
+// anchor's recorded continuity link to identify exactly one application play
+// attempt sequence/epoch, a successful recorded call return for that exact
+// attempt, and one unique native kPlay aligned inside the retained 20ms fence
+// to that attempt AND to its recorded call return. The later DOM notification
+// may arrive well after the call return: WHATWG play() returns a promise and
+// queues `playing` asynchronously, so no call-to-notification latency bound is
+// claimed. The mode also requires settled prior pause/seek activity,
+// uninterrupted observed progression to the same fresh kEnded, unique zero
+// seek, post-seek pipeline kPlaying and advancing zero completion. It proves
+// only the observed resume-to-end segment and reset; it is not an entirely
+// observed cycle, not interrupted-sound proof, and it never substitutes kPlay
+// for the post-seek pipeline kPlaying or DOM completion.
 
 const PROFILE = 'awwv.controlled-native-media-loop-cycle.v1';
 const OBSERVED_RESUME_CLAIM = 'observed resume-to-end segment and reset; not an entirely observed cycle or uninterrupted sound';
@@ -1177,53 +1181,56 @@ function validateObservedResumeAnchor(start, selected) {
     }
 }
 
-// One unique, fresh, most-recent application play attempt with its recorded
-// successful call return. This is not a promise-settlement receipt: the
+// One exact application play attempt/result pair, identified by the later DOM
+// anchor's recorded continuity link rather than by timestamp proximity. The
 // recorded `resultType: 'object'` return of the wrapped play call is the only
-// application evidence here. Prior pause/seek activity must be settled before
-// the anchor, no pause/seek/play transition may sit between the play intent
-// and the DOM resume anchor, and both the application attempt and its recorded
-// result must lead the actual DOM playing anchor by no more than the retained
-// 20ms fence. Preserved event sequence decides whether a mutation intervenes
-// between the play intent and the anchor, so an ordered setter and play call
-// recorded in the same millisecond are not treated as a tie.
+// application result evidence here; it is not a promise-settlement receipt.
+// Prior pause/seek activity must be settled before the intent, no
+// pause/seek/play/reset/error transition may sit between the intent and the DOM
+// anchor or between the anchor and the end/reset confirmation, and the DOM
+// anchor must follow the recorded call return. There is deliberately no
+// application-call-to-DOM-notification latency bound; the measured delay is
+// retained in evidence only. Preserved event sequence decides whether a
+// mutation intervenes between the intent and the anchor, so an ordered setter
+// and play call recorded in the same millisecond are not treated as a tie.
 function validateObservedResumeProvenance(provenance, lifecycle) {
     const anchorMs = lifecycle.start.observedAtMs;
     const floorMs = lifecycle.selectionFloorMs;
     const selectedId = provenance.selectedId;
-    const mutationAttempts = provenance.events.filter((entry) => entry.event.kind === 'mutation-attempt'
-        && entry.event.id === selectedId);
-    const playAttempts = mutationAttempts.filter((entry) => entry.event.targetType === 'method'
-        && entry.event.name === 'play'
-        && entry.clocks.dateNow <= anchorMs);
-    if (playAttempts.length === 0) reject('resume.play.unique');
-    // The newest play intent before the DOM anchor is authoritative. Two play
-    // calls sharing that millisecond are genuinely ambiguous; a setter sharing
-    // it is not.
-    const latestPlayMs = Math.max(...playAttempts.map((entry) => entry.clocks.dateNow));
-    const latestPlays = playAttempts.filter((entry) => entry.clocks.dateNow === latestPlayMs);
-    if (latestPlays.length !== 1) reject('resume.play.unique');
-    const attempt = latestPlays[0];
+
+    // The DOM descriptor captured at record time carries the exact application
+    // play sequence/epoch. This link is authoritative; a missing, stale or
+    // forged link is rejected and never replaced by a nearest-time guess.
+    const anchorDescribe = lifecycle.start.signal.controlledProvenance;
+    const continuity = requirePlain(
+        anchorDescribe.provenance.continuity,
+        'resume.link.continuity',
+    );
+    const lastPlaySequence = requireInteger(continuity.lastPlaySequence, 'resume.link.sequence');
+    if (lastPlaySequence <= 0) reject('resume.link.sequence');
+    const lastPlayEpoch = requireInteger(continuity.lastPlayEpoch, 'resume.link.epoch');
+    if (lastPlayEpoch !== 1) reject('resume.link.epoch');
+
+    const linked = provenance.events.filter(
+        (entry) => entry.event.sequence === lastPlaySequence,
+    );
+    if (linked.length !== 1) reject('resume.link.sequence');
+    const attempt = linked[0];
+    if (attempt.event.kind !== 'mutation-attempt'
+        || attempt.event.id !== selectedId
+        || attempt.event.targetType !== 'method'
+        || attempt.event.name !== 'play') {
+        reject('resume.link.attempt');
+    }
     if (attempt.event.sourceEpoch !== 1) reject('resume.play.epoch');
+    if (attempt.event.sourceEpoch !== lastPlayEpoch) reject('resume.link.epoch');
     if (!(attempt.clocks.dateNow >= floorMs)) reject('resume.play.fresh');
     if (!(attempt.clocks.dateNow < anchorMs)) reject('resume.play.order');
 
-    // Preserved event sequence, not dateNow equality, decides whether any
-    // mutation attempt intervenes between the play intent and the anchor.
-    for (const entry of mutationAttempts) {
-        if (entry.event.sequence <= attempt.event.sequence) continue;
-        if (!(entry.clocks.dateNow <= anchorMs)) continue;
-        reject('resume.play.settled');
-    }
-
-    const attemptLeadMs = anchorMs - attempt.clocks.dateNow;
-    if (!(attemptLeadMs > 0 && attemptLeadMs <= CLOCK_FENCE_MS)) {
-        reject('resume.play.fence');
-    }
-
-    const resultEntry = provenance.events.find((entry) => entry.event.kind === 'mutation-result'
+    const resultEntries = provenance.events.filter((entry) => entry.event.kind === 'mutation-result'
         && entry.event.sequenceOfAttempt === attempt.event.sequence);
-    if (!resultEntry) reject('resume.play.result');
+    if (resultEntries.length !== 1) reject('resume.play.result');
+    const resultEntry = resultEntries[0];
     const result = resultEntry.event;
     if (result.id !== selectedId
         || result.sourceEpoch !== 1
@@ -1233,13 +1240,39 @@ function validateObservedResumeProvenance(provenance, lifecycle) {
         || result.resultType !== 'object') {
         reject('resume.play.result');
     }
-    if (!(resultEntry.clocks.dateNow >= attempt.clocks.dateNow)
-        || !(resultEntry.clocks.dateNow <= anchorMs)) {
+    if (!(resultEntry.clocks.dateNow >= attempt.clocks.dateNow)) {
         reject('resume.play.result');
     }
-    const resultLeadMs = anchorMs - resultEntry.clocks.dateNow;
-    if (!(resultLeadMs >= 0 && resultLeadMs <= CLOCK_FENCE_MS)) {
-        reject('resume.play.fence');
+    // The DOM playing notification must follow the recorded call return. No
+    // upper bound is applied to this measured delay.
+    if (!(resultEntry.clocks.dateNow <= anchorMs)) reject('resume.play.result');
+
+    // Another application play attempt that could compete for the same exact
+    // linked intent is genuine ambiguity. Older settled attempts outside the
+    // fence remain prior history.
+    for (const entry of provenance.events) {
+        const event = entry.event;
+        if (event.kind !== 'mutation-attempt') continue;
+        if (event.id !== selectedId) continue;
+        if (event.sourceEpoch !== 1) continue;
+        if (event.targetType !== 'method' || event.name !== 'play') continue;
+        if (event.sequence === attempt.event.sequence) continue;
+        if (!(entry.clocks.dateNow >= floorMs)) continue;
+        if (!(entry.clocks.dateNow <= anchorMs)) continue;
+        if (Math.abs(entry.clocks.dateNow - attempt.clocks.dateNow) <= CLOCK_FENCE_MS) {
+            reject('resume.play.unique');
+        }
+    }
+
+    // Preserved event sequence, not dateNow equality, decides whether any
+    // selected-object mutation attempt intervenes between the linked intent and
+    // the DOM anchor. The interval is not bounded by the 20ms fence.
+    for (const entry of provenance.events) {
+        const event = entry.event;
+        if (event.kind !== 'mutation-attempt' || event.id !== selectedId) continue;
+        if (event.sequence <= attempt.event.sequence) continue;
+        if (!(entry.clocks.dateNow <= anchorMs)) continue;
+        reject('resume.play.settled');
     }
 
     for (const entry of lifecycle.signals) {
@@ -1251,6 +1284,26 @@ function validateObservedResumeProvenance(provenance, lifecycle) {
             continue;
         }
         if (RESUME_SETTLED_KINDS.has(entry.signal.kind)) reject('resume.play.settled');
+    }
+
+    // No extra pause/play/seek/load/reset/error transition may sit between the
+    // resume anchor and the end/reset confirmation. The selected zero-seek
+    // samples themselves remain the only expected transitions there.
+    const confirmationMs = lifecycle.selected.confirmation.observedAtMs;
+    const selectedSequences = new Set([
+        lifecycle.selected.preSeek.signalSequence,
+        lifecycle.selected.seeking.signalSequence,
+        lifecycle.selected.seeked.signalSequence,
+        lifecycle.selected.playing.signalSequence,
+        lifecycle.selected.confirmation.signalSequence,
+    ]);
+    for (const entry of lifecycle.signals) {
+        if (entry.signal.elementId !== lifecycle.qaElementId) continue;
+        if (entry.signal.sourceEpoch !== lifecycle.qaSourceEpoch) continue;
+        if (entry.signal.url !== provenance.source) continue;
+        if (!(entry.observedAtMs > anchorMs && entry.observedAtMs < confirmationMs)) continue;
+        if (selectedSequences.has(entry.signalSequence)) continue;
+        if (RESUME_SETTLED_KINDS.has(entry.signal.kind)) reject('resume.after.settled');
     }
 
     lifecycle.resume = {
@@ -1491,7 +1544,7 @@ function projectMediaEvents(events) {
     return sorted;
 }
 
-function correlateCycle(mediaResult, lifecycle, binding, projection) {
+function correlateCycle(mediaResult, lifecycle, binding, projection, provenance) {
     const { player } = mediaResult;
     const sorted = projectMediaEvents(player.events);
     const selected = lifecycle.selected;
@@ -1515,15 +1568,35 @@ function correlateCycle(mediaResult, lifecycle, binding, projection) {
     let start;
     let resumeNativePlaying = null;
     if (lifecycle.startMode === 'observed-resume') {
-        // Native kPlay is resume-intent evidence only. It is correlated against
-        // the DOM resume anchor inside the unchanged 20ms fence and never
-        // replaces the post-seek pipeline kPlaying or the DOM zero completion.
+        // Native kPlay is resume-intent evidence only. It is matched to the
+        // exact continuity-linked application attempt AND to that attempt's
+        // recorded call return, each inside the unchanged 20ms fence. The DOM
+        // playing notification may arrive far later and is deliberately not
+        // matched to kPlay by latency.
+        const resume = lifecycle.resume;
+        if (!resume) reject('media.cycle.resume.play.unique');
         const playCandidates = sorted.filter((event) => event.role === 'resume-play'
             && event.projectedAtMs >= selectionFloorMs
             && event.projectedAtMs <= lifecycle.start.observedAtMs
-            && Math.abs(event.projectedAtMs - lifecycle.start.observedAtMs) <= CLOCK_FENCE_MS);
+            && Math.abs(event.projectedAtMs - resume.attemptMs) <= CLOCK_FENCE_MS
+            && Math.abs(event.projectedAtMs - resume.resultMs) <= CLOCK_FENCE_MS);
         if (playCandidates.length !== 1) reject('media.cycle.resume.play.unique');
         start = playCandidates[0];
+        // A competing application play attempt inside the same native fence
+        // would make the exact link non-unique even though timestamps happen to
+        // select one native event. Reject it explicitly.
+        for (const entry of provenance.events) {
+            const event = entry.event;
+            if (event.kind !== 'mutation-attempt') continue;
+            if (event.id !== provenance.selectedId) continue;
+            if (event.sourceEpoch !== 1) continue;
+            if (event.targetType !== 'method' || event.name !== 'play') continue;
+            if (event.sequence === resume.attempt.event.sequence) continue;
+            if (!(entry.clocks.dateNow <= lifecycle.start.observedAtMs)) continue;
+            if (Math.abs(entry.clocks.dateNow - start.projectedAtMs) <= CLOCK_FENCE_MS) {
+                reject('media.cycle.resume.play.ambiguous');
+            }
+        }
         // At most one explained resume-side pipeline kPlaying may accompany the
         // kPlay inside the same retained 20ms fence. It is not required and it
         // is never the post-seek anchor.
@@ -1824,6 +1897,11 @@ function buildEvidence(input, binding, projection, provenance, sentinel, media, 
             anchorDeltaMs: lifecycle.start.observedAtMs - cycle.start.projectedAtMs,
             attemptLeadMs: lifecycle.start.observedAtMs - lifecycle.resume.attemptMs,
             resultLeadMs: lifecycle.start.observedAtMs - lifecycle.resume.resultMs,
+            notificationDelayMs: lifecycle.start.observedAtMs - lifecycle.resume.resultMs,
+            nativeToAttemptMs: cycle.start.projectedAtMs - lifecycle.resume.attemptMs,
+            nativeToResultMs: cycle.start.projectedAtMs - lifecycle.resume.resultMs,
+            attemptToResultMs: lifecycle.resume.resultMs - lifecycle.resume.attemptMs,
+            appNativeFenceMs: CLOCK_FENCE_MS,
             selectionFloorMs: lifecycle.selectionFloorMs,
         };
     }
@@ -1859,7 +1937,7 @@ function verify(input) {
     if (lifecycle.startMode === 'observed-resume') {
         validateObservedResumeProvenance(provenance, lifecycle);
     }
-    const cycle = correlateCycle(media, lifecycle, binding, projection);
+    const cycle = correlateCycle(media, lifecycle, binding, projection, provenance);
     validateInterference(provenance, lifecycle);
     const evidence = buildEvidence(
         input,

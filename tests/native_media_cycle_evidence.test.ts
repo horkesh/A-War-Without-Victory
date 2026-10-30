@@ -2234,6 +2234,37 @@ function resumeInput(options: { orderedSameMsSetterBeforePlay?: boolean } = {}):
         addMutationAt(input, 'loop', RESUME_PLAY_MS);
     }
     addMutationAt(input, 'play', RESUME_PLAY_MS, 'success', 'object');
+    linkResumeAnchor(input);
+    return input;
+}
+
+// The DOM descriptor records the exact application play sequence/epoch at
+// record time. The resume anchor must carry that link; timestamps alone are
+// never used to guess which application play call the anchor belongs to.
+function linkResumeAnchor(input: any): any {
+    const pair = resumePlayPair(input);
+    const anchor = resumeAnchor(input);
+    anchor.controlledProvenance.provenance.continuity.lastPlaySequence = pair.attempt.sequence;
+    anchor.controlledProvenance.provenance.continuity.lastPlayEpoch = pair.attempt.sourceEpoch;
+    return pair;
+}
+
+function setResumeTiming(
+    input: any,
+    attemptMs: number,
+    resultMs: number,
+    nativeMs: number,
+): any {
+    const pair = resumePlayPair(input);
+    pair.attempt.at = at(attemptMs);
+    pair.result.at = at(resultMs);
+    nativeKPlay(input).timestamp = mediaTimestamp(nativeMs);
+    return pair;
+}
+
+function timingInput(attemptMs: number, resultMs: number, nativeMs: number): any {
+    const input = resumeInput();
+    setResumeTiming(input, attemptMs, resultMs, nativeMs);
     return input;
 }
 
@@ -2427,35 +2458,163 @@ describe('verifyControlledNativeLoopCycle observed-resume start mode', () => {
         const idPair = resumePlayPair(wrongId);
         idPair.attempt.id = 'media:other';
         idPair.result.id = 'media:other';
-        expectResumeRejected(wrongId, 'resume.play.settled');
+        expectResumeRejected(wrongId, 'resume.link.attempt');
     });
 
-    test('accepts application play leads at the exact 20ms DOM fence boundary and rejects just outside it', () => {
-        const boundary = resumeInput();
-        const boundaryPair = resumePlayPair(boundary);
-        boundaryPair.attempt.at = at(RESUME_MS - 20);
-        boundaryPair.result.at = at(RESUME_MS - 20);
-        const result = verify(boundary);
+    test('accepts a 91ms delayed DOM playing notification with the exact linked sequence and native 10.876ms before the app intent', () => {
+        const input = resumeInput();
+        const pair = resumePlayPair(input);
+        const attemptMs = RESUME_MS - 91;
+        setResumeTiming(input, attemptMs, attemptMs, attemptMs - 10.876);
+        const before = JSON.stringify(input);
+        const result = verify(input);
         expect(result.ok).toBe(true);
-        expect(result.evidence.start.attemptLeadMs).toBeCloseTo(20, 6);
-        expect(result.evidence.start.resultLeadMs).toBeCloseTo(20, 6);
+        expect(result.evidence.start.playAttempt).toMatchObject({
+            sequence: pair.attempt.sequence,
+            sourceEpoch: 1,
+        });
+        expect(result.evidence.start.playResult).toMatchObject({
+            sequence: pair.result.sequence,
+            sequenceOfAttempt: pair.attempt.sequence,
+            outcome: 'success',
+            resultType: 'object',
+        });
+        expect(result.evidence.start.notificationDelayMs).toBeCloseTo(91, 6);
+        expect(result.evidence.start.nativeToAttemptMs).toBeCloseTo(-10.876, 3);
+        expect(result.evidence.start.nativeToResultMs).toBeCloseTo(-10.876, 3);
+        expect(result.evidence.start.anchorDeltaMs).toBeCloseTo(101.876, 3);
+        expect(JSON.stringify(input)).toBe(before);
+        expect(JSON.stringify(verify(input))).toBe(JSON.stringify(result));
+    });
 
-        const attemptOutside = resumeInput();
-        const attemptPair = resumePlayPair(attemptOutside);
-        attemptPair.attempt.at = at(RESUME_MS - 20.001);
-        attemptPair.result.at = at(RESUME_MS - 20.001);
-        expectResumeRejected(attemptOutside, 'resume.play.fence');
+    test('accepts native kPlay exactly 20ms from the app attempt and rejects just outside while DOM delay varies', () => {
+        for (const attemptLeadMs of [91, 240]) {
+            const attemptMs = RESUME_MS - attemptLeadMs;
+            const input = timingInput(attemptMs, attemptMs + 5, attemptMs + 20);
+            const result = verify(input);
+            expect(result.ok).toBe(true);
+            expect(result.evidence.start.nativeToAttemptMs).toBeCloseTo(20, 6);
+            expect(result.evidence.start.nativeToResultMs).toBeCloseTo(15, 6);
+            expect(result.evidence.start.notificationDelayMs).toBeCloseTo(attemptLeadMs - 5, 6);
+        }
+        const attemptMs = RESUME_MS - 91;
+        const outside = timingInput(attemptMs, attemptMs + 5, attemptMs + 20.001);
+        expectResumeRejected(outside, 'media.cycle.resume.play.unique');
+    });
 
-        const attemptLate = resumeInput();
-        const latePair = resumePlayPair(attemptLate);
-        latePair.attempt.at = at(RESUME_MS);
-        latePair.result.at = at(RESUME_MS);
-        expectResumeRejected(attemptLate, 'resume.play.order');
+    test('accepts native kPlay exactly 20ms from the recorded call result and rejects just outside while DOM delay varies', () => {
+        for (const notificationDelayMs of [10, 91, 240]) {
+            const resultMs = RESUME_MS - notificationDelayMs;
+            const input = timingInput(resultMs - 5, resultMs, resultMs - 20);
+            const result = verify(input);
+            expect(result.ok).toBe(true);
+            expect(result.evidence.start.nativeToResultMs).toBeCloseTo(-20, 6);
+            expect(result.evidence.start.nativeToAttemptMs).toBeCloseTo(-15, 6);
+            expect(result.evidence.start.notificationDelayMs).toBeCloseTo(notificationDelayMs, 6);
+        }
+        const resultMs = RESUME_MS - 91;
+        const outside = timingInput(resultMs - 5, resultMs, resultMs - 20.001);
+        expectResumeRejected(outside, 'media.cycle.resume.play.unique');
+    });
 
-        const resultLate = resumeInput();
-        const resultPair = resumePlayPair(resultLate);
-        resultPair.result.at = at(RESUME_MS + 1);
-        expectResumeRejected(resultLate, 'resume.play.result');
+    test('rejects missing, stale, wrong-sequence and wrong-epoch DOM continuity links without timestamp fallback', () => {
+        const missing = resumeInput();
+        delete resumeAnchor(missing).controlledProvenance.provenance.continuity;
+        expectResumeRejected(missing, 'resume.link.continuity');
+
+        const stale = resumeInput();
+        resumeAnchor(stale).controlledProvenance.provenance.continuity.lastPlaySequence = 3;
+        expectResumeRejected(stale, 'resume.play.settled');
+
+        const wrongSequence = resumeInput();
+        resumeAnchor(wrongSequence).controlledProvenance.provenance.continuity.lastPlaySequence = 999;
+        expectResumeRejected(wrongSequence, 'resume.link.sequence');
+
+        const wrongEpoch = resumeInput();
+        resumeAnchor(wrongEpoch).controlledProvenance.provenance.continuity.lastPlayEpoch = 2;
+        expectResumeRejected(wrongEpoch, 'resume.link.epoch');
+    });
+
+    test('rejects mutation, pause, seek, reset and error during a delayed notification interval', () => {
+        const attemptMs = RESUME_MS - 91;
+        const mutation = resumeInput();
+        setResumeTiming(mutation, attemptMs, attemptMs, attemptMs - 10.876);
+        addMutationAt(mutation, 'pause', attemptMs + 45);
+        expectResumeRejected(mutation, 'resume.play.settled');
+
+        for (const kind of ['pause', 'seeking', 'seeked', 'error']) {
+            const input = resumeInput();
+            setResumeTiming(input, attemptMs, attemptMs, attemptMs - 10.876);
+            const sequence = Math.max(...input.lifecycleSignals.map(
+                (signal: any) => signal.signalSequence,
+            )) + 1;
+            input.lifecycleSignals.push(lifecycleSignal(
+                sequence,
+                kind,
+                attemptMs + 45,
+                recordedCancellationState({
+                    currentTime: RESUME_TIME,
+                    ...(kind === 'pause' ? { paused: true } : {}),
+                    ...(kind === 'seeking' ? { seeking: true } : {}),
+                }),
+            ));
+            expectResumeRejected(input, 'resume.play.settled');
+        }
+
+        const reset = resumeInput();
+        setResumeTiming(reset, attemptMs, attemptMs, attemptMs - 10.876);
+        const resetEvents = reset.provenance.snapshot.events.records;
+        resetEvents.push({
+            sequence: Math.max(...resetEvents.map((event: any) => event.sequence)) + 1,
+            kind: 'source-epoch',
+            at: at(attemptMs + 45),
+            id: 'media:1',
+            cause: 'load',
+            previous: 1,
+            sourceEpoch: 2,
+            source: AMBIENT,
+        });
+        reset.provenance.snapshot.events.count = resetEvents.length;
+        expectResumeRejected(reset, 'provenance.source-reset');
+    });
+
+    test('rejects a pause between the resume anchor and the end/reset confirmation', () => {
+        const input = resumeInput();
+        const sequence = Math.max(...input.lifecycleSignals.map(
+            (signal: any) => signal.signalSequence,
+        )) + 1;
+        input.lifecycleSignals.push(lifecycleSignal(
+            sequence,
+            'pause',
+            RESUME_MS + 500,
+            recordedCancellationState({ currentTime: RESUME_TIME + 0.5, paused: true }),
+        ));
+        expectResumeRejected(input, 'resume.after.settled');
+    });
+
+    test('rejects wrong identity, metadata, coverage and duration on a delayed-notification anchor', () => {
+        const duration = resumeInput();
+        setResumeTiming(duration, RESUME_MS - 91, RESUME_MS - 91, RESUME_MS - 101.876);
+        resumeAnchor(duration).mediaState.duration = RESUME_DURATION + 0.001;
+        resumeAnchor(duration).mediaState.buffered = [[0, RESUME_DURATION + 0.001]];
+        resumeAnchor(duration).mediaState.seekable = [[0, RESUME_DURATION + 0.001]];
+        expectResumeRejected(duration, 'selected.start.duration');
+
+        const coverage = resumeInput();
+        setResumeTiming(coverage, RESUME_MS - 91, RESUME_MS - 91, RESUME_MS - 101.876);
+        resumeAnchor(coverage).mediaState.buffered = [[0, 5]];
+        expectResumeRejected(coverage, 'selected.start.buffered');
+
+        const identity = resumeInput();
+        setResumeTiming(identity, RESUME_MS - 91, RESUME_MS - 91, RESUME_MS - 101.876);
+        resumeAnchor(identity).controlledProvenance.element.id = 'media:other';
+        expectResumeRejected(identity, 'lifecycle.controlledProvenance.identity');
+    });
+
+    test('rejects DOM playing before the recorded call return', () => {
+        const input = resumeInput();
+        resumePlayPair(input).result.at = at(RESUME_MS + 1);
+        expectResumeRejected(input, 'resume.play.result');
     });
 
     test('accepts an ordered same-millisecond loop setter before play and rejects a later intervening mutation', () => {
@@ -2487,16 +2646,16 @@ describe('verifyControlledNativeLoopCycle observed-resume start mode', () => {
         const before = JSON.stringify(missing);
         const result = verify(missing);
         expect(result.ok).toBe(false);
-        expect(result.reasons).toContain('resume.play.settled');
+        expect(result.reasons).toContain('resume.link.attempt');
         expect(JSON.stringify(missing)).toBe(before);
 
         const noPlay = resumeInput();
         removeMutationPair(noPlay, resumePlayPair(noPlay));
         removeMutationPair(noPlay, resumePlayPair(noPlay));
-        expectResumeRejected(noPlay, 'resume.play.unique');
+        expectResumeRejected(noPlay, 'resume.link.sequence');
     });
 
-    test('rejects a missing, delayed or ambiguous native kPlay anchor', () => {
+    test('rejects a missing, outside-fence or ambiguous native kPlay anchor', () => {
         const missing = resumeInput();
         const events = mediaPlayerEvents(missing);
         const index = events.indexOf(nativeKPlay(missing));
@@ -2504,7 +2663,7 @@ describe('verifyControlledNativeLoopCycle observed-resume start mode', () => {
         expectResumeRejected(missing, 'media.cycle.resume.play.unique');
 
         const delayed = resumeInput();
-        nativeKPlay(delayed).timestamp = mediaTimestamp(RESUME_MS - 25);
+        nativeKPlay(delayed).timestamp = mediaTimestamp(RESUME_MS - 35);
         expectResumeRejected(delayed, 'media.cycle.resume.play.unique');
 
         const ambiguous = resumeInput();
