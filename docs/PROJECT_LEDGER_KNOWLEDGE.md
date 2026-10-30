@@ -1,3 +1,7 @@
+## 2026-10-30 - Continuous ambient requests need command idempotence
+
+A repeated surface or gesture request may target an element already playing. Update volume without reissuing loop/play only after successful playback and explicit healthy state. Keep pending/rejected retries and stale-promise identity controls; paused=false alone is insufficient. This reduces redundant commands without exempting actual playback mutations from native QA. Mock tests prove command semantics; package/browser evidence remains separate. See [ambient reentry](PROJECT_LEDGER.md#2026-10-30---idempotent-continuous-ambient-playback-requests).
+
 ## 2026-10-30 — Compare native QA clocks in one declared domain
 
 A wall-clock/monotonic offset recorded at player creation can drift during a long native route. Capture actual renderer clock pairs and compare through one fixed declared anchor; use the supported request timestamp basis for native events. Keep historical generation checks, raw collector windows and raw timestamps separate. A constructor wrapper and native media-log creation are different stages, so their separation is not an equivalent-stage latency bound. Missing clock evidence cannot be reconstructed into an old capture. These are controlled QA observations, not simulation timestamps or gap-free sound proof. See [clock-domain closure](PROJECT_LEDGER.md#2026-10-30--controlled-native-media-clock-domains).
