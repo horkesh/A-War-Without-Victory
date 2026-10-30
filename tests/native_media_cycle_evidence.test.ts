@@ -72,6 +72,8 @@ const ENDED_MS = LOOP_BASE_MS + 2100;
 const SEEK_MS = LOOP_BASE_MS + 2102;
 const POST_PLAY_MS = LOOP_BASE_MS + 2114;
 const CONFIRMATION_MS = POST_PLAY_MS + 100;
+const EARLIER_START_MS = START_MS - 400;
+const EARLIER_ENDED_MS = START_MS - 200;
 const REQUEST_MS = CREATED_MS + 30007;
 const PROTOCOL_REQUEST_S = (REQUEST_MS - MEDIA_OFFSET_MS) / 1000;
 const WINDOW_OPEN = CREATED_MS + 30000;
@@ -721,6 +723,57 @@ function appendCapturedCompletedLoop(
     );
 }
 
+function completedEarlierLoopInput(): any {
+    const input = baseInput();
+    for (const signal of input.lifecycleSignals) signal.signalSequence += 2;
+    input.lifecycleSignals.unshift(
+        lifecycleSignal(1, 'playing', EARLIER_START_MS, lifecycleState({ currentTime: 0 })),
+        lifecycleSignal(2, 'ended', EARLIER_ENDED_MS, lifecycleState({
+            currentTime: 10,
+            ended: true,
+            paused: true,
+        })),
+    );
+    input.selected = {
+        preSeek: { signalSequence: 4 },
+        seeking: { signalSequence: 5 },
+        seeked: { signalSequence: 6 },
+        playing: { signalSequence: 7 },
+        confirmation: { signalSequence: 8 },
+    };
+    appendCapturedCompletedLoop(input, mediaTimestamp(EARLIER_START_MS), 0.2);
+    return input;
+}
+
+function withoutFreshStarts(input: any): void {
+    input.lifecycleSignals = input.lifecycleSignals.filter(
+        (signal: any) => !(signal.kind === 'playing'
+            && signal.mediaState.currentTime === 0
+            && signal.observedAtMs < PRE_SEEK_MS),
+    );
+}
+
+function appendForeignPlayingStart(
+    input: any,
+    options: { elementId: string; sourceEpoch: number },
+): void {
+    const sequence = Math.max(...input.lifecycleSignals.map((signal: any) => signal.signalSequence)) + 1;
+    const foreign = lifecycleSignal(
+        sequence,
+        'playing',
+        START_MS + 10,
+        lifecycleState({ currentTime: 0 }),
+    );
+    foreign.url = AMBIENT_OTHER;
+    foreign.sourceEpoch = options.sourceEpoch;
+    foreign.elementId = options.elementId;
+    foreign.controlledProvenance = selectedDescribe();
+    foreign.controlledProvenance.element.id = 'media:foreign';
+    foreign.controlledProvenance.element.source = AMBIENT_OTHER;
+    foreign.controlledProvenance.provenance.attributes.src = AMBIENT_OTHER;
+    input.lifecycleSignals.push(foreign);
+}
+
 function clone<T>(value: T): T {
     return structuredClone(value);
 }
@@ -935,6 +988,87 @@ describe('verifyControlledNativeLoopCycle', () => {
         expect(captured.filter((event: any) => event.value.event === 'kPipelineStateChange'
             && event.value.pipeline_state === 'kSeeking')).toHaveLength(3);
         expect(result.evidence.media.seekReference.timestamp).toBe(CAPTURED_SEQUENCE[1].timestamp);
+    });
+
+    test('selects the unique latest start after a completed earlier lifecycle and native loop', () => {
+        const input = completedEarlierLoopInput();
+        const before = JSON.stringify(input);
+        const result = verify(input);
+        expect(result.ok).toBe(true);
+        expect(result.evidence.lifecycle.start).toEqual({
+            signalSequence: 3,
+            observedAtMs: START_MS + 5,
+        });
+        expect(result.evidence.media.startReference).toEqual({
+            recordSequence: 3,
+            recordIndex: 2,
+            eventIndex: 5,
+            timestamp: mediaTimestamp(START_MS),
+        });
+        expect(result.evidence.lifecycle.preSeek.signalSequence).toBe(4);
+        expect(result.evidence.lifecycle.confirmation.signalSequence).toBe(8);
+        expect(JSON.stringify(input)).toBe(before);
+    });
+
+    test('rejects two eligible latest starts sharing one timestamp', () => {
+        const input = completedEarlierLoopInput();
+        input.lifecycleSignals[0].observedAtMs = input.lifecycleSignals[2].observedAtMs;
+        const before = JSON.stringify(input);
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('selected.start.unique');
+        expect(JSON.stringify(input)).toBe(before);
+    });
+
+    test('rejects a selected cycle with no fresh earlier playing start', () => {
+        const input = completedEarlierLoopInput();
+        withoutFreshStarts(input);
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('selected.start.unique');
+    });
+
+    test('rejects a latest playing candidate for a different QA element', () => {
+        const input = completedEarlierLoopInput();
+        withoutFreshStarts(input);
+        appendForeignPlayingStart(input, {
+            elementId: 'qa-ambient-foreign',
+            sourceEpoch: 1,
+        });
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('selected.start.unique');
+    });
+
+    test('rejects a latest playing candidate from another source epoch', () => {
+        const input = completedEarlierLoopInput();
+        withoutFreshStarts(input);
+        appendForeignPlayingStart(input, {
+            elementId: QA_ELEMENT_ID,
+            sourceEpoch: 2,
+        });
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('selected.start.unique');
+    });
+
+    test('rejects a prior playing start older than the fresh collection floor', () => {
+        const input = completedEarlierLoopInput();
+        input.lifecycleSignals = input.lifecycleSignals.filter(
+            (signal: any) => signal.signalSequence !== 3,
+        );
+        input.lifecycleSignals[0].observedAtMs = WINDOW_OPEN - 100;
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('selected.start.unique');
+    });
+
+    test('rejects an additional native playing start beside the selected lifecycle start', () => {
+        const input = completedEarlierLoopInput();
+        mediaPlayerEvents(input).push(pipelineState('kPlaying', START_MS + 2));
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('media.cycle.start.unique');
     });
 
     test('same result when the replay array is reordered or delivery records are batched', () => {

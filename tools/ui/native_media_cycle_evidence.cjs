@@ -1157,12 +1157,16 @@ function validateLifecycleAndSelect(input, binding, provenance, projection) {
         }
     }
     const startCandidates = signals.filter((entry) => entry.signal.elementId === qaElementId
+        && entry.signal.sourceEpoch === qaSourceEpoch
         && entry.signal.kind === 'playing'
         && entry.state.currentTime === 0
         && entry.observedAtMs < selected.preSeek.observedAtMs
         && entry.observedAtMs >= selectionFloorMs);
-    if (startCandidates.length !== 1) reject('selected.start.unique');
-    const start = startCandidates[0];
+    if (startCandidates.length === 0) reject('selected.start.unique');
+    const latestStartMs = Math.max(...startCandidates.map((entry) => entry.observedAtMs));
+    const latestStarts = startCandidates.filter((entry) => entry.observedAtMs === latestStartMs);
+    if (latestStarts.length !== 1) reject('selected.start.unique');
+    const start = latestStarts[0];
     if (start.observedAtMs >= selected.preSeek.observedAtMs) reject('selected.start.order');
 
     return { signals, bySequence, selected, start, qaElementId, qaSourceEpoch };
