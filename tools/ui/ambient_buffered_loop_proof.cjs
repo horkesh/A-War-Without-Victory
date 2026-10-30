@@ -10,6 +10,7 @@
 
 const fs = require('node:fs');
 const crypto = require('node:crypto');
+const { verifyControlledNativeLoopCycle } = require('./native_media_cycle_evidence.cjs');
 
 const ALLOWLIST = 'ambient-buffered-loop-proof-v1';
 // Separately named acceptance for cancellations whose cached 206 response
@@ -17,6 +18,11 @@ const ALLOWLIST = 'ambient-buffered-loop-proof-v1';
 // expected cached-loop cancellation is response-correlated; it never claims a
 // completed transfer or gap-free audio.
 const ALLOWLIST_CACHED_RESPONSE = 'ambient-buffered-cached-response-proof-v2';
+// Distinct acceptance for a loop whose natural wrap is proven by the real
+// controlled-native cycle correlator rather than the sampled 100ms heuristic.
+// The verifier evidence is embedded; the legacy completion path and criterion
+// are retained separately and are never relabelled.
+const CONTROLLED_CYCLE_CRITERION = 'ambient-buffered-controlled-native-cycle-proof-v3';
 const FAST_PATH = 'fast-100ms';
 const SLOW_CACHED_RESPONSE_PATH = 'slow-cached-response';
 const COLLECTOR_SCHEMA = 'awwv.r8-warroom.cdp-network-collection.v3';
@@ -511,7 +517,60 @@ function coverageOk(ranges, duration) {
     return previousEnd !== null && previousEnd >= duration;
 }
 
-function buildProof(rawFailure, chain, signals, sidecar, clockProjection) {
+// Build the correlator's lifecycle view from the checker's already-selected
+// actual samples. The caller's cycleInput never supplies lifecycle samples,
+// selected references or a clock projection. Controls are taken only from the
+// exact per-record read that the controlled QA profile captured alongside the
+// object description; a missing, errored, non-boolean or true read stays raw.
+function controlledLifecycleSignals(assetSignals) {
+    const signals = [];
+    for (const signal of assetSignals) {
+        if (!isPlainObject(signal) || !isPlainObject(signal.mediaState)) return null;
+        const read = signal.controlledControlsRead;
+        if (!isPlainObject(read) || read.error !== null || typeof read.value !== 'boolean') return null;
+        if (read.value !== false) return null;
+        if (Object.prototype.hasOwnProperty.call(signal.mediaState, 'controls')) {
+            if (typeof signal.mediaState.controls !== 'boolean'
+                || signal.mediaState.controls !== read.value) return null;
+            signals.push(copyJson(signal));
+        } else {
+            // The exact recorded read is injected onto a clone only; raw input
+            // signals are never mutated and no attribute absence is inferred.
+            const copy = copyJson(signal);
+            copy.mediaState.controls = read.value;
+            signals.push(copy);
+        }
+    }
+    return signals;
+}
+
+function verifyControlledCycleEvidence(controlledCycle, assetSignals, clockProjection, selected) {
+    if (!isPlainObject(controlledCycle)) return null;
+    for (const key of ['binding', 'provenance', 'sentinel', 'media']) {
+        if (!Object.prototype.hasOwnProperty.call(controlledCycle, key)) return null;
+    }
+    const lifecycleSignals = controlledLifecycleSignals(assetSignals);
+    if (!lifecycleSignals) return null;
+    const result = verifyControlledNativeLoopCycle({
+        binding: controlledCycle.binding,
+        provenance: controlledCycle.provenance,
+        sentinel: controlledCycle.sentinel,
+        media: controlledCycle.media,
+        lifecycleSignals,
+        selected: {
+            preSeek: { signalSequence: selected.preSeek.signalSequence },
+            seeking: { signalSequence: selected.seeking.signalSequence },
+            seeked: { signalSequence: selected.seeked.signalSequence },
+            playing: { signalSequence: selected.playing.signalSequence },
+            confirmation: { signalSequence: selected.confirmation.signalSequence },
+        },
+        clockProjection,
+    });
+    if (!result || result.ok !== true || !isPlainObject(result.evidence)) return null;
+    return result.evidence;
+}
+
+function buildProof(rawFailure, chain, signals, sidecar, clockProjection, controlledCycle) {
     const asset = parseAssetUrl(rawFailure.url);
     if (!asset) return null;
     const origin = asset.url.origin;
@@ -666,7 +725,23 @@ function buildProof(rawFailure, chain, signals, sidecar, clockProjection) {
     const elapsedToSeekS = (seeking.observedAtMs - preSeek.observedAtMs) / 1000;
     if (!isFiniteNumber(elapsedToSeekS) || elapsedToSeekS < 0) return null;
     if (confirmation.mediaState.currentTime >= duration) return null;
-    if (Math.abs(elapsedToSeekS - predictedRemainingS) > WRAP_PREDICTION_S) return null;
+
+    let controlledNativeCycleEvidence = null;
+    if (controlledCycle !== null) {
+        // A supplied controlled profile replaces only the sampled-time wrap
+        // heuristic. The real pure correlator must pass on the checker-bound
+        // lifecycle samples; invalid controlled evidence stays raw even when
+        // the legacy heuristic would have passed. All later guards still run.
+        controlledNativeCycleEvidence = verifyControlledCycleEvidence(
+            controlledCycle,
+            assetSignals,
+            clockProjection,
+            { preSeek, seeking, seeked, playing, confirmation },
+        );
+        if (!controlledNativeCycleEvidence) return null;
+    } else if (Math.abs(elapsedToSeekS - predictedRemainingS) > WRAP_PREDICTION_S) {
+        return null;
+    }
 
     // DOM seeking and the CDP request wall clock are both browser-domain
     // epochs, so their 20ms correlation stays meaningful. The Node delivery
@@ -742,8 +817,17 @@ function buildProof(rawFailure, chain, signals, sidecar, clockProjection) {
         // The acceptance path and allowlist are explicit, so a slow cached
         // response can never be relabelled as the legacy fast proof.
         path: acceptancePath,
-        criterion: allowlist,
+        criterion: controlledNativeCycleEvidence ? CONTROLLED_CYCLE_CRITERION : allowlist,
+        legacyCriterion: allowlist,
         allowlist,
+        controlledNativeCycle: controlledNativeCycleEvidence
+            ? {
+                criterion: CONTROLLED_CYCLE_CRITERION,
+                legacyCriterion: allowlist,
+                completionPath: acceptancePath,
+                evidence: controlledNativeCycleEvidence,
+            }
+            : null,
         responseAlignment: {
             latencyMs: responseLatencyMs,
             seekedLatencyMs: seekedDelayMs,
@@ -844,7 +928,7 @@ function buildProof(rawFailure, chain, signals, sidecar, clockProjection) {
 // Attribution
 // ---------------------------------------------------------------------------
 
-function attributeFailure(rawFailure, chains, signals, target, sidecar, observationWindow) {
+function attributeFailure(rawFailure, chains, signals, target, sidecar, observationWindow, controlledCycles) {
     if (!validateRawFailure(rawFailure)) return null;
     if (!observationWindow) return null;
 
@@ -867,7 +951,22 @@ function attributeFailure(rawFailure, chains, signals, target, sidecar, observat
     if (correlated.length !== 1) return null;
     const { chain, clockProjection } = correlated[0];
 
-    const proof = buildProof(rawFailure, chain, signals, sidecar, clockProjection);
+    let controlledCycle = null;
+    if (controlledCycles !== null) {
+        // A supplied controlled profile is an explicit mode: exactly one record
+        // must claim this already-unique chain request. Missing, duplicate or
+        // malformed matches never fall back to the legacy wrap heuristic.
+        if (!Array.isArray(controlledCycles)) return null;
+        const matches = controlledCycles.filter((entry) => isPlainObject(entry)
+            && entry.requestId === chain.requestId);
+        if (matches.length !== 1) return null;
+        const record = matches[0];
+        if (!Object.prototype.hasOwnProperty.call(record, 'cycleInput')
+            || !isPlainObject(record.cycleInput)) return null;
+        controlledCycle = record.cycleInput;
+    }
+
+    const proof = buildProof(rawFailure, chain, signals, sidecar, clockProjection, controlledCycle);
     if (!proof) return null;
 
     return { requestId: chain.requestId, proof };
@@ -878,6 +977,14 @@ function attributeBufferedAmbientLoopAborts(input = {}) {
 
     const networkFailures = Array.isArray(input.networkFailures) ? input.networkFailures : [];
     const lifecycleSignals = Array.isArray(input.lifecycleSignals) ? input.lifecycleSignals : [];
+
+    // Presence, not truthiness, selects the controlled profile. An explicitly
+    // supplied null/undefined/malformed value disables the legacy heuristic
+    // rather than silently falling back to it.
+    const controlledSupplied = Object.prototype.hasOwnProperty.call(input, 'controlledNativeCycles');
+    const controlledCycles = controlledSupplied
+        ? (Array.isArray(input.controlledNativeCycles) ? input.controlledNativeCycles : [])
+        : null;
 
     const verified = verifyReceipt(input);
     let chains = [];
@@ -909,7 +1016,7 @@ function attributeBufferedAmbientLoopAborts(input = {}) {
         if (!target || !sidecar || !observationWindow) return { rawFailure, attribution: null };
         let attribution = null;
         try {
-            attribution = attributeFailure(rawFailure, chains, lifecycleSignals, target, sidecar, observationWindow);
+            attribution = attributeFailure(rawFailure, chains, lifecycleSignals, target, sidecar, observationWindow, controlledCycles);
         } catch {
             attribution = null;
         }

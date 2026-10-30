@@ -1,0 +1,1336 @@
+{
+  "binding": {
+    "sourceSha40": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "packageSha40": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "runtime": {
+      "browser": "Chromium 142.0.7444.175",
+      "electron": "40.0.0",
+      "revision": "synthetic-revision"
+    },
+    "frameUrl": "http://127.0.0.1:50306/index.html?session=fixture#warroom",
+    "origin": "http://127.0.0.1:50306",
+    "documentGeneration": "document-generation-7",
+    "profile": "awwv.controlled-native-media-loop-cycle.v1",
+    "collectionReady": {
+      "dateNow": 1793309335935.365,
+      "performanceNow": 12229.800048828125,
+      "timeOrigin": 1793309323705.565
+    },
+    "generationInstalled": {
+      "dateNow": 1793309335415.365,
+      "performanceNow": 11709.800048828125
+    }
+  },
+  "provenance": {
+    "snapshot": {
+      "schema": "awwv.native-media-mutation-provenance.v1",
+      "diagnosticOnly": true,
+      "applicationAcceptance": false,
+      "universalProvenance": false,
+      "valid": true,
+      "label": "synthetic controlled provenance",
+      "coverage": {
+        "profile": "controlled-qa-native-media-mutation-provenance",
+        "diagnosticOnly": true,
+        "productionDefaultControls": false,
+        "applicationAcceptance": false,
+        "universalProvenance": false,
+        "exactObjectIdentity": true,
+        "sameRealmInstalledAudioConstructorOnly": true,
+        "autoplay": "rejected",
+        "sourceChildren": "unsupported-invalidating",
+        "unknownCreation": "unsupported-invalidating",
+        "attributesCaptured": [
+          "src",
+          "loop",
+          "controls",
+          "autoplay",
+          "preload"
+        ],
+        "rateProperties": {
+          "playbackRate": "property",
+          "defaultPlaybackRate": "property",
+          "attributeReflection": false
+        },
+        "srcObject": {
+          "property": "wrapped",
+          "attributeReflection": false
+        },
+        "methods": {
+          "play": "wrapped",
+          "pause": "wrapped",
+          "load": "wrapped",
+          "fastSeek": "unavailable"
+        },
+        "setters": {
+          "currentTime": "wrapped",
+          "src": "wrapped",
+          "playbackRate": "wrapped",
+          "defaultPlaybackRate": "wrapped",
+          "loop": "wrapped",
+          "controls": "wrapped",
+          "autoplay": "wrapped",
+          "srcObject": "wrapped",
+          "preload": "wrapped"
+        },
+        "missingOptionalApis": [
+          "fastSeek"
+        ],
+        "absenceAudit": {
+          "schema": "awwv.native-media-optional-absence-audit.v1",
+          "recordedAt": "installation",
+          "recheckedOnEveryValidation": true,
+          "prototypeChain": "all",
+          "instanceShadows": "rejected",
+          "readFailure": "fail-closed",
+          "laterAppearance": "reject",
+          "presentButUnwrapped": "reject",
+          "entries": [
+            {
+              "name": "fastSeek",
+              "kind": "method",
+              "status": "absent"
+            }
+          ]
+        },
+        "sourceEpoch": {
+          "semantics": "monotonic-per-object",
+          "initialNonEmptySourceEpoch": 1,
+          "emptySourceEpoch": 0,
+          "advancesOn": [
+            "src-setter-success",
+            "srcObject-setter-success",
+            "load-success"
+          ],
+          "sameUrlReloadAdvancesEpoch": true,
+          "urlEqualityPreservesEpoch": false,
+          "constructorSetupCountsAsInitial": true
+        },
+        "mutationObserver": {
+          "attributes": true,
+          "childList": true,
+          "subtree": true,
+          "recordCap": 64,
+          "drainBeforeValidation": true,
+          "unexplainedMutations": "invalidate",
+          "sourceChildUnsupported": true
+        },
+        "limits": {
+          "events": 256,
+          "entries": 16,
+          "observerRecordsPerObject": 64
+        },
+        "browserTamperResistance": false,
+        "note": "synthetic"
+      },
+      "install": {
+        "status": "installed",
+        "installedAt": {
+          "dateNow": 1793309335415.365,
+          "performanceNow": 11709.800048828125
+        },
+        "readyStateAtInstall": "loading",
+        "readyState": "complete",
+        "realmValid": true,
+        "originValid": true,
+        "origin": "http://127.0.0.1:50306",
+        "lateInstallation": false,
+        "constructorWrapped": true,
+        "playLayerBound": true,
+        "methods": {
+          "play": "wrapped",
+          "pause": "wrapped",
+          "load": "wrapped",
+          "fastSeek": "unavailable"
+        },
+        "setters": {
+          "currentTime": "wrapped",
+          "src": "wrapped",
+          "playbackRate": "wrapped",
+          "defaultPlaybackRate": "wrapped",
+          "loop": "wrapped",
+          "controls": "wrapped",
+          "autoplay": "wrapped",
+          "srcObject": "wrapped",
+          "preload": "wrapped"
+        },
+        "unsupportedOptionalApis": [
+          "fastSeek"
+        ],
+        "absenceAudit": {
+          "schema": "awwv.native-media-optional-absence-audit.v1",
+          "recordedAt": "installation",
+          "recheckedOnEveryValidation": true,
+          "prototypeChain": "all",
+          "instanceShadows": "rejected",
+          "readFailure": "fail-closed",
+          "laterAppearance": "reject",
+          "presentButUnwrapped": "reject",
+          "entries": [
+            {
+              "name": "fastSeek",
+              "kind": "method",
+              "status": "absent"
+            }
+          ]
+        },
+        "apiFrozen": true
+      },
+      "invalidReasons": [],
+      "events": {
+        "capacity": 256,
+        "count": 4,
+        "truncated": false,
+        "dropped": 0,
+        "records": [
+          {
+            "sequence": 1,
+            "kind": "install",
+            "at": {
+              "dateNow": 1793309335415.365,
+              "performanceNow": 11709.800048828125
+            },
+            "readyState": "loading",
+            "origin": "http://127.0.0.1:50306",
+            "methods": {
+              "play": "wrapped",
+              "pause": "wrapped",
+              "load": "wrapped",
+              "fastSeek": "unavailable"
+            },
+            "setters": {
+              "currentTime": "wrapped",
+              "src": "wrapped",
+              "playbackRate": "wrapped",
+              "defaultPlaybackRate": "wrapped",
+              "loop": "wrapped",
+              "controls": "wrapped",
+              "autoplay": "wrapped",
+              "srcObject": "wrapped",
+              "preload": "wrapped"
+            },
+            "missingOptionalApis": [
+              "fastSeek"
+            ]
+          },
+          {
+            "sequence": 2,
+            "kind": "construct",
+            "at": {
+              "dateNow": 1793309335925.365,
+              "performanceNow": 12219.800048828125
+            },
+            "id": "media:1",
+            "constructorSequence": 1,
+            "source": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+            "sourceEpoch": 1,
+            "subclass": false,
+            "origin": "http://127.0.0.1:50306"
+          },
+          {
+            "sequence": 3,
+            "kind": "mutation-attempt",
+            "at": {
+              "dateNow": 1793309366375.365,
+              "performanceNow": 42669.800048828125
+            },
+            "targetType": "method",
+            "name": "play",
+            "id": "media:1",
+            "sourceEpoch": 1,
+            "argTypes": [],
+            "argumentCount": 0
+          },
+          {
+            "sequence": 4,
+            "kind": "mutation-result",
+            "at": {
+              "dateNow": 1793309366376.365,
+              "performanceNow": 42670.800048828125
+            },
+            "targetType": "method",
+            "name": "play",
+            "id": "media:1",
+            "outcome": "success",
+            "resultType": "object",
+            "sourceEpoch": 1,
+            "sequenceOfAttempt": 3
+          }
+        ]
+      },
+      "registry": {
+        "capacity": 16,
+        "count": 1,
+        "overflow": false,
+        "duplicateSources": [],
+        "entries": [
+          {
+            "id": "media:1",
+            "alive": true,
+            "supported": true,
+            "subclass": false,
+            "sourceEpoch": 1,
+            "source": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+            "sourceIsAmbient": true,
+            "admissible": true,
+            "reason": null,
+            "attributes": {
+              "src": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+              "loop": "",
+              "controls": null,
+              "autoplay": null,
+              "preload": "auto"
+            },
+            "rateProperties": {
+              "playbackRate": 1,
+              "defaultPlaybackRate": 1
+            },
+            "continuity": {
+              "playCount": 1,
+              "pauseCount": 0,
+              "lastPlaySequence": 3,
+              "lastPauseSequence": null,
+              "lastPlayEpoch": 1,
+              "lastPauseEpoch": null
+            },
+            "mutationCounts": {
+              "setters": 0,
+              "methods": 1,
+              "byName": {
+                "play": 1
+              }
+            },
+            "observer": {
+              "recordsSeen": 0,
+              "overflow": false,
+              "unexplained": 0,
+              "drainedBeforeValidation": true
+            },
+            "readErrors": {}
+          }
+        ]
+      }
+    },
+    "selected": {
+      "schema": "awwv.native-media-mutation-provenance.v1",
+      "diagnosticOnly": true,
+      "diagnosticValid": true,
+      "valid": true,
+      "reason": null,
+      "element": {
+        "id": "media:1",
+        "alive": true,
+        "supported": true,
+        "subclass": false,
+        "createdByInstalledConstructor": true,
+        "constructorSequence": 1,
+        "sourceEpoch": 1,
+        "source": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+        "sourceIsAmbient": true,
+        "origin": "http://127.0.0.1:50306",
+        "registeredAt": {
+          "dateNow": 1793309335925.165,
+          "performanceNow": 12219.60009765625
+        }
+      },
+      "provenance": {
+        "profile": "controlled-qa-native-media-mutation-provenance",
+        "sourceEpochSemantics": "monotonic-per-object",
+        "sameUrlReloadAdvancesEpoch": true,
+        "initialSetupValid": true,
+        "laterMutations": "explicit-evidence",
+        "attributes": {
+          "src": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+          "loop": "",
+          "controls": null,
+          "autoplay": null,
+          "preload": "auto"
+        },
+        "rateAttributes": {
+          "playbackRate": null,
+          "defaultPlaybackRate": null
+        },
+        "rateProperties": {
+          "playbackRate": 1,
+          "defaultPlaybackRate": 1
+        },
+        "srcObject": {
+          "present": false,
+          "type": "none",
+          "attributeReflection": false
+        },
+        "autoplayEnabled": false,
+        "observer": {
+          "recordsSeen": 0,
+          "overflow": false,
+          "unexplained": 0,
+          "drainedBeforeValidation": true
+        },
+        "ownShadows": [],
+        "readErrors": {},
+        "continuity": {
+          "playCount": 1,
+          "pauseCount": 0,
+          "lastPlaySequence": 3,
+          "lastPauseSequence": null,
+          "lastPlayEpoch": 1,
+          "lastPauseEpoch": null
+        }
+      },
+      "mutationCounts": {
+        "setters": 0,
+        "methods": 1,
+        "byName": {
+          "play": 1
+        }
+      }
+    }
+  },
+  "sentinel": {
+    "schema": "awwv.native-media-seek-sentinel.v1",
+    "diagnosticOnly": true,
+    "naturalOriginAdmitted": false,
+    "valid": true,
+    "label": "synthetic controlled sentinel",
+    "coverage": {
+      "mediaSessionActions": [
+        "seekto",
+        "seekforward",
+        "seekbackward"
+      ],
+      "exactRegistryOnly": true,
+      "osControl": false,
+      "defaultMediaSession": false,
+      "naturalLoopOrigin": false,
+      "audioQuality": false,
+      "sourceEpochSemantics": "observed-source-url-changes-only",
+      "sameUrlReloadProvenance": false
+    },
+    "install": {
+      "status": "installed",
+      "installedAt": {
+        "dateNow": 1793309335415.365,
+        "performanceNow": 11709.800048828125
+      },
+      "readyStateAtInstall": "loading",
+      "readyState": "complete",
+      "realmValid": true,
+      "originValid": true,
+      "origin": "http://127.0.0.1:50306",
+      "installedActions": [
+        "seekto",
+        "seekforward",
+        "seekbackward"
+      ],
+      "registrationFailures": [],
+      "rollback": [],
+      "playWrapped": true,
+      "setActionHandlerWrapped": true,
+      "apiFrozen": true
+    },
+    "invalidReasons": [],
+    "events": {
+      "capacity": 128,
+      "count": 1,
+      "truncated": false,
+      "dropped": 0,
+      "records": [
+        {
+          "sequence": 1,
+          "kind": "install",
+          "at": {
+            "dateNow": 1793309335415.365,
+            "performanceNow": 11709.800048828125
+          },
+          "readyState": "loading",
+          "origin": "http://127.0.0.1:50306",
+          "actions": [
+            "seekto",
+            "seekforward",
+            "seekbackward"
+          ]
+        }
+      ]
+    },
+    "registry": {
+      "capacity": 16,
+      "count": 0,
+      "duplicateSources": [],
+      "entries": []
+    }
+  },
+  "media": {
+    "schema": "awwv.native-media-origin-probe.v1",
+    "diagnosticOnly": true,
+    "failClosedDiagnostic": true,
+    "admission": "none",
+    "status": "diagnostic-complete",
+    "passive": true,
+    "setup": {
+      "state": "ready",
+      "enable": {
+        "attempted": true,
+        "succeeded": true,
+        "settled": true
+      },
+      "domain": "Media",
+      "subscriptions": [
+        "Media.playerCreated",
+        "Media.playerPropertiesChanged",
+        "Media.playerEventsAdded",
+        "Media.playerMessagesLogged",
+        "Media.playerErrorsRaised"
+      ]
+    },
+    "caps": {
+      "records": 4096,
+      "bytes": 4194304,
+      "players": 128,
+      "errors": 64,
+      "errorMessageChars": 400
+    },
+    "metadata": {
+      "playersObserved": 1,
+      "playersDropped": 0,
+      "playersTruncated": false,
+      "errorsRecorded": 0,
+      "errorsDropped": 0,
+      "errorsTruncated": false
+    },
+    "summary": {
+      "delivered": 4,
+      "recorded": 4,
+      "dropped": 0,
+      "truncated": false,
+      "evidenceTruncated": false,
+      "storedBytes": 1000,
+      "playersObserved": 1
+    },
+    "overflow": {
+      "records": false,
+      "bytes": false,
+      "other": false,
+      "players": false,
+      "errors": false,
+      "dropReasons": {
+        "records": 0,
+        "bytes": 0,
+        "other": 0
+      }
+    },
+    "errors": [],
+    "records": [
+      {
+        "sequence": 1,
+        "event": "Media.playerCreated",
+        "observedAtMs": 1793309368819.365,
+        "params": {
+          "player": {
+            "playerId": "A8E6B18BCE9F2756121472424E0069E3"
+          }
+        }
+      },
+      {
+        "sequence": 2,
+        "event": "Media.playerPropertiesChanged",
+        "observedAtMs": 1793309368819.365,
+        "params": {
+          "playerId": "A8E6B18BCE9F2756121472424E0069E3",
+          "properties": [
+            {
+              "name": "kFrameUrl",
+              "value": "http://127.0.0.1:50306/index.html?session=fixture#warroom"
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 3,
+        "event": "Media.playerEventsAdded",
+        "observedAtMs": 1793309368819.365,
+        "params": {
+          "playerId": "A8E6B18BCE9F2756121472424E0069E3",
+          "events": [
+            {
+              "timestamp": 698481.1827971191,
+              "value": "{\"event\":\"kLoad\",\"url\":\"http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg\"}"
+            },
+            {
+              "timestamp": 698481.1807971192,
+              "value": "{\"event\":\"kMediaLogCreated\",\"created\":\"2026-10-29 21:28:55.915365 UTC\"}"
+            },
+            {
+              "timestamp": 698511.6807971192,
+              "value": "{\"event\":\"kPipelineStateChange\",\"pipeline_state\":\"kPlaying\"}"
+            },
+            {
+              "timestamp": 698513.164772,
+              "value": "{\"event\":\"kEnded\"}"
+            },
+            {
+              "timestamp": 698513.782797,
+              "value": "{\"event\":\"kSeek\",\"seek_target\":0}"
+            },
+            {
+              "timestamp": 698513.78286,
+              "value": "{\"event\":\"kPipelineStateChange\",\"pipeline_state\":\"kSeeking\"}"
+            },
+            {
+              "timestamp": 698513.783011,
+              "value": "{\"event\":\"kPipelineStateChange\",\"pipeline_state\":\"kPlaying\"}"
+            },
+            {
+              "timestamp": 698513.783379,
+              "value": "{\"event\":\"kBufferingStateChanged\",\"audio_buffering_state\":{\"state\":\"BUFFERING_HAVE_ENOUGH\"}}"
+            },
+            {
+              "timestamp": 698513.84742,
+              "value": "{\"event\":\"kBufferingStateChanged\",\"pipeline_buffering_state\":{\"for_suspended_start\":false,\"state\":\"BUFFERING_HAVE_ENOUGH\"}}"
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 4,
+        "event": "Media.playerErrorsRaised",
+        "observedAtMs": 1793309368819.365,
+        "params": {
+          "playerId": "A8E6B18BCE9F2756121472424E0069E3",
+          "errors": []
+        }
+      }
+    ],
+    "control": {
+      "requested": false,
+      "mode": null,
+      "status": "disabled",
+      "reason": "option-not-requested",
+      "expectedOrigin": null,
+      "thresholdSeconds": null,
+      "pollIntervalMs": null,
+      "timeoutMs": null,
+      "scopeStatement": "synthetic passive capture",
+      "player": null,
+      "candidate": null,
+      "intent": null,
+      "invocation": null
+    }
+  },
+  "lifecycleSignals": [
+    {
+      "signalSequence": 1,
+      "kind": "playing",
+      "observedAtMs": 1793309366420.365,
+      "elementId": "media:1",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 4,
+        "paused": false,
+        "seeking": false,
+        "ended": false,
+        "currentTime": 0,
+        "duration": 10,
+        "loop": true,
+        "controls": false,
+        "mediaError": null,
+        "buffered": [
+          [
+            0,
+            10
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            10
+          ]
+        ]
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {},
+      "controlledProvenance": {
+        "schema": "awwv.native-media-mutation-provenance.v1",
+        "diagnosticOnly": true,
+        "diagnosticValid": true,
+        "valid": true,
+        "reason": null,
+        "element": {
+          "id": "media:1",
+          "alive": true,
+          "supported": true,
+          "subclass": false,
+          "createdByInstalledConstructor": true,
+          "constructorSequence": 1,
+          "sourceEpoch": 1,
+          "source": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+          "sourceIsAmbient": true,
+          "origin": "http://127.0.0.1:50306",
+          "registeredAt": {
+            "dateNow": 1793309335925.165,
+            "performanceNow": 12219.60009765625
+          }
+        },
+        "provenance": {
+          "profile": "controlled-qa-native-media-mutation-provenance",
+          "sourceEpochSemantics": "monotonic-per-object",
+          "sameUrlReloadAdvancesEpoch": true,
+          "initialSetupValid": true,
+          "laterMutations": "explicit-evidence",
+          "attributes": {
+            "src": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+            "loop": "",
+            "controls": null,
+            "autoplay": null,
+            "preload": "auto"
+          },
+          "rateAttributes": {
+            "playbackRate": null,
+            "defaultPlaybackRate": null
+          },
+          "rateProperties": {
+            "playbackRate": 1,
+            "defaultPlaybackRate": 1
+          },
+          "srcObject": {
+            "present": false,
+            "type": "none",
+            "attributeReflection": false
+          },
+          "autoplayEnabled": false,
+          "observer": {
+            "recordsSeen": 0,
+            "overflow": false,
+            "unexplained": 0,
+            "drainedBeforeValidation": true
+          },
+          "ownShadows": [],
+          "readErrors": {},
+          "continuity": {
+            "playCount": 1,
+            "pauseCount": 0,
+            "lastPlaySequence": 3,
+            "lastPauseSequence": null,
+            "lastPlayEpoch": 1,
+            "lastPauseEpoch": null
+          }
+        },
+        "mutationCounts": {
+          "setters": 0,
+          "methods": 1,
+          "byName": {
+            "play": 1
+          }
+        }
+      },
+      "controlledControlsRead": {
+        "value": false,
+        "error": null
+      }
+    },
+    {
+      "signalSequence": 2,
+      "kind": "timeupdate",
+      "observedAtMs": 1793309367799.3398,
+      "elementId": "media:1",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 4,
+        "paused": false,
+        "seeking": false,
+        "ended": false,
+        "currentTime": 9.9,
+        "duration": 10,
+        "loop": true,
+        "controls": false,
+        "mediaError": null,
+        "buffered": [
+          [
+            0,
+            10
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            10
+          ]
+        ]
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {},
+      "controlledProvenance": {
+        "schema": "awwv.native-media-mutation-provenance.v1",
+        "diagnosticOnly": true,
+        "diagnosticValid": true,
+        "valid": true,
+        "reason": null,
+        "element": {
+          "id": "media:1",
+          "alive": true,
+          "supported": true,
+          "subclass": false,
+          "createdByInstalledConstructor": true,
+          "constructorSequence": 1,
+          "sourceEpoch": 1,
+          "source": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+          "sourceIsAmbient": true,
+          "origin": "http://127.0.0.1:50306",
+          "registeredAt": {
+            "dateNow": 1793309335925.165,
+            "performanceNow": 12219.60009765625
+          }
+        },
+        "provenance": {
+          "profile": "controlled-qa-native-media-mutation-provenance",
+          "sourceEpochSemantics": "monotonic-per-object",
+          "sameUrlReloadAdvancesEpoch": true,
+          "initialSetupValid": true,
+          "laterMutations": "explicit-evidence",
+          "attributes": {
+            "src": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+            "loop": "",
+            "controls": null,
+            "autoplay": null,
+            "preload": "auto"
+          },
+          "rateAttributes": {
+            "playbackRate": null,
+            "defaultPlaybackRate": null
+          },
+          "rateProperties": {
+            "playbackRate": 1,
+            "defaultPlaybackRate": 1
+          },
+          "srcObject": {
+            "present": false,
+            "type": "none",
+            "attributeReflection": false
+          },
+          "autoplayEnabled": false,
+          "observer": {
+            "recordsSeen": 0,
+            "overflow": false,
+            "unexplained": 0,
+            "drainedBeforeValidation": true
+          },
+          "ownShadows": [],
+          "readErrors": {},
+          "continuity": {
+            "playCount": 1,
+            "pauseCount": 0,
+            "lastPlaySequence": 3,
+            "lastPauseSequence": null,
+            "lastPlayEpoch": 1,
+            "lastPauseEpoch": null
+          }
+        },
+        "mutationCounts": {
+          "setters": 0,
+          "methods": 1,
+          "byName": {
+            "play": 1
+          }
+        }
+      },
+      "controlledControlsRead": {
+        "value": false,
+        "error": null
+      }
+    },
+    {
+      "signalSequence": 3,
+      "kind": "seeking",
+      "observedAtMs": 1793309368517.415,
+      "elementId": "media:1",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 4,
+        "paused": false,
+        "seeking": true,
+        "ended": false,
+        "currentTime": 0,
+        "duration": 10,
+        "loop": true,
+        "controls": false,
+        "mediaError": null,
+        "buffered": [
+          [
+            0,
+            10
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            10
+          ]
+        ]
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {},
+      "controlledProvenance": {
+        "schema": "awwv.native-media-mutation-provenance.v1",
+        "diagnosticOnly": true,
+        "diagnosticValid": true,
+        "valid": true,
+        "reason": null,
+        "element": {
+          "id": "media:1",
+          "alive": true,
+          "supported": true,
+          "subclass": false,
+          "createdByInstalledConstructor": true,
+          "constructorSequence": 1,
+          "sourceEpoch": 1,
+          "source": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+          "sourceIsAmbient": true,
+          "origin": "http://127.0.0.1:50306",
+          "registeredAt": {
+            "dateNow": 1793309335925.165,
+            "performanceNow": 12219.60009765625
+          }
+        },
+        "provenance": {
+          "profile": "controlled-qa-native-media-mutation-provenance",
+          "sourceEpochSemantics": "monotonic-per-object",
+          "sameUrlReloadAdvancesEpoch": true,
+          "initialSetupValid": true,
+          "laterMutations": "explicit-evidence",
+          "attributes": {
+            "src": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+            "loop": "",
+            "controls": null,
+            "autoplay": null,
+            "preload": "auto"
+          },
+          "rateAttributes": {
+            "playbackRate": null,
+            "defaultPlaybackRate": null
+          },
+          "rateProperties": {
+            "playbackRate": 1,
+            "defaultPlaybackRate": 1
+          },
+          "srcObject": {
+            "present": false,
+            "type": "none",
+            "attributeReflection": false
+          },
+          "autoplayEnabled": false,
+          "observer": {
+            "recordsSeen": 0,
+            "overflow": false,
+            "unexplained": 0,
+            "drainedBeforeValidation": true
+          },
+          "ownShadows": [],
+          "readErrors": {},
+          "continuity": {
+            "playCount": 1,
+            "pauseCount": 0,
+            "lastPlaySequence": 3,
+            "lastPauseSequence": null,
+            "lastPlayEpoch": 1,
+            "lastPauseEpoch": null
+          }
+        },
+        "mutationCounts": {
+          "setters": 0,
+          "methods": 1,
+          "byName": {
+            "play": 1
+          }
+        }
+      },
+      "controlledControlsRead": {
+        "value": false,
+        "error": null
+      }
+    },
+    {
+      "signalSequence": 4,
+      "kind": "seeked",
+      "observedAtMs": 1793309368517.465,
+      "elementId": "media:1",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 4,
+        "paused": false,
+        "seeking": false,
+        "ended": false,
+        "currentTime": 0,
+        "duration": 10,
+        "loop": true,
+        "controls": false,
+        "mediaError": null,
+        "buffered": [
+          [
+            0,
+            10
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            10
+          ]
+        ]
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {},
+      "controlledProvenance": {
+        "schema": "awwv.native-media-mutation-provenance.v1",
+        "diagnosticOnly": true,
+        "diagnosticValid": true,
+        "valid": true,
+        "reason": null,
+        "element": {
+          "id": "media:1",
+          "alive": true,
+          "supported": true,
+          "subclass": false,
+          "createdByInstalledConstructor": true,
+          "constructorSequence": 1,
+          "sourceEpoch": 1,
+          "source": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+          "sourceIsAmbient": true,
+          "origin": "http://127.0.0.1:50306",
+          "registeredAt": {
+            "dateNow": 1793309335925.165,
+            "performanceNow": 12219.60009765625
+          }
+        },
+        "provenance": {
+          "profile": "controlled-qa-native-media-mutation-provenance",
+          "sourceEpochSemantics": "monotonic-per-object",
+          "sameUrlReloadAdvancesEpoch": true,
+          "initialSetupValid": true,
+          "laterMutations": "explicit-evidence",
+          "attributes": {
+            "src": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+            "loop": "",
+            "controls": null,
+            "autoplay": null,
+            "preload": "auto"
+          },
+          "rateAttributes": {
+            "playbackRate": null,
+            "defaultPlaybackRate": null
+          },
+          "rateProperties": {
+            "playbackRate": 1,
+            "defaultPlaybackRate": 1
+          },
+          "srcObject": {
+            "present": false,
+            "type": "none",
+            "attributeReflection": false
+          },
+          "autoplayEnabled": false,
+          "observer": {
+            "recordsSeen": 0,
+            "overflow": false,
+            "unexplained": 0,
+            "drainedBeforeValidation": true
+          },
+          "ownShadows": [],
+          "readErrors": {},
+          "continuity": {
+            "playCount": 1,
+            "pauseCount": 0,
+            "lastPlaySequence": 3,
+            "lastPauseSequence": null,
+            "lastPlayEpoch": 1,
+            "lastPauseEpoch": null
+          }
+        },
+        "mutationCounts": {
+          "setters": 0,
+          "methods": 1,
+          "byName": {
+            "play": 1
+          }
+        }
+      },
+      "controlledControlsRead": {
+        "value": false,
+        "error": null
+      }
+    },
+    {
+      "signalSequence": 5,
+      "kind": "playing",
+      "observedAtMs": 1793309368517.629,
+      "elementId": "media:1",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 4,
+        "paused": false,
+        "seeking": false,
+        "ended": false,
+        "currentTime": 0,
+        "duration": 10,
+        "loop": true,
+        "controls": false,
+        "mediaError": null,
+        "buffered": [
+          [
+            0,
+            10
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            10
+          ]
+        ]
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {},
+      "controlledProvenance": {
+        "schema": "awwv.native-media-mutation-provenance.v1",
+        "diagnosticOnly": true,
+        "diagnosticValid": true,
+        "valid": true,
+        "reason": null,
+        "element": {
+          "id": "media:1",
+          "alive": true,
+          "supported": true,
+          "subclass": false,
+          "createdByInstalledConstructor": true,
+          "constructorSequence": 1,
+          "sourceEpoch": 1,
+          "source": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+          "sourceIsAmbient": true,
+          "origin": "http://127.0.0.1:50306",
+          "registeredAt": {
+            "dateNow": 1793309335925.165,
+            "performanceNow": 12219.60009765625
+          }
+        },
+        "provenance": {
+          "profile": "controlled-qa-native-media-mutation-provenance",
+          "sourceEpochSemantics": "monotonic-per-object",
+          "sameUrlReloadAdvancesEpoch": true,
+          "initialSetupValid": true,
+          "laterMutations": "explicit-evidence",
+          "attributes": {
+            "src": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+            "loop": "",
+            "controls": null,
+            "autoplay": null,
+            "preload": "auto"
+          },
+          "rateAttributes": {
+            "playbackRate": null,
+            "defaultPlaybackRate": null
+          },
+          "rateProperties": {
+            "playbackRate": 1,
+            "defaultPlaybackRate": 1
+          },
+          "srcObject": {
+            "present": false,
+            "type": "none",
+            "attributeReflection": false
+          },
+          "autoplayEnabled": false,
+          "observer": {
+            "recordsSeen": 0,
+            "overflow": false,
+            "unexplained": 0,
+            "drainedBeforeValidation": true
+          },
+          "ownShadows": [],
+          "readErrors": {},
+          "continuity": {
+            "playCount": 1,
+            "pauseCount": 0,
+            "lastPlaySequence": 3,
+            "lastPauseSequence": null,
+            "lastPlayEpoch": 1,
+            "lastPauseEpoch": null
+          }
+        },
+        "mutationCounts": {
+          "setters": 0,
+          "methods": 1,
+          "byName": {
+            "play": 1
+          }
+        }
+      },
+      "controlledControlsRead": {
+        "value": false,
+        "error": null
+      }
+    },
+    {
+      "signalSequence": 6,
+      "kind": "timeupdate",
+      "observedAtMs": 1793309368617.5789,
+      "elementId": "media:1",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 4,
+        "paused": false,
+        "seeking": false,
+        "ended": false,
+        "currentTime": 0.08,
+        "duration": 10,
+        "loop": true,
+        "controls": false,
+        "mediaError": null,
+        "buffered": [
+          [
+            0,
+            10
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            10
+          ]
+        ]
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {},
+      "controlledProvenance": {
+        "schema": "awwv.native-media-mutation-provenance.v1",
+        "diagnosticOnly": true,
+        "diagnosticValid": true,
+        "valid": true,
+        "reason": null,
+        "element": {
+          "id": "media:1",
+          "alive": true,
+          "supported": true,
+          "subclass": false,
+          "createdByInstalledConstructor": true,
+          "constructorSequence": 1,
+          "sourceEpoch": 1,
+          "source": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+          "sourceIsAmbient": true,
+          "origin": "http://127.0.0.1:50306",
+          "registeredAt": {
+            "dateNow": 1793309335925.165,
+            "performanceNow": 12219.60009765625
+          }
+        },
+        "provenance": {
+          "profile": "controlled-qa-native-media-mutation-provenance",
+          "sourceEpochSemantics": "monotonic-per-object",
+          "sameUrlReloadAdvancesEpoch": true,
+          "initialSetupValid": true,
+          "laterMutations": "explicit-evidence",
+          "attributes": {
+            "src": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+            "loop": "",
+            "controls": null,
+            "autoplay": null,
+            "preload": "auto"
+          },
+          "rateAttributes": {
+            "playbackRate": null,
+            "defaultPlaybackRate": null
+          },
+          "rateProperties": {
+            "playbackRate": 1,
+            "defaultPlaybackRate": 1
+          },
+          "srcObject": {
+            "present": false,
+            "type": "none",
+            "attributeReflection": false
+          },
+          "autoplayEnabled": false,
+          "observer": {
+            "recordsSeen": 0,
+            "overflow": false,
+            "unexplained": 0,
+            "drainedBeforeValidation": true
+          },
+          "ownShadows": [],
+          "readErrors": {},
+          "continuity": {
+            "playCount": 1,
+            "pauseCount": 0,
+            "lastPlaySequence": 3,
+            "lastPauseSequence": null,
+            "lastPlayEpoch": 1,
+            "lastPauseEpoch": null
+          }
+        },
+        "mutationCounts": {
+          "setters": 0,
+          "methods": 1,
+          "byName": {
+            "play": 1
+          }
+        }
+      },
+      "controlledControlsRead": {
+        "value": false,
+        "error": null
+      }
+    }
+  ],
+  "selected": {
+    "preSeek": {
+      "signalSequence": 2
+    },
+    "seeking": {
+      "signalSequence": 3
+    },
+    "seeked": {
+      "signalSequence": 4
+    },
+    "playing": {
+      "signalSequence": 5
+    },
+    "confirmation": {
+      "signalSequence": 6
+    }
+  },
+  "clockProjection": {
+    "requestWallTimeS": 1793309365.922365,
+    "protocolTimestamps": {
+      "request": 698511.1877971191,
+      "response": 698511.2877971191,
+      "failure": 698511.3877971191
+    },
+    "projectedObservedAtMs": {
+      "request": 1793309365922.365,
+      "response": 1793309366022.365,
+      "failure": 1793309366122.365
+    },
+    "observationWindow": {
+      "clock": "node-epoch-ms",
+      "openedAtMs": 1793309365915.365,
+      "closedAtMs": 1793309368829.365
+    }
+  },
+  "unit_fixture_only": true,
+  "_provenance_note": "SYNTHETIC unit-only controlled native cycle fixture generated from the existing native_media_cycle_evidence baseInput/capturedSequenceInput shapes. NOT a native qualification receipt, NOT a real cancellation capture and NOT evidence of gap-free audio."
+}

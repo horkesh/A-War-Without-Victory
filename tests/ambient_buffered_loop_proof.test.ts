@@ -2356,3 +2356,447 @@ test('a rejected retained case leaves the unrelated raw failure and fixture prov
     assert.deepEqual(built.input.networkFailures, [rawA, rawB], 'both raw failures must stay immutable');
     assert.equal(fixture.unit_fixture_only, true, 'fixture provenance must stay unit-only');
 });
+
+// ---------------------------------------------------------------------------
+// Controlled native cycle evidence (synthetic integration only)
+// ---------------------------------------------------------------------------
+//
+// These cases are SYNTHETIC. The portable cycle fixture was generated from the
+// existing native correlator's baseInput/capturedSequenceInput shapes; it is
+// not a real cancellation capture, not a native qualification receipt, and it
+// makes no gap-free audio claim.
+
+const CONTROLLED_CYCLE_FIXTURE_PATH = join(
+    process.cwd(),
+    'tests',
+    'fixtures',
+    'native_audio_controlled_cycle_case.json',
+);
+const controlledCycleFixture = JSON.parse(
+    readFileSync(CONTROLLED_CYCLE_FIXTURE_PATH, 'utf8'),
+) as any;
+const { verifyControlledNativeLoopCycle } = require('../tools/ui/native_media_cycle_evidence.cjs') as {
+    verifyControlledNativeLoopCycle: (input: any) => { ok: boolean; reasons?: string[]; evidence?: any };
+};
+const CONTROLLED_CYCLE_CRITERION = 'ambient-buffered-controlled-native-cycle-proof-v3';
+
+function controlledSeekEvent(cycle: any): any {
+    const record = cycle.media.records.find((entry: any) => entry.event === 'Media.playerEventsAdded');
+    return record.params.events.find((event: any) => JSON.parse(event.value).event === 'kSeek');
+}
+
+function alignControlledChain(parts: Parts, chain: any, cycle: any): void {
+    const seeking = cycle.lifecycleSignals.find((signal: any) => signal.kind === 'seeking'
+        && signal.mediaState?.currentTime === 0
+        && signal.mediaState?.seeking === true);
+    assert.ok(seeking, 'controlled cycle must expose one seeking0');
+    const seekTimestamp = controlledSeekEvent(cycle).timestamp;
+    chain.request.wall_time_s = seeking.observedAtMs / 1000;
+    chain.request.timestamp = seekTimestamp;
+    chain.response.timestamp = seekTimestamp + 0.001;
+    chain.failure.timestamp = seekTimestamp + 0.002;
+    chain.request.observed_at_ms = seeking.observedAtMs + 1;
+    chain.response.observed_at_ms = seeking.observedAtMs + 2;
+    chain.failure.observed_at_ms = seeking.observedAtMs + 3;
+    parts.failures[0].requestInitiatedAtMs = chain.request.observed_at_ms;
+    parts.failures[0].observedAtMs = chain.failure.observed_at_ms;
+}
+
+function appendControlledMutation(cycle: any, name: string): void {
+    const events = cycle.provenance.snapshot.events.records;
+    const sequence = events.length + 1;
+    const dateNow = cycle.lifecycleSignals[2].observedAtMs + 5;
+    const at = {
+        dateNow,
+        performanceNow: dateNow - cycle.binding.collectionReady.timeOrigin,
+    };
+    events.push({
+        sequence,
+        kind: 'mutation-attempt',
+        at,
+        targetType: 'setter',
+        name,
+        id: 'media:1',
+        sourceEpoch: 1,
+        argTypes: [],
+        argumentCount: 1,
+    });
+    events.push({
+        sequence: sequence + 1,
+        kind: 'mutation-result',
+        at: { ...at, dateNow: dateNow + 1, performanceNow: at.performanceNow + 1 },
+        targetType: 'setter',
+        name,
+        id: 'media:1',
+        outcome: 'success',
+        resultType: 'number',
+        sourceEpoch: 1,
+        sequenceOfAttempt: sequence,
+    });
+    cycle.provenance.snapshot.events.count = events.length;
+}
+
+type ControlledOptions = {
+    cycleMutate?: (cycle: any) => void;
+    partsMutate?: (parts: Parts, cycle: any, chain: any) => void;
+    records?: (records: any[], built: Built, cycle: any, chain: any) => any;
+};
+
+function buildControlled(options: ControlledOptions = {}): { built: Built; cycle: any; chain: any } {
+    const cycle = clone(controlledCycleFixture);
+    const baseWindow = clone(controlledCycleFixture.clockProjection.observationWindow);
+    const built = build(0, {
+        mutate: (parts) => {
+            options.cycleMutate?.(cycle);
+            parts.signals = clone(cycle.lifecycleSignals);
+            const chain = chainOf(parts.artifact, 0);
+            alignControlledChain(parts, chain, cycle);
+            options.partsMutate?.(parts, cycle, chain);
+        },
+        windowMutate: (parts) => {
+            parts.artifact.observation_window.opened_at_ms = Math.min(
+                parts.artifact.observation_window.opened_at_ms,
+                baseWindow.openedAtMs,
+            ) - 1;
+            parts.artifact.observation_window.closed_at_ms = Math.max(
+                parts.artifact.observation_window.closed_at_ms,
+                baseWindow.closedAtMs,
+            ) + 1;
+        },
+    });
+    const chain = chainOf(built.parts.artifact, 0);
+    const records = [{ requestId: chain.request.request_id, cycleInput: cycle }];
+    (built.input as any).controlledNativeCycles = options.records
+        ? options.records(records, built, cycle, chain)
+        : records;
+    return { built, cycle, chain };
+}
+
+function expectNoControlledAdmission(built: Built): void {
+    const before = JSON.stringify(built.input);
+    const result = attributeBufferedAmbientLoopAborts(built.input);
+    assert.deepEqual(result.expected, [], 'invalid controlled evidence must never be admitted');
+    assert.equal(result.remaining.length, built.input.networkFailures.length);
+    assert.deepEqual(result.remaining, built.input.networkFailures);
+    assert.equal(JSON.stringify(built.input), before, 'checker must not mutate raw inputs');
+}
+
+test('controlled cycle fixture is synthetic and passes the real pure verifier alone', () => {
+    assert.equal(controlledCycleFixture.unit_fixture_only, true);
+    assert.match(controlledCycleFixture._provenance_note, /SYNTHETIC/);
+    assert.match(controlledCycleFixture._provenance_note, /NOT a native qualification receipt/);
+    const result = verifyControlledNativeLoopCycle(clone(controlledCycleFixture));
+    assert.equal(result.ok, true, `portable fixture must pass the pure verifier: ${result.reasons}`);
+    assert.equal(result.evidence.scope.admission, 'none');
+    assert.equal(result.evidence.scope.gapFreeAudio, false);
+});
+
+test('admits the controlled native cycle when the sampled wrap prediction differs by over 100ms', () => {
+    const fixtureCheck = verifyControlledNativeLoopCycle(clone(controlledCycleFixture));
+    assert.equal(fixtureCheck.ok, true, `fixture must pass before checker admission: ${fixtureCheck.reasons}`);
+
+    const { built, cycle } = buildControlled();
+    const failuresBefore = clone(built.input.networkFailures);
+    const signalsBefore = clone(built.input.lifecycleSignals);
+
+    const result = attributeBufferedAmbientLoopAborts(built.input);
+
+    assert.deepEqual(result.remaining, [], 'the controlled cycle must replace only the sampled wrap heuristic');
+    assert.equal(result.expected.length, 1);
+    const proof = result.expected[0].bufferedLoopProof;
+    assert.equal(result.expected[0].allowlist, ALLOWLIST, 'the harness allowlist must not be relabelled');
+    assert.equal(proof.path, 'fast-100ms', 'the original completion path must be retained');
+    assert.equal(proof.allowlist, ALLOWLIST);
+    assert.equal(proof.legacyCriterion, ALLOWLIST);
+    assert.equal(proof.criterion, CONTROLLED_CYCLE_CRITERION);
+    assert.ok(Math.abs(proof.clocks.wrapDeltaS) > 0.1, 'the old sampled-time heuristic would reject this cycle');
+    assert.ok(proof.controlledNativeCycle, 'the controlled acceptance must carry embedded verifier evidence');
+    assert.equal(proof.controlledNativeCycle.criterion, CONTROLLED_CYCLE_CRITERION);
+    assert.equal(proof.controlledNativeCycle.legacyCriterion, ALLOWLIST);
+    assert.equal(proof.controlledNativeCycle.completionPath, 'fast-100ms');
+    const evidence = proof.controlledNativeCycle.evidence;
+    assert.equal(evidence.scope.profile, 'awwv.controlled-native-media-loop-cycle.v1');
+    assert.equal(evidence.scope.admission, 'none');
+    assert.equal(evidence.scope.networkFailureAdmitted, false);
+    assert.equal(evidence.scope.existingGuardChanged, false);
+    assert.equal(evidence.scope.gapFreeAudio, false);
+    assert.equal(evidence.lifecycle.seeking.signalSequence, cycle.selected.seeking.signalSequence);
+    assert.equal(evidence.lifecycle.seeking.observedAtMs, proof.clocks.seekObservedAtMs);
+    assert.deepEqual(evidence.rawReferences.lifecycleSignals, built.input.lifecycleSignals);
+    assert.equal(proof.body.sha256, null);
+    assert.equal(proof.body.byteCount, null);
+
+    assert.deepEqual(built.input.networkFailures, failuresBefore, 'raw failure input must stay immutable');
+    assert.deepEqual(built.input.lifecycleSignals, signalsBefore, 'raw lifecycle signals must stay immutable');
+});
+
+test('keeps the legacy sampled-time wrap path when no controlled profile is supplied', () => {
+    const { built } = buildControlled({
+        cycleMutate: (cycle) => {
+            cycle.lifecycleSignals[1].mediaState.currentTime = 9.3;
+        },
+    });
+    delete (built.input as any).controlledNativeCycles;
+
+    const result = attributeBufferedAmbientLoopAborts(built.input);
+
+    assert.equal(result.expected.length, 1);
+    const proof = result.expected[0].bufferedLoopProof;
+    assert.equal(proof.criterion, ALLOWLIST);
+    assert.equal(proof.controlledNativeCycle, null);
+});
+
+test('does not fall back to legacy when controlled evidence is explicitly supplied but malformed', () => {
+    const { built } = buildControlled({
+        cycleMutate: (cycle) => {
+            cycle.lifecycleSignals[1].mediaState.currentTime = 9.3;
+        },
+    });
+    delete (built.input as any).controlledNativeCycles;
+    assert.equal(attributeBufferedAmbientLoopAborts(built.input).expected.length, 1, 'legacy path must pass');
+
+    for (const supplied of [undefined, null, {}, 'malformed']) {
+        (built.input as any).controlledNativeCycles = supplied;
+        expectNoControlledAdmission(built);
+    }
+    (built.input as any).controlledNativeCycles = [];
+    expectNoControlledAdmission(built);
+});
+
+test('uses checker-selected lifecycle samples and clocks rather than caller-supplied refs', () => {
+    const { built } = buildControlled({
+        cycleMutate: (cycle) => {
+            cycle.selected = {
+                preSeek: { signalSequence: 1 },
+                seeking: { signalSequence: 1 },
+                seeked: { signalSequence: 1 },
+                playing: { signalSequence: 1 },
+                confirmation: { signalSequence: 1 },
+            };
+            cycle.clockProjection = {
+                requestWallTimeS: 1,
+                protocolTimestamps: { request: 0, response: 0, failure: 0 },
+                projectedObservedAtMs: { request: 0, response: 0, failure: 0 },
+                observationWindow: { clock: 'node-epoch-ms', openedAtMs: 0, closedAtMs: 1 },
+            };
+        },
+    });
+
+    const result = attributeBufferedAmbientLoopAborts(built.input);
+
+    assert.equal(result.expected.length, 1, 'caller-selected refs and projection are not authority');
+    const evidence = result.expected[0].bufferedLoopProof.controlledNativeCycle.evidence;
+    assert.equal(evidence.lifecycle.preSeek.signalSequence, 2);
+    assert.equal(evidence.lifecycle.seeking.signalSequence, 3);
+    assert.notEqual(evidence.clocks.requestWallTimeS, 1);
+});
+
+test('does not let a caller projection rescue an invalid checker clock', () => {
+    const { built } = buildControlled({
+        cycleMutate: (cycle) => {
+            cycle.clockProjection = {
+                requestWallTimeS: 1,
+                protocolTimestamps: { request: 0, response: 0, failure: 0 },
+                projectedObservedAtMs: { request: 0, response: 0, failure: 0 },
+                observationWindow: { clock: 'node-epoch-ms', openedAtMs: 0, closedAtMs: 1 },
+            };
+        },
+        partsMutate: (parts) => {
+            const seeking = parts.signals.find((signal: any) => signal.kind === 'seeking');
+            seeking.observedAtMs += 100;
+        },
+    });
+    expectNoControlledAdmission(built);
+});
+
+test('keeps both duplicate raw failures raw even when the controlled cycle verifies', () => {
+    const { built } = buildControlled({
+        partsMutate: (parts) => {
+            appendSameAssetFailure(parts, 1);
+        },
+    });
+    const before = JSON.stringify(built.input);
+    const result = attributeBufferedAmbientLoopAborts(built.input);
+    assert.deepEqual(result.expected, []);
+    assert.equal(result.remaining.length, 2);
+    assert.equal(JSON.stringify(built.input), before);
+});
+
+type ControlledCase = { name: string } & ControlledOptions;
+
+const CONTROLLED_NEGATIVES: ControlledCase[] = [
+    {
+        name: 'rejects a missing controlled record for the unique request',
+        records: () => [],
+    },
+    {
+        name: 'rejects a controlled record that claims a different request',
+        records: (records) => records.map((record) => ({ ...record, requestId: 'different-request' })),
+    },
+    {
+        name: 'rejects duplicate controlled records claiming one request',
+        records: (records) => [records[0], clone(records[0])],
+    },
+    {
+        name: 'rejects a malformed cycleInput',
+        records: (records) => records.map((record) => ({ ...record, cycleInput: null })),
+    },
+    {
+        name: 'rejects incomplete provenance',
+        cycleMutate: (cycle) => {
+            delete cycle.provenance.snapshot;
+        },
+    },
+    {
+        name: 'rejects tampered provenance validity',
+        cycleMutate: (cycle) => {
+            cycle.provenance.snapshot.valid = false;
+        },
+    },
+    {
+        name: 'rejects truncated provenance events',
+        cycleMutate: (cycle) => {
+            cycle.provenance.snapshot.events.truncated = true;
+        },
+    },
+    {
+        name: 'rejects tampered sentinel validity',
+        cycleMutate: (cycle) => {
+            cycle.sentinel.valid = false;
+        },
+    },
+    {
+        name: 'rejects a wrong player identity',
+        cycleMutate: (cycle) => {
+            cycle.media.records[0].params.player.playerId = 'other-player';
+        },
+    },
+    {
+        name: 'rejects a wrong media asset',
+        cycleMutate: (cycle) => {
+            const record = cycle.media.records.find((entry: any) => entry.event === 'Media.playerEventsAdded');
+            const load = record.params.events.find((event: any) => JSON.parse(event.value).event === 'kLoad');
+            const value = JSON.parse(load.value);
+            value.url = 'http://127.0.0.1:50306/assets/ambient_field-5Mv-hV7p.ogg';
+            load.value = JSON.stringify(value);
+        },
+    },
+    {
+        name: 'rejects a wrong object source',
+        cycleMutate: (cycle) => {
+            cycle.provenance.selected.element.source = 'http://127.0.0.1:50306/assets/ambient_field-5Mv-hV7p.ogg';
+        },
+    },
+    {
+        name: 'rejects a wrong lifecycle source epoch',
+        cycleMutate: (cycle) => {
+            cycle.lifecycleSignals[2].sourceEpoch = 2;
+        },
+    },
+    {
+        name: 'rejects missing controlled controls read',
+        cycleMutate: (cycle) => {
+            delete cycle.lifecycleSignals[2].controlledControlsRead;
+        },
+    },
+    {
+        name: 'rejects an errored controlled controls read',
+        cycleMutate: (cycle) => {
+            cycle.lifecycleSignals[2].controlledControlsRead = { value: false, error: 'read-failed' };
+        },
+    },
+    {
+        name: 'rejects a true controlled controls read',
+        cycleMutate: (cycle) => {
+            cycle.lifecycleSignals[2].controlledControlsRead = { value: true, error: null };
+            cycle.lifecycleSignals[2].mediaState.controls = true;
+        },
+    },
+    {
+        name: 'rejects inconsistent controls state and recorded read',
+        cycleMutate: (cycle) => {
+            cycle.lifecycleSignals[2].mediaState.controls = true;
+        },
+    },
+    {
+        name: 'rejects a stale media record outside the observation window',
+        cycleMutate: (cycle) => {
+            cycle.media.records[0].observedAtMs = cycle.clockProjection.observationWindow.closedAtMs + 100;
+        },
+    },
+    {
+        name: 'rejects an extra manual mutation inside the cycle',
+        cycleMutate: (cycle) => {
+            appendControlledMutation(cycle, 'currentTime');
+        },
+    },
+    {
+        name: 'rejects a raised media player error',
+        cycleMutate: (cycle) => {
+            const record = cycle.media.records.find((entry: any) => entry.event === 'Media.playerErrorsRaised');
+            record.params.errors.push({ code: 2, message: 'synthetic error' });
+        },
+    },
+    {
+        name: 'rejects a partial buffered range',
+        partsMutate: (parts) => {
+            const seeking = parts.signals.find((signal: any) => signal.kind === 'seeking');
+            const index = parts.signals.indexOf(seeking);
+            parts.signals[index - 1].mediaState.buffered = [[0, 5]];
+        },
+    },
+    {
+        name: 'rejects a non-206 response after the verifier would pass',
+        partsMutate: (parts, _cycle, chain) => {
+            chain.response.status = 200;
+        },
+    },
+    {
+        name: 'rejects a mismatched content range after the verifier would pass',
+        partsMutate: (parts, _cycle, chain) => {
+            chain.response.content_range.value = 'bytes 0-9/10';
+        },
+    },
+    {
+        name: 'rejects continuation that disagrees beyond the existing 250ms guard',
+        partsMutate: (parts) => {
+            const confirmation = parts.signals[parts.signals.length - 1];
+            confirmation.mediaState.currentTime = 0.9;
+        },
+    },
+    {
+        name: 'rejects late completion with an early response instead of widening fast completion',
+        partsMutate: (parts) => {
+            const seeking = parts.signals.find((signal: any) => signal.kind === 'seeking');
+            const seeked = parts.signals.find((signal: any) => signal.kind === 'seeked');
+            const playing = parts.signals.find((signal: any) => signal.kind === 'playing'
+                && signal.mediaState.currentTime === 0);
+            seeked.observedAtMs = seeking.observedAtMs + 150;
+            playing.observedAtMs = seeking.observedAtMs + 160;
+        },
+    },
+    {
+        name: 'rejects a stale cached-response marker after the verifier would pass',
+        partsMutate: (parts, _cycle, chain) => {
+            chain.response.from_disk_cache = false;
+        },
+    },
+    {
+        name: 'rejects a seek that no longer correlates with the checker request clock',
+        partsMutate: (parts) => {
+            const seeking = parts.signals.find((signal: any) => signal.kind === 'seeking');
+            seeking.observedAtMs += 100;
+        },
+    },
+];
+
+for (const mutation of CONTROLLED_NEGATIVES) {
+    test(`controlled cycle negative: ${mutation.name}`, () => {
+        const { built } = buildControlled({
+            cycleMutate: mutation.cycleMutate,
+            partsMutate: mutation.partsMutate,
+            records: mutation.records,
+        });
+        expectNoControlledAdmission(built);
+    });
+}
