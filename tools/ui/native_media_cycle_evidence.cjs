@@ -1053,8 +1053,13 @@ function validateLifecycleAndSelect(input, binding, provenance, projection) {
         requireNonEmptyString(signal.url, 'lifecycle.url');
         requireNonEmptyString(signal.origin, 'lifecycle.origin');
         const state = requirePlain(signal.mediaState, 'lifecycle.mediaState');
-        requireEmptyArray(signal.mediaStateUnavailable, 'lifecycle.mediaStateUnavailable');
         requireEmptyObject(signal.mediaStateReadErrors, 'lifecycle.mediaStateReadErrors');
+        const unavailable = signal.mediaStateUnavailable;
+        if (!Array.isArray(unavailable)
+            || unavailable.length > 1
+            || (unavailable.length === 1 && unavailable[0] !== 'duration')) {
+            reject('lifecycle.mediaStateUnavailable');
+        }
         const entry = { signal, index, signalSequence, observedAtMs, state };
         signals.push(entry);
         bySequence.set(signalSequence, entry);
@@ -1194,6 +1199,16 @@ function validateLifecycleAndSelect(input, binding, provenance, projection) {
     if (latestStarts.length !== 1) reject('selected.start.unique');
     const start = latestStarts[0];
     if (start.observedAtMs >= selected.preSeek.observedAtMs) reject('selected.start.order');
+
+    for (const entry of signals) {
+        if (entry.signal.mediaStateUnavailable.length === 0) continue;
+        if (!(entry.observedAtMs < binding.collectionReady.dateNow)
+            || !(entry.observedAtMs < start.observedAtMs)
+            || !Object.prototype.hasOwnProperty.call(entry.state, 'duration')
+            || entry.state.duration !== null) {
+            reject('lifecycle.mediaStateUnavailable');
+        }
+    }
 
     return { signals, bySequence, selected, start, qaElementId, qaSourceEpoch };
 }

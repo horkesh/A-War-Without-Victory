@@ -576,6 +576,51 @@ function lifecycleSignal(sequence: number, kind: string, observedAtMs: number, s
     };
 }
 
+function startupAbsentLifecycleState(overrides: Record<string, unknown> = {}) {
+    return lifecycleState({
+        networkState: 2,
+        readyState: 0,
+        paused: true,
+        currentTime: 0,
+        duration: null,
+        buffered: [],
+        seekable: [],
+        ...overrides,
+    });
+}
+
+function startupSignal(sequence: number, kind: string, observedAtMs: number): any {
+    const signal: any = lifecycleSignal(
+        sequence,
+        kind,
+        observedAtMs,
+        startupAbsentLifecycleState(),
+    );
+    signal.mediaStateUnavailable = ['duration'];
+    return signal;
+}
+
+function startupAbsenceInput(): any {
+    const input = baseInput();
+    const kinds = ['playing', 'waiting', 'request-start', 'progress', 'suspend'];
+    const offsets = [-400, -300, -200, -100, -50];
+    const startup = kinds.map((kind, index) => startupSignal(
+        index + 1,
+        kind,
+        READY_MS + offsets[index],
+    ));
+    for (const signal of input.lifecycleSignals) signal.signalSequence += startup.length;
+    input.lifecycleSignals.unshift(...startup);
+    input.selected = {
+        preSeek: { signalSequence: 7 },
+        seeking: { signalSequence: 8 },
+        seeked: { signalSequence: 9 },
+        playing: { signalSequence: 10 },
+        confirmation: { signalSequence: 11 },
+    };
+    return input;
+}
+
 function baseInput(): any {
     const describeResult = selectedDescribe();
     const snapshot = provenanceSnapshot(describeResult);
@@ -903,6 +948,85 @@ describe('verifyControlledNativeLoopCycle', () => {
         expect(result.evidence.rawReferences.mediaPlayerEvents[0].timestamp).toBeGreaterThan(600000);
         expect(JSON.stringify(input)).toBe(before);
         expect(JSON.stringify(verify(input))).toBe(JSON.stringify(result));
+    });
+
+    test('accepts actual-shaped startup duration absence strictly before readiness and selected start', () => {
+        const input = startupAbsenceInput();
+        const before = JSON.stringify(input);
+        const result = verify(input);
+        expect(result.ok).toBe(true);
+        const retained = result.evidence.rawReferences.lifecycleSignals;
+        expect(retained).toHaveLength(input.lifecycleSignals.length);
+        expect(retained.slice(0, 5)).toEqual(input.lifecycleSignals.slice(0, 5));
+        for (const signal of retained.slice(0, 5)) {
+            expect(signal.mediaStateUnavailable).toEqual(['duration']);
+            expect(signal.mediaState.duration).toBeNull();
+            expect(signal.mediaState.readyState).toBe(0);
+            expect(signal.mediaStateReadErrors).toEqual({});
+        }
+        expect(JSON.stringify(input)).toBe(before);
+    });
+
+    test('rejects the startup duration marker at the exact collection readiness boundary', () => {
+        const input = startupAbsenceInput();
+        input.lifecycleSignals[4].observedAtMs = READY_MS;
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('lifecycle.mediaStateUnavailable');
+    });
+
+    test('rejects the startup duration marker after readiness but before the selected start', () => {
+        const input = startupAbsenceInput();
+        input.lifecycleSignals[4].observedAtMs = READY_MS + 100;
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('lifecycle.mediaStateUnavailable');
+    });
+
+    test('rejects the startup duration marker moved into the selected proof interval', () => {
+        const input = startupAbsenceInput();
+        input.lifecycleSignals[4].observedAtMs = POST_PLAY_MS;
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('lifecycle.mediaStateUnavailable');
+    });
+
+    test('rejects other unavailable fields, duplicate markers and malformed annotations at startup', () => {
+        const cases: any[] = [
+            ['buffered'],
+            ['duration', 'buffered'],
+            ['duration', 'duration'],
+            ['duration', null],
+            'duration',
+            {},
+        ];
+        for (const unavailable of cases) {
+            const input = startupAbsenceInput();
+            input.lifecycleSignals[4].mediaStateUnavailable = unavailable;
+            expectRejected(input);
+        }
+    });
+
+    test('rejects missing, non-null or inferred startup duration values', () => {
+        const missing = startupAbsenceInput();
+        delete missing.lifecycleSignals[4].mediaState.duration;
+        expectRejected(missing);
+
+        const undefinedDuration = startupAbsenceInput();
+        undefinedDuration.lifecycleSignals[4].mediaState.duration = undefined;
+        expectRejected(undefinedDuration);
+
+        const inferred = startupAbsenceInput();
+        inferred.lifecycleSignals[4].mediaState.duration = 30;
+        expectRejected(inferred);
+    });
+
+    test('rejects any startup mediaState read error even with the duration marker', () => {
+        const input = startupAbsenceInput();
+        input.lifecycleSignals[4].mediaStateReadErrors = { duration: 'read-threw' };
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('lifecycle.mediaStateReadErrors');
     });
 
     test('accepts actual pipeline/buffering shapes, historical creation and documented optional absence', () => {
