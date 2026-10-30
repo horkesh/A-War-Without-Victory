@@ -10,11 +10,17 @@ import {
 } from '../../src/ui/map/audio/audio_preferences.js';
 import {
   getAudioState,
+  isAmbientPlaybackEnabled,
   playAmbientBed,
   playCue,
+  playMusic,
   resetAudioForTests,
+  setAmbientPlaybackEnabled,
+  setEnabled,
   unlockAudioForUserGesture,
+  unmuteAudio,
 } from '../../src/ui/map/audio/audio_engine.js';
+import * as soundManifest from '../../src/ui/map/audio/sound_manifest.js';
 import { getCueConfig } from '../../src/ui/map/audio/sound_manifest.js';
 import { hasResolvedCueAsset, resolveCueAssetUrl } from '../../src/ui/map/audio/audioAssets.js';
 import { AudioSurfaceBedController } from '../../src/ui/map/components/AudioSurfaceBedController.js';
@@ -148,6 +154,7 @@ describe('WP-8 ambient audio floor', () => {
 
   afterEach(() => {
     cleanup();
+    vi.restoreAllMocks();
     vi.unstubAllGlobals();
     useGameStore.setState(useGameStore.getInitialState());
   });
@@ -184,6 +191,7 @@ describe('WP-8 ambient audio floor', () => {
     }
 
     applyAudioPreferences({ muted: false, masterVolume: 0.5 });
+    setAmbientPlaybackEnabled(true);
     unlockAudioForUserGesture();
     await expect(playAmbientBed('ambient_warroom')).resolves.toBeUndefined();
 
@@ -197,6 +205,7 @@ describe('WP-8 ambient audio floor', () => {
 
   it('mute silences cues and ambient beds through the same bus state', async () => {
     applyAudioPreferences({ muted: false, masterVolume: 0.5 });
+    setAmbientPlaybackEnabled(true);
     unlockAudioForUserGesture();
     await playAmbientBed('ambient_warroom');
     applyAudioPreferences({ muted: true, masterVolume: 0.5 });
@@ -227,6 +236,7 @@ describe('WP-8 ambient audio floor', () => {
   });
 
   it('applies startup preferences before gesture-unlocked ambient playback', async () => {
+    setAmbientPlaybackEnabled(true);
     render(React.createElement(AudioSurfaceBedController, { appScreen: 'warroom' }));
 
     expect(getAudioState()).toMatchObject({
@@ -250,6 +260,7 @@ describe('WP-8 ambient audio floor', () => {
 
   it('updates volume on looping-bed reentry without replaying or resetting the running element', async () => {
     applyAudioPreferences({ muted: false, masterVolume: 0.5 });
+    setAmbientPlaybackEnabled(true);
     unlockAudioForUserGesture();
     await playAmbientBed('ambient_warroom');
 
@@ -273,6 +284,7 @@ describe('WP-8 ambient audio floor', () => {
 
   it('retries a pending looping play instead of treating paused=false as success', async () => {
     applyAudioPreferences({ muted: false, masterVolume: 0.5 });
+    setAmbientPlaybackEnabled(true);
     unlockAudioForUserGesture();
     await playAmbientBed('ambient_warroom');
 
@@ -290,6 +302,7 @@ describe('WP-8 ambient audio floor', () => {
 
   it('retries after a rejected play while keeping the loop setter idempotent', async () => {
     applyAudioPreferences({ muted: false, masterVolume: 0.5 });
+    setAmbientPlaybackEnabled(true);
     unlockAudioForUserGesture();
     await playAmbientBed('ambient_warroom');
 
@@ -306,6 +319,7 @@ describe('WP-8 ambient audio floor', () => {
 
   it('retries after a synchronous play failure', async () => {
     applyAudioPreferences({ muted: false, masterVolume: 0.5 });
+    setAmbientPlaybackEnabled(true);
     unlockAudioForUserGesture();
 
     FakeAudio.playMode = 'throw';
@@ -323,6 +337,7 @@ describe('WP-8 ambient audio floor', () => {
 
   it('does not let an older rejected settlement undo a newer successful play', async () => {
     applyAudioPreferences({ muted: false, masterVolume: 0.5 });
+    setAmbientPlaybackEnabled(true);
     unlockAudioForUserGesture();
     await playAmbientBed('ambient_warroom');
 
@@ -346,6 +361,7 @@ describe('WP-8 ambient audio floor', () => {
 
   it('does not let an older successful settlement mask a newer failed play', async () => {
     applyAudioPreferences({ muted: false, masterVolume: 0.5 });
+    setAmbientPlaybackEnabled(true);
     unlockAudioForUserGesture();
     await playAmbientBed('ambient_warroom');
 
@@ -368,6 +384,7 @@ describe('WP-8 ambient audio floor', () => {
 
   it('replays a looping bed when the element is paused, ended, or errored', async () => {
     applyAudioPreferences({ muted: false, masterVolume: 0.5 });
+    setAmbientPlaybackEnabled(true);
     unlockAudioForUserGesture();
     await playAmbientBed('ambient_warroom');
 
@@ -393,6 +410,7 @@ describe('WP-8 ambient audio floor', () => {
 
   it('plays conservatively when running-state fields are incomplete', async () => {
     applyAudioPreferences({ muted: false, masterVolume: 0.5 });
+    setAmbientPlaybackEnabled(true);
     unlockAudioForUserGesture();
     await playAmbientBed('ambient_warroom');
 
@@ -408,6 +426,7 @@ describe('WP-8 ambient audio floor', () => {
 
   it('replays when error is undefined rather than explicitly null', async () => {
     applyAudioPreferences({ muted: false, masterVolume: 0.5 });
+    setAmbientPlaybackEnabled(true);
     unlockAudioForUserGesture();
     await playAmbientBed('ambient_warroom');
 
@@ -426,6 +445,7 @@ describe('WP-8 ambient audio floor', () => {
 
   it('issues loop and play commands again when the loop setting changes', async () => {
     applyAudioPreferences({ muted: false, masterVolume: 0.5 });
+    setAmbientPlaybackEnabled(true);
     unlockAudioForUserGesture();
     await playAmbientBed('ambient_warroom');
 
@@ -444,6 +464,7 @@ describe('WP-8 ambient audio floor', () => {
 
   it('resets and retriggers one-shot cues without redundant loop setters', async () => {
     applyAudioPreferences({ muted: false, masterVolume: 0.5 });
+    setAmbientPlaybackEnabled(true);
     unlockAudioForUserGesture();
 
     await playCue('ui_click', 1000);
@@ -462,6 +483,7 @@ describe('WP-8 ambient audio floor', () => {
   });
 
   it('retries ambient playback through controller pointer and keyboard gestures after a pending failure', async () => {
+    setAmbientPlaybackEnabled(true);
     render(React.createElement(AudioSurfaceBedController, { appScreen: 'warroom' }));
 
     window.dispatchEvent(new Event('pointerdown'));
@@ -485,6 +507,7 @@ describe('WP-8 ambient audio floor', () => {
   });
 
   it('does not reissue commands on a second gesture when the ambient bed is already successfully running', async () => {
+    setAmbientPlaybackEnabled(true);
     render(React.createElement(AudioSurfaceBedController, { appScreen: 'warroom' }));
 
     window.dispatchEvent(new Event('pointerdown'));
@@ -507,6 +530,7 @@ describe('WP-8 ambient audio floor', () => {
   });
 
   it('stops the old bed on surface change, starts the new bed, and stops on a null surface', async () => {
+    setAmbientPlaybackEnabled(true);
     const view = render(React.createElement(AudioSurfaceBedController, { appScreen: 'warroom' }));
 
     window.dispatchEvent(new Event('pointerdown'));
@@ -538,6 +562,7 @@ describe('WP-8 ambient audio floor', () => {
   });
 
   it('allows the controller bed to resume after mute and unmute with exact command counts', async () => {
+    setAmbientPlaybackEnabled(true);
     render(React.createElement(AudioSurfaceBedController, { appScreen: 'warroom' }));
 
     window.dispatchEvent(new Event('pointerdown'));
@@ -567,5 +592,183 @@ describe('WP-8 ambient audio floor', () => {
     expect(element.currentTimeSetValues).toEqual([]);
     expect(element.volumeSetValues[1]).toBeCloseTo(0.5 * 0.14, 5);
     expect(getAudioState()).toMatchObject({ muted: false, currentAmbientId: 'ambient_warroom' });
+  });
+
+  it('keeps ambient playback gated off by default and restores the gate on test reset', () => {
+    expect(getAudioState().ambientPlaybackEnabled).toBe(false);
+    expect(isAmbientPlaybackEnabled()).toBe(false);
+
+    setAmbientPlaybackEnabled(true);
+    expect(getAudioState().ambientPlaybackEnabled).toBe(true);
+    expect(isAmbientPlaybackEnabled()).toBe(true);
+
+    resetAudioForTests();
+    expect(getAudioState().ambientPlaybackEnabled).toBe(false);
+    expect(isAmbientPlaybackEnabled()).toBe(false);
+  });
+
+  it('blocks both ambient entry points before resolution or Audio construction', async () => {
+    const resolveSpy = vi.spyOn(soundManifest, 'resolveCuePlaybackUrl');
+    applyAudioPreferences({ muted: false, masterVolume: 0.5 });
+    unlockAudioForUserGesture();
+
+    await playCue('ambient_warroom', 1000);
+    await playAmbientBed('ambient_field');
+
+    expect(resolveSpy).not.toHaveBeenCalled();
+    expect(FakeAudio.instances).toHaveLength(0);
+    expect(getAudioState()).toMatchObject({
+      ambientPlaybackEnabled: false,
+      acceptedCueCount: 0,
+      lastCueId: null,
+      lastResolvedAssetUrl: null,
+      currentAmbientId: null,
+      requestedAmbientId: 'ambient_field',
+    });
+
+    setAmbientPlaybackEnabled(true);
+    await playCue('ambient_warroom', 1000);
+
+    expect(resolveSpy).toHaveBeenCalledWith('ambient_warroom');
+    expect(FakeAudio.instances).toHaveLength(1);
+    expect(FakeAudio.latest().src).toMatch(/ambient_warroom.*\.ogg$/u);
+    expect(getAudioState()).toMatchObject({
+      ambientPlaybackEnabled: true,
+      acceptedCueCount: 1,
+      lastCueId: 'ambient_warroom',
+      currentAmbientId: null,
+    });
+  });
+
+  it('keeps all beds silent across settings, gesture, and surface changes without changing global audio', async () => {
+    const resolveSpy = vi.spyOn(soundManifest, 'resolveCuePlaybackUrl');
+    const prefs = applyAudioPreferences(loadAudioPreferences(new MemoryStorage()));
+    expect(prefs).toEqual({ muted: false, masterVolume: 0.5 });
+
+    for (const bedId of ['ambient_warroom', 'ambient_field', 'ambient_archive'] as const) {
+      await playAmbientBed(bedId);
+      expect(getAudioState().requestedAmbientId).toBe(bedId);
+    }
+
+    setEnabled(true);
+    unmuteAudio();
+    applyAudioPreferences({ muted: false, masterVolume: 0.5 });
+    unlockAudioForUserGesture();
+    expect(isAmbientPlaybackEnabled()).toBe(false);
+
+    const view = render(React.createElement(AudioSurfaceBedController, { appScreen: 'warroom' }));
+    window.dispatchEvent(new Event('pointerdown'));
+    await Promise.resolve();
+
+    view.rerender(React.createElement(AudioSurfaceBedController, { appScreen: 'game' }));
+    useGameStore.setState({ chronicleOpen: true });
+    view.rerender(React.createElement(AudioSurfaceBedController, { appScreen: 'game' }));
+    view.rerender(React.createElement(AudioSurfaceBedController, { appScreen: 'mainMenu' }));
+    await Promise.resolve();
+
+    expect(resolveSpy).not.toHaveBeenCalled();
+    expect(FakeAudio.instances).toHaveLength(0);
+    expect(getAudioState()).toMatchObject({
+      enabled: true,
+      muted: false,
+      ambientPlaybackEnabled: false,
+      currentAmbientId: null,
+      requestedAmbientId: 'ambient_archive',
+    });
+  });
+
+  it('pauses every cached ambient bed on disable while leaving UI, music, and stinger playback untouched', async () => {
+    const originalResolveCuePlaybackUrl = soundManifest.resolveCuePlaybackUrl;
+    vi.spyOn(soundManifest, 'resolveCuePlaybackUrl').mockImplementation((id) => {
+      if (id === 'menu_theme' || id === 'stinger_dayton_ceasefire') {
+        return `/test/${id}.ogg`;
+      }
+      return originalResolveCuePlaybackUrl(id);
+    });
+    applyAudioPreferences({ muted: false, masterVolume: 0.5 });
+    setAmbientPlaybackEnabled(true);
+    unlockAudioForUserGesture();
+
+    await playCue('ambient_warroom', 1000);
+    await playAmbientBed('ambient_field');
+    await playCue('ambient_archive', 1000);
+    await playCue('ui_click', 1000);
+    await playMusic('menu_theme');
+    await playCue('stinger_dayton_ceasefire', 1000);
+
+    const ambientElements = FakeAudio.instances.filter((element) => /ambient_(warroom|field|archive)/u.test(element.src));
+    const uiElement = FakeAudio.instances.find((element) => element.src.includes('ui_click'))!;
+    const musicElement = FakeAudio.instances.find((element) => element.src.includes('menu_theme'))!;
+    const stingerElement = FakeAudio.instances.find((element) => element.src.includes('stinger_dayton_ceasefire'))!;
+    expect(ambientElements).toHaveLength(3);
+    expect(uiElement.playCallCount).toBe(1);
+    expect(musicElement.playCallCount).toBe(1);
+    expect(stingerElement.playCallCount).toBe(1);
+    expect(getAudioState().currentMusicId).toBe('menu_theme');
+
+    setAmbientPlaybackEnabled(false);
+
+    for (const element of ambientElements) {
+      expect(element.pauseCallCount).toBe(1);
+    }
+    expect(uiElement.pauseCallCount).toBe(0);
+    expect(musicElement.pauseCallCount).toBe(0);
+    expect(stingerElement.pauseCallCount).toBe(0);
+    expect(getAudioState()).toMatchObject({
+      ambientPlaybackEnabled: false,
+      currentAmbientId: null,
+      currentMusicId: 'menu_theme',
+      lastCueId: 'stinger_dayton_ceasefire',
+    });
+  });
+
+  it('makes repeated disable idempotent and supports explicit re-enable with retry', async () => {
+    applyAudioPreferences({ muted: false, masterVolume: 0.5 });
+    setAmbientPlaybackEnabled(true);
+    unlockAudioForUserGesture();
+    await playAmbientBed('ambient_warroom');
+
+    const element = FakeAudio.latest();
+    expect(element.playCallCount).toBe(1);
+
+    setAmbientPlaybackEnabled(false);
+    expect(element.pauseCallCount).toBe(1);
+    expect(getAudioState()).toMatchObject({
+      ambientPlaybackEnabled: false,
+      currentAmbientId: null,
+    });
+
+    setAmbientPlaybackEnabled(false);
+    expect(element.pauseCallCount).toBe(1);
+    expect(isAmbientPlaybackEnabled()).toBe(false);
+
+    setAmbientPlaybackEnabled(true);
+    expect(element.playCallCount).toBe(1);
+    expect(getAudioState().currentAmbientId).toBeNull();
+
+    await playAmbientBed('ambient_warroom');
+
+    expect(element.playCallCount).toBe(2);
+    expect(element.pauseCallCount).toBe(1);
+    expect(getAudioState()).toMatchObject({
+      ambientPlaybackEnabled: true,
+      currentAmbientId: 'ambient_warroom',
+    });
+  });
+
+  it('does not treat zero volume as the ambient playback gate', async () => {
+    applyAudioPreferences({ muted: false, masterVolume: 0 });
+    setAmbientPlaybackEnabled(true);
+    unlockAudioForUserGesture();
+
+    await playAmbientBed('ambient_warroom');
+
+    expect(FakeAudio.instances).toHaveLength(1);
+    expect(FakeAudio.latest().playCallCount).toBe(1);
+    expect(FakeAudio.latest().volume).toBe(0);
+    expect(getAudioState()).toMatchObject({
+      ambientPlaybackEnabled: true,
+      currentAmbientId: 'ambient_warroom',
+    });
   });
 });
