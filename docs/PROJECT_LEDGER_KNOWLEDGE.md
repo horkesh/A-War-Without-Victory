@@ -1,3 +1,7 @@
+## 2026-10-30 - Match native readiness stages, not pipeline intent to DOM readiness
+
+Chromium pipeline kPlaying and DOM playing are different stages. Keep native end/seek/pipeline order, then match the same-player pipeline BUFFERING_HAVE_ENOUGH readiness record (not audio-buffering and not suspended-start) to DOM completion with the genuine unchanged alignment fence. Optional resume pipeline evidence belongs strictly between native kPlay and native kEnded. Preserve all mutation/error/resource guards and show the decisive readiness record and signed delta. Old failed captures stay failed; this is controlled observation, not audible-continuity proof. See [readiness correlation](PROJECT_LEDGER.md#2026-10-30---correlate-native-pipeline-readiness-to-dom-completion).
+
 ## 2026-10-30 - Continuous ambient requests need command idempotence
 
 A repeated surface or gesture request may target an element already playing. Update volume without reissuing loop/play only after successful playback and explicit healthy state. Keep pending/rejected retries and stale-promise identity controls; paused=false alone is insufficient. This reduces redundant commands without exempting actual playback mutations from native QA. Mock tests prove command semantics; package/browser evidence remains separate. See [ambient reentry](PROJECT_LEDGER.md#2026-10-30---idempotent-continuous-ambient-playback-requests).

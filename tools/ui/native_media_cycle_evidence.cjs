@@ -1704,13 +1704,16 @@ function correlateCycle(mediaResult, lifecycle, provenance, effectiveMediaOffset
                 reject('media.cycle.resume.play.ambiguous');
             }
         }
-        // At most one explained resume-side pipeline kPlaying may accompany the
-        // kPlay inside the same retained 20ms fence. It is not required and it
-        // is never the post-seek anchor.
+        // At most one explained resume-side pipeline kPlaying may sit strictly
+        // between the uniquely matched native kPlay start and the native kEnded
+        // endpoint. The selection is by native cycling timestamps, not by the
+        // projected application attempt or the following seek. This separate
+        // pipeline stage is not bounded by the DOM resume notification's 20ms
+        // fence; the observed delay is retained as a diagnostic and is not a
+        // latency waiver.
         const explainedPlaying = sorted.filter((event) => event.role === 'playing'
-            && event.projectedAtMs >= start.projectedAtMs
-            && event.projectedAtMs < seek.projectedAtMs
-            && event.projectedAtMs <= lifecycle.start.projectedAtMs + CLOCK_FENCE_MS);
+            && event.timestamp > start.timestamp
+            && event.timestamp < ended.timestamp);
         if (explainedPlaying.length > 1) reject('media.cycle.resume.playing.ambiguous');
         resumeNativePlaying = explainedPlaying.length === 1 ? explainedPlaying[0] : null;
     } else {
@@ -1724,11 +1727,36 @@ function correlateCycle(mediaResult, lifecycle, provenance, effectiveMediaOffset
     if (!(mediaResult.log.timestamp <= start.timestamp)) reject('media.log.order');
     if (!(mediaResult.load.timestamp <= start.timestamp)) reject('media.load.order');
 
+    // The DOM readyState-4 completion follows the pipeline BUFFERING_HAVE_ENOUGH
+    // readiness marker, not the earlier pipeline kPlaying transition. The two
+    // native stages are distinct: the pipeline kPlaying is selected separately
+    // and must precede or equal this readiness marker. Only the pipeline
+    // buffering state is authoritative here; the separate audio buffering state
+    // marker never supplies readiness. The marker is bound to the selected
+    // zero seek, the selected cycle and the selected confirmation, so a marker
+    // from a previous or later cycle cannot be matched arbitrarily late.
+    const readinessCandidates = sorted.filter((event) => event.value.event === 'kBufferingStateChanged'
+        && Object.prototype.hasOwnProperty.call(event.value, 'pipeline_buffering_state')
+        && event.projectedAtMs > seek.projectedAtMs
+        && event.projectedAtMs <= selected.confirmation.projectedAtMs
+        && Math.abs(event.projectedAtMs - selected.playing.projectedAtMs) <= CLOCK_FENCE_MS);
+    if (readinessCandidates.length !== 1) reject('media.cycle.readiness.unique');
+    const readiness = readinessCandidates[0];
+    const pipelineBuffering = readiness.value.pipeline_buffering_state;
+    if (!isPlainObject(pipelineBuffering)
+        || pipelineBuffering.state !== 'BUFFERING_HAVE_ENOUGH'
+        || pipelineBuffering.for_suspended_start !== false) {
+        reject('media.cycle.readiness.stage');
+    }
+
     const postCandidates = sorted.filter((event) => event.role === 'playing'
         && event.projectedAtMs > seek.projectedAtMs
-        && Math.abs(event.projectedAtMs - selected.playing.projectedAtMs) <= CLOCK_FENCE_MS);
+        && event.projectedAtMs <= selected.confirmation.projectedAtMs);
     if (postCandidates.length !== 1) reject('media.cycle.playing.unique');
     const postPlaying = postCandidates[0];
+    if (!(postPlaying.projectedAtMs <= readiness.projectedAtMs)) {
+        reject('media.cycle.playing.order');
+    }
 
     const seekingStates = sorted.filter((event) => event.role === 'seeking-state'
         && event.projectedAtMs >= start.projectedAtMs
@@ -1756,12 +1784,13 @@ function correlateCycle(mediaResult, lifecycle, provenance, effectiveMediaOffset
     }
     for (const event of sorted) {
         if (event.projectedAtMs < start.projectedAtMs
-            || event.projectedAtMs > postPlaying.projectedAtMs) {
+            || event.projectedAtMs > readiness.projectedAtMs) {
             continue;
         }
         if (event === start || event === ended || event === seek || event === postPlaying) {
             continue;
         }
+        if (event === readiness) continue;
         if (event === resumeNativePlaying) continue;
         if (event.role === 'load' || event.role === 'pause' || event.role === 'error') {
             reject('media.cycle.interference');
@@ -1775,11 +1804,14 @@ function correlateCycle(mediaResult, lifecycle, provenance, effectiveMediaOffset
     if (selected.confirmation.projectedAtMs < postPlaying.projectedAtMs) {
         reject('media.cycle.confirmation');
     }
-    for (const event of cycleEvents) {
+    if (selected.confirmation.projectedAtMs < readiness.projectedAtMs) {
+        reject('media.cycle.confirmation');
+    }
+    for (const event of [...cycleEvents, readiness]) {
         if (event.projectedAtMs < selectionFloorMs) reject('media.window');
     }
 
-    return { sorted, start, ended, seek, postPlaying, cycleEvents };
+    return { sorted, start, ended, seek, postPlaying, readiness, cycleEvents };
 }
 
 function validateInterference(provenance, lifecycle, clockModel) {
@@ -1917,6 +1949,16 @@ function buildEvidence(
                 eventIndex: cycle.postPlaying.eventIndex,
                 timestamp: cycle.postPlaying.timestamp,
             },
+            readinessReference: {
+                recordSequence: cycle.readiness.record.sequence,
+                recordIndex: cycle.readiness.recordIndex,
+                eventIndex: cycle.readiness.eventIndex,
+                timestamp: cycle.readiness.timestamp,
+                pipelineBufferingState: {
+                    state: cycle.readiness.value.pipeline_buffering_state.state,
+                    forSuspendedStart: cycle.readiness.value.pipeline_buffering_state.for_suspended_start,
+                },
+            },
             eventOrder: cycle.cycleEvents.map((event) => event.value.event),
             nodeDeliveryOrderUsed: false,
             decoderEofUsed: false,
@@ -1990,6 +2032,9 @@ function buildEvidence(
             endedProjectedAtMs: cycle.ended.projectedAtMs,
             seekProjectedAtMs: cycle.seek.projectedAtMs,
             postSeekPlayingProjectedAtMs: cycle.postPlaying.projectedAtMs,
+            readinessProjectedAtMs: cycle.readiness.projectedAtMs,
+            readinessVsDomPlayingDeltaMs: cycle.readiness.projectedAtMs
+                - selected.playing.projectedAtMs,
             clockFenceMs: CLOCK_FENCE_MS,
         },
         rawReferences: {

@@ -580,6 +580,10 @@
               "value": "{\"event\":\"kPipelineStateChange\",\"pipeline_state\":\"kPlaying\"}"
             },
             {
+              "timestamp": 698513.783061,
+              "value": "{\"event\":\"kBufferingStateChanged\",\"pipeline_buffering_state\":{\"for_suspended_start\":false,\"state\":\"BUFFERING_HAVE_ENOUGH\"}}"
+            },
+            {
               "timestamp": 698513.783379,
               "value": "{\"event\":\"kBufferingStateChanged\",\"audio_buffering_state\":{\"state\":\"BUFFERING_HAVE_ENOUGH\"}}"
             },

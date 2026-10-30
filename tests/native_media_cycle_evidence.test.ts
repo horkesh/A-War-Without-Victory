@@ -71,6 +71,7 @@ const PRE_SEEK_MS = LOOP_BASE_MS + 2000;
 const ENDED_MS = LOOP_BASE_MS + 2100;
 const SEEK_MS = LOOP_BASE_MS + 2102;
 const POST_PLAY_MS = LOOP_BASE_MS + 2114;
+const READINESS_MS = POST_PLAY_MS + 3;
 const CONFIRMATION_MS = POST_PLAY_MS + 100;
 const EARLIER_START_MS = START_MS - 400;
 const EARLIER_ENDED_MS = START_MS - 200;
@@ -450,6 +451,9 @@ function mediaSnapshot() {
         makeEvent('kBufferingStateChanged', POST_PLAY_MS - 20, {
             pipeline_buffering_state: { for_suspended_start: false, state: 'BUFFERING_HAVE_ENOUGH' },
         }),
+        makeEvent('kBufferingStateChanged', READINESS_MS, {
+            pipeline_buffering_state: { for_suspended_start: false, state: 'BUFFERING_HAVE_ENOUGH' },
+        }),
     ];
     return {
         schema: MEDIA_SCHEMA,
@@ -781,6 +785,19 @@ function capturedSequenceInput(): any {
     for (const entry of CAPTURED_SEQUENCE) {
         events.push({ timestamp: entry.timestamp, value: JSON.stringify(entry.value) });
     }
+    // Unit-only readiness marker at the retained DOM completion stage. The raw
+    // captured sequence above is not rewritten; this synthetic marker only
+    // supplies the separately required pipeline buffering stage.
+    events.push({
+        timestamp: CAPTURED_SEQUENCE[3].timestamp + 0.00005,
+        value: JSON.stringify({
+            event: 'kBufferingStateChanged',
+            pipeline_buffering_state: {
+                for_suspended_start: false,
+                state: 'BUFFERING_HAVE_ENOUGH',
+            },
+        }),
+    });
 
     const protocolRequest = (REQUEST_MS - mediaOffsetMs) / 1000;
     input.clockProjection.protocolTimestamps = {
@@ -2328,6 +2345,7 @@ const RESUME_PRE_SEEK_MS = RESUME_MS + (RESUME_PRE_SEEK_TIME - RESUME_TIME) * 10
 const RESUME_ENDED_MS = RESUME_PRE_SEEK_MS + (RESUME_DURATION - RESUME_PRE_SEEK_TIME) * 1000;
 const RESUME_SEEK_MS = RESUME_ENDED_MS + 2;
 const RESUME_POST_PLAY_MS = RESUME_SEEK_MS + 30;
+const RESUME_READINESS_MS = RESUME_POST_PLAY_MS + 3;
 const RESUME_CONFIRMATION_MS = RESUME_POST_PLAY_MS + 100;
 const RESUME_WINDOW_CLOSE = RESUME_CONFIRMATION_MS + 200;
 const RESUME_NATIVE_PLAY_MS = RESUME_MS - 3;
@@ -2356,6 +2374,12 @@ function resumeMediaEvents(): any[] {
             audio_buffering_state: { state: 'BUFFERING_HAVE_ENOUGH' },
         }),
         makeEvent('kBufferingStateChanged', RESUME_POST_PLAY_MS - 20, {
+            pipeline_buffering_state: {
+                for_suspended_start: false,
+                state: 'BUFFERING_HAVE_ENOUGH',
+            },
+        }),
+        makeEvent('kBufferingStateChanged', RESUME_READINESS_MS, {
             pipeline_buffering_state: {
                 for_suspended_start: false,
                 state: 'BUFFERING_HAVE_ENOUGH',
@@ -3076,13 +3100,14 @@ describe('verifyControlledNativeLoopCycle observed-resume start mode', () => {
         expectResumeRejected(delayedEnded);
     });
 
-    test('still rejects the retained native post-seek playing 21.406ms before DOM playing (Case 3)', () => {
+    test('rejects a post-seek readiness marker displaced 21.406ms from DOM playing', () => {
         const input = resumeInput();
-        nativePostSeekPlaying(input).timestamp =
-            mediaTimestamp(RESUME_POST_PLAY_MS + 3 - 21.406);
+        const readiness = pipelineReadinessWithin(input, RESUME_READINESS_MS);
+        expect(readiness).toHaveLength(1);
+        readiness[0].timestamp = mediaTimestamp(RESUME_READINESS_MS + 21.406);
         const result = verify(input);
         expect(result.ok).toBe(false);
-        expect(result.reasons).toContain('media.cycle.playing.unique');
+        expect(result.reasons).toContain('media.cycle.readiness.unique');
     });
 
     test('rejects a missing native endpoint, missing post-seek playing, non-zero completion and failed continuation', () => {
@@ -3111,6 +3136,299 @@ describe('verifyControlledNativeLoopCycle observed-resume start mode', () => {
         const extraPlay = resumeInput();
         mediaPlayerEvents(extraPlay).push(makeEvent('kPlay', RESUME_MS + 100));
         expectResumeRejected(extraPlay, 'media.cycle.resume.play.ambiguous');
+    });
+});
+
+/*
+ * Post-seek stage correlation amendment.
+ *
+ * Pinned Chromium 146 marks the pipeline kPlaying shortly after the seek, while
+ * the DOM `playing` completion follows the separate pipeline BUFFERING_HAVE_ENOUGH
+ * readiness marker. The old 20ms pipeline-playing-to-DOM-playing cap therefore
+ * compared distinct stages. These synthetic unit markers pin the corrected
+ * same-stage readiness fence without widening any existing fence.
+ */
+const READINESS_FENCE_MS = 20;
+
+function mediaNetworkOffsetMs(input: any): number {
+    return input.clockProjection.requestWallTimeS * 1000
+        - input.clockProjection.protocolTimestamps.request * 1000;
+}
+
+function addPipelineReadiness(input: any, epochMs: number): any {
+    const event = makeEvent('kBufferingStateChanged', epochMs, {
+        pipeline_buffering_state: {
+            for_suspended_start: false,
+            state: 'BUFFERING_HAVE_ENOUGH',
+        },
+    });
+    mediaPlayerEvents(input).push(event);
+    return event;
+}
+
+function pipelineReadinessWithin(input: any, epochMs: number, fenceMs = READINESS_FENCE_MS): any[] {
+    const offsetMs = mediaNetworkOffsetMs(input);
+    return mediaPlayerEvents(input).filter((event: any) => {
+        const value = JSON.parse(event.value);
+        if (value.event !== 'kBufferingStateChanged') return false;
+        if (!Object.prototype.hasOwnProperty.call(value, 'pipeline_buffering_state')) return false;
+        return Math.abs(event.timestamp * 1000 + offsetMs - epochMs) <= fenceMs;
+    });
+}
+
+function delayedReadinessInput(delayMs: number): { input: any; marker: any; playingMs: number } {
+    const input = baseInput();
+    const playingMs = POST_PLAY_MS + delayMs;
+    moveSignal(input.lifecycleSignals[4], playingMs);
+    moveSignal(input.lifecycleSignals[5], playingMs + 100);
+    const marker = addPipelineReadiness(input, playingMs + 0.3);
+    const windowClose = playingMs + 300;
+    for (const record of input.media.records) record.observedAtMs = windowClose - 10;
+    input.clockProjection.observationWindow.closedAtMs = windowClose;
+    return { input, marker, playingMs };
+}
+
+function moveReadinessToForeignPlayer(input: any, marker: any): void {
+    const events = mediaPlayerEvents(input);
+    events.splice(events.indexOf(marker), 1);
+    appendMediaRecord(input, {
+        event: 'Media.playerCreated',
+        params: { player: { playerId: 'player-2' } },
+    });
+    appendMediaRecord(input, {
+        event: 'Media.playerPropertiesChanged',
+        params: { playerId: 'player-2', properties: [{ name: 'kFrameUrl', value: FRAME_URL }] },
+    });
+    appendMediaRecord(input, {
+        event: 'Media.playerEventsAdded',
+        params: { playerId: 'player-2', events: [marker] },
+    });
+    input.media.metadata.playersObserved = 2;
+    input.media.summary.playersObserved = 2;
+}
+
+function resumeSidePipelinePlaying(input: any): any {
+    return mediaPlayerEvents(input).find((event: any) => {
+        const value = JSON.parse(event.value);
+        return value.event === 'kPipelineStateChange'
+            && value.pipeline_state === 'kPlaying'
+            && Math.abs(event.timestamp - mediaTimestamp(RESUME_MS - 2)) < 0.000001;
+    });
+}
+
+function delayedResumePipelineInput(delayMs: number): any {
+    const input = resumeInput();
+    resumeSidePipelinePlaying(input).timestamp = mediaTimestamp(RESUME_MS + delayMs);
+    if (pipelineReadinessWithin(input, RESUME_POST_PLAY_MS + 3).length === 0) {
+        addPipelineReadiness(input, RESUME_POST_PLAY_MS + 3);
+    }
+    return input;
+}
+
+describe('post-seek readiness stage correlation', () => {
+    test('accepts delayed DOM playing matched to the unique pipeline HAVE_ENOUGH readiness marker', () => {
+        const { input, marker, playingMs } = delayedReadinessInput(238);
+        const before = JSON.stringify(input);
+        const result = verify(input);
+        expect(result.ok).toBe(true);
+        expect(result.evidence.lifecycle.playing.observedAtMs).toBe(playingMs);
+        // The retained post-seek pipeline reference remains the pipeline kPlaying,
+        // not the much later DOM completion.
+        expect(result.evidence.media.postSeekPlayingReference.timestamp)
+            .toBe(mediaTimestamp(POST_PLAY_MS));
+        expect(result.evidence.clocks.postSeekPlayingProjectedAtMs).toBeCloseTo(POST_PLAY_MS, 3);
+        expect(result.evidence.media.eventOrder).toEqual([
+            'kPipelineStateChange',
+            'kPipelineStateChange',
+            'kSeek',
+            'kPipelineStateChange',
+        ]);
+        expect(result.evidence.rawReferences.mediaPlayerEvents.some((event: any) =>
+            event.value.event === 'kBufferingStateChanged'
+            && event.value.pipeline_buffering_state?.state === 'BUFFERING_HAVE_ENOUGH'
+            && event.value.pipeline_buffering_state?.for_suspended_start === false
+            && event.timestamp === marker.timestamp)).toBe(true);
+        const markerRecord = input.media.records.find(
+            (record: any) => record.params?.events?.includes(marker),
+        );
+        expect(result.evidence.media.readinessReference).toMatchObject({
+            recordSequence: markerRecord.sequence,
+            recordIndex: input.media.records.indexOf(markerRecord),
+            eventIndex: markerRecord.params.events.indexOf(marker),
+            timestamp: marker.timestamp,
+            pipelineBufferingState: {
+                state: 'BUFFERING_HAVE_ENOUGH',
+                forSuspendedStart: false,
+            },
+        });
+        expect(result.evidence.clocks.readinessProjectedAtMs).toBeCloseTo(playingMs + 0.3, 3);
+        expect(result.evidence.clocks.readinessVsDomPlayingDeltaMs).toBeCloseTo(0.3, 3);
+        expect(Math.abs(result.evidence.clocks.readinessVsDomPlayingDeltaMs))
+            .toBeLessThanOrEqual(READINESS_FENCE_MS);
+        expect(JSON.stringify(input)).toBe(before);
+    });
+
+    test('accepts a native pipeline playing after kPlay but just before the app attempt', () => {
+        const input = resumeInput();
+        setResumeTiming(input, RESUME_MS - 50, RESUME_MS - 45, RESUME_MS - 60);
+        resumeSidePipelinePlaying(input).timestamp = mediaTimestamp(RESUME_MS - 55);
+        const before = JSON.stringify(input);
+        const result = verify(input);
+        expect(result.ok).toBe(true);
+        expect(result.evidence.startMode).toBe('observed-resume');
+        expect(result.evidence.rawReferences.mediaPlayerEvents.some((event: any) =>
+            event.value.event === 'kPipelineStateChange'
+            && event.value.pipeline_state === 'kPlaying'
+            && event.timestamp === mediaTimestamp(RESUME_MS - 55))).toBe(true);
+        expect(JSON.stringify(input)).toBe(before);
+    });
+
+    test('rejects an extra pipeline playing after kEnded before the endpoint seek', () => {
+        const input = resumeInput();
+        const events = mediaPlayerEvents(input);
+        events.splice(events.indexOf(resumeSidePipelinePlaying(input)), 1);
+        events.push(makeEvent('kPipelineStateChange', RESUME_ENDED_MS + 0.5, {
+            pipeline_state: 'kPlaying',
+        }));
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('media.cycle.playing.ambiguous');
+    });
+
+    test('accepts one optional resume-side pipeline playing 41-49ms after the DOM resume', () => {
+        for (const delayMs of [41, 49]) {
+            const input = delayedResumePipelineInput(delayMs);
+            const before = JSON.stringify(input);
+            const result = verify(input);
+            expect(result.ok).toBe(true);
+            expect(result.evidence.startMode).toBe('observed-resume');
+            expect(result.evidence.media.postSeekPlayingReference.timestamp)
+                .toBe(mediaTimestamp(RESUME_POST_PLAY_MS));
+            expect(result.evidence.media.eventOrder).toEqual([
+                'kPlay',
+                'kPipelineStateChange',
+                'kSeek',
+                'kPipelineStateChange',
+            ]);
+            expect(result.evidence.rawReferences.mediaPlayerEvents.some((event: any) =>
+                event.value.event === 'kPipelineStateChange'
+                && event.value.pipeline_state === 'kPlaying'
+                && event.timestamp === mediaTimestamp(RESUME_MS + delayMs))).toBe(true);
+            expect(JSON.stringify(input)).toBe(before);
+        }
+    });
+
+    test('rejects a second optional resume-side pipeline playing after the matched intent', () => {
+        const input = delayedResumePipelineInput(41);
+        mediaPlayerEvents(input).push(makeEvent('kPipelineStateChange', RESUME_MS + 10, {
+            pipeline_state: 'kPlaying',
+        }));
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('media.cycle.resume.playing.ambiguous');
+    });
+
+    test('rejects missing, audio-only, wrong-player, wrong-state and suspended readiness markers', () => {
+        const missing = delayedReadinessInput(238);
+        const missingEvents = mediaPlayerEvents(missing.input);
+        missingEvents.splice(missingEvents.indexOf(missing.marker), 1);
+        expect(verify(missing.input).reasons).toContain('media.cycle.readiness.unique');
+
+        const audioOnly = delayedReadinessInput(238);
+        audioOnly.marker.value = JSON.stringify({
+            event: 'kBufferingStateChanged',
+            audio_buffering_state: { state: 'BUFFERING_HAVE_ENOUGH' },
+        });
+        expect(verify(audioOnly.input).reasons).toContain('media.cycle.readiness.unique');
+
+        const wrongPlayer = delayedReadinessInput(238);
+        moveReadinessToForeignPlayer(wrongPlayer.input, wrongPlayer.marker);
+        expect(verify(wrongPlayer.input).reasons).toContain('media.cycle.readiness.unique');
+
+        for (const pipelineBufferingState of [
+            { for_suspended_start: false, state: 'BUFFERING_LOW_DATA' },
+            { for_suspended_start: true, state: 'BUFFERING_HAVE_ENOUGH' },
+            { state: 'BUFFERING_HAVE_ENOUGH' },
+        ]) {
+            const input = delayedReadinessInput(238);
+            input.marker.value = JSON.stringify({
+                event: 'kBufferingStateChanged',
+                pipeline_buffering_state: pipelineBufferingState,
+            });
+            expect(verify(input.input).reasons).toContain('media.cycle.readiness.stage');
+        }
+    });
+
+    test('rejects duplicate, preseek, out-of-order and later-cycle readiness markers', () => {
+        const duplicate = delayedReadinessInput(238);
+        addPipelineReadiness(duplicate.input, duplicate.playingMs + 0.4);
+        expect(verify(duplicate.input).reasons).toContain('media.cycle.readiness.unique');
+
+        const preseek = delayedReadinessInput(238);
+        preseek.marker.timestamp = mediaTimestamp(SEEK_MS - 1);
+        expect(verify(preseek.input).reasons).toContain('media.cycle.readiness.unique');
+
+        const outOfOrder = delayedReadinessInput(238);
+        const pipeline = mediaPlayerEvents(outOfOrder.input).find((event: any) => {
+            const value = JSON.parse(event.value);
+            return value.event === 'kPipelineStateChange'
+                && value.pipeline_state === 'kPlaying'
+                && Math.abs(event.timestamp - mediaTimestamp(POST_PLAY_MS)) < 0.000001;
+        });
+        pipeline.timestamp = mediaTimestamp(outOfOrder.playingMs + 1);
+        expect(verify(outOfOrder.input).reasons).toContain('media.cycle.playing.order');
+
+        const laterCycle = delayedReadinessInput(238);
+        laterCycle.marker.timestamp = mediaTimestamp(laterCycle.playingMs + 1000);
+        expect(verify(laterCycle.input).reasons).toContain('media.cycle.readiness.unique');
+    });
+
+    test('rejects competing native play, pause, seek, load, end, reset and error inside the readiness interval', () => {
+        const cases: Array<[string, Record<string, unknown>, string]> = [
+            ['kPlay', {}, 'media.cycle.resume.play.ambiguous'],
+            ['kPause', {}, 'media.cycle.interference'],
+            ['kSeek', { seek_target: 0 }, 'media.cycle.seek.ambiguous'],
+            ['kLoad', { url: AMBIENT }, 'media.load.unique'],
+            ['kEnded', {}, 'media.cycle.ended.ambiguous'],
+            ['kError', {}, 'media.cycle.interference'],
+        ];
+        for (const [event, extra, reason] of cases) {
+            const { input } = delayedReadinessInput(238);
+            mediaPlayerEvents(input).push(makeEvent(event, POST_PLAY_MS + 100, extra));
+            const result = verify(input);
+            expect(result.ok).toBe(false);
+            expect(result.reasons).toContain(reason);
+        }
+
+        const reset = delayedReadinessInput(238);
+        const records = reset.input.provenance.snapshot.events.records;
+        records.push({
+            sequence: records.length + 1,
+            kind: 'source-epoch',
+            at: at(POST_PLAY_MS + 100),
+            id: 'media:1',
+            cause: 'load',
+            previous: 1,
+            sourceEpoch: 2,
+            source: AMBIENT,
+        });
+        reset.input.provenance.snapshot.events.count = records.length;
+        expect(verify(reset.input).reasons).toContain('provenance.source-reset');
+    });
+
+    test('keeps the unchanged 20ms readiness fence and rejects 20.001ms', () => {
+        for (const offsetMs of [READINESS_FENCE_MS, -READINESS_FENCE_MS]) {
+            const { input, marker, playingMs } = delayedReadinessInput(238);
+            marker.timestamp = mediaTimestamp(playingMs + offsetMs);
+            expect(verify(input).ok).toBe(true);
+        }
+        for (const offsetMs of [20.001, -20.001]) {
+            const { input, marker, playingMs } = delayedReadinessInput(238);
+            marker.timestamp = mediaTimestamp(playingMs + offsetMs);
+            const result = verify(input);
+            expect(result.ok).toBe(false);
+            expect(result.reasons).toContain('media.cycle.readiness.unique');
+        }
     });
 });
 
@@ -3161,13 +3479,13 @@ describe('clock-model comparison composition', () => {
         expect(JSON.stringify(input)).toBe(before);
     });
 
-    test('rejects post-seek playing whose raw wall agrees with native playing but performance projection is outside 20ms', () => {
+    test('rejects post-seek readiness whose raw wall agrees with DOM playing but performance projection is outside 20ms', () => {
         const input = baseInput();
         setComparisonClock(input.lifecycleSignals[4], POST_PLAY_MS + 15, POST_PLAY_MS + 25);
         const before = JSON.stringify(input);
         const result = verify(input);
         expect(result.ok).toBe(false);
-        expect(result.reasons).toContain('media.cycle.playing.unique');
+        expect(result.reasons).toContain('media.cycle.readiness.unique');
         expect(JSON.stringify(input)).toBe(before);
     });
 
