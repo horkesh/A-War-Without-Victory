@@ -6439,6 +6439,486 @@ function installAmbientLifecycleObserver() {
       observedAtMs: Date.now(),
       ...stateSnapshot,
     });
+    return window.__AWWV_QA_AMBIENT_LIFECYCLE_SIGNALS__[window.__AWWV_QA_AMBIENT_LIFECYCLE_SIGNALS__.length - 1];
+  };
+  const passiveDiagnosticCap = 64;
+  const passiveDiagnostics = [];
+  const passiveDiagnosticReceipt = {
+    label: 'passive-continuation-diagnostic',
+    cap: passiveDiagnosticCap,
+    entries: passiveDiagnostics,
+    dropped: 0,
+    overflowed: false,
+  };
+  let passiveDiagnosticSequence = 0;
+  window.__AWWV_QA_AMBIENT_PASSIVE_CONTINUATION_DIAGNOSTICS__ = passiveDiagnosticReceipt;
+  const copyPassiveValue = (value) => {
+    try {
+      return JSON.parse(JSON.stringify(value));
+    } catch {
+      return null;
+    }
+  };
+  const pushPassiveDiagnostic = (stage, details = {}) => {
+    passiveDiagnosticSequence += 1;
+    if (passiveDiagnostics.length >= passiveDiagnosticCap) {
+      passiveDiagnosticReceipt.dropped += 1;
+      passiveDiagnosticReceipt.overflowed = true;
+      return null;
+    }
+    const entry = {
+      kind: 'passive-continuation-diagnostic',
+      label: 'passive-continuation-diagnostic',
+      diagnosticSequence: passiveDiagnosticSequence,
+      stage,
+      ...details,
+    };
+    passiveDiagnostics.push(entry);
+    return entry;
+  };
+  const passiveSampleDelaysMs = [16, 40, 80];
+  const passiveContinuityKeys = [
+    'playCount',
+    'pauseCount',
+    'lastPlaySequence',
+    'lastPauseSequence',
+    'lastPlayEpoch',
+    'lastPauseEpoch',
+  ];
+  const passiveSamplers = new WeakMap();
+  const allPassiveSamplers = new Set();
+  const clearPassiveTimers = (sampler) => {
+    for (const timerId of sampler.timerIds) {
+      try {
+        window.clearTimeout(timerId);
+      } catch {}
+    }
+    sampler.timerIds = [];
+  };
+  const stopPassiveSampler = (sampler, reason) => {
+    if (!sampler) return;
+    const alreadyStopped = sampler.cancelled;
+    sampler.cancelled = true;
+    sampler.stopReason = reason;
+    clearPassiveTimers(sampler);
+    allPassiveSamplers.delete(sampler);
+    if (passiveSamplers.get(sampler.element) === sampler) passiveSamplers.delete(sampler.element);
+    if (!alreadyStopped) {
+      pushPassiveDiagnostic('stop', {
+        reason,
+        elementId: sampler.elementId,
+        sourceEpoch: sampler.baselineSourceEpoch,
+        url: sampler.baselineRawUrl,
+        triggerObservedAtMs: sampler.triggerObservedAtMs,
+        sampleIndex: sampler.sampleIndex,
+        observedAtMs: Date.now(),
+      });
+    }
+  };
+  const cancelPassiveSampling = (element, reason) => {
+    const sampler = passiveSamplers.get(element);
+    if (sampler) stopPassiveSampler(sampler, reason);
+  };
+  const cancelAllPassiveSampling = (reason) => {
+    for (const sampler of [...allPassiveSamplers]) stopPassiveSampler(sampler, reason);
+  };
+  const passiveProvenanceApi = () => {
+    try {
+      const api = window.__AWWV_NATIVE_MEDIA_MUTATION_PROVENANCE__;
+      return api && typeof api.describe === 'function' ? api : null;
+    } catch {
+      return null;
+    }
+  };
+  const describePassiveProvenance = (api, element) => {
+    try {
+      return { described: api.describe(element), error: null };
+    } catch (error) {
+      return { described: null, error: String(error?.message ?? error).slice(0, 400) };
+    }
+  };
+  const passiveProvenanceValid = (described) => {
+    if (!described || described.valid !== true || described.diagnosticValid !== true) return false;
+    const describedElement = described.element;
+    if (!describedElement
+      || describedElement.alive !== true
+      || typeof describedElement.id !== 'string'
+      || !Number.isInteger(describedElement.sourceEpoch)
+      || typeof describedElement.source !== 'string') return false;
+    const counts = described.mutationCounts;
+    if (!counts
+      || !Number.isFinite(counts.setters)
+      || !Number.isFinite(counts.methods)
+      || !counts.byName
+      || typeof counts.byName !== 'object') return false;
+    return Boolean(described.provenance && described.provenance.continuity && typeof described.provenance.continuity === 'object');
+  };
+  const sameMutationCounts = (before, after) => {
+    if (before.setters !== after.setters || before.methods !== after.methods) return false;
+    const beforeKeys = Object.keys(before.byName);
+    const afterKeys = Object.keys(after.byName);
+    if (beforeKeys.length !== afterKeys.length) return false;
+    for (const key of beforeKeys) {
+      if (!Object.is(before.byName[key], after.byName[key])) return false;
+    }
+    return true;
+  };
+  const passiveMutationReason = (baseline, current) => {
+    if (!passiveProvenanceValid(current)) return 'provenance-invalid';
+    if (!baseline || !baseline.element || current.element.id !== baseline.element.id) return 'identity-change';
+    if (current.element.sourceEpoch !== baseline.element.sourceEpoch) return 'source-epoch-change';
+    if (!Object.is(current.element.source, baseline.element.source)) return 'source-change';
+    if (!sameMutationCounts(baseline.mutationCounts, current.mutationCounts)) return 'mutation-counts';
+    const beforeContinuity = baseline.continuity;
+    const afterContinuity = current.provenance.continuity;
+    for (const key of passiveContinuityKeys) {
+      if (!Object.is(afterContinuity[key], beforeContinuity[key])) return `continuity-${key}`;
+    }
+    return null;
+  };
+  const snapshotPassiveProvenance = (described) => {
+    if (!passiveProvenanceValid(described)) return null;
+    const byName = {};
+    for (const key of Object.keys(described.mutationCounts.byName)) {
+      byName[key] = described.mutationCounts.byName[key];
+    }
+    const continuity = {};
+    for (const key of passiveContinuityKeys) {
+      continuity[key] = described.provenance.continuity[key];
+    }
+    return {
+      element: {
+        id: described.element.id,
+        sourceEpoch: described.element.sourceEpoch,
+        source: described.element.source,
+      },
+      mutationCounts: {
+        setters: described.mutationCounts.setters,
+        methods: described.mutationCounts.methods,
+        byName,
+      },
+      continuity,
+    };
+  };
+  const publishPassiveConfirmation = (sampler, candidate) => {
+    window.__AWWV_QA_AMBIENT_LIFECYCLE_SIGNALS__.push({
+      kind: 'passive-continuation',
+      signalSequence: ++nextSignalSequence,
+      elementId: candidate.elementId,
+      sourceEpoch: candidate.sourceEpoch,
+      url: candidate.url,
+      origin: sampler.origin,
+      observedAtMs: candidate.observedAtMs,
+      ...candidate.stateSnapshot,
+      label: 'passive-continuation',
+      sampling: candidate.sampling,
+    });
+  };
+  const runPassiveSample = (sampler, requestedOffsetMs) => {
+    if (sampler.cancelled) return;
+    if (passiveSamplers.get(sampler.element) !== sampler) {
+      sampler.cancelled = true;
+      return;
+    }
+    sampler.sampleIndex += 1;
+    const sampleIndex = sampler.sampleIndex;
+    const triggerObservedAtMs = sampler.triggerObservedAtMs;
+    const baselineCurrentTime = sampler.baselineCurrentTime;
+    let rejection = null;
+    const activeApi = passiveProvenanceApi();
+    if (!activeApi || activeApi !== sampler.api) {
+      rejection = { outcome: 'provenance-api-changed', sampling: {} };
+    } else {
+      const pre = describePassiveProvenance(activeApi, sampler.element);
+      if (pre.error) {
+        rejection = { outcome: 'provenance-read-error', sampling: { error: pre.error } };
+      } else {
+        const reason = passiveMutationReason(sampler.baselineProvenance, pre.described);
+        if (reason) rejection = { outcome: 'mutation', sampling: { mutationReason: reason } };
+      }
+    }
+    const observedAtMs = Date.now();
+    const stateSnapshot = readMediaState(sampler.element);
+    let rawUrl = '';
+    let rawUrlError = null;
+    try {
+      rawUrl = sampler.element.currentSrc || sampler.element.src || '';
+    } catch (error) {
+      rawUrlError = String(error?.message ?? error).slice(0, 400);
+    }
+    let ownerDocument = null;
+    let ownerDocumentError = null;
+    try {
+      ownerDocument = sampler.element.ownerDocument;
+    } catch (error) {
+      ownerDocumentError = String(error?.message ?? error).slice(0, 400);
+    }
+    const metadataValue = getMetadata(sampler.element);
+    let postDescribed = null;
+    if (!rejection) {
+      const postApi = passiveProvenanceApi();
+      if (!postApi || postApi !== sampler.api) {
+        rejection = { outcome: 'provenance-api-changed', sampling: {} };
+      } else {
+        const post = describePassiveProvenance(postApi, sampler.element);
+        if (post.error) {
+          rejection = { outcome: 'provenance-read-error', sampling: { error: post.error } };
+        } else {
+          const reason = passiveMutationReason(sampler.baselineProvenance, post.described);
+          if (reason) rejection = { outcome: 'mutation', sampling: { mutationReason: reason } };
+          else postDescribed = post.described;
+        }
+      }
+    }
+    if (!rejection && rawUrlError) {
+      rejection = { outcome: 'read-failure', sampling: { readFailure: 'source-url-read-error', error: rawUrlError } };
+    }
+    if (!rejection && ownerDocumentError) {
+      rejection = { outcome: 'read-failure', sampling: { readFailure: 'owner-document-read-error', error: ownerDocumentError } };
+    }
+    if (!rejection && rawUrl !== sampler.baselineRawUrl) {
+      rejection = { outcome: 'source-change', sampling: { sourceChange: true } };
+    }
+    if (!rejection && ownerDocument !== sampler.baselineOwnerDocument) {
+      rejection = { outcome: 'realm-teardown', sampling: { realmTeardown: true } };
+    }
+    if (!rejection && metadataValue.sourceEpoch !== sampler.baselineSourceEpoch) {
+      rejection = { outcome: 'source-change', sampling: { sourceChange: true } };
+    }
+    const mediaState = stateSnapshot.mediaState;
+    let outcome;
+    let sampling;
+    if (rejection) {
+      outcome = rejection.outcome;
+      sampling = { ...rejection.sampling };
+    } else if (!Number.isFinite(mediaState.currentTime)) {
+      outcome = 'read-failure';
+      sampling = { readFailure: 'currentTime-unavailable' };
+    } else {
+      const readFailureFields = [
+        ...Object.keys(stateSnapshot.mediaStateReadErrors),
+        ...stateSnapshot.mediaStateUnavailable,
+      ];
+      if (readFailureFields.length > 0) {
+        outcome = 'read-failure';
+        sampling = { readFailure: 'state-read-error', fields: readFailureFields };
+      } else if (mediaState.paused === true) {
+        outcome = 'paused';
+        sampling = {};
+      } else if (mediaState.ended === true) {
+        outcome = 'ended';
+        sampling = {};
+      } else if (mediaState.currentTime > baselineCurrentTime) {
+        outcome = 'advanced';
+        sampling = {
+          provenanceElementId: postDescribed.element.id,
+          provenanceSourceEpoch: postDescribed.element.sourceEpoch,
+        };
+      } else {
+        outcome = 'not-advanced';
+        sampling = {};
+      }
+    }
+    if (outcome === 'advanced') {
+      const stillOwned = passiveSamplers.get(sampler.element) === sampler;
+      if (!stillOwned && sampler.stopReason === 'new-trigger') {
+        outcome = 'ownership-replaced';
+        sampling = { ...sampling, stopReason: sampler.stopReason };
+      } else if (sampler.cancelled || !stillOwned) {
+        outcome = 'cancelled-during-read';
+        sampling = { ...sampling, stopReason: sampler.stopReason ?? null };
+      }
+    }
+    const candidate = {
+      elementId: metadataValue.elementId,
+      sourceEpoch: metadataValue.sourceEpoch,
+      url: rawUrl || sampler.baselineRawUrl,
+      observedAtMs,
+      requestedOffsetMs,
+      sampleIndex,
+      triggerObservedAtMs,
+      baselineCurrentTime,
+      stateSnapshot,
+      outcome,
+      confirmedAdvance: outcome === 'advanced',
+      ...sampling,
+    };
+    if (outcome === 'advanced') {
+      publishPassiveConfirmation(sampler, {
+        ...candidate,
+        sampling: {
+          label: 'passive-continuation',
+          source: 'actual-zero-position-playing-continuation',
+          triggerObservedAtMs,
+          requestedOffsetMs,
+          sampledAtMs: observedAtMs,
+          actualDelayMs: observedAtMs - triggerObservedAtMs,
+          sampleIndex,
+          maxSamples: passiveSampleDelaysMs.length,
+          baselineCurrentTime,
+          outcome,
+          confirmedAdvance: true,
+          ...sampling,
+        },
+      });
+    } else {
+      pushPassiveDiagnostic('sample', {
+        reason: outcome,
+        elementId: candidate.elementId,
+        sourceEpoch: candidate.sourceEpoch,
+        url: candidate.url,
+        observedAtMs,
+        candidate: copyPassiveValue(candidate),
+      });
+    }
+    if (outcome !== 'not-advanced' || sampleIndex >= passiveSampleDelaysMs.length) {
+      stopPassiveSampler(sampler, outcome);
+    }
+  };
+  const maybeStartPassiveContinuation = (element, signal) => {
+    if (!signal || !signal.mediaState) return;
+    if (signal.mediaState.currentTime !== 0 || signal.mediaState.paused !== false) return;
+    let enabled = false;
+    try {
+      enabled = window.__AWWV_QA_ENABLE_PASSIVE_CONTINUATION_SAMPLES__ === true;
+    } catch {
+      enabled = false;
+    }
+    if (!enabled) return;
+    cancelPassiveSampling(element, 'new-trigger');
+    const value = getMetadata(element);
+    const api = passiveProvenanceApi();
+    if (!api) {
+      pushPassiveDiagnostic('api', {
+        reason: 'provenance-api-missing',
+        elementId: value.elementId,
+        sourceEpoch: value.sourceEpoch,
+        observedAtMs: Date.now(),
+      });
+      return;
+    }
+    const baseline = describePassiveProvenance(api, element);
+    if (baseline.error) {
+      pushPassiveDiagnostic('api', {
+        reason: 'provenance-read-error',
+        error: baseline.error,
+        elementId: value.elementId,
+        sourceEpoch: value.sourceEpoch,
+        observedAtMs: Date.now(),
+      });
+      return;
+    }
+    const baselineSnapshot = snapshotPassiveProvenance(baseline.described);
+    if (!baselineSnapshot) {
+      pushPassiveDiagnostic('api', {
+        reason: 'provenance-invalid',
+        elementId: value.elementId,
+        sourceEpoch: value.sourceEpoch,
+        observedAtMs: Date.now(),
+      });
+      return;
+    }
+    let rawUrl;
+    try {
+      rawUrl = element.currentSrc || element.src || '';
+    } catch (error) {
+      pushPassiveDiagnostic('api', {
+        reason: 'source-url-read-error',
+        error: String(error?.message ?? error).slice(0, 400),
+        elementId: value.elementId,
+        sourceEpoch: value.sourceEpoch,
+        observedAtMs: Date.now(),
+      });
+      return;
+    }
+    if (!rawUrl) {
+      pushPassiveDiagnostic('api', {
+        reason: 'source-url-missing',
+        elementId: value.elementId,
+        sourceEpoch: value.sourceEpoch,
+        observedAtMs: Date.now(),
+      });
+      return;
+    }
+    let ownerDocument;
+    try {
+      ownerDocument = element.ownerDocument;
+    } catch (error) {
+      pushPassiveDiagnostic('api', {
+        reason: 'owner-document-read-error',
+        error: String(error?.message ?? error).slice(0, 400),
+        elementId: value.elementId,
+        sourceEpoch: value.sourceEpoch,
+        observedAtMs: Date.now(),
+      });
+      return;
+    }
+    if (!ownerDocument) {
+      pushPassiveDiagnostic('api', {
+        reason: 'realm-unavailable',
+        elementId: value.elementId,
+        sourceEpoch: value.sourceEpoch,
+        observedAtMs: Date.now(),
+      });
+      return;
+    }
+    const sampler = {
+      element,
+      api,
+      elementId: value.elementId,
+      origin: window.location.origin,
+      baselineProvenance: baselineSnapshot,
+      baselineCurrentTime: signal.mediaState.currentTime,
+      baselineSourceEpoch: value.sourceEpoch,
+      baselineRawUrl: rawUrl,
+      baselineOwnerDocument: ownerDocument,
+      triggerObservedAtMs: signal.observedAtMs,
+      sampleIndex: 0,
+      timerIds: [],
+      cancelled: false,
+      stopReason: null,
+    };
+    passiveSamplers.set(element, sampler);
+    allPassiveSamplers.add(sampler);
+    if (typeof window.setTimeout !== 'function') {
+      pushPassiveDiagnostic('schedule', {
+        reason: 'timer-unavailable',
+        elementId: value.elementId,
+        sourceEpoch: value.sourceEpoch,
+        observedAtMs: Date.now(),
+      });
+      stopPassiveSampler(sampler, 'timer-unavailable');
+      return;
+    }
+    for (const delay of passiveSampleDelaysMs) {
+      try {
+        const timerId = window.setTimeout(() => {
+          try {
+            runPassiveSample(sampler, delay);
+          } catch (error) {
+            pushPassiveDiagnostic('callback', {
+              reason: 'callback-exception',
+              error: String(error?.message ?? error).slice(0, 400),
+              elementId: sampler.elementId,
+              sourceEpoch: sampler.baselineSourceEpoch,
+              observedAtMs: Date.now(),
+            });
+            stopPassiveSampler(sampler, 'callback-exception');
+          }
+        }, delay);
+        sampler.timerIds.push(timerId);
+      } catch (error) {
+        pushPassiveDiagnostic('schedule', {
+          reason: 'timer-schedule-failure',
+          error: String(error?.message ?? error).slice(0, 400),
+          elementId: value.elementId,
+          sourceEpoch: value.sourceEpoch,
+          observedAtMs: Date.now(),
+        });
+        stopPassiveSampler(sampler, 'timer-schedule-failure');
+        return;
+      }
+    }
   };
   const observedElements = new WeakSet();
   const observedEvents = new WeakSet();
@@ -6463,9 +6943,30 @@ function installAmbientLifecycleObserver() {
     listener: (event) => {
       if (!(event.target instanceof HTMLMediaElement) || observedEvents.has(event)) return;
       observedEvents.add(event);
+      let signal = null;
       try {
-        record(signalKind, event.target);
+        signal = record(signalKind, event.target);
       } catch {}
+      try {
+        if (passiveCancellationEventKinds.has(signalKind)) {
+          cancelPassiveSampling(event.target, `event:${signalKind}`);
+        }
+        if (signalKind === 'playing') maybeStartPassiveContinuation(event.target, signal);
+      } catch {}
+    },
+  }));
+  const passiveCancellationEventKinds = new Set([
+    'emptied',
+    'request-start',
+    'browser-abort',
+    'error',
+    'seeking',
+  ]);
+  const passiveCancellationBindings = ['ended', 'ratechange', 'pause'].map((eventKind) => ({
+    eventKind,
+    listener: (event) => {
+      if (!(event.target instanceof HTMLMediaElement)) return;
+      cancelPassiveSampling(event.target, `event:${eventKind}`);
     },
   }));
   const observeElement = (element) => {
@@ -6473,11 +6974,15 @@ function installAmbientLifecycleObserver() {
     for (const binding of mediaEventBindings) {
       element.addEventListener(binding.eventKind, binding.listener);
     }
+    for (const binding of passiveCancellationBindings) {
+      element.addEventListener(binding.eventKind, binding.listener);
+    }
     observedElements.add(element);
   };
   const observeAndRecordMethod = (kind, element, forceNewEpoch = false) => {
     try {
       observeElement(element);
+      cancelPassiveSampling(element, `method:${kind}`);
       record(kind, element, forceNewEpoch);
     } catch {}
   };
@@ -6499,6 +7004,12 @@ function installAmbientLifecycleObserver() {
   for (const binding of mediaEventBindings) {
     document.addEventListener(binding.eventKind, binding.listener, true);
   }
+  for (const binding of passiveCancellationBindings) {
+    document.addEventListener(binding.eventKind, binding.listener, true);
+  }
+  const teardownPassiveSampling = () => cancelAllPassiveSampling('teardown');
+  window.addEventListener('pagehide', teardownPassiveSampling, true);
+  window.addEventListener('beforeunload', teardownPassiveSampling, true);
 }
 
 async function installAmbientLifecycleObserverBeforeStartup(page) {
@@ -6508,6 +7019,32 @@ async function installAmbientLifecycleObserverBeforeStartup(page) {
 
 async function readAmbientLifecycleSignals(frame) {
   return frame.evaluate(() => [...(window.__AWWV_QA_AMBIENT_LIFECYCLE_SIGNALS__ ?? [])]);
+}
+
+async function readAmbientPassiveDiagnostics(frame) {
+  return frame.evaluate(() => {
+    const value = window.__AWWV_QA_AMBIENT_PASSIVE_CONTINUATION_DIAGNOSTICS__;
+    if (!value || !Array.isArray(value.entries)) {
+      return {
+        available: false,
+        label: 'passive-continuation-diagnostic',
+        cap: null,
+        count: 0,
+        dropped: 0,
+        overflowed: false,
+        entries: [],
+      };
+    }
+    return {
+      available: true,
+      label: value.label ?? 'passive-continuation-diagnostic',
+      cap: value.cap ?? null,
+      count: value.entries.length,
+      dropped: value.dropped ?? 0,
+      overflowed: value.overflowed === true,
+      entries: value.entries.map((entry) => JSON.parse(JSON.stringify(entry))),
+    };
+  });
 }
 
 function attributeBufferedAmbientLoopAbortsThroughProof({
@@ -7612,6 +8149,7 @@ async function runFaction(faction, result) {
     const tileFetchAbortSignals = await readTileFetchAbortSignals(frame);
     attributeTileFetchAborts(networkFailures, tileFetchAbortSignals, expectedTileFetchAborts);
     const ambientLifecycleSignals = await readAmbientLifecycleSignals(frame);
+    const ambientPassiveContinuationDiagnostics = await readAmbientPassiveDiagnostics(frame);
     attributeAmbientLifecycleAborts(
       networkFailures,
       ambientLifecycleSignals,
@@ -7649,6 +8187,7 @@ async function runFaction(faction, result) {
       expectedAmbientLifecycleAborts,
       expectedBufferedAmbientLoopAborts,
       ambientLifecycleSignals,
+      ambientPassiveContinuationDiagnostics,
       mainProcessOutputEvidencePath,
       mainProcessStdout,
       mainProcessStderr,
@@ -7679,6 +8218,27 @@ async function runFaction(faction, result) {
     const failureAmbientLifecycleSignals = frame
       ? await readAmbientLifecycleSignals(frame).catch(() => [])
       : [];
+    const failureAmbientPassiveContinuationDiagnostics = frame
+      ? await readAmbientPassiveDiagnostics(frame).catch((error) => ({
+        available: false,
+        label: 'passive-continuation-diagnostic',
+        cap: null,
+        count: 0,
+        dropped: 0,
+        overflowed: false,
+        entries: [],
+        error: compactText(error?.stack ?? error),
+      }))
+      : {
+        available: false,
+        label: 'passive-continuation-diagnostic',
+        cap: null,
+        count: 0,
+        dropped: 0,
+        overflowed: false,
+        entries: [],
+        error: 'No observed owner frame was resolved before failure',
+      };
     result.factions.push({
       faction,
       failed: true,
@@ -7699,6 +8259,7 @@ async function runFaction(faction, result) {
       expectedAmbientLifecycleAborts,
       failureTileFetchAbortSignals,
       failureAmbientLifecycleSignals,
+      failureAmbientPassiveContinuationDiagnostics,
       ...(collectCdpNetworkV3 ? { cdpNetworkCollection, cdpNetworkCollectionError } : {}),
       mainProcessOutputEvidencePath,
       mainProcessStdout,

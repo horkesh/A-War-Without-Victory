@@ -978,6 +978,202 @@ function ambientSignals(window: Window & typeof globalThis): any[] {
     return (window as any).__AWWV_QA_AMBIENT_LIFECYCLE_SIGNALS__;
 }
 
+type PassiveHarnessOptions = {
+    enableFlag?: boolean;
+    provenance?: 'valid' | 'absent' | 'invalid' | 'throwing';
+    now?: number;
+    sharedProvenanceObjects?: boolean;
+    failScheduleAt?: number;
+};
+
+function createPassiveHarness(options: PassiveHarnessOptions = {}) {
+    const dom = new JSDOM(`
+        <audio id="ambient" src="http://127.0.0.1:3002/assets/ambient_field-D4f9a2.ogg"></audio>
+    `);
+    const { window } = dom;
+    const ambient = window.document.querySelector<HTMLAudioElement>('#ambient')!;
+    const calls = { play: 0, pause: 0, load: 0 };
+    Object.defineProperties(window.HTMLMediaElement.prototype, {
+        play: { configurable: true, writable: true, value: () => { calls.play += 1; return Promise.resolve(); } },
+        pause: { configurable: true, writable: true, value: () => { calls.pause += 1; } },
+        load: { configurable: true, writable: true, value: () => { calls.load += 1; } },
+    });
+    let now = options.now ?? 1_000;
+    let currentTime = 0;
+    let paused = false;
+    let ended = false;
+    let throwCurrentTime = false;
+    let throwBuffered = false;
+    let callbackThrow = false;
+    let ownerDocumentLost = false;
+    let durationUnavailable = false;
+    let onCurrentTimeRead: (() => void) | null = null;
+    let buffered = mediaTimeRanges([[-0.0065, 0.12]]);
+    let seekable = mediaTimeRanges([[0, 30]]);
+    const currentTimeReads = { count: 0 };
+    Object.defineProperties(ambient, {
+        currentSrc: { configurable: true, value: ambient.src },
+        networkState: { configurable: true, get: () => 2 },
+        readyState: { configurable: true, get: () => 4 },
+        paused: { configurable: true, get: () => paused, set: () => {} },
+        ended: { configurable: true, get: () => ended },
+        seeking: { configurable: true, get: () => false },
+        currentTime: {
+            configurable: true,
+            get: () => {
+                currentTimeReads.count += 1;
+                if (onCurrentTimeRead) onCurrentTimeRead();
+                if (throwCurrentTime) throw new Error('currentTime read blocked');
+                return currentTime;
+            },
+            set: () => {},
+        },
+        duration: { configurable: true, get: () => durationUnavailable ? undefined : 30 },
+        loop: { configurable: true, get: () => true },
+        buffered: { configurable: true, get: () => { if (throwBuffered) throw new Error('buffered read blocked'); return buffered; } },
+        seekable: { configurable: true, get: () => seekable },
+        error: { configurable: true, value: null },
+        ownerDocument: { configurable: true, get: () => ownerDocumentLost ? null : window.document },
+    });
+    const provenanceState = {
+        id: 'prov:1',
+        alive: true,
+        sourceEpoch: 1,
+        source: ambient.src,
+        setters: 0,
+        methods: 0,
+        byName: {} as Record<string, number>,
+        continuity: {
+            playCount: 0,
+            pauseCount: 0,
+            lastPlaySequence: null as number | null,
+            lastPauseSequence: null as number | null,
+            lastPlayEpoch: null as number | null,
+            lastPauseEpoch: null as number | null,
+        },
+    };
+    let describeCalls = 0;
+    const api = {
+        describe: (_element: unknown) => {
+            describeCalls += 1;
+            if (options.provenance === 'throwing' && describeCalls > 1) throw new Error('provenance read blocked');
+            const result = {
+                schema: 'awwv.native-media-mutation-provenance.v1',
+                diagnosticOnly: true,
+                diagnosticValid: options.provenance !== 'invalid',
+                valid: options.provenance !== 'invalid',
+                reason: options.provenance === 'invalid' ? 'invalid-test-provenance' : null,
+                element: {
+                    id: provenanceState.id,
+                    alive: options.provenance !== 'invalid' && provenanceState.alive,
+                    supported: true,
+                    subclass: false,
+                    sourceEpoch: provenanceState.sourceEpoch,
+                    source: provenanceState.source,
+                    sourceIsAmbient: true,
+                },
+                mutationCounts: {
+                    setters: provenanceState.setters,
+                    methods: provenanceState.methods,
+                    byName: options.sharedProvenanceObjects ? provenanceState.byName : { ...provenanceState.byName },
+                },
+                provenance: {
+                    profile: 'controlled-qa-native-media-mutation-provenance',
+                    continuity: options.sharedProvenanceObjects ? provenanceState.continuity : { ...provenanceState.continuity },
+                },
+            };
+            if (callbackThrow) {
+                Object.defineProperty(result, 'valid', {
+                    configurable: true,
+                    get: () => { throw new Error('post-read provenance blocked'); },
+                });
+            }
+            return result;
+        },
+    };
+    if (options.provenance !== 'absent') {
+        (window as any).__AWWV_NATIVE_MEDIA_MUTATION_PROVENANCE__ = api;
+    }
+    if (options.enableFlag !== false) {
+        (window as any).__AWWV_QA_ENABLE_PASSIVE_CONTINUATION_SAMPLES__ = true;
+    }
+    let nextTimerId = 1;
+    let scheduleCalls = 0;
+    const timers: Array<{ id: number; delay: number; callback: () => void; cleared: boolean; fired: boolean }> = [];
+    (window as any).setTimeout = (callback: () => void, delay: number) => {
+        scheduleCalls += 1;
+        if (options.failScheduleAt === scheduleCalls) throw new Error('timer scheduling blocked');
+        const id = nextTimerId++;
+        timers.push({ id, delay, callback, cleared: false, fired: false });
+        return id;
+    };
+    (window as any).clearTimeout = (id: number) => {
+        const timer = timers.find((entry) => entry.id === id);
+        if (timer) timer.cleared = true;
+    };
+    let dispatched = 0;
+    const originalDispatch = ambient.dispatchEvent.bind(ambient);
+    ambient.dispatchEvent = ((event: Event) => {
+        dispatched += 1;
+        return originalDispatch(event);
+    }) as typeof ambient.dispatchEvent;
+    const install = loadFunction<() => void>(readHarness(), 'installAmbientLifecycleObserver', {
+        window,
+        document: window.document,
+        HTMLMediaElement: window.HTMLMediaElement,
+        Date: { now: () => now },
+    });
+    install();
+    install();
+    const diagnosticReceipt = () => (window as any).__AWWV_QA_AMBIENT_PASSIVE_CONTINUATION_DIAGNOSTICS__ ?? null;
+    return {
+        window,
+        ambient,
+        api,
+        calls,
+        timers,
+        provenanceState,
+        currentTimeReads,
+        signals: () => ambientSignals(window),
+        livePassive: () => ambientSignals(window).filter((signal: any) => signal.kind === 'passive-continuation'),
+        diagnostics: diagnosticReceipt,
+        diagnosticEntries: () => diagnosticReceipt()?.entries ?? [],
+        pending: () => timers.filter((timer) => !timer.cleared && !timer.fired),
+        fire: (timer: { callback: () => void; fired: boolean }) => {
+            timer.fired = true;
+            timer.callback();
+        },
+        setNow: (value: number) => { now = value; },
+        setCurrentTime: (value: number) => { currentTime = value; },
+        setPaused: (value: boolean) => { paused = value; },
+        setEnded: (value: boolean) => { ended = value; },
+        setThrowCurrentTime: (value: boolean) => { throwCurrentTime = value; },
+        setThrowBuffered: (value: boolean) => { throwBuffered = value; },
+        setDurationUnavailable: (value: boolean) => { durationUnavailable = value; },
+        setBuffered: (value: any) => { buffered = value; },
+        setSeekable: (value: any) => { seekable = value; },
+        setCallbackThrow: (value: boolean) => { callbackThrow = value; },
+        setOwnerDocumentLost: (value: boolean) => { ownerDocumentLost = value; },
+        setOnCurrentTimeRead: (value: (() => void) | null) => { onCurrentTimeRead = value; },
+        dispatchedCount: () => dispatched,
+        resetDispatchedCount: () => { dispatched = 0; },
+        describeCalls: () => describeCalls,
+        scheduleCalls: () => scheduleCalls,
+    };
+}
+
+function passiveSamples(window: Window & typeof globalThis): any[] {
+    return ambientSignals(window).filter((signal: any) => signal.kind === 'passive-continuation');
+}
+
+function passiveDiagnostics(harness: ReturnType<typeof createPassiveHarness>): any[] {
+    return harness.diagnosticEntries();
+}
+
+function passiveSampleDiagnostics(harness: ReturnType<typeof createPassiveHarness>): any[] {
+    return passiveDiagnostics(harness).filter((entry: any) => entry.stage === 'sample');
+}
+
 test('ambient lifecycle observer records browser media progress with exact element state and ignores other audio', () => {
     const dom = new JSDOM(`
         <audio id="ambient" src="http://127.0.0.1:3002/assets/ambient_field-D4f9a2.ogg"></audio>
@@ -1129,6 +1325,507 @@ test('ambient lifecycle observer records passive timeupdate observations with ex
     assert.strictEqual(calls.play, 0);
     assert.strictEqual(calls.pause, 0);
     assert.strictEqual(calls.load, 0);
+});
+
+test('passive continuation confirms a real zero-position playing advance with actual getter timing', () => {
+    const harness = createPassiveHarness({ now: 1_000 });
+    harness.ambient.dispatchEvent(new harness.window.Event('playing'));
+    assert.equal(harness.signals().length, 1);
+    assert.equal(harness.signals()[0].kind, 'playing');
+    assert.deepEqual(harness.timers.map((timer) => timer.delay), [16, 40, 80]);
+    assert.equal(harness.pending().length, 3);
+    harness.resetDispatchedCount();
+
+    harness.setCurrentTime(0.12);
+    harness.setNow(1_018);
+    harness.fire(harness.timers[0]);
+
+    const samples = passiveSamples(harness.window);
+    assert.equal(samples.length, 1);
+    const sample = samples[0];
+    assert.equal(sample.label, 'passive-continuation');
+    assert.equal(sample.sampling.label, 'passive-continuation');
+    assert.equal(sample.sampling.requestedOffsetMs, 16);
+    assert.equal(sample.sampling.sampledAtMs, 1_018);
+    assert.equal(sample.sampling.actualDelayMs, 18);
+    assert.equal(sample.sampling.baselineCurrentTime, 0);
+    assert.equal(sample.sampling.confirmedAdvance, true);
+    assert.equal(sample.sampling.outcome, 'advanced');
+    assert.equal(sample.observedAtMs, 1_018);
+    assert.equal(sample.mediaState.currentTime, 0.12);
+    assert.deepEqual(normalizeTimeRangePairs(sample.mediaState.buffered), [[-0.0065, 0.12]]);
+    assert.deepEqual(normalizeTimeRangePairs(sample.mediaState.seekable), [[0, 30]]);
+    assert.deepEqual(sample.mediaStateReadErrors, {});
+    assert.equal(sample.mediaStateUnavailable.includes('currentTime'), false);
+    assert.deepEqual(harness.pending().map((timer) => timer.delay), []);
+    assert.equal(harness.calls.play, 0);
+    assert.equal(harness.calls.pause, 0);
+    assert.equal(harness.calls.load, 0);
+    assert.equal(harness.dispatchedCount(), 0);
+});
+
+test('passive continuation makes no advance claim across three non-advancing actual samples', () => {
+    const harness = createPassiveHarness();
+    harness.ambient.dispatchEvent(new harness.window.Event('playing'));
+    const offsets = [16, 40, 80];
+    assert.deepEqual(harness.timers.map((timer) => timer.delay), offsets);
+
+    for (let index = 0; index < offsets.length; index += 1) {
+        harness.setNow(1_000 + offsets[index] + index);
+        harness.fire(harness.timers[index]);
+        assert.equal(harness.livePassive().length, 0);
+        const diagnostics = passiveSampleDiagnostics(harness);
+        assert.equal(diagnostics.length, index + 1);
+        assert.equal(diagnostics[index].reason, 'not-advanced');
+        assert.equal(diagnostics[index].candidate.confirmedAdvance, false);
+        assert.equal(diagnostics[index].candidate.stateSnapshot.mediaState.currentTime, 0);
+        assert.equal(diagnostics[index].candidate.stateSnapshot.mediaState.readyState, 4);
+    }
+
+    assert.deepEqual(harness.pending().map((timer) => timer.delay), []);
+    assert.equal(harness.livePassive().length, 0);
+    assert.equal(passiveSampleDiagnostics(harness).length, 3);
+    assert.ok(harness.currentTimeReads.count <= 4, 'one trigger read plus at most three sample reads');
+    assert.equal(harness.calls.play + harness.calls.pause + harness.calls.load, 0);
+    assert.equal(harness.dispatchedCount(), 1);
+});
+
+test.each([
+    ['mutation counts', (harness: ReturnType<typeof createPassiveHarness>) => { harness.provenanceState.setters += 1; }, 'mutation-counts'],
+    ['source epoch', (harness: ReturnType<typeof createPassiveHarness>) => { harness.provenanceState.sourceEpoch += 1; }, 'source-epoch-change'],
+    ['source url', (harness: ReturnType<typeof createPassiveHarness>) => { harness.provenanceState.source = 'http://127.0.0.1:3002/assets/ambient_warroom-Other.ogg'; }, 'source-change'],
+    ['play continuity', (harness: ReturnType<typeof createPassiveHarness>) => { harness.provenanceState.continuity.playCount += 1; }, 'continuity-playCount'],
+])('passive continuation keeps pending %s out of eligible lifecycle signals with a positive ready payload', (_name, mutate, reason) => {
+    const harness = createPassiveHarness();
+    harness.ambient.dispatchEvent(new harness.window.Event('playing'));
+    harness.setCurrentTime(0.4);
+    mutate(harness);
+    harness.setNow(1_016);
+    harness.fire(harness.timers[0]);
+
+    assert.equal(harness.livePassive().length, 0);
+    const diagnostics = passiveSampleDiagnostics(harness);
+    assert.equal(diagnostics.length, 1);
+    assert.equal(diagnostics[0].reason, 'mutation');
+    assert.equal(diagnostics[0].candidate.outcome, 'mutation');
+    assert.equal(diagnostics[0].candidate.confirmedAdvance, false);
+    assert.equal(diagnostics[0].candidate.mutationReason, reason);
+    assert.equal(diagnostics[0].candidate.stateSnapshot.mediaState.currentTime, 0.4);
+    assert.equal(diagnostics[0].candidate.stateSnapshot.mediaState.readyState, 4);
+    assert.deepEqual(harness.pending().map((timer) => timer.delay), []);
+});
+
+test('a pause event cancels every pending passive continuation timer and retains the stop reason', () => {
+    const harness = createPassiveHarness();
+    harness.ambient.dispatchEvent(new harness.window.Event('playing'));
+    const timers = [...harness.timers];
+    assert.equal(harness.pending().length, 3);
+
+    harness.ambient.dispatchEvent(new harness.window.Event('pause'));
+    assert.deepEqual(harness.pending().map((timer) => timer.delay), []);
+    assert.equal(harness.livePassive().length, 0);
+    assert.equal(passiveDiagnostics(harness).some((entry: any) => entry.stage === 'stop' && entry.reason === 'event:pause'), true);
+
+    harness.setCurrentTime(0.5);
+    harness.setNow(1_050);
+    for (const timer of timers) harness.fire(timer);
+    assert.equal(harness.livePassive().length, 0);
+});
+
+test('paused or ended state observed during a passive sample stays in diagnostics only', () => {
+    for (const mutation of ['paused', 'ended'] as const) {
+        const harness = createPassiveHarness();
+        harness.ambient.dispatchEvent(new harness.window.Event('playing'));
+        harness.setCurrentTime(0.25);
+        if (mutation === 'paused') harness.setPaused(true);
+        else harness.setEnded(true);
+        harness.setNow(1_016);
+        harness.fire(harness.timers[0]);
+
+        assert.equal(harness.livePassive().length, 0);
+        const diagnostics = passiveSampleDiagnostics(harness);
+        assert.equal(diagnostics.length, 1);
+        assert.equal(diagnostics[0].reason, mutation);
+        assert.equal(diagnostics[0].candidate.confirmedAdvance, false);
+        assert.equal(diagnostics[0].candidate.stateSnapshot.mediaState.currentTime, 0.25);
+        assert.deepEqual(harness.pending().map((timer) => timer.delay), []);
+    }
+});
+
+test('incomplete media reads and provenance failures cannot confirm a passive advance', () => {
+    const throwingRead = createPassiveHarness();
+    throwingRead.ambient.dispatchEvent(new throwingRead.window.Event('playing'));
+    throwingRead.setCurrentTime(0.2);
+    throwingRead.setThrowCurrentTime(true);
+    throwingRead.setNow(1_016);
+    throwingRead.fire(throwingRead.timers[0]);
+
+    assert.equal(throwingRead.livePassive().length, 0);
+    const readDiagnostics = passiveSampleDiagnostics(throwingRead);
+    assert.equal(readDiagnostics.length, 1);
+    assert.equal(readDiagnostics[0].reason, 'read-failure');
+    assert.equal(readDiagnostics[0].candidate.confirmedAdvance, false);
+    assert.equal(readDiagnostics[0].candidate.stateSnapshot.mediaState.currentTime, null);
+    assert.match(readDiagnostics[0].candidate.stateSnapshot.mediaStateReadErrors.currentTime, /blocked/);
+    assert.deepEqual(throwingRead.pending().map((timer) => timer.delay), []);
+
+    const throwingBuffered = createPassiveHarness();
+    throwingBuffered.ambient.dispatchEvent(new throwingBuffered.window.Event('playing'));
+    throwingBuffered.setCurrentTime(0.4);
+    throwingBuffered.setThrowBuffered(true);
+    throwingBuffered.setNow(1_016);
+    throwingBuffered.fire(throwingBuffered.timers[0]);
+
+    assert.equal(throwingBuffered.livePassive().length, 0);
+    const bufferedDiagnostics = passiveSampleDiagnostics(throwingBuffered);
+    assert.equal(bufferedDiagnostics.length, 1);
+    assert.equal(bufferedDiagnostics[0].reason, 'read-failure');
+    assert.equal(bufferedDiagnostics[0].candidate.stateSnapshot.mediaState.currentTime, 0.4);
+    assert.equal(bufferedDiagnostics[0].candidate.stateSnapshot.mediaState.readyState, 4);
+    assert.match(bufferedDiagnostics[0].candidate.stateSnapshot.mediaStateReadErrors.buffered, /blocked/);
+    assert.deepEqual(throwingBuffered.pending().map((timer) => timer.delay), []);
+
+    const throwingProvenance = createPassiveHarness({ provenance: 'throwing' });
+    throwingProvenance.ambient.dispatchEvent(new throwingProvenance.window.Event('playing'));
+    throwingProvenance.setCurrentTime(0.2);
+    throwingProvenance.setNow(1_016);
+    throwingProvenance.fire(throwingProvenance.timers[0]);
+
+    assert.equal(throwingProvenance.livePassive().length, 0);
+    const provenanceDiagnostics = passiveSampleDiagnostics(throwingProvenance);
+    assert.equal(provenanceDiagnostics.length, 1);
+    assert.equal(provenanceDiagnostics[0].reason, 'provenance-read-error');
+    assert.match(provenanceDiagnostics[0].candidate.error, /blocked/);
+    assert.deepEqual(throwingProvenance.pending().map((timer) => timer.delay), []);
+});
+
+test('mutations during the actual getter read fail the post-read provenance check', () => {
+    const harness = createPassiveHarness();
+    harness.ambient.dispatchEvent(new harness.window.Event('playing'));
+    harness.setCurrentTime(0.4);
+    harness.setOnCurrentTimeRead(() => {
+        harness.provenanceState.setters += 1;
+        harness.setOnCurrentTimeRead(null);
+    });
+    harness.setNow(1_016);
+    harness.fire(harness.timers[0]);
+
+    assert.equal(harness.livePassive().length, 0);
+    const diagnostics = passiveSampleDiagnostics(harness);
+    assert.equal(diagnostics.length, 1);
+    assert.equal(diagnostics[0].reason, 'mutation');
+    assert.equal(diagnostics[0].candidate.stateSnapshot.mediaState.currentTime, 0.4);
+    assert.equal(diagnostics[0].candidate.stateSnapshot.mediaState.readyState, 4);
+    assert.equal(diagnostics[0].candidate.mutationReason, 'mutation-counts');
+    assert.deepEqual(harness.pending().map((timer) => timer.delay), []);
+});
+
+test('cancellation or ownership replacement during the getter read cannot publish and preserves replacement timers', () => {
+    const paused = createPassiveHarness();
+    paused.ambient.dispatchEvent(new paused.window.Event('playing'));
+    paused.setCurrentTime(0.4);
+    paused.setOnCurrentTimeRead(() => {
+        paused.setOnCurrentTimeRead(null);
+        paused.ambient.dispatchEvent(new paused.window.Event('pause'));
+    });
+    paused.setNow(1_016);
+    paused.fire(paused.timers[0]);
+
+    assert.equal(paused.livePassive().length, 0);
+    const pausedDiagnostics = passiveSampleDiagnostics(paused);
+    assert.equal(pausedDiagnostics.length, 1);
+    assert.equal(pausedDiagnostics[0].reason, 'cancelled-during-read');
+    assert.equal(pausedDiagnostics[0].candidate.stopReason, 'event:pause');
+    assert.equal(pausedDiagnostics[0].candidate.stateSnapshot.mediaState.currentTime, 0.4);
+    assert.equal(pausedDiagnostics[0].candidate.stateSnapshot.mediaState.readyState, 4);
+    assert.deepEqual(paused.pending().map((timer) => timer.delay), []);
+
+    const tornDown = createPassiveHarness();
+    tornDown.ambient.dispatchEvent(new tornDown.window.Event('playing'));
+    tornDown.setCurrentTime(0.4);
+    tornDown.setOnCurrentTimeRead(() => {
+        tornDown.setOnCurrentTimeRead(null);
+        tornDown.window.dispatchEvent(new tornDown.window.Event('pagehide'));
+    });
+    tornDown.setNow(1_016);
+    tornDown.fire(tornDown.timers[0]);
+
+    assert.equal(tornDown.livePassive().length, 0);
+    const teardownDiagnostics = passiveSampleDiagnostics(tornDown);
+    assert.equal(teardownDiagnostics.length, 1);
+    assert.equal(teardownDiagnostics[0].reason, 'cancelled-during-read');
+    assert.equal(teardownDiagnostics[0].candidate.stopReason, 'teardown');
+    assert.deepEqual(tornDown.pending().map((timer) => timer.delay), []);
+
+    const realmLost = createPassiveHarness();
+    realmLost.ambient.dispatchEvent(new realmLost.window.Event('playing'));
+    realmLost.setCurrentTime(0.4);
+    realmLost.setOnCurrentTimeRead(() => {
+        realmLost.setOnCurrentTimeRead(null);
+        realmLost.setOwnerDocumentLost(true);
+    });
+    realmLost.setNow(1_016);
+    realmLost.fire(realmLost.timers[0]);
+
+    assert.equal(realmLost.livePassive().length, 0);
+    assert.equal(passiveSampleDiagnostics(realmLost)[0].reason, 'realm-teardown');
+    assert.deepEqual(realmLost.pending().map((timer) => timer.delay), []);
+
+    const replaced = createPassiveHarness({ now: 1_000 });
+    replaced.ambient.dispatchEvent(new replaced.window.Event('playing'));
+    replaced.setCurrentTime(0.4);
+    replaced.setOnCurrentTimeRead(() => {
+        replaced.setOnCurrentTimeRead(null);
+        replaced.setCurrentTime(0);
+        replaced.setNow(1_001);
+        replaced.ambient.dispatchEvent(new replaced.window.Event('playing'));
+        replaced.setCurrentTime(0.4);
+    });
+    replaced.setNow(1_016);
+    replaced.fire(replaced.timers[0]);
+
+    assert.equal(replaced.livePassive().length, 0);
+    const replacementDiagnostics = passiveSampleDiagnostics(replaced);
+    assert.equal(replacementDiagnostics.length, 1);
+    assert.equal(replacementDiagnostics[0].reason, 'ownership-replaced');
+    assert.equal(replacementDiagnostics[0].candidate.stateSnapshot.mediaState.currentTime, 0.4);
+    assert.deepEqual(replaced.pending().map((timer) => timer.delay), [16, 40, 80]);
+
+    replaced.setCurrentTime(0.5);
+    replaced.setNow(1_017);
+    replaced.fire(replaced.pending()[0]);
+    assert.equal(replaced.livePassive().length, 1);
+    assert.equal(replaced.livePassive()[0].sampling.confirmedAdvance, true);
+    assert.deepEqual(replaced.pending().map((timer) => timer.delay), []);
+});
+
+test.each([
+    ['duration', (harness: ReturnType<typeof createPassiveHarness>) => harness.setDurationUnavailable(true)],
+    ['buffered', (harness: ReturnType<typeof createPassiveHarness>) => harness.setBuffered(mediaTimeRanges([[5, 4]]))],
+    ['seekable', (harness: ReturnType<typeof createPassiveHarness>) => harness.setSeekable(mediaTimeRanges([[0, 2], [1, 3]]))],
+])('unavailable %s is incomplete and cannot publish a positive ready advance', (field, makeUnavailable) => {
+    const harness = createPassiveHarness();
+    harness.ambient.dispatchEvent(new harness.window.Event('playing'));
+    harness.setCurrentTime(0.4);
+    makeUnavailable(harness);
+    harness.setNow(1_016);
+    harness.fire(harness.timers[0]);
+
+    assert.equal(harness.livePassive().length, 0);
+    const diagnostics = passiveSampleDiagnostics(harness);
+    assert.equal(diagnostics.length, 1);
+    assert.equal(diagnostics[0].reason, 'read-failure');
+    const candidate = diagnostics[0].candidate;
+    assert.equal(candidate.stateSnapshot.mediaState.currentTime, 0.4);
+    assert.equal(candidate.stateSnapshot.mediaState.readyState, 4);
+    assert.equal(candidate.stateSnapshot.mediaState[field], null);
+    assert.equal(candidate.stateSnapshot.mediaStateUnavailable.includes(field), true);
+    assert.equal(Object.prototype.hasOwnProperty.call(candidate.stateSnapshot.mediaStateReadErrors, field), false);
+    assert.deepEqual(harness.pending().map((timer) => timer.delay), []);
+});
+
+test('provenance API loss or realm teardown during the getter read cannot publish a confirmation', () => {
+    const apiLoss = createPassiveHarness();
+    apiLoss.ambient.dispatchEvent(new apiLoss.window.Event('playing'));
+    apiLoss.setCurrentTime(0.4);
+    apiLoss.setOnCurrentTimeRead(() => {
+        delete (apiLoss.window as any).__AWWV_NATIVE_MEDIA_MUTATION_PROVENANCE__;
+        apiLoss.setOnCurrentTimeRead(null);
+    });
+    apiLoss.setNow(1_016);
+    apiLoss.fire(apiLoss.timers[0]);
+    assert.equal(apiLoss.livePassive().length, 0);
+    assert.match(passiveSampleDiagnostics(apiLoss)[0].reason, /provenance-api/);
+    assert.deepEqual(apiLoss.pending().map((timer) => timer.delay), []);
+
+    const realmLoss = createPassiveHarness();
+    realmLoss.ambient.dispatchEvent(new realmLoss.window.Event('playing'));
+    realmLoss.setCurrentTime(0.4);
+    realmLoss.setOnCurrentTimeRead(() => {
+        realmLoss.setOwnerDocumentLost(true);
+        realmLoss.setOnCurrentTimeRead(null);
+    });
+    realmLoss.setNow(1_016);
+    realmLoss.fire(realmLoss.timers[0]);
+    assert.equal(realmLoss.livePassive().length, 0);
+    assert.equal(passiveSampleDiagnostics(realmLoss)[0].reason, 'realm-teardown');
+    assert.deepEqual(realmLoss.pending().map((timer) => timer.delay), []);
+});
+
+test('stable baseline provenance does not alias mutable counters supplied by the API', () => {
+    const harness = createPassiveHarness({ sharedProvenanceObjects: true });
+    harness.ambient.dispatchEvent(new harness.window.Event('playing'));
+    harness.provenanceState.byName.currentTime = 1;
+    harness.setCurrentTime(0.4);
+    harness.setNow(1_016);
+    harness.fire(harness.timers[0]);
+
+    assert.equal(harness.livePassive().length, 0);
+    const diagnostics = passiveSampleDiagnostics(harness);
+    assert.equal(diagnostics.length, 1);
+    assert.equal(diagnostics[0].reason, 'mutation');
+    assert.equal(diagnostics[0].candidate.mutationReason, 'mutation-counts');
+    assert.equal(diagnostics[0].candidate.stateSnapshot.mediaState.currentTime, 0.4);
+    assert.deepEqual(harness.pending().map((timer) => timer.delay), []);
+});
+
+test('teardown clears every owned passive timer and retains the durable stop reason', () => {
+    const harness = createPassiveHarness();
+    harness.ambient.dispatchEvent(new harness.window.Event('playing'));
+    const timers = [...harness.timers];
+    assert.equal(harness.pending().length, 3);
+
+    harness.window.dispatchEvent(new harness.window.Event('pagehide'));
+    assert.deepEqual(harness.pending().map((timer) => timer.delay), []);
+    assert.equal(passiveDiagnostics(harness).some((entry: any) => entry.stage === 'stop' && entry.reason === 'teardown'), true);
+
+    harness.setCurrentTime(0.3);
+    harness.setNow(1_100);
+    for (const timer of timers) harness.fire(timer);
+    assert.equal(harness.livePassive().length, 0);
+});
+
+test.each([
+    ['loadstart', 'event:request-start'],
+    ['abort', 'event:browser-abort'],
+])('mapped %s cancellation clears all owned timers with the signal-kind reason', (eventKind, reason) => {
+    const harness = createPassiveHarness();
+    harness.ambient.dispatchEvent(new harness.window.Event('playing'));
+    assert.equal(harness.pending().length, 3);
+
+    harness.ambient.dispatchEvent(new harness.window.Event(eventKind));
+    assert.deepEqual(harness.pending().map((timer) => timer.delay), []);
+    assert.equal(harness.livePassive().length, 0);
+    assert.equal(passiveDiagnostics(harness).some((entry: any) => entry.stage === 'stop' && entry.reason === reason), true);
+});
+
+test('scheduling failures clear the already-owned timers and retain the failure', () => {
+    const harness = createPassiveHarness({ failScheduleAt: 2 });
+    harness.ambient.dispatchEvent(new harness.window.Event('playing'));
+
+    assert.deepEqual(harness.pending().map((timer) => timer.delay), []);
+    assert.equal(harness.livePassive().length, 0);
+    assert.equal(passiveDiagnostics(harness).some((entry: any) => entry.stage === 'schedule' && entry.reason === 'timer-schedule-failure'), true);
+});
+
+test('a callback exception stops the sampler and retains the error separately from lifecycle signals', () => {
+    const harness = createPassiveHarness();
+    harness.ambient.dispatchEvent(new harness.window.Event('playing'));
+    harness.setCurrentTime(0.4);
+    harness.setCallbackThrow(true);
+    harness.setNow(1_016);
+    harness.fire(harness.timers[0]);
+
+    assert.equal(harness.livePassive().length, 0);
+    assert.deepEqual(harness.pending().map((timer) => timer.delay), []);
+    const callbackDiagnostics = passiveDiagnostics(harness).filter((entry: any) => entry.stage === 'callback');
+    assert.equal(callbackDiagnostics.length, 1);
+    assert.equal(callbackDiagnostics[0].reason, 'callback-exception');
+    assert.match(callbackDiagnostics[0].error, /blocked/);
+});
+
+test('a new zero-position playing observation cancels prior pending samples within the three-read bound', () => {
+    const harness = createPassiveHarness({ now: 1_000 });
+    harness.ambient.dispatchEvent(new harness.window.Event('playing'));
+    const first = [...harness.timers];
+    assert.deepEqual(harness.pending().map((timer) => timer.delay), [16, 40, 80]);
+
+    harness.setNow(1_001);
+    harness.ambient.dispatchEvent(new harness.window.Event('playing'));
+    assert.deepEqual(first.map((timer) => timer.cleared), [true, true, true]);
+    assert.deepEqual(harness.pending().map((timer) => timer.delay), [16, 40, 80]);
+    assert.equal(passiveDiagnostics(harness).some((entry: any) => entry.stage === 'stop' && entry.reason === 'new-trigger'), true);
+
+    harness.setCurrentTime(0.4);
+    harness.setNow(1_020);
+    for (const timer of first) harness.fire(timer);
+    assert.equal(harness.livePassive().length, 0);
+
+    harness.setNow(1_017);
+    harness.fire(harness.pending()[0]);
+    const samples = harness.livePassive();
+    assert.equal(samples.length, 1, JSON.stringify(passiveDiagnostics(harness)));
+    assert.equal(samples[0].sampling.confirmedAdvance, true);
+    assert.equal(samples[0].sampling.sampleIndex, 1);
+    assert.deepEqual(harness.pending().map((timer) => timer.delay), []);
+});
+
+test('passive continuation is opt-in and never invents samples without a flag and valid provenance', () => {
+    const flagOff = createPassiveHarness({ enableFlag: false });
+    flagOff.ambient.dispatchEvent(new flagOff.window.Event('playing'));
+    assert.equal(flagOff.timers.length, 0);
+    assert.equal(flagOff.describeCalls(), 0);
+    assert.equal(flagOff.livePassive().length, 0);
+    assert.equal(flagOff.diagnosticEntries().length, 0);
+
+    const absent = createPassiveHarness({ provenance: 'absent' });
+    absent.ambient.dispatchEvent(new absent.window.Event('playing'));
+    assert.equal(absent.timers.length, 0);
+    assert.equal(absent.livePassive().length, 0);
+    assert.equal(passiveDiagnostics(absent).some((entry: any) => entry.stage === 'api' && entry.reason === 'provenance-api-missing'), true);
+
+    const invalid = createPassiveHarness({ provenance: 'invalid' });
+    invalid.ambient.dispatchEvent(new invalid.window.Event('playing'));
+    assert.equal(invalid.timers.length, 0);
+    assert.equal(invalid.livePassive().length, 0);
+    assert.equal(passiveDiagnostics(invalid).some((entry: any) => entry.stage === 'api' && entry.reason === 'provenance-invalid'), true);
+
+    const methodOnly = createPassiveHarness();
+    void methodOnly.ambient.play();
+    assert.equal(methodOnly.timers.length, 0);
+    assert.equal(methodOnly.livePassive().length, 0);
+
+    const nonzero = createPassiveHarness();
+    nonzero.setCurrentTime(0.5);
+    nonzero.ambient.dispatchEvent(new nonzero.window.Event('playing'));
+    assert.equal(nonzero.timers.length, 0);
+    assert.equal(nonzero.livePassive().length, 0);
+});
+
+test('provenance installed after the observer but before the playing event still starts sampling', () => {
+    const harness = createPassiveHarness({ provenance: 'absent' });
+    (harness.window as any).__AWWV_NATIVE_MEDIA_MUTATION_PROVENANCE__ = harness.api;
+    harness.ambient.dispatchEvent(new harness.window.Event('playing'));
+    assert.deepEqual(harness.timers.map((timer) => timer.delay), [16, 40, 80]);
+
+    harness.setCurrentTime(0.4);
+    harness.setNow(1_016);
+    harness.fire(harness.timers[0]);
+    assert.equal(harness.livePassive().length, 1, JSON.stringify(passiveDiagnostics(harness)));
+    assert.equal(harness.livePassive()[0].sampling.confirmedAdvance, true);
+    assert.deepEqual(harness.pending().map((timer) => timer.delay), []);
+});
+
+test('QA receipt helper reads the bounded passive diagnostic journal with honest overflow counters', async () => {
+    const receipt = {
+        label: 'passive-continuation-diagnostic',
+        cap: 8,
+        entries: [{ stage: 'sample', reason: 'mutation' }],
+        dropped: 3,
+        overflowed: true,
+    };
+    const read = loadAsyncFunction<(frame: any) => Promise<any>>(
+        readHarness(),
+        'readAmbientPassiveDiagnostics',
+        { window: { __AWWV_QA_AMBIENT_PASSIVE_CONTINUATION_DIAGNOSTICS__: receipt } },
+    );
+    const result = await read({ evaluate: async (callback: () => unknown) => callback() });
+    assert.deepEqual(result, {
+        available: true,
+        label: 'passive-continuation-diagnostic',
+        cap: 8,
+        count: 1,
+        dropped: 3,
+        overflowed: true,
+        entries: receipt.entries,
+    });
+});
+
+test('passive diagnostics are wired into success and failure QA receipts', () => {
+    const harness = readHarness();
+    assert.match(harness, /const ambientPassiveContinuationDiagnostics = await readAmbientPassiveDiagnostics\(frame\)/);
+    assert.match(harness, /ambientPassiveContinuationDiagnostics,/);
+    assert.match(harness, /failureAmbientPassiveContinuationDiagnostics/);
 });
 
 test('ambient lifecycle observer captures exact full, partial, and disjoint buffered/seekable ranges without mutating playback', () => {
