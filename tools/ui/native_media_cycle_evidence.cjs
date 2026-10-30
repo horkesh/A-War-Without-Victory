@@ -40,8 +40,21 @@
 // The first narrow profile supports only the initial successful constructor URL
 // (provenance sourceEpoch 1) with exactly one Media load generation. Same-URL
 // reloads, multiple loads and other epochs are deliberately unresolved.
+//
+// Explicit controlled-QA contract extension: when no fresh zero start exists,
+// the most recent fresh DOM `playing` anchor may be a positive-position resume.
+// That separately labelled `observed-resume` mode additionally requires one
+// unique application play attempt with a successful recorded call return, one
+// unique native kPlay correlated inside the retained 20ms fence, both
+// application attempt and result leads inside that same 20ms fence, settled
+// prior pause/seek activity, uninterrupted observed progression to the same
+// fresh kEnded, unique zero seek, post-seek pipeline kPlaying and advancing
+// zero completion. It proves only the observed resume-to-end segment and reset;
+// it is not an entirely observed cycle, not interrupted-sound proof, and it
+// never substitutes kPlay for the post-seek pipeline kPlaying or DOM completion.
 
 const PROFILE = 'awwv.controlled-native-media-loop-cycle.v1';
+const OBSERVED_RESUME_CLAIM = 'observed resume-to-end segment and reset; not an entirely observed cycle or uninterrupted sound';
 const MUTATION_SCHEMA = 'awwv.native-media-mutation-provenance.v1';
 const MUTATION_PROFILE = 'controlled-qa-native-media-mutation-provenance';
 const SENTINEL_SCHEMA = 'awwv.native-media-seek-sentinel.v1';
@@ -674,6 +687,7 @@ function validateProvenance(provenance, binding) {
         selectedEntry,
         events: normalizedEvents,
         attempts,
+        results,
         installEvent: installEvents[0].event,
     };
 }
@@ -787,6 +801,7 @@ function classifyMediaValue(value) {
         if (value.pipeline_state === 'kSeeking') return 'seeking-state';
         return 'benign';
     }
+    if (value.event === 'kPlay') return 'resume-play';
     if (value.event === 'kPlaying') return 'playing';
     if (value.event === 'kEnded') return 'ended';
     if (value.event === 'kSeek') return 'seek';
@@ -1106,6 +1121,147 @@ function isAdmissibleInProgressZeroSeekWaiting(
     return true;
 }
 
+const RESUME_SETTLED_KINDS = new Set([
+    'pause',
+    'seeking',
+    'seeked',
+    'load',
+    'emptied',
+    'error',
+    'stalled',
+    'abort',
+    'playing',
+]);
+
+// Observed-resume anchor state. This is deliberately stricter than the
+// zero-start anchor: the resume position is real playback evidence, so the
+// sample must be a complete, error-free, readyState 4, unpaused, unended,
+// non-seeking, looping, control-free sample with a finite positive position
+// inside an unchanged duration and full signed buffered/seekable coverage.
+// The existing zero-start selection and claims are untouched.
+function validateObservedResumeAnchor(start, selected) {
+    const { state, signal } = start;
+    if (signal.mediaStateUnavailable.length !== 0) reject('selected.start.mediaStateUnavailable');
+    if (Object.keys(signal.mediaStateReadErrors).length !== 0) {
+        reject('selected.start.mediaStateReadErrors');
+    }
+    if (state.readyState !== 4
+        || state.seeking !== false
+        || state.paused !== false
+        || state.ended !== false
+        || state.loop !== true
+        || state.controls !== false
+        || state.mediaError !== null) {
+        reject('selected.start.state');
+    }
+    if (!isFiniteNumber(state.currentTime) || !(state.currentTime > 0)) {
+        reject('selected.start.position');
+    }
+    if (!isFiniteNumber(state.duration) || state.duration <= 0) {
+        reject('selected.start.duration');
+    }
+    if (!(state.currentTime < state.duration)) reject('selected.start.position');
+    if (!signedCoverageOk(state.buffered, state.duration)) {
+        reject('selected.start.buffered');
+    }
+    if (!signedCoverageOk(state.seekable, state.duration)) {
+        reject('selected.start.seekable');
+    }
+    for (const name of ['preSeek', 'seeking', 'seeked', 'playing', 'confirmation']) {
+        if (selected[name].state.duration !== state.duration) {
+            reject('selected.start.duration');
+        }
+    }
+    if (!(selected.preSeek.state.currentTime > state.currentTime)) {
+        reject('selected.start.progression');
+    }
+}
+
+// One unique, fresh, most-recent application play attempt with its recorded
+// successful call return. This is not a promise-settlement receipt: the
+// recorded `resultType: 'object'` return of the wrapped play call is the only
+// application evidence here. Prior pause/seek activity must be settled before
+// the anchor, no pause/seek/play transition may sit between the play intent
+// and the DOM resume anchor, and both the application attempt and its recorded
+// result must lead the actual DOM playing anchor by no more than the retained
+// 20ms fence. Preserved event sequence decides whether a mutation intervenes
+// between the play intent and the anchor, so an ordered setter and play call
+// recorded in the same millisecond are not treated as a tie.
+function validateObservedResumeProvenance(provenance, lifecycle) {
+    const anchorMs = lifecycle.start.observedAtMs;
+    const floorMs = lifecycle.selectionFloorMs;
+    const selectedId = provenance.selectedId;
+    const mutationAttempts = provenance.events.filter((entry) => entry.event.kind === 'mutation-attempt'
+        && entry.event.id === selectedId);
+    const playAttempts = mutationAttempts.filter((entry) => entry.event.targetType === 'method'
+        && entry.event.name === 'play'
+        && entry.clocks.dateNow <= anchorMs);
+    if (playAttempts.length === 0) reject('resume.play.unique');
+    // The newest play intent before the DOM anchor is authoritative. Two play
+    // calls sharing that millisecond are genuinely ambiguous; a setter sharing
+    // it is not.
+    const latestPlayMs = Math.max(...playAttempts.map((entry) => entry.clocks.dateNow));
+    const latestPlays = playAttempts.filter((entry) => entry.clocks.dateNow === latestPlayMs);
+    if (latestPlays.length !== 1) reject('resume.play.unique');
+    const attempt = latestPlays[0];
+    if (attempt.event.sourceEpoch !== 1) reject('resume.play.epoch');
+    if (!(attempt.clocks.dateNow >= floorMs)) reject('resume.play.fresh');
+    if (!(attempt.clocks.dateNow < anchorMs)) reject('resume.play.order');
+
+    // Preserved event sequence, not dateNow equality, decides whether any
+    // mutation attempt intervenes between the play intent and the anchor.
+    for (const entry of mutationAttempts) {
+        if (entry.event.sequence <= attempt.event.sequence) continue;
+        if (!(entry.clocks.dateNow <= anchorMs)) continue;
+        reject('resume.play.settled');
+    }
+
+    const attemptLeadMs = anchorMs - attempt.clocks.dateNow;
+    if (!(attemptLeadMs > 0 && attemptLeadMs <= CLOCK_FENCE_MS)) {
+        reject('resume.play.fence');
+    }
+
+    const resultEntry = provenance.events.find((entry) => entry.event.kind === 'mutation-result'
+        && entry.event.sequenceOfAttempt === attempt.event.sequence);
+    if (!resultEntry) reject('resume.play.result');
+    const result = resultEntry.event;
+    if (result.id !== selectedId
+        || result.sourceEpoch !== 1
+        || result.targetType !== 'method'
+        || result.name !== 'play'
+        || result.outcome !== 'success'
+        || result.resultType !== 'object') {
+        reject('resume.play.result');
+    }
+    if (!(resultEntry.clocks.dateNow >= attempt.clocks.dateNow)
+        || !(resultEntry.clocks.dateNow <= anchorMs)) {
+        reject('resume.play.result');
+    }
+    const resultLeadMs = anchorMs - resultEntry.clocks.dateNow;
+    if (!(resultLeadMs >= 0 && resultLeadMs <= CLOCK_FENCE_MS)) {
+        reject('resume.play.fence');
+    }
+
+    for (const entry of lifecycle.signals) {
+        if (entry.signal.elementId !== lifecycle.qaElementId) continue;
+        if (entry.signal.sourceEpoch !== lifecycle.qaSourceEpoch) continue;
+        if (entry.signal.url !== provenance.source) continue;
+        if (entry === lifecycle.start) continue;
+        if (!(entry.observedAtMs > attempt.clocks.dateNow && entry.observedAtMs <= anchorMs)) {
+            continue;
+        }
+        if (RESUME_SETTLED_KINDS.has(entry.signal.kind)) reject('resume.play.settled');
+    }
+
+    lifecycle.resume = {
+        attempt,
+        result: resultEntry,
+        attemptMs: attempt.clocks.dateNow,
+        resultMs: resultEntry.clocks.dateNow,
+        floorMs,
+    };
+}
+
 function validateLifecycleAndSelect(input, binding, provenance, projection) {
     if (!Array.isArray(input.lifecycleSignals)) reject('lifecycle');
     const selectionFloorMs = Math.max(
@@ -1276,18 +1432,23 @@ function validateLifecycleAndSelect(input, binding, provenance, projection) {
             reject('selected.seeking.ambiguity');
         }
     }
-    const startCandidates = signals.filter((entry) => entry.signal.elementId === qaElementId
+    // The newest fresh playing anchor is authoritative. A zero-position anchor
+    // keeps the existing zero-start path exactly; a positive-position anchor
+    // selects the separately labelled observed-resume path. A newer unmatched
+    // or ambiguous anchor is never skipped in favour of an older one.
+    const anchorCandidates = signals.filter((entry) => entry.signal.elementId === qaElementId
         && entry.signal.sourceEpoch === qaSourceEpoch
         && entry.signal.kind === 'playing'
-        && entry.state.currentTime === 0
         && entry.observedAtMs < selected.preSeek.observedAtMs
         && entry.observedAtMs >= selectionFloorMs);
-    if (startCandidates.length === 0) reject('selected.start.unique');
-    const latestStartMs = Math.max(...startCandidates.map((entry) => entry.observedAtMs));
-    const latestStarts = startCandidates.filter((entry) => entry.observedAtMs === latestStartMs);
+    if (anchorCandidates.length === 0) reject('selected.start.unique');
+    const latestStartMs = Math.max(...anchorCandidates.map((entry) => entry.observedAtMs));
+    const latestStarts = anchorCandidates.filter((entry) => entry.observedAtMs === latestStartMs);
     if (latestStarts.length !== 1) reject('selected.start.unique');
     const start = latestStarts[0];
     if (start.observedAtMs >= selected.preSeek.observedAtMs) reject('selected.start.order');
+    const startMode = start.state.currentTime === 0 ? 'zero-start' : 'observed-resume';
+    if (startMode === 'observed-resume') validateObservedResumeAnchor(start, selected);
 
     for (const entry of signals) {
         if (entry.signal.mediaStateUnavailable.length === 0) continue;
@@ -1299,7 +1460,16 @@ function validateLifecycleAndSelect(input, binding, provenance, projection) {
         }
     }
 
-    return { signals, bySequence, selected, start, qaElementId, qaSourceEpoch };
+    return {
+        signals,
+        bySequence,
+        selected,
+        start,
+        startMode,
+        selectionFloorMs,
+        qaElementId,
+        qaSourceEpoch,
+    };
 }
 
 function projectMediaEvents(events) {
@@ -1342,11 +1512,34 @@ function correlateCycle(mediaResult, lifecycle, binding, projection) {
     const ended = endedCandidates[0];
     if (!(ended.projectedAtMs > selected.preSeek.observedAtMs)) reject('media.cycle.ended');
 
-    const startCandidates = sorted.filter((event) => event.role === 'playing'
-        && Math.abs(event.projectedAtMs - lifecycle.start.observedAtMs) <= CLOCK_FENCE_MS
-        && event.projectedAtMs < selected.preSeek.observedAtMs);
-    if (startCandidates.length !== 1) reject('media.cycle.start.unique');
-    const start = startCandidates[0];
+    let start;
+    let resumeNativePlaying = null;
+    if (lifecycle.startMode === 'observed-resume') {
+        // Native kPlay is resume-intent evidence only. It is correlated against
+        // the DOM resume anchor inside the unchanged 20ms fence and never
+        // replaces the post-seek pipeline kPlaying or the DOM zero completion.
+        const playCandidates = sorted.filter((event) => event.role === 'resume-play'
+            && event.projectedAtMs >= selectionFloorMs
+            && event.projectedAtMs <= lifecycle.start.observedAtMs
+            && Math.abs(event.projectedAtMs - lifecycle.start.observedAtMs) <= CLOCK_FENCE_MS);
+        if (playCandidates.length !== 1) reject('media.cycle.resume.play.unique');
+        start = playCandidates[0];
+        // At most one explained resume-side pipeline kPlaying may accompany the
+        // kPlay inside the same retained 20ms fence. It is not required and it
+        // is never the post-seek anchor.
+        const explainedPlaying = sorted.filter((event) => event.role === 'playing'
+            && event.projectedAtMs >= start.projectedAtMs
+            && event.projectedAtMs < seek.projectedAtMs
+            && event.projectedAtMs <= lifecycle.start.observedAtMs + CLOCK_FENCE_MS);
+        if (explainedPlaying.length > 1) reject('media.cycle.resume.playing.ambiguous');
+        resumeNativePlaying = explainedPlaying.length === 1 ? explainedPlaying[0] : null;
+    } else {
+        const startCandidates = sorted.filter((event) => event.role === 'playing'
+            && Math.abs(event.projectedAtMs - lifecycle.start.observedAtMs) <= CLOCK_FENCE_MS
+            && event.projectedAtMs < selected.preSeek.observedAtMs);
+        if (startCandidates.length !== 1) reject('media.cycle.start.unique');
+        start = startCandidates[0];
+    }
     if (start.projectedAtMs < selectionFloorMs) reject('media.cycle.start.window');
     if (!(mediaResult.log.projectedAtMs <= start.projectedAtMs)) reject('media.log.order');
     if (!(mediaResult.load.projectedAtMs <= start.projectedAtMs)) reject('media.load.order');
@@ -1369,7 +1562,12 @@ function correlateCycle(mediaResult, lifecycle, binding, projection) {
     }
 
     const cycleEvents = [start, ended, seek, postPlaying];
-    const transitionRoles = ['playing', 'ended', 'seek', 'playing'];
+    const transitionRoles = [
+        lifecycle.startMode === 'observed-resume' ? 'resume-play' : 'playing',
+        'ended',
+        'seek',
+        'playing',
+    ];
     for (let index = 0; index < cycleEvents.length; index += 1) {
         if (cycleEvents[index].role !== transitionRoles[index]) reject('media.cycle.events');
         if (index > 0 && !(cycleEvents[index - 1].timestamp < cycleEvents[index].timestamp)) {
@@ -1384,6 +1582,7 @@ function correlateCycle(mediaResult, lifecycle, binding, projection) {
         if (event === start || event === ended || event === seek || event === postPlaying) {
             continue;
         }
+        if (event === resumeNativePlaying) continue;
         if (event.role === 'load' || event.role === 'pause' || event.role === 'error') {
             reject('media.cycle.interference');
         }
@@ -1391,6 +1590,7 @@ function correlateCycle(mediaResult, lifecycle, binding, projection) {
         if (event.role === 'seek') reject('media.cycle.seek.ambiguous');
         if (event.role === 'ended') reject('media.cycle.ended.ambiguous');
         if (event.role === 'playing') reject('media.cycle.playing.ambiguous');
+        if (event.role === 'resume-play') reject('media.cycle.resume.play.ambiguous');
     }
     if (selected.confirmation.observedAtMs < postPlaying.projectedAtMs) {
         reject('media.cycle.confirmation');
@@ -1424,7 +1624,7 @@ function validateInterference(provenance, lifecycle) {
 
 function buildEvidence(input, binding, projection, provenance, sentinel, media, lifecycle, cycle) {
     const { selected } = lifecycle;
-    return {
+    const evidence = {
         scope: {
             profile: PROFILE,
             sourceSha40: binding.binding.sourceSha40,
@@ -1576,6 +1776,58 @@ function buildEvidence(input, binding, projection, provenance, sentinel, media, 
             lifecycleSignals: clone(input.lifecycleSignals),
         },
     };
+    if (lifecycle.startMode === 'observed-resume') {
+        evidence.startMode = 'observed-resume';
+        evidence.startClaim = OBSERVED_RESUME_CLAIM;
+        evidence.scope.observedResumeSegmentOnly = true;
+        evidence.scope.entirelyObservedCycle = false;
+        evidence.scope.uninterruptedSound = false;
+        evidence.start = {
+            mode: 'observed-resume',
+            claim: OBSERVED_RESUME_CLAIM,
+            anchor: {
+                signalSequence: lifecycle.start.signalSequence,
+                observedAtMs: lifecycle.start.observedAtMs,
+                currentTime: lifecycle.start.state.currentTime,
+                duration: lifecycle.start.state.duration,
+                readyState: lifecycle.start.state.readyState,
+                seeking: false,
+                paused: false,
+                ended: false,
+            },
+            playAttempt: {
+                sequence: lifecycle.resume.attempt.event.sequence,
+                id: lifecycle.resume.attempt.event.id,
+                sourceEpoch: lifecycle.resume.attempt.event.sourceEpoch,
+                targetType: lifecycle.resume.attempt.event.targetType,
+                name: lifecycle.resume.attempt.event.name,
+                dateNow: lifecycle.resume.attempt.clocks.dateNow,
+                performanceNow: lifecycle.resume.attempt.clocks.performanceNow,
+            },
+            playResult: {
+                sequence: lifecycle.resume.result.event.sequence,
+                id: lifecycle.resume.result.event.id,
+                sourceEpoch: lifecycle.resume.result.event.sourceEpoch,
+                outcome: lifecycle.resume.result.event.outcome,
+                resultType: lifecycle.resume.result.event.resultType,
+                sequenceOfAttempt: lifecycle.resume.result.event.sequenceOfAttempt,
+                dateNow: lifecycle.resume.result.clocks.dateNow,
+                performanceNow: lifecycle.resume.result.clocks.performanceNow,
+            },
+            nativePlay: {
+                recordSequence: cycle.start.record.sequence,
+                recordIndex: cycle.start.recordIndex,
+                eventIndex: cycle.start.eventIndex,
+                timestamp: cycle.start.timestamp,
+                projectedAtMs: cycle.start.projectedAtMs,
+            },
+            anchorDeltaMs: lifecycle.start.observedAtMs - cycle.start.projectedAtMs,
+            attemptLeadMs: lifecycle.start.observedAtMs - lifecycle.resume.attemptMs,
+            resultLeadMs: lifecycle.start.observedAtMs - lifecycle.resume.resultMs,
+            selectionFloorMs: lifecycle.selectionFloorMs,
+        };
+    }
+    return evidence;
 }
 
 function verify(input) {
@@ -1604,6 +1856,9 @@ function verify(input) {
     }
     const lifecycle = validateLifecycleAndSelect(input, binding, provenance, projection);
     validateProvenanceEventClocks(provenance, binding, lifecycle);
+    if (lifecycle.startMode === 'observed-resume') {
+        validateObservedResumeProvenance(provenance, lifecycle);
+    }
     const cycle = correlateCycle(media, lifecycle, binding, projection);
     validateInterference(provenance, lifecycle);
     const evidence = buildEvidence(

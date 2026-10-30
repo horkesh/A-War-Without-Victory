@@ -2092,3 +2092,647 @@ describe('verifyControlledNativeLoopCycle', () => {
         expectWaitingRejected(input);
     });
 });
+
+/*
+ * Observed-resume start mode (explicit controlled-QA contract extension).
+ *
+ * A cancellation may be attributed from a fresh resume anchor at a positive
+ * position when no fresh zero start exists. This is NOT an entirely observed
+ * cycle, NOT uninterrupted sound, and it never substitutes kPlay for the
+ * post-seek pipeline kPlaying or the DOM zero completion.
+ */
+const RESUME_MS = START_MS + 5000;
+const RESUME_TIME = 28.496443;
+const RESUME_DURATION = 30;
+const RESUME_PRE_SEEK_TIME = 29.748984;
+const RESUME_CONFIRMATION_TIME = 0.19293;
+const RESUME_OLDER_MS = RESUME_MS - 3610;
+const RESUME_OLDER_TIME = 24.886463;
+const RESUME_PRE_SEEK_MS = RESUME_MS + (RESUME_PRE_SEEK_TIME - RESUME_TIME) * 1000;
+const RESUME_ENDED_MS = RESUME_PRE_SEEK_MS + (RESUME_DURATION - RESUME_PRE_SEEK_TIME) * 1000;
+const RESUME_SEEK_MS = RESUME_ENDED_MS + 2;
+const RESUME_POST_PLAY_MS = RESUME_SEEK_MS + 30;
+const RESUME_CONFIRMATION_MS = RESUME_POST_PLAY_MS + 100;
+const RESUME_WINDOW_CLOSE = RESUME_CONFIRMATION_MS + 200;
+const RESUME_NATIVE_PLAY_MS = RESUME_MS - 3;
+const RESUME_PLAY_MS = RESUME_MS - 12;
+const RESUME_PLAY_RESULT_MS = RESUME_MS - 11;
+const RESUME_PAUSE_MS = RESUME_MS - 120;
+const RESUME_SETTLE_SEEK_MS = RESUME_MS - 150;
+const OBSERVED_RESUME_CLAIM = 'observed resume-to-end segment and reset; not an entirely observed cycle or uninterrupted sound';
+
+function resumeMediaEvents(): any[] {
+    return [
+        makeEvent('kMediaLogCreated', CREATED_MS, { created: CREATED_UTC }),
+        makeEvent('kLoad', CREATED_MS + 2, { url: AMBIENT }),
+        // Historical native start from the older cycle. It is settled history
+        // and lies outside the observed resume-to-end interval.
+        pipelineState('kPlaying', START_MS),
+        makeEvent('kPlay', RESUME_NATIVE_PLAY_MS),
+        // Explained resume-side pipeline transition. It may accompany kPlay but
+        // it is never the post-seek pipeline kPlaying anchor.
+        pipelineState('kPlaying', RESUME_MS - 2),
+        pipelineState('kEnded', RESUME_ENDED_MS),
+        makeEvent('kSeek', RESUME_SEEK_MS, { seek_target: 0 }),
+        pipelineState('kSeeking', RESUME_SEEK_MS + 0.06),
+        pipelineState('kPlaying', RESUME_POST_PLAY_MS),
+        makeEvent('kBufferingStateChanged', RESUME_SEEK_MS + 1, {
+            audio_buffering_state: { state: 'BUFFERING_HAVE_ENOUGH' },
+        }),
+        makeEvent('kBufferingStateChanged', RESUME_POST_PLAY_MS - 20, {
+            pipeline_buffering_state: {
+                for_suspended_start: false,
+                state: 'BUFFERING_HAVE_ENOUGH',
+            },
+        }),
+        makeEvent('kDecoderEOF', RESUME_ENDED_MS + 1),
+    ];
+}
+
+function addMutationAt(
+    input: any,
+    name: string,
+    epochMs: number,
+    outcome = 'success',
+    resultType = 'undefined',
+): any {
+    const events = input.provenance.snapshot.events.records;
+    const sequence = events.length + 1;
+    const targetType = ['play', 'pause', 'load', 'fastSeek'].includes(name) ? 'method' : 'setter';
+    const attempt = {
+        sequence,
+        kind: 'mutation-attempt',
+        at: at(epochMs),
+        targetType,
+        name,
+        id: 'media:1',
+        sourceEpoch: 1,
+        argTypes: [],
+        argumentCount: name === 'play' ? 0 : 1,
+    };
+    const result = {
+        sequence: sequence + 1,
+        kind: 'mutation-result',
+        at: at(epochMs + 1),
+        targetType,
+        name,
+        id: 'media:1',
+        outcome,
+        resultType,
+        sourceEpoch: 1,
+        sequenceOfAttempt: sequence,
+    };
+    events.push(attempt, result);
+    input.provenance.snapshot.events.count = events.length;
+    return { attempt, result };
+}
+
+function resumeInput(options: { orderedSameMsSetterBeforePlay?: boolean } = {}): any {
+    const input = baseInput();
+    input.lifecycleSignals = [
+        lifecycleSignal(1, 'playing', RESUME_OLDER_MS, recordedCancellationState({
+            currentTime: RESUME_OLDER_TIME,
+        })),
+        lifecycleSignal(2, 'playing', RESUME_MS, recordedCancellationState({
+            currentTime: RESUME_TIME,
+        })),
+        lifecycleSignal(3, 'timeupdate', RESUME_PRE_SEEK_MS, recordedCancellationState({
+            currentTime: RESUME_PRE_SEEK_TIME,
+        })),
+        lifecycleSignal(4, 'seeking', RESUME_SEEK_MS + 2, recordedCancellationState({
+            readyState: 1,
+            currentTime: 0,
+            seeking: true,
+        })),
+        lifecycleSignal(5, 'seeked', RESUME_SEEK_MS + 5, recordedCancellationState({ currentTime: 0 })),
+        lifecycleSignal(6, 'playing', RESUME_POST_PLAY_MS + 3, recordedCancellationState({
+            currentTime: 0,
+        })),
+        lifecycleSignal(7, 'timeupdate', RESUME_POST_PLAY_MS + 80, recordedCancellationState({
+            currentTime: RESUME_CONFIRMATION_TIME,
+        })),
+    ];
+    input.selected = {
+        preSeek: { signalSequence: 3 },
+        seeking: { signalSequence: 4 },
+        seeked: { signalSequence: 5 },
+        playing: { signalSequence: 6 },
+        confirmation: { signalSequence: 7 },
+    };
+
+    const events = mediaPlayerEvents(input);
+    events.length = 0;
+    events.push(...resumeMediaEvents());
+    for (const record of input.media.records) {
+        record.observedAtMs = RESUME_WINDOW_CLOSE - 10;
+    }
+    input.clockProjection.observationWindow.closedAtMs = RESUME_WINDOW_CLOSE;
+
+    addMutationAt(input, 'currentTime', RESUME_SETTLE_SEEK_MS);
+    addMutationAt(input, 'pause', RESUME_PAUSE_MS);
+    if (options.orderedSameMsSetterBeforePlay) {
+        addMutationAt(input, 'loop', RESUME_PLAY_MS);
+    }
+    addMutationAt(input, 'play', RESUME_PLAY_MS, 'success', 'object');
+    return input;
+}
+
+function resumeAnchor(input: any): any {
+    return input.lifecycleSignals.find((signal: any) => signal.kind === 'playing'
+        && signal.observedAtMs === RESUME_MS);
+}
+
+function resumePlayPair(input: any): any {
+    const events = input.provenance.snapshot.events.records;
+    const attempts = events.filter((event: any) => event.kind === 'mutation-attempt'
+        && event.name === 'play');
+    const attempt = attempts[attempts.length - 1];
+    const result = events.find((event: any) => event.kind === 'mutation-result'
+        && event.sequenceOfAttempt === attempt.sequence);
+    return { attempt, result };
+}
+
+// Remove one attempt/result pair while preserving the producer's required
+// continuous sequence stream (sequence === index + 1 and result references).
+function removeMutationPair(input: any, pair: any): void {
+    const records = input.provenance.snapshot.events.records;
+    const retained = records.filter(
+        (event: any) => event !== pair.attempt && event !== pair.result,
+    );
+    const remap = new Map<number, number>();
+    retained.forEach((event: any, index: number) => remap.set(event.sequence, index + 1));
+    for (const event of retained) {
+        if (event.kind === 'mutation-result') {
+            event.sequenceOfAttempt = remap.get(event.sequenceOfAttempt);
+        }
+        event.sequence = remap.get(event.sequence);
+    }
+    input.provenance.snapshot.events.records = retained;
+    input.provenance.snapshot.events.count = retained.length;
+}
+
+function nativeKPlay(input: any): any {
+    return mediaPlayerEvents(input).find((event: any) => JSON.parse(event.value).event === 'kPlay');
+}
+
+function nativePostSeekPlaying(input: any): any {
+    return mediaPlayerEvents(input).find((event: any) => {
+        const value = JSON.parse(event.value);
+        return value.event === 'kPipelineStateChange'
+            && value.pipeline_state === 'kPlaying'
+            && Math.abs(event.timestamp - mediaTimestamp(RESUME_POST_PLAY_MS)) < 0.000001;
+    });
+}
+
+function expectResumeRejected(input: any, reason?: string): void {
+    const before = JSON.stringify(input);
+    const result = verify(input);
+    expect(result.ok).toBe(false);
+    expect(Array.isArray(result.reasons)).toBe(true);
+    expect(result.reasons.length).toBeGreaterThan(0);
+    if (reason) expect(result.reasons).toContain(reason);
+    expect(JSON.stringify(input)).toBe(before);
+}
+
+describe('verifyControlledNativeLoopCycle observed-resume start mode', () => {
+    test('accepts the actual-shaped fresh resume at 28.496443 of 30 through end, reset and continued play', () => {
+        const input = resumeInput();
+        const before = JSON.stringify(input);
+        const result = verify(input);
+        expect(result.ok).toBe(true);
+        expect(result.evidence.startMode).toBe('observed-resume');
+        expect(result.evidence.startClaim).toBe(OBSERVED_RESUME_CLAIM);
+        expect(result.evidence.start).toMatchObject({
+            mode: 'observed-resume',
+            claim: OBSERVED_RESUME_CLAIM,
+            anchor: {
+                signalSequence: 2,
+                observedAtMs: RESUME_MS,
+                currentTime: RESUME_TIME,
+                duration: RESUME_DURATION,
+                readyState: 4,
+                seeking: false,
+                paused: false,
+                ended: false,
+            },
+        });
+        expect(result.evidence.lifecycle.start).toEqual({
+            signalSequence: 2,
+            observedAtMs: RESUME_MS,
+        });
+        expect(result.evidence.lifecycle.preSeek.signalSequence).toBe(3);
+        expect(result.evidence.lifecycle.playing.signalSequence).toBe(6);
+        expect(result.evidence.media.eventOrder).toEqual([
+            'kPlay',
+            'kPipelineStateChange',
+            'kSeek',
+            'kPipelineStateChange',
+        ]);
+        expect(result.evidence.start.playAttempt.sequence).toBe(9);
+        expect(result.evidence.start.playResult).toMatchObject({
+            sequence: 10,
+            outcome: 'success',
+            resultType: 'object',
+            sequenceOfAttempt: 9,
+        });
+        expect(result.evidence.start.nativePlay).toMatchObject({
+            timestamp: mediaTimestamp(RESUME_NATIVE_PLAY_MS),
+        });
+        expect(result.evidence.start.anchorDeltaMs).toBeCloseTo(3, 6);
+        expect(result.evidence.clocks.startProjectedAtMs).toBeCloseTo(RESUME_NATIVE_PLAY_MS, 3);
+        expect(result.evidence.media.seekReference.seekTarget).toBe(0);
+        expect(result.evidence.media.postSeekPlayingReference.timestamp)
+            .toBe(mediaTimestamp(RESUME_POST_PLAY_MS));
+        expect(result.evidence.scope.observedResumeSegmentOnly).toBe(true);
+        expect(result.evidence.scope.entirelyObservedCycle).toBe(false);
+        expect(result.evidence.scope.uninterruptedSound).toBe(false);
+        expect(JSON.stringify(input)).toBe(before);
+        expect(JSON.stringify(verify(input))).toBe(JSON.stringify(result));
+    });
+
+    test('does not emit observed-resume claims for the retained zero-start mode', () => {
+        const input = cancellationInput();
+        const result = verify(input);
+        expect(result.ok).toBe(true);
+        expect(result.evidence.startMode).toBeUndefined();
+        expect(result.evidence.startClaim).toBeUndefined();
+        expect(result.evidence.start).toBeUndefined();
+        expect(result.evidence.media.eventOrder).toEqual([
+            'kPipelineStateChange',
+            'kPipelineStateChange',
+            'kSeek',
+            'kPipelineStateChange',
+        ]);
+    });
+
+    test('accepts the fresh resume after an older zero start separated by settled pause and seek activity', () => {
+        const input = resumeInput();
+        const sequence = Math.max(...input.lifecycleSignals.map((signal: any) => signal.signalSequence)) + 1;
+        input.lifecycleSignals.push(lifecycleSignal(
+            sequence,
+            'playing',
+            RESUME_OLDER_MS - 1000,
+            recordedCancellationState({ currentTime: 0 }),
+        ));
+        const result = verify(input);
+        expect(result.ok).toBe(true);
+        expect(result.evidence.startMode).toBe('observed-resume');
+        expect(result.evidence.lifecycle.start.signalSequence).toBe(2);
+        expect(result.evidence.lifecycle.start.observedAtMs).toBe(RESUME_MS);
+    });
+
+    test('rejects missing, failed, stale and ambiguous application play attempt/result pairs', () => {
+        const missing = resumeInput();
+        const missingEvents = missing.provenance.snapshot.events.records;
+        const missingPair = resumePlayPair(missing);
+        missing.provenance.snapshot.events.records = missingEvents.filter(
+            (event: any) => event !== missingPair.attempt && event !== missingPair.result,
+        );
+        missing.provenance.snapshot.events.count = missing.provenance.snapshot.events.records.length;
+        expectResumeRejected(missing);
+
+        const threw = resumeInput();
+        resumePlayPair(threw).result.outcome = 'threw';
+        expectResumeRejected(threw, 'resume.play.result');
+
+        const wrongResult = resumeInput();
+        resumePlayPair(wrongResult).result.resultType = 'undefined';
+        expectResumeRejected(wrongResult, 'resume.play.result');
+
+        const stale = resumeInput();
+        const staleEvents = stale.provenance.snapshot.events.records;
+        const stalePlays = staleEvents.filter((event: any) => event.kind === 'mutation-attempt'
+            && event.name === 'play');
+        stalePlays[0].at = at(READY_MS - 200);
+        stalePlays[1].at = at(READY_MS - 100);
+        for (const event of staleEvents) {
+            if (event.kind !== 'mutation-result') continue;
+            const attempt = staleEvents.find((candidate: any) => candidate.kind === 'mutation-attempt'
+                && candidate.sequence === event.sequenceOfAttempt);
+            if (attempt && attempt.name === 'play') event.at = at(READY_MS - 99);
+        }
+        expectResumeRejected(stale, 'resume.play.fresh');
+
+        const ambiguous = resumeInput();
+        addMutationAt(ambiguous, 'play', RESUME_PLAY_MS, 'success', 'object');
+        expectResumeRejected(ambiguous, 'resume.play.unique');
+
+        const wrongEpoch = resumeInput();
+        const epochPair = resumePlayPair(wrongEpoch);
+        epochPair.attempt.sourceEpoch = 2;
+        epochPair.result.sourceEpoch = 2;
+        expectResumeRejected(wrongEpoch, 'resume.play.epoch');
+
+        const wrongId = resumeInput();
+        const idPair = resumePlayPair(wrongId);
+        idPair.attempt.id = 'media:other';
+        idPair.result.id = 'media:other';
+        expectResumeRejected(wrongId, 'resume.play.settled');
+    });
+
+    test('accepts application play leads at the exact 20ms DOM fence boundary and rejects just outside it', () => {
+        const boundary = resumeInput();
+        const boundaryPair = resumePlayPair(boundary);
+        boundaryPair.attempt.at = at(RESUME_MS - 20);
+        boundaryPair.result.at = at(RESUME_MS - 20);
+        const result = verify(boundary);
+        expect(result.ok).toBe(true);
+        expect(result.evidence.start.attemptLeadMs).toBeCloseTo(20, 6);
+        expect(result.evidence.start.resultLeadMs).toBeCloseTo(20, 6);
+
+        const attemptOutside = resumeInput();
+        const attemptPair = resumePlayPair(attemptOutside);
+        attemptPair.attempt.at = at(RESUME_MS - 20.001);
+        attemptPair.result.at = at(RESUME_MS - 20.001);
+        expectResumeRejected(attemptOutside, 'resume.play.fence');
+
+        const attemptLate = resumeInput();
+        const latePair = resumePlayPair(attemptLate);
+        latePair.attempt.at = at(RESUME_MS);
+        latePair.result.at = at(RESUME_MS);
+        expectResumeRejected(attemptLate, 'resume.play.order');
+
+        const resultLate = resumeInput();
+        const resultPair = resumePlayPair(resultLate);
+        resultPair.result.at = at(RESUME_MS + 1);
+        expectResumeRejected(resultLate, 'resume.play.result');
+    });
+
+    test('accepts an ordered same-millisecond loop setter before play and rejects a later intervening mutation', () => {
+        const ordered = resumeInput({ orderedSameMsSetterBeforePlay: true });
+        const orderedPair = resumePlayPair(ordered);
+        expect(orderedPair.attempt.at.dateNow).toBe(RESUME_PLAY_MS);
+        const result = verify(ordered);
+        expect(result.ok).toBe(true);
+        expect(result.evidence.start.playAttempt.sequence).toBe(orderedPair.attempt.sequence);
+        expect(result.evidence.start.attemptLeadMs)
+            .toBeCloseTo(RESUME_MS - RESUME_PLAY_MS, 6);
+
+        const laterSameMs = resumeInput();
+        addMutationAt(laterSameMs, 'loop', RESUME_PLAY_MS);
+        expectResumeRejected(laterSameMs, 'resume.play.settled');
+
+        const later = resumeInput();
+        addMutationAt(later, 'loop', RESUME_MS - 5);
+        expectResumeRejected(later, 'resume.play.settled');
+    });
+
+    test('rejects a well-formed continuous stream missing the fresh application play pair at the resume-specific guard', () => {
+        const missing = resumeInput();
+        // A later mutation keeps the removed play pair mid-stream, so the
+        // helper must repair sequence continuity for the stream to remain
+        // well formed before the resume guard is reached.
+        addMutationAt(missing, 'loop', RESUME_MS - 5);
+        removeMutationPair(missing, resumePlayPair(missing));
+        const before = JSON.stringify(missing);
+        const result = verify(missing);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('resume.play.settled');
+        expect(JSON.stringify(missing)).toBe(before);
+
+        const noPlay = resumeInput();
+        removeMutationPair(noPlay, resumePlayPair(noPlay));
+        removeMutationPair(noPlay, resumePlayPair(noPlay));
+        expectResumeRejected(noPlay, 'resume.play.unique');
+    });
+
+    test('rejects a missing, delayed or ambiguous native kPlay anchor', () => {
+        const missing = resumeInput();
+        const events = mediaPlayerEvents(missing);
+        const index = events.indexOf(nativeKPlay(missing));
+        events.splice(index, 1);
+        expectResumeRejected(missing, 'media.cycle.resume.play.unique');
+
+        const delayed = resumeInput();
+        nativeKPlay(delayed).timestamp = mediaTimestamp(RESUME_MS - 25);
+        expectResumeRejected(delayed, 'media.cycle.resume.play.unique');
+
+        const ambiguous = resumeInput();
+        mediaPlayerEvents(ambiguous).push(makeEvent('kPlay', RESUME_MS - 4));
+        expectResumeRejected(ambiguous, 'media.cycle.resume.play.unique');
+    });
+
+    test('rejects the native kPlay recorded for another player', () => {
+        const input = resumeInput();
+        const events = mediaPlayerEvents(input);
+        const index = events.indexOf(nativeKPlay(input));
+        const moved = events[index];
+        events.splice(index, 1);
+        appendMediaRecord(input, {
+            event: 'Media.playerCreated',
+            params: { player: { playerId: 'player-2' } },
+        });
+        appendMediaRecord(input, {
+            event: 'Media.playerPropertiesChanged',
+            params: { playerId: 'player-2', properties: [{ name: 'kFrameUrl', value: FRAME_URL }] },
+        });
+        appendMediaRecord(input, {
+            event: 'Media.playerEventsAdded',
+            params: { playerId: 'player-2', events: [moved] },
+        });
+        input.media.metadata.playersObserved = 2;
+        input.media.summary.playersObserved = 2;
+        expectResumeRejected(input, 'media.cycle.resume.play.unique');
+    });
+
+    test('rejects a resume anchor with the wrong object, source or lifecycle identity', () => {
+        const source = resumeInput();
+        const sourceAnchor = resumeAnchor(source);
+        sourceAnchor.controlledProvenance.element.source = AMBIENT_OTHER;
+        sourceAnchor.controlledProvenance.provenance.attributes.src = AMBIENT_OTHER;
+        expectResumeRejected(source, 'lifecycle.controlledProvenance.identity');
+
+        const epoch = resumeInput();
+        resumeAnchor(epoch).sourceEpoch = 2;
+        expectResumeRejected(epoch);
+
+        const element = resumeInput();
+        resumeAnchor(element).elementId = 'qa-ambient-foreign';
+        expectResumeRejected(element, 'lifecycle.competing-element');
+    });
+
+    test('rejects resume anchor states other than readyState 4, unseeked, in-bounds and fully covered', () => {
+        const ready = resumeInput();
+        resumeAnchor(ready).mediaState.readyState = 3;
+        expectResumeRejected(ready, 'selected.start.state');
+
+        const seeking = resumeInput();
+        resumeAnchor(seeking).mediaState.seeking = true;
+        expectResumeRejected(seeking, 'selected.start.state');
+
+        const paused = resumeInput();
+        resumeAnchor(paused).mediaState.paused = true;
+        expectResumeRejected(paused, 'selected.start.state');
+
+        const ended = resumeInput();
+        resumeAnchor(ended).mediaState.ended = true;
+        expectResumeRejected(ended, 'selected.start.state');
+
+        const loop = resumeInput();
+        resumeAnchor(loop).mediaState.loop = false;
+        expectResumeRejected(loop, 'selected.start.state');
+
+        const controls = resumeInput();
+        resumeAnchor(controls).mediaState.controls = true;
+        expectResumeRejected(controls, 'selected.start.state');
+
+        const error = resumeInput();
+        resumeAnchor(error).mediaState.mediaError = { code: 2, message: 'synthetic' };
+        expectResumeRejected(error);
+
+        const zero = resumeInput();
+        const zeroEvents = mediaPlayerEvents(zero);
+        const resumePlayingIndex = zeroEvents.findIndex((event: any) => {
+            const value = JSON.parse(event.value);
+            return value.event === 'kPipelineStateChange'
+                && value.pipeline_state === 'kPlaying'
+                && Math.abs(event.timestamp - mediaTimestamp(RESUME_MS - 2)) < 0.000001;
+        });
+        zeroEvents.splice(resumePlayingIndex, 1);
+        resumeAnchor(zero).mediaState.currentTime = 0;
+        expectResumeRejected(zero);
+
+        for (const currentTime of [RESUME_DURATION, RESUME_DURATION + 1, -1, Number.NaN]) {
+            const input = resumeInput();
+            resumeAnchor(input).mediaState.currentTime = currentTime;
+            expectResumeRejected(input, 'selected.start.position');
+        }
+
+        for (const [field, value] of [
+            ['buffered', []],
+            ['buffered', [[0, 5]]],
+            ['buffered', [[0, 10], [11, 30]]],
+            ['seekable', []],
+            ['seekable', [[0, 29.999]]],
+            ['seekable', [[1, 30]]],
+        ] as Array<[string, any]>) {
+            const input = resumeInput();
+            resumeAnchor(input).mediaState[field] = value;
+            expectResumeRejected(input, `selected.start.${field}`);
+        }
+    });
+
+    test('rejects a missing or changed duration and incomplete resume annotations', () => {
+        const missing = resumeInput();
+        delete resumeAnchor(missing).mediaState.duration;
+        expectResumeRejected(missing);
+
+        for (const duration of [null, 0, -1, Number.NaN, Number.POSITIVE_INFINITY, '30']) {
+            const input = resumeInput();
+            resumeAnchor(input).mediaState.duration = duration;
+            expectResumeRejected(input);
+        }
+
+        const changed = resumeInput();
+        changed.lifecycleSignals[2].mediaState.duration = RESUME_DURATION + 0.001;
+        expectResumeRejected(changed, 'selected.start.duration');
+
+        const unavailable = resumeInput();
+        resumeAnchor(unavailable).mediaStateUnavailable = ['buffered'];
+        expectResumeRejected(unavailable, 'lifecycle.mediaStateUnavailable');
+
+        const unreadable = resumeInput();
+        resumeAnchor(unreadable).mediaStateReadErrors = { buffered: 'read-threw' };
+        expectResumeRejected(unreadable, 'lifecycle.mediaStateReadErrors');
+    });
+
+    test('rejects pause or seek transition between the play intent and the resume anchor', () => {
+        const pause = resumeInput();
+        const sequence = Math.max(...pause.lifecycleSignals.map((signal: any) => signal.signalSequence)) + 1;
+        pause.lifecycleSignals.push(lifecycleSignal(
+            sequence,
+            'pause',
+            RESUME_MS - 10,
+            recordedCancellationState({
+                currentTime: RESUME_TIME,
+                paused: true,
+            }),
+        ));
+        expectResumeRejected(pause, 'resume.play.settled');
+
+        const seeking = resumeInput();
+        const seekSequence = Math.max(...seeking.lifecycleSignals.map((signal: any) => signal.signalSequence)) + 1;
+        seeking.lifecycleSignals.push(lifecycleSignal(
+            seekSequence,
+            'seeking',
+            RESUME_MS - 6,
+            recordedCancellationState({
+                currentTime: RESUME_TIME,
+                seeking: true,
+            }),
+        ));
+        expectResumeRejected(seeking, 'resume.play.settled');
+    });
+
+    test('rejects pause, play, seek, source, rate and control mutation after the resume anchor', () => {
+        for (const name of ['pause', 'play', 'currentTime', 'src', 'playbackRate', 'controls']) {
+            const input = resumeInput();
+            addMutationAt(input, name, RESUME_MS + 100);
+            expectResumeRejected(input, `provenance.interference.${name}`);
+        }
+    });
+
+    test('rejects nonunique anchors and matches outside the retained 20ms fence', () => {
+        const duplicate = resumeInput();
+        const sequence = Math.max(...duplicate.lifecycleSignals.map((signal: any) => signal.signalSequence)) + 1;
+        duplicate.lifecycleSignals.push(lifecycleSignal(
+            sequence,
+            'playing',
+            RESUME_MS,
+            recordedCancellationState({ currentTime: RESUME_TIME + 0.001 }),
+        ));
+        expectResumeRejected(duplicate, 'selected.start.unique');
+
+        const delayedPlay = resumeInput();
+        nativeKPlay(delayedPlay).timestamp = mediaTimestamp(RESUME_MS + 21);
+        expectResumeRejected(delayedPlay, 'media.cycle.resume.play.unique');
+
+        const delayedEnded = resumeInput();
+        mediaPlayerEvents(delayedEnded)
+            .find((event: any) => semanticMediaEvent(event) === 'kEnded')
+            .timestamp = mediaTimestamp(RESUME_PRE_SEEK_MS - 21);
+        expectResumeRejected(delayedEnded);
+    });
+
+    test('still rejects the retained native post-seek playing 21.406ms before DOM playing (Case 3)', () => {
+        const input = resumeInput();
+        nativePostSeekPlaying(input).timestamp =
+            mediaTimestamp(RESUME_POST_PLAY_MS + 3 - 21.406);
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('media.cycle.playing.unique');
+    });
+
+    test('rejects a missing native endpoint, missing post-seek playing, non-zero completion and failed continuation', () => {
+        const missingEnded = resumeInput();
+        const endedEvents = mediaPlayerEvents(missingEnded);
+        const endedIndex = endedEvents.findIndex(
+            (event: any) => semanticMediaEvent(event) === 'kEnded',
+        );
+        endedEvents.splice(endedIndex, 1);
+        expectResumeRejected(missingEnded, 'media.cycle.ended');
+
+        const missingPost = resumeInput();
+        const postEvents = mediaPlayerEvents(missingPost);
+        const postIndex = postEvents.indexOf(nativePostSeekPlaying(missingPost));
+        postEvents.splice(postIndex, 1);
+        expectResumeRejected(missingPost, 'media.cycle.playing.unique');
+
+        const progressed = resumeInput();
+        inputPlaying(progressed).mediaState.currentTime = 0.1;
+        expectResumeRejected(progressed, 'selected.playing');
+
+        const stalled = resumeInput();
+        stalled.lifecycleSignals[6].mediaState.currentTime = 0;
+        expectResumeRejected(stalled, 'selected.confirmation');
+
+        const extraPlay = resumeInput();
+        mediaPlayerEvents(extraPlay).push(makeEvent('kPlay', RESUME_MS + 100));
+        expectResumeRejected(extraPlay, 'media.cycle.resume.play.ambiguous');
+    });
+});
+
+function inputPlaying(input: any): any {
+    return input.lifecycleSignals.find((signal: any) => signal.signalSequence
+        === input.selected.playing.signalSequence);
+}
