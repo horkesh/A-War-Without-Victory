@@ -582,7 +582,7 @@ test('installs a frozen diagnostic API and describes initial ambient constructio
         unexplainedMutations: 'invalidate',
     });
     expect(snapshot.coverage.limits).toEqual({
-        events: 256,
+        events: 32768,
         entries: 16,
         observerRecordsPerObject: 64,
     });
@@ -1182,18 +1182,97 @@ test('detects replaced methods, tampered descriptors, replaced constructor and o
     expect(setterShadow.api.describe(setterElement).provenance.ownShadows).toContain('loop');
 });
 
-test('bounds events, observer records and entries, failing closed on overflow', () => {
-    const eventRealm = createRealm();
-    const eventElement = new eventRealm.Audio(AMBIENT_WARROOM);
-    for (let index = 0; index < 200; index += 1) eventElement.currentTime = index;
-    const eventSnapshot = eventRealm.api.snapshot();
-    expect(eventSnapshot.events.capacity).toBe(256);
-    expect(eventSnapshot.events.count).toBe(256);
-    expect(eventSnapshot.events.truncated).toBe(true);
-    expect(eventSnapshot.events.dropped).toBeGreaterThan(0);
-    expect(eventSnapshot.invalidReasons).toContain('event-overflow');
-    expect(eventSnapshot.valid).toBe(false);
+test('retains valid provenance beyond the observed 335-event workload', () => {
+    const EVENT_CAPACITY = 32768;
+    const OBSERVED_LAST_PLAY_SEQUENCE = 335;
+    const CYCLES = 200;
+    const realm = createRealm();
+    const element = new realm.Audio(AMBIENT_WARROOM);
+    const initialCount = realm.api.snapshot().events.count;
+    expect(initialCount).toBeLessThan(OBSERVED_LAST_PLAY_SEQUENCE);
 
+    for (let index = 0; index < CYCLES; index += 1) {
+        element.currentTime = index % 10;
+        element.play();
+        element.pause();
+    }
+
+    const description = realm.api.describe(element);
+    expect(description.valid).toBe(true);
+    expect(description.reason).toBe(null);
+    expect(description.provenance.continuity.playCount).toBe(CYCLES);
+    expect(description.provenance.continuity.pauseCount).toBe(CYCLES);
+    expect(description.provenance.continuity.lastPlaySequence).toBeGreaterThan(
+        OBSERVED_LAST_PLAY_SEQUENCE,
+    );
+
+    const snapshot = realm.api.snapshot();
+    expect(snapshot.valid).toBe(true);
+    expect(snapshot.invalidReasons).toEqual([]);
+    expect(snapshot.events.capacity).toBe(EVENT_CAPACITY);
+    expect(snapshot.events.truncated).toBe(false);
+    expect(snapshot.events.dropped).toBe(0);
+    // Each of the three wrapped writes appends an attempt and a result record.
+    expect(snapshot.events.count).toBe(initialCount + CYCLES * 3 * 2);
+    expect(snapshot.events.count).toBeGreaterThan(OBSERVED_LAST_PLAY_SEQUENCE);
+    expect(snapshot.events.count).toBeLessThan(EVENT_CAPACITY);
+    expect(snapshot.events.records[snapshot.events.count - 1].sequence).toBe(snapshot.events.count);
+    expect(description.provenance.continuity.lastPlaySequence).toBe(snapshot.events.count - 3);
+});
+
+test('invalidates exactly at the 32768-event retention boundary without bypassing production limits', () => {
+    const realm = createRealm();
+    const element = new realm.Audio(AMBIENT_WARROOM);
+    const initial = realm.api.snapshot();
+    const capacity = initial.events.capacity;
+    // The advertised limit is the production constant under test, not a local override.
+    expect(capacity).toBe(32768);
+    // Constructor setup is observable: install plus this construction.
+    expect(initial.events.records.map((record: any) => record.kind)).toEqual(['install', 'construct']);
+    expect(initial.events.truncated).toBe(false);
+    expect(initial.events.dropped).toBe(0);
+
+    // A currentTime write appends exactly mutation-attempt then mutation-result.
+    const eventsPerWrite = 2;
+    const remaining = capacity - initial.events.count;
+    expect(remaining % eventsPerWrite).toBe(0);
+    const writesToFill = remaining / eventsPerWrite;
+    expect(writesToFill).toBeGreaterThan(0);
+    for (let index = 0; index < writesToFill; index += 1) element.currentTime = index;
+
+    const filled = realm.api.snapshot();
+    expect(filled.valid).toBe(true);
+    expect(filled.invalidReasons).toEqual([]);
+    expect(filled.events.count).toBe(capacity);
+    expect(filled.events.truncated).toBe(false);
+    expect(filled.events.dropped).toBe(0);
+    expect(filled.events.records[0].sequence).toBe(1);
+    expect(filled.events.records[capacity - 1].sequence).toBe(capacity);
+    expect(filled.events.records.every((record: any, index: number) => record.sequence === index + 1)).toBe(true);
+
+    // The next wrapped call appends the first event that cannot be retained.
+    expect(element.play()).toBe('play-return');
+    const overflowed = realm.api.snapshot();
+    expect(overflowed.valid).toBe(false);
+    expect(overflowed.invalidReasons).toContain('event-overflow');
+    expect(overflowed.events.capacity).toBe(capacity);
+    expect(overflowed.events.count).toBe(capacity);
+    expect(overflowed.events.truncated).toBe(true);
+    // The overflowing play drops its attempt and its result record.
+    expect(overflowed.events.dropped).toBe(2);
+    expect(overflowed.events.records[capacity - 1].sequence).toBe(capacity);
+    expect(overflowed.events.records.every((record: any, index: number) => record.sequence === index + 1)).toBe(true);
+    // New events are dropped; retained records are never rewritten, so the play attempt is absent.
+    expect(overflowed.events.records.some((record: any) =>
+        record.kind === 'mutation-attempt' && record.name === 'play')).toBe(false);
+    // Sequence and continuity accounting keep advancing past the retained capacity.
+    expect(overflowed.registry.entries[0].continuity.playCount).toBe(1);
+    expect(overflowed.registry.entries[0].continuity.lastPlaySequence).toBe(capacity + 1);
+    expect(overflowed.registry.entries[0].admissible).toBe(false);
+    expect(overflowed.registry.entries[0].reason).toBe('diagnostic-invalid');
+});
+
+test('bounds observer records and entries, failing closed on overflow', () => {
     const observerRealm = createRealm();
     const observerElement = new observerRealm.Audio(AMBIENT_WARROOM);
     for (let index = 0; index < 70; index += 1) observerElement.loop = index % 2 === 0;

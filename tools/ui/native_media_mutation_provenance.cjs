@@ -25,7 +25,12 @@ function installNativeMediaMutationProvenance(priorApi) {
     const MARKER = 'awwv-native-media-mutation-provenance-api-v1';
     const LABEL = 'ALTERED CONTROLLED-QA PROFILE: exact same-realm Audio-constructor provenance and explicit mutation evidence only. This is not acceptance, production/default-control coverage, universal provenance, playback-quality proof, natural-loop proof, or tamper resistance.';
     const AMBIENT_PATH = /^\/assets\/ambient_(?:warroom|field|archive)-[A-Za-z0-9_-]+\.ogg$/;
-    const EVENT_CAP = 256;
+    // Retention bound only. 32768 is a practical finite ceiling for the planned
+    // route shapes, not demonstrated sufficiency for the full 188-turn route and
+    // not an acceptance or physics threshold. The appendEvent overflow path is
+    // unchanged: the first event past this cap is dropped, marks truncation and
+    // adds event-overflow, so no capture is reinterpreted as valid here.
+    const EVENT_CAP = 32768;
     const ENTRY_CAP = 16;
     const OBSERVER_RECORD_CAP = 64;
     const REQUIRED_METHODS = ['play', 'pause', 'load'];
