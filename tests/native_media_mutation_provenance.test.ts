@@ -577,14 +577,14 @@ test('installs a frozen diagnostic API and describes initial ambient constructio
         attributes: true,
         childList: true,
         subtree: true,
-        recordCap: 64,
+        recordCap: 4096,
         drainBeforeValidation: true,
         unexplainedMutations: 'invalidate',
     });
     expect(snapshot.coverage.limits).toEqual({
         events: 32768,
         entries: 16,
-        observerRecordsPerObject: 64,
+        observerRecordsPerObject: 4096,
     });
     expect(snapshot.coverage.browserTamperResistance).toBe(false);
     expect(snapshot.registry.count).toBe(1);
@@ -1275,11 +1275,14 @@ test('invalidates exactly at the 32768-event retention boundary without bypassin
 test('bounds observer records and entries, failing closed on overflow', () => {
     const observerRealm = createRealm();
     const observerElement = new observerRealm.Audio(AMBIENT_WARROOM);
-    for (let index = 0; index < 70; index += 1) observerElement.loop = index % 2 === 0;
+    const observerRecordCap = observerRealm.api.snapshot().coverage.mutationObserver.recordCap;
+    expect(observerRecordCap).toBe(4096);
+    for (let index = 0; index <= observerRecordCap; index += 1) observerElement.loop = true;
     const observerSnapshot = observerRealm.api.snapshot();
     expect(observerSnapshot.valid).toBe(false);
     expect(observerSnapshot.invalidReasons).toContain('observer-record-overflow');
     expect(observerSnapshot.registry.entries[0].observer.overflow).toBe(true);
+    expect(observerSnapshot.registry.entries[0].observer.recordsSeen).toBe(observerRecordCap + 1);
 
     const entryRealm = createRealm();
     for (let index = 0; index < 17; index += 1) {
@@ -1291,6 +1294,115 @@ test('bounds observer records and entries, failing closed on overflow', () => {
     expect(entrySnapshot.registry.overflow).toBe(true);
     expect(entrySnapshot.invalidReasons).toContain('entry-overflow');
     expect(entrySnapshot.valid).toBe(false);
+});
+
+test('retains one hundred legitimate explained loop observer records as valid provenance', () => {
+    const realm = createRealm();
+    const element = new realm.Audio(AMBIENT_WARROOM);
+    const initialDescription = realm.api.describe(element);
+    expect(initialDescription.valid).toBe(true);
+    expect(initialDescription.provenance.observer).toMatchObject({
+        recordsSeen: 0,
+        overflow: false,
+        unexplained: 0,
+    });
+
+    const explainedWrites = 100;
+    for (let index = 0; index < explainedWrites; index += 1) element.loop = true;
+
+    const description = realm.api.describe(element);
+    expect(description.valid).toBe(true);
+    expect(description.reason).toBe(null);
+    expect(description.provenance.observer).toMatchObject({
+        recordsSeen: explainedWrites,
+        overflow: false,
+        unexplained: 0,
+    });
+
+    const snapshot = realm.api.snapshot();
+    expect(snapshot.valid).toBe(true);
+    expect(snapshot.invalidReasons).toEqual([]);
+    expect(snapshot.registry.entries[0].observer).toMatchObject({
+        recordsSeen: explainedWrites,
+        overflow: false,
+        unexplained: 0,
+    });
+    expect(snapshot.events.records.filter((record: any) =>
+        record.kind === 'attribute-mutation-explained' && record.attributeName === 'loop'))
+        .toHaveLength(explainedWrites);
+});
+
+test('invalidates exactly at the 4096 observer-record boundary without event-cap masking', () => {
+    const realm = createRealm();
+    const element = new realm.Audio(AMBIENT_WARROOM);
+    const initialDescription = realm.api.describe(element);
+    const initialSnapshot = realm.api.snapshot();
+    const recordCap = initialSnapshot.coverage.mutationObserver.recordCap;
+    const initialRecords = initialDescription.provenance.observer.recordsSeen;
+    const initialEvents = initialSnapshot.events.count;
+    expect(recordCap).toBe(4096);
+    expect(initialRecords).toBe(0);
+    expect(initialSnapshot.valid).toBe(true);
+
+    // One explained loop write is exactly one processed observer record.
+    const writesToFill = recordCap - initialRecords;
+    expect(writesToFill).toBe(4096);
+    for (let index = 0; index < writesToFill; index += 1) element.loop = true;
+
+    const filledDescription = realm.api.describe(element);
+    expect(filledDescription.valid).toBe(true);
+    expect(filledDescription.reason).toBe(null);
+    expect(filledDescription.provenance.observer).toMatchObject({
+        recordsSeen: recordCap,
+        overflow: false,
+        unexplained: 0,
+    });
+
+    const filledSnapshot = realm.api.snapshot();
+    expect(filledSnapshot.valid).toBe(true);
+    expect(filledSnapshot.invalidReasons).toEqual([]);
+    expect(filledSnapshot.registry.entries[0].observer).toMatchObject({
+        recordsSeen: recordCap,
+        overflow: false,
+        unexplained: 0,
+    });
+    // Three retained events per explained write, and the global event cap is far away.
+    expect(filledSnapshot.events.count).toBe(initialEvents + writesToFill * 3);
+    expect(filledSnapshot.events.capacity).toBe(32768);
+    expect(filledSnapshot.events.count).toBeLessThan(filledSnapshot.events.capacity);
+    expect(filledSnapshot.events.truncated).toBe(false);
+    expect(filledSnapshot.events.dropped).toBe(0);
+    expect(filledSnapshot.events.records.filter((record: any) =>
+        record.kind === 'attribute-mutation-explained' && record.attributeName === 'loop'))
+        .toHaveLength(recordCap);
+
+    // The first record past the real observer cap invalidates instead of being retained.
+    element.loop = true;
+    const overflowedDescription = realm.api.describe(element);
+    expect(overflowedDescription.valid).toBe(false);
+    expect(overflowedDescription.reason).toBe('observer-record-overflow');
+    expect(overflowedDescription.provenance.observer).toMatchObject({
+        recordsSeen: recordCap + 1,
+        overflow: true,
+        unexplained: 0,
+    });
+
+    const overflowedSnapshot = realm.api.snapshot();
+    expect(overflowedSnapshot.valid).toBe(false);
+    expect(overflowedSnapshot.invalidReasons).toContain('observer-record-overflow');
+    expect(overflowedSnapshot.registry.entries[0].observer).toMatchObject({
+        recordsSeen: recordCap + 1,
+        overflow: true,
+        unexplained: 0,
+    });
+    // The observer boundary is reached with the event retention budget untouched.
+    expect(overflowedSnapshot.events.capacity).toBe(32768);
+    expect(overflowedSnapshot.events.count).toBe(filledSnapshot.events.count + 3);
+    expect(overflowedSnapshot.events.count).toBeLessThan(overflowedSnapshot.events.capacity);
+    expect(overflowedSnapshot.events.truncated).toBe(false);
+    expect(overflowedSnapshot.events.dropped).toBe(0);
+    expect(overflowedSnapshot.events.records.some((record: any) =>
+        record.kind === 'invalidation' && record.reason === 'observer-record-overflow')).toBe(true);
 });
 
 test('sampling performs no media actions and returns serializable exact identity data', () => {

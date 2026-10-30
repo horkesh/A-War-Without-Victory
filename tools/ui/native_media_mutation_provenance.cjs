@@ -32,7 +32,12 @@ function installNativeMediaMutationProvenance(priorApi) {
     // adds event-overflow, so no capture is reinterpreted as valid here.
     const EVENT_CAP = 32768;
     const ENTRY_CAP = 16;
-    const OBSERVER_RECORD_CAP = 64;
+    // Finite cumulative retention bound for per-object observer records. This is
+    // only an instrumentation-retention ceiling, not demonstrated sufficiency for
+    // the 24- or 188-turn route shapes and not an audio acceptance or physics
+    // threshold. Counting stays cumulative per object, overflow still invalidates
+    // the object, and retained records are never pruned, reset or ignored.
+    const OBSERVER_RECORD_CAP = 4096;
     const REQUIRED_METHODS = ['play', 'pause', 'load'];
     const OPTIONAL_METHODS = ['fastSeek'];
     const REQUIRED_SETTERS = [
