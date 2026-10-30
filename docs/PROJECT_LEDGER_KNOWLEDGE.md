@@ -6293,3 +6293,7 @@ A roster can influence an existing nominal power cap/floor without being physica
 
 ## 2026-10-30 - Disable ambience before resolution, not by zero volume
 Zero bus volume still creates, preloads and plays media. A reversible category-specific gate must act before resolution/construction in both generic cue and bed entry points, stop cached beds, and remain independent of global enable/unmute/settings/gesture state. Keep provided assets and enabled-path tests intact. Bind a disabled-profile package separately, require complete zero-ambient request observations and actual nonambient playback, and never use that profile to close older enabled-audio failures. See the [dated policy entry](PROJECT_LEDGER.md#2026-10-30---reversible-ambience-disabled-native-gameplay-profile).
+
+
+## 2026-10-30 - A modal must cover its actual opener
+A valid canonical z-index token can still be the wrong tier for a component. Check relative sibling stacking and DOM order against the actual opener; preserving the token table does not prove physical reachability. The Settings8500/MainMenu9000 regression passed old isolated controls tests but failed native unforced clicks. Keep a relative-order regression and require the real rendered route. See the [dated repair](PROJECT_LEDGER.md#2026-10-30---settings-above-its-main-menu-opener).

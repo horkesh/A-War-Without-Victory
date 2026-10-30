@@ -12615,3 +12615,11 @@ Phase: UI/audio presentation and native QA. Owner approved disabling current amb
 Validation: genuine RED2pass/24fail followed by26 ambient and51 related tests passing; independent51 related tests, TypeScript, lint and diff checks pass. Package and native evidence are pending at this source checkpoint. The three Ogg assets/imports are retained byte-exact. Original ambience-enabled failures and unadopted buffered-resume experiments remain preserved and are not relabelled passing.
 
 Determinism/scope: no simulation, scenario, control, historical target, authority, save or combat changes. Exact measured January709 and April709 gameplay evidence is reused only subject to unchanged source/data and simulation-bundle identity; new package and save parity plus required native routes/horizons remain required. The new acceptance claim is ambience-disabled gameplay qualification with observed nonambient playback, never ambience-enabled audio acceptance or audible continuity. No push, adoption or publication.
+
+
+## 2026-10-30 - Settings above its main-menu opener
+Phase: UI ownership/native QA. The ambience-disabled native attempt02 stopped beforecampaign actions because the real Audio tab was covered by MainMenu's workspace: MainMenu used HARD_MODAL9000 while siblingSettings used MODAL_HARD8500. The native failure remains preserved. Pyrrhic approved changing only Settings to existing HARD_MODAL; its later sibling DOM order places it above the opener, with critical modals still above. Tier constants, Credits, ambience policy, controls and gameplay are unchanged.
+
+OpenCode recorded genuine RED3pass/1fail then4focused/67related tests passing. Independent67tests, TypeScript and lint pass; reviewGO requires fresh unforced native clicks. Real MainMenu/Settings markup regression checks relative tiers/DOM order, Audio controls, Escape and Close. jsdom is not physical hit-testing.
+
+Determinism: presentation-only one-token change. Exact simulation bytes and source/data bindings must remain unchanged; the existing newly packaged104 save-parity replay (all9 artifacts exact to retained709 evidence) is reused only at that unchanged simulation scope. New UI package/native evidence are pending. No forced clicks, target repaint, prior-failure relabelling, push or adoption.
