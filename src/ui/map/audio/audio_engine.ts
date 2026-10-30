@@ -43,7 +43,14 @@ const DEFAULT_VOLUMES: Record<AudioVolumeKind, number> = {
     stinger: 0,
 };
 
+type PlaybackAttemptStatus = 'pending' | 'success' | 'failure';
+
+interface PlaybackAttempt {
+    status: PlaybackAttemptStatus;
+}
+
 const playbackElementsByCueId = new Map<string, HTMLAudioElement>();
+const playbackAttemptByElement = new Map<HTMLAudioElement, PlaybackAttempt>();
 
 let state: AudioBusState = {
     enabled: false,
@@ -68,23 +75,55 @@ function getPlaybackElement(cueId: string, resolvedAssetUrl: string): HTMLAudioE
     if (typeof Audio === 'undefined') return null;
     const existing = playbackElementsByCueId.get(cueId);
     if (existing?.src === resolvedAssetUrl) return existing;
+    if (existing) playbackAttemptByElement.delete(existing);
     const element = new Audio(resolvedAssetUrl);
     element.preload = 'auto';
     playbackElementsByCueId.set(cueId, element);
     return element;
 }
 
+function isHealthyRunningLoop(element: HTMLAudioElement): boolean {
+    const attempt = playbackAttemptByElement.get(element);
+    return attempt?.status === 'success'
+        && element.loop === true
+        && element.paused === false
+        && element.ended === false
+        && element.error === null;
+}
+
+function settlePlaybackAttempt(
+    element: HTMLAudioElement,
+    attempt: PlaybackAttempt,
+    status: 'success' | 'failure',
+): void {
+    if (playbackAttemptByElement.get(element) !== attempt) return;
+    attempt.status = status;
+}
+
 function playResolvedAsset(cueId: string, resolvedAssetUrl: string, category: AudioCueCategory, defaultVolume: number, loop = false): void {
     const element = getPlaybackElement(cueId, resolvedAssetUrl);
     if (!element) return;
-    element.loop = loop;
+    const loopChanged = element.loop !== loop;
+    if (loopChanged) element.loop = loop;
     element.volume = clampVolume(state.volumes.master * state.volumes[category] * defaultVolume);
+    if (!loopChanged && loop && isHealthyRunningLoop(element)) {
+        return;
+    }
+    const attempt: PlaybackAttempt = { status: 'pending' };
+    playbackAttemptByElement.set(element, attempt);
     try {
         if (!loop) element.currentTime = 0;
-        void element.play()?.catch(() => undefined);
+        const playResult: Promise<void> | undefined = element.play();
+        if (playResult && typeof playResult.then === 'function') {
+            void playResult.then(
+                () => settlePlaybackAttempt(element, attempt, 'success'),
+                () => settlePlaybackAttempt(element, attempt, 'failure'),
+            );
+        }
     } catch {
         // Playback is best-effort. Autoplay or decode failures must not surface
         // as console noise or block UI flow.
+        settlePlaybackAttempt(element, attempt, 'failure');
     }
 }
 
@@ -267,6 +306,7 @@ export function getAudioState(): AudioBusState {
 export function resetAudioForTests(): void {
     stopAllPlayback();
     playbackElementsByCueId.clear();
+    playbackAttemptByElement.clear();
     state = {
         enabled: false,
         muted: true,

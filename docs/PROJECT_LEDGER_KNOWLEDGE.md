@@ -1,3 +1,7 @@
+## 2026-10-30 - Continuous ambient requests need command idempotence
+
+A repeated surface or gesture request may target an element already playing. Update volume without reissuing loop/play only after successful playback and explicit healthy state. Keep pending/rejected retries and stale-promise identity controls; paused=false alone is insufficient. This reduces redundant commands without exempting actual playback mutations from native QA. Mock tests prove command semantics; package/browser evidence remains separate. See [ambient reentry](PROJECT_LEDGER.md#2026-10-30---idempotent-continuous-ambient-playback-requests).
+
 ## 2026-10-26 — Follow exact operation participation across command and projection boundaries
 
 A brigade's own corps may differ from the corps hosting its joint operation.
