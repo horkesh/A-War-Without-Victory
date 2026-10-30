@@ -3,9 +3,9 @@
     "sourceSha40": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     "packageSha40": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
     "runtime": {
-      "browser": "Chromium 142.0.7444.175",
-      "electron": "40.0.0",
-      "revision": "synthetic-revision"
+      "browser": "Chrome/146.0.7680.80",
+      "electron": "41.0.3",
+      "revision": "@f08938029c887ea624da7a1717059788ed95034d"
     },
     "frameUrl": "http://127.0.0.1:50306/index.html?session=fixture#warroom",
     "origin": "http://127.0.0.1:50306",
@@ -728,7 +728,13 @@
       "controlledControlsRead": {
         "value": false,
         "error": null
-      }
+      },
+      "clock": {
+        "dateNow": 1793309366420.365,
+        "performanceNow": 42714.800048828125,
+        "timeOrigin": 1793309323705.565
+      },
+      "clockReadErrors": {}
     },
     {
       "signalSequence": 2,
@@ -841,7 +847,13 @@
       "controlledControlsRead": {
         "value": false,
         "error": null
-      }
+      },
+      "clock": {
+        "dateNow": 1793309367799.3398,
+        "performanceNow": 44093.77490234375,
+        "timeOrigin": 1793309323705.565
+      },
+      "clockReadErrors": {}
     },
     {
       "signalSequence": 3,
@@ -954,7 +966,13 @@
       "controlledControlsRead": {
         "value": false,
         "error": null
-      }
+      },
+      "clock": {
+        "dateNow": 1793309368517.415,
+        "performanceNow": 44811.85009765625,
+        "timeOrigin": 1793309323705.565
+      },
+      "clockReadErrors": {}
     },
     {
       "signalSequence": 4,
@@ -1067,7 +1085,13 @@
       "controlledControlsRead": {
         "value": false,
         "error": null
-      }
+      },
+      "clock": {
+        "dateNow": 1793309368517.465,
+        "performanceNow": 44811.900146484375,
+        "timeOrigin": 1793309323705.565
+      },
+      "clockReadErrors": {}
     },
     {
       "signalSequence": 5,
@@ -1180,7 +1204,13 @@
       "controlledControlsRead": {
         "value": false,
         "error": null
-      }
+      },
+      "clock": {
+        "dateNow": 1793309368517.629,
+        "performanceNow": 44812.06396484375,
+        "timeOrigin": 1793309323705.565
+      },
+      "clockReadErrors": {}
     },
     {
       "signalSequence": 6,
@@ -1293,7 +1323,13 @@
       "controlledControlsRead": {
         "value": false,
         "error": null
-      }
+      },
+      "clock": {
+        "dateNow": 1793309368617.5789,
+        "performanceNow": 44912.013916015625,
+        "timeOrigin": 1793309323705.565
+      },
+      "clockReadErrors": {}
     }
   ],
   "selected": {

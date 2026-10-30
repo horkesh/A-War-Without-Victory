@@ -13,7 +13,7 @@
 //
 // binding: {
 //   sourceSha40, packageSha40,                 // exact lower-case SHA-40
-//   runtime: { browser, electron, revision },  // non-empty strings
+//   runtime: { browser, electron, revision },  // exact pinned supported runtime
 //   frameUrl, origin, documentGeneration,      // same local document
 //   profile: 'awwv.controlled-native-media-loop-cycle.v1',
 //   collectionReady: { dateNow, performanceNow, timeOrigin },
@@ -26,9 +26,12 @@
 // sentinel: __AWWV_NATIVE_MEDIA_SEEK_SENTINEL__ final snapshot
 // media: passive startMediaOriginProbe final snapshot
 //   (awwv.native-media-origin-probe.v1); renderer probe control must be disabled
-// lifecycleSignals: old QA ambient lifecycle entries, each relevant entry
-//   augmented with controlledProvenance = exact describe(element) at record
-//   time. The old QA elementId/sourceEpoch may differ from the helper object
+// lifecycleSignals: QA ambient lifecycle entries, each carrying clock =
+//   { dateNow, performanceNow, timeOrigin } captured together at record time
+//   plus clockReadErrors (empty for eligible observations), and each relevant
+//   entry augmented with controlledProvenance = exact describe(element) at
+//   record time. Missing/error clocks never become eligible. The old QA
+//   elementId/sourceEpoch may differ from the helper object
 //   id/epoch; the former must stay consistent across the selected cycle and
 //   the latter must identify the selected Audio object at helper sourceEpoch 1.
 // selected: { preSeek, seeking, seeked, playing, confirmation }, each an object
@@ -68,6 +71,12 @@ const SHA40 = /^[0-9a-f]{40}$/;
 const AMBIENT_PATH = /^\/assets\/ambient_(?:warroom|field|archive)-[A-Za-z0-9_-]+\.ogg$/;
 const UTC_CREATED = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,6}))? UTC$/;
 const CLOCK_FENCE_MS = 20;
+const SUPPORTED_RUNTIME = Object.freeze({
+    browser: 'Chrome/146.0.7680.80',
+    electron: '41.0.3',
+    revision: '@f08938029c887ea624da7a1717059788ed95034d',
+});
+const CLOCK_MODEL = 'shared-monotonic-renderer-anchor-v1';
 const MEDIA_RECORD_EVENTS = [
     'Media.playerCreated',
     'Media.playerPropertiesChanged',
@@ -235,6 +244,19 @@ function validateClockPair(value, timeOrigin, reason) {
     return clocks;
 }
 
+// Every lifecycle observation must carry the three values captured together in
+// the renderer. The values are validated independently; no field is inferred
+// from another observation or from the observation wall time.
+function validateDocumentClock(value, binding, reason) {
+    requirePlain(value, reason);
+    const dateNow = requireFinite(value.dateNow, reason);
+    const performanceNow = requireFinite(value.performanceNow, reason);
+    const timeOrigin = requireFinite(value.timeOrigin, reason);
+    if (dateNow <= 0 || performanceNow < 0 || timeOrigin <= 0) reject(reason);
+    if (timeOrigin !== binding.timeOrigin) reject(`${reason}.origin`);
+    return { dateNow, performanceNow, timeOrigin };
+}
+
 function validateBinding(binding) {
     requirePlain(binding, 'binding');
     requireNonEmptyString(binding.sourceSha40, 'binding.sourceSha40');
@@ -243,9 +265,11 @@ function validateBinding(binding) {
         reject('binding.sha40');
     }
     const runtime = requirePlain(binding.runtime, 'binding.runtime');
-    requireNonEmptyString(runtime.browser, 'binding.runtime');
-    requireNonEmptyString(runtime.electron, 'binding.runtime');
-    requireNonEmptyString(runtime.revision, 'binding.runtime');
+    if (runtime.browser !== SUPPORTED_RUNTIME.browser
+        || runtime.electron !== SUPPORTED_RUNTIME.electron
+        || runtime.revision !== SUPPORTED_RUNTIME.revision) {
+        reject('binding.runtime');
+    }
     requireNonEmptyString(binding.origin, 'binding.origin');
     const frame = parseFrameUrl(binding.frameUrl, binding.origin);
     requireNonEmptyString(binding.documentGeneration, 'binding.documentGeneration');
@@ -518,9 +542,8 @@ function validateProvenance(provenance, binding) {
         || install.apiFrozen !== true) {
         reject('provenance.install');
     }
-    const installedAt = validateClockPair(
+    const installedAt = validateEventClockShape(
         install.installedAt,
-        binding.timeOrigin,
         'provenance.install.installedAt',
     );
     if (Math.abs(installedAt.dateNow - binding.generationInstalled.dateNow) > CLOCK_FENCE_MS
@@ -632,9 +655,8 @@ function validateProvenance(provenance, binding) {
         || construct.at.performanceNow < installEvent.at.performanceNow) {
         reject('provenance.selected.construct.generation');
     }
-    const registeredAt = validateClockPair(
+    const registeredAt = validateEventClockShape(
         selectedElement.registeredAt,
-        binding.timeOrigin,
         'provenance.selected.registeredAt',
     );
     if (registeredAt.dateNow > construct.at.dateNow
@@ -693,23 +715,84 @@ function validateProvenance(provenance, binding) {
         attempts,
         results,
         installEvent: installEvents[0].event,
+        constructEvent: construct,
     };
 }
 
-function validateProvenanceEventClocks(provenance, binding, lifecycle) {
-    const confirmationMs = lifecycle.selected.confirmation.observedAtMs;
-    if (!isFiniteNumber(confirmationMs) || confirmationMs <= 0) {
-        reject('provenance.events.clock');
+// The selected seeking observation supplies the one renderer anchor used for
+// the proof interval. It is never selected to minimize a residual. The anchor
+// maps the captured performance timeline onto the captured local wall clock;
+// a lifetime wall/performance offset remains a reported diagnostic.
+function buildAnchorProjection(binding, selected) {
+    const anchorEntry = selected.seeking;
+    const anchor = anchorEntry.clock;
+    if (!anchor || anchor.timeOrigin !== binding.timeOrigin) reject('lifecycle.clock.anchor');
+    const localOffsetMs = anchor.dateNow - anchor.performanceNow;
+    if (!isFiniteNumber(localOffsetMs)) reject('lifecycle.clock.anchor');
+    return { anchorEntry, anchor, localOffsetMs };
+}
+
+function buildClockModel(binding, lifecycle) {
+    const { anchorEntry, anchor, localOffsetMs } = lifecycle.anchorProjection;
+    const proofStartMs = lifecycle.start.projectedAtMs;
+    const proofEndMs = lifecycle.selected.confirmation.projectedAtMs;
+    if (!(proofStartMs <= proofEndMs)) reject('lifecycle.clock.interval');
+    return {
+        anchorEntry,
+        anchor,
+        localOffsetMs,
+        proofStartMs,
+        proofEndMs,
+        lateBoundaryMs: proofEndMs + CLOCK_FENCE_MS,
+    };
+}
+
+function projectRendererMs(clockModel, clocks) {
+    const projected = clockModel.localOffsetMs + clocks.performanceNow;
+    if (!isFiniteNumber(projected)) reject('lifecycle.clock.projection');
+    return projected;
+}
+
+function validateLifecycleClockModel(lifecycle, clockModel) {
+    const source = lifecycle.selected.confirmation.signal.url;
+    const relevant = lifecycle.signals.filter((entry) => entry.signal.elementId === lifecycle.qaElementId
+        && entry.signal.sourceEpoch === lifecycle.qaSourceEpoch
+        && entry.signal.url === source);
+    let previousPerformanceNow = -Infinity;
+    for (const entry of relevant) {
+        const { performanceNow } = entry.clock;
+        if (performanceNow < previousPerformanceNow) {
+            reject('lifecycle.clock.chronology');
+        }
+        previousPerformanceNow = performanceNow;
     }
-    const lateBoundaryMs = confirmationMs + CLOCK_FENCE_MS;
+    for (const entry of relevant) {
+        const { dateNow } = entry.clock;
+        const projected = projectRendererMs(clockModel, entry.clock);
+        const nearProof = projected >= clockModel.proofStartMs - CLOCK_FENCE_MS
+            && projected <= clockModel.proofEndMs + CLOCK_FENCE_MS;
+        if (nearProof && Math.abs(dateNow - projected) > CLOCK_FENCE_MS) {
+            reject('lifecycle.clock.local');
+        }
+    }
+}
+
+function validateProvenanceEventClocks(provenance, clockModel) {
+    let previousPerformanceNow = -Infinity;
     for (const entry of provenance.events) {
         const { dateNow, performanceNow } = entry.clocks;
-        const projectedByPerformance = binding.timeOrigin + performanceNow;
-        if (!isFiniteNumber(projectedByPerformance)) reject('provenance.events.clock');
-        const dateLate = dateNow > lateBoundaryMs;
-        const performanceLate = projectedByPerformance > lateBoundaryMs;
+        if (performanceNow < previousPerformanceNow) {
+            reject('provenance.events.clock.chronology');
+        }
+        previousPerformanceNow = performanceNow;
+        const projected = projectRendererMs(clockModel, entry.clocks);
+        const dateLate = dateNow > clockModel.lateBoundaryMs;
+        const performanceLate = projected > clockModel.lateBoundaryMs;
         if (dateLate !== performanceLate) reject('provenance.events.clock.membership');
-        if (!dateLate && Math.abs(dateNow - projectedByPerformance) > CLOCK_FENCE_MS) {
+        if (dateLate) continue;
+        const nearProof = projected >= clockModel.proofStartMs - CLOCK_FENCE_MS
+            || dateNow >= clockModel.proofStartMs - CLOCK_FENCE_MS;
+        if (nearProof && Math.abs(dateNow - projected) > CLOCK_FENCE_MS) {
             reject('provenance.events.clock');
         }
     }
@@ -750,7 +833,7 @@ function validateSentinel(sentinel, binding) {
         || install.apiFrozen !== true) {
         reject('sentinel.install');
     }
-    const installedAt = validateClockPair(install.installedAt, binding.timeOrigin, 'sentinel.install.installedAt');
+    const installedAt = validateEventClockShape(install.installedAt, 'sentinel.install.installedAt');
     if (Math.abs(installedAt.dateNow - binding.generationInstalled.dateNow) > CLOCK_FENCE_MS
         || Math.abs(installedAt.performanceNow - binding.generationInstalled.performanceNow) > CLOCK_FENCE_MS) {
         reject('sentinel.install.installedAt');
@@ -772,12 +855,15 @@ function validateSentinel(sentinel, binding) {
     }
     if (events.count > events.capacity) reject('sentinel.events.capacity');
     let previous = 0;
+    let previousPerformanceNow = -Infinity;
     for (let eventIndex = 0; eventIndex < events.records.length; eventIndex += 1) {
         const event = requirePlain(events.records[eventIndex], 'sentinel.events.record');
         const sequence = requireInteger(event.sequence, 'sentinel.events.sequence');
         if (sequence !== eventIndex + 1 || sequence <= previous) reject('sentinel.events.sequence');
         previous = sequence;
-        validateClockPair(event.at, binding.timeOrigin, 'sentinel.events.clock');
+        const clocks = validateEventClockShape(event.at, 'sentinel.events.clock');
+        if (clocks.performanceNow < previousPerformanceNow) reject('sentinel.events.clock');
+        previousPerformanceNow = clocks.performanceNow;
         if (event.kind === 'media-session-action'
             || event.kind === 'action-registration'
             || event.kind === 'action-registration-failure') {
@@ -1027,15 +1113,17 @@ function validateMedia(media, binding, source) {
     const logEvents = player.events.filter((event) => event.value.event === 'kMediaLogCreated');
     if (logEvents.length !== 1) reject('media.player.log-created');
     const logEvent = logEvents[0];
+    if (!(logEvent.timestamp <= loads[0].timestamp)) {
+        reject('media.history.native-order');
+    }
     const createdUtcMs = parseUtcCreated(logEvent.value.created);
     const mediaOffsetMs = createdUtcMs - logEvent.timestamp * 1000;
     if (!isFiniteNumber(mediaOffsetMs)) reject('media.clock.offset');
-    for (const observedPlayer of players.values()) {
-        for (const event of observedPlayer.events) {
-            event.projectedAtMs = event.timestamp * 1000 + mediaOffsetMs;
-            if (!isFiniteNumber(event.projectedAtMs)) reject('media.clock.projection');
-        }
-    }
+    const historicalProjection = (event) => {
+        const projected = event.timestamp * 1000 + mediaOffsetMs;
+        if (!isFiniteNumber(projected)) reject('media.clock.historical-projection');
+        return projected;
+    };
 
     return {
         media,
@@ -1046,6 +1134,8 @@ function validateMedia(media, binding, source) {
         log: logEvent,
         createdUtcMs,
         mediaOffsetMs,
+        historicalLogProjectedAtMs: historicalProjection(logEvent),
+        historicalLoadProjectedAtMs: historicalProjection(loads[0]),
         records,
     };
 }
@@ -1092,8 +1182,8 @@ function isAdmissibleInProgressZeroSeekWaiting(
     if (signal.kind !== 'waiting') return false;
     if (!(entry.signalSequence > selected.seeking.signalSequence
         && entry.signalSequence < selected.seeked.signalSequence)) return false;
-    if (!(entry.observedAtMs >= selected.seeking.observedAtMs
-        && entry.observedAtMs < selected.seeked.observedAtMs)) return false;
+    if (!(entry.projectedAtMs >= selected.seeking.projectedAtMs
+        && entry.projectedAtMs < selected.seeked.projectedAtMs)) return false;
     if (signal.elementId !== qaElementId
         || signal.sourceEpoch !== qaSourceEpoch
         || signal.url !== source
@@ -1193,8 +1283,8 @@ function validateObservedResumeAnchor(start, selected) {
 // retained in evidence only. Preserved event sequence decides whether a
 // mutation intervenes between the intent and the anchor, so an ordered setter
 // and play call recorded in the same millisecond are not treated as a tie.
-function validateObservedResumeProvenance(provenance, lifecycle) {
-    const anchorMs = lifecycle.start.observedAtMs;
+function validateObservedResumeProvenance(provenance, lifecycle, clockModel) {
+    const anchorMs = lifecycle.start.projectedAtMs;
     const floorMs = lifecycle.selectionFloorMs;
     const selectedId = provenance.selectedId;
 
@@ -1224,8 +1314,9 @@ function validateObservedResumeProvenance(provenance, lifecycle) {
     }
     if (attempt.event.sourceEpoch !== 1) reject('resume.play.epoch');
     if (attempt.event.sourceEpoch !== lastPlayEpoch) reject('resume.link.epoch');
-    if (!(attempt.clocks.dateNow >= floorMs)) reject('resume.play.fresh');
-    if (!(attempt.clocks.dateNow < anchorMs)) reject('resume.play.order');
+    const attemptMs = projectRendererMs(clockModel, attempt.clocks);
+    if (!(attemptMs >= floorMs)) reject('resume.play.fresh');
+    if (!(attemptMs < anchorMs)) reject('resume.play.order');
 
     const resultEntries = provenance.events.filter((entry) => entry.event.kind === 'mutation-result'
         && entry.event.sequenceOfAttempt === attempt.event.sequence);
@@ -1240,12 +1331,13 @@ function validateObservedResumeProvenance(provenance, lifecycle) {
         || result.resultType !== 'object') {
         reject('resume.play.result');
     }
-    if (!(resultEntry.clocks.dateNow >= attempt.clocks.dateNow)) {
+    const resultMs = projectRendererMs(clockModel, resultEntry.clocks);
+    if (!(resultMs >= attemptMs)) {
         reject('resume.play.result');
     }
     // The DOM playing notification must follow the recorded call return. No
     // upper bound is applied to this measured delay.
-    if (!(resultEntry.clocks.dateNow <= anchorMs)) reject('resume.play.result');
+    if (!(resultMs <= anchorMs)) reject('resume.play.result');
 
     // Another application play attempt that could compete for the same exact
     // linked intent is genuine ambiguity. Older settled attempts outside the
@@ -1257,9 +1349,10 @@ function validateObservedResumeProvenance(provenance, lifecycle) {
         if (event.sourceEpoch !== 1) continue;
         if (event.targetType !== 'method' || event.name !== 'play') continue;
         if (event.sequence === attempt.event.sequence) continue;
-        if (!(entry.clocks.dateNow >= floorMs)) continue;
-        if (!(entry.clocks.dateNow <= anchorMs)) continue;
-        if (Math.abs(entry.clocks.dateNow - attempt.clocks.dateNow) <= CLOCK_FENCE_MS) {
+        const candidateMs = projectRendererMs(clockModel, entry.clocks);
+        if (!(candidateMs >= floorMs)) continue;
+        if (!(candidateMs <= anchorMs)) continue;
+        if (Math.abs(candidateMs - attemptMs) <= CLOCK_FENCE_MS) {
             reject('resume.play.unique');
         }
     }
@@ -1271,7 +1364,7 @@ function validateObservedResumeProvenance(provenance, lifecycle) {
         const event = entry.event;
         if (event.kind !== 'mutation-attempt' || event.id !== selectedId) continue;
         if (event.sequence <= attempt.event.sequence) continue;
-        if (!(entry.clocks.dateNow <= anchorMs)) continue;
+        if (!(projectRendererMs(clockModel, entry.clocks) <= anchorMs)) continue;
         reject('resume.play.settled');
     }
 
@@ -1280,7 +1373,7 @@ function validateObservedResumeProvenance(provenance, lifecycle) {
         if (entry.signal.sourceEpoch !== lifecycle.qaSourceEpoch) continue;
         if (entry.signal.url !== provenance.source) continue;
         if (entry === lifecycle.start) continue;
-        if (!(entry.observedAtMs > attempt.clocks.dateNow && entry.observedAtMs <= anchorMs)) {
+        if (!(entry.projectedAtMs > attemptMs && entry.projectedAtMs <= anchorMs)) {
             continue;
         }
         if (RESUME_SETTLED_KINDS.has(entry.signal.kind)) reject('resume.play.settled');
@@ -1289,7 +1382,7 @@ function validateObservedResumeProvenance(provenance, lifecycle) {
     // No extra pause/play/seek/load/reset/error transition may sit between the
     // resume anchor and the end/reset confirmation. The selected zero-seek
     // samples themselves remain the only expected transitions there.
-    const confirmationMs = lifecycle.selected.confirmation.observedAtMs;
+    const confirmationMs = lifecycle.selected.confirmation.projectedAtMs;
     const selectedSequences = new Set([
         lifecycle.selected.preSeek.signalSequence,
         lifecycle.selected.seeking.signalSequence,
@@ -1301,7 +1394,7 @@ function validateObservedResumeProvenance(provenance, lifecycle) {
         if (entry.signal.elementId !== lifecycle.qaElementId) continue;
         if (entry.signal.sourceEpoch !== lifecycle.qaSourceEpoch) continue;
         if (entry.signal.url !== provenance.source) continue;
-        if (!(entry.observedAtMs > anchorMs && entry.observedAtMs < confirmationMs)) continue;
+        if (!(entry.projectedAtMs > anchorMs && entry.projectedAtMs < confirmationMs)) continue;
         if (selectedSequences.has(entry.signalSequence)) continue;
         if (RESUME_SETTLED_KINDS.has(entry.signal.kind)) reject('resume.after.settled');
     }
@@ -1309,18 +1402,14 @@ function validateObservedResumeProvenance(provenance, lifecycle) {
     lifecycle.resume = {
         attempt,
         result: resultEntry,
-        attemptMs: attempt.clocks.dateNow,
-        resultMs: resultEntry.clocks.dateNow,
+        attemptMs,
+        resultMs,
         floorMs,
     };
 }
 
 function validateLifecycleAndSelect(input, binding, provenance, projection) {
     if (!Array.isArray(input.lifecycleSignals)) reject('lifecycle');
-    const selectionFloorMs = Math.max(
-        binding.collectionReady.dateNow,
-        projection.observationWindow.openedAtMs,
-    );
     const signals = [];
     const bySequence = new Map();
     for (let index = 0; index < input.lifecycleSignals.length; index += 1) {
@@ -1331,6 +1420,10 @@ function validateLifecycleAndSelect(input, binding, provenance, projection) {
         }
         const observedAtMs = requireFinite(signal.observedAtMs, 'lifecycle.observedAtMs');
         if (observedAtMs <= 0) reject('lifecycle.observedAtMs');
+        const clock = validateDocumentClock(signal.clock, binding, 'lifecycle.clock');
+        if (observedAtMs !== clock.dateNow) reject('lifecycle.clock.observation');
+        const clockReadErrors = requirePlain(signal.clockReadErrors, 'lifecycle.clock.read-errors');
+        if (Object.keys(clockReadErrors).length !== 0) reject('lifecycle.clock.read-errors');
         requireNonEmptyString(signal.kind, 'lifecycle.kind');
         requireNonEmptyString(signal.elementId, 'lifecycle.elementId');
         requireInteger(signal.sourceEpoch, 'lifecycle.sourceEpoch');
@@ -1344,7 +1437,7 @@ function validateLifecycleAndSelect(input, binding, provenance, projection) {
             || (unavailable.length === 1 && unavailable[0] !== 'duration')) {
             reject('lifecycle.mediaStateUnavailable');
         }
-        const entry = { signal, index, signalSequence, observedAtMs, state };
+        const entry = { signal, index, signalSequence, observedAtMs, clock, state };
         signals.push(entry);
         bySequence.set(signalSequence, entry);
     }
@@ -1401,21 +1494,28 @@ function validateLifecycleAndSelect(input, binding, provenance, projection) {
         if (sequences.has(selected[name].signalSequence)) reject('selected.duplicate');
         sequences.add(selected[name].signalSequence);
     }
+    const anchorProjection = buildAnchorProjection(binding, selected);
+    for (const entry of signals) {
+        entry.projectedAtMs = projectRendererMs(anchorProjection, entry.clock);
+    }
+    const readinessProjectedMs = projectRendererMs(anchorProjection, binding.collectionReady);
+    const selectionFloorMs = readinessProjectedMs;
     const order = ['preSeek', 'seeking', 'seeked', 'playing', 'confirmation'];
     for (let index = 1; index < order.length; index += 1) {
         const previous = selected[order[index - 1]];
         const current = selected[order[index]];
         if (current.signalSequence <= previous.signalSequence
-            || current.observedAtMs < previous.observedAtMs) {
+            || current.projectedAtMs < previous.projectedAtMs) {
             reject('selected.order');
         }
     }
-    if (!(selected.preSeek.observedAtMs < selected.confirmation.observedAtMs)) {
+    if (!(selected.preSeek.projectedAtMs < selected.confirmation.projectedAtMs)) {
         reject('selected.order');
     }
     for (const name of order) {
         const entry = selected[name];
-        if (entry.observedAtMs < selectionFloorMs
+        if (entry.projectedAtMs < readinessProjectedMs) reject('selected.window');
+        if (entry.observedAtMs < projection.observationWindow.openedAtMs
             || entry.observedAtMs > projection.observationWindow.closedAtMs) {
             reject('selected.window');
         }
@@ -1464,8 +1564,8 @@ function validateLifecycleAndSelect(input, binding, provenance, projection) {
     const disallowed = new Set(['load', 'emptied', 'error', 'stalled', 'abort', 'waiting']);
     for (const entry of signals) {
         if (entry.signal.elementId !== qaElementId) continue;
-        if (entry.observedAtMs < selected.preSeek.observedAtMs
-            || entry.observedAtMs > selected.confirmation.observedAtMs) continue;
+        if (entry.projectedAtMs < selected.preSeek.projectedAtMs
+            || entry.projectedAtMs > selected.confirmation.projectedAtMs) continue;
         if (disallowed.has(entry.signal.kind)) {
             if (entry.signal.kind === 'waiting'
                 && isAdmissibleInProgressZeroSeekWaiting(
@@ -1492,21 +1592,23 @@ function validateLifecycleAndSelect(input, binding, provenance, projection) {
     const anchorCandidates = signals.filter((entry) => entry.signal.elementId === qaElementId
         && entry.signal.sourceEpoch === qaSourceEpoch
         && entry.signal.kind === 'playing'
-        && entry.observedAtMs < selected.preSeek.observedAtMs
-        && entry.observedAtMs >= selectionFloorMs);
+        && entry.projectedAtMs < selected.preSeek.projectedAtMs
+        && entry.projectedAtMs >= selectionFloorMs
+        && entry.observedAtMs >= projection.observationWindow.openedAtMs
+        && entry.observedAtMs <= projection.observationWindow.closedAtMs);
     if (anchorCandidates.length === 0) reject('selected.start.unique');
-    const latestStartMs = Math.max(...anchorCandidates.map((entry) => entry.observedAtMs));
-    const latestStarts = anchorCandidates.filter((entry) => entry.observedAtMs === latestStartMs);
+    const latestStartMs = Math.max(...anchorCandidates.map((entry) => entry.projectedAtMs));
+    const latestStarts = anchorCandidates.filter((entry) => entry.projectedAtMs === latestStartMs);
     if (latestStarts.length !== 1) reject('selected.start.unique');
     const start = latestStarts[0];
-    if (start.observedAtMs >= selected.preSeek.observedAtMs) reject('selected.start.order');
+    if (start.projectedAtMs >= selected.preSeek.projectedAtMs) reject('selected.start.order');
     const startMode = start.state.currentTime === 0 ? 'zero-start' : 'observed-resume';
     if (startMode === 'observed-resume') validateObservedResumeAnchor(start, selected);
 
     for (const entry of signals) {
         if (entry.signal.mediaStateUnavailable.length === 0) continue;
-        if (!(entry.observedAtMs < binding.collectionReady.dateNow)
-            || !(entry.observedAtMs < start.observedAtMs)
+        if (!(entry.projectedAtMs < readinessProjectedMs)
+            || !(entry.projectedAtMs < start.projectedAtMs)
             || !Object.prototype.hasOwnProperty.call(entry.state, 'duration')
             || entry.state.duration !== null) {
             reject('lifecycle.mediaStateUnavailable');
@@ -1520,12 +1622,19 @@ function validateLifecycleAndSelect(input, binding, provenance, projection) {
         start,
         startMode,
         selectionFloorMs,
+        readinessProjectedMs,
+        anchorProjection,
         qaElementId,
         qaSourceEpoch,
     };
 }
 
-function projectMediaEvents(events) {
+function projectMediaEvents(events, effectiveMediaOffsetMs) {
+    if (!isFiniteNumber(effectiveMediaOffsetMs)) reject('media.clock.network-offset');
+    for (const event of events) {
+        event.projectedAtMs = event.timestamp * 1000 + effectiveMediaOffsetMs;
+        if (!isFiniteNumber(event.projectedAtMs)) reject('media.clock.projection');
+    }
     const sorted = events.slice().sort((left, right) => {
         if (left.timestamp !== right.timestamp) return left.timestamp - right.timestamp;
         if (left.recordIndex !== right.recordIndex) return left.recordIndex - right.recordIndex;
@@ -1544,26 +1653,23 @@ function projectMediaEvents(events) {
     return sorted;
 }
 
-function correlateCycle(mediaResult, lifecycle, binding, projection, provenance) {
+function correlateCycle(mediaResult, lifecycle, provenance, effectiveMediaOffsetMs) {
     const { player } = mediaResult;
-    const sorted = projectMediaEvents(player.events);
+    const sorted = projectMediaEvents(player.events, effectiveMediaOffsetMs);
     const selected = lifecycle.selected;
-    const selectionFloorMs = Math.max(
-        binding.collectionReady.dateNow,
-        projection.observationWindow.openedAtMs,
-    );
+    const selectionFloorMs = lifecycle.readinessProjectedMs;
     const seekCandidates = sorted.filter((event) => event.role === 'seek'
         && event.value.seek_target === 0
-        && Math.abs(event.projectedAtMs - selected.seeking.observedAtMs) <= CLOCK_FENCE_MS);
+        && Math.abs(event.projectedAtMs - selected.seeking.projectedAtMs) <= CLOCK_FENCE_MS);
     if (seekCandidates.length !== 1) reject('media.seek.unique');
     const seek = seekCandidates[0];
 
     const endedCandidates = sorted.filter((event) => event.role === 'ended'
-        && event.projectedAtMs > selected.preSeek.observedAtMs
+        && event.projectedAtMs > selected.preSeek.projectedAtMs
         && event.projectedAtMs <= seek.projectedAtMs);
     if (endedCandidates.length !== 1) reject('media.cycle.ended');
     const ended = endedCandidates[0];
-    if (!(ended.projectedAtMs > selected.preSeek.observedAtMs)) reject('media.cycle.ended');
+    if (!(ended.projectedAtMs > selected.preSeek.projectedAtMs)) reject('media.cycle.ended');
 
     let start;
     let resumeNativePlaying = null;
@@ -1577,7 +1683,7 @@ function correlateCycle(mediaResult, lifecycle, binding, projection, provenance)
         if (!resume) reject('media.cycle.resume.play.unique');
         const playCandidates = sorted.filter((event) => event.role === 'resume-play'
             && event.projectedAtMs >= selectionFloorMs
-            && event.projectedAtMs <= lifecycle.start.observedAtMs
+            && event.projectedAtMs <= lifecycle.start.projectedAtMs
             && Math.abs(event.projectedAtMs - resume.attemptMs) <= CLOCK_FENCE_MS
             && Math.abs(event.projectedAtMs - resume.resultMs) <= CLOCK_FENCE_MS);
         if (playCandidates.length !== 1) reject('media.cycle.resume.play.unique');
@@ -1592,8 +1698,9 @@ function correlateCycle(mediaResult, lifecycle, binding, projection, provenance)
             if (event.sourceEpoch !== 1) continue;
             if (event.targetType !== 'method' || event.name !== 'play') continue;
             if (event.sequence === resume.attempt.event.sequence) continue;
-            if (!(entry.clocks.dateNow <= lifecycle.start.observedAtMs)) continue;
-            if (Math.abs(entry.clocks.dateNow - start.projectedAtMs) <= CLOCK_FENCE_MS) {
+            const candidateMs = projectRendererMs(lifecycle.anchorProjection, entry.clocks);
+            if (!(candidateMs <= lifecycle.start.projectedAtMs)) continue;
+            if (Math.abs(candidateMs - start.projectedAtMs) <= CLOCK_FENCE_MS) {
                 reject('media.cycle.resume.play.ambiguous');
             }
         }
@@ -1603,29 +1710,29 @@ function correlateCycle(mediaResult, lifecycle, binding, projection, provenance)
         const explainedPlaying = sorted.filter((event) => event.role === 'playing'
             && event.projectedAtMs >= start.projectedAtMs
             && event.projectedAtMs < seek.projectedAtMs
-            && event.projectedAtMs <= lifecycle.start.observedAtMs + CLOCK_FENCE_MS);
+            && event.projectedAtMs <= lifecycle.start.projectedAtMs + CLOCK_FENCE_MS);
         if (explainedPlaying.length > 1) reject('media.cycle.resume.playing.ambiguous');
         resumeNativePlaying = explainedPlaying.length === 1 ? explainedPlaying[0] : null;
     } else {
         const startCandidates = sorted.filter((event) => event.role === 'playing'
-            && Math.abs(event.projectedAtMs - lifecycle.start.observedAtMs) <= CLOCK_FENCE_MS
-            && event.projectedAtMs < selected.preSeek.observedAtMs);
+            && Math.abs(event.projectedAtMs - lifecycle.start.projectedAtMs) <= CLOCK_FENCE_MS
+            && event.projectedAtMs < selected.preSeek.projectedAtMs);
         if (startCandidates.length !== 1) reject('media.cycle.start.unique');
         start = startCandidates[0];
     }
     if (start.projectedAtMs < selectionFloorMs) reject('media.cycle.start.window');
-    if (!(mediaResult.log.projectedAtMs <= start.projectedAtMs)) reject('media.log.order');
-    if (!(mediaResult.load.projectedAtMs <= start.projectedAtMs)) reject('media.load.order');
+    if (!(mediaResult.log.timestamp <= start.timestamp)) reject('media.log.order');
+    if (!(mediaResult.load.timestamp <= start.timestamp)) reject('media.load.order');
 
     const postCandidates = sorted.filter((event) => event.role === 'playing'
         && event.projectedAtMs > seek.projectedAtMs
-        && Math.abs(event.projectedAtMs - selected.playing.observedAtMs) <= CLOCK_FENCE_MS);
+        && Math.abs(event.projectedAtMs - selected.playing.projectedAtMs) <= CLOCK_FENCE_MS);
     if (postCandidates.length !== 1) reject('media.cycle.playing.unique');
     const postPlaying = postCandidates[0];
 
     const seekingStates = sorted.filter((event) => event.role === 'seeking-state'
         && event.projectedAtMs >= start.projectedAtMs
-        && event.projectedAtMs <= selected.confirmation.observedAtMs);
+        && event.projectedAtMs <= selected.confirmation.projectedAtMs);
     const selectedSeekingStates = seekingStates.filter((event) =>
         event.projectedAtMs > seek.projectedAtMs
         && event.projectedAtMs < postPlaying.projectedAtMs);
@@ -1665,38 +1772,59 @@ function correlateCycle(mediaResult, lifecycle, binding, projection, provenance)
         if (event.role === 'playing') reject('media.cycle.playing.ambiguous');
         if (event.role === 'resume-play') reject('media.cycle.resume.play.ambiguous');
     }
-    if (selected.confirmation.observedAtMs < postPlaying.projectedAtMs) {
+    if (selected.confirmation.projectedAtMs < postPlaying.projectedAtMs) {
         reject('media.cycle.confirmation');
     }
     for (const event of cycleEvents) {
-        if (event.projectedAtMs < selectionFloorMs
-            || event.projectedAtMs < projection.observationWindow.openedAtMs
-            || event.projectedAtMs > projection.observationWindow.closedAtMs) {
-            reject('media.window');
-        }
+        if (event.projectedAtMs < selectionFloorMs) reject('media.window');
     }
 
     return { sorted, start, ended, seek, postPlaying, cycleEvents };
 }
 
-function validateInterference(provenance, lifecycle) {
-    const startMs = lifecycle.start.observedAtMs;
-    const endMs = lifecycle.selected.confirmation.observedAtMs;
+function validateInterference(provenance, lifecycle, clockModel) {
+    const startMs = lifecycle.start.projectedAtMs;
+    const endMs = lifecycle.selected.confirmation.projectedAtMs;
     for (const entry of provenance.events) {
         const event = entry.event;
         if (event.kind === 'source-epoch' && event.id === provenance.selectedId) {
             reject('provenance.source-reset');
         }
         if (event.kind !== 'mutation-attempt' || event.id !== provenance.selectedId) continue;
-        const atMs = entry.clocks.dateNow;
+        const atMs = projectRendererMs(clockModel, entry.clocks);
         if (atMs >= startMs && atMs <= endMs) {
             reject(`provenance.interference.${event.name}`);
         }
     }
 }
 
-function buildEvidence(input, binding, projection, provenance, sentinel, media, lifecycle, cycle) {
+function buildEvidence(
+    input,
+    binding,
+    projection,
+    provenance,
+    sentinel,
+    media,
+    lifecycle,
+    cycle,
+    clockModel,
+) {
     const { selected } = lifecycle;
+    const networkOffsetMs = projection.wallTimeS * 1000
+        - projection.protocolTimestamps.request * 1000;
+    const lifetimeDriftMs = [];
+    for (const signal of input.lifecycleSignals) {
+        const clock = signal.clock;
+        if (isPlainObject(clock)
+            && isFiniteNumber(clock.dateNow)
+            && isFiniteNumber(clock.performanceNow)) {
+            lifetimeDriftMs.push(clock.dateNow - (binding.timeOrigin + clock.performanceNow));
+        }
+    }
+    for (const entry of provenance.events) {
+        lifetimeDriftMs.push(entry.clocks.dateNow
+            - (binding.timeOrigin + entry.clocks.performanceNow));
+    }
     const evidence = {
         scope: {
             profile: PROFILE,
@@ -1713,6 +1841,7 @@ function buildEvidence(input, binding, projection, provenance, sentinel, media, 
             universalProvenance: false,
             defaultControl: false,
             adversarial: false,
+            observedSegmentOnly: true,
             gapFreeAudio: false,
         },
         binding: {
@@ -1810,24 +1939,51 @@ function buildEvidence(input, binding, projection, provenance, sentinel, media, 
             controlledProvenanceAtRecordTime: true,
         },
         clocks: {
+            clockModel: CLOCK_MODEL,
+            rendererAnchor: {
+                signalSequence: clockModel.anchorEntry.signalSequence,
+                observedAtMs: clockModel.anchorEntry.observedAtMs,
+                dateNow: clockModel.anchor.dateNow,
+                performanceNow: clockModel.anchor.performanceNow,
+                timeOrigin: clockModel.anchor.timeOrigin,
+                projectedAtMs: clockModel.anchorEntry.projectedAtMs,
+                localOffsetMs: clockModel.localOffsetMs,
+            },
+            rendererProjection: 'anchorDateNow+(performanceNow-anchorPerformanceNow)',
+            provenanceProjection: 'anchorDateNow+(performanceNow-anchorPerformanceNow)',
             requestWallTimeS: projection.wallTimeS,
             protocolTimestamps: clone(projection.protocolTimestamps),
             projectedObservedAtMs: clone(projection.projectedObservedAtMs),
             observationWindow: clone(projection.observationWindow),
             timeOrigin: binding.timeOrigin,
             collectionReadyDateNow: binding.collectionReady.dateNow,
+            collectionReadyProjectedAtMs: lifecycle.readinessProjectedMs,
+            selectionFloorMs: lifecycle.selectionFloorMs,
             generationInstalledDateNow: binding.generationInstalled.dateNow,
+            lifetimeWallPerformanceDriftMs: {
+                samples: lifetimeDriftMs.length,
+                min: lifetimeDriftMs.length > 0 ? Math.min(...lifetimeDriftMs) : null,
+                max: lifetimeDriftMs.length > 0 ? Math.max(...lifetimeDriftMs) : null,
+                maxAbs: lifetimeDriftMs.length > 0
+                    ? Math.max(...lifetimeDriftMs.map((value) => Math.abs(value)))
+                    : null,
+            },
             createdUtcMs: media.createdUtcMs,
             createdUtc: media.log.value.created,
             mediaLogTimestamp: media.log.timestamp,
             mediaTimestampDomain: 'browser-monotonic-seconds',
             mediaOffsetMs: media.mediaOffsetMs,
-            networkOffsetMs: projection.wallTimeS * 1000
-                - projection.protocolTimestamps.request * 1000,
-            mediaOffsetDeltaMs: media.mediaOffsetMs
-                - (projection.wallTimeS * 1000 - projection.protocolTimestamps.request * 1000),
-            mediaProjection: 'timestamp*1000+mediaOffsetMs',
+            historicalMediaOffsetMs: media.mediaOffsetMs,
+            effectiveMediaOffsetMs: networkOffsetMs,
+            networkOffsetMs,
+            mediaOffsetDeltaMs: media.mediaOffsetMs - networkOffsetMs,
+            mediaProjection: 'timestamp*1000+networkOffsetMs',
+            historicalMediaProjection: 'timestamp*1000+historicalMediaOffsetMs',
             logProjectedAtMs: media.log.projectedAtMs,
+            historicalLogProjectedAtMs: media.historicalLogProjectedAtMs,
+            historicalLoadProjectedAtMs: media.historicalLoadProjectedAtMs,
+            nativeCreationVsConstructMarkerMs: media.historicalLogProjectedAtMs
+                - provenance.constructEvent.at.dateNow,
             requestAnchorDeltaMs: projection.projectedObservedAtMs.request - media.createdUtcMs,
             rendererLogDeltaMs: media.createdUtcMs - media.log.projectedAtMs,
             startProjectedAtMs: cycle.start.projectedAtMs,
@@ -1861,6 +2017,7 @@ function buildEvidence(input, binding, projection, provenance, sentinel, media, 
             anchor: {
                 signalSequence: lifecycle.start.signalSequence,
                 observedAtMs: lifecycle.start.observedAtMs,
+                projectedAtMs: lifecycle.start.projectedAtMs,
                 currentTime: lifecycle.start.state.currentTime,
                 duration: lifecycle.start.state.duration,
                 readyState: lifecycle.start.state.readyState,
@@ -1876,6 +2033,7 @@ function buildEvidence(input, binding, projection, provenance, sentinel, media, 
                 name: lifecycle.resume.attempt.event.name,
                 dateNow: lifecycle.resume.attempt.clocks.dateNow,
                 performanceNow: lifecycle.resume.attempt.clocks.performanceNow,
+                projectedAtMs: lifecycle.resume.attemptMs,
             },
             playResult: {
                 sequence: lifecycle.resume.result.event.sequence,
@@ -1886,6 +2044,7 @@ function buildEvidence(input, binding, projection, provenance, sentinel, media, 
                 sequenceOfAttempt: lifecycle.resume.result.event.sequenceOfAttempt,
                 dateNow: lifecycle.resume.result.clocks.dateNow,
                 performanceNow: lifecycle.resume.result.clocks.performanceNow,
+                projectedAtMs: lifecycle.resume.resultMs,
             },
             nativePlay: {
                 recordSequence: cycle.start.record.sequence,
@@ -1894,10 +2053,10 @@ function buildEvidence(input, binding, projection, provenance, sentinel, media, 
                 timestamp: cycle.start.timestamp,
                 projectedAtMs: cycle.start.projectedAtMs,
             },
-            anchorDeltaMs: lifecycle.start.observedAtMs - cycle.start.projectedAtMs,
-            attemptLeadMs: lifecycle.start.observedAtMs - lifecycle.resume.attemptMs,
-            resultLeadMs: lifecycle.start.observedAtMs - lifecycle.resume.resultMs,
-            notificationDelayMs: lifecycle.start.observedAtMs - lifecycle.resume.resultMs,
+            anchorDeltaMs: lifecycle.start.projectedAtMs - cycle.start.projectedAtMs,
+            attemptLeadMs: lifecycle.start.projectedAtMs - lifecycle.resume.attemptMs,
+            resultLeadMs: lifecycle.start.projectedAtMs - lifecycle.resume.resultMs,
+            notificationDelayMs: lifecycle.start.projectedAtMs - lifecycle.resume.resultMs,
             nativeToAttemptMs: cycle.start.projectedAtMs - lifecycle.resume.attemptMs,
             nativeToResultMs: cycle.start.projectedAtMs - lifecycle.resume.resultMs,
             attemptToResultMs: lifecycle.resume.resultMs - lifecycle.resume.attemptMs,
@@ -1924,21 +2083,25 @@ function verify(input) {
     const networkOffsetMs = projection.wallTimeS * 1000
         - projection.protocolTimestamps.request * 1000;
     if (!isFiniteNumber(networkOffsetMs)) reject('media.clock.network-offset');
-    if (Math.abs(media.mediaOffsetMs - networkOffsetMs) > CLOCK_FENCE_MS) {
-        reject('media.clock.offset-disagreement');
-    }
-    for (const historical of [media.log, media.load]) {
-        if (historical.projectedAtMs < binding.generationInstalled.dateNow - CLOCK_FENCE_MS) {
+    for (const historicalAtMs of [media.historicalLogProjectedAtMs, media.historicalLoadProjectedAtMs]) {
+        if (historicalAtMs < binding.generationInstalled.dateNow - CLOCK_FENCE_MS) {
             reject('media.history.generation');
         }
     }
     const lifecycle = validateLifecycleAndSelect(input, binding, provenance, projection);
-    validateProvenanceEventClocks(provenance, binding, lifecycle);
+    const clockModel = buildClockModel(binding, lifecycle);
+    validateLifecycleClockModel(lifecycle, clockModel);
+    validateProvenanceEventClocks(provenance, clockModel);
     if (lifecycle.startMode === 'observed-resume') {
-        validateObservedResumeProvenance(provenance, lifecycle);
+        validateObservedResumeProvenance(provenance, lifecycle, clockModel);
     }
-    const cycle = correlateCycle(media, lifecycle, binding, projection, provenance);
-    validateInterference(provenance, lifecycle);
+    const cycle = correlateCycle(
+        media,
+        lifecycle,
+        provenance,
+        networkOffsetMs,
+    );
+    validateInterference(provenance, lifecycle, clockModel);
     const evidence = buildEvidence(
         input,
         binding,
@@ -1948,6 +2111,7 @@ function verify(input) {
         media,
         lifecycle,
         cycle,
+        clockModel,
     );
     return { ok: true, evidence };
 }

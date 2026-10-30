@@ -6422,6 +6422,41 @@ function installAmbientLifecycleObserver() {
     }
     return { mediaState, mediaStateUnavailable, mediaStateReadErrors };
   };
+  const performanceApi = (() => {
+    try {
+      if (typeof performance !== 'undefined'
+        && performance
+        && typeof performance.now === 'function') return performance;
+    } catch {}
+    try {
+      if (window.performance && typeof window.performance.now === 'function') {
+        return window.performance;
+      }
+    } catch {}
+    return null;
+  })();
+  const captureObservationClock = () => {
+    const clock = { dateNow: null, performanceNow: null, timeOrigin: null };
+    const clockReadErrors = {};
+    try {
+      clock.dateNow = Date.now();
+    } catch (error) {
+      clockReadErrors.dateNow = String(error?.message ?? error).slice(0, 400);
+    }
+    try {
+      if (!performanceApi) throw new Error('performance unavailable');
+      clock.performanceNow = performanceApi.now();
+    } catch (error) {
+      clockReadErrors.performanceNow = String(error?.message ?? error).slice(0, 400);
+    }
+    try {
+      if (!performanceApi) throw new Error('performance unavailable');
+      clock.timeOrigin = performanceApi.timeOrigin;
+    } catch (error) {
+      clockReadErrors.timeOrigin = String(error?.message ?? error).slice(0, 400);
+    }
+    return { clock, clockReadErrors, observedAtMs: clock.dateNow };
+  };
   const record = (kind, element, forceNewEpoch = false) => {
     const value = getMetadata(element);
     const url = ambientUrl(element) || value.url;
@@ -6429,6 +6464,7 @@ function installAmbientLifecycleObserver() {
     if (forceNewEpoch || value.sourceEpoch === 0 || value.url !== url) value.sourceEpoch += 1;
     value.url = url;
     const stateSnapshot = readMediaState(element);
+    const clockCapture = captureObservationClock();
     window.__AWWV_QA_AMBIENT_LIFECYCLE_SIGNALS__.push({
       kind,
       signalSequence: ++nextSignalSequence,
@@ -6436,7 +6472,9 @@ function installAmbientLifecycleObserver() {
       sourceEpoch: value.sourceEpoch,
       url,
       origin: window.location.origin,
-      observedAtMs: Date.now(),
+      observedAtMs: clockCapture.observedAtMs,
+      clock: clockCapture.clock,
+      clockReadErrors: clockCapture.clockReadErrors,
       ...stateSnapshot,
     });
     return window.__AWWV_QA_AMBIENT_LIFECYCLE_SIGNALS__[window.__AWWV_QA_AMBIENT_LIFECYCLE_SIGNALS__.length - 1];
@@ -6609,6 +6647,8 @@ function installAmbientLifecycleObserver() {
       url: candidate.url,
       origin: sampler.origin,
       observedAtMs: candidate.observedAtMs,
+      clock: candidate.clock,
+      clockReadErrors: candidate.clockReadErrors,
       ...candidate.stateSnapshot,
       label: 'passive-continuation',
       sampling: candidate.sampling,
@@ -6637,8 +6677,27 @@ function installAmbientLifecycleObserver() {
         if (reason) rejection = { outcome: 'mutation', sampling: { mutationReason: reason } };
       }
     }
-    const observedAtMs = Date.now();
     const stateSnapshot = readMediaState(sampler.element);
+    // Capture the renderer clock before the final API/provenance/ownership
+    // validation below. The publisher consumes this captured value and never
+    // reads a clock or media getter itself.
+    const clockCapture = captureObservationClock();
+    const observedAtMs = clockCapture.observedAtMs;
+    const clockFields = Object.keys(clockCapture.clockReadErrors);
+    if (!rejection && (clockFields.length > 0
+      || !Number.isFinite(clockCapture.clock.dateNow)
+      || !Number.isFinite(clockCapture.clock.performanceNow)
+      || !Number.isFinite(clockCapture.clock.timeOrigin))) {
+      rejection = {
+        outcome: 'read-failure',
+        sampling: {
+          readFailure: 'clock-read-error',
+          fields: clockFields.length > 0
+            ? clockFields
+            : ['dateNow', 'performanceNow', 'timeOrigin'],
+        },
+      };
+    }
     let rawUrl = '';
     let rawUrlError = null;
     try {
@@ -6734,6 +6793,8 @@ function installAmbientLifecycleObserver() {
       sourceEpoch: metadataValue.sourceEpoch,
       url: rawUrl || sampler.baselineRawUrl,
       observedAtMs,
+      clock: clockCapture.clock,
+      clockReadErrors: clockCapture.clockReadErrors,
       requestedOffsetMs,
       sampleIndex,
       triggerObservedAtMs,

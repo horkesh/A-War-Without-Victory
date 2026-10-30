@@ -968,6 +968,7 @@ function createObservedAmbient(
         document: window.document,
         HTMLMediaElement: window.HTMLMediaElement,
         Date: { now: () => 1_000 },
+        performance: { now: () => 0, timeOrigin: 1_000 },
     });
     install();
     install();
@@ -984,6 +985,7 @@ type PassiveHarnessOptions = {
     now?: number;
     sharedProvenanceObjects?: boolean;
     failScheduleAt?: number;
+    clockFails?: boolean;
 };
 
 function createPassiveHarness(options: PassiveHarnessOptions = {}) {
@@ -1122,6 +1124,13 @@ function createPassiveHarness(options: PassiveHarnessOptions = {}) {
         document: window.document,
         HTMLMediaElement: window.HTMLMediaElement,
         Date: { now: () => now },
+        performance: {
+            now: () => {
+                if (options.clockFails) throw new Error('performance clock blocked');
+                return now - 1_000;
+            },
+            timeOrigin: 1_000,
+        },
     });
     install();
     install();
@@ -1199,6 +1208,7 @@ test('ambient lifecycle observer records browser media progress with exact eleme
         document: window.document,
         HTMLMediaElement: window.HTMLMediaElement,
         Date: { now: () => ++now },
+        performance: { now: () => now - 1_000, timeOrigin: 1_000 },
     });
 
     install();
@@ -1235,6 +1245,8 @@ test('ambient lifecycle observer records browser media progress with exact eleme
     });
     assert.deepEqual(signals[0].mediaStateUnavailable, ['mediaError']);
     assert.deepEqual(signals[0].mediaStateReadErrors, {});
+    assert.deepEqual(signals[0].clock, { dateNow: 1_001, performanceNow: 1, timeOrigin: 1_000 });
+    assert.deepEqual(signals[0].clockReadErrors, {});
     assert.equal(signals[4].mediaState.currentTime, null);
     assert.equal(signals[4].mediaState.seeking, null);
     assert.deepEqual(signals[4].mediaState.mediaError, { code: 3, message: 'decode failed' });
@@ -1281,6 +1293,7 @@ test('ambient lifecycle observer records passive timeupdate observations with ex
         document: window.document,
         HTMLMediaElement: window.HTMLMediaElement,
         Date: { now: () => ++now },
+        performance: { now: () => now - 3_000, timeOrigin: 3_000 },
     });
     install();
     install();
@@ -1352,6 +1365,8 @@ test('passive continuation confirms a real zero-position playing advance with ac
     assert.equal(sample.sampling.confirmedAdvance, true);
     assert.equal(sample.sampling.outcome, 'advanced');
     assert.equal(sample.observedAtMs, 1_018);
+    assert.deepEqual(sample.clock, { dateNow: 1_018, performanceNow: 18, timeOrigin: 1_000 });
+    assert.deepEqual(sample.clockReadErrors, {});
     assert.equal(sample.mediaState.currentTime, 0.12);
     assert.deepEqual(normalizeTimeRangePairs(sample.mediaState.buffered), [[-0.0065, 0.12]]);
     assert.deepEqual(normalizeTimeRangePairs(sample.mediaState.seekable), [[0, 30]]);
@@ -1380,6 +1395,10 @@ test('passive continuation makes no advance claim across three non-advancing act
         assert.equal(diagnostics[index].candidate.confirmedAdvance, false);
         assert.equal(diagnostics[index].candidate.stateSnapshot.mediaState.currentTime, 0);
         assert.equal(diagnostics[index].candidate.stateSnapshot.mediaState.readyState, 4);
+        assert.equal(diagnostics[index].candidate.clock.dateNow, 1_000 + offsets[index] + index);
+        assert.ok(Number.isFinite(diagnostics[index].candidate.clock.performanceNow));
+        assert.equal(diagnostics[index].candidate.clock.timeOrigin, 1_000);
+        assert.deepEqual(diagnostics[index].candidate.clockReadErrors, {});
     }
 
     assert.deepEqual(harness.pending().map((timer) => timer.delay), []);
@@ -1497,6 +1516,25 @@ test('incomplete media reads and provenance failures cannot confirm a passive ad
     assert.equal(provenanceDiagnostics[0].reason, 'provenance-read-error');
     assert.match(provenanceDiagnostics[0].candidate.error, /blocked/);
     assert.deepEqual(throwingProvenance.pending().map((timer) => timer.delay), []);
+});
+
+test('a clock read failure cannot publish a passive advance and retains the raw error', () => {
+    const harness = createPassiveHarness({ clockFails: true });
+    harness.ambient.dispatchEvent(new harness.window.Event('playing'));
+    harness.setCurrentTime(0.4);
+    harness.setNow(1_016);
+    harness.fire(harness.timers[0]);
+
+    assert.equal(harness.livePassive().length, 0);
+    const diagnostics = passiveSampleDiagnostics(harness);
+    assert.equal(diagnostics.length, 1);
+    assert.equal(diagnostics[0].reason, 'read-failure');
+    assert.equal(diagnostics[0].candidate.readFailure, 'clock-read-error');
+    assert.equal(diagnostics[0].candidate.clock.dateNow, 1_016);
+    assert.equal(diagnostics[0].candidate.clock.performanceNow, null);
+    assert.equal(diagnostics[0].candidate.clock.timeOrigin, 1_000);
+    assert.match(diagnostics[0].candidate.clockReadErrors.performanceNow, /blocked/);
+    assert.deepEqual(harness.pending().map((timer) => timer.delay), []);
 });
 
 test('mutations during the actual getter read fail the post-read provenance check', () => {
@@ -1986,6 +2024,7 @@ test('ambient lifecycle observer follows detached Audio elements created by the 
         document: window.document,
         HTMLMediaElement: window.HTMLMediaElement,
         Date: { now: () => ++now },
+        performance: { now: () => now - 2_000, timeOrigin: 2_000 },
     });
     install();
     install();

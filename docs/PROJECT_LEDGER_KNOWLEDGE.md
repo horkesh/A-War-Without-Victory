@@ -1,3 +1,7 @@
+## 2026-10-30 — Compare native QA clocks in one declared domain
+
+A wall-clock/monotonic offset recorded at player creation can drift during a long native route. Capture actual renderer clock pairs and compare through one fixed declared anchor; use the supported request timestamp basis for native events. Keep historical generation checks, raw collector windows and raw timestamps separate. A constructor wrapper and native media-log creation are different stages, so their separation is not an equivalent-stage latency bound. Missing clock evidence cannot be reconstructed into an old capture. These are controlled QA observations, not simulation timestamps or gap-free sound proof. See [clock-domain closure](PROJECT_LEDGER.md#2026-10-30--controlled-native-media-clock-domains).
+
 ## 2026-10-26 — Follow exact operation participation across command and projection boundaries
 
 A brigade's own corps may differ from the corps hosting its joint operation.

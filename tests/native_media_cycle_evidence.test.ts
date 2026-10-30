@@ -83,6 +83,14 @@ function at(epochMs: number) {
     return { dateNow: epochMs, performanceNow: epochMs - TIME_ORIGIN };
 }
 
+function capturedClock(epochMs: number, wallDriftMs = 0) {
+    return {
+        dateNow: epochMs + wallDriftMs,
+        performanceNow: epochMs - TIME_ORIGIN,
+        timeOrigin: TIME_ORIGIN,
+    };
+}
+
 function mediaTimestamp(epochMs: number) {
     return (epochMs - MEDIA_OFFSET_MS) / 1000;
 }
@@ -572,7 +580,24 @@ function lifecycleSignal(sequence: number, kind: string, observedAtMs: number, s
         mediaState: state,
         mediaStateUnavailable: [],
         mediaStateReadErrors: {},
+        clock: capturedClock(observedAtMs),
+        clockReadErrors: {},
         controlledProvenance: selectedDescribe(),
+    };
+}
+
+function moveSignal(signal: any, observedAtMs: number): void {
+    signal.observedAtMs = observedAtMs;
+    signal.clock = capturedClock(observedAtMs);
+}
+
+function driftSignal(signal: any, wallDriftMs: number): void {
+    const dateNow = signal.observedAtMs + wallDriftMs;
+    signal.observedAtMs = dateNow;
+    signal.clock = {
+        dateNow,
+        performanceNow: signal.clock.performanceNow,
+        timeOrigin: TIME_ORIGIN,
     };
 }
 
@@ -637,9 +662,9 @@ function baseInput(): any {
             sourceSha40: SOURCE_SHA,
             packageSha40: PACKAGE_SHA,
             runtime: {
-                browser: 'Chromium 142.0.7444.175',
-                electron: '40.0.0',
-                revision: 'synthetic-revision',
+                browser: 'Chrome/146.0.7680.80',
+                electron: '41.0.3',
+                revision: '@f08938029c887ea624da7a1717059788ed95034d',
             },
             frameUrl: FRAME_URL,
             origin: ORIGIN,
@@ -768,12 +793,12 @@ function capturedSequenceInput(): any {
     const endedMs = projected(CAPTURED_SEQUENCE[0].timestamp);
     const seekMs = projected(capturedSeek.timestamp);
     const playingMs = projected(CAPTURED_SEQUENCE[3].timestamp);
-    input.lifecycleSignals[0].observedAtMs = START_MS + 5;
-    input.lifecycleSignals[1].observedAtMs = endedMs - 100;
-    input.lifecycleSignals[2].observedAtMs = seekMs + 0.05;
-    input.lifecycleSignals[3].observedAtMs = seekMs + 0.1;
-    input.lifecycleSignals[4].observedAtMs = playingMs + 0.05;
-    input.lifecycleSignals[5].observedAtMs = playingMs + 100;
+    moveSignal(input.lifecycleSignals[0], START_MS + 5);
+    moveSignal(input.lifecycleSignals[1], endedMs - 100);
+    moveSignal(input.lifecycleSignals[2], seekMs + 0.05);
+    moveSignal(input.lifecycleSignals[3], seekMs + 0.1);
+    moveSignal(input.lifecycleSignals[4], playingMs + 0.05);
+    moveSignal(input.lifecycleSignals[5], playingMs + 100);
 
     for (const record of input.media.records) {
         if (record.params && record.params.playerId) {
@@ -983,19 +1008,165 @@ describe('verifyControlledNativeLoopCycle', () => {
         });
         expect(result.evidence.clocks.createdUtcMs).toBeCloseTo(CREATED_MS, 3);
         expect(result.evidence.clocks.mediaLogTimestamp).toBeCloseTo(LOG_TIMESTAMP, 6);
+        expect(result.evidence.clocks.clockModel).toBe('shared-monotonic-renderer-anchor-v1');
+        expect(result.evidence.clocks.rendererAnchor.signalSequence).toBe(3);
+        expect(result.evidence.clocks.rendererAnchor.observedAtMs).toBe(SEEK_MS + 2);
+        expect(result.evidence.clocks.rendererAnchor.localOffsetMs).toBeCloseTo(TIME_ORIGIN, 3);
+        expect(result.evidence.clocks.lifetimeWallPerformanceDriftMs.maxAbs).toBeLessThan(1);
         expect(result.evidence.clocks.mediaOffsetMs).toBeCloseTo(MEDIA_OFFSET_MS, 3);
+        expect(result.evidence.clocks.historicalMediaOffsetMs).toBeCloseTo(MEDIA_OFFSET_MS, 3);
+        expect(result.evidence.clocks.effectiveMediaOffsetMs).toBeCloseTo(MEDIA_OFFSET_MS, 3);
         expect(result.evidence.clocks.networkOffsetMs).toBeCloseTo(MEDIA_OFFSET_MS, 3);
         expect(result.evidence.clocks.mediaOffsetDeltaMs).toBeCloseTo(0, 3);
-        expect(result.evidence.clocks.mediaProjection).toBe('timestamp*1000+mediaOffsetMs');
+        expect(result.evidence.clocks.mediaProjection).toBe('timestamp*1000+networkOffsetMs');
+        expect(result.evidence.clocks.historicalMediaProjection)
+            .toBe('timestamp*1000+historicalMediaOffsetMs');
         expect(result.evidence.clocks.startProjectedAtMs).toBeCloseTo(START_MS, 3);
         expect(result.evidence.clocks.logProjectedAtMs).toBeCloseTo(CREATED_MS, 3);
+        expect(result.evidence.clocks.historicalLogProjectedAtMs).toBeCloseTo(CREATED_MS, 3);
         expect(result.evidence.clocks.logProjectedAtMs).toBeLessThan(WINDOW_OPEN);
         expect(result.evidence.clocks.startProjectedAtMs).toBeGreaterThan(WINDOW_OPEN);
         expect(result.evidence.clocks.requestAnchorDeltaMs).toBeGreaterThan(29000);
+        expect(result.evidence.scope.observedSegmentOnly).toBe(true);
         expect(result.evidence.media.logReference.created).toBe(CREATED_UTC);
         expect(result.evidence.rawReferences.mediaPlayerEvents[0].timestamp).toBeGreaterThan(600000);
         expect(JSON.stringify(input)).toBe(before);
         expect(JSON.stringify(verify(input))).toBe(JSON.stringify(result));
+    });
+
+    test('maps the selected cycle with the independent Network pair while reporting historical Media drift', () => {
+        const input = baseInput();
+        const log = mediaPlayerEvents(input)
+            .find((event: any) => JSON.parse(event.value).event === 'kMediaLogCreated');
+        const load = mediaPlayerEvents(input)
+            .find((event: any) => JSON.parse(event.value).event === 'kLoad');
+        log.timestamp += 0.04718;
+        load.timestamp += 0.04718;
+        const before = JSON.stringify(input);
+        const result = verify(input);
+        expect(result.ok).toBe(true);
+        expect(result.evidence.clocks.mediaOffsetDeltaMs).toBeCloseTo(-47.18, 3);
+        expect(Math.abs(result.evidence.clocks.mediaOffsetDeltaMs)).toBeGreaterThan(20);
+        expect(result.evidence.clocks.historicalLogProjectedAtMs).toBeCloseTo(CREATED_MS, 3);
+        expect(result.evidence.clocks.logProjectedAtMs).toBeCloseTo(CREATED_MS + 47.18, 3);
+        expect(result.evidence.clocks.startProjectedAtMs).toBeCloseTo(START_MS, 3);
+        expect(JSON.stringify(input)).toBe(before);
+    });
+
+    test('accepts a long-lived wall/performance drift using each captured local pair and the seeking anchor', () => {
+        const input = baseInput();
+        const driftMs = 45;
+        for (const signal of input.lifecycleSignals) driftSignal(signal, driftMs);
+        input.clockProjection.requestWallTimeS = (REQUEST_MS + driftMs) / 1000;
+        input.clockProjection.projectedObservedAtMs = {
+            request: REQUEST_MS + driftMs,
+            response: REQUEST_MS + driftMs + 100,
+            failure: REQUEST_MS + driftMs + 200,
+        };
+        const before = JSON.stringify(input);
+        const result = verify(input);
+        expect(result.ok).toBe(true);
+        expect(result.evidence.clocks.rendererAnchor.signalSequence).toBe(3);
+        expect(result.evidence.clocks.rendererAnchor.localOffsetMs).toBeCloseTo(TIME_ORIGIN + driftMs, 6);
+        expect(result.evidence.clocks.lifetimeWallPerformanceDriftMs.maxAbs).toBeCloseTo(driftMs, 6);
+        expect(result.evidence.clocks.mediaOffsetDeltaMs).toBeCloseTo(-driftMs, 6);
+        expect(result.evidence.clocks.startProjectedAtMs).toBeCloseTo(START_MS + driftMs, 3);
+        expect(JSON.stringify(input)).toBe(before);
+    });
+
+    test('rejects old lifecycle rows without actual captured clock pairs instead of synthesizing them', () => {
+        const missing = baseInput();
+        delete missing.lifecycleSignals[2].clock;
+        const missingResult = verify(missing);
+        expect(missingResult.ok).toBe(false);
+        expect(missingResult.reasons).toContain('lifecycle.clock');
+
+        const partial = baseInput();
+        delete partial.lifecycleSignals[3].clock.performanceNow;
+        const partialResult = verify(partial);
+        expect(partialResult.ok).toBe(false);
+        expect(partialResult.reasons).toContain('lifecycle.clock');
+
+        const readError = baseInput();
+        readError.lifecycleSignals[4].clockReadErrors.performanceNow = 'clock read blocked';
+        const readResult = verify(readError);
+        expect(readResult.ok).toBe(false);
+        expect(readResult.reasons).toContain('lifecycle.clock.read-errors');
+
+        const wrongOrigin = baseInput();
+        wrongOrigin.lifecycleSignals[5].clock.timeOrigin += 1;
+        const originResult = verify(wrongOrigin);
+        expect(originResult.ok).toBe(false);
+        expect(originResult.reasons).toContain('lifecycle.clock.origin');
+
+        const staleObserved = baseInput();
+        staleObserved.lifecycleSignals[1].observedAtMs += 1;
+        const staleResult = verify(staleObserved);
+        expect(staleResult.ok).toBe(false);
+        expect(staleResult.reasons).toContain('lifecycle.clock.observation');
+    });
+
+    test('rejects every unsupported runtime or revision instead of assuming the shared monotonic model', () => {
+        const fields = [
+            ['browser', 'Chrome/145.0.0.0'],
+            ['electron', '40.0.0'],
+            ['revision', '@0000000000000000000000000000000000000000'],
+        ] as const;
+        for (const [field, value] of fields) {
+            const input = baseInput();
+            input.binding.runtime[field] = value;
+            const result = verify(input);
+            expect(result.ok).toBe(false);
+            expect(result.reasons).toContain('binding.runtime');
+        }
+    });
+
+    test('rejects missing or malformed selected Network request anchors', () => {
+        const missing = baseInput();
+        delete missing.clockProjection.protocolTimestamps.request;
+        expect(verify(missing).reasons).toContain('clockProjection.protocolTimestamps');
+
+        const nonfinite = baseInput();
+        nonfinite.clockProjection.protocolTimestamps.request = Number.NaN;
+        expect(verify(nonfinite).reasons).toContain('clockProjection.protocolTimestamps');
+
+        const wrongProjection = baseInput();
+        wrongProjection.clockProjection.projectedObservedAtMs.request = REQUEST_MS + 1;
+        expect(verify(wrongProjection).reasons).toContain('clockProjection.request-anchor');
+    });
+
+    test('rejects nonmonotonic captured renderer performance time', () => {
+        const input = baseInput();
+        input.lifecycleSignals[2].clock.performanceNow =
+            input.lifecycleSignals[1].clock.performanceNow - 1;
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('selected.order');
+
+        const history = baseInput();
+        const reversed = lifecycleSignal(
+            3,
+            'timeupdate',
+            PRE_SEEK_MS + 5,
+            lifecycleState({ currentTime: 9.95 }),
+        );
+        setComparisonClock(reversed, PRE_SEEK_MS + 5, PRE_SEEK_MS - 15);
+        insertLifecycleSignal(history, 2, reversed);
+        const historyResult = verify(history);
+        expect(historyResult.ok).toBe(false);
+        expect(historyResult.reasons).toContain('lifecycle.clock.chronology');
+    });
+
+    test('still rejects a genuine 20.001ms same-stage seeking/native discrepancy', () => {
+        const input = baseInput();
+        const shiftMs = 20.001;
+        moveSignal(input.lifecycleSignals[2], SEEK_MS + shiftMs);
+        moveSignal(input.lifecycleSignals[3], SEEK_MS + 5 + shiftMs);
+        moveSignal(input.lifecycleSignals[4], POST_PLAY_MS + 3 + shiftMs);
+        moveSignal(input.lifecycleSignals[5], POST_PLAY_MS + 80 + shiftMs);
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('media.seek.unique');
     });
 
     test('accepts actual-shaped startup duration absence strictly before readiness and selected start', () => {
@@ -1017,7 +1188,7 @@ describe('verifyControlledNativeLoopCycle', () => {
 
     test('rejects the startup duration marker at the exact collection readiness boundary', () => {
         const input = startupAbsenceInput();
-        input.lifecycleSignals[4].observedAtMs = READY_MS;
+        moveSignal(input.lifecycleSignals[4], READY_MS);
         const result = verify(input);
         expect(result.ok).toBe(false);
         expect(result.reasons).toContain('lifecycle.mediaStateUnavailable');
@@ -1025,7 +1196,7 @@ describe('verifyControlledNativeLoopCycle', () => {
 
     test('rejects the startup duration marker after readiness but before the selected start', () => {
         const input = startupAbsenceInput();
-        input.lifecycleSignals[4].observedAtMs = READY_MS + 100;
+        moveSignal(input.lifecycleSignals[4], READY_MS + 100);
         const result = verify(input);
         expect(result.ok).toBe(false);
         expect(result.reasons).toContain('lifecycle.mediaStateUnavailable');
@@ -1033,10 +1204,33 @@ describe('verifyControlledNativeLoopCycle', () => {
 
     test('rejects the startup duration marker moved into the selected proof interval', () => {
         const input = startupAbsenceInput();
-        input.lifecycleSignals[4].observedAtMs = POST_PLAY_MS;
+        moveSignal(input.lifecycleSignals[4], POST_PLAY_MS);
         const result = verify(input);
         expect(result.ok).toBe(false);
         expect(result.reasons).toContain('lifecycle.mediaStateUnavailable');
+    });
+
+    test('rejects a start whose captured performance is before readiness despite a raw-wall-fresh placement', () => {
+        const input = baseInput();
+        for (const signal of input.lifecycleSignals) driftSignal(signal, 10);
+        setComparisonClock(input.lifecycleSignals[0], START_MS + 5, START_MS + 5);
+        input.binding.collectionReady = {
+            dateNow: START_MS + 10,
+            performanceNow: START_MS + 10 - TIME_ORIGIN,
+            timeOrigin: TIME_ORIGIN,
+        };
+        const startEvent = mediaPlayerEvents(input).find((event: any) => {
+            const value = JSON.parse(event.value);
+            return value.event === 'kPipelineStateChange'
+                && value.pipeline_state === 'kPlaying'
+                && Math.abs(event.timestamp - mediaTimestamp(START_MS)) < 0.000001;
+        });
+        startEvent.timestamp = mediaTimestamp(START_MS + 15);
+        const before = JSON.stringify(input);
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('selected.start.unique');
+        expect(JSON.stringify(input)).toBe(before);
     });
 
     test('rejects other unavailable fields, duplicate markers and malformed annotations at startup', () => {
@@ -1209,7 +1403,7 @@ describe('verifyControlledNativeLoopCycle', () => {
 
     test('rejects two eligible latest starts sharing one timestamp', () => {
         const input = completedEarlierLoopInput();
-        input.lifecycleSignals[0].observedAtMs = input.lifecycleSignals[2].observedAtMs;
+        moveSignal(input.lifecycleSignals[0], input.lifecycleSignals[2].observedAtMs);
         const before = JSON.stringify(input);
         const result = verify(input);
         expect(result.ok).toBe(false);
@@ -1254,7 +1448,7 @@ describe('verifyControlledNativeLoopCycle', () => {
         input.lifecycleSignals = input.lifecycleSignals.filter(
             (signal: any) => signal.signalSequence !== 3,
         );
-        input.lifecycleSignals[0].observedAtMs = WINDOW_OPEN - 100;
+        moveSignal(input.lifecycleSignals[0], WINDOW_OPEN - 100);
         const result = verify(input);
         expect(result.ok).toBe(false);
         expect(result.reasons).toContain('selected.start.unique');
@@ -1393,24 +1587,46 @@ describe('verifyControlledNativeLoopCycle', () => {
         expectRejected(input);
     });
 
-    test('rejects a UTC creation anchor conflicting with the Media monotonic offset', () => {
-        const late = baseInput();
-        const lateEvent = mediaPlayerEvents(late)
+    test('accepts delayed native Media creation relative to the provenance construct marker and reports separation', () => {
+        const input = baseInput();
+        const event = mediaPlayerEvents(input)
             .find((entry: any) => JSON.parse(entry.value).event === 'kMediaLogCreated');
-        lateEvent.value = JSON.stringify({
+        event.value = JSON.stringify({
             event: 'kMediaLogCreated',
-            created: '2026-10-29 21:28:56.015365 UTC',
+            created: '2026-10-29 21:28:56.061309 UTC',
         });
-        expectRejected(late);
+        const before = JSON.stringify(input);
+        const result = verify(input);
+        expect(result.ok).toBe(true);
+        expect(result.evidence.clocks.nativeCreationVsConstructMarkerMs)
+            .toBeCloseTo(135.944, 3);
+        expect(JSON.stringify(input)).toBe(before);
+    });
 
-        const early = baseInput();
-        const earlyEvent = mediaPlayerEvents(early)
+    test('rejects impossible native Media history order rather than inventing a stage latency', () => {
+        const input = baseInput();
+        const events = mediaPlayerEvents(input);
+        const log = events.find((entry: any) => JSON.parse(entry.value).event === 'kMediaLogCreated');
+        const load = events.find((entry: any) => JSON.parse(entry.value).event === 'kLoad');
+        log.timestamp = load.timestamp + 0.001;
+        const before = JSON.stringify(input);
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('media.history.native-order');
+        expect(JSON.stringify(input)).toBe(before);
+    });
+
+    test('rejects historical Media creation before the installed generation', () => {
+        const input = baseInput();
+        const event = mediaPlayerEvents(input)
             .find((entry: any) => JSON.parse(entry.value).event === 'kMediaLogCreated');
-        earlyEvent.value = JSON.stringify({
+        event.value = JSON.stringify({
             event: 'kMediaLogCreated',
-            created: '2026-10-29 21:28:55.815365 UTC',
+            created: '2026-10-29 21:28:55.385365 UTC',
         });
-        expectRejected(early);
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('media.history.generation');
     });
 
     test('rejects absent optional APIs without the documented rechecked absence contract', () => {
@@ -1506,7 +1722,7 @@ describe('verifyControlledNativeLoopCycle', () => {
             const parsed = JSON.parse(event.value);
             return semanticMediaEvent(event) === 'kPlaying' && Math.abs(event.timestamp - mediaTimestamp(START_MS)) < 0.000001;
         }).timestamp = mediaTimestamp(early);
-        input.lifecycleSignals[0].observedAtMs = early + 5;
+        moveSignal(input.lifecycleSignals[0], early + 5);
         expectRejected(input);
     });
 
@@ -1964,14 +2180,14 @@ describe('verifyControlledNativeLoopCycle', () => {
 
     test('rejects waiting before the uniquely selected seeking sample', () => {
         const input = inProgressWaitingInput();
-        waitingOf(input).observedAtMs = SEEK_MS;
+        moveSignal(waitingOf(input), SEEK_MS);
         expectWaitingRejected(input);
     });
 
     test('rejects waiting at or after the uniquely selected seeked sample', () => {
         for (const offset of [0, 1, 2]) {
             const input = inProgressWaitingInput();
-            waitingOf(input).observedAtMs = SEEK_MS + 5 + offset;
+            moveSignal(waitingOf(input), SEEK_MS + 5 + offset);
             expectWaitingRejected(input);
         }
     });
@@ -1980,7 +2196,7 @@ describe('verifyControlledNativeLoopCycle', () => {
         const input = inProgressWaitingInput();
         const waiting = waitingOf(input);
         waiting.signalSequence = 547;
-        waiting.observedAtMs = POST_PLAY_MS + 10;
+        moveSignal(waiting, POST_PLAY_MS + 10);
         expectWaitingRejected(input);
     });
 
@@ -2249,6 +2465,20 @@ function linkResumeAnchor(input: any): any {
     return pair;
 }
 
+function retimeResumeHistory(input: any, earliestMs: number): void {
+    const records = input.provenance.snapshot.events.records;
+    const priorAttempts = records.filter((event: any) => event.kind === 'mutation-attempt'
+        && event.name !== 'play');
+    let cursorMs = earliestMs - (priorAttempts.length * 10) - 10;
+    for (const attempt of priorAttempts) {
+        attempt.at = at(cursorMs);
+        const result = records.find((event: any) => event.kind === 'mutation-result'
+            && event.sequenceOfAttempt === attempt.sequence);
+        if (result) result.at = at(cursorMs + 1);
+        cursorMs += 10;
+    }
+}
+
 function setResumeTiming(
     input: any,
     attemptMs: number,
@@ -2258,6 +2488,7 @@ function setResumeTiming(
     const pair = resumePlayPair(input);
     pair.attempt.at = at(attemptMs);
     pair.result.at = at(resultMs);
+    retimeResumeHistory(input, Math.min(attemptMs, resultMs));
     nativeKPlay(input).timestamp = mediaTimestamp(nativeMs);
     return pair;
 }
@@ -2398,9 +2629,8 @@ describe('verifyControlledNativeLoopCycle observed-resume start mode', () => {
 
     test('accepts the fresh resume after an older zero start separated by settled pause and seek activity', () => {
         const input = resumeInput();
-        const sequence = Math.max(...input.lifecycleSignals.map((signal: any) => signal.signalSequence)) + 1;
-        input.lifecycleSignals.push(lifecycleSignal(
-            sequence,
+        insertLifecycleSignal(input, 0, lifecycleSignal(
+            1,
             'playing',
             RESUME_OLDER_MS - 1000,
             recordedCancellationState({ currentTime: 0 }),
@@ -2408,7 +2638,7 @@ describe('verifyControlledNativeLoopCycle observed-resume start mode', () => {
         const result = verify(input);
         expect(result.ok).toBe(true);
         expect(result.evidence.startMode).toBe('observed-resume');
-        expect(result.evidence.lifecycle.start.signalSequence).toBe(2);
+        expect(result.evidence.lifecycle.start.signalSequence).toBe(3);
         expect(result.evidence.lifecycle.start.observedAtMs).toBe(RESUME_MS);
     });
 
@@ -2431,21 +2661,17 @@ describe('verifyControlledNativeLoopCycle observed-resume start mode', () => {
         expectResumeRejected(wrongResult, 'resume.play.result');
 
         const stale = resumeInput();
-        const staleEvents = stale.provenance.snapshot.events.records;
-        const stalePlays = staleEvents.filter((event: any) => event.kind === 'mutation-attempt'
-            && event.name === 'play');
-        stalePlays[0].at = at(READY_MS - 200);
-        stalePlays[1].at = at(READY_MS - 100);
-        for (const event of staleEvents) {
-            if (event.kind !== 'mutation-result') continue;
-            const attempt = staleEvents.find((candidate: any) => candidate.kind === 'mutation-attempt'
-                && candidate.sequence === event.sequenceOfAttempt);
-            if (attempt && attempt.name === 'play') event.at = at(READY_MS - 99);
-        }
+        removeMutationPair(stale, resumePlayPair(stale));
+        const stalePair = resumePlayPair(stale);
+        stalePair.attempt.at = at(CREATED_MS + 15);
+        stalePair.result.at = at(CREATED_MS + 16);
+        const staleAnchor = resumeAnchor(stale).controlledProvenance.provenance.continuity;
+        staleAnchor.lastPlaySequence = stalePair.attempt.sequence;
+        staleAnchor.lastPlayEpoch = 1;
         expectResumeRejected(stale, 'resume.play.fresh');
 
         const ambiguous = resumeInput();
-        addMutationAt(ambiguous, 'play', RESUME_PLAY_MS, 'success', 'object');
+        addMutationAt(ambiguous, 'play', RESUME_PLAY_MS + 1, 'success', 'object');
         expectResumeRejected(ambiguous, 'resume.play.unique');
 
         const wrongEpoch = resumeInput();
@@ -2545,11 +2771,8 @@ describe('verifyControlledNativeLoopCycle observed-resume start mode', () => {
         for (const kind of ['pause', 'seeking', 'seeked', 'error']) {
             const input = resumeInput();
             setResumeTiming(input, attemptMs, attemptMs, attemptMs - 10.876);
-            const sequence = Math.max(...input.lifecycleSignals.map(
-                (signal: any) => signal.signalSequence,
-            )) + 1;
-            input.lifecycleSignals.push(lifecycleSignal(
-                sequence,
+            insertLifecycleSignal(input, 1, lifecycleSignal(
+                2,
                 kind,
                 attemptMs + 45,
                 recordedCancellationState({
@@ -2580,11 +2803,8 @@ describe('verifyControlledNativeLoopCycle observed-resume start mode', () => {
 
     test('rejects a pause between the resume anchor and the end/reset confirmation', () => {
         const input = resumeInput();
-        const sequence = Math.max(...input.lifecycleSignals.map(
-            (signal: any) => signal.signalSequence,
-        )) + 1;
-        input.lifecycleSignals.push(lifecycleSignal(
-            sequence,
+        insertLifecycleSignal(input, 2, lifecycleSignal(
+            3,
             'pause',
             RESUME_MS + 500,
             recordedCancellationState({ currentTime: RESUME_TIME + 0.5, paused: true }),
@@ -2619,6 +2839,10 @@ describe('verifyControlledNativeLoopCycle observed-resume start mode', () => {
 
     test('accepts an ordered same-millisecond loop setter before play and rejects a later intervening mutation', () => {
         const ordered = resumeInput({ orderedSameMsSetterBeforePlay: true });
+        const orderedLoopResult = ordered.provenance.snapshot.events.records.find(
+            (event: any) => event.kind === 'mutation-result' && event.name === 'loop',
+        );
+        orderedLoopResult.at = at(RESUME_PLAY_MS);
         const orderedPair = resumePlayPair(ordered);
         expect(orderedPair.attempt.at.dateNow).toBe(RESUME_PLAY_MS);
         const result = verify(ordered);
@@ -2628,6 +2852,7 @@ describe('verifyControlledNativeLoopCycle observed-resume start mode', () => {
             .toBeCloseTo(RESUME_MS - RESUME_PLAY_MS, 6);
 
         const laterSameMs = resumeInput();
+        resumePlayPair(laterSameMs).result.at = at(RESUME_PLAY_MS);
         addMutationAt(laterSameMs, 'loop', RESUME_PLAY_MS);
         expectResumeRejected(laterSameMs, 'resume.play.settled');
 
@@ -2797,9 +3022,8 @@ describe('verifyControlledNativeLoopCycle observed-resume start mode', () => {
 
     test('rejects pause or seek transition between the play intent and the resume anchor', () => {
         const pause = resumeInput();
-        const sequence = Math.max(...pause.lifecycleSignals.map((signal: any) => signal.signalSequence)) + 1;
-        pause.lifecycleSignals.push(lifecycleSignal(
-            sequence,
+        insertLifecycleSignal(pause, 1, lifecycleSignal(
+            2,
             'pause',
             RESUME_MS - 10,
             recordedCancellationState({
@@ -2810,9 +3034,8 @@ describe('verifyControlledNativeLoopCycle observed-resume start mode', () => {
         expectResumeRejected(pause, 'resume.play.settled');
 
         const seeking = resumeInput();
-        const seekSequence = Math.max(...seeking.lifecycleSignals.map((signal: any) => signal.signalSequence)) + 1;
-        seeking.lifecycleSignals.push(lifecycleSignal(
-            seekSequence,
+        insertLifecycleSignal(seeking, 1, lifecycleSignal(
+            2,
             'seeking',
             RESUME_MS - 6,
             recordedCancellationState({
@@ -2895,3 +3118,101 @@ function inputPlaying(input: any): any {
     return input.lifecycleSignals.find((signal: any) => signal.signalSequence
         === input.selected.playing.signalSequence);
 }
+
+function setComparisonClock(signal: any, wallMs: number, performanceEpochMs: number): void {
+    signal.observedAtMs = wallMs;
+    signal.clock = {
+        dateNow: wallMs,
+        performanceNow: performanceEpochMs - TIME_ORIGIN,
+        timeOrigin: TIME_ORIGIN,
+    };
+}
+
+function insertLifecycleSignal(input: any, index: number, signal: any): void {
+    for (const existing of input.lifecycleSignals) {
+        if (existing.signalSequence >= signal.signalSequence) existing.signalSequence += 1;
+    }
+    for (const name of ['preSeek', 'seeking', 'seeked', 'playing', 'confirmation']) {
+        if (input.selected[name].signalSequence >= signal.signalSequence) {
+            input.selected[name].signalSequence += 1;
+        }
+    }
+    input.lifecycleSignals.splice(index, 0, signal);
+}
+
+describe('clock-model comparison composition', () => {
+    test('rejects resume intent/result whose raw wall agrees with native kPlay but performance projection is outside 20ms', () => {
+        const input = resumeInput();
+        const nativeMs = RESUME_MS - 30;
+        const pair = resumePlayPair(input);
+        pair.attempt.at = {
+            dateNow: nativeMs + 15,
+            performanceNow: (nativeMs + 25) - TIME_ORIGIN,
+        };
+        pair.result.at = {
+            dateNow: nativeMs + 16,
+            performanceNow: (nativeMs + 26) - TIME_ORIGIN,
+        };
+        nativeKPlay(input).timestamp = mediaTimestamp(nativeMs);
+        const before = JSON.stringify(input);
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('media.cycle.resume.play.unique');
+        expect(JSON.stringify(input)).toBe(before);
+    });
+
+    test('rejects post-seek playing whose raw wall agrees with native playing but performance projection is outside 20ms', () => {
+        const input = baseInput();
+        setComparisonClock(input.lifecycleSignals[4], POST_PLAY_MS + 15, POST_PLAY_MS + 25);
+        const before = JSON.stringify(input);
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('media.cycle.playing.unique');
+        expect(JSON.stringify(input)).toBe(before);
+    });
+
+    test('assesses nonselected interference by performance interval even when raw wall is outside', () => {
+        const input = baseInput();
+        const interference = lifecycleSignal(
+            3,
+            'error',
+            PRE_SEEK_MS - 5,
+            lifecycleState({ currentTime: 9.95 }),
+        );
+        setComparisonClock(interference, PRE_SEEK_MS - 5, PRE_SEEK_MS + 15);
+        insertLifecycleSignal(input, 2, interference);
+        const before = JSON.stringify(input);
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('selected.interference');
+        expect(JSON.stringify(input)).toBe(before);
+    });
+
+    test('rejects reversed performance chronology across the relevant lifecycle history', () => {
+        const input = baseInput();
+        const reversed = lifecycleSignal(
+            3,
+            'timeupdate',
+            PRE_SEEK_MS + 5,
+            lifecycleState({ currentTime: 9.95 }),
+        );
+        setComparisonClock(reversed, PRE_SEEK_MS + 5, PRE_SEEK_MS - 15);
+        insertLifecycleSignal(input, 2, reversed);
+        const before = JSON.stringify(input);
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('lifecycle.clock.chronology');
+        expect(JSON.stringify(input)).toBe(before);
+    });
+
+    test('rejects reversed performance chronology across the complete provenance stream', () => {
+        const input = baseInput();
+        appendProvenanceHistory(input, CONFIRMATION_MS + 20000);
+        appendProvenanceHistory(input, CONFIRMATION_MS + 19990);
+        const before = JSON.stringify(input);
+        const result = verify(input);
+        expect(result.ok).toBe(false);
+        expect(result.reasons).toContain('provenance.events.clock.chronology');
+        expect(JSON.stringify(input)).toBe(before);
+    });
+});
