@@ -9,6 +9,10 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-31 — Verdict Load Save delegates returned state to App replacement owner — NOT ADOPTED
+
+The real Verdict footer, including the fallback no-verdict screen, discarded `loadStateDialog`'s returned `stateJson`. Both now share one pending-guarded handler that accepts only `ok` + non-empty canonical state and hands it once to App's existing `handleMainMenuLoadGame` campaign-replacement path; cancel/error/missing/empty/rejection do nothing and no control renders without a replacement owner. RED 8 failed / 6 passed; GREEN focused 14/14 and four-file 79/79. Package/native qualification and adoption remain pending; no full suite, typecheck, or native run.
+
 ## 2026-10-28 — Native-audio/CDP evidence metadata diagnostic — NOT ADOPTED
 
 Observation-only diagnostic. The old RS134-event save/resume bytes and projection

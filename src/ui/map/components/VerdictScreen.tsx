@@ -12,7 +12,7 @@
  *
  * "The least bad version of a tragedy."
  */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
 import type { FactionVerdict, DimensionGrade, GameVerdict } from '../../../state/negotiation_types.js';
@@ -298,6 +298,77 @@ const GRADE_COLORS: Record<string, string> = {
 
 type VerdictLowerSection = 'report' | 'reckoning' | 'codex' | 'replay';
 
+type VerdictLoadSaveIPC = {
+    isAvailable: boolean;
+    loadStateDialog?: () => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
+};
+
+type VerdictLoadSaveStateHandler = (stateJson: string) => void | Promise<void>;
+
+type VerdictLoadSaveErrorHandler = (message: string) => void;
+
+/**
+ * Shared dialog-result handler for both the full verdict and fallback footers.
+ * A successful, non-empty stateJson is handed to App's existing campaign
+ * replacement owner; the screen never installs returned state itself.
+ */
+function useVerdictLoadSave(
+    ipc: VerdictLoadSaveIPC,
+    onLoadSaveState: VerdictLoadSaveStateHandler | undefined,
+    onLoadSaveError: VerdictLoadSaveErrorHandler | undefined,
+) {
+    const [pending, setPending] = useState(false);
+    const pendingRef = useRef(false);
+    const canLoadSave = ipc.isAvailable
+        && typeof ipc.loadStateDialog === 'function'
+        && typeof onLoadSaveState === 'function';
+
+    const handleLoadSave = async () => {
+        if (!canLoadSave || !ipc.loadStateDialog || !onLoadSaveState || pendingRef.current) return;
+        pendingRef.current = true;
+        setPending(true);
+        try {
+            const result = await ipc.loadStateDialog();
+            const stateJson = result?.stateJson;
+            if (!result?.ok || typeof stateJson !== 'string' || stateJson.trim().length === 0) return;
+            await onLoadSaveState(stateJson);
+        } catch (err) {
+            onLoadSaveError?.(err instanceof Error ? err.message : String(err));
+        } finally {
+            pendingRef.current = false;
+            setPending(false);
+        }
+    };
+
+    return { canLoadSave, pending, handleLoadSave };
+}
+
+function VerdictLoadSaveButton({
+    ipc,
+    onLoadSaveState,
+    onLoadSaveError,
+    className,
+}: {
+    ipc: VerdictLoadSaveIPC;
+    onLoadSaveState: VerdictLoadSaveStateHandler | undefined;
+    onLoadSaveError: VerdictLoadSaveErrorHandler | undefined;
+    className: string;
+}) {
+    const { canLoadSave, pending, handleLoadSave } = useVerdictLoadSave(ipc, onLoadSaveState, onLoadSaveError);
+    if (!canLoadSave) return null;
+    return (
+        <button
+            type="button"
+            onClick={() => { void handleLoadSave(); }}
+            disabled={pending}
+            aria-busy={pending}
+            className={className}
+        >
+            {t('gameOver.loadSave')}
+        </button>
+    );
+}
+
 const LOWER_SECTION_LABEL_KEYS: Record<VerdictLowerSection, MessageKey> = {
     report: 'verdict.lowerSection.report',
     reckoning: 'verdict.lowerSection.reckoning',
@@ -309,7 +380,14 @@ const LOWER_SECTION_LABEL_KEYS: Record<VerdictLowerSection, MessageKey> = {
 // Main Component
 // ═══════════════════════════════════════════════════════════════════════════
 
-export function VerdictScreen() {
+export interface VerdictScreenProps {
+    /** App-owned campaign replacement callback (the Main Menu load-game path). */
+    onLoadSaveState?: VerdictLoadSaveStateHandler;
+    /** Existing loadError conduit for dialog/callback failures. */
+    onLoadSaveError?: VerdictLoadSaveErrorHandler;
+}
+
+export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScreenProps = {}) {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const startReplayInspection = useGameStore((s) => s.startReplayInspection);
     // The Wrapped overlay (Z.MODAL_RAISED) is opened FROM this screen's own
@@ -404,6 +482,8 @@ export function VerdictScreen() {
             factionBrigades={factionBrigades}
             outcome={loadedGameState.gameOutcome}
             ipc={ipc}
+            onLoadSaveState={onLoadSaveState}
+            onLoadSaveError={onLoadSaveError}
         />;
     }
 
@@ -676,14 +756,12 @@ export function VerdictScreen() {
                         >
                             {t('gameOver.newGame')}
                         </button>
-                        {ipc.isAvailable && (
-                            <button
-                                onClick={() => ipc.loadStateDialog?.()}
-                                className="min-h-8 px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors sm:min-h-9 sm:px-6 sm:py-2"
-                            >
-                                {t('gameOver.loadSave')}
-                            </button>
-                        )}
+                        <VerdictLoadSaveButton
+                            ipc={ipc}
+                            onLoadSaveState={onLoadSaveState}
+                            onLoadSaveError={onLoadSaveError}
+                            className="min-h-8 px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors disabled:opacity-60 sm:min-h-9 sm:px-6 sm:py-2"
+                        />
                     </div>
                 </div>
             </div>
@@ -1074,6 +1152,7 @@ function formatFallbackWeekCount(count: number): string {
 
 function FallbackGameOver({
     date, turn, years, weeks, factionIds, factionOsids, totalOsids, factionBrigades, outcome, ipc,
+    onLoadSaveState, onLoadSaveError,
 }: {
     date: string;
     turn: number;
@@ -1084,7 +1163,9 @@ function FallbackGameOver({
     totalOsids: number;
     factionBrigades: Record<string, number>;
     outcome?: string;
-    ipc: { isAvailable: boolean; loadStateDialog?: () => void };
+    ipc: VerdictLoadSaveIPC;
+    onLoadSaveState: VerdictLoadSaveStateHandler | undefined;
+    onLoadSaveError: VerdictLoadSaveErrorHandler | undefined;
 }) {
     useLocale();
     const display = fallbackOutcomeDisplay(outcome);
@@ -1156,14 +1237,12 @@ function FallbackGameOver({
                     >
                         {t('gameOver.newGame')}
                     </button>
-                    {ipc.isAvailable && (
-                        <button
-                            onClick={() => ipc.loadStateDialog?.()}
-                            className="px-6 py-2 text-xs font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors"
-                        >
-                            {t('gameOver.loadSave')}
-                        </button>
-                    )}
+                    <VerdictLoadSaveButton
+                        ipc={ipc}
+                        onLoadSaveState={onLoadSaveState}
+                        onLoadSaveError={onLoadSaveError}
+                        className="px-6 py-2 text-xs font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors disabled:opacity-60"
+                    />
                 </div>
             </div>
         </div>
