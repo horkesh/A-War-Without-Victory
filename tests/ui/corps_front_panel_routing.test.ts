@@ -5,8 +5,76 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { CorpsFrontPanel } from '../../src/ui/map/components/CorpsFrontPanel.js';
 import { derivePanelRailState } from '../../src/ui/map/components/panelRail.js';
+import { t, type MessageKey } from '../../src/ui/map/i18n/index.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
+
+/** Tailwind v3.4 default palette values, already installed locally (no new dependency). */
+const TAILWIND_LIGHT_PALETTE: Record<string, Record<number, string>> = {
+  green: { 100: '#dcfce7', 600: '#16a34a', 700: '#15803d', 800: '#166534' },
+  amber: { 100: '#fef3c7', 600: '#d97706', 800: '#92400e' },
+  orange: { 100: '#ffedd5', 600: '#ea580c', 800: '#9a3412' },
+  red: { 100: '#fee2e2', 800: '#991b1b' },
+  neutral: { 100: '#f5f5f5' },
+};
+
+/** Real light surfaces the CorpsFrontPanel dossier actually paints beneath strength badges. */
+const DECLARED_LIGHT_SURFACES = new Set([
+  '#f0e8d8', // dossier paper (bg-[#f0e8d8])
+  '#f5f5f5', // neutral-100 assessment cards
+  '#ffffff', // white cards
+  '#dcfce7', // green-100 fortress chip
+  '#fee2e2', // red-100 critical chip
+]);
+
+function srgbToLinear(channel: number): number {
+  const value = channel / 255;
+  return value <= 0.03928 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+}
+
+function luminance(hex: string): number {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return 0.2126 * srgbToLinear(r) + 0.7152 * srgbToLinear(g) + 0.0722 * srgbToLinear(b);
+}
+
+function contrast(fg: string, bg: string): number {
+  const high = Math.max(luminance(fg), luminance(bg));
+  const low = Math.min(luminance(fg), luminance(bg));
+  return (high + 0.05) / (low + 0.05);
+}
+
+function classTokens(element: Element): string[] {
+  return (element.getAttribute('class') ?? '').split(/\s+/).filter(Boolean);
+}
+
+/** Resolve the first rendered text-* color on this badge. */
+function renderedTextColor(element: Element): string | null {
+  for (const token of classTokens(element)) {
+    if (token === 'text-white') return '#ffffff';
+    const match = /^text-(green|amber|orange|red|neutral)-(\d{3})$/.exec(token);
+    if (!match) continue;
+    const hex = TAILWIND_LIGHT_PALETTE[match[1]]?.[Number(match[2])];
+    if (hex) return hex;
+  }
+  return null;
+}
+
+/** Resolve the nearest real painted background, including the badge's own chip background. */
+function renderedBackground(element: Element): string | null {
+  for (let node: Element | null = element; node; node = node.parentElement) {
+    for (const token of classTokens(node)) {
+      if (token === 'bg-[#f0e8d8]') return '#f0e8d8';
+      if (token === 'bg-white') return '#ffffff';
+      const match = /^bg-(green|amber|orange|red|neutral)-(\d{3})$/.exec(token);
+      if (!match) continue;
+      const hex = TAILWIND_LIGHT_PALETTE[match[1]]?.[Number(match[2])];
+      if (hex) return hex;
+    }
+  }
+  return null;
+}
 
 function makeState(): LoadedGameState {
   return {
@@ -1347,4 +1415,27 @@ describe('CorpsFrontPanel field routing', () => {
     expect(container.textContent).toContain('Operation planning, brigade assignments, and attack axes are managed by corps command.');
     expect(container.textContent).toContain('Presidential intervention is issued through Army HQ directives.');
   });
+
+  it.each(['fortress', 'strong', 'adequate', 'thin', 'critical'] as const)(
+    'renders the %s strength badge at WCAG AA contrast on its real light surface',
+    (strengthClass) => {
+      const state = makeState();
+      (state.corpsFrontSectors![0] as unknown as Record<string, unknown>).combat_strength_class = strengthClass;
+      useGameStore.setState({ loadedGameState: state });
+
+      render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+      const badge = screen.getByText(t(`corpsFront.strength.${strengthClass}` as MessageKey));
+      const fg = renderedTextColor(badge);
+      const bg = renderedBackground(badge);
+
+      expect(fg, `${strengthClass} badge must declare a text color`).not.toBeNull();
+      expect(bg, `${strengthClass} badge must resolve a real light background`).not.toBeNull();
+      expect(DECLARED_LIGHT_SURFACES.has(bg!), `${strengthClass} background ${bg} is not a declared light surface`).toBe(true);
+      expect(
+        contrast(fg!, bg!),
+        `${strengthClass} ${fg} on ${bg} must reach 4.5:1`,
+      ).toBeGreaterThanOrEqual(4.5);
+    },
+  );
 });

@@ -30,9 +30,9 @@ function StrengthBadge({
 }) {
   switch (strengthClass) {
     case 'fortress': return <span className="text-green-700 font-bold bg-green-100 px-1 rounded">{t('corpsFront.strength.fortress')}</span>;
-    case 'strong': return <span className="text-green-600 font-semibold">{t('corpsFront.strength.strong')}</span>;
-    case 'adequate': return <span className="text-amber-600 font-semibold">{t('corpsFront.strength.adequate')}</span>;
-    case 'thin': return <span className="text-orange-600 font-semibold">{t('corpsFront.strength.thin')}</span>;
+    case 'strong': return <span className="text-green-800 font-semibold">{t('corpsFront.strength.strong')}</span>;
+    case 'adequate': return <span className="text-amber-800 font-semibold">{t('corpsFront.strength.adequate')}</span>;
+    case 'thin': return <span className="text-orange-800 font-semibold">{t('corpsFront.strength.thin')}</span>;
     case 'critical': return <span className="text-red-800 font-bold bg-red-100 px-1 rounded">{t('corpsFront.strength.critical')}</span>;
     default:
       return friendlyLineReported
