@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
     OPERATION_OPPORTUNITY_CATALOG,
     applyOpportunityDecision,
+    applyOpportunityDecisionDetailed,
     buildProposalId,
     evaluateAxes,
     isOpportunityEligible,
@@ -540,6 +541,103 @@ function buildKupresCincarState(opts: {
     } as unknown as GameState;
 }
 
+function buildKonjicState(opts: {
+    turn: number;
+    stagingHeld?: boolean;
+    objectivesHeldByRs?: boolean;
+    alliance?: number;
+    addCommanderState?: boolean;
+    supplyPressure?: number;
+    axisCoordinationLow?: boolean;
+    missingCommand?: boolean;
+}): GameState {
+    const low = opts.axisCoordinationLow ?? false;
+    const cmd: CorpsCommandState = {
+        command_span: 2,
+        subordinate_count: 2,
+        og_slots: 1,
+        active_ogs: [],
+        corps_exhaustion: low ? 100 : 8,
+        stance: 'offensive',
+        active_operations: [],
+        commander_state: (opts.addCommanderState ?? true)
+            ? { current_plan: null, decision_trace: null, operation_history: [] } as unknown as CorpsCommandState['commander_state']
+            : undefined,
+    };
+
+    const controllers: Record<string, FactionId> = {
+        'op:konjic:konjic_2': (opts.stagingHeld ?? true) ? 'RBiH' : 'RS',
+        'op:konjic:bijela_2': (opts.objectivesHeldByRs ?? true) ? 'RS' : 'RBiH',
+        'op:konjic:glavaticevo_2': (opts.objectivesHeldByRs ?? true) ? 'RS' : 'RBiH',
+    };
+
+    const formations: Record<string, unknown> = {
+        arbih_4th_corps: {
+            id: 'arbih_4th_corps',
+            name: 'ARBiH 4th Corps',
+            kind: 'corps',
+            status: 'active',
+            faction: 'RBiH',
+            corps_id: 'arbih_4th_corps',
+            personnel: 50,
+            cohesion: 80,
+            morale: 75,
+        },
+    };
+    for (const id of ['arbih_443rd_mountain', 'arbih_450th_light']) {
+        formations[id] = {
+            id,
+            name: id,
+            kind: 'brigade',
+            status: 'active',
+            faction: 'RBiH',
+            corps_id: 'arbih_4th_corps',
+            personnel: low ? 100 : 1800,
+            strength: low ? 100 : 1800,
+            officer_quality: low ? 0.1 : 0.75,
+            cohesion: low ? 10 : 62,
+            morale: low ? 10 : 97,
+            composition: {
+                tanks: 0,
+                artillery: 1,
+                tank_condition: { operational: 0 },
+                artillery_condition: { operational: 1 },
+            },
+        };
+    }
+
+    return {
+        schema_version: 0,
+        meta: { turn: opts.turn, seed: 'konjic-test', phase: 'war' },
+        factions: [{
+            id: 'RBiH',
+            capability_profile: {
+                training_quality: low ? 0.3 : 0.7,
+                organizational_maturity: low ? 0.3 : 0.7,
+                equipment_access: 0.5,
+                equipment_operational: 0.5,
+                doctrine_effectiveness: { ATTACK: 0.6, COORDINATED_STRIKE: 0.6 },
+            },
+        }],
+        military: {
+            formations,
+            front_segments: {},
+            front_posture: {},
+            front_posture_regions: {},
+            front_pressure: {},
+            militia_pools: {},
+            corps_command: opts.missingCommand ? {} : { arbih_4th_corps: cmd },
+            faction_officer_maturity: { RBiH: low ? 1 : 3.5 },
+        },
+        political: {
+            political_controllers: controllers,
+            war_alliance_rbih_hrhb: opts.alliance ?? 0.65,
+            war_supply_pressure: { RBiH: opts.supplyPressure ?? 55 },
+        } as unknown as GameState['political'],
+        displacement: {} as GameState['displacement'],
+    } as unknown as GameState;
+}
+
 describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
     it('authors BEHAR-I as a two-proxy Toljenak-only allocation in the bounded preparation window', () => {
         expect(BEHAR_I_94_OPPORTUNITY).toMatchObject({
@@ -760,6 +858,7 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
             KUPRES_CINCAR_94_OPPORTUNITY,
             VLASIC_RIDGE_95_OPPORTUNITY,
             DONJI_VAKUF_95_OPPORTUNITY,
+            OPERATION_OPPORTUNITY_CATALOG.find(d => d.opportunity_id === 'konjic_september_94')!,
         ]);
         expect(OPERATION_OPPORTUNITY_CATALOG.some(d => d.opportunity_id === 'kupres_cincar_94')).toBe(true);
         expect(OPERATION_OPPORTUNITY_CATALOG.some(d => d.opportunity_id === 'vlasic_ridge_95')).toBe(true);
@@ -1118,6 +1217,209 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         // ...and the 2-turn window means the earliest execution turn is t154
         // (t152 start + 2 planning turns), matching the documented Domet-1 start.
         expect(op.phase_started_turn + (op.planning_duration ?? 0)).toBe(154);
+    });
+});
+
+describe('Konjic September 94 opportunity', () => {
+    function konjicDef() {
+        const def = OPERATION_OPPORTUNITY_CATALOG.find(
+            (entry) => entry.opportunity_id === 'konjic_september_94',
+        );
+        expect(def).toBeDefined();
+        return def!;
+    }
+
+    it('registers the stable opportunity in the canonical catalog', () => {
+        const def = konjicDef();
+        expect(def).toMatchObject({
+            opportunity_id: 'konjic_september_94',
+            name: 'Konjic September Offensive',
+            tier: 'T1',
+            faction: 'RBiH',
+            primary_corps: 'arbih_4th_corps',
+            family: 'central_bosnia_vlasic',
+            staging_osid: 'op:konjic:konjic_2',
+            planning_duration: 2,
+            historical_exit_class: 'partial_success',
+            staff_recommendation: 'approve',
+        });
+        expect(def.min_attack_outcome).toBeUndefined();
+        expect(def.preparation_probe_delivery).toBeUndefined();
+        expect(def.coordinated_advance).toBeUndefined();
+        expect(def.axes).toEqual([expect.objectContaining({
+            axis_id: 'bijela_glavaticevo',
+            brigades: ['arbih_443rd_mountain', 'arbih_450th_light'],
+            objectives: ['op:konjic:bijela_2', 'op:konjic:glavaticevo_2'],
+            staging_osid: 'op:konjic:konjic_2',
+        })]);
+        expect(CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES).toContain(def);
+        expect(OPERATION_OPPORTUNITY_CATALOG).toContain(def);
+    });
+
+    it('keeps 125 closed, admits 126 and 130, and closes 131', () => {
+        for (const [turn, expected] of [
+            [125, false],
+            [126, true],
+            [130, true],
+            [131, false],
+        ] as const) {
+            const state = buildKonjicState({ turn });
+            const def = konjicDef();
+            const axes = evaluateAxes(state, turn, def);
+            expect(axes.find((axis) => axis.axis === 'date_window')?.green).toBe(expected);
+            expect(isOpportunityEligible(def, axes)).toBe(expected);
+
+            runOpportunityEvaluationStep(state, turn);
+            const proposal = (state.military.operation_opportunities ?? [])
+                .find((entry) => entry.opportunity_id === 'konjic_september_94');
+            if (expected) {
+                expect(proposal).toMatchObject({
+                    proposal_id: `OPP_${turn}_konjic_september_94`,
+                    status: 'eligible_pending_review',
+                });
+            } else {
+                expect(proposal).toBeUndefined();
+            }
+        }
+    });
+
+    it('rejects 126 when the required command, readiness, staging, alliance, or enemy gate fails', () => {
+        const cases = [
+            { state: buildKonjicState({ turn: 126, missingCommand: true }), axis: 'corps_readiness' },
+            { state: buildKonjicState({ turn: 126, axisCoordinationLow: true }), axis: 'corps_readiness' },
+            { state: buildKonjicState({ turn: 126, stagingHeld: false }), axis: 'staging_access' },
+            { state: buildKonjicState({ turn: 126, alliance: 0.35 }), axis: 'alliance_context' },
+            { state: buildKonjicState({ turn: 126, objectivesHeldByRs: false }), axis: 'enemy_weakness' },
+        ] as const;
+
+        for (const { state, axis } of cases) {
+            const def = konjicDef();
+            const axes = evaluateAxes(state, 126, def);
+            expect(axes.find((entry) => entry.axis === axis)?.green).toBe(false);
+            expect(isOpportunityEligible(def, axes)).toBe(false);
+
+            runOpportunityEvaluationStep(state, 126);
+            expect((state.military.operation_opportunities ?? [])
+                .find((entry) => entry.opportunity_id === 'konjic_september_94')).toBeUndefined();
+            if (state.military.corps_command?.arbih_4th_corps) {
+                expect(state.military.corps_command.arbih_4th_corps.active_operations).toHaveLength(0);
+            }
+        }
+    });
+
+    it('keeps optional logistics and quality advisory while the actual 4th Corps owns readiness', () => {
+        const state = buildKonjicState({ turn: 126, supplyPressure: 95, addCommanderState: false });
+        const def = konjicDef();
+        const axes = evaluateAxes(state, 126, def);
+        expect(axes.find((entry) => entry.axis === 'logistics')?.green).toBe(false);
+        expect(axes.find((entry) => entry.axis === 'commander_confidence')?.green).toBe(false);
+        expect(axes.find((entry) => entry.axis === 'weather_season')?.green).toBe(true);
+        expect(axes.find((entry) => entry.axis === 'force_quality')?.green).toBe(true);
+        expect(isOpportunityEligible(def, axes)).toBe(true);
+        expect(axes.find((entry) => entry.axis === 'corps_readiness')?.reason).toContain('4th Corps');
+        expect(Object.keys(state.military.corps_command!)).toEqual(['arbih_4th_corps']);
+
+        runOpportunityEvaluationStep(state, 126);
+        expect((state.military.operation_opportunities ?? [])
+            .find((entry) => entry.opportunity_id === 'konjic_september_94')).toBeDefined();
+
+        const insufficient = buildKonjicState({
+            turn: 126,
+            supplyPressure: 95,
+            addCommanderState: false,
+            axisCoordinationLow: true,
+        });
+        const insufficientAxes = evaluateAxes(insufficient, 126, def);
+        expect(isOpportunityEligible(def, insufficientAxes)).toBe(false);
+        runOpportunityEvaluationStep(insufficient, 126);
+        expect((insufficient.military.operation_opportunities ?? [])
+            .find((entry) => entry.opportunity_id === 'konjic_september_94')).toBeUndefined();
+    });
+
+    it('approves the exact two-unit operation without a preparation or attack override', () => {
+        const state = buildKonjicState({ turn: 126 });
+        const def = konjicDef();
+        runOpportunityEvaluationStep(state, 126);
+
+        expect(preflightOpportunityAdmission(state, def, def.axes, 'standard', 126)).toEqual({
+            admitted: true,
+            selected_participants: 2,
+            required_participants: 2,
+            reason: null,
+        });
+
+        const approved = applyOpportunityDecision(
+            state,
+            126,
+            buildProposalId('konjic_september_94', 126),
+            'approve',
+        );
+        expect(approved?.status).toBe('approved');
+
+        const op = state.military.corps_command!.arbih_4th_corps.active_operations[0]!;
+        expect(op).toMatchObject({
+            name: 'Konjic September Offensive',
+            planning_duration: 2,
+            staging_osid: 'op:konjic:konjic_2',
+            participating_brigades: ['arbih_443rd_mountain', 'arbih_450th_light'],
+        });
+        expect(op.axes).toHaveLength(1);
+        expect(op.axes![0]).toMatchObject({
+            axis_id: 'bijela_glavaticevo',
+            assigned_brigades: ['arbih_443rd_mountain', 'arbih_450th_light'],
+            objectives: ['op:konjic:bijela_2', 'op:konjic:glavaticevo_2'],
+        });
+        expect(op.min_attack_outcome).toBeUndefined();
+        expect(op.preparation_probe_delivery).toBeUndefined();
+        expect(op.coordinated_advance).toBeUndefined();
+    });
+
+    it('manual decline creates no operation or claim', () => {
+        const state = buildKonjicState({ turn: 126 });
+        runOpportunityEvaluationStep(state, 126);
+
+        const declined = applyOpportunityDecision(
+            state,
+            126,
+            buildProposalId('konjic_september_94', 126),
+            'decline',
+        );
+        expect(declined?.status).toBe('declined');
+        expect(state.military.corps_command!.arbih_4th_corps.active_operations).toHaveLength(0);
+        expect((state.military.operation_opportunity_resolutions ?? []).find(
+            (entry) => entry.opportunity_id === 'konjic_september_94' && entry.response === 'decline',
+        )).toBeDefined();
+    });
+
+    it('does not steal or force-release an incompatible existing operation ownership', () => {
+        const state = buildKonjicState({ turn: 126 });
+        const cmd = state.military.corps_command!.arbih_4th_corps;
+        const existing = {
+            name: 'Existing 4th Corps Commitment',
+            type: 'sector_attack',
+            phase: 'execution',
+            started_turn: 124,
+            phase_started_turn: 125,
+            participating_brigades: ['arbih_443rd_mountain', 'arbih_450th_light'],
+            objectives: ['op:konjic:bijela_2'],
+            current_objective_index: 0,
+        } as (typeof cmd.active_operations)[number];
+        cmd.active_operations.push(existing);
+        runOpportunityEvaluationStep(state, 126);
+
+        const outcome = applyOpportunityDecisionDetailed(
+            state,
+            126,
+            buildProposalId('konjic_september_94', 126),
+            'approve',
+        );
+        expect(outcome.decision_applied).toBe(false);
+        expect(outcome.reason).toBeTruthy();
+        expect(cmd.active_operations).toHaveLength(1);
+        expect(cmd.active_operations[0]).toBe(existing);
+        expect((state.military.operation_opportunities ?? [])
+            .find((entry) => entry.opportunity_id === 'konjic_september_94')?.status)
+            .toBe('eligible_pending_review');
     });
 });
 

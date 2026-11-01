@@ -1,10 +1,10 @@
 /**
  * operation_opportunity_catalog_central_bosnia.ts
  *
- * Phase 2 operation-opportunity family: Central Bosnia / Vlasic / Kupres.
+ * Phase 2 operation-opportunity family: Central Bosnia / Konjic / Vlasic / Kupres.
  *
  * Non-sensitive Ring 1 territorial operation family. The proposal authorizes
- * ARBiH 1st/3rd Corps and HRHB/HVO/HV territorial military operations in Central
+ * ARBiH 1st/3rd/4th Corps and HRHB/HVO/HV territorial military operations in Central
  * Bosnia. It does not add civilian-harm levers, new rupture behavior, or
  * combat math.
  */
@@ -35,6 +35,36 @@ const BEHAR_I_OBJECTIVE_TOLJENAK = 'op:vares:toljenak';
 const BEHAR_I_READINESS_FLOOR = 0.36;
 const BEHAR_I_AXIS_COORDINATION_FLOOR = 0.35;
 const BEHAR_I_SUPPLY_PRESSURE_CEILING = 90;
+
+// Source facts: BB1 printed pp.239 / PDF pp.276 records the 4th Corps main
+// offensive on 11-12 September 1994, Bijela occupied on 15 September, and the
+// renewed Borci-Glavaticevo line offensive on 23 September. BB2 printed
+// pp.495-497 / PDF pp.514-516 lists the 443rd (Suad Alic) and 450th light in
+// the Konjic OOB. Model assumptions, not source claims: preparation from turn
+// 126, allocation of exactly these two brigades, the Bijela then Glavaticevo
+// OSID sequence, and Glavaticevo as regional coverage. Exact town-capture date
+// and exclusive participation are not proved.
+const KONJIC_PRIMARY_CORPS = 'arbih_4th_corps';
+const KONJIC_STAGING = 'op:konjic:konjic_2';
+const KONJIC_OBJECTIVES: readonly string[] = [
+    'op:konjic:bijela_2',
+    'op:konjic:glavaticevo_2',
+];
+const KONJIC_READINESS_FLOOR = 0.36;
+const KONJIC_AXIS_COORDINATION_FLOOR = 0.35;
+const KONJIC_SUPPLY_PRESSURE_CEILING = 90;
+
+const KONJIC_AXES: readonly OpportunityAxisDef[] = [{
+    axis_id: 'bijela_glavaticevo',
+    name: 'Bijela-Glavaticevo Line',
+    corps: KONJIC_PRIMARY_CORPS,
+    brigades: [
+        'arbih_443rd_mountain' as FormationId,
+        'arbih_450th_light' as FormationId,
+    ],
+    objectives: KONJIC_OBJECTIVES,
+    staging_osid: KONJIC_STAGING,
+}];
 
 const BEHAR_I_AXES: readonly OpportunityAxisDef[] = [{
     axis_id: 'nisici_plateau',
@@ -874,6 +904,123 @@ export const DONJI_VAKUF_95_OPPORTUNITY: OperationOpportunityDef = {
     staff_recommendation: 'approve',
 };
 
+const dateWindowKonjic: AxisPredicate = (_state, turn) => {
+    if (turn < 126) return { green: false, reason: 'September 1994 Konjic operation window not yet open' };
+    if (turn > 130) return { green: false, reason: 'September 1994 Konjic operation window has closed' };
+    return { green: true, reason: 'within September 1994 Konjic operation window' };
+};
+
+const allianceContextKonjic: AxisPredicate = (state) => {
+    const alliance = state.political?.war_alliance_rbih_hrhb ?? 0;
+    if (alliance < FEDERATION_ALLIANCE_FLOOR) {
+        return { green: false, reason: 'post-Washington Federation coordination below Konjic threshold' };
+    }
+    return { green: true, reason: 'post-Washington Federation coordination supports the Konjic operation' };
+};
+
+const stagingAccessKonjic: AxisPredicate = (state) => {
+    const control = getPoliticalControllerOSID(state, KONJIC_STAGING, undefined);
+    return control === 'RBiH'
+        ? { green: true, reason: 'Konjic assembly area remains RBiH-held' }
+        : { green: false, reason: 'Konjic assembly area is not RBiH-held' };
+};
+
+const enemyWeaknessKonjic: AxisPredicate = (state) => {
+    const enemyHeld = KONJIC_OBJECTIVES.filter(
+        (osid) => getPoliticalControllerOSID(state, osid, undefined) === 'RS',
+    ).length;
+    return enemyHeld > 0
+        ? { green: true, reason: 'Bijela-Glavaticevo objectives remain in enemy hands' }
+        : { green: false, reason: 'no Bijela-Glavaticevo objectives remain in enemy hands' };
+};
+
+const corpsReadinessKonjic: AxisPredicate = (state) => {
+    if (!state.military.corps_command?.[KONJIC_PRIMARY_CORPS]) {
+        return { green: false, reason: '4th Corps command not present in this scenario' };
+    }
+    const traits = computeCorpsOperationReadiness(state, KONJIC_PRIMARY_CORPS as FormationId);
+    if (traits.operation_readiness < KONJIC_READINESS_FLOOR) {
+        return { green: false, reason: '4th Corps readiness below Konjic operation floor' };
+    }
+    return { green: true, reason: '4th Corps readiness sufficient for the Konjic operation' };
+};
+
+const logisticsKonjic: AxisPredicate = (state) => {
+    const pressure = getFactionLiveSupplyPressure(state, 'RBiH');
+    if (pressure >= KONJIC_SUPPLY_PRESSURE_CEILING) {
+        return { green: false, reason: 'RBiH supply pressure too high for the Konjic operation' };
+    }
+    return { green: true, reason: 'RBiH supply pressure within Konjic operation margin' };
+};
+
+const commanderConfidenceKonjic: AxisPredicate = (state) => {
+    const commanderState = state.military.corps_command?.[KONJIC_PRIMARY_CORPS]?.commander_state;
+    if (!commanderState) {
+        return { green: false, reason: '4th Corps commander state unavailable' };
+    }
+    return { green: true, reason: '4th Corps commander state present' };
+};
+
+const forceQualityKonjic: AxisPredicate = (state) => {
+    if (!state.military.corps_command?.[KONJIC_PRIMARY_CORPS]) {
+        return { green: false, reason: '4th Corps command not present in this scenario' };
+    }
+    const traits = computeCorpsOperationReadiness(state, KONJIC_PRIMARY_CORPS as FormationId);
+    if (traits.axis_coordination < KONJIC_AXIS_COORDINATION_FLOOR) {
+        return { green: false, reason: '4th Corps axis coordination below Konjic threshold' };
+    }
+    return { green: true, reason: '4th Corps axis coordination supports the Konjic operation' };
+};
+
+const weatherSeasonKonjic: AxisPredicate = () => ({
+    green: true,
+    reason: 'bounded September conditions are acceptable for the Konjic operation',
+});
+
+export const KONJIC_SEPTEMBER_94_OPPORTUNITY: OperationOpportunityDef = {
+    opportunity_id: 'konjic_september_94',
+    name: 'Konjic September Offensive',
+    tier: 'T1',
+    faction: 'RBiH',
+    primary_corps: KONJIC_PRIMARY_CORPS,
+    family: 'central_bosnia_vlasic',
+    axes: KONJIC_AXES,
+    staging_osid: KONJIC_STAGING,
+    planning_duration: 2,
+    citations: [
+        'Balkan Battlegrounds I printed pp.239 / PDF pp.276 - 4th Corps main offensive 11-12 Sep 1994, Bijela occupied 15 Sep, renewed Borci-Glavaticevo line offensive 23 Sep',
+        'Balkan Battlegrounds II printed pp.495-497 / PDF pp.514-516 - 443rd (Suad Alic) and 450th light in the Konjic OOB',
+        'Model assumptions only: turn 126 preparation, the two-brigade allocation, the Bijela then Glavaticevo OSID sequence and Glavaticevo regional coverage are calibration choices; exact town-capture date and exclusive participation are not proved',
+    ],
+    historical_exit_class: 'partial_success',
+    prerequisites: {
+        date_window: 'required',
+        political_authorization: 'n_a',
+        corps_readiness: 'required',
+        logistics: 'optional',
+        staging_access: 'required',
+        weather_season: 'optional',
+        commander_confidence: 'optional',
+        enemy_weakness: 'required',
+        alliance_context: 'required',
+        force_quality: 'optional',
+        min_optional_axes: 2,
+    },
+    evaluators: {
+        date_window: dateWindowKonjic,
+        political_authorization: alwaysGreen,
+        corps_readiness: corpsReadinessKonjic,
+        logistics: logisticsKonjic,
+        staging_access: stagingAccessKonjic,
+        weather_season: weatherSeasonKonjic,
+        commander_confidence: commanderConfidenceKonjic,
+        enemy_weakness: enemyWeaknessKonjic,
+        alliance_context: allianceContextKonjic,
+        force_quality: forceQualityKonjic,
+    },
+    staff_recommendation: 'approve',
+};
+
 // ═══════════════════════════════════════════════════════════════════════════
 // KUPRES_PHASE_2_94 — Operation Cincar Phase 2 / Kupres Town (Nov 1994)
 //
@@ -1188,4 +1335,5 @@ export const CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES: readonly OperationOpportunityD
     KUPRES_CINCAR_94_OPPORTUNITY,
     VLASIC_RIDGE_95_OPPORTUNITY,
     DONJI_VAKUF_95_OPPORTUNITY,
+    KONJIC_SEPTEMBER_94_OPPORTUNITY,
 ];
