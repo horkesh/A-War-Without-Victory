@@ -1223,6 +1223,9 @@ test('ambient lifecycle observer follows detached Audio elements created by the 
     vi.stubGlobal('Audio', CapturingAudio);
     const audioBus = await import('../src/ui/map/audio/audio_engine.js');
     audioBus.resetAudioForTests();
+    // The production default is ambience OFF; this fixture observes the enabled path, so opt the
+    // ambient category in explicitly rather than changing the default or enabling music/stingers.
+    audioBus.setAmbientPlaybackEnabled(true);
     audioBus.setEnabled(true);
     audioBus.unlockAudioForUserGesture();
     await audioBus.playAmbientBed('ambient_field');
