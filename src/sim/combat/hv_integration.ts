@@ -34,16 +34,15 @@ import { strictCompare } from '../../state/validateGameState.js';
 
 /**
  * Weeks after Washington Agreement before HV brigades arrive.
- * Calibrated scenario timing choice: current live Washington t100 + 32 gives
- * modeled HV availability at t132. The original 30 is retained in prior
- * branch/receipts, not silently discarded.
+ * Calibrated model choice: the retained baseline Washington is t98, so
+ * 98 + 32 gives modeled HV availability at t130. The earlier adjacent
+ * t100 + 32 = t132 rationale was inaccurate and remains preserved in the
+ * 1b95 branch history rather than being treated as fact.
  *
- * Source context: retained BB1 printed p.243 dates Cincar beginning 1 Nov 1994
- * and says HVO gathered Guards through October, with Croatian Army forces likely
- * planning and probably executing it. That source does not establish the exact
- * modeled HV roster arrival or brigade involvement; t132 is not historically
- * proved, and operation phases run before hv-integration, so actual admission at
- * t132 is a hypothesis to measure rather than a guarantee.
+ * Timing 32 is a scenario model choice, not a claim of exact historical HV
+ * arrival. BB1 printed p.243 supports Cincar beginning 1 Nov 1994 and HVO
+ * gathering Guards through October; it does not source the modeled roster
+ * arrival tick or unit involvement.
  */
 export const HV_PREPARATION_DELAY = 32;
 

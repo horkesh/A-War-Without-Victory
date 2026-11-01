@@ -73,6 +73,7 @@ import {
     isEliteReservedForHistoricalOperation,
     mayEliteJoinOperation,
 } from './historical_elite_reservations.js';
+import { isVlasicCohaExceptionOperation } from './coha_operation_exception.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getPrimaryOperation } from './corps_operation_helpers.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
@@ -404,11 +405,33 @@ function pickOperationAxis(operation: CorpsOperation, brigadeId: FormationId): O
     return axes[0] ?? null;
 }
 
+/**
+ * Automatic reserve attachment must not revoke an already-active COHA exception.
+ * Test the existing exception against the proposed roster rather than adding a
+ * second whitelist: an authored reinforcement keeps the exception valid, while
+ * an unauthored brigade would invalidate it. The real operation is not mutated.
+ */
+function autoAttachmentWouldRevokeCohaException(
+    state: GameState,
+    corpsId: string,
+    operation: CorpsOperation,
+    brigadeId: FormationId,
+): boolean {
+    if (!isVlasicCohaExceptionOperation(state, corpsId, operation)) return false;
+    if (operation.participating_brigades.includes(brigadeId)) return false;
+    const proposedRoster = {
+        ...operation,
+        participating_brigades: [...operation.participating_brigades, brigadeId],
+    };
+    return !isVlasicCohaExceptionOperation(state, corpsId, proposedRoster);
+}
+
 function pickActiveOperation(state: GameState, corpsId: string, brigadeId: FormationId): CorpsOperation | null {
     const operations = [...(state.military.corps_command?.[corpsId]?.active_operations ?? [])]
         .filter((operation) => operation.phase === 'planning' || operation.phase === 'execution')
         .filter((operation) => mayEliteJoinOperation(brigadeId, state.meta.turn, operation.name))
         .filter((operation) => !isExcludedGuardsEnclaveOperation(brigadeId, operation))
+        .filter((operation) => !autoAttachmentWouldRevokeCohaException(state, corpsId, operation, brigadeId))
         .sort((a, b) => {
             const phaseRank = (operation: CorpsOperation): number => operation.phase === 'execution' ? 0 : 1;
             const aHasBrigade = a.participating_brigades?.includes(brigadeId) ? 1 : 0;
@@ -1132,7 +1155,8 @@ export function deployEliteLoan(
     // reconciliation attaches a staged loan on the launch turn.
     if ((reason === 'offensive_support' || reason === 'exploitation') && options?.auto_join_operation !== false) {
         const activeOp = pickActiveOperation(state, corpsId, brigadeId);
-        if (activeOp?.phase === 'execution') {
+        if (activeOp?.phase === 'execution'
+            && !autoAttachmentWouldRevokeCohaException(state, corpsId, activeOp, brigadeId)) {
             attachEliteToOperation(activeOp, brigadeId);
         }
     }
@@ -1405,7 +1429,8 @@ function reconcileEliteLoanOperationCommitments(state: GameState): Set<string> {
     for (const bid of Object.keys(formations).sort(strictCompare)) {
         const loan = formations[bid].elite_loan_state;
         if (!loan?.on_loan || !loan.loaned_to_corps) continue;
-        corpsWithLoanedElite.add(loan.loaned_to_corps);
+        const receivingCorpsId = loan.loaned_to_corps;
+        corpsWithLoanedElite.add(receivingCorpsId);
 
         const alreadyCommitted = Object.keys(corpsCommand)
             .sort(strictCompare)
@@ -1413,13 +1438,19 @@ function reconcileEliteLoanOperationCommitments(state: GameState): Set<string> {
                 operation.participating_brigades.includes(bid)
                 || (operation.axes ?? []).some((axis) => axis.assigned_brigades.includes(bid))
             ));
-        const targetCommand = corpsCommand[loan.loaned_to_corps];
+        const targetCommand = corpsCommand[receivingCorpsId];
         if (!targetCommand || alreadyCommitted) continue;
 
         const operation = (targetCommand.active_operations ?? []).find((candidate) =>
             candidate.phase === 'execution'
             && mayEliteJoinOperation(bid as FormationId, state.meta.turn, candidate.name)
-            && !isExcludedGuardsEnclaveOperation(bid as FormationId, candidate));
+            && !isExcludedGuardsEnclaveOperation(bid as FormationId, candidate)
+            && !autoAttachmentWouldRevokeCohaException(
+                state,
+                receivingCorpsId,
+                candidate,
+                bid as FormationId,
+            ));
         if (operation) attachEliteToOperation(operation, bid);
     }
     return corpsWithLoanedElite;
