@@ -993,6 +993,11 @@ export const KONJIC_SEPTEMBER_94_OPPORTUNITY: OperationOpportunityDef = {
     axes: KONJIC_AXES,
     staging_osid: KONJIC_STAGING,
     planning_duration: 2,
+    // Existing authored option only: after a decisive actual capture, advance
+    // at most one same-axis supporter. This is a model coordination choice for
+    // the concentration problem, not proved exact historical orders. It does
+    // not change power, outcomes, occupation permissions, or other-axis units.
+    coordinated_advance: true,
     citations: [
         'Balkan Battlegrounds I printed pp.239 / PDF pp.276 - 4th Corps main offensive 11-12 Sep 1994, Bijela occupied 15 Sep, renewed Borci-Glavaticevo line offensive 23 Sep',
         'Balkan Battlegrounds II printed pp.495-497 / PDF pp.514-516 - 443rd (Suad Alic) and 450th light in the Konjic OOB; the 43rd and 49th were probably reinforced by corps-level reserves including at least the 4th Muslimski (likely reinforcement, not proved exact brigade participation or an exclusive roster)',

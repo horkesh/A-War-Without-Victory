@@ -1245,7 +1245,7 @@ describe('Konjic September 94 opportunity', () => {
         });
         expect(def.min_attack_outcome).toBeUndefined();
         expect(def.preparation_probe_delivery).toBeUndefined();
-        expect(def.coordinated_advance).toBeUndefined();
+        expect(def.coordinated_advance).toBe(true);
         expect(def.axes).toEqual([expect.objectContaining({
             axis_id: 'bijela_glavaticevo',
             brigades: ['arbih_443rd_mountain', 'arbih_450th_light', 'arbih_4th_muslim_light'],
@@ -1371,6 +1371,23 @@ describe('Konjic September 94 opportunity', () => {
         });
         expect(op.min_attack_outcome).toBeUndefined();
         expect(op.preparation_probe_delivery).toBeUndefined();
+        expect(op.coordinated_advance).toBe(true);
+    });
+
+    it('omits coordinated advance when the authored option is absent', () => {
+        const { coordinated_advance: _ignored, ...unflagged } = konjicDef();
+        const state = buildKonjicState({ turn: 127 });
+        runOpportunityEvaluationStep(state, 127, [unflagged]);
+
+        const approved = applyOpportunityDecision(
+            state,
+            127,
+            buildProposalId('konjic_september_94', 127),
+            'approve',
+            [unflagged],
+        );
+        expect(approved?.status).toBe('approved');
+        const op = state.military.corps_command!.arbih_4th_corps.active_operations[0]!;
         expect(op.coordinated_advance).toBeUndefined();
     });
 
