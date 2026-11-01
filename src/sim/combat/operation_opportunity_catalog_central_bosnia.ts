@@ -353,9 +353,13 @@ const KUPRES_GLAMOC_SHOULDER_AXES: readonly OpportunityAxisDef[] = [
     },
 ];
 
+// Calibrated model choice to concentrate existing authored forces before the
+// competing Osvit allocation; not a documented January historical operation
+// date. Earlier eligibility does not bypass gates or guarantee delivery/combat.
 const dateWindowVlasic: AxisPredicate = (_state, turn) => {
-    if (turn < 150) return { green: false, reason: 'February 1995 planning window for spring Central Bosnia operation not yet open' };
+    if (turn < 143) return { green: false, reason: 'February 1995 planning window for spring Central Bosnia operation not yet open' };
     if (turn > 166) return { green: false, reason: 'spring 1995 Central Bosnia operation window has closed' };
+    if (turn < 150) return { green: true, reason: 'within calibrated advance-preparation window for spring Central Bosnia operation' };
     return { green: true, reason: 'within February 1995 planning / spring Central Bosnia operation window' };
 };
 

@@ -908,7 +908,7 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
 
     it('does not surface before/after window, under broken alliance, lost staging, or no enemy-held objectives', () => {
         const cases = [
-            buildVlasicState({ turn: 149 }),
+            buildVlasicState({ turn: 142 }),
             buildVlasicState({ turn: 167 }),
             buildVlasicState({ turn: 156, alliance: 0.35 }),
             buildVlasicState({ turn: 156, stagingHeld: false }),
@@ -1200,6 +1200,77 @@ describe('Kupres/Cincar advance preparation window 131', () => {
             expect((state.military.operation_opportunities ?? [])
                 .find(p => p.opportunity_id === 'kupres_cincar_94')).toBeUndefined();
             expect(state.military.corps_command!.hvo_tomislavgrad.active_operations).toHaveLength(0);
+        }
+    });
+});
+
+describe('Vlašić advance preparation window 143..149', () => {
+    const EARLY_REASON = 'within calibrated advance-preparation window for spring Central Bosnia operation';
+    const CLOSED_BEFORE_REASON = 'February 1995 planning window for spring Central Bosnia operation not yet open';
+    const CLOSED_AFTER_REASON = 'spring 1995 Central Bosnia operation window has closed';
+    const STANDARD_REASON = 'within February 1995 planning / spring Central Bosnia operation window';
+
+    function dateWindowEvaluation(state: GameState, turn: number) {
+        return evaluateAxes(state, turn, VLASIC_RIDGE_95_OPPORTUNITY)
+            .find((axis) => axis.axis === 'date_window');
+    }
+
+    it('keeps 142 closed with the original pre-window reason and 167 closed', () => {
+        for (const [turn, reason] of [
+            [142, CLOSED_BEFORE_REASON],
+            [167, CLOSED_AFTER_REASON],
+        ] as const) {
+            const state = buildVlasicState({ turn });
+            const axes = evaluateAxes(state, turn, VLASIC_RIDGE_95_OPPORTUNITY);
+            expect(dateWindowEvaluation(state, turn)).toMatchObject({ green: false, reason });
+            expect(isOpportunityEligible(VLASIC_RIDGE_95_OPPORTUNITY, axes)).toBe(false);
+
+            runOpportunityEvaluationStep(state, turn);
+            expect((state.military.operation_opportunities ?? [])
+                .find(p => p.opportunity_id === 'vlasic_ridge_95')).toBeUndefined();
+        }
+    });
+
+    it('admits 143 and 149 early while preserving 150 and 166', () => {
+        for (const turn of [143, 149, 150, 166]) {
+            const state = buildVlasicState({ turn });
+            const axes = evaluateAxes(state, turn, VLASIC_RIDGE_95_OPPORTUNITY);
+            expect(isOpportunityEligible(VLASIC_RIDGE_95_OPPORTUNITY, axes)).toBe(true);
+            expect(dateWindowEvaluation(state, turn)).toMatchObject({
+                green: true,
+                reason: turn < 150 ? EARLY_REASON : STANDARD_REASON,
+            });
+
+            runOpportunityEvaluationStep(state, turn);
+            expect((state.military.operation_opportunities ?? [])
+                .find(p => p.opportunity_id === 'vlasic_ridge_95')).toMatchObject({
+                proposal_id: `OPP_${turn}_vlasic_ridge_95`,
+                status: 'eligible_pending_review',
+            });
+        }
+    });
+
+    it('does not admit 143 when alliance, staging, enemy, or readiness gates fail', () => {
+        const readinessRed = buildVlasicState({ turn: 143, axisCoordinationLow: true });
+        readinessRed.military.corps_command!.arbih_3rd_corps.corps_exhaustion = 100;
+        for (const id of VLASIC_BRIGADES) {
+            const formation = readinessRed.military.formations![id]!;
+            formation.personnel = 100;
+            formation.cohesion = 10;
+            formation.morale = 10;
+        }
+        const cases = [
+            buildVlasicState({ turn: 143, alliance: 0.35 }),
+            buildVlasicState({ turn: 143, stagingHeld: false }),
+            buildVlasicState({ turn: 143, objectivesHeldByRs: false }),
+            readinessRed,
+        ];
+
+        for (const state of cases) {
+            runOpportunityEvaluationStep(state, 143);
+            expect((state.military.operation_opportunities ?? [])
+                .find(p => p.opportunity_id === 'vlasic_ridge_95')).toBeUndefined();
+            expect(state.military.corps_command!.arbih_3rd_corps.active_operations).toHaveLength(0);
         }
     });
 });
