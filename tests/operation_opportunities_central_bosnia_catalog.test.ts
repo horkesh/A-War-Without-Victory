@@ -846,7 +846,7 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         const missingStagingController = buildKupresCincarState({ turn: 138 });
         delete missingStagingController.political.political_controllers!['op:duvno:tomislavgrad_2'];
         const cases = [
-            buildKupresCincarState({ turn: 131 }),
+            buildKupresCincarState({ turn: 130 }),
             buildKupresCincarState({ turn: 143 }),
             buildKupresCincarState({ turn: 138, alliance: 0.35 }),
             buildKupresCincarState({ turn: 138, stagingHeld: false }),
@@ -1118,5 +1118,88 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         // ...and the 2-turn window means the earliest execution turn is t154
         // (t152 start + 2 planning turns), matching the documented Domet-1 start.
         expect(op.phase_started_turn + (op.planning_duration ?? 0)).toBe(154);
+    });
+});
+
+describe('Kupres/Cincar advance preparation window 131', () => {
+    const OPEN_REASON = 'within autumn 1994 Kupres/Cincar operation window';
+    const CLOSED_BEFORE_REASON = 'autumn 1994 Kupres/Cincar window not yet open';
+    const CLOSED_AFTER_REASON = 'autumn 1994 Kupres/Cincar window has closed';
+
+    function dateWindowEvaluation(state: GameState, turn: number) {
+        return evaluateAxes(state, turn, KUPRES_CINCAR_94_OPPORTUNITY)
+            .find((axis) => axis.axis === 'date_window');
+    }
+
+    it('keeps 130 closed, admits 131/132/142, and closes 143 with unchanged reasons', () => {
+        for (const [turn, green, reason] of [
+            [130, false, CLOSED_BEFORE_REASON],
+            [131, true, OPEN_REASON],
+            [132, true, OPEN_REASON],
+            [142, true, OPEN_REASON],
+            [143, false, CLOSED_AFTER_REASON],
+        ] as const) {
+            const state = buildKupresCincarState({ turn });
+            const axes = evaluateAxes(state, turn, KUPRES_CINCAR_94_OPPORTUNITY);
+            expect(dateWindowEvaluation(state, turn)).toMatchObject({ green, reason });
+            expect(isOpportunityEligible(KUPRES_CINCAR_94_OPPORTUNITY, axes)).toBe(green);
+
+            runOpportunityEvaluationStep(state, turn);
+            const proposal = (state.military.operation_opportunities ?? [])
+                .find(p => p.opportunity_id === 'kupres_cincar_94');
+            if (green) {
+                expect(proposal).toMatchObject({
+                    proposal_id: `OPP_${turn}_kupres_cincar_94`,
+                    status: 'eligible_pending_review',
+                });
+            } else {
+                expect(proposal).toBeUndefined();
+            }
+        }
+    });
+
+    it('spawns the ordinary planning operation at 131 without claiming a combat date', () => {
+        const state = buildKupresCincarState({ turn: 131 });
+        runOpportunityEvaluationStep(state, 131);
+        const proposalId = buildProposalId('kupres_cincar_94', 131);
+
+        expect((state.military.operation_opportunities ?? [])
+            .find(p => p.opportunity_id === 'kupres_cincar_94')).toMatchObject({
+            proposal_id: proposalId,
+            status: 'eligible_pending_review',
+        });
+
+        const approved = applyOpportunityDecision(state, 131, proposalId, 'approve');
+        expect(approved?.status).toBe('approved');
+
+        const operation = state.military.corps_command!.hvo_tomislavgrad.active_operations[0];
+        expect(operation).toMatchObject({
+            name: 'Operation Cincar / Kupres',
+            phase: 'planning',
+            phase_started_turn: 131,
+            planning_duration: 4,
+        });
+        expect(operation.axes![0].objectives).toEqual(KUPRES_OBJECTIVES);
+        expect(state.military.brigade_attack_orders).toBeUndefined();
+        expect(state.political.political_controllers).toMatchObject({
+            'op:kupres:bucovaca': 'RS',
+            'op:kupres:donji_malovan': 'RS',
+            'op:kupres:novo_selo_2': 'RS',
+        });
+    });
+
+    it('still blocks 131 when alliance, staging, or enemy-objective gates fail', () => {
+        const cases = [
+            buildKupresCincarState({ turn: 131, alliance: 0.35 }),
+            buildKupresCincarState({ turn: 131, stagingHeld: false }),
+            buildKupresCincarState({ turn: 131, objectivesHeldByRs: false }),
+        ];
+
+        for (const state of cases) {
+            runOpportunityEvaluationStep(state, 131);
+            expect((state.military.operation_opportunities ?? [])
+                .find(p => p.opportunity_id === 'kupres_cincar_94')).toBeUndefined();
+            expect(state.military.corps_command!.hvo_tomislavgrad.active_operations).toHaveLength(0);
+        }
     });
 });

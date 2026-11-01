@@ -518,8 +518,12 @@ const weatherSeasonDonjiVakuf: AxisPredicate = () => (
     { green: true, reason: 'September conditions are acceptable for Donji Vakuf' }
 );
 
+// Calibrated staff-preparation choice: open one week earlier so the ordinary
+// planning path can support the actual main-assault screen at 135. This is a
+// scenario hypothesis, not a documented 131 start; window eligibility alone
+// does not guarantee a combat date.
 const dateWindowKupresCincar: AxisPredicate = (_state, turn) => {
-    if (turn < 132) return { green: false, reason: 'autumn 1994 Kupres/Cincar window not yet open' };
+    if (turn < 131) return { green: false, reason: 'autumn 1994 Kupres/Cincar window not yet open' };
     if (turn > 142) return { green: false, reason: 'autumn 1994 Kupres/Cincar window has closed' };
     return { green: true, reason: 'within autumn 1994 Kupres/Cincar operation window' };
 };
