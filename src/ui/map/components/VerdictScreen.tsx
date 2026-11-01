@@ -40,6 +40,8 @@ import { parseGhostEntryProse, resolveGhostEntryProse } from '../data/ghostEntry
 // round-trip; does NOT advance turns or mutate engine state.
 import { ReplayScrubber } from './replay/index.js';
 import { Z } from '../../shared/zIndex.js';
+import { FACTION_COLORS_SUBTLE } from '../utils/theme.js';
+import { Modal } from '../../shared/Modal.js';
 import { CinematicVerdict } from './verdict/CinematicVerdict.js';
 import { t, useLocale, type MessageKey } from '../i18n';
 import {
@@ -516,12 +518,19 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
     );
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+        <div className="fixed inset-0"
              style={wrappedOpen ? { display: 'none' } : { zIndex: Z.GAME_OVER }}
              data-awwv-endgame-surface="verdict"
              data-awwv-endgame-outcome={verdict.outcome_label}
              data-awwv-verdict-focus={selectedFaction}>
-            <div className="w-[min(980px,calc(100vw-24px))] max-h-[92vh] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden">
+            <Modal
+                isOpen={!wrappedOpen}
+                dismissible={false}
+                zIndex={Z.GAME_OVER}
+                ariaLabel={t('gameOver.title')}
+                backdropClassName="bg-black/90 backdrop-blur-sm"
+                panelClassName="w-[min(980px,calc(100vw-24px))] max-h-[92vh] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden"
+            >
                 <CinematicVerdict
                     verdict={verdict}
                     costLedger={loadedGameState.costLedger}
@@ -580,8 +589,7 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                                 }`}
                                 style={active ? { borderBottomColor: FACTION_HEX[fid] } : undefined}
                             >
-                                <div className="text-xs font-bold uppercase tracking-wider"
-                                     style={{ color: FACTION_HEX[fid] }}>
+                                <div className={`text-xs font-bold uppercase tracking-wider ${FACTION_COLORS_SUBTLE[fid] ?? ''}`}>
                                     {FACTION_SHORT[fid] ?? fid}
                                 </div>
                                 {v && (
@@ -740,7 +748,7 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
 
                 {/* Footer */}
                 <div className="shrink-0 border-t border-panel-border bg-panel-card/30 px-4 py-2 sm:px-6 sm:py-4">
-                    <div className="mb-2 text-center text-xs italic text-text-secondary/60 sm:mb-3">
+                    <div className="mb-2 text-center text-xs italic text-text-secondary sm:mb-3">
                         {t('verdict.footer.tagline')}
                     </div>
                     <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
@@ -764,7 +772,7 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                         />
                     </div>
                 </div>
-            </div>
+            </Modal>
         </div>
     );
 }
@@ -845,8 +853,7 @@ export function FactionReport({
                 <div className="text-xs uppercase tracking-[0.3em] text-text-secondary mb-1">
                     {t('verdict.report.pyrrhicScore')}
                 </div>
-                <div className="text-[48px] font-bold tabular-nums leading-none"
-                     style={{ color }}>
+                <div className={`text-[48px] font-bold tabular-nums leading-none ${FACTION_COLORS_SUBTLE[verdict.faction] ?? ''}`}>
                     {verdict.pyrrhic_score.toFixed(1)}
                 </div>
                 <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full border"
@@ -1174,11 +1181,18 @@ function FallbackGameOver({
     const wrappedOpen = useGameStore((s) => s.wrappedOpen);
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+        <div className="fixed inset-0"
              style={wrappedOpen ? { display: 'none' } : { zIndex: Z.GAME_OVER }}
              data-awwv-endgame-surface="fallback"
              data-awwv-endgame-outcome={display.title}>
-            <div className="w-[560px] max-h-[85vh] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden">
+            <Modal
+                isOpen={!wrappedOpen}
+                dismissible={false}
+                zIndex={Z.GAME_OVER}
+                ariaLabel={t('gameOver.title')}
+                backdropClassName="bg-black/80 backdrop-blur-sm"
+                panelClassName="w-[560px] max-h-[85vh] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden"
+            >
                 <div className="px-8 py-6 border-b border-panel-border bg-panel-card/50 text-center">
                     <div className="text-xs font-mono uppercase tracking-[0.4em] text-accent-gold/60 mb-2">
                         {date} &mdash; A War Without Victory
@@ -1202,7 +1216,7 @@ function FallbackGameOver({
                                 <div className="flex items-center justify-between mb-2">
                                     <div className="flex items-center gap-2">
                                         <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: color }} />
-                                        <span className="text-[12px] font-bold text-text-primary uppercase tracking-wide">{getPlayerSafeMilitaryFactionName(fid, fid)}</span>
+                                        <span className={`text-[12px] font-bold uppercase tracking-wide ${FACTION_COLORS_SUBTLE[fid] ?? 'text-text-primary'}`}>{getPlayerSafeMilitaryFactionName(fid, fid)}</span>
                                     </div>
                                     <span className="text-xs text-text-primary tabular-nums font-bold">{pct}%</span>
                                 </div>
@@ -1244,7 +1258,7 @@ function FallbackGameOver({
                         className="px-6 py-2 text-xs font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors disabled:opacity-60"
                     />
                 </div>
-            </div>
+            </Modal>
         </div>
     );
 }

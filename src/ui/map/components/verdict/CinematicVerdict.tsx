@@ -146,7 +146,12 @@ export function CinematicVerdict({
                                 {t('verdict.copy')}
                             </button>
                         </div>
-                        <pre className="mt-2 hidden max-h-28 overflow-auto whitespace-pre-wrap break-words text-xs leading-relaxed text-text-secondary/85 sm:block">
+                        <pre
+                            role="region"
+                            tabIndex={0}
+                            aria-label={t('verdict.shareSummary')}
+                            className="mt-2 hidden max-h-28 overflow-auto whitespace-pre-wrap break-words text-xs leading-relaxed text-text-secondary sm:block"
+                        >
                             {shareSummary}
                         </pre>
                     </div>
