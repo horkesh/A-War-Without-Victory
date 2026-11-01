@@ -1256,10 +1256,10 @@ describe('Konjic September 94 opportunity', () => {
         expect(OPERATION_OPPORTUNITY_CATALOG).toContain(def);
     });
 
-    it('keeps 125 closed, admits 126 and 130, and closes 131', () => {
+    it('keeps 126 closed, admits 127 and 130, and closes 131', () => {
         for (const [turn, expected] of [
-            [125, false],
-            [126, true],
+            [126, false],
+            [127, true],
             [130, true],
             [131, false],
         ] as const) {
@@ -1283,22 +1283,22 @@ describe('Konjic September 94 opportunity', () => {
         }
     });
 
-    it('rejects 126 when the required command, readiness, staging, alliance, or enemy gate fails', () => {
+    it('rejects 127 when the required command, readiness, staging, alliance, or enemy gate fails', () => {
         const cases = [
-            { state: buildKonjicState({ turn: 126, missingCommand: true }), axis: 'corps_readiness' },
-            { state: buildKonjicState({ turn: 126, axisCoordinationLow: true }), axis: 'corps_readiness' },
-            { state: buildKonjicState({ turn: 126, stagingHeld: false }), axis: 'staging_access' },
-            { state: buildKonjicState({ turn: 126, alliance: 0.35 }), axis: 'alliance_context' },
-            { state: buildKonjicState({ turn: 126, objectivesHeldByRs: false }), axis: 'enemy_weakness' },
+            { state: buildKonjicState({ turn: 127, missingCommand: true }), axis: 'corps_readiness' },
+            { state: buildKonjicState({ turn: 127, axisCoordinationLow: true }), axis: 'corps_readiness' },
+            { state: buildKonjicState({ turn: 127, stagingHeld: false }), axis: 'staging_access' },
+            { state: buildKonjicState({ turn: 127, alliance: 0.35 }), axis: 'alliance_context' },
+            { state: buildKonjicState({ turn: 127, objectivesHeldByRs: false }), axis: 'enemy_weakness' },
         ] as const;
 
         for (const { state, axis } of cases) {
             const def = konjicDef();
-            const axes = evaluateAxes(state, 126, def);
+            const axes = evaluateAxes(state, 127, def);
             expect(axes.find((entry) => entry.axis === axis)?.green).toBe(false);
             expect(isOpportunityEligible(def, axes)).toBe(false);
 
-            runOpportunityEvaluationStep(state, 126);
+            runOpportunityEvaluationStep(state, 127);
             expect((state.military.operation_opportunities ?? [])
                 .find((entry) => entry.opportunity_id === 'konjic_september_94')).toBeUndefined();
             if (state.military.corps_command?.arbih_4th_corps) {
@@ -1308,9 +1308,9 @@ describe('Konjic September 94 opportunity', () => {
     });
 
     it('keeps optional logistics and quality advisory while the actual 4th Corps owns readiness', () => {
-        const state = buildKonjicState({ turn: 126, supplyPressure: 95, addCommanderState: false });
+        const state = buildKonjicState({ turn: 127, supplyPressure: 95, addCommanderState: false });
         const def = konjicDef();
-        const axes = evaluateAxes(state, 126, def);
+        const axes = evaluateAxes(state, 127, def);
         expect(axes.find((entry) => entry.axis === 'logistics')?.green).toBe(false);
         expect(axes.find((entry) => entry.axis === 'commander_confidence')?.green).toBe(false);
         expect(axes.find((entry) => entry.axis === 'weather_season')?.green).toBe(true);
@@ -1319,29 +1319,29 @@ describe('Konjic September 94 opportunity', () => {
         expect(axes.find((entry) => entry.axis === 'corps_readiness')?.reason).toContain('4th Corps');
         expect(Object.keys(state.military.corps_command!)).toEqual(['arbih_4th_corps']);
 
-        runOpportunityEvaluationStep(state, 126);
+        runOpportunityEvaluationStep(state, 127);
         expect((state.military.operation_opportunities ?? [])
             .find((entry) => entry.opportunity_id === 'konjic_september_94')).toBeDefined();
 
         const insufficient = buildKonjicState({
-            turn: 126,
+            turn: 127,
             supplyPressure: 95,
             addCommanderState: false,
             axisCoordinationLow: true,
         });
-        const insufficientAxes = evaluateAxes(insufficient, 126, def);
+        const insufficientAxes = evaluateAxes(insufficient, 127, def);
         expect(isOpportunityEligible(def, insufficientAxes)).toBe(false);
-        runOpportunityEvaluationStep(insufficient, 126);
+        runOpportunityEvaluationStep(insufficient, 127);
         expect((insufficient.military.operation_opportunities ?? [])
             .find((entry) => entry.opportunity_id === 'konjic_september_94')).toBeUndefined();
     });
 
     it('approves the exact two-unit operation without a preparation or attack override', () => {
-        const state = buildKonjicState({ turn: 126 });
+        const state = buildKonjicState({ turn: 127 });
         const def = konjicDef();
-        runOpportunityEvaluationStep(state, 126);
+        runOpportunityEvaluationStep(state, 127);
 
-        expect(preflightOpportunityAdmission(state, def, def.axes, 'standard', 126)).toEqual({
+        expect(preflightOpportunityAdmission(state, def, def.axes, 'standard', 127)).toEqual({
             admitted: true,
             selected_participants: 2,
             required_participants: 2,
@@ -1350,8 +1350,8 @@ describe('Konjic September 94 opportunity', () => {
 
         const approved = applyOpportunityDecision(
             state,
-            126,
-            buildProposalId('konjic_september_94', 126),
+            127,
+            buildProposalId('konjic_september_94', 127),
             'approve',
         );
         expect(approved?.status).toBe('approved');
@@ -1375,13 +1375,13 @@ describe('Konjic September 94 opportunity', () => {
     });
 
     it('manual decline creates no operation or claim', () => {
-        const state = buildKonjicState({ turn: 126 });
-        runOpportunityEvaluationStep(state, 126);
+        const state = buildKonjicState({ turn: 127 });
+        runOpportunityEvaluationStep(state, 127);
 
         const declined = applyOpportunityDecision(
             state,
-            126,
-            buildProposalId('konjic_september_94', 126),
+            127,
+            buildProposalId('konjic_september_94', 127),
             'decline',
         );
         expect(declined?.status).toBe('declined');
@@ -1392,7 +1392,7 @@ describe('Konjic September 94 opportunity', () => {
     });
 
     it('does not steal or force-release an incompatible existing operation ownership', () => {
-        const state = buildKonjicState({ turn: 126 });
+        const state = buildKonjicState({ turn: 127 });
         const cmd = state.military.corps_command!.arbih_4th_corps;
         const existing = {
             name: 'Existing 4th Corps Commitment',
@@ -1405,12 +1405,12 @@ describe('Konjic September 94 opportunity', () => {
             current_objective_index: 0,
         } as (typeof cmd.active_operations)[number];
         cmd.active_operations.push(existing);
-        runOpportunityEvaluationStep(state, 126);
+        runOpportunityEvaluationStep(state, 127);
 
         const outcome = applyOpportunityDecisionDetailed(
             state,
-            126,
-            buildProposalId('konjic_september_94', 126),
+            127,
+            buildProposalId('konjic_september_94', 127),
             'approve',
         );
         expect(outcome.decision_applied).toBe(false);
