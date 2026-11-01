@@ -5,10 +5,10 @@
     "narrative": "At noon on New Year's Day, the guns fall silent across most of Bosnia. The four-month cessation of hostilities agreement is imperfect -- snipers still shoot, mortars still fall on Sarajevo's outskirts -- but the wholesale combat operations that have defined the war pause. Both sides know this is a breathing space, not peace. The question is who will use it better.",
     "category": "diplomatic",
     "source_tier": "icty_icj_un",
-    "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record.",
+    "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record. The trigger is pinned to the COHA's actual effective date (1 January 1995; turn 143 on the completed-week calendar), not a multi-week slack window. The 16-turn aggression modifiers are separate soft policy, not a hard coha_active pause clock.",
     "trigger": {
-      "turn_min": 139,
-      "turn_max": 140,
+      "turn_min": 143,
+      "turn_max": 143,
       "phase": "war",
       "requires_events": [
         "carter_ceasefire_1994"
@@ -48,43 +48,6 @@
       "coha_active": true
     },
     "historical_source": "BB Vol. II. ICTY Karadzic Judgment."
-  },
-  {
-    "id": "coha_expires_1995",
-    "title": "Ceasefire Expires -- War Resumes",
-    "narrative": "The four-month ceasefire expires without renewal. Within days, artillery resumes along front lines across Bosnia. Both sides have used the winter to prepare. The VRS has quietly concentrated Drina Corps assets near the eastern enclaves. The ARBiH has reorganized its corps structure and received equipment through back-channels. The final act of the war begins.",
-    "category": "military",
-    "source_tier": "icty_icj_un",
-    "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record.",
-    "trigger": {
-      "turn_min": 156,
-      "turn_max": 158,
-      "phase": "war"
-    },
-    "once": true,
-    "effect": {
-      "kind": "narrative",
-      "text": "The COHA ceasefire expires. Full-scale hostilities resume across Bosnia-Herzegovina."
-    },
-    "effects": [
-      {
-        "kind": "aggression_modifier",
-        "faction": "RS",
-        "delta": 0.15,
-        "duration_turns": 12
-      },
-      {
-        "kind": "aggression_modifier",
-        "faction": "RBiH",
-        "delta": 0.1,
-        "duration_turns": 12
-      }
-    ],
-    "sets_flags": {
-      "coha_active": false,
-      "coha_expired": true
-    },
-    "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). ICTY Mladic Judgment (IT-09-92-T)."
   },
   {
     "id": "operation_flash_1995",
@@ -131,6 +94,43 @@
       "operation_flash_occurred": true
     },
     "historical_source": "ICTY Gotovina et al. (IT-06-90-T). UNSCR 981. BB Vol. II, Ch. 13."
+  },
+  {
+    "id": "coha_expires_1995",
+    "title": "Ceasefire Expires -- War Resumes",
+    "narrative": "The four-month ceasefire expires without renewal. Within days, artillery resumes along front lines across Bosnia. Both sides have used the winter to prepare. The VRS has quietly concentrated Drina Corps assets near the eastern enclaves. The ARBiH has reorganized its corps structure and received equipment through back-channels. The final act of the war begins.",
+    "category": "military",
+    "source_tier": "icty_icj_un",
+    "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record. The trigger is pinned to the COHA's actual expiry (1 May 1995; turn 161 on the completed-week calendar), not the earlier four-month narrative slack.",
+    "trigger": {
+      "turn_min": 161,
+      "turn_max": 161,
+      "phase": "war"
+    },
+    "once": true,
+    "effect": {
+      "kind": "narrative",
+      "text": "The COHA ceasefire expires. Full-scale hostilities resume across Bosnia-Herzegovina."
+    },
+    "effects": [
+      {
+        "kind": "aggression_modifier",
+        "faction": "RS",
+        "delta": 0.15,
+        "duration_turns": 12
+      },
+      {
+        "kind": "aggression_modifier",
+        "faction": "RBiH",
+        "delta": 0.1,
+        "duration_turns": 12
+      }
+    ],
+    "sets_flags": {
+      "coha_active": false,
+      "coha_expired": true
+    },
+    "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). ICTY Mladic Judgment (IT-09-92-T)."
   },
   {
     "id": "tuzla_gate_massacre_1995",

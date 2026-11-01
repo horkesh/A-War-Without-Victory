@@ -249,11 +249,11 @@ export const HISTORICAL_OSID_ANCHORS_APR1994: readonly HistoricalEpochOsidAnchor
 // ===== Apr 1995 (w156) — events + pre-Krajina-collapse OSIDs; area bands diagnostic-only =====
 
 export const HISTORICAL_EVENT_ANCHORS_APR1995: readonly HistoricalEventAnchor[] = [
-    { event_id: 'carter_ceasefire_1994',         expected_week_max: 140, tolerance: 3, citation: 'BB1 ch.86 — Carter shuttle Dec 1994' },
-    { event_id: 'coha_ceasefire_begins_1995',    expected_week_max: 142, tolerance: 3, citation: 'BB1 p.65 — Cessation of Hostilities Agreement Jan 1995' },
-    { event_id: 'coha_expires_1995',             expected_week_max: 158, tolerance: 2, citation: 'BB1 ch.87 — COHA expires May 1995' },
+    { event_id: 'carter_ceasefire_1994',         expected_week_max: 142, tolerance: 3, citation: 'BB1 printed pp.28-29 / PDF pp.65-66 — Carter shuttle 18-20 Dec 1994; temporary truce 23/24 Dec 1994' },
+    { event_id: 'coha_ceasefire_begins_1995',    expected_week_max: 143, tolerance: 3, citation: 'BB1 printed pp.28-29 / PDF pp.65-66 — COHA effective 1 Jan 1995' },
+    { event_id: 'coha_expires_1995',             expected_week_max: 161, tolerance: 2, citation: 'BB1 printed pp.33/35 / PDF pp.70/72 — COHA expiry 1 May 1995' },
     { event_id: 'srebrenica_demilitarization_1993', expected_week_max: 56, tolerance: 2, citation: 'UNSC Res 819 + BB1 p.444 — must still be set at w156' },
-    { event_id: 'un_safe_areas_declared_1993',      expected_week_max: 54, tolerance: 2, citation: 'UNSC Res 824' },
+    { event_id: 'un_safe_areas_declared_1993',      expected_week_max: 57, tolerance: 2, citation: 'UNSC Res 824, 6 May 1993' },
     { event_id: 'bihac_crisis_1994',                expected_week_max: 137, tolerance: 3, citation: 'BB1 p.62 — Bihać crisis late 1994' },
 ];
 
