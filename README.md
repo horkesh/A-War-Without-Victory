@@ -1,3 +1,21 @@
+# Canonical AWWV calibration control timeline
+
+**Standard tool:** https://horkesh.github.io/A-War-Without-Victory/ — the interactive week-by-week control timeline with checkpoint navigation, search, cell inspection and zoom/pan. Use this tool for requests for the calibration map/tool; single-checkpoint Sites maps are not substitutes.
+
+## Current publication — 2026-11-01
+
+[Open the current timeline](https://horkesh.github.io/A-War-Without-Victory/). Exact artifact: `control_timeline_709_through104.html`, SHA-256 `17df2d9f0158ca6befbdb1e921e58a2818981cd49c664e9714a55766251c303b`.
+
+This coherent all-AI observer run actually completed104 weeks: January1993(w39)709/712 and April1994(w104)709/712. All168 control events and712 initial controllers are preserved;744 polygons include32 scoring aliases. Weeks0–104 are inspectable; April1995(w156) and October1995(w188) are disabled/not reached. No later history was invented or spliced from another run. The older188-week runs remain available below.
+
+Source `18dc69fac06ff729b551a43f862b48547ce22c86`; save SHA-256 `74fe4be432ec3b26ba4bd6c68611f04ae13c33e3a4481c49e89aedb775bb7623`. Source measurement completed2026-10-29T18:03:37.454Z; HTML generated2026-11-01T12:23:06.538Z. Publication time is not a new simulation result. Dirty-worktree/non-master warnings remain; this is unadopted observer evidence, not native-player acceptance or completed full-campaign qualification. Ambience-disabled native qualification is separate and remains unclaimed here.
+
+## Maintenance contract
+
+Preserve one coherent saved history, exact source/reference provenance, old dated viewer artifacts and `.nojekyll`. Never treat planned duration or last flip as actual completed week. Historical mismatch is defined only at reached painted checkpoints39/104/156/188, not intermediate weeks. Publish only reviewed/tested generated viewer artifacts to this branch under explicit publication authorization; do not modify simulation sources, references or acceptance status. Keep root pointed at the current verified timeline and preserve old query routes.
+
+## Preserved historical publications
+
 # A War Without Victory — calibration control timeline
 
 [Open the current n14 map with corrected Prusac paint](https://horkesh.github.io/A-War-Without-Victory/?run=april1995-n14-prusac-20260929). The saved simulation is unchanged and remains a dirty-source inspection candidate, not an adopted baseline. The owner's RBiH reference correction makes Prusac a mismatch at all four checkpoints. Replayed scores are 706/706/705/671 of 712; April 1995 protected anchors remain 40/40. The t29 VRS operation capture and other open integration gates remain visible. Earlier pages below retain their original painted-reference snapshots.
