@@ -353,9 +353,14 @@ const KUPRES_GLAMOC_SHOULDER_AXES: readonly OpportunityAxisDef[] = [
     },
 ];
 
+// Calibrated advance-preparation choice: 143 is the latest free week before
+// generic Operacija Most claims the 712th/727th at 144. This is a model
+// sequencing reservation, not a documented January planning date; earlier
+// approval does not bypass the other evaluators or guarantee delivery/combat.
 const dateWindowVlasic: AxisPredicate = (_state, turn) => {
-    if (turn < 150) return { green: false, reason: 'February 1995 planning window for spring Central Bosnia operation not yet open' };
+    if (turn < 143) return { green: false, reason: 'February 1995 planning window for spring Central Bosnia operation not yet open' };
     if (turn > 166) return { green: false, reason: 'spring 1995 Central Bosnia operation window has closed' };
+    if (turn < 150) return { green: true, reason: 'within calibrated advance-preparation window for spring Central Bosnia operation' };
     return { green: true, reason: 'within February 1995 planning / spring Central Bosnia operation window' };
 };
 
