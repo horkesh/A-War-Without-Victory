@@ -161,30 +161,28 @@ describe('HV integration', () => {
         }
     });
 
-    test('Washington100 fixed boundary pins the HV preparation delay at 32', () => {
-        // Calibrated scenario timing: Washington t100 + 32 = HV availability t132.
-        // Fixed rather than derived so a regression back to 30 is rejected.
-        assert.strictEqual(HV_PREPARATION_DELAY, 32);
-        assert.strictEqual(100 + HV_PREPARATION_DELAY, 132);
+    test('Washington98 fixed boundary pins the HV preparation delay at 31', () => {
+        // Intermediate calibrated timing: retained Washington t98 + 31 = HV availability t129.
+        // Fixed rather than derived so prior 32 and earlier 30 are rejected.
+        assert.strictEqual(HV_PREPARATION_DELAY, 31);
+        assert.strictEqual(98 + HV_PREPARATION_DELAY, 129);
     });
 
-    test('Washington100 fixed boundary holds 130/131, counts 2/1, arrives 132 and does not respawn 133', () => {
-        // Reject the prior delay of 30: it would spawn at t130 instead of t132.
-        for (const [turn, countdown] of [[130, 2], [131, 1]] as const) {
-            const state = makeWashingtonSignedState(100, turn);
-            const report = tickHvIntegration(state);
+    test('Washington98 fixed boundary holds 128, counts 1, arrives 129 and does not respawn 130', () => {
+        // Reject prior 32 (spawns t130) and earlier 30 (spawns t128): neither may reach t129.
+        const heldState = makeWashingtonSignedState(98, 128);
+        const heldReport = tickHvIntegration(heldState);
 
-            assert.strictEqual(report.washington_signed, true);
-            assert.strictEqual(report.spawned_this_turn, false, `No formation may spawn at t${turn}`);
-            assert.strictEqual(report.spawned_brigade_ids.length, 0);
-            assert.strictEqual(report.turns_until_spawn, countdown, `Countdown at t${turn}`);
-            assert.strictEqual(state.meta.hv_brigades_spawned, undefined);
-            for (const def of HV_BRIGADE_DEFS) {
-                assert.strictEqual(state.military.formations[def.id], undefined, `${def.id} must not exist at t${turn}`);
-            }
+        assert.strictEqual(heldReport.washington_signed, true);
+        assert.strictEqual(heldReport.spawned_this_turn, false, 'No formation may spawn at t128');
+        assert.strictEqual(heldReport.spawned_brigade_ids.length, 0);
+        assert.strictEqual(heldReport.turns_until_spawn, 1, 'Countdown at t128');
+        assert.strictEqual(heldState.meta.hv_brigades_spawned, undefined);
+        for (const def of HV_BRIGADE_DEFS) {
+            assert.strictEqual(heldState.military.formations[def.id], undefined, `${def.id} must not exist at t128`);
         }
 
-        const spawnState = makeWashingtonSignedState(100, 132);
+        const spawnState = makeWashingtonSignedState(98, 129);
         const spawnReport = tickHvIntegration(spawnState);
 
         assert.strictEqual(spawnReport.spawned_this_turn, true);
@@ -213,14 +211,14 @@ describe('HV integration', () => {
         };
         for (const def of HV_BRIGADE_DEFS) {
             const f = spawnState.military.formations[def.id]!;
-            assert.ok(f, `${def.id} must exist at t132`);
+            assert.ok(f, `${def.id} must exist at t129`);
             assert.strictEqual(f.id, def.id);
             assert.strictEqual(f.personnel, expectedPersonnel[def.id], `${def.id} personnel`);
             assert.strictEqual(f.location_osid, expectedLocations[def.id], `${def.id} deployment/fallback`);
             assert.strictEqual(spawnState.political.political_controllers?.[f.location_osid!], 'HRHB');
         }
 
-        (spawnState.meta as any).turn = 133;
+        (spawnState.meta as any).turn = 130;
         const afterReport = tickHvIntegration(spawnState);
         assert.strictEqual(afterReport.already_spawned, true);
         assert.strictEqual(afterReport.spawned_this_turn, false);
@@ -228,7 +226,7 @@ describe('HV integration', () => {
         assert.strictEqual(
             HV_BRIGADE_DEFS.filter(def => spawnState.military.formations[def.id] != null).length,
             4,
-            'no respawn at t133',
+            'no respawn at t130',
         );
     });
 

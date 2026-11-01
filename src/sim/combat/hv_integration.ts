@@ -34,18 +34,21 @@ import { strictCompare } from '../../state/validateGameState.js';
 
 /**
  * Weeks after Washington Agreement before HV brigades arrive.
- * Calibrated scenario timing choice: current live Washington t100 + 32 gives
- * modeled HV availability at t132. The original 30 is retained in prior
- * branch/receipts, not silently discarded.
+ * Intermediate calibrated timing choice on the retained baseline: Washington is
+ * t98, so 98 + 31 models HV availability at t129. The earlier adjacent rationale
+ * said t100 + 32 = t132; that was inaccurate and remains preserved only in prior
+ * 1b95 branch/receipt history rather than being treated as fact.
  *
- * Source context: retained BB1 printed p.243 dates Cincar beginning 1 Nov 1994
- * and says HVO gathered Guards through October, with Croatian Army forces likely
- * planning and probably executing it. That source does not establish the exact
- * modeled HV roster arrival or brigade involvement; t132 is not historically
- * proved, and operation phases run before hv-integration, so actual admission at
- * t132 is a hypothesis to measure rather than a guarantee.
+ * Retained measured context: delay 30 spawned at t128, diverting HV and Kralj
+ * Petar into the ordinary Pljusak window at t131 and losing Vidimlije at t132.
+ * Delay 32 spawned at t130, preserving Vidimlije and the full Cincar roster but
+ * assembling more slowly. This 31 trial tests earlier assembly between them.
+ *
+ * Source context: BB1 printed p.243 provides Cincar beginning 1 Nov 1994 and HVO
+ * gathering Guards through October. It does not source the exact modeled HV
+ * roster arrival tick or unit involvement; t129 is not historically proved.
  */
-export const HV_PREPARATION_DELAY = 32;
+export const HV_PREPARATION_DELAY = 31;
 
 /** Corps assignment for spawned HV brigades. */
 export const HV_CORPS_ID = 'hvo_tomislavgrad' as FormationId;
