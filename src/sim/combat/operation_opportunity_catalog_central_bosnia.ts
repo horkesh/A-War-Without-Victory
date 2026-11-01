@@ -353,9 +353,13 @@ const KUPRES_GLAMOC_SHOULDER_AXES: readonly OpportunityAxisDef[] = [
     },
 ];
 
+// Calibrated allocation choice: 146 is the last measured free week before
+// Strijela claims the 712th/727th at 147. This reserves the existing authored
+// ridge force; it is not a sourced historical preparation date.
 const dateWindowVlasic: AxisPredicate = (_state, turn) => {
-    if (turn < 150) return { green: false, reason: 'February 1995 planning window for spring Central Bosnia operation not yet open' };
+    if (turn < 146) return { green: false, reason: 'February 1995 planning window for spring Central Bosnia operation not yet open' };
     if (turn > 166) return { green: false, reason: 'spring 1995 Central Bosnia operation window has closed' };
+    if (turn < 150) return { green: true, reason: 'within calibrated advance-preparation window for spring Central Bosnia operation' };
     return { green: true, reason: 'within February 1995 planning / spring Central Bosnia operation window' };
 };
 

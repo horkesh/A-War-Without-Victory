@@ -908,7 +908,7 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
 
     it('does not surface before/after window, under broken alliance, lost staging, or no enemy-held objectives', () => {
         const cases = [
-            buildVlasicState({ turn: 149 }),
+            buildVlasicState({ turn: 145 }),
             buildVlasicState({ turn: 167 }),
             buildVlasicState({ turn: 156, alliance: 0.35 }),
             buildVlasicState({ turn: 156, stagingHeld: false }),
@@ -1118,5 +1118,67 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         // ...and the 2-turn window means the earliest execution turn is t154
         // (t152 start + 2 planning turns), matching the documented Domet-1 start.
         expect(op.phase_started_turn + (op.planning_duration ?? 0)).toBe(154);
+    });
+});
+
+describe('Vlašić advance preparation window 146..149', () => {
+    const EARLY_REASON = 'within calibrated advance-preparation window for spring Central Bosnia operation';
+    const CLOSED_BEFORE_REASON = 'February 1995 planning window for spring Central Bosnia operation not yet open';
+    const CLOSED_AFTER_REASON = 'spring 1995 Central Bosnia operation window has closed';
+    const STANDARD_REASON = 'within February 1995 planning / spring Central Bosnia operation window';
+
+    function dateWindowEvaluation(state: GameState, turn: number) {
+        return evaluateAxes(state, turn, VLASIC_RIDGE_95_OPPORTUNITY)
+            .find((axis) => axis.axis === 'date_window');
+    }
+
+    it('keeps 145 closed with the original pre-window reason and 167 closed', () => {
+        for (const [turn, reason] of [
+            [145, CLOSED_BEFORE_REASON],
+            [167, CLOSED_AFTER_REASON],
+        ] as const) {
+            const state = buildVlasicState({ turn });
+            const axes = evaluateAxes(state, turn, VLASIC_RIDGE_95_OPPORTUNITY);
+            expect(dateWindowEvaluation(state, turn)).toMatchObject({ green: false, reason });
+            expect(isOpportunityEligible(VLASIC_RIDGE_95_OPPORTUNITY, axes)).toBe(false);
+
+            runOpportunityEvaluationStep(state, turn);
+            expect((state.military.operation_opportunities ?? [])
+                .find(p => p.opportunity_id === 'vlasic_ridge_95')).toBeUndefined();
+        }
+    });
+
+    it('admits 146 and 149 early while preserving 150 and 166', () => {
+        for (const turn of [146, 149, 150, 166]) {
+            const state = buildVlasicState({ turn });
+            const axes = evaluateAxes(state, turn, VLASIC_RIDGE_95_OPPORTUNITY);
+            expect(isOpportunityEligible(VLASIC_RIDGE_95_OPPORTUNITY, axes)).toBe(true);
+            expect(dateWindowEvaluation(state, turn)).toMatchObject({
+                green: true,
+                reason: turn < 150 ? EARLY_REASON : STANDARD_REASON,
+            });
+
+            runOpportunityEvaluationStep(state, turn);
+            expect((state.military.operation_opportunities ?? [])
+                .find(p => p.opportunity_id === 'vlasic_ridge_95')).toMatchObject({
+                proposal_id: `OPP_${turn}_vlasic_ridge_95`,
+                status: 'eligible_pending_review',
+            });
+        }
+    });
+
+    it('does not admit 146 when alliance, staging, or enemy-objective gates fail', () => {
+        const cases = [
+            buildVlasicState({ turn: 146, alliance: 0.35 }),
+            buildVlasicState({ turn: 146, stagingHeld: false }),
+            buildVlasicState({ turn: 146, objectivesHeldByRs: false }),
+        ];
+
+        for (const state of cases) {
+            runOpportunityEvaluationStep(state, 146);
+            expect((state.military.operation_opportunities ?? [])
+                .find(p => p.opportunity_id === 'vlasic_ridge_95')).toBeUndefined();
+            expect(state.military.corps_command!.arbih_3rd_corps.active_operations).toHaveLength(0);
+        }
     });
 });
