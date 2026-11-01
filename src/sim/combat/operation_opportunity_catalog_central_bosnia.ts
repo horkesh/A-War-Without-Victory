@@ -41,7 +41,7 @@ const BEHAR_I_SUPPLY_PRESSURE_CEILING = 90;
 // renewed Borci-Glavaticevo line offensive on 23 September. BB2 printed
 // pp.495-497 / PDF pp.514-516 lists the 443rd (Suad Alic) and 450th light in
 // the Konjic OOB. Model assumptions, not source claims: preparation from turn
-// 127, allocation of exactly these two brigades, the Bijela then Glavaticevo
+// 127, allocation of these three brigades, the Bijela then Glavaticevo
 // OSID sequence, and Glavaticevo as regional coverage. Exact town-capture date
 // and exclusive participation are not proved.
 const KONJIC_PRIMARY_CORPS = 'arbih_4th_corps';
@@ -58,9 +58,15 @@ const KONJIC_AXES: readonly OpportunityAxisDef[] = [{
     axis_id: 'bijela_glavaticevo',
     name: 'Bijela-Glavaticevo Line',
     corps: KONJIC_PRIMARY_CORPS,
+    // Model allocation: the 443rd and 450th are the authored core. BBII printed
+    // pp.495-497 / PDF pp.514-516 states the 43rd and 49th were probably
+    // reinforced by corps-level reserves including at least the 4th Muslimski.
+    // This supports likely reinforcement, not proved exact brigade participation
+    // or an exclusive roster.
     brigades: [
         'arbih_443rd_mountain' as FormationId,
         'arbih_450th_light' as FormationId,
+        'arbih_4th_muslim_light' as FormationId,
     ],
     objectives: KONJIC_OBJECTIVES,
     staging_osid: KONJIC_STAGING,
@@ -989,8 +995,8 @@ export const KONJIC_SEPTEMBER_94_OPPORTUNITY: OperationOpportunityDef = {
     planning_duration: 2,
     citations: [
         'Balkan Battlegrounds I printed pp.239 / PDF pp.276 - 4th Corps main offensive 11-12 Sep 1994, Bijela occupied 15 Sep, renewed Borci-Glavaticevo line offensive 23 Sep',
-        'Balkan Battlegrounds II printed pp.495-497 / PDF pp.514-516 - 443rd (Suad Alic) and 450th light in the Konjic OOB',
-        'Model assumptions only: turn 127 preparation, the two-brigade allocation, the Bijela then Glavaticevo OSID sequence and Glavaticevo regional coverage are calibration choices; exact town-capture date and exclusive participation are not proved',
+        'Balkan Battlegrounds II printed pp.495-497 / PDF pp.514-516 - 443rd (Suad Alic) and 450th light in the Konjic OOB; the 43rd and 49th were probably reinforced by corps-level reserves including at least the 4th Muslimski (likely reinforcement, not proved exact brigade participation or an exclusive roster)',
+        'Model assumptions only: turn 127 preparation, the three-brigade allocation, the Bijela then Glavaticevo OSID sequence and Glavaticevo regional coverage are calibration choices; exact town-capture date and exclusive participation are not proved',
     ],
     historical_exit_class: 'partial_success',
     prerequisites: {

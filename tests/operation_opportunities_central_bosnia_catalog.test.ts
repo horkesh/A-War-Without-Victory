@@ -584,7 +584,7 @@ function buildKonjicState(opts: {
             morale: 75,
         },
     };
-    for (const id of ['arbih_443rd_mountain', 'arbih_450th_light']) {
+    for (const id of ['arbih_443rd_mountain', 'arbih_450th_light', 'arbih_4th_muslim_light']) {
         formations[id] = {
             id,
             name: id,
@@ -1248,7 +1248,7 @@ describe('Konjic September 94 opportunity', () => {
         expect(def.coordinated_advance).toBeUndefined();
         expect(def.axes).toEqual([expect.objectContaining({
             axis_id: 'bijela_glavaticevo',
-            brigades: ['arbih_443rd_mountain', 'arbih_450th_light'],
+            brigades: ['arbih_443rd_mountain', 'arbih_450th_light', 'arbih_4th_muslim_light'],
             objectives: ['op:konjic:bijela_2', 'op:konjic:glavaticevo_2'],
             staging_osid: 'op:konjic:konjic_2',
         })]);
@@ -1336,14 +1336,14 @@ describe('Konjic September 94 opportunity', () => {
             .find((entry) => entry.opportunity_id === 'konjic_september_94')).toBeUndefined();
     });
 
-    it('approves the exact two-unit operation without a preparation or attack override', () => {
+    it('approves the exact three-unit operation without a preparation or attack override', () => {
         const state = buildKonjicState({ turn: 127 });
         const def = konjicDef();
         runOpportunityEvaluationStep(state, 127);
 
         expect(preflightOpportunityAdmission(state, def, def.axes, 'standard', 127)).toEqual({
             admitted: true,
-            selected_participants: 2,
+            selected_participants: 3,
             required_participants: 2,
             reason: null,
         });
@@ -1361,17 +1361,79 @@ describe('Konjic September 94 opportunity', () => {
             name: 'Konjic September Offensive',
             planning_duration: 2,
             staging_osid: 'op:konjic:konjic_2',
-            participating_brigades: ['arbih_443rd_mountain', 'arbih_450th_light'],
+            participating_brigades: ['arbih_443rd_mountain', 'arbih_450th_light', 'arbih_4th_muslim_light'],
         });
         expect(op.axes).toHaveLength(1);
         expect(op.axes![0]).toMatchObject({
             axis_id: 'bijela_glavaticevo',
-            assigned_brigades: ['arbih_443rd_mountain', 'arbih_450th_light'],
+            assigned_brigades: ['arbih_443rd_mountain', 'arbih_450th_light', 'arbih_4th_muslim_light'],
             objectives: ['op:konjic:bijela_2', 'op:konjic:glavaticevo_2'],
         });
         expect(op.min_attack_outcome).toBeUndefined();
         expect(op.preparation_probe_delivery).toBeUndefined();
         expect(op.coordinated_advance).toBeUndefined();
+    });
+
+    it('keeps the normal minimum two when the third brigade is unavailable', () => {
+        const state = buildKonjicState({ turn: 127 });
+        delete state.military.formations!['arbih_4th_muslim_light'];
+        const def = konjicDef();
+        runOpportunityEvaluationStep(state, 127);
+
+        expect(preflightOpportunityAdmission(state, def, def.axes, 'standard', 127)).toEqual({
+            admitted: true,
+            selected_participants: 2,
+            required_participants: 2,
+            reason: null,
+        });
+        const approved = applyOpportunityDecision(
+            state,
+            127,
+            buildProposalId('konjic_september_94', 127),
+            'approve',
+        );
+        expect(approved?.status).toBe('approved');
+        const op = state.military.corps_command!.arbih_4th_corps.active_operations[0]!;
+        expect(op.participating_brigades).toEqual(['arbih_443rd_mountain', 'arbih_450th_light']);
+    });
+
+    it('keeps the normal minimum two and existing owner when the third brigade is legitimately committed', () => {
+        const state = buildKonjicState({ turn: 127 });
+        const cmd = state.military.corps_command!.arbih_4th_corps;
+        const existing = {
+            name: 'Existing Third Brigade Commitment',
+            type: 'sector_attack',
+            phase: 'execution',
+            started_turn: 125,
+            phase_started_turn: 126,
+            participating_brigades: ['arbih_4th_muslim_light'],
+            objectives: ['op:konjic:bijela_2'],
+            current_objective_index: 0,
+        } as (typeof cmd.active_operations)[number];
+        cmd.active_operations.push(existing);
+        const def = konjicDef();
+        runOpportunityEvaluationStep(state, 127);
+
+        expect(preflightOpportunityAdmission(state, def, def.axes, 'standard', 127)).toEqual({
+            admitted: true,
+            selected_participants: 2,
+            required_participants: 2,
+            reason: null,
+        });
+        const approved = applyOpportunityDecision(
+            state,
+            127,
+            buildProposalId('konjic_september_94', 127),
+            'approve',
+        );
+        expect(approved?.status).toBe('approved');
+        const op = cmd.active_operations.find(
+            (entry) => entry.name === 'Konjic September Offensive',
+        )!;
+        expect(op.participating_brigades).toEqual(['arbih_443rd_mountain', 'arbih_450th_light']);
+        expect(cmd.active_operations).toHaveLength(2);
+        expect(cmd.active_operations[0]).toBe(existing);
+        expect(existing.participating_brigades).toEqual(['arbih_4th_muslim_light']);
     });
 
     it('manual decline creates no operation or claim', () => {
@@ -1414,7 +1476,7 @@ describe('Konjic September 94 opportunity', () => {
             'approve',
         );
         expect(outcome.decision_applied).toBe(false);
-        expect(outcome.reason).toBeTruthy();
+        expect(outcome.reason).toBe('below_minimum_brigades (1/2)');
         expect(cmd.active_operations).toHaveLength(1);
         expect(cmd.active_operations[0]).toBe(existing);
         expect((state.military.operation_opportunities ?? [])
