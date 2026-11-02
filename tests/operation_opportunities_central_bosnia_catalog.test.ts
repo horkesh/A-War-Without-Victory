@@ -47,10 +47,11 @@ const VLASIC_OBJECTIVES = [
 const VLASIC_BRIGADES = [
     'arbih_17th_vitezka_mountain',
     'arbih_706th_muslim_mountain',
-    'arbih_712th_mountain',
     'arbih_727th_slavna',
+    'arbih_712th_mountain',
     'arbih_737th_muslim_light',
     'arbih_705th_slavna_mountain',
+    'arbih_7th_vitezka_muslim_liberation',
 ];
 
 const DONJI_VAKUF_STAGING_ANCHORS = [
@@ -899,6 +900,21 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
             'op:travnik:paklarevo',
             'op:travnik:gornje_krcevine',
         ]);
+    });
+
+    it('adds the 7th Vitezka Muslim Liberation Brigade to the authored ridge roster only', () => {
+        // BB I printed p.301: the 7th Muslimski joined the day after the opening
+        // 17th Krajina / 727th / General Staff Guards wave. Weekly model: an
+        // authored participation assumption, not exact next-day delivery.
+        const ridgeAxis = VLASIC_RIDGE_95_OPPORTUNITY.axes[0];
+        expect(ridgeAxis.brigades).toEqual(VLASIC_BRIGADES);
+        expect(ridgeAxis.brigades[0]).toBe('arbih_17th_vitezka_mountain');
+        expect(ridgeAxis.brigades.filter(id => id === 'arbih_7th_vitezka_muslim_liberation'))
+            .toHaveLength(1);
+
+        const probeAxis = VLASIC_RIDGE_95_OPPORTUNITY.variants
+            ?.find(v => v.variant_id === 'ridge_probe')?.axes[0];
+        expect(probeAxis?.brigades).not.toContain('arbih_7th_vitezka_muslim_liberation');
     });
 
     it('starts Donji Vakuf 95 on the live Travnik-Komar contact edge', () => {

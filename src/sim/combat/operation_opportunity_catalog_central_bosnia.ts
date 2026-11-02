@@ -232,6 +232,11 @@ const VLASIC_AXES: readonly OpportunityAxisDef[] = [
             'arbih_712th_mountain' as FormationId,
             'arbih_737th_muslim_light' as FormationId,
             'arbih_705th_slavna_mountain' as FormationId,
+            // BB I printed p.301: the 7th Muslimski joined on the day after the
+            // opening 17th Krajina / 727th / General Staff Guards wave. A weekly
+            // model can support this authored participation assumption, but it
+            // cannot claim exact next-day delivery or opening-wave membership.
+            'arbih_7th_vitezka_muslim_liberation' as FormationId,
         ],
         objectives: VLASIC_TRAVNIK_RIDGE_OBJECTIVES,
         staging_osid: STAGING_TURBE,

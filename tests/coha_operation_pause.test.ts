@@ -194,6 +194,64 @@ describe('COHA operation pause', () => {
         )).toBe(false);
     });
 
+    it('authenticates the 7th Vitezka Muslim Liberation Brigade in the 153..155 window only', () => {
+        const SEVENTH = 'arbih_7th_vitezka_muslim_liberation' as any;
+        for (const turn of [153, 154, 155]) {
+            const state = makeVlasicState(turn);
+            const op = state.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
+            op.participating_brigades = [...op.participating_brigades, SEVENTH];
+            op.axes![0]!.assigned_brigades = [...op.axes![0]!.assigned_brigades, SEVENTH];
+
+            expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', op)).toBe(true);
+            expect(isVlasicCohaExceptionAttackOrder(state, SEVENTH, 'op:travnik:paklarevo')).toBe(true);
+        }
+        for (const turn of [152, 156]) {
+            const state = makeVlasicState(turn);
+            const op = state.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
+            op.participating_brigades = [...op.participating_brigades, SEVENTH];
+            op.axes![0]!.assigned_brigades = [...op.axes![0]!.assigned_brigades, SEVENTH];
+
+            expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', op)).toBe(false);
+            expect(isVlasicCohaExceptionAttackOrder(state, SEVENTH, 'op:travnik:paklarevo')).toBe(false);
+        }
+    });
+
+    it('rejects unknown rosters, wrong corps/staging/target/name, and ambiguous 7th ownership', () => {
+        const SEVENTH = 'arbih_7th_vitezka_muslim_liberation' as any;
+        const authored = () => {
+            const state = makeVlasicState(154);
+            const op = state.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
+            op.participating_brigades = [...op.participating_brigades, SEVENTH];
+            op.axes![0]!.assigned_brigades = [...op.axes![0]!.assigned_brigades, SEVENTH];
+            return { state, op };
+        };
+
+        const mixed = authored();
+        mixed.op.participating_brigades = [...mixed.op.participating_brigades, 'arbih_unknown_brigade' as any];
+        expect(isVlasicCohaExceptionOperation(mixed.state, 'arbih_3rd_corps', mixed.op)).toBe(false);
+
+        const wrongCorps = authored();
+        expect(isVlasicCohaExceptionOperation(wrongCorps.state, 'arbih_7th_corps', wrongCorps.op)).toBe(false);
+
+        const wrongName = authored();
+        wrongName.op.name = 'Operation Vitez';
+        expect(isVlasicCohaExceptionOperation(wrongName.state, 'arbih_3rd_corps', wrongName.op)).toBe(false);
+
+        const wrongStaging = authored();
+        wrongStaging.op.staging_osid = 'op:travnik:turbe_2';
+        expect(isVlasicCohaExceptionOperation(wrongStaging.state, 'arbih_3rd_corps', wrongStaging.op)).toBe(false);
+
+        const wrongTarget = authored();
+        expect(isVlasicCohaExceptionAttackOrder(wrongTarget.state, SEVENTH, 'op:travnik:gornje_krcevine')).toBe(false);
+
+        const nonparticipant = makeVlasicState(154);
+        expect(isVlasicCohaExceptionAttackOrder(nonparticipant, SEVENTH, 'op:travnik:paklarevo')).toBe(false);
+
+        const ambiguous = authored();
+        ambiguous.state.military.corps_command!.arbih_3rd_corps!.active_operations.push(ambiguous.op);
+        expect(isVlasicCohaExceptionAttackOrder(ambiguous.state, SEVENTH, 'op:travnik:paklarevo')).toBe(false);
+    });
+
     it('advances the approved Vlašić operation while leaving its phase clock unshifted', () => {
         const state = makeVlasicState(154);
         const operation = state.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;

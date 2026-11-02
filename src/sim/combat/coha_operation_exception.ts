@@ -22,6 +22,10 @@ const VLASIC_AUTHORED_BRIGADES = new Set<FormationId>([
     'arbih_712th_mountain' as FormationId,
     'arbih_737th_muslim_light' as FormationId,
     'arbih_705th_slavna_mountain' as FormationId,
+    // BB I printed p.301: 7th Muslimski joined the day after the opening
+    // 17th Krajina / 727th / General Staff Guards wave. Authored weekly-model
+    // participation assumption only; not exact next-day delivery.
+    'arbih_7th_vitezka_muslim_liberation' as FormationId,
 ]);
 
 export function isVlasicCohaWindow(turn: number): boolean {
