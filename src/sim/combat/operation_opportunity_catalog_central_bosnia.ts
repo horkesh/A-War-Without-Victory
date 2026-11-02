@@ -827,6 +827,7 @@ export const VLASIC_RIDGE_95_OPPORTUNITY: OperationOpportunityDef = {
     // operation can begin executing by t154 (1995-03-20, the documented
     // Domet-1 start) instead of waiting out a 4-turn planning window.
     planning_duration: 2,
+    coordinated_advance: true,
     min_attack_outcome: 'repulsed',
     citations: [
         'docs/research/2026-05-01-late-war-operation-opportunity-research.md - Central Bosnia / Vlasic-Kupres family backlog',

@@ -529,7 +529,7 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
         expect(OPERATION_OPPORTUNITY_CATALOG
             .filter(def => def.coordinated_advance === true)
             .map(def => def.opportunity_id))
-            .toEqual(['konjic_september_94', 'mistral_2_95']);
+            .toEqual(['vlasic_ridge_95', 'konjic_september_94', 'mistral_2_95']);
 
         const cases = [
             { decision: 'approve' as const, expectedAxes: MISTRAL_2_95_OPPORTUNITY.axes },

@@ -1073,6 +1073,8 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         expect(approved?.status).toBe('approved');
         expect(approveState.military.corps_command!.arbih_3rd_corps.active_operations[0].name)
             .toBe('Operation Vlasic Ridge');
+        expect(approveState.military.corps_command!.arbih_3rd_corps.active_operations[0].coordinated_advance)
+            .toBe(true);
 
         const redirectState = buildVlasicState({ turn: 156 });
         runOpportunityEvaluationStep(redirectState, 156);
