@@ -525,11 +525,11 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
             .not.toContain('op:mrkonjic_grad:mrkonjic_grad_2');
     });
 
-    it('opts only Mistral 2 into coordinated advance through every real decision-to-factory path', () => {
+    it('inventories exactly the reviewed coordinated-advance opt-ins and covers Mistral 2 factory paths', () => {
         expect(OPERATION_OPPORTUNITY_CATALOG
             .filter(def => def.coordinated_advance === true)
             .map(def => def.opportunity_id))
-            .toEqual(['mistral_2_95']);
+            .toEqual(['konjic_september_94', 'mistral_2_95']);
 
         const cases = [
             { decision: 'approve' as const, expectedAxes: MISTRAL_2_95_OPPORTUNITY.axes },
