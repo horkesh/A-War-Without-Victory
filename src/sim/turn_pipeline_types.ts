@@ -132,6 +132,8 @@ export interface TurnInput {
     historicalCorpsLookup?: (faction: string, mun_id: string, ordinal: number) => string | null;
     /** When provided, emergent brigades retain the canonical OOB identity they already represent. */
     historicalOobIdLookup?: (faction: string, mun_id: string, ordinal: number) => string | null;
+    /** When provided, emergent brigades inherit the authored equipment class from the same matched OOB record. */
+    historicalEquipmentClassLookup?: (faction: string, mun_id: string, ordinal: number) => string | null;
     /** When provided, Peace phase wave flip uses ethnicity for holdout decisions (avoids 0/0 → all flips). */
     settlementDataRaw?: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }>;
     /** When provided, historical event definitions loaded from scenario JSON files. */

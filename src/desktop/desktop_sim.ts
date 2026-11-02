@@ -472,6 +472,7 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
                 historicalNameLookup: sharedTurnInputs.historicalNameLookup,
                 historicalCorpsLookup: sharedTurnInputs.historicalCorpsLookup,
                 historicalOobIdLookup: sharedTurnInputs.historicalOobIdLookup,
+                historicalEquipmentClassLookup: sharedTurnInputs.historicalEquipmentClassLookup,
                 eventDefinitions: loadDesktopEventDefinitions(baseDir),
             });
             assertTurnSuccess(result);

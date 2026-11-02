@@ -1510,6 +1510,7 @@ interface ScenarioStartupBuildResult {
     historicalNameLookup?: HistoricalOrdinalLookup;
     historicalCorpsLookup?: HistoricalOrdinalLookup;
     historicalOobIdLookup?: HistoricalOrdinalLookup;
+    historicalEquipmentClassLookup?: HistoricalOrdinalLookup;
     sidToMun: Map<string, string>;
     initOverrideChangeCount: number;
 }
@@ -1614,6 +1615,7 @@ export async function buildScenarioStartupState(
         historicalNameLookup,
         historicalCorpsLookup,
         historicalOobIdLookup,
+        historicalEquipmentClassLookup,
     } = sharedTurnInputs;
     let sidToMun = buildSidToMunFromSettlements(graph.settlements);
     let initOverrideChangeCount = 0;
@@ -2067,6 +2069,7 @@ export async function buildScenarioStartupState(
         historicalNameLookup,
         historicalCorpsLookup,
         historicalOobIdLookup,
+        historicalEquipmentClassLookup,
         sidToMun,
         initOverrideChangeCount
     };
@@ -2620,6 +2623,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             historicalNameLookup,
             historicalCorpsLookup,
             historicalOobIdLookup,
+            historicalEquipmentClassLookup,
             sidToMun,
             initOverrideChangeCount
         } = startup;
@@ -2970,6 +2974,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     historicalNameLookup,
                     historicalCorpsLookup,
                     historicalOobIdLookup,
+                    historicalEquipmentClassLookup,
                     eventDefinitions,
                     // LANE D-CONTENT (Path A): wire per-turn displacement event sink.
                     // Engine clear-displacement-event-log step calls this with the

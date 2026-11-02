@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import {
+    buildHistoricalOobLookups,
     DESKTOP_PRODUCTION_TURN_INPUT_REQUIREMENTS,
     EXPLICIT_MINIMAL_FIXTURE_TURN_INPUT_REQUIREMENTS,
     loadSharedTurnInputs,
@@ -47,8 +48,8 @@ async function seedValidInputs(population?: unknown): Promise<string> {
         }),
         writeJson(baseDir, 'data/source/oob_brigades.json', {
             brigades: [
-                { id: 'late-name', faction: 'RBiH', name: 'Zulu Brigade', home_mun: 'mun-a' },
-                { id: 'early-name', faction: 'RBiH', name: 'Alpha Brigade', home_mun: 'mun-a', corps: 'corps-a' },
+                { id: 'late-name', faction: 'RBiH', name: 'Zulu Brigade', home_mun: 'mun-a', default_equipment_class: 'mountain' },
+                { id: 'early-name', faction: 'RBiH', name: 'Alpha Brigade', home_mun: 'mun-a', corps: 'corps-a', default_equipment_class: 'motorized' },
             ],
         }),
         writeJson(baseDir, 'data/derived/municipality_hq_settlement.json', {
@@ -112,7 +113,10 @@ describe('shared validated turn input contract', () => {
         ]);
         expect(inputs.historicalNameLookup?.('RBiH', 'mun-a', 1)).toBe('Alpha Brigade');
         expect(inputs.historicalCorpsLookup?.('RBiH', 'mun-a', 1)).toBe('corps-a');
+        expect(inputs.historicalOobIdLookup?.('RBiH', 'mun-a', 1)).toBe('early-name');
         expect(inputs.historicalOobIdLookup?.('RBiH', 'mun-a', 2)).toBe('late-name');
+        expect(inputs.historicalEquipmentClassLookup?.('RBiH', 'mun-a', 1)).toBe('motorized');
+        expect(inputs.historicalEquipmentClassLookup?.('RBiH', 'mun-a', 2)).toBe('mountain');
         expect(sids).toEqual(before);
     });
 
@@ -298,6 +302,10 @@ describe('shared validated turn input contract', () => {
             expect(startup.historicalOobIdLookup?.(firstOob.faction, firstOob.home_mun, 1)).toBe(
                 desktop.historicalOobIdLookup?.(firstOob.faction, firstOob.home_mun, 1),
             );
+            expect(startup.historicalEquipmentClassLookup?.(firstOob.faction, firstOob.home_mun, 1)).toBe(
+                desktop.historicalEquipmentClassLookup?.(firstOob.faction, firstOob.home_mun, 1),
+            );
+            expect(startup.historicalEquipmentClassLookup?.(firstOob.faction, firstOob.home_mun, 1)).toBeDefined();
         },
         30_000,
     );
@@ -325,6 +333,34 @@ describe('shared validated turn input contract', () => {
         expect(startup.historicalNameLookup).toBeUndefined();
         expect(startup.historicalCorpsLookup).toBeUndefined();
         expect(startup.historicalOobIdLookup).toBeUndefined();
+        expect(startup.historicalEquipmentClassLookup).toBeUndefined();
         expect(startup.municipalityHqSettlement).toEqual({});
+    });
+
+    it('empty OOB omits every optional lookup, including equipment class', () => {
+        const lookups = buildHistoricalOobLookups([]);
+        expect(lookups).toEqual({
+            historicalNameLookup: undefined,
+            historicalCorpsLookup: undefined,
+            historicalOobIdLookup: undefined,
+            historicalEquipmentClassLookup: undefined,
+        });
+    });
+
+    it('actual validated catalog supplies equipment class from the same ordinal as identity', async () => {
+        const baseDir = await seedValidInputs();
+        const inputs = await prepareSharedTurnInputs({
+            baseDir,
+            sids: ['sid_a'],
+            requirements: DESKTOP_PRODUCTION_TURN_INPUT_REQUIREMENTS,
+        });
+        for (const ordinal of [1, 2]) {
+            const id = inputs.historicalOobIdLookup?.('RBiH', 'mun-a', ordinal);
+            const name = inputs.historicalNameLookup?.('RBiH', 'mun-a', ordinal);
+            const equipmentClass = inputs.historicalEquipmentClassLookup?.('RBiH', 'mun-a', ordinal);
+            expect(id).toMatch(ordinal === 1 ? /^early-name$/ : /^late-name$/);
+            expect(name).toMatch(ordinal === 1 ? /^Alpha Brigade$/ : /^Zulu Brigade$/);
+            expect(equipmentClass).toBe(ordinal === 1 ? 'motorized' : 'mountain');
+        }
     });
 });

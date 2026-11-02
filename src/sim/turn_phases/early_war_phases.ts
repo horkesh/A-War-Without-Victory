@@ -164,6 +164,7 @@ export const earlyWarPhases: NamedPhase[] = [
                 historicalNameLookup: context.input.historicalNameLookup ?? undefined,
                 historicalCorpsLookup: context.input.historicalCorpsLookup ?? undefined,
                 historicalOobIdLookup: context.input.historicalOobIdLookup ?? undefined,
+                historicalEquipmentClassLookup: context.input.historicalEquipmentClassLookup ?? undefined,
                 population1991ByMun: context.input.municipalityPopulation1991 ?? undefined,
                 canonicalToOperational
             }, getSiegeStateCache(context)?.siegeRatios);

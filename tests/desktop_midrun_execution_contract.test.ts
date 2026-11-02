@@ -105,7 +105,17 @@ it('actual adapters and a fresh-process canonical reload agree at the full bound
   turnSpy.mockRestore();
   const inputDifferences=Object.keys({...actualInputs[0],...actualInputs[1]}).filter(k=>!isDeepStrictEqual((actualInputs[0] as any)[k],(actualInputs[1] as any)[k]));
   expect(actualInputs).toHaveLength(3);
-  expect(inputDifferences.sort()).toEqual(['historicalNameLookup','historicalCorpsLookup','historicalOobIdLookup','displacementEventStreamSink'].sort());
+  expect(inputDifferences.sort()).toEqual(['historicalNameLookup','historicalCorpsLookup','historicalOobIdLookup','historicalEquipmentClassLookup','displacementEventStreamSink'].sort());
+  for(const input of actualInputs){
+   expect(input.historicalEquipmentClassLookup).toBeDefined();
+   expect(input.historicalOobIdLookup).toBeDefined();
+   expect(input.historicalEquipmentClassLookup!('RS','sokolac',1)).toBe('motorized');
+   expect(input.historicalOobIdLookup!('RS','sokolac',1)).toBe('rs_2nd_romanija_brigade');
+   expect(input.historicalEquipmentClassLookup!('RS','ilijas',1)).toBe('light_infantry');
+   expect(input.historicalOobIdLookup!('RS','ilijas',1)).toBe('rs_ilijas_brigade');
+   expect(input.historicalEquipmentClassLookup!('RS','ZZZ_NOT_A_REAL_MUN_1990',1)).toBeNull();
+   expect(input.historicalOobIdLookup!('RS','ZZZ_NOT_A_REAL_MUN_1990',1)).toBeNull();
+  }
   const compare=async(name:string,a:unknown,b:unknown)=>{
    const same=isDeepStrictEqual(a,b);
    if(!same){await writeFile(join(dir,name+'-left.txt'),inspect(a,{depth:null,sorted:true,maxArrayLength:null,maxStringLength:null}));await writeFile(join(dir,name+'-right.txt'),inspect(b,{depth:null,sorted:true,maxArrayLength:null,maxStringLength:null}));}
