@@ -1040,6 +1040,26 @@ function hasPlayerHistoricalOperationAssistWork(state: GameState): boolean {
 // War-phase step array
 // ---------------------------------------------------------------------------
 
+/**
+ * Rebuild the transient home-distance cache from the current pre-combat
+ * adjacency and the current formation placements. EngineInvariant 13.1 treats
+ * the cache as derived state: segment ratings, movement/spawn/lifecycle and
+ * preparation all run between the end-of-turn rebuild and the next consumer,
+ * so every consumer refreshes it immediately before reading.
+ */
+function refreshHomeDistanceCache(context: TurnContext): void {
+    if (context.state.meta.phase !== 'war') return;
+    const spatial = getSpatialContextCache(context);
+    if (!spatial) return;
+    const adjacency = spatial.preCombat.adjacency as Map<Osid, Osid[]>;
+    const sortedIds = Object.keys(context.state.military.formations ?? {}).sort(strictCompare);
+    context.state.military.home_distance_cache = buildHomeDistanceCache(
+        context.state.military.formations ?? {},
+        adjacency,
+        sortedIds,
+    );
+}
+
 export const warPhases: NamedPhase[] = [
     {
         name: 'initialize',
@@ -1746,6 +1766,7 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             if (!context.state.military.corps_front_sectors) return;
             const supplyByOsid = context.report?.supply_resolution?.supply_state_by_osid ?? null;
+            refreshHomeDistanceCache(context);
             const ratingReport = computeSectorCombatRatings(context.state, supplyByOsid);
             if (ratingReport.sectors_rated > 0) {
                 context.report.sector_combat_ratings = ratingReport;
@@ -1931,6 +1952,7 @@ export const warPhases: NamedPhase[] = [
                         : undefined,
                 };
             }
+            refreshHomeDistanceCache(context);
             const prepEvents = advanceSectorOffensives(
                 context.state,
                 supplyByOsid,
@@ -2150,12 +2172,7 @@ export const warPhases: NamedPhase[] = [
     {
         name: 'compute-home-distance-cache',
         run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const spatial = getSpatialContextCache(context);
-            if (!spatial) return;
-            const adjacency = spatial.preCombat.adjacency as Map<Osid, Osid[]>;
-            const sortedIds = Object.keys(context.state.military.formations ?? {}).sort(strictCompare);
-            context.state.military.home_distance_cache = buildHomeDistanceCache(context.state.military.formations ?? {}, adjacency, sortedIds);
+            refreshHomeDistanceCache(context);
         }
     },
     {

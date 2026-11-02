@@ -6301,3 +6301,9 @@ A valid canonical z-index token can still be the wrong tier for a component. Che
 
 ## 2026-10-30 - Audit semantic palettes at their actual surface
 Small outcome badges can fail contrast even when unrelated canonical palette tokens pass. Import the real semantic palette, pin all keys and check both actual dark backgrounds; do not fix a rendered failure by weakening the native readability guard. Existing audited good/danger colors can repair presentation without altering outcome classifications or simulation. See [dated repair](PROJECT_LEDGER.md#2026-10-30---readable-native-army-hq-outcome-badges).
+
+## 2026-11-02 - Rebuild transient home-distance state before its consumers
+
+Canonical saves deliberately exclude home_distance_cache. Rebuild it from current formation placements and the existing deterministic graph before sector combat ratings and again before operation preparation: intervening movement, spawn and lifecycle steps can invalidate an earlier value. Retain the existing later refresh for subsequent combat consumers. Do not persist the cache or normalize away forecast differences to claim save/load parity; prove absent/stale-cache equivalence through actual consumers and retain the original failing state/report. See [home-distance cache repair](PROJECT_LEDGER.md#2026-11-02---home-distance-preparation-cache-ordering-repair).
+
+This records the existing derived-state invariant and the proved first-consumer timing pitfall, not new combat math or a numeric acceptance change. Baseline preservation and native requalification remain measured gates.
