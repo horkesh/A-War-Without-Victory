@@ -5670,12 +5670,10 @@
         "unstaffed_front": true
       },
       "sector:arbih_3rd_corps:8": {
-        "assigned_brigade_ids": [
-          "arbih_706th_muslim_mountain"
-        ],
+        "assigned_brigade_ids": [],
         "corps_id": "arbih_3rd_corps",
-        "defensive_power": 20.064000000000004,
-        "density": 0.25,
+        "defensive_power": 0,
+        "density": 0,
         "edge_ids": [
           "op:donji_vakuf:komar_2__op:travnik:gornje_krcevine",
           "op:jajce:grdovo__op:travnik:gornje_krcevine",
@@ -5717,17 +5715,19 @@
         "territory_osids": [
           "op:travnik:gornje_krcevine"
         ],
-        "threat_ratio": 99.68102073365229
+        "threat_ratio": 9999,
+        "unstaffed_front": true
       },
       "sector:arbih_3rd_corps:9": {
         "assigned_brigade_ids": [
           "arbih_17th_vitezka_mountain",
+          "arbih_706th_muslim_mountain",
           "arbih_712th_mountain",
           "arbih_737th_muslim_light"
         ],
         "corps_id": "arbih_3rd_corps",
-        "defensive_power": 25.280640000000002,
-        "density": 0.3,
+        "defensive_power": 36.91776,
+        "density": 0.4,
         "edge_ids": [
           "op:donji_vakuf:komar_2__op:travnik:turbe_2",
           "op:kotor_varos:krusevo_brdo_i__op:travnik:gluha_bukovica",
@@ -5797,7 +5797,7 @@
           "op:zenica:serici_2",
           "op:zenica:stranjani_2"
         ],
-        "threat_ratio": 118.66788182577656
+        "threat_ratio": 81.26170168504264
       },
       "sector:arbih_4th_corps:0": {
         "assigned_brigade_ids": [
@@ -8854,7 +8854,7 @@
           "op:travnik:paklarevo",
           "op:travnik:varosluk"
         ],
-        "threat_ratio": 8.955223880597016
+        "threat_ratio": 0
       },
       "sector:vrs_1st_krajina:21": {
         "assigned_brigade_ids": [
@@ -9142,7 +9142,7 @@
           "op:travnik:paklarevo",
           "op:travnik:varosluk"
         ],
-        "threat_ratio": 120.25338424158278
+        "threat_ratio": 141.7621196343862
       },
       "sector:vrs_1st_krajina:25": {
         "assigned_brigade_ids": [
@@ -17822,7 +17822,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:arbih_3rd_corps:8"
+          "sector_id": "sector:arbih_3rd_corps:9"
         },
         "cohesion": 38,
         "composition": {
@@ -17866,11 +17866,11 @@
         },
         "faction": "RBiH",
         "force_label": "ARBiH",
-        "home_osid": "op:travnik:gornje_krcevine",
+        "home_osid": "op:travnik:travnik_2",
         "hq_sid": "op:travnik:cukle_2",
         "id": "arbih_706th_muslim_mountain",
         "kind": "brigade",
-        "location_osid": "op:travnik:gornje_krcevine",
+        "location_osid": "op:travnik:travnik_2",
         "max_personnel": 1800,
         "morale": 60,
         "name": "706th Muslim Mountain",

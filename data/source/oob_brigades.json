@@ -1295,7 +1295,7 @@
     "corps": "arbih_3rd_corps",
     "home_mun": "travnik",
     "home_settlement": "Travnik",
-    "home_osid": "op:travnik:gornje_krcevine",
+    "home_osid": "op:travnik:travnik_2",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
     "available_from": 0,

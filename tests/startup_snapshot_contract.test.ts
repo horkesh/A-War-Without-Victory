@@ -538,3 +538,32 @@ test('startup snapshot validator reports the committed artifact as current', asy
     const result = await validateStartupSnapshot(process.cwd(), 'apr_1992');
     assert.strictEqual(result.matches, true);
 }, 120_000);
+
+test('desktop new campaign materializes the 706th at its Travnik-city opening placement', async () => {
+    const { state } = await startNewCampaign(
+        process.cwd(),
+        'RS',
+        'apr_1992',
+        'historical',
+        { observerParity: true },
+    );
+    const formation = state.military.formations['arbih_706th_muslim_mountain'];
+
+    assert.ok(formation, '706th Muslim Mountain must exist in the actual startup state');
+    assert.strictEqual(formation.status, 'active');
+    assert.strictEqual(formation.kind, 'brigade');
+    assert.strictEqual(formation.corps_id, 'arbih_3rd_corps');
+    assert.strictEqual(formation.location_osid, 'op:travnik:travnik_2');
+    assert.strictEqual(formation.home_osid, 'op:travnik:travnik_2');
+    assert.strictEqual(formation.personnel, 440);
+    assert.strictEqual(formation.cohesion, 38);
+    assert.strictEqual(state.meta.player_faction, undefined);
+    assert.strictEqual(
+        state.political.initial_political_controllers?.['op:travnik:gornje_krcevine'],
+        'RBiH',
+    );
+    assert.strictEqual(
+        state.political.initial_political_controllers?.['op:travnik:travnik_2'],
+        'RBiH',
+    );
+}, 120_000);
