@@ -26,6 +26,9 @@ const VLASIC_AUTHORED_BRIGADES = new Set<FormationId>([
     // 17th Krajina / 727th / General Staff Guards wave. Authored weekly-model
     // participation assumption only; not exact next-day delivery.
     'arbih_7th_vitezka_muslim_liberation' as FormationId,
+    // BB I printed p.301 names the General Staff Guards in the opening wave.
+    // Closed authored identity only; no roster-derived eligibility.
+    'arbih_guards_brigade' as FormationId,
 ]);
 
 export function isVlasicCohaWindow(turn: number): boolean {

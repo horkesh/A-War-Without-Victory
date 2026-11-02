@@ -237,6 +237,10 @@ const VLASIC_AXES: readonly OpportunityAxisDef[] = [
             // model can support this authored participation assumption, but it
             // cannot claim exact next-day delivery or opening-wave membership.
             'arbih_7th_vitezka_muslim_liberation' as FormationId,
+            // BB I printed p.301 names a General Staff Guards formation in the
+            // opening 17th Krajina / 727th wave. Authored roster identity only;
+            // exact delivery and pursuit remain calibration assumptions.
+            'arbih_guards_brigade' as FormationId,
         ],
         objectives: VLASIC_TRAVNIK_RIDGE_OBJECTIVES,
         staging_osid: STAGING_TURBE,

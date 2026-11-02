@@ -216,6 +216,28 @@ describe('COHA operation pause', () => {
         }
     });
 
+    it('authenticates the Guards Brigade in the exact authored operation only within 153..155', () => {
+        const GUARDS = 'arbih_guards_brigade' as any;
+        for (const turn of [153, 154, 155]) {
+            const state = makeVlasicState(turn);
+            const op = state.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
+            op.participating_brigades = [...op.participating_brigades, GUARDS];
+            op.axes![0]!.assigned_brigades = [...op.axes![0]!.assigned_brigades, GUARDS];
+
+            expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', op)).toBe(true);
+            expect(isVlasicCohaExceptionAttackOrder(state, GUARDS, 'op:travnik:paklarevo')).toBe(true);
+        }
+        for (const turn of [152, 156]) {
+            const state = makeVlasicState(turn);
+            const op = state.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
+            op.participating_brigades = [...op.participating_brigades, GUARDS];
+            op.axes![0]!.assigned_brigades = [...op.axes![0]!.assigned_brigades, GUARDS];
+
+            expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', op)).toBe(false);
+            expect(isVlasicCohaExceptionAttackOrder(state, GUARDS, 'op:travnik:paklarevo')).toBe(false);
+        }
+    });
+
     it('rejects unknown rosters, wrong corps/staging/target/name, and ambiguous 7th ownership', () => {
         const SEVENTH = 'arbih_7th_vitezka_muslim_liberation' as any;
         const authored = () => {

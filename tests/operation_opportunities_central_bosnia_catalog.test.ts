@@ -44,6 +44,8 @@ const VLASIC_OBJECTIVES = [
     'op:travnik:gornje_krcevine',
 ];
 
+const GUARDS = 'arbih_guards_brigade';
+
 const VLASIC_BRIGADES = [
     'arbih_17th_vitezka_mountain',
     'arbih_706th_muslim_mountain',
@@ -52,6 +54,7 @@ const VLASIC_BRIGADES = [
     'arbih_737th_muslim_light',
     'arbih_705th_slavna_mountain',
     'arbih_7th_vitezka_muslim_liberation',
+    GUARDS,
 ];
 
 const DONJI_VAKUF_STAGING_ANCHORS = [
@@ -352,6 +355,48 @@ function buildVlasicState(opts: {
         } as unknown as GameState['political'],
         displacement: {} as GameState['displacement'],
     } as unknown as GameState;
+}
+
+function applyGuardsHostLoan(
+    state: GameState,
+    opts: { loanedTo?: string; disrupted?: boolean } = {},
+): void {
+    const guard = state.military.formations![GUARDS] as {
+        corps_id?: string;
+        personnel?: number;
+        strength?: number;
+        cohesion?: number;
+        morale?: number;
+        location_osid?: string;
+        disrupted_turns?: number;
+        elite_loan_state?: Record<string, unknown>;
+    };
+    guard.corps_id = 'arbih_general_staff';
+    guard.personnel = 1200;
+    guard.strength = 1200;
+    guard.cohesion = 62.03;
+    guard.morale = 95;
+    guard.location_osid = 'op:travnik:turbe_2';
+    guard.disrupted_turns = opts.disrupted ? 1 : 0;
+    guard.elite_loan_state = {
+        on_loan: true,
+        loaned_to_corps: opts.loanedTo ?? 'arbih_3rd_corps',
+        loan_start_turn: 22,
+        last_recall_turn: null,
+        loan_start_personnel: 1200,
+        permanently_degraded: false,
+        current_episode_id: 0,
+    };
+}
+
+function buildGuardsLoanState(opts: {
+    turn?: number;
+    loanedTo?: string;
+    disrupted?: boolean;
+} = {}): GameState {
+    const state = buildVlasicState({ turn: opts.turn ?? 154 });
+    applyGuardsHostLoan(state, opts);
+    return state;
 }
 
 function buildDonjiVakufState(opts: {
@@ -915,6 +960,146 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         const probeAxis = VLASIC_RIDGE_95_OPPORTUNITY.variants
             ?.find(v => v.variant_id === 'ridge_probe')?.axes[0];
         expect(probeAxis?.brigades).not.toContain('arbih_7th_vitezka_muslim_liberation');
+    });
+
+    it('appends the Guards Brigade to the 17th-led authored ridge roster only', () => {
+        const ridgeAxis = VLASIC_RIDGE_95_OPPORTUNITY.axes[0];
+        expect(ridgeAxis.brigades).toEqual(VLASIC_BRIGADES);
+        expect(ridgeAxis.brigades).toHaveLength(8);
+        expect(ridgeAxis.brigades[0]).toBe('arbih_17th_vitezka_mountain');
+        expect(ridgeAxis.brigades.slice(0, 7)).toEqual([
+            'arbih_17th_vitezka_mountain',
+            'arbih_706th_muslim_mountain',
+            'arbih_727th_slavna',
+            'arbih_712th_mountain',
+            'arbih_737th_muslim_light',
+            'arbih_705th_slavna_mountain',
+            'arbih_7th_vitezka_muslim_liberation',
+        ]);
+        expect(ridgeAxis.brigades.filter(id => id === GUARDS)).toHaveLength(1);
+        expect(ridgeAxis.brigades[7]).toBe(GUARDS);
+
+        const probeAxis = VLASIC_RIDGE_95_OPPORTUNITY.variants
+            ?.find(v => v.variant_id === 'ridge_probe')?.axes[0];
+        expect(probeAxis?.brigades).not.toContain(GUARDS);
+    });
+
+    it('admits the Guards through the existing same-host loan and preserves the loan state', () => {
+        const state = buildGuardsLoanState();
+        const before = structuredClone(state.military.formations![GUARDS]!.elite_loan_state);
+        runOpportunityEvaluationStep(state, 154);
+        const def = VLASIC_RIDGE_95_OPPORTUNITY;
+
+        expect(preflightOpportunityAdmission(state, def, def.axes, 'standard', 154)).toEqual({
+            admitted: true,
+            selected_participants: 8,
+            required_participants: 2,
+            reason: null,
+        });
+
+        const outcome = applyOpportunityDecisionDetailed(
+            state,
+            154,
+            buildProposalId('vlasic_ridge_95', 154),
+            'approve',
+        );
+        expect(outcome.decision_applied).toBe(true);
+        const operation = state.military.corps_command!.arbih_3rd_corps.active_operations[0]!;
+        expect(operation.participating_brigades).toHaveLength(8);
+        expect(operation.participating_brigades).toContain(GUARDS);
+        expect(before).toMatchObject({
+            on_loan: true,
+            loaned_to_corps: 'arbih_3rd_corps',
+            loan_start_turn: 22,
+            current_episode_id: 0,
+            permanently_degraded: false,
+        });
+        expect(state.military.formations![GUARDS]!.elite_loan_state).toEqual(before);
+    });
+
+    it('rejects a Guards other-host loan, live commitment, or disruption without stealing it', () => {
+        const control = buildGuardsLoanState();
+        expect(preflightOpportunityAdmission(
+            control,
+            VLASIC_RIDGE_95_OPPORTUNITY,
+            VLASIC_RIDGE_95_OPPORTUNITY.axes,
+            'standard',
+            154,
+        )).toMatchObject({ admitted: true, selected_participants: 8 });
+
+        const committed = buildGuardsLoanState();
+        const command = committed.military.corps_command!.arbih_3rd_corps;
+        const existingOperation = {
+            name: 'Existing Guards Commitment',
+            type: 'sector_attack',
+            phase: 'execution',
+            started_turn: 150,
+            phase_started_turn: 151,
+            participating_brigades: [GUARDS],
+            objectives: ['op:travnik:gornje_krcevine'],
+            current_objective_index: 0,
+        } as (typeof command.active_operations)[number];
+        command.active_operations.push(existingOperation);
+
+        for (const state of [
+            buildGuardsLoanState({ loanedTo: 'arbih_7th_corps' }),
+            committed,
+            buildGuardsLoanState({ disrupted: true }),
+        ]) {
+            runOpportunityEvaluationStep(state, 154);
+            expect(preflightOpportunityAdmission(
+                state,
+                VLASIC_RIDGE_95_OPPORTUNITY,
+                VLASIC_RIDGE_95_OPPORTUNITY.axes,
+                'standard',
+                154,
+            )).toMatchObject({ admitted: true, selected_participants: 7 });
+
+            const outcome = applyOpportunityDecisionDetailed(
+                state,
+                154,
+                buildProposalId('vlasic_ridge_95', 154),
+                'approve',
+            );
+            expect(outcome.decision_applied).toBe(true);
+            const operations = state.military.corps_command!.arbih_3rd_corps.active_operations;
+            const spawned = operations.find(operation => operation.name === 'Operation Vlasic Ridge')!;
+            expect(spawned.participating_brigades).toHaveLength(7);
+            expect(spawned.participating_brigades).not.toContain(GUARDS);
+            expect(spawned.participating_brigades).toContain('arbih_17th_vitezka_mountain');
+        }
+
+        expect(command.active_operations[0]).toBe(existingOperation);
+        expect(existingOperation.participating_brigades).toEqual([GUARDS]);
+    });
+
+    it('derives a four-brigade minimum from the eight-ID roster through the real factory', () => {
+        const state = buildVlasicState({ turn: 154 });
+        const def = VLASIC_RIDGE_95_OPPORTUNITY;
+
+        expect(preflightOpportunityAdmission(state, def, def.axes, 'minimum', 154)).toEqual({
+            admitted: true,
+            selected_participants: 4,
+            required_participants: 2,
+            reason: null,
+        });
+
+        runOpportunityEvaluationStep(state, 154);
+        const outcome = applyOpportunityDecisionDetailed(
+            state,
+            154,
+            buildProposalId('vlasic_ridge_95', 154),
+            'under_resource',
+        );
+        expect(outcome.decision_applied).toBe(true);
+        const operation = state.military.corps_command!.arbih_3rd_corps.active_operations[0]!;
+        expect(operation.participating_brigades).toHaveLength(4);
+        expect(new Set(operation.participating_brigades)).toEqual(new Set([
+            'arbih_17th_vitezka_mountain',
+            'arbih_706th_muslim_mountain',
+            'arbih_727th_slavna',
+            'arbih_712th_mountain',
+        ]));
     });
 
     it('starts Donji Vakuf 95 on the live Travnik-Komar contact edge', () => {
