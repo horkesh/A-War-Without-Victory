@@ -1,0 +1,116 @@
+{
+  "schema": "awwv.qualified-live-calibration-publication.v1",
+  "prepared_utc": "2026-11-03T06:25:39.415202+00:00",
+  "artifact": {
+    "name": "control_timeline_qualified_brka_188.html",
+    "bytes": 726362,
+    "sha256": "504c2704d849c35c450d8e0b5d8f5749db10024a417095db1f087c6c52598e68"
+  },
+  "calibration_authority": "Actual desktop advanceTurn live-game path, all-AI observer, plus exact normal-UI boundary parity. No old headless master-scenario gate or baseline operation injection.",
+  "baseline_commit": "64e616e0b696dc3dafebb02028a745af33711f5c",
+  "source_binding_sha256": "ccc5d2dbb32203b96e57f878b896f9c47213f9bb8a12be1f62d0c6913aac6040",
+  "bundle_sha256": "81cdb13514b35919cd9b588a2eb53b415224a9a466fdc238e7e8692b6dee67c4",
+  "source_identity": "Reviewed uncommitted gameplay source:117-file manifest,nine reviewed deltas,one pinned untracked test; HEAD alone is not the candidate identity. Two unrelated documents recorded separately.",
+  "qualified_receipt_sha256": "82283ead9eb6df7990ddcd783814b7ff4dcc2dcbbba285134e4b6ab1e1da8f40",
+  "cold188_audit_sha256": "ded6699d977d27b9443b803dc89ee07ffe6658ed7c063c29cb15759f8dbcb020",
+  "save_sha256": "ec6d3e4ada8d32963aa50415c10dc86039e6fbe09158ef084b6523e6eb08a9fd",
+  "completed_week": 188,
+  "events": 262,
+  "initial_scored_cells": 712,
+  "rendered_polygons": 744,
+  "all188_replay_maps_exact_actual_runtime": true,
+  "four_checkpoint_full_controller_maps_exact": true,
+  "original_scores": [
+    709,
+    709,
+    708,
+    692
+  ],
+  "current_reference_scores": [
+    709,
+    708,
+    709,
+    692
+  ],
+  "reference_correction": "Owner-approved Brka aggregate: April1994rev6 expectsRS; April1995rev9 expectsRBiH. This is reference-only rescoring of unchanged simulated controls, not a gameplay gain.",
+  "references": [
+    {
+      "week": 39,
+      "reference_revision": 7,
+      "reference_sha256": "6a64300a599aa0b75833d5232bf9f08a1ab97085746337e622d54fb1a4a0ddc7",
+      "matched": 709,
+      "brka": {
+        "simulated": "RBiH",
+        "painted": "RBiH"
+      }
+    },
+    {
+      "week": 104,
+      "reference_revision": 6,
+      "reference_sha256": "846996a596aaa42c749a021ac4481d433f0480a40071321b3379f802adf764f9",
+      "matched": 708,
+      "brka": {
+        "simulated": "RBiH",
+        "painted": "RS"
+      }
+    },
+    {
+      "week": 156,
+      "reference_revision": 9,
+      "reference_sha256": "8b0f3dbcc29c9c035f2eb5c661dc3bda26487a4c616c528db60598106b4891e9",
+      "matched": 709,
+      "brka": {
+        "simulated": "RBiH",
+        "painted": "RBiH"
+      }
+    },
+    {
+      "week": 188,
+      "reference_revision": 7,
+      "reference_sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b",
+      "matched": 692,
+      "brka": {
+        "simulated": "RBiH",
+        "painted": "RS"
+      }
+    }
+  ],
+  "anchors": [
+    31,
+    32,
+    40,
+    31
+  ],
+  "health156": [
+    0,
+    0,
+    0,
+    3,
+    0
+  ],
+  "health188": [
+    0,
+    0,
+    0,
+    1,
+    0
+  ],
+  "scope_limits": [
+    "Ambience-disabled gameplay only; old audio-enabled failures remain failed.",
+    "Resource checks cover the observed listener-attached window; no uncaptured startup or gap-free audio claim.",
+    "No fresh selected-player full188 campaign claim; earlier mixed-package receipts remain separate.",
+    "October692 differs from older calendar693 by3 controls; attribution to classifier versus roster is unproven. No October equivalence claim.",
+    "Original source-binding PENDING metadata is preserved; this new assessment does not rewrite old receipts.",
+    "No adoption, publication, push or spatial/reference change."
+  ],
+  "qualification_scope": "Reviewed current-source tests/type/lint, exact live-desktop observer156/188 cold pairs and the five normal-UI admission/execution boundary advances, under explicit scope limits.",
+  "ambience_disabled": true,
+  "adopted": false,
+  "game_source_published": false,
+  "publication_branch_only": "gh-pages",
+  "base_remote_commit": "bae95d9f5aff9b3917ae9ba7be5717871c60b447",
+  "historical_capture_pending_labels_preserved": true,
+  "strict_generation_preflight_sha256": "e32b80459ffd0ba05343a5aeb225d3037dbe19ca835245052c02016cd4eafe15",
+  "generator_sha256": "481f3a9c09fefab8a989e7f1387e203a33e5956e78f11476970a43eb07650c09",
+  "provenance_contract_sha256": "c76f2c45dc318b942ae907d99029d40151aa71c8caed03ced80442c4dabe17f9"
+}

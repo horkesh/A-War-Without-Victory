@@ -1,3 +1,15 @@
+## Current published measured snapshot — 2026-11-03
+
+[Open the current measured, UNQUALIFIED weekly timeline 0–188](control_timeline_measured_health699_188.html). Source baseline `64e616e0b696dc3dafebb02028a745af33711f5c`; source binding `361427763e79dde27d53dab365fc7446af92f0608bd51d9810154d1412f271f2`; bundle `29196c4ee877ad40c09fe312628c20b27b474c0d7e86da07349efa4832e08915`. This is HEAD plus the 135-file manifest, 34 reviewed deltas, 6 untracked tests and 2 non-game documents — not a clean commit.
+
+Repeat-verified cold pair: all 188 digest equivalents and 85 nonclock artifacts; scores 708/707/707/699 vs prior 709/708/709/692 at weeks 39/104/156/188. Reference revisions remain 7/6/9/7; no repaint. All five final health metrics are 0 and the anchors pass.
+
+Current game includes stranded health fixes, Gubin sequencing and the late503 allocation. Causation of earlier losses is not fully established. Exact changed early cells versus the prior publication: January 1993 Donje Žešće moves RBiH→RS against painted RBiH; April 1994 Kreševo moves HRHB→RBiH against painted HRHB; April 1995 Kreševo moves HRHB→RBiH, Kupres and Novo Selo move HRHB→RS (all painted HRHB), and Gornje Krčevine moves RS→RBiH (painted RBiH). Net October 1995 is +7 versus the prior publication, but this snapshot is not qualified.
+
+Known Farz timing defect: first combat at 169 (26 June–2 July), not the historical 10 September; the fix is not in this published snapshot. The full suite terminated FAIL with one genuine stale fixed-route enumeration expectation (the new 503rd axis is absent from the expected list); native boundaries and the offline package remain pending.
+
+No adoption, no selected-player 188 equivalence, and no gap-free audio claim. This is ambience-disabled observer evidence only; old audio-enabled FAILs remain FAILED. [Previous published 709/708/709/692](control_timeline_qualified_brka_188.html) remains available with earlier regressions retained. No source or raw save is uploaded. The previous provenance archive `PUBLICATION-PROVENANCE-previous-qualified-brka-188.json` is retained.
+
 ## Current publication - 2026-11-03
 
 [Open the current qualified observer timeline](control_timeline_qualified_brka_188.html). Source baseline 64e616e0b696dc3dafebb02028a745af33711f5c; exact source binding ccc5d2dbb32203b96e57f878b896f9c47213f9bb8a12be1f62d0c6913aac6040; bundle 81cdb13514b35919cd9b588a2eb53b415224a9a466fdc238e7e8692b6dee67c4.
