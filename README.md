@@ -1,3 +1,10 @@
+## Current publication - 2026-11-03
+
+[Open the current qualified observer timeline](control_timeline_qualified_brka_188.html). Source baseline 64e616e0b696dc3dafebb02028a745af33711f5c; exact source binding ccc5d2dbb32203b96e57f878b896f9c47213f9bb8a12be1f62d0c6913aac6040; bundle 81cdb13514b35919cd9b588a2eb53b415224a9a466fdc238e7e8692b6dee67c4.
+
+This is one coherent 262-event / 712-cell saved history replayed weekly from 0 through 188. All four checkpoint controller maps match the replay exactly. Current corrected references are April 1994 revision 6 and April 1995 revision 9; scores are 709/708/709/692 at weeks 39/104/156/188. Those corrected-reference scores differ from the original receipt 709/709/708/692 only by the Brka painted-reference correction: reference-only changes, not new gameplay gains.
+
+Scope: scoped qualified observer fallback with tests, cold pairs and focused native boundaries. It is not adoption, not a current experimental qualification, and not selected-player 188 certification; ambience is disabled. The earlier public week-104 page and older 188-week pages remain available below. No game source or raw save is uploaded here.
 # Canonical AWWV calibration control timeline
 
 **Standard tool:** https://horkesh.github.io/A-War-Without-Victory/ — the interactive week-by-week control timeline with checkpoint navigation, search, cell inspection and zoom/pan. Use this tool for requests for the calibration map/tool; single-checkpoint Sites maps are not substitutes.
