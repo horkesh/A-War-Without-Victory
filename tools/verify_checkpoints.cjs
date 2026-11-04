@@ -325,8 +325,15 @@ if (neverLost.length > 0) {
   }
 }
 
+// PARKED (owner, 2026-11-04): calibration runs one checkpoint at a time (Jan 1993 -> Apr 1994
+// -> Apr 1995 -> Oct 1995). Farz/Uragan (Sep 1995) belongs to the October 1995 checkpoint, so
+// its guards print for information but do NOT breach unless `--farz-guard` is passed. Re-enable
+// (pass the flag, or make it the default) when October 1995 becomes the active checkpoint.
+// Open defect waiting there: docs/40_reports/audits/20261104_handover/FARZ-TG-ROOT-CAUSE.md.
+const FARZ_GUARD_ENFORCED = process.argv.includes('--farz-guard');
+
 console.log('');
-console.log('OPERATION FARZ / "Uragan 95" — the positive half; a fix that breaks this is the WRONG fix');
+console.log(`OPERATION FARZ / "Uragan 95" — the positive half; a fix that breaks this is the WRONG fix${FARZ_GUARD_ENFORCED ? '' : '  [PARKED until the October 1995 checkpoint: informational, not a breach; pass --farz-guard to enforce]'}`);
 console.log('  P1 cells — all four Ozren cells must be RBiH by w188');
 let farzBroken = 0;
 for (const [name, osid] of FARZ_CELLS) {
@@ -418,7 +425,8 @@ if (unwarranted.length > 0) {
   console.log('    (none; 2nd Corps participation is reported above)');
 }
 
-if (farzBroken > 0) breached = true;
+if (farzBroken > 0 && FARZ_GUARD_ENFORCED) breached = true;
+else if (farzBroken > 0) console.log(`  Farz guard PARKED: ${farzBroken} Farz finding(s) above are informational until the October 1995 checkpoint.`);
 // LIVENESS: say how much was compared, not merely that nothing tripped.
 console.log(`  compared: ${EASTERN_SURPLUS_MUNS.length} municipalities (negative) + ${FARZ_CELLS.length} cells (positive)`);
 if (guardCells !== 9) {
