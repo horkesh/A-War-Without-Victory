@@ -177,6 +177,21 @@ export function minimalEnv(policy, env, configPath) {
   return out;
 }
 
+// The implementer runs in its own process group on POSIX (detached => setsid), so the whole tree,
+// including shells and test runners it spawned, can be killed with one negative-PID signal.
+export function spawnOptionsFor(platform, base) {
+  return platform === 'win32' ? { ...base, windowsHide: true } : { ...base, detached: true };
+}
+
+export function terminateTree(pid, platform, deps = { spawnSync, kill: process.kill.bind(process) }) {
+  if (!pid) return;
+  if (platform === 'win32') {
+    deps.spawnSync('taskkill', ['/PID', String(pid), '/T', '/F'], { stdio: 'ignore' });
+    return;
+  }
+  try { deps.kill(-pid, 'SIGKILL'); } catch (e) { if (e?.code !== 'ESRCH') throw e; } // ESRCH: group already gone
+}
+
 // ---------- git / fs ----------
 
 function git(dir, args) {
@@ -298,15 +313,13 @@ async function main() {
   console.log(`[implementer] job ${path.basename(jobDir)} started ${start} in ${dir}`);
 
   const code = await new Promise((resolve) => {
-    const child = spawn(exe, args, { cwd: dir, stdio: ['ignore', stdout, stderr], windowsHide: true, env: childEnv });
+    const child = spawn(exe, args, spawnOptionsFor(process.platform, { cwd: dir, stdio: ['ignore', stdout, stderr], env: childEnv }));
     let timedOut = false;
-    const t = setTimeout(() => {
-      timedOut = true;
-      if (process.platform === 'win32') spawnSync('taskkill', ['/PID', String(child.pid), '/T', '/F']);
-      else child.kill('SIGKILL');
-    }, a.timeoutMin * 60_000);
+    const t = setTimeout(() => { timedOut = true; terminateTree(child.pid, process.platform); }, a.timeoutMin * 60_000);
     child.on('error', (e) => { clearTimeout(t); fs.writeSync(stderr, `spawn error: ${e.message}\n`); resolve({ exit: -1, timedOut }); });
-    child.on('close', (exit) => { clearTimeout(t); resolve({ exit, timedOut }); });
+    // Also reap any descendant still alive after a normal exit (e.g. a backgrounded test runner),
+    // so nothing can write to the worktree after the post-run snapshot below.
+    child.on('close', (exit) => { clearTimeout(t); terminateTree(child.pid, process.platform); resolve({ exit, timedOut }); });
   });
   fs.closeSync(stdout); fs.closeSync(stderr);
   const end = new Date().toISOString();

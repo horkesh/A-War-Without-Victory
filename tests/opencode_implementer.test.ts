@@ -4,9 +4,42 @@ import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 // @ts-expect-error -- plain ESM tool module without type declarations
-import { allowCmdProblem, buildAgentConfig, diffSnapshots, globToRegExp, matchesAny, minimalEnv, parsePorcelainZ, parseStream, snapshot } from '../tools/opencode_implementer/run.mjs';
+import { allowCmdProblem, buildAgentConfig, diffSnapshots, globToRegExp, matchesAny, minimalEnv, parsePorcelainZ, parseStream, snapshot, spawnOptionsFor, terminateTree } from '../tools/opencode_implementer/run.mjs';
 
 const POLICY = JSON.parse(fs.readFileSync(path.resolve('tools/opencode_implementer/policy.json'), 'utf8'));
+
+describe('opencode implementer launcher: process-tree termination', () => {
+  it('runs the implementer in its own process group on POSIX and hides the window on Windows', () => {
+    expect(spawnOptionsFor('linux', { cwd: 'x' })).toEqual({ cwd: 'x', detached: true });
+    expect(spawnOptionsFor('darwin', { cwd: 'x' })).toEqual({ cwd: 'x', detached: true });
+    expect(spawnOptionsFor('win32', { cwd: 'x' })).toEqual({ cwd: 'x', windowsHide: true });
+  });
+
+  it('kills the whole group on POSIX, tolerates an already-gone group, and uses taskkill /T on Windows', () => {
+    const calls: unknown[][] = [];
+    const deps = { spawnSync: (...a: unknown[]) => { calls.push(['spawnSync', ...a]); }, kill: (...a: unknown[]) => { calls.push(['kill', ...a]); } };
+    terminateTree(4242, 'linux', deps);
+    terminateTree(4242, 'win32', deps);
+    expect(calls[0]).toEqual(['kill', -4242, 'SIGKILL']);
+    expect(calls[1].slice(0, 3)).toEqual(['spawnSync', 'taskkill', ['/PID', '4242', '/T', '/F']]);
+    const gone = { spawnSync: () => {}, kill: () => { throw Object.assign(new Error('gone'), { code: 'ESRCH' }); } };
+    expect(() => terminateTree(1, 'linux', gone)).not.toThrow();
+    const denied = { spawnSync: () => {}, kill: () => { throw Object.assign(new Error('nope'), { code: 'EPERM' }); } };
+    expect(() => terminateTree(1, 'linux', denied)).toThrow('nope');
+  });
+
+  it.skipIf(process.platform === 'win32')('a descendant spawned by the implementer cannot write after termination (POSIX, real processes)', async () => {
+    const { spawn } = await import('node:child_process');
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'oc-tree-'));
+    const late = path.join(dir, 'late.txt');
+    // parent shell backgrounds a delayed writer, then waits: the shape of an implementer running a test runner
+    const child = spawn('sh', ['-c', `(sleep 1; echo late > "${late}") & wait`], spawnOptionsFor(process.platform, { stdio: 'ignore' }));
+    await new Promise((r) => setTimeout(r, 200));
+    terminateTree(child.pid, process.platform);
+    await new Promise((r) => setTimeout(r, 1500));
+    expect(fs.existsSync(late)).toBe(false);
+  });
+});
 
 describe('opencode implementer launcher: permission policy', () => {
   it('compiles default-deny first, protected-path denies last, and appends per-job shell allows', () => {
