@@ -1,0 +1,55 @@
+{
+  "_comment": "Source policy for the awwv-implementer OpenCode agent. run.mjs compiles it into a per-job OPENCODE_CONFIG (saved in the job dir as AGENT-CONFIG.json). Rules are emitted in this order: default_deny, tool_allow, shell_allow (+ the job's validated --allow-cmd), final_deny. Verified by the 2026-11-04 canary (runs/implementer/permission-canary-01): rules are last-match-wins, the shell permission action is 'shell', and the write tool is governed by 'edit'. final_deny therefore overrides every allow: command chaining/redirection, code-running flags, and edits to the oracle, toolchain config and protected data.",
+  "agent": "awwv-implementer",
+  "steps": 150,
+  "default_deny": [
+    { "action": "*", "resource": "*", "effect": "deny" }
+  ],
+  "tool_allow": [
+    { "action": "read", "resource": "*", "effect": "allow" },
+    { "action": "glob", "resource": "*", "effect": "allow" },
+    { "action": "grep", "resource": "*", "effect": "allow" },
+    { "action": "list", "resource": "*", "effect": "allow" },
+    { "action": "edit", "resource": "*", "effect": "allow" },
+    { "action": "todowrite", "resource": "*", "effect": "allow" },
+    { "action": "lsp", "resource": "*", "effect": "allow" }
+  ],
+  "shell_allow": [
+    "git status",
+    "git status *",
+    "git diff",
+    "git diff *",
+    "git log *",
+    "git show *",
+    "git ls-files *",
+    "node node_modules/vitest/vitest.mjs run *",
+    "node node_modules/typescript/bin/tsc --noEmit",
+    "node node_modules/typescript/bin/tsc --noEmit *",
+    "npm run test:vitest -- *",
+    "npm run gate:local -- *",
+    "npm run lint:negative-assertions"
+  ],
+  "shell_deny": [
+    "*;*", "*&*", "*|*", "*$(*", "*`*", "*>*", "*<*", "*\n*", "*\r*",
+    "*--pre*", "*--output*", "*--ext-diff*", "*--textconv*", "*--exec*", "*--upload-pack*",
+    "*--config*", "* -c *", "*--open-files-in-pager*", "*--paginate*", "*--root=*", "*--dir=*", "*--globalSetup*", "*--setupFiles*"
+  ],
+  "edit_deny": [
+    ".git/**", ".gitattributes", "**/.gitattributes", ".gitmodules", ".gitconfig", ".npmrc", "**/.npmrc",
+    ".claude/**", ".codex/**", ".github/**", ".cursor/**", ".opencode/**", "opencode.json", "opencode.jsonc",
+    "node_modules/**", "package.json", "package-lock.json",
+    "tsconfig*.json", "vitest.config.*", "vitest.cmd", "tsx.cmd",
+    "tools/opencode_implementer/**", "tools/local_executor/**", "tools/test/**", "tools/hooks/**",
+    "tools/validate_open_gates.cjs", "tools/scan_negative_source_assertions.cjs",
+    "docs/10_canon/FORAWWV*", "data/source/calibration/painted_control_*"
+  ],
+  "final_deny": [
+    { "action": "external_directory", "resource": "*", "effect": "deny" }
+  ],
+  "env_passthrough": [
+    "PATH", "Path", "PATHEXT", "SystemRoot", "SYSTEMROOT", "windir", "ComSpec", "OS",
+    "USERPROFILE", "HOME", "HOMEDRIVE", "HOMEPATH", "APPDATA", "LOCALAPPDATA",
+    "TEMP", "TMP", "XDG_DATA_HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME",
+    "NUMBER_OF_PROCESSORS", "PROCESSOR_ARCHITECTURE", "VOLTA_HOME", "LANG"
+  ]
+}
