@@ -180,7 +180,7 @@ The OSID model uses two related command forms. A corps sector is the **standing-
 
 **Implementation-note (Level-1 operation authorization identity, 2026-07-15):** A corps commander may request presidential authorization only for a concrete `ready` plan with at least one target. The decision identity is the exact tuple `APPROVE_OP:<corps_id>:<plan_id>`. Approval remains authoritative until that exact operation is admitted to the active lifecycle; if emission is temporarily blocked, the plan remains ready and is not re-prompted. Rejection abandons the exact plan. Resolved exact-plan rows remain durable no-reprompt records, while a later genuinely new plan receives a new identity.
 
-**Implementation-note (COHA pause, scoped Vlašić exception, and exact battle causality, 2026-09-28):** During an active cessation-of-hostilities agreement, brigade AI clears operation attack/posture orders but preserves legal movement, and `advanceSectorOffensives()` pauses unrelated operation clocks with `operation_lifecycle_paused_reason: 'coha_ceasefire'`. The sole authored exception is `Operation Vlasic Ridge` of RBiH 3rd Corps during turns 153–155: its validated authored participants and the current objective of their executing authored Vlašić axis may use the normal operation lifecycle, attack-order, battle-resolution, and result-reconciliation paths. Generic attacks, unrelated operations, future authored objectives, and all other COHA behavior remain suppressed. Attack resolution records suppressed orders and, for actual battles, the exact attacker brigade ids plus contributing operation ids. AAR/scenario attribution consumes those receipts and never assigns a battle to an operation merely because both name the same target.
+**Implementation-note (COHA pause, scoped Vlašić exception, and exact battle causality, implemented 2026-09-28; calendar corrected 2026-11-02):** During an active cessation-of-hostilities agreement, brigade AI clears operation attack/posture orders but preserves legal movement, and `advanceSectorOffensives()` pauses unrelated operation clocks with `operation_lifecycle_paused_reason: 'coha_ceasefire'`. The sole authored exception is `Operation Vlasic Ridge` of RBiH 3rd Corps at receipt turn 155 only (the completed week of 20-26 March 1995): its validated authored participants and the current objective of their executing authored Vlašić axis may use the normal operation lifecycle, attack-order, battle-resolution, and result-reconciliation paths. Generic attacks, unrelated operations, future authored objectives, and all other COHA behavior remain suppressed. The upper bound stays 155 conservatively: it identifies the completed 20-26 March interval and does not claim that historical fighting ended on 26 March. Attack resolution records suppressed orders and, for actual battles, the exact attacker brigade ids plus contributing operation ids. AAR/scenario attribution consumes those receipts and never assigns a battle to an operation merely because both name the same target.
 
 **Mixed-battle occupation authority (2026-08-27):** A winning aggregated battle changes political control only when every validated contributing attacker permits occupation. Validation is the attack resolver's existing active, located, and tactical-adjacency gate. For each validated contributor, an explicit `occupies_on_victory: false` on its matched operation vetoes the shared territorial flip; a missing declaration or no matched operation defaults to `true`. Rejected or nonadjacent orders are outside the contributor set and cannot veto occupation. This rule changes only the territorial consequence: the battle result, casualties, and battle receipts remain valid when occupation is withheld.
 
@@ -218,6 +218,17 @@ sector wrapped around that isolated pocket does not make its brigade connected t
 front. The stranded-brigade lifecycle therefore treats the location as unreachable and invokes
 the ordinary deterministic emergency-retreat/lifecycle path when combat removes the pocket.
 
+**Stranded cohesion liveness clarification (2026-11-03):** the ordinary cohesion
+drift still applies to every eligible unengaged formation, including positive and
+negative ambient/enclave drift, OPSEC/TG suppression, ceiling and `[0,100]` bounds.
+Only formations in the CURRENT fresh-turn lifecycle report's `still_holding`
+receipt skip the upward faction-floor correction, so the same-pass stranded
+cohesion decrement is not erased. This is a current-pass exception, not a
+persistent flag, global holding exception, or suppression of ordinary recovery.
+Absent, empty, stale, newly-stranded, reconnected, tagged-enclave, active or
+queued-owned receipts keep existing behavior. Runtime/full-campaign/save/native
+validation remains pending.
+
 **Own-origin salient retention (2026-10-28):** automatic capture-triggered salient withdrawal
 retains any component holding the displaced faction's OWN configured, currently held supply
 origin. Being separate from a larger component is not by itself sufficient grounds for automatic
@@ -236,6 +247,18 @@ ordinary evacuation would otherwise occur, and only to a destination still held 
 and claimed by its own corps sector. It is not ordinary enemy-territory traversal, does not flip
 control, and grants no generalized movement or exemption; other formations keep the existing
 graph path.
+
+**Reconstitution stranded-episode reset (2026-11-03):** a successful non-collapsed
+reactivation through the ordinary home/refugee pool or reserve Path C begins a new
+stranded episode: `stranded_status` becomes `none` and `stranded_since_turn` is
+cleared, while historical `last_reachable_turn` is preserved until the ordinary
+same-turn lifecycle classifies the actual destination. A critically supplied
+destination starts a NEW holding episode at the current turn and is not decayed
+again in the same pass; a supplied destination remains `none` and updates
+`last_reachable_turn`. Legacy `collapsed` records are terminal-dead (EH3) and are
+refused before any pool, reserve or formation mutation; ordinary destroyed units
+are otherwise unchanged. No forced movement, declared-supply exemption, date or
+identity exception was added.
 
 **Operation-completion ownership handoff (2026-10-23, focused candidate):** operations
 completing in the current `advance-sector-offensives` invocation publish released participant
@@ -412,6 +435,8 @@ When War phase runs, attack orders are resolved as **discrete attacks** per targ
 **Snap events:** Ammunition Crisis, Commander Casualty, Last Stand, Surrender Cascade, Pyrrhic Victory, Fortification Destroyed—per spec §8 when state conditions are met. Equipment capture on surrender/elimination.
 
 **Brigade dissolution (n292, updated n579/n905):** Brigades meeting 2-of-3 criteria — personnel < 400, cohesion ≤ 20, morale ≤ 15 — are dissolved. Enclave brigades require 3-of-3. Absolute floor (150, enclave 50) counts as "low personnel" criterion. Remaining personnel are returned to the faction's strategic reserve (50%). Surviving equipment is redistributed to nearest same-corps brigade (70% salvaged); **source brigade composition is zeroed on dissolution** (n905 duplication fix). Module: `src/sim/combat/brigade_dissolution.ts`.
+
+**Salvage route clarification (2026-11-03):** the surviving-equipment recipient is the nearest eligible active same-faction, same-corps brigade/OG with a provable own-controlled location. Traversal uses the canonical friendly OSID graph (own or actually allied intermediate nodes only); source and recipient must be own-controlled, and unknown/null/enemy locations are barriers. Equal hop distance breaks by stable formation ID. Missing graph is fail-closed for remote transfer: only a provable own-controlled same-cell recipient may receive, otherwise equipment is unrecovered. The 70% tank/artillery rate, source zeroing including AA, 50% personnel reserve, dissolution criteria and all existing effects are unchanged. No unit movement, teleport, controller change or new equipment is created. Runtime proof remains pending.
 
 **§6.4 Morale-collapse override (LANE-NIGHTSHIFT-N4-CANON-AMENDMENT, 2026-05-03):** Beyond the 2-of-3 attrition criteria, a fourth dissolution path exists for sustained morale collapse. Each turn, every brigade's `morale_low_streak` increments if its morale is at or below `MORALE_OVERRIDE_THRESHOLD` (15), and resets to 0 if morale rises above `MORALE_OVERRIDE_RESET` (20). When `morale_low_streak` reaches `MORALE_OVERRIDE_TURNS` (8), the brigade dissolves on the next dissolution check regardless of personnel count, cohesion, or equipment. Historical justification: sustained morale collapse historically dissolved units regardless of nominal strength (cf. JNA dissolution dynamics 1991–92, ARBiH 5th Corps wavering through Bihać pocket 1994). Reconstitution and replacement intake cannot reverse a brigade once this counter trips; the unit is removed from order of battle and its personnel are returned to the faction manpower pool. **Save/load contract:** `morale_low_streak` is persisted on FormationState; absent on legacy saves it deserializes to 0. **Implementation gate:** dissolution path gated behind environment flag `MORALE_OVERRIDE_ENABLED` (default `false`). With the flag off, the streak counter still increments (diagnostic-only); only the dissolution path is suppressed. The flag is intended to flip after user evidence-review of the streak distribution in production runs.
 

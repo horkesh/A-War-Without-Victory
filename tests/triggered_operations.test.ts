@@ -215,7 +215,7 @@ describe('triggered operations definitions', () => {
 
 describe('checkTriggeredOperations', () => {
     it('uses a unique live OOB alias for an authored Army-HQ participant', () => {
-        const state = makeState(160);
+        const state = makeState(178);
         const authored = state.military.formations!.arbih_328th_mountain!;
         delete state.military.formations!.arbih_328th_mountain;
         state.military.formations!.F_RBiH_0001 = {
@@ -243,6 +243,44 @@ describe('checkTriggeredOperations', () => {
                 && warning.detail.includes('arbih_328th_mountain')),
             false,
         );
+    });
+
+    it('keeps Farz historical weekly timing: 177 refuses, 178 may inject only into planning', () => {
+        const farz = _TRIGGERED_OPS.find((def) => def.name === 'Operation Farz 95')!;
+        const prepare = (turn: number) => {
+            const state = makeState(turn);
+            state.political.political_controllers![farz.staging_osid] = 'RBiH';
+            for (const axis of farz.axes) {
+                for (const objective of axis.objectives) {
+                    state.political.political_controllers![objective] = 'RS';
+                }
+            }
+            return state;
+        };
+
+        assert.equal(farz.trigger(prepare(177), 177), false);
+        const before = prepare(177);
+        assert.ok(!injectArmyHqOperations(before).includes('Operation Farz 95'));
+        assert.equal(
+            before.military.corps_command![farz.primary_corps]!.active_operations
+                .some((operation) => operation.name === 'Operation Farz 95'),
+            false,
+        );
+
+        const mayInject = prepare(178);
+        assert.equal(farz.trigger(mayInject, 178), true);
+        assert.ok(injectArmyHqOperations(mayInject).includes('Operation Farz 95'));
+        const operation = mayInject.military.corps_command![farz.primary_corps]!.active_operations
+            .find((candidate) => candidate.name === 'Operation Farz 95')!;
+        assert.equal(operation.phase, 'planning');
+        assert.equal(operation.started_turn, 178);
+        assert.equal(operation.phase_started_turn, 178);
+        assert.equal(operation.planning_duration, 3);
+        assert.equal(operation.force_launch, undefined);
+
+        const cooldown = prepare(178);
+        cooldown.military.army_hq_last_op_turn = { RBiH: 177 } as any;
+        assert.ok(!injectArmyHqOperations(cooldown).includes('Operation Farz 95'));
     });
 
     it('injects Posavina Corridor after Operation Corridor is complete', () => {

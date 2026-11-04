@@ -50,6 +50,9 @@ import {
     historicalOperationAuthorizationAction,
 } from './historical_operation_authorization.js';
 import { resolveOperationFormation } from './operation_formation_resolver.js';
+import { getOperationAuthorizedDestinations } from './brigade_routine_scope.js';
+import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
+import { isFriendlyFaction } from '../early_war/alliance_update.js';
 import { isOperationObjectiveHostile } from './operation_objective_hostility.js';
 import { computeMultiAxisPlanningDuration } from './sector_offensive_axis_helpers.js';
 import { isEliteAuthoredForHistoricalOperation } from './historical_elite_reservations.js';
@@ -1280,18 +1283,21 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
         //
         // UNADOPTED April-only local defensive-distribution experiment.
         // CALIBRATION ASSUMPTION, not an attested historical action or date and
-        // not a route-bug fix. Ordinary concentration begins at turn 60 while
-        // the operation still opens at turn 71 with its four planning turns.
-        // This second unadopted calibration assumption brings the existing heavy
-        // Kralj force alongside the local Rama Brigade before the defense window;
-        // no historical movement or date is attested. Ordinary authority, route,
-        // and retreat rules remain, and donor-front preservation must be measured.
+        // not a route-bug fix. Ordinary concentration begins at turn 59, one
+        // turn earlier than the inherited 60, while the operation still opens at
+        // turn 71 with its four planning turns. The current source measures the
+        // early Ljubunci loss at turn 62 rather than the inherited 65; this tests
+        // whether earlier assembly of the existing heavy Kralj force alongside
+        // the local Rama Brigade changes that defense window. No historical
+        // movement or date is attested, and no defense or capture is guaranteed.
+        // Ordinary authority, route, and retreat rules remain, and donor-front
+        // preservation must be measured.
         corps: 'hvo_tomislavgrad',
         faction: 'HRHB',
         name: 'Prozor–Rama Line Counterattack',
         staging_osid: 'op:prozor:prozor_2',
         available_from: 71,
-        prestage_from: 60,
+        prestage_from: 59,
         min_attack_outcome: 'repulsed',
         execution_attack_power_mult: 1.8,
         planning_duration: 4,
@@ -1312,7 +1318,11 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
                 axis_id: 'prozor_lug',
                 name: 'Prozor Lug',
                 brigades: ['hrhb_kralj_tomislav_brigade'],
-                objectives: ['op:prozor:lug_2'],
+                // MODELED follow-on allocation, not an attested historical order:
+                // after Lug, Kralj continues to Paroš using the existing
+                // same-operation shared-objective convergence with Rama. It does
+                // not add strength, guarantee capture or double-credit a brigade.
+                objectives: ['op:prozor:lug_2', 'op:prozor:paros'],
                 staging_osid: 'op:prozor:ljubunci_2',
             },
             {
@@ -1385,7 +1395,10 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         name: 'Trnovo Eastern Counterattack (Model)',
         staging_osid: 'op:trnovo:delijas',
         available_from: 13,
-        prestage_from: 8,
+        // Modeled assembly timing, not a historical date claim: start one turn
+        // earlier to offset the measured extra Podgrab transit turn. This does
+        // not promise arrival, admission timing, capture or any combat result.
+        prestage_from: 7,
         planning_duration: 1,
         minimum_viable_participants: 2,
         minimum_assembled_participants: 2,
@@ -1407,7 +1420,12 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                 name: 'Donje Zesce Concentration',
                 brigades: ['arbih_102nd_motorized'],
                 objectives: ['op:foca:donje_zesce'],
-                staging_osid: 'op:foca:mazlina',
+                // Bounded model assumption: stage the 102nd at friendly Podgrab
+                // instead of Mazlina to test whether avoiding the opening
+                // defensive casualty exchange preserves the supporting brigade.
+                // Actual Podgrab arrival and a Mazlina hold are unproven; this
+                // does not guarantee casualty avoidance or any capture outcome.
+                staging_osid: 'op:pale:podgrab',
             },
         ],
     },
@@ -1870,6 +1888,48 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                 ],
                 objectives: ['op:jablanica:doljani_2'],
                 staging_osid: 'op:jablanica:jablanica_2',
+            },
+        ],
+    },
+    {
+        // Owner-reviewed bounded model of the documented 2nd Corps Uragan effort.
+        // Delić ICTY testimony pp.2738-39/2747-49 and judgment §§285,397-399
+        // describe coordinated 2nd Corps Uragan and 3rd Corps Farz beginning
+        // 10 September 1995 with a reported linkup on 11 September. BB I p.386
+        // documents the 22nd Division brigades moving from the Pribitkovići area
+        // toward Seona/Lozna. Exact brigade start cells are unproven.
+        //
+        // This is a source-backed, bounded experiment only, not historical
+        // certainty, an attested march route, or proof of a joint launch. The
+        // measured fresh-188 state has Seona RBiH-held and adjacent RS Vozuća
+        // with 2nd Corps ownership; the named brigades have friendly paths of
+        // 3/5/6 hops (9th Muslim two hops). Those are current model routes.
+        // planning_duration:7 is the explicit six-hop game-model budget under
+        // maxHops=planning_duration-1, NOT a seven-week historical plan.
+        // The existing queued lane yields any brigade already owned by another
+        // operation; the 9th's existing probe ownership must be respected.
+        // This entry intentionally sets no sync launch, force flag, multiplier,
+        // minimum override, morale/movement bypass or Army-HQ/Farz ownership.
+        corps: 'arbih_2nd_corps',
+        faction: 'RBiH',
+        name: 'Operation Uragan 95',
+        staging_osid: 'op:banovici:seona',
+        enqueue_from: 177,
+        prestage_from: 177,
+        available_from: 179,
+        planning_duration: 7,
+        axes: [
+            {
+                axis_id: 'uragan_seona_vozuca',
+                name: 'Uragan Seona–Vozuća',
+                brigades: [
+                    'arbih_9th_muslim_liberation',
+                    'arbih_211th_liberation',
+                    'arbih_222nd_liberation',
+                    'arbih_250th_liberation',
+                ],
+                objectives: ['op:zavidovici:vozuca_2'],
+                staging_osid: 'op:banovici:seona',
             },
         ],
     },
@@ -2424,7 +2484,47 @@ function getQueuedHeadHeldBrigadeIds(state: GameState, def: PrePlannedOp): Set<F
     return held;
 }
 
-function prestageReservedPrePlannedElites(state: GameState, def: PrePlannedOp, turn: number): void {
+/**
+ * A live planning operation's own approach/staging destination for one of its
+ * actual participants. This is the same authority predicate the column-movement
+ * processor uses, so prestaging cannot delete the very approach march the
+ * operation owns. Only the consumed first destination is validated, and it must
+ * still be friendly to this brigade. Missing adjacency is not an authorization;
+ * a missing reverse map falls back to the shared predicate's direct lookup.
+ */
+function isLivePlanningApproachDestination(
+    state: GameState,
+    liveOperation: CorpsOperation | undefined,
+    brigadeId: FormationId,
+    destinations: readonly SettlementId[],
+    adjacency?: Map<Osid, Osid[]>,
+    reverseMap?: OperationalToCanonicalReverseMap,
+): boolean {
+    if (!liveOperation || liveOperation.phase !== 'planning') return false;
+    if (!adjacency || destinations.length === 0) return false;
+    const authorized = getOperationAuthorizedDestinations(
+        state,
+        brigadeId,
+        liveOperation,
+        adjacency,
+        reverseMap,
+    );
+    const destination = destinations[0];
+    if (!destination || !authorized.has(destination)) return false;
+    const formation = state.military.formations?.[brigadeId];
+    if (!formation) return false;
+    const controller = getPoliticalControllerOSID(state, destination, reverseMap ?? undefined);
+    return controller === formation.faction
+        || isFriendlyFaction(controller, formation.faction, state);
+}
+
+function prestageReservedPrePlannedElites(
+    state: GameState,
+    def: PrePlannedOp,
+    turn: number,
+    adjacency?: Map<Osid, Osid[]>,
+    reverseMap?: OperationalToCanonicalReverseMap,
+): void {
     if (def.prestage_from == null || turn < def.prestage_from) return;
     if (state.meta.player_faction === def.faction) return;
     const command = state.military.corps_command?.[def.corps];
@@ -2451,11 +2551,53 @@ function prestageReservedPrePlannedElites(state: GameState, def: PrePlannedOp, t
             if (formation.elite_loan_state?.on_loan
                 && (formation.elite_loan_state.loaned_to_corps !== def.corps
                     || !isEliteAuthoredForHistoricalOperation(brigadeId, def.name))) continue;
-            if (formation.location_osid === axis.staging_osid) {
-                const transit = movementState[brigadeId];
-                const order = state.military.brigade_movement_orders?.[brigadeId];
-                const destinations = transit?.destination_sids ?? order?.destination_sids ?? [];
-                const orderedAway = destinations.length > 0 && !destinations.includes(axis.staging_osid as SettlementId);
+            const location = formation.location_osid;
+            const atStaging = location === axis.staging_osid;
+            const transit = movementState[brigadeId];
+            const order = state.military.brigade_movement_orders?.[brigadeId];
+            const activeTransit = transit?.status === 'in_transit';
+            const consumedDestinations = activeTransit
+                ? transit?.destination_sids ?? []
+                : order?.destination_sids ?? [];
+            const consumedDestination = consumedDestinations[0];
+            // Staging is an ordinary concentration destination, not an approach
+            // hold: a return-to-staging order must not masquerade as valid
+            // operation geometry.
+            const consumedApproach = consumedDestination !== axis.staging_osid
+                && isLivePlanningApproachDestination(
+                    state,
+                    liveOperation,
+                    brigadeId,
+                    consumedDestinations,
+                    adjacency,
+                    reverseMap,
+                );
+            const atApproach = Boolean(location) && isLivePlanningApproachDestination(
+                state,
+                liveOperation,
+                brigadeId,
+                location ? [location as SettlementId] : [],
+                adjacency,
+                reverseMap,
+            );
+            const movementOwner = activeTransit ? transit?.owner : order?.owner;
+            const authoredHistoricalElite = isSectorAssignmentExemptCorpsId(formation.corps_id)
+                && isEliteAuthoredForHistoricalOperation(brigadeId, def.name);
+            const protectedMovement = (activeTransit || order != null)
+                && movementOwner !== 'bot_discretionary'
+                && !authoredHistoricalElite;
+
+            if (atStaging) {
+                if (consumedApproach) continue;
+                // Legacy at-staging datum selection: ANY retained movement
+                // state's destinations are considered, including packing and
+                // unpacking where status is not yet in_transit.
+                const legacyDestinations = transit?.destination_sids ?? order?.destination_sids ?? [];
+                const orderedAway = legacyDestinations.length > 0
+                    && !legacyDestinations.includes(axis.staging_osid as SettlementId);
+                // Original at-staging rule: ANY Main Staff exempt formation's
+                // away movement is reclaimable, independent of authored elite
+                // reservation membership.
                 const reclaimable = transit?.owner === 'bot_discretionary'
                     || order?.owner === 'bot_discretionary'
                     || isSectorAssignmentExemptCorpsId(formation.corps_id);
@@ -2465,14 +2607,36 @@ function prestageReservedPrePlannedElites(state: GameState, def: PrePlannedOp, t
                 }
                 continue;
             }
-            if (movementState[brigadeId]?.status === 'in_transit') {
-                if (movementState[brigadeId]?.destination_sids?.includes(axis.staging_osid as SettlementId)) continue;
-                const authoredHistoricalElite = isSectorAssignmentExemptCorpsId(formation.corps_id)
-                    && isEliteAuthoredForHistoricalOperation(brigadeId, def.name);
-                if (movementState[brigadeId]?.owner !== 'bot_discretionary' && !authoredHistoricalElite) continue;
+
+            if (activeTransit) {
+                if (consumedApproach || protectedMovement) continue;
+                // A live approach location is the operation's own assembly
+                // point: cancel a discretionary departure and hold there.
+                if (atApproach) {
+                    delete state.military.brigade_movement_state?.[brigadeId];
+                    delete state.military.brigade_movement_orders?.[brigadeId];
+                    continue;
+                }
+                if (transit?.destination_sids?.includes(axis.staging_osid as SettlementId)) continue;
                 delete state.military.brigade_movement_state?.[brigadeId];
                 delete state.military.brigade_movement_orders?.[brigadeId];
+            } else if (order) {
+                if (consumedApproach) continue;
+                if (atApproach) {
+                    if (protectedMovement) continue;
+                    delete state.military.brigade_movement_orders?.[brigadeId];
+                    continue;
+                }
+                // Legacy off-staging fallback: a non-transit pending order is
+                // retargeted to the authored staging area regardless of owner.
+                delete state.military.brigade_movement_orders?.[brigadeId];
+            } else if (atApproach) {
+                // The brigade already stands at its own current lawful
+                // approach while the operation is planning: hold, never emit a
+                // return-to-staging order.
+                continue;
             }
+
             if (formation.posture === 'dig_in') {
                 formation.posture = 'defend';
                 formation.dig_in_progress = 0;
@@ -2492,7 +2656,11 @@ function prestageReservedPrePlannedElites(state: GameState, def: PrePlannedOp, t
 }
 
 /** Advance dated bot-controlled Main Staff concentrations every war turn. */
-export function prestageDeferredPrePlannedElites(state: GameState): void {
+export function prestageDeferredPrePlannedElites(
+    state: GameState,
+    adjacency?: Map<Osid, Osid[]>,
+    reverseMap?: OperationalToCanonicalReverseMap,
+): void {
     const turn = state.meta.turn;
     for (const def of ALL_PRE_PLANNED) {
         if (def.enqueue_from != null) {
@@ -2510,7 +2678,7 @@ export function prestageDeferredPrePlannedElites(state: GameState): void {
                 && !command?.active_operations.some((op) => op.name === def.name)) continue;
             if (hasDeclinedPrePlannedAuthorization(state, def)) continue;
         }
-        prestageReservedPrePlannedElites(state, def, turn);
+        prestageReservedPrePlannedElites(state, def, turn, adjacency, reverseMap);
     }
 }
 
@@ -2555,7 +2723,7 @@ export function injectPrePlannedOperations(
 
     for (const def of ALL_PRE_PLANNED) {
         if (options?.faction && def.faction !== options.faction) continue;
-        prestageReservedPrePlannedElites(state, def, turn);
+        prestageReservedPrePlannedElites(state, def, turn, adjacency);
     }
 
     // Validate only definitions that are actually eligible to inject now.

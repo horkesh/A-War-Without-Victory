@@ -415,6 +415,33 @@ function isOperationAuthorizedColumnOrder(
     });
 }
 
+function recordedTransitRouteIsValid(
+    state: GameState,
+    formation: FormationState,
+    path: readonly string[],
+    reverseMap: OperationalToCanonicalReverseMap,
+    adjacency: Map<Osid, Osid[]>,
+): boolean {
+    const factionId = formation.faction;
+    if (!factionId) return false;
+
+    // Every recorded edge must still exist. A column cannot traverse a broken graph.
+    for (let index = 1; index < path.length; index += 1) {
+        if (!(adjacency.get(path[index - 1] as Osid) ?? []).includes(path[index] as Osid)) return false;
+    }
+
+    // The origin and every intermediate node must still be traversable under the same
+    // controller/null + isFriendlyFaction semantics used when the route was accepted.
+    // The terminal is deliberately excluded: normal Dijkstra permits a hostile destination,
+    // and the existing arrival/fallback policy below remains authoritative for it.
+    for (let index = 0; index < path.length - 1; index += 1) {
+        const controller = getPoliticalControllerOSID(state, path[index]!, reverseMap);
+        if (controller !== null && !isFriendlyFaction(controller, factionId, state)) return false;
+    }
+
+    return true;
+}
+
 /**
  * Process OSID column movement orders and advance in-transit brigades.
  *
@@ -479,6 +506,39 @@ export function processOsidColumnMovement(
 
         const f = formations[formationId];
         if (!f || f.status !== 'active') {
+            delete movementState[formationId];
+            continue;
+        }
+
+        // T4 combat consequence can move location_osid after T3 created this transit (retreat,
+        // displacement, advance). The path is the only record of the physical march: its first
+        // node must still equal the brigade's actual location and its last node must still be
+        // the recorded destination. If the origin no longer matches, the column is stale and must
+        // not execute the old path from a new location. Cancel only the transit: do not choose a
+        // new destination, do not relocate the brigade, and do not touch independent pending
+        // orders. Missing/malformed legacy paths are equally unverifiable and are cancelled
+        // rather than allowed to teleport on arrival.
+        const currentLocation = (f as { location_osid?: string }).location_osid;
+        const recordedDestination = ms.destination_sids?.[0];
+        const recordedPath = ms.path;
+        const validRecordedTransit = typeof currentLocation === 'string'
+            && ms.destination_sids?.length === 1
+            && Array.isArray(recordedPath)
+            && recordedPath.length >= 2
+            && recordedPath.every((node) => typeof node === 'string')
+            && recordedPath[0] === currentLocation
+            && recordedPath[recordedPath.length - 1] === recordedDestination;
+        if (!validRecordedTransit) {
+            delete movementState[formationId];
+            continue;
+        }
+
+        // Revalidate the accepted route's current physical legality before any countdown or
+        // arrival. This is not a reroute: if the graph edge or any source/intermediate control
+        // changed since acceptance, stop the column at its actual location and leave independent
+        // pending orders and other journeys untouched. A hostile terminal remains allowed so the
+        // existing predecessor fallback can run only after this full prefix check succeeds.
+        if (!recordedTransitRouteIsValid(state, f, recordedPath, reverseMap, adjacency)) {
             delete movementState[formationId];
             continue;
         }

@@ -22,10 +22,17 @@ const VLASIC_AUTHORED_BRIGADES = new Set<FormationId>([
     'arbih_712th_mountain' as FormationId,
     'arbih_737th_muslim_light' as FormationId,
     'arbih_705th_slavna_mountain' as FormationId,
+    // MODELED theater allocation only; the closed identity set follows the
+    // main-mission roster, not a general COHA relaxation.
+    'arbih_7th_vitezka_muslim_liberation' as FormationId,
+    'arbih_guards_brigade' as FormationId,
+    'arbih_314th_slavna_liberation' as FormationId,
+    'arbih_717th_slavna_mountain' as FormationId,
+    'arbih_303rd_vitezka_mountain' as FormationId,
 ]);
 
 export function isVlasicCohaWindow(turn: number): boolean {
-    return turn >= 153 && turn <= 155;
+    return turn >= 155 && turn <= 155;
 }
 
 function operationObjectives(op: CorpsOperation): readonly string[] {

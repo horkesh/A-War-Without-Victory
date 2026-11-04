@@ -8,6 +8,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { applyEventEffects } from '../src/sim/events/apply_effects.js';
+import { deserializeState, serializeState } from '../src/state/serialize.js';
 import type { EventEffect } from '../src/sim/events/event_types.js';
 import type { GameState } from '../src/state/game_state.js';
 
@@ -34,7 +35,27 @@ function makeState(f: Record<string, unknown>): GameState {
         meta: { turn: 165, phase: 'war', scenario_id: 'test', player_faction: 'RBiH', seed: 'a' },
         factions: [{ id: 'RBiH' }, { id: 'RS' }, { id: 'HRHB' }],
         military: { formations: { [f.id as string]: f } },
+        political: {
+            political_controllers: {
+                'op:srebrenica:srebrenica_2': 'RBiH',
+                'op:zivinice:gracanica_2': 'RBiH',
+            },
+            control_overrides: {},
+        },
     } as unknown as GameState;
+}
+
+function makeStateWith(formations: Record<string, Record<string, unknown>>): GameState {
+    const state = makeState(Object.values(formations)[0]!);
+    state.military.formations = formations as any;
+    return state;
+}
+
+function journey(origin: string, destination: string) {
+    return {
+        status: 'in_transit', stance: 'column', destination_sids: [destination],
+        path: [origin, destination], turns_remaining: 2, owner: 'bot_discretionary',
+    };
 }
 
 const srebEffect: EventEffect = {
@@ -121,6 +142,121 @@ describe('enclave_formation_displacement', () => {
             const f = encFormation();
             applyEventEffects(makeState(f), [{ ...srebEffect, casualty_fraction: Number.NaN }]);
             expect(f.personnel).toBe(1000);
+        });
+    });
+
+    it('flag ON reduced: changed-cell breakout invalidates only the matching journey and preserves orders', () => {
+        withFlag('true', () => {
+            const f = encFormation();
+            const other = encFormation({
+                id: 'arbih_unrelated', tags: ['enclave'],
+                location_osid: 'op:other:hold', home_osid: 'op:other:hold',
+            });
+            const state = makeStateWith({ [f.id as string]: f, [other.id as string]: other });
+            const order = { destination_sids: ['op:zivinice:gracanica_2'], stance: 'column' };
+            const otherOrder = { destination_sids: ['op:other:dest'], stance: 'combat' };
+            const otherJourney = journey('op:other:hold', 'op:other:dest');
+            state.military.brigade_movement_state = {
+                [f.id as string]: journey('op:srebrenica:srebrenica_2', 'op:other:dest'),
+                [other.id as string]: otherJourney,
+            } as any;
+            state.military.brigade_movement_orders = {
+                [f.id as string]: order,
+                [other.id as string]: otherOrder,
+            } as any;
+            const ordersWireBefore = JSON.stringify((state.military as any).brigade_movement_orders);
+            const otherJourneyWireBefore = JSON.stringify(otherJourney);
+
+            applyEventEffects(state, [srebEffect]);
+
+            expect(f.location_osid).toBe('op:zivinice:gracanica_2');
+            expect(f.personnel).toBe(400);
+            expect((state.military as any).brigade_movement_state?.[f.id as string]).toBeUndefined();
+            expect((state.military as any).brigade_movement_state?.[other.id as string]).toEqual(otherJourney);
+            expect((state.military as any).brigade_movement_orders?.[f.id as string]).toEqual(order);
+            expect((state.military as any).brigade_movement_orders?.[other.id as string]).toEqual(otherOrder);
+            expect(JSON.stringify((state.military as any).brigade_movement_orders)).toBe(ordersWireBefore);
+            expect(JSON.stringify((state.military as any).brigade_movement_state?.[other.id as string])).toBe(otherJourneyWireBefore);
+        });
+    });
+
+    it('flag ON reduced: same-cell breakout preserves the existing journey and pending order', () => {
+        withFlag('true', () => {
+            const f = encFormation({
+                location_osid: 'op:zivinice:gracanica_2',
+                home_osid: 'op:srebrenica:srebrenica_2',
+            });
+            const state = makeState(f);
+            const order = { destination_sids: ['op:other:dest'], stance: 'column' };
+            const existing = journey('op:zivinice:gracanica_2', 'op:other:dest');
+            const journeyWireBefore = JSON.stringify(existing);
+            const orderWireBefore = JSON.stringify(order);
+            (state.military as any).brigade_movement_state = { [f.id as string]: existing };
+            (state.military as any).brigade_movement_orders = { [f.id as string]: order };
+
+            applyEventEffects(state, [srebEffect]);
+
+            expect(f.location_osid).toBe('op:zivinice:gracanica_2');
+            expect(f.personnel).toBe(400);
+            expect((state.military as any).brigade_movement_state?.[f.id as string]).toEqual(existing);
+            expect((state.military as any).brigade_movement_orders?.[f.id as string]).toEqual(order);
+            expect(JSON.stringify((state.military as any).brigade_movement_state?.[f.id as string])).toBe(journeyWireBefore);
+            expect(JSON.stringify((state.military as any).brigade_movement_orders?.[f.id as string])).toBe(orderWireBefore);
+        });
+    });
+
+    it('flag OFF reduced: journeys remain untouched', () => {
+        withFlag('false', () => {
+            const f = encFormation();
+            const state = makeState(f);
+            const existing = journey('op:srebrenica:srebrenica_2', 'op:other:dest');
+            (state.military as any).brigade_movement_state = { [f.id as string]: existing };
+
+            applyEventEffects(state, [srebEffect]);
+
+            expect((state.military as any).brigade_movement_state?.[f.id as string]).toEqual(existing);
+        });
+    });
+
+    it('flag ON excluded non-enclave formation retains its journey', () => {
+        withFlag('true', () => {
+            const f = encFormation({ tags: [] });
+            const state = makeState(f);
+            const existing = journey('op:srebrenica:srebrenica_2', 'op:other:dest');
+            (state.military as any).brigade_movement_state = { [f.id as string]: existing };
+
+            applyEventEffects(state, [srebEffect]);
+
+            expect((state.military as any).brigade_movement_state?.[f.id as string]).toEqual(existing);
+        });
+    });
+
+    it('flag ON malformed event retains its journey', () => {
+        withFlag('true', () => {
+            const f = encFormation();
+            const state = makeState(f);
+            const existing = journey('op:srebrenica:srebrenica_2', 'op:other:dest');
+            (state.military as any).brigade_movement_state = { [f.id as string]: existing };
+
+            applyEventEffects(state, [{ ...srebEffect, casualty_fraction: Number.NaN }]);
+
+            expect((state.military as any).brigade_movement_state?.[f.id as string]).toEqual(existing);
+        });
+    });
+
+    it('flag ON reduced: canonical save/load carries no obsolete journey', () => {
+        withFlag('true', () => {
+            const f = encFormation();
+            const state = makeState(f);
+            (state.military as any).brigade_movement_state = {
+                [f.id as string]: journey('op:srebrenica:srebrenica_2', 'op:other:dest'),
+            };
+
+            applyEventEffects(state, [srebEffect]);
+            const loaded = deserializeState(serializeState(state));
+
+            expect(loaded.military.formations?.[f.id as string]?.location_osid).toBe('op:zivinice:gracanica_2');
+            expect((loaded.military as any).brigade_movement_state?.[f.id as string]).toBeUndefined();
         });
     });
 });

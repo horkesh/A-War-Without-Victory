@@ -1698,6 +1698,7 @@ export function ensureMinimumSectorCoverage(
         sectorFrontOsids: ReadonlySet<string>,
         activeCounts: CoverageOccupancyCounts,
         maxHops = LOCAL_FRONT_RELIEF_MAX_HOPS,
+        eligibility?: (target: string) => boolean,
     ): { target: string; dist: number } | null => {
         const formation = formations[bid];
         if (!formation?.location_osid) return null;
@@ -1708,7 +1709,8 @@ export function ensureMinimumSectorCoverage(
             vacantTargets.add(target);
         }
         if (vacantTargets.size === 0) return null;
-        if (vacantTargets.has(formation.location_osid)) {
+        if (vacantTargets.has(formation.location_osid)
+            && (!eligibility || eligibility(formation.location_osid))) {
             return { target: formation.location_osid, dist: 0 };
         }
 
@@ -1721,7 +1723,8 @@ export function ensureMinimumSectorCoverage(
                 const neighbors = adjacency.get(osid as Osid);
                 if (!neighbors) continue;
                 for (const neighbor of neighbors) {
-                    if (vacantTargets.has(neighbor)) {
+                    if (vacantTargets.has(neighbor)
+                        && (!eligibility || eligibility(neighbor))) {
                         candidates.push(neighbor);
                     }
                     if (visited.has(neighbor)) continue;
@@ -1745,12 +1748,14 @@ export function ensureMinimumSectorCoverage(
         sector: CorpsFrontSector,
         activeCounts: CoverageOccupancyCounts,
         maxHops = LOCAL_FRONT_RELIEF_MAX_HOPS,
+        eligibility?: (target: string) => boolean,
     ): { target: string; dist: number } | null => (
         pickVacantLocalFrontTargetFromFrontSet(
             bid,
             frontOsidsFor(sector),
             activeCounts,
             maxHops,
+            eligibility,
         )
     );
 
@@ -1904,7 +1909,13 @@ export function ensureMinimumSectorCoverage(
                 for (let ri = 0; ri < sector.reserve_brigade_ids.length; ri++) {
                     const bid = sector.reserve_brigade_ids[ri]!;
                     if (!isZeroAssignedRescueEligible(bid)) continue;
-                    const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, activeCounts);
+                    const target = pickVacantLocalFrontTargetFromFrontSet(
+                        bid,
+                        sectorFrontOsids,
+                        activeCounts,
+                        LOCAL_FRONT_RELIEF_MAX_HOPS,
+                        (candidate) => targetPreservesHomeDistance(bid, candidate),
+                    );
                     if (target) {
                         if (!targetPreservesHomeDistance(bid, target.target)) continue;
                         sector.reserve_brigade_ids.splice(ri, 1);
@@ -1925,7 +1936,13 @@ export function ensureMinimumSectorCoverage(
                     .sort(strictCompare)
                     .map((bid) => {
                         if (!isZeroAssignedRescueEligible(bid)) return null;
-                        const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, activeCounts);
+                        const target = pickVacantLocalFrontTargetFromFrontSet(
+                            bid,
+                            sectorFrontOsids,
+                            activeCounts,
+                            LOCAL_FRONT_RELIEF_MAX_HOPS,
+                            (candidate) => targetPreservesHomeDistance(bid, candidate),
+                        );
                         if (target && !targetPreservesHomeDistance(bid, target.target)) return null;
                         return target ? { bid, dist: target.dist, target: target.target } : null;
                     })
@@ -1952,7 +1969,13 @@ export function ensureMinimumSectorCoverage(
                             .sort(strictCompare)
                             .map((bid) => {
                                 if (!isZeroAssignedRescueEligible(bid)) return null;
-                                const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, activeCounts);
+                                const target = pickVacantLocalFrontTargetFromFrontSet(
+                                    bid,
+                                    sectorFrontOsids,
+                                    activeCounts,
+                                    LOCAL_FRONT_RELIEF_MAX_HOPS,
+                                    (candidate) => targetPreservesHomeDistance(bid, candidate),
+                                );
                                 if (target && !targetPreservesHomeDistance(bid, target.target)) return null;
                                 return target ? { donor, bid, dist: target.dist, target: target.target } : null;
                             });
@@ -1986,7 +2009,13 @@ export function ensureMinimumSectorCoverage(
                             .sort(strictCompare)
                             .map((bid) => {
                                 if (!isZeroAssignedRescueEligible(bid)) return null;
-                                const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, activeCounts);
+                                const target = pickVacantLocalFrontTargetFromFrontSet(
+                                    bid,
+                                    sectorFrontOsids,
+                                    activeCounts,
+                                    LOCAL_FRONT_RELIEF_MAX_HOPS,
+                                    (candidate) => targetPreservesHomeDistance(bid, candidate),
+                                );
                                 if (target && !targetPreservesHomeDistance(bid, target.target)) return null;
                                 return target ? { donor, bid, dist: target.dist, target: target.target } : null;
                             });
@@ -2076,7 +2105,13 @@ export function ensureMinimumSectorCoverage(
                             if (brigadeMovementOrders?.[entry.bid]) return null;
                             if (claimTypeForSector(entry.donor, entry.bid) !== 'front') return null;
                             if (entry.donor.assigned_brigade_ids.length <= needed(entry.donor)) return null;
-                            const target = pickVacantLocalFrontTarget(entry.bid, sector, activeCounts, LOCAL_FRONT_RELIEF_MAX_HOPS);
+                            const target = pickVacantLocalFrontTarget(
+                                entry.bid,
+                                sector,
+                                activeCounts,
+                                LOCAL_FRONT_RELIEF_MAX_HOPS,
+                                (candidate) => targetPreservesHomeDistance(entry.bid, candidate),
+                            );
                             if (!target) return null;
                             if (!targetPreservesHomeDistance(entry.bid, target.target)) return null;
                             return { ...entry, target: target.target, dist: target.dist, personnel: effectivePersonnel(formation) };
@@ -2104,6 +2139,7 @@ export function ensureMinimumSectorCoverage(
                             sector,
                             activeCounts,
                             LOCAL_FRONT_RELIEF_MAX_HOPS,
+                            (target) => targetPreservesHomeDistance(candidate.bid, target),
                         );
                         if (!retargeted) continue;
                         if (!targetPreservesHomeDistance(candidate.bid, retargeted.target)) continue;
@@ -2346,7 +2382,13 @@ export function ensureMinimumSectorCoverage(
                         if (opParticipants.has(entry.bid)) return null;
                         if (brigadeMovementState?.[entry.bid]?.status === 'in_transit') return null;
                         if (brigadeMovementOrders?.[entry.bid]) return null;
-                        const target = pickVacantLocalFrontTarget(entry.bid, sector, activeCounts, LOCAL_FRONT_RELIEF_MAX_HOPS);
+                        const target = pickVacantLocalFrontTarget(
+                            entry.bid,
+                            sector,
+                            activeCounts,
+                            LOCAL_FRONT_RELIEF_MAX_HOPS,
+                            (candidate) => targetPreservesHomeDistance(entry.bid, candidate),
+                        );
                         if (!target) return null;
                         if (!targetPreservesHomeDistance(entry.bid, target.target)) return null;
                         return { ...entry, target: target.target, dist: target.dist };
@@ -2443,6 +2485,7 @@ export function ensureMinimumSectorCoverage(
                         recipient,
                         activeCounts,
                         FLOOR_COMPLETION_MAX_HOPS,
+                        (candidate) => targetPreservesHomeDistance(entry.bid, candidate),
                     );
                     if (!bestTarget) return null;
                     if (!targetPreservesHomeDistance(entry.bid, bestTarget.target)) return null;
@@ -2483,6 +2526,7 @@ export function ensureMinimumSectorCoverage(
                     recipient,
                     activeCounts,
                     FLOOR_COMPLETION_MAX_HOPS,
+                    (target) => targetPreservesHomeDistance(candidate.bid, target),
                 );
                 if (!retargeted) continue;
                 if (!targetPreservesHomeDistance(candidate.bid, retargeted.target)) continue;
@@ -2577,6 +2621,7 @@ export function ensureMinimumSectorCoverage(
                                 recipient,
                                 activeCounts,
                                 SEVERE_NEARBY_RELIEF_MAX_HOPS,
+                                (candidate) => targetPreservesHomeDistance(entry.bid, candidate),
                             );
                             if (!bestTarget) return null;
                             if (!targetPreservesHomeDistance(entry.bid, bestTarget.target)) return null;
@@ -2616,6 +2661,7 @@ export function ensureMinimumSectorCoverage(
                     recipient,
                     activeCounts,
                     SEVERE_NEARBY_RELIEF_MAX_HOPS,
+                    (target) => targetPreservesHomeDistance(candidate.bid, target),
                 );
                 if (!retargeted) continue;
                 if (!targetPreservesHomeDistance(candidate.bid, retargeted.target)) continue;

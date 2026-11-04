@@ -4166,12 +4166,22 @@ test('duplicate exact counter during settled reads clicks nothing and persists d
             },
         );
 
+        let rejectedError: any = null;
         await assert.rejects(
             () => verify({}, frame, 'RBiH', [], 'initial-map-probe', { id: 'formation-duplicate' }),
-            /identity is not unique during stable resolution/,
+            (error: unknown) => {
+                rejectedError = error;
+                return /identity is not unique during stable resolution/.test(String((error as Error)?.message ?? error));
+            },
         );
 
+        assert.match(String(rejectedError?.message ?? rejectedError), /identity is not unique during stable resolution/);
         assert.equal(clicks, 0);
+        assert.equal(
+            rejectedError?.counterSelectionSidecarError,
+            undefined,
+            `counter-selection sidecar write failed while preserving the original identity error: ${String(rejectedError?.counterSelectionSidecarError)}; original: ${String(rejectedError?.message ?? rejectedError)}`,
+        );
         const factionDir = join(tempRoot, 'RBiH');
         const files = nodeFs.readdirSync(factionDir).sort();
         assert.deepEqual(files, ['initial-map-probe-counter-formation-duplicate-selection-failure.json']);

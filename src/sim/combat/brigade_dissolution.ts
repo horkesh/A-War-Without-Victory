@@ -24,6 +24,7 @@
 
 import type { FormationId, FormationState, GameState } from '../../state/game_state.js';
 import { isEnclaveBrigade } from './enclave_resilience.js';
+import { isFriendlyFaction } from '../early_war/alliance_update.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { lookupStepCurve, type WarTimeline } from '../../state/war_timeline.js';
 
@@ -107,7 +108,10 @@ export function resolveDissolutionThreshold(
     return lookupStepCurve(entries, turn, defaultValue);
 }
 
-export function dissolveCombatIneffectiveBrigades(state: GameState): DissolutionReport {
+export function dissolveCombatIneffectiveBrigades(
+    state: GameState,
+    osidAdjacency?: ReadonlyMap<string, readonly string[]>,
+): DissolutionReport {
     const report: DissolutionReport = { dissolved_count: 0, dissolved_brigades: [] };
     const formations = state.military.formations ?? {};
     const formationIds = Object.keys(formations).sort((a, b) => strictCompare(a, b));
@@ -184,21 +188,54 @@ export function dissolveCombatIneffectiveBrigades(state: GameState): Dissolution
             }
         }
 
-        // Transfer equipment to nearest same-corps active brigade
+        // Transfer equipment to the nearest eligible same-corps recipient with a
+        // provable own-controlled location. Friendly (own/allied) OSIDs may form
+        // the route, but source and recipient must be own-controlled. Missing
+        // graph is fail-closed for remote transfer; a same-cell own recipient is
+        // still provable. Stable formation ID breaks equal-distance ties.
         if (f.composition && f.corps_id) {
             const salvageRate = DISSOLUTION_EQUIPMENT_TRANSFER_RATE;
             const tanksToTransfer = Math.floor((f.composition.tanks ?? 0) * salvageRate);
             const artilleryToTransfer = Math.floor((f.composition.artillery ?? 0) * salvageRate);
 
-            // Find first alphabetically in same corps (deterministic)
+            const controllers = state.political?.political_controllers ?? {};
+            const sourceFaction = typeof f.faction === 'string' && f.faction.length > 0 ? f.faction : null;
+            const sourceLocation = typeof f.location_osid === 'string' ? f.location_osid : null;
+            const sourceOwnControlled = sourceFaction !== null && sourceLocation !== null && controllers[sourceLocation] === sourceFaction;
+            const distances = new Map<string, number>();
+            if (sourceOwnControlled && sourceLocation !== null && sourceFaction !== null) {
+                distances.set(sourceLocation, 0);
+                if (osidAdjacency) {
+                    const queue = [sourceLocation];
+                    for (let head = 0; head < queue.length; head++) {
+                        const current = queue[head]!;
+                        const nextDistance = (distances.get(current) ?? 0) + 1;
+                        for (const neighbor of osidAdjacency.get(current) ?? []) {
+                            if (distances.has(neighbor)) continue;
+                            const controller = controllers[neighbor];
+                            if (controller == null || !isFriendlyFaction(controller, sourceFaction, state)) continue;
+                            distances.set(neighbor, nextDistance);
+                            queue.push(neighbor);
+                        }
+                    }
+                }
+            }
+
             let targetBrigade: FormationState | null = null;
-            for (const tid of formationIds) {
-                const t = formations[tid];
-                if (!t || t.status !== 'active' || tid === fid) continue;
-                if (t.faction !== f.faction || t.corps_id !== f.corps_id) continue;
-                if (t.kind !== 'brigade' && t.kind !== 'og') continue;
-                targetBrigade = t;
-                break;
+            let targetDistance = Number.POSITIVE_INFINITY;
+            if (sourceOwnControlled) {
+                for (const tid of formationIds) {
+                    const t = formations[tid];
+                    if (!t || t.status !== 'active' || tid === fid) continue;
+                    if (t.faction !== f.faction || t.corps_id !== f.corps_id) continue;
+                    if (t.kind !== 'brigade' && t.kind !== 'og') continue;
+                    if (!t.composition || typeof t.location_osid !== 'string') continue;
+                    if (controllers[t.location_osid] !== f.faction) continue;
+                    const distance = distances.get(t.location_osid);
+                    if (distance === undefined || distance >= targetDistance) continue;
+                    targetBrigade = t;
+                    targetDistance = distance;
+                }
             }
 
             if (targetBrigade && targetBrigade.composition) {

@@ -17,8 +17,11 @@ import type {
     OpportunityAxisDef,
 } from './operation_opportunities.js';
 import { computeCorpsOperationReadiness } from './corps_operation_readiness.js';
+import { findBrigadeLiveOperationAnywhere } from './corps_operation_helpers.js';
 import { isWesternTheaterRuptured } from './operation_storm_theater.js';
 import { getFactionLiveSupplyPressure } from './supply_condition.js';
+import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
+import { MAX_EXHAUSTION_FOR_OPERATION } from './bot_constants.js';
 
 const PRIMARY_CORPS = 'arbih_3rd_corps';
 // The historical Donji Vakuf push is associated with the 7th Corps under
@@ -232,6 +235,20 @@ const VLASIC_AXES: readonly OpportunityAxisDef[] = [
             'arbih_712th_mountain' as FormationId,
             'arbih_737th_muslim_light' as FormationId,
             'arbih_705th_slavna_mountain' as FormationId,
+            // MODELED theater allocation under owner paint-calibration
+            // authority, not a documented March 1995 order. The 314th is an
+            // existing mandatory 3rd Corps active unit; the 717th and 303rd
+            // are existing 3rd Corps reserve units. Eleven authored IDs
+            // include the inactive 706th, leaving ten potentially active
+            // catalogue slots before availability; the actual retained Guards
+            // loan means only nine expected participants here. The existing
+            // minimum formula stays Math.floor(11/2) = 5, with no guarantee of
+            // admission, delivery or historic participation.
+            'arbih_7th_vitezka_muslim_liberation' as FormationId,
+            'arbih_guards_brigade' as FormationId,
+            'arbih_314th_slavna_liberation' as FormationId,
+            'arbih_717th_slavna_mountain' as FormationId,
+            'arbih_303rd_vitezka_mountain' as FormationId,
         ],
         objectives: VLASIC_TRAVNIK_RIDGE_OBJECTIVES,
         staging_osid: STAGING_TURBE,
@@ -481,8 +498,112 @@ const weatherSeasonVlasic: AxisPredicate = (_state, turn) => {
     return { green: true, reason: 'spring mountain conditions are acceptable for ridge action' };
 };
 
+// ─── Paklarevo local concentration model ─────────────────────────────────────
+// MODELED allocation, not an attested historical order. The retained trace has
+// the ridge's first Paklarevo fall at155 with nine attackers and no force
+// shortage; the published profile had already taken Paklarevo at113 through a
+// generated operation. This one-turn local model tests whether the existing
+// supplied 3rd Corps trio can deliver the same target at the first fresh
+// post-exhaustion eligibility, without reserving them earlier or changing any
+// force, supply, intel or combat rule.
+const PAKLAREVO_MODEL_OBJECTIVE = 'op:travnik:paklarevo';
+const PAKLAREVO_MODEL_STAGING = STAGING_TURBE;
+const PAKLAREVO_MODEL_TRIO = [
+    'arbih_712th_mountain',
+    'arbih_727th_slavna',
+    'arbih_770th_slavna_mountain',
+] as const;
+const PAKLAREVO_MODEL_READINESS_FLOOR = 0.36;
+const PAKLAREVO_MODEL_SUPPLY_CEILING = 90;
+const PAKLAREVO_MODEL_AXES: readonly OpportunityAxisDef[] = [{
+    axis_id: 'paklarevo_local_concentration',
+    name: 'Paklarevo Local Concentration',
+    corps: PRIMARY_CORPS,
+    // Exact local trio only. 708th is deliberately excluded: it is the sole
+    // Medini defender against six RS formations in Komar. This is a modeled
+    // local allocation, not a named historical offensive or order.
+    brigades: [...PAKLAREVO_MODEL_TRIO] as FormationId[],
+    objectives: [PAKLAREVO_MODEL_OBJECTIVE],
+    staging_osid: PAKLAREVO_MODEL_STAGING,
+}];
+
+const dateWindowPaklarevoModel: AxisPredicate = (_state, turn) => {
+    if (turn < 123) return { green: false, reason: 'Paklarevo local model window not yet open' };
+    if (turn > 123) return { green: false, reason: 'Paklarevo local model window has closed' };
+    return { green: true, reason: 'within the single turn 123 Paklarevo local model window' };
+};
+
+const stagingAccessPaklarevoModel: AxisPredicate = (state) => {
+    const controller = getPoliticalControllerOSID(state, PAKLAREVO_MODEL_STAGING, undefined);
+    return controller === 'RBiH'
+        ? { green: true, reason: 'Turbe remains an ordinary friendly assembly approach' }
+        : { green: false, reason: 'Turbe is not friendly-held for the local Paklarevo assembly' };
+};
+
+const enemyWeaknessPaklarevoModel: AxisPredicate = (state) => {
+    const controller = getPoliticalControllerOSID(state, PAKLAREVO_MODEL_OBJECTIVE, undefined);
+    return controller === 'RS'
+        ? { green: true, reason: 'Paklarevo remains in enemy hands' }
+        : { green: false, reason: 'Paklarevo is no longer an enemy-held objective' };
+};
+
+const corpsReadinessPaklarevoModel: AxisPredicate = (state) => {
+    const cmd = state.military.corps_command?.[PRIMARY_CORPS];
+    if (!cmd) return { green: false, reason: '3rd Corps command not present in this scenario' };
+    if (cmd.corps_exhaustion > MAX_EXHAUSTION_FOR_OPERATION) {
+        return { green: false, reason: `3rd Corps exhaustion ${cmd.corps_exhaustion} above ordinary operation threshold ${MAX_EXHAUSTION_FOR_OPERATION}` };
+    }
+    const traits = computeCorpsOperationReadiness(state, PRIMARY_CORPS as FormationId);
+    if (traits.operation_readiness < PAKLAREVO_MODEL_READINESS_FLOOR) {
+        return { green: false, reason: '3rd Corps readiness below Paklarevo local operation floor' };
+    }
+    return { green: true, reason: '3rd Corps exhaustion and readiness permit ordinary local preparation' };
+};
+
+const logisticsPaklarevoModel: AxisPredicate = (state) => {
+    const pressure = getFactionLiveSupplyPressure(state, 'RBiH');
+    return pressure >= PAKLAREVO_MODEL_SUPPLY_CEILING
+        ? { green: false, reason: 'RBiH supply pressure too high for the Paklarevo local operation' }
+        : { green: true, reason: 'RBiH supply pressure within the ordinary Paklarevo margin' };
+};
+
+const forceQualityPaklarevoModel: AxisPredicate = (state) => {
+    const cmd = state.military.corps_command?.[PRIMARY_CORPS];
+    if (!cmd) return { green: false, reason: '3rd Corps command not present in this scenario' };
+    if (cmd.og_slots > 0 && cmd.active_ogs.length >= cmd.og_slots) {
+        return { green: false, reason: 'No ordinary operational-group slot remains for the Paklarevo model' };
+    }
+    for (const brigadeId of PAKLAREVO_MODEL_TRIO) {
+        const formation = state.military.formations?.[brigadeId as FormationId];
+        if (!formation) return { green: false, reason: `${brigadeId} is missing` };
+        if (formation.faction !== 'RBiH') return { green: false, reason: `${brigadeId} is not RBiH` };
+        const owner = formation.corps_id ?? (formation as { own_corps_cmd?: string }).own_corps_cmd;
+        if (owner !== PRIMARY_CORPS) return { green: false, reason: `${brigadeId} is not a 3rd Corps formation` };
+        if (!isEligibleOperationFormation(formation)) return { green: false, reason: `${brigadeId} is not eligible for an operation` };
+        if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) return { green: false, reason: `${brigadeId} is below the ordinary attack floor` };
+        if ((formation.disrupted_turns ?? 0) > 0) return { green: false, reason: `${brigadeId} is disrupted` };
+        const movement = state.military.brigade_movement_state?.[brigadeId as FormationId]?.status;
+        if (movement === 'in_transit' || movement === 'packing') {
+            return { green: false, reason: `${brigadeId} is already moving` };
+        }
+        if (findBrigadeLiveOperationAnywhere(state, brigadeId as FormationId)) {
+            return { green: false, reason: `${brigadeId} is already committed to a live operation` };
+        }
+    }
+    return { green: true, reason: 'All exact local trio formations are available and unconflicted' };
+};
+
 const dateWindowDonjiVakuf: AxisPredicate = (_state, turn) => {
-    if (turn < 177) return { green: false, reason: 'September 1995 Donji Vakuf window not yet open' };
+    // Balkan Battlegrounds I printed p.382 (notes680-681/685-688, p.420):
+    // earlier 24 July and 12 August attacks failed; renewed 7th Corps attacks
+    // around Donji Vakuf/Komar began 10 September, with town entry/capture
+    // 13-14 September. A local retrospective places initial fighting on 9
+    // September, the same modeled week. Completed turn179 covers 4-10 September.
+    // Lower bound178 is only a weekly approximation allowing ordinary earliest
+    // execution on179; it does not assert a historical preparation day, force
+    // execution, or change the upper bound, planning_duration, evaluators,
+    // readiness/logistics gates, 7th Corps proxy representation or any other field.
+    if (turn < 178) return { green: false, reason: 'September 1995 Donji Vakuf window not yet open' };
     if (turn > 180) return { green: false, reason: 'September 1995 Donji Vakuf window has closed' };
     return { green: true, reason: 'within September 1995 Donji Vakuf operation window' };
 };
@@ -819,8 +940,10 @@ export const VLASIC_RIDGE_95_OPPORTUNITY: OperationOpportunityDef = {
     axes: VLASIC_AXES,
     staging_osid: STAGING_TRAVNIK,
     // 2026-09-28 timing candidate: planning 4→2 so a t152-approved Vlašić
-    // operation can begin executing by t154 (1995-03-20, the documented
-    // Domet-1 start) instead of waiting out a 4-turn planning window.
+    // operation can begin executing in the week completed by receipt 155
+    // (20-26 March 1995, the documented Domet-1 opening) rather than waiting
+    // out a 4-turn planning window. The two-turn preparation is an explicit
+    // model assumption, not a sourced historical preparation period.
     planning_duration: 2,
     min_attack_outcome: 'repulsed',
     citations: [
@@ -862,6 +985,49 @@ export const VLASIC_RIDGE_95_OPPORTUNITY: OperationOpportunityDef = {
             staging_osid: STAGING_TURBE,
         },
     ],
+    staff_recommendation: 'approve',
+};
+
+// Explicit model-only baseline. `did_not_launch` records that no sourced named
+// historical offensive is being claimed here; it is NOT evidence that local
+// combat did not occur around Paklarevo.
+export const PAKLAREVO_LOCAL_94_MODEL_OPPORTUNITY: OperationOpportunityDef = {
+    opportunity_id: 'paklarevo_local_94_model',
+    name: 'Paklarevo Local Concentration (Model)',
+    tier: 'T1',
+    faction: 'RBiH',
+    primary_corps: PRIMARY_CORPS,
+    family: 'central_bosnia_vlasic',
+    axes: PAKLAREVO_MODEL_AXES,
+    staging_osid: PAKLAREVO_MODEL_STAGING,
+    planning_duration: 2,
+    citations: [],
+    historical_exit_class: 'did_not_launch',
+    prerequisites: {
+        date_window: 'required',
+        political_authorization: 'n_a',
+        corps_readiness: 'required',
+        logistics: 'required',
+        staging_access: 'required',
+        weather_season: 'n_a',
+        commander_confidence: 'n_a',
+        enemy_weakness: 'required',
+        alliance_context: 'n_a',
+        force_quality: 'required',
+        min_optional_axes: 0,
+    },
+    evaluators: {
+        date_window: dateWindowPaklarevoModel,
+        political_authorization: alwaysGreen,
+        corps_readiness: corpsReadinessPaklarevoModel,
+        logistics: logisticsPaklarevoModel,
+        staging_access: stagingAccessPaklarevoModel,
+        weather_season: alwaysGreen,
+        commander_confidence: alwaysGreen,
+        enemy_weakness: enemyWeaknessPaklarevoModel,
+        alliance_context: alwaysGreen,
+        force_quality: forceQualityPaklarevoModel,
+    },
     staff_recommendation: 'approve',
 };
 
@@ -1347,4 +1513,5 @@ export const CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES: readonly OperationOpportunityD
     VLASIC_RIDGE_95_OPPORTUNITY,
     DONJI_VAKUF_95_OPPORTUNITY,
     KONJIC_SEPTEMBER_94_OPPORTUNITY,
+    PAKLAREVO_LOCAL_94_MODEL_OPPORTUNITY,
 ];

@@ -12,11 +12,14 @@ import {
 } from '../src/sim/combat/operation_opportunities.js';
 import {
     FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES,
+    MISTRAL_1_95_OPPORTUNITY,
     MISTRAL_2_95_OPPORTUNITY,
     SOUTHERN_MOVE_95_OPPORTUNITY,
 } from '../src/sim/combat/operation_opportunity_catalog_federation_western_bosnia.js';
 import { OPERATION_STORM_EVENT_ID } from '../src/sim/combat/operation_storm_theater.js';
 import { getSectorOffensiveCurrentObjective } from '../src/sim/combat/bot_brigade_ai_osid.js';
+import { getCurrentLaunchObjectives } from '../src/sim/combat/sector_offensive_axis_helpers.js';
+import { updateSectorOffensiveResults } from '../src/sim/combat/sector_offensive.js';
 import { advanceLatePhaseGates, operationInstanceId } from '../src/sim/combat/operation_phase_gate.js';
 import { getPreparationObjectiveView } from '../src/sim/combat/sector_offensive_axis_helpers.js';
 import { effectiveOperationMinimum } from '../src/sim/combat/operation_minimum_policy.js';
@@ -375,6 +378,106 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
         expect(op!.axes!.find(axis => axis.axis_id === 'mistral_1_glamoc')!.assigned_brigades)
             .toEqual(['hrhb_kralj_petar_kreimir_iv_brigade']);
         expect(state.military.brigade_movement_state).toEqual(transitBefore);
+    });
+
+    it('starts Grahovo at Gubin while preserving all former goals and shared-objective progression', () => {
+        const grahovoExpected = [
+            'op:livno:gubin_2',
+            'op:bosansko_grahovo:crni_lug',
+            'op:bosansko_grahovo:malesevci',
+            'op:bosansko_grahovo:bosansko_grahovo_2',
+            'op:bosansko_grahovo:ugarci',
+        ];
+        const glamocExpected = [
+            'op:glamoc:vidimlije_2',
+            'op:glamoc:glamoc_2',
+            'op:glamoc:pribelja',
+            'op:glamoc:kovacevci_2',
+            'op:glamoc:halapic',
+            'op:livno:gubin_2',
+            'op:glamoc:stekerovci_2',
+        ];
+        const grahovoAxis = MISTRAL_1_95_OPPORTUNITY.axes[0];
+        const glamocAxis = MISTRAL_1_95_OPPORTUNITY.axes[1];
+        expect(grahovoAxis.objectives).toEqual(grahovoExpected);
+        expect(glamocAxis.objectives).toEqual(glamocExpected);
+        expect(grahovoAxis.staging_osid).toBe('op:livno:misi_2');
+
+        const adjacent = (a: string, b: string) => OPERATIONAL_CONTACT_GRAPH.some(edge =>
+            (edge.a === a && edge.b === b) || (edge.a === b && edge.b === a));
+        expect(adjacent('op:livno:gubin_2', 'op:livno:priluka_2')).toBe(true);
+        expect(adjacent('op:livno:misi_2', 'op:livno:prolog_2')).toBe(true);
+        expect(adjacent('op:livno:prolog_2', 'op:livno:priluka_2')).toBe(true);
+        expect(grahovoExpected.slice(0, -1).every((from, index) => adjacent(from, grahovoExpected[index + 1]))).toBe(true);
+
+        const state = buildMistralState({ turn: 160, stormFired: false });
+        state.military.formations.hrhb_kralj_petar_kreimir_iv_brigade = {
+            id: 'hrhb_kralj_petar_kreimir_iv_brigade',
+            name: 'Kralj Petar Krešimir IV Brigade',
+            kind: 'brigade',
+            status: 'active',
+            faction: 'HRHB',
+            corps_id: 'hvo_tomislavgrad',
+            personnel: 1500,
+            strength: 1500,
+        } as any;
+        runOpportunityEvaluationStep(state, 160);
+        applyOpportunityDecision(state, 160, buildProposalId('mistral_1_95', 160), 'approve');
+        const op = state.military.corps_command!.hvo_tomislavgrad.active_operations
+            .find(activeOp => activeOp.name === 'Operation Mistral 1')!;
+        const grahovo = op.axes!.find(axis => axis.axis_id === 'mistral_1_grahovo')!;
+        const glamoc = op.axes!.find(axis => axis.axis_id === 'mistral_1_glamoc')!;
+        expect(op.axes!.map(axis => axis.axis_id).sort()).toEqual(['mistral_1_glamoc', 'mistral_1_grahovo']);
+        expect(grahovo.assigned_brigades).toEqual(['hvo_1st_guard_abb', 'hv_4th_guards_split']);
+        expect(glamoc.assigned_brigades).toEqual(['hrhb_kralj_petar_kreimir_iv_brigade']);
+
+        // Valid synthetic execution preconditions only; these are not expectations.
+        state.military.formations.hvo_tomislavgrad = {
+            id: 'hvo_tomislavgrad',
+            name: 'HVO Tomislavgrad Corps',
+            kind: 'corps',
+            status: 'active',
+            faction: 'HRHB',
+            personnel: 0,
+            cohesion: 70,
+            morale: 70,
+        } as any;
+        grahovo.objectives = [...MISTRAL_1_95_OPPORTUNITY.axes[0]!.objectives];
+        glamoc.objectives = [...MISTRAL_1_95_OPPORTUNITY.axes[1]!.objectives];
+        op.phase = 'execution';
+        grahovo.status = 'executing';
+        glamoc.status = 'executing';
+        grahovo.current_objective_index = 0;
+        glamoc.current_objective_index = 5;
+        grahovo.attack_attempt_count = 1;
+        glamoc.attack_attempt_count = 1;
+        state.political.political_controllers!['op:livno:gubin_2'] = 'RS';
+        expect(getCurrentLaunchObjectives(op).filter(target => target === 'op:livno:gubin_2')).toHaveLength(1);
+        const hostileCaptureCounts = [grahovo.objective_capture_count, glamoc.objective_capture_count];
+        updateSectorOffensiveResults(state);
+        expect([grahovo.current_objective_index, glamoc.current_objective_index]).toEqual([0, 5]);
+        expect([grahovo.objective_capture_count, glamoc.objective_capture_count]).toEqual(hostileCaptureCounts);
+
+        state.political.political_controllers!['op:livno:gubin_2'] = 'HRHB';
+        grahovo.status = 'executing';
+        glamoc.status = 'executing';
+        grahovo.current_objective_index = 0;
+        glamoc.current_objective_index = 5;
+        updateSectorOffensiveResults(state);
+        expect([grahovo.current_objective_index, glamoc.current_objective_index]).toEqual([1, 6]);
+        expect([grahovo.objective_capture_count, glamoc.objective_capture_count]).toEqual([
+            hostileCaptureCounts[0]! + 1,
+            hostileCaptureCounts[1]! + 1,
+        ]);
+        expect(getSectorOffensiveCurrentObjective(op, grahovo.assigned_brigades[0]!))
+            .toBe('op:bosansko_grahovo:crni_lug');
+        expect(getSectorOffensiveCurrentObjective(op, glamoc.assigned_brigades[0]!))
+            .toBe('op:glamoc:stekerovci_2');
+        updateSectorOffensiveResults(state);
+        expect([grahovo.objective_capture_count, glamoc.objective_capture_count]).toEqual([
+            hostileCaptureCounts[0]! + 1,
+            hostileCaptureCounts[1]! + 1,
+        ]);
     });
 
     it('rejects an unreserved in-transit opportunity participant', () => {

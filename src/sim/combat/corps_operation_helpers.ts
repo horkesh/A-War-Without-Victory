@@ -89,12 +89,18 @@ export function getOperationSlotUsage(cmd: CorpsCommandState): number {
     return getOperationSlotUsageForOperations(cmd.active_operations);
 }
 
-/** Find which operation (if any) a brigade participates in */
+/** Find which operation (if any) a brigade participates in.
+ * A live planning/execution match wins over an earlier recovery-only match;
+ * within each phase class the corps array order remains authoritative.
+ */
 export function findBrigadeOperation(cmd: CorpsCommandState, brigadeId: string): CorpsOperation | null {
+    let recovery: CorpsOperation | null = null;
     for (const op of cmd.active_operations) {
-        if (op.participating_brigades.includes(brigadeId)) return op;
+        if (!op.participating_brigades.includes(brigadeId)) continue;
+        if (op.phase === 'planning' || op.phase === 'execution') return op;
+        recovery ??= op;
     }
-    return null;
+    return recovery;
 }
 
 /** Brigades on all live axes whose current objective matches brigadeId's axis. */
@@ -187,6 +193,7 @@ export function findBrigadeOperationAnywhere(
     const corpsCommand = state.military?.corps_command;
     if (!corpsCommand) return null;
     const corpsIds = Object.keys(corpsCommand).sort(strictCompare);
+    let recovery: { corps_id: FormationId; cmd: CorpsCommandState; op: CorpsOperation } | null = null;
     for (const cid of corpsIds) {
         const cmd = corpsCommand[cid];
         if (!cmd) continue;
@@ -197,12 +204,13 @@ export function findBrigadeOperationAnywhere(
         // write-path defect, and dereferencing them unguarded crashed
         // checkTriggeredOperations through getOperationsMult -> computeAttackerPower.
         for (const op of cmd.active_operations ?? []) {
-            if (op?.participating_brigades?.includes(brigadeId)) {
-                return { corps_id: cid as FormationId, cmd, op };
-            }
+            if (!op?.participating_brigades?.includes(brigadeId)) continue;
+            const match = { corps_id: cid as FormationId, cmd, op };
+            if (op.phase === 'planning' || op.phase === 'execution') return match;
+            recovery ??= match;
         }
     }
-    return null;
+    return recovery;
 }
 
 /**
@@ -230,9 +238,9 @@ export function findBrigadeLiveOperationAnywhere(
     for (const cid of corpsIds) {
         const cmd = corpsCommand[cid];
         if (!cmd) continue;
-        for (const op of cmd.active_operations) {
-            if (op.phase !== 'planning' && op.phase !== 'execution') continue;
-            if (op.participating_brigades.includes(brigadeId)) {
+        for (const op of cmd.active_operations ?? []) {
+            if (op?.phase !== 'planning' && op?.phase !== 'execution') continue;
+            if (op?.participating_brigades?.includes(brigadeId)) {
                 return { corps_id: cid as FormationId, cmd, op };
             }
         }

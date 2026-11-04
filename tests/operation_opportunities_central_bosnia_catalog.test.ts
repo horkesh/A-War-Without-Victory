@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
+import oobBrigades from '../data/source/oob_brigades.json';
 
 import {
     OPERATION_OPPORTUNITY_CATALOG,
+    applyBotOpportunityDecisions,
     applyOpportunityDecision,
     applyOpportunityDecisionDetailed,
     buildProposalId,
@@ -23,6 +25,7 @@ import {
     CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES,
     DONJI_VAKUF_95_OPPORTUNITY,
     KUPRES_CINCAR_94_OPPORTUNITY,
+    PAKLAREVO_LOCAL_94_MODEL_OPPORTUNITY,
     VLASIC_RIDGE_95_OPPORTUNITY,
 } from '../src/sim/combat/operation_opportunity_catalog_central_bosnia.js';
 import type { OperationAAR } from '../src/sim/combat/operation_aar.js';
@@ -44,13 +47,30 @@ const VLASIC_OBJECTIVES = [
     'op:travnik:gornje_krcevine',
 ];
 
+const PAKLAREVO_TRIO = [
+    'arbih_712th_mountain',
+    'arbih_727th_slavna',
+    'arbih_770th_slavna_mountain',
+];
+const PAKLAREVO_UNRELATED_PLAN = [
+    'arbih_708th_mountain',
+    'arbih_733rd_mountain',
+    'arbih_717th_slavna_mountain',
+    'arbih_725th_mountain',
+];
+
 const VLASIC_BRIGADES = [
     'arbih_17th_vitezka_mountain',
     'arbih_706th_muslim_mountain',
-    'arbih_712th_mountain',
     'arbih_727th_slavna',
+    'arbih_712th_mountain',
     'arbih_737th_muslim_light',
     'arbih_705th_slavna_mountain',
+    'arbih_7th_vitezka_muslim_liberation',
+    'arbih_guards_brigade',
+    'arbih_314th_slavna_liberation',
+    'arbih_717th_slavna_mountain',
+    'arbih_303rd_vitezka_mountain',
 ];
 
 const DONJI_VAKUF_STAGING_ANCHORS = [
@@ -300,23 +320,33 @@ function buildVlasicState(opts: {
 
     const formations: Record<string, unknown> = {};
     for (const id of VLASIC_BRIGADES) {
+        const is717 = id === 'arbih_717th_slavna_mountain';
+        const is303 = id === 'arbih_303rd_vitezka_mountain';
+        const reserve = is717 || is303;
         formations[id] = {
             id,
             name: id,
             kind: 'brigade',
-            status: 'active',
+            // Eleven authored IDs include the inactive 706th. This fixture
+            // supplies ten eligible participants because the Guards brigade
+            // is available here. That is distinct from the actual retained
+            // Guards loan, where only nine participants are expected.
+            status: id === 'arbih_706th_muslim_mountain' ? 'inactive' : 'active',
             faction: 'RBiH',
             corps_id: 'arbih_3rd_corps',
-            personnel: 1400,
-            strength: 1400,
+            personnel: reserve ? 1800 : 1400,
+            strength: reserve ? 1800 : 1400,
             officer_quality: opts.axisCoordinationLow ? 0.25 : 0.75,
-            cohesion: opts.axisCoordinationLow ? 35 : 70,
-            morale: opts.axisCoordinationLow ? 40 : 72,
+            cohesion: opts.axisCoordinationLow ? 35 : (reserve ? 62 : 70),
+            morale: opts.axisCoordinationLow ? 40 : (reserve ? 95 : 72),
+            // Synthetic fully-ready 303rd fixture: inventory matches the existing
+            // OOB, but condition fractions are 1/0/0. Actual retained wear differs
+            // and must be measured, not inferred from this fixture.
             composition: {
-                tanks: 0,
-                artillery: 1,
-                tank_condition: { operational: 0 },
-                artillery_condition: { operational: 1 },
+                tanks: is303 ? 2 : 0,
+                artillery: is303 ? 3 : 1,
+                tank_condition: is303 ? { operational: 1, degraded: 0, non_operational: 0 } : { operational: 0 },
+                artillery_condition: is303 ? { operational: 1, degraded: 0, non_operational: 0 } : { operational: 1 },
             },
         };
     }
@@ -453,6 +483,125 @@ function buildDonjiVakufSourceOobState(turn: number): GameState {
         formation.own_corps_cmd = 'arbih_3rd_corps';
     }
     return state;
+}
+
+function buildPaklarevoState(opts: {
+    turn?: number;
+    exhaustion?: number;
+    supplyPressure?: number;
+    activeOgs?: string[];
+    lowReadiness?: boolean;
+} = {}): GameState {
+    const turn = opts.turn ?? 123;
+    const plan = {
+        plan_id: 'ai-plan-123-unrelated',
+        objective_description: 'Unrelated pre-123 plan',
+        target_osids: ['op:travnik:paklarevo', 'op:donji_vakuf:komar_2'],
+        required_brigades: 4,
+        assigned_brigades: [...PAKLAREVO_UNRELATED_PLAN],
+        staging_zone: 'travnik',
+        status: 'concentrating',
+        created_turn: 120,
+        target_ready_turn: 125,
+        concentration_progress: 0.5,
+        viability_score: 0.5,
+        source: 'reactive',
+    };
+    const cmd: CorpsCommandState = {
+        command_span: 8,
+        subordinate_count: 8,
+        og_slots: 1,
+        active_ogs: [...(opts.activeOgs ?? [])],
+        corps_exhaustion: opts.exhaustion ?? 28,
+        stance: 'offensive',
+        active_operations: [],
+        commander_state: {
+            current_plan: plan,
+            decision_trace: null,
+            operation_history: [],
+        } as unknown as CorpsCommandState['commander_state'],
+    };
+    const formation = (id: string, location_osid: string, cohesion: number) => ({
+        id,
+        name: id,
+        kind: 'brigade',
+        status: 'active',
+        faction: 'RBiH',
+        corps_id: 'arbih_3rd_corps',
+        own_corps_cmd: 'arbih_3rd_corps',
+        personnel: 1800,
+        strength: 1800,
+        officer_quality: opts.lowReadiness ? 0.2 : 0.75,
+        cohesion: opts.lowReadiness ? 30 : cohesion,
+        morale: opts.lowReadiness ? 35 : 95,
+        location_osid,
+        disruption: 0,
+        disrupted_turns: 0,
+        readiness: 'active',
+        posture: 'attack',
+        ops: { fatigue: 0, last_supplied_turn: turn },
+        composition: {
+            tanks: 0,
+            artillery: 1,
+            tank_condition: { operational: 0 },
+            artillery_condition: { operational: 1 },
+        },
+    });
+    const formations: Record<string, unknown> = {
+        'arbih_3rd_corps': {
+            id: 'arbih_3rd_corps', name: 'ARBiH 3rd Corps', kind: 'corps',
+            status: 'active', faction: 'RBiH',
+        },
+        'arbih_712th_mountain': formation('arbih_712th_mountain', 'op:travnik:turbe_2', 62),
+        'arbih_727th_slavna': formation('arbih_727th_slavna', 'op:travnik:ovcarevo', 62),
+        'arbih_770th_slavna_mountain': formation('arbih_770th_slavna_mountain', 'op:travnik:gluha_bukovica', 73.13),
+        'arbih_708th_mountain': formation('arbih_708th_mountain', 'op:donji_vakuf:medini', 70),
+        'arbih_733rd_mountain': formation('arbih_733rd_mountain', 'op:travnik:turbe_2', 70),
+        'arbih_717th_slavna_mountain': formation('arbih_717th_slavna_mountain', 'op:travnik:turbe_2', 70),
+        'arbih_725th_mountain': formation('arbih_725th_mountain', 'op:travnik:turbe_2', 70),
+    };
+    return {
+        schema_version: 0,
+        meta: { turn, seed: 'paklarevo-model-test', phase: 'war' },
+        factions: [{
+            id: 'RBiH',
+            capability_profile: {
+                training_quality: opts.lowReadiness ? 0.25 : 0.7,
+                organizational_maturity: opts.lowReadiness ? 0.25 : 0.7,
+                equipment_access: 0.5,
+                equipment_operational: 0.5,
+                doctrine_effectiveness: { ATTACK: 0.6, COORDINATED_STRIKE: 0.6 },
+            },
+        }],
+        military: {
+            formations,
+            front_segments: {},
+            front_posture: {},
+            front_posture_regions: {},
+            front_pressure: {},
+            militia_pools: {},
+            corps_command: { arbih_3rd_corps: cmd },
+            faction_officer_maturity: { RBiH: opts.lowReadiness ? 1.2 : 3.5 },
+            corps_front_sectors: {
+                'sector:arbih_3rd_corps:paklarevo': {
+                    sector_id: 'sector:arbih_3rd_corps:paklarevo',
+                    corps_id: 'arbih_3rd_corps',
+                    assigned_brigade_ids: [...PAKLAREVO_TRIO],
+                    reserve_brigade_ids: [...PAKLAREVO_UNRELATED_PLAN],
+                    sub_segments: [],
+                },
+            },
+        },
+        political: {
+            political_controllers: {
+                'op:travnik:turbe_2': 'RBiH',
+                'op:travnik:paklarevo': 'RS',
+            },
+            war_supply_pressure: { RBiH: opts.supplyPressure ?? 55 },
+            war_alliance_rbih_hrhb: 0.65,
+        },
+        displacement: {},
+    } as unknown as GameState;
 }
 
 function buildKupresCincarState(opts: {
@@ -859,6 +1008,7 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
             VLASIC_RIDGE_95_OPPORTUNITY,
             DONJI_VAKUF_95_OPPORTUNITY,
             OPERATION_OPPORTUNITY_CATALOG.find(d => d.opportunity_id === 'konjic_september_94')!,
+            PAKLAREVO_LOCAL_94_MODEL_OPPORTUNITY,
         ]);
         expect(OPERATION_OPPORTUNITY_CATALOG.some(d => d.opportunity_id === 'kupres_cincar_94')).toBe(true);
         expect(OPERATION_OPPORTUNITY_CATALOG.some(d => d.opportunity_id === 'vlasic_ridge_95')).toBe(true);
@@ -881,6 +1031,195 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         expect(DONJI_VAKUF_95_OPPORTUNITY.primary_corps).toBe('arbih_3rd_corps');
     });
 
+    it('uses only exact repository OOB IDs for the Paklarevo local trio', () => {
+        const rows = oobBrigades as Array<{ id?: string }>;
+        const ids = new Set(rows.map((row) => row.id).filter((id): id is string => typeof id === 'string'));
+        const expected = [
+            'arbih_712th_mountain',
+            'arbih_727th_slavna',
+            'arbih_770th_slavna_mountain',
+        ];
+        for (const id of expected) expect(ids.has(id), `${id} must exist in repository OOB`).toBe(true);
+        expect(ids.has('arbih_770th_mountain')).toBe(false);
+        expect(PAKLAREVO_LOCAL_94_MODEL_OPPORTUNITY.axes[0]!.brigades).toEqual(expected);
+    });
+
+    it('admits the modeled Paklarevo local trio at turn 123 with ordinary planning and no state side effects', () => {
+        const def = PAKLAREVO_LOCAL_94_MODEL_OPPORTUNITY;
+        expect(def.opportunity_id).toBe('paklarevo_local_94_model');
+        expect(def.name).toBe('Paklarevo Local Concentration (Model)');
+        expect(def.tier).toBe('T1');
+        expect(def.family).toBe('central_bosnia_vlasic');
+        expect(def.faction).toBe('RBiH');
+        expect(def.primary_corps).toBe('arbih_3rd_corps');
+        expect(def.historical_exit_class).toBe('did_not_launch');
+        expect(def.citations).toEqual([]);
+        expect(def.variants).toBeUndefined();
+        expect((def as any).min_attack_outcome).toBeUndefined();
+        expect((def as any).targets_friendly_overrides).toBeUndefined();
+        expect(def.axes).toHaveLength(1);
+        expect([...def.axes[0]!.brigades].sort()).toEqual([...PAKLAREVO_TRIO].sort());
+        expect(def.axes[0]!.objectives).toEqual(['op:travnik:paklarevo']);
+        expect(def.axes[0]!.staging_osid).toBe('op:travnik:turbe_2');
+        const state = buildPaklarevoState();
+        const cmd = state.military.corps_command!.arbih_3rd_corps;
+        const planBefore = structuredClone((cmd.commander_state as any).current_plan);
+        const controllersBefore = structuredClone(state.political.political_controllers);
+        const locationsBefore = Object.fromEntries(PAKLAREVO_TRIO.map((id) => [
+            id,
+            state.military.formations![id]!.location_osid,
+        ]));
+        const attackBefore = structuredClone(state.military.brigade_attack_orders);
+        const movementBefore = structuredClone(state.military.brigade_movement_orders);
+        expect(preflightOpportunityAdmission(state, def, def.axes, 'standard', 123)).toEqual({
+            admitted: true,
+            selected_participants: 3,
+            required_participants: 2,
+            reason: null,
+        });
+
+        runOpportunityEvaluationStep(state, 123);
+        const proposal = state.military.operation_opportunities
+            ?.find((entry) => entry.opportunity_id === 'paklarevo_local_94_model');
+        expect(proposal).toBeDefined();
+        expect(proposal!.status).toBe('eligible_pending_review');
+        const approved = applyOpportunityDecision(
+            state,
+            123,
+            buildProposalId('paklarevo_local_94_model', 123),
+            'approve',
+        );
+        expect(approved?.status).toBe('approved');
+
+        const op = cmd.active_operations.find((entry) => entry.name === 'Paklarevo Local Concentration (Model)');
+        expect(op).toBeDefined();
+        expect(op!.phase).toBe('planning');
+        expect(op!.planning_duration).toBe(2);
+        expect([...op!.participating_brigades].sort()).toEqual([...PAKLAREVO_TRIO].sort());
+        expect(op!.axes).toHaveLength(1);
+        expect([...op!.axes![0]!.assigned_brigades].sort()).toEqual([...PAKLAREVO_TRIO].sort());
+        expect(op!.axes![0]!.objectives).toEqual(['op:travnik:paklarevo']);
+        expect(op!.axes![0]!.staging_osid).toBe('op:travnik:turbe_2');
+        expect(new Set(op!.axes![0]!.assigned_brigades).size).toBe(3);
+        expect((cmd.commander_state as any).current_plan).toEqual(planBefore);
+        expect(state.political.political_controllers).toEqual(controllersBefore);
+        expect(Object.fromEntries(PAKLAREVO_TRIO.map((id) => [
+            id,
+            state.military.formations![id]!.location_osid,
+        ]))).toEqual(locationsBefore);
+        expect(state.military.brigade_attack_orders).toEqual(attackBefore);
+        expect(state.military.brigade_movement_orders).toEqual(movementBefore);
+    });
+
+    it('admits the exact Paklarevo trio through the normal synchronous bot decision path without side effects', () => {
+        const expectedTrio = [
+            'arbih_712th_mountain',
+            'arbih_727th_slavna',
+            'arbih_770th_slavna_mountain',
+        ];
+        const state = buildPaklarevoState();
+        const cmd = state.military.corps_command!.arbih_3rd_corps;
+        const planBefore = structuredClone((cmd.commander_state as any).current_plan);
+        const controllersBefore = structuredClone(state.political.political_controllers);
+        const locationsBefore = Object.fromEntries(expectedTrio.map((id) => [
+            id,
+            state.military.formations![id]!.location_osid,
+        ]));
+        const attackBefore = structuredClone(state.military.brigade_attack_orders);
+        const movementBefore = structuredClone(state.military.brigade_movement_orders);
+
+        runOpportunityEvaluationStep(state, 123);
+        const outcomes = applyBotOpportunityDecisions(
+            state,
+            123,
+            null,
+            [PAKLAREVO_LOCAL_94_MODEL_OPPORTUNITY],
+        );
+        expect(outcomes.some((outcome) => outcome.decision_applied && outcome.proposal?.status === 'approved')).toBe(true);
+        const op = cmd.active_operations.find((entry) => entry.name === 'Paklarevo Local Concentration (Model)');
+        expect(op).toBeDefined();
+        expect(op!.phase).toBe('planning');
+        expect(op!.planning_duration).toBe(2);
+        expect([...op!.participating_brigades].sort()).toEqual([...expectedTrio].sort());
+        expect(op!.axes).toHaveLength(1);
+        expect([...op!.axes![0]!.assigned_brigades].sort()).toEqual([...expectedTrio].sort());
+        expect(op!.axes![0]!.objectives).toEqual(['op:travnik:paklarevo']);
+        expect(new Set(op!.axes![0]!.assigned_brigades).size).toBe(3);
+        expect((cmd.commander_state as any).current_plan).toEqual(planBefore);
+        expect(state.political.political_controllers).toEqual(controllersBefore);
+        expect(Object.fromEntries(expectedTrio.map((id) => [
+            id,
+            state.military.formations![id]!.location_osid,
+        ]))).toEqual(locationsBefore);
+        expect(state.military.brigade_attack_orders).toEqual(attackBefore);
+        expect(state.military.brigade_movement_orders).toEqual(movementBefore);
+    });
+
+    it('rejects the Paklarevo model before and after its one-turn window without reserving the trio', () => {
+        for (const turn of [122, 124]) {
+            const state = buildPaklarevoState({ turn });
+            const def = PAKLAREVO_LOCAL_94_MODEL_OPPORTUNITY;
+            expect(isOpportunityEligible(def, evaluateAxes(state, turn, def))).toBe(false);
+            runOpportunityEvaluationStep(state, turn);
+            expect(state.military.operation_opportunities ?? []).toEqual([]);
+            expect(state.military.corps_command!.arbih_3rd_corps.active_operations).toEqual([]);
+            expect(state.military.brigade_movement_orders).toEqual(undefined);
+            expect(PAKLAREVO_TRIO.map((id) => state.military.formations![id]!.location_osid))
+                .toEqual(['op:travnik:turbe_2', 'op:travnik:ovcarevo', 'op:travnik:gluha_bukovica']);
+        }
+    });
+
+    it('enforces exhaustion, readiness, logistics and ordinary slot gates for the Paklarevo model', () => {
+        const def = PAKLAREVO_LOCAL_94_MODEL_OPPORTUNITY;
+        expect(preflightOpportunityAdmission(buildPaklarevoState({ exhaustion: 28 }), def, def.axes, 'standard', 123).admitted)
+            .toBe(true);
+        for (const state of [
+            buildPaklarevoState({ exhaustion: 31 }),
+            buildPaklarevoState({ supplyPressure: 95 }),
+            buildPaklarevoState({ activeOgs: ['held-og'] }),
+            buildPaklarevoState({ lowReadiness: true }),
+        ]) {
+            runOpportunityEvaluationStep(state, 123);
+            expect((state.military.operation_opportunities ?? [])
+                .find((entry) => entry.opportunity_id === 'paklarevo_local_94_model')).toBeUndefined();
+        }
+    });
+
+    it('blocks the Paklarevo model when any exact trio member is missing, inactive, moving or already committed', () => {
+        const def = PAKLAREVO_LOCAL_94_MODEL_OPPORTUNITY;
+        const cases: GameState[] = [];
+        const missing = buildPaklarevoState();
+        delete missing.military.formations!['arbih_712th_mountain'];
+        cases.push(missing);
+        const inactive = buildPaklarevoState();
+        inactive.military.formations!['arbih_727th_slavna']!.status = 'inactive';
+        cases.push(inactive);
+        const moving = buildPaklarevoState();
+        moving.military.brigade_movement_state = {
+            'arbih_770th_slavna_mountain': { status: 'in_transit', destination_sids: ['op:travnik:paklarevo'] },
+        } as any;
+        cases.push(moving);
+        const committed = buildPaklarevoState();
+        committed.military.corps_command!.arbih_3rd_corps.active_operations.push({
+            name: 'Unrelated Live Ownership',
+            type: 'sector_attack',
+            phase: 'execution',
+            started_turn: 120,
+            phase_started_turn: 121,
+            participating_brigades: ['arbih_770th_slavna_mountain'],
+            objectives: ['op:travnik:paklarevo'],
+            current_objective_index: 0,
+        } as any);
+        cases.push(committed);
+
+        for (const state of cases) {
+            expect(isOpportunityEligible(def, evaluateAxes(state, 123, def))).toBe(false);
+            runOpportunityEvaluationStep(state, 123);
+            expect((state.military.operation_opportunities ?? [])
+                .find((entry) => entry.opportunity_id === 'paklarevo_local_94_model')).toBeUndefined();
+        }
+    });
+
     it('authors the March Vlašić ridge axis without Varošluk, retaining the two Domet-1 targets', () => {
         // 2026-09-28 owner-approved scope correction (PROJECT_LEDGER.md "Owner
         // approval for March Vlašić objective scope"; 2026-09-02 Historian ruling
@@ -899,6 +1238,128 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
             'op:travnik:paklarevo',
             'op:travnik:gornje_krcevine',
         ]);
+    });
+
+    it('authors the exact eleven-ID main Vlašić roster in priority order after the original six', () => {
+        const ridgeAxis = VLASIC_RIDGE_95_OPPORTUNITY.axes[0];
+        expect(ridgeAxis.brigades).toEqual(VLASIC_BRIGADES);
+        expect(ridgeAxis.brigades.slice(0, 6)).toEqual([
+            'arbih_17th_vitezka_mountain',
+            'arbih_706th_muslim_mountain',
+            'arbih_727th_slavna',
+            'arbih_712th_mountain',
+            'arbih_737th_muslim_light',
+            'arbih_705th_slavna_mountain',
+        ]);
+        expect(new Set(ridgeAxis.brigades).size).toBe(11);
+        expect(ridgeAxis.brigades).toContain('arbih_717th_slavna_mountain');
+        expect(ridgeAxis.brigades).toContain('arbih_303rd_vitezka_mountain');
+
+        const probeAxis = VLASIC_RIDGE_95_OPPORTUNITY.variants
+            ?.find(v => v.variant_id === 'ridge_probe')?.axes[0];
+        expect(probeAxis?.brigades).toEqual([
+            'arbih_17th_vitezka_mountain',
+            'arbih_706th_muslim_mountain',
+            'arbih_727th_slavna',
+        ]);
+    });
+
+    it('derives the five-brigade minimum from eleven authored IDs and keeps ten eligible fixture participants', () => {
+        const state = buildVlasicState({ turn: 155 });
+        const active = VLASIC_BRIGADES.filter(
+            (id) => (state.military.formations![id] as { status?: string }).status === 'active',
+        );
+        expect(active).toHaveLength(10);
+        expect(active).toContain('arbih_717th_slavna_mountain');
+        expect(active).toContain('arbih_303rd_vitezka_mountain');
+        expect(active).not.toContain('arbih_706th_muslim_mountain');
+
+        const def = VLASIC_RIDGE_95_OPPORTUNITY;
+        expect(preflightOpportunityAdmission(state, def, def.axes, 'minimum', 155)).toEqual({
+            admitted: true,
+            selected_participants: 5,
+            required_participants: 2,
+            reason: null,
+        });
+        expect(preflightOpportunityAdmission(state, def, def.axes, 'standard', 155)).toEqual({
+            admitted: true,
+            selected_participants: 10,
+            required_participants: 2,
+            reason: null,
+        });
+    });
+
+    it('refuses a one-live roster below the ordinary operation floor', () => {
+        const state = buildVlasicState({ turn: 155 });
+        const keep = new Set(['arbih_17th_vitezka_mountain']);
+        for (const id of VLASIC_BRIGADES) {
+            if (!keep.has(id)) (state.military.formations![id] as { status?: string }).status = 'inactive';
+        }
+        const def = VLASIC_RIDGE_95_OPPORTUNITY;
+        const result = preflightOpportunityAdmission(state, def, def.axes, 'minimum', 155);
+        expect(result.admitted).toBe(false);
+        expect(result.selected_participants).toBe(1);
+        expect(result.required_participants).toBe(2);
+    });
+
+    it('admits 314 as a normal active same-corps participant', () => {
+        const state = buildVlasicState({ turn: 155 });
+        runOpportunityEvaluationStep(state, 155);
+
+        const approved = applyOpportunityDecision(
+            state,
+            155,
+            buildProposalId('vlasic_ridge_95', 155),
+            'approve',
+        );
+        expect(approved?.status).toBe('approved');
+        const op = state.military.corps_command!.arbih_3rd_corps.active_operations[0]!;
+        expect(op.participating_brigades).toContain('arbih_314th_slavna_liberation');
+        expect(op.participating_brigades).toContain('arbih_7th_vitezka_muslim_liberation');
+        expect(op.participating_brigades).toContain('arbih_guards_brigade');
+        expect(op.participating_brigades).toContain('arbih_717th_slavna_mountain');
+        expect(op.participating_brigades).toContain('arbih_303rd_vitezka_mountain');
+        expect(op.participating_brigades).not.toContain('arbih_706th_muslim_mountain');
+        expect(op.participating_brigades).toHaveLength(10);
+    });
+
+    it('refuses 314 when it is already committed to a live non-probe operation', () => {
+        const state = buildVlasicState({ turn: 155 });
+        const cmd = state.military.corps_command!.arbih_3rd_corps;
+        cmd.active_operations.push({
+            name: '314 Live Commitment',
+            type: 'sector_attack',
+            phase: 'execution',
+            started_turn: 153,
+            phase_started_turn: 154,
+            participating_brigades: ['arbih_314th_slavna_liberation'],
+            objectives: ['op:travnik:paklarevo'],
+            current_objective_index: 0,
+        } as (typeof cmd.active_operations)[number]);
+
+        const def = VLASIC_RIDGE_95_OPPORTUNITY;
+        expect(preflightOpportunityAdmission(state, def, def.axes, 'standard', 155)).toEqual({
+            admitted: true,
+            selected_participants: 9,
+            required_participants: 2,
+            reason: null,
+        });
+
+        runOpportunityEvaluationStep(state, 155);
+        const approved = applyOpportunityDecision(
+            state,
+            155,
+            buildProposalId('vlasic_ridge_95', 155),
+            'approve',
+        );
+        expect(approved?.status).toBe('approved');
+        const op = cmd.active_operations.find(
+            (entry) => entry.name === 'Operation Vlasic Ridge',
+        )!;
+        expect(op.participating_brigades).not.toContain('arbih_314th_slavna_liberation');
+        expect(op.participating_brigades).toContain('arbih_717th_slavna_mountain');
+        expect(op.participating_brigades).toContain('arbih_303rd_vitezka_mountain');
+        expect(op.participating_brigades).toHaveLength(9);
     });
 
     it('starts Donji Vakuf 95 on the live Travnik-Komar contact edge', () => {
@@ -1072,6 +1533,59 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         expect(redirected?.redirect_variant_id).toBe('ridge_probe');
         expect(redirectState.military.corps_command!.arbih_3rd_corps.active_operations[0].axes)
             .toHaveLength(1);
+    });
+
+    it('corrects Donji Vakuf earliest eligibility to 178 while preserving the 180 ceiling and ordinary readiness gates', () => {
+        const dateWindow = (state: GameState, turn: number) => evaluateAxes(state, turn, DONJI_VAKUF_95_OPPORTUNITY)
+            .find((axis) => axis.axis === 'date_window');
+
+        const state177 = buildDonjiVakufState({ turn: 177 });
+        const axes177 = evaluateAxes(state177, 177, DONJI_VAKUF_95_OPPORTUNITY);
+        expect(dateWindow(state177, 177)).toMatchObject({
+            green: false,
+            reason: 'September 1995 Donji Vakuf window not yet open',
+        });
+        expect(isOpportunityEligible(DONJI_VAKUF_95_OPPORTUNITY, axes177)).toBe(false);
+        runOpportunityEvaluationStep(state177, 177);
+        expect((state177.military.operation_opportunities ?? [])
+            .find((entry) => entry.opportunity_id === 'donji_vakuf_95')).toBeUndefined();
+
+        for (const turn of [178, 180]) {
+            const state = buildDonjiVakufState({ turn });
+            const axes = evaluateAxes(state, turn, DONJI_VAKUF_95_OPPORTUNITY);
+            expect(dateWindow(state, turn)).toMatchObject({
+                green: true,
+                reason: 'within September 1995 Donji Vakuf operation window',
+            });
+            expect(isOpportunityEligible(DONJI_VAKUF_95_OPPORTUNITY, axes)).toBe(true);
+            runOpportunityEvaluationStep(state, turn);
+            expect((state.military.operation_opportunities ?? [])
+                .find((entry) => entry.opportunity_id === 'donji_vakuf_95')).toMatchObject({
+                proposal_id: `OPP_${turn}_donji_vakuf_95`,
+                status: 'eligible_pending_review',
+            });
+        }
+
+        const state181 = buildDonjiVakufState({ turn: 181 });
+        expect(dateWindow(state181, 181)).toMatchObject({
+            green: false,
+            reason: 'September 1995 Donji Vakuf window has closed',
+        });
+        expect(isOpportunityEligible(
+            DONJI_VAKUF_95_OPPORTUNITY,
+            evaluateAxes(state181, 181, DONJI_VAKUF_95_OPPORTUNITY),
+        )).toBe(false);
+
+        const blocked = buildDonjiVakufState({ turn: 178 });
+        delete blocked.military.corps_command!.arbih_3rd_corps;
+        expect(dateWindow(blocked, 178)).toMatchObject({ green: true });
+        expect(isOpportunityEligible(
+            DONJI_VAKUF_95_OPPORTUNITY,
+            evaluateAxes(blocked, 178, DONJI_VAKUF_95_OPPORTUNITY),
+        )).toBe(false);
+        runOpportunityEvaluationStep(blocked, 178);
+        expect((blocked.military.operation_opportunities ?? [])
+            .find((entry) => entry.opportunity_id === 'donji_vakuf_95')).toBeUndefined();
     });
 
     it('surfaces Donji Vakuf 95 after Storm rupture when 7th Corps staging and live RS objectives hold', () => {

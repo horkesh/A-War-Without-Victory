@@ -193,15 +193,21 @@ describe('front-distribution writer diagnostics', () => {
             ['final-distribute-brigades-to-front', 1, 'actor'],
             ['final-distribute-brigades-to-front', 1, 'actor2'],
         ]);
-        expect(on.report.front_distribution_diagnostics.writes.filter((write: any) => write.invocation_ordinal === 0).map((write: any) => write.write_ordinal)).toEqual([0, 1, 2]);
-        expect(on.report.front_distribution_diagnostics.writes.filter((write: any) => write.invocation_ordinal === 1).map((write: any) => write.write_ordinal)).toEqual([0, 1]);
+        // Honest actual callsite shape: the first pass issues two main_phase_b orders.
+        // The second pass must not overwrite or consume those pending orders.
+        expect(on.report.front_distribution_diagnostics.writes.filter((write: any) => write.invocation_ordinal === 0).map((write: any) => write.write_ordinal)).toEqual([0, 1]);
+        expect(on.report.front_distribution_diagnostics.writes.filter((write: any) => write.invocation_ordinal === 1).map((write: any) => write.write_ordinal)).toEqual([]);
+        expect(on.state.military.brigade_movement_orders).toEqual({
+            actor: { destination_sids: ['front_a'], stance: 'column' },
+            actor2: { destination_sids: ['front_b'], stance: 'column' },
+        });
         const row = buildWeeklyReport(on.state);
         attachFrontDistributionDiagnosticsToWeeklyReport(row, on.report.front_distribution_diagnostics);
         mkdirSync(TMP, { recursive: true });
         writeFileSync(join(TMP, 'weekly_report.jsonl'), `${JSON.stringify(row)}\n`);
         const result = spawnSync(process.execPath, ['tools/diagnostics/front_distribution_writer_coverage.cjs', TMP, '--expect-boundary', 'actor:21', '--expect-boundary', 'actor2:21', '--json'], { cwd: process.cwd(), encoding: 'utf8' });
         expect(result.status).toBe(0);
-        expect(JSON.parse(result.stdout)).toEqual(expect.objectContaining({ inconsistencies: [], missing_expected_boundaries: [], invocations: 4, writes: 5 }));
+        expect(JSON.parse(result.stdout)).toEqual(expect.objectContaining({ inconsistencies: [], missing_expected_boundaries: [], invocations: 4, writes: 2 }));
         const rejectProduction = (mutate: (candidate: any) => void, message: string) => {
             const candidate = structuredClone(row) as any;
             mutate(candidate.front_distribution_diagnostics);

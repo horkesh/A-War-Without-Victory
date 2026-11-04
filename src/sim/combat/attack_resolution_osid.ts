@@ -143,6 +143,7 @@ import {
     getFriendlyRetreatDestinations,
     resetFormationEntrenchment,
     forceRetreatWithPenalties,
+    relocateFormationAfterCombat,
     applyDefeatPenalties,
     applyPersonnelLoss,
     findEmergencyRetreatOsid as _findEmergencyRetreatOsid,
@@ -478,7 +479,7 @@ export function resolveAttackOrdersOsid(
             const retreatDests = getFriendlyRetreatDestinations(state, otherFormation, adjacency, reverseMap);
             const dest = retreatDests[0];
             if (dest != null) {
-                otherFormation.location_osid = dest;
+                relocateFormationAfterCombat(state, otherFormation, dest);
                 resetFormationEntrenchment(otherFormation);
             } else {
                 forceRetreatWithPenalties(state, otherFormation, reverseMap, loc, { adjacency, friendlyOsids: getFriendlyForFaction(factionId) });
@@ -1534,7 +1535,7 @@ export function resolveAttackOrdersOsid(
                 const retreatDests = surrenderCascade ? [] : getFriendlyRetreatDestinations(state, defenderFormation, adjacency, reverseMap);
                 const dest = retreatDests[0];
                 if (dest != null) {
-                    (defenderFormation as { location_osid?: string }).location_osid = dest;
+                    relocateFormationAfterCombat(state, defenderFormation, dest);
                     applyDefeatPenalties(defenderFormation, targetOsid, state.meta?.turn ?? 0, outcome);
                 } else {
                     forceRetreatWithPenalties(state, defenderFormation, reverseMap, targetOsid, { adjacency, friendlyOsids: getFriendlyForFaction(defenderFormation.faction as string) });
@@ -1554,7 +1555,7 @@ export function resolveAttackOrdersOsid(
         if (flip) {
             const advanceFormation = attackerFormations[0];
             if (advanceFormation) {
-                (advanceFormation as { location_osid?: string }).location_osid = targetOsid;
+                relocateFormationAfterCombat(state, advanceFormation, targetOsid);
                 (advanceFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
             }
             // A decisive operation breach can carry one supporting brigade
@@ -1567,7 +1568,7 @@ export function resolveAttackOrdersOsid(
                     getBrigadeAxis(opMatch.op, attacker.id)?.axis_id === leadAxis.axis_id
                 );
                 if (support) {
-                    support.location_osid = targetOsid;
+                    relocateFormationAfterCombat(state, support, targetOsid);
                     support.entrenchment_turns = 0;
                 }
             }
@@ -1581,7 +1582,7 @@ export function resolveAttackOrdersOsid(
                 const retreatDests = getFriendlyRetreatDestinations(state, otherFormation, adjacency, reverseMap);
                 const dest = retreatDests[0];
                 if (dest != null) {
-                    otherFormation.location_osid = dest;
+                    relocateFormationAfterCombat(state, otherFormation, dest);
                     resetFormationEntrenchment(otherFormation);
                 } else {
                     forceRetreatWithPenalties(state, otherFormation, reverseMap, targetOsid, { adjacency, friendlyOsids: getFriendlyForFaction(f.faction as string) });
@@ -1651,7 +1652,7 @@ export function resolveAttackOrdersOsid(
         const retreatDests = getFriendlyRetreatDestinations(state, otherFormation, adjacency, reverseMap);
         const dest = retreatDests[0];
         if (dest != null) {
-            otherFormation.location_osid = dest;
+            relocateFormationAfterCombat(state, otherFormation, dest);
             resetFormationEntrenchment(otherFormation);
         } else {
             forceRetreatWithPenalties(state, otherFormation, reverseMap, loc, { adjacency, friendlyOsids: getFinalFriendly(factionId) });

@@ -330,6 +330,67 @@ describe('Patron Pressure — Military Strength', () => {
         const ratio = getMilitaryStrengthRatio(state, 'RS');
         expect(ratio).toBeCloseTo(2000 / 155000, 2);
     });
+
+    it('excludes inactive no-lifecycle remnants while retaining legacy unspecified-status formations', () => {
+        const formations: Record<string, any> = {
+            active: {
+                faction: 'HRHB', kind: 'brigade', personnel: 2000,
+                status: 'active', lifecycle_status: 'active',
+            },
+            inactive_missing_lifecycle: {
+                faction: 'HRHB', kind: 'brigade', personnel: 2304,
+                status: 'inactive',
+            },
+            inactive_nonterminal_label: {
+                faction: 'HRHB', kind: 'brigade', personnel: 900,
+                status: 'inactive', lifecycle_status: 'active',
+            },
+            legacy_no_status: {
+                faction: 'HRHB', kind: 'brigade', personnel: 1000,
+                lifecycle_status: 'active',
+            },
+        };
+        const state = makeState({ formations });
+        expect(getMilitaryStrengthRatio(state, 'HRHB')).toBeCloseTo((2000 + 1000) / 50000, 6);
+    });
+
+    it('preserves active/legacy controls and ignores other factions, kinds and terminal lifecycles', () => {
+        const formations: Record<string, any> = {
+            active: { faction: 'RS', kind: 'brigade', personnel: 2000, status: 'active', lifecycle_status: 'active' },
+            legacy: { faction: 'RS', kind: 'brigade', personnel: 1000, lifecycle_status: 'active' },
+            other_faction: { faction: 'RBiH', kind: 'brigade', personnel: 9000, status: 'active', lifecycle_status: 'active' },
+            other_kind: { faction: 'RS', kind: 'og', personnel: 8000, status: 'active', lifecycle_status: 'active' },
+            destroyed: { faction: 'RS', kind: 'brigade', personnel: 7000, status: 'active', lifecycle_status: 'destroyed' },
+            merged: { faction: 'RS', kind: 'brigade', personnel: 6000, status: 'active', lifecycle_status: 'merged' },
+            withdrawn: { faction: 'RS', kind: 'brigade', personnel: 5000, status: 'active', lifecycle_status: 'withdrawn' },
+            disbanded: { faction: 'RS', kind: 'brigade', personnel: 4000, status: 'inactive', lifecycle_status: 'disbanded' },
+        };
+        const state = makeState({ formations });
+        expect(getMilitaryStrengthRatio(state, 'RS')).toBeCloseTo((2000 + 1000) / 155000, 6);
+    });
+
+    it('inactive exclusion reaches override authority without inventing a new policy', () => {
+        const activeOnly = makeState({
+            formations: {
+                active: { faction: 'HRHB', kind: 'brigade', personnel: 2000, status: 'active', lifecycle_status: 'active' },
+            },
+        });
+        const withInactive = makeState({
+            formations: {
+                active: { faction: 'HRHB', kind: 'brigade', personnel: 2000, status: 'active', lifecycle_status: 'active' },
+                inactive: { faction: 'HRHB', kind: 'brigade', personnel: 2304, status: 'inactive' },
+            },
+        });
+        const activePr = activeOnly.military.negotiation!.patron_relationships.HRHB;
+        const activeCap = activeOnly.military.negotiation!.capital.HRHB;
+        const withInactivePr = withInactive.military.negotiation!.patron_relationships.HRHB;
+        const withInactiveCap = withInactive.military.negotiation!.capital.HRHB;
+        activePr.sanctions_active = true;
+        withInactivePr.sanctions_active = true;
+        expect(getMilitaryStrengthRatio(withInactive, 'HRHB')).toBeCloseTo(2000 / 50000, 6);
+        expect(computeOverrideAuthority(withInactive, 'HRHB', withInactivePr, withInactiveCap))
+            .toBe(computeOverrideAuthority(activeOnly, 'HRHB', activePr, activeCap));
+    });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════

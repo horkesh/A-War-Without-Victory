@@ -78,6 +78,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { getPrimaryOperation } from './corps_operation_helpers.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { removeFromActiveOperation } from './brigade_dissolution.js';
+import { invalidateBrigadeJourney } from './brigade_journey_lifecycle.js';
 import { ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from './enclave_resilience.js';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -1209,6 +1210,7 @@ export function recallEliteLoan(
     ls.loaned_to_corps = null;
     ls.last_recall_turn = turn;
     ls.current_episode_id = null;
+    invalidateBrigadeJourney(state, brigadeId);
     // Explicit reserve contract: when loan ends, elite returns to base (not home).
     const returnBase = f.base_osid ?? f.home_osid;
     if (returnBase) {

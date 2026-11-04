@@ -267,6 +267,10 @@ function disperseStackedRearBrigadesForSector(
         if (frontOsids.has(f.location_osid)) continue;
         const movementState = state.military.brigade_movement_state;
         if (movementState?.[bid]?.status === 'in_transit') continue;
+        // Pending movement orders belong to the existing authority (player-staged,
+        // authored, or bot). Rear-stack repair must not relocate the formation or
+        // overwrite its destination; leave it to the movement/order pipeline.
+        if (state.military.brigade_movement_orders?.[bid]) continue;
         const list = rearByOsid.get(f.location_osid) ?? [];
         list.push(bid);
         rearByOsid.set(f.location_osid, list);
@@ -861,6 +865,11 @@ export function distributeBrigadesToFront(
                 if (f.status === 'inactive') continue;
                 if ((f.disrupted_turns ?? 0) > 0) continue;
                 if (opParticipants.has(bid)) continue;
+                // T6 distribution must not swallow an already-owned journey. Active transit and
+                // any pending movement order are left to their existing authority; they are not
+                // cancelled or retargeted merely to improve distribution.
+                if (state.military.brigade_movement_state?.[bid]?.status === 'in_transit') continue;
+                if (state.military.brigade_movement_orders?.[bid]) continue;
                 eligibleBrigadeIds.push(bid);
             }
 

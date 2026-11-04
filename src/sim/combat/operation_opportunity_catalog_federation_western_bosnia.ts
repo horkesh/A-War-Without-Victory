@@ -647,7 +647,11 @@ const MISTRAL_1_KUPRES_DEPENDENCY_ANCHORS: readonly string[] = [
     'op:kupres:bucovaca',
 ];
 
+// Post-health sequencing experiment: Gubin is already an authored Mistral 1
+// objective and the nearest legal Livno approach target before Crni Lug. This
+// changes only objective order; it adds no target, force or combat entitlement.
 const MISTRAL_1_GRAHOVO_OBJECTIVES: readonly string[] = [
+    'op:livno:gubin_2',
     'op:bosansko_grahovo:crni_lug',
     'op:bosansko_grahovo:malesevci',
     'op:bosansko_grahovo:bosansko_grahovo_2',

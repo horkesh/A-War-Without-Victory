@@ -271,6 +271,26 @@ const SANA_AXES: readonly OpportunityAxisDef[] = [
         },
     },
     {
+        axis_id: 'sana_veliki_badic_503rd_late',
+        name: 'Veliki Badić Late 503rd (modeled, post-Gornja Suvaja)',
+        corps: PRIMARY_CORPS,
+        // MODELED late allocation only: the 503rd may detach after the main axis
+        // captures Gornja Suvaja. This does not claim the 503rd was the historical
+        // captor of Veliki Badić.
+        brigades: [],
+        objectives: ['op:bosanska_krupa:veliki_badic'],
+        staging_osid: STAGING_IVANJSKA,
+        preserve_objective_sequence: true,
+        phase_gate: {
+            main_axis_id: 'sana_krupa',
+            requires_operation_captures: ['op:bosanska_krupa:gornja_suvaja'],
+            handoff: {
+                brigade_id: 'arbih_503rd_slavna_mountain' as FormationId,
+                source_axis_id: 'sana_krupa',
+            },
+        },
+    },
+    {
         axis_id: 'sana_bihac_petrovac',
         name: 'Bihać–Petrovac Corridor',
         corps: PRIMARY_CORPS,

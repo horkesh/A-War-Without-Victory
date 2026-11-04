@@ -42,6 +42,7 @@ import {
 import { getEnclaveCapitalOsid, isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
 import { removeFromActiveOperation } from './brigade_dissolution.js';
 import { getCorpsHqOsid } from './corps_front_sectors.js';
+import { invalidateBrigadeJourney } from './brigade_journey_lifecycle.js';
 import type { CombatOutcome } from './combat_math.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -88,6 +89,28 @@ export function applyDefeatPenalties(
     };
     if (outcome === 'decisive_victory') (f as { disrupted_turns?: number }).disrupted_turns = 2;
     else if (outcome === 'victory') (f as { disrupted_turns?: number }).disrupted_turns = 1;
+}
+
+/**
+ * Apply a physical T4 combat relocation and invalidate only the interrupted journey.
+ *
+ * A column transit records the path origin where the brigade physically began. If
+ * combat changes location before that journey completes, the recorded transit is no
+ * longer executable from the formation's actual position. Delete only this brigade's
+ * `brigade_movement_state`; never clear independent `brigade_movement_orders`,
+ * entrenchment, assignment or morale. Same-location writes are true no-ops so a
+ * coverage-only penalty or an unchanged advance preserves a legitimate transit.
+ */
+export function relocateFormationAfterCombat(
+    state: GameState,
+    formation: FormationState,
+    nextOsid: string | undefined,
+): void {
+    const previousOsid = (formation as { location_osid?: string }).location_osid;
+    if (previousOsid === nextOsid) return;
+
+    invalidateBrigadeJourney(state, formation.id);
+    (formation as { location_osid?: string }).location_osid = nextOsid;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -441,12 +464,12 @@ export function forceRetreatWithPenalties(
     formation.cohesion = Math.max(0, (formation.cohesion ?? 60) - cohesionLoss);
     formation.personnel = Math.max(MIN_COMBAT_PERSONNEL, Math.floor((formation.personnel ?? 0) * personnelRetain));
     if (dest != null) {
-        f.location_osid = dest;
+        relocateFormationAfterCombat(state, formation, dest);
         f.last_retreat_from = { osid: sourceOsid, turn: state.meta?.turn ?? 0 };
     } else {
         // Absolute last resort: no friendly territory exists at all — brigade disperses
         // This should only happen if the entire faction's territory is lost
-        f.location_osid = undefined;
+        relocateFormationAfterCombat(state, formation, undefined);
         removeFromActiveOperation(state, formation.id, formation.corps_id);
         formation.status = 'inactive';
         formation.destruction_turn = state.meta?.turn ?? 0;
@@ -486,7 +509,7 @@ export function displaceFormationsInEnemyTerritory(
         const dest = retreatDests[0];
         if (dest != null) {
             // Adjacent friendly OSID — simple displacement, no penalties
-            otherFormation.location_osid = dest;
+            relocateFormationAfterCombat(state, otherFormation, dest);
             resetFormationEntrenchment(otherFormation);
         } else {
             // No adjacent friendly — emergency retreat with penalties

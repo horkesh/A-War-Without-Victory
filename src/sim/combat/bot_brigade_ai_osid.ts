@@ -27,6 +27,7 @@ import type {
     BrigadeAttackOrderOwner,
     BrigadeMovementOrder,
     BrigadePosture,
+    CorpsCommandState,
     CorpsFrontSector,
     CorpsOperation,
     CorpsStance,
@@ -63,7 +64,7 @@ import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
 import { getAllAxisBrigades, isMultiAxis } from './sector_offensive_axis_helpers.js';
 import { buildOfficerCombatLookup, getCorpsStance } from './combat_math.js';
-import { findBrigadeOperation, findBrigadeOperationAnywhere } from './corps_operation_helpers.js';
+import { findBrigadeOperation, findBrigadeOperationAnywhere, findBrigadeLiveOperationAnywhere } from './corps_operation_helpers.js';
 import { isVlasicCohaExceptionAttackOrder } from './coha_operation_exception.js';
 import { recordLinkedPreparationProbeOrderOpportunity } from './operation_preparation.js';
 export { getConvergingOperationBrigades } from './corps_operation_helpers.js';
@@ -556,6 +557,25 @@ interface GeneratedDirectOperationAttackIdentity {
 }
 
 /**
+ * Resolve the operation that currently commands this brigade: a corps-local
+ * planning/execution match stays authoritative, but a corps-local recovery
+ * operation must not hide a live cross-corps mission. Recovery-only remains
+ * the fallback when no live match exists anywhere.
+ */
+function resolveActiveOperationForBrigade(
+    state: GameState,
+    brigadeId: FormationId,
+    cmd: CorpsCommandState | null,
+): CorpsOperation | null {
+    const local = cmd ? findBrigadeOperation(cmd, brigadeId) : null;
+    if (local && (local.phase === 'planning' || local.phase === 'execution')) return local;
+    const live = findBrigadeLiveOperationAnywhere(state, brigadeId)?.op ?? null;
+    if (live) return live;
+    if (local) return local;
+    return findBrigadeOperationAnywhere(state, brigadeId)?.op ?? null;
+}
+
+/**
  * Resolve the operation that currently commands this brigade, using the same
  * effective lookup as the execution loop: loaned receiving corps first, then a
  * state-wide fallback for multi-corps operations.
@@ -569,9 +589,7 @@ function resolveExecutionOperationForBrigade(
     const loanedTo = brigade.elite_loan_state?.on_loan ? brigade.elite_loan_state.loaned_to_corps : null;
     const corpsId = loanedTo ?? brigade.corps_id;
     const cmd = corpsId ? state.military.corps_command?.[corpsId] : null;
-    let activeOp = cmd ? findBrigadeOperation(cmd, brigadeId) : null;
-    if (!activeOp) activeOp = findBrigadeOperationAnywhere(state, brigadeId)?.op ?? null;
-    return activeOp;
+    return resolveActiveOperationForBrigade(state, brigadeId, cmd ?? null);
 }
 
 /**
@@ -826,11 +844,7 @@ function executeFactionDirectivesImpl(
         // state-wide search so secondary-axis brigades see their op during
         // planning + execution. Determinism: state-wide search iterates corps
         // ids via strictCompare. See tests/multi_corps_operation_visibility.test.ts.
-        let activeOp = cmd ? findBrigadeOperation(cmd, brigade.id) : null;
-        if (!activeOp) {
-            const found = findBrigadeOperationAnywhere(state, brigade.id);
-            if (found) activeOp = found.op;
-        }
+        const activeOp = resolveActiveOperationForBrigade(state, brigade.id, cmd ?? null);
         const isActiveSectorOperationParticipant =
             (activeOp?.type === 'sector_attack' || activeOp?.type === 'probe') &&
             isOperationParticipant(activeOp, brigade.id);

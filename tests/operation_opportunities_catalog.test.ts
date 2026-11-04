@@ -989,6 +989,54 @@ describe('entry-specific: sana_95 family', () => {
         expect(SANA_95_OPPORTUNITY.historical_exit_class).toBe('partial_success');
     });
 
+    it('authors the modeled late-503rd Badić axis while preserving the original 505th handoff and main roster', () => {
+        const krupa = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_krupa')!;
+        const badic505 = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_veliki_badic_505th')!;
+        const badic503 = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_veliki_badic_503rd_late')!;
+        expect(krupa.brigades).toEqual([
+            'arbih_511th_slavna_mountain',
+            'arbih_505th_vitezka_mountain',
+            'arbih_503rd_slavna_mountain',
+        ]);
+        expect(krupa.objectives).toHaveLength(9);
+        expect(SANA_95_OPPORTUNITY.planning_duration).toBe(5);
+        expect(badic505).toMatchObject({
+            brigades: [],
+            staging_osid: 'op:bosanska_krupa:ivanjska_2',
+            phase_gate: {
+                main_axis_id: 'sana_krupa',
+                requires_operation_captures: ['op:bosanska_krupa:ivanjska_2'],
+                handoff: { brigade_id: 'arbih_505th_vitezka_mountain', source_axis_id: 'sana_krupa' },
+            },
+        });
+        expect(badic503).toMatchObject({
+            brigades: [],
+            objectives: ['op:bosanska_krupa:veliki_badic'],
+            staging_osid: 'op:bosanska_krupa:ivanjska_2',
+            preserve_objective_sequence: true,
+            phase_gate: {
+                main_axis_id: 'sana_krupa',
+                requires_operation_captures: ['op:bosanska_krupa:gornja_suvaja'],
+                handoff: { brigade_id: 'arbih_503rd_slavna_mountain', source_axis_id: 'sana_krupa' },
+            },
+        });
+        const state = buildState({ entry, turn: 180 });
+        runOpportunityEvaluationStep(state, 180);
+        applyOpportunityDecision(state, 180, buildProposalId('sana_95', 180), 'approve');
+        const spawned = state.military.corps_command!['arbih_5th_corps']
+            .active_operations.find(operation => operation.name === 'Operation Sana')!;
+        const main = spawned.axes!.find(axis => axis.axis_id === 'sana_krupa')!;
+        const late503 = spawned.axes!.find(axis => axis.axis_id === 'sana_veliki_badic_503rd_late')!;
+        expect(main.assigned_brigades).toEqual([
+            'arbih_511th_slavna_mountain',
+            'arbih_505th_vitezka_mountain',
+            'arbih_503rd_slavna_mountain',
+        ]);
+        expect(late503.assigned_brigades).toEqual([]);
+        expect(new Set(spawned.axes!.flatMap(axis => axis.assigned_brigades)).size)
+            .toBe(spawned.axes!.flatMap(axis => axis.assigned_brigades).length);
+    });
+
     it('gates: no Storm fired / pocket collapsed / all targets liberated → no proposal', () => {
         // No Storm.
         const stateNoStorm = buildState({ entry, turn: 180, operationStormTriggered: false });
@@ -1117,6 +1165,7 @@ describe('entry-specific: sana_95 family', () => {
         }))).toEqual([
             { axis_id: 'sana_krupa', assigned_brigades: krupa.brigades },
             { axis_id: 'sana_veliki_badic_505th', assigned_brigades: [] },
+            { axis_id: 'sana_veliki_badic_503rd_late', assigned_brigades: [] },
             { axis_id: 'sana_bihac_petrovac', assigned_brigades: bp.brigades },
             { axis_id: 'sana_west_sana_510th', assigned_brigades: [] },
             {

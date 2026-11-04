@@ -596,7 +596,13 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         staging_osid: 'op:zavidovici:hajderovici_2',
         planning_duration: 3,
         min_attack_outcome: 'repulsed',
-        trigger: (_state, turn) => turn >= 160,
+        // ICTY Delić trial judgment §285 dates Farz/Uragan combat from 10 Sep 1995;
+        // the planning order was 25 Aug 1995. This is a weekly approximation, not a
+        // guaranteed historical day. Completed turn 179 covers 4-10 Sep, so earliest
+        // eligibility begins at 178 and ordinary lifecycle gates execute no earlier
+        // than turn 179. planning_duration=3 is a preparation budget, not a mandatory
+        // three-turn delay.
+        trigger: (_state, turn) => turn >= 178,
         axes: [
             {
                 axis_id: 'vozuca_pocket',

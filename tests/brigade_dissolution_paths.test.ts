@@ -231,6 +231,7 @@ describe('brigade dissolution path coverage', () => {
             },
         });
         const state = makeState({ [dissolving.id]: dissolving, [sibling.id]: sibling });
+        state.political.political_controllers!['op:test:test_1'] = 'RS';
 
         const report = dissolveCombatIneffectiveBrigades(state);
 

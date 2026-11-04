@@ -247,6 +247,7 @@ import {
     getOperationalData,
     getOrLoadOperationalData,
     getOrLoadOperationalMapping,
+    getOrLoadOperationalEdges,
     getOperationalSettlementGraph,
     getGraphAndEdges,
     getSiegeStateCache,
@@ -1284,7 +1285,9 @@ export const warPhases: NamedPhase[] = [
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const { dissolveCombatIneffectiveBrigades } = await import('../combat/brigade_dissolution.js');
-            const dissolutionReport = dissolveCombatIneffectiveBrigades(context.state);
+            const edges = await getOrLoadOperationalEdges(context);
+            const adjacency = edges ? buildStaticOsidAdjacency(edges) : undefined;
+            const dissolutionReport = dissolveCombatIneffectiveBrigades(context.state, adjacency);
             if (dissolutionReport.dissolved_count > 0) {
                 context.report.brigade_dissolution = dissolutionReport;
             }
@@ -1605,7 +1608,13 @@ export const warPhases: NamedPhase[] = [
         name: 'prestage-deferred-historical-elites',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            prestageDeferredPrePlannedElites(context.state);
+            const spatial = getSpatialContextCache(context);
+            const od = getOperationalData(context);
+            prestageDeferredPrePlannedElites(
+                context.state,
+                spatial?.preCombat.adjacency as Map<Osid, Osid[]> | undefined,
+                od?.opData?.operationalToCanonical,
+            );
         }
     },
     {
@@ -3277,7 +3286,11 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             const engagedIds = context.report.attack_resolution_osid?.engaged_formation_ids ?? [];
-            context.report.cohesion_drift_report = runCohesionDrift(context.state, engagedIds);
+            context.report.cohesion_drift_report = runCohesionDrift(
+                context.state,
+                engagedIds,
+                context.report.stranded_brigade_lifecycle?.still_holding ?? [],
+            );
         }
     },
     {
@@ -3316,7 +3329,9 @@ export const warPhases: NamedPhase[] = [
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const { dissolveCombatIneffectiveBrigades } = await import('../combat/brigade_dissolution.js');
-            const dissolutionReport = dissolveCombatIneffectiveBrigades(context.state);
+            const edges = await getOrLoadOperationalEdges(context);
+            const adjacency = edges ? buildStaticOsidAdjacency(edges) : undefined;
+            const dissolutionReport = dissolveCombatIneffectiveBrigades(context.state, adjacency);
             if (dissolutionReport.dissolved_count > 0) {
                 // Merge into existing dissolution report if present
                 const existing = context.report.brigade_dissolution;

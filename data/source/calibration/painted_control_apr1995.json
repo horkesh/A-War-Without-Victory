@@ -6,13 +6,20 @@
     "description": "Painted control target: April 1995",
     "total_osids": 712,
     "counts": {
-      "RS": 388,
-      "RBiH": 248,
+      "RS": 387,
+      "RBiH": 249,
       "HRHB": 76
     },
     "source": "painted_control_targets",
-    "revision": 8,
+    "revision": 9,
     "changelog": [
+      {
+        "date": "2026-11-02",
+        "osid": "op:brcko:brka_2",
+        "from": "RS",
+        "to": "RBiH",
+        "rationale": "Owner determination, 2026-11-02 (reference rebase; not a gameplay, simulation, geometry, weighting, or direct-controller change): paint op:brcko:brka_2 RBiH in the April 1995 painted reference. CIA Balkan Battlegrounds II Annex 35 printed p381 records Donja Brka captured by 27 July 1993 in Sadejstvo 93 and renamed Srpska Brka; Gornja was an intended convergence point, not confirmed captured. CIA Balkan Battlegrounds I printed pp.235-236 records the ARBiH 2nd Corps attack on Donja Brka on 3 August 1994 from government-held Gornja, about 4 km2 taken, and failed VRS counterattacks in August-September 1994; the government still held both Gornja and Donja. Vol I p257 notes 106-111 cite Tanjug 3 August and Sarajevo Radio 5 August, 8 August and 12 September 1994. April 1995 continuity is an inference, not a direct exact April map; this is the owner's whole-OSID reference determination, not proof that every constituent was uniform. The actual Brka (+4) cell of 40.474 km2 contains S300187 Brka, S300195 Brod, S300250 Cadavac, S300497 Omerbegovaca and S300675 Ulovici; Donja/Gornja are not separate named census rows. Retained Brod/Omer RS July 1993 and post-Dayton context leaves a mixed-constituent caveat. There is no hard wrong-locality contradiction; this does not claim the whole 40 km2 was captured from the 4 km2 locality gain. Only this OSID differs between the old and new April references; Jan1993 and Oct1995 remain byte-identical. The old qualified 708 receipt and old reference bytes/hashes are preserved; this is a reference rebase, not a gameplay improvement or new qualification. The previously paused autumn-1994 RS attack candidate remains unmeasured and must not be resumed under changed paint. Sources: https://pdfcoffee.com/balkan-battlegrounds-vol-2-pdf-free.html ; https://www.scribd.com/document/525984217/Balkan-Battlegrounds"
+      },
       {
         "date": "2026-10-23",
         "osid": "op:vares:toljenak",
@@ -341,7 +348,7 @@
     "op:brcko:boce_2": "RBiH",
     "op:brcko:brcko": "RS",
     "op:brcko:brezovo_polje_selo_2": "RS",
-    "op:brcko:brka_2": "RS",
+    "op:brcko:brka_2": "RBiH",
     "op:brcko:bukvik_gornji_2": "RBiH",
     "op:brcko:donji_rahic": "RS",
     "op:brcko:gornji_rahic_2": "RBiH",

@@ -15,7 +15,8 @@ import {
 import { warPhases } from '../src/sim/turn_phases/war_phases.js';
 import { createInitialGameState } from '../src/scenario/scenario_runner.js';
 import { getSectorOffensiveApproachOsids } from '../src/sim/combat/bot_brigade_ai_osid.js';
-import { advanceSectorOffensives } from '../src/sim/combat/sector_offensive.js';
+import { advanceSectorOffensives, updateSectorOffensiveResults } from '../src/sim/combat/sector_offensive.js';
+import { getConvergingOperationBrigades, getOperationBrigadesAtCurrentObjective } from '../src/sim/combat/corps_operation_helpers.js';
 import { hasMinimumAssembledParticipants } from '../src/sim/combat/sector_offensive_launch_helpers.js';
 import { collectOpInjectionWarnings } from '../src/sim/combat/operation_validation.js';
 import type { OpInjectionWarning } from '../src/sim/combat/operation_validation.js';
@@ -24,6 +25,7 @@ import type {
     CorpsFrontSector,
     CorpsOperation,
     FactionId,
+    FormationId,
     FormationState,
     GameState,
 } from '../src/state/game_state.js';
@@ -835,7 +837,7 @@ describe('pre-planned operations', () => {
     });
 
     it('defines the current pre-planned operation catalog', () => {
-        assert.equal(_ALL_PRE_PLANNED.length, 33);
+        assert.equal(_ALL_PRE_PLANNED.length, 34);
         assert.deepEqual(
             _ALL_PRE_PLANNED.map((def) => def.name),
             [
@@ -879,6 +881,7 @@ describe('pre-planned operations', () => {
                 // load, so the local Jablanica-Doljani plan must precede Neretva.
                 'Jablanica–Doljani Local Attack',
                 "Operation Neretva '93",
+                'Operation Uragan 95',
             ],
         );
 
@@ -1705,7 +1708,7 @@ describe('pre-planned operations', () => {
         assert.equal(operation.faction, 'HRHB');
         assert.equal(operation.staging_osid, 'op:prozor:prozor_2');
         assert.equal(operation.available_from, 71);
-        assert.equal(operation.prestage_from, 60);
+        assert.equal(operation.prestage_from, 59);
         assert.equal(operation.minimum_viable_participants, 1);
         assert.equal(operation.minimum_assembled_participants, 1);
         assert.equal(operation.execution_attack_power_mult, 1.8);
@@ -1723,7 +1726,7 @@ describe('pre-planned operations', () => {
             {
                 axis_id: 'prozor_lug',
                 brigades: ['hrhb_kralj_tomislav_brigade'],
-                objectives: ['op:prozor:lug_2'],
+                objectives: ['op:prozor:lug_2', 'op:prozor:paros'],
                 staging_osid: 'op:prozor:ljubunci_2',
             },
             {
@@ -1764,9 +1767,95 @@ describe('pre-planned operations', () => {
         ]);
     });
 
-    it('prestages both Kralj and Rama toward Ljubunci at turn 60 without moving either physically', () => {
+    it('advances Kralj from Lug to a shared Paros follow-on without double-assigning or double-counting convergence', () => {
+        const state = makeMinimalState();
+        injectPrePlannedOperations(state);
+        const command = state.military.corps_command!.hvo_tomislavgrad!;
+        const kralj = state.military.formations.hrhb_kralj_tomislav_brigade!;
+        delete state.military.formations.hrhb_kralj_tomislav_brigade;
+        state.military.formations.F_HRHB_0001 = {
+            ...kralj,
+            id: 'F_HRHB_0001',
+            tags: ['oob:hrhb_kralj_tomislav_brigade'],
+        };
+        state.meta.turn = 71;
+        state.political.war_alliance_rbih_hrhb = -1;
+        assert.equal(injectQueuedOperation(state, 'hvo_tomislavgrad'), true);
+
+        const op = command.active_operations[0]!;
+        const lug = op.axes!.find((axis) => axis.axis_id === 'prozor_lug')!;
+        const paros = op.axes!.find((axis) => axis.axis_id === 'prozor_paros')!;
+        assert.deepEqual(op.axes!.map((axis) => axis.assigned_brigades), [
+            ['F_HRHB_0001'],
+            ['hvo_rama_brigade'],
+        ]);
+        assert.deepEqual(lug.objectives, ['op:prozor:lug_2', 'op:prozor:paros']);
+        assert.deepEqual(paros.objectives, ['op:prozor:paros']);
+        const assigned = op.axes!.flatMap((axis) => axis.assigned_brigades);
+        assert.equal(new Set(assigned).size, assigned.length);
+        assert.equal(assigned.filter((id) => id === 'F_HRHB_0001').length, 1);
+        assert.equal(assigned.filter((id) => id === 'hvo_rama_brigade').length, 1);
+
+        op.phase = 'execution';
+        op.phase_started_turn = 71;
+        for (const axis of op.axes!) axis.status = 'executing';
+        state.military.formations!.hvo_tomislavgrad = {
+            ...structuredClone(kralj),
+            id: 'hvo_tomislavgrad',
+            name: 'HVO Tomislavgrad Corps',
+            kind: 'corps',
+            corps_id: 'hvo_tomislavgrad',
+            location_osid: 'op:prozor:prozor_2',
+        } as FormationState;
+        (state.military.corps_front_sectors!['sector:hvo_tomislavgrad:0'] as any).sub_segments = [];
+        state.political.political_controllers!['op:prozor:lug_2'] = 'HRHB';
+        state.political.political_controllers!['op:prozor:paros'] = 'RS';
+        state.meta.turn = 75;
+        updateSectorOffensiveResults(state);
+
+        assert.equal(lug.current_objective_index, 1, 'Kralj must advance from Lug');
+        assert.equal(lug.objectives[lug.current_objective_index], 'op:prozor:paros', 'Kralj current objective must be Paros');
+        assert.equal(lug.objective_capture_count, 1, 'Kralj must credit Lug once');
+        assert.equal(paros.current_objective_index, 0, 'Rama must stay on Paros independently');
+        assert.equal(paros.objectives[paros.current_objective_index], 'op:prozor:paros', 'Rama current objective must remain Paros');
+        assert.equal(paros.objective_capture_count, 0, 'Rama must not inherit Kralj Lug credit');
+
+        const converged = getOperationBrigadesAtCurrentObjective(op, 'op:prozor:paros');
+        assert.deepEqual([...converged].sort(), ['F_HRHB_0001', 'hvo_rama_brigade'].sort());
+        assert.equal(new Set(converged).size, converged.length);
+        const kraljConvergence = getConvergingOperationBrigades(op, 'F_HRHB_0001' as FormationId);
+        assert.deepEqual([...kraljConvergence].sort(), [...converged].sort());
+        assert.equal(new Set(kraljConvergence).size, kraljConvergence.length);
+
+        state.political.political_controllers!['op:prozor:paros'] = 'HRHB';
+        state.meta.turn = 76;
+        updateSectorOffensiveResults(state);
+
+        assert.equal(lug.current_objective_index, 2);
+        assert.equal(lug.status, 'complete');
+        assert.equal(paros.current_objective_index, 1);
+        assert.equal(paros.status, 'complete');
+        // The operation field is the SUM of per-axis capture credits, not a
+        // unique-territory count: Paros is credited once to Kralj and once to Rama.
+        assert.equal(lug.objective_capture_count, 2);
+        assert.equal(paros.objective_capture_count, 1);
+        assert.equal(op.objective_capture_count, 3, 'operation aggregate must equal per-axis credits');
+
+        // A normal repeat reconciliation with no new control changes must not
+        // re-credit or disturb the completed axes.
+        updateSectorOffensiveResults(state);
+        assert.equal(lug.current_objective_index, 2);
+        assert.equal(paros.current_objective_index, 1);
+        assert.equal(lug.status, 'complete');
+        assert.equal(paros.status, 'complete');
+        assert.equal(lug.objective_capture_count, 2);
+        assert.equal(paros.objective_capture_count, 1);
+        assert.equal(op.objective_capture_count, 3);
+    });
+
+    it('prestages both Kralj and Rama toward Ljubunci at turn 59 without moving either physically', () => {
         // CALIBRATION ASSUMPTION (UNADOPTED): ordinary concentration may begin at
-        // turn 60, but injection still waits for turn 71 and its four planning
+        // turn 59, but injection still waits for turn 71 and its four planning
         // turns. This second assumption brings the existing heavy Kralj force
         // alongside Rama; no historical movement or date is attested. Physical
         // locations and controls stay unchanged, and ordinary authority, route,
@@ -1790,7 +1879,7 @@ describe('pre-planned operations', () => {
         assert.equal(kralj.location_osid, 'op:duvno:tomislavgrad_2');
         assert.equal(rama.location_osid, 'op:prozor:rumboci_2');
 
-        state.meta.turn = 59;
+        state.meta.turn = 58;
         prestageDeferredPrePlannedElites(state);
 
         assert.deepEqual(command.queued_operations, ['Prozor–Rama Line Counterattack']);
@@ -1799,7 +1888,7 @@ describe('pre-planned operations', () => {
         assert.equal(kralj.location_osid, 'op:duvno:tomislavgrad_2');
         assert.equal(rama.location_osid, 'op:prozor:rumboci_2');
 
-        state.meta.turn = 60;
+        state.meta.turn = 59;
         prestageDeferredPrePlannedElites(state);
 
         assert.deepEqual(command.queued_operations, ['Prozor–Rama Line Counterattack']);
@@ -2732,7 +2821,7 @@ describe('pre-planned operations', () => {
         const command = state.military.corps_command!.arbih_1st_corps!;
         command.active_operations = [];
         command.queued_operations = ['Operation Circle'];
-        // The Trnovo concentration experiment now queues from turn 8 and shares
+        // The Trnovo concentration experiment now queues from turn 7 and shares
         // the 831st. Mark it resolved so this KRUG timing test isolates Circle's
         // own prestage window instead of testing two overlapping plans.
         state.operation_history = [{
@@ -3570,13 +3659,124 @@ describe('Gorazde Local Counterattack (Model)', () => {
     });
 });
 
+describe('Operation Uragan 95 model', () => {
+    const name = 'Operation Uragan 95';
+    const corps = 'arbih_2nd_corps';
+    const staging = 'op:banovici:seona';
+    const objective = 'op:zavidovici:vozuca_2';
+    const roster = [
+        'arbih_9th_muslim_liberation',
+        'arbih_211th_liberation',
+        'arbih_222nd_liberation',
+        'arbih_250th_liberation',
+    ];
+
+    it('authors the bounded Uragan model entry without launch or control bypasses', () => {
+        const def = _ALL_PRE_PLANNED.find((candidate) => candidate.name === name);
+        assert.ok(def);
+        assert.equal(def!.corps, corps);
+        assert.equal(def!.faction, 'RBiH');
+        assert.equal(def!.enqueue_from, 177);
+        assert.equal(def!.prestage_from, 177);
+        assert.equal(def!.available_from, 179);
+        assert.equal(def!.planning_duration, 7);
+        assert.equal(def!.staging_osid, staging);
+        assert.equal(def!.axes.length, 1);
+        assert.equal(def!.axes[0]!.staging_osid, staging);
+        assert.deepEqual(def!.axes[0]!.objectives, [objective]);
+        assert.deepEqual(def!.axes[0]!.brigades, roster);
+        assert.equal(def!.sync_operation_name, undefined);
+        assert.equal((def as any).force_launch, undefined);
+        assert.equal((def as any).army_hq_op_id, undefined);
+        assert.equal(def!.execution_attack_power_mult, undefined);
+        assert.equal(def!.min_attack_outcome, undefined);
+        assert.equal(def!.minimum_viable_participants, undefined);
+    });
+
+    it('queues at177, refuses at178, and injects at179 without seizing the probe-owned 9th', () => {
+        const state = makeMinimalState();
+        const command = state.military.corps_command![corps]!;
+        command.active_operations = [];
+        command.queued_operations = [];
+
+        state.meta.turn = 176;
+        prestageDeferredPrePlannedElites(state);
+        assert.ok(!command.queued_operations.includes(name));
+        state.meta.turn = 177;
+        prestageDeferredPrePlannedElites(state);
+        assert.equal(command.queued_operations.includes(name), true);
+
+        const ninth = state.military.formations![roster[0]]!;
+        ninth.location_osid = 'op:lukavac:bikodze';
+        command.active_operations = [{
+            name: 'probe_2nd_corps_uragan_window',
+            type: 'probe',
+            phase: 'execution',
+            started_turn: 177,
+            phase_started_turn: 177,
+            participating_brigades: [roster[0]],
+            objectives: ['op:zavidovici:cardak_2'],
+            current_objective_index: 0,
+        } as CorpsOperation];
+        command.queued_operations = [name];
+
+        state.meta.turn = 178;
+        assert.equal(injectQueuedOperation(state, corps), false);
+        assert.deepEqual(command.queued_operations, [name]);
+        assert.equal(command.active_operations.some((operation) => operation.name === name), false);
+
+        state.meta.turn = 179;
+        assert.equal(injectQueuedOperation(state, corps), true);
+        const operation = command.active_operations.find((candidate) => candidate.name === name);
+        assert.ok(operation);
+        assert.equal(operation!.phase, 'planning');
+        assert.equal(operation!.planning_duration, 7);
+        assert.equal(ninth.location_osid, 'op:lukavac:bikodze');
+        assert.deepEqual([...operation!.participating_brigades].sort(), roster.slice(1).sort());
+        assert.equal(operation!.participating_brigades.includes(roster[0]), false);
+        assert.ok(command.active_operations.some((candidate) =>
+            candidate.name === 'probe_2nd_corps_uragan_window'
+            && candidate.participating_brigades.includes(roster[0])));
+        assert.deepEqual(operation!.axes![0]!.objectives, [objective]);
+        assert.equal(operation!.axes![0]!.staging_osid, staging);
+    });
+
+    it('honours an explicit RBiH decline and does not launch or move the roster', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 179;
+        state.meta.player_faction = 'RBiH' as FactionId;
+        const command = state.military.corps_command![corps]!;
+        command.active_operations = [];
+        command.queued_operations = [name];
+        state.meta.pending_proposal_reviews = [{
+            id: 'PROP_0_historical_op_preplanned_arbih_2nd_corps_operation_uragan_95',
+            turn: state.meta.turn,
+            faction: 'RBiH' as FactionId,
+            domain: 'ops',
+            description: 'Operation Uragan 95 - declined by the president.',
+            proposed_action: 'HISTORICAL_OP:preplanned:arbih_2nd_corps:Operation Uragan 95',
+            current_value: 'awaiting_authorization',
+            proposed_value: 'authorize',
+            accepted: false,
+            resolved_turn: state.meta.turn,
+        } as never];
+        const before = Object.fromEntries(roster.map((id) => [id, state.military.formations![id]!.location_osid]));
+
+        assert.equal(injectQueuedOperation(state, corps), false);
+        assert.equal(command.active_operations.length, 0);
+        assert.equal(state.political.political_controllers![staging], 'RBiH');
+        assert.equal(state.political.political_controllers![objective], 'RS');
+        for (const id of roster) assert.equal(state.military.formations![id]!.location_osid, before[id]);
+    });
+});
+
 describe('Trnovo Eastern Counterattack (Model)', () => {
     const name = 'Trnovo Eastern Counterattack (Model)';
     const brigadeId = 'arbih_831st_drina_lineage';
     const supportBrigadeId = 'arbih_102nd_motorized';
     const stagingOsid = 'op:trnovo:delijas';
     const objectiveOsid = 'op:trnovo:tosici';
-    const supportStagingOsid = 'op:foca:mazlina';
+    const supportStagingOsid = 'op:pale:podgrab';
     const supportObjectiveOsid = 'op:foca:donje_zesce';
     const mainApproachOsid = 'op:trnovo:gornja_presjenica';
     const supportApproachOsid = 'op:trnovo:kijevo_2';
@@ -3599,6 +3799,7 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
             location_osid: supportApproachOsid,
         } as FormationState;
         state.military.formations![supportBrigadeId] = formation;
+        state.political.political_controllers![supportStagingOsid] = 'RBiH';
         const sector = state.military.corps_front_sectors?.['sector:arbih_1st_corps:0'];
         if (sector && !sector.assigned_brigade_ids.includes(supportBrigadeId)) {
             sector.assigned_brigade_ids.push(supportBrigadeId);
@@ -3614,7 +3815,7 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         assert.equal(operation.staging_osid, stagingOsid);
         assert.equal(operation.available_from, 13);
         assert.equal(operation.enqueue_from, undefined);
-        assert.equal(operation.prestage_from, 8);
+        assert.equal(operation.prestage_from, 7);
         assert.equal(operation.planning_duration, 1);
         assert.equal(operation.minimum_viable_participants, 2);
         assert.equal(operation.minimum_assembled_participants, 2);
@@ -3644,9 +3845,9 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         }
     });
 
-    it('marshals the undated startup roster at turn 8 without injecting', () => {
+    it('marshals the undated startup roster at turn 7 without injecting', () => {
         const state = makeMinimalState();
-        state.meta.turn = 7;
+        state.meta.turn = 6;
         const command = state.military.corps_command!.arbih_1st_corps!;
         command.active_operations = [];
         command.queued_operations = [name, 'Operation Circle'];
@@ -3670,7 +3871,7 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
         assert.equal(state.military.brigade_movement_orders?.[brigadeId], undefined);
         assert.equal(state.military.brigade_movement_orders?.[supportBrigadeId], undefined);
 
-        state.meta.turn = 8;
+        state.meta.turn = 7;
         prestageDeferredPrePlannedElites(state);
 
         assert.deepEqual(
@@ -4022,12 +4223,12 @@ describe('Trnovo Eastern Counterattack (Model)', () => {
 
     it('does not freeze the 831st for a future-dated queued head before Operation Circle prestages', () => {
         const { state, main } = makeQueuedHeadFixture(['Operation Circle', name], mainApproachOsid);
-        state.meta.turn = 8;
+        state.meta.turn = 7;
 
         assert.equal(
             getQueuedDatedPrestageBrigadeIds(state).has(brigadeId),
             false,
-            'the future-dated head does not reserve the 831st at turn 8',
+            'the future-dated head does not reserve the 831st at turn 7',
         );
 
         prestageDeferredPrePlannedElites(state);

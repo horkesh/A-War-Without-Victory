@@ -4,12 +4,23 @@ import { describe, expect, it } from 'vitest';
 import { generateAllBotOrdersOsid } from '../src/sim/combat/bot_brigade_ai_osid.js';
 import { resolveAttackOrdersOsid } from '../src/sim/combat/attack_resolution_osid.js';
 import { SANA_95_OPPORTUNITY } from '../src/sim/combat/operation_opportunity_catalog_5th_corps.js';
-import { advanceLatePhaseGates, buildAttackOrderOwner } from '../src/sim/combat/operation_phase_gate.js';
+import {
+    advanceLatePhaseGates,
+    buildAttackOrderOwner,
+    operationInstanceId,
+    recordOwnedCaptureReceipt,
+} from '../src/sim/combat/operation_phase_gate.js';
 import { processOsidColumnMovement } from '../src/sim/combat/osid_column_movement.js';
 import { getPreparationObjectiveView } from '../src/sim/combat/sector_offensive_axis_helpers.js';
 import { initializeCasualtyLedger } from '../src/state/casualty_ledger.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
-import type { CorpsOperation, FactionId, GameState, OperationAxis } from '../src/state/game_state.js';
+import type {
+    CorpsOperation,
+    FactionId,
+    FormationId,
+    GameState,
+    OperationAxis,
+} from '../src/state/game_state.js';
 
 const trubar = 'op:bihac:trubar';
 const vodjenica = 'op:bosanski_petrovac:vodjenica';
@@ -468,6 +479,150 @@ describe('Operation Sana bounded pocket cleanup tails', () => {
                 axis_id: 'sana_veliki_badic_505th',
                 target: velikiBadic,
             });
+    });
+
+    it('gates the modeled late 503rd handoff on an owned still-held Gornja Suvaja receipt exactly once', () => {
+        const gornjaSuvaja = 'op:bosanska_krupa:gornja_suvaja';
+        const lateDefinition = SANA_95_OPPORTUNITY.axes.find(
+            (axis) => axis.axis_id === 'sana_veliki_badic_503rd_late',
+        )!;
+        const state = makeRetainedN73IvanjskaHandoffState();
+        const operation = state.military.corps_command!.arbih_5th_corps!.active_operations[0]!;
+        const source = operation.axes!.find((axis) => axis.axis_id === 'sana_krupa')!;
+        const original505 = operation.axes!.find(
+            (axis) => axis.axis_id === 'sana_veliki_badic_505th',
+        )!;
+        const brigade503 = 'arbih_503rd_slavna_mountain' as FormationId;
+        const late503 = {
+            axis_id: lateDefinition.axis_id,
+            name: lateDefinition.name,
+            assigned_brigades: [...lateDefinition.brigades],
+            objectives: [...lateDefinition.objectives],
+            current_objective_index: 0,
+            staging_osid: lateDefinition.staging_osid,
+            preserve_objective_sequence: lateDefinition.preserve_objective_sequence,
+            status: 'executing',
+            failure_count: 0,
+            consecutive_failures_on_current: 0,
+            momentum: 0,
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 0,
+            idle_execution_turn_streak: 0,
+            late_phase: {
+                phase: 'holding',
+                main_axis_id: lateDefinition.phase_gate!.main_axis_id,
+                requires: [...lateDefinition.phase_gate!.requires_operation_captures],
+                gated_objectives: [...lateDefinition.objectives],
+                receipts: [],
+                handoff: lateDefinition.phase_gate!.handoff,
+            },
+        } as OperationAxis;
+        operation.axes!.push(late503);
+        original505.late_phase!.receipts = [];
+        state.political.political_controllers![gornjaSuvaja] = 'RBiH';
+        state.military.formations![brigade503]!.location_osid = 'op:bosanska_krupa:arapusa_2';
+        state.military.brigade_movement_orders = {
+            [brigade503]: { destination_sids: [ivanjska], stance: 'column' },
+        };
+
+        const beforeMainObjectives = structuredClone(source.objectives);
+        const before505 = structuredClone(original505);
+        const beforePhysical = structuredClone({
+            formation: state.military.formations![brigade503],
+            controllers: state.political.political_controllers,
+            movementOrder: state.military.brigade_movement_orders?.[brigade503],
+        });
+
+        expect(late503.assigned_brigades).toEqual([]);
+        expect(source.assigned_brigades.filter((id) => id === brigade503)).toHaveLength(1);
+        advanceLatePhaseGates(state, operation, 'arbih_5th_corps', 'RBiH', 181);
+
+        expect(late503).toMatchObject({
+            assigned_brigades: [],
+            late_phase: { phase: 'holding', receipts: [] },
+        });
+        expect(source.assigned_brigades.filter((id) => id === brigade503)).toHaveLength(1);
+        expect(source.assigned_brigades).toContain('arbih_511th_slavna_mountain');
+        expect(source.objectives).toEqual(beforeMainObjectives);
+        expect(original505).toEqual(before505);
+        expect({
+            formation: state.military.formations![brigade503],
+            controllers: state.political.political_controllers,
+            movementOrder: state.military.brigade_movement_orders?.[brigade503],
+        }).toEqual(beforePhysical);
+
+        state.military.brigade_attack_orders = { [brigade503]: gornjaSuvaja };
+        state.military.brigade_attack_order_owners = {
+            [brigade503]: {
+                operation_id: operationInstanceId('arbih_5th_corps', operation),
+                axis_id: 'sana_krupa',
+                target: gornjaSuvaja,
+                turn: 182,
+            },
+        };
+        expect(recordOwnedCaptureReceipt(state, {
+            op: operation,
+            corpsId: 'arbih_5th_corps',
+            leadId: brigade503,
+            targetOsid: gornjaSuvaja,
+            battleId: `182:${gornjaSuvaja}:${brigade503}:rs_defender`,
+            turn: 182,
+        })).toBe(true);
+        const beforeSecondAdvance = structuredClone({
+            formation: state.military.formations![brigade503],
+            controllers: state.political.political_controllers,
+            movementOrder: state.military.brigade_movement_orders?.[brigade503],
+            attackOrder: state.military.brigade_attack_orders?.[brigade503],
+        });
+
+        advanceLatePhaseGates(state, operation, 'arbih_5th_corps', 'RBiH', 182);
+
+        expect(source.assigned_brigades).toEqual([
+            'arbih_511th_slavna_mountain',
+            'arbih_505th_vitezka_mountain',
+        ]);
+        expect(late503).toMatchObject({
+            assigned_brigades: [brigade503],
+            main_brigade: brigade503,
+            late_phase: {
+                phase: 'capture',
+                activated_turn: 182,
+            },
+        });
+        expect(operation.axes!.flatMap((axis) => axis.assigned_brigades)
+            .filter((id) => id === brigade503)).toHaveLength(1);
+        expect(operation.participating_brigades.filter((id) => id === brigade503)).toHaveLength(1);
+        expect(source.objectives).toEqual(beforeMainObjectives);
+        expect(original505).toEqual(before505);
+        expect({
+            formation: state.military.formations![brigade503],
+            controllers: state.political.political_controllers,
+            movementOrder: state.military.brigade_movement_orders?.[brigade503],
+            attackOrder: state.military.brigade_attack_orders?.[brigade503],
+        }).toEqual(beforeSecondAdvance);
+
+        late503.failure_count = 2;
+        late503.attack_attempt_count = 3;
+        late503.objective_capture_count = 1;
+        const afterActivation = structuredClone({
+            assigned_brigades: late503.assigned_brigades,
+            failure_count: late503.failure_count,
+            attack_attempt_count: late503.attack_attempt_count,
+            objective_capture_count: late503.objective_capture_count,
+            activated_turn: late503.late_phase!.activated_turn,
+        });
+        advanceLatePhaseGates(state, operation, 'arbih_5th_corps', 'RBiH', 183);
+
+        expect({
+            assigned_brigades: late503.assigned_brigades,
+            failure_count: late503.failure_count,
+            attack_attempt_count: late503.attack_attempt_count,
+            objective_capture_count: late503.objective_capture_count,
+            activated_turn: late503.late_phase!.activated_turn,
+        }).toEqual(afterActivation);
+        expect(operation.axes!.flatMap((axis) => axis.assigned_brigades)
+            .filter((id) => id === brigade503)).toHaveLength(1);
     });
 
     it.each([

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
-import type { GameState, FactionId, FormationState } from '../src/state/game_state.js';
+import type { GameState, FactionId, FormationState, BrigadeMovementOrder } from '../src/state/game_state.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
 import type { TerrainScalarsData, TerrainScalars } from '../src/map/terrain_scalars.js';
 import type { OperationalToCanonicalReverseMap } from '../src/data/operational_data.js';
@@ -1181,5 +1181,364 @@ describe('processOsidColumnMovement — operation-authorized dig-in march', () =
             formation_id: 'brig_op',
             reason: 'no_friendly_path',
         })]);
+    });
+});
+
+describe('processOsidColumnMovement — transit origin integrity', () => {
+    const BABIN = 'op:donji_vakuf:babin_potok_2';
+    const OBORCI = 'op:donji_vakuf:oborci_2';
+    const KUTANJA = 'op:donji_vakuf:kutanja';
+
+    function makeDisplacedState(turnsRemaining = 1): GameState {
+        const manualOrder: BrigadeMovementOrder = {
+            destination_sids: [OBORCI],
+            stance: 'combat',
+        };
+        return makeState([
+            makeFormation('brig1', 'RS', KUTANJA),
+        ], {
+            military: {
+                brigade_movement_state: {
+                    brig1: {
+                        status: 'in_transit',
+                        stance: 'column',
+                        destination_sids: [OBORCI],
+                        path: [BABIN, OBORCI],
+                        turns_remaining: turnsRemaining,
+                        owner: 'bot_discretionary',
+                    },
+                },
+                brigade_movement_orders: {
+                    brig1: manualOrder,
+                },
+            } as any,
+            political: {
+                political_controllers: {
+                    [BABIN]: 'RBiH',
+                    [OBORCI]: 'RS',
+                    [KUTANJA]: 'RS',
+                },
+            } as any,
+        });
+    }
+
+    it('cancels stale transit after combat displacement changed the physical origin', () => {
+        const state = makeDisplacedState(1);
+
+        const report = processOsidColumnMovement(
+            state,
+            [makeEdge(BABIN, OBORCI)],
+            mockReverseMap([BABIN, OBORCI, KUTANJA]),
+            flatTerrain(),
+        );
+
+        expect(report.column_advances).toBe(0);
+        expect(report.column_arrivals).toBe(0);
+        expect(state.military.formations?.brig1?.location_osid).toBe(KUTANJA);
+        expect(state.military.brigade_movement_state?.brig1).toBeUndefined();
+        expect(state.military.brigade_movement_orders?.brig1).toEqual({
+            destination_sids: [OBORCI],
+            stance: 'combat',
+        });
+    });
+
+    it('cancels stale transit before arrival even when one step remains', () => {
+        const state = makeDisplacedState(0);
+
+        const report = processOsidColumnMovement(
+            state,
+            [makeEdge(BABIN, OBORCI)],
+            mockReverseMap([BABIN, OBORCI, KUTANJA]),
+            flatTerrain(),
+        );
+
+        expect(report.column_advances).toBe(0);
+        expect(report.column_arrivals).toBe(0);
+        expect(state.military.formations?.brig1?.location_osid).toBe(KUTANJA);
+        expect(state.military.brigade_movement_state?.brig1).toBeUndefined();
+    });
+
+    it('still advances a valid unchanged column transit', () => {
+        const state = makeState([
+            makeFormation('brig1', 'RS', 'A'),
+        ], {
+            military: {
+                brigade_movement_state: {
+                    brig1: {
+                        status: 'in_transit',
+                        stance: 'column',
+                        destination_sids: ['B'],
+                        path: ['A', 'B'],
+                        turns_remaining: 2,
+                    },
+                },
+            } as any,
+        });
+
+        const report = processOsidColumnMovement(
+            state,
+            [makeEdge('A', 'B')],
+            mockReverseMap(['A', 'B']),
+            flatTerrain(),
+        );
+
+        expect(report.column_advances).toBe(1);
+        expect(report.column_arrivals).toBe(0);
+        expect(state.military.formations?.brig1?.location_osid).toBe('A');
+        expect(state.military.brigade_movement_state?.brig1?.turns_remaining).toBe(1);
+    });
+
+    it('still completes a valid unchanged column transit on arrival', () => {
+        const state = makeState([
+            makeFormation('brig1', 'RS', 'A'),
+        ], {
+            military: {
+                brigade_movement_state: {
+                    brig1: {
+                        status: 'in_transit',
+                        stance: 'column',
+                        destination_sids: ['B'],
+                        path: ['A', 'B'],
+                        turns_remaining: 1,
+                    },
+                },
+            } as any,
+        });
+
+        const report = processOsidColumnMovement(
+            state,
+            [makeEdge('A', 'B')],
+            mockReverseMap(['A', 'B']),
+            flatTerrain(),
+        );
+
+        expect(report.column_arrivals).toBe(1);
+        expect(state.military.formations?.brig1?.location_osid).toBe('B');
+        expect(state.military.brigade_movement_state).toBeUndefined();
+    });
+
+    it('cancels unverifiable legacy transit when the path is absent', () => {
+        const state = makeState([
+            makeFormation('brig1', 'RS', 'A'),
+        ], {
+            military: {
+                brigade_movement_state: {
+                    brig1: {
+                        status: 'in_transit',
+                        stance: 'column',
+                        destination_sids: ['B'],
+                        turns_remaining: 1,
+                    },
+                },
+            } as any,
+        });
+
+        const report = processOsidColumnMovement(
+            state,
+            [makeEdge('A', 'B')],
+            mockReverseMap(['A', 'B']),
+            flatTerrain(),
+        );
+
+        expect(report.column_advances).toBe(0);
+        expect(report.column_arrivals).toBe(0);
+        expect(state.military.formations?.brig1?.location_osid).toBe('A');
+        expect(state.military.brigade_movement_state?.brig1).toBeUndefined();
+    });
+
+    it('cancels malformed path transit without inventing a destination', () => {
+        const state = makeState([
+            makeFormation('brig1', 'RS', 'A'),
+        ], {
+            military: {
+                brigade_movement_state: {
+                    brig1: {
+                        status: 'in_transit',
+                        stance: 'column',
+                        destination_sids: ['C'],
+                        path: ['A', 'B'],
+                        turns_remaining: 1,
+                    },
+                },
+            } as any,
+        });
+
+        const report = processOsidColumnMovement(
+            state,
+            makeLinearEdges(),
+            mockReverseMap(['A', 'B', 'C', 'D', 'E']),
+            flatTerrain(),
+        );
+
+        expect(report.column_advances).toBe(0);
+        expect(report.column_arrivals).toBe(0);
+        expect(state.military.formations?.brig1?.location_osid).toBe('A');
+        expect(state.military.brigade_movement_state?.brig1).toBeUndefined();
+    });
+});
+
+describe('processOsidColumnMovement — in-flight recorded route validity', () => {
+    function makeTransit(path: string[], turnsRemaining: number, controllers: Record<string, string | null>, faction: FactionId = 'RS') {
+        return makeState([makeFormation('brig1', faction, path[0]!)], {
+            military: {
+                brigade_movement_state: {
+                    brig1: {
+                        status: 'in_transit', stance: 'column', destination_sids: [path[path.length - 1]],
+                        path, turns_remaining: turnsRemaining, owner: 'bot_discretionary',
+                    },
+                },
+            } as any,
+            political: { political_controllers: controllers } as any,
+        });
+    }
+
+    function run(state: GameState, reverse = mockReverseMap(['A', 'B', 'C', 'D', 'E'])) {
+        return processOsidColumnMovement(state, makeLinearEdges(), reverse, flatTerrain());
+    }
+
+    it('cancels after an accepted route loses an intermediate at remaining2 and remaining1', () => {
+        for (const remaining of [2, 1]) {
+            const state = makeState([makeFormation('brig1', 'RS', 'A')], {
+                military: { brigade_movement_orders: { brig1: { destination_sids: ['D'], stance: 'column' } } } as any,
+                political: { political_controllers: { A: 'RS', B: 'RS', C: 'RS', D: 'RS' } } as any,
+            });
+            const start = run(state);
+            expect(start.column_starts).toBe(1);
+            state.military.brigade_movement_state!.brig1!.turns_remaining = remaining;
+            state.political.political_controllers!.B = 'RBiH';
+            state.military.brigade_movement_orders = { brig1: { destination_sids: ['D'] } } as any;
+
+            const report = run(state);
+
+            expect(report.column_advances).toBe(0);
+            expect(report.column_arrivals).toBe(0);
+            expect(state.military.formations?.brig1?.location_osid).toBe('A');
+            expect(state.military.brigade_movement_state?.brig1).toBeUndefined();
+            expect(state.military.brigade_movement_orders?.brig1).toEqual({ destination_sids: ['D'] });
+        }
+    });
+
+    it('cancels when the source itself becomes non-traversable', () => {
+        const state = makeTransit(['A', 'B', 'C', 'D'], 2, { A: 'RS', B: 'RS', C: 'RS', D: 'RS' });
+        state.political.political_controllers!.A = 'RBiH';
+
+        const report = run(state);
+
+        expect(report.column_advances).toBe(0);
+        expect(state.military.formations?.brig1?.location_osid).toBe('A');
+        expect(state.military.brigade_movement_state?.brig1).toBeUndefined();
+    });
+
+    it('cancels hostile terminal with hostile predecessor instead of teleporting to predecessor', () => {
+        const state = makeTransit(['A', 'B', 'C', 'D'], 1, { A: 'RS', B: 'RS', C: 'RBiH', D: 'RBiH' });
+
+        const report = run(state);
+
+        expect(report.column_arrivals).toBe(0);
+        expect(state.military.formations?.brig1?.location_osid).toBe('A');
+        expect(state.military.brigade_movement_state?.brig1).toBeUndefined();
+    });
+
+    it('cancels when a friendly predecessor has a hostile earlier prefix', () => {
+        const state = makeTransit(['A', 'B', 'C', 'D'], 1, { A: 'RS', B: 'RBiH', C: 'RS', D: 'RBiH' });
+
+        const report = run(state);
+
+        expect(report.column_arrivals).toBe(0);
+        expect(state.military.formations?.brig1?.location_osid).toBe('A');
+        expect(state.military.brigade_movement_state?.brig1).toBeUndefined();
+    });
+
+    it('preserves the existing predecessor fallback when only the terminal is hostile', () => {
+        const state = makeTransit(['A', 'B', 'C'], 1, { A: 'RS', B: 'RS', C: 'RBiH' });
+
+        const report = run(state);
+
+        expect(report.column_arrivals).toBe(1);
+        expect(state.military.formations?.brig1?.location_osid).toBe('B');
+        expect(state.military.brigade_movement_state?.brig1).toBeUndefined();
+    });
+
+    it('allows allied bridge traversal and cancels after actual alliance closure', () => {
+        const allied = makeTransit(['A', 'B', 'C'], 2, { A: 'RBiH', B: 'HRHB', C: 'RBiH' }, 'RBiH');
+        allied.factions = [{ id: 'RBiH' }, { id: 'HRHB' }] as any;
+        allied.political.war_alliance_rbih_hrhb = 0.75;
+        const alliedReport = run(allied);
+        expect(alliedReport.column_advances).toBe(1);
+        expect(allied.military.brigade_movement_state?.brig1?.turns_remaining).toBe(1);
+
+        const closed = makeTransit(['A', 'B', 'C'], 2, { A: 'RBiH', B: 'HRHB', C: 'RBiH' }, 'RBiH');
+        closed.factions = [{ id: 'RBiH' }, { id: 'HRHB' }] as any;
+        closed.political.war_alliance_rbih_hrhb = 0;
+        const closedReport = run(closed);
+        expect(closedReport.column_advances).toBe(0);
+        expect(closed.military.formations?.brig1?.location_osid).toBe('A');
+        expect(closed.military.brigade_movement_state?.brig1).toBeUndefined();
+    });
+
+    it('allows direct-null traversal and cancels canonical-mapped enemy fallback', () => {
+        const nullState = makeTransit(['A', 'B', 'C'], 2, { A: null, B: null, C: 'RS' });
+        const nullReport = run(nullState);
+        expect(nullReport.column_advances).toBe(1);
+        expect(nullState.military.brigade_movement_state?.brig1?.turns_remaining).toBe(1);
+
+        const canonicalReverse = new Map<string, string[]>([
+            ['A', ['A']], ['B', ['sidB']], ['C', ['C']], ['D', ['D']],
+        ]) as OperationalToCanonicalReverseMap;
+        const enemyState = makeTransit(['A', 'B', 'C'], 2, { A: 'RS', B: 'RS', C: 'RS' });
+        enemyState.political.political_controllers!.sidB = 'RBiH';
+        delete enemyState.political.political_controllers!.B;
+        const enemyReport = run(enemyState, canonicalReverse);
+        expect(enemyReport.column_advances).toBe(0);
+        expect(enemyState.military.formations?.brig1?.location_osid).toBe('A');
+        expect(enemyState.military.brigade_movement_state?.brig1).toBeUndefined();
+    });
+
+    it('cancels a disconnected recorded edge even when endpoints are friendly', () => {
+        const state = makeTransit(['A', 'B', 'C'], 2, { A: 'RS', B: 'RS', C: 'RS' });
+        const report = processOsidColumnMovement(
+            state,
+            [makeEdge('A', 'B'), makeEdge('C', 'D')],
+            mockReverseMap(['A', 'B', 'C', 'D']),
+            flatTerrain(),
+        );
+        expect(report.column_advances).toBe(0);
+        expect(state.military.formations?.brig1?.location_osid).toBe('A');
+        expect(state.military.brigade_movement_state?.brig1).toBeUndefined();
+    });
+
+    it('keeps a valid journey uninterrupted through canonical save/load and arrival', () => {
+        const state = makeTransit(['A', 'B', 'C'], 2, { A: 'RS', B: 'RS', C: 'RS' });
+        const loaded = deserializeState(serializeState(state));
+        const first = run(loaded);
+        expect(first.column_advances).toBe(1);
+        expect(loaded.military.brigade_movement_state?.brig1?.turns_remaining).toBe(1);
+
+        const again = deserializeState(serializeState(loaded));
+        const arrival = run(again);
+        expect(arrival.column_arrivals).toBe(1);
+        expect(again.military.formations?.brig1?.location_osid).toBe('C');
+        expect(again.military.brigade_movement_state?.brig1).toBeUndefined();
+    });
+
+    it('unrelated journeys continue normally while a cancelled journey leaves pending manual orders untouched', () => {
+        const state = makeTransit(['A', 'B', 'C'], 2, { A: 'RS', B: 'RS', C: 'RS' });
+        state.military.formations!.brig2 = makeFormation('brig2', 'RS', 'D');
+        state.military.brigade_movement_state!.brig2 = {
+            status: 'in_transit', stance: 'column', destination_sids: ['E'],
+            path: ['D', 'E'], turns_remaining: 2, owner: 'bot_discretionary',
+        };
+        state.political.political_controllers!.E = 'RS';
+        state.military.brigade_movement_orders = { brig1: { destination_sids: ['D'] } } as any;
+        state.political.political_controllers!.B = 'RBiH';
+
+        const report = run(state);
+
+        expect(report.column_advances).toBe(1);
+        expect(state.military.formations?.brig1?.location_osid).toBe('A');
+        expect(state.military.brigade_movement_state?.brig1).toBeUndefined();
+        expect(state.military.brigade_movement_orders?.brig1).toEqual({ destination_sids: ['D'] });
+        expect(state.military.brigade_movement_state?.brig2?.path).toEqual(['D', 'E']);
+        expect(state.military.brigade_movement_state?.brig2?.turns_remaining).toBe(1);
     });
 });
