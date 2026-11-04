@@ -13220,3 +13220,40 @@ Test-first RED: 4 failed / 2 passed / 31 skipped in the focused rear-stack autho
 Diagnostic update after root behavior: `front_distribution_writer_diagnostic` now records the actual two first-pass `main_phase_b` writes [0,1], zero second-pass writes, four invocation receipts, and unconsumed `actor -> front_a` / `actor2 -> front_b` orders. State/report parity and diagnostics validation remain; coverage was not weakened.
 
 Limits: unit evidence only. No full aggregate, campaign, package, native, qualification or adoption. Prior 709/708/710/696 zero-health current-source evidence is no longer current after this source change; exact rebinding and independent review are required.
+
+## 2026-11-04 - Codex→Claude handover reconciliation: W1, W3 no-teleport, Army HQ slot gate (MEASURED 188w, LOCAL INTEGRATION BRANCH, NOT ADOPTED)
+
+Codex wound down and handed calibration ownership to Claude (owner instruction). Preservation came first: every dirty Codex checkout and the two non-Git isolated folders were snapshotted non-destructively with a temp index, with no worktree, index or branch changed, under `refs/handover/20261104/*` in the main repository object store. The W1/W3 folders were captured for `src tests tools/diagnostics data/derived/startup` only, because their `proof/` trees may hold the previously leaked webhook transcript. A webhook/token scan of every snapshot diff found 0 matches. Integration branch `claude/handover-integration-20261104` was built on snapshot `90156c1e0` (= `64e616e0b` + all 57 uncommitted April entries). It is local only; nothing was pushed or merged.
+
+Commits:
+- `00c7c35ab` — Codex W1. Inactive formations are not backfilled onto the map; a coverage-only defeat keeps `last_retreat_from`; TG donor/anchor/friendly scans skip inactive formations. 3 direct tests: RED 8/15 -> GREEN 15/15.
+- `054da07e7` — Codex W3 empty-sector fix (`brigade_assignment.ts` only). `ensureMinimumSectorCoverage` no longer instantly borrows a sibling sector's rear/reserve/line brigade into a zero-assigned sector, per Engine Invariants §14.9. The Seher scenario, its test, its startup edit and the dated observer harnesses are EXCLUDED. RED 10 -> GREEN 121/121.
+- `4e2bda1fc` — startup regenerated, because W3 made the baked save drift. sha256 `a76ede76cb7dd87a44cace84fd26579233cc4e40e85568a2037c4b316f6744c8`.
+- `dfbab5f43` — `injectArmyHqOperations` gates on `hasAvailableSlot` (mirroring the ordinary triggered path) instead of `hasActiveOperation`, and records an `active_primary_corps` trace. Implemented by the OpenCode implementer (in bounds), reviewed by Claude. RED 2 -> GREEN 35/35.
+- `d5534a085`, `6ff059aa6` — tests re-pinned or re-fixtured to the lawful no-teleport state:
+  - startup contract: sole reserve-only sector is now `vrs_east_bosnian:0`, honestly `unstaffed_front`; the 443rd Mountain startup orphan is RESOLVED;
+  - reload contract: omission allowlist re-derived with the lost/added-defined-value checks active;
+  - final-sector fixture: relocation now comes from a legal own-rear promotion, with all 55 assertion lines byte-identical.
+
+188-week canonical runs, one change per run (jan1993/apr1994/apr1995/oct1995 of 712, `tools/verify_checkpoints.cjs`; `tools/engine_health_gate.cjs --strict` PASS on all, 0 stranded):
+- snapshot 709/701/701/686;
+- +W1 709/708/710/694 (reproduces Codex's independent W1 figure);
+- +W3 702/704/701/689, with Farz P1 Ozren 1/4;
+- +slot gate 702/704/701/691, with Ozren 4/4 and Srebrenica/Žepa falling on schedule.
+
+Run dirs and outputs: integration worktree `runs/claude-measure-20261104/` (Git-ignored).
+
+Pyrrhic panel (4 blind seats, frozen packet, Claude as integrator; `runs/claude-measure-20261104/panel/DECISION.md`): KEEP W3, 3–1 (canon/design, operations and sectors KEEP; historian PARK). Operations and Sectors independently found the Ozren root cause: a recovering probe blocked the Army HQ Farz injection. The historian's dissent is binding for main adoption: the early-war ground W3 loses (Konjic Glavatičevo/Ljuta, Vogošća Hotonj, Trnovo Tošići, the Goražde/Čajniče/Foča rim) must be recovered through the legal T1/T2/T3 relief path and startup placement, never by restoring the teleport.
+
+Recorded residuals:
+- own-sector reserve/rear promotion and `severe-rescue`/`severe-relief` still relocate instantly;
+- T1 skips a sector whose own reserve fails promotion for a non-legal reason (`vrs_east_bosnian:0` at startup);
+- column starts fell 1175->771 (not attributed).
+
+Inherited, present in the snapshot:
+- the Farz authored-AAR receipt guard fails in every run;
+- full suite on the final head fails only 4 tests: paradox_local_qa_harness ×1, plan_index ×2, salient_evacuation_observer ×1. `plan_index` was deliberately not regenerated.
+
+Three real-save Foča tests read `data/derived/latest_run_final_save.json`. They failed only while campaign runs had rewritten that tracked file, and pass on a clean tree. tsc 0.
+
+Limits: local integration branch only; no main adoption, pin refresh, native/package qualification or publication.
