@@ -942,7 +942,7 @@ function makeMisassignFormation(id: string, overrides: Partial<FormationState>):
 }
 
 describe('post-merge misassignment relocation', () => {
-    it('keeps a brigade with the same-corps sector that truthfully owns its current location', () => {
+    it('keeps a rear brigade with the same-corps sector that truthfully owns its current location instead of transferring it into an empty sibling', () => {
         const state: GameState = {
             schema_version: CURRENT_SCHEMA_VERSION,
             meta: {
@@ -1022,16 +1022,29 @@ describe('post-merge misassignment relocation', () => {
         ];
 
         const sectors = buildCorpsFrontSectors(state, edges, null);
-        const assignedOwner = Object.values(sectors).find((sector) => sector.assigned_brigade_ids.includes('brig_home'));
-        expect(assignedOwner).toBeDefined();
-        expect(state.military.formations.brig_home.location_osid).toMatch(/^op:front:/);
+        const owner = Object.values(sectors).find((sector) =>
+            sector.assigned_brigade_ids.includes('brig_home')
+            || sector.reserve_brigade_ids.includes('brig_home')
+            || (sector.rear_brigade_ids ?? []).includes('brig_home'));
+        expect(owner).toBeDefined();
+        expect(owner?.sector_id).toBe('sector:corps_a:0');
+        expect(owner?.corps_id).toBe('corps_a');
+        expect(owner?.territory_osids).toContain('op:home:rear');
+        expect(owner?.rear_brigade_ids ?? []).toContain('brig_home');
+        expect(state.military.formations.brig_home.location_osid).toBe('op:home:rear');
         expect(state.military.formations.brig_home.assignment).toEqual({
             kind: 'sector',
-            sector_id: assignedOwner?.sector_id,
-            role: 'front',
+            sector_id: owner?.sector_id,
+            role: 'rear',
         });
+
+        const emptySibling = Object.values(sectors).find((sector) => sector.sector_id !== owner?.sector_id);
+        expect(emptySibling).toBeDefined();
+        expect(emptySibling?.assigned_brigade_ids).toEqual([]);
+        expect(emptySibling?.reserve_brigade_ids).toEqual([]);
+        expect(emptySibling?.rear_brigade_ids ?? []).toEqual([]);
         for (const sector of Object.values(sectors)) {
-            if (sector.sector_id === assignedOwner?.sector_id) continue;
+            if (sector.sector_id === owner?.sector_id) continue;
             expect(sector.assigned_brigade_ids).not.toContain('brig_home');
             expect(sector.reserve_brigade_ids).not.toContain('brig_home');
             expect(sector.rear_brigade_ids ?? []).not.toContain('brig_home');

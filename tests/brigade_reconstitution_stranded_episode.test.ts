@@ -11,6 +11,10 @@ import {
     STRANDED_MORALE_DECAY,
     updateStrandedBrigadeLifecycle,
 } from '../src/sim/combat/stranded_brigade_lifecycle.js';
+import {
+    DISSOLUTION_PERSONNEL_TO_RESERVE_RATE,
+    dissolveCombatIneffectiveBrigades,
+} from '../src/sim/combat/brigade_dissolution.js';
 import { appendDisplacementEvent } from '../src/state/displacement_event_log.js';
 import { militiaPoolKey } from '../src/state/militia_pool_key.js';
 import type { DisplacementEvent, FormationState, GameState } from '../src/state/game_state.js';
@@ -323,5 +327,263 @@ describe('reconstitution journey invalidation', () => {
             expect(state.military.brigade_movement_state?.[id]).toBeDefined();
             expect(state.military.brigade_movement_orders?.[id]).toEqual(order);
         }
+    });
+});
+
+describe('synthetic two-cycle RBiH refugee characterization', () => {
+    it('draws from the majority refugee destination, reclassifies, dissolves once, waits the delay, and draws again without duplication', () => {
+        const startTurn = 60;
+        const corpsId = 'arbih_2nd_corps';
+        const brigadeId = 'synthetic_rbih_refugee_brigade';
+        const homeMun = 'lost_home';
+        const srebrenicaLikeMun = 'srebrenica_like';
+        const tuzlaLikeMun = 'tuzla_like';
+        const srebrenicaLikeOsid = 'op:srebrenica_like:ref_1';
+        const tuzlaLikeOsid = 'op:tuzla_like:ref_1';
+
+        const f = brigade(brigadeId, {
+            faction: 'RBiH',
+            corps_id: corpsId,
+            home_osid: 'op:lost_home:home_1',
+            location_osid: 'op:lost_home:home_1',
+            origin_mun: homeMun,
+            status: 'inactive',
+            lifecycle_status: 'destroyed',
+            personnel: 0,
+            cohesion: 0,
+            morale: 0,
+            max_personnel: 800,
+            destruction_turn: startTurn - RECONSTITUTION_DELAY_TURNS,
+            stranded_status: 'holding',
+            stranded_since_turn: startTurn - 10,
+            composition: {
+                infantry: 100,
+                tanks: 10,
+                artillery: 6,
+                aa_systems: 4,
+                tank_condition: { operational: 10, degraded: 0, non_operational: 0 },
+                artillery_condition: { operational: 6, degraded: 0, non_operational: 0 },
+            },
+        });
+        const state = makeState({ [brigadeId]: f });
+        state.meta.turn = startTurn;
+        state.political.political_controllers = {
+            'op:lost_home:home_1': 'RS',
+            [srebrenicaLikeOsid]: 'RBiH',
+            [tuzlaLikeOsid]: 'RBiH',
+        };
+        state.political.last_supply_state_by_osid = {
+            [srebrenicaLikeOsid]: 'critical',
+            [tuzlaLikeOsid]: 'adequate',
+        };
+        state.military.corps_front_sectors = {
+            [`sector:${corpsId}:0`]: {
+                sector_id: `sector:${corpsId}:0`,
+                corps_id: corpsId,
+                faction: 'RBiH',
+                territory_osids: [srebrenicaLikeOsid, tuzlaLikeOsid],
+                front_edges: [],
+                sub_segments: [],
+                assigned_brigade_ids: [brigadeId],
+                reserve_brigade_ids: [],
+            },
+        } as any;
+
+        const srebrenicaKey = militiaPoolKey(srebrenicaLikeMun as any, 'RBiH');
+        const tuzlaKey = militiaPoolKey(tuzlaLikeMun as any, 'RBiH');
+        state.military.militia_pools![srebrenicaKey] = {
+            mun_id: srebrenicaLikeMun, faction: 'RBiH', available: 700, committed: 0,
+            exhausted: false, updated_turn: startTurn - 1,
+        } as any;
+        state.military.militia_pools![tuzlaKey] = {
+            mun_id: tuzlaLikeMun, faction: 'RBiH', available: 500, committed: 0,
+            exhausted: false, updated_turn: startTurn - 1,
+        } as any;
+
+        appendDisplacementEvent(state, {
+            turn: startTurn - 20,
+            origin_mun: homeMun,
+            dest_mun: srebrenicaLikeMun,
+            dest_osid: srebrenicaLikeOsid,
+            ethnicity: 'RBiH',
+            displaced: 5000,
+            killed: 0,
+            fled_abroad: 0,
+            settled: 5000,
+        } as DisplacementEvent);
+        appendDisplacementEvent(state, {
+            turn: startTurn - 20,
+            origin_mun: homeMun,
+            dest_mun: tuzlaLikeMun,
+            dest_osid: tuzlaLikeOsid,
+            ethnicity: 'RBiH',
+            displaced: 1200,
+            killed: 0,
+            fled_abroad: 0,
+            settled: 1200,
+        } as DisplacementEvent);
+
+        const srebrenicaPool = state.military.militia_pools![srebrenicaKey]!;
+        const tuzlaPool = state.military.militia_pools![tuzlaKey]!;
+        const srebrenicaAvailableBefore = srebrenicaPool.available;
+        const fundingTotal = () => srebrenicaPool.available
+            + tuzlaPool.available
+            + (f.personnel ?? 0)
+            + (state.military.strategic_reserves!.RBiH ?? 0);
+        const fundingAtStart = fundingTotal();
+
+        const first = reconstituteBrigades(state);
+        expect(first.reconstituted_count).toBe(1);
+        const firstEntry = first.reconstituted_brigades[0]!;
+        expect(firstEntry.refugee_mun).toBe(srebrenicaLikeMun);
+        expect(firstEntry.pool_drawn).toBe(Math.floor(800 * RECONSTITUTION_PERSONNEL_FRACTION));
+        expect(srebrenicaAvailableBefore - srebrenicaPool.available).toBe(firstEntry.pool_drawn);
+        expect(srebrenicaPool.committed).toBe(firstEntry.pool_drawn);
+        expect(tuzlaPool.available).toBe(500);
+        expect(tuzlaPool.committed).toBe(0);
+        expect(fundingTotal()).toBe(fundingAtStart);
+
+        const availableAfterFirst = srebrenicaPool.available;
+        const committedAfterFirst = srebrenicaPool.committed;
+        const repeatedWhileActive = reconstituteBrigades(state);
+        expect(repeatedWhileActive.reconstituted_count).toBe(0);
+        expect(srebrenicaPool.available).toBe(availableAfterFirst);
+        expect(srebrenicaPool.committed).toBe(committedAfterFirst);
+
+        const classification = updateStrandedBrigadeLifecycle(state, new Map());
+        expect(classification.newly_stranded).toContain(brigadeId);
+        expect(f.stranded_status).toBe('holding');
+        expect(f.stranded_since_turn).toBe(startTurn);
+        const cohesionAfterReconstitution = f.cohesion;
+        const moraleAfterReconstitution = f.morale;
+
+        for (let offset = 1; offset <= 4; offset += 1) {
+            state.meta.turn = startTurn + offset;
+            const lifecycle = updateStrandedBrigadeLifecycle(state, new Map());
+            expect(lifecycle.still_holding).toContain(brigadeId);
+        }
+        expect(f.cohesion).toBe((cohesionAfterReconstitution ?? 0) - (STRANDED_COHESION_DECAY * 4));
+        expect(f.morale).toBe((moraleAfterReconstitution ?? 0) - (STRANDED_MORALE_DECAY * 4));
+        expect(f.personnel).toBe(firstEntry.pool_drawn);
+
+        const reserveBeforeDissolution = state.military.strategic_reserves!.RBiH!;
+        const dissolution = dissolveCombatIneffectiveBrigades(state, new Map());
+        const expectedReserveCredit = Math.floor(
+            firstEntry.pool_drawn * DISSOLUTION_PERSONNEL_TO_RESERVE_RATE,
+        );
+        expect(dissolution.dissolved_count).toBe(1);
+        expect(dissolution.dissolved_brigades[0]!.personnel_remaining).toBe(firstEntry.pool_drawn);
+        expect(dissolution.dissolved_brigades[0]!.personnel_to_reserve).toBe(expectedReserveCredit);
+        expect(state.military.strategic_reserves!.RBiH).toBe(reserveBeforeDissolution + expectedReserveCredit);
+        expect(f.status).toBe('inactive');
+        expect(f.lifecycle_status).toBe('destroyed');
+        expect(f.personnel).toBe(0);
+        expect(f.composition!.tanks).toBe(0);
+        expect(f.composition!.artillery).toBe(0);
+        expect(f.composition!.aa_systems).toBe(0);
+        expect(f.destruction_turn).toBe(startTurn + 4);
+
+        const reserveAfterDissolution = state.military.strategic_reserves!.RBiH!;
+        expect(dissolveCombatIneffectiveBrigades(state, new Map()).dissolved_count).toBe(0);
+        expect(state.military.strategic_reserves!.RBiH).toBe(reserveAfterDissolution);
+
+        expect(fundingTotal()).toBe(fundingAtStart - expectedReserveCredit);
+        const availableAfterDissolution = srebrenicaPool.available;
+        const committedAfterDissolution = srebrenicaPool.committed;
+        const formationAfterDissolution = JSON.stringify({
+            status: f.status,
+            lifecycle_status: f.lifecycle_status,
+            personnel: f.personnel,
+            location_osid: f.location_osid,
+            destruction_turn: f.destruction_turn,
+            cohesion: f.cohesion,
+            morale: f.morale,
+        });
+        const fundingAfterDissolution = fundingTotal();
+
+        state.meta.turn = startTurn + 4 + 4;
+        const ageFour = reconstituteBrigades(state);
+        expect(ageFour.reconstituted_count).toBe(0);
+        expect(srebrenicaPool.available).toBe(availableAfterDissolution);
+        expect(srebrenicaPool.committed).toBe(committedAfterDissolution);
+        expect(state.military.strategic_reserves!.RBiH).toBe(reserveAfterDissolution);
+        expect(JSON.stringify({
+            status: f.status,
+            lifecycle_status: f.lifecycle_status,
+            personnel: f.personnel,
+            location_osid: f.location_osid,
+            destruction_turn: f.destruction_turn,
+            cohesion: f.cohesion,
+            morale: f.morale,
+        })).toBe(formationAfterDissolution);
+        expect(fundingTotal()).toBe(fundingAfterDissolution);
+
+        state.meta.turn = startTurn + 4 + RECONSTITUTION_DELAY_TURNS;
+        const second = reconstituteBrigades(state);
+        expect(second.reconstituted_count).toBe(1);
+        const secondEntry = second.reconstituted_brigades[0]!;
+        expect(secondEntry.id).toBe(brigadeId);
+        expect(secondEntry.refugee_mun).toBe(srebrenicaLikeMun);
+        expect(secondEntry.pool_drawn).toBe(firstEntry.pool_drawn);
+        expect(secondEntry.via_reserve).toBeUndefined();
+        expect(srebrenicaPool.available).toBe(availableAfterDissolution - secondEntry.pool_drawn);
+        expect(srebrenicaPool.committed).toBe(secondEntry.pool_drawn * 2);
+        expect(state.military.strategic_reserves!.RBiH).toBe(reserveAfterDissolution);
+        expect(f.personnel).toBe(secondEntry.pool_drawn);
+        expect(f.composition!.tanks).toBe(0);
+        expect(f.composition!.artillery).toBe(0);
+        expect(f.composition!.aa_systems).toBe(0);
+        expect(fundingTotal()).toBe(fundingAfterDissolution);
+
+        const cohesionAfterSecondReconstitution = f.cohesion;
+        const moraleAfterSecondReconstitution = f.morale;
+        const fundingBeforeClassification = fundingTotal();
+        const secondClassification = updateStrandedBrigadeLifecycle(state, new Map());
+        expect(secondClassification.newly_stranded).toContain(brigadeId);
+        expect(f.stranded_status).toBe('holding');
+        expect(f.stranded_since_turn).toBe(startTurn + 4 + RECONSTITUTION_DELAY_TURNS);
+        expect(f.cohesion).toBe(cohesionAfterSecondReconstitution);
+        expect(f.morale).toBe(moraleAfterSecondReconstitution);
+        expect(reconstituteBrigades(state).reconstituted_count).toBe(0);
+        expect(srebrenicaPool.available).toBe(availableAfterDissolution - secondEntry.pool_drawn);
+        expect(srebrenicaPool.committed).toBe(secondEntry.pool_drawn * 2);
+        expect(state.military.strategic_reserves!.RBiH).toBe(reserveAfterDissolution);
+        expect(fundingTotal()).toBe(fundingBeforeClassification);
+
+        const cycleTwoTurn = startTurn + 4 + RECONSTITUTION_DELAY_TURNS;
+        for (let offset = 1; offset <= 4; offset += 1) {
+            state.meta.turn = cycleTwoTurn + offset;
+            const lifecycle = updateStrandedBrigadeLifecycle(state, new Map());
+            expect(lifecycle.still_holding).toContain(brigadeId);
+            expect(f.cohesion).toBe((cohesionAfterSecondReconstitution ?? 0) - (STRANDED_COHESION_DECAY * offset));
+            expect(f.morale).toBe((moraleAfterSecondReconstitution ?? 0) - (STRANDED_MORALE_DECAY * offset));
+            expect(f.personnel).toBe(secondEntry.pool_drawn);
+        }
+        expect(fundingTotal()).toBe(fundingBeforeClassification);
+
+        const reserveBeforeSecondDissolution = state.military.strategic_reserves!.RBiH!;
+        const secondDissolution = dissolveCombatIneffectiveBrigades(state, new Map());
+        expect(secondDissolution.dissolved_count).toBe(1);
+        expect(secondDissolution.dissolved_brigades[0]!.personnel_remaining).toBe(secondEntry.pool_drawn);
+        expect(secondDissolution.dissolved_brigades[0]!.personnel_to_reserve).toBe(expectedReserveCredit);
+        expect(state.military.strategic_reserves!.RBiH)
+            .toBe(reserveBeforeSecondDissolution + expectedReserveCredit);
+        expect(f.status).toBe('inactive');
+        expect(f.personnel).toBe(0);
+        expect(f.composition!.tanks).toBe(0);
+        expect(f.composition!.artillery).toBe(0);
+        expect(f.composition!.aa_systems).toBe(0);
+        expect(f.destruction_turn).toBe(cycleTwoTurn + 4);
+
+        const reserveAfterSecondDissolution = state.military.strategic_reserves!.RBiH!;
+        expect(dissolveCombatIneffectiveBrigades(state, new Map()).dissolved_count).toBe(0);
+        expect(state.military.strategic_reserves!.RBiH).toBe(reserveAfterSecondDissolution);
+        expect(fundingTotal()).toBe(fundingAfterDissolution - expectedReserveCredit);
+
+        expect(srebrenicaPool.available).toBe(60);
+        expect(srebrenicaPool.committed).toBe(640);
+        expect(tuzlaPool.available).toBe(500);
+        expect(tuzlaPool.committed).toBe(0);
+        expect(state.military.strategic_reserves!.RBiH).toBe(320);
     });
 });

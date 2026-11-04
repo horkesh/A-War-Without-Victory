@@ -128,4 +128,137 @@ describe('empty-sector relief reassignment', () => {
 
         expect(computeEmptySectorReliefReassignments(briefing)).toEqual([]);
     });
+
+    it('emits intent for a plain legal rear donor', () => {
+        const briefing = makeBriefing();
+        const donor = briefing.state_ref.military.formations.relief_brigade;
+        const before = structuredClone(donor);
+
+        expect(computeEmptySectorReliefReassignments(briefing)).toEqual([{
+            brigade_id: 'relief_brigade',
+            to_sector_id: 'sector:test:empty',
+            reason: 'empty front sector requires corps relief',
+        }]);
+        expect(donor).toEqual(before);
+    });
+
+    it('does not issue intent for a donor with a manual movement order', () => {
+        const briefing = makeBriefing();
+        briefing.state_ref.military.brigade_movement_orders = {
+            relief_brigade: { destination_sids: ['op:test:b'], stance: 'column' },
+        };
+
+        expect(computeEmptySectorReliefReassignments(briefing)).toEqual([]);
+        expect(briefing.state_ref.military.formations.relief_brigade.location_osid)
+            .toBe('op:test:rear');
+    });
+
+    it('does not issue intent for a donor with a pending dig-in posture order', () => {
+        const briefing = makeBriefing();
+        briefing.state_ref.military.brigade_posture_orders = [
+            { brigade_id: 'relief_brigade', posture: 'dig_in' },
+        ];
+
+        expect(computeEmptySectorReliefReassignments(briefing)).toEqual([]);
+        expect(briefing.state_ref.military.formations.relief_brigade.location_osid)
+            .toBe('op:test:rear');
+    });
+
+    it('does not issue intent for an active-operation participant', () => {
+        const briefing = makeBriefing();
+        briefing.state_ref.military.corps_command = {
+            test_corps: {
+                active_operations: [{
+                    type: 'attack',
+                    phase: 'execution',
+                    participating_brigades: ['relief_brigade'],
+                }],
+            },
+        };
+
+        expect(computeEmptySectorReliefReassignments(briefing)).toEqual([]);
+        expect(briefing.state_ref.military.formations.relief_brigade.location_osid)
+            .toBe('op:test:rear');
+    });
+
+    it('does not issue intent for an elite-loaned donor', () => {
+        const briefing = makeBriefing();
+        briefing.state_ref.military.formations.relief_brigade.elite_loan_state = {
+            on_loan: true,
+            loaned_to_corps: 'other_corps',
+            loan_start_turn: 1,
+        };
+
+        expect(computeEmptySectorReliefReassignments(briefing)).toEqual([]);
+        expect(briefing.state_ref.military.formations.relief_brigade.location_osid)
+            .toBe('op:test:rear');
+    });
+
+    it('does not issue intent for a line donor that is only at its own floor', () => {
+        const briefing = makeBriefing();
+        const donorSector = briefing.sectors.find(
+            (sector: { sector_id: string }) => sector.sector_id === 'sector:test:donor',
+        );
+        donorSector.rear_brigade_ids = [];
+        donorSector.assigned_brigade_ids = ['relief_brigade'];
+        donorSector.length_edges = 8;
+        donorSector.threat_ratio = 100;
+
+        expect(computeEmptySectorReliefReassignments(briefing)).toEqual([]);
+        expect(briefing.state_ref.military.formations.relief_brigade.location_osid)
+            .toBe('op:test:rear');
+    });
+
+    it('emits intent for a line donor above its own floor and below the pressure threshold', () => {
+        const briefing = makeBriefing();
+        const rear2 = 'op:test:rear_2';
+        briefing.spatial.adjacency.set(rear2, ['op:test:rear']);
+        briefing.spatial.adjacency.set('op:test:rear', [
+            ...(briefing.spatial.adjacency.get('op:test:rear') ?? []),
+            rear2,
+        ]);
+        briefing.spatial.friendlyOsidsByFaction.get('RBiH')!.add(rear2);
+
+        const second = structuredClone(
+            briefing.state_ref.military.formations.relief_brigade,
+        );
+        second.id = 'brig_second';
+        second.name = 'brig_second';
+        second.location_osid = rear2;
+        second.home_osid = rear2;
+        briefing.state_ref.military.formations.brig_second = second;
+        briefing.brigades.push(second);
+
+        const donorSector = briefing.sectors.find(
+            (sector: { sector_id: string }) => sector.sector_id === 'sector:test:donor',
+        );
+        donorSector.rear_brigade_ids = [];
+        donorSector.assigned_brigade_ids = ['relief_brigade', 'brig_second'];
+        donorSector.length_edges = 8;
+        donorSector.threat_ratio = 100;
+
+        expect(computeEmptySectorReliefReassignments(briefing)).toEqual([{
+            brigade_id: 'relief_brigade',
+            to_sector_id: 'sector:test:empty',
+            reason: 'empty front sector requires corps relief',
+        }]);
+    });
+
+    it('does not issue intent when the only friendly route is hostile', () => {
+        const briefing = makeBriefing();
+        briefing.spatial.friendlyOsidsByFaction.get('RBiH')!.delete('op:test:b');
+
+        expect(computeEmptySectorReliefReassignments(briefing)).toEqual([]);
+        expect(briefing.state_ref.military.formations.relief_brigade.location_osid)
+            .toBe('op:test:rear');
+    });
+
+    it('does not issue intent when the friendly route is disconnected', () => {
+        const briefing = makeBriefing();
+        briefing.spatial.adjacency.delete('op:test:b');
+
+        expect(computeEmptySectorReliefReassignments(briefing)).toEqual([]);
+        expect(briefing.state_ref.military.formations.relief_brigade.location_osid)
+            .toBe('op:test:rear');
+    });
 });

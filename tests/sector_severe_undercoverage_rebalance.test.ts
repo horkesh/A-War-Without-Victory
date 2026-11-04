@@ -258,7 +258,7 @@ describe('ensureMinimumSectorCoverage severe undercoverage rebalance', () => {
         expect(formations.brig_far_reserve.location_osid).toBe('op:recipient:rear_4');
     });
 
-    it('peels a nearby low-pressure front donor into an empty same-corps sector', () => {
+    it('leaves an empty same-corps sector unstaffed instead of peeling a nearby low-pressure front donor', () => {
         const recipient = makeSector({
             sectorId: 'sector:corps_a:recipient',
             frontOsids: ['op:recipient:f1', 'op:recipient:f2', 'op:recipient:f3', 'op:recipient:f4'],
@@ -290,6 +290,19 @@ describe('ensureMinimumSectorCoverage severe undercoverage rebalance', () => {
         const componentOf = new Map<string, number>([
             ...[...friendlyOsids].map((osid) => [osid, 0] as const),
         ]);
+        const state = {
+            meta: { turn: 12 },
+            political: {},
+            factions: [{ id: 'RS' }],
+            military: {
+                formations,
+                brigade_movement_orders: {},
+                brigade_movement_state: {},
+                brigade_posture_orders: [],
+                corps_command: {},
+            },
+        } as any;
+        const militaryBefore = structuredClone(state.military);
 
         ensureMinimumSectorCoverage(
             [recipient, donor],
@@ -297,14 +310,22 @@ describe('ensureMinimumSectorCoverage severe undercoverage rebalance', () => {
             adjacency,
             friendlyOsids,
             componentOf,
+            state,
         );
 
-        expect(recipient.assigned_brigade_ids).toEqual(['brig_front_a']);
-        expect(donor.assigned_brigade_ids).toEqual(['brig_front_b', 'brig_front_c']);
-        expect(formations.brig_front_a.location_osid).toBe('op:recipient:f2');
+        expect(recipient.assigned_brigade_ids).toEqual([]);
+        expect(recipient.reserve_brigade_ids).toEqual([]);
+        expect(recipient.rear_brigade_ids ?? []).toEqual([]);
+        expect(donor.assigned_brigade_ids).toEqual(['brig_front_a', 'brig_front_b', 'brig_front_c']);
+        expect(donor.reserve_brigade_ids).toEqual([]);
+        expect(donor.rear_brigade_ids ?? []).toEqual([]);
+        expect(formations.brig_front_a.location_osid).toBe('op:donor:f1');
+        expect(formations.brig_front_b.location_osid).toBe('op:donor:f2');
+        expect(formations.brig_front_c.location_osid).toBe('op:donor:f3');
+        expect(state.military).toEqual(militaryBefore);
     });
 
-    it('does not peel a front donor into an empty sector when the target would create brigade drift', () => {
+    it('leaves an empty sector unstaffed even when the would-be donor move would also exceed the home-distance bound', () => {
         const recipient = makeSector({
             sectorId: 'sector:corps_a:recipient',
             frontOsids: ['op:recipient:f1', 'op:recipient:f2', 'op:recipient:f3', 'op:recipient:f4'],
@@ -1357,7 +1378,7 @@ describe('zero-sector rescue ownership', () => {
         expect(formations.brig_rear_ok.location_osid).toBe('op:recipient:f2');
     });
 
-    it('pulls only an uncommitted sibling rear onto the recipient front', () => {
+    it('leaves an empty same-corps sector unstaffed instead of pulling a sibling rear brigade', () => {
         const recipient = makeSector({
             sectorId: 'sector:corps_a:recipient',
             frontOsids: ['op:recipient:f1', 'op:recipient:f2', 'op:recipient:f3'],
@@ -1383,6 +1404,7 @@ describe('zero-sector rescue ownership', () => {
                 { type: 'attack', phase: 'execution', participating_brigades: ['brig_op_rear_execution'] },
             ],
         });
+        const militaryBefore = structuredClone(state.military);
 
         const adjacency = makeAdjacency([
             ['op:donor:rear_1', 'op:recipient:f2'],
@@ -1396,15 +1418,19 @@ describe('zero-sector rescue ownership', () => {
 
         run([recipient, donor], formations, adjacency, friendlyOsids, state);
 
-        expect(recipient.assigned_brigade_ids).toEqual(['brig_rear_ok']);
+        expect(recipient.assigned_brigade_ids).toEqual([]);
+        expect(recipient.reserve_brigade_ids).toEqual([]);
+        expect(recipient.rear_brigade_ids ?? []).toEqual([]);
         expect(donor.assigned_brigade_ids).toEqual(['brig_donor_front']);
-        expect(donor.rear_brigade_ids).toEqual(['brig_op_rear_execution']);
+        expect(donor.reserve_brigade_ids).toEqual([]);
+        expect(donor.rear_brigade_ids).toEqual(['brig_op_rear_execution', 'brig_rear_ok']);
         expect(formations.brig_op_rear_execution.location_osid).toBe('op:donor:rear_1');
-        expect(formations.brig_rear_ok.location_osid).toBe('op:recipient:f2');
+        expect(formations.brig_rear_ok.location_osid).toBe('op:donor:rear_1');
         expect(formations.brig_donor_front.location_osid).toBe('op:donor:f1');
+        expect(state.military).toEqual(militaryBefore);
     });
 
-    it('pulls only an uncommitted sibling reserve onto the recipient front', () => {
+    it('leaves an empty same-corps sector unstaffed instead of pulling a sibling reserve brigade', () => {
         const recipient = makeSector({
             sectorId: 'sector:corps_a:recipient',
             frontOsids: ['op:recipient:f1', 'op:recipient:f2', 'op:recipient:f3'],
@@ -1438,6 +1464,7 @@ describe('zero-sector rescue ownership', () => {
                 { type: 'attack', phase: 'execution', participating_brigades: ['brig_op_reserve_execution'] },
             ],
         });
+        const militaryBefore = structuredClone(state.military);
 
         const adjacency = makeAdjacency([
             ['op:donor:rear_1', 'op:recipient:f2'],
@@ -1451,20 +1478,24 @@ describe('zero-sector rescue ownership', () => {
 
         run([recipient, donor], formations, adjacency, friendlyOsids, state);
 
-        expect(recipient.assigned_brigade_ids).toEqual(['brig_reserve_ok']);
+        expect(recipient.assigned_brigade_ids).toEqual([]);
+        expect(recipient.reserve_brigade_ids).toEqual([]);
+        expect(recipient.rear_brigade_ids ?? []).toEqual([]);
         expect(donor.assigned_brigade_ids).toEqual(['brig_donor_front']);
         expect(donor.reserve_brigade_ids).toEqual([
             'brig_op_reserve_execution',
             'brig_dig_pending_reserve',
+            'brig_reserve_ok',
         ]);
         expect(formations.brig_op_reserve_execution.location_osid).toBe('op:donor:rear_1');
         expect(formations.brig_dig_pending_reserve.location_osid).toBe('op:donor:rear_1');
-        expect(formations.brig_reserve_ok.location_osid).toBe('op:recipient:f2');
+        expect(formations.brig_reserve_ok.location_osid).toBe('op:donor:rear_1');
         expect(formations.brig_donor_front.location_osid).toBe('op:donor:f1');
+        expect(state.military).toEqual(militaryBefore);
     });
 
     it.each(['dense-index', 'test-only-legacy-scan'] as const)(
-        'keeps planning and execution operation participants out of the zero-sector pull (%s occupancy)',
+        'leaves an empty sector unstaffed instead of pulling a sibling reserve, including uncommitted and operation-participant reserves (%s occupancy)',
         (occupancyStrategy) => {
             const recipient = makeSector({
                 sectorId: 'sector:corps_a:recipient',
@@ -1497,6 +1528,7 @@ describe('zero-sector rescue ownership', () => {
                     { type: 'attack', phase: 'execution', participating_brigades: ['brig_a_execution'] },
                 ],
             });
+            const militaryBefore = structuredClone(state.military);
 
             const adjacency = makeAdjacency([
                 ['op:donor:rear_1', 'op:recipient:f2'],
@@ -1510,13 +1542,20 @@ describe('zero-sector rescue ownership', () => {
 
             run([recipient, donor], formations, adjacency, friendlyOsids, state, occupancyStrategy);
 
-            expect(recipient.assigned_brigade_ids).toEqual(['brig_z_free']);
+            expect(recipient.assigned_brigade_ids).toEqual([]);
+            expect(recipient.reserve_brigade_ids).toEqual([]);
+            expect(recipient.rear_brigade_ids ?? []).toEqual([]);
             expect(donor.assigned_brigade_ids).toEqual(['brig_donor_front']);
-            expect(donor.reserve_brigade_ids).toEqual(['brig_a_planning', 'brig_a_execution']);
+            expect(donor.reserve_brigade_ids).toEqual([
+                'brig_a_planning',
+                'brig_a_execution',
+                'brig_z_free',
+            ]);
             expect(formations.brig_a_planning.location_osid).toBe('op:donor:rear_1');
             expect(formations.brig_a_execution.location_osid).toBe('op:donor:rear_1');
-            expect(formations.brig_z_free.location_osid).toBe('op:recipient:f2');
+            expect(formations.brig_z_free.location_osid).toBe('op:donor:rear_1');
             expect(formations.brig_donor_front.location_osid).toBe('op:donor:f1');
+            expect(state.military).toEqual(militaryBefore);
         },
     );
 });

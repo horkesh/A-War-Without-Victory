@@ -542,10 +542,8 @@ describe('sector-partition instrumentation — env-flag gating', () => {
             'ensureMinimumSectorCoverage:severe-rescue:severe-relief',
             'ensureMinimumSectorCoverage:territory-claim-rescue',
             'ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned',
+            'ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:promote-rear',
             'ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:promote-reserve',
-            'ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:pull-rear',
-            'ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:pull-reserve',
-            'ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:transfer-surplus',
             'ensureMinimumSectorCoverage:territory-claim-rescue:zero-front',
         ];
 
@@ -682,8 +680,9 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         // memoization boundary. Both accepted occupancy strategies share this
         // read-only lookup; only their active-formation counting differs.
         expect(region).toContain('const sectorFrontOsids = frontOsidsFor(sector);');
-        expect(region).toContain('const sameComponentDonors = corpsSectors');
         expect(region).toContain('const activeCounts = freshActiveCounts();');
+        expect(region).toContain('Empty-sector relief belongs to T1 intent -> T2 column');
+        expect(region).toContain('continue;');
         const callStarts = normalized.match(/pickVacantLocalFrontTargetFromFrontSet\(/g) ?? [];
         const guardedCalls = normalized.match(
             /pickVacantLocalFrontTargetFromFrontSet\( bid, sectorFrontOsids, activeCounts, LOCAL_FRONT_RELIEF_MAX_HOPS, \(candidate\) => targetPreservesHomeDistance\(bid, candidate\), \)/g,

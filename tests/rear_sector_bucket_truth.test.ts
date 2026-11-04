@@ -101,7 +101,7 @@ describe('rear brigade sector bucket truth', () => {
         });
     });
 
-    it('promotes a reachable rear brigade into an otherwise empty same-corps sector', () => {
+    it('leaves an otherwise empty same-corps sector unstaffed instead of promoting a sibling rear brigade', () => {
         const donor = makeSector();
         donor.sector_id = 'sector:vrs_test:donor';
         donor.assigned_brigade_ids = ['brig_front'];
@@ -145,7 +145,12 @@ describe('rear brigade sector bucket truth', () => {
 
         ensureMinimumSectorCoverage([donor, recipient], formations, adjacency, friendlyOsids, componentOf);
 
-        expect(donor.rear_brigade_ids).toEqual([]);
-        expect(recipient.assigned_brigade_ids).toEqual(['brig_rear']);
+        expect(donor.assigned_brigade_ids).toEqual(['brig_front']);
+        expect(donor.rear_brigade_ids).toEqual(['brig_rear']);
+        expect(recipient.assigned_brigade_ids).toEqual([]);
+        expect(recipient.reserve_brigade_ids).toEqual([]);
+        expect(recipient.rear_brigade_ids ?? []).toEqual([]);
+        expect(formations.brig_front.location_osid).toBe('op:test:front');
+        expect(formations.brig_rear.location_osid).toBe('op:test:rear2');
     });
 });
