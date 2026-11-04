@@ -3229,12 +3229,14 @@ test('officer succession policy is explicit, versioned, defaults to keep, and re
 
 test('historical officer succession strategy accepts only the exact live player offer and preserves default keep', () => {
     const harness = readHarness();
+    // Committed minimal extract (meta.player_faction, military.pending_officer_events,
+    // military.named_officer_data) of the former local-only evidence file
+    // tmp/player-bot-capability-parity-20261024/native104-failure-inventory-02/failure-state44.json.
     const fixture = JSON.parse(readFileSync(join(
         process.cwd(),
-        'tmp',
-        'player-bot-capability-parity-20261024',
-        'native104-failure-inventory-02',
-        'failure-state44.json',
+        'tests',
+        'fixtures',
+        'officer_succession_state44.json',
     ), 'utf8'));
     const events = fixture.military.pending_officer_events;
     const officerData = fixture.military.named_officer_data;

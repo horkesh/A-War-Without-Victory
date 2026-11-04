@@ -117,7 +117,8 @@ describe('salient evacuation stdout observer', () => {
     });
 
     it('reader accepts valid input and rejects each structural/provenance contradiction with exit 2', () => {
-        const reader = 'logs/claude-channel-20261004/314-salient-reader.cjs';
+        // Committed copy of the former local-only logs/claude-channel-20261004/314-salient-reader.cjs.
+        const reader = 'tools/diagnostics/salient_evacuation_reader.cjs';
         setEnv(true);
         const base: any[] = runAndRows(stateWith(Object.fromEntries(IDS.map(id => [id, brigade(id, 'pocket')])))).rows;
         const invoke = (rows: any[]) => spawnSync(process.execPath, [reader, '--turn', '10', '--capture', 'neck', '--faction', 'HRHB', '--brigades', IDS.join(','), '--emit', 'JSON'], { input: rows.map(r => `${SALIENT_EVACUATION_PREFIX} ${JSON.stringify(r)}`).join('\n'), encoding: 'utf8' });

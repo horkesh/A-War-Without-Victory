@@ -1,0 +1,4503 @@
+{
+  "_comment": "Extracted 2026-11-04 from Codex local evidence tmp/player-bot-capability-parity-20261024/native104-failure-inventory-02/failure-state44.json (RBiH native turn 44 failure state): only the fields tests/paradox_local_qa_harness.test.ts reads.",
+  "meta": {
+    "player_faction": "RBiH"
+  },
+  "military": {
+    "pending_officer_events": [
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:4",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:secondary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 4,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:5",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:secondary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 5,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:6",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_central_bosnia:secondary",
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 6,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:6",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:secondary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 6,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:7",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_central_bosnia:secondary",
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 7,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:7",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:secondary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 7,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:8",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_central_bosnia:secondary",
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 8,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:8",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 8,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:9",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_central_bosnia:secondary",
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 9,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:9",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 9,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:10",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 10,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:10",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 10,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:11",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 11,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:11",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 11,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:12",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 12,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:12",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 12,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:13",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 13,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:13",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 13,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:14",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 14,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:14",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 14,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:15",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 15,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:15",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 15,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:16",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 16,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:16",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 16,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:17",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 17,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:17",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 17,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:18",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 18,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:18",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 18,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:19",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 19,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:19",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 19,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:20",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 20,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:20",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 20,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:21",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 21,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:21",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 21,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:22",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 22,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:22",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 22,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:23",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 23,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:23",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 23,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:24",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 24,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:24",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 24,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:25",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 25,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:25",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 25,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:26",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 26,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:26",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 26,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:27",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 27,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:27",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 27,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:28",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 28,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:28",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 28,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:29",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 29,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:29",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 29,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:30",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 30,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:30",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 30,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:31",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 31,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:31",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 31,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:32",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 32,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:32",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 32,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:33",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 33,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:33",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 33,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:34",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 34,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:34",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 34,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:35",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 35,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:35",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 35,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:36",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 36,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:36",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 36,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:37",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 37,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:37",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 37,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:38",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 38,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:38",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 38,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:39",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 39,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:39",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 39,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:40",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 40,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:40",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 40,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:41",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 41,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:41",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 41,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:42",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 42,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:42",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 42,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:43",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 43,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:43",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 43,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:HRHB:directive:44",
+        "faction": "HRHB",
+        "interpreted_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "hvo_northwest_bosnia:secondary",
+            "hvo_southeast_herzegovina:secondary",
+            "hvo_tomislavgrad:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "hvo_petkovic",
+        "original_order": {
+          "corps_id": "hvo_central_bosnia",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Milivoj Petković acknowledges the political directive but routes it through the staff's reading of conditions before passing to corps commanders.",
+        "turn": 44,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "event_id": "army:RS:directive:44",
+        "faction": "RS",
+        "interpreted_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "objectives": [
+            "jna_herzegovina_command:secondary",
+            "vrs_1st_krajina:primary",
+            "vrs_2nd_krajina:secondary",
+            "vrs_drina:secondary",
+            "vrs_east_bosnian:secondary",
+            "vrs_herzegovina:secondary",
+            "vrs_main_staff:secondary",
+            "vrs_sarajevo_romanija:secondary"
+          ],
+          "order_type": "political_directive"
+        },
+        "officer_id": "vrs_mladic",
+        "original_order": {
+          "corps_id": "vrs_1st_krajina",
+          "directive_verb": "PREPARE_RESERVE",
+          "order_type": "political_directive"
+        },
+        "overridable": true,
+        "override_action": "override-army-directive",
+        "reason": "Ratko Mladić pushes back on the political directive — corps allocations will deviate from the literal reading.",
+        "turn": 44,
+        "type": "army_directive_pushback"
+      },
+      {
+        "acknowledged": false,
+        "corps_id": "arbih_2nd_corps",
+        "current_commander_id": "arbih_knez",
+        "event_id": "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic",
+        "faction": "RBiH",
+        "officer_id": "arbih_sadic",
+        "turn": 44,
+        "type": "replacement_suggested"
+      }
+    ],
+    "named_officer_data": [
+      {
+        "aggressiveness": 5,
+        "available_from_turn": 0,
+        "bio_short": "JNA officer leading the VRS main staff at the opening of the war.",
+        "can_improve": false,
+        "casualty_vulnerability": 0.05,
+        "command_style": "Forceful, offensive-minded central command",
+        "compatible_corps_ids": [],
+        "competence": 4,
+        "defensive_skill": 3,
+        "faction": "RS",
+        "id": "vrs_mladic",
+        "improvement_rate": 0,
+        "is_historical_start": true,
+        "known_for": "Opening VRS army command",
+        "name": "Ratko Mladić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_alignment_note": "Modeled as an RS army-command appointment.",
+        "political_reliability": 2,
+        "pool_tier": "starter",
+        "rank": "army_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Genocide, crimes against humanity, violations of laws of war",
+          "court": "ICTY",
+          "sentence": "Life imprisonment",
+          "summary": "Srebrenica genocide, Sarajevo siege campaign of terror, persecution and forcible transfer across Bosnia",
+          "verdict": "convicted"
+        }
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.05,
+        "competence": 4,
+        "defensive_skill": 4,
+        "faction": "RS",
+        "id": "vrs_milovanovic",
+        "improvement_rate": 0,
+        "is_historical_start": true,
+        "name": "Manojlo Milovanović",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "starter",
+        "rank": "deputy",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 0,
+        "bio_short": "JNA-trained commander assigned to 1st Krajina Corps in the opening OOB.",
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "command_style": "Skilled all-round corps command",
+        "compatible_corps_ids": [
+          "vrs_east_bosnian"
+        ],
+        "competence": 5,
+        "defensive_skill": 4,
+        "faction": "RS",
+        "historical_corps_id": "vrs_1st_krajina",
+        "home_corps_id": "vrs_1st_krajina",
+        "id": "vrs_talic",
+        "improvement_rate": 0,
+        "is_historical_start": true,
+        "known_for": "1st Krajina Corps opening command",
+        "name": "Momir Talić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_alignment_note": "Regular RS corps command appointment.",
+        "political_reliability": 4,
+        "pool_tier": "starter",
+        "rank": "corps_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Crimes against humanity (persecution), violations of laws of war",
+          "court": "ICTY",
+          "summary": "Indicted for persecution of Bosniaks and Croats in Autonomous Region of Krajina; died of cancer during trial 2003",
+          "verdict": "died_before_trial"
+        }
+      },
+      {
+        "aggressiveness": 2,
+        "available_from_turn": 0,
+        "available_until_turn": 110,
+        "bio_short": "JNA-background officer assigned to 2nd Krajina Corps at scenario start.",
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "command_style": "Cautious, steady corps defense",
+        "competence": 2,
+        "defensive_skill": 3,
+        "faction": "RS",
+        "historical_corps_id": "vrs_2nd_krajina",
+        "home_corps_id": "vrs_2nd_krajina",
+        "id": "vrs_tomanic",
+        "improvement_rate": 0,
+        "is_historical_start": true,
+        "known_for": "2nd Krajina Corps opening command",
+        "name": "Radivoje Tomanić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_alignment_note": "Regular RS corps command appointment.",
+        "political_reliability": 3,
+        "pool_tier": "starter",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 110,
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "RS",
+        "home_corps_id": "vrs_2nd_krajina",
+        "id": "vrs_boric",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Grujo Borić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 3,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "bio_short": "JNA-trained commander assigned to East Bosnian Corps in the opening OOB.",
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "command_style": "Methodical, defense-capable command",
+        "competence": 4,
+        "defensive_skill": 4,
+        "faction": "RS",
+        "historical_corps_id": "vrs_east_bosnian",
+        "home_corps_id": "vrs_east_bosnian",
+        "id": "vrs_simic",
+        "improvement_rate": 0,
+        "is_historical_start": true,
+        "known_for": "East Bosnian Corps opening command",
+        "name": "Novica Simić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_alignment_note": "Regular RS corps command appointment.",
+        "political_reliability": 4,
+        "pool_tier": "starter",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "available_until_turn": 18,
+        "bio_short": "JNA-background officer assigned to Sarajevo-Romanija Corps at scenario start.",
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "command_style": "Balanced line command",
+        "competence": 3,
+        "defensive_skill": 3,
+        "enclave_lock": {
+          "enclave_id": "sarajevo_ring"
+        },
+        "faction": "RS",
+        "historical_corps_id": "vrs_sarajevo_romanija",
+        "home_corps_id": "vrs_sarajevo_romanija",
+        "id": "vrs_sipcic",
+        "improvement_rate": 0,
+        "is_historical_start": true,
+        "known_for": "Sarajevo-Romanija opening command",
+        "name": "Tomislav Šipčić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_alignment_note": "Regular RS corps command appointment.",
+        "political_reliability": 3,
+        "pool_tier": "starter",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 18,
+        "available_until_turn": 118,
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "competence": 3,
+        "defensive_skill": 4,
+        "enclave_lock": {
+          "enclave_id": "sarajevo_ring"
+        },
+        "faction": "RS",
+        "home_corps_id": "vrs_sarajevo_romanija",
+        "id": "vrs_galic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Stanislav Galić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 5,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Crimes against humanity (murder, inhumane acts), terror against civilian population",
+          "court": "ICTY",
+          "sentence": "Life imprisonment",
+          "summary": "SRK commander convicted for prolonged sniping and shelling campaign against Sarajevo civilians",
+          "verdict": "convicted"
+        }
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 118,
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "competence": 3,
+        "defensive_skill": 4,
+        "enclave_lock": {
+          "enclave_id": "sarajevo_ring"
+        },
+        "faction": "RS",
+        "home_corps_id": "vrs_sarajevo_romanija",
+        "id": "vrs_d_milosevic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Dragomir Milošević",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 5,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Crimes against humanity (murder, inhumane acts), terror, unlawful attacks on civilians",
+          "court": "ICTY",
+          "sentence": "29 years",
+          "summary": "SRK commander convicted for continuing Sarajevo siege campaign including modified air bomb attacks",
+          "verdict": "convicted"
+        }
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 28,
+        "available_until_turn": 170,
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "RS",
+        "historical_corps_id": "vrs_drina",
+        "home_corps_id": "vrs_drina",
+        "id": "vrs_zivanovic",
+        "improvement_rate": 0,
+        "is_historical_start": true,
+        "name": "Milenko Živanović",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "starter",
+        "rank": "corps_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Crimes against humanity (Srebrenica and Žepa, July 1995)",
+          "court": "BiH State Court",
+          "summary": "Charged by the Court of BiH, not the ICTY, which recorded his command only in judgements against other men: the Krivaja-95 orders of 2 July 1995 that opened the attack on Srebrenica were issued in his name. He commanded the Drina Corps until about 2000 hours on 13 July 1995. The BiH indictment — crimes against humanity at Srebrenica and Žepa — is open and unanswered; Serbia separately tried him for war crimes against civilians and acquitted him in July 2025, upheld on appeal.",
+          "verdict": "indicted"
+        }
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 170,
+        "can_improve": false,
+        "casualty_vulnerability": 0.15,
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "RS",
+        "home_corps_id": "vrs_drina",
+        "id": "vrs_krstic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Radislav Krstić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 5,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Aiding and abetting genocide, crimes against humanity (persecution, murder)",
+          "court": "ICTY",
+          "sentence": "35 years",
+          "summary": "Drina Corps commander convicted for aiding Srebrenica genocide in July 1995",
+          "verdict": "convicted"
+        }
+      },
+      {
+        "aggressiveness": 2,
+        "available_from_turn": 0,
+        "bio_short": "JNA-background officer assigned to Herzegovina Corps in the opening OOB.",
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "command_style": "Defensive, low-risk corps command",
+        "competence": 3,
+        "defensive_skill": 4,
+        "faction": "RS",
+        "historical_corps_id": "vrs_herzegovina",
+        "home_corps_id": "vrs_herzegovina",
+        "id": "vrs_grubac",
+        "improvement_rate": 0,
+        "is_historical_start": true,
+        "known_for": "Herzegovina Corps opening command",
+        "name": "Radovan Grubač",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_alignment_note": "Regular RS corps command appointment.",
+        "political_reliability": 4,
+        "pool_tier": "starter",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 5,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.15,
+        "compatible_corps_ids": [
+          "vrs_east_bosnian"
+        ],
+        "competence": 4,
+        "defensive_skill": 3,
+        "faction": "RS",
+        "home_corps_id": "vrs_1st_krajina",
+        "id": "vrs_lisica",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Slavko Lisica",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 3,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.05,
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "RS",
+        "id": "vrs_tolimir",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Zdravko Tolimir",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 5,
+        "pool_tier": "tier_a",
+        "rank": "deputy",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Genocide, conspiracy to commit genocide, crimes against humanity",
+          "court": "ICTY",
+          "sentence": "Life imprisonment",
+          "summary": "VRS intelligence chief convicted for role in Srebrenica genocide and forcible transfer of Zepa population",
+          "verdict": "convicted"
+        }
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.05,
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "RS",
+        "id": "vrs_miletic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Radivoje Miletić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "deputy",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Crimes against humanity (persecution, forcible transfer, murder)",
+          "court": "ICTY",
+          "sentence": "18 years",
+          "summary": "VRS Main Staff operations chief convicted for orchestrating forcible transfer from Srebrenica and Zepa",
+          "verdict": "convicted"
+        }
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "compatible_corps_ids": [
+          "vrs_east_bosnian"
+        ],
+        "competence": 3,
+        "defensive_skill": 4,
+        "faction": "RS",
+        "home_corps_id": "vrs_1st_krajina",
+        "id": "vrs_kelecevic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Boško Kelečević",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "competence": 3,
+        "defensive_skill": 4,
+        "enclave_lock": {
+          "enclave_id": "sarajevo_ring"
+        },
+        "faction": "RS",
+        "home_corps_id": "vrs_sarajevo_romanija",
+        "id": "vrs_sladoje",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Čedomir Sladoje",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "RS",
+        "home_corps_id": "vrs_east_bosnian",
+        "id": "vrs_gavric",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Budimir Gavrić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 5,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.15,
+        "competence": 4,
+        "defensive_skill": 3,
+        "faction": "RS",
+        "home_corps_id": "vrs_drina",
+        "id": "vrs_pandurevic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Vinko Pandurević",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 3,
+        "pool_tier": "tier_b",
+        "rank": "corps_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Aiding and abetting murder and persecution",
+          "court": "ICTY",
+          "sentence": "13 years",
+          "summary": "Zvornik Brigade commander convicted re Srebrenica; lighter sentence for opening corridor allowing survivors to escape",
+          "verdict": "convicted"
+        }
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.15,
+        "compatible_corps_ids": [
+          "vrs_east_bosnian"
+        ],
+        "competence": 4,
+        "defensive_skill": 4,
+        "faction": "RS",
+        "home_corps_id": "vrs_drina",
+        "id": "vrs_andric",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Svetozar Andrić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_b",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 5,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.2,
+        "competence": 4,
+        "defensive_skill": 3,
+        "faction": "RS",
+        "home_corps_id": "vrs_1st_krajina",
+        "id": "vrs_zeljaja",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Radmilo Željaja",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 3,
+        "pool_tier": "tier_b",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.15,
+        "compatible_corps_ids": [
+          "vrs_1st_krajina"
+        ],
+        "competence": 4,
+        "defensive_skill": 4,
+        "faction": "RS",
+        "home_corps_id": "vrs_2nd_krajina",
+        "id": "vrs_samardzija",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Drago Samardžija",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 3,
+        "pool_tier": "tier_b",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "competence": 3,
+        "defensive_skill": 5,
+        "faction": "RS",
+        "home_corps_id": "vrs_east_bosnian",
+        "id": "vrs_kutlesic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Milorad Kutlešić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_b",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.15,
+        "competence": 4,
+        "defensive_skill": 5,
+        "faction": "RS",
+        "home_corps_id": "vrs_herzegovina",
+        "id": "vrs_gusic_n",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Novica Gušić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 3,
+        "pool_tier": "tier_b",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "compatible_corps_ids": [
+          "vrs_2nd_krajina"
+        ],
+        "competence": 3,
+        "defensive_skill": 4,
+        "faction": "RS",
+        "home_corps_id": "vrs_1st_krajina",
+        "id": "vrs_colic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Pero Čolić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_b",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "competence": 3,
+        "defensive_skill": 4,
+        "faction": "RS",
+        "home_corps_id": "vrs_herzegovina",
+        "id": "vrs_lalovic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Dragan Lalović",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 3,
+        "pool_tier": "tier_b",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "compatible_corps_ids": [
+          "vrs_sarajevo_romanija"
+        ],
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "RS",
+        "home_corps_id": "vrs_east_bosnian",
+        "id": "vrs_despotovic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Pero Despotović",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 3,
+        "pool_tier": "tier_b",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.15,
+        "compatible_corps_ids": [
+          "vrs_east_bosnian"
+        ],
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "RS",
+        "home_corps_id": "vrs_1st_krajina",
+        "id": "vrs_arsic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Vladimir Arsić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 3,
+        "pool_tier": "tier_b",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "RS",
+        "home_corps_id": "vrs_drina",
+        "id": "vrs_blagojevic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Vidoje Blagojević",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_c",
+        "rank": "corps_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Crimes against humanity (persecution, inhumane acts), aiding forcible transfer",
+          "court": "ICTY",
+          "sentence": "15 years",
+          "summary": "Bratunac Brigade commander convicted for aiding forcible transfer of Srebrenica civilians",
+          "verdict": "convicted"
+        }
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "RS",
+        "home_corps_id": "vrs_drina",
+        "id": "vrs_obrenovic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Dragan Obrenović",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_c",
+        "rank": "corps_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Persecution as crime against humanity",
+          "court": "ICTY",
+          "sentence": "17 years",
+          "summary": "Zvornik Brigade deputy pleaded guilty for role in Srebrenica killings; cooperated with prosecution",
+          "verdict": "convicted"
+        }
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "competence": 3,
+        "defensive_skill": 4,
+        "enclave_lock": {
+          "enclave_id": "sarajevo_ring"
+        },
+        "faction": "RS",
+        "home_corps_id": "vrs_sarajevo_romanija",
+        "id": "vrs_lizdek",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Vlado Lizdek",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_c",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 0,
+        "available_until_turn": 60,
+        "bio_short": "JNA-background officer leading the RBiH army command at scenario start.",
+        "can_improve": true,
+        "casualty_vulnerability": 0.05,
+        "command_style": "Assertive, improvised central command",
+        "competence": 3,
+        "defensive_skill": 2,
+        "faction": "RBiH",
+        "id": "arbih_halilovic",
+        "improvement_rate": 0.05,
+        "is_historical_start": true,
+        "known_for": "Opening RBiH army command",
+        "name": "Sefer Halilović",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_alignment_note": "Modeled as an RBiH army-command appointment.",
+        "political_reliability": 2,
+        "pool_tier": "starter",
+        "rank": "army_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Violations of laws of war (command responsibility for Grabovica and Uzdol massacres)",
+          "court": "ICTY",
+          "summary": "Acquitted of command responsibility for murder of Croat civilians during Operation Neretva 93",
+          "verdict": "acquitted"
+        }
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 60,
+        "can_improve": false,
+        "casualty_vulnerability": 0.05,
+        "competence": 4,
+        "defensive_skill": 4,
+        "faction": "RBiH",
+        "id": "arbih_delic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Rasim Delić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 5,
+        "pool_tier": "starter",
+        "rank": "army_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Violations of laws of war (cruel treatment by mujahedin fighters)",
+          "court": "ICTY",
+          "sentence": "3 years",
+          "summary": "ARBiH commander convicted for failing to prevent abuse of Serb prisoners by El Mujahed Detachment",
+          "verdict": "convicted"
+        }
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 0,
+        "available_until_turn": 68,
+        "bio_short": "JNA-trained officer assigned to 1st Corps around Sarajevo at scenario start.",
+        "can_improve": true,
+        "casualty_vulnerability": 0.15,
+        "command_style": "Bold, resilient enclave command",
+        "competence": 3,
+        "defensive_skill": 4,
+        "enclave_lock": {
+          "enclave_id": "sarajevo"
+        },
+        "faction": "RBiH",
+        "historical_corps_id": "arbih_1st_corps",
+        "home_corps_id": "arbih_1st_corps",
+        "id": "arbih_talijan",
+        "improvement_rate": 0.06,
+        "is_historical_start": true,
+        "known_for": "1st Corps opening command",
+        "name": "Mustafa Hajrulahović \"Talijan\"",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_alignment_note": "Regular RBiH corps command appointment.",
+        "political_reliability": 4,
+        "pool_tier": "starter",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 2,
+        "available_from_turn": 68,
+        "can_improve": true,
+        "casualty_vulnerability": 0.1,
+        "competence": 4,
+        "defensive_skill": 5,
+        "enclave_lock": {
+          "enclave_id": "sarajevo"
+        },
+        "faction": "RBiH",
+        "home_corps_id": "arbih_1st_corps",
+        "id": "arbih_karavelic",
+        "improvement_rate": 0.04,
+        "is_historical_start": false,
+        "name": "Vahid Karavelić",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 2,
+        "available_from_turn": 0,
+        "available_until_turn": 44,
+        "bio_short": "JNA-background officer assigned to 2nd Corps in the opening OOB.",
+        "can_improve": true,
+        "casualty_vulnerability": 0.1,
+        "command_style": "Cautious, uneven corps command",
+        "competence": 2,
+        "defensive_skill": 3,
+        "faction": "RBiH",
+        "historical_corps_id": "arbih_2nd_corps",
+        "home_corps_id": "arbih_2nd_corps",
+        "id": "arbih_knez",
+        "improvement_rate": 0.04,
+        "is_historical_start": true,
+        "known_for": "2nd Corps opening command",
+        "name": "Željko Knez",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_alignment_note": "Regular RBiH corps command appointment.",
+        "political_reliability": 2,
+        "pool_tier": "starter",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 44,
+        "available_until_turn": 132,
+        "can_improve": true,
+        "casualty_vulnerability": 0.1,
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "RBiH",
+        "home_corps_id": "arbih_2nd_corps",
+        "id": "arbih_sadic",
+        "improvement_rate": 0.05,
+        "is_historical_start": false,
+        "name": "Hazim Šadić",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 132,
+        "can_improve": true,
+        "casualty_vulnerability": 0.15,
+        "competence": 4,
+        "defensive_skill": 3,
+        "faction": "RBiH",
+        "home_corps_id": "arbih_2nd_corps",
+        "id": "arbih_s_delic",
+        "improvement_rate": 0.04,
+        "is_historical_start": false,
+        "name": "Sead Delić",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_b",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 22,
+        "available_until_turn": 80,
+        "can_improve": true,
+        "casualty_vulnerability": 0.1,
+        "compatible_corps_ids": [],
+        "competence": 3,
+        "defensive_skill": 4,
+        "faction": "RBiH",
+        "historical_corps_id": "arbih_3rd_corps",
+        "home_corps_id": "arbih_3rd_corps",
+        "id": "arbih_hadzihasanovic",
+        "improvement_rate": 0.04,
+        "is_historical_start": true,
+        "name": "Enver Hadžihasanović",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "starter",
+        "rank": "corps_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Violations of laws of war (command responsibility)",
+          "court": "ICTY",
+          "sentence": "3.5 years",
+          "summary": "3rd Corps commander convicted for command responsibility for crimes against Croat civilians in central Bosnia 1993",
+          "verdict": "convicted"
+        }
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 80,
+        "available_until_turn": 120,
+        "can_improve": false,
+        "casualty_vulnerability": 0.15,
+        "compatible_corps_ids": [],
+        "competence": 5,
+        "defensive_skill": 3,
+        "faction": "RBiH",
+        "home_corps_id": "arbih_3rd_corps",
+        "id": "arbih_alagic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Mehmed Alagić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 3,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Violations of laws of war (murder, cruel treatment, wanton destruction)",
+          "court": "ICTY",
+          "summary": "Indicted jointly with Hadzihasanovic; died before trial concluded 2003",
+          "verdict": "died_before_trial"
+        }
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 110,
+        "can_improve": true,
+        "casualty_vulnerability": 0.1,
+        "competence": 3,
+        "defensive_skill": 2,
+        "faction": "RBiH",
+        "home_corps_id": "arbih_3rd_corps",
+        "id": "arbih_mahmuljin",
+        "improvement_rate": 0.05,
+        "is_historical_start": false,
+        "name": "Sakib Mahmuljin",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "War crimes against prisoners of war",
+          "court": "BiH State Court",
+          "sentence": "8 years",
+          "summary": "3rd Corps commander convicted for command responsibility re El Mujahed Detachment abuse of Serb POWs",
+          "verdict": "convicted"
+        }
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 24,
+        "available_until_turn": 80,
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "competence": 4,
+        "defensive_skill": 4,
+        "faction": "RBiH",
+        "home_corps_id": "arbih_4th_corps",
+        "id": "arbih_pasalic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Arif Pašalić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 5,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "available_until_turn": 80,
+        "bio_short": "JNA-background officer assigned to 5th Corps in the Bihac pocket.",
+        "can_improve": true,
+        "casualty_vulnerability": 0.1,
+        "command_style": "Defensive, enclave-oriented command",
+        "competence": 3,
+        "defensive_skill": 3,
+        "enclave_lock": {
+          "enclave_id": "bihac"
+        },
+        "faction": "RBiH",
+        "historical_corps_id": "arbih_5th_corps",
+        "home_corps_id": "arbih_5th_corps",
+        "id": "arbih_drekovic",
+        "improvement_rate": 0.05,
+        "is_historical_start": true,
+        "known_for": "5th Corps opening command",
+        "name": "Ramiz Dreković",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_alignment_note": "Regular RBiH corps command appointment.",
+        "political_reliability": 4,
+        "pool_tier": "starter",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "competence": 5,
+        "defensive_skill": 5,
+        "enclave_lock": {
+          "enclave_id": "bihac",
+          "locked_until_turn": 170
+        },
+        "faction": "RBiH",
+        "home_corps_id": "arbih_5th_corps",
+        "id": "arbih_dudakovic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Atif Dudaković",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Crimes against humanity (murder, persecution of Serb civilians)",
+          "court": "BiH State Court",
+          "summary": "5th Corps commander indicted 2018 for crimes against Serb civilians in Bihac area; trial ongoing",
+          "verdict": "indicted"
+        }
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.1,
+        "competence": 3,
+        "defensive_skill": 4,
+        "enclave_lock": {
+          "enclave_id": "sarajevo"
+        },
+        "faction": "RBiH",
+        "home_corps_id": "arbih_1st_corps",
+        "id": "arbih_ajnadzic",
+        "improvement_rate": 0.05,
+        "is_historical_start": false,
+        "name": "Nedžad Ajnadžić",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.1,
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "RBiH",
+        "home_corps_id": "arbih_3rd_corps",
+        "id": "arbih_cikotic",
+        "improvement_rate": 0.05,
+        "is_historical_start": false,
+        "name": "Selmo Cikotić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 2,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.05,
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "RBiH",
+        "home_corps_id": "arbih_1st_corps",
+        "id": "arbih_divjak",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Jovan Divjak",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "deputy",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 2,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.05,
+        "compatible_corps_ids": [
+          "arbih_1st_corps",
+          "arbih_3rd_corps"
+        ],
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "RBiH",
+        "id": "arbih_siber",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Stjepan Šiber",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 3,
+        "pool_tier": "tier_a",
+        "rank": "deputy",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3.1499999999999995,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.1,
+        "compatible_corps_ids": [],
+        "competence": 3.5250000000000004,
+        "defensive_skill": 2.94,
+        "faction": "RBiH",
+        "home_corps_id": "arbih_3rd_corps",
+        "id": "arbih_cuskic",
+        "improvement_rate": 0.05,
+        "is_historical_start": false,
+        "name": "Fikret Čuskić",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.1,
+        "competence": 4,
+        "defensive_skill": 3,
+        "enclave_lock": {
+          "enclave_id": "bihac"
+        },
+        "faction": "RBiH",
+        "home_corps_id": "arbih_5th_corps",
+        "id": "arbih_selmanovic",
+        "improvement_rate": 0.04,
+        "is_historical_start": false,
+        "name": "Mirsad Šelmanović",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.2,
+        "competence": 5,
+        "defensive_skill": 5,
+        "enclave_lock": {
+          "enclave_id": "gorazde"
+        },
+        "faction": "RBiH",
+        "home_corps_id": "arbih_1st_corps",
+        "id": "arbih_imamovic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Zaim Imamović",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.15,
+        "competence": 4,
+        "defensive_skill": 5,
+        "enclave_lock": {
+          "enclave_id": "zepa"
+        },
+        "faction": "RBiH",
+        "home_corps_id": "arbih_2nd_corps",
+        "id": "arbih_palic",
+        "improvement_rate": 0.05,
+        "is_historical_start": false,
+        "name": "Avdo Palić",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 5,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.2,
+        "competence": 3,
+        "defensive_skill": 4,
+        "enclave_lock": {
+          "enclave_id": "srebrenica",
+          "locked_until_turn": 168
+        },
+        "faction": "RBiH",
+        "home_corps_id": "arbih_2nd_corps",
+        "id": "arbih_oric",
+        "improvement_rate": 0.06,
+        "is_historical_start": false,
+        "name": "Naser Orić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 3,
+        "pool_tier": "tier_b",
+        "rank": "corps_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Violations of laws of war (murder and cruel treatment of Serb prisoners)",
+          "court": "ICTY",
+          "summary": "Srebrenica enclave commander; initial conviction overturned, fully acquitted on appeal 2008",
+          "verdict": "acquitted"
+        }
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 120,
+        "can_improve": true,
+        "casualty_vulnerability": 0.15,
+        "competence": 4,
+        "defensive_skill": 3,
+        "faction": "RBiH",
+        "home_corps_id": "arbih_2nd_corps",
+        "id": "arbih_lendo",
+        "improvement_rate": 0.04,
+        "is_historical_start": false,
+        "name": "Refik Lendo",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_b",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.15,
+        "competence": 3,
+        "defensive_skill": 4,
+        "enclave_lock": {
+          "enclave_id": "srebrenica"
+        },
+        "faction": "RBiH",
+        "home_corps_id": "arbih_2nd_corps",
+        "id": "arbih_becirovic",
+        "improvement_rate": 0.05,
+        "is_historical_start": false,
+        "name": "Ramiz Bećirović",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_b",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.1,
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "RBiH",
+        "home_corps_id": "arbih_3rd_corps",
+        "id": "arbih_merdan",
+        "improvement_rate": 0.04,
+        "is_historical_start": false,
+        "name": "Džemal Merdan",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_b",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 5,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.25,
+        "competence": 4.449999999999999,
+        "defensive_skill": 2.96,
+        "faction": "RBiH",
+        "home_corps_id": "arbih_2nd_corps",
+        "id": "arbih_mesic",
+        "improvement_rate": 0.06,
+        "is_historical_start": false,
+        "name": "Hajrudin Mešić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_b",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 4.05,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.25,
+        "competence": 4.18,
+        "defensive_skill": 3.98,
+        "enclave_lock": {
+          "enclave_id": "sarajevo"
+        },
+        "faction": "RBiH",
+        "home_corps_id": "arbih_1st_corps",
+        "id": "arbih_zajko",
+        "improvement_rate": 0.06,
+        "is_historical_start": false,
+        "name": "Safet Zajko",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_b",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.2,
+        "competence": 4,
+        "defensive_skill": 3,
+        "faction": "RBiH",
+        "home_corps_id": "arbih_2nd_corps",
+        "id": "arbih_malkic",
+        "improvement_rate": 0.05,
+        "is_historical_start": false,
+        "name": "Nesib Malkić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_b",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 5,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.25,
+        "competence": 4,
+        "defensive_skill": 3,
+        "enclave_lock": {
+          "enclave_id": "bihac"
+        },
+        "faction": "RBiH",
+        "home_corps_id": "arbih_5th_corps",
+        "id": "arbih_nanic",
+        "improvement_rate": 0.06,
+        "is_historical_start": false,
+        "name": "Izet Nanić",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 3,
+        "pool_tier": "tier_c",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 5,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.3,
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "RBiH",
+        "home_corps_id": "arbih_4th_corps",
+        "id": "arbih_hujdur",
+        "improvement_rate": 0.06,
+        "is_historical_start": false,
+        "name": "Midhad Hujdur \"Hujka\"",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 3,
+        "pool_tier": "tier_c",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.3,
+        "competence": 3,
+        "defensive_skill": 3,
+        "enclave_lock": {
+          "enclave_id": "sarajevo"
+        },
+        "faction": "RBiH",
+        "home_corps_id": "arbih_1st_corps",
+        "id": "arbih_sehovic",
+        "improvement_rate": 0.06,
+        "is_historical_start": false,
+        "name": "Enver Šehović",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 3,
+        "pool_tier": "tier_c",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 5,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.3,
+        "competence": 3,
+        "defensive_skill": 2,
+        "faction": "RBiH",
+        "home_corps_id": "arbih_2nd_corps",
+        "id": "arbih_hodzic",
+        "improvement_rate": 0.06,
+        "is_historical_start": false,
+        "name": "Mehdin Hodžić",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 3,
+        "pool_tier": "tier_c",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 5,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.3,
+        "competence": 3.225,
+        "defensive_skill": 1,
+        "enclave_lock": {
+          "enclave_id": "sarajevo"
+        },
+        "faction": "RBiH",
+        "home_corps_id": "arbih_1st_corps",
+        "id": "arbih_s_hadzic",
+        "improvement_rate": 0.06,
+        "is_historical_start": false,
+        "name": "Safet Hadžić",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_c",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 5,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.25,
+        "competence": 3,
+        "defensive_skill": 2,
+        "enclave_lock": {
+          "enclave_id": "bihac"
+        },
+        "faction": "RBiH",
+        "home_corps_id": "arbih_5th_corps",
+        "id": "arbih_besic",
+        "improvement_rate": 0.06,
+        "is_historical_start": false,
+        "name": "Adil Bešić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_c",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "available_until_turn": 64,
+        "bio_short": "JNA-background officer leading HVO army command at scenario start.",
+        "can_improve": false,
+        "casualty_vulnerability": 0.05,
+        "command_style": "Methodical, defense-capable central command",
+        "competence": 4,
+        "defensive_skill": 4,
+        "faction": "HRHB",
+        "id": "hvo_petkovic",
+        "improvement_rate": 0,
+        "is_historical_start": true,
+        "known_for": "Opening HVO army command",
+        "name": "Milivoj Petković",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_alignment_note": "Modeled as an HRHB army-command appointment.",
+        "political_reliability": 4,
+        "pool_tier": "starter",
+        "rank": "army_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Crimes against humanity (persecution, murder, deportation), violations of laws of war",
+          "court": "ICTY",
+          "sentence": "20 years",
+          "summary": "HVO Main Staff chief convicted as part of Herceg-Bosna joint criminal enterprise to ethnically cleanse Bosniaks",
+          "verdict": "convicted"
+        }
+      },
+      {
+        "aggressiveness": 5,
+        "available_from_turn": 64,
+        "available_until_turn": 80,
+        "can_improve": false,
+        "casualty_vulnerability": 0.05,
+        "competence": 2,
+        "defensive_skill": 2,
+        "faction": "HRHB",
+        "id": "hvo_praljak",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Slobodan Praljak",
+        "origin": "political",
+        "override_tolerance": 3,
+        "political_reliability": 5,
+        "pool_tier": "starter",
+        "rank": "army_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Crimes against humanity, destruction of Stari Most (Old Bridge of Mostar)",
+          "court": "ICTY",
+          "sentence": "20 years",
+          "summary": "HVO commander convicted; died by suicide (poison) in ICTY courtroom as appeal verdict was read",
+          "verdict": "convicted"
+        }
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 80,
+        "available_until_turn": 100,
+        "can_improve": false,
+        "casualty_vulnerability": 0.05,
+        "competence": 5,
+        "defensive_skill": 4,
+        "faction": "HRHB",
+        "id": "hvo_roso",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Ante Roso",
+        "origin": "foreign",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "starter",
+        "rank": "army_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 100,
+        "available_until_turn": 120,
+        "can_improve": false,
+        "casualty_vulnerability": 0.05,
+        "competence": 4,
+        "defensive_skill": 4,
+        "faction": "HRHB",
+        "id": "hvo_petkovic_2",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Milivoj Petković (2nd tenure)",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "starter",
+        "rank": "army_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Crimes against humanity (persecution, murder, deportation), violations of laws of war",
+          "court": "ICTY",
+          "sentence": "20 years",
+          "summary": "HVO Main Staff chief convicted as part of Herceg-Bosna joint criminal enterprise to ethnically cleanse Bosniaks",
+          "verdict": "convicted"
+        }
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 120,
+        "can_improve": false,
+        "casualty_vulnerability": 0.05,
+        "competence": 3,
+        "defensive_skill": 4,
+        "faction": "HRHB",
+        "id": "hvo_blaskic_2",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Tihomir Blaškić (army)",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 3,
+        "pool_tier": "starter",
+        "rank": "army_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Crimes against humanity (persecution), violations of laws of war",
+          "court": "ICTY",
+          "sentence": "9 years",
+          "summary": "Central Bosnia OZ commander; initial 45-year sentence drastically reduced to 9 years on appeal",
+          "verdict": "convicted"
+        }
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 0,
+        "available_until_turn": 120,
+        "bio_short": "JNA-background officer assigned to Central Bosnia HVO command at scenario start.",
+        "can_improve": true,
+        "casualty_vulnerability": 0.1,
+        "command_style": "Bold, defense-capable corps command",
+        "competence": 3,
+        "defensive_skill": 4,
+        "faction": "HRHB",
+        "historical_corps_id": "hvo_central_bosnia",
+        "home_corps_id": "hvo_central_bosnia",
+        "id": "hvo_blaskic",
+        "improvement_rate": 0.03,
+        "is_historical_start": true,
+        "known_for": "Central Bosnia opening command",
+        "name": "Tihomir Blaškić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_alignment_note": "Regular HRHB corps command appointment.",
+        "political_reliability": 3,
+        "pool_tier": "starter",
+        "rank": "corps_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Crimes against humanity (persecution), violations of laws of war",
+          "court": "ICTY",
+          "sentence": "9 years",
+          "summary": "Central Bosnia OZ commander; initial 45-year sentence drastically reduced to 9 years on appeal",
+          "verdict": "convicted"
+        }
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "available_until_turn": 44,
+        "bio_short": "HV-background officer assigned to Tomislavgrad command in the opening OOB.",
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "command_style": "Balanced regional command",
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "HRHB",
+        "historical_corps_id": "hvo_tomislavgrad",
+        "home_corps_id": "hvo_tomislavgrad",
+        "id": "hvo_tole",
+        "improvement_rate": 0,
+        "is_historical_start": true,
+        "known_for": "Tomislavgrad opening command",
+        "name": "Žarko Tole",
+        "origin": "hv",
+        "override_tolerance": 3,
+        "political_alignment_note": "Regular HRHB corps command appointment.",
+        "political_reliability": 4,
+        "pool_tier": "starter",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 44,
+        "available_until_turn": 96,
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "HRHB",
+        "home_corps_id": "hvo_tomislavgrad",
+        "id": "hvo_siljeg",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Željko Šiljeg",
+        "origin": "hv",
+        "override_tolerance": 3,
+        "political_reliability": 5,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "",
+          "court": "ICTY",
+          "summary": "The ICTY named him in the Prlić et al. findings without charging him: as North-West Herzegovina OZ commander he ordered the arrest of all Muslim men of Prozor aged 16 to 60 on 6 July 1993, and reported the “cleansing” of four attacked villages at Gornji Vakuf that January.",
+          "verdict": "named_in_findings"
+        }
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 96,
+        "available_until_turn": 120,
+        "can_improve": false,
+        "casualty_vulnerability": 0.15,
+        "competence": 4,
+        "defensive_skill": 4,
+        "faction": "HRHB",
+        "home_corps_id": "hvo_tomislavgrad",
+        "id": "hvo_skender",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Zvonimir Škender",
+        "origin": "foreign",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 120,
+        "can_improve": false,
+        "casualty_vulnerability": 0.15,
+        "competence": 4,
+        "defensive_skill": 3,
+        "faction": "HRHB",
+        "home_corps_id": "hvo_tomislavgrad",
+        "id": "hvo_glasnovic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Željko Glasnović",
+        "origin": "foreign",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "bio_short": "Militia-origin commander assigned to Southeast Herzegovina in the opening OOB.",
+        "can_improve": true,
+        "casualty_vulnerability": 0.1,
+        "command_style": "Balanced local command",
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "HRHB",
+        "historical_corps_id": "hvo_southeast_herzegovina",
+        "home_corps_id": "hvo_southeast_herzegovina",
+        "id": "hvo_lasic",
+        "improvement_rate": 0.03,
+        "is_historical_start": true,
+        "known_for": "Southeast Herzegovina opening command",
+        "name": "Miljenko Lasić",
+        "origin": "militia",
+        "override_tolerance": 3,
+        "political_alignment_note": "Regular HRHB corps command appointment.",
+        "political_reliability": 4,
+        "pool_tier": "starter",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 2,
+        "available_from_turn": 0,
+        "bio_short": "Military-origin commander assigned to Northwest Bosnia in the opening OOB.",
+        "can_improve": true,
+        "casualty_vulnerability": 0.1,
+        "command_style": "Cautious, defensive regional command",
+        "competence": 3,
+        "defensive_skill": 4,
+        "enclave_lock": {
+          "enclave_id": "orasje"
+        },
+        "faction": "HRHB",
+        "historical_corps_id": "hvo_northwest_bosnia",
+        "home_corps_id": "hvo_northwest_bosnia",
+        "id": "hvo_matuzovic",
+        "improvement_rate": 0.03,
+        "is_historical_start": true,
+        "known_for": "Northwest Bosnia opening command",
+        "name": "Đuro Matuzović",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_alignment_note": "Regular HRHB corps command appointment.",
+        "political_reliability": 4,
+        "pool_tier": "starter",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 5,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.15,
+        "competence": 2,
+        "defensive_skill": 2,
+        "faction": "HRHB",
+        "home_corps_id": "hvo_central_bosnia",
+        "id": "hvo_rajic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Ivica Rajić",
+        "origin": "jna",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Grave breaches of Geneva Conventions, violations of laws of war",
+          "court": "ICTY",
+          "sentence": "12 years",
+          "summary": "Pleaded guilty for HVO attack on Bosniak village of Stupni Do; massacre of civilians October 1993",
+          "verdict": "convicted"
+        }
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.1,
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "HRHB",
+        "home_corps_id": "hvo_central_bosnia",
+        "id": "hvo_nakic",
+        "improvement_rate": 0.03,
+        "is_historical_start": false,
+        "name": "Franjo Nakić",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.1,
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "HRHB",
+        "home_corps_id": "hvo_southeast_herzegovina",
+        "id": "hvo_obradovic",
+        "improvement_rate": 0.03,
+        "is_historical_start": false,
+        "name": "Nedjeljko Obradović",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "competence": 3,
+        "defensive_skill": 3,
+        "enclave_lock": {
+          "enclave_id": "orasje"
+        },
+        "faction": "HRHB",
+        "home_corps_id": "hvo_northwest_bosnia",
+        "id": "hvo_stefanek",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Vinko Štefanek",
+        "origin": "hv",
+        "override_tolerance": 3,
+        "political_reliability": 5,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 5,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.05,
+        "competence": 3,
+        "defensive_skill": 2,
+        "faction": "HRHB",
+        "home_corps_id": "hvo_central_bosnia",
+        "id": "hvo_kordic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Dario Kordić",
+        "origin": "political",
+        "override_tolerance": 3,
+        "political_reliability": 5,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Crimes against humanity (persecution, murder, deportation), unlawful attacks on civilians, wanton destruction",
+          "court": "ICTY",
+          "sentence": "25 years",
+          "summary": "Vice-president of Herceg-Bosna who exercised de facto military command in Lašva Valley; ordered Bušovača and Ahmići attacks",
+          "verdict": "convicted"
+        }
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.1,
+        "competence": 3,
+        "defensive_skill": 4,
+        "enclave_lock": {
+          "enclave_id": "orasje"
+        },
+        "faction": "HRHB",
+        "home_corps_id": "hvo_northwest_bosnia",
+        "id": "hvo_orsolc",
+        "improvement_rate": 0.03,
+        "is_historical_start": false,
+        "name": "Ivo Oršolić",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Crimes against Serbian civilians in Orašje area 1992-1993",
+          "court": "BiH State Court",
+          "summary": "Indicted 2016 for crimes against Serb civilians in Orašje; pleaded not guilty",
+          "verdict": "indicted"
+        }
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.15,
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "HRHB",
+        "home_corps_id": "hvo_central_bosnia",
+        "id": "hvo_totic",
+        "improvement_rate": 0.03,
+        "is_historical_start": false,
+        "name": "Živko Totić",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 3,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 100,
+        "can_improve": false,
+        "casualty_vulnerability": 0.15,
+        "compatible_corps_ids": [
+          "hvo_tomislavgrad"
+        ],
+        "competence": 4,
+        "defensive_skill": 4,
+        "faction": "HRHB",
+        "home_corps_id": "hvo_central_bosnia",
+        "id": "hvo_i_nakic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Ilija Nakić",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 88,
+        "can_improve": false,
+        "casualty_vulnerability": 0.15,
+        "compatible_corps_ids": [
+          "hvo_tomislavgrad"
+        ],
+        "competence": 4,
+        "defensive_skill": 3,
+        "faction": "HRHB",
+        "home_corps_id": "hvo_southeast_herzegovina",
+        "id": "hvo_sopta",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Stanko Sopta",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 130,
+        "can_improve": false,
+        "casualty_vulnerability": 0.1,
+        "competence": 3,
+        "defensive_skill": 4,
+        "enclave_lock": {
+          "enclave_id": "orasje"
+        },
+        "faction": "HRHB",
+        "home_corps_id": "hvo_northwest_bosnia",
+        "id": "hvo_bilonjic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Mato Bilonjić",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_a",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 4,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.15,
+        "competence": 3,
+        "defensive_skill": 4,
+        "faction": "HRHB",
+        "home_corps_id": "hvo_central_bosnia",
+        "id": "hvo_cerkez",
+        "improvement_rate": 0.04,
+        "is_historical_start": false,
+        "name": "Mario Čerkez",
+        "origin": "militia",
+        "override_tolerance": 3,
+        "political_reliability": 3,
+        "pool_tier": "tier_b",
+        "rank": "corps_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Crimes against humanity (persecution), violations of laws of war",
+          "court": "ICTY",
+          "sentence": "6 years",
+          "summary": "Viteska Brigade commander convicted for attacks on Bosniak civilians in Vitez; many convictions overturned on appeal",
+          "verdict": "convicted"
+        }
+      },
+      {
+        "aggressiveness": 3,
+        "available_from_turn": 0,
+        "can_improve": true,
+        "casualty_vulnerability": 0.1,
+        "compatible_corps_ids": [
+          "hvo_northwest_bosnia"
+        ],
+        "competence": 3,
+        "defensive_skill": 3,
+        "faction": "HRHB",
+        "home_corps_id": "hvo_central_bosnia",
+        "id": "hvo_lozancic",
+        "improvement_rate": 0.03,
+        "is_historical_start": false,
+        "name": "Ivo Lozančić",
+        "origin": "military",
+        "override_tolerance": 3,
+        "political_reliability": 4,
+        "pool_tier": "tier_b",
+        "rank": "corps_commander",
+        "stubbornness": 3
+      },
+      {
+        "aggressiveness": 5,
+        "available_from_turn": 0,
+        "can_improve": false,
+        "casualty_vulnerability": 0.2,
+        "competence": 2,
+        "defensive_skill": 1,
+        "faction": "HRHB",
+        "home_corps_id": "hvo_southeast_herzegovina",
+        "id": "hvo_naletlic",
+        "improvement_rate": 0,
+        "is_historical_start": false,
+        "name": "Mladen Naletilić \"Tuta\"",
+        "origin": "militia",
+        "override_tolerance": 3,
+        "political_reliability": 3,
+        "pool_tier": "tier_b",
+        "rank": "corps_commander",
+        "stubbornness": 3,
+        "war_crimes_record": {
+          "charges": "Crimes against humanity (persecution, murder, rape), grave breaches of Geneva Conventions",
+          "court": "ICTY",
+          "sentence": "20 years",
+          "summary": "Convicts Battalion commander convicted for campaign of persecution against Bosniaks including forced labor and human shields",
+          "verdict": "convicted"
+        }
+      }
+    ]
+  }
+}
