@@ -1,4 +1,15 @@
 export const enMessages = {
+    'equipmentReport.title': 'Equipment report',
+    'equipmentReport.tanks': 'Tanks held',
+    'equipmentReport.artillery': 'Artillery held',
+    'equipmentReport.aa_systems': 'AA systems held',
+    'equipmentReport.pool': 'Heavy equipment operational pool',
+    'equipmentReport.explanation': 'Holdings count weapons. The operational percentage describes a separate abstract heavy-equipment pool, not the condition of each weapon type.',
+    'equipmentReport.reports': 'Reports: {reported} / {total} active brigades',
+    'equipmentReport.partial': '{count} reported (partial)',
+    'equipmentReport.zeroPool': 'No heavy equipment in reported pool',
+    'equipmentReport.close': 'Close war summary',
+
     'settings.title': 'Settings',
     'settings.tab.gameplay': 'Gameplay',
     'settings.tab.display': 'Display',

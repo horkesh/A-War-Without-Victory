@@ -2,6 +2,7 @@
  * War Summary content — extracted from WarSummaryModal for inline rendering
  * inside Army HQ SUMMARY tab. Same data, no modal wrapper.
  */
+import { EquipmentSummary } from './EquipmentSummary';
 import { useEffect, useMemo, useState } from 'react';
 import type { SummaryFocusSection } from '../../data/types';
 import { useGameStore } from '../../store/gameStore';
@@ -158,6 +159,7 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
                 <div className="grid grid-cols-1 xl:grid-cols-2 min-[2200px]:grid-cols-3 gap-4">
                     {playerFaction ? (
                         <>
+                            <EquipmentSummary summary={loadedGameState.equipmentSummary} />
                             {strategicObjectives.length > 0 && (
                                 <StrategicObjectivesSection objectives={strategicObjectives} onNavigateTarget={onNavigateTarget} />
                             )}

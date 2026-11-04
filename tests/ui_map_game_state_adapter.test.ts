@@ -82,7 +82,7 @@ test('B4 exposes four RBiH strategic objectives with command ownership and spars
                 cardId: 'command:elite-deploy:reserve_alpha',
             },
         },
-        lastConsequence: 'Turn 20: territorial control was lost.',
+        lastConsequence: 'Week 20: territorial control was lost.',
     });
     assert.deepEqual(objectives[1], {
         id: 'military_credibility',

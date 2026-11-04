@@ -79,6 +79,7 @@ The player is the faction president (wartime political leader). Shell ownership 
 | Campaign shell | Warroom | Tactical toolbar return affordance | Warroom is the president's desk, not a records browser. |
 | Battlespace inspection | Tactical Map | Army HQ map links and highlights | Tactical Map owns spatial truth and selection context. |
 | Military command review | Army HQ | Toolbar alerts, Inbox rows, Warroom hotspots | Army HQ owns depth; other shells route into it. |
+| Own-faction equipment report | Army HQ briefing + canonical summary, shared equipment component/read model | Warroom staff route and faction explainer drill-in | Active-brigade own holdings and separate existing operational pool; explicit missing/partial reports, no new readiness bands or stockpile HUD. UI-only aggregate, not a save field. |
 | Presidential decision queue | Presidential Inbox | Toolbar badge, Army HQ attention count | The queue should derive from existing pending state, not own mutation. |
 | Operation opportunity dossiers | Army HQ briefing | Inbox rows, Records, Cost Ledger | Family-specific UI should not fork the generic opportunity surface. |
 | Turn aftermath | `TurnAftermathModal` after successful `advance-turn` | Chronicle, War Summary, Army HQ Records | Live C1 bridge over `latestTurnSummary` + unified Inbox obligations; it summarizes and routes, it does not write sim truth. |

@@ -1,6 +1,8 @@
 **Latest implementation report — corrected-engine calibration packet (2026-10-26):** [Report](implemented/20261026_CORRECTED_ENGINE_CALIBRATION_PACKET.md) records retained audits, the focused zero-drift morale correction, the blocked Circle/HVO proposals, and the unchanged 703/712, four-loss, health13>3 failure.
 # docs/40_reports — Master Index and Structure
 
+**Command overview usability (2026-11-04):** [Report](implemented/20261104_COMMAND_OVERVIEW_USABILITY.md) records the isolated equipment-report and dialog/keyboard implementation, owner design disposition and verification; no calibration/native/package acceptance is claimed.
+
 **Player information polish — isolated local branch (2026-11-04):** [Report and verification](implemented/20261104_PLAYER_INFORMATION_POLISH.md) cover weeks wording, formatting, missing data, labels, layout and accessibility; integration into Claude's reconciled source remains separate.
 
 **Latest implementation report — combat fatigue single owner (2026-10-26):** [Report](implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md) records focused RED/GREEN results, independent source GO, and the 703/712 STOP_NO_RETRY prefix result with four protected losses, health13>3 and open global gates.

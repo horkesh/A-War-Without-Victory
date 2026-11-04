@@ -7,6 +7,7 @@
  *
  * No Math.random(), no timestamps. Sorted iteration via strictCompare.
  */
+import { summarizeOwnEquipment, type OwnEquipmentSummary } from '../../shared/equipmentSummary.js';
 
 import type {
     BrigadeMovementState,
@@ -55,6 +56,7 @@ export interface FormationDetail {
 }
 
 export interface OwnForcesSnapshot {
+    equipmentSummary: OwnEquipmentSummary;
     totalPersonnel: number;
     activeBrigades: number;
     totalBrigades: number;
@@ -482,6 +484,7 @@ function extractOwnForces(state: GameState, pf: FactionId): OwnForcesSnapshot {
     }
 
     return {
+        equipmentSummary: summarizeOwnEquipment(Object.values(formations), pf),
         totalPersonnel,
         activeBrigades,
         totalBrigades,

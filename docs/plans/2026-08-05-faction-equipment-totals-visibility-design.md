@@ -3,7 +3,9 @@
 **Date:** 2026-08-05
 **Source:** Pyrrhic panel (ui-ux-developer, game-designer, modern-wargame-expert), convened on owner request
 **Scope:** `src/ui/warroom/components/FactionOverviewPanel.ts`, `src/ui/map/components/CorpsCard.tsx` — design only, no implementation in this note
-**Status:** Proposed — not yet wired into MASTER_ROADMAP.md / COMMAND_BOARD.md
+**Status:** Implemented on isolated `codex/command-overview-usability`, 2026-11-04; [report](../40_reports/implemented/20261104_COMMAND_OVERVIEW_USABILITY.md). Integration and broader acceptance remain separate.
+
+**Owner amendment — 2026-11-04:** For the authorized [command overview usability packet](2026-11-04-command-overview-usability-plan.md), show the existing abstract heavy-equipment operational percentage and report completeness instead of the undefined Adequate/Strained/Critical bands below. The owner explicitly selected this disposition. Weapon holdings remain separate from the readiness pool; no new gameplay/readiness formula or threshold is introduced. Current Warroom staff/faction drill-in routes lead to canonical Army HQ summary; that summary and the corps-list briefing share one presentation/read model. The legacy extractor exposes the same pure report; its fallback panel was not revived or modified. Historical design discussion below is retained.
 
 ## Problem
 

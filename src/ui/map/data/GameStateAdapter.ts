@@ -30,6 +30,7 @@
  *
  * Migrated from legacy ui_legacy/data/GameStateAdapter.ts — import paths updated.
  */
+import { summarizeOwnEquipment } from '../../shared/equipmentSummary';
 
 import type {
     AoROrderView, AttackOrderView,
@@ -2867,6 +2868,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             turn,
             date: metadataDate,
         },
+        equipmentSummary: summarizeOwnEquipment(Object.values(formationsRecord), playerFaction),
         formations: presentedFormations, militiaPools, controlBySettlement, initialControlBySettlement, statusBySettlement,
         brigadeAorByFormationId,
         attackOrders, aorOrders, recentControlEvents, allControlEvents: recentControlEvents, displacementEventLog: displacementEventLogRaw, recruitment,

@@ -97,6 +97,10 @@ These are known danger zones and must be treated carefully:
 - settlement-level military detail
 - diplomacy/event internals
 
+## Own-faction equipment report
+
+The UI-only `LoadedGameState.equipmentSummary` and Warroom `OwnForcesSnapshot.equipmentSummary` are player-safe, explicit-player aggregates over active brigade reports. They expose own holdings and a separate reported abstract heavy-equipment operational percentage, with per-field reporting completeness. Opponent, command and OG/TG rollup rows are excluded; missing player identity fails closed. Missing/partial reports do not become zero or full-faction certainty. This is not a canonical GameState/save field or a per-weapon condition estimate. Army HQ briefing/summary owns presentation; Warroom links into that owner. See the [implementation report](../40_reports/implemented/20261104_COMMAND_OVERVIEW_USABILITY.md).
+
 ## Display rule
 
 Player-facing UI must render display names, not raw engine identifiers.
