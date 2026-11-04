@@ -146,6 +146,16 @@ function makeState(): { state: GameState; edges: EdgeRecord[] } {
     return { state, edges };
 }
 
+// Give sector B its own RS-held rear cell and an eligible brigade parked there,
+// so zero-assigned coverage promotes sector B's own rear instead of borrowing.
+function armOwnRearRelocation(fixture: ReturnType<typeof makeState>): void {
+    fixture.state.political.political_controllers!['op:test:rear_b'] = 'RS';
+    fixture.edges.push({ a: 'op:test:rear_b', b: 'op:test:front_b' } as EdgeRecord);
+    const brigStack = fixture.state.military.formations!.brig_stack!;
+    brigStack.location_osid = 'op:test:rear_b';
+    brigStack.home_osid = 'op:test:rear_b';
+}
+
 function canonicalTruthProjection(state: GameState): unknown {
     const sectorEntries = Object.entries(state.military.corps_front_sectors ?? {})
         .sort(([a], [b]) => strictCompare(a, b));
@@ -273,6 +283,7 @@ describe('turn-local final-sector reconciliation session', () => {
 
         for (const scenario of scenarios) {
             const fixture = makeState();
+            armOwnRearRelocation(fixture);
             if (scenario.noRelocation) {
                 fixture.state.military.formations!.brig_stack!.location_osid = 'op:test:front_b';
                 fixture.state.military.formations!.brig_stack!.home_osid = 'op:test:front_b';
@@ -292,6 +303,7 @@ describe('turn-local final-sector reconciliation session', () => {
 
     it('keeps active-operation postcombat cleanup roster-only, adds zero geometry builds, and equals legacy full reconciliation', () => {
         const fixture = makeState();
+        armOwnRearRelocation(fixture);
         const state = structuredClone(fixture.state);
         const legacy = structuredClone(fixture.state);
         const session = createFinalSectorReconciliationSession(state.meta.turn, 'postcombat-geometry');
@@ -332,6 +344,7 @@ describe('turn-local final-sector reconciliation session', () => {
 
     it('wires a postcombat location writeback to one explicit follow-up geometry epoch', async () => {
         const fixture = makeState();
+        armOwnRearRelocation(fixture);
         const context = {
             state: structuredClone(fixture.state),
             rng: () => { throw new Error('randomness forbidden'); },
@@ -373,6 +386,7 @@ describe('turn-local final-sector reconciliation session', () => {
 
     it('does not add an operation receipt when operation truth makes no edit', async () => {
         const fixture = makeState();
+        armOwnRearRelocation(fixture);
         const operation = fixture.state.military.corps_command!.corps_a!.active_operations[0]!;
         operation.participating_brigades = ['brig_seed'];
         operation.axes![0]!.assigned_brigades = ['brig_seed'];
@@ -582,6 +596,7 @@ describe('turn-local final-sector reconciliation session', () => {
 
     it('records and consumes a geometry receipt when operation roster coverage relocates a brigade', () => {
         const fixture = makeState();
+        armOwnRearRelocation(fixture);
         const state = structuredClone(fixture.state);
         const legacy = structuredClone(fixture.state);
         const session = createFinalSectorReconciliationSession(state.meta.turn, 'postcombat-geometry');
@@ -589,9 +604,9 @@ describe('turn-local final-sector reconciliation session', () => {
         reconcileFinalSectorTruth(state, fixture.edges, null, undefined, undefined, null, false, { session });
         reconcileFinalSectorTruth(legacy, fixture.edges, null);
 
-        state.military.formations!.brig_seed!.location_osid = 'op:test:front_a';
+        state.military.formations!.brig_seed!.location_osid = 'op:test:rear';
         state.military.formations!.brig_stack!.location_osid = 'op:test:front_a';
-        legacy.military.formations!.brig_seed!.location_osid = 'op:test:front_a';
+        legacy.military.formations!.brig_seed!.location_osid = 'op:test:rear';
         legacy.military.formations!.brig_stack!.location_osid = 'op:test:front_a';
         recordFinalSectorReconciliationMutation(session, 'operation-roster', 'reconcile-final-operation-truth');
 
