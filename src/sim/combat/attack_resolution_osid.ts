@@ -1545,7 +1545,9 @@ export function resolveAttackOrdersOsid(
                 // Apply morale/disruption penalties at their current position —
                 // losing a covered OSID is demoralizing and disrupts the formation,
                 // but the brigade stays where it physically is.
-                applyDefeatPenalties(defenderFormation, targetOsid, state.meta?.turn ?? 0, outcome);
+                applyDefeatPenalties(defenderFormation, targetOsid, state.meta?.turn ?? 0, outcome, {
+                    recordRetreatOrigin: false,
+                });
             }
         }
 

@@ -76,17 +76,26 @@ export function resetFormationEntrenchment(f: FormationState): void {
     (f as { defense_streak?: number }).defense_streak = 0;
 }
 
+/** Options for defeat penalties that did not involve a physical retreat. */
+export interface DefeatPenaltyOptions {
+    /** Coverage-only defenders keep their prior retreat history. Default: true. */
+    recordRetreatOrigin?: boolean;
+}
+
 /** Apply standard defeat penalties to a displaced defender: reset entrenchment, record retreat origin, and optionally set disrupted turns. */
 export function applyDefeatPenalties(
     f: FormationState,
     targetOsid: string,
     turn: number,
     outcome: CombatOutcome,
+    options?: DefeatPenaltyOptions,
 ): void {
     resetFormationEntrenchment(f);
-    (f as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from = {
-        osid: targetOsid, turn,
-    };
+    if (options?.recordRetreatOrigin !== false) {
+        (f as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from = {
+            osid: targetOsid, turn,
+        };
+    }
     if (outcome === 'decisive_victory') (f as { disrupted_turns?: number }).disrupted_turns = 2;
     else if (outcome === 'victory') (f as { disrupted_turns?: number }).disrupted_turns = 1;
 }

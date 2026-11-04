@@ -416,6 +416,7 @@ function computeDonorCorpsSet(
     const anchorOsids = new Set<string>();
     for (const id of Object.keys(formations).sort(strictCompare)) {
         const f = formations[id];
+        if (f.status === 'inactive') continue;
         if (f.corps_id === anchorCorps && f.location_osid) anchorOsids.add(f.location_osid);
     }
     if (anchorOsids.size === 0) return result;
@@ -429,6 +430,7 @@ function computeDonorCorpsSet(
     // Any same-faction corps with a brigade on an anchor-OSID-neighbor is adjacent.
     for (const id of Object.keys(formations).sort(strictCompare)) {
         const f = formations[id];
+        if (f.status === 'inactive') continue;
         if (f.faction !== anchorFaction) continue;
         const corps = f.corps_id;
         if (corps == null || result.has(corps)) continue;
@@ -454,6 +456,7 @@ function computeFriendlyOsids(
     // transient frontline states whose political read-model has not yet caught up.
     for (const id of Object.keys(formations).sort(strictCompare)) {
         const f = formations[id];
+        if (f.status === 'inactive') continue;
         if (f.faction === anchorFaction && f.location_osid) friendly.add(f.location_osid);
     }
     return friendly;
