@@ -303,16 +303,32 @@ test('baked April 1992 startup sector truth audits clean without rebuilt-state m
     };
     assert.deepStrictEqual(savedAudit.counts, expectedAuditCounts);
     assert.strictEqual(savedAudit.ok, true);
+    // Since the Engine Invariants 14.9 no-teleport construction (054da07e7) a zero-assigned
+    // sector no longer borrows a sibling sector's brigade. 2nd Krajina:0 therefore keeps its own
+    // 9th Grahovo on the line, and the sole reserve-only sector is East Bosnian:0, honestly
+    // flagged unstaffed_front with its own Semberija reserve still in place (not relocated).
+    // Its reserve not being promoted is the recorded T1 residual in
+    // runs/claude-measure-20261104/panel/DECISION.md, pinned here so any change turns this red.
     assert.deepStrictEqual(
         savedAudit.issues.reserve_only_live_sectors.map((issue) => issue.sector_id),
-        ['sector:vrs_2nd_krajina:0'],
-        'the sole diagnostic reserve-only issue must be the lawfully unstaffed 2nd Krajina sector',
+        ['sector:vrs_east_bosnian:0'],
+        'the sole diagnostic reserve-only issue must be the lawfully unstaffed East Bosnian sector',
+    );
+    const eastBosnianSector = savedState.military.corps_front_sectors?.['sector:vrs_east_bosnian:0'];
+    assert.ok(eastBosnianSector, 'East Bosnian diagnostic sector must exist');
+    assert.strictEqual(eastBosnianSector.unstaffed_front, true);
+    assert.deepStrictEqual(eastBosnianSector.assigned_brigade_ids, []);
+    assert.deepStrictEqual(eastBosnianSector.reserve_brigade_ids, ['rs_2nd_semberija_light_infantry']);
+    assert.strictEqual(
+        savedState.military.formations['rs_2nd_semberija_light_infantry']?.location_osid,
+        'op:bijeljina:cadjavica_gornja_2',
+        'the unstaffed sector reserve stays where it is; construction must not relocate it',
     );
 
     const drvarSector = savedState.military.corps_front_sectors?.['sector:vrs_2nd_krajina:0'];
-    assert.ok(drvarSector, '2nd Krajina diagnostic sector must exist');
-    assert.strictEqual(drvarSector.unstaffed_front, true);
-    assert.deepStrictEqual(drvarSector.assigned_brigade_ids, []);
+    assert.ok(drvarSector, '2nd Krajina sector must exist');
+    assert.notStrictEqual(drvarSector.unstaffed_front, true);
+    assert.deepStrictEqual(drvarSector.assigned_brigade_ids, ['rs_9th_grahovo_light_infantry']);
     assert.deepStrictEqual(drvarSector.reserve_brigade_ids, ['rs_1st_drvar_light_infantry']);
 
     const drvarBrigade = savedState.military.formations['rs_1st_drvar_light_infantry'];
@@ -491,8 +507,12 @@ test('baked April 1992 startup sector roster and sectorless brigades are structu
         'hrhb_travnik_brigade',
     ]);
     assert.deepStrictEqual(unresolvedIds.sort(), []);
-    // Known startup one-pass orphan, named rather than hidden. ensureMinimumSectorCoverage
-    // moves this brigade op:konjic:brdjani -> op:trnovo:trnovo to staff the 8-OSID
+    // RESOLVED by the Engine Invariants 14.9 no-teleport construction (054da07e7):
+    // arbih_443rd_mountain now stays at op:konjic:brdjani as a reserve of
+    // sector:arbih_4th_corps:3, so no startup brigade is left without a sector classification.
+    // Historical note on the former orphan, kept for context:
+    // ensureMinimumSectorCoverage used to
+    // move this brigade op:konjic:brdjani -> op:trnovo:trnovo to staff the 8-OSID
     // Foca/Kalinovik/Trnovo front of sector:arbih_4th_corps:0 (3 hops, inside
     // LOCAL_FRONT_RELIEF_MAX_HOPS). The sector it was last rostered into is then deleted by
     // canonicalizeSameFactionEdgeOwnership (corps_front_sectors.ts:741-744), and no rehome
@@ -510,10 +530,10 @@ test('baked April 1992 startup sector roster and sectorless brigades are structu
     // Surfaced by acd637f13 rebuilding the snapshot on the rebased base (the Foca takeover
     // reshaped that front), NOT by the militia/schema-v38 work.
     //
-    // Pinned by name so a DIFFERENT brigade orphaning still turns this red. The engine
-    // repair — re-running the rehome pass after the delete loop — is calibration-moving and
-    // queued as its own 188w-gated lane.
-    assert.deepStrictEqual(missingSectorClassification.sort(), ['arbih_443rd_mountain']);
+    // Any brigade orphaning at startup now turns this red.
+    assert.deepStrictEqual(missingSectorClassification.sort(), []);
+    const brigade443 = state.military.formations['arbih_443rd_mountain'];
+    assert.strictEqual(brigade443?.location_osid, 'op:konjic:brdjani');
 }, 120_000);
 
 test('desktop new campaign preserves default-on SRK strangle containment at birth', async () => {

@@ -11,26 +11,26 @@ import {serializeState} from '../src/state/serialize.js';
 import {serializeRuntimeGameState} from '../src/state/serializeGameState.js';
 
 // Exact JSON omission shapes independently checked for this real week1 fixture.
+// Re-derived 2026-11-04 after the Engine Invariants 14.9 no-teleport startup (4e2bda1fc) changed
+// the week-1 battle set: collected with only this allowlist check disabled while the
+// lost/added-defined-value checks stayed active (no defined value lost or added; next-turn state
+// and report equal after fresh-process reload). Only undefined-valued keys differ.
 const ALLOWED_JSON_OMISSION_PATHS=new Set<string>([
   "/military/corps_command/jna_herzegovina_command/active_operations/0/recovery_reason",
   "/military/corps_command/vrs_1st_krajina/active_operations/0/recovery_reason",
-  "/military/corps_command/vrs_2nd_krajina/active_operations/0/recovery_reason",
   "/military/corps_command/vrs_drina/active_operations/0/recovery_reason",
   "/military/corps_command/vrs_east_bosnian/active_operations/0/recovery_reason",
   "/military/corps_command/vrs_herzegovina/active_operations/0/recovery_reason",
   "/military/corps_command/vrs_sarajevo_romanija/active_operations/0/recovery_reason",
   "/turn_summaries/1/battles/0/defender_contributions",
   "/turn_summaries/1/battles/1/defender_contributions",
-  "/turn_summaries/1/battles/2/defender_contributions",
-  "/turn_summaries/1/battles/4/mun_id",
+  "/turn_summaries/1/battles/4/defender_contributions",
   "/turn_summaries/1/battles/5/mun_id",
   "/turn_summaries/1/battles/5/defender_contributions",
-  "/turn_summaries/1/battles/6/mun_id",
   "/turn_summaries/1/battles/6/defender_contributions",
   "/turn_summaries/1/battles/7/defender_contributions",
   "/turn_summaries/1/battles/8/defender_contributions",
   "/turn_summaries/1/battles/9/defender_contributions",
-  "/turn_summaries/1/battles/10/defender_contributions",
   "/turn_summaries/1/displacement_hotspot"
 ]);
 
