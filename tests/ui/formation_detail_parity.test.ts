@@ -222,6 +222,17 @@ function makeFormationDetailState(): LoadedGameState {
 }
 
 describe('Formation Detail parity display', () => {
+  it.each([[1, '1 week', '1 week remaining'], [2, '2 weeks', '2 weeks remaining']])('shows weekly formation duration %s', (weeks, entrenched, disrupted) => {
+    const state = makeFormationDetailState();
+    const brigade = state.formations.find(f => f.id === 'rbih_heroic_brigade')!;
+    brigade.entrenchment_turns = Number(weeks);
+    brigade.disrupted_turns = Number(weeks);
+    useGameStore.setState({ loadedGameState: state, selectedFormationId: brigade.id });
+    render(React.createElement(FormationDetail));
+    expect(screen.getByText(String(entrenched))).toBeTruthy();
+    expect(screen.getByText(String(disrupted))).toBeTruthy();
+  });
+
   const assignBrigadeToSector = vi.fn(async () => ({ ok: true }));
 
   beforeEach(() => {

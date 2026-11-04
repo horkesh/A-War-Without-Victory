@@ -99,7 +99,7 @@ describe('field toolbar navigation ownership', () => {
     expect(screen.getByRole('button', { name: 'CHRONICLE' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'RECORDS' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'CODEX' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: /Advance turn/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Advance week/i })).toBeTruthy();
 
     expect(screen.queryByRole('button', { name: 'SUMMARY' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'OPS' })).toBeNull();

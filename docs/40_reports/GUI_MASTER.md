@@ -2,7 +2,9 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-10-23 (bounded R8 readability, runtime-output isolation and all-faction zero-turn Save/load verified; full shakedown remains blocked)
+**Updated:** 2026-11-04 (branch-local player-information polish; existing native/package gates remain unchanged)
+
+**Player-information presentation — isolated branch:** `codex/player-information-polish` implements weeks wording, shared active-locale exact/compact counts, truthful missing/zero handling, consistent explanations, wrapping and keyboard access on existing formation/settlement/HQ/aftermath surfaces. Focused evidence covers 28 unique files/454 tests, final TypeScript passes, and real-browser 1366/1920 proofs plus independent review pass. The [implementation report](implemented/20261104_PLAYER_INFORMATION_POLISH.md) records synthetic display-stress scope, retained failures, provenance and later-integration boundaries. This local branch changes no simulation, calibration or native/package acceptance status.
 
 **R8 repair scope:** local source `2d1872e15` and immutable clip2 package verify the
 full DirectiveCard instruction in All, Command and current dossier views on the exact

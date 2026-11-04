@@ -133,7 +133,6 @@ describe('BrigadeRow supply labels', () => {
     expect(screen.getByText('1.3k')).toBeTruthy();
     expect(screen.getByRole('button').getAttribute('aria-label')).toMatch(/1[,.]250 personnel/);
     const source = readFileSync('src/ui/map/components/BrigadeRow.tsx', 'utf8');
-    expect(source).toContain("import { formatPersonnel, toTitleCase } from '../utils/formatters'");
     expect(source).toContain('{formatPersonnel(formation.personnel)}');
   });
 });

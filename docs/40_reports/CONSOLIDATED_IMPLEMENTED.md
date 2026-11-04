@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Player information polish (2026-11-04, isolated local branch):** [Report](implemented/20261104_PLAYER_INFORMATION_POLISH.md) records all six presentation improvements, focused 28-file/454-test evidence, two-viewport browser proof and independent review after one targeted correction. No calibration/native/package qualification or integration is claimed.
+
 **Toljenak Behar-I n92 (2026-10-23):** [Report](implemented/20261023_BEHAR_I_TOLJENAK_CANDIDATE.md) records lawful t135 capture, retention through188 and707/707/706/706 under the owner's Toljenak-only April repaint. Zero formerly correct losses or unrelated control changes. Historical run provenance is preserved with one exact scoring-reference exception; one full suite plus documentation-only correction checks are retained separately. n91 and global NO-GO remain preserved; no baseline adoption.
 
 **April 1994 operational calibration:** [implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md) - consolidates the Srebrenica, Trnovo/Goražde, and RBiH-HRHB lanes; purposeful emergent targeting and historical-name ownership; removal of passive post-fade control; operational recovery of bounded positions; Derventa/Liše/Prozor corrections; deterministic v72/v73 proof; 703/712 accepted week-104 result; and the complete nine-OSID residual list.

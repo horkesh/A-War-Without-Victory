@@ -141,18 +141,35 @@ export function formatCorpsDisplayName(
     return fallback;
 }
 
-/** Compact personnel display: 2400 → "2.4k", 800 → "800". */
-export function formatPersonnel(n: number): string {
-    return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
+/** Exact reported count, rounded to a whole person/item in the active UI locale. */
+export function formatCount(value: number | null | undefined): string {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return t('corpsFront.unreported');
+    return Math.round(value).toLocaleString(getActiveLocale() === 'bcs' ? 'bs-BA' : 'en-US');
 }
 
-/** Compact summary number: 2400 → "2k", 1211000 → "1.2M". Thousands round to integers; millions to one decimal. */
-export function fmtK(n: number): string {
-    if (n >= 1_000_000) {
-        return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
-    }
-    if (n >= 1000) return `${Math.round(n / 1000)}k`;
-    return String(Math.round(n));
+function compactNumber(value: number | null | undefined, personnel: boolean): string {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return t('corpsFront.unreported');
+    const magnitude = Math.abs(value);
+    const scale = magnitude >= 1_000_000 ? 1_000_000 : magnitude >= 1_000 ? 1_000 : 1;
+    const decimals = scale === 1_000_000 || (personnel && scale === 1_000) ? 1 : 0;
+    // Select scale before rounding (999,999 remains thousands); round signed deltas symmetrically.
+    const rounded = Number((magnitude / scale).toFixed(decimals));
+    const number = rounded.toLocaleString(getActiveLocale() === 'bcs' ? 'bs-BA' : 'en-US', {
+        useGrouping: false,
+        minimumFractionDigits: personnel && scale > 1 ? 1 : 0,
+        maximumFractionDigits: decimals,
+    });
+    return `${value < 0 && rounded !== 0 ? '-' : ''}${number}${scale === 1_000_000 ? 'M' : scale === 1_000 ? 'k' : ''}`;
+}
+
+/** Personnel summaries retain one decimal for thousands and millions, including signed deltas. */
+export function formatPersonnel(n: number | null | undefined): string {
+    return compactNumber(n, true);
+}
+
+/** Summary counts round thousands to integers and millions to one decimal; scale precedes rounding. */
+export function fmtK(n: number | null | undefined): string {
+    return compactNumber(n, false);
 }
 
 /** Format percentage with one decimal. */
