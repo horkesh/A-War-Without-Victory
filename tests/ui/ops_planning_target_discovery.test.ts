@@ -649,7 +649,7 @@ describe('ops planning target discovery', () => {
         render(createElement(CommanderPhase, { onAdvance: vi.fn() }));
 
         const commanderButton = screen.getByRole('button', {
-            name: /Select operations commander.*Petar Testic.*HOME CORPS.*turns preparation/i,
+            name: /Select operations commander.*Petar Testic.*HOME CORPS.*week preparation/i,
         });
         expect(commanderButton.getAttribute('title')).toMatch(/Petar Testic/);
         expect(commanderButton.getAttribute('aria-pressed')).toBe('false');

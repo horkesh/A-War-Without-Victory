@@ -238,8 +238,8 @@ describe('buildTurnAftermathView', () => {
       reasons: ['40 friendly casualties', '1 formation destroyed', '350 displaced'],
     });
     expect(view?.judgment).toEqual({
-      headline: 'Hard turn entered the record.',
-      detail: 'The turn cost register is critical: 40 friendly casualties / 1 formation destroyed / 350 displaced.',
+      headline: 'Hard week entered the record.',
+      detail: 'The week cost register is critical: 40 friendly casualties / 1 formation destroyed / 350 displaced.',
       memoryTone: 'cost',
       primarySurface: 'chronicle',
       secondarySurface: 'codex',
@@ -537,7 +537,7 @@ describe('buildTurnAftermathView', () => {
     expect(view?.territory.gains).toBe(0);
     expect(view?.territory.losses).toBe(0);
     expect(view?.territory.notable).toEqual([]);
-    expect(view?.headline).toBe('No territorial change this turn.');
+    expect(view?.headline).toBe('No territorial change this week.');
     expect(view?.narrativeLine).toBe('A quiet week is still a week of depletion, waiting, and staff work.');
     expect(view?.combat).toMatchObject({
       battleCount: 0,
@@ -603,7 +603,7 @@ describe('buildTurnAftermathView', () => {
     expect(view?.tone).toBe('quiet');
     expect(view?.territory.friendlyNet).toBe(0);
     expect(view?.territory.notable).toEqual([]);
-    expect(view?.headline).toBe('No territorial change this turn.');
+    expect(view?.headline).toBe('No territorial change this week.');
     expect(view?.combat.battleCount).toBe(0);
     expect(view?.humanitarian.displacedThisTurn).toBe(0);
     expect(view?.cost).toMatchObject({
@@ -621,7 +621,7 @@ describe('buildTurnAftermathView', () => {
     const view = buildTurnAftermathView({ nextState: makeState({ latestTurnSummary: null, turnSummaries: [] }) });
     expect(view?.turn).toBe(12);
     expect(view?.tone).toBe('quiet');
-    expect(view?.headline).toBe('Turn advanced.');
+    expect(view?.headline).toBe('Week advanced.');
     expect(view?.judgment).toMatchObject({
       headline: 'No judgment recorded yet.',
       memoryTone: 'quiet',
@@ -841,13 +841,13 @@ describe('buildTurnAftermathView', () => {
       displayFriendlyMilitaryCasualties: 160,
       friendlyMilitaryCasualtyScope: 'turn_archive',
     });
-    expect(cost.briefing).toBe('3 recorded turns: 160 friendly casualties, 5200 displaced, +2 net territorial change, 0.31 opposing casualties per friendly casualty.');
+    expect(cost.briefing).toBe('Weeks recorded: 3; 160 friendly casualties, 5200 displaced, +2 net territorial change, 0.31 opposing casualties per friendly casualty.');
     expect(cost.briefing).not.toContain('OSID');
     expect(cost.windowLabel).toContain(' - ');
     expect(cost.topDrivers).toEqual([
       '5200 displaced',
       '2 own formations destroyed',
-      '2 hard turns',
+      '2 hard weeks',
       '160 friendly casualties',
     ]);
     expect(cost.mostCostlyTurn).toMatchObject({

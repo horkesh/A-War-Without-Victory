@@ -3,7 +3,8 @@
  * Uses FlipCard for front (summary) / back (detail) with 3D flip animation.
  * Compressed mode stays as a single-line mini card when another card is flipped.
  */
-import { useMemo } from 'react';
+import { formatCount } from '../../utils/formatters';
+import { useId, useMemo } from 'react';
 import type { FormationView, CorpsFrontSectorView, OperationView, LoadedGameState } from '../../data/types';
 import type { TurnBattle } from '../../../../state/turn_summary';
 import { formatCorpsDisplayName } from '../../utils/formatters';
@@ -117,6 +118,7 @@ export function ArmyHQCorpsCard({
     isExpanded, isCompressed, onToggleExpand,
     readinessGrade, hasThreat,
 }: ArmyHQCorpsCardProps) {
+    const descriptionId = useId();
     const data = useMemo(() => {
         const personnelSummary = sumReportedPersonnel(brigades);
         const totalPersonnel = personnelSummary.reportedTotal;
@@ -201,7 +203,7 @@ export function ArmyHQCorpsCard({
             grade: effectivenessBand.grade,
             label: t(effectivenessBand.labelKey),
         })
-        : t('effectiveness.exactTooltip', { value: data.eff.totalEffectiveness.toLocaleString() });
+        : t('effectiveness.exactTooltip', { value: formatCount(data.eff.totalEffectiveness) });
     const expandCardAria = t('armyHqCorps.expandCardAria', { corps: displayName });
     const collapseCardAria = t('armyHqCorps.collapseCardAria', { corps: displayName });
     const reportedCohesion = data.avgCohesion;
@@ -213,6 +215,12 @@ export function ArmyHQCorpsCard({
     const compressedCohesionWidth = reportedCohesion != null ? Math.min(100, reportedCohesion) : 0;
     const frontCohesionWidth = reportedCohesion != null ? Math.min(70, reportedCohesion * 0.7) : 0;
 
+    const conditionDescription = (
+        <span id={descriptionId} data-testid="army-hq-corps-focus-description" className="sr-only group-focus-visible:not-sr-only group-focus-visible:block min-w-0 max-w-full break-words px-3 py-2 text-xs font-normal text-text-secondary">
+            {effectivenessTitle}. {cohesionTitle}
+        </span>
+    );
+
     // Compressed: single line when another card is flipped
     if (isCompressed) {
         return (
@@ -220,8 +228,10 @@ export function ArmyHQCorpsCard({
                 type="button"
                 onClick={onToggleExpand}
                 aria-label={expandCardAria}
-                className="bg-panel-card border border-panel-border overflow-hidden hover:border-amber-400/40 transition-colors cursor-pointer group"
+                aria-describedby={descriptionId}
+                className="bg-panel-card border border-panel-border overflow-hidden hover:border-amber-400/40 transition-colors cursor-pointer group focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-gold"
             >
+                {conditionDescription}
                 <div className="flex items-center justify-between px-3 py-2 bg-panel-card">
                     <span className="text-xs font-bold text-text-secondary uppercase tracking-widest font-mono">
                         {displayName}
@@ -255,24 +265,25 @@ export function ArmyHQCorpsCard({
             data-testid="army-hq-corps-card"
             data-commander-source={data.commanderDisplay?.source ?? 'none'}
             aria-label={expandCardAria}
-            className={`min-h-[256px] w-full bg-panel-card border border-panel-border overflow-hidden hover:border-amber-400/50 transition-all cursor-pointer relative flex flex-col text-left
+                aria-describedby={descriptionId}
+            className={`min-h-[256px] w-full bg-panel-card border border-panel-border overflow-hidden hover:border-amber-400/50 transition-all cursor-pointer group relative focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-gold flex flex-col text-left
                 ${readinessGrade && READINESS_BORDER[readinessGrade] ? `border-l-[3px] ${READINESS_BORDER[readinessGrade]}` : isCritical ? 'border-l-[3px] border-l-red-600' : noCommander ? 'border-l-[3px] border-l-amber-500' : ''}`}
         >
-            {/* Threat badge */}
-            {hasThreat && (
-                <div className="absolute top-2 left-2 text-xs text-red-400 font-bold animate-pulse tracking-[0.15em] bg-red-500/10 border border-red-500/30 px-1.5 py-0.5 z-10">
-                    {t('armyHqCorps.incoming')}
-                </div>
-            )}
-
-            {/* Status Stamp */}
-            <div className={`absolute top-4 right-4 text-xs font-bold uppercase tracking-[0.2em] px-2 py-1 border ${stanceClass} z-10 font-mono`}>
-                {stanceLabel}
+            {conditionDescription}
+            <div className="flex flex-wrap items-start justify-between gap-2 px-4 pt-4">
+                {hasThreat && (
+                    <span className="max-w-full break-words text-xs text-red-400 font-bold animate-pulse tracking-[0.15em] bg-red-500/10 border border-red-500/30 px-1.5 py-0.5">
+                        {t('armyHqCorps.incoming')}
+                    </span>
+                )}
+                <span className={`ml-auto max-w-full break-words text-xs font-bold uppercase tracking-[0.2em] px-2 py-1 border ${stanceClass} font-mono`}>
+                    {stanceLabel}
+                </span>
             </div>
 
-            <div className="px-4 py-4 flex-1 flex flex-col">
+            <div className="min-w-0 w-full px-4 py-4 flex-1 flex flex-col">
                 {/* Line 1: Corps name */}
-                <div className="text-[16px] font-bold text-amber-400 uppercase tracking-widest leading-tight pr-24" style={{ fontFamily: 'var(--font-command)' }}>
+                <div className="break-words min-w-0 text-[16px] font-bold text-amber-400 uppercase tracking-widest leading-tight" style={{ fontFamily: 'var(--font-command)' }}>
                     {displayName}
                 </div>
 
@@ -294,7 +305,7 @@ export function ArmyHQCorpsCard({
                     <div className="hidden h-3 w-1 border-l border-panel-border sm:block" />
                     <span
                         data-testid="army-hq-corps-effectiveness"
-                        className={`shrink-0 font-bold ${gradeColor}`}
+                        className={`min-w-0 max-w-full break-words font-bold ${gradeColor}`}
                         title={effectivenessTitle}
                     >
                         {t('armyHqCorps.effectivenessShort', {

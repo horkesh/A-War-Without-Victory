@@ -508,7 +508,7 @@ describe('Army HQ Records operation AAR review', () => {
 
         render(createElement(RecordsContent));
 
-        expect(screen.getByRole('button', { name: 'TURN AFTERMATH' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'WEEK AFTERMATH' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'LATEST WEEKLY REPORT' })).toBeTruthy();
         expect(screen.getByText('No weekly aftermath reports have been filed for this campaign yet.')).toBeTruthy();
         expect(screen.getByTestId('records-archive-summary').textContent).toContain('Weekly Aftermath');
@@ -558,7 +558,7 @@ describe('Army HQ Records operation AAR review', () => {
         expect(screen.getByText('Archive Routes')).toBeTruthy();
         expect(screen.getByText('Cabinet crisis response')).toBeTruthy();
         expect(screen.getByText('Chronicle Decisions')).toBeTruthy();
-        expect(screen.getByRole('button', { name: 'TURN AFTERMATH' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'WEEK AFTERMATH' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'DESK DECISIONS' })).toBeTruthy();
         const archiveSummaryCopy = screen.getByTestId('records-archive-summary').textContent ?? '';
         expect(archiveSummaryCopy).toMatch(/Desk Decisions\s*0/);
@@ -647,9 +647,9 @@ describe('Army HQ Records operation AAR review', () => {
 
         render(createElement(RecordsContent));
 
-        expect(screen.getByRole('button', { name: 'TURN AFTERMATH' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'WEEK AFTERMATH' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'LATEST WEEKLY REPORT' })).toBeTruthy();
-        expect(screen.queryByRole('button', { name: /Turn Aftermath 0/i })).toBeNull();
+        expect(screen.queryByRole('button', { name: /Week Aftermath 0/i })).toBeNull();
         expect(screen.getAllByTitle('0 records').length).toBeGreaterThan(0);
         expect(document.body.textContent ?? '').toContain('No report yet');
         expect(document.body.textContent ?? '').not.toContain('Quiet turn');

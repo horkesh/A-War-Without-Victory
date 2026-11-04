@@ -13,7 +13,7 @@ import { getDecisionSurfaceForInboxType } from '../data/decisionSurfaceRegistry'
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { t, type MessageKey } from '../i18n';
-import { formatPersonnel, turnToDateString } from '../utils/formatters';
+import { formatPersonnel, formatCount, turnToDateString } from '../utils/formatters';
 
 interface TurnAftermathModalProps {
   isOpen: boolean;
@@ -51,8 +51,8 @@ interface TurnAftermathModalProps {
 }
 
 function formatSigned(value: number): string {
-  if (value > 0) return `+${value}`;
-  return String(value);
+  if (value > 0) return `+${formatCount(value)}`;
+  return formatCount(value);
 }
 
 function toneClasses(tone: TurnAftermathView['tone']): string {
@@ -222,9 +222,9 @@ export function TurnAftermathModal({
                     other: Math.abs(view.territory.friendlyNet - (view.territory.gains - view.territory.losses)),
                   })}
               />
-              <Metric label={t('turnAftermath.metric.battles')} value={String(view.combat.friendlyBattleCount)} detail={t('turnAftermath.detail.total', { count: view.combat.battleCount })} />
-              <Metric label={t('turnAftermath.metric.casualties')} value={String(view.combat.friendlyCasualties)} detail={t('turnAftermath.detail.opposing', { count: view.combat.opposingCasualties })} />
-              <Metric label={t('turnAftermath.metric.displaced')} value={String(view.humanitarian.displacedThisTurn)} detail={view.humanitarian.hotspotLabel ?? t('turnAftermath.noHotspot')} />
+              <Metric label={t('turnAftermath.metric.battles')} value={formatCount(view.combat.friendlyBattleCount)} detail={t('turnAftermath.detail.total', { count: formatCount(view.combat.battleCount) })} />
+              <Metric label={t('turnAftermath.metric.casualties')} value={formatCount(view.combat.friendlyCasualties)} detail={t('turnAftermath.detail.opposing', { count: formatCount(view.combat.opposingCasualties) })} />
+              <Metric label={t('turnAftermath.metric.displaced')} value={formatCount(view.humanitarian.displacedThisTurn)} detail={view.humanitarian.hotspotLabel ?? t('turnAftermath.noHotspot')} />
             </div>
 
             <div className="border border-white/10 bg-black/20">
@@ -255,10 +255,10 @@ export function TurnAftermathModal({
                 {t('turnAftermath.commandDesk')}
               </div>
               <div className="grid grid-cols-2 gap-2 p-3 text-sm">
-                <Metric label={t('turnAftermath.metric.actionable')} value={String(view.nextActions.actionableCount)} detail={t('turnAftermath.detail.blocking', { count: view.nextActions.blockingCount })} compact />
-                <Metric label={t('turnAftermath.metric.opportunities')} value={String(view.nextActions.opportunityCount)} detail={t('turnAftermath.detail.armyHq')} compact />
-                <Metric label={t('turnAftermath.metric.reserves')} value={String(view.nextActions.reserveCount)} detail={t('turnAftermath.detail.requests')} compact />
-                <Metric label={t('turnAftermath.metric.officers')} value={String(view.nextActions.officerCount)} detail={t('turnAftermath.detail.personnel')} compact />
+                <Metric label={t('turnAftermath.metric.actionable')} value={formatCount(view.nextActions.actionableCount)} detail={t('turnAftermath.detail.blocking', { count: formatCount(view.nextActions.blockingCount) })} compact />
+                <Metric label={t('turnAftermath.metric.opportunities')} value={formatCount(view.nextActions.opportunityCount)} detail={t('turnAftermath.detail.armyHq')} compact />
+                <Metric label={t('turnAftermath.metric.reserves')} value={formatCount(view.nextActions.reserveCount)} detail={t('turnAftermath.detail.requests')} compact />
+                <Metric label={t('turnAftermath.metric.officers')} value={formatCount(view.nextActions.officerCount)} detail={t('turnAftermath.detail.personnel')} compact />
               </div>
               <div className="divide-y divide-white/10 border-t border-white/10">
                 {!hasTopActions ? (
@@ -489,10 +489,10 @@ export function TurnAftermathModal({
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-2 p-3 text-sm">
-                <Metric label={t('turnAftermath.metric.ownCasualties')} value={formatPersonnel(view.cost.friendlyMilitaryCasualties)} detail={t('turnAftermath.detail.theater', { count: view.cost.theaterMilitaryCasualties })} compact />
-                <Metric label={t('turnAftermath.metric.displaced')} value={String(view.cost.displacedThisTurn)} detail={t('turnAftermath.detail.thisTurn')} compact />
-                <Metric label={t('turnAftermath.metric.destroyed')} value={String(view.cost.ownFormationsDestroyed)} detail={t('turnAftermath.detail.ownFormations')} compact />
-                <Metric label={t('turnAftermath.metric.supplySpent')} value={String(view.cost.ownSupplySpent + view.cost.ownHeavyMunitionsSpent)} detail={t('turnAftermath.detail.heavy', { count: view.cost.ownHeavyMunitionsSpent })} compact />
+                <Metric label={t('turnAftermath.metric.ownCasualties')} value={formatPersonnel(view.cost.friendlyMilitaryCasualties)} detail={t('turnAftermath.detail.theater', { count: formatCount(view.cost.theaterMilitaryCasualties) })} compact />
+                <Metric label={t('turnAftermath.metric.displaced')} value={formatCount(view.cost.displacedThisTurn)} detail={t('turnAftermath.detail.thisTurn')} compact />
+                <Metric label={t('turnAftermath.metric.destroyed')} value={formatCount(view.cost.ownFormationsDestroyed)} detail={t('turnAftermath.detail.ownFormations')} compact />
+                <Metric label={t('turnAftermath.metric.supplySpent')} value={formatCount(view.cost.ownSupplySpent + view.cost.ownHeavyMunitionsSpent)} detail={t('turnAftermath.detail.heavy', { count: formatCount(view.cost.ownHeavyMunitionsSpent) })} compact />
               </div>
               <div className="border-t border-white/10 px-3 py-2 text-xs text-text-secondary">
                 {view.cost.reasons.slice(0, 3).join(' / ')}
@@ -521,7 +521,7 @@ export function TurnAftermathModal({
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <Metric label={t('turnAftermath.metric.formations')} value={`+${view.formations.ownSpawned} / -${view.formations.ownDestroyed}`} detail={t('turnAftermath.detail.spawnedTotal', { count: view.formations.spawned })} />
+              <Metric label={t('turnAftermath.metric.formations')} value={`+${view.formations.ownSpawned} / -${view.formations.ownDestroyed}`} detail={t('turnAftermath.detail.spawnedTotal', { count: formatCount(view.formations.spawned) })} />
               <Metric label={t('turnAftermath.metric.supply')} value={formatSigned(view.supply.ownSupplyDelta)} detail={t('turnAftermath.detail.heavyValue', { value: formatSigned(view.supply.ownHeavyMunitionsDelta) })} />
             </div>
           </section>
@@ -583,7 +583,7 @@ function Metric({
   return (
     <div className={`min-w-0 overflow-hidden border border-white/10 bg-white/[0.03] ${compact ? 'px-3 py-2' : 'px-3 py-3'}`}>
       <div className="break-words text-xs font-mono uppercase tracking-[0.12em] text-text-secondary">{label}</div>
-      <div className="mt-1 text-lg font-bold tabular-nums text-text-primary">{value}</div>
+      <div className="mt-1 break-words text-lg font-bold tabular-nums text-text-primary">{value}</div>
       <div className="break-words text-xs text-text-secondary">{detail}</div>
     </div>
   );

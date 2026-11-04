@@ -1,6 +1,8 @@
 **Latest implementation report — corrected-engine calibration packet (2026-10-26):** [Report](implemented/20261026_CORRECTED_ENGINE_CALIBRATION_PACKET.md) records retained audits, the focused zero-drift morale correction, the blocked Circle/HVO proposals, and the unchanged 703/712, four-loss, health13>3 failure.
 # docs/40_reports — Master Index and Structure
 
+**Player information polish — isolated local branch (2026-11-04):** [Report and verification](implemented/20261104_PLAYER_INFORMATION_POLISH.md) cover weeks wording, formatting, missing data, labels, layout and accessibility; integration into Claude's reconciled source remains separate.
+
 **Latest implementation report — combat fatigue single owner (2026-10-26):** [Report](implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md) records focused RED/GREEN results, independent source GO, and the 703/712 STOP_NO_RETRY prefix result with four protected losses, health13>3 and open global gates.
 
 **2026-10-23 Toljenak-only Behar-I n92:** [Implementation and measured evidence](implemented/20261023_BEHAR_I_TOLJENAK_CANDIDATE.md) proves November capture, October retention and707/707/706/706 after the owner's April repaint. Zero formerly correct losses; full-suite coverage and targeted documentation corrections retained. n91 remains unchanged. Global standing: [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md).

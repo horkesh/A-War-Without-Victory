@@ -126,7 +126,7 @@ describe('ADVANCE_TURN gated feedback', () => {
       pressureWarning: false,
     }));
 
-    fireEvent.click(screen.getByRole('button', { name: /advance turn/i }));
+    fireEvent.click(screen.getByRole('button', { name: /advance week/i }));
 
     expect(advanceTurnAndSync).toHaveBeenCalledTimes(1);
     expect(useGameStore.getState().advanceTurnPending).toBe(false);
@@ -151,7 +151,7 @@ describe('ADVANCE_TURN gated feedback', () => {
 
     expect(screen.getByText('Advance blocked')).toBeTruthy();
     expect(screen.getByText(/Resolve the pending presidential decisions/i)).toBeTruthy();
-    const advanceButton = screen.getByRole('button', { name: 'Advance Turn' });
+    const advanceButton = screen.getByRole('button', { name: 'Advance Week' });
     expect(advanceButton.hasAttribute('disabled')).toBe(true);
 
     fireEvent.click(screen.getByRole('button', { name: 'Open review' }));

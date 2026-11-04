@@ -26,6 +26,14 @@ const INTENTIONAL_EN_ONLY = new Set<string>([
 ]);
 
 describe('UI localization substrate', () => {
+    it('renders weekly durations with singular English units while preserving tokens and locale', () => {
+        expect(t('eventModal.effect.duration', { turns: 1 }, 'en')).toBe(' for a 1-week period');
+        expect(t('eventModal.effect.duration', { turns: 21 }, 'en')).toBe(' for a 21-week period');
+        expect(t('eventModal.effect.duration', { turns: 1.1 }, 'en')).toBe(' for a 1.1-week period');
+        expect(t('turnAftermath.records.hardTurnsDetail', { hardTurns: 1 }, 'en')).toBe('Hard weeks: 1');
+        expect(t('eventModal.effect.duration', { turns: 1 }, 'bcs')).toBe(' tokom 1 poteza');
+    });
+
     it('defaults to English when no locale is provided', () => {
         expect(DEFAULT_LOCALE).toBe('en');
         expect(t('settings.title')).toBe('Settings');

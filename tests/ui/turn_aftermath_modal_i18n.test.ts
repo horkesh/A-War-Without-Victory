@@ -77,6 +77,23 @@ function makeView(): TurnAftermathView {
 }
 
 describe('TurnAftermathModal localization', () => {
+    it('keeps zero and nonfinite aftermath reports distinct in the active locale', () => {
+        const view = makeView();
+        view.combat.friendlyCasualties = NaN;
+        view.humanitarian.displacedThisTurn = 0;
+        view.cost.friendlyMilitaryCasualties = 1_234_567;
+        setLocale('bcs');
+        render(createElement(TurnAftermathModal, {
+            isOpen: true, view, onClose: vi.fn(), onOpenInbox: vi.fn(),
+            onOpenSummary: vi.fn(), onOpenRecords: vi.fn(), onOpenChronicle: vi.fn(), onOpenCodex: vi.fn(),
+        }));
+        expect(screen.queryByText('NaN')).toBeNull();
+        expect(screen.getAllByText('Nije prijavljeno').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('0').length).toBeGreaterThan(0);
+        expect(screen.getByText('1,2M')).toBeTruthy();
+        expect(Number.isNaN(view.combat.friendlyCasualties)).toBe(true);
+    });
+
     afterEach(() => {
         cleanup();
         window.localStorage.clear();
@@ -129,7 +146,7 @@ describe('TurnAftermathModal localization', () => {
         expect(screen.getByRole('button', { name: 'Pregled rata' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Sedmične posljedice' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Pregledaj inbox' })).toBeTruthy();
-        expect(screen.queryByText('Turn Aftermath')).toBeNull();
+        expect(screen.queryByText('Week Aftermath')).toBeNull();
     });
 
     it('labels top desk item types with player-facing registry copy', () => {

@@ -297,7 +297,7 @@ describe('War Summary campaign cost localization', () => {
         expect(objectives[0]?.textContent).toContain('TrendWorsening');
         expect(objectives[0]?.textContent).toContain('In command1st Corps');
         expect(objectives[0]?.textContent).toContain('Current commitment4 front contacts / 2 thinly held');
-        expect(objectives[0]?.textContent).toContain('Last relevant consequenceTurn 8: territorial control was lost.');
+        expect(objectives[0]?.textContent).toContain('Last relevant consequenceWeek 8: territorial control was lost.');
         expect(objectives[2]?.textContent).toContain('StatusNo staff report');
         expect(objectives[2]?.textContent).toContain('In commandPresidency');
         expect(within(section).getAllByRole('button', { name: /Decision Room: Review/i }).length).toBeGreaterThan(0);
@@ -322,7 +322,7 @@ describe('War Summary campaign cost localization', () => {
         render(createElement(WarSummaryContent, { focusSection: 'overview' }));
 
         const section = screen.getByRole('region', { name: 'Strategic Objectives' });
-        expect(section.textContent).toContain('Turn 9: Operation Cerska-Kamenica concluded.');
+        expect(section.textContent).toContain('Week 9: Operation Cerska-Kamenica concluded.');
         expect(section.textContent).not.toContain('operation Operation Cerska-Kamenica');
     });
 

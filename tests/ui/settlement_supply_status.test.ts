@@ -73,7 +73,6 @@ describe('SettlementDetailContent supply status surface', () => {
     expect(screen.getByText('1.3k')).toBeTruthy();
     expect(screen.queryByText('1250')).toBeNull();
     const source = readFileSync('src/ui/map/components/SettlementDetailContent.tsx', 'utf8');
-    expect(source).toContain("import { formatPersonnel } from '../utils/formatters'");
     expect(source).toContain('{formatPersonnel(f.personnel)}');
   });
 
@@ -294,7 +293,7 @@ describe('SettlementDetailContent supply status surface', () => {
       .toContain('Estimated from municipality records');
   });
 
-  it('explains the four-turn hostile-takeover delay when displacement records exist but remain empty', () => {
+  it('explains the four-week hostile-takeover delay when displacement records exist but remain empty', () => {
     render(createElement(SettlementDetailContent, {
       ...BASE_PROPS,
       osidPropertiesMap: {
@@ -317,7 +316,7 @@ describe('SettlementDetailContent supply status surface', () => {
 
     const copy = screen.getByTestId('settlement-displacement-empty').textContent ?? '';
     expect(copy).toContain('No displacement recorded');
-    expect(copy).toContain('only after hostile control holds for four turns');
+    expect(copy).toContain('only after hostile control holds for four weeks');
     expect(copy).not.toMatch(/takeover (?:is|has been) active/i);
   });
 
@@ -343,7 +342,7 @@ describe('SettlementDetailContent supply status surface', () => {
     }));
 
     expect(screen.queryByTestId('settlement-displacement-empty')).toBeNull();
-    expect(document.body.textContent).not.toContain('only after hostile control holds for four turns');
+    expect(document.body.textContent).not.toContain('only after hostile control holds for four weeks');
   });
 
   it('renders stationed-unit drilldowns as native buttons when they are clickable', () => {

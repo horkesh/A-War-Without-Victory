@@ -1,7 +1,7 @@
-import { memo } from 'react';
+import { memo, useId } from 'react';
 import type { FormationView } from '../data/types';
 import { FACTION_BG_SUBTLE, FACTION_COLORS } from '../utils/theme';
-import { formatPersonnel, toTitleCase } from '../utils/formatters';
+import { formatPersonnel, toTitleCase, formatCount } from '../utils/formatters';
 import { getPrestigeTier, getPrestigeTierColor, getHighestTier, getDecorationName } from '../utils/decorationUtils';
 import { Icon } from './icons/Icon';
 import { t, useLocale, type MessageKey } from '../i18n';
@@ -64,6 +64,7 @@ const SUPPLY_LABEL_KEY: Record<SupplyState, MessageKey> = {
 
 export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlighted = false, onClick, onHoverChange }: BrigadeRowProps) {
   const [locale] = useLocale();
+  const descriptionId = useId();
   const formationName = getLocalizedFormationName(formation, locale);
   const reportedCohesion = typeof formation.cohesion === 'number' && Number.isFinite(formation.cohesion)
     ? formation.cohesion
@@ -98,7 +99,7 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
   const badge = STATUS_BADGE[displayStatus] ?? STATUS_BADGE.recorded;
   const statusLabel = t(badge.labelKey);
   const personnelLabel = formation.personnel != null
-    ? t('brigadeRow.personnelAria', { personnel: formation.personnel.toLocaleString() })
+    ? t('brigadeRow.personnelAria', { personnel: formatCount(formation.personnel) })
     : t('brigadeRow.personnelAria', { personnel: t('corpsFront.unreported') });
   const rowAriaLabel = t('brigadeRow.ariaLabel', {
     name: formationName,
@@ -110,7 +111,7 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
   });
 
   const containerClasses = [
-    'flex items-center gap-1.5 font-mono text-xs border-b border-panel-border/50 last:border-b-0 px-2',
+    'group w-full flex flex-wrap items-center gap-1.5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-gold font-mono text-xs border-b border-panel-border/50 last:border-b-0 px-2',
     `border-l-2 ${stanceStripe}`,
     compact ? 'py-1' : 'py-1.5',
     rowClass,
@@ -128,12 +129,16 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
       data-highlighted={highlighted ? 'true' : 'false'}
       title={t('brigadeRow.title', { supply: supplyLabel, fatigue: fatigueLabel, cohesion: cohesionLabel })}
       aria-label={rowAriaLabel}
+      aria-describedby={descriptionId}
     >
+      <span id={descriptionId} className="sr-only group-focus-visible:not-sr-only group-focus-visible:w-full break-words text-text-secondary">
+        {t('brigadeRow.title', { supply: supplyLabel, fatigue: fatigueLabel, cohesion: cohesionLabel })}
+      </span>
+      {/* Keep the name on its own line so report metrics cannot starve its width. */}
+      <span data-testid="brigade-row-name" className={`basis-full w-full break-words min-w-0 ${factionText}`}>{formationName}</span>
+
       {/* Supply dot */}
       <span className={`shrink-0 text-[14px] leading-none ${supplyColor}`} aria-label={supplyLabel}>●</span>
-
-      {/* Brigade name */}
-      <span className={`truncate min-w-0 flex-1 ${factionText}`}>{formationName}</span>
 
       {/* Prestige pip */}
       {prestigeTier > 0 && (() => {
@@ -147,12 +152,10 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
       })()}
 
       {/* Personnel count */}
-      {formation.personnel != null && (
-        <span className="shrink-0 text-xs tabular-nums text-text-secondary flex items-center gap-0.5" title={t('brigadeRow.personnelTitle', { personnel: formation.personnel.toLocaleString() })}>
-          <Icon name="personnel" size={9} />
-          {formatPersonnel(formation.personnel)}
-        </span>
-      )}
+      <span className="shrink-0 text-xs tabular-nums text-text-secondary flex items-center gap-0.5" title={t('brigadeRow.personnelTitle', { personnel: formatCount(formation.personnel) })}>
+        <Icon name="personnel" size={9} />
+        {formatPersonnel(formation.personnel)}
+      </span>
 
       {/* Cohesion bar */}
       <div className="flex items-center gap-0.5 shrink-0" aria-label={t('brigadeRow.cohesionAria', { cohesion: cohesionLabel })}>
@@ -169,7 +172,7 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
       </div>
 
       {/* Fatigue */}
-      <div className={`w-5 text-right shrink-0 tabular-nums text-xs ${fatClass} flex items-center justify-end gap-0.5`} aria-label={t('brigadeRow.fatigueAria', { fatigue: fatigueLabel })}>
+      <div className={`min-w-5 text-right shrink-0 tabular-nums text-xs ${fatClass} flex items-center justify-end gap-0.5`} aria-label={t('brigadeRow.fatigueAria', { fatigue: fatigueLabel })}>
         <Icon name="fatigue" size={8} />
         {fatigueLabel}
       </div>
