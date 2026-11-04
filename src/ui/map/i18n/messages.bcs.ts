@@ -1,6 +1,17 @@
 import type { MessageKey } from './messages.en';
 
 export const bcsMessages: Partial<Record<MessageKey, string>> = {
+    'equipmentReport.title': 'Izvještaj o opremi',
+    'equipmentReport.tanks': 'Tenkovi na stanju',
+    'equipmentReport.artillery': 'Artiljerija na stanju',
+    'equipmentReport.aa_systems': 'PVO sistemi na stanju',
+    'equipmentReport.pool': 'Operativni fond teške opreme',
+    'equipmentReport.explanation': 'Stanje prikazuje broj oruđa. Operativni postotak opisuje zaseban apstraktni fond teške opreme, a ne stanje svake vrste oružja.',
+    'equipmentReport.reports': 'Izvještaji: {reported} / {total} aktivnih brigada',
+    'equipmentReport.partial': '{count} prijavljeno (djelimično)',
+    'equipmentReport.zeroPool': 'Nema teške opreme u prijavljenom fondu',
+    'equipmentReport.close': 'Zatvori ratni pregled',
+
     'settings.title': 'Postavke',
     'settings.tab.gameplay': 'Igra',
     'settings.tab.display': 'Prikaz',

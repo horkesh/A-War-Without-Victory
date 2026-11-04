@@ -8,6 +8,8 @@
  *
  * See: docs/20_engineering/PRESIDENTIAL_COMMAND_DOCTRINE.md
  */
+import { useDialogFocus } from '../../../shared/Modal';
+import { EquipmentSummary } from './EquipmentSummary';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { useIPC } from '../../desktop/useIPC';
@@ -195,6 +197,7 @@ export function ArmyHQModal({
     onReturnToDesk,
 }: ArmyHQModalProps = {}) {
     const open = useGameStore((s) => s.armyHQOpen);
+    const dialogFocus = useDialogFocus(open);
     const setOpen = useGameStore((s) => s.setArmyHQOpen);
     const faction = useGameStore((s) => s.selectedArmyId);
     const setSelectedArmyHqId = useGameStore((s) => s.setSelectedArmyHqId);
@@ -390,10 +393,11 @@ export function ArmyHQModal({
     // so we host only The War's Record (campaign history sourced from loadedGameState).
     if (open && state && isObserver) {
         return (
-            <div className="fixed inset-0 flex overflow-hidden font-mono" style={{ zIndex: Z.MODAL }} role="dialog" aria-modal="true" aria-label={t('armyHq.dialogTitle')}>
+            <div ref={dialogFocus.ref} onKeyDown={dialogFocus.onKeyDown} tabIndex={-1} className="fixed inset-0 flex overflow-hidden font-mono" style={{ zIndex: Z.MODAL }} role="dialog" aria-modal="true" aria-label={t('armyHq.dialogTitle')}>
                 <button
                     type="button"
                     aria-label={t('armyHq.dismissBackdrop')}
+                tabIndex={-1}
                     className="absolute inset-0 bg-black/85 cursor-default"
                     onClick={() => setOpen(false)}
                 />
@@ -445,6 +449,9 @@ export function ArmyHQModal({
 
     return (
         <div
+            ref={dialogFocus.ref}
+            onKeyDown={dialogFocus.onKeyDown}
+            tabIndex={-1}
             data-testid="army-hq-modal"
             data-expanded-corps-id={expandedCorpsId ?? ''}
             className="fixed inset-0 flex overflow-hidden font-mono"
@@ -457,6 +464,7 @@ export function ArmyHQModal({
             <button
                 type="button"
                 aria-label={t('armyHq.dismissBackdrop')}
+                tabIndex={-1}
                 className="absolute inset-0 bg-black/85 cursor-default"
                 onClick={() => setOpen(false)}
             />
@@ -620,6 +628,7 @@ export function ArmyHQModal({
                              */}
                             {!expandedCorpsId && (
                                 <>
+                                <EquipmentSummary summary={state.equipmentSummary} />
                                 <CommandAccessStrip
                                     corpsFormations={data.corpsFormations}
                                     sectorsByCorps={data.sectorsByCorps}

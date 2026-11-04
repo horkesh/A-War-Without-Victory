@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Command overview usability (2026-11-04, isolated local branch):** [Report](implemented/20261104_COMMAND_OVERVIEW_USABILITY.md) covers own-equipment reporting, the owner-approved percentage/completeness contract, canonical Warroom/HQ routes and dialog focus fixes; final frontend/browser/independent-review evidence passes. Integration remains separate.
+
 **Player information polish (2026-11-04, isolated local branch):** [Report](implemented/20261104_PLAYER_INFORMATION_POLISH.md) records all six presentation improvements, focused 28-file/454-test evidence, two-viewport browser proof and independent review after one targeted correction. No calibration/native/package qualification or integration is claimed.
 
 **Toljenak Behar-I n92 (2026-10-23):** [Report](implemented/20261023_BEHAR_I_TOLJENAK_CANDIDATE.md) records lawful t135 capture, retention through188 and707/707/706/706 under the owner's Toljenak-only April repaint. Zero formerly correct losses or unrelated control changes. Historical run provenance is preserved with one exact scoring-reference exception; one full suite plus documentation-only correction checks are retained separately. n91 and global NO-GO remain preserved; no baseline adoption.
