@@ -283,6 +283,86 @@ describe('checkTriggeredOperations', () => {
         assert.ok(!injectArmyHqOperations(cooldown).includes('Operation Farz 95'));
     });
 
+    const prepareFarzState = (turn: number): GameState => {
+        const farz = _TRIGGERED_OPS.find((def) => def.name === 'Operation Farz 95')!;
+        const state = makeState(turn);
+        state.political.political_controllers![farz.staging_osid] = 'RBiH';
+        for (const axis of farz.axes) {
+            for (const objective of axis.objectives) {
+                state.political.political_controllers![objective] = 'RS';
+            }
+        }
+        return state;
+    };
+
+    const setArbihThirdCorpsActiveBrigades = (state: GameState, target: number): void => {
+        const current = Object.values(state.military.formations ?? {}).filter((formation) =>
+            formation.corps_id === 'arbih_3rd_corps'
+            && formation.status === 'active'
+            && ((formation.kind ?? 'brigade') === 'brigade' || formation.kind === 'hv_phantom')
+        ).length;
+        for (let index = current; index < target; index++) {
+            const id = `arbih_test_3rd_${index}`;
+            state.military.formations![id] = makeFormation(id, 'arbih_3rd_corps', {
+                faction: 'RBiH' as FactionId,
+            });
+        }
+    };
+
+    it('injects Army HQ Farz beside a probe when the corps has another slot', () => {
+        const state = prepareFarzState(178);
+        setArbihThirdCorpsActiveBrigades(state, 24); // 24 active brigades -> 2 slots
+        state.military.corps_command!['arbih_3rd_corps']!.active_operations = [{
+            name: 'Test Probe',
+            type: 'probe',
+            phase: 'recovery',
+            participating_brigades: [],
+        } as any];
+
+        const injected = injectArmyHqOperations(state);
+
+        assert.ok(injected.includes('Operation Farz 95'));
+    });
+
+    it('blocks Army HQ Farz when a probe consumes the corps only slot and records why', () => {
+        const state = prepareFarzState(178);
+        setArbihThirdCorpsActiveBrigades(state, 23); // 23 active brigades -> 1 slot
+        state.military.corps_command!['arbih_3rd_corps']!.active_operations = [{
+            name: 'Test Probe',
+            type: 'probe',
+            phase: 'recovery',
+            participating_brigades: [],
+        } as any];
+
+        const injected = injectArmyHqOperations(state);
+
+        assert.ok(!injected.includes('Operation Farz 95'));
+        assert.equal(
+            state.military.watched_operations?.find((row: any) => row.operation_name === 'Operation Farz 95')?.blocker_code,
+            'active_primary_corps',
+        );
+    });
+
+    it('blocks Army HQ Farz when two non-probe operations fill both slots', () => {
+        const state = prepareFarzState(178);
+        setArbihThirdCorpsActiveBrigades(state, 24); // 24 active brigades -> 2 slots
+        state.military.corps_command!['arbih_3rd_corps']!.active_operations = [{
+            name: 'Test Attack A',
+            type: 'sector_attack',
+            phase: 'execution',
+            participating_brigades: [],
+        } as any, {
+            name: 'Test Attack B',
+            type: 'sector_attack',
+            phase: 'execution',
+            participating_brigades: [],
+        } as any];
+
+        const injected = injectArmyHqOperations(state);
+
+        assert.ok(!injected.includes('Operation Farz 95'));
+    });
+
     it('injects Posavina Corridor after Operation Corridor is complete', () => {
         const state = makeState(5);
         state.operation_history = [{

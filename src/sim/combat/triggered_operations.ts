@@ -1509,9 +1509,16 @@ export function injectArmyHqOperations(state: GameState): string[] {
         // Phase C frequency gate: 52-turn cooldown + once-per-year-bucket ceiling.
         if (!armyHqFrequencyGateOpen(state, def.faction, turn)) continue;
 
-        // Primary corps must be free (Army HQ op still anchors in one corps).
+        // Primary corps must have a free concurrent operation slot. Like the ordinary
+        // triggered path, an unrelated probe in another slot does not suppress the op.
         const primaryCmd = cc[def.primary_corps];
-        if (!primaryCmd || hasActiveOperation(primaryCmd)) continue;
+        if (!primaryCmd || !hasAvailableSlot(primaryCmd, activeCorpsBrigadeCount(state, def.primary_corps))) {
+            recordWatchedOperationTrace(state, def, turn, {
+                launch_status: 'not_launched',
+                blocker_code: 'active_primary_corps',
+            });
+            continue;
+        }
 
         // Stale offer with no enemy objectives left?
         if (!opStillHasEnemyObjectives(state, def)) continue;
