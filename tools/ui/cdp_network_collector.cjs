@@ -681,7 +681,12 @@ function startCdpNetworkCollection(options) {
         if (artifact.status !== 'over-cap' && artifact.status !== 'setup-error' && artifact.status !== 'runtime-error') artifact.status = 'flush-timeout';
       }
       acceptingSettlements = false;
-      await detachOnce(deadline);
+      // If a wait already ran out the SHARED close deadline, no detach budget remains. Decide that
+      // from the timeout result, not by re-reading the clock: timers may fire ~1 ms before
+      // `now()` reaches the deadline (seen on Linux CI), which used to leave a phantom 1 ms of
+      // budget and turn an expected 'detach-timeout' into a late 'detached'.
+      const deadlineExhausted = setupResult.timedOut || pendingResult.timedOut;
+      await detachOnce(deadlineExhausted ? -Infinity : deadline);
       closed = true;
       removeListeners();
       if (artifact.flush.detach === 'detach-timeout' && artifact.status !== 'over-cap' && artifact.status !== 'setup-error' && artifact.status !== 'runtime-error') artifact.status = 'flush-timeout';
