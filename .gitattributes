@@ -30,3 +30,5 @@ logs/branch-hygiene/20260924-parallel-audit/r8-uncommitted.patch -text -diff
 *.osm.pbf filter=lfs diff=lfs merge=lfs -text
 
 logs/r8-native-calibration-parity-20261026/initial-calibration-packet/** -text -diff
+# Preserve the archived R8 draft patch's recorded SHA-256 on every checkout.
+logs/branch-hygiene/20260924-parallel-audit/r8-uncommitted.patch -text

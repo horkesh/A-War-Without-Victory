@@ -13257,3 +13257,205 @@ Inherited, present in the snapshot:
 Three real-save Foča tests read `data/derived/latest_run_final_save.json`. They failed only while campaign runs had rewritten that tracked file, and pass on a clean tree. tsc 0.
 
 Limits: local integration branch only; no main adoption, pin refresh, native/package qualification or publication.
+
+
+### 2026-10-18 — Calibration-safe local housekeeping
+
+The owner authorized local folder, worktree, branch and artifact housekeeping
+and documentation synchronization while protecting parallel calibration.
+The retained September checkout is not the live October queue. Active work
+is in `C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory`;
+its own roadmap, command board, calibration master and ledger govern that work.
+The October measurement checkout, April-1995 integration tree and read-observer
+tree remain protected. The September board, roadmap, calibration reference and
+locally excluded `working-on.md` now identify their checkout scope; no scores,
+acceptance criteria or lane dispositions were changed.
+
+A read-only Sol audit inventoried 20 registered worktrees and 13 local branches.
+Two clean detached worktrees, `21d7` at `61db7e9df` and `40ef` at `2d4efeb6f`,
+were retired with non-force `git worktree remove` after confirming integrated
+ancestry, no tracked/untracked changes, no ignored content and no dependency
+links. Eighteen worktrees remain. All 13 branch refs were preserved; nine
+dependency junctions and dirty, divergent or evidence-bearing trees were retained.
+Five obsolete scratch directories were moved to
+`F:/AWWV-housekeeping-20261018/scratch`: 21 files, 439,408 bytes, with every
+SHA-256 verified after the move. The previous local summary is backed up in
+the same external directory. Runs, logs, saves, packages and active processes
+were preserved. The pre-existing `.claude/scheduled_tasks.lock` deletion remains
+outside this change.
+
+The exact existing R8 preservation patch cited above is added to version control
+at its original path and recorded hash, repairing the strict receipt check's
+single inherited portability failure. An exact-path Git attribute prevents
+line-ending conversion from changing the preserved patch hash. Its original
+unified-diff whitespace is retained; whitespace checks cover the edited docs
+and attribute file separately. No draft patch was applied. Plan-index
+and open-gate validation pass. Focused documentation tests initially passed
+37/38; restoring the board's required "Derived dispatch view" wording passed
+the affected file 7/7, reusing the other two files' passing evidence. No full
+suite, campaign, package, push, merge or baseline adoption was performed.
+Inventory, preservation manifest, original failure and correction logs are in
+`F:/AWWV-housekeeping-20261018`.
+
+### 2026-10-18 — Follow-up worktree retirement and drive-root consolidation
+
+The owner requested more archival housekeeping while protecting parallel
+calibration. Four further clean detached worktrees were retired through Git:
+`e1e5`, `bc01-pre-controls`, `r7-readability-pre`, and `r7-readability-post-a`.
+Their exact integrated source commits and restoration instructions are recorded
+under `F:/AWWV-worktree-archives/20261018-retired-worktrees`. All 15 ignored
+diagnostic/hook files were archived and SHA-256 verified before removal; only
+the four dependency junctions were unlinked, without recursion. Their physical
+dependency target was verified intact. Fourteen registered worktrees remain;
+all branch names and calibration refs were preserved.
+
+Four dormant drive-root folders were consolidated intact under
+`F:/AWWV-worktree-archives/drive-root-20261018`: the June hygiene archive,
+`awwv-flake-check`, `awwv-instr-evidence`, and `AWWV-perf`. The same-volume
+renames preserved original directory/file identities and matching inventories
+for 35,208 files (7,822,756,547 bytes). Ten recorded dependency junctions were
+detached without traversal first, including one dangling historical RE link.
+The archive README maps historical paths to their new locations, and the move
+manifest records file inventories and junction targets for restoration. This
+consolidation does not reclaim the archived payload's disk space.
+
+The agent-setup modernization backup was moved prematurely before the scoped
+reference audit finished. It was restored immediately to its original
+`F:/AWWV-agent-setup-modernization-backup` path when the audit found exact-path
+Apply/Rollback receipt bindings in the modernization plan. Its directory/file
+identities and required receipt subtree were verified after restoration; that
+contract and the parallel calibration checkout were not edited.
+
+The four attribution repositories, mixed `F:/tmp` sources/runtime files, current
+housekeeping evidence, protected October/April/read-observer checkouts and
+unrelated drive contents remain in place. Remaining worktrees retain active
+ownership, unique/dirty work, cited evidence or physical dependency installs.
+No build, campaign, source change, baseline adoption, push or merge was performed.
+The bounded audit, final inventory, move/restore proofs and review are retained
+under `F:/AWWV-housekeeping-20261018`.
+
+### 2026-10-18 — Reclaim space while preserving calibration inputs and evidence
+
+The owner requested further housekeeping and actual disk-space recovery. A
+bounded Sol metadata audit separated unused generated installs/outputs from
+calibration dependencies and cited package/playtest evidence. Active calibration,
+its dependency chain, the main checkout's shared dependency install, map-cache
+data, original source files, logs, runs and frozen packages were preserved.
+
+Transparent NTFS compression was applied only to a fixed set of 256 archived
+text/data files under `F:/AWWV-worktree-archives/drive-root-20261018`, excluding
+shared hardlinks and already-compressed media. The one-file pilot saved
+49,643,979 stored bytes with an identical SHA-256. The remaining 255 files
+completed in 150 seconds within the three-minute stopping rule and saved
+1,295,645,362 bytes. All 256 before/after hashes matched. Total stored-size
+reduction is **1,345,289,341 bytes**, with paths and readable contents unchanged;
+compression is reversible. No additional compression campaign was run.
+
+Five verified generated directories were removed from dormant BC02 and R8
+checkouts: both root and map-UI `node_modules` installs, plus BC02's `dist`.
+This removed 148,461 files totaling **2,894,818,120 logical bytes**. The BC02
+root/UI lockfiles and the R8 workspace lockfile cover the removed installs;
+source and lockfile hashes and both checkouts' Git statuses matched afterward.
+The single R8 `node_modules/awwv-map` junction was unlinked without recursion
+before deleting its containing dependency directory; its UI source target was
+preserved. The BC02 map cache was retained rather than widening data-provenance
+review for a small saving. All 14 worktrees and branch names remain available.
+
+The deletion audit recorded free-space increases of 1,828,769,792 bytes on C:
+and 1,325,076,480 bytes on F: across that operation. These volume observations
+include concurrent activity; the file-level compression and removed-payload
+counts above are the bounded maintenance evidence, not a promise about future
+free capacity. No source behavior, acceptance criterion, calibration ref,
+baseline, package, active process or protected dependency target was changed.
+No build, campaign, full suite, push or merge was performed. Plans, open gates,
+strict receipt citations and ledger whitespace were checked locally. Audit,
+hashes, commands, logs and independent review are retained under
+`F:/AWWV-housekeeping-20261018`.
+
+### 2026-10-18 — Bounded duplicate-evidence check and safe cold-report compression
+
+The owner authorized checking the retained playtest folders and frozen packages
+for duplicates, reclaiming only safe space while preserving unique evidence and
+parallel calibration. A no-follow metadata inventory covered 16,780 files
+(26,675,792,146 logical bytes) across the primary and R8 playtest/package roots;
+113 runtime/profile/cache directories were excluded. Size and partial-content
+fingerprints narrowed the full-hash work. The fixed four-minute pass stopped at
+240.248 seconds after reading 9,304,368,436 bytes: 692 files received full hashes,
+55 of 2,091 candidate size groups completed, and 58 exact duplicate-content
+groups established 6,858,317,184 bytes of potential payload sharing. Smaller
+candidate groups remain unchecked; this is not an exhaustive duplicate count.
+
+Independent review rejected hardlink conversion while package/runtime gates
+remain open. Sharing streams would couple future writes and discard distinct
+per-path metadata. The original and replacement packages, their paths and the
+retained post-run directory mismatch remain evidence; no package was normalized,
+deleted, compressed or linked. Duplicate screenshots retain separate files and
+provenance. No additional hashing campaign was run after the stopping rule.
+
+One duplicate PNG compression pilot was immaterial and was decompressed back
+to its original allocation and attributes. A cold JSON-report pilot preserved
+content and metadata while saving 68,596,826 bytes; the fixed remaining 34
+closed reports/netlogs saved 200,771,646 bytes in 15.99 seconds, within the
+two-minute limit. Total stored-size reduction is **269,368,472 bytes** across
+35 files. All full hashes, file IDs, link counts, creation/write timestamps,
+ACLs, stream inventories and non-compression attributes matched; access times
+were restored. Only transparent NTFS compression changed, reversible with
+`compact /U` on the recorded files. Saves, profiles, runtime caches and package
+trees were excluded from mutation. No evidence file was deleted or hardlinked.
+
+Fresh metadata verification passed for every original inventoried file,
+including 7,076 package files. The 14 worktrees remain available; calibration
+checkouts, dependencies and processes received no writes or process operations.
+No build, scenario, full suite, push, merge, acceptance change or baseline
+adoption was performed. The duplicate inventory, bounded hash results, safety
+review, compression/restoration proofs and final review are retained under
+`F:/AWWV-housekeeping-20261018`.
+
+### 2026-10-18 — Lossless compression of closed October telemetry snapshots
+
+The owner authorized safe space recovery while preserving every unique piece
+of evidence and ongoing calibration. The October checkpoint remains an active
+checkout. Its preserving-capture wrapper retains full before/after telemetry
+copies, so old closed archives accounted for most of its storage growth.
+
+A frozen, receipt-bound selection admitted 1,202 `C-before.jsonl` and
+`C-after.jsonl` snapshots older than 24 hours under the checkpoint's local logs
+directory, in channel `claude-channel-20261004` (exact external paths are in
+the frozen selection). Failed, malformed, recent and label-658+
+captures were excluded. The live C/D telemetry sources, D snapshots, receipts,
+capture writer, source files, packages, dependencies and directory compression
+inheritance were excluded from mutation. Compression waited until calibration
+allowance 658 and its evidence/report closeout completed; a process guard then
+checked before every file and would pause for calibration, scenario, test or
+TypeScript compiler work. The executor used below-normal CPU and background
+I/O priority, with synchronous in-process NTFS compression.
+
+Independent safety review cleared the guarded single-file pilot and separately
+bound batch. The pilot saved 48,345,058 bytes (75.0016%). The remaining 1,201
+files saved 67,526,712,761 bytes. All 1,202 selected files completed, reducing
+their measured stored size from **90,102,820,251 to 22,527,762,432 bytes**:
+**67,575,057,819 bytes of file-level stored-size reduction**, with no selected
+remainder. Active work totalled 2,320.338 seconds, within the fixed 90-minute
+limit. No file was
+deleted, moved, replaced, hardlinked or deduplicated.
+
+Every processed file received fresh full SHA-256 checks before and after,
+matched to its preservation receipt. File IDs, link counts, logical lengths,
+creation/write times, owner/ACL, streams and non-compression attributes matched;
+last-access times were restored. Receipt hashes remained exact. Logical file
+sizes and paths remain unchanged. Among audited properties, only NTFS stored
+allocation and the expected Compressed attribute changed. NTFS change-time was
+not measured or claimed preserved. New captures can still accumulate because the
+writer and current telemetry-retention contract were left intact.
+
+C: free-capacity observations rose from 299,312,152,576 to 355,717,554,176
+bytes across the operation: a net increase of 56,405,401,600 bytes. Volume-wide
+activity and allocation outside the selected files were not controlled, so this
+observation is distinct from the file-level stored-size reduction above.
+
+The frozen selection, permits, per-file intent/verification journal, pilot and
+batch results, volume observations and independent review are retained under
+`F:/AWWV-housekeeping-20261018`. No engine, build, scenario or full-suite run was
+performed for this maintenance. No calibration acceptance criterion, baseline,
+branch, worktree registration, push or merge was changed. Closeout uses focused
+plan-index, open-gate, strict receipt-citation and ledger-whitespace checks.
