@@ -1,0 +1,302 @@
+{
+  "title": "What Remains of Home - Opening Titles",
+  "date": "2026-11-05",
+  "status": "separate title-cue audition; runtime adoption open",
+  "role_decision": {
+    "menu": "Original sampled125second v3: docs/audio/WHAT_REMAINS_OF_HOME_AUDITION.json",
+    "opening": "Separate35second identity cue; immediate low/mid bowed melody, one restrained rise/arrival, clean ending",
+    "continuation": "V4 retained as comparison, not selected as title/menu role",
+    "decision_owner": "Codex; routine creative role choice based on musician feedback"
+  },
+  "composition": {
+    "duration_seconds": 35,
+    "events": 54,
+    "first_motif_seconds": 0.5,
+    "arrival_seconds": 23.8333333333,
+    "excluded_roles": [
+      "piano",
+      "frame hits",
+      "spiccato ostinato",
+      "metallic tuned percussion"
+    ],
+    "new_downloads": 0
+  },
+  "recipes_normalized_lf_sha256": {
+    "tools/audio/create_opening_cue.py": "c277b5c8701fe94970d258cb74811d52ed12d41b86500307b65672317c2ad8f8",
+    "tools/audio/create_after_the_silence.py": "a26bc286ba908c6cc3c24075b8211e8b4aef9e7c8e7c568db05735f21fa1e2f8",
+    "tools/audio/create_theme_continuation.py": "b62fec583b47d5a3e92a2e787bcffcba9bc106a5209cf49a93d247b089a7d76f"
+  },
+  "frozen_render_recipe_hashes": {
+    "create_opening_cue.py": "d6623d95b9a89f9fb1a2e9997285f8d349e818623f43faae226ae68964d2e8cc",
+    "create_after_the_silence.py": "a26bc286ba908c6cc3c24075b8211e8b4aef9e7c8e7c568db05735f21fa1e2f8",
+    "create_theme_continuation.py": "82bf4b3355cd914cce09eeec256608ce11b5e055051a585c48021f5355d21be4"
+  },
+  "sample_library": {
+    "repository": "https://github.com/sgossner/VSCO-2-CE",
+    "commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+    "license": "CC0-1.0",
+    "scope": "Original project notes rendered with recorded samples, not a new live performance",
+    "sources": [
+      {
+        "path": "LICENSE",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/LICENSE",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 6555,
+        "sha256": "36ffd9dc085d529a7e60e1276d73ae5a030b020313e6c5408593a6ae2af39673",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Strings/Cello Section/susvib/susvib_C1_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/susvib/susvib_C1_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2347376,
+        "sha256": "abdcea431f384e135c469b0f3e4ac2a437f282f521dc5bcbe22abc221536e8de",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Strings/Cello Section/susvib/susvib_D2_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/susvib/susvib_D2_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2550956,
+        "sha256": "e8640dec9febc6e39fcf06b19d2c95a85d5ff8c38f13c9879e69f551eaf38ab8",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Strings/Cello Section/susvib/susvib_G1_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/susvib/susvib_G1_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2161700,
+        "sha256": "9e5d24e8e28d6c7f650f9bb2b33d43c13e341a8bd33124c64e23881378b181ba",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Strings/Violin Section/susVib/VlnEns_susVib_A3_v1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_A3_v1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 1890316,
+        "sha256": "72817a53dfd2eb61eca94658c14e1cab6017629ca2f27bab8e394c6675bfaad7",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Strings/Violin Section/susVib/VlnEns_susVib_D3_v1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_D3_v1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2061808,
+        "sha256": "583e660bc5daa4e094aef5fc014fbb92751040be8741ed7a16847306a1fe0a99",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Strings/Viola Section/susvib/ViolaEns_susvib_G2_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/susvib/ViolaEns_susvib_G2_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2001644,
+        "sha256": "557c2e033951015c30765bf18266bce0dd0412e3ca646dd1a225c32422c60662",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v4/sample-cache"
+      },
+      {
+        "path": "Strings/Viola Section/susvib/ViolaEns_susvib_D3_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/susvib/ViolaEns_susvib_D3_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2789648,
+        "sha256": "61ab4cfc0ea90c683433a7c50b3bb4fa86a81c9d4854589562707d54ed028349",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v4/sample-cache"
+      },
+      {
+        "path": "Percussion/Timpani/Timpani1_Hit_v3_rr1_Sum.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Percussion/Timpani/Timpani1_Hit_v3_rr1_Sum.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 1602676,
+        "sha256": "8b39a785901d08dee14dd89914bdf2201e16ee418965e4d903fdb8e280a14d24",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v4/sample-cache"
+      },
+      {
+        "path": "Percussion/Timpani/Rolls/Timpani1_Roll_v3_rr1_Sum.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Percussion/Timpani/Rolls/Timpani1_Roll_v3_rr1_Sum.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 5196524,
+        "sha256": "834f3fcf28a546d854cf3e331cde3d14da68788d130ca306a2ef6f975230566a",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v4/sample-cache"
+      }
+    ]
+  },
+  "score": {
+    "path": "logs\\player-experience-completion-20261105\\theme-v5-opening\\score.json",
+    "sha256": "639f9a1802f3432d8c6f6c24530c140e46f4029d955de878bf24153b58f1f19c"
+  },
+  "exports": [
+    {
+      "path": "logs\\player-experience-completion-20261105\\theme-v5-opening\\what_remains_of_home_opening.mp3",
+      "sha256": "53d19b127dfb3f9ce64304aa308bb7351dd28ebe3ff3b267d18718572bc10fa6"
+    },
+    {
+      "path": "logs\\player-experience-completion-20261105\\theme-v5-opening\\what_remains_of_home_opening.ogg",
+      "sha256": "853e1fe7d082e96096960245794307a7b85cb63d4a8d07591cbd996ec114e085"
+    },
+    {
+      "path": "logs\\player-experience-completion-20261105\\theme-v5-opening\\what_remains_of_home_opening.wav",
+      "sha256": "d051a3539754d067eaa6940631d2670b4cd29f44b1562401b6c5503c5f6d2055"
+    }
+  ],
+  "render_report": {
+    "title": "What Remains of Home \u2014 Opening",
+    "purpose": "Short title/opening identity; v3 remains calm menu candidate",
+    "duration_seconds": 35,
+    "frames": 1680000,
+    "event_count": 54,
+    "event_counts": {
+      "cello": 36,
+      "timpani": 2,
+      "timpani_roll": 1,
+      "viola": 9,
+      "violin": 6
+    },
+    "frozen_recipe_hashes": {
+      "create_opening_cue.py": "d6623d95b9a89f9fb1a2e9997285f8d349e818623f43faae226ae68964d2e8cc",
+      "create_after_the_silence.py": "a26bc286ba908c6cc3c24075b8211e8b4aef9e7c8e7c568db05735f21fa1e2f8",
+      "create_theme_continuation.py": "82bf4b3355cd914cce09eeec256608ce11b5e055051a585c48021f5355d21be4"
+    },
+    "metrics": {
+      "mix": {
+        "pcm24_sha256": "9fb44327d01ac0d2f540576fe9c3ec7e97706a02bb7e33566206a1bc78c27b2e",
+        "wav_sha256": "d051a3539754d067eaa6940631d2670b4cd29f44b1562401b6c5503c5f6d2055",
+        "peak_dbfs": -5.577439785003662
+      },
+      "strings": {
+        "pcm24_sha256": "13247bde44303bbbb12de481aaf6d266b04f5177f310190d210152810bcdf3b4",
+        "wav_sha256": "18222cdcaac0329c02fcbd2f9bf2ab5eeaff8f14152ac9243af295fef8fd7cea",
+        "peak_dbfs": -7.203454494476318
+      },
+      "percussion": {
+        "pcm24_sha256": "0e804fd8680d533a5099e660f2e726283b9ed454480578dff6ae210d4a40ced1",
+        "wav_sha256": "54c79ef91ff64564f5bc72475f441b203f9e97a8a3edb4ca6b918ee33229276c",
+        "peak_dbfs": -6.323834419250488
+      },
+      "texture": {
+        "pcm24_sha256": "3b9de86ead41b4241138cd0b40532af8db6fc49079cc94cfa437e22fe5bf80d4",
+        "wav_sha256": "4b70061e1ff46c805608bec3bcdc1458a1d32a124a27a79645f3c73486195bd5",
+        "peak_dbfs": -32.360748291015625
+      }
+    },
+    "mix_gain": 3.476189136505127,
+    "downloaded_bytes": 0,
+    "integrated_lufs": -18.1,
+    "true_peak_dbfs": -5.6,
+    "approval": "Separate short opening audition; human creative/sensitivity approval open; v3 menu unchanged"
+  },
+  "technical_verification": {
+    "status": "PASS",
+    "frames": 1680000,
+    "duration_seconds": 35,
+    "pcm24_stem_sum_max_lsb": 2,
+    "integrated_lufs": -18.1,
+    "true_peak_dbfs": -5.6,
+    "encoded": [
+      {
+        "file": "what_remains_of_home_opening.mp3",
+        "codec": "mp3",
+        "duration_seconds": 35,
+        "decoded_peak_dbfs": -5.599000930786133,
+        "sha256": "53d19b127dfb3f9ce64304aa308bb7351dd28ebe3ff3b267d18718572bc10fa6"
+      },
+      {
+        "file": "what_remains_of_home_opening.ogg",
+        "codec": "vorbis",
+        "duration_seconds": 35,
+        "decoded_peak_dbfs": -5.468658447265625,
+        "sha256": "853e1fe7d082e96096960245794307a7b85cb63d4a8d07591cbd996ec114e085"
+      }
+    ],
+    "frozen_recipe_hashes": {
+      "create_opening_cue.py": "d6623d95b9a89f9fb1a2e9997285f8d349e818623f43faae226ae68964d2e8cc",
+      "create_after_the_silence.py": "a26bc286ba908c6cc3c24075b8211e8b4aef9e7c8e7c568db05735f21fa1e2f8",
+      "create_theme_continuation.py": "82bf4b3355cd914cce09eeec256608ce11b5e055051a585c48021f5355d21be4"
+    },
+    "downloads": 0,
+    "production_and_old_recipe_diffs": "",
+    "approval": "Technical only; creative/sensitivity approval open"
+  },
+  "browser_verification": {
+    "scope": "Local compressed audition decode and trusted-gesture real-media play promise/time advance; not human listening or game integration",
+    "passed": true,
+    "rows": [
+      {
+        "file": "logs/player-experience-completion-20261105/theme-v5-opening/what_remains_of_home_opening.mp3",
+        "bytes": 701061,
+        "sha256": "53d19b127dfb3f9ce64304aa308bb7351dd28ebe3ff3b267d18718572bc10fa6",
+        "duration": 35,
+        "currentTime": 0.104552,
+        "paused": false,
+        "readyState": 4,
+        "playPromise": "playing"
+      },
+      {
+        "file": "logs/player-experience-completion-20261105/theme-v5-opening/what_remains_of_home_opening.ogg",
+        "bytes": 619144,
+        "sha256": "853e1fe7d082e96096960245794307a7b85cb63d4a8d07591cbd996ec114e085",
+        "duration": 35,
+        "currentTime": 0.115669,
+        "paused": false,
+        "readyState": 4,
+        "playPromise": "playing"
+      }
+    ],
+    "errors": []
+  },
+  "prior_preservation": {
+    "pass": true,
+    "prior_main_artifacts_scores_recipes_checked": 14,
+    "checks": {
+      "logs\\player-experience-completion-20261105\\theme-v3\\what_remains_of_home.mp3": true,
+      "logs\\player-experience-completion-20261105\\theme-v3\\what_remains_of_home.ogg": true,
+      "logs\\player-experience-completion-20261105\\theme-v3\\what_remains_of_home.wav": true,
+      "logs\\player-experience-completion-20261105\\theme-v3\\score.json": true,
+      "tools/audio/create_after_the_silence.py": true,
+      "logs\\player-experience-completion-20261105\\theme-v4\\what_remains_of_home_continuation.wav": true,
+      "logs\\player-experience-completion-20261105\\theme-v4\\what_remains_of_home_continuation.mp3": true,
+      "logs\\player-experience-completion-20261105\\theme-v4\\what_remains_of_home_continuation.ogg": true,
+      "logs\\player-experience-completion-20261105\\theme-v4\\what_remains_of_home_continuation_piano.wav": true,
+      "logs\\player-experience-completion-20261105\\theme-v4\\what_remains_of_home_continuation_strings.wav": true,
+      "logs\\player-experience-completion-20261105\\theme-v4\\what_remains_of_home_continuation_percussion.wav": true,
+      "logs\\player-experience-completion-20261105\\theme-v4\\what_remains_of_home_continuation_texture.wav": true,
+      "logs\\player-experience-completion-20261105\\theme-v4\\score.json": true,
+      "tools/audio/create_theme_continuation.py": true
+    }
+  },
+  "level_matching": "One common-gain refinement matched the menu audition level; approximateLUFS was a mix target, not an artistic acceptance gate. Firstrender/browser evidence retained under attempt01.",
+  "review": {
+    "status": "GO for technical correctness, provenance and structure",
+    "path": "logs\\player-experience-completion-20261105\\theme-v5-opening\\independent-review.md",
+    "sha256": "a41ec1a2623c9764056989ebb33feac598d6c5979d3e596eab500a490d58e1f3",
+    "open_actionable_findings": 0,
+    "limits": "Human creative/sensitivity approval and runtime adoption remain open"
+  },
+  "delivery": "Private connected-Drive MP3 copies of selected menu and opening; URLs remain in ignored delivery evidence rather than committed metadata.",
+  "reproducibility": "Fixed score/IR, pinned sample sources and recorded toolchain; encoded bytes not guaranteed identical across platforms/toolchains.",
+  "evidence_root": "logs\\player-experience-completion-20261105\\theme-v5-opening",
+  "scope": "No prior recipe/production asset/mapping/UI/engine/state/save/IPC/calibration/data/dependency change; no campaign, packaging, push/merge or release.",
+  "pre_commit": {
+    "exit": 0,
+    "path": "logs/player-experience-completion-20261105/theme-v5-opening/pre-commit.log",
+    "method": "Tracked pre-commit script invoked directly; no shared hook configuration changed"
+  }
+}
