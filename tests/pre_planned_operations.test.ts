@@ -565,6 +565,8 @@ describe('pre-planned operations', () => {
         assert.equal(visoko.staging_osid, 'op:visoko:visoko_2');
         assert.equal(visoko.min_attack_outcome, 'victory');
         assert.equal(visoko.planning_duration, 8);
+        // Calibration assumption 2026-11-05: Vareš 147th/185th join and march from turn 4.
+        assert.equal(visoko.prestage_from, 4);
         assert.deepEqual(visoko.axes, [
             {
                 axis_id: 'visoko_breza_perimeter',
@@ -574,6 +576,8 @@ describe('pre-planned operations', () => {
                     'arbih_146th_light',
                     'arbih_164th_mountain',
                     'arbih_guards_brigade',
+                    'arbih_147th_light',
+                    'arbih_185th_light',
                 ],
                 objectives: ['op:visoko:gornja_vratnica_2'],
                 staging_osid: 'op:visoko:visoko_2',

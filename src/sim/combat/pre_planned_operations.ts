@@ -1365,6 +1365,13 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         // Guards Brigade to join the Visoko assembly if it materializes in time.
         min_attack_outcome: 'victory',
         planning_duration: 8,
+        // Calibration assumption (owner directive 2026-11-05), not a sourced roster: the
+        // neighbouring Vareš 147th/185th Light (same corps, two hops from the Visoko
+        // assembly) join the local action and march from turn 4 through ordinary movement,
+        // so the attack clears its 'victory' bar before the RS sector reserve grows. This
+        // replaces the strength W3 removed (a pre-W3 RS teleport had weakened the defence).
+        // Measured +5 January cells, 0 lost (scratch 39-week, no-player).
+        prestage_from: 4,
         axes: [
             {
                 axis_id: 'visoko_breza_perimeter',
@@ -1374,6 +1381,8 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                     'arbih_146th_light',
                     'arbih_164th_mountain',
                     'arbih_guards_brigade',
+                    'arbih_147th_light',
+                    'arbih_185th_light',
                 ],
                 objectives: ['op:visoko:gornja_vratnica_2'],
                 staging_osid: 'op:visoko:visoko_2',
