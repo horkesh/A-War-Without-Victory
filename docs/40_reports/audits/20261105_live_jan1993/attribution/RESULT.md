@@ -68,3 +68,35 @@ After the three war-phase gates (shared order pass, no live-only re-injection, n
 
 - Headless 188w is byte-identical to the manifest; the full suite exits 0.
 - Codex CX-20261105-011: the 709 desktop results were all-AI observers (player_faction null) on pre-W3 source. Headless/no-player January fell 709 → 702 with W3 no-teleport (handover measurement C vs B). Recovering those cells lawfully is the next calibration lane.
+
+## January 1993 calibration: Visoko–Breza reinforcement (commit 379a3f309)
+
+The W3 loss trace (read-only investigator) found:
+- Visoko and Hotonj rested on a pre-W3 RS teleport, the step-2 front-donor peel. It moved a weak `rs_ilidza_brigade` into Gornja Vratnica.
+- Under lawful movement the Visoko action stalls t8–t19 and holds the 1st Corps slot, so Trnovo starts late.
+- The Goražde cells follow from the 851st's startup placement plus T1 relief.
+
+The fix: the neighbouring same-corps Vareš 147th/185th Light join the Visoko action, with a turn-4 prestage march.
+
+**Headless 188w** (`verify_checkpoints`, base 702/704/701/691):
+
+| Checkpoint | Base | Now | Change |
+|---|---|---|---|
+| jan1993 | 702 | **707** | +5 |
+| apr1994 | 704 | 705 | +1 |
+| apr1995 | 701 | 703 | +2 |
+| oct1995 | 691 | 692 | +1 |
+| **Net** | | | **+9** |
+
+- January recovers Gornja Vratnica (t9), Tošići and Donje Žešće (t14), Hotonj (held) and Lupnica (t35), with 0 lost.
+- Enclave guard holds and falls on schedule.
+- Strict engine health PASS: 0 stranded, 0 ghost, 0 zero-eligible, 0 consistency failures; all checkpoint floors met.
+- Protected-anchor tests pass.
+
+**Live January 1993**, production autonomy, historical-default policies: **RBiH 707, RS 707, HRHB 707.** Every faction is identical to the no-player branch on every cell.
+
+**Full suite:** a single failure, `integration_formation_integrity`, which was a test timing artefact; corrected in `27f245c87`. Kamenica crossed the personnel threshold in turn-40 combat and dissolved at t41, as the engine designs.
+
+**Rejected:** the T1 donor ranking with distance before tier. On top of this change it gives January 705 (−2): +Kamen, −Kolovarice, −Jemanlići, −Jablanica.
+
+**Note:** headless output now differs from the pinned regression manifest. The baselines and structural fingerprint need a re-pin as part of the final push, when the owner accepts.
