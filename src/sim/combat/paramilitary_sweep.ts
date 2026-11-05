@@ -59,6 +59,7 @@ import type { EdgeRecord } from '../../map/settlements.js';
 // Casualty split routed through the B1 casualty-realism V2 gate. Flag-OFF returns the
 // shipped main-path split (KIA 0.22 / WIA 0.74 / MIA 0.04), byte-identical to before.
 import { getMainCasualtySplit } from './casualty_realism_v2_gate.js';
+import { selectStaffControlledFactions } from '../bot/staff_control.js';
 /** Casualty multiplier when paramilitary retreats from defended OSID (heavy losses). */
 const DEFENDED_RETREAT_CASUALTY_MULT = 3;
 const OFFENSIVE_PARAMILITARY_FACTIONS = new Set<FactionId>(['HRHB', 'RS']);
@@ -417,7 +418,15 @@ export function detectParamilitaryTargets(
 ): ParamilitarySweepReport {
     const report = emptyReport();
     const turn = state.meta?.turn ?? 0;
-    const playerFaction = state.meta?.player_faction ?? null;
+    // Owner calibration directive 2026-11-05: live play must reproduce the calibrated
+    // headless (no-player) result. At autonomy >= 1 the player's staff runs rear-pocket
+    // consolidation exactly as bot staff do (no pending window, no per-request gate). Only a
+    // manual (autonomy 0) player keeps the request/policy path. Headless has no player: inert.
+    const rawPlayerFaction = state.meta?.player_faction ?? null;
+    const playerFaction = rawPlayerFaction != null
+        && selectStaffControlledFactions(state).includes(rawPlayerFaction)
+        ? null
+        : rawPlayerFaction;
     const playerPolicyDecisionPending = isPlayerParamilitaryPolicyDecisionPending(state, playerFaction);
     if (playerPolicyDecisionPending && playerFaction) {
         removePrematurePlayerParamilitaryRequests(state, playerFaction);
