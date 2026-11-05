@@ -84,8 +84,8 @@ describe('ReplayScrubber autoplay controls', () => {
         const surface = screen.getByTestId('replay-scrubber');
         expect(surface.getAttribute('data-awwv-replay-playback-status')).toBe('paused');
         expect(screen.getByRole('button', { name: 'Play replay playback' }).getAttribute('data-awwv-replay-play-toggle')).toBe('true');
-        expect(screen.getByRole('button', { name: 'Previous replay turn' }).getAttribute('data-awwv-replay-step')).toBe('prev');
-        expect(screen.getByRole('button', { name: 'Next replay turn' }).getAttribute('data-awwv-replay-step')).toBe('next');
+        expect(screen.getByRole('button', { name: 'Previous replay week' }).getAttribute('data-awwv-replay-step')).toBe('prev');
+        expect(screen.getByRole('button', { name: 'Next replay week' }).getAttribute('data-awwv-replay-step')).toBe('next');
         expect(screen.getByText('1 / 3')).toBeTruthy();
         expect(surface.textContent).not.toMatch(/\b\d+\s*ms\s*\/\s*turn\b/i);
     });
@@ -106,7 +106,7 @@ describe('ReplayScrubber autoplay controls', () => {
         expect(surface.textContent).not.toContain('RBiH:12');
         expect(screen.getByText('ARBiH 12 settlements')).toBeTruthy();
 
-        fireEvent.click(screen.getByRole('button', { name: 'Next replay turn' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Next replay week' }));
 
         expect(surface.textContent).not.toContain('RS:14');
         expect(screen.getByText('VRS 14 settlements')).toBeTruthy();
@@ -138,13 +138,13 @@ describe('ReplayScrubber autoplay controls', () => {
         renderScrubber();
 
         fireEvent.click(screen.getByRole('button', { name: 'Play replay playback' }));
-        fireEvent.click(screen.getByRole('button', { name: 'Next replay turn' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Next replay week' }));
 
         expect(screen.getByText('2 / 3')).toBeTruthy();
         expect(screen.getByTestId('replay-scrubber').getAttribute('data-awwv-replay-playback-status')).toBe('paused');
 
         fireEvent.click(screen.getByRole('button', { name: 'Play replay playback' }));
-        fireEvent.change(screen.getByLabelText('Replay turn scrubber'), { target: { value: '2' } });
+        fireEvent.change(screen.getByLabelText('Replay week scrubber'), { target: { value: '2' } });
 
         expect(screen.getByText('3 / 3')).toBeTruthy();
         expect(screen.getByTestId('replay-scrubber').getAttribute('data-awwv-replay-playback-status')).toBe('paused');

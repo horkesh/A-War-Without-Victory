@@ -231,12 +231,12 @@ describe('PresidentialDecisionRoomPanel flat contract', () => {
 
     await waitFor(() => expect(acceptProposal).toHaveBeenCalledWith('proposal-alpha'));
     const receipt = await screen.findByTestId('decision-room-action-receipt');
-    expect(receipt.textContent).toContain('Directive staged for next turn');
+    expect(receipt.textContent).toContain('Directive staged for next week');
 
     mockModel.cards = [];
     rerender(createElement(PresidentialDecisionRoomPanel));
     expect(screen.getByTestId('decision-room-action-receipt').textContent).toContain(
-      'Directive staged for next turn',
+      'Directive staged for next week',
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));

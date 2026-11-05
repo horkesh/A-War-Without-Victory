@@ -1225,7 +1225,7 @@ describe('GUI audit label discipline', () => {
     expect(orbatContainer.textContent).toContain('3/5');
     expect(orbatContainer.textContent).toContain('8/10 operational');
     expect(orbatContainer.textContent).toContain('3/5 operational');
-    expect(orbatContainer.textContent).toContain('1.5 turns');
+    expect(orbatContainer.textContent).toContain('1.5 wk');
     expect(orbatContainer.textContent).not.toContain('1/10');
     expect(orbatContainer.textContent).not.toMatch(/\bOP\b|\b1\.5T\b/);
   });

@@ -24,7 +24,7 @@ describe('AutonomyPanel levels', () => {
         expect(screen.getByTestId('autonomy-level-1')).toBeTruthy();
         expect(screen.getByTestId('autonomy-level-2')).toBeTruthy();
         expect(screen.getByTestId('autonomy-level-3')).toBeTruthy();
-        expect(screen.getByText('Changes take effect at the start of the next turn.')).toBeTruthy();
+        expect(screen.getByText('Changes take effect at the start of the next week.')).toBeTruthy();
         expect(screen.queryByText('soon')).toBeNull();
 
         fireEvent.click(screen.getByRole('button', { name: /2 - Delegated/ }));

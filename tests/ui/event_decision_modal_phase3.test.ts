@@ -257,7 +257,7 @@ describe('EventDecisionModal presidential dossier', () => {
     expect(screen.getByRole('button', { name: 'Choose response: Maintain the separate project' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Choose response: Seek a joint front' })).toBeTruthy();
     expect(screen.getByText(/filed in the Chronicle decision ledger/i)).toBeTruthy();
-    expect(screen.getByText(/Army HQ Records keeps consequences, opportunities, operations, and turn aftermath/i)).toBeTruthy();
+    expect(screen.getByText(/Army HQ Records keeps consequences, opportunities, operations, and week aftermath/i)).toBeTruthy();
     expect(screen.queryByText(/source review required/i)).toBeNull();
     expect(screen.queryByText('Rationale')).toBeNull();
   });

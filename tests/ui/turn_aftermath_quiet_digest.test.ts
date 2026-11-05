@@ -223,7 +223,7 @@ describe('turn aftermath quiet digest', () => {
 
     render(createElement(BottomStatusStrip));
 
-    expect(screen.getByText('Quiet turn filed. Full aftermath is available for review.')).toBeTruthy();
+    expect(screen.getByText('Quiet week filed. Full aftermath is available for review.')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Review aftermath report' }));
     expect(useGameStore.getState().turnAftermathOpen).toBe(true);
 

@@ -62,7 +62,7 @@ describe('DeskAuthorityHeader', () => {
     expect(screen.getByTestId('desk-authority-bank').textContent).toContain('9');
     expect(screen.getByTestId('desk-authority-bank').textContent).toContain('15');
     expect(screen.getByTestId('desk-authority-income-source').textContent).toMatch(/international standing/i);
-    expect(screen.getByTestId('desk-authority-cadence').textContent).toMatch(/one directive every 3 turns/i);
+    expect(screen.getByTestId('desk-authority-cadence').textContent).toMatch(/one directive per 3-week interval/i);
   });
 
   it('explains a full balance as reserve power rather than a spend quota', () => {
