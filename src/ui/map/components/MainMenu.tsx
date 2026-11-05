@@ -3,11 +3,11 @@ import { Z } from '../../shared/zIndex';
 import { SUPPORTED_LOCALES, t, useLocale, type Locale, type MessageKey } from '../i18n';
 import { useIPC } from '../desktop/useIPC';
 import type { SaveRecord, StartNewCampaignPayload } from '../desktop/types';
-import { getArmyName, getFactionCrest } from '../utils/factionAssets';
+import { getFactionCrest } from '../utils/factionAssets';
 import { AWWV_APP_VERSION } from '../utils/appVersion';
 import { playerFacingErrorCopy } from '../utils/errorCopy';
 import { turnToDateString } from '../utils/formatters';
-import { sidePickerFactionLabel } from '../utils/sidePickerLabels';
+import { sidePickerFactionDescriptor, sidePickerFactionLabel } from '../utils/sidePickerLabels';
 import { OpeningCinematicLayer } from './opening/OpeningCinematicLayer';
 import { OpeningSplash } from './opening/OpeningSplash';
 import openingMonitoringRoomNeutral from '../assets/opening/opening_monitoring_room_neutral.webp';
@@ -35,28 +35,24 @@ const FACTIONS: PlayerFaction[] = ['RBiH', 'RS', 'HRHB'];
 export const OPENING_MONITORING_ROOM_ASSET = openingMonitoringRoomNeutral;
 
 const DOSSIERS: Record<PlayerFaction, {
-    descriptor: MessageKey;
     war: MessageKey;
     begin: MessageKey;
     constraint: MessageKey;
     arc: MessageKey;
 }> = {
     RBiH: {
-        descriptor: 'mainMenu.dossier.RBiH.descriptor',
         war: 'intro.forceBriefing.RBiH.body',
         begin: 'intro.identity.RBiH.situation',
         constraint: 'intro.identity.RBiH.escape',
         arc: 'intro.identity.RBiH.identity',
     },
     RS: {
-        descriptor: 'mainMenu.dossier.RS.descriptor',
         war: 'intro.forceBriefing.RS.body',
         begin: 'intro.identity.RS.situation',
         constraint: 'intro.identity.RS.escape',
         arc: 'intro.identity.RS.identity',
     },
     HRHB: {
-        descriptor: 'mainMenu.dossier.HRHB.descriptor',
         war: 'intro.forceBriefing.HRHB.body',
         begin: 'intro.identity.HRHB.situation',
         constraint: 'intro.identity.HRHB.escape',
@@ -170,6 +166,8 @@ export function MainMenu({ hasSave, starting = false, errorMessage, onNewGame, o
     }
 
     const previewScene = selectedFaction ?? 'neutral';
+    // The faction step is the rail alone; the console returns with the dossier, or for an error.
+    const showConsole = view !== 'factions' || Boolean(errorMessage);
     const campaignView = view === 'factions' || view === 'dossier' || view === 'mode';
     const selectFaction = (faction: PlayerFaction) => {
         setSelectedFaction(faction);
@@ -211,14 +209,13 @@ export function MainMenu({ hasSave, starting = false, errorMessage, onNewGame, o
                         <FactionChoices starting={starting} selectedFaction={selectedFaction} showBack={view === 'factions'} onSelect={selectFaction} onBack={back} />
                     </aside>
                 )}
-                <div className="main-menu-opening__console">
+                {showConsole && <div className="main-menu-opening__console">
                     {errorMessage && <div role="alert" className="command-error">{playerFacingErrorCopy(errorMessage)}</div>}
                     {view === 'landing' && <LandingActions hasSave={hasSave} onNewWar={() => setView('factions')} onContinue={onContinue} onRecords={() => setView('records')} onSettings={onSettings} onCredits={onCredits} onQuit={onQuit} />}
-                    {view === 'factions' && <FactionStandby />}
                     {view === 'dossier' && selectedFaction && <FactionDossier faction={selectedFaction} onBack={back} onTakeCommand={() => setView('mode')} primaryActionRef={primaryActionRef} />}
                     {view === 'mode' && selectedFaction && <ModeChoice faction={selectedFaction} mode={decisionMode} starting={starting || submitted} onModeChange={setDecisionMode} onBack={back} onBegin={beginCampaign} primaryActionRef={primaryActionRef} />}
                     {view === 'records' && <FieldRecords hasSave={hasSave} records={records} loading={recordsLoading} loadingFilename={recordLoadingFilename} importing={desktopImporting} error={recordsError} onResume={onContinue} onLoadRecord={loadRecord} onImport={onLoadGame} onDesktopImport={ipc.isAvailable ? importDesktopState : null} onBack={back} />}
-                </div>
+                </div>}
             </section>
             <div className="main-menu-opening__version">{AWWV_APP_VERSION}</div>
         </main>
@@ -244,21 +241,13 @@ function FactionChoices({ starting, selectedFaction, showBack, onSelect, onBack 
     return <div className="faction-rail">
         <CommandHeading eyebrow={t('mainMenu.newWar')} title={t('sidePicker.chooseFaction')} />
         <p className="faction-rail__help">{t('mainMenu.chooseFactionHelp')}</p>
-        <div className="faction-rail__choices">{FACTIONS.map((faction, index) => <button key={faction} type="button" data-testid={`main-menu-faction-${faction}`} disabled={starting} aria-pressed={selectedFaction === faction} onClick={() => onSelect(faction)} className="faction-rail__choice" aria-label={`${sidePickerFactionLabel(faction)} — ${t(DOSSIERS[faction].descriptor)}`}>
+        <div className="faction-rail__choices">{FACTIONS.map((faction, index) => <button key={faction} type="button" data-testid={`main-menu-faction-${faction}`} disabled={starting} aria-pressed={selectedFaction === faction} onClick={() => onSelect(faction)} className="faction-rail__choice" aria-label={`${sidePickerFactionLabel(faction)} — ${sidePickerFactionDescriptor(faction)}`}>
             <span className="faction-rail__index">0{index + 1}</span>
             {getFactionCrest(faction) && <img src={getFactionCrest(faction)} alt="" className="faction-rail__crest" />}
-            <span className="faction-rail__label"><strong>{sidePickerFactionLabel(faction)}</strong><small>{getArmyName(faction)}</small></span>
+            <span className="faction-rail__label"><strong>{sidePickerFactionLabel(faction)}</strong><small>{sidePickerFactionDescriptor(faction)}</small></span>
             <span aria-hidden="true" className="faction-rail__marker">{selectedFaction === faction ? '●' : '○'}</span>
         </button>)}</div>
         {showBack && <BackButton onClick={onBack} />}
-    </div>;
-}
-
-function FactionStandby() {
-    return <div className="command-console-stack command-console-stack--standby">
-        <CommandHeading eyebrow={t('mainMenu.commandBrief')} title={t('sidePicker.chooseFaction')} />
-        <p className="command-console-copy">{t('mainMenu.chooseFactionHelp')}</p>
-        <div className="command-console-signal" aria-hidden="true"><span /><span /><span /></div>
     </div>;
 }
 
@@ -268,7 +257,7 @@ function FactionDossier({ faction, onBack, onTakeCommand, primaryActionRef }: { 
     return <article className="command-dossier">
         <div className="command-dossier__header">
             {getFactionCrest(faction) && <img src={getFactionCrest(faction)} alt="" className="command-dossier__crest" />}
-            <div><div className="command-eyebrow">{t('mainMenu.commandBrief')}</div><h2>{sidePickerFactionLabel(faction)}</h2><p>{t(dossier.descriptor)}</p></div>
+            <div><div className="command-eyebrow">{t('mainMenu.commandBrief')}</div><h2>{sidePickerFactionLabel(faction)}</h2><p>{sidePickerFactionDescriptor(faction)}</p></div>
         </div>
         <div className="command-dossier__rows">{rows.map(([label, body]) => <section key={label}><h3>{t(label)}</h3><p>{t(body)}</p></section>)}</div>
         <div className="command-console-footer"><BackButton onClick={onBack} compact /><button ref={primaryActionRef} type="button" onClick={onTakeCommand} className="command-primary-button">{t('mainMenu.takeCommand')}</button></div>

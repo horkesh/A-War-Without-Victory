@@ -1,12 +1,12 @@
 import type { StartNewCampaignPayload } from '../desktop/types';
-import { getFactionFlag, getArmyName } from '../utils/factionAssets';
+import { getFactionFlag } from '../utils/factionAssets';
 import { AWWV_APP_VERSION } from '../utils/appVersion';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { Icon } from './icons/Icon';
 import { t, useLocale } from '../i18n';
 import { playerFacingErrorCopy } from '../utils/errorCopy';
-import { sidePickerFactionLabel } from '../utils/sidePickerLabels';
+import { sidePickerFactionDescriptor, sidePickerFactionLabel } from '../utils/sidePickerLabels';
 
 interface SidePickerOverlayProps {
   isOpen: boolean;
@@ -62,9 +62,7 @@ export function SidePickerOverlay({
               )}
               <div className="flex flex-col">
                 <span className="text-sm font-semibold tracking-wide">{sidePickerFactionLabel(faction)}</span>
-                {getArmyName(faction) && (
-                  <span className="text-xs text-text-secondary uppercase">{t('sidePicker.forces', { army: getArmyName(faction) ?? faction })}</span>
-                )}
+                <span className="text-xs text-text-secondary">{sidePickerFactionDescriptor(faction)}</span>
               </div>
             </button>
           ))}
