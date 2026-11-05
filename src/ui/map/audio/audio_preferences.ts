@@ -2,12 +2,16 @@ import {
     muteAudio,
     setEnabled,
     setMasterVolume,
+    setMusicPlaybackEnabled,
+    setMusicVolume,
     unmuteAudio,
 } from './audio_engine.js';
 
 export interface AudioPreferences {
     muted: boolean;
     masterVolume: number;
+    musicEnabled?: boolean;
+    musicVolume?: number;
 }
 
 interface StorageLike {
@@ -20,6 +24,8 @@ export const AUDIO_PREFERENCES_STORAGE_KEY = 'awwv.audio.preferences.v2';
 export const DEFAULT_AUDIO_PREFERENCES: AudioPreferences = {
     muted: false,
     masterVolume: 0.5,
+    musicEnabled: false,
+    musicVolume: 0.5,
 };
 
 const OLD_V1_DEFAULT_AUDIO_PREFERENCES: AudioPreferences = {
@@ -42,12 +48,14 @@ export function normalizeAudioPreferences(value: unknown): AudioPreferences {
     return {
         muted: typeof record.muted === 'boolean' ? record.muted : DEFAULT_AUDIO_PREFERENCES.muted,
         masterVolume: clampMasterVolume(record.masterVolume),
+        musicEnabled: record.musicEnabled === true,
+        musicVolume: clampMasterVolume(record.musicVolume),
     };
 }
 
 function getBrowserStorage(): StorageLike | null {
     if (typeof window === 'undefined') return null;
-    return window.localStorage;
+    try { return window.localStorage; } catch { return null; }
 }
 
 function isOldV1Default(value: AudioPreferences): boolean {
@@ -102,5 +110,7 @@ export function applyAudioPreferences(preferences: AudioPreferences): AudioPrefe
         unmuteAudio();
     }
     setMasterVolume(normalized.masterVolume);
+    setMusicVolume(normalized.musicVolume ?? 0.5);
+    setMusicPlaybackEnabled(normalized.musicEnabled === true);
     return normalized;
 }

@@ -10,9 +10,9 @@
  * Slot-stable, placeholder-first contract (Soundscape packet §5):
  * - Cue IDs are the stable public contract; nothing here is referenced by call
  *   sites — the bus looks cues up by ID.
- * - The priority-1 UI feedback set has committed CC0 `.ogg` binaries and the
+ * - The priority-1 UI set combines original and Kenney CC0 `.ogg` binaries; the
  *   three required ambient beds have first-party `.ogg` binaries. Optional
- *   ambience, music, and stinger slots remain placeholders.
+ *   ambience, other music, and stinger slots remain placeholders.
  * - When another binary lands, add ONE static import + ONE map entry, and flip
  *   that cue's `assetStatus` to `'provided'` in `sound_manifest.ts`. No
  *   call-site or schema change.
@@ -28,25 +28,26 @@
  */
 
 // --- Template for landing a real asset (uncomment + adjust when a binary exists) ---
-// import uiClickUrl from '../assets/audio/ui/ui_click.ogg';
+// import uiClickUrl from '../assets/audio/designed/ui_click.ogg';
 //
 // then add to AUDIO_ASSET_URLS below:
 //   ui_click: uiClickUrl,
 // and set that cue's assetStatus to 'provided' in sound_manifest.ts.
 
 // --- Priority-1 UI feedback set (17 cues) ----------------------------------
-// Source: Kenney "Interface Sounds" pack (v1.0), licensed CC0 / public domain
+// Eight first-party designed effects; remaining cues: Kenney "Interface Sounds"
+// pack (v1.0), licensed CC0 / public domain
 // (https://creativecommons.org/publicdomain/zero/1.0/). Commercial redistribution
 // inside a sold desktop binary is permitted; attribution not required. Per-cue
 // provenance is recorded in docs/audio/LICENSES/<cue_id>.md. Selections favor the
 // dry/quiet/tactile variants the composer brief requires (no bright game beeps).
-import uiClickUrl from '../assets/audio/ui/ui_click.ogg';
-import uiHoverUrl from '../assets/audio/ui/ui_hover.ogg';
-import uiOpenUrl from '../assets/audio/ui/ui_open.ogg';
-import uiCloseUrl from '../assets/audio/ui/ui_close.ogg';
-import turnAdvanceUrl from '../assets/audio/ui/turn_advance.ogg';
-import turnCompleteUrl from '../assets/audio/ui/turn_complete.ogg';
-import turnReviewOpenUrl from '../assets/audio/ui/turn_review_open.ogg';
+import uiClickUrl from '../assets/audio/designed/ui_click.ogg';
+import uiHoverUrl from '../assets/audio/designed/ui_hover.ogg';
+import uiOpenUrl from '../assets/audio/designed/ui_open_panel.ogg';
+import uiCloseUrl from '../assets/audio/designed/ui_close_panel.ogg';
+import turnAdvanceUrl from '../assets/audio/designed/turn_advance.ogg';
+import turnCompleteUrl from '../assets/audio/designed/turn_complete.ogg';
+import turnReviewOpenUrl from '../assets/audio/designed/turn_review_open.ogg';
 import battleUrl from '../assets/audio/ui/battle.ogg';
 import battleDecisiveUrl from '../assets/audio/ui/battle_decisive.ogg';
 import battleCatastrophicUrl from '../assets/audio/ui/battle_catastrophic.ogg';
@@ -54,9 +55,12 @@ import opLaunchUrl from '../assets/audio/ui/op_launch.ogg';
 import opCompleteUrl from '../assets/audio/ui/op_complete.ogg';
 import eventUrl from '../assets/audio/ui/event.ogg';
 import eventCriticalUrl from '../assets/audio/ui/event_critical.ogg';
-import peacePlanUrl from '../assets/audio/ui/peace_plan.ogg';
-import gameOverUrl from '../assets/audio/ui/game_over.ogg';
+import peacePlanUrl from '../assets/audio/designed/peace_plan_offered.ogg';
+import gameOverUrl from '../assets/audio/compat/game_over.ogg';
 import tutorialCompleteUrl from '../assets/audio/ui/tutorial_complete.ogg';
+
+// Original first-party menu composition, 90 seconds with clean ending.
+import menuThemeUrl from '../assets/audio/music/menu_original.ogg';
 
 // --- Required restrained ambient beds (first-party deterministic recipes) ---
 import ambientWarroomUrl from '../assets/audio/ambient/ambient_warroom.ogg';
@@ -88,6 +92,7 @@ export const AUDIO_ASSET_URLS: Readonly<Record<string, string>> = Object.freeze(
     peace_plan_offered: peacePlanUrl,
     game_over: gameOverUrl,
     tutorial_objective_complete: tutorialCompleteUrl,
+    menu_theme: menuThemeUrl,
     ambient_warroom: ambientWarroomUrl,
     ambient_field: ambientFieldUrl,
     ambient_archive: ambientArchiveUrl,

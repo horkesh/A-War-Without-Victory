@@ -19,8 +19,10 @@
  * palette CANONICAL tuples remain byte-stable). See
  * `docs/40_reports/implemented/20260506_V093_A11Y_LANE_D_CONTRAST_REDUCED_MOTION.md`.
  */
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { playCue } from '../audio/audio_engine';
 import { Z } from '../../shared/zIndex';
+import { useDialogFocus } from '../../shared/Modal';
 import { OnboardingRestartButton } from './onboarding/OnboardingOverlay';
 import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
@@ -68,6 +70,11 @@ interface SettingsScreenProps {
 }
 
 export function SettingsScreen({ onClose }: SettingsScreenProps) {
+    const dialogFocus = useDialogFocus(true);
+    const handleClose = useCallback(() => {
+        void playCue('ui_close_panel');
+        onClose();
+    }, [onClose]);
     const [activeSection, setActiveSection] = useState('audio');
     const [locale, setLocale] = useLocale();
     const [crashQueue] = useState(() => createCrashDiagnosticsQueue());
@@ -98,11 +105,11 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
             event.preventDefault();
             event.stopPropagation();
             event.stopImmediatePropagation();
-            onClose();
+            handleClose();
         };
         window.addEventListener('keydown', handler, true);
         return () => window.removeEventListener('keydown', handler, true);
-    }, [onClose]);
+    }, [handleClose]);
 
     // ─── A11y: reduce-motion toggle (Lane D) ──────────────────────────────
     // Reads localStorage on mount; falls back to OS-level
@@ -159,6 +166,8 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
         const saved = saveAudioPreferences(audioPreferences);
         applyAudioPreferences(saved);
     }, [audioPreferences]);
+
+    useEffect(() => { void playCue('ui_open_panel'); }, []);
 
     const setSoundscapeEnabled = (enabled: boolean) => {
         setAudioPreferences((current) => ({ ...current, muted: !enabled }));
@@ -235,24 +244,36 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
             <button
                 type="button"
                 className="absolute inset-0 z-0 cursor-default border-0 bg-transparent p-0"
-                onClick={onClose}
+                tabIndex={-1}
+                onClick={handleClose}
                 aria-label={t('settings.close.ariaLabel')}
             />
             <div
                  data-testid="settings-panel"
+                 ref={dialogFocus.ref}
+                 onKeyDownCapture={dialogFocus.onKeyDown}
+                 onClickCapture={event => {
+                     const button = (event.target as HTMLElement).closest('button');
+                     if (button && !button.hasAttribute('data-audio-close')) void playCue('ui_click');
+                 }}
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="settings-title"
+                 tabIndex={-1}
                  className="relative z-10 w-[90%] max-w-[500px] max-h-[80vh] overflow-auto rounded-lg border border-[#8a7a60]/30 shadow-2xl p-6"
                  style={{ background: 'rgba(26, 24, 21, 0.97)' }}
             >
 
-                <h2 className="text-[16px] text-[#c4a35a] font-bold tracking-wider text-center mb-4"
+                <h2 id="settings-title" className="text-[16px] text-[#c4a35a] font-bold tracking-wider text-center mb-4"
                     style={{ fontFamily: 'var(--font-command)' }}>
                     {t('settings.title')}
                 </h2>
 
                 {/* Section tabs */}
-                <div className="flex gap-2 mb-4 justify-center">
+                <div className="flex flex-wrap gap-2 mb-4 justify-center">
                     {allSections.map(sec => (
                         <button key={sec.id} type="button"
+                            aria-pressed={activeSection === sec.id}
                             onClick={() => setActiveSectionAndRefresh(sec.id)}
                             className={`text-xs uppercase tracking-wider px-3 py-1.5 rounded border transition-colors ${
                                 activeSection === sec.id
@@ -289,6 +310,25 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                     )}
                     {activeSection === 'audio' && (
                         <>
+                            <SettingRow
+                                label={t('settings.audio.music.label')}
+                                description={t('settings.audio.music.description')}
+                            >
+                                <BoundToggleSwitch
+                                    checked={audioPreferences.musicEnabled === true}
+                                    onChange={(musicEnabled) => setAudioPreferences(current => ({ ...current, musicEnabled }))}
+                                    ariaLabel={t('settings.audio.music.ariaLabel')}
+                                />
+                            </SettingRow>
+                            <SettingRow label={t('settings.audio.musicVolume.label')} description={t('settings.audio.musicVolume.description')}>
+                                <input
+                                    type="range" min="0" max="100" step="5"
+                                    value={Math.round((audioPreferences.musicVolume ?? 0.5) * 100)}
+                                    onChange={event => setAudioPreferences(current => ({ ...current, musicVolume: Number(event.target.value) / 100 }))}
+                                    aria-label={t('settings.audio.musicVolume.ariaLabel')}
+                                    className="w-28 accent-[#c4a35a]"
+                                />
+                            </SettingRow>
                             <SettingRow
                                 label={t('settings.audio.soundscape.label')}
                                 description={t('settings.audio.soundscape.description')}
@@ -425,7 +465,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                 </div>
 
                 <div className="flex justify-center gap-3">
-                    <button type="button" onClick={onClose}
+                    <button type="button" onClick={handleClose} data-audio-close
                         className="text-xs uppercase tracking-wider text-[#8a7a60] border border-[#8a7a60]/20 px-4 py-2 rounded hover:bg-[#8a7a60]/10"
                         style={{ fontFamily: 'var(--font-command)' }}>
                         {t('settings.close')}

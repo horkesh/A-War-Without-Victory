@@ -1,13 +1,8 @@
 /**
- * Deterministic audio bus stub.
- *
- * Audio is disabled by default and this module performs no network, Web Audio,
- * timestamp, or random work. It exposes the bus shape that later asset-backed
- * audio can implement without changing call sites.
- *
- * Howler.js is intentionally not added for this kickoff pass: there are no
- * real assets to load yet, and adding a runtime dependency would increase
- * packaging scope before playback requirements are proven.
+ * Renderer-only, best-effort audio bus using bundled media URLs.
+ * Playback requires enabled sound and a user gesture. Music additionally
+ * requires explicit opt-in; the separate ambience policy defaults off.
+ * Playback never writes simulation state or blocks a player action.
  */
 
 import { getCueConfig, getMusicConfig, getSfxConfig, resolveCuePlaybackUrl, type AudioCueCategory } from './sound_manifest.js';
@@ -36,6 +31,8 @@ interface AudioBusState {
     currentMusicId: string | null;
     currentAmbientId: string | null;
     requestedAmbientId: string | null;
+    requestedMusicId: string | null;
+    musicPlaybackEnabled: boolean;
     acceptedCueCount: number;
     lastCueAcceptedAtMsById: Record<string, number>;
     volumes: Record<AudioVolumeKind, number>;
@@ -68,6 +65,8 @@ let state: AudioBusState = {
     currentMusicId: null,
     currentAmbientId: null,
     requestedAmbientId: null,
+    requestedMusicId: null,
+    musicPlaybackEnabled: false,
     acceptedCueCount: 0,
     lastCueAcceptedAtMsById: {},
     volumes: { ...DEFAULT_VOLUMES },
@@ -81,8 +80,14 @@ function clampVolume(value: number): number {
 function getPlaybackElement(cueId: string, resolvedAssetUrl: string): HTMLAudioElement | null {
     if (typeof Audio === 'undefined') return null;
     const existing = playbackElementsByCueId.get(cueId);
-    if (existing?.src === resolvedAssetUrl) return existing;
-    if (existing) playbackAttemptByElement.delete(existing);
+    // Browser src is absolute even when the bundled URL is relative. The
+    // cue's cached element already owns its URL; only failed decodes need a
+    // fresh element to reset the browser's terminal media-error state.
+    if (existing && !existing.error) return existing;
+    if (existing) {
+        stopPlayback(cueId);
+        playbackAttemptByElement.delete(existing);
+    }
     const element = new Audio(resolvedAssetUrl);
     element.preload = 'auto';
     playbackElementsByCueId.set(cueId, element);
@@ -108,29 +113,31 @@ function settlePlaybackAttempt(
 }
 
 function playResolvedAsset(cueId: string, resolvedAssetUrl: string, category: AudioCueCategory, defaultVolume: number, loop = false): void {
-    const element = getPlaybackElement(cueId, resolvedAssetUrl);
-    if (!element) return;
-    const loopChanged = element.loop !== loop;
-    if (loopChanged) element.loop = loop;
-    element.volume = clampVolume(state.volumes.master * state.volumes[category] * defaultVolume);
-    if (!loopChanged && loop && isHealthyRunningLoop(element)) {
-        return;
-    }
-    const attempt: PlaybackAttempt = { status: 'pending' };
-    playbackAttemptByElement.set(element, attempt);
     try {
-        if (!loop) element.currentTime = 0;
-        const playResult: Promise<void> | undefined = element.play();
-        if (playResult && typeof playResult.then === 'function') {
-            void playResult.then(
-                () => settlePlaybackAttempt(element, attempt, 'success'),
-                () => settlePlaybackAttempt(element, attempt, 'failure'),
-            );
+        const element = getPlaybackElement(cueId, resolvedAssetUrl);
+        if (!element) return;
+        const loopChanged = element.loop !== loop;
+        if (loopChanged) element.loop = loop;
+        const volume = clampVolume(state.volumes.master * state.volumes[category] * defaultVolume);
+        if (element.volume !== volume) element.volume = volume;
+        if (!loopChanged && loop && isHealthyRunningLoop(element)) return;
+        const attempt: PlaybackAttempt = { status: 'pending' };
+        playbackAttemptByElement.set(element, attempt);
+        try {
+            if (!loop) element.currentTime = 0;
+            const playResult: Promise<void> | undefined = element.play();
+            if (playResult && typeof playResult.then === 'function') {
+                void playResult.then(
+                    () => settlePlaybackAttempt(element, attempt, 'success'),
+                    () => settlePlaybackAttempt(element, attempt, 'failure'),
+                );
+            }
+        } catch {
+            // Autoplay/decode failures cannot interrupt the player action.
+            settlePlaybackAttempt(element, attempt, 'failure');
         }
     } catch {
-        // Playback is best-effort. Autoplay or decode failures must not surface
-        // as console noise or block UI flow.
-        settlePlaybackAttempt(element, attempt, 'failure');
+        // Media construction and property setters can fail as well as play().
     }
 }
 
@@ -162,21 +169,26 @@ export function installAudioGestureUnlockListeners(
     target: Pick<EventTarget, 'addEventListener' | 'removeEventListener'> | null =
         typeof window === 'undefined' ? null : window,
     onUnlock?: () => void,
+    retryPlaybackOnGesture = false,
 ): () => void {
     if (!target) return () => undefined;
-    const unlock = () => {
-        unlockAudioForUserGesture();
-        onUnlock?.();
-    };
-    target.addEventListener('pointerdown', unlock, { once: true });
-    target.addEventListener('keydown', unlock, { once: true });
-    return () => {
+    const cleanup = () => {
         target.removeEventListener('pointerdown', unlock);
         target.removeEventListener('keydown', unlock);
     };
+    const unlock = () => {
+        if (!retryPlaybackOnGesture) cleanup();
+        unlockAudioForUserGesture();
+        onUnlock?.();
+    };
+    target.addEventListener('pointerdown', unlock, { once: !retryPlaybackOnGesture });
+    target.addEventListener('keydown', unlock, { once: !retryPlaybackOnGesture });
+    return cleanup;
 }
 
 export function setEnabled(enabled: boolean): void {
+    if (state.enabled === enabled) return;
+    if (!enabled) stopAllPlayback();
     state = {
         ...state,
         enabled,
@@ -226,6 +238,12 @@ export function setVolume(kind: AudioVolumeKind, value: number): void {
             [kind]: clampVolume(value),
         },
     };
+    for (const [cueId, element] of playbackElementsByCueId) {
+        const cue = getCueConfig(cueId);
+        if (!cue || (kind !== 'master' && cue.category !== kind)) continue;
+        const volume = clampVolume(state.volumes.master * state.volumes[cue.category] * cue.defaultVolume);
+        try { if (element.volume !== volume) element.volume = volume; } catch { /* best effort */ }
+    }
 }
 
 export async function playCue(id: string, nowMs?: number): Promise<void> {
@@ -233,6 +251,7 @@ export async function playCue(id: string, nowMs?: number): Promise<void> {
     const cue = getCueConfig(id);
     if (!cue) return;
     if (cue.category === 'ambient' && !state.ambientPlaybackEnabled) return;
+    if (cue.category === 'music' && !state.musicPlaybackEnabled) return;
     const normalizedNowMs = Number.isFinite(nowMs) ? Math.max(0, Math.floor(nowMs as number)) : null;
     const previousAcceptedAtMs = state.lastCueAcceptedAtMsById[cue.id];
     if (
@@ -267,14 +286,34 @@ export async function playSFX(id: string): Promise<void> {
 }
 
 export async function playMusic(id: string): Promise<void> {
-    if (!state.enabled || state.muted || !state.userGestureUnlocked) return;
     if (!getMusicConfig(id)) return;
+    state = { ...state, requestedMusicId: id };
+    if (!state.musicPlaybackEnabled || !state.enabled || state.muted || !state.userGestureUnlocked) return;
+    if (state.currentMusicId && state.currentMusicId !== id) stopPlayback(state.currentMusicId);
     await playCue(id);
-    state = { ...state, currentMusicId: id };
+    if (state.enabled && !state.muted && state.musicPlaybackEnabled && state.requestedMusicId === id) {
+        state = { ...state, currentMusicId: id };
+    }
 }
 
 export function stopMusic(): void {
-    state = { ...state, currentMusicId: null };
+    // A request starts its media before playMusic's await assigns the current
+    // id. Stop cached music as well as committed playback so cleanup cannot
+    // leave an in-flight request running without an owner.
+    for (const cueId of playbackElementsByCueId.keys()) {
+        if (getCueConfig(cueId)?.category === 'music') stopPlayback(cueId);
+    }
+    state = { ...state, currentMusicId: null, requestedMusicId: null };
+}
+
+export function setMusicPlaybackEnabled(enabled: boolean): void {
+    if (!enabled) {
+        for (const cueId of playbackElementsByCueId.keys()) {
+            if (getCueConfig(cueId)?.category === 'music') stopPlayback(cueId);
+        }
+    }
+    state = { ...state, musicPlaybackEnabled: enabled, currentMusicId: enabled ? state.currentMusicId : null };
+    if (enabled && state.requestedMusicId) void playMusic(state.requestedMusicId);
 }
 
 export async function playAmbientBed(id: string): Promise<void> {
@@ -283,6 +322,7 @@ export async function playAmbientBed(id: string): Promise<void> {
     if (!state.enabled || state.muted || !state.userGestureUnlocked) return;
     const cue = getCueConfig(id);
     if (!cue || cue.category !== 'ambient') return;
+    if (state.currentAmbientId && state.currentAmbientId !== id) stopPlayback(state.currentAmbientId);
     const resolvedAssetUrl = resolveCuePlaybackUrl(cue.id);
     state = {
         ...state,
@@ -313,6 +353,7 @@ export function setSFXVolume(value: number): void {
 }
 
 export function muteAudio(): void {
+    if (state.muted) return;
     stopAllPlayback();
     state = { ...state, muted: true, currentAmbientId: null, currentMusicId: null };
 }
@@ -351,6 +392,8 @@ export function resetAudioForTests(): void {
         currentMusicId: null,
         currentAmbientId: null,
         requestedAmbientId: null,
+        requestedMusicId: null,
+        musicPlaybackEnabled: false,
         acceptedCueCount: 0,
         lastCueAcceptedAtMsById: {},
         volumes: { ...DEFAULT_VOLUMES },

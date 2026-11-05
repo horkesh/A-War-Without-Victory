@@ -51,6 +51,28 @@ afterEach(() => {
 });
 
 describe('audio asset provenance inventory', () => {
+    it('validates explicit retained versions and never exempts unrelated orphan binaries', () => {
+        const root = makeRoot();
+        writeOggStub(root, 'src/ui/map/assets/audio/ui/cue_provided.ogg');
+        writeBytes(root, 'docs/audio/LICENSES/cue_provided.md', new Uint8Array());
+        const previousFile = 'src/ui/map/assets/audio/ui/previous.ogg';
+        const previousHash = writeBytes(root, previousFile, Buffer.from('OggSprevious'));
+        const manifest = structuredClone(fixture.valid.manifest);
+        manifest.cues.cue_provided.previous_versions = [{
+            ...manifest.cues.cue_provided,
+            file: previousFile,
+            processed_sha256: previousHash,
+        }];
+        const input = { ...fixture.valid, root_dir: root, manifest };
+        expect(violationCodes(buildAudioAssetProvenanceReport(input))).toEqual([]);
+        const previous = manifest.cues.cue_provided.previous_versions[0];
+        previous.processed_sha256 = '0'.repeat(64);
+        previous.license = 'CC-BY-NC-4.0';
+        writeOggStub(root, 'src/ui/map/assets/audio/ui/unrelated.ogg');
+        expect(violationCodes(buildAudioAssetProvenanceReport(input))).toEqual(expect.arrayContaining([
+            'invalid_previous_audio_binary', 'invalid_previous_audio_license', 'unregistered_audio_binary',
+        ]));
+    });
     it('accepts a fully attributed OggS container precheck and an explicit optional placeholder disposition', () => {
         const root = makeRoot();
         writeOggStub(root, 'src/ui/map/assets/audio/ui/cue_provided.ogg');
@@ -199,8 +221,8 @@ describe('audio asset provenance inventory', () => {
 
         expect(report.summary).toMatchObject({
             total_cues: 36,
-            provided_cues: 20,
-            placeholder_cues: 16,
+            provided_cues: 21,
+            placeholder_cues: 15,
             manifest_cues: 36,
             blocking_violations: 0,
         });
@@ -214,7 +236,7 @@ describe('audio asset provenance inventory', () => {
         expect(codes).not.toContain('unregistered_audio_binary');
 
         const providedRecords = report.records.filter((record) => record.disposition === 'provided');
-        expect(providedRecords).toHaveLength(20);
+        expect(providedRecords).toHaveLength(21);
         for (const record of providedRecords) {
             expect(record.duration_seconds).toBeGreaterThan(0);
             expect(Number.isFinite(record.loudness_lufs)).toBe(true);

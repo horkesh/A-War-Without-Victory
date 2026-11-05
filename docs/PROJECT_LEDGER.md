@@ -13529,3 +13529,11 @@ Headless 188w is byte-identical to the 2026-11-04 re-pin (702/704/701/691; `fina
 The Goražde gap (Glamoč, Sopotnica) for RBiH and RS players traces to a t1 live/no-player divergence: army-directive pushback appears in the no-player branch only, and by t23 RS 1st Podrinje garrisons Sopotnica. A live-only queue-pollution defect is confirmed and queued for its own run.
 
 Record: `docs/40_reports/audits/20261105_live_jan1993/prestage_fix/RESULT.md`.
+
+### 2026-11-05 — Isolated renderer soundscape and accessible audio controls
+
+**Change:** On `codex/player-experience-completion` from `f0d77121c`, repair media stop/live-volume/gesture/storage/retry behavior, add independent default-OFF music control, shared Settings dialog focus, and bounded existing cue hooks. Owner requested original audio and a denser haunting revision: eight tactile effects and 90-second synthesized piano/strings/texture theme v2 with reproducible recipe, stems/auditions and provenance. Preserve all 20 original binaries; packet-preserving compatibility remux repairs original game-over Chromium timestamps (128 additional decoder-tail samples documented).
+
+**Determinism/scope:** Renderer-only preferences and side effects; no simulation/AI, canonical state/save/IPC behavior, calibration, authored/control/scenario data or dependencies changed. Ambient gate remains OFF. No campaigns/advances, push, merge, packaging or release; human listening, sensitivity/design and global R7 acceptance remain open.
+
+**Validation:** Controls: 18 files / 121 tests with unaffected evidence reused; review correction: 4 files / 49 tests; asset/provenance/Python checks; final typecheck/lint/UIbuild/chunk checks; real-browser controls/two viewports, all 21 local decodes, cue-specific actual play promises, navigation/file/fingerprint preservation and 21 byte-exact emitted assets. Failures retained. [Report](40_reports/implemented/20261105_PLAYER_EXPERIENCE_COMPLETION.md) and [receipt](40_reports/implemented/20261105_PLAYER_EXPERIENCE_COMPLETION_RECEIPT.json). Independent review final status is in the receipt; no global gate closed.

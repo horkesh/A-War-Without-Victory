@@ -1,3 +1,14 @@
+# Audio compatibility provenance: `game_over`
+
+- Current runtime file: `src/ui/map/assets/audio/compat/game_over.ogg`.
+- Source: Kenney Interface Sounds, `minimize_007.ogg`, CC0 1.0; original source and full source/license attribution remain below and in the sidecar previous version.
+- Processing: `python tools/audio/remux_game_over.py`, FFmpeg 8.1.2; `-fflags +genpts -map_metadata -1 -c:a copy -fflags +bitexact` repairs Ogg presentation timestamps without transcoding. All 30 compressed Vorbis packet hashes are identical, with no transcode. The original 8064 decoded samples remain identical; repaired timestamps expose an additional 128-sample decoder tail (8192 total at 44.1 kHz). FFprobe container duration reports 0.182857 seconds; decoded audio/Chromium presentation is 0.185760 seconds.
+- Reproduction check: `python tools/audio/remux_game_over.py --verify`; original and processed SHA256 are recorded in `AUDIO_ASSET_PROVENANCE.json`.
+- Reason: Chromium rejected the original container with `PTS is not defined`; browser decoding is verified separately from lossless/reproducibility checks.
+- Original `src/ui/map/assets/audio/ui/game_over.ogg` remains unchanged.
+
+## Retained original source and license
+
 # Audio provenance: `game_over`
 
 - **File committed:** `src/ui/map/assets/audio/ui/game_over.ogg`

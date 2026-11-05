@@ -2,7 +2,9 @@ import { useEffect, useMemo } from 'react';
 import {
   installAudioGestureUnlockListeners,
   playAmbientBed,
+  playMusic,
   stopAmbientBed,
+  stopMusic,
 } from '../audio/audio_engine.js';
 import {
   applyAudioPreferences,
@@ -27,7 +29,6 @@ function selectAmbientBed(
 }
 
 function requestAmbientBedPlayback(bedId: AmbientBedId): void {
-  applyAudioPreferences(loadAudioPreferences());
   void playAmbientBed(bedId);
 }
 
@@ -40,6 +41,8 @@ export function AudioSurfaceBedController({ appScreen }: AudioSurfaceBedControll
 
   useEffect(() => {
     applyAudioPreferences(loadAudioPreferences());
+    void playMusic('menu_theme');
+    return () => stopMusic();
   }, []);
 
   useEffect(() => {
@@ -52,10 +55,12 @@ export function AudioSurfaceBedController({ appScreen }: AudioSurfaceBedControll
   }, [bedId]);
 
   useEffect(() => {
-    if (!bedId) return;
     return installAudioGestureUnlockListeners(undefined, () => {
-      requestAmbientBedPlayback(bedId);
-    });
+      // Keep the current in-memory choice: denied persistence must not undo
+      // a preference the player just changed in Settings.
+      void playMusic('menu_theme');
+      if (bedId) void playAmbientBed(bedId);
+    }, true);
   }, [bedId]);
 
   return null;

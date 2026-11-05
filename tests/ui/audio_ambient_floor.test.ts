@@ -162,7 +162,7 @@ describe('WP-8 ambient audio floor', () => {
   it('fresh profiles enable the bus but no cue is accepted before user gesture unlock', async () => {
     const prefs = applyAudioPreferences(loadAudioPreferences(new MemoryStorage()));
 
-    expect(prefs).toEqual({ muted: false, masterVolume: 0.5 });
+    expect(prefs).toEqual({ musicEnabled: false, musicVolume: 0.5, muted: false, masterVolume: 0.5 });
     expect(getAudioState()).toMatchObject({ enabled: true, muted: false, userGestureUnlocked: false });
 
     await playCue('ui_click', 1000);
@@ -404,8 +404,10 @@ describe('WP-8 ambient audio floor', () => {
 
     element.error = new Error('decode error');
     await playAmbientBed('ambient_warroom');
-    expect(element.playCallCount).toBe(4);
-    expect(element.loopSetValues).toEqual([true]);
+    const recovered = FakeAudio.latest();
+    expect(recovered).not.toBe(element);
+    expect(recovered.playCallCount).toBe(1);
+    expect(recovered.loopSetValues).toEqual([true]);
   });
 
   it('plays conservatively when running-state fields are incomplete', async () => {
@@ -525,8 +527,8 @@ describe('WP-8 ambient audio floor', () => {
     expect(element.currentTimeSetValues).toEqual([]);
     expect(element.pauseCallCount).toBe(0);
     expect(element.paused).toBe(false);
-    expect(element.volumeSetValues).toHaveLength(2);
-    expect(element.volumeSetValues[1]).toBeCloseTo(0.5 * 0.14, 5);
+    expect(element.volumeSetValues).toHaveLength(1);
+    expect(element.volumeSetValues[0]).toBeCloseTo(0.5 * 0.14, 5);
   });
 
   it('stops the old bed on surface change, starts the new bed, and stops on a null surface', async () => {
@@ -590,7 +592,9 @@ describe('WP-8 ambient audio floor', () => {
     expect(element.pauseCallCount).toBe(1);
     expect(element.loopSetValues).toEqual([true]);
     expect(element.currentTimeSetValues).toEqual([]);
-    expect(element.volumeSetValues[1]).toBeCloseTo(0.5 * 0.14, 5);
+    expect(element.volumeSetValues).toHaveLength(3);
+    expect(element.volumeSetValues[1]).toBe(0);
+    expect(element.volumeSetValues[2]).toBeCloseTo(0.5 * 0.14, 5);
     expect(getAudioState()).toMatchObject({ muted: false, currentAmbientId: 'ambient_warroom' });
   });
 
@@ -643,7 +647,7 @@ describe('WP-8 ambient audio floor', () => {
   it('keeps all beds silent across settings, gesture, and surface changes without changing global audio', async () => {
     const resolveSpy = vi.spyOn(soundManifest, 'resolveCuePlaybackUrl');
     const prefs = applyAudioPreferences(loadAudioPreferences(new MemoryStorage()));
-    expect(prefs).toEqual({ muted: false, masterVolume: 0.5 });
+    expect(prefs).toEqual({ musicEnabled: false, musicVolume: 0.5, muted: false, masterVolume: 0.5 });
 
     for (const bedId of ['ambient_warroom', 'ambient_field', 'ambient_archive'] as const) {
       await playAmbientBed(bedId);
@@ -693,6 +697,7 @@ describe('WP-8 ambient audio floor', () => {
     await playAmbientBed('ambient_field');
     await playCue('ambient_archive', 1000);
     await playCue('ui_click', 1000);
+    applyAudioPreferences({ muted: false, masterVolume: 0.5, musicEnabled: true });
     await playMusic('menu_theme');
     await playCue('stinger_dayton_ceasefire', 1000);
 

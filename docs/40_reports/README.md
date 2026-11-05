@@ -1,6 +1,8 @@
 **Latest implementation report — corrected-engine calibration packet (2026-10-26):** [Report](implemented/20261026_CORRECTED_ENGINE_CALIBRATION_PACKET.md) records retained audits, the focused zero-drift morale correction, the blocked Circle/HVO proposals, and the unchanged 703/712, four-loss, health13>3 failure.
 # docs/40_reports — Master Index and Structure
 
+**Player experience and original soundscape (2026-11-05, isolated branch):** [Report](implemented/20261105_PLAYER_EXPERIENCE_COMPLETION.md) and [receipt](implemented/20261105_PLAYER_EXPERIENCE_COMPLETION_RECEIPT.json) cover optional music, tactile effects, reliable audio controls, accessible Settings and scoped offline renderer evidence. Human listening, sensitivity/design and packaged acceptance remain open.
+
 **Command overview usability (2026-11-04):** [Report](implemented/20261104_COMMAND_OVERVIEW_USABILITY.md) records the isolated equipment-report and dialog/keyboard implementation, owner design disposition and verification; no calibration/native/package acceptance is claimed.
 
 **Player information polish — isolated local branch (2026-11-04):** [Report and verification](implemented/20261104_PLAYER_INFORMATION_POLISH.md) cover weeks wording, formatting, missing data, labels, layout and accessibility; integration into Claude's reconciled source remains separate.
