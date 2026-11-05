@@ -25,6 +25,8 @@ import {
 import type { FactionId, GameState } from '../../src/state/game_state.js';
 import { strictCompare } from '../../src/state/validateGameState.js';
 import { isHistoricalOperationAuthorizationReview } from '../../src/sim/combat/historical_operation_authorization.js';
+import { resolvePeacePlan } from '../../src/sim/negotiation/peace_plans.js';
+import { getPeacePlanById } from '../../src/sim/negotiation/peace_plan_data.js';
 
 type EventPolicy = 'defer' | 'historical_default' | 'staff_recommended';
 type ParamilitaryPolicy = 'defer' | 'allow' | 'deny' | 'regular' | 'standing_allow';
@@ -58,7 +60,7 @@ interface CliOptions {
 
 interface DecisionTranscriptRow {
     turn: number;
-    family: 'event' | 'historical_operation' | 'paramilitary_request';
+    family: 'event' | 'historical_operation' | 'paramilitary_request' | 'peace_plan';
     id: string;
     decision: string;
     value?: string;
@@ -382,12 +384,40 @@ function applyParamilitaryPolicy(
     if (resolvedAny) resolvePlayerParamilitaryDecisions(state);
 }
 
+/**
+ * The player's answer to a pending peace plan (the PeacePlanModal / `resolve-peace-plan` IPC).
+ * With no player the scheduler resolves every faction on the offer turn; with a player the plan
+ * stays pending until answered, and a pending plan blocks every later plan. Under the
+ * historical_default policy the player gives its documented historical response.
+ */
+function applyPeacePlanPolicy(
+    state: GameState,
+    faction: FactionId,
+    policy: EventPolicy,
+    transcript: DecisionTranscriptRow[],
+): void {
+    const pending = state.military.negotiation?.pending_peace_plan;
+    if (!pending) return;
+    // RBiH answers Vance-Owen and Owen-Stoltenberg through its own event decisions (the
+    // Presidency -> Assembly sequence), which applyEventPolicy already resolves.
+    if (faction === 'RBiH' && (pending.plan_id === 'vance_owen' || pending.plan_id === 'owen_stoltenberg')) return;
+    const plan = getPeacePlanById(pending.plan_id);
+    const response = policy === 'historical_default' ? plan?.historical_responses[faction] : undefined;
+    if (!response) {
+        transcript.push({ turn: state.meta.turn, family: 'peace_plan', id: pending.plan_id, decision: 'defer' });
+        return;
+    }
+    resolvePeacePlan(state, pending.plan_id, response);
+    transcript.push({ turn: state.meta.turn, family: 'peace_plan', id: pending.plan_id, decision: policy, value: response });
+}
+
 function applyPlayerPolicy(
     state: GameState,
     options: CliOptions,
     transcript: DecisionTranscriptRow[],
 ): void {
     applyEventPolicy(state, options.faction, options.eventPolicy, transcript);
+    applyPeacePlanPolicy(state, options.faction, options.eventPolicy, transcript);
     applyHistoricalOperationPolicy(state, options.faction, options.historicalOperationPolicy, transcript);
     applyParamilitaryPolicy(state, options.faction, options.paramilitaryPolicy, transcript);
     // Last: resolving an event (e.g. the opening state-identity decision) can re-enable the
