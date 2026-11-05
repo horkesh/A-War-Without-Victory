@@ -4964,6 +4964,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'eventDecision.effect.dimensionShift': '{faction} {dimension} {delta}',
     'eventDecision.effect.recorded': 'Efekat evidentiran',
     'eventModal.effect.duration': ' tokom {turns} poteza',
+    'eventModal.effect.duration.one': ' tokom {turns} poteza',
     'eventModal.effect.moraleChange': '{faction}moral{delta}',
     'eventModal.effect.supplyDelta': '{faction}snabdijevanje{delta}',
     'eventModal.effect.cohesionChange': '{faction}kohezija{delta}',

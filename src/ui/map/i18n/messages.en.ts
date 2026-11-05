@@ -5570,6 +5570,7 @@ export const enMessages = {
     'eventDecision.effect.dimensionShift': '{faction} {dimension} {delta}',
     'eventDecision.effect.recorded': 'Effect recorded',
     'eventModal.effect.duration': ' for {turns} weeks',
+    'eventModal.effect.duration.one': ' for {turns} week',
     'eventModal.effect.moraleChange': '{faction}morale{delta}',
     'eventModal.effect.supplyDelta': '{faction}supply{delta}',
     'eventModal.effect.cohesionChange': '{faction}cohesion{delta}',
