@@ -989,6 +989,19 @@ function App() {
     appScreen,
   ]);
 
+  // PAUSE BEFORE COMBAT: a paused turn waits on the player, so its decision must reach the
+  // screen even when one of the auto-launch gates above (opening brief, transition overlay,
+  // main menu) would hold it back — otherwise the turn would sit paused with nothing to
+  // answer or continue from.
+  useEffect(() => {
+    if (turnPauseStatus?.status !== 'paused') return;
+    if (activeEventDecisionId !== null) return;
+    const pausedDecision = (loadedGameState?.pendingEventDecisions ?? []).find((decision) => (
+      decision.faction === playerFaction && turnPauseStatus.eventIds.includes(decision.event_id)
+    ));
+    if (pausedDecision) setActiveEventDecisionId(pausedDecision.event_id);
+  }, [turnPauseStatus, activeEventDecisionId, loadedGameState?.pendingEventDecisions, playerFaction]);
+
   // Async presidential blockers own the full interaction surface. Preserve
   // map selection/camera state, but suspend every Warroom shell that could
   // otherwise remain clickable behind the required response.
