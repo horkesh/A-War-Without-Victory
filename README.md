@@ -1,4 +1,16 @@
-## Current published measured snapshot — 2026-11-03
+## Current published snapshot — 2026-11-05
+
+[Open the current weekly timeline 0–188](control_timeline_jan707_188_20261105.html), with scores of **707/705/703/692** at weeks 39/104/156/188.
+
+- **Source:** commit `379a3f309` on the unpushed local branch `claude/live-jan1993-calibration`.
+- **Run:** the 188-week scenario runner with no player. The live game (desktop `advanceTurn`, RBiH, RS or HRHB as player at production autonomy, historical-default decisions) matches it cell-for-cell at January 1993 (707/712 for each faction).
+- **Checks:** strict engine health passes (0 stranded, 0 ghost operations); anchors pass; all 712 cells are anchored with 0 markers outside their cell.
+- **Engine:** the no-teleport engine (Engine Invariants 14.9), plus live player-staff parity fixes and the Visoko–Breza reinforcement (Vareš 147th/185th, a calibration assumption).
+- **Still open:** January has 5 mismatches (Miljeno, Todorovići, Kamen, Krivajevići, Seher). The Farz guard is parked until October 1995. Baselines are not yet re-pinned. Not adopted.
+
+The previous pages, [measured 708/707/707/699](control_timeline_measured_health699_188.html) and [published 709/708/709/692](control_timeline_qualified_brka_188.html), ran on the pre-no-teleport engine and remain available. Previous provenance: `PUBLICATION-PROVENANCE-previous-measured-health699.json`. No game source or raw save is uploaded.
+
+## Previous published measured snapshot — 2026-11-03
 
 [Open the current measured, UNQUALIFIED weekly timeline 0–188](control_timeline_measured_health699_188.html). Source baseline `64e616e0b696dc3dafebb02028a745af33711f5c`; source binding `361427763e79dde27d53dab365fc7446af92f0608bd51d9810154d1412f271f2`; bundle `29196c4ee877ad40c09fe312628c20b27b474c0d7e86da07349efa4832e08915`. This is HEAD plus the 135-file manifest, 34 reviewed deltas, 6 untracked tests and 2 non-game documents — not a clean commit.
 
