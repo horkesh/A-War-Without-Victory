@@ -1,3 +1,15 @@
+**LIVE January 1993 baseline on current main — 2026-11-05 (`live-equivalent-desktop-v1`, evidence only; NOT adopted):**
+- Source: main `b78cdda5a`. The run brief was fixed in advance: [RUN-BRIEF](audits/20261105_live_jan1993/RUN-BRIEF.md).
+- Method: `tools/ai_play/desktop_calibration_compare.ts --turns 39 --autonomy-level production` (=2, as `startNewCampaign` sets it), historical_default events, paramilitary deny, historical operations accept. Each branch is scored per OSID against `painted_control_jan1993.json`.
+- Result: live player RBiH **698/712**, RS **698**, HRHB **703**; the no-player desktop branch scores 702 in all three.
+- RBiH player vs no-player (6 cells):
+  - Bukvik and Obadi are taken in the no-player game only by t1–2 bot-paramilitary captures. The historical always_deny RBiH player cannot get them. This is an OWNER DESIGN QUESTION: should early TO/Patriotic League holds have a non-paramilitary lawful path?
+  - The Goražde 801st captures of Glamoč and Sopotnica are absent.
+  - Prača is lost.
+  - Lupnica favours the player.
+- The first measurement, forced to autonomy 1, scored 688/694/697. An independent scenario-tester found it INVALID ([assessment](audits/20261105_live_jan1993/LEVEL1-RUN-ASSESSMENT.md)): the Level-1 `commander_loop` guard has no faction check, so it also froze BOT corps plans. That is recorded as an ENGINE DEFECT for a Level-1 live player (`commander_loop.ts` ~236-296, `emit.ts:775`); it is not a calibration lever.
+- January's bar remains ≥700/712 plus the eight named captures (2026-09-22 amendment). The no-player branch reaches 702 with 7/8 (Lupnica missing). Original target 707 unchanged.
+
 **Handover regression re-pin — 2026-11-04 (headless only; NOT a calibration adoption):** The Codex→Claude handover, PR #521 (ledger 2026-11-04), re-pins the `definitive-harness-regression-v1` artifacts.
 - What was re-pinned: `data/derived/scenario/baselines/manifest.json` (all 8 hashes) and `data/calibration/structural_fingerprint_188w.json` (92ff10609b13c5bd). These are regression references only, per the 2026-10-27 ruling below.
 - Headless 188w head: 702/704/701/691. Floors 694/674/668/641 are all met; 31/31 anchors, enclave guard 9/9, strict health 0 stranded, and n3/n5 are byte-identical (deterministic).

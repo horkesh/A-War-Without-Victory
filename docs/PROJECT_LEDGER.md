@@ -13470,3 +13470,29 @@ The owner directed that the repository be committed, merged and cleaned before c
 The scenario-tester assessment was NO-GO unless a carve-out is recorded: P-A finds 0/4 authored Farz receipts, where the previous accepted pin `81a65d76f` had 4/4. The carve-out is recorded in `docs/40_reports/CALIBRATION_MASTER.md` (top) as an OPEN DEFECT, not an acceptance. The decision records are committed under `docs/40_reports/audits/20261104_handover/`: the packet, four panel seats, the integrated decision, and the re-pin assessment.
 
 Live-equivalent calibration (the target) is unmeasured on this source. Codex has been asked for the live baseline, measurement brief and gap causes (coordination file `F:/AWWV-coordination/CODEX_CLAUDE_HANDOFF.md`, CL-20261104-003).
+
+## 2026-11-05 - First valid live-equivalent January 1993 baseline on main (EVIDENCE ONLY, NOT ADOPTED)
+
+The owner directed calibration to resume on valid assumptions, with LIVE play as the target and January 1993 first. Run brief fixed in advance (`docs/40_reports/audits/20261105_live_jan1993/RUN-BRIEF.md`).
+
+The tool `tools/ai_play/desktop_calibration_compare.ts` gains two options:
+- `--final-save-dir`, so each branch can be scored per OSID with `tools/compare_painted_vs_sim.cjs`;
+- `--autonomy-level` (0-3 or `production`; the default stays 1 and is recorded).
+
+New helper: `tools/diagnostics/live_branch_cell_diff.cjs`.
+
+Live player at production autonomy (Level 2), main `b78cdda5a`, 39 turns, historical_default events, paramilitary deny, historical operations accept. January 1993 scores /712:
+
+| | RBiH | RS | HRHB |
+|---|---|---|---|
+| player | 698 | 698 | 703 |
+| no-player desktop branch | 702 | 702 | 702 |
+
+The earlier autonomy-1 run (688/694/697) is INVALID as a baseline. The scenario-tester found that the Level-1 `commander_loop` guard and `emit.ts:775` block have no faction check, so a Level-1 live player freezes BOT corps plans as well. That is recorded as an engine defect, not a lever.
+
+The remaining RBiH gap breaks down as:
+- an owner design question: Bukvik and Obadi are held only by t1-2 bot-paramilitary captures, which a historical always_deny player cannot reproduce;
+- the 801st Goražde captures (Glamoč, Sopotnica);
+- Prača.
+
+The no-player branch reaches 702 with 7/8 named captures (Lupnica). The bar (≥700 plus 8 named captures) and the 707 target are unchanged.
