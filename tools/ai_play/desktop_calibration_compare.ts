@@ -42,6 +42,8 @@ interface CliOptions {
     /** When set, write `<dir>/{headless,player}/final_save.json` so each branch can be scored
      *  per-OSID with `tools/compare_painted_vs_sim.cjs <dir>/<branch> --target <checkpoint>`. */
     finalSaveDir?: string;
+    /** Corps ids whose operation queue and live operations are recorded every turn (diagnostic only). */
+    traceCorps?: string[];
     electronLogPath?: string;
     electronAutosavePath?: string;
 }
@@ -230,6 +232,9 @@ function parseArgs(argv: string[]): CliOptions {
         ),
         ...(values.get('--out') ? { outPath: values.get('--out') } : {}),
         ...(values.get('--final-save-dir') ? { finalSaveDir: values.get('--final-save-dir') } : {}),
+        ...(values.get('--trace-corps')
+            ? { traceCorps: (values.get('--trace-corps') ?? '').split(',').filter(Boolean).sort(strictCompare) }
+            : {}),
         autonomyLevel: (() => {
             const raw = parseEnum(values.get('--autonomy-level') ?? '1', ['0', '1', '2', '3', 'production'] as const, '--autonomy-level');
             return raw === 'production' ? 'production' : (Number(raw) as 0 | 1 | 2 | 3);
@@ -652,6 +657,21 @@ function reportSummary(state: GameState, report: unknown, playerFaction: Faction
     };
 }
 
+/** Diagnostic snapshot of each traced corps' queue and live operations, in deterministic order. */
+function corpsTrace(state: GameState, corpsIds: string[]) {
+    return Object.fromEntries(corpsIds.map((corpsId) => {
+        const command = state.military.corps_command?.[corpsId];
+        return [corpsId, {
+            queued_operations: [...(command?.queued_operations ?? [])],
+            active_operations: (command?.active_operations ?? []).map((operation) => ({
+                name: operation.name,
+                phase: operation.phase,
+                participating_brigades: [...(operation.participating_brigades ?? [])].sort(strictCompare),
+            })),
+        }];
+    }));
+}
+
 async function runComparison(baseDir: string, options: CliOptions) {
     const key = 'apr_1992' as const;
     const definition = getStartupSnapshotDefinition(key);
@@ -729,6 +749,12 @@ async function runComparison(baseDir: string, options: CliOptions) {
                 electron.control_counts,
                 headless.control_counts,
             );
+        }
+        if (options.traceCorps) {
+            row.corps_trace = {
+                headless: corpsTrace(headlessState, options.traceCorps),
+                player: corpsTrace(playerState, options.traceCorps),
+            };
         }
         turns.push(row);
     }

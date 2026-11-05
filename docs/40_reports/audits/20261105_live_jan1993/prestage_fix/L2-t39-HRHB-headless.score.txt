@@ -1,0 +1,40 @@
+=== Painted vs Sim Comparison ===
+Run: runs/claude-live-jan1993-prestage/HRHB/headless
+Painted target: jan1993 (January 1993)
+Painted file: data/source/calibration/painted_control_jan1993.json
+Total OSIDs: 712
+
+OVERALL
+  Match:    702 / 712  (98.6%)
+  Mismatch: 10 / 712  (1.4%)
+  Area-weighted match: 50934 / 51337 km²  (99.2%)
+
+FACTION TOTALS (count)
+  Painted  RS=375 (52.7%)  RBiH=251 (35.3%)  HRHB=86 (12.1%)
+  Sim      RS=375 (52.7%)  RBiH=250 (35.1%)  HRHB=87 (12.2%)
+  Delta    RS=+0  RBiH=-1  HRHB=+1
+
+FACTION TOTALS (area-weighted)
+  Painted  RS=32560 km² (63.4%)  RBiH=12431 km² (24.2%)  HRHB=6346 km² (12.4%)
+  Sim      RS=32551 km² (63.4%)  RBiH=12426 km² (24.2%)  HRHB=6360 km² (12.4%)
+
+BY REGION
+  KRAJINA           match   127/127 (100.0%)  area 100.0% (11992 km²)  RS_sim=108 RBiH_sim=19 HRHB_sim=0 | painted RS=108 RBiH=19 HRHB=0
+  POSAVINA_NE       match   104/104 (100.0%)  area 100.0% (5778 km²)  RS_sim=61 RBiH_sim=41 HRHB_sim=2 | painted RS=61 RBiH=41 HRHB=2
+  DRINA             match   108/112 (96.4%)   area  97.3% (7160 km²)  RS_sim=75 RBiH_sim=37 HRHB_sim=0 | painted RS=75 RBiH=37 HRHB=0
+  CENTRAL_CORRIDOR  match     90/92 (97.8%)   area  99.2% (4880 km²)  RS_sim=35 RBiH_sim=53 HRHB_sim=4 | painted RS=35 RBiH=53 HRHB=4
+  CENTRAL_BOSNIA    match   153/155 (98.7%)   area  99.1% (8241 km²)  RS_sim=33 RBiH_sim=87 HRHB_sim=35 | painted RS=35 RBiH=86 HRHB=34
+  SARAJEVO          match     28/30 (93.3%)   area  93.7% (1524 km²)  RS_sim=22 RBiH_sim=8 HRHB_sim=0 | painted RS=20 RBiH=10 HRHB=0
+  HERZEGOVINA       match     92/92 (100.0%)  area 100.0% (11763 km²)  RS_sim=41 RBiH_sim=5 HRHB_sim=46 | painted RS=41 RBiH=5 HRHB=46
+
+MISMATCHES (painted→sim)
+  op:cajnice:miljeno_2         painted=RS    sim=RBiH  region=DRINA
+  op:cajnice:todorovici        painted=RS    sim=RBiH  region=DRINA
+  op:foca:donje_zesce          painted=RBiH  sim=RS    region=DRINA
+  op:gorazde:kamen             painted=RBiH  sim=RS    region=DRINA
+  op:ilijas:krivajevici        painted=RS    sim=RBiH  region=CENTRAL_CORRIDOR
+  op:visoko:gornja_vratnica_2  painted=RBiH  sim=RS    region=CENTRAL_CORRIDOR
+  op:jajce:lupnica             painted=RS    sim=HRHB  region=CENTRAL_BOSNIA
+  op:kalesija:seher_2          painted=RS    sim=RBiH  region=CENTRAL_BOSNIA
+  op:trnovo:tosici             painted=RBiH  sim=RS    region=SARAJEVO
+  op:vogosca:hotonj            painted=RBiH  sim=RS    region=SARAJEVO

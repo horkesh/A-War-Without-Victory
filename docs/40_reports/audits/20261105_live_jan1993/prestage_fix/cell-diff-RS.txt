@@ -1,0 +1,3 @@
+differ: 3 | no-player right & player wrong: 2 | player right & no-player wrong: 1 | neither: 0
+  gorazde          2 | glamoc(ref RBiH, nopl RBiH, pl RS); sopotnica(ref RBiH, nopl RBiH, pl RS)
+  jajce            1 | lupnica(ref RS, nopl HRHB, pl RS)

@@ -1,3 +1,15 @@
+**LIVE January 1993 after the player-staff prestage fix — 2026-11-05 (evidence only; NOT adopted):**
+- Engine fix: authored prestage marches and queued-head reservations now follow `selectStaffControlledFactions`. They previously skipped every player faction; now they skip only a manual (autonomy 0) player.
+- Live production autonomy: RBiH **698** (unchanged), RS **701** (was 698), HRHB **703** (unchanged). The no-player branches score 702 before and after.
+- RS player regains Korenići, Donji Koričani and Gornje Krčevine.
+- Headless 188w is byte-identical to the re-pin (702/704/701/691; manifest hashes match), so the fix is inert headless as designed.
+- Goražde Glamoč/Sopotnica remain the RBiH- and RS-player gap. An independent operations review traced it as follows:
+  - the live and no-player games diverge from **t1** (army-directive pushback appears in the no-player branch only);
+  - by t23, RS 1st Podrinje garrisons Sopotnica in the player branch, so Operation Circle never executes.
+- A separate live-only queue-pollution defect is confirmed (the per-turn player injection re-queues active ops). It has a one-line fix and is queued for its own measured run.
+- **Next lane: find the player-gated mechanic behind the t1 divergence.**
+- Record: [RESULT.md](audits/20261105_live_jan1993/prestage_fix/RESULT.md).
+
 **LIVE January 1993 baseline on current main — 2026-11-05 (`live-equivalent-desktop-v1`, evidence only; NOT adopted):**
 - Source: main `b78cdda5a`. The run brief was fixed in advance: [RUN-BRIEF](audits/20261105_live_jan1993/RUN-BRIEF.md).
 - Method: `tools/ai_play/desktop_calibration_compare.ts --turns 39 --autonomy-level production` (=2, as `startNewCampaign` sets it), historical_default events, paramilitary deny, historical operations accept. Each branch is scored per OSID against `painted_control_jan1993.json`.

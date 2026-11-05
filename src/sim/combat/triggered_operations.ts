@@ -26,6 +26,7 @@ import { createSingleAxis } from './sector_offensive_axis_helpers.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { DefenderPowerBreakdown } from './combat_math.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { selectStaffControlledFactions } from '../bot/staff_control.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants.js';
 import {
@@ -1204,7 +1205,7 @@ export function prestageBrigadesForTriggeredOp(
 /** Begin the historical concentration march while elites remain at Army HQ. */
 function prestageReservedTriggeredElites(state: GameState, def: TriggeredOpDef, turn: number): void {
     if (def.prestage_from == null || turn < def.prestage_from) return;
-    if (state.meta.player_faction === def.faction) return;
+    if (!selectStaffControlledFactions(state).includes(def.faction)) return;
     const formations = state.military.formations ?? {};
     const movementState = state.military.brigade_movement_state ?? {};
     for (const axis of def.axes) {
