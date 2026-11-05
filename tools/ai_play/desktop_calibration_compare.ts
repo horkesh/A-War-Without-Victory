@@ -23,12 +23,22 @@ import {
     getStartupSnapshotPath,
 } from '../../src/scenario/startup_snapshot.js';
 import type { FactionId, GameState } from '../../src/state/game_state.js';
+import type { EventDefinition, PendingEventDecision } from '../../src/sim/events/event_types.js';
+import { loadEventDefinitionsFromDir } from '../../src/sim/events/event_loader.js';
+import { selectBotEventResponse } from '../../src/sim/events/evaluate_events.js';
 import { strictCompare } from '../../src/state/validateGameState.js';
 import { isHistoricalOperationAuthorizationReview } from '../../src/sim/combat/historical_operation_authorization.js';
 import { resolvePeacePlan } from '../../src/sim/negotiation/peace_plans.js';
 import { getPeacePlanById } from '../../src/sim/negotiation/peace_plan_data.js';
 
-type EventPolicy = 'defer' | 'historical_default' | 'staff_recommended';
+/**
+ * `bot_equivalent`: answer every player decision exactly as the bot would (the engine's own
+ * `selectBotEventResponse`) — the authored historical default where one exists, otherwise the
+ * bot's scorer. `historical_default` instead falls back to the FIRST option when no default
+ * is authored, which is a different answer from the bot's on scorer-routed events
+ * (address_to_nation_*, decorate_a_unit_*, ...). Peace plans are answered historically by both.
+ */
+type EventPolicy = 'defer' | 'historical_default' | 'staff_recommended' | 'bot_equivalent';
 type ParamilitaryPolicy = 'defer' | 'allow' | 'deny' | 'regular' | 'standing_allow';
 type HistoricalOperationPolicy = 'defer' | 'accept' | 'decline';
 
@@ -64,6 +74,8 @@ interface DecisionTranscriptRow {
     id: string;
     decision: string;
     value?: string;
+    /** 'paused_turn': answered inside the pause before combat (turn = the turn being run). */
+    stage?: 'paused_turn';
 }
 
 interface ElectronStateSummary {
@@ -234,7 +246,7 @@ function parseArgs(argv: string[]): CliOptions {
         faction: parseEnum(values.get('--faction') ?? 'RS', ['HRHB', 'RBiH', 'RS'] as const, '--faction'),
         eventPolicy: parseEnum(
             values.get('--event-policy') ?? 'defer',
-            ['defer', 'historical_default', 'staff_recommended'] as const,
+            ['defer', 'historical_default', 'staff_recommended', 'bot_equivalent'] as const,
             '--event-policy',
         ),
         paramilitaryPolicy: parseEnum(
@@ -287,28 +299,46 @@ function applyBotParityParamilitaryDiagnostic(state: GameState, faction: Faction
     state.paramilitary_policy = 'always_allow';
 }
 
+/** Event catalog for `bot_equivalent` (loaded once per run, from the same files the desktop loads). */
+let botEquivalentCatalog: Map<string, EventDefinition> | null = null;
+
+function botEquivalentResponseId(state: GameState, decision: PendingEventDecision): string | undefined {
+    const def = botEquivalentCatalog?.get(decision.event_id);
+    if (!def || !def.response_options || def.response_options.length === 0) return undefined;
+    return selectBotEventResponse(state, def, decision.faction, false).chosen.id;
+}
+
 function applyEventPolicy(
     state: GameState,
     faction: FactionId,
     policy: EventPolicy,
     transcript: DecisionTranscriptRow[],
+    pausedDecisions?: readonly PendingEventDecision[],
 ): void {
-    const pending = [...(state.military.pending_event_decisions ?? [])]
-        .filter((decision) => decision.faction === faction)
-        .sort((a, b) => strictCompare(a.event_id, b.event_id));
+    // In the pause before combat the decisions are answered in the order the turn fired them
+    // (the order a bot answers in-turn); between turns, by event id as before.
+    const pending = pausedDecisions
+        ? pausedDecisions.filter((decision) => decision.faction === faction)
+        : [...(state.military.pending_event_decisions ?? [])]
+            .filter((decision) => decision.faction === faction)
+            .sort((a, b) => strictCompare(a.event_id, b.event_id));
 
     for (const decision of pending) {
         const responseId = policy === 'historical_default'
             ? decision.historical_default_response_id ?? decision.response_options[0]?.id
             : policy === 'staff_recommended'
                 ? decision.staff_recommended_response_id ?? decision.historical_default_response_id
-                : undefined;
+                : policy === 'bot_equivalent'
+                    ? botEquivalentResponseId(state, decision)
+                    : undefined;
+        const stage = pausedDecisions ? { stage: 'paused_turn' as const } : {};
         if (!responseId) {
             transcript.push({
                 turn: state.meta.turn,
                 family: 'event',
                 id: decision.event_id,
                 decision: 'defer',
+                ...stage,
             });
             continue;
         }
@@ -319,6 +349,7 @@ function applyEventPolicy(
             id: decision.event_id,
             decision: policy,
             value: responseId,
+            ...stage,
         });
     }
 }
@@ -402,7 +433,9 @@ function applyPeacePlanPolicy(
     // Presidency -> Assembly sequence), which applyEventPolicy already resolves.
     if (faction === 'RBiH' && (pending.plan_id === 'vance_owen' || pending.plan_id === 'owen_stoltenberg')) return;
     const plan = getPeacePlanById(pending.plan_id);
-    const response = policy === 'historical_default' ? plan?.historical_responses[faction] : undefined;
+    const response = policy === 'historical_default' || policy === 'bot_equivalent'
+        ? plan?.historical_responses[faction]
+        : undefined;
     if (!response) {
         transcript.push({ turn: state.meta.turn, family: 'peace_plan', id: pending.plan_id, decision: 'defer' });
         return;
@@ -783,9 +816,14 @@ async function runComparison(baseDir: string, options: CliOptions) {
     // backward compatibility with existing artifacts.
     if (options.autonomyLevel !== 'production') playerState.meta.autonomy_level = options.autonomyLevel;
     const playerAutonomyLevel = playerState.meta.autonomy_level;
-    playerState.meta.decision_mode = options.eventPolicy === 'historical_default'
+    playerState.meta.decision_mode = options.eventPolicy === 'historical_default' || options.eventPolicy === 'bot_equivalent'
         ? 'historical'
         : 'emergent';
+    if (options.eventPolicy === 'bot_equivalent') {
+        botEquivalentCatalog = new Map(
+            loadEventDefinitionsFromDir(0, resolve(baseDir, 'data/scenarios/events')).map((def) => [def.id, def]),
+        );
+    }
     if (options.paramilitaryPolicy === 'standing_allow') {
         playerState.paramilitary_policy = 'always_allow';
     }
@@ -798,7 +836,16 @@ async function runComparison(baseDir: string, options: CliOptions) {
     for (let index = 0; index < options.turns; index += 1) {
         applyPlayerPolicy(playerState, options, transcript);
         const headlessResult = await advanceTurn(headlessState, baseDir);
-        const playerResult = await advanceTurn(playerState, baseDir);
+        // PAUSE BEFORE COMBAT: the player answers decisions fired this turn inside the turn,
+        // right after evaluate-events, as the live desktop does — so its answer lands before
+        // this turn's movement and combat, exactly like a bot's. Anything still pending
+        // between turns (opening decisions, deferred ones, peace plans) is answered by
+        // applyPlayerPolicy above.
+        const playerResult = await advanceTurn(playerState, baseDir, {
+            onPlayerDecisionsPending: (workingState, decisions) => {
+                applyEventPolicy(workingState, options.faction, options.eventPolicy, transcript, decisions);
+            },
+        });
         if (headlessResult.error) throw new Error(`Headless advance failed: ${headlessResult.error}`);
         if (playerResult.error) throw new Error(`Player advance failed: ${playerResult.error}`);
         headlessState = headlessResult.state;

@@ -216,6 +216,37 @@ describe('desktop calibration comparison provenance', () => {
     });
   });
 
+  it('answers a decision fired mid-turn inside the pause before combat, as the bot does', () => {
+    // RS's paramilitary-policy decision fires during turn 2. The player branch answers it in
+    // the pause right after evaluate-events (stage 'paused_turn', turn = the turn being run),
+    // so with the bot's own answer the two branches stay identical.
+    const result = runComparison([
+      '--turns', '3',
+      '--faction', 'RS',
+      '--autonomy-level', 'production',
+      '--event-policy', 'bot_equivalent',
+      '--paramilitary-policy', 'deny',
+      '--historical-operation-policy', 'accept',
+    ]);
+
+    expect(result.status, result.stderr).toBe(0);
+    const output = JSON.parse(result.stdout);
+    const paused = output.decision_transcript.filter((row: { stage?: string }) => row.stage === 'paused_turn');
+    expect(paused).toEqual([
+      {
+        turn: 2,
+        family: 'event',
+        id: 'rs_paramilitary_policy_1992',
+        decision: 'bot_equivalent',
+        value: 'always_allow',
+        stage: 'paused_turn',
+      },
+    ]);
+    for (const row of output.turns) {
+      expect(row.control_delta_player_minus_headless).toEqual({ HRHB: 0, RBiH: 0, RS: 0 });
+    }
+  }, 180_000);
+
   it('emits byte-identical JSON for identical zero-turn inputs', () => {
     const first = runZeroTurnComparison();
     const second = runZeroTurnComparison();
