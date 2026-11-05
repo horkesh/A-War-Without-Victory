@@ -694,17 +694,35 @@ export function finalizeOperationAAR(
 
     const loggedCaptureSet = new Set<string>();
     const causalCaptureSet = new Set<string>();
+    // Capture and loss receipts from both sources are replayed in chronological
+    // turn order, so a later recorded loss cannot be undone by an older
+    // engagement flip. Within one turn the original order is kept: weekly-log
+    // captures, then weekly-log losses, then engagement captures (the weekly
+    // entry is written before that turn's battle receipts, see below).
+    const capturesByTurn = new Map<number, Set<string>>();
+    const lossesByTurn = new Map<number, Set<string>>();
+    const engagementCapturesByTurn = new Map<number, Set<string>>();
+    const addReceipt = (map: Map<number, Set<string>>, turn: number, osid: string): void => {
+        let receipts = map.get(turn);
+        if (!receipts) {
+            receipts = new Set<string>();
+            map.set(turn, receipts);
+        }
+        receipts.add(osid);
+    };
     for (const entry of log) {
         for (const osid of entry.objectives_captured_this_turn ?? []) {
             if (objectives.includes(osid)) {
                 loggedCaptureSet.add(osid);
                 if (entry.attacks_this_turn > 0) {
-                    causalCaptureSet.add(osid);
+                    addReceipt(capturesByTurn, entry.turn, osid);
                 }
             }
         }
         for (const osid of entry.objectives_lost_this_turn ?? []) {
-            causalCaptureSet.delete(osid);
+            if (objectives.includes(osid)) {
+                addReceipt(lossesByTurn, entry.turn, osid);
+            }
         }
     }
     // Weekly operation entries are written before some same-turn battle capture
@@ -716,8 +734,20 @@ export function finalizeOperationAAR(
         for (const engagement of engagements) {
             if (engagement.turn < op.started_turn || engagement.turn > state.meta.turn) continue;
             if (engagement.role !== 'attacker' || engagement.territory_flipped !== true) continue;
-            if (objectives.includes(engagement.osid)) causalCaptureSet.add(engagement.osid);
+            if (objectives.includes(engagement.osid)) {
+                addReceipt(engagementCapturesByTurn, engagement.turn, engagement.osid);
+            }
         }
+    }
+    const receiptTurns = [...new Set([
+        ...capturesByTurn.keys(),
+        ...lossesByTurn.keys(),
+        ...engagementCapturesByTurn.keys(),
+    ])].sort((a, b) => a - b);
+    for (const turn of receiptTurns) {
+        for (const osid of capturesByTurn.get(turn) ?? []) causalCaptureSet.add(osid);
+        for (const osid of lossesByTurn.get(turn) ?? []) causalCaptureSet.delete(osid);
+        for (const osid of engagementCapturesByTurn.get(turn) ?? []) causalCaptureSet.add(osid);
     }
     const objectivesLoggedCaptured = objectives.filter((osid) => loggedCaptureSet.has(osid));
     const causallyCapturedObjectives = objectives.filter((osid) => causalCaptureSet.has(osid));
