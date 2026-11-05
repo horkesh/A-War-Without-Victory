@@ -1,6 +1,25 @@
-## Current published snapshot — 2026-11-05
+## Current published snapshot — 2026-11-05 (latest)
 
-[Open the current weekly timeline 0–188](control_timeline_jan707_188_20261105.html), with scores of **707/705/703/692** at weeks 39/104/156/188.
+[Open the current weekly timeline 0–188](control_timeline_jan711_188_20261105.html), with scores of **711/707/706/693** at weeks 39/104/156/188.
+
+- **Source:** the unpushed local branch `claude/live-jan1993-calibration`; the commit is named in `PUBLICATION-PROVENANCE.json`.
+- **Run:** the 188-week scenario runner with no player. The live game (desktop `advanceTurn`, RBiH, RS or HRHB as player at production autonomy, historical-default decisions) matches it cell-for-cell at January 1993 (711/712 for each faction).
+- **Checks:**
+  - strict engine health passes;
+  - the enclave guard holds (Goražde), and Srebrenica and Žepa fall on schedule;
+  - 0 markers outside their cell, 0 missing.
+- **What changed:** four operation-data changes recover the last five January cells, each a calibration assumption:
+  - Miljeno and Todorovići: the Čajniče Brigade's home axis;
+  - Kamen: the 802nd joins the Goražde counterattack;
+  - Krivajevići: an Ilijaš Brigade axis on Kijevo;
+  - Seher: a 1st Zvornik axis on Podrinje Sweep.
+- **Still open:** Donji Koričani (Skender Vakuf) is the one January mismatch. The Farz guard is parked until October 1995. Baselines are not yet re-pinned. Not adopted.
+
+The previous 2026-11-05 page, [707/705/703/692](control_timeline_jan707_188_20261105.html), remains available. Its provenance is archived as `PUBLICATION-PROVENANCE-previous-jan707.json`.
+
+## Previous published snapshot — 2026-11-05 (707)
+
+[Open the 707 weekly timeline 0–188](control_timeline_jan707_188_20261105.html), with scores of **707/705/703/692** at weeks 39/104/156/188.
 
 - **Source:** commit `379a3f309` on the unpushed local branch `claude/live-jan1993-calibration`.
 - **Run:** the 188-week scenario runner with no player. The live game (desktop `advanceTurn`, RBiH, RS or HRHB as player at production autonomy, historical-default decisions) matches it cell-for-cell at January 1993 (707/712 for each faction).

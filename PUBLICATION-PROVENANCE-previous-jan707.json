@@ -1,0 +1,24 @@
+{
+  "schema": "awwv.measured-unqualified-live-calibration-publication.v1",
+  "prepared": "2026-11-05",
+  "artifact": {
+    "name": "control_timeline_jan707_188_20261105.html",
+    "bytes": 719703,
+    "sha256": "cbe00721262d533404cdf2b32d34688d2ee463016018ecfb4b7b48abd3aceb07"
+  },
+  "status": "MEASURED_UNQUALIFIED_NOT_ADOPTED",
+  "source_commit": "379a3f309",
+  "source_branch": "claude/live-jan1993-calibration (local, unpushed)",
+  "calibration_authority": "definitive-harness-regression-v1 scenario_runner 188w (no player). Live-equivalent desktop advanceTurn with RBiH, RS or HRHB as player at production autonomy matches it cell-for-cell at week 39 (707/712 each).",
+  "completed_week": 188,
+  "events": 266,
+  "initial_scored_cells": 712,
+  "rendered_polygons": 744,
+  "final_save_sha256": "7733fa9dea6f826e214263e40e62f88ac2784afd79f33a89ad6d04496dc66405",
+  "scores": [707, 705, 703, 692],
+  "previous_published_scores": [708, 707, 707, 699],
+  "engine_health_strict": "PASS (0 stranded, 0 ghost, 0 zero-eligible, 0 invalid-op weeks, 0 consistency failures)",
+  "anchors": "PASS (scenario anchor contract)",
+  "viewer_markers": "712/712 scored cells anchored, 0 anchors outside cell, 22 mismatch markers",
+  "notes": "Includes W3 no-teleport (Engine Invariants 14.9), live player-staff parity fixes, and the Visoko-Breza reinforcement (Vares 147th/185th, calibration assumption). Farz guard parked until the October 1995 checkpoint. Baselines/structural fingerprint not yet re-pinned."
+}
