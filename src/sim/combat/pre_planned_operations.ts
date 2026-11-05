@@ -23,6 +23,7 @@ import type {
 import { munFromOsid, type Osid } from './osid_adjacency.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { selectStaffControlledFactions } from '../bot/staff_control.js';
 import { assignOperationCommander } from './officer_system.js';
 import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants.js';
@@ -2472,8 +2473,8 @@ function getQueuedHeadHeldBrigadeIds(state: GameState, def: PrePlannedOp): Set<F
     const headOperationName = command?.queued_operations?.[0];
     if (!headOperationName || headOperationName === def.name) return new Set<FormationId>();
     const reserved = getQueuedDatedPrestageBrigadeIds({
-        meta: state.meta,
-        military: { corps_command: { [def.corps]: command } },
+        ...state,
+        military: { ...state.military, corps_command: { [def.corps]: command } },
     });
     const formations = state.military.formations ?? {};
     const held = new Set<FormationId>();
@@ -2526,7 +2527,7 @@ function prestageReservedPrePlannedElites(
     reverseMap?: OperationalToCanonicalReverseMap,
 ): void {
     if (def.prestage_from == null || turn < def.prestage_from) return;
-    if (state.meta.player_faction === def.faction) return;
+    if (!selectStaffControlledFactions(state).includes(def.faction)) return;
     const command = state.military.corps_command?.[def.corps];
     const liveOperation = command?.active_operations?.find((operation) => operation.name === def.name);
     if (liveOperation && liveOperation.phase !== 'planning') return;
@@ -3323,22 +3324,29 @@ export function getHeadQueuedPrePlannedBrigadeIds(
  * leave these formations at their authored staging area until injection. */
 export function getQueuedDatedPrestageBrigadeIds(
     state: {
-        readonly meta: { readonly turn: number; readonly player_faction?: FactionId | null };
+        readonly meta: {
+            readonly turn: number;
+            readonly player_faction?: FactionId | null;
+            readonly autonomy_level?: number;
+            readonly headless_scenario_auto_control?: boolean;
+        };
+        readonly factions?: readonly { readonly id: FactionId }[];
         readonly military: { readonly corps_command?: Record<string, { readonly queued_operations?: readonly string[] } | undefined> };
     },
 ): Set<FormationId> {
     const reserved = new Set<FormationId>();
+    const staffControlled = new Set(selectStaffControlledFactions(state as GameState));
     for (const corpsId of Object.keys(state.military.corps_command ?? {}).sort(strictCompare)) {
         const operationName = state.military.corps_command?.[corpsId]?.queued_operations?.[0];
         if (!operationName) continue;
         const def = ALL_PRE_PLANNED.find((candidate) => candidate.corps === corpsId && candidate.name === operationName);
         if (!def) continue;
         // Explicit enqueue dates take precedence even for player factions; the prestage
-        // fallback covers bot-controlled prestaging only, so a selected player is never
-        // implicitly reserved. Arrival ownership holds while the head queue waits.
+        // fallback covers staff-controlled factions, so only a manual player (autonomy 0)
+        // is never implicitly reserved. Arrival ownership holds while the head queue waits.
         const reserveFrom = def.enqueue_from ?? def.prestage_from;
         if (reserveFrom == null || state.meta.turn < reserveFrom) continue;
-        if (def.enqueue_from == null && state.meta.player_faction === def.faction) continue;
+        if (def.enqueue_from == null && !staffControlled.has(def.faction)) continue;
         for (const axis of def.axes) for (const brigadeId of axis.brigades) reserved.add(brigadeId);
     }
     return reserved;
