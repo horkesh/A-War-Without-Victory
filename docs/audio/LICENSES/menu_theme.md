@@ -1,12 +1,13 @@
-# Original audio provenance: `menu_theme`
+# Audio provenance: `menu_theme`
 
-- Author: A War Without Victory project, original procedural synthesis and composition created for this project.
-- License: FIRST_PARTY; project-owned source and generated assets, for distribution with AWWV. No third-party sample or external music composition is incorporated.
-- Recipe: `tools/audio/generate_original_soundscape.py` (explicit score, modal/additive synthesis, fixed NumPy PCG64 seeds).
-- Toolchain: Python 3.14, NumPy 2.4.1, FFmpeg 8.1.2 libvorbis quality 5; 48 kHz PCM24 WAV masters.
-- Reproduction: `python tools/audio/generate_original_soundscape.py --music-only --publish`; PCM24 hash and final OGG hash are recorded in `AUDIO_ASSET_PROVENANCE.json`.
-- Preview/master delivery: ignored `logs/player-experience-completion-20261105/audio-preview/` contains MP3 auditions and 24-bit WAV masters. Menu stems: piano (melodic lead), strings, texture, percussion.
-- Content: Revision 2: 90-second recurring low piano motif, overlapping bowed-string suspensions with unresolved minor-second friction, longer piano decays and evolving analogue grain. Clean five-second ending, not a seamless loop; no triumphant cadence.
-- No voices, anthem, folk quotation, combat imitation or heroic intent. Automated technical checks do not establish listening or sensitive-history approval.
+- Work: **What Remains of Home**. Calm menu v3, 125.035 seconds; whole-track loop preserves the approved clean ending.
+- Composition: A War Without Victory project, original authored score. No reference audio/MIDI, anthem, folk quotation, voices or combat imitation.
+- Composition license: FIRST_PARTY, for distribution with AWWV.
+- Recorded sample credit: Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote, **VSCO 2 Community Edition**, CC0-1.0.
+- Pinned library: https://github.com/sgossner/VSCO-2-CE/tree/440300901dfe9275fd84e0b7763af1f8443ae62e
+- Retained license: [VSCO-2-CE-CC0.txt](VSCO-2-CE-CC0.txt), SHA-256 `36ffd9dc085d529a7e60e1276d73ae5a030b020313e6c5408593a6ae2af39673`.
+- Source-by-source URLs, sample hashes, frozen recipes, score and export hashes: [audition provenance](../WHAT_REMAINS_OF_HOME_AUDITION.json). The music uses recorded samples; it is not a new live performance.
+- Runtime adoption: user authorized the selected opening and calm menu integration on 2026-11-05. Approved OGG copied byte-for-byte; no recipe rerendering or sample editing.
+- Bundle filenames and hashes: [AUDIO_ASSET_PROVENANCE.json](../AUDIO_ASSET_PROVENANCE.json). Runtime requires explicit music opt-in and a trusted gesture; mute/volume controls remain independent.
 
-Revision history: first audition preserved as WAV/MP3 mix, four stems, runtime OGG, provenance and technical metrics under `audio-preview/v1/` in the ignored evidence directory. Revision 2 answers the owner's request for a denser, more haunting arrangement. Eight UI effects are unchanged. Creative/listening approval remains open.
+The earlier procedural `menu_original.ogg` remains retained unchanged and inventoried as a previous version: original fixed-seed synthesis from `tools/audio/generate_original_soundscape.py`, FIRST_PARTY, with no third-party samples. It is no longer the runtime menu mapping.

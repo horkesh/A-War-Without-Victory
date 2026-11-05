@@ -162,5 +162,118 @@
     "effects": "logs/player-experience-completion-20261105/audio-preview/effects_reel.mp3"
   },
   "sourceHashConvention": "Text normalized to LF; OGG bytes exact",
-  "provenanceHash": "05b609ffc1e471402d1816fde14db4bd2000466d402828f86f19ee9a2b944a81"
+  "provenanceHash": "05b609ffc1e471402d1816fde14db4bd2000466d402828f86f19ee9a2b944a81",
+  "openingMusicIntegration": {
+    "date": "2026-11-05",
+    "base": "f3bfb8ee0",
+    "ownerAuthorizedRuntimeAdoption": true,
+    "behavior": "35s opening once for eligible opening session; natural end to calm125s loop; keep started opening through room changes, skip unheard opening on menu exit. Preserve default music off, gesture gate, global mute/master/music controls and existing all-surface scope.",
+    "music": [
+      {
+        "file": "src/ui/map/assets/audio/music/what_remains_of_home.ogg",
+        "bytes": 2410733,
+        "sha256": "03e41ab40866925750f956a6d33a73e07846d33a4cbced71c213a03553b2d81b",
+        "emitted": [
+          {
+            "file": "dist/tactical-map/assets/what_remains_of_home-CFrL-rLW.ogg",
+            "sha256": "03e41ab40866925750f956a6d33a73e07846d33a4cbced71c213a03553b2d81b"
+          }
+        ]
+      },
+      {
+        "file": "src/ui/map/assets/audio/music/what_remains_of_home_opening.ogg",
+        "bytes": 619144,
+        "sha256": "853e1fe7d082e96096960245794307a7b85cb63d4a8d07591cbd996ec114e085",
+        "emitted": [
+          {
+            "file": "dist/tactical-map/assets/what_remains_of_home_opening-CBPeigGT.ogg",
+            "sha256": "853e1fe7d082e96096960245794307a7b85cb63d4a8d07591cbd996ec114e085"
+          }
+        ]
+      }
+    ],
+    "originalAudioFilesPreserved": 30,
+    "tests": {
+      "distinctFiles": 7,
+      "distinctPassing": 76,
+      "fresh": {
+        "files": 3,
+        "passing": 32,
+        "evidence": "logs/player-experience-completion-20261105/opening-integration/focused03.log"
+      },
+      "reusedUnaffected": {
+        "files": 4,
+        "passing": 44,
+        "evidence": "logs/player-experience-completion-20261105/opening-integration/focused01.log"
+      },
+      "retainedFailures": "red*.log and focused01.log; asset expectations and missing behavior corrected, targeted verification retained"
+    },
+    "commands": [
+      {
+        "evidence": "logs/player-experience-completion-20261105/opening-integration/typecheck01.log",
+        "exit": 0,
+        "sha256": "025017ea5dc29eb540825da9ff5c7b5c7d6db81cfd98633b026692edf3831584"
+      },
+      {
+        "evidence": "logs/player-experience-completion-20261105/opening-integration/lint01.log",
+        "exit": 0,
+        "sha256": "87e68f674be77635a7cfc3178b5b0858cba8097cc25e8fee6f889fa3c3e5a78f"
+      },
+      {
+        "evidence": "logs/player-experience-completion-20261105/opening-integration/build01.log",
+        "exit": 0,
+        "sha256": "0e7eedcd5a9707f8bcc08d8df1bb302c31d8e636d7d7b74da21c67c907e83e31"
+      },
+      {
+        "evidence": "logs/player-experience-completion-20261105/opening-integration/chunks01.log",
+        "exit": 0,
+        "sha256": "d54ca0903feef0ebb1791bcd1fbc6355e97fdab471c1d20b47d47dd233869550"
+      },
+      {
+        "evidence": "logs/player-experience-completion-20261105/opening-integration/precommit01.log",
+        "exit": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "native": {
+      "evidence": "logs/player-experience-completion-20261105/opening-integration/native01/receipt.json",
+      "sha256": "8176834c4edaf18ab6ee714b5781a90b7f1e384ed33092610f692a7a5d08038a",
+      "checks": [
+        "Own built JS, isolated native userData/sessionData/save roots",
+        "Fresh profile no pre-gesture playback; music off despite real gestures",
+        "35s non-loop opening progresses across gestures/level changes; mute pauses and resumes",
+        "Actual natural ended event hands off once to calm125s loop, no overlap",
+        "Music off/on resumes calm and does not replay opening",
+        "Persisted opt-in still gesture gated; new app session starts new opening",
+        "Served local music bytes match build; no remote requests or unhandled page errors"
+      ],
+      "observedFullOpening": true,
+      "calmLoopConfigured": true,
+      "observedFullCalmLoopCycle": false,
+      "productionPlayback": true,
+      "previewSoundtrackInjected": false,
+      "campaignInitializations": 0,
+      "advances": 0
+    },
+    "independentReview": {
+      "status": "GO",
+      "evidence": "logs/player-experience-completion-20261105/opening-integration/independent-review.md",
+      "sha256": "186216a54220f3e6bf20dd7707cfa973021335e38611fc0622dca576a50ddb3b",
+      "openActionableFindings": 0
+    },
+    "sourceHashes": {
+      ".gitattributes": "bafc6ef10e31315b562f47746d6156a99b96b5c8dc4676c612bf62406f0cf472",
+      "src/ui/map/audio/audioAssets.ts": "79690590fe7fbc87f9263508210e2a967949473cebf56cfafc0ee8aba891f2ab",
+      "src/ui/map/audio/audio_engine.ts": "b306f9d74f162a0921e01c81e3a4cd49d586461047a1de5261ee2c01a12d1f4f",
+      "src/ui/map/audio/sound_manifest.ts": "f32465eca1bd5f0112771eb92ae7ee62b6033eaa3f2191a833739e6116d87293",
+      "src/ui/map/components/AudioSurfaceBedController.tsx": "6f053bd4cae695725a36863bfa4e4da2108f24e20d2b8bb099872a1832ef575c",
+      "tests/ui/audio_opening_sequence.test.ts": "7ff4a5207028e08ecec4f880d929f296739d658e48e9f1219465a3d4403b522c"
+    },
+    "provenanceHash": "fe60ca6a28f5d87032d25bdbcc4d38ec14bf7b8f55093c238113a151576664c4",
+    "limits": [
+      "Renderer-only adoption; no simulation/state/save/IPC/calibration/data/dependency changes",
+      "Native title/menu development build; no release package qualification, full125s loop observation, broad human sensitivity/global R7 acceptance, merge/push/release",
+      "All earlier receipt sections retain their historical scope; this addendum establishes only the new integration evidence"
+    ]
+  }
 }

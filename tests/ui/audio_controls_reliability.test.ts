@@ -110,7 +110,7 @@ it('keeps requested music silent until explicit opt-in and gesture, then updates
   expect(FakeAudio.elements).toHaveLength(0);
   fireEvent.keyDown(window, { key: 'Enter' });
   await Promise.resolve();
-  const music = FakeAudio.elements.find(element => element.src.includes('menu'));
+  const music = FakeAudio.elements.find(element => element.src.includes('opening'));
   expect(music).toBeDefined();
   expect(music!.paused).toBe(false);
   expect(music!.volume).toBeCloseTo(.5 * .4 * .4);

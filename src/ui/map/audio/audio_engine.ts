@@ -54,6 +54,7 @@ interface PlaybackAttempt {
 
 const playbackElementsByCueId = new Map<string, HTMLAudioElement>();
 const playbackAttemptByElement = new Map<HTMLAudioElement, PlaybackAttempt>();
+let openingContinuation: (() => void) | null = null;
 
 let state: AudioBusState = {
     enabled: false,
@@ -108,11 +109,18 @@ function settlePlaybackAttempt(
     attempt: PlaybackAttempt,
     status: 'success' | 'failure',
 ): void {
-    if (playbackAttemptByElement.get(element) !== attempt) return;
+    if (playbackAttemptByElement.get(element) !== attempt) {
+        // A late play promise may settle after pause. Do not let an ownerless
+        // media element resume; a newer attempt on this element keeps ownership.
+        if (status === 'success' && !playbackAttemptByElement.has(element)) {
+            try { element.pause(); } catch { /* best effort */ }
+        }
+        return;
+    }
     attempt.status = status;
 }
 
-function playResolvedAsset(cueId: string, resolvedAssetUrl: string, category: AudioCueCategory, defaultVolume: number, loop = false): void {
+function playResolvedAsset(cueId: string, resolvedAssetUrl: string, category: AudioCueCategory, defaultVolume: number, loop = false, resume = false): void {
     try {
         const element = getPlaybackElement(cueId, resolvedAssetUrl);
         if (!element) return;
@@ -120,11 +128,14 @@ function playResolvedAsset(cueId: string, resolvedAssetUrl: string, category: Au
         if (loopChanged) element.loop = loop;
         const volume = clampVolume(state.volumes.master * state.volumes[category] * defaultVolume);
         if (element.volume !== volume) element.volume = volume;
+        if (resume && playbackAttemptByElement.get(element)?.status === 'pending') return;
+        if (resume && playbackAttemptByElement.get(element)?.status === 'success'
+            && element.paused === false && !element.ended && !element.error) return;
         if (!loopChanged && loop && isHealthyRunningLoop(element)) return;
         const attempt: PlaybackAttempt = { status: 'pending' };
         playbackAttemptByElement.set(element, attempt);
         try {
-            if (!loop) element.currentTime = 0;
+            if (!loop && !resume) element.currentTime = 0;
             const playResult: Promise<void> | undefined = element.play();
             if (playResult && typeof playResult.then === 'function') {
                 void playResult.then(
@@ -144,6 +155,7 @@ function playResolvedAsset(cueId: string, resolvedAssetUrl: string, category: Au
 function stopPlayback(cueId: string): void {
     const element = playbackElementsByCueId.get(cueId);
     if (!element) return;
+    playbackAttemptByElement.delete(element);
     try {
         element.pause();
     } catch {
@@ -285,20 +297,64 @@ export async function playSFX(id: string): Promise<void> {
     await playCue(id);
 }
 
-export async function playMusic(id: string): Promise<void> {
-    if (!getMusicConfig(id)) return;
-    state = { ...state, requestedMusicId: id };
-    if (!state.musicPlaybackEnabled || !state.enabled || state.muted || !state.userGestureUnlocked) return;
-    if (state.currentMusicId && state.currentMusicId !== id) stopPlayback(state.currentMusicId);
-    await playCue(id);
-    if (state.enabled && !state.muted && state.musicPlaybackEnabled && state.requestedMusicId === id) {
-        state = { ...state, currentMusicId: id };
+/** Request the short opening identity once for the owning controller lifetime. */
+export function playOpeningMusic(): void {
+    void playMusic('opening_titles');
+}
+
+/** Leave an unheard title behind when the player has already entered play. */
+export function leaveOpeningMusicWindow(): void {
+    if (state.requestedMusicId === 'opening_titles' && !playbackElementsByCueId.has('opening_titles')) {
+        void playMusic('menu_theme');
     }
 }
 
+/** Retry the existing owner request after a trusted gesture, without replacing it. */
+export function retryRequestedMusic(): void {
+    if (state.requestedMusicId) void playMusic(state.requestedMusicId);
+}
+
+export async function playMusic(id: string): Promise<void> {
+    const cue = getCueConfig(id);
+    if (!getMusicConfig(id) || !cue) return;
+    if (state.requestedMusicId !== id) {
+        openingContinuation?.();
+        openingContinuation = null;
+        // The previous request may still be pending and lack a current ID.
+        if (state.requestedMusicId) stopPlayback(state.requestedMusicId);
+    }
+    state = { ...state, requestedMusicId: id };
+    if (!state.musicPlaybackEnabled || !state.enabled || state.muted || !state.userGestureUnlocked) return;
+    const resolvedAssetUrl = resolveCuePlaybackUrl(id);
+    if (!resolvedAssetUrl) return;
+    let element: HTMLAudioElement | null;
+    try { element = getPlaybackElement(id, resolvedAssetUrl); } catch { return; }
+    if (!element) return;
+    if (id === 'opening_titles' && !openingContinuation) {
+        const finish = () => {
+            if (state.requestedMusicId !== id || !state.enabled || state.muted || !state.musicPlaybackEnabled) return;
+            void playMusic('menu_theme');
+        };
+        const fail = () => {
+            // Decode failure consumes the opening even while preferences pause
+            // playback. The calm successor remains silent under the same gates.
+            if (state.requestedMusicId === id) void playMusic('menu_theme');
+        };
+        element.addEventListener?.('ended', finish);
+        element.addEventListener?.('error', fail);
+        openingContinuation = () => {
+            element.removeEventListener?.('ended', finish);
+            element.removeEventListener?.('error', fail);
+        };
+    }
+    state = { ...state, currentMusicId: id, lastResolvedAssetUrl: resolvedAssetUrl };
+    playResolvedAsset(id, resolvedAssetUrl, cue.category, cue.defaultVolume, cue.loop === true, true);
+}
+
 export function stopMusic(): void {
-    // A request starts its media before playMusic's await assigns the current
-    // id. Stop cached music as well as committed playback so cleanup cannot
+    openingContinuation?.();
+    openingContinuation = null;
+    // Stop cached music as well as committed playback so cleanup cannot
     // leave an in-flight request running without an owner.
     for (const cueId of playbackElementsByCueId.keys()) {
         if (getCueConfig(cueId)?.category === 'music') stopPlayback(cueId);
@@ -379,6 +435,7 @@ export function getAudioState(): AudioBusState {
 }
 
 export function resetAudioForTests(): void {
+    stopMusic();
     stopAllPlayback();
     playbackElementsByCueId.clear();
     playbackAttemptByElement.clear();

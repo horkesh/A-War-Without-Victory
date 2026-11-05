@@ -59,8 +59,9 @@ import peacePlanUrl from '../assets/audio/designed/peace_plan_offered.ogg';
 import gameOverUrl from '../assets/audio/compat/game_over.ogg';
 import tutorialCompleteUrl from '../assets/audio/ui/tutorial_complete.ogg';
 
-// Original first-party menu composition, 90 seconds with clean ending.
-import menuThemeUrl from '../assets/audio/music/menu_original.ogg';
+// Original sampled compositions: 35-second opening, then calm 125-second menu.
+import menuThemeUrl from '../assets/audio/music/what_remains_of_home.ogg';
+import openingTitlesUrl from '../assets/audio/music/what_remains_of_home_opening.ogg';
 
 // --- Required restrained ambient beds (first-party deterministic recipes) ---
 import ambientWarroomUrl from '../assets/audio/ambient/ambient_warroom.ogg';
@@ -93,6 +94,7 @@ export const AUDIO_ASSET_URLS: Readonly<Record<string, string>> = Object.freeze(
     game_over: gameOverUrl,
     tutorial_objective_complete: tutorialCompleteUrl,
     menu_theme: menuThemeUrl,
+    opening_titles: openingTitlesUrl,
     ambient_warroom: ambientWarroomUrl,
     ambient_field: ambientFieldUrl,
     ambient_archive: ambientArchiveUrl,

@@ -1,8 +1,11 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import {
   installAudioGestureUnlockListeners,
   playAmbientBed,
   playMusic,
+  playOpeningMusic,
+  leaveOpeningMusicWindow,
+  retryRequestedMusic,
   stopAmbientBed,
   stopMusic,
 } from '../audio/audio_engine.js';
@@ -33,6 +36,8 @@ function requestAmbientBedPlayback(bedId: AmbientBedId): void {
 }
 
 export function AudioSurfaceBedController({ appScreen }: AudioSurfaceBedControllerProps) {
+  // The opening request belongs to this controller, not to changing room beds.
+  const startsInOpening = useRef(appScreen === 'mainMenu' && useGameStore.getState().loadedGameState === null);
   const chronicleOpen = useGameStore((state) => state.chronicleOpen);
   const armyHQOpen = useGameStore((state) => state.armyHQOpen);
   const armyHQTab = useGameStore((state) => state.armyHQTab);
@@ -41,9 +46,14 @@ export function AudioSurfaceBedController({ appScreen }: AudioSurfaceBedControll
 
   useEffect(() => {
     applyAudioPreferences(loadAudioPreferences());
-    void playMusic('menu_theme');
+    if (startsInOpening.current) playOpeningMusic();
+    else void playMusic('menu_theme');
     return () => stopMusic();
   }, []);
+
+  useEffect(() => {
+    if (appScreen !== 'mainMenu') leaveOpeningMusicWindow();
+  }, [appScreen]);
 
   useEffect(() => {
     if (!bedId) {
@@ -58,7 +68,7 @@ export function AudioSurfaceBedController({ appScreen }: AudioSurfaceBedControll
     return installAudioGestureUnlockListeners(undefined, () => {
       // Keep the current in-memory choice: denied persistence must not undo
       // a preference the player just changed in Settings.
-      void playMusic('menu_theme');
+      retryRequestedMusic();
       if (bedId) void playAmbientBed(bedId);
     }, true);
   }, [bedId]);

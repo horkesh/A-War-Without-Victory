@@ -32,3 +32,6 @@ logs/branch-hygiene/20260924-parallel-audit/r8-uncommitted.patch -text -diff
 logs/r8-native-calibration-parity-20261026/initial-calibration-packet/** -text -diff
 # Preserve the archived R8 draft patch's recorded SHA-256 on every checkout.
 logs/branch-hygiene/20260924-parallel-audit/r8-uncommitted.patch -text
+
+# Keep the pinned audio sample license hash stable on Windows checkouts.
+docs/audio/LICENSES/VSCO-2-CE-CC0.txt text eol=lf

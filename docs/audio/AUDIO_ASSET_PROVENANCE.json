@@ -342,23 +342,44 @@
       ]
     },
     "menu_theme": {
-      "file": "src/ui/map/assets/audio/music/menu_original.ogg",
-      "original_filename": "menu_theme.pcm_s24le_48000_2ch",
-      "original_sha256": "04b19917b4592dbcc35b4fdeffa720c057498ac93e99e0a4c9ed4267e7e3c877",
-      "processed_sha256": "5e5381ef95946e39f2ed093120f9a8906e83548fd0e8c514df835b79ebf22cf0",
-      "duration_seconds": 90.0,
-      "loudness_lufs": -21.3,
-      "loudness_method": "FFmpeg 8.1.2 ebur128 final Summary integrated I, measured on encoded OGG",
-      "source_url": "tools/audio/generate_original_soundscape.py#menu_theme",
-      "author": "A War Without Victory project",
+      "file": "src/ui/map/assets/audio/music/what_remains_of_home.ogg",
+      "original_filename": "what_remains_of_home.ogg",
+      "original_sha256": "03e41ab40866925750f956a6d33a73e07846d33a4cbced71c213a03553b2d81b",
+      "processed_sha256": "03e41ab40866925750f956a6d33a73e07846d33a4cbced71c213a03553b2d81b",
+      "duration_seconds": 125.03535416666666,
+      "loudness_lufs": -18.3,
+      "loudness_method": "FFmpeg 8.1.2 ebur128 final Summary integrated I on bundled OGG; logs/player-experience-completion-20261105/opening-integration/menu-loudness.log",
+      "source_url": "docs/audio/WHAT_REMAINS_OF_HOME_AUDITION.json",
+      "author": "A War Without Victory project; VSCO 2 CE samples by Versilian Studios / Sam Gossner, sample cutting Elan Hickler / Soundemote",
       "license": "FIRST_PARTY",
       "license_url": "docs/audio/LICENSES/menu_theme.md",
-      "attribution": "A War Without Victory project \u2014 original procedural composition and synthesis",
-      "processing_command": "python tools/audio/generate_original_soundscape.py --music-only --publish",
+      "attribution": "What Remains of Home \u2014 original project composition; recorded samples: VSCO 2 CE \u2014 Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote \u2014 CC0-1.0",
+      "processing_command": "none; approved final OGG copied byte-for-byte; no rendering or sample processing",
       "license_note": "docs/audio/LICENSES/menu_theme.md",
       "sensitive_content_class": "restrained_music",
       "disposition": "provided",
-      "notes": "Original fixed-seed synthesis; no samples or quotations. Revision 2: recurring low piano motif, overlapping bowed suspensions and evolving analogue grain; 90-second clean ending, not a seamless loop."
+      "notes": "Original authored score rendered with pinned CC0 VSCO 2 CE recorded samples. Source/sample hashes and frozen render recipes retained in WHAT_REMAINS_OF_HOME_AUDITION.json. User authorized renderer integration on 2026-11-05. Calm menu v3; clean ending retained and whole track looped.",
+      "previous_versions": [
+        {
+          "file": "src/ui/map/assets/audio/music/menu_original.ogg",
+          "original_filename": "menu_theme.pcm_s24le_48000_2ch",
+          "original_sha256": "04b19917b4592dbcc35b4fdeffa720c057498ac93e99e0a4c9ed4267e7e3c877",
+          "processed_sha256": "5e5381ef95946e39f2ed093120f9a8906e83548fd0e8c514df835b79ebf22cf0",
+          "duration_seconds": 90.0,
+          "loudness_lufs": -21.3,
+          "loudness_method": "FFmpeg 8.1.2 ebur128 final Summary integrated I, measured on encoded OGG",
+          "source_url": "tools/audio/generate_original_soundscape.py#menu_theme",
+          "author": "A War Without Victory project",
+          "license": "FIRST_PARTY",
+          "license_url": "docs/audio/LICENSES/menu_theme.md",
+          "attribution": "A War Without Victory project \u2014 original procedural composition and synthesis",
+          "processing_command": "python tools/audio/generate_original_soundscape.py --music-only --publish",
+          "license_note": "docs/audio/LICENSES/menu_theme.md",
+          "sensitive_content_class": "restrained_music",
+          "disposition": "provided",
+          "notes": "Original fixed-seed synthesis; no samples or quotations. Revision 2: recurring low piano motif, overlapping bowed suspensions and evolving analogue grain; 90-second clean ending, not a seamless loop."
+        }
+      ]
     },
     "operation_complete": {
       "file": "src/ui/map/assets/audio/ui/op_complete.ogg",
@@ -888,6 +909,25 @@
       "sensitive_content_class": "restrained_music",
       "disposition": "missing_optional_placeholder",
       "notes": "Optional placeholder; no binary or license claim."
+    },
+    "opening_titles": {
+      "file": "src/ui/map/assets/audio/music/what_remains_of_home_opening.ogg",
+      "original_filename": "what_remains_of_home_opening.ogg",
+      "original_sha256": "853e1fe7d082e96096960245794307a7b85cb63d4a8d07591cbd996ec114e085",
+      "processed_sha256": "853e1fe7d082e96096960245794307a7b85cb63d4a8d07591cbd996ec114e085",
+      "duration_seconds": 35,
+      "loudness_lufs": -18.0,
+      "loudness_method": "FFmpeg 8.1.2 ebur128 final Summary integrated I on bundled OGG; logs/player-experience-completion-20261105/opening-integration/opening-loudness.log",
+      "source_url": "docs/audio/WHAT_REMAINS_OF_HOME_OPENING_AUDITION.json",
+      "author": "A War Without Victory project; VSCO 2 CE samples by Versilian Studios / Sam Gossner, sample cutting Elan Hickler / Soundemote",
+      "license": "FIRST_PARTY",
+      "license_url": "docs/audio/LICENSES/opening_titles.md",
+      "attribution": "What Remains of Home \u2014 original project composition; recorded samples: VSCO 2 CE \u2014 Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote \u2014 CC0-1.0",
+      "processing_command": "none; approved final OGG copied byte-for-byte; no rendering or sample processing",
+      "license_note": "docs/audio/LICENSES/opening_titles.md",
+      "sensitive_content_class": "restrained_music",
+      "disposition": "provided",
+      "notes": "Original authored score rendered with pinned CC0 VSCO 2 CE recorded samples. Source/sample hashes and frozen render recipes retained in WHAT_REMAINS_OF_HOME_OPENING_AUDITION.json. User authorized renderer integration on 2026-11-05. 35-second opening identity, non-looping; natural end continues to calm menu."
     }
   }
 }

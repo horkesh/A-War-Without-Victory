@@ -434,5 +434,13 @@
     "browser_compressed_decode_and_play": "PASS: MP3 and OGG",
     "technical_export_and_sources": "PASS",
     "independent_review": "GO"
+  },
+  "runtime_adoption": {
+    "date": "2026-11-05",
+    "authority": "Explicit user authorization to integrate selected opening cue and calm menu v3",
+    "cue_id": "menu_theme",
+    "bundled_file": "src/ui/map/assets/audio/music/what_remains_of_home.ogg",
+    "bundled_sha256": "03e41ab40866925750f956a6d33a73e07846d33a4cbced71c213a03553b2d81b",
+    "processing": "byte-for-byte copy; audition exports/recipes/sample sources unchanged"
   }
 }
