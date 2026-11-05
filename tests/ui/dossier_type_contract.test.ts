@@ -13,9 +13,12 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { withoutComments } from '../helpers/sourceComments';
 
 const root = resolve(__dirname, '../..');
-const read = (relativePath: string) => readFileSync(resolve(root, relativePath), 'utf8');
+// Comments are stripped before any absence assertion: the prose most likely to mention
+// `font-mono` is the comment explaining why it is not used (tests/helpers/sourceComments.ts).
+const read = (relativePath: string) => withoutComments(readFileSync(resolve(root, relativePath), 'utf8'));
 
 function tsxFiles(dir: string): string[] {
   const out: string[] = [];
@@ -56,7 +59,7 @@ describe('type policy: prose in the command face, figures in the data face', () 
     const offenders: string[] = [];
     for (const dir of dirs) {
       for (const file of tsxFiles(resolve(root, dir))) {
-        for (const offender of proseInDataFace(readFileSync(file, 'utf8'))) {
+        for (const offender of proseInDataFace(withoutComments(readFileSync(file, 'utf8')))) {
           offenders.push(`${relative(root, file)}:${offender}`);
         }
       }
