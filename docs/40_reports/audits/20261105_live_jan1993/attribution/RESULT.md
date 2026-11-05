@@ -139,3 +139,25 @@ The one new January mismatch is Donji Koričani (Skender Vakuf, painted RS, now 
 **Live January 1993**, production autonomy, historical-default policies: **RBiH 711, RS 711, HRHB 711.** For every faction, 0 cells differ from the no-player branch.
 
 Tests: the Kijevo, `cajnice_south` and Goražde roster pins in `tests/pre_planned_operations.test.ts` are updated. The Goražde floor test now drains both rostered brigades.
+
+## Donji Koričani: 711 → 712
+
+Donji Koričani is Croat-majority and HRHB at startup. At week 39 no brigade stands in it; the HVO Vitezovi brigade, which defended it at t23, is back in Vitez. All but one of its 11 neighbours are RS; Čukle (Travnik, RBiH) is the exception.
+
+**Why it was lost:** in both runs the 3rd Banja Luka wins a decisive victory there at t23 without a flip, because the defender is present. In the 707 run, the 1st Krajina commander AI's one-brigade Operacija Munja then takes the empty cell at t34. After the 711 changes, the commander's small single-objective operations each draw 3 brigades and run longer, one at a time. So the Koričani operation (Operacija Zaslon) only starts at t37 and is still planning at t39.
+
+**Variants** (39w, base 711; each 712 at week 39 with 0 lost):
+
+| Variant | Change | Taken | 188w |
+|---|---|---|---|
+| A | Koričani appended to Donji Vakuf `vlasic_pocket` | t35 | 712/708/707/**683**: oct −10 |
+| B | New Donji Vakuf axis, 1st Laktaši from Kruševo Brdo | t29 | 712/708/707/694 |
+| **D** | New Donji Vakuf axis, 3rd Banja Luka from Kruševo Brdo | t29 | **712/708/707/697** |
+
+**A was rejected.** Its October loss is a timing knife-edge. Jajce Recovery ends one week later (t183), so Southern Move executes from t188 instead of t186. Eleven western-Bosnia cells that fell at t186–188 in the 711 run then fall after the run ends. The late-1995 western cells are fragile this way in every run: they fall in the last two or three weeks.
+
+**D adopted.** A one-brigade `skender_vakuf_koricani` axis on Operation Donji Vakuf (a calibration assumption):
+
+- **Headless 188w:** 712/708/707/697 (base 711/707/706/693, net +7).
+- **October 1995 versus 711:** gains Domaljevac, Krepšić, Slatina, Bjelajce and Ostra Luka; loses Sanski Most Ilidža, a t188 capture before.
+- **Guards:** enclaves on schedule; strict health PASS.
