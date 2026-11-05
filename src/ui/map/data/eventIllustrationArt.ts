@@ -27,6 +27,44 @@
  * Canonical owner: src/ui/map/data/eventIllustrationArt.ts
  */
 
+import { t, type MessageKey } from '../i18n';
+
+/**
+ * The §6-gated event stills (docs/40_reports/governance/20260610_SECTION6_ART_SIGNOFF.md).
+ * A still listed here is never decorative: wherever it renders it carries this factual alt
+ * text, and a surface that composites faction colour over its art uses the neutral accent
+ * instead (§6 panel on visual-polish D8, 2026-11-06). Keyed by on-disk basename without
+ * extension. Category plates are never in this table, so they never stand in for a §6 still.
+ */
+const SECTION6_STILL_ALT_KEYS: Readonly<Record<string, MessageKey>> = Object.freeze({
+  event_concentration_camps_revealed_1992: 'eventArt.alt.event_concentration_camps_revealed_1992',
+  event_ahmici_massacre_1993: 'eventArt.alt.event_ahmici_massacre_1993',
+  event_drina_valley_ethnic_cleansing_1992: 'eventArt.alt.event_drina_valley_ethnic_cleansing_1992',
+  event_markale_shelling: 'eventArt.alt.event_markale_shelling',
+  event_srebrenica_falls_1995: 'eventArt.alt.event_srebrenica_falls_1995',
+  event_zepa_falls_1995: 'eventArt.alt.event_zepa_falls_1995',
+});
+
+/** Basename of an authored `image` key without directory or extension; null when blank. */
+function imageStem(image: string | null | undefined): string | null {
+  if (typeof image !== 'string') return null;
+  const trimmed = image.trim();
+  if (trimmed.length === 0) return null;
+  const lastSlash = trimmed.lastIndexOf('/');
+  const basename = lastSlash >= 0 ? trimmed.slice(lastSlash + 1) : trimmed;
+  return basename.replace(/\.webp$/i, '') || null;
+}
+
+/**
+ * The factual alt text for a §6-gated still, localised; null for any other image, which a
+ * caller may then treat as decorative (`alt=""`).
+ */
+export function section6StillAlt(image: string | null | undefined): string | null {
+  const stem = imageStem(image);
+  const key = stem ? SECTION6_STILL_ALT_KEYS[stem] : undefined;
+  return key ? t(key) : null;
+}
+
 // Eager + ?url so the bundler hashes any committed illustration into dist and we
 // get a plain URL string keyed by the glob path. An `image` with no matching
 // asset resolves to null and that event falls through to text-only.
