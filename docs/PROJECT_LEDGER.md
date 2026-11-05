@@ -13529,3 +13529,11 @@ Headless 188w is byte-identical to the 2026-11-04 re-pin (702/704/701/691; `fina
 The Goražde gap (Glamoč, Sopotnica) for RBiH and RS players traces to a t1 live/no-player divergence: army-directive pushback appears in the no-player branch only, and by t23 RS 1st Podrinje garrisons Sopotnica. A live-only queue-pollution defect is confirmed and queued for its own run.
 
 Record: `docs/40_reports/audits/20261105_live_jan1993/prestage_fix/RESULT.md`.
+
+## 2026-11-05 - Visual polish and art-direction packet registered under R7 (PLANNED, NO CODE CHANGE)
+
+The owner asked for a lane that collides with neither the live January 1993 calibration worktree nor Codex's player-experience packet, and chose game art, GUI and visual polish. A live inspection of the shipped art library (about 130 plates under `src/ui/map/assets/` and 15 faction-year room plates under `src/ui/warroom/assets/`) and of the running map app on main `f0d77121c` (Vite, RBiH, turn 1, 1366x768 and 1920x1080) found the art coherent and the chrome generic. Verified wiring facts: 28 events across the six catalog files author an `image` key for the 31 shipped illustrations; `EventDecisionModal` does not use `DecisionModalImageHeader` while six sibling modals do; the corkboard map is already live data drawn by `WarroomShellLayer`; a procedural paper Staff Map already exists at the fourth zoom.
+
+Record: `docs/40_reports/working/20261105_VISUAL_INSPECTION_AND_ART_DIRECTION.md` with twelve screenshots. Packet: `docs/plans/2026-11-05-visual-polish-art-direction-plan.md`, registered as a subordinate R7 presentation packet in the roadmap §5 R7 row, the command board R7 row, the plans README, `GUI_MASTER.md`, `WARROOM_MASTER.md` and `GUI_POLISH_MASTER.md`; `plan_index.yml` regenerated. Phases: 0 baseline, A war map as a map, B diegetic warroom chrome, C art wiring, D paper/type for Army HQ, Chronicle and Codex, E opening faction step, F asset QA decision packet. Presentation only: no simulation, state, save, scenario, calibration, audio, Settings or modal focus/dismissal change; Codex's open files and the calibration worktree are excluded by the plan's §3.
+
+Housekeeping: `.claude/launch.json` pointed `preview_start` at a non-existent `src/ui/map/node_modules/vite`; it now runs `npm run dev:map` on port 3002.

@@ -1,6 +1,6 @@
 # AWWV Warroom Master Reference
 
-**Updated:** 2026-08-29 (React-owned cinematic opening, exact Warroom continuity, unified typography, approved owner art, and the atmospheric map-portal texture)
+**Updated:** 2026-11-05 (visual polish packet registered: Phase B diegetic warroom chrome is PLANNED, see [../plans/2026-11-05-visual-polish-art-direction-plan.md](../plans/2026-11-05-visual-polish-art-direction-plan.md); nothing in this file's contracts changed)
 
 ## Current shell-transition contract
 
