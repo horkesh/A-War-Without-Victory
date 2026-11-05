@@ -55,3 +55,12 @@ The whole later Trnovo → Circle → Goražde cascade therefore sits downstream
 - Headless 188w is byte-identical to the manifest (final_save 26b80117…, weekly_report 5d25054d…, control_delta 27c9aaef…, activity_summary dbad0370…).
 - Full suite exit 0.
 - Panel decision on the paramilitary split: [paramilitary_panel/DECISION.md](paramilitary_panel/DECISION.md).
+
+## Political-directive fix: measured result (this branch, commit 3be2a5bd8)
+
+- Live January 1993 at production autonomy, 39 turns: RBiH 698, RS 701, HRHB 703; no-player 702. No score change.
+- Mechanism confirmed in the RBiH-player final save:
+  - `political_directives_by_faction` now holds HRHB, RBiH and RS (before: HRHB and RS only). The RBiH verb at t39 is HONOR_TRUCE.
+  - `army_directive_pushback` mentions: 108 (before: 69).
+- Headless 188w is byte-identical to the manifest (final_save 26b80117…, weekly_report 5d25054d…, control_delta 27c9aaef…, activity_summary dbad0370…).
+- Full suite exit 0.
