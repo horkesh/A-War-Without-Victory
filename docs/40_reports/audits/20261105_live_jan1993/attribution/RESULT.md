@@ -28,3 +28,18 @@ The first diagnostic run (`runs/claude-live-jan1993-attribution/`) applied parit
 - **RBiH:** the January 1993 live gap is a design decision, not an operations bug. The panel's lane B, a lawful TO/local-consolidation route through ordinary combat, is the route to close it.
 - **RS:** look for a player-only mechanism other than paramilitaries. The candidates are the opening decision at t0, player-only negotiation/patron setup, and staff-control paths.
 - **Lupnica:** investigation pending.
+
+## Engine change: player staff runs rear-pocket consolidation like bot staff (owner directive)
+
+The owner directed on 2026-11-05 ("this is calibration work now... efficient and quick") that live play must reproduce the calibrated headless result, waiving the panel gate. At autonomy >= 1 the player's staff now consolidates rear pockets exactly as bot staff do. The policy answer governs only a manual player (autonomy 0). Live January 1993, production autonomy, historical-default policies (no diagnostic flag):
+
+| Player | Before | After | No-player | Cells differing player vs no-player |
+|---|---|---|---|---|
+| RBiH | 698 | **702** | 702 | **none** |
+| RS | 701 | 700 | 702 | Glamoč, Sopotnica, Lupnica, Volari |
+| HRHB | 703 | 703 | 702 | Lupnica |
+
+- Headless 188w is byte-identical to the manifest.
+- Full suite exit 0.
+- Lupnica (Lupnica investigator): a knife-edge cell. Headless captures it at t40, one turn after the checkpoint, and player games tip it 1–3 turns earlier. It needs no lever.
+- Next: the player staff's army-reserve requests are never auto-assigned (`army_reserve_system.ts:1297-1301`, at every autonomy). The RS-player Goražde gap has a further unidentified cause.
