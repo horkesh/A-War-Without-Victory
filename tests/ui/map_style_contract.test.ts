@@ -12,6 +12,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { withoutBlockComments } from '../helpers/sourceComments';
 import {
   HILLSHADE_PAINT,
   MAP_PAPER_PALETTE,
@@ -126,7 +127,9 @@ describe('tactical map style contract', () => {
   it('serves glyphs locally and introduces no remote URL', () => {
     expect(style.glyphs?.startsWith('/font/')).toBe(true);
     expect(style.sprite).toBeUndefined();
-    expect(styleText).not.toMatch(/https?:\/\//);
+    // The style is JSON and carries no comments, so the strip is a no-op; it keeps the
+    // absence assertion on the sanctioned path (tests/helpers/sourceComments.ts).
+    expect(withoutBlockComments(styleText)).not.toMatch(/https?:\/\//);
   });
 
   it('prints faction inks as sepia-pulled projections of the canonical palette', () => {
