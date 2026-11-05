@@ -1,6 +1,25 @@
-## Current published snapshot — 2026-11-05 (latest, 712)
+## Current published snapshot — 2026-11-05 (latest, April 1994 at 711)
 
-[Open the current weekly timeline 0–188](control_timeline_jan712_188_20261105.html), with scores of **712/708/707/697** at weeks 39/104/156/188. January 1993 matches all 712 cells.
+[Open the current weekly timeline 0–188](control_timeline_apr711_188_20261105.html), with scores of **712/711/710/693** at weeks 39/104/156/188. January 1993 is signed off at 712/712.
+
+- **Source:** the unpushed local branch `claude/live-jan1993-calibration`; the commit is named in `PUBLICATION-PROVENANCE.json`.
+- **Live equals headless through April 1994.** For RBiH, RS and HRHB as the player at production autonomy, 0 cells differ at weeks 39 and 104. Three fixes made this hold past week 39:
+  - the player's staff follows the historical officer-succession schedule;
+  - peace plans are answered;
+  - a new **pause before combat**: when a decision fires for the player, the turn stops before movement and combat so the answer takes effect that same week.
+- **What changed for April 1994:**
+  - The Jablanica-based 444th Mountain now returns home before the Doljani attack. This unblocks the 4th Corps queue, so Neretva '93 takes Doljani and Turija in September 1993.
+  - Kreševo stays HRHB as a side effect.
+  - Brka is not lawfully reachable: the Serb brigades there are too weak to attack.
+- **October 1995 is −4**, from the known late-1995 timing knife-edge, to be reworked at that checkpoint.
+- **Checks:** strict engine health passes; enclaves on schedule; full suite passes; 0 markers outside their cell.
+- **Not adopted:** baselines are not yet re-pinned.
+
+The previous [712/708/707/697](control_timeline_jan712_188_20261105.html) page remains available; its provenance is archived as `PUBLICATION-PROVENANCE-previous-jan712.json`.
+
+## Previous published snapshot — 2026-11-05 (712)
+
+[Open the 712 weekly timeline 0–188](control_timeline_jan712_188_20261105.html), with scores of **712/708/707/697** at weeks 39/104/156/188. January 1993 matches all 712 cells.
 
 - **Source:** the unpushed local branch `claude/live-jan1993-calibration`; the commit is named in `PUBLICATION-PROVENANCE.json`.
 - **Run:** the 188-week scenario runner with no player; a repeat run is control-identical. The live game (any player faction, production autonomy, historical-default decisions) matches it cell-for-cell at January 1993 (712/712 each).

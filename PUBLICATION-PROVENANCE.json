@@ -2,32 +2,32 @@
  "schema": "awwv.measured-unqualified-live-calibration-publication.v1",
  "prepared": "2026-11-05",
  "artifact": {
-  "name": "control_timeline_jan712_188_20261105.html",
-  "bytes": 718862,
-  "sha256": "b7c82535cbaf00e5f5eafdfe944614b41870fc6a4002726870ae352db41800ba"
+  "name": "control_timeline_apr711_188_20261105.html",
+  "bytes": 718660,
+  "sha256": "41ab508d5fe58331191051598ccdb18657aa0459c6e353de09cc45b52b8db743"
  },
  "status": "MEASURED_UNQUALIFIED_NOT_ADOPTED",
- "source_commit": "f50e42924",
+ "source_commit": "750547089",
  "source_branch": "claude/live-jan1993-calibration (local, unpushed)",
- "calibration_authority": "definitive-harness-regression-v1 scenario_runner 188w (no player); a repeat run is control-identical. Live-equivalent desktop advanceTurn with RBiH, RS or HRHB as player at production autonomy matches it cell-for-cell at week 39 (712/712 each, 0 cells differing).",
+ "calibration_authority": "definitive-harness-regression-v1 scenario_runner 188w (no player). Live-equivalent desktop advanceTurn with RBiH, RS or HRHB as player at production autonomy, with the player's decisions answered inside the new pause-before-combat, matches it cell-for-cell at weeks 39 and 104 (0 cells differing for all three factions, bot_equivalent decision policy).",
  "completed_week": 188,
  "initial_scored_cells": 712,
  "rendered_polygons": 744,
- "final_save_sha256": "c31249042d04b9376422c1d73ce6fbea3ab3515df9f97b1dc638ec24e47931db",
+ "final_save_sha256": "39962a57639dcd944b8958318a33292312b4659470af55efe1b5b360d8a37317",
  "scores": [
+  712,
+  711,
+  710,
+  693
+ ],
+ "previous_published_scores": [
   712,
   708,
   707,
   697
  ],
- "previous_published_scores": [
-  711,
-  707,
-  706,
-  693
- ],
  "engine_health_strict": "PASS (0 stranded, 0 ghost, 0 zero-eligible, 0 dead ops, 0 consistency failures)",
  "anchors": "PASS (scenario anchor contract); full vitest suite PASS",
- "viewer_markers": "16 mismatch markers checked, 0 anchors outside cell, 0 markers missing",
- "notes": "Adds a one-brigade Skender Vakuf axis (3rd Banja Luka, Donji Koricani) to Operation Donji Vakuf on top of the 711 snapshot. All operation changes since 707 are calibration assumptions on operation rosters and objectives; there is no control write, no teleport and no startup edit. Farz guard parked until the October 1995 checkpoint. Baselines/structural fingerprint not yet re-pinned."
+ "viewer_markers": "20 mismatch markers checked, 0 anchors outside cell, 0 markers missing",
+ "notes": "January 1993 signed off by the owner at 712/712. April 1994 change: Jablanica-Doljani Local Attack prestages the 444th home from t58, unblocking the 4th Corps queue so Neretva '93 takes Doljani and Turija at t74 (Kresevo stays HRHB as a side effect). Brka is not lawfully fixable (VRS EBK brigades at morale/cohesion 20). October 1995 is -4 from the late-1995 timing knife-edge, accepted until the October checkpoint. Live = headless fixes: staff-controlled player follows the bot officer schedule; harness answers peace plans; player decisions answered in a pause before combat. Farz guard parked; baselines not yet re-pinned."
 }
