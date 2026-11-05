@@ -708,7 +708,9 @@ describe('pre-planned operations', () => {
         assert.equal(local.army_hq_op_id, undefined);
         assert.equal(local.execution_attack_power_mult, undefined);
         assert.equal(local.enqueue_from, undefined);
-        assert.equal(local.prestage_from, undefined);
+        // Calibration assumption (apr1994 711): the 444th returns home to Jablanica
+        // from t58 so the queue head can build at t66 instead of blocking Neretva '93.
+        assert.equal(local.prestage_from, 58);
         assert.equal(local.axes.length, 1);
         assert.deepEqual(local.axes[0]?.brigades, ['arbih_444th_mountain']);
         assert.deepEqual(local.axes[0]?.objectives, ['op:jablanica:doljani_2']);

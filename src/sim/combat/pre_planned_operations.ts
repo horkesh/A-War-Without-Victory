@@ -1851,11 +1851,21 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         // `planning_duration: 3` was spent marching the 444th from
         // `op:konjic:celebici_2`. A t69 opening attack is NOT established by this
         // definition, and no capture of Doljani is guaranteed by it.
+        //
+        // Calibration assumption (apr1994 711, 2026-11-05): `prestage_from: 58`
+        // returns the 444th to its home at Jablanica before the attack opens.
+        // Without it the 444th sits 4 hops away (op:trnovo:tusila), the build fails
+        // `staging_unreachable` every turn t66–t94, and from t95 Washington makes
+        // every objective "already controlled", so this queue head never clears and
+        // Operation Neretva '93 behind it never runs. With it, the local attack
+        // launches and fails, the queue advances, and Neretva '93 takes Doljani and
+        // Turija at t74 by ordinary combat.
         corps: 'arbih_4th_corps',
         faction: 'RBiH',
         name: 'Jablanica–Doljani Local Attack',
         staging_osid: 'op:jablanica:jablanica_2',
         available_from: 66,
+        prestage_from: 58,
         min_attack_outcome: 'repulsed',
         planning_duration: 3,
         minimum_viable_participants: 1,
