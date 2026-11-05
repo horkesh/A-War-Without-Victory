@@ -75,6 +75,7 @@ import { buildFormationsGeoJSON } from './builders/buildFormationsGeoJSON';
 import { buildOsidCentroidLookup } from './builders/geojsonLookup';
 import { resolveFormationNavigationAnchor } from './builders/resolveFormationLocationOsid';
 import { ensureFormationIcons, ensureTacticalIcons } from './formationIcons';
+import { MAP_PAPER_PALETTE } from './mapPaperPalette';
 import { buildFogOfWarGeoJSON } from './builders/buildFogOfWarGeoJSON';
 import { buildEnclaveGeoJSON } from './builders/buildEnclaveGeoJSON';
 import { buildBattleMarkersGeoJSON } from './builders/buildBattleMarkersGeoJSON';
@@ -2701,7 +2702,7 @@ export function MapContainer({
                       ?? (safeHasLayer(m, 'formation-markers') ? 'formation-markers' : undefined);
                     safeEnsureLayer(
                       m,
-                      { id: FOG_FILL_LAYER_ID, type: 'fill', source: FOG_OVERLAY_SOURCE_ID, paint: { 'fill-color': 'rgba(0, 0, 0, 0.42)' } },
+                      { id: FOG_FILL_LAYER_ID, type: 'fill', source: FOG_OVERLAY_SOURCE_ID, paint: { 'fill-color': MAP_PAPER_PALETTE.fog } },
                       fogBeforeId,
                     );
                     if (m.getSource(FOG_OVERLAY_SOURCE_ID)) (m.getSource(FOG_OVERLAY_SOURCE_ID) as GeoJSONSource).setData(fogGeoJson);
