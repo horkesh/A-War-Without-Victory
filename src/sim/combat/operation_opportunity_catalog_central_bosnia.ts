@@ -502,7 +502,7 @@ const weatherSeasonVlasic: AxisPredicate = (_state, turn) => {
 // MODELED allocation, not an attested historical order. The retained trace has
 // the ridge's first Paklarevo fall at155 with nine attackers and no force
 // shortage; the published profile had already taken Paklarevo at113 through a
-// generated operation. This one-turn local model tests whether the existing
+// generated operation. This bounded local model tests whether the existing
 // supplied 3rd Corps trio can deliver the same target at the first fresh
 // post-exhaustion eligibility, without reserving them earlier or changing any
 // force, supply, intel or combat rule.
@@ -527,10 +527,26 @@ const PAKLAREVO_MODEL_AXES: readonly OpportunityAxisDef[] = [{
     staging_osid: PAKLAREVO_MODEL_STAGING,
 }];
 
+// 2026-11-06 re-timing (calibration assumption, not a sourced date). The old
+// single turn 123 never fired: Operacija Ihlas (123-128) and Sjena (128-133)
+// held the 712th. 133 is the first turn Sjena has released the trio; 139 is the
+// last turn before Operacija Slap claims the 712th at 140. Inside the window the
+// ordinary exhaustion gate decides (measured: 3rd Corps exhaustion 46 at 133,
+// first eligible at 139, Paklarevo falls 142 = 19-25 Dec 1994).
+//
+// Why Gornje Krcevine needs this: the COHA exception admits Operation Vlasic
+// Ridge at receipt 155 only, and its serial axis can take one objective per
+// week. Starting from an RS Paklarevo it takes Paklarevo at 155 and only the
+// 17th is in Paklarevo at 156; its lone attack is morale-absorbed and the rest
+// of the group arrives at 158, so Gornje Krcevine waits for COHA expiry (161).
+// With Paklarevo already held, Vlasic planning stages the group INTO Paklarevo
+// and the 155 opening takes Gornje Krcevine (Vitovlje) in the Domet-1 week.
+const PAKLAREVO_MODEL_FIRST_TURN = 133;
+const PAKLAREVO_MODEL_LAST_TURN = 139;
 const dateWindowPaklarevoModel: AxisPredicate = (_state, turn) => {
-    if (turn < 123) return { green: false, reason: 'Paklarevo local model window not yet open' };
-    if (turn > 123) return { green: false, reason: 'Paklarevo local model window has closed' };
-    return { green: true, reason: 'within the single turn 123 Paklarevo local model window' };
+    if (turn < PAKLAREVO_MODEL_FIRST_TURN) return { green: false, reason: 'Paklarevo local model window not yet open' };
+    if (turn > PAKLAREVO_MODEL_LAST_TURN) return { green: false, reason: 'Paklarevo local model window has closed' };
+    return { green: true, reason: 'within the turn 133-139 Paklarevo local model window' };
 };
 
 const stagingAccessPaklarevoModel: AxisPredicate = (state) => {
