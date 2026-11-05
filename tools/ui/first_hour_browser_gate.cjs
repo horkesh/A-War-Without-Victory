@@ -1369,6 +1369,48 @@ async function runFoundationalFlow(page, summary, flow) {
     resolved: true,
   };
   await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_after_decision_receipt`);
+  await resolveParamilitaryOpeningPolicyWithHistoricalDefault(page, summary, flow);
+}
+
+// Since 4af70df91 (src/sim/events/opening_policy_transition.ts) the player must also answer the
+// pre-first-advance "Paramilitary Authorization Policy" decision before the Decision Room opens.
+// The gate answers it with the option the game itself badges "Historical default" (the
+// historically attested choice), records which one, and fails if that badge is missing. It only
+// handles this named decision; any other unexpected required decision still blocks and fails.
+const PARAMILITARY_OPENING_POLICY_TITLE = 'Paramilitary Authorization Policy';
+async function resolveParamilitaryOpeningPolicyWithHistoricalDefault(page, summary, flow) {
+  const appeared = await page.waitForFunction(
+    (title) => document.body.innerText.includes(title),
+    { timeout: 5000 },
+    PARAMILITARY_OPENING_POLICY_TITLE,
+  ).then(() => true, () => false);
+  summary.evidence.paramilitaryOpeningPolicyByFaction ??= {};
+  if (!appeared) {
+    summary.evidence.paramilitaryOpeningPolicyByFaction[flow.faction] = { presented: false };
+    return;
+  }
+  const chosen = await page.evaluate(() => {
+    const buttons = Array.from(document.querySelectorAll('[data-testid="event-decision-response"]'))
+      .filter((el) => {
+        const rect = el.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0 && /historical default/i.test(el.textContent || '');
+      });
+    if (buttons.length !== 1) return { ok: false, count: buttons.length };
+    const label = (buttons[0].getAttribute('aria-label') || buttons[0].textContent || '').replace(/\s+/g, ' ').trim();
+    buttons[0].click();
+    return { ok: true, label };
+  });
+  if (!chosen.ok) {
+    throw new Error(`${flow.faction} ${PARAMILITARY_OPENING_POLICY_TITLE}: expected exactly one visible historical-default response, found ${chosen.count}`);
+  }
+  await page.waitForFunction(
+    (title) => !document.body.innerText.includes(title),
+    { timeout: 15000 },
+    PARAMILITARY_OPENING_POLICY_TITLE,
+  );
+  await dismissTutorialIfPresent(page);
+  summary.evidence.paramilitaryOpeningPolicyByFaction[flow.faction] = { presented: true, response: chosen.label };
+  await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_after_paramilitary_opening_policy`);
 }
 
 async function verifyFirstHourDecisionRoomKnowledgeBoundary(page, summary, flow) {
@@ -1445,13 +1487,18 @@ async function verifyDecisionRecordsAndChronicle(page, summary, flow) {
   await assertTurnZeroRecordsProvenanceCounts(page, summary, flow);
   await captureEvidence(page, summary, 'army_hq_records');
   await waitForVisibleText(page, 'Latest Filed Decision');
-  await waitForVisibleText(page, flow.decisionTitle);
+  // The opening paramilitary policy (when presented) is answered after the foundational decision,
+  // so it is the latest filed record.
+  const latestFiledTitle = summary.evidence.paramilitaryOpeningPolicyByFaction?.[flow.faction]?.presented
+    ? PARAMILITARY_OPENING_POLICY_TITLE
+    : flow.decisionTitle;
+  await waitForVisibleText(page, latestFiledTitle);
   await waitForVisibleText(page, 'Chronicle Decisions');
   await waitForVisibleText(page, '1');
   const recordsSummaryText = await visibleSurfaceText(page, [
     'Archive Routes',
     'Chronicle Decisions',
-    flow.decisionTitle,
+    latestFiledTitle,
   ]);
   assertNoFirstHourKnowledgeLeaks('Army HQ Records summary', recordsSummaryText);
   summary.evidence.receiptChecksByFaction ??= {};
