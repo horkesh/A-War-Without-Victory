@@ -164,8 +164,13 @@ class WarroomApp {
         }
         // PAUSE BEFORE COMBAT: forward the in-flight turn's paused/resumed status into the
         // embedded React map, which owns the decision modal and its Continue turn button.
+        // The pause happens INSIDE the embedded advanceTurn invoke, so the paused state the main
+        // process sent just before this status is still held back by the in-flight-invoke
+        // coalescing (applyAdmittedDesktopGameStateUpdate). Release it first: the paused turn
+        // waits on the player, and the React map can only open the decision from that state.
         if (this.desktopBridge?.subscribeTurnPausedForDecisions) {
             this.unsubscribeDesktopTurnPaused = this.desktopBridge.subscribeTurnPausedForDecisions((status: unknown) => {
+                this.flushPendingEmbeddedGameState();
                 this.broadcastEmbeddedBridgeEvent('turn-paused-for-decisions', status);
             });
         }

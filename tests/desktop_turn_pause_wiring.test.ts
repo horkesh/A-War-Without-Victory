@@ -43,6 +43,19 @@ describe('pause-before-combat IPC wiring', () => {
         expect(session).toContain('setTurnPauseStatus(status ?? null)');
     });
 
+    it('the warroom shell releases the held paused state before forwarding the pause status', () => {
+        // The embedded map's advanceTurn is still in flight when the turn pauses, so the shell
+        // holds incoming state until the invoke returns. Found in the real app (2026-11-05): the
+        // paused state never reached the React map and the decision card never opened.
+        const warroom = read('src/ui/warroom/warroom.ts');
+        const start = warroom.indexOf('subscribeTurnPausedForDecisions((status: unknown) => {');
+        expect(start).toBeGreaterThanOrEqual(0);
+        const block = warroom.slice(start, warroom.indexOf('});', start));
+        expect(block).toContain('this.flushPendingEmbeddedGameState();');
+        expect(block.indexOf('this.flushPendingEmbeddedGameState();'))
+            .toBeLessThan(block.indexOf("this.broadcastEmbeddedBridgeEvent('turn-paused-for-decisions', status);"));
+    });
+
     it('the mutex refuses other mutations while the turn is paused', () => {
         expect(main).toContain('createPauseAwareMutex(createSerialMutex(), () => pausedTurn.isPaused())');
     });
