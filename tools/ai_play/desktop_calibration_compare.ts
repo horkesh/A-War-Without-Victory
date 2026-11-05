@@ -44,6 +44,14 @@ interface CliOptions {
     finalSaveDir?: string;
     /** Corps ids whose operation queue and live operations are recorded every turn (diagnostic only). */
     traceCorps?: string[];
+    /**
+     * ATTRIBUTION DIAGNOSTIC ONLY — never a calibration result (Pyrrhic panel 2026-11-05,
+     * docs/40_reports/audits/20261105_live_jan1993/paramilitary_panel/DECISION.md). Gives the
+     * player faction the bot's paramilitary behaviour (no pending-decision window, standing
+     * allow) so player-vs-no-player divergence can be attributed. Requires an `--out` path
+     * containing "attribution"; the output carries a top-level `diagnostic` label.
+     */
+    botParityParamilitaryDiagnostic?: boolean;
     electronLogPath?: string;
     electronAutosavePath?: string;
 }
@@ -211,6 +219,13 @@ function parseArgs(argv: string[]): CliOptions {
     if (Boolean(electronLogPath) !== Boolean(electronAutosavePath)) {
         throw new Error('--electron-log and --electron-autosave must be provided together');
     }
+    const botParityRaw = values.get('--diagnostic-bot-parity-paramilitary');
+    const botParityParamilitaryDiagnostic = botParityRaw === undefined
+        ? false
+        : parseEnum(botParityRaw, ['on'] as const, '--diagnostic-bot-parity-paramilitary') === 'on';
+    if (botParityParamilitaryDiagnostic && !(values.get('--out') ?? '').includes('attribution')) {
+        throw new Error('--diagnostic-bot-parity-paramilitary requires an --out path containing "attribution" (diagnostic output must never sit with calibration evidence)');
+    }
 
     return {
         turns,
@@ -241,7 +256,33 @@ function parseArgs(argv: string[]): CliOptions {
         })(),
         ...(electronLogPath ? { electronLogPath } : {}),
         ...(electronAutosavePath ? { electronAutosavePath } : {}),
+        ...(botParityParamilitaryDiagnostic ? { botParityParamilitaryDiagnostic } : {}),
     };
+}
+
+/** Player paramilitary-policy events, mirroring `PLAYER_PARAMILITARY_POLICY_EVENT` in paramilitary_sweep.ts. */
+const PLAYER_PARAMILITARY_POLICY_EVENT_IDS: Partial<Record<FactionId, string>> = {
+    RS: 'rs_paramilitary_policy_1992',
+    RBiH: 'rbih_paramilitary_policy_1992',
+};
+
+/**
+ * ATTRIBUTION DIAGNOSTIC ONLY. Bot factions spawn paramilitaries from t1 and auto-approve
+ * regardless of their policy decision; the player faction waits while its policy event is
+ * pending and then follows its decision. This removes the player's policy event (so it is
+ * never pending) and sets a standing allow, matching the bot. It is applied to the player
+ * branch's own state only and never to the no-player branch.
+ */
+function applyBotParityParamilitaryDiagnostic(state: GameState, faction: FactionId): void {
+    const eventId = PLAYER_PARAMILITARY_POLICY_EVENT_IDS[faction];
+    if (eventId) {
+        state.military.enabled_event_ids = (state.military.enabled_event_ids ?? []).filter((id) => id !== eventId);
+        if (state.military.pending_event_decisions) {
+            state.military.pending_event_decisions = state.military.pending_event_decisions
+                .filter((decision) => decision.event_id !== eventId);
+        }
+    }
+    state.paramilitary_policy = 'always_allow';
 }
 
 function applyEventPolicy(
@@ -346,6 +387,7 @@ function applyPlayerPolicy(
     options: CliOptions,
     transcript: DecisionTranscriptRow[],
 ): void {
+    if (options.botParityParamilitaryDiagnostic) applyBotParityParamilitaryDiagnostic(state, options.faction);
     applyEventPolicy(state, options.faction, options.eventPolicy, transcript);
     applyHistoricalOperationPolicy(state, options.faction, options.historicalOperationPolicy, transcript);
     applyParamilitaryPolicy(state, options.faction, options.paramilitaryPolicy, transcript);
@@ -766,6 +808,13 @@ async function runComparison(baseDir: string, options: CliOptions) {
             await mkdir(branchDir, { recursive: true });
             await writeFile(resolve(branchDir, 'final_save.json'), serializeState(state), 'utf8');
         }
+        if (options.botParityParamilitaryDiagnostic) {
+            await writeFile(
+                resolve(baseDir, options.finalSaveDir, 'DIAGNOSTIC_ONLY.txt'),
+                'decision_policy=bot_parity_paramilitary_diagnostic\nAttribution evidence only. NOT a calibration score; never cite these saves as calibration.\n',
+                'utf8',
+            );
+        }
     }
 
     const baseOutput = {
@@ -813,6 +862,13 @@ async function runComparison(baseDir: string, options: CliOptions) {
                     : 'between_turns',
             paramilitary_target_scope: 'player_unrestricted_municipality_scope_undefended_only',
         },
+        ...(options.botParityParamilitaryDiagnostic ? {
+            diagnostic: {
+                decision_policy: 'bot_parity_paramilitary_diagnostic',
+                qualifies_calibration: false,
+                note: 'Player branch given bot paramilitary behaviour for attribution; not a matched historical-default policy.',
+            },
+        } : {}),
         decision_transcript: transcript,
         branches: {
             headless: {

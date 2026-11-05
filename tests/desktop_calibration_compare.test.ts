@@ -225,6 +225,40 @@ describe('desktop calibration comparison provenance', () => {
     expect(second.stdout).toBe(first.stdout);
   });
 
+  it('refuses the bot-parity paramilitary diagnostic outside an attribution output path', () => {
+    const result = runComparison([
+      '--turns', '0', '--faction', 'RBiH',
+      '--diagnostic-bot-parity-paramilitary', 'on',
+      '--out', join(fixtureDir, 'calibration-score.json'),
+    ]);
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain('requires an --out path containing "attribution"');
+  });
+
+  it('labels bot-parity paramilitary output as diagnostic and never as calibration', () => {
+    const outPath = join(fixtureDir, 'bot-parity-attribution.json');
+    const result = runComparison([
+      '--turns', '0', '--faction', 'RBiH',
+      '--diagnostic-bot-parity-paramilitary', 'on',
+      '--out', outPath,
+    ]);
+
+    expect(result.status, result.stderr).toBe(0);
+    const output = JSON.parse(readFileSync(outPath, 'utf8'));
+    expect(output.diagnostic).toEqual({
+      decision_policy: 'bot_parity_paramilitary_diagnostic',
+      qualifies_calibration: false,
+      note: 'Player branch given bot paramilitary behaviour for attribution; not a matched historical-default policy.',
+    });
+    expect(output.execution_profiles.gameplay.qualification).toBe('evidence_only');
+  });
+
+  it('carries no diagnostic label when the bot-parity diagnostic is off', () => {
+    const output = JSON.parse(runZeroTurnComparison().stdout);
+    expect(output).not.toHaveProperty('diagnostic');
+  });
+
   it('requires the Electron log and autosave inputs as a pair', () => {
     const result = runComparison([
       '--turns', '1',
