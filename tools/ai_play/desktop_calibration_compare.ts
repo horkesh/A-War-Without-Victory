@@ -37,6 +37,8 @@ interface CliOptions {
     paramilitaryPolicy: ParamilitaryPolicy;
     historicalOperationPolicy: HistoricalOperationPolicy;
     outPath?: string;
+    /** Player-branch autonomy: a fixed level, or 'production' to keep what startNewCampaign sets. */
+    autonomyLevel: 0 | 1 | 2 | 3 | 'production';
     /** When set, write `<dir>/{headless,player}/final_save.json` so each branch can be scored
      *  per-OSID with `tools/compare_painted_vs_sim.cjs <dir>/<branch> --target <checkpoint>`. */
     finalSaveDir?: string;
@@ -228,6 +230,10 @@ function parseArgs(argv: string[]): CliOptions {
         ),
         ...(values.get('--out') ? { outPath: values.get('--out') } : {}),
         ...(values.get('--final-save-dir') ? { finalSaveDir: values.get('--final-save-dir') } : {}),
+        autonomyLevel: (() => {
+            const raw = parseEnum(values.get('--autonomy-level') ?? '1', ['0', '1', '2', '3', 'production'] as const, '--autonomy-level');
+            return raw === 'production' ? 'production' : (Number(raw) as 0 | 1 | 2 | 3);
+        })(),
         ...(electronLogPath ? { electronLogPath } : {}),
         ...(electronAutosavePath ? { electronAutosavePath } : {}),
     };
@@ -677,7 +683,12 @@ async function runComparison(baseDir: string, options: CliOptions) {
         options.faction as 'HRHB' | 'RBiH' | 'RS',
         key,
     )).state;
-    playerState.meta.autonomy_level = 1;
+    // Production startup sets Level 2 (desktop_sim.ts startNewCampaign): Level 1's commander_loop
+    // guard holds commander plans at 'ready' awaiting a human answer, which this harness never
+    // gives. `--autonomy-level production` keeps the production value; the default stays 1 for
+    // backward compatibility with existing artifacts.
+    if (options.autonomyLevel !== 'production') playerState.meta.autonomy_level = options.autonomyLevel;
+    const playerAutonomyLevel = playerState.meta.autonomy_level;
     playerState.meta.decision_mode = options.eventPolicy === 'historical_default'
         ? 'historical'
         : 'emergent';
@@ -763,7 +774,7 @@ async function runComparison(baseDir: string, options: CliOptions) {
             startup_snapshot_sha256: sha256(snapshotPayload.replace(/\r\n/g, '\n')),
         },
         player_policy: {
-            autonomy_level: 1,
+            autonomy_level: playerAutonomyLevel,
             event_decisions: options.eventPolicy,
             non_player_event_mode: playerState.meta.decision_mode,
             player_event_resolution_timing: 'between_turns',
