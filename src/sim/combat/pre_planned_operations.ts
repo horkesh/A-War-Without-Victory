@@ -1185,6 +1185,18 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 // Supply-corrected coordination experiment: wait for both already-assigned brigades.
                 minimum_forward_brigades: 2,
             },
+            {
+                // Calibration assumption (jan1993 712): the 3rd Banja Luka, which already
+                // fights at Donji Koričani at t23, clears the HRHB-held village from
+                // Kruševo Brdo. Painted RS at all four checkpoints; wartime control is
+                // not established by a source (see the Vlašić note in the central-Bosnia
+                // opportunity catalog).
+                axis_id: 'skender_vakuf_koricani',
+                name: 'Skender Vakuf Koričani',
+                brigades: ['rs_3rd_banja_luka_light_infantry' as FormationId],
+                objectives: ['op:skender_vakuf:donji_koricani'],
+                staging_osid: 'op:kotor_varos:krusevo_brdo_i',
+            },
         ],
     },
     {
