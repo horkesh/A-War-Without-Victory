@@ -37,6 +37,9 @@ interface CliOptions {
     paramilitaryPolicy: ParamilitaryPolicy;
     historicalOperationPolicy: HistoricalOperationPolicy;
     outPath?: string;
+    /** When set, write `<dir>/{headless,player}/final_save.json` so each branch can be scored
+     *  per-OSID with `tools/compare_painted_vs_sim.cjs <dir>/<branch> --target <checkpoint>`. */
+    finalSaveDir?: string;
     electronLogPath?: string;
     electronAutosavePath?: string;
 }
@@ -224,6 +227,7 @@ function parseArgs(argv: string[]): CliOptions {
             '--historical-operation-policy',
         ),
         ...(values.get('--out') ? { outPath: values.get('--out') } : {}),
+        ...(values.get('--final-save-dir') ? { finalSaveDir: values.get('--final-save-dir') } : {}),
         ...(electronLogPath ? { electronLogPath } : {}),
         ...(electronAutosavePath ? { electronAutosavePath } : {}),
     };
@@ -716,6 +720,15 @@ async function runComparison(baseDir: string, options: CliOptions) {
             );
         }
         turns.push(row);
+    }
+
+    if (options.finalSaveDir) {
+        // Per-OSID scoring needs the whole final control map, not just the counts emitted below.
+        for (const [branch, state] of [['headless', headlessState], ['player', playerState]] as const) {
+            const branchDir = resolve(baseDir, options.finalSaveDir, branch);
+            await mkdir(branchDir, { recursive: true });
+            await writeFile(resolve(branchDir, 'final_save.json'), serializeState(state), 'utf8');
+        }
     }
 
     const baseOutput = {
