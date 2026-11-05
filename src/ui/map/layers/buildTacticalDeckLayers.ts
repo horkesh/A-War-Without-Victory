@@ -8,6 +8,7 @@
 import { IconLayer, TextLayer } from '@deck.gl/layers';
 import type { FeatureCollection, Feature } from 'geojson';
 import { getIconDataUrl } from '../map/formationIcons';
+import { COUNTER_HALO_RGB, INK_TEXT_RGB, PAPER_HALO_RGB } from '../map/mapPaperPalette';
 import { getFormationStackPixelOffset } from '../map/clickSelectionPriority';
 import { UI_COMMAND_FONT_FAMILY, UI_DATA_FONT_FAMILY } from '../styles/typography';
 
@@ -361,8 +362,8 @@ export function buildTacticalDeckLayers(
                 getPixelOffset: (d: Feature) => getViewportSafePixelOffset(d, viewportClip, labelHalfSize),
                 getText: (d: any) => (d.properties?.name ?? '').toUpperCase(),
                 getSize: fontSize,
-                getColor: [235, 225, 205, 240],
-                outlineColor: [10, 8, 6, 230],
+                getColor: [...INK_TEXT_RGB, 235],
+                outlineColor: [...PAPER_HALO_RGB, 235],
                 outlineWidth: 3,
                 fontFamily: UI_COMMAND_FONT_FAMILY,
                 fontWeight: 'bold',
@@ -486,7 +487,7 @@ export function buildTacticalDeckLayers(
                 getText: () => '\u25cf',
                 getSize: Math.max(18, Math.round(iconHeight * 0.58)),
                 getColor: [15, 19, 26, 255],
-                outlineColor: [235, 225, 205, 255],
+                outlineColor: [...COUNTER_HALO_RGB, 255],
                 outlineWidth: 1,
                 fontSettings: { sdf: true },
                 characterSet: ['\u25cf'],
