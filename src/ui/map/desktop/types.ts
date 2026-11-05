@@ -73,6 +73,16 @@ export interface RuntimeFeatureFlags {
     srkStranglePostureActive: boolean;
 }
 
+/**
+ * PAUSE BEFORE COMBAT (owner decision 2026-11-05): sent by the main process while an
+ * advance-turn is in flight. 'paused' — the turn stopped after evaluate-events for the listed
+ * decisions fired this turn; 'resumed' — the rest of the turn (movement, combat, ...) is
+ * running; `null` — the turn is over.
+ */
+export type TurnPauseStatus =
+    | { status: 'paused'; turn: number; eventIds: string[] }
+    | { status: 'resumed'; turn?: number };
+
 export type { GameStateUpdateMetadata } from '../../shared/gameStateUpdateMetadata';
 import type { GameStateUpdateMetadata } from '../../shared/gameStateUpdateMetadata';
 
