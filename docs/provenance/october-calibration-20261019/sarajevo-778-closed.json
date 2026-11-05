@@ -1,0 +1,31 @@
+{
+  "schema": "awwv.778.closed.v1",
+  "sealed_utc": "2026-10-21T08:12:09.355Z",
+  "writes_closed": true,
+  "verdict": "PASS_BOUNDED_TRACE__ACTUAL_WRITER_AND_RANK_UNMEASURED__NO_FIX",
+  "result": {
+    "path": "logs/claude-channel-20261004/778-result.json",
+    "bytes": 29579,
+    "sha256": "58877156bca2d77fefb20457cdd17b028d2e7cf999e7ac901bb350865bf6ba2d"
+  },
+  "inventory": {
+    "path": "logs/claude-channel-20261004/778-inventory.json",
+    "bytes": 9005,
+    "sha256": "d5f2b2e4957db9094b84c0c36f696c26033d0afd2470b53d32fabf7dbf5cfc7d"
+  },
+  "head": "26431de4d1c63c6b585e9b318974bf1ceecd3e41",
+  "status_porcelain": "",
+  "telemetry": {
+    "C": {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 102001043,
+      "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899"
+    },
+    "D": {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    }
+  },
+  "engine_runs": 0
+}

@@ -151,9 +151,13 @@ test('production choice classification has no direct refused acts and excludes l
 test('Neretva, Grabovica, and Uzdol anchors are source-owned September 1993 content', async () => {
     const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
     assert.strictEqual(report.historical_anchors.length, 2);
+    const expectedWindows: Record<string, string> = {
+        operation_neretva_93_1993: 'turn 76',
+        grabovica_uzdol_massacres_1993: 'turn 77',
+    };
     for (const anchor of report.historical_anchors) {
         assert.strictEqual(anchor.chronology_status, 'pass', `${anchor.anchor_id} historical placement mismatch`);
-        assert.strictEqual(anchor.event_window, 'turns 74-76');
+        assert.strictEqual(anchor.event_window, expectedWindows[anchor.anchor_id], anchor.anchor_id);
         assert.strictEqual(anchor.provenance_status, 'pass');
         assert.strictEqual(anchor.status, 'pass');
         assert.deepStrictEqual(anchor.provenance_gaps, []);

@@ -1,0 +1,65 @@
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/ui/event_decision_auto_launch_contract.test.ts > event decision modal auto-launch contract > logs raw browser fallback event-decision errors while showing generic player copy
+AssertionError: expected '<EventDecisionModal\n            deci…' to contain 'resolveBrowserEventDecision(nextState…'
+
+- Expected
++ Received
+
+- resolveBrowserEventDecision(nextState, eventId, responseId)
++ <EventDecisionModal
++             decision={decision}
++             eventCatalog={eventCatalogFull}
++             state={loadedGameState?.rawGameState}
++             advisor={resolveEventDecisionAdvisor(decision, loadedGameState?.namedOfficerData, playerFaction)}
++             errorMessage={loadError}
++             onDismissError={dismissActiveEventDecisionError}
++             onRespond={async (eventId, responseId) => {
++               const responseLabel = decision.response_options
++                 .find((option) => option.id === responseId)?.label ?? responseId;
++               const publishResponseReceipt = () => setActionReceiptMessage(
++                 t('firedEvent.wrapper.responseRecorded', { response: responseLabel }),
++               );
++               if (ipc.isAvailable) {
++                 const result = await ipc.respondToEventDecision(eventId, responseId);
++                 if (result.ok === true) {
++                   setRecentlyAcceptedEventDecisionId(eventId);
++                   setActiveEventDecisionId(null);
++                   publishResponseReceipt();
++                 } else {
++                   setLoadError(result.error ?? 'Failed to record event decision.');
++                 }
++                 return;
++               }
++               const rawGameState = loadedGameState?.rawGameState;
++               if (!rawGameState) {
++                 setLoadError('Cannot record event decision without loaded game state.');
++                 return;
++               }
++               try {
++                 const nextState = structuredClone(rawGameState);
++                 resolveBrowserEventDecision(nextState, eventId, responseId, eventCatalogFull);
++                 await loadSave(nextState);
++                 setRecentlyAcceptedEventDecisionId(eventId);
++                 setActiveEventDecisionId(null);
++                 publishResponseReceipt();
++               } catch (err) {
++                 console.warn('[EventDecisionModal] browser fallback failed', err);
++                 setLoadError('Failed to record event decision.');
++               }
++             }}
++           />
++         );
++       })()}
++       
+
+ ❯ tests/ui/event_decision_auto_launch_contract.test.ts:162:30
+    160|     );
+    161| 
+    162|     expect(modalRenderBlock).toContain('resolveBrowserEventDecision(ne…
+       |                              ^
+    163|     expect(modalRenderBlock).toContain('console.warn(\'[EventDecisionM…
+    164|     expect(modalRenderBlock).toContain('setLoadError(\'Failed to recor…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

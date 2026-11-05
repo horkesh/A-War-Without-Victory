@@ -259,10 +259,11 @@ describe('applyFacilityCombatDamage', () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe('applyCombatFatigue', () => {
-    it('applies FATIGUE_ATTACKER (2) to all attackers', () => {
+    it('applies FATIGUE_ATTACKER (2) to all attackers in defended combat', () => {
         const a1 = makeFormation({ id: 'a1', ops: { fatigue: 5, last_supplied_turn: null } });
         const a2 = makeFormation({ id: 'a2', ops: { fatigue: 10, last_supplied_turn: null } });
-        applyCombatFatigue({ attackerFormations: [a1, a2], defenderFormation: null });
+        const def = makeFormation({ id: 'def' });
+        applyCombatFatigue({ attackerFormations: [a1, a2], defenderFormation: def });
         expect(a1.ops!.fatigue).toBe(5 + FATIGUE_ATTACKER);
         expect(a2.ops!.fatigue).toBe(10 + FATIGUE_ATTACKER);
     });
@@ -312,10 +313,10 @@ describe('applyCombatFatigue', () => {
         expect(def.ops!.fatigue).toBe(FATIGUE_MAX);
     });
 
-    it('no-ops when no defender', () => {
+    it('applies reduced attacker fatigue when no defender is present', () => {
         const a1 = makeFormation({ id: 'a1', ops: { fatigue: 0, last_supplied_turn: null } });
         applyCombatFatigue({ attackerFormations: [a1], defenderFormation: null });
-        expect(a1.ops!.fatigue).toBe(FATIGUE_ATTACKER);
+        expect(a1.ops!.fatigue).toBe(0.5);
         // No crash, no defender mutation
     });
 });

@@ -1,0 +1,18 @@
+{
+  "schema": "awwv.786.final-preflight-closed.v1",
+  "closed_utc": "2026-10-21T11:21:29.212Z",
+  "writes_closed": true,
+  "result": {
+    "path": "logs/claude-channel-20261004/786-final-preflight-result.json",
+    "bytes": 2742,
+    "sha256": "34b0dfe09f1e4164db70a75b66484e6af44b79d2083bc2d0d0665a7fc75e9460"
+  },
+  "inventory": {
+    "path": "logs/claude-channel-20261004/786-final-preflight-inventory.json",
+    "bytes": 20941,
+    "sha256": "9fded695901f16b16b4d6b4f18d7804602cfb5afe9c59dec15ccd23628e2c339"
+  },
+  "runner_invocations": 0,
+  "allowance_unspent": true,
+  "verdict": "PREPARATION_CORRECTED_AFTER_FINAL_NO_GO__CAMPAIGN_WINDOW_CLOSED_UNSPENT"
+}

@@ -1,0 +1,43 @@
+{
+  "schema": "awwv.startup-policy-repair-v2.compatibility-correction-03.v1",
+  "status": "FOCUSED_GREEN_PENDING_INDEPENDENT_REVIEW",
+  "head": "b371adc3e0935825649e5eda4e6bbd45a44a359d",
+  "implementation": {
+    "production_files_changed_in_this_correction": ["src/sim/events/opening_policy_transition.ts"],
+    "test_files_changed_in_this_correction": ["tests/pre_first_advance_paramilitary_policy.test.ts", "tests/browser_campaign_start_fallback.test.ts", "tests/player_start_surface_contracts.test.ts"],
+    "opening_lane": "turn_fired=0, current turn=0, War/RBiH, exact headless false, exact reviewed identity payload/bookkeeping; queues exactly one reviewed policy decision after canonical player receipt",
+    "legacy_identity_lane": "catalog-authored turn_fired 2-5, current turn >= fire, War/RBiH, headless marker false or absent, exact payload/bookkeeping; uses ordinary canonical resolution and does not queue policy early",
+    "legacy_policy_lane": "retains catalog-authored turn_fired 3-9 with current turn >= fire and accepts the legacy optional headless marker when it is not true",
+    "atomic_rejection": "mixed opening/legacy tuples and stale/forged/duplicate/closed/pre-started-policy states reject on the clone without input mutation"
+  },
+  "checks": {
+    "red_policy": {"exit_code": 1, "passed": 33, "failed": 1, "receipt": "red-policy.receipt.json", "expected_failure": "legacy identity rejected by strict opening guard"},
+    "green_policy_before_proof_extension": {"exit_code": 0, "passed": 34, "failed": 0, "receipt": "green-policy.receipt.json"},
+    "focused_current": {"exit_code": 0, "files_passed": 6, "passed": 94, "failed": 0, "receipt": "focused-current.receipt.json"},
+    "tsc_initial": {"exit_code": 2, "receipt": "tsc.receipt.json", "failure": "two strict-null errors in new notification assertion"},
+    "tsc_corrected": {"exit_code": 0, "receipt": "tsc-corrected.receipt.json"},
+    "diff_check": {"path": "DIFF_CHECK.txt", "result": "clean"}
+  },
+  "bindings": {
+    "final": "FINAL_BINDING.json",
+    "hashes": "FINAL_HASHES.json",
+    "diff": "FINAL_CANDIDATE.diff",
+    "diff_sha256": "691d9bac92b91523eb928e775c1b1799ec1eb5f949a960faa62b925e17be5226",
+    "frozen_startup_sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+  },
+  "proof_added": [
+    "both production adapters resolve serialized legacy identity with absent optional headless metadata identically",
+    "legacy identity receipt then naturally authored policy fire then delayed serialized policy response",
+    "mixed turn-0/turn-3 identity tuples reject through both adapters without mutation",
+    "all foundational options bind exact receipt, notification content/targets, firing count/last-fired/readiness",
+    "all authored morale/alliance immediate target deltas and RS/HRHB timed modifier values/expiry clocks",
+    "timed modifier records persist across the already-existing first Advance",
+    "real foundational and policy modals render every display-safe effect and dimension row"
+  ],
+  "remaining_limits": [
+    "Raw formation morale and alliance values are asserted at immediate resolution; normal combat/alliance systems may evolve them during first Advance, so the test does not require them to remain arithmetically frozen afterward.",
+    "No new independent final review is included in this result.",
+    "No full repository suite, package, native run, build, campaign, tuning, or baseline adoption was authorized or run.",
+    "The previously closed immutable b371 compute differential is retained rather than regenerated because this correction does not touch compute or initialization source."
+  ]
+}

@@ -1,0 +1,259 @@
+32 changed file(s) vs 8913cca6f714e07acf59785ce526c19dc5fc9973; 127 test file(s) reference them:
+
+  tests/affected_tests.test.ts
+      via .claude/README.md, docs/plans/2026-09-12-agent-setup-modernization-plan.md, docs/plans/2026-09-12-agent-setup-modernization-plan.md → tools/affected_tests.cjs
+  tests/agent_skill_import.test.ts
+      via (changed), .claude/skills/awwv-make-cursor-prompt/SKILL.md, .claude/skills/awwv-read-first/SKILL.md
+  tests/audio_asset_provenance.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/build_historical_shadow.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md, docs/plans/2026-09-12-agent-setup-modernization-plan.md → tools/build_historical_shadow.cjs
+  tests/ci_dependency_install_contract.test.ts
+      via .claude/README.md
+  tests/codex_sensitive_claim_inventory.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/codex_sensitive_history_source_notes.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/codex_source_quality.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/cohesion_floor_vs_dissolution.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md, docs/plans/2026-09-12-agent-setup-modernization-plan.md → tools/engine_health_gate.cjs, docs/plans/2026-09-12-agent-setup-modernization-plan.md → tools/hooks/floor_vs_dissolution.ts
+  tests/command_authority_economy.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/consequence_substrate_inventory_diagnostic.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/contain_posture_release_laneA.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/contain_posture_release_laneV.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/contain_predicate_diagnostic.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/corps_operation_readiness.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/dayton_institutional_expansion.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/dayton_phase2_dial_bot_verdict.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/dayton_player_agency_smoke.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/desktop_release_ci_guardrails.test.ts
+      via .claude/README.md
+  tests/diagnostics_output_artifact_ownership.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/docs_desktop_v09_truth.test.ts
+      via .claude/README.md, CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/enclave_formation_displacement.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/endgame_188w_diagnostics.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/engine_health_gate.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md → tools/engine_health_gate.cjs
+  tests/engine_truth_checkpoint.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/event_causality_chain.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/event_family_graph.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/event_state_shape_b2.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/events_evaluate_b3.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/fatigue_distribution_audit_diagnostic.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/final_calibration_candidate_report.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/force_quality_checkpoint_windows_diagnostic.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/force_quality_diagnostic_artifact_ownership.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/force_quality_trace_persistence.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/force_quality_trajectory_diagnostic.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/formation_life_far_from_home_truth.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/formation_life_packet_inventory.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/formation_life_sector_front_inertness.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/game_state_field_classification.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/generated_artifact_inventory.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs, docs/20_engineering/AGENT_WORKFLOW.md, docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md
+  tests/hook_guard_dirty_citation.test.ts
+      via .claude/README.md, CLAUDE.md, docs/plans/2026-09-12-agent-setup-modernization-plan.md → tools/hooks/floor_vs_dissolution.ts
+  tests/hook_guard_inline_script.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md → tools/hooks/floor_vs_dissolution.ts
+  tests/hook_guard_large_read.test.ts
+      via .claude/README.md → tools/local_executor/delegate.mjs, .claude/README.md → tools/local_executor/verdict.mjs, docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/hook_guard_lookup_absence.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md → tools/hooks/floor_vs_dissolution.ts
+  tests/hook_guard_pipe_exit_code.test.ts
+      via .claude/README.md, .claude/README.md → tools/local_executor/delegate.mjs, .claude/README.md → tools/local_executor/verdict.mjs
+  tests/hook_guard_scope_drift.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md → tools/engine_health_gate.cjs, docs/plans/2026-09-12-agent-setup-modernization-plan.md → tools/hooks/floor_vs_dissolution.ts
+  tests/hook_guard_stash_pop.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md → tools/hooks/floor_vs_dissolution.ts
+  tests/hook_guard_truncated_search.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md, docs/plans/2026-09-12-agent-setup-modernization-plan.md → tools/hooks/floor_vs_dissolution.ts
+  tests/hook_registry.test.ts
+      via .claude/README.md → tools/local_executor/delegate.mjs, docs/plans/2026-09-12-agent-setup-modernization-plan.md → tools/hooks/floor_vs_dissolution.ts
+  tests/hv_1995_lifecycle_diagnostic.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/integration_run_summary.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/krivaja_brigade_lifecycle_diagnostic.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/lifecycle_legacy_terms_gate.test.ts
+      via .claude/napkin.md, docs/20_engineering/AGENT_WORKFLOW.md, docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md
+  tests/local_executor_harness.test.ts
+      via .claude/README.md → tools/local_executor/delegate.mjs, .claude/README.md → tools/local_executor/verdict.mjs, CLAUDE.md
+  tests/local_executor_verify_quotes.test.ts
+      via .claude/README.md → tools/local_executor/delegate.mjs, .claude/README.md → tools/local_executor/verdict.mjs, docs/plans/2026-09-12-agent-setup-modernization-plan.md → tools/local_executor/verify_quotes.mjs
+  tests/localization_coverage.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/map_derived_artifact_ownership.test.ts
+      via .claude/README.md
+  tests/officer_oob_provenance.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/officer_quality_no_calendar_railroad.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/open_gates_register.test.ts
+      via .claude/README.md → tools/local_executor/delegate.mjs, .claude/README.md → tools/local_executor/verdict.mjs, docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/operation_commitment_audit.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/operation_delivery_audit_predicate_split.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/operation_launch_order_consistency_diagnostic.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/operational_tactical_group_audit.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/opportunity_campaign_proof_diagnostic.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/opportunity_health_diagnostic.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/painted_compare_artifact_ownership.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/painted_control_targets.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/phase_d_causality_runtime_integration.test.ts
+      via CLAUDE.md, CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/phase_e_activation_simulator.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/plan_index.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md → tools/derive_plan_index.cjs
+  tests/political_dimensions_snapshot.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/presidential_cadence_cli_provenance.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/presidential_cadence_provenance.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/presidential_command_convergence_diagnostic.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/receipt_citations.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md → tools/validate_receipt_citations.cjs
+  tests/render_task_prompt.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md → tools/validate_task_manifests.cjs
+  tests/rs_104week_decision_cadence.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/run_vitest_balanced.test.ts
+      via CLAUDE.md → tools/test/run_vitest_default.mjs
+  tests/runtime_dependency_resolution.test.ts
+      via CLAUDE.md → tools/test/run_vitest_default.mjs
+  tests/sarajevo_constant_inventory.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/sarajevo_id_set_canon_annotation.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/save_migration_drift_artifact_ownership.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/save_migration_drift_audit.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/scenario_historical_painted_anchors.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/scenario_integrity_walk.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/sector_partition_buildCorpsFrontSectors_integration.test.ts
+      via CLAUDE.md → tools/test/run_vitest_default.mjs
+  tests/sector_topology_commit.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/sector_topology_detached_state.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/sector_topology_mutation_journal.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/sector_topology_snapshot.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/sector_topology_solver.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/sector_topology_trace.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/sensitive_history_canon_gate_audit.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/sensitive_history_canon_gate_audit_strict_gate.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/sensitive_history_player_choice_content.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs, docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/sensitive_history_semantics.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/sensitive_history_status_diagnostic.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/sim/events/event_acceptance_report.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/sim/events/event_notification_residuals_diagnostic.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/sim/events/event_presidential_acceptance.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/sim/events/event_taxonomy_report.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/srebrenica_diagnostic_v2.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/srebrenica_rupture_trace_diagnostic.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/standing_og_doctrine_contract.test.ts
+      via docs/20_engineering/AGENT_WORKFLOW.md, docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md
+  tests/strict_null_inventory.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/strict_null_inventory_progress.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs, docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/structural_fingerprint.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/supply_design_completion_diagnostic.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/task_manifests.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md, docs/plans/2026-09-12-agent-setup-modernization-plan.md → tools/validate_task_manifests.cjs
+  tests/terrain_snapshot_artifact_ownership.test.ts
+      via .claude/README.md
+  tests/test_discovery_contract.test.ts
+      via CLAUDE.md → tools/test/run_vitest_default.mjs
+  tests/test_runner_contract.test.ts
+      via CLAUDE.md → tools/test/run_vitest_default.mjs
+  tests/test_runner_default_contract.test.ts
+      via CLAUDE.md, CLAUDE.md → tools/test/run_vitest_default.mjs
+  tests/test_suite_inventory.test.ts
+      via CLAUDE.md → tools/test/run_vitest_default.mjs
+  tests/ui/bosnian_place_name_diacritics.test.ts
+      via .claude/README.md, .claude/README.md → tools/local_executor/delegate.mjs, .claude/README.md → tools/local_executor/verdict.mjs
+  tests/ui/event_decision_modal_catalog.test.ts
+      via CLAUDE.md → tools/diagnostics/operation_delivery_audit.cjs
+  tests/ui/faction_report_mobile_subdivision.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/ui/first_hour_browser_gate_contract.test.ts
+      via .claude/README.md
+  tests/ui/map_mode_shortcut_contract.test.ts
+      via docs/20_engineering/AGENT_WORKFLOW.md, docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md
+  tests/ui/map_modes_no_duplicate_labels.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/ui/onboarding_persistence_replacement.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/ui/ops_view_right_panel_exclusivity.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/ui/situation_briefing_progressive_disclosure.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md
+  tests/ui/typography_contract.test.ts
+      via .claude/README.md
+  tests/ui/warroom_board_luminance.test.ts
+      via docs/plans/2026-09-12-agent-setup-modernization-plan.md → tools/derive_warroom_board_luminance.cjs
+  tests/v092_playtest_package_docs.test.ts
+      via .claude/README.md
+
+SUPERSET heuristic, and not a substitute for CI: a test that reaches the change
+only through imports names none of these paths and will not appear here.

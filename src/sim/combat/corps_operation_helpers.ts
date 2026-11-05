@@ -20,16 +20,21 @@
  * ═══════════════════════════════════════════════════════════════
  */
 
-import type { CorpsCommandState, CorpsFrontSector, CorpsOperation, FormationId, FormationState, GameState, OperationAxis } from '../../state/game_state.js';
+import type { CorpsCommandState, CorpsFrontSector, CorpsOperation, FactionId, FormationId, FormationState, GameState, OperationAxis } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 // ─── Minimal type for pre-planned op fields consumed by buildCorpsOperation ──
 interface PrePlannedOpDef {
     name: string;
     planning_duration?: number;
+    preparation_probe_delivery?: CorpsOperation['preparation_probe_delivery'];
     minimum_viable_participants?: number;
     minimum_assembled_participants?: number;
+    require_all_axes_ready?: boolean;
     execution_attack_power_mult?: number;
+    coordinated_advance?: boolean;
+    sync_operation_name?: string;
+    army_hq_op_id?: string;
     staging_osid: string;
     min_attack_outcome?: CorpsOperation['min_attack_outcome'];
 }
@@ -41,15 +46,61 @@ export function getMaxOperationSlots(activeBrigadeCount: number): number {
 
 /** Whether the corps has a free operation slot */
 export function hasAvailableSlot(cmd: CorpsCommandState, activeBrigadeCount: number): boolean {
-    return cmd.active_operations.length < getMaxOperationSlots(activeBrigadeCount);
+    return getOperationSlotUsage(cmd) < getMaxOperationSlots(activeBrigadeCount);
 }
 
-/** Find which operation (if any) a brigade participates in */
+function sharesExactPreparationParentSlot(
+    op: CorpsOperation,
+    activeOperations: readonly CorpsOperation[],
+): boolean {
+    const link = op.preparation_probe_link;
+    if (!link || op.type !== 'probe') return false;
+    const parent = activeOperations.find((candidate) =>
+        candidate !== op
+        && candidate.preparation_probe_delivery === 'subordinate'
+        && candidate.name === link.parent_operation_name
+        && candidate.started_turn === link.parent_started_turn
+        && candidate.phase === 'planning'
+    );
+    const request = parent?.active_probe;
+    if (!parent || !request
+        || request.started_turn !== link.request_started_turn
+        || request.target_osid !== link.target_osid
+        || request.target_osid !== op.objectives?.[0]) return false;
+    const participants = [...op.participating_brigades].sort(strictCompare);
+    const requested = [...new Set(request.brigade_ids)].sort(strictCompare);
+    const sources = link.source_axes.map((source) => source.brigade_id);
+    if (requested.length !== participants.length || sources.length !== participants.length) return false;
+    if (requested.some((brigadeId, index) => brigadeId !== participants[index])) return false;
+    if (sources.some((brigadeId, index) => brigadeId !== participants[index])) return false;
+    if (participants.some((brigadeId) => parent.participating_brigades.includes(brigadeId))) return false;
+    const parentAxisIds = new Set((parent.axes ?? []).map((axis) => axis.axis_id));
+    return link.source_axes.every((source) => source.axis_id === undefined || parentAxisIds.has(source.axis_id));
+}
+
+export function getOperationSlotUsageForOperations(activeOperations: readonly CorpsOperation[]): number {
+    return activeOperations.reduce(
+        (count, op) => count + (sharesExactPreparationParentSlot(op, activeOperations) ? 0 : 1),
+        0,
+    );
+}
+
+export function getOperationSlotUsage(cmd: CorpsCommandState): number {
+    return getOperationSlotUsageForOperations(cmd.active_operations);
+}
+
+/** Find which operation (if any) a brigade participates in.
+ * A live planning/execution match wins over an earlier recovery-only match;
+ * within each phase class the corps array order remains authoritative.
+ */
 export function findBrigadeOperation(cmd: CorpsCommandState, brigadeId: string): CorpsOperation | null {
+    let recovery: CorpsOperation | null = null;
     for (const op of cmd.active_operations) {
-        if (op.participating_brigades.includes(brigadeId)) return op;
+        if (!op.participating_brigades.includes(brigadeId)) continue;
+        if (op.phase === 'planning' || op.phase === 'execution') return op;
+        recovery ??= op;
     }
-    return null;
+    return recovery;
 }
 
 /** Brigades on all live axes whose current objective matches brigadeId's axis. */
@@ -85,6 +136,32 @@ export function getOperationBrigadesAtCurrentObjective(
 }
 
 /**
+ * Include executing partner commands in a named synchronized assault forecast.
+ * Planning peers are deliberately excluded: they have not committed to the attack.
+ */
+export function getSynchronizedOperationBrigadesAtObjective(
+    state: GameState,
+    op: CorpsOperation,
+    faction: FactionId,
+    objective: string,
+): FormationId[] {
+    const brigadeIds = new Set(getOperationBrigadesAtCurrentObjective(op, objective));
+    if (!op.sync_operation_name) return [...brigadeIds].sort(strictCompare);
+    const commands = state.military.corps_command ?? {};
+    for (const corpsId of Object.keys(commands).sort(strictCompare)) {
+        if (state.military.formations?.[corpsId]?.faction !== faction) continue;
+        const command = commands[corpsId];
+        for (const peer of [...(command?.active_operations ?? [])].sort((a, b) => strictCompare(a.name, b.name))) {
+            if (peer === op || peer.phase !== 'execution' || peer.sync_operation_name !== op.sync_operation_name) continue;
+            for (const brigadeId of getOperationBrigadesAtCurrentObjective(peer, objective)) {
+                brigadeIds.add(brigadeId);
+            }
+        }
+    }
+    return [...brigadeIds].sort(strictCompare);
+}
+
+/**
  * State-wide variant of findBrigadeOperation. Searches every corps's
  * active_operations and returns the first match in deterministic
  * (sorted-corps-id) order.
@@ -116,6 +193,7 @@ export function findBrigadeOperationAnywhere(
     const corpsCommand = state.military?.corps_command;
     if (!corpsCommand) return null;
     const corpsIds = Object.keys(corpsCommand).sort(strictCompare);
+    let recovery: { corps_id: FormationId; cmd: CorpsCommandState; op: CorpsOperation } | null = null;
     for (const cid of corpsIds) {
         const cmd = corpsCommand[cid];
         if (!cmd) continue;
@@ -126,12 +204,13 @@ export function findBrigadeOperationAnywhere(
         // write-path defect, and dereferencing them unguarded crashed
         // checkTriggeredOperations through getOperationsMult -> computeAttackerPower.
         for (const op of cmd.active_operations ?? []) {
-            if (op?.participating_brigades?.includes(brigadeId)) {
-                return { corps_id: cid as FormationId, cmd, op };
-            }
+            if (!op?.participating_brigades?.includes(brigadeId)) continue;
+            const match = { corps_id: cid as FormationId, cmd, op };
+            if (op.phase === 'planning' || op.phase === 'execution') return match;
+            recovery ??= match;
         }
     }
-    return null;
+    return recovery;
 }
 
 /**
@@ -145,7 +224,7 @@ export function getBrigadeExecutionAttackPowerMult(
 ): number {
     const match = findBrigadeOperationAnywhere(state, brigadeId);
     if (!match || match.op.phase !== 'execution') return 1;
-    return Math.max(0.5, Math.min(2, match.op.execution_attack_power_mult ?? 1));
+    return Math.max(0.5, Math.min(3, match.op.execution_attack_power_mult ?? 1));
 }
 
 /** Find a brigade's planning/execution commitment anywhere in corps command. */
@@ -159,9 +238,9 @@ export function findBrigadeLiveOperationAnywhere(
     for (const cid of corpsIds) {
         const cmd = corpsCommand[cid];
         if (!cmd) continue;
-        for (const op of cmd.active_operations) {
-            if (op.phase !== 'planning' && op.phase !== 'execution') continue;
-            if (op.participating_brigades.includes(brigadeId)) {
+        for (const op of cmd.active_operations ?? []) {
+            if (op?.phase !== 'planning' && op?.phase !== 'execution') continue;
+            if (op?.participating_brigades?.includes(brigadeId)) {
                 return { corps_id: cid as FormationId, cmd, op };
             }
         }
@@ -284,15 +363,22 @@ export function buildCorpsOperation(
         objectives: [...new Set(allObjectives)],
         current_objective_index: 0,
         planning_duration: def.planning_duration ?? 1,
+        ...(def.preparation_probe_delivery != null
+            ? { preparation_probe_delivery: def.preparation_probe_delivery }
+            : {}),
         ...(def.minimum_viable_participants != null
             ? { minimum_viable_participants: Math.max(1, Math.trunc(def.minimum_viable_participants)) }
             : {}),
         ...(def.minimum_assembled_participants != null
             ? { minimum_assembled_participants: Math.max(1, Math.trunc(def.minimum_assembled_participants)) }
             : {}),
+        ...(def.require_all_axes_ready === true ? { require_all_axes_ready: true } : {}),
         ...(def.execution_attack_power_mult != null
-            ? { execution_attack_power_mult: Math.max(0.5, Math.min(2, def.execution_attack_power_mult)) }
+            ? { execution_attack_power_mult: Math.max(0.5, Math.min(3, def.execution_attack_power_mult)) }
             : {}),
+        ...(def.coordinated_advance === true ? { coordinated_advance: true } : {}),
+        ...(def.sync_operation_name ? { sync_operation_name: def.sync_operation_name } : {}),
+        ...(def.army_hq_op_id ? { army_hq_op_id: def.army_hq_op_id } : {}),
         supply_readiness: 1.0,
         momentum: 0,
         failure_count: 0,

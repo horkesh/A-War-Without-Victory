@@ -20,6 +20,82 @@ function makeState(): GameState {
 }
 
 describe('reconcileFinalOperationTruth', () => {
+    it.each([
+        { turn: 154, startedTurn: 153, name: 'Generic June Offensive', brigadeId: 'hv_4th_guards_split', retained: false },
+        { turn: 154, startedTurn: 132, name: 'Operation Cincar / Kupres', brigadeId: 'F_HRHB_0001', retained: true },
+        { turn: 155, startedTurn: 132, name: 'Operation Cincar / Kupres', brigadeId: 'F_HRHB_0001', retained: true },
+        { turn: 154, startedTurn: 154, name: 'Operation Cincar / Kupres', brigadeId: 'F_HRHB_0001', retained: false },
+        { turn: 160, startedTurn: 159, name: 'Operation Mistral 1', brigadeId: 'hv_4th_guards_split', retained: true },
+        { turn: 113, startedTurn: 112, name: 'Operation Zvezda 94', brigadeId: 'rs_1st_guards_motorized', retained: true },
+    ])('$name reservation carry-over retained=$retained at t$turn (started t$startedTurn)', ({ turn, startedTurn, name, brigadeId, retained }) => {
+        const state = makeState();
+        state.meta.turn = turn;
+        state.military.formations = {
+            [brigadeId]: makeFormation({
+                id: brigadeId,
+                faction: brigadeId.startsWith('rs_') ? 'RS' : 'HRHB',
+                corps_id: 'test_corps',
+                location_osid: 'front_truth',
+                home_osid: 'front_truth',
+                status: 'active',
+            }),
+            line_brigade: makeFormation({
+                id: 'line_brigade',
+                faction: 'HRHB',
+                corps_id: 'test_corps',
+                location_osid: 'front_truth',
+                home_osid: 'front_truth',
+                status: 'active',
+            }),
+        };
+        state.military.corps_front_sectors = {
+            truth: makeSector({
+                sector_id: 'sector:test:truth',
+                corps_id: 'test_corps',
+                assigned_brigade_ids: [brigadeId, 'line_brigade'],
+                territory_osids: ['front_truth'],
+                friendly_osids: ['front_truth'],
+                edge_ids: ['front_truth__enemy'],
+            }),
+        };
+        state.military.corps_command = {
+            test_corps: {
+                active_operations: [{
+                    name,
+                    type: 'sector_attack',
+                    phase: 'execution',
+                    started_turn: startedTurn,
+                    phase_started_turn: startedTurn,
+                    participating_brigades: [brigadeId, 'line_brigade'],
+                    sector_id: 'sector:test:truth',
+                    axes: [{
+                        axis_id: 'axis:test',
+                        name: 'Main Axis',
+                        assigned_brigades: [brigadeId, 'line_brigade'],
+                        objectives: ['enemy'],
+                        current_objective_index: 0,
+                        status: 'executing',
+                        failure_count: 0,
+                        consecutive_failures_on_current: 0,
+                        momentum: 0,
+                        attack_attempt_count: 0,
+                        objective_capture_count: 0,
+                        movement_only_execution_turns: 0,
+                        idle_execution_turn_streak: 0,
+                    }],
+                    objectives: ['enemy'],
+                }],
+            } as any,
+        };
+
+        reconcileFinalOperationTruth(state);
+
+        const op = state.military.corps_command!.test_corps.active_operations[0]!;
+        expect(op.participating_brigades.includes(brigadeId)).toBe(retained);
+        expect(op.axes?.[0]?.assigned_brigades.includes(brigadeId)).toBe(retained);
+        expect(op.participating_brigades).toContain('line_brigade');
+    });
+
     it('removes stale participants and axis brigades, then reanchors to truthful final sectors', () => {
         const state = makeState();
         state.military.formations = {

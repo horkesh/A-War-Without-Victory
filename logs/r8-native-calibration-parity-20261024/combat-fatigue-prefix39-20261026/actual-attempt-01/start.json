@@ -1,0 +1,70 @@
+{
+  "schema": "awwv.preserved-preflight.start.v1",
+  "start_utc": "2026-10-26T01:58:55.528Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01",
+  "timeout_ms": 300000,
+  "original_argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/qualification.cjs",
+    "--mode",
+    "campaign",
+    "--config",
+    "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/CONFIG.bound.v2.json",
+    "--config-sha256",
+    "790ed05f9676d3c85d7c593a9226d87c8e0ee10ac82c0b52e66fb1a33831b16c",
+    "--evidence",
+    "{evidenceDir}"
+  ],
+  "argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/qualification.cjs",
+    "--mode",
+    "campaign",
+    "--config",
+    "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/CONFIG.bound.v2.json",
+    "--config-sha256",
+    "790ed05f9676d3c85d7c593a9226d87c8e0ee10ac82c0b52e66fb1a33831b16c",
+    "--evidence",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\combat-fatigue-prefix39-20261026-v1\\actual-attempt-01"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "opening-preservation.json",
+    "preflight.json",
+    "launch.json",
+    "campaign.stdout.log",
+    "campaign.stderr.log",
+    "campaign.execution.json",
+    "postrun/evaluation-candidate.json",
+    "postrun/evaluation-positive.json",
+    "postrun/evaluation-negative.json",
+    "postrun/scoring.json",
+    "postrun/consistency.stdout.log",
+    "postrun/consistency.stderr.log",
+    "postrun/consistency.execution.json",
+    "postrun/health.stdout.log",
+    "postrun/health.stderr.log",
+    "postrun/health.execution.json",
+    "postrun/movement.stdout.log",
+    "postrun/movement.stderr.log",
+    "postrun/movement.execution.json",
+    "postrun/graph-roster.json",
+    "postrun/save-provenance.json",
+    "postrun/control-attribution.json",
+    "postrun/horizon-status.json",
+    "closing-preservation.json",
+    "result.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/qualification.cjs",
+    "bytes": 28271,
+    "raw_sha256": "97019c6d0a133c9d54ef99574b052ebfb0d954da17f5de79b235af226cd9f6f3",
+    "normalized_text_sha256": "97019c6d0a133c9d54ef99574b052ebfb0d954da17f5de79b235af226cd9f6f3",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 28271,
+      "sha256": "97019c6d0a133c9d54ef99574b052ebfb0d954da17f5de79b235af226cd9f6f3"
+    }
+  }
+}

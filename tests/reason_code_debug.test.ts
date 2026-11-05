@@ -20,9 +20,11 @@
  * file and reset in `afterEach`.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+    emitLocalOccupationCandidateRecord,
     isReasonCodeTopicEnabled,
+    LOCAL_OCCUPATION_CANDIDATE_PREFIX,
     resetReasonCodeTopicCacheForTests,
     sortedIds,
     whenReasonCodeTopic,
@@ -43,6 +45,16 @@ const ALL_TOPICS: ReasonCodeTopic[] = [
     'movement_reject',
     'objective_filter',
     'opportunity_roster',
+    'route_decision',
+    // ENGINE-HEALTH B3 (2026-09-19): TG augmentation declines.
+    'tg_formation',
+    'dispatcher_decision',
+    'movement_phase',
+    'personnel',
+    'reinforcement_allocation',
+    'local_occupation_candidate',
+    'reconciliation_write',
+    'preplanned_eligibility',
 ];
 
 function setFlag(value: string | undefined): void {
@@ -79,6 +91,14 @@ describe('reason-code gate', () => {
         expect(isReasonCodeTopicEnabled('movement_reject')).toBe(false);
         expect(isReasonCodeTopicEnabled('objective_filter')).toBe(false);
         expect(isReasonCodeTopicEnabled('opportunity_roster')).toBe(false);
+        expect(isReasonCodeTopicEnabled('route_decision')).toBe(false);
+    });
+
+    it.each(ALL_TOPICS)('enables the exact topic %s with whitespace and case normalization only', (topic) => {
+        setFlag(`  ${topic.toUpperCase()}  `);
+        for (const candidate of ALL_TOPICS) {
+            expect(isReasonCodeTopicEnabled(candidate), candidate).toBe(candidate === topic);
+        }
     });
 
     it('accepts all and * as every topic, and tolerates whitespace and case', () => {
@@ -90,10 +110,13 @@ describe('reason-code gate', () => {
         }
     });
 
-    it('DEGRADES A TYPO TO SILENCE rather than throwing', () => {
+    it.each([
+        'battle_stak,not_a_topic',
+        ', ,BATTLE STACK,preplanned eligibility,,',
+    ])('DEGRADES A TYPO OR MALFORMED SELECTOR TO SILENCE rather than throwing: %s', (selector) => {
         // A misspelled topic must never fail a 188-week run. It must produce
         // exactly as much output as an unset variable: none.
-        setFlag('battle_stak,not_a_topic');
+        setFlag(selector);
         for (const topic of ALL_TOPICS) {
             expect(isReasonCodeTopicEnabled(topic)).toBe(false);
         }
@@ -127,6 +150,16 @@ describe('reason-code gate', () => {
         const input = ['c', 'a', 'b'];
         expect(sortedIds(input)).toEqual(['a', 'b', 'c']);
         expect(input).toEqual(['c', 'a', 'b']);
+    });
+
+    it('local occupation emitter is silent when off and isolates a throwing stdout sink when on', () => {
+        const sink = vi.spyOn(console, 'log').mockImplementation(() => { throw new Error('sink failed'); });
+        expect(() => emitLocalOccupationCandidateRecord({ phase: 'test' })).not.toThrow();
+        expect(sink).not.toHaveBeenCalled();
+        setFlag('local_occupation_candidate');
+        expect(() => emitLocalOccupationCandidateRecord({ phase: 'test' })).not.toThrow();
+        expect(sink).toHaveBeenCalledWith(`${LOCAL_OCCUPATION_CANDIDATE_PREFIX} {"phase":"test"}`);
+        sink.mockRestore();
     });
 });
 

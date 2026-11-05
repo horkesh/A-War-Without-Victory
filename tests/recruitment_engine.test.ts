@@ -1,5 +1,6 @@
 import assert from 'node:assert';
 import { describe, expect, test } from 'vitest';
+import { loadOobBrigades } from '../src/scenario/oob_loader.js';
 import type { OobBrigade, OobCorps } from '../src/scenario/oob_loader.js';
 import { createOobFormations } from '../src/scenario/oob_early_war_entry.js';
 import {
@@ -12,10 +13,10 @@ import {
     runBotRecruitment
 } from '../src/sim/recruitment_engine.js';
 import { ensureEmbargoProfiles, getEffectiveHeavyEquipmentAccess } from '../src/state/embargo.js';
-import type { FormationState, GameState } from '../src/state/game_state.js';
+import type { BrigadeComposition, FormationState, GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { militiaPoolKey } from '../src/state/militia_pool_key.js';
-import { RECRUITMENT_DEFAULTS } from '../src/state/recruitment_types.js';
+import { EQUIPMENT_CLASS_TEMPLATES, RECRUITMENT_DEFAULTS } from '../src/state/recruitment_types.js';
 
 function makeBrigade(overrides: Partial<OobBrigade> & Pick<OobBrigade, 'id' | 'faction' | 'name' | 'home_mun'>): OobBrigade {
     return {
@@ -62,6 +63,69 @@ describe('mandatory historical formation timing', () => {
             6,
         )).toBe(true);
         expect(canFormMandatoryHistoricalBrigade([], 5, 6)).toBe(false);
+    });
+
+    test('loads and fields the 31st Drina lineage through the ordinary mandatory pool path at turn 7', async () => {
+        const brigades = await loadOobBrigades(process.cwd());
+        const lineage = brigades.find((brigade) => brigade.id === 'arbih_831st_drina_lineage');
+        expect(lineage).toBeDefined();
+        expect(lineage).toMatchObject({
+            name: '31st Drina Lineage',
+            faction: 'RBiH',
+            corps: 'arbih_1st_corps',
+            home_mun: 'gorazde',
+            home_osid: 'op:gorazde:gorazde_2',
+            mandatory: true,
+            available_from: 7,
+            initial_personnel: 900,
+            manpower_cost: 800,
+        });
+        expect(lineage!.tags ?? []).not.toContain('enclave');
+
+        const poolKey = militiaPoolKey('gorazde', 'RBiH');
+        const state = makeState({
+            meta: { turn: 6, seed: 'krug-31st-lineage' },
+            military: {
+                militia_pools: {
+                    [poolKey]: {
+                        mun_id: 'gorazde', faction: 'RBiH', available: 2000,
+                        committed: 0, exhausted: 0, updated_turn: 6,
+                    },
+                },
+            } as never,
+            political: {
+                political_controllers: { 'op:gorazde:gorazde_2': 'RBiH' },
+            } as never,
+        });
+        const resources = initializeRecruitmentResources(['RBiH'], { RBiH: 0 }, { RBiH: 0 });
+        state.military.recruitment_state = resources;
+        const sidToMun = new Map([['op:gorazde:gorazde_2', 'gorazde']]);
+
+        const before = runBotRecruitment(
+            state, [], [lineage!], resources, sidToMun,
+            { gorazde: 'op:gorazde:gorazde_2' },
+            { includeCorps: false, includeMandatory: true, factionIds: ['RBiH'] },
+        );
+        expect(before.mandatory_recruited).toBe(0);
+        expect(state.military.formations.arbih_831st_drina_lineage).toBeUndefined();
+
+        state.meta.turn = 7;
+        const due = runBotRecruitment(
+            state, [], [lineage!], resources, sidToMun,
+            { gorazde: 'op:gorazde:gorazde_2' },
+            { includeCorps: false, includeMandatory: true, factionIds: ['RBiH'] },
+        );
+        expect(due.mandatory_recruited).toBe(1);
+        expect(state.military.formations.arbih_831st_drina_lineage).toMatchObject({
+            personnel: 900,
+            corps_id: 'arbih_1st_corps',
+            location_osid: 'op:gorazde:gorazde_2',
+        });
+        expect(state.military.militia_pools?.[poolKey]).toMatchObject({
+            available: 1100,
+            committed: 900,
+            updated_turn: 7,
+        });
     });
 });
 
@@ -157,6 +221,7 @@ describe('recruitBrigade', () => {
         assert.strictEqual(result.success, true);
         assert.ok(result.formation);
         assert.strictEqual(result.formation!.name, '7th Muslim');
+        expect(result.formation).toMatchObject({ force_label: 'ARBiH', morale: 60, ops: { fatigue: 0, last_supplied_turn: null }, activation_gated: false, activation_turn: null });
         assert.ok(result.formation!.composition);
         assert.strictEqual(result.formation!.composition!.artillery, 2); // mountain template
         assert.strictEqual(result.action!.equipment_spent, 5); // mountain cost
@@ -261,6 +326,71 @@ describe('recruitBrigade', () => {
         const result = recruitBrigade(state, brigade, 'mountain', resources, sidToMun, {});
         assert.strictEqual(result.success, false);
         assert.strictEqual(result.reason, 'no_equipment');
+    });
+
+    test('dynamic recruitment uses the chosen non-JNA class and ignores authored OOB composition', () => {
+        const poolKey = militiaPoolKey('banja_luka', 'RS');
+        const state = makeState({
+            military: {
+                militia_pools: {
+                    [poolKey]: { mun_id: 'banja_luka', faction: 'RS', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 }
+                }
+            } as any,
+            political: {
+                political_controllers: { s1: 'RS' }
+            } as any,
+        });
+        const sidToMun = new Map([['s1', 'banja_luka']]);
+        const resources = initializeRecruitmentResources(['RS']);
+        const authoredComposition: BrigadeComposition = {
+            infantry: 640,
+            tanks: 99,
+            artillery: 77,
+            aa_systems: 9,
+            tank_condition: { operational: 0.2, degraded: 0.3, non_operational: 0.5 },
+            artillery_condition: { operational: 0.1, degraded: 0.4, non_operational: 0.5 },
+        };
+        const authoredBrigade = makeBrigade({
+            id: 'rs_dynamic_authored',
+            faction: 'RS',
+            name: 'Dynamic Authored',
+            home_mun: 'banja_luka',
+            default_equipment_class: 'motorized',
+            composition: authoredComposition,
+        });
+        const plainBrigade = makeBrigade({
+            id: 'rs_dynamic_plain',
+            faction: 'RS',
+            name: 'Dynamic Plain',
+            home_mun: 'banja_luka',
+            default_equipment_class: 'motorized',
+        });
+        const expected = {
+            infantry: EQUIPMENT_CLASS_TEMPLATES.mechanized.infantry,
+            tanks: EQUIPMENT_CLASS_TEMPLATES.mechanized.tanks,
+            artillery: EQUIPMENT_CLASS_TEMPLATES.mechanized.artillery,
+            aa_systems: EQUIPMENT_CLASS_TEMPLATES.mechanized.aa_systems,
+        };
+
+        const authoredResult = recruitBrigade(
+            state, authoredBrigade, 'mechanized', resources, sidToMun, { banja_luka: 's1' }
+        );
+        expect(authoredResult.success).toBe(true);
+        expect(authoredResult.action?.equipment_class).toBe('mechanized');
+        expect(authoredResult.formation?.equipment_class).toBe('mechanized');
+        expect(authoredResult.formation?.composition).toMatchObject(expected);
+        expect(authoredResult.formation?.composition).not.toEqual(authoredComposition);
+        expect(authoredResult.formation?.composition!.tanks).not.toBe(40);
+        expect(authoredResult.formation?.composition!.artillery).not.toBe(30);
+        expect(authoredComposition.tanks).toBe(99);
+
+        const plainResult = recruitBrigade(
+            state, plainBrigade, 'mechanized', resources, sidToMun, { banja_luka: 's1' }
+        );
+        expect(plainResult.success).toBe(true);
+        expect(plainResult.formation?.composition).toMatchObject(expected);
+        expect(plainResult.formation?.composition!.tanks).not.toBe(40);
+        expect(plainResult.formation?.composition!.artillery).not.toBe(30);
     });
 });
 
@@ -449,7 +579,7 @@ describe('runBotRecruitment', () => {
             faction: 'RBiH',
             name: '1st Cerska Brigade',
             home_mun: 'vlasenica',
-            home_osid: 'op:vlasenica:sebiocina',
+            home_osid: 'op:vlasenica:cerska_2',
             corps: 'arbih_2nd_corps',
             available_from: 4,
             mandatory: true,
@@ -1060,6 +1190,69 @@ describe('runBotRecruitment', () => {
         assert.strictEqual(report.actions.filter((a) => a.mandatory).length, 1);
         assert.ok(state.military.formations['rs_mand_1']);
         assert.ok(!state.military.formations['rs_mand_2']);
+    });
+
+    test('mandatory historical recruitment preserves authored composition and copies it per formation', () => {
+        const poolKey = militiaPoolKey('zenica', 'RBiH');
+        const authoredComposition: BrigadeComposition = {
+            infantry: 700,
+            tanks: 0,
+            artillery: 0,
+            aa_systems: 2,
+            tank_condition: { operational: 0.25, degraded: 0.5, non_operational: 0.25 },
+            artillery_condition: { operational: 0.4, degraded: 0.35, non_operational: 0.25 },
+        };
+        const makeAuthoredState = () => makeState({
+            military: {
+                militia_pools: {
+                    [poolKey]: { mun_id: 'zenica', faction: 'RBiH', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 }
+                }
+            } as any,
+            political: {
+                political_controllers: { s1: 'RBiH' }
+            } as any,
+        });
+        const sidToMun = new Map([['s1', 'zenica']]);
+        const resources = initializeRecruitmentResources(['RBiH'], { RBiH: 0 }, { RBiH: 0 });
+        const brigades = [
+            makeBrigade({
+                id: 'rbih_authored_composition_a',
+                faction: 'RBiH',
+                name: 'Authored A',
+                home_mun: 'zenica',
+                mandatory: true,
+                priority: 1,
+                composition: authoredComposition,
+            }),
+            makeBrigade({
+                id: 'rbih_authored_composition_b',
+                faction: 'RBiH',
+                name: 'Authored B',
+                home_mun: 'zenica',
+                mandatory: true,
+                priority: 2,
+                composition: authoredComposition,
+            }),
+        ];
+
+        const state = makeAuthoredState();
+        runBotRecruitment(
+            state, [], brigades, resources, sidToMun, { zenica: 's1' },
+            { includeCorps: false, includeMandatory: true, factionIds: ['RBiH'] },
+        );
+        const first = state.military.formations['rbih_authored_composition_a'] as FormationState;
+        const second = state.military.formations['rbih_authored_composition_b'] as FormationState;
+        expect(first.composition).toEqual(authoredComposition);
+        expect(second.composition).toEqual(authoredComposition);
+
+        first.composition!.tank_condition.operational = 0.01;
+        expect(authoredComposition.tank_condition.operational).toBe(0.25);
+        expect(second.composition!.tank_condition.operational).toBe(0.25);
+
+        const legacyState = makeAuthoredState();
+        createOobFormations(legacyState, [], [brigades[0]], { zenica: 's1' }, sidToMun);
+        const legacy = legacyState.military.formations['rbih_authored_composition_a'] as FormationState;
+        expect(legacy.composition).toEqual(authoredComposition);
     });
 
     test('RS JNA override: RS mechanized and motorized get 40 tanks, 30 artillery', () => {

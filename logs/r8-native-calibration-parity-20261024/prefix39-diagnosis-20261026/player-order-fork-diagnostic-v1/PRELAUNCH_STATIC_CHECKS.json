@@ -1,0 +1,20 @@
+{
+  "schema": "awwv.player-order-fork-diagnostic-v1.prelaunch-static-checks.v1",
+  "pass": true,
+  "head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+  "checks": {
+    "diagnosticNodeSyntax": "PASS",
+    "launcherNodeSyntax": "PASS",
+    "configJsonParse": "PASS",
+    "boundFileHashes": { "status": "PASS", "count": 15 },
+    "fixedAttemptAbsent": "PASS",
+    "preservedWrapperArgumentShape": "PASS",
+    "publicApiNamesPresentInHarness": "PASS",
+    "sameCorpsOverlapSourceGuardPresent": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "engineExecuted": false,
+  "testsExecuted": false,
+  "attemptCreated": false,
+  "note": "These are parser, hash, source-selector, readability, and runtime-prerequisite checks only. The baseline advance and candidate fork remain unexecuted."
+}

@@ -1,0 +1,88 @@
+{
+  "schema": "awwv.later-native-force-query.precheck.v1",
+  "root": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "node": {
+    "version": "v22.23.2",
+    "executable": "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe"
+  },
+  "source": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/src/desktop/desktop_sim.ts",
+    "bytes": 59490,
+    "sha256": "91e3163da0aeddca169deabf0b73c47216800f0e6dee0ddc63de5d98f7416954"
+  },
+  "warPhases": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/src/sim/turn_phases/war_phases.ts",
+    "bytes": 233941,
+    "sha256": "8a085a37835541f4dc267e5c1f7f75a714bafc596e21d43b1467cb8ee62d7fcd"
+  },
+  "loader": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/node_modules/tsx/dist/loader.mjs",
+    "bytes": 729,
+    "sha256": "0b1c5b86192772fe9257710e739959cee5947c11ae1f93b61abfaa9b80c6def1"
+  },
+  "inputs": [
+    {
+      "label": "turn-016",
+      "path": "tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/turn-autosaves/turn-016.json",
+      "actual": {
+        "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/turn-autosaves/turn-016.json",
+        "bytes": 4756685,
+        "sha256": "861d4e34a4b4c22c15db6fa857449c7f5bd68deb352edbb2a0059c6960ac07e3"
+      },
+      "expected": {
+        "bytes": 4756685,
+        "sha256": "861d4e34a4b4c22c15db6fa857449c7f5bd68deb352edbb2a0059c6960ac07e3"
+      }
+    },
+    {
+      "label": "turn-025",
+      "path": "tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/turn-autosaves/turn-025.json",
+      "actual": {
+        "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/turn-autosaves/turn-025.json",
+        "bytes": 5146025,
+        "sha256": "d384bd9f7f24ebd044fd13bc3b123ad05f51aa074c0d44faedbe99075ac6adcc"
+      },
+      "expected": {
+        "bytes": 5146025,
+        "sha256": "d384bd9f7f24ebd044fd13bc3b123ad05f51aa074c0d44faedbe99075ac6adcc"
+      }
+    },
+    {
+      "label": "turn-030",
+      "path": "tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/turn-autosaves/turn-030.json",
+      "actual": {
+        "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/turn-autosaves/turn-030.json",
+        "bytes": 5218514,
+        "sha256": "2cf9f899f9287f5eeffd631a641f0446449d03fa7b01721a75ebc1ace2588c4f"
+      },
+      "expected": {
+        "bytes": 5218514,
+        "sha256": "2cf9f899f9287f5eeffd631a641f0446449d03fa7b01721a75ebc1ace2588c4f"
+      }
+    },
+    {
+      "label": "final-039",
+      "path": "tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/final-autosave.json",
+      "actual": {
+        "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/final-autosave.json",
+        "bytes": 5364177,
+        "sha256": "623cbaed0e6186bc5f2c4a18fd5e9b22836db9343df0e4122316c92e5c9902e8"
+      },
+      "expected": {
+        "bytes": 5364177,
+        "sha256": "623cbaed0e6186bc5f2c4a18fd5e9b22836db9343df0e4122316c92e5c9902e8"
+      }
+    }
+  ],
+  "targets": [
+    [
+      "op:foca:donje_zesce",
+      "RS"
+    ],
+    [
+      "op:trnovo:tosici",
+      "RS"
+    ]
+  ],
+  "queryOnly": true
+}

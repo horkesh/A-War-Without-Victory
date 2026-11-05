@@ -1,0 +1,72 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T21:56:52.105Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/implementation-v1/retention-correction-v1/attempt-06-focused-green",
+  "timeout_ms": 180000,
+  "original_argv": [
+    "C:/Program Files/Volta/node.exe",
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/implementation-v1/retention-correction-v1/launch.cjs",
+    "{evidenceDir}",
+    "focused-green"
+  ],
+  "argv": [
+    "C:/Program Files/Volta/node.exe",
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/implementation-v1/retention-correction-v1/launch.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-package-v6\\scenario-postturn-parity-repair-v1\\implementation-v1\\retention-correction-v1\\attempt-06-focused-green",
+    "focused-green"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "CHILD_RESULT.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/implementation-v1/retention-correction-v1/launch.cjs",
+    "bytes": 3587,
+    "raw_sha256": "de73b3e5feb3d359b55e24635c8c7ea34ccd9a052f274cd9e15dee032321b914",
+    "normalized_text_sha256": "de73b3e5feb3d359b55e24635c8c7ea34ccd9a052f274cd9e15dee032321b914",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 3587,
+      "sha256": "de73b3e5feb3d359b55e24635c8c7ea34ccd9a052f274cd9e15dee032321b914"
+    }
+  },
+  "end_utc": "2026-10-25T21:57:13.791Z",
+  "pid": 8628,
+  "child_exit": 0,
+  "wrapper_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/implementation-v1/retention-correction-v1/launch.cjs",
+    "bytes": 3587,
+    "raw_sha256": "de73b3e5feb3d359b55e24635c8c7ea34ccd9a052f274cd9e15dee032321b914",
+    "normalized_text_sha256": "de73b3e5feb3d359b55e24635c8c7ea34ccd9a052f274cd9e15dee032321b914",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 804,
+    "sha256": "d558061c4009416e7dcd6f99c5e8d10f79b635fdf7c6b7f868f3fe7486126c86"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "CHILD_RESULT.json",
+      "bytes": 1464,
+      "sha256": "199ac411d420cc3daf80f33391a4ddba3bed9afdb52ebe0cbc0c06120cd4a6f9"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

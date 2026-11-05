@@ -5,6 +5,7 @@
  * Phase H1.2: Fails early if data prerequisites are missing (same remediation as sim:data:check).
  * --map: copy final_save.json to data/derived/latest_run_final_save.json and print tactical map instructions.
  * --video: emit weekly save artifacts and replay_timeline.json for tactical map replay/export.
+ * --save-weeks: emit selected canonical diagnostic saves, e.g. --save-weeks 183,184.
  * --full-replay-save-sequence: emit replay_sequence.jsonl and replay_save_sequence.json full-state payloads.
  * --unique: append timestamp to run directory so each run creates a new folder (no overwrite).
  * --timing-json: emit timing.json with wall-clock benchmark buckets.
@@ -33,6 +34,7 @@ export async function copyFinalSaveToLatestRun(finalSavePath: string, repoRoot: 
 function parseArgs(): {
   scenario: string;
   weeks?: number;
+  saveWeeks?: number[];
   out: string;
   continueSave?: string;
   continueWeek?: number;
@@ -46,6 +48,7 @@ function parseArgs(): {
   const args = process.argv.slice(2);
   let scenario = '';
   let weeks: number | undefined;
+  let saveWeeks: number[] | undefined;
   let out = 'runs';
   let continueSave: string | undefined;
   let continueWeek: number | undefined;
@@ -60,6 +63,13 @@ function parseArgs(): {
       scenario = args[++i];
     } else if (args[i] === '--weeks' && args[i + 1]) {
       weeks = parseInt(args[++i], 10);
+    } else if (args[i] === '--save-weeks') {
+      const operand = args[i + 1];
+      if (!operand || operand.startsWith('--')) {
+        throw new Error('--save-weeks requires a comma-separated week list');
+      }
+      saveWeeks = operand.split(',').map((value) => Number(value));
+      i += 1;
     } else if (args[i] === '--out' && args[i + 1]) {
       out = args[++i];
     } else if (args[i] === '--continue-save' && args[i + 1]) {
@@ -83,13 +93,14 @@ function parseArgs(): {
   if (!scenario) {
     scenario = DEFAULT_SCENARIO;
   }
-  return { scenario, weeks, out, continueSave, continueWeek, postureAllPushAndApplyBreaches, map, video, fullReplaySaveSequence, unique, timingJson };
+  return { scenario, weeks, saveWeeks, out, continueSave, continueWeek, postureAllPushAndApplyBreaches, map, video, fullReplaySaveSequence, unique, timingJson };
 }
 
 async function main(): Promise<void> {
   const {
     scenario,
     weeks,
+    saveWeeks,
     out,
     continueSave,
     continueWeek,
@@ -112,6 +123,7 @@ async function main(): Promise<void> {
     scenarioPath: scenario,
     outDirBase: out,
     weeksOverride: weeks,
+    emitSaveAtWeeks: saveWeeks,
     resumeFromSavePath: continueSave,
     resumeFromWeekIndex: continueWeek,
     postureAllPushAndApplyBreaches,

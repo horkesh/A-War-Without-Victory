@@ -1,0 +1,147 @@
+{
+  "schema": "awwv.pre-first-advance-paramilitary-policy.red-team-review.v1",
+  "date": "2026-10-24",
+  "seat": "Red-team",
+  "lens": "war-or-game / real Bosnian War observer",
+  "independent": true,
+  "implementerExcluded": true,
+  "scope": "static_read_only_proposal_review",
+  "reviewedHead": "b371adc3e0935825649e5eda4e6bbd45a44a359d",
+  "verdict": "GO_WITH_BINDING_CONDITIONS",
+  "implementationAuthorizedByThisSeat": false,
+  "brightLineRuling": {
+    "rewardForAtrocityBrightLineEngaged": true,
+    "brightLineCrossedByBoundedProposal": false,
+    "ring": "Ring 1 existing bounded authorization surface",
+    "reason": "always_allow can enable two immediate territorial captures, but the bounded proposal retains a freely chosen three-option decision, historical/counterfactual truth, full costs, canonical receipts, and civilian/war-crime accounting without target selection, KPI linkage, or recommendation."
+  },
+  "realObserverRuling": {
+    "openingPolicyQuestionAbsurd": false,
+    "approvedInterpretation": "General Presidency command-policy abstraction after the turn-0 identity decision.",
+    "forbiddenInterpretations": [
+      "documented exact three-option meeting at campaign birth",
+      "complete effective control of every irregular group at turn 0",
+      "historically verified RBiH paramilitary action at the two simulated target OSIDs",
+      "standing authorization as historically normal or necessary for calibration"
+    ]
+  },
+  "causalBoundary": {
+    "provenImmediateDifferences": [
+      "op:brcko:bukvik_gornji_2",
+      "op:srebrenica:obadi"
+    ],
+    "allSevenJanuaryDifferencesProven": false,
+    "score707Proven": false,
+    "historicalParityProven": false,
+    "calibrationAdoptionProven": false
+  },
+  "bindings": [
+    {
+      "id": "RED-1",
+      "requirement": "Queue exactly one policy decision after the explicit turn-0 RBiH identity receipt and before Advance; retain ask until response; keep deny, ask, and allow equally operable and unselected; add no pressure, countdown, recommendation, or focus-as-consent behavior."
+    },
+    {
+      "id": "RED-2",
+      "requirement": "Forbid selection or inference from Historical mode, identity, harness flags, retries, save/load, hydration, IPC redelivery, fallback, or headless behavior; require one visible player action, one player-source receipt, fail-closed errors, and no duplicates."
+    },
+    {
+      "id": "RED-3",
+      "requirement": "Preserve every authored option and all labels, descriptions, markers, sources, assessments, future consequences, previews, flags, dimensions, modifiers, notifications, and causality, including allow's civilian/war-crime disclosure and complete political and recruitment costs."
+    },
+    {
+      "id": "RED-4",
+      "requirement": "Move the whole event and exact clocks to turn 0; prohibit direct writes, provisional overrides, second authorities, reduced costs, later duplicate events, and split receipts; any consequence that cannot move intact voids the verdict."
+    },
+    {
+      "id": "RED-5",
+      "requirement": "Route every enabled deployment and capture through all existing detection, spawn, advance, displacement/civilian-casualty, war_crimes_events, standing, condemnation, ledger, and provenance writers; any missing, delayed, reset, suppressed, or selective accounting blocks."
+    },
+    {
+      "id": "RED-6",
+      "requirement": "Add no parity, recovery, optimal-play, stronger-opening, territorial-opportunity, military-necessity, score, grade, achievement, recommendation, casualty-to-territory, territory-per-atrocity, or mitigation frame; human cost remains neutral-or-worse in every score dimension."
+    },
+    {
+      "id": "RED-7",
+      "requirement": "Keep always_deny the historical default and ask/always_allow counterfactual; describe the event as a general command abstraction, not a dated incident or achieved control; use the approved April sources and never the two captures as historical evidence."
+    },
+    {
+      "id": "RED-8",
+      "requirement": "Limit proof to two immediate differences and pre-first-Advance capability; make no claim about all seven January differences, score 707, turn-39/188 equivalence, historical parity, calibration fitness, or acceptance-floor satisfaction."
+    },
+    {
+      "id": "RED-9",
+      "requirement": "Preserve n91-n95 and all telemetry byte-identically; change no event data, headless/no-player behavior, sweep/target/control/capture/scoring logic, policy values, historical default, protected controls, baselines, thresholds, or acceptance criteria."
+    },
+    {
+      "id": "RED-10",
+      "requirement": "Use focused RED/GREEN proof for explicit branches, clocks, hostile cases, receipt idempotence, persistence, Electron/browser equivalence, and civilian/war-crime accounting; never relabel the frozen b371adc3e suite as implementation evidence or run a package/campaign for reassurance."
+    },
+    {
+      "id": "RED-11",
+      "requirement": "Stop and surface the owner on coercive, efficient, historically normal, calibration-required, territory-offsetting, or incompletely accounted behavior, or whenever free refusal is in doubt; do not reinterpret the gate to save the candidate."
+    }
+  ],
+  "preserve": [
+    "n91",
+    "n92",
+    "n93",
+    "n94",
+    "n95",
+    "all telemetry",
+    "event data",
+    "headless and bot behavior",
+    "sweep, target, control, capture, scoring, civilian, and war-crime writer semantics",
+    "protected controls, baselines, thresholds, and acceptance criteria"
+  ],
+  "sourceBindings": [
+    {
+      "path": "docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md",
+      "lines": "50-66,128-143,207-233,250-256",
+      "sha256": "4945b9a0bb7d300a5185ac09e069cac9911e3c4a88d01f963ff5699adea40247"
+    },
+    {
+      "path": "docs/10_canon/FORAWWV.md",
+      "lines": "4-14,167-170,353",
+      "sha256": "93ffe5844bbbdd6f091a6e523f0bc46cc1e35a088e2d1a3abac4f07fb9e42ebe"
+    },
+    {
+      "path": "docs/40_reports/REAL_WAR_MASTER.md",
+      "lines": "285-287,1603-1608,2028-2031,2057-2063",
+      "sha256": "1f55134a7d7e5ec926413183572299b370a80eb5da3a4d3c6258af6c92827726"
+    },
+    {
+      "path": "data/scenarios/events/war_1992.json",
+      "lines": "2103-2345",
+      "sha256": "7596df56b934be4334ab8bffe51cf92f439c1fec238d6b82c21e68f25c61162a"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/clean-freeze-review/PARAMILITARY_TIMING_AUTHORITY_AUDIT.md",
+      "lines": "3-56",
+      "sha256": "8b5716f8628ad6400616e0b36498e57bf875a889e473cf8976a762fa906b0c90"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/PROPOSAL.md",
+      "lines": "5-74",
+      "sha256": "12ff5263e6c9236b6db1812cc9e7052b405e7037111ae510730883758e0dc109"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/RED_FIXTURE_DESIGN.md",
+      "lines": "5-61",
+      "sha256": "0d18b1b250645a6b254ab9694b6496af10a3166ccde6fd392592af4a945c4b77"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/SOURCE_AUDIT.json",
+      "sha256": "5bef240dab4e171f52ca8ec205be01fe623e8e17ec3b81b670177f2a9605fd54"
+    }
+  ],
+  "execution": {
+    "implementation": false,
+    "sourceRuntimeDocsTestWrites": false,
+    "tests": false,
+    "build": false,
+    "package": false,
+    "campaign": false,
+    "native": false,
+    "reviewArtifactWritesOnly": true
+  }
+}

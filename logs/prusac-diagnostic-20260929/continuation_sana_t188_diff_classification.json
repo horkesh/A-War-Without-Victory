@@ -1,0 +1,233 @@
+{
+  "normalized_leaf_difference_count": 1147,
+  "counts_by_top_level": {
+    "military": 1093,
+    "turn_summaries[]": 54
+  },
+  "counts_by_system": {
+    "military.corps_command": 908,
+    "military.formations": 168,
+    "turn_summaries[].movements[]": 30,
+    "turn_summaries[].arc_transitions[]": 16,
+    "turn_summaries[].battles[]": 6,
+    "military.corps_front_sectors": 5,
+    "military.casualty_ledger": 4,
+    "military.militia_pools": 3,
+    "military.negotiation": 3,
+    "military.strategic_reserves": 2,
+    "turn_summaries[].arc_transitions[length]": 1,
+    "turn_summaries[].movements[length]": 1
+  },
+  "counts_by_subsystem": {
+    "military.corps_command.arbih_2nd_corps": 384,
+    "military.corps_command.arbih_1st_corps": 111,
+    "military.corps_command.hvo_northwest_bosnia": 69,
+    "military.corps_command.arbih_3rd_corps": 64,
+    "military.corps_command.vrs_1st_krajina": 62,
+    "military.corps_command.hvo_southeast_herzegovina": 53,
+    "military.corps_command.arbih_5th_corps": 31,
+    "military.corps_command.vrs_drina": 30,
+    "military.corps_command.hvo_tomislavgrad": 20,
+    "military.formations.hrhb_105th_modrica_brigade": 19,
+    "military.formations.arbih_1st_cerska": 18,
+    "military.corps_command.arbih_4th_corps": 15,
+    "military.corps_command.vrs_2nd_krajina": 15,
+    "military.corps_command.vrs_herzegovina": 15,
+    "military.formations.rs_4th_banja_luka_light_infantry": 13,
+    "military.formations.rs_1st_gradika_light_infantry": 11,
+    "military.corps_command.arbih_general_staff": 10,
+    "military.corps_command.vrs_east_bosnian": 10,
+    "military.corps_command.vrs_sarajevo_romanija": 10,
+    "military.formations.arbih_246th_vitezka_mountain": 10,
+    "military.corps_command.hvo_central_bosnia": 9,
+    "military.formations.arbih_2nd_corps": 7,
+    "military.formations.arbih_general_staff": 7,
+    "turn_summaries[].movements[].formation_id": 7,
+    "turn_summaries[].movements[].formation_name": 7,
+    "turn_summaries[].movements[].from_osid": 7,
+    "turn_summaries[].movements[].to_osid": 7,
+    "turn_summaries[].battles[].defender_contributions[]": 6,
+    "military.casualty_ledger.RS": 4,
+    "military.formations.hvo_main_staff": 4,
+    "military.formations.hvo_northwest_bosnia": 4,
+    "military.formations.rs_17th_klju_light_infantry": 4,
+    "military.formations.hrhb_111th_brigade": 3,
+    "military.formations.rs_15th_biha_infantry": 3,
+    "military.negotiation.capital": 3,
+    "turn_summaries[].arc_transitions[].formation_id": 3,
+    "turn_summaries[].arc_transitions[].formation_name": 3,
+    "turn_summaries[].arc_transitions[].from_arc": 3,
+    "turn_summaries[].arc_transitions[].to_arc": 3,
+    "military.corps_front_sectors.sector:arbih_2nd_corps:1": 2,
+    "military.corps_front_sectors.sector:vrs_1st_krajina:4": 2,
+    "military.formations.arbih_280th_east_bosnian_light": 2,
+    "military.formations.arbih_282nd_east_bosnian_light": 2,
+    "military.formations.arbih_283rd_east_bosnian_light": 2,
+    "military.formations.arbih_284th_east_bosnian_light": 2,
+    "military.formations.arbih_801st_light": 2,
+    "military.formations.arbih_808th_liberation": 2,
+    "military.formations.arbih_843rd_light": 2,
+    "military.formations.arbih_851st_vitezka_liberation": 2,
+    "military.formations.hrhb_94th_brigade": 2,
+    "military.formations.hrhb_95th_brigade": 2,
+    "military.formations.hrhb_ban_jelai_brigade": 2,
+    "military.formations.hrhb_kiseljak_brigade": 2,
+    "military.formations.hrhb_kreevo_brigade": 2,
+    "military.militia_pools.tuzla:RBiH": 2,
+    "turn_summaries[].arc_transitions[]": 2,
+    "turn_summaries[].arc_transitions[].faction": 2,
+    "turn_summaries[].movements[]": 2,
+    "military.corps_front_sectors.sector:vrs_drina:1": 1,
+    "military.formations.arbih_17th_vitezka_mountain": 1,
+    "military.formations.arbih_1st_olovo": 1,
+    "military.formations.arbih_281st_east_bosnian_light": 1,
+    "military.formations.arbih_327th_vitezka_mountain": 1,
+    "military.formations.arbih_328th_mountain": 1,
+    "military.formations.arbih_4th_muslim_light": 1,
+    "military.formations.arbih_501st_slavna_mountain": 1,
+    "military.formations.arbih_502nd_vitezka_mountain": 1,
+    "military.formations.arbih_504th_cazin_light": 1,
+    "military.formations.arbih_506th_mountain": 1,
+    "military.formations.arbih_511th_slavna_mountain": 1,
+    "military.formations.arbih_517th_light": 1,
+    "military.formations.arbih_705th_slavna_mountain": 1,
+    "military.formations.arbih_707th_slavna_mountain": 1,
+    "military.formations.arbih_727th_slavna": 1,
+    "military.formations.arbih_7th_vitezka_muslim_liberation": 1,
+    "military.formations.arbih_802nd_light": 1,
+    "military.formations.arbih_803rd_light": 1,
+    "military.formations.arbih_807th_muslim_liberation": 1,
+    "military.formations.arbih_9th_muslim_liberation": 1,
+    "military.formations.F_HRHB_0001": 1,
+    "military.formations.hrhb_101st_oraje_brigade": 1,
+    "military.formations.hrhb_106th_bosanska_posavina_brigade": 1,
+    "military.formations.hrhb_kralj_petar_kreimir_iv_brigade": 1,
+    "military.formations.hv_4th_guards_split": 1,
+    "military.formations.hvo_4th_guard_sinovi_posavine": 1,
+    "military.formations.hvo_hrvoje_vukcic_brigade": 1,
+    "military.formations.rs_11th_krupa_light_infantry": 1,
+    "military.formations.rs_11th_mrkonji_light_infantry": 1,
+    "military.formations.rs_16th_krajina_motorized": 1,
+    "military.formations.rs_19th_krajina_light_infantry": 1,
+    "military.formations.rs_1st_doboj_light_infantry": 1,
+    "military.formations.rs_22nd_krajina_infantry": 1,
+    "military.formations.rs_27th_derventa_motorized": 1,
+    "military.formations.rs_2nd_banja_luka_light_infantry": 1,
+    "military.formations.rs_2nd_posavina_light_infantry": 1,
+    "military.formations.rs_2nd_tesli_light_infantry": 1,
+    "military.formations.rs_3rd_petrovac_light_infantry": 1,
+    "military.formations.rs_kalinovik_brigade": 1,
+    "military.militia_pools.zvornik:RBiH": 1,
+    "military.strategic_reserves.HRHB": 1,
+    "military.strategic_reserves.RBiH": 1,
+    "turn_summaries[].arc_transitions[length]": 1,
+    "turn_summaries[].movements[length]": 1
+  },
+  "samples_by_system": {
+    "military.corps_command": [
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_102nd_motorized",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_104th_vitezka_motorized",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_105th_motorized",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_111th_vitezka_motorized",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_112th_vitezka_motorized"
+    ],
+    "military.formations": [
+      "military.formations.F_HRHB_0001.ops.fatigue",
+      "military.formations.arbih_17th_vitezka_mountain.ops.fatigue",
+      "military.formations.arbih_1st_cerska.brigade_history.peak_personnel",
+      "military.formations.arbih_1st_cerska.cohesion",
+      "military.formations.arbih_1st_cerska.destruction_turn"
+    ],
+    "turn_summaries[].movements[]": [],
+    "turn_summaries[].arc_transitions[]": [],
+    "turn_summaries[].battles[]": [],
+    "military.corps_front_sectors": [
+      "military.corps_front_sectors.sector:arbih_2nd_corps:1.defensive_power",
+      "military.corps_front_sectors.sector:arbih_2nd_corps:1.threat_ratio",
+      "military.corps_front_sectors.sector:vrs_1st_krajina:4.defensive_power",
+      "military.corps_front_sectors.sector:vrs_1st_krajina:4.threat_ratio",
+      "military.corps_front_sectors.sector:vrs_drina:1.threat_ratio"
+    ],
+    "military.casualty_ledger": [
+      "military.casualty_ledger.RS.missing_captured",
+      "military.casualty_ledger.RS.per_formation.rs_1st_gradika_light_infantry.wounded",
+      "military.casualty_ledger.RS.per_formation.rs_4th_banja_luka_light_infantry.missing_captured",
+      "military.casualty_ledger.RS.wounded"
+    ],
+    "military.militia_pools": [
+      "military.militia_pools.tuzla:RBiH.available",
+      "military.militia_pools.tuzla:RBiH.committed",
+      "military.militia_pools.zvornik:RBiH.exhausted"
+    ],
+    "military.negotiation": [
+      "military.negotiation.capital.HRHB.combat_effective_brigades",
+      "military.negotiation.capital.RBiH.combat_effective_brigades",
+      "military.negotiation.capital.RBiH.military_casualties_taken"
+    ],
+    "military.strategic_reserves": [
+      "military.strategic_reserves.HRHB",
+      "military.strategic_reserves.RBiH"
+    ],
+    "turn_summaries[].arc_transitions[length]": [],
+    "turn_summaries[].movements[length]": []
+  },
+  "column_aggregate_difference": {
+    "n37": {
+      "column_advances": 1,
+      "column_arrivals": 6,
+      "column_blocked": 11,
+      "column_starts": 6
+    },
+    "trace": {
+      "column_advances": 1,
+      "column_arrivals": 6,
+      "column_blocked": 12,
+      "column_starts": 5
+    },
+    "final_formation_movement_differences": [
+      {
+        "id": "arbih_1st_cerska",
+        "wanted": {
+          "location_osid": "op:srebrenica:bostahovine_2",
+          "movement_destination": null,
+          "movement_status": null
+        },
+        "actual": {
+          "location_osid": "op:tuzla:gornja_tuzla",
+          "movement_destination": null,
+          "movement_status": null
+        }
+      },
+      {
+        "id": "hrhb_105th_modrica_brigade",
+        "wanted": {
+          "location_osid": "op:bosanski_samac:novo_selo_2",
+          "movement_destination": null,
+          "movement_status": null
+        },
+        "actual": {
+          "location_osid": "op:orasje:donja_mahala",
+          "movement_destination": null,
+          "movement_status": null
+        }
+      }
+    ],
+    "retained_t187_vs_unflagged_replay_formation_snapshot_differences": [],
+    "extra_trace_turn188_movements": [
+      {
+        "formation_id": "arbih_1st_cerska",
+        "from_osid": "op:srebrenica:bostahovine_2",
+        "to_osid": "op:tuzla:gornja_tuzla",
+        "resumed_reconstitution": true
+      },
+      {
+        "formation_id": "hrhb_105th_modrica_brigade",
+        "from_osid": "op:bosanski_samac:novo_selo_2",
+        "to_osid": "op:orasje:donja_mahala",
+        "resumed_reconstitution": true
+      }
+    ],
+    "actor_identifiable_from_retained_evidence": false,
+    "missing_receipt": "Both weekly reports omit movement_reject column_rejections. Two destroyed formations reconstituted and moved only in the resumed trace, proving broader divergence, but the retained aggregates do not identify which pending column order accounts for blocked +1 / starts -1."
+  }
+}

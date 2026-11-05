@@ -1,0 +1,1616 @@
+{
+  "writes_closed": true,
+  "captured_utc": "2026-10-22T17:38:59.219Z",
+  "verdict": "UNMEASURED_ACTUAL_WRITER_BOUNDARY",
+  "summary": "The retained n84 artifacts prove Pale regular reinforcement closes turn 21 at 0/1600 and opens turn 22 at 111/1600, but they do not record Pale pool balances or operands at the surviving upstream writer boundaries. Source and retained gates narrow the unexplained positive change to turn-22 ongoing-mobilization (direct and shared displaced-in credits), followed by possible pool decay before the observed opening. Exact attribution within that phase remains unmeasured; arithmetic reconstruction is not substituted for an actual receipt.",
+  "actual_run_dir": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n84",
+  "head": "49bc34cad43929a5033819d9c51c88a9782552e8",
+  "observed_boundary": {
+    "turn21": [
+      {
+        "byte_offset": 4716162,
+        "branch": "regular",
+        "completed_turn": 21,
+        "event": "stage_open",
+        "pool": {
+          "available": {
+            "presence": "present_value",
+            "value": 0
+          },
+          "committed": {
+            "presence": "present_value",
+            "value": 1600
+          },
+          "presence": "present"
+        },
+        "pool_key": "pale:RS",
+        "schema_version": 2,
+        "selected_pool_ordinal": 0,
+        "source": "formation_spawn.reinforce"
+      },
+      {
+        "byte_offset": 4716489,
+        "branch": "regular",
+        "cap": {
+          "presence": "present_value",
+          "value": 2200
+        },
+        "completed_turn": 21,
+        "current_personnel": {
+          "presence": "present_value",
+          "value": 1411
+        },
+        "disposition": "skipped",
+        "effective_available": {
+          "presence": "unreached"
+        },
+        "event": "recipient",
+        "formation_id": "rs_4th_sarajevo_light_infantry",
+        "global_order": 212,
+        "need": {
+          "presence": "unreached"
+        },
+        "personnel_after": {
+          "presence": "unreached"
+        },
+        "pool_available_after": {
+          "presence": "unreached"
+        },
+        "pool_available_before": {
+          "presence": "present_value",
+          "value": 0
+        },
+        "pool_committed_after": {
+          "presence": "unreached"
+        },
+        "pool_committed_before": {
+          "presence": "present_value",
+          "value": 1600
+        },
+        "pool_key": "pale:RS",
+        "rate": {
+          "presence": "unreached"
+        },
+        "reason": "pool_empty",
+        "reserve_for_spawn": {
+          "presence": "unreached"
+        },
+        "schema_version": 2,
+        "source": "formation_spawn.reinforce",
+        "transfer": {
+          "presence": "unreached"
+        }
+      },
+      {
+        "byte_offset": 4717337,
+        "attempted_recipient_count": 1,
+        "attempted_recipients": [
+          {
+            "formation_id": "rs_4th_sarajevo_light_infantry",
+            "global_order": 212
+          }
+        ],
+        "branch": "regular",
+        "completed_turn": 21,
+        "diagnostic_error_count": 0,
+        "event": "stage_close",
+        "pool": {
+          "available": {
+            "presence": "present_value",
+            "value": 0
+          },
+          "committed": {
+            "presence": "present_value",
+            "value": 1600
+          },
+          "presence": "present"
+        },
+        "pool_key": "pale:RS",
+        "schema_version": 2,
+        "selected_pool_ordinal": 0,
+        "source": "formation_spawn.reinforce"
+      }
+    ],
+    "turn22": [
+      {
+        "byte_offset": 4923604,
+        "branch": "regular",
+        "completed_turn": 22,
+        "event": "stage_open",
+        "pool": {
+          "available": {
+            "presence": "present_value",
+            "value": 111
+          },
+          "committed": {
+            "presence": "present_value",
+            "value": 1600
+          },
+          "presence": "present"
+        },
+        "pool_key": "pale:RS",
+        "schema_version": 2,
+        "selected_pool_ordinal": 0,
+        "source": "formation_spawn.reinforce"
+      },
+      {
+        "byte_offset": 4924219,
+        "branch": "regular",
+        "cap": {
+          "presence": "present_value",
+          "value": 2200
+        },
+        "completed_turn": 22,
+        "current_personnel": {
+          "presence": "present_value",
+          "value": 1405
+        },
+        "disposition": "transferred",
+        "effective_available": {
+          "presence": "present_value",
+          "value": 111
+        },
+        "event": "recipient",
+        "formation_id": "rs_4th_sarajevo_light_infantry",
+        "global_order": 215,
+        "need": {
+          "presence": "present_value",
+          "value": 400
+        },
+        "personnel_after": {
+          "presence": "present_value",
+          "value": 1516
+        },
+        "pool_available_after": {
+          "presence": "present_value",
+          "value": 0
+        },
+        "pool_available_before": {
+          "presence": "present_value",
+          "value": 111
+        },
+        "pool_committed_after": {
+          "presence": "present_value",
+          "value": 1711
+        },
+        "pool_committed_before": {
+          "presence": "present_value",
+          "value": 1600
+        },
+        "pool_key": "pale:RS",
+        "rate": {
+          "presence": "present_value",
+          "value": 400
+        },
+        "reason": null,
+        "reserve_for_spawn": {
+          "presence": "present_value",
+          "value": 0
+        },
+        "schema_version": 2,
+        "source": "formation_spawn.reinforce",
+        "transfer": {
+          "presence": "present_value",
+          "value": 111
+        }
+      },
+      {
+        "byte_offset": 4925191,
+        "attempted_recipient_count": 1,
+        "attempted_recipients": [
+          {
+            "formation_id": "rs_4th_sarajevo_light_infantry",
+            "global_order": 215
+          }
+        ],
+        "branch": "regular",
+        "completed_turn": 22,
+        "diagnostic_error_count": 0,
+        "event": "stage_close",
+        "pool": {
+          "available": {
+            "presence": "present_value",
+            "value": 0
+          },
+          "committed": {
+            "presence": "present_value",
+            "value": 1711
+          },
+          "presence": "present"
+        },
+        "pool_key": "pale:RS",
+        "schema_version": 2,
+        "selected_pool_ordinal": 0,
+        "source": "formation_spawn.reinforce"
+      }
+    ]
+  },
+  "retained_record_coverage": {
+    "weekly_rows": 188,
+    "weekly_sequence_1_to_188": true,
+    "phase_manifest_rows_turn21": 190,
+    "phase_manifest_rows_turn22": 190,
+    "allocation_rows": 564,
+    "allocation_schema": 2,
+    "allocation_invocations": 188,
+    "personnel_records": 71931,
+    "personnel_faction_passes": 564,
+    "displacement_rows": 92174,
+    "native_inventory": 31,
+    "consumed_inputs": 32
+  },
+  "phase_keys": {
+    "turn22": {
+      "initialize": 0,
+      "capture-aar-snapshot": 1,
+      "snapshot-political-controllers": 2,
+      "snapshot-alliance-at-turn-start": 3,
+      "migrate-political-control-osid": 4,
+      "cleanup-expired-event-modifiers": 5,
+      "update-event-readiness": 6,
+      "evaluate-events": 7,
+      "jna-transition": 8,
+      "observe-threshold-flags": 9,
+      "compute-dimension-bases": 10,
+      "sync-front-segments": 11,
+      "normalize-front-posture": 12,
+      "expand-region-posture": 13,
+      "update-formation-fatigue": 14,
+      "apply-guerrilla-attrition": 15,
+      "supply-resolution": 16,
+      "update-formation-lifecycle": 17,
+      "check-brigade-dissolution": 18,
+      "reconstitute-brigades": 19,
+      "formation-hq-relocation": 20,
+      "location-osid-backfill": 21,
+      "init-brigade-history": 22,
+      "activate-corps": 23,
+      "load-operational-data": 24,
+      "supply-osid": 25,
+      "compute-spatial-context-pre-combat": 26,
+      "refresh-sarajevo-lifeline-cache": 27,
+      "update-siege-counters": 28,
+      "compute-supply-reserves": 29,
+      "update-smuggling-routes": 30,
+      "enclave-resilience": 31,
+      "compute-home-defense-active": 32,
+      "prestage-deferred-historical-elites": 33,
+      "osid-column-movement": 34,
+      "apply-brigade-movement": 35,
+      "derive-osid-front-segments": 36,
+      "partition-corps-front-sectors": 37,
+      "assign-brigades-to-subsegments": 38,
+      "promote-og-to-division": 39,
+      "distribute-brigades-to-front": 40,
+      "return-displaced-brigades": 41,
+      "compute-sector-combat-ratings": 42,
+      "paramilitary-detect": 43,
+      "paramilitary-advance": 44,
+      "process-brigade-movement": 45,
+      "phantom-brigade-spawn": 46,
+      "jna-phantom-withdrawals": 47,
+      "reconcile-live-operation-truth": 48,
+      "update-stranded-brigade-lifecycle": 49,
+      "inject-player-pre-planned-operations": 50,
+      "advance-sector-offensives": 51,
+      "apply-force-launch-consequences": 52,
+      "reevaluate-weakened-operations": 53,
+      "decay-officer-interpretation-state": 54,
+      "inject-queued-operations": 55,
+      "admit-authored-pre-planned-reinforcements": 56,
+      "inject-authored-operations": 57,
+      "apply-op-halts": 58,
+      "inject-op-directive": 59,
+      "apply-co-replacements": 60,
+      "inject-army-hq-operations": 61,
+      "check-triggered-operations": 62,
+      "compute-home-distance-cache": 63,
+      "apply-resolved-opportunity-decisions": 64,
+      "apply-autonomy-transition": 65,
+      "ai-army-decisions": 66,
+      "ai-corps-decisions": 67,
+      "ai-corps-dialogue": 68,
+      "ai-war-dispatches": 69,
+      "evaluate-army-hq-gathering": 70,
+      "produce-political-directive": 71,
+      "evaluate-army-co-transitions": 72,
+      "apply-army-directive-interpretation": 73,
+      "generate-bot-corps-orders": 74,
+      "generate-player-stance-recommendations": 75,
+      "generate-level1-proposals": 76,
+      "evaluate-operation-opportunities": 77,
+      "apply-bot-opportunity-decisions": 78,
+      "generate-level1-opportunity-proposals": 79,
+      "generate-level1-op-proposals": 80,
+      "commander-correct-march-orders": 81,
+      "recompute-sector-combat-ratings": 82,
+      "generate-army-reserve-requests": 83,
+      "generate-bot-brigade-orders": 84,
+      "apply-brigade-posture": 85,
+      "apply-sector-stance-orders": 86,
+      "recover-command-authority": 87,
+      "update-corps-effects": 88,
+      "advance-corps-operations": 89,
+      "activate-operational-groups": 90,
+      "equipment-degradation": 91,
+      "equipment-progression": 92,
+      "apply-posture-costs": 93,
+      "check-truce-break": 94,
+      "build-active-offensives-cache": 95,
+      "apply-brcko-tactical-group-relocation": 96,
+      "resolve-attack-orders": 97,
+      "compute-spatial-context-post-combat": 98,
+      "attribute-operation-casualties": 99,
+      "update-sector-offensive-results": 100,
+      "record-operation-weekly-entry": 101,
+      "displace-enemy-territory": 102,
+      "update-officer-quality": 103,
+      "evaluate-brigade-decorations": 104,
+      "apply-casualty-pool-exhaustion": 105,
+      "cohesion-drift": 106,
+      "morale-drift": 107,
+      "apply-siege-morale-drain": 108,
+      "check-brigade-dissolution-post-combat": 109,
+      "apply-frontline-attrition": 110,
+      "apply-siege-bombardment-attrition": 111,
+      "hostile-takeover-displacement": 112,
+      "alliance-update": 113,
+      "bilateral-flip-count-war": 114,
+      "ceasefire-check": 115,
+      "washington-check": 116,
+      "operation-storm-check": 117,
+      "hv-integration": 118,
+      "process-lifecycle-events": 119,
+      "recruitment": 120,
+      "ongoing-mobilization": 121,
+      "pool-war-weariness-decay": 122,
+      "reroute-pool-surplus": 123,
+      "formation-spawn": 124,
+      "brigade-reinforcement": 125,
+      "recall-drifted-brigades": 126,
+      "strategic-reserve-collection": 127,
+      "strategic-reserve-reinforcement": 128,
+      "sanitize-ghost-sector-power": 129,
+      "apply-vrs-equipment-decay": 130,
+      "tick-elite-loans": 131,
+      "officer-succession": 132,
+      "check-heroic-stand": 133,
+      "check-warlord-friction": 134,
+      "update-faction-officer-maturity": 135,
+      "generate-war-stories": 136,
+      "compute-combat-summaries": 137,
+      "wia-trickleback": 138,
+      "update-og-lifecycle": 139,
+      "supply-pressure-exhaustion": 140,
+      "phase-e-pressure-update": 141,
+      "front-emergence": 142,
+      "derive-sector-intel": 143,
+      "phase-f-displacement": 144,
+      "update-capability-profiles": 145,
+      "update-embargo-profiles": 146,
+      "update-enclave-integrity": 147,
+      "update-sarajevo-exception": 148,
+      "update-patron-ivp": 149,
+      "evaluate-humanitarian-convoys": 150,
+      "update-legitimacy": 151,
+      "apply-formation-commitment": 152,
+      "update-doctrine-eligibility": 153,
+      "update-heavy-equipment": 154,
+      "expose-effective-posture": 155,
+      "accumulate-front-pressure": 156,
+      "accumulate-exhaustion": 157,
+      "phase3a-pressure-eligibility": 158,
+      "phase3a-pressure-diffusion": 159,
+      "phase3b-pressure-exhaustion": 160,
+      "phase3c-exhaustion-collapse-gating": 161,
+      "phase3d-collapse-resolution": 162,
+      "phase5d-loss-of-control-trends": 163,
+      "update-militia-fatigue": 164,
+      "update-displacement": 165,
+      "update-sustainability": 166,
+      "update-negotiation-pressure": 167,
+      "update-negotiation-capital": 168,
+      "expire-ceasefire": 169,
+      "update-negotiation-offers": 170,
+      "rederive-osid-front-segments": 171,
+      "reconcile-final-sector-truth": 172,
+      "reconcile-final-operation-truth": 173,
+      "reconcile-final-sector-truth-after-ops": 174,
+      "repair-active-elite-deployment-after-final-topology": 175,
+      "final-distribute-brigades-to-front": 176,
+      "seal-final-sector-truth-after-distribution": 177,
+      "compute-combat-effective-brigades": 178,
+      "evaluate-peace-plans": 179,
+      "resolve-counter-offers": 180,
+      "check-victory-conditions": 181,
+      "update-patron-pressure": 182,
+      "evaluate-rupture-consequences": 183,
+      "compute-negotiation-capital": 184,
+      "evaluate-dayton-trigger": 185,
+      "assemble-command-briefing": 186,
+      "compile-turn-summary": 187,
+      "resolve-noop": 188,
+      "clear-displacement-event-log": 189
+    }
+  },
+  "writer_inventory": [
+    {
+      "file": "src/sim/combat/brigade_reconstitution.ts",
+      "line": 449,
+      "text": "pool.available -= poolDraw;"
+    },
+    {
+      "file": "src/sim/combat/militia_casualties.ts",
+      "line": 123,
+      "text": "pool.available = Math.max(0, (pool.available ?? 0) - drawnFromAvailable);"
+    },
+    {
+      "file": "src/sim/combat/ongoing_mobilization.ts",
+      "line": 327,
+      "text": "pool.available += mobilized + shipmentBonus;"
+    },
+    {
+      "file": "src/sim/combat/ongoing_mobilization.ts",
+      "line": 374,
+      "text": "pools[key] = { mun_id: munId, faction: poolFaction, available: 0, committed: 0, exhausted: 0, updated_turn: currentTurn };"
+    },
+    {
+      "file": "src/sim/combat/ongoing_mobilization.ts",
+      "line": 392,
+      "text": "pool.available += mobilized;"
+    },
+    {
+      "file": "src/sim/combat/ongoing_mobilization.ts",
+      "line": 419,
+      "text": "pools[key] = { mun_id: target, faction: 'RBiH', available: 0, committed: 0, exhausted: 0, updated_turn: currentTurn };"
+    },
+    {
+      "file": "src/sim/combat/ongoing_mobilization.ts",
+      "line": 421,
+      "text": "pools[key].available += perTarget;"
+    },
+    {
+      "file": "src/sim/combat/pool_decay.ts",
+      "line": 76,
+      "text": "pool.available = Math.max(0, pool.available - decayed);"
+    },
+    {
+      "file": "src/sim/combat/strategic_reserve.ts",
+      "line": 101,
+      "text": "pool.available -= excess;"
+    },
+    {
+      "file": "src/sim/combat/strategic_reserve.ts",
+      "line": 133,
+      "text": "pool.available = 0;"
+    },
+    {
+      "file": "src/sim/early_war/minority_militia_decay.ts",
+      "line": 94,
+      "text": "pool.available = newAvailable;"
+    },
+    {
+      "file": "src/sim/early_war/pool_population.ts",
+      "line": 151,
+      "text": "pools[key].available += evenShare;"
+    },
+    {
+      "file": "src/sim/early_war/pool_population.ts",
+      "line": 163,
+      "text": "pools[key].available += add;"
+    },
+    {
+      "file": "src/sim/early_war/pool_population.ts",
+      "line": 196,
+      "text": "(state as GameState & { militia_pools: Record<string, MilitiaPoolState> }).military.militia_pools = {};"
+    },
+    {
+      "file": "src/sim/early_war/pool_population.ts",
+      "line": 228,
+      "text": "pool.available += contribution;"
+    },
+    {
+      "file": "src/sim/early_war/pool_population.ts",
+      "line": 235,
+      "text": "available: contribution,"
+    },
+    {
+      "file": "src/sim/early_war/pool_population.ts",
+      "line": 254,
+      "text": "pool.available += contribution;"
+    },
+    {
+      "file": "src/sim/early_war/pool_population.ts",
+      "line": 261,
+      "text": "available: contribution,"
+    },
+    {
+      "file": "src/sim/early_war/pool_population.ts",
+      "line": 293,
+      "text": "pool.available += contribution;"
+    },
+    {
+      "file": "src/sim/early_war/pool_population.ts",
+      "line": 299,
+      "text": "available: contribution,"
+    },
+    {
+      "file": "src/sim/early_war/pool_population.ts",
+      "line": 339,
+      "text": "(state as GameState & { militia_pools: Record<string, MilitiaPoolState> }).military.militia_pools = {};"
+    },
+    {
+      "file": "src/sim/early_war/pool_population.ts",
+      "line": 382,
+      "text": "existing.available = newAvailable;"
+    },
+    {
+      "file": "src/sim/early_war/pool_population.ts",
+      "line": 390,
+      "text": "available: newAvailable,"
+    },
+    {
+      "file": "src/sim/formation_spawn.ts",
+      "line": 374,
+      "text": "pool.available -= transfer;"
+    },
+    {
+      "file": "src/sim/formation_spawn.ts",
+      "line": 496,
+      "text": "pool.available -= transfer;"
+    },
+    {
+      "file": "src/sim/formation_spawn.ts",
+      "line": 566,
+      "text": "pool.available -= transfer;"
+    },
+    {
+      "file": "src/sim/formation_spawn.ts",
+      "line": 612,
+      "text": "(state as GameState & { militia_pools: Record<string, MilitiaPoolState> }).military.militia_pools = {};"
+    },
+    {
+      "file": "src/sim/formation_spawn.ts",
+      "line": 704,
+      "text": "pool.available -= MIN_DETACHMENT_SPAWN;"
+    },
+    {
+      "file": "src/sim/formation_spawn.ts",
+      "line": 784,
+      "text": "pool.available -= MIN_DETACHMENT_SPAWN;"
+    },
+    {
+      "file": "src/sim/formation_spawn.ts",
+      "line": 902,
+      "text": "pool.available -= batchSize;"
+    },
+    {
+      "file": "src/sim/formation_spawn.ts",
+      "line": 1003,
+      "text": "pool.available = Math.max(0, (pool.available ?? 0) + returned);"
+    },
+    {
+      "file": "src/sim/recruitment_engine.ts",
+      "line": 696,
+      "text": "pool.available -= action.manpower_spent;"
+    },
+    {
+      "file": "src/sim/recruitment_engine.ts",
+      "line": 972,
+      "text": "if (!state.military.militia_pools) state.military.militia_pools = {};"
+    },
+    {
+      "file": "src/sim/recruitment_engine.ts",
+      "line": 978,
+      "text": "available: 0,"
+    },
+    {
+      "file": "src/sim/recruitment_engine.ts",
+      "line": 987,
+      "text": "seededPool.available += mandatoryDrain - manpowerAvailable;"
+    },
+    {
+      "file": "src/sim/recruitment_engine.ts",
+      "line": 1001,
+      "text": "pool.available -= effectiveManpower;"
+    },
+    {
+      "file": "src/sim/recruitment_engine.ts",
+      "line": 1225,
+      "text": "pools[surplus.poolKey].available -= amount;"
+    },
+    {
+      "file": "src/sim/recruitment_engine.ts",
+      "line": 1226,
+      "text": "surplus.available -= amount;"
+    },
+    {
+      "file": "src/sim/recruitment_engine.ts",
+      "line": 1233,
+      "text": "available: 0,"
+    },
+    {
+      "file": "src/sim/recruitment_engine.ts",
+      "line": 1239,
+      "text": "pools[deficit.poolKey].available += amount;"
+    },
+    {
+      "file": "src/sim/recruitment_turn.ts",
+      "line": 295,
+      "text": "pool.available += transfer;"
+    },
+    {
+      "file": "src/state/displacement.ts",
+      "line": 633,
+      "text": "pool.available = Math.max(0, pool.available - poolReduction);"
+    },
+    {
+      "file": "src/state/displacement.ts",
+      "line": 878,
+      "text": "pool.available = Math.max(0, pool.available - poolReduction);"
+    },
+    {
+      "file": "src/state/displacement.ts",
+      "line": 999,
+      "text": "pool.available = Math.max(0, pool.available - excess);"
+    },
+    {
+      "file": "src/state/displacement_takeover.ts",
+      "line": 458,
+      "text": "if (!state.military.militia_pools) state.military.militia_pools = {};"
+    },
+    {
+      "file": "src/state/displacement_takeover.ts",
+      "line": 472,
+      "text": "pool.available += contribution;"
+    },
+    {
+      "file": "src/state/displacement_takeover.ts",
+      "line": 478,
+      "text": "available: contribution,"
+    },
+    {
+      "file": "src/state/displacement_takeover.ts",
+      "line": 744,
+      "text": "sourcePool.available = Math.max(0, sourcePool.available - reduction);"
+    },
+    {
+      "file": "src/state/displacement_takeover.ts",
+      "line": 877,
+      "text": "sourcePool.available = Math.max(0, sourcePool.available - reduction);"
+    }
+  ],
+  "reached_writer_audit": [
+    {
+      "interval": "post regular-close turn 21",
+      "phase": "strategic-reserve-collection",
+      "source": "src/sim/combat/strategic_reserve.ts:74-137",
+      "classification": "nonpositive municipal-pool writer; subtracts/zeros available"
+    },
+    {
+      "interval": "post regular-close turn 21",
+      "phase": "wia-trickleback",
+      "source": "src/sim/formation_spawn.ts:985-1004",
+      "classification": "only later positive writer; required wounded_pending is not retained. Zero Pale RS militia-defender battle rows through turn 22 limits but does not replace the missing state operand."
+    },
+    {
+      "interval": "pre regular-open turn 22",
+      "phase": "reconstitute-brigades",
+      "source": "src/sim/combat/brigade_reconstitution.ts:280-451",
+      "classification": "subtract-only municipal-pool writer"
+    },
+    {
+      "interval": "pre regular-open turn 22",
+      "phase": "hostile-takeover-displacement",
+      "source": "src/state/displacement_takeover.ts:454-483; src/sim/turn_phases/war_phases.ts:3283,3330-3336",
+      "classification": "turn-22 native displacement stream has one Pale/RS arrival totaling 24; one-turn contribution formula floor(24*0.02)=0. This excludes that observed arrival as the +111 source, while no phase-boundary pool receipt exists."
+    },
+    {
+      "interval": "pre regular-open turn 22",
+      "phase": "recruitment",
+      "source": "src/sim/recruitment_turn.ts:266-298; src/sim/recruitment_engine.ts:848-1017",
+      "classification": "Pale has one authored OOB brigade and it is already active from initial save; mandatory accrual/top-up gates require a pending missing brigade. Elective actions subtract."
+    },
+    {
+      "interval": "pre regular-open turn 22",
+      "phase": "ongoing-mobilization",
+      "source": "src/sim/combat/ongoing_mobilization.ts:227-438; src/sim/early_war/pool_population.ts:188-309",
+      "classification": "surviving positive writer phase for pale:RS: direct controller credit plus repeated displaced_in_by_faction credit. Required actual exhaustion/controller/modifier/displaced-in operands and before/after pool values are not retained."
+    },
+    {
+      "interval": "pre regular-open turn 22",
+      "phase": "pool-war-weariness-decay",
+      "source": "src/sim/combat/pool_decay.ts:61-79",
+      "classification": "subtract-only after ongoing mobilization; exact Pale before/decay/after absent"
+    },
+    {
+      "interval": "pre regular-open turn 22",
+      "phase": "reroute-pool-surplus",
+      "source": "src/sim/recruitment_engine.ts:1159-1248",
+      "classification": "Pale has no unspawned authored OOB candidate; source requires one for deficit credit"
+    },
+    {
+      "interval": "pre regular-open turn 22",
+      "phase": "formation-spawn",
+      "source": "src/sim/formation_spawn.ts:579-970",
+      "classification": "spawn writers subtract available; no positive writer in this phase"
+    },
+    {
+      "interval": "excluded tail",
+      "phase": "early-war pool population",
+      "source": "src/sim/turn_pipeline.ts:153-168; src/sim/turn_phases/early_war_phases.ts:114-169",
+      "classification": "not invoked because actual initial recruitment_mode is player_choice"
+    }
+  ],
+  "evidence_classification": {
+    "established": [
+      "Observed allocation boundary and lawful 111 transfer are direct retained receipts.",
+      "Turn-22 phase order and reachability are direct retained phase-manifest evidence.",
+      "The weekly native artifact omits recruitment, ongoing-mobilization, decay, reroute, spawn, reinforcement, reserve, and WIA phase reports; those fields are absent on turns 21 and 22.",
+      "No retained artifact records pale:RS before/after at ongoing-mobilization or pool-war-weariness-decay."
+    ],
+    "inference": "Exhaustive source/gate audit leaves ongoing-mobilization as the surviving positive turn-22 phase, with decay able to alter its credit before stage_open. This is a limited-writer inference, not an actual-writer receipt.",
+    "unobserved_operands": [
+      "Pale pool exhausted and wounded_pending at phase boundaries",
+      "Pale displaced_in_by_faction as consumed on turn 22",
+      "Pale municipality controller/authority/event multiplier at the ongoing-mobilization call",
+      "Pale available before/after ongoing-mobilization and pool decay"
+    ],
+    "rejected_substitutes": [
+      "source possibility alone",
+      "numeric coincidence from reconstructed displacement totals",
+      "synthetic fixture behavior",
+      "replay/counterfactual reconstruction"
+    ]
+  },
+  "smallest_justified_next_fix": {
+    "kind": "default-off stdout-only future observer proposal",
+    "proposal": "Add a selected-pool receipt at each militia-pool writer boundary, keyed by completed_turn, phase/source and pool_key, with available/committed/exhausted/wounded_pending before and after plus the writer operands. Select pale:RS, prove default-off neutrality, and only then request one separately authorized measurement if the owner still needs exact attribution.",
+    "implementation_authorized": false,
+    "gameplay_change": false,
+    "threshold_change": false
+  },
+  "protected_pins": [
+    {
+      "path": "src/sim/combat/reinforcement_allocation_diagnostic.ts",
+      "expected": "12d24113946ad414ae3f310a45c9d7f52e0a24bde916ed60f0001d18d4bacdc6",
+      "actual": "12d24113946ad414ae3f310a45c9d7f52e0a24bde916ed60f0001d18d4bacdc6",
+      "equal": true
+    },
+    {
+      "path": "tools/diagnostics/reinforcement_allocation_reader.cjs",
+      "expected": "bf1e94e52c2efb447041161fa6e14de2d078f2177d7392209344acc746c71c86",
+      "actual": "bf1e94e52c2efb447041161fa6e14de2d078f2177d7392209344acc746c71c86",
+      "equal": true
+    },
+    {
+      "path": "tests/reinforcement_allocation_diagnostic.test.ts",
+      "expected": "6eff326a27cc9892aa45a6d84ae018afd19ecba18af65896ce050f7a05a094df",
+      "actual": "6eff326a27cc9892aa45a6d84ae018afd19ecba18af65896ce050f7a05a094df",
+      "equal": true
+    },
+    {
+      "path": "src/sim/formation_spawn.ts",
+      "expected": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa",
+      "actual": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa",
+      "equal": true
+    },
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "expected": "b7467c47f97c5c349535b59aaeafa3dea0bc5d03314961c5ac17ef3a4283434a",
+      "actual": "b7467c47f97c5c349535b59aaeafa3dea0bc5d03314961c5ac17ef3a4283434a",
+      "equal": true
+    },
+    {
+      "path": "src/sim/combat/personnel_diagnostic.ts",
+      "expected": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3",
+      "actual": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3",
+      "equal": true
+    },
+    {
+      "path": "tests/personnel_diagnostic.test.ts",
+      "expected": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b",
+      "actual": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b",
+      "equal": true
+    },
+    {
+      "path": "tests/reason_code_debug.test.ts",
+      "expected": "44a60e84d8b22d1cb629364a84e10257d3454531678b987a75582ddaee9a756c",
+      "actual": "44a60e84d8b22d1cb629364a84e10257d3454531678b987a75582ddaee9a756c",
+      "equal": true
+    },
+    {
+      "path": "data/calibration/engine_health_thresholds.json",
+      "expected": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d",
+      "actual": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d",
+      "equal": true
+    },
+    {
+      "path": "data/source/calibration/painted_control_oct1995.json",
+      "expected": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b",
+      "actual": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b",
+      "equal": true
+    },
+    {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "expected": "00d6d7e65832a45e4b8ddc34e077c228b9496ca8f1068a6b9633571b4bae5557",
+      "actual": "00d6d7e65832a45e4b8ddc34e077c228b9496ca8f1068a6b9633571b4bae5557",
+      "equal": true
+    },
+    {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "expected": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "actual": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "equal": true
+    }
+  ],
+  "inherited_hashes": {
+    "result818": "66c081b063566d605d4873f5c4031c3dca6bce26e6957f8bc2ed4c7900a5ce96",
+    "review819": "d1a4c8974e4cfd92d824178cb45168c1b0dbf80b41e3be6db436eac2605a11fb",
+    "result820": "96db9ccc3562c973ea79f4c9c174d35899052bd8d3f72617a827858627d4b6be"
+  },
+  "telemetry_pins": {
+    "c": {
+      "bytes": 103894385,
+      "sha256": "00d6d7e65832a45e4b8ddc34e077c228b9496ca8f1068a6b9633571b4bae5557"
+    },
+    "d": {
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    }
+  },
+  "closed_stream_inventory": [
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependencies.json",
+      "bytes": 6938,
+      "sha256": "28cfdea5bf99324abb71485fee74e193c189f1d010e8906dbf1bbf539c47d4b2"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-00.snapshot",
+      "bytes": 388155,
+      "sha256": "a87a4ae9995d7cc1cc6099242e45de00bd615ba0c93cfd4bf7ced20e469388b5"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-01.snapshot",
+      "bytes": 1886,
+      "sha256": "dedf8f58014d9769b885848b45c085ea5f36252e3489e839d2cf5639132061a2"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-02.snapshot",
+      "bytes": 36348,
+      "sha256": "66c081b063566d605d4873f5c4031c3dca6bce26e6957f8bc2ed4c7900a5ce96"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-03.snapshot",
+      "bytes": 6545,
+      "sha256": "d1a4c8974e4cfd92d824178cb45168c1b0dbf80b41e3be6db436eac2605a11fb"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-04.snapshot",
+      "bytes": 34340,
+      "sha256": "96db9ccc3562c973ea79f4c9c174d35899052bd8d3f72617a827858627d4b6be"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-05.snapshot",
+      "bytes": 4234,
+      "sha256": "29229e757fe29fec26d9abc6afb7b777d95079035c517d2ae17f47615dd32298"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-06.snapshot",
+      "bytes": 1373722,
+      "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-07.snapshot",
+      "bytes": 32887671,
+      "sha256": "b3510073a304411fb2d5cafbcbb45d980c6c4d9f8888962039c1bd4852ea79de"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-08.snapshot",
+      "bytes": 23654,
+      "sha256": "95648226f916e0404c630e0384539c88f7befe4cb8e8e387be988552c8d2fba2"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-09.snapshot",
+      "bytes": 8134,
+      "sha256": "3c5d461a187fc8690e6c12d586195ed7c8afd18be1e03cbb41a139ea0478f00f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-10.snapshot",
+      "bytes": 22839,
+      "sha256": "e1f41af529c78077882a3b282461314a41b4015dea6f4ab858cbe605ed3afb32"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-11.snapshot",
+      "bytes": 3164,
+      "sha256": "925e711289cbd63d3305484133d984205d727d3a72dc533e468938523a367afb"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-12.snapshot",
+      "bytes": 10755,
+      "sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-13.snapshot",
+      "bytes": 4026,
+      "sha256": "166ac9cc394ace45e208551620ec43ae070af6461617acb926199f3741df4064"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-14.snapshot",
+      "bytes": 20841,
+      "sha256": "d1874728bcade108c694a02735099322ca6bd58cc871dc0f0628bab1516a51e7"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-15.snapshot",
+      "bytes": 47679,
+      "sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-16.snapshot",
+      "bytes": 55659,
+      "sha256": "c657b778736fe9599395b48968702e45ca4d1141de6112990942ce3a744ae4d9"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-17.snapshot",
+      "bytes": 13674,
+      "sha256": "d807e44faac2aabe3cde46bd0ab775b34738e2d6a10b608ec9589ac2589e62c3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-18.snapshot",
+      "bytes": 15623,
+      "sha256": "1a1061dc850edc23d58abb59bcc730b604c7a4389201ef63941d405ddd863f50"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-19.snapshot",
+      "bytes": 231691,
+      "sha256": "93fcb005fa725c8a45269370c8319ca34779d1e032624fee08a4ae5800baa04a"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-20.snapshot",
+      "bytes": 11675,
+      "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-21.snapshot",
+      "bytes": 43147,
+      "sha256": "d992a11227b4728dafe9006519bdeb4ca8bb90490e7d4f55fb7865ac034fa7b2"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/dependency-22.snapshot",
+      "bytes": 42755,
+      "sha256": "5f3717d4ab04592aacfba9ecc82a67459d28fbc9e4dfad2eba14ee5826a8bf3a"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/entry-script.snapshot",
+      "bytes": 14318,
+      "sha256": "eec1e2ab62835c01ae4463187856bda6d9fb798972156ac8313453b2f3e5ca23"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/receipt.json",
+      "bytes": 7216,
+      "sha256": "0b14ae5a289c847fac4bc18250f61bfc90e94fa2944d845f79ced2519ff5fdf9"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/result.json",
+      "bytes": 39780,
+      "sha256": "ff118d29191ade8ca29db74370218494ce450e7414d0f763525710d7ec957cdd"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/start.json",
+      "bytes": 2231,
+      "sha256": "e493556b61df132230da64ad36de53d1ace20bd2b32956a54e08a220ed978e84"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/stdout.log",
+      "bytes": 205,
+      "sha256": "f2f6419fe4406f290a0da82430097f7a5ff23e087ec597ed70494ec92e5e4be5"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-audit.cjs",
+      "bytes": 14318,
+      "sha256": "eec1e2ab62835c01ae4463187856bda6d9fb798972156ac8313453b2f3e5ca23"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependencies.json",
+      "bytes": 9094,
+      "sha256": "4d21c9007353cf8ac335f1f805866dd9bb292d6051692a799cb9554d6c9ef58c"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-00.snapshot",
+      "bytes": 52944,
+      "sha256": "b475f88f15b130a626d1699f9d3064a2e64c70e816b67b608d734b10763a7c7b"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-01.snapshot",
+      "bytes": 115874,
+      "sha256": "e01b58c71b0d51daadf1796ba21a02d0cca04509add1ef706f3b8a350f7c513d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-02.snapshot",
+      "bytes": 388155,
+      "sha256": "a87a4ae9995d7cc1cc6099242e45de00bd615ba0c93cfd4bf7ced20e469388b5"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-03.snapshot",
+      "bytes": 1886,
+      "sha256": "dedf8f58014d9769b885848b45c085ea5f36252e3489e839d2cf5639132061a2"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-04.snapshot",
+      "bytes": 658,
+      "sha256": "a983136b285381a37ec0910801d60270d59e423fee5e26893da75f1224e8bb24"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-05.snapshot",
+      "bytes": 36348,
+      "sha256": "66c081b063566d605d4873f5c4031c3dca6bce26e6957f8bc2ed4c7900a5ce96"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-06.snapshot",
+      "bytes": 6545,
+      "sha256": "d1a4c8974e4cfd92d824178cb45168c1b0dbf80b41e3be6db436eac2605a11fb"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-07.snapshot",
+      "bytes": 34340,
+      "sha256": "96db9ccc3562c973ea79f4c9c174d35899052bd8d3f72617a827858627d4b6be"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-08.snapshot",
+      "bytes": 4234,
+      "sha256": "29229e757fe29fec26d9abc6afb7b777d95079035c517d2ae17f47615dd32298"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-09.snapshot",
+      "bytes": 39780,
+      "sha256": "ff118d29191ade8ca29db74370218494ce450e7414d0f763525710d7ec957cdd"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-10.snapshot",
+      "bytes": 16327575,
+      "sha256": "94d4b2e2f1a9f4a30c64e75fbc1b264a15802314a810a4d146ecc300f2bc75c9"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-11.snapshot",
+      "bytes": 1373722,
+      "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-12.snapshot",
+      "bytes": 32887671,
+      "sha256": "b3510073a304411fb2d5cafbcbb45d980c6c4d9f8888962039c1bd4852ea79de"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-13.snapshot",
+      "bytes": 17275,
+      "sha256": "4f385b0b5f32d82e38b0dea8a7d7a54f5b2f48687c8cbf1ef2c73af93725ba6c"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-14.snapshot",
+      "bytes": 23654,
+      "sha256": "95648226f916e0404c630e0384539c88f7befe4cb8e8e387be988552c8d2fba2"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-15.snapshot",
+      "bytes": 8134,
+      "sha256": "3c5d461a187fc8690e6c12d586195ed7c8afd18be1e03cbb41a139ea0478f00f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-16.snapshot",
+      "bytes": 22839,
+      "sha256": "e1f41af529c78077882a3b282461314a41b4015dea6f4ab858cbe605ed3afb32"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-17.snapshot",
+      "bytes": 3164,
+      "sha256": "925e711289cbd63d3305484133d984205d727d3a72dc533e468938523a367afb"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-18.snapshot",
+      "bytes": 10755,
+      "sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-19.snapshot",
+      "bytes": 4026,
+      "sha256": "166ac9cc394ace45e208551620ec43ae070af6461617acb926199f3741df4064"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-20.snapshot",
+      "bytes": 20841,
+      "sha256": "d1874728bcade108c694a02735099322ca6bd58cc871dc0f0628bab1516a51e7"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-21.snapshot",
+      "bytes": 47679,
+      "sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-22.snapshot",
+      "bytes": 55659,
+      "sha256": "c657b778736fe9599395b48968702e45ca4d1141de6112990942ce3a744ae4d9"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-23.snapshot",
+      "bytes": 13674,
+      "sha256": "d807e44faac2aabe3cde46bd0ab775b34738e2d6a10b608ec9589ac2589e62c3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-24.snapshot",
+      "bytes": 15623,
+      "sha256": "1a1061dc850edc23d58abb59bcc730b604c7a4389201ef63941d405ddd863f50"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-25.snapshot",
+      "bytes": 231691,
+      "sha256": "93fcb005fa725c8a45269370c8319ca34779d1e032624fee08a4ae5800baa04a"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-26.snapshot",
+      "bytes": 11675,
+      "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-27.snapshot",
+      "bytes": 43147,
+      "sha256": "d992a11227b4728dafe9006519bdeb4ca8bb90490e7d4f55fb7865ac034fa7b2"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-28.snapshot",
+      "bytes": 42755,
+      "sha256": "5f3717d4ab04592aacfba9ecc82a67459d28fbc9e4dfad2eba14ee5826a8bf3a"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/dependency-29.snapshot",
+      "bytes": 25491,
+      "sha256": "985eeaa427a356e83db5b384a9fbe5533c6bb4eb385855eb4f025a0ed7c11c32"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/entry-script.snapshot",
+      "bytes": 16414,
+      "sha256": "5c96215346757f755c46a1d32e294894d0f4f49330eca9828d8d9a234291645a"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/receipt.json",
+      "bytes": 8428,
+      "sha256": "94be75813b94f5958479f9fa1eaa75abeb6554b1fc86b6b6cdca8af6d7605164"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/start.json",
+      "bytes": 2450,
+      "sha256": "c1dbb8e756891969f90826e1affc07132718948fb967d2cbe23ba2852a2bf02a"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/stderr.log",
+      "bytes": 906,
+      "sha256": "f39e54daa87850ecb76973a421c1e8cf51a4de05e0daa55b60de1eaaeba71406"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-b/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependencies.json",
+      "bytes": 9094,
+      "sha256": "4d21c9007353cf8ac335f1f805866dd9bb292d6051692a799cb9554d6c9ef58c"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-00.snapshot",
+      "bytes": 52944,
+      "sha256": "b475f88f15b130a626d1699f9d3064a2e64c70e816b67b608d734b10763a7c7b"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-01.snapshot",
+      "bytes": 115874,
+      "sha256": "e01b58c71b0d51daadf1796ba21a02d0cca04509add1ef706f3b8a350f7c513d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-02.snapshot",
+      "bytes": 388155,
+      "sha256": "a87a4ae9995d7cc1cc6099242e45de00bd615ba0c93cfd4bf7ced20e469388b5"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-03.snapshot",
+      "bytes": 1886,
+      "sha256": "dedf8f58014d9769b885848b45c085ea5f36252e3489e839d2cf5639132061a2"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-04.snapshot",
+      "bytes": 658,
+      "sha256": "a983136b285381a37ec0910801d60270d59e423fee5e26893da75f1224e8bb24"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-05.snapshot",
+      "bytes": 36348,
+      "sha256": "66c081b063566d605d4873f5c4031c3dca6bce26e6957f8bc2ed4c7900a5ce96"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-06.snapshot",
+      "bytes": 6545,
+      "sha256": "d1a4c8974e4cfd92d824178cb45168c1b0dbf80b41e3be6db436eac2605a11fb"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-07.snapshot",
+      "bytes": 34340,
+      "sha256": "96db9ccc3562c973ea79f4c9c174d35899052bd8d3f72617a827858627d4b6be"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-08.snapshot",
+      "bytes": 4234,
+      "sha256": "29229e757fe29fec26d9abc6afb7b777d95079035c517d2ae17f47615dd32298"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-09.snapshot",
+      "bytes": 39780,
+      "sha256": "ff118d29191ade8ca29db74370218494ce450e7414d0f763525710d7ec957cdd"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-10.snapshot",
+      "bytes": 16327575,
+      "sha256": "94d4b2e2f1a9f4a30c64e75fbc1b264a15802314a810a4d146ecc300f2bc75c9"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-11.snapshot",
+      "bytes": 1373722,
+      "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-12.snapshot",
+      "bytes": 32887671,
+      "sha256": "b3510073a304411fb2d5cafbcbb45d980c6c4d9f8888962039c1bd4852ea79de"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-13.snapshot",
+      "bytes": 17275,
+      "sha256": "4f385b0b5f32d82e38b0dea8a7d7a54f5b2f48687c8cbf1ef2c73af93725ba6c"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-14.snapshot",
+      "bytes": 23654,
+      "sha256": "95648226f916e0404c630e0384539c88f7befe4cb8e8e387be988552c8d2fba2"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-15.snapshot",
+      "bytes": 8134,
+      "sha256": "3c5d461a187fc8690e6c12d586195ed7c8afd18be1e03cbb41a139ea0478f00f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-16.snapshot",
+      "bytes": 22839,
+      "sha256": "e1f41af529c78077882a3b282461314a41b4015dea6f4ab858cbe605ed3afb32"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-17.snapshot",
+      "bytes": 3164,
+      "sha256": "925e711289cbd63d3305484133d984205d727d3a72dc533e468938523a367afb"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-18.snapshot",
+      "bytes": 10755,
+      "sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-19.snapshot",
+      "bytes": 4026,
+      "sha256": "166ac9cc394ace45e208551620ec43ae070af6461617acb926199f3741df4064"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-20.snapshot",
+      "bytes": 20841,
+      "sha256": "d1874728bcade108c694a02735099322ca6bd58cc871dc0f0628bab1516a51e7"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-21.snapshot",
+      "bytes": 47679,
+      "sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-22.snapshot",
+      "bytes": 55659,
+      "sha256": "c657b778736fe9599395b48968702e45ca4d1141de6112990942ce3a744ae4d9"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-23.snapshot",
+      "bytes": 13674,
+      "sha256": "d807e44faac2aabe3cde46bd0ab775b34738e2d6a10b608ec9589ac2589e62c3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-24.snapshot",
+      "bytes": 15623,
+      "sha256": "1a1061dc850edc23d58abb59bcc730b604c7a4389201ef63941d405ddd863f50"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-25.snapshot",
+      "bytes": 231691,
+      "sha256": "93fcb005fa725c8a45269370c8319ca34779d1e032624fee08a4ae5800baa04a"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-26.snapshot",
+      "bytes": 11675,
+      "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-27.snapshot",
+      "bytes": 43147,
+      "sha256": "d992a11227b4728dafe9006519bdeb4ca8bb90490e7d4f55fb7865ac034fa7b2"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-28.snapshot",
+      "bytes": 42755,
+      "sha256": "5f3717d4ab04592aacfba9ecc82a67459d28fbc9e4dfad2eba14ee5826a8bf3a"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/dependency-29.snapshot",
+      "bytes": 25491,
+      "sha256": "985eeaa427a356e83db5b384a9fbe5533c6bb4eb385855eb4f025a0ed7c11c32"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/entry-script.snapshot",
+      "bytes": 16443,
+      "sha256": "494f5de6a51e22707fccbcec0956aa0b3b48f4060024249be7879ee0a2184059"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/receipt.json",
+      "bytes": 8427,
+      "sha256": "f10a27bd3bc9e7e24e6da7ec95b3297d1013394f74a6088d899974a1eac160ea"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/start.json",
+      "bytes": 2450,
+      "sha256": "67893c2bd758fa71536362bef1e4b371cc9067c96cbae42411703c7eef97a2c3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/stderr.log",
+      "bytes": 953,
+      "sha256": "b894311366a28b476b4e9c527726a36e8357a6ec6ec93b353f3f3c67d9be98e6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-c/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-finalize.cjs",
+      "bytes": 16490,
+      "sha256": "f0c25e7c559f6a89550386593ae37e2bff39a940d38b8746d4e71f73f8b5e9c5"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-writer-rg.txt",
+      "bytes": 9464,
+      "sha256": "50442f2f1336ca27264e5b785c4c210e561a8a9aaeea779496abd8aa4bf72fa7"
+    }
+  ],
+  "dependencies": [
+    {
+      "path": "data/derived/municipality_population_1991.json",
+      "bytes": 52944,
+      "sha256": "b475f88f15b130a626d1699f9d3064a2e64c70e816b67b608d734b10763a7c7b",
+      "snapshot": "dependency-00.snapshot",
+      "snapshot_sha256": "b475f88f15b130a626d1699f9d3064a2e64c70e816b67b608d734b10763a7c7b"
+    },
+    {
+      "path": "data/source/oob_brigades.json",
+      "bytes": 115874,
+      "sha256": "e01b58c71b0d51daadf1796ba21a02d0cca04509add1ef706f3b8a350f7c513d",
+      "snapshot": "dependency-01.snapshot",
+      "snapshot_sha256": "e01b58c71b0d51daadf1796ba21a02d0cca04509add1ef706f3b8a350f7c513d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/818-postrun-a/allocation-raw-selected.jsonl",
+      "bytes": 388155,
+      "sha256": "a87a4ae9995d7cc1cc6099242e45de00bd615ba0c93cfd4bf7ced20e469388b5",
+      "snapshot": "dependency-02.snapshot",
+      "snapshot_sha256": "a87a4ae9995d7cc1cc6099242e45de00bd615ba0c93cfd4bf7ced20e469388b5"
+    },
+    {
+      "path": "logs/claude-channel-20261004/818-postrun-a/allocation-reader.json",
+      "bytes": 1886,
+      "sha256": "dedf8f58014d9769b885848b45c085ea5f36252e3489e839d2cf5639132061a2",
+      "snapshot": "dependency-03.snapshot",
+      "snapshot_sha256": "dedf8f58014d9769b885848b45c085ea5f36252e3489e839d2cf5639132061a2"
+    },
+    {
+      "path": "logs/claude-channel-20261004/818-postrun-a/readers/result.json",
+      "bytes": 658,
+      "sha256": "a983136b285381a37ec0910801d60270d59e423fee5e26893da75f1224e8bb24",
+      "snapshot": "dependency-04.snapshot",
+      "snapshot_sha256": "a983136b285381a37ec0910801d60270d59e423fee5e26893da75f1224e8bb24"
+    },
+    {
+      "path": "logs/claude-channel-20261004/818-result.json",
+      "bytes": 36348,
+      "sha256": "66c081b063566d605d4873f5c4031c3dca6bce26e6957f8bc2ed4c7900a5ce96",
+      "snapshot": "dependency-05.snapshot",
+      "snapshot_sha256": "66c081b063566d605d4873f5c4031c3dca6bce26e6957f8bc2ed4c7900a5ce96"
+    },
+    {
+      "path": "logs/claude-channel-20261004/819-pale-run-review/819-review.json",
+      "bytes": 6545,
+      "sha256": "d1a4c8974e4cfd92d824178cb45168c1b0dbf80b41e3be6db436eac2605a11fb",
+      "snapshot": "dependency-06.snapshot",
+      "snapshot_sha256": "d1a4c8974e4cfd92d824178cb45168c1b0dbf80b41e3be6db436eac2605a11fb"
+    },
+    {
+      "path": "logs/claude-channel-20261004/820-result.json",
+      "bytes": 34340,
+      "sha256": "96db9ccc3562c973ea79f4c9c174d35899052bd8d3f72617a827858627d4b6be",
+      "snapshot": "dependency-07.snapshot",
+      "snapshot_sha256": "96db9ccc3562c973ea79f4c9c174d35899052bd8d3f72617a827858627d4b6be"
+    },
+    {
+      "path": "logs/claude-channel-20261004/821-root-plan.md",
+      "bytes": 4234,
+      "sha256": "29229e757fe29fec26d9abc6afb7b777d95079035c517d2ae17f47615dd32298",
+      "snapshot": "dependency-08.snapshot",
+      "snapshot_sha256": "29229e757fe29fec26d9abc6afb7b777d95079035c517d2ae17f47615dd32298"
+    },
+    {
+      "path": "logs/claude-channel-20261004/822-pale-upstream-a/result.json",
+      "bytes": 39780,
+      "sha256": "ff118d29191ade8ca29db74370218494ce450e7414d0f763525710d7ec957cdd",
+      "snapshot": "dependency-09.snapshot",
+      "snapshot_sha256": "ff118d29191ade8ca29db74370218494ce450e7414d0f763525710d7ec957cdd"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n84/displacement_event_log.jsonl",
+      "bytes": 16327575,
+      "sha256": "94d4b2e2f1a9f4a30c64e75fbc1b264a15802314a810a4d146ecc300f2bc75c9",
+      "snapshot": "dependency-10.snapshot",
+      "snapshot_sha256": "94d4b2e2f1a9f4a30c64e75fbc1b264a15802314a810a4d146ecc300f2bc75c9"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n84/initial_save.json",
+      "bytes": 1373722,
+      "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+      "snapshot": "dependency-11.snapshot",
+      "snapshot_sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n84/weekly_report.jsonl",
+      "bytes": 32887671,
+      "sha256": "b3510073a304411fb2d5cafbcbb45d980c6c4d9f8888962039c1bd4852ea79de",
+      "snapshot": "dependency-12.snapshot",
+      "snapshot_sha256": "b3510073a304411fb2d5cafbcbb45d980c6c4d9f8888962039c1bd4852ea79de"
+    },
+    {
+      "path": "src/scenario/turn_inputs.ts",
+      "bytes": 17275,
+      "sha256": "4f385b0b5f32d82e38b0dea8a7d7a54f5b2f48687c8cbf1ef2c73af93725ba6c",
+      "snapshot": "dependency-13.snapshot",
+      "snapshot_sha256": "4f385b0b5f32d82e38b0dea8a7d7a54f5b2f48687c8cbf1ef2c73af93725ba6c"
+    },
+    {
+      "path": "src/sim/combat/brigade_reconstitution.ts",
+      "bytes": 23654,
+      "sha256": "95648226f916e0404c630e0384539c88f7befe4cb8e8e387be988552c8d2fba2",
+      "snapshot": "dependency-14.snapshot",
+      "snapshot_sha256": "95648226f916e0404c630e0384539c88f7befe4cb8e8e387be988552c8d2fba2"
+    },
+    {
+      "path": "src/sim/combat/militia_casualties.ts",
+      "bytes": 8134,
+      "sha256": "3c5d461a187fc8690e6c12d586195ed7c8afd18be1e03cbb41a139ea0478f00f",
+      "snapshot": "dependency-15.snapshot",
+      "snapshot_sha256": "3c5d461a187fc8690e6c12d586195ed7c8afd18be1e03cbb41a139ea0478f00f"
+    },
+    {
+      "path": "src/sim/combat/ongoing_mobilization.ts",
+      "bytes": 22839,
+      "sha256": "e1f41af529c78077882a3b282461314a41b4015dea6f4ab858cbe605ed3afb32",
+      "snapshot": "dependency-16.snapshot",
+      "snapshot_sha256": "e1f41af529c78077882a3b282461314a41b4015dea6f4ab858cbe605ed3afb32"
+    },
+    {
+      "path": "src/sim/combat/pool_decay.ts",
+      "bytes": 3164,
+      "sha256": "925e711289cbd63d3305484133d984205d727d3a72dc533e468938523a367afb",
+      "snapshot": "dependency-17.snapshot",
+      "snapshot_sha256": "925e711289cbd63d3305484133d984205d727d3a72dc533e468938523a367afb"
+    },
+    {
+      "path": "src/sim/combat/strategic_reserve.ts",
+      "bytes": 10755,
+      "sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae",
+      "snapshot": "dependency-18.snapshot",
+      "snapshot_sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae"
+    },
+    {
+      "path": "src/sim/early_war/minority_militia_decay.ts",
+      "bytes": 4026,
+      "sha256": "166ac9cc394ace45e208551620ec43ae070af6461617acb926199f3741df4064",
+      "snapshot": "dependency-19.snapshot",
+      "snapshot_sha256": "166ac9cc394ace45e208551620ec43ae070af6461617acb926199f3741df4064"
+    },
+    {
+      "path": "src/sim/early_war/pool_population.ts",
+      "bytes": 20841,
+      "sha256": "d1874728bcade108c694a02735099322ca6bd58cc871dc0f0628bab1516a51e7",
+      "snapshot": "dependency-20.snapshot",
+      "snapshot_sha256": "d1874728bcade108c694a02735099322ca6bd58cc871dc0f0628bab1516a51e7"
+    },
+    {
+      "path": "src/sim/formation_spawn.ts",
+      "bytes": 47679,
+      "sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa",
+      "snapshot": "dependency-21.snapshot",
+      "snapshot_sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa"
+    },
+    {
+      "path": "src/sim/recruitment_engine.ts",
+      "bytes": 55659,
+      "sha256": "c657b778736fe9599395b48968702e45ca4d1141de6112990942ce3a744ae4d9",
+      "snapshot": "dependency-22.snapshot",
+      "snapshot_sha256": "c657b778736fe9599395b48968702e45ca4d1141de6112990942ce3a744ae4d9"
+    },
+    {
+      "path": "src/sim/recruitment_turn.ts",
+      "bytes": 13674,
+      "sha256": "d807e44faac2aabe3cde46bd0ab775b34738e2d6a10b608ec9589ac2589e62c3",
+      "snapshot": "dependency-23.snapshot",
+      "snapshot_sha256": "d807e44faac2aabe3cde46bd0ab775b34738e2d6a10b608ec9589ac2589e62c3"
+    },
+    {
+      "path": "src/sim/turn_phases/early_war_phases.ts",
+      "bytes": 15623,
+      "sha256": "1a1061dc850edc23d58abb59bcc730b604c7a4389201ef63941d405ddd863f50",
+      "snapshot": "dependency-24.snapshot",
+      "snapshot_sha256": "1a1061dc850edc23d58abb59bcc730b604c7a4389201ef63941d405ddd863f50"
+    },
+    {
+      "path": "src/sim/turn_phases/war_phases.ts",
+      "bytes": 231691,
+      "sha256": "93fcb005fa725c8a45269370c8319ca34779d1e032624fee08a4ae5800baa04a",
+      "snapshot": "dependency-25.snapshot",
+      "snapshot_sha256": "93fcb005fa725c8a45269370c8319ca34779d1e032624fee08a4ae5800baa04a"
+    },
+    {
+      "path": "src/sim/turn_pipeline.ts",
+      "bytes": 11675,
+      "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25",
+      "snapshot": "dependency-26.snapshot",
+      "snapshot_sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25"
+    },
+    {
+      "path": "src/state/displacement.ts",
+      "bytes": 43147,
+      "sha256": "d992a11227b4728dafe9006519bdeb4ca8bb90490e7d4f55fb7865ac034fa7b2",
+      "snapshot": "dependency-27.snapshot",
+      "snapshot_sha256": "d992a11227b4728dafe9006519bdeb4ca8bb90490e7d4f55fb7865ac034fa7b2"
+    },
+    {
+      "path": "src/state/displacement_takeover.ts",
+      "bytes": 42755,
+      "sha256": "5f3717d4ab04592aacfba9ecc82a67459d28fbc9e4dfad2eba14ee5826a8bf3a",
+      "snapshot": "dependency-28.snapshot",
+      "snapshot_sha256": "5f3717d4ab04592aacfba9ecc82a67459d28fbc9e4dfad2eba14ee5826a8bf3a"
+    },
+    {
+      "path": "src/state/formation_constants.ts",
+      "bytes": 25491,
+      "sha256": "985eeaa427a356e83db5b384a9fbe5533c6bb4eb385855eb4f025a0ed7c11c32",
+      "snapshot": "dependency-29.snapshot",
+      "snapshot_sha256": "985eeaa427a356e83db5b384a9fbe5533c6bb4eb385855eb4f025a0ed7c11c32"
+    }
+  ],
+  "protection": {
+    "full_suite_invocations": 0,
+    "build_invocations": 0,
+    "run_turn_invocations": 0,
+    "replay_invocations": 0,
+    "campaign_invocations": 0,
+    "source_mutations": 0,
+    "test_mutations": 0,
+    "data_mutations": 0,
+    "gameplay_mutations": 0,
+    "threshold_mutations": 0,
+    "docs_mutations": 0,
+    "git_mutations": 0
+  },
+  "status_scope": []
+}

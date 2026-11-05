@@ -1,0 +1,159 @@
+{
+  "schema": "awwv.pre-first-advance-paramilitary-policy.red-team-initialization-addendum.v1",
+  "date": "2026-10-24",
+  "seat": "Red-team",
+  "lens": "war-or-game / real Bosnian War observer",
+  "independent": true,
+  "implementerExcluded": true,
+  "scope": "static_read_only_initialization_delta_review",
+  "reviewedHead": "b371adc3e0935825649e5eda4e6bbd45a44a359d",
+  "verdict": "GO_WITH_BINDING_CONDITIONS",
+  "implementationAuthorizedByThisSeat": false,
+  "priorRedTeamBindingsRetained": true,
+  "ruling": {
+    "failedCandidateAcceptable": false,
+    "failedReason": "It persisted 200 civilian deaths and two territorial captures while dropping all policy dimension shifts and both canonical war-crime counter increments.",
+    "fillOnlyInitializerAcceptableConditionally": true,
+    "hiddenConsentCreated": false,
+    "newAtrocityControlSurfaceCreated": false,
+    "rewardForAtrocityBrightLineEngaged": true,
+    "brightLineCrossedByRevisedProposal": false,
+    "reason": "Neutral missing-only substrate creation selects no response and enables no target; it restores existing authored choice consequences and early-harm accounting. It remains acceptable only with exact preservation, no derived work, no headless retiming, and every original consent and anti-reward binding."
+  },
+  "failedCandidateEvidence": {
+    "allowCaptures": [
+      "op:srebrenica:obadi",
+      "op:brcko:bukvik_gornji_2"
+    ],
+    "civilianDeathsPersisted": 200,
+    "expectedWarCrimesEventsDelta": 2,
+    "observedWarCrimesEventsDelta": 0,
+    "expectedWarCrimesEventsEmergentDelta": 2,
+    "observedDimensionDeltas": "all zero due to absent strategic_dimensions",
+    "disposition": "preserved_and_backed_out"
+  },
+  "bindings": [
+    {
+      "id": "RED-INIT-1",
+      "requirement": "Retain every original RED_TEAM.md binding: explicit post-identity three-way choice, ask unresolved/default, deny historical, ask/allow counterfactual, free refusal, hard block, no inferred consent, pressure, recommendation, target selector, direct policy write, or alternate atrocity surface."
+    },
+    {
+      "id": "RED-INIT-2",
+      "requirement": "Initialize missing neutral/default substrate before every ordinary RBiH/RS/HRHB foundational choice in Electron and browser; create no response, effect, receipt, notification, policy, request, deployment, capture, control, phase, or score and expose no UI implication that a choice was made."
+    },
+    {
+      "id": "RED-INIT-3",
+      "requirement": "Use one browser-safe fill-only initializer with exact existing factories and canonical faction order; preserve every existing object, value, key, counter, array, nested identity, partial dimension store, and extra faction; fail closed on malformed present containers."
+    },
+    {
+      "id": "RED-INIT-4",
+      "requirement": "Perform no derived computation, tick, event evaluation, base recomputation, or reset; prove one-call/two-call byte identity and statically inventory all pre-compute readers/writers. Any early delta beyond authored explicit-choice propagation and existing early-harm writers is a BLOCK."
+    },
+    {
+      "id": "RED-INIT-5",
+      "requirement": "Replace the compute_capital private prelude only at its current call position with exact old-behavior equivalence across absent, empty, complete, missing-entry, sentinel-rich, extra-key, malformed-container, and partial-dimension states; any pre-update or final-output delta blocks."
+    },
+    {
+      "id": "RED-INIT-6",
+      "requirement": "For ordinary Electron/browser RBiH, RS, and HRHB, prove the canonical substrate exists before response and the existing resolver applies exact authored foundational dimensions, flags, effects, clocks, notifications, causality, and one player receipt without adding or rebalancing consequences."
+    },
+    {
+      "id": "RED-INIT-7",
+      "requirement": "Keep opening_policy_transition.ts as the separate single browser-safe atomic queue/resolver owner; retain exact option order/disclosures, turn-0 receipt, 52/104 clocks, notification parity, persistence/idempotence, stale/forged/duplicate rejection, and no direct writer."
+    },
+    {
+      "id": "RED-INIT-8",
+      "requirement": "From one serialized pre-response RBiH state, prove deny has no request/deployment, ask has exactly two reviewed requests and no capture, and allow has exactly two reviewed captures, 200 civilian deaths, +2 war_crimes_events, +2 war_crimes_events_emergent, and all standing, condemnation, ledger, displacement, receipt, and provenance consequences through unchanged writers."
+    },
+    {
+      "id": "RED-INIT-9",
+      "requirement": "Add no viability, competitiveness, parity, recovery, historical-authenticity, territorial-opportunity, score, grade, achievement, recommendation, casualty-to-territory, or moral-offset framing; no KPI or acceptance floor may depend on authorization."
+    },
+    {
+      "id": "RED-INIT-10",
+      "requirement": "Preserve baked/n94/n95 initial bytes at SHA-256 413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1 and observer parity; explicitly label their early war-crime totals incomplete in comparisons and never use the undercount as exculpatory, historical, scoring, or calibration evidence."
+    },
+    {
+      "id": "RED-INIT-11",
+      "requirement": "Preserve n91-n95, telemetry, references, pins, protected controls, event data, phase order, migrations, snapshots, headless behavior, all downstream writers, historical defaults, scores, thresholds, baselines, and acceptance criteria; the latent headless defect requires separate owner authority."
+    },
+    {
+      "id": "RED-INIT-12",
+      "requirement": "Limit changes to the exact seven production and six test files; stop and return to the owner on broader scope, any factory/schema/writer/phase/event change, overwrite, byte delta, missing cost, undisclosed early behavior, ordinary adapter mismatch, or doubt about free refusal."
+    }
+  ],
+  "allowedProductionFiles": [
+    "src/sim/negotiation/initialize_negotiation_state.ts",
+    "src/sim/negotiation/compute_capital.ts",
+    "src/sim/events/opening_policy_transition.ts",
+    "src/desktop/desktop_sim.ts",
+    "src/ui/map/desktop/campaignRecruitmentActions.ts",
+    "src/desktop/electron-main.cjs",
+    "src/ui/map/App.tsx"
+  ],
+  "allowedTestFiles": [
+    "tests/negotiation_capital.test.ts",
+    "tests/startup_snapshot_contract.test.ts",
+    "tests/browser_campaign_start_fallback.test.ts",
+    "tests/player_start_surface_contracts.test.ts",
+    "tests/pre_first_advance_paramilitary_policy.test.ts",
+    "tests/desktop_persistence_contract.test.ts"
+  ],
+  "headlessLatentDefect": {
+    "exists": true,
+    "fixedByThisProposal": false,
+    "disposition": "document_only_preserve_exact_bytes",
+    "comparisonRule": "Known incomplete early war-crime counters may not support moral, historical, scoring, calibration, or parity claims."
+  },
+  "sourceBindings": [
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/startup-consequence-diagnosis/DIAGNOSIS.md",
+      "sha256": "bab4297842f8434f4cddcacd5b5d93609688cbeff0d51e2df1fe975772b266c9"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/startup-consequence-diagnosis/PROPOSAL.md",
+      "sha256": "270e018da91d48ae350a5460c6fe3d02a892406e53d130d6e609b78942fe24ab"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/startup-consequence-diagnosis/EVIDENCE.json",
+      "sha256": "a1d57ca9210586812424c30aebcb303b75e7b20879dfb8ed72fbec7daf6d6f3d"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/opening-policy-implementation/failed-candidate/FINDINGS.md",
+      "sha256": "2db6dbd68c713be1144ea40a40dbd1be6eb3d31ff33a4622482a16f63446fe12"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/SYSTEMS_INITIALIZATION_ADDENDUM.md",
+      "sha256": "67d8c00e02922660e5a19892876710e40f7e35f29cd69bfe3525c130b08adb66"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/RED_TEAM.md",
+      "sha256": "eaa9b443c0cc17e7166f576040e8cf49092e7d126a7fa8e64d538ceb9f7894d6"
+    },
+    {
+      "path": "docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md",
+      "lines": "50-66,128-143,207-233,250-256",
+      "sha256": "4945b9a0bb7d300a5185ac09e069cac9911e3c4a88d01f963ff5699adea40247"
+    },
+    {
+      "path": "docs/10_canon/FORAWWV.md",
+      "lines": "4-14,167-170,353",
+      "sha256": "93ffe5844bbbdd6f091a6e523f0bc46cc1e35a088e2d1a3abac4f07fb9e42ebe"
+    },
+    {
+      "path": "docs/40_reports/REAL_WAR_MASTER.md",
+      "lines": "285-287,2028-2031,2057-2063",
+      "sha256": "1f55134a7d7e5ec926413183572299b370a80eb5da3a4d3c6258af6c92827726"
+    }
+  ],
+  "execution": {
+    "implementation": false,
+    "sourceRuntimeDocsTestWrites": false,
+    "tests": false,
+    "build": false,
+    "package": false,
+    "campaign": false,
+    "native": false,
+    "reviewArtifactWritesOnly": true
+  }
+}

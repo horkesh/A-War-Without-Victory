@@ -1,0 +1,103 @@
+{
+  "schema": "awwv.startup-policy-repair-v2.final-independent-implementation-review.v1",
+  "verdict": "GO_BOUNDED_IMPLEMENTATION_CANDIDATE",
+  "reviewed_head": "b371adc3e0935825649e5eda4e6bbd45a44a359d",
+  "scope": "13-file startup/policy implementation candidate only",
+  "findings": {
+    "critical": [],
+    "suggestion": [],
+    "nice_to_have": []
+  },
+  "closed_remaining_items": [
+    {
+      "id": "legacy-identity-production-adapter-regression",
+      "evidence": [
+        "src/sim/events/opening_policy_transition.ts:101-109",
+        "src/sim/events/opening_policy_transition.ts:171-200",
+        "src/sim/events/opening_policy_transition.ts:215-238",
+        "tests/pre_first_advance_paramilitary_policy.test.ts:292-356"
+      ]
+    },
+    {
+      "id": "foundational-source-truth-and-display-proof-narrow-gap",
+      "evidence": [
+        "tests/browser_campaign_start_fallback.test.ts:233-379",
+        "tests/player_start_surface_contracts.test.ts:57-83",
+        "tests/player_start_surface_contracts.test.ts:96-166"
+      ]
+    }
+  ],
+  "candidate_sha256": {
+    "src/sim/negotiation/initialize_negotiation_state.ts": "65ff81ed92f9b03b64d3a661a3fe247612110feece4aaa41a7e11425ba844c00",
+    "src/sim/negotiation/compute_capital.ts": "07eeb251ddaa13dafc749128caec3c3caa81fd4fb1f66083aa71a6279bdfbca4",
+    "src/sim/events/opening_policy_transition.ts": "3c9e8c5ed2bcdb668d5b264292cf8fdbc0098f06aefa472c259c69d8ded6b80e",
+    "src/desktop/desktop_sim.ts": "3fd6d5e5e1a2bda9640ae2889ab8d8d26c220bcd329944a764567b6d3f6f8813",
+    "src/ui/map/desktop/campaignRecruitmentActions.ts": "dfb48a8196b4602c49817ae2c25faf4d7edbea8db92735822cf990dd99a0c639",
+    "src/desktop/electron-main.cjs": "3d68cf41fc91e27876d3c8191907e4ba6bfb58557b93f5733353e3c8f0ee2345",
+    "src/ui/map/App.tsx": "8cfae1653dcd81fde35f25af60624aef6da479c5188ca06b50d51a56c0dea672",
+    "tests/negotiation_capital.test.ts": "42289b4ee9ed1b0483852f0ca6b4f811225a9094339dc2fe7f3d4a071509b9e3",
+    "tests/startup_snapshot_contract.test.ts": "33746e4db1fb9b77d58c4b4d5ba8430c3a57fc47e1e87b5f44a23d181aeefb63",
+    "tests/browser_campaign_start_fallback.test.ts": "b93f00cc67d84bc78c34aaa77e4ac9561f4fc8bfeab439c177e76ad5af15c49f",
+    "tests/player_start_surface_contracts.test.ts": "620f3b197392dc3dde086846dac0fd56ef524bea28477df2b053169b6034d520",
+    "tests/pre_first_advance_paramilitary_policy.test.ts": "a6f66ba823871b72bac3ccabee5ccca36d59b845d63a7394898476dee96feae1",
+    "tests/desktop_persistence_contract.test.ts": "01e8b18faf4a8a367748ab5d4d4bdd03f6e9c3611f8c3813a41cb28b94e528db"
+  },
+  "bindings": {
+    "candidate_diff_sha256": "691d9bac92b91523eb928e775c1b1799ec1eb5f949a960faa62b925e17be5226",
+    "frozen_startup_sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+    "renewed_review_hashes_checked": 12,
+    "renewed_review_hash_mismatches": 0,
+    "candidate_hashes_checked": 13,
+    "candidate_hash_mismatches": 0
+  },
+  "checks": {
+    "focused": {
+      "receipt": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/compatibility-correction-03/focused-preserved-final-01/receipt.json",
+      "receipt_sha256": "346a76912d66ee9a085a5f29f7ab1d4b48af8f5cf3a458b0a46a4b7cc0f63e07",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract_pass": true,
+      "files_passed": 6,
+      "tests_passed": 94,
+      "tests_failed": 0,
+      "duration_seconds": 53.66
+    },
+    "typescript_nonincremental": {
+      "receipt": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/compatibility-correction-03/tsc-preserved-final-01/receipt.json",
+      "receipt_sha256": "e7ebae4717cb8f0fc0c59584fae4f40d425b5a73f1fbddcab537b95a0bc4af24",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract_pass": true
+    },
+    "diff_check_exit": 0
+  },
+  "scope_assessment": {
+    "compatibility_correction_production_files_changed": [
+      "src/sim/events/opening_policy_transition.ts"
+    ],
+    "compatibility_correction_test_files_changed": [
+      "tests/pre_first_advance_paramilitary_policy.test.ts",
+      "tests/browser_campaign_start_fallback.test.ts",
+      "tests/player_start_surface_contracts.test.ts"
+    ],
+    "expanded_production_scope": false,
+    "six_seat_binding_breach": false
+  },
+  "broader_gates_certified": false,
+  "pending": [
+    "separate final integration authority and completed Git-diff binding",
+    "clean 188-week qualification",
+    "required full suite",
+    "package/native/player calibration gates from the controlling plan"
+  ],
+  "validation_repeated": {
+    "focused_tests": true,
+    "typecheck": true,
+    "full_suite": false,
+    "build": false,
+    "native": false,
+    "package": false,
+    "campaign": false,
+    "reason": "Same unchanged final focused/typecheck pair rerun once through the required preserved-preflight envelope; no review or source change repeated."
+  }
+}

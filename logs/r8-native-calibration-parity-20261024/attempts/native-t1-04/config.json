@@ -1,0 +1,26 @@
+{
+  "command": "node",
+  "args": [
+    "tools/ui/paradox_local_qa.cjs",
+    "--turns=1",
+    "--faction=RBiH",
+    "--label=native-calibration-rbih-t1-20261024-04",
+    "--historical-choice",
+    "--skip-initial-tour",
+    "--no-checkpoint-tour",
+    "--archive-turn-autosaves",
+    "--save-load-proof",
+    "--packaged-executable=dist-packaged/r8-native-shakedown-20261024-qualified/win-unpacked/A War Without Victory.exe"
+  ],
+  "env": {
+    "DO_NOT_TRACK": "1",
+    "NO_UPDATE_NOTIFIER": "1"
+  },
+  "requireAbsent": [
+    "tmp-paradox-qa-20260710/paradox-local-qa-native-calibration-rbih-t1-20261024-04.json",
+    "tmp-paradox-qa-20260710/paradox-local-qa-progress-native-calibration-rbih-t1-20261024-04.json",
+    "tmp-paradox-qa-20260710/paradox-local-qa-netlog-native-calibration-rbih-t1-20261024-04.json",
+    "tmp-paradox-qa-20260710/evidence/native-calibration-rbih-t1-20261024-04",
+    "tmp-paradox-qa-20260710/user-data/native-calibration-rbih-t1-20261024-04-RBiH"
+  ]
+}

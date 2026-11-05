@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'vitest';
 
@@ -86,15 +86,24 @@ test('release resources retain production inputs while excluding the four review
         assert.ok(existsSync(join(root, relativePath)), `missing positive release input: ${relativePath}`);
     }
 
-    const trackedResearchPaths = execFileSync(
+    const trackedResearchEntries = execFileSync(
         'git',
-        ['ls-files', '-z', '--', ...RESEARCH_ROOTS],
+        ['ls-files', '--stage', '-z', '--', ...RESEARCH_ROOTS],
         { cwd: root, encoding: 'utf8' },
-    ).split('\0').filter(Boolean).sort(strictCompare);
-    const trackedResearchBytes = trackedResearchPaths.reduce(
-        (total, relativePath) => total + statSync(join(root, relativePath)).size,
-        0,
-    );
+    ).split('\0').filter(Boolean);
+    const trackedResearchPaths = trackedResearchEntries
+        .map((entry) => entry.slice(entry.indexOf('\t') + 1))
+        .sort(strictCompare);
+    const trackedResearchObjectIds = trackedResearchEntries.map((entry) => {
+        const match = /^\d+ ([0-9a-f]+) \d+\t/.exec(entry);
+        assert.ok(match, `could not parse tracked research index entry: ${entry}`);
+        return match[1];
+    });
+    const trackedResearchBytes = execFileSync(
+        'git',
+        ['cat-file', '--batch-check=%(objectsize)'],
+        { cwd: root, encoding: 'utf8', input: `${trackedResearchObjectIds.join('\n')}\n` },
+    ).trim().split(/\r?\n/).reduce((total, size) => total + Number(size), 0);
     assert.equal(trackedResearchPaths.length, 239, 'all reviewed research source files must remain tracked');
     assert.equal(trackedResearchBytes, 53_031_799, 'reviewed research source bytes must remain intact');
 

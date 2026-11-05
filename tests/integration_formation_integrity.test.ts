@@ -5,16 +5,18 @@ import { join } from 'node:path';
 import { checkDataPrereqs } from '../src/data_prereq/check_data_prereqs.js';
 import { runScenario } from '../src/scenario/scenario_runner.js';
 import {
+    resolveDissolutionThreshold,
     DISSOLUTION_COHESION_THRESHOLD,
     DISSOLUTION_MORALE_THRESHOLD,
     DISSOLUTION_PERSONNEL_THRESHOLD,
 } from '../src/sim/combat/brigade_dissolution.js';
 import type { FormationState, GameState } from '../src/state/game_state.js';
 
-const SCENARIO_40W = join(process.cwd(), 'data', 'scenarios', 'apr1992_definitive_40w.json');
+const SCENARIO_188W = join(process.cwd(), 'data', 'scenarios', 'apr1992_definitive_188w.json');
+const WEEKS_OVERRIDE = 40;
 const OUT_DIR = join(process.cwd(), '.tmp_integration_formation_integrity');
 
-describe('formation integrity (40w)', () => {
+describe('formation integrity (canonical 188w @40w)', () => {
     let state: GameState;
     let skipped = false;
 
@@ -26,7 +28,7 @@ describe('formation integrity (40w)', () => {
         }
         if (existsSync(OUT_DIR)) await rm(OUT_DIR, { recursive: true });
 
-        const result = await runScenario({ scenarioPath: SCENARIO_40W, outDirBase: OUT_DIR });
+        const result = await runScenario({ scenarioPath: SCENARIO_188W, outDirBase: OUT_DIR, weeksOverride: WEEKS_OVERRIDE });
         const json = await readFile(result.paths.final_save, 'utf8');
         state = JSON.parse(json);
     }, 600_000);
@@ -69,17 +71,29 @@ describe('formation integrity (40w)', () => {
         if (skipped) return;
         const formations = state.military.formations ?? {};
         const violations: string[] = [];
+        const timeline = state.military.war_timeline;
+        const turn = state.meta.turn;
 
         for (const [id, fm] of Object.entries(formations) as Array<[string, FormationState]>) {
             if (fm.status !== 'active' || fm.kind !== 'brigade') continue;
+
+            const personnelThreshold = resolveDissolutionThreshold(
+                timeline, 'dissolution_personnel_threshold', fm.faction, turn, DISSOLUTION_PERSONNEL_THRESHOLD,
+            );
+            const cohesionThreshold = resolveDissolutionThreshold(
+                timeline, 'dissolution_cohesion_threshold', fm.faction, turn, DISSOLUTION_COHESION_THRESHOLD,
+            );
+            const moraleThreshold = resolveDissolutionThreshold(
+                timeline, 'dissolution_morale_threshold', fm.faction, turn, DISSOLUTION_MORALE_THRESHOLD,
+            );
 
             const personnel = fm.personnel ?? 1000;
             const cohesion = fm.cohesion ?? 60;
             const morale = fm.morale ?? 60;
             let criteriaCount = 0;
-            if (personnel < DISSOLUTION_PERSONNEL_THRESHOLD) criteriaCount++;
-            if (cohesion <= DISSOLUTION_COHESION_THRESHOLD) criteriaCount++;
-            if (morale <= DISSOLUTION_MORALE_THRESHOLD) criteriaCount++;
+            if (personnel < personnelThreshold) criteriaCount++;
+            if (cohesion <= cohesionThreshold) criteriaCount++;
+            if (morale <= moraleThreshold) criteriaCount++;
 
             const requiredCriteria = fm.tags?.includes('enclave') ? 3 : 2;
             if (criteriaCount >= requiredCriteria) {
@@ -90,6 +104,26 @@ describe('formation integrity (40w)', () => {
         }
 
         expect(violations).toEqual([]);
+    });
+
+    it.each([
+        [38, 20, 15],
+        [39, 15, 12],
+        [40, 15, 12],
+    ])('resolves RS dissolution thresholds at turn %i from the loaded war timeline', (turn, cohesion, morale) => {
+        expect(skipped).toBe(false);
+        expect(state.meta.turn).toBe(40);
+        const timeline = state.military.war_timeline;
+        expect(timeline).toBeDefined();
+        expect(
+            resolveDissolutionThreshold(timeline, 'dissolution_personnel_threshold', 'RS', turn, DISSOLUTION_PERSONNEL_THRESHOLD),
+        ).toBe(400);
+        expect(
+            resolveDissolutionThreshold(timeline, 'dissolution_cohesion_threshold', 'RS', turn, DISSOLUTION_COHESION_THRESHOLD),
+        ).toBe(cohesion);
+        expect(
+            resolveDissolutionThreshold(timeline, 'dissolution_morale_threshold', 'RS', turn, DISSOLUTION_MORALE_THRESHOLD),
+        ).toBe(morale);
     });
 
     afterAll(async () => {

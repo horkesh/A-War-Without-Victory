@@ -1,0 +1,755 @@
+{
+  "scope": "Final implementation attempts, both reviewed candidate snapshots, contract and independent reviews; root closeout checks retained separately.",
+  "files": [
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/CORRECTED_FINAL_RECEIPT.json",
+      "bytes": 3373,
+      "sha256": "3e1d0205d87dc35cceb9bc53f151ba920cc171dd12411dd24bbc3eecfab3ef6f"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/HISTORY_BOUND_CORRECTION_RECEIPT.json",
+      "bytes": 1916,
+      "sha256": "790c19303a3260ca4076395d6e80dd46980cd16fe7fbce5f661f813456174c33"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/SETUP_FAILURE_01.md",
+      "bytes": 432,
+      "sha256": "5c04c8bb343e6cdf60b70006de0b230558e4c6798b5355a5ac37cad81bbffff5"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-diff-check/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-diff-check/receipt.json",
+      "bytes": 2889,
+      "sha256": "e7ae7e27a66f2bc905379e48cf41f8d1a17a3c5500276a888987e2b068c6710b"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-diff-check/start.json",
+      "bytes": 1841,
+      "sha256": "875f5d842bdf7ba644a894783c1e964c6eed99374afd211c1baada54e4f4a878"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-diff-check/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-diff-check/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-diff.txt",
+      "bytes": 11726,
+      "sha256": "463aa31a595fdbe254cae4786b7855e230c04d601d41b95e27ed0d9e528fb2da"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-focused-01/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-focused-01/receipt.json",
+      "bytes": 2826,
+      "sha256": "e30365dcc6d36b71a6217f12381bbe7b184237c1c8e32ad9cbdd073da9b5a57d"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-focused-01/start.json",
+      "bytes": 1777,
+      "sha256": "5b554eacc4b5c598021fbef0c7b34077fa64fe631f4fff74bfce980b323ba0b3"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-focused-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-focused-01/stdout.log",
+      "bytes": 407,
+      "sha256": "a1d0fded09497ef5091c6e860679ac49b17f0e9aeb32eeb4edc9b6dfa467f422"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-focused-final/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-focused-final/receipt.json",
+      "bytes": 2832,
+      "sha256": "51f5b403164c3c8ded91326064fe45676110642d2a9b89286e855e470123c60b"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-focused-final/start.json",
+      "bytes": 1783,
+      "sha256": "62f4129f57f9d5c6027f854901b5fa3179d025db362e5c55bc32766c74deedd3"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-focused-final/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-focused-final/stdout.log",
+      "bytes": 407,
+      "sha256": "79213d3910172570f74585d5dac7238bc5812089e73be7f4f060cad12f0025d3"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-green-01/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-green-01/receipt.json",
+      "bytes": 2733,
+      "sha256": "885d8fd2c52750df892f676467e418e2c5395cdb321990bca060939737f7c358"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-green-01/start.json",
+      "bytes": 1681,
+      "sha256": "c212c6d9a23af306269c9ce26f092e40464986c94986064eb985ac1c2b0798bd"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-green-01/stderr.log",
+      "bytes": 918,
+      "sha256": "4cba8e24c6aee09ddf3405e1654390b0c4fff6db1e8885d75c9ca58c5efaaa88"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-green-01/stdout.log",
+      "bytes": 632,
+      "sha256": "ecec82c7c35da13ee0531d2c517f950cc34dbd1b6826b4aae6346ace752e0bf9"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-green-02/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-green-02/receipt.json",
+      "bytes": 2731,
+      "sha256": "b4bc31ecee38e8e1876a111442cdfda3cfd510a5d0e232529cc6f351d124e6e0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-green-02/start.json",
+      "bytes": 1681,
+      "sha256": "2c5790364685e451a442d6ea47caeec335db9aed6396a3bca7f87f6e1ee3db84"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-green-02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-green-02/stdout.log",
+      "bytes": 341,
+      "sha256": "be8e78696f7a54a1223df7b5a33e68f0eb829412f64aa353e63f7313112e068e"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-harness-syntax/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-harness-syntax/receipt.json",
+      "bytes": 2593,
+      "sha256": "7692551f44c2b51182d4a221d043156ffe9cdf4529100365219dbecce0e84a7e"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-harness-syntax/start.json",
+      "bytes": 1545,
+      "sha256": "6eafd1547dee01e07df67f9c48b9b4f31e1e37a6fd38acde1d5997d0687cd73f"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-harness-syntax/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-harness-syntax/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-helper-syntax/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-helper-syntax/receipt.json",
+      "bytes": 2601,
+      "sha256": "bd81e33c0aaf0fd01f5eab2857090b9d56bbfc84a59b166a11cd753e7f1bf754"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-helper-syntax/start.json",
+      "bytes": 1553,
+      "sha256": "dd0804b9044486a94f06a697ef652ce21eb2a70dc46701fd7412ad138596d1fc"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-helper-syntax/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-helper-syntax/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-red-01/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-red-01/receipt.json",
+      "bytes": 2731,
+      "sha256": "c8ad42b969fd5e549ea55921d5eda15c9f04732d8cfe4c620d2c65af617e0548"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-red-01/start.json",
+      "bytes": 1677,
+      "sha256": "109dcd89bce7e4632d0fb1ba643dcd29cc5b57c33582015dae82fc62bf3f9bb1"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-red-01/stderr.log",
+      "bytes": 3756,
+      "sha256": "f711f3a025c4377d0e549837637fb9ec17fb325190c37bb10c60dec4e256eed5"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-red-01/stdout.log",
+      "bytes": 1611,
+      "sha256": "18c67a79de97841c7858d6f099afa3d11ae9c3e3d429f356227d6938ee279731"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-typecheck/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-typecheck/receipt.json",
+      "bytes": 2715,
+      "sha256": "4d4b94ebb0207d6c1691670760093fdc9030f27117ad631ed121d255704adcd9"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-typecheck/start.json",
+      "bytes": 1667,
+      "sha256": "b596221e83c0198f0fcd93ae2d3082947e31db70bffcd4cf8ae43c83a9a1a9b3"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-typecheck/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-typecheck/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/focused-green-01/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/focused-green-01/receipt.json",
+      "bytes": 2817,
+      "sha256": "305621e961b89789da97464a0c91502c145a7e5089f4288d4c74598f2f3e9154"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/focused-green-01/start.json",
+      "bytes": 1767,
+      "sha256": "b04a1026d5cc294b066e054b64006193a7ca6806f79e41d5fc6557f9cf2c9f26"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/focused-green-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/focused-green-01/stdout.log",
+      "bytes": 403,
+      "sha256": "dc85a23aa9e07192aae0a221650a7f554d316bcf5bf1592060d04f11f3fbf296"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/focused-green-02/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/focused-green-02/receipt.json",
+      "bytes": 2819,
+      "sha256": "2f9a36aaf0140b307a42417b56eac161815b9dce59b1545ae4f051b5256d9b2c"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/focused-green-02/start.json",
+      "bytes": 1767,
+      "sha256": "588e3c8d437dfdc72bce2b9e2ccb2954152a13ee2fc690f2db01187528f8f766"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/focused-green-02/stderr.log",
+      "bytes": 784,
+      "sha256": "0fcd040258f7dcf1602a397c4da0f9510c483b9858cf98435f4038d1b370f756"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/focused-green-02/stdout.log",
+      "bytes": 634,
+      "sha256": "a5648b032578c4fc29302b393fcf5f203af59aac5c4b4d3768e903bb2bca8e74"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/focused-green-03/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/focused-green-03/receipt.json",
+      "bytes": 2817,
+      "sha256": "159abe17f099e3df29a33fc6e646d59e6260e6881c53b90780aa4cbddb2337bc"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/focused-green-03/start.json",
+      "bytes": 1767,
+      "sha256": "1451a012a54b59577adefd7296430abeb70a6a498e827241102ba1f44b87be48"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/focused-green-03/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/focused-green-03/stdout.log",
+      "bytes": 405,
+      "sha256": "273676d4b5f432ea05a290c4229520dfdf83189e75e8b653ca458df042100959"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/harness-red-01/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/harness-red-01/receipt.json",
+      "bytes": 2730,
+      "sha256": "b43d68600dd7a2b54c2ff2ed966f10187e2d900b8b9de04d46b2f175ba8e6c7e"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/harness-red-01/start.json",
+      "bytes": 1677,
+      "sha256": "3d8608028d171763d9bf57712a1e7358f732db98d1795dadcd90ed4beaf9616f"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/harness-red-01/stderr.log",
+      "bytes": 1666,
+      "sha256": "0292b454c1b4df94069e4953f8ca3718726f1f4baba78adafc4c20f99027675c"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/harness-red-01/stdout.log",
+      "bytes": 686,
+      "sha256": "7c33c38ab5a12e765716a96186a0bd508cc3b20f3fac88347f2d41688eaaa549"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/harness-syntax-01/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/harness-syntax-01/receipt.json",
+      "bytes": 2576,
+      "sha256": "f213046b8ecbf2012b94111d2396004bbcd84140c5d443b510209054205ee70c"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/harness-syntax-01/start.json",
+      "bytes": 1529,
+      "sha256": "b520a87583ac3efe4e88053d7fdf0209ccf59d7fef520ddaca3eb0f313f137aa"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/harness-syntax-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/harness-syntax-01/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/harness-syntax-02/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/harness-syntax-02/receipt.json",
+      "bytes": 2576,
+      "sha256": "7770c53603d3776b4639ce0efb1f261e003c9cd6636c57202640a5c559334cb5"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/harness-syntax-02/start.json",
+      "bytes": 1529,
+      "sha256": "64dbc3e9506f51003738c102537540874b7159c08a78bd9b9c3e443de9036af2"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/harness-syntax-02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/harness-syntax-02/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/helper-green-01/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/helper-green-01/receipt.json",
+      "bytes": 2725,
+      "sha256": "83d4180f9144f77d030ffdb5e3c89f0044fc921ac406a0409d6731f5e1f0bc19"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/helper-green-01/start.json",
+      "bytes": 1673,
+      "sha256": "6e47c268805bf4ebaece2b3b1d745e843de7db3b55ba930b856c99da7a46f33e"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/helper-green-01/stderr.log",
+      "bytes": 621,
+      "sha256": "45f89e945d778f23ad46451ec875062dbd1367323b7ec85853b8f24974d3fe3e"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/helper-green-01/stdout.log",
+      "bytes": 496,
+      "sha256": "c19c76a1e037fa35fa42b4c1e4ee9c05c97ee8350053d1265da4858846c40698"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/helper-green-02/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/helper-green-02/receipt.json",
+      "bytes": 2723,
+      "sha256": "e8c6b132ae7e6c812ee5cdaadbb6439fe5531d8e8f38303c1da5fb9e68a63ac1"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/helper-green-02/start.json",
+      "bytes": 1673,
+      "sha256": "390298cae30cc6ba0261b0606fcbc3be28abfde519c5dd782369a8c7c66ac91b"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/helper-green-02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/helper-green-02/stdout.log",
+      "bytes": 336,
+      "sha256": "59d35beb0497e128e9856e221562bc6cc4124e7ddd7026a683f0a467e7ab1b0a"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/helper-syntax-01/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/helper-syntax-01/receipt.json",
+      "bytes": 2585,
+      "sha256": "c0057326706fc977673ae7eab5e483ddc81b094fa97542b6e2cb3c71e9583a8d"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/helper-syntax-01/start.json",
+      "bytes": 1537,
+      "sha256": "d07c833b524bb638f4e79f868f39c07adab916fbf62bb13abd42e0085b6a924a"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/helper-syntax-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/helper-syntax-01/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/helper-syntax-02/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/helper-syntax-02/receipt.json",
+      "bytes": 2584,
+      "sha256": "b2bf3360acd9356bd91d1a4dd5374f1c022e55f7d0aa548678ba715ec59c4f97"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/helper-syntax-02/start.json",
+      "bytes": 1537,
+      "sha256": "414b63b2890d909b7341a90f0ae034bb0444675afb1d78823cd814c1f13e758f"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/helper-syntax-02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/helper-syntax-02/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/history-bound-correction.diff",
+      "bytes": 5321,
+      "sha256": "80b05995470dd36a87ccce1c54cba00edd7164e586977d6dbff25780c8f546df"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/history-bound-helper-green/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/history-bound-helper-green/receipt.json",
+      "bytes": 2745,
+      "sha256": "fef9427184a9ee706a25aa367e75e7ace68cf96607d3fdb4d960f979ee306d46"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/history-bound-helper-green/start.json",
+      "bytes": 1695,
+      "sha256": "9bd5f6a62bc68d841b11dceb90bba595cf664212a7b7c9432e65366d780ca021"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/history-bound-helper-green/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/history-bound-helper-green/stdout.log",
+      "bytes": 341,
+      "sha256": "d51bb4cf9df0998830a8098bc1841bd19356cc445d4d17be9d7a961d02c7453c"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/history-bound-helper-syntax/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/history-bound-helper-syntax/receipt.json",
+      "bytes": 2607,
+      "sha256": "9429115ca9a1db12daeb2277fe7a1de63c9cba75b58275ae762ba037c6963d05"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/history-bound-helper-syntax/start.json",
+      "bytes": 1559,
+      "sha256": "6caa583b49e95420532e87f293a6f343c24acab78b872d8e6cb7e84b6c36a2dd"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/history-bound-helper-syntax/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/history-bound-helper-syntax/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/history-bound-red/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/history-bound-red/receipt.json",
+      "bytes": 2730,
+      "sha256": "5e219adaffbff3d580f4cd3fe213f3cc9d2b3af2a8649e3000d2d00a4cf33841"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/history-bound-red/start.json",
+      "bytes": 1677,
+      "sha256": "8fc53ff9dbcb5514090b4bb3a7d45b89000ac76458df8f2dbb7c6e093b0a3732"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/history-bound-red/stderr.log",
+      "bytes": 1350,
+      "sha256": "cfc304995f6ba7726a78548ee826aeb0ac44e9ff4e73bd803c0666c666697187"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/history-bound-red/stdout.log",
+      "bytes": 630,
+      "sha256": "842b3ca9ed24ca3e9dbc74c89f588695e520d0669b8c2c53da7334e753a01a69"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/history-bound-typecheck/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/history-bound-typecheck/receipt.json",
+      "bytes": 2721,
+      "sha256": "4eec245e287a30c9f58134aecbe8e6bdf21cf093e3f4369489759752bd97af02"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/history-bound-typecheck/start.json",
+      "bytes": 1673,
+      "sha256": "ce9bc51c6eda46202734b9780c0273214b7af5a62c1e7ae915f3ba1fd4de466b"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/history-bound-typecheck/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/history-bound-typecheck/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/red-02/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/red-02/receipt.json",
+      "bytes": 2709,
+      "sha256": "9c5d5c36fa2a31d0fc033866cda27589b399d6bfbd2ed174e2918ff6bc324d2a"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/red-02/start.json",
+      "bytes": 1655,
+      "sha256": "5d06633ada735c2a9336bd9b8edcae1062b3e83995bab3dee14c093c0d29d70e"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/red-02/stderr.log",
+      "bytes": 6241,
+      "sha256": "45311e75ba838a6d47376ce2bdcc7c031c306fecfda0b011cf2c52aaaff2aba7"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/red-02/stdout.log",
+      "bytes": 2790,
+      "sha256": "5b89d75e9cd9295506eb761519686eb8ad31df7313c2e2f380c04b9a138ea2bd"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/typecheck-01/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/typecheck-01/receipt.json",
+      "bytes": 2655,
+      "sha256": "17637d53daf072c59d6045fcb11d9dcff894f74006645b01eea59de6b19460a5"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/typecheck-01/start.json",
+      "bytes": 1601,
+      "sha256": "e3ddbc875bce1d335b2421b0409ec5f11977d189206431f787460f23b879cdce"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/typecheck-01/stderr.log",
+      "bytes": 772,
+      "sha256": "64bb50f638976a13051038d7d535e3d221765685b255616c3cbd526fde215441"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/typecheck-01/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/typecheck-02/entry-script.snapshot",
+      "bytes": 630,
+      "sha256": "9b5add915ba52d47a0feb81a6780f4faee8dabe885eeef7496f06498776034a0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/typecheck-02/receipt.json",
+      "bytes": 2699,
+      "sha256": "6ebde6ed5aa19d11e5ee8455e337992d82f70e6485bf630b6c376531d925280c"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/typecheck-02/start.json",
+      "bytes": 1651,
+      "sha256": "2fbb3a997ac793dd3d55e276b424d7e5c750c906284501553af74f7f41bef900"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/typecheck-02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/implementation/typecheck-02/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/candidate-before-correction/MANIFEST.json",
+      "bytes": 855,
+      "sha256": "7f41367ce64157303f0e04e04c0555447198a2b179b955de3bb826f59c3e2412"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/candidate-before-correction/tests__cdp_network_collector.test.ts",
+      "bytes": 14740,
+      "sha256": "542a296c52578cc5014bf7edea7539c3815e998300578f26a0e80639e3cabf56"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/candidate-before-correction/tests__paradox_local_qa_harness.test.ts",
+      "bytes": 160197,
+      "sha256": "86c34630a9d69168a0d0fdf703656bc70980fec15bbda51e2c79048b3d3fe53a"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/candidate-before-correction/tmp__r8-warroom-collection-v3-20261024__CONTRACT.md",
+      "bytes": 23909,
+      "sha256": "ecf1edddca7f65e0b20d4980c3efea2cdd3877e5fc23ddcf8b48dd8883d8615f"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/candidate-before-correction/tools__ui__cdp_network_collector.cjs",
+      "bytes": 24347,
+      "sha256": "1261586d71a1d3997afb2a60fd52c98c3b9e7a52db1e3e44730edc368c8e6216"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/candidate-before-correction/tools__ui__paradox_local_qa.cjs",
+      "bytes": 325200,
+      "sha256": "0e143e14bffcd8e21fb7075daac31d8b19d0187e28c1c3aae80abd5ee2eb2060"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/candidate-before-history-bound/MANIFEST.json",
+      "bytes": 855,
+      "sha256": "ad30b08a9a3ab9f21efff9afb37457cc04d0eff76df5e2880fa16b080b73d88d"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/candidate-before-history-bound/tests__cdp_network_collector.test.ts",
+      "bytes": 28608,
+      "sha256": "eacca88c35057704c78e3666215a3030c886a8dfdf574341c743adf1d6e9b9b0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/candidate-before-history-bound/tests__paradox_local_qa_harness.test.ts",
+      "bytes": 161910,
+      "sha256": "d1a4288ece34f43dd3d944f9c3f1c51e12dc36ad6a756ce5a5a08166197fa061"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/candidate-before-history-bound/tmp__r8-warroom-collection-v3-20261024__CONTRACT.md",
+      "bytes": 23909,
+      "sha256": "ecf1edddca7f65e0b20d4980c3efea2cdd3877e5fc23ddcf8b48dd8883d8615f"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/candidate-before-history-bound/tools__ui__cdp_network_collector.cjs",
+      "bytes": 26876,
+      "sha256": "2f85f696bb94e20ba5654c4826b1c3d297a352968f564b40ae2b0e43523c42d9"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/candidate-before-history-bound/tools__ui__paradox_local_qa.cjs",
+      "bytes": 325225,
+      "sha256": "f2e5c9681d449fc4aec1271a7e9152cdeeaf50bca0925c1d6827bf3745d4ecd0"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/review/INDEPENDENT_REVIEW.md",
+      "bytes": 12266,
+      "sha256": "f7433e0eed92679c1074788da967ac7397f94e5de3a10589392149621fe3deda"
+    },
+    {
+      "path": "tmp/r8-warroom-collection-v3-20261024/review/REVIEW_CONTRACT.md",
+      "bytes": 11002,
+      "sha256": "0f9ad7b1a77caaeddb41081b76cb77233aed6e276dcf68b0bd15ab79add6d048"
+    },
+    {
+      "path": "tmp\\r8-warroom-collection-v3-20261024\\CONTRACT.md",
+      "bytes": 24218,
+      "sha256": "1b8bd2f1dfcf757c802599d8723b60b670e381dc5132c440c992b1911e92de37"
+    }
+  ]
+}

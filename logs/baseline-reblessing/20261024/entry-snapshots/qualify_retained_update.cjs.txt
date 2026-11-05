@@ -1,0 +1,258 @@
+'use strict';
+
+const cp = require('node:child_process');
+const crypto = require('node:crypto');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const ROOT = path.resolve(__dirname, '..', '..');
+const MANIFEST_REL = 'data/derived/scenario/baselines/manifest.json';
+const TARGET_REL = 'data/derived/scenario/_baseline_tmp/apr1992_188w';
+const N91 = 'runs/apr1992_definitive_188w__6deb5845c150c196__w188_n91';
+const N92 = 'runs/apr1992_definitive_188w__6deb5845c150c196__w188_n92';
+const CAP_MS = 3 * 60 * 1000;
+const ARTIFACTS = ['activity_summary.json', 'control_delta.json', 'end_report.md', 'final_save.json', 'formation_delta.json', 'run_summary.json', 'watched_operations.json', 'weekly_report.jsonl'].sort();
+const TARGET_FILES = ['activity_summary.json', 'brigade_temporal_log.jsonl', 'control_delta.json', 'destroyed_brigades.json', 'displacement_event_log.jsonl', 'end_report.md', 'final_save.json', 'formation_delta.json', 'initial_save.json', 'operation_aars.json', 'replay_save_manifest.json', 'run_meta.json', 'run_summary.json', 'watched_operations.json', 'weekly_report.jsonl'].sort();
+const ACCEPTED = {
+  'activity_summary.json': 'a59b868cdde127a35b0a6012ff72848808f73a0a888e44732442c5bf42771ce5',
+  'control_delta.json': 'de5cb5b59eb0abb2aba9f45a75e774d5d44bf73ed3f785fb59f2ed02d3da840c',
+  'end_report.md': 'c559c5ef8e9fc2ee7ab79028c77e986c463462168f4e563f5f7dc3f6253dde7a',
+  'final_save.json': 'ff003195e966d163c27916cb0b9bb6293e9e8b0f2312684688318761cf6def34',
+  'formation_delta.json': 'ba416ce5b450f027a5cbbba941c9a68a286d8dbcb4f75041a1ef2279d4626c72',
+  'run_summary.json': 'f8429e29760314d256f822d2f4d5aa9c997d5cfc053035e1859dcac560df71d5',
+  'watched_operations.json': '41d0d2a62eac1d57c3d0bd1f53d5a46df3857b0d3598bc971af7bfa96b9858b6',
+  'weekly_report.jsonl': 'b7024560561a2e8eceae114c77b6003d939163d81971e9f610842f2e90de296f',
+};
+const RETAINED_UPDATE_FILES = {
+  'baseline-target-before.json': ['191', 'b70b99e596ccedc4cadf50d031c066294a94f26a1f86b3391523609e1d8cc991'],
+  'dependency-verification.json': ['753', '8700590418ae20e8c74bc868b5c2819cb04fcfd9854e4a7819915cefab880e64'],
+  'entry-script.snapshot': ['10309', '0a410b85706feedd17019b0cac312a55e9c59c5c1ddf014580de6ce24da1cfa1'],
+  'preservation-before.json': ['1916745', '9e4bddb626dce0368bd973c6fde028ab7f6b5946b79d9825887b419b5db9dac5'],
+  'receipt.json': ['4325', '23220ec0415c802306d25b5647ea65f301c3234dc37ad516ea3abfb35c032dac'],
+  'start.json': ['2409', '4afd8ce00f8c81fbe7097672298e458da6eacde67635227157a2c35f87be4a12'],
+  'stderr.log': ['1145', '6eafa0368876d800975c78fa89b1f735e6f9c4b9f823eafd6ebbebab471b7b08'],
+  'stdout.log': ['878596', 'b6841d8cedddfc4ee555fe4bf8ebda4dc161793886d00551e2c6f07aa4d42543'],
+  'update-execution.json': ['100', 'adec593c1276cab529f5603b6ddaa00d8a2b8b9a9a568faf55a8959470d9dfb2'],
+  'update-launch.json': ['886', '7e1efb34637d9a1b8513ea3a723aeec1c9820b14f4f0f72f98c4d4e40f03f2ab'],
+};
+
+const sha256 = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
+const readJson = (file) => JSON.parse(fs.readFileSync(file, 'utf8'));
+const writeJson = (file, value) => fs.writeFileSync(file, JSON.stringify(value, null, 2) + '\n', { flag: 'wx' });
+const normalizedSha = (file) => sha256(Buffer.from(fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n').replace(/\r/g, '\n'), 'utf8'));
+const git = (args, encoding = 'utf8') => cp.execFileSync('git', args, { cwd: ROOT, encoding, windowsHide: true });
+
+function parsePorcelainV1(text) {
+  return text.replace(/\r\n/g, '\n').replace(/\n$/, '').split('\n').filter((line) => line.length > 0).map((raw) => {
+    if (raw.length < 4 || raw[2] !== ' ') throw new Error(`malformed porcelain-v1 row: ${JSON.stringify(raw)}`);
+    return { index: raw[0], worktree: raw[1], path: raw.slice(3), raw };
+  });
+}
+
+function assessManifestOnlyStatus(text) {
+  let rows;
+  try { rows = parsePorcelainV1(text); } catch (error) { return { pass: false, rows: [], error: String(error.message) }; }
+  const pass = rows.length === 1 && rows[0].index === ' ' && rows[0].worktree === 'M' && rows[0].path === MANIFEST_REL;
+  return { pass, rows, error: null };
+}
+
+function proveRawManifestHashReplacement(oldBytes, currentBytes, before, after) {
+  const oldText = oldBytes.toString('utf8');
+  let reverted = currentBytes.toString('utf8');
+  const rows = ARTIFACTS.map((name) => {
+    const oldHash = before[name];
+    const newHash = after[name];
+    const oldOccurrences = oldText.split(oldHash).length - 1;
+    const newOccurrences = reverted.split(newHash).length - 1;
+    const pass = oldHash !== newHash && oldOccurrences === 1 && newOccurrences === 1;
+    if (pass) reverted = reverted.replace(newHash, oldHash);
+    return { name, old_hash: oldHash, new_hash: newHash, old_occurrences: oldOccurrences, new_occurrences: newOccurrences, pass };
+  });
+  const reconstructed = Buffer.from(reverted, 'utf8');
+  return { pass: rows.every((row) => row.pass) && reconstructed.equals(oldBytes), rows, reconstructed_sha256: sha256(reconstructed), old_sha256: sha256(oldBytes), bytes_exact_after_replacing_eight_hashes: reconstructed.equals(oldBytes) };
+}
+
+function arg(argv, name) {
+  const at = argv.indexOf(name);
+  if (at < 0 || !argv[at + 1]) throw new Error(`${name} is required`);
+  return argv[at + 1];
+}
+
+function compactInventory(inventoryPath, appendPaths = [], excludePaths = []) {
+  const inventory = readJson(inventoryPath);
+  if (!Array.isArray(inventory.files)) throw new Error('preservation inventory files missing');
+  const append = new Set(appendPaths.map((p) => path.resolve(ROOT, p).toLowerCase()));
+  const exclude = new Set(excludePaths.map((p) => path.resolve(ROOT, p).toLowerCase()));
+  const cache = new Map();
+  const failures = [];
+  const telemetry = [];
+  let checked = 0;
+  for (const expected of inventory.files) {
+    const absolute = path.resolve(ROOT, expected.path);
+    if (exclude.has(absolute.toLowerCase())) continue;
+    checked += 1;
+    if (!fs.existsSync(absolute)) { failures.push({ path: expected.path, reason: 'missing' }); continue; }
+    const key = `${absolute.toLowerCase()}\0${expected.bytes}\0${append.has(absolute.toLowerCase()) ? 'prefix' : 'exact'}`;
+    let actual = cache.get(key);
+    if (!actual) {
+      const bytes = fs.readFileSync(absolute);
+      actual = append.has(absolute.toLowerCase())
+        ? { mode: 'append_prefix', current_bytes: bytes.length, opening_prefix_sha256: sha256(bytes.subarray(0, expected.bytes)), append_bytes: bytes.length - expected.bytes }
+        : { mode: 'exact', current_bytes: bytes.length, current_sha256: sha256(bytes) };
+      cache.set(key, actual);
+    }
+    const pass = actual.mode === 'append_prefix'
+      ? actual.current_bytes >= expected.bytes && actual.opening_prefix_sha256 === expected.sha256
+      : actual.current_bytes === expected.bytes && actual.current_sha256 === expected.sha256;
+    if (!pass) failures.push({ path: expected.path, expected_bytes: expected.bytes, expected_sha256: expected.sha256, ...actual });
+    if (actual.mode === 'append_prefix') telemetry.push({ path: expected.path, expected_bytes: expected.bytes, expected_sha256: expected.sha256, ...actual, pass });
+  }
+  return { expected_count: inventory.files.length, checked_count: checked, excluded_count: inventory.files.length - checked, unique_files_hashed: cache.size, telemetry, failures, pass: failures.length === 0 };
+}
+
+function verifySnapshot(snapshotPath, exclude = []) {
+  const snapshot = readJson(snapshotPath);
+  const excluded = new Set(exclude);
+  const failures = [];
+  let checked = 0;
+  for (const expected of snapshot.files ?? []) {
+    if (excluded.has(expected.path)) continue;
+    checked += 1;
+    const absolute = path.join(ROOT, expected.path);
+    if (!fs.existsSync(absolute)) { failures.push({ path: expected.path, reason: 'missing' }); continue; }
+    const bytes = fs.readFileSync(absolute);
+    const actualSha = sha256(bytes);
+    if (bytes.length !== expected.bytes || actualSha !== expected.sha256) failures.push({ path: expected.path, expected_bytes: expected.bytes, actual_bytes: bytes.length, expected_sha256: expected.sha256, actual_sha256: actualSha });
+  }
+  return { expected_count: snapshot.files?.length ?? 0, checked_count: checked, excluded_count: (snapshot.files?.length ?? 0) - checked, failures, pass: failures.length === 0 };
+}
+
+function main() {
+  const argv = process.argv.slice(2);
+  const evidence = path.resolve(argv[0] ?? '');
+  const expectedHead = arg(argv, '--expected-head').toLowerCase();
+  const preservationPath = path.resolve(arg(argv, '--preservation-inventory'));
+  const sourceSnapshot = path.resolve(arg(argv, '--source-snapshot'));
+  const n94Snapshot = path.resolve(arg(argv, '--n94-inventory'));
+  const updateAttempt = path.resolve(arg(argv, '--update-attempt'));
+  const oldManifestSha = arg(argv, '--old-manifest-sha').toLowerCase();
+  if (!argv.includes('--owner-authorized-once')) throw new Error('owner authorization token required');
+  if (!fs.statSync(evidence, { throwIfNoEntry: false })?.isDirectory()) throw new Error(`evidence directory does not exist: ${evidence}`);
+  if (!/^[0-9a-f]{40}$/.test(expectedHead) || !/^[0-9a-f]{64}$/.test(oldManifestSha)) throw new Error('invalid expected hash argument');
+  const started = Date.now();
+  const deadline = started + CAP_MS;
+  const failures = [];
+  const gates = {};
+  const gate = (name, fn) => {
+    try { const detail = fn(); gates[name] = detail; if (detail?.pass === false) failures.push({ category: name, detail }); }
+    catch (error) { const detail = { pass: false, error: String(error.stack ?? error) }; gates[name] = detail; failures.push({ category: name, detail }); }
+  };
+
+  gate('runtime_and_head', () => ({ node: process.version, head: git(['rev-parse', 'HEAD']).trim().toLowerCase(), pass: /^v22\./.test(process.version) && git(['rev-parse', 'HEAD']).trim().toLowerCase() === expectedHead }));
+  gate('manifest_only_status', () => assessManifestOnlyStatus(git(['status', '--porcelain=v1'])));
+  gate('retained_execution', () => {
+    const receipt = readJson(path.join(updateAttempt, 'receipt.json'));
+    const launch = readJson(path.join(updateAttempt, 'update-launch.json'));
+    const execution = readJson(path.join(updateAttempt, 'update-execution.json'));
+    const dependency = readJson(path.join(updateAttempt, 'dependency-verification.json'));
+    const targetBefore = readJson(path.join(updateAttempt, 'baseline-target-before.json'));
+    const preservationBefore = readJson(path.join(updateAttempt, 'preservation-before.json'));
+    const updateStderr = fs.readFileSync(path.join(updateAttempt, 'stderr.log'), 'utf8');
+    const campaignStderr = fs.readFileSync(path.join(path.dirname(updateAttempt), 'campaign-01', 'stderr.log'), 'utf8');
+    const warningPattern = /^\[brigade_assignment\] UNRESOLVED hrhb_travnik_brigade .*$/gm;
+    const updateWarnings = updateStderr.match(warningPattern) ?? [];
+    const campaignWarnings = campaignStderr.match(warningPattern) ?? [];
+    const duration = new Date(receipt.end_utc).getTime() - new Date(receipt.start_utc).getTime();
+    const commandPass = launch.argv?.slice(-2).join(' ') === 'node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_baseline_regression.ts';
+    const warningsMatchAcceptedRun = updateWarnings.length === 2 && JSON.stringify(updateWarnings) === JSON.stringify(campaignWarnings);
+    const retainedNames = fs.readdirSync(updateAttempt, { withFileTypes: true });
+    const retainedRows = retainedNames.map((entry) => {
+      const bytes = entry.isFile() ? fs.readFileSync(path.join(updateAttempt, entry.name)) : null;
+      const expected = RETAINED_UPDATE_FILES[entry.name];
+      return { name: entry.name, is_file: entry.isFile(), bytes: bytes?.length ?? null, sha256: bytes ? sha256(bytes) : null, pass: entry.isFile() && Boolean(expected) && bytes.length === Number(expected[0]) && sha256(bytes) === expected[1] };
+    }).sort((a, b) => a.name.localeCompare(b.name));
+    const retainedHashesPass = retainedRows.length === Object.keys(RETAINED_UPDATE_FILES).length && retainedRows.every((row) => row.pass);
+    const receiptPass = receipt.child_exit === 1 && receipt.wrapper_exit === 126 && receipt.timed_out === false && receipt.entry_script?.raw_sha256 === '0a410b85706feedd17019b0cac312a55e9c59c5c1ddf014580de6ce24da1cfa1' && receipt.entry_script_post?.matches_start_raw_sha256 === true && JSON.stringify(receipt.artifact_contract?.unexpected) === '[]' && JSON.stringify(receipt.artifact_contract?.missing_allowed) === JSON.stringify(['preservation-after.json', 'update-result.json']);
+    const preflightPass = dependency.pass === true && dependency.required_count === 1 && targetBefore.file_count === 0 && (targetBefore.files ?? []).length === 0 && preservationBefore.pass === true && preservationBefore.expected_count === 3226 && preservationBefore.checked_count === 3226 && preservationBefore.failures?.length === 0;
+    const statusFailureOnly = /Error: only manifest may be tracked-dirty after update, actual:\r?\nM data\/derived\/scenario\/baselines\/manifest\.json/.test(updateStderr) && (updateStderr.match(/Error:/g) ?? []).length === 1;
+    const pass = launch.cap_ms === 2100000 && receipt.timeout_ms === 2100000 && duration <= 2100000 && execution.exit === 0 && execution.timed_out === false && execution.remaining_ms > 0 && commandPass && launch.expected_head === expectedHead && launch.expected_manifest_sha256 === oldManifestSha && warningsMatchAcceptedRun && retainedHashesPass && receiptPass && preflightPass && statusFailureOnly;
+    return { pass, producer_exit: execution.exit, producer_timed_out: execution.timed_out, remaining_ms: execution.remaining_ms, outer_duration_ms: duration, outer_child_exit: receipt.child_exit, outer_wrapper_exit: receipt.wrapper_exit, receipt_binding_pass: receiptPass, preflight_binding_pass: preflightPass, retained_files_exact: retainedHashesPass, retained_files: retainedRows, status_failure_only: statusFailureOnly, expected_red_reason: 'post-producer manifest-only porcelain leading-space loss', travnik_warnings: updateWarnings, warnings_match_stage1: warningsMatchAcceptedRun, command: launch.argv };
+  });
+  gate('manifest_delta', () => {
+    const oldBytes = git(['show', `${expectedHead}:${MANIFEST_REL}`], 'buffer');
+    const old = JSON.parse(oldBytes.toString('utf8'));
+    const current = readJson(path.join(ROOT, MANIFEST_REL));
+    const before = old.scenarios?.[0]?.hashes ?? {};
+    const after = current.scenarios?.[0]?.hashes ?? {};
+    const shape = structuredClone(current); shape.scenarios[0].hashes = before;
+    const changed = ARTIFACTS.filter((name) => before[name] !== after[name]);
+    const rawReplacement = proveRawManifestHashReplacement(oldBytes, fs.readFileSync(path.join(ROOT, MANIFEST_REL)), before, after);
+    const pass = sha256(oldBytes) === oldManifestSha && JSON.stringify(shape) === JSON.stringify(old) && JSON.stringify(after) === JSON.stringify(ACCEPTED) && changed.length === 8 && rawReplacement.pass;
+    return { pass, old_sha256: sha256(oldBytes), expected_old_sha256: oldManifestSha, changed, after, raw_replacement: rawReplacement };
+  });
+  gate('target_inventory_and_hashes', () => {
+    const dir = path.join(ROOT, TARGET_REL);
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    const nonFiles = entries.filter((x) => !x.isFile()).map((x) => x.name).sort();
+    const names = entries.map((x) => x.name).sort();
+    const hashes = Object.fromEntries(ARTIFACTS.map((name) => [name, sha256(fs.readFileSync(path.join(dir, name)))]));
+    return { pass: nonFiles.length === 0 && JSON.stringify(names) === JSON.stringify(TARGET_FILES) && JSON.stringify(hashes) === JSON.stringify(ACCEPTED), names, non_files: nonFiles, hashes };
+  });
+  gate('target_provenance', () => {
+    const provenance = readJson(path.join(ROOT, TARGET_REL, 'run_meta.json')).provenance ?? {};
+    const rows = provenance.consumed_inputs?.files ?? [];
+    const mismatches = rows.filter((row) => !fs.existsSync(path.join(ROOT, row.path)) || normalizedSha(path.join(ROOT, row.path)) !== row.sha256);
+    const recomputed = sha256(Buffer.from(rows.map((row) => `${row.path} ${row.sha256 ?? 'ABSENT'}\n`).join(''), 'utf8'));
+    const pass = provenance.git_commit === expectedHead && provenance.git_dirty === false && rows.length === 32 && mismatches.length === 0 && provenance.consumed_inputs?.digest === recomputed;
+    return { pass, git_commit: provenance.git_commit, git_dirty: provenance.git_dirty, input_count: rows.length, input_mismatches: mismatches, recorded_digest: provenance.consumed_inputs?.digest, recomputed_digest: recomputed };
+  });
+  gate('source_outside_manifest', () => verifySnapshot(sourceSnapshot, [MANIFEST_REL]));
+  gate('preservation_3226', () => compactInventory(preservationPath, ['data/derived/_debug/c_lane_corps_directive_telemetry.jsonl', 'data/derived/_debug/d_lane_persona_decisions.jsonl'], [MANIFEST_REL]));
+  gate('n94_inventory_40', () => {
+    const detail = verifySnapshot(n94Snapshot);
+    const rows = readJson(n94Snapshot).files ?? [];
+    const dir = rows.length ? path.dirname(path.join(ROOT, rows[0].path)) : '';
+    const actualNames = fs.readdirSync(dir, { withFileTypes: true }).filter((x) => x.isFile()).map((x) => x.name).sort();
+    const expectedNames = rows.map((row) => path.basename(row.path)).sort();
+    detail.pass = detail.pass && rows.length === 40 && JSON.stringify(actualNames) === JSON.stringify(expectedNames);
+    detail.actual_count = actualNames.length;
+    return detail;
+  });
+  gate('n94_same_gameplay_artifacts', () => {
+    const n94 = new Map((readJson(n94Snapshot).files ?? []).map((row) => [path.basename(row.path), row.sha256]));
+    const names = ARTIFACTS.filter((name) => name !== 'weekly_report.jsonl');
+    const rows = names.map((name) => ({ name, n94_sha256: n94.get(name), target_sha256: sha256(fs.readFileSync(path.join(ROOT, TARGET_REL, name))), pass: n94.get(name) === ACCEPTED[name] }));
+    return { pass: rows.every((row) => row.pass), scope: 'seven non-weekly baseline artifacts; default-profile weekly identity is checked directly against accepted CI', rows };
+  });
+
+  const readerResults = {};
+  const run = (name, args) => {
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) { const detail = { pass: false, exit: null, timed_out: true, error: 'three-minute qualifier deadline exhausted' }; readerResults[name] = detail; failures.push({ category: name, detail }); return; }
+    const child = cp.spawnSync(process.execPath, args, { cwd: ROOT, encoding: 'utf8', windowsHide: true, timeout: remaining, killSignal: 'SIGKILL' });
+    const exit = child.error?.code === 'ETIMEDOUT' ? 124 : child.status;
+    fs.writeFileSync(path.join(evidence, `${name}.stdout.log`), child.stdout ?? '', { flag: 'wx' });
+    fs.writeFileSync(path.join(evidence, `${name}.stderr.log`), child.stderr ?? '', { flag: 'wx' });
+    const detail = { pass: exit === 0, exit, timed_out: exit === 124, signal: child.signal, error: child.error ? String(child.error.message) : null, argv: [process.execPath, ...args], remaining_ms: Math.max(0, deadline - Date.now()) };
+    writeJson(path.join(evidence, `${name}.execution.json`), detail);
+    readerResults[name] = detail;
+    if (!detail.pass) failures.push({ category: name, detail });
+  };
+  run('checkpoints', ['tools/verify_checkpoints.cjs', TARGET_REL, '--base', 'jan=707,apr94=707,apr95=706,oct=706', '--cascade-base', '41']);
+  run('consistency', ['tools/validate_run_consistency.cjs', TARGET_REL]);
+  run('health', ['tools/engine_health_gate.cjs', TARGET_REL, '--horizon', '188w', '--json']);
+  run('protected-vs-n91', ['logs/claude-channel-20261004/221-campaign-gate-v2.cjs', TARGET_REL, N91, '--out', path.join(evidence, 'protected-vs-n91.json'), '--horizon', '188']);
+  run('protected-vs-n92', ['logs/claude-channel-20261004/221-campaign-gate-v2.cjs', TARGET_REL, N92, '--out', path.join(evidence, 'protected-vs-n92.json'), '--horizon', '188']);
+
+  const result = { schema: 'awwv.retained-baseline-update-qualification.v1', pass: failures.length === 0, read_only: true, expected_head: expectedHead, elapsed_ms: Date.now() - started, cap_ms: CAP_MS, gates, readers: readerResults, failures, retained_red_receipt: path.relative(ROOT, path.join(updateAttempt, 'receipt.json')).replaceAll('\\', '/') };
+  writeJson(path.join(evidence, 'QUALIFICATION.json'), result);
+  const lines = ['# Retained baseline update qualification', '', `Verdict: **${result.pass ? 'PASS' : 'FAIL'}**`, '', `The production child exited 0 and was not rerun. The retained RED wrapper receipt remains at \`${result.retained_red_receipt}\`; its post-producer failure came from trimming the leading porcelain status column before comparing \` M\`.`, '', `Fresh qualifier elapsed: ${result.elapsed_ms} ms (cap ${CAP_MS} ms).`, '', `Failure categories: ${failures.length ? failures.map((x) => x.category).join(', ') : 'none'}.`, '', 'The qualifier checked the accepted eight hashes, exact target inventory, clean 32-input provenance, eight-value-only manifest delta, raw tracked-source preservation outside the manifest, all 3,226 old bindings with telemetry-prefix semantics, exact n94 40-file preservation, seven n94 gameplay-artifact identities, and the retained checkpoint/consistency/health/protected readers.', ''];
+  fs.writeFileSync(path.join(evidence, 'DIAGNOSIS.md'), lines.join('\n'), { flag: 'wx' });
+  process.stdout.write(JSON.stringify({ pass: result.pass, elapsed_ms: result.elapsed_ms, failures: failures.map((x) => x.category) }) + '\n');
+  process.exit(result.pass ? 0 : 2);
+}
+
+module.exports = { assessManifestOnlyStatus, parsePorcelainV1, proveRawManifestHashReplacement };
+if (require.main === module) {
+  try { main(); } catch (error) { process.stderr.write(String(error.stack ?? error) + '\n'); process.exit(1); }
+}

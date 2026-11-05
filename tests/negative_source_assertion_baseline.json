@@ -32,6 +32,8 @@
     "tests/release_notes_generator.test.ts",
     "tests/rs_104week_decision_cadence.test.ts",
     "tests/run_provenance_input_surface_scan.test.ts",
+    "tests/scenario_read_context.test.ts",
+    "tests/scenario_runner_read_context_wiring.test.ts",
     "tests/sector_partition_instrumentation.test.ts",
     "tests/sector_topology_snapshot.test.ts",
     "tests/sector_topology_solver.test.ts",

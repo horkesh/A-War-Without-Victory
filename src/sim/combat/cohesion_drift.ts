@@ -117,12 +117,14 @@ export interface CohesionDriftReport {
  */
 export function runCohesionDrift(
     state: GameState,
-    engagedFormationIds: FormationId[] | Set<string>
+    engagedFormationIds: FormationId[] | Set<string>,
+    strandedStillHoldingIds: readonly FormationId[] = []
 ): CohesionDriftReport {
     const report: CohesionDriftReport = { formations_updated: 0, by_faction: {} };
     const engagedSet = engagedFormationIds instanceof Set
         ? engagedFormationIds
         : new Set(engagedFormationIds);
+    const strandedStillHoldingSet = new Set(strandedStillHoldingIds);
     const formations = state.military.formations ?? {};
     const turn = state.meta.turn;
     const factionIds = (state.factions ?? []).map((x) => x.id).filter((x): x is FactionId => typeof x === 'string').sort(strictCompare);
@@ -169,10 +171,13 @@ export function runCohesionDrift(
         const prev = Math.max(0, Math.min(100, f.cohesion ?? 60));
         // Apply drift
         let next = Math.max(0, Math.min(100, prev + drift));
-        // C1: Clamp to faction cohesion floor (ARBiH professionalization) and ceiling (RS decay)
+        // C1: Clamp to faction cohesion floor (ARBiH professionalization) and ceiling (RS decay).
+        // Current-pass stranded still-holding recipients are exempt from only the upward floor
+        // correction so their ordinary drift is not erased; ceiling, bounds, engagement skip,
+        // OPSEC/TG suppression and all non-receipt behavior remain unchanged.
         const floor = getFactionCohesionFloor(faction, turn, state.military.war_timeline);
         const ceiling = getFactionCohesionCeiling(faction, turn, state.military.war_timeline);
-        if (next < floor) next = floor;
+        if (next < floor && !strandedStillHoldingSet.has(id)) next = floor;
         if (next > ceiling) next = ceiling;
         if (next === prev) continue;
         (f as { cohesion?: number }).cohesion = next;

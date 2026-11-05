@@ -21,7 +21,7 @@ name: Event System CI
 # `tests/ci_workflow_test_paths_exist.test.ts` asserts every path named in
 # this file exists on disk, so the next deletion fails loudly instead.
 #
-# Three event gates run sequentially on every trigger, preceded on development-
+# Two event gates run sequentially on every trigger, preceded on development-
 # branch pushes by TypeScript typecheck for loader / vocabulary / shape errors:
 #   1. Event-system + Phase E/F/H suite — covering loader, decisions,
 #      evaluation, taxonomy, presidential acceptance, families, causality,
@@ -32,8 +32,10 @@ name: Event System CI
 #      slides, catalog wire-up, archive spine / decision consequences).
 #   2. Phase F2 strict gate (Phase G3) — asserts CRITICAL + WARNING = 0
 #      on the real catalog. This is the canon-compliance hard rail.
-#   3. Baseline regression — byte-identical run-artifact hash check via
-#      tools/scenario_runner/run_baseline_regression.ts.
+#
+# The byte-identical run-artifact hash check lives in the separate advisory
+# Baseline Pins workflow, so its intentionally honest stale-pin result does not
+# determine this workflow's conclusion.
 #
 # Determinism + convention notes:
 #   - Node 22 (matches repo's other workflows; see baseline-regression.yml).

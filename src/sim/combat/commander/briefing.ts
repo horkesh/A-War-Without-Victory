@@ -29,6 +29,7 @@
  */
 
 import type { EdgeRecord } from '../../../map/settlements.js';
+import type { TerrainScalarsData } from '../../../map/terrain_scalars.js';
 import type {
     FactionId,
     FormationId,
@@ -567,6 +568,26 @@ function collectCampaignIntent(
         ? overlay.deviation_reason
         : null;
 
+    // Open Croat-Bosniak war is deliberately asymmetric. The diverted ARBiH
+    // corps receives the opposing bilateral-front OSIDs as campaign objectives;
+    // the diverted HVO corps is hold-only. Consume this transient directive
+    // before the commander replaces it with its emitted per-turn directive.
+    const corpsCommand = state.military.corps_command?.[corpsId];
+    if (corpsCommand?.status_reason === 'rbih_hrhb_bilateral_front_diversion') {
+        const bilateralTargets = [...(corpsCommand.directive?.offensive_targets ?? [])]
+            .sort(strictCompare);
+        const isBilateralAttacker = bilateralTargets.length > 0;
+        return {
+            role: isBilateralAttacker ? 'primary' : 'contain',
+            offensiveTargets: bilateralTargets,
+            holdTargets: [...(corpsCommand.directive?.hold_osids ?? [])].sort(strictCompare),
+            stanceCeiling: isBilateralAttacker ? 'offensive' : 'defensive',
+            syncRole: null,
+            syncTargets: [],
+            deviationReason,
+        };
+    }
+
     if (!plan || plan.valid_until_turn < turn) {
         // No CampaignPlan — overlay still wins for `role` if present.
         return {
@@ -647,6 +668,8 @@ export function buildBriefing(
     ethnicMap: OsidEthnicComposition | null,
     corpsSubordinatesByCorps?: CorpsSubordinatesByCorps,
     enemyEquipmentSummaryContext?: EnemyEquipmentSummaryContext,
+    osidPopulationMap?: import('../../../data/operational_data.js').OsidPopulationMap,
+    terrainData?: TerrainScalarsData | null,
 ): CommanderBriefing {
     const turn = state.meta?.turn ?? 0;
 
@@ -810,6 +833,8 @@ export function buildBriefing(
         brigades,
         state_ref: state,
         reverse_map: reverseMap,
+        terrain_data: terrainData ?? null,
+        osid_population_map: osidPopulationMap,
         supply_by_osid: supplyByOsid,
         ethnic_map: ethnicMap,
         graph_analysis: graphAnalysis,
@@ -831,6 +856,8 @@ export function buildBriefing(
         must_hold_osids: mustHoldOsids,
         campaign_role: campaignIntent.role,
         campaign_offensive_targets: campaignIntent.offensiveTargets,
+        bilateral_offensive: corpsCmd?.status_reason === 'rbih_hrhb_bilateral_front_diversion'
+            && campaignIntent.offensiveTargets.length > 0,
         campaign_hold_targets: campaignIntent.holdTargets,
         campaign_stance_ceiling: campaignIntent.stanceCeiling,
         campaign_sync_role: campaignIntent.syncRole,

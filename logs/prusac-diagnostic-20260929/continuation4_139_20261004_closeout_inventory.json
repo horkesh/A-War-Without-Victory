@@ -1,0 +1,71 @@
+{
+  "scope": "documentation closeout and retained-evidence preservation; no simulation rerun",
+  "head": "fe828b9e0222a80238dbe60c22391fae53c48039",
+  "parent_fingerprints_checked": 18,
+  "source_fingerprints_checked": 8,
+  "production_diff": [],
+  "retained_runs": [
+    "apr1992_definitive_188w__0b1f040ff4abe835__w139_n40",
+    "apr1992_definitive_188w__4658849344f21642__w186_n38",
+    "apr1992_definitive_188w__6deb5845c150c196__w188_n37",
+    "apr1992_definitive_188w__6deb5845c150c196__w188_n39"
+  ],
+  "retained_partial52": "runs/apr1992_historical_52w__434fe8ff83b7b523__w52",
+  "junctions": {
+    "runs": {
+      "symlink": true,
+      "target": "C:\\Users\\User\\.codex\\worktrees\\april-1995-glamoc\\A-War-Without-Victory\\runs"
+    },
+    "node_modules": {
+      "symlink": true,
+      "target": "C:\\Users\\User\\.codex\\worktrees\\april-1995-glamoc\\A-War-Without-Victory\\node_modules"
+    }
+  },
+  "node_version": "v22.23.2",
+  "reused_n40_artifacts": [
+    {
+      "path": "runs/apr1992_definitive_188w__0b1f040ff4abe835__w139_n40/run_meta.json",
+      "bytes": 11493,
+      "sha256": "8b106c29dd10e3bbae934277d719c9d960bf3c2820ff539e2afb031c507c34ba",
+      "hash_evidence": "reused unchanged n40 provenance; presence/size freshly checked"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__0b1f040ff4abe835__w139_n40/initial_save.json",
+      "bytes": 1373722,
+      "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+      "hash_evidence": "reused unchanged n40 provenance; presence/size freshly checked"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__0b1f040ff4abe835__w139_n40/final_save.json",
+      "bytes": 7611874,
+      "sha256": "d6715e9cefa14d0cf88b1af34d12c38c231186b6cf44cbb71e87636c0a6b04b9",
+      "hash_evidence": "reused unchanged n40 provenance; presence/size freshly checked"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__0b1f040ff4abe835__w139_n40/weekly_report.jsonl",
+      "bytes": 153790127,
+      "sha256": "10cc0729966a4f45eeb6ea22bf61da5901d9e34ecebd0287ded5c3cecccc8058",
+      "hash_evidence": "reused unchanged n40 provenance; presence/size freshly checked"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__0b1f040ff4abe835__w139_n40/run_summary.json",
+      "bytes": 490378,
+      "sha256": "10fb820edf424f02e81bed8cbfcb23402f9fea59fed2b737eed8c9cfceab187e",
+      "hash_evidence": "reused unchanged n40 provenance; presence/size freshly checked"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__0b1f040ff4abe835__w139_n40/control_delta.json",
+      "bytes": 27664,
+      "sha256": "cd1994f6bfebc3613a14c0d07d3bd8f49893107bc391472e686b347863e0593d",
+      "hash_evidence": "reused unchanged n40 provenance; presence/size freshly checked"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__0b1f040ff4abe835__w139_n40/formation_delta.json",
+      "bytes": 3676,
+      "sha256": "bf329b15eb9698bca8c16d0d5c35934f3b0a2cd0310341ae7790c7f8153db8ff",
+      "hash_evidence": "reused unchanged n40 provenance; presence/size freshly checked"
+    }
+  ],
+  "unaffected_prior36_fingerprints_reused": true,
+  "errors": []
+}

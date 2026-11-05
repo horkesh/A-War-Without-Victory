@@ -1,0 +1,5 @@
+{
+  "command": "node node_modules/vitest/vitest.mjs run tests/current-scenario-postturn-boundary.test.ts --reporter=verbose",
+  "exit_code": 0,
+  "elapsed_seconds": 26.3317355
+}

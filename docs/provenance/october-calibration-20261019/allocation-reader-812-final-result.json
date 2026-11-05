@@ -1,0 +1,322 @@
+{
+  "writes_closed": true,
+  "captured_utc": "2026-10-22T11:26:20.968Z",
+  "verdict": "APPROVED_STRICT_ALLOCATION_READER",
+  "summary": "Strict shared-pool allocation reader is implemented and independently approved. Schema 2 closes each regular-stage pool with an ordered attempted-recipient manifest and diagnostic error count. This detects omitted skipped or zero-transfer rows that schema 1 balances could not expose. The portable reader rejects schema 1, validates every observed block before selecting requested turns, and requires explicit invocation counts and ordered completed turns.",
+  "validation": "Initial focused validation: 3 files, 67/67 tests passed, child/wrapper exits 0/0, reused at unaffected scope. Independent review then found that a partial topic prefix could be ignored. The reader-only correction rejects every nonempty proper prefix; its final affected fixture passed 18/18 with child/wrapper exits 0/0, and final nonincremental noEmit exits 0/0. There are 36 negative controls, including 5 added prefix fragments. The original rejection, red and superseded checks remain preserved. Counts are separate, never combined into a fictional rerun. One independent review and one targeted correction verification were performed.",
+  "scope": "Only the observer, strict reader and production-function fixture changed. formation_spawn.ts, reason gate, personnel code/tests, C/D telemetry, thresholds and October reference remain byte-exact. No gameplay, state, report, save, weekly or file-telemetry change; no campaign, replay or full suite. Retained n80 703/712 remains NO-GO/unadopted, n83 remains a rejected 689 trajectory, and missing n80 allocation history remains unmeasured. Reader readiness does not prove campaign neutrality or calibration recovery.",
+  "next_action": "Next proposed action: one instrumented original-trajectory 188-week diagnostic against n83, 35-minute cap, runner timeout 600 seconds, one invocation with no retry. Measure Pale regular-stage opening balance, reserve and ordered earlier recipients at completed turns 21–22. Require exact native gameplay artifact identity, input provenance, telemetry preservation and the existing plus new strict readers. The fixed proposal is in allocation-reader-809-root-plan.md; no campaign launch is authorized by this closeout.",
+  "files": [
+    {
+      "path": "src/sim/combat/reinforcement_allocation_diagnostic.ts",
+      "bytes": 7113,
+      "sha256": "12d24113946ad414ae3f310a45c9d7f52e0a24bde916ed60f0001d18d4bacdc6"
+    },
+    {
+      "path": "tools/diagnostics/reinforcement_allocation_reader.cjs",
+      "bytes": 20531,
+      "sha256": "bf1e94e52c2efb447041161fa6e14de2d078f2177d7392209344acc746c71c86"
+    },
+    {
+      "path": "tests/reinforcement_allocation_diagnostic.test.ts",
+      "bytes": 36000,
+      "sha256": "6eff326a27cc9892aa45a6d84ae018afd19ecba18af65896ce050f7a05a094df"
+    }
+  ],
+  "protected_source_pins": [
+    {
+      "path": "src/sim/formation_spawn.ts",
+      "bytes": 47679,
+      "sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa",
+      "expected_bytes": 47679,
+      "expected_sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa",
+      "matches": true
+    },
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "bytes": 20275,
+      "sha256": "b7467c47f97c5c349535b59aaeafa3dea0bc5d03314961c5ac17ef3a4283434a",
+      "expected_bytes": 20275,
+      "expected_sha256": "b7467c47f97c5c349535b59aaeafa3dea0bc5d03314961c5ac17ef3a4283434a",
+      "matches": true
+    },
+    {
+      "path": "src/sim/combat/personnel_diagnostic.ts",
+      "bytes": 5870,
+      "sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3",
+      "expected_bytes": 5870,
+      "expected_sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3",
+      "matches": true
+    },
+    {
+      "path": "tests/personnel_diagnostic.test.ts",
+      "bytes": 19693,
+      "sha256": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b",
+      "expected_bytes": 19693,
+      "expected_sha256": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b",
+      "matches": true
+    },
+    {
+      "path": "tests/reason_code_debug.test.ts",
+      "bytes": 10435,
+      "sha256": "44a60e84d8b22d1cb629364a84e10257d3454531678b987a75582ddaee9a756c",
+      "expected_bytes": 10435,
+      "expected_sha256": "44a60e84d8b22d1cb629364a84e10257d3454531678b987a75582ddaee9a756c",
+      "matches": true
+    }
+  ],
+  "telemetry": [
+    {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 102947714,
+      "sha256": "edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9",
+      "expected_bytes": 102947714,
+      "expected_sha256": "edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9",
+      "matches": true
+    },
+    {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "expected_bytes": 1041,
+      "expected_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "matches": true
+    }
+  ],
+  "protected_controls": [
+    {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 102947714,
+      "sha256": "edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9",
+      "expected_bytes": 102947714,
+      "expected_sha256": "edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9",
+      "matches": true
+    },
+    {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "expected_bytes": 1041,
+      "expected_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "matches": true
+    },
+    {
+      "path": "data/calibration/engine_health_thresholds.json",
+      "bytes": 3775,
+      "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d",
+      "expected_bytes": 3775,
+      "expected_sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d",
+      "matches": true
+    },
+    {
+      "path": "data/source/calibration/painted_control_oct1995.json",
+      "bytes": 35266,
+      "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b",
+      "expected_bytes": 35266,
+      "expected_sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b",
+      "matches": true
+    }
+  ],
+  "worker": {
+    "initial": {
+      "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-17-seal/810-result.json",
+      "sha256": "ea62ebabf5672e7e953b806d084e1fb42287f470f71024e7b5e8a8a4891a2fa3"
+    },
+    "corrected": {
+      "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-21-correction-seal/810-correction-result.json",
+      "sha256": "01fcec63e08e661d62d8ad413145ccbc1b583728e383b45b8719ef760f66af79"
+    }
+  },
+  "review": {
+    "initial": {
+      "path": "logs/claude-channel-20261004/811-allocation-reader-review/811-review.json",
+      "sha256": "46dd0e7918636328d249a4a515c952db8577150dcb471b3eb4d51c3f75044aef",
+      "verdict": "REJECT_BLOCKING_FINDING"
+    },
+    "targeted": {
+      "path": "logs/claude-channel-20261004/811-allocation-reader-review/811-correction-verification.json",
+      "sha256": "74e3cd1542941aaab6396bb8d10c78aea5325494260fb77c228702bb2739a56f",
+      "verdict": "APPROVED"
+    }
+  },
+  "checks": {
+    "retained_red": {
+      "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-18-red-partial-prefix/receipt.json",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "artifact_contract_pass": true,
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 569,
+        "sha256": "cfd9cacac0c96accac8a369510f2fc9822bd26df6da317df47b4bf2111366f51"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 869,
+        "sha256": "661f4d4ec1ec400d965cb216b42d896c0ac9c6e67016cb91cec4cc6c360f81f1"
+      }
+    },
+    "final_affected": {
+      "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-19-green-partial-prefix/receipt.json",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract_pass": true,
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 357,
+        "sha256": "c9adc88161a8566cc2fe89ff979043a6e2b97038e4caedb339f1a4c28de3fcf0"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "final_typecheck": {
+      "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-20-correction-typecheck/receipt.json",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract_pass": true,
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "focused_counts": {
+      "files": 1,
+      "tests": 18,
+      "passed": 18,
+      "failed": 0
+    }
+  },
+  "reused_checks": {
+    "final_focused": {
+      "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-15-final-focused/receipt.json",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract_pass": true,
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 605,
+        "sha256": "646f11e81ee1703a9bd3c2b4e2093b108148a27b58b356b0051441472b332bdb"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 1364,
+        "sha256": "444b3be9772f73bfb445df781a5c757894867c178c1a27868fce3cbcd8d56d80"
+      }
+    },
+    "final_typecheck": {
+      "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-16-final-typecheck/receipt.json",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract_pass": true,
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "focused_counts": {
+      "files": 3,
+      "tests": 67,
+      "passed": 67,
+      "failed": 0
+    },
+    "typecheck": {
+      "nonincremental": true,
+      "no_emit": true
+    }
+  },
+  "negative_controls": {
+    "original": {
+      "stream_loss_duplication_reordering_truncation": 8,
+      "schema_selector_manifest_presence_arithmetic_errors": 15,
+      "zero_transfer_manifest_gap": 1,
+      "whole_stream_scope_order_and_turn_token": 4,
+      "cli_existing_output_invalid_stream_and_usage": 3,
+      "total": 31
+    },
+    "added_partial_prefix": 5,
+    "total": 36
+  },
+  "cli": {
+    "success_exit": 0,
+    "invalid_receipt_exit": 2,
+    "usage_exit": 3,
+    "requires": [
+      "--input",
+      "--output",
+      "--pool",
+      "--turns",
+      "--expected-invocations-per-turn"
+    ],
+    "output_contract": "new file opened with wx"
+  },
+  "receipt_contract": {
+    "supported_schema_version": 2,
+    "schema_v1": "unsupported because it has no close completeness manifest",
+    "validates_all_observed_blocks": true,
+    "selected_future_scope": {
+      "pools": [
+        "pale:RS"
+      ],
+      "turns": [
+        21,
+        22
+      ],
+      "expected_invocations_per_turn": 1
+    },
+    "historical_claim": "No allocation coverage is claimed until a future source-bound campaign stdout passes this reader."
+  },
+  "raw_inventory": {
+    "path": "logs/claude-channel-20261004/812-raw-inventory.json",
+    "sha256": "e9e195781abfeb3e1e05e8245ec58b90ad6f2d547c73eada6321b7363b99485c",
+    "entries": 271
+  },
+  "campaign_invocations": 0,
+  "replay_invocations": 0,
+  "full_suite_invocations": 0,
+  "telemetry_append_bytes": {
+    "C": 0,
+    "D": 0
+  },
+  "calibration": "Retained703/712 NO-GO/unadopted; no new campaign measurement.",
+  "closed_utc": "2026-10-22T11:28:33.107Z",
+  "administrative_eof_normalization": {
+    "path": "tools/diagnostics/reinforcement_allocation_reader.cjs",
+    "sha256": "1b8bb4b6d9491d8a9c0dcf32b05e7f83a5abcd4c1cf8c9d50b3928287c4060f0",
+    "writes_closed": true,
+    "scope": "Administrative removal of one surplus terminal blank line only. Exact reviewed bytes archived before edit; all non-terminal-whitespace bytes identical. No semantic implementation/review change.",
+    "before": {
+      "bytes": 20532,
+      "sha256": "9739fe2e8ff59d2cf1896b9c177c3a6ac9ef1c84e9c03c2097da44f523c10840"
+    },
+    "after": {
+      "bytes": 20531,
+      "sha256": "bf1e94e52c2efb447041161fa6e14de2d078f2177d7392209344acc746c71c86"
+    },
+    "syntax_exit": 0,
+    "review_reused": "811-correction-verification at unchanged non-whitespace bytes",
+    "cause": "812-preserve-a staged whitespace check exited2; no commit or push reached. Wrapper126 also records expected later artifacts absent after stop."
+  },
+  "administrative_inventory": {
+    "path": "logs/claude-channel-20261004/812-administrative-inventory.json",
+    "sha256": "a8af79e73bc416fed71adceff51f9c0ab14769076fef61e8878eaf0c35273f84"
+  },
+  "initial_root_result": {
+    "path": "logs/claude-channel-20261004/812-integration-a/result.json",
+    "sha256": "e58f82b576aad6fa6ff311f4607d563f67c274a92750da93cc07b129d4a240b0"
+  }
+}

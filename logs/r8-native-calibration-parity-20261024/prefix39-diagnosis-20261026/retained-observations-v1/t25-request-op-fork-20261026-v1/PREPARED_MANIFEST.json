@@ -1,0 +1,15 @@
+{
+  "schema": "awwv.t25-request-op-fork.prepared-manifest.v1",
+  "status": "PREPARED_NOT_EXECUTED_AWAITING_INDEPENDENT_PRELAUNCH_REVIEW",
+  "attempt_path": "tmp/player-bot-capability-parity-20261024/t25-request-op-fork-20261026-v1/attempt-001",
+  "attempt_exists": false,
+  "files": [
+    { "path": "CONFIG.json", "bytes": 6542, "sha256": "cc1b7d9da81655be7c2ed053ab796cb4865135fda5e5e0ce093e0668aadf8bbd" },
+    { "path": "request_op_fork_t25.cjs", "bytes": 27287, "sha256": "f7036cfb6a48e789b63843e93a03e7b37507b04994985d5dbcea1e4e8d07b872" },
+    { "path": "launch_request_op_fork_t25.cjs", "bytes": 5902, "sha256": "bbc09756f600be8ccefd33b016483b473fbf6c591874c2f49677349370d39f9b" },
+    { "path": "PRECHECK.json", "bytes": 2244, "sha256": "d5ac91515cdae691911530b0468223a16b9fe999d2ed7d23d53f7a95feae028b" },
+    { "path": "RUN_COMMAND.txt", "bytes": 179, "sha256": "5ff6e0829279fd6507856d45ad953987d9da4df311ee214ffbe813b92c6e9e0e" },
+    { "path": "STOPPING_CRITERIA.md", "bytes": 2614, "sha256": "5a1433a475ec5994134d7d20be11a57c9841e4e0574ddde74f2f67148c58758f" }
+  ],
+  "execution_authority": "Root may launch exactly once only after independent static review returns GO."
+}

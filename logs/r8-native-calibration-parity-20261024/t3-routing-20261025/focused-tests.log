@@ -1,0 +1,14 @@
+
+ RUN  v2.1.9 C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory
+
+ ✓ tests/army_reserve_system.test.ts (81 tests) 41ms
+ ✓ tests/osid_column_movement.test.ts (32 tests) 14ms
+ ✓ tests/brigade_routine_scope.test.ts (37 tests) 15ms
+ ✓ tests/enclave_displacement_default_on.test.ts (5 tests) 5ms
+ ✓ tests/enclave_formation_displacement.test.ts (8 tests) 4ms
+
+ Test Files  5 passed (5)
+      Tests  163 passed (163)
+   Start at  03:38:25
+   Duration  8.61s (transform 2.48s, setup 18ms, collect 7.07s, tests 80ms, environment 1ms, prepare 402ms)
+

@@ -3773,7 +3773,10 @@ function deriveFiredEvents(state: any, playerFaction: string | null): LoadedGame
         const info = eventInfo.get(id);
         const decision = decisionInfo.get(id);
         const staticInfo = getStaticEventDisplayInfo(id);
-        const turn = decision?.turn ?? info?.turn ?? 0;
+        // Fallback to the engine's own last-fired turn: a record written at war termination
+        // has no turn summary (no later turn runs), and must not sort as turn 0 under the cap.
+        const recordedTurn = state.military?.event_last_fired_turn?.[id];
+        const turn = decision?.turn ?? info?.turn ?? (typeof recordedTurn === 'number' ? recordedTurn : 0);
         const response = decision
             ? staticInfo?.responseLabels.get(decision.responseId) ?? getPlayerSafeDisplayLabel(decision.responseId, 'response recorded')
             : null;

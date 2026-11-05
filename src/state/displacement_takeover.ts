@@ -1,3 +1,4 @@
+import { initializeMilitiaPoolDefaults } from './militia_pool_defaults.js';
 import type { SettlementRecord } from '../map/settlements.js';
 import type { DisplacementRoutingRecord } from './displacement.js';
 import {
@@ -480,6 +481,7 @@ function addOneTurnPoolContribution(
                 exhausted: 0,
                 updated_turn: currentTurn
             };
+            initializeMilitiaPoolDefaults(state.military.militia_pools[key]);
         }
     }
 }

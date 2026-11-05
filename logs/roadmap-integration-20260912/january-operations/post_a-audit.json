@@ -1,0 +1,263 @@
+{
+  "source": "ac3e5e1524558d2dc4e4fc40924306fc2873735a",
+  "january_score": 700,
+  "january_pass": true,
+  "regressions": [],
+  "recoveries": [
+    "op:bihac:orasac_2",
+    "op:donji_vakuf:donji_vakuf_2",
+    "op:donji_vakuf:korenici",
+    "op:donji_vakuf:prusac_2"
+  ],
+  "passive_transfers": 0,
+  "capture_receipts": [
+    {
+      "osid": "op:bihac:orasac_2",
+      "pass": true,
+      "capture": {
+        "attacker_brigade": "rs_11th_krupa_light_infantry",
+        "battle_id": "29:op:bihac:orasac_2:rs_11th_krupa_light_infantry:null",
+        "from": "RBiH",
+        "mechanism": "combat",
+        "mun_id": "bihac",
+        "settlement_id": "op:bihac:orasac_2",
+        "to": "RS",
+        "turn": 29
+      },
+      "provenance": {
+        "kind": "operation_owned",
+        "gates": false,
+        "operation_ids": [
+          "vrs_2nd_krajina:Operacija Bunar:t25"
+        ]
+      }
+    },
+    {
+      "osid": "op:donji_vakuf:donji_vakuf_2",
+      "pass": true,
+      "capture": {
+        "attacker_brigade": "rs_16th_krajina_motorized",
+        "battle_id": "35:op:donji_vakuf:donji_vakuf_2:rs_16th_krajina_motorized:arbih_705th_slavna_mountain",
+        "from": "RBiH",
+        "mechanism": "combat",
+        "mun_id": "donji_vakuf",
+        "settlement_id": "op:donji_vakuf:donji_vakuf_2",
+        "to": "RS",
+        "turn": 35
+      },
+      "provenance": {
+        "kind": "operation_owned",
+        "gates": false,
+        "operation_ids": [
+          "vrs_1st_krajina:Operation Donji Vakuf:t30"
+        ]
+      }
+    },
+    {
+      "osid": "op:donji_vakuf:prusac_2",
+      "pass": true,
+      "capture": {
+        "attacker_brigade": "rs_16th_krajina_motorized",
+        "battle_id": "39:op:donji_vakuf:prusac_2:rs_16th_krajina_motorized:null",
+        "from": "RBiH",
+        "mechanism": "combat",
+        "mun_id": "donji_vakuf",
+        "settlement_id": "op:donji_vakuf:prusac_2",
+        "to": "RS",
+        "turn": 39
+      },
+      "provenance": {
+        "kind": "operation_owned",
+        "gates": false,
+        "operation_ids": [
+          "vrs_1st_krajina:Operation Donji Vakuf:t30"
+        ]
+      }
+    },
+    {
+      "osid": "op:donji_vakuf:korenici",
+      "pass": true,
+      "capture": {
+        "attacker_brigade": "rs_16th_krajina_motorized",
+        "battle_id": "36:op:donji_vakuf:korenici:rs_16th_krajina_motorized:arbih_707th_slavna_mountain",
+        "from": "RBiH",
+        "mechanism": "combat",
+        "mun_id": "donji_vakuf",
+        "settlement_id": "op:donji_vakuf:korenici",
+        "to": "RS",
+        "turn": 36
+      },
+      "provenance": {
+        "kind": "operation_owned",
+        "gates": false,
+        "operation_ids": [
+          "vrs_1st_krajina:Operation Donji Vakuf:t30"
+        ]
+      }
+    },
+    {
+      "osid": "op:mrkonjic_grad:baljvine_2",
+      "pass": true,
+      "capture": {
+        "attacker_brigade": "rs_1st_gradika_light_infantry",
+        "battle_id": "28:op:mrkonjic_grad:baljvine_2:rs_1st_gradika_light_infantry:null",
+        "from": "HRHB",
+        "mechanism": "combat",
+        "mun_id": "mrkonjic_grad",
+        "settlement_id": "op:mrkonjic_grad:baljvine_2",
+        "to": "RS",
+        "turn": 28
+      },
+      "provenance": {
+        "kind": "operation_owned",
+        "gates": false,
+        "operation_ids": [
+          "vrs_1st_krajina:Operacija Bor:t27"
+        ]
+      }
+    },
+    {
+      "osid": "op:jajce:jezero_2",
+      "pass": true,
+      "capture": {
+        "attacker_brigade": "rs_2nd_banja_luka_light_infantry",
+        "battle_id": "32:op:jajce:jezero_2:rs_2nd_banja_luka_light_infantry:null",
+        "from": "RBiH",
+        "mechanism": "combat",
+        "mun_id": "jajce",
+        "settlement_id": "op:jajce:jezero_2",
+        "to": "RS",
+        "turn": 32
+      },
+      "provenance": {
+        "kind": "operation_owned",
+        "gates": false,
+        "operation_ids": [
+          "vrs_1st_krajina:Operacija Bastion:t31"
+        ]
+      }
+    },
+    {
+      "osid": "op:skender_vakuf:donji_koricani",
+      "pass": true,
+      "capture": {
+        "attacker_brigade": "rs_6th_sanske_infantry",
+        "battle_id": "34:op:skender_vakuf:donji_koricani:rs_6th_sanske_infantry:null",
+        "from": "HRHB",
+        "mechanism": "combat",
+        "mun_id": "skender_vakuf",
+        "settlement_id": "op:skender_vakuf:donji_koricani",
+        "to": "RS",
+        "turn": 34
+      },
+      "provenance": {
+        "kind": "operation_owned",
+        "gates": false,
+        "operation_ids": [
+          "vrs_1st_krajina:Operacija Munja:t33"
+        ]
+      }
+    },
+    {
+      "osid": "op:jajce:lupnica",
+      "pass": true,
+      "capture": {
+        "attacker_brigade": "rs_1st_gradika_light_infantry",
+        "battle_id": "36:op:jajce:lupnica:rs_1st_gradika_light_infantry:null",
+        "from": "HRHB",
+        "mechanism": "combat",
+        "mun_id": "jajce",
+        "settlement_id": "op:jajce:lupnica",
+        "to": "RS",
+        "turn": 36
+      },
+      "provenance": {
+        "kind": "operation_owned",
+        "gates": false,
+        "operation_ids": [
+          "vrs_1st_krajina:Operacija Javor:t35"
+        ]
+      }
+    }
+  ],
+  "turn_seals": 188,
+  "final_seals": 1,
+  "unresolved_seals": [],
+  "inventory": [
+    {
+      "name": "activity_summary.json",
+      "size": 452,
+      "sha256": "931af3a3bfbb3f2e92fd1121d9431ebe28b49217556a608835391dcb07e1d86a"
+    },
+    {
+      "name": "brigade_temporal_log.jsonl",
+      "size": 24024048,
+      "sha256": "be40e6d8b4cb44ae611536e24dc205888950a8fc8e7759fef193798a7a51a60d"
+    },
+    {
+      "name": "control_delta.json",
+      "size": 33547,
+      "sha256": "69bbc009ed09b7a5fb43fee97c79164a694747074a65cc03da5fe67769cabfa4"
+    },
+    {
+      "name": "destroyed_brigades.json",
+      "size": 7935,
+      "sha256": "d73952bddb9fe4afa848f5e0631d984f86e915dc43ab6120b0d86eeb86db18bd"
+    },
+    {
+      "name": "displacement_event_log.jsonl",
+      "size": 16531906,
+      "sha256": "3cd654b9cde9fc035681ad1cb186306872bc6f436f117203d98a615bdb9b66c5"
+    },
+    {
+      "name": "end_report.md",
+      "size": 51148,
+      "sha256": "04b83873020066bac67514f634f381b512345f3462dda84fb9323d576f6dc549"
+    },
+    {
+      "name": "final_save.json",
+      "size": 8903187,
+      "sha256": "8e80eca07cf0317fd8775ab818bb10adade8230076b6bde99d2b3a0a082fecee"
+    },
+    {
+      "name": "formation_delta.json",
+      "size": 3828,
+      "sha256": "d761d665063a7dc46611a42e5746699e35791878ffb7ee0d83311cc726639acb"
+    },
+    {
+      "name": "initial_save.json",
+      "size": 1372160,
+      "sha256": "45bcfd9746aabaa85e49d2ce2a44efffdd36ecb7a53966edd450ed419f67a3bf"
+    },
+    {
+      "name": "operation_aars.json",
+      "size": 639753,
+      "sha256": "740dfef2c069ec5299610fa775cf8844603f36f4d27836d38a1704e481b7c9da"
+    },
+    {
+      "name": "replay_save_manifest.json",
+      "size": 37173,
+      "sha256": "de8dafbb3c6884a0a4d81eca0e83ed862aa647a25242962adf02272d24698cf3"
+    },
+    {
+      "name": "run_meta.json",
+      "size": 10506,
+      "sha256": "a77fcb36d521797d8f5d6d9d7a8c687d93d5e55c40e5203da5b5c8899e66f983"
+    },
+    {
+      "name": "run_summary.json",
+      "size": 636763,
+      "sha256": "a30e9c79e9cc4b85de56f8a0cf9bbdf0b3da48670078e2b88ba6f0def9c5e601"
+    },
+    {
+      "name": "watched_operations.json",
+      "size": 2145,
+      "sha256": "dbdac0c77207130c316b99bc44238dd0f487aaffaea5cef62d467c6fc76bc4a8"
+    },
+    {
+      "name": "weekly_report.jsonl",
+      "size": 2053833,
+      "sha256": "3af639ee7fc2d2a48900467636574133517896b1bef8a803f904ad738e24c86c"
+    }
+  ]
+}

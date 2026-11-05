@@ -1,0 +1,8 @@
+Error: input hash mismatch: data/derived/operational/operational_settlements.geojson
+    at <anonymous> (C:\Users\User\.codex\worktrees\october-calibration-checkpoint\A-War-Without-Victory\tmp\player-bot-capability-parity-20261024\terrain-parity-repair\cold-load-validation-v2\native39-validation-v1\warm-normalization-probe-v1\warm_turn16_snapshot.mts:186:45)
+    at Array.map (<anonymous>)
+    at main (C:\Users\User\.codex\worktrees\october-calibration-checkpoint\A-War-Without-Victory\tmp\player-bot-capability-parity-20261024\terrain-parity-repair\cold-load-validation-v2\native39-validation-v1\warm-normalization-probe-v1\warm_turn16_snapshot.mts:184:63)
+    at <anonymous> (C:\Users\User\.codex\worktrees\october-calibration-checkpoint\A-War-Without-Victory\tmp\player-bot-capability-parity-20261024\terrain-parity-repair\cold-load-validation-v2\native39-validation-v1\warm-normalization-probe-v1\warm_turn16_snapshot.mts:331:1)
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:681:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)

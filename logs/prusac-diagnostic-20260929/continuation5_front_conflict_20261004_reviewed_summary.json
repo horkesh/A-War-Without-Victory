@@ -1,0 +1,236 @@
+{
+  "pass": true,
+  "owner_authorization": "Proceed",
+  "base_commit": "b7f4ed902f15d6d3a4db3cab86a065da2021b37e",
+  "question": "Can actual helper eligibility be recovered, and does real producer/column behavior establish a contract defect?",
+  "scope": "Bounded source diagnosis plus real-function synthetic fixtures; no production correction.",
+  "test": {
+    "path": "tests/front_distribution_order_conflict_diagnostic.test.ts",
+    "sha256": "a46a4b082f86c06e5c2d62c07d921ed7204a069a3172ff3e2e52665fdf56d1b3",
+    "command": "node node_modules/vitest/vitest.mjs run tests/front_distribution_order_conflict_diagnostic.test.ts",
+    "initial_exit": 0,
+    "final_exit": 0,
+    "tests": 3,
+    "files": 1,
+    "red_defect_proof": false,
+    "fixture_inputs": "Explicitly synthetic topology/formation/sector/operation; real producer order, not manually fabricated."
+  },
+  "measured_fixture": [
+    "Two fresh synthetic dig_in fixtures produce equal observations: real main Phase B issues a column order, then the next consumer invocation records posture_dig_in and consumes it without transit/location change.",
+    "Identical defend topology accepts the same real producer order into column transit.",
+    "The constructed main Phase B active-operation participant receives no distribution order."
+  ],
+  "source_findings": [
+    "Six source writer families share the column order shape; other-family operation guards are source-inspected, not empirically covered by these three fixtures.",
+    "Threatened-front candidates include reserve OR rear buckets; garrison eligibility uses an entrenchment threshold.",
+    "Phase176 seals sector rosters after distribution, phase177 seals again: post-turn buckets cannot reconstruct pre-write helper inputs.",
+    "No authoritative contract reviewed requires a posture filter on every local distribution writer; characterization alone does not establish a contract violation."
+  ],
+  "independent_review": {
+    "verdict": "GO bounded characterization; STOP without production fix/campaign/historical attribution",
+    "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_independent_review.md",
+    "targeted_verification": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_correction_verification.md",
+    "corrected_summary": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_summary_corrected.md",
+    "original_summary_preserved": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_summary.md",
+    "corrections": [
+      "Next-consumer/following-turn chronology",
+      "Reserve-or-rear pool",
+      "Exact entrenchment threshold",
+      "Fixture main Phase B versus source-only other guards",
+      "Remove unique-helper inference"
+    ]
+  },
+  "inventory": {
+    "pass": true,
+    "base_commit": "b7f4ed902f15d6d3a4db3cab86a065da2021b37e",
+    "checks": [
+      {
+        "path": "src/sim/combat/brigade_front_distribution.ts",
+        "sha256": "ef36c1d5882ec529a94024af0dcf3ca482d52645158cac5211049c2a3f19f755",
+        "intact": true
+      },
+      {
+        "path": "src/sim/combat/osid_column_movement.ts",
+        "sha256": "a3600a86885ecd34bb976dd92e784c0f01fe8c1796d66bd2039cf5bae46a6489",
+        "intact": true
+      },
+      {
+        "path": "src/sim/turn_phases/war_phase_reconciliation_steps.ts",
+        "sha256": "2f62a89c0ac5a145fa7737930b015aab74ac976b0d2532cec45e63a0b792d0b6",
+        "intact": true
+      },
+      {
+        "path": "src/state/game_state.ts",
+        "sha256": "7ff612b93c97d708d4b43638f1015c80d905d7737aa5d938847976e6c4f92e6c",
+        "intact": true
+      },
+      {
+        "path": "src/state/serializeGameState.ts",
+        "sha256": "a4010315c439eb0901a53d8166a8c44cb08427aff5d994e51e05ddb64657be97",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_reviewed_summary.json",
+        "sha256": "8f79b81bf0e32b56f41659f69104c435b11083d4b1bae268bcee78650588a29c",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_closeout.json",
+        "sha256": "e51de12305a6c297968cbbb1ceb044332188d246f7fb3e77739e3a6f18a0068c",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_independent_review.md",
+        "sha256": "4d3a1bab69187408a729ef223d38fb4eb000de854e9e2a459904b961cf2dd817",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_139_20261004_reviewed_summary.json",
+        "sha256": "c80aef69ea3bd8fa378aab235b03c3af4c58c74da7bfda3d4b0bf99fbcec5f50",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_campaign_reviewed_summary.json",
+        "sha256": "2efec3c3e1c910da881f9ba9da70cc27ec256865ae58ebc019bfecb05c5b74e5",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_reviewed_summary.json",
+        "sha256": "e0406841a817f319c89d402c4218acdbedcd6a3f4f29a15d332ae759762f7b7b",
+        "intact": true
+      }
+    ],
+    "junctions": [
+      {
+        "path": "runs",
+        "target": "C:\\Users\\User\\.codex\\worktrees\\april-1995-glamoc\\A-War-Without-Victory\\runs",
+        "intact": true
+      },
+      {
+        "path": "node_modules",
+        "target": "C:\\Users\\User\\.codex\\worktrees\\april-1995-glamoc\\A-War-Without-Victory\\node_modules",
+        "intact": true
+      }
+    ],
+    "retained_runs": [
+      {
+        "name": "apr1992_definitive_188w__0b1f040ff4abe835__w139_n40",
+        "present": true
+      },
+      {
+        "name": "apr1992_definitive_188w__4658849344f21642__w186_n38",
+        "present": true
+      },
+      {
+        "name": "apr1992_definitive_188w__6deb5845c150c196__w188_n37",
+        "present": true
+      },
+      {
+        "name": "apr1992_definitive_188w__6deb5845c150c196__w188_n39",
+        "present": true
+      },
+      {
+        "name": "apr1992_historical_52w__434fe8ff83b7b523__w52",
+        "present": true
+      },
+      {
+        "name": "apr1992_definitive_188w__0b1f040ff4abe835__w139_n41",
+        "present": true
+      }
+    ],
+    "production_diff_empty": true,
+    "limits": "Parent/source fingerprints and retained run presence checked; n41 full raw campaign neutrality/preservation evidence reused. Earlier overwritten initial observer summary remains unrecovered."
+  },
+  "reuse": [
+    "Unchanged production tests and source checks",
+    "n41 saves/input/control/prefix neutrality",
+    "n39 late towns2/3,belt4/4,Jajce3/5,four losses, protected/Farz/critical receipts"
+  ],
+  "claim_limits": [
+    "Actualn41 phase176 helper/rejection unmeasured; n39 posture_dig_in receipt remains n39-scoped.",
+    "Originaldirty517 source/pre-order cause unbound; no selector or order-lifecycle change.",
+    "No later Varosluk admission link or Sanski/Jajce/four lost-match closure.",
+    "Literal31-input139 criterion remains failed/unwaived; all ordinary combat/protected/matching/denominator/save/canon/receipt/final-review gates remain.",
+    "Initial observer interim summary overwrite remains unrecovered."
+  ],
+  "next_missing_evidence": "Pre-write helper identity, rosters/candidates/eligibility/distance; reuse existing movement_reject for rejection cause. No expensive campaign is authorized.",
+  "artifacts": {
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_correction_verification.md": {
+      "sha256": "c33a3984a72dd3da27d32cec466b0accc9ea6eef824da792840f552a905dd47a",
+      "bytes": 2477
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_independent_review.md": {
+      "sha256": "2c480eaa45699fdcbcebfd2d79a19cb021feeca72f790c2409573ffd3535843e",
+      "bytes": 7586
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_inventory.cjs": {
+      "sha256": "9bd73269ceed77d7d53f654071b096f6f08a948a879488bcf1bee6ab35bc9d93",
+      "bytes": 1831
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_inventory.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_inventory.json": {
+      "sha256": "1ebab4a03de6727b94dd0ed482d354b0171a4348d03290797c010c3ad53f1bef",
+      "bytes": 3531
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_inventory.log": {
+      "sha256": "4469ad5f1874b45e8382c2e237955c8b89c3a4bd982b5ce3d0767773b20a3701",
+      "bytes": 93
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_newfile.command.txt": {
+      "sha256": "b698c42c2e5fa7861fee1e59517ad329c7d5f1f508589fa20fb504f658102fbb",
+      "bytes": 100
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_newfile.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_newfile.log": {
+      "sha256": "6f68aa6907590b0e795d9bece09f459aded5e5e217152b94ee429292bf337a18",
+      "bytes": 372
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_newfile_final.command.txt": {
+      "sha256": "b698c42c2e5fa7861fee1e59517ad329c7d5f1f508589fa20fb504f658102fbb",
+      "bytes": 100
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_newfile_final.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_newfile_final.log": {
+      "sha256": "58aae317665b5c4708b862d0713453b0917e02ffd79703be1a3dce4131ead714",
+      "bytes": 372
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_root_start.cjs": {
+      "sha256": "7feb41fd8f9b37f1d6b950feea3dad81e75329e43f5c8574b402decae3ceda99",
+      "bytes": 2061
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_root_start.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_root_start.json": {
+      "sha256": "e9bc76e9c6eabeb7a150779edff55ff2a6b30159465d9b20c40b17c6e72c1387",
+      "bytes": 2925
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_root_start.log": {
+      "sha256": "dc743a4d9dbc647eac8e666dd2297e05ec0755c22bb2870805f2e45ec84e819e",
+      "bytes": 91
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_summary.md": {
+      "sha256": "4b40d651a8b154dd04e51f8b21d75eb8dc0465ecea08c33b52b20ff751b3d631",
+      "bytes": 8055
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_summary_corrected.md": {
+      "sha256": "d9bb32aaebd5f28d47e606cb45ac12e34cb5025fa8ed4ef1ed48e2ed48579502",
+      "bytes": 9940
+    }
+  },
+  "production_change": false,
+  "campaign_replay_full_suite": false,
+  "calibration_acceptance": false,
+  "merge_push_adoption": false,
+  "closeout": "Affected documentation/citation/index/whitespace and required local commit hook are recorded separately after execution."
+}

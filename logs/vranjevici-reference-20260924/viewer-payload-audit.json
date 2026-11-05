@@ -1,0 +1,41 @@
+{
+  "changes": [
+    {
+      "key": "jan1993",
+      "week": 39,
+      "from": "RBiH",
+      "to": "RS",
+      "old_score": 706,
+      "new_score": 707
+    },
+    {
+      "key": "apr1994",
+      "week": 104,
+      "from": "RBiH",
+      "to": "RS",
+      "old_score": 696,
+      "new_score": 697
+    },
+    {
+      "key": "apr1995",
+      "week": 156,
+      "from": "RBiH",
+      "to": "RS",
+      "old_score": 689,
+      "new_score": 690
+    },
+    {
+      "key": "oct1995",
+      "week": 188,
+      "from": "RBiH",
+      "to": "RS",
+      "old_score": 661,
+      "new_score": 662
+    }
+  ],
+  "events_unchanged": 232,
+  "embedded_script_syntax": true,
+  "generated_bytes": 720280,
+  "generated_sha256": "046372ce689b94d002488df57d7c1a9d9db15615162c3115a690a1791cedd10a",
+  "previous_sha256": "07d9e574006e0e6e5639a602358675ffa0537ff942fab3e63f1f2cab1724b07d"
+}

@@ -589,12 +589,83 @@ export function normalizeScenario(raw: unknown): Scenario {
 }
 
 /**
- * Load scenario from path: read file, parse JSON, normalize and validate.
+ * Observation of ONE executed `loadScenario` read (diagnostic; absent by default).
+ *
+ * `decoded_text` is the literal string `readFile(path, 'utf8')` returned and that is then passed
+ * to `JSON.parse`. `resolved_path` is the LEXICAL resolution of `path_as_passed` against
+ * `cwd_at_read`; it is not physical-file or symlink identity. The cwd is sampled once, and the
+ * path is resolved from that local, synchronously before the existing `readFile` call.
  */
-export async function loadScenario(path: string): Promise<Scenario> {
+export interface ScenarioReadObservation {
+    readonly path_as_passed: string;
+    readonly cwd_at_read: string;
+    readonly resolved_path: string;
+    readonly decoded_text: string;
+}
+
+/**
+ * Optional per-invocation observer for `loadScenario`. State lives in whoever owns the observer
+ * (a per-run context), never in this module. Every callback is guarded: an observer exception is
+ * reported through `onObserverError` (itself guarded) and NEVER changes the loader's result or
+ * its own errors. `onRead` may return an opaque token that is handed back to the later callbacks.
+ */
+export interface ScenarioReadObserver {
+    onRead(observation: ScenarioReadObservation): unknown;
+    onNormalized?(token: unknown): void;
+    onParseFailed?(token: unknown, errorName: string): void;
+    onObserverError?(error: unknown): void;
+}
+
+/** Run an observer callback; an observer-originated exception is reported, never rethrown. */
+function callObserverGuarded<T>(observer: ScenarioReadObserver, fn: () => T): T | undefined {
+    try {
+        return fn();
+    } catch (error) {
+        try {
+            observer.onObserverError?.(error);
+        } catch {
+            // The observer's own error hook failed; the loader behaves as if unobserved.
+        }
+        return undefined;
+    }
+}
+
+/**
+ * Load scenario from path: read file, parse JSON, normalize and validate.
+ *
+ * With `observer` absent (the default) this is exactly: read, parse, normalize. With an observer
+ * the read evidence is recorded separately from the later normalization success, and loader
+ * errors are rethrown unchanged.
+ */
+export async function loadScenario(path: string, observer?: ScenarioReadObserver): Promise<Scenario> {
+    // Sampled once, synchronously, immediately before the existing read (no await in between).
+    const cwdAtRead = observer === undefined ? undefined : process.cwd();
+    const resolvedPath = cwdAtRead === undefined ? undefined : resolve(cwdAtRead, path);
     const content = await readFile(path, 'utf8');
-    const raw: unknown = JSON.parse(content);
-    return normalizeScenario(raw);
+    let token: unknown;
+    if (observer !== undefined && cwdAtRead !== undefined && resolvedPath !== undefined) {
+        token = callObserverGuarded(observer, () => observer.onRead({
+            path_as_passed: path,
+            cwd_at_read: cwdAtRead,
+            resolved_path: resolvedPath,
+            decoded_text: content,
+        }));
+    }
+    let scenario: Scenario;
+    try {
+        const raw: unknown = JSON.parse(content);
+        scenario = normalizeScenario(raw);
+    } catch (error) {
+        if (observer !== undefined) {
+            const errorName = error instanceof Error ? error.name : 'non_error_throw';
+            callObserverGuarded(observer, () => observer.onParseFailed?.(token, errorName));
+        }
+        throw error;
+    }
+    if (observer !== undefined) {
+        callObserverGuarded(observer, () => observer.onNormalized?.(token));
+    }
+    return scenario;
 }
 
 /**

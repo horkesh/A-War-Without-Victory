@@ -47,7 +47,9 @@ export type AttackOrderSkipReason =
     | 'no_location'
     | 'not_tactically_adjacent'
     | 'alliance_blocked'
-    | 'not_enemy_controlled_without_defenders';
+    | 'not_enemy_controlled_without_defenders'
+    /** Opt-in phase gate: capture order onto a gated objective of a still-holding axis (see operation_phase_gate.ts). */
+    | 'capture_phase_held';
 
 export interface AttackResolutionOsidReport {
     orders_processed: number;

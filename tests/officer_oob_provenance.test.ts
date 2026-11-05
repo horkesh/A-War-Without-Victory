@@ -225,14 +225,14 @@ describe('officer/OOB provenance inventory', () => {
         // ...and hvo_hrvoje_vukcic_brigade, which was deleted on name grounds and is
         // in fact the JAJCE formation (BB2 Annex 29, p.349/330), re-homed there under
         // Central Bosnia rather than the post-fall Tomislavgrad assignment.
-        // Officers 68 -> 90, elite commanders 3 -> 5, brigades 244 -> 246,
+        // Officers 68 -> 90, elite commanders 3 -> 5, brigades 244 -> 247,
         // omitted candidates 40 -> 14.
-        expect(report.summary.total_records).toBe(360);
+        expect(report.summary.total_records).toBe(361);
         expect(report.records.filter((record) => record.record_kind === 'officer')).toHaveLength(90);
         expect(report.records.filter((record) => record.record_kind === 'corps')).toHaveLength(19);
-        expect(report.records.filter((record) => record.record_kind === 'brigade')).toHaveLength(246);
+        expect(report.records.filter((record) => record.record_kind === 'brigade')).toHaveLength(247);
         expect(report.records.filter((record) => record.record_kind === 'elite_commander')).toHaveLength(5);
-        expect(report.summary.manifest_records).toBe(360);
+        expect(report.summary.manifest_records).toBe(361);
         expect(report.summary.omitted_candidate_records).toBe(14);
         expect(violationCodes(report)).not.toContain('missing_provenance');
 

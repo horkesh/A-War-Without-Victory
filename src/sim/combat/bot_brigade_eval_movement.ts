@@ -1,12 +1,57 @@
 import type { BrigadeEvaluationContext } from './bot_brigade_eval_types.js';
 import { findNearestFriendlyOsidInSet, isMovementDestinationRisky } from './bot_brigade_context.js';
 import { issueInteriorMovement, findNearestOffensiveTarget } from './bot_brigade_movement_ai.js';
+import {
+    filterOffensiveTargetsToRoutineScope,
+    filterToRoutineScope,
+    isDestinationInRoutineScope,
+    resolveRoutineMovementScope,
+    withOperationAuthorizedDestinations,
+} from './brigade_routine_scope.js';
 import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
+import { isReasonCodeTopicEnabled, sortedIds } from './reason_code_debug.js';
+import type { BotRouteDecisionDetail } from './bot_brigade_ai_osid.js';
+import { strictCompare } from '../../state/validateGameState.js';
 
 const INTERIOR_MOVEMENT_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval.interiorMovement';
 
 function interiorMovementProfileTime<T>(labelSuffix: string, fn: () => T): T {
     return botOrdersPerfTime(`${INTERIOR_MOVEMENT_PROFILE_PREFIX}${labelSuffix}`, fn);
+}
+
+function recordRouteDecision(
+    ctx: BrigadeEvaluationContext,
+    detail: Pick<BotRouteDecisionDetail,
+        'rule' | 'route_goal_osids' | 'outcome' | 'candidate_destination_osid'
+        | 'issued_destination_osid' | 'rejection_reason'>,
+): void {
+    if (!isReasonCodeTopicEnabled('route_decision')) return;
+    const { activeOp, brigade, loc, result, state } = ctx;
+    const axis = activeOp?.axes?.find((candidate) => candidate.assigned_brigades.includes(brigade.id));
+    const objective = axis?.objectives?.[axis.current_objective_index ?? 0]
+        ?? activeOp?.objectives?.[activeOp.current_objective_index ?? 0]
+        ?? null;
+    const receipt: BotRouteDecisionDetail = {
+        turn: state.meta?.turn ?? 0,
+        phase: state.meta?.phase ?? null,
+        brigade_id: brigade.id,
+        location_osid: loc,
+        transit_status: state.military.brigade_movement_state?.[brigade.id]?.status ?? null,
+        preexisting_movement_order_destination_osid:
+            state.military.brigade_movement_orders?.[brigade.id]?.destination_sids?.[0] ?? null,
+        persistent_movement_state_destination_osid:
+            state.military.brigade_movement_state?.[brigade.id]?.destination_sids?.[0] ?? null,
+        operation_name: activeOp?.name ?? null,
+        axis_id: axis?.axis_id ?? null,
+        current_objective: objective,
+        ...detail,
+        route_goal_osids: sortedIds(detail.route_goal_osids),
+    };
+    const receipts = result.route_decision_details ??= [];
+    const existing = receipts.findIndex((candidate) => candidate.brigade_id === brigade.id);
+    if (existing >= 0) receipts[existing] = receipt;
+    else receipts.push(receipt);
+    receipts.sort((a, b) => strictCompare(a.brigade_id, b.brigade_id));
 }
 
 /**
@@ -28,7 +73,14 @@ function interiorMovementProfileTime<T>(labelSuffix: string, fn: () => T): T {
  * MOVEMENT TIER: T2 - Tactical Routing (Interior Reposition) (see MOVEMENT_AUTHORITY.md)
  */
 export function evaluateInteriorMovement(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, loc, faction, adjacency, state, reverseMap, graphAnalysis, directive, result, columnAssignments } = ctx;
+    const { brigade, loc, faction, adjacency, state, reverseMap, activeOp, graphAnalysis, directive, result, columnAssignments } = ctx;
+    // Shared routine-movement scope: discretionary repositioning is limited to the assigned
+    // sub-segment front. Unassigned/reserve/stale formations keep the corps-wide reach. An
+    // active operation the brigade participates in additionally authorizes its own
+    // staging/approach OSIDs (see `withOperationAuthorizedDestinations`).
+    const routineScope = withOperationAuthorizedDestinations(
+        resolveRoutineMovementScope(state, brigade), state, brigade.id, activeOp, adjacency, reverseMap,
+    );
 
     // First: if directive has a priority sector, march toward it (offensive concentration).
     if (interiorMovementProfileTime('.prioritySector', () => {
@@ -39,11 +91,26 @@ export function evaluateInteriorMovement(ctx: BrigadeEvaluationContext): boolean
             for (const ss of prioritySec.sub_segments) {
                 for (const o of ss.friendly_osids) priorityOsids.add(o);
             }
+            // NOT routine-scoped: `priority_sector_id` is the corps commander naming a sector for
+            // offensive concentration — an existing higher-priority authority, like Rule 5b2 and
+            // Rule 5c. Narrowing it would empty the set whenever the priority sector is not the
+            // brigade's own (the normal case) and leave a full-component BFS running for nothing.
+            // This rule writes a single-hop `movement_order`, which T3 never revalidates (it skips
+            // anything without `stance:'column'`) and which does not survive to T6, so it needs no
+            // authority exemption downstream.
             if (!priorityOsids.has(loc)) {
                 const dest = findNearestFriendlyOsidInSet(
                     state, faction, loc, adjacency, reverseMap, priorityOsids
                 );
                 if (dest && !isMovementDestinationRisky(dest, graphAnalysis)) {
+                    recordRouteDecision(ctx, {
+                        rule: 'priority_sector',
+                        route_goal_osids: [...priorityOsids],
+                        outcome: 'issued',
+                        candidate_destination_osid: dest,
+                        issued_destination_osid: dest,
+                        rejection_reason: null,
+                    });
                     result.movement_orders[brigade.id] = dest;
                     result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
                     return true;
@@ -55,10 +122,28 @@ export function evaluateInteriorMovement(ctx: BrigadeEvaluationContext): boolean
 
     if (interiorMovementProfileTime('.offensiveTarget', () => {
         if (!directive || directive.offensive_targets.length === 0) return false;
-        const targetSet = new Set(directive.offensive_targets);
+        // Scope the ENEMY goal set by adjacency to a legally occupiable cell — never the value
+        // `findNearestOffensiveTarget` returns, which is the FIRST STEP of an up-to-30-hop path.
+        // Scope-checking that first step forbids every legal multi-hop journey (including a
+        // brigade simply walking out of the interior toward its own assigned front) and, because
+        // this block returns true regardless, also suppressed the `.ownCorpsFront` and
+        // `.fallback` rules below it — freezing the formation outright.
+        const targetSet = filterOffensiveTargetsToRoutineScope(
+            routineScope, new Set(directive.offensive_targets), adjacency,
+        );
+        if (targetSet.size === 0) return false;
         const directiveTarget = findNearestOffensiveTarget(state, faction, loc, targetSet, adjacency, reverseMap, 30);
         if (directiveTarget) {
-            if (!isMovementDestinationRisky(directiveTarget, graphAnalysis)) {
+            const risky = isMovementDestinationRisky(directiveTarget, graphAnalysis);
+            recordRouteDecision(ctx, {
+                rule: 'offensive_target',
+                route_goal_osids: [...targetSet],
+                outcome: risky ? 'rejected' : 'issued',
+                candidate_destination_osid: directiveTarget,
+                issued_destination_osid: risky ? null : directiveTarget,
+                rejection_reason: risky ? 'risky_destination' : null,
+            });
+            if (!risky) {
                 result.movement_orders[brigade.id] = directiveTarget;
             }
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
@@ -81,14 +166,41 @@ export function evaluateInteriorMovement(ctx: BrigadeEvaluationContext): boolean
                 for (const osid of subSegment.friendly_osids ?? []) ownCorpsFrontOsids.add(osid);
             }
         }
-        if (insideOwnCorpsTerritory && ownCorpsFrontOsids.size > 0) {
-            if (!ownCorpsFrontOsids.has(loc)) {
+        const scopedOwnCorpsFrontOsids = filterToRoutineScope(routineScope, ownCorpsFrontOsids);
+        if (insideOwnCorpsTerritory && scopedOwnCorpsFrontOsids.size > 0) {
+            if (!scopedOwnCorpsFrontOsids.has(loc)) {
                 const dest = findNearestFriendlyOsidInSet(
-                    state, faction, loc, adjacency, reverseMap, ownCorpsFrontOsids,
+                    state, faction, loc, adjacency, reverseMap, scopedOwnCorpsFrontOsids,
                 );
                 if (dest && !isMovementDestinationRisky(dest, graphAnalysis)) {
+                    recordRouteDecision(ctx, {
+                        rule: 'own_corps_front',
+                        route_goal_osids: [...scopedOwnCorpsFrontOsids],
+                        outcome: 'issued',
+                        candidate_destination_osid: dest,
+                        issued_destination_osid: dest,
+                        rejection_reason: null,
+                    });
                     result.movement_orders[brigade.id] = dest;
+                } else {
+                    recordRouteDecision(ctx, {
+                        rule: 'own_corps_front',
+                        route_goal_osids: [...scopedOwnCorpsFrontOsids],
+                        outcome: dest ? 'rejected' : 'no_order',
+                        candidate_destination_osid: dest ?? null,
+                        issued_destination_osid: null,
+                        rejection_reason: dest ? 'risky_destination' : 'no_destination_selected',
+                    });
                 }
+            } else {
+                recordRouteDecision(ctx, {
+                    rule: 'own_corps_front',
+                    route_goal_osids: [...scopedOwnCorpsFrontOsids],
+                    outcome: 'held',
+                    candidate_destination_osid: null,
+                    issued_destination_osid: null,
+                    rejection_reason: 'already_at_goal',
+                });
             }
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
             return true;
@@ -99,6 +211,17 @@ export function evaluateInteriorMovement(ctx: BrigadeEvaluationContext): boolean
     interiorMovementProfileTime('.fallback', () => {
         issueInteriorMovement(brigade, loc, faction, adjacency, state, reverseMap, graphAnalysis, result,
             ['undefended', 'critical', 'threatened', 'active'], columnAssignments);
+        const issuedDestination = result.column_march_orders[brigade.id]
+            ?? result.movement_orders[brigade.id]
+            ?? null;
+        recordRouteDecision(ctx, {
+            rule: 'fallback',
+            route_goal_osids: [],
+            outcome: issuedDestination ? 'issued' : 'no_order',
+            candidate_destination_osid: issuedDestination,
+            issued_destination_osid: issuedDestination,
+            rejection_reason: issuedDestination ? null : 'no_destination_selected',
+        });
     });
 
     return true; // interior movement is the final fallback for unhandled brigades.

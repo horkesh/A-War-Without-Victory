@@ -1,0 +1,101 @@
+{
+  "status": "PASS_DIAGNOSTIC_SCOPE_NATIVE_BLOCKED",
+  "implementation": "RESULT.json",
+  "governance": {
+    "passed": 31,
+    "failed": 0,
+    "childExit": 0,
+    "wrapperExit": 0
+  },
+  "closeout": {
+    "pass": true,
+    "childExit": 0,
+    "wrapperExit": 0,
+    "sourceHashes": 4,
+    "protectedSimulationDataWorkflows": "unchanged",
+    "links": 7
+  },
+  "planIndex": "up to date",
+  "preservation": "PRESERVATION.json;3226priorBindings+n94_40files+exactTelemetry+frozenFunctionsAndReader",
+  "nativeRetry": false,
+  "calibrationTuning": false,
+  "commit": false,
+  "push": false,
+  "files": [
+    {
+      "path": "logs/r8-warroom-collection-v3-20261024/CLOSEOUT_AUDIT.json",
+      "bytes": 5363,
+      "sha256": "503258fb7ecd740de5e59404fe823c84b7751fb54f31a3d8229d799382c3051d"
+    },
+    {
+      "path": "logs/r8-warroom-collection-v3-20261024/CLOSEOUT_RECEIPT.json",
+      "bytes": 2609,
+      "sha256": "b3c1c9cdbc6d8bab81d7ca9503af87a92af3841fd00ee20eb190bc7a04f0c49a"
+    },
+    {
+      "path": "logs/r8-warroom-collection-v3-20261024/CONTRACT.md",
+      "bytes": 24218,
+      "sha256": "1b8bd2f1dfcf757c802599d8723b60b670e381dc5132c440c992b1911e92de37"
+    },
+    {
+      "path": "logs/r8-warroom-collection-v3-20261024/CORRECTED_FINAL_RECEIPT.json",
+      "bytes": 3373,
+      "sha256": "3e1d0205d87dc35cceb9bc53f151ba920cc171dd12411dd24bbc3eecfab3ef6f"
+    },
+    {
+      "path": "logs/r8-warroom-collection-v3-20261024/GOVERNANCE_RECEIPT.json",
+      "bytes": 2690,
+      "sha256": "2a752426cc93f4818ab55c18742650001eaf79771589f6f6913c7deaa68642fc"
+    },
+    {
+      "path": "logs/r8-warroom-collection-v3-20261024/HISTORY_BOUND_CORRECTION_RECEIPT.json",
+      "bytes": 1916,
+      "sha256": "790c19303a3260ca4076395d6e80dd46980cd16fe7fbce5f661f813456174c33"
+    },
+    {
+      "path": "logs/r8-warroom-collection-v3-20261024/INDEPENDENT_REVIEW.md",
+      "bytes": 12266,
+      "sha256": "f7433e0eed92679c1074788da967ac7397f94e5de3a10589392149621fe3deda"
+    },
+    {
+      "path": "logs/r8-warroom-collection-v3-20261024/PRESERVATION.json",
+      "bytes": 2612,
+      "sha256": "948b7764cc0b72d1501c3ce89c6c17586d1ba0a65c420387658c50e0ca2c45ba"
+    },
+    {
+      "path": "logs/r8-warroom-collection-v3-20261024/RAW_EVIDENCE_INVENTORY.json",
+      "bytes": 33121,
+      "sha256": "799556cf39f4c046e68e57368c04cfea82b4f30ee1c3c7374a0efc4785f124c7"
+    },
+    {
+      "path": "logs/r8-warroom-collection-v3-20261024/RESULT.json",
+      "bytes": 6325,
+      "sha256": "c8389f1828a848244b8ac53a8829a959b0859170b09ac49243f920c3d8e9b17e"
+    },
+    {
+      "path": "logs/r8-warroom-collection-v3-20261024/RETAINED_REQUEST_VOLUME.json",
+      "bytes": 406,
+      "sha256": "d2093757f0ace9b2f928a9645f3d52b9d60751e471dad2de48099f317f526ab4"
+    },
+    {
+      "path": "logs/r8-warroom-collection-v3-20261024/REVIEW_CONTRACT.md",
+      "bytes": 11002,
+      "sha256": "0f9ad7b1a77caaeddb41081b76cb77233aed6e276dcf68b0bd15ab79add6d048"
+    },
+    {
+      "path": "logs/r8-warroom-collection-v3-20261024/governance.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/r8-warroom-collection-v3-20261024/governance.stdout.log",
+      "bytes": 417,
+      "sha256": "be596d6274166b062c5e247ecc0f9cce22c8b973a27f10d4d9e60d7e563ac524"
+    }
+  ],
+  "supersedes": {
+    "path": "CLOSEOUT_RESULT.json",
+    "sha256": "bd4fe1e29f5202be47a1d403ac2db9138c2eb49b52d93192362a1fce9f15040c",
+    "reason": "Original administrative summary said11links; actual successful audit checked7. Original remains preserved; no verification result changed."
+  }
+}

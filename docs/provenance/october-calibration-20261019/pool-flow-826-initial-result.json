@@ -1,0 +1,299 @@
+{
+  "verdict": "READY_FOR_INDEPENDENT_REVIEW",
+  "scope": "default-OFF stdout-only pale:RS pool flow readiness for completed turns 21-22; no campaign measurement or gameplay change",
+  "head": "9ea5d278c481324172d8ada8b32fc188de55a0e2",
+  "files": [
+    {
+      "path": "src/sim/combat/ongoing_mobilization.ts",
+      "bytes": 23557,
+      "sha256": "96ab1158ab2684a14ff617f55561b097d070f41beb39171c2a7a20d6ada69f44"
+    },
+    {
+      "path": "src/sim/combat/pool_decay.ts",
+      "bytes": 3519,
+      "sha256": "2e1f070a25545263786b27ea1b569bfe8a71216f380bf231edea209f56fc8b81"
+    },
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "bytes": 20310,
+      "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd"
+    },
+    {
+      "path": "src/sim/combat/pool_flow_diagnostic.ts",
+      "bytes": 5745,
+      "sha256": "a3ded36652e28b2bfe47da236b05d62df19903d2af3d93028e7d31ce460a26c6"
+    },
+    {
+      "path": "src/sim/early_war/pool_population.ts",
+      "bytes": 21958,
+      "sha256": "6c6f17ff8ee0825b988de239fa3f2c3cdfdcd3fe1b32dccd377ff232155bb2b9"
+    },
+    {
+      "path": "src/sim/formation_spawn.ts",
+      "bytes": 48167,
+      "sha256": "86a4247c15820892013c8ab853e8fb62646a5db5d152868d5316965c63b4fe94"
+    },
+    {
+      "path": "src/sim/turn_pipeline.ts",
+      "bytes": 12385,
+      "sha256": "75b0b6fe0eed8105f1fd154fc7b2ee6cc79bb816629df732d707a9d06d8f5eb6"
+    },
+    {
+      "path": "tests/pool_flow_diagnostic.test.ts",
+      "bytes": 13629,
+      "sha256": "0859c579f4b3a0491d8bc340ed96fd3b7e5c0c47d914acb436fe2036019d8add"
+    },
+    {
+      "path": "tools/diagnostics/pool_flow_reader.cjs",
+      "bytes": 7493,
+      "sha256": "3fcaf815c6f7aa86d16ce5fcb7cd1c06d7330057c45f19ecc27c1e03ab4e9154"
+    }
+  ],
+  "whitespace": {
+    "tracked_diff_check_exit": 0,
+    "all_changed_files_eof_newline": true,
+    "trailing_whitespace_findings": 0
+  },
+  "activation": "AWWV_DEBUG_REASON_CODES=pool_flow and AWWV_DEBUG_REINFORCEMENT_POOLS containing pale:RS",
+  "reader_cli": "node tools/diagnostics/pool_flow_reader.cjs --input <stdout.log> --output <fresh-result.json>",
+  "schema": {
+    "prefix": "[pool_flow]",
+    "version": 1,
+    "pool_key": "pale:RS",
+    "turns": [
+      21,
+      22
+    ]
+  },
+  "tests": {
+    "focused": {
+      "files": 6,
+      "tests": 99,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "path": "logs/claude-channel-20261004/826-focused-final/receipt.json"
+    },
+    "typecheck": {
+      "command": "tsc --noEmit --incremental false -p tsconfig.json",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "path": "logs/claude-channel-20261004/826-typecheck-final/receipt.json"
+    }
+  },
+  "failure_ledger": [
+    {
+      "attempt": "826-red-01",
+      "kind": "intended_RED",
+      "result": "missing production pool_flow module import"
+    },
+    {
+      "attempt": "826-red-02",
+      "kind": "intended_RED_plus_harness_contract",
+      "result": "phase/writer receipt assertions failed as intended; wrapper126 additionally recorded one overdeclared dependency snapshot"
+    },
+    {
+      "attempt": "826-red-03",
+      "kind": "intended_RED",
+      "result": "missing pool_flow_reader module"
+    },
+    {
+      "attempt": "826-red-04",
+      "kind": "test_design_miss",
+      "result": "cross-turn poison also broke within-turn continuity, so test passed before cross-turn check; retained and corrected"
+    },
+    {
+      "attempt": "826-red-05",
+      "kind": "intended_RED",
+      "result": "isolated cross-turn discontinuity was accepted before reader correction"
+    },
+    {
+      "attempt": "826-green-04",
+      "kind": "fixture_setup_failure",
+      "result": "serialize parity fixture lacked required political_controllers; production behavior did not fail"
+    },
+    {
+      "attempt": "826-final",
+      "kind": "finalizer_setup_failure",
+      "result": "status parser trimmed the first porcelain status prefix; no result packet emitted"
+    }
+  ],
+  "receipts": [
+    {
+      "name": "826-red-01",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "artifact_pass": true,
+      "receipt_sha256": "4ee170c1dc2ab01545ac0806c4c50468b4786221d7dadb3cc27504d0aaed881e"
+    },
+    {
+      "name": "826-green-01",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_pass": true,
+      "receipt_sha256": "e51895acd49a6f6a811e579cd1d991135e971d3217e73026e0feef045a0ad9d6"
+    },
+    {
+      "name": "826-red-02",
+      "child_exit": 1,
+      "wrapper_exit": 126,
+      "artifact_pass": false,
+      "receipt_sha256": "c946b59efbefd9574a5349c84f751e6212d8f955ee8231d1c6ed2171b22dd06e"
+    },
+    {
+      "name": "826-green-02",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_pass": true,
+      "receipt_sha256": "d5136952b30c627c315307722436591f9de4394c388d76d816ecb8db4cb9d2bf"
+    },
+    {
+      "name": "826-red-03",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "artifact_pass": true,
+      "receipt_sha256": "046d660946d415a076b4c75c0c96f500c6e5e36f670e51bf17e0ebe22d06677f"
+    },
+    {
+      "name": "826-green-03",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_pass": true,
+      "receipt_sha256": "b44e9dc5447582ac30052f41970c98d2ddc651fa8c918bbcb1c86984541c4bf7"
+    },
+    {
+      "name": "826-red-04",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_pass": true,
+      "receipt_sha256": "c075c75d6651844b6e9d7a991e61fc4981eb8dc70861386f8567dbfb176fac90"
+    },
+    {
+      "name": "826-red-05",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "artifact_pass": true,
+      "receipt_sha256": "639c779ce919910508c75b5d741f9e014b2a240a510b3dc1bb665ad714f63bdb"
+    },
+    {
+      "name": "826-green-04",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "artifact_pass": true,
+      "receipt_sha256": "fb55b2100f91a1f8ad5f123ce38bb210c100bbd1f145d6fa4e2bea33873398c5"
+    },
+    {
+      "name": "826-green-05",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_pass": true,
+      "receipt_sha256": "7eb48c637d37a4cfb777cdfd1a9af5595aa6892b41c1b769e5b213989750064c"
+    },
+    {
+      "name": "826-focused-final",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_pass": true,
+      "receipt_sha256": "b7569e0fb2ceb167f1741720994c92b7d522ba4122cc7948d27ee641164d202c"
+    },
+    {
+      "name": "826-typecheck-final",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_pass": true,
+      "receipt_sha256": "7b2c90340e4ac715a1288d0903e61c4b8dc70aa82d59f8b72f5278d46822ab7b"
+    }
+  ],
+  "telemetry": {
+    "C": {
+      "before_bytes": 103894385,
+      "before_sha256": "00d6d7e65832a45e4b8ddc34e077c228b9496ca8f1068a6b9633571b4bae5557",
+      "after_bytes": 103894385,
+      "after_sha256": "00d6d7e65832a45e4b8ddc34e077c228b9496ca8f1068a6b9633571b4bae5557",
+      "append_bytes": 0,
+      "exact_prefix": true
+    },
+    "D": {
+      "before_bytes": 1041,
+      "before_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "after_bytes": 1041,
+      "after_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "append_bytes": 0,
+      "exact_prefix": true
+    }
+  },
+  "protected_controls": [
+    {
+      "path": "data/calibration/engine_health_thresholds.json",
+      "bytes": 3775,
+      "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d"
+    },
+    {
+      "path": "data/source/calibration/painted_control_oct1995.json",
+      "bytes": 35266,
+      "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b"
+    }
+  ],
+  "closed_receipt_inventory": [
+    {
+      "path": "logs/claude-channel-20261004/826-focused-final/receipt.json",
+      "bytes": 7542,
+      "sha256": "b7569e0fb2ceb167f1741720994c92b7d522ba4122cc7948d27ee641164d202c"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-green-01/receipt.json",
+      "bytes": 3939,
+      "sha256": "e51895acd49a6f6a811e579cd1d991135e971d3217e73026e0feef045a0ad9d6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-green-02/receipt.json",
+      "bytes": 4710,
+      "sha256": "d5136952b30c627c315307722436591f9de4394c388d76d816ecb8db4cb9d2bf"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-green-03/receipt.json",
+      "bytes": 3945,
+      "sha256": "b44e9dc5447582ac30052f41970c98d2ddc651fa8c918bbcb1c86984541c4bf7"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-green-04/receipt.json",
+      "bytes": 3948,
+      "sha256": "fb55b2100f91a1f8ad5f123ce38bb210c100bbd1f145d6fa4e2bea33873398c5"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-green-05/receipt.json",
+      "bytes": 3944,
+      "sha256": "7eb48c637d37a4cfb777cdfd1a9af5595aa6892b41c1b769e5b213989750064c"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-red-01/receipt.json",
+      "bytes": 3658,
+      "sha256": "4ee170c1dc2ab01545ac0806c4c50468b4786221d7dadb3cc27504d0aaed881e"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-red-02/receipt.json",
+      "bytes": 4778,
+      "sha256": "c946b59efbefd9574a5349c84f751e6212d8f955ee8231d1c6ed2171b22dd06e"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-red-03/receipt.json",
+      "bytes": 3665,
+      "sha256": "046d660946d415a076b4c75c0c96f500c6e5e36f670e51bf17e0ebe22d06677f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-red-04/receipt.json",
+      "bytes": 3941,
+      "sha256": "c075c75d6651844b6e9d7a991e61fc4981eb8dc70861386f8567dbfb176fac90"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-red-05/receipt.json",
+      "bytes": 3942,
+      "sha256": "639c779ce919910508c75b5d741f9e014b2a240a510b3dc1bb665ad714f63bdb"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-typecheck-final/receipt.json",
+      "bytes": 5673,
+      "sha256": "7b2c90340e4ac715a1288d0903e61c4b8dc70aa82d59f8b72f5278d46822ab7b"
+    }
+  ],
+  "inherited_boundaries": "703 remains NO-GO/unadopted; rejected n83/n84 and all thresholds/reference telemetry are unchanged; readiness tests do not prove campaign neutrality, retained-run writer values, or historical causality"
+}

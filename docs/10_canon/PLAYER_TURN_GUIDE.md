@@ -133,6 +133,7 @@ The following table lists every `name:` literal from early_war_phases.ts, war_ph
 | War - Resolution | `apply-posture-costs` | Indirect | war_phases.ts:1585 |
 | War - Resolution | `check-truce-break` | No | war_phases.ts:1592 |
 | War - Resolution | `resolve-attack-orders` | Indirect | war_phases.ts:1614 |
+| War - Post-Combat | `recover-formation-fatigue` | No | war_phases.ts (after actual attack resolution; excludes combatants) |
 | War - Resolution | `compute-spatial-context-post-combat` | No | war_phases.ts:1685 |
 | War - Resolution | `attribute-operation-casualties` | Indirect | war_phases.ts:1717 |
 | War - Resolution | `update-sector-offensive-results` | Indirect | war_phases.ts:1726 |

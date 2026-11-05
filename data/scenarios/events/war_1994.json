@@ -3263,8 +3263,8 @@
     "narrative": "Jimmy Carter arrives in Sarajevo. The former president, acting as private mediator, shuttles between the warring parties and extracts a commitment to a complete cessation of hostilities effective New Year's Day. Humanitarian corridors will reopen. Behind the scenes, both sides know the ceasefire is a breathing space — time to rearm, resupply, and prepare for whatever comes next.",
     "category": "diplomatic",
     "trigger": {
-      "turn_min": 138,
-      "turn_max": 139,
+      "turn_min": 141,
+      "turn_max": 142,
       "phase": "war"
     },
     "once": true,
@@ -3275,8 +3275,8 @@
     "source_note": "Carter Center archives, Balkan Battlegrounds Vol. II Ch. 12, and the ICTY Karadzic Judgment ground the winter COHA.",
     "staff_assessment": "Sarajevo can preserve diplomatic credibility by honoring the Carter pause, while using the lower tempo to rebuild under scrutiny.",
     "trigger_evidence": [
-      "External diplomatic calendar: Carter's December 1994 Sarajevo-Pale shuttle and the COHA are modeled as a fixed late-December event.",
-      "The turn 138-139 window is an exogenous calendar guardrail, not a battlefield-state predicate."
+      "External diplomatic calendar: Carter's December 1994 Sarajevo-Pale shuttle is modeled against the 18-20 December shuttle window; the temporary truce followed on 23/24 December.",
+      "The turn 141-142 window is an exogenous calendar guardrail, not a battlefield-state predicate."
     ],
     "effect": {
       "kind": "narrative",

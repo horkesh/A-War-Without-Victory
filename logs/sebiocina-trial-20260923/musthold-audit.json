@@ -1,0 +1,416 @@
+{
+  "jan1993": {
+    "control": {
+      "matched": 705,
+      "anchors": "30/30",
+      "failed_anchors": [],
+      "changed_cells_from_control": 0,
+      "newly_wrong_from_control": [],
+      "newly_right_from_control": [],
+      "corridor": {
+        "op:brcko:brcko": "RS",
+        "op:brcko:brezovo_polje_selo_2": "RS",
+        "op:brcko:donji_rahic": "RS",
+        "op:brcko:krepsic": "RS",
+        "op:brcko:potocari_2": "RS",
+        "op:brcko:skakava_donja": "RS"
+      },
+      "bijeljina": {
+        "op:bijeljina:bijeljina_2": "RS",
+        "op:bijeljina:bukovica_donja": "RS",
+        "op:bijeljina:cadjavica_gornja_2": "RS",
+        "op:bijeljina:crnjelovo_donje": "RS",
+        "op:bijeljina:dvorovi_2": "RS",
+        "op:bijeljina:glavicice": "RS",
+        "op:bijeljina:janja_2": "RS",
+        "op:bijeljina:pucile_2": "RS",
+        "op:bijeljina:suho_polje_2": "RS",
+        "op:bijeljina:velika_obarska_2": "RS"
+      }
+    },
+    "trial": {
+      "matched": 706,
+      "anchors": "30/30",
+      "failed_anchors": [],
+      "changed_cells_from_control": 1,
+      "newly_wrong_from_control": [],
+      "newly_right_from_control": [
+        "op:vlasenica:sebiocina"
+      ],
+      "corridor": {
+        "op:brcko:brcko": "RS",
+        "op:brcko:brezovo_polje_selo_2": "RS",
+        "op:brcko:donji_rahic": "RS",
+        "op:brcko:krepsic": "RS",
+        "op:brcko:potocari_2": "RS",
+        "op:brcko:skakava_donja": "RS"
+      },
+      "bijeljina": {
+        "op:bijeljina:bijeljina_2": "RS",
+        "op:bijeljina:bukovica_donja": "RS",
+        "op:bijeljina:cadjavica_gornja_2": "RS",
+        "op:bijeljina:crnjelovo_donje": "RS",
+        "op:bijeljina:dvorovi_2": "RS",
+        "op:bijeljina:glavicice": "RS",
+        "op:bijeljina:janja_2": "RS",
+        "op:bijeljina:pucile_2": "RS",
+        "op:bijeljina:suho_polje_2": "RS",
+        "op:bijeljina:velika_obarska_2": "RS"
+      }
+    },
+    "musthold": {
+      "matched": 706,
+      "anchors": "30/30",
+      "failed_anchors": [],
+      "changed_cells_from_control": 1,
+      "newly_wrong_from_control": [],
+      "newly_right_from_control": [
+        "op:vlasenica:sebiocina"
+      ],
+      "corridor": {
+        "op:brcko:brcko": "RS",
+        "op:brcko:brezovo_polje_selo_2": "RS",
+        "op:brcko:donji_rahic": "RS",
+        "op:brcko:krepsic": "RS",
+        "op:brcko:potocari_2": "RS",
+        "op:brcko:skakava_donja": "RS"
+      },
+      "bijeljina": {
+        "op:bijeljina:bijeljina_2": "RS",
+        "op:bijeljina:bukovica_donja": "RS",
+        "op:bijeljina:cadjavica_gornja_2": "RS",
+        "op:bijeljina:crnjelovo_donje": "RS",
+        "op:bijeljina:dvorovi_2": "RS",
+        "op:bijeljina:glavicice": "RS",
+        "op:bijeljina:janja_2": "RS",
+        "op:bijeljina:pucile_2": "RS",
+        "op:bijeljina:suho_polje_2": "RS",
+        "op:bijeljina:velika_obarska_2": "RS"
+      }
+    }
+  },
+  "apr1994": {
+    "control": {
+      "matched": 697,
+      "anchors": "31/31",
+      "failed_anchors": [],
+      "changed_cells_from_control": 0,
+      "newly_wrong_from_control": [],
+      "newly_right_from_control": [],
+      "corridor": {
+        "op:brcko:brcko": "RS",
+        "op:brcko:brezovo_polje_selo_2": "RS",
+        "op:brcko:donji_rahic": "RS",
+        "op:brcko:krepsic": "RS",
+        "op:brcko:potocari_2": "RS",
+        "op:brcko:skakava_donja": "RS"
+      },
+      "bijeljina": {
+        "op:bijeljina:bijeljina_2": "RS",
+        "op:bijeljina:bukovica_donja": "RS",
+        "op:bijeljina:cadjavica_gornja_2": "RS",
+        "op:bijeljina:crnjelovo_donje": "RS",
+        "op:bijeljina:dvorovi_2": "RS",
+        "op:bijeljina:glavicice": "RS",
+        "op:bijeljina:janja_2": "RS",
+        "op:bijeljina:pucile_2": "RS",
+        "op:bijeljina:suho_polje_2": "RS",
+        "op:bijeljina:velika_obarska_2": "RS"
+      }
+    },
+    "trial": {
+      "matched": 692,
+      "anchors": "30/31",
+      "failed_anchors": [
+        "op:brcko:brcko"
+      ],
+      "changed_cells_from_control": 5,
+      "newly_wrong_from_control": [
+        "op:brcko:brcko",
+        "op:brcko:donji_rahic",
+        "op:brcko:potocari_2",
+        "op:kresevo:kresevo_2",
+        "op:rogatica:brcigovo"
+      ],
+      "newly_right_from_control": [],
+      "corridor": {
+        "op:brcko:brcko": "RBiH",
+        "op:brcko:brezovo_polje_selo_2": "RS",
+        "op:brcko:donji_rahic": "RBiH",
+        "op:brcko:krepsic": "RS",
+        "op:brcko:potocari_2": "RBiH",
+        "op:brcko:skakava_donja": "RS"
+      },
+      "bijeljina": {
+        "op:bijeljina:bijeljina_2": "RS",
+        "op:bijeljina:bukovica_donja": "RS",
+        "op:bijeljina:cadjavica_gornja_2": "RS",
+        "op:bijeljina:crnjelovo_donje": "RS",
+        "op:bijeljina:dvorovi_2": "RS",
+        "op:bijeljina:glavicice": "RS",
+        "op:bijeljina:janja_2": "RS",
+        "op:bijeljina:pucile_2": "RS",
+        "op:bijeljina:suho_polje_2": "RS",
+        "op:bijeljina:velika_obarska_2": "RS"
+      }
+    },
+    "musthold": {
+      "matched": 696,
+      "anchors": "31/31",
+      "failed_anchors": [],
+      "changed_cells_from_control": 1,
+      "newly_wrong_from_control": [
+        "op:rogatica:brcigovo"
+      ],
+      "newly_right_from_control": [],
+      "corridor": {
+        "op:brcko:brcko": "RS",
+        "op:brcko:brezovo_polje_selo_2": "RS",
+        "op:brcko:donji_rahic": "RS",
+        "op:brcko:krepsic": "RS",
+        "op:brcko:potocari_2": "RS",
+        "op:brcko:skakava_donja": "RS"
+      },
+      "bijeljina": {
+        "op:bijeljina:bijeljina_2": "RS",
+        "op:bijeljina:bukovica_donja": "RS",
+        "op:bijeljina:cadjavica_gornja_2": "RS",
+        "op:bijeljina:crnjelovo_donje": "RS",
+        "op:bijeljina:dvorovi_2": "RS",
+        "op:bijeljina:glavicice": "RS",
+        "op:bijeljina:janja_2": "RS",
+        "op:bijeljina:pucile_2": "RS",
+        "op:bijeljina:suho_polje_2": "RS",
+        "op:bijeljina:velika_obarska_2": "RS"
+      }
+    }
+  },
+  "apr1995": {
+    "control": {
+      "matched": 692,
+      "anchors": "38/39",
+      "failed_anchors": [
+        "op:glamoc:glamoc_2"
+      ],
+      "changed_cells_from_control": 0,
+      "newly_wrong_from_control": [],
+      "newly_right_from_control": [],
+      "corridor": {
+        "op:brcko:brcko": "RS",
+        "op:brcko:brezovo_polje_selo_2": "RS",
+        "op:brcko:donji_rahic": "RS",
+        "op:brcko:krepsic": "RS",
+        "op:brcko:potocari_2": "RS",
+        "op:brcko:skakava_donja": "RS"
+      },
+      "bijeljina": {
+        "op:bijeljina:bijeljina_2": "RS",
+        "op:bijeljina:bukovica_donja": "RS",
+        "op:bijeljina:cadjavica_gornja_2": "RS",
+        "op:bijeljina:crnjelovo_donje": "RS",
+        "op:bijeljina:dvorovi_2": "RS",
+        "op:bijeljina:glavicice": "RS",
+        "op:bijeljina:janja_2": "RS",
+        "op:bijeljina:pucile_2": "RS",
+        "op:bijeljina:suho_polje_2": "RS",
+        "op:bijeljina:velika_obarska_2": "RS"
+      }
+    },
+    "trial": {
+      "matched": 686,
+      "anchors": "37/39",
+      "failed_anchors": [
+        "op:brcko:brcko",
+        "op:glamoc:glamoc_2"
+      ],
+      "changed_cells_from_control": 8,
+      "newly_wrong_from_control": [
+        "op:brcko:brcko",
+        "op:brcko:donji_rahic",
+        "op:brcko:potocari_2",
+        "op:kresevo:kresevo_2",
+        "op:rogatica:brcigovo",
+        "op:travnik:paklarevo",
+        "op:trnovo:kijevo_2"
+      ],
+      "newly_right_from_control": [
+        "op:trnovo:gornja_presjenica"
+      ],
+      "corridor": {
+        "op:brcko:brcko": "RBiH",
+        "op:brcko:brezovo_polje_selo_2": "RS",
+        "op:brcko:donji_rahic": "RBiH",
+        "op:brcko:krepsic": "RS",
+        "op:brcko:potocari_2": "RBiH",
+        "op:brcko:skakava_donja": "RS"
+      },
+      "bijeljina": {
+        "op:bijeljina:bijeljina_2": "RS",
+        "op:bijeljina:bukovica_donja": "RS",
+        "op:bijeljina:cadjavica_gornja_2": "RS",
+        "op:bijeljina:crnjelovo_donje": "RS",
+        "op:bijeljina:dvorovi_2": "RS",
+        "op:bijeljina:glavicice": "RS",
+        "op:bijeljina:janja_2": "RS",
+        "op:bijeljina:pucile_2": "RS",
+        "op:bijeljina:suho_polje_2": "RS",
+        "op:bijeljina:velika_obarska_2": "RS"
+      }
+    },
+    "musthold": {
+      "matched": 689,
+      "anchors": "38/39",
+      "failed_anchors": [
+        "op:glamoc:glamoc_2"
+      ],
+      "changed_cells_from_control": 3,
+      "newly_wrong_from_control": [
+        "op:orasje:donja_mahala",
+        "op:rogatica:brcigovo",
+        "op:travnik:paklarevo"
+      ],
+      "newly_right_from_control": [],
+      "corridor": {
+        "op:brcko:brcko": "RS",
+        "op:brcko:brezovo_polje_selo_2": "RS",
+        "op:brcko:donji_rahic": "RS",
+        "op:brcko:krepsic": "RS",
+        "op:brcko:potocari_2": "RS",
+        "op:brcko:skakava_donja": "RS"
+      },
+      "bijeljina": {
+        "op:bijeljina:bijeljina_2": "RS",
+        "op:bijeljina:bukovica_donja": "RS",
+        "op:bijeljina:cadjavica_gornja_2": "RS",
+        "op:bijeljina:crnjelovo_donje": "RS",
+        "op:bijeljina:dvorovi_2": "RS",
+        "op:bijeljina:glavicice": "RS",
+        "op:bijeljina:janja_2": "RS",
+        "op:bijeljina:pucile_2": "RS",
+        "op:bijeljina:suho_polje_2": "RS",
+        "op:bijeljina:velika_obarska_2": "RS"
+      }
+    }
+  },
+  "oct1995": {
+    "control": {
+      "matched": 657,
+      "anchors": "30/30",
+      "failed_anchors": [],
+      "changed_cells_from_control": 0,
+      "newly_wrong_from_control": [],
+      "newly_right_from_control": [],
+      "corridor": {
+        "op:brcko:brcko": "RS",
+        "op:brcko:brezovo_polje_selo_2": "RS",
+        "op:brcko:donji_rahic": "RS",
+        "op:brcko:krepsic": "RS",
+        "op:brcko:potocari_2": "RS",
+        "op:brcko:skakava_donja": "RS"
+      },
+      "bijeljina": {
+        "op:bijeljina:bijeljina_2": "RS",
+        "op:bijeljina:bukovica_donja": "RS",
+        "op:bijeljina:cadjavica_gornja_2": "RS",
+        "op:bijeljina:crnjelovo_donje": "RS",
+        "op:bijeljina:dvorovi_2": "RS",
+        "op:bijeljina:glavicice": "RS",
+        "op:bijeljina:janja_2": "RS",
+        "op:bijeljina:pucile_2": "RS",
+        "op:bijeljina:suho_polje_2": "RS",
+        "op:bijeljina:velika_obarska_2": "RS"
+      }
+    },
+    "trial": {
+      "matched": 642,
+      "anchors": "29/30",
+      "failed_anchors": [
+        "op:brcko:brcko"
+      ],
+      "changed_cells_from_control": 21,
+      "newly_wrong_from_control": [
+        "op:bosanska_krupa:arapusa_2",
+        "op:bosanska_krupa:donji_dubovik_2",
+        "op:bosanska_krupa:gornja_suvaja",
+        "op:bosanska_krupa:ivanjska_2",
+        "op:bosanska_krupa:vranjska_2",
+        "op:bosanski_petrovac:krnjeusa",
+        "op:brcko:brcko",
+        "op:brcko:donji_rahic",
+        "op:brcko:potocari_2",
+        "op:hadzici:misevici_2",
+        "op:ilidza:rakovica_2",
+        "op:ilidza:rudnik_2",
+        "op:ilidza:sarajevo_dio_ilidza_2",
+        "op:ilijas:podlugovi",
+        "op:kresevo:kresevo_2",
+        "op:rogatica:brcigovo",
+        "op:sanski_most:budimlic_japra_2",
+        "op:trnovo:kijevo_2"
+      ],
+      "newly_right_from_control": [
+        "op:sanski_most:lusci_palanka_2",
+        "op:trnovo:gornja_presjenica",
+        "op:vares:toljenak"
+      ],
+      "corridor": {
+        "op:brcko:brcko": "RBiH",
+        "op:brcko:brezovo_polje_selo_2": "RS",
+        "op:brcko:donji_rahic": "RBiH",
+        "op:brcko:krepsic": "RS",
+        "op:brcko:potocari_2": "RBiH",
+        "op:brcko:skakava_donja": "RS"
+      },
+      "bijeljina": {
+        "op:bijeljina:bijeljina_2": "RS",
+        "op:bijeljina:bukovica_donja": "RS",
+        "op:bijeljina:cadjavica_gornja_2": "RS",
+        "op:bijeljina:crnjelovo_donje": "RS",
+        "op:bijeljina:dvorovi_2": "RS",
+        "op:bijeljina:glavicice": "RS",
+        "op:bijeljina:janja_2": "RS",
+        "op:bijeljina:pucile_2": "RS",
+        "op:bijeljina:suho_polje_2": "RS",
+        "op:bijeljina:velika_obarska_2": "RS"
+      }
+    },
+    "musthold": {
+      "matched": 661,
+      "anchors": "30/30",
+      "failed_anchors": [],
+      "changed_cells_from_control": 8,
+      "newly_wrong_from_control": [
+        "op:orasje:donja_mahala",
+        "op:rogatica:brcigovo"
+      ],
+      "newly_right_from_control": [
+        "op:bosanski_petrovac:bosanski_petrovac_2",
+        "op:bosanski_petrovac:dobro_selo_2",
+        "op:bosanski_petrovac:jasenovac_2",
+        "op:bosanski_petrovac:kolonic_2",
+        "op:kljuc:hadzici",
+        "op:kljuc:kljuc_2"
+      ],
+      "corridor": {
+        "op:brcko:brcko": "RS",
+        "op:brcko:brezovo_polje_selo_2": "RS",
+        "op:brcko:donji_rahic": "RS",
+        "op:brcko:krepsic": "RS",
+        "op:brcko:potocari_2": "RS",
+        "op:brcko:skakava_donja": "RS"
+      },
+      "bijeljina": {
+        "op:bijeljina:bijeljina_2": "RS",
+        "op:bijeljina:bukovica_donja": "RS",
+        "op:bijeljina:cadjavica_gornja_2": "RS",
+        "op:bijeljina:crnjelovo_donje": "RS",
+        "op:bijeljina:dvorovi_2": "RS",
+        "op:bijeljina:glavicice": "RS",
+        "op:bijeljina:janja_2": "RS",
+        "op:bijeljina:pucile_2": "RS",
+        "op:bijeljina:suho_polje_2": "RS",
+        "op:bijeljina:velika_obarska_2": "RS"
+      }
+    }
+  }
+}

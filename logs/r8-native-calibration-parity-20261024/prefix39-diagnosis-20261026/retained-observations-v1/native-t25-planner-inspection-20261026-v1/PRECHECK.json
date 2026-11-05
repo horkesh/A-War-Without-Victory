@@ -1,0 +1,50 @@
+{
+  "schema": "awwv.native-t25-request-op-planner-precheck.v1",
+  "performed_utc": "2026-10-26T01:02:12.642Z",
+  "planner_executed": false,
+  "runtime": {
+    "node_version": "v22.23.2",
+    "node_exec_path": "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "node_exec_bytes": 86997320,
+    "node_exec_sha256": "0d0f5e39f9f3d9587bc19f73eab3c2c9c4903fd02d6dbf9c853dd81b3d95fad4"
+  },
+  "syntax_check": {
+    "typescript_transpile_syntax_errors": 0,
+    "standalone_strict_typecheck_exit": 0,
+    "standalone_strict_typecheck_command": "node node_modules/typescript/bin/tsc --noEmit --incremental false --target ES2021 --module ES2022 --moduleResolution Node --strict --skipLibCheck --esModuleInterop --resolveJsonModule --types node <inspection-script>"
+  },
+  "workspace": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "source_sha256": "8a085a37835541f4dc267e5c1f7f75a714bafc596e21d43b1467cb8ee62d7fcd",
+  "save": {
+    "sha256": "d384bd9f7f24ebd044fd13bc3b123ad05f51aa074c0d44faedbe99075ac6adcc",
+    "bytes": 5146025,
+    "turn": 25,
+    "phase": "war",
+    "player_faction": "RBiH",
+    "game_over": false,
+    "end_state_present": false,
+    "requested_corps_command_keys_present": true
+  },
+  "graph": {
+    "sha256": "f7f9aaeea51710fda376234d79945b51dfea31a16ebca948ffd8dc54f3ce0c46",
+    "edge_count": 2047,
+    "endpoint_count": 712,
+    "controller_key_count": 712,
+    "endpoint_domain_equals_controller_domain": true,
+    "missing_endpoint_controllers": 0,
+    "controller_keys_missing_from_graph": 0,
+    "non_operational_endpoint_ids": 0,
+    "non_operational_controller_keys": 0,
+    "target_controller": "RS",
+    "target_neighbors": [
+      { "id": "op:kalinovik:golubici_2", "controller": "RS" },
+      { "id": "op:kalinovik:varos_2", "controller": "RS" },
+      { "id": "op:kalinovik:vlaholje", "controller": "RS" },
+      { "id": "op:trnovo:delijas", "controller": "RBiH" },
+      { "id": "op:trnovo:kijevo_2", "controller": "RS" },
+      { "id": "op:trnovo:trnovo", "controller": "RBiH" }
+    ]
+  },
+  "corps_ids": ["arbih_1st_corps", "arbih_4th_corps"],
+  "target_osid": "op:trnovo:tosici"
+}

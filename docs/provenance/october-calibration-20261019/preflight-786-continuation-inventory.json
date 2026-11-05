@@ -1,0 +1,289 @@
+{
+  "schema": "awwv.786.continuation-inventory.v1",
+  "captured_utc": "2026-10-21T11:12:30.606Z",
+  "writes_closed": true,
+  "entry_count": 56,
+  "entries": [
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-byte-selfcheck.receipt.json",
+      "bytes": 2285,
+      "sha256": "c1e33b85a79d2765db0bd5573cad54fe0ad2688cbe25e0934fd4f96277f601a2"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-byte-selfcheck.start.json",
+      "bytes": 1473,
+      "sha256": "c9a86dfebd4473bf8a40b15e21590ac4c0782a803f5edc9d55316355dfbd0e4b"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-byte-selfcheck.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-byte-selfcheck.stdout.log",
+      "bytes": 1773,
+      "sha256": "b3f12b76fe1c5591a26294a5e10a6c1cf1c8cc489672822886e3d2562817e06b"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-byte-selfcheck.wrapper-error.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-commander-selfcheck.receipt.json",
+      "bytes": 2273,
+      "sha256": "a71249d707b6a985394967c66797199574ed5bb70537b0483d164cd752e726e1"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-commander-selfcheck.start.json",
+      "bytes": 1446,
+      "sha256": "8b5b30301ad62c2cc022c5ebbf2800ab0c56df9b9ecc7894aa59c9aea17eee70"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-commander-selfcheck.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-commander-selfcheck.stdout.log",
+      "bytes": 4130,
+      "sha256": "972c50ec88544f7f0cc4759791ae780c597a62c11e0d2af6b40092849ca7d3d9"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-commander-selfcheck.wrapper-error.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-preflight-b.receipt.json",
+      "bytes": 2168,
+      "sha256": "233634c9c7e13e3b1f189ea9d014af3f25523bb7f8cacb15582cc843af30bfc6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-preflight-b.start.json",
+      "bytes": 1365,
+      "sha256": "9b1031ece4ed154dc37ae4412ccc628b0af3a40e396ebd12276eb27ff2c181ba"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-preflight-b.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-preflight-b.stdout.log",
+      "bytes": 581,
+      "sha256": "7f659df7ebff650c3d6b2f15f32c0cca68d2be87dcb27be06c6eec677020dd17"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-preflight-b.wrapper-error.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-preflight.receipt.json",
+      "bytes": 2148,
+      "sha256": "c9a23480581589f828c55fef14a0d3a0a1c9d121bee3ced9fc2dc14154739a9c"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-preflight.start.json",
+      "bytes": 1351,
+      "sha256": "18d367b68939ab9ca6eb73deb94be26fade66d8f2d9c8d263c84f2873c661508"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-preflight.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-preflight.stdout.log",
+      "bytes": 265,
+      "sha256": "1d73bf7be53d1890fa71b9eaaeb5f18aa58001c5ee8eb4880fd21a49e0830fd0"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-preflight.wrapper-error.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-reader-controls-telemetry/C-after.jsonl",
+      "bytes": 102001043,
+      "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-reader-controls-telemetry/C-before.jsonl",
+      "bytes": 102001043,
+      "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-reader-controls-telemetry/D-after.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-reader-controls-telemetry/D-before.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-reader-controls-telemetry/before.json",
+      "bytes": 674,
+      "sha256": "9226f11c83082bb66b75632cdbcc0d89ca1b1a4bc91e143f6d5ce97718993ef5"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-reader-controls-telemetry/result.json",
+      "bytes": 2076,
+      "sha256": "765d8dfc5708fa306ba2006441788a95853921f0ae1d290f5074cbd497dfe46a"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-reader-controls.receipt.json",
+      "bytes": 2287,
+      "sha256": "1ded8682aaa134abd15474c133f6ef4df874665cf914b41066d0fede35c24951"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-reader-controls.start.json",
+      "bytes": 1473,
+      "sha256": "d7211794c98e84cb120f74c15c40754842f0a6a4837e6540c5c2899f4ef8a928"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-reader-controls.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-reader-controls.stdout.log",
+      "bytes": 37,
+      "sha256": "1460c2c04ef4e1a032c364156b95fcb5fba5c29aaa23023f1e768f562cdf88e4"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-reader-controls.wrapper-error.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-seal-telemetry/C-after.jsonl",
+      "bytes": 102001043,
+      "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-seal-telemetry/C-before.jsonl",
+      "bytes": 102001043,
+      "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-seal-telemetry/D-after.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-seal-telemetry/D-before.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-seal-telemetry/before.json",
+      "bytes": 652,
+      "sha256": "51691d1edeb289779c70eee1542ba29e330e11be62b8f42809da132dd56465e3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-seal-telemetry/result.json",
+      "bytes": 1930,
+      "sha256": "5e225f9b65576079571ee2e93a4ad291f0410b5b9dbc502bcbc01cd33208560a"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-seal.receipt.json",
+      "bytes": 2097,
+      "sha256": "c76d2ad65684c62342cfb8229d96d0d8a8ce78e562fe76e1168e2aae844f9b30"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-seal.start.json",
+      "bytes": 1316,
+      "sha256": "f43f122ce6cbf08bc98868970b39f7aecf04aa175e8345befbc8bec74db9728d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-seal.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-seal.stdout.log",
+      "bytes": 410,
+      "sha256": "c93fcff672c9c4c4ed62ce83f23a7c1b8b0eb9570ebe7019847a96fcd973fff8"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-786-seal.wrapper-error.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-closed.json",
+      "bytes": 1092,
+      "sha256": "8dfed6e2acb53688541e75b71ffea0129c0a185bbf27fe5950702d9e934d57a2"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-closeout.cjs",
+      "bytes": 2884,
+      "sha256": "5cdd4b3fa8af9d1a016ddd7288b5655db7cae99187cd3154b61fff836d7e9c32"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-continuation-result.json",
+      "bytes": 6903,
+      "sha256": "d4ed156abee5477ef7e10ae1f6b3058c2a6a825903a4abdcb9803d3ce8fcad5e"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-continuation-stop.cjs",
+      "bytes": 3723,
+      "sha256": "e99602a8cc1f1442d369ddfbbf91184412629b9e64e682bcfe2497f2e607ecf5"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-inventory.json",
+      "bytes": 9648,
+      "sha256": "e3313f3b79ec44e0b1966177bb49f2d0a3e8da524a1b2ae3a9fd1d5b0ab629b4"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-preflight-b.cjs",
+      "bytes": 5592,
+      "sha256": "cd11636cf5ecbc8579f09149e58d362a84e88871823219f4520382699e44ff32"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-preflight-b.json",
+      "bytes": 5235,
+      "sha256": "2003128a630f783a69a6b8a7f21d8e51c0cb6c410d4fb3f2cacd066b7c93a438"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-preflight.cjs",
+      "bytes": 5472,
+      "sha256": "c6e9f60b6ce980378d53767859e740e2cab4addac101bbb1a4b413f51568a064"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-preflight.json",
+      "bytes": 5963,
+      "sha256": "51eddbedfe995fe41f5669971b8d743d363048174920a3876798806b3a95c16f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-reader-controls-a/controls.json",
+      "bytes": 2108,
+      "sha256": "7af226cdda8da393eaf7eca73a8c37d391df041d3335c83bc9f4d209462c0cb6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-result.json",
+      "bytes": 7304,
+      "sha256": "0edf82ac47dc5093578d0444c41ffbb67e11ca51a90228e9d09ee4c209edd890"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-run-env.json",
+      "bytes": 327,
+      "sha256": "5a4e74ce7f8ea830e1525ed6be4d96302feb802ab1251338437550756d656d5c"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-seal.cjs",
+      "bytes": 3889,
+      "sha256": "3f4d4571ce10dfd0bb31f0f755a2286c1905b82b65ba296cb5bb35bce0c11f7c"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-stateful-readers.cjs",
+      "bytes": 12630,
+      "sha256": "fbdd5ce0ee14cde3ec3195c82da1fec41f00d7eeffd807fed3cd8159ca45c797"
+    }
+  ],
+  "runner_attempts": 0
+}

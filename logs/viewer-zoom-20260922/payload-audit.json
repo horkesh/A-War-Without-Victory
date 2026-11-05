@@ -1,0 +1,22 @@
+{
+  "all_campaign_geometry_reference_payloads_unchanged": true,
+  "keys": [
+    "CELLS",
+    "INIT",
+    "EVENTS",
+    "PAINTED",
+    "SCORES",
+    "FCOLOR",
+    "MCOLOR",
+    "MARKERS",
+    "FSHORT"
+  ],
+  "scores": [
+    702,
+    694,
+    689,
+    651
+  ],
+  "simulation_commit": "efa53f55c34e4e9fe8ec8d4fe99ec01502ba1ed1",
+  "html_sha256": "d7867c1ea15b0e2615160593082b630e0aaf321fb0c3701dc728a24607a95198"
+}

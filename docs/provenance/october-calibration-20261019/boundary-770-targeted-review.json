@@ -1,0 +1,107 @@
+{
+  "schema": "awwv.boundary-observer-targeted-verification.v1",
+  "sealed_utc": "2026-10-21T05:22:57.1991360Z",
+  "writes_closed": true,
+  "verdict": "PASS_OBSERVER_READINESS",
+  "observer_readiness": true,
+  "gameplay_neutrality_claimed": false,
+  "campaign_neutrality_claimed": false,
+  "historical_causality_claimed": false,
+  "head": "7de47be2050cbe2efee78b9028bf6b3a03bf3fca",
+  "verification_scope": ["770-F1", "770-F2", "770-F3"],
+  "findings": [
+    {
+      "id": "770-F1",
+      "status": "CLOSED",
+      "evidence": "tests/pre_planned_operations.test.ts now compares the real direct injectPrePlannedOperations topic-OFF and topic-ON full state, stable serialization, and void return, and separately proves a throwing stdout sink does not escape."
+    },
+    {
+      "id": "770-F2",
+      "status": "CLOSED",
+      "evidence": "tests/reason_code_debug.test.ts includes reconciliation_write and preplanned_eligibility in its selector matrix and exercises unset, empty, exact padded uppercase, all, *, whitespace/case and malformed/typo silence."
+    },
+    {
+      "id": "770-F3",
+      "status": "CLOSED",
+      "evidence": "logs/claude-channel-20261004/769-red-reconciliation-a-retrospective.json preserves the literal attempted command and errors, identifies copied_from_tool_transcript provenance, and explicitly states that it is neither a runtime nor wrapper receipt."
+    }
+  ],
+  "correction_boundary": {
+    "production_files_changed": 0,
+    "test_files_changed": ["tests/pre_planned_operations.test.ts", "tests/reason_code_debug.test.ts"],
+    "evidence_files_added": [
+      "logs/claude-channel-20261004/769-red-reconciliation-a-retrospective.json",
+      "logs/claude-channel-20261004/769-correction-770-archive-report-failure-retrospective.json"
+    ],
+    "production_source_verdict": "PASS_REUSED_FROM_770_INDEPENDENT_REVIEW"
+  },
+  "correction_checks": {
+    "focused": {
+      "attempt": "769-correction-770-focused-a",
+      "requested_files": ["tests/pre_planned_operations.test.ts", "tests/reason_code_debug.test.ts"],
+      "total": 141,
+      "passed": 141,
+      "failed": 0,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "vitest_sha256": "416f2bfee65324d18f29318987dfa7ff70d364b69c24e4278896c1a5cf8ad99c"
+    },
+    "typecheck": {
+      "attempt": "769-correction-770-typecheck-a",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "private_build_info_sha256": "20209df24641892ac43fd5b41bbc8b11fad98190841463f1498df6dd2b1df8a2"
+    },
+    "diff_check_exit": 0,
+    "verification_note": "No tests, probes, campaigns, builds, replays or runtime were rerun by the targeted reviewer; sealed correction receipts were inspected directly."
+  },
+  "reused_unaffected_evidence": {
+    "focused_combined": "769-focused-combined-a: 159/159",
+    "targeted_correction": "769-correction-focused-a: 132/132",
+    "off_allocation_subset": "769-off-allocation-correction-a: 100/100",
+    "final_original_typecheck": "769-typecheck-d: child 0, wrapper 0",
+    "count_rule": "These are overlapping runs retained at their actual scopes and are not summed."
+  },
+  "source_pins_unchanged": [
+    {"path": "src/sim/combat/reason_code_debug.ts", "bytes": 20066, "sha256": "07ac547769cd7df22bf183e662d48e7e0a5ab5e5ba1d67157f588acc2aa77b2c"},
+    {"path": "src/sim/combat/commander_march_correction.ts", "bytes": 28367, "sha256": "56f4fd5bb73c7a058752007481442bf21085298365dbd04955323ac87033e793"},
+    {"path": "src/sim/combat/pre_planned_operations.ts", "bytes": 150579, "sha256": "5ea85b79e0a2df80bfed1702c7fcceaaf44df5cdc66b661ce6296d0e3e9c392a"}
+  ],
+  "test_pins": [
+    {"path": "tests/pre_planned_operations.test.ts", "bytes": 135571, "sha256": "a4d283f516a6eefa94da900916d9a7d9599aa7f03d9462bda9b483467d54585e"},
+    {"path": "tests/reason_code_debug.test.ts", "bytes": 10386, "sha256": "84d6ead9826cba20534a63024d461e311baf2cebf79b2d06011be11da708f29a"}
+  ],
+  "original_769_seals_unchanged": [
+    {"path": "logs/claude-channel-20261004/769-result.json", "sha256": "e417ddf7b5e38053281f79d8670b249a53528f6c6fa9cb60e41b9d09ca495ce9"},
+    {"path": "logs/claude-channel-20261004/769-inventory.json", "sha256": "3b8007850a3679e1ab62029b4126e28ae00f91754b435fb510ec72ad5a977e09"},
+    {"path": "logs/claude-channel-20261004/769-closed.json", "sha256": "712b762cd37331b70466aebd99986099c6bd4db906fdff824134eff2c6c89108"}
+  ],
+  "correction_seals": [
+    {"path": "logs/claude-channel-20261004/769-correction-770-result.json", "sha256": "4d081dd8a7b3798a520694351bf3c276ed48116173c1f9f09f246543c1b7b63e"},
+    {"path": "logs/claude-channel-20261004/769-correction-770-inventory.json", "sha256": "a5dcc311749c56a3166228c8ef163253b797ef91b788c123311992da873d24cc"},
+    {"path": "logs/claude-channel-20261004/769-correction-770-closed.json", "sha256": "051aac7e6ac48ea240af383f96f290a98919392825bc9378fee53e718cce4870"}
+  ],
+  "preservation": {
+    "c_before_after": {"bytes": 101054372, "sha256": "b11e26cdda6948e8a0c6812a1e5563578d8de42d4cc4f235a25598d075acc8be", "identical": true, "appended_bytes": 0},
+    "d_before_after": {"bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3", "identical": true, "appended_bytes": 0},
+    "protected": [
+      {"path": "src/sim/combat/commander/emit.ts", "bytes": 198276, "sha256": "6d04bd153030f88b7105f8d9e71510487576136cfa67a5f0bc10ba74ad7109ae"},
+      {"path": "data/calibration/engine_health_thresholds.json", "bytes": 3775, "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d"},
+      {"path": "data/source/calibration/painted_control_oct1995.json", "bytes": 35266, "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b"}
+    ]
+  },
+  "retrospective_evidence": [
+    {"path": "logs/claude-channel-20261004/769-red-reconciliation-a-retrospective.json", "sha256": "fd7d33ef8df0fcfc1d67d82d2f1ab2d0210e8ed56f1ceccc123ffcd6db3d06e9", "kind": "copied transcript, not runtime/wrapper receipt"},
+    {"path": "logs/claude-channel-20261004/769-correction-770-archive-report-failure-retrospective.json", "sha256": "97df68a37b9974c36f4cbe62368aeec0479ec1d2f08dcbd57d610917a55efc0f", "kind": "copied transcript of pre-execution PowerShell parse failure"},
+    {"path": "logs/claude-channel-20261004/771-postclose-tool-transcript.json", "sha256": "05bf5a33ec1951da3299a2ceb483476dccf8bba6223ce8a435dd856d5e783973", "kind": "outside closed 769 evidence set; copied transcript, numeric exit and original time unavailable and not invented"}
+  ],
+  "limits": {
+    "campaigns": 0,
+    "full_suites": 0,
+    "builds": 0,
+    "replays": 0,
+    "run_turn_calls": 0,
+    "git_actions": 0,
+    "readiness_scope": "observer implementation and focused proof only"
+  }
+}

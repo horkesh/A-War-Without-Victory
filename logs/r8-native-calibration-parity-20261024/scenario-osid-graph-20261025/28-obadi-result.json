@@ -1,0 +1,1199 @@
+{
+  "schema": "awwv.directive-obadi-diagnostic-v2.result.v1",
+  "pass": false,
+  "verdict": "NO_COMBAT_WITHIN_FIXED_WINDOW",
+  "captureClaim": false,
+  "head": "295d5f7290b1085dc76bbebb41df72386cd6b705",
+  "runtime": {
+    "path": "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "bytes": 86997320,
+    "sha256": "0d0f5e39f9f3d9587bc19f73eab3c2c9c4903fd02d6dbf9c853dd81b3d95fad4",
+    "version": "v22.23.2"
+  },
+  "commandManifest": {
+    "schema": "awwv.directive-delivery-diagnostic-v2.command.v1",
+    "kind": "production",
+    "executable": "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "args": [
+      "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\node_modules\\tsx\\dist\\cli.mjs",
+      "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-package-v6\\directive-obadi-diagnostic-v2\\directive_obadi_entry.ts",
+      "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-package-v6\\directive-obadi-diagnostic-v2\\CONFIG.json",
+      "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-package-v6\\directive-obadi-diagnostic-v2\\attempts\\production-01",
+      "--root-review-go",
+      "ROOT_REVIEW_GO_DIRECTIVE_OBADI_V2"
+    ],
+    "cwd": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory",
+    "timeoutMs": 300000
+  },
+  "input": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp-paradox-qa-20260710/evidence/historical-default-p03-rbih-t39-01/rbih/turn-autosaves/turn-020.json",
+    "bytes": 5041256,
+    "sha256": "b6c96de72c587b29fd0da9e74280a0cc0c07ae827fbb1ec29d3b5e43a8316e59"
+  },
+  "bindings": [
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/src/sim/turn_phases/war_phases.ts",
+      "bytes": 233809,
+      "sha256": "d9ec4ee736cf5ac2c05508bddc5a94bcda0897a9fbe0e09d63dfaa7dfe6cd456"
+    },
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/src/sim/combat/enclave_resilience.ts",
+      "bytes": 44772,
+      "sha256": "26270d58fdd8b3acd5a311735d090d5e96354d92bc4934014c3617a6015b7397"
+    },
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tests/op_directive_injection.test.ts",
+      "bytes": 16757,
+      "sha256": "7ad8e909ff975afca0390e87ba7d35641f9f76eea597c9cb4b8a7c29f3d07651"
+    },
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tests/op_directive_objection.test.ts",
+      "bytes": 18777,
+      "sha256": "56ba1dbcdd6dfaa5ca7277703a30d688fb7090fc3f655c68c29273192df34f0e"
+    },
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/src/desktop/desktop_sim.ts",
+      "bytes": 59490,
+      "sha256": "91e3163da0aeddca169deabf0b73c47216800f0e6dee0ddc63de5d98f7416954"
+    },
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/src/desktop/op_directive_staging.cjs",
+      "bytes": 6784,
+      "sha256": "cfd1deb864063153cbe128af3a0297c4f2f73b3baed39e4ec97894cc92bb344c"
+    },
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/src/ui/map/utils/formatters.ts",
+      "bytes": 6108,
+      "sha256": "9c8f86536487663f447fbaafb752ecdf89f730a50d4e6c182a372178a8ed7745"
+    },
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/directive-delivery-diagnostic-v1/directive_delivery_entry.ts",
+      "bytes": 19221,
+      "sha256": "f2e5a91228dcc6597b0e06fbc0eb7a642d9edc5ebe97afe2d99b68a9f2b6b308"
+    },
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/directive-delivery-diagnostic-v2/contracts.ts",
+      "bytes": 6333,
+      "sha256": "2d5f0e6374a00516653d4ad95072cdb7c938518a93598f7ea16d356dbe3fa44b"
+    }
+  ],
+  "failureEvidence": [
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/directive-obadi-diagnostic-v1_1/attempts/production-01/command.json",
+      "bytes": 1206,
+      "sha256": "6b50c2e1694dd16c610f59347a680edc0054859ea7bc92e248ac701c6f804e32"
+    },
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/directive-obadi-diagnostic-v1_1/attempts/production-01/RESULT.json",
+      "bytes": 180,
+      "sha256": "93ad67e2bc83a87b1642a5c6667460c7729f6bb48eb7fe0647fd051f6bc5b170"
+    },
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/directive-obadi-diagnostic-v1_1/attempts/production-01/stage-receipt.json",
+      "bytes": 935,
+      "sha256": "6386e7de33e47b74ae29f1847d7abf9366b0809ac4d93601699859461b2810ff"
+    },
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/directive-obadi-diagnostic-v1_1/attempts/production-01/stderr.log",
+      "bytes": 42,
+      "sha256": "457d53b68b7ac5c0f56c642e0f73c3fee6972445b743a3c53a860b7871b0d20a"
+    },
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/directive-obadi-diagnostic-v1_1/attempts/production-01/stdout.log",
+      "bytes": 1693,
+      "sha256": "2a30631fd8e2a54d0ca46c033c28e35bbf31649e9f1c099906706e651043818b"
+    },
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/directive-obadi-diagnostic-v1_1/attempts/production-01/wrapper-receipt.json",
+      "bytes": 207,
+      "sha256": "a54d71b349498cf5772e2b0304daf325f1dad9eaf53e2cf3da9e3f171cdc348f"
+    }
+  ],
+  "stageReceipt": {
+    "objection": {
+      "forceRatio": 1.6982606977648265,
+      "estimatedCasualties": 358,
+      "recommendedAction": "delay"
+    },
+    "forced": true,
+    "stagePayload": {
+      "corpsId": "arbih_2nd_corps",
+      "targetOsid": "op:srebrenica:obadi",
+      "forced_over_objection": true
+    },
+    "stageOptions": {},
+    "authBefore": {
+      "current": 100,
+      "last_recovery": 5.5,
+      "last_recovery_source": "international_standing",
+      "lifetime_spent": 25,
+      "max": 100,
+      "reserve": 15,
+      "reserve_max": 15,
+      "spent_this_turn": 0
+    },
+    "authAfter": {
+      "current": 75,
+      "last_recovery": 5.5,
+      "last_recovery_source": "international_standing",
+      "lifetime_spent": 50,
+      "max": 100,
+      "reserve": 15,
+      "reserve_max": 15,
+      "spent_this_turn": 25
+    },
+    "pending": {
+      "target_osid": "op:srebrenica:obadi",
+      "turn": 20,
+      "ca_cost": 25,
+      "forced_over_objection": true
+    },
+    "stageResult": {
+      "ok": true
+    }
+  },
+  "operation": {
+    "operationId": "arbih_2nd_corps:Presidential Directive — op:srebrenica:obadi:t21",
+    "name": "Presidential Directive — op:srebrenica:obadi",
+    "type": "sector_attack",
+    "phase": "planning",
+    "startedTurn": 21,
+    "requestedByPresident": true,
+    "forced": true,
+    "commanderOfficerId": "arbih_mesic",
+    "roster": [
+      "arbih_1st_cerska",
+      "arbih_1st_kamenica",
+      "arbih_246th_vitezka_mountain",
+      "arbih_281st_east_bosnian_light",
+      "arbih_282nd_east_bosnian_light",
+      "arbih_283rd_east_bosnian_light",
+      "arbih_284th_east_bosnian_light"
+    ],
+    "axes": [
+      {
+        "axisId": "main",
+        "stagingOsid": "op:srebrenica:donji_potocari_2",
+        "objectives": [
+          "op:srebrenica:obadi"
+        ],
+        "assignedBrigades": [
+          "arbih_1st_cerska",
+          "arbih_1st_kamenica",
+          "arbih_246th_vitezka_mountain",
+          "arbih_281st_east_bosnian_light",
+          "arbih_282nd_east_bosnian_light",
+          "arbih_283rd_east_bosnian_light",
+          "arbih_284th_east_bosnian_light"
+        ]
+      }
+    ],
+    "rosterState": [
+      {
+        "formationId": "arbih_1st_cerska",
+        "status": "active",
+        "personnel": 472,
+        "locationOsid": "op:srebrenica:donji_potocari_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_1st_kamenica",
+        "status": "active",
+        "personnel": 477,
+        "locationOsid": "op:bratunac:jezestica_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_246th_vitezka_mountain",
+        "status": "active",
+        "personnel": 466,
+        "locationOsid": "op:bratunac:pobudje_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_281st_east_bosnian_light",
+        "status": "active",
+        "personnel": 600,
+        "locationOsid": "op:srebrenica:milacevici",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_282nd_east_bosnian_light",
+        "status": "active",
+        "personnel": 600,
+        "locationOsid": "op:srebrenica:ljeskovik_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_283rd_east_bosnian_light",
+        "status": "active",
+        "personnel": 600,
+        "locationOsid": "op:srebrenica:ljeskovik_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_284th_east_bosnian_light",
+        "status": "active",
+        "personnel": 600,
+        "locationOsid": "op:srebrenica:ljeskovik_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      }
+    ]
+  },
+  "movementObserved": true,
+  "ownedCombat": null,
+  "advances": 6,
+  "maxAdvances": 6,
+  "stoppedAtTurn": 26,
+  "turnReceipts": [
+    {
+      "turn": 21,
+      "pendingConsumed": true,
+      "operation": {
+        "operationId": "arbih_2nd_corps:Presidential Directive — op:srebrenica:obadi:t21",
+        "name": "Presidential Directive — op:srebrenica:obadi",
+        "type": "sector_attack",
+        "phase": "planning",
+        "startedTurn": 21,
+        "requestedByPresident": true,
+        "forced": true,
+        "commanderOfficerId": "arbih_mesic",
+        "roster": [
+          "arbih_1st_cerska",
+          "arbih_1st_kamenica",
+          "arbih_246th_vitezka_mountain",
+          "arbih_281st_east_bosnian_light",
+          "arbih_282nd_east_bosnian_light",
+          "arbih_283rd_east_bosnian_light",
+          "arbih_284th_east_bosnian_light"
+        ],
+        "axes": [
+          {
+            "axisId": "main",
+            "stagingOsid": "op:srebrenica:donji_potocari_2",
+            "objectives": [
+              "op:srebrenica:obadi"
+            ],
+            "assignedBrigades": [
+              "arbih_1st_cerska",
+              "arbih_1st_kamenica",
+              "arbih_246th_vitezka_mountain",
+              "arbih_281st_east_bosnian_light",
+              "arbih_282nd_east_bosnian_light",
+              "arbih_283rd_east_bosnian_light",
+              "arbih_284th_east_bosnian_light"
+            ]
+          }
+        ],
+        "rosterState": [
+          {
+            "formationId": "arbih_1st_cerska",
+            "status": "active",
+            "personnel": 472,
+            "locationOsid": "op:srebrenica:donji_potocari_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_1st_kamenica",
+            "status": "active",
+            "personnel": 477,
+            "locationOsid": "op:bratunac:jezestica_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_246th_vitezka_mountain",
+            "status": "active",
+            "personnel": 466,
+            "locationOsid": "op:bratunac:pobudje_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_281st_east_bosnian_light",
+            "status": "active",
+            "personnel": 600,
+            "locationOsid": "op:srebrenica:milacevici",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_282nd_east_bosnian_light",
+            "status": "active",
+            "personnel": 600,
+            "locationOsid": "op:srebrenica:ljeskovik_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_283rd_east_bosnian_light",
+            "status": "active",
+            "personnel": 600,
+            "locationOsid": "op:srebrenica:ljeskovik_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_284th_east_bosnian_light",
+            "status": "active",
+            "personnel": 600,
+            "locationOsid": "op:srebrenica:ljeskovik_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          }
+        ]
+      },
+      "movement": {
+        "turn": 21,
+        "locationChanges": [
+          {
+            "formationId": "arbih_283rd_east_bosnian_light",
+            "fromOsid": "op:srebrenica:bostahovine_2",
+            "fromController": "RBiH",
+            "toOsid": "op:srebrenica:ljeskovik_2",
+            "toController": "RBiH"
+          }
+        ],
+        "summaryMovements": [
+          {
+            "formation_id": "arbih_283rd_east_bosnian_light",
+            "formation_name": "283rd East Bosnian Light",
+            "from_osid": "op:srebrenica:bostahovine_2",
+            "to_osid": "op:srebrenica:ljeskovik_2"
+          }
+        ]
+      },
+      "combat": {
+        "allBattleCount": 1,
+        "ownedBattles": []
+      },
+      "controller": {
+        "targetOsid": "op:srebrenica:obadi",
+        "before": "RS",
+        "after": "RS",
+        "controlEvents": [],
+        "captureProvenance": "not_captured"
+      },
+      "aar": null,
+      "canonical": {
+        "bytes": 5059810,
+        "sha256": "c1619f4c85f2bb7c2fdeeb7b76261f32ef014dafea7f15acfb1c348aaa582633"
+      },
+      "runtime": {
+        "bytes": 5105803,
+        "sha256": "61a2afb01da64d36b9839b483ac6ab50f742299a8593fbae6e482d93b9c20357"
+      }
+    },
+    {
+      "turn": 22,
+      "pendingConsumed": true,
+      "operation": {
+        "operationId": "arbih_2nd_corps:Presidential Directive — op:srebrenica:obadi:t21",
+        "name": "Presidential Directive — op:srebrenica:obadi",
+        "type": "sector_attack",
+        "phase": "planning",
+        "startedTurn": 21,
+        "requestedByPresident": true,
+        "forced": true,
+        "commanderOfficerId": "arbih_mesic",
+        "roster": [
+          "arbih_1st_cerska",
+          "arbih_1st_kamenica",
+          "arbih_246th_vitezka_mountain",
+          "arbih_281st_east_bosnian_light",
+          "arbih_282nd_east_bosnian_light",
+          "arbih_283rd_east_bosnian_light",
+          "arbih_284th_east_bosnian_light"
+        ],
+        "axes": [
+          {
+            "axisId": "main",
+            "stagingOsid": "op:srebrenica:donji_potocari_2",
+            "objectives": [
+              "op:srebrenica:obadi"
+            ],
+            "assignedBrigades": [
+              "arbih_1st_cerska",
+              "arbih_1st_kamenica",
+              "arbih_246th_vitezka_mountain",
+              "arbih_281st_east_bosnian_light",
+              "arbih_282nd_east_bosnian_light",
+              "arbih_283rd_east_bosnian_light",
+              "arbih_284th_east_bosnian_light"
+            ]
+          }
+        ],
+        "rosterState": [
+          {
+            "formationId": "arbih_1st_cerska",
+            "status": "active",
+            "personnel": 466,
+            "locationOsid": "op:srebrenica:donji_potocari_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_1st_kamenica",
+            "status": "active",
+            "personnel": 470,
+            "locationOsid": "op:bratunac:jezestica_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_246th_vitezka_mountain",
+            "status": "active",
+            "personnel": 460,
+            "locationOsid": "op:bratunac:pobudje_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_281st_east_bosnian_light",
+            "status": "active",
+            "personnel": 600,
+            "locationOsid": "op:srebrenica:milacevici",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_282nd_east_bosnian_light",
+            "status": "active",
+            "personnel": 600,
+            "locationOsid": "op:srebrenica:ljeskovik_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_283rd_east_bosnian_light",
+            "status": "active",
+            "personnel": 600,
+            "locationOsid": "op:srebrenica:ljeskovik_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_284th_east_bosnian_light",
+            "status": "active",
+            "personnel": 600,
+            "locationOsid": "op:srebrenica:ljeskovik_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          }
+        ]
+      },
+      "movement": {
+        "turn": 22,
+        "locationChanges": [],
+        "summaryMovements": []
+      },
+      "combat": {
+        "allBattleCount": 4,
+        "ownedBattles": []
+      },
+      "controller": {
+        "targetOsid": "op:srebrenica:obadi",
+        "before": "RS",
+        "after": "RS",
+        "controlEvents": [],
+        "captureProvenance": "not_captured"
+      },
+      "aar": null,
+      "canonical": {
+        "bytes": 5086192,
+        "sha256": "5526896965d7686060e8bd17751575e78f22f03ee66c2be17e8b4b971618a371"
+      },
+      "runtime": {
+        "bytes": 5131905,
+        "sha256": "63f5722516d127c2f5ed56357838aa215db9c4e9dd5bd64fce9624787f32c820"
+      }
+    },
+    {
+      "turn": 23,
+      "pendingConsumed": true,
+      "operation": {
+        "operationId": "arbih_2nd_corps:Presidential Directive — op:srebrenica:obadi:t21",
+        "name": "Presidential Directive — op:srebrenica:obadi",
+        "type": "sector_attack",
+        "phase": "planning",
+        "startedTurn": 21,
+        "requestedByPresident": true,
+        "forced": true,
+        "commanderOfficerId": "arbih_mesic",
+        "roster": [
+          "arbih_1st_cerska",
+          "arbih_1st_kamenica",
+          "arbih_246th_vitezka_mountain",
+          "arbih_281st_east_bosnian_light",
+          "arbih_282nd_east_bosnian_light",
+          "arbih_283rd_east_bosnian_light",
+          "arbih_284th_east_bosnian_light"
+        ],
+        "axes": [
+          {
+            "axisId": "main",
+            "stagingOsid": "op:srebrenica:donji_potocari_2",
+            "objectives": [
+              "op:srebrenica:obadi"
+            ],
+            "assignedBrigades": [
+              "arbih_1st_cerska",
+              "arbih_1st_kamenica",
+              "arbih_246th_vitezka_mountain",
+              "arbih_281st_east_bosnian_light",
+              "arbih_282nd_east_bosnian_light",
+              "arbih_283rd_east_bosnian_light",
+              "arbih_284th_east_bosnian_light"
+            ]
+          }
+        ],
+        "rosterState": [
+          {
+            "formationId": "arbih_1st_cerska",
+            "status": "active",
+            "personnel": 460,
+            "locationOsid": "op:srebrenica:donji_potocari_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_1st_kamenica",
+            "status": "active",
+            "personnel": 464,
+            "locationOsid": "op:bratunac:jezestica_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_246th_vitezka_mountain",
+            "status": "active",
+            "personnel": 454,
+            "locationOsid": "op:bratunac:pobudje_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_281st_east_bosnian_light",
+            "status": "active",
+            "personnel": 600,
+            "locationOsid": "op:srebrenica:donji_potocari_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_282nd_east_bosnian_light",
+            "status": "active",
+            "personnel": 600,
+            "locationOsid": "op:srebrenica:ljeskovik_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_283rd_east_bosnian_light",
+            "status": "active",
+            "personnel": 600,
+            "locationOsid": "op:srebrenica:ljeskovik_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_284th_east_bosnian_light",
+            "status": "active",
+            "personnel": 600,
+            "locationOsid": "op:srebrenica:ljeskovik_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          }
+        ]
+      },
+      "movement": {
+        "turn": 23,
+        "locationChanges": [
+          {
+            "formationId": "arbih_281st_east_bosnian_light",
+            "fromOsid": "op:srebrenica:milacevici",
+            "fromController": "RBiH",
+            "toOsid": "op:srebrenica:donji_potocari_2",
+            "toController": "RBiH"
+          }
+        ],
+        "summaryMovements": [
+          {
+            "formation_id": "arbih_281st_east_bosnian_light",
+            "formation_name": "281st East Bosnian Light",
+            "from_osid": "op:srebrenica:milacevici",
+            "to_osid": "op:srebrenica:donji_potocari_2"
+          }
+        ]
+      },
+      "combat": {
+        "allBattleCount": 5,
+        "ownedBattles": []
+      },
+      "controller": {
+        "targetOsid": "op:srebrenica:obadi",
+        "before": "RS",
+        "after": "RS",
+        "controlEvents": [],
+        "captureProvenance": "not_captured"
+      },
+      "aar": null,
+      "canonical": {
+        "bytes": 5110477,
+        "sha256": "10c9539b520d00a8d278ef013ad65cfea0d4000c17147018cb81b14c8248f6b6"
+      },
+      "runtime": {
+        "bytes": 5155723,
+        "sha256": "24f466863f487ee9e83d81d939f42320f9f36e07bf6d7c00ef5008e6acaa1373"
+      }
+    },
+    {
+      "turn": 24,
+      "pendingConsumed": true,
+      "operation": {
+        "operationId": "arbih_2nd_corps:Presidential Directive — op:srebrenica:obadi:t21",
+        "name": "Presidential Directive — op:srebrenica:obadi",
+        "type": "sector_attack",
+        "phase": "planning",
+        "startedTurn": 21,
+        "requestedByPresident": true,
+        "forced": true,
+        "commanderOfficerId": "arbih_mesic",
+        "roster": [
+          "arbih_1st_cerska",
+          "arbih_1st_kamenica",
+          "arbih_246th_vitezka_mountain",
+          "arbih_281st_east_bosnian_light",
+          "arbih_282nd_east_bosnian_light",
+          "arbih_283rd_east_bosnian_light",
+          "arbih_284th_east_bosnian_light"
+        ],
+        "axes": [
+          {
+            "axisId": "main",
+            "stagingOsid": "op:srebrenica:donji_potocari_2",
+            "objectives": [
+              "op:srebrenica:obadi"
+            ],
+            "assignedBrigades": [
+              "arbih_1st_cerska",
+              "arbih_1st_kamenica",
+              "arbih_246th_vitezka_mountain",
+              "arbih_281st_east_bosnian_light",
+              "arbih_282nd_east_bosnian_light",
+              "arbih_283rd_east_bosnian_light",
+              "arbih_284th_east_bosnian_light"
+            ]
+          }
+        ],
+        "rosterState": [
+          {
+            "formationId": "arbih_1st_cerska",
+            "status": "active",
+            "personnel": 454,
+            "locationOsid": "op:srebrenica:donji_potocari_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_1st_kamenica",
+            "status": "active",
+            "personnel": 458,
+            "locationOsid": "op:bratunac:jezestica_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_246th_vitezka_mountain",
+            "status": "active",
+            "personnel": 448,
+            "locationOsid": "op:bratunac:pobudje_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_281st_east_bosnian_light",
+            "status": "active",
+            "personnel": 600,
+            "locationOsid": "op:srebrenica:donji_potocari_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_282nd_east_bosnian_light",
+            "status": "active",
+            "personnel": 600,
+            "locationOsid": "op:srebrenica:ljeskovik_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_283rd_east_bosnian_light",
+            "status": "active",
+            "personnel": 600,
+            "locationOsid": "op:srebrenica:ljeskovik_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_284th_east_bosnian_light",
+            "status": "active",
+            "personnel": 600,
+            "locationOsid": "op:srebrenica:ljeskovik_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          }
+        ]
+      },
+      "movement": {
+        "turn": 24,
+        "locationChanges": [],
+        "summaryMovements": []
+      },
+      "combat": {
+        "allBattleCount": 4,
+        "ownedBattles": []
+      },
+      "controller": {
+        "targetOsid": "op:srebrenica:obadi",
+        "before": "RS",
+        "after": "RS",
+        "controlEvents": [],
+        "captureProvenance": "not_captured"
+      },
+      "aar": null,
+      "canonical": {
+        "bytes": 5156941,
+        "sha256": "5b422833e3ede1b2afbdd10cddfc1bf5f3be15816b9e62684728a747d6232266"
+      },
+      "runtime": {
+        "bytes": 5201894,
+        "sha256": "aec0c11dca7250e65bcbe0e8e747b0969d5c3eaf545e8895d799a02d0b14791a"
+      }
+    },
+    {
+      "turn": 25,
+      "pendingConsumed": true,
+      "operation": {
+        "operationId": "arbih_2nd_corps:Presidential Directive — op:srebrenica:obadi:t21",
+        "name": "Presidential Directive — op:srebrenica:obadi",
+        "type": "sector_attack",
+        "phase": "recovery",
+        "startedTurn": 21,
+        "requestedByPresident": true,
+        "forced": true,
+        "commanderOfficerId": "arbih_mesic",
+        "roster": [
+          "arbih_1st_cerska",
+          "arbih_1st_kamenica",
+          "arbih_246th_vitezka_mountain",
+          "arbih_281st_east_bosnian_light",
+          "arbih_282nd_east_bosnian_light",
+          "arbih_283rd_east_bosnian_light",
+          "arbih_284th_east_bosnian_light"
+        ],
+        "axes": [
+          {
+            "axisId": "main",
+            "stagingOsid": "op:srebrenica:donji_potocari_2",
+            "objectives": [
+              "op:srebrenica:obadi"
+            ],
+            "assignedBrigades": [
+              "arbih_1st_cerska",
+              "arbih_1st_kamenica",
+              "arbih_246th_vitezka_mountain",
+              "arbih_281st_east_bosnian_light",
+              "arbih_282nd_east_bosnian_light",
+              "arbih_283rd_east_bosnian_light",
+              "arbih_284th_east_bosnian_light"
+            ]
+          }
+        ],
+        "rosterState": [
+          {
+            "formationId": "arbih_1st_cerska",
+            "status": "active",
+            "personnel": 448,
+            "locationOsid": "op:srebrenica:donji_potocari_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_1st_kamenica",
+            "status": "active",
+            "personnel": 452,
+            "locationOsid": "op:bratunac:jezestica_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_246th_vitezka_mountain",
+            "status": "active",
+            "personnel": 443,
+            "locationOsid": "op:bratunac:pobudje_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_281st_east_bosnian_light",
+            "status": "active",
+            "personnel": 600,
+            "locationOsid": "op:srebrenica:donji_potocari_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_282nd_east_bosnian_light",
+            "status": "active",
+            "personnel": 600,
+            "locationOsid": "op:srebrenica:ljeskovik_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_283rd_east_bosnian_light",
+            "status": "active",
+            "personnel": 600,
+            "locationOsid": "op:srebrenica:ljeskovik_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          },
+          {
+            "formationId": "arbih_284th_east_bosnian_light",
+            "status": "active",
+            "personnel": 600,
+            "locationOsid": "op:srebrenica:ljeskovik_2",
+            "locationController": "RBiH",
+            "corpsId": "arbih_2nd_corps"
+          }
+        ]
+      },
+      "movement": {
+        "turn": 25,
+        "locationChanges": [],
+        "summaryMovements": []
+      },
+      "combat": {
+        "allBattleCount": 6,
+        "ownedBattles": []
+      },
+      "controller": {
+        "targetOsid": "op:srebrenica:obadi",
+        "before": "RS",
+        "after": "RS",
+        "controlEvents": [],
+        "captureProvenance": "not_captured"
+      },
+      "aar": null,
+      "canonical": {
+        "bytes": 5175634,
+        "sha256": "e759d4e83ba215362bcd57fd085714e32e2390b7fef82f05c50ddd8235fb7266"
+      },
+      "runtime": {
+        "bytes": 5218529,
+        "sha256": "91954ee7e7ea56dc5fe6fafcb186690e9e54e59526fb2f0b3ec777e5f9f25e13"
+      }
+    },
+    {
+      "turn": 26,
+      "pendingConsumed": true,
+      "operation": null,
+      "movement": {
+        "turn": 26,
+        "locationChanges": [],
+        "summaryMovements": []
+      },
+      "combat": {
+        "allBattleCount": 1,
+        "ownedBattles": []
+      },
+      "controller": {
+        "targetOsid": "op:srebrenica:obadi",
+        "before": "RS",
+        "after": "RS",
+        "controlEvents": [],
+        "captureProvenance": "not_captured"
+      },
+      "aar": {
+        "axis_summaries": [
+          {
+            "axis_id": "main",
+            "axis_name": "Main Advance",
+            "brigades": [
+              "arbih_1st_cerska",
+              "arbih_1st_kamenica",
+              "arbih_246th_vitezka_mountain",
+              "arbih_281st_east_bosnian_light",
+              "arbih_282nd_east_bosnian_light",
+              "arbih_283rd_east_bosnian_light",
+              "arbih_284th_east_bosnian_light"
+            ],
+            "casualties_inflicted": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "casualties_suffered": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "launch_blocker": "zero_eligible_axis",
+            "objectives_captured": [],
+            "objectives_targeted": [
+              "op:srebrenica:obadi"
+            ],
+            "staging_osid": "op:srebrenica:donji_potocari_2",
+            "total_attacks": 0
+          }
+        ],
+        "ca_cost_at_launch": 15,
+        "capture_provenance": "no_objectives_held",
+        "casualties_inflicted": {
+          "killed": 0,
+          "wounded": 0
+        },
+        "casualties_suffered": {
+          "killed": 0,
+          "wounded": 0
+        },
+        "commander_assessment_at_launch": "abort",
+        "commander_name": "Hajrudin Mešić",
+        "commander_officer_id": "arbih_mesic",
+        "commander_rank": "corps_commander",
+        "corps_id": "arbih_2nd_corps",
+        "duration_turns": 5,
+        "ended_turn": 26,
+        "equipment_captured": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "equipment_destroyed": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "equipment_lost": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "faction": "RBiH",
+        "final_strength": 3743,
+        "force_launched": true,
+        "force_ratio_estimate": 3,
+        "grade": {
+          "factors": {
+            "exchange_ratio": 0,
+            "objective_completion": 0,
+            "preservation": 98.29306722689076,
+            "tempo": 0
+          },
+          "stars": 1,
+          "verdict": "No Assault Attempted"
+        },
+        "initial_strength": 3808,
+        "objectives_captured": [],
+        "objectives_held_without_logged_capture": [],
+        "objectives_logged_captured": [],
+        "objectives_targeted": [
+          "op:srebrenica:obadi"
+        ],
+        "operation_id": "arbih_2nd_corps:Presidential Directive — op:srebrenica:obadi:t21",
+        "operation_name": "Presidential Directive — op:srebrenica:obadi",
+        "outcome": "failure",
+        "participating_brigades": [
+          "arbih_1st_cerska",
+          "arbih_1st_kamenica",
+          "arbih_246th_vitezka_mountain",
+          "arbih_281st_east_bosnian_light",
+          "arbih_282nd_east_bosnian_light",
+          "arbih_283rd_east_bosnian_light",
+          "arbih_284th_east_bosnian_light"
+        ],
+        "recovery_reason": "zero_eligible_axis",
+        "requested_by_president": true,
+        "started_turn": 21,
+        "total_attacks": 0,
+        "type": "sector_attack",
+        "weekly_log": [
+          {
+            "attacks_this_turn": 0,
+            "brigade_count": 7,
+            "casualties_inflicted": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "casualties_suffered": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 0,
+            "notable_events": [],
+            "objectives_captured_this_turn": [],
+            "objectives_lost_this_turn": [],
+            "phase": "planning",
+            "turn": 21
+          },
+          {
+            "attacks_this_turn": 0,
+            "brigade_count": 7,
+            "casualties_inflicted": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "casualties_suffered": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 0,
+            "notable_events": [],
+            "objectives_captured_this_turn": [],
+            "objectives_lost_this_turn": [],
+            "phase": "planning",
+            "turn": 22
+          },
+          {
+            "attacks_this_turn": 0,
+            "brigade_count": 7,
+            "casualties_inflicted": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "casualties_suffered": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 0,
+            "notable_events": [],
+            "objectives_captured_this_turn": [],
+            "objectives_lost_this_turn": [],
+            "phase": "planning",
+            "turn": 23
+          },
+          {
+            "attacks_this_turn": 0,
+            "brigade_count": 7,
+            "casualties_inflicted": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "casualties_suffered": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 0,
+            "notable_events": [],
+            "objectives_captured_this_turn": [],
+            "objectives_lost_this_turn": [],
+            "phase": "planning",
+            "turn": 24
+          },
+          {
+            "attacks_this_turn": 0,
+            "brigade_count": 7,
+            "casualties_inflicted": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "casualties_suffered": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 0,
+            "notable_events": [],
+            "objectives_captured_this_turn": [],
+            "objectives_lost_this_turn": [],
+            "phase": "recovery",
+            "turn": 25
+          }
+        ]
+      },
+      "canonical": {
+        "bytes": 5176092,
+        "sha256": "620e3bfb363d1260c8289327f90800bb19a5c543070d6d7e65d3305d625a76cf"
+      },
+      "runtime": {
+        "bytes": 5219048,
+        "sha256": "c78b829edb93c9f3dd18fc74631c9e62651fe10f35e480ffdda894af520a135d"
+      }
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "schema": "awwv.757.pre-t3-stale-operation-march-correction.v1",
+  "writes_closed": true,
+  "verdict": "TARGETED_758_CORRECTION_IMPLEMENTED_GREEN__VERIFICATION_PENDING",
+  "corrects_without_rewriting": {
+    "original_result": { "path": "logs/claude-channel-20261004/757-stale-operation-march-a/result.json", "bytes": 5922, "sha256": "0ecea409e25bd067f8ba31c6d1bbd053bceef123a1e780189fe57c80918cc04c" },
+    "original_inventory": { "path": "logs/claude-channel-20261004/757-stale-operation-march-a/inventory.json", "bytes": 2168, "sha256": "adad08725d7b0f44cd187a69e9984f8af2e235e31fef920a0941cb6a94327305" },
+    "original_closed_receipt": { "path": "logs/claude-channel-20261004/757-stale-operation-march-a/closed-receipt.json", "bytes": 586, "sha256": "84294d4b75bc5c70a32bbf6c4309c3211954abc3fd509151e8df2950527815da" },
+    "originals_unchanged": true
+  },
+  "review": {
+    "path": "logs/claude-channel-20261004/758-independent-review.json",
+    "bytes": 6277,
+    "sha256": "34053ad3ff0453acc8e400f62385973742edba97e54d7f2c425e6ac395bf88c1",
+    "verdict": "BLOCK_TARGETED_CORRECTION_REQUIRED",
+    "all_findings_addressed": true
+  },
+  "corrections": {
+    "ownership": "Enumerates participant or axis membership across every corps command and every operation phase in deterministic corps order. Reconciliation requires exactly one state-wide membership, both participant and exactly one axis, planning/execution phase, and physical hosting by the brigade's effective loan/home corps. Any recovery/completed membership, cross-corps overlap, axis-only ambiguity, or foreign-host-only joint membership preserves the order.",
+    "eligibility_expansion": false,
+    "provenance": {
+      "authoritative_source": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w184.json",
+      "bytes": 8704869,
+      "sha256": "e97ed2e154be0738773e326392347741d7aa17e730138b1f669008d045a879b4",
+      "retained_pin_source": "docs/provenance/october-calibration-20261019/retained-historical-pins.json",
+      "separate_174_fixture_not_claimed_as_n80": true,
+      "controls_agree": true
+    },
+    "ownership_header": "Distinguishes the narrow T2 command-owner reconciliation before T3 consumption from the unchanged T6 repair functions; it does not assign command decisions to T3."
+  },
+  "files": [
+    { "path": "src/sim/combat/commander_march_correction.ts", "bytes": 16668, "sha256": "9db5d8b250fc606c00a2e8d7327d2ff4113cb1048414d7f1532c1f9cb6d0a68d" },
+    { "path": "src/sim/turn_phases/war_phases.ts", "bytes": 231691, "sha256": "93fcb005fa725c8a45269370c8319ca34779d1e032624fee08a4ae5800baa04a" },
+    { "path": "tests/stale_operation_march_reconciliation.test.ts", "bytes": 10886, "sha256": "5911d5ad2fffdf1fcc9f161b6363f8ccf82b814eef912908756eaca1646b8857" },
+    { "path": "tests/mistral_prisoje_turn_order.test.ts", "bytes": 24721, "sha256": "fbb527e4b5ad279abcade093aeca9a66e75a99da783e20c721386363c2392747" }
+  ],
+  "checks": {
+    "red": { "attempt": "logs/claude-channel-20261004/757-correction-red-a", "child_exit": 1, "wrapper_exit": 1, "total": 25, "passed": 22, "failed": 3, "failures": ["live plus recovery membership", "live plus completed membership", "cross-corps live overlap"] },
+    "focused_green": { "attempt": "logs/claude-channel-20261004/757-correction-green-a", "child_exit": 0, "wrapper_exit": 0, "total": 29, "passed": 29, "failed": 0, "composition": "25 ownership/reconciliation plus 4 Mistral production-wiring assertions" },
+    "root_noemit": { "attempt": "logs/claude-channel-20261004/757-correction-noemit-a", "timeout_ms": 180000, "child_exit": 0, "wrapper_exit": 0, "timed_out": false, "stdout_bytes": 0, "stderr_bytes": 0, "private_buildinfo_bytes": 644985 },
+    "diff_check_exit": 0,
+    "phase_order": { "osid_column_phase_line": 1552, "reconcile_line": 1571, "consumer_line": 1576, "pass": true },
+    "source_checks": { "stable_state_wide_command_order": true, "unique_membership_fail_closed": true, "effective_host_required": true, "scenario_hardcodes": 0 }
+  },
+  "preservation": {
+    "C_before": { "bytes": 100107701, "sha256": "8d242e18f199a54c26f755e648fe4612159563ec0b606930112653770d725f3c" },
+    "C_after": { "bytes": 100107701, "sha256": "8d242e18f199a54c26f755e648fe4612159563ec0b606930112653770d725f3c" },
+    "C_prefix_preserved": true,
+    "C_append_bytes": 0,
+    "D_before": { "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3" },
+    "D_after": { "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3" },
+    "full_before_after_archives_retained": true,
+    "all_prior_757_attempts_and_failures_retained": true,
+    "protected_emit_reference_threshold_reused": true,
+    "native_31_reused": true,
+    "sealed_179_receipts_retained": true,
+    "restore_truncate_cleanup_delete": false
+  },
+  "scope": {
+    "changed_source_or_test_paths": 4,
+    "campaigns": 0,
+    "full_suites": 0,
+    "builds": 0,
+    "saved_prefix_runs": 0,
+    "full_runTurn": 0,
+    "turn186": 0,
+    "schema_canon_threshold_control_changes": 0,
+    "git_writes": 0
+  },
+  "limits": [
+    "A read-only targeted correction verification remains required after this seal.",
+    "No gameplay regression, gain, full-campaign neutrality, turn-186 causality or acceptance claim is made.",
+    "Retained 703/712 remains prior unadopted evidence; full-suite and qualifying-campaign gates remain unrun and unmet."
+  ]
+}

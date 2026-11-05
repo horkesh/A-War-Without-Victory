@@ -1,0 +1,49 @@
+{
+  "git_commit": "ac3e5e1524558d2dc4e4fc40924306fc2873735a",
+  "measured_weeks": 188,
+  "january_pass": true,
+  "scores": [
+    700,
+    702,
+    697,
+    667
+  ],
+  "cases": [
+    {
+      "osid": "op:bihac:orasac_2",
+      "turn": 29
+    },
+    {
+      "osid": "op:donji_vakuf:donji_vakuf_2",
+      "turn": 35
+    },
+    {
+      "osid": "op:donji_vakuf:prusac_2",
+      "turn": 39
+    },
+    {
+      "osid": "op:donji_vakuf:korenici",
+      "turn": 36
+    },
+    {
+      "osid": "op:mrkonjic_grad:baljvine_2",
+      "turn": 28
+    },
+    {
+      "osid": "op:jajce:jezero_2",
+      "turn": 32
+    },
+    {
+      "osid": "op:skender_vakuf:donji_koricani",
+      "turn": 34
+    },
+    {
+      "osid": "op:jajce:lupnica",
+      "turn": 36
+    }
+  ],
+  "run": "runs\\january_operations_20260914\\post_a\\apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0",
+  "receipt": "logs\\roadmap-integration-20260912\\january-operations\\post_a-january.json",
+  "final_save_sha256": "8e80eca07cf0317fd8775ab818bb10adade8230076b6bde99d2b3a0a082fecee",
+  "html_sha256": "d38d81eb29deee1531cf6ed36bc93cb99dc3c20ea9bb5cee09b18ef02fe905c9"
+}

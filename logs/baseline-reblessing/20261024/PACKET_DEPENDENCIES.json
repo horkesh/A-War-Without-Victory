@@ -1,0 +1,34 @@
+{
+  "files": [
+    {
+      "path": "tmp/baseline-rebless-20261024/campaign_entry.cjs",
+      "bytes": 9913,
+      "sha256": "fb8c791c7089a7f557807cb628d3289158c00569664a8d88eda113ff5808e04f",
+      "snapshot": "logs/baseline-reblessing/20261024/entry-snapshots/campaign_entry.cjs.txt"
+    },
+    {
+      "path": "tmp/baseline-rebless-20261024/baseline_update_entry.cjs",
+      "bytes": 10309,
+      "sha256": "0a410b85706feedd17019b0cac312a55e9c59c5c1ddf014580de6ce24da1cfa1",
+      "snapshot": "logs/baseline-reblessing/20261024/entry-snapshots/baseline_update_entry.cjs.txt"
+    },
+    {
+      "path": "tmp/baseline-rebless-20261024/packet_common.cjs",
+      "bytes": 9788,
+      "sha256": "499da1bb887ee852d97569a9acba48734c2fdbc699e0182a10a26f2f74c80750",
+      "snapshot": "logs/baseline-reblessing/20261024/entry-snapshots/packet_common.cjs.txt"
+    },
+    {
+      "path": "tmp/baseline-rebless-20261024/postrun_entry.cjs",
+      "bytes": 4651,
+      "sha256": "31d9bd6ec38798ee143f852d9c71fb962f743817761368359bff1ddd653847ae",
+      "snapshot": "logs/baseline-reblessing/20261024/entry-snapshots/postrun_entry.cjs.txt"
+    },
+    {
+      "path": "tmp/baseline-rebless-20261024/evaluate_candidate.cjs",
+      "bytes": 13024,
+      "sha256": "f0bd6ec4bd7af44368f754b6dc03d258872335fa41ef41eb342e765a7695667c",
+      "snapshot": "logs/baseline-reblessing/20261024/entry-snapshots/evaluate_candidate.cjs.txt"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "schema": "awwv.773.closed.v1",
+  "sealed_utc": "2026-10-21T06:40:23.054Z",
+  "writes_closed": true,
+  "verdict": "PASS_OBSERVER_NEUTRALITY_DIAGNOSTIC__N81_REMAINS_REJECTED__NO_ADOPTION",
+  "result": {
+    "path": "logs/claude-channel-20261004/773-result.json",
+    "bytes": 40810,
+    "sha256": "211443ce774d265cace5d063937ce01a9f1672827e7591041ac51e4ec7515e2e"
+  },
+  "inventory": {
+    "path": "logs/claude-channel-20261004/773-inventory.json",
+    "bytes": 20719,
+    "sha256": "b54d8682d427cd2b95c8afa924478fd9c8dcab355ad885cf74adae0be1fa5758"
+  },
+  "head": "7d1e7054b658c81a7d875b12a4c1fb115bc88c88",
+  "clean": true,
+  "runner_invocations": 1,
+  "retries": 0
+}

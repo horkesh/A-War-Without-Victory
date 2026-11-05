@@ -21,6 +21,7 @@ import { getPoliticalControllerOSID } from './settlement_control.js';
 import type { EdgeRecord } from '../map/settlements.js';
 import type { CanonicalToOperationalMap, OperationalToCanonicalReverseMap } from '../data/operational_data.js';
 import { runSupplyBfs } from './supply_reachability.js';
+import { isFriendlyFaction } from '../sim/early_war/alliance_update.js';
 import { buildOsidAdjacency } from '../sim/combat/osid_adjacency.js';
 import { strictCompare } from './validateGameState.js';
 
@@ -58,9 +59,10 @@ function edgeTopologyFingerprint(edges: readonly EdgeRecord[]): string {
 function factionCacheKey(
     sources: readonly string[],
     controlled: readonly string[],
+    transit: readonly string[],
     edgeTopology: string,
 ): string {
-    return sources.join(',') + '||' + controlled.join(',') + '||edges=' + edgeTopology;
+    return sources.join(',') + '||' + controlled.join(',') + '||transit=' + transit.join(',') + '||edges=' + edgeTopology;
 }
 
 /**
@@ -91,10 +93,12 @@ export function computeSupplyReachabilityOsid(
     // per OSID, dispatched to the owning faction's list. Preserves per-faction
     // sort order because sortedOsids is already sorted.
     const controlledByFaction = new Map<string, string[]>();
+    const controllerByOsid = new Map<string, string>();
     for (const faction of factions) controlledByFaction.set(faction.id, []);
     for (const osid of sortedOsids) {
         const c = getPoliticalControllerOSID(state, osid, operationalToCanonical);
         if (c) {
+            controllerByOsid.set(osid, c);
             const bucket = controlledByFaction.get(c);
             if (bucket) bucket.push(osid);
         }
@@ -120,19 +124,37 @@ export function computeSupplyReachabilityOsid(
         }
         const sources = [...sourceOsids].sort(strictCompare);
 
-        // Cache check: if (sources, controlled) matches last turn, skip BFS.
-        const cacheKey = factionCacheKey(sources, controlled, edgeTopology);
+        const controlledSet = new Set(controlled);
+
+        // Source eligibility: owned + controlled configured origin only.
+        // Allied nodes can be transit but never seed the BFS.
+        const ownedSources = sources.filter((osid) => controlledSet.has(osid));
+
+        // Friendly transit set = own controlled OSIDs + current allies under
+        // the canonical live alliance predicate. Unknown/enemy stay blocked.
+        const transitSet = new Set<string>();
+        const transit: string[] = [];
+        for (const osid of sortedOsids) {
+            const controller = controllerByOsid.get(osid);
+            if (isFriendlyFaction(controller, faction.id, state)) {
+                transitSet.add(osid);
+                transit.push(osid);
+            }
+        }
+
+        // Cache check: cache key includes transit eligibility so alliance or
+        // transit-ownership changes invalidate even with unchanged own nodes.
+        const cacheKey = factionCacheKey(sources, controlled, transit, edgeTopology);
         const cached = perFactionCache.get(faction.id);
         if (cached && cached.key === cacheKey) {
             factionResults.push(cached.result);
             continue;
         }
 
-        const controlledSet = new Set(controlled);
         const bfs = runSupplyBfs({
             controlled,
-            sources,
-            isTraversable: (node) => controlledSet.has(node),
+            sources: ownedSources,
+            isTraversable: (node) => transitSet.has(node),
             getNeighbors: (node) => adjacency.get(node) ?? [],
         });
 

@@ -1,0 +1,54 @@
+{
+  "mode": "exact-t187",
+  "prerequisites": {
+    "save_turn": 186,
+    "scenario_id_equal": true,
+    "consumed_input_digest_n38": "8f13061b19ed9fd2d899f77f0115fdd4c5379e52cb058b3edadbd00e0e41af20",
+    "consumed_input_digest_n37": "8f13061b19ed9fd2d899f77f0115fdd4c5379e52cb058b3edadbd00e0e41af20",
+    "consumed_input_digest_equal": true,
+    "initial_save_sha256_n38": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+    "initial_save_sha256_n37": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+    "initial_save_equal": true
+  },
+  "run_out_dir": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\prusac-diagnostic-20260929\\continuation_sana_t187_exact_artifacts",
+  "checks": {
+    "turn": true,
+    "formation_506": true,
+    "formation_517": true,
+    "current_objective": true,
+    "battle": true,
+    "control_counts": true,
+    "column_movement": true
+  },
+  "pass": true,
+  "observed": {
+    "current_objective": "op:sanski_most:stari_majdan",
+    "formation_506": {
+      "location_osid": "op:sanski_most:skucani_vakuf_2",
+      "movement_destination": null,
+      "movement_status": null
+    },
+    "formation_517": {
+      "location_osid": "op:bosanska_krupa:donji_dubovik_2",
+      "movement_destination": "op:sanski_most:lusci_palanka_2",
+      "movement_status": "in_transit"
+    },
+    "battle": {
+      "attacker_brigade": "arbih_506th_mountain",
+      "target_osid": "op:sanski_most:skucani_vakuf_2",
+      "attacker_won": true,
+      "outcome": "costly_victory"
+    },
+    "control_counts": {
+      "HRHB": 99,
+      "RBiH": 278,
+      "RS": 335
+    },
+    "column_movement": {
+      "column_advances": 1,
+      "column_arrivals": 13,
+      "column_blocked": 10,
+      "column_starts": 10
+    }
+  }
+}

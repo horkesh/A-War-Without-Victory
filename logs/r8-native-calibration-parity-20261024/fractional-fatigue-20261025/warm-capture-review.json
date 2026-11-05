@@ -1,0 +1,213 @@
+{
+  "schema": "awwv.actual-warm-capture-review.v1",
+  "reviewer": "desktop_terrain_canon_review",
+  "independent": true,
+  "verdict": "GO",
+  "qualification_status": "TURN16_SERIALIZATION_SEAM_DIAGNOSTIC_QUALIFIED_ONLY",
+  "scope": "Independent review of the single retained warm-capture-02 attempt against WARM_CAPTURE_PLAN_V5. No scenario, native application, build, campaign, replay, source edit, gameplay edit, or additional attempt was performed by this review.",
+  "authority": {
+    "head": "f7c40a0d1e28fde596f217b2c297b0734ec67470",
+    "clean_tree_after_attempt": true,
+    "plan": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/WARM_CAPTURE_PLAN_V5.json",
+      "bytes": 12151,
+      "sha256": "cdb25f38aba66ca6c9e70f237b170a25de745eee6dabc534f59cc5811b8b27ec"
+    },
+    "entry": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm_turn16_snapshot_v2.mts",
+      "bytes": 20226,
+      "sha256": "220bb66d4aacb1452b91650be0fad7a79013e7b6d3bdd15f86ac39a4ca33028b"
+    },
+    "targeted_prelaunch_review": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/WARM_CAPTURE_V2_TARGETED_REVIEW.json",
+      "bytes": 8453,
+      "sha256": "b779ea65a444409cbf30fc86ad05ec46d18bd099cacc136d2e1c279596439103",
+      "verdict": "GO"
+    },
+    "input_binding_diagnosis": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/INPUT_BINDING_DIAGNOSIS.json",
+      "bytes": 50085,
+      "sha256": "8f8d8694e9ca58f9e743f62440296382e9f0366a4adf59ea02d8c5c00a4a035e"
+    }
+  },
+  "attempt": {
+    "id": "warm-capture-02",
+    "start_utc": "2026-10-25T11:57:31.656Z",
+    "end_utc": "2026-10-25T11:57:48.527Z",
+    "elapsed_ms": 16871,
+    "timeout_ms": 180000,
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "timed_out": false,
+    "signal": null,
+    "stderr_bytes": 0,
+    "artifact_contract_pass": true,
+    "allowed_artifact_count": 21,
+    "retained_artifact_count": 21,
+    "unexpected_artifacts": [],
+    "missing_allowed_artifacts": [],
+    "entry_start_post_hash_match": true,
+    "receipt": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm-capture-02/receipt.json",
+      "bytes": 7407,
+      "sha256": "3cfd16046d29ac9aabbb6b15b4e3c8bb75be0b8ac1276d67ae2916805b0fb1f9"
+    },
+    "start": {
+      "bytes": 2917,
+      "sha256": "ba9be6d54c60551c5d145800c13476055da3cafaeccad85d95e749be4bf047bb"
+    },
+    "stdout": {
+      "bytes": 52337,
+      "sha256": "63db048dd9c43784e15578855d675eb968101a387de9f0aa4f7bd301bc8c10a1"
+    },
+    "stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "result": {
+    "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm-capture-02/result.json",
+    "bytes": 566,
+    "sha256": "b0693b42638ad890318a39d2541f9fd32746892308e0d671cad3e8dbc1b16137",
+    "pass": true,
+    "status": "PASS_FIDELITY_CHARACTERIZED",
+    "observer_count": 16,
+    "boundary_week_index": 15,
+    "boundary_turn": 16,
+    "state_path_difference_count": 386,
+    "formation_count": 279,
+    "formation_difference_count": 107
+  },
+  "prerequisites": {
+    "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm-capture-02/prerequisites.json",
+    "bytes": 16383,
+    "sha256": "315278506f74caf934d7ad2d5a89f73a6ea1f02026f2b08cec27c77f355db0e0",
+    "pass": true,
+    "expected_head_matches_actual": true,
+    "node": "v22.23.2",
+    "scenario": "data/scenarios/apr1992_definitive_188w.json",
+    "weeks": 16,
+    "retained_n98": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n98",
+    "consumed_input_count": 32,
+    "consumed_input_digest": "88cf2d9ad4913bc62dde684d71465a28622c28b559713e4d0f13124ad8031c69",
+    "normalized_row_hashes_match": true,
+    "raw_exact_rows": 31,
+    "normalized_only_rows": 1,
+    "normalized_only_path": "data/derived/operational/operational_settlements.geojson",
+    "supplemental_raw_binding_count": 8,
+    "supplemental_raw_bindings_match": true,
+    "negative_checks": {
+      "line_endings_normalize_equal": true,
+      "raw_line_endings_differ": true,
+      "semantic_mutation_rejected": true
+    }
+  },
+  "fidelity": {
+    "initial_save": {
+      "actual_path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm-capture-02/run/initial_save.json",
+      "retained_n98_path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n98/initial_save.json",
+      "bytes": 1373722,
+      "actual_sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+      "retained_n98_sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+      "byte_exact": true
+    },
+    "emitted_turn16_save": {
+      "actual_path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm-capture-02/run/save_w16.json",
+      "retained_n98_path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n98/save_w16.json",
+      "bytes": 4493938,
+      "actual_sha256": "22ef518bb1f894d0afb450643a21d4a628f8f5c1462a80ebda498f81ece943ca",
+      "retained_n98_sha256": "22ef518bb1f894d0afb450643a21d4a628f8f5c1462a80ebda498f81ece943ca",
+      "byte_exact": true
+    },
+    "observed_turn16_canonical": {
+      "bytes": 4493938,
+      "sha256": "22ef518bb1f894d0afb450643a21d4a628f8f5c1462a80ebda498f81ece943ca",
+      "schema_version": 38,
+      "byte_exact_to_emitted_and_retained_n98": true
+    },
+    "all_three_required_exact_matches": true
+  },
+  "raw_snapshot": {
+    "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm-capture-02/raw-turn16.NOT_GAME_SAVE.v8",
+    "bytes": 2917513,
+    "sha256": "dc7f155e8ace4bdffa173701186f69e40d06b833b1331e54d468b0bdb3c1f63e",
+    "format": "node:v8.serialize",
+    "marker": "NOT_GAME_SAVE__NODE_V8_DIAGNOSTIC_SNAPSHOT",
+    "node": "v22.23.2",
+    "week_index": 15,
+    "state_turn": 16,
+    "contains_detached_state": true,
+    "contains_completed_report": true,
+    "independently_deserialized_for_shape_only": true,
+    "game_save": false
+  },
+  "characterization": {
+    "diagnostic": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm-capture-02/diagnostic.json",
+      "bytes": 22080915,
+      "sha256": "4ace77267dc108e95a39f1f3f1982bb63a5b4535f8e80030e7c7f057d08e11f5"
+    },
+    "state_path_difference_count": 386,
+    "formation_count": 279,
+    "formations_with_differences": 107,
+    "raw_runtime": {
+      "bytes": 4502365,
+      "sha256": "7f6e320977ab45154f28bfa47a29ee5ab7eaf7e8bc70711f7f0380d2bc672177"
+    },
+    "roundtrip_runtime": {
+      "bytes": 4502365,
+      "sha256": "7f6e320977ab45154f28bfa47a29ee5ab7eaf7e8bc70711f7f0380d2bc672177"
+    },
+    "raw_canonical": {
+      "bytes": 4493938,
+      "sha256": "22ef518bb1f894d0afb450643a21d4a628f8f5c1462a80ebda498f81ece943ca"
+    },
+    "normalized_canonical": {
+      "bytes": 4493938,
+      "sha256": "22ef518bb1f894d0afb450643a21d4a628f8f5c1462a80ebda498f81ece943ca"
+    },
+    "runtime_bytes_equal_after_roundtrip": true,
+    "canonical_bytes_equal_after_roundtrip": true,
+    "interpretation_boundary": "The recorded object-path and formation differences characterize own-property presence/value normalization at the turn-16 seam. This review does not interpret individual fields or assign causation."
+  },
+  "artifact_and_preservation_review": {
+    "receipt_binds_all_21_allowed_artifacts_by_bytes_and_sha256": true,
+    "runner_result_path_inventory_count": 16,
+    "run_meta_is_present_and_receipt_bound_even_though_not_exposed_in_runScenario_result_paths": true,
+    "weekly_report_line_count": 16,
+    "all_outputs_confined_to_owned_attempt_directory": true,
+    "tracked_tree_unchanged": true,
+    "original_failed_attempt_receipt_unchanged": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm-capture-01/receipt.json",
+      "bytes": 4743,
+      "sha256": "7fde7b2ef4a3b72850a7e72b4c74ae28130646fffe78178530c9eb606acfd47f"
+    },
+    "original_entry_unchanged": {
+      "bytes": 16291,
+      "sha256": "b9a3ef9eb5429e38cd685866f6b08414acf2f6b112c13046492310d542b99c48"
+    },
+    "retained_n98_files_read_only": true,
+    "prior_runs_profiles_telemetry_or_packages_modified": false
+  },
+  "gates": {
+    "head_and_cleanliness": true,
+    "entry_start_post_identity": true,
+    "input_normalization_and_digest": true,
+    "source_and_terrain_supplements": true,
+    "observer_count_and_boundary": true,
+    "initial_n98_byte_identity": true,
+    "turn16_emitted_n98_byte_identity": true,
+    "turn16_observed_n98_byte_identity": true,
+    "raw_snapshot_shape_and_marker": true,
+    "artifact_contract": true,
+    "wrapper_and_child_exit": true,
+    "preservation": true
+  },
+  "findings": [],
+  "residual_scope": [
+    "This evidence establishes only an authentic, n98-exact turn-16 capture and the observed serializeRuntimeState/deserializeState characterization.",
+    "It does not execute or reproduce turn 17, establish why native and n98 later diverge, prove a gameplay defect, qualify native39, or satisfy the 707 acceptance criterion.",
+    "The user goal remains unmet: the retained native39 result is still 705 with two formerly-correct operation losses.",
+    "No map, calibration, policy, control, package, or gameplay acceptance criterion is waived by this diagnostic GO."
+  ]
+}

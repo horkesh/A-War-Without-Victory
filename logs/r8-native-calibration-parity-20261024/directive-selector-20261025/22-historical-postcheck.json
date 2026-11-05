@@ -1,0 +1,360 @@
+{
+  "schema": "awwv.historical-default-native39-v1.postcheck.v1",
+  "pass": false,
+  "head": "a3063366ae094468fbb2ede143f9ced3a1ed2f68",
+  "config": {
+    "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/historical-default-native39-v1/CONFIG.actual.json",
+    "bytes": 6227,
+    "sha256": "0edd35068f4698459c73c6f094d7b4beaf8c16f77fe84990bfd5ec8fbc25cd4f"
+  },
+  "receipt": {
+    "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/historical-default-native39-v1/attempts/historical-default-p03-rbih-t39-01/receipt.json",
+    "bytes": 4618,
+    "sha256": "115180aeed3b4b36f42a763854dfe4e0b4be49319d9d82a3c4d3064d745c1fd8"
+  },
+  "attempt": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/historical-default-native39-v1/attempts/historical-default-p03-rbih-t39-01",
+  "retainedArtifacts": [
+    {
+      "path": "config.json",
+      "bytes": 6227,
+      "sha256": "0edd35068f4698459c73c6f094d7b4beaf8c16f77fe84990bfd5ec8fbc25cd4f"
+    },
+    {
+      "path": "result.json",
+      "bytes": 24179452,
+      "sha256": "98e5631a1aeb15dcf6cc6351097b43aff276c90dfa77f01f79b555cd775efc04"
+    },
+    {
+      "path": "progress.json",
+      "bytes": 24179170,
+      "sha256": "db003c08ac4d18b1df2cf14a314e901894a7d63a7ec6dbe13ffa5ac69f3bd2ad"
+    },
+    {
+      "path": "netlog.json",
+      "bytes": 4403639,
+      "sha256": "3b90d12cdc4b69d6b6b630303090bc2aef52c1624b12861cc24ea152742bd624"
+    },
+    {
+      "path": "harness.stdout.log",
+      "bytes": 33654,
+      "sha256": "3a3ee5a4bbe52ec0da2f3e602fe73e5081e91785d56205c316d6367f6317516a"
+    },
+    {
+      "path": "harness.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "external-inventory.json",
+      "bytes": 765,
+      "sha256": "87bf0cfcf49bb2b415517ea7b43a889d61489bb1c60dbe8bdffdf4a480d45146"
+    },
+    {
+      "path": "exit.json",
+      "bytes": 246,
+      "sha256": "5918d4766777f2df762da9085bc6345a3c89e6ec9979378f766140cfd1ac7b96"
+    }
+  ],
+  "externalInventory": [
+    {
+      "path": "tmp-paradox-qa-20260710/paradox-local-qa-historical-default-p03-rbih-t39-01.json",
+      "bytes": 24179452,
+      "sha256": "98e5631a1aeb15dcf6cc6351097b43aff276c90dfa77f01f79b555cd775efc04"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/paradox-local-qa-progress-historical-default-p03-rbih-t39-01.json",
+      "bytes": 24179170,
+      "sha256": "db003c08ac4d18b1df2cf14a314e901894a7d63a7ec6dbe13ffa5ac69f3bd2ad"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/paradox-local-qa-netlog-historical-default-p03-rbih-t39-01.json",
+      "bytes": 4403639,
+      "sha256": "3b90d12cdc4b69d6b6b630303090bc2aef52c1624b12861cc24ea152742bd624"
+    }
+  ],
+  "facts": {
+    "acceptanceContractExact": true,
+    "calibration": {
+      "provenance": {
+        "packagePass": true,
+        "headPass": true
+      },
+      "score": 702,
+      "controllers": 712,
+      "formerLosses": {
+        "n91": [
+          "op:brcko:bukvik_gornji_2",
+          "op:foca:donje_zesce",
+          "op:mrkonjic_grad:baljvine_2",
+          "op:srebrenica:obadi",
+          "op:trnovo:tosici"
+        ],
+        "n92": [
+          "op:brcko:bukvik_gornji_2",
+          "op:foca:donje_zesce",
+          "op:mrkonjic_grad:baljvine_2",
+          "op:srebrenica:obadi",
+          "op:trnovo:tosici"
+        ]
+      },
+      "tosici": "RS",
+      "kolovarice": "RS",
+      "saveLoadExact": true,
+      "cdpComplete": true,
+      "audioComplete": true,
+      "fieldAbsence": true,
+      "archiveTurns": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39
+      ],
+      "operations": [
+        {
+          "name": "Maglaj Local Counterattack",
+          "admitted": true,
+          "live": true,
+          "namedOfficer": true,
+          "completedHistory": true
+        },
+        {
+          "name": "Operation Circle",
+          "admitted": true,
+          "live": true,
+          "namedOfficer": true,
+          "completedHistory": true
+        },
+        {
+          "name": "Srebrenica–Cerska Link-Up",
+          "admitted": true,
+          "live": true,
+          "namedOfficer": true,
+          "completedHistory": true
+        },
+        {
+          "name": "Visoko–Breza Line Clearing",
+          "admitted": true,
+          "live": true,
+          "namedOfficer": true,
+          "completedHistory": true
+        }
+      ],
+      "diagnostics": true,
+      "noBlockers": true
+    },
+    "evaluation": {
+      "pass": false,
+      "checks": {
+        "terminal": true,
+        "commandExact": true,
+        "noOverride": true,
+        "choicesExact": true,
+        "initialAuthority": true,
+        "turn39": true,
+        "officerAcknowledgements": true,
+        "reserveInputsBounded": true,
+        "runtime": true,
+        "scoreFloor": false,
+        "controllers": true,
+        "zeroFormerLosses": false,
+        "tosici": false,
+        "kolovarice": true,
+        "archiveTurns": true,
+        "operationLifecycleExact": true,
+        "calibrationRuntime": true
+      }
+    },
+    "battleDiagnostic": {
+      "reusedOnly": true,
+      "acceptanceGate": false,
+      "pass": true,
+      "count": 12,
+      "targetsOutcomesExact": true
+    },
+    "runtime": {
+      "saveLoadExact": true,
+      "cdpComplete": true,
+      "audioComplete": true,
+      "diagnosticsClean": true,
+      "noBlockers": true,
+      "fieldAbsence": true,
+      "provenanceExact": true,
+      "preservationExact": true
+    },
+    "inputAudit": {
+      "coverage": "six recorded Historical event choices, two officer acknowledgements, and generated reserve acceptance actions",
+      "fullInputOrderParity": "NOT_ESTABLISHED",
+      "commandExact": true,
+      "choicesExact": true,
+      "noOverride": true,
+      "choiceRows": [
+        {
+          "eventId": "rbih_state_identity",
+          "responseId": "civic",
+          "turn": 0,
+          "faction": "RBiH",
+          "basis": "authored_historical_default",
+          "playerInput": true,
+          "status": "applied",
+          "receipt": {
+            "eventId": "rbih_state_identity",
+            "responseId": "civic",
+            "decisionSource": "player",
+            "faction": "RBiH",
+            "turn": 0
+          }
+        },
+        {
+          "eventId": "rbih_paramilitary_policy_1992",
+          "responseId": "always_deny",
+          "turn": 0,
+          "faction": "RBiH",
+          "basis": "authored_historical_default",
+          "playerInput": true,
+          "status": "applied",
+          "receipt": {
+            "eventId": "rbih_paramilitary_policy_1992",
+            "responseId": "always_deny",
+            "decisionSource": "player",
+            "faction": "RBiH",
+            "turn": 0
+          }
+        },
+        {
+          "eventId": "rbih_minority_retention_1992",
+          "responseId": "retain_minorities",
+          "turn": 12,
+          "faction": "RBiH",
+          "basis": "authored_historical_default",
+          "playerInput": true,
+          "status": "applied",
+          "receipt": {
+            "eventId": "rbih_minority_retention_1992",
+            "responseId": "retain_minorities",
+            "decisionSource": "player",
+            "faction": "RBiH",
+            "turn": 12
+          }
+        },
+        {
+          "eventId": "london_conference_1992",
+          "responseId": "accept_principles",
+          "turn": 20,
+          "faction": "RBiH",
+          "basis": "authored_historical_default",
+          "playerInput": true,
+          "status": "applied",
+          "receipt": {
+            "eventId": "london_conference_1992",
+            "responseId": "accept_principles",
+            "decisionSource": "player",
+            "faction": "RBiH",
+            "turn": 20
+          }
+        },
+        {
+          "eventId": "ic_pressure_vopp_engagement",
+          "responseId": "acknowledge_pressure",
+          "turn": 38,
+          "faction": "RBiH",
+          "basis": "authored_historical_default",
+          "playerInput": true,
+          "status": "applied",
+          "receipt": {
+            "eventId": "ic_pressure_vopp_engagement",
+            "responseId": "acknowledge_pressure",
+            "decisionSource": "player",
+            "faction": "RBiH",
+            "turn": 38
+          }
+        },
+        {
+          "eventId": "vance_owen_plan_1993",
+          "responseId": "accept",
+          "turn": 39,
+          "faction": "RBiH",
+          "basis": "authored_historical_default",
+          "playerInput": true,
+          "status": "applied",
+          "receipt": {
+            "eventId": "vance_owen_plan_1993",
+            "responseId": "accept",
+            "decisionSource": "player",
+            "faction": "RBiH",
+            "turn": 39
+          }
+        }
+      ],
+      "officerAcknowledgements": [
+        {
+          "id": "officer-acknowledge:arrival_arbih_hadzihasanovic_t22",
+          "present": true
+        },
+        {
+          "id": "officer-acknowledge:arrival_arbih_pasalic_t24",
+          "present": true
+        }
+      ],
+      "reserveActions": [
+        "reserve-issue:req:15:arbih_2nd_corps:offensive_support",
+        "reserve-issue:req:22:arbih_1st_corps:exploitation",
+        "reserve-cautious-action"
+      ],
+      "reserveIssueRows": [
+        {
+          "action": "reserve-issue:req:15:arbih_2nd_corps:offensive_support",
+          "requestId": "req:15:arbih_2nd_corps:offensive_support",
+          "generatedBefore": true,
+          "clearedAfter": true,
+          "acceptedSuggestedFormation": true
+        },
+        {
+          "action": "reserve-issue:req:22:arbih_1st_corps:exploitation",
+          "requestId": "req:22:arbih_1st_corps:exploitation",
+          "generatedBefore": true,
+          "clearedAfter": true,
+          "acceptedSuggestedFormation": true
+        }
+      ],
+      "reserveInputsBounded": true,
+      "reserveClassification": "request purpose and suggested cohorts/formations are generated simulation outputs; the player input accepts the actual request without forcing either",
+      "operationCapabilityReuse": "retained audit found no missing named-operation capability at autonomy 2; four lifecycle gates remain measured below"
+    },
+    "controlGainAttribution": "unchanged reviewed V3 compareNative39FromResult operation lifecycle and bound package/harness provenance; no claim that final controllers alone prove each causal capture"
+  }
+}

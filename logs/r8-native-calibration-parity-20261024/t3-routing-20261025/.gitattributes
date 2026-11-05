@@ -1,0 +1,2 @@
+# Preserve the exact copied evidence bytes covered by MANIFEST.json.
+* -text -diff

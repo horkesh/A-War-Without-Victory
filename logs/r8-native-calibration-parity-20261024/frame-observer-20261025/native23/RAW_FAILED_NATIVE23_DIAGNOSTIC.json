@@ -1,0 +1,133 @@
+{
+  "scope": "Raw diagnostic of FAILED observer attempt; no qualification",
+  "turn": 23,
+  "player": "RBiH",
+  "headless": false,
+  "policy": "always_allow",
+  "controllerCount": 712,
+  "targets": {
+    "op:gorazde:kolovarice": "RS",
+    "op:trnovo:tosici": "RS"
+  },
+  "early": [
+    {
+      "turn": 1,
+      "controls": {
+        "op:brcko:bukvik_gornji_2": "RBiH",
+        "op:srebrenica:obadi": "RBiH",
+        "op:kakanj:biljesevo": "RS",
+        "op:kladanj:olovci_2": "RS"
+      }
+    },
+    {
+      "turn": 2,
+      "controls": {
+        "op:brcko:bukvik_gornji_2": "RBiH",
+        "op:srebrenica:obadi": "RBiH",
+        "op:kakanj:biljesevo": "RBiH",
+        "op:kladanj:olovci_2": "RBiH"
+      }
+    }
+  ],
+  "choices": [
+    {
+      "eventId": "rbih_paramilitary_policy_1992",
+      "responseId": "always_allow",
+      "responseLabel": "Authorize paramilitary standing orders",
+      "basis": "player_selected_counterfactual",
+      "source": "none",
+      "sourceLocation": "not_required",
+      "turn": 0,
+      "faction": "RBiH",
+      "options": [
+        {
+          "id": "always_deny",
+          "label": "Refuse paramilitary deployment"
+        },
+        {
+          "id": "ask",
+          "label": "Review each deployment"
+        },
+        {
+          "id": "always_allow",
+          "label": "Authorize paramilitary standing orders"
+        }
+      ],
+      "playerInput": true,
+      "historicityClaim": "none_counterfactual_player_choice",
+      "requestedOverride": {
+        "requested": "always_allow",
+        "version": 1,
+        "provenance": "explicit_visible_player_policy_selector",
+        "eventId": "rbih_paramilitary_policy_1992"
+      },
+      "actionLabel": "pre-tour event rbih_paramilitary_policy_1992 response",
+      "status": "applied",
+      "receipt": {
+        "eventId": "rbih_paramilitary_policy_1992",
+        "responseId": "always_allow",
+        "decisionSource": "player",
+        "faction": "RBiH",
+        "turn": 0
+      }
+    }
+  ],
+  "archiveCount": 23,
+  "provisionalCount": 23,
+  "files": {
+    "finalAutosave": "f9ce535068c8ba374068995c8f43a620cda313567f3052d22ec621034331b237",
+    "quicksave": "f9ce535068c8ba374068995c8f43a620cda313567f3052d22ec621034331b237",
+    "settled23": "f9ce535068c8ba374068995c8f43a620cda313567f3052d22ec621034331b237"
+  },
+  "cdp": {
+    "status": "inconsistent",
+    "inconsistencies": [
+      {
+        "sequence": 1,
+        "code": "response-without-request",
+        "request_id": "F6B04AC5BC1F8B21B100B0982335E0EB"
+      }
+    ],
+    "events": [
+      {
+        "observer_session_id": "cdp-observer-f2ba4ce9b4e4283c0401c37e",
+        "sequence": 2,
+        "kind": "response",
+        "request_id": "F6B04AC5BC1F8B21B100B0982335E0EB",
+        "generation": 0,
+        "timestamp": 293213.536378,
+        "url": {
+          "status": "present",
+          "protocol": "http:",
+          "hostname": "127.0.0.1",
+          "port": "51038",
+          "path": [
+            "",
+            "index.html"
+          ],
+          "had_userinfo": false,
+          "had_query": true,
+          "had_fragment": false
+        },
+        "status": 200,
+        "mime_type": "text/html",
+        "protocol": "http/1.1",
+        "from_disk_cache": false,
+        "from_service_worker": false,
+        "content_range": {
+          "status": "absent",
+          "value": null
+        },
+        "content_length": {
+          "status": "present",
+          "value": "5772"
+        },
+        "accept_ranges": {
+          "status": "present",
+          "value": "bytes"
+        },
+        "chain_tainted": false
+      }
+    ]
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "schema": "awwv.787.status-contract-audit.v1",
+  "captured_utc": "2026-10-21T11:23:22.192Z",
+  "writes_closed": true,
+  "verdict": "PARTIAL_PASS_NOT_REACHED_AND_INTERFACE_CLOSED__FULL_STATUS_MATRIX_UNPROVED",
+  "scope": "One bounded changed-contract audit of task 786 revision D: exact not_reached forbidden fields, module require interface, and claimed per-status control binding to the producer. This is not a campaign GO review and does not repeat the original seven-finding review.",
+  "old_window": {
+    "verdict": "FAILED_NO_GO",
+    "campaign_launched": false,
+    "runner_invocations": 0,
+    "retroactive_approval": false
+  },
+  "bindings": {
+    "validator": {
+      "path": "logs/claude-channel-20261004/786-commander-semantics-d.cjs",
+      "sha256": "bd4543832b9cca7905fe420f91cafb6315fb4eb0f03f498048496a376dac5cd2"
+    },
+    "controls": {
+      "path": "logs/claude-channel-20261004/786-commander-controls-d/controls.json",
+      "pass": true,
+      "count": 18,
+      "valid_status_positives": 9,
+      "not_reached_field_injection_negatives": 9
+    },
+    "final_packet": {
+      "path": "logs/claude-channel-20261004/786-final-preflight-result.json",
+      "sha256": "34b0dfe09f1e4164db70a75b66484e6af44b79d2083bc2d0d0665a7fc75e9460"
+    },
+    "producer": "src/sim/combat/commander/emit.ts:2313"
+  },
+  "passed": [
+    {
+      "criterion": "Exact not_reached initial shape",
+      "evidence": "Validator requires selected_brigade_id, selected_brigade_location, and derived_sector_id to be null and all six diagnostic arrays to be empty. Nine one-field injection negatives cover every forbidden field."
+    },
+    {
+      "criterion": "Require-safe module interface",
+      "evidence": "Fresh Node 22 require exited 0 and exported detailErrors and validateFile without executing CLI dispatch. D has an explicit require.main guard."
+    },
+    {
+      "criterion": "Composition with prior corrected readers",
+      "evidence": "D delegates non-not_reached semantic checks to C; C composes retained 203 checkRow on every completion. The final packet binds unchanged reader B and D by exact hashes."
+    }
+  ],
+  "blocking_finding": {
+    "id": "STATUS-MATRIX-PRODUCER-BINDING",
+    "finding": "The nine positive status controls are not valid producer-shaped records. The fixture constructor gives every non-bypass status null selected fields and empty arrays. Production selects a brigade and populates brigade_candidates before no_sector, missing_adjacency_or_friendly_set_or_location, empty_enemy_set, empty_direct_set, all_filtered, and generic_search; derived_sector_id is also populated for the latter five, and target arrays vary by the reached filter stage. Consequently the controls prove enum acceptance, not the claimed per-status contract.",
+    "validator_limit": "D adds exact semantics only for not_reached and delegates the remaining statuses to C, whose special cases are local_occupation_bypass and no_brigade. The other six producer statuses still share the generic branch.",
+    "impact": "The requested full per-status matrix versus producer source is unproved. This does not reopen the exact not_reached or require-safe findings, which are closed."
+  },
+  "producer_shape_summary": {
+    "not_reached": "initial all-null/all-empty shape",
+    "no_brigade": "candidate evaluation reached; no selected survivor",
+    "no_sector": "brigade selected; selected fields and candidate detail present; derived sector absent",
+    "missing_adjacency_or_friendly_set_or_location": "brigade selected and sector derived; generic target search prerequisites missing",
+    "empty_enemy_set": "brigade selected and sector derived; enemy set empty",
+    "empty_direct_set": "brigade selected and sector derived; enemy candidates present but direct set empty",
+    "all_filtered": "brigade selected and sector derived; direct candidates present but no target survives filters",
+    "generic_search": "brigade selected and sector derived; at least one ranked target survives",
+    "local_occupation_bypass": "one selected candidate with every generic eligibility stage NOT_REACHED"
+  },
+  "next_bounded_action": "If future preparation continues, replace the six impossible empty positive fixtures with producer-shaped positives and add status-specific negative mutations for selected/derived/candidate/target stage relationships. No campaign, runtime, general suite, or source/data change is authorized by this audit."
+}

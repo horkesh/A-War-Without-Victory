@@ -431,7 +431,7 @@ function setCurrentStateSnapshots(sim, state) {
   currentCanonicalSaveJson = canonicalSaveJson;
 }
 
-function writeCanonicalCurrentState(sim, state, excludeSender, metadata, options = {}) {
+function persistCurrentStateSnapshots(sim, state) {
   const previousGameStateJson = currentGameStateJson;
   const previousCanonicalSaveJson = currentCanonicalSaveJson;
   setCurrentStateSnapshots(sim, state);
@@ -442,12 +442,32 @@ function writeCanonicalCurrentState(sim, state, excludeSender, metadata, options
     currentCanonicalSaveJson = previousCanonicalSaveJson;
     throw error;
   }
+}
+
+function writeCanonicalCurrentState(sim, state, excludeSender, metadata, options = {}) {
+  // Any handler that ends the war (decision, peace plan, Dayton) leaves no later turn,
+  // so no-choice records play already owes are written here, before the save.
+  if (state?.meta?.game_over === true) sim.writeOwedTerminationRecords(state, getBaseDir());
+  persistCurrentStateSnapshots(sim, state);
   if (metadata) {
     const broadcastExclude = options.excludeSenderFromBroadcast ? excludeSender : undefined;
     sendGameStateToRenderer(currentGameStateJson, broadcastExclude, metadata);
   } else {
     sendGameStateToRenderer(currentGameStateJson);
   }
+}
+
+async function loadStatePathIntoDesktop(filePath, excludeSender) {
+  const sim = getDesktopSim();
+  const { state } = await sim.loadStateFromPath(filePath, getBaseDir());
+  const manifestJson = readReplaySaveManifestSidecar(filePath);
+  const sequenceJson = manifestJson ? null : readReplaySaveSequenceSidecar(filePath);
+  persistCurrentStateSnapshots(sim, state);
+  liveReplayManifestFrames = [];
+  if (manifestJson) sendReplayManifestToRenderer(manifestJson);
+  if (sequenceJson) sendReplaySequenceToRenderer(sequenceJson);
+  sendGameStateToRenderer(currentGameStateJson, excludeSender, CAMPAIGN_REPLACEMENT_UPDATE);
+  return { ok: true, stateJson: projectCurrentGameStateForRenderer() };
 }
 
 function ensureCorpsCommandEntry(state, corpsId, stance = 'balanced') {
@@ -1255,16 +1275,7 @@ function createMainWindow(options = {}) {
             try {
               const result = await showStateFileDialog(win);
               if (result.canceled || !result.filePaths.length) return;
-              const sim = getDesktopSim();
-              const { state } = await sim.loadStateFromPath(result.filePaths[0]);
-              setCurrentStateSnapshots(sim, state);
-              liveReplayManifestFrames = [];
-              // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: optional sidecar.
-              const manifestJson = readReplaySaveManifestSidecar(result.filePaths[0]);
-              if (manifestJson) sendReplayManifestToRenderer(manifestJson);
-              const sequenceJson = manifestJson ? null : readReplaySaveSequenceSidecar(result.filePaths[0]);
-              if (sequenceJson) sendReplaySequenceToRenderer(sequenceJson);
-              sendGameStateToRenderer(currentGameStateJson, undefined, CAMPAIGN_REPLACEMENT_UPDATE);
+              await loadStatePathIntoDesktop(result.filePaths[0]);
             } catch (e) { console.error('Load state failed:', e); }
           }
         },
@@ -2008,6 +2019,11 @@ function getSavesDir() {
   return path.join(root, 'saves');
 }
 
+function configurePackagedRuntimeOutputRoot() {
+  if (!app.isPackaged || String(process.env.AWWV_RUNTIME_OUTPUT_ROOT || '').trim()) return;
+  process.env.AWWV_RUNTIME_OUTPUT_ROOT = path.join(app.getPath('userData'), 'runtime-output');
+}
+
 /** Write canonical save bytes to the writable saves directory. Returns the file path. */
 function writeSaveFile(filename) {
   if (!currentCanonicalSaveJson) throw new Error('No game loaded');
@@ -2270,6 +2286,7 @@ if (process.platform === 'win32' && typeof app.setAppUserModelId === 'function')
 }
 
 app.whenReady().then(() => {
+  configurePackagedRuntimeOutputRoot();
   alignPackagedProcessCwdWithResources();
   registerProtocol();
   // Task 6.5: install BEFORE any handler registers so every channel is policy-wrapped.
@@ -2338,20 +2355,7 @@ app.whenReady().then(() => {
     const result = await showStateFileDialog(BrowserWindow.getFocusedWindow());
     if (result.canceled || !result.filePaths.length) return { ok: false, error: 'Canceled' };
     try {
-      const sim = getDesktopSim();
-      const { state } = await sim.loadStateFromPath(result.filePaths[0]);
-      setCurrentStateSnapshots(sim, state);
-      liveReplayManifestFrames = [];
-      // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: optional sidecar.
-      // Carried alongside the state so the VerdictScreen Replay tab works
-      // when the user loads a final_save.json that has a sibling
-      // replay_save_sequence.json (produced by the scenario harness).
-      const manifestJson = readReplaySaveManifestSidecar(result.filePaths[0]);
-      if (manifestJson) sendReplayManifestToRenderer(manifestJson);
-      const sequenceJson = manifestJson ? null : readReplaySaveSequenceSidecar(result.filePaths[0]);
-      if (sequenceJson) sendReplaySequenceToRenderer(sequenceJson);
-      sendGameStateToRenderer(currentGameStateJson, undefined, CAMPAIGN_REPLACEMENT_UPDATE);
-      return { ok: true };
+      return await loadStatePathIntoDesktop(result.filePaths[0], _event.sender);
     } catch (e) {
       return { ok: false, error: classifyLoadError(e) };
     }
@@ -2373,7 +2377,7 @@ app.whenReady().then(() => {
         return { ok: false, error: 'Save record is unavailable.' };
       }
       const sim = getDesktopSim();
-      const { state } = await sim.loadStateFromPath(resolveSaveRecordPath(getSavesDir(), filename));
+      const { state } = await sim.loadStateFromPath(resolveSaveRecordPath(getSavesDir(), filename), getBaseDir());
       setCurrentStateSnapshots(sim, state);
       liveReplayManifestFrames = [];
       return { ok: true, stateJson: projectCurrentGameStateForRenderer() };
@@ -3399,8 +3403,8 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const state = readCanonicalCurrentState(sim);
-      sim.resolveEventDecision(state, eventId, responseId);
-      writeCanonicalCurrentState(sim, state, _event.sender);
+      const nextState = sim.resolveDesktopEventDecision(state, eventId, responseId, getBaseDir());
+      writeCanonicalCurrentState(sim, nextState, _event.sender);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };

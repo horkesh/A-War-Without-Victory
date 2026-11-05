@@ -1,0 +1,264 @@
+{
+  "writes_closed": true,
+  "captured_utc": "2026-10-22T06:28:42.560Z",
+  "client_date": "2026-10-22",
+  "verdict": "APPROVED_SHARED_POOL_OBSERVER_AND_FIXTURE",
+  "summary": "Default-off stdout-only regular shared-pool allocation receipt and deterministic production-path fixtures are implemented and independently approved. Topic reinforcement_allocation requires explicit AWWV_DEBUG_REINFORCEMENT_POOLS; emits stage_open/recipient/stage_close with source, completedturn, pool balances, ordered recipients/skips and presence-tagged reserve/effective/transfer values. No gameplay decision, threshold, state/save/report/weekly or file-telemetry change.",
+  "files": [
+    {
+      "path": "src/sim/combat/reinforcement_allocation_diagnostic.ts",
+      "bytes": 6244,
+      "sha256": "f98037e0ab7def9cc09695431a150263b9c35957da13084a158bbed5f104b039"
+    },
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "bytes": 20275,
+      "sha256": "b7467c47f97c5c349535b59aaeafa3dea0bc5d03314961c5ac17ef3a4283434a"
+    },
+    {
+      "path": "src/sim/formation_spawn.ts",
+      "bytes": 47679,
+      "sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa"
+    },
+    {
+      "path": "tests/reinforcement_allocation_diagnostic.test.ts",
+      "bytes": 20408,
+      "sha256": "682027bd41c1dc84817166847a1a0a5e388aa0170b96149e4a9b56a924c48a75"
+    },
+    {
+      "path": "tests/reason_code_debug.test.ts",
+      "bytes": 10435,
+      "sha256": "44a60e84d8b22d1cb629364a84e10257d3454531678b987a75582ddaee9a756c"
+    }
+  ],
+  "protected_source_pins": [
+    {
+      "path": "src/sim/combat/movement_phase_diagnostic.ts",
+      "bytes": 7386,
+      "sha256": "cac140facd432e206a079093514702237f7690088b92eac10a556de9e6ba62d8",
+      "expected_sha256": "cac140facd432e206a079093514702237f7690088b92eac10a556de9e6ba62d8",
+      "matches": true
+    },
+    {
+      "path": "src/sim/combat/personnel_diagnostic.ts",
+      "bytes": 5870,
+      "sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3",
+      "expected_sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3",
+      "matches": true
+    },
+    {
+      "path": "src/sim/turn_pipeline.ts",
+      "bytes": 11675,
+      "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25",
+      "expected_sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25",
+      "matches": true
+    },
+    {
+      "path": "src/sim/combat/strategic_reserve.ts",
+      "bytes": 10755,
+      "sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae",
+      "expected_sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae",
+      "matches": true
+    },
+    {
+      "path": "src/sim/combat/frontline_attrition.ts",
+      "bytes": 21594,
+      "sha256": "0cc09b4eca821d2dce287893fdde312239c2b8be495ed02e36b8a23ba59f5ee1",
+      "expected_sha256": "0cc09b4eca821d2dce287893fdde312239c2b8be495ed02e36b8a23ba59f5ee1",
+      "matches": true
+    },
+    {
+      "path": "src/sim/combat/morale_drift.ts",
+      "bytes": 17730,
+      "sha256": "cb7720d5da303e02d89fb3aaf034488a340a51155dfd6dbfc4839cf9cedcdc5c",
+      "expected_sha256": "cb7720d5da303e02d89fb3aaf034488a340a51155dfd6dbfc4839cf9cedcdc5c",
+      "matches": true
+    },
+    {
+      "path": "src/sim/combat/commander/emit.ts",
+      "bytes": 202428,
+      "sha256": "76351f818c3403fcc23bf5b51f30c467bd42886d68f1e6b754d9f90baa58746b",
+      "expected_sha256": "76351f818c3403fcc23bf5b51f30c467bd42886d68f1e6b754d9f90baa58746b",
+      "matches": true
+    },
+    {
+      "path": "tests/personnel_diagnostic.test.ts",
+      "bytes": 19693,
+      "sha256": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b",
+      "expected_sha256": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b",
+      "matches": true
+    },
+    {
+      "path": "tests/commander_creation_observer.test.ts",
+      "bytes": 100803,
+      "sha256": "05bfd3cf245aa0f929c44d6efff8abdf7316e0fb54b415f25a3c48c9e0f8bb86",
+      "expected_sha256": "05bfd3cf245aa0f929c44d6efff8abdf7316e0fb54b415f25a3c48c9e0f8bb86",
+      "matches": true
+    }
+  ],
+  "telemetry": [
+    {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 102947714,
+      "sha256": "edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9",
+      "expected_bytes": 102947714,
+      "expected_sha256": "edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9",
+      "matches": true
+    },
+    {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "expected_bytes": 1041,
+      "expected_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "matches": true
+    }
+  ],
+  "protected_controls": [
+    {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 102947714,
+      "sha256": "edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9",
+      "expected_bytes": 102947714,
+      "expected_sha256": "edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9",
+      "matches": true
+    },
+    {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "expected_bytes": 1041,
+      "expected_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "matches": true
+    },
+    {
+      "path": "data/calibration/engine_health_thresholds.json",
+      "bytes": 3775,
+      "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d",
+      "expected_bytes": 3775,
+      "expected_sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d",
+      "matches": true
+    },
+    {
+      "path": "data/source/calibration/painted_control_oct1995.json",
+      "bytes": 35266,
+      "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b",
+      "expected_bytes": 35266,
+      "expected_sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b",
+      "matches": true
+    }
+  ],
+  "field_contract": {
+    "prefix": "[reinforcement_allocation]",
+    "topic": "reinforcement_allocation",
+    "selector": "AWWV_DEBUG_REINFORCEMENT_POOLS",
+    "source": "formation_spawn.reinforce",
+    "branch": "regular",
+    "events": [
+      "stage_open",
+      "recipient",
+      "stage_close"
+    ],
+    "numeric_presence": [
+      "unreached",
+      "present_undefined",
+      "present_null",
+      "present_nonfinite",
+      "present_value"
+    ],
+    "pool_presence": [
+      "missing",
+      "present"
+    ],
+    "skip_reasons": [
+      "ineligible",
+      "at_cap",
+      "pool_missing",
+      "pool_empty",
+      "reserve_exhausted",
+      "no_transfer"
+    ],
+    "stage_close_scope": "regular stage before enclave reinforcement; not whole-function or whole-pool lifecycle"
+  },
+  "fixture": {
+    "qualification": "Synthetic production-function evidence only; it does not recover n80 history or establish n83 historical reserve.",
+    "pale_rs": {
+      "opening_available": 1900,
+      "opening_committed": 100,
+      "sorted_transfers": [
+        300,
+        400
+      ],
+      "reserves": [
+        0,
+        0
+      ],
+      "closing_available": 1200,
+      "closing_committed": 800,
+      "conserved_total": 2000
+    },
+    "zenica_rs": {
+      "opening_available": 900,
+      "opening_committed": 20,
+      "actual_helper_reserve": 800,
+      "effective_available": 100,
+      "transfer": 100,
+      "closing_available": 800,
+      "closing_committed": 120,
+      "conserved_total": 920
+    },
+    "cross_faction_legitimacy": "The earlier Pale HRHB formation uses the existing recruit_pool_faction=RS field and a matching HRHB location controller; the observer adds no cross-faction mechanic.",
+    "reverse_insertion": "Identical stdout rows, serialized state, and report."
+  },
+  "validation": "Initial affected batch96/96 across7files is reused at its covered scope; final corrected observer8/8 and nonincremental noEmit0. Independent807 targeted verification9/9 across2files, child/wrapper0/0, includes its original default-OFF red control. Counts are separate, not summed. Initial ordering defect and all failed fixture/type/source-label/infrastructure controls remain retained; one consolidated review and one targeted correction verification.",
+  "correction": "Review found pool-field/key evaluation had moved before eligibility even OFF. Correction restores eligibility→cap→single production pool selection. Early-skip ON association is lazy/caught observer-only metadata; post-cap rows reuse production key. Source/access regression verifies skipped OFF paths and exception containment rather than relying solely on plain-state parity.",
+  "review": {
+    "initial": {
+      "path": "logs/claude-channel-20261004/807-reinforcement-allocation-review/807-review.json",
+      "sha256": "06cd7add2ccdac48c8fd79662a7f9c250cb6dc1eabb923f651279996087dab4a"
+    },
+    "targeted": {
+      "path": "logs/claude-channel-20261004/807-reinforcement-allocation-review/807-correction-verification.json",
+      "sha256": "a58b45a9eb30b9c2400ee774de97e6dafdee7c1d47d37cad8518c257e1f56c04",
+      "verdict": "APPROVED",
+      "counts": {
+        "attempt": "attempt-04-correction-verification",
+        "files": 2,
+        "tests": 9,
+        "passed": 9,
+        "failed": 0,
+        "child_exit": 0,
+        "wrapper_exit": 0,
+        "artifact_contract_pass": true,
+        "stdout_sha256": "05fb98d2eb70f2ce26fe2ebf2457c6ad0f24323e908e7458d5f45db73932110e",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "worker": {
+    "initial": {
+      "path": "logs/claude-channel-20261004/806-reinforcement-allocation/attempt-13-seal/806-result.json",
+      "sha256": "2a664bb4da698504eb3ca3d7f5f19b1165c41b34507655e7d6ae114d3100fa1a"
+    },
+    "corrected": {
+      "path": "logs/claude-channel-20261004/806-reinforcement-allocation-correction/correction-result.json",
+      "sha256": "3d6ab80e366633a3e0162ea23420d5bad54c350da9a851a32e2ca1ef8027bb41"
+    }
+  },
+  "raw_inventory": {
+    "path": "logs/claude-channel-20261004/808-raw-inventory.json",
+    "sha256": "e6de4b711cf53bf0afb063721bc7ce48e306404cc087487d2ef454cbe8a4914f",
+    "entries": 241
+  },
+  "campaign_invocations": 0,
+  "replay_invocations": 0,
+  "full_suite_invocations": 0,
+  "telemetry_append_bytes": {
+    "C": 0,
+    "D": 0
+  },
+  "threshold_reference_exact": true,
+  "calibration": "Retained703/712 NO-GO/unadopted; rejectedn81/n82/n83 trajectory unchanged, no new campaign measurement.",
+  "scope": "Regular stage closes before enclave branch; receipts do not claim complete upstream pool lifecycle or recover absent n80 turn22 history. Repeated turn/pool context is not a unique invocation ID; consume stage blocks in order.",
+  "next_action": "Receipt preparation is accepted. No new campaign or historical causal closure follows; any future measurement needs its separately authorized fixed question, exact artifact gates and scoped reader coverage."
+}

@@ -1,0 +1,63 @@
+{
+  "schema": "awwv.native23-cdp-installed-adapter-attempt-binding.v1",
+  "source_head": "bff97de7af9406dc2cb907674e2463fccb43052a",
+  "verdict": "PREREQUISITES_PASS_FIXTURE_ENTRY_FAILED_NO_BROWSER_LAUNCH",
+  "prerequisites": {
+    "playwright_version": "1.60.0",
+    "frame_api": "BrowserContext.newCDPSession(page: Page|Frame)",
+    "types": {
+      "path": "node_modules/playwright-core/types/types.d.ts",
+      "bytes": 1013672,
+      "sha256": "e5b810845dedef5aa0d682efa61be20dcb2e28c27a64ff5cc4cfc122f3f3980f"
+    },
+    "browser": {
+      "path": "C:/Users/User/AppData/Local/ms-playwright/chromium-1223/chrome-win64/chrome.exe",
+      "bytes": 4011008,
+      "sha256": "290fa7018fda22c52ada5eddb0113baf3ebc41fd0fde6085eddb19793606c635"
+    }
+  },
+  "attempt": {
+    "path": "adapter-attempt-01",
+    "child_exit": 1,
+    "wrapper_exit": 126,
+    "timed_out": false,
+    "signal": null,
+    "spawn_error": null,
+    "browser_launches": 0,
+    "failure": "MODULE_NOT_FOUND before run(): '../../../../tools/ui/cdp_network_collector.cjs' resolves above the repository from the fixture directory",
+    "files": [
+      {
+        "path": "entry-script.snapshot",
+        "bytes": 9695,
+        "sha256": "ade69c4df452439f63d7c94e633f8de48a48bf8f26968a2491ba84b07884c184"
+      },
+      {
+        "path": "receipt.json",
+        "bytes": 2868,
+        "sha256": "d071b9205eda246aef5813a80ed4639aa3300a10c00afb1374e3bb634f590e5d"
+      },
+      {
+        "path": "start.json",
+        "bytes": 1744,
+        "sha256": "341aeed185febd8fff2e4a6e9ded4c7a6557d8fd2b6ecdfcbe53fca8ee46036d"
+      },
+      {
+        "path": "stderr.log",
+        "bytes": 1448,
+        "sha256": "35141caf04bd6ad2fa6755df814fed31d77f51d88c164e9ad102ce3ef0c54ca8"
+      },
+      {
+        "path": "stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "artifact_contract": {
+      "pass": false,
+      "unexpected": [],
+      "missing_allowed": ["RESULT.json"]
+    }
+  },
+  "question_answered": false,
+  "retry_performed": false
+}

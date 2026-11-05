@@ -43,7 +43,7 @@ description: "Owns derived data pipelines: contact graph, OSID derivation, polyg
 After any pipeline change:
 1. `md5sum` before and after on ALL output files — identify which actually changed
 2. `node -e "... edges.filter(e => e.field !== undefined).length"` — verify non-zero counts for critical fields
-3. If contact graph changed: `npm run calibrate:40w` — mandatory regression check
+3. If contact graph changed: `npm run ci:structural-fingerprint:check` — mandatory regression check
 4. If polygon geometry changed: check `tools/compare_painted_vs_sim.cjs` output
 
 ## Output format

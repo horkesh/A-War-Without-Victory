@@ -5,7 +5,7 @@
  */
 
 import { createHash } from 'node:crypto';
-import { createWriteStream } from 'node:fs';
+import { createWriteStream, writeSync } from 'node:fs';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -44,7 +44,7 @@ import {
     computeControlFlipProposals
 } from '../state/control_flip_proposals.js';
 import { computeFrontBreaches } from '../state/front_breaches.js';
-import type { FactionId, GameState, MunicipalityId } from '../state/game_state.js';
+import type { CorpsOperation, FactionId, GameState, MunicipalityId } from '../state/game_state.js';
 import { CANONICAL_FACTIONS, CURRENT_SCHEMA_VERSION } from '../state/game_state.js';
 import { prepareNewGameState } from '../state/initialize_new_game_state.js';
 import {
@@ -59,7 +59,12 @@ import {
 } from '../state/seed_organizational_penetration_from_control.js';
 import { applyJnaInheritanceBonus, ensureSupplyReserves } from '../state/supply_reserves.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
-import { buildRunProvenance, type RunHarness } from './run_provenance.js';
+import { buildRunProvenance, type ConsumedInputHash, type RunHarness } from './run_provenance.js';
+import {
+    createScenarioReadContext,
+    renderScenarioReadComparison,
+    type ScenarioReadContext,
+} from './scenario_read_context.js';
 import { runOneTurn } from '../state/turn_pipeline.js';
 import { computeSpatialContext } from '../sim/spatial_context.js';
 import { strictCompare } from '../state/validateGameState.js';
@@ -176,7 +181,7 @@ import type {
     WeeklyCorpsSummaryEntry,
     WeeklyReportRow
 } from './scenario_reporting.js';
-import { buildWeeklyReport } from './scenario_reporting.js';
+import { attachBotOrderDiagnosticsToWeeklyReport, attachFrontDistributionDiagnosticsToWeeklyReport, attachMovementPhaseDiagnosticsToWeeklyReport, buildWeeklyReport } from './scenario_reporting.js';
 import { buildBrigadeTemporalRows } from './brigade_temporal_emit.js';
 // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: per-turn full-state snapshot
 // stream + end-of-run consolidated `replay_save_sequence.json` artifact powering
@@ -373,12 +378,20 @@ export function hasCivilianCasualtyRecords(casualties: unknown): boolean {
 export type BaselineOpsScopeMode = 'all_front_active' | 'static_front_only' | 'fluid_front_only';
 export type ReplayPayloadMode = 'manifest_only' | 'full';
 
+export interface DiagnosticTurnBoundaryObservation {
+    readonly week_index: number;
+    readonly state: GameState;
+    readonly report: TurnReport;
+}
+
 export interface RunScenarioOptions {
     scenarioPath: string;
     /** Deterministic verification override; canonical scenarios default to `harness-seed`. */
     seedOverride?: string;
     outDirBase?: string;
     emitEvery?: number;
+    /** Optional deterministic, opt-in diagnostic saves after the requested weeks. */
+    emitSaveAtWeeks?: readonly number[];
     /** When true, emit a weekly save every turn to support tactical-map replay/video workflows. */
     emitWeeklySavesForVideo?: boolean;
     weeksOverride?: number;
@@ -422,6 +435,12 @@ export interface RunScenarioOptions {
     emitTimingJson?: boolean;
     /** Replay payload policy. Default manifest_only avoids full-state replay bloat; full preserves legacy sidecars. */
     replayPayloadMode?: ReplayPayloadMode;
+    /**
+     * Diagnostic/test-only observation of the authentic in-memory state after a
+     * completed scenario week. Receives detached structured clones and cannot
+     * influence simulation state. Clone or callback failures reject the run.
+     */
+    diagnosticTurnBoundaryObserver?: (observation: DiagnosticTurnBoundaryObservation) => void;
 }
 
 export interface RunScenarioResult {
@@ -1491,6 +1510,7 @@ interface ScenarioStartupBuildResult {
     historicalNameLookup?: HistoricalOrdinalLookup;
     historicalCorpsLookup?: HistoricalOrdinalLookup;
     historicalOobIdLookup?: HistoricalOrdinalLookup;
+    historicalEquipmentClassLookup?: HistoricalOrdinalLookup;
     sidToMun: Map<string, string>;
     initOverrideChangeCount: number;
 }
@@ -1557,8 +1577,8 @@ export async function buildScenarioStartupState(
     // Initialize data-driven terrain classification sets before combat runs.
     // Keep Node-only file loading out of combat_math so browser map bundles can
     // safely import the combat helpers without pulling in fs/path.
-    setUrbanOsidSet(loadUrbanOsidSet());
-    setForestOsidSet(loadForestOsidSet());
+    setUrbanOsidSet(loadUrbanOsidSet(baseDir));
+    setForestOsidSet(loadForestOsidSet(baseDir));
     const needsHistoricalOob = Boolean(
         scenario.init_formations_oob ||
         scenario.recruitment_mode === 'player_choice' ||
@@ -1595,6 +1615,7 @@ export async function buildScenarioStartupState(
         historicalNameLookup,
         historicalCorpsLookup,
         historicalOobIdLookup,
+        historicalEquipmentClassLookup,
     } = sharedTurnInputs;
     let sidToMun = buildSidToMunFromSettlements(graph.settlements);
     let initOverrideChangeCount = 0;
@@ -2048,9 +2069,331 @@ export async function buildScenarioStartupState(
         historicalNameLookup,
         historicalCorpsLookup,
         historicalOobIdLookup,
+        historicalEquipmentClassLookup,
         sidToMun,
         initOverrideChangeCount
     };
+}
+
+/**
+ * VLAŠÍC MARCH-TIMING DIAGNOSTIC — opt-in, read-only, inert by default.
+ *
+ * WHY THIS EXISTS. The n6 prefix approved the Operation Vlasic Ridge opportunity at
+ * t150 but the first Paklarevo battle did not land until t156, and the weekly report
+ * omits both `turnReport.preparation_events` and the live operation's
+ * `preparation_sub_phase` — so the gate that delayed execution (intel confidence?
+ * supply? force ratio? assembly floor?) could not be read from any retained artifact.
+ * This trace prints one stable JSON line per turn 149–156 with the operation's
+ * preparation state, its assigned brigades' positions/movement, and the matching
+ * per-turn preparation events, so the delaying gate is identifiable from a single
+ * 156-week prefix run.
+ *
+ * ═══ GATE ═══
+ *
+ * Emits ONLY when `AWWV_VLASIC_TRACE=1` is set in the environment. With the gate off
+ * the function returns before touching state — zero effect on simulation state,
+ * default artifacts, or deterministic ordering.
+ *
+ * ═══ OBSERVATION ONLY ═══
+ *
+ * Reads existing state/report fields only. Mutates nothing, writes no files, and
+ * reproduces no readiness evaluation — opening-readiness thresholds are reported as
+ * authored (`minimum_viable_participants`, `minimum_assembled_participants`) without
+ * recomputing pass/fail. Output is one `stableStringify` line on stdout, prefixed
+ * `[vlasic-trace] `, so it can be grepped out of combined run output.
+ */
+const VLASIC_TRACE_ENV_VAR = 'AWWV_VLASIC_TRACE';
+const VLASIC_TRACE_OPERATION_NAME = 'Operation Vlasic Ridge';
+const VLASIC_TRACE_TURN_MIN = 149;
+const VLASIC_TRACE_TURN_MAX = 156;
+
+export function emitVlasicTraceLine(state: GameState, turnReport: TurnReport): void {
+    if (process.env[VLASIC_TRACE_ENV_VAR] !== '1') return;
+    const turn = state.meta.turn;
+    if (turn < VLASIC_TRACE_TURN_MIN || turn > VLASIC_TRACE_TURN_MAX) return;
+
+    // Find the operation across all corps' active-operation lists. Corps IDs are
+    // sorted so the emitted corps_id is deterministic.
+    let found: { corpsId: string; op: CorpsOperation } | null = null;
+    const corpsCommand = state.military.corps_command ?? {};
+    for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
+        const ops = corpsCommand[corpsId]?.active_operations ?? [];
+        const match = ops.find((op) => op.name === VLASIC_TRACE_OPERATION_NAME);
+        if (match) {
+            found = { corpsId, op: match };
+            break;
+        }
+    }
+
+    const brigades = found
+        ? found.op.participating_brigades.map((id) => {
+            const formation = state.military.formations?.[id];
+            return {
+                id,
+                location_osid: formation?.location_osid ?? null,
+                status: formation?.status ?? null,
+                movement: state.military.brigade_movement_state?.[id] ?? null,
+            };
+        })
+        : [];
+
+    const preparationEvents = (turnReport.preparation_events ?? []).filter(
+        (event) => event.operation_name === VLASIC_TRACE_OPERATION_NAME
+    );
+
+    const payload = {
+        turn,
+        operation: found
+            ? {
+                corps_id: found.corpsId,
+                name: found.op.name,
+                phase: found.op.phase,
+                phase_started_turn: found.op.phase_started_turn,
+                planning_duration: found.op.planning_duration ?? null,
+                preparation_sub_phase: found.op.preparation_sub_phase ?? null,
+                preparation_turns_elapsed: found.op.preparation_turns_elapsed ?? null,
+                preparation_max_turns: found.op.preparation_max_turns ?? null,
+                supply_readiness: found.op.supply_readiness ?? null,
+                intel_confidence_at_assessment: found.op.intel_confidence_at_assessment ?? null,
+                force_ratio_estimate: found.op.force_ratio_estimate ?? null,
+                commander_assessment: found.op.commander_assessment ?? null,
+                postponement_count: found.op.postponement_count ?? null,
+                staging_osid: found.op.staging_osid ?? null,
+                reinforcement_source: found.op.reinforcement_source ?? null,
+                attached_brigades: found.op.attached_brigades ?? [],
+                primary_sector_brigades: found.op.primary_sector_brigades ?? [],
+                minimum_viable_participants: found.op.minimum_viable_participants ?? null,
+                minimum_assembled_participants: found.op.minimum_assembled_participants ?? null,
+                require_all_axes_ready: found.op.require_all_axes_ready ?? null,
+                is_pre_planned: found.op.is_pre_planned ?? null,
+            }
+            : null,
+        brigades,
+        preparation_events: preparationEvents,
+    };
+
+    process.stdout.write(`[vlasic-trace] ${stableStringify(payload)}\n`);
+}
+
+/**
+ * MISTRAL 2 PREPARATION-HOLD DIAGNOSTIC — opt-in, read-only, inert by default.
+ *
+ * WHY THIS EXISTS. The weekly report serializes neither `turnReport.preparation_events`
+ * nor the operation's preparation fields, so the early Operation Mistral 2 preparation
+ * trajectory cannot be read from a retained artifact. This trace prints one stable JSON
+ * line per turn (turns 175-181) so that trajectory can be observed in a single run.
+ * It exposes existing values only; it asserts no cause and no internal branch.
+ *
+ * ═══ GATE ═══
+ *
+ * Emits ONLY when `AWWV_MISTRAL_PREP_TRACE=1` is set. With the gate off the function
+ * returns before touching state — zero effect on state, default artifacts or ordering.
+ *
+ * ═══ INDEXING AND PHASE ═══
+ *
+ * Called once per loop iteration, AFTER `runTurn` returns. The argument is the zero-based
+ * LOOP index (`loop_index`), not a weekly `week_index`: `runTurn` sets `meta.turn` to
+ * `loop_index + 1` before the war phases, so `turn = loop_index + 1`, the weekly row has
+ * `week_index = turn` (`buildWeeklyReport`) and temporal rows use `week_index = loop_index`.
+ * `preparation_events` are the existing per-tick events (POST-tick `sub_phase`, the tick's
+ * own confidence). The `operation` block, `sector_intel_for_sector` and `brigades` are read
+ * AFTER the whole turn pipeline: post-turn state, not pre-tick state.
+ *
+ * ═══ OBSERVATION ONLY ═══
+ *
+ * Reads existing state/report fields only. Mutates nothing, recomputes no readiness,
+ * writes no files. One `stableStringify` line on stdout prefixed `[mistral-prep-trace] `.
+ */
+const MISTRAL_PREP_TRACE_ENV_VAR = 'AWWV_MISTRAL_PREP_TRACE';
+const MISTRAL_PREP_TRACE_OPERATION_NAME = 'Operation Mistral 2';
+const MISTRAL_PREP_TRACE_TURN_MIN = 175;
+const MISTRAL_PREP_TRACE_TURN_MAX = 181;
+
+export function emitMistralPrepTraceLine(state: GameState, turnReport: TurnReport, loopIndex: number): void {
+    if (process.env[MISTRAL_PREP_TRACE_ENV_VAR] !== '1') return;
+    const turn = state.meta.turn;
+    if (turn < MISTRAL_PREP_TRACE_TURN_MIN || turn > MISTRAL_PREP_TRACE_TURN_MAX) return;
+
+    // Corps IDs are sorted so the emitted corps_id is deterministic.
+    let found: { corpsId: string; op: CorpsOperation } | null = null;
+    const corpsCommand = state.military.corps_command ?? {};
+    for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
+        const ops = corpsCommand[corpsId]?.active_operations ?? [];
+        const match = ops.find((op) => op.name === MISTRAL_PREP_TRACE_OPERATION_NAME);
+        if (match) {
+            found = { corpsId, op: match };
+            break;
+        }
+    }
+
+    const sectorId = found?.op.sector_id;
+    const sectorIntel = sectorId
+        ? (state.military.sector_intel?.[sectorId] ?? []).map((record) => ({
+            enemy_sector_id: record.enemy_sector_id,
+            confidence: record.confidence,
+        }))
+        : [];
+
+    const brigades = found
+        ? found.op.participating_brigades.map((id) => {
+            const formation = state.military.formations?.[id];
+            return {
+                id,
+                location_osid: formation?.location_osid ?? null,
+                status: formation?.status ?? null,
+            };
+        })
+        : [];
+
+    const preparationEvents = (turnReport.preparation_events ?? []).filter(
+        (event) => event.operation_name === MISTRAL_PREP_TRACE_OPERATION_NAME
+    );
+
+    const payload = {
+        loop_index: loopIndex,
+        turn,
+        operation: found
+            ? {
+                corps_id: found.corpsId,
+                name: found.op.name,
+                started_turn: found.op.started_turn,
+                phase: found.op.phase,
+                phase_started_turn: found.op.phase_started_turn,
+                planning_duration: found.op.planning_duration ?? null,
+                preparation_sub_phase: found.op.preparation_sub_phase ?? null,
+                preparation_turns_elapsed: found.op.preparation_turns_elapsed ?? null,
+                preparation_max_turns: found.op.preparation_max_turns ?? null,
+                postponement_count: found.op.postponement_count ?? null,
+                commander_assessment: found.op.commander_assessment ?? null,
+                commander_officer_id: found.op.commander_officer_id ?? null,
+                is_pre_planned: found.op.is_pre_planned ?? null,
+                force_launch: found.op.force_launch ?? null,
+                supply_readiness: found.op.supply_readiness ?? null,
+                intel_confidence_at_assessment: found.op.intel_confidence_at_assessment ?? null,
+                supply_readiness_at_assessment: found.op.supply_readiness_at_assessment ?? null,
+                force_ratio_estimate: found.op.force_ratio_estimate ?? null,
+                active_probe: found.op.active_probe ?? null,
+                sector_id: sectorId ?? null,
+                loaned_brigade_count: found.op.loaned_brigades?.length ?? 0,
+                participating_brigades: found.op.participating_brigades,
+            }
+            : null,
+        sector_intel_for_sector: sectorIntel,
+        brigades,
+        preparation_events: preparationEvents,
+    };
+
+    process.stdout.write(`[mistral-prep-trace] ${stableStringify(payload)}\n`);
+}
+
+/**
+ * ONE-LOADER SCENARIO READ RECEIPT (diagnostic; default OFF).
+ *
+ * When enabled, `runScenario` hands a fresh per-invocation `ScenarioReadContext` to the existing
+ * `loadScenario` call, and right after the provenance stamp resolves (before `run_meta` is built or
+ * written) prints exactly one line comparing the exact decoded text the loader parsed with the stamp
+ * row for the same logical scenario input. It covers `loadScenario` ONLY: no other loader, no
+ * actual-used-31 claim, lexical (not physical-file) path identity. It writes no state, save,
+ * `run_meta`, file or stamp field, and performs no extra filesystem read.
+ *
+ * Gate: only the literal "1" enables it (absent, "0", "true" and any other value are OFF). It is
+ * sampled ONCE at `runScenario` entry; later environment changes are not observed.
+ */
+export const SCENARIO_READ_RECEIPT_ENV_VAR = 'AWWV_SCENARIO_READ_RECEIPT';
+export const SCENARIO_READ_RECEIPT_LINE_PREFIX = '[input-read-receipt] ';
+
+export function isScenarioReadReceiptEnabled(env: NodeJS.ProcessEnv): boolean {
+    return env[SCENARIO_READ_RECEIPT_ENV_VAR] === '1';
+}
+
+function describeScenarioReadDiagnosticError(error: unknown): string {
+    return error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+}
+
+function invalidScenarioReadDiagnostic(reason: string): string {
+    return stableStringify({ proof_status: 'INVALID', overall: 'invalid', invalid_reasons: [reason] });
+}
+
+export interface ScenarioReadReceiptEmission {
+    /** The context handed to `loadScenario`, or `undefined` when its factory failed. */
+    readonly context: ScenarioReadContext | undefined;
+    /** Description of a factory failure, reported as an INVALID diagnostic. */
+    readonly contextFailure: string | undefined;
+    readonly baseDir: string;
+    readonly scenarioPath: string;
+    readonly stampFiles: readonly ConsumedInputHash[];
+}
+
+/**
+ * Facts about the one diagnostic write. `delivered` is true ONLY when every byte was written; a
+ * short or failed write records how many bytes did go out and the error, never a success claim.
+ */
+export interface ScenarioReadReceiptOutputFacts {
+    readonly delivered: boolean;
+    readonly bytes_total: number;
+    readonly bytes_written: number;
+    readonly error: string | undefined;
+}
+
+/**
+ * SYNCHRONOUS write of the diagnostic text to stdout (fd 1): every failure surfaces here as a thrown
+ * error or a non-positive byte count and is caught, so there is no asynchronous sink error, no
+ * listener and no callback to retain. A partial write loops until complete or fails with the
+ * partial count recorded; a zero/invalid count is a stalled write (never an endless loop).
+ */
+function writeScenarioReadReceiptSync(text: string): ScenarioReadReceiptOutputFacts {
+    const data = Buffer.from(text, 'utf8');
+    let written = 0;
+    try {
+        while (written < data.length) {
+            const count = writeSync(1, data, written, data.length - written);
+            if (!Number.isInteger(count) || count <= 0) {
+                return {
+                    delivered: false,
+                    bytes_total: data.length,
+                    bytes_written: written,
+                    error: `stalled_write: writeSync returned ${String(count)}`,
+                };
+            }
+            written += count;
+        }
+    } catch (error) {
+        return {
+            delivered: false,
+            bytes_total: data.length,
+            bytes_written: written,
+            error: describeScenarioReadDiagnosticError(error),
+        };
+    }
+    return { delivered: true, bytes_total: data.length, bytes_written: written, error: undefined };
+}
+
+/**
+ * Emit the single diagnostic line. Every diagnostic failure (comparison, render, output) is contained:
+ * it can never replace a runner or loader result or error, a failed comparison/render is reported as
+ * an explicit INVALID diagnostic, and a failed or short output write is returned as facts (never
+ * claimed as delivered).
+ */
+export function emitScenarioReadReceiptDiagnostic(emission: ScenarioReadReceiptEmission): ScenarioReadReceiptOutputFacts {
+    let payload: string;
+    try {
+        if (emission.context === undefined) {
+            payload = invalidScenarioReadDiagnostic(emission.contextFailure ?? 'context_missing');
+        } else {
+            payload = renderScenarioReadComparison(emission.context.compareToStamp({
+                baseDir: emission.baseDir,
+                scenarioPathAsPassed: emission.scenarioPath,
+                stampFiles: emission.stampFiles,
+            }));
+        }
+    } catch (error) {
+        try {
+            payload = invalidScenarioReadDiagnostic(`diagnostic_failure: ${describeScenarioReadDiagnosticError(error)}`);
+        } catch {
+            payload = '{"invalid_reasons":["diagnostic_failure"],"overall":"invalid","proof_status":"INVALID"}';
+        }
+    }
+    return writeScenarioReadReceiptSync(`${SCENARIO_READ_RECEIPT_LINE_PREFIX}${payload}\n`);
 }
 
 export async function runScenario(options: RunScenarioOptions): Promise<RunScenarioResult> {
@@ -2058,6 +2401,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         scenarioPath,
         outDirBase = 'runs',
         emitEvery = 0,
+        emitSaveAtWeeks,
         emitWeeklySavesForVideo = false,
         weeksOverride,
         injectFailureAfterRunMeta,
@@ -2077,10 +2421,28 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         consoleDiagnostics = process.env.VITEST !== 'true',
         emitTimingJson = false,
         replayPayloadMode = 'manifest_only',
+        diagnosticTurnBoundaryObserver,
     } = options;
     if (replayPayloadMode !== 'manifest_only' && replayPayloadMode !== 'full') {
         throw new Error(`Unsupported replayPayloadMode: ${String(replayPayloadMode)}`);
     }
+    // One-loader scenario read receipt (diagnostic, default OFF). The gate is sampled exactly once,
+    // here; a factory failure is contained and reported later as an INVALID diagnostic.
+    const scenarioReadReceiptOn = isScenarioReadReceiptEnabled(process.env);
+    let scenarioReadContext: ScenarioReadContext | undefined;
+    let scenarioReadContextFailure: string | undefined;
+    if (scenarioReadReceiptOn) {
+        try {
+            scenarioReadContext = createScenarioReadContext();
+        } catch (error) {
+            scenarioReadContextFailure = `context_factory_failure: ${describeScenarioReadDiagnosticError(error)}`;
+        }
+    }
+
+    // Establish run-scoped process state before any scenario I/O. This keeps the
+    // lifecycle gate effective even when setup fails (and prevents a later run from
+    // inheriting flags from an earlier run).
+    applyCollapseGateFromEnv();
 
     // COLLAPSE PHASE IV-a (2026-06-10) — env-gated collapse-pipeline enable. HELD / EXPLORATORY.
     // The collapse pipeline (Phase 3A→3D) is feature-gated OFF by default (every getEnablePhase3*()
@@ -2101,18 +2463,18 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     // restores the module defaults, which are exactly the values a pristine process starts with.
     // Determinism: reads only an env var at run start; no RNG/clock; identical across two runs with
     // the same env.
-    applyCollapseGateFromEnv();
     const emitFullReplayPayload = replayPayloadMode === 'full';
     const timingTotals = createScenarioTimingTotals();
     const totalTimingStart = timingStart(emitTimingJson);
-    if (!consoleDiagnostics) {
-        pushRoutineConsoleDiagnosticsSuppressed();
-    }
     if (initialStateOnly && resumeFromSavePath) {
         throw new Error('initialStateOnly cannot be combined with resumeFromSavePath');
     }
     const effectiveEmitEvery = emitWeeklySavesForVideo ? Math.max(1, emitEvery) : emitEvery;
-    let scenario = await timedAsync(emitTimingJson, timingTotals, 'setup', () => loadScenario(scenarioPath));
+    let scenario = await timedAsync(emitTimingJson, timingTotals, 'setup', () => (
+        scenarioReadContext === undefined
+            ? loadScenario(scenarioPath)
+            : loadScenario(scenarioPath, scenarioReadContext)
+    ));
     if (filterProbeIntent) {
         scenario = scenarioWithoutProbeIntent(scenario);
     }
@@ -2120,8 +2482,33 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     if (weeks < 1 || !Number.isInteger(weeks)) {
         throw new Error('weeks must be an integer >= 1');
     }
-    const scenarioForId = weeksOverride !== undefined ? { ...scenario, weeks } : scenario;
-    const run_id = computeRunId(scenarioForId);
+    const selectedSaveWeeks = emitSaveAtWeeks === undefined
+        ? new Set<number>()
+        : (() => {
+            const normalized = [...emitSaveAtWeeks].sort((a, b) => a - b);
+            for (let index = 0; index < normalized.length; index += 1) {
+                const week = normalized[index];
+                if (!Number.isInteger(week) || week < 1 || week > weeks) {
+                    throw new Error(`emitSaveAtWeeks must contain unique positive integer weeks within 1..${weeks}`);
+                }
+                if (index > 0 && normalized[index - 1] === week) {
+                    throw new Error('emitSaveAtWeeks must contain unique positive integer weeks');
+                }
+            }
+            return new Set(normalized);
+        })();
+    if (!consoleDiagnostics) {
+        pushRoutineConsoleDiagnosticsSuppressed();
+    }
+    // The effective scenario carries the overridden duration. Duration-derived
+    // selection (scoring-reference epoch, reached checkpoints) MUST read this,
+    // not the declared file duration: otherwise a canonical 188w run shortened
+    // with `--weeks 40` would still grade a week-40 state against the oct1995
+    // anchors. When no override is supplied this object IS `scenario` by reference,
+    // so duration-derived selection is unchanged by construction. That is a
+    // source-path argument, not a measured byte-hash comparison.
+    const effectiveScenario = weeksOverride !== undefined ? { ...scenario, weeks } : scenario;
+    const run_id = computeRunId(effectiveScenario);
     let runDirName: string;
     if (uniqueRunFolder) {
         await mkdir(outDirBase, { recursive: true });
@@ -2162,9 +2549,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             // checkpoint it reaches, so this is a set, not the terminal key alone.
             paintedReferenceKeys: Array.from(
                 new Set([
-                    ...checkpointsForScenario(scenario).map((c) => c.key),
-                    ...(usesPaintedControlReference(scenario)
-                        ? [pickHistoricalReferenceKey(scenario)]
+                    ...checkpointsForScenario(effectiveScenario).map((c) => c.key),
+                    ...(usesPaintedControlReference(effectiveScenario)
+                        ? [pickHistoricalReferenceKey(effectiveScenario)]
                         : []),
                 ])
             ).sort(strictCompare),
@@ -2175,9 +2562,20 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             collapseEnabled: readCollapseGateFromEnv(),
         })
     );
+    // Diagnostic only (default OFF; gate sampled once at entry): one line, immediately after the stamp
+    // and before `run_meta` is built or written. Reads the already-built stamp rows; changes nothing.
+    if (scenarioReadReceiptOn) {
+        emitScenarioReadReceiptDiagnostic({
+            context: scenarioReadContext,
+            contextFailure: scenarioReadContextFailure,
+            baseDir,
+            scenarioPath,
+            stampFiles: provenance.consumed_inputs.files,
+        });
+    }
     const usesHistoricalAnchorContract = scenario.init_control === 'apr1992'
         || (scenario.init_control_mode === 'ethnic_1991' && scenario.scenario_id.includes('apr1992'));
-    const anchorEpoch = pickHistoricalReferenceKey(scenario);
+    const anchorEpoch = pickHistoricalReferenceKey(effectiveScenario);
     const run_meta = {
         scenario_id: scenario.scenario_id,
         run_id,
@@ -2225,6 +2623,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             historicalNameLookup,
             historicalCorpsLookup,
             historicalOobIdLookup,
+            historicalEquipmentClassLookup,
             sidToMun,
             initOverrideChangeCount
         } = startup;
@@ -2480,7 +2879,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
 
         // Checkpoints this run will reach, and the control snapshot captured at each.
         // Keyed by absolute week so ordering is the table's, not insertion order.
-        const activeCheckpoints = checkpointsForScenario(scenario);
+        const activeCheckpoints = checkpointsForScenario(effectiveScenario);
         const checkpointSnapshots = new Map<number, ReturnType<typeof extractSettlementControlSnapshot>>();
 
         for (let week_index = startWeekIndex; week_index < weeks; week_index++) {
@@ -2515,6 +2914,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             }
 
             let turnReport: Awaited<ReturnType<typeof runTurn>>['report'];
+            let consumedSuccessfulPublicWarTurn = false;
             if (state.meta.phase === 'peace') {
                 const phaseBeforeTurn = state.meta.phase;
                 const result = runOneTurn(state, { seed: state.meta.seed });
@@ -2555,6 +2955,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 }
             } else {
                 const runResult = await runTurn(state, {
+                dataBaseDir: baseDir,
                     seed: state.meta.seed,
                     settlementGraph: graph,
                     operationalSettlementGraph,
@@ -2573,6 +2974,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     historicalNameLookup,
                     historicalCorpsLookup,
                     historicalOobIdLookup,
+                    historicalEquipmentClassLookup,
                     eventDefinitions,
                     // LANE D-CONTENT (Path A): wire per-turn displacement event sink.
                     // Engine clear-displacement-event-log step calls this with the
@@ -2585,6 +2987,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 });
                 assertTurnSuccess(runResult);
                 state = runResult.nextState;
+                consumedSuccessfulPublicWarTurn = true;
                 turnReport = runResult.report;
                 autoResolveOpportunityProposalReviews(
                     state,
@@ -2612,6 +3015,13 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     oobCreated = true;
                 }
             }
+
+            // VLAŠÍC MARCH-TIMING DIAGNOSTIC: opt-in, read-only. Inert unless
+            // AWWV_VLASIC_TRACE=1; see emitVlasicTraceLine for the contract.
+            emitVlasicTraceLine(state, turnReport);
+            // MISTRAL 2 PREPARATION-HOLD DIAGNOSTIC: opt-in, read-only. Inert unless
+            // AWWV_MISTRAL_PREP_TRACE=1; see emitMistralPrepTraceLine for the contract.
+            emitMistralPrepTraceLine(state, turnReport, week_index /* zero-based loop index */);
 
             let weeklyCombatCausalityForReport: WeeklyCombatCausalitySummary | undefined;
             let weeklyControlChangeAttributionForReport: WeeklyControlChangeAttributionSummary | undefined;
@@ -2797,11 +3207,12 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 weeklyControlChangeAttributionForReport = weeklyControlChangeAttribution;
             }
 
+            let appliedScenarioControlFlips = 0;
             if (shouldApplyBreaches && adjacencyMap && state.meta.phase === 'war') {
                 const derivedFrontEdges = computeFrontEdges(state, graph.edges);
                 let breaches = computeFrontBreaches(state, derivedFrontEdges);
                 const proposalsFile = computeControlFlipProposals(state, derivedFrontEdges, breaches, adjacencyMap);
-                applyControlFlipProposals(state, proposalsFile);
+                appliedScenarioControlFlips = applyControlFlipProposals(state, proposalsFile).applied;
             }
             if (botManager) {
                 botControlTimeline.push({
@@ -2838,12 +3249,14 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 ops = { enabled: true, level };
             }
 
-            repairScenarioArtifactState(
-                state,
-                graph.edges,
-                operationalData?.operationalToCanonical ?? null,
-                operationalCentroids,
-            );
+            if (!consumedSuccessfulPublicWarTurn || appliedScenarioControlFlips > 0) {
+                repairScenarioArtifactState(
+                    state,
+                    operationalSettlementGraph.edges,
+                    operationalData?.operationalToCanonical ?? null,
+                    operationalCentroids,
+                );
+            }
             timingAdd(timingTotals, 'simulation', weekSimulationStart);
 
             const weeklyDiagnosticsStart = timingStart(emitTimingJson);
@@ -2976,6 +3389,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             if (turnReport.movement_report) {
                 reportRow.movement_report = turnReport.movement_report;
             }
+            // `weekly_report.jsonl` is baselined. Preserve its default shape and
+            // attach the bot-order snapshot only for an emitted route receipt.
+            attachBotOrderDiagnosticsToWeeklyReport(reportRow, turnReport.bot_order_diagnostics);
+            attachMovementPhaseDiagnosticsToWeeklyReport(reportRow, turnReport.movement_phase_diagnostics);
+            attachFrontDistributionDiagnosticsToWeeklyReport(reportRow, turnReport.front_distribution_diagnostics);
             // REASON-CODE INSTRUMENTATION (topic `formation_refusal`) — item 4.
             // `turnReport.recruitment_report` has NO other consumer anywhere in
             // `src/`, so without this attachment the counters would be surfaced into
@@ -3050,7 +3468,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 });
             }
 
-            if (effectiveEmitEvery > 0 && (week_index + 1) % effectiveEmitEvery === 0) {
+            const elapsedWeek = week_index + 1;
+            if (
+                (effectiveEmitEvery > 0 && elapsedWeek % effectiveEmitEvery === 0)
+                || selectedSaveWeeks.has(elapsedWeek)
+            ) {
                 const midPath = join(outDir, `save_w${week_index + 1}.json`);
                 const serializedMid = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
                     serializeState(state)
@@ -3080,6 +3502,15 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     checkpointHere.week,
                     extractSettlementControlSnapshot(state, graph)
                 );
+            }
+            if (diagnosticTurnBoundaryObserver) {
+                const detachedState = structuredClone(state);
+                const detachedReport = structuredClone(turnReport);
+                diagnosticTurnBoundaryObserver({
+                    week_index,
+                    state: detachedState,
+                    report: detachedReport,
+                });
             }
         }
 
@@ -3260,11 +3691,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         let historicalControlAlignment: HistoricalControlAlignmentDiagnostics | undefined;
         let osidPairMatch: OsidPairMatchDiagnostics | undefined;
         let historicalAnchorChecks: HistoricalAnchorCheck[] | undefined;
-        if (usesPaintedControlReference(scenario)) {
+        if (usesPaintedControlReference(effectiveScenario)) {
             // Wave 15: pick the painted reference matching scenario duration.
             // Loads the OSID-keyed painted_control_{key}.json directly, skipping
             // the createInitialGameState detour used by the legacy mun1990 path.
-            const referenceKey = pickHistoricalReferenceKey(scenario);
+            const referenceKey = pickHistoricalReferenceKey(effectiveScenario);
             const historicalReferenceSnapshot = await loadPaintedControlReferenceSnapshot(referenceKey, baseDir);
             historicalControlAlignment = computeHistoricalControlAlignmentDiagnostics(
                 finalControlSnapshot,

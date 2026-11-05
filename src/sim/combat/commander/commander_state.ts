@@ -18,8 +18,9 @@ import type {
     CorpsFrontSector,
     SectorIntelRecord,
 } from '../../../state/game_state.js';
-import type { OperationalToCanonicalReverseMap } from '../../../data/operational_data.js';
+import type { OperationalToCanonicalReverseMap, OsidPopulationMap } from '../../../data/operational_data.js';
 
+import type { TerrainScalarsData } from '../../../map/terrain_scalars.js';
 import type { SpatialContext } from '../../spatial_context.js';
 import type { FactionGraphAnalysis } from '../osid_graph_analysis.js';
 import type { OsidEthnicComposition } from '../ethnic_defense.js';
@@ -190,6 +191,8 @@ export interface CommanderPlan {
     /** Turn when the plan was first suspended. Used for MAX_SUSPENSION_TURNS timeout. */
     readonly suspended_since_turn?: number;
     readonly source: 'pre_planned' | 'reactive' | 'opportunity';
+    /** Plan originated from the open Croat-Bosniak-war ARBiH directive. */
+    readonly bilateral_offensive?: boolean;
     /** Phase 4 (Force Quality Foundation): true when force-quality readiness gated this plan
      *  (operation_readiness < threshold). The plan is downgraded — concentration window extended,
      *  axis count capped — but not deleted. See `../corps_operation_readiness.ts`. */
@@ -489,6 +492,15 @@ export interface CommanderBriefing {
     readonly state_ref?: GameState;
     /** Optional reverse map for OSID combat prediction at emit time. */
     readonly reverse_map?: OperationalToCanonicalReverseMap | null;
+    /**
+     * Optional per-settlement terrain scalars, threaded from the turn pipeline. Consumed by the
+     * P-A time-bounded participant-admission check so the creator estimates column transit with
+     * the SAME terrain-weighted movement model the execution step uses. Absent in unit fixtures;
+     * the check falls back to default terrain rather than rejecting a candidate.
+     */
+    readonly terrain_data?: TerrainScalarsData | null;
+    /** Population input consumed by the normal combat predictor's local-militia defense. */
+    readonly osid_population_map?: OsidPopulationMap;
     readonly supply_by_osid: SupplyStateByOsidReport | null;
     readonly ethnic_map: OsidEthnicComposition | null;
     readonly graph_analysis: FactionGraphAnalysis | null;
@@ -525,6 +537,8 @@ export interface CommanderBriefing {
     readonly campaign_role: FrontPriority['role'] | null;
     /** Army HQ offensive target shortlist for this corps. */
     readonly campaign_offensive_targets: readonly string[];
+    /** Open Croat-Bosniak war: this ARBiH corps is the designated bilateral attacker. */
+    readonly bilateral_offensive?: boolean;
     /** Army HQ hold-at-all-costs targets for this corps. */
     readonly campaign_hold_targets: readonly string[];
     /** Army HQ stance ceiling for this corps from doctrine override. */

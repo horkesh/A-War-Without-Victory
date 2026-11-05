@@ -1,0 +1,899 @@
+{
+  "writes_closed": true,
+  "captured_utc": "2026-10-22T17:25:03.306Z",
+  "client_date": "2026-10-22",
+  "verdict": "PASS_N83_OBSERVER_NEUTRALITY_AND_PALE_ALLOCATION_MEASURED",
+  "summary": "The one approved instrumented 188-week diagnostic completed as n84 with runner exit 0, no retries. All 30 gameplay artifacts and TEN 10 selected-save pairs are byte-identical to n83, with the exact 31-file native inventory and 32 ordered normalized consumed inputs/digest. Raw run_meta differences remain retained as preclassified metadata. Independent review accepts the bounded measurement. This reproduces rejected n83 gameplay; it does not restore or adopt retained n80 703/712.",
+  "findings": "At completed turn 21, Pale opens with available 0 / committed 1600. Its sole attempted recipient, rs_4th_sarajevo_light_infantry, is skipped as pool_empty; closing balances are unchanged. At turn 22, Pale opens with raw available 111 / committed 1600. The same brigade is the sole attempted recipient: reserve 0, effective availability 111, need/rate 400, transfer 111, personnel 1405→1516. Closing availability is 0 and committed is 1711. No earlier Pale recipient consumed anything. The captured allocation is lawful; the upstream net pool change from 0 to 111 is outside this observer boundary.",
+  "coverage": "All reader gates exit 0 after raw identity: 564 allocation records spanning 188 observed validated regular-stage blocks, requested turns 21 and 22 once each; personnel 71931 records and 564 faction passes; commander 4418 records, 3290 completions, zero violations. Source binding and raw row offsets are retained. No whole-pool lifecycle or missing n80 counterfactual is established.",
+  "preservation": "Production, reader, test, thresholds and October reference hashes remain exact. Full C/D before/after archives preserve their opening prefixes. C appends 946671 bytes to 103894385, SHA256 00d6d7e65832a45e4b8ddc34e077c228b9496ca8f1068a6b9633571b4bae5557; D remains 1041 bytes, SHA256 ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3, append 0. Two hrhb_travnik_brigade stderr notices remain raw and unresolved; they did not fail the runner or diagnostic gates. No full suite, replay, gameplay fix, adoption or acceptance waiver occurred. Every inherited NO-GO gate remains.",
+  "next_action": "Smallest justified next action: trace retained evidence and source for pool writes between turn 21 closing availability 0 and turn 22 opening availability 111. Do not change allocation/ranking rules or thresholds, infer an actual upstream writer, or reconstruct absent n80 history from this receipt. No additional campaign is authorized.",
+  "execution_ack_utc": "2026-10-22T17:12:18Z",
+  "deadline_utc": "2026-10-22T17:47:18Z",
+  "campaign_invocations": 1,
+  "retries": 0,
+  "full_suite_invocations": 0,
+  "actual_run_dir": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n84",
+  "runner": {
+    "argv": [
+      "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+      "node_modules/tsx/dist/cli.mjs",
+      "tools/scenario_runner/run_scenario_with_preflight.ts",
+      "--scenario",
+      "data/scenarios/apr1992_definitive_188w.json",
+      "--weeks",
+      "188",
+      "--out",
+      "runs",
+      "--unique",
+      "--save-weeks",
+      "39,104,111,112,113,156,178,179,180,181,182,183,184,185,186,187"
+    ],
+    "timeout_ms": 600000,
+    "start_utc": "2026-10-22T17:15:18.520Z",
+    "end_utc": "2026-10-22T17:17:37.320Z",
+    "child_exit": 0,
+    "signal": null,
+    "error": null,
+    "removed_sensitive_env_key_names": [
+      "AWWV_SLACK_WEBHOOK_URL",
+      "SLACK_WEBHOOK_URL"
+    ],
+    "debug_env": {
+      "AWWV_DEBUG_AXIS_READINESS": "Mistral",
+      "AWWV_MISTRAL_PREP_TRACE": "1",
+      "AWWV_DEBUG_REASON_CODES": "movement_phase,reconciliation_write,preplanned_eligibility,personnel,commander_creation,reinforcement_allocation",
+      "AWWV_DEBUG_MOVEMENT_FORMATIONS": "hvo_1st_guard_abb",
+      "AWWV_DEBUG_PERSONNEL_FORMATIONS": "rs_4th_sarajevo_light_infantry",
+      "AWWV_DEBUG_REINFORCEMENT_POOLS": "pale:RS"
+    },
+    "actual_run_dir": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n84",
+    "stdout": {
+      "path": "logs/claude-channel-20261004/818-pale-diagnostic/stdout.log",
+      "bytes": 43896358,
+      "sha256": "bb35df5e562e5953029874b7c2313912d5b1c75d75fc0683e29aaf5e3d77a7d5"
+    },
+    "stderr": {
+      "path": "logs/claude-channel-20261004/818-pale-diagnostic/stderr.log",
+      "bytes": 242,
+      "sha256": "808ff486ce3635268f3e66e920320a6f7d80e995bd91d66c3ed96626d1a70931"
+    }
+  },
+  "preserved_attempts": {
+    "preflight": {
+      "dir": "logs/claude-channel-20261004/818-preflight-a",
+      "entry": "logs/claude-channel-20261004/818-preflight.cjs",
+      "start_utc": "2026-10-22T17:14:58.696Z",
+      "end_utc": "2026-10-22T17:15:04.450Z",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract": {
+        "pass": true,
+        "unexpected": [],
+        "missing_allowed": []
+      },
+      "receipt": {
+        "path": "logs/claude-channel-20261004/818-preflight-a/receipt.json",
+        "bytes": 6205,
+        "sha256": "26ba7f9a5f18aa439c54ed599a1a8729c304f29b53f5ff3c90702e11f49c6044"
+      }
+    },
+    "runner": {
+      "dir": "logs/claude-channel-20261004/818-pale-diagnostic",
+      "entry": "logs/claude-channel-20261004/818-run-one.cjs",
+      "start_utc": "2026-10-22T17:15:18.235Z",
+      "end_utc": "2026-10-22T17:17:37.997Z",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract": {
+        "pass": true,
+        "unexpected": [],
+        "missing_allowed": []
+      },
+      "receipt": {
+        "path": "logs/claude-channel-20261004/818-pale-diagnostic/receipt.json",
+        "bytes": 5208,
+        "sha256": "d60647ae884ca791e9191399dbf40e66ab9906bc6538ecf192b58f81f30ab339"
+      }
+    },
+    "postrun": {
+      "dir": "logs/claude-channel-20261004/818-postrun-a",
+      "entry": "logs/claude-channel-20261004/818-postrun.cjs",
+      "start_utc": "2026-10-22T17:18:07.265Z",
+      "end_utc": "2026-10-22T17:18:10.505Z",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract": {
+        "pass": true,
+        "unexpected": [],
+        "missing_allowed": []
+      },
+      "receipt": {
+        "path": "logs/claude-channel-20261004/818-postrun-a/receipt.json",
+        "bytes": 5599,
+        "sha256": "cff74c456c04525370d610ac9b51eb97571a67cb64e1c175e88939b4b0a51622"
+      }
+    }
+  },
+  "identity": {
+    "pass": true,
+    "native_count": 31,
+    "native_inventory_equal": true,
+    "all_gameplay_pairs": {
+      "count": 30,
+      "equal": 30,
+      "exclusion": "run_meta.json only"
+    },
+    "ten_comparator": {
+      "valid": true,
+      "pass": true,
+      "count": 10,
+      "equal": 10
+    },
+    "run_meta": {
+      "raw_equal": false,
+      "baseline_sha256": "b5a9faff9db1b2ed010dc980af36ce9403574724ee7dc40102c8837e104cb3c3",
+      "actual_sha256": "2abcbcaec448554be969b368d059d8425c0402b6cbea2bf1736cb20281ebbdf0",
+      "classification": "preclassified metadata difference retained raw"
+    },
+    "provenance": {
+      "scenario_id": "apr1992_definitive_188w",
+      "weeks": 188,
+      "actual_count": 32,
+      "baseline_count": 32,
+      "actual_digest": "7986f05230e1d526e1794673e796dcb77730501d4958e435970c4ec806cc8039",
+      "baseline_digest": "7986f05230e1d526e1794673e796dcb77730501d4958e435970c4ec806cc8039",
+      "ordered_paths_equal": true,
+      "rows_equal": true,
+      "current": [
+        {
+          "path": "data/derived/census_rolled_up_wgs84.json",
+          "expected": "6653e75d9dd695bc2b676b1a49635bd51eecf228ec8c58b37ed1ecb773f1e3b2",
+          "actual": "6653e75d9dd695bc2b676b1a49635bd51eecf228ec8c58b37ed1ecb773f1e3b2",
+          "equal": true
+        },
+        {
+          "path": "data/derived/municipality_hq_settlement.json",
+          "expected": "7ff0af467f4b1fedbe7e2515fc9ca96dde9f3c825724c0bf6333653a08a1801b",
+          "actual": "7ff0af467f4b1fedbe7e2515fc9ca96dde9f3c825724c0bf6333653a08a1801b",
+          "equal": true
+        },
+        {
+          "path": "data/derived/municipality_political_controllers_1990.json",
+          "expected": "5fb60e0d3b7ec22da487c720c5256a58c3c8a95c2114c3ecaa2d13ed8cccfdd4",
+          "actual": "5fb60e0d3b7ec22da487c720c5256a58c3c8a95c2114c3ecaa2d13ed8cccfdd4",
+          "equal": true
+        },
+        {
+          "path": "data/derived/municipality_population_1991.json",
+          "expected": "b475f88f15b130a626d1699f9d3064a2e64c70e816b67b608d734b10763a7c7b",
+          "actual": "b475f88f15b130a626d1699f9d3064a2e64c70e816b67b608d734b10763a7c7b",
+          "equal": true
+        },
+        {
+          "path": "data/derived/operational/operational_contact_graph.json",
+          "expected": "f7f9aaeea51710fda376234d79945b51dfea31a16ebca948ffd8dc54f3ce0c46",
+          "actual": "f7f9aaeea51710fda376234d79945b51dfea31a16ebca948ffd8dc54f3ce0c46",
+          "equal": true
+        },
+        {
+          "path": "data/derived/operational/operational_political_control.json",
+          "expected": "309af26381cb36126f5c80b2327035865b4ac9c467cda66211f35516949a0a3d",
+          "actual": "309af26381cb36126f5c80b2327035865b4ac9c467cda66211f35516949a0a3d",
+          "equal": true
+        },
+        {
+          "path": "data/derived/operational/operational_settlements.geojson",
+          "expected": "c03cc9ce4286b779139ce460e5f515d67415fe633e4ed2dbda1764b9440338c8",
+          "actual": "c03cc9ce4286b779139ce460e5f515d67415fe633e4ed2dbda1764b9440338c8",
+          "equal": true
+        },
+        {
+          "path": "data/derived/settlement_edges.json",
+          "expected": "69073545ddac46395019b63295cd0de3a79920771b417178eb06cc38aa9a7cb7",
+          "actual": "69073545ddac46395019b63295cd0de3a79920771b417178eb06cc38aa9a7cb7",
+          "equal": true
+        },
+        {
+          "path": "data/derived/settlement_ethnicity_data.json",
+          "expected": "ca1e986d7f1c5e6662c7629a6f970441d1fb5474a48271bb0626194455674104",
+          "actual": "ca1e986d7f1c5e6662c7629a6f970441d1fb5474a48271bb0626194455674104",
+          "equal": true
+        },
+        {
+          "path": "data/scenarios/apr1992_definitive_188w.json",
+          "expected": "4257b039f5b1dbb7f21d940ec656b2d0b787856f27e7c26b6f3f57f256d82ecf",
+          "actual": "4257b039f5b1dbb7f21d940ec656b2d0b787856f27e7c26b6f3f57f256d82ecf",
+          "equal": true
+        },
+        {
+          "path": "data/scenarios/events/consequences.json",
+          "expected": "17ee0a0aaaf9162e550db85081a513c4b764ee042a50a0f663198de884300b0b",
+          "actual": "17ee0a0aaaf9162e550db85081a513c4b764ee042a50a0f663198de884300b0b",
+          "equal": true
+        },
+        {
+          "path": "data/scenarios/events/war_1992.json",
+          "expected": "7596df56b934be4334ab8bffe51cf92f439c1fec238d6b82c21e68f25c61162a",
+          "actual": "7596df56b934be4334ab8bffe51cf92f439c1fec238d6b82c21e68f25c61162a",
+          "equal": true
+        },
+        {
+          "path": "data/scenarios/events/war_1992_hrhb_summer.json",
+          "expected": "de9bfc484847caa911d6921424b80ddcf8754219fffc016bdd346f80028d99e2",
+          "actual": "de9bfc484847caa911d6921424b80ddcf8754219fffc016bdd346f80028d99e2",
+          "equal": true
+        },
+        {
+          "path": "data/scenarios/events/war_1993.json",
+          "expected": "d31a781fc2479546a217f8cc82f958783c283345a1e1122c68d7b9dfd1bc46d2",
+          "actual": "d31a781fc2479546a217f8cc82f958783c283345a1e1122c68d7b9dfd1bc46d2",
+          "equal": true
+        },
+        {
+          "path": "data/scenarios/events/war_1994.json",
+          "expected": "aef6d5321f41224953c311b2194ac71eb8b42e6e63c3a501fdacd79d1ce29449",
+          "actual": "aef6d5321f41224953c311b2194ac71eb8b42e6e63c3a501fdacd79d1ce29449",
+          "equal": true
+        },
+        {
+          "path": "data/scenarios/events/war_1995.json",
+          "expected": "b16b52e0a25c4312c2dc146e824c46fe3b5d8b567907d443304bb8dbb4958dc4",
+          "actual": "b16b52e0a25c4312c2dc146e824c46fe3b5d8b567907d443304bb8dbb4958dc4",
+          "equal": true
+        },
+        {
+          "path": "data/scenarios/initial_formations/initial_formations_apr1992.json",
+          "expected": "37832ee7aad72e8a99aaf21ec66d92d0161477902e8db42bf1579d77314008f4",
+          "actual": "37832ee7aad72e8a99aaf21ec66d92d0161477902e8db42bf1579d77314008f4",
+          "equal": true
+        },
+        {
+          "path": "data/scenarios/officers/apr1992_officers.json",
+          "expected": "1a4565169fc90b119da7bd5624587078a42b935dd16d241ecb93b8e0a29524d0",
+          "actual": "1a4565169fc90b119da7bd5624587078a42b935dd16d241ecb93b8e0a29524d0",
+          "equal": true
+        },
+        {
+          "path": "data/scenarios/political_leader_data.json",
+          "expected": "6affed383f92f9786fa112c1fedc2b6a9c4dc5193c750c822c1ccf114b643474",
+          "actual": "6affed383f92f9786fa112c1fedc2b6a9c4dc5193c750c822c1ccf114b643474",
+          "equal": true
+        },
+        {
+          "path": "data/scenarios/presidential_initiatives/apr1992.json",
+          "expected": "f26279f708514b5b237ba71f915d43131db2663660de44d27b23684f5f415cfb",
+          "actual": "f26279f708514b5b237ba71f915d43131db2663660de44d27b23684f5f415cfb",
+          "equal": true
+        },
+        {
+          "path": "data/scenarios/timelines/apr1992.json",
+          "expected": "3674a0cfc0c2062a0c0a5390a53cdfe2a7704628199ce60d9ff7148c55699a9d",
+          "actual": "3674a0cfc0c2062a0c0a5390a53cdfe2a7704628199ce60d9ff7148c55699a9d",
+          "equal": true
+        },
+        {
+          "path": "data/source/calibration/painted_control_apr1994.json",
+          "expected": "24f6e8923afa6a5ceaf7e4148cd119f2952f48c99544b5e50e994836dc863dba",
+          "actual": "24f6e8923afa6a5ceaf7e4148cd119f2952f48c99544b5e50e994836dc863dba",
+          "equal": true
+        },
+        {
+          "path": "data/source/calibration/painted_control_apr1995.json",
+          "expected": "59f05f4919e8e4b6cfd81fe63958a9cd07406acbdb4aa8a4edd1a14596cba44d",
+          "actual": "59f05f4919e8e4b6cfd81fe63958a9cd07406acbdb4aa8a4edd1a14596cba44d",
+          "equal": true
+        },
+        {
+          "path": "data/source/calibration/painted_control_jan1993.json",
+          "expected": "6a64300a599aa0b75833d5232bf9f08a1ab97085746337e622d54fb1a4a0ddc7",
+          "actual": "6a64300a599aa0b75833d5232bf9f08a1ab97085746337e622d54fb1a4a0ddc7",
+          "equal": true
+        },
+        {
+          "path": "data/source/calibration/painted_control_oct1995.json",
+          "expected": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b",
+          "actual": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b",
+          "equal": true
+        },
+        {
+          "path": "data/source/formation_lifecycle_events.json",
+          "expected": "f70b3f5b48196eedda02602b2a454dbfba83e2d3de7147854143e0b75247f90b",
+          "actual": "f70b3f5b48196eedda02602b2a454dbfba83e2d3de7147854143e0b75247f90b",
+          "equal": true
+        },
+        {
+          "path": "data/source/municipalities_1990_initial_political_controllers_apr1992.json",
+          "expected": "dcbf9ec5a73a0d8b86588851e5ca7a83fab7f37aa9f1513e27eebb11b5802f6d",
+          "actual": "dcbf9ec5a73a0d8b86588851e5ca7a83fab7f37aa9f1513e27eebb11b5802f6d",
+          "equal": true
+        },
+        {
+          "path": "data/source/municipalities_1990_registry_110.json",
+          "expected": "8ede3d014b0b8694021b79e77e58f07266f647682b23fcd2a793417f16d433cc",
+          "actual": "8ede3d014b0b8694021b79e77e58f07266f647682b23fcd2a793417f16d433cc",
+          "equal": true
+        },
+        {
+          "path": "data/source/oob_brigades.json",
+          "expected": "e01b58c71b0d51daadf1796ba21a02d0cca04509add1ef706f3b8a350f7c513d",
+          "actual": "e01b58c71b0d51daadf1796ba21a02d0cca04509add1ef706f3b8a350f7c513d",
+          "equal": true
+        },
+        {
+          "path": "data/source/oob_corps.json",
+          "expected": "bce056408d0b7fcaeda20c3f847c4cc36f054ae2355d740708c83f139d76149c",
+          "actual": "bce056408d0b7fcaeda20c3f847c4cc36f054ae2355d740708c83f139d76149c",
+          "equal": true
+        },
+        {
+          "path": "data/source/settlement_political_controllers_overrides.json",
+          "expected": "0eb42921290f1812adc5fc4a008113483840d7d2ab2e2d382ea7582ca4659a33",
+          "actual": "0eb42921290f1812adc5fc4a008113483840d7d2ab2e2d382ea7582ca4659a33",
+          "equal": true
+        },
+        {
+          "path": "data/source/settlements_initial_master.json",
+          "expected": "0a4fa946436ed525e38d94df0d3afe98ad2cfdd1e0f26f4cad2ae32bc894535d",
+          "actual": "0a4fa946436ed525e38d94df0d3afe98ad2cfdd1e0f26f4cad2ae32bc894535d",
+          "equal": true
+        }
+      ],
+      "digest_recomputed": "7986f05230e1d526e1794673e796dcb77730501d4958e435970c4ec806cc8039"
+    }
+  },
+  "readers": {
+    "allocation": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "raw_rows": 564,
+      "validated_schema": 2,
+      "observed_turns": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147,
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167,
+        168,
+        169,
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180,
+        181,
+        182,
+        183,
+        184,
+        185,
+        186,
+        187,
+        188
+      ],
+      "observed_invocation_count": 188,
+      "selected_invocation_count": 2,
+      "selected_recipient_count": 2,
+      "requested_turns": [
+        21,
+        22
+      ],
+      "expected_invocations_per_turn": 1,
+      "artifact": {
+        "path": "logs/claude-channel-20261004/818-postrun-a/allocation-reader.json",
+        "bytes": 1886,
+        "sha256": "dedf8f58014d9769b885848b45c085ea5f36252e3489e839d2cf5639132061a2"
+      }
+    },
+    "personnel_commander": {
+      "wrapper_exit": 0,
+      "result": {
+        "schema": "awwv.commander-target-selection-postrun.v1",
+        "pass": true,
+        "inputs": {
+          "stdout": "logs/claude-channel-20261004/818-pale-diagnostic/stdout.log",
+          "baseline": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n83",
+          "stateful_reader": "logs/claude-channel-20261004/786-stateful-readers-b.cjs"
+        },
+        "readers": {
+          "stateful": {
+            "exit": 0,
+            "stdout": "{\"pass\":true,\"personnel\":71931,\"passes\":564}\n",
+            "stderr": ""
+          },
+          "commander": {
+            "exit": 0,
+            "stdout": "{\"pass\":true,\"records\":4418,\"completion_rows\":3290,\"violations\":0}\n",
+            "stderr": ""
+          }
+        },
+        "failures": []
+      },
+      "artifacts": [
+        {
+          "path": "logs/claude-channel-20261004/818-postrun-a/readers/result.json",
+          "bytes": 658,
+          "sha256": "a983136b285381a37ec0910801d60270d59e423fee5e26893da75f1224e8bb24"
+        },
+        {
+          "path": "logs/claude-channel-20261004/818-postrun-a/readers/stateful-reader/reader.json",
+          "bytes": 176362,
+          "sha256": "beb19db3d9ac009bb6c376cd508372bf7be45d6e1f10f6fabad8d7ee78adfce7"
+        },
+        {
+          "path": "logs/claude-channel-20261004/818-postrun-a/readers/commander-reader.json",
+          "bytes": 69,
+          "sha256": "e9c90ab5d949f777e376c5a126b34800010e9987e9cf4e822182ac69fcd7abfd"
+        }
+      ]
+    }
+  },
+  "allocation_findings": {
+    "turn21": {
+      "opening": {
+        "available": 0,
+        "committed": 1600
+      },
+      "attempted_recipients": [
+        {
+          "formation_id": "rs_4th_sarajevo_light_infantry",
+          "global_order": 212
+        }
+      ],
+      "brigade": {
+        "formation_id": "rs_4th_sarajevo_light_infantry",
+        "disposition": "skipped",
+        "reason": "pool_empty",
+        "current_personnel": 1411
+      },
+      "closing": {
+        "available": 0,
+        "committed": 1600
+      },
+      "accounting": "available 0; no transfer; closes available 0 / committed 1600"
+    },
+    "turn22": {
+      "opening": {
+        "raw_available": 111,
+        "committed": 1600
+      },
+      "earlier_pale_recipients": [],
+      "attempted_recipients": [
+        {
+          "formation_id": "rs_4th_sarajevo_light_infantry",
+          "global_order": 215
+        }
+      ],
+      "brigade": {
+        "formation_id": "rs_4th_sarajevo_light_infantry",
+        "current_personnel": 1405,
+        "reserve_for_spawn": 0,
+        "effective_available": 111,
+        "need": 400,
+        "rate": 400,
+        "transfer": 111,
+        "personnel_after": 1516
+      },
+      "closing": {
+        "available": 0,
+        "committed": 1711
+      },
+      "accounting": "raw 111 - reserve 0 = effective 111; transfer 111; available 111 - 111 = 0; committed 1600 + 111 = 1711; personnel 1405 + 111 = 1516"
+    },
+    "answer": "Nothing earlier in the Pale regular-stage ordering consumed the 111. The pool opened with raw available 111, reserve_for_spawn was 0, and rs_4th_sarajevo_light_infantry was the sole attempted Pale recipient, leaving effective 111 and receiving all 111."
+  },
+  "source_binding": {
+    "completed_turn": "formation_spawn currentTurn = state.meta.turn -> observer completed_turn; preflight source_completed_turn_binding=true",
+    "weekly": "weekly week_index = state.meta.turn; corrected baseline binding week_index 1..188",
+    "observer_source": "formation_spawn.reinforce regular schema 2",
+    "protected_source_pins": [
+      {
+        "path": "logs/claude-channel-20261004/818-preflight.cjs",
+        "bytes": 7362,
+        "sha256": "9ba9e3509ded1241a11f87f7e2a58d59d965eaacf3d8c17f5031c29f036ee54a",
+        "snapshot": "logs/claude-channel-20261004/818-preflight-a/dependency-00.snapshot"
+      },
+      {
+        "path": "logs/claude-channel-20261004/818-run-one.cjs",
+        "bytes": 4077,
+        "sha256": "3303707354a9736de16ec51bafdbb1ee65ceda4b78f6d4b17d107eac39288817",
+        "snapshot": "logs/claude-channel-20261004/818-preflight-a/dependency-01.snapshot"
+      },
+      {
+        "path": "logs/claude-channel-20261004/818-postrun.cjs",
+        "bytes": 6478,
+        "sha256": "93daf5eddcefbc8c0383e6ff027fc714c7c2aa48cc2702d0f2af9daae4b611b3",
+        "snapshot": "logs/claude-channel-20261004/818-preflight-a/dependency-02.snapshot"
+      },
+      {
+        "path": "tools/diagnostics/run_preserved_preflight.cjs",
+        "bytes": 9536,
+        "sha256": "3933e010daf15938d026692e732e401d5ce50e1e0656d546e4697723e9a7779e",
+        "snapshot": "logs/claude-channel-20261004/818-preflight-a/dependency-03.snapshot"
+      },
+      {
+        "path": "tools/scenario_runner/run_scenario_with_preflight.ts",
+        "bytes": 8261,
+        "sha256": "1329bd3d611c40c5ff24536dc02e5a84845786c1e9627fc76a1073fd00399992",
+        "snapshot": "logs/claude-channel-20261004/818-preflight-a/dependency-04.snapshot"
+      },
+      {
+        "path": "tools/scenario_runner/run_scenario.ts",
+        "bytes": 9059,
+        "sha256": "40b7d90b69cd1592836c6107314219f5cbbf920d05a601d019bcb6033efbe678",
+        "snapshot": "logs/claude-channel-20261004/818-preflight-a/dependency-05.snapshot"
+      },
+      {
+        "path": "src/scenario/scenario_runner.ts",
+        "bytes": 209522,
+        "sha256": "74125b6227ab10516466621a66b55e1fd698f7e6abdbe3e5468947a510684a86",
+        "snapshot": "logs/claude-channel-20261004/818-preflight-a/dependency-06.snapshot"
+      },
+      {
+        "path": "src/scenario/scenario_reporting.ts",
+        "bytes": 18242,
+        "sha256": "df0c17f6473f80ad2867106749d07ceda18fef1a53a68097586d3231e4f521c2",
+        "snapshot": "logs/claude-channel-20261004/818-preflight-a/dependency-07.snapshot"
+      },
+      {
+        "path": "src/sim/turn_pipeline.ts",
+        "bytes": 11675,
+        "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25",
+        "snapshot": "logs/claude-channel-20261004/818-preflight-a/dependency-08.snapshot"
+      },
+      {
+        "path": "src/sim/formation_spawn.ts",
+        "bytes": 47679,
+        "sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa",
+        "snapshot": "logs/claude-channel-20261004/818-preflight-a/dependency-09.snapshot"
+      },
+      {
+        "path": "src/sim/combat/reinforcement_allocation_diagnostic.ts",
+        "bytes": 7113,
+        "sha256": "12d24113946ad414ae3f310a45c9d7f52e0a24bde916ed60f0001d18d4bacdc6",
+        "snapshot": "logs/claude-channel-20261004/818-preflight-a/dependency-10.snapshot"
+      },
+      {
+        "path": "tools/diagnostics/reinforcement_allocation_reader.cjs",
+        "bytes": 20531,
+        "sha256": "bf1e94e52c2efb447041161fa6e14de2d078f2177d7392209344acc746c71c86",
+        "snapshot": "logs/claude-channel-20261004/818-preflight-a/dependency-11.snapshot"
+      },
+      {
+        "path": "logs/claude-channel-20261004/786-stateful-readers-b.cjs",
+        "bytes": 9292,
+        "sha256": "e3d837c7f193c7a4fc052eb6b0fc4745ab5b04e85c9bbd43c3d0d9fbdb93759f",
+        "snapshot": "logs/claude-channel-20261004/818-preflight-a/dependency-12.snapshot"
+      },
+      {
+        "path": "tools/diagnostics/commander_target_selection_postrun.cjs",
+        "bytes": 2363,
+        "sha256": "d4274e6c786a37ab7037feb85d2e1dd4ed590391aa8db67f6c38bc1591d95329",
+        "snapshot": "logs/claude-channel-20261004/818-preflight-a/dependency-13.snapshot"
+      },
+      {
+        "path": "tools/diagnostics/commander_target_selection_reader.cjs",
+        "bytes": 20326,
+        "sha256": "98c9613c0d8fe2ce875cd14a75803f21c3cfbd96f7563e7851fe76740d3db21e",
+        "snapshot": "logs/claude-channel-20261004/818-preflight-a/dependency-14.snapshot"
+      },
+      {
+        "path": "logs/claude-channel-20261004/178-fullrun-byte-gate.cjs",
+        "bytes": 13338,
+        "sha256": "7ba6360b4325b660b39bb3c35786a85cb2c503318025207633f7375e0795ac18",
+        "snapshot": "logs/claude-channel-20261004/818-preflight-a/dependency-15.snapshot"
+      },
+      {
+        "path": "logs/claude-channel-20261004/812-result.json",
+        "bytes": 13970,
+        "sha256": "e5d2ce35f94e5dae37fc5afa100008e184acd784358e74c14a5f6bc6f2e7b49f",
+        "snapshot": "logs/claude-channel-20261004/818-preflight-a/dependency-16.snapshot"
+      },
+      {
+        "path": "logs/claude-channel-20261004/811-allocation-reader-review/811-correction-verification.json",
+        "bytes": 8132,
+        "sha256": "74e3cd1542941aaab6396bb8d10c78aea5325494260fb77c228702bb2739a56f",
+        "snapshot": "logs/claude-channel-20261004/818-preflight-a/dependency-17.snapshot"
+      }
+    ]
+  },
+  "limits": [
+    "Observer-only n84 exactly reproduces rejected n83 gameplay artifacts; it does not establish an n80 counterfactual or historical cause.",
+    "Retained n80 703/712 remains NO-GO and unadopted; n83/n84 remains the rejected 689 trajectory; every inherited gate is unchanged.",
+    "The two unresolved hrhb_travnik_brigade stderr notices are retained raw and did not fail the runner, identity, telemetry, provenance, or reader gates."
+  ],
+  "files": [],
+  "protected_source_pins": [
+    {
+      "path": "src/sim/combat/reinforcement_allocation_diagnostic.ts",
+      "bytes": 7113,
+      "sha256": "12d24113946ad414ae3f310a45c9d7f52e0a24bde916ed60f0001d18d4bacdc6"
+    },
+    {
+      "path": "tools/diagnostics/reinforcement_allocation_reader.cjs",
+      "bytes": 20531,
+      "sha256": "bf1e94e52c2efb447041161fa6e14de2d078f2177d7392209344acc746c71c86"
+    },
+    {
+      "path": "tests/reinforcement_allocation_diagnostic.test.ts",
+      "bytes": 36000,
+      "sha256": "6eff326a27cc9892aa45a6d84ae018afd19ecba18af65896ce050f7a05a094df"
+    },
+    {
+      "path": "src/sim/formation_spawn.ts",
+      "bytes": 47679,
+      "sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa",
+      "expected_bytes": 47679,
+      "expected_sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa",
+      "matches": true
+    },
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "bytes": 20275,
+      "sha256": "b7467c47f97c5c349535b59aaeafa3dea0bc5d03314961c5ac17ef3a4283434a",
+      "expected_bytes": 20275,
+      "expected_sha256": "b7467c47f97c5c349535b59aaeafa3dea0bc5d03314961c5ac17ef3a4283434a",
+      "matches": true
+    },
+    {
+      "path": "src/sim/combat/personnel_diagnostic.ts",
+      "bytes": 5870,
+      "sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3",
+      "expected_bytes": 5870,
+      "expected_sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3",
+      "matches": true
+    },
+    {
+      "path": "tests/personnel_diagnostic.test.ts",
+      "bytes": 19693,
+      "sha256": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b",
+      "expected_bytes": 19693,
+      "expected_sha256": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b",
+      "matches": true
+    },
+    {
+      "path": "tests/reason_code_debug.test.ts",
+      "bytes": 10435,
+      "sha256": "44a60e84d8b22d1cb629364a84e10257d3454531678b987a75582ddaee9a756c",
+      "expected_bytes": 10435,
+      "expected_sha256": "44a60e84d8b22d1cb629364a84e10257d3454531678b987a75582ddaee9a756c",
+      "matches": true
+    }
+  ],
+  "protected_controls": [
+    {
+      "path": "data/calibration/engine_health_thresholds.json",
+      "bytes": 3775,
+      "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d",
+      "expected_bytes": 3775,
+      "expected_sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d",
+      "matches": true
+    },
+    {
+      "path": "data/source/calibration/painted_control_oct1995.json",
+      "bytes": 35266,
+      "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b",
+      "expected_bytes": 35266,
+      "expected_sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b",
+      "matches": true
+    }
+  ],
+  "telemetry": [
+    {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "archive": "c-after.bin",
+      "bytes": 103894385,
+      "sha256": "00d6d7e65832a45e4b8ddc34e077c228b9496ca8f1068a6b9633571b4bae5557"
+    },
+    {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "archive": "d-after.bin",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    }
+  ],
+  "telemetry_prefix_append": {
+    "C": {
+      "opening_prefix_equal": true,
+      "append_bytes": 946671,
+      "opening_bytes": 102947714,
+      "after_bytes": 103894385
+    },
+    "D": {
+      "opening_prefix_equal": true,
+      "append_bytes": 0,
+      "opening_bytes": 1041,
+      "after_bytes": 1041
+    }
+  },
+  "worker": {
+    "path": "logs/claude-channel-20261004/818-result.json",
+    "sha256": "66c081b063566d605d4873f5c4031c3dca6bce26e6957f8bc2ed4c7900a5ce96"
+  },
+  "review": {
+    "path": "logs/claude-channel-20261004/819-pale-run-review/819-review.json",
+    "sha256": "d1a4c8974e4cfd92d824178cb45168c1b0dbf80b41e3be6db436eac2605a11fb",
+    "verdict": "APPROVE_BOUNDED_OBSERVER_ONLY_DIAGNOSTIC"
+  },
+  "raw_inventory": {
+    "path": "logs/claude-channel-20261004/820-raw-inventory.json",
+    "sha256": "f919757d1bb27c829aa65b7702b612541e136db9ee49f400fc89c259fd5767f7",
+    "entries": 80
+  },
+  "retained_root_closeout_failure": {
+    "attempt": "logs/claude-channel-20261004/820-integration-a",
+    "child_exit": 1,
+    "wrapper_exit": 126,
+    "cause": "Root closeout script read worker raw inventory.entries; its schema uses files. Failure occurred before documentation or portable writes. Six later expected artifacts were consequently absent. Corrected to files and cheaply re-executed closeout only; no runner or reader repeated.",
+    "receipt_sha256": "550bcfbaebfd65d640f1dff479f417bf320279c49a14d77682389bb2117076b0",
+    "retained_in_pushed_raw_inventory": true
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "schema": "awwv.scenario-postturn-prefix39.control-fixture-manifest.v2",
+  "head": "0278c956d3fce3cdb62161a282f3936eaa0c66c1",
+  "canonical_excerpt_sha256": "6a19943b3419ea8fcd505f5fdbfe8b1435905a69d1d3f5072b3494d43f6e70d6",
+  "inputs": {
+    "n91": {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n91/save_w39.json",
+      "bytes": 5105717,
+      "sha256": "e51224ac22a839d4c1af35a0ea828afb79b62f0ed56559c3b47dcda45578eec5"
+    },
+    "n92": {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n92/save_w39.json",
+      "bytes": 5105717,
+      "sha256": "e51224ac22a839d4c1af35a0ea828afb79b62f0ed56559c3b47dcda45578eec5"
+    },
+    "n101": {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n101/save_w39.json",
+      "bytes": 5105750,
+      "sha256": "f459cd050e55e764092010ef79c23a7c629487e3c6a8ea5d3aaf33082dc053e3"
+    },
+    "n102": {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n102/save_w39.json",
+      "bytes": 5484765,
+      "sha256": "12ae79ebac55cf1287605d3da7f1360e67fafbc0dcb3703bba4ee2537039e628"
+    },
+    "jan1993_reference": {
+      "path": "data/source/calibration/painted_control_jan1993.json",
+      "bytes": 34371,
+      "sha256": "6a64300a599aa0b75833d5232bf9f08a1ab97085746337e622d54fb1a4a0ddc7"
+    }
+  },
+  "expected": {
+    "positive": {
+      "run": "n101",
+      "score": 707,
+      "denominator": 712,
+      "n91_losses": 0,
+      "n92_losses": 0
+    },
+    "negative": {
+      "run": "n102",
+      "score": 705,
+      "denominator": 712,
+      "n91_losses": 2,
+      "n92_losses": 2,
+      "lost_osids": [
+        "op:foca:donje_zesce",
+        "op:trnovo:tosici"
+      ]
+    }
+  }
+}

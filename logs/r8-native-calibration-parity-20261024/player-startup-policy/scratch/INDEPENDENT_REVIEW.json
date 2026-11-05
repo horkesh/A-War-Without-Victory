@@ -1,0 +1,103 @@
+{
+  "schema": "awwv.suite-scratch-repair.independent-review.v1",
+  "verdict": "GO",
+  "reviewed_head": "b371adc3e0935825649e5eda4e6bbd45a44a359d",
+  "scope": [
+    "tests/run_vitest_balanced.test.ts",
+    "tests/vitest_balanced_receipts.test.ts",
+    "tests/fixtures/vitest_balanced/receipt_nested_child.fixture.ts"
+  ],
+  "findings": {
+    "critical": [],
+    "suggestion": [],
+    "nice_to_have": []
+  },
+  "source_binding": {
+    "before_snapshots_match_head_blobs": true,
+    "final_snapshots_match_working_files": true,
+    "final_diff_exact": true,
+    "final_diff_bytes": 10230,
+    "working_sha256": {
+      "tests/run_vitest_balanced.test.ts": "694e967af826217fee0c5de7197fc2a40c2056033888899dab3c583dc3c13813",
+      "tests/vitest_balanced_receipts.test.ts": "deb1ce416c85a89bae0130a3307bbf931ae77f1563c47a15fc6e861bd1e677f4",
+      "tests/fixtures/vitest_balanced/receipt_nested_child.fixture.ts": "c4187af5db738fff09aa22ff1e28aec0e3b8e497c2ce7c59fe38436efd2a5c00"
+    }
+  },
+  "evidence_binding": {
+    "listed_hashes_checked": 22,
+    "listed_hash_mismatches": 0,
+    "red": {
+      "exit": 0,
+      "tests_passed": 23,
+      "legacy_added": 38,
+      "legacy_removed": 0,
+      "legacy_modified": 0
+    },
+    "first_correction": {
+      "exit": 1,
+      "tests_passed": 17,
+      "tests_failed": 6,
+      "cause": "generated configs retained a relative discover_test_files import after moving deeper",
+      "preserved": true,
+      "qualified": false
+    },
+    "final": {
+      "exit": 0,
+      "tests_passed": 23,
+      "tests_failed": 0,
+      "legacy_inventory_files": 461,
+      "legacy_added": 0,
+      "legacy_removed": 0,
+      "legacy_modified": 0,
+      "generated_configs": 11,
+      "generated_configs_with_absolute_discovery_url": 11,
+      "retained_roots": [
+        {
+          "path": "tmp/player-bot-capability-parity-20261024/suite-scratch-repair/runs/run-vitest-balanced-11228-c3a466af-dd54-4ae9-b697-e89fc9aa8b09",
+          "files": 8,
+          "bytes": 2960,
+          "inventory_sha256": "c2967ac14fbc92bf8ae1c7fc09fbf0a41ef4b943a8788f816b6fd381e0ecacb4"
+        },
+        {
+          "path": "tmp/player-bot-capability-parity-20261024/suite-scratch-repair/runs/vitest-balanced-receipts-13624-07d1c6bb-22b7-4a8f-bc48-601796361764",
+          "files": 31,
+          "bytes": 30908,
+          "inventory_sha256": "5ab2e0acddca583c2b5e2a9022e60716ec9ea4d28ca15da5e5c7799f40a8d744"
+        }
+      ]
+    },
+    "typecheck_exit": 0,
+    "test_contract_names_unchanged": true,
+    "full_suite_reused": {
+      "overall_pass": false,
+      "sole_failed_check": "scratch_preserved",
+      "child_exit": 0,
+      "tests_passed": 15020,
+      "tests_failed": 0,
+      "tests_skipped": 33,
+      "receipt_coverage_pass": true,
+      "runtime_authority_before_after_pass": true,
+      "telemetry_prefixes_exact": true,
+      "source_stable": true,
+      "legacy_additions": 36
+    }
+  },
+  "boundary_checks": {
+    "fresh_uuid_roots": true,
+    "retained_outputs": true,
+    "ignored_evidence_root": true,
+    "production_runner_helpers_exercised": true,
+    "no_contract_weakening": true,
+    "no_unrelated_environment_mutation": true,
+    "no_legacy_deletion_or_overwrite": true,
+    "no_gameplay_or_campaign_change": true,
+    "no_determinism_risk_found": true
+  },
+  "validation_repeated": {
+    "focused_tests": false,
+    "full_suite": false,
+    "build": false,
+    "native": false,
+    "campaign": false
+  }
+}

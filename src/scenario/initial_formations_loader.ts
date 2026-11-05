@@ -1,3 +1,4 @@
+import { initializeFormationDefaults } from '../state/formation_defaults.js';
 /**
  * Load initial formations from a scenario asset (Option A / Phase 2).
  * Schema: array of records with required id, faction, name; optional kind, assignment, status, created_turn.
@@ -120,7 +121,7 @@ export async function loadInitialFormations(path: string): Promise<FormationStat
             ? raw.posture as BrigadePosture : undefined;
         const corps_id = typeof raw.corps_id === 'string' && raw.corps_id.trim() ? raw.corps_id.trim() : undefined;
 
-        result.push({
+        const formation: FormationState = {
             id,
             faction,
             name,
@@ -135,7 +136,9 @@ export async function loadInitialFormations(path: string): Promise<FormationStat
             ...(location_osid !== undefined && { location_osid }),
             ...(posture !== undefined && { posture }),
             ...(corps_id !== undefined && { corps_id })
-        });
+        };
+        initializeFormationDefaults(formation, created_turn);
+        result.push(formation);
     }
 
     result.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));

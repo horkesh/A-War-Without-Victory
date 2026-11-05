@@ -1,3 +1,10 @@
+import {execFile} from 'node:child_process';
+import {promisify,isDeepStrictEqual} from 'node:util';
+import {mkdtemp,writeFile,readFile} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {deserialize as deserializeV8} from 'node:v8';
+import {serializeState,deserializeState} from '../src/state/serialize.js';
 /**
  * HV (Croatian Army) Integration tests.
  *
@@ -152,6 +159,77 @@ describe('HV integration', () => {
             assert.strictEqual(f.faction, 'HRHB');
             assert.strictEqual(f.status, 'active');
         }
+    });
+
+    test('Washington100 fixed boundary pins the HV preparation delay at 32', () => {
+        // Calibrated scenario timing: Washington t100 + 32 = HV availability t132.
+        // Fixed rather than derived so a regression back to 30 is rejected.
+        assert.strictEqual(HV_PREPARATION_DELAY, 32);
+        assert.strictEqual(100 + HV_PREPARATION_DELAY, 132);
+    });
+
+    test('Washington100 fixed boundary holds 130/131, counts 2/1, arrives 132 and does not respawn 133', () => {
+        // Reject the prior delay of 30: it would spawn at t130 instead of t132.
+        for (const [turn, countdown] of [[130, 2], [131, 1]] as const) {
+            const state = makeWashingtonSignedState(100, turn);
+            const report = tickHvIntegration(state);
+
+            assert.strictEqual(report.washington_signed, true);
+            assert.strictEqual(report.spawned_this_turn, false, `No formation may spawn at t${turn}`);
+            assert.strictEqual(report.spawned_brigade_ids.length, 0);
+            assert.strictEqual(report.turns_until_spawn, countdown, `Countdown at t${turn}`);
+            assert.strictEqual(state.meta.hv_brigades_spawned, undefined);
+            for (const def of HV_BRIGADE_DEFS) {
+                assert.strictEqual(state.military.formations[def.id], undefined, `${def.id} must not exist at t${turn}`);
+            }
+        }
+
+        const spawnState = makeWashingtonSignedState(100, 132);
+        const spawnReport = tickHvIntegration(spawnState);
+
+        assert.strictEqual(spawnReport.spawned_this_turn, true);
+        assert.strictEqual(spawnReport.turns_until_spawn, 0);
+        assert.deepStrictEqual(spawnReport.spawned_brigade_ids, [
+            'hv_1st_guards_tigers',
+            'hv_4th_guards_split',
+            'hv_5th_guards_karlovac',
+            'hv_7th_guards_varazdin',
+        ]);
+        assert.strictEqual(spawnState.meta.hv_brigades_spawned, true);
+
+        const expectedPersonnel: Record<string, number> = {
+            hv_4th_guards_split: 3000,
+            hv_7th_guards_varazdin: 2500,
+            hv_1st_guards_tigers: 2000,
+            hv_5th_guards_karlovac: 2500,
+        };
+        const expectedLocations: Record<string, string> = {
+            // Authored primaries where HRHB controls them.
+            hv_4th_guards_split: 'op:livno:livno_2',
+            hv_7th_guards_varazdin: 'op:duvno:tomislavgrad_2',
+            // Authored primaries are RS-held; ordered fallbacks apply.
+            hv_1st_guards_tigers: 'op:livno:livno_2',
+            hv_5th_guards_karlovac: 'op:duvno:tomislavgrad_2',
+        };
+        for (const def of HV_BRIGADE_DEFS) {
+            const f = spawnState.military.formations[def.id]!;
+            assert.ok(f, `${def.id} must exist at t132`);
+            assert.strictEqual(f.id, def.id);
+            assert.strictEqual(f.personnel, expectedPersonnel[def.id], `${def.id} personnel`);
+            assert.strictEqual(f.location_osid, expectedLocations[def.id], `${def.id} deployment/fallback`);
+            assert.strictEqual(spawnState.political.political_controllers?.[f.location_osid!], 'HRHB');
+        }
+
+        (spawnState.meta as any).turn = 133;
+        const afterReport = tickHvIntegration(spawnState);
+        assert.strictEqual(afterReport.already_spawned, true);
+        assert.strictEqual(afterReport.spawned_this_turn, false);
+        assert.strictEqual(afterReport.spawned_brigade_ids.length, 0);
+        assert.strictEqual(
+            HV_BRIGADE_DEFS.filter(def => spawnState.military.formations[def.id] != null).length,
+            4,
+            'no respawn at t133',
+        );
     });
 
     test('HV brigades have correct stats — high equipment, cohesion, morale', () => {
@@ -427,3 +505,25 @@ describe('Washington patron override (Path B)', () => {
         assert.strictEqual(state.political.rbih_hrhb_state!.ceasefire_since_turn, currentTurn);
     });
 });
+
+test('canonical cold reload preserves actual HV constructor values and authored stats',async()=>{
+    const root=process.cwd(),dir=await mkdtemp(join(tmpdir(),'hv-constructor-reload-'));
+    const turn=100+HV_PREPARATION_DELAY;
+    // Normalize only the surrounding fixture before invoking the real constructor.
+    const state=deserializeState(serializeState(makeWashingtonSignedState(100,turn)));
+    const report=tickHvIntegration(state);
+    assert.strictEqual(report.spawned_this_turn,true);
+    assert.strictEqual(report.spawned_brigade_ids.length,4);
+    const save=join(dir,'hv-save.json'),output=join(dir,'loaded-formations.v8');
+    await writeFile(save,serializeState(state));
+    const child=await promisify(execFile)(process.execPath,['--import','tsx',join(root,'tests/_helpers/read_canonical_formations.ts'),root,save,output],{cwd:root,timeout:30_000,maxBuffer:1024*1024});
+    await writeFile(join(dir,'child.stdout.log'),child.stdout);await writeFile(join(dir,'child.stderr.log'),child.stderr);
+    const loaded=deserializeV8(await readFile(output));assert.notStrictEqual(loaded.pid,process.pid);
+    for(const def of HV_BRIGADE_DEFS){
+        const actual=state.military.formations[def.id];
+        assert.ok(isDeepStrictEqual(actual,loaded.formations[def.id]),`${def.id} initialized before save; artifacts=${dir}`);
+        assert.strictEqual(actual.morale,def.morale);assert.strictEqual(actual.cohesion,def.cohesion);
+        assert.strictEqual(actual.personnel,def.personnel);assert.deepStrictEqual(actual.composition,def.composition);
+    }
+    await writeFile(join(dir,'receipt.json'),JSON.stringify({parentPid:process.pid,childPid:loaded.pid,spawned:report.spawned_brigade_ids,equalFormationValues:true},null,2));
+},45_000);

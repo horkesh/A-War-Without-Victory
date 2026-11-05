@@ -1,0 +1,124 @@
+{
+  "schema": "awwv.pre-first-advance-paramilitary-policy.historian-review.v1",
+  "date": "2026-10-24",
+  "seat": "Historian",
+  "independent": true,
+  "implementerExcluded": true,
+  "scope": "static_read_only_proposal_review",
+  "reviewedHead": "b371adc3e0935825649e5eda4e6bbd45a44a359d",
+  "verdict": "GO_WITH_BINDING_CONDITIONS",
+  "implementationAuthorizedByThisSeat": false,
+  "historicalRuling": {
+    "earlyGeneralPolicyOfferingJustified": true,
+    "exactDatedThreeOptionIncidentEstablished": false,
+    "approvedInterpretation": "Counterfactual command abstraction anchored in the RBiH Presidency's 8-9 April 1992 effort to place armed individuals and units under a single TO command.",
+    "historicalDefault": "always_deny",
+    "historicalDefaultMeaning": "Integration-or-refusal policy toward a parallel paramilitary track, not a claim of complete effective control at turn 0.",
+    "counterfactualOptions": [
+      "ask",
+      "always_allow"
+    ]
+  },
+  "sensitiveHistoryRuling": {
+    "ring": "Ring 1 existing bounded authorization surface",
+    "ring3SurfaceCreated": false,
+    "rewardForAtrocityBrightLineEngaged": true,
+    "brightLinePreservedConditionally": true,
+    "reason": "The complete existing policy event may be offered earlier without a new atrocity instruction, but always_allow can enable two immediate simulated captures and may never be framed as a benefit, historical parity, or calibration remedy."
+  },
+  "conditions": [
+    {
+      "id": "HIST-1",
+      "requirement": "Treat the turn-0 event as a general command-policy abstraction after identity; add no dated meeting, order, quotation, or claim that the exact three-option decision occurred historically."
+    },
+    {
+      "id": "HIST-2",
+      "requirement": "Preserve the distinction between an integration-or-refusal policy and uneven effective control; do not imply that all irregular, criminal, or local fighting groups were subordinated at campaign birth."
+    },
+    {
+      "id": "HIST-3",
+      "requirement": "Keep always_deny as the sole historical default and ask/always_allow as counterfactual; no preselection, hidden Historical-mode inference, or automatic consent."
+    },
+    {
+      "id": "HIST-4",
+      "requirement": "Move the whole existing event with all three authored options, descriptions, source fields, effects, flags, dimensions, notifications, consequences, receipts, civilian-casualty accounting, and war-crime accounting; no split authority or direct policy write."
+    },
+    {
+      "id": "HIST-5",
+      "requirement": "Use the two retained turn-1 bot captures only as capability evidence; make no historical capture claim, no all-seven-differences causal claim, and no calibration tuning or adoption claim."
+    },
+    {
+      "id": "HIST-6",
+      "requirement": "Add no reward, parity, recovery, optimization, territorial-opportunity, military-necessity, score, achievement, or casualty-to-territory framing for always_allow."
+    },
+    {
+      "id": "HIST-7",
+      "requirement": "Bind the April timing justification to ICTY Hadzihasanovic and Kubura IT-01-47-T paragraphs 312-313 and/or BB1 pages 166-169. Do not use UN A/54/549 paragraph 35 as evidence of Sarajevo's April single-command policy; it concerns the Srebrenica enclave's raids and counter-raids."
+    },
+    {
+      "id": "HIST-8",
+      "requirement": "Leave event data, headless/no-player behavior, sweep/target/control/scoring logic, thresholds, protected controls, n91-n95, and all telemetry unchanged; any expansion returns to the panel."
+    },
+    {
+      "id": "HIST-9",
+      "requirement": "Treat this as one independent Historian seat only; implementation requires every other specified review and unanimous section-6 panel approval."
+    }
+  ],
+  "sourceAudit": [
+    {
+      "source": "ICTY Hadzihasanovic and Kubura Trial Judgment IT-01-47-T",
+      "pinpoint": "paragraphs 312-313",
+      "finding": "On 8 April 1992 the Presidency established the RBiH TO Staff; on 9 April it ordered armed individuals and units to report to TO staffs and come under a single command.",
+      "supports": "opening timing for a general command-policy abstraction"
+    },
+    {
+      "source": "ICTY Oric Trial Judgment IT-03-68-T",
+      "pinpoint": "paragraphs 123-126",
+      "finding": "The Presidency's May-July 1992 decrees sought a joint armed structure while effective organization remained incomplete.",
+      "supports": "policy-versus-capacity distinction"
+    },
+    {
+      "source": "Balkan Battlegrounds Volume I",
+      "pinpoint": "pages 166-169",
+      "finding": "The Patriotic League was organized with Presidency/SDA approval before the war and its command entered the state TO structure in April 1992.",
+      "supports": "prewar provenance and April integration timing"
+    },
+    {
+      "source": "Balkan Battlegrounds Volume I",
+      "pinpoint": "pages 189, 216, 222-223",
+      "finding": "Early Sarajevo forces remained heterogeneous and partly autonomous; professionalization and the Caco/Celo crackdown came later.",
+      "supports": "no claim of complete turn-0 control"
+    },
+    {
+      "source": "UN A/54/549",
+      "pinpoint": "paragraph 35",
+      "finding": "Describes raids and counter-raids from the Srebrenica enclave and reported abuses during Bosniac expansion.",
+      "supports": "not admissible as evidence for Sarajevo's April single-command policy"
+    }
+  ],
+  "causalBoundary": {
+    "proven": "Retained evidence shows two immediate turn-1 RBiH bot captures absent from the ordinary player lane.",
+    "notProven": "Those captures are historically authentic RBiH paramilitary actions, the timing difference caused all seven January differences, or any calibration floor should change."
+  },
+  "preserve": [
+    "n91",
+    "n92",
+    "n93",
+    "n94",
+    "n95",
+    "all telemetry",
+    "event data",
+    "headless and bot behavior",
+    "sweep, target, control, capture, and scoring semantics",
+    "protected controls and acceptance criteria"
+  ],
+  "execution": {
+    "sourceOrRuntimeWrites": false,
+    "documentationWrites": false,
+    "tests": false,
+    "build": false,
+    "campaign": false,
+    "package": false,
+    "reviewArtifactWritesOnly": true
+  }
+}

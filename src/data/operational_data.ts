@@ -203,7 +203,7 @@ export async function loadOsidAreas(baseDir?: string): Promise<OsidAreaData> {
 }
 
 export function backfillFormationLocationOsid(
-    state: { military: { formations?: Record<string, { hq_sid?: string; location_osid?: string; kind?: string }> } },
+    state: { military: { formations?: Record<string, { hq_sid?: string; location_osid?: string; kind?: string; status?: 'active' | 'inactive' }> } },
     canonicalToOperational: CanonicalToOperationalMap
 ): void {
     const formations = state.military.formations;
@@ -211,7 +211,13 @@ export function backfillFormationLocationOsid(
     const ids = Object.keys(formations).sort(strictCompare);
     for (const id of ids) {
         const f = formations[id];
-        if (!f || f.location_osid != null) continue;
+        if (!f) continue;
+        // Inactive records include terminal physical retreats that deliberately
+        // cleared location_osid. Backfill must not resurrect a map location for
+        // them; status-absent legacy records keep the original compatibility
+        // behavior and still backfill.
+        if (f.status === 'inactive') continue;
+        if (f.location_osid != null) continue;
         // Corps/army HQ formations are command structures, not map entities.
         if (f.kind === 'corps_asset' || f.kind === 'army_hq' || f.kind === 'corps') continue;
         const osid = resolveLocationOsid(f.hq_sid, canonicalToOperational);

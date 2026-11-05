@@ -1,0 +1,266 @@
+{
+  "schema": "awwv.cold-load-validation.native39-prep-review.v1",
+  "reviewedAt": "2026-10-25",
+  "reviewer": "desktop_terrain_canon_review",
+  "verdict": "GO",
+  "independent": true,
+  "observerHead": "77a2cc8e6b270474d0c3beef48b655c2903192e8",
+  "packageCodeHead": "12a4680f04fc3e4cbd8b2fb5f5133b472afd1fd6",
+  "configSha256": "bdbcca5d65d128e6d33855122f82458368546f2f1859c13a8fd6750132f6a137",
+  "entry": {
+    "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/native39.cjs",
+    "bytes": 22138,
+    "sha256": "1489e240ba459caa9efe58cb3e37f0f0e5e811c83c24aab485f524044ebce824"
+  },
+  "manifest": {
+    "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/FINAL_MANIFEST.json",
+    "bytes": 5650,
+    "sha256": "7dad871fe199e0446dc88754555588f1e7b0109bd22aaa6683e1d39a365e6d42"
+  },
+  "openingReviewSha256": "816f0b167e4e078aa42b923b72d9c327b34bbb06dedaf432c5d595ddda008aa6",
+  "scope": "Independent preparation review for one fresh production-harness RBiH turn-39 execution. GO authorizes one attempt only after a new reviewed CHECK receipt succeeds. It does not treat the synthetic fixture as performance evidence and does not establish the turn-39 result.",
+  "authority": {
+    "openingAmendment": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native03-offline-amendment-v1/evaluate-actual-01/OFFLINE_AMENDMENT.json",
+      "sha256": "61ce01bb8bb83609749613b987ec867e7c0a37299374de1eda746cb116f0e3a3",
+      "pass": true,
+      "corrected": "25/25",
+      "nativeRunRepeated": false
+    },
+    "openingIndependentReview": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native03-offline-amendment-v1/INDEPENDENT_TARGETED_REVIEW.json",
+      "sha256": "816f0b167e4e078aa42b923b72d9c327b34bbb06dedaf432c5d595ddda008aa6",
+      "verdict": "GO",
+      "nativeOpeningPrerequisite": "QUALIFIED_FROM_RETAINED_NATIVE03_EVIDENCE"
+    },
+    "packageBinding": {
+      "sha256": "d336895a95e03be095ae76e7b654d152beae008ce93497a48ad8bb6cdf78051b"
+    },
+    "packageReview": {
+      "sha256": "2286b240b1eba39f7d1030ff148fbcf6f22592502031f3cf3bd1cf6841e2a99f"
+    },
+    "observerReview": {
+      "sha256": "8d37d119efe6dfe66484bbe3b91ecc801e2c993ba166767a9344605b767cf33f"
+    },
+    "terminalCI": {
+      "sha256": "60a0e9835accec9ee60edbeb9ba90bc1c471e2fae13331ecc662f367ca9c0942",
+      "status": "TERMINAL_SUCCESS",
+      "runs": 2
+    },
+    "package": {
+      "head": "12a4680f04fc3e4cbd8b2fb5f5133b472afd1fd6",
+      "count": 1228,
+      "aggregateSha256": "306895aa25404df21e16968be2863ccd7dd4b9571ab02a6c4248ed679948208b"
+    },
+    "observer": {
+      "head": "77a2cc8e6b270474d0c3beef48b655c2903192e8"
+    },
+    "legacyPreservation": {
+      "sha256": "26c4f3dd2eda428601eb4c48b109d54cf38cf9efe11c4f716299b4b7267ee486",
+      "runs": 8,
+      "failedAttempts": 8,
+      "rawProfiles": 6,
+      "inventoryGroups": 22,
+      "records": 1213
+    }
+  },
+  "frozenPacket": {
+    "config": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/CONFIG.actual.json",
+      "bytes": 9250,
+      "sha256": "bdbcca5d65d128e6d33855122f82458368546f2f1859c13a8fd6750132f6a137"
+    },
+    "manifestRows": 6,
+    "allManifestRowsMatch": true,
+    "worktreeClean": true,
+    "headMatchesObserver": true,
+    "fixedOutputsAbsent": true
+  },
+  "cheapEvidence": {
+    "selftest": {
+      "receipt": {
+        "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/test-actual-02/receipt.json",
+        "bytes": 3471,
+        "sha256": "9a0ddb2ed54e29cc97869ed06757324afe2b234e6cc81325c05f285095dfd8ea",
+        "childExit": 0,
+        "wrapperExit": 0,
+        "timedOut": false,
+        "artifactContractPass": true
+      },
+      "result": {
+        "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/test-actual-02/TEST_RESULT.json",
+        "bytes": 1252,
+        "sha256": "a3750376378b539e7c3e22aae339a15cec1f7ceb0341f3245720fbe225f81d15",
+        "pass": true,
+        "passed": 12,
+        "total": 12,
+        "nativeInvoked": false,
+        "fixturePerformanceEvidence": false
+      },
+      "fixtureDeclaration": {
+        "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/test-actual-02/FIXTURE_DECLARATION.json",
+        "bytes": 662,
+        "sha256": "6449eeb578808255903626dd6e9ec0463420ca12fbb2acf033af915a42a2107d",
+        "performanceEvidence": false
+      }
+    },
+    "defaultCheck": {
+      "receipt": {
+        "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/check-default-02/receipt.json",
+        "bytes": 3440,
+        "sha256": "134108dce6e63b47dfc53e87f2a83fc0a3bf4786502b002c8aea2f80266cb169",
+        "childExit": 0,
+        "wrapperExit": 0,
+        "timedOut": false,
+        "artifactContractPass": true
+      },
+      "artifact": {
+        "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/check-default-02/CHECK.json",
+        "bytes": 212,
+        "sha256": "5ac66a644205df902fe1008d9b8447ea3518ec3c6f63faabdb0fcceb0128b105",
+        "status": "HOLD_PREP_REVIEW_PENDING",
+        "nativeReady": false
+      }
+    },
+    "preservedEarlierFailure": {
+      "receipt": {
+        "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/check-default-01/receipt.json",
+        "bytes": 3504,
+        "sha256": "de98cd9b37d4135dc23685c4317f9bc1a28166448183311f5131b2b364efbdc8",
+        "childExit": 0,
+        "wrapperExit": 126,
+        "artifactContractPass": false
+      },
+      "reason": "The earlier default check allowed both CHECK.json and NATIVE39_READY.json even though the HOLD branch emitted only CHECK.json. It remains retained and is not counted as a successful readiness check."
+    }
+  },
+  "executionContract": {
+    "command": [
+      "tools/ui/paradox_local_qa.cjs",
+      "--turns=39",
+      "--faction=RBiH",
+      "--label=player-parity-rbih-t39-20261025-04",
+      "--historical-choice",
+      "--rbih-paramilitary-policy=always_allow",
+      "--officer-succession-policy=historical",
+      "--skip-initial-tour",
+      "--no-checkpoint-tour",
+      "--archive-turn-autosaves",
+      "--save-load-proof",
+      "--cdp-network-collection-v3",
+      "--packaged-executable=dist-packaged/desktop-cold-load-20261025-02/win-unpacked/A War Without Victory.exe"
+    ],
+    "attemptLimit": 1,
+    "retry": false,
+    "childTimeoutMs": 2100000,
+    "wrapperTimeoutMs": 2160000,
+    "expectedDurationMs": {
+      "min": 720000,
+      "max": 960000
+    },
+    "freshOutputLabel": "player-parity-rbih-t39-20261025-04",
+    "preservedWrapperRequired": true,
+    "reviewedCheckRequiredBeforeRun": true
+  },
+  "acceptance": {
+    "totalGates": 38,
+    "acceptedInfrastructurePredicates": 17,
+    "infrastructurePredicates": [
+      "wrapper-and-artifacts-authentic",
+      "successful-result",
+      "start-binding",
+      "initial-real-load",
+      "target-and-blockers",
+      "consoleMessages",
+      "pageErrors",
+      "networkFailures",
+      "unexpectedMainProcessStderr",
+      "settled-archive-coverage",
+      "provisional-archive-coverage",
+      "canonical-final-player",
+      "save-load-canonical-and-loaded-projection",
+      "manifest-file",
+      "main-stream-contiguous",
+      "assignment-seals",
+      "stderr-classification"
+    ],
+    "provenanceAndRuntime": [
+      "candidate-clean-provenance",
+      "package-provenance",
+      "harness-provenance",
+      "observer-provenance",
+      "opening-amendment-provenance",
+      "historical-officer-provenance",
+      "child-and-native-preflight",
+      "package-comparison-closing-chain",
+      "external-inventory-live",
+      "progress-bound",
+      "netlog-and-audio-lifecycle",
+      "cdp-v3-complete"
+    ],
+    "playerAndCalibration": [
+      "visible-player-choices",
+      "historical-officer-policy-through39",
+      "target39-score-707",
+      "formerly-correct-n91",
+      "formerly-correct-n92",
+      "controller-save-exact712",
+      "controller-projection-exact712",
+      "kolovarice-rs",
+      "tosici-rbih"
+    ],
+    "paintedScoreMinimum": 707,
+    "paintedPopulation": 712,
+    "controllersExact": 712,
+    "formerlyCorrectLosses": {
+      "n91": 0,
+      "n92": 0
+    },
+    "landmarks": {
+      "op:gorazde:kolovarice": "RS",
+      "op:trnovo:tosici": "RBiH"
+    },
+    "turn": 39,
+    "faction": "RBiH",
+    "decisionMode": "historical",
+    "autonomyLevel": 2,
+    "policy": "always_allow",
+    "archiveCoverage": {
+      "settledTurns": "1..39",
+      "provisionalTurns": "1..39"
+    },
+    "saveLoadCanonicalAndProjectionExact": true,
+    "cdpStrictZeroCounters": true,
+    "audioLifecycleRequired": true,
+    "normalPlayerChoicesRequired": true,
+    "historicalOfficerPolicyRequired": true
+  },
+  "negativeControls": [
+    "explicit failed:false rejected",
+    "explicit error:null rejected",
+    "explicit cdpNetworkCollectionError:null rejected",
+    "wrong result command rejected",
+    "start binding drift rejected",
+    "missing settled archive rejected",
+    "nonzero CDP target failure rejected",
+    "wrong visible choice rejected",
+    "711-controller final save rejected",
+    "pending CDP state rejected"
+  ],
+  "findings": [
+    "The packet binds dual provenance honestly: package code remains at 12a4680f while observer-only code and terminal CI are at 77a2cc8e.",
+    "The native03 opening prerequisite is admitted through the immutable 25/25 offline amendment and its independent GO review; the native39 packet does not relabel the original 22/25 postcheck.",
+    "The 38/38 fixture is producer-shaped interface evidence only. It is explicitly marked performanceEvidence:false and cannot satisfy the 707/712 turn-39 acceptance result.",
+    "The evaluator includes the accepted 17 infrastructure predicates and retains strict provenance, CDP, audio, archive, choice, officer, preservation, score, formerly-correct, controller-count, and landmark gates.",
+    "A new reviewed CHECK must complete 0/0 with NATIVE39_READY.json before the one authorized production run. Any failure ends the attempt; no retry is authorized."
+  ],
+  "decision": {
+    "authorizeReviewedCheck": true,
+    "authorizeOneNative39AttemptAfterReviewedCheckPass": true,
+    "nativeAttemptLimit": 1,
+    "retry": false,
+    "turn39QualifiedNow": false,
+    "performanceEvidencePresent": false,
+    "stopRule": "Stop after the single run and preserved postcheck. If any stage fails, retain all evidence and diagnose without rerunning."
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "schema": "awwv.boundary-observer-close.v1",
+  "closed_utc": "2026-10-21T05:10:06.3815574Z",
+  "writes_closed": true,
+  "implementation_complete": true,
+  "independent_review_complete": false,
+  "next_owner": "fresh independent Sol 770 review",
+  "head_unchanged": "7de47be2050cbe2efee78b9028bf6b3a03bf3fca",
+  "git_actions": [],
+  "production_files_changed": 3,
+  "test_files_changed": 2,
+  "other_tracked_changes": 0,
+  "diff_check_exit": 0,
+  "final_focused_exit": 0,
+  "final_typecheck_exit": 0,
+  "campaigns": 0,
+  "full_suites": 0,
+  "builds": 0,
+  "replays": 0,
+  "run_turn_calls": 0
+}

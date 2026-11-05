@@ -29,7 +29,7 @@ test('latest-run final-save artifact ownership stays aligned across docs, script
     const packageJson = JSON.parse(packageJsonRaw) as { scripts: Record<string, string> };
     assert.match(
         packageJson.scripts['sim:scenario:run:40w'],
-        /run_scenario_with_preflight\.ts --scenario data\/scenarios\/apr1992_definitive_40w\.json --unique --map --out runs/,
+        /run_scenario_with_preflight\.ts --scenario data\/scenarios\/apr1992_definitive_188w\.json --weeks 40 --unique --map --out runs/,
     );
     assert.match(
         packageJson.scripts['sim:scenario:run:default'],

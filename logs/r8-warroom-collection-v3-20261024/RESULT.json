@@ -1,0 +1,173 @@
+{
+  "status": "DIAGNOSTIC_COLLECTION_QUALIFIED_NATIVE_BLOCKED",
+  "sourceHead": "81a65d76fce4936ea39c6d4b4d5df144139c8ba5",
+  "flag": "--cdp-network-collection-v3",
+  "schema": "awwv.r8-warroom.cdp-network-collection.v3",
+  "nonAdmitting": true,
+  "independentReview": "PASS / GO",
+  "tests": {
+    "helper": {
+      "passed": 47,
+      "failed": 0,
+      "attempt": "tmp/r8-warroom-collection-v3-20261024/implementation/history-bound-helper-green"
+    },
+    "harness": {
+      "passed": 83,
+      "failed": 0,
+      "reusedUnchanged": true,
+      "attempt": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-focused-final"
+    },
+    "earlierCombined": {
+      "passed": 128,
+      "failed": 0,
+      "helperBeforeFinalHistoryBound": true
+    },
+    "syntax": "child/wrapper0/0",
+    "nonincrementalTypescript": "child/wrapper0/0"
+  },
+  "preservation": {
+    "pass": true,
+    "exact": [
+      {
+        "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+        "bytes": 123007933,
+        "sha256": "b6abcbe9523fe1d07694684ff5a0e61d69505a70958dab3c3383d5da30d4fb54",
+        "currentBytes": 123007933,
+        "currentSha256": "b6abcbe9523fe1d07694684ff5a0e61d69505a70958dab3c3383d5da30d4fb54",
+        "pass": true
+      },
+      {
+        "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+        "bytes": 1041,
+        "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+        "currentBytes": 1041,
+        "currentSha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+        "pass": true
+      },
+      {
+        "path": "tmp/r8-native-shakedown-20261024/prep/read_native_result.cjs",
+        "bytes": 7150,
+        "sha256": "4acc5c288d25aefaba70231bd2646cd871fdd39083bc9d5173639bad2e5e590d",
+        "currentBytes": 7150,
+        "currentSha256": "4acc5c288d25aefaba70231bd2646cd871fdd39083bc9d5173639bad2e5e590d",
+        "pass": true
+      }
+    ],
+    "frozen": [
+      {
+        "name": "classifyExpectedRequestAbort",
+        "sha256": "a03d822e51df091f2bda2b5e54dbef2b41b9f2406b535538669d0dd586a933cd",
+        "currentSha256": "a03d822e51df091f2bda2b5e54dbef2b41b9f2406b535538669d0dd586a933cd",
+        "pass": true
+      },
+      {
+        "name": "classifyExpectedTileFetchAbort",
+        "sha256": "2bd31503104a27700e1f66ff0a77ffabe44c7dfa08a59f777f8cfee769a63d1c",
+        "currentSha256": "2bd31503104a27700e1f66ff0a77ffabe44c7dfa08a59f777f8cfee769a63d1c",
+        "pass": true
+      },
+      {
+        "name": "attributeTileFetchAborts",
+        "sha256": "9d66905adfdd048ee508794fac81c98cb36f96452f8e771b201a8441d30f6a18",
+        "currentSha256": "9d66905adfdd048ee508794fac81c98cb36f96452f8e771b201a8441d30f6a18",
+        "pass": true
+      },
+      {
+        "name": "classifyExpectedAmbientLifecycleAbort",
+        "sha256": "23e953c3b0c697f256c81085eaa4ae1d97c9ca1068d788d292e28eefa7db91f6",
+        "currentSha256": "23e953c3b0c697f256c81085eaa4ae1d97c9ca1068d788d292e28eefa7db91f6",
+        "pass": true
+      },
+      {
+        "name": "attributeAmbientLifecycleAborts",
+        "sha256": "769f36c4c94ff5548da8eff6f944e3106ab59eb89004c2cabde1edeb294f26d2",
+        "currentSha256": "769f36c4c94ff5548da8eff6f944e3106ab59eb89004c2cabde1edeb294f26d2",
+        "pass": true
+      }
+    ],
+    "priorBindings": {
+      "count": 3226,
+      "excluded": 0,
+      "pass": true,
+      "failures": []
+    },
+    "n94": {
+      "count": 40,
+      "failures": []
+    },
+    "packageEvidenceReused": "tmp/baseline-rebless-20261024/post-push-preservation.json; no package/build/native writes this task"
+  },
+  "sourceFiles": [
+    {
+      "path": "tools/ui/cdp_network_collector.cjs",
+      "bytes": 26866,
+      "sha256": "02e5d8306a0f8e3ac082a56d33e12898d9d88bc54f9a0023d79ccf9af82c6607"
+    },
+    {
+      "path": "tools/ui/paradox_local_qa.cjs",
+      "bytes": 325225,
+      "sha256": "f2e5c9681d449fc4aec1271a7e9152cdeeaf50bca0925c1d6827bf3745d4ecd0"
+    },
+    {
+      "path": "tests/cdp_network_collector.test.ts",
+      "bytes": 30395,
+      "sha256": "c34f24f38a75f856204b4d5d2005d4fc13a4c46534b578d5da702b2d4a3bc772"
+    },
+    {
+      "path": "tests/paradox_local_qa_harness.test.ts",
+      "bytes": 161910,
+      "sha256": "d1a4288ece34f43dd3d944f9c3f1c51e12dc36ad6a756ce5a5a08166197fa061"
+    }
+  ],
+  "residuals": [
+    "Playwright/CDP/NetLog identities remain separate; no new admission or reader.",
+    "Post-failure body availability and packaged asset identity remain unmeasured.",
+    "One page-target session may miss OOPIF media; zero candidates means coverage NOT ESTABLISHED.",
+    "Existing native warroom failure, Ajnie and faction Save/load gates remain open."
+  ],
+  "nativeRuns": 0,
+  "browserRuns": 0,
+  "campaigns": 0,
+  "packageBuilds": 0,
+  "calibrationChanges": 0,
+  "commits": 0,
+  "pushes": 0,
+  "rawEvidence": "tmp/r8-warroom-collection-v3-20261024",
+  "portableFiles": [
+    {
+      "path": "logs\\r8-warroom-collection-v3-20261024\\CONTRACT.md",
+      "bytes": 24218,
+      "sha256": "1b8bd2f1dfcf757c802599d8723b60b670e381dc5132c440c992b1911e92de37"
+    },
+    {
+      "path": "logs\\r8-warroom-collection-v3-20261024\\REVIEW_CONTRACT.md",
+      "bytes": 11002,
+      "sha256": "0f9ad7b1a77caaeddb41081b76cb77233aed6e276dcf68b0bd15ab79add6d048"
+    },
+    {
+      "path": "logs\\r8-warroom-collection-v3-20261024\\INDEPENDENT_REVIEW.md",
+      "bytes": 12266,
+      "sha256": "f7433e0eed92679c1074788da967ac7397f94e5de3a10589392149621fe3deda"
+    },
+    {
+      "path": "logs\\r8-warroom-collection-v3-20261024\\PRESERVATION.json",
+      "bytes": 2612,
+      "sha256": "948b7764cc0b72d1501c3ce89c6c17586d1ba0a65c420387658c50e0ca2c45ba"
+    },
+    {
+      "path": "logs\\r8-warroom-collection-v3-20261024\\CORRECTED_FINAL_RECEIPT.json",
+      "bytes": 3373,
+      "sha256": "3e1d0205d87dc35cceb9bc53f151ba920cc171dd12411dd24bbc3eecfab3ef6f"
+    },
+    {
+      "path": "logs\\r8-warroom-collection-v3-20261024\\HISTORY_BOUND_CORRECTION_RECEIPT.json",
+      "bytes": 1916,
+      "sha256": "790c19303a3260ca4076395d6e80dd46980cd16fe7fbce5f661f813456174c33"
+    },
+    {
+      "path": "logs\\r8-warroom-collection-v3-20261024\\RETAINED_REQUEST_VOLUME.json",
+      "bytes": 406,
+      "sha256": "d2093757f0ace9b2f928a9645f3d52b9d60751e471dad2de48099f317f526ab4"
+    }
+  ]
+}

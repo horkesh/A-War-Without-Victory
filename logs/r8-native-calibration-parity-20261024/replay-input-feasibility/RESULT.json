@@ -1,0 +1,39 @@
+{
+  "schema": "awwv.player-replay-input-feasibility-result.v1",
+  "status": "FEASIBILITY_COMPLETE_PLAYER_QUALIFICATION_INCOMPLETE",
+  "stopLabel": "MISSING_REPLAYABLE_INPUT_CONTRACT",
+  "head": "81a65d76fce4936ea39c6d4b4d5df144139c8ba5",
+  "finding": "Retained split records do not establish complete consumed order; inspected production replay only selects stored frames.",
+  "narrative": "FEASIBILITY.md",
+  "findings": "FEASIBILITY.json",
+  "preservation": "checks/PRESERVATION.json",
+  "sameInputDeterminism": "UNREACHED",
+  "independentReview": {
+    "status": "GO",
+    "report": "review/REVIEW.md",
+    "sha256": "6fd8d84fa296b1963c137ddbbb54b1caa6d85e7fc4f92a1fd5506387fee68658"
+  },
+  "documentationChecks": {
+    "testsPassed": 40,
+    "testsFailed": 0,
+    "planIndexExit": 0,
+    "diffCheckExit": 0,
+    "unchangedProtectedFiles": 10,
+    "receipt": "checks/governance-commands.json"
+  },
+  "next": {
+    "status": "PROPOSED_NOT_IMPLEMENTED",
+    "scope": "Versioned production action recording and reexecution consumer; focused offline production-path/order checks and independent review",
+    "nativeOrCampaign": "NONE",
+    "acceptanceConditions": [
+      "Bind canonical starting state before action ordinal 0",
+      "Assign ordinals only after durable successful serialization/autosave/broadcast; exclude rolled-back or failed attempts",
+      "Retain exact payload/authority and per-settled-state comparison; no invented old inputs"
+    ]
+  },
+  "changes": "Documentation/evidence only; all retained source changes preserved; no gameplay/tuning/reference/baseline changes",
+  "finalUnchanged": {
+    "inspectedSources": 10,
+    "protectedCurrentFiles": 10
+  }
+}

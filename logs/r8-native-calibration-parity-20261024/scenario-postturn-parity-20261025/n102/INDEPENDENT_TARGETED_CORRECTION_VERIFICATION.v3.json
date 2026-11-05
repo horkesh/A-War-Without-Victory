@@ -1,0 +1,124 @@
+{
+  "schema": "awwv.scenario-osid-repair-regression-independent-targeted-correction-verification.v3",
+  "reviewed_at": "2026-10-25",
+  "review_scope": "Targeted verification of the three blockers in INDEPENDENT_PRELAUNCH_REVIEW.json plus directly introduced v3 edges; no general re-review.",
+  "original_review": {
+    "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/regression-v1/INDEPENDENT_PRELAUNCH_REVIEW.json",
+    "sha256": "6cdd58784fb7d99179682f871ea134c930693a7a5c07621525462a51b9bec206",
+    "verdict": "NO_GO",
+    "preserved_unchanged": true
+  },
+  "verdict": "GO_TO_SOLE_EXACT_FINALIZED_V3_188_WEEK_COMMAND",
+  "findings": [],
+  "campaign_executed_by_this_verification": false,
+  "simulation_executed_by_this_verification": false,
+  "new_preflight_or_selftest_executed_by_this_verification": false,
+  "authorization_boundary": "This GO releases only the exact command_argv in FINALIZED.v3.json for one no-retry authoritative 188-week qualifier. It does not qualify the trajectory, authorize tuning or baseline adoption, waive any campaign gate, or authorize the full suite before the campaign qualifies.",
+  "frozen_scope": {
+    "worktree": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+    "head": "b30597f49aad99032781c251b41a9de886cce3be",
+    "parent": "295d5f7290b1085dc76bbebb41df72386cd6b705",
+    "tracked_worktree_clean": true,
+    "expected_candidate": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n102",
+    "expected_candidate_absent": true,
+    "campaign_attempt_dir": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/regression-v1/campaign-01",
+    "campaign_attempt_dir_absent": true,
+    "node": "v22.23.2"
+  },
+  "frozen_hashes": {
+    "qualification_mts": "87ffab6fc6b1309dec1130ed1a6edb255c34c45b8ef1efebd1009edaf9f30ee6",
+    "config_bound_v3_json": "bce575f6a324d8ec4bc002a4ead81c0f99309953023498e7f3f78133afe2012a",
+    "launch_manifest_v3_json": "2972b66f46d668d02e046d9e584337c21a9bb98b29d56bd9f2d6d129886e3d71",
+    "wrapper_config_v3_json": "9b5da00e3c250a0fa0e6dee01971e3580dac5b920ce2d085739c62724b1e7cd5",
+    "finalized_v3_json": "f9ba7370be61568e160f2aaee64f0ce06414a02d4f3e557484d36fc8aae74a73",
+    "preparation_result_v3_json": "6de497e2b09ef131ad5e209783bf73ffeedc5c016ac5a07aff195c6c3a0e4fa3"
+  },
+  "correction_verification": [
+    {
+      "prior_finding": "P1-FINALIZED-CONFIG-BINDING-STALE-AND-UNENFORCED",
+      "status": "RESOLVED",
+      "evidence": [
+        "FINALIZED.v3.json records the actual entry, config, manifest, and wrapper byte counts and SHA-256 hashes; every recorded hash matches the frozen file.",
+        "The exact child argv supplies --manifest LAUNCH_MANIFEST.v3.json and --manifest-sha256 2972b66f46d668d02e046d9e584337c21a9bb98b29d56bd9f2d6d129886e3d71.",
+        "qualification.mts validates the external manifest bytes before mode dispatch, then requires the manifest entry/config rows to equal the actual running entry and selected config file rows.",
+        "validateConfig now enforces exact node path/version, 188 horizon, canonical scenario, 25 explicit legacy save-week arguments, four checkpoints, minimum-floor semantics, n102/n101 paths, comparison paths, retained roots, diagnostic environment, and 27 bound rows.",
+        "Wrapper, manifest, and FINALIZED.v3 agree on the 63-artifact allowlist, campaign-01 leaf, 2,100,000 ms cap, 120,000 ms closing reserve, entry, config, manifest, and manifest-hash argument."
+      ]
+    },
+    {
+      "prior_finding": "P1-GRAPH-ROSTER-CONSISTENCY-INCOMPLETE",
+      "status": "RESOLVED",
+      "evidence": [
+        "graphCheck validates assigned_brigade_ids and reserve_brigade_ids as required arrays and rear_brigade_ids as the optional array defined by CorpsFrontSector in src/state/game_state.ts:2674.",
+        "Every assigned, reserve, and rear roster ID must exist and point back to the same sector through formation.assignment.sector_id.",
+        "Every formation with a sector assignment must appear in a sector roster; duplicate membership across sectors or roles fails.",
+        "Malformed required rosters and non-string entries fail closed.",
+        "Read-only application of the predicate to the retained real GREEN one-week save found 587 fronts, 157 sectors, zero malformed sectors, zero roster/assignment mismatches, zero duplicate memberships, and zero assigned formations missing from rosters."
+      ]
+    },
+    {
+      "prior_finding": "P1-CURRENT-FINAL-CONFIG-HAS-NO-EXECUTED-CHEAP-PROOF",
+      "status": "RESOLVED",
+      "evidence": [
+        "preflight-v3-01 receipt and child both exited 0, artifact contract passed, manifest hash matched, 27 bindings passed, entry snapshot remained exact, and the full retained inventory was correctly deferred to the actual campaign.",
+        "selftest-v3-01 receipt and child both exited 0, artifact contract passed, entry snapshot remained exact, all 16 controls passed, and simulation_executed is false.",
+        "Negative controls cover wrong manifest hash, changed floor semantics, changed save week, changed environment, wrong graph domain, wrong rear assignment, missing reserve formation, duplicate role membership, malformed roster, missing required roster, ordinary campaign failure classification, and actual deadline classification."
+      ]
+    }
+  ],
+  "fresh_retained_evidence": {
+    "preflight_v3_01": {
+      "start_sha256": "8bcb98636b9207c9d7fe263e4b7d6b03208a48a222856e7f2815e77c409bbb8c",
+      "receipt_sha256": "19db01115600f6cf399d1998dd6d540e89ed303ea220e120139b2289a4448d5c",
+      "result_sha256": "4ab6c55fab712e2c4bb810d2636977613455b83d80b728e647e8cba49bd63b75",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "bindings": 27,
+      "timed_out": false,
+      "spawn_error": null
+    },
+    "selftest_v3_01": {
+      "start_sha256": "c66c3e74480ee779c1a139ffc18bb7242a52906ffa41c0f832b8475e0c5378ac",
+      "receipt_sha256": "a10ab3bea941decb6bc9cebe1a05518b5b4192acc86950becb86712c72bad6f8",
+      "result_sha256": "a7e835c2188954d4b0e44f4e228d82e89f53513f1d6544955f4cf5285c310e2b",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "controls": 16,
+      "simulation_executed": false,
+      "timed_out": false,
+      "spawn_error": null
+    }
+  },
+  "introduced_edges_review": {
+    "runtime_manifest_hash_enforcement": "PASS",
+    "complete_frozen_config_contract": "PASS",
+    "assigned_reserve_optional_rear_schema_compatibility": "PASS",
+    "negative_control_liveness": "PASS",
+    "final_command_receipt_agreement": "PASS",
+    "determinism": "No determinism risks found under docs/10_canon/Engine_Invariants_v0_9_0.md, docs/20_engineering/DETERMINISM_TEST_MATRIX.md, docs/20_engineering/CODE_CANON.md, and docs/10_canon/Phase_Specifications_v0_9_0.md. V3 changes only evidence-local validation and launch binding; no simulation state, ordering, serialization, coefficient, data, threshold, control, supply, enclave, package, or native behavior changes.",
+    "nonblocking_output_note": "The evidence-only graph-producer payload adds malformed_sectors and duplicate_roster_membership. assigned_formations now reports unique formations across assigned/rear/reserve rosters rather than only the assigned list. This does not affect the pass predicate or production artifacts, but downstream evidence readers should use the new meaning."
+  },
+  "commands_and_checks": [
+    {
+      "command": "SHA-256 and byte verification of all six frozen v3 files and retained v3 receipts",
+      "result": "All supplied hashes exact"
+    },
+    {
+      "command": "Structured comparison of FINALIZED.v3 command_argv, WRAPPER_CONFIG.v3 child/outer argv, LAUNCH_MANIFEST.v3, and CONFIG.bound.v3",
+      "result": "Exact paths, hash argument, allowlist, cap, reserve, attempt leaf, runtime, and config agree"
+    },
+    {
+      "command": "Static inspection of qualification.mts manifest/config validation, graphCheck, selftest, and campaign dispatch",
+      "result": "All three prior blocker predicates corrected; no introduced blocking edge"
+    },
+    {
+      "command": "Read-only schema/roster audit of implementation-v1/green-definitive-scenario-output-01/save_w1.json",
+      "result": "Real artifact conforms to required assigned/reserve and optional-rear semantics with zero consistency failures"
+    },
+    {
+      "command": "HEAD/status and fresh-leaf checks",
+      "result": "Clean committed b30597f49aad99032781c251b41a9de886cce3be; n102 and campaign-01 absent"
+    }
+  ],
+  "release_instruction": "Execute only FINALIZED.v3.json#exact_command_argv once. On any wrapper, startup, campaign, reader, graph, score, formerly-correct-cell, anchor, provenance, health, attribution, enclave, supply, alliance, movement, timeout, or preservation failure, retain all evidence and STOP_NO_RETRY."
+}

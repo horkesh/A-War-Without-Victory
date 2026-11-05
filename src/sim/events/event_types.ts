@@ -7,6 +7,7 @@
 import type { FactionId, GameState } from '../../state/game_state.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
+import { operationExecutedAttackCount } from '../combat/operation_attack_count.js';
 import type { EventConstraints } from './event_constraints.js';
 
 /** State-based condition for conditional event triggers. */
@@ -16,7 +17,8 @@ export type EventCondition =
     | { type: 'alliance_above'; value: number }
     | { type: 'faction_controls_municipality'; faction: string; municipality: string; threshold?: number }
     | { type: 'siege_active'; osid_or_municipality: string }
-    | { type: 'operation_completed'; operation_name_pattern: string }
+    | { type: 'operation_completed'; operation_name_pattern: string; min_attacks?: number }
+    | { type: 'operation_attacked'; operation_name_pattern: string; min_attacks?: number }
     | { type: 'and'; conditions: EventCondition[] }
     | { type: 'or'; conditions: EventCondition[] }
     | { type: 'not'; condition: EventCondition }
@@ -796,8 +798,37 @@ export function evaluateCondition(condition: EventCondition, state: GameState, e
             const pattern = condition.operation_name_pattern;
             for (const aar of history) {
                 if (!aar) continue;
+                if ((aar.total_attacks ?? 0) < (condition.min_attacks ?? 0)) continue;
                 if (aar.operation_id?.includes(pattern)) return true;
                 if (aar.operation_name?.includes(pattern)) return true;
+            }
+            return false;
+        }
+        case 'operation_attacked': {
+            // True once a matching operation has executed at least `min_attacks`
+            // (floor 1) attacks, whether it is still live or has ended. Live ops are
+            // read from corps_command active_operations using the same attack
+            // counters the AAR later copies (axis sum, else the op-level counter);
+            // those counters reset to 0 when execution starts, so a planned-only op
+            // never qualifies. Ended ops use the AAR total; player-halted ops (which
+            // write no AAR) use the attack count kept on their halted_op_record.
+            // Existence check → order-independent → deterministic.
+            const pattern = condition.operation_name_pattern;
+            const minAttacks = Math.max(1, condition.min_attacks ?? 1);
+            for (const aar of state.operation_history ?? []) {
+                if (!aar || (aar.total_attacks ?? 0) < minAttacks) continue;
+                if (aar.operation_id?.includes(pattern)) return true;
+                if (aar.operation_name?.includes(pattern)) return true;
+            }
+            for (const corps of Object.values(state.military?.corps_command ?? {})) {
+                for (const op of corps?.active_operations ?? []) {
+                    if (op?.name?.includes(pattern) && operationExecutedAttackCount(op) >= minAttacks) return true;
+                }
+                for (const halted of corps?.halted_op_record ?? []) {
+                    if ((halted?.executed_attacks ?? 0) < minAttacks) continue;
+                    if (halted.operation_id?.includes(pattern)) return true;
+                    if (halted.op_name?.includes(pattern)) return true;
+                }
             }
             return false;
         }

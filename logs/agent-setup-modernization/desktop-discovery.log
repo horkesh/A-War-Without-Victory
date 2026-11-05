@@ -1,0 +1,24 @@
+{
+  "executable": "C:\\Users\\User\\AppData\\Local\\OpenAI\\Codex\\bin\\bffc5354119c8421\\codex.exe",
+  "initialization": {
+    "userAgent": "Codex Desktop/0.154.0-alpha.6.2 (Windows 10.0.26200; x86_64) dumb (awwv_read_only_discovery; 1.0.0)",
+    "codexHome": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\discovery-profile",
+    "platformFamily": "windows",
+    "platformOs": "windows"
+  },
+  "project": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\discovery-project",
+  "profile": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\discovery-profile",
+  "sentinels": [
+    {
+      "name": "awwv-discovery-probe",
+      "description": "Use only for the disposable AWWV discovery sentinel.",
+      "path": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\discovery-project\\.agents\\skills\\awwv-discovery-probe\\SKILL.md",
+      "scope": "repo",
+      "enabled": true,
+      "pluginId": null
+    }
+  ],
+  "errors": [],
+  "api": "skills/list; no thread or turn started",
+  "desktop_activation": "unverified; current session catalog remains user-level"
+}

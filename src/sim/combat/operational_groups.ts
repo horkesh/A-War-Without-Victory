@@ -1,3 +1,4 @@
+import { initializeFormationDefaults } from '../../state/formation_defaults.js';
 /**
  * Legacy Operational Group compatibility lifecycle.
  * New temporary force concentration is owned by Tactical Groups; this module may only
@@ -195,6 +196,8 @@ export function activateOGs(state: GameState): OGActivationReport {
             posture: order.posture,
             corps_id: order.corps_id,
         };
+
+        initializeFormationDefaults(state.military.formations[ogId], state.meta.turn);
 
         // Register OG with corps command
         const corpsCmd = state.military.corps_command?.[order.corps_id];

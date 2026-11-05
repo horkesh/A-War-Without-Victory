@@ -1,135 +1,5 @@
 [
   {
-    "id": "gornji_vakuf_clashes_1993",
-    "title": "HVO-ARBiH Fighting Erupts at Gornji Vakuf",
-    "narrative": "Heavy fighting breaks out between HVO and ARBiH forces in Gornji Vakuf as the HVO attempts to establish control over the town in line with the proposed Vance-Owen provincial boundaries. The clashes — involving tanks, artillery, and infantry — mark a significant escalation beyond the sporadic incidents of late 1992.",
-    "category": "military",
-    "family": "hrhb_central_bosnia_war",
-    "source_tier": "icty_icj_un",
-    "emergence_class": "compound",
-    "trigger": {
-      "turn_min": 35,
-      "turn_max": 60,
-      "phase": "war",
-      "condition": {
-        "type": "and",
-        "conditions": [
-          {
-            "type": "flag_equals",
-            "flag": "hrhb_1992_cooperation_state",
-            "value": "friction_emerges"
-          },
-          {
-            "type": "alliance_below",
-            "value": 0.45
-          }
-        ]
-      }
-    },
-    "requires_enabled": true,
-    "once": true,
-    "requires_player_response": true,
-    "responding_faction": "HRHB",
-    "bot_response_logic": "historical",
-    "historical_source": "ICTY Prlic et al. IT-04-74-T Trial Judgment Vol. 2 §§221-310 and Vol. 4 §§44-67; Prlic Appeals Judgment §§601-650; Blaskic IT-95-14-T §§161-220; Kordic IT-95-14/2-T §§560-650; Balkan Battlegrounds Vol. II pp. 448, 452; docs/40_reports/1993_EVENT_RESEARCH.md.",
-    "source_note": "BB Vol. II frames Gornji Vakuf as an early 1993 HVO-ARBiH escalation around the Vance-Owen provincial map; the local response choice is a command-posture abstraction. Per Sensitive History Gate §1.5 #11 the escalate posture is operational-tempo only — specific atrocities (Dusa, Bistrica, Zdrimci) emerge from Ring 1 combat / paramilitary / displacement engines and Ring 2 essays, not from this row's effects.",
-    "staff_assessment": "Escalating reinforces the local HVO position but deepens the command split with ARBiH; a ceasefire contains the front at the cost of initiative and morale.",
-    "trigger_evidence": [
-      "Alliance cohesion has fallen below the cooperation threshold.",
-      "The Vance-Owen provincial map has made central Bosnia command boundaries contested.",
-      "HVO and ARBiH units are already fighting around Gornji Vakuf."
-    ],
-    "historical_default_response_id": "escalate",
-    "pressure": {
-      "base_rate": 2,
-      "threshold": 4,
-      "decay_rate": 0.5,
-      "modifiers": [
-        {
-          "condition": {
-            "type": "flag_equals",
-            "flag": "hvo_arbih_tensions_rising",
-            "value": true
-          },
-          "rate_bonus": 1
-        }
-      ]
-    },
-    "effect": {
-      "kind": "alliance_change",
-      "delta": -0.15
-    },
-    "effects": [
-      {
-        "kind": "narrative",
-        "text": "HVO and ARBiH forces fight a pitched battle at Gornji Vakuf. The Vance-Owen provincial map becomes a pretext for Croat territorial grabs."
-      }
-    ],
-    "response_options": [
-      {
-        "id": "escalate",
-        "branch_tag": "hrhb_central_bosnia_war",
-        "label": "Respond with force",
-        "description": "Send reinforcements to Gornji Vakuf. Escalates the confrontation significantly.",
-        "historical_marker": "historical_default",
-        "aggression_affinity": 0.7,
-        "risk_level": 0.7,
-        "effects": [
-          {
-            "kind": "alliance_change",
-            "delta": -0.2
-          },
-          {
-            "kind": "morale_change",
-            "faction": "HRHB",
-            "delta": 3
-          }
-        ]
-      },
-      {
-        "id": "negotiate",
-        "branch_tag": "hrhb_central_bosnia_ceasefire",
-        "label": "Seek a local ceasefire",
-        "description": "Attempt to contain the fighting. De-escalates but does not resolve underlying tensions.",
-        "aggression_affinity": -0.5,
-        "risk_level": 0.4,
-        "effects": [
-          {
-            "kind": "alliance_change",
-            "delta": -0.05
-          },
-          {
-            "kind": "morale_change",
-            "faction": "HRHB",
-            "delta": -2
-          }
-        ]
-      }
-    ],
-    "notifications_to_other_factions": {
-      "escalate": {
-        "RBiH": {
-          "headline": "HVO reinforces Gornji Vakuf fight",
-          "body": "Herceg-Bosna sends reinforcements into the Gornji Vakuf clashes. Sarajevo staff see a significant escalation in the HVO-ARBiH confrontation and a sharper break in local cooperation."
-        },
-        "RS": {
-          "headline": "HVO and ARBiH fighting intensifies",
-          "body": "Herceg-Bosna answers the Gornji Vakuf clashes with force. Pale analysts see the Vance-Owen provincial map becoming a boundary dispute for deeper Croat-Bosniak fighting."
-        }
-      },
-      "negotiate": {
-        "RBiH": {
-          "headline": "HVO seeks a local Gornji Vakuf ceasefire",
-          "body": "Herceg-Bosna tries to contain the fighting around Gornji Vakuf. Sarajevo sees de-escalation on the local front, though the underlying territorial dispute remains unresolved."
-        },
-        "RS": {
-          "headline": "Gornji Vakuf fighting is contained for now",
-          "body": "Herceg-Bosna moves toward a local ceasefire rather than a wider escalation. Pale reads the alliance strain as real, but not yet a full rupture."
-        }
-      }
-    }
-  },
-  {
     "id": "ic_pressure_vopp_engagement",
     "source_tier": "agreement_text",
     "title": "Western Powers Press Sarajevo: Engage with Vance-Owen",
@@ -436,6 +306,136 @@
     }
   },
   {
+    "id": "gornji_vakuf_clashes_1993",
+    "title": "HVO-ARBiH Fighting Erupts at Gornji Vakuf",
+    "narrative": "Heavy fighting breaks out between HVO and ARBiH forces in Gornji Vakuf as the HVO attempts to establish control over the town in line with the proposed Vance-Owen provincial boundaries. The clashes — involving tanks, artillery, and infantry — mark a significant escalation beyond the sporadic incidents of late 1992.",
+    "category": "military",
+    "family": "hrhb_central_bosnia_war",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 40,
+      "turn_max": 60,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_1992_cooperation_state",
+            "value": "friction_emerges"
+          },
+          {
+            "type": "alliance_below",
+            "value": 0.45
+          }
+        ]
+      }
+    },
+    "requires_enabled": true,
+    "once": true,
+    "requires_player_response": true,
+    "responding_faction": "HRHB",
+    "bot_response_logic": "historical",
+    "historical_source": "ICTY Prlic et al. IT-04-74-T Trial Judgment Vol. 2 §§221-310 and Vol. 4 §§44-67; Prlic Appeals Judgment §§601-650; Blaskic IT-95-14-T §§161-220; Kordic IT-95-14/2-T §§560-650; Balkan Battlegrounds Vol. II pp. 448, 452; docs/40_reports/1993_EVENT_RESEARCH.md.",
+    "source_note": "BB Vol. II frames Gornji Vakuf as an early 1993 HVO-ARBiH escalation around the Vance-Owen provincial map; the local response choice is a command-posture abstraction. Per Sensitive History Gate §1.5 #11 the escalate posture is operational-tempo only — specific atrocities (Dusa, Bistrica, Zdrimci) emerge from Ring 1 combat / paramilitary / displacement engines and Ring 2 essays, not from this row's effects.",
+    "staff_assessment": "Escalating reinforces the local HVO position but deepens the command split with ARBiH; a ceasefire contains the front at the cost of initiative and morale.",
+    "trigger_evidence": [
+      "Alliance cohesion has fallen below the cooperation threshold.",
+      "The Vance-Owen provincial map has made central Bosnia command boundaries contested.",
+      "HVO and ARBiH units are already fighting around Gornji Vakuf."
+    ],
+    "historical_default_response_id": "escalate",
+    "pressure": {
+      "base_rate": 2,
+      "threshold": 4,
+      "decay_rate": 0.5,
+      "modifiers": [
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "hvo_arbih_tensions_rising",
+            "value": true
+          },
+          "rate_bonus": 1
+        }
+      ]
+    },
+    "effect": {
+      "kind": "alliance_change",
+      "delta": -0.15
+    },
+    "effects": [
+      {
+        "kind": "narrative",
+        "text": "HVO and ARBiH forces fight a pitched battle at Gornji Vakuf. The Vance-Owen provincial map becomes a pretext for Croat territorial grabs."
+      }
+    ],
+    "response_options": [
+      {
+        "id": "escalate",
+        "branch_tag": "hrhb_central_bosnia_war",
+        "label": "Respond with force",
+        "description": "Send reinforcements to Gornji Vakuf. Escalates the confrontation significantly.",
+        "historical_marker": "historical_default",
+        "aggression_affinity": 0.7,
+        "risk_level": 0.7,
+        "effects": [
+          {
+            "kind": "alliance_change",
+            "delta": -0.2
+          },
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": 3
+          }
+        ]
+      },
+      {
+        "id": "negotiate",
+        "branch_tag": "hrhb_central_bosnia_ceasefire",
+        "label": "Seek a local ceasefire",
+        "description": "Attempt to contain the fighting. De-escalates but does not resolve underlying tensions.",
+        "aggression_affinity": -0.5,
+        "risk_level": 0.4,
+        "effects": [
+          {
+            "kind": "alliance_change",
+            "delta": -0.05
+          },
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": -2
+          }
+        ]
+      }
+    ],
+    "notifications_to_other_factions": {
+      "escalate": {
+        "RBiH": {
+          "headline": "HVO reinforces Gornji Vakuf fight",
+          "body": "Herceg-Bosna sends reinforcements into the Gornji Vakuf clashes. Sarajevo staff see a significant escalation in the HVO-ARBiH confrontation and a sharper break in local cooperation."
+        },
+        "RS": {
+          "headline": "HVO and ARBiH fighting intensifies",
+          "body": "Herceg-Bosna answers the Gornji Vakuf clashes with force. Pale analysts see the Vance-Owen provincial map becoming a boundary dispute for deeper Croat-Bosniak fighting."
+        }
+      },
+      "negotiate": {
+        "RBiH": {
+          "headline": "HVO seeks a local Gornji Vakuf ceasefire",
+          "body": "Herceg-Bosna tries to contain the fighting around Gornji Vakuf. Sarajevo sees de-escalation on the local front, though the underlying territorial dispute remains unresolved."
+        },
+        "RS": {
+          "headline": "Gornji Vakuf fighting is contained for now",
+          "body": "Herceg-Bosna moves toward a local ceasefire rather than a wider escalation. Pale reads the alliance strain as real, but not yet a full rupture."
+        }
+      }
+    }
+  },
+  {
     "id": "turajlic_assassination_1993",
     "title": "Deputy Prime Minister Turajlic Assassinated",
     "narrative": "VRS soldiers stop a UN convoy transporting Bosnian Deputy Prime Minister Hakija Turajlic from Sarajevo Airport. After a 90-minute standoff, a Serb soldier shoots Turajlic seven times through the open door of a French UNPROFOR APC, killing him in front of five peacekeepers. He is the highest-ranking Bosnian official killed in the war.",
@@ -490,8 +490,8 @@
   },
   {
     "id": "croat_bosniak_war_begins_1993",
-    "title": "Croat-Bosniak War Erupts",
-    "narrative": "After clashes at Prozor and Gornji Vakuf, fighting between HVO and ARBiH formations hardens into open war across central Bosnia and Herzegovina from mid-January 1993. HVO forces attack in municipalities claimed for Herceg-Bosna, opening a second front for the Bosnian government. Later ICTY judgments attribute the Herceg-Bosna/HVO campaign and discrete ARBiH crimes to specific actors under different legal findings.",
+    "title": "HVO-ARBiH Alliance Fractures",
+    "narrative": "After the October 1992 Prozor battle and January 1993 fighting at Gornji Vakuf and Busovača, the HVO-ARBiH alliance fractures amid local clashes and competing territorial claims. The wider central-Bosnia offensive follows in April. Later ICTY judgments attribute the Herceg-Bosna/HVO campaign and discrete ARBiH crimes to specific actors under different legal findings.",
     "category": "military",
     "source_tier": "icty_icj_un",
     "historical_source": "Balkan Battlegrounds Vol. I, ch. 39, pp. 219 and 225 (Croat-Bosniak fighting chronology); ICTY Prlic et al. Trial Judgment (IT-04-74-T), Herceg-Bosna/HVO joint-criminal-enterprise findings; ICTY Kordic and Cerkez Trial Judgment (IT-95-14/2-T), Lasva Valley attack findings; ICTY Hadzihasanovic and Kubura Trial Judgment (IT-01-47-T), superior-responsibility findings for discrete ARBiH crimes.",
@@ -541,7 +541,7 @@
       },
       {
         "kind": "narrative",
-        "text": "The Croat-Bosniak alliance collapses. HVO and ARBiH forces engage in open warfare across central Bosnia."
+        "text": "The HVO-ARBiH alliance fractures amid local clashes in central Bosnia."
       }
     ]
   },
@@ -707,8 +707,8 @@
   },
   {
     "id": "central_bosnia_fighting_1993",
-    "title": "Central Bosnia Engulfed in Three-Way War",
-    "narrative": "Central Bosnia becomes a patchwork of overlapping front lines as VRS, HVO, and ARBiH forces fight simultaneously. Towns like Travnik, Vitez, and Busovaca change hands or are divided street by street. The three-way nature of the conflict creates impossible tactical situations and widespread civilian suffering.",
+    "title": "Central Bosnia Fronts Harden",
+    "narrative": "VRS, HVO, and ARBiH forces occupy overlapping fronts in central Bosnia as local HVO-ARBiH fighting and tensions continue. Travnik, Vitez, and Busovača face pressure from different directions before the wider April offensive. The conflict creates severe tactical strain and civilian suffering.",
     "source_note": "Existing event/essay/project sources ground the row's institutional and operational context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "military",
     "historical_source": "ICTY Hadzihasanovic Trial Judgment (IT-01-47-T); ICTY Kordic Trial Judgment (IT-95-14/2-T)",
@@ -724,7 +724,7 @@
     "once": true,
     "effect": {
       "kind": "narrative",
-      "text": "Three-way fighting engulfs central Bosnia. The overlapping front lines create a humanitarian catastrophe."
+      "text": "Central Bosnia's overlapping fronts harden as local HVO-ARBiH clashes continue."
     },
     "effects": [
       {
@@ -2427,8 +2427,8 @@
   },
   {
     "id": "battle_of_travnik_1993",
-    "title": "Battle of Travnik — ARBiH Recaptures City",
-    "narrative": "The ARBiH 3rd Corps launches an offensive against HVO positions in Travnik, overwhelming the garrison within days. Thousands of Croat civilians flee across VRS lines rather than remain under ARBiH control. The loss of Travnik is a major setback for the HVO in central Bosnia, demonstrating the ARBiH's growing numerical superiority in the interior.",
+    "title": "Battle of Travnik — HVO Position Falls",
+    "narrative": "The ARBiH 3rd Corps attacks HVO positions around Travnik in early June. A local HVO position falls after fighting while ARBiH retains the town it already held. The HVO's position in central Bosnia weakens.",
     "category": "military",
     "source_tier": "icty_icj_un",
     "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record.",
@@ -2440,19 +2440,13 @@
         "croat_bosniak_war_begins_1993"
       ],
       "condition": {
-        "type": "faction_controls_municipality",
-        "faction": "RBiH",
-        "municipality": "travnik",
-        "threshold": 0.5
+        "type": "territory_control",
+        "osid": "op:travnik:puticevo_2",
+        "faction": "RBiH"
       }
     },
     "once": true,
     "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 5
-      },
       {
         "kind": "morale_change",
         "faction": "HRHB",
@@ -2460,7 +2454,7 @@
       },
       {
         "kind": "narrative",
-        "text": "Travnik falls to the ARBiH. Croat civilians flee, and the HVO's position in central Bosnia begins its terminal decline."
+        "text": "ARBiH forces take an HVO position near Travnik."
       }
     ],
     "dimension_shifts": [
@@ -3029,10 +3023,9 @@
         "croat_bosniak_war_begins_1993"
       ],
       "condition": {
-        "type": "faction_controls_municipality",
+        "type": "territory_control",
         "faction": "RBiH",
-        "municipality": "bugojno",
-        "threshold": 0.5
+        "osid": "op:bugojno:medini"
       }
     },
     "once": true,
@@ -3764,92 +3757,6 @@
       }
     },
     "historical_source": "UNSCR 713 (25 September 1991) — comprehensive arms embargo on former-Yugoslavia. Balkan Battlegrounds Vol. II (CIA Office of Russian and European Analysis 2002) — 1993-95 ARBiH supply chronology + Silajdžić diplomatic posture + Iran-Croatia arms channel context. Alija Izetbegović, 'Inescapable Questions: Autobiographical Notes' (Islamic Foundation 2003) — UN General Assembly addresses + lift-and-strike argumentation. Richard Holbrooke, 'To End A War' (Random House 1998) chs. 4-6 — Clinton administration deliberation on lift-and-strike, August 1995 endgame. US Senate Foreign Relations Committee records — S.J. Res. 110 of 11 August 1993 (passed 70-30; Clinton vetoed); Dole-Lieberman amendment July-August 1995 (passed 69-29; Clinton vetoed 11 August 1995, override failed). UN A/54/549 (Secretary-General's report on Srebrenica, 15 November 1999) §§ on UNSCR 713 application + lift-and-strike diplomacy. ICTY Sefer Halilović IT-01-48-T Trial Judgment (16 November 2005) — ARBiH General Staff supply situation 1993. ICTY Karadžić IT-95-5/18-T Vol. III — international diplomatic context of Sarajevo's posture. ICTY Hadžihasanović & Kubura IT-01-47-T Trial Judgment (15 March 2006) — 3rd Corps + 7th Muslim Brigade integration context. US Senate Select Committee on Intelligence — 'Iranian Arms to Bosnia' hearings 1996-1997 (declassified portions). US embassy archived reporting on the Iran arms channel (declassified 2005-2010 tranches)."
-  },
-  {
-    "id": "operation_neretva_93_1993",
-    "title": "Operation Neretva '93",
-    "narrative": "On 14 September 1993, ARBiH forces mount a sizable offensive east of Prozor during the Neretva fighting. The advance continues south from Jablanica and Dreznica, with combat around Vrdi and a separate 17 September attack from East Mostar. The recorded gains remain limited and do not establish a decisive breakthrough.",
-    "category": "military",
-    "source_tier": "icty_icj_un",
-    "historical_source": "Balkan Battlegrounds Vol. II, pp. 434-435, September 1993 fighting east of Prozor and along the Neretva; ICTY Halilovic Trial Judgment (IT-01-48-T, 16 November 2005), Operation Neretva command record and Grabovica/Uzdol findings.",
-    "source_note": "Balkan Battlegrounds anchors the bounded September chronology: the 14 September offensive east of Prozor, movement south from Jablanica and Dreznica, fighting at Vrdi, and the 17 September East Mostar attack. The Halilovic Trial Judgment supplies command and crime-case context but does not support attributing superior responsibility after the acquittal. The row omits unsupported strategic objectives, campaign ranking, and diplomatic causation.",
-    "trigger": {
-      "turn_min": 74,
-      "turn_max": 76,
-      "phase": "war",
-      "requires_events": [
-        "croat_bosniak_war_begins_1993"
-      ],
-      "condition": {
-        "type": "flag_equals",
-        "flag": "mostar_liberated",
-        "value": true
-      }
-    },
-    "once": true,
-    "effect": {
-      "kind": "narrative",
-      "text": "ARBiH forces open the September offensive east of Prozor and continue attacks along the Neretva toward Mostar."
-    },
-    "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 3
-      }
-    ]
-  },
-  {
-    "id": "grabovica_uzdol_massacres_1993",
-    "title": "Grabovica and Uzdol Massacres",
-    "narrative": "During September 1993 operations in Herzegovina, ARBiH soldiers kill at least 13 Croat civilians at Grabovica on 8-9 September 1993. At Uzdol on 14 September 1993, ARBiH personnel kill 29 civilians and one captured HVO soldier. The ICTY Trial Chamber finds that the crimes occurred but acquits Sefer Halilovic because his superior authority and effective control over the perpetrators were not proved beyond reasonable doubt; the Appeal Chamber affirms the acquittal.",
-    "category": "humanitarian",
-    "source_tier": "icty_icj_un",
-    "historical_source": "ICTY Halilovic Trial Judgment (IT-01-48-T, 16 November 2005), Grabovica/Uzdol crime findings and superior-responsibility acquittal; ICTY Halilovic Appeal Judgment (IT-01-48-A, 16 October 2007), prosecution appeal dismissed and acquittal affirmed; Balkan Battlegrounds Vol. II, pp. 434-435, September 1993 fighting east of Prozor and along the Neretva.",
-    "source_note": "The Trial Judgment establishes the Grabovica and Uzdol crime findings while separately acquitting Sefer Halilovic because the required superior authority and effective control were not proved; the Appeal Judgment affirmed that outcome. Balkan Battlegrounds anchors the September 1993 operational chronology and Uzdol date. This is an informational consequence with no response option or reward, and it makes no claim of collective or equivalent guilt.",
-    "trigger": {
-      "turn_min": 74,
-      "turn_max": 76,
-      "phase": "war",
-      "requires_events": [
-        "operation_neretva_93_1993"
-      ]
-    },
-    "once": true,
-    "effects": [
-      {
-        "kind": "humanitarian_impact",
-        "faction": "RBiH",
-        "war_crimes_delta": 2
-      },
-      {
-        "kind": "morale_change",
-        "faction": "HRHB",
-        "delta": -3
-      },
-      {
-        "kind": "negotiation_capital",
-        "faction": "RBiH",
-        "dimension": "international_credibility",
-        "delta": -10
-      },
-      {
-        "kind": "narrative",
-        "text": "ARBiH crimes against Croat civilians at Grabovica and Uzdol enter the tribunal record; Halilovic's acquittal resolves his individual superior responsibility, not whether the crimes occurred."
-      }
-    ],
-    "dimension_shifts": [
-      {
-        "faction": "RBiH",
-        "dimension": "international_standing",
-        "delta": -10
-      }
-    ],
-    "effect": {
-      "kind": "humanitarian_impact",
-      "faction": "RBiH",
-      "war_crimes_delta": 2
-    }
   },
   {
     "id": "hrhb_owen_stoltenberg_response_1993",
@@ -4754,6 +4661,85 @@
     "historical_source": "ICTY Krajisnik IT-00-39-T Trial Judgment (27 September 2006) §§1006-1040 (Pale leadership response to Belgrade pressure on diplomatic envelope, 1993-1994). ICTY Karadzic IT-95-5/18-T Trial Judgment (24 March 2016) Vol. III §§4263-4310 (FRY-RS channel friction across the autumn 1993 - August 1994 corridor). ICTY Milosevic IT-02-54-T (FRY-RS channel context for Belgrade-blessed diplomacy; patron-pressure modulation). Richard Holbrooke, To End a War (Random House 1998) chs. 4-5 (Belgrade-Pale split as defining political-military thread of the war's mid-period). David Owen, Balkan Odyssey (Harcourt 1995) ch. 7 (Belgrade-brokered Invincible package and Pale acquiescence pattern). Balkan Battlegrounds Vol. II Ch. 11 (FRY-RS channel modulation through the autumn 1993 Owen-Stoltenberg window)."
   },
   {
+    "id": "operation_neretva_93_1993",
+    "title": "Operation Neretva '93",
+    "narrative": "On 14 September 1993, ARBiH forces mount a sizable offensive east of Prozor during the Neretva fighting. The advance continues south from Jablanica and Dreznica, with combat around Vrdi and a separate 17 September attack from East Mostar. The recorded gains remain limited and do not establish a decisive breakthrough.",
+    "category": "military",
+    "source_tier": "icty_icj_un",
+    "historical_source": "Balkan Battlegrounds Vol. II, pp. 434-435, September 1993 fighting east of Prozor and along the Neretva; ICTY Halilovic Trial Judgment (IT-01-48-T, 16 November 2005), Operation Neretva command record and Grabovica/Uzdol findings.",
+    "source_note": "Balkan Battlegrounds anchors the bounded September chronology: the 14 September offensive east of Prozor, movement south from Jablanica and Dreznica, fighting at Vrdi, and the 17 September East Mostar attack. The Halilovic Trial Judgment supplies command and crime-case context but does not support attributing superior responsibility after the acquittal. The row omits unsupported strategic objectives, campaign ranking, and diplomatic causation.",
+    "trigger": {
+      "turn_min": 76,
+      "turn_max": 76,
+      "phase": "war",
+      "requires_events": [
+        "croat_bosniak_war_begins_1993"
+      ],
+      "condition": {
+        "type": "operation_attacked",
+        "operation_name_pattern": "Operation Neretva '93",
+        "min_attacks": 1
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "narrative",
+      "text": "ARBiH forces open the September offensive east of Prozor and continue attacks along the Neretva toward Mostar."
+    }
+  },
+  {
+    "id": "grabovica_uzdol_massacres_1993",
+    "title": "Grabovica and Uzdol Massacres",
+    "narrative": "During September 1993 operations in Herzegovina, ARBiH soldiers kill at least 13 Croat civilians at Grabovica on 8-9 September 1993. At Uzdol on 14 September 1993, ARBiH personnel kill 29 civilians and one captured HVO soldier. The ICTY Trial Chamber finds that the crimes occurred but acquits Sefer Halilovic because his superior authority and effective control over the perpetrators were not proved beyond reasonable doubt; the Appeal Chamber affirms the acquittal.",
+    "category": "humanitarian",
+    "source_tier": "icty_icj_un",
+    "historical_source": "ICTY Halilovic Trial Judgment (IT-01-48-T, 16 November 2005), Grabovica/Uzdol crime findings and superior-responsibility acquittal; ICTY Halilovic Appeal Judgment (IT-01-48-A, 16 October 2007), prosecution appeal dismissed and acquittal affirmed; Balkan Battlegrounds Vol. II, pp. 434-435, September 1993 fighting east of Prozor and along the Neretva.",
+    "source_note": "The Trial Judgment establishes the Grabovica and Uzdol crime findings while separately acquitting Sefer Halilovic because the required superior authority and effective control were not proved; the Appeal Judgment affirmed that outcome. Balkan Battlegrounds anchors the September 1993 operational chronology and Uzdol date. This is an informational consequence with no response option or reward, and it makes no claim of collective or equivalent guilt.",
+    "trigger": {
+      "turn_min": 77,
+      "turn_max": 77,
+      "phase": "war",
+      "requires_events": [
+        "operation_neretva_93_1993"
+      ]
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "humanitarian_impact",
+        "faction": "RBiH",
+        "war_crimes_delta": 2
+      },
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": -3
+      },
+      {
+        "kind": "negotiation_capital",
+        "faction": "RBiH",
+        "dimension": "international_credibility",
+        "delta": -10
+      },
+      {
+        "kind": "narrative",
+        "text": "ARBiH crimes against Croat civilians at Grabovica and Uzdol enter the tribunal record; Halilovic's acquittal resolves his individual superior responsibility, not whether the crimes occurred."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "international_standing",
+        "delta": -10
+      }
+    ],
+    "effect": {
+      "kind": "humanitarian_impact",
+      "faction": "RBiH",
+      "war_crimes_delta": 2
+    }
+  },
+  {
     "id": "abdic_apwb_declared_1993",
     "title": "Abdic Declares the Autonomous Province",
     "narrative": "Sarajevo Presidency files, 27 September 1993. Fikret Abdic — the Velika Kladusa industrialist who polled ahead of Izetbegovic on the joint Presidency list in November 1990, and who has rejected the Presidency's positions on the Owen-Stoltenberg framework — has today declared the Autonomous Province of Western Bosnia centered on Velika Kladusa. Una-Sana economic ties with the Republic of Serbian Krajina and Pale-aligned channels are documented. The 5th Corps in Bihac now faces a second internal front to the north as well as the external siege from the south and west. The Presidency must record a posture toward the breakaway entity: suppress it militarily through 5th Corps clearance operations, tolerate it for now and concentrate on the external siege, offer Federation-line negotiating channels, or open formal talks on a negotiated autonomy that recognizes Abdic's seat at the table.",
@@ -5124,14 +5110,19 @@
     "narrative": "HVO special units 'Apostoli' and 'Maturice' under Ivica Rajic attack the Bosniak village of Stupni Do near Vares, killing approximately 31 civilians and destroying the village. Over 250 Bosniak men in nearby Vares are rounded up and subjected to inhuman treatment. When UNPROFOR attempts to investigate, HVO forces obstruct access for days before the evidence is documented.",
     "category": "humanitarian",
     "source_tier": "icty_icj_un",
-    "source_note": "The Rajic Sentencing Judgment supplies the adjudicated crime and command record following the guilty plea; Balkan Battlegrounds Vol. II pp. 437-440 independently anchors the Vares and Stupni Do operational chronology. The essay is original synthesis and keeps legal findings distinct from broader military context.",
+    "source_note": "The Rajic Sentencing Judgment supplies the adjudicated crime and command record following the guilty plea; Balkan Battlegrounds Vol. II pp. 437-440 independently anchors the Vares and Stupni Do operational chronology. The essay is original synthesis and keeps legal findings distinct from broader military context. Timing: the attack took place on 23 October 1993, the turn-81 week, while the HVO still held Vares; the ARBiH entered the abandoned town on 3-4 November (BB2 printed pp. 438-440). The row therefore opens at turn 81 and requires HVO control of Vares town.",
     "trigger": {
-      "turn_min": 80,
+      "turn_min": 81,
       "turn_max": 83,
       "phase": "war",
       "requires_events": [
         "croat_bosniak_war_begins_1993"
-      ]
+      ],
+      "condition": {
+        "type": "territory_control",
+        "osid": "op:vares:vares_2",
+        "faction": "HRHB"
+      }
     },
     "once": true,
     "effects": [

@@ -8,7 +8,8 @@
 # enumerable, which it was not: 292 plan documents exist and 264 are unlinked history.
 #
 # FIELDS
-#   lane_open   the lane is not marked COMPLETE/CLOSED in the register
+#   lane_open   the bold status head of the register row does not assert COMPLETE/CLOSED.
+#               Prose after the head explains sub-items and never decides the lane.
 #   tokens      approximate, size/4 — whether the plan fits a 32,768-token context at all
 #   tasks       path to a machine-readable task manifest, or null if none exists yet
 
@@ -78,12 +79,12 @@ lanes:
         tasks: null
   - lane: R6
     title: "Historical gameplay depth and final calibration"
-    lane_open: false
-    status: "PRE-1.0 SCOPE COMPLETE — CLOSED 2026-08-09 (`n163`: 634 matched, 30/31 anchors, Section 6 correct, 40w fingerprint golden). Do not conflate the later 629/31-of-"
+    lane_open: true
+    status: "TOLJENAK VALIDATED; GLOBAL NO-GO. n94 clean707/707/706/706, zero n91/n92 losses; eight baseline pins adopted from reproduced default CI bytes. No tuning; six mi"
     plans:
       - path: docs/plans/2026-07-31-historical-gameplay-depth-calibration-plan.md
         exists: true
-        tokens: 20303
+        tokens: 20440
         fits_context: true
         tasks: null
       - path: docs/plans/2026-08-06-exhaustion-scoring-redesign-plan.md
@@ -124,11 +125,11 @@ lanes:
   - lane: R7
     title: "Content, historical attribution, audio, accessibility, and opening experience"
     lane_open: true
-    status: "ACTIVE — DATE REPAIR PACKAGED; ACCEPTANCE OPEN. `ea33b23a5` retains nine-case image/UI/hook GO, fixed column/artwork; included in Inbox package `7d97b72fc`. Fre"
+    status: "ACTIVE — AUDIO AND BROADER ACCEPTANCE OPEN. WR01 delivered in #517; stale-pin refresh landed in #518. Human listening/sensitivity, offline playback/controls and"
     plans:
       - path: docs/plans/2026-07-31-content-history-localization-audio-plan.md
         exists: true
-        tokens: 13147
+        tokens: 13301
         fits_context: true
         tasks: docs/plans/tasks/2026-07-31-content-history-localization-audio-plan.yml
       - path: docs/plans/2026-08-23-opening-screens-implementation-plan.md
@@ -143,7 +144,7 @@ lanes:
         tasks: null
       - path: docs/plans/2026-09-05-r7-presentation-and-english-readability-amendment-plan.md
         exists: true
-        tokens: 25493
+        tokens: 25640
         fits_context: true
         tasks: null
       - path: docs/plans/2026-09-07-arbih-brigade-honorific-name-correction-plan.md
@@ -159,11 +160,11 @@ lanes:
   - lane: R8
     title: "Full-campaign packaged-Electron validation and diaries"
     lane_open: true
-    status: "WAITING ON R7. INBOX REPAIRED; PACKAGE/SHAKEDOWN GATES OPEN — 2026-09-10. `7d97b72fc` route/build/hook GO; sole stale UI assertion reconciled by 45/45 tests, ex"
+    status: "PLAYER/BOT CAPABILITY PARITY ACTIVE — GLOBAL NO-GO. The authorized fatigue candidate39 is STOP_NO_RETRY at703/712 with four protected losses and health13>3. No "
     plans:
       - path: docs/plans/2026-07-31-full-campaign-electron-validation-plan.md
         exists: true
-        tokens: 40387
+        tokens: 66362
         fits_context: false
         tasks: null
   - lane: R9

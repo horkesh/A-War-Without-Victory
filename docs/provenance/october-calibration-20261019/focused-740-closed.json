@@ -1,0 +1,36 @@
+{
+  "schema": "awwv.740.closed-receipt.v1",
+  "captured_utc": "2026-10-20T08:04:19.447Z",
+  "verdict": "PASS_BOUNDED_TWO_FAILURE_CORRECTION",
+  "writes_closed": true,
+  "result": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/396-varosluk-740-seal-a-attempt/result.json",
+    "bytes": 31144,
+    "sha256": "ccda14a858fbc39bcb0e86991aae6306038c0de1237bab65b88752fa902abea8"
+  },
+  "inventory": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/396-varosluk-740-seal-a-attempt/inventory.json",
+    "bytes": 20624,
+    "sha256": "073b8eee33f6a2fc7aab6818e5f91c6cd02ee5300b4b4c042a05ace3b95064ff"
+  },
+  "after_roadmap": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/396-varosluk-740-seal-a-attempt/after-roadmap.md",
+    "bytes": 58755,
+    "sha256": "703a5d8f6519918db874948e38487bc35eed682d34f786ac4395fa98578de912"
+  },
+  "after_test": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/396-varosluk-740-seal-a-attempt/after-test.ts",
+    "bytes": 50032,
+    "sha256": "f2027242d84bf5f03fae63a932380b289a1cf734586434ba461fa4643b63a9cb"
+  },
+  "focused_result": {
+    "path": "logs/claude-channel-20261004/396-varosluk-740-focused-a-attempt/result.json",
+    "bytes": 783,
+    "sha256": "6cecef14d4407ba6bd83ed7d17a12cf2fb74788c09b32ebc20925c9c953618fb"
+  },
+  "noemit_result": {
+    "path": "logs/claude-channel-20261004/396-varosluk-740-noemit-a-attempt/result.json",
+    "bytes": 361,
+    "sha256": "3d53cd6aa0c16dbfdb646b019b98717814f08de6eb75f6189febe097a6947a3f"
+  }
+}

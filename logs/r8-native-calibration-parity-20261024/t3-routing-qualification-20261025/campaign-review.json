@@ -1,0 +1,24 @@
+{
+  "schema": "awwv.independent-actual-qualification-review.v1",
+  "verdict": "GO_TO_REQUIRED_FULL_SUITE",
+  "candidate_head": "fd061e898ad3de942d62c016547a5e453ddd9422",
+  "candidate_run": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n97",
+  "receipt": {
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "timed_out": false,
+    "artifact_contract": true,
+    "entry_sha256": "c4ef3f1fea02ee9a2ed49a3c2954e68995c7c3e6439bf3c04cb675922e1ae3d1"
+  },
+  "terminal": {
+    "campaign_exit": 0,
+    "created_runs": 1,
+    "postrun_exit": 0,
+    "reader_exits_zero": 12
+  },
+  "scores": {"39": 707, "104": 707, "156": 706, "188": 706},
+  "formerly_correct_losses": {"n91": 0, "n92": 0},
+  "n94_diagnostic": {"governing": false, "pass": true, "state_comparisons": 27, "control_comparisons": 4},
+  "preservation": {"n91_n96_exact": true, "telemetry_append_only": true},
+  "residual_gates": ["required full suite", "package/build", "native-player calibration", "release"]
+}

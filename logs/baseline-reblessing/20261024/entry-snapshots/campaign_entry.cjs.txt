@@ -1,0 +1,216 @@
+'use strict';
+
+const cp = require('node:child_process');
+const fs = require('node:fs');
+const path = require('node:path');
+const {
+  assertNoFilesRecursively,
+  buildCampaignEnvironment,
+  fileRecord,
+  parseAuthorizedArgs,
+  sha256,
+  snapshotTree,
+  verifyPreservationInventory,
+  verifyDependencyInventory,
+} = require('./packet_common.cjs');
+
+const ROOT = path.resolve(__dirname, '..', '..');
+const FIXED_BASELINE_TARGET = path.join(ROOT, 'data', 'derived', 'scenario', '_baseline_tmp', 'apr1992_188w');
+const SAVE_WEEKS = '15,16,39,104,111,112,113,130,131,132,133,134,135,136,156,178,179,180,181,182,183,184,185,186,187';
+const CAP_MS = 35 * 60 * 1000;
+const TELEMETRY = [
+  'data/derived/_debug/c_lane_corps_directive_telemetry.jsonl',
+  'data/derived/_debug/d_lane_persona_decisions.jsonl',
+];
+
+const writeExclusive = (file, value) => fs.writeFileSync(file, JSON.stringify(value, null, 2) + '\n', { flag: 'wx' });
+const git = (args) => cp.execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', windowsHide: true }).trim();
+
+function trackedFingerprint() {
+  const names = cp.execFileSync('git', ['ls-files', '-z'], { cwd: ROOT, encoding: 'buffer', windowsHide: true })
+    .toString('utf8').split('\0').filter(Boolean).sort();
+  const files = names.map((name) => fileRecord(ROOT, path.join(ROOT, name)));
+  return {
+    count: files.length,
+    aggregate_sha256: sha256(Buffer.from(files.map((row) => `${row.path}\0${row.bytes}\0${row.sha256}\n`).join(''))),
+    files,
+  };
+}
+
+function optionalRecord(relative) {
+  const absolute = path.join(ROOT, relative);
+  return fs.existsSync(absolute) ? fileRecord(ROOT, absolute) : { path: relative, bytes: 0, sha256: null, absent: true };
+}
+
+function prefixRecord(relative, opening) {
+  const absolute = path.join(ROOT, relative);
+  if (opening.absent) return optionalRecord(relative);
+  const fd = fs.openSync(absolute, 'r');
+  try {
+    const bytes = Buffer.alloc(opening.bytes);
+    const read = fs.readSync(fd, bytes, 0, opening.bytes, 0);
+    const current = fileRecord(ROOT, absolute);
+    return {
+      ...current,
+      opening_bytes: opening.bytes,
+      opening_sha256: opening.sha256,
+      opening_prefix_sha256: sha256(bytes.subarray(0, read)),
+      opening_prefix_exact: read === opening.bytes && sha256(bytes) === opening.sha256,
+      append_bytes: current.bytes - opening.bytes,
+    };
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
+function runNames() {
+  return fs.readdirSync(path.join(ROOT, 'runs'), { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name.startsWith('apr1992_definitive_188w__'))
+    .map((entry) => entry.name).sort();
+}
+
+function main() {
+  const argv = process.argv.slice(2);
+  const { evidenceDir, expectedHead } = parseAuthorizedArgs(argv);
+  const preservationAt = argv.indexOf('--preservation-inventory');
+  if (preservationAt < 0 || !argv[preservationAt + 1]) throw new Error('--preservation-inventory is required');
+  const preservationPath = path.resolve(argv[preservationAt + 1]);
+  const dependencyAt = argv.indexOf('--dependency-inventory');
+  if (dependencyAt < 0 || !argv[dependencyAt + 1]) throw new Error('--dependency-inventory is required');
+  const dependencyPath = path.resolve(argv[dependencyAt + 1]);
+  const evidence = path.resolve(evidenceDir);
+  if (!fs.statSync(evidence, { throwIfNoEntry: false })?.isDirectory()) throw new Error(`evidence directory does not exist: ${evidence}`);
+  const dependencyVerification = verifyDependencyInventory(dependencyPath, [
+    path.join(__dirname, 'packet_common.cjs'),
+    path.join(__dirname, 'postrun_entry.cjs'),
+    path.join(__dirname, 'evaluate_candidate.cjs'),
+  ]);
+  writeExclusive(path.join(evidence, 'dependency-verification.json'), dependencyVerification);
+  if (!dependencyVerification.pass) throw new Error(`packet dependency inventory has ${dependencyVerification.failures.length} mismatch(es)`);
+  if (path.resolve(process.cwd()).toLowerCase() !== ROOT.toLowerCase()) throw new Error(`wrong worktree: ${process.cwd()}`);
+  const head = git(['rev-parse', 'HEAD']).toLowerCase();
+  if (head !== expectedHead) throw new Error(`HEAD mismatch: expected ${expectedHead}, actual ${head}`);
+  const dirty = git(['status', '--porcelain=v1']);
+  if (dirty) throw new Error(`clean campaign required; git status is not empty:\n${dirty}`);
+  const nodeVersion = process.version;
+  if (!/^v22\./.test(nodeVersion)) throw new Error(`Node 22 required, actual ${nodeVersion}`);
+
+  const baselineBefore = snapshotTree(ROOT, FIXED_BASELINE_TARGET);
+  writeExclusive(path.join(evidence, 'baseline-target-before.json'), baselineBefore);
+  assertNoFilesRecursively(FIXED_BASELINE_TARGET);
+  const preservationBefore = verifyPreservationInventory(preservationPath, TELEMETRY.map((relative) => path.join(ROOT, relative)));
+  writeExclusive(path.join(evidence, 'preservation-before.json'), preservationBefore);
+  if (!preservationBefore.pass) throw new Error(`opening preservation inventory has ${preservationBefore.failures.length} mismatch(es)`);
+
+  const sourceBefore = trackedFingerprint();
+  const telemetryBefore = TELEMETRY.map(optionalRecord);
+  const runsBefore = runNames();
+  const started = Date.now();
+  const deadline = started + CAP_MS;
+  const env = buildCampaignEnvironment(process.env);
+  const args = [
+    'node_modules/tsx/dist/cli.mjs',
+    'tools/scenario_runner/run_scenario_with_preflight.ts',
+    '--scenario', 'data/scenarios/apr1992_definitive_188w.json',
+    '--weeks', '188',
+    '--out', 'runs',
+    '--unique',
+    '--save-weeks', SAVE_WEEKS,
+  ];
+  writeExclusive(path.join(evidence, 'campaign-launch.json'), {
+    schema: 'awwv.baseline-rebless-campaign-launch.v1',
+    start_utc: new Date(started).toISOString(),
+    deadline_utc: new Date(deadline).toISOString(),
+    cap_ms: CAP_MS,
+    cwd: ROOT,
+    expected_head: expectedHead,
+    actual_head: head,
+    node: { executable: process.execPath, version: nodeVersion },
+    argv: [process.execPath, ...args],
+    invocation_limit: 1,
+    automatic_retry: false,
+    debug_environment: Object.fromEntries(Object.entries(env).filter(([key]) => /^AWWV_DEBUG_|^AWWV_MISTRAL_PREP_TRACE$|^AWWV_S6_GRADE_RUN$/.test(key)).sort()),
+    save_weeks: SAVE_WEEKS.split(',').map(Number),
+    telemetry_before: telemetryBefore,
+    existing_run_names: runsBefore,
+  });
+  writeExclusive(path.join(evidence, 'source-before.json'), sourceBefore);
+
+  const campaign = cp.spawnSync(process.execPath, args, {
+    cwd: ROOT,
+    env,
+    stdio: 'inherit',
+    windowsHide: true,
+    timeout: Math.max(1, deadline - Date.now()),
+    killSignal: 'SIGKILL',
+  });
+  const runsAfterCampaign = runNames();
+  const created = runsAfterCampaign.filter((name) => !runsBefore.includes(name));
+  const campaignExit = campaign.error?.code === 'ETIMEDOUT' ? 124 : campaign.status;
+  writeExclusive(path.join(evidence, 'campaign-execution.json'), {
+    end_utc: new Date().toISOString(),
+    exit: campaignExit,
+    signal: campaign.signal,
+    timed_out: campaignExit === 124,
+    error: campaign.error ? String(campaign.error.message) : null,
+    created_run_dirs: created.map((name) => `runs/${name}`),
+    remaining_ms: Math.max(0, deadline - Date.now()),
+  });
+
+  let postrun = { exit: null, signal: null, error: 'campaign did not qualify for reader' };
+  if (campaignExit === 0 && created.length === 1 && Date.now() < deadline) {
+    const postrunArgs = [
+      path.join(__dirname, 'postrun_entry.cjs'),
+      '--candidate', `runs/${created[0]}`,
+      '--evidence-dir', path.join(evidence, 'postrun'),
+      '--expected-head', expectedHead,
+      '--deadline-ms', String(deadline),
+    ];
+    const child = cp.spawnSync(process.execPath, postrunArgs, {
+      cwd: ROOT,
+      stdio: 'inherit',
+      windowsHide: true,
+      timeout: Math.max(1, deadline - Date.now()),
+      killSignal: 'SIGKILL',
+    });
+    postrun = {
+      exit: child.error?.code === 'ETIMEDOUT' ? 124 : child.status,
+      signal: child.signal,
+      error: child.error ? String(child.error.message) : null,
+    };
+  }
+
+  const sourceAfter = trackedFingerprint();
+  writeExclusive(path.join(evidence, 'source-after.json'), sourceAfter);
+  const telemetryAfter = TELEMETRY.map((relative) => prefixRecord(relative, telemetryBefore.find((row) => row.path === relative)));
+  const baselineAfter = snapshotTree(ROOT, FIXED_BASELINE_TARGET);
+  writeExclusive(path.join(evidence, 'baseline-target-after.json'), baselineAfter);
+  const preservationAfter = verifyPreservationInventory(preservationPath, TELEMETRY.map((relative) => path.join(ROOT, relative)));
+  writeExclusive(path.join(evidence, 'preservation-after.json'), preservationAfter);
+  const pass = campaignExit === 0
+    && created.length === 1
+    && postrun.exit === 0
+    && sourceBefore.aggregate_sha256 === sourceAfter.aggregate_sha256
+    && telemetryAfter.every((row) => row.absent || row.opening_prefix_exact)
+    && preservationAfter.pass
+    && baselineBefore.aggregate_sha256 === baselineAfter.aggregate_sha256
+    && baselineAfter.file_count === 0;
+  const summary = {
+    schema: 'awwv.baseline-rebless-campaign-result.v1',
+    pass,
+    expected_head: expectedHead,
+    candidate: created.length === 1 ? `runs/${created[0]}` : null,
+    campaign_exit: campaignExit,
+    postrun,
+    source_stable: sourceBefore.aggregate_sha256 === sourceAfter.aggregate_sha256,
+    telemetry_after: telemetryAfter,
+    preservation_inventory_exact_or_append_prefix: preservationAfter.pass,
+    baseline_target_stable_and_empty: baselineBefore.aggregate_sha256 === baselineAfter.aggregate_sha256 && baselineAfter.file_count === 0,
+    remaining_ms: Math.max(0, deadline - Date.now()),
+  };
+  writeExclusive(path.join(evidence, 'packet-summary.json'), summary);
+  process.stdout.write(JSON.stringify(summary) + '\n');
+  process.exit(pass ? 0 : 2);
+}
+
+try { main(); } catch (error) { process.stderr.write(String(error.stack ?? error) + '\n'); process.exit(1); }

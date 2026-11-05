@@ -1,0 +1,162 @@
+'use strict';
+
+const crypto = require('node:crypto');
+const fs = require('node:fs');
+const path = require('node:path');
+const { BASELINE_ARTIFACTS, projectDefaultWeeklyReport, sha256, validateAcceptedCandidateHashes } = require('./packet_common.cjs');
+
+const ROOT = path.resolve(__dirname, '..', '..');
+const N91 = 'runs/apr1992_definitive_188w__6deb5845c150c196__w188_n91';
+const N92 = 'runs/apr1992_definitive_188w__6deb5845c150c196__w188_n92';
+const CI_WEEKLY_SHA = 'b7024560561a2e8eceae114c77b6003d939163d81971e9f610842f2e90de296f';
+const CHECKPOINTS = [['jan1993', 39, 707], ['apr1994', 104, 707], ['apr1995', 156, 706], ['oct1995', 188, 706]];
+const SHARED_TURNS = [39, 104, 111, 112, 113, 156, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188];
+const TOLJENAK_TURNS = [130, 131, 132, 133, 134, 135, 136, 156, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188];
+const TOLJENAK = 'op:vares:toljenak';
+const BEHAR_OPERATION_ID = 'arbih_1st_corps:Operation Behar-I:t133';
+const BEHAR_BRIGADES = ['arbih_162nd_mountain', 'arbih_164th_mountain'];
+const ANCHORS = [
+  ['op:sanski_most:ostra_luka', 'RS'],
+  ['op:bosanska_krupa:veliki_badic', 'RBiH'],
+  ...['op:bosanska_krupa:ivanjska_2', 'op:bosanska_krupa:arapusa_2', 'op:bosanska_krupa:donji_dubovik_2', 'op:bosanska_krupa:vranjska_2', 'op:bosanska_krupa:jasenica_2', 'op:bosanska_krupa:gornja_suvaja', 'op:bosanski_petrovac:krnjeusa', 'op:bosanski_novi:krslje_2', 'op:bosanski_novi:matavazi_2'].map((id) => [id, 'RBiH']),
+  ...['op:mrkonjic_grad:majdan_2', 'op:mrkonjic_grad:podrasnica_2', 'op:mrkonjic_grad:mrkonjic_grad_2', 'op:mrkonjic_grad:bjelajce_2', 'op:mrkonjic_grad:baljvine_2'].map((id) => [id, 'HRHB']),
+];
+
+const read = (file) => JSON.parse(fs.readFileSync(path.join(ROOT, file), 'utf8'));
+const state = (dir, turn) => read(path.join(dir, turn === 188 ? 'final_save.json' : `save_w${turn}.json`));
+const control = (save) => save.political?.political_controllers ?? {};
+const normalize = (text) => text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+const normalizedSha = (file) => crypto.createHash('sha256').update(normalize(fs.readFileSync(path.join(ROOT, file), 'utf8')), 'utf8').digest('hex');
+const sameSet = (a, b) => JSON.stringify([...(a ?? [])].sort()) === JSON.stringify([...(b ?? [])].sort());
+
+function arg(name) {
+  const at = process.argv.indexOf(name);
+  if (at < 0 || !process.argv[at + 1]) throw new Error(`${name} is required`);
+  return process.argv[at + 1];
+}
+
+function digestRows(rows) {
+  return sha256(Buffer.from(rows.map((row) => `${row.path} ${row.sha256 ?? 'ABSENT'}\n`).join(''), 'utf8'));
+}
+
+function main() {
+  process.chdir(ROOT);
+  const candidate = arg('--run').replaceAll('\\', '/');
+  const output = path.resolve(arg('--out'));
+  const expectedHead = arg('--expected-head').toLowerCase();
+  if (!/^[0-9a-f]{40}$/.test(expectedHead)) throw new Error('expected head must be a 40-character commit');
+  const failures = [];
+  const fail = (category, detail) => failures.push({ category, detail });
+
+  const expectedInventory = [...new Set([...fs.readdirSync(path.join(ROOT, N92)), 'save_w15.json', 'save_w16.json'])]
+    .filter((name) => fs.statSync(path.join(ROOT, N92, name), { throwIfNoEntry: false })?.isFile() || ['save_w15.json', 'save_w16.json'].includes(name)).sort();
+  const actualInventory = fs.readdirSync(path.join(ROOT, candidate)).filter((name) => fs.statSync(path.join(ROOT, candidate, name)).isFile()).sort();
+  const inventory = {
+    expected_count: 40,
+    actual_count: actualInventory.length,
+    missing: expectedInventory.filter((name) => !actualInventory.includes(name)),
+    extra: actualInventory.filter((name) => !expectedInventory.includes(name)),
+  };
+  if (expectedInventory.length !== 40 || inventory.actual_count !== 40 || inventory.missing.length || inventory.extra.length) fail('native_inventory', inventory);
+
+  const saveBindings = actualInventory.filter((name) => /^save_w\d+\.json$/.test(name)).map((name) => {
+    const expected = Number(name.match(/\d+/)[0]);
+    const actual = read(path.join(candidate, name)).meta?.turn ?? null;
+    return { name, expected, actual, pass: expected === actual };
+  });
+  const final = state(candidate, 188);
+  if (saveBindings.some((row) => !row.pass) || final.meta?.turn !== 188) fail('save_binding', { saveBindings, final_turn: final.meta?.turn ?? null });
+
+  const checkpoints = {};
+  for (const [label, turn, floor] of CHECKPOINTS) {
+    const reference = read(`data/source/calibration/painted_control_${label}.json`).by_settlement_id;
+    const ids = Object.keys(reference).sort();
+    const candidateControl = control(state(candidate, turn));
+    const score = ids.filter((id) => candidateControl[id] === reference[id]).length;
+    const against = {};
+    for (const [name, baselineDir] of [['n91', N91], ['n92', N92]]) {
+      const baselineControl = control(state(baselineDir, turn));
+      const formerlyCorrect = ids.filter((id) => baselineControl[id] === reference[id]);
+      const lost = formerlyCorrect.filter((id) => candidateControl[id] !== reference[id]).map((id) => ({ id, expected: reference[id], baseline: baselineControl[id], candidate: candidateControl[id] }));
+      against[name] = { formerly_correct: formerlyCorrect.length, lost };
+      if (lost.length) fail('formerly_correct_loss', { label, baseline: name, lost });
+    }
+    checkpoints[label] = { turn, denominator: ids.length, floor, score, against };
+    if (ids.length !== 712 || score < floor) fail('checkpoint_floor', checkpoints[label]);
+  }
+
+  const shared = {};
+  for (const turn of SHARED_TURNS) {
+    shared[turn] = {};
+    const current = control(state(candidate, turn));
+    for (const [name, baselineDir] of [['n91', N91], ['n92', N92]]) {
+      const baseline = control(state(baselineDir, turn));
+      const rows = [...new Set([...Object.keys(baseline), ...Object.keys(current)])].sort().filter((id) => baseline[id] !== current[id]).map((id) => ({ id, baseline: baseline[id] ?? null, candidate: current[id] ?? null }));
+      shared[turn][name] = rows;
+      const allowed = name === 'n91' && turn >= 156 && rows.length === 1 && rows[0].id === TOLJENAK && rows[0].baseline === 'RS' && rows[0].candidate === 'RBiH';
+      if (rows.length && !allowed) fail('shared_control_delta', { turn, baseline: name, rows });
+    }
+  }
+
+  const weeklyBytes = fs.readFileSync(path.join(ROOT, candidate, 'weekly_report.jsonl'));
+  const weekly = weeklyBytes.toString('utf8').trimEnd().split('\n').map(JSON.parse);
+  if (weekly.length !== 188 || weekly.some((row, index) => row.week_index !== index + 1)) fail('weekly_binding', { rows: weekly.length });
+  const projection = projectDefaultWeeklyReport(weeklyBytes);
+  const projectionAudit = {
+    source_bytes: weeklyBytes.length,
+    source_sha256: sha256(weeklyBytes),
+    projected_bytes: projection.bytes.length,
+    projected_sha256: projection.sha256,
+    expected_ci_sha256: CI_WEEKLY_SHA,
+    rows: projection.rows,
+    removed: projection.removed,
+    pass: projection.sha256 === CI_WEEKLY_SHA && projection.rows === 188
+      && projection.removed.movement_phase_diagnostics_rows === 188
+      && projection.removed.attacker_brigades_rows === 517
+      && projection.removed.defender_contributions_rows === 281,
+  };
+  if (!projectionAudit.pass) fail('weekly_diagnostic_projection', projectionAudit);
+  const actualArtifactHashes = Object.fromEntries(BASELINE_ARTIFACTS.filter((name) => name !== 'weekly_report.jsonl').map((name) => [name, sha256(fs.readFileSync(path.join(ROOT, candidate, name)))]));
+  const acceptedArtifactAudit = { ...validateAcceptedCandidateHashes(actualArtifactHashes, projection.sha256), actual_hashes: actualArtifactHashes, weekly_projection_sha256: projection.sha256 };
+  if (!acceptedArtifactAudit.pass) fail('accepted_ci_artifact_hashes', acceptedArtifactAudit.failures);
+
+  const toljenak = TOLJENAK_TURNS.map((turn) => ({ turn, actual: control(state(candidate, turn))[TOLJENAK] ?? null, expected: turn < 135 ? 'RS' : 'RBiH' }));
+  if (toljenak.some((row) => row.actual !== row.expected)) fail('toljenak_retention', toljenak);
+  const battles = weekly.flatMap((row) => (row.battles ?? []).filter((battle) => row.week_index === 135 && battle.target_osid === TOLJENAK && battle.attacker_won === true && battle.operation_id === BEHAR_OPERATION_ID && sameSet(battle.attacker_brigades, BEHAR_BRIGADES)).map((battle) => ({ turn: row.week_index, ...battle })));
+  const events = (final.political?.control_events ?? []).filter((event) => (event.osid ?? event.settlement_id) === TOLJENAK && event.turn === 135 && event.mechanism === 'combat' && event.from === 'RS' && event.to === 'RBiH' && battles.some((battle) => battle.battle_id === event.battle_id && battle.attacker_brigade === event.attacker_brigade));
+  const diagnostics = weekly.flatMap((row) => (row.operation_diagnostics ?? []).filter((entry) => row.week_index === 135 && entry.operation_name === 'Operation Behar-I' && entry.corps_id === 'arbih_1st_corps' && entry.battle_count === 1 && entry.objective_capture_count === 1 && entry.eligible_attacker_count === 2 && sameSet((entry.participant_attack_orders ?? []).map((order) => order.brigade_id), BEHAR_BRIGADES) && (entry.participant_attack_orders ?? []).every((order) => order.target_osid === TOLJENAK && order.resolver_seen_target_osid === TOLJENAK && order.battle_count === 1) && (entry.skipped_attack_orders ?? []).length === 0));
+  const aars = read(path.join(candidate, 'operation_aars.json')).filter((aar) => aar.operation_id === BEHAR_OPERATION_ID && aar.outcome === 'success' && aar.capture_provenance === 'logged_capture' && (aar.objectives_captured ?? []).includes(TOLJENAK));
+  if (battles.length !== 1 || events.length !== 1 || diagnostics.length !== 1 || aars.length !== 1) fail('toljenak_native_producer', { battles: battles.length, events: events.length, diagnostics: diagnostics.length, aars: aars.length });
+
+  const anchors = ANCHORS.map(([id, expected]) => ({ id, expected, actual: control(final)[id] ?? null, pass: control(final)[id] === expected }));
+  if (anchors.some((row) => !row.pass)) fail('protected_16_anchors', anchors.filter((row) => !row.pass));
+  const hvo = [
+    ['prisoje', 'op:jajce:prisoje', 'Operation Mistral 2', 'hvo_tomislavgrad:Operation Mistral 2:t175'],
+    ['donji_vrbljani', 'op:kljuc:donji_vrbljani_2', 'Operation Southern Move', 'hvo_tomislavgrad:Operation Southern Move:t182'],
+  ].map(([name, osid, operationName, operationId]) => {
+    const matches = weekly.flatMap((row) => (row.battles ?? []).filter((battle) => row.week_index === 188 && battle.target_osid === osid && battle.attacker_won === true && battle.operation_name === operationName && battle.operation_id === operationId));
+    const matchingEvents = (final.political?.control_events ?? []).filter((event) => (event.osid ?? event.settlement_id) === osid && event.turn === 188 && event.mechanism === 'combat' && event.from === 'RS' && event.to === 'HRHB' && matches.some((battle) => battle.battle_id === event.battle_id));
+    return { name, osid, controller: control(final)[osid] ?? null, battle_count: matches.length, event_count: matchingEvents.length, pass: control(final)[osid] === 'HRHB' && matches.length === 1 && matchingEvents.length === 1 };
+  });
+  if (hvo.some((row) => !row.pass)) fail('retained_hvo_outcome', hvo);
+
+  const runMeta = read(path.join(candidate, 'run_meta.json'));
+  const rows = runMeta.provenance?.consumed_inputs?.files ?? [];
+  const mismatches = rows.filter((row) => !fs.existsSync(path.join(ROOT, row.path)) || normalizedSha(row.path) !== row.sha256);
+  const provenance = {
+    git_commit: runMeta.provenance?.git_commit ?? null,
+    git_dirty: runMeta.provenance?.git_dirty ?? null,
+    count: rows.length,
+    recorded_digest: runMeta.provenance?.consumed_inputs?.digest ?? null,
+    recomputed_digest: digestRows(rows),
+    input_mismatches: mismatches,
+  };
+  if (provenance.git_commit !== expectedHead || provenance.git_dirty !== false || provenance.count !== 32 || provenance.recorded_digest !== provenance.recomputed_digest || mismatches.length) fail('native_input_provenance', provenance);
+
+  const result = { schema: 'awwv.baseline-rebless-candidate-evaluation.v1', pass: failures.length === 0, candidate, baselines: { n91: N91, n92: N92 }, inventory, save_bindings: saveBindings, checkpoints, shared_control_deltas: shared, toljenak: { timeline: toljenak, battles, events, diagnostics, aars }, protected_16_anchors: anchors, retained_hvo: hvo, accepted_ci_artifact_hashes: acceptedArtifactAudit, weekly_diagnostic_projection: projectionAudit, provenance, failures };
+  fs.writeFileSync(output, JSON.stringify(result, null, 2) + '\n', { flag: 'wx' });
+  process.stdout.write(JSON.stringify({ pass: result.pass, scores: Object.fromEntries(Object.entries(checkpoints).map(([key, value]) => [key, value.score])), projection: projectionAudit, failures }) + '\n');
+  process.exit(result.pass ? 0 : 2);
+}
+
+try { main(); } catch (error) { process.stderr.write(String(error.stack ?? error) + '\n'); process.exit(1); }

@@ -1,0 +1,115 @@
+{
+  "schema": "circle-cited-wartime-artifacts-v1",
+  "date": "2026-10-26",
+  "verdict": "UNRESOLVED",
+  "artifacts": [
+    {
+      "requested": "Kunarac Exhibit 23 map",
+      "identity": "Trial Exhibit 23; tendered within the Prosecution's Exhibits 1-36",
+      "full_registry_document_id": null,
+      "description": "1:50,000 trial map of municipalities relevant to the case, with selected areas circled in green; depicts Sarajevo-Trnovo-Rogoj-Dobro Polje-Miljevina-Foca route and positions Gorazde and Kalinovik.",
+      "references": [
+        {
+          "url": "https://www.icty.org/x/cases/kunarac/trans/en/000320it.htm",
+          "date": "2000-03-20",
+          "pages": "360-363"
+        },
+        {
+          "url": "https://www.icty.org/x/cases/kunarac/trans/en/000524it.htm",
+          "date": "2000-05-24",
+          "pages": "4023-4025"
+        }
+      ],
+      "retrieval": "not_retrieved",
+      "missing_access": "Actual scanned exhibit and fuller registry identifier are not exposed on the unauthenticated selected-documents page; the UCR record viewer requires sign-in or registration.",
+      "limitations": [
+        "not identified as a wartime operational map",
+        "no source date stated",
+        "no dated-control or unit overlay established"
+      ]
+    },
+    {
+      "requested": "TG II order or war diary for 1992-07-31 through 1992-08-03",
+      "identity": null,
+      "full_registry_document_id": null,
+      "retrieval": "not_identified",
+      "reference": {
+        "url": "https://www.icty.org/x/cases/kunarac/trans/en/000524it.htm",
+        "pages": "3978-3982, 4023-4041"
+      },
+      "finding": "The transcript names no contemporaneous TG II order or war diary.",
+      "nearby_but_not_substitute": {
+        "identity": "Defence Exhibit 69",
+        "type": "Husein Alic witness statement",
+        "interview_dates": ["1999-06-03", "1999-11-23"],
+        "admitted": "2000-05-24",
+        "pages": "4036-4038",
+        "reason_excluded": "later witness statement, not a wartime order or diary"
+      }
+    }
+  ],
+  "testimony_only_metadata": {
+    "witness": "Muhamed Nogo",
+    "pages": "3978-3979",
+    "participants_named": [
+      "the unit commanded by Nogo",
+      "the unit from the TO Trnovo staff",
+      "units from Igman",
+      "7th Rijeka"
+    ],
+    "qualification": "non-exhaustive oral testimony, not an order of battle"
+  },
+  "correction": {
+    "prior_text": "CLARIFICATION.v1 names Alija Alic",
+    "correct_metadata": "Husein Alic",
+    "source": "https://www.icty.org/x/cases/kunarac/trans/en/000524it.htm",
+    "pages": "4015-4023",
+    "prior_file_modified": false
+  },
+  "requests": [
+    {
+      "request_id": "Q1/turn71search0",
+      "query": "site:icty.org/x/cases/kunarac \"Exhibit 23\" map Rogoj",
+      "result_urls": ["https://www.icty.org/x/cases/kunarac/trans/en/000524it.htm"]
+    },
+    {
+      "request_id": "Q2",
+      "query": "site:icty.org \"Exhibit 23\" \"Alija Alic\" Kunarac",
+      "result_urls": [],
+      "note": "No matching witness because the correct name is Husein Alic."
+    },
+    {
+      "request_id": "Q3",
+      "query": "site:ucr.irmct.org Kunarac \"Exhibit 23\" Rogoj map",
+      "result_urls": []
+    },
+    {
+      "request_id": "Q4/turn71search1",
+      "query": "site:ucr.irmct.org Kunarac Alic \"31 July 1992\" exhibit",
+      "result_urls": ["https://www.icty.org/x/cases/kunarac/trans/en/000320it.htm"],
+      "note": "Returned transcript description, not the exhibit image."
+    },
+    {
+      "request_id": "O1/turn72view0",
+      "url": "https://www.icty.org/en/case/kunarac",
+      "result": "case page links to UCR selected documents"
+    },
+    {
+      "request_id": "O2/turn72view1",
+      "url": "https://ucr.irmct.org/",
+      "result": "sign-in/registration required for record viewing"
+    },
+    {
+      "request_id": "O3/turn73view0",
+      "url": "https://ucr.irmct.org/scasedocs/case/IT-96-23",
+      "result": "selected-documents page has no exhibit category or Exhibit 23 scan"
+    }
+  ],
+  "actions_not_taken": [
+    "login",
+    "registration",
+    "contact or records request",
+    "substitution of map for aggregate ownership",
+    "substitution of later OOB for 1992 forces"
+  ]
+}

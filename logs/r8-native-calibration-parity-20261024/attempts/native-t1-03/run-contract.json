@@ -1,0 +1,48 @@
+{
+  "question": "Qualify repaired native save/load, failure attribution and provisional/settled capture through actual ordinary Historical UI. Known exact-daily control divergence remains FAILED.",
+  "expectedMinutes": [
+    3,
+    8
+  ],
+  "capMs": 900000,
+  "automaticRetry": false,
+  "configuration": "tmp/r8-native-calibration-parity-20261024/native-t1-03-config.json",
+  "sources": [
+    {
+      "path": "tools/ui/paradox_local_qa.cjs",
+      "bytes": 330688,
+      "sha256": "14faffa17bcc04612cc441ed870449e8cb769743e5343e5fa74e79d33b92a291",
+      "snapshot": "tmp/r8-native-calibration-parity-20261024/frozen-reliability/tools__ui__paradox_local_qa.cjs"
+    },
+    {
+      "path": "tests/paradox_local_qa_harness.test.ts",
+      "bytes": 168388,
+      "sha256": "ae5887f223d77f734d360ea4118a0b1d98e2c5366d44e9aa12db3fab94b67a19",
+      "snapshot": "tmp/r8-native-calibration-parity-20261024/frozen-reliability/tests__paradox_local_qa_harness.test.ts"
+    },
+    {
+      "path": "tools/diagnostics/native_calibration_outcome_compare.cjs",
+      "bytes": 24284,
+      "sha256": "ab2afc3f8b3106b33db55c3235f4bd10bd130b998d11cb919be981e6640d79b8",
+      "snapshot": "tmp/r8-native-calibration-parity-20261024/frozen-reliability/tools__diagnostics__native_calibration_outcome_compare.cjs"
+    },
+    {
+      "path": "tests/native_calibration_outcome_compare.test.ts",
+      "bytes": 7013,
+      "sha256": "7fe58af33bc554035a78b97ff470aa24a96346589c3d07ad3e3f5b6a7268bc39",
+      "snapshot": "tmp/r8-native-calibration-parity-20261024/frozen-reliability/tests__native_calibration_outcome_compare.test.ts"
+    }
+  ],
+  "review": "tmp/r8-native-calibration-parity-20261024/review/HARNESS_RELIABILITY_REVIEW.md",
+  "pass": [
+    "actual mode/faction/t0 binding",
+    "normal turn1",
+    "raw provisional and settled snapshots",
+    "canonical manualsave exact",
+    "actual Field Records Resume",
+    "only declared transient hydration differences",
+    "actual loaded projection exact",
+    "zero unmatched runtime diagnostics",
+    "child/wrapper0"
+  ]
+}

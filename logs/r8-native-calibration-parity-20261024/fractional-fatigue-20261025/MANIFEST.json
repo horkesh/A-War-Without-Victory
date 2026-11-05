@@ -1,0 +1,109 @@
+{
+  "schema": "awwv.fractional-fatigue.selected-proof.v1",
+  "baseHead": "f7c40a0d1e28fde596f217b2c297b0734ec67470",
+  "scope": "Reviewed focused candidate; no broad/native qualification",
+  "files": [
+    {
+      "name": "preimplementation-review.json",
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/FATIGUE_REPAIR_PREIMPLEMENTATION_REVIEW.json",
+      "bytes": 16895,
+      "sha256": "7cbd418d92daa950d3e706b34d6a2952a4eb10440db2d157725983f87ca204e5"
+    },
+    {
+      "name": "normalization-diagnosis.json",
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/ACTUAL_NORMALIZATION_DIAGNOSIS.json",
+      "bytes": 13799,
+      "sha256": "37a16a2de1eb9983fd621ca5914fdececfd96ce8967e6bf4462244ad99dd3925"
+    },
+    {
+      "name": "normalization-diagnosis.md",
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/ACTUAL_NORMALIZATION_DIAGNOSIS.md",
+      "bytes": 6032,
+      "sha256": "6d4e2da24d5257ce9c70850fd133a69364b2a7e1557127cec9c17adaa3768b04"
+    },
+    {
+      "name": "warm-capture-review.json",
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/ACTUAL_WARM_CAPTURE_REVIEW.json",
+      "bytes": 10300,
+      "sha256": "ca0a59b0242b344fc3d575d285a0f2d6c87a10219b6f027eae4d89670c9789f4"
+    },
+    {
+      "name": "warm-capture-result.json",
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm-capture-02/result.json",
+      "bytes": 566,
+      "sha256": "b0693b42638ad890318a39d2541f9fd32746892308e0d671cad3e8dbc1b16137"
+    },
+    {
+      "name": "warm-capture-receipt.json",
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm-capture-02/receipt.json",
+      "bytes": 7407,
+      "sha256": "3cfd16046d29ac9aabbb6b15b4e3c8bb75be0b8ac1276d67ae2916805b0fb1f9"
+    },
+    {
+      "name": "input-binding-diagnosis.json",
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/INPUT_BINDING_DIAGNOSIS.json",
+      "bytes": 50085,
+      "sha256": "8f8d8694e9ca58f9e743f62440296382e9f0366a4adf59ea02d8c5c00a4a035e"
+    },
+    {
+      "name": "failed-warm-capture-receipt.json",
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm-capture-01/receipt.json",
+      "bytes": 4743,
+      "sha256": "7fde7b2ef4a3b72850a7e72b4c74ae28130646fffe78178530c9eb606acfd47f"
+    },
+    {
+      "name": "failed-warm-capture-stderr.log",
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm-capture-01/stderr.log",
+      "bytes": 1174,
+      "sha256": "78f4e684746e0a10270f83d6c5570b2c4b08b7cbf0413b51836d56071312fe29"
+    },
+    {
+      "name": "implementation-review.json",
+      "source": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-repair-20261025/FATIGUE_REPAIR_POSTIMPLEMENTATION_REVIEW.json",
+      "bytes": 9654,
+      "sha256": "981a0c9469628db5aa5711e8cb27de2e8ec5f7237c5cea9bfe294a5b2e28f8ed"
+    },
+    {
+      "name": "targeted-correction-review.json",
+      "source": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-repair-20261025/FATIGUE_REPAIR_TARGETED_CORRECTION_REVIEW.json",
+      "bytes": 5051,
+      "sha256": "d298af7abdb92a54ee629b7c2e37a595a769187b159b1c25bda7268d22bf4fa8"
+    },
+    {
+      "name": "source-freeze.json",
+      "source": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-repair-20261025/FINAL_SOURCE_TEST_FREEZE_TARGETED_CORRECTION_01.json",
+      "bytes": 3747,
+      "sha256": "bc1ec87a5680a61127f2d3a27ef9558c5b754b8130fcf2180f0b5c8f02343b0d"
+    },
+    {
+      "name": "red-receipt.json",
+      "source": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-repair-20261025/red-01/receipt.json",
+      "bytes": 2882,
+      "sha256": "a3cab9cbd36a5487bf049dc400f446f144ae89e34effddc0a57257e44784bade"
+    },
+    {
+      "name": "green-receipt.json",
+      "source": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-repair-20261025/targeted-green-01/receipt.json",
+      "bytes": 2903,
+      "sha256": "8d521fea98679378120c3d6f39a9c6cf7b70dc61b034cffd4d4f06299e5c763b"
+    },
+    {
+      "name": "typecheck-receipt.json",
+      "source": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-repair-20261025/targeted-typecheck-01/receipt.json",
+      "bytes": 2916,
+      "sha256": "8c081a7010cbe91c67e94ec319da16b92432f89e72dd9fdbf691e8c870b9e166"
+    },
+    {
+      "name": "raw-snapshot-receipt.json",
+      "source": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-repair-20261025/actual-snapshot-02/receipt.json",
+      "bytes": 3439,
+      "sha256": "a698f5d0a386fae2f828ffc3c92aa2dff041a69df62824a547f9cb203b668468"
+    },
+    {
+      "name": "raw-snapshot-result.json",
+      "source": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-repair-20261025/actual-snapshot-02/result.json",
+      "bytes": 194015,
+      "sha256": "fa771460ccf59dd55af949be8ed09a057e4d1a886662043d55005fb0fa56841c"
+    }
+  ]
+}

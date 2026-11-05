@@ -1,0 +1,304 @@
+{
+  "turn": 5,
+  "pendingConsumed": true,
+  "operation": {
+    "operationId": "arbih_2nd_corps:Presidential Directive — op:brcko:bukvik_gornji_2:t2",
+    "name": "Presidential Directive — op:brcko:bukvik_gornji_2",
+    "type": "sector_attack",
+    "phase": "recovery",
+    "startedTurn": 2,
+    "requestedByPresident": true,
+    "forced": true,
+    "commanderOfficerId": "arbih_mesic",
+    "roster": [
+      "arbih_213th_vitezka_mountain",
+      "arbih_215th_vitezka_mountain",
+      "arbih_217th_vitezka_mountain",
+      "arbih_221st_mountain",
+      "arbih_222nd_liberation",
+      "arbih_246th_vitezka_mountain",
+      "arbih_250th_liberation",
+      "arbih_252nd_slavna_mountain",
+      "arbih_253rd_mountain",
+      "arbih_2nd_tuzla",
+      "hrhb_108th_brko_brigade"
+    ],
+    "axes": [
+      {
+        "axisId": "main",
+        "stagingOsid": "op:brcko:bijela_2",
+        "objectives": [
+          "op:brcko:bukvik_gornji_2"
+        ],
+        "assignedBrigades": [
+          "arbih_213th_vitezka_mountain",
+          "arbih_215th_vitezka_mountain",
+          "arbih_217th_vitezka_mountain",
+          "arbih_221st_mountain",
+          "arbih_222nd_liberation",
+          "arbih_246th_vitezka_mountain",
+          "arbih_250th_liberation",
+          "arbih_252nd_slavna_mountain",
+          "arbih_253rd_mountain",
+          "arbih_2nd_tuzla",
+          "hrhb_108th_brko_brigade"
+        ]
+      }
+    ],
+    "rosterState": [
+      {
+        "formationId": "arbih_213th_vitezka_mountain",
+        "status": "active",
+        "personnel": 989,
+        "locationOsid": "op:brcko:bukvik_gornji_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_215th_vitezka_mountain",
+        "status": "active",
+        "personnel": 885,
+        "locationOsid": "op:gradacac:gradacac_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_217th_vitezka_mountain",
+        "status": "active",
+        "personnel": 773,
+        "locationOsid": "op:brcko:bijela_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_221st_mountain",
+        "status": "active",
+        "personnel": 682,
+        "locationOsid": "op:brcko:bijela_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_222nd_liberation",
+        "status": "active",
+        "personnel": 559,
+        "locationOsid": "op:brcko:bijela_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_246th_vitezka_mountain",
+        "status": "active",
+        "personnel": 593,
+        "locationOsid": "op:kalesija:kalesija_selo",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_250th_liberation",
+        "status": "active",
+        "personnel": 721,
+        "locationOsid": "op:tuzla:gornja_tuzla",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_252nd_slavna_mountain",
+        "status": "active",
+        "personnel": 513,
+        "locationOsid": "op:brcko:gornji_rahic_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_253rd_mountain",
+        "status": "active",
+        "personnel": 513,
+        "locationOsid": "op:brcko:gornji_rahic_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_2nd_tuzla",
+        "status": "active",
+        "personnel": 513,
+        "locationOsid": "op:brcko:gornji_rahic_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "hrhb_108th_brko_brigade",
+        "status": "active",
+        "personnel": 872,
+        "locationOsid": "op:brcko:gornji_rahic_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      }
+    ]
+  },
+  "movement": {
+    "turn": 5,
+    "locationChanges": [
+      {
+        "formationId": "arbih_213th_vitezka_mountain",
+        "fromOsid": "op:brcko:skakava_donja",
+        "fromController": "RBiH",
+        "toOsid": "op:brcko:bukvik_gornji_2",
+        "toController": "RBiH"
+      },
+      {
+        "formationId": "arbih_222nd_liberation",
+        "fromOsid": "op:gracanica:gracanica_2",
+        "fromController": "RBiH",
+        "toOsid": "op:brcko:bijela_2",
+        "toController": "RBiH"
+      },
+      {
+        "formationId": "arbih_246th_vitezka_mountain",
+        "fromOsid": "op:zvornik:sapna",
+        "fromController": "RBiH",
+        "toOsid": "op:kalesija:kalesija_selo",
+        "toController": "RBiH"
+      },
+      {
+        "formationId": "arbih_250th_liberation",
+        "fromOsid": "op:kalesija:tojsici_2",
+        "fromController": "RBiH",
+        "toOsid": "op:tuzla:gornja_tuzla",
+        "toController": "RBiH"
+      },
+      {
+        "formationId": "arbih_252nd_slavna_mountain",
+        "fromOsid": "op:zivinice:gracanica_2",
+        "fromController": "RBiH",
+        "toOsid": "op:brcko:gornji_rahic_2",
+        "toController": "RBiH"
+      }
+    ],
+    "summaryMovements": [
+      {
+        "formation_id": "arbih_213th_vitezka_mountain",
+        "formation_name": "213th Mountain",
+        "from_osid": "op:brcko:skakava_donja",
+        "to_osid": "op:brcko:bukvik_gornji_2"
+      },
+      {
+        "formation_id": "arbih_222nd_liberation",
+        "formation_name": "222nd Liberation",
+        "from_osid": "op:gracanica:gracanica_2",
+        "to_osid": "op:brcko:bijela_2"
+      },
+      {
+        "formation_id": "arbih_246th_vitezka_mountain",
+        "formation_name": "246th Mountain",
+        "from_osid": "op:zvornik:sapna",
+        "to_osid": "op:kalesija:kalesija_selo"
+      },
+      {
+        "formation_id": "arbih_250th_liberation",
+        "formation_name": "250th Liberation",
+        "from_osid": "op:kalesija:tojsici_2",
+        "to_osid": "op:tuzla:gornja_tuzla"
+      },
+      {
+        "formation_id": "arbih_252nd_slavna_mountain",
+        "formation_name": "252nd Mountain",
+        "from_osid": "op:zivinice:gracanica_2",
+        "to_osid": "op:brcko:gornji_rahic_2"
+      }
+    ]
+  },
+  "combat": {
+    "allBattleCount": 5,
+    "ownedBattles": [
+      {
+        "battle_id": "5:op:brcko:bukvik_gornji_2:arbih_213th_vitezka_mountain:null",
+        "attacker_brigade": "arbih_213th_vitezka_mountain",
+        "attacker_brigades": [
+          "arbih_213th_vitezka_mountain",
+          "arbih_217th_vitezka_mountain",
+          "arbih_221st_mountain",
+          "arbih_222nd_liberation",
+          "arbih_250th_liberation",
+          "arbih_252nd_slavna_mountain",
+          "arbih_253rd_mountain",
+          "arbih_2nd_tuzla",
+          "hrhb_108th_brko_brigade"
+        ],
+        "contributing_operation_ids": [
+          "arbih_2nd_corps:Presidential Directive — op:brcko:bukvik_gornji_2:t2"
+        ],
+        "attacker_faction": "RBiH",
+        "defender_faction": "RS",
+        "target_osid": "op:brcko:bukvik_gornji_2",
+        "outcome": "decisive_victory",
+        "power_ratio": 4.76475042748863,
+        "attacker_won": true,
+        "defender_brigade": null,
+        "defender_kind": "militia",
+        "defender_militia_pool_key": "brcko:RS",
+        "snap_events": [],
+        "attacker_casualties": 116,
+        "defender_casualties": 96,
+        "execution_friction": {
+          "labels": [
+            "stale_intel"
+          ],
+          "attacker_confidence_band": "low"
+        },
+        "defending_sub_segment_id": "subseg:sector:vrs_east_bosnian:6:0",
+        "equipment": {
+          "attacker_tanks_lost": 0,
+          "attacker_artillery_lost": 9,
+          "defender_tanks_lost": 0,
+          "defender_artillery_lost": 0,
+          "scavenged_tanks": 0,
+          "scavenged_artillery": 0,
+          "captured_tanks": 2,
+          "captured_artillery": 4,
+          "captured_by": "RBiH"
+        },
+        "operation_id": "arbih_2nd_corps:Presidential Directive — op:brcko:bukvik_gornji_2:t2",
+        "operation_name": "Presidential Directive — op:brcko:bukvik_gornji_2",
+        "rosterAttackers": [
+          "arbih_213th_vitezka_mountain",
+          "arbih_217th_vitezka_mountain",
+          "arbih_221st_mountain",
+          "arbih_222nd_liberation",
+          "arbih_250th_liberation",
+          "arbih_252nd_slavna_mountain",
+          "arbih_253rd_mountain",
+          "arbih_2nd_tuzla",
+          "hrhb_108th_brko_brigade"
+        ]
+      }
+    ]
+  },
+  "controller": {
+    "targetOsid": "op:brcko:bukvik_gornji_2",
+    "before": "RS",
+    "after": "RBiH",
+    "controlEvents": [
+      {
+        "attacker_brigade": "arbih_213th_vitezka_mountain",
+        "battle_id": "5:op:brcko:bukvik_gornji_2:arbih_213th_vitezka_mountain:null",
+        "from": "RS",
+        "mechanism": "combat",
+        "mun_id": "brcko",
+        "settlement_id": "op:brcko:bukvik_gornji_2",
+        "to": "RBiH",
+        "turn": 5
+      }
+    ],
+    "captureProvenance": "attack_backed_controller_change"
+  },
+  "aar": null,
+  "canonical": {
+    "bytes": 4018945,
+    "sha256": "a696f0090cb81335a9970bf7d3d2e923c772c011dced9afce53f0068e2b4449c"
+  },
+  "runtime": {
+    "bytes": 4081549,
+    "sha256": "e0ff19a6ff60a0dbed0e5d474c75afed871aea6c57518baeab636c49da9b86a8"
+  }
+}

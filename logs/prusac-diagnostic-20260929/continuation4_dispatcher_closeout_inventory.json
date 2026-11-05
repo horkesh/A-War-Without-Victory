@@ -1,0 +1,17 @@
+{
+  "source_files": 8,
+  "parent_fingerprints": 22,
+  "n39_artifacts": 7,
+  "mismatches": [],
+  "retained_paths": [
+    "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n37",
+    "runs/apr1992_definitive_188w__4658849344f21642__w186_n38",
+    "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n39",
+    "runs/apr1992_historical_52w__434fe8ff83b7b523__w52"
+  ],
+  "runs_realpath": "C:\\Users\\User\\.codex\\worktrees\\april-1995-glamoc\\A-War-Without-Victory\\runs",
+  "node_modules_realpath": "C:\\Users\\User\\.codex\\worktrees\\april-1995-glamoc\\A-War-Without-Victory\\node_modules",
+  "node_version": "v22.23.2",
+  "protected_diff_empty": true,
+  "prior36_fingerprints_reused": true
+}

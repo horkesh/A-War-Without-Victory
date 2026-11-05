@@ -1,6 +1,4 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { test } from 'vitest';
 
 import {
@@ -8,12 +6,6 @@ import {
     generateAllBotOrdersOsid
 } from '../src/sim/combat/bot_brigade_ai_osid.js';
 import type { CorpsDirective, CorpsOperation, GameState } from '../src/state/game_state.js';
-
-test('execution concentration treats one adjacent axis-mate as one additional attacker', () => {
-    const source = readFileSync(resolve('src/sim/combat/bot_brigade_eval_attack.ts'), 'utf8');
-    assert.match(source, /const additionalAttackers = Math\.max\(alreadyAssigned, adjacentOperationParticipants\)/);
-    assert.doesNotMatch(source, /adjacentOperationParticipants > 1/);
-});
 
 test('execution-phase sector offensive narrows brigade directive to current objective', () => {
     const directive: CorpsDirective = {
@@ -135,6 +127,66 @@ test('execution-phase operation attacks current objective even without a corps d
     });
 
     assert.equal(state.military.brigade_attack_orders?.rs_1st_bratunac, 'op:bratunac:bratunac_2');
+});
+
+test('forward assault floor holds an adjacent brigade until its axis mate reaches the objective approach', () => {
+    const state = {
+        meta: { turn: 2, phase: 'war', seed: 'test-seed' },
+        corps_front_directives: {},
+        military: {
+            formations: {
+                lead: {
+                    id: 'lead', kind: 'brigade', faction: 'RS', status: 'active', corps_id: 'vrs_drina',
+                    posture: 'defend', cohesion: 70, morale: 70, personnel: 1000,
+                    equipment: { infantry: 1000, tanks: 0, artillery: 0, air_defense: 0 },
+                    location_osid: 'op:test:approach',
+                },
+                mate: {
+                    id: 'mate', kind: 'brigade', faction: 'RS', status: 'active', corps_id: 'vrs_drina',
+                    posture: 'defend', cohesion: 70, morale: 70, personnel: 1000,
+                    equipment: { infantry: 1000, tanks: 0, artillery: 0, air_defense: 0 },
+                    location_osid: 'op:test:rear',
+                },
+            },
+            corps_command: {
+                vrs_drina: {
+                    stance: 'offensive',
+                    active_operations: [{
+                        name: 'Operation Assembly', type: 'sector_attack', phase: 'execution',
+                        started_turn: 0, phase_started_turn: 1,
+                        participating_brigades: ['lead', 'mate'],
+                        objectives: ['op:test:objective'], current_objective_index: 0,
+                        momentum: 0, failure_count: 0, consecutive_failures_on_current: 0,
+                        axes: [{
+                            axis_id: 'axis', name: 'Axis', status: 'executing',
+                            assigned_brigades: ['lead', 'mate'], objectives: ['op:test:objective'],
+                            current_objective_index: 0, staging_osid: 'op:test:approach',
+                            minimum_forward_brigades: 2,
+                            momentum: 0, failure_count: 0, consecutive_failures_on_current: 0,
+                            consecutive_catastrophic_on_current: 0, objective_capture_count: 0,
+                            attack_attempt_count: 0, idle_execution_turn_streak: 0,
+                            movement_only_execution_turns: 0,
+                        }],
+                    }],
+                },
+            },
+            brigade_posture_orders: [],
+        },
+        political: { political_controllers: {
+            'op:test:rear': 'RS', 'op:test:approach': 'RS', 'op:test:objective': 'RBiH',
+        } },
+    } as unknown as GameState;
+
+    generateAllBotOrdersOsid(state, ['RS'], {
+        edges: [
+            { a: 'op:test:rear', b: 'op:test:approach' },
+            { a: 'op:test:approach', b: 'op:test:objective' },
+        ] as any,
+        reverseMap: new Map(), supplyStateByOsid: {} as any, osidPopulationMap: new Map(),
+    });
+
+    assert.equal(state.military.brigade_attack_orders?.lead, undefined);
+    assert.equal(state.military.brigade_movement_orders?.mate?.destination_sids?.[0], 'op:test:approach');
 });
 
 test('COHA suppresses bot attack orders and attack posture costs while preserving non-combat orders', () => {
@@ -292,6 +344,25 @@ test('merge mode preserves existing manual player orders for the same brigade', 
     assert.deepEqual(
         state.military.brigade_posture_orders?.filter((order: any) => order.brigade_id === 'rs_1st_bratunac'),
         [{ brigade_id: 'rs_1st_bratunac', posture: 'hold' }],
+    );
+
+    state.military.brigade_movement_orders = {
+        rs_1st_bratunac: { destination_sids: ['op:bratunac:manual_move'], stance: 'column' },
+    };
+    generateAllBotOrdersOsid(state, ['RS'], {
+        edges: [
+            { a: 'op:bratunac:slapasnica', b: 'op:bratunac:bratunac_2' },
+            { a: 'op:bratunac:slapasnica', b: 'op:bratunac:manual_target' },
+            { a: 'op:bratunac:slapasnica', b: 'op:bratunac:manual_move' },
+            { a: 'op:bratunac:slapasnica', b: 'op:bratunac:polom' },
+        ] as any,
+        reverseMap: new Map(),
+        supplyStateByOsid: {} as any,
+        osidPopulationMap: new Map(),
+    });
+    assert.deepEqual(
+        state.military.brigade_movement_orders?.rs_1st_bratunac,
+        { destination_sids: ['op:bratunac:manual_move'], stance: 'column' },
     );
 });
 
@@ -981,6 +1052,170 @@ test('execution-phase operation does not attack unrelated intermediates off the 
     assert.notEqual(
         state.military.brigade_attack_orders?.rs_1st_doboj_light_infantry,
         'op:test:a_unrelated_easy'
+    );
+});
+
+test('flagged Sana axis holds when its current objective has no friendly approach instead of attacking sibling-axis Ripac', () => {
+    const state = {
+        meta: { turn: 177, phase: 'war', seed: 'sana-t176-facts' },
+        corps_front_directives: {},
+        military: {
+            formations: {
+                arbih_506th_mountain: {
+                    id: 'arbih_506th_mountain', kind: 'brigade', faction: 'RBiH', status: 'active',
+                    corps_id: 'arbih_5th_corps', personnel: 1200, cohesion: 70, morale: 70,
+                    equipment: { infantry: 1200, tanks: 0, artillery: 0, air_defense: 0 },
+                    location_osid: 'op:bihac:bihac_2',
+                },
+                arbih_517th_light: {
+                    id: 'arbih_517th_light', kind: 'brigade', faction: 'RBiH', status: 'active',
+                    corps_id: 'arbih_5th_corps', personnel: 1200, cohesion: 70, morale: 70,
+                    equipment: { infantry: 1200, tanks: 0, artillery: 0, air_defense: 0 },
+                    location_osid: 'op:bihac:bihac_2',
+                },
+            },
+            corps_command: {
+                arbih_5th_corps: {
+                    stance: 'offensive',
+                    active_operations: [{
+                        name: 'Operation Sana', type: 'sector_attack', phase: 'execution',
+                        started_turn: 175, phase_started_turn: 176,
+                        participating_brigades: ['arbih_506th_mountain', 'arbih_517th_light'],
+                        objectives: ['op:bosanska_krupa:donji_dubovik_2'], current_objective_index: 0,
+                        axes: [{
+                            axis_id: 'sana_sanski_most_kljuc', name: 'Sanski Most + Ključ Liberation',
+                            assigned_brigades: ['arbih_506th_mountain', 'arbih_517th_light'],
+                            objectives: ['op:bosanska_krupa:donji_dubovik_2'], current_objective_index: 0,
+                            staging_osid: 'op:bosanska_krupa:ivanjska_2', preserve_objective_sequence: true,
+                            status: 'executing', failure_count: 0, consecutive_failures_on_current: 0,
+                            momentum: 0, attack_attempt_count: 0, objective_capture_count: 0,
+                            movement_only_execution_turns: 0, idle_execution_turn_streak: 0,
+                        }],
+                    }],
+                },
+            },
+            brigade_posture_orders: [],
+        },
+        political: {
+            political_controllers: {
+                'op:bihac:bihac_2': 'RBiH',
+                'op:bihac:ripac': 'RS',
+                'op:bosanska_krupa:otoka_2': 'RBiH',
+                'op:bosanska_krupa:donji_dubovik_2': 'RS',
+                'op:bosanska_krupa:ivanjska_2': 'RS',
+            },
+        },
+    } as any as GameState;
+
+    generateAllBotOrdersOsid(state, ['RBiH'], {
+        edges: [
+            { a: 'op:bihac:bihac_2', b: 'op:bihac:ripac' },
+            { a: 'op:bihac:bihac_2', b: 'op:bosanska_krupa:otoka_2' },
+            { a: 'op:bosanska_krupa:otoka_2', b: 'op:bosanska_krupa:ivanjska_2' },
+            { a: 'op:bihac:ripac', b: 'op:bosanska_krupa:donji_dubovik_2' },
+        ] as any,
+        reverseMap: new Map(), supplyStateByOsid: {} as any, osidPopulationMap: new Map(),
+    });
+
+    assert.equal(state.military.brigade_attack_orders?.arbih_506th_mountain, undefined);
+    assert.equal(state.military.brigade_attack_orders?.arbih_517th_light, undefined);
+    assert.equal(
+        state.military.brigade_movement_orders?.arbih_506th_mountain?.destination_sids?.[0],
+        'op:bosanska_krupa:otoka_2',
+    );
+    assert.equal(
+        state.military.brigade_movement_orders?.arbih_517th_light?.destination_sids?.[0],
+        'op:bosanska_krupa:otoka_2',
+    );
+
+    // Once the sibling capture makes Ivanjska friendly, the same flagged axis
+    // uses it as the real approach to Donji Dubovik and resumes ordinary attack.
+    (state.political as any).political_controllers['op:bosanska_krupa:ivanjska_2'] = 'RBiH';
+    generateAllBotOrdersOsid(state, ['RBiH'], {
+        edges: [
+            { a: 'op:bihac:bihac_2', b: 'op:bosanska_krupa:ivanjska_2' },
+            { a: 'op:bosanska_krupa:ivanjska_2', b: 'op:bosanska_krupa:donji_dubovik_2' },
+        ] as any,
+        reverseMap: new Map(), supplyStateByOsid: {} as any, osidPopulationMap: new Map(),
+    });
+    assert.equal(
+        state.military.brigade_movement_orders?.arbih_506th_mountain?.destination_sids?.[0],
+        'op:bosanska_krupa:ivanjska_2',
+    );
+    assert.equal(
+        state.military.brigade_movement_orders?.arbih_517th_light?.destination_sids?.[0],
+        'op:bosanska_krupa:ivanjska_2',
+    );
+
+    state.military.formations.arbih_506th_mountain.location_osid = 'op:bosanska_krupa:ivanjska_2';
+    state.military.formations.arbih_517th_light.location_osid = 'op:bosanska_krupa:ivanjska_2';
+    state.military.brigade_movement_orders = {};
+    state.military.brigade_posture_orders = [];
+    generateAllBotOrdersOsid(state, ['RBiH'], {
+        edges: [{ a: 'op:bosanska_krupa:ivanjska_2', b: 'op:bosanska_krupa:donji_dubovik_2' }] as any,
+        reverseMap: new Map(), supplyStateByOsid: {} as any, osidPopulationMap: new Map(),
+    });
+    assert.equal(
+        state.military.brigade_attack_orders?.arbih_506th_mountain,
+        'op:bosanska_krupa:donji_dubovik_2',
+    );
+    assert.equal(
+        state.military.brigade_attack_orders?.arbih_517th_light,
+        'op:bosanska_krupa:donji_dubovik_2',
+    );
+});
+
+test('planning flagged axis stages at a friendly neighbor when authored staging is hostile and no approach exists', () => {
+    const state = {
+        meta: { turn: 176, phase: 'war', seed: 'sana-t176-planning-neighbor' },
+        corps_front_directives: {},
+        military: {
+            formations: {
+                arbih_506th_mountain: {
+                    id: 'arbih_506th_mountain', kind: 'brigade', faction: 'RBiH', status: 'active',
+                    corps_id: 'arbih_5th_corps', personnel: 1200, cohesion: 70, morale: 70,
+                    equipment: { infantry: 1200, tanks: 0, artillery: 0, air_defense: 0 },
+                    location_osid: 'op:bihac:bihac_2',
+                },
+            },
+            corps_command: {
+                arbih_5th_corps: {
+                    stance: 'offensive',
+                    active_operations: [{
+                        name: 'Operation Sana', type: 'sector_attack', phase: 'planning',
+                        started_turn: 175, phase_started_turn: 175,
+                        participating_brigades: ['arbih_506th_mountain'],
+                        objectives: ['op:bosanska_krupa:donji_dubovik_2'], current_objective_index: 0,
+                        axes: [{
+                            axis_id: 'sana_sanski_most_kljuc', assigned_brigades: ['arbih_506th_mountain'],
+                            objectives: ['op:bosanska_krupa:donji_dubovik_2'], current_objective_index: 0,
+                            staging_osid: 'op:bosanska_krupa:ivanjska_2', preserve_objective_sequence: true,
+                        }], staging_osid: 'op:bosanska_krupa:ivanjska_2', planning_duration: 5,
+                    }],
+                },
+            },
+            brigade_posture_orders: [],
+        },
+        political: {
+            political_controllers: {
+                'op:bihac:bihac_2': 'RBiH', 'op:bosanska_krupa:otoka_2': 'RBiH',
+                'op:bosanska_krupa:ivanjska_2': 'RS',
+                'op:bosanska_krupa:donji_dubovik_2': 'RS',
+            },
+        },
+    } as any as GameState;
+
+    generateAllBotOrdersOsid(state, ['RBiH'], {
+        edges: [
+            { a: 'op:bihac:bihac_2', b: 'op:bosanska_krupa:otoka_2' },
+            { a: 'op:bosanska_krupa:otoka_2', b: 'op:bosanska_krupa:ivanjska_2' },
+        ] as any,
+        reverseMap: new Map(), supplyStateByOsid: {} as any, osidPopulationMap: new Map(),
+    });
+
+    assert.equal(
+        state.military.brigade_movement_orders?.arbih_506th_mountain?.destination_sids?.[0],
+        'op:bosanska_krupa:otoka_2',
     );
 });
 

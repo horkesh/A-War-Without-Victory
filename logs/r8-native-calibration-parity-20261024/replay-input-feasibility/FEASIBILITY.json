@@ -1,0 +1,156 @@
+{
+  "schema": "awwv.player-replay-input-feasibility.v1",
+  "date": "2026-10-24",
+  "verdict": "NOT_FEASIBLE_WITH_RETAINED_CONTRACT",
+  "scopeMeaning": "The inspected retained RBiH artifact and bounded production owners do not establish a complete production-consumable input-reexecution contract. This is a scoped evidence/contract gap, not proof of a gameplay bug, global absence, or unrecoverability.",
+  "question": "Does the retained player artifact serialize every state-mutating player action in complete consumed global order, and does an existing production consumer apply that serialization while advancing the real engine?",
+  "sourceOwnerDiscovery": {
+    "status": "COMPLETE_FOR_BOUNDED_SCOPE",
+    "producer": [
+      "tools/ui/paradox_local_qa.cjs",
+      "src/desktop/preload.cjs",
+      "src/desktop/electron-main.cjs",
+      "src/desktop/desktop_sim.ts"
+    ],
+    "snapshotSerialization": [
+      "src/scenario/scenario_runner.ts",
+      "src/scenario/replay_save_emit.ts",
+      "src/sim/replay/replay_manifest.ts"
+    ],
+    "productionPlaybackConsumer": [
+      "src/desktop/electron-main.cjs",
+      "src/desktop/preload.cjs",
+      "src/ui/map/components/replay/ReplayScrubber.tsx",
+      "src/sim/replay/replay_player.ts",
+      "src/sim/replay/replay_summary_player.ts"
+    ]
+  },
+  "producerSchemaConsumerChain": {
+    "recording": "The harness drives visible UI actions. Event choices are appended to eventChoiceTranscript with a receipt; playTurns appends handled-action, advance-click, and settled-turn-archive rows to turnEvents; final state projections separately expose event/reserve/officer receipts and proposalRecords.",
+    "resultSerialization": "The harness writes the result object containing eventChoiceTranscript, events, and playtest.turnEvents to the retained JSON. The evidence manifest binds scenario/faction/source plus initial and final autosaves, but has no action-stream member.",
+    "snapshotSerialization": "The scenario runner calls runTurn, then records a canonical GameState snapshot or sparse summary. replay_save_emit materializes GameState frames and a frame manifest.",
+    "playbackConsumption": "Electron reads replay snapshot/manifest sidecars and sends them to renderers. ReplayScrubber constructs replayPlayer/replaySummaryPlayer, whose only progression is cursor seek over stored frames.",
+    "engineInputReexecution": "ABSENT_IN_INSPECTED_CHAIN"
+  },
+  "artifactCoverage": {
+    "retainedArtifact": "tmp-paradox-qa-20260710/paradox-local-qa-native-calibration-rbih-t39-20261024-03.json",
+    "retainedManifest": "tmp-paradox-qa-20260710/evidence/native-calibration-rbih-t39-20261024-03/rbih/manifest.json",
+    "counts": {
+      "eventChoiceTranscript": 6,
+      "finalEventDecisionReceipts": 6,
+      "finalReserveDecisionReceipts": 2,
+      "finalOfficerDecisionReceipts": 2,
+      "finalProposalRecords": 4,
+      "turnEventsHandled": 36,
+      "turnEventsAdvanceClick": 39,
+      "turnEventsSettledArchive": 39,
+      "visibleNoticeAcknowledgementsInEvents": 28,
+      "genericNoticeAcknowledgementsInTurnEvents": 27
+    },
+    "observedMutationKinds": [
+      "event response",
+      "reserve request issue",
+      "officer acknowledgement",
+      "event-notice acknowledgement",
+      "proposal resolution present only as final records",
+      "Advance"
+    ],
+    "boundFields": {
+      "eventChoices": ["faction", "turn", "responseId", "receipt", "playerInput"],
+      "reserveReceipts": ["faction", "turn", "requestId", "brigadeId", "outcome", "decidedBy"],
+      "officerReceipts": ["faction", "turn", "eventId", "decision"],
+      "advances": ["guard", "before.turn", "before.phase", "before.playerFaction", "advanceDispatch.turn", "outcome", "after.turn"],
+      "settledArchives": ["guard", "turn", "kind", "path", "sha256"]
+    },
+    "missingContractFields": [
+      "one canonical global action ordinal spanning pre-tour, turn loop, and post-loop actions",
+      "explicit actor on event choices and officer receipts",
+      "phase on standalone event/reserve/officer/proposal records",
+      "complete exact selection/payload for every handled mutation",
+      "direct per-action receipt-to-settled-archive binding",
+      "serialized replay schema/version covering actions",
+      "production consumer identity/version for that action schema"
+    ]
+  },
+  "orderingCounterexamples": [
+    "rbih_state_identity at turn 0 and vance_owen_plan_1993 at turn 39 are in eventChoiceTranscript but outside playtest.turnEvents, so turnEvents is not the complete global action order.",
+    "The final state has four proposalRecords, while playtest.turnEvents contains no strategic-proposal action for this run; final records cannot establish when or through which consumed selection each resolution occurred.",
+    "The event evidence has 28 handled-event-notice rows, while turnEvents contains 27 generic acknowledge-visible-event-notice actions; exact notice identity is held in a separate array and is not joined by a shared action ordinal.",
+    "Standalone choice and receipt rows lack phase and direct settled-archive binding. Matching by turn would be reconstruction by inference and does not satisfy complete consumed global order."
+  ],
+  "positiveConsumerCheck": {
+    "consumerFound": true,
+    "consumer": "replayPlayer/replaySummaryPlayer via ReplayScrubber",
+    "appliesRecordedActions": false,
+    "advancesProductionEngine": false,
+    "behavior": "Selects stored GameState frames or stored summaries by cursor index. Source comments and methods explicitly state read-only playback with no turn advance, engine mutation, or simulation effects.",
+    "productionAdvanceOwner": "electron-main advance-turn -> desktop_sim.advanceTurn -> runTurn",
+    "bindingFromReplayConsumerToAdvanceOwner": false
+  },
+  "firstFailingSeam": {
+    "name": "NO_SINGLE_COMPLETE_CONSUMED_ACTION_STREAM",
+    "finding": "The retained producer evidence is split across eventChoiceTranscript, events, turnEvents, final receipts, and final proposalRecords. Explicit fields do not provide a complete joined global order with actor/faction/turn/phase/selection/receipt/archive binding.",
+    "independentDecisiveSeam": "The actual production replay consumer is snapshot/summary selection and never applies actions or advances runTurn."
+  },
+  "determinismAssessment": {
+    "finding": "Input reexecution determinism cannot be tested from this retained contract. Engine Invariants section 11.4 requires identical inputs to produce identical outputs; the matrix states exact determinism claims require identical state and phase inputs. Stored-frame playback and Save/load reconstruction do not supply that proof.",
+    "risks": [
+      "Inferring order by turn or by separate array order can reorder multiple same-turn actions.",
+      "Reconstructing missing actor, phase, selection, or archive linkage from final state would invent inputs.",
+      "Using snapshot playback as replay proof would compare stored outputs rather than reexecute identical production inputs."
+    ]
+  },
+  "smallestConcreteFollowupPacket": {
+    "status": "FUTURE_IMPLEMENTATION_REQUIRES_OWNER_AUTHORIZATION",
+    "scope": [
+      "Define a versioned deterministic PlayerActionEnvelope for the retained action kinds with global ordinal, kind, actor, faction, pre-turn, phase, exact selection/payload, authoritative receipt identity, post-action state hash, and settled-archive turn/hash binding.",
+      "Emit the envelope at the production IPC mutation boundary and Advance boundary, including pre-tour and post-loop actions, then serialize one canonical ordered stream in the evidence packet.",
+      "Add a production reexecution consumer that starts from the bound initial canonical save, dispatches each envelope through the same desktop_sim mutation owners in ordinal order, calls the real advanceTurn/runTurn path for Advance, and rejects missing/duplicate/out-of-order/unconsumed actions.",
+      "Compare canonical state bytes after every bound settled archive; keep snapshot/summary replay labeled as playback."
+    ],
+    "cheapChecks": [
+      "static schema/owner scan and serialization round-trip",
+      "focused fixtures with two same-turn actions plus pre-tour and post-loop actions",
+      "negative fixtures for missing actor/phase/selection/receipt/archive, duplicate ordinal, and reordered action",
+      "one in-memory production-path micro fixture proving the consumer calls action owners and real advanceTurn; no native launch or campaign"
+    ],
+    "requiredReview": "One independent determinism/production-owner review after implementation, followed only by targeted correction verification if needed.",
+    "campaignProposal": "NONE"
+  },
+  "checks": {
+    "retainedJsonReadable": true,
+    "manifestJsonReadable": true,
+    "scopedFilesPresent": "12/12",
+    "rawSearchMatchCount": 15365,
+    "rawSearchLog": "tmp/player-replay-input-feasibility-20261024/worker/source-matches.log",
+    "harnessSha256": "e47dce360ea538ccdae4fff4cc183d4c6166c64c4dd7f46585db285fc9ab6086",
+    "harnessMatchesRetainedManifest": true,
+    "harnessTestSha256": "9e978fd94759b767dfbf3acd37eb6b9c23a81bd702acc1f806d836c6acd6e955",
+    "harnessTestMatchesRetained90of90Qualification": true,
+    "testExecution": "NOT_RUN_REUSED_UNCHANGED_90_OF_90",
+    "nativeBuildEngineReplayExecution": "NOT_RUN"
+  },
+  "evidenceFiles": [
+    "tmp/player-replay-input-feasibility-20261024/worker/source-matches.log",
+    "tmp/player-replay-input-feasibility-20261024/worker/source-excerpts.log",
+    "tmp/player-replay-input-feasibility-20261024/worker/artifact-excerpts.log",
+    "tmp/player-replay-input-feasibility-20261024/worker/source-hashes.json",
+    "tmp/player-replay-input-feasibility-20261024/worker/retained-input-hashes.json",
+    "tmp/player-replay-input-feasibility-20261024/worker/readability-summary.json",
+    "tmp/player-replay-input-feasibility-20261024/worker/artifact-action-coverage.json",
+    "tmp/player-replay-input-feasibility-20261024/worker/action-kind-inventory.json"
+  ],
+  "sourceCitations": [
+    "tools/ui/paradox_local_qa.cjs:1317-1338, 1501-1510, 5577, 5621, 5656, 7141-7145, 7215-7219",
+    "src/scenario/scenario_runner.ts:2939, 3417-3422, 3599-3604",
+    "src/scenario/replay_save_emit.ts:1-18, 114-121, 167-184",
+    "src/desktop/electron-main.cjs:337-379, 2394-2440",
+    "src/sim/replay/replay_player.ts:3-10, 102-126",
+    "src/sim/replay/replay_summary_player.ts:29-56",
+    "src/ui/map/components/replay/ReplayScrubber.tsx:3-10, 51-61, 73-96",
+    "src/sim/replay/replay_manifest.ts:3-14",
+    "docs/10_canon/Engine_Invariants_v0_9_0.md:299-301, 455-467",
+    "docs/20_engineering/DETERMINISM_TEST_MATRIX.md:3-18, 90-94",
+    "docs/plans/2026-07-31-full-campaign-electron-validation-plan.md:28-34, 62-70"
+  ]
+}

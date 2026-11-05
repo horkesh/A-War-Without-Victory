@@ -1,0 +1,3 @@
+# Preserve large original attempts in place; commit compact byte-bound copies.
+**/attempts/
+**/outer-launch-*/

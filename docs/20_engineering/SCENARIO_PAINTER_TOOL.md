@@ -67,7 +67,7 @@ checkpoint calibration uses settlement/OSID-level references under
 
 1. Run only the declared master
    `data/scenarios/apr1992_definitive_188w.json`. January 1993 is week 39 of this scenario;
-   do not use `apr1992_definitive_40w*.json` for a current score.
+   do not use a short-duration override of the definitive scenario for a current score.
 2. Treat the painted controller as checkpoint truth. Research is used to identify combat
    operations, dates, formations, and axes capable of producing that boundary.
 3. Do not add a calibration-authored `control_change` event. Initial April corrections,

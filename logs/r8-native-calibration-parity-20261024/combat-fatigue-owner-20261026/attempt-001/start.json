@@ -1,0 +1,30 @@
+{
+  "schema": "awwv.preserved-preflight.start.v1",
+  "start_utc": "2026-10-26T01:31:25.002Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/combat-fatigue-owner-diagnosis-20261026-v1/attempt-001",
+  "timeout_ms": 60000,
+  "original_argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tmp/player-bot-capability-parity-20261024/combat-fatigue-owner-diagnosis-20261026-v1/run_red_once.cjs",
+    "{evidenceDir}"
+  ],
+  "argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tmp/player-bot-capability-parity-20261024/combat-fatigue-owner-diagnosis-20261026-v1/run_red_once.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\combat-fatigue-owner-diagnosis-20261026-v1\\attempt-001"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/combat-fatigue-owner-diagnosis-20261026-v1/run_red_once.cjs",
+    "bytes": 2641,
+    "raw_sha256": "8e9920fa010e3d5297a7090120828f18487e60b8d423ad4feef818e10b2eda2a",
+    "normalized_text_sha256": "8e9920fa010e3d5297a7090120828f18487e60b8d423ad4feef818e10b2eda2a",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 2641,
+      "sha256": "8e9920fa010e3d5297a7090120828f18487e60b8d423ad4feef818e10b2eda2a"
+    }
+  }
+}

@@ -11,7 +11,7 @@ import { loadEventDefinitions } from '../src/sim/events/event_loader.js';
 import { resolveEventDecision } from '../src/sim/events/resolve_decision.js';
 import { updateEventReadiness } from '../src/sim/events/pressure_system.js';
 import type { EventDefinition, Rng } from '../src/sim/events/event_types.js';
-import { triggerMatches } from '../src/sim/events/event_types.js';
+import { evaluateCondition, triggerMatches } from '../src/sim/events/event_types.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { strictCompare } from '../src/state/validateGameState.js';
@@ -625,19 +625,205 @@ test('triggerMatches: turn_min — event with turn_min 40 matches turn 40', () =
     assert.strictEqual(triggerMatches(ev, state, 40), true);
 });
 
-test('Operation Neretva 93 cannot fire before its September 1993 historical window', () => {
+const NERETVA_93 = "Operation Neretva '93";
+const NERETVA_ATTACKED = { type: 'operation_attacked', operation_name_pattern: NERETVA_93, min_attacks: 1 } as const;
+
+/** Live Neretva op on the 4th Corps; `axisAttacks` null means a legacy op without axes. */
+function withLiveNeretva(state: GameState, phase: 'planning' | 'execution', axisAttacks: number[] | null): GameState {
+    const op = axisAttacks === null
+        ? { name: NERETVA_93, phase, started_turn: 70, attack_attempt_count: 0 }
+        : {
+            name: NERETVA_93,
+            phase,
+            started_turn: 70,
+            axes: axisAttacks.map((attack_attempt_count, index) => ({ axis_id: `axis_${index}`, attack_attempt_count })),
+        };
+    state.military.corps_command = {
+        arbih_4th_corps: { active_operations: [op] },
+    } as unknown as GameState['military']['corps_command'];
+    return state;
+}
+
+function neretvaReadyState(turn: number): GameState {
+    const state = minimalState('war', turn);
+    state.military.fired_event_ids = ['croat_bosniak_war_begins_1993'];
+    return state;
+}
+
+test('operation_attacked: absent, planned-only and unattacked operations do not satisfy it', () => {
+    assert.strictEqual(evaluateCondition(NERETVA_ATTACKED, minimalState('war', 76)), false);
+    assert.strictEqual(evaluateCondition(NERETVA_ATTACKED, withLiveNeretva(minimalState('war', 76), 'planning', [0, 0])), false);
+    assert.strictEqual(evaluateCondition(NERETVA_ATTACKED, withLiveNeretva(minimalState('war', 76), 'execution', [0, 0])), false);
+    assert.strictEqual(evaluateCondition(NERETVA_ATTACKED, withLiveNeretva(minimalState('war', 76), 'execution', null)), false);
+
+    const endedWithoutAttack = minimalState('war', 76);
+    endedWithoutAttack.operation_history = [{
+        operation_id: `arbih_4th_corps:${NERETVA_93}:t70`,
+        operation_name: NERETVA_93,
+        total_attacks: 0,
+    }] as GameState['operation_history'];
+    assert.strictEqual(evaluateCondition(NERETVA_ATTACKED, endedWithoutAttack), false);
+
+    const otherOp = withLiveNeretva(minimalState('war', 76), 'execution', [2]);
+    (otherOp.military.corps_command as any).arbih_4th_corps.active_operations[0].name = 'Operation Trebević';
+    assert.strictEqual(evaluateCondition(NERETVA_ATTACKED, otherOp), false);
+});
+
+test('operation_attacked: an attacked operation satisfies it whether live or ended', () => {
+    assert.strictEqual(evaluateCondition(NERETVA_ATTACKED, withLiveNeretva(minimalState('war', 76), 'execution', [0, 1])), true);
+
+    const legacy = withLiveNeretva(minimalState('war', 76), 'execution', null);
+    (legacy.military.corps_command as any).arbih_4th_corps.active_operations[0].attack_attempt_count = 1;
+    assert.strictEqual(evaluateCondition(NERETVA_ATTACKED, legacy), true);
+
+    const ended = minimalState('war', 76);
+    ended.operation_history = [{
+        operation_id: `arbih_4th_corps:${NERETVA_93}:t70`,
+        operation_name: NERETVA_93,
+        total_attacks: 1,
+    }] as GameState['operation_history'];
+    assert.strictEqual(evaluateCondition(NERETVA_ATTACKED, ended), true);
+
+    // min_attacks is honoured above its floor of 1.
+    assert.strictEqual(evaluateCondition(
+        { ...NERETVA_ATTACKED, min_attacks: 3 },
+        withLiveNeretva(minimalState('war', 76), 'execution', [1, 1]),
+    ), false);
+});
+
+test('Operation Neretva 93 opens only in the t76 week, once the operation has attacked, with no morale bonus', () => {
     const event = loadedEventById('operation_neretva_93_1993');
-    const earlyState = minimalState('war', 60);
-    earlyState.military.fired_event_ids = ['croat_bosniak_war_begins_1993'];
-    earlyState.military.event_flags = { mostar_liberated: true };
+    assert.strictEqual(event.trigger.turn_min, 76);
+    assert.strictEqual(event.trigger.turn_max, 76);
+    assert.deepStrictEqual(event.trigger.condition, NERETVA_ATTACKED);
+    assert.strictEqual((event.effects ?? []).some((effect) => effect.kind === 'morale_change'), false);
 
-    assert.strictEqual(event.trigger.turn_min, 74);
-    assert.strictEqual(triggerMatches(event, earlyState, 60), false);
+    assert.strictEqual(triggerMatches(event, withLiveNeretva(neretvaReadyState(75), 'execution', [1]), 75), false);
+    assert.strictEqual(triggerMatches(event, withLiveNeretva(neretvaReadyState(76), 'planning', [0]), 76), false);
+    assert.strictEqual(triggerMatches(event, withLiveNeretva(neretvaReadyState(76), 'execution', [1]), 76), true);
+    assert.strictEqual(triggerMatches(event, withLiveNeretva(neretvaReadyState(77), 'execution', [1]), 77), false);
+});
 
-    const septemberState = minimalState('war', 74);
-    septemberState.military.fired_event_ids = ['croat_bosniak_war_begins_1993'];
-    septemberState.military.event_flags = { mostar_liberated: true };
-    assert.strictEqual(triggerMatches(event, septemberState, 74), true);
+test('evaluateEvents: Neretva 93 fires at t76 and the Grabovica/Uzdol record follows once at t77', () => {
+    const neretva = loadedEventById('operation_neretva_93_1993');
+    const grabovica = loadedEventById('grabovica_uzdol_massacres_1993');
+    assert.strictEqual(grabovica.trigger.turn_min, 77);
+    assert.strictEqual(grabovica.trigger.turn_max, 77);
+    assert.deepStrictEqual(grabovica.trigger.requires_events, ['operation_neretva_93_1993']);
+    assert.notStrictEqual(grabovica.same_turn_requires_events, true);
+    const registry = [grabovica, neretva];
+
+    const early = withLiveNeretva(neretvaReadyState(75), 'execution', [1]);
+    assert.deepStrictEqual(evaluateEvents(early, rejectRandomness, 75, registry).fired, []);
+
+    // Planning alone never satisfies the parent, so neither row ever fires.
+    const unattacked = withLiveNeretva(neretvaReadyState(76), 'planning', [0]);
+    assert.deepStrictEqual(evaluateEvents(unattacked, rejectRandomness, 76, registry).fired, []);
+    unattacked.meta.turn = 77;
+    assert.deepStrictEqual(evaluateEvents(unattacked, rejectRandomness, 77, registry).fired, []);
+
+    const halted = neretvaReadyState(76);
+    halted.military.corps_command = {
+        arbih_4th_corps: {
+            active_operations: [],
+            halted_op_record: [{
+                op_name: NERETVA_93,
+                turn: 75,
+                operation_id: `arbih_4th_corps:${NERETVA_93}:t70`,
+                executed_attacks: 1,
+            }],
+        },
+    } as unknown as GameState['military']['corps_command'];
+
+    for (const state of [
+        withLiveNeretva(neretvaReadyState(76), 'execution', [0, 2]),
+        (() => {
+            const ended = neretvaReadyState(76);
+            ended.operation_history = [{
+                operation_id: `arbih_4th_corps:${NERETVA_93}:t70`,
+                operation_name: NERETVA_93,
+                total_attacks: 1,
+            }] as GameState['operation_history'];
+            return ended;
+        })(),
+        halted,
+    ]) {
+        assert.deepStrictEqual(
+            evaluateEvents(state, rejectRandomness, 76, registry).fired.map((fired) => fired.id),
+            ['operation_neretva_93_1993'],
+        );
+        state.meta.turn = 77;
+        assert.deepStrictEqual(
+            evaluateEvents(state, rejectRandomness, 77, registry).fired.map((fired) => fired.id),
+            ['grabovica_uzdol_massacres_1993'],
+        );
+        state.meta.turn = 78;
+        assert.deepStrictEqual(evaluateEvents(state, rejectRandomness, 78, registry).fired, []);
+        assert.deepStrictEqual(
+            state.military.fired_event_ids,
+            ['croat_bosniak_war_begins_1993', 'operation_neretva_93_1993', 'grabovica_uzdol_massacres_1993'],
+        );
+        assert.strictEqual(state.military.event_last_fired_turn?.operation_neretva_93_1993, 76);
+        assert.strictEqual(state.military.event_last_fired_turn?.grabovica_uzdol_massacres_1993, 77);
+        assert.strictEqual(state.military.event_fire_counts?.grabovica_uzdol_massacres_1993, 1);
+    }
+});
+
+test('evaluateEvents: the t77 record is not displaced by competing decision rows', () => {
+    const neretva = loadedEventById('operation_neretva_93_1993');
+    const grabovica = loadedEventById('grabovica_uzdol_massacres_1993');
+    const decisions = Array.from({ length: 6 }, (_, index) => ({
+        id: `competing_decision_${index}`,
+        trigger: { turn_min: 77, turn_max: 77, phase: 'war' },
+        effect: { kind: 'narrative', text: 'decision' },
+        once: true,
+        responding_faction: 'RS',
+        response_options: [{ id: 'ok', label: 'ok', effects: [] }],
+    } as unknown as EventDefinition));
+    const state = withLiveNeretva(neretvaReadyState(76), 'execution', [1]);
+    evaluateEvents(state, rejectRandomness, 76, [neretva, grabovica, ...decisions]);
+    state.meta.turn = 77;
+    const result = evaluateEvents(state, rejectRandomness, 77, [neretva, grabovica, ...decisions]);
+    assert.ok(result.fired.some((fired) => fired.id === 'grabovica_uzdol_massacres_1993'));
+    assert.ok(result.overflowed);
+    assert.ok(!result.overflowed_ids.includes('grabovica_uzdol_massacres_1993'));
+});
+
+test('Gornji Vakuf clashes cannot fire before January 1993', () => {
+    const event = loadedEventById('gornji_vakuf_clashes_1993');
+    const state = minimalState('war', 40);
+    state.military.event_flags = { hrhb_1992_cooperation_state: 'friction_emerges' };
+    state.political.war_alliance_rbih_hrhb = 0.4;
+    assert.strictEqual(event.trigger.turn_min, 40);
+    assert.strictEqual(triggerMatches(event, state, 39), false);
+    assert.strictEqual(triggerMatches(event, state, 40), true);
+});
+
+test('Travnik victory event waits for an HVO position to be captured', () => {
+    const event = loadedEventById('battle_of_travnik_1993');
+    const state = minimalState('war', 60);
+    state.military.fired_event_ids = ['croat_bosniak_war_begins_1993'];
+    state.political.political_controllers = {
+        'op:travnik:travnik_2': 'RBiH',
+        'op:travnik:cukle_2': 'RBiH',
+        'op:travnik:puticevo_2': 'HRHB',
+    };
+
+    assert.strictEqual(triggerMatches(event, state, 60), false);
+    state.political.political_controllers['op:travnik:puticevo_2'] = 'RBiH';
+    assert.strictEqual(triggerMatches(event, state, 60), true);
+});
+
+test('Stupni Do waits for its dated week and requires HVO-held Vareš', () => {
+    const event = loadedEventById('stupni_do_massacre_1993');
+    const state = minimalState('war', 81);
+    state.military.fired_event_ids = ['croat_bosniak_war_begins_1993'];
+    state.political.political_controllers = { 'op:vares:vares_2': 'HRHB' };
+
+    assert.strictEqual(triggerMatches(event, state, 80), false);
+    assert.strictEqual(triggerMatches(event, state, 81), true);
+    state.political.political_controllers['op:vares:vares_2'] = 'RBiH';
+    assert.strictEqual(triggerMatches(event, state, 81), false);
 });
 
 test('RBiH officer-corps posture breaks the opening decision drought in early summer 1992', () => {

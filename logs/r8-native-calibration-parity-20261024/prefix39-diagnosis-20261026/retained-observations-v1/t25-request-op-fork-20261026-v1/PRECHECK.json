@@ -1,0 +1,61 @@
+{
+  "schema": "awwv.t25-request-op-fork.precheck.v1",
+  "prepared_at": "2026-10-26",
+  "executed": false,
+  "attempt_exists": false,
+  "head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+  "source_status": " M src/sim/turn_phases/war_phases.ts",
+  "node": {
+    "path": "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "version": "v22.23.2",
+    "bytes": 86997320,
+    "sha256": "0d0f5e39f9f3d9587bc19f73eab3c2c9c4903fd02d6dbf9c853dd81b3d95fad4"
+  },
+  "syntax": {
+    "request_op_fork_t25_cjs_exit": 0,
+    "launch_request_op_fork_t25_cjs_exit": 0
+  },
+  "static_call_sites": {
+    "advanceTurn": 1,
+    "queryDirectiveObjection": 1,
+    "stageOpDirective": 1,
+    "resolveDesktopEventDecision": 1,
+    "note": "The sole advanceTurn call is inside an instrumented helper; runtime guards require exactly 1 fidelity plus 14 fork invocations and reject a 16th call."
+  },
+  "candidate_floor": {
+    "shared_constant_path": "src/state/formation_constants.ts",
+    "shared_constant": "MIN_ATTACK_PERSONNEL",
+    "frozen_value": 500,
+    "planner_path": "src/sim/turn_phases/war_phases.ts",
+    "planner_imports_shared_constant": true,
+    "planner_filters_before_reachability_and_minimum_roster": true,
+    "reviewed_T25_roster_count": 4,
+    "reviewed_T25_staging_osid": "op:trnovo:trnovo"
+  },
+  "forbidden_static_matches": [],
+  "input": {
+    "turn25_sha256": "d384bd9f7f24ebd044fd13bc3b123ad05f51aa074c0d44faedbe99075ac6adcc",
+    "turn26_sha256": "8fe86a5dfc2dac18c935c1bda367f7f4c4bfb6dffda26d4fbf9b8a1dc18f9209",
+    "retained_turn39_sha256": "623cbaed0e6186bc5f2c4a18fd5e9b22836db9343df0e4122316c92e5c9902e8",
+    "native_manifest_sha256": "5fe20c64fcdb651f576a1078e02a1ad1b1d9bf31f46a9ac305f168964be94fc5"
+  },
+  "bounds": {
+    "fidelity_advances": 1,
+    "fork_advances": 14,
+    "maximum_total_advances": 15,
+    "wrapper_timeout_ms": 90000,
+    "retry": false
+  },
+  "prohibited_scope": {
+    "manual_roster_override": false,
+    "manual_order_override": false,
+    "manual_position_override": false,
+    "command_authority_patch": false,
+    "phase_shortcut": false,
+    "request_force_launch": false,
+    "campaign": false,
+    "native": false,
+    "package": false,
+    "source_or_test_edit": false
+  }
+}

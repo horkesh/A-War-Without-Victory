@@ -1,0 +1,17 @@
+
+> awwv@0.9.9-beta.1 test:vitest
+> node tools/test/run_vitest_default.mjs tests/docs_desktop_v09_truth.test.ts tests/open_gates_register.test.ts tests/plan_index.test.ts --reporter=dot
+
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ✓ tests/open_gates_register.test.ts (18 tests) 455ms
+ ✓ tests/docs_desktop_v09_truth.test.ts (7 tests) 64ms
+ ✓ tests/plan_index.test.ts (7 tests) 110ms
+
+ Test Files  3 passed (3)
+      Tests  32 passed (32)
+   Start at  23:10:57
+   Duration  2.08s (transform 77ms, setup 22ms, collect 119ms, tests 629ms, environment 1ms, prepare 291ms)
+
+EXIT_CODE=0

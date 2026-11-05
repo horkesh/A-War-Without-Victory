@@ -1,0 +1,53 @@
+{
+  "schema": "awwv.player-order-fork-diagnostic-v2.freeze.v1",
+  "status": "FROZEN_HOLD_FOR_INDEPENDENT_GO",
+  "root": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+  "packet": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v2",
+  "files": [
+    { "path": "CONFIG.json", "bytes": 8854, "sha256": "1e12eb521fba3668ea00a0e5c2cef4fbf7f4f9884f82692a0c7cb702d5262937" },
+    { "path": "diagnostic_entry_v2.cjs", "bytes": 22108, "sha256": "40c0ea17eb65277e2ac706c7425aed099ac4e3a66805bb42fcd7f80a9db2571a" },
+    { "path": "LAUNCH_COMMANDS.md", "bytes": 1480, "sha256": "82eff61ebbeec7d94c38581ac2a2b482fc0e41da96738f08a68729c9664e71f5" },
+    { "path": "launch_fidelity_v2.cjs", "bytes": 5017, "sha256": "e9d9b28cede919f8bd17af9be0b1652d07a33fa3ca56dd559c23033062d5ae9b" },
+    { "path": "launch_v2.cjs", "bytes": 5358, "sha256": "c9d4cef4f6fd2cc13f6e51ecc80099797c72ac66d8a6094858ffacad3ad6ca8e" },
+    { "path": "PLAN.md", "bytes": 6421, "sha256": "a480a0afd9428f71151faf7b3ebeb0a994caf8e6baa1bd6d4c503462d53a3247" },
+    { "path": "PRELAUNCH_REVIEW_HISTORY.md", "bytes": 1075, "sha256": "67c4129ea4e67425f3b1f217242473f9cf77d4866eb5e1c14910168fe19ba281" },
+    { "path": "PRELAUNCH_STATIC_CHECKS.json", "bytes": 4463, "sha256": "488ad8f01cadbb072ed917030fc6a5d79588ad380c6ec101ddc611f8f531853c" }
+  ],
+  "firstStage": {
+    "outerArgv": [
+      "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+      "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v2/launch_fidelity_v2.cjs"
+    ],
+    "childArgv": [
+      "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+      "--import",
+      "file:///C:/Users/User/.codex/worktrees/april-1995-glamoc/A-War-Without-Victory/node_modules/tsx/dist/loader.mjs",
+      "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v2/diagnostic_entry_v2.cjs",
+      "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v2/CONFIG.json",
+      "{evidenceDir}",
+      "fidelity-only"
+    ],
+    "attempt": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v2/attempts/fidelity-current-source-01",
+    "timeoutMs": 180000,
+    "retry": false,
+    "maximumAdvances": 1,
+    "queryOrStageReachable": false
+  },
+  "conditionalFork": {
+    "enabled": false,
+    "enableCondition": "preserved first-stage pass plus targeted independent review and root decision",
+    "launcher": "launch_v2.cjs",
+    "mode": "fork-after-fidelity",
+    "attempt": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v2/attempts/player-order-fork-current-source-01",
+    "maximumAdvances": 23,
+    "repeatsBaselineAdvance": false
+  },
+  "prelaunch": {
+    "engineOrTestExecuted": false,
+    "diagnosticAttemptCreated": false,
+    "fidelityAttemptLeafAbsent": true,
+    "forkAttemptLeafAbsent": true,
+    "attemptParentPresent": true
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "schema": "awwv.preserved-preflight.start.v1",
+  "start_utc": "2026-10-25T05:38:50.892Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-syntax-01",
+  "timeout_ms": 30000,
+  "original_argv": [
+    "node",
+    "tmp/player-bot-capability-parity-20261024/frame-observer-repair/run_syntax.cjs",
+    "{evidenceDir}"
+  ],
+  "argv": [
+    "node",
+    "tmp/player-bot-capability-parity-20261024/frame-observer-repair/run_syntax.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\frame-observer-repair\\setup-policy-syntax-01"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/frame-observer-repair/run_syntax.cjs",
+    "bytes": 466,
+    "raw_sha256": "77c816ba639e8771101480846e5f3c4d16179bfeaaeacdc825572b7aa2c547a1",
+    "normalized_text_sha256": "77c816ba639e8771101480846e5f3c4d16179bfeaaeacdc825572b7aa2c547a1",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 466,
+      "sha256": "77c816ba639e8771101480846e5f3c4d16179bfeaaeacdc825572b7aa2c547a1"
+    }
+  }
+}

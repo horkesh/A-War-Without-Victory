@@ -73,7 +73,13 @@ import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
 import { isEastHerzegovinaPair, isGrazAccordsActive, shouldGrazBlockAttack } from '../local_truces.js';
 import { isFriendlyFaction as isFriendlyFactionCtrl, isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
 import { isBrigadeEligibleForOperationObjectives, isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
-import { tickPreparation, hasUnresolvedProbe, autoResolveProbe, formTgsAtReadyTransition } from './operation_preparation.js';
+import { tickPreparation, hasUnresolvedProbe, autoResolveProbe, formTgsAtReadyTransition, formTgForAxis, settleLinkedPreparationProbeOnRecovery } from './operation_preparation.js';
+import {
+    emitLinkedPreparationProbeRecord,
+    emitSouthernMovePreparationPassRecord,
+    isSouthernMovePreparationPassSelected,
+} from './reason_code_debug.js';
+import { advanceLatePhaseGates, isLatePhaseResultPassIdle, startLatePhaseHold } from './operation_phase_gate.js';
 // ADR-0005 v2.2b #45: TG dissolution at execution→recovery. Flag-gated.
 import {
     completeOperationLifecycle,
@@ -100,17 +106,22 @@ import { checkLoanedArrivals, areLoanedBrigadesReady, cleanupDissolvedLoans } fr
 import { MAX_OP_LOAN_DISTANCE, LOAN_STAGING_BUFFER_TURNS } from './operation_reinforcement_constants.js';
 import { findBrigadeLiveOperationAnywhere, hasActiveOperation, removeOperation } from './corps_operation_helpers.js';
 import { MIN_ATTACK_PERSONNEL, MAX_BRIGADE_PERSONNEL } from '../../state/formation_constants.js';
+import { mayEliteJoinOperation } from './historical_elite_reservations.js';
+import { isVlasicCohaExceptionOperation } from './coha_operation_exception.js';
 import { isFactionOffensiveOpsSuppressed } from '../events/active_modifiers.js';
 import { isOperationObjectiveForeignControlled } from './operation_objective_hostility.js';
+import { effectiveOperationMinimum } from './operation_minimum_policy.js';
 import {
     allAxesTerminal,
     assignBrigadeRoles,
     computeMultiAxisPlanningDuration,
     computePlanningDuration,
+    PLANNING_INVALIDATION_GRACE_TURNS,
     createSingleAxis,
     getAllAxisBrigades,
     getAllAxisObjectives,
     getCurrentLaunchObjectives,
+    getPreparationObjectiveView,
     isMultiAxis,
     isSupportBrigadeOnActiveOp,
     resetAxisForExecution,
@@ -616,11 +627,17 @@ const MAX_OPERATION_ZERO_PROGRESS_FAILURES = 5;
  *  But no one sends men to die at the same fortified position three turns running.
  *  After 2 consecutive catastrophics, the axis stalls. */
 const MAX_CONSECUTIVE_CATASTROPHIC_ON_CURRENT = 2;
+
+/** Maximum turns an idle axis will wait for a sibling axis to capture a shared
+ *  current objective before stalling. Prevents premature stall when another executing
+ *  axis in the same operation is advancing on the same objective (convergence capture).
+ *  Finite termination: the cap guarantees the waiting axis stalls if the sibling
+ *  ceases advancing or fails to capture within the wait window. */
+const MAX_SHARED_OBJECTIVE_WAIT_TURNS = 3;
 const EARLY_LAUNCH_COHESION_PENALTY = 15;
 const ALL_OUT_EXTRA_COHESION_COST = 1;
 const BOMBARDMENT_PREP_COST = 2;
 const FEINT_PLANNING_TURNS = 2;
-const PLANNING_INVALIDATION_GRACE_TURNS = 2;
 
 /**
  * Synthesis §3 E-B2: Operation Una negative-control combat-power cap.
@@ -887,12 +904,28 @@ function beginRecovery(
     if (!resolvedHostCorpsId) {
         throw new Error(`Cannot enter recovery for unhosted operation ${op.name}`);
     }
+    settleLinkedPreparationProbeOnRecovery(state, resolvedHostCorpsId, op);
     op.force_launch = false;
     // Clean up OPSEC marking when operation leaves active phase
     if (op.sector_id && Array.isArray(state.military.opsec_sectors)) {
         state.military.opsec_sectors = state.military.opsec_sectors.filter(s => s !== op.sector_id);
     }
     enterOperationRecovery(state, resolvedHostCorpsId, op, turn, reason);
+}
+
+function findLiveLinkedPreparationProbe(
+    cmd: CorpsCommandState,
+    parent: CorpsOperation,
+): CorpsOperation | null {
+    if (parent.preparation_probe_delivery !== 'subordinate') return null;
+    return cmd.active_operations.find((candidate) => {
+        const link = candidate.preparation_probe_link;
+        return link !== undefined
+            && link.parent_operation_name === parent.name
+            && link.parent_started_turn === parent.started_turn
+            && parent.active_probe?.started_turn === link.request_started_turn
+            && parent.active_probe.target_osid === link.target_osid;
+    }) ?? null;
 }
 
 function filterAxisPlanningObjectives(
@@ -920,6 +953,112 @@ function pruneUnreachablePlanningObjectivePrefix(
     return objectives.slice(firstReachableIndex);
 }
 
+type SanaPlanningTracePhase = 'pre' | 'post';
+
+/**
+ * Observation-only boundary receipt for the owner-authorized Sana diagnosis.
+ *
+ * The gate is deliberately the first operation: when the trace is off this
+ * function must not inspect graph, sector, formation, or movement state.
+ */
+export function emitSanaPlanningTraceReceipt(
+    state: GameState,
+    corpsId: FormationId,
+    op: CorpsOperation,
+    faction: FactionId,
+    staticAdjacency: Map<string, string[]> | undefined,
+    phase: SanaPlanningTracePhase,
+    verdict?: 'completed' | 'valid' | 'invalidated',
+): void {
+    const turn = state.meta?.turn ?? 0;
+    if (
+        process.env.AWWV_SANA_PLANNING_TRACE !== '1'
+        || op.name !== 'Operation Sana'
+        || corpsId !== 'arbih_5th_corps'
+        || turn < 175
+        || turn > 177
+    ) return;
+
+    const axisObjectives = (op.axes ?? []).map((axis) => ({
+        axis_id: axis.axis_id,
+        objectives: [...axis.objectives],
+        staging_osid: axis.staging_osid ?? null,
+    })).sort((a, b) => strictCompare(a.axis_id, b.axis_id));
+    const tracedAxis = op.axes?.find((axis) => axis.axis_id === 'sana_sanski_most_kljuc') ?? op.axes?.[0];
+    const objectives = [...(tracedAxis?.objectives ?? op.objectives ?? [])];
+    const objectiveFacts = objectives.map((objective) => {
+        const approaches = [...collectObjectiveApproachOsids(state, corpsId, faction, [objective], staticAdjacency)]
+            .sort(strictCompare);
+        return {
+            objective,
+            effective_controller: getPoliticalControllerOSID(state, objective, undefined) ?? null,
+            approaches,
+        };
+    });
+    const objectiveSet = new Set(objectives);
+    const approachSet = new Set(objectiveFacts.flatMap((fact) => fact.approaches));
+    const liveFrontEdges = (state.military.war_front_edges_osid ?? [])
+        .filter((edge) => objectiveSet.has(edge.a) || objectiveSet.has(edge.b) || approachSet.has(edge.a) || approachSet.has(edge.b))
+        .map((edge) => ({
+            edge_id: edge.edge_id,
+            a: edge.a,
+            b: edge.b,
+            side_a: edge.side_a,
+            side_b: edge.side_b,
+        }))
+        .sort((a, b) => strictCompare(a.edge_id, b.edge_id));
+    const staticGraphEdges = objectives.flatMap((objective) =>
+        [...(staticAdjacency?.get(objective) ?? [])].sort(strictCompare).map((neighbor) => ({
+            objective,
+            neighbor,
+            objective_controller: getPoliticalControllerOSID(state, objective, undefined) ?? null,
+            neighbor_controller: getPoliticalControllerOSID(state, neighbor, undefined) ?? null,
+        })))
+        .sort((a, b) => strictCompare(`${a.objective}:${a.neighbor}`, `${b.objective}:${b.neighbor}`));
+    const relevantSubsegments = Object.values(state.military.corps_front_sectors ?? {})
+        .filter((sector) => sector.corps_id === corpsId)
+        .flatMap((sector) => (sector.sub_segments ?? [])
+            .filter((subSegment) => subSegment.enemy_osids.some((osid) => objectiveSet.has(osid)))
+            .map((subSegment) => ({
+                sector_id: sector.sector_id,
+                sub_segment_id: subSegment.sub_segment_id,
+                edge_ids: [...subSegment.edge_ids].sort(strictCompare),
+                friendly_osids: [...subSegment.friendly_osids].sort(strictCompare),
+                enemy_osids: [...subSegment.enemy_osids].sort(strictCompare),
+            })))
+        .sort((a, b) => strictCompare(a.sub_segment_id, b.sub_segment_id));
+    const tracedBrigades = ['arbih_506th_mountain', 'arbih_517th_light'].map((brigadeId) => {
+        const brigade = state.military.formations?.[brigadeId];
+        return {
+            brigade_id: brigadeId,
+            location_osid: brigade?.location_osid ?? null,
+            movement_state: state.military.brigade_movement_state?.[brigadeId] ?? null,
+            movement_order: state.military.brigade_movement_orders?.[brigadeId] ?? null,
+        };
+    });
+    const receipt = {
+        trace: 'sana_planning_boundary',
+        phase,
+        turn,
+        corps_id: corpsId,
+        operation: op.name,
+        axis_objectives: axisObjectives,
+        objectives,
+        objective_facts: objectiveFacts,
+        live_front_edges: liveFrontEdges,
+        static_graph_edges: staticGraphEdges,
+        corps_front_subsegments: relevantSubsegments,
+        operation_staging_osid: op.staging_osid ?? null,
+        preserve_objective_sequence: op.preserve_objective_sequence === true,
+        brigades: tracedBrigades,
+        ...(phase === 'post' ? {
+            resulting_objectives: [...(tracedAxis?.objectives ?? op.objectives ?? [])],
+            verdict,
+        } : {}),
+    };
+    console.log(JSON.stringify(receipt));
+}
+
 export function reconcilePlanningObjectives(
     state: GameState,
     corpsId: FormationId,
@@ -935,6 +1074,7 @@ export function reconcilePlanningObjectives(
         for (const axis of op.axes) {
             const enemyObjectives = filterAxisPlanningObjectives(state, axis, faction);
             const filteredObjectives = op.preserve_objective_sequence === true
+                || axis.preserve_objective_sequence === true
                 ? enemyObjectives
                 : pruneUnreachablePlanningObjectivePrefix(
                     state,
@@ -1175,10 +1315,47 @@ export function advanceSectorOffensives(
     terrainMultByOsid?: Record<string, number>, // LANE-2026-05-02
     staticAdjacency?: Map<string, string[]>,
     openingAttackPredictionContext?: OpeningAttackPredictionContext,
+    completedParticipantIds?: Set<FormationId>,
 ): PreparationEvent[] {
     const prepEvents: PreparationEvent[] = [];
     const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return prepEvents;
+
+    const observedTurn = state.meta?.turn ?? 0;
+    const observedCorpsId = 'hvo_tomislavgrad' as FormationId;
+    const observedFaction = state.military.formations?.[observedCorpsId]?.faction;
+    const observedCommand = corpsCommand[observedCorpsId];
+    const observedOperations = isSouthernMovePreparationPassSelected(observedFaction, observedCorpsId, observedTurn)
+        ? (observedCommand?.active_operations ?? []).map((operation, operationIndex) => ({
+            operation,
+            operationIndex,
+            operationStartedTurn: operation.started_turn,
+            operationPhaseStartedTurn: operation.phase_started_turn,
+        }))
+            .filter(({ operation }) => operation.name === 'Operation Southern Move')
+        : undefined;
+    const observedOutcomes: Map<CorpsOperation, 'not_reached' | 'tick_called'> | undefined = observedOperations === undefined
+        ? undefined
+        : new Map(observedOperations.map(({ operation }) => [operation, 'not_reached'] as const));
+    const observedInventory = (entries: typeof observedOperations) => (entries ?? []).map(({
+        operation, operationIndex, operationStartedTurn, operationPhaseStartedTurn,
+    }) => ({
+        operation_index: operationIndex,
+        operation_name: operation.name,
+        operation_started_turn: operationStartedTurn,
+        operation_phase_started_turn: operationPhaseStartedTurn,
+        operation_phase: operation.phase,
+        operation_type: operation.type,
+        sector_id: operation.sector_id,
+    }));
+    if (observedOperations !== undefined) {
+        emitSouthernMovePreparationPassRecord(observedFaction, observedCorpsId, observedTurn, () => ({
+            event: 'caller_start', turn: observedTurn, corps_id: observedCorpsId, faction: observedFaction,
+            eligible_count: observedOperations.length, operation_inventory: observedInventory(observedOperations),
+        }));
+    }
+
+    try {
 
     // ── Per-turn corps exhaustion decay ────────────────────────────────────
     // Corps recover from operational exhaustion each turn. Without decay,
@@ -1201,6 +1378,7 @@ export function advanceSectorOffensives(
             const cmd = corpsCommand[corpsId];
             if (!cmd) continue;
             for (const operation of cmd.active_operations) {
+                if (isVlasicCohaExceptionOperation(state, corpsId, operation, turn)) continue;
                 if (
                     (operation.phase === 'planning' || operation.phase === 'execution') &&
                     operation.phase_started_turn < turn
@@ -1215,7 +1393,8 @@ export function advanceSectorOffensives(
                 }
             }
         }
-        return prepEvents;
+        // The exception operation continues through the normal lifecycle below;
+        // every other operation has already had its clock paused above.
     }
 
     const corpsIds = Object.keys(corpsCommand).sort(strictCompare);
@@ -1223,8 +1402,32 @@ export function advanceSectorOffensives(
         const cmd = corpsCommand[corpsId];
         if (!cmd || cmd.active_operations.length === 0) continue;
 
-        for (const op of [...cmd.active_operations]) {
+        for (const [operationIndex, op] of [...cmd.active_operations].entries()) {
         if (op.type !== 'sector_attack' && op.type !== 'feint' && op.type !== 'probe') continue;
+        if (state.military.event_flags?.coha_active === true
+            && !isVlasicCohaExceptionOperation(state, corpsId, op, state.meta?.turn ?? 0)) continue;
+
+        const operationName = op.name;
+        op.participating_brigades = op.participating_brigades.filter((brigadeId) =>
+            mayEliteJoinOperation(brigadeId, state.meta.turn, operationName, op.started_turn));
+        if (Array.isArray(op.axes)) {
+            const participantSet = new Set(op.participating_brigades);
+            for (const axis of op.axes) {
+                axis.assigned_brigades = axis.assigned_brigades.filter((brigadeId) =>
+                    participantSet.has(brigadeId)
+                    && mayEliteJoinOperation(brigadeId, state.meta.turn, operationName, op.started_turn));
+            }
+        }
+        if (op.active_probe) {
+            const linkedChild = findLiveLinkedPreparationProbe(cmd, op);
+            if (!linkedChild) {
+                const participantSet = new Set(op.participating_brigades);
+                op.active_probe.brigade_ids = op.active_probe.brigade_ids.filter((brigadeId) =>
+                    participantSet.has(brigadeId)
+                    && mayEliteJoinOperation(brigadeId, state.meta.turn, operationName, op.started_turn));
+                if (op.active_probe.brigade_ids.length === 0) delete op.active_probe;
+            }
+        }
 
         // Reset per-turn combat feedback counters
         op.battles_this_turn = 0;
@@ -1243,7 +1446,8 @@ export function advanceSectorOffensives(
         const multiAxis = isMultiAxis(op);
         const operationStaticAdjacency = op.is_pre_planned === true ? staticAdjacency : undefined;
 
-        const allObjectives = multiAxis ? getAllAxisObjectives(op) : (op.objectives ?? []);
+        const fullObjectives = multiAxis ? getAllAxisObjectives(op) : (op.objectives ?? []);
+        const allObjectives = getPreparationObjectiveView(op, fullObjectives);
         const allBrigades = multiAxis ? getAllAxisBrigades(op) : op.participating_brigades;
 
         const resolvedSectorId = resolveOperationSectorId(
@@ -1318,13 +1522,19 @@ export function advanceSectorOffensives(
             if (op.type === 'sector_attack' && op.force_launch !== true && !isPrePlannedBlitz) {
                 // Auto-resolve any pending probes that didn't trigger combat
                 const activeProbe = op.active_probe;
+                const linkedChild = findLiveLinkedPreparationProbe(cmd, op);
+                if (linkedChild) {
+                    op.preparation_turns_elapsed = (op.preparation_turns_elapsed ?? 0) + 1;
+                    continue;
+                }
                 if (hasUnresolvedProbe(op) && activeProbe && (turn - activeProbe.started_turn) >= 1) {
-                    autoResolveProbe(state, op, faction);
+                    autoResolveProbe(state, op, faction, corpsId, operationIndex);
                 }
 
                 // LANE-2026-05-02: thread supplyByOsid + terrainMultByOsid into preparation
                 // for honest defender-modifier-aware force-ratio estimation.
-                const prepResult = tickPreparation(state, op, corpsId, faction, op.supply_readiness ?? 1.0, supplyByOsid, terrainMultByOsid, staticAdjacency);
+                if (observedOutcomes?.has(op)) observedOutcomes.set(op, 'tick_called');
+                const prepResult = tickPreparation(state, op, corpsId, faction, op.supply_readiness ?? 1.0, supplyByOsid, terrainMultByOsid, staticAdjacency, operationIndex);
 
                 // Synthesis §3 E-B2: Operation Una negative-control penalty.
                 // HV-only thrusts without HVO-native co-deployment historically
@@ -1426,7 +1636,24 @@ export function advanceSectorOffensives(
                 beginRecovery(op, turn, 'political_blocked', state);
                 continue;
             }
+            emitSanaPlanningTraceReceipt(
+                state,
+                corpsId,
+                op,
+                faction,
+                operationStaticAdjacency,
+                'pre',
+            );
             const planningObjectiveState = reconcilePlanningObjectives(state, corpsId, op, faction, operationStaticAdjacency);
+            emitSanaPlanningTraceReceipt(
+                state,
+                corpsId,
+                op,
+                faction,
+                operationStaticAdjacency,
+                'post',
+                planningObjectiveState,
+            );
             if (planningObjectiveState === 'completed') {
                 beginRecovery(op, turn, 'completed', state);
                 continue;
@@ -1531,6 +1758,18 @@ export function advanceSectorOffensives(
                 op.phase = 'execution';
                 op.phase_started_turn = turn;
                 op.recovery_reason = undefined;
+                if (op.preparation_probe_link) {
+                    op.preparation_probe_link.entered_execution_turn = turn;
+                    emitLinkedPreparationProbeRecord(op, faction, corpsId, turn, (receipt) => ({
+                        event: 'linked_probe_execution',
+                        ...receipt,
+                        phase_before: 'planning',
+                        phase_after: 'execution',
+                        transition_reason: forcedLaunch
+                            ? 'force_launch'
+                            : preparationReady ? 'preparation_ready' : 'participants_ready',
+                    }));
+                }
 
                 // ADR-0005 Phase 2: Every donor-eligible offensive attempts TG formation
                 // here. The `none` policy forms no TG; zero-donor fallback remains an ordinary operation.
@@ -1541,6 +1780,8 @@ export function advanceSectorOffensives(
 
                 if (multiAxis) {
                     for (const axis of op.axes!) resetAxisForExecution(axis);
+                    // Opt-in phase gate: start each holding axis's own hold clock exactly once.
+                    startLatePhaseHold(op, turn);
                 } else {
                     op.current_objective_index = 0;
                     op.momentum = 0;
@@ -1643,14 +1884,16 @@ export function advanceSectorOffensives(
                 ? getMultiAxisRecoveryDuration(op)
                 : getRecoveryDuration(op);
             if (elapsed >= recoveryDuration) {
-                const exhaustionCost = op.type === 'feint' || op.type === 'probe' ? 5 : 15;
+                const exhaustionCost = op.preparation_probe_link
+                    ? 0
+                    : op.type === 'feint' || op.type === 'probe' ? 5 : 15;
                 cmd.corps_exhaustion = Math.min(100, (cmd.corps_exhaustion ?? 0) + exhaustionCost);
                 if (op.type === 'sector_attack' || op.type === 'probe') {
                     recordFailedObjectives(cmd, op, turn);
                 }
-                if (op.type === 'sector_attack') {
+                if (op.type === 'sector_attack' || op.preparation_probe_link) {
                     const finalizedAAR = finalizeOperationAAR(state, corpsId, op);
-                    linkOpportunityResolutionToAAR(state, finalizedAAR);
+                    if (op.type === 'sector_attack') linkOpportunityResolutionToAAR(state, finalizedAAR);
                     // Apply experience gain to operation commander based on AAR grade
                     if (op.commander_officer_id && state.operation_history?.length) {
                         if (finalizedAAR.commander_officer_id === op.commander_officer_id) {
@@ -1688,7 +1931,9 @@ export function advanceSectorOffensives(
                 // Release brigades: issue return-march orders for participants away from home.
                 // Without this, brigades stay at their operation endpoint and get classified
                 // into whatever sector owns that OSID — potentially far from home.
-                issuePostOperationReturnMarches(state, op);
+                if (op.preparation_probe_link?.restored_to_parent !== true) {
+                    issuePostOperationReturnMarches(state, op);
+                }
 
                 // Only reset probe counter when a FULL operation completes.
                 // Probe completions must preserve the counter so it can reach
@@ -1708,11 +1953,44 @@ export function advanceSectorOffensives(
                 }
                 completeOperationLifecycle(state, corpsId, op);
                 removeOperation(cmd, op);
+                if (completedParticipantIds) {
+                    const participantIds = isMultiAxis(op)
+                        ? getAllAxisBrigades(op)
+                        : (op.participating_brigades ?? []);
+                    for (const participantId of [...new Set(participantIds)].sort(strictCompare)) {
+                        completedParticipantIds.add(participantId as FormationId);
+                    }
+                }
             }
         }
         }
     }
     return prepEvents;
+    } finally {
+        if (observedOperations !== undefined) {
+            for (const { operation, operationIndex, operationStartedTurn, operationPhaseStartedTurn } of observedOperations) {
+                emitSouthernMovePreparationPassRecord(observedFaction, observedCorpsId, observedTurn, () => ({
+                    event: 'caller_outcome', turn: observedTurn, corps_id: observedCorpsId, faction: observedFaction,
+                    operation_name: operation.name,
+                    operation_index: operationIndex, operation_started_turn: operationStartedTurn,
+                    operation_phase_started_turn: operationPhaseStartedTurn,
+                    outcome: observedOutcomes?.get(operation) ?? 'not_reached',
+                    cause_measured: false,
+                }));
+            }
+            const endEntries = (observedCommand?.active_operations ?? []).map((operation, operationIndex) => ({
+                operation,
+                operationIndex,
+                operationStartedTurn: operation.started_turn,
+                operationPhaseStartedTurn: operation.phase_started_turn,
+            }))
+                .filter(({ operation }) => operation.name === 'Operation Southern Move');
+            emitSouthernMovePreparationPassRecord(observedFaction, observedCorpsId, observedTurn, () => ({
+                event: 'caller_end', turn: observedTurn, corps_id: observedCorpsId, faction: observedFaction,
+                eligible_count: endEntries.length, operation_inventory: observedInventory(endEntries),
+            }));
+        }
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1731,8 +2009,6 @@ export function updateSectorOffensiveResults(
     state: GameState,
     reverseMap?: OperationalToCanonicalReverseMap | null
 ): void {
-    if (state.military.event_flags?.coha_active === true) return;
-
     const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return;
 
@@ -1743,6 +2019,8 @@ export function updateSectorOffensiveResults(
 
         for (const op of cmd.active_operations) {
             if ((op.type !== 'sector_attack' && op.type !== 'probe') || op.phase !== 'execution') continue;
+            if (state.military.event_flags?.coha_active === true
+                && !isVlasicCohaExceptionOperation(state, corpsId, op, state.meta?.turn ?? 0)) continue;
 
             const corps = state.military.formations?.[corpsId];
             const faction: FactionId = corps?.faction ?? 'RS';
@@ -1768,10 +2046,18 @@ function updateMultiAxisResults(
 ): void {
     const axes = op.axes!;
 
+    // Opt-in phase gate (operation_phase_gate.ts): receipts written by this turn's combat may now
+    // satisfy a holding axis's prerequisites. Inert for operations without an `late_phase` axis.
+    advanceLatePhaseGates(state, op, corpsId, faction, turn, reverseMap,
+        (axis) => formTgForAxis(state, op, axis, turn, undefined, { corps_id: corpsId, caller_stage: 'pre_results' }),
+        'pre_results');
+
     // First pass: check for convergence captures (shared objectives captured by any axis)
     const capturedThisTurn = new Set<string>();
     for (const axis of axes) {
         if (axis.status !== 'executing') continue;
+        // A holding axis neither credits nor advances (no progression through friendly control).
+        if (isLatePhaseResultPassIdle(axis, turn)) continue;
         const currentIdx = axis.current_objective_index;
         if (currentIdx >= axis.objectives.length) continue;
         const currentObj = axis.objectives[currentIdx]!;
@@ -1796,9 +2082,31 @@ function updateMultiAxisResults(
         }
     }
 
+    // Snapshot eligible sibling shared-objective paths at the start of the second
+    // pass. Loop iterations mutate sibling status and current_objective_index
+    // (captures advance the index, stalls flip status), so deciding the wait from
+    // a snapshot keeps it independent of axis iteration order.
+    const eligibleSiblingPaths = axes.map((other, idx) => {
+        if (other.status !== 'executing') return null;
+        if (isLatePhaseResultPassIdle(other, turn)) return null;
+        // Credible progress: the sibling has attacked at least once, or was active
+        // on the previous turn (the idle streak only survives a fully idle turn).
+        const hasCredibleProgress = other.attack_attempt_count > 0
+            || other.idle_execution_turn_streak === 0;
+        if (!hasCredibleProgress) return null;
+        const remaining = other.current_objective_index < other.objectives.length
+            ? other.objectives.slice(other.current_objective_index)
+            : [];
+        return { idx, remaining };
+    });
+
     // Second pass: advance each axis
-    for (const axis of axes) {
+    for (const [axisIndex, axis] of axes.entries()) {
         if (axis.status !== 'executing') continue;
+        // Holding axis: lawful approach/hold only; the only axis-local clock is the main axis's
+        // lifecycle (stall if it ends terminal without the owned captures) — no movement-only,
+        // idle, failure or shared-wait accrual while capture authority is withheld.
+        if (isLatePhaseResultPassIdle(axis, turn)) continue;
         const currentIdx = axis.current_objective_index;
         if (currentIdx >= axis.objectives.length) {
             axis.status = 'complete';
@@ -1820,6 +2128,7 @@ function updateMultiAxisResults(
             }
             axis.idle_execution_turn_streak = 0;
             axis.movement_only_execution_turns = 0; // reset: objective captured
+            axis.shared_objective_wait_turns = 0; // reset: no longer waiting for sibling
             axis.current_objective_index = currentIdx + 1;
             axis.consecutive_failures_on_current = 0;
             axis.consecutive_catastrophic_on_current = 0;
@@ -1850,17 +2159,35 @@ function updateMultiAxisResults(
             });
 
             if (anyResolvedObjectiveBattle) {
-                // Direct attack on current objective — standard failure tracking
+                // Direct attack on current objective. A resolved attacker win
+                // can reduce defender resistance without crossing the political
+                // occupation threshold in the same turn; that is continued
+                // operational progress, not a failed assault.
                 axis.attack_attempt_count += 1;
                 axis.idle_execution_turn_streak = 0;
                 // Only reset movement_only counter when no brigades are also marching.
                 // If some axis brigades are in transit while others attack, the marching
                 // signal must persist — stranded brigades cycling attack/march never reset.
                 if (!anyMoved) axis.movement_only_execution_turns = 0;
-                axis.last_result = 'failed';
+                const hadSuccessfulObjectiveBattle = axis.assigned_brigades.some(bid => {
+                    const b = state.military.formations?.[bid];
+                    if (!b?.brigade_history?.engagements?.length) return false;
+                    const lastEng = b.brigade_history.engagements[b.brigade_history.engagements.length - 1];
+                    return lastEng.turn === turn
+                        && lastEng.osid === currentObjective
+                        && lastEng.role === 'attacker'
+                        && (lastEng.outcome === 'costly_victory'
+                            || lastEng.outcome === 'victory'
+                            || lastEng.outcome === 'decisive_victory');
+                });
+                axis.last_result = hadSuccessfulObjectiveBattle ? 'approach' : 'failed';
                 axis.momentum = 0;
-                axis.failure_count += 1;
-                axis.consecutive_failures_on_current += 1;
+                if (hadSuccessfulObjectiveBattle) {
+                    axis.consecutive_failures_on_current = 0;
+                } else {
+                    axis.failure_count += 1;
+                    axis.consecutive_failures_on_current += 1;
+                }
                 fullyRevealProbeSectorIntel(state, op);
 
                 // ── Catastrophic outcome stall ──
@@ -1871,7 +2198,10 @@ function updateMultiAxisResults(
                     const b = state.military.formations?.[bid];
                     if (!b?.brigade_history?.engagements?.length) return false;
                     const lastEng = b.brigade_history.engagements[b.brigade_history.engagements.length - 1];
-                    return lastEng.role === 'attacker' && lastEng.outcome === 'catastrophic';
+                    return lastEng.turn === turn
+                        && lastEng.osid === currentObjective
+                        && lastEng.role === 'attacker'
+                        && lastEng.outcome === 'catastrophic';
                 });
                 if (wasCatastrophic) {
                     axis.consecutive_catastrophic_on_current = (axis.consecutive_catastrophic_on_current ?? 0) + 1;
@@ -1883,7 +2213,8 @@ function updateMultiAxisResults(
                     continue;
                 }
 
-                if (axis.consecutive_failures_on_current >= MAX_CONSECUTIVE_FAILURES_ON_CURRENT) {
+                if (!hadSuccessfulObjectiveBattle
+                    && axis.consecutive_failures_on_current >= MAX_CONSECUTIVE_FAILURES_ON_CURRENT) {
                     axis.current_objective_index = currentIdx + 1;
                     axis.consecutive_failures_on_current = 0;
                     axis.consecutive_catastrophic_on_current = 0; // reset on objective change
@@ -1912,29 +2243,53 @@ function updateMultiAxisResults(
                 } else {
                     // Truly idle: no movement, no attack.
                     axis.idle_execution_turn_streak += 1;
-                    axis.last_result = 'stalemate';
                     axis.momentum = 0;
+
+                    // Check if this axis is waiting for a sibling to capture a shared objective.
+                    // When another executing axis in the same operation has credible progress
+                    // (attacked at least once, or active on the previous turn) and the shared
+                    // objective lies on its remaining path, the idle axis gets a bounded wait
+                    // instead of stalling.
+                    const hasAdvancingSiblingOnSameObjective = eligibleSiblingPaths.some(entry =>
+                        entry !== null && entry.idx !== axisIndex && entry.remaining.includes(currentObjective));
+
+                    const idleStallThreshold = op.type === 'probe' ? 1 : 4;
+                    const wouldIdleStall = !anyMoved && axis.attack_attempt_count === 0
+                        && axis.idle_execution_turn_streak >= idleStallThreshold;
+
+                    if (wouldIdleStall && hasAdvancingSiblingOnSameObjective) {
+                        // Bounded wait for sibling to capture shared objective.
+                        axis.shared_objective_wait_turns = (axis.shared_objective_wait_turns ?? 0) + 1;
+                        if (axis.shared_objective_wait_turns <= MAX_SHARED_OBJECTIVE_WAIT_TURNS) {
+                            axis.last_result = 'approach';
+                            // Don't increment failure counts — this is a wait, not a failure.
+                            continue;
+                        }
+                        // Wait cap reached — fall through to normal stall.
+                    }
+
+                    axis.last_result = 'stalemate';
                     axis.failure_count += 1;
                     axis.consecutive_failures_on_current += 1;
+
+                    // Idle stall: no movement and no attacks ever on this axis.
+                    // Threshold = 4 to give brigades time to march from staging to objectives
+                    // via regular movement (1 hop/turn). Column-marching brigades are already
+                    // detected via anyMoved (in_transit) and use the movement-only stall instead.
+                    if (wouldIdleStall) {
+                        axis.movement_only_execution_turns = Math.max(1, axis.movement_only_execution_turns);
+                        axis.status = 'stalled';
+                        continue;
+                    }
                 }
 
-                // Idle stall: no movement and no attacks ever on this axis.
-                // Threshold = 4 to give brigades time to march from staging to objectives
-                // via regular movement (1 hop/turn). Column-marching brigades are already
-                // detected via anyMoved (in_transit) and use the movement-only stall instead.
-                const idleStallThreshold = op.type === 'probe' ? 1 : 4;
-                if (!anyMoved && axis.attack_attempt_count === 0 && axis.idle_execution_turn_streak >= idleStallThreshold) {
-                    axis.movement_only_execution_turns = Math.max(1, axis.movement_only_execution_turns);
-                    axis.status = 'stalled';
-                    continue;
-                }
-
-                // Movement-only stall: brigades marching but not attacking objectives
+                // Movement-only stall: brigades marching but not attacking objectives.
+                // Checked after both branches so a continuously marching axis still stalls
+                // at its existing cap.
                 if (axis.movement_only_execution_turns >= MAX_MOVEMENT_ONLY_EXECUTION_TURNS) {
                     axis.status = 'stalled';
                     continue;
                 }
-
             }
         }
 
@@ -1974,6 +2329,12 @@ function updateMultiAxisResults(
         beginRecovery(op, turn, 'probe_complete', state);
         return;
     }
+
+    // Opt-in phase gate: the main axis may have just become terminal in this pass; a holding axis
+    // then stalls terminally unless its owned prerequisites already activated it above.
+    advanceLatePhaseGates(state, op, corpsId, faction, turn, reverseMap,
+        (axis) => formTgForAxis(state, op, axis, turn, undefined, { corps_id: corpsId, caller_stage: 'post_results' }),
+        'post_results');
 
     // Zero-progress early abort — now PER-AXIS for true parallel execution.
     // Each axis stalls from its own zero-progress failures, not contaminated
@@ -2490,20 +2851,6 @@ export function evaluateSectorOffensiveLaunch(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Minimum active brigades required to sustain an operation by type.
- * Below this threshold the operation is aborted as infeasible.
- * probe/feint need only 1; sector_attack needs 2 for combined-arms.
- */
-const MIN_BRIGADES_BY_TYPE: Record<string, number> = {
-    probe: 1,
-    feint: 1,
-    sector_attack: 2,
-    general_offensive: 2,
-    strategic_defense: 1,
-    reorganization: 0,
-};
-
-/**
  * Fraction of initial_strength below which the operation is aborted.
  * 50% = if the force has lost half its starting personnel, the op is no
  * longer viable regardless of how many brigades remain nominally assigned.
@@ -2571,9 +2918,7 @@ export function reevaluateWeakenedOperations(state: GameState): void {
         }
 
         // --- Decision: should this operation be aborted? ---
-        const minRequired = op.minimum_viable_participants != null
-            ? Math.max(1, Math.trunc(op.minimum_viable_participants))
-            : (MIN_BRIGADES_BY_TYPE[op.type] ?? 2);
+        const minRequired = effectiveOperationMinimum(op.type, op.minimum_viable_participants);
         let abortReason: string | null = null;
 
         if (activeBrigadeCount === 0) {
@@ -2590,6 +2935,10 @@ export function reevaluateWeakenedOperations(state: GameState): void {
         if (multiAxis && op.axes && !abortReason) {
             for (const axis of op.axes) {
                 if (axis.status !== 'executing') continue;
+                // An explicit late-phase handoff deliberately leaves its destination empty
+                // until the operation-owned prerequisite capture is received. Keep that
+                // holding axis eligible for the handoff; every other empty axis still stalls.
+                if (axis.late_phase?.phase === 'holding' && axis.late_phase.handoff !== undefined) continue;
                 let axisActive = 0;
                 for (const bid of axis.assigned_brigades) {
                     const f = formations[bid];
@@ -2752,6 +3101,7 @@ export function evaluateOperationProgress(
                             !op.participating_brigades.includes(s.id) &&
                             !updatedParticipants.includes(s.id) &&
                             findBrigadeLiveOperationAnywhere(state, s.id) === null &&
+                            mayEliteJoinOperation(s.id, turn, op.name) &&
                             (s.personnel ?? 0) / MAX_BRIGADE_PERSONNEL >= PERSONNEL_HEALTHY_THRESHOLD &&
                             (s.cohesion ?? 60) >= COHESION_HEALTHY_THRESHOLD
                         );

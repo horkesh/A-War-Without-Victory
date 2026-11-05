@@ -1,0 +1,11 @@
+{
+  "end_utc": "2026-10-24T13:44:21.669Z",
+  "exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "error": null,
+  "created_run_dirs": [
+    "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n94"
+  ],
+  "remaining_ms": 1956688
+}

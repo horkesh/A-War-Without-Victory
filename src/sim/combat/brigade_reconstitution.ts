@@ -43,6 +43,7 @@ import type { FactionId, FormationId, FormationState, GameState, MunicipalityId 
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { ensureBrigadeHistory } from './brigade_history_recorder.js';
+import { invalidateBrigadeJourney } from './brigade_journey_lifecycle.js';
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
@@ -287,6 +288,10 @@ export function reconstituteBrigades(state: GameState): ReconstitutionReport {
         if (f.lifecycle_status !== 'destroyed') continue;
         if (f.kind !== 'brigade' && f.kind !== 'og') continue;
 
+        // Legacy collapsed records are terminal-dead (EH3). Refuse before any
+        // pool/reserve/formation mutation; never resurrect them as ordinary units.
+        if (f.stranded_status === 'collapsed') continue;
+
         // Delay check: must have been destroyed long enough ago
         // Use the turn the formation was last modified (created_turn tracks original creation;
         // we need destruction turn). Since we don't have a dedicated field, approximate:
@@ -404,6 +409,8 @@ export function reconstituteBrigades(state: GameState): ReconstitutionReport {
 
             f.status = 'active';
             f.lifecycle_status = undefined;
+            f.stranded_status = 'none';
+            f.stranded_since_turn = undefined;
             f.personnel = reserveDraw;
             const reconHistC = ensureBrigadeHistory(f);
             if (reserveDraw > reconHistC.peak_personnel) reconHistC.peak_personnel = reserveDraw;
@@ -413,6 +420,7 @@ export function reconstituteBrigades(state: GameState): ReconstitutionReport {
             // dispersed from the faction-wide reserve, not motivated refugees.
             f.morale = RECONSTITUTION_MORALE[faction];
             f.readiness = 'forming';
+            invalidateBrigadeJourney(state, fid);
             f.location_osid = spawnOsidC;
             f.entrenchment_turns = 0;
             f.disrupted_turns = 0;
@@ -453,6 +461,8 @@ export function reconstituteBrigades(state: GameState): ReconstitutionReport {
         // Reactivate formation
         f.status = 'active';
         f.lifecycle_status = undefined;
+        f.stranded_status = 'none';
+        f.stranded_since_turn = undefined;
         f.personnel = poolDraw;
         // Track peak personnel after reconstitution
         const reconHist = ensureBrigadeHistory(f);
@@ -462,6 +472,7 @@ export function reconstituteBrigades(state: GameState): ReconstitutionReport {
         // Refugee brigades get a morale bonus — displaced population fights with purpose
         f.morale = RECONSTITUTION_MORALE[faction] + (isRefugee ? REFUGEE_MORALE_BONUS : 0);
         f.readiness = 'forming';
+        invalidateBrigadeJourney(state, fid);
         f.location_osid = locationOsid;
         f.entrenchment_turns = 0;
         f.disrupted_turns = 0;

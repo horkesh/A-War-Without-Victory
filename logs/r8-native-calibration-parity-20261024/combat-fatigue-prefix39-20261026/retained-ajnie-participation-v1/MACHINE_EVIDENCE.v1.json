@@ -1,0 +1,5553 @@
+{
+  "schema": "retained-ajnie-participation-v1",
+  "generated_utc": "2026-10-26T02:09:30.9661057Z",
+  "scope": "retained artifacts and source inspection only; no simulation, API, or source edit",
+  "runs": [
+    {
+      "label": "candidate_0278c956",
+      "run_path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\runs\\player-parity-fatigue-owner-39-20261026-01\\apr1992_definitive_188w__2272e1011ba35428__w39_n0",
+      "temporal_turns_8_16": [
+        {
+          "turn": 8,
+          "week_index": 7,
+          "lifecycle_status": null,
+          "status": "active",
+          "active_op_id": "vrs_herzegovina:Operation Foca:t4",
+          "current_op_phase": "execution",
+          "personnel": 928,
+          "cohesion": 48.449999999999996,
+          "morale": 70,
+          "fatigue": 3,
+          "location_osid": "op:cajnice:batotici",
+          "mv_state": null,
+          "mv_destinations": null,
+          "assigned_sub_segment_id": "subseg:sector:vrs_herzegovina:0:0"
+        },
+        {
+          "turn": 9,
+          "week_index": 8,
+          "lifecycle_status": null,
+          "status": "active",
+          "active_op_id": "vrs_herzegovina:Operation Foca:t4",
+          "current_op_phase": "execution",
+          "personnel": 821,
+          "cohesion": 42.4,
+          "morale": 68,
+          "fatigue": 5.5,
+          "location_osid": "op:cajnice:batotici",
+          "mv_state": null,
+          "mv_destinations": null,
+          "assigned_sub_segment_id": "subseg:sector:vrs_herzegovina:0:0"
+        },
+        {
+          "turn": 10,
+          "week_index": 9,
+          "lifecycle_status": null,
+          "status": "active",
+          "active_op_id": "vrs_herzegovina:Operation Foca:t4",
+          "current_op_phase": "execution",
+          "personnel": 505,
+          "cohesion": 24.4,
+          "morale": 58,
+          "fatigue": 7,
+          "location_osid": "op:cajnice:batotici",
+          "mv_state": null,
+          "mv_destinations": null,
+          "assigned_sub_segment_id": "subseg:sector:vrs_herzegovina:0:0"
+        },
+        {
+          "turn": 11,
+          "week_index": 10,
+          "lifecycle_status": null,
+          "status": "active",
+          "active_op_id": "vrs_herzegovina:Operation Foca:t4",
+          "current_op_phase": "execution",
+          "personnel": 503,
+          "cohesion": 35,
+          "morale": 53,
+          "fatigue": 7.5,
+          "location_osid": "op:cajnice:batotici",
+          "mv_state": null,
+          "mv_destinations": null,
+          "assigned_sub_segment_id": "subseg:sector:vrs_herzegovina:0:0"
+        },
+        {
+          "turn": 12,
+          "week_index": 11,
+          "lifecycle_status": null,
+          "status": "active",
+          "active_op_id": "vrs_herzegovina:Operation Foca:t4",
+          "current_op_phase": "execution",
+          "personnel": 501,
+          "cohesion": 35,
+          "morale": 56,
+          "fatigue": 7,
+          "location_osid": "op:cajnice:batotici",
+          "mv_state": null,
+          "mv_destinations": null,
+          "assigned_sub_segment_id": "subseg:sector:vrs_herzegovina:0:0"
+        },
+        {
+          "turn": 13,
+          "week_index": 12,
+          "lifecycle_status": null,
+          "status": "active",
+          "active_op_id": "vrs_herzegovina:Operation Foca:t4",
+          "current_op_phase": "execution",
+          "personnel": 499,
+          "cohesion": 35,
+          "morale": 56,
+          "fatigue": 7.5,
+          "location_osid": "op:cajnice:batotici",
+          "mv_state": null,
+          "mv_destinations": null,
+          "assigned_sub_segment_id": "subseg:sector:vrs_herzegovina:0:0"
+        },
+        {
+          "turn": 14,
+          "week_index": 13,
+          "lifecycle_status": null,
+          "status": "active",
+          "active_op_id": "vrs_herzegovina:Operation Foca:t4",
+          "current_op_phase": "recovery",
+          "personnel": 497,
+          "cohesion": 35,
+          "morale": 56,
+          "fatigue": 7,
+          "location_osid": "op:cajnice:batotici",
+          "mv_state": null,
+          "mv_destinations": null,
+          "assigned_sub_segment_id": "subseg:sector:vrs_herzegovina:0:0"
+        },
+        {
+          "turn": 15,
+          "week_index": 14,
+          "lifecycle_status": null,
+          "status": "active",
+          "active_op_id": "vrs_herzegovina:Operation Foca:t4",
+          "current_op_phase": "recovery",
+          "personnel": 495,
+          "cohesion": 35,
+          "morale": 56,
+          "fatigue": 7.5,
+          "location_osid": "op:cajnice:batotici",
+          "mv_state": null,
+          "mv_destinations": null,
+          "assigned_sub_segment_id": "subseg:sector:vrs_herzegovina:0:0"
+        },
+        {
+          "turn": 16,
+          "week_index": 15,
+          "lifecycle_status": null,
+          "status": "active",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "personnel": 493,
+          "cohesion": 35,
+          "morale": 56,
+          "fatigue": 7,
+          "location_osid": "op:cajnice:batotici",
+          "mv_state": null,
+          "mv_destinations": null,
+          "assigned_sub_segment_id": "subseg:sector:vrs_herzegovina:0:0"
+        }
+      ],
+      "weekly_turns_8_16": [
+        {
+          "turn": 8,
+          "battles": [],
+          "foca_operation_diagnostics": [
+            {
+              "attack_attempt_count": 2,
+              "attack_order_targets": [
+                {
+                  "battle_count": 1,
+                  "current_objective": false,
+                  "order_count": 1,
+                  "target_osid": "op:foca:miljevina_2"
+                },
+                {
+                  "battle_count": 1,
+                  "current_objective": false,
+                  "order_count": 1,
+                  "target_osid": "op:foca:ustikolina"
+                }
+              ],
+              "battle_count": 2,
+              "corps_id": "vrs_herzegovina",
+              "current_objective": "op:foca:izbisno",
+              "current_objective_attack_count": 0,
+              "current_objective_battle_count": 0,
+              "current_objectives": [
+                "op:foca:izbisno",
+                "op:gorazde:kolovarice",
+                "op:kalinovik:golubici_2"
+              ],
+              "eligible_attacker_count": 2,
+              "faction_id": "RS",
+              "idle_execution_turn_streak": 0,
+              "invalid_for_combat_calibration": false,
+              "invalidation_reasons": [],
+              "movement_only_execution_turns": 0,
+              "movement_order_count": 3,
+              "objective_attempt_count": 6,
+              "objective_capture_count": 6,
+              "operation_name": "Operation Foca",
+              "operation_phase": "execution",
+              "operation_type": "sector_attack",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "rs_bilea_brigade",
+                  "location_osid": "op:foca:miljevina_2",
+                  "resolver_seen_target_osid": "op:foca:miljevina_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:foca:miljevina_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "rs_foa_brigade",
+                  "location_osid": "op:foca:ustikolina",
+                  "resolver_seen_target_osid": "op:foca:ustikolina",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:foca:ustikolina"
+                }
+              ],
+              "participating_brigades": [
+                "jna_kalinovik_to_tg",
+                "rs_ajnie_brigade",
+                "rs_bilea_brigade",
+                "rs_foa_brigade",
+                "rs_gacko_brigade",
+                "rs_kalinovik_brigade"
+              ],
+              "recovery_reason": null,
+              "skipped_attack_orders": []
+            }
+          ],
+          "ajnie_movement_mentions": "UNREPORTED"
+        },
+        {
+          "turn": 9,
+          "battles": [
+            {
+              "attacker_brigade": "rs_ajnie_brigade",
+              "attacker_brigades": [
+                "rs_ajnie_brigade",
+                "rs_foa_brigade"
+              ],
+              "attacker_casualties": 195,
+              "attacker_faction": "RS",
+              "attacker_won": false,
+              "battle_id": "9:op:gorazde:kolovarice:rs_ajnie_brigade:arbih_801st_light",
+              "defender_brigade": "arbih_801st_light",
+              "defender_casualties": 90,
+              "defender_faction": "RBiH",
+              "equipment": {
+                "attacker_artillery_lost": 2,
+                "attacker_tanks_lost": 0,
+                "captured_artillery": 0,
+                "captured_tanks": 0,
+                "defender_artillery_lost": 1,
+                "defender_tanks_lost": 0,
+                "scavenged_artillery": 0,
+                "scavenged_tanks": 0
+              },
+              "execution_friction": {
+                "attacker_confidence_band": "low",
+                "labels": [
+                  "stale_intel"
+                ]
+              },
+              "operation_id": "vrs_herzegovina:Operation Foca:t4",
+              "operation_name": "Operation Foca",
+              "outcome": "stalemate",
+              "power_breakdown": {
+                "attacker_count": 2,
+                "attacker_power": 191.33940441442817,
+                "attacker_power_raw": 215.2299262254535,
+                "defender_power": 265.8115351444628,
+                "defender_power_path": "sector",
+                "defending_sector_id": "sector:arbih_1st_corps:3",
+                "min_floor_applied": false,
+                "physical_power": 242.9214601444628,
+                "reactive_response": 0,
+                "sector_brigade_count": 1,
+                "sector_stance": "fortify"
+              },
+              "power_ratio": 0.72,
+              "target_osid": "op:gorazde:kolovarice"
+            }
+          ],
+          "foca_operation_diagnostics": [
+            {
+              "attack_attempt_count": 5,
+              "attack_order_targets": [
+                {
+                  "battle_count": 1,
+                  "current_objective": false,
+                  "order_count": 1,
+                  "target_osid": "op:foca:izbisno"
+                },
+                {
+                  "battle_count": 1,
+                  "current_objective": true,
+                  "order_count": 2,
+                  "target_osid": "op:gorazde:kolovarice"
+                },
+                {
+                  "battle_count": 1,
+                  "current_objective": false,
+                  "order_count": 2,
+                  "target_osid": "op:kalinovik:golubici_2"
+                }
+              ],
+              "battle_count": 3,
+              "corps_id": "vrs_herzegovina",
+              "current_objective": "op:foca:kosman",
+              "current_objective_attack_count": 2,
+              "current_objective_battle_count": 0,
+              "current_objectives": [
+                "op:foca:kosman",
+                "op:gorazde:kolovarice",
+                "op:kalinovik:sela_2"
+              ],
+              "eligible_attacker_count": 5,
+              "faction_id": "RS",
+              "idle_execution_turn_streak": 0,
+              "invalid_for_combat_calibration": false,
+              "invalidation_reasons": [],
+              "movement_only_execution_turns": 0,
+              "movement_order_count": 1,
+              "objective_attempt_count": 9,
+              "objective_capture_count": 8,
+              "operation_name": "Operation Foca",
+              "operation_phase": "execution",
+              "operation_type": "sector_attack",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "rs_ajnie_brigade",
+                  "location_osid": "op:cajnice:batotici",
+                  "resolver_seen_target_osid": "op:gorazde:kolovarice",
+                  "target_is_current_objective": true,
+                  "target_osid": "op:gorazde:kolovarice"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "rs_bilea_brigade",
+                  "location_osid": "op:foca:izbisno",
+                  "resolver_seen_target_osid": "op:foca:izbisno",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:foca:izbisno"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "rs_foa_brigade",
+                  "location_osid": "op:foca:ustikolina",
+                  "resolver_seen_target_osid": "op:gorazde:kolovarice",
+                  "target_is_current_objective": true,
+                  "target_osid": "op:gorazde:kolovarice"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "rs_gacko_brigade",
+                  "location_osid": "op:kalinovik:golubici_2",
+                  "resolver_seen_target_osid": "op:kalinovik:golubici_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:kalinovik:golubici_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "rs_kalinovik_brigade",
+                  "location_osid": "op:kalinovik:obalj",
+                  "resolver_seen_target_osid": "op:kalinovik:golubici_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:kalinovik:golubici_2"
+                }
+              ],
+              "participating_brigades": [
+                "jna_kalinovik_to_tg",
+                "rs_ajnie_brigade",
+                "rs_bilea_brigade",
+                "rs_foa_brigade",
+                "rs_gacko_brigade",
+                "rs_kalinovik_brigade"
+              ],
+              "recovery_reason": null,
+              "skipped_attack_orders": []
+            }
+          ],
+          "ajnie_movement_mentions": "UNREPORTED"
+        },
+        {
+          "turn": 10,
+          "battles": [
+            {
+              "attacker_brigade": "rs_ajnie_brigade",
+              "attacker_brigades": [
+                "rs_ajnie_brigade"
+              ],
+              "attacker_casualties": 313,
+              "attacker_faction": "RS",
+              "attacker_won": false,
+              "battle_id": "10:op:gorazde:kolovarice:rs_ajnie_brigade:arbih_801st_light",
+              "defender_brigade": "arbih_801st_light",
+              "defender_casualties": 32,
+              "defender_faction": "RBiH",
+              "equipment": {
+                "attacker_artillery_lost": 1,
+                "attacker_tanks_lost": 0,
+                "captured_artillery": 1,
+                "captured_by": "RBiH",
+                "captured_tanks": 0,
+                "defender_artillery_lost": 0,
+                "defender_tanks_lost": 0,
+                "scavenged_artillery": 0,
+                "scavenged_tanks": 0
+              },
+              "execution_friction": {
+                "attacker_confidence_band": "low",
+                "labels": [
+                  "stale_intel"
+                ]
+              },
+              "operation_id": "vrs_herzegovina:Operation Foca:t4",
+              "operation_name": "Operation Foca",
+              "outcome": "catastrophic",
+              "power_breakdown": {
+                "attacker_count": 1,
+                "attacker_power": 83.63795624413531,
+                "attacker_power_raw": 98.39759558133566,
+                "defender_power": 340.4705262459046,
+                "defender_power_path": "sector",
+                "defending_sector_id": "sector:arbih_1st_corps:2",
+                "min_floor_applied": false,
+                "physical_power": 317.4312762459046,
+                "reactive_response": 0,
+                "sector_brigade_count": 1,
+                "sector_stance": "fortify"
+              },
+              "power_ratio": 0.25,
+              "target_osid": "op:gorazde:kolovarice"
+            }
+          ],
+          "foca_operation_diagnostics": [
+            {
+              "attack_attempt_count": 3,
+              "attack_order_targets": [
+                {
+                  "battle_count": 1,
+                  "current_objective": true,
+                  "order_count": 1,
+                  "target_osid": "op:gorazde:kolovarice"
+                },
+                {
+                  "battle_count": 1,
+                  "current_objective": false,
+                  "order_count": 2,
+                  "target_osid": "op:kalinovik:sela_2"
+                }
+              ],
+              "battle_count": 2,
+              "corps_id": "vrs_herzegovina",
+              "current_objective": "op:foca:kosman",
+              "current_objective_attack_count": 1,
+              "current_objective_battle_count": 0,
+              "current_objectives": [
+                "op:foca:kosman",
+                "op:gorazde:kolovarice"
+              ],
+              "eligible_attacker_count": 3,
+              "faction_id": "RS",
+              "idle_execution_turn_streak": 0,
+              "invalid_for_combat_calibration": false,
+              "invalidation_reasons": [],
+              "movement_only_execution_turns": 0,
+              "movement_order_count": 1,
+              "objective_attempt_count": 11,
+              "objective_capture_count": 9,
+              "operation_name": "Operation Foca",
+              "operation_phase": "execution",
+              "operation_type": "sector_attack",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "rs_ajnie_brigade",
+                  "location_osid": "op:cajnice:batotici",
+                  "resolver_seen_target_osid": "op:gorazde:kolovarice",
+                  "target_is_current_objective": true,
+                  "target_osid": "op:gorazde:kolovarice"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "rs_gacko_brigade",
+                  "location_osid": "op:kalinovik:sela_2",
+                  "resolver_seen_target_osid": "op:kalinovik:sela_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:kalinovik:sela_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "rs_kalinovik_brigade",
+                  "location_osid": "op:kalinovik:obalj",
+                  "resolver_seen_target_osid": "op:kalinovik:sela_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:kalinovik:sela_2"
+                }
+              ],
+              "participating_brigades": [
+                "rs_ajnie_brigade",
+                "rs_bilea_brigade",
+                "rs_foa_brigade",
+                "rs_gacko_brigade",
+                "rs_kalinovik_brigade"
+              ],
+              "recovery_reason": null,
+              "skipped_attack_orders": []
+            }
+          ],
+          "ajnie_movement_mentions": "UNREPORTED"
+        },
+        {
+          "turn": 11,
+          "battles": [],
+          "foca_operation_diagnostics": [
+            {
+              "attack_attempt_count": 0,
+              "attack_order_targets": [],
+              "battle_count": 0,
+              "corps_id": "vrs_herzegovina",
+              "current_objective": "op:foca:kosman",
+              "current_objective_attack_count": 0,
+              "current_objective_battle_count": 0,
+              "current_objectives": [
+                "op:foca:kosman",
+                "op:gorazde:kolovarice"
+              ],
+              "eligible_attacker_count": 0,
+              "faction_id": "RS",
+              "idle_execution_turn_streak": 0,
+              "invalid_for_combat_calibration": false,
+              "invalidation_reasons": [],
+              "movement_only_execution_turns": 0,
+              "movement_order_count": 1,
+              "objective_attempt_count": 11,
+              "objective_capture_count": 9,
+              "operation_name": "Operation Foca",
+              "operation_phase": "execution",
+              "operation_type": "sector_attack",
+              "participant_attack_orders": [],
+              "participating_brigades": [
+                "rs_ajnie_brigade",
+                "rs_bilea_brigade",
+                "rs_foa_brigade",
+                "rs_gacko_brigade",
+                "rs_kalinovik_brigade"
+              ],
+              "recovery_reason": null,
+              "skipped_attack_orders": []
+            }
+          ],
+          "ajnie_movement_mentions": "UNREPORTED"
+        },
+        {
+          "turn": 12,
+          "battles": [],
+          "foca_operation_diagnostics": [
+            {
+              "attack_attempt_count": 0,
+              "attack_order_targets": [],
+              "battle_count": 0,
+              "corps_id": "vrs_herzegovina",
+              "current_objective": "op:gorazde:kolovarice",
+              "current_objective_attack_count": 0,
+              "current_objective_battle_count": 0,
+              "current_objectives": [
+                "op:gorazde:kolovarice"
+              ],
+              "eligible_attacker_count": 0,
+              "faction_id": "RS",
+              "idle_execution_turn_streak": 0,
+              "invalid_for_combat_calibration": false,
+              "invalidation_reasons": [],
+              "movement_only_execution_turns": 0,
+              "movement_order_count": 0,
+              "objective_attempt_count": 12,
+              "objective_capture_count": 10,
+              "operation_name": "Operation Foca",
+              "operation_phase": "execution",
+              "operation_type": "sector_attack",
+              "participant_attack_orders": [],
+              "participating_brigades": [
+                "rs_ajnie_brigade",
+                "rs_bilea_brigade",
+                "rs_foa_brigade",
+                "rs_gacko_brigade",
+                "rs_kalinovik_brigade"
+              ],
+              "recovery_reason": null,
+              "skipped_attack_orders": []
+            }
+          ],
+          "ajnie_movement_mentions": "UNREPORTED"
+        },
+        {
+          "turn": 13,
+          "battles": [],
+          "foca_operation_diagnostics": [
+            {
+              "attack_attempt_count": 0,
+              "attack_order_targets": [],
+              "battle_count": 0,
+              "corps_id": "vrs_herzegovina",
+              "current_objective": "op:gorazde:kolovarice",
+              "current_objective_attack_count": 0,
+              "current_objective_battle_count": 0,
+              "current_objectives": [
+                "op:gorazde:kolovarice"
+              ],
+              "eligible_attacker_count": 0,
+              "faction_id": "RS",
+              "idle_execution_turn_streak": 0,
+              "invalid_for_combat_calibration": false,
+              "invalidation_reasons": [],
+              "movement_only_execution_turns": 0,
+              "movement_order_count": 0,
+              "objective_attempt_count": 12,
+              "objective_capture_count": 10,
+              "operation_name": "Operation Foca",
+              "operation_phase": "execution",
+              "operation_type": "sector_attack",
+              "participant_attack_orders": [],
+              "participating_brigades": [
+                "rs_ajnie_brigade",
+                "rs_bilea_brigade",
+                "rs_foa_brigade",
+                "rs_gacko_brigade",
+                "rs_kalinovik_brigade"
+              ],
+              "recovery_reason": null,
+              "skipped_attack_orders": []
+            }
+          ],
+          "ajnie_movement_mentions": "UNREPORTED"
+        },
+        {
+          "turn": 14,
+          "battles": [
+            {
+              "attacker_brigade": "rs_foa_brigade",
+              "attacker_brigades": [
+                "rs_foa_brigade"
+              ],
+              "attacker_casualties": 23,
+              "attacker_faction": "RS",
+              "attacker_won": false,
+              "battle_id": "14:op:gorazde:kolovarice:rs_foa_brigade:null",
+              "defender_brigade": null,
+              "defender_casualties": 19,
+              "defender_faction": "RBiH",
+              "defender_kind": "militia",
+              "defender_militia_pool_key": "gorazde:RBiH",
+              "equipment": {
+                "attacker_artillery_lost": 1,
+                "attacker_tanks_lost": 0,
+                "captured_artillery": 0,
+                "captured_tanks": 0,
+                "defender_artillery_lost": 0,
+                "defender_tanks_lost": 0,
+                "scavenged_artillery": 0,
+                "scavenged_tanks": 0
+              },
+              "execution_friction": {
+                "attacker_confidence_band": "low",
+                "labels": [
+                  "stale_intel"
+                ]
+              },
+              "operation_id": "vrs_herzegovina:Operation Foca:t4",
+              "operation_name": "Operation Foca",
+              "outcome": "stalemate",
+              "power_breakdown": {
+                "attacker_count": 1,
+                "attacker_power": 77.64063368535002,
+                "attacker_power_raw": 91.34192198276475,
+                "defender_power": 86.13595,
+                "defender_power_path": "militia_only",
+                "defending_sector_id": null,
+                "min_floor_applied": false,
+                "physical_power": 0,
+                "reactive_response": 0,
+                "sector_brigade_count": 0,
+                "sector_stance": null
+              },
+              "power_ratio": 0.9,
+              "target_osid": "op:gorazde:kolovarice"
+            }
+          ],
+          "foca_operation_diagnostics": [
+            {
+              "attack_attempt_count": 1,
+              "attack_order_targets": [
+                {
+                  "battle_count": 1,
+                  "current_objective": false,
+                  "order_count": 1,
+                  "target_osid": "op:gorazde:kolovarice"
+                }
+              ],
+              "battle_count": 1,
+              "corps_id": "vrs_herzegovina",
+              "current_objective": null,
+              "current_objective_attack_count": 0,
+              "current_objective_battle_count": 0,
+              "current_objectives": [],
+              "eligible_attacker_count": 1,
+              "faction_id": "RS",
+              "idle_execution_turn_streak": 0,
+              "invalid_for_combat_calibration": false,
+              "invalidation_reasons": [],
+              "movement_only_execution_turns": 0,
+              "movement_order_count": 0,
+              "objective_attempt_count": 13,
+              "objective_capture_count": 10,
+              "operation_name": "Operation Foca",
+              "operation_phase": "recovery",
+              "operation_type": "sector_attack",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "rs_foa_brigade",
+                  "location_osid": "op:foca:ustikolina",
+                  "resolver_seen_target_osid": "op:gorazde:kolovarice",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:gorazde:kolovarice"
+                }
+              ],
+              "participating_brigades": [
+                "rs_ajnie_brigade",
+                "rs_bilea_brigade",
+                "rs_foa_brigade",
+                "rs_gacko_brigade",
+                "rs_kalinovik_brigade"
+              ],
+              "recovery_reason": "max_failures",
+              "skipped_attack_orders": []
+            }
+          ],
+          "ajnie_movement_mentions": "UNREPORTED"
+        },
+        {
+          "turn": 15,
+          "battles": [],
+          "foca_operation_diagnostics": [
+            {
+              "attack_attempt_count": 0,
+              "attack_order_targets": [],
+              "battle_count": 0,
+              "corps_id": "vrs_herzegovina",
+              "current_objective": null,
+              "current_objective_attack_count": 0,
+              "current_objective_battle_count": 0,
+              "current_objectives": [],
+              "eligible_attacker_count": 0,
+              "faction_id": "RS",
+              "idle_execution_turn_streak": 0,
+              "invalid_for_combat_calibration": false,
+              "invalidation_reasons": [],
+              "movement_only_execution_turns": 0,
+              "movement_order_count": 0,
+              "objective_attempt_count": 13,
+              "objective_capture_count": 10,
+              "operation_name": "Operation Foca",
+              "operation_phase": "recovery",
+              "operation_type": "sector_attack",
+              "participant_attack_orders": [],
+              "participating_brigades": [
+                "rs_ajnie_brigade",
+                "rs_bilea_brigade",
+                "rs_foa_brigade",
+                "rs_gacko_brigade",
+                "rs_kalinovik_brigade"
+              ],
+              "recovery_reason": "max_failures",
+              "skipped_attack_orders": []
+            }
+          ],
+          "ajnie_movement_mentions": "UNREPORTED"
+        }
+      ],
+      "foca_aar": {
+        "axis_summaries": [
+          {
+            "axis_id": "foca_valley",
+            "axis_name": "Foca Valley",
+            "brigades": [
+              "rs_foa_brigade"
+            ],
+            "casualties_inflicted": {
+              "killed": 16,
+              "wounded": 54
+            },
+            "casualties_suffered": {
+              "killed": 21,
+              "wounded": 71
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "objectives_captured": [
+              "op:foca:patkovina",
+              "op:foca:ustikolina"
+            ],
+            "objectives_targeted": [
+              "op:foca:patkovina",
+              "op:foca:ustikolina",
+              "op:gorazde:kolovarice"
+            ],
+            "staging_osid": "op:foca:foca_3",
+            "total_attacks": 3
+          },
+          {
+            "axis_id": "foca_south",
+            "axis_name": "Foča Southern Mop-Up",
+            "brigades": [
+              "rs_bilea_brigade"
+            ],
+            "casualties_inflicted": {
+              "killed": 69,
+              "wounded": 232
+            },
+            "casualties_suffered": {
+              "killed": 43,
+              "wounded": 143
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "objectives_captured": [
+              "op:foca:tjentiste_2",
+              "op:foca:miljevina_2",
+              "op:foca:izbisno"
+            ],
+            "objectives_targeted": [
+              "op:foca:tjentiste_2",
+              "op:foca:miljevina_2",
+              "op:foca:izbisno",
+              "op:foca:kosman"
+            ],
+            "staging_osid": "op:gacko:izgori",
+            "total_attacks": 4
+          },
+          {
+            "axis_id": "cajnice_south",
+            "axis_name": "Čajniče Southern Approach",
+            "brigades": [
+              "rs_ajnie_brigade"
+            ],
+            "casualties_inflicted": {
+              "killed": 41,
+              "wounded": 139
+            },
+            "casualties_suffered": {
+              "killed": 117,
+              "wounded": 393
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 4,
+              "tanks": 6
+            },
+            "launch_blocker": "recent_catastrophic_losses_at_objective",
+            "objectives_captured": [
+              "op:cajnice:batotici",
+              "op:foca:brusna_2"
+            ],
+            "objectives_targeted": [
+              "op:cajnice:batotici",
+              "op:foca:brusna_2",
+              "op:gorazde:kolovarice"
+            ],
+            "staging_osid": "op:cajnice:cajnice_2",
+            "total_attacks": 4
+          },
+          {
+            "axis_id": "kalinovik",
+            "axis_name": "Kalinovik",
+            "brigades": [
+              "rs_gacko_brigade",
+              "rs_kalinovik_brigade"
+            ],
+            "casualties_inflicted": {
+              "killed": 64,
+              "wounded": 213
+            },
+            "casualties_suffered": {
+              "killed": 42,
+              "wounded": 141
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 1,
+              "tanks": 0
+            },
+            "launch_blocker": "zero_eligible_axis",
+            "objectives_captured": [
+              "op:kalinovik:golubici_2",
+              "op:kalinovik:sela_2"
+            ],
+            "objectives_targeted": [
+              "op:kalinovik:golubici_2",
+              "op:kalinovik:sela_2"
+            ],
+            "staging_osid": "op:kalinovik:kalinovik_2",
+            "total_attacks": 2
+          }
+        ],
+        "capture_provenance": "logged_capture",
+        "casualties_inflicted": {
+          "killed": 190,
+          "wounded": 638
+        },
+        "casualties_suffered": {
+          "killed": 223,
+          "wounded": 748
+        },
+        "commander_name": "Novica Gušić",
+        "commander_officer_id": "vrs_gusic_n",
+        "commander_rank": "corps_commander",
+        "corps_id": "vrs_herzegovina",
+        "duration_turns": 12,
+        "ended_turn": 16,
+        "equipment_captured": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "equipment_destroyed": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "equipment_lost": {
+          "artillery": 5,
+          "tanks": 6
+        },
+        "faction": "RS",
+        "final_strength": 4840,
+        "grade": {
+          "factors": {
+            "exchange_ratio": 28.140061791967042,
+            "objective_completion": 81.81818181818183,
+            "preservation": 73.18917284137305,
+            "tempo": 75
+          },
+          "stars": 5,
+          "verdict": "Brilliant Victory"
+        },
+        "initial_strength": 6613,
+        "objectives_captured": [
+          "op:foca:patkovina",
+          "op:foca:ustikolina",
+          "op:foca:tjentiste_2",
+          "op:foca:miljevina_2",
+          "op:foca:izbisno",
+          "op:cajnice:batotici",
+          "op:foca:brusna_2",
+          "op:kalinovik:golubici_2",
+          "op:kalinovik:sela_2"
+        ],
+        "objectives_held_without_logged_capture": [],
+        "objectives_logged_captured": [
+          "op:foca:patkovina",
+          "op:foca:ustikolina",
+          "op:foca:tjentiste_2",
+          "op:foca:miljevina_2",
+          "op:foca:izbisno",
+          "op:foca:kosman",
+          "op:cajnice:batotici",
+          "op:foca:brusna_2",
+          "op:kalinovik:golubici_2",
+          "op:kalinovik:sela_2"
+        ],
+        "objectives_targeted": [
+          "op:foca:patkovina",
+          "op:foca:ustikolina",
+          "op:gorazde:kolovarice",
+          "op:foca:tjentiste_2",
+          "op:foca:miljevina_2",
+          "op:foca:izbisno",
+          "op:foca:kosman",
+          "op:cajnice:batotici",
+          "op:foca:brusna_2",
+          "op:kalinovik:golubici_2",
+          "op:kalinovik:sela_2"
+        ],
+        "operation_id": "vrs_herzegovina:Operation Foca:t4",
+        "operation_name": "Operation Foca",
+        "outcome": "partial",
+        "participating_brigades": [
+          "rs_ajnie_brigade",
+          "rs_bilea_brigade",
+          "rs_foa_brigade",
+          "rs_gacko_brigade",
+          "rs_kalinovik_brigade"
+        ],
+        "recovery_reason": "max_failures",
+        "started_turn": 4,
+        "total_attacks": 13,
+        "type": "sector_attack",
+        "weekly_log": [
+          {
+            "attacks_this_turn": 0,
+            "brigade_count": 6,
+            "casualties_inflicted": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "casualties_suffered": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 0,
+            "notable_events": [],
+            "objectives_captured_this_turn": [],
+            "objectives_lost_this_turn": [],
+            "phase": "planning",
+            "turn": 4
+          },
+          {
+            "attacks_this_turn": 0,
+            "brigade_count": 6,
+            "casualties_inflicted": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "casualties_suffered": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 0,
+            "notable_events": [],
+            "objectives_captured_this_turn": [],
+            "objectives_lost_this_turn": [],
+            "phase": "planning",
+            "turn": 5
+          },
+          {
+            "attacks_this_turn": 0,
+            "brigade_count": 6,
+            "casualties_inflicted": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "casualties_suffered": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 0,
+            "notable_events": [],
+            "objectives_captured_this_turn": [],
+            "objectives_lost_this_turn": [],
+            "phase": "planning",
+            "turn": 6
+          },
+          {
+            "attacks_this_turn": 3,
+            "axis_entries": {
+              "cajnice_south": {
+                "attacks_this_turn": 1,
+                "casualties_inflicted": {
+                  "killed": 14,
+                  "wounded": 48
+                },
+                "casualties_suffered": {
+                  "killed": 5,
+                  "wounded": 17
+                },
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_lost": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "objectives_captured_this_turn": [],
+                "objectives_lost_this_turn": []
+              },
+              "foca_south": {
+                "attacks_this_turn": 1,
+                "casualties_inflicted": {
+                  "killed": 18,
+                  "wounded": 62
+                },
+                "casualties_suffered": {
+                  "killed": 8,
+                  "wounded": 26
+                },
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_lost": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "objectives_captured_this_turn": [],
+                "objectives_lost_this_turn": []
+              },
+              "foca_valley": {
+                "attacks_this_turn": 1,
+                "casualties_inflicted": {
+                  "killed": 6,
+                  "wounded": 19
+                },
+                "casualties_suffered": {
+                  "killed": 9,
+                  "wounded": 29
+                },
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_lost": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "objectives_captured_this_turn": [],
+                "objectives_lost_this_turn": []
+              }
+            },
+            "brigade_count": 6,
+            "casualties_inflicted": {
+              "killed": 38,
+              "wounded": 129
+            },
+            "casualties_suffered": {
+              "killed": 22,
+              "wounded": 72
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 1,
+            "notable_events": [
+              "first_blood",
+              "breakthrough"
+            ],
+            "objectives_captured_this_turn": [
+              "op:foca:patkovina",
+              "op:foca:tjentiste_2",
+              "op:cajnice:batotici"
+            ],
+            "objectives_lost_this_turn": [],
+            "phase": "execution",
+            "turn": 7
+          },
+          {
+            "attacks_this_turn": 2,
+            "axis_entries": {
+              "foca_south": {
+                "attacks_this_turn": 1,
+                "casualties_inflicted": {
+                  "killed": 18,
+                  "wounded": 59
+                },
+                "casualties_suffered": {
+                  "killed": 8,
+                  "wounded": 27
+                },
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_lost": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "objectives_captured_this_turn": [],
+                "objectives_lost_this_turn": []
+              },
+              "foca_valley": {
+                "attacks_this_turn": 1,
+                "casualties_inflicted": {
+                  "killed": 6,
+                  "wounded": 21
+                },
+                "casualties_suffered": {
+                  "killed": 7,
+                  "wounded": 25
+                },
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_lost": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "objectives_captured_this_turn": [],
+                "objectives_lost_this_turn": []
+              }
+            },
+            "brigade_count": 6,
+            "casualties_inflicted": {
+              "killed": 24,
+              "wounded": 80
+            },
+            "casualties_suffered": {
+              "killed": 15,
+              "wounded": 52
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 2,
+            "notable_events": [
+              "breakthrough"
+            ],
+            "objectives_captured_this_turn": [
+              "op:foca:ustikolina",
+              "op:foca:miljevina_2",
+              "op:foca:brusna_2"
+            ],
+            "objectives_lost_this_turn": [],
+            "phase": "execution",
+            "turn": 8
+          },
+          {
+            "attacks_this_turn": 3,
+            "axis_entries": {
+              "cajnice_south": {
+                "attacks_this_turn": 1,
+                "casualties_inflicted": {
+                  "killed": 20,
+                  "wounded": 67
+                },
+                "casualties_suffered": {
+                  "killed": 43,
+                  "wounded": 144
+                },
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_lost": {
+                  "artillery": 1,
+                  "tanks": 2
+                },
+                "objectives_captured_this_turn": [],
+                "objectives_lost_this_turn": []
+              },
+              "foca_south": {
+                "attacks_this_turn": 1,
+                "casualties_inflicted": {
+                  "killed": 33,
+                  "wounded": 111
+                },
+                "casualties_suffered": {
+                  "killed": 27,
+                  "wounded": 90
+                },
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_lost": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "objectives_captured_this_turn": [],
+                "objectives_lost_this_turn": []
+              },
+              "kalinovik": {
+                "attacks_this_turn": 1,
+                "casualties_inflicted": {
+                  "killed": 22,
+                  "wounded": 73
+                },
+                "casualties_suffered": {
+                  "killed": 8,
+                  "wounded": 27
+                },
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_lost": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "objectives_captured_this_turn": [],
+                "objectives_lost_this_turn": []
+              }
+            },
+            "brigade_count": 6,
+            "casualties_inflicted": {
+              "killed": 75,
+              "wounded": 251
+            },
+            "casualties_suffered": {
+              "killed": 78,
+              "wounded": 261
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 1,
+              "tanks": 2
+            },
+            "momentum": 3,
+            "notable_events": [
+              "breakthrough"
+            ],
+            "objectives_captured_this_turn": [
+              "op:foca:izbisno",
+              "op:kalinovik:golubici_2"
+            ],
+            "objectives_lost_this_turn": [],
+            "phase": "execution",
+            "turn": 9
+          },
+          {
+            "attacks_this_turn": 2,
+            "axis_entries": {
+              "cajnice_south": {
+                "attacks_this_turn": 1,
+                "casualties_inflicted": {
+                  "killed": 7,
+                  "wounded": 24
+                },
+                "casualties_suffered": {
+                  "killed": 69,
+                  "wounded": 232
+                },
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_lost": {
+                  "artillery": 3,
+                  "tanks": 4
+                },
+                "objectives_captured_this_turn": [],
+                "objectives_lost_this_turn": []
+              },
+              "kalinovik": {
+                "attacks_this_turn": 1,
+                "casualties_inflicted": {
+                  "killed": 42,
+                  "wounded": 140
+                },
+                "casualties_suffered": {
+                  "killed": 34,
+                  "wounded": 114
+                },
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_lost": {
+                  "artillery": 1,
+                  "tanks": 0
+                },
+                "objectives_captured_this_turn": [],
+                "objectives_lost_this_turn": []
+              }
+            },
+            "brigade_count": 5,
+            "casualties_inflicted": {
+              "killed": 49,
+              "wounded": 164
+            },
+            "casualties_suffered": {
+              "killed": 103,
+              "wounded": 346
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 4,
+              "tanks": 4
+            },
+            "momentum": 2,
+            "notable_events": [
+              "breakthrough"
+            ],
+            "objectives_captured_this_turn": [
+              "op:kalinovik:sela_2"
+            ],
+            "objectives_lost_this_turn": [],
+            "phase": "execution",
+            "turn": 10
+          },
+          {
+            "attacks_this_turn": 0,
+            "brigade_count": 5,
+            "casualties_inflicted": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "casualties_suffered": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 2,
+            "notable_events": [],
+            "objectives_captured_this_turn": [],
+            "objectives_lost_this_turn": [],
+            "phase": "execution",
+            "turn": 11
+          },
+          {
+            "attacks_this_turn": 0,
+            "brigade_count": 5,
+            "casualties_inflicted": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "casualties_suffered": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 2,
+            "notable_events": [
+              "breakthrough"
+            ],
+            "objectives_captured_this_turn": [
+              "op:foca:kosman"
+            ],
+            "objectives_lost_this_turn": [],
+            "phase": "execution",
+            "turn": 12
+          },
+          {
+            "attacks_this_turn": 0,
+            "brigade_count": 5,
+            "casualties_inflicted": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "casualties_suffered": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 2,
+            "notable_events": [
+              "stalled"
+            ],
+            "objectives_captured_this_turn": [],
+            "objectives_lost_this_turn": [],
+            "phase": "execution",
+            "turn": 13
+          },
+          {
+            "attacks_this_turn": 1,
+            "axis_entries": {
+              "foca_valley": {
+                "attacks_this_turn": 1,
+                "casualties_inflicted": {
+                  "killed": 4,
+                  "wounded": 14
+                },
+                "casualties_suffered": {
+                  "killed": 5,
+                  "wounded": 17
+                },
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_lost": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "objectives_captured_this_turn": [],
+                "objectives_lost_this_turn": []
+              }
+            },
+            "brigade_count": 5,
+            "casualties_inflicted": {
+              "killed": 4,
+              "wounded": 14
+            },
+            "casualties_suffered": {
+              "killed": 5,
+              "wounded": 17
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 2,
+            "notable_events": [],
+            "objectives_captured_this_turn": [],
+            "objectives_lost_this_turn": [],
+            "phase": "recovery",
+            "turn": 14
+          },
+          {
+            "attacks_this_turn": 0,
+            "brigade_count": 5,
+            "casualties_inflicted": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "casualties_suffered": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 2,
+            "notable_events": [],
+            "objectives_captured_this_turn": [],
+            "objectives_lost_this_turn": [],
+            "phase": "recovery",
+            "turn": 15
+          }
+        ]
+      },
+      "watched_foca": "UNREPORTED",
+      "save_w15": {
+        "turn": 15,
+        "formation": {
+          "id": "rs_ajnie_brigade",
+          "status": "active",
+          "readiness": "active",
+          "personnel": 495,
+          "cohesion": 35,
+          "morale": 56,
+          "fatigue": 7.5,
+          "location_osid": "op:cajnice:batotici",
+          "posture": "defend",
+          "home_defense_active": true,
+          "last_repulsed_from": {
+            "osid": "op:gorazde:kolovarice",
+            "turn": 10
+          },
+          "brigade_history": {
+            "battles_as_attacker": 3,
+            "battles_as_defender": 0,
+            "battles_fought": 3,
+            "current_defense_streak": 0,
+            "current_victory_streak": 0,
+            "defeats": 1,
+            "engagements": [
+              {
+                "battle_id": "7:op:cajnice:batotici:rs_ajnie_brigade:null",
+                "casualties_inflicted": 65,
+                "casualties_taken": 23,
+                "enemy_faction": "RBiH",
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "osid": "op:cajnice:batotici",
+                "outcome": "decisive_victory",
+                "role": "attacker",
+                "territory_flipped": true,
+                "turn": 7,
+                "was_concentrated": false
+              },
+              {
+                "battle_id": "9:op:gorazde:kolovarice:rs_ajnie_brigade:arbih_801st_light",
+                "casualties_inflicted": 45,
+                "casualties_taken": 98,
+                "enemy_faction": "RBiH",
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 1,
+                  "tanks": 0
+                },
+                "osid": "op:gorazde:kolovarice",
+                "outcome": "stalemate",
+                "role": "attacker",
+                "territory_flipped": false,
+                "turn": 9,
+                "was_concentrated": true
+              },
+              {
+                "battle_id": "10:op:gorazde:kolovarice:rs_ajnie_brigade:arbih_801st_light",
+                "casualties_inflicted": 32,
+                "casualties_taken": 313,
+                "enemy_faction": "RBiH",
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "osid": "op:gorazde:kolovarice",
+                "outcome": "catastrophic",
+                "role": "attacker",
+                "territory_flipped": false,
+                "turn": 10,
+                "was_concentrated": false
+              }
+            ],
+            "first_battle_osid": "op:cajnice:batotici",
+            "first_battle_turn": 7,
+            "longest_defense_streak": 0,
+            "longest_victory_streak": 1,
+            "nadir_personnel": 508,
+            "peak_personnel": 1000,
+            "stalemates": 1,
+            "total_casualties_inflicted": 142,
+            "total_casualties_taken": 502,
+            "total_equipment_captured": {
+              "aa_systems": 0,
+              "artillery": 0,
+              "tanks": 0
+            },
+            "total_equipment_destroyed": {
+              "aa_systems": 0,
+              "artillery": 1,
+              "tanks": 0
+            },
+            "total_osids_captured": 1,
+            "total_osids_lost": 0,
+            "turns_under_siege": 0,
+            "victories": 1,
+            "worst_single_battle_casualties": 313,
+            "worst_single_battle_turn": 10
+          },
+          "battle_outcome_count": 2
+        },
+        "movement_order": "UNREPORTED",
+        "movement_state": "UNREPORTED",
+        "operation": {
+          "name": "Operation Foca",
+          "phase": "recovery",
+          "phase_started_turn": 14,
+          "participating_brigades": [
+            "rs_ajnie_brigade",
+            "rs_bilea_brigade",
+            "rs_foa_brigade",
+            "rs_gacko_brigade",
+            "rs_kalinovik_brigade"
+          ],
+          "axes": [
+            {
+              "assigned_brigades": [
+                "rs_foa_brigade"
+              ],
+              "attack_attempt_count": 3,
+              "axis_id": "foca_valley",
+              "battles_this_turn": 0,
+              "consecutive_catastrophic_on_current": 0,
+              "consecutive_failures_on_current": 0,
+              "current_objective_index": 3,
+              "failure_count": 5,
+              "idle_execution_turn_streak": 0,
+              "last_result": "failed",
+              "main_brigade": "rs_foa_brigade",
+              "momentum": 0,
+              "movement_only_execution_turns": 0,
+              "name": "Foca Valley",
+              "objective_battles_this_turn": 0,
+              "objective_capture_count": 2,
+              "objectives": [
+                "op:foca:patkovina",
+                "op:foca:ustikolina",
+                "op:gorazde:kolovarice"
+              ],
+              "shared_objective_wait_turns": 0,
+              "staging_osid": "op:foca:foca_3",
+              "status": "complete",
+              "total_battles": 3
+            },
+            {
+              "assigned_brigades": [
+                "rs_bilea_brigade"
+              ],
+              "attack_attempt_count": 4,
+              "axis_id": "foca_south",
+              "battles_this_turn": 0,
+              "consecutive_catastrophic_on_current": 0,
+              "consecutive_failures_on_current": 0,
+              "current_objective_index": 4,
+              "failure_count": 0,
+              "idle_execution_turn_streak": 0,
+              "last_result": "captured",
+              "main_brigade": "rs_bilea_brigade",
+              "momentum": 1,
+              "movement_only_execution_turns": 0,
+              "name": "Foča Southern Mop-Up",
+              "objective_battles_this_turn": 0,
+              "objective_capture_count": 4,
+              "objectives": [
+                "op:foca:tjentiste_2",
+                "op:foca:miljevina_2",
+                "op:foca:izbisno",
+                "op:foca:kosman"
+              ],
+              "shared_objective_wait_turns": 0,
+              "staging_osid": "op:gacko:izgori",
+              "status": "complete",
+              "total_battles": 3
+            },
+            {
+              "assigned_brigades": [
+                "rs_ajnie_brigade"
+              ],
+              "attack_attempt_count": 4,
+              "axis_id": "cajnice_south",
+              "battles_this_turn": 0,
+              "consecutive_catastrophic_on_current": 1,
+              "consecutive_failures_on_current": 2,
+              "current_objective_index": 2,
+              "failure_count": 2,
+              "idle_execution_turn_streak": 0,
+              "last_result": "failed",
+              "launch_blocker": "recent_catastrophic_losses_at_objective",
+              "main_brigade": "rs_ajnie_brigade",
+              "momentum": 0,
+              "movement_only_execution_turns": 0,
+              "name": "Čajniče Southern Approach",
+              "objective_battles_this_turn": 0,
+              "objective_capture_count": 2,
+              "objectives": [
+                "op:cajnice:batotici",
+                "op:foca:brusna_2",
+                "op:gorazde:kolovarice"
+              ],
+              "shared_objective_wait_turns": 0,
+              "staging_osid": "op:cajnice:cajnice_2",
+              "status": "stalled",
+              "total_battles": 3
+            },
+            {
+              "assigned_brigades": [
+                "rs_gacko_brigade",
+                "rs_kalinovik_brigade"
+              ],
+              "attack_attempt_count": 2,
+              "axis_id": "kalinovik",
+              "battles_this_turn": 0,
+              "consecutive_catastrophic_on_current": 0,
+              "consecutive_failures_on_current": 0,
+              "current_objective_index": 2,
+              "failure_count": 0,
+              "idle_execution_turn_streak": 0,
+              "last_result": "captured",
+              "launch_blocker": "zero_eligible_axis",
+              "main_brigade": "rs_gacko_brigade",
+              "momentum": 2,
+              "movement_only_execution_turns": 0,
+              "name": "Kalinovik",
+              "objective_battles_this_turn": 0,
+              "objective_capture_count": 2,
+              "objectives": [
+                "op:kalinovik:golubici_2",
+                "op:kalinovik:sela_2"
+              ],
+              "shared_objective_wait_turns": 0,
+              "staging_osid": "op:kalinovik:kalinovik_2",
+              "status": "complete",
+              "support_brigades": [
+                "jna_kalinovik_to_tg",
+                "rs_kalinovik_brigade"
+              ],
+              "total_battles": 2
+            }
+          ],
+          "current_objective_index": 0,
+          "failure_count": 0,
+          "consecutive_failures_on_current": 0,
+          "recovery_reason": "max_failures",
+          "weekly_log": [
+            {
+              "attacks_this_turn": 0,
+              "brigade_count": 6,
+              "casualties_inflicted": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "casualties_suffered": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "momentum": 0,
+              "notable_events": [],
+              "objectives_captured_this_turn": [],
+              "objectives_lost_this_turn": [],
+              "phase": "planning",
+              "turn": 4
+            },
+            {
+              "attacks_this_turn": 0,
+              "brigade_count": 6,
+              "casualties_inflicted": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "casualties_suffered": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "momentum": 0,
+              "notable_events": [],
+              "objectives_captured_this_turn": [],
+              "objectives_lost_this_turn": [],
+              "phase": "planning",
+              "turn": 5
+            },
+            {
+              "attacks_this_turn": 0,
+              "brigade_count": 6,
+              "casualties_inflicted": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "casualties_suffered": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "momentum": 0,
+              "notable_events": [],
+              "objectives_captured_this_turn": [],
+              "objectives_lost_this_turn": [],
+              "phase": "planning",
+              "turn": 6
+            },
+            {
+              "attacks_this_turn": 3,
+              "axis_entries": {
+                "cajnice_south": {
+                  "attacks_this_turn": 1,
+                  "casualties_inflicted": {
+                    "killed": 14,
+                    "wounded": 48
+                  },
+                  "casualties_suffered": {
+                    "killed": 5,
+                    "wounded": 17
+                  },
+                  "equipment_captured": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_destroyed": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_lost": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "objectives_captured_this_turn": [],
+                  "objectives_lost_this_turn": []
+                },
+                "foca_south": {
+                  "attacks_this_turn": 1,
+                  "casualties_inflicted": {
+                    "killed": 18,
+                    "wounded": 62
+                  },
+                  "casualties_suffered": {
+                    "killed": 8,
+                    "wounded": 26
+                  },
+                  "equipment_captured": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_destroyed": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_lost": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "objectives_captured_this_turn": [],
+                  "objectives_lost_this_turn": []
+                },
+                "foca_valley": {
+                  "attacks_this_turn": 1,
+                  "casualties_inflicted": {
+                    "killed": 6,
+                    "wounded": 19
+                  },
+                  "casualties_suffered": {
+                    "killed": 9,
+                    "wounded": 29
+                  },
+                  "equipment_captured": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_destroyed": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_lost": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "objectives_captured_this_turn": [],
+                  "objectives_lost_this_turn": []
+                }
+              },
+              "brigade_count": 6,
+              "casualties_inflicted": {
+                "killed": 38,
+                "wounded": 129
+              },
+              "casualties_suffered": {
+                "killed": 22,
+                "wounded": 72
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "momentum": 1,
+              "notable_events": [
+                "first_blood",
+                "breakthrough"
+              ],
+              "objectives_captured_this_turn": [
+                "op:foca:patkovina",
+                "op:foca:tjentiste_2",
+                "op:cajnice:batotici"
+              ],
+              "objectives_lost_this_turn": [],
+              "phase": "execution",
+              "turn": 7
+            },
+            {
+              "attacks_this_turn": 2,
+              "axis_entries": {
+                "foca_south": {
+                  "attacks_this_turn": 1,
+                  "casualties_inflicted": {
+                    "killed": 18,
+                    "wounded": 59
+                  },
+                  "casualties_suffered": {
+                    "killed": 8,
+                    "wounded": 27
+                  },
+                  "equipment_captured": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_destroyed": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_lost": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "objectives_captured_this_turn": [],
+                  "objectives_lost_this_turn": []
+                },
+                "foca_valley": {
+                  "attacks_this_turn": 1,
+                  "casualties_inflicted": {
+                    "killed": 6,
+                    "wounded": 21
+                  },
+                  "casualties_suffered": {
+                    "killed": 7,
+                    "wounded": 25
+                  },
+                  "equipment_captured": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_destroyed": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_lost": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "objectives_captured_this_turn": [],
+                  "objectives_lost_this_turn": []
+                }
+              },
+              "brigade_count": 6,
+              "casualties_inflicted": {
+                "killed": 24,
+                "wounded": 80
+              },
+              "casualties_suffered": {
+                "killed": 15,
+                "wounded": 52
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "momentum": 2,
+              "notable_events": [
+                "breakthrough"
+              ],
+              "objectives_captured_this_turn": [
+                "op:foca:ustikolina",
+                "op:foca:miljevina_2",
+                "op:foca:brusna_2"
+              ],
+              "objectives_lost_this_turn": [],
+              "phase": "execution",
+              "turn": 8
+            },
+            {
+              "attacks_this_turn": 3,
+              "axis_entries": {
+                "cajnice_south": {
+                  "attacks_this_turn": 1,
+                  "casualties_inflicted": {
+                    "killed": 20,
+                    "wounded": 67
+                  },
+                  "casualties_suffered": {
+                    "killed": 43,
+                    "wounded": 144
+                  },
+                  "equipment_captured": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_destroyed": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_lost": {
+                    "artillery": 1,
+                    "tanks": 2
+                  },
+                  "objectives_captured_this_turn": [],
+                  "objectives_lost_this_turn": []
+                },
+                "foca_south": {
+                  "attacks_this_turn": 1,
+                  "casualties_inflicted": {
+                    "killed": 33,
+                    "wounded": 111
+                  },
+                  "casualties_suffered": {
+                    "killed": 27,
+                    "wounded": 90
+                  },
+                  "equipment_captured": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_destroyed": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_lost": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "objectives_captured_this_turn": [],
+                  "objectives_lost_this_turn": []
+                },
+                "kalinovik": {
+                  "attacks_this_turn": 1,
+                  "casualties_inflicted": {
+                    "killed": 22,
+                    "wounded": 73
+                  },
+                  "casualties_suffered": {
+                    "killed": 8,
+                    "wounded": 27
+                  },
+                  "equipment_captured": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_destroyed": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_lost": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "objectives_captured_this_turn": [],
+                  "objectives_lost_this_turn": []
+                }
+              },
+              "brigade_count": 6,
+              "casualties_inflicted": {
+                "killed": 75,
+                "wounded": 251
+              },
+              "casualties_suffered": {
+                "killed": 78,
+                "wounded": 261
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 1,
+                "tanks": 2
+              },
+              "momentum": 3,
+              "notable_events": [
+                "breakthrough"
+              ],
+              "objectives_captured_this_turn": [
+                "op:foca:izbisno",
+                "op:kalinovik:golubici_2"
+              ],
+              "objectives_lost_this_turn": [],
+              "phase": "execution",
+              "turn": 9
+            },
+            {
+              "attacks_this_turn": 2,
+              "axis_entries": {
+                "cajnice_south": {
+                  "attacks_this_turn": 1,
+                  "casualties_inflicted": {
+                    "killed": 7,
+                    "wounded": 24
+                  },
+                  "casualties_suffered": {
+                    "killed": 69,
+                    "wounded": 232
+                  },
+                  "equipment_captured": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_destroyed": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_lost": {
+                    "artillery": 3,
+                    "tanks": 4
+                  },
+                  "objectives_captured_this_turn": [],
+                  "objectives_lost_this_turn": []
+                },
+                "kalinovik": {
+                  "attacks_this_turn": 1,
+                  "casualties_inflicted": {
+                    "killed": 42,
+                    "wounded": 140
+                  },
+                  "casualties_suffered": {
+                    "killed": 34,
+                    "wounded": 114
+                  },
+                  "equipment_captured": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_destroyed": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_lost": {
+                    "artillery": 1,
+                    "tanks": 0
+                  },
+                  "objectives_captured_this_turn": [],
+                  "objectives_lost_this_turn": []
+                }
+              },
+              "brigade_count": 5,
+              "casualties_inflicted": {
+                "killed": 49,
+                "wounded": 164
+              },
+              "casualties_suffered": {
+                "killed": 103,
+                "wounded": 346
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 4,
+                "tanks": 4
+              },
+              "momentum": 2,
+              "notable_events": [
+                "breakthrough"
+              ],
+              "objectives_captured_this_turn": [
+                "op:kalinovik:sela_2"
+              ],
+              "objectives_lost_this_turn": [],
+              "phase": "execution",
+              "turn": 10
+            },
+            {
+              "attacks_this_turn": 0,
+              "brigade_count": 5,
+              "casualties_inflicted": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "casualties_suffered": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "momentum": 2,
+              "notable_events": [],
+              "objectives_captured_this_turn": [],
+              "objectives_lost_this_turn": [],
+              "phase": "execution",
+              "turn": 11
+            },
+            {
+              "attacks_this_turn": 0,
+              "brigade_count": 5,
+              "casualties_inflicted": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "casualties_suffered": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "momentum": 2,
+              "notable_events": [
+                "breakthrough"
+              ],
+              "objectives_captured_this_turn": [
+                "op:foca:kosman"
+              ],
+              "objectives_lost_this_turn": [],
+              "phase": "execution",
+              "turn": 12
+            },
+            {
+              "attacks_this_turn": 0,
+              "brigade_count": 5,
+              "casualties_inflicted": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "casualties_suffered": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "momentum": 2,
+              "notable_events": [
+                "stalled"
+              ],
+              "objectives_captured_this_turn": [],
+              "objectives_lost_this_turn": [],
+              "phase": "execution",
+              "turn": 13
+            },
+            {
+              "attacks_this_turn": 1,
+              "axis_entries": {
+                "foca_valley": {
+                  "attacks_this_turn": 1,
+                  "casualties_inflicted": {
+                    "killed": 4,
+                    "wounded": 14
+                  },
+                  "casualties_suffered": {
+                    "killed": 5,
+                    "wounded": 17
+                  },
+                  "equipment_captured": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_destroyed": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_lost": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "objectives_captured_this_turn": [],
+                  "objectives_lost_this_turn": []
+                }
+              },
+              "brigade_count": 5,
+              "casualties_inflicted": {
+                "killed": 4,
+                "wounded": 14
+              },
+              "casualties_suffered": {
+                "killed": 5,
+                "wounded": 17
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "momentum": 2,
+              "notable_events": [],
+              "objectives_captured_this_turn": [],
+              "objectives_lost_this_turn": [],
+              "phase": "recovery",
+              "turn": 14
+            },
+            {
+              "attacks_this_turn": 0,
+              "brigade_count": 5,
+              "casualties_inflicted": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "casualties_suffered": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "momentum": 2,
+              "notable_events": [],
+              "objectives_captured_this_turn": [],
+              "objectives_lost_this_turn": [],
+              "phase": "recovery",
+              "turn": 15
+            }
+          ]
+        }
+      },
+      "save_w16": {
+        "turn": 16,
+        "formation": {
+          "id": "rs_ajnie_brigade",
+          "status": "active",
+          "readiness": "active",
+          "personnel": 493,
+          "cohesion": 35,
+          "morale": 56,
+          "fatigue": 7,
+          "location_osid": "op:cajnice:batotici",
+          "posture": "defend",
+          "home_defense_active": true,
+          "last_repulsed_from": {
+            "osid": "op:gorazde:kolovarice",
+            "turn": 10
+          },
+          "brigade_history": {
+            "battles_as_attacker": 3,
+            "battles_as_defender": 0,
+            "battles_fought": 3,
+            "current_defense_streak": 0,
+            "current_victory_streak": 0,
+            "defeats": 1,
+            "engagements": [
+              {
+                "battle_id": "7:op:cajnice:batotici:rs_ajnie_brigade:null",
+                "casualties_inflicted": 65,
+                "casualties_taken": 23,
+                "enemy_faction": "RBiH",
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "osid": "op:cajnice:batotici",
+                "outcome": "decisive_victory",
+                "role": "attacker",
+                "territory_flipped": true,
+                "turn": 7,
+                "was_concentrated": false
+              },
+              {
+                "battle_id": "9:op:gorazde:kolovarice:rs_ajnie_brigade:arbih_801st_light",
+                "casualties_inflicted": 45,
+                "casualties_taken": 98,
+                "enemy_faction": "RBiH",
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 1,
+                  "tanks": 0
+                },
+                "osid": "op:gorazde:kolovarice",
+                "outcome": "stalemate",
+                "role": "attacker",
+                "territory_flipped": false,
+                "turn": 9,
+                "was_concentrated": true
+              },
+              {
+                "battle_id": "10:op:gorazde:kolovarice:rs_ajnie_brigade:arbih_801st_light",
+                "casualties_inflicted": 32,
+                "casualties_taken": 313,
+                "enemy_faction": "RBiH",
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "osid": "op:gorazde:kolovarice",
+                "outcome": "catastrophic",
+                "role": "attacker",
+                "territory_flipped": false,
+                "turn": 10,
+                "was_concentrated": false
+              }
+            ],
+            "first_battle_osid": "op:cajnice:batotici",
+            "first_battle_turn": 7,
+            "longest_defense_streak": 0,
+            "longest_victory_streak": 1,
+            "nadir_personnel": 508,
+            "peak_personnel": 1000,
+            "stalemates": 1,
+            "total_casualties_inflicted": 142,
+            "total_casualties_taken": 504,
+            "total_equipment_captured": {
+              "aa_systems": 0,
+              "artillery": 0,
+              "tanks": 0
+            },
+            "total_equipment_destroyed": {
+              "aa_systems": 0,
+              "artillery": 1,
+              "tanks": 0
+            },
+            "total_osids_captured": 1,
+            "total_osids_lost": 0,
+            "turns_under_siege": 0,
+            "victories": 1,
+            "worst_single_battle_casualties": 313,
+            "worst_single_battle_turn": 10
+          },
+          "battle_outcome_count": 2
+        },
+        "movement_order": "UNREPORTED",
+        "movement_state": "UNREPORTED",
+        "operation": "UNREPORTED"
+      }
+    },
+    {
+      "label": "parent_33f39",
+      "run_path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\runs\\player-parity-postturn-39-20261025-01\\apr1992_definitive_188w__2272e1011ba35428__w39_n0",
+      "temporal_turns_8_16": [
+        {
+          "turn": 8,
+          "week_index": 7,
+          "lifecycle_status": null,
+          "status": "active",
+          "active_op_id": "vrs_herzegovina:Operation Foca:t4",
+          "current_op_phase": "execution",
+          "personnel": 928,
+          "cohesion": 48.449999999999996,
+          "morale": 70,
+          "fatigue": 5,
+          "location_osid": "op:cajnice:batotici",
+          "mv_state": null,
+          "mv_destinations": null,
+          "assigned_sub_segment_id": "subseg:sector:vrs_herzegovina:0:0"
+        },
+        {
+          "turn": 9,
+          "week_index": 8,
+          "lifecycle_status": null,
+          "status": "active",
+          "active_op_id": "vrs_herzegovina:Operation Foca:t4",
+          "current_op_phase": "execution",
+          "personnel": 754,
+          "cohesion": 37.4,
+          "morale": 65,
+          "fatigue": 9.5,
+          "location_osid": "op:cajnice:batotici",
+          "mv_state": null,
+          "mv_destinations": null,
+          "assigned_sub_segment_id": "subseg:sector:vrs_herzegovina:0:0"
+        },
+        {
+          "turn": 10,
+          "week_index": 9,
+          "lifecycle_status": null,
+          "status": "active",
+          "active_op_id": "vrs_herzegovina:Operation Foca:t4",
+          "current_op_phase": "execution",
+          "personnel": 749,
+          "cohesion": 35,
+          "morale": 62,
+          "fatigue": 9,
+          "location_osid": "op:cajnice:batotici",
+          "mv_state": null,
+          "mv_destinations": null,
+          "assigned_sub_segment_id": "subseg:sector:vrs_herzegovina:0:0"
+        },
+        {
+          "turn": 11,
+          "week_index": 10,
+          "lifecycle_status": null,
+          "status": "active",
+          "active_op_id": "vrs_herzegovina:Operation Foca:t4",
+          "current_op_phase": "execution",
+          "personnel": 746,
+          "cohesion": 35,
+          "morale": 62,
+          "fatigue": 9.5,
+          "location_osid": "op:cajnice:batotici",
+          "mv_state": null,
+          "mv_destinations": null,
+          "assigned_sub_segment_id": "subseg:sector:vrs_herzegovina:0:0"
+        },
+        {
+          "turn": 12,
+          "week_index": 11,
+          "lifecycle_status": null,
+          "status": "active",
+          "active_op_id": "vrs_herzegovina:Operation Foca:t4",
+          "current_op_phase": "execution",
+          "personnel": 743,
+          "cohesion": 35,
+          "morale": 65,
+          "fatigue": 9,
+          "location_osid": "op:cajnice:batotici",
+          "mv_state": null,
+          "mv_destinations": null,
+          "assigned_sub_segment_id": "subseg:sector:vrs_herzegovina:0:0"
+        },
+        {
+          "turn": 13,
+          "week_index": 12,
+          "lifecycle_status": null,
+          "status": "active",
+          "active_op_id": "vrs_herzegovina:Operation Foca:t4",
+          "current_op_phase": "execution",
+          "personnel": 740,
+          "cohesion": 35,
+          "morale": 65,
+          "fatigue": 9.5,
+          "location_osid": "op:cajnice:batotici",
+          "mv_state": null,
+          "mv_destinations": null,
+          "assigned_sub_segment_id": "subseg:sector:vrs_herzegovina:0:0"
+        },
+        {
+          "turn": 14,
+          "week_index": 13,
+          "lifecycle_status": null,
+          "status": "active",
+          "active_op_id": "vrs_herzegovina:Operation Foca:t4",
+          "current_op_phase": "recovery",
+          "personnel": 719,
+          "cohesion": 33,
+          "morale": 66,
+          "fatigue": 11.5,
+          "location_osid": "op:gorazde:kolovarice",
+          "mv_state": null,
+          "mv_destinations": null,
+          "assigned_sub_segment_id": "subseg:sector:vrs_herzegovina:0:0"
+        },
+        {
+          "turn": 15,
+          "week_index": 14,
+          "lifecycle_status": null,
+          "status": "active",
+          "active_op_id": "vrs_herzegovina:Operation Foca:t4",
+          "current_op_phase": "recovery",
+          "personnel": 715,
+          "cohesion": 35,
+          "morale": 66,
+          "fatigue": 12,
+          "location_osid": "op:gorazde:kolovarice",
+          "mv_state": null,
+          "mv_destinations": null,
+          "assigned_sub_segment_id": "subseg:sector:vrs_herzegovina:0:0"
+        },
+        {
+          "turn": 16,
+          "week_index": 15,
+          "lifecycle_status": null,
+          "status": "active",
+          "active_op_id": "vrs_herzegovina:probe_vrs_herzegovina_t16:t16",
+          "current_op_phase": "planning",
+          "personnel": 711,
+          "cohesion": 35,
+          "morale": 64,
+          "fatigue": 11.5,
+          "location_osid": "op:gorazde:kolovarice",
+          "mv_state": null,
+          "mv_destinations": null,
+          "assigned_sub_segment_id": "subseg:sector:vrs_herzegovina:0:0"
+        }
+      ],
+      "weekly_turns_8_16": [
+        {
+          "turn": 8,
+          "battles": [],
+          "foca_operation_diagnostics": [
+            {
+              "attack_attempt_count": 2,
+              "attack_order_targets": [
+                {
+                  "battle_count": 1,
+                  "current_objective": false,
+                  "order_count": 1,
+                  "target_osid": "op:foca:miljevina_2"
+                },
+                {
+                  "battle_count": 1,
+                  "current_objective": false,
+                  "order_count": 1,
+                  "target_osid": "op:foca:ustikolina"
+                }
+              ],
+              "battle_count": 2,
+              "corps_id": "vrs_herzegovina",
+              "current_objective": "op:foca:izbisno",
+              "current_objective_attack_count": 0,
+              "current_objective_battle_count": 0,
+              "current_objectives": [
+                "op:foca:izbisno",
+                "op:gorazde:kolovarice",
+                "op:kalinovik:golubici_2"
+              ],
+              "eligible_attacker_count": 2,
+              "faction_id": "RS",
+              "idle_execution_turn_streak": 0,
+              "invalid_for_combat_calibration": false,
+              "invalidation_reasons": [],
+              "movement_only_execution_turns": 0,
+              "movement_order_count": 3,
+              "objective_attempt_count": 6,
+              "objective_capture_count": 6,
+              "operation_name": "Operation Foca",
+              "operation_phase": "execution",
+              "operation_type": "sector_attack",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "rs_bilea_brigade",
+                  "location_osid": "op:foca:miljevina_2",
+                  "resolver_seen_target_osid": "op:foca:miljevina_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:foca:miljevina_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "rs_foa_brigade",
+                  "location_osid": "op:foca:ustikolina",
+                  "resolver_seen_target_osid": "op:foca:ustikolina",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:foca:ustikolina"
+                }
+              ],
+              "participating_brigades": [
+                "jna_kalinovik_to_tg",
+                "rs_ajnie_brigade",
+                "rs_bilea_brigade",
+                "rs_foa_brigade",
+                "rs_gacko_brigade",
+                "rs_kalinovik_brigade"
+              ],
+              "recovery_reason": null,
+              "skipped_attack_orders": []
+            }
+          ],
+          "ajnie_movement_mentions": "UNREPORTED"
+        },
+        {
+          "turn": 9,
+          "battles": [
+            {
+              "attacker_brigade": "rs_ajnie_brigade",
+              "attacker_brigades": [
+                "rs_ajnie_brigade",
+                "rs_foa_brigade"
+              ],
+              "attacker_casualties": 328,
+              "attacker_faction": "RS",
+              "attacker_won": false,
+              "battle_id": "9:op:gorazde:kolovarice:rs_ajnie_brigade:arbih_801st_light",
+              "defender_brigade": "arbih_801st_light",
+              "defender_casualties": 62,
+              "defender_faction": "RBiH",
+              "equipment": {
+                "attacker_artillery_lost": 2,
+                "attacker_tanks_lost": 0,
+                "captured_artillery": 0,
+                "captured_by": "RBiH",
+                "captured_tanks": 0,
+                "defender_artillery_lost": 1,
+                "defender_tanks_lost": 0,
+                "scavenged_artillery": 0,
+                "scavenged_tanks": 0
+              },
+              "execution_friction": {
+                "attacker_confidence_band": "low",
+                "labels": [
+                  "stale_intel"
+                ]
+              },
+              "operation_id": "vrs_herzegovina:Operation Foca:t4",
+              "operation_name": "Operation Foca",
+              "outcome": "repulsed",
+              "power_ratio": 0.69,
+              "target_osid": "op:gorazde:kolovarice"
+            }
+          ],
+          "foca_operation_diagnostics": [
+            {
+              "attack_attempt_count": 5,
+              "attack_order_targets": [
+                {
+                  "battle_count": 1,
+                  "current_objective": false,
+                  "order_count": 1,
+                  "target_osid": "op:foca:izbisno"
+                },
+                {
+                  "battle_count": 1,
+                  "current_objective": true,
+                  "order_count": 2,
+                  "target_osid": "op:gorazde:kolovarice"
+                },
+                {
+                  "battle_count": 1,
+                  "current_objective": false,
+                  "order_count": 2,
+                  "target_osid": "op:kalinovik:golubici_2"
+                }
+              ],
+              "battle_count": 3,
+              "corps_id": "vrs_herzegovina",
+              "current_objective": "op:foca:kosman",
+              "current_objective_attack_count": 2,
+              "current_objective_battle_count": 0,
+              "current_objectives": [
+                "op:foca:kosman",
+                "op:gorazde:kolovarice",
+                "op:kalinovik:sela_2"
+              ],
+              "eligible_attacker_count": 5,
+              "faction_id": "RS",
+              "idle_execution_turn_streak": 0,
+              "invalid_for_combat_calibration": false,
+              "invalidation_reasons": [],
+              "movement_only_execution_turns": 0,
+              "movement_order_count": 1,
+              "objective_attempt_count": 9,
+              "objective_capture_count": 8,
+              "operation_name": "Operation Foca",
+              "operation_phase": "execution",
+              "operation_type": "sector_attack",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "rs_ajnie_brigade",
+                  "location_osid": "op:cajnice:batotici",
+                  "resolver_seen_target_osid": "op:gorazde:kolovarice",
+                  "target_is_current_objective": true,
+                  "target_osid": "op:gorazde:kolovarice"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "rs_bilea_brigade",
+                  "location_osid": "op:foca:izbisno",
+                  "resolver_seen_target_osid": "op:foca:izbisno",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:foca:izbisno"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "rs_foa_brigade",
+                  "location_osid": "op:foca:ustikolina",
+                  "resolver_seen_target_osid": "op:gorazde:kolovarice",
+                  "target_is_current_objective": true,
+                  "target_osid": "op:gorazde:kolovarice"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "rs_gacko_brigade",
+                  "location_osid": "op:kalinovik:golubici_2",
+                  "resolver_seen_target_osid": "op:kalinovik:golubici_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:kalinovik:golubici_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "rs_kalinovik_brigade",
+                  "location_osid": "op:kalinovik:obalj",
+                  "resolver_seen_target_osid": "op:kalinovik:golubici_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:kalinovik:golubici_2"
+                }
+              ],
+              "participating_brigades": [
+                "jna_kalinovik_to_tg",
+                "rs_ajnie_brigade",
+                "rs_bilea_brigade",
+                "rs_foa_brigade",
+                "rs_gacko_brigade",
+                "rs_kalinovik_brigade"
+              ],
+              "recovery_reason": null,
+              "skipped_attack_orders": []
+            }
+          ],
+          "ajnie_movement_mentions": "UNREPORTED"
+        },
+        {
+          "turn": 10,
+          "battles": [],
+          "foca_operation_diagnostics": [
+            {
+              "attack_attempt_count": 2,
+              "attack_order_targets": [
+                {
+                  "battle_count": 1,
+                  "current_objective": false,
+                  "order_count": 2,
+                  "target_osid": "op:kalinovik:sela_2"
+                }
+              ],
+              "battle_count": 1,
+              "corps_id": "vrs_herzegovina",
+              "current_objective": "op:foca:kosman",
+              "current_objective_attack_count": 0,
+              "current_objective_battle_count": 0,
+              "current_objectives": [
+                "op:foca:kosman",
+                "op:gorazde:kolovarice"
+              ],
+              "eligible_attacker_count": 2,
+              "faction_id": "RS",
+              "idle_execution_turn_streak": 0,
+              "invalid_for_combat_calibration": false,
+              "invalidation_reasons": [],
+              "movement_only_execution_turns": 0,
+              "movement_order_count": 1,
+              "objective_attempt_count": 10,
+              "objective_capture_count": 9,
+              "operation_name": "Operation Foca",
+              "operation_phase": "execution",
+              "operation_type": "sector_attack",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "rs_gacko_brigade",
+                  "location_osid": "op:kalinovik:sela_2",
+                  "resolver_seen_target_osid": "op:kalinovik:sela_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:kalinovik:sela_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "rs_kalinovik_brigade",
+                  "location_osid": "op:kalinovik:obalj",
+                  "resolver_seen_target_osid": "op:kalinovik:sela_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:kalinovik:sela_2"
+                }
+              ],
+              "participating_brigades": [
+                "rs_ajnie_brigade",
+                "rs_bilea_brigade",
+                "rs_foa_brigade",
+                "rs_gacko_brigade",
+                "rs_kalinovik_brigade"
+              ],
+              "recovery_reason": null,
+              "skipped_attack_orders": []
+            }
+          ],
+          "ajnie_movement_mentions": "UNREPORTED"
+        },
+        {
+          "turn": 11,
+          "battles": [],
+          "foca_operation_diagnostics": [
+            {
+              "attack_attempt_count": 0,
+              "attack_order_targets": [],
+              "battle_count": 0,
+              "corps_id": "vrs_herzegovina",
+              "current_objective": "op:foca:kosman",
+              "current_objective_attack_count": 0,
+              "current_objective_battle_count": 0,
+              "current_objectives": [
+                "op:foca:kosman",
+                "op:gorazde:kolovarice"
+              ],
+              "eligible_attacker_count": 0,
+              "faction_id": "RS",
+              "idle_execution_turn_streak": 0,
+              "invalid_for_combat_calibration": false,
+              "invalidation_reasons": [],
+              "movement_only_execution_turns": 0,
+              "movement_order_count": 1,
+              "objective_attempt_count": 10,
+              "objective_capture_count": 9,
+              "operation_name": "Operation Foca",
+              "operation_phase": "execution",
+              "operation_type": "sector_attack",
+              "participant_attack_orders": [],
+              "participating_brigades": [
+                "rs_ajnie_brigade",
+                "rs_bilea_brigade",
+                "rs_foa_brigade",
+                "rs_gacko_brigade",
+                "rs_kalinovik_brigade"
+              ],
+              "recovery_reason": null,
+              "skipped_attack_orders": []
+            }
+          ],
+          "ajnie_movement_mentions": "UNREPORTED"
+        },
+        {
+          "turn": 12,
+          "battles": [],
+          "foca_operation_diagnostics": [
+            {
+              "attack_attempt_count": 0,
+              "attack_order_targets": [],
+              "battle_count": 0,
+              "corps_id": "vrs_herzegovina",
+              "current_objective": "op:gorazde:kolovarice",
+              "current_objective_attack_count": 0,
+              "current_objective_battle_count": 0,
+              "current_objectives": [
+                "op:gorazde:kolovarice"
+              ],
+              "eligible_attacker_count": 0,
+              "faction_id": "RS",
+              "idle_execution_turn_streak": 0,
+              "invalid_for_combat_calibration": false,
+              "invalidation_reasons": [],
+              "movement_only_execution_turns": 0,
+              "movement_order_count": 0,
+              "objective_attempt_count": 11,
+              "objective_capture_count": 10,
+              "operation_name": "Operation Foca",
+              "operation_phase": "execution",
+              "operation_type": "sector_attack",
+              "participant_attack_orders": [],
+              "participating_brigades": [
+                "rs_ajnie_brigade",
+                "rs_bilea_brigade",
+                "rs_foa_brigade",
+                "rs_gacko_brigade",
+                "rs_kalinovik_brigade"
+              ],
+              "recovery_reason": null,
+              "skipped_attack_orders": []
+            }
+          ],
+          "ajnie_movement_mentions": "UNREPORTED"
+        },
+        {
+          "turn": 13,
+          "battles": [],
+          "foca_operation_diagnostics": [
+            {
+              "attack_attempt_count": 0,
+              "attack_order_targets": [],
+              "battle_count": 0,
+              "corps_id": "vrs_herzegovina",
+              "current_objective": "op:gorazde:kolovarice",
+              "current_objective_attack_count": 0,
+              "current_objective_battle_count": 0,
+              "current_objectives": [
+                "op:gorazde:kolovarice"
+              ],
+              "eligible_attacker_count": 0,
+              "faction_id": "RS",
+              "idle_execution_turn_streak": 0,
+              "invalid_for_combat_calibration": false,
+              "invalidation_reasons": [],
+              "movement_only_execution_turns": 0,
+              "movement_order_count": 0,
+              "objective_attempt_count": 11,
+              "objective_capture_count": 10,
+              "operation_name": "Operation Foca",
+              "operation_phase": "execution",
+              "operation_type": "sector_attack",
+              "participant_attack_orders": [],
+              "participating_brigades": [
+                "rs_ajnie_brigade",
+                "rs_bilea_brigade",
+                "rs_foa_brigade",
+                "rs_gacko_brigade",
+                "rs_kalinovik_brigade"
+              ],
+              "recovery_reason": null,
+              "skipped_attack_orders": []
+            }
+          ],
+          "ajnie_movement_mentions": "UNREPORTED"
+        },
+        {
+          "turn": 14,
+          "battles": [
+            {
+              "attacker_brigade": "rs_ajnie_brigade",
+              "attacker_brigades": [
+                "rs_ajnie_brigade",
+                "rs_foa_brigade"
+              ],
+              "attacker_casualties": 42,
+              "attacker_faction": "RS",
+              "attacker_won": true,
+              "battle_id": "14:op:gorazde:kolovarice:rs_ajnie_brigade:null",
+              "defender_brigade": null,
+              "defender_casualties": 50,
+              "defender_faction": "RBiH",
+              "defender_kind": "militia",
+              "defender_militia_pool_key": "gorazde:RBiH",
+              "equipment": {
+                "attacker_artillery_lost": 2,
+                "attacker_tanks_lost": 0,
+                "captured_artillery": 0,
+                "captured_tanks": 0,
+                "defender_artillery_lost": 0,
+                "defender_tanks_lost": 0,
+                "scavenged_artillery": 0,
+                "scavenged_tanks": 0
+              },
+              "execution_friction": {
+                "attacker_confidence_band": "low",
+                "labels": [
+                  "stale_intel"
+                ]
+              },
+              "operation_id": "vrs_herzegovina:Operation Foca:t4",
+              "operation_name": "Operation Foca",
+              "outcome": "victory",
+              "power_ratio": 1.56,
+              "target_osid": "op:gorazde:kolovarice"
+            }
+          ],
+          "foca_operation_diagnostics": [
+            {
+              "attack_attempt_count": 2,
+              "attack_order_targets": [
+                {
+                  "battle_count": 1,
+                  "current_objective": false,
+                  "order_count": 2,
+                  "target_osid": "op:gorazde:kolovarice"
+                }
+              ],
+              "battle_count": 1,
+              "corps_id": "vrs_herzegovina",
+              "current_objective": null,
+              "current_objective_attack_count": 0,
+              "current_objective_battle_count": 0,
+              "current_objectives": [],
+              "eligible_attacker_count": 2,
+              "faction_id": "RS",
+              "idle_execution_turn_streak": 0,
+              "invalid_for_combat_calibration": false,
+              "invalidation_reasons": [],
+              "movement_only_execution_turns": 0,
+              "movement_order_count": 0,
+              "objective_attempt_count": 13,
+              "objective_capture_count": 12,
+              "operation_name": "Operation Foca",
+              "operation_phase": "recovery",
+              "operation_type": "sector_attack",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "rs_ajnie_brigade",
+                  "location_osid": "op:gorazde:kolovarice",
+                  "resolver_seen_target_osid": "op:gorazde:kolovarice",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:gorazde:kolovarice"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "rs_foa_brigade",
+                  "location_osid": "op:foca:ustikolina",
+                  "resolver_seen_target_osid": "op:gorazde:kolovarice",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:gorazde:kolovarice"
+                }
+              ],
+              "participating_brigades": [
+                "rs_ajnie_brigade",
+                "rs_bilea_brigade",
+                "rs_foa_brigade",
+                "rs_gacko_brigade",
+                "rs_kalinovik_brigade"
+              ],
+              "recovery_reason": "completed",
+              "skipped_attack_orders": []
+            }
+          ],
+          "ajnie_movement_mentions": "UNREPORTED"
+        },
+        {
+          "turn": 15,
+          "battles": [],
+          "foca_operation_diagnostics": [
+            {
+              "attack_attempt_count": 0,
+              "attack_order_targets": [],
+              "battle_count": 0,
+              "corps_id": "vrs_herzegovina",
+              "current_objective": null,
+              "current_objective_attack_count": 0,
+              "current_objective_battle_count": 0,
+              "current_objectives": [],
+              "eligible_attacker_count": 0,
+              "faction_id": "RS",
+              "idle_execution_turn_streak": 0,
+              "invalid_for_combat_calibration": false,
+              "invalidation_reasons": [],
+              "movement_only_execution_turns": 0,
+              "movement_order_count": 0,
+              "objective_attempt_count": 13,
+              "objective_capture_count": 12,
+              "operation_name": "Operation Foca",
+              "operation_phase": "recovery",
+              "operation_type": "sector_attack",
+              "participant_attack_orders": [],
+              "participating_brigades": [
+                "rs_ajnie_brigade",
+                "rs_bilea_brigade",
+                "rs_foa_brigade",
+                "rs_gacko_brigade",
+                "rs_kalinovik_brigade"
+              ],
+              "recovery_reason": "completed",
+              "skipped_attack_orders": []
+            }
+          ],
+          "ajnie_movement_mentions": "UNREPORTED"
+        }
+      ],
+      "foca_aar": {
+        "axis_summaries": [
+          {
+            "axis_id": "foca_valley",
+            "axis_name": "Foca Valley",
+            "brigades": [
+              "rs_foa_brigade"
+            ],
+            "casualties_inflicted": {
+              "killed": 12,
+              "wounded": 39
+            },
+            "casualties_suffered": {
+              "killed": 17,
+              "wounded": 55
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "objectives_captured": [
+              "op:foca:patkovina",
+              "op:foca:ustikolina",
+              "op:gorazde:kolovarice"
+            ],
+            "objectives_targeted": [
+              "op:foca:patkovina",
+              "op:foca:ustikolina",
+              "op:gorazde:kolovarice"
+            ],
+            "staging_osid": "op:foca:foca_3",
+            "total_attacks": 3
+          },
+          {
+            "axis_id": "foca_south",
+            "axis_name": "Foča Southern Mop-Up",
+            "brigades": [
+              "rs_bilea_brigade"
+            ],
+            "casualties_inflicted": {
+              "killed": 68,
+              "wounded": 230
+            },
+            "casualties_suffered": {
+              "killed": 43,
+              "wounded": 144
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "objectives_captured": [
+              "op:foca:tjentiste_2",
+              "op:foca:miljevina_2",
+              "op:foca:izbisno"
+            ],
+            "objectives_targeted": [
+              "op:foca:tjentiste_2",
+              "op:foca:miljevina_2",
+              "op:foca:izbisno",
+              "op:foca:kosman"
+            ],
+            "staging_osid": "op:gacko:izgori",
+            "total_attacks": 4
+          },
+          {
+            "axis_id": "cajnice_south",
+            "axis_name": "Čajniče Southern Approach",
+            "brigades": [
+              "rs_ajnie_brigade"
+            ],
+            "casualties_inflicted": {
+              "killed": 39,
+              "wounded": 131
+            },
+            "casualties_suffered": {
+              "killed": 86,
+              "wounded": 291
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 2,
+              "tanks": 3
+            },
+            "objectives_captured": [
+              "op:cajnice:batotici",
+              "op:foca:brusna_2",
+              "op:gorazde:kolovarice"
+            ],
+            "objectives_targeted": [
+              "op:cajnice:batotici",
+              "op:foca:brusna_2",
+              "op:gorazde:kolovarice"
+            ],
+            "staging_osid": "op:cajnice:cajnice_2",
+            "total_attacks": 4
+          },
+          {
+            "axis_id": "kalinovik",
+            "axis_name": "Kalinovik",
+            "brigades": [
+              "rs_gacko_brigade",
+              "rs_kalinovik_brigade"
+            ],
+            "casualties_inflicted": {
+              "killed": 63,
+              "wounded": 212
+            },
+            "casualties_suffered": {
+              "killed": 42,
+              "wounded": 142
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 1,
+              "tanks": 0
+            },
+            "launch_blocker": "zero_eligible_axis",
+            "objectives_captured": [
+              "op:kalinovik:golubici_2",
+              "op:kalinovik:sela_2"
+            ],
+            "objectives_targeted": [
+              "op:kalinovik:golubici_2",
+              "op:kalinovik:sela_2"
+            ],
+            "staging_osid": "op:kalinovik:kalinovik_2",
+            "total_attacks": 2
+          }
+        ],
+        "capture_provenance": "logged_capture",
+        "casualties_inflicted": {
+          "killed": 182,
+          "wounded": 612
+        },
+        "casualties_suffered": {
+          "killed": 188,
+          "wounded": 632
+        },
+        "commander_name": "Novica Gušić",
+        "commander_officer_id": "vrs_gusic_n",
+        "commander_rank": "corps_commander",
+        "corps_id": "vrs_herzegovina",
+        "duration_turns": 12,
+        "ended_turn": 16,
+        "equipment_captured": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "equipment_destroyed": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "equipment_lost": {
+          "artillery": 3,
+          "tanks": 3
+        },
+        "faction": "RS",
+        "final_strength": 4996,
+        "grade": {
+          "factors": {
+            "exchange_ratio": 31.953658536585365,
+            "objective_completion": 90.9090909090909,
+            "preservation": 75.54816270981401,
+            "tempo": 75
+          },
+          "stars": 5,
+          "verdict": "Brilliant Victory"
+        },
+        "initial_strength": 6613,
+        "objectives_captured": [
+          "op:foca:patkovina",
+          "op:foca:ustikolina",
+          "op:gorazde:kolovarice",
+          "op:foca:tjentiste_2",
+          "op:foca:miljevina_2",
+          "op:foca:izbisno",
+          "op:cajnice:batotici",
+          "op:foca:brusna_2",
+          "op:kalinovik:golubici_2",
+          "op:kalinovik:sela_2"
+        ],
+        "objectives_held_without_logged_capture": [],
+        "objectives_logged_captured": [
+          "op:foca:patkovina",
+          "op:foca:ustikolina",
+          "op:gorazde:kolovarice",
+          "op:foca:tjentiste_2",
+          "op:foca:miljevina_2",
+          "op:foca:izbisno",
+          "op:foca:kosman",
+          "op:cajnice:batotici",
+          "op:foca:brusna_2",
+          "op:kalinovik:golubici_2",
+          "op:kalinovik:sela_2"
+        ],
+        "objectives_targeted": [
+          "op:foca:patkovina",
+          "op:foca:ustikolina",
+          "op:gorazde:kolovarice",
+          "op:foca:tjentiste_2",
+          "op:foca:miljevina_2",
+          "op:foca:izbisno",
+          "op:foca:kosman",
+          "op:cajnice:batotici",
+          "op:foca:brusna_2",
+          "op:kalinovik:golubici_2",
+          "op:kalinovik:sela_2"
+        ],
+        "operation_id": "vrs_herzegovina:Operation Foca:t4",
+        "operation_name": "Operation Foca",
+        "outcome": "partial",
+        "participating_brigades": [
+          "rs_ajnie_brigade",
+          "rs_bilea_brigade",
+          "rs_foa_brigade",
+          "rs_gacko_brigade",
+          "rs_kalinovik_brigade"
+        ],
+        "recovery_reason": "completed",
+        "started_turn": 4,
+        "total_attacks": 13,
+        "type": "sector_attack",
+        "weekly_log": [
+          {
+            "attacks_this_turn": 0,
+            "brigade_count": 6,
+            "casualties_inflicted": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "casualties_suffered": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 0,
+            "notable_events": [],
+            "objectives_captured_this_turn": [],
+            "objectives_lost_this_turn": [],
+            "phase": "planning",
+            "turn": 4
+          },
+          {
+            "attacks_this_turn": 0,
+            "brigade_count": 6,
+            "casualties_inflicted": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "casualties_suffered": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 0,
+            "notable_events": [],
+            "objectives_captured_this_turn": [],
+            "objectives_lost_this_turn": [],
+            "phase": "planning",
+            "turn": 5
+          },
+          {
+            "attacks_this_turn": 0,
+            "brigade_count": 6,
+            "casualties_inflicted": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "casualties_suffered": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 0,
+            "notable_events": [],
+            "objectives_captured_this_turn": [],
+            "objectives_lost_this_turn": [],
+            "phase": "planning",
+            "turn": 6
+          },
+          {
+            "attacks_this_turn": 3,
+            "axis_entries": {
+              "cajnice_south": {
+                "attacks_this_turn": 1,
+                "casualties_inflicted": {
+                  "killed": 14,
+                  "wounded": 48
+                },
+                "casualties_suffered": {
+                  "killed": 5,
+                  "wounded": 17
+                },
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_lost": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "objectives_captured_this_turn": [],
+                "objectives_lost_this_turn": []
+              },
+              "foca_south": {
+                "attacks_this_turn": 1,
+                "casualties_inflicted": {
+                  "killed": 18,
+                  "wounded": 62
+                },
+                "casualties_suffered": {
+                  "killed": 8,
+                  "wounded": 26
+                },
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_lost": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "objectives_captured_this_turn": [],
+                "objectives_lost_this_turn": []
+              },
+              "foca_valley": {
+                "attacks_this_turn": 1,
+                "casualties_inflicted": {
+                  "killed": 6,
+                  "wounded": 19
+                },
+                "casualties_suffered": {
+                  "killed": 9,
+                  "wounded": 29
+                },
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_lost": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "objectives_captured_this_turn": [],
+                "objectives_lost_this_turn": []
+              }
+            },
+            "brigade_count": 6,
+            "casualties_inflicted": {
+              "killed": 38,
+              "wounded": 129
+            },
+            "casualties_suffered": {
+              "killed": 22,
+              "wounded": 72
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 1,
+            "notable_events": [
+              "first_blood",
+              "breakthrough"
+            ],
+            "objectives_captured_this_turn": [
+              "op:foca:patkovina",
+              "op:foca:tjentiste_2",
+              "op:cajnice:batotici"
+            ],
+            "objectives_lost_this_turn": [],
+            "phase": "execution",
+            "turn": 7
+          },
+          {
+            "attacks_this_turn": 2,
+            "axis_entries": {
+              "foca_south": {
+                "attacks_this_turn": 1,
+                "casualties_inflicted": {
+                  "killed": 18,
+                  "wounded": 59
+                },
+                "casualties_suffered": {
+                  "killed": 8,
+                  "wounded": 27
+                },
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_lost": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "objectives_captured_this_turn": [],
+                "objectives_lost_this_turn": []
+              },
+              "foca_valley": {
+                "attacks_this_turn": 1,
+                "casualties_inflicted": {
+                  "killed": 6,
+                  "wounded": 20
+                },
+                "casualties_suffered": {
+                  "killed": 8,
+                  "wounded": 26
+                },
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_lost": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "objectives_captured_this_turn": [],
+                "objectives_lost_this_turn": []
+              }
+            },
+            "brigade_count": 6,
+            "casualties_inflicted": {
+              "killed": 24,
+              "wounded": 79
+            },
+            "casualties_suffered": {
+              "killed": 16,
+              "wounded": 53
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 2,
+            "notable_events": [
+              "breakthrough"
+            ],
+            "objectives_captured_this_turn": [
+              "op:foca:ustikolina",
+              "op:foca:miljevina_2",
+              "op:foca:brusna_2"
+            ],
+            "objectives_lost_this_turn": [],
+            "phase": "execution",
+            "turn": 8
+          },
+          {
+            "attacks_this_turn": 3,
+            "axis_entries": {
+              "cajnice_south": {
+                "attacks_this_turn": 1,
+                "casualties_inflicted": {
+                  "killed": 14,
+                  "wounded": 46
+                },
+                "casualties_suffered": {
+                  "killed": 72,
+                  "wounded": 243
+                },
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_lost": {
+                  "artillery": 2,
+                  "tanks": 3
+                },
+                "objectives_captured_this_turn": [],
+                "objectives_lost_this_turn": []
+              },
+              "foca_south": {
+                "attacks_this_turn": 1,
+                "casualties_inflicted": {
+                  "killed": 32,
+                  "wounded": 109
+                },
+                "casualties_suffered": {
+                  "killed": 27,
+                  "wounded": 91
+                },
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_lost": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "objectives_captured_this_turn": [],
+                "objectives_lost_this_turn": []
+              },
+              "kalinovik": {
+                "attacks_this_turn": 1,
+                "casualties_inflicted": {
+                  "killed": 22,
+                  "wounded": 73
+                },
+                "casualties_suffered": {
+                  "killed": 8,
+                  "wounded": 27
+                },
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_lost": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "objectives_captured_this_turn": [],
+                "objectives_lost_this_turn": []
+              }
+            },
+            "brigade_count": 6,
+            "casualties_inflicted": {
+              "killed": 68,
+              "wounded": 228
+            },
+            "casualties_suffered": {
+              "killed": 107,
+              "wounded": 361
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 2,
+              "tanks": 3
+            },
+            "momentum": 3,
+            "notable_events": [
+              "breakthrough"
+            ],
+            "objectives_captured_this_turn": [
+              "op:foca:izbisno",
+              "op:kalinovik:golubici_2"
+            ],
+            "objectives_lost_this_turn": [],
+            "phase": "execution",
+            "turn": 9
+          },
+          {
+            "attacks_this_turn": 1,
+            "axis_entries": {
+              "kalinovik": {
+                "attacks_this_turn": 1,
+                "casualties_inflicted": {
+                  "killed": 41,
+                  "wounded": 139
+                },
+                "casualties_suffered": {
+                  "killed": 34,
+                  "wounded": 115
+                },
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_lost": {
+                  "artillery": 1,
+                  "tanks": 0
+                },
+                "objectives_captured_this_turn": [],
+                "objectives_lost_this_turn": []
+              }
+            },
+            "brigade_count": 5,
+            "casualties_inflicted": {
+              "killed": 41,
+              "wounded": 139
+            },
+            "casualties_suffered": {
+              "killed": 34,
+              "wounded": 115
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 1,
+              "tanks": 0
+            },
+            "momentum": 2,
+            "notable_events": [
+              "breakthrough"
+            ],
+            "objectives_captured_this_turn": [
+              "op:kalinovik:sela_2"
+            ],
+            "objectives_lost_this_turn": [],
+            "phase": "execution",
+            "turn": 10
+          },
+          {
+            "attacks_this_turn": 0,
+            "brigade_count": 5,
+            "casualties_inflicted": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "casualties_suffered": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 2,
+            "notable_events": [],
+            "objectives_captured_this_turn": [],
+            "objectives_lost_this_turn": [],
+            "phase": "execution",
+            "turn": 11
+          },
+          {
+            "attacks_this_turn": 0,
+            "brigade_count": 5,
+            "casualties_inflicted": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "casualties_suffered": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 2,
+            "notable_events": [
+              "breakthrough"
+            ],
+            "objectives_captured_this_turn": [
+              "op:foca:kosman"
+            ],
+            "objectives_lost_this_turn": [],
+            "phase": "execution",
+            "turn": 12
+          },
+          {
+            "attacks_this_turn": 0,
+            "brigade_count": 5,
+            "casualties_inflicted": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "casualties_suffered": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 2,
+            "notable_events": [
+              "stalled"
+            ],
+            "objectives_captured_this_turn": [],
+            "objectives_lost_this_turn": [],
+            "phase": "execution",
+            "turn": 13
+          },
+          {
+            "attacks_this_turn": 1,
+            "axis_entries": {
+              "cajnice_south": {
+                "attacks_this_turn": 1,
+                "casualties_inflicted": {
+                  "killed": 11,
+                  "wounded": 37
+                },
+                "casualties_suffered": {
+                  "killed": 9,
+                  "wounded": 31
+                },
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_lost": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "objectives_captured_this_turn": [],
+                "objectives_lost_this_turn": []
+              }
+            },
+            "brigade_count": 5,
+            "casualties_inflicted": {
+              "killed": 11,
+              "wounded": 37
+            },
+            "casualties_suffered": {
+              "killed": 9,
+              "wounded": 31
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 2,
+            "notable_events": [
+              "breakthrough"
+            ],
+            "objectives_captured_this_turn": [
+              "op:gorazde:kolovarice"
+            ],
+            "objectives_lost_this_turn": [],
+            "phase": "recovery",
+            "turn": 14
+          },
+          {
+            "attacks_this_turn": 0,
+            "brigade_count": 5,
+            "casualties_inflicted": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "casualties_suffered": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 2,
+            "notable_events": [],
+            "objectives_captured_this_turn": [],
+            "objectives_lost_this_turn": [],
+            "phase": "recovery",
+            "turn": 15
+          }
+        ]
+      },
+      "watched_foca": "UNREPORTED",
+      "save_w15": {
+        "turn": 15,
+        "formation": {
+          "id": "rs_ajnie_brigade",
+          "status": "active",
+          "readiness": "active",
+          "personnel": 715,
+          "cohesion": 35,
+          "morale": 66,
+          "fatigue": 12,
+          "location_osid": "op:gorazde:kolovarice",
+          "posture": "defend",
+          "home_defense_active": false,
+          "last_repulsed_from": {
+            "osid": "op:gorazde:kolovarice",
+            "turn": 9
+          },
+          "brigade_history": {
+            "battles_as_attacker": 3,
+            "battles_as_defender": 0,
+            "battles_fought": 3,
+            "current_defense_streak": 0,
+            "current_victory_streak": 1,
+            "defeats": 1,
+            "engagements": [
+              {
+                "battle_id": "7:op:cajnice:batotici:rs_ajnie_brigade:null",
+                "casualties_inflicted": 65,
+                "casualties_taken": 23,
+                "enemy_faction": "RBiH",
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "osid": "op:cajnice:batotici",
+                "outcome": "decisive_victory",
+                "role": "attacker",
+                "territory_flipped": true,
+                "turn": 7,
+                "was_concentrated": false
+              },
+              {
+                "battle_id": "9:op:gorazde:kolovarice:rs_ajnie_brigade:arbih_801st_light",
+                "casualties_inflicted": 31,
+                "casualties_taken": 164,
+                "enemy_faction": "RBiH",
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 1,
+                  "tanks": 0
+                },
+                "osid": "op:gorazde:kolovarice",
+                "outcome": "repulsed",
+                "role": "attacker",
+                "territory_flipped": false,
+                "turn": 9,
+                "was_concentrated": true
+              },
+              {
+                "battle_id": "14:op:gorazde:kolovarice:rs_ajnie_brigade:null",
+                "casualties_inflicted": 25,
+                "casualties_taken": 21,
+                "enemy_faction": "RBiH",
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "osid": "op:gorazde:kolovarice",
+                "outcome": "victory",
+                "role": "attacker",
+                "territory_flipped": true,
+                "turn": 14,
+                "was_concentrated": true
+              }
+            ],
+            "first_battle_osid": "op:cajnice:batotici",
+            "first_battle_turn": 7,
+            "longest_defense_streak": 0,
+            "longest_victory_streak": 1,
+            "nadir_personnel": 719,
+            "peak_personnel": 1000,
+            "stalemates": 0,
+            "total_casualties_inflicted": 121,
+            "total_casualties_taken": 280,
+            "total_equipment_captured": {
+              "aa_systems": 0,
+              "artillery": 0,
+              "tanks": 0
+            },
+            "total_equipment_destroyed": {
+              "aa_systems": 0,
+              "artillery": 1,
+              "tanks": 0
+            },
+            "total_osids_captured": 2,
+            "total_osids_lost": 0,
+            "turns_under_siege": 0,
+            "victories": 2,
+            "worst_single_battle_casualties": 164,
+            "worst_single_battle_turn": 9
+          },
+          "battle_outcome_count": 3
+        },
+        "movement_order": "UNREPORTED",
+        "movement_state": "UNREPORTED",
+        "operation": {
+          "name": "Operation Foca",
+          "phase": "recovery",
+          "phase_started_turn": 14,
+          "participating_brigades": [
+            "rs_ajnie_brigade",
+            "rs_bilea_brigade",
+            "rs_foa_brigade",
+            "rs_gacko_brigade",
+            "rs_kalinovik_brigade"
+          ],
+          "axes": [
+            {
+              "assigned_brigades": [
+                "rs_foa_brigade"
+              ],
+              "attack_attempt_count": 3,
+              "axis_id": "foca_valley",
+              "battles_this_turn": 0,
+              "consecutive_catastrophic_on_current": 0,
+              "consecutive_failures_on_current": 0,
+              "current_objective_index": 3,
+              "failure_count": 4,
+              "idle_execution_turn_streak": 0,
+              "last_result": "captured",
+              "main_brigade": "rs_foa_brigade",
+              "momentum": 1,
+              "movement_only_execution_turns": 0,
+              "name": "Foca Valley",
+              "objective_battles_this_turn": 0,
+              "objective_capture_count": 3,
+              "objectives": [
+                "op:foca:patkovina",
+                "op:foca:ustikolina",
+                "op:gorazde:kolovarice"
+              ],
+              "shared_objective_wait_turns": 0,
+              "staging_osid": "op:foca:foca_3",
+              "status": "complete",
+              "total_battles": 2
+            },
+            {
+              "assigned_brigades": [
+                "rs_bilea_brigade"
+              ],
+              "attack_attempt_count": 4,
+              "axis_id": "foca_south",
+              "battles_this_turn": 0,
+              "consecutive_catastrophic_on_current": 0,
+              "consecutive_failures_on_current": 0,
+              "current_objective_index": 4,
+              "failure_count": 0,
+              "idle_execution_turn_streak": 0,
+              "last_result": "captured",
+              "main_brigade": "rs_bilea_brigade",
+              "momentum": 1,
+              "movement_only_execution_turns": 0,
+              "name": "Foča Southern Mop-Up",
+              "objective_battles_this_turn": 0,
+              "objective_capture_count": 4,
+              "objectives": [
+                "op:foca:tjentiste_2",
+                "op:foca:miljevina_2",
+                "op:foca:izbisno",
+                "op:foca:kosman"
+              ],
+              "shared_objective_wait_turns": 0,
+              "staging_osid": "op:gacko:izgori",
+              "status": "complete",
+              "total_battles": 3
+            },
+            {
+              "assigned_brigades": [
+                "rs_ajnie_brigade"
+              ],
+              "attack_attempt_count": 4,
+              "axis_id": "cajnice_south",
+              "battles_this_turn": 0,
+              "consecutive_catastrophic_on_current": 0,
+              "consecutive_failures_on_current": 0,
+              "current_objective_index": 3,
+              "failure_count": 5,
+              "idle_execution_turn_streak": 0,
+              "last_result": "captured",
+              "main_brigade": "rs_ajnie_brigade",
+              "momentum": 1,
+              "movement_only_execution_turns": 0,
+              "name": "Čajniče Southern Approach",
+              "objective_battles_this_turn": 0,
+              "objective_capture_count": 3,
+              "objectives": [
+                "op:cajnice:batotici",
+                "op:foca:brusna_2",
+                "op:gorazde:kolovarice"
+              ],
+              "shared_objective_wait_turns": 0,
+              "staging_osid": "op:cajnice:cajnice_2",
+              "status": "complete",
+              "total_battles": 3
+            },
+            {
+              "assigned_brigades": [
+                "rs_gacko_brigade",
+                "rs_kalinovik_brigade"
+              ],
+              "attack_attempt_count": 2,
+              "axis_id": "kalinovik",
+              "battles_this_turn": 0,
+              "consecutive_catastrophic_on_current": 0,
+              "consecutive_failures_on_current": 0,
+              "current_objective_index": 2,
+              "failure_count": 0,
+              "idle_execution_turn_streak": 0,
+              "last_result": "captured",
+              "launch_blocker": "zero_eligible_axis",
+              "main_brigade": "rs_gacko_brigade",
+              "momentum": 2,
+              "movement_only_execution_turns": 0,
+              "name": "Kalinovik",
+              "objective_battles_this_turn": 0,
+              "objective_capture_count": 2,
+              "objectives": [
+                "op:kalinovik:golubici_2",
+                "op:kalinovik:sela_2"
+              ],
+              "shared_objective_wait_turns": 0,
+              "staging_osid": "op:kalinovik:kalinovik_2",
+              "status": "complete",
+              "support_brigades": [
+                "jna_kalinovik_to_tg",
+                "rs_kalinovik_brigade"
+              ],
+              "total_battles": 2
+            }
+          ],
+          "current_objective_index": 0,
+          "failure_count": 0,
+          "consecutive_failures_on_current": 0,
+          "recovery_reason": "completed",
+          "weekly_log": [
+            {
+              "attacks_this_turn": 0,
+              "brigade_count": 6,
+              "casualties_inflicted": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "casualties_suffered": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "momentum": 0,
+              "notable_events": [],
+              "objectives_captured_this_turn": [],
+              "objectives_lost_this_turn": [],
+              "phase": "planning",
+              "turn": 4
+            },
+            {
+              "attacks_this_turn": 0,
+              "brigade_count": 6,
+              "casualties_inflicted": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "casualties_suffered": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "momentum": 0,
+              "notable_events": [],
+              "objectives_captured_this_turn": [],
+              "objectives_lost_this_turn": [],
+              "phase": "planning",
+              "turn": 5
+            },
+            {
+              "attacks_this_turn": 0,
+              "brigade_count": 6,
+              "casualties_inflicted": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "casualties_suffered": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "momentum": 0,
+              "notable_events": [],
+              "objectives_captured_this_turn": [],
+              "objectives_lost_this_turn": [],
+              "phase": "planning",
+              "turn": 6
+            },
+            {
+              "attacks_this_turn": 3,
+              "axis_entries": {
+                "cajnice_south": {
+                  "attacks_this_turn": 1,
+                  "casualties_inflicted": {
+                    "killed": 14,
+                    "wounded": 48
+                  },
+                  "casualties_suffered": {
+                    "killed": 5,
+                    "wounded": 17
+                  },
+                  "equipment_captured": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_destroyed": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_lost": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "objectives_captured_this_turn": [],
+                  "objectives_lost_this_turn": []
+                },
+                "foca_south": {
+                  "attacks_this_turn": 1,
+                  "casualties_inflicted": {
+                    "killed": 18,
+                    "wounded": 62
+                  },
+                  "casualties_suffered": {
+                    "killed": 8,
+                    "wounded": 26
+                  },
+                  "equipment_captured": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_destroyed": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_lost": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "objectives_captured_this_turn": [],
+                  "objectives_lost_this_turn": []
+                },
+                "foca_valley": {
+                  "attacks_this_turn": 1,
+                  "casualties_inflicted": {
+                    "killed": 6,
+                    "wounded": 19
+                  },
+                  "casualties_suffered": {
+                    "killed": 9,
+                    "wounded": 29
+                  },
+                  "equipment_captured": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_destroyed": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_lost": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "objectives_captured_this_turn": [],
+                  "objectives_lost_this_turn": []
+                }
+              },
+              "brigade_count": 6,
+              "casualties_inflicted": {
+                "killed": 38,
+                "wounded": 129
+              },
+              "casualties_suffered": {
+                "killed": 22,
+                "wounded": 72
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "momentum": 1,
+              "notable_events": [
+                "first_blood",
+                "breakthrough"
+              ],
+              "objectives_captured_this_turn": [
+                "op:foca:patkovina",
+                "op:foca:tjentiste_2",
+                "op:cajnice:batotici"
+              ],
+              "objectives_lost_this_turn": [],
+              "phase": "execution",
+              "turn": 7
+            },
+            {
+              "attacks_this_turn": 2,
+              "axis_entries": {
+                "foca_south": {
+                  "attacks_this_turn": 1,
+                  "casualties_inflicted": {
+                    "killed": 18,
+                    "wounded": 59
+                  },
+                  "casualties_suffered": {
+                    "killed": 8,
+                    "wounded": 27
+                  },
+                  "equipment_captured": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_destroyed": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_lost": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "objectives_captured_this_turn": [],
+                  "objectives_lost_this_turn": []
+                },
+                "foca_valley": {
+                  "attacks_this_turn": 1,
+                  "casualties_inflicted": {
+                    "killed": 6,
+                    "wounded": 20
+                  },
+                  "casualties_suffered": {
+                    "killed": 8,
+                    "wounded": 26
+                  },
+                  "equipment_captured": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_destroyed": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_lost": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "objectives_captured_this_turn": [],
+                  "objectives_lost_this_turn": []
+                }
+              },
+              "brigade_count": 6,
+              "casualties_inflicted": {
+                "killed": 24,
+                "wounded": 79
+              },
+              "casualties_suffered": {
+                "killed": 16,
+                "wounded": 53
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "momentum": 2,
+              "notable_events": [
+                "breakthrough"
+              ],
+              "objectives_captured_this_turn": [
+                "op:foca:ustikolina",
+                "op:foca:miljevina_2",
+                "op:foca:brusna_2"
+              ],
+              "objectives_lost_this_turn": [],
+              "phase": "execution",
+              "turn": 8
+            },
+            {
+              "attacks_this_turn": 3,
+              "axis_entries": {
+                "cajnice_south": {
+                  "attacks_this_turn": 1,
+                  "casualties_inflicted": {
+                    "killed": 14,
+                    "wounded": 46
+                  },
+                  "casualties_suffered": {
+                    "killed": 72,
+                    "wounded": 243
+                  },
+                  "equipment_captured": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_destroyed": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_lost": {
+                    "artillery": 2,
+                    "tanks": 3
+                  },
+                  "objectives_captured_this_turn": [],
+                  "objectives_lost_this_turn": []
+                },
+                "foca_south": {
+                  "attacks_this_turn": 1,
+                  "casualties_inflicted": {
+                    "killed": 32,
+                    "wounded": 109
+                  },
+                  "casualties_suffered": {
+                    "killed": 27,
+                    "wounded": 91
+                  },
+                  "equipment_captured": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_destroyed": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_lost": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "objectives_captured_this_turn": [],
+                  "objectives_lost_this_turn": []
+                },
+                "kalinovik": {
+                  "attacks_this_turn": 1,
+                  "casualties_inflicted": {
+                    "killed": 22,
+                    "wounded": 73
+                  },
+                  "casualties_suffered": {
+                    "killed": 8,
+                    "wounded": 27
+                  },
+                  "equipment_captured": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_destroyed": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_lost": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "objectives_captured_this_turn": [],
+                  "objectives_lost_this_turn": []
+                }
+              },
+              "brigade_count": 6,
+              "casualties_inflicted": {
+                "killed": 68,
+                "wounded": 228
+              },
+              "casualties_suffered": {
+                "killed": 107,
+                "wounded": 361
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 2,
+                "tanks": 3
+              },
+              "momentum": 3,
+              "notable_events": [
+                "breakthrough"
+              ],
+              "objectives_captured_this_turn": [
+                "op:foca:izbisno",
+                "op:kalinovik:golubici_2"
+              ],
+              "objectives_lost_this_turn": [],
+              "phase": "execution",
+              "turn": 9
+            },
+            {
+              "attacks_this_turn": 1,
+              "axis_entries": {
+                "kalinovik": {
+                  "attacks_this_turn": 1,
+                  "casualties_inflicted": {
+                    "killed": 41,
+                    "wounded": 139
+                  },
+                  "casualties_suffered": {
+                    "killed": 34,
+                    "wounded": 115
+                  },
+                  "equipment_captured": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_destroyed": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_lost": {
+                    "artillery": 1,
+                    "tanks": 0
+                  },
+                  "objectives_captured_this_turn": [],
+                  "objectives_lost_this_turn": []
+                }
+              },
+              "brigade_count": 5,
+              "casualties_inflicted": {
+                "killed": 41,
+                "wounded": 139
+              },
+              "casualties_suffered": {
+                "killed": 34,
+                "wounded": 115
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 1,
+                "tanks": 0
+              },
+              "momentum": 2,
+              "notable_events": [
+                "breakthrough"
+              ],
+              "objectives_captured_this_turn": [
+                "op:kalinovik:sela_2"
+              ],
+              "objectives_lost_this_turn": [],
+              "phase": "execution",
+              "turn": 10
+            },
+            {
+              "attacks_this_turn": 0,
+              "brigade_count": 5,
+              "casualties_inflicted": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "casualties_suffered": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "momentum": 2,
+              "notable_events": [],
+              "objectives_captured_this_turn": [],
+              "objectives_lost_this_turn": [],
+              "phase": "execution",
+              "turn": 11
+            },
+            {
+              "attacks_this_turn": 0,
+              "brigade_count": 5,
+              "casualties_inflicted": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "casualties_suffered": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "momentum": 2,
+              "notable_events": [
+                "breakthrough"
+              ],
+              "objectives_captured_this_turn": [
+                "op:foca:kosman"
+              ],
+              "objectives_lost_this_turn": [],
+              "phase": "execution",
+              "turn": 12
+            },
+            {
+              "attacks_this_turn": 0,
+              "brigade_count": 5,
+              "casualties_inflicted": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "casualties_suffered": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "momentum": 2,
+              "notable_events": [
+                "stalled"
+              ],
+              "objectives_captured_this_turn": [],
+              "objectives_lost_this_turn": [],
+              "phase": "execution",
+              "turn": 13
+            },
+            {
+              "attacks_this_turn": 1,
+              "axis_entries": {
+                "cajnice_south": {
+                  "attacks_this_turn": 1,
+                  "casualties_inflicted": {
+                    "killed": 11,
+                    "wounded": 37
+                  },
+                  "casualties_suffered": {
+                    "killed": 9,
+                    "wounded": 31
+                  },
+                  "equipment_captured": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_destroyed": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "equipment_lost": {
+                    "artillery": 0,
+                    "tanks": 0
+                  },
+                  "objectives_captured_this_turn": [],
+                  "objectives_lost_this_turn": []
+                }
+              },
+              "brigade_count": 5,
+              "casualties_inflicted": {
+                "killed": 11,
+                "wounded": 37
+              },
+              "casualties_suffered": {
+                "killed": 9,
+                "wounded": 31
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "momentum": 2,
+              "notable_events": [
+                "breakthrough"
+              ],
+              "objectives_captured_this_turn": [
+                "op:gorazde:kolovarice"
+              ],
+              "objectives_lost_this_turn": [],
+              "phase": "recovery",
+              "turn": 14
+            },
+            {
+              "attacks_this_turn": 0,
+              "brigade_count": 5,
+              "casualties_inflicted": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "casualties_suffered": {
+                "killed": 0,
+                "wounded": 0
+              },
+              "equipment_captured": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_destroyed": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "equipment_lost": {
+                "artillery": 0,
+                "tanks": 0
+              },
+              "momentum": 2,
+              "notable_events": [],
+              "objectives_captured_this_turn": [],
+              "objectives_lost_this_turn": [],
+              "phase": "recovery",
+              "turn": 15
+            }
+          ]
+        }
+      },
+      "save_w16": {
+        "turn": 16,
+        "formation": {
+          "id": "rs_ajnie_brigade",
+          "status": "active",
+          "readiness": "active",
+          "personnel": 711,
+          "cohesion": 35,
+          "morale": 64,
+          "fatigue": 11.5,
+          "location_osid": "op:gorazde:kolovarice",
+          "posture": "defend",
+          "home_defense_active": false,
+          "last_repulsed_from": {
+            "osid": "op:gorazde:kolovarice",
+            "turn": 9
+          },
+          "brigade_history": {
+            "battles_as_attacker": 3,
+            "battles_as_defender": 0,
+            "battles_fought": 3,
+            "current_defense_streak": 0,
+            "current_victory_streak": 1,
+            "defeats": 1,
+            "engagements": [
+              {
+                "battle_id": "7:op:cajnice:batotici:rs_ajnie_brigade:null",
+                "casualties_inflicted": 65,
+                "casualties_taken": 23,
+                "enemy_faction": "RBiH",
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "osid": "op:cajnice:batotici",
+                "outcome": "decisive_victory",
+                "role": "attacker",
+                "territory_flipped": true,
+                "turn": 7,
+                "was_concentrated": false
+              },
+              {
+                "battle_id": "9:op:gorazde:kolovarice:rs_ajnie_brigade:arbih_801st_light",
+                "casualties_inflicted": 31,
+                "casualties_taken": 164,
+                "enemy_faction": "RBiH",
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 1,
+                  "tanks": 0
+                },
+                "osid": "op:gorazde:kolovarice",
+                "outcome": "repulsed",
+                "role": "attacker",
+                "territory_flipped": false,
+                "turn": 9,
+                "was_concentrated": true
+              },
+              {
+                "battle_id": "14:op:gorazde:kolovarice:rs_ajnie_brigade:null",
+                "casualties_inflicted": 25,
+                "casualties_taken": 21,
+                "enemy_faction": "RBiH",
+                "equipment_captured": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "equipment_destroyed": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "osid": "op:gorazde:kolovarice",
+                "outcome": "victory",
+                "role": "attacker",
+                "territory_flipped": true,
+                "turn": 14,
+                "was_concentrated": true
+              }
+            ],
+            "first_battle_osid": "op:cajnice:batotici",
+            "first_battle_turn": 7,
+            "longest_defense_streak": 0,
+            "longest_victory_streak": 1,
+            "nadir_personnel": 719,
+            "peak_personnel": 1000,
+            "stalemates": 0,
+            "total_casualties_inflicted": 121,
+            "total_casualties_taken": 284,
+            "total_equipment_captured": {
+              "aa_systems": 0,
+              "artillery": 0,
+              "tanks": 0
+            },
+            "total_equipment_destroyed": {
+              "aa_systems": 0,
+              "artillery": 1,
+              "tanks": 0
+            },
+            "total_osids_captured": 2,
+            "total_osids_lost": 0,
+            "turns_under_siege": 0,
+            "victories": 2,
+            "worst_single_battle_casualties": 164,
+            "worst_single_battle_turn": 9
+          },
+          "battle_outcome_count": 3
+        },
+        "movement_order": "UNREPORTED",
+        "movement_state": "UNREPORTED",
+        "operation": "UNREPORTED"
+      }
+    }
+  ],
+  "battle_power_observability": {
+    "configured_reason_codes": "movement_phase,commander_creation,battle_stack,operation_capture_ownership,mistral_tg_activation,battle_power",
+    "retained_stream_marker": "[battle_power]",
+    "retained_stream_marker_count": 0,
+    "reason_code_source": {
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\src\\sim\\combat\\reason_code_debug.ts",
+      "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd",
+      "hits": [
+        {
+          "line": 63,
+          "text": " *   AWWV_DEBUG_REASON_CODES=battle_stack,battle_power"
+        },
+        {
+          "line": 80,
+          "text": " *  battle_power      — item 2. The power ratio's two halves plus the sector context"
+        },
+        {
+          "line": 84,
+          "text": " *                      a `zero_eligible_axis`, on the artifact rather than on stdout."
+        },
+        {
+          "line": 114,
+          "text": "    | 'battle_power'"
+        },
+        {
+          "line": 143,
+          "text": "    'battle_power',"
+        },
+        {
+          "line": 212,
+          "text": " * Spread helper: `...whenReasonCodeTopic('battle_power', () => ({ ... }))`."
+        },
+        {
+          "line": 229,
+          "text": " * Opt-in `commander_creation` stdout receipt: ONE uniquely-prefixed JSON line per record (pass markers and per-corps"
+        },
+        {
+          "line": 237,
+          "text": "        console.log(`${COMMANDER_CREATION_PREFIX} ${stableStringify(record)}`);"
+        },
+        {
+          "line": 239,
+          "text": "        // Observation and stdout failures cannot affect commander output."
+        },
+        {
+          "line": 244,
+          "text": " * Local-only stdout observation of the real four-class local occupation search."
+        },
+        {
+          "line": 252,
+          "text": "        console.log(`${LOCAL_OCCUPATION_CANDIDATE_PREFIX} ${stableStringify(record)}`);"
+        },
+        {
+          "line": 258,
+          "text": "/** Default-off stdout receipts at the actual stale-order reconciliation assignment. */"
+        },
+        {
+          "line": 263,
+          "text": "        console.log(`${RECONCILIATION_WRITE_PREFIX} ${stableStringify({ schema_version: 1, ...record })}`);"
+        },
+        {
+          "line": 269,
+          "text": "/** Default-off stdout receipts for pre-planned build eligibility and caller outcomes. */"
+        },
+        {
+          "line": 274,
+          "text": "        console.log(`${PREPLANNED_ELIGIBILITY_PREFIX} ${stableStringify({ schema_version: 1, ...record })}`);"
+        },
+        {
+          "line": 280,
+          "text": "/** Copy-only stdout receipts for the bounded Mistral activation/capture observation packet. */"
+        },
+        {
+          "line": 287,
+          "text": "    console.log(`${MISTRAL_TG_ACTIVATION_PREFIX} ${stableStringify({ schema_version: 1, ...record })}`);"
+        },
+        {
+          "line": 292,
+          "text": "    console.log(`${MISTRAL_TG_DONOR_SELECTION_PREFIX} ${stableStringify({ schema_version: 1, ...record })}`);"
+        },
+        {
+          "line": 297,
+          "text": "    console.log(`${OPERATION_CAPTURE_OWNERSHIP_PREFIX} ${stableStringify({ schema_version: 1, ...record })}`);"
+        },
+        {
+          "line": 300,
+          "text": "/** Copy-only stdout receipts for the bounded salient evacuation observer. */"
+        },
+        {
+          "line": 304,
+          "text": "    console.log(`${SALIENT_EVACUATION_PREFIX} ${stableStringify({ schema_version: 1, ...record })}`);"
+        },
+        {
+          "line": 308,
+          "text": " * Local-only stdout observation for the exact historical Southern Move preparation window."
+        },
+        {
+          "line": 347,
+          "text": "    console.log(`${SOUTHERN_MOVE_PREPARATION_PREFIX} ${stableStringify({"
+        },
+        {
+          "line": 364,
+          "text": "    console.log(`${SOUTHERN_MOVE_PREPARATION_PREFIX} ${stableStringify({"
+        },
+        {
+          "line": 411,
+          "text": " * Separate stdout stream for the actual confidence getter reached by the selected"
+        },
+        {
+          "line": 457,
+          "text": "    console.log(`${SOUTHERN_MOVE_CONFIDENCE_LOOKUP_PREFIX} ${stableStringify({"
+        }
+      ]
+    },
+    "attack_resolution_source": {
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\src\\sim\\combat\\attack_resolution_osid.ts",
+      "sha256": "ff8992ab13f54f7f5b2aea79adc1c2a2a6a4d1f9cb58acd21ed27726ea6069ab",
+      "hits": [
+        {
+          "line": 1441,
+          "text": "            ...whenReasonCodeTopic('battle_power', () => ({"
+        },
+        {
+          "line": 1442,
+          "text": "                power_breakdown: {"
+        }
+      ]
+    },
+    "finding": "battle_power gates power_breakdown fields on retained battle records; inspected source defines no battle_power stdout emitter"
+  },
+  "missing_records": [
+    "No retained pre-resolution T14 per-axis eligibility/rejection decision names rs_ajnie_brigade.",
+    "No retained save between T10 and T14; save_w15/save_w16 are post-T14.",
+    "Absent movement_order/movement_state properties are recorded as UNREPORTED, not inferred as rejected."
+  ],
+  "classification": {
+    "retained_causal_chain": [
+      "Candidate T9 Kolovarice stalemate with rs_ajnie_brigade + rs_foa_brigade.",
+      "Candidate T10 emits an rs_ajnie_brigade-only catastrophic Kolovarice attack: 313 attacker casualties, ratio 0.25. Parent emits no T10 ajnie attack.",
+      "Candidate T14 Foca diagnostic remains owned by the same operation, enters recovery with max_failures, and orders only rs_foa_brigade; cajnice_south records recent_catastrophic_losses_at_objective.",
+      "Parent T14 orders rs_ajnie_brigade + rs_foa_brigade and captures Kolovarice."
+    ],
+    "operation_owner_or_handoff_anomaly_evidenced": false,
+    "rejected_movement_anomaly_evidenced": false,
+    "malformed_or_illegal_actor_evidenced": false,
+    "classification": "normal divergent combat/eligibility path under changed fatigue is evidenced; a code defect is not evidenced",
+    "unreported": [
+      "The exact T14 per-candidate axis predicate receipt for rs_ajnie_brigade because axis_reject was not enabled.",
+      "Any pre-T14 save after T10; only post-T14 saves 15 and 16 are retained.",
+      "A named movement rejection; temporal rows contain no mv_state/destination and post-T14 saves have no movement order/state entry."
+    ],
+    "smallest_next_question": "If the owner wants further diagnosis, inspect one future bounded retained run with axis_reject enabled to ask which exact T14 predicate excludes rs_ajnie_brigade; this finding does not authorize replay."
+  },
+  "postprocessing": {
+    "performed_utc": "2026-10-26T02:10:35.9771907Z",
+    "action": "Corrected configured_reason_codes lookup to AWWV_DEBUG_REASON_CODES and added classification from already extracted fields; no child rerun."
+  }
+}

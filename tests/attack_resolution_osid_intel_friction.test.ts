@@ -1,6 +1,9 @@
+import {predictCombatOutcome} from '../src/sim/combat/combat_predictor.js';
+import {buildOsidAdjacency} from '../src/sim/combat/osid_adjacency.js';
 import { describe, expect, it } from 'vitest';
 
 import { resolveAttackOrdersOsid } from '../src/sim/combat/attack_resolution_osid.js';
+import { updateSectorOffensiveResults } from '../src/sim/combat/sector_offensive.js';
 import {
     getIntelAmbushDefenderCasualtyMult,
     getIntelAmbushAttackerCasualtyMult,
@@ -8,6 +11,7 @@ import {
 } from '../src/sim/combat/combat_math.js';
 import { compileTurnSummary } from '../src/sim/compile_turn_summary.js';
 import { initializeCasualtyLedger } from '../src/state/casualty_ledger.js';
+import { MIN_COMBAT_PERSONNEL } from '../src/state/formation_constants.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
 import type { AARSnapshot, TurnReport } from '../src/sim/turn_pipeline_types.js';
 import type {
@@ -230,6 +234,297 @@ function seedIntel(state: GameState, confidence: number): void {
 }
 
 describe('attack resolution intel execution friction', () => {
+    it('strictly orders the lead and advances exactly the first admitted same-axis supporter', () => {
+        const { state, edges } = makeScenario();
+        for (const id of ['brig_rs_2', 'brig_rs_3', 'brig_rs_cross', 'brig_rs_free']) {
+            state.military.formations![id] = makeFormation(id, 'RS', 'brigade', 'op:rs:staging', {
+                corps_id: 'vrs_1st',
+            });
+        }
+        const op = state.military.corps_command!.vrs_1st!.active_operations[0]!;
+        op.coordinated_advance = true;
+        op.participating_brigades = ['brig_rs_cross', 'brig_rs_3', 'brig_rs_2', 'brig_rs_1'];
+        op.axes = [
+            {
+                axis_id: 'breach', status: 'executing',
+                assigned_brigades: ['brig_rs_3', 'brig_rs_2', 'brig_rs_1'],
+                objectives: ['op:rbih:target'], current_objective_index: 0,
+            },
+            {
+                axis_id: 'other', status: 'executing',
+                assigned_brigades: ['brig_rs_cross'],
+                objectives: ['op:rbih:target'], current_objective_index: 0,
+            },
+        ] as CorpsOperation['axes'];
+        state.military.brigade_attack_orders = {
+            brig_rs_free: 'op:rbih:target',
+            brig_rs_cross: 'op:rbih:target',
+            brig_rs_3: 'op:rbih:target',
+            brig_rs_2: 'op:rbih:target',
+            brig_rs_1: 'op:rbih:target',
+        } as any;
+        const report = resolveAttackOrdersOsid(state, edges, new Map<string, string[]>());
+        expect(report.battles[0]?.outcome).toBe('decisive_victory');
+        expect(report.battles[0]?.attacker_brigades).toEqual([
+            'brig_rs_1', 'brig_rs_2', 'brig_rs_3', 'brig_rs_cross', 'brig_rs_free',
+        ]);
+        expect(state.military.formations!.brig_rs_1!.location_osid).toBe('op:rbih:target');
+        expect(state.military.formations!.brig_rs_2!.location_osid).toBe('op:rbih:target');
+        expect(state.military.formations!.brig_rs_3!.location_osid).toBe('op:rs:staging');
+        expect(state.military.formations!.brig_rs_cross!.location_osid).toBe('op:rs:staging');
+        expect(state.military.formations!.brig_rs_free!.location_osid).toBe('op:rs:staging');
+    });
+
+    it('does not advance a same-faction coattacker committed to another live operation', () => {
+        const { state, edges } = makeScenario();
+        state.military.formations!.brig_rs_2 = makeFormation(
+            'brig_rs_2', 'RS', 'brigade', 'op:rs:staging', { corps_id: 'vrs_1st' },
+        );
+        const leadOperation = state.military.corps_command!.vrs_1st!.active_operations[0]!;
+        leadOperation.coordinated_advance = true;
+        leadOperation.axes = [{
+            axis_id: 'breach', status: 'executing',
+            assigned_brigades: ['brig_rs_1'],
+            objectives: ['op:rbih:target'], current_objective_index: 0,
+        }] as CorpsOperation['axes'];
+        const otherLiveOperation = {
+            ...structuredClone(leadOperation),
+            name: 'other_live_op',
+            started_turn: 4,
+            phase_started_turn: 4,
+            coordinated_advance: true,
+            participating_brigades: ['brig_rs_2'],
+            axes: [{
+                axis_id: 'other_breach', status: 'executing',
+                assigned_brigades: ['brig_rs_2'],
+                objectives: ['op:rbih:target'], current_objective_index: 0,
+            }],
+        } as CorpsOperation;
+        state.military.corps_command!.vrs_1st!.active_operations.push(otherLiveOperation);
+        state.military.brigade_attack_orders = {
+            brig_rs_2: 'op:rbih:target',
+            brig_rs_1: 'op:rbih:target',
+        } as any;
+
+        const report = resolveAttackOrdersOsid(state, edges, new Map<string, string[]>());
+
+        expect(report.battles[0]?.outcome).toBe('decisive_victory');
+        expect(report.battles[0]?.attacker_brigades).toEqual(['brig_rs_1', 'brig_rs_2']);
+        expect(state.military.formations!.brig_rs_1!.location_osid).toBe('op:rbih:target');
+        expect(state.military.formations!.brig_rs_2!.location_osid).toBe('op:rs:staging');
+    });
+
+    it.each([
+        { name: 'unflagged operation', configure: (op: CorpsOperation) => { delete op.coordinated_advance; } },
+        { name: 'nonexecuting operation', configure: (op: CorpsOperation) => { op.phase = 'recovery'; } },
+        { name: 'decisive battle without a control flip', configure: (op: CorpsOperation) => { op.occupies_on_victory = false; } },
+        {
+            name: 'nondecisive battle',
+            configure: (_op: CorpsOperation, state: GameState) => {
+                state.military.formations!.brig_rbih_1!.personnel = 50_000;
+                state.military.formations!.brig_rbih_1!.cohesion = 100;
+                state.military.formations!.brig_rbih_1!.morale = 100;
+            },
+        },
+    ])('does not advance a supporter for $name', ({ configure }) => {
+        const { state, edges } = makeScenario();
+        state.military.formations!.brig_rs_2 = makeFormation(
+            'brig_rs_2', 'RS', 'brigade', 'op:rs:staging', { corps_id: 'vrs_1st' },
+        );
+        const op = state.military.corps_command!.vrs_1st!.active_operations[0]!;
+        op.coordinated_advance = true;
+        op.participating_brigades = ['brig_rs_1', 'brig_rs_2'];
+        op.axes = [{
+            axis_id: 'breach', status: 'executing',
+            assigned_brigades: ['brig_rs_1', 'brig_rs_2'],
+            objectives: ['op:rbih:target'], current_objective_index: 0,
+        }] as CorpsOperation['axes'];
+        state.military.brigade_attack_orders = {
+            brig_rs_2: 'op:rbih:target', brig_rs_1: 'op:rbih:target',
+        } as any;
+        configure(op, state);
+
+        const report = resolveAttackOrdersOsid(state, edges, new Map<string, string[]>());
+
+        expect(report.battles).toHaveLength(1);
+        expect(state.military.formations!.brig_rs_2!.location_osid).toBe('op:rs:staging');
+    });
+
+    it('divides mobile sector response across simultaneous axes without weakening a lone attack', () => {
+        const makeMultiAxis = (secondAttack: boolean) => {
+            const { state, edges } = makeScenario();
+            const formations = state.military.formations!;
+            formations.brig_rs_1!.location_osid = 'op:rs:stage_a';
+            formations.brig_rs_2 = makeFormation('brig_rs_2', 'RS', 'brigade', 'op:rs:stage_b', { corps_id: 'vrs_1st' });
+            for (const id of ['brig_rbih_1', 'brig_rbih_2']) {
+                formations[id] = makeFormation(id, 'RBiH', 'brigade', 'op:rbih:reserve', {
+                    corps_id: 'rbih_corps',
+                    personnel: 900,
+                    cohesion: 80,
+                });
+            }
+            state.political.political_controllers!['op:rs:stage_a'] = 'RS';
+            state.political.political_controllers!['op:rs:stage_b'] = 'RS';
+            state.political.political_controllers!['op:rbih:target_a'] = 'RBiH';
+            state.political.political_controllers!['op:rbih:target_b'] = 'RBiH';
+            state.political.political_controllers!['op:rbih:reserve'] = 'RBiH';
+            const op = state.military.corps_command!.vrs_1st!.active_operations[0]!;
+            op.participating_brigades = ['brig_rs_1', 'brig_rs_2'];
+            op.axes = [
+                { axis_id: 'a', status: 'executing', assigned_brigades: ['brig_rs_1'], objectives: ['op:rbih:target_a'], current_objective_index: 0 },
+                { axis_id: 'b', status: 'executing', assigned_brigades: ['brig_rs_2'], objectives: ['op:rbih:target_b'], current_objective_index: 0 },
+            ] as CorpsOperation['axes'];
+            state.military.corps_front_sectors!['sector:rbih_defense:0'] = makeSector(
+                'sector:rbih_defense:0', 'rbih_corps', 'RBiH',
+                ['brig_rbih_1', 'brig_rbih_2'],
+                [makeSubSegment('sub:defense', ['op:rs:stage_a', 'op:rs:stage_b'],
+                    ['op:rbih:target_a', 'op:rbih:target_b', 'op:rbih:reserve'], ['ea', 'eb', 'ra', 'rb'])],
+            );
+            state.military.brigade_attack_orders = secondAttack
+                ? { brig_rs_1: 'op:rbih:target_a', brig_rs_2: 'op:rbih:target_b' } as any
+                : { brig_rs_1: 'op:rbih:target_a' } as any;
+            edges.push(
+                { edge_id: 'ea', a: 'op:rs:stage_a', b: 'op:rbih:target_a' } as EdgeRecord,
+                { edge_id: 'eb', a: 'op:rs:stage_b', b: 'op:rbih:target_b' } as EdgeRecord,
+                { edge_id: 'ra', a: 'op:rbih:reserve', b: 'op:rbih:target_a' } as EdgeRecord,
+                { edge_id: 'rb', a: 'op:rbih:reserve', b: 'op:rbih:target_b' } as EdgeRecord,
+            );
+            return { state, edges };
+        };
+        const alone = makeMultiAxis(false);
+        const together = makeMultiAxis(true);
+        // Single-target forecasts intentionally do not assume another axis will execute.
+        // Test that the reserve estimate stays exclusive while real batch resolution
+        // divides mobile response; enemy fog remains a separate approximation.
+        const singleForecast = predictCombatOutcome(alone.state, 'brig_rs_1', 'op:rbih:target_a', buildOsidAdjacency(alone.edges), new Map(), {});
+        const batchForecast = predictCombatOutcome(together.state, 'brig_rs_1', 'op:rbih:target_a', buildOsidAdjacency(together.edges), new Map(), {});
+        expect(singleForecast).not.toBeNull();expect(batchForecast).not.toBeNull();
+        expect(batchForecast!.defender_power).toBe(singleForecast!.defender_power);
+        expect(batchForecast!.attacker_power).toBe(singleForecast!.attacker_power);
+        const aloneBattle = resolveAttackOrdersOsid(alone.state, alone.edges, new Map<string, string[]>())
+            .battles.find(b => b.target_osid === 'op:rbih:target_a');
+        const togetherBattle = resolveAttackOrdersOsid(together.state, together.edges, new Map<string, string[]>())
+            .battles.find(b => b.target_osid === 'op:rbih:target_a');
+        expect(aloneBattle).toBeDefined();
+        expect(togetherBattle).toBeDefined();
+        expect(togetherBattle!.power_ratio).toBeGreaterThan(aloneBattle!.power_ratio * 1.3);
+    });
+
+    it('aggregates hostile Ivanjska gateway attacks from disjoint Krupa and Sanski axes', () => {
+        const otoka = 'op:bosanska_krupa:otoka_2';
+        const ivanjska = 'op:bosanska_krupa:ivanjska_2';
+        const donjiDubovik = 'op:bosanska_krupa:donji_dubovik_2';
+        const krupaBrigadeId = 'brig_rbih_krupa';
+        const sanskiBrigadeId = 'brig_rbih_sanski';
+        const defenderId = 'brig_rs_ivanjska';
+        const operation = {
+            name: 'Sana Ivanjska gateway evidence',
+            type: 'sector_attack',
+            phase: 'execution',
+            started_turn: 180,
+            phase_started_turn: 180,
+            participating_brigades: [krupaBrigadeId, sanskiBrigadeId],
+            objectives: [ivanjska, donjiDubovik],
+            current_objective_index: 0,
+            objective_capture_count: 0,
+            attack_attempt_count: 1,
+            axes: [
+                {
+                    axis_id: 'sana_krupa',
+                    status: 'executing',
+                    assigned_brigades: [krupaBrigadeId],
+                    objectives: [ivanjska, donjiDubovik],
+                    current_objective_index: 0,
+                    attack_attempt_count: 1,
+                },
+                {
+                    axis_id: 'sana_sanski_most_kljuc',
+                    status: 'executing',
+                    assigned_brigades: [sanskiBrigadeId],
+                    objectives: [ivanjska, donjiDubovik],
+                    current_objective_index: 0,
+                    attack_attempt_count: 1,
+                },
+            ],
+        } as unknown as CorpsOperation;
+        const state = {
+            meta: {
+                turn: 180,
+                phase: 'war',
+                seed: 'sana-ivanjska-hostile-gateway',
+            },
+            factions: [{ id: 'RBiH' }, { id: 'RS' }],
+            political: {
+                political_controllers: {
+                    [otoka]: 'RBiH',
+                    [ivanjska]: 'RS',
+                    [donjiDubovik]: 'RS',
+                },
+                control_events: [],
+            },
+            military: {
+                formations: {
+                    rbih_corps: makeFormation('rbih_corps', 'RBiH', 'corps', otoka),
+                    [krupaBrigadeId]: makeFormation(krupaBrigadeId, 'RBiH', 'brigade', otoka, {
+                        corps_id: 'rbih_corps',
+                    }),
+                    [sanskiBrigadeId]: makeFormation(sanskiBrigadeId, 'RBiH', 'brigade', otoka, {
+                        corps_id: 'rbih_corps',
+                    }),
+                    [defenderId]: makeFormation(defenderId, 'RS', 'brigade', ivanjska, {
+                        corps_id: 'rs_corps',
+                        personnel: 300,
+                        cohesion: 20,
+                        morale: 20,
+                    }),
+                    rs_corps: makeFormation('rs_corps', 'RS', 'corps', donjiDubovik),
+                },
+                corps_command: {
+                    rbih_corps: {
+                        active_operations: [operation],
+                    },
+                },
+                brigade_attack_orders: {
+                    [krupaBrigadeId]: ivanjska,
+                    [sanskiBrigadeId]: ivanjska,
+                },
+                casualty_ledger: initializeCasualtyLedger(['RBiH', 'RS']),
+            },
+            displacement: {},
+        } as unknown as GameState;
+        const edges: EdgeRecord[] = [
+            { edge_id: 'otoka-ivanjska', a: otoka, b: ivanjska } as EdgeRecord,
+            { edge_id: 'ivanjska-donji-dubovik', a: ivanjska, b: donjiDubovik } as EdgeRecord,
+        ];
+
+        // Orders are supplied directly because this test covers resolver aggregation,
+        // not the separate operation order-generation path.
+        const report = resolveAttackOrdersOsid(state, edges, new Map<string, string[]>());
+        const ivanjskaBattles = report.battles.filter((battle) => battle.target_osid === ivanjska);
+        expect(ivanjskaBattles).toHaveLength(1);
+        expect(ivanjskaBattles[0]!.attacker_brigades).toEqual([krupaBrigadeId, sanskiBrigadeId].sort());
+        expect(ivanjskaBattles[0]!.attacker_faction).toBe('RBiH');
+        expect(ivanjskaBattles[0]!.defender_faction).toBe('RS');
+
+        const controlEvents = state.political.control_events ?? [];
+        expect(report.flips_applied).toBe(1);
+        expect(controlEvents).toHaveLength(1);
+        expect(controlEvents.filter((event) =>
+            event.settlement_id === ivanjska
+            && event.mechanism === 'combat'
+            && event.from === 'RS'
+            && event.to === 'RBiH',
+        )).toHaveLength(1);
+        expect(state.political.political_controllers![ivanjska]).toBe('RBiH');
+
+        updateSectorOffensiveResults(state);
+        expect(operation.axes![0]!.current_objective_index).toBe(1);
+        expect(operation.axes![1]!.current_objective_index).toBe(1);
+        expect(operation.axes![0]!.objectives[operation.axes![0]!.current_objective_index]).toBe(donjiDubovik);
+        expect(operation.axes![1]!.objectives[operation.axes![1]!.current_objective_index]).toBe(donjiDubovik);
+        expect(state.political.political_controllers![donjiDubovik]).toBe('RS');
+    });
+
     it('resolves attack orders across live war-front contacts outside the movement graph', () => {
         const { state } = makeScenario();
         state.military.war_front_edges_osid = [{
@@ -613,17 +908,49 @@ describe('attack resolution intel execution friction', () => {
     it('applies low-confidence OPSEC ambush friction as reduced defender losses', () => {
         const staleOnly = makeScenario();
         seedIntel(staleOnly.state, 0);
+        staleOnly.state.military.formations!['brig_rbih_1'].personnel = 3000;
         const staleOnlyReport = resolveAttackOrdersOsid(staleOnly.state, staleOnly.edges, new Map<string, string[]>());
 
         const ambush = makeScenario();
         seedIntel(ambush.state, 0);
         ambush.state.military.opsec_sectors = ['sector:rbih_defense:0'];
+        ambush.state.military.formations!['brig_rbih_1'].personnel = 3000;
         const ambushReport = resolveAttackOrdersOsid(ambush.state, ambush.edges, new Map<string, string[]>());
 
         expect(ambushReport.casualty_defender).toBeLessThan(staleOnlyReport.casualty_defender);
+        expect(staleOnlyReport.casualty_defender).toBeLessThan(3000 - MIN_COMBAT_PERSONNEL);
+        expect(ambushReport.casualty_defender).toBeLessThan(3000 - MIN_COMBAT_PERSONNEL);
         expect(ambushReport.battles[0]!.execution_friction).toEqual({
             labels: ['stale_intel', 'defender_opsec', 'ambush_risk'],
             attacker_confidence_band: 'low',
         });
+    });
+});
+
+
+describe('predictor known own execution friction', () => {
+    function prediction(confidence: number, targetConfidence?: number, opsec = false) {
+        const {state, edges} = makeScenario();
+        seedIntel(state, confidence);
+        if (targetConfidence !== undefined) state.military.sector_intel!['sector:vrs_1st:0'][0].osid_confidence![0].confidence = targetConfidence;
+        if (opsec) state.military.opsec_sectors = ['sector:rbih_defense:0'];
+        const before = JSON.stringify(state);
+        const result = predictCombatOutcome(state, 'brig_rs_1', 'op:rbih:target', buildOsidAdjacency(edges), new Map(), {}, 'attack');
+        expect(JSON.stringify(state)).toBe(before);
+        expect(result).not.toBeNull();
+        return result!;
+    }
+    it('models the known own-force penalty while preserving the enemy fog discount', () => {
+        const fresh = prediction(1), blind = prediction(0);
+        expect(blind.attacker_power / fresh.attacker_power).toBeCloseTo(getIntelExecutionFrictionMultipliers(0, false).attackerPowerMult, 12);
+        expect(blind.defender_power / fresh.defender_power).toBeCloseTo(0.70 / 0.95, 12);
+    });
+    it('uses the target-specific own-confidence override exactly as resolution does', () => {
+        const fresh = prediction(1), locallyBlind = prediction(1, 0);
+        expect(locallyBlind.attacker_power / fresh.attacker_power).toBeCloseTo(0.85, 12);
+        expect(locallyBlind.defender_power).toBe(fresh.defender_power);
+    });
+    it('does not expose hidden enemy OPSEC through prediction', () => {
+        expect(prediction(0, undefined, true)).toEqual(prediction(0));
     });
 });

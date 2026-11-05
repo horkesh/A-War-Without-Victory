@@ -1,0 +1,58 @@
+{
+  "scope": "Exact n91-n97 and qualified package trees; every prior native23 raw-inventory file binding. No remote backup claim.",
+  "runs": [
+    {
+      "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n91",
+      "count": 31,
+      "exactTree": true,
+      "mismatches": []
+    },
+    {
+      "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n92",
+      "count": 38,
+      "exactTree": true,
+      "mismatches": []
+    },
+    {
+      "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n93",
+      "count": 40,
+      "exactTree": true,
+      "mismatches": []
+    },
+    {
+      "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n94",
+      "count": 40,
+      "exactTree": true,
+      "mismatches": []
+    },
+    {
+      "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n95",
+      "count": 40,
+      "exactTree": true,
+      "mismatches": []
+    },
+    {
+      "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n96",
+      "count": 40,
+      "exactTree": true,
+      "mismatches": []
+    },
+    {
+      "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n97",
+      "count": 40,
+      "exactTree": true,
+      "mismatches": []
+    }
+  ],
+  "package": {
+    "root": "dist-packaged/player-column-routing-20261025-01/win-unpacked",
+    "count": 1228,
+    "exactTree": true,
+    "mismatches": []
+  },
+  "native23": {
+    "count": 176,
+    "mismatches": []
+  },
+  "pass": true
+}

@@ -1,0 +1,85 @@
+{
+  "schema": "circle-formation-allocation-audit-v1",
+  "date": "2026-10-26",
+  "verdict": "UNRESOLVED_FORMATION_IDENTITY",
+  "allocation_amendment_supported": false,
+  "historical_identity_status": {
+    "witness_tgii": "Husein Alic",
+    "witness_participants": "Muhamed Nogo",
+    "participants_named_nonexhaustively": [
+      "Nogo's unit",
+      "TO Trnovo staff unit",
+      "units from Igman",
+      "7th Rijeka"
+    ],
+    "formal_tgii_chain_proven": false,
+    "full_july_1992_roster_proven": false,
+    "circle_or_krug_name_proven": false,
+    "aggregate_capture_chain_proven": false
+  },
+  "authored_allocation": {
+    "host_corps": "arbih_1st_corps",
+    "brigades": [
+      "arbih_801st_light",
+      "arbih_802nd_light",
+      "arbih_851st_vitezka_liberation",
+      "arbih_843rd_light",
+      "arbih_808th_liberation",
+      "arbih_102nd_motorized",
+      "arbih_109th_mountain"
+    ],
+    "source": "src/sim/combat/pre_planned_operations.ts:1301",
+    "source_sha256": "5ea85b79e0a2df80bfed1702c7fcceaaf44df5cdc66b661ce6296d0e3e9c392a",
+    "author_intent_commit": "92f924f9dff92f4df91e32be195f1438efd7053d",
+    "intent": "BB1-p187 regional chronology plus local-route model allocation; ordinary battle-owned control"
+  },
+  "oob_provenance": {
+    "source": "docs/provenance/OFFICER_OOB_PROVENANCE.json",
+    "source_sha256": "964715896d3e2cfa08300fcf8abede63ae2113a435a109fced79959aa2cc7d78",
+    "oob_sha256": "e01b58c71b0d51daadf1796ba21a02d0cca04509add1ef706f3b8a350f7c513d",
+    "citation": "Balkan Battlegrounds Volume I, Appendix H, Skeleton Bosnian Army Order of Battle, October 1995, PDF pp. 506-515",
+    "scope": "exact formation identity and command attribution only",
+    "excluded_scope": ["July 1992 participation", "gameplay personnel", "gameplay timing", "TG II chain"]
+  },
+  "retained_runtime": {
+    "source_commit": "0278c956d3fce3cdb62161a282f3936eaa0c66c1",
+    "save_w15": "runs/player-parity-fatigue-owner-39-20261026-01/apr1992_definitive_188w__2272e1011ba35428__w39_n0/save_w15.json",
+    "save_w15_sha256": "dae65bd362a14bcc2d3733657e0125d424725e7d226cf0f92b6a58a01a16c6cb",
+    "save_w16": "runs/player-parity-fatigue-owner-39-20261026-01/apr1992_definitive_188w__2272e1011ba35428__w39_n0/save_w16.json",
+    "save_w16_sha256": "1db44a4198219e3fba517051befafcacb54e34069723d1976aa88f6593fce0ba",
+    "t16_date": "1992-07-27",
+    "t16_actual_participants": [
+      "arbih_109th_mountain",
+      "arbih_801st_light",
+      "arbih_802nd_light",
+      "arbih_843rd_light",
+      "arbih_851st_vitezka_liberation"
+    ],
+    "authored_but_unassigned_t16": ["arbih_808th_liberation", "arbih_102nd_motorized"],
+    "fourth_corps_observation": {
+      "arbih_441st_vitezka_mountain": "active near Mostar",
+      "arbih_443rd_mountain": "active at modeled Trnovo",
+      "arbih_446th_light": "absent from t16 save",
+      "arbih_450th_light": "active near Konjic"
+    }
+  },
+  "historical_sources": [
+    "tmp/player-bot-capability-parity-20261024/circle-historical-admission-audit-20261026-v1/finding.md",
+    "tmp/player-bot-capability-parity-20261024/circle-historical-admission-primary-search-20261026-v1/finding.md",
+    "tmp/player-bot-capability-parity-20261024/circle-historical-admission-primary-search-20261026-v1/citations.json",
+    "tmp/player-bot-capability-parity-20261024/circle-cited-wartime-artifacts-20261026-v1/finding.md",
+    "tmp/player-bot-capability-parity-20261024/circle-cited-wartime-artifacts-20261026-v1/artifact-inventory.json"
+  ],
+  "model_inference_boundary": {
+    "gorazde_local": ["arbih_801st_light", "arbih_802nd_light", "arbih_808th_liberation", "arbih_843rd_light", "arbih_851st_vitezka_liberation"],
+    "hadzici_igman_side": ["arbih_102nd_motorized", "arbih_109th_mountain"],
+    "historical_roster_claim": false,
+    "guaranteed_capture": false
+  },
+  "governance": {
+    "ordinary_roster_data_change": "historian and canon review required",
+    "enclave_mechanics_or_sensitive_representation": "apply SENSITIVE_HISTORY_DESIGN_GATE.md review",
+    "forawwv_or_values_bright_line_change": "mandated panel required",
+    "panel_required_for_current_no_change_finding": false
+  }
+}

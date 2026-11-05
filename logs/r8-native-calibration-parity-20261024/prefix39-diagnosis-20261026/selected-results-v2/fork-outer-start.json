@@ -1,0 +1,11 @@
+{
+  "retries": 0,
+  "freeze_sha256": "1619235da0c921147a59036cdd6595f0d8f1102de1c231bed075b818ae46d226",
+  "cap_ms": 180000,
+  "cwd": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory",
+  "max_advances": 23,
+  "argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/launch_fork_v4.cjs"
+  ]
+}

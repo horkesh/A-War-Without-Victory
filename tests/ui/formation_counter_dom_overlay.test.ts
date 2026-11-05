@@ -40,14 +40,15 @@ function stackedFormation(id: string, osid: string, stackIndex: number, coordina
   };
 }
 
-function render(container: HTMLDivElement, projectX = 200) {
-  const onCounterSelect = vi.fn();
+function renderFeatures(
+  container: HTMLDivElement,
+  features: Array<ReturnType<typeof formation>>,
+  onCounterSelect = vi.fn(),
+  projectX = 200,
+) {
   renderFormationCounterDomOverlay({
     container,
-    formationsGeoJson: {
-      type: 'FeatureCollection',
-      features: [formation('a', 0, 3), formation('b', 1, 3), formation('c', 2, 3)],
-    } as any,
+    formationsGeoJson: { type: 'FeatureCollection', features } as any,
     formationsVisible: true,
     zoom: 10,
     viewportClip: {
@@ -61,6 +62,41 @@ function render(container: HTMLDivElement, projectX = 200) {
     onCounterSelect,
   });
   return onCounterSelect;
+}
+
+function render(container: HTMLDivElement, projectX = 200, onCounterSelect = vi.fn()) {
+  return renderFeatures(
+    container,
+    [formation('a', 0, 3), formation('b', 1, 3), formation('c', 2, 3)],
+    onCounterSelect,
+    projectX,
+  );
+}
+
+function dispatchNativeGesture(button: HTMLButtonElement, type: 'pointerdown' | 'pointerup' | 'click') {
+  button.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, button: 0 }));
+}
+
+async function observeContainerMutations(
+  container: HTMLDivElement,
+  action: () => void,
+): Promise<MutationRecord[]> {
+  const records: MutationRecord[] = [];
+  const observer = new MutationObserver((mutations) => records.push(...mutations));
+  observer.observe(container, { childList: true, subtree: true });
+  action();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  observer.disconnect();
+  return records;
+}
+
+function containerChildListRecords(records: MutationRecord[], container: HTMLDivElement): MutationRecord[] {
+  return records.filter((record) => record.target === container);
+}
+
+function recordsDetachingControls(records: MutationRecord[], controls: Set<Element>): MutationRecord[] {
+  return records.filter((record) => [...record.addedNodes, ...record.removedNodes]
+    .some((node) => controls.has(node as Element)));
 }
 
 describe('accessible formation counter overlay', () => {
@@ -114,6 +150,83 @@ describe('accessible formation counter overlay', () => {
     expect(document.activeElement).toBe(after);
     expect(after.querySelector('img')?.style.opacity).toBe('0');
     expect(Number.parseFloat(after.style.left)).toBeGreaterThan(250);
+    container.remove();
+  });
+
+  it('keeps unchanged keyed controls attached through an identical refresh and held reflow', async () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const firstSelect = render(container, 200);
+    const before = [...container.querySelectorAll<HTMLButtonElement>('[data-awwv-counter-roving-key]')];
+    const beforeControls = new Set<Element>(before);
+    const focused = container.querySelector<HTMLButtonElement>('[data-awwv-formation-counter-id="b"]')!;
+    focused.focus();
+
+    const secondSelect = vi.fn();
+    const identicalRecords = await observeContainerMutations(container, () => render(container, 200, secondSelect));
+
+    expect(containerChildListRecords(identicalRecords, container)).toHaveLength(0);
+    expect(recordsDetachingControls(identicalRecords, beforeControls)).toHaveLength(0);
+    const afterIdentical = [...container.querySelectorAll<HTMLButtonElement>('[data-awwv-counter-roving-key]')];
+    expect(afterIdentical).toEqual(before);
+    expect(document.activeElement).toBe(focused);
+    expect(focused.isConnected).toBe(true);
+
+    dispatchNativeGesture(focused, 'click');
+    expect(secondSelect).toHaveBeenCalledTimes(1);
+    expect(secondSelect.mock.calls[0]![0].id).toBe('b');
+    expect(secondSelect.mock.calls[0]![1]).toBe('exact');
+    expect(firstSelect).not.toHaveBeenCalled();
+
+    focused.focus();
+    dispatchNativeGesture(focused, 'pointerdown');
+    const reflowSelect = vi.fn();
+    const reflowRecords = await observeContainerMutations(container, () => render(container, 320, reflowSelect));
+    dispatchNativeGesture(focused, 'pointerup');
+
+    expect(containerChildListRecords(reflowRecords, container)).toHaveLength(0);
+    expect(recordsDetachingControls(reflowRecords, beforeControls)).toHaveLength(0);
+    const afterReflow = container.querySelector<HTMLButtonElement>('[data-awwv-formation-counter-id="b"]')!;
+    expect(afterReflow).toBe(focused);
+    expect(document.activeElement).toBe(focused);
+    expect(focused.isConnected).toBe(true);
+    expect(Number.parseFloat(focused.style.left)).toBeGreaterThan(250);
+
+    dispatchNativeGesture(focused, 'click');
+    expect(reflowSelect).toHaveBeenCalledTimes(1);
+    expect(reflowSelect.mock.calls[0]![0].id).toBe('b');
+    expect(reflowSelect.mock.calls[0]![1]).toBe('exact');
+    expect(secondSelect).toHaveBeenCalledTimes(1);
+    container.remove();
+  });
+
+  it('keeps deterministic order for changed control sets and removes stale controls', async () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const firstSelect = render(container, 200);
+    const beforeA = container.querySelector<HTMLButtonElement>('[data-awwv-formation-counter-id="a"]')!;
+    const beforeC = container.querySelector<HTMLButtonElement>('[data-awwv-formation-counter-id="c"]')!;
+    const staleB = container.querySelector<HTMLButtonElement>('[data-awwv-formation-counter-id="b"]')!;
+
+    const secondSelect = vi.fn();
+    await observeContainerMutations(container, () => {
+      renderFeatures(container, [formation('c', 0, 1), formation('a', 0, 1)], secondSelect);
+    });
+
+    const controls = [...container.querySelectorAll<HTMLButtonElement>('[data-awwv-counter-roving-key]')];
+    expect(controls.map((button) => button.dataset.awwvCounterRovingKey)).toEqual(['counter:c', 'counter:a']);
+    expect(controls[0]).toBe(beforeC);
+    expect(controls[1]).toBe(beforeA);
+    expect(staleB.isConnected).toBe(false);
+    expect(container.querySelector('[data-awwv-formation-counter-id="b"]')).toBeNull();
+    expect(container.querySelector('[data-awwv-formation-stack-osid]')).toBeNull();
+    expect(controls[1]!.getAttribute('aria-label')).toBe('Formation a');
+
+    dispatchNativeGesture(controls[1]!, 'click');
+    expect(secondSelect).toHaveBeenCalledTimes(1);
+    expect(secondSelect.mock.calls[0]![0].id).toBe('a');
+    expect(secondSelect.mock.calls[0]![1]).toBe('exact');
+    expect(firstSelect).not.toHaveBeenCalled();
     container.remove();
   });
 

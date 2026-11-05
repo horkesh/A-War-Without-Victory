@@ -1,0 +1,48 @@
+
+ RUN  v2.1.9 C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory
+
+ ❯ tests/cdp_network_collector.test.ts (55 tests | 2 failed) 206ms
+   × canceled PMTiles fetch before response is a lawful terminal chain and cannot trigger body capture 7ms
+     → 'inconsistent' == 'complete'
+   × target-shaped failure before response remains non-candidate and cannot trigger body capture 1ms
+     → 'inconsistent' == 'complete'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/cdp_network_collector.test.ts > canceled PMTiles fetch before response is a lawful terminal chain and cannot trigger body capture
+AssertionError: 'inconsistent' == 'complete'
+
+Expected: "complete"
+Received: "inconsistent"
+
+ ❯ tests/cdp_network_collector.test.ts:657:12
+    655|     const artifact = await collector.closeAndFlush();
+    656| 
+    657|     assert.equal(artifact.status, 'complete');
+       |            ^
+    658|     assert.deepEqual(artifact.inconsistencies, []);
+    659|     assert.deepEqual(artifact.events.map((row: any) => row.kind), ['re…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/cdp_network_collector.test.ts > target-shaped failure before response remains non-candidate and cannot trigger body capture
+AssertionError: 'inconsistent' == 'complete'
+
+Expected: "complete"
+Received: "inconsistent"
+
+ ❯ tests/cdp_network_collector.test.ts:678:12
+    676|     const artifact = await collector.closeAndFlush();
+    677| 
+    678|     assert.equal(artifact.status, 'complete');
+       |            ^
+    679|     assert.deepEqual(artifact.inconsistencies, []);
+    680|     assert.deepEqual(artifact.events[1].disqualification_reasons, ['re…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 53 passed (55)
+   Start at  11:02:41
+   Duration  1.26s (transform 76ms, setup 21ms, collect 79ms, tests 206ms, environment 0ms, prepare 431ms)
+

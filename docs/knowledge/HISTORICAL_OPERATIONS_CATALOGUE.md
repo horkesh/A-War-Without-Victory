@@ -2,7 +2,7 @@
 
 **Purpose:** a single reference for the Historian (and anyone else) to check which named historical operations the engine already models, without grepping `pre_planned_operations.ts`/`triggered_operations.ts` from scratch each time.
 
-**Status: COMPLETE 2026-08-11 (three systems).** Extracted mechanically from source. All 15 RS pre-planned ops (verified table below), the single HRHB pre-planned op (Operation Jackal), and all 8 `triggered_operations.ts` defs (Posavina Corridor, Herzegovina Consolidation, Kotor Varoš, Cerska-Kamenica, Krivaja-95, Farz 95, Stupčanica-95, Mistral 2) are catalogued with corps/faction/timing/citation/staging/objectives. **As of 2026-08-11 the third system — the `operation_opportunity_catalog_*.ts` "operation opportunity" family (RBiH/HRHB late-war offensives + a T3 defensive triad) — is now included** in the new section below; it was previously (wrongly) framed as "out of scope." Note: `ARBIH_PRE_PLANNED` is an **empty array** — there are zero RBiH *pre-planned* ops, and the only RBiH op in `triggered_operations.ts` is the triggered Operation Farz 95; RBiH/HRHB's real discretionary offensives all live in that third system. Treat comments in the source as ground truth over this doc if they ever diverge — this file needs periodic re-sync, and comments themselves can go stale (see the Trnovo `available_from` discrepancy noted below, found 2026-08-11).
+**Status: COMPLETE 2026-08-11 (three systems); re-synced 2026-09-17.** Extracted mechanically from source. All 15 RS pre-planned ops (verified table below), the single HRHB pre-planned op (Operation Jackal), and all 8 `triggered_operations.ts` defs (Posavina Corridor, Herzegovina Consolidation, Kotor Varoš, Cerska-Kamenica, Krivaja-95, Farz 95, Stupčanica-95, Mistral 2) are catalogued with corps/faction/timing/citation/staging/objectives. **As of 2026-08-11 the third system — the `operation_opportunity_catalog_*.ts` "operation opportunity" family (RBiH/HRHB late-war offensives + a T3 defensive triad) — is now included** in the new section below; it was previously (wrongly) framed as "out of scope." Note: `ARBIH_PRE_PLANNED` is an **empty array** — there are zero RBiH *pre-planned* ops, and the only RBiH op in `triggered_operations.ts` is the triggered Operation Farz 95; RBiH/HRHB's real discretionary offensives all live in that third system. Treat comments in the source as ground truth over this doc if they ever diverge — this file needs periodic re-sync, and comments themselves can go stale (see the Trnovo `available_from` discrepancy noted below, found 2026-08-11).
 
 ## Verified: RS pre-planned operations (`src/sim/combat/pre_planned_operations.ts`)
 
@@ -30,11 +30,40 @@ The `HRHB_PRE_PLANNED` array holds exactly one op.
 
 | Operation | Corps | available_from | Citation | Staging OSID | Objectives (single axis `stolac_sweep`) |
 |---|---|---|---|---|---|
-| Operation Jackal (Stolac-Čapljina) | hvo_southeast_herzegovina | w8 | — | op:capljina:capljina_2 | tasovcici_2 → mostar:hodbina_2 → stolac:rotimlja_2 → stolac:stolac_2 |
+| Operation Jackal (Stolac-Čapljina) | hvo_southeast_herzegovina | w8 | — | op:capljina:capljina_2 | tasovcici_2 → mostar:hodbina_2 → stolac:rotimlja_2 → stolac:stolac_2 → **stolac:pjesivac_kula_2** |
 
-## RBiH pre-planned operations — NONE
+**Catalogue correction (2026-09-17).** `op:stolac:pjesivac_kula_2` was appended to the single `stolac_sweep`
+axis by `41a148bf9` (2026-09-16), after Stolac. Hatelji (`op:stolac:hatelji_2`) remains **excluded**. No new
+axis, combat multiplier, initial-control change or reference repaint was part of that correction.
 
-The `ARBIH_PRE_PLANNED` array is **empty** (comment-only). A previous attempt (R28) to add "Op Sana 95" on `arbih_5th_corps` was BLOCKED for regression (−6 OSIDs / −1pp) because the triggered "Operation Sana" already ran on 5th Corps at w175-188 and the pre-planned entry stalled behind it. RBiH's only modeled discretionary offensive is the triggered **Operation Farz 95** (Vozuća, below). Note: "Operation Herzegovina Consolidation" (from an earlier name-scan) lives in `triggered_operations.ts`, NOT here — it is catalogued in the triggered table below. The Sana/western-Bosnia RBiH offensives (plus the Central-Bosnia and Federation/Western-Bosnia HRHB offensives) live in the separate "opportunity" system (`operation_opportunity_catalog_*.ts`) — catalogued in full in the new "Verified: operation-opportunity-catalog operations" section below.
+## Verified: RBiH pre-planned operations (`src/sim/combat/pre_planned_operations.ts`)
+
+**Catalogue correction (2026-09-17).** Earlier revisions of this section asserted `ARBIH_PRE_PLANNED` was
+"empty (comment-only)". That was accurate at 2026-08-11 but is **not** true on the current branch: the array
+holds exactly one op.
+
+| Operation | Corps | available_from | Citation | Staging OSID |
+|---|---|---|---|---|
+| Central Bosnia Counteroffensive | arbih_3rd_corps | w60 | — | op:travnik:travnik_2 |
+
+Axes: *fojnica_periphery* (`op:fojnica:bakovici_2`) · *kakanj_salient* (kakanj:slapnica_2, bukovlje_2,
+seoce_2, poljani_2) · *gornji_vakuf_novi_travnik* (op:gornji_vakuf:zdrimci, op:novi_travnik:rat_2) ·
+*novi_travnik_northern_approach* (op:novi_travnik:ruda_2) · *vares_approach* (op:vares:gornja_borovica_2,
+op:vares:vares_2) · *zavidovici_position* (`op:zavidovici:cardak_2`). `planning_duration: 12`;
+`execution_attack_power_mult: 1.35`.
+
+**The `zavidovici_position` axis is a fallback, not the source of the Čardak capture.** On the calibration
+scenario the 3rd Corps commander takes `op:zavidovici:cardak_2` first, through the generic bounded
+isolated-position mechanism (operation-owned combat, t23 = 1992-09-14, `arbih_3rd_corps:Operacija Izlaz:t21`).
+The authored axis attacks Čardak explicitly from `op:zavidovici:hajderovici_2` only if the position is still
+held when this op (w60) injects. **Its successful 1992 capture does not depend on this later definition**,
+and the objective is not removed. See [Čardak diagnosis](../40_reports/20260916_CARDAK_1992_GOSTOVIC_VALLEY_DIAGNOSIS.md).
+
+*History retained:* the R28 attempt to add "Op Sana 95" on `arbih_5th_corps` as a pre-planned op was BLOCKED
+for regression (−6 OSIDs / −1pp) because the triggered "Operation Sana" already ran on 5th Corps at w175-188
+and the pre-planned entry stalled behind it; no such def exists here. RBiH's other discretionary offensives
+live in the triggered system (Operation Farz 95) and the separate "operation-opportunity" system
+(`operation_opportunity_catalog_*.ts`, catalogued below).
 
 **Known stale-comment trap (found 2026-08-11):** `pre_planned_operations.ts` line 426 has a leftover comment reading "available_from: 6 — injects right after Op Prsten recovery (~w4)" directly above the ACTUAL field on line 439, `available_from: 69` (with its own, correct, comment: "historical Lukavac 93 = August 1993 (~w69)"). The 69 value is what's live in code and matches history; the "6" comment is dead prose from an earlier version. A near-identical stale reference exists in `triggered_operations.ts` line 1222 ("Trnovo (available_from:6) injects immediately after"). Anyone reading only comments (as a prior investigation in this session briefly did) will get the wrong timing — always check the literal field value.
 
@@ -45,7 +74,7 @@ These use predicate `trigger(state, turn)` gating rather than a plain `available
 | Operation | Faction | Primary corps | Trigger (predicate logic) | Citation | Staging OSID | Objectives |
 |---|---|---|---|---|---|---|
 | Operation Posavina Corridor (Orašje Pocket) | RS | vrs_1st_krajina | 1KK has completed Op Corridor (`corpsCompletedOp`) | BB1 p.182 | op:bosanski_samac:domaljevac_2 | orasje:donja_mahala → orasje:orasje |
-| Operation Herzegovina Consolidation | RS | vrs_herzegovina | vrs_herzegovina completed **both** Op Visegrad AND Op Foca AND has no active/queued op | BB1 p.193, BB2 p.514 | op:nevesinje:sopilja | *mostar_heights*: vranjevici_2(way)→blagaj_2→hodbina_2 · *konjic_south*: glavaticevo_2(way)→dzepi_2→konjic_2 |
+| Operation Herzegovina Consolidation | RS | vrs_herzegovina | vrs_herzegovina completed **both** Op Visegrad AND Op Foca AND has no active/queued op | BB1 printed p.156, BB2 p.514 | op:nevesinje:sopilja | *mostar_heights*: vranjevici_2(conditional waypoint)→blagaj_2→hodbina_2 · *konjic_south*: glavaticevo_2(conditional waypoint)→dzepi_2→konjic_2 |
 | Operation Kotor Varos | RS | vrs_1st_krajina | turn ≥ 10 AND ≥1 of {kotor_varos_2, vrbanjci_2, prisocka_2} still enemy-held | — | op:kotor_varos:kotor_varos_2 | kotor_varos_2, vrbanjci_2, prisocka_2 |
 | Operation Cerska-Kamenica (Cerska Pocket, Kamenica) | RS | vrs_drina | turn ≥ 40 | — | op:vlasenica:grabovica | *cerska_pocket*: vlasenica:cerska_2 · *kamenica*: srebrenica:osmace_2, radovcici, sulice_2 |
 | **Operation Krivaja-95** (Srebrenica Enclave) | RS | vrs_drina | turn ≥ 170 AND `srebrenica_falls_1995` event receipt fired | ICTY Popović IT-05-88-T §244/§245 fn757/§247 (no BB page) | op:bratunac:bratunac_2 | srebrenica: donji_potocari_2, srebrenica_2, bostahovine_2, milacevici, suceska |
@@ -53,7 +82,7 @@ These use predicate `trigger(state, turn)` gating rather than a plain `available
 | **Operation Stupčanica-95** (Žepa Pocket) | RS | vrs_drina | turn ≥ 172 AND `zepa_falls_1995` event receipt fired | BB2 p.611, ICTY Krstić verdict | op:vlasenica:grabovica | rogatica:zepa_2 |
 | Operation Mistral 2 (Drvar–Grahovo / Šipovo–Mrkonjić) | HRHB | hvo_main_staff | turn ≥ 175 (**filtered OUT of the live catalogue — see note; never fires via triggered path**) | BB2 pp.629-642 | op:livno:misi_2 | *mistral_drvar*: glamoc:halapic, stekerovci_2; titov_drvar:prekaja_2, drvar_2, sipovljani_2; bosansko_grahovo:crni_lug, bosansko_grahovo_2, malesevci, ugarci · *mistral_sipovo*: sipovo:brdjani, gornji_mujdzici_2, sipovo_2, volari_2, pribeljci_2; mrkonjic_grad:gerzovo_2, mrkonjic_grad_2, bjelajce_2, baljvine_2, majdan_2, podrasnica_2 |
 
-"(way)" = RS waypoint objective, painted-own from t0, stripped at execution (not a real target). Objective OSIDs are shown without the `op:` prefix except where the municipality differs from the column context; each is `op:<mun>:<settlement>` in source.
+"(conditional waypoint)" = an objective that `buildAxesFromDef` strips at execution **only if the attacker already controls it at plan time**. It is NOT necessarily "painted-own from t0": on the current branch `op:mostar:vranjevici_2` and `op:konjic:glavaticevo_2` start **RBiH**, so they are stripped only when RS holds them at plan time. The historical assignment of those cells is under review — see [the Vranjevići/Mostar diagnosis](../40_reports/20260917_VRANJEVICI_MOSTAR_JANUARY_DIAGNOSIS.md) — and this catalogue records the mechanical behaviour only. Objective OSIDs are shown without the `op:` prefix except where the municipality differs from the column context; each is `op:<mun>:<settlement>` in source.
 
 **Two defs are NOT live via the triggered path:**
 - **Operation Mistral 2** is defined in `TRIGGERED_OPS_RAW` but explicitly filtered out (`TRIGGERED_OPS = TRIGGERED_OPS_RAW.filter(d => d.name !== 'Operation Mistral 2')`, line ~691). It is kept only as historical footprint text; the live behaviour is owned by the Federation/Western-Bosnia **opportunity catalog**. So the Mistral 2 row above documents design intent, not an operation that actually fires here.

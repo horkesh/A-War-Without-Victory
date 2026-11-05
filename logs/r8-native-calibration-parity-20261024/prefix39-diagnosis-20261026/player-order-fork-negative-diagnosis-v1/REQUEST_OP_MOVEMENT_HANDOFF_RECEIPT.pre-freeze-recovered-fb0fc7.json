@@ -1,0 +1,312 @@
+{
+  "schema": "awwv.request-op-movement-handoff-diagnosis.v1",
+  "date": "2026-10-26",
+  "mode": "source-and-retained-evidence-only",
+  "head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+  "execution_performed": {
+    "engine": false,
+    "query": false,
+    "stage": false,
+    "advance": false,
+    "test": false,
+    "source_edit": false
+  },
+  "canonical_floor": 500,
+  "request_roster_at_staged_t16": [
+    {
+      "formation_id": "arbih_441st_vitezka_mountain",
+      "personnel": 1528,
+      "location_osid": "op:mostar:blagaj_2",
+      "meets_floor": true
+    },
+    {
+      "formation_id": "arbih_442nd_mountain",
+      "personnel": 491,
+      "location_osid": "op:mostar:kruzanj_2",
+      "meets_floor": false
+    },
+    {
+      "formation_id": "arbih_443rd_mountain",
+      "personnel": 1383,
+      "location_osid": "op:trnovo:trnovo",
+      "meets_floor": true
+    },
+    {
+      "formation_id": "arbih_444th_mountain",
+      "personnel": 315,
+      "location_osid": "op:konjic:celebici_2",
+      "meets_floor": false
+    },
+    {
+      "formation_id": "arbih_445th_mountain",
+      "personnel": 371,
+      "location_osid": "op:mostar:blagaj_2",
+      "meets_floor": false
+    },
+    {
+      "formation_id": "arbih_447th_liberation",
+      "personnel": 470,
+      "location_osid": "op:mostar:kruzanj_2",
+      "meets_floor": false
+    },
+    {
+      "formation_id": "arbih_448th_liberation",
+      "personnel": 402,
+      "location_osid": "op:konjic:ljuta",
+      "meets_floor": false
+    },
+    {
+      "formation_id": "arbih_449th_eastern_herzegovina_mountain",
+      "personnel": 333,
+      "location_osid": "op:mostar:potoci",
+      "meets_floor": false
+    },
+    {
+      "formation_id": "arbih_450th_light",
+      "personnel": 476,
+      "location_osid": "op:konjic:ljuta",
+      "meets_floor": false
+    },
+    {
+      "formation_id": "arbih_4th_muslim_light",
+      "personnel": 468,
+      "location_osid": "op:konjic:glavaticevo_2",
+      "meets_floor": false
+    }
+  ],
+  "roster_counts": {
+    "selected": 10,
+    "meets_offensive_floor": 2,
+    "below_offensive_floor": 8,
+    "directive_minimum_participants": 3
+  },
+  "case_442": {
+    "t16": {
+      "personnel": 491,
+      "status": "active",
+      "kind": "brigade",
+      "disrupted_turns": 0,
+      "location_osid": "op:mostar:kruzanj_2",
+      "assigned_sector": "sector:arbih_4th_corps:2"
+    },
+    "assigned_front_contains_location_at_t17": true,
+    "t17": {
+      "personnel": 488,
+      "posture": "defend",
+      "movement_order": null,
+      "movement_state": null
+    },
+    "movement_order_or_state_observed_t17_through_t39": false,
+    "first_rejecting_predicate": "evaluateGarrisonAndDetachments: (brigade.personnel ?? 0) < MIN_ATTACK_PERSONNEL",
+    "first_handler_inference_inputs": [
+      "not a garrison=true formation",
+      "kind=brigade, not militia detachment",
+      "assigned sector front includes op:mostar:kruzanj_2",
+      "491 < 500"
+    ],
+    "result": "defend_and_return_before_sector_attack"
+  },
+  "comparison_443": {
+    "t16_personnel": 1383,
+    "t17_personnel": 1476,
+    "location_t16_t22": "op:trnovo:trnovo",
+    "meets_floor": true,
+    "operation_owned_attacks": [
+      {
+        "turn": 21,
+        "target": "op:trnovo:tosici",
+        "outcome": "stalemate"
+      },
+      {
+        "turn": 22,
+        "target": "op:trnovo:tosici",
+        "outcome": "catastrophic"
+      }
+    ]
+  },
+  "comparison_441": {
+    "t16_personnel": 1528,
+    "t17_order": {
+      "destination_sids": [
+        "op:trnovo:trnovo"
+      ],
+      "owner": "bot_discretionary",
+      "stance": "column"
+    },
+    "t18_path": [
+      "op:mostar:blagaj_2",
+      "op:mostar:mostar_istok_2",
+      "op:mostar:potoci",
+      "op:konjic:celebici_2",
+      "op:konjic:konjic_2",
+      "op:konjic:dzepi_2",
+      "op:trnovo:tusila",
+      "op:trnovo:trnovo"
+    ],
+    "attack": {
+      "turn": 23,
+      "target": "op:trnovo:tosici",
+      "outcome": "catastrophic"
+    }
+  },
+  "source_contract": {
+    "request_selector": {
+      "path": "src/sim/turn_phases/war_phases.ts",
+      "lines": "763-879",
+      "observed_gap": "legalPool uses isEligibleOperationFormation plus availability/commitment/objective/reachability, without MIN_ATTACK_PERSONNEL"
+    },
+    "dispatcher_order": {
+      "path": "src/sim/combat/bot_brigade_ai_osid.ts",
+      "lines": "885-892",
+      "fact": "garrison_and_detachments executes before sector_attack"
+    },
+    "first_consumer_gate": {
+      "path": "src/sim/combat/bot_brigade_eval_hold.ts",
+      "lines": "8-35",
+      "fact": "on-front below-floor brigade is set to defend and handled"
+    },
+    "operation_route_owner": {
+      "path": "src/sim/combat/bot_brigade_eval_attack.ts",
+      "lines": "211-289",
+      "fact": "above-floor planning participant receives approach/staging column movement when needed"
+    },
+    "historical_selector_comparator": {
+      "path": "src/sim/combat/operation_opportunities.ts",
+      "lines": "1697-1823",
+      "fact": "authored historical operation selection rejects below-floor, disrupted, and ordinary in-transit formations before admission"
+    }
+  },
+  "bukvik_retained_comparator": {
+    "head": "295d5f7290b1085dc76bbebb41df72386cd6b705",
+    "target": "op:brcko:bukvik_gornji_2",
+    "roster_count": 11,
+    "minimum_personnel": 536,
+    "all_roster_above_current_floor": true,
+    "movement_rows_at_turn4": 7,
+    "operation_owned_attackers_at_turn5": 9,
+    "scope_limit": "retained ordinary REQUEST delivery comparator only; not a duplicated battle diagnosis or historical-capture claim"
+  },
+  "diagnosis": {
+    "missing_movement_owner": false,
+    "off_sector_admission_is_sufficient_explanation": false,
+    "observed_root_cause": "REQUEST selector admits formations that the first normal brigade consumer forbids from offensive routing",
+    "smallest_candidate": "apply existing MIN_ATTACK_PERSONNEL in planDirectiveOperation before reachable minimum-three selection",
+    "exact_t16_effect": "two eligible formations remain; ordinary planner returns no_available_force",
+    "threshold_change_proposed": false,
+    "unobserved_related_audit": [
+      "disrupted",
+      "in_transit"
+    ]
+  },
+  "bindings": [
+    {
+      "path": "src/state/formation_constants.ts",
+      "bytes": 25491,
+      "sha256": "985eeaa427a356e83db5b384a9fbe5533c6bb4eb385855eb4f025a0ed7c11c32"
+    },
+    {
+      "path": "src/sim/turn_phases/war_phases.ts",
+      "bytes": 233809,
+      "sha256": "d9ec4ee736cf5ac2c05508bddc5a94bcda0897a9fbe0e09d63dfaa7dfe6cd456"
+    },
+    {
+      "path": "src/sim/combat/bot_brigade_ai_osid.ts",
+      "bytes": 62126,
+      "sha256": "ce40df92bba5458009e2813b41bf4195207d143b38e59edfa93c8d93fb78b9c0"
+    },
+    {
+      "path": "src/sim/combat/bot_brigade_eval_hold.ts",
+      "bytes": 6372,
+      "sha256": "eece9c3e06cff18f82fc1d9efc94ba5421f3a31addefea486c21c4e172d955ef"
+    },
+    {
+      "path": "src/sim/combat/bot_brigade_eval_attack.ts",
+      "bytes": 50814,
+      "sha256": "cdc2c62207d78a6716f8fd67d427ff58d693026e8dd7e0c63f2bbbd79ec96c03"
+    },
+    {
+      "path": "src/sim/combat/operation_opportunities.ts",
+      "bytes": 92382,
+      "sha256": "8d1f0cfbeb4017b94d3e6095c7f473be762b35933b41bac1f831b0a01544a7a5"
+    },
+    {
+      "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/staged-state-turn-016.json",
+      "bytes": 4756863,
+      "sha256": "f7a6930d8e15c28fc0756e0c0622315a4a06b8d53cec9981c374908e52b8d771"
+    },
+    {
+      "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/state-turn-017.json",
+      "bytes": 4795153,
+      "sha256": "da64e5a190da2e80e137c46fd1eb3924ae7ecd4b5a3e8eedce2d27f00a796c92"
+    },
+    {
+      "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/state-turn-018.json",
+      "bytes": 4890880,
+      "sha256": "be8fdde18082c49a2001d969fab8c797abcfbf18052f01c8dbc3d964b94ed16a"
+    },
+    {
+      "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/state-turn-021.json",
+      "bytes": 5041772,
+      "sha256": "a5e25b25f49027b3da08d7c8334afd66f9458fb37fd08560355752e68a0273cc"
+    },
+    {
+      "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/state-turn-022.json",
+      "bytes": 5067776,
+      "sha256": "61e03ebb6a04e21eafbae4a403de4a48005454b621170db2b9e718f724a6a2dc"
+    },
+    {
+      "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01/state-turn-023.json",
+      "bytes": 5104314,
+      "sha256": "08d0650f4ad2ed7e305ec620de306122f52e155ed8206024548548e7767c18c1"
+    },
+    {
+      "path": "logs/r8-native-calibration-parity-20261024/scenario-osid-graph-20261025/20-delivery-actual-review.json",
+      "bytes": 10764,
+      "sha256": "e3712a19ddbee8fcbd873f883cdc530427c1e057d468624c626b22be2016528f"
+    },
+    {
+      "path": "logs/r8-native-calibration-parity-20261024/scenario-osid-graph-20261025/21-delivery-result.json",
+      "bytes": 41509,
+      "sha256": "3a61a057c837dc27815c582bb3f2fe02e04fae7d426500e3b12761f0867dece0"
+    },
+    {
+      "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/INDEPENDENT_ACTUAL_RESULT_REVIEW.v1.json",
+      "bytes": 11380,
+      "sha256": "c85b9a89bb253e3f9d79cbecb4a153a529c2a36a6feee281a0fdb9ba735b7cc5"
+    }
+  ],
+  "below_floor_movement_scan_t17_t39": {
+    "arbih_442nd_mountain": {
+      "order_turns": [],
+      "state_turns": []
+    },
+    "arbih_444th_mountain": {
+      "order_turns": [],
+      "state_turns": []
+    },
+    "arbih_445th_mountain": {
+      "order_turns": [],
+      "state_turns": []
+    },
+    "arbih_447th_liberation": {
+      "order_turns": [],
+      "state_turns": []
+    },
+    "arbih_448th_liberation": {
+      "order_turns": [],
+      "state_turns": []
+    },
+    "arbih_449th_eastern_herzegovina_mountain": {
+      "order_turns": [],
+      "state_turns": []
+    },
+    "arbih_450th_light": {
+      "order_turns": [],
+      "state_turns": []
+    },
+    "arbih_4th_muslim_light": {
+      "order_turns": [],
+      "state_turns": []
+    }
+  }
+}

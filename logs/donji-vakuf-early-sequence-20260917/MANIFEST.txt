@@ -1,0 +1,43 @@
+# Durable evidence — Donji Vakuf early-sequence correction, 2026-09-17
+#
+# Candidate n404, reproduced BYTE-IDENTICALLY as n405:
+#   runs/apr1992_definitive_188w__9137f75e9f35be20__w39_n404
+#   runs/apr1992_definitive_188w__9137f75e9f35be20__w39_n405
+#   baseline: ..._w39_n403 (clean tree at 41a148bf9)
+# Command: npm run sim:scenario:run:188w -- --weeks 39
+#   (the DEFINITIVE 188-week scenario with a duration override through t39 — NOT the separate
+#   40-week scenario). n404/n405 ran git_dirty: true; the baseline n403 ran clean.
+# Those raw run directories are gitignored and local-only; only these compact extracts are committed.
+#
+# Provenance: 31 consumed inputs, EXACTLY ONE differs from n403 —
+#   data/scenarios/events/war_1992.json  7596df56b934be43... -> 35d0f79f12b1e55d...
+#   digest f8ace65496620fad...4748caaf -> c19985625ad8827f...4261fb3
+#
+# SHA-256 below are of the COMMITTED BLOBS (`git cat-file blob :<path>`), which are the durable
+# bytes. .gitattributes normalizes .cjs/.md/.txt to LF on commit, so an on-disk CRLF copy can
+# differ from its committed blob. Verify against these blob hashes, not the working-tree copies.
+#
+# No credential, token or secret value appears in any file listed here.
+
+350b11550845982d7ed676e8544e7d29f08eb169d33f5cb88046db115ecdb477  CHANGE_SPEC.md
+964e111d1ee1c897868854c0bd29ac25746b964eb564fd1cf7cf5d180b6395b8  dv_sequence.cjs
+5175034ef5ae1232a3ffbffcbbf1a15fa574b149d19e59ef7ad2c344ab0751cb  dv_sequence_n404.txt
+78201334342a9f1fff4469d73bf92b308313544ea0f2bdbe94d19621eb80620f  gates_n403_vs_n404.txt
+64aff774da382bc342d96e2086542753a9415b417e02efd0b9ae4fa3a2bae7a9  jan_mismatch_diff.cjs
+8cc663d4eabb0978d32136a1a0ca0ed20f8e3345cf9ff75a21cbc2890187a148  jan_mismatch_diff.txt
+
+# WHAT EACH FILE IS
+#   CHANGE_SPEC.md          written BEFORE any edit, per the packet: the wired-mechanism inventory
+#                           (including the two mechanisms found DEAD and rejected on that basis),
+#                           the two stated limitations, and the change table
+#                           (field -> old premise -> evidence -> configuration -> expected effect).
+#   dv_sequence_n404.txt    which event fired when, every control event on the municipality's ten
+#                           cells with calendar dates and mechanism, and the operation diagnostics.
+#   jan_mismatch_diff.txt   the January mismatch sets diffed CELL BY CELL, not net: 1 fixed,
+#                           0 introduced, 10 carried. A net-equal score can hide a swap; this cannot.
+#   gates_n403_vs_n404.txt  verify_checkpoints and engine_health_gate for both runs side by side.
+#                           The apr1994/apr1995/oct1995 lines on a 39-week run are the t39 state
+#                           replayed against later references — NOT REACHED, not measurements — and
+#                           both runs fail the same two health gates for the same horizon reason.
+#   dv_sequence.cjs         regenerates dv_sequence_n404.txt from any run directory.
+#   jan_mismatch_diff.cjs   regenerates jan_mismatch_diff.txt from two run directories.

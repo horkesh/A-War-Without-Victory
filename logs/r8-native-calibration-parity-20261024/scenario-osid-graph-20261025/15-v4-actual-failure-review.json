@@ -1,0 +1,108 @@
+{
+  "schema": "awwv.pre-t6-causal-capture.actual-failure-review.v4",
+  "reviewed_at": "2026-10-25",
+  "verdict": "ACTUAL_GENERATION_FAILED_RETAINED_CAUSE_REPRODUCED_OFFLINE",
+  "head": "295d5f7290b1085dc76bbebb41df72386cd6b705",
+  "actual_run": {
+    "count": 1,
+    "elapsed_ms": 6090,
+    "capture_child_exit": 0,
+    "capture_wrapper_exit": 0,
+    "capture_timed_out": false,
+    "supervisor_pass": false,
+    "supervisor_status": "STOP_POSTCHECK",
+    "postcheck_exit": 2,
+    "postcheck_failures": [
+      "FINAL_NOT_EXACT_TO_COMPOSITE_AND_OBSERVER",
+      "ENTRY_EXACTNESS_FLAGS_FALSE"
+    ],
+    "producer_outputs_exact_to_qualified_v2_off": 5,
+    "producer_outputs_total": 5,
+    "captured_pre_runtime_unchanged": true,
+    "causal_go": false,
+    "disposition": "Preserve the failed run. Do not retry the scenario process and do not waive either integrity failure."
+  },
+  "failure_diagnosis": {
+    "contract_error": "The reused V3 shadow used loadOperationalEdges(), while the actual scenario-only post-turn repair receives graph.edges from buildScenarioStartupState's canonical settlement graph.",
+    "actual_runner_arguments": {
+      "settlements": "data/source/settlements_initial_master.json",
+      "edges": "data/derived/settlement_edges.json",
+      "repair_call": "repairScenarioArtifactState(state, graph.edges, operationalData.operationalToCanonical, operationalCentroids)"
+    },
+    "domain_mismatch": "repairScenarioArtifactState passes its edges to computeFrontEdgesOsid and reconcileFinalSectorTruth. The canonical graph endpoints are settlement IDs such as S100013, while computeFrontEdgesOsid expects OSID endpoints such as op:banja_luka:banja_luka_2.",
+    "first_source_predicate": {
+      "file": "src/map/front_edges.ts",
+      "line": 127,
+      "predicate": "if (sideA === null || sideB === null || sideA === sideB) continue;",
+      "effect": "Canonical SID endpoints are queried as OSIDs, so the OSID controller lookup yields null and every canonical edge is skipped. The retained actual post-repair state has zero war_front_edges_osid entries."
+    },
+    "downstream_empty_geometry_predicate": {
+      "file": "src/sim/combat/corps_front_sectors.ts",
+      "line": 397,
+      "predicate": "if (!osidFrontEdges || osidFrontEdges.length === 0) return {};",
+      "effect": "The fresh reconciliation installs an empty corps_front_sectors map; sector-derived membership for both target formations disappears."
+    }
+  },
+  "retained_offline_check": {
+    "attempt": "attempts/retained-canonical-graph-shadow-01",
+    "simulation_executed": false,
+    "state_advanced": false,
+    "deserialize_or_migration_used": false,
+    "timeout_ms": 30000,
+    "elapsed_ms": 1175,
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "timed_out": false,
+    "artifact_contract_pass": true,
+    "retained_input_matches_raw_trace": true,
+    "canonical_sequential_matches_composite": true,
+    "canonical_composite_matches_actual_postrepair": true,
+    "public_target_diagnostics_count": 0,
+    "predicate_status": "PREDICATE_NOT_EXPOSED_BY_PUBLIC_DIAGNOSTICS"
+  },
+  "two_target_transition": {
+    "ids": [
+      "hv_113th_brigade_tg",
+      "hv_4th_guards_tg"
+    ],
+    "input": {
+      "sector_ids_both": [
+        "sector:hvo_southeast_herzegovina:0"
+      ],
+      "location_osid_both": "op:capljina:capljina_2",
+      "fatigue_both": 0.5
+    },
+    "after_displace": "Both remain assigned to sector:hvo_southeast_herzegovina:0 with unchanged location and fatigue.",
+    "after_front_edges": "Both remain assigned to sector:hvo_southeast_herzegovina:0 with unchanged location and fatigue; war_front_edges_osid is now empty under the mismatched canonical-edge/OSID computation.",
+    "after_reconcile": "Both sector_ids arrays become empty with unchanged location and fatigue.",
+    "exact_actual_postrepair_match": true,
+    "first_membership_writer": "RECONCILE_FINAL_SECTOR_TRUTH",
+    "causal_chain": "Canonical SID graph supplied to OSID front-edge computation -> all edges rejected at the null-controller predicate -> empty OSID front edge set -> full geometry reconciliation returns and installs empty sectors -> both target memberships are erased.",
+    "operational_graph_contrast": "The retained wrong-domain V3 shadow using operational edges kept both formations assigned through displacement, front-edge recomputation, and reconciliation."
+  },
+  "evidence_hashes_sha256": {
+    "attempts/capture-01/PRE_REPAIR_T1.runtime.json": "64643cc6dc8a9ecd9a4972a4af71f752795c7a46ad4be960bbff0ab2478e3ea5",
+    "attempts/capture-01/POST_REPAIR_T1.runtime.json": "3e449c7e7d1245a939c258e64b0d57d167bad984518beb70864915db328574a6",
+    "attempts/capture-01/SHADOW_ISOLATION.json": "7ce7521d7cfaea36df703cc506521bf875368ca85131c0ca73e8cb75e38a82ff",
+    "attempts/supervisor-01/POSTCHECK.json": "9eee68c2eb4b7f6f14fd595a7402b0c9cf6f1b361c1f5437c57c3e07e6ac3e24",
+    "attempts/supervisor-01/SUPERVISOR.json": "9c4da0fe6c6f4173ba9b942d9ab5e1081c61115ff4a8ab0f6c08ba7574ab14e6",
+    "retained_canonical_graph_shadow.mts": "81658d2a7d312fba05c7e3159dd1ca89ff5ff3960165b5df290ae00b5382c6cc",
+    "attempts/retained-canonical-graph-shadow-01/CANONICAL_GRAPH_SHADOW.json": "2ecdb9ab7fdff434dc662d44944af19157d02ef0d25035b3562ce36933b56255",
+    "attempts/retained-canonical-graph-shadow-01/receipt.json": "d04204733504155574d3a344c1c604855a9099d4daf69c7d60a338fa4ef4de60",
+    "data/source/settlements_initial_master.json": "0a4fa946436ed525e38d94df0d3afe98ad2cfdd1e0f26f4cad2ae32bc894535d",
+    "data/derived/settlement_edges.json": "69073545ddac46395019b63295cd0de3a79920771b417178eb06cc38aa9a7cb7",
+    "src/scenario/scenario_runner.ts": "0003f3b39df003302ffbb8cfaca6709b6f58be40eca447cf9fd2d94b579d2b2c",
+    "src/map/front_edges.ts": "1a25767d218424da01762b50ceea3de9b0b509e5e2e19824bfee184b134cc7a7",
+    "src/sim/combat/corps_front_sectors.ts": "a46f78a9248e4333346cd2f3066a10a0c195cf6546e1c6e8b974405129b46d93"
+  },
+  "smallest_evidence_backed_proposal": {
+    "owner_decision_required": true,
+    "proposal": "Resolve the scenario-only post-turn repair boundary as one canon decision. If the extra repair remains, supply the operational contact edges expected by computeFrontEdgesOsid and reconcileFinalSectorTruth, matching the public war-phase edge domain. Also consider retiring or narrowing the extra full rebuild because the public turn pipeline already reconciles and then performs final brigade distribution/sealing; do not implement either option until canon establishes whether post-turn reconstruction is required.",
+    "required_targeted_acceptance": "On a retained or minimal deterministic state, the chosen boundary must preserve the final distribution/seal result and must not erase the two target memberships through an edge-domain mismatch. Full calibration or gameplay tuning is outside this scope."
+  },
+  "claim_limits": [
+    "The V4 actual generation did not pass its integrity contract and cannot support the planned automatic capture claim.",
+    "The offline result proves the artifact-side graph-argument mismatch and exact two-target causal chain for the retained T1 state only.",
+    "It does not decide whether the extra scenario repair is canonically required, establish a global gameplay fix, authorize implementation, or justify tuning, baseline, native, campaign, suite, or package work."
+  ]
+}

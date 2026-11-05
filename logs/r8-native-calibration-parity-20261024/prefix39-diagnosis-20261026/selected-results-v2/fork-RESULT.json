@@ -1,0 +1,1318 @@
+{
+  "schema": "awwv.player-order-fork-diagnostic-v4.result.v1",
+  "pass": false,
+  "verdict": "PLAYER_FORK_FAILS_T39_ACCEPTANCE",
+  "scope": "offline current-source public-production-API fork; not native campaign qualification or same-input full-campaign proof",
+  "head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+  "mode": "fork-only",
+  "baselineFidelity": true,
+  "priorFidelity": {
+    "attempt": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/attempts/fidelity-current-source-01",
+    "receipt": {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/attempts/fidelity-current-source-01/receipt.json",
+      "bytes": 4560,
+      "sha256": "75edc31c43c9710608a10448e19d8ff99aa1a020a12453b4d1c8f0345de6a5aa"
+    },
+    "fidelity": {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/attempts/fidelity-current-source-01/BASELINE_FIDELITY.json",
+      "bytes": 332,
+      "sha256": "5905bd16df7d20a70666833e787f8a2ce2a57d8f0eca83e73b7d01cb600e7d79"
+    },
+    "produced": {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/attempts/fidelity-current-source-01/baseline-produced-turn-017.json",
+      "bytes": 4790188,
+      "sha256": "32d5b1bbcdb74bb2f7a2c5dbc9bca40bd5237cab318052c90c0abe9c0f184cf1"
+    },
+    "independentActualReview": {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fidelity-diagnostic-v3/INDEPENDENT_ACTUAL_FIDELITY_REVIEW.v1.json",
+      "bytes": 9082,
+      "sha256": "c4604af9987fd77634e0b11cefdf31239437697b858578e2d7fb28d9c20a3a92"
+    }
+  },
+  "queryDerivedForce": true,
+  "operation": {
+    "operationId": "arbih_4th_corps:Presidential Directive — op:trnovo:tosici:t17",
+    "name": "Presidential Directive — op:trnovo:tosici",
+    "type": "sector_attack",
+    "phase": "planning",
+    "startedTurn": 17,
+    "requestedByPresident": true,
+    "forced": true,
+    "commanderOfficerId": "arbih_malkic",
+    "roster": [
+      "arbih_441st_vitezka_mountain",
+      "arbih_442nd_mountain",
+      "arbih_443rd_mountain",
+      "arbih_444th_mountain",
+      "arbih_445th_mountain",
+      "arbih_447th_liberation",
+      "arbih_448th_liberation",
+      "arbih_449th_eastern_herzegovina_mountain",
+      "arbih_450th_light",
+      "arbih_4th_muslim_light"
+    ],
+    "axes": [
+      {
+        "axisId": "main",
+        "stagingOsid": "op:trnovo:delijas",
+        "objectives": [
+          "op:trnovo:tosici"
+        ],
+        "assignedBrigades": [
+          "arbih_441st_vitezka_mountain",
+          "arbih_442nd_mountain",
+          "arbih_443rd_mountain",
+          "arbih_444th_mountain",
+          "arbih_445th_mountain",
+          "arbih_447th_liberation",
+          "arbih_448th_liberation",
+          "arbih_449th_eastern_herzegovina_mountain",
+          "arbih_450th_light",
+          "arbih_4th_muslim_light"
+        ]
+      }
+    ]
+  },
+  "moved": true,
+  "fought": true,
+  "eventTranscript": [
+    {
+      "turn": 20,
+      "eventId": "london_conference_1992",
+      "responseId": "accept_principles",
+      "receipt": {
+        "turn": 20,
+        "eventId": "london_conference_1992",
+        "responseId": "accept_principles",
+        "source": "player"
+      }
+    },
+    {
+      "turn": 38,
+      "eventId": "ic_pressure_vopp_engagement",
+      "responseId": "acknowledge_pressure",
+      "receipt": {
+        "turn": 38,
+        "eventId": "ic_pressure_vopp_engagement",
+        "responseId": "acknowledge_pressure",
+        "source": "player"
+      }
+    },
+    {
+      "turn": 39,
+      "eventId": "vance_owen_plan_1993",
+      "responseId": "accept",
+      "receipt": {
+        "turn": 39,
+        "eventId": "vance_owen_plan_1993",
+        "responseId": "accept",
+        "source": "player"
+      }
+    }
+  ],
+  "retainedNativeScore": {
+    "score": 704,
+    "denominator": 712,
+    "floor": 707,
+    "against": {
+      "n91": {
+        "formerlyCorrect": 707,
+        "lost": [
+          {
+            "id": "op:donji_vakuf:korenici",
+            "expected": "RS",
+            "baseline": "RS",
+            "candidate": "RBiH"
+          },
+          {
+            "id": "op:foca:donje_zesce",
+            "expected": "RBiH",
+            "baseline": "RBiH",
+            "candidate": "RS"
+          },
+          {
+            "id": "op:trnovo:tosici",
+            "expected": "RBiH",
+            "baseline": "RBiH",
+            "candidate": "RS"
+          }
+        ]
+      },
+      "n92": {
+        "formerlyCorrect": 707,
+        "lost": [
+          {
+            "id": "op:donji_vakuf:korenici",
+            "expected": "RS",
+            "baseline": "RS",
+            "candidate": "RBiH"
+          },
+          {
+            "id": "op:foca:donje_zesce",
+            "expected": "RBiH",
+            "baseline": "RBiH",
+            "candidate": "RS"
+          },
+          {
+            "id": "op:trnovo:tosici",
+            "expected": "RBiH",
+            "baseline": "RBiH",
+            "candidate": "RS"
+          }
+        ]
+      }
+    },
+    "pass": false
+  },
+  "rejectedV1WrongCohortScore": {
+    "score": 705,
+    "denominator": 712,
+    "floor": 707,
+    "against": {
+      "n91": {
+        "formerlyCorrect": 707,
+        "lost": [
+          {
+            "id": "op:foca:donje_zesce",
+            "expected": "RBiH",
+            "baseline": "RBiH",
+            "candidate": "RS"
+          },
+          {
+            "id": "op:trnovo:tosici",
+            "expected": "RBiH",
+            "baseline": "RBiH",
+            "candidate": "RS"
+          }
+        ]
+      },
+      "n92": {
+        "formerlyCorrect": 707,
+        "lost": [
+          {
+            "id": "op:foca:donje_zesce",
+            "expected": "RBiH",
+            "baseline": "RBiH",
+            "candidate": "RS"
+          },
+          {
+            "id": "op:trnovo:tosici",
+            "expected": "RBiH",
+            "baseline": "RBiH",
+            "candidate": "RS"
+          }
+        ]
+      }
+    },
+    "pass": false
+  },
+  "score": {
+    "score": 704,
+    "denominator": 712,
+    "floor": 707,
+    "against": {
+      "n91": {
+        "formerlyCorrect": 707,
+        "lost": [
+          {
+            "id": "op:donji_vakuf:korenici",
+            "expected": "RS",
+            "baseline": "RS",
+            "candidate": "RBiH"
+          },
+          {
+            "id": "op:foca:donje_zesce",
+            "expected": "RBiH",
+            "baseline": "RBiH",
+            "candidate": "RS"
+          },
+          {
+            "id": "op:trnovo:tosici",
+            "expected": "RBiH",
+            "baseline": "RBiH",
+            "candidate": "RS"
+          }
+        ]
+      },
+      "n92": {
+        "formerlyCorrect": 707,
+        "lost": [
+          {
+            "id": "op:donji_vakuf:korenici",
+            "expected": "RS",
+            "baseline": "RS",
+            "candidate": "RBiH"
+          },
+          {
+            "id": "op:foca:donje_zesce",
+            "expected": "RBiH",
+            "baseline": "RBiH",
+            "candidate": "RS"
+          },
+          {
+            "id": "op:trnovo:tosici",
+            "expected": "RBiH",
+            "baseline": "RBiH",
+            "candidate": "RS"
+          }
+        ]
+      }
+    },
+    "pass": false
+  },
+  "advances": 23,
+  "stoppedAtTurn": 39,
+  "turnReceipts": [
+    {
+      "turn": 17,
+      "operation": {
+        "operationId": "arbih_4th_corps:Presidential Directive — op:trnovo:tosici:t17",
+        "name": "Presidential Directive — op:trnovo:tosici",
+        "type": "sector_attack",
+        "phase": "planning",
+        "startedTurn": 17,
+        "requestedByPresident": true,
+        "forced": true,
+        "commanderOfficerId": "arbih_malkic",
+        "roster": [
+          "arbih_441st_vitezka_mountain",
+          "arbih_442nd_mountain",
+          "arbih_443rd_mountain",
+          "arbih_444th_mountain",
+          "arbih_445th_mountain",
+          "arbih_447th_liberation",
+          "arbih_448th_liberation",
+          "arbih_449th_eastern_herzegovina_mountain",
+          "arbih_450th_light",
+          "arbih_4th_muslim_light"
+        ],
+        "axes": [
+          {
+            "axisId": "main",
+            "stagingOsid": "op:trnovo:delijas",
+            "objectives": [
+              "op:trnovo:tosici"
+            ],
+            "assignedBrigades": [
+              "arbih_441st_vitezka_mountain",
+              "arbih_442nd_mountain",
+              "arbih_443rd_mountain",
+              "arbih_444th_mountain",
+              "arbih_445th_mountain",
+              "arbih_447th_liberation",
+              "arbih_448th_liberation",
+              "arbih_449th_eastern_herzegovina_mountain",
+              "arbih_450th_light",
+              "arbih_4th_muslim_light"
+            ]
+          }
+        ]
+      },
+      "lineage": {
+        "turn": 17,
+        "moves": [],
+        "ownedBattles": [],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": null,
+      "canonical": {
+        "bytes": 4795153,
+        "sha256": "da64e5a190da2e80e137c46fd1eb3924ae7ecd4b5a3e8eedce2d27f00a796c92"
+      },
+      "report": {
+        "bytes": 654434,
+        "sha256": "fa76b5aff1f06e1b3cb53d226399ca11812ecea1f6a1712ffa2b56b296551ad2"
+      }
+    },
+    {
+      "turn": 18,
+      "operation": {
+        "operationId": "arbih_4th_corps:Presidential Directive — op:trnovo:tosici:t17",
+        "name": "Presidential Directive — op:trnovo:tosici",
+        "type": "sector_attack",
+        "phase": "planning",
+        "startedTurn": 17,
+        "requestedByPresident": true,
+        "forced": true,
+        "commanderOfficerId": "arbih_malkic",
+        "roster": [
+          "arbih_441st_vitezka_mountain",
+          "arbih_442nd_mountain",
+          "arbih_443rd_mountain",
+          "arbih_444th_mountain",
+          "arbih_445th_mountain",
+          "arbih_447th_liberation",
+          "arbih_448th_liberation",
+          "arbih_449th_eastern_herzegovina_mountain",
+          "arbih_450th_light",
+          "arbih_4th_muslim_light"
+        ],
+        "axes": [
+          {
+            "axisId": "main",
+            "stagingOsid": "op:trnovo:delijas",
+            "objectives": [
+              "op:trnovo:tosici"
+            ],
+            "assignedBrigades": [
+              "arbih_441st_vitezka_mountain",
+              "arbih_442nd_mountain",
+              "arbih_443rd_mountain",
+              "arbih_444th_mountain",
+              "arbih_445th_mountain",
+              "arbih_447th_liberation",
+              "arbih_448th_liberation",
+              "arbih_449th_eastern_herzegovina_mountain",
+              "arbih_450th_light",
+              "arbih_4th_muslim_light"
+            ]
+          }
+        ]
+      },
+      "lineage": {
+        "turn": 18,
+        "moves": [],
+        "ownedBattles": [],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": null,
+      "canonical": {
+        "bytes": 4890880,
+        "sha256": "be8fdde18082c49a2001d969fab8c797abcfbf18052f01c8dbc3d964b94ed16a"
+      },
+      "report": {
+        "bytes": 662431,
+        "sha256": "b2adabdc2fa036482264630b670f076413b8d9cd7b9301faa684a7924ffabb7c"
+      }
+    },
+    {
+      "turn": 19,
+      "operation": {
+        "operationId": "arbih_4th_corps:Presidential Directive — op:trnovo:tosici:t17",
+        "name": "Presidential Directive — op:trnovo:tosici",
+        "type": "sector_attack",
+        "phase": "planning",
+        "startedTurn": 17,
+        "requestedByPresident": true,
+        "forced": true,
+        "commanderOfficerId": "arbih_malkic",
+        "roster": [
+          "arbih_441st_vitezka_mountain",
+          "arbih_442nd_mountain",
+          "arbih_443rd_mountain",
+          "arbih_444th_mountain",
+          "arbih_445th_mountain",
+          "arbih_447th_liberation",
+          "arbih_448th_liberation",
+          "arbih_449th_eastern_herzegovina_mountain",
+          "arbih_450th_light",
+          "arbih_4th_muslim_light"
+        ],
+        "axes": [
+          {
+            "axisId": "main",
+            "stagingOsid": "op:trnovo:delijas",
+            "objectives": [
+              "op:trnovo:tosici"
+            ],
+            "assignedBrigades": [
+              "arbih_441st_vitezka_mountain",
+              "arbih_442nd_mountain",
+              "arbih_443rd_mountain",
+              "arbih_444th_mountain",
+              "arbih_445th_mountain",
+              "arbih_447th_liberation",
+              "arbih_448th_liberation",
+              "arbih_449th_eastern_herzegovina_mountain",
+              "arbih_450th_light",
+              "arbih_4th_muslim_light"
+            ]
+          }
+        ]
+      },
+      "lineage": {
+        "turn": 19,
+        "moves": [],
+        "ownedBattles": [],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": null,
+      "canonical": {
+        "bytes": 5002091,
+        "sha256": "3ce99cf5b937e73a6e57f33857555438551e93df7b2be7f06d6d84071be8dc28"
+      },
+      "report": {
+        "bytes": 660112,
+        "sha256": "0e07a59a5e802d995369be6e1553b342746bb0ef618b218a720617586d2cffe0"
+      }
+    },
+    {
+      "turn": 20,
+      "operation": {
+        "operationId": "arbih_4th_corps:Presidential Directive — op:trnovo:tosici:t17",
+        "name": "Presidential Directive — op:trnovo:tosici",
+        "type": "sector_attack",
+        "phase": "planning",
+        "startedTurn": 17,
+        "requestedByPresident": true,
+        "forced": true,
+        "commanderOfficerId": "arbih_malkic",
+        "roster": [
+          "arbih_441st_vitezka_mountain",
+          "arbih_442nd_mountain",
+          "arbih_443rd_mountain",
+          "arbih_444th_mountain",
+          "arbih_445th_mountain",
+          "arbih_447th_liberation",
+          "arbih_448th_liberation",
+          "arbih_449th_eastern_herzegovina_mountain",
+          "arbih_450th_light",
+          "arbih_4th_muslim_light"
+        ],
+        "axes": [
+          {
+            "axisId": "main",
+            "stagingOsid": "op:trnovo:delijas",
+            "objectives": [
+              "op:trnovo:tosici"
+            ],
+            "assignedBrigades": [
+              "arbih_441st_vitezka_mountain",
+              "arbih_442nd_mountain",
+              "arbih_443rd_mountain",
+              "arbih_444th_mountain",
+              "arbih_445th_mountain",
+              "arbih_447th_liberation",
+              "arbih_448th_liberation",
+              "arbih_449th_eastern_herzegovina_mountain",
+              "arbih_450th_light",
+              "arbih_4th_muslim_light"
+            ]
+          }
+        ]
+      },
+      "lineage": {
+        "turn": 20,
+        "moves": [],
+        "ownedBattles": [],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": {
+        "turn": 20,
+        "eventId": "london_conference_1992",
+        "responseId": "accept_principles"
+      },
+      "canonical": {
+        "bytes": 5019829,
+        "sha256": "a097add0d3b6617d2236007fc87443d9698c759575331beacfa5678f3cd82c95"
+      },
+      "report": {
+        "bytes": 661543,
+        "sha256": "2b7efbadd8fccaafbf83884185021bf475fd9290c3576f04f67aac5e8429b435"
+      }
+    },
+    {
+      "turn": 21,
+      "operation": {
+        "operationId": "arbih_4th_corps:Presidential Directive — op:trnovo:tosici:t17",
+        "name": "Presidential Directive — op:trnovo:tosici",
+        "type": "sector_attack",
+        "phase": "execution",
+        "startedTurn": 17,
+        "requestedByPresident": true,
+        "forced": true,
+        "commanderOfficerId": "arbih_malkic",
+        "roster": [
+          "arbih_441st_vitezka_mountain",
+          "arbih_442nd_mountain",
+          "arbih_443rd_mountain",
+          "arbih_444th_mountain",
+          "arbih_445th_mountain",
+          "arbih_447th_liberation",
+          "arbih_448th_liberation",
+          "arbih_449th_eastern_herzegovina_mountain",
+          "arbih_450th_light",
+          "arbih_4th_muslim_light"
+        ],
+        "axes": [
+          {
+            "axisId": "main",
+            "stagingOsid": "op:trnovo:delijas",
+            "objectives": [
+              "op:trnovo:tosici"
+            ],
+            "assignedBrigades": [
+              "arbih_441st_vitezka_mountain",
+              "arbih_442nd_mountain",
+              "arbih_443rd_mountain",
+              "arbih_444th_mountain",
+              "arbih_445th_mountain",
+              "arbih_447th_liberation",
+              "arbih_448th_liberation",
+              "arbih_449th_eastern_herzegovina_mountain",
+              "arbih_450th_light",
+              "arbih_4th_muslim_light"
+            ]
+          }
+        ]
+      },
+      "lineage": {
+        "turn": 21,
+        "moves": [],
+        "ownedBattles": [
+          {
+            "battle_id": "21:op:trnovo:tosici:arbih_443rd_mountain:rs_foa_brigade",
+            "attacker_brigade": "arbih_443rd_mountain",
+            "attacker_brigades": [
+              "arbih_443rd_mountain"
+            ],
+            "contributing_operation_ids": [
+              "arbih_4th_corps:Presidential Directive — op:trnovo:tosici:t17"
+            ],
+            "attacker_faction": "RBiH",
+            "defender_faction": "RS",
+            "target_osid": "op:trnovo:tosici",
+            "outcome": "stalemate",
+            "power_ratio": 0.806394287977693,
+            "attacker_won": false,
+            "defender_brigade": "rs_foa_brigade",
+            "defender_kind": "formation",
+            "snap_events": [],
+            "attacker_casualties": 202,
+            "defender_casualties": 37,
+            "execution_friction": {
+              "labels": [
+                "stale_intel"
+              ],
+              "attacker_confidence_band": "low"
+            },
+            "defending_sub_segment_id": "subseg:sector:vrs_herzegovina:0:0",
+            "equipment": {
+              "attacker_tanks_lost": 0,
+              "attacker_artillery_lost": 1,
+              "defender_tanks_lost": 0,
+              "defender_artillery_lost": 1,
+              "scavenged_tanks": 0,
+              "scavenged_artillery": 0,
+              "captured_tanks": 0,
+              "captured_artillery": 0
+            },
+            "operation_id": "arbih_4th_corps:Presidential Directive — op:trnovo:tosici:t17",
+            "operation_name": "Presidential Directive — op:trnovo:tosici"
+          }
+        ],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": null,
+      "canonical": {
+        "bytes": 5041772,
+        "sha256": "a5e25b25f49027b3da08d7c8334afd66f9458fb37fd08560355752e68a0273cc"
+      },
+      "report": {
+        "bytes": 658794,
+        "sha256": "e821db52cd449a8794230e62517b29603fea8a45a9f329de8fa84370d7c310de"
+      }
+    },
+    {
+      "turn": 22,
+      "operation": {
+        "operationId": "arbih_4th_corps:Presidential Directive — op:trnovo:tosici:t17",
+        "name": "Presidential Directive — op:trnovo:tosici",
+        "type": "sector_attack",
+        "phase": "execution",
+        "startedTurn": 17,
+        "requestedByPresident": true,
+        "forced": true,
+        "commanderOfficerId": "arbih_malkic",
+        "roster": [
+          "arbih_441st_vitezka_mountain",
+          "arbih_442nd_mountain",
+          "arbih_443rd_mountain",
+          "arbih_444th_mountain",
+          "arbih_445th_mountain",
+          "arbih_447th_liberation",
+          "arbih_448th_liberation",
+          "arbih_449th_eastern_herzegovina_mountain",
+          "arbih_450th_light",
+          "arbih_4th_muslim_light"
+        ],
+        "axes": [
+          {
+            "axisId": "main",
+            "stagingOsid": "op:trnovo:delijas",
+            "objectives": [
+              "op:trnovo:tosici"
+            ],
+            "assignedBrigades": [
+              "arbih_441st_vitezka_mountain",
+              "arbih_442nd_mountain",
+              "arbih_443rd_mountain",
+              "arbih_444th_mountain",
+              "arbih_445th_mountain",
+              "arbih_447th_liberation",
+              "arbih_448th_liberation",
+              "arbih_449th_eastern_herzegovina_mountain",
+              "arbih_450th_light",
+              "arbih_4th_muslim_light"
+            ]
+          }
+        ]
+      },
+      "lineage": {
+        "turn": 22,
+        "moves": [],
+        "ownedBattles": [
+          {
+            "battle_id": "22:op:trnovo:tosici:arbih_443rd_mountain:rs_bilea_brigade",
+            "attacker_brigade": "arbih_443rd_mountain",
+            "attacker_brigades": [
+              "arbih_443rd_mountain"
+            ],
+            "contributing_operation_ids": [
+              "arbih_4th_corps:Presidential Directive — op:trnovo:tosici:t17"
+            ],
+            "attacker_faction": "RBiH",
+            "defender_faction": "RS",
+            "target_osid": "op:trnovo:tosici",
+            "outcome": "catastrophic",
+            "power_ratio": 0.1385149112526484,
+            "attacker_won": false,
+            "defender_brigade": "rs_bilea_brigade",
+            "defender_kind": "formation",
+            "snap_events": [],
+            "attacker_casualties": 920,
+            "defender_casualties": 62,
+            "defender_contributions": [
+              {
+                "brigade_id": "rs_bilea_brigade",
+                "distance_hops": 2,
+                "is_home_municipality": false,
+                "reactive_weight": 204.29,
+                "casualties_taken": 57
+              },
+              {
+                "brigade_id": "rs_foa_brigade",
+                "distance_hops": 4,
+                "is_home_municipality": false,
+                "reactive_weight": 16.26,
+                "casualties_taken": 5
+              }
+            ],
+            "execution_friction": {
+              "labels": [
+                "stale_intel"
+              ],
+              "attacker_confidence_band": "low"
+            },
+            "defending_sub_segment_id": "subseg:sector:vrs_herzegovina:0:0",
+            "equipment": {
+              "attacker_tanks_lost": 0,
+              "attacker_artillery_lost": 0,
+              "defender_tanks_lost": 0,
+              "defender_artillery_lost": 1,
+              "scavenged_tanks": 0,
+              "scavenged_artillery": 0,
+              "captured_tanks": 0,
+              "captured_artillery": 0,
+              "captured_by": "RS"
+            },
+            "operation_id": "arbih_4th_corps:Presidential Directive — op:trnovo:tosici:t17",
+            "operation_name": "Presidential Directive — op:trnovo:tosici"
+          }
+        ],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": null,
+      "canonical": {
+        "bytes": 5067776,
+        "sha256": "61e03ebb6a04e21eafbae4a403de4a48005454b621170db2b9e718f724a6a2dc"
+      },
+      "report": {
+        "bytes": 669688,
+        "sha256": "f88f1308fae149f1d9ba41677cb4a81843c47c6c51a831f51b10226d95824973"
+      }
+    },
+    {
+      "turn": 23,
+      "operation": {
+        "operationId": "arbih_4th_corps:Presidential Directive — op:trnovo:tosici:t17",
+        "name": "Presidential Directive — op:trnovo:tosici",
+        "type": "sector_attack",
+        "phase": "recovery",
+        "startedTurn": 17,
+        "requestedByPresident": true,
+        "forced": true,
+        "commanderOfficerId": "arbih_malkic",
+        "roster": [
+          "arbih_441st_vitezka_mountain",
+          "arbih_442nd_mountain",
+          "arbih_443rd_mountain",
+          "arbih_444th_mountain",
+          "arbih_445th_mountain",
+          "arbih_447th_liberation",
+          "arbih_448th_liberation",
+          "arbih_449th_eastern_herzegovina_mountain",
+          "arbih_450th_light",
+          "arbih_4th_muslim_light"
+        ],
+        "axes": [
+          {
+            "axisId": "main",
+            "stagingOsid": "op:trnovo:delijas",
+            "objectives": [
+              "op:trnovo:tosici"
+            ],
+            "assignedBrigades": [
+              "arbih_441st_vitezka_mountain",
+              "arbih_442nd_mountain",
+              "arbih_443rd_mountain",
+              "arbih_444th_mountain",
+              "arbih_445th_mountain",
+              "arbih_447th_liberation",
+              "arbih_448th_liberation",
+              "arbih_449th_eastern_herzegovina_mountain",
+              "arbih_450th_light",
+              "arbih_4th_muslim_light"
+            ]
+          }
+        ]
+      },
+      "lineage": {
+        "turn": 23,
+        "moves": [
+          {
+            "formationId": "arbih_441st_vitezka_mountain",
+            "from": "op:mostar:blagaj_2",
+            "to": "op:trnovo:trnovo",
+            "receipts": [
+              {
+                "formation_id": "arbih_441st_vitezka_mountain",
+                "formation_name": "441st Mountain",
+                "from_osid": "op:mostar:blagaj_2",
+                "to_osid": "op:trnovo:trnovo"
+              }
+            ]
+          }
+        ],
+        "ownedBattles": [
+          {
+            "battle_id": "23:op:trnovo:tosici:arbih_441st_vitezka_mountain:rs_bilea_brigade",
+            "attacker_brigade": "arbih_441st_vitezka_mountain",
+            "attacker_brigades": [
+              "arbih_441st_vitezka_mountain"
+            ],
+            "contributing_operation_ids": [
+              "arbih_4th_corps:Presidential Directive — op:trnovo:tosici:t17"
+            ],
+            "attacker_faction": "RBiH",
+            "defender_faction": "RS",
+            "target_osid": "op:trnovo:tosici",
+            "outcome": "catastrophic",
+            "power_ratio": 0.19296037208757802,
+            "attacker_won": false,
+            "defender_brigade": "rs_bilea_brigade",
+            "defender_kind": "formation",
+            "snap_events": [],
+            "attacker_casualties": 920,
+            "defender_casualties": 65,
+            "defender_contributions": [
+              {
+                "brigade_id": "rs_ajnie_brigade",
+                "distance_hops": 5,
+                "is_home_municipality": false,
+                "reactive_weight": 3.9,
+                "casualties_taken": 1
+              },
+              {
+                "brigade_id": "rs_bilea_brigade",
+                "distance_hops": 2,
+                "is_home_municipality": false,
+                "reactive_weight": 224.24,
+                "casualties_taken": 60
+              },
+              {
+                "brigade_id": "rs_foa_brigade",
+                "distance_hops": 4,
+                "is_home_municipality": false,
+                "reactive_weight": 16.1,
+                "casualties_taken": 4
+              }
+            ],
+            "execution_friction": {
+              "labels": [
+                "stale_intel"
+              ],
+              "attacker_confidence_band": "low"
+            },
+            "defending_sub_segment_id": "subseg:sector:vrs_herzegovina:0:0",
+            "equipment": {
+              "attacker_tanks_lost": 0,
+              "attacker_artillery_lost": 1,
+              "defender_tanks_lost": 0,
+              "defender_artillery_lost": 1,
+              "scavenged_tanks": 0,
+              "scavenged_artillery": 0,
+              "captured_tanks": 0,
+              "captured_artillery": 0,
+              "captured_by": "RS"
+            },
+            "operation_id": "arbih_4th_corps:Presidential Directive — op:trnovo:tosici:t17",
+            "operation_name": "Presidential Directive — op:trnovo:tosici"
+          }
+        ],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": null,
+      "canonical": {
+        "bytes": 5104314,
+        "sha256": "08d0650f4ad2ed7e305ec620de306122f52e155ed8206024548548e7767c18c1"
+      },
+      "report": {
+        "bytes": 666280,
+        "sha256": "30376adadad11ce92b61439617d7add10abefe3ecfe5631000a993d360e1f67c"
+      }
+    },
+    {
+      "turn": 24,
+      "operation": {
+        "operationId": "arbih_4th_corps:Presidential Directive — op:trnovo:tosici:t17",
+        "name": "Presidential Directive — op:trnovo:tosici",
+        "type": "sector_attack",
+        "phase": "recovery",
+        "startedTurn": 17,
+        "requestedByPresident": true,
+        "forced": true,
+        "commanderOfficerId": "arbih_malkic",
+        "roster": [
+          "arbih_441st_vitezka_mountain",
+          "arbih_442nd_mountain",
+          "arbih_443rd_mountain",
+          "arbih_444th_mountain",
+          "arbih_445th_mountain",
+          "arbih_447th_liberation",
+          "arbih_448th_liberation",
+          "arbih_449th_eastern_herzegovina_mountain",
+          "arbih_450th_light",
+          "arbih_4th_muslim_light"
+        ],
+        "axes": [
+          {
+            "axisId": "main",
+            "stagingOsid": "op:trnovo:delijas",
+            "objectives": [
+              "op:trnovo:tosici"
+            ],
+            "assignedBrigades": [
+              "arbih_441st_vitezka_mountain",
+              "arbih_442nd_mountain",
+              "arbih_443rd_mountain",
+              "arbih_444th_mountain",
+              "arbih_445th_mountain",
+              "arbih_447th_liberation",
+              "arbih_448th_liberation",
+              "arbih_449th_eastern_herzegovina_mountain",
+              "arbih_450th_light",
+              "arbih_4th_muslim_light"
+            ]
+          }
+        ]
+      },
+      "lineage": {
+        "turn": 24,
+        "moves": [],
+        "ownedBattles": [],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": null,
+      "canonical": {
+        "bytes": 5153485,
+        "sha256": "190847eea44a84529199e5fd2f337714a22ad73ecc906c6a5320ec23a4fd6140"
+      },
+      "report": {
+        "bytes": 668774,
+        "sha256": "bd93dda8bc4dd686f5804109c73098234979561f175e20cd7dcbe4e53f6f5c1d"
+      }
+    },
+    {
+      "turn": 25,
+      "operation": null,
+      "lineage": {
+        "turn": 25,
+        "moves": [],
+        "ownedBattles": [],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": null,
+      "canonical": {
+        "bytes": 5191350,
+        "sha256": "bf6d83f97c017e986983233c33d6b13f1a5223670aa0d9fbf8869bc27b9091b6"
+      },
+      "report": {
+        "bytes": 668981,
+        "sha256": "312c271c4561f785c2a8ef264fc4f1c559fb471bfa2c8aa4b50edb673c3ced8c"
+      }
+    },
+    {
+      "turn": 26,
+      "operation": null,
+      "lineage": {
+        "turn": 26,
+        "moves": [
+          {
+            "formationId": "arbih_441st_vitezka_mountain",
+            "from": "op:trnovo:trnovo",
+            "to": "op:trnovo:tusila",
+            "receipts": [
+              {
+                "formation_id": "arbih_441st_vitezka_mountain",
+                "formation_name": "441st Mountain",
+                "from_osid": "op:trnovo:trnovo",
+                "to_osid": "op:trnovo:tusila"
+              }
+            ]
+          }
+        ],
+        "ownedBattles": [],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": null,
+      "canonical": {
+        "bytes": 5213423,
+        "sha256": "48fcdda6a247a2ac0cca96ba8d348ea205408ec3d9589336cbbfed9d74887edd"
+      },
+      "report": {
+        "bytes": 663741,
+        "sha256": "500eca0aff56f1cb909239c440f5836f6bbfb2a92af705aea2e254261719ffda"
+      }
+    },
+    {
+      "turn": 27,
+      "operation": null,
+      "lineage": {
+        "turn": 27,
+        "moves": [
+          {
+            "formationId": "arbih_443rd_mountain",
+            "from": "op:trnovo:trnovo",
+            "to": "op:konjic:glavaticevo_2",
+            "receipts": [
+              {
+                "formation_id": "arbih_443rd_mountain",
+                "formation_name": "443rd Mountain",
+                "from_osid": "op:trnovo:trnovo",
+                "to_osid": "op:konjic:glavaticevo_2"
+              }
+            ]
+          }
+        ],
+        "ownedBattles": [],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": null,
+      "canonical": {
+        "bytes": 5204838,
+        "sha256": "bda7a8b4ce5c7778d9dcaa9dbe34dadb6bcb42509b2d9b0a198605e0d454af41"
+      },
+      "report": {
+        "bytes": 657976,
+        "sha256": "ecd0cc490c9f6b0dcfaacaf31db2e03e07985c0cb98b2057320b7ea25e275b9d"
+      }
+    },
+    {
+      "turn": 28,
+      "operation": null,
+      "lineage": {
+        "turn": 28,
+        "moves": [
+          {
+            "formationId": "arbih_443rd_mountain",
+            "from": "op:konjic:glavaticevo_2",
+            "to": "op:konjic:dzepi_2",
+            "receipts": [
+              {
+                "formation_id": "arbih_443rd_mountain",
+                "formation_name": "443rd Mountain",
+                "from_osid": "op:konjic:glavaticevo_2",
+                "to_osid": "op:konjic:dzepi_2"
+              }
+            ]
+          }
+        ],
+        "ownedBattles": [],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": null,
+      "canonical": {
+        "bytes": 5240736,
+        "sha256": "1112dae224398b0b0b5ddf81cf87941404d7bbb8b834b1736677d022943b38f3"
+      },
+      "report": {
+        "bytes": 660542,
+        "sha256": "ea81d3833b9cec23a79d710024e922d8f506efecc19f5179b72686ae9ee46835"
+      }
+    },
+    {
+      "turn": 29,
+      "operation": null,
+      "lineage": {
+        "turn": 29,
+        "moves": [],
+        "ownedBattles": [],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": null,
+      "canonical": {
+        "bytes": 5265564,
+        "sha256": "42c91fa9e5f9355b4620693a3eacad80293750354eae3510973ceebe62c782b1"
+      },
+      "report": {
+        "bytes": 670361,
+        "sha256": "2d3ee59224c8177708c0df7dae7f778e756c7ee2187af9295074bff57e497e54"
+      }
+    },
+    {
+      "turn": 30,
+      "operation": null,
+      "lineage": {
+        "turn": 30,
+        "moves": [],
+        "ownedBattles": [],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": null,
+      "canonical": {
+        "bytes": 5259928,
+        "sha256": "40d89739c50b636d0bcb3e086f68dde89c14ae87e8ff78c334323d0fb3cbee7f"
+      },
+      "report": {
+        "bytes": 660861,
+        "sha256": "ad589a3453a615a9fa3e23d4518e7740bb9de310973aeebaeeb9b8dca1d25352"
+      }
+    },
+    {
+      "turn": 31,
+      "operation": null,
+      "lineage": {
+        "turn": 31,
+        "moves": [],
+        "ownedBattles": [],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": null,
+      "canonical": {
+        "bytes": 5291025,
+        "sha256": "d977d4fcc6756f08dc50d5548e771a7dea9ee6ebf90ae1176693be633476197a"
+      },
+      "report": {
+        "bytes": 663695,
+        "sha256": "48f9cb063c9f05537476e98921aa60d9dd406acfcfec91425f50d407f2944882"
+      }
+    },
+    {
+      "turn": 32,
+      "operation": null,
+      "lineage": {
+        "turn": 32,
+        "moves": [],
+        "ownedBattles": [],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": null,
+      "canonical": {
+        "bytes": 5301200,
+        "sha256": "0261dedd91ea115b884ef0b1bb4a4ec362a878e5857570ddd69e36fc60643b0a"
+      },
+      "report": {
+        "bytes": 659591,
+        "sha256": "b13ccf69412f24a63a9a9762bcb5367d505b4fa7056499418d7688471e33e633"
+      }
+    },
+    {
+      "turn": 33,
+      "operation": null,
+      "lineage": {
+        "turn": 33,
+        "moves": [],
+        "ownedBattles": [],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": null,
+      "canonical": {
+        "bytes": 5315193,
+        "sha256": "7e69769d2eca3cb1292d2ff11450776bf7544ec899e7183a4a6b8cd6c306aa5e"
+      },
+      "report": {
+        "bytes": 662837,
+        "sha256": "cdfac2ef4328752f1134f0c0454253fb5e8f58e6d293524b0dd9c91829174490"
+      }
+    },
+    {
+      "turn": 34,
+      "operation": null,
+      "lineage": {
+        "turn": 34,
+        "moves": [],
+        "ownedBattles": [],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": null,
+      "canonical": {
+        "bytes": 5322192,
+        "sha256": "895559a36d4d792c92cc89f1380edf345a62a1be8bd1f71e4764659c83111491"
+      },
+      "report": {
+        "bytes": 660573,
+        "sha256": "e0cf46fd271fac35f7463ad1bf83e30a622f848f2474cf8cbabb1b8111e7383a"
+      }
+    },
+    {
+      "turn": 35,
+      "operation": null,
+      "lineage": {
+        "turn": 35,
+        "moves": [],
+        "ownedBattles": [],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": null,
+      "canonical": {
+        "bytes": 5341913,
+        "sha256": "9700177f2c63019e3c0fe927ceaca1fe935cf12fb34f47e7eb828d6ac7022370"
+      },
+      "report": {
+        "bytes": 662197,
+        "sha256": "a1a8c296631069fef5e75675579aefecf385c7f82c03bcfb1cf84dff40f02721"
+      }
+    },
+    {
+      "turn": 36,
+      "operation": null,
+      "lineage": {
+        "turn": 36,
+        "moves": [],
+        "ownedBattles": [],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": null,
+      "canonical": {
+        "bytes": 5349667,
+        "sha256": "94c183ab9410a334d710db5268d6b3a4d3b16b83843cbfaf380bce4f19a18f75"
+      },
+      "report": {
+        "bytes": 656830,
+        "sha256": "7a2651f139b87da34436f46517185cf4315e60ba3cae9d350a300fe5e77d35a5"
+      }
+    },
+    {
+      "turn": 37,
+      "operation": null,
+      "lineage": {
+        "turn": 37,
+        "moves": [],
+        "ownedBattles": [],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": null,
+      "canonical": {
+        "bytes": 5375998,
+        "sha256": "a97e78763396fd51a5f39a6180ff659c4e547c5d73bf2ef0a62b1921d2ec0e69"
+      },
+      "report": {
+        "bytes": 660620,
+        "sha256": "b309f315ea80e8d91bba882f79427add1dae05910d292a625c491b1b04fdade9"
+      }
+    },
+    {
+      "turn": 38,
+      "operation": null,
+      "lineage": {
+        "turn": 38,
+        "moves": [],
+        "ownedBattles": [],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": {
+        "turn": 38,
+        "eventId": "ic_pressure_vopp_engagement",
+        "responseId": "acknowledge_pressure"
+      },
+      "canonical": {
+        "bytes": 5386953,
+        "sha256": "d701dddbf222000dd691f004e06f441343a90a14137a31d2142f75f64dcce6e6"
+      },
+      "report": {
+        "bytes": 654213,
+        "sha256": "85bd2e62f5434ac1c7cedc1273c95b056fea163c2e15815b68c627a3a42f8aca"
+      }
+    },
+    {
+      "turn": 39,
+      "operation": null,
+      "lineage": {
+        "turn": 39,
+        "moves": [],
+        "ownedBattles": [],
+        "beforeController": "RS",
+        "afterController": "RS",
+        "controlEvents": []
+      },
+      "event": {
+        "turn": 39,
+        "eventId": "vance_owen_plan_1993",
+        "responseId": "accept"
+      },
+      "canonical": {
+        "bytes": 5409065,
+        "sha256": "222c45c7dfc5c91c30c197cc0083c3b31bac29f5d20d39e72999cf03fe243547"
+      },
+      "report": {
+        "bytes": 658859,
+        "sha256": "ed33db16e947217a4a28985aec9663f39e26ce725e7286631d77b9ea39c76a63"
+      }
+    }
+  ]
+}

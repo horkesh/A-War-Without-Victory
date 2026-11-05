@@ -1,0 +1,199 @@
+{
+  "writes_closed": true,
+  "captured_utc": "2026-10-22T05:30:51.758Z",
+  "client_date": "2026-10-22",
+  "verdict": "PASS_N82_OBSERVER_NEUTRALITY_AND_REVIEWED_BOUNDED_FINDINGS",
+  "summary": "The single instrumented188 diagnostic completed as n83: runner0, raw30/30 gameplay artifacts and TEN10/10 byte-identical to n82, exact31 inventory and32 normalized consumed inputs/digest. Independent799 accepts substantive findings; one post-close inventory correction is verified70/70 with0mismatches. No retry or gameplay/threshold change. Retained n80 remains703/712 NO-GO/unadopted; n83 reproduces rejected n82 trajectory, not recovery.",
+  "findings": "At completedturn22, rs_4th_sarajevo_light_infantry changed1411→1405 by frontline attrition(-6), then1405→1516 by an actual regular formation_spawn.reinforce transfer(+111) from pale:RS (available111, need400, rate400, cap2200). At Romanija23, it ranked0 with fitness0.3056256 versus1stRomanija0.2985696; builder created/returned one probe. At Kijevo24, its Prača candidacy was committed_elsewhere to that probe, so reachability wasNOT_REACHED; two shoulder brigades were built and caller terminal admitted=true. Builder emission alone is not admission. Actual n80 allocation/dirty-source counterfactual remainsUNMEASURED.",
+  "execution_ack_utc": "2026-10-22T05:13:23Z",
+  "deadline_utc": "2026-10-22T05:48:23Z",
+  "campaign_invocations": 1,
+  "retries": 0,
+  "full_suite_invocations": 0,
+  "actual_run_dir": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n83",
+  "runner": {
+    "allowance": "1/1 spent; no retry",
+    "actual_run_dir": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n83",
+    "start_utc": "2026-10-22T05:18:19.548Z",
+    "end_utc": "2026-10-22T05:20:42.570Z",
+    "runner_child_exit": 0,
+    "runner_wrapper_child_exit": 0,
+    "runner_wrapper_exit": 0,
+    "telemetry_archive_pass": true,
+    "C": {
+      "opening_prefix_equal": true,
+      "append_bytes": 946671,
+      "opening_bytes": 102001043,
+      "after_bytes": 102947714
+    },
+    "D": {
+      "opening_prefix_equal": true,
+      "append_bytes": 0,
+      "opening_bytes": 1041,
+      "after_bytes": 1041
+    }
+  },
+  "identity": {
+    "postrun_child_exit": 0,
+    "postrun_wrapper_exit": 0,
+    "native_count": 31,
+    "raw30_equal": 30,
+    "ten_equal": 10,
+    "run_meta_raw_equal": false,
+    "run_meta_baseline_sha256": "261e0728bb814c12d9b410b9a18f3e0cb7102cc218aed765a5c49ddda5ad22e2",
+    "run_meta_actual_sha256": "b5a9faff9db1b2ed010dc980af36ce9403574724ee7dc40102c8837e104cb3c3",
+    "consumed_inputs_count": 32,
+    "consumed_inputs_digest": "7986f05230e1d526e1794673e796dcb77730501d4958e435970c4ec806cc8039",
+    "ordered_rows_equal": true
+  },
+  "readers": {
+    "stateful_exit": 0,
+    "tracked_commander_exit": 0,
+    "personnel_records": 71931,
+    "covered_personnel_writers": 303,
+    "commander_passes": 564,
+    "commander_completion_rows": 3290,
+    "tracked_records": 4418,
+    "tracked_completion_rows": 3290,
+    "tracked_violations": 0
+  },
+  "worker_result": {
+    "path": "logs/claude-channel-20261004/798-seal-a/798-result.json",
+    "sha256": "2e03cbbe69e4319f570e2f078cf13956d32d4b338f221a5b776d7028179d1e44"
+  },
+  "initial_review": {
+    "path": "logs/claude-channel-20261004/799-review-b/799-review.json",
+    "sha256": "aad9f02e78e663804b1f3284d27d8a167a90f14f09eaaa7b781c182d0ab60553",
+    "preservation_rejection_retained": true
+  },
+  "targeted_preservation_review": {
+    "path": "logs/claude-channel-20261004/799-preservation-supplement-a/799-preservation-supplement.json",
+    "sha256": "3b6637f50b3b3e146f80cd0271d5892e6635c9c3a121f075c3f03e375d63aadd"
+  },
+  "authoritative_postclose_798_inventory": {
+    "path": "logs/claude-channel-20261004/800-postclose-a/inventory.json",
+    "sha256": "62cceaad5f1cf1bb976eca9a84b1f95ae28485d97fddfe66bc34ba2ffe4e90dd",
+    "entries": 70
+  },
+  "raw_inventory": {
+    "path": "logs/claude-channel-20261004/800-raw-inventory.json",
+    "sha256": "833ca11b2f096e199810eacafe163273f44724f91dbd17bc459ef4e9729661ee",
+    "entries": 101
+  },
+  "protected_source_pins": [
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "bytes": 20210,
+      "sha256": "beabdcaa779995ed93d820a957b0fd4cbd1e662d47502b0c0374b28819880484"
+    },
+    {
+      "path": "src/sim/combat/movement_phase_diagnostic.ts",
+      "bytes": 7386,
+      "sha256": "cac140facd432e206a079093514702237f7690088b92eac10a556de9e6ba62d8"
+    },
+    {
+      "path": "src/sim/combat/personnel_diagnostic.ts",
+      "bytes": 5870,
+      "sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3"
+    },
+    {
+      "path": "src/sim/turn_pipeline.ts",
+      "bytes": 11675,
+      "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25"
+    },
+    {
+      "path": "src/sim/formation_spawn.ts",
+      "bytes": 44692,
+      "sha256": "d8586722b72a3345c610d422f4e069fe2150748a316cbe8d1fc8c4fcfd86c072"
+    },
+    {
+      "path": "src/sim/combat/strategic_reserve.ts",
+      "bytes": 10755,
+      "sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae"
+    },
+    {
+      "path": "src/sim/combat/frontline_attrition.ts",
+      "bytes": 21594,
+      "sha256": "0cc09b4eca821d2dce287893fdde312239c2b8be495ed02e36b8a23ba59f5ee1"
+    },
+    {
+      "path": "src/sim/combat/morale_drift.ts",
+      "bytes": 17730,
+      "sha256": "cb7720d5da303e02d89fb3aaf034488a340a51155dfd6dbfc4839cf9cedcdc5c"
+    },
+    {
+      "path": "src/sim/combat/commander/emit.ts",
+      "bytes": 202428,
+      "sha256": "76351f818c3403fcc23bf5b51f30c467bd42886d68f1e6b754d9f90baa58746b"
+    },
+    {
+      "path": "tests/personnel_diagnostic.test.ts",
+      "bytes": 19693,
+      "sha256": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b"
+    },
+    {
+      "path": "tests/reason_code_debug.test.ts",
+      "bytes": 10403,
+      "sha256": "189ba6da07dc0b931e4e98c54565e50bd8182299843606cefccbc113e972bf08"
+    },
+    {
+      "path": "tests/commander_creation_observer.test.ts",
+      "bytes": 100803,
+      "sha256": "05bfd3cf245aa0f929c44d6efff8abdf7316e0fb54b415f25a3c48c9e0f8bb86"
+    }
+  ],
+  "telemetry": [
+    {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "archive": "c-after.bin",
+      "bytes": 102947714,
+      "sha256": "edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9"
+    },
+    {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "archive": "d-after.bin",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    }
+  ],
+  "telemetry_prefix_append": {
+    "C": {
+      "opening_prefix_equal": true,
+      "append_bytes": 946671,
+      "opening_bytes": 102001043,
+      "after_bytes": 102947714
+    },
+    "D": {
+      "opening_prefix_equal": true,
+      "append_bytes": 0,
+      "opening_bytes": 1041,
+      "after_bytes": 1041
+    }
+  },
+  "threshold_reference_exact": true,
+  "retained_failures": [
+    {
+      "attempt": "798-preflight-a",
+      "child_exit": 2,
+      "wrapper_exit": 2,
+      "cause": "two local checker assumptions; corrected only governed Oct path and exact scoped review verdict"
+    },
+    {
+      "attempt": "798-extract-a",
+      "child_exit": 2,
+      "wrapper_exit": 2,
+      "cause": "bounded extraction interpreted 21->22 as value transition; corrected to turns 21 and 22"
+    }
+  ],
+  "preservation_correction": "Original798inventory recorded still-open sealstdout as0bytes; final270bytes were present. Original inventory/result/closed and rejectedreview remain immutable. Fresh inventory outside798scope verified70/70; no bytes lost.",
+  "limits": [
+    "n82 reproduction establishes observer neutrality for the 30 retained gameplay artifacts only; it does not recover n80 703/712",
+    "n80 remains retained 703/712 NO-GO; n81/n82 remain rejected 689",
+    "no n80 counterfactual or historical causality inference",
+    "phase closure localizes phase changes; only listed direct_writers identify covered assignments",
+    "uncovered personnel writers remain unmeasured",
+    "commander build_operations_complete distinguishes built and returned at builder scope; it does not independently prove later game-state admission",
+    "Operation Kijevo caller_terminal explicitly observed admitted=true at turn24"
+  ],
+  "next_action": "Inspect retained n80 records for actual completedturn22 Pale pool/recipient allocation. Do not infer zero transfer or causality from endpoint1405; if boundary absent, keep n80 causeUNMEASURED. No production fix or additional campaign authorized."
+}

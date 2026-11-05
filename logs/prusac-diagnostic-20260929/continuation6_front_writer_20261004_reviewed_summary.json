@@ -1,0 +1,696 @@
+{
+  "pass": true,
+  "base_commit": "09dcd816e44566961e224bf010c8d7bfaad83edb",
+  "scope": "Reviewed local opt-in observation preparation; no historical cause or calibration acceptance.",
+  "question": "Observe exact front-distribution writer and pre-write inputs without changing simulation decisions",
+  "command_exits": {
+    "red": 1,
+    "affected": 1,
+    "affected_correction": 0,
+    "reader_hardening_red": 1,
+    "reader_hardening_green": 0,
+    "final4_green": 0,
+    "reader_hardening_syntax": 0,
+    "review_correction_red": 1,
+    "review_correction_green": 1,
+    "review_correction_green2": 0,
+    "review_correction_green3": 0,
+    "review_correction_syntax": 0,
+    "residual_red": 1,
+    "residual_green": 0,
+    "residual_syntax": 0,
+    "inventory": 0
+  },
+  "sources": {
+    "src/sim/combat/front_distribution_diagnostic.ts": {
+      "bytes": 10045,
+      "sha256": "e9059b458d582722a0c2f301fd562b98367d49bae917e83713bf70bcc0d7a61a"
+    },
+    "src/sim/combat/brigade_front_distribution.ts": {
+      "bytes": 53489,
+      "sha256": "92c4bfb02a8c8aedfdf78901b73dea7152fe66df4d5cc16e62c0649c50dee1e6"
+    },
+    "src/sim/combat/movement_phase_diagnostic.ts": {
+      "bytes": 7386,
+      "sha256": "cac140facd432e206a079093514702237f7690088b92eac10a556de9e6ba62d8"
+    },
+    "src/sim/combat/reason_code_debug.ts": {
+      "bytes": 9917,
+      "sha256": "cbf8e09da6754f18d6f5aa1497eb3bbd45905debb960bf69e1a699c8c08c18a2"
+    },
+    "src/sim/turn_phases/war_phases.ts": {
+      "bytes": 231312,
+      "sha256": "5ae935c3db6bc80e0b1f878a1871067fb6ffdcb239dcf317574433acfb8f2709"
+    },
+    "src/sim/turn_phases/war_phase_reconciliation_steps.ts": {
+      "bytes": 10719,
+      "sha256": "c09184e75d1be6917beb3daf7167132bc52c52c4acd5e7c4df1a13204dfe31c2"
+    },
+    "src/sim/turn_pipeline_types.ts": {
+      "bytes": 36830,
+      "sha256": "dbf02b2ce77484d6b872122e9415c84b8d33171559f785320eacb9b048073694"
+    },
+    "src/scenario/scenario_reporting.ts": {
+      "bytes": 18242,
+      "sha256": "df0c17f6473f80ad2867106749d07ceda18fef1a53a68097586d3231e4f521c2"
+    },
+    "src/scenario/scenario_runner.ts": {
+      "bytes": 197529,
+      "sha256": "dad9f156b7db3a641871753714c950971407fb530d34cf128c4184ab0d2b6365"
+    },
+    "tools/diagnostics/front_distribution_writer_coverage.cjs": {
+      "bytes": 13632,
+      "sha256": "565b4b46af667008e1a2e88472ff1f9ca6dfc3a78ff82bb54e1e3f6f706e3152"
+    },
+    "tests/front_distribution_writer_diagnostic.test.ts": {
+      "bytes": 21992,
+      "sha256": "3bd493d4b4d1f57fda979751e13abfd367054d66091d6ea3840fd38528124019"
+    }
+  },
+  "artifacts": {
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_affected.command.txt": {
+      "bytes": 203,
+      "sha256": "7afe0173d45689b3e20ead7ae0bd68ac07dac6ac1e5ffe2d178db2d71f8e88e5"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_affected.exit.txt": {
+      "bytes": 1,
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_affected.log": {
+      "bytes": 31166,
+      "sha256": "037885405605abdfa3fbb6eb300a356ebaf311fd707653ff7eab5feb1070d78a"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_affected_correction.command.txt": {
+      "bytes": 203,
+      "sha256": "7afe0173d45689b3e20ead7ae0bd68ac07dac6ac1e5ffe2d178db2d71f8e88e5"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_affected_correction.exit.txt": {
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_affected_correction.log": {
+      "bytes": 1804,
+      "sha256": "87a1a62329bd0c3c0f8f9d0cf04f2571009caa1e3a221863590cab6f5c3d11d1"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_build_receipt.cjs": {
+      "bytes": 5500,
+      "sha256": "d7026b5643f68c286f1aa58c81e3a3c8e6aea095f89aaa431962fc7f76693be7"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_build_receipt.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_correction_summary.md": {
+      "bytes": 4795,
+      "sha256": "6608f047f11513de9cb819690e63ea5df74998f1984f7a43e0b72f34148a52a3"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_correction_verification.md": {
+      "bytes": 4871,
+      "sha256": "9949934cd35a9d563ee9cd234b729c99bc8e21cf0b7b10d13a0c9ffba95a2650"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_diagnosis_tool_readback.md": {
+      "bytes": 1621,
+      "sha256": "aac0a2590fdfbec1d9cbd3a4c54cf6b4e445a3c2c7fecf7da3e0ee89228fe934"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final2_green.command.txt": {
+      "bytes": 203,
+      "sha256": "7afe0173d45689b3e20ead7ae0bd68ac07dac6ac1e5ffe2d178db2d71f8e88e5"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final2_green.exit.txt": {
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final2_green.log": {
+      "bytes": 1804,
+      "sha256": "695817b586f1776cd9f08785fe3f8adde09df6734d3a013347ae71f84757bb79"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final2_syntax.command.txt": {
+      "bytes": 69,
+      "sha256": "2a60932b69af197dc2b0bded3a6a42642aaffa7dd5d9c77ad5084a2644468150"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final2_syntax.exit.txt": {
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final2_syntax.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final3_green.command.txt": {
+      "bytes": 203,
+      "sha256": "7afe0173d45689b3e20ead7ae0bd68ac07dac6ac1e5ffe2d178db2d71f8e88e5"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final3_green.exit.txt": {
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final3_green.log": {
+      "bytes": 1804,
+      "sha256": "18476b5e9306443b67586e7259d02228852b1b5f8b0dffc7f63ff6d737f0a9f0"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final4_green.command.txt": {
+      "bytes": 203,
+      "sha256": "7afe0173d45689b3e20ead7ae0bd68ac07dac6ac1e5ffe2d178db2d71f8e88e5"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final4_green.exit.txt": {
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final4_green.log": {
+      "bytes": 1965,
+      "sha256": "cce2c6aa2c3d533ea1f72e3faf42e6b4796fa31a644ea9837a9df31dcd76c34e"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final_green.command.txt": {
+      "bytes": 203,
+      "sha256": "7afe0173d45689b3e20ead7ae0bd68ac07dac6ac1e5ffe2d178db2d71f8e88e5"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final_green.exit.txt": {
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final_green.log": {
+      "bytes": 1804,
+      "sha256": "51cf61740bfc6e178e19376ac3960f5fe3934886ac15114325d3e69454406845"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_green.command.txt": {
+      "bytes": 90,
+      "sha256": "0907f0ba1f3b134efc31f87a752e29e83e0aa7bedf04ba53c85616d1e8937ae1"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_green.exit.txt": {
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_green.log": {
+      "bytes": 364,
+      "sha256": "a7a1e493d48384bc1e3c7b011e6e998f89ed9b7d94e7661f4bb5c3e7ba82a186"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_implementation_summary.md": {
+      "bytes": 6043,
+      "sha256": "d24126ea18015038e5d6b7d8fdc9bc3484c3d9f2da38d3de37b51bc663d21e35"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_independent_review.md": {
+      "bytes": 10691,
+      "sha256": "e2a00a0989d7c549623c5467f59475fbdc8cbd5340e9eb60d8b0980039327d24"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_inventory.cjs": {
+      "bytes": 2778,
+      "sha256": "349e5481215ac220490fd00df1478edbde825f5f3eb0512d593790be4f1f3d02"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_inventory.exit.txt": {
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_inventory.json": {
+      "bytes": 9572,
+      "sha256": "a9a3ca9722600fd9f1595e23a4713dc5074ea3b865bd4e109cc82531dd79e7d0"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_inventory.log": {
+      "bytes": 120,
+      "sha256": "1dc424e4700cd11a0806db924601b3ea831bef015df4be09d5b529f08c530ead"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reader_hardening_green.command.txt": {
+      "bytes": 90,
+      "sha256": "0907f0ba1f3b134efc31f87a752e29e83e0aa7bedf04ba53c85616d1e8937ae1"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reader_hardening_green.exit.txt": {
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reader_hardening_green.log": {
+      "bytes": 527,
+      "sha256": "06f15bfc590dd03c4d73c31c7a58068bcb0cf82b473adf08180bede453554857"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reader_hardening_red.command.txt": {
+      "bytes": 90,
+      "sha256": "0907f0ba1f3b134efc31f87a752e29e83e0aa7bedf04ba53c85616d1e8937ae1"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reader_hardening_red.exit.txt": {
+      "bytes": 1,
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reader_hardening_red.log": {
+      "bytes": 1597,
+      "sha256": "6cd8e6871f841cc2f61963c2ee5d47d52cb5d5c793361dbebbc43160ecb019ed"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reader_hardening_syntax.command.txt": {
+      "bytes": 69,
+      "sha256": "2a60932b69af197dc2b0bded3a6a42642aaffa7dd5d9c77ad5084a2644468150"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reader_hardening_syntax.exit.txt": {
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reader_hardening_syntax.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reader_pre_residual.txt": {
+      "bytes": 13612,
+      "sha256": "cafa9bcde5995aa4543d1101f1cca92b3971cd272fc7f586afd9520d98cbd995"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reader_pre_review.txt": {
+      "bytes": 9807,
+      "sha256": "b287f7ffa94ba116a93e96f6c53bc66684bffc09947d39832dbc4054b20e3890"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_red.command.txt": {
+      "bytes": 90,
+      "sha256": "0907f0ba1f3b134efc31f87a752e29e83e0aa7bedf04ba53c85616d1e8937ae1"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_red.exit.txt": {
+      "bytes": 1,
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_red.log": {
+      "bytes": 1618,
+      "sha256": "043f36d0ba9585508c4798f1c5c2136c144b6fe7dbd92f97734a3d9746ee5107"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_green.command.txt": {
+      "bytes": 90,
+      "sha256": "0907f0ba1f3b134efc31f87a752e29e83e0aa7bedf04ba53c85616d1e8937ae1"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_green.exit.txt": {
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_green.log": {
+      "bytes": 656,
+      "sha256": "13a7d24a3f58fca214940ae58d1a33d13f5ee651ccc0a0751247ea0fdcc6b8f1"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_red.command.txt": {
+      "bytes": 90,
+      "sha256": "0907f0ba1f3b134efc31f87a752e29e83e0aa7bedf04ba53c85616d1e8937ae1"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_red.exit.txt": {
+      "bytes": 1,
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_red.log": {
+      "bytes": 1246,
+      "sha256": "708c2ef05da19c4d420951ef5efc550719edffd0dfc380339464c8fb05af3a5a"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_summary.md": {
+      "bytes": 2858,
+      "sha256": "d858da7a8b57bea3cef6b2898f69cdb3a976e884260f7ed3e96aa02a21db1457"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_syntax.command.txt": {
+      "bytes": 69,
+      "sha256": "2a60932b69af197dc2b0bded3a6a42642aaffa7dd5d9c77ad5084a2644468150"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_syntax.exit.txt": {
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_syntax.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_verification.md": {
+      "bytes": 3743,
+      "sha256": "2d2867b789f3abaa333c0220c909f84a4bc14202d3f71975b32b14c94d4f61c5"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_green.command.txt": {
+      "bytes": 90,
+      "sha256": "0907f0ba1f3b134efc31f87a752e29e83e0aa7bedf04ba53c85616d1e8937ae1"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_green.exit.txt": {
+      "bytes": 1,
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_green.log": {
+      "bytes": 1729,
+      "sha256": "f28ebdb9cc4155014d44e26aa5affe39ea32e11c471c5bfb4385cb40aec34667"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_green2.command.txt": {
+      "bytes": 90,
+      "sha256": "0907f0ba1f3b134efc31f87a752e29e83e0aa7bedf04ba53c85616d1e8937ae1"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_green2.exit.txt": {
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_green2.log": {
+      "bytes": 523,
+      "sha256": "15e30b3e20a7cae30a8fca811c7e3ba8a22d33841b487ceae865656bd6146cd4"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_green3.command.txt": {
+      "bytes": 90,
+      "sha256": "0907f0ba1f3b134efc31f87a752e29e83e0aa7bedf04ba53c85616d1e8937ae1"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_green3.exit.txt": {
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_green3.log": {
+      "bytes": 656,
+      "sha256": "82594b905ca9d34708e248e5c074f671e746d5b814fe029973847cfc40e77966"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_red.command.txt": {
+      "bytes": 90,
+      "sha256": "0907f0ba1f3b134efc31f87a752e29e83e0aa7bedf04ba53c85616d1e8937ae1"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_red.exit.txt": {
+      "bytes": 1,
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_red.log": {
+      "bytes": 2255,
+      "sha256": "e605a9f0053f663ff7f7f3eb2ca7bdaeb59c1951e72b16a07e2fb7bdc1c85c66"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_syntax.command.txt": {
+      "bytes": 69,
+      "sha256": "2a60932b69af197dc2b0bded3a6a42642aaffa7dd5d9c77ad5084a2644468150"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_syntax.exit.txt": {
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_syntax.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_root_start.json": {
+      "bytes": 2360,
+      "sha256": "b1e17774e58ac275df5d61c080a4a982589750c39efb4832f4ed0b708841a1d1"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_syntax.command.txt": {
+      "bytes": 69,
+      "sha256": "2a60932b69af197dc2b0bded3a6a42642aaffa7dd5d9c77ad5084a2644468150"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_syntax.exit.txt": {
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_syntax.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_test_pre_residual.txt": {
+      "bytes": 20234,
+      "sha256": "98b318fb33f7c4b4b32777c09755ec1634e7f906530c41c637e5529521f5e7b7"
+    },
+    "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_test_pre_review.txt": {
+      "bytes": 15050,
+      "sha256": "61fa1efe43e07c1ec253ce2750695a9cd20b33384af9d8d340a108c08fb05314"
+    }
+  },
+  "review": {
+    "initial": "NO-GO reader/test-only; producer hooks accepted bounded and neutral.",
+    "targeted": "First correction verification NO-GO on null helper inputs; consolidated residual and revised totality sweep, then GO only as recorded by residual_verification. No unchanged full rereview.",
+    "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_verification.md"
+  },
+  "capability": "Six column-capable writer families plus Phase A direct action, both real pipeline calls, explicit invocation/no-write coverage, shared selected-actor selector, detached typed immediate pre-write observations and real weekly reader.",
+  "claim_limits": [
+    "Synthetic real-function fixtures and report/weekly/reader proof do not identify a retained historical helper or prove a gameplay defect.",
+    "Input boundary is post-selection/pre-write, not complete pre-selection reconstruction; earlier local mutations are possible.",
+    "Main Phase B score is hook-time reconstruction from selected locals, not a captured comparator trace.",
+    "No-write invocation means coverage, not a named rejection predicate; reuse existing movement_reject.",
+    "Earlier fixture-diagnosis runs lack raw log files; tool readback preserves two categories and notes another same-category observation, not a complete raw inventory. Initial observer interim-summary overwrite exception remains unrecovered."
+  ],
+  "preservation": {
+    "pass": true,
+    "base_commit": "09dcd816e44566961e224bf010c8d7bfaad83edb",
+    "parents": [
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_final_integration_summary.json",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_reviewed_summary.json",
+        "intact": true
+      }
+    ],
+    "artifact_checks": [
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_reviewed_summary.json",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_closeout.json",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_commit.log",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_commit.exit.txt",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_test_pre_type_fix.txt",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_test_pre_type_fix_preservation.json",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_type_fix_summary.md",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_type_fix_green.log",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_type_fix_green.exit.txt",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_type_fix_verification.md",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_compare.exit.txt",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_compare.json",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_compare.log",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_compare_extract.cjs",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_compare_extract.command.txt",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_coverage.exit.txt",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_coverage.json",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_coverage.stderr.log",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_extraction_summary.md",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_full_control_audit.cjs",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_full_control_audit.command.txt",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_full_control_audit.exit.txt",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_full_control_audit.json",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_full_control_audit.log",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_full_control_audit.stderr.log",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_full_control_audit.syntax.exit.txt",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_independent_review.md",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_preflight.cjs",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_preflight.exit.txt",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_preflight.log",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_preservation.cjs",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_preservation.exit.txt",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_preservation.json",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_preservation.log",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection.command.txt",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection.exit.txt",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection.json",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection.stderr.log",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection_complete.command.txt",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection_complete.exit.txt",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection_complete.json",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection_complete.stderr.log",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection_complete_extract.cjs",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection_complete_syntax.exit.txt",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection_extract.cjs",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection_summary.md",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection_syntax.exit.txt",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_run_identity.json",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_runner.exit.txt",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_runner.stderr.log",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_runner.stdout.log",
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_started.json",
+        "intact": true
+      }
+    ],
+    "retained_runs": [
+      {
+        "name": "apr1992_definitive_188w__0b1f040ff4abe835__w139_n40",
+        "present": true
+      },
+      {
+        "name": "apr1992_definitive_188w__4658849344f21642__w186_n38",
+        "present": true
+      },
+      {
+        "name": "apr1992_definitive_188w__6deb5845c150c196__w188_n37",
+        "present": true
+      },
+      {
+        "name": "apr1992_definitive_188w__6deb5845c150c196__w188_n39",
+        "present": true
+      },
+      {
+        "name": "apr1992_historical_52w__434fe8ff83b7b523__w52",
+        "present": true
+      },
+      {
+        "name": "apr1992_definitive_188w__0b1f040ff4abe835__w139_n41",
+        "present": true
+      }
+    ],
+    "junctions": [
+      {
+        "path": "runs",
+        "target": "C:\\Users\\User\\.codex\\worktrees\\april-1995-glamoc\\A-War-Without-Victory\\runs",
+        "intact": true
+      },
+      {
+        "path": "node_modules",
+        "target": "C:\\Users\\User\\.codex\\worktrees\\april-1995-glamoc\\A-War-Without-Victory\\node_modules",
+        "intact": true
+      }
+    ],
+    "protected_boundary_diff_empty": true,
+    "reusedSources": [
+      {
+        "path": "tools/diagnostics/movement_phase_coverage.cjs",
+        "unchanged": true
+      },
+      {
+        "path": "tests/front_distribution_order_conflict_diagnostic.test.ts",
+        "unchanged": true
+      }
+    ],
+    "limits": "Retained parent/raw-log bindings and run presence checked; prior campaign byte inventories reused. No new historical measurement. Original observer interim-summary overwrite exception remains unrecovered."
+  },
+  "reuse": "56 other affected producer/topic/selector cases from final4_green; diagnostic cases refreshed after the residual guard. Continuation5 characterization and unchanged prior reader; n40/n41 historical prefix neutrality; n39 late controls/Farz receipts. No new historical measurement.",
+  "remaining": [
+    "Original dirty517 source and actual pre-order cause unbound.",
+    "Actualn41 writer/rejection and later737 admission link unmeasured.",
+    "Sanski town, two missing Jajce HRHB gains, four lost n25 matches; all protected controls, ordering, ordinary combat, denominator/save and required receipts/final review remain mandatory.",
+    "Literal31-input139 criterion remains failed/unwaived; reached-prefix proof does not close188 gates."
+  ],
+  "boundary_diff": "",
+  "campaign_replay_full_suite": false,
+  "gameplay_correction": false,
+  "calibration_acceptance": false,
+  "merge_push_adoption": false,
+  "closeout": "Fresh docs/citations/index/whitespace and required existing hook are recorded separately; no success inferred from this pre-hook receipt."
+}

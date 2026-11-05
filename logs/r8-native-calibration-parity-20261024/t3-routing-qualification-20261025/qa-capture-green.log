@@ -1,0 +1,12 @@
+{
+  "schema": "awwv.private-native-capture-selftest.v1",
+  "pass": true,
+  "checks": [
+    "missing result retains progress, netlog, inventory, exit, and missing list",
+    "early missing evidence root still writes artifacts, inventory, and exit",
+    "nonzero child status is preserved after complete capture",
+    "timeout remains a failure while capture records missing artifacts",
+    "clean child and complete artifacts remain successful",
+    "existing destinations are never overwritten"
+  ]
+}

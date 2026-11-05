@@ -1,0 +1,204 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-24T13:57:45.210Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/baseline-rebless-20261024/update-qualification-01",
+  "timeout_ms": 180000,
+  "original_argv": [
+    "C:\\Program Files\\Volta\\node.exe",
+    "tmp/baseline-rebless-20261024/qualify_retained_update.cjs",
+    "{evidenceDir}",
+    "--expected-head",
+    "a913286803a095b6dc3f57a44175081d6ae4b8eb",
+    "--old-manifest-sha",
+    "67774c275f206633a931d1d1aa3990336d1dd0e0877ebaaf924feb6f75378888",
+    "--preservation-inventory",
+    "logs/baseline-reblessing/20261024/PRESERVATION_BEFORE.json",
+    "--source-snapshot",
+    "tmp/baseline-rebless-20261024/campaign-01/source-after.json",
+    "--n94-inventory",
+    "tmp/baseline-rebless-20261024/n94-before-update.json",
+    "--update-attempt",
+    "tmp/baseline-rebless-20261024/update-01",
+    "--owner-authorized-once"
+  ],
+  "argv": [
+    "C:\\Program Files\\Volta\\node.exe",
+    "tmp/baseline-rebless-20261024/qualify_retained_update.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\baseline-rebless-20261024\\update-qualification-01",
+    "--expected-head",
+    "a913286803a095b6dc3f57a44175081d6ae4b8eb",
+    "--old-manifest-sha",
+    "67774c275f206633a931d1d1aa3990336d1dd0e0877ebaaf924feb6f75378888",
+    "--preservation-inventory",
+    "logs/baseline-reblessing/20261024/PRESERVATION_BEFORE.json",
+    "--source-snapshot",
+    "tmp/baseline-rebless-20261024/campaign-01/source-after.json",
+    "--n94-inventory",
+    "tmp/baseline-rebless-20261024/n94-before-update.json",
+    "--update-attempt",
+    "tmp/baseline-rebless-20261024/update-01",
+    "--owner-authorized-once"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "QUALIFICATION.json",
+    "DIAGNOSIS.md",
+    "protected-vs-n91.json",
+    "protected-vs-n92.json",
+    "checkpoints.stdout.log",
+    "checkpoints.stderr.log",
+    "checkpoints.execution.json",
+    "consistency.stdout.log",
+    "consistency.stderr.log",
+    "consistency.execution.json",
+    "health.stdout.log",
+    "health.stderr.log",
+    "health.execution.json",
+    "protected-vs-n91.stdout.log",
+    "protected-vs-n91.stderr.log",
+    "protected-vs-n91.execution.json",
+    "protected-vs-n92.stdout.log",
+    "protected-vs-n92.stderr.log",
+    "protected-vs-n92.execution.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/baseline-rebless-20261024/qualify_retained_update.cjs",
+    "bytes": 21837,
+    "raw_sha256": "1aed441a1d420b7504e1b4b5a8943c1889a37ae76862a527e552da5052084645",
+    "normalized_text_sha256": "1aed441a1d420b7504e1b4b5a8943c1889a37ae76862a527e552da5052084645",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 21837,
+      "sha256": "1aed441a1d420b7504e1b4b5a8943c1889a37ae76862a527e552da5052084645"
+    }
+  },
+  "end_utc": "2026-10-24T13:57:57.194Z",
+  "pid": 23164,
+  "child_exit": 0,
+  "wrapper_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/baseline-rebless-20261024/qualify_retained_update.cjs",
+    "bytes": 21837,
+    "raw_sha256": "1aed441a1d420b7504e1b4b5a8943c1889a37ae76862a527e552da5052084645",
+    "normalized_text_sha256": "1aed441a1d420b7504e1b4b5a8943c1889a37ae76862a527e552da5052084645",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 47,
+    "sha256": "907125d51a1d9cf2fbc23d1e573938d56c85ecdc741b215131e4ee716a192dd1"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "QUALIFICATION.json",
+      "bytes": 16589,
+      "sha256": "2a0b004e899f55a6048f8297457a8f68d2da4ff0c8be9fb26c13de9d7261b605"
+    },
+    {
+      "path": "DIAGNOSIS.md",
+      "bytes": 775,
+      "sha256": "450f957e6595f2558522218971aeb14a3fbd1d55715b4baafa74959ce5f00c00"
+    },
+    {
+      "path": "protected-vs-n91.json",
+      "bytes": 7935,
+      "sha256": "ea54b339198d8c57624883dfa0e9ed8ab2d93359294a91dfae6aa4a7c7fee710"
+    },
+    {
+      "path": "protected-vs-n92.json",
+      "bytes": 7935,
+      "sha256": "738fb2cedef9270e7a91697aae4d59ae56bb5a93b2cec226a2481e0fd6b855ed"
+    },
+    {
+      "path": "checkpoints.stdout.log",
+      "bytes": 3100,
+      "sha256": "0ff1fb1da0f26ae7cf641e6f5d7db8a3f51f21cf0ba5208a17f29f8d8ca8673b"
+    },
+    {
+      "path": "checkpoints.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "checkpoints.execution.json",
+      "bytes": 397,
+      "sha256": "7c1d117f7279298cc46706fd7aab478fea7275d25ec91bcc6c0e91446f466377"
+    },
+    {
+      "path": "consistency.stdout.log",
+      "bytes": 2086,
+      "sha256": "b8c2371708c9fb66c7a31cf448a957f559f112b472e93310d0632f15247b640e"
+    },
+    {
+      "path": "consistency.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "consistency.execution.json",
+      "bytes": 314,
+      "sha256": "ef4f3d3a34d926e5a03178da74d829f05ce9583d85c9e373eef809e387287bc3"
+    },
+    {
+      "path": "health.stdout.log",
+      "bytes": 2301,
+      "sha256": "cfa27a45942f49ff0cbe2db32b130f4b43e596eb57584acc26534839cec5e0e0"
+    },
+    {
+      "path": "health.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "health.execution.json",
+      "bytes": 351,
+      "sha256": "8a38dc92226eeb6e287c8749a379ee593d1a3fc2eff4d75c9badb6937ed70c11"
+    },
+    {
+      "path": "protected-vs-n91.stdout.log",
+      "bytes": 7322,
+      "sha256": "4129bf93fe2ecb66675ed3bb171f3378f6353c1668df9c854543e41af166d5e1"
+    },
+    {
+      "path": "protected-vs-n91.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "protected-vs-n91.execution.json",
+      "bytes": 615,
+      "sha256": "405a522a313478e2dfb1ef29dd5497925da3533378ac2b0f9b5a76a743ac8bdb"
+    },
+    {
+      "path": "protected-vs-n92.stdout.log",
+      "bytes": 7322,
+      "sha256": "4129bf93fe2ecb66675ed3bb171f3378f6353c1668df9c854543e41af166d5e1"
+    },
+    {
+      "path": "protected-vs-n92.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "protected-vs-n92.execution.json",
+      "bytes": 615,
+      "sha256": "2b09bf2765bec0065e34e7f85e6fa04545ab56ecc8a0a77d47058ad25f3064c4"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

@@ -1,0 +1,260 @@
+{
+  "schema": "awwv.directive-obadi-diagnostic-v2.actual-review.v1",
+  "date": "2026-10-25",
+  "reviewRole": "independent gameplay-programmer, canon, systems, and determinism review",
+  "mode": "read-only review of the single retained production attempt; no query, staging, advance, simulation, test, build, package, campaign, source edit, tuning, threshold change, or retry",
+  "verdict": "NEGATIVE_CAPABILITY_RESULT__CALIBRATION_UNMET",
+  "summary": "The corrected-start diagnostic proved lawful directive admission, normal 25 CA consumption, a soft objection override, operation creation, and two physical roster movements. It did not prove operation-owned combat or capture. The operation stayed in planning, the opening-attack executable predicate returned false, and the lifecycle retired it with recovery_reason zero_eligible_axis after the fixed planning grace expired.",
+  "attempt": {
+    "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/directive-obadi-diagnostic-v2/attempts/production-01",
+    "head": "295d5f7290b1085dc76bbebb41df72386cd6b705",
+    "resultSha256": "e223e59ae527d5e0baef10f7cbf8e1d8301399b45bc477ea5d9d3f3de44e43ab",
+    "wrapperExit": 2,
+    "childExit": 2,
+    "timedOut": false,
+    "signal": null,
+    "elapsedMs": 12543,
+    "noRetry": true,
+    "completedAdvances": 6,
+    "returnedTurns": [21, 22, 23, 24, 25, 26],
+    "resultPass": false,
+    "resultVerdict": "NO_COMBAT_WITHIN_FIXED_WINDOW",
+    "captureClaim": false,
+    "stderrBytes": 0
+  },
+  "inputAndRuntime": {
+    "inputPath": "tmp-paradox-qa-20260710/evidence/historical-default-p03-rbih-t39-01/rbih/turn-autosaves/turn-020.json",
+    "inputBytes": 5041256,
+    "inputSha256": "b6c96de72c587b29fd0da9e74280a0cc0c07ae827fbb1ec29d3b5e43a8316e59",
+    "inputTurn": 20,
+    "inputCalendarDate": "1992-08-24",
+    "nodeVersion": "v22.23.2",
+    "nodeSha256": "0d0f5e39f9f3d9587bc19f73eab3c2c9c4903fd02d6dbf9c853dd81b3d95fad4",
+    "sourceBindingAssessment": "RESULT.json binds the production consumer, staging path, directive planner, enclave eligibility source, formatter, tests, and harness helpers to the recorded head. The later unrelated working-tree edit to tests/scenario_runner_artifact_repair.test.ts occurred after this retained attempt and does not alter these bound bytes or the desktop advance path."
+  },
+  "admission": {
+    "target": "op:srebrenica:obadi",
+    "targetControllerAtInput": "RS",
+    "corps": "arbih_2nd_corps",
+    "commanderOfficerId": "arbih_mesic",
+    "commanderName": "Hajrudin Mešić",
+    "operationId": "arbih_2nd_corps:Presidential Directive — op:srebrenica:obadi:t21",
+    "stagingOsid": "op:srebrenica:donji_potocari_2",
+    "stagingControllerAtInput": "RBiH",
+    "rosterCount": 7,
+    "roster": [
+      "arbih_1st_cerska",
+      "arbih_1st_kamenica",
+      "arbih_246th_vitezka_mountain",
+      "arbih_281st_east_bosnian_light",
+      "arbih_282nd_east_bosnian_light",
+      "arbih_283rd_east_bosnian_light",
+      "arbih_284th_east_bosnian_light"
+    ],
+    "legalityEvidence": {
+      "allActiveAtInput": true,
+      "allFactionRBiHAtInput": true,
+      "allCorpsArbih2ndAtInput": true,
+      "activeOperationRosterOverlapsAtInput": [],
+      "withinCanonicalRosterBounds3To12": true,
+      "productionObjectiveEligibilityWasRequiredForEverySelectedFormation": true,
+      "assessment": "The seven-member roster was lawfully admitted by the corrected harness using the unchanged production objective-eligibility predicate. The three formations below the later 500-person offensive-action floor were still legal directive selections; that floor is an opening-attack guard, not the repaired admission rule."
+    }
+  },
+  "commandAuthorityAndOverride": {
+    "objection": {
+      "forceRatio": 1.6982606977648265,
+      "estimatedCasualties": 358,
+      "recommendedAction": "delay"
+    },
+    "hardRejection": false,
+    "softOverrideUsed": true,
+    "stageOptions": {},
+    "stagePayloadForcedOverObjection": true,
+    "caBefore": {
+      "current": 100,
+      "spentThisTurn": 0,
+      "lifetimeSpent": 25
+    },
+    "caAfter": {
+      "current": 75,
+      "spentThisTurn": 25,
+      "lifetimeSpent": 50
+    },
+    "normalRequestCost": 25,
+    "assessment": "The public objection was advisory and the permitted soft override staged the normal target/corps request. No force_launch option or hard-guard bypass was supplied. was_force_launched records the political override consequence; force_launch was absent until serialized false in recovery and therefore did not bypass launch readiness."
+  },
+  "movement": {
+    "observed": true,
+    "formationLocationChangeCount": 2,
+    "turnsWithRosterMovement": 2,
+    "events": [
+      {
+        "turn": 21,
+        "formationId": "arbih_283rd_east_bosnian_light",
+        "from": "op:srebrenica:bostahovine_2",
+        "to": "op:srebrenica:ljeskovik_2"
+      },
+      {
+        "turn": 23,
+        "formationId": "arbih_281st_east_bosnian_light",
+        "from": "op:srebrenica:milacevici",
+        "to": "op:srebrenica:donji_potocari_2"
+      }
+    ],
+    "assessment": "Movement and staging participation are proven. They are not evidence of an attack."
+  },
+  "operationPhaseHistory": {
+    "returnedStatePhases": [
+      { "turn": 21, "phase": "planning", "axisBlocker": null },
+      { "turn": 22, "phase": "planning", "axisBlocker": null },
+      { "turn": 23, "phase": "planning", "axisBlocker": "zero_eligible_axis" },
+      { "turn": 24, "phase": "planning", "axisBlocker": "zero_eligible_axis" },
+      { "turn": 25, "phase": "recovery", "axisBlocker": "zero_eligible_axis", "recoveryReason": "zero_eligible_axis" },
+      { "turn": 26, "phase": "absent_from_active_operations", "aarRecoveryReason": "zero_eligible_axis" }
+    ],
+    "aarWeeklyLog": [
+      { "turn": 21, "phase": "planning", "attacks": 0 },
+      { "turn": 22, "phase": "planning", "attacks": 0 },
+      { "turn": 23, "phase": "planning", "attacks": 0 },
+      { "turn": 24, "phase": "planning", "attacks": 0 },
+      { "turn": 25, "phase": "recovery", "attacks": 0 }
+    ]
+  },
+  "failureDiagnosis": {
+    "firstExactProductionRejection": {
+      "function": "axisHasExecutableOpeningAttack",
+      "returned": false,
+      "threshold": "costly_victory",
+      "persistedAxisField": "launch_blocker",
+      "persistedAxisValue": "zero_eligible_axis",
+      "firstPersistedOnReturnedTurn": 23,
+      "repeatedOnReturnedTurn": 24,
+      "operationRecoveryField": "recovery_reason",
+      "operationRecoveryValue": "zero_eligible_axis",
+      "recoveryOnReturnedTurn": 25
+    },
+    "preparation": {
+      "rejectedHere": false,
+      "events": [
+        { "turn": 22, "subPhase": "intel_gathering", "intelConfidence": 0.20999999999999994, "supplyReadiness": 1, "forceRatioEstimate": 1, "probeOrdered": true },
+        { "turn": 23, "subPhase": "ready", "intelConfidence": 0.48, "supplyReadiness": 1, "forceRatioEstimate": 1, "commanderAssessment": "launch" },
+        { "turn": 24, "subPhase": "ready", "intelConfidence": 0.5, "supplyReadiness": 1, "forceRatioEstimate": 3, "commanderAssessment": "launch" }
+      ],
+      "assessment": "Preparation reached ready and recommended launch. No preparation abort, manual termination, or defender_power_too_high recovery occurred."
+    },
+    "supply": {
+      "rejectedHere": false,
+      "operationSupplyReadinessTurns21To25": [1, 1, 1, 1, 1],
+      "assessment": "The operation-level readiness value persisted as 1 and the preparation events also reported 1. Supply was not the lifecycle blocker recorded by this attempt."
+    },
+    "assemblyAndAttackFloor": {
+      "rejectedHere": false,
+      "minimumAssembledParticipantsField": null,
+      "axisMinimumStagedBrigadesField": null,
+      "mainBrigade": "arbih_282nd_east_bosnian_light",
+      "mainBrigadePersonnelDuringReadinessWindow": 600,
+      "mainBrigadeDisruptedTurns": 0,
+      "minimumAttackPersonnel": 500,
+      "assessment": "The returned blocker is downstream of the assembly and attack-floor checks. The active, undisrupted 600-person main brigade passed the canonical offensive-action floor."
+    },
+    "approachAndAdjacency": {
+      "rejectedHere": false,
+      "noApproachBlockerObserved": false,
+      "unreachableAtLaunchObserved": false,
+      "adjacentEligiblePositionsDuringReadiness": [
+        "op:srebrenica:donji_potocari_2",
+        "op:srebrenica:ljeskovik_2"
+      ],
+      "assessment": "The retained input identifies both positions as RBiH-controlled neighbors of Obadi; the 600-person main brigade was at Ljeskovik and other 600-person assigned brigades were also on those positions. The engine did not emit no_approach_osid."
+    },
+    "predictor": {
+      "rejectedHere": true,
+      "exactPredicate": "No considered opening attack returned an outcome sufficient for the costly_victory threshold, including the concentrated-outcome alternative; the helper therefore returned false and classifyAxisOpeningAttack persisted zero_eligible_axis.",
+      "subtypeResolution": "UNRESOLVED_FROM_RETAINED_ATTEMPT",
+      "subtypeReason": "launch_blocker_detail and launch_readiness_detail are absent because the opt-in axis_reject reason-code topic was not enabled. The persisted default-run field deliberately collapses predictor-no-candidate and predictor-candidate-below-threshold into zero_eligible_axis. No post-hoc rerun is authorized, so this review does not label it present_too_weak or not_reachable_from_position.",
+      "notAForceRatioContradiction": "Preparation force_ratio_estimate is a planning assessment. Opening executability uses the combat predictor and the operation's min_attack_outcome, defaulting here to costly_victory. A preparation estimate of 1 or 3 does not itself satisfy that predicate."
+    },
+    "lifecycle": {
+      "planningDuration": 1,
+      "graceTurns": 2,
+      "phaseStartedTurn": 21,
+      "fatalEvaluationTurn": 25,
+      "fatalElapsed": 4,
+      "fatalComparison": "4 > 1 + 2",
+      "sourceBranch": "sector_offensive.ts:1506-1516 at recorded head",
+      "assessment": "At turn 25, force_launch was not true and the fixed planning deadline had expired. evaluateOpeningAttackReadiness returned non-executable, so beginRecovery wrote zero_eligible_axis before another preparation tick or any planning-to-execution transition."
+    }
+  },
+  "combatAndControl": {
+    "allWorldBattleCountsByTurn": [1, 4, 5, 4, 6, 1],
+    "operationOwnedBattleCount": 0,
+    "operationAarTotalAttacks": 0,
+    "operationAarOutcome": "failure",
+    "operationAarGrade": "No Assault Attempted",
+    "targetControllerBeforeByTurn": ["RS", "RS", "RS", "RS", "RS", "RS"],
+    "targetControllerAfterByTurn": ["RS", "RS", "RS", "RS", "RS", "RS"],
+    "targetControlEventCount": 0,
+    "captureProvenanceByTurn": ["not_captured", "not_captured", "not_captured", "not_captured", "not_captured", "not_captured"],
+    "assessment": "Other battles occurred in the world, but none belonged to this operation. Obadi remained under RS control and there is no capture lineage."
+  },
+  "sourceTraceAtRecordedHead": [
+    {
+      "path": "src/state/formation_constants.ts",
+      "lines": "76-82",
+      "fact": "MIN_ATTACK_PERSONNEL is 500."
+    },
+    {
+      "path": "src/sim/combat/sector_offensive_launch_helpers.ts",
+      "lines": "698-700, 763-909",
+      "fact": "The default planning attack threshold is costly_victory; opening executability requires a direct or concentrated predicted outcome sufficient for that threshold."
+    },
+    {
+      "path": "src/sim/combat/sector_offensive_launch_helpers.ts",
+      "lines": "1127-1239",
+      "fact": "Axis classification checks approach, optional assembly, attack floor, and then the opening-attack predicate; a false predicate is persisted as zero_eligible_axis."
+    },
+    {
+      "path": "src/sim/combat/sector_offensive_launch_helpers.ts",
+      "lines": "1192-1268",
+      "fact": "Detailed dead-axis/not-reachable/present-too-weak facts are written only when the axis_reject reason-code topic is enabled."
+    },
+    {
+      "path": "src/sim/combat/sector_offensive.ts",
+      "lines": "1506-1516",
+      "fact": "After planning_duration plus grace, a non-force_launch operation enters recovery when opening readiness remains non-executable."
+    }
+  ],
+  "retainedEvidence": {
+    "rawBoundaryFiles": 12,
+    "rawStateFiles": 6,
+    "rawReportFiles": 6,
+    "receiptFiles": 6,
+    "criticalHashes": [
+      { "path": "attempts/production-01/command.json", "sha256": "9307e2a53338e71eb93370b99be73573174b7d5535aaf43697c0e3d1b9e33e34" },
+      { "path": "attempts/production-01/stage-receipt.json", "sha256": "6386e7de33e47b74ae29f1847d7abf9366b0809ac4d93601699859461b2810ff" },
+      { "path": "attempts/production-01/RESULT.json", "sha256": "e223e59ae527d5e0baef10f7cbf8e1d8301399b45bc477ea5d9d3f3de44e43ab" },
+      { "path": "attempts/production-01/raw-advance-state-turn-023.json", "sha256": "24f466863f487ee9e83d81d939f42320f9f36e07bf6d7c00ef5008e6acaa1373" },
+      { "path": "attempts/production-01/raw-advance-state-turn-025.json", "sha256": "91954ee7e7ea56dc5fe6fafcb186690e9e54e59526fb2f0b3ec777e5f9f25e13" },
+      { "path": "attempts/production-01/raw-advance-state-turn-026.json", "sha256": "c78b829edb93c9f3dd18fc74631c9e62651fe10f35e480ffdda894af520a135d" },
+      { "path": "attempts/production-01/raw-advance-report-turn-023.json", "sha256": "0eb51003859238853e0a5f775fa1978a1a3eb8765d8c531da2d00e33ccf695cd" },
+      { "path": "attempts/production-01/raw-advance-report-turn-025.json", "sha256": "5597be7e2dfc1ebc273a0381f256a5721db95adb66867390d4e2374d8ca01d64" },
+      { "path": "attempts/production-01/raw-advance-report-turn-026.json", "sha256": "5418b5ef52366c997a1a6e13569edbcdf19e062938c411697a22a071cedaf5f7" },
+      { "path": "attempts/production-01/wrapper-receipt.json", "sha256": "6c2fec3cdefbdb8edbe5eb488e39c07a17b642e0d4d9307ca8f80193ee307ce6" }
+    ]
+  },
+  "retainedV1_1Failure": {
+    "status": "PRESERVED_AND_NOT_WAIVED",
+    "verdict": "ROSTER_NOT_ENCLAVE_FORCE",
+    "resultSha256": "93ad67e2bc83a87b1642a5c6667460c7729f6bb48eb7fe0647fd051f6bc5b170",
+    "meaning": "The v1.1 attempt remains a harness false rejection after one completed advance and lacks raw state/report evidence. V2 answers the corrected legal-roster and raw-boundary question; it does not retroactively turn v1.1 into a capability result."
+  },
+  "claimLimits": [
+    "This is a negative fixed-window capability result: the Obadi capture criterion is unmet.",
+    "It proves no operation-owned combat, no attack resolution, and no capture of Obadi.",
+    "It makes no claim about a different player strategy, a longer window, a combined Bukvik-plus-Obadi strategy, January 1995, score 707, the native/package UI path, or historical capture.",
+    "It does not diagnose a gameplay defect or recommend a fix. The normal combat predictor and hard launch-readiness guards rejected this admitted operation in the retained state.",
+    "No rerun, alternate roster, threshold reduction, tuning, forced control change, teleport, or strategy shopping is authorized or implied by this review."
+  ],
+  "reviewConclusion": "BLOCK capability/calibration qualification for Obadi. Preserve the lawful-delivery proof and the negative outcome together: seven eligible uncommitted formations were admitted, 25 CA was spent, two formations physically moved, preparation reached ready, but the opening-attack predictor never supplied an outcome sufficient for costly_victory before the fixed deadline. The exact persisted blocker is zero_eligible_axis; its optional fine-grained subtype was not recorded and remains unresolved."
+}

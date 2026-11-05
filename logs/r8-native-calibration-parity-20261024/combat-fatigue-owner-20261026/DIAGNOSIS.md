@@ -1,0 +1,9 @@
+# Combat-fatigue owner diagnosis — stopped before RED
+
+Canon assigns one fatigue charge per defended battle: +2 to each attacker and +1 to the primary defender, capped at 30 (`Systems_Manual_v0_9_0.md:1109`; `context.md:301`). The independent preimplementation review is GO for `applyCombatFatigue` as the sole owner, with the attacker delta made defender-aware so undefended occupation remains +0.5.
+
+Static source/history evidence identifies two current writer sites. The older resolver path writes `recordFormationFatigue(attacker, defender ? 2 : 0.5)` and `recordFormationFatigue(primaryDefender, 1)`. `applyCombatFatigue` separately writes +2/+1 and is called later in the same battle loop. The helper was added in commit `948c6fdf4d`; its own comment calls it an exact reproduction of the formerly inline block. The later Standing-OG work retained/invoked the helper while the earlier writers remained. This is strong static evidence of duplicate ownership, but the authorized task required a real resolver RED before production mutation.
+
+No resolver RED was obtained. Attempt 001 stopped in the launcher because unnormalized slash styles made the authorized-root comparison false. The authorized corrected attempt 002 passed a nonmutating path/readability/syntax precheck, then Vitest rejected the tmp test path because the repository config has a fixed maintained-test include list. It reported “No test files found” before importing or running the resolver.
+
+Both attempts are preserved. No source or maintained test changed, and there was no campaign, native run, package, query, turn advance, or retry after attempt 002. The next smallest route, if separately authorized, is to add the already reviewed real-resolver test under `tests/`, run that included test once to obtain +4/+2 RED, then apply the sole-owner correction and focused GREEN/typecheck. Undefended +0.5 and cap/init behavior remain explicit required coverage.

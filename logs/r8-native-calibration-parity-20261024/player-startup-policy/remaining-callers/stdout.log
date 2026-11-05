@@ -1,0 +1,54 @@
+
+ RUN  v2.1.9 C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory
+
+stdout | tests/desktop_calibration_compare.test.ts
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/desktop_calibration_compare.test.ts
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+ ✓ tests/desktop_calibration_compare.test.ts (9 tests) 20382ms
+   ✓ desktop calibration comparison provenance > binds both branches to one current startup snapshot and labels player-choice divergence 5777ms
+   ✓ desktop calibration comparison provenance > puts non-player factions in historical mode for a historical-default comparison 1189ms
+   ✓ desktop calibration comparison provenance > distinguishes standing same-turn authorization from between-turn request approval 1180ms
+   ✓ desktop calibration comparison provenance > emits byte-identical JSON for identical zero-turn inputs 2364ms
+   ✓ desktop calibration comparison provenance > requires the Electron log and autosave inputs as a pair 919ms
+   ✓ desktop calibration comparison provenance > binds a validated Electron replay and attributes actions outside the controlled policy 3893ms
+   ✓ desktop calibration comparison provenance > rejects faction provenance mismatches 1023ms
+   ✓ desktop calibration comparison provenance > rejects turn provenance mismatches 1021ms
+   ✓ desktop calibration comparison provenance > rejects scenario provenance mismatches 1028ms
+ ✓ tests/desktop_campaign_start_contract.test.ts (9 tests) 2281ms
+   ✓ initial_save is already in canonical loaded-save form at campaign birth 1156ms
+   ✓ startNewCampaign disables headless auto-control for the selected player faction 305ms
+   ✓ startNewCampaign queues the selected faction foundational decision at campaign birth 444ms
+stdout | tests/turn_result_production_callers.test.ts > TurnResult production caller handling > desktop keeps the input save unchanged and returns a deterministic actionable invariant error
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/turn_result_production_callers.test.ts > TurnResult production caller handling > desktop keeps the input save unchanged and returns a deterministic actionable invariant error
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:8 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/turn_result_production_callers.test.ts > TurnResult production caller handling > desktop keeps the input save unchanged and returns a deterministic actionable invariant error
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/turn_result_production_callers.test.ts > TurnResult production caller handling > desktop keeps the input save unchanged and returns a deterministic actionable invariant error
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:8 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+ ✓ tests/turn_result_production_callers.test.ts (2 tests) 2727ms
+   ✓ TurnResult production caller handling > desktop keeps the input save unchanged and returns a deterministic actionable invariant error 2606ms
+
+ Test Files  3 passed (3)
+      Tests  20 passed (20)
+   Start at  00:31:50
+   Duration  34.94s (transform 2.71s, setup 16ms, collect 8.61s, tests 25.39s, environment 1ms, prepare 228ms)
+
+{"child_exit":0,"signal":null}

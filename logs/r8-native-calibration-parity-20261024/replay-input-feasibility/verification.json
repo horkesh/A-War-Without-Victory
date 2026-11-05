@@ -1,0 +1,10 @@
+{
+  "verdict": "NOT_FEASIBLE_WITH_RETAINED_CONTRACT",
+  "requiredOutputs": 10,
+  "missingOutputs": 0,
+  "scopedSourceStatus": [
+    " M tests/paradox_local_qa_harness.test.ts",
+    " M tools/ui/paradox_local_qa.cjs"
+  ],
+  "reportSha256": "e579d7b416a434dacf2ffdbac13964a97437cd6200ac7453a1aadd332e9121c8"
+}

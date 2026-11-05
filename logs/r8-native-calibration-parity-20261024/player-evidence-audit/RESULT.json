@@ -1,0 +1,67 @@
+{
+  "schema": "awwv.player-validation-evidence-audit-result.v1",
+  "status": "AUDIT_COMPLETE_PLAYER_QUALIFICATION_INCOMPLETE",
+  "head": "81a65d76fce4936ea39c6d4b4d5df144139c8ba5",
+  "audit": "AUDIT.json",
+  "narrative": "AUDIT.md",
+  "summaryCounts": {
+    "cells": 21,
+    "PASS_CURRENT_EVIDENCE": 2,
+    "PARTIAL": 7,
+    "FAILED": 1,
+    "UNREACHED": 11,
+    "INAPPLICABILITY_REQUIRES_AUTHORITY": 0
+  },
+  "finding": "Retained evidence does not establish a complete ordered production-consumable player-input replay contract. Save/load is separate proof.",
+  "reused": [
+    "RBiH t39 UI/39settled/39provisional/assignmentseals/exactSaveLoad atmeasuredscope",
+    "RS/HRHB real zero-turn exactSaveLoad witholderpackage provenance only",
+    "unchanged qualified90harnessfixtures atoriginalscope,notreplayproof"
+  ],
+  "notEstablished": [
+    "same-input production input replay/repeat",
+    "current all-faction opening/counter/input qualification",
+    "full canonical protection/health reader coverage",
+    "three qualified24turn andthree188turn sessions",
+    "full tour/diary/performance/replay/endgame and inherited audio closure"
+  ],
+  "readerBoundary": "n94 equality comparator is diagnostic for player mode, not canonical protection/full health. Builtin required-event scope is RS>=52 nonresume; RBiH39 five-event proof is a separate reader. No choice-based protected waiver.",
+  "next": {
+    "scope": "OFFLINE_REPLAY_INPUT_CONTRACT_FEASIBILITY_FIRST",
+    "executed": false,
+    "commands": "See AUDIT.json cheapestRejectingNextStep existingChecksFirst; all12 bounded input/source paths exist",
+    "freshDirectoryGuard": "Before any listed command: if(Test-Path -LiteralPath tmp/player-validation-evidence-audit-20261024/input-contract-feasibility-01){throw \"Required fresh attempt directory already exists\"}",
+    "preservation": "Run through preserved-preflight/exclusive fresh artifacts; raw rg output tofile, compact counts/excerpts only",
+    "capMsPerCommand": 180000,
+    "expectedMachineChecks": "seconds to about3minutes; unchanged90fixture evidence reused",
+    "pass": "Explicit source-owned complete consumed action order and actual production consumer, bound actor/faction/turn/selection/receipt/archives",
+    "stop": [
+      "unreadable inputs",
+      "source owner discovery incomplete",
+      "missing/unordered/unbound/nonconsumable input"
+    ],
+    "failureMeaning": "Evidence insufficient in inspected scope, not established gameplay defect/global absence/permanent unrecoverability",
+    "automaticRetry": false,
+    "subsequentScope": "All-faction frozen opening qualification separate/later; any newreader/capture/consumer is proposedimplementation,notavailableexecutableorauthorizedbythisaudit"
+  },
+  "preservation": {
+    "n94Files": 40,
+    "currentSourceEvidencePins": 10,
+    "telemetry": "exact,zeroappend",
+    "legacyClassifiers": "fiveunchanged",
+    "priorBindings": 3226
+  },
+  "verification": {
+    "documentationReview": "GO — review/FINAL_INTEGRATION_REVIEW.md",
+    "governance": "40/40,child/wrapper0/0",
+    "independentAuditReview": "GO after targeted corrections;priorcandidates/rejectionpreserved"
+  },
+  "scope": {
+    "newNativeCampaignEngineReplayBuild": false,
+    "gameplayOrSourceTestChanges": false,
+    "committed": false,
+    "pushed": false,
+    "tuningBaselineReferenceChanges": false
+  },
+  "raw": "tmp/player-validation-evidence-audit-20261024/;rawprofiles/savesremainoriginalpaths,localinventoryisnotremote backup"
+}

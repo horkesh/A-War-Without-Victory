@@ -1,0 +1,2 @@
+tests/paradox_local_qa_harness.test.ts(3904,25): error TS2550: Property 'hasOwn' does not exist on type 'ObjectConstructor'. Do you need to change your target library? Try changing the 'lib' compiler option to 'es2022' or later.
+{"child_exit":2,"signal":null}

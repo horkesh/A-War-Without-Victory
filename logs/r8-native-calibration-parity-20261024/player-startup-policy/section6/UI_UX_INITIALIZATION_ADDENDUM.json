@@ -1,0 +1,170 @@
+{
+  "schema": "awwv.sensitive-history.ui-ux-initialization-addendum.v1",
+  "date": "2026-10-24",
+  "seat": "ui-ux-developer",
+  "reviewedHead": "b371adc3e0935825649e5eda4e6bbd45a44a359d",
+  "scope": "static_read_only_revised_ordinary_player_initialization_delta",
+  "verdict": "GO_WITH_BINDING_CONDITIONS",
+  "implementationAuthorizedByThisSeat": false,
+  "originalUiUxVerdictPreserved": true,
+  "ruling": {
+    "initializerAddsPlayerAction": false,
+    "initializerAddsUiOwner": false,
+    "initializerAddsPolicyValue": false,
+    "existingModalRemainsOwner": true,
+    "threeFactionDisplayedDimensionsMustApply": true,
+    "twoStepRbihConsentUnchanged": true,
+    "unresolvedPolicy": "ask",
+    "historicalPolicyOption": "always_deny",
+    "preselectionAllowed": false,
+    "rewardFramingAllowed": false,
+    "headlessMoralComparisonAllowed": false
+  },
+  "bindings": [
+    {
+      "id": "UI-INIT-1",
+      "requirement": "The initializer creates no prompt, response, selected value, policy, notification, receipt, action, or alternate owner; EventDecisionModal and canonical event-decision resolution remain sole owners."
+    },
+    {
+      "id": "UI-INIT-2",
+      "requirement": "For every option of rbih_state_identity, rs_strategic_goals, and hrhb_political_goal, all display-safe effect rows and displayed dimension shifts exactly match the resolved ordinary Electron and browser state, including cross-faction HRHB united_front effects."
+    },
+    {
+      "id": "UI-INIT-3",
+      "requirement": "Do not change EventDecisionModal, Modal, eventEffectDisplay, localization, event data, or any other UI file; preserve authored labels, descriptions, markers, sources, option order, and display-safe previews; do not expose internal tuning values as optimization metrics."
+    },
+    {
+      "id": "UI-INIT-4",
+      "requirement": "RBiH remains identity then exactly one policy modal; before explicit policy response the state remains ask with no receipt, request, deployment, or capture, and Advance/dismissal/hotkey bypass remains blocked."
+    },
+    {
+      "id": "UI-INIT-5",
+      "requirement": "Preserve three uniquely named and enabled policy buttons in authored order, labelled non-dismissible dialog semantics, focus containment, keyboard traversal, source context, historical marker on deny only, and no focus-only selection or recommendation."
+    },
+    {
+      "id": "UI-INIT-6",
+      "requirement": "The allow branch retains all authored dimensions/modifiers and unchanged-writer records for exactly +2 war_crimes_events, +2 war_crimes_events_emergent, and 200 civilian deaths; territory may not offset these costs or become a parity, recovery, optimization, score, grade, badge, achievement, recommendation, or acceptance claim."
+    },
+    {
+      "id": "UI-INIT-7",
+      "requirement": "Initialized neutral substrate creates no pre-response toolbar badge, inbox item, toast, warning, recommendation, KPI, or action; the foundational required modal remains the opening owner."
+    },
+    {
+      "id": "UI-INIT-8",
+      "requirement": "Electron and browser starts present identical opening decisions and resolved outcomes; failures, stale state, load, and retries fail closed without implicit consent, overwritten visible choice, or duplicate effect/receipt."
+    },
+    {
+      "id": "UI-INIT-9",
+      "requirement": "Frozen observer/no-player behavior remains without UI; any mention of the latent headless early-counter defect labels it incomplete and may not support moral, historical, scoring, calibration, or favorable comparison claims."
+    },
+    {
+      "id": "UI-INIT-10",
+      "requirement": "Restrict implementation to the exact seven production and six test files approved by renewed Systems and Red-team reviews; any UI, localization, event-data, modal, policy-owner, request-surface, phase/writer, snapshot, migration, scoring, telemetry, n91-n95, or acceptance-floor change is BLOCK."
+    }
+  ],
+  "requiredUiEvidence": [
+    "source-complete all-option table proving displayed effects and dimensions match exact post-response state for all three faction openings in Electron and browser",
+    "real RBiH policy modal fixture proving exact options, descriptions, markers, sources, visible consequence rows, focus containment, keyboard traversal, non-dismissibility, and no focus-only response",
+    "save-load and duplicate-delivery fixtures proving one explicit identity receipt followed by one explicit policy receipt",
+    "static diff proof that no UI or alternative decision-owner file changed"
+  ],
+  "automaticBlockConditions": [
+    "any displayed opening consequence that no-ops, changes sign or faction, or is reset",
+    "any hidden or inferred response, preselection, recommendation, dismissal bypass, or new policy control",
+    "any new benefit, parity, recovery, territorial-opportunity, moral-offset, score, grade, badge, achievement, or acceptance framing",
+    "any ordinary Electron-browser presentation or resolution mismatch",
+    "any headless moral or historical comparison based on known incomplete counters",
+    "any file outside the exact renewed allowlists or any required UI component change"
+  ],
+  "allowedProductionFiles": [
+    "src/sim/negotiation/initialize_negotiation_state.ts",
+    "src/sim/negotiation/compute_capital.ts",
+    "src/sim/events/opening_policy_transition.ts",
+    "src/desktop/desktop_sim.ts",
+    "src/ui/map/desktop/campaignRecruitmentActions.ts",
+    "src/desktop/electron-main.cjs",
+    "src/ui/map/App.tsx"
+  ],
+  "allowedTestFiles": [
+    "tests/negotiation_capital.test.ts",
+    "tests/startup_snapshot_contract.test.ts",
+    "tests/browser_campaign_start_fallback.test.ts",
+    "tests/player_start_surface_contracts.test.ts",
+    "tests/pre_first_advance_paramilitary_policy.test.ts",
+    "tests/desktop_persistence_contract.test.ts"
+  ],
+  "evidenceDigestBindings": [
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/startup-consequence-diagnosis/DIAGNOSIS.md",
+      "sha256": "bab4297842f8434f4cddcacd5b5d93609688cbeff0d51e2df1fe975772b266c9"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/startup-consequence-diagnosis/PROPOSAL.md",
+      "sha256": "270e018da91d48ae350a5460c6fe3d02a892406e53d130d6e609b78942fe24ab"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/startup-consequence-diagnosis/EVIDENCE.json",
+      "sha256": "a1d57ca9210586812424c30aebcb303b75e7b20879dfb8ed72fbec7daf6d6f3d"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/opening-policy-implementation/failed-candidate/FINDINGS.md",
+      "sha256": "2db6dbd68c713be1144ea40a40dbd1be6eb3d31ff33a4622482a16f63446fe12"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/SYSTEMS_INITIALIZATION_ADDENDUM.md",
+      "sha256": "67d8c00e02922660e5a19892876710e40f7e35f29cd69bfe3525c130b08adb66"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/RED_TEAM_INITIALIZATION_ADDENDUM.md",
+      "sha256": "c69f418328ad98c9eae2586fa1b45fb2a4f1dc8a072dd1de0bef11cccf2fb8a7"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/UI_UX.md",
+      "sha256": "3b51505688aad996d7a784a9b35215f971cb65dec66462a88e5049e905b1a65a"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/UI_UX.json",
+      "sha256": "2d78935d9e84550a917700432d7f625fa4d6c6475c67bdeca3cdfa64592b9401"
+    }
+  ],
+  "uiSourceHashBindings": [
+    {
+      "path": "src/ui/map/components/EventDecisionModal.tsx",
+      "sha256": "0dc01807c1ae2a196a637759f68633f91dd72edcd7620fc78f60561a87989271"
+    },
+    {
+      "path": "src/ui/map/utils/eventEffectDisplay.ts",
+      "sha256": "43b5d037eda82da62e4f6b273f7058bf5830de6067c0d96d4a1c2f70535728c5"
+    },
+    {
+      "path": "src/ui/shared/Modal.tsx",
+      "sha256": "ea3f7a0c60ecec77fa991fd0d03402aebf6b81f3739a3291d58ab6d1a060f157"
+    },
+    {
+      "path": "src/state/player_decision_manifest.ts",
+      "sha256": "587ef6d32f9aac3c76bf68f9c575b46d90246d1fef3618ebff988f2f0d4539fd"
+    },
+    {
+      "path": "data/scenarios/events/war_1992.json",
+      "sha256": "7596df56b934be4334ab8bffe51cf92f439c1fec238d6b82c21e68f25c61162a"
+    },
+    {
+      "path": "docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md",
+      "sha256": "4945b9a0bb7d300a5185ac09e069cac9911e3c4a88d01f963ff5699adea40247"
+    },
+    {
+      "path": "docs/20_engineering/UI_OWNERSHIP_MATRIX.md",
+      "sha256": "2a3271354752fdd5291f7f44ea5c161ea34d5a5f3f0eb9592bb5cc21299fa042"
+    }
+  ],
+  "execution": {
+    "implementation": false,
+    "sourceRuntimeDocsTestWrites": false,
+    "tests": false,
+    "build": false,
+    "package": false,
+    "campaign": false,
+    "native": false,
+    "reviewArtifactWritesOnly": true
+  }
+}

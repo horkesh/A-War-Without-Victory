@@ -1,0 +1,68 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-27T07:14:15.761Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/jan93-restoration-20261027/codex-helper1/attempt-01",
+  "timeout_ms": 60000,
+  "original_argv": [
+    "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "node_modules/tsx/dist/cli.mjs",
+    "tmp/jan93-restoration-20261027/codex-helper1/probe.ts",
+    "{evidenceDir}"
+  ],
+  "argv": [
+    "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "node_modules/tsx/dist/cli.mjs",
+    "tmp/jan93-restoration-20261027/codex-helper1/probe.ts",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\jan93-restoration-20261027\\codex-helper1\\attempt-01"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "probe-result.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/jan93-restoration-20261027/codex-helper1/probe.ts",
+    "bytes": 3506,
+    "raw_sha256": "f67938253d74dad1f230fe54f189355356ee46abc1432649e197250459b6419c",
+    "normalized_text_sha256": "f67938253d74dad1f230fe54f189355356ee46abc1432649e197250459b6419c",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 3506,
+      "sha256": "f67938253d74dad1f230fe54f189355356ee46abc1432649e197250459b6419c"
+    }
+  },
+  "end_utc": "2026-10-27T07:14:20.448Z",
+  "pid": 21052,
+  "child_exit": 1,
+  "wrapper_exit": 126,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/jan93-restoration-20261027/codex-helper1/probe.ts",
+    "bytes": 3506,
+    "raw_sha256": "f67938253d74dad1f230fe54f189355356ee46abc1432649e197250459b6419c",
+    "normalized_text_sha256": "f67938253d74dad1f230fe54f189355356ee46abc1432649e197250459b6419c",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 492,
+    "sha256": "4594bea60d77b4623a6410984479aef70cb46ba60e2e1871efb1cbfdbf259ad6"
+  },
+  "retained_artifacts": [],
+  "artifact_contract": {
+    "pass": false,
+    "unexpected": [],
+    "missing_allowed": [
+      "probe-result.json"
+    ]
+  }
+}

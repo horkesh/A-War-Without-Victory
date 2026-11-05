@@ -1,0 +1,54 @@
+CHECKPOINT SCORES  (replayed against CURRENT painted references)
+  jan1993   700 / 712   base 694   +6
+  apr1994   702 / 712   base 674   +28
+  apr1995   697 / 712   base 668   +29
+  oct1995   667 / 712   base 641   +26
+  NET across checkpoints: +89
+
+ENCLAVE GUARD (canon H1.8) — holds
+  Gorazde               RBiH RBiH RBiH RBiH ** HOLDS **
+                                            UNCONTESTED (0 battles as target)
+  Bihac                 RBiH RBiH RBiH RBiH ** HOLDS **
+                                            UNCONTESTED (0 battles as target)
+  Teocak                RBiH RBiH RBiH RBiH ** HOLDS **
+                                            CONTESTED-AND-HELD (2 battles)
+  Sarajevo-centar       RBiH RBiH RBiH RBiH ** HOLDS **
+                                            UNCONTESTED (0 battles as target)
+  Sarajevo-stari grad   RBiH RBiH RBiH RBiH ** HOLDS **
+                                            UNCONTESTED (0 battles as target)
+  Sarajevo-novo         RBiH RBiH RBiH RBiH ** HOLDS **
+                                            UNCONTESTED (0 battles as target)
+  Sarajevo-novi grad    RBiH RBiH RBiH RBiH ** HOLDS **
+                                            UNCONTESTED (0 battles as target)
+
+ENCLAVE GUARD (canon H1.8) — falls (two-sided: RBiH through w156, RS at w188)
+  Srebrenica            RBiH RBiH RBiH RS   ** FALLS ON SCHEDULE **
+  Zepa                  RBiH RBiH RBiH RS   ** FALLS ON SCHEDULE **
+
+  guard cells compared: 9 (7 holds + 2 falls)
+
+EASTERN CAPTURE PROVENANCE — Birač / Majevica / north Podrinje
+  no unattributed/off-operation capture stops across 9 municipalities ** CLEAN **
+  1 never-captured cell(s) still RBiH at w188 — CALIBRATION (1995 window), not an engine defect:
+      op:kalesija:seher_2   jan1993 reference: RS
+
+OPERATION FARZ / "Uragan 95" — the positive half; a fix that breaks this is the WRONG fix
+  P1 cells — all four Ozren cells must be RBiH by w188
+    Vozuća (13 Sep 1995)       RBiH  ** TAKEN **
+    Maglaj — donja bočinja     RBiH  ** TAKEN **
+    Maglaj — gornja bočinja    RBiH  ** TAKEN **
+    Spreča / north Ozren       RBiH  ** TAKEN **
+  P-A discriminator — the 2nd-Corps signature cell, captured by 2nd Corps, in the window
+    taken t168 by arbih_327th_vitezka_mountain (arbih_3rd_corps)  *** FAIL — needs an arbih_2nd_corps capture at t>=160 ***
+  P-B universal guard — EVERY late 2nd-Corps capture must be reference-warranted
+    0 late 2nd-Corps capture(s) examined
+    (none — P-A is what requires 2nd Corps to act at all)
+  compared: 9 municipalities (negative) + 4 cells (positive)
+
+HRHB WESTERN-BOSNIA CASCADE (documented regression site) — at oct1995
+  bosansko_grahovo 4/4  sipovo 5/5  glamoc 6/6  titov_drvar 3/3  bosanski_petrovac 8/8  mrkonjic_grad 0/6  kljuc 2/7  sanski_most 2/10
+  cascade matched: 30 across 8 municipalities
+  cascade base 40   -10
+  *** CASCADE REGRESSION worse than -2 at the documented 2026-05-26 site — do not merge on this evidence ***
+
+RESULT: GUARD BREACHED — §6 panel matter. Do not merge.

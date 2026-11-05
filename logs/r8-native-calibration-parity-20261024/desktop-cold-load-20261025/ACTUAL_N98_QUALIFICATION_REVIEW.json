@@ -1,0 +1,620 @@
+{
+  "schema": "awwv.terrain-parity.actual-n98-qualification-independent-review.v1",
+  "reviewer": {
+    "task": "/root/desktop_terrain_canon_review",
+    "role": "independent actual-evidence reviewer"
+  },
+  "reviewed_at_utc": "2026-10-25T07:10:51.983414Z",
+  "scope": {
+    "candidate_head": "2ca7d7bcdf795f20c5c15f0004b3c72019f98337",
+    "candidate_run": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n98",
+    "attempt": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01",
+    "review_only": true,
+    "executed_engine_campaign_suite_build_package_native": false,
+    "reused_reviews": [
+      "SOURCE_REVIEW_V2.json",
+      "TARGETED_V3_CORRECTION_REVIEW.json"
+    ]
+  },
+  "verdict": {
+    "qualification": "GO",
+    "status": "N98_ACTUAL_188W_QUALIFICATION_EVIDENCE_ACCEPTED",
+    "full_suite": "BLOCKED_PENDING_TARGETED_RECEIPT_READER_CORRECTION_AND_REVIEW",
+    "reason": "The retained campaign and all gameplay/readers satisfy the qualification contract. The current full-suite readiness reader has a tooling-only fixed-count defect and must not gate this valid 60-child attempt as though it were the older 52-child policy campaign."
+  },
+  "wrapper": {
+    "schema": "awwv.preserved-preflight.receipt.v1",
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "timed_out": false,
+    "spawn_error": null,
+    "artifact_contract": {
+      "pass": true,
+      "unexpected": [],
+      "missing_allowed": []
+    },
+    "allowed_count": 60,
+    "retained_count": 60,
+    "independent_retained_hash_mismatch_count": 0,
+    "independent_retained_records_aggregate_sha256": "54e07211ac4ab8c88f0c045e4ec6c1ed868dc98393a1830a18bff7260993b2b2",
+    "total_attempt_file_count": 65,
+    "wrapper_owned_file_count": 5,
+    "total_attempt_records_aggregate_sha256": "b2b64775babbf75288f29a90ef2073b134e67a6177e5fdb4d3b767b825e43993",
+    "entry_script_stable": true,
+    "entry_script_sha256": "2bf2f4651c913734827b003be233873dc7dfcb4bb8a83281b0889f47bac5eaa4"
+  },
+  "campaign_result": {
+    "schema": "awwv.terrain-parity.campaign-result.v2",
+    "pass": true,
+    "status": "QUALIFICATION_READERS_PASS",
+    "campaign_exit": 0,
+    "checks": {
+      "campaign_zero": true,
+      "exactly_one_run": true,
+      "readers_zero": true,
+      "candidate_binding_stable": true,
+      "telemetry_append_only": true,
+      "preserved_n91_n97_exact": true,
+      "within_shared_deadline": true
+    },
+    "failure_count": 0,
+    "single_new_run": true,
+    "campaign_attempt_directories": [
+      "campaign-01"
+    ],
+    "runs_at_or_after_n98": [
+      "apr1992_definitive_188w__6deb5845c150c196__w188_n98"
+    ]
+  },
+  "reader_results": {
+    "count": 14,
+    "names": [
+      "evaluation",
+      "timeline-vs-n91",
+      "timeline-vs-n92",
+      "timeline-vs-n94",
+      "timeline-vs-n97",
+      "exact-state-vs-n94",
+      "exact-state-vs-n97",
+      "checkpoints",
+      "consistency",
+      "health",
+      "protected-vs-n91",
+      "protected-vs-n92",
+      "producer",
+      "movement"
+    ],
+    "all_exit_zero_and_not_timed_out": true,
+    "per_reader_pass": {
+      "evaluation": true,
+      "timeline-vs-n91": true,
+      "timeline-vs-n92": true,
+      "timeline-vs-n94": true,
+      "timeline-vs-n97": true,
+      "exact-state-vs-n94": true,
+      "exact-state-vs-n97": true,
+      "checkpoints": true,
+      "consistency": true,
+      "health": true,
+      "protected-vs-n91": true,
+      "protected-vs-n92": true,
+      "producer": true,
+      "movement": true
+    },
+    "summary_failure_count": 0
+  },
+  "gameplay_acceptance": {
+    "evaluation_pass": true,
+    "evaluation_status": "GO_TO_QUALIFYING_FULL_SUITE",
+    "evaluation_failure_count": 0,
+    "checkpoint_scores": {
+      "jan1993": {
+        "turn": 39,
+        "denominator": 712,
+        "floor": 707,
+        "score": 707,
+        "n91_formerly_correct": 707,
+        "n91_lost": [],
+        "n92_formerly_correct": 707,
+        "n92_lost": []
+      },
+      "apr1994": {
+        "turn": 104,
+        "denominator": 712,
+        "floor": 707,
+        "score": 707,
+        "n91_formerly_correct": 707,
+        "n91_lost": [],
+        "n92_formerly_correct": 707,
+        "n92_lost": []
+      },
+      "apr1995": {
+        "turn": 156,
+        "denominator": 712,
+        "floor": 706,
+        "score": 706,
+        "n91_formerly_correct": 705,
+        "n91_lost": [],
+        "n92_formerly_correct": 706,
+        "n92_lost": []
+      },
+      "oct1995": {
+        "turn": 188,
+        "denominator": 712,
+        "floor": 706,
+        "score": 706,
+        "n91_formerly_correct": 705,
+        "n91_lost": [],
+        "n92_formerly_correct": 706,
+        "n92_lost": []
+      }
+    },
+    "protected_16_anchors": {
+      "count": 16,
+      "all_pass": true,
+      "rows": [
+        {
+          "id": "op:sanski_most:ostra_luka",
+          "expected": "RS",
+          "actual": "RS",
+          "pass": true
+        },
+        {
+          "id": "op:bosanska_krupa:veliki_badic",
+          "expected": "RBiH",
+          "actual": "RBiH",
+          "pass": true
+        },
+        {
+          "id": "op:bosanska_krupa:ivanjska_2",
+          "expected": "RBiH",
+          "actual": "RBiH",
+          "pass": true
+        },
+        {
+          "id": "op:bosanska_krupa:arapusa_2",
+          "expected": "RBiH",
+          "actual": "RBiH",
+          "pass": true
+        },
+        {
+          "id": "op:bosanska_krupa:donji_dubovik_2",
+          "expected": "RBiH",
+          "actual": "RBiH",
+          "pass": true
+        },
+        {
+          "id": "op:bosanska_krupa:vranjska_2",
+          "expected": "RBiH",
+          "actual": "RBiH",
+          "pass": true
+        },
+        {
+          "id": "op:bosanska_krupa:jasenica_2",
+          "expected": "RBiH",
+          "actual": "RBiH",
+          "pass": true
+        },
+        {
+          "id": "op:bosanska_krupa:gornja_suvaja",
+          "expected": "RBiH",
+          "actual": "RBiH",
+          "pass": true
+        },
+        {
+          "id": "op:bosanski_petrovac:krnjeusa",
+          "expected": "RBiH",
+          "actual": "RBiH",
+          "pass": true
+        },
+        {
+          "id": "op:bosanski_novi:krslje_2",
+          "expected": "RBiH",
+          "actual": "RBiH",
+          "pass": true
+        },
+        {
+          "id": "op:bosanski_novi:matavazi_2",
+          "expected": "RBiH",
+          "actual": "RBiH",
+          "pass": true
+        },
+        {
+          "id": "op:mrkonjic_grad:majdan_2",
+          "expected": "HRHB",
+          "actual": "HRHB",
+          "pass": true
+        },
+        {
+          "id": "op:mrkonjic_grad:podrasnica_2",
+          "expected": "HRHB",
+          "actual": "HRHB",
+          "pass": true
+        },
+        {
+          "id": "op:mrkonjic_grad:mrkonjic_grad_2",
+          "expected": "HRHB",
+          "actual": "HRHB",
+          "pass": true
+        },
+        {
+          "id": "op:mrkonjic_grad:bjelajce_2",
+          "expected": "HRHB",
+          "actual": "HRHB",
+          "pass": true
+        },
+        {
+          "id": "op:mrkonjic_grad:baljvine_2",
+          "expected": "HRHB",
+          "actual": "HRHB",
+          "pass": true
+        }
+      ]
+    },
+    "toljenak": {
+      "timeline_rows": 19,
+      "timeline_all_pass": true,
+      "battle_rows": 1,
+      "event_rows": 1,
+      "diagnostic_rows": 1,
+      "aar_rows": 1,
+      "capture_turn": 135,
+      "final_controller": "RBiH"
+    },
+    "retained_hvo": {
+      "prisoje": {
+        "controller": "HRHB",
+        "battle_rows": 1,
+        "event_rows": 1
+      },
+      "donji_vrbljani": {
+        "controller": "HRHB",
+        "battle_rows": 1,
+        "event_rows": 1
+      }
+    },
+    "enclave_guard": {
+      "holds": 7,
+      "scheduled_falls": 2,
+      "compared_cells": 9,
+      "result": "PASS",
+      "evidence": {
+        "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/child/postrun/checkpoints.stdout.log",
+        "bytes": 3100,
+        "sha256": "0ff1fb1da0f26ae7cf641e6f5d7db8a3f51f21cf0ba5208a17f29f8d8ca8673b"
+      }
+    },
+    "protected_comparisons": {
+      "n91": {
+        "pass": true,
+        "failure_count": 0,
+        "authoritative21": {
+          "defined": 21,
+          "applicable": 21,
+          "rows_all_ok": true
+        },
+        "legacy11": {
+          "defined": 11,
+          "applicable": 11,
+          "rows_all_ok": true
+        },
+        "seven": {
+          "count": 7,
+          "all_ok": true
+        },
+        "jajce5": {
+          "count": 5,
+          "all_ok": true
+        },
+        "named": {
+          "count": 2,
+          "ids": [
+            "op:mrkonjic_grad:majdan_2",
+            "op:titov_drvar:drvar_2"
+          ],
+          "all_ok": true
+        },
+        "checkpoint_lost": {
+          "jan1993": [],
+          "apr1994": [],
+          "apr1995": [],
+          "oct1995": []
+        }
+      },
+      "n92": {
+        "pass": true,
+        "failure_count": 0,
+        "authoritative21": {
+          "defined": 21,
+          "applicable": 21,
+          "rows_all_ok": true
+        },
+        "legacy11": {
+          "defined": 11,
+          "applicable": 11,
+          "rows_all_ok": true
+        },
+        "seven": {
+          "count": 7,
+          "all_ok": true
+        },
+        "jajce5": {
+          "count": 5,
+          "all_ok": true
+        },
+        "named": {
+          "count": 2,
+          "ids": [
+            "op:mrkonjic_grad:majdan_2",
+            "op:titov_drvar:drvar_2"
+          ],
+          "all_ok": true
+        },
+        "checkpoint_lost": {
+          "jan1993": [],
+          "apr1994": [],
+          "apr1995": [],
+          "oct1995": []
+        }
+      }
+    },
+    "exact_state_diagnostics": {
+      "n94": {
+        "pass": true,
+        "comparison_count": 27,
+        "failure_count": 0
+      },
+      "n97": {
+        "pass": true,
+        "comparison_count": 27,
+        "failure_count": 0
+      },
+      "acceptance_treatment": "real booleans; both true; diagnostic status did not waive failure"
+    },
+    "health_consistency_producer_movement": {
+      "all_exit_zero": true,
+      "movement_missing_expected_boundaries": 0,
+      "movement_inconsistencies": 0,
+      "health_pass": true,
+      "consistency_pass": true,
+      "health_check_count": 11,
+      "health_hard_check_count": 10,
+      "health_failed_check_count": 0
+    }
+  },
+  "inventory_and_provenance": {
+    "candidate_run_inventory_count": 40,
+    "candidate_run_inventory_exact": true,
+    "candidate_run_files": [
+      "activity_summary.json",
+      "brigade_temporal_log.jsonl",
+      "control_delta.json",
+      "destroyed_brigades.json",
+      "displacement_event_log.jsonl",
+      "end_report.md",
+      "final_save.json",
+      "formation_delta.json",
+      "initial_save.json",
+      "operation_aars.json",
+      "replay_save_manifest.json",
+      "run_meta.json",
+      "run_summary.json",
+      "save_w104.json",
+      "save_w111.json",
+      "save_w112.json",
+      "save_w113.json",
+      "save_w130.json",
+      "save_w131.json",
+      "save_w132.json",
+      "save_w133.json",
+      "save_w134.json",
+      "save_w135.json",
+      "save_w136.json",
+      "save_w15.json",
+      "save_w156.json",
+      "save_w16.json",
+      "save_w178.json",
+      "save_w179.json",
+      "save_w180.json",
+      "save_w181.json",
+      "save_w182.json",
+      "save_w183.json",
+      "save_w184.json",
+      "save_w185.json",
+      "save_w186.json",
+      "save_w187.json",
+      "save_w39.json",
+      "watched_operations.json",
+      "weekly_report.jsonl"
+    ],
+    "git_commit": "2ca7d7bcdf795f20c5c15f0004b3c72019f98337",
+    "git_dirty": false,
+    "recorded_input_count": 32,
+    "recorded_input_digest": "88cf2d9ad4913bc62dde684d71465a28622c28b559713e4d0f13124ad8031c69",
+    "recomputed_input_digest": "88cf2d9ad4913bc62dde684d71465a28622c28b559713e4d0f13124ad8031c69",
+    "current_input_mismatches": [],
+    "supplemental_critical_input_count": 3,
+    "supplemental_critical_inputs": [
+      {
+        "path": "data/derived/operational/canonical_to_operational_map.json",
+        "bytes": 221196,
+        "sha256": "d8ca46cf1a5f425cd1ffd45eef3d99b19247128e6fe5ff28e0cad4d3f76fe1ef"
+      },
+      {
+        "path": "data/derived/operational/urban_osids.json",
+        "bytes": 641,
+        "sha256": "6c5fbdf22a7b837917422b11eb53a975bb855c027cd4c92cb7158fafd9c42e4c"
+      },
+      {
+        "path": "data/derived/operational/forest_osids.json",
+        "bytes": 2796,
+        "sha256": "f458666662a072c65b7d5c5e4b89c261399fca0f10476736b83fd914e651fa49"
+      }
+    ],
+    "input_model": "32 recorded producer inputs plus 3 explicitly bound terrain-critical inputs",
+    "candidate_binding_sha256": "8271c9939e1546103b4d73811b02a1ed6ba7245989af2a68c158c8232059d92f",
+    "candidate_binding_schema": "awwv.terrain-parity.candidate-binding.v3",
+    "candidate_delta_count": 72,
+    "candidate_delta_aggregate_sha256": "8a97b8389fdfb75a1ccb41bfe8ecf1acf96698ee194112f8af6f1ff6e331cf03",
+    "reviewed_file_count": 72,
+    "frozen_tool_count": 46,
+    "frozen_tool_aggregate_sha256": "043e95c585e6b532b365ca6c0e84792ee3ddaf1ed47ea03e1d5688c9884fdaf1",
+    "retained_run_count": 7,
+    "prior_attempt_count": 3,
+    "native_process_preflight_pass": true,
+    "active_native_process_count": 0,
+    "source_before_after_byte_identical": true,
+    "source_before_sha256": "1d51f0bdfd43e06e1cec2e9d5d14f3caaed89dfcf0700b811f0c8e121c255709",
+    "source_after_sha256": "1d51f0bdfd43e06e1cec2e9d5d14f3caaed89dfcf0700b811f0c8e121c255709",
+    "preserved_n91_n97_exact": true,
+    "preserved_run_snapshots_before_after_equal": true,
+    "telemetry_append_only": true,
+    "telemetry_opening_prefixes_exact": true
+  },
+  "evidence_bindings": [
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/receipt.json",
+      "bytes": 16169,
+      "sha256": "d7eb5c724c1904e999d4931ba368a88bb2ad22b48df0ced7e2d04a3f5ce088c1"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/start.json",
+      "bytes": 4859,
+      "sha256": "162e8d1354827844e081af2a75e234c49f2b51d38e236f14e439c36b499b77e6"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/entry-script.snapshot",
+      "bytes": 4663,
+      "sha256": "2bf2f4651c913734827b003be233873dc7dfcb4bb8a83281b0889f47bac5eaa4"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/stdout.log",
+      "bytes": 17919,
+      "sha256": "7136dca1dd8c400ba14a4b301fb254a133830a1e68ffeb8a1f53b163a0f898ab"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/child/preflight.json",
+      "bytes": 220220,
+      "sha256": "ee2ba6ef4eadb715c7f89aa0065d75e8b48d9ab66343d04b87d9e8e5e8d427b6"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/child/source-before.json",
+      "bytes": 149831,
+      "sha256": "1d51f0bdfd43e06e1cec2e9d5d14f3caaed89dfcf0700b811f0c8e121c255709"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/child/source-after.json",
+      "bytes": 149831,
+      "sha256": "1d51f0bdfd43e06e1cec2e9d5d14f3caaed89dfcf0700b811f0c8e121c255709"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/child/launch.json",
+      "bytes": 6838,
+      "sha256": "c2002006a2d98a0f6f6f54906deb61c6ed72bff411ab4389ddb198f0866f8570"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/child/campaign-execution.json",
+      "bytes": 157,
+      "sha256": "f17517b2b883014063b3d5bdce406ca5d8b128876cc53e8c7c6f9fff2d929e4d"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/child/result.json",
+      "bytes": 440918,
+      "sha256": "1bf5a2cedcdc6f29824bb40c056d1d2de2d1575bdb73e60a992529d15cb51b6e"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/child/postrun/summary.json",
+      "bytes": 23209,
+      "sha256": "39dccc5a8f5954a34b2ce8d775b684ab19de003a07d91a109c2b43ff8e8b192a"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/child/postrun/evaluation.json",
+      "bytes": 27388,
+      "sha256": "b1a91795aaaeb78c2ccf4be623ba1dd73965ed12d6fdbc70bc3d8bfe86946017"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/child/postrun/exact-state-vs-n94.json",
+      "bytes": 6834,
+      "sha256": "7d32d305e062cc10e5f4f09ccabb6e93c5d00cf7f33cc740b6e8c617084f4f2b"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/child/postrun/exact-state-vs-n97.json",
+      "bytes": 6834,
+      "sha256": "845f63c3cce29d095be9cb771d8905c68de2aac4f5953923b2cc5190497c3baf"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/child/postrun/protected-vs-n91.json",
+      "bytes": 7935,
+      "sha256": "ea54b339198d8c57624883dfa0e9ed8ab2d93359294a91dfae6aa4a7c7fee710"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/child/postrun/protected-vs-n92.json",
+      "bytes": 7935,
+      "sha256": "738fb2cedef9270e7a91697aae4d59ae56bb5a93b2cec226a2481e0fd6b855ed"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/child/postrun/checkpoints.stdout.log",
+      "bytes": 3100,
+      "sha256": "0ff1fb1da0f26ae7cf641e6f5d7db8a3f51f21cf0ba5208a17f29f8d8ca8673b"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/child/postrun/health.stdout.log",
+      "bytes": 2301,
+      "sha256": "cfa27a45942f49ff0cbe2db32b130f4b43e596eb57584acc26534839cec5e0e0"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/child/postrun/consistency.stdout.log",
+      "bytes": 2094,
+      "sha256": "6807850147951e96656beadaab95a631863612fbd661be8c68093758a3a4aa6c"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/child/postrun/producer.stdout.log",
+      "bytes": 14925,
+      "sha256": "3a4365c0df46acbf009e8cd8ad04d258fee1d93afdf1ffc9f335348b225a33f0"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v3/campaign-01/child/postrun/movement.stdout.log",
+      "bytes": 8962,
+      "sha256": "1ae4d5d9623a4d22d4d9c2b6f7ac8a0c6d4878c15ffed75b9df01a38d1b9f5e0"
+    }
+  ],
+  "full_suite_reader_defect": {
+    "classification": "TOOLING_CONTRACT_READER_DEFECT; NOT GAMEPLAY OR QUALIFICATION FAILURE",
+    "observed_failure": {
+      "path": "tmp/player-bot-capability-parity-20261024/root/TERRAIN_FULL_SUITE_SELFCHECK.stderr.log",
+      "bytes": 1118,
+      "sha256": "dcd535f6c160979156c47d4503faf446b6a2a7851bdd5a1e4e5d1ea8688c17de",
+      "message": "Error: qualifying campaign not GO"
+    },
+    "call_site": "tmp/player-bot-capability-parity-20261024/terrain-parity-full-suite-v3/suite_common.cjs:10",
+    "defect_locations": [
+      "tmp/player-bot-capability-parity-20261024/policy-clean-validation/packet_common.cjs:401",
+      "tmp/player-bot-capability-parity-20261024/policy-clean-validation/packet_common.cjs:403"
+    ],
+    "defect": "verifyPreservedWrapperReceipt requires exactly 52 allowed and retained rows although this qualification config and authenticated receipt contain exactly 60. Independent review confirmed all 60 configured paths are present with matching byte counts and SHA-256 values, with 5 wrapper-owned files and no extras.",
+    "required_targeted_correction": {
+      "packet": "terrain-parity-full-suite-v4; keep qualification-v3, campaign-01, n98, and all frozen evidence untouched",
+      "behavior": "Read the expected child count and exact path set from the bound qualification-v3 campaign config; require receipt allowed paths and retained paths to equal that 60-row set; verify every retained byte count/SHA and the exact five wrapper-owned files; preserve every other receipt, candidate, result, and summary gate.",
+      "authority": "Bind the v4 reader/manifest to the immutable qualification-v3 candidate binding and exact campaign evidence hashes.",
+      "cheap_positive_fixture": "The authentic campaign-01 must validate as 65 total = 5 wrapper-owned + 60 configured/retained child files.",
+      "cheap_negative_fixtures": [
+        "missing configured child file rejected",
+        "unexpected child or wrapper file rejected",
+        "retained byte/SHA corruption rejected",
+        "changed allowed path set/count rejected",
+        "nonzero child/wrapper exit, timeout, spawn error, artifact-contract failure, candidate/result/summary mismatch still rejected"
+      ],
+      "review_gate": "One targeted independent correction review before starting the full suite; no new 188-week campaign is required or authorized."
+    }
+  },
+  "limits": [
+    "This accepts only the retained n98 188-week qualification evidence at candidate 2ca7d7bcdf795f20c5c15f0004b3c72019f98337.",
+    "It does not accept or imply full-suite, packaging, or native-opening completion.",
+    "The full-suite readiness selfcheck remains failed until the targeted reader correction passes its positive and negative fixtures."
+  ]
+}

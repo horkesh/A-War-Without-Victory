@@ -1,0 +1,396 @@
+{
+  "schema_version": 1,
+  "provenance": {
+    "description": "Active operational OSIDs with usable line frontage on the Bosnia and Herzegovina exterior boundary, attributed to adjacent states.",
+    "crs": "OGC:CRS84 (WGS84 longitude, latitude)",
+    "operational_geometry": {
+      "path": "data/derived/operational/operational_settlements.geojson",
+      "source_feature_count": 744,
+      "active_osid_count": 712,
+      "fold_map": "data/derived/operational/micro_osid_merge_map.json",
+      "fold_count": 32
+    },
+    "bih_boundary": {
+      "path": "data/source/boundaries/bih_adm0.geojson",
+      "boundary_id": "BIH-ADM0-45210373",
+      "sha256": "3fe0135768dd2fcf2650b884e761fa04fdad70fda0d7df5a2d9a3ed257d0bd80"
+    },
+    "neighbor_boundaries": [
+      {
+        "state": "HRV",
+        "path": "data/source/boundaries/geoboundaries_adm0_2023/geoBoundaries-HRV-ADM0_simplified.geojson",
+        "metadata_path": "data/source/boundaries/geoboundaries_adm0_2023/geoBoundaries-HRV-ADM0-metaData.json",
+        "metadata_sha256": "a78410458085ad4ee1efbcff27f9bb28bbd8101b2c73e41a3c20e11883d43c56",
+        "boundary_id": "HRV-ADM0-1432937",
+        "boundary_year": "2017",
+        "build_date": "2023-12-12",
+        "source_url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/HRV/ADM0/geoBoundaries-HRV-ADM0_simplified.geojson",
+        "license": "Open Data Commons Open Database License 1.0",
+        "license_url": "https://www.openstreetmap.org/copyright",
+        "sha256": "7f9b66bd5e0f84ac77efbd49219730637b5e3b4da03ae9c0e134bc146e3631b7"
+      },
+      {
+        "state": "MNE",
+        "path": "data/source/boundaries/geoboundaries_adm0_2023/geoBoundaries-MNE-ADM0_simplified.geojson",
+        "metadata_path": "data/source/boundaries/geoboundaries_adm0_2023/geoBoundaries-MNE-ADM0-metaData.json",
+        "metadata_sha256": "0e8a48cd3d59b17194c74b2436d0ead818927e4256dc887abcfcc67335e47712",
+        "boundary_id": "MNE-ADM0-69169217",
+        "boundary_year": "2017",
+        "build_date": "2023-12-12",
+        "source_url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/MNE/ADM0/geoBoundaries-MNE-ADM0_simplified.geojson",
+        "license": "Open Data Commons Open Database License 1.0",
+        "license_url": "https://www.openstreetmap.org/copyright",
+        "sha256": "5878886ab474d94f17607eb7395b62e1a33da0d0758a02ce307da643e20c210b"
+      },
+      {
+        "state": "SRB",
+        "path": "data/source/boundaries/geoboundaries_adm0_2023/geoBoundaries-SRB-ADM0_simplified.geojson",
+        "metadata_path": "data/source/boundaries/geoboundaries_adm0_2023/geoBoundaries-SRB-ADM0-metaData.json",
+        "metadata_sha256": "56f9631ff090fb10bca65936ef3f49965a811929eb056cf3aafb0deb551324cb",
+        "boundary_id": "SRB-ADM0-94879208",
+        "boundary_year": "2017",
+        "build_date": "2023-12-12",
+        "source_url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/SRB/ADM0/geoBoundaries-SRB-ADM0_simplified.geojson",
+        "license": "Open Data Commons Open Database License 1.0",
+        "license_url": "https://www.openstreetmap.org/copyright",
+        "sha256": "03a7f63318b09351689666b2f0e149c10d6331abfcc3c3b2070dfc7840d89ebf"
+      }
+    ],
+    "method": {
+      "algorithm": "Classify source polygon line segments whose endpoints and midpoint are within the BIH-boundary tolerance; attribute each midpoint to the nearest adjacent ADM0 boundary; sum frontage after the 744-to-712 redirect fold.",
+      "exterior_tolerance_km": 0.02,
+      "neighbor_attribution_tolerance_km": 3,
+      "minimum_shared_border_km": 0.05,
+      "ordering": "strictCompare"
+    }
+  },
+  "osids": {
+    "op:bihac:bihac_2": [
+      "HRV"
+    ],
+    "op:bihac:orasac_2": [
+      "HRV"
+    ],
+    "op:bihac:racic": [
+      "HRV"
+    ],
+    "op:bihac:ripac": [
+      "HRV"
+    ],
+    "op:bihac:trubar": [
+      "HRV"
+    ],
+    "op:bihac:velika_gata": [
+      "HRV"
+    ],
+    "op:bijeljina:crnjelovo_donje": [
+      "HRV",
+      "SRB"
+    ],
+    "op:bijeljina:dvorovi_2": [
+      "SRB"
+    ],
+    "op:bijeljina:glavicice": [
+      "SRB"
+    ],
+    "op:bijeljina:janja_2": [
+      "SRB"
+    ],
+    "op:bileca:bileca_2": [
+      "MNE"
+    ],
+    "op:bileca:korita": [
+      "MNE"
+    ],
+    "op:bosanska_dubica:aginci": [
+      "HRV"
+    ],
+    "op:bosanska_dubica:donja_slabinja_2": [
+      "HRV"
+    ],
+    "op:bosanska_dubica:kozarska_dubica": [
+      "HRV"
+    ],
+    "op:bosanska_dubica:medjedja_2": [
+      "HRV"
+    ],
+    "op:bosanska_gradiska:gradiska_3": [
+      "HRV"
+    ],
+    "op:bosanska_gradiska:kozinci": [
+      "HRV"
+    ],
+    "op:bosanska_gradiska:kruskik_2": [
+      "HRV"
+    ],
+    "op:bosanska_gradiska:mackovac": [
+      "HRV"
+    ],
+    "op:bosanska_gradiska:orahova": [
+      "HRV"
+    ],
+    "op:bosanska_kostajnica:kostajnica": [
+      "HRV"
+    ],
+    "op:bosanska_kostajnica:petrinja": [
+      "HRV"
+    ],
+    "op:bosanska_krupa:ivanjska_2": [
+      "HRV"
+    ],
+    "op:bosanski_brod:brod": [
+      "HRV"
+    ],
+    "op:bosanski_brod:lijesce_2": [
+      "HRV"
+    ],
+    "op:bosanski_brod:novo_selo_2": [
+      "HRV"
+    ],
+    "op:bosanski_novi:dobrljin_2": [
+      "HRV"
+    ],
+    "op:bosanski_novi:matavazi_2": [
+      "HRV"
+    ],
+    "op:bosanski_novi:poljavnice": [
+      "HRV"
+    ],
+    "op:bosanski_samac:domaljevac_2": [
+      "HRV"
+    ],
+    "op:bosanski_samac:samac_2": [
+      "HRV"
+    ],
+    "op:bosanski_samac:tisina": [
+      "HRV"
+    ],
+    "op:bosansko_grahovo:bosansko_grahovo_2": [
+      "HRV"
+    ],
+    "op:bosansko_grahovo:crni_lug": [
+      "HRV"
+    ],
+    "op:bosansko_grahovo:ugarci": [
+      "HRV"
+    ],
+    "op:bratunac:bratunac_2": [
+      "SRB"
+    ],
+    "op:bratunac:polom": [
+      "SRB"
+    ],
+    "op:bratunac:slapasnica": [
+      "SRB"
+    ],
+    "op:bratunac:vranesevici": [
+      "SRB"
+    ],
+    "op:bratunac:zapolje_2": [
+      "SRB"
+    ],
+    "op:brcko:brcko": [
+      "HRV"
+    ],
+    "op:brcko:brezovo_polje_selo_2": [
+      "HRV"
+    ],
+    "op:brcko:donji_rahic": [
+      "HRV"
+    ],
+    "op:brcko:krepsic": [
+      "HRV"
+    ],
+    "op:brcko:potocari_2": [
+      "HRV"
+    ],
+    "op:cajnice:batotici": [
+      "MNE"
+    ],
+    "op:cajnice:cajnice_2": [
+      "MNE"
+    ],
+    "op:cajnice:todorovici": [
+      "SRB"
+    ],
+    "op:cajnice:zaborak": [
+      "MNE",
+      "SRB"
+    ],
+    "op:capljina:capljina_2": [
+      "HRV"
+    ],
+    "op:capljina:visici_2": [
+      "HRV"
+    ],
+    "op:cazin:mrazovac": [
+      "HRV"
+    ],
+    "op:cazin:sturlic_2": [
+      "HRV"
+    ],
+    "op:derventa:derventa_2": [
+      "HRV"
+    ],
+    "op:derventa:lug": [
+      "HRV"
+    ],
+    "op:duvno:prisoje_2": [
+      "HRV"
+    ],
+    "op:duvno:vinica_2": [
+      "HRV"
+    ],
+    "op:foca:brusna_2": [
+      "MNE"
+    ],
+    "op:foca:kosman": [
+      "MNE"
+    ],
+    "op:foca:tjentiste_2": [
+      "MNE"
+    ],
+    "op:foca:velenici_2": [
+      "MNE"
+    ],
+    "op:foca:zavait_3": [
+      "MNE"
+    ],
+    "op:gacko:avtovac_2": [
+      "MNE"
+    ],
+    "op:gacko:izgori": [
+      "MNE"
+    ],
+    "op:grude:sovici_3": [
+      "HRV"
+    ],
+    "op:livno:gubin_2": [
+      "HRV"
+    ],
+    "op:livno:misi_2": [
+      "HRV"
+    ],
+    "op:livno:priluka_2": [
+      "HRV"
+    ],
+    "op:livno:prolog_2": [
+      "HRV"
+    ],
+    "op:ljubuski:grab": [
+      "HRV"
+    ],
+    "op:ljubuski:ljubuski_2": [
+      "HRV"
+    ],
+    "op:ljubuski:studenci_2": [
+      "HRV"
+    ],
+    "op:ljubuski:vitina_2": [
+      "HRV"
+    ],
+    "op:neum:gornje_hrasno_2": [
+      "HRV"
+    ],
+    "op:neum:gradac_2": [
+      "HRV"
+    ],
+    "op:neum:neum_2": [
+      "HRV"
+    ],
+    "op:odzak:donja_dubica": [
+      "HRV"
+    ],
+    "op:odzak:gornji_svilaj": [
+      "HRV"
+    ],
+    "op:odzak:potocani_2": [
+      "HRV"
+    ],
+    "op:orasje:donja_mahala": [
+      "HRV"
+    ],
+    "op:orasje:orasje": [
+      "HRV"
+    ],
+    "op:posusje:posusje_2": [
+      "HRV"
+    ],
+    "op:posusje:vir_2": [
+      "HRV"
+    ],
+    "op:rudo:mrsovo_2": [
+      "SRB"
+    ],
+    "op:rudo:rudo_2": [
+      "SRB"
+    ],
+    "op:srbac:kobas": [
+      "HRV"
+    ],
+    "op:srbac:sitnesi_2": [
+      "HRV"
+    ],
+    "op:srbac:srbac_2": [
+      "HRV"
+    ],
+    "op:srebrenica:ljeskovik_2": [
+      "SRB"
+    ],
+    "op:srebrenica:mala_daljegosta_2": [
+      "SRB"
+    ],
+    "op:srebrenica:radovcici": [
+      "SRB"
+    ],
+    "op:srebrenica:sulice_2": [
+      "SRB"
+    ],
+    "op:trebinje:bihovo_2": [
+      "HRV"
+    ],
+    "op:trebinje:ivanica": [
+      "HRV"
+    ],
+    "op:trebinje:trebimlja_2": [
+      "HRV"
+    ],
+    "op:trebinje:trebinje_2": [
+      "HRV",
+      "MNE"
+    ],
+    "op:velika_kladusa:poljana_2": [
+      "HRV"
+    ],
+    "op:velika_kladusa:vejinac_2": [
+      "HRV"
+    ],
+    "op:velika_kladusa:velika_kladusa_2": [
+      "HRV"
+    ],
+    "op:velika_kladusa:zboriste_2": [
+      "HRV"
+    ],
+    "op:visegrad:donji_dobrun_2": [
+      "SRB"
+    ],
+    "op:visegrad:velji_lug": [
+      "SRB"
+    ],
+    "op:visegrad:zlijeb": [
+      "SRB"
+    ],
+    "op:zvornik:gornji_sepak_2": [
+      "SRB"
+    ],
+    "op:zvornik:kozluk_2": [
+      "SRB"
+    ],
+    "op:zvornik:novo_selo": [
+      "SRB"
+    ],
+    "op:zvornik:zvornik": [
+      "SRB"
+    ]
+  }
+}

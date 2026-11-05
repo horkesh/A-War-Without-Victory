@@ -30,6 +30,8 @@ import {
     type DesktopScenarioKey,
 } from '../../src/desktop/desktop_sim.js';
 import { resolveEventDecision } from '../../src/sim/events/resolve_decision.js';
+import { loadEventDefinitions } from '../../src/sim/events/event_loader.js';
+import { writeOwedRecordsAtTermination } from '../../src/sim/endgame/owed_termination_records.js';
 import { assembleCommandBriefing, type CommandBriefing } from '../../src/sim/briefing/collect_briefing.js';
 import { serializeState, deserializeState } from '../../src/state/serialize.js';
 import { resetDisplacementPressureCache } from '../../src/state/displacement.js';
@@ -67,6 +69,11 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 const __dirname_ = dirname(fileURLToPath(import.meta.url));
 export const REPO_BASE_DIR = resolve(__dirname_, '../..');
+
+/** Mirror of the desktop save choke point: a war-ending action still writes owed records. */
+function writeOwedRecordsIfEnded(state: GameState): void {
+    if (state.meta.game_over === true) writeOwedRecordsAtTermination(state, loadEventDefinitions(0));
+}
 
 // ── Serializable decision context (what an LLM player would read each turn) ───
 
@@ -199,6 +206,7 @@ export function injectDecision(
     const historicalDefault = decision?.historical_default_response_id;
     // Apply the chosen response + remove from pending (same path as Electron IPC).
     resolveEventDecision(state, eventId, responseId);
+    writeOwedRecordsIfEnded(state);
     return {
         turn: state.meta?.turn ?? 0,
         eventId,
@@ -247,6 +255,7 @@ export async function replayDecisionLog(
             const pending = state.military.pending_event_decisions ?? [];
             if (pending.some((d) => d.event_id === e.eventId)) {
                 resolveEventDecision(state, e.eventId, e.responseId);
+                writeOwedRecordsIfEnded(state);
             }
         }
         state = await advance(state, baseDir);
@@ -300,7 +309,9 @@ export function localSupport(
 
 /** Resolve a peace-plan menu ('accepted' or 'rejected'). */
 export function resolvePeacePlanChoice(state: GameState, planId: string, response: 'accepted' | 'rejected') {
-    return resolvePeacePlan(state, planId, response);
+    const result = resolvePeacePlan(state, planId, response);
+    writeOwedRecordsIfEnded(state);
+    return result;
 }
 
 /**
@@ -345,6 +356,7 @@ export function resolveParamilitary(state: GameState, decisionByTarget: Record<s
 export function resolveDayton(state: GameState, proposal: DaytonProposal): { result: unknown; state: GameState } {
     const roundTripped = deserializeState(serializeState(state)) as GameState;
     const result = resolveDaytonNegotiation(roundTripped, proposal) as any;
+    writeOwedRecordsIfEnded(roundTripped);
 
     if (process.env.DIAGNOSE_DAYTON_FREEZE === '1') {
         const es = (roundTripped as any).meta?.endgame_snapshot;

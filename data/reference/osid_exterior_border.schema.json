@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://awwv.local/schemas/osid_exterior_border.schema.json",
+  "title": "Operational OSID exterior border attribution",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "provenance", "osids"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["description", "crs", "operational_geometry", "bih_boundary", "neighbor_boundaries", "method"],
+      "properties": {
+        "description": { "type": "string", "minLength": 1 },
+        "crs": { "const": "OGC:CRS84 (WGS84 longitude, latitude)" },
+        "operational_geometry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "source_feature_count", "active_osid_count", "fold_map", "fold_count"],
+          "properties": {
+            "path": { "const": "data/derived/operational/operational_settlements.geojson" },
+            "source_feature_count": { "const": 744 },
+            "active_osid_count": { "const": 712 },
+            "fold_map": { "const": "data/derived/operational/micro_osid_merge_map.json" },
+            "fold_count": { "const": 32 }
+          }
+        },
+        "bih_boundary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "boundary_id", "sha256"],
+          "properties": {
+            "path": { "const": "data/source/boundaries/bih_adm0.geojson" },
+            "boundary_id": { "const": "BIH-ADM0-45210373" },
+            "sha256": { "$ref": "#/$defs/sha256" }
+          }
+        },
+        "neighbor_boundaries": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "prefixItems": [
+            { "type": "object", "properties": { "state": { "const": "HRV" } } },
+            { "type": "object", "properties": { "state": { "const": "MNE" } } },
+            { "type": "object", "properties": { "state": { "const": "SRB" } } }
+          ],
+          "items": { "$ref": "#/$defs/neighborSource" }
+        },
+        "method": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["algorithm", "exterior_tolerance_km", "neighbor_attribution_tolerance_km", "minimum_shared_border_km", "ordering"],
+          "properties": {
+            "algorithm": { "type": "string", "minLength": 1 },
+            "exterior_tolerance_km": { "const": 0.02 },
+            "neighbor_attribution_tolerance_km": { "const": 3 },
+            "minimum_shared_border_km": { "const": 0.05 },
+            "ordering": { "const": "strictCompare" }
+          }
+        }
+      }
+    },
+    "osids": {
+      "type": "object",
+      "propertyNames": { "pattern": "^op:[a-z0-9_]+:[a-z0-9_]+$" },
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": { "enum": ["HRV", "MNE", "SRB"] }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "neighborSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "path", "metadata_path", "metadata_sha256", "boundary_id", "boundary_year", "build_date", "source_url", "license", "license_url", "sha256"],
+      "properties": {
+        "state": { "enum": ["HRV", "MNE", "SRB"] },
+        "path": { "type": "string", "pattern": "^data/source/boundaries/geoboundaries_adm0_2023/geoBoundaries-(HRV|MNE|SRB)-ADM0_simplified\\.geojson$" },
+        "metadata_path": { "type": "string", "pattern": "^data/source/boundaries/geoboundaries_adm0_2023/geoBoundaries-(HRV|MNE|SRB)-ADM0-metaData\\.json$" },
+        "metadata_sha256": { "$ref": "#/$defs/sha256" },
+        "boundary_id": { "type": "string", "pattern": "^(HRV|MNE|SRB)-ADM0-[0-9]+$" },
+        "boundary_year": { "const": "2017" },
+        "build_date": { "const": "2023-12-12" },
+        "source_url": { "type": "string", "pattern": "^https://github\\.com/wmgeolab/geoBoundaries/raw/9469f09/" },
+        "license": { "const": "Open Data Commons Open Database License 1.0" },
+        "license_url": { "const": "https://www.openstreetmap.org/copyright" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  }
+}

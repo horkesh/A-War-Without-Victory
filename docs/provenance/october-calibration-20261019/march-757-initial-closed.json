@@ -1,0 +1,19 @@
+{
+  "schema": "awwv.757.pre-t3-stale-operation-march-closed.v1",
+  "writes_closed": true,
+  "result": "result.json",
+  "inventory": "inventory.json",
+  "implementation_complete": true,
+  "independent_review_pending": true,
+  "final_targeted_passed": 25,
+  "final_targeted_failed": 0,
+  "root_noemit_child_exit": 0,
+  "root_noemit_wrapper_exit": 0,
+  "diff_check_exit": 0,
+  "phase_order_exact": true,
+  "C_before_after_exact": true,
+  "D_before_after_exact": true,
+  "all_attempts_and_failures_retained": true,
+  "campaigns_or_full_suites_run": 0,
+  "acceptance_or_gain_claim": false
+}

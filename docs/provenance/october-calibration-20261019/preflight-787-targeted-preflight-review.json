@@ -1,0 +1,64 @@
+{
+  "schema": "awwv.787.targeted-preflight-review.v1",
+  "captured_utc": "2026-10-21T11:19:32.411Z",
+  "writes_closed": true,
+  "verdict": "NO_GO_COMMANDER_NOT_REACHED_SEMANTICS_UNDER_ENFORCED",
+  "campaign_authorized_to_start": false,
+  "reviewed": {
+    "personnel_and_schedule_reader": {
+      "path": "logs/claude-channel-20261004/786-stateful-readers-b.cjs",
+      "sha256": "e3d837c7f193c7a4fc052eb6b0fc4745ab5b04e85c9bbd43c3d0d9fbdb93759f"
+    },
+    "commander_semantics_reader": {
+      "path": "logs/claude-channel-20261004/786-commander-semantics-c.cjs",
+      "sha256": "1ba4681d043138991d930947fd29513ce06c9b22307e0d81dee8adc644609e83"
+    },
+    "personnel_and_schedule_controls": {
+      "path": "logs/claude-channel-20261004/786-reader-controls-b-v3/controls.json",
+      "sha256": "3e8e979e4e38bf15de1493cb1910a9841c47f5cc23bd1ec963bcc83bd1c4b147",
+      "pass": true,
+      "count": 10
+    },
+    "commander_semantics_controls": {
+      "path": "logs/claude-channel-20261004/786-commander-controls-c-b/controls.json",
+      "sha256": "65cf232fd0cc9e6a17892f09bca692e99b68d1c3053588f7bbc1f69bf60472fd",
+      "pass": true,
+      "count": 10
+    }
+  },
+  "original_findings": {
+    "P1_phase_manifest": "closed",
+    "P2_personnel_continuity": "closed",
+    "P3_presence_and_writer_semantics": "closed_at_fixed_plan_scope",
+    "C1_full_caller_pass_schedule": "closed",
+    "C2_commander_selection_semantics": "open_blocking",
+    "C3_alternate_positive_controls": "closed_except_not_reached_negative",
+    "G1_named_semantic_controls": "closed"
+  },
+  "blocking_finding": {
+    "id": "C2-NOT-REACHED",
+    "finding": "The commander semantic validator applies special status semantics only to local_occupation_bypass and no_brigade. Every other status, including not_reached, falls through the generic ranking path. It therefore accepts a not_reached detail containing a fully reached, ranked, selected brigade with a non-null selected_brigade_id. That contradicts the production initialization of not_reached and leaves the fixed-plan selected/bypass/not-reached gate unproved.",
+    "source_evidence": [
+      "786-commander-semantics-c.cjs:4-6",
+      "src/sim/combat/commander/emit.ts:2313-2324"
+    ],
+    "control_gap": "The valid-not-reached positive has empty candidates and a null selected id, but no negative control mutates forbidden reached or selected detail under status not_reached."
+  },
+  "secondary_finding": {
+    "severity": "non_campaign_blocking_but_real",
+    "finding": "786-commander-semantics-c.cjs exports functions but lacks a require.main guard around CLI dispatch. Requiring it executes validateFile(undefined) and throws ERR_INVALID_ARG_TYPE. Direct CLI invocation remains usable, but exported composition/testing is not usable as written.",
+    "observed_exit": 1,
+    "observed_error": "TypeError [ERR_INVALID_ARG_TYPE]: path must be a string; validateFile received undefined"
+  },
+  "accepted_closures": [
+    "Personnel is bound to the baseline's complete 188-turn ordered phase manifests.",
+    "Personnel actor, presence enum, cross-phase, cross-turn, phase-end, and terminal continuity are enforced.",
+    "Bounded writer sources and fixed-plan transfer/casualty/branch context are validated and chained to phase endpoints where numeric deltas exist.",
+    "Commander schedule enforces 188 turns by HRHB, RBiH, RS with exact ordered per-pass corps completion coverage.",
+    "Every completion row is composed with the retained 203 full-row validator.",
+    "Commander status enum, fitness tags, stage short-circuiting, ordinals, eligibility, rank comparator, selected identity, and local-occupation bypass are otherwise enforced."
+  ],
+  "runner_invocations_observed": 0,
+  "original_786_false_failure_preserved": true,
+  "stop_reason": "The fixed not-reached acceptance criterion remains unmet, and the final allowed targeted review cycle found the unresolved defect. Do not launch the campaign or begin another unchanged review cycle."
+}

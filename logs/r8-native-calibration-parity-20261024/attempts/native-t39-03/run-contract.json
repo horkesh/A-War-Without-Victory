@@ -1,0 +1,57 @@
+{
+  "question": "Observe genuine packaged Historical RBiH checkpoint calibration through39 with qualified actualAdvance/archive/SaveLoad route; strict native audio gate independently remains FAILED.",
+  "knownResult": "Exact daily replay FAILED from turn1; not waived. t1-04 infrastructure and actual Save/Resume PASS0/0.",
+  "configuration": "tmp/r8-native-calibration-parity-20261024/native-t39-03-config.json",
+  "expectedMinutes": [
+    8,
+    12
+  ],
+  "capMs": 1800000,
+  "automaticRetry": false,
+  "pass": [
+    "ordinary visible Historical/Advance route",
+    "settled canonical archives turns1 through39",
+    "turn39 exact accepted n94 map and707/712",
+    "zero formerly correct n91/n92 cells lost at reached saved checkpoints",
+    "January OSID and event anchors",
+    "runtime FINAL_SEAL unresolved0 every turn",
+    "canonical save/load and exact independently hydrated loaded projection",
+    "bound accepted inputs, immutable reference and retained evidence",
+    "exact settled and provisional archive inventories1..39 with immutable hashes and turn identities",
+    "exactly n91 and n92 turn39 protection rows; no vacuous future acceptance",
+    "final result runtime diagnostics after teardown plus full main-process stream",
+    "overall/daily comparator FAIL retained separately from checkpoint outcome"
+  ],
+  "stop": [
+    "unexpected runtime,input,archive,save/load or engine failure stops attempt",
+    "failed turn39 checkpoint prevents188 expansion; diagnose retained evidence",
+    "daily differences retained as FAILED and not reclassified",
+    "strict legacy audio failures remain open separately"
+  ],
+  "review": "tmp/r8-native-calibration-parity-20261024/review/NATIVE_ADVANCE_PREREQ_01_AUDIO_SEPARATION_REVIEW.md",
+  "previousAttempt": "Nativeadvanceprereq01 routePASSandcanonicalSaveLoadexact; overallstrictFAILsole oldknownambientwarroomERR_ABORTED; proof ADVANCE_PREREQ_01_ACTUAL_ROUTE_PROOF.json. Oldnative39attempts01/02preserved.",
+  "sources": [
+    {
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tools\\ui\\paradox_local_qa.cjs",
+      "sha256": "e47dce360ea538ccdae4fff4cc183d4c6166c64c4dd7f46585db285fc9ab6086"
+    },
+    {
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tests\\paradox_local_qa_harness.test.ts",
+      "sha256": "9e978fd94759b767dfbf3acd37eb6b9c23a81bd702acc1f806d836c6acd6e955"
+    },
+    {
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tools\\diagnostics\\native_calibration_outcome_compare.cjs",
+      "sha256": "ab2afc3f8b3106b33db55c3235f4bd10bd130b998d11cb919be981e6640d79b8"
+    },
+    {
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tests\\native_calibration_outcome_compare.test.ts",
+      "sha256": "7fe58af33bc554035a78b97ff470aa24a96346589c3d07ad3e3f5b6a7268bc39"
+    }
+  ],
+  "dualResult": {
+    "calibrationMeasurement": "Exactturn39map+707,allarchives,Jananchors,n91/n92losses[],engine/input/canonicalgates;nooverallnativepassclaim",
+    "strictNative": "Unmatched ambient_warroom-CO4FPnyV.ogg GET media/non-main-frame net::ERR_ABORTED Rangebytes=0- remainsstrictFAIL; neverclassifybenignorremove",
+    "runtimeBoundary": "Anychanged/newruntimeidentity/categoryinvalidatesmeasurement; fullrawdiagnosticsretained",
+    "laterGates": "188/allfactions/Farzunreached; evaluate39beforefurtherdecision"
+  }
+}

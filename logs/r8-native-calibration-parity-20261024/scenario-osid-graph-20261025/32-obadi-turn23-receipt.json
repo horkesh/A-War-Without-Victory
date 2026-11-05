@@ -1,0 +1,139 @@
+{
+  "turn": 23,
+  "pendingConsumed": true,
+  "operation": {
+    "operationId": "arbih_2nd_corps:Presidential Directive — op:srebrenica:obadi:t21",
+    "name": "Presidential Directive — op:srebrenica:obadi",
+    "type": "sector_attack",
+    "phase": "planning",
+    "startedTurn": 21,
+    "requestedByPresident": true,
+    "forced": true,
+    "commanderOfficerId": "arbih_mesic",
+    "roster": [
+      "arbih_1st_cerska",
+      "arbih_1st_kamenica",
+      "arbih_246th_vitezka_mountain",
+      "arbih_281st_east_bosnian_light",
+      "arbih_282nd_east_bosnian_light",
+      "arbih_283rd_east_bosnian_light",
+      "arbih_284th_east_bosnian_light"
+    ],
+    "axes": [
+      {
+        "axisId": "main",
+        "stagingOsid": "op:srebrenica:donji_potocari_2",
+        "objectives": [
+          "op:srebrenica:obadi"
+        ],
+        "assignedBrigades": [
+          "arbih_1st_cerska",
+          "arbih_1st_kamenica",
+          "arbih_246th_vitezka_mountain",
+          "arbih_281st_east_bosnian_light",
+          "arbih_282nd_east_bosnian_light",
+          "arbih_283rd_east_bosnian_light",
+          "arbih_284th_east_bosnian_light"
+        ]
+      }
+    ],
+    "rosterState": [
+      {
+        "formationId": "arbih_1st_cerska",
+        "status": "active",
+        "personnel": 460,
+        "locationOsid": "op:srebrenica:donji_potocari_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_1st_kamenica",
+        "status": "active",
+        "personnel": 464,
+        "locationOsid": "op:bratunac:jezestica_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_246th_vitezka_mountain",
+        "status": "active",
+        "personnel": 454,
+        "locationOsid": "op:bratunac:pobudje_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_281st_east_bosnian_light",
+        "status": "active",
+        "personnel": 600,
+        "locationOsid": "op:srebrenica:donji_potocari_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_282nd_east_bosnian_light",
+        "status": "active",
+        "personnel": 600,
+        "locationOsid": "op:srebrenica:ljeskovik_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_283rd_east_bosnian_light",
+        "status": "active",
+        "personnel": 600,
+        "locationOsid": "op:srebrenica:ljeskovik_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      },
+      {
+        "formationId": "arbih_284th_east_bosnian_light",
+        "status": "active",
+        "personnel": 600,
+        "locationOsid": "op:srebrenica:ljeskovik_2",
+        "locationController": "RBiH",
+        "corpsId": "arbih_2nd_corps"
+      }
+    ]
+  },
+  "movement": {
+    "turn": 23,
+    "locationChanges": [
+      {
+        "formationId": "arbih_281st_east_bosnian_light",
+        "fromOsid": "op:srebrenica:milacevici",
+        "fromController": "RBiH",
+        "toOsid": "op:srebrenica:donji_potocari_2",
+        "toController": "RBiH"
+      }
+    ],
+    "summaryMovements": [
+      {
+        "formation_id": "arbih_281st_east_bosnian_light",
+        "formation_name": "281st East Bosnian Light",
+        "from_osid": "op:srebrenica:milacevici",
+        "to_osid": "op:srebrenica:donji_potocari_2"
+      }
+    ]
+  },
+  "combat": {
+    "allBattleCount": 5,
+    "ownedBattles": []
+  },
+  "controller": {
+    "targetOsid": "op:srebrenica:obadi",
+    "before": "RS",
+    "after": "RS",
+    "controlEvents": [],
+    "captureProvenance": "not_captured"
+  },
+  "aar": null,
+  "canonical": {
+    "bytes": 5110477,
+    "sha256": "10c9539b520d00a8d278ef013ad65cfea0d4000c17147018cb81b14c8248f6b6"
+  },
+  "runtime": {
+    "bytes": 5155723,
+    "sha256": "24f466863f487ee9e83d81d939f42320f9f36e07bf6d7c00ef5008e6acaa1373"
+  }
+}

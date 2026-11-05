@@ -1,0 +1,126 @@
+{
+  "schema": "awwv.733.independent-review.v1",
+  "writes_closed": true,
+  "verdict": "CHANGES_REQUIRED",
+  "requested_terminal_verdict": "PASS_SCOPED_HARNESS",
+  "requested_terminal_verdict_reached": false,
+  "scope": "Independent review of sealed 732 timing-baseline refresh and balanced-Vitest per-file receipts. Read-only source/evidence inspection; no full suite, campaign, build, source correction, or test rerun.",
+  "worktree": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "head": "c46faf3f97508e97ab7486c172c74126c7154169",
+  "findings": [
+    {
+      "priority": "P1",
+      "id": "nested-receipt-context-inheritance",
+      "locations": [
+        "tools/test/run_vitest_balanced.mjs:145",
+        "tests/run_vitest_balanced.test.ts:75"
+      ],
+      "finding": "runVitestChild defaults its child environment to process.env. In an actual balanced worker, tests/run_vitest_balanced.test.ts launches a real nested Vitest child without an explicit environment. That child inherits the outer AWWV_VITEST_RECEIPT_* identity and appends an unplanned fixture's events to the outer lane file, outside the manifest plan and with an independently initialized sequence.",
+      "impact": "The diagnostic can misattribute nested control work to the outer file and corrupt the lane's sequence/unfinished-file interpretation during the real balanced suite. The retained 34-test focused run started without an outer receipt context and therefore does not exercise this path.",
+      "required_correction": "Remove all receipt-context variables from runVitestChild's default child environment. Keep explicit receipt environments for planner-owned balanced children and receipt-contract fixtures. Add a regression that starts with a populated parent receipt context and proves an ordinary nested child cannot append to that parent file."
+    },
+    {
+      "priority": "P1",
+      "id": "lane-sequence-resets-per-file",
+      "locations": [
+        "tools/test/vitest_receipt_runner.mjs:29",
+        "node_modules/vitest/dist/chunks/resolveConfig.rBxzbVsl.js:6752",
+        "node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:105"
+      ],
+      "finding": "The receipt sequence begins at zero in every custom-runner constructor. Vitest 2.1.9 uses one worker at a time when fileParallelism is false, but with the default isolated pool it dispatches ordinary files as separate single-file worker tasks and resolves a new runner for each task. Those tasks reuse the same planner lane JSONL, so each file can append sequence 1..N again.",
+      "impact": "Sequence is not unique or monotonic per lane in the intended full-suite topology. A consumer cannot reliably order or validate events by the advertised sequence field. All retained receipt contract runs use one fixture file per child and do not prove the multi-file lane case.",
+      "required_correction": "Make sequence allocation durable across runner instances that share a lane, or remove/change the field's contract. Add a real two-file same-lane Vitest regression that proves one strictly increasing sequence and exact planned file ownership."
+    },
+    {
+      "priority": "P1",
+      "id": "finish-before-native-finalization",
+      "locations": [
+        "tools/test/vitest_receipt_runner.mjs:98"
+      ],
+      "finding": "onAfterRunSuite persists execution_finish before calling and awaiting super.onAfterRunSuite. The native hook performs snapshot finalization and can reject. The receipt can therefore claim pass before Vitest's own file finalization fails.",
+      "impact": "A completed pass receipt can be false even when the child ultimately exits nonzero. This violates the finish record's stated truth boundary.",
+      "required_correction": "Await native onAfterRunSuite first and append execution_finish only after it succeeds. Add a focused custom-runner regression in which native finalization rejects and the lane retains only truthful pre-finish events."
+    },
+    {
+      "priority": "P2",
+      "id": "fake-clock-timestamp",
+      "locations": [
+        "tools/test/vitest_receipt_runner.mjs:46"
+      ],
+      "finding": "recorded_at_utc calls the mutable global Date constructor after test code has run. A file that leaves Vitest fake timers/system time active can write a fabricated or regressing wall-clock timestamp. No retained fixture exercises fake timers.",
+      "impact": "The external diagnostic timestamp may become unreasonable and can undermine chronological analysis, even though it does not enter GameState or saves.",
+      "required_correction": "Capture/use a real diagnostic clock outside test-controlled globals and prove recorded timestamps remain plausible and durations finite/nonnegative when a fixture activates fake timers."
+    }
+  ],
+  "verified_evidence": {
+    "sealed_732": {
+      "result_verdict": "PASS_FOCUSED",
+      "focused_exit": 0,
+      "focused_files": 4,
+      "focused_tests": 34,
+      "typecheck_corrected_exit": 0,
+      "typecheck_corrected_diagnostics": 0,
+      "source_pin_count": 15,
+      "source_pins_match": true,
+      "retained_receipt_manifest_and_jsonl_count": 76,
+      "sealed_result_sha256": "dd527868f11ce5e6dbc2bfb7841ab55535cd5551f9e069379f61d7d28cf104c1",
+      "sealed_markdown_sha256": "cc3d01305b926a9817f87cb2ceafde5228312aec87d212b1d1ed321dbb676d43",
+      "sealed_inventory_sha256": "ebc7bee0d17cd73f816959a367615dd5a8454932bb75abaaa6bb785234b5c501"
+    },
+    "baseline": {
+      "retained_run": 718,
+      "stdout_sha256": "264573c915ed4191be463960225f56d2416c00f4185d14af601cc0fcac8b3efe",
+      "extraction_sha256": "9688536ebbe644a2a9d9a3b6e0fcf3711452f41dfe4846a504e2fda69756773e",
+      "measured_positive_file_count": 1342,
+      "retained_prior_file_count": 6,
+      "weighted_file_count": 1348,
+      "zero_or_negative_weight_count": 0,
+      "maximum_weight_file": "tests/sector_partition_buildCorpsFrontSectors_integration.test.ts",
+      "maximum_weight_ms": 853246,
+      "runtime_rewrite_path_found": false
+    },
+    "coverage": {
+      "retained_718_unique_files": 1437,
+      "current_unique_files": 1438,
+      "current_executions": 1441,
+      "serial_count": 74,
+      "only_added_test": "tests/vitest_balanced_receipts.test.ts",
+      "partitioned_file": "tests/sector_partition_buildCorpsFrontSectors_integration.test.ts"
+    },
+    "preservation": {
+      "protected_pin_count": 5,
+      "n80_native_count": 31,
+      "c_bytes": 97701891,
+      "c_sha256": "294077be226a772639eb03d89216b9e8d11d4e1d97e8b29abccfbf45440142df",
+      "d_bytes": 1041,
+      "d_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "threshold_sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d",
+      "emit_sha256": "1982766d04bd153030f88b7105f8d9e71510487576136cfa67a5f0bc10ba74ad7109ae"
+    }
+  },
+  "nonblocking_observations": [
+    "Receipt persistence uses synchronous append plus fsync; write errors are not caught in the custom runner and therefore propagate.",
+    "Create-new run directories and lane files prevent overwrite; the balanced runner cleanup is limited to generated configs and does not delete receipt telemetry or fixtures.",
+    "The receipt clock and unique run naming remain external harness diagnostics and do not enter GameState, saves, simulation ordering, or planning determinism.",
+    "Pass, fail, skip, collection error, and killed CPU-bound import start-only behavior are demonstrated at one-file scope.",
+    "Reporter passthrough --reporter=dot --silent does not disable the configured custom runner.",
+    "No production engine, gameplay, data, save, threshold, or canon file appears in the 15-file source scope."
+  ],
+  "validation": {
+    "new_commands_run": [],
+    "reason_no_rerun": "The four findings are established by final source plus the installed Vitest 2.1.9 worker lifecycle. A correction is required before a focused rerun can answer a new question.",
+    "reused": [
+      "logs/claude-channel-20261004/396-varosluk-732-focused-b.stdout.log",
+      "logs/claude-channel-20261004/396-varosluk-732-typecheck-b.receipt.json",
+      "logs/claude-channel-20261004/732-seal-c/732-result.json",
+      "logs/claude-channel-20261004/732-seal-c/inventory.json",
+      "logs/claude-channel-20261004/732-seal-c/closed-receipt.json"
+    ]
+  },
+  "limits": [
+    "No full suite or campaign was run. Retained run 718 remains TIMEOUT with unknown in-flight work and is not reclassified.",
+    "Historical 703/712/718 evidence retains its original scope. No native 703 green claim is made.",
+    "All historical NO-GO and unadopted gates remain unchanged.",
+    "PASS_SCOPED_HARNESS requires correction and one targeted correction verification."
+  ]
+}

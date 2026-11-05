@@ -1,0 +1,11 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ✓ tests/war_phase_step_order.test.ts (6 tests) 14ms
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  23:02:55
+   Duration  5.94s (transform 3.98s, setup 17ms, collect 5.19s, tests 14ms, environment 0ms, prepare 101ms)
+
+EXIT_CODE=0

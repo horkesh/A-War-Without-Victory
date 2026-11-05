@@ -1,0 +1,71 @@
+{
+  "pass": true,
+  "result": {
+    "path": "tmp-paradox-qa-20260710/paradox-local-qa-player-capability-historical-officer-t44-20261024-01.json",
+    "sha256": "e634155392359b84942beaf8e2225d7c227865b197787a1a16b4a7986c34edb7"
+  },
+  "choice": {
+    "policy": "historical",
+    "policyVersion": 1,
+    "eventId": "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic",
+    "candidateOfficerId": "arbih_sadic",
+    "currentCommanderId": "arbih_knez",
+    "corpsId": "arbih_2nd_corps",
+    "visibleResponseLabel": "Appoint Historical Successor",
+    "receipt": {
+      "id": "officer:44:replacement:arbih_knez:arbih_2nd_corps:arbih_sadic:replacement_accepted",
+      "eventId": "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic",
+      "eventType": "replacement_suggested",
+      "turn": 44,
+      "faction": "RBiH",
+      "decision": "replacement_accepted",
+      "newOfficerId": "arbih_sadic",
+      "outgoingOfficerId": "arbih_knez"
+    },
+    "cleared": true
+  },
+  "assignment": {
+    "sadic": {
+      "acting_commander": false,
+      "assigned_corps_id": "arbih_2nd_corps",
+      "battles": 0,
+      "effective_competence_penalty": 0,
+      "officer_id": "arbih_sadic",
+      "penalty_turns_remaining": 0,
+      "recent_overrides": [],
+      "status": "active",
+      "turns_in_command": 0,
+      "victories": 0
+    },
+    "knez": {
+      "acting_commander": false,
+      "assigned_corps_id": null,
+      "battles": 0,
+      "effective_competence_penalty": 0,
+      "officer_id": "arbih_knez",
+      "penalty_turns_remaining": 0,
+      "recent_overrides": [],
+      "status": "retired",
+      "turns_in_command": 44,
+      "victories": 0
+    }
+  },
+  "samePreChoiceCanonical44": {
+    "pass": true,
+    "historical": {
+      "turn": 44,
+      "kind": "provisional",
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-capability-historical-officer-t44-20261024-01\\rbih\\turn-autosaves-pre-settlement\\turn-044.json",
+      "sha256": "9b0bb2ed61704d34bd21be56fe07cabcc6cac376a9b0d5f47a31608e2c5141e9",
+      "bytes": 5608276
+    },
+    "keep": {
+      "turn": 44,
+      "kind": "provisional",
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-capability-officer-t44-20261024-01\\rbih\\turn-autosaves-pre-settlement\\turn-044.json",
+      "sha256": "9b0bb2ed61704d34bd21be56fe07cabcc6cac376a9b0d5f47a31608e2c5141e9",
+      "bytes": 5608276
+    }
+  },
+  "scope": "Real visible historicalsuccessor choice andauthoritativereceipt/assignment, withidenticalprechoice44statevsKeep probe.17infrastructure/Save-loadgatesseparate. Notterritorycausality/calibration orsame-inputdeterminism."
+}

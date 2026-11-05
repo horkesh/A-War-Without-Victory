@@ -1,0 +1,142 @@
+{
+  "schema": "awwv.791.independent-review.v1",
+  "reviewer": "producer_reader_review_791",
+  "head": "e5a1fb7b83d9ff3c6c6b07ceaa6ab52d5d9e33e1",
+  "verdict": "ACCEPT_SCOPED_WITH_INHERITED_RED",
+  "open_change_findings": [],
+  "resolved_during_single_correction": [
+    {
+      "severity": "critical",
+      "finding": "The reader and tracked test depended on ignored logs/203 evidence and were not portable to a clean checkout.",
+      "resolution": "A tracked byte-identical 203 reader is used by production tooling, and the tracked test no longer reads ignored logs.",
+      "locations": [
+        "tools/diagnostics/commander_target_selection_reader.cjs:6",
+        "tools/diagnostics/commander_creation_reader_203.cjs:1"
+      ]
+    },
+    {
+      "severity": "critical",
+      "finding": "The standalone validator accepted an empty or unrelated-only log with zero completion rows.",
+      "resolution": "Zero build_operations_complete coverage is now a violation.",
+      "locations": [
+        "tools/diagnostics/commander_target_selection_reader.cjs:324",
+        "tools/diagnostics/commander_target_selection_reader.cjs:333"
+      ]
+    },
+    {
+      "severity": "critical",
+      "finding": "Computed cooldown, politics, reachability, and prediction values were not bound to their reached filter results; deterministic target and survivor order was not enforced.",
+      "resolution": "The reader now binds raw/effective cooldown and turn, controller/politics, reachability, prediction presence/outcome/viability, target order, survivor rank order, and rank-zero selection.",
+      "locations": [
+        "tools/diagnostics/commander_target_selection_reader.cjs:194",
+        "tools/diagnostics/commander_target_selection_reader.cjs:228",
+        "tools/diagnostics/commander_target_selection_reader.cjs:241",
+        "tools/diagnostics/commander_target_selection_reader.cjs:245",
+        "tests/commander/probe_target_selection_filter.test.ts:637"
+      ]
+    }
+  ],
+  "fresh_evidence": {
+    "focused_producer_tests": {
+      "attempt": "logs/claude-channel-20261004/791-focused-final",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract": true,
+      "tests_passed": 2,
+      "tests_failed": 0,
+      "tests_skipped": 14,
+      "negative_mutations": 23,
+      "producer_rows": 9,
+      "unique_statuses": 9,
+      "rows_sha256": "0837a8d40083ededc821dddfe92b42dfcdf4326382b78e175aab7e0c69ff2e67"
+    },
+    "reader_cli": {
+      "attempt": "logs/claude-channel-20261004/791-reader-cli-final",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract": true,
+      "records": 9,
+      "completion_rows": 9,
+      "violations": 0
+    },
+    "require_safe": {
+      "attempt": "logs/claude-channel-20261004/791-require-safe-final",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract": true,
+      "modules": [
+        "tools/diagnostics/commander_target_selection_reader.cjs",
+        "tools/diagnostics/commander_target_selection_postrun.cjs"
+      ]
+    },
+    "baseline_selector_control": {
+      "attempt": "logs/claude-channel-20261004/791-baseline-selector-control",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "artifact_contract": true,
+      "tests_failed": 1,
+      "classification": "pre-existing HEAD assertion/source contradiction",
+      "test_location": "tests/commander/probe_target_selection_filter.test.ts:477",
+      "head_source_location": "src/sim/combat/commander/emit.ts:2306",
+      "reason": "The HEAD test expects probe_gate_receipt to be absent for off-selector faction/corps/turn cases, while HEAD production creates probe_gate_receipt unconditionally whenever commander_creation is enabled. The reviewed change does not modify production source and its harness additions are conditional outside this case."
+    },
+    "head_extracted_baseline_file": {
+      "attempt": "logs/claude-channel-20261004/790-head-baseline-probe-test",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "artifact_contract": true,
+      "tests_total": 14,
+      "tests_passed": 13,
+      "tests_failed": 1,
+      "failed_test": "fallback probe target production filters emits detail only for the exact topic, faction, corps, and turn selector",
+      "temporary_head_test_removed": true
+    }
+  },
+  "reused_evidence": {
+    "observer_suite": {
+      "attempt": "logs/claude-channel-20261004/790-observer-vitest",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "tests_passed": 60,
+      "tests_failed": 0
+    },
+    "no_emit_typecheck": {
+      "attempt": "logs/claude-channel-20261004/790-exact-final-typecheck",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract": true,
+      "note": "Executed on the exact frozen final TypeScript file."
+    },
+    "closing_manifest": {
+      "attempt": "logs/claude-channel-20261004/790-closing-manifest",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "pass": true
+    }
+  },
+  "hashes": {
+    "tests/commander/probe_target_selection_filter.test.ts": "e2a59b0b987c4ed11dc5fee66f274865b7852883856d6d9a615194097febd318",
+    "tools/diagnostics/commander_creation_reader_203.cjs": "250816bce802f41a02a3f6d8b215b0747fbf6c67466e8f2e588e30e40a629078",
+    "tools/diagnostics/commander_target_selection_postrun.cjs": "d4274e6c786a37ab7037feb85d2e1dd4ed590391aa8db67f6c38bc1591d95329",
+    "tools/diagnostics/commander_target_selection_reader.cjs": "98c9613c0d8fe2ce875cd14a75803f21c3cfbd96f7563e7851fe76740d3db21e",
+    "logs/claude-channel-20261004/203-commander-creation-reader.cjs": "250816bce802f41a02a3f6d8b215b0747fbf6c67466e8f2e588e30e40a629078"
+  },
+  "preservation": {
+    "production_and_threshold_pins_match_opening": true,
+    "old_786_787_203_hashes_match_opening": true,
+    "changed_tracked_scope": [
+      "tests/commander/probe_target_selection_filter.test.ts",
+      "tools/diagnostics/commander_creation_reader_203.cjs",
+      "tools/diagnostics/commander_target_selection_postrun.cjs",
+      "tools/diagnostics/commander_target_selection_reader.cjs"
+    ],
+    "production_source_changed": false,
+    "campaign_runner_invocations": 0
+  },
+  "residual_scope": [
+    "The postrun composition is require-safe and ready but was not executed against a campaign; its state is READY/UNREACHED.",
+    "This review qualifies the commander target-selection completion-row stage only, not the older stateful/intermediate-B reader, whole personnel pipeline, telemetry, or campaign readiness.",
+    "The inherited selector assertion remains red and should be reconciled separately against the intended diagnostic selector contract.",
+    "No full suite, package build, campaign, or telemetry run was performed or authorized."
+  ]
+}

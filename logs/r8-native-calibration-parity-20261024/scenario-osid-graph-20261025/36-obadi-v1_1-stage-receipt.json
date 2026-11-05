@@ -1,0 +1,43 @@
+{
+  "objection": {
+    "forceRatio": 1.6982606977648265,
+    "estimatedCasualties": 358,
+    "recommendedAction": "delay"
+  },
+  "forced": true,
+  "stagePayload": {
+    "corpsId": "arbih_2nd_corps",
+    "targetOsid": "op:srebrenica:obadi",
+    "forced_over_objection": true
+  },
+  "stageOptions": {},
+  "authBefore": {
+    "current": 100,
+    "last_recovery": 5.5,
+    "last_recovery_source": "international_standing",
+    "lifetime_spent": 25,
+    "max": 100,
+    "reserve": 15,
+    "reserve_max": 15,
+    "spent_this_turn": 0
+  },
+  "authAfter": {
+    "current": 75,
+    "last_recovery": 5.5,
+    "last_recovery_source": "international_standing",
+    "lifetime_spent": 50,
+    "max": 100,
+    "reserve": 15,
+    "reserve_max": 15,
+    "spent_this_turn": 25
+  },
+  "pending": {
+    "target_osid": "op:srebrenica:obadi",
+    "turn": 20,
+    "ca_cost": 25,
+    "forced_over_objection": true
+  },
+  "stageResult": {
+    "ok": true
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "schema": "awwv.native23-cdp-installed-adapter-attempt-binding.v1",
+  "created_utc": "2026-10-25T05:17:08.9249039Z",
+  "repository_head": "bff97de7af9406dc2cb907674e2463fccb43052a",
+  "question": "Can Playwright 1.60.0 newCDPSession(actual embedded Frame) capture a complete post-attach loopback request/response/finish/body chain compared with the outer Page, while the strict response-only orphan control still rejects?",
+  "preflight": {
+    "syntax_check": {
+      "command": "node --check installed_adapter_fixture_v2.cjs",
+      "exit": 0
+    },
+    "resolved_collector": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tools/ui/cdp_network_collector.cjs",
+    "original_fixture_preserved": true,
+    "changed_lines": [
+      "- require('../../../../tools/ui/cdp_network_collector.cjs')",
+      "+ require('../../../tools/ui/cdp_network_collector.cjs')"
+    ],
+    "browser": {
+      "path": "C:/Users/User/AppData/Local/ms-playwright/chromium-1223/chrome-win64/chrome.exe",
+      "bytes": 4011008,
+      "sha256": "290fa7018fda22c52ada5eddb0113baf3ebc41fd0fde6085eddb19793606c635"
+    }
+  },
+  "execution": {
+    "wrapper": "tools/diagnostics/run_preserved_preflight.cjs",
+    "timeout_ms": 120000,
+    "attempts": 1,
+    "child_exit": 1,
+    "wrapper_exit": 1,
+    "timed_out": false,
+    "launch_count": 1,
+    "artifact_contract_pass": true
+  },
+  "observed": {
+    "outer_target": {
+      "id": "1327DBAE2FC9110F47573141E369B733",
+      "type": "page",
+      "matching_event_counts": {
+        "request": 0,
+        "response": 0,
+        "finish": 0,
+        "failure": 0
+      }
+    },
+    "frame_target": {
+      "id": "1903DBDC29163B87F515BEEF1698DB28",
+      "type": "iframe",
+      "matching_event_counts": {
+        "request": 1,
+        "response": 1,
+        "finish": 0,
+        "failure": 0
+      },
+      "request_id": "20836.2",
+      "frame_id": "1903DBDC29163B87F515BEEF1698DB28",
+      "status": 206,
+      "range": "bytes=0-"
+    },
+    "browser_body": {
+      "bytes": 26,
+      "sha256": "3910462cf065a7e2dd8305280146b3221d0f449105a2bd3299263b5549238824"
+    },
+    "direct_same_session_body": null,
+    "fake_midflight": {
+      "pass": true,
+      "status": "inconsistent",
+      "requests": 0,
+      "responses": 1,
+      "inconsistency": "response-without-request"
+    }
+  },
+  "verdict": {
+    "complete_chain_proven": false,
+    "target_boundary_proven_for_request_and_response": true,
+    "outer_page_full_coverage_proven": false,
+    "strict_orphan_rejection_proven": true,
+    "production_attachment_ready": false
+  },
+  "files": [
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/installed_adapter_fixture.cjs",
+      "bytes": 9695,
+      "sha256": "ade69c4df452439f63d7c94e633f8de48a48bf8f26968a2491ba84b07884c184"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/installed_adapter_fixture_v2.cjs",
+      "bytes": 9692,
+      "sha256": "05eb133820853f60b7b93b5fa0c00b50674b7a53b7c23ae5cccb4f8b449f8f73"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-02/entry-script.snapshot",
+      "bytes": 9692,
+      "sha256": "05eb133820853f60b7b93b5fa0c00b50674b7a53b7c23ae5cccb4f8b449f8f73"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-02/start.json",
+      "bytes": 1753,
+      "sha256": "c2d4b303380c2fc5fc4f1c777b88bb594a07d01d301bb6fa7713b9f4a909d559"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-02/receipt.json",
+      "bytes": 2997,
+      "sha256": "b266c9ba27e5b2ed1d4e6d727360ed49a62355241df3600c2532290f2bcf789e"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-02/RESULT.json",
+      "bytes": 4191,
+      "sha256": "a3bce7fc158abea601054c5ffc1197826dca0cbaaae0acb53d261ceda9fc9610"
+    },
+    {
+      "path": "tools/ui/cdp_network_collector.cjs",
+      "bytes": 26866,
+      "sha256": "02e5d8306a0f8e3ac082a56d33e12898d9d88bc54f9a0023d79ccf9af82c6607"
+    },
+    {
+      "path": "tools/ui/paradox_local_qa.cjs",
+      "bytes": 361860,
+      "sha256": "71a9bbb675d4c33d290e92e97c7e3780211e5ce3c500f37c637bf46ef8e32503"
+    },
+    {
+      "path": "node_modules/playwright-core/types/types.d.ts",
+      "bytes": 1013672,
+      "sha256": "e5b810845dedef5aa0d682efa61be20dcb2e28c27a64ff5cc4cfc122f3f3980f"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/ADAPTER_ATTEMPT_02_REPORT.md",
+      "bytes": 5374,
+      "sha256": "f818212b9d0857b53b3c1bb0b975c16eb8427363804f237a3e020df82b34afc9"
+    }
+  ]
+}

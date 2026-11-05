@@ -46,6 +46,12 @@ import { bfsDistance } from './sector_utils.js';
 // ADR-0005 v2.2c (issue #40): exclude brigades reserved by not-yet-injected pre-planned ops.
 import { getReservedPrePlannedBrigadeIds } from './pre_planned_operations.js';
 import {
+    emitMistralTgDonorSelectionRecord,
+    isReasonCodeTopicEnabled,
+} from './reason_code_debug.js';
+import {
+    DONATION_READINESS_FRACTION,
+    DONATION_READINESS_FRACTION_HRHB,
     ENABLE_TG_ARMY_HQ_OPS,
     ENABLE_TG_COHESION_BLEED,
     MAX_DONATIONS_PER_SCENARIO,
@@ -76,6 +82,29 @@ export interface DonorSelectionContext {
      * applies. Never widens the cap above the module default.
      */
     max_donors?: number;
+    /** Exact caller-owned metadata for the opt-in stdout observer. Never persisted. */
+    observation?: {
+        caller_turn: number;
+        operation_name: string;
+        operation_id: string | null;
+        axis_id: string | null;
+        corps_id: string | null;
+        caller_stage: 'pre_results' | 'post_results' | 'direct' | 'ready_transition';
+    };
+}
+
+type DonorFirstRejection = 'anchor' | 'inactive' | 'wrong_faction' | 'corps_scope'
+    | 'reserved_pre_planned' | 'cohesion' | 'already_lending' | 'cooldown'
+    | 'donation_cap' | 'distance' | 'nonpositive_contribution';
+
+interface DonorObservationEntry {
+    brigade_id: string;
+    outcome: 'unreached' | 'rejected' | 'selected' | 'survived_cap';
+    first_rejection: DonorFirstRejection | null;
+    distance_hops: number | null;
+    personnel_lent: number | null;
+    survivor_index: number | null;
+    selected_index: number | null;
 }
 
 // === Eligibility thresholds (ADR-0005 §Tier 1 constraints) ===
@@ -85,24 +114,146 @@ const DONATION_CAP_FRACTION = 0.30;
 const MAX_DONORS_PER_TG = 3;
 
 /**
+ * Readiness fraction that a prospective TG's donor pledge must reach, by faction.
+ *
+ * HRHB (HVO) axes use the relaxed `DONATION_READINESS_FRACTION_HRHB`; everyone else uses
+ * the standard `DONATION_READINESS_FRACTION`. See the constants' own doc-comments for the
+ * doctrinal rationale and for what the ENGINE-HEALTH B3 repair changed about its scope.
+ */
+export function tgDonationReadinessFraction(faction?: string): number {
+    // Declared `string`, not the narrower faction-id union: `FormationState.faction` is
+    // itself declared `string`, so narrowing here would force a type assertion at every
+    // caller — a new strict-null escape that
+    // `tests/strict_null_inventory_progress.test.ts` ratchets against. Same precedent as
+    // `getSectorOffensiveApproachOsids`. The value is only compared against a literal.
+    return faction === 'HRHB' ? DONATION_READINESS_FRACTION_HRHB : DONATION_READINESS_FRACTION;
+}
+
+/**
+ * Total personnel a candidate donor pool actually pledges.
+ * Distance falloff, the donation cap and the residual-personnel floor are already applied
+ * by `selectDonors`, so this is a plain sum over the returned contributions.
+ */
+export function totalPledgedPersonnel(donors: ReadonlyArray<{ personnel_lent: number }>): number {
+    return donors.reduce((sum, d) => sum + d.personnel_lent, 0);
+}
+
+/**
+ * ADR-0005 v2.2c #3 donation readiness — IS THE TACTICAL GROUP AUGMENTATION VIABLE?
+ *
+ * Returns true when the candidate donor pool pledges at least the faction's readiness
+ * fraction of the anchor's personnel, i.e. when a genuine multi-donor Tactical Group can
+ * form rather than a lone anchor wearing a TG costume.
+ *
+ * ══ ENGINE-HEALTH B3 (2026-09-19) — THIS IS A FORMATION TEST, NOT AN OPERATION VETO ══
+ *
+ * This predicate previously lived in `sector_offensive_launch_helpers.ts` as
+ * `donationReadinessBlocksAxis`, and `classifyAxisOpeningAttack` used it to REFUSE the
+ * whole axis with `insufficient_donation` — after `axisHasExecutableOpeningAttack` had
+ * already judged the attack winnable. It was also non-monotonic: an EMPTY donor pool was
+ * explicitly allowed through ("degrade to lone-anchor"), while a pool one man above empty
+ * but below the fraction blocked the operation outright. Adding a small amount of
+ * available support therefore turned an executable axis into a cancelled one.
+ *
+ * The Phase-1.5 rationale for the zero-donor branch — *with no donors no TG would form
+ * anyway, so blocking degrades a valid lone-anchor op into a cancellation* — applies
+ * verbatim to the weak-donor case. It had simply been applied at one boundary instead of
+ * to the whole predicate.
+ *
+ * THE CONTRACT NOW: donor support is optional augmentation. This predicate decides only
+ * whether the TG forms. An inadequate pool declines the augmentation; the underlying
+ * operation continues to be governed by the ordinary opening-attack readiness gates, and
+ * fights with its own participants at their real strength. No donor personnel, equipment,
+ * cohesion cost or per-scenario donation credit is consumed by a declined augmentation,
+ * because `formTacticalGroup` is simply never called.
+ *
+ * MONOTONIC: adding an eligible donor with a non-negative contribution can never turn an
+ * executable operation into a blocked one. Pinned by
+ * `tests/tg_donation_augmentation_monotonic.test.ts`.
+ *
+ * Deterministic: `selectDonors` is deterministic and side-effect free, so this is a stable
+ * pure function of the turn's state.
+ */
+export function tgDonationMeetsReadiness(
+    donors: ReadonlyArray<{ personnel_lent: number }>,
+    anchorPersonnel: number,
+    faction?: string,
+): boolean {
+    // No donors: nothing to augment with. The caller forms no TG and the anchor fights
+    // alone — the same outcome as an inadequate pool, reached one step earlier.
+    if (donors.length === 0) return false;
+    return totalPledgedPersonnel(donors) >= tgDonationReadinessFraction(faction) * anchorPersonnel;
+}
+
+/**
  * Select donor contributions for a prospective TG (ADR-0005 full donor model).
  *
  * Returns empty array if anchor not found or no eligible donors. The returned
  * contributions carry frozen `distance_hops`, falloff-scaled `personnel_lent`,
  * and falloff-scaled `heavy_equipment_lent` (pro-rata equipment slice).
+ *
+ * PURE: reads state, returns contributions, mutates nothing. Callers may therefore ask
+ * "would a TG be viable?" without committing any donor cost — the B3 contract depends on
+ * that (see `tgDonationMeetsReadiness`).
  */
 export function selectDonors(
     state: GameState,
     context: DonorSelectionContext,
 ): TgDonorContribution[] {
     const formations = state.military?.formations;
-    if (!formations) return [];
+    const observe = isReasonCodeTopicEnabled('mistral_tg_donor_selection');
+    const populationIds = observe && formations ? Object.keys(formations).sort(strictCompare) : [];
+    const observation = observe
+        ? (() => {
+            const population = populationIds.map((brigade_id): DonorObservationEntry => ({
+                brigade_id, outcome: 'unreached', first_rejection: null, distance_hops: null,
+                personnel_lent: null, survivor_index: null, selected_index: null,
+            }));
+            return {
+                population,
+                populationById: new Map(population.map(entry => [entry.brigade_id, entry] as const)),
+            };
+        })()
+        : undefined;
+    const emit = (
+        terminalReason: string | null,
+        allowedCorps: ReadonlySet<FormationId> | null,
+        survivorOrder: readonly string[],
+        selectedOrder: readonly string[],
+        cap: number,
+    ): void => {
+        if (!observation) return;
+        emitMistralTgDonorSelectionRecord({
+            kind: 'donor_selection',
+            turn: state.meta?.turn ?? 0,
+            caller_turn: context.observation?.caller_turn ?? null,
+            operation_name: context.observation?.operation_name ?? null,
+            operation_id: context.observation?.operation_id ?? null,
+            axis_id: context.observation?.axis_id ?? null,
+            corps_id: context.observation?.corps_id ?? null,
+            caller_stage: context.observation?.caller_stage ?? 'direct',
+            anchor_brigade_id: context.anchor_brigade_id,
+            staging_osid: context.staging_osid,
+            army_hq_op_id: context.army_hq_op_id ?? null,
+            terminal_reason: terminalReason,
+            allowed_corps: allowedCorps == null ? null : [...allowedCorps].sort(strictCompare),
+            population_count: observation.population.length,
+            population: observation.population,
+            survivor_count: survivorOrder.length,
+            survivor_order: survivorOrder,
+            selected_count: selectedOrder.length,
+            selected_order: selectedOrder,
+            requested_cap: context.max_donors ?? null,
+            effective_cap: cap,
+        });
+    };
+    if (!formations) { emit('formations_missing', null, [], [], 0); return []; }
 
     const anchor = formations[context.anchor_brigade_id];
-    if (!anchor) return [];
+    if (!anchor) { emit('anchor_missing', null, [], [], 0); return []; }
     const anchorCorps = anchor.corps_id;
     const anchorFaction = anchor.faction;
-    if (!anchorCorps) return [];
+    if (!anchorCorps) { emit('anchor_corps_missing', null, [], [], 0); return []; }
 
     const currentTurn = state.meta?.turn ?? 0;
     // Issue #40: brigades reserved by pre-planned ops that have not yet injected must not be
@@ -128,18 +279,30 @@ export function selectDonors(
     const candidates: FormationState[] = Object.keys(formations)
         .sort(strictCompare)
         .map(id => formations[id])
-        .filter(f => isEligibleDonor(f, context, anchorFaction, allowedCorps, currentTurn, reservedPrePlanned));
+        .filter(f => isEligibleDonor(
+            f, context, anchorFaction, allowedCorps, currentTurn, reservedPrePlanned,
+            observation?.populationById.get(f.id),
+        ));
 
     // Compute BFS hops once per candidate (frozen at formation), drop beyond the ceiling.
     interface Scored { donor: FormationState; hops: number; }
     const scored: Scored[] = [];
     for (const f of candidates) {
         const hops = bfsHops(f.location_osid, context.staging_osid, adjacency, friendlyOsids);
-        if (hops > MAX_OG_DONOR_DISTANCE) continue; // ADR §Distance falloff: skip
+        const observed = observation?.populationById.get(f.id);
+        if (observed) observed.distance_hops = hops;
+        if (hops > MAX_OG_DONOR_DISTANCE) {
+            if (observed) { observed.outcome = 'rejected'; observed.first_rejection = 'distance'; }
+            continue;
+        } // ADR §Distance falloff: skip
         // Residual-personnel floor must use the distance-scaled donation.
         const personnel = f.personnel ?? 0;
         const donation = computeDonationPersonnel(f, hops);
-        if (donation <= 0) continue;
+        if (observed) observed.personnel_lent = donation;
+        if (donation <= 0) {
+            if (observed) { observed.outcome = 'rejected'; observed.first_rejection = 'nonpositive_contribution'; }
+            continue;
+        }
         scored.push({ donor: f, hops });
     }
 
@@ -159,9 +322,28 @@ export function selectDonors(
         ? Math.max(0, Math.min(MAX_DONORS_PER_TG, context.max_donors))
         : MAX_DONORS_PER_TG;
 
-    return scored
+    const selected = scored
         .slice(0, cap)
         .map(s => buildContribution(s.donor, anchorCorps, s.hops));
+    if (observation) {
+        for (let i = 0; i < scored.length; i++) {
+            const observed = observation.populationById.get(scored[i].donor.id);
+            if (!observed) {
+                throw new Error(`Missing donor observation row for ${scored[i].donor.id}`);
+            }
+            observed.survivor_index = i;
+            observed.outcome = i < selected.length ? 'selected' : 'survived_cap';
+            if (i < selected.length) observed.selected_index = i;
+        }
+        emit(
+            null,
+            allowedCorps,
+            scored.map(s => s.donor.id),
+            selected.map(d => d.brigade_id),
+            cap,
+        );
+    }
+    return selected;
 }
 
 function isEligibleDonor(
@@ -171,22 +353,27 @@ function isEligibleDonor(
     allowedCorps: ReadonlySet<FormationId> | null,
     currentTurn: number,
     reservedPrePlanned: ReadonlySet<FormationId>,
+    observed?: DonorObservationEntry,
 ): boolean {
-    if (f.id === context.anchor_brigade_id) return false;
-    if (f.status !== 'active') return false;
-    if (f.faction !== anchorFaction) return false;
+    const reject = (reason: DonorFirstRejection): false => {
+        if (observed) { observed.outcome = 'rejected'; observed.first_rejection = reason; }
+        return false;
+    };
+    if (f.id === context.anchor_brigade_id) return reject('anchor');
+    if (f.status !== 'active') return reject('inactive');
+    if (f.faction !== anchorFaction) return reject('wrong_faction');
     // Corps scope: regular TG → own corps ∪ adjacent corps; Army HQ op → faction-wide (allowedCorps null).
     if (allowedCorps != null) {
         const corps = f.corps_id;
-        if (corps == null || !allowedCorps.has(corps)) return false;
+        if (corps == null || !allowedCorps.has(corps)) return reject('corps_scope');
     }
-    if (reservedPrePlanned.has(f.id)) return false; // issue #40: reserved for a not-yet-injected pre-planned op
-    if ((f.cohesion ?? 0) < COHESION_HEALTHY_THRESHOLD) return false;
-    if (Object.keys(f.personnel_lent_by_tg ?? {}).length > 0) return false; // Hard Invariant #1
-    if (f.tg_cooldown_until_turn != null && currentTurn < f.tg_cooldown_until_turn) return false;
+    if (reservedPrePlanned.has(f.id)) return reject('reserved_pre_planned'); // issue #40: reserved for a not-yet-injected pre-planned op
+    if ((f.cohesion ?? 0) < COHESION_HEALTHY_THRESHOLD) return reject('cohesion');
+    if (Object.keys(f.personnel_lent_by_tg ?? {}).length > 0) return reject('already_lending'); // Hard Invariant #1
+    if (f.tg_cooldown_until_turn != null && currentTurn < f.tg_cooldown_until_turn) return reject('cooldown');
     // v2.3 per-scenario donation cap (Hard Invariant / §Schema anti-fire-hose). Only enforced
     // under ENABLE_TG_COHESION_BLEED; flag-off leaves the eligible set unchanged (byte-identical).
-    if (ENABLE_TG_COHESION_BLEED && (f.tg_donations_this_scenario ?? 0) >= MAX_DONATIONS_PER_SCENARIO) return false;
+    if (ENABLE_TG_COHESION_BLEED && (f.tg_donations_this_scenario ?? 0) >= MAX_DONATIONS_PER_SCENARIO) return reject('donation_cap');
     // Residual-personnel floor is re-checked post-BFS (distance-scaled donation); a coarse
     // pre-check using zero-hop donation here would only ever be looser, so skip it.
     return true;
@@ -229,6 +416,7 @@ function computeDonorCorpsSet(
     const anchorOsids = new Set<string>();
     for (const id of Object.keys(formations).sort(strictCompare)) {
         const f = formations[id];
+        if (f.status === 'inactive') continue;
         if (f.corps_id === anchorCorps && f.location_osid) anchorOsids.add(f.location_osid);
     }
     if (anchorOsids.size === 0) return result;
@@ -242,6 +430,7 @@ function computeDonorCorpsSet(
     // Any same-faction corps with a brigade on an anchor-OSID-neighbor is adjacent.
     for (const id of Object.keys(formations).sort(strictCompare)) {
         const f = formations[id];
+        if (f.status === 'inactive') continue;
         if (f.faction !== anchorFaction) continue;
         const corps = f.corps_id;
         if (corps == null || result.has(corps)) continue;
@@ -267,6 +456,7 @@ function computeFriendlyOsids(
     // transient frontline states whose political read-model has not yet caught up.
     for (const id of Object.keys(formations).sort(strictCompare)) {
         const f = formations[id];
+        if (f.status === 'inactive') continue;
         if (f.faction === anchorFaction && f.location_osid) friendly.add(f.location_osid);
     }
     return friendly;

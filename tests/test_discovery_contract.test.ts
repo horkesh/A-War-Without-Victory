@@ -179,4 +179,69 @@ describe('test discovery contracts', () => {
 
         expect(discoveredFiles.has('tests/test_factories.ts')).toBe(false);
     });
+
+    describe('opt-in scenario-read wiring startup test', () => {
+        const WIRING = 'tests/scenario_runner_read_context_wiring.test.ts';
+        const names = (rootDir: string, env: Record<string, string | undefined>) => {
+            const saved = process.env.AWWV_READ_WIRING_CASE;
+            try {
+                const selector = env.AWWV_READ_WIRING_CASE;
+                if (selector === undefined) delete process.env.AWWV_READ_WIRING_CASE;
+                else process.env.AWWV_READ_WIRING_CASE = selector;
+                const discovered = discoverTests(rootDir);
+                return {
+                    all: new Set(toRepoRelative(rootDir, [...discovered.vitestFiles, ...discovered.nodeTestFiles])),
+                    scenario: new Set(toRepoRelative(rootDir, discovered.scenarioVitestFiles)),
+                };
+            } finally {
+                if (saved === undefined) delete process.env.AWWV_READ_WIRING_CASE;
+                else process.env.AWWV_READ_WIRING_CASE = saved;
+            }
+        };
+
+        it('is omitted by default when the selector variable is absent', () => {
+            const absent = names(process.cwd(), {});
+            expect(absent.all.has(WIRING)).toBe(false);
+            expect(absent.scenario.has(WIRING)).toBe(false);
+        });
+
+        it('stays discovered for every present selector value, including empty and unknown, so its own rejection runs', () => {
+            for (const value of ['off', 'on', 'failing', '', 'bogus', ' on']) {
+                const present = names(process.cwd(), { AWWV_READ_WIRING_CASE: value });
+                expect(present.all.has(WIRING), JSON.stringify(value)).toBe(true);
+            }
+        });
+
+        it('changes membership of no other file', () => {
+            const absent = names(process.cwd(), {});
+            const present = names(process.cwd(), { AWWV_READ_WIRING_CASE: 'on' });
+            const onlyInPresent = [...present.all].filter((file) => !absent.all.has(file));
+            const onlyInAbsent = [...absent.all].filter((file) => !present.all.has(file));
+            expect(onlyInPresent).toEqual([WIRING]);
+            expect(onlyInAbsent).toEqual([]);
+        });
+
+        it('the default process environment drives the same behavior and is restored afterwards', () => {
+            const saved = process.env.AWWV_READ_WIRING_CASE;
+            try {
+                delete process.env.AWWV_READ_WIRING_CASE;
+                const absent = toRepoRelative(process.cwd(), discoverTests(process.cwd()).vitestFiles);
+                expect(absent.includes(WIRING)).toBe(false);
+                process.env.AWWV_READ_WIRING_CASE = '';
+                const empty = toRepoRelative(process.cwd(), discoverTests(process.cwd()).vitestFiles);
+                expect(empty.includes(WIRING)).toBe(true);
+            } finally {
+                if (saved === undefined) delete process.env.AWWV_READ_WIRING_CASE;
+                else process.env.AWWV_READ_WIRING_CASE = saved;
+            }
+            expect(process.env.AWWV_READ_WIRING_CASE).toBe(saved);
+        });
+
+        it('an explicit filter with no selector has no eligible file, so the frozen run cannot pass vacuously', () => {
+            // The omitted file is the only file matching the wiring filter; vitest.config sets no
+            // passWithNoTests, so a filter that matches no discovered file exits nonzero.
+            const absent = names(process.cwd(), {});
+            expect([...absent.all].filter((file) => file.includes('scenario_runner_read_context_wiring'))).toEqual([]);
+        });
+    });
 });

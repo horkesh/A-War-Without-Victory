@@ -310,6 +310,36 @@ describe('Faction home morale floors', () => {
         runMoraleDrift(state, []);
         expect(state.military.formations!['b1']!.morale).toBeGreaterThanOrEqual(25);
     });
+
+    it('applies the HRHB home floor when net drift is zero before collapse consequences', () => {
+        const state = makeState({
+            b1: {
+                faction: 'HRHB', morale: 0, cohesion: 40, personnel: 700,
+                home_defense_active: true,
+            } as any,
+        });
+
+        runMoraleDrift(state, []);
+
+        expect(state.military.formations!['b1']!.morale).toBe(25);
+        expect(state.military.formations!['b1']!.cohesion).toBe(40);
+        expect(state.military.formations!['b1']!.personnel).toBe(700);
+    });
+
+    it('applies collapse consequences when net drift is zero and no morale floor applies', () => {
+        const state = makeState({
+            b1: {
+                faction: 'HRHB', morale: 0, cohesion: 40, personnel: 700,
+                home_defense_active: false,
+            } as any,
+        });
+
+        runMoraleDrift(state, []);
+
+        expect(state.military.formations!['b1']!.morale).toBe(0);
+        expect(state.military.formations!['b1']!.cohesion).toBe(38);
+        expect(state.military.formations!['b1']!.personnel).toBe(665);
+    });
 });
 
 describe('RBiH existential floor', () => {
@@ -317,8 +347,8 @@ describe('RBiH existential floor', () => {
         const state = makeState({
             b1: { faction: 'RBiH', morale: 20, location_osid: 'op:tuzla:tuzla_1' } as any,
         });
-        // Affinity must exceed HIGH_AFFINITY_THRESHOLD (0.70) to produce non-zero drift,
-        // otherwise the drift===0 guard skips floor logic. bosniak+other = 76% > 70%.
+        // bosniak+other = 76% > 70%, so this preserves coverage of a positive
+        // affinity drift followed by the existential floor.
         const munPop = { tuzla: { total: 100, bosniak: 71, serb: 12, croat: 12, other: 5 } };
         runMoraleDrift(state, [], munPop);
         expect(state.military.formations!['b1']!.morale).toBeGreaterThanOrEqual(25);

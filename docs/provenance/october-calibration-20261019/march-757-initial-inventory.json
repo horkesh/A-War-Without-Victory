@@ -1,0 +1,40 @@
+{
+  "schema": "awwv.757.pre-t3-stale-operation-march-inventory.v1",
+  "head": "eed73dc0c66ed291b67b9547b96702ecb2797d73",
+  "outputs": ["result.json", "inventory.json", "closed-receipt.json"],
+  "changed_paths": [
+    "src/sim/combat/commander_march_correction.ts",
+    "src/sim/turn_phases/war_phases.ts",
+    "tests/mistral_prisoje_turn_order.test.ts",
+    "tests/stale_operation_march_reconciliation.test.ts"
+  ],
+  "authorized_plan_note": "logs/claude-channel-20261004/756-root-plan.md",
+  "attempts": [
+    { "path": "757-red-c", "child_exit": 1, "wrapper_exit": 1 },
+    { "path": "757-green-a", "child_exit": 0, "wrapper_exit": 0 },
+    { "path": "757-focused-a", "child_exit": 1, "wrapper_exit": 1 },
+    { "path": "757-mistral-diagnosis-a", "child_exit": 1, "wrapper_exit": 1 },
+    { "path": "757-mistral-green-a", "child_exit": 0, "wrapper_exit": 0 },
+    { "path": "757-targeted-correction-a", "child_exit": 0, "wrapper_exit": 0 },
+    { "path": "757-current-objective-green-a", "child_exit": 1, "wrapper_exit": 1 },
+    { "path": "757-current-objective-green-b", "child_exit": 0, "wrapper_exit": 0 },
+    { "path": "757-noemit-a", "child_exit": 2, "wrapper_exit": 2 },
+    { "path": "757-noemit-b", "child_exit": 0, "wrapper_exit": 0 },
+    { "path": "757-noemit-c", "child_exit": 0, "wrapper_exit": 0 }
+  ],
+  "telemetry_archives": [
+    { "path": "479C-before-full.jsonl", "bytes": 100107701, "sha256": "8d242e18f199a54c26f755e648fe4612159563ec0b606930112653770d725f3c" },
+    { "path": "479C-after-full.jsonl", "bytes": 100107701, "sha256": "8d242e18f199a54c26f755e648fe4612159563ec0b606930112653770d725f3c" },
+    { "path": "479D-before-full.jsonl", "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3" },
+    { "path": "479D-after-full.jsonl", "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3" }
+  ],
+  "preservation": {
+    "C_prefix_preserved": true,
+    "C_append_bytes": 0,
+    "D_exact": true,
+    "protected_3_exact_reused": true,
+    "native_31_exact_reused": true,
+    "sealed_receipt_set_179_retained": true,
+    "restore_truncate_cleanup_delete": false
+  }
+}

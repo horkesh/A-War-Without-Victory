@@ -1,0 +1,81 @@
+{
+  "task": "782-correction-783",
+  "status": "corrected_and_focused_verified",
+  "opening_head": "e95a1df818f5a8ba77b134926bc7c17a388ec8e1",
+  "current_head": "e95a1df818f5a8ba77b134926bc7c17a388ec8e1",
+  "review": {
+    "path": "logs/claude-channel-20261004/783-independent-review.json",
+    "sha256": "d0e438bc6c77ccf8d4821b204b977ed37593ee1292c8b94c706934465b4ebec8",
+    "findings_closed": [
+      "all actual generic-probe filter false and NOT_REACHED stage transitions, nonfinite fitness tags, and reached helper single-evaluation behavior",
+      "all bounded personnel writer branches and formation/personnel presence distinctions"
+    ]
+  },
+  "selector_correction": {
+    "personnel_selector": "AWWV_DEBUG_PERSONNEL_FORMATIONS",
+    "movement_selector": "AWWV_DEBUG_MOVEMENT_FORMATIONS",
+    "own_selector_only": true,
+    "simultaneous_fixture": { "movement": "abb", "personnel": "rs4" },
+    "movement_phase_diagnostics_exactly_equal_with_personnel_off_or_on": true,
+    "personnel_phase_sources_only_selected_rs4": true,
+    "personnel_real_writer_selected_rs4": "formation_spawn.wia_trickleback"
+  },
+  "claims": {
+    "observability_readiness_only": true,
+    "historical_cause_or_recovery_claim": false,
+    "gameplay_or_threshold_change": false,
+    "game_state_save_report_weekly_schema_change": false,
+    "existing_movement_phase_weekly_payload_changed": false,
+    "production_behavior_correction_limited_to_diagnostic_selector": true
+  },
+  "coverage": {
+    "personnel_presence": [
+      "formation_absent",
+      "formation_present_undefined",
+      "formation_present_null",
+      "personnel_absent",
+      "present_undefined",
+      "present_null",
+      "present_nonfinite",
+      "present_value"
+    ],
+    "personnel_direct_writers": [
+      "formation_spawn.reinforce:bottom_up",
+      "formation_spawn.reinforce:regular",
+      "formation_spawn.reinforce:enclave",
+      "formation_spawn.wia_trickleback",
+      "strategic_reserve.reinforce",
+      "frontline_attrition",
+      "morale_drift.desertion:collapse",
+      "morale_drift.desertion:low_morale"
+    ],
+    "commander_probe": [
+      "disrupted_and_effective false then later stages NOT_REACHED",
+      "elite_available false then later stages NOT_REACHED",
+      "historical_queue_free false then combat_ready NOT_REACHED",
+      "combat_ready false",
+      "NaN Infinity and -Infinity explicit tags",
+      "original duplicate-preserving surplus ordinals",
+      "actual survivor ranks and selected identity",
+      "each reached filter helper evaluated once"
+    ],
+    "uncovered_limits": [
+      "combat resolution casualty and retreat writers",
+      "brigade dissolution, formation merge, lifecycle-event, and paramilitary personnel writers",
+      "militia-pool-only mutations",
+      "a phase delta does not identify a unique writer"
+    ]
+  },
+  "verification": [
+    { "attempt": "782-correction-783-targeted-01", "exit": 1, "test_process_started": false, "evidence": "logs/claude-channel-20261004/782-correction-783-targeted-01-invocation-rejection.json" },
+    { "attempt": "782-correction-783-targeted-02", "child_exit": 1, "wrapper_exit": 1, "tests": 68, "passed": 66, "failed": 2, "diagnosis": "fixture-only formation map and morale transition assumptions" },
+    { "attempt": "782-correction-783-targeted-03", "child_exit": 0, "wrapper_exit": 0, "tests": 68, "passed": 68, "failed": 0 },
+    { "attempt": "782-correction-783-commander-compilefix-01", "child_exit": 0, "wrapper_exit": 0, "tests": 60, "passed": 60, "failed": 0 },
+    { "attempt": "782-correction-783-focused-final-02", "child_exit": 0, "wrapper_exit": 0, "tests": 148, "passed": 148, "failed": 0 },
+    { "attempt": "782-correction-783-typecheck-final-01", "child_exit": 2, "wrapper_exit": 2, "diagnosis": "test fixture wrote readonly arrays directly" },
+    { "attempt": "782-correction-783-typecheck-final-02", "child_exit": 0, "wrapper_exit": 0, "mode": "project noEmit with private typecheck.tsbuildinfo" },
+    { "check": "git diff --check", "exit": 0 }
+  ],
+  "omitted_by_authority": ["full suite", "campaign", "scenario advance", "replay", "runTurn scenario campaign", "package build"],
+  "retained_prior_posture": "n80 retained 703/712 NO-GO and unadopted; n81/n82 rejected 689; unmet gates remain unmet"
+}

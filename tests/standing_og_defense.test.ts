@@ -33,6 +33,18 @@ function makeState(): GameState {
                     experience: 0.3,
                     location_osid: 'op:zvornik:sapna',
                 },
+                arbih_1st_cerska: {
+                    id: 'arbih_1st_cerska',
+                    name: '1st Cerska',
+                    faction: 'RBiH',
+                    kind: 'brigade',
+                    status: 'active',
+                    personnel: 600,
+                    cohesion: 60,
+                    morale: 60,
+                    experience: 0.3,
+                    location_osid: 'op:vlasenica:cerska_2',
+                },
                 operation_participant: {
                     id: 'operation_participant',
                     name: 'Operation participant',
@@ -121,7 +133,7 @@ function makeState(): GameState {
 }
 
 describe('standing OG reactive-defense availability', () => {
-    it('does not borrow formations already committed to another action', () => {
+    it('respects the queued-operation roster without borrowing committed formations', () => {
         const state = makeState();
 
         expect(isStandingOgDefenseBrigadeAvailable(state, 'available' as FormationId)).toBe(true);
@@ -129,6 +141,7 @@ describe('standing OG reactive-defense availability', () => {
         expect(isStandingOgDefenseBrigadeAvailable(state, 'disrupted' as FormationId)).toBe(false);
         expect(isStandingOgDefenseBrigadeAvailable(state, 'moving' as FormationId)).toBe(false);
         expect(isStandingOgDefenseBrigadeAvailable(state, 'ordered' as FormationId)).toBe(false);
-        expect(isStandingOgDefenseBrigadeAvailable(state, 'arbih_246th_vitezka_mountain' as FormationId)).toBe(false);
+        expect(isStandingOgDefenseBrigadeAvailable(state, 'arbih_246th_vitezka_mountain' as FormationId)).toBe(true);
+        expect(isStandingOgDefenseBrigadeAvailable(state, 'arbih_1st_cerska' as FormationId)).toBe(false);
     });
 });

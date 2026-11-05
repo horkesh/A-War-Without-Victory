@@ -877,6 +877,14 @@ function getHeavyMunitionsMult(factionId: string, state: GameState): number {
     return 0.5;
 }
 
+/** Power queries must not initialize persistent equipment while forecasting.
+ * Reuse the existing default composition policy on a detached formation shell.
+ * Execution's explicit equipment writers still own initialization and losses.
+ */
+function readCombatComposition(formation: FormationState) {
+    return formation.composition ?? ensureBrigadeComposition({ ...formation });
+}
+
 /**
  * Artillery suppression of entrenchment.
  * Uses the best-equipped attacker's suppression (corps concentrate fire support).
@@ -890,7 +898,7 @@ export function getArtillerySuppression(attackers: FormationState[], attackerFac
     // more than one alone, but with diminishing returns from coordination overhead.
     const suppressions: number[] = [];
     for (const attacker of attackers) {
-        const comp = attacker.composition ?? ensureBrigadeComposition(attacker);
+        const comp = readCombatComposition(attacker);
         const artEff = comp.artillery * (comp.artillery_condition?.operational ?? 0.5);
         const tankEff = comp.tanks * (comp.tank_condition?.operational ?? 0.5);
         suppressions.push((artEff * 1.0 + tankEff * 0.5) / 100);
@@ -920,7 +928,7 @@ export function getBombardmentCasualtyMult(attackers: FormationState[], attacker
     if (attackers.length === 0) return 1.0;
     let totalFirepower = 0;
     for (const attacker of attackers) {
-        const comp = attacker.composition ?? ensureBrigadeComposition(attacker);
+        const comp = readCombatComposition(attacker);
         const artEff = comp.artillery * (comp.artillery_condition?.operational ?? 0.5);
         const tankEff = comp.tanks * (comp.tank_condition?.operational ?? 0.5);
         totalFirepower += artEff + tankEff * 0.5;
@@ -974,7 +982,7 @@ export function getDefensiveFireMult(
  *   terrainMult=1.7 → 0.30 (mountains, minimum effectiveness)
  */
 export function getHeavyWeaponsOffensiveMult(formation: FormationState, terrainMult = 1.0, targetOsid?: string): number {
-    const comp = formation.composition ?? ensureBrigadeComposition(formation);
+    const comp = readCombatComposition(formation);
     const artEff = comp.artillery * (comp.artillery_condition?.operational ?? 0.5);
     const tankEff = comp.tanks * (comp.tank_condition?.operational ?? 0.5);
     // Urban terrain is at least as bad for tanks as mountains — treat as terrainMult≥1.7
@@ -1058,7 +1066,7 @@ export function getAttackerFirepowerDeficitMult(
 function sumRawHeavyFirepower(formations: readonly FormationState[]): number {
     let total = 0;
     for (const f of formations) {
-        const comp = f.composition ?? ensureBrigadeComposition(f);
+        const comp = readCombatComposition(f);
         const artEff = comp.artillery * (comp.artillery_condition?.operational ?? 0.5);
         const tankEff = comp.tanks * (comp.tank_condition?.operational ?? 0.5);
         total += tankEff * 10 + artEff * 8;
@@ -1092,7 +1100,7 @@ export function getEquipmentRatio(formation: FormationState): number {
         if (formation.faction === 'RS') return 0.7;
         return 0.6;
     }
-    const comp = formation.composition ?? ensureBrigadeComposition(formation);
+    const comp = readCombatComposition(formation);
     const total = comp.infantry + comp.tanks + comp.artillery + comp.aa_systems;
     if (total <= 0) return 0.5;
     const infantryBase = 0.5;
@@ -1514,6 +1522,27 @@ function getExternalDefenseSupportMultiplier(
     return support.combat_multiplier;
 }
 
+/** Dated theater support also applies to OSID attacks and their launch forecasts. */
+function getExternalAttackSupportMultiplier(
+    state: GameState,
+    attackerFaction: string,
+    targetOsid?: string,
+): number {
+    if (!targetOsid) return 1.0;
+    const turn = state.meta.turn ?? 0;
+    const mun = munFromOsid(targetOsid);
+    if (!mun) return 1.0;
+    const support = state.military.war_timeline?.external_support?.find(s =>
+        s.faction === attackerFaction
+        && s.role === 'attack'
+        && s.osid_attack_support === true
+        && turn >= (s.start_turn ?? 0)
+        && turn < s.end_turn
+        && s.municipalities.includes(mun)
+    );
+    return support?.combat_multiplier ?? 1.0;
+}
+
 export function computeAttackerPower(
     state: GameState,
     formation: FormationState,
@@ -1546,6 +1575,8 @@ export function computeAttackerPower(
     // recruitment_modifier hash-neutral on 40w.
     const eqMult = getActiveEquipmentQualityMultiplier(state, formation.faction, state.meta.turn ?? 0);
     if (eqMult !== 1.0) power *= eqMult;
+    const theaterSupportMult = getExternalAttackSupportMultiplier(state, formation.faction, targetOsid);
+    if (theaterSupportMult !== 1.0) power *= theaterSupportMult;
     return power;
 }
 

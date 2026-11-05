@@ -1,0 +1,102 @@
+{
+  "scope": "Observer-only source checkpoint. Package02 qualified at12a; native opening remains failed for collector inconsistency. No new campaign/player39 claim.",
+  "packageCodeHead": "12a4680f04fc3e4cbd8b2fb5f5133b472afd1fd6",
+  "files": [
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/frame-inconsistency-diagnosis-01/DIAGNOSIS.md",
+      "path": "logs/r8-native-calibration-parity-20261024/request-failure-terminal-20261025/DIAGNOSIS.md",
+      "bytes": 5802,
+      "sha256": "54d84ef3095b4d27c27803d5b4f9126fc49329a8664e687091a57c9200cff36b"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/frame-inconsistency-diagnosis-01/red-focused-test.log",
+      "path": "logs/r8-native-calibration-parity-20261024/request-failure-terminal-20261025/red-focused-test.log",
+      "bytes": 2076,
+      "sha256": "85fae10b206b3daae74c6bde62cb70279e4ecc294517f9009c94525ef1713494"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/frame-inconsistency-diagnosis-01/green-focused-test.log",
+      "path": "logs/r8-native-calibration-parity-20261024/request-failure-terminal-20261025/green-focused-test.log",
+      "bytes": 351,
+      "sha256": "4954fb2e68858a23d7c5681d364956efa594633adb5ce2d248d418b3b2bce325"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/frame-inconsistency-diagnosis-01/node-check.log",
+      "path": "logs/r8-native-calibration-parity-20261024/request-failure-terminal-20261025/node-check.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/frame-inconsistency-diagnosis-01/root-typecheck-final-01/result.json",
+      "path": "logs/r8-native-calibration-parity-20261024/request-failure-terminal-20261025/typecheck-result.json",
+      "bytes": 33,
+      "sha256": "56c0df2b73b56993afa2d6758ffa6ea9f612059292ceb4d2f5b219406c9ff4f7"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native-opening-failure-audit-02/OBSERVER_POSTIMPLEMENTATION_REVIEW.json",
+      "path": "logs/r8-native-calibration-parity-20261024/request-failure-terminal-20261025/OBSERVER_POSTIMPLEMENTATION_REVIEW.json",
+      "bytes": 10552,
+      "sha256": "8d37d119efe6dfe66484bbe3b91ecc801e2c993ba166767a9344605b767cf33f"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native-opening-failure-audit-02/ALL_OTHER_GATES_AUDIT.json",
+      "path": "logs/r8-native-calibration-parity-20261024/request-failure-terminal-20261025/ALL_OTHER_GATES_AUDIT.json",
+      "bytes": 10815,
+      "sha256": "fbcb9c640443c9dc85af3506cb13d9ef30292d89dad8ab2bec663cbdb31287e0"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/ACTUAL_PACKAGE02_REVIEW.json",
+      "path": "logs/r8-native-calibration-parity-20261024/request-failure-terminal-20261025/ACTUAL_PACKAGE02_REVIEW.json",
+      "bytes": 12225,
+      "sha256": "2286b240b1eba39f7d1030ff148fbcf6f22592502031f3cf3bd1cf6841e2a99f"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/EXE_INTEGRITY_AMENDMENT_REVIEW.json",
+      "path": "logs/r8-native-calibration-parity-20261024/request-failure-terminal-20261025/EXE_INTEGRITY_AMENDMENT_REVIEW.json",
+      "bytes": 7007,
+      "sha256": "be65fab987a4e1793a64260b7cd88e108e6373a47956729a7826805b592dc4b4"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/package-binding-materializer-v1/INDEPENDENT_MATERIALIZER_REVIEW.json",
+      "path": "logs/r8-native-calibration-parity-20261024/request-failure-terminal-20261025/INDEPENDENT_MATERIALIZER_REVIEW.json",
+      "bytes": 7764,
+      "sha256": "3029fb77edcd32054453136b5521a6f4739d78152ad09811b673966dd3805e8a"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/postbuild-materialized-actual-01/PACKAGE_BINDING.json",
+      "path": "logs/r8-native-calibration-parity-20261024/request-failure-terminal-20261025/PACKAGE_BINDING.json",
+      "bytes": 12109,
+      "sha256": "d336895a95e03be095ae76e7b654d152beae008ce93497a48ad8bb6cdf78051b"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/compare-actual-01/COMPARISON.json",
+      "path": "logs/r8-native-calibration-parity-20261024/request-failure-terminal-20261025/COMPARISON.json",
+      "bytes": 840,
+      "sha256": "a34e490b4aaceb3926b8988b5084f8c9c03aa55fc405de7e2d617d48d9f0acdc"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/preserve-close-actual-01/PRESERVATION_CLOSING.json",
+      "path": "logs/r8-native-calibration-parity-20261024/request-failure-terminal-20261025/PRESERVATION_CLOSING.json",
+      "bytes": 3863,
+      "sha256": "b99d18be4b05025f90538d4fbaa2d677ba0b940973a67259f717e4c2aa5da144"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native-opening-actual-01/receipt.json",
+      "path": "logs/r8-native-calibration-parity-20261024/request-failure-terminal-20261025/native-opening-receipt.json",
+      "bytes": 5465,
+      "sha256": "a0221be2d6f0181076940f5b4f4eb6165b96bd495c4643d4664b56b86abd35ff"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native-opening-actual-01/exit.json",
+      "path": "logs/r8-native-calibration-parity-20261024/request-failure-terminal-20261025/native-opening-exit.json",
+      "bytes": 593,
+      "sha256": "e6af1cb6593c7398dde9c431060bd4fb28df02e90fe5679a66d9ac535682b1e2"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/LEGACY_TELEMETRY_PRESERVATION_AFTER_NATIVE02_FAILURE.json",
+      "path": "logs/r8-native-calibration-parity-20261024/request-failure-terminal-20261025/LEGACY_TELEMETRY_PRESERVATION_AFTER_NATIVE02_FAILURE.json",
+      "bytes": 325943,
+      "sha256": "26c4f3dd2eda428601eb4c48b109d54cf38cf9efe11c4f716299b4b7267ee486"
+    }
+  ]
+}

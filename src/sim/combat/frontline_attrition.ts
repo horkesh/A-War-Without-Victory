@@ -47,6 +47,7 @@ import {
     GRAZ_EXEMPT_HRHB_CORPS,
 } from '../local_truces.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
+import { emitPersonnelWriterRecord, isPersonnelDiagnosticSelected } from './personnel_diagnostic.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -352,6 +353,12 @@ export function applyFrontlineAttrition(
 
         // Apply personnel loss
         formation.personnel = Math.max(MIN_COMBAT_PERSONNEL, personnel - casualties);
+        if (isPersonnelDiagnosticSelected(fid)) emitPersonnelWriterRecord(fid, {
+            source: 'frontline_attrition', completed_turn: turn, before: personnel,
+            base_attrition: baseAttritionCas, bombardment: bombardmentCas, casualties,
+            casualty_cap: personnel - MIN_COMBAT_PERSONNEL, after: formation.personnel,
+            faction_id: factionId, sector_id: sector.sector_id,
+        });
 
         // Record in casualty ledger (split via B1 gate; flag-OFF == KIA/WIA_FRACTION).
         const killed = Math.floor(casualties * kiaFrac);

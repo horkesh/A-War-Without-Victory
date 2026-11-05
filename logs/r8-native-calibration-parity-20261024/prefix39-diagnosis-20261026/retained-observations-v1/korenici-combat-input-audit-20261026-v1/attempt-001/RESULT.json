@@ -1,0 +1,4300 @@
+{
+  "schema": "awwv.korenici-combat-input-audit.v1",
+  "scope": "one retained-file extraction; no engine import/API/query/advance/state mutation",
+  "source_contract": {
+    "files": [
+      {
+        "path": "src/sim/combat/attack_resolution_osid.ts",
+        "sha256": "5b0d61371b7d0d828ed2b06ffd5d11354629ded288632f26cbfe9d22c1ce2f16"
+      },
+      {
+        "path": "src/sim/combat/combat_math.ts",
+        "sha256": "35a5240f49cd1b659cce6264a844549765b4edf0117b8181a76535e6d5cbe48e"
+      },
+      {
+        "path": "src/sim/combat/corps_operation_helpers.ts",
+        "sha256": "336ab45b05ad25d6ecbab6d92d05d01e78f130c2d99bfa67deecf6e2663ba376"
+      },
+      {
+        "path": "src/sim/combat/bot_constants.ts",
+        "sha256": "fd0227c97406bd7ebe262dea6fcc465042629d34bb153d3d8de5d4348b6c6d8f"
+      }
+    ],
+    "outcome_ratio_bands": {
+      "decisive_victory": "[2.0,+inf)",
+      "victory": "[1.5,2.0)",
+      "costly_victory": "[1.0,1.5)",
+      "stalemate": "[0.7,1.0)",
+      "repulsed": "[0.5,0.7)",
+      "catastrophic": "[0,0.5)"
+    },
+    "fatigue": "FATIGUE_MAX=30; attack multiplier linearly 1.0 to 0.6; defend multiplier linearly 1.0 to 0.75",
+    "operation": "execution multiplier is formation-scoped; axis mates within 1 hop count 1 and at 2 hops count 0.5, floored; concentration adds 0.10 per effective brigade capped at 0.30",
+    "support_power_mult": 1
+  },
+  "terrain": {
+    "graph": {
+      "path": "data/derived/operational/operational_contact_graph.json",
+      "sha256": "f7f9aaeea51710fda376234d79945b51dfea31a16ebca948ffd8dc54f3ce0c46"
+    },
+    "scalars": {
+      "path": "data/derived/terrain/settlements_terrain_scalars.json",
+      "sha256": "cfcf257bf6daa325aa239330742163a54985f5ff882109598ddeeb13e812563f"
+    },
+    "operational_settlements": {
+      "path": "data/derived/operational/operational_settlements.geojson",
+      "sha256": "03713c8e80ba7111ff64ad0bd69b70db4c7e2b30e22f23b8c4e2c11be60baa1a"
+    },
+    "constituent_rows": [
+      {
+        "sid": "S112810",
+        "road_access_index": 1,
+        "river_crossing_penalty": 1,
+        "elevation_mean_m": 588.6,
+        "elevation_stddev_m": 25.3,
+        "slope_index": 0.258,
+        "terrain_friction_index": 0.258,
+        "composite": 1.1700000000000002
+      },
+      {
+        "sid": "S112925",
+        "road_access_index": 0,
+        "river_crossing_penalty": 0,
+        "elevation_mean_m": 714.4,
+        "elevation_stddev_m": 23.4,
+        "slope_index": 0.224,
+        "terrain_friction_index": 0.224,
+        "composite": 1
+      },
+      {
+        "sid": "S113042",
+        "road_access_index": 0.731,
+        "river_crossing_penalty": 0,
+        "elevation_mean_m": 783,
+        "elevation_stddev_m": 70.8,
+        "slope_index": 0.568,
+        "terrain_friction_index": 0.568,
+        "composite": 1.512
+      },
+      {
+        "sid": "S113077",
+        "road_access_index": 1,
+        "river_crossing_penalty": 1,
+        "elevation_mean_m": 702.2,
+        "elevation_stddev_m": 123.1,
+        "slope_index": 0.388,
+        "terrain_friction_index": 0.388,
+        "composite": 1.3455
+      },
+      {
+        "sid": "S113204",
+        "road_access_index": 1,
+        "river_crossing_penalty": 0,
+        "elevation_mean_m": 663.9,
+        "elevation_stddev_m": 41.9,
+        "slope_index": 0.298,
+        "terrain_friction_index": 0.298,
+        "composite": 0.9
+      },
+      {
+        "sid": "S113409",
+        "road_access_index": 1,
+        "river_crossing_penalty": 0,
+        "elevation_mean_m": 649.7,
+        "elevation_stddev_m": 30.6,
+        "slope_index": 0.29,
+        "terrain_friction_index": 0.29,
+        "composite": 0.9
+      }
+    ],
+    "defender_terrain_mult_from_current_formula": 1.1379166666666667,
+    "mean_slope_for_seasonal_consumer": 0.3376666666666666
+  },
+  "current_p03_a306": [
+    {
+      "cohort": "current_p03_a306",
+      "turn": 34,
+      "pre_path": "tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/turn-autosaves/turn-033.json",
+      "pre_sha256": "d381cd1cde5001bdb9f48a9d5dd7f70de5359a810150b6a6c1abdb083f0418f4",
+      "post_path": "tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/turn-autosaves/turn-034.json",
+      "post_sha256": "2cfe77c02018c34e32f9b9ac99e0c81e310351485355ae502b95b4a1d93c4805",
+      "target_controller_pre": "RBiH",
+      "target_supply_pre": "adequate",
+      "attacker_pre": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 2200,
+        "morale": 92,
+        "cohesion": 33,
+        "posture": "attack",
+        "readiness": "active",
+        "disrupted_turns": 0,
+        "entrenchment_turns": 0,
+        "fatigue": 11,
+        "attack_fatigue_mult_from_current_formula": 0.8533333333333333,
+        "defend_fatigue_mult_from_current_formula": 0.9083333333333333,
+        "supply_at_location": "strained",
+        "composition": {
+          "aa_systems": 5,
+          "artillery": 27,
+          "artillery_condition": {
+            "degraded": 0.08418662499999993,
+            "non_operational": 0.008908124999999992,
+            "operational": 0.9069052499999998
+          },
+          "infantry": 800,
+          "tank_condition": {
+            "degraded": 0.32616800000000007,
+            "non_operational": 0.06214200000000002,
+            "operational": 0.61169
+          },
+          "tanks": 31
+        },
+        "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 33,
+          "last_maintenance": 33,
+          "maintenance_deficit": 0.8524218,
+          "non_operational_heavy": 0,
+          "operational_heavy": 24,
+          "total_heavy": 57
+        },
+        "experience": 0.10317321874999999,
+        "officer_quality": 0.43272967324412726,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:6"
+        },
+        "sub_segment": "subseg:sector:vrs_1st_krajina:6:0"
+      },
+      "defenders_pre": [
+        {
+          "id": "arbih_330th_liberation",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 1800,
+          "morale": 80,
+          "cohesion": 53.65,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 12,
+          "fatigue": 1,
+          "attack_fatigue_mult_from_current_formula": 0.9866666666666667,
+          "defend_fatigue_mult_from_current_formula": 0.9916666666666667,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 1,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.26100000000000007,
+              "non_operational": 0.026999999999999958,
+              "operational": 0.7119999999999997
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 33,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": null,
+          "officer_quality": 0.23147458277311153,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_708th_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 667,
+          "morale": 48,
+          "cohesion": 54.05,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 2.4,
+          "fatigue": 0.5,
+          "attack_fatigue_mult_from_current_formula": 0.9933333333333333,
+          "defend_fatigue_mult_from_current_formula": 0.9958333333333333,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 2,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.05949999999999998,
+              "non_operational": 0.00749999999999999,
+              "operational": 0.9329999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "mountain",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 33,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": null,
+          "officer_quality": 0.1815346327755713,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_770th_slavna_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 206,
+          "morale": 38,
+          "cohesion": 35,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 2,
+          "entrenchment_turns": 0,
+          "fatigue": 5,
+          "attack_fatigue_mult_from_current_formula": 0.9333333333333333,
+          "defend_fatigue_mult_from_current_formula": 0.9583333333333334,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.12350000000000004,
+              "non_operational": 0.019499999999999972,
+              "operational": 0.8569999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 33,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.0889875,
+          "officer_quality": 0.064625,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        }
+      ],
+      "operation_pre": {
+        "corps_id": "vrs_1st_krajina",
+        "operation": "Operation Donji Vakuf",
+        "phase": "execution",
+        "execution_attack_power_mult": 1.65,
+        "axis_id": "donji_vakuf_sweep",
+        "main_brigade": "rs_22nd_krajina_infantry",
+        "support_brigades": [
+          "rs_16th_krajina_motorized",
+          "rs_5th_kozara_light_infantry"
+        ],
+        "assigned_brigades": [
+          "rs_16th_krajina_motorized",
+          "rs_22nd_krajina_infantry",
+          "rs_5th_kozara_light_infantry"
+        ],
+        "current_objective": "op:donji_vakuf:korenici",
+        "axis_mates": [
+          {
+            "id": "rs_22nd_krajina_infantry",
+            "location_osid": "op:sipovo:pribeljci_2",
+            "status": "active",
+            "hops_to_korenici": 3,
+            "weighted_contribution": 0
+          },
+          {
+            "id": "rs_5th_kozara_light_infantry",
+            "location_osid": "op:donji_vakuf:babin_potok_2",
+            "status": "active",
+            "hops_to_korenici": 2,
+            "weighted_contribution": 0.5
+          }
+        ],
+        "counted_axis_support": 0,
+        "effective_attacker_count": 1,
+        "concentration_mult_from_current_formula": 1
+      },
+      "reported_battle": {
+        "all_attacker_ids": [
+          "rs_16th_krajina_motorized"
+        ],
+        "attacker_casualties": 291,
+        "attacker_faction": "RS",
+        "defender_casualties": 360,
+        "defender_contributions": [
+          {
+            "brigade_id": "arbih_330th_liberation",
+            "casualties_taken": 248,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 399.46
+          },
+          {
+            "brigade_id": "arbih_708th_mountain",
+            "casualties_taken": 101,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 163.42
+          },
+          {
+            "brigade_id": "arbih_770th_slavna_mountain",
+            "casualties_taken": 11,
+            "distance_hops": 0,
+            "is_home_municipality": true,
+            "reactive_weight": 17.56
+          }
+        ],
+        "defender_faction": "RBiH",
+        "execution_friction": {
+          "attacker_confidence_band": "low",
+          "labels": [
+            "stale_intel"
+          ]
+        },
+        "osid": "op:donji_vakuf:korenici",
+        "outcome": "costly_victory",
+        "primary_attacker_id": "rs_16th_krajina_motorized",
+        "primary_defender_id": "arbih_330th_liberation",
+        "territory_flipped": false,
+        "was_concentrated": false
+      },
+      "inferred_effective_power_ratio_band_from_outcome": "[1.0,1.5)",
+      "attacker_post": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 1947,
+        "morale": 92,
+        "cohesion": 25,
+        "posture": "attack",
+        "readiness": "active",
+        "disrupted_turns": 1,
+        "entrenchment_turns": 1.2,
+        "fatigue": 14.5,
+        "attack_fatigue_mult_from_current_formula": 0.8066666666666666,
+        "defend_fatigue_mult_from_current_formula": 0.8791666666666667,
+        "supply_at_location": "adequate",
+        "composition": {
+          "aa_systems": 5,
+          "artillery": 26,
+          "artillery_condition": {
+            "degraded": 0.09488637499999993,
+            "non_operational": 0.010825874999999992,
+            "operational": 0.8942877499999998
+          },
+          "infantry": 800,
+          "tank_condition": {
+            "degraded": 0.32771100000000003,
+            "non_operational": 0.060669000000000015,
+            "operational": 0.6116199999999999
+          },
+          "tanks": 29
+        },
+        "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 34,
+          "last_maintenance": 34,
+          "maintenance_deficit": 0.8524218,
+          "non_operational_heavy": 0,
+          "operational_heavy": 23,
+          "total_heavy": 57
+        },
+        "experience": 0.136367687421875,
+        "officer_quality": 0.265832768074152,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:6"
+        },
+        "sub_segment": "subseg:sector:vrs_1st_krajina:6:0"
+      },
+      "defenders_post": [
+        {
+          "id": "arbih_330th_liberation",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 1628,
+          "morale": 75,
+          "cohesion": 48.2,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 11.5,
+          "fatigue": 2.5,
+          "attack_fatigue_mult_from_current_formula": 0.9666666666666667,
+          "defend_fatigue_mult_from_current_formula": 0.9791666666666666,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.26700000000000007,
+              "non_operational": 0.026999999999999958,
+              "operational": 0.7059999999999997
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 34,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.045,
+          "officer_quality": 0.064625,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_708th_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 568,
+          "morale": 48,
+          "cohesion": 54.25,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 3.5999999999999996,
+          "fatigue": 0.5,
+          "attack_fatigue_mult_from_current_formula": 0.9933333333333333,
+          "defend_fatigue_mult_from_current_formula": 0.9958333333333333,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 2,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.06549999999999999,
+              "non_operational": 0.00749999999999999,
+              "operational": 0.9269999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "mountain",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 34,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": null,
+          "officer_quality": 0.18835387790266292,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_770th_slavna_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 210,
+          "morale": 35,
+          "cohesion": 53.69230769230769,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 1,
+          "entrenchment_turns": 1.2,
+          "fatigue": 4.5,
+          "attack_fatigue_mult_from_current_formula": 0.94,
+          "defend_fatigue_mult_from_current_formula": 0.9625,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.13300000000000003,
+              "non_operational": 0.02099999999999997,
+              "operational": 0.8459999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 34,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.0889875,
+          "officer_quality": 0.07188265625,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        }
+      ]
+    },
+    {
+      "cohort": "current_p03_a306",
+      "turn": 35,
+      "pre_path": "tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/turn-autosaves/turn-034.json",
+      "pre_sha256": "2cfe77c02018c34e32f9b9ac99e0c81e310351485355ae502b95b4a1d93c4805",
+      "post_path": "tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/turn-autosaves/turn-035.json",
+      "post_sha256": "1f251832d5ad1669ac0e8b35821451ae65c6d6f8d5aaa58ccc04e661f52c2bc4",
+      "target_controller_pre": "RBiH",
+      "target_supply_pre": "adequate",
+      "attacker_pre": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 1947,
+        "morale": 92,
+        "cohesion": 25,
+        "posture": "attack",
+        "readiness": "active",
+        "disrupted_turns": 1,
+        "entrenchment_turns": 1.2,
+        "fatigue": 14.5,
+        "attack_fatigue_mult_from_current_formula": 0.8066666666666666,
+        "defend_fatigue_mult_from_current_formula": 0.8791666666666667,
+        "supply_at_location": "adequate",
+        "composition": {
+          "aa_systems": 5,
+          "artillery": 26,
+          "artillery_condition": {
+            "degraded": 0.09488637499999993,
+            "non_operational": 0.010825874999999992,
+            "operational": 0.8942877499999998
+          },
+          "infantry": 800,
+          "tank_condition": {
+            "degraded": 0.32771100000000003,
+            "non_operational": 0.060669000000000015,
+            "operational": 0.6116199999999999
+          },
+          "tanks": 29
+        },
+        "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 34,
+          "last_maintenance": 34,
+          "maintenance_deficit": 0.8524218,
+          "non_operational_heavy": 0,
+          "operational_heavy": 23,
+          "total_heavy": 57
+        },
+        "experience": 0.136367687421875,
+        "officer_quality": 0.265832768074152,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:6"
+        },
+        "sub_segment": "subseg:sector:vrs_1st_krajina:6:0"
+      },
+      "defenders_pre": [
+        {
+          "id": "arbih_330th_liberation",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 1628,
+          "morale": 75,
+          "cohesion": 48.2,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 11.5,
+          "fatigue": 2.5,
+          "attack_fatigue_mult_from_current_formula": 0.9666666666666667,
+          "defend_fatigue_mult_from_current_formula": 0.9791666666666666,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.26700000000000007,
+              "non_operational": 0.026999999999999958,
+              "operational": 0.7059999999999997
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 34,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.045,
+          "officer_quality": 0.064625,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_708th_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 568,
+          "morale": 48,
+          "cohesion": 54.25,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 3.5999999999999996,
+          "fatigue": 0.5,
+          "attack_fatigue_mult_from_current_formula": 0.9933333333333333,
+          "defend_fatigue_mult_from_current_formula": 0.9958333333333333,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 2,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.06549999999999999,
+              "non_operational": 0.00749999999999999,
+              "operational": 0.9269999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "mountain",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 34,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": null,
+          "officer_quality": 0.18835387790266292,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_770th_slavna_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 210,
+          "morale": 35,
+          "cohesion": 53.69230769230769,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 1,
+          "entrenchment_turns": 1.2,
+          "fatigue": 4.5,
+          "attack_fatigue_mult_from_current_formula": 0.94,
+          "defend_fatigue_mult_from_current_formula": 0.9625,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.13300000000000003,
+              "non_operational": 0.02099999999999997,
+              "operational": 0.8459999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 34,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.0889875,
+          "officer_quality": 0.07188265625,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        }
+      ],
+      "operation_pre": {
+        "corps_id": "vrs_1st_krajina",
+        "operation": "Operation Donji Vakuf",
+        "phase": "execution",
+        "execution_attack_power_mult": 1.65,
+        "axis_id": "donji_vakuf_sweep",
+        "main_brigade": "rs_22nd_krajina_infantry",
+        "support_brigades": [
+          "rs_16th_krajina_motorized",
+          "rs_5th_kozara_light_infantry"
+        ],
+        "assigned_brigades": [
+          "rs_16th_krajina_motorized",
+          "rs_22nd_krajina_infantry",
+          "rs_5th_kozara_light_infantry"
+        ],
+        "current_objective": "op:donji_vakuf:korenici",
+        "axis_mates": [
+          {
+            "id": "rs_22nd_krajina_infantry",
+            "location_osid": "op:donji_vakuf:babin_potok_2",
+            "status": "active",
+            "hops_to_korenici": 2,
+            "weighted_contribution": 0.5
+          },
+          {
+            "id": "rs_5th_kozara_light_infantry",
+            "location_osid": "op:donji_vakuf:babin_potok_2",
+            "status": "active",
+            "hops_to_korenici": 2,
+            "weighted_contribution": 0.5
+          }
+        ],
+        "counted_axis_support": 1,
+        "effective_attacker_count": 2,
+        "concentration_mult_from_current_formula": 1.1
+      },
+      "reported_battle": {
+        "all_attacker_ids": [
+          "rs_16th_krajina_motorized"
+        ],
+        "attacker_casualties": 383,
+        "attacker_faction": "RS",
+        "defender_casualties": 137,
+        "defender_contributions": [
+          {
+            "brigade_id": "arbih_330th_liberation",
+            "casualties_taken": 84,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 407.38
+          },
+          {
+            "brigade_id": "arbih_708th_mountain",
+            "casualties_taken": 40,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 196.72
+          },
+          {
+            "brigade_id": "arbih_770th_slavna_mountain",
+            "casualties_taken": 13,
+            "distance_hops": 0,
+            "is_home_municipality": true,
+            "reactive_weight": 64.34
+          }
+        ],
+        "defender_faction": "RBiH",
+        "execution_friction": {
+          "attacker_confidence_band": "low",
+          "labels": [
+            "stale_intel"
+          ]
+        },
+        "osid": "op:donji_vakuf:korenici",
+        "outcome": "repulsed",
+        "primary_attacker_id": "rs_16th_krajina_motorized",
+        "primary_defender_id": "arbih_330th_liberation",
+        "territory_flipped": false,
+        "was_concentrated": false
+      },
+      "inferred_effective_power_ratio_band_from_outcome": "[0.5,0.7)",
+      "attacker_post": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 1956,
+        "morale": 87,
+        "cohesion": 14,
+        "posture": "hold",
+        "readiness": "overextended",
+        "disrupted_turns": 1,
+        "entrenchment_turns": 2.4,
+        "fatigue": 19,
+        "attack_fatigue_mult_from_current_formula": 0.7466666666666666,
+        "defend_fatigue_mult_from_current_formula": 0.8416666666666667,
+        "supply_at_location": "adequate",
+        "composition": {
+          "aa_systems": 5,
+          "artillery": 24,
+          "artillery_condition": {
+            "degraded": 0.10565449999999993,
+            "non_operational": 0.01278899999999999,
+            "operational": 0.8815564999999999
+          },
+          "infantry": 800,
+          "tank_condition": {
+            "degraded": 0.329245,
+            "non_operational": 0.059205,
+            "operational": 0.6115499999999999
+          },
+          "tanks": 26
+        },
+        "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 35,
+          "last_maintenance": 35,
+          "maintenance_deficit": 0.8524218,
+          "non_operational_heavy": 0,
+          "operational_heavy": 22,
+          "total_heavy": 57
+        },
+        "experience": 0.15593582670394532,
+        "officer_quality": 0.056825,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "sub_segment": "subseg:sector:vrs_1st_krajina:4:0"
+      },
+      "defenders_post": [
+        {
+          "id": "arbih_330th_liberation",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 1800,
+          "morale": 76,
+          "cohesion": 53.7,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 11.5,
+          "fatigue": 5,
+          "attack_fatigue_mult_from_current_formula": 0.9333333333333333,
+          "defend_fatigue_mult_from_current_formula": 0.9583333333333334,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 1,
+            "artillery_condition": {
+              "degraded": 0.5,
+              "non_operational": 0,
+              "operational": 0.5
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.5,
+              "non_operational": 0,
+              "operational": 0.5
+            },
+            "tanks": 1
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 35,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.1183125,
+          "officer_quality": 0.064625,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_708th_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 531,
+          "morale": 48,
+          "cohesion": 58.449999999999996,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 4.8,
+          "fatigue": 1,
+          "attack_fatigue_mult_from_current_formula": 0.9866666666666667,
+          "defend_fatigue_mult_from_current_formula": 0.9916666666666667,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 2,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.0715,
+              "non_operational": 0.00749999999999999,
+              "operational": 0.9209999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "mountain",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 35,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": null,
+          "officer_quality": 0.19514755086052793,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_770th_slavna_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 204,
+          "morale": 35,
+          "cohesion": 56.85,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 2.4,
+          "fatigue": 5,
+          "attack_fatigue_mult_from_current_formula": 0.9333333333333333,
+          "defend_fatigue_mult_from_current_formula": 0.9583333333333334,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.14250000000000002,
+              "non_operational": 0.022499999999999968,
+              "operational": 0.8349999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 35,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.0889875,
+          "officer_quality": 0.07911309628906249,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        }
+      ]
+    },
+    {
+      "cohort": "current_p03_a306",
+      "turn": 36,
+      "pre_path": "tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/turn-autosaves/turn-035.json",
+      "pre_sha256": "1f251832d5ad1669ac0e8b35821451ae65c6d6f8d5aaa58ccc04e661f52c2bc4",
+      "post_path": "tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/turn-autosaves/turn-036.json",
+      "post_sha256": "23dec1ebed50cebb4c2fab30ff1a2c2cfed72bad61f10b1ac450526b88e72cdf",
+      "target_controller_pre": "RBiH",
+      "target_supply_pre": "adequate",
+      "attacker_pre": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 1956,
+        "morale": 87,
+        "cohesion": 14,
+        "posture": "hold",
+        "readiness": "overextended",
+        "disrupted_turns": 1,
+        "entrenchment_turns": 2.4,
+        "fatigue": 19,
+        "attack_fatigue_mult_from_current_formula": 0.7466666666666666,
+        "defend_fatigue_mult_from_current_formula": 0.8416666666666667,
+        "supply_at_location": "adequate",
+        "composition": {
+          "aa_systems": 5,
+          "artillery": 24,
+          "artillery_condition": {
+            "degraded": 0.10565449999999993,
+            "non_operational": 0.01278899999999999,
+            "operational": 0.8815564999999999
+          },
+          "infantry": 800,
+          "tank_condition": {
+            "degraded": 0.329245,
+            "non_operational": 0.059205,
+            "operational": 0.6115499999999999
+          },
+          "tanks": 26
+        },
+        "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 35,
+          "last_maintenance": 35,
+          "maintenance_deficit": 0.8524218,
+          "non_operational_heavy": 0,
+          "operational_heavy": 22,
+          "total_heavy": 57
+        },
+        "experience": 0.15593582670394532,
+        "officer_quality": 0.056825,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "sub_segment": "subseg:sector:vrs_1st_krajina:4:0"
+      },
+      "defenders_pre": [
+        {
+          "id": "arbih_330th_liberation",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 1800,
+          "morale": 76,
+          "cohesion": 53.7,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 11.5,
+          "fatigue": 5,
+          "attack_fatigue_mult_from_current_formula": 0.9333333333333333,
+          "defend_fatigue_mult_from_current_formula": 0.9583333333333334,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 1,
+            "artillery_condition": {
+              "degraded": 0.5,
+              "non_operational": 0,
+              "operational": 0.5
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.5,
+              "non_operational": 0,
+              "operational": 0.5
+            },
+            "tanks": 1
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 35,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.1183125,
+          "officer_quality": 0.064625,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_708th_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 531,
+          "morale": 48,
+          "cohesion": 58.449999999999996,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 4.8,
+          "fatigue": 1,
+          "attack_fatigue_mult_from_current_formula": 0.9866666666666667,
+          "defend_fatigue_mult_from_current_formula": 0.9916666666666667,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 2,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.0715,
+              "non_operational": 0.00749999999999999,
+              "operational": 0.9209999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "mountain",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 35,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": null,
+          "officer_quality": 0.19514755086052793,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_770th_slavna_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 204,
+          "morale": 35,
+          "cohesion": 56.85,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 2.4,
+          "fatigue": 5,
+          "attack_fatigue_mult_from_current_formula": 0.9333333333333333,
+          "defend_fatigue_mult_from_current_formula": 0.9583333333333334,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.14250000000000002,
+              "non_operational": 0.022499999999999968,
+              "operational": 0.8349999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 35,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.0889875,
+          "officer_quality": 0.07911309628906249,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        }
+      ],
+      "operation_pre": {
+        "corps_id": "vrs_1st_krajina",
+        "operation": "Operation Donji Vakuf",
+        "phase": "execution",
+        "execution_attack_power_mult": 1.65,
+        "axis_id": "donji_vakuf_sweep",
+        "main_brigade": "rs_22nd_krajina_infantry",
+        "support_brigades": [
+          "rs_16th_krajina_motorized",
+          "rs_5th_kozara_light_infantry"
+        ],
+        "assigned_brigades": [
+          "rs_16th_krajina_motorized",
+          "rs_22nd_krajina_infantry",
+          "rs_5th_kozara_light_infantry"
+        ],
+        "current_objective": "op:donji_vakuf:korenici",
+        "axis_mates": [
+          {
+            "id": "rs_22nd_krajina_infantry",
+            "location_osid": "op:donji_vakuf:babin_potok_2",
+            "status": "active",
+            "hops_to_korenici": 2,
+            "weighted_contribution": 0.5
+          },
+          {
+            "id": "rs_5th_kozara_light_infantry",
+            "location_osid": "op:donji_vakuf:babin_potok_2",
+            "status": "active",
+            "hops_to_korenici": 2,
+            "weighted_contribution": 0.5
+          }
+        ],
+        "counted_axis_support": 1,
+        "effective_attacker_count": 2,
+        "concentration_mult_from_current_formula": 1.1
+      },
+      "reported_battle": {
+        "all_attacker_ids": [
+          "rs_16th_krajina_motorized"
+        ],
+        "attacker_casualties": 466,
+        "attacker_faction": "RS",
+        "defender_casualties": 278,
+        "defender_contributions": [
+          {
+            "brigade_id": "arbih_330th_liberation",
+            "casualties_taken": 184,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 510.8
+          },
+          {
+            "brigade_id": "arbih_708th_mountain",
+            "casualties_taken": 69,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 189.41
+          },
+          {
+            "brigade_id": "arbih_770th_slavna_mountain",
+            "casualties_taken": 25,
+            "distance_hops": 0,
+            "is_home_municipality": true,
+            "reactive_weight": 67.86
+          }
+        ],
+        "defender_faction": "RBiH",
+        "execution_friction": {
+          "attacker_confidence_band": "low",
+          "labels": [
+            "stale_intel"
+          ]
+        },
+        "osid": "op:donji_vakuf:korenici",
+        "outcome": "stalemate",
+        "primary_attacker_id": "rs_16th_krajina_motorized",
+        "primary_defender_id": "arbih_330th_liberation",
+        "territory_flipped": false,
+        "was_concentrated": false
+      },
+      "inferred_effective_power_ratio_band_from_outcome": "[0.7,1.0)",
+      "attacker_post": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 1813,
+        "morale": 85,
+        "cohesion": 12,
+        "posture": "hold",
+        "readiness": "degraded",
+        "disrupted_turns": 0,
+        "entrenchment_turns": 3.5999999999999996,
+        "fatigue": 22.5,
+        "attack_fatigue_mult_from_current_formula": 0.7,
+        "defend_fatigue_mult_from_current_formula": 0.8125,
+        "supply_at_location": "adequate",
+        "composition": {
+          "aa_systems": 5,
+          "artillery": 23,
+          "artillery_condition": {
+            "degraded": 0.11014549999999992,
+            "non_operational": 0.012077999999999986,
+            "operational": 0.8777764999999998
+          },
+          "infantry": 800,
+          "tank_condition": {
+            "degraded": 0.33076999999999995,
+            "non_operational": 0.05774999999999999,
+            "operational": 0.61148
+          },
+          "tanks": 24
+        },
+        "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 36,
+          "last_maintenance": 36,
+          "maintenance_deficit": 0.8524218,
+          "non_operational_heavy": 0,
+          "operational_heavy": 21,
+          "total_heavy": 57
+        },
+        "experience": 0.1752985005235539,
+        "officer_quality": 0.056825,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "sub_segment": "subseg:sector:vrs_1st_krajina:4:0"
+      },
+      "defenders_post": [
+        {
+          "id": "arbih_330th_liberation",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 1800,
+          "morale": 77,
+          "cohesion": 53.2,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 11.5,
+          "fatigue": 6.5,
+          "attack_fatigue_mult_from_current_formula": 0.9133333333333333,
+          "defend_fatigue_mult_from_current_formula": 0.9458333333333333,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0.4965,
+              "non_operational": 0,
+              "operational": 0.5035
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.506,
+              "non_operational": 0,
+              "operational": 0.494
+            },
+            "tanks": 1
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 36,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.18887578124999999,
+          "officer_quality": 0.064625,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_708th_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 465,
+          "morale": 48,
+          "cohesion": 58.65,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 6,
+          "fatigue": 0.5,
+          "attack_fatigue_mult_from_current_formula": 0.9933333333333333,
+          "defend_fatigue_mult_from_current_formula": 0.9958333333333333,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 2,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.0775,
+              "non_operational": 0.00749999999999999,
+              "operational": 0.9149999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "mountain",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 36,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": null,
+          "officer_quality": 0.20191574754480096,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_770th_slavna_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 179,
+          "morale": 35,
+          "cohesion": 56.05,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 3.5999999999999996,
+          "fatigue": 4.5,
+          "attack_fatigue_mult_from_current_formula": 0.94,
+          "defend_fatigue_mult_from_current_formula": 0.9625,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.152,
+              "non_operational": 0.023999999999999966,
+              "operational": 0.8239999999999998
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 36,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.0889875,
+          "officer_quality": 0.08631642217797851,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        }
+      ]
+    },
+    {
+      "cohort": "current_p03_a306",
+      "turn": 37,
+      "pre_path": "tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/turn-autosaves/turn-036.json",
+      "pre_sha256": "23dec1ebed50cebb4c2fab30ff1a2c2cfed72bad61f10b1ac450526b88e72cdf",
+      "post_path": "tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/turn-autosaves/turn-037.json",
+      "post_sha256": "ac5c05feecd41b39e267745e08367474c8df2214abe55c363b8630148e94b104",
+      "target_controller_pre": "RBiH",
+      "target_supply_pre": "adequate",
+      "attacker_pre": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 1813,
+        "morale": 85,
+        "cohesion": 12,
+        "posture": "hold",
+        "readiness": "degraded",
+        "disrupted_turns": 0,
+        "entrenchment_turns": 3.5999999999999996,
+        "fatigue": 22.5,
+        "attack_fatigue_mult_from_current_formula": 0.7,
+        "defend_fatigue_mult_from_current_formula": 0.8125,
+        "supply_at_location": "adequate",
+        "composition": {
+          "aa_systems": 5,
+          "artillery": 23,
+          "artillery_condition": {
+            "degraded": 0.11014549999999992,
+            "non_operational": 0.012077999999999986,
+            "operational": 0.8777764999999998
+          },
+          "infantry": 800,
+          "tank_condition": {
+            "degraded": 0.33076999999999995,
+            "non_operational": 0.05774999999999999,
+            "operational": 0.61148
+          },
+          "tanks": 24
+        },
+        "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 36,
+          "last_maintenance": 36,
+          "maintenance_deficit": 0.8524218,
+          "non_operational_heavy": 0,
+          "operational_heavy": 21,
+          "total_heavy": 57
+        },
+        "experience": 0.1752985005235539,
+        "officer_quality": 0.056825,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "sub_segment": "subseg:sector:vrs_1st_krajina:4:0"
+      },
+      "defenders_pre": [
+        {
+          "id": "arbih_330th_liberation",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 1800,
+          "morale": 77,
+          "cohesion": 53.2,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 11.5,
+          "fatigue": 6.5,
+          "attack_fatigue_mult_from_current_formula": 0.9133333333333333,
+          "defend_fatigue_mult_from_current_formula": 0.9458333333333333,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0.4965,
+              "non_operational": 0,
+              "operational": 0.5035
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.506,
+              "non_operational": 0,
+              "operational": 0.494
+            },
+            "tanks": 1
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 36,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.18887578124999999,
+          "officer_quality": 0.064625,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_708th_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 465,
+          "morale": 48,
+          "cohesion": 58.65,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 6,
+          "fatigue": 0.5,
+          "attack_fatigue_mult_from_current_formula": 0.9933333333333333,
+          "defend_fatigue_mult_from_current_formula": 0.9958333333333333,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 2,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.0775,
+              "non_operational": 0.00749999999999999,
+              "operational": 0.9149999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "mountain",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 36,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": null,
+          "officer_quality": 0.20191574754480096,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_770th_slavna_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 179,
+          "morale": 35,
+          "cohesion": 56.05,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 3.5999999999999996,
+          "fatigue": 4.5,
+          "attack_fatigue_mult_from_current_formula": 0.94,
+          "defend_fatigue_mult_from_current_formula": 0.9625,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.152,
+              "non_operational": 0.023999999999999966,
+              "operational": 0.8239999999999998
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 36,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.0889875,
+          "officer_quality": 0.08631642217797851,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        }
+      ],
+      "operation_pre": {
+        "corps_id": "vrs_1st_krajina",
+        "operation": "Operation Donji Vakuf",
+        "phase": "execution",
+        "execution_attack_power_mult": 1.65,
+        "axis_id": "donji_vakuf_sweep",
+        "main_brigade": "rs_22nd_krajina_infantry",
+        "support_brigades": [
+          "rs_16th_krajina_motorized",
+          "rs_5th_kozara_light_infantry"
+        ],
+        "assigned_brigades": [
+          "rs_16th_krajina_motorized",
+          "rs_22nd_krajina_infantry",
+          "rs_5th_kozara_light_infantry"
+        ],
+        "current_objective": "op:donji_vakuf:korenici",
+        "axis_mates": [
+          {
+            "id": "rs_22nd_krajina_infantry",
+            "location_osid": "op:donji_vakuf:donji_vakuf_2",
+            "status": "active",
+            "hops_to_korenici": 1,
+            "weighted_contribution": 1
+          },
+          {
+            "id": "rs_5th_kozara_light_infantry",
+            "location_osid": "op:donji_vakuf:donji_vakuf_2",
+            "status": "active",
+            "hops_to_korenici": 1,
+            "weighted_contribution": 1
+          }
+        ],
+        "counted_axis_support": 2,
+        "effective_attacker_count": 3,
+        "concentration_mult_from_current_formula": 1.2
+      },
+      "reported_battle": {
+        "all_attacker_ids": [
+          "rs_16th_krajina_motorized"
+        ],
+        "attacker_casualties": 607,
+        "attacker_faction": "RS",
+        "defender_casualties": 151,
+        "defender_contributions": [
+          {
+            "brigade_id": "arbih_330th_liberation",
+            "casualties_taken": 109,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 522.44
+          },
+          {
+            "brigade_id": "arbih_708th_mountain",
+            "casualties_taken": 29,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 142.05
+          },
+          {
+            "brigade_id": "arbih_770th_slavna_mountain",
+            "casualties_taken": 13,
+            "distance_hops": 0,
+            "is_home_municipality": true,
+            "reactive_weight": 64.14
+          }
+        ],
+        "defender_faction": "RBiH",
+        "osid": "op:donji_vakuf:korenici",
+        "outcome": "repulsed",
+        "primary_attacker_id": "rs_16th_krajina_motorized",
+        "primary_defender_id": "arbih_330th_liberation",
+        "territory_flipped": false,
+        "was_concentrated": false
+      },
+      "inferred_effective_power_ratio_band_from_outcome": "[0.5,0.7)",
+      "attacker_post": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 1588,
+        "morale": 80,
+        "cohesion": 5,
+        "posture": "hold",
+        "readiness": "degraded",
+        "disrupted_turns": 1,
+        "entrenchment_turns": 4.8,
+        "fatigue": 27,
+        "attack_fatigue_mult_from_current_formula": 0.6399999999999999,
+        "defend_fatigue_mult_from_current_formula": 0.775,
+        "supply_at_location": "adequate",
+        "composition": {
+          "aa_systems": 5,
+          "artillery": 21,
+          "artillery_condition": {
+            "degraded": 0.11469874999999992,
+            "non_operational": 0.011409749999999986,
+            "operational": 0.8738914999999998
+          },
+          "infantry": 800,
+          "tank_condition": {
+            "degraded": 0.332286,
+            "non_operational": 0.05630400000000001,
+            "operational": 0.61141
+          },
+          "tanks": 21
+        },
+        "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 37,
+          "last_maintenance": 37,
+          "maintenance_deficit": 0.8524218,
+          "non_operational_heavy": 0,
+          "operational_heavy": 20,
+          "total_heavy": 57
+        },
+        "experience": 0.19445786626805658,
+        "officer_quality": 0.056825,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "sub_segment": "subseg:sector:vrs_1st_krajina:4:0"
+      },
+      "defenders_post": [
+        {
+          "id": "arbih_330th_liberation",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 1800,
+          "morale": 78,
+          "cohesion": 54.7,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 11.5,
+          "fatigue": 9,
+          "attack_fatigue_mult_from_current_formula": 0.88,
+          "defend_fatigue_mult_from_current_formula": 0.925,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 1,
+            "artillery_condition": {
+              "degraded": 0.5,
+              "non_operational": 0,
+              "operational": 0.5
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.5706666666666667,
+              "non_operational": 0,
+              "operational": 0.42933333333333334
+            },
+            "tanks": 3
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 37,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.256792939453125,
+          "officer_quality": 0.064625,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_708th_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 439,
+          "morale": 48,
+          "cohesion": 57.35,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 7.2,
+          "fatigue": 1,
+          "attack_fatigue_mult_from_current_formula": 0.9866666666666667,
+          "defend_fatigue_mult_from_current_formula": 0.9916666666666667,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 2,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.08700000000000001,
+              "non_operational": 0.008999999999999987,
+              "operational": 0.9039999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "mountain",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 37,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": null,
+          "officer_quality": 0.20865856349150796,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_770th_slavna_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 166,
+          "morale": 35,
+          "cohesion": 55.25,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 4.8,
+          "fatigue": 5,
+          "attack_fatigue_mult_from_current_formula": 0.9333333333333333,
+          "defend_fatigue_mult_from_current_formula": 0.9583333333333334,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.16149999999999998,
+              "non_operational": 0.025499999999999964,
+              "operational": 0.8129999999999998
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 37,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.0889875,
+          "officer_quality": 0.0934927355948111,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        }
+      ]
+    }
+  ],
+  "old_native04_77a2_comparison_only": [
+    {
+      "cohort": "old_native04_77a2_comparison_only",
+      "turn": 34,
+      "pre_path": "tmp-paradox-qa-20260710/evidence/player-parity-rbih-t39-20261025-04/rbih/turn-autosaves/turn-033.json",
+      "pre_sha256": "31da96b8c9bf959c87cee67daccd2e4028e500b624fffcc160d30971141d1c12",
+      "post_path": "tmp-paradox-qa-20260710/evidence/player-parity-rbih-t39-20261025-04/rbih/turn-autosaves/turn-034.json",
+      "post_sha256": "e8ebaf9b6dff9fd506c3b75d48556a56d89ebaecb4a24de681e952ab51053b48",
+      "target_controller_pre": "RBiH",
+      "target_supply_pre": "adequate",
+      "attacker_pre": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 2200,
+        "morale": 92,
+        "cohesion": 33,
+        "posture": "attack",
+        "readiness": "active",
+        "disrupted_turns": 0,
+        "entrenchment_turns": 0,
+        "fatigue": 0,
+        "attack_fatigue_mult_from_current_formula": 1,
+        "defend_fatigue_mult_from_current_formula": 1,
+        "supply_at_location": "strained",
+        "composition": {
+          "aa_systems": 5,
+          "artillery": 27,
+          "artillery_condition": {
+            "degraded": 0.08418662499999993,
+            "non_operational": 0.008908124999999992,
+            "operational": 0.9069052499999998
+          },
+          "infantry": 800,
+          "tank_condition": {
+            "degraded": 0.32616800000000007,
+            "non_operational": 0.06214200000000002,
+            "operational": 0.61169
+          },
+          "tanks": 31
+        },
+        "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 33,
+          "last_maintenance": 33,
+          "maintenance_deficit": 0.8524218,
+          "non_operational_heavy": 0,
+          "operational_heavy": 24,
+          "total_heavy": 57
+        },
+        "experience": 0.10317321874999999,
+        "officer_quality": 0.4326909732326168,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:6"
+        },
+        "sub_segment": "subseg:sector:vrs_1st_krajina:6:0"
+      },
+      "defenders_pre": [
+        {
+          "id": "arbih_330th_liberation",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 1800,
+          "morale": 80,
+          "cohesion": 53.65,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 12,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 1,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.26100000000000007,
+              "non_operational": 0.026999999999999958,
+              "operational": 0.7119999999999997
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 33,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": null,
+          "officer_quality": 0.23147458277311153,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_708th_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 667,
+          "morale": 48,
+          "cohesion": 54.05,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 2.4,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 2,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.05949999999999998,
+              "non_operational": 0.00749999999999999,
+              "operational": 0.9329999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "mountain",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 33,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": null,
+          "officer_quality": 0.1815346327755713,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_770th_slavna_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 191,
+          "morale": 38,
+          "cohesion": 35,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 2,
+          "entrenchment_turns": 0,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.12350000000000004,
+              "non_operational": 0.019499999999999972,
+              "operational": 0.8569999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 33,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.0889875,
+          "officer_quality": 0.064625,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        }
+      ],
+      "operation_pre": {
+        "corps_id": "vrs_1st_krajina",
+        "operation": "Operation Donji Vakuf",
+        "phase": "execution",
+        "execution_attack_power_mult": 1.65,
+        "axis_id": "donji_vakuf_sweep",
+        "main_brigade": "rs_22nd_krajina_infantry",
+        "support_brigades": [
+          "rs_16th_krajina_motorized",
+          "rs_5th_kozara_light_infantry"
+        ],
+        "assigned_brigades": [
+          "rs_16th_krajina_motorized",
+          "rs_22nd_krajina_infantry",
+          "rs_5th_kozara_light_infantry"
+        ],
+        "current_objective": "op:donji_vakuf:korenici",
+        "axis_mates": [
+          {
+            "id": "rs_22nd_krajina_infantry",
+            "location_osid": "op:sipovo:pribeljci_2",
+            "status": "active",
+            "hops_to_korenici": 3,
+            "weighted_contribution": 0
+          },
+          {
+            "id": "rs_5th_kozara_light_infantry",
+            "location_osid": "op:donji_vakuf:babin_potok_2",
+            "status": "active",
+            "hops_to_korenici": 2,
+            "weighted_contribution": 0.5
+          }
+        ],
+        "counted_axis_support": 0,
+        "effective_attacker_count": 1,
+        "concentration_mult_from_current_formula": 1
+      },
+      "reported_battle": {
+        "all_attacker_ids": [
+          "rs_16th_krajina_motorized"
+        ],
+        "attacker_casualties": 216,
+        "attacker_faction": "RS",
+        "defender_casualties": 564,
+        "defender_contributions": [
+          {
+            "brigade_id": "arbih_330th_liberation",
+            "casualties_taken": 389,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 399.46
+          },
+          {
+            "brigade_id": "arbih_708th_mountain",
+            "casualties_taken": 159,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 163.42
+          },
+          {
+            "brigade_id": "arbih_770th_slavna_mountain",
+            "casualties_taken": 16,
+            "distance_hops": 0,
+            "is_home_municipality": true,
+            "reactive_weight": 16.85
+          }
+        ],
+        "defender_faction": "RBiH",
+        "execution_friction": {
+          "attacker_confidence_band": "low",
+          "labels": [
+            "stale_intel"
+          ]
+        },
+        "osid": "op:donji_vakuf:korenici",
+        "outcome": "victory",
+        "primary_attacker_id": "rs_16th_krajina_motorized",
+        "primary_defender_id": "arbih_330th_liberation",
+        "territory_flipped": false,
+        "was_concentrated": false
+      },
+      "inferred_effective_power_ratio_band_from_outcome": "[1.5,2.0)",
+      "attacker_post": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 2056,
+        "morale": 93,
+        "cohesion": 31,
+        "posture": "attack",
+        "readiness": "active",
+        "disrupted_turns": 0,
+        "entrenchment_turns": 1.2,
+        "fatigue": 0,
+        "attack_fatigue_mult_from_current_formula": 1,
+        "defend_fatigue_mult_from_current_formula": 1,
+        "supply_at_location": "adequate",
+        "composition": {
+          "aa_systems": 5,
+          "artillery": 26,
+          "artillery_condition": {
+            "degraded": 0.09488637499999993,
+            "non_operational": 0.010825874999999992,
+            "operational": 0.8942877499999998
+          },
+          "infantry": 800,
+          "tank_condition": {
+            "degraded": 0.32771100000000003,
+            "non_operational": 0.060669000000000015,
+            "operational": 0.6116199999999999
+          },
+          "tanks": 29
+        },
+        "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 34,
+          "last_maintenance": 34,
+          "maintenance_deficit": 0.8524218,
+          "non_operational_heavy": 0,
+          "operational_heavy": 23,
+          "total_heavy": 57
+        },
+        "experience": 0.136367687421875,
+        "officer_quality": 0.3103335571882019,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:6"
+        },
+        "sub_segment": "subseg:sector:vrs_1st_krajina:6:0"
+      },
+      "defenders_post": [
+        {
+          "id": "arbih_330th_liberation",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 1367,
+          "morale": 75,
+          "cohesion": 46.2,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 11.5,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.26700000000000007,
+              "non_operational": 0.026999999999999958,
+              "operational": 0.7059999999999997
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 34,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.045,
+          "officer_quality": 0.064625,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_708th_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 511,
+          "morale": 48,
+          "cohesion": 54.25,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 3.5999999999999996,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 2,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.06549999999999999,
+              "non_operational": 0.00749999999999999,
+              "operational": 0.9269999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "mountain",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 34,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": null,
+          "officer_quality": 0.18835387790266292,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_770th_slavna_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 176,
+          "morale": 35,
+          "cohesion": 53.69230769230769,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 1,
+          "entrenchment_turns": 1.2,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.13300000000000003,
+              "non_operational": 0.02099999999999997,
+              "operational": 0.8459999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 34,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.0889875,
+          "officer_quality": 0.07188265625,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        }
+      ]
+    },
+    {
+      "cohort": "old_native04_77a2_comparison_only",
+      "turn": 35,
+      "pre_path": "tmp-paradox-qa-20260710/evidence/player-parity-rbih-t39-20261025-04/rbih/turn-autosaves/turn-034.json",
+      "pre_sha256": "e8ebaf9b6dff9fd506c3b75d48556a56d89ebaecb4a24de681e952ab51053b48",
+      "post_path": "tmp-paradox-qa-20260710/evidence/player-parity-rbih-t39-20261025-04/rbih/turn-autosaves/turn-035.json",
+      "post_sha256": "3cb7b82e575c4356ca976f8c9d3af451ae95233c2d24fc79f70ebfdbb69b46fd",
+      "target_controller_pre": "RBiH",
+      "target_supply_pre": "adequate",
+      "attacker_pre": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 2056,
+        "morale": 93,
+        "cohesion": 31,
+        "posture": "attack",
+        "readiness": "active",
+        "disrupted_turns": 0,
+        "entrenchment_turns": 1.2,
+        "fatigue": 0,
+        "attack_fatigue_mult_from_current_formula": 1,
+        "defend_fatigue_mult_from_current_formula": 1,
+        "supply_at_location": "adequate",
+        "composition": {
+          "aa_systems": 5,
+          "artillery": 26,
+          "artillery_condition": {
+            "degraded": 0.09488637499999993,
+            "non_operational": 0.010825874999999992,
+            "operational": 0.8942877499999998
+          },
+          "infantry": 800,
+          "tank_condition": {
+            "degraded": 0.32771100000000003,
+            "non_operational": 0.060669000000000015,
+            "operational": 0.6116199999999999
+          },
+          "tanks": 29
+        },
+        "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 34,
+          "last_maintenance": 34,
+          "maintenance_deficit": 0.8524218,
+          "non_operational_heavy": 0,
+          "operational_heavy": 23,
+          "total_heavy": 57
+        },
+        "experience": 0.136367687421875,
+        "officer_quality": 0.3103335571882019,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:6"
+        },
+        "sub_segment": "subseg:sector:vrs_1st_krajina:6:0"
+      },
+      "defenders_pre": [
+        {
+          "id": "arbih_330th_liberation",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 1367,
+          "morale": 75,
+          "cohesion": 46.2,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 11.5,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.26700000000000007,
+              "non_operational": 0.026999999999999958,
+              "operational": 0.7059999999999997
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 34,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.045,
+          "officer_quality": 0.064625,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_708th_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 511,
+          "morale": 48,
+          "cohesion": 54.25,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 3.5999999999999996,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 2,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.06549999999999999,
+              "non_operational": 0.00749999999999999,
+              "operational": 0.9269999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "mountain",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 34,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": null,
+          "officer_quality": 0.18835387790266292,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_770th_slavna_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 176,
+          "morale": 35,
+          "cohesion": 53.69230769230769,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 1,
+          "entrenchment_turns": 1.2,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.13300000000000003,
+              "non_operational": 0.02099999999999997,
+              "operational": 0.8459999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 34,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.0889875,
+          "officer_quality": 0.07188265625,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        }
+      ],
+      "operation_pre": {
+        "corps_id": "vrs_1st_krajina",
+        "operation": "Operation Donji Vakuf",
+        "phase": "execution",
+        "execution_attack_power_mult": 1.65,
+        "axis_id": "donji_vakuf_sweep",
+        "main_brigade": "rs_22nd_krajina_infantry",
+        "support_brigades": [
+          "rs_16th_krajina_motorized",
+          "rs_5th_kozara_light_infantry"
+        ],
+        "assigned_brigades": [
+          "rs_16th_krajina_motorized",
+          "rs_22nd_krajina_infantry",
+          "rs_5th_kozara_light_infantry"
+        ],
+        "current_objective": "op:donji_vakuf:korenici",
+        "axis_mates": [
+          {
+            "id": "rs_22nd_krajina_infantry",
+            "location_osid": "op:donji_vakuf:babin_potok_2",
+            "status": "active",
+            "hops_to_korenici": 2,
+            "weighted_contribution": 0.5
+          },
+          {
+            "id": "rs_5th_kozara_light_infantry",
+            "location_osid": "op:donji_vakuf:babin_potok_2",
+            "status": "active",
+            "hops_to_korenici": 2,
+            "weighted_contribution": 0.5
+          }
+        ],
+        "counted_axis_support": 1,
+        "effective_attacker_count": 2,
+        "concentration_mult_from_current_formula": 1.1
+      },
+      "reported_battle": {
+        "all_attacker_ids": [
+          "rs_16th_krajina_motorized"
+        ],
+        "attacker_casualties": 280,
+        "attacker_faction": "RS",
+        "defender_casualties": 261,
+        "defender_contributions": [
+          {
+            "brigade_id": "arbih_330th_liberation",
+            "casualties_taken": 154,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 302.51
+          },
+          {
+            "brigade_id": "arbih_708th_mountain",
+            "casualties_taken": 81,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 159.95
+          },
+          {
+            "brigade_id": "arbih_770th_slavna_mountain",
+            "casualties_taken": 26,
+            "distance_hops": 0,
+            "is_home_municipality": true,
+            "reactive_weight": 50.43
+          }
+        ],
+        "defender_faction": "RBiH",
+        "execution_friction": {
+          "attacker_confidence_band": "low",
+          "labels": [
+            "stale_intel"
+          ]
+        },
+        "osid": "op:donji_vakuf:korenici",
+        "outcome": "costly_victory",
+        "primary_attacker_id": "rs_16th_krajina_motorized",
+        "primary_defender_id": "arbih_330th_liberation",
+        "territory_flipped": false,
+        "was_concentrated": false
+      },
+      "inferred_effective_power_ratio_band_from_outcome": "[1.0,1.5)",
+      "attacker_post": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 1822,
+        "morale": 93,
+        "cohesion": 23,
+        "posture": "attack",
+        "readiness": "active",
+        "disrupted_turns": 1,
+        "entrenchment_turns": 2.4,
+        "fatigue": 0,
+        "attack_fatigue_mult_from_current_formula": 1,
+        "defend_fatigue_mult_from_current_formula": 1,
+        "supply_at_location": "adequate",
+        "composition": {
+          "aa_systems": 5,
+          "artillery": 25,
+          "artillery_condition": {
+            "degraded": 0.10565449999999993,
+            "non_operational": 0.01278899999999999,
+            "operational": 0.8815564999999999
+          },
+          "infantry": 800,
+          "tank_condition": {
+            "degraded": 0.329245,
+            "non_operational": 0.059205,
+            "operational": 0.6115499999999999
+          },
+          "tanks": 27
+        },
+        "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 35,
+          "last_maintenance": 35,
+          "maintenance_deficit": 0.8524218,
+          "non_operational_heavy": 0,
+          "operational_heavy": 22,
+          "total_heavy": 57
+        },
+        "experience": 0.16898125289199217,
+        "officer_quality": 0.13153316718312927,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "sub_segment": "subseg:sector:vrs_1st_krajina:4:0"
+      },
+      "defenders_post": [
+        {
+          "id": "arbih_330th_liberation",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 1350,
+          "morale": 70,
+          "cohesion": 44.7,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 11.5,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.2730000000000001,
+              "non_operational": 0.026999999999999958,
+              "operational": 0.6999999999999997
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 35,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.0889875,
+          "officer_quality": 0.064625,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_708th_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 433,
+          "morale": 48,
+          "cohesion": 58.449999999999996,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 4.8,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 2,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.0715,
+              "non_operational": 0.00749999999999999,
+              "operational": 0.9209999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "mountain",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 35,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": null,
+          "officer_quality": 0.19514755086052793,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_770th_slavna_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 152,
+          "morale": 35,
+          "cohesion": 56.85,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 2.4,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.14250000000000002,
+              "non_operational": 0.022499999999999968,
+              "operational": 0.8349999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 35,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.0889875,
+          "officer_quality": 0.07911309628906249,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        }
+      ]
+    },
+    {
+      "cohort": "old_native04_77a2_comparison_only",
+      "turn": 36,
+      "pre_path": "tmp-paradox-qa-20260710/evidence/player-parity-rbih-t39-20261025-04/rbih/turn-autosaves/turn-035.json",
+      "pre_sha256": "3cb7b82e575c4356ca976f8c9d3af451ae95233c2d24fc79f70ebfdbb69b46fd",
+      "post_path": "tmp-paradox-qa-20260710/evidence/player-parity-rbih-t39-20261025-04/rbih/turn-autosaves/turn-036.json",
+      "post_sha256": "2db1a966eeaa9fe5db13c90acd03204bd3725cee5f6e229432edbece3e1608b4",
+      "target_controller_pre": "RBiH",
+      "target_supply_pre": "adequate",
+      "attacker_pre": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 1822,
+        "morale": 93,
+        "cohesion": 23,
+        "posture": "attack",
+        "readiness": "active",
+        "disrupted_turns": 1,
+        "entrenchment_turns": 2.4,
+        "fatigue": 0,
+        "attack_fatigue_mult_from_current_formula": 1,
+        "defend_fatigue_mult_from_current_formula": 1,
+        "supply_at_location": "adequate",
+        "composition": {
+          "aa_systems": 5,
+          "artillery": 25,
+          "artillery_condition": {
+            "degraded": 0.10565449999999993,
+            "non_operational": 0.01278899999999999,
+            "operational": 0.8815564999999999
+          },
+          "infantry": 800,
+          "tank_condition": {
+            "degraded": 0.329245,
+            "non_operational": 0.059205,
+            "operational": 0.6115499999999999
+          },
+          "tanks": 27
+        },
+        "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 35,
+          "last_maintenance": 35,
+          "maintenance_deficit": 0.8524218,
+          "non_operational_heavy": 0,
+          "operational_heavy": 22,
+          "total_heavy": 57
+        },
+        "experience": 0.16898125289199217,
+        "officer_quality": 0.13153316718312927,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "sub_segment": "subseg:sector:vrs_1st_krajina:4:0"
+      },
+      "defenders_pre": [
+        {
+          "id": "arbih_330th_liberation",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 1350,
+          "morale": 70,
+          "cohesion": 44.7,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 11.5,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.2730000000000001,
+              "non_operational": 0.026999999999999958,
+              "operational": 0.6999999999999997
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 35,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.0889875,
+          "officer_quality": 0.064625,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_708th_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 433,
+          "morale": 48,
+          "cohesion": 58.449999999999996,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 4.8,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 2,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.0715,
+              "non_operational": 0.00749999999999999,
+              "operational": 0.9209999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "mountain",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 35,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": null,
+          "officer_quality": 0.19514755086052793,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_770th_slavna_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 152,
+          "morale": 35,
+          "cohesion": 56.85,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 2.4,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.14250000000000002,
+              "non_operational": 0.022499999999999968,
+              "operational": 0.8349999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 35,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.0889875,
+          "officer_quality": 0.07911309628906249,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        }
+      ],
+      "operation_pre": {
+        "corps_id": "vrs_1st_krajina",
+        "operation": "Operation Donji Vakuf",
+        "phase": "execution",
+        "execution_attack_power_mult": 1.65,
+        "axis_id": "donji_vakuf_sweep",
+        "main_brigade": "rs_22nd_krajina_infantry",
+        "support_brigades": [
+          "rs_16th_krajina_motorized",
+          "rs_5th_kozara_light_infantry"
+        ],
+        "assigned_brigades": [
+          "rs_16th_krajina_motorized",
+          "rs_22nd_krajina_infantry",
+          "rs_5th_kozara_light_infantry"
+        ],
+        "current_objective": "op:donji_vakuf:korenici",
+        "axis_mates": [
+          {
+            "id": "rs_22nd_krajina_infantry",
+            "location_osid": "op:donji_vakuf:babin_potok_2",
+            "status": "active",
+            "hops_to_korenici": 2,
+            "weighted_contribution": 0.5
+          },
+          {
+            "id": "rs_5th_kozara_light_infantry",
+            "location_osid": "op:donji_vakuf:babin_potok_2",
+            "status": "active",
+            "hops_to_korenici": 2,
+            "weighted_contribution": 0.5
+          }
+        ],
+        "counted_axis_support": 1,
+        "effective_attacker_count": 2,
+        "concentration_mult_from_current_formula": 1.1
+      },
+      "reported_battle": {
+        "all_attacker_ids": [
+          "rs_16th_krajina_motorized"
+        ],
+        "attacker_casualties": 414,
+        "attacker_faction": "RS",
+        "defender_casualties": 516,
+        "defender_contributions": [
+          {
+            "brigade_id": "arbih_330th_liberation",
+            "casualties_taken": 329,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 318.14
+          },
+          {
+            "brigade_id": "arbih_708th_mountain",
+            "casualties_taken": 135,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 131.62
+          },
+          {
+            "brigade_id": "arbih_770th_slavna_mountain",
+            "casualties_taken": 52,
+            "distance_hops": 0,
+            "is_home_municipality": true,
+            "reactive_weight": 52.24
+          }
+        ],
+        "defender_faction": "RBiH",
+        "execution_friction": {
+          "attacker_confidence_band": "low",
+          "labels": [
+            "stale_intel"
+          ]
+        },
+        "osid": "op:donji_vakuf:korenici",
+        "outcome": "victory",
+        "primary_attacker_id": "rs_16th_krajina_motorized",
+        "primary_defender_id": "arbih_330th_liberation",
+        "territory_flipped": false,
+        "was_concentrated": false
+      },
+      "inferred_effective_power_ratio_band_from_outcome": "[1.5,2.0)",
+      "attacker_post": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 2001,
+        "morale": 94,
+        "cohesion": 21,
+        "posture": "hold",
+        "readiness": "overextended",
+        "disrupted_turns": 0,
+        "entrenchment_turns": 3.5999999999999996,
+        "fatigue": 0,
+        "attack_fatigue_mult_from_current_formula": 1,
+        "defend_fatigue_mult_from_current_formula": 1,
+        "supply_at_location": "adequate",
+        "composition": {
+          "aa_systems": 5,
+          "artillery": 24,
+          "artillery_condition": {
+            "degraded": 0.11649099999999993,
+            "non_operational": 0.014797499999999986,
+            "operational": 0.8687114999999999
+          },
+          "infantry": 800,
+          "tank_condition": {
+            "degraded": 0.33076999999999995,
+            "non_operational": 0.05774999999999999,
+            "operational": 0.61148
+          },
+          "tanks": 25
+        },
+        "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 36,
+          "last_maintenance": 36,
+          "maintenance_deficit": 0.8524218,
+          "non_operational_heavy": 0,
+          "operational_heavy": 21,
+          "total_heavy": 57
+        },
+        "experience": 0.2010240809663823,
+        "officer_quality": 0.056825,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "sub_segment": "subseg:sector:vrs_1st_krajina:4:0"
+      },
+      "defenders_post": [
+        {
+          "id": "arbih_330th_liberation",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 1007,
+          "morale": 65,
+          "cohesion": 37.2,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 11.5,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.2790000000000001,
+              "non_operational": 0.026999999999999958,
+              "operational": 0.6939999999999997
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 36,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.13198528125,
+          "officer_quality": 0.064625,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_708th_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 302,
+          "morale": 48,
+          "cohesion": 57.15,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 6,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 2,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.081,
+              "non_operational": 0.008999999999999987,
+              "operational": 0.9099999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "mountain",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 36,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": null,
+          "officer_quality": 0.20191574754480096,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_770th_slavna_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 101,
+          "morale": 35,
+          "cohesion": 56.05,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 3.5999999999999996,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.152,
+              "non_operational": 0.023999999999999966,
+              "operational": 0.8239999999999998
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 36,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.0889875,
+          "officer_quality": 0.08631642217797851,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        }
+      ]
+    },
+    {
+      "cohort": "old_native04_77a2_comparison_only",
+      "turn": 37,
+      "pre_path": "tmp-paradox-qa-20260710/evidence/player-parity-rbih-t39-20261025-04/rbih/turn-autosaves/turn-036.json",
+      "pre_sha256": "2db1a966eeaa9fe5db13c90acd03204bd3725cee5f6e229432edbece3e1608b4",
+      "post_path": "tmp-paradox-qa-20260710/evidence/player-parity-rbih-t39-20261025-04/rbih/turn-autosaves/turn-037.json",
+      "post_sha256": "8f7e1a86a32129f6b5056b4348d83577326cbd7ee88fca97edd8f422458de99c",
+      "target_controller_pre": "RBiH",
+      "target_supply_pre": "adequate",
+      "attacker_pre": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:donji_vakuf_2",
+        "personnel": 2001,
+        "morale": 94,
+        "cohesion": 21,
+        "posture": "hold",
+        "readiness": "overextended",
+        "disrupted_turns": 0,
+        "entrenchment_turns": 3.5999999999999996,
+        "fatigue": 0,
+        "attack_fatigue_mult_from_current_formula": 1,
+        "defend_fatigue_mult_from_current_formula": 1,
+        "supply_at_location": "adequate",
+        "composition": {
+          "aa_systems": 5,
+          "artillery": 24,
+          "artillery_condition": {
+            "degraded": 0.11649099999999993,
+            "non_operational": 0.014797499999999986,
+            "operational": 0.8687114999999999
+          },
+          "infantry": 800,
+          "tank_condition": {
+            "degraded": 0.33076999999999995,
+            "non_operational": 0.05774999999999999,
+            "operational": 0.61148
+          },
+          "tanks": 25
+        },
+        "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 36,
+          "last_maintenance": 36,
+          "maintenance_deficit": 0.8524218,
+          "non_operational_heavy": 0,
+          "operational_heavy": 21,
+          "total_heavy": 57
+        },
+        "experience": 0.2010240809663823,
+        "officer_quality": 0.056825,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:4"
+        },
+        "sub_segment": "subseg:sector:vrs_1st_krajina:4:0"
+      },
+      "defenders_pre": [
+        {
+          "id": "arbih_330th_liberation",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 1007,
+          "morale": 65,
+          "cohesion": 37.2,
+          "posture": "dig_in",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 11.5,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.2790000000000001,
+              "non_operational": 0.026999999999999958,
+              "operational": 0.6939999999999997
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 36,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.13198528125,
+          "officer_quality": 0.064625,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_708th_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 302,
+          "morale": 48,
+          "cohesion": 57.15,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 6,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 2,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.081,
+              "non_operational": 0.008999999999999987,
+              "operational": 0.9099999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "mountain",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 36,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": null,
+          "officer_quality": 0.20191574754480096,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_770th_slavna_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:donji_vakuf:korenici",
+          "personnel": 101,
+          "morale": 35,
+          "cohesion": 56.05,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 3.5999999999999996,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.152,
+              "non_operational": 0.023999999999999966,
+              "operational": 0.8239999999999998
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 36,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.0889875,
+          "officer_quality": 0.08631642217797851,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        }
+      ],
+      "operation_pre": {
+        "corps_id": "vrs_1st_krajina",
+        "operation": "Operation Donji Vakuf",
+        "phase": "execution",
+        "execution_attack_power_mult": 1.65,
+        "axis_id": "donji_vakuf_sweep",
+        "main_brigade": "rs_22nd_krajina_infantry",
+        "support_brigades": [
+          "rs_16th_krajina_motorized",
+          "rs_5th_kozara_light_infantry"
+        ],
+        "assigned_brigades": [
+          "rs_16th_krajina_motorized",
+          "rs_22nd_krajina_infantry",
+          "rs_5th_kozara_light_infantry"
+        ],
+        "current_objective": "op:donji_vakuf:korenici",
+        "axis_mates": [
+          {
+            "id": "rs_22nd_krajina_infantry",
+            "location_osid": "op:donji_vakuf:donji_vakuf_2",
+            "status": "active",
+            "hops_to_korenici": 1,
+            "weighted_contribution": 1
+          },
+          {
+            "id": "rs_5th_kozara_light_infantry",
+            "location_osid": "op:donji_vakuf:donji_vakuf_2",
+            "status": "active",
+            "hops_to_korenici": 1,
+            "weighted_contribution": 1
+          }
+        ],
+        "counted_axis_support": 2,
+        "effective_attacker_count": 3,
+        "concentration_mult_from_current_formula": 1.2
+      },
+      "reported_battle": {
+        "all_attacker_ids": [
+          "rs_16th_krajina_motorized"
+        ],
+        "attacker_casualties": 288,
+        "attacker_faction": "RS",
+        "defender_casualties": 634,
+        "defender_contributions": [
+          {
+            "brigade_id": "arbih_330th_liberation",
+            "casualties_taken": 441,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 152.85
+          },
+          {
+            "brigade_id": "arbih_708th_mountain",
+            "casualties_taken": 192,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 81.08
+          },
+          {
+            "brigade_id": "arbih_770th_slavna_mountain",
+            "casualties_taken": 1,
+            "distance_hops": 0,
+            "is_home_municipality": true,
+            "reactive_weight": 33.7
+          }
+        ],
+        "defender_faction": "RBiH",
+        "mun_id": "donji_vakuf",
+        "osid": "op:donji_vakuf:korenici",
+        "outcome": "decisive_victory",
+        "primary_attacker_id": "rs_16th_krajina_motorized",
+        "primary_defender_id": "arbih_330th_liberation",
+        "territory_flipped": true,
+        "was_concentrated": false
+      },
+      "inferred_effective_power_ratio_band_from_outcome": "[2.0,+inf)",
+      "attacker_post": {
+        "id": "rs_16th_krajina_motorized",
+        "faction": "RS",
+        "corps_id": "vrs_1st_krajina",
+        "location_osid": "op:donji_vakuf:korenici",
+        "personnel": 2200,
+        "morale": 97,
+        "cohesion": 24,
+        "posture": "hold",
+        "readiness": "overextended",
+        "disrupted_turns": 0,
+        "entrenchment_turns": 0,
+        "fatigue": 0,
+        "attack_fatigue_mult_from_current_formula": 1,
+        "defend_fatigue_mult_from_current_formula": 1,
+        "supply_at_location": "adequate",
+        "composition": {
+          "aa_systems": 5,
+          "artillery": 23,
+          "artillery_condition": {
+            "degraded": 0.12104424999999992,
+            "non_operational": 0.014129249999999986,
+            "operational": 0.8648264999999998
+          },
+          "infantry": 800,
+          "tank_condition": {
+            "degraded": 0.332286,
+            "non_operational": 0.05630400000000001,
+            "operational": 0.61141
+          },
+          "tanks": 23
+        },
+        "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 37,
+          "last_maintenance": 37,
+          "maintenance_deficit": 0.8524218,
+          "non_operational_heavy": 0,
+          "operational_heavy": 20,
+          "total_heavy": 57
+        },
+        "experience": 0.2325061595494706,
+        "officer_quality": 0.056825,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:5"
+        },
+        "sub_segment": "subseg:sector:vrs_1st_krajina:5:0"
+      },
+      "defenders_post": [
+        {
+          "id": "arbih_330th_liberation",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:bugojno:prijaci",
+          "personnel": 866,
+          "morale": 60,
+          "cohesion": 35,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 2,
+          "entrenchment_turns": 0,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 1,
+            "artillery_condition": {
+              "degraded": 0.7,
+              "non_operational": 0,
+              "operational": 0.3
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.7,
+              "non_operational": 0,
+              "operational": 0.3
+            },
+            "tanks": 1
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 37,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.174015612421875,
+          "officer_quality": 0.064625,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_708th_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:bugojno:prijaci",
+          "personnel": 115,
+          "morale": 48,
+          "cohesion": 55.85,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 0,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 2,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.09050000000000001,
+              "non_operational": 0.010499999999999985,
+              "operational": 0.8989999999999999
+            },
+            "tanks": 0
+          },
+          "equipment_class": "mountain",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 37,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": null,
+          "officer_quality": 0.20865856349150796,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        },
+        {
+          "id": "arbih_770th_slavna_mountain",
+          "faction": "RBiH",
+          "corps_id": "arbih_3rd_corps",
+          "location_osid": "op:bugojno:prijaci",
+          "personnel": 101,
+          "morale": 35,
+          "cohesion": 55.25,
+          "posture": "defend",
+          "readiness": "active",
+          "disrupted_turns": 0,
+          "entrenchment_turns": 0,
+          "fatigue": 0,
+          "attack_fatigue_mult_from_current_formula": 1,
+          "defend_fatigue_mult_from_current_formula": 1,
+          "supply_at_location": "adequate",
+          "composition": {
+            "aa_systems": 0,
+            "artillery": 0,
+            "artillery_condition": {
+              "degraded": 0,
+              "non_operational": 0,
+              "operational": 1
+            },
+            "infantry": 800,
+            "tank_condition": {
+              "degraded": 0.16149999999999998,
+              "non_operational": 0.025499999999999964,
+              "operational": 0.8129999999999998
+            },
+            "tanks": 0
+          },
+          "equipment_class": "light_infantry",
+          "equipment_state": {
+            "degraded_heavy": 0,
+            "last_maintenance": 37,
+            "maintenance_deficit": 0.9315648,
+            "non_operational_heavy": 0,
+            "operational_heavy": 6,
+            "total_heavy": 6
+          },
+          "experience": 0.0889875,
+          "officer_quality": 0.0934927355948111,
+          "assignment": {
+            "kind": "sector",
+            "role": "front",
+            "sector_id": "sector:arbih_3rd_corps:0"
+          },
+          "sub_segment": "subseg:sector:arbih_3rd_corps:0:0"
+        }
+      ]
+    }
+  ],
+  "n101_reported_only": [
+    {
+      "cohort": "n101",
+      "turn": 34,
+      "source_path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n101/save_w39.json",
+      "source_sha256": "f459cd050e55e764092010ef79c23a7c629487e3c6a8ea5d3aaf33082dc053e3",
+      "reported_battle": {
+        "all_attacker_ids": [
+          "rs_16th_krajina_motorized"
+        ],
+        "attacker_casualties": 186,
+        "attacker_faction": "RS",
+        "defender_casualties": 655,
+        "defender_contributions": [
+          {
+            "brigade_id": "arbih_705th_slavna_mountain",
+            "casualties_taken": 237,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 149.78
+          },
+          {
+            "brigade_id": "arbih_707th_slavna_mountain",
+            "casualties_taken": 277,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 175.2
+          },
+          {
+            "brigade_id": "arbih_708th_mountain",
+            "casualties_taken": 105,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 66.27
+          },
+          {
+            "brigade_id": "arbih_770th_slavna_mountain",
+            "casualties_taken": 36,
+            "distance_hops": 0,
+            "is_home_municipality": true,
+            "reactive_weight": 22.94
+          }
+        ],
+        "defender_faction": "RBiH",
+        "execution_friction": {
+          "attacker_confidence_band": "low",
+          "labels": [
+            "stale_intel"
+          ]
+        },
+        "mun_id": "donji_vakuf",
+        "osid": "op:donji_vakuf:korenici",
+        "outcome": "decisive_victory",
+        "primary_attacker_id": "rs_16th_krajina_motorized",
+        "primary_defender_id": "arbih_707th_slavna_mountain",
+        "territory_flipped": true,
+        "was_concentrated": false
+      },
+      "inferred_effective_power_ratio_band_from_outcome": "[2.0,+inf)",
+      "prebattle_state": "unreported: no retained immediately-prior autosave in this reference run"
+    }
+  ],
+  "n102_reported_only": [
+    {
+      "cohort": "n102",
+      "turn": 37,
+      "source_path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n102/save_w39.json",
+      "source_sha256": "12ae79ebac55cf1287605d3da7f1360e67fafbc0dcb3703bba4ee2537039e628",
+      "reported_battle": {
+        "all_attacker_ids": [
+          "rs_16th_krajina_motorized"
+        ],
+        "attacker_casualties": 304,
+        "attacker_faction": "RS",
+        "defender_casualties": 337,
+        "defender_contributions": [
+          {
+            "brigade_id": "arbih_708th_mountain",
+            "casualties_taken": 164,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 93.64
+          },
+          {
+            "brigade_id": "arbih_770th_slavna_mountain",
+            "casualties_taken": 173,
+            "distance_hops": 0,
+            "is_home_municipality": true,
+            "reactive_weight": 99.09
+          }
+        ],
+        "defender_faction": "RBiH",
+        "execution_friction": {
+          "attacker_confidence_band": "low",
+          "labels": [
+            "stale_intel"
+          ]
+        },
+        "mun_id": "donji_vakuf",
+        "osid": "op:donji_vakuf:korenici",
+        "outcome": "decisive_victory",
+        "primary_attacker_id": "rs_16th_krajina_motorized",
+        "primary_defender_id": "arbih_708th_mountain",
+        "territory_flipped": true,
+        "was_concentrated": false
+      },
+      "inferred_effective_power_ratio_band_from_outcome": "[2.0,+inf)",
+      "prebattle_state": "unreported: no retained immediately-prior autosave in this reference run"
+    },
+    {
+      "cohort": "n102",
+      "turn": 36,
+      "source_path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n102/save_w39.json",
+      "source_sha256": "12ae79ebac55cf1287605d3da7f1360e67fafbc0dcb3703bba4ee2537039e628",
+      "reported_battle": {
+        "all_attacker_ids": [
+          "rs_16th_krajina_motorized"
+        ],
+        "attacker_casualties": 238,
+        "attacker_faction": "RS",
+        "defender_casualties": 221,
+        "defender_contributions": [
+          {
+            "brigade_id": "arbih_330th_liberation",
+            "casualties_taken": 155,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 450.97
+          },
+          {
+            "brigade_id": "arbih_708th_mountain",
+            "casualties_taken": 32,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 94.78
+          },
+          {
+            "brigade_id": "arbih_770th_slavna_mountain",
+            "casualties_taken": 34,
+            "distance_hops": 0,
+            "is_home_municipality": true,
+            "reactive_weight": 100.38
+          }
+        ],
+        "defender_faction": "RBiH",
+        "execution_friction": {
+          "attacker_confidence_band": "low",
+          "labels": [
+            "stale_intel"
+          ]
+        },
+        "osid": "op:donji_vakuf:korenici",
+        "outcome": "stalemate",
+        "primary_attacker_id": "rs_16th_krajina_motorized",
+        "primary_defender_id": "arbih_330th_liberation",
+        "territory_flipped": false,
+        "was_concentrated": false
+      },
+      "inferred_effective_power_ratio_band_from_outcome": "[0.7,1.0)",
+      "prebattle_state": "unreported: no retained immediately-prior autosave in this reference run"
+    },
+    {
+      "cohort": "n102",
+      "turn": 35,
+      "source_path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n102/save_w39.json",
+      "source_sha256": "12ae79ebac55cf1287605d3da7f1360e67fafbc0dcb3703bba4ee2537039e628",
+      "reported_battle": {
+        "all_attacker_ids": [
+          "rs_16th_krajina_motorized"
+        ],
+        "attacker_casualties": 219,
+        "attacker_faction": "RS",
+        "defender_casualties": 328,
+        "defender_contributions": [
+          {
+            "brigade_id": "arbih_330th_liberation",
+            "casualties_taken": 203,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 409.03
+          },
+          {
+            "brigade_id": "arbih_705th_slavna_mountain",
+            "casualties_taken": 44,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 88.89
+          },
+          {
+            "brigade_id": "arbih_708th_mountain",
+            "casualties_taken": 40,
+            "distance_hops": 0,
+            "is_home_municipality": false,
+            "reactive_weight": 80.66
+          },
+          {
+            "brigade_id": "arbih_770th_slavna_mountain",
+            "casualties_taken": 41,
+            "distance_hops": 0,
+            "is_home_municipality": true,
+            "reactive_weight": 83.35
+          }
+        ],
+        "defender_faction": "RBiH",
+        "execution_friction": {
+          "attacker_confidence_band": "low",
+          "labels": [
+            "stale_intel"
+          ]
+        },
+        "osid": "op:donji_vakuf:korenici",
+        "outcome": "stalemate",
+        "primary_attacker_id": "rs_16th_krajina_motorized",
+        "primary_defender_id": "arbih_330th_liberation",
+        "territory_flipped": false,
+        "was_concentrated": false
+      },
+      "inferred_effective_power_ratio_band_from_outcome": "[0.7,1.0)",
+      "prebattle_state": "unreported: no retained immediately-prior autosave in this reference run"
+    }
+  ],
+  "limits": [
+    "Retained public battle records do not include numeric attacker power, defender power, exact effective ratio, random roll, or a decomposed combat trace.",
+    "Current and old-native autosaves permit exact pre/post formation, supply, operation, and proximity reads; n101/n102 do not retain immediately-prior battle autosaves.",
+    "Derived fatigue, terrain, concentration multipliers and ratio bands are source-formula reconstructions and are labeled as such; they are not recorded trace fields."
+  ]
+}

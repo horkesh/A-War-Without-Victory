@@ -1,0 +1,267 @@
+{
+  "schema": "awwv.terrain-parity.tooling-review.v1",
+  "reviewed_utc": "2026-10-25T07:49:12.7859874+01:00",
+  "reviewer_role": "independent validation-tooling reviewer",
+  "worktree": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "verdict": "NO_GO_CORRECTION_REQUIRED",
+  "authorization": {
+    "qualification_campaign": false,
+    "full_suite": false,
+    "reason": "The packets preserve the requested gameplay readers and cost controls, but candidate freezing, runtime prerequisites, tool authority binding, suite-plan validation, and recoverable scratch preservation are not yet fail-closed equivalents of the approved T3 tools."
+  },
+  "scope": {
+    "reviewed_packets": [
+      "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v1",
+      "tmp/player-bot-capability-parity-20261024/terrain-parity-full-suite-v1"
+    ],
+    "comparators": [
+      "tmp/player-bot-capability-parity-20261024/t3-routing-qualification",
+      "tmp/player-bot-capability-parity-20261024/t3-routing-full-suite"
+    ],
+    "excluded": [
+      "campaign execution",
+      "full-suite execution",
+      "engine execution",
+      "build or package execution",
+      "native application execution",
+      "source changes"
+    ]
+  },
+  "reviewed_hashes": {
+    "qualification": {
+      "campaign_entry.cjs": "9d28a22e789bbb70a0299c798fc97ef725c44d8dc295dad9a9b2b354b163d488",
+      "campaign-wrapper-config.json": "e1575ce52eba3c365860c8889c1a17849b9196865dea7a83cb3565b2c146d48f",
+      "exact_state_compare.cjs": "868b22dbc0d99e176d37696924f3396d14b1ac3c773f58bb84146025711ac989",
+      "freeze_candidate.cjs": "fa17204a85ba96e2df0e4dbb522cd58296345e28b4041f39469029b7488e00c3",
+      "freeze-inputs.json": "2aad32a03dfedd5f77b4dd963a6a00126f0092a1d0c239343e9913da5de9aa87",
+      "invoke.cjs": "695e756f2ac12aa8d5e4420504ae90fdb5376cad5729f21c68aa8c236d29a0db",
+      "packet_common.cjs": "1ff4f5ee9959595eb20d1f1a4ff092d31d5c8a6f4692daf861a068033cd0eeb8",
+      "PLAN.md": "61ddf42fe7d26468ef950034c13a55294178caa4922a916b4b1e91c7c7d3be9b",
+      "postrun_entry.cjs": "2a3f5e331c51cdbacaafcf17b4122d8ec327292fc32bf70109ce1c048a7014b2",
+      "selfcheck.cjs": "cb261f37b063db943c125c0baacb6aced5774de60fcf6b0b42967c7ea4a65de5"
+    },
+    "full_suite": {
+      "full_suite_entry.cjs": "fa1b4c899049c11527244f09b0d424fceb0e6cd9d302261f73a423d72968b083",
+      "full-suite-wrapper-config.json": "d7915f41339c2e6b92867a04e74b23012f87f47bbd78addb10df15a11e7d842d",
+      "invoke.cjs": "3105acf66fe74ddcbde41df1df287a806102a2721c9d45a79a55a2749a2df570",
+      "PLAN.md": "284b052ed70a38f1a92c29b4efb41aec7e54933cc33e5bbba463a970b4278373",
+      "selfcheck.cjs": "dd5df901fb5ff4c81488c827daa39bc48e38214301cb64b50b48af406d3ab0ea",
+      "suite_common.cjs": "452fdeb299883471d5acfd80776a2532beb33395f0e63bea554c6ed7452d0ba8"
+    }
+  },
+  "cheap_checks": {
+    "cjs_syntax": {
+      "files": 11,
+      "all_exit_zero": true
+    },
+    "json_parse": {
+      "files": 3,
+      "all_exit_zero": true
+    },
+    "qualification_preparation": {
+      "attempt": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/tooling-review-qualification-prep-01",
+      "receipt_sha256": "3e6b504238180156b8602f4fd465ded2f82b586f695a5a705872431fe2386c03",
+      "stdout_sha256": "dd8083a8e93ed07629cadecb5829fd77125ec521c5401b4ede5395f30fed63d4",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "observed": {
+        "FROZEN": false,
+        "RUNNABLE": false,
+        "pending": true,
+        "attempt_prefix_empty": true,
+        "critical_map_urban_forest_present": true,
+        "retained_n91_n97_present": true,
+        "pass": true
+      }
+    },
+    "full_suite_preparation": {
+      "attempt": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/tooling-review-full-suite-prep-01",
+      "receipt_sha256": "e2906f72a798d71cd2c1383ef0da6dfda251acc00c6b360d98b7d968ac2595ca",
+      "stdout_sha256": "c5704be694fe0953de5344aec7950d15393f2c8a9e08c5964c609c0a520eb18d",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "observed": {
+        "status": "WAITING_FOR_QUALIFICATION",
+        "attempt_prefix_empty": true,
+        "pass": true
+      }
+    },
+    "review_harness_setup_failure": {
+      "preserved_in_review_record": true,
+      "error": "Initial preserved-wrapper invocation was rejected before attempt creation because the reviewer omitted the required {evidenceDir} child-argv placeholder. The corrected invocations above are the packet self-check evidence; this setup failure is not attributed to either packet."
+    },
+    "unauthorized_F_packet_search": {
+      "matches": 0,
+      "pass": true
+    }
+  },
+  "retained_requirements": {
+    "qualification_35_minute_outer_cap_and_no_automatic_retry": true,
+    "full_suite_35_minute_outer_cap_and_no_automatic_retry": true,
+    "n91_through_n97_tree_preservation_before_and_after_qualification": true,
+    "supplemental_canonical_map_urban_forest_bindings_present": true,
+    "checkpoint_floors_707_707_706_706": true,
+    "zero_formerly_correct_losses_via_evaluator_and_protected_readers": true,
+    "protected_timeline_checkpoint_consistency_health_producer_and_movement_readers_present": true,
+    "exact_40_file_candidate_inventory": true,
+    "n94_and_n97_exact_state_diagnostics": {
+      "bound_tool_emits_boolean": true,
+      "postrun_accepts_only_boolean_pass_field": true,
+      "diagnostic_result_does_not_waive_other_acceptance_readers": true,
+      "qualification": "This remains trustworthy only after the candidate-binding and tool-authority blockers below are corrected."
+    },
+    "full_suite_waits_for_qualification_receipt_result_and_postrun_summary": true,
+    "per_file_receipt_coverage_and_five_native_summary_checks_present": true,
+    "telemetry_prefix_and_source_stability_checks_present": true
+  },
+  "blockers": [
+    {
+      "id": "TR-TOOL-001",
+      "severity": "critical",
+      "file": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v1/packet_common.cjs",
+      "lines": [
+        21,
+        29,
+        35
+      ],
+      "finding": "Freeze readiness is sentinel-based rather than schema-based. Values such as null, an arbitrary string, or malformed objects for independent_review and focused_test_receipt are treated as no longer pending and are copied into the candidate binding without verifying path, bytes, hash, receipt schema, review verdict, or reviewed candidate head.",
+      "impact": "A clean committed candidate can become runnable without the required independent review and focused-test proof.",
+      "required_correction": "Define and validate exact freeze-input schemas. Require independent review and focused-test receipt records with existing paths, byte/hash matches, expected schemas and passing verdicts, and exact candidate/base bindings before creating candidate-binding.json. Keep PENDING, missing, malformed, stale, or non-passing inputs fail-closed."
+    },
+    {
+      "id": "TR-TOOL-002",
+      "severity": "critical",
+      "file": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v1/packet_common.cjs",
+      "lines": [
+        34
+      ],
+      "finding": "The candidate delta gate permits every unreviewed docs/** and logs/** path. The authorized candidate is the three reviewed implementation files plus the specifically authorized pre-edit plan path, so broad directory exemptions do not freeze the reviewed candidate.",
+      "impact": "Unreviewed canon, acceptance, evidence, or continuity changes can enter the committed candidate without blocking qualification.",
+      "required_correction": "Require the exact authorized delta. Every allowed path, including the pre-edit plan, must be named and hash-bound in reviewed_files; reject every other changed path."
+    },
+    {
+      "id": "TR-TOOL-003",
+      "severity": "critical",
+      "file": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v1/packet_common.cjs",
+      "lines": [
+        38,
+        39,
+        40,
+        41,
+        42,
+        43
+      ],
+      "finding": "assertCandidate trusts the ignored candidate-binding.json after checking only candidate_head, current HEAD/cleanliness, tools, critical inputs, retained runs, and prior attempts. It does not validate binding schema/base_ref, recompute and compare the committed base-to-head delta, revalidate reviewed_files, or revalidate the independent-review and focused-test evidence recorded at freeze.",
+      "impact": "The ignored binding can be edited or replaced without making Git dirty, allowing a forged or stale freeze to pass campaign and full-suite readiness.",
+      "required_correction": "At every assertCandidate call, validate binding schema/base/head; recompute and exactly compare delta paths/bytes/hashes; validate reviewed_files against the delta; and re-read/re-hash/revalidate the independent review and focused-test receipt. Bind candidate-binding.json itself into downstream full-suite readiness by content hash."
+    },
+    {
+      "id": "TR-TOOL-004",
+      "severity": "high",
+      "file": "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v1/packet_common.cjs",
+      "lines": [
+        38,
+        39,
+        40,
+        41,
+        42,
+        43
+      ],
+      "comparison": "tmp/player-bot-capability-parity-20261024/t3-routing-qualification/qualification_common.cjs:146-157",
+      "finding": "The T3 candidate preflight's active native-process query and rejection were removed.",
+      "impact": "Qualification may run concurrently with an AWWV/Electron/native process that can mutate shared runtime files or contaminate evidence.",
+      "required_correction": "Restore the fail-closed active-process check at freeze/assert or campaign preflight, and retain its proof in the preflight evidence."
+    },
+    {
+      "id": "TR-TOOL-005",
+      "severity": "high",
+      "file": "tmp/player-bot-capability-parity-20261024/terrain-parity-full-suite-v1/full_suite_entry.cjs",
+      "lines": [
+        4,
+        7
+      ],
+      "comparison": "tmp/player-bot-capability-parity-20261024/t3-routing-full-suite/full_suite_entry.cjs:161-181",
+      "finding": "The full-suite startup no longer proves the exact Git Bash and jq paths/versions and no longer rejects forbidden AWWV_872/AWWV_880 control or finalization-injection variables.",
+      "impact": "A known Windows shell-resolution hazard or inherited control variables can alter suite execution after the expensive run begins.",
+      "required_correction": "Restore the exact Git Bash/jq prerequisite proof and fail-closed forbidden-variable check before launching the suite, recording the proof in opening evidence."
+    },
+    {
+      "id": "TR-TOOL-006",
+      "severity": "high",
+      "file": "tmp/player-bot-capability-parity-20261024/terrain-parity-full-suite-v1/full_suite_entry.cjs",
+      "lines": [
+        4,
+        7
+      ],
+      "comparison": "tmp/player-bot-capability-parity-20261024/t3-routing-full-suite/full_suite_entry.cjs:148-157,236",
+      "finding": "The fresh suite plan is counted but not validated as exactly four parallel shards with the required single partitioned sector test. The opening gate therefore omits the T3 partitioned_four_cases assertion.",
+      "impact": "A malformed or changed test plan can run and produce counts without proving the intended unchanged suite topology.",
+      "required_correction": "Require parallel.length === 4, arrays of the expected shape, and partitionedFiles exactly [tests/sector_partition_buildCorpsFrontSectors_integration.test.ts] before suite launch. Record and gate the assertion."
+    },
+    {
+      "id": "TR-TOOL-007",
+      "severity": "critical",
+      "files": [
+        "tmp/player-bot-capability-parity-20261024/terrain-parity-qualification-v1/packet_common.cjs",
+        "tmp/player-bot-capability-parity-20261024/terrain-parity-full-suite-v1/suite_common.cjs"
+      ],
+      "lines": {
+        "packet_common.cjs": [
+          20,
+          35,
+          41
+        ],
+        "suite_common.cjs": [
+          1,
+          2,
+          3
+        ]
+      },
+      "comparison": "tmp/player-bot-capability-parity-20261024/t3-routing-full-suite/CONTRACT_MANIFEST.json and suite_common.cjs:10-30",
+      "finding": "The new tool binding omits suite authorities and executables retained by the T3 contract, including the closed-suite report parser, default/balanced Vitest runners, receipt tools, duration baseline, suite inventory, package files, tsconfig, and Vitest config. Several of these are ignored or execution-defining and are not protected by the current Git-clean check.",
+      "impact": "The full suite can execute or be interpreted through unbound changed tooling while still reporting candidate stability.",
+      "required_correction": "Restore an exact contract manifest or equivalent freeze/assert records for every executable, parser, config, baseline, inventory, package file, and candidate/qualification authority consumed by the qualification and full-suite packets. Revalidate all hashes immediately before and after each run."
+    },
+    {
+      "id": "TR-TOOL-008",
+      "severity": "critical",
+      "file": "tmp/player-bot-capability-parity-20261024/terrain-parity-full-suite-v1/full_suite_entry.cjs",
+      "lines": [
+        4,
+        7,
+        9
+      ],
+      "comparison": "tmp/player-bot-capability-parity-20261024/t3-routing-full-suite/full_suite_entry.cjs:78-110,228-236,269-292",
+      "finding": "Opening and closing scratch roots are fingerprinted but are not copied into a recoverable preservation archive. The former opening_exact, closing_exact, and copied-snapshot comparison gates were replaced by scratch_unchanged only.",
+      "impact": "If the suite mutates or removes scratch evidence, the packet can detect drift but cannot preserve the opening and closing trees needed for diagnosis and audit.",
+      "required_correction": "Restore exclusive opening and closing scratch/telemetry archival copies, verify each copy byte-for-byte, compare the two snapshots, and gate opening_exact, closing_exact, and scratch_preserved in the result."
+    },
+    {
+      "id": "TR-TOOL-009",
+      "severity": "high",
+      "file": "tmp/player-bot-capability-parity-20261024/terrain-parity-full-suite-v1/suite_common.cjs",
+      "lines": [
+        3
+      ],
+      "comparison": "tmp/player-bot-capability-parity-20261024/t3-routing-full-suite/suite_common.cjs:34-57",
+      "finding": "Qualification readiness checks a passing wrapper/result/summary and candidate path agreement, but does not explicitly require result.checks all true, summary.expected_head equal to the requested head, or the recorded supplemental critical bindings equal to the currently asserted bindings.",
+      "impact": "A malformed or stale ignored qualification artifact can satisfy the condensed readiness expression after the candidate-binding weakness is exploited.",
+      "required_correction": "Require the exact expected head in result and summary, every required result check true, exact candidate path/tree, and exact supplemental binding equality. Revalidate the qualification receipt and candidate binding by frozen hash at full-suite opening and closing."
+    }
+  ],
+  "correction_gate": {
+    "required_before_any_expensive_run": [
+      "Correct TR-TOOL-001 through TR-TOOL-009 without changing gameplay acceptance criteria.",
+      "Run syntax and JSON checks again.",
+      "Run preparation-only self-checks into new exclusive evidence directories.",
+      "Demonstrate negative self-tests for malformed review/receipt inputs, extra docs/logs delta, edited ignored binding, active native process, wrong shell/jq, malformed four-shard plan, changed bound suite tool, and scratch-copy mismatch.",
+      "Obtain one targeted independent correction verification against the corrected hashes."
+    ],
+    "stop_rule": "Do not launch qualification or full suite until the targeted correction verification returns GO. Preserve any cheap-check failure and do not repeat unchanged review cycles."
+  },
+  "notes": [
+    "The retained gameplay acceptance readers, n91-n97 preservation, supplemental terrain bindings, exact candidate inventory, 35-minute caps, and no-retry policy are directionally correct and should be preserved during correction.",
+    "No campaign, suite, engine, build, package, browser, native app, or source modification was performed by this review.",
+    "The previously settled implementation review was not repeated."
+  ]
+}

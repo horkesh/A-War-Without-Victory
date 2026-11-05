@@ -1,0 +1,54 @@
+{
+  "schema": "awwv.native-capture-repair-targeted-typecheck-verification.v1",
+  "reviewer": {
+    "identity": "receipt-integration-independent-reviewer",
+    "role": "targeted correction verifier",
+    "distinctFromImplementer": true
+  },
+  "reviewedAt": "2026-10-25T05:38:31+01:00",
+  "verdict": "GO",
+  "finding": null,
+  "correction": {
+    "path": "tests/paradox_local_qa_harness.test.ts",
+    "before": "Object.hasOwn(finalized, 'completedAt')",
+    "after": "Object.prototype.hasOwnProperty.call(finalized, 'completedAt')",
+    "assessment": "The sole post-review correction is a test-only TypeScript library compatibility substitution with identical own-property semantics.",
+    "priorBytes": 215682,
+    "priorSha256ReconstructedFromExactInverse": "a99e082264f586128dbe8c8d476bbfced16777c1deb073cb652c0f5f84dae33c",
+    "currentBytes": 215705,
+    "currentSha256": "d4976d34beb002dd847682154886c8bed5b1f2c4412e1ff3ce97de5535fa2d53"
+  },
+  "productionHarness": {
+    "path": "tools/ui/paradox_local_qa.cjs",
+    "bytes": 361860,
+    "sha256": "71a9bbb675d4c33d290e92e97c7e3780211e5ce3c500f37c637bf46ef8e32503",
+    "unchangedFromIndependentImplementationReview": true
+  },
+  "freshValidation": {
+    "focusedHarness": {
+      "path": "tmp/player-bot-capability-parity-20261024/native-capture-repair/evidence/green-harness-typefix-01.log",
+      "sha256": "1194c0ed210dd7063a59088a94fecf8bfca6db48f8601bf02734786abf3f3121",
+      "result": "101/101 tests passed",
+      "exit": 0
+    },
+    "typecheck": {
+      "receiptPath": "tmp/player-bot-capability-parity-20261024/native-capture-repair/typecheck-02/receipt.json",
+      "receiptSha256": "31d3ce08680e758bf59ec116b3bc91e8814b3c5a02e3f90f49f577cb4d6fc0f2",
+      "childExit": 0,
+      "wrapperExit": 0,
+      "timedOut": false,
+      "stderrBytes": 0,
+      "artifactContractPass": true
+    },
+    "diffCheckExit": 0
+  },
+  "preservation": {
+    "failedTypecheck01Retained": true,
+    "cliPreSpawnRejectionRetained": true,
+    "priorIndependentReviewUnchanged": true
+  },
+  "limits": [
+    "This targeted verification does not repeat the production implementation review.",
+    "No new native run, build, package, campaign, or gameplay qualification is covered."
+  ]
+}

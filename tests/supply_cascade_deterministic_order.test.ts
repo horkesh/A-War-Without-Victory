@@ -35,6 +35,17 @@ function makeState(): GameState {
             { id: 'RS', supply_sources: ['op:bravo:source'] },
             { id: 'RBiH', supply_sources: ['op:alpha:source'] },
         ],
+        political: {
+            political_controllers: {
+                'op:alpha:source': 'RBiH',
+                'op:alpha:junction': 'RBiH',
+                'op:alpha:front': 'RBiH',
+                'op:alpha:reserve': 'RBiH',
+                'op:alpha:pocket': 'RS',
+                'op:bravo:junction': 'RS',
+                'op:bravo:source': 'RS',
+            },
+        },
     } as unknown as GameState;
 }
 

@@ -328,12 +328,12 @@ export function validateFormations(
             } else {
                 const opsRecord = ops as Record<string, unknown>;
                 const fatigue = opsRecord.fatigue;
-                if (typeof fatigue !== 'number' || !Number.isInteger(fatigue) || fatigue < 0) {
+                if (typeof fatigue !== 'number' || !Number.isFinite(fatigue) || fatigue < 0) {
                     issues.push({
                         severity: 'error',
                         code: 'formations.ops.fatigue.invalid',
                         path: `${basePath}.ops.fatigue`,
-                        message: 'ops.fatigue must be an integer >= 0'
+                        message: 'ops.fatigue must be a finite number >= 0'
                     });
                 }
                 const lastSuppliedTurn = opsRecord.last_supplied_turn;

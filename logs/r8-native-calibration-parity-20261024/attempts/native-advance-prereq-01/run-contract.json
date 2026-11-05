@@ -1,0 +1,38 @@
+{
+  "question": "Does the consolidated owner-scoped direct-or-modal Advance protocol operate through the actual packaged UI and capture settled turn1 before real Save/Records/Resume?",
+  "configuration": "tmp/r8-native-calibration-parity-20261024/native-advance-prereq-01-config.json",
+  "expectedMinutes": [
+    3,
+    5
+  ],
+  "capMs": 600000,
+  "automaticRetry": false,
+  "priorFailures": [
+    "native-t39-01 turn15 actualopenDecisionRoom+archivebypass",
+    "native-t39-02 turn0 toolbartextfalsemodal;noengine turns"
+  ],
+  "pass": [
+    "actualvisibleHistoricalmode",
+    "trueownerclassifiernotbodytext",
+    "normalownedtoolbar dispatch and actual observed1turn transition",
+    "no repeatedAdvance or fallbackclick",
+    "oneprovisional+onesettled immutableturn1 archive",
+    "settledsnapshotafterrequireddecisionsandstablebytes",
+    "actualSaveMenuRecordsResume canonicalbytesexact and independentexpectedprojectionexact",
+    "console/page/unmatchednetwork/unexpectedstderr0 andturn1sealunresolved0"
+  ],
+  "stop": "Anyunexpectedfailure stops and preserves all evidence; noautomaticretry/no39expansionuntilqualified",
+  "review": "tmp/r8-native-calibration-parity-20261024/review/T39_02_DISPATCH_PREREQUISITE_TARGETED_REVIEW.md",
+  "scope": "externalharness/tests only;existingqualifiedpackage;nogameplay,policy,tuning,reference,baselinechange",
+  "dailyParity": "KnownFAILED2OSIDsnotwaived;thisisinfrastructurerouteprerequisiteonly",
+  "sources": [
+    {
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tools\\ui\\paradox_local_qa.cjs",
+      "sha256": "e47dce360ea538ccdae4fff4cc183d4c6166c64c4dd7f46585db285fc9ab6086"
+    },
+    {
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tests\\paradox_local_qa_harness.test.ts",
+      "sha256": "9e978fd94759b767dfbf3acd37eb6b9c23a81bd702acc1f806d836c6acd6e955"
+    }
+  ]
+}

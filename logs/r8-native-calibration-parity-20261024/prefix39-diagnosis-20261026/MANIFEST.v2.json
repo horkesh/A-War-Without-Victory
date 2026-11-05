@@ -1,0 +1,26 @@
+{
+  "schema": "prefix39-diagnosis-manifest.v2",
+  "created": "2026-10-26",
+  "source_head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+  "source_fix_proof": "source-fix-proof-20261026/MANIFEST.json",
+  "retained_prior_manifest": "MANIFEST.json",
+  "retained_selected_manifest": "selected-results-v2/MANIFEST.json",
+  "source_sha256": "8a085a37835541f4dc267e5c1f7f75a714bafc596e21d43b1467cb8ee62d7fcd",
+  "test_sha256": [
+    {
+      "path": "tests/op_directive_objection.test.ts",
+      "sha256": "892242ebe14ac935581cf218877fa466ca8f1f218e0d97ed9c21f34acc83902f"
+    },
+    {
+      "path": "tests/op_directive_injection.test.ts",
+      "sha256": "add227b78c06141a2ee501972907dad52caf4edd5069b5244b6f2d6020a01115"
+    }
+  ],
+  "review_sha256": "4d5752ccc5b4a14183b9b6bf26c3fd4f83fc40c6df9d4cac228fafcff6ccce9a",
+  "copied_file_count": 30,
+  "copied_bytes": 108661,
+  "evidence_scope": "Documentation/proof closeout only; current source fix and eight attempts are recorded, while calibration and all qualification gates remain open.",
+  "recovery_note": "Original pre-freeze receipt was recovered before freeze; the original path was touched and recovery is recorded in the retained negative-diagnosis directory.",
+  "ignored_and_large_evidence": "Preserve attempts/outer-launch and full state/report/stream trees in place; do not move, delete, force-add, or overwrite.",
+  "original_manifests": "Preserved byte-exact and unchanged."
+}

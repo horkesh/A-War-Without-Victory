@@ -1,0 +1,195 @@
+{
+  "captured_utc": "2026-10-19T22:35:06.375Z",
+  "writes_closed": true,
+  "scope": "Fresh full hashes for protected surfaces and all31 native n80 files only; no full raw-evidence rehash or new campaign.",
+  "exit": 0,
+  "head": "83b56ced8d7201335f2bbc0cc37772c2f0a839ca",
+  "protectedPins": [
+    {
+      "path": "src/sim/combat/commander/emit.ts",
+      "bytes": 198276,
+      "sha256": "6d04bd153030f88b7105f8d9e71510487576136cfa67a5f0bc10ba74ad7109ae"
+    },
+    {
+      "path": "data/calibration/engine_health_thresholds.json",
+      "bytes": 3775,
+      "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d"
+    },
+    {
+      "path": "data/source/calibration/painted_control_oct1995.json",
+      "bytes": 35266,
+      "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b"
+    },
+    {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 97701891,
+      "sha256": "294077be226a772639eb03d89216b9e8d11d4e1d97e8b29abccfbf45440142df"
+    },
+    {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    }
+  ],
+  "n80_native": [
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/activity_summary.json",
+      "bytes": 452,
+      "sha256": "a94746c36a581c78d28838586726003d55138355ad08217173e3858aaee08b1f"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/brigade_temporal_log.jsonl",
+      "bytes": 24008332,
+      "sha256": "96ce62d2d557aea3ebaaa380b5e50e95477b88c5b7d5b0f7af79edcea4bd5672"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/control_delta.json",
+      "bytes": 34210,
+      "sha256": "1b7f716afa2f027ce4c95613bfd4b67ea41d2dd2be9eb21e8d75d3c43c8dce2f"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/destroyed_brigades.json",
+      "bytes": 8414,
+      "sha256": "5f3af38a0427efdc5d25d7f0ab9340ad6078d55c749ecdc97b47250e226bc20c"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/displacement_event_log.jsonl",
+      "bytes": 16287633,
+      "sha256": "b0bca8cf1cb7e1be575055070ec7a02e0a5b7dd83d29eab81f8b5575496b5b40"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/end_report.md",
+      "bytes": 51679,
+      "sha256": "ca76b504b882606050efa54ec50b2461939196d39a82009a4c125d1ce4627116"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/final_save.json",
+      "bytes": 9062898,
+      "sha256": "d4343ffafd3500338ac189ab5657541891aa11fd7d1a91c3d8957b0dee24fe22"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/formation_delta.json",
+      "bytes": 3813,
+      "sha256": "ba416ce5b450f027a5cbbba941c9a68a286d8dbcb4f75041a1ef2279d4626c72"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/initial_save.json",
+      "bytes": 1373722,
+      "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/operation_aars.json",
+      "bytes": 664031,
+      "sha256": "4847f4f10b1a839e62939b34c5dbac0d1f566673e5b5f59d6d50e3bb3e2b9ac8"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/replay_save_manifest.json",
+      "bytes": 37176,
+      "sha256": "cb30192b4ba0c1fee9dadf0f448ce071ff495ca08a55aa33917f5e0847b702eb"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/run_meta.json",
+      "bytes": 10644,
+      "sha256": "a98187302ed3dcbe1dcc8b61a657d4ed65656553f7f18694a6c395bd79f9b700"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/run_summary.json",
+      "bytes": 628873,
+      "sha256": "d89fed7dc6ba4eb68c78b54d183b2210cbe933ecf0807a615fad99972591860e"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w104.json",
+      "bytes": 6714371,
+      "sha256": "9a2235197ed43ccb1f764853dd62325c3f9abcd515feca0f08500643961df1d8"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w111.json",
+      "bytes": 6774588,
+      "sha256": "e2932fe17b96f5a0b7f6e86432744a2a9c62eb8d6cd5e00378a292c5fc74b9b2"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w112.json",
+      "bytes": 6778864,
+      "sha256": "aed4e472cb4e50f09c4b1d807407b9aca041d3fe1ac9af7ba71aa774bf7f7cee"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w113.json",
+      "bytes": 6808677,
+      "sha256": "8d1cafe3fe8d74ca284521b337d54ee2db59fdc1491077570bb7e7a58a8921d6"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w156.json",
+      "bytes": 7644553,
+      "sha256": "7c43afc7681a3643f35b794dc699bdd513f6f7e7e9ebc5d62aabdd5f37ac5105"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w178.json",
+      "bytes": 8302045,
+      "sha256": "2f9174eb9b4050d03ff24683b236b84662bb2d1f0a80efc4f172b8321776a1bb"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w179.json",
+      "bytes": 8379463,
+      "sha256": "d717baa4063fb7c4ea1b286bb0d3bc5887c519da64661e7d95397c22444a83e4"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w180.json",
+      "bytes": 8432929,
+      "sha256": "006e1b061b3442b04125b37751af8aa0f1db9038b50d675429d2807942cabe06"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w181.json",
+      "bytes": 8488545,
+      "sha256": "1198a770b37e79fb4f83d673113f519afe699d367b44985b3612bc3b818437c0"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w182.json",
+      "bytes": 8572153,
+      "sha256": "a102c7966722c6bf3a05961d42bc48ba7821f6e1e7892efddfc164eddccf1c65"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w183.json",
+      "bytes": 8631721,
+      "sha256": "d6c8ac682fc0cd4d7d6de2b8159d79678a883d0fcfbbe25f5f46443267b08f16"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w184.json",
+      "bytes": 8704869,
+      "sha256": "e97ed2e154be0738773e326392347741d7aa17e730138b1f669008d045a879b4"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w185.json",
+      "bytes": 8759240,
+      "sha256": "30b9b18c5ef395f78221ce7214bd7125a55df98e91bff6100f6c7cc050a43180"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w186.json",
+      "bytes": 8839338,
+      "sha256": "7e4cecda1e51d2db598ec2d73a936379dff6d2289a61df106b37dc03426c9b32"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w187.json",
+      "bytes": 8850470,
+      "sha256": "635c3ba98ca8206371476a092b850b5b6002c1a875f7a4a6398781199ec00af4"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w39.json",
+      "bytes": 5105717,
+      "sha256": "e51224ac22a839d4c1af35a0ea828afb79b62f0ed56559c3b47dcda45578eec5"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/watched_operations.json",
+      "bytes": 1754,
+      "sha256": "41d0d2a62eac1d57c3d0bd1f53d5a46df3857b0d3598bc971af7bfa96b9858b6"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/weekly_report.jsonl",
+      "bytes": 2001700,
+      "sha256": "4efc6d93b821e236149ab601e7dc769d9bad1c06aa799ed6c915b4e9df248385"
+    }
+  ],
+  "retained_score": "703/712; preserved prior measurement, not rerun",
+  "new_tests": 0,
+  "new_full_suites": 0,
+  "new_campaigns": 0
+}

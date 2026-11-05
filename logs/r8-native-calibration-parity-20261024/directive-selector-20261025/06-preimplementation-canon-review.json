@@ -1,0 +1,144 @@
+{
+  "schema": "awwv.directive-selector-repair.preimplementation-canon-review.v1",
+  "date": "2026-10-25",
+  "head": "a3063366a",
+  "seat": [
+    "gameplay-programmer",
+    "canon-compliance-reviewer",
+    "systems-programmer",
+    "determinism-auditor",
+    "game-designer"
+  ],
+  "mode": "read-only source review; this artifact is the only write",
+  "verdict": "CONDITIONAL_GO",
+  "goal_limit": "Approve only a truthful, deterministic presidential REQUEST-OP selector repair. This review does not establish physical delivery, capture, checkpoint 707, calibration improvement, package correctness, or campaign acceptance.",
+  "prior_artifact_check": {
+    "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/directive-selector-repair-v1/PREIMPLEMENTATION_CANON_REVIEW.json",
+    "existed_before_this_followup": false,
+    "clarification": "The earlier final correctly said no files changed. No earlier PREIMPLEMENTATION_CANON_REVIEW artifact existed; this follow-up creates it under the owner-designated directory."
+  },
+  "authority_applicability": {
+    "ruling": "The regular presidential Request-op is governed by the ordinary CorpsOperation minimum and participant ceiling. Systems Manual section 21 does not create a two-brigade or unbounded exception and expressly says the presidential note does not supersede sections 6.4, 7.5, or 8.",
+    "citations": [
+      {
+        "source": "docs/10_canon/Systems_Manual_v0_9_0.md",
+        "location": "section 21, line 976",
+        "effect": "Request-op is a strategic directive through generals; the additive presidential note does not supersede section 6.4."
+      },
+      {
+        "source": "docs/plans/2026-06-01-presidential-command-model-design.md",
+        "location": "sections 2 and 7",
+        "effect": "The president names strategic intent, never brigades or axes; Request-op reuses the merged staging/injection substrate. It is not classified as an authored historical operation."
+      },
+      {
+        "source": "src/sim/turn_phases/war_phases.ts",
+        "location": "lines 890-899",
+        "effect": "The injected request is constructed with isPrePlanned=false and type sector_attack."
+      },
+      {
+        "source": "docs/10_canon/Systems_Manual_v0_9_0.md",
+        "location": "section 6.4, line 167",
+        "effect": "Ordinary sector-offensive launch criteria include at least three brigades."
+      },
+      {
+        "source": "docs/10_canon/Systems_Manual_v0_9_0.md",
+        "location": "section 6.8, line 294",
+        "effect": "MAX_PARTICIPATING_BRIGADES is 12 per operation."
+      },
+      {
+        "source": "docs/10_canon/Rulebook_v0_9_0.md",
+        "location": "section 7.1, line 317",
+        "effect": "A corps operation assigns up to 12 brigades; the corps commander draws them from the full corps pool."
+      },
+      {
+        "source": "docs/10_canon/Phase_Specifications_v0_9_0.md",
+        "location": "line 30",
+        "effect": "The phase authority delegates operation preparation to Systems Manual section 7.6 and supplies no Request-op roster exception."
+      },
+      {
+        "source": "docs/10_canon/War_Specification_v0_9_0.md",
+        "location": "lines 49 and 79",
+        "effect": "Request operations remain in the normal War operation lifecycle; the War specification supplies no minimum-two or unbounded exception."
+      }
+    ],
+    "code_contradictions_to_correct_in_this_path": [
+      {
+        "current": "planDirectiveOperation reuses AUTHORED_OP_MIN_PARTICIPANTS=2 for a non-preplanned sector_attack",
+        "ruling": "Use a directive-local regular sector-attack minimum of 3. Do not change AUTHORED_OP_MIN_PARTICIPANTS or authored, triggered, queued, opportunity, or bot paths."
+      },
+      {
+        "current": "planDirectiveOperation admits every available brigade with no ceiling",
+        "ruling": "Cap this regular directive at 12. Do not alter the separate generic sector_offensive.ts cap or tune unrelated operation paths."
+      }
+    ]
+  },
+  "selection_policy": {
+    "verdict": "GO",
+    "rule": "After existing availability, cross-operation commitment, live-formation, enclave-objective, and friendly-route guards, rank candidates using the established generic sector-attack commander comparator: equipment offensive priority descending via getEquipmentOffensivePriority(resolveEquipmentClass(formation)), then strictCompare formation ID. Take at most 12, then store/return the selected participant IDs in strictCompare order for canonical output.",
+    "support": [
+      "src/sim/combat/sector_offensive.ts lines 2721-2738 already uses equipment priority descending with strictCompare tie-break for ordinary sector-attack participants.",
+      "src/sim/combat/sector_offensive_launch_helpers.ts lines 95-107 exposes the pure equipment priority and equipment-class helpers.",
+      "Using strictCompare-sorted pool.slice(0,12) alone would create an unsupported semantic preference for lexicographically small formation IDs; the established equipment comparator avoids that invention.",
+      "Do not copy the generic 15 percent reserve slicing. Reserve retention is a separate allocation mechanism and is not stated by the Request-op authority."
+    ]
+  },
+  "exact_scope": {
+    "production_files": [
+      "src/sim/turn_phases/war_phases.ts"
+    ],
+    "test_files": [
+      "tests/op_directive_objection.test.ts",
+      "tests/op_directive_injection.test.ts",
+      "tests/op_directive_staging.test.ts only if an existing hard-guard assertion needs a direct regression extension"
+    ],
+    "required_reuse": [
+      "src/sim/combat/enclave_resilience.ts:isBrigadeEligibleForOperationObjectives",
+      "an existing pure normal friendly/allied route or connected-component helper",
+      "src/sim/combat/sector_offensive_launch_helpers.ts:getEquipmentOffensivePriority",
+      "src/sim/combat/sector_offensive_launch_helpers.ts:resolveEquipmentClass",
+      "src/state/validateGameState.ts:strictCompare"
+    ],
+    "forbidden_expansion": [
+      "No enclave definition/list/rule change",
+      "No bot, authored, triggered, queued, opportunity, generic sector_offensive, combat predictor, combat threshold, alliance, supply, control, movement execution, save schema, CA cost, or UI brigade-picking change",
+      "No distance, radius, roster-size below 12, personnel-at-admission, or objective-priority heuristic",
+      "No direct location/control mutation, forced flip, teleport, or brigade diversion outside an admitted CorpsOperation"
+    ]
+  },
+  "planner_contract": {
+    "shared_purity": "Keep planDirectiveOperation as the single pure plan used by queryDirectiveObjection and injectOpDirectives.",
+    "staging": "Sort friendly adjacent staging candidates with strictCompare and choose the first candidate for which at least three legal route-capable formations exist. This preserves the existing lexicographic staging tie-break while making it feasibility-aware; it adds no distance optimization.",
+    "participants": "For the chosen staging cell, select only available, uncommitted, active same-corps formations allowed for the target objective and connected by the normal friendly/allied route. Apply the established equipment-priority comparator, cap at 12, then canonicalize returned IDs with strictCompare.",
+    "rejections": {
+      "objective_unreachable": "No friendly adjacent staging cell exists.",
+      "no_available_force": "Friendly staging exists, but no candidate staging cell has at least three legal route-capable formations."
+    },
+    "force_over_objection": "A forced request may override commander advice only. It cannot bypass objective, route, enclave, availability, minimum-three, maximum-12, validation, or slot guards."
+  },
+  "enclave_gate": {
+    "required": true,
+    "ruling": "A distinct historian review is mandatory because the repair changes operation eligibility for Srebrenica/Žepa-tagged formations, even though it reuses the existing predicate unchanged.",
+    "authority": "docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md section 6, lines 209 and 221",
+    "panel_scope": "A full section 6 panel is not automatically required. Escalate only if the historian identifies a reward-for-atrocity issue, a dispute, or another bright-line question under lines 222-233."
+  },
+  "determinism_and_compatibility": {
+    "ordering": "Sort staging candidates, comparator ties, final participant IDs, and corps traversal with strictCompare. Reverse insertion order must not change the plan.",
+    "headless": "Preserve injectOpDirectives lines 861-864: with no pending_op_directive, return before planner invocation and perform zero mutation.",
+    "save": "Add no GameState or IPC field. Planner-local sets/maps/components and ephemeral ranking are not serialized. Existing pending_op_directive shape and desktop serialize-autosave-broadcast ownership remain unchanged.",
+    "query_consume_parity": "The objection query and consume step must receive the same plan for the same state and adjacency."
+  },
+  "red_first_fixture_plan": [
+    "First RED in tests/op_directive_objection.test.ts: 3-12 route-capable objective-legal formations plus a disconnected regular and an enclave-illegal formation; expect only legal routed formations, equipment-priority selection where relevant, strict final ID order, and byte-identical JSON before/after planner call.",
+    "RED: lexicographically first friendly staging neighbor has fewer than three legal routed formations while the second has at least three; expect the second staging cell.",
+    "RED: friendly staging exists but every candidate has fewer than three legal routed formations; expect no_available_force. No friendly neighbor remains objective_unreachable.",
+    "RED: more than 12 legal routed formations with differing equipment classes; expect exactly 12 chosen by established equipment priority then strict ID tie-break, with final participant output strict-sorted.",
+    "RED determinism: reverse formation object insertion and adjacency-neighbor insertion; expect identical plan.",
+    "Injection RED: forced_over_objection with a hard planner failure injects nothing and records the same rejection; a legal plan injects exactly the planned participants.",
+    "Preserve the existing no-pending headless zero-mutation and planner purity assertions."
+  ],
+  "unresolved_outside_scope": [
+    "src/sim/combat/sector_offensive.ts currently declares a code-level participant cap of 20 while canon says 12. This review does not authorize or assess a global generic-operation correction.",
+    "No result from focused selector fixtures can establish real movement delivery, capture causality, 707, or campaign parity."
+  ],
+  "implementation_authority": "The owner's broad authorization for recommended ordinary-player capability fixes covers bringing this Request-op path into existing canon. No canon document or acceptance criterion is changed."
+}

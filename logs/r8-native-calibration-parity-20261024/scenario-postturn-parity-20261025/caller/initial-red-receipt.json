@@ -1,0 +1,7 @@
+{
+  "command": "node node_modules/vitest/vitest.mjs run tests/current-scenario-postturn-boundary.test.ts -t preserves successful public war boundaries --reporter=verbose",
+  "exit_code": 1,
+  "elapsed_seconds": 23.6512105,
+  "source_sha256": "209effd648d90f7f0b64e5b36f7e4b868f5a3a603786bf50e812298e987dc63c",
+  "expected": "fail because unconditional scenario repair enters on zero applied flips"
+}

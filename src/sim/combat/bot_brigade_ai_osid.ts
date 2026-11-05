@@ -1,3 +1,4 @@
+import {buildSlopeByOsid} from './attack_retreat_displacement.js';
 /**
  * OSID-native bot brigade AI — directive-based execution (HoI-style).
  *
@@ -23,8 +24,10 @@
  */
 
 import type {
+    BrigadeAttackOrderOwner,
     BrigadeMovementOrder,
     BrigadePosture,
+    CorpsCommandState,
     CorpsFrontSector,
     CorpsOperation,
     CorpsStance,
@@ -32,14 +35,15 @@ import type {
     FormationId,
     FormationState,
     GameState,
-    OperationAxis,
 } from '../../state/game_state.js';
-import { getFormationTier, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
+import { getFormationTier, isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
+import { operationInstanceId, syncAttackOrderOwners, isGatedObjectiveHeld } from './operation_phase_gate.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { OperationalToCanonicalReverseMap, OsidPopulationMap } from '../../data/operational_data.js';
 import {
     predictAllAdjacentTargets,
+    predictCombatOutcome,
     buildTerrainCache,
     type PredictedOutcome
 } from './combat_predictor.js';
@@ -53,14 +57,16 @@ import {
     type Osid
 } from './osid_adjacency.js';
 import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
-import { areRbihHrhbAllied, isFriendlyFaction } from '../early_war/alliance_update.js';
+import { areRbihHrhbAllied } from '../early_war/alliance_update.js';
 import { shouldGrazBlockAttack, isGrazAccordsActive, isEastHerzegovinaPair } from '../local_truces.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
 import { getAllAxisBrigades, isMultiAxis } from './sector_offensive_axis_helpers.js';
 import { buildOfficerCombatLookup, getCorpsStance } from './combat_math.js';
-import { findBrigadeOperation, findBrigadeOperationAnywhere } from './corps_operation_helpers.js';
+import { findBrigadeOperation, findBrigadeOperationAnywhere, findBrigadeLiveOperationAnywhere } from './corps_operation_helpers.js';
+import { isVlasicCohaExceptionAttackOrder } from './coha_operation_exception.js';
+import { recordLinkedPreparationProbeOrderOpportunity } from './operation_preparation.js';
 export { getConvergingOperationBrigades } from './corps_operation_helpers.js';
 import { buildSectorDefenseByFactionAndOsid } from './corps_front_sectors.js';
 
@@ -68,11 +74,51 @@ import { evaluateGarrisonAndDetachments, evaluateReserve, evaluateHold } from '.
 import { evaluateSectorMarch, evaluateReturnToCorps, evaluatePocketEvacuation, evaluateFrontCoverage } from './bot_brigade_eval_front.js';
 import { evaluateHomeDefense, evaluateSupplyGate, evaluateSectorAttack, evaluateReorganize, evaluateDefensive, evaluateOffensive, recordAxisOrderGenerationDetail } from './bot_brigade_eval_attack.js';
 import { evaluateInteriorMovement } from './bot_brigade_eval_movement.js';
-import type { BrigadeEvaluationContext } from './bot_brigade_eval_types.js';
+import type { BrigadeEvaluationContext, SectorMarchObservation } from './bot_brigade_eval_types.js';
 
 import type { OsidEthnicComposition } from './ethnic_defense.js';
 import { COUNTER_ATTACK_RETREAT_WINDOW } from './bot_constants.js';
 import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
+import { isReasonCodeTopicEnabled, sortedIds } from './reason_code_debug.js';
+
+/**
+ * Resolve exceptional receiving-command authority for a surviving operation-evaluator attack.
+ * Routine orders retain formation corps authority. Invalid or ambiguous loan/owner metadata
+ * returns null so the caller applies Graz to the home corps and fails closed.
+ */
+export function resolveReceivingOperationAttackCorps(
+    state: GameState,
+    brigadeId: string,
+    target: string,
+    owner: BrigadeAttackOrderOwner | undefined,
+): string | null {
+    const formation = state.military.formations?.[brigadeId];
+    if (!formation || !isEligibleOperationFormation(formation)) return null;
+    const loan = formation.elite_loan_state;
+    const receivingCorps = loan?.on_loan === true && loan.loaned_to_corps
+        ? loan.loaned_to_corps
+        : null;
+    const commands = state.military.corps_command ?? {};
+    if (!receivingCorps || !commands[receivingCorps]) return null;
+    if (!owner || owner.target !== target || owner.turn !== (state.meta?.turn ?? 0)) return null;
+
+    const matches: Array<{ host: string }> = [];
+    for (const host of Object.keys(commands).sort(strictCompare)) {
+        for (const operation of commands[host]?.active_operations ?? []) {
+            if (operation.phase !== 'execution') continue;
+            if (operationInstanceId(host, operation) !== owner.operation_id) continue;
+            if (!operation.participating_brigades.includes(brigadeId as FormationId)) continue;
+            const axes = (operation.axes ?? []).filter((axis) =>
+                axis.axis_id === owner.axis_id
+                && axis.status === 'executing'
+                && axis.assigned_brigades.includes(brigadeId as FormationId));
+            if (axes.length === 1) matches.push({ host });
+        }
+    }
+    return matches.length === 1 && matches[0]!.host === receivingCorps
+        ? receivingCorps
+        : null;
+}
 
 /**
  * ═══════════════════════════════════════════════════════════════
@@ -209,15 +255,118 @@ export interface OsidBotOrdersResult {
     attack_orders: Record<FormationId, Osid>;
     /** Score for each attack order — used by attack share cap to trim lowest-priority attacks first. */
     attack_scores: Record<FormationId, number>;
+    /**
+     * Emitted-order ownership (opt-in): written ONLY by the operation evaluator for brigades of an
+     * operation that carries a phase gate (`OperationAxis.late_phase`). Absent otherwise, so default
+     * runs never acquire the field. Entries are dropped wherever the matching attack order is
+     * trimmed, removed or loses the dispatcher merge.
+     */
+    attack_order_owners?: Record<FormationId, BrigadeAttackOrderOwner>;
     movement_orders: Record<FormationId, Osid>;
     /** Column march orders: brigade → distant destination OSID (multi-turn transit). */
     column_march_orders: Record<FormationId, Osid>;
     /** Diagnostics: operation participants that could directly attack the current objective this turn. */
     eligible_attackers_by_corps: Record<FormationId, number>;
+    /** Env-gated observation of the terminal generic interior-routing rule. */
+    route_decision_details?: BotRouteDecisionDetail[];
+    dispatcher_decision_details?: BotDispatcherDecisionDetail[];
 }
 
 export interface BotOrderGenerationDiagnostics {
     eligible_attackers_by_corps: Record<FormationId, number>;
+    /** Absent unless `AWWV_DEBUG_REASON_CODES=route_decision` emitted a receipt. */
+    route_decision_details?: BotRouteDecisionDetail[];
+    /** Absent unless `AWWV_DEBUG_REASON_CODES=dispatcher_decision`. */
+    dispatcher_decision_details?: BotDispatcherDecisionDetail[];
+}
+
+export interface BotDispatcherOutput {
+    attack_target_osid: string | null;
+    movement_destination_osid: string | null;
+    column_march_destination_osid: string | null;
+    postures: BrigadePosture[];
+}
+
+export type BotDispatcherEligibility =
+    | 'eligible'
+    | 'faction_not_requested'
+    | 'inactive'
+    | 'unsupported_kind'
+    | 'missing_location'
+    | 'caller_filter_rejected';
+
+export type BotDispatcherHandler =
+    | 'active_column_skip'
+    | 'garrison_and_detachments'
+    | 'sector_march'
+    | 'return_to_corps'
+    | 'pocket_evacuation'
+    | 'home_defense'
+    | 'reserve'
+    | 'supply_gate'
+    | 'sector_attack'
+    | 'hold'
+    | 'reorganize'
+    | 'defensive'
+    | 'offensive'
+    | 'front_coverage'
+    | 'interior_movement';
+
+export interface BotDispatcherDecisionDetail {
+    turn: number;
+    phase: string | null;
+    pass: 'bot_dispatcher';
+    scope: 'replace' | 'merge';
+    requested_factions: FactionId[];
+    formation_id: FormationId;
+    formation_faction: string | null;
+    formation_status: string | null;
+    formation_kind: string | null;
+    location_osid: string | null;
+    eligibility: BotDispatcherEligibility;
+    caller_filter: 'not_present' | 'not_invoked' | 'accepted' | 'rejected';
+    corps_id: string | null;
+    corps_stance: string | null;
+    directive_assigned_front_ids: string[];
+    directive_offensive_targets: string[];
+    directive_hold_osids: string[];
+    directive_avoid_osids: string[];
+    assigned_sector_id: string | null;
+    assigned_sector_role: 'line' | 'reserve' | null;
+    operation_name: string | null;
+    operation_axis_id: string | null;
+    operation_current_objective: string | null;
+    transit_status: string | null;
+    transit_stance: string | null;
+    persistent_destination_osids: string[];
+    preexisting_movement_order_destination_osid: string | null;
+    first_handler: BotDispatcherHandler | null;
+    pre_cap_output: BotDispatcherOutput;
+    final_generated_output: BotDispatcherOutput;
+    snapshot_output?: BotDispatcherOutput;
+    /** Opt-in terminal `evaluateSectorMarch` exit and inputs; absent when the evaluator was not reached. */
+    sector_march?: SectorMarchObservation;
+}
+
+export interface BotRouteDecisionDetail {
+    turn: number;
+    phase: string | null;
+    brigade_id: FormationId;
+    location_osid: Osid;
+    transit_status: string | null;
+    /** Destination already present in the turn-scoped order map when this evaluator ran. */
+    preexisting_movement_order_destination_osid: string | null;
+    /** Destination retained by the multi-turn movement state, if any. */
+    persistent_movement_state_destination_osid: string | null;
+    operation_name: string | null;
+    axis_id: string | null;
+    current_objective: string | null;
+    rule: 'priority_sector' | 'offensive_target' | 'own_corps_front' | 'fallback';
+    route_goal_osids: Osid[];
+    outcome: 'issued' | 'rejected' | 'held' | 'no_order';
+    candidate_destination_osid: Osid | null;
+    issued_destination_osid: Osid | null;
+    rejection_reason: 'risky_destination' | 'already_at_goal' | 'no_destination_selected' | null;
 }
 
 export interface BotOrderGenerationOptions {
@@ -235,25 +384,100 @@ interface BrigadeContext {
     adjacentEnemyOsids: Osid[];
 }
 
+const DISPATCHER_FORMATION_KINDS = new Set([
+    'brigade', 'og', 'operational_group', 'militia', 'jna_phantom', 'hv_phantom',
+]);
+
+function emptyDispatcherOutput(): BotDispatcherOutput {
+    return {
+        attack_target_osid: null,
+        movement_destination_osid: null,
+        column_march_destination_osid: null,
+        postures: [],
+    };
+}
+
+function captureDispatcherOutput(result: OsidBotOrdersResult, formationId: FormationId): BotDispatcherOutput {
+    return {
+        attack_target_osid: result.attack_orders[formationId] ?? null,
+        movement_destination_osid: result.movement_orders[formationId] ?? null,
+        column_march_destination_osid: result.column_march_orders[formationId] ?? null,
+        postures: result.posture_orders
+            .filter((order) => order.brigade_id === formationId)
+            .map((order) => order.posture),
+    };
+}
+
+function createDispatcherDetail(
+    state: GameState,
+    formationId: FormationId,
+    formation: FormationState,
+    requestedFactions: FactionId[],
+    options: BotOrderGenerationOptions,
+): BotDispatcherDecisionDetail {
+    const factionRequested = requestedFactions.includes(formation.faction);
+    const eligibility: BotDispatcherEligibility = !factionRequested
+        ? 'faction_not_requested'
+        : formation.status !== 'active'
+            ? 'inactive'
+            : formation.kind == null || !DISPATCHER_FORMATION_KINDS.has(formation.kind)
+                ? 'unsupported_kind'
+                : formation.location_osid == null
+                    ? 'missing_location'
+                    : 'eligible';
+    const movementState = state.military.brigade_movement_state?.[formationId];
+    return {
+        turn: state.meta?.turn ?? 0,
+        phase: state.meta?.phase ?? null,
+        pass: 'bot_dispatcher',
+        scope: options.mergeWithExistingOrders ? 'merge' : 'replace',
+        requested_factions: requestedFactions,
+        formation_id: formationId,
+        formation_faction: formation.faction ?? null,
+        formation_status: formation.status ?? null,
+        formation_kind: formation.kind ?? null,
+        location_osid: formation.location_osid ?? null,
+        eligibility,
+        caller_filter: eligibility !== 'eligible'
+            ? 'not_invoked'
+            : options.brigadeFilter ? 'not_invoked' : 'not_present',
+        corps_id: formation.corps_id ?? null,
+        corps_stance: null,
+        directive_assigned_front_ids: [],
+        directive_offensive_targets: [],
+        directive_hold_osids: [],
+        directive_avoid_osids: [],
+        assigned_sector_id: null,
+        assigned_sector_role: null,
+        operation_name: null,
+        operation_axis_id: null,
+        operation_current_objective: null,
+        transit_status: movementState?.status ?? null,
+        transit_stance: movementState?.stance ?? null,
+        persistent_destination_osids: sortedIds(movementState?.destination_sids ?? []),
+        preexisting_movement_order_destination_osid:
+            state.military.brigade_movement_orders?.[formationId]?.destination_sids?.[0] ?? null,
+        first_handler: null,
+        pre_cap_output: emptyDispatcherOutput(),
+        final_generated_output: emptyDispatcherOutput(),
+    };
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Operation helpers (private to orchestrator)
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Find the axis a brigade belongs to, or null if flat/not found. */
-export function getBrigadeAxis(op: CorpsOperation, brigadeId: FormationId): OperationAxis | null {
-    const axes = op.axes;
-    if (!Array.isArray(axes) || axes.length === 0) return null;
-    return axes.find(a => a.assigned_brigades.includes(brigadeId)) ?? null;
-}
-
-/** Check if a brigade participates in the operation (axis-aware). */
-export function isOperationParticipant(op: CorpsOperation, brigadeId: FormationId): boolean {
-    const axes = op.axes;
-    if (Array.isArray(axes) && axes.length > 0) {
-        return axes.some(a => a.assigned_brigades.includes(brigadeId));
-    }
-    return op.participating_brigades.includes(brigadeId);
-}
+// `getBrigadeAxis`, `isOperationParticipant` and `getSectorOffensiveApproachOsids` now live in
+// the leaf module `operation_approach_osids.ts`, so that `brigade_routine_scope.ts` can share the
+// SAME operation-approach predicate the attack evaluator uses without creating an import cycle
+// (this file imports the evaluators, and the evaluators import the scope module).
+// Owner packet 2026-09-18. Re-exported here so every existing import path is unchanged.
+import {
+    getBrigadeAxis,
+    isOperationParticipant,
+    getSectorOffensiveApproachOsids,
+} from './operation_approach_osids.js';
+export { getBrigadeAxis, isOperationParticipant, getSectorOffensiveApproachOsids };
 
 export function isPinnedActiveOperationAttacker(state: GameState, brigadeId: FormationId): boolean {
     // Joint and enclave operations are stored only on the hosting corps. A
@@ -304,55 +528,6 @@ export function getSectorOffensiveCurrentObjective(
         : null;
 }
 
-export function getSectorOffensiveApproachOsids(
-    state: GameState,
-    activeOp: import('../../state/game_state.js').CorpsOperation,
-    faction: FactionId,
-    adjacency: Map<Osid, Osid[]>,
-    reverseMap: OperationalToCanonicalReverseMap,
-    brigadeId?: FormationId,
-): Set<Osid> {
-    const axis = brigadeId ? getBrigadeAxis(activeOp, brigadeId) : null;
-    const objectives = axis ? axis.objectives : (activeOp.objectives ?? []);
-    const currentIdx = axis ? axis.current_objective_index : (activeOp.current_objective_index ?? 0);
-    const approachOsids = new Set<Osid>();
-    for (const objective of objectives.slice(currentIdx)) {
-        for (const neighbor of getTacticalAdjacentOsids(state, objective as Osid, adjacency)) {
-            const neighborController = getPoliticalControllerOSID(state, neighbor, reverseMap);
-            if (neighborController === faction || isFriendlyFaction(neighborController, faction, state)) {
-                approachOsids.add(neighbor);
-            }
-        }
-        if (approachOsids.size > 0) {
-            break;
-        }
-    }
-    // Wave 10 fallback: tactical_adjacency ∪ war_front_edges_osid is under-authored
-    // for HVO–VRS deep targets (Kupres / Glamoč / Jajce zones). When the stricter
-    // graph yields no friendly approach OSIDs, fall through to the corps's front
-    // sector sub-segment scan — the permissive check used by the launch gate
-    // (sector_offensive.ts collectAdjacentFriendlyOsids). Without this fallback
-    // the launch gate passes but per-turn brigade brain stalls, producing
-    // spawned-no-attack ops with no_logged_attempt recovery_reason.
-    if (approachOsids.size === 0 && state.military.corps_front_sectors && brigadeId) {
-        const corpsId = state.military.formations?.[brigadeId]?.corps_id;
-        if (corpsId) {
-            for (const objective of objectives.slice(currentIdx)) {
-                for (const sector of Object.values(state.military.corps_front_sectors)) {
-                    if (sector.corps_id !== corpsId) continue;
-                    for (const subSegment of sector.sub_segments) {
-                        if (!subSegment.enemy_osids.includes(objective as string)) continue;
-                        for (const fo of subSegment.friendly_osids) {
-                            approachOsids.add(fo as Osid);
-                        }
-                    }
-                }
-                if (approachOsids.size > 0) break;
-            }
-        }
-    }
-    return approachOsids;
-}
 
 export function getSectorOffensiveProbeThreshold(
     activeOp: import('../../state/game_state.js').CorpsOperation,
@@ -374,6 +549,104 @@ function isPartOfNamedOperation(state: GameState, formation: FormationState): bo
     const op = findBrigadeOperation(cmd, formation.id);
     if (!op) return false;
     return op.phase === 'execution' && isOperationParticipant(op, formation.id);
+}
+
+interface GeneratedDirectOperationAttackIdentity {
+    objective: Osid;
+    threshold: PredictedOutcome;
+}
+
+/**
+ * Resolve the operation that currently commands this brigade: a corps-local
+ * planning/execution match stays authoritative, but a corps-local recovery
+ * operation must not hide a live cross-corps mission. Recovery-only remains
+ * the fallback when no live match exists anywhere.
+ */
+function resolveActiveOperationForBrigade(
+    state: GameState,
+    brigadeId: FormationId,
+    cmd: CorpsCommandState | null,
+): CorpsOperation | null {
+    const local = cmd ? findBrigadeOperation(cmd, brigadeId) : null;
+    if (local && (local.phase === 'planning' || local.phase === 'execution')) return local;
+    const live = findBrigadeLiveOperationAnywhere(state, brigadeId)?.op ?? null;
+    if (live) return live;
+    if (local) return local;
+    return findBrigadeOperationAnywhere(state, brigadeId)?.op ?? null;
+}
+
+/**
+ * Resolve the operation that currently commands this brigade, using the same
+ * effective lookup as the execution loop: loaned receiving corps first, then a
+ * state-wide fallback for multi-corps operations.
+ */
+function resolveExecutionOperationForBrigade(
+    state: GameState,
+    brigadeId: FormationId,
+): CorpsOperation | null {
+    const brigade = state.military.formations?.[brigadeId];
+    if (!brigade) return null;
+    const loanedTo = brigade.elite_loan_state?.on_loan ? brigade.elite_loan_state.loaned_to_corps : null;
+    const corpsId = loanedTo ?? brigade.corps_id;
+    const cmd = corpsId ? state.military.corps_command?.[corpsId] : null;
+    return resolveActiveOperationForBrigade(state, brigadeId, cmd ?? null);
+}
+
+/**
+ * Identify a generated attack order as a direct current-objective attack of an
+ * executing sector_attack/probe operation. Terminal axes and held gates are not
+ * direct-operation orders.
+ */
+function getGeneratedDirectOperationAttackIdentity(
+    state: GameState,
+    brigadeId: FormationId,
+    target: string,
+): GeneratedDirectOperationAttackIdentity | null {
+    const brigade = state.military.formations?.[brigadeId];
+    if (!brigade || brigade.status !== 'active') return null;
+    const activeOp = resolveExecutionOperationForBrigade(state, brigadeId);
+    if (!activeOp || activeOp.phase !== 'execution') return null;
+    if (activeOp.type !== 'sector_attack' && activeOp.type !== 'probe') return null;
+    if (!isOperationParticipant(activeOp, brigadeId)) return null;
+    const axis = getBrigadeAxis(activeOp, brigadeId);
+    if (axis && axis.status !== 'executing') return null;
+    const objective = getSectorOffensiveCurrentObjective(activeOp, brigadeId);
+    if (!objective || objective !== target) return null;
+    if (isGatedObjectiveHeld(axis, objective)) return null;
+    return {
+        objective,
+        threshold: getSectorOffensiveProbeThreshold(activeOp, brigadeId),
+    };
+}
+
+/**
+ * Actual committed same-faction attackers for one target in the projected final
+ * order map. A supporter must be physically able to join this turn: active,
+ * same faction, at least MIN_ATTACK_PERSONNEL, tactically adjacent, and not in
+ * transit. Deterministic: sorted by brigade id.
+ */
+function collectCommittedSameTargetSupporters(
+    state: GameState,
+    faction: FactionId,
+    target: string,
+    brigadeId: FormationId,
+    projectedAttackOrders: Readonly<Record<string, string>>,
+    adjacency: Map<Osid, Osid[]>,
+): FormationId[] {
+    const supporters: FormationId[] = [];
+    for (const peerId of Object.keys(projectedAttackOrders).sort(strictCompare)) {
+        if (peerId === brigadeId) continue;
+        if (projectedAttackOrders[peerId] !== target) continue;
+        const formation = state.military.formations?.[peerId];
+        if (!formation || formation.status !== 'active' || formation.faction !== faction) continue;
+        if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
+        const peerLoc = formation.location_osid;
+        if (!peerLoc) continue;
+        if (state.military.brigade_movement_state?.[peerId]?.status === 'in_transit') continue;
+        if (!getTacticalAdjacentOsids(state, peerLoc as Osid, adjacency).includes(target as Osid)) continue;
+        supporters.push(peerId as FormationId);
+    }
+    return supporters;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -403,7 +676,10 @@ function executeFactionDirectives(
     graphAnalysis: FactionGraphAnalysis,
     supplyStateByOsid?: SupplyStateByOsidReport | null,
     ethnicMap?: OsidEthnicComposition,
-    osidPopulationMap?: OsidPopulationMap
+    osidPopulationMap?: OsidPopulationMap,
+    dispatcherDetails?: BotDispatcherDecisionDetail[],
+    slopeByOsid?: Record<string, number>,
+    authoritativePriorAttackOrders?: Readonly<Record<string, string>>,
 ): OsidBotOrdersResult {
     return botOrdersPerfTime('bot_orders.executeFactionDirectives.total', () => executeFactionDirectivesImpl(
         state,
@@ -416,6 +692,9 @@ function executeFactionDirectives(
         supplyStateByOsid,
         ethnicMap,
         osidPopulationMap,
+        dispatcherDetails,
+        slopeByOsid,
+        authoritativePriorAttackOrders,
     ));
 }
 
@@ -465,7 +744,10 @@ function executeFactionDirectivesImpl(
     graphAnalysis: FactionGraphAnalysis,
     supplyStateByOsid?: SupplyStateByOsidReport | null,
     ethnicMap?: OsidEthnicComposition,
-    osidPopulationMap?: OsidPopulationMap
+    osidPopulationMap?: OsidPopulationMap,
+    dispatcherDetails?: BotDispatcherDecisionDetail[],
+    slopeByOsid?: Record<string, number>,
+    authoritativePriorAttackOrders?: Readonly<Record<string, string>>,
 ): OsidBotOrdersResult {
     const result: OsidBotOrdersResult = {
         posture_orders: [],
@@ -475,6 +757,7 @@ function executeFactionDirectivesImpl(
         column_march_orders: {},
         eligible_attackers_by_corps: {}
     };
+    const processedBrigadeIds = [...new Set(brigades.map((brigade) => brigade.id))].sort(strictCompare);
     const chosenTargets = new Map<Osid, number>();
     const columnAssignments = new Map<Osid, number>();
     const sectorAssignmentByBrigade = buildSectorAssignmentByBrigade(state);
@@ -561,11 +844,7 @@ function executeFactionDirectivesImpl(
         // state-wide search so secondary-axis brigades see their op during
         // planning + execution. Determinism: state-wide search iterates corps
         // ids via strictCompare. See tests/multi_corps_operation_visibility.test.ts.
-        let activeOp = cmd ? findBrigadeOperation(cmd, brigade.id) : null;
-        if (!activeOp) {
-            const found = findBrigadeOperationAnywhere(state, brigade.id);
-            if (found) activeOp = found.op;
-        }
+        const activeOp = resolveActiveOperationForBrigade(state, brigade.id, cmd ?? null);
         const isActiveSectorOperationParticipant =
             (activeOp?.type === 'sector_attack' || activeOp?.type === 'probe') &&
             isOperationParticipant(activeOp, brigade.id);
@@ -593,6 +872,25 @@ function executeFactionDirectivesImpl(
         const assignedSectorFrontOsids = sectorAssignment && !sectorAssignment.isReserve
             ? sectorAssignment.frontOsids
             : null;
+        const dispatcherDetail = dispatcherDetails?.find((entry) => entry.formation_id === brigade.id);
+        if (dispatcherDetail) {
+            const axis = activeOp ? getBrigadeAxis(activeOp, brigade.id) : null;
+            dispatcherDetail.corps_id = corpsId ?? null;
+            dispatcherDetail.corps_stance = corpsStance;
+            dispatcherDetail.directive_assigned_front_ids = sortedIds(directive?.assigned_front_ids ?? []);
+            dispatcherDetail.directive_offensive_targets = sortedIds(directive?.offensive_targets ?? []);
+            dispatcherDetail.directive_hold_osids = sortedIds(directive?.hold_osids ?? []);
+            dispatcherDetail.directive_avoid_osids = sortedIds(directive?.avoid_osids ?? []);
+            dispatcherDetail.assigned_sector_id = sectorAssignment?.sector.sector_id ?? null;
+            dispatcherDetail.assigned_sector_role = sectorAssignment
+                ? (sectorAssignment.isReserve ? 'reserve' : 'line')
+                : null;
+            dispatcherDetail.operation_name = activeOp?.name ?? null;
+            dispatcherDetail.operation_axis_id = axis?.axis_id ?? null;
+            dispatcherDetail.operation_current_objective = activeOp
+                ? getSectorOffensiveCurrentObjective(activeOp, brigade.id)
+                : null;
+        }
 
         const ctx: BrigadeEvaluationContext = {
             state,
@@ -624,9 +922,19 @@ function executeFactionDirectivesImpl(
             corpsTerritoryOsidsByCorps,
             officerCombatLookup,
             getOfficerCombatLookup,
+            processedBrigadeIds,
+            ...(authoritativePriorAttackOrders === undefined ? {} : {
+                authoritativePriorAttackOrders,
+            }),
+            ...(dispatcherDetail === undefined ? {} : {
+                sectorMarchObserver: (observation: SectorMarchObservation) => {
+                    dispatcherDetail.sector_march = { ...observation };
+                },
+            }),
             adjacency,
             reverseMap,
             terrainCache,
+            slopeByOsid,
             graphAnalysis,
             supplyStateByOsid,
             ethnicMap,
@@ -636,6 +944,11 @@ function executeFactionDirectivesImpl(
 
         // Skip brigades already in column transit — re-issuing orders resets progress.
         const existingTransit = state.military.brigade_movement_state?.[brigade.id];
+        if (dispatcherDetail) {
+            dispatcherDetail.transit_status = existingTransit?.status ?? null;
+            dispatcherDetail.transit_stance = existingTransit?.stance ?? null;
+            dispatcherDetail.persistent_destination_osids = sortedIds(existingTransit?.destination_sids ?? []);
+        }
         if (existingTransit?.stance === 'column' && existingTransit?.status === 'in_transit') {
             if (isActiveSectorOperationParticipant && activeOp) {
                 const objective = getSectorOffensiveCurrentObjective(activeOp, brigade.id);
@@ -660,23 +973,39 @@ function executeFactionDirectivesImpl(
                 });
             }
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+            if (dispatcherDetail) {
+                dispatcherDetail.first_handler = 'active_column_skip';
+                dispatcherDetail.pre_cap_output = captureDispatcherOutput(result, brigade.id);
+            }
             continue;
         }
+        const runEvaluator = (
+            handler: BotDispatcherHandler,
+            timing: string,
+            evaluate: () => boolean,
+        ): boolean => {
+            const didHandle = botOrdersPerfTime(timing, evaluate);
+            if (didHandle && dispatcherDetail) {
+                dispatcherDetail.first_handler = handler;
+                dispatcherDetail.pre_cap_output = captureDispatcherOutput(result, brigade.id);
+            }
+            return didHandle;
+        };
         const handled = botOrdersPerfTime('bot_orders.executeFactionDirectives.evaluators', () => {
-            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.garrisonAndDetachments', () => evaluateGarrisonAndDetachments(ctx))) return true;
-            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.sectorMarch', () => evaluateSectorMarch(ctx))) return true;
-            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.returnToCorps', () => evaluateReturnToCorps(ctx))) return true; // Before hold/defense — orphans march home first
-            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.pocketEvacuation', () => evaluatePocketEvacuation(ctx))) return true; // Evacuate tiny non-enclave pockets
-            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.homeDefense', () => evaluateHomeDefense(ctx))) return true;
-            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.reserve', () => evaluateReserve(ctx))) return true;
-            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.supplyGate', () => evaluateSupplyGate(ctx))) return true;
-            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.sectorAttack', () => evaluateSectorAttack(ctx))) return true;
-            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.hold', () => evaluateHold(ctx))) return true;
-            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.reorganize', () => evaluateReorganize(ctx))) return true;
-            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.defensive', () => evaluateDefensive(ctx))) return true;
-            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.offensive', () => evaluateOffensive(ctx))) return true;
-            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.frontCoverage', () => evaluateFrontCoverage(ctx))) return true;
-            botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.interiorMovement', () => evaluateInteriorMovement(ctx));
+            if (runEvaluator('garrison_and_detachments', 'bot_orders.executeFactionDirectives.eval.garrisonAndDetachments', () => evaluateGarrisonAndDetachments(ctx))) return true;
+            if (runEvaluator('sector_march', 'bot_orders.executeFactionDirectives.eval.sectorMarch', () => evaluateSectorMarch(ctx))) return true;
+            if (runEvaluator('return_to_corps', 'bot_orders.executeFactionDirectives.eval.returnToCorps', () => evaluateReturnToCorps(ctx))) return true;
+            if (runEvaluator('pocket_evacuation', 'bot_orders.executeFactionDirectives.eval.pocketEvacuation', () => evaluatePocketEvacuation(ctx))) return true;
+            if (runEvaluator('home_defense', 'bot_orders.executeFactionDirectives.eval.homeDefense', () => evaluateHomeDefense(ctx))) return true;
+            if (runEvaluator('reserve', 'bot_orders.executeFactionDirectives.eval.reserve', () => evaluateReserve(ctx))) return true;
+            if (runEvaluator('supply_gate', 'bot_orders.executeFactionDirectives.eval.supplyGate', () => evaluateSupplyGate(ctx))) return true;
+            if (runEvaluator('sector_attack', 'bot_orders.executeFactionDirectives.eval.sectorAttack', () => evaluateSectorAttack(ctx))) return true;
+            if (runEvaluator('hold', 'bot_orders.executeFactionDirectives.eval.hold', () => evaluateHold(ctx))) return true;
+            if (runEvaluator('reorganize', 'bot_orders.executeFactionDirectives.eval.reorganize', () => evaluateReorganize(ctx))) return true;
+            if (runEvaluator('defensive', 'bot_orders.executeFactionDirectives.eval.defensive', () => evaluateDefensive(ctx))) return true;
+            if (runEvaluator('offensive', 'bot_orders.executeFactionDirectives.eval.offensive', () => evaluateOffensive(ctx))) return true;
+            if (runEvaluator('front_coverage', 'bot_orders.executeFactionDirectives.eval.frontCoverage', () => evaluateFrontCoverage(ctx))) return true;
+            runEvaluator('interior_movement', 'bot_orders.executeFactionDirectives.eval.interiorMovement', () => evaluateInteriorMovement(ctx));
             return true;
         });
         if (handled) continue;
@@ -707,35 +1036,74 @@ export function generateAllBotOrdersOsid(
     options: BotOrderGenerationOptions = {},
 ): BotOrderGenerationDiagnostics {
     const adjacency = (ctx.adjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(ctx.edges);
-    const terrainCache = buildTerrainCache(ctx.reverseMap);
+    const terrainCache = buildTerrainCache(ctx.reverseMap, ctx.terrainData);
+    const slopeByOsid = buildSlopeByOsid(ctx.reverseMap, ctx.terrainData);
     const sortedFactions = [...botFactions].sort(strictCompare);
 
     const allAttackOrders: Record<FormationId, Osid> = {};
+    const allAttackOrderOwners: Record<FormationId, BrigadeAttackOrderOwner> = {};
     const allPostureOrders: Array<{ brigade_id: FormationId; posture: BrigadePosture }> = [];
     const allMovementOrders: Record<FormationId, Osid> = {};
     const allColumnMarchOrders: Record<FormationId, Osid> = {};
     const allEligibleAttackersByCorps: Record<FormationId, number> = {};
+    let allRouteDecisionDetails: BotRouteDecisionDetail[] | undefined;
+    const dispatcherDetails = isReasonCodeTopicEnabled('dispatcher_decision')
+        ? Object.keys(state.military.formations ?? {}).sort(strictCompare)
+            .flatMap((formationId) => {
+                const formation = state.military.formations?.[formationId];
+                return formation == null ? [] : [createDispatcherDetail(
+                    state,
+                    formationId as FormationId,
+                    formation,
+                    sortedFactions,
+                    options,
+                )];
+            })
+        : undefined;
+    const dispatcherByFormation = new Map(
+        dispatcherDetails?.map((detail) => [detail.formation_id, detail]) ?? [],
+    );
 
     for (const faction of sortedFactions) {
         const fmtsBrigades = state.military.formations ?? {};
-        const brigades = Object.keys(fmtsBrigades).sort(strictCompare).map(k => fmtsBrigades[k]!)
-            .filter((f): f is FormationState =>
-                f != null &&
-                f.faction === faction &&
-                f.status === 'active' &&
-                (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'militia' || f.kind === 'jna_phantom' || f.kind === 'hv_phantom') &&
-                f.location_osid != null
-            )
-            .filter((f) => options.brigadeFilter ? options.brigadeFilter(f) : true);
+        const brigades: FormationState[] = [];
+        for (const formationId of Object.keys(fmtsBrigades).sort(strictCompare)) {
+            const formation = fmtsBrigades[formationId];
+            if (formation == null
+                || formation.faction !== faction
+                || formation.status !== 'active'
+                || formation.kind == null
+                || !DISPATCHER_FORMATION_KINDS.has(formation.kind)
+                || formation.location_osid == null) continue;
+            const accepted = options.brigadeFilter ? options.brigadeFilter(formation) : true;
+            const detail = dispatcherByFormation.get(formation.id);
+            if (detail && options.brigadeFilter) detail.caller_filter = accepted ? 'accepted' : 'rejected';
+            if (!accepted) {
+                if (detail) detail.eligibility = 'caller_filter_rejected';
+                continue;
+            }
+            brigades.push(formation);
+        }
 
         if (brigades.length === 0) continue;
 
         const graphAnalysis = analyzeFactionGraphCached(state, faction, adjacency, ctx.reverseMap);
 
+        const priorAttackOrdersForForecast: Readonly<Record<string, string>> | undefined =
+            options.mergeWithExistingOrders
+                ? Object.fromEntries(
+                    Object.entries(state.military.brigade_attack_orders ?? {})
+                        .filter((entry): entry is [string, string] => entry[1] != null),
+                )
+                : undefined;
+
         const result = executeFactionDirectives(
             state, faction, brigades, adjacency, ctx.reverseMap,
             terrainCache, graphAnalysis,
-            ctx.supplyStateByOsid, ctx.ethnicCompositionByOsid, ctx.osidPopulationMap
+            ctx.supplyStateByOsid, ctx.ethnicCompositionByOsid, ctx.osidPopulationMap,
+            dispatcherDetails,
+            slopeByOsid,
+            priorAttackOrdersForForecast,
         );
 
         // Per-corps attack share cap: each corps gets attack slots proportional to its size.
@@ -788,6 +1156,7 @@ export function generateAllBotOrdersOsid(
             for (const entry of trimmed) {
                 delete result.attack_orders[entry.bid];
                 delete result.attack_scores[entry.bid];
+                if (result.attack_order_owners) delete result.attack_order_owners[entry.bid];
                 result.posture_orders.push({ brigade_id: entry.bid, posture: 'hold' });
             }
         }
@@ -810,7 +1179,15 @@ export function generateAllBotOrdersOsid(
                 // Remove from attack orders, force hold (warlord friction: unit refuses orders)
                 delete result.attack_orders[frictionTarget.bid];
                 delete result.attack_scores[frictionTarget.bid];
+                if (result.attack_order_owners) delete result.attack_order_owners[frictionTarget.bid];
                 result.posture_orders.push({ brigade_id: frictionTarget.bid, posture: 'hold' });
+            }
+        }
+
+        if (dispatcherDetails) {
+            for (const brigade of brigades) {
+                const detail = dispatcherByFormation.get(brigade.id);
+                if (detail) detail.final_generated_output = captureDispatcherOutput(result, brigade.id);
             }
         }
 
@@ -825,12 +1202,20 @@ export function generateAllBotOrdersOsid(
         allPostureOrders.push(...result.posture_orders);
         for (const [bid, target] of Object.entries(result.attack_orders)) {
             if (target != null) allAttackOrders[bid as FormationId] = target;
+            const owner = result.attack_order_owners?.[bid as FormationId];
+            if (target != null && owner !== undefined && owner.target === target) {
+                allAttackOrderOwners[bid as FormationId] = owner;
+            }
         }
         for (const [bid, dest] of Object.entries(result.movement_orders)) {
             if (dest != null) allMovementOrders[bid as FormationId] = dest;
         }
         for (const [bid, dest] of Object.entries(result.column_march_orders)) {
             if (dest != null) allColumnMarchOrders[bid as FormationId] = dest;
+        }
+        if (result.route_decision_details !== undefined) {
+            allRouteDecisionDetails ??= [];
+            allRouteDecisionDetails.push(...result.route_decision_details);
         }
         for (const corpsId of Object.keys(finalEligibleAttackersByCorps).sort(strictCompare)) {
             allEligibleAttackersByCorps[corpsId] =
@@ -850,7 +1235,10 @@ export function generateAllBotOrdersOsid(
             if (!target) continue;
             const f = formations[bid];
             if (!f) continue;
-            const corpsId = f.corps_id ?? '';
+            const homeCorpsId = f.corps_id ?? '';
+            const owner = allAttackOrderOwners[bid as FormationId];
+            const corpsId = resolveReceivingOperationAttackCorps(state, bid, target, owner)
+                ?? homeCorpsId;
             const faction = f.faction;
             const targetController = pc[target] ?? '';
             // Skip Graz block for brigades attacking Op Jackal objectives only
@@ -879,13 +1267,21 @@ export function generateAllBotOrdersOsid(
     // stage attacks or charge attack/assault posture costs during the pause.
     if (state.military.event_flags?.coha_active === true) {
         for (const brigadeId of Object.keys(allAttackOrders).sort(strictCompare)) {
-            delete allAttackOrders[brigadeId as FormationId];
+            const target = allAttackOrders[brigadeId as FormationId];
+            if (!isVlasicCohaExceptionAttackOrder(state, brigadeId as FormationId, target)) {
+                delete allAttackOrders[brigadeId as FormationId];
+            }
         }
         for (const corpsId of Object.keys(allEligibleAttackersByCorps).sort(strictCompare)) {
-            delete allEligibleAttackersByCorps[corpsId as FormationId];
+            const hasExceptionOrder = Object.entries(allAttackOrders).some(([brigadeId, target]) =>
+                state.military.formations?.[brigadeId]?.corps_id === corpsId
+                && isVlasicCohaExceptionAttackOrder(state, brigadeId as FormationId, target));
+            if (!hasExceptionOrder) delete allEligibleAttackersByCorps[corpsId as FormationId];
         }
         for (const order of allPostureOrders) {
-            if (order.posture === 'attack' || order.posture === 'assault') {
+            const target = allAttackOrders[order.brigade_id as FormationId];
+            if ((order.posture === 'attack' || order.posture === 'assault')
+                && !target) {
                 order.posture = 'hold';
             }
         }
@@ -902,6 +1298,140 @@ export function generateAllBotOrdersOsid(
         const faction = state.military.formations?.[brigadeId]?.faction;
         return faction != null && !processedFactions.has(faction);
     };
+    const existingAttackOrdersBefore = state.military.brigade_attack_orders ?? {};
+    const preservedAttackOrders: Record<FormationId, Osid> = {};
+    if (!options.mergeWithExistingOrders) {
+        for (const [bid, target] of Object.entries(state.military.brigade_attack_orders ?? {})) {
+            if (target != null && isUnprocessedFactionOrder(bid)) {
+                preservedAttackOrders[bid as FormationId] = target as Osid;
+            }
+        }
+    }
+    const generatedOrderWonMerge = (brigadeId: string): boolean =>
+        !options.mergeWithExistingOrders || !existingAttackOrdersBefore[brigadeId];
+    const buildProjectedAttackOrders = (): Record<string, string> => {
+        const projected: Record<string, string> = {};
+        if (!options.mergeWithExistingOrders) {
+            for (const [bid, target] of Object.entries(preservedAttackOrders)) {
+                if (target != null) projected[bid] = target;
+            }
+        }
+        for (const [bid, target] of Object.entries(allAttackOrders)) {
+            if (target != null) projected[bid] = target;
+        }
+        if (options.mergeWithExistingOrders) {
+            for (const [bid, target] of Object.entries(existingAttackOrdersBefore)) {
+                if (target != null) projected[bid] = target;
+            }
+        }
+        return projected;
+    };
+
+    // ── Last consistency check: generated direct-operation attacks must be
+    // supported by the attack orders that actually survive caps, friction,
+    // Graz, and the manual merge. Only generated orders that win the merge may
+    // be vetoed; authoritative/manual/unprocessed orders are never removed or
+    // retargeted. Monotone removal, sorted, bounded by the candidate count.
+    const generatedDirectCandidates = Object.keys(allAttackOrders)
+        .sort(strictCompare)
+        .map((bid) => bid as FormationId)
+        .filter((bid) => {
+            if (!generatedOrderWonMerge(bid)) return false;
+            const target = allAttackOrders[bid];
+            return target != null
+                && getGeneratedDirectOperationAttackIdentity(state, bid, target) !== null;
+        });
+    if (generatedDirectCandidates.length > 0) {
+        let reconciliationOfficerCombatLookup: ReturnType<typeof buildOfficerCombatLookup> | undefined;
+        let reconciliationOfficerCombatLookupBuilt = false;
+        const getReconciliationOfficerCombatLookup = (): ReturnType<typeof buildOfficerCombatLookup> | undefined => {
+            if (!state.military.named_officers || !state.military.named_officer_data) return undefined;
+            if (!reconciliationOfficerCombatLookupBuilt) {
+                reconciliationOfficerCombatLookupBuilt = true;
+                reconciliationOfficerCombatLookup = buildOfficerCombatLookup(state);
+            }
+            return reconciliationOfficerCombatLookup;
+        };
+        const officerLookup = getReconciliationOfficerCombatLookup();
+        for (let pass = 0; pass <= generatedDirectCandidates.length; pass += 1) {
+            const projectedAttackOrders = buildProjectedAttackOrders();
+            let vetoedThisPass = false;
+            for (const brigadeId of generatedDirectCandidates) {
+                const target = allAttackOrders[brigadeId];
+                if (target == null) continue;
+                const identity = getGeneratedDirectOperationAttackIdentity(state, brigadeId, target);
+                if (!identity) continue;
+                const brigade = state.military.formations?.[brigadeId];
+                if (!brigade) continue;
+                const supporters = collectCommittedSameTargetSupporters(
+                    state,
+                    brigade.faction,
+                    identity.objective,
+                    brigadeId,
+                    projectedAttackOrders,
+                    adjacency,
+                );
+                const prediction = predictCombatOutcome(
+                    state,
+                    brigadeId,
+                    identity.objective,
+                    adjacency,
+                    ctx.reverseMap,
+                    terrainCache,
+                    'attack',
+                    supporters.length > 0 ? supporters : undefined,
+                    ctx.supplyStateByOsid,
+                    ctx.osidPopulationMap,
+                    slopeByOsid,
+                    ctx.ethnicCompositionByOsid,
+                    undefined,
+                    officerLookup,
+                );
+                if (prediction && isOutcomeSufficientForAttack(prediction.predicted_outcome, identity.threshold)) {
+                    continue;
+                }
+                delete allAttackOrders[brigadeId];
+                delete allAttackOrderOwners[brigadeId];
+                let replacedPosture = false;
+                for (const order of allPostureOrders) {
+                    if (order.brigade_id === brigadeId
+                        && (order.posture === 'attack' || order.posture === 'assault')) {
+                        order.posture = 'defend';
+                        replacedPosture = true;
+                    }
+                }
+                if (!replacedPosture) {
+                    allPostureOrders.push({ brigade_id: brigadeId, posture: 'defend' });
+                }
+                const detail = dispatcherByFormation.get(brigadeId);
+                if (detail) {
+                    detail.final_generated_output = {
+                        ...detail.final_generated_output,
+                        attack_target_osid: null,
+                        postures: allPostureOrders
+                            .filter((order) => order.brigade_id === brigadeId)
+                            .map((order) => order.posture),
+                    };
+                }
+                vetoedThisPass = true;
+                break;
+            }
+            if (!vetoedThisPass) break;
+        }
+    }
+
+    // Keep the diagnostic tied to generated orders that actually survive the
+    // merge. Manual/authoritative prior orders are not new generated attacks.
+    for (const corpsId of Object.keys(allEligibleAttackersByCorps)) {
+        delete allEligibleAttackersByCorps[corpsId as FormationId];
+    }
+    for (const bid of Object.keys(allAttackOrders).sort(strictCompare)) {
+        if (!generatedOrderWonMerge(bid)) continue;
+        const brig = state.military.formations?.[bid as FormationId];
+        const corpsId = brig?.corps_id;
+        if (!corpsId) continue;
+        allEligibleAttackersByCorps[corpsId] = (allEligibleAttackersByCorps[corpsId] ?? 0) + 1;
+    }
 
     if (!state.military.brigade_posture_orders) state.military.brigade_posture_orders = [];
     const postureOrdersToWrite = options.mergeWithExistingOrders
@@ -912,17 +1442,27 @@ export function generateAllBotOrdersOsid(
     state.military.brigade_posture_orders.push(...postureOrdersToWrite);
 
     if (Object.keys(allAttackOrders).length > 0 || !options.mergeWithExistingOrders) {
-        const preservedAttackOrders: Record<FormationId, Osid> = {};
-        if (!options.mergeWithExistingOrders) {
-            for (const [bid, target] of Object.entries(state.military.brigade_attack_orders ?? {})) {
-                if (target != null && isUnprocessedFactionOrder(bid)) {
-                    preservedAttackOrders[bid as FormationId] = target as Osid;
-                }
-            }
-        }
+        const priorAttackOrderOwners = state.military.brigade_attack_order_owners ?? {};
         state.military.brigade_attack_orders = options.mergeWithExistingOrders
             ? { ...allAttackOrders, ...(state.military.brigade_attack_orders ?? {}) }
             : { ...preservedAttackOrders, ...allAttackOrders };
+        // Emitted-order ownership (opt-in): keep only ownership of orders that WON this merge.
+        syncAttackOrderOwners(
+            state,
+            allAttackOrderOwners,
+            priorAttackOrderOwners,
+            existingAttackOrdersBefore,
+            options.mergeWithExistingOrders === true,
+            (bid) => preservedAttackOrders[bid as FormationId] !== undefined,
+        );
+        for (const brigadeId of Object.keys(allAttackOrders).sort(strictCompare)) {
+            const target = allAttackOrders[brigadeId as FormationId];
+            if (generatedOrderWonMerge(brigadeId)
+                && target !== undefined
+                && state.military.brigade_attack_orders?.[brigadeId as FormationId] === target) {
+                recordLinkedPreparationProbeOrderOpportunity(state, brigadeId as FormationId, target);
+            }
+        }
     }
 
     // Movement orders: merge regular moves + column march destinations
@@ -943,7 +1483,12 @@ export function generateAllBotOrdersOsid(
         const preservedMovementOrders: Record<FormationId, BrigadeMovementOrder> = {};
         if (!options.mergeWithExistingOrders) {
             for (const [bid, order] of Object.entries(state.military.brigade_movement_orders ?? {})) {
-                if (order != null && isUnprocessedFactionOrder(bid)) {
+                // Replacement mode owns only its own tagged discretionary
+                // routing. Untagged orders come from player/operation/reserve
+                // systems and remain authoritative even for a processed bot
+                // faction; otherwise the next bot pass silently erases an
+                // authored operation's staging march.
+                if (order != null && (order.owner !== 'bot_discretionary' || isUnprocessedFactionOrder(bid))) {
                     preservedMovementOrders[bid as FormationId] = order as BrigadeMovementOrder;
                 }
             }
@@ -954,6 +1499,13 @@ export function generateAllBotOrdersOsid(
     }
 
     return {
-        eligible_attackers_by_corps: allEligibleAttackersByCorps
+        eligible_attackers_by_corps: allEligibleAttackersByCorps,
+        ...(allRouteDecisionDetails === undefined ? {} : {
+            route_decision_details: [...allRouteDecisionDetails]
+                .sort((a, b) => strictCompare(a.brigade_id, b.brigade_id)),
+        }),
+        ...(dispatcherDetails === undefined ? {} : {
+            dispatcher_decision_details: dispatcherDetails,
+        }),
     };
 }

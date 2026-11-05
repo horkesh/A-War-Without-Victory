@@ -1,0 +1,105 @@
+BaselineRegressionError: Baseline regression FAILED: 8 failures across 1 scenario.
+  apr1992_188w: 8 failures
+
+Baseline mismatch: scenario=apr1992_188w artifact=activity_summary.json
+  expected: 7d10356d0715db21370c3f7d6acc15db7948856c80962363f505641b48bfbd4e
+  actual:   fe8f01984eeb3e9e4f3ac6a2cbece298da1c181be0ed4673472792ac8ed6c3a1
+  run dir:  <REPO>\data\derived\scenario\_baseline_tmp\apr1992_188w
+Baseline mismatch: scenario=apr1992_188w artifact=control_delta.json
+  expected: 4cb8219cf3b7dcbfdd66476a7af5bbfa0709fdd24e0a37d6900a9b808d6acb85
+  actual:   e50d6ab6c8f65813437ce0b7c270fcb162a1b6cc3d01ce4458837724e26ed4ca
+  run dir:  <REPO>\data\derived\scenario\_baseline_tmp\apr1992_188w
+Baseline mismatch: scenario=apr1992_188w artifact=end_report.md
+  expected: fea39f3bf7eda907b290e3bd2579ac050c847ae2f783153117f95f1f94d0cf8d
+  actual:   31e0eff8ba996f9cb99780e4f5ff75c0ee19e0ada9971093ce512b89dffb40b3
+  run dir:  <REPO>\data\derived\scenario\_baseline_tmp\apr1992_188w
+Baseline mismatch: scenario=apr1992_188w artifact=final_save.json
+  expected: e414dc69f6e875fcd2a7394582921f20ca03123112baf12e9308c50035c29c50
+  actual:   1c332850e6eb35b422a303860ea4853678b073d862b6a694883013cc621f3342
+  run dir:  <REPO>\data\derived\scenario\_baseline_tmp\apr1992_188w
+Baseline mismatch: scenario=apr1992_188w artifact=formation_delta.json
+  expected: bbd7260e219d311bea201053d0d7c913f4b30b83bcead72b05d5f2c957566cb1
+  actual:   d761d665063a7dc46611a42e5746699e35791878ffb7ee0d83311cc726639acb
+  run dir:  <REPO>\data\derived\scenario\_baseline_tmp\apr1992_188w
+Baseline mismatch: scenario=apr1992_188w artifact=run_summary.json
+  expected: b8ebc2c1ff4522fed0651be224ba360fcfeff0da4e6983f27d9df008eeba98cb
+  actual:   559856bbce1f962aa8ecff8ed4b126825eba8b6b8bd0e1cdaa39f6147db39db4
+  run dir:  <REPO>\data\derived\scenario\_baseline_tmp\apr1992_188w
+Baseline mismatch: scenario=apr1992_188w artifact=watched_operations.json
+  expected: 785a073b9312e34d20ba143915478ab768ce7847ad337b121f98491df8325b18
+  actual:   41d0d2a62eac1d57c3d0bd1f53d5a46df3857b0d3598bc971af7bfa96b9858b6
+  run dir:  <REPO>\data\derived\scenario\_baseline_tmp\apr1992_188w
+Baseline mismatch: scenario=apr1992_188w artifact=weekly_report.jsonl
+  expected: 4c5cb00bde51a15e2f7766d31ececb03e86d81bfcf1f93a4c04c01cbda31b9cf
+  actual:   0d33e38c7b915c2ff5345f82fd87acc3faa175512d524c3720fb4915c9eb22c7
+  run dir:  <REPO>\data\derived\scenario\_baseline_tmp\apr1992_188w
+    at compareAgainstBaselines (<REPO>\tools\scenario_runner\run_baseline_regression.ts:305:15)
+    at async main (<REPO>\tools\scenario_runner\run_baseline_regression.ts:380:5) {
+  failures: [
+    {
+      kind: 'mismatch',
+      scenario_id: 'apr1992_188w',
+      artifact: 'activity_summary.json',
+      expected: '7d10356d0715db21370c3f7d6acc15db7948856c80962363f505641b48bfbd4e',
+      actual: 'fe8f01984eeb3e9e4f3ac6a2cbece298da1c181be0ed4673472792ac8ed6c3a1',
+      run_dir: 'F:\\A-War-Without-Victory\\data\\derived\\scenario\\_baseline_tmp\\apr1992_188w'
+    },
+    {
+      kind: 'mismatch',
+      scenario_id: 'apr1992_188w',
+      artifact: 'control_delta.json',
+      expected: '4cb8219cf3b7dcbfdd66476a7af5bbfa0709fdd24e0a37d6900a9b808d6acb85',
+      actual: 'e50d6ab6c8f65813437ce0b7c270fcb162a1b6cc3d01ce4458837724e26ed4ca',
+      run_dir: 'F:\\A-War-Without-Victory\\data\\derived\\scenario\\_baseline_tmp\\apr1992_188w'
+    },
+    {
+      kind: 'mismatch',
+      scenario_id: 'apr1992_188w',
+      artifact: 'end_report.md',
+      expected: 'fea39f3bf7eda907b290e3bd2579ac050c847ae2f783153117f95f1f94d0cf8d',
+      actual: '31e0eff8ba996f9cb99780e4f5ff75c0ee19e0ada9971093ce512b89dffb40b3',
+      run_dir: 'F:\\A-War-Without-Victory\\data\\derived\\scenario\\_baseline_tmp\\apr1992_188w'
+    },
+    {
+      kind: 'mismatch',
+      scenario_id: 'apr1992_188w',
+      artifact: 'final_save.json',
+      expected: 'e414dc69f6e875fcd2a7394582921f20ca03123112baf12e9308c50035c29c50',
+      actual: '1c332850e6eb35b422a303860ea4853678b073d862b6a694883013cc621f3342',
+      run_dir: 'F:\\A-War-Without-Victory\\data\\derived\\scenario\\_baseline_tmp\\apr1992_188w'
+    },
+    {
+      kind: 'mismatch',
+      scenario_id: 'apr1992_188w',
+      artifact: 'formation_delta.json',
+      expected: 'bbd7260e219d311bea201053d0d7c913f4b30b83bcead72b05d5f2c957566cb1',
+      actual: 'd761d665063a7dc46611a42e5746699e35791878ffb7ee0d83311cc726639acb',
+      run_dir: 'F:\\A-War-Without-Victory\\data\\derived\\scenario\\_baseline_tmp\\apr1992_188w'
+    },
+    {
+      kind: 'mismatch',
+      scenario_id: 'apr1992_188w',
+      artifact: 'run_summary.json',
+      expected: 'b8ebc2c1ff4522fed0651be224ba360fcfeff0da4e6983f27d9df008eeba98cb',
+      actual: '559856bbce1f962aa8ecff8ed4b126825eba8b6b8bd0e1cdaa39f6147db39db4',
+      run_dir: 'F:\\A-War-Without-Victory\\data\\derived\\scenario\\_baseline_tmp\\apr1992_188w'
+    },
+    {
+      kind: 'mismatch',
+      scenario_id: 'apr1992_188w',
+      artifact: 'watched_operations.json',
+      expected: '785a073b9312e34d20ba143915478ab768ce7847ad337b121f98491df8325b18',
+      actual: '41d0d2a62eac1d57c3d0bd1f53d5a46df3857b0d3598bc971af7bfa96b9858b6',
+      run_dir: 'F:\\A-War-Without-Victory\\data\\derived\\scenario\\_baseline_tmp\\apr1992_188w'
+    },
+    {
+      kind: 'mismatch',
+      scenario_id: 'apr1992_188w',
+      artifact: 'weekly_report.jsonl',
+      expected: '4c5cb00bde51a15e2f7766d31ececb03e86d81bfcf1f93a4c04c01cbda31b9cf',
+      actual: '0d33e38c7b915c2ff5345f82fd87acc3faa175512d524c3720fb4915c9eb22c7',
+      run_dir: 'F:\\A-War-Without-Victory\\data\\derived\\scenario\\_baseline_tmp\\apr1992_188w'
+    }
+  ]
+}
+local reproduction exit status: 1

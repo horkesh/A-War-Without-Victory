@@ -52,7 +52,8 @@
  * configured here.
  */
 
-import type { GameState } from '../../state/game_state.js';
+import type { FormationId, GameState } from '../../state/game_state.js';
+import { invalidateBrigadeJourney } from './brigade_journey_lifecycle.js';
 
 /** Turn the Tactical Group relocates to Brčko (a few turns ahead of the
  *  observed wk58-59 crisis, giving it time to be "in position"). */
@@ -64,7 +65,7 @@ const RETURN_TURN = 70;
  *  healthy (not attritted on another front) and the unit BB explicitly
  *  describes as relocating for the operation. See module doc for why the
  *  first candidate (16th Krajina Motorized) was replaced. */
-const TACTICAL_GROUP_FORMATION_IDS: readonly string[] = ['rs_5th_kozara_light_infantry'];
+const TACTICAL_GROUP_FORMATION_IDS: readonly FormationId[] = ['rs_5th_kozara_light_infantry' as FormationId];
 const BRCKO_OSID = 'op:brcko:brcko';
 
 export function isBrckoTacticalGroupEnabled(): boolean {
@@ -82,10 +83,11 @@ export function applyBrckoTacticalGroupRelocation(state: GameState): void {
     for (const fid of TACTICAL_GROUP_FORMATION_IDS) {
         const formation = state.military.formations?.[fid];
         if (!formation || formation.status !== 'active') continue;
-        if (turn === RELOCATE_TURN) {
-            formation.location_osid = BRCKO_OSID;
-        } else if (turn === RETURN_TURN && formation.home_osid) {
-            formation.location_osid = formation.home_osid;
-        }
+        const targetOsid = turn === RELOCATE_TURN
+            ? BRCKO_OSID
+            : (turn === RETURN_TURN && formation.home_osid ? formation.home_osid : undefined);
+        if (!targetOsid || targetOsid === formation.location_osid) continue;
+        invalidateBrigadeJourney(state, fid);
+        formation.location_osid = targetOsid;
     }
 }

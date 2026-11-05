@@ -1,0 +1,37 @@
+{
+  "verdict": "GREEN_FOCUSED_PENDING_INDEPENDENT_REVIEW_AND_BROAD_GATES",
+  "changedFiles": [
+    "src/sim/turn_phases/war_phases.ts",
+    "tests/army_hq_gathering_phase_routing.test.ts"
+  ],
+  "red": {
+    "log": "tmp/player-bot-capability-parity-20261024/hq-gathering-repair/red-focused.log",
+    "passed": 5,
+    "exit": 1,
+    "failed": 5,
+    "tests": 10
+  },
+  "green": {
+    "exit": 0,
+    "files": 7,
+    "tests": 145,
+    "log": "tmp/player-bot-capability-parity-20261024/hq-gathering-repair/focused-suite-final.log",
+    "failed": 0,
+    "passed": 145
+  },
+  "typecheck": {
+    "log": "tmp/player-bot-capability-parity-20261024/hq-gathering-repair/typecheck-final.log",
+    "command": "npx tsc --noEmit --incremental false",
+    "exit": 0
+  },
+  "diffCheck": {
+    "exit": 0,
+    "log": "tmp/player-bot-capability-parity-20261024/hq-gathering-repair/diff-check.log"
+  },
+  "implementation": "Use selectBotBrigadeOrderFactions membership while retaining literal RS,RBiH,HRHB phase iteration order.",
+  "residual": [
+    "Independent review owned by root",
+    "188-week scenario and full suite owned by root",
+    "No campaign, build, package, or native run performed"
+  ]
+}

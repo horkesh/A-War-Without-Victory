@@ -1,0 +1,28 @@
+Mostar Vranjevići painted-reference correction — 2026-09-24
+
+Owner direction: paint op:mostar:vranjevici_2 RS at all four calibration checkpoints. The four active painted_control_{jan1993,apr1994,apr1995,oct1995}.json files previously assigned RBiH through an owner-authored 2026-08-24 decision. This new owner decision supersedes that paint. The 2026-09-17 diagnosis still notes constituent-level geographic uncertainty; this change does not claim a new historical source.
+
+Change scope:
+- Exactly the one OSID value changes RBiH -> RS in each active reference. Each file's metadata counts now reconcile to 712 entries, revision increments by one, and a dated changelog entry records the superseding owner decision.
+- No initial control, operational geometry, OOB, scenario, simulation operation, or saved run changes. The previous Doljani January HRHB correction remains intact.
+
+Static rescoring of the unchanged Sebiočina corrected 188-week n2 run (final-save SHA-256 8262413bcf258e15e4e8a7dfc2853cc75d776230f49241e546afd31016f47d73):
+- January 1993 w39: 706 -> 707/712, mismatches 6 -> 5.
+- April 1994 w104: 696 -> 697/712, mismatches 16 -> 15.
+- April 1995 w156: 689 -> 690/712, mismatches 23 -> 22.
+- October 1995 w188: 661 -> 662/712, mismatches 51 -> 50.
+- The unchanged run holds this OSID RS at all four points. No simulation was rerun; these are replay scores against revised painted files, not new campaign evidence.
+
+Checks:
+- Counts and 712-OSID universe verified in all four files; revisions 6/4/5/5.
+- npm run sim:data:check exit 0; focused painted-control and historical-anchor tests 59/59 pass; scoped git diff --check exit 0.
+- Viewer payload audit: current painted maps differ from the previously published viewer only at this OSID in each checkpoint. All 232 control events, initial owners, cells, markers and colors are unchanged; embedded script syntax passes. viewer-payload-audit.json.
+- Marker verification: 712/712 markers; all 57 distinct mismatch anchors inside their cells, zero outside/missing.
+- Local and live desktop/touch browser checks pass all four scores and actual/reference RS states, Sebiočina January RBiH, zoom/reset, no browser errors or horizontal overflow. browser-local.json and browser-live.json.
+
+External viewer:
+- Published only index.html and README.md on gh-pages commit b66e6da43d7de960cfe45ad51a6fe5a39d287c17. Pages reports built. URL: https://horkesh.github.io/A-War-Without-Victory/?run=vranjevici-rs-20260924
+- Generated, committed and live HTML are byte-identical: 720280 bytes, SHA-256 046372ce689b94d002488df57d7c1a9d9db15615162c3115a690a1791cedd10a; live HTTP 200.
+- The viewer labels the run as a dirty local candidate. Publication does not adopt a baseline or change the full-campaign NO-GO. Inherited Farz wrong-corps, Prozor operation-injection and the post-snapshot full-suite gate remain open.
+
+Next session: April 1994 calibration starts from the revised 697/712 checkpoint of the retained candidate. The exact 15 remaining cells, simulated owners and painted owners are saved in apr1994-mismatches.json. Diagnose their historical/control mechanisms before proposing one bounded change.

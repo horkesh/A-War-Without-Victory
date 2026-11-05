@@ -1,0 +1,130 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-22T18:16:30.666Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/826-final-b",
+  "timeout_ms": 60000,
+  "original_argv": [
+    "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "logs/claude-channel-20261004/826-finalize.cjs",
+    "{evidenceDir}"
+  ],
+  "argv": [
+    "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "logs/claude-channel-20261004/826-finalize.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\claude-channel-20261004\\826-final-b"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "dependencies.json",
+    "dependency-00.snapshot",
+    "dependency-01.snapshot",
+    "dependency-02.snapshot",
+    "dependency-03.snapshot",
+    "dependency-04.snapshot",
+    "dependency-05.snapshot",
+    "dependency-06.snapshot",
+    "dependency-07.snapshot",
+    "dependency-08.snapshot",
+    "result.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/826-finalize.cjs",
+    "bytes": 6899,
+    "raw_sha256": "2739a677bd4aa67f0a33774ff0c09eb11d59afd7ede7a47ce5b7244ddc033f14",
+    "normalized_text_sha256": "2739a677bd4aa67f0a33774ff0c09eb11d59afd7ede7a47ce5b7244ddc033f14",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 6899,
+      "sha256": "2739a677bd4aa67f0a33774ff0c09eb11d59afd7ede7a47ce5b7244ddc033f14"
+    }
+  },
+  "end_utc": "2026-10-22T18:16:31.337Z",
+  "pid": 26512,
+  "child_exit": 0,
+  "wrapper_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/826-finalize.cjs",
+    "bytes": 6899,
+    "raw_sha256": "2739a677bd4aa67f0a33774ff0c09eb11d59afd7ede7a47ce5b7244ddc033f14",
+    "normalized_text_sha256": "2739a677bd4aa67f0a33774ff0c09eb11d59afd7ede7a47ce5b7244ddc033f14",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 130,
+    "sha256": "6bd2f76d916f258bbf927e5861e16472942b154a3bb41c4a54db4516412bc974"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "dependencies.json",
+      "bytes": 1809,
+      "sha256": "4da886e3e0c46828061d91339dd8ca204c9c80698e6c560f37989b850fecb216"
+    },
+    {
+      "path": "dependency-00.snapshot",
+      "bytes": 23557,
+      "sha256": "96ab1158ab2684a14ff617f55561b097d070f41beb39171c2a7a20d6ada69f44"
+    },
+    {
+      "path": "dependency-01.snapshot",
+      "bytes": 3519,
+      "sha256": "2e1f070a25545263786b27ea1b569bfe8a71216f380bf231edea209f56fc8b81"
+    },
+    {
+      "path": "dependency-02.snapshot",
+      "bytes": 20310,
+      "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd"
+    },
+    {
+      "path": "dependency-03.snapshot",
+      "bytes": 5745,
+      "sha256": "a3ded36652e28b2bfe47da236b05d62df19903d2af3d93028e7d31ce460a26c6"
+    },
+    {
+      "path": "dependency-04.snapshot",
+      "bytes": 21958,
+      "sha256": "6c6f17ff8ee0825b988de239fa3f2c3cdfdcd3fe1b32dccd377ff232155bb2b9"
+    },
+    {
+      "path": "dependency-05.snapshot",
+      "bytes": 48167,
+      "sha256": "86a4247c15820892013c8ab853e8fb62646a5db5d152868d5316965c63b4fe94"
+    },
+    {
+      "path": "dependency-06.snapshot",
+      "bytes": 12385,
+      "sha256": "75b0b6fe0eed8105f1fd154fc7b2ee6cc79bb816629df732d707a9d06d8f5eb6"
+    },
+    {
+      "path": "dependency-07.snapshot",
+      "bytes": 13629,
+      "sha256": "0859c579f4b3a0491d8bc340ed96fd3b7e5c0c47d914acb436fe2036019d8add"
+    },
+    {
+      "path": "dependency-08.snapshot",
+      "bytes": 7493,
+      "sha256": "3fcaf815c6f7aa86d16ce5fcb7cd1c06d7330057c45f19ecc27c1e03ab4e9154"
+    },
+    {
+      "path": "result.json",
+      "bytes": 10105,
+      "sha256": "19db5a57abcd5998ddce9fbe8014ed77ab6152270651af9a2ba1103b451184fb"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

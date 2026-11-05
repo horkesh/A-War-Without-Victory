@@ -1,0 +1,118 @@
+{
+  "schema": "awwv.759.reviewed-pre-t3-reconciliation.v1",
+  "writes_closed": true,
+  "verdict": "FOCUSED_IMPLEMENTATION_REVIEWED__CAMPAIGN_REGRESSION_UNMEASURED",
+  "summary": "Pre-T3 stale-operation march reconciliation implemented and independently verified after one ownership correction. It redirects only a proved completed prior objective of the same unique operation/axis to its current friendly approach. Valid orders, movement guards and thresholds remain protected. Focused29/29 and final noEmit pass; retained n80 remains703/712, NO-GO/unadopted. No new campaign or full suite; calibration impact is UNMEASURED.",
+  "inputs": [
+    {
+      "path": "logs/claude-channel-20261004/757-correction-758-a/result.json",
+      "sha256": "33b067297bfd71da2be939a18224a8d58209ea922ebbd3086859b55354bb3129"
+    },
+    {
+      "path": "logs/claude-channel-20261004/758-targeted-verification.json",
+      "sha256": "61c9f621b49349592a98c69d04a78b5dde4b41ebce422f25cd4d7bca2319b420"
+    },
+    {
+      "path": "logs/claude-channel-20261004/758-independent-review.json",
+      "sha256": "34053ad3ff0453acc8e400f62385973742edba97e54d7f2c425e6ac395bf88c1"
+    }
+  ],
+  "files": [
+    {
+      "path": "src/sim/combat/commander_march_correction.ts",
+      "bytes": 16668,
+      "sha256": "9db5d8b250fc606c00a2e8d7327d2ff4113cb1048414d7f1532c1f9cb6d0a68d"
+    },
+    {
+      "path": "src/sim/turn_phases/war_phases.ts",
+      "bytes": 231691,
+      "sha256": "93fcb005fa725c8a45269370c8319ca34779d1e032624fee08a4ae5800baa04a"
+    },
+    {
+      "path": "tests/stale_operation_march_reconciliation.test.ts",
+      "bytes": 10886,
+      "sha256": "5911d5ad2fffdf1fcc9f161b6363f8ccf82b814eef912908756eaca1646b8857"
+    },
+    {
+      "path": "tests/mistral_prisoje_turn_order.test.ts",
+      "bytes": 24721,
+      "sha256": "fbb527e4b5ad279abcade093aeca9a66e75a99da783e20c721386363c2392747"
+    }
+  ],
+  "behavior": {
+    "owner": "T2 command-owner prepass immediately before T3 column consumption; existing T6 remains unchanged",
+    "eligibility": "pending bot_discretionary column, eligible nonreserve formation, no transit; exactly one state-wide participant-or-axis membership across all commands/phases, participating plus exactly one axis, live planning/execution, host equals effective valid loan/home corps",
+    "staleness": "unique completed earlier axis objective, capture count covers advanced prefix, old objective friendly-held and no longer current operation/routine/reassignment authorized",
+    "replacement": "existing current-objective approach geometry and deterministic nearest friendly path; no staging fallback",
+    "preserved": "valid routine, operation/staging, reassignment, player/authored/nonbot, transit, reserve/lifecycle, recovery/completed, invalid-loan, overlapping/foreign-host or ambiguous cases"
+  },
+  "checks": {
+    "final_focused": {
+      "attempt": "logs/claude-channel-20261004/757-correction-green-a",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "total": 29,
+      "passed": 29,
+      "failed": 0,
+      "composition": "25 ownership/reconciliation plus 4 Mistral production-wiring assertions"
+    },
+    "root_noemit": {
+      "attempt": "logs/claude-channel-20261004/757-correction-noemit-a",
+      "timeout_ms": 180000,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "private_buildinfo_bytes": 644985
+    },
+    "unaffected_affected_assertions_reused": 158,
+    "not_a_combined_fresh_test_total": true,
+    "independent_initial": "BLOCK; ownership/provenance/header corrected once",
+    "targeted_verification": "PASS_NO_REMAINING_758_BLOCKERS",
+    "previous_failures": "Original missing-export RED, obsolete diagnostic expectation/controller assumption failures, typecheck attempts and correction RED22/3 retained in local inventories; not erased or counted as green reruns"
+  },
+  "preservation": {
+    "C_before": {
+      "bytes": 100107701,
+      "sha256": "8d242e18f199a54c26f755e648fe4612159563ec0b606930112653770d725f3c"
+    },
+    "C_after": {
+      "bytes": 100107701,
+      "sha256": "8d242e18f199a54c26f755e648fe4612159563ec0b606930112653770d725f3c"
+    },
+    "C_prefix_preserved": true,
+    "C_append_bytes": 0,
+    "D_before": {
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    },
+    "D_after": {
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    },
+    "full_before_after_archives_retained": true,
+    "all_prior_757_attempts_and_failures_retained": true,
+    "protected_emit_reference_threshold_reused": true,
+    "native_31_reused": true,
+    "sealed_179_receipts_retained": true,
+    "restore_truncate_cleanup_delete": false
+  },
+  "scope": {
+    "campaigns": 0,
+    "full_suites": 0,
+    "builds": 0,
+    "saved_prefix_runs": 0,
+    "full_runTurn": 0,
+    "turn186": 0,
+    "threshold_control_schema_canon_changes": 0
+  },
+  "limits": [
+    "703/712 is retained n80 evidence, not a score of this changed engine. Zero formerly-correct OSID losses has not been measured for this change.",
+    "Required qualifying full-suite, authoritative188, protected-anchor, deterministic artifact/provenance and other acceptance gates remain unmet until separately authorized and passed.",
+    "Earlier736 full-suite failures and focused corrections retain their original scopes; there is no new green full suite.",
+    "Prisoje capture, later turn timing and earlier Bravnice emitter remain unmeasured.",
+    "All inherited acceptance/preservation/history gates, n42 observational-only GO, Farz ruling and122 STOP remain unchanged.",
+    "Raw evidence remains LOCAL with pushed inventory per owner; inventory publication is not a remote raw-byte backup."
+  ]
+}

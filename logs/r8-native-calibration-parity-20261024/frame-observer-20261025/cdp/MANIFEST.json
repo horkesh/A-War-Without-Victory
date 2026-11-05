@@ -1,0 +1,29 @@
+{
+  "schema": "awwv.native23-cdp-failure-diagnosis.manifest.v1",
+  "source_head": "bff97de7af9406dc2cb907674e2463fccb43052a",
+  "scope": "retained-evidence diagnosis only; no source or retained evidence mutation",
+  "count": 4,
+  "aggregate_sha256": "a2145cb6ea5a5f9f0f10dc831360fbbdfb8d8c43d90e930a828f0eb014588418",
+  "files": [
+    {
+      "path": "RAW_INVENTORY.json",
+      "bytes": 46680,
+      "sha256": "dc2a0dfdfcc7fe2e8a833830795406b109109bf2cfc5f992c938dddef45585eb"
+    },
+    {
+      "path": "REPORT.md",
+      "bytes": 9460,
+      "sha256": "c104dee56916f65c7b5a091c5f20a494c04c5981b3c0e877983ae94b5d24521e"
+    },
+    {
+      "path": "SOURCE_BINDINGS.json",
+      "bytes": 2600,
+      "sha256": "3c7668cf153a1cb2e00112857e9adc57602392a7155f951b3e041aa3dc339416"
+    },
+    {
+      "path": "build_diagnosis.cjs",
+      "bytes": 5046,
+      "sha256": "5b066ce29379209a279a31a5d30c9cb8c642d8cec7c63df6dfd3f2b430cdb17c"
+    }
+  ]
+}

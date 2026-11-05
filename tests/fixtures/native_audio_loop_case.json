@@ -1,0 +1,1072 @@
+{
+  "unit_fixture_only": true,
+  "provenance": "Distilled from actual capture02; selected native media chains/signals, summary counts adjusted to subset; NOT a native qualification receipt",
+  "source_capture_sha256": "b586cc22b4085489557a56d2a6b93dcdde3df6a725e5b9fcbf562f67e850dcd2",
+  "source_cdp_sha256": "8907841076b638b3d923a3970cd7a5cb993e72a928ca767202853dbd6f348cd5",
+  "failures": [
+    {
+      "kind": "requestfailed",
+      "method": "GET",
+      "url": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+      "resourceType": "media",
+      "isMainFrame": false,
+      "failure": {
+        "errorText": "net::ERR_ABORTED"
+      },
+      "eventCount": 35,
+      "teardownStarted": false,
+      "observedAtMs": 1793225071035,
+      "requestInitiatedAtMs": 1793225071032,
+      "requestRange": {
+        "status": "present",
+        "value": "bytes=0-"
+      },
+      "mapNavigationWindow": null,
+      "tileFetchIdentity": null
+    },
+    {
+      "kind": "requestfailed",
+      "method": "GET",
+      "url": "http://127.0.0.1:50306/assets/ambient_field-5Mv-hV7p.ogg",
+      "resourceType": "media",
+      "isMainFrame": false,
+      "failure": {
+        "errorText": "net::ERR_ABORTED"
+      },
+      "eventCount": 62,
+      "teardownStarted": false,
+      "observedAtMs": 1793225150276,
+      "requestInitiatedAtMs": 1793225150273,
+      "requestRange": {
+        "status": "present",
+        "value": "bytes=0-"
+      },
+      "mapNavigationWindow": null,
+      "tileFetchIdentity": null
+    }
+  ],
+  "signals": [
+    {
+      "kind": "play",
+      "signalSequence": 72,
+      "elementId": "media:1",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "observedAtMs": 1793225069190,
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 4,
+        "paused": true,
+        "ended": false,
+        "seeking": false,
+        "currentTime": 28.153244,
+        "duration": 30,
+        "loop": true,
+        "buffered": [
+          [
+            -0.002667,
+            30
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            30
+          ]
+        ],
+        "mediaError": null
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {}
+    },
+    {
+      "kind": "playing",
+      "signalSequence": 73,
+      "elementId": "media:1",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "observedAtMs": 1793225069274,
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 4,
+        "paused": false,
+        "ended": false,
+        "seeking": false,
+        "currentTime": 28.247404,
+        "duration": 30,
+        "loop": true,
+        "buffered": [
+          [
+            -0.002667,
+            30
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            30
+          ]
+        ],
+        "mediaError": null
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {}
+    },
+    {
+      "kind": "play",
+      "signalSequence": 74,
+      "elementId": "media:1",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "observedAtMs": 1793225070445,
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 4,
+        "paused": false,
+        "ended": false,
+        "seeking": false,
+        "currentTime": 29.419271,
+        "duration": 30,
+        "loop": true,
+        "buffered": [
+          [
+            -0.002667,
+            30
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            30
+          ]
+        ],
+        "mediaError": null
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {}
+    },
+    {
+      "kind": "seeking",
+      "signalSequence": 75,
+      "elementId": "media:1",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "observedAtMs": 1793225071031,
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 1,
+        "paused": false,
+        "ended": false,
+        "seeking": true,
+        "currentTime": 0,
+        "duration": 30,
+        "loop": true,
+        "buffered": [
+          [
+            -0.002667,
+            30
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            30
+          ]
+        ],
+        "mediaError": null
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {}
+    },
+    {
+      "kind": "waiting",
+      "signalSequence": 76,
+      "elementId": "media:1",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "observedAtMs": 1793225071031,
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 1,
+        "paused": false,
+        "ended": false,
+        "seeking": true,
+        "currentTime": 0,
+        "duration": 30,
+        "loop": true,
+        "buffered": [
+          [
+            -0.002667,
+            30
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            30
+          ]
+        ],
+        "mediaError": null
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {}
+    },
+    {
+      "kind": "progress",
+      "signalSequence": 77,
+      "elementId": "media:1",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "observedAtMs": 1793225071033,
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 1,
+        "paused": false,
+        "ended": false,
+        "seeking": true,
+        "currentTime": 0,
+        "duration": 30,
+        "loop": true,
+        "buffered": [
+          [
+            -0.002667,
+            30
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            30
+          ]
+        ],
+        "mediaError": null
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {}
+    },
+    {
+      "kind": "suspend",
+      "signalSequence": 78,
+      "elementId": "media:1",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "observedAtMs": 1793225071033,
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 1,
+        "paused": false,
+        "ended": false,
+        "seeking": true,
+        "currentTime": 0,
+        "duration": 30,
+        "loop": true,
+        "buffered": [
+          [
+            -0.002667,
+            30
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            30
+          ]
+        ],
+        "mediaError": null
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {}
+    },
+    {
+      "kind": "seeked",
+      "signalSequence": 79,
+      "elementId": "media:1",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "observedAtMs": 1793225071033,
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 4,
+        "paused": false,
+        "ended": false,
+        "seeking": false,
+        "currentTime": 0,
+        "duration": 30,
+        "loop": true,
+        "buffered": [
+          [
+            -0.002667,
+            30
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            30
+          ]
+        ],
+        "mediaError": null
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {}
+    },
+    {
+      "kind": "canplay",
+      "signalSequence": 80,
+      "elementId": "media:1",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "observedAtMs": 1793225071033,
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 4,
+        "paused": false,
+        "ended": false,
+        "seeking": false,
+        "currentTime": 0,
+        "duration": 30,
+        "loop": true,
+        "buffered": [
+          [
+            -0.002667,
+            30
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            30
+          ]
+        ],
+        "mediaError": null
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {}
+    },
+    {
+      "kind": "playing",
+      "signalSequence": 81,
+      "elementId": "media:1",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "observedAtMs": 1793225071033,
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 4,
+        "paused": false,
+        "ended": false,
+        "seeking": false,
+        "currentTime": 0,
+        "duration": 30,
+        "loop": true,
+        "buffered": [
+          [
+            -0.002667,
+            30
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            30
+          ]
+        ],
+        "mediaError": null
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {}
+    },
+    {
+      "kind": "pause",
+      "signalSequence": 82,
+      "elementId": "media:1",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_warroom-CO4FPnyV.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "observedAtMs": 1793225072346,
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 4,
+        "paused": false,
+        "ended": false,
+        "seeking": false,
+        "currentTime": 1.243228,
+        "duration": 30,
+        "loop": true,
+        "buffered": [
+          [
+            -0.002667,
+            30
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            30
+          ]
+        ],
+        "mediaError": null
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {}
+    },
+    {
+      "kind": "playing",
+      "signalSequence": 138,
+      "elementId": "media:2",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_field-5Mv-hV7p.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "observedAtMs": 1793225144986,
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 4,
+        "paused": false,
+        "ended": false,
+        "seeking": false,
+        "currentTime": 24.774116,
+        "duration": 30,
+        "loop": true,
+        "buffered": [
+          [
+            -0.002667,
+            30
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            30
+          ]
+        ],
+        "mediaError": null
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {}
+    },
+    {
+      "kind": "play",
+      "signalSequence": 139,
+      "elementId": "media:2",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_field-5Mv-hV7p.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "observedAtMs": 1793225146386,
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 4,
+        "paused": false,
+        "ended": false,
+        "seeking": false,
+        "currentTime": 26.116723,
+        "duration": 30,
+        "loop": true,
+        "buffered": [
+          [
+            -0.002667,
+            30
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            30
+          ]
+        ],
+        "mediaError": null
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {}
+    },
+    {
+      "kind": "seeking",
+      "signalSequence": 140,
+      "elementId": "media:2",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_field-5Mv-hV7p.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "observedAtMs": 1793225150271,
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 1,
+        "paused": false,
+        "ended": false,
+        "seeking": true,
+        "currentTime": 0,
+        "duration": 30,
+        "loop": true,
+        "buffered": [
+          [
+            -0.002667,
+            30
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            30
+          ]
+        ],
+        "mediaError": null
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {}
+    },
+    {
+      "kind": "waiting",
+      "signalSequence": 141,
+      "elementId": "media:2",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_field-5Mv-hV7p.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "observedAtMs": 1793225150271,
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 1,
+        "paused": false,
+        "ended": false,
+        "seeking": true,
+        "currentTime": 0,
+        "duration": 30,
+        "loop": true,
+        "buffered": [
+          [
+            -0.002667,
+            30
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            30
+          ]
+        ],
+        "mediaError": null
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {}
+    },
+    {
+      "kind": "progress",
+      "signalSequence": 142,
+      "elementId": "media:2",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_field-5Mv-hV7p.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "observedAtMs": 1793225150274,
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 1,
+        "paused": false,
+        "ended": false,
+        "seeking": true,
+        "currentTime": 0,
+        "duration": 30,
+        "loop": true,
+        "buffered": [
+          [
+            -0.002667,
+            30
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            30
+          ]
+        ],
+        "mediaError": null
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {}
+    },
+    {
+      "kind": "suspend",
+      "signalSequence": 143,
+      "elementId": "media:2",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_field-5Mv-hV7p.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "observedAtMs": 1793225150274,
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 1,
+        "paused": false,
+        "ended": false,
+        "seeking": true,
+        "currentTime": 0,
+        "duration": 30,
+        "loop": true,
+        "buffered": [
+          [
+            -0.002667,
+            30
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            30
+          ]
+        ],
+        "mediaError": null
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {}
+    },
+    {
+      "kind": "seeked",
+      "signalSequence": 144,
+      "elementId": "media:2",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_field-5Mv-hV7p.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "observedAtMs": 1793225150274,
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 4,
+        "paused": false,
+        "ended": false,
+        "seeking": false,
+        "currentTime": 0,
+        "duration": 30,
+        "loop": true,
+        "buffered": [
+          [
+            -0.002667,
+            30
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            30
+          ]
+        ],
+        "mediaError": null
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {}
+    },
+    {
+      "kind": "canplay",
+      "signalSequence": 145,
+      "elementId": "media:2",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_field-5Mv-hV7p.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "observedAtMs": 1793225150274,
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 4,
+        "paused": false,
+        "ended": false,
+        "seeking": false,
+        "currentTime": 0,
+        "duration": 30,
+        "loop": true,
+        "buffered": [
+          [
+            -0.002667,
+            30
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            30
+          ]
+        ],
+        "mediaError": null
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {}
+    },
+    {
+      "kind": "playing",
+      "signalSequence": 146,
+      "elementId": "media:2",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_field-5Mv-hV7p.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "observedAtMs": 1793225150274,
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 4,
+        "paused": false,
+        "ended": false,
+        "seeking": false,
+        "currentTime": 0,
+        "duration": 30,
+        "loop": true,
+        "buffered": [
+          [
+            -0.002667,
+            30
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            30
+          ]
+        ],
+        "mediaError": null
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {}
+    },
+    {
+      "kind": "pause",
+      "signalSequence": 147,
+      "elementId": "media:2",
+      "sourceEpoch": 1,
+      "url": "http://127.0.0.1:50306/assets/ambient_field-5Mv-hV7p.ogg",
+      "origin": "http://127.0.0.1:50306",
+      "observedAtMs": 1793225167616,
+      "mediaState": {
+        "networkState": 1,
+        "readyState": 4,
+        "paused": false,
+        "ended": false,
+        "seeking": false,
+        "currentTime": 17.272859,
+        "duration": 30,
+        "loop": true,
+        "buffered": [
+          [
+            -0.002667,
+            30
+          ]
+        ],
+        "seekable": [
+          [
+            0,
+            30
+          ]
+        ],
+        "mediaError": null
+      },
+      "mediaStateUnavailable": [],
+      "mediaStateReadErrors": {}
+    }
+  ],
+  "artifact": {
+    "schema": "awwv.r8-warroom.cdp-network-collection.v3",
+    "status": "complete",
+    "non_admitting": true,
+    "session": {
+      "observer_session_id": "cdp-observer-1c7c5ae3b86bb8b8651456bd",
+      "producer": "playwright-public-context-newCDPSession",
+      "domain": "CDP Network",
+      "network_enable_parameters": {},
+      "body_method": "Network.getResponseBody",
+      "cross_stream_mapping": "none",
+      "target": {
+        "target_id": "9AA4F882001185231494AA3C146F3BCB",
+        "type": "iframe",
+        "selected_frame_url": {
+          "status": "present",
+          "protocol": "http:",
+          "hostname": "127.0.0.1",
+          "port": "50306",
+          "path": [
+            "",
+            "index.html"
+          ],
+          "had_userinfo": false,
+          "had_query": true,
+          "had_fragment": false
+        },
+        "reported_url": {
+          "status": "present",
+          "protocol": "http:",
+          "hostname": "127.0.0.1",
+          "port": "50306",
+          "path": [
+            "",
+            "index.html"
+          ],
+          "had_userinfo": false,
+          "had_query": true,
+          "had_fragment": false
+        }
+      },
+      "coverage_window": {
+        "begins_after": "selected-gameplay-frame-network-enable",
+        "excludes": [
+          "outer-page-load",
+          "campaign-bootstrap",
+          "intro-or-resume-routing",
+          "pre-attachment-frame-traffic"
+        ]
+      }
+    },
+    "caps": {
+      "eventRows": 4096,
+      "liveRequestIds": 128,
+      "targetGenerations": 16,
+      "bodyAttempts": 16,
+      "bodyBytes": 1048576,
+      "errorChars": 400,
+      "idChars": 256,
+      "valueChars": 256,
+      "pathComponentChars": 256,
+      "pathComponents": 64,
+      "urlProjectionChars": 2048,
+      "dynamicChars": 400,
+      "closeTimeoutMs": 5000
+    },
+    "setup": {
+      "state": "ready",
+      "primary_error": null,
+      "cleanup_error": null
+    },
+    "events": [
+      {
+        "observer_session_id": "cdp-observer-1c7c5ae3b86bb8b8651456bd",
+        "sequence": 379,
+        "kind": "request",
+        "request_id": "24304.18835",
+        "generation": 1,
+        "timestamp": 614199.999343,
+        "wall_time_s": 1793225071.031249,
+        "url": {
+          "status": "present",
+          "protocol": "http:",
+          "hostname": "127.0.0.1",
+          "port": "50306",
+          "path": [
+            "",
+            "assets",
+            "ambient_warroom-CO4FPnyV.ogg"
+          ],
+          "had_userinfo": false,
+          "had_query": false,
+          "had_fragment": false
+        },
+        "method": "GET",
+        "resource_type": "Media",
+        "frame_id": "9AA4F882001185231494AA3C146F3BCB",
+        "loader_id": "9119D5BE4E18E33717F8D34D79C297B4",
+        "redirect_present": false,
+        "chain_tainted": false,
+        "actual_range": {
+          "status": "present",
+          "value": "bytes=0-"
+        },
+        "observed_at_ms": 1793225071031
+      },
+      {
+        "observer_session_id": "cdp-observer-1c7c5ae3b86bb8b8651456bd",
+        "sequence": 380,
+        "kind": "response",
+        "request_id": "24304.18835",
+        "generation": 1,
+        "timestamp": 614200.00108,
+        "url": {
+          "status": "present",
+          "protocol": "http:",
+          "hostname": "127.0.0.1",
+          "port": "50306",
+          "path": [
+            "",
+            "assets",
+            "ambient_warroom-CO4FPnyV.ogg"
+          ],
+          "had_userinfo": false,
+          "had_query": false,
+          "had_fragment": false
+        },
+        "status": 206,
+        "mime_type": "application/octet-stream",
+        "protocol": "http/1.1",
+        "from_disk_cache": true,
+        "from_service_worker": false,
+        "content_range": {
+          "status": "present",
+          "value": "bytes 0-206419/206420"
+        },
+        "content_length": {
+          "status": "present",
+          "value": "206420"
+        },
+        "accept_ranges": {
+          "status": "present",
+          "value": "bytes"
+        },
+        "chain_tainted": false,
+        "observed_at_ms": 1793225071033
+      },
+      {
+        "observer_session_id": "cdp-observer-1c7c5ae3b86bb8b8651456bd",
+        "sequence": 381,
+        "kind": "failure",
+        "request_id": "24304.18835",
+        "generation": 1,
+        "timestamp": 614200.001519,
+        "error_text": "net::ERR_ABORTED",
+        "canceled": true,
+        "blocked_reason": null,
+        "candidate": true,
+        "disqualification_reasons": [],
+        "chain_tainted": false,
+        "observed_at_ms": 1793225071034
+      },
+      {
+        "observer_session_id": "cdp-observer-1c7c5ae3b86bb8b8651456bd",
+        "sequence": 518,
+        "kind": "request",
+        "request_id": "24304.22608",
+        "generation": 1,
+        "timestamp": 614279.238524,
+        "wall_time_s": 1793225150.272051,
+        "url": {
+          "status": "present",
+          "protocol": "http:",
+          "hostname": "127.0.0.1",
+          "port": "50306",
+          "path": [
+            "",
+            "assets",
+            "ambient_field-5Mv-hV7p.ogg"
+          ],
+          "had_userinfo": false,
+          "had_query": false,
+          "had_fragment": false
+        },
+        "method": "GET",
+        "resource_type": "Media",
+        "frame_id": "9AA4F882001185231494AA3C146F3BCB",
+        "loader_id": "9119D5BE4E18E33717F8D34D79C297B4",
+        "redirect_present": false,
+        "chain_tainted": false,
+        "actual_range": {
+          "status": "present",
+          "value": "bytes=0-"
+        },
+        "observed_at_ms": 1793225150272
+      },
+      {
+        "observer_session_id": "cdp-observer-1c7c5ae3b86bb8b8651456bd",
+        "sequence": 519,
+        "kind": "response",
+        "request_id": "24304.22608",
+        "generation": 1,
+        "timestamp": 614279.240441,
+        "url": {
+          "status": "present",
+          "protocol": "http:",
+          "hostname": "127.0.0.1",
+          "port": "50306",
+          "path": [
+            "",
+            "assets",
+            "ambient_field-5Mv-hV7p.ogg"
+          ],
+          "had_userinfo": false,
+          "had_query": false,
+          "had_fragment": false
+        },
+        "status": 206,
+        "mime_type": "application/octet-stream",
+        "protocol": "http/1.1",
+        "from_disk_cache": true,
+        "from_service_worker": false,
+        "content_range": {
+          "status": "present",
+          "value": "bytes 0-196083/196084"
+        },
+        "content_length": {
+          "status": "present",
+          "value": "196084"
+        },
+        "accept_ranges": {
+          "status": "present",
+          "value": "bytes"
+        },
+        "chain_tainted": false,
+        "observed_at_ms": 1793225150274
+      },
+      {
+        "observer_session_id": "cdp-observer-1c7c5ae3b86bb8b8651456bd",
+        "sequence": 520,
+        "kind": "failure",
+        "request_id": "24304.22608",
+        "generation": 1,
+        "timestamp": 614279.240775,
+        "error_text": "net::ERR_ABORTED",
+        "canceled": true,
+        "blocked_reason": null,
+        "candidate": true,
+        "disqualification_reasons": [],
+        "chain_tainted": false,
+        "observed_at_ms": 1793225150275
+      }
+    ],
+    "body_attempts": [
+      {
+        "observer_session_id": "cdp-observer-1c7c5ae3b86bb8b8651456bd",
+        "request_id": "24304.18835",
+        "generation": 1,
+        "trigger_sequence": 381,
+        "settled_sequence": 382,
+        "provenance": "direct-Network.getResponseBody",
+        "state": "error",
+        "byte_count": null,
+        "sha256": null,
+        "error": "redacted-error:c6b1b06243a4afa6f9ace2d3:chars=107"
+      },
+      {
+        "observer_session_id": "cdp-observer-1c7c5ae3b86bb8b8651456bd",
+        "request_id": "24304.22608",
+        "generation": 1,
+        "trigger_sequence": 520,
+        "settled_sequence": 521,
+        "provenance": "direct-Network.getResponseBody",
+        "state": "error",
+        "byte_count": null,
+        "sha256": null,
+        "error": "redacted-error:c6b1b06243a4afa6f9ace2d3:chars=107"
+      }
+    ],
+    "inconsistencies": [],
+    "overflow_receipts": [],
+    "observation_stopped_at_sequence": null,
+    "summary": {
+      "rows_by_kind": {
+        "request": 2,
+        "response": 2,
+        "failure": 2,
+        "finish": 0
+      },
+      "target_like_failures": 2,
+      "body_attempts_by_state": {
+        "captured": 0,
+        "unavailable": 0,
+        "error": 2,
+        "pending": 0,
+        "truncated": 0
+      },
+      "inconsistencies": 0,
+      "cap_violations": 0,
+      "pending_at_flush": 0,
+      "complete_through_stop_only": false
+    },
+    "flush": {
+      "state": "closed",
+      "pending_at_deadline": 0,
+      "detach": "detached"
+    }
+  }
+}

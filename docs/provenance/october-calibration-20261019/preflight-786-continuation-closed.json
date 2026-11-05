@@ -1,0 +1,31 @@
+{
+  "schema": "awwv.786.continuation-closed.v1",
+  "closed_utc": "2026-10-21T11:12:32.195Z",
+  "writes_closed": true,
+  "verdict": "NO_GO_READER_COVERAGE_BLOCKERS__RUNNER_NOT_LAUNCHED",
+  "result": {
+    "path": "logs/claude-channel-20261004/786-continuation-result.json",
+    "bytes": 6903,
+    "sha256": "d4ed156abee5477ef7e10ae1f6b3058c2a6a825903a4abdcb9803d3ce8fcad5e"
+  },
+  "inventory": {
+    "path": "logs/claude-channel-20261004/786-continuation-inventory.json",
+    "bytes": 11483,
+    "sha256": "3a0384e963c0bd952a20e3f6e661a3d0a72fa9bc25c98261597bbeefd06bd6eb"
+  },
+  "runner_invocations": 0,
+  "allowance_unspent": true,
+  "no_active_owned_runner": true,
+  "head": "cd65b0f20b045378342c8cd1f224f46649d368cf",
+  "clean": true,
+  "telemetry": {
+    "C": {
+      "bytes": 102001043,
+      "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899"
+    },
+    "D": {
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    }
+  }
+}

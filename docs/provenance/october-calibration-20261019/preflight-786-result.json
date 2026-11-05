@@ -1,0 +1,217 @@
+{
+  "schema": "awwv.786.instrumented188-diagnostic.v1",
+  "sealed_utc": "2026-10-21T11:07:05.196Z",
+  "writes_closed": true,
+  "verdict": "NO_GO_PREREQUISITE_PROVENANCE_MISMATCH__RUNNER_NOT_LAUNCHED",
+  "authorization": {
+    "one_188_invocation": true,
+    "invocations_used": 0,
+    "retries": 0,
+    "hard_deadline_utc": "2026-10-21T11:35:36Z"
+  },
+  "opening_and_current": {
+    "workdir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+    "head": "cd65b0f20b045378342c8cd1f224f46649d368cf",
+    "clean": true,
+    "status": ""
+  },
+  "question": "Measure personnel and generic-probe selection against n82 with observer-neutral raw artifacts.",
+  "scope": {
+    "campaigns": 0,
+    "runTurn_calls": 0,
+    "full_suites": 0,
+    "builds": 0,
+    "replays": 0,
+    "source_test_data_docs_git_edits": 0,
+    "local_diagnostic_files_only": true
+  },
+  "prerequisites": {
+    "pass": false,
+    "evidence": "logs/claude-channel-20261004/786-preflight.json",
+    "head_and_clean": true,
+    "source_test_pins_12": true,
+    "native_inventory_31": true,
+    "baseline_ordered_inputs_32_and_digest_valid": true,
+    "current_inputs_matching_baseline": 31,
+    "active_runner_count": 0,
+    "blocking_mismatch": {
+      "path": "data/derived/operational/operational_settlements.geojson",
+      "baseline_sha256": "c03cc9ce4286b779139ce460e5f515d67415fe633e4ed2dbda1764b9440338c8",
+      "current_sha256": "03713c8e80ba7111ff64ad0bd69b70db4c7e2b30e22f23b8c4e2c11be60baa1a",
+      "hash_algorithm": "SHA256 over exact raw file bytes",
+      "current_bytes": 3222754,
+      "current_mtime_utc": "2026-10-03T09:32:59.796Z"
+    },
+    "failure_categories": {
+      "head_status": [],
+      "source_test_pins": [],
+      "review_and_raw_inventory_pins": [],
+      "native_inventory": [],
+      "baseline_provenance_structure": [],
+      "runtime_prerequisites": [],
+      "active_runner": [],
+      "reader_controls": [],
+      "telemetry_preservation": [],
+      "current_input_bytes": [
+        {
+          "path": "data/derived/operational/operational_settlements.geojson",
+          "baseline_sha256": "c03cc9ce4286b779139ce460e5f515d67415fe633e4ed2dbda1764b9440338c8",
+          "current_sha256": "03713c8e80ba7111ff64ad0bd69b70db4c7e2b30e22f23b8c4e2c11be60baa1a",
+          "hash_algorithm": "SHA256 over exact raw file bytes",
+          "current_bytes": 3222754,
+          "current_mtime_utc": "2026-10-03T09:32:59.796Z"
+        }
+      ]
+    }
+  },
+  "cheap_controls": {
+    "reader_controls": {
+      "pass": true,
+      "count": 14,
+      "evidence": "logs/claude-channel-20261004/786-reader-controls-a/controls.json",
+      "cases": [
+        {
+          "name": "personnel positive",
+          "pass": true,
+          "expected_error": false,
+          "error": null
+        },
+        {
+          "name": "personnel malformed",
+          "pass": true,
+          "expected_error": true,
+          "error": "line 1: malformed [personnel] JSON"
+        },
+        {
+          "name": "personnel missing end",
+          "pass": true,
+          "expected_error": true,
+          "error": "terminal while active"
+        },
+        {
+          "name": "personnel reordered",
+          "pass": true,
+          "expected_error": true,
+          "error": "writer outside phase"
+        },
+        {
+          "name": "personnel duplicate",
+          "pass": true,
+          "expected_error": true,
+          "error": "personnel turn coverage"
+        },
+        {
+          "name": "personnel truncated",
+          "pass": true,
+          "expected_error": true,
+          "error": "personnel truncated"
+        },
+        {
+          "name": "personnel absent actor",
+          "pass": true,
+          "expected_error": true,
+          "error": "requested actor absent"
+        },
+        {
+          "name": "commander positive",
+          "pass": true,
+          "expected_error": false,
+          "error": null
+        },
+        {
+          "name": "commander malformed",
+          "pass": true,
+          "expected_error": true,
+          "error": "line 1: malformed [commander_creation] JSON"
+        },
+        {
+          "name": "commander missing end",
+          "pass": true,
+          "expected_error": true,
+          "error": "commander truncated"
+        },
+        {
+          "name": "commander reordered",
+          "pass": true,
+          "expected_error": true,
+          "error": "completion outside/misbound pass"
+        },
+        {
+          "name": "commander duplicate",
+          "pass": true,
+          "expected_error": true,
+          "error": "completion inventory/duplicate"
+        },
+        {
+          "name": "commander truncated",
+          "pass": true,
+          "expected_error": true,
+          "error": "commander truncated"
+        },
+        {
+          "name": "commander absent actor window",
+          "pass": true,
+          "expected_error": true,
+          "error": "target corps 20..24 coverage"
+        }
+      ]
+    },
+    "byte_comparator": {
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "evidence": {
+        "path": "logs/claude-channel-20261004/396-varosluk-786-byte-selfcheck.stdout.log",
+        "bytes": 1773,
+        "sha256": "b3f12b76fe1c5591a26294a5e10a6c1cf1c8cc489672822886e3d2562817e06b"
+      }
+    },
+    "commander_reader": {
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "evidence": {
+        "path": "logs/claude-channel-20261004/396-varosluk-786-commander-selfcheck.stdout.log",
+        "bytes": 4130,
+        "sha256": "972c50ec88544f7f0cc4759791ae780c597a62c11e0d2af6b40092849ca7d3d9"
+      }
+    }
+  },
+  "telemetry": {
+    "C": {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 102001043,
+      "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899"
+    },
+    "D": {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    },
+    "append_bytes": 0,
+    "prefix_preserved": true
+  },
+  "gates": {
+    "runner": "UNREACHED_PREREQUISITE_FAILURE",
+    "actual_run_dir": "UNREACHED_NO_STDOUT",
+    "native31_candidate": "UNREACHED",
+    "raw_all30_gameplay_files": "UNREACHED",
+    "ten_pair_comparator": "UNREACHED",
+    "candidate_provenance32": "UNREACHED",
+    "personnel_188_stateful_coverage": "UNREACHED",
+    "personnel_21_to_22_writer": "UNMEASURED",
+    "commander_caller_pass_inventory": "UNREACHED",
+    "generic_fallback_turn23": "UNMEASURED",
+    "kijevo_turn24_exclusion": "UNMEASURED",
+    "independent_review_787": "READY_FOR_ROOT_DISPATCH"
+  },
+  "findings": {
+    "historical_n80_counterfactual": "UNKNOWN",
+    "observer_neutrality": "UNMEASURED",
+    "baseline_adoption": false,
+    "retained_posture": "n80 retained 703/712 NO-GO unadopted; n81/n82 rejected 689; all inherited gates remain unmet"
+  },
+  "failures": [
+    "input:data/derived/operational/operational_settlements.geojson: 03713c8e80ba7111ff64ad0bd69b70db4c7e2b30e22f23b8c4e2c11be60baa1a"
+  ],
+  "stop_reason": "785 requires exact same ordered 32 consumed inputs and commands stop on provenance failure; data edits/restoration and expensive retry prohibited.",
+  "closed_utc": "2026-10-21T11:07:32.636Z"
+}

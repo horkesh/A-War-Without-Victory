@@ -1,0 +1,36 @@
+{
+  "schema": "awwv.startup-policy-repair-v2.targeted-correction-verification-addendum.v1",
+  "supersedes": "TARGETED_CORRECTION_VERIFICATION.md finding 2 and TARGETED_CORRECTION_VERIFICATION.json finding all-faction-all-option-binding-still-incomplete",
+  "verdict": "NO_GO_BOUNDED_CORRECTION_REQUIRED",
+  "reviewed_head": "b371adc3e0935825649e5eda4e6bbd45a44a359d",
+  "established_without_retest": [
+    "every foundational option runs through browser and Electron production adapters",
+    "opening projection parity includes negotiation, pending/firing maps, flags, receipts, notifications, recruitment modifiers, bot priority shifts, and policy",
+    "serialize/load parity",
+    "first Advance succeeds for both adapters",
+    "authored flags and dimension modifiers persist across first Advance, including cross-faction shifts"
+  ],
+  "remaining_findings": [
+    {
+      "id": "legacy-identity-production-adapter-regression",
+      "condition": "Classify coherent opening and catalog-authored legacy identity lanes; preserve ordinary legacy adapter semantics including absent optional headless metadata, queue no early policy there, and reject mixed tuples without mutation."
+    },
+    {
+      "id": "foundational-source-truth-and-display-proof-narrow-gap",
+      "evidence": [
+        "tests/browser_campaign_start_fallback.test.ts:231-311",
+        "tests/player_start_surface_contracts.test.ts:67-88",
+        "tests/player_start_surface_contracts.test.ts:91-121",
+        "tests/player_start_surface_contracts.test.ts:139-149"
+      ],
+      "condition": "Extend the existing matrix to bind morale, alliance, aggression, and equipment-quality effects and exact durations/expiry to authored options before and after its existing Advance; bind exact receipt/notification/firing clocks; assert each display-safe effect and dimension row in the existing real modal loop."
+    }
+  ],
+  "retained_checks": {
+    "policy": { "passed": 32, "failed": 0, "exit_code": 0 },
+    "focused": { "files_passed": 6, "passed": 92, "failed": 0, "exit_code": 0 },
+    "tsc_nonincremental": { "exit_code": 0 }
+  },
+  "validation_repeated": false,
+  "source_or_test_edits": false
+}

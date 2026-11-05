@@ -1,0 +1,178 @@
+{
+  "pass": true,
+  "base_commit": "b7f4ed902f15d6d3a4db3cab86a065da2021b37e",
+  "exits": {
+    "newfile": 0,
+    "newfile_final": 0,
+    "inventory": 0,
+    "build_receipt": 0,
+    "docs": 0,
+    "plan_index": 0,
+    "citations": 0
+  },
+  "artifact_checks": [
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_correction_verification.md",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_independent_review.md",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_inventory.cjs",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_inventory.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_inventory.json",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_inventory.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_newfile.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_newfile.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_newfile.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_newfile_final.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_newfile_final.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_newfile_final.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_root_start.cjs",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_root_start.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_root_start.json",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_root_start.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_summary.md",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_summary_corrected.md",
+      "intact": true
+    }
+  ],
+  "source_parent_checks": [
+    {
+      "path": "src/sim/combat/brigade_front_distribution.ts",
+      "intact": true
+    },
+    {
+      "path": "src/sim/combat/osid_column_movement.ts",
+      "intact": true
+    },
+    {
+      "path": "src/sim/turn_phases/war_phase_reconciliation_steps.ts",
+      "intact": true
+    },
+    {
+      "path": "src/state/game_state.ts",
+      "intact": true
+    },
+    {
+      "path": "src/state/serializeGameState.ts",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_reviewed_summary.json",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_closeout.json",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_independent_review.md",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_139_20261004_reviewed_summary.json",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_campaign_reviewed_summary.json",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_reviewed_summary.json",
+      "intact": true
+    }
+  ],
+  "test_intact": true,
+  "production_diff_empty": true,
+  "documentation": {
+    "tests": 56,
+    "exit": 0,
+    "tracked_citations": 135,
+    "whitespace": [
+      "working=0",
+      "staged=0"
+    ],
+    "caps": [
+      {
+        "path": "docs/plans/MASTER_ROADMAP.md",
+        "characters": 59978,
+        "maximum": 60000
+      },
+      {
+        "path": "docs/plans/COMMAND_BOARD.md",
+        "characters": 19689,
+        "maximum": 20000
+      }
+    ]
+  },
+  "required_hook": {
+    "command": "git -c core.hooksPath=.husky commit -m \"Characterize front distribution column order conflict\"",
+    "result": "Pending execution; own result recorded separately in commit log/exit and final binding."
+  },
+  "staged_snapshot_before_closeout": [
+    "docs/20_engineering/DETERMINISM_TEST_MATRIX.md",
+    "docs/40_reports/CALIBRATION_MASTER.md",
+    "docs/PROJECT_LEDGER.md",
+    "docs/plans/COMMAND_BOARD.md",
+    "docs/plans/MASTER_ROADMAP.md",
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_correction_verification.md",
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_independent_review.md",
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_reviewed_summary.json",
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_summary.md",
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_summary_corrected.md",
+    "logs/prusac-diagnostic-20260929/sana_ivanjska_joint_validation_plan.md",
+    "logs/prusac-diagnostic-20260929/sana_n37_convergence_report.md",
+    "tests/front_distribution_order_conflict_diagnostic.test.ts"
+  ],
+  "calibration_acceptance": false,
+  "campaign_replay_full_suite": false,
+  "merge_push_adoption": false
+}

@@ -1,0 +1,48 @@
+{
+  "mode": "static tabletop against proposed P1-P3 text; no runtime session activated",
+  "cases": [
+    {
+      "case": "documentation typo",
+      "expected": "read the named file and use focused documentation/reference/whitespace checks",
+      "negative": "no canon stack, design interview, scenario, typecheck, build, or campaign",
+      "routes": ["AGENTS.md documentation/process row", "AGENT_WORKFLOW.md validation by change type"],
+      "verdict": "pass"
+    },
+    {
+      "case": "specified UI bug",
+      "expected": "use relevant GUI/player-information/UI-ownership sources, implement the agreed behavior, and obtain real rendered evidence plus affected checks",
+      "negative": "no generic brainstorming interview and no automatic stop after the first patch or first failure",
+      "routes": ["AGENT_WORKFLOW.md map/UI row", "brainstorming negative boundary", "executing-plans continuation rule"],
+      "verdict": "pass"
+    },
+    {
+      "case": "territory-moving simulation rule",
+      "expected": "load affected canon/specs/invariants/determinism and preserve full-suite, authoritative 188-week, anchors, provenance and independent review",
+      "negative": "no focused-test waiver and no unplanned campaign expansion",
+      "routes": ["CLAUDE.md hard boundaries", "AGENT_WORKFLOW.md simulation and calibration gates", "verification-before-completion non-waiver"],
+      "verdict": "pass"
+    },
+    {
+      "case": "sensitive-history canon change without panel receipt",
+      "expected": "identify the applicable distinct unanimous panel, exclude the implementer, preserve owner proposal visibility, and withhold the edit/claim",
+      "negative": "no generic reviewer substitution and no unapproved FORAWWV edit",
+      "routes": ["AGENT_WORKFLOW.md canon boundary", "CLAUDE.md hard boundaries"],
+      "verdict": "pass"
+    },
+    {
+      "case": "plan-only request",
+      "expected": "produce a reviewable plan with outcome, scope, dependencies, checks, authority and stopping conditions",
+      "negative": "no implementation and no forced execution-choice question",
+      "routes": ["AGENT_WORKFLOW.md authority classification", "writing-plans handoff boundary"],
+      "verdict": "pass"
+    },
+    {
+      "case": "first in-scope test failure",
+      "expected": "retain evidence, inspect failure categories, diagnose and cheaply verify a targeted correction",
+      "negative": "no automatic approval request, full-suite retry, or fixed batch stop",
+      "routes": ["AGENT_WORKFLOW.md failure handling", "executing-plans failure rule", "orchestrator cost discipline"],
+      "verdict": "pass"
+    }
+  ],
+  "runtime_residual": "Actual Claude/Codex/Cursor routing trials and live activation remain parent-owned P5 work."
+}

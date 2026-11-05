@@ -1,3 +1,5 @@
+import { initializeMilitiaPoolLifecycleDefaults } from './militia_pool_defaults.js';
+import { initializeFormationDefaults } from './formation_defaults.js';
 /**
  * Save migration registry - versioned field defaults for old saves.
  *
@@ -11,7 +13,7 @@
 
 import type { FactionId, GameState } from './game_state.js';
 import { reconcileLoadedArmyHqOperationLifecycle } from './operation_lifecycle_reconciliation.js';
-import { canonicalizePoliticalSideId, defaultArmyLabelForSide, POLITICAL_SIDES, type ArmyLabel, type PoliticalSideId } from './identity.js';
+import { canonicalizePoliticalSideId } from './identity.js';
 
 interface SaveMigration {
     /** Schema version this migration brings the state TO. */
@@ -190,32 +192,7 @@ function defaultFormations(state: GameState): void {
     for (const key of sortedKeys(formations)) {
         const form = formations[key];
         if (!form || typeof form !== 'object' || Array.isArray(form)) continue;
-        if (typeof form.faction === 'string') {
-            const oldFaction = form.faction;
-            const canonicalFaction = canonicalizePoliticalSideId(oldFaction);
-            form.faction = canonicalFaction;
-            if ((oldFaction === 'ARBiH' || oldFaction === 'VRS' || oldFaction === 'HVO') && !form.force_label) {
-                form.force_label = oldFaction as ArmyLabel;
-            }
-            if (POLITICAL_SIDES.includes(canonicalFaction as PoliticalSideId) && !form.force_label) {
-                form.force_label = defaultArmyLabelForSide(canonicalFaction as PoliticalSideId);
-            }
-        }
-        if (!form.ops || typeof form.ops !== 'object' || Array.isArray(form.ops)) {
-            form.ops = { fatigue: 0, last_supplied_turn: null };
-        } else {
-            if (!Number.isInteger(form.ops.fatigue) || form.ops.fatigue < 0) form.ops.fatigue = 0;
-            if (form.ops.last_supplied_turn !== null && (!Number.isInteger(form.ops.last_supplied_turn) || form.ops.last_supplied_turn > turn)) {
-                form.ops.last_supplied_turn = null;
-            }
-        }
-        if (form.kind === undefined) form.kind = 'brigade';
-        if (form.readiness === undefined) form.readiness = 'active';
-        if (form.cohesion === undefined) form.cohesion = 60;
-        if (form.morale === undefined || form.morale === null) form.morale = 60;
-        form.morale = Math.max(0, Math.min(100, form.morale));
-        if (form.activation_gated === undefined) form.activation_gated = false;
-        if (form.activation_turn === undefined) form.activation_turn = null;
+        initializeFormationDefaults(form, turn);
     }
 }
 
@@ -225,10 +202,7 @@ function defaultMilitiaPools(state: GameState): void {
     for (const key of sortedKeys(pools)) {
         const pool = pools[key];
         if (!pool || typeof pool !== 'object' || Array.isArray(pool)) continue;
-        if (pool.faction !== null && typeof pool.faction === 'string') {
-            pool.faction = canonicalizePoliticalSideId(pool.faction);
-        }
-        if (!Number.isInteger(pool.fatigue) || pool.fatigue < 0) pool.fatigue = 0;
+        initializeMilitiaPoolLifecycleDefaults(pool);
     }
 }
 

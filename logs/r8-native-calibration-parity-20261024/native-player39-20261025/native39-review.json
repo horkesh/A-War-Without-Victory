@@ -1,0 +1,572 @@
+{
+  "schema": "awwv.cold-load-validation.native39-actual-independent-review.v1",
+  "reviewedAt": "2026-10-25",
+  "reviewer": "desktop_terrain_canon_review",
+  "independent": true,
+  "verdict": "NO_GO",
+  "runtimeVerdict": "PASS",
+  "calibrationVerdict": "FAIL",
+  "retryAuthorized": false,
+  "observerHead": "77a2cc8e6b270474d0c3beef48b655c2903192e8",
+  "packageCodeHead": "12a4680f04fc3e4cbd8b2fb5f5133b472afd1fd6",
+  "scope": "Independent review of the single retained native39 execution, its postcheck, preservation authorities, and a bounded operation-access join. This does not diagnose first divergence or root cause, does not synthesize campaign-only engine-health reports from native evidence, and does not authorize a retry.",
+  "authority": {
+    "preparationReview": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/INDEPENDENT_PREP_REVIEW.json",
+      "bytes": 10989,
+      "sha256": "ae73dfccc30f5dc2403c0f279bc06a92c8a2a80b050648868cbb6ac72ada26a1",
+      "verdict": "GO"
+    },
+    "config": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/CONFIG.actual.json",
+      "bytes": 9250,
+      "sha256": "bdbcca5d65d128e6d33855122f82458368546f2f1859c13a8fd6750132f6a137"
+    },
+    "entry": {
+      "sha256": "1489e240ba459caa9efe58cb3e37f0f0e5e811c83c24aab485f524044ebce824"
+    },
+    "manifest": {
+      "sha256": "7dad871fe199e0446dc88754555588f1e7b0109bd22aaa6683e1d39a365e6d42"
+    },
+    "openingReview": {
+      "sha256": "816f0b167e4e078aa42b923b72d9c327b34bbb06dedaf432c5d595ddda008aa6"
+    },
+    "openingAmendment": {
+      "sha256": "61ce01bb8bb83609749613b987ec867e7c0a37299374de1eda746cb116f0e3a3"
+    }
+  },
+  "actualEvidence": {
+    "check": {
+      "receipt": {
+        "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/check-actual-01/receipt.json",
+        "bytes": 4022,
+        "sha256": "f9ce4f9f1d26191c0dc0f1370fe8d3103601a1cf094b7a5ebae1c7febf941a9d",
+        "childExit": 0,
+        "wrapperExit": 0,
+        "timedOut": false,
+        "artifactContractPass": true
+      },
+      "ready": {
+        "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/check-actual-01/NATIVE39_READY.json",
+        "bytes": 1357,
+        "sha256": "06bd2b9c6743a99039d5e5807fcec8f595b6ff47bf8487f2f4b0935350d1e285",
+        "pass": true,
+        "practicalGates": 38
+      }
+    },
+    "run": {
+      "receipt": {
+        "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/run-actual-01/receipt.json",
+        "bytes": 6105,
+        "sha256": "a6c705f7b5f4dc44a261cf23e7602db010ea004ba24c3f905d348e3bc063ee95",
+        "childExit": 0,
+        "wrapperExit": 0,
+        "timedOut": false,
+        "spawnError": null,
+        "artifactContractPass": true,
+        "allowedArtifacts": 8,
+        "retainedArtifacts": 8
+      },
+      "artifacts": {
+        "config": {
+          "bytes": 9250,
+          "sha256": "bdbcca5d65d128e6d33855122f82458368546f2f1859c13a8fd6750132f6a137"
+        },
+        "result": {
+          "bytes": 24320780,
+          "sha256": "fc07daa8c583a6f1f3b7f42844245713ab5299b911aa83ff4dbcd1db5d786e20"
+        },
+        "progress": {
+          "bytes": 24320498,
+          "sha256": "b686fdfe7f6b2fd5e686e2115577603f6eb6217af922a6d87a51541cf0484368"
+        },
+        "netlog": {
+          "bytes": 4469216,
+          "sha256": "932b660c4aca4ca18707ce29ec5c9a44eec7ff08f715171973d4a2af1554bf9f"
+        },
+        "stdout": {
+          "bytes": 34008,
+          "sha256": "48b84585d5364235ac944d66a866cc940d801b87eea8f44b611459b26bc12cc8"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "externalInventory": {
+          "bytes": 72726,
+          "sha256": "46702f62a56450052388f440dd66353fa061c679a2905b8bb70d66cfd6b8041f",
+          "files": 225,
+          "liveBindingGate": true
+        },
+        "exit": {
+          "bytes": 665,
+          "sha256": "e0c53b2503f1994cb7a0cfe3d47ffee10a59fe3b2b12cf0ec4ad244cfe459fa9",
+          "exit": 0,
+          "timedOut": false,
+          "errorCode": null,
+          "elapsedMs": 727405,
+          "attempt": 1,
+          "retry": false
+        }
+      }
+    },
+    "postcheck": {
+      "receipt": {
+        "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/postcheck-actual-01/receipt.json",
+        "bytes": 5370,
+        "sha256": "676427a2d46d8a974e582d67034a03b2f62c65409f2446f280e6dd71cc8911d7",
+        "childExit": 1,
+        "wrapperExit": 1,
+        "timedOut": false,
+        "spawnError": null,
+        "artifactContractPass": true
+      },
+      "artifact": {
+        "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/postcheck-actual-01/NATIVE39_POSTCHECK.json",
+        "bytes": 3684,
+        "sha256": "cd3aa7ef60286950385e91622e688c0ae56fb6d2471c1a6800ffa8d7b932645e",
+        "pass": false,
+        "passed": 34,
+        "total": 38,
+        "score": 705
+      }
+    }
+  },
+  "actualRuntime": {
+    "completedAt": "2026-10-25T11:00:38.090Z",
+    "turn": {
+      "initial": 0,
+      "final": 39,
+      "maxObserved": 39
+    },
+    "player": {
+      "faction": "RBiH",
+      "autonomyLevel": 2,
+      "decisionMode": "historical",
+      "paramilitaryPolicy": "always_allow"
+    },
+    "provenance": {
+      "gitHead": "77a2cc8e6b270474d0c3beef48b655c2903192e8",
+      "workingTreeStatusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "workingTreeContentSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "workingTreeContentFileCount": 0,
+      "packageExecutableSha256": "c97f9aee446b2931d01bfb5b5a4ac9d802500fcacb734ea3a00523ba236c9539",
+      "packageAsarSha256": "ba64264b9611870214490cb433e9698fd82862fdf2cfd5c2c8272d51a2d1ed9f",
+      "harnessSha256": "771410a733e4ebc8d821ded0bc44bf6f3719f0dabf275aa5432ad00445938484",
+      "collectorSha256": "b8c957b337ba81d375a471c4b0d84f1a0fda1a0c2a4f9c52d0a84b0b3b6a7259"
+    },
+    "blockerInventory": {
+      "eventDecisions": 0,
+      "proposals": 0,
+      "paramilitary": 0,
+      "reserves": 0,
+      "convoys": 0,
+      "officerEvents": 0,
+      "peacePlan": 0,
+      "counterOffers": 0,
+      "dayton": 0,
+      "operationOpportunities": 0
+    },
+    "diagnostics": {
+      "consoleMessages": 0,
+      "pageErrors": 0,
+      "networkFailures": 0,
+      "unexpectedMainProcessStderr": 0
+    },
+    "archives": {
+      "settledTurns": 39,
+      "provisionalTurns": 39,
+      "coverage": "1..39",
+      "final": {
+        "bytes": 5328576,
+        "sha256": "e58b94766763a10f80dc9bb69a2cb0a8ddde6436f22b12465b4035da63f38340"
+      },
+      "manualSave": {
+        "bytes": 5328576,
+        "sha256": "e58b94766763a10f80dc9bb69a2cb0a8ddde6436f22b12465b4035da63f38340"
+      }
+    },
+    "saveLoad": {
+      "canonicalBytesEqual": true,
+      "beforeAutosaveSha256": "e58b94766763a10f80dc9bb69a2cb0a8ddde6436f22b12465b4035da63f38340",
+      "afterAutosaveSha256": "e58b94766763a10f80dc9bb69a2cb0a8ddde6436f22b12465b4035da63f38340",
+      "expectedStateSha256": "f7110dd7b52c9705c123d7951ae5d715d59ed9fc8e61f334aa717527e1513ef5",
+      "afterStateSha256": "f7110dd7b52c9705c123d7951ae5d715d59ed9fc8e61f334aa717527e1513ef5",
+      "loadedProjectionExactBytes": true,
+      "loadedProjectionActualSha256": "f7110dd7b52c9705c123d7951ae5d715d59ed9fc8e61f334aa717527e1513ef5",
+      "loadedProjectionExpectedSha256": "f7110dd7b52c9705c123d7951ae5d715d59ed9fc8e61f334aa717527e1513ef5"
+    },
+    "cdp": {
+      "path": "tmp-paradox-qa-20260710/evidence/player-parity-rbih-t39-20261025-04/rbih/cdp-network-collection-v3.json",
+      "bytes": 767364,
+      "sha256": "4330e23cadbc75773abb9fb842378150ae1d9f20ecde34a7b149f188fcc8359c",
+      "schema": "awwv.r8-warroom.cdp-network-collection.v3",
+      "status": "complete",
+      "requests": 369,
+      "responses": 366,
+      "failures": 6,
+      "finishes": 363,
+      "targetLikeFailures": 0,
+      "bodyAttempts": {
+        "captured": 0,
+        "unavailable": 0,
+        "error": 0,
+        "pending": 0,
+        "truncated": 0
+      },
+      "inconsistencies": 0,
+      "capViolations": 0,
+      "pendingAtFlush": 0,
+      "completeThroughStopOnly": false
+    },
+    "audio": {
+      "signals": 149,
+      "hasPlay": true,
+      "hasPlaying": true,
+      "mediaStateReadErrors": 0
+    },
+    "choices": [
+      {
+        "eventId": "rbih_state_identity",
+        "responseId": "civic",
+        "basis": "authored_historical_default"
+      },
+      {
+        "eventId": "rbih_paramilitary_policy_1992",
+        "responseId": "always_allow",
+        "basis": "player_selected_counterfactual"
+      },
+      {
+        "eventId": "rbih_minority_retention_1992",
+        "responseId": "retain_minorities",
+        "basis": "authored_historical_default"
+      },
+      {
+        "eventId": "london_conference_1992",
+        "responseId": "accept_principles",
+        "basis": "authored_historical_default"
+      },
+      {
+        "eventId": "ic_pressure_vopp_engagement",
+        "responseId": "acknowledge_pressure",
+        "basis": "authored_historical_default"
+      },
+      {
+        "eventId": "vance_owen_plan_1993",
+        "responseId": "accept",
+        "basis": "authored_historical_default"
+      }
+    ],
+    "officerReceipts": [
+      {
+        "eventId": "arrival_arbih_hadzihasanovic_t22",
+        "turn": 22,
+        "decision": "acknowledged"
+      },
+      {
+        "eventId": "arrival_arbih_pasalic_t24",
+        "turn": 24,
+        "decision": "acknowledged"
+      }
+    ]
+  },
+  "gateAudit": {
+    "passed": 34,
+    "total": 38,
+    "passedInfrastructurePredicates": 17,
+    "passedOtherPracticalGates": 17,
+    "falseGates": [
+      {
+        "name": "target39-score-707",
+        "actual": 705,
+        "requiredMinimum": 707
+      },
+      {
+        "name": "formerly-correct-n91",
+        "losses": [
+          "op:foca:donje_zesce",
+          "op:trnovo:tosici"
+        ]
+      },
+      {
+        "name": "formerly-correct-n92",
+        "losses": [
+          "op:foca:donje_zesce",
+          "op:trnovo:tosici"
+        ]
+      },
+      {
+        "name": "tosici-rbih",
+        "actual": "RS",
+        "required": "RBiH"
+      }
+    ],
+    "trueCalibrationFacts": {
+      "controllerSaveCount": 712,
+      "controllerProjectionCount": 712,
+      "kolovarice": "RS"
+    },
+    "allOtherGateCategoriesPass": true
+  },
+  "calibrationResidual": {
+    "paintedPopulation": 712,
+    "score": 705,
+    "requiredMinimum": 707,
+    "shortfall": 2,
+    "formerlyCorrectLosses": {
+      "n91": [
+        "op:foca:donje_zesce",
+        "op:trnovo:tosici"
+      ],
+      "n92": [
+        "op:foca:donje_zesce",
+        "op:trnovo:tosici"
+      ]
+    },
+    "controllers": {
+      "op:foca:donje_zesce": "RS",
+      "op:trnovo:tosici": "RS",
+      "op:gorazde:kolovarice": "RS"
+    }
+  },
+  "operationAccessJoin": {
+    "scope": "Observed native turn-autosaves 1..39. Authorization, live operation, named-officer assignment, and completion/history records were joined without inferring causality.",
+    "historicalReceipts": 4,
+    "operations": [
+      {
+        "receipt": {
+          "turn": 4,
+          "id": "PROP_4_historical_op_preplanned_arbih_2nd_corps_srebrenica_cerska_link_up",
+          "action": "HISTORICAL_OP:preplanned:arbih_2nd_corps:Srebrenica–Cerska Link-Up",
+          "accepted": true,
+          "value": "authorize"
+        },
+        "corps": "arbih_2nd_corps",
+        "operation": "Srebrenica–Cerska Link-Up",
+        "assignedOfficer": "arbih_mesic",
+        "historyFirstSeenTurn": 16,
+        "completion": {
+          "startedTurn": 4,
+          "endedTurn": 16,
+          "outcome": "success",
+          "recoveryReason": "completed",
+          "targeted": [
+            "op:bratunac:jezestica_2",
+            "op:vlasenica:sebiocina"
+          ],
+          "captured": [
+            "op:bratunac:jezestica_2",
+            "op:vlasenica:sebiocina"
+          ]
+        },
+        "activeTurnRange": [
+          4,
+          15
+        ],
+        "assignedTurnRange": [
+          4,
+          15
+        ]
+      },
+      {
+        "receipt": {
+          "turn": 8,
+          "id": "PROP_8_historical_op_preplanned_arbih_1st_corps_visoko_breza_line_clearing",
+          "action": "HISTORICAL_OP:preplanned:arbih_1st_corps:Visoko–Breza Line Clearing",
+          "accepted": true,
+          "value": "authorize"
+        },
+        "corps": "arbih_1st_corps",
+        "operation": "Visoko–Breza Line Clearing",
+        "assignedOfficer": "arbih_zajko",
+        "historyFirstSeenTurn": 16,
+        "completion": {
+          "startedTurn": 8,
+          "endedTurn": 16,
+          "outcome": "success",
+          "recoveryReason": "completed",
+          "targeted": [
+            "op:visoko:gornja_vratnica_2"
+          ],
+          "captured": [
+            "op:visoko:gornja_vratnica_2"
+          ]
+        },
+        "activeTurnRange": [
+          8,
+          15
+        ],
+        "assignedTurnRange": [
+          8,
+          15
+        ]
+      },
+      {
+        "receipt": {
+          "turn": 14,
+          "id": "PROP_14_historical_op_preplanned_arbih_3rd_corps_maglaj_local_counterattack",
+          "action": "HISTORICAL_OP:preplanned:arbih_3rd_corps:Maglaj Local Counterattack",
+          "accepted": true,
+          "value": "authorize"
+        },
+        "corps": "arbih_3rd_corps",
+        "operation": "Maglaj Local Counterattack",
+        "assignedOfficer": "arbih_merdan",
+        "historyFirstSeenTurn": 29,
+        "completion": {
+          "startedTurn": 14,
+          "endedTurn": 29,
+          "outcome": "failure",
+          "recoveryReason": "max_failures",
+          "targeted": [
+            "op:maglaj:jablanica"
+          ],
+          "captured": []
+        },
+        "activeTurnRange": [
+          14,
+          28
+        ],
+        "assignedTurnRange": [
+          14,
+          28
+        ]
+      },
+      {
+        "receipt": {
+          "turn": 16,
+          "id": "PROP_16_historical_op_preplanned_arbih_1st_corps_operation_circle",
+          "action": "HISTORICAL_OP:preplanned:arbih_1st_corps:Operation Circle",
+          "accepted": true,
+          "value": "authorize"
+        },
+        "corps": "arbih_1st_corps",
+        "operation": "Operation Circle",
+        "assignedOfficer": "arbih_zajko",
+        "historyFirstSeenTurn": 22,
+        "completion": {
+          "startedTurn": 16,
+          "endedTurn": 22,
+          "outcome": "partial",
+          "recoveryReason": "max_failures",
+          "targeted": [
+            "op:gorazde:glamoc",
+            "op:gorazde:kamen",
+            "op:gorazde:sopotnica",
+            "op:foca:donje_zesce",
+            "op:trnovo:tosici"
+          ],
+          "captured": [
+            "op:gorazde:glamoc",
+            "op:gorazde:kamen",
+            "op:gorazde:sopotnica"
+          ]
+        },
+        "activeTurnRange": [
+          16,
+          21
+        ],
+        "assignedTurnRange": [
+          16,
+          21
+        ]
+      }
+    ],
+    "finding": "All four HISTORICAL_OP authorizations reached a live corps operation and a completed operation-history record. The two residual settlements were targeted but not captured by the partial Operation Circle record; this rules out missing operation admission as the observed failure category but does not establish why its outcomes differed."
+  },
+  "acceptedN98Comparison": {
+    "scope": "Contextual turn-39 comparison only. N98 is headless auto-control evidence with different execution conditions and is not identical-input determinism evidence.",
+    "save": {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n98/save_w39.json",
+      "bytes": 5105717,
+      "sha256": "e51224ac22a839d4c1af35a0ea828afb79b62f0ed56559c3b47dcda45578eec5",
+      "turn": 39,
+      "controllerCount": 712,
+      "headlessScenarioAutoControl": true
+    },
+    "controls": {
+      "op:foca:donje_zesce": "RBiH",
+      "op:trnovo:tosici": "RBiH",
+      "op:gorazde:kolovarice": "RS"
+    },
+    "operationHistoryFacts": {
+      "sameStartEndForAllFour": true,
+      "unchangedOtherThreeSummaries": true,
+      "operationCircle": {
+        "n98": {
+          "startedTurn": 16,
+          "endedTurn": 22,
+          "outcome": "partial",
+          "recoveryReason": "completed",
+          "captured": [
+            "op:gorazde:glamoc",
+            "op:gorazde:sopotnica",
+            "op:foca:donje_zesce",
+            "op:trnovo:tosici"
+          ]
+        },
+        "native": {
+          "startedTurn": 16,
+          "endedTurn": 22,
+          "outcome": "partial",
+          "recoveryReason": "max_failures",
+          "captured": [
+            "op:gorazde:glamoc",
+            "op:gorazde:kamen",
+            "op:gorazde:sopotnica"
+          ]
+        }
+      }
+    }
+  },
+  "preservation": {
+    "legacy": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/LEGACY_TELEMETRY_PRESERVATION_AFTER_NATIVE02_FAILURE.json",
+      "sha256": "26c4f3dd2eda428601eb4c48b109d54cf38cf9efe11c4f716299b4b7267ee486",
+      "runs": 8,
+      "failedAttempts": 8,
+      "rawProfiles": 6,
+      "inventoryGroups": 22,
+      "records": 1213
+    },
+    "native03Root": {
+      "count": 42,
+      "aggregateSha256": "231809e1970f9d449a798ba6735388ea4a69da8643b7eb040faaf35aa727da3a"
+    },
+    "openingAmendmentRoot": {
+      "count": 18,
+      "aggregateSha256": "67d3bb741b9593d27ed3dc749f9e3b1d273b7b3d12aa79ba69eac4a8da4e2df4"
+    },
+    "telemetryPrefixes": {
+      "c": {
+        "bytes": 140097015,
+        "sha256": "40e25ae15966d04006287209632c5b9db95fefb6eb9ada2eb203a46fc1d2627c"
+      },
+      "d": {
+        "bytes": 1041,
+        "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+      }
+    },
+    "postcheckReachedAndPassedPreservationReaders": true,
+    "newNativeEvidenceRetained": true
+  },
+  "scopeLimits": [
+    "The native result and postcheck establish 38 defined practical gates only. Campaign-only full scenario engine-health, classifier, or multi-faction summaries are not produced by this native schema and are not synthesized here.",
+    "N98 is reused only for the specific accepted turn-39 controller and operation-history facts listed above; its headless auto-control route differs from the player-native execution.",
+    "No first-divergence or causal conclusion is made. A separate diagnosis must use the retained turn archives and operation records."
+  ],
+  "findings": [
+    "The one authorized native39 process completed successfully with clean provenance, complete archives, exact Save/Load, strict CDP completion, audio lifecycle evidence, normal visible choices, acknowledged historical officer events, zero blockers, and zero diagnostic errors.",
+    "Calibration acceptance failed substantively at 705/712. Donje Žešće and Tošići are the only formerly-correct n91/n92 losses; Tošići therefore also fails its explicit landmark gate.",
+    "All four historical operation authorization receipts joined to live operations, named-officer assignments, and completed history records. Missing operation admission is not the observed category.",
+    "The native and accepted N98 turn-39 records share all four operation start/end windows. Operation Circle is the bounded factual difference relevant to the residuals: native ended partial/max_failures without capturing Donje Žešće or Tošići; N98 ended partial/completed with both captured. This is a diagnostic lead, not a root-cause conclusion.",
+    "The original failed 34/38 postcheck remains authoritative. No other passing gate waives the score, zero-loss, or Tošići criteria, and no retry is authorized."
+  ],
+  "decision": {
+    "runtimeEvidenceAccepted": true,
+    "calibrationQualified": false,
+    "turn39Qualified": false,
+    "retryAuthorized": false,
+    "nextWork": "Independent diagnosis of the retained turn/operation divergence may proceed without another native run. Any gameplay change or new costly execution requires its own reviewed scope."
+  }
+}

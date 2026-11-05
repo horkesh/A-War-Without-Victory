@@ -1,0 +1,15 @@
+import { spawn } from 'node:child_process';
+import { writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+const logs=import.meta.dirname,cwd='F:/A-War-Without-Victory';
+const args=['--print','--tools','Read,Skill','--allowedTools','Read,Skill','--strict-mcp-config','--no-session-persistence','--model','sonnet','--effort','medium','--output-format','stream-json','--verbose'];
+const env={...process.env,PATH:'C:/Program Files/Git/usr/bin;C:/Program Files/Git/bin;'+process.env.PATH};
+delete env.AWWV_HANDOFF_RESULT_DIR;delete env.AWWV_HANDOFF_RUN_ID;
+const child=spawn('C:/Users/User/.local/bin/claude.exe',args,{cwd,env,stdio:['pipe','pipe','pipe'],windowsHide:true});
+let stdout='',stderr='',timedOut=false;
+child.stdout.on('data',b=>stdout+=b);child.stderr.on('data',b=>stderr+=b);
+const prompt='Read-only activation acceptance test. Use the actual loaded CLAUDE.md and skill catalog from this checkout, not a supplied snapshot. Do not perform the hypothetical work. You may read relevant instruction/skill files, but do not edit, run tests/builds/simulations, create agents, message sessions, or use network services. In one concise response state sources/skills, authority boundaries, and required verification for: (1) a README spelling fix; (2) an agreed modal clipped-footer UI bug; (3) a territory-moving simulation rule change; (4) a sensitive-history canon change without a panel receipt. Also state how plan-only work and a first in-scope test failure are handled. Identify whether using-superpowers, brainstorming and awwv-read-first apply by default. Inspect only the relevant instructions required to settle your answers.';
+writeFileSync(join(logs,'live-claude-prompt.txt'),prompt+'\n');child.stdin.end(prompt);
+const timer=setTimeout(()=>{timedOut=true;child.kill();},180000);
+child.on('error',e=>stderr+=e.message);
+child.on('close',code=>{clearTimeout(timer);writeFileSync(join(logs,'live-claude-transcript.jsonl'),stdout);writeFileSync(join(logs,'live-claude-stderr.log'),stderr);const records=stdout.trim().split(/\r?\n/).flatMap(line=>{try{return[JSON.parse(line)];}catch{return[];}});const result=records.findLast(r=>r.type==='result');const receipt={exit:code,timedOut,cwd,args,settings:'actual default user/project/local; no settings or system-prompt override',tools:['Read','Skill'],mcp:'disabled for bounded offline instruction routing',sessionPersistence:false,result};writeFileSync(join(logs,'live-claude-receipt.json'),JSON.stringify(receipt,null,2)+'\n');console.log(JSON.stringify({exit:code,timedOut,is_error:result?.is_error}));process.exitCode=code===0&&!timedOut&&!result?.is_error?0:1;});

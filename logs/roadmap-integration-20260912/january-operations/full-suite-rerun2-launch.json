@@ -1,0 +1,32 @@
+﻿{
+    "head":  "ac3e5e1524558d2dc4e4fc40924306fc2873735a",
+    "branch":  "codex/january-1993-operations-20260914",
+    "status":  [
+                   " M docs/40_reports/CALIBRATION_MASTER.md",
+                   " M docs/40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md",
+                   " M docs/plans/COMMAND_BOARD.md",
+                   " M docs/plans/MASTER_ROADMAP.md",
+                   " M docs/plans/plan_index.yml",
+                   "A  logs/roadmap-integration-20260912/january-operations/diagnostic_g-orasac-compact.json",
+                   "A  logs/roadmap-integration-20260912/january-operations/diagnostic_g-orasac-diagnosis.md",
+                   "A  logs/roadmap-integration-20260912/january-operations/full-suite-rerun-launch.json",
+                   "A  logs/roadmap-integration-20260912/january-operations/post_a-audit.json",
+                   "A  logs/roadmap-integration-20260912/january-operations/post_a-checkpoints-reverified-20260916.log",
+                   "A  logs/roadmap-integration-20260912/january-operations/post_a-checkpoints.log",
+                   "A  logs/roadmap-integration-20260912/january-operations/post_a-consistency.log",
+                   "A  logs/roadmap-integration-20260912/january-operations/post_a-health.log",
+                   "A  logs/roadmap-integration-20260912/january-operations/post_a-independent-evidence-review.md",
+                   "A  logs/roadmap-integration-20260912/january-operations/post_a-january.json",
+                   "A  logs/roadmap-integration-20260912/january-operations/post_a-launch.json",
+                   "A  logs/roadmap-integration-20260912/january-operations/post_a-validation.json"
+               ],
+    "node":  "v22.23.2",
+    "command":  "npm.cmd run test:vitest:balanced",
+    "bash_on_path":  "C:\\Program Files\\Git\\bin\\bash.exe (Git Bash prepended)",
+    "note":  "Second rerun. The first rerun was INVALID: vitest resolved bash to C:\\Windows\\system32\\bash.exe (WSL), so 10 hook-guard/CI-guardrail files failed on MSYS path resolution. Those 10 files are byte-identical to main and unrelated to the January work.",
+    "started_at":  "2026-09-16T10:47:06.1525263+02:00",
+    "finished_at":  "2026-09-16T11:15:58.5772929+02:00",
+    "exit":  0,
+    "result":  "13982 passed across 1389 files, 31 tests / 4 files skipped, exit 0. Sole FAIL is tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts, the intentional child-process control asserted by tests/run_vitest_balanced.test.ts (13/13 pass).",
+    "post_head":  "ac3e5e1524558d2dc4e4fc40924306fc2873735a"
+}

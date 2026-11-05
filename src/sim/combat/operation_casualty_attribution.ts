@@ -14,7 +14,7 @@
 import type { GameState, FormationId, CorpsOperation } from '../../state/game_state.js';
 import type { AttackResolutionOsidReport } from './attack_resolution_osid.js';
 import { emptyPendingCasualties, type PendingOperationCasualties } from './operation_aar.js';
-import { findBrigadeOperation } from './corps_operation_helpers.js';
+import { findBrigadeOperationAnywhere } from './corps_operation_helpers.js';
 import { KIA_FRACTION, WIA_FRACTION } from './attack_casualty_distribution.js';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
@@ -45,16 +45,13 @@ interface BrigadeOpContext {
 function getBrigadeOpContext(state: GameState, brigadeId: FormationId): BrigadeOpContext | null {
     const formation = state.military.formations?.[brigadeId];
     if (!formation) return null;
-    const corpsId = formation.corps_id;
-    if (!corpsId) return null;
-    const corps = state.military.corps_command?.[corpsId];
-    if (!corps) return null;
-    const op = findBrigadeOperation(corps, brigadeId);
-    if (!op) return null;
+    const match = findBrigadeOperationAnywhere(state, brigadeId);
+    if (!match) return null;
+    const { op } = match;
     if (op.type !== 'sector_attack') return null;
 
     const axisId = getBrigadeAxisId(op, brigadeId);
-    return { op, corpsId, axisId };
+    return { op, corpsId: match.corps_id, axisId };
 }
 
 /** Find which axis a brigade belongs to. Returns null if no axes or not found. */

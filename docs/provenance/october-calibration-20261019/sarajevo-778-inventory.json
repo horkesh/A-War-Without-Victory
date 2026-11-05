@@ -1,0 +1,238 @@
+{
+  "schema": "awwv.778.inventory.v1",
+  "sealed_utc": "2026-10-21T08:12:09.354Z",
+  "writes_closed": true,
+  "entry_count": 46,
+  "entries": [
+    {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 102001043,
+      "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899"
+    },
+    {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-773-one188-telemetry/C-after.jsonl",
+      "bytes": 102001043,
+      "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-773-one188-telemetry/D-after.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/396-varosluk-773-one188.stdout.log",
+      "bytes": 5154789,
+      "sha256": "922c65fceb712a4d82c1061d3e59af8e607b95eaed4dee7ea16dd6d962d4f903"
+    },
+    {
+      "path": "logs/claude-channel-20261004/773-result.json",
+      "bytes": 40810,
+      "sha256": "211443ce774d265cace5d063937ce01a9f1672827e7591041ac51e4ec7515e2e"
+    },
+    {
+      "path": "logs/claude-channel-20261004/774-targeted-verification.json",
+      "bytes": 3137,
+      "sha256": "7ece8a7a456b1a4c2e3bb549ae6a3abddae1d9046e798f59de2e9275b2a9dafd"
+    },
+    {
+      "path": "logs/claude-channel-20261004/775-result.json",
+      "bytes": 25055,
+      "sha256": "8131fa5115a439d14fb06cae93d72150d8cf67bb941f58e5e67fbd6b5446735f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/776-result.json",
+      "bytes": 1391,
+      "sha256": "73ba7055fc71eacf10b2699f05ff4e49a4f51c4bc740b587d6ad8136c11db50f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-closeout.cjs",
+      "bytes": 10819,
+      "sha256": "90a49ba49c307544dd6c4bab56141197f7009d17c80619c2982d8bc1bf35625a"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-controls-a/controls.json",
+      "bytes": 603,
+      "sha256": "4024eb1f5aede11af2cbec3dd1c4d260c135aae2436e3c59e8da3539cf9f17a3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-controls-a/entry-script.snapshot",
+      "bytes": 1601,
+      "sha256": "5849bb563ef08563f2b745931c817e512410b80d053e03b47d3b33621c174063"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-controls-a/receipt.json",
+      "bytes": 2667,
+      "sha256": "b6e5c0d52131eb5b0204bcab83a17c66562bebc8bfc9ad638a8f7c5939c163b6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-controls-a/start.json",
+      "bytes": 1481,
+      "sha256": "fcd0113d28e1219cdeaef6931cb5b13f11885ac49102c2236bd7b81259d88cad"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-controls-a/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-controls-a/stdout.log",
+      "bytes": 338,
+      "sha256": "1afcf19c1beae6642166fdfc44ab494222fadbb88738f33dbeb9b3eb6757c266"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-controls.cjs",
+      "bytes": 1601,
+      "sha256": "5849bb563ef08563f2b745931c817e512410b80d053e03b47d3b33621c174063"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-result.json",
+      "bytes": 29579,
+      "sha256": "58877156bca2d77fefb20457cdd17b028d2e7cf999e7ac901bb350865bf6ba2d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-targeted-a/entry-script.snapshot",
+      "bytes": 3643,
+      "sha256": "17cbdcd18d5716965d5c14cd1917832a99093d23a31ec10d114162e97260784e"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-targeted-a/receipt.json",
+      "bytes": 2668,
+      "sha256": "e2849f3eb62e616d2c57a7925a302190f050d3395dfeacaa566787a0a7932d62"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-targeted-a/start.json",
+      "bytes": 1481,
+      "sha256": "e94ebff7c706866e704efed3651d80870ec4eb117e6a824141fdd25dab0ce70d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-targeted-a/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-targeted-a/stdout.log",
+      "bytes": 93,
+      "sha256": "b8c981831a95783fd0943b9ca4ae5548d6928064eb0133fc072d6a1bda499ac6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-targeted-a/targeted.json",
+      "bytes": 47488,
+      "sha256": "b3a527e61ddbe0a290be34e6af85f17bd4e007821dedb54d0f721f8222ed64f6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-targeted.cjs",
+      "bytes": 3643,
+      "sha256": "17cbdcd18d5716965d5c14cd1917832a99093d23a31ec10d114162e97260784e"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-trace-a/entry-script.snapshot",
+      "bytes": 5309,
+      "sha256": "f5af39963bbabfe92f2fa34338b0c4d09b0a83890bf37022ebf3ab095571c150"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-trace-a/receipt.json",
+      "bytes": 2646,
+      "sha256": "272103513b95d6f8cade893ba37b6efd2c60a825dff997f9f1e87d53c6700427"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-trace-a/start.json",
+      "bytes": 1463,
+      "sha256": "61e2e959780f038c9462a10bbb37342511d9332a687a5e09b58aeed12c9c68c1"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-trace-a/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-trace-a/stdout.log",
+      "bytes": 118,
+      "sha256": "bc6ed42ae742a57ac5561e9f68737929197546d92ed7fae30ce277f442a4f407"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-trace-a/trace.json",
+      "bytes": 98650,
+      "sha256": "5b86000d0504460976b8aebf378ba71a74f3e1c050fad59d2822eaccf82b8da4"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-trace.cjs",
+      "bytes": 5309,
+      "sha256": "f5af39963bbabfe92f2fa34338b0c4d09b0a83890bf37022ebf3ab095571c150"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/brigade_temporal_log.jsonl",
+      "bytes": 24008332,
+      "sha256": "96ce62d2d557aea3ebaaa380b5e50e95477b88c5b7d5b0f7af79edcea4bd5672"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/run_meta.json",
+      "bytes": 10644,
+      "sha256": "a98187302ed3dcbe1dcc8b61a657d4ed65656553f7f18694a6c395bd79f9b700"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/weekly_report.jsonl",
+      "bytes": 2001700,
+      "sha256": "4efc6d93b821e236149ab601e7dc769d9bad1c06aa799ed6c915b4e9df248385"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n81/brigade_temporal_log.jsonl",
+      "bytes": 24019679,
+      "sha256": "0d61d70d04755bfeb3c5e4ede87d0303038a0401f0f6d815dd0d11df44e14889"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n81/run_meta.json",
+      "bytes": 10645,
+      "sha256": "6a59cf76784a6e6c108462fff195913441de800ba6a7f8c594cf71ff9f45a392"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n81/weekly_report.jsonl",
+      "bytes": 32887671,
+      "sha256": "b3510073a304411fb2d5cafbcbb45d980c6c4d9f8888962039c1bd4852ea79de"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n82/brigade_temporal_log.jsonl",
+      "bytes": 24019679,
+      "sha256": "0d61d70d04755bfeb3c5e4ede87d0303038a0401f0f6d815dd0d11df44e14889"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n82/run_meta.json",
+      "bytes": 10645,
+      "sha256": "261e0728bb814c12d9b410b9a18f3e0cb7102cc218aed765a5c49ddda5ad22e2"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n82/weekly_report.jsonl",
+      "bytes": 32887671,
+      "sha256": "b3510073a304411fb2d5cafbcbb45d980c6c4d9f8888962039c1bd4852ea79de"
+    },
+    {
+      "path": "src/sim/combat/commander/emit.ts",
+      "bytes": 198276,
+      "sha256": "6d04bd153030f88b7105f8d9e71510487576136cfa67a5f0bc10ba74ad7109ae"
+    },
+    {
+      "path": "src/sim/combat/commander/force_eval.ts",
+      "bytes": 11413,
+      "sha256": "3190b89e8c597628f881fd73102f23bc843f09920e16af93a754bae39e42198f"
+    },
+    {
+      "path": "src/sim/combat/corps_operation_helpers.ts",
+      "bytes": 25601,
+      "sha256": "336ab45b05ad25d6ecbab6d92d05d01e78f130c2d99bfa67deecf6e2663ba376"
+    },
+    {
+      "path": "src/sim/combat/movement_phase_diagnostic.ts",
+      "bytes": 7386,
+      "sha256": "cac140facd432e206a079093514702237f7690088b92eac10a556de9e6ba62d8"
+    },
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "bytes": 20066,
+      "sha256": "07ac547769cd7df22bf183e662d48e7e0a5ab5e5ba1d67157f588acc2aa77b2c"
+    }
+  ]
+}

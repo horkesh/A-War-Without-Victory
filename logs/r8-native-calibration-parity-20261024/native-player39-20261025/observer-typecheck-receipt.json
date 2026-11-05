@@ -1,0 +1,70 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T11:33:22.328Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/typecheck-02",
+  "timeout_ms": 180000,
+  "original_argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/run_typecheck.cjs",
+    "{evidenceDir}"
+  ],
+  "argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/run_typecheck.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\cold-load-validation-v2\\native39-validation-v1\\warm-normalization-probe-v1\\typecheck-02"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "typecheck-result.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/run_typecheck.cjs",
+    "bytes": 941,
+    "raw_sha256": "510d690ed30811de3f2032b646f61ef855576afa0ad91d8c96f3a7abdabe08b6",
+    "normalized_text_sha256": "510d690ed30811de3f2032b646f61ef855576afa0ad91d8c96f3a7abdabe08b6",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 941,
+      "sha256": "510d690ed30811de3f2032b646f61ef855576afa0ad91d8c96f3a7abdabe08b6"
+    }
+  },
+  "end_utc": "2026-10-25T11:33:53.275Z",
+  "pid": 28028,
+  "child_exit": 0,
+  "wrapper_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/run_typecheck.cjs",
+    "bytes": 941,
+    "raw_sha256": "510d690ed30811de3f2032b646f61ef855576afa0ad91d8c96f3a7abdabe08b6",
+    "normalized_text_sha256": "510d690ed30811de3f2032b646f61ef855576afa0ad91d8c96f3a7abdabe08b6",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "typecheck-result.json",
+      "bytes": 288,
+      "sha256": "789513e1d2901538f959b6ad91f182e3945ef8ef15579669580243e2e838a925"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

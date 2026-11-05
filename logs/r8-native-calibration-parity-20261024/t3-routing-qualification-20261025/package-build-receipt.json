@@ -1,0 +1,94 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T03:36:40.811Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/package-build-01",
+  "timeout_ms": 2100000,
+  "original_argv": [
+    "node",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/invoke_package_build.cjs",
+    "{evidenceDir}",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/package-launch-config.json",
+    "a1130567b2e1fd7e4eb5f584bb83c9c8ee30b4b2ad643d3330e04df52aa09d91",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep-independent-review-04/result.json",
+    "5a3e2d91d4eeacd153f47dfbfa1ae193e1f1dcb4f2082511abb34d27836d06df",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/package-preflight-02/PREFLIGHT.json",
+    "df5cc083b5873681a92dae4c9695c6bd8b2bfec47a96df04daa1c7fedd57c471",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/package-preflight-02/receipt.json",
+    "047e8e336ea4a77027f684e6d1ac12c7f8b392737cb591f35f24423489c23048",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/package-build-check-01/BUILD_READY.json",
+    "ff94246b43205c3d61a494e69ce64fd8398374c11d05c0b55714c4251d384904",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/package-build-check-01/receipt.json",
+    "3ec4aecc279c200b19ebf04db59644c7dc7e6d1bfaf251f2447ae18c567fa10e"
+  ],
+  "argv": [
+    "node",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/invoke_package_build.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\t3-routing-package-prep\\package-build-01",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/package-launch-config.json",
+    "a1130567b2e1fd7e4eb5f584bb83c9c8ee30b4b2ad643d3330e04df52aa09d91",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep-independent-review-04/result.json",
+    "5a3e2d91d4eeacd153f47dfbfa1ae193e1f1dcb4f2082511abb34d27836d06df",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/package-preflight-02/PREFLIGHT.json",
+    "df5cc083b5873681a92dae4c9695c6bd8b2bfec47a96df04daa1c7fedd57c471",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/package-preflight-02/receipt.json",
+    "047e8e336ea4a77027f684e6d1ac12c7f8b392737cb591f35f24423489c23048",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/package-build-check-01/BUILD_READY.json",
+    "ff94246b43205c3d61a494e69ce64fd8398374c11d05c0b55714c4251d384904",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/package-build-check-01/receipt.json",
+    "3ec4aecc279c200b19ebf04db59644c7dc7e6d1bfaf251f2447ae18c567fa10e"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "command.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/invoke_package_build.cjs",
+    "bytes": 16154,
+    "raw_sha256": "a758b588b876acc50033e9da970cb742104ddb2f3952cf3778e905ce49585879",
+    "normalized_text_sha256": "a758b588b876acc50033e9da970cb742104ddb2f3952cf3778e905ce49585879",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 16154,
+      "sha256": "a758b588b876acc50033e9da970cb742104ddb2f3952cf3778e905ce49585879"
+    }
+  },
+  "end_utc": "2026-10-25T03:38:58.460Z",
+  "pid": 26660,
+  "child_exit": 0,
+  "wrapper_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/t3-routing-package-prep/invoke_package_build.cjs",
+    "bytes": 16154,
+    "raw_sha256": "a758b588b876acc50033e9da970cb742104ddb2f3952cf3778e905ce49585879",
+    "normalized_text_sha256": "a758b588b876acc50033e9da970cb742104ddb2f3952cf3778e905ce49585879",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 22930,
+    "sha256": "8464c0f6c481573a8c2abb7429cf1a9a8146c8f50784cf5eeed08694d9ef7b4e"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "command.json",
+      "bytes": 2119,
+      "sha256": "3e489029b5786dee70a3ccb915453a8b54debe1686fcd7741301051b861a82e7"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

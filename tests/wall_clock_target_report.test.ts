@@ -11,8 +11,8 @@ describe('wall-clock target report', () => {
             timingPath: 'runs/sample/timing.json',
             timing: {
                 schema_version: 1,
-                run_id: 'apr1992_definitive_40w__sample',
-                scenario_id: 'apr1992_definitive_40w',
+                run_id: 'apr1992_definitive_188w__sample',
+                scenario_id: 'apr1992_definitive_188w',
                 weeks: 40,
                 final_state_hash: 'abc123',
                 buckets_ms: {
@@ -37,7 +37,7 @@ describe('wall-clock target report', () => {
 
         expect(report.schema_version).toBe(1);
         expect(report.source_timing_path).toBe('runs/sample/timing.json');
-        expect(report.run.run_id).toBe('apr1992_definitive_40w__sample');
+        expect(report.run.run_id).toBe('apr1992_definitive_188w__sample');
         expect(report.environment).toEqual({
             machine_label: 'local-win-test',
             node_version: 'v24.0.0',

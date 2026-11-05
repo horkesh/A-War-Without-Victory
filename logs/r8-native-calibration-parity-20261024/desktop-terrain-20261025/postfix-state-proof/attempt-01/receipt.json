@@ -1,0 +1,99 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T06:49:04.417Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/attempt-01",
+  "timeout_ms": 15000,
+  "original_argv": [
+    ".\\node_modules\\.bin\\tsx.cmd",
+    "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\postfix-state-proof\\n97-w17-desktop-terrain-postfix-proof.mts",
+    "--evidence-dir",
+    "{evidenceDir}"
+  ],
+  "argv": [
+    ".\\node_modules\\.bin\\tsx.cmd",
+    "tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\postfix-state-proof\\n97-w17-desktop-terrain-postfix-proof.mts",
+    "--evidence-dir",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\postfix-state-proof\\attempt-01"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "launch.json",
+    "result.json",
+    "postfix-state.json",
+    "postfix-report.json",
+    "canonical-state.json",
+    "canonical-report.json",
+    "state-diff-vs-primed.json",
+    "report-diff-vs-primed.json",
+    "state-diff-vs-retained-a.json",
+    "report-diff-vs-retained-a.json",
+    "operation-diff-vs-v4.json",
+    "battle-diff-vs-v4.json",
+    "operation-diff-vs-retained-a.json",
+    "battle-diff-vs-retained-a.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/n97-w17-desktop-terrain-postfix-proof.mts",
+    "bytes": 30780,
+    "raw_sha256": "d7ccae50ab8395964bf53975cdd60f6341277391f860a2c41eb4b48b3c91f920",
+    "normalized_text_sha256": "d7ccae50ab8395964bf53975cdd60f6341277391f860a2c41eb4b48b3c91f920",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 30780,
+      "sha256": "d7ccae50ab8395964bf53975cdd60f6341277391f860a2c41eb4b48b3c91f920"
+    }
+  },
+  "end_utc": "2026-10-25T06:49:04.431Z",
+  "pid": null,
+  "child_exit": 125,
+  "wrapper_exit": 125,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": {
+    "code": "EINVAL",
+    "syscall": "spawn",
+    "path": null,
+    "message": "spawn EINVAL"
+  },
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/n97-w17-desktop-terrain-postfix-proof.mts",
+    "bytes": 30780,
+    "raw_sha256": "d7ccae50ab8395964bf53975cdd60f6341277391f860a2c41eb4b48b3c91f920",
+    "normalized_text_sha256": "d7ccae50ab8395964bf53975cdd60f6341277391f860a2c41eb4b48b3c91f920",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": [
+      "launch.json",
+      "result.json",
+      "postfix-state.json",
+      "postfix-report.json",
+      "canonical-state.json",
+      "canonical-report.json",
+      "state-diff-vs-primed.json",
+      "report-diff-vs-primed.json",
+      "state-diff-vs-retained-a.json",
+      "report-diff-vs-retained-a.json",
+      "operation-diff-vs-v4.json",
+      "battle-diff-vs-v4.json",
+      "operation-diff-vs-retained-a.json",
+      "battle-diff-vs-retained-a.json"
+    ]
+  }
+}

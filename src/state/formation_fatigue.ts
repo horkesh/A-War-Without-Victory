@@ -255,7 +255,7 @@ const FATIGUE_RECOVERY_INTERVAL = 2;
  *  Sustained frontline duty is tiring but manageable. Combat fatigue (+2 attacker,
  *  +1 defender per battle) is the primary fatigue driver, not garrison duty.
  *  At 0.5/turn with recovery -1 every 2 turns, a non-fighting frontline brigade
- *  stabilizes around fatigue ~5-10 (manageable). A fighting brigade accumulates
+ *  balances duty and recovery over two weeks. A fighting brigade accumulates
  *  faster from combat bonuses. */
 const FRONTLINE_FATIGUE_PER_TURN = 0.5;
 const LATE_WAR_FATIGUE_STRAIN_TURN = 104;
@@ -288,25 +288,28 @@ function hasLateWarExhaustedRecentCombatStrain(
     return currentTurn - lastEngagementTurn <= RECENT_COMBAT_FATIGUE_STRAIN_TURNS;
 }
 
+/** Apply frontline duty once before planning/combat; independent of recovery. */
+export function applyFrontlineDutyFatigue(state: GameState): void {
+    const formations = state.military.formations;
+    if (!formations) return;
+    const frontlineAssigned = buildFrontlineAssignedFormationSet(state);
+    for (const fid of Object.keys(formations).sort(strictCompare)) {
+        const formation = formations[fid];
+        if (!formation || formation.status !== 'active' || !frontlineAssigned.has(fid)) continue;
+        recordFormationFatigue(formation, FRONTLINE_FATIGUE_PER_TURN);
+    }
+}
+
 /**
- * Apply per-turn fatigue recovery and frontline duty fatigue to all active formations.
- * Called once per turn from the war pipeline, regardless of combat activity.
- *
- * Recovery: -1 fatigue every 2 turns, UNLESS the brigade was engaged in combat this turn.
- * Frontline duty: +0.5 fatigue/turn for front-assigned brigades (garrison tension).
- * Combat fatigue: accumulates separately in attack_resolution_osid.ts (+2 attacker, +1 defender).
- *
- * The primary fatigue driver is combat, not frontline assignment. Brigades on the front
- * that are not fighting slowly accumulate garrison fatigue but also recover, reaching
- * an equilibrium. Brigades in active combat accumulate faster and need rotation.
+ * Apply recovery after combat: -1 every two turns to formations that did not fight.
+ * Frontline duty is owned separately by the precombat update phase. Existing
+ * late-war recent-combat strain is retained here, after the recovery decision.
  */
 export function applyFatigueRecovery(state: GameState, engagedFormationIds?: Set<string>): void {
     const formations = state.military.formations;
     if (!formations) return;
     const currentTurn = state.meta?.turn ?? 0;
     const isRecoveryTurn = currentTurn % FATIGUE_RECOVERY_INTERVAL === 0;
-    const frontlineAssigned = buildFrontlineAssignedFormationSet(state);
-
     for (const fid of Object.keys(formations).sort()) {
         const formation = formations[fid]!;
         if (!formation || formation.status !== 'active') continue;
@@ -314,17 +317,11 @@ export function applyFatigueRecovery(state: GameState, engagedFormationIds?: Set
             formation.ops = { fatigue: 0, last_supplied_turn: null };
         }
         let current = formation.ops.fatigue ?? 0;
-        const isFrontAssigned = frontlineAssigned.has(fid);
         const wasEngaged = engagedFormationIds ? engagedFormationIds.has(fid) : false;
 
         // Recovery: -1 every 2 turns, UNLESS engaged in combat this turn
         if (isRecoveryTurn && current > 0 && !wasEngaged) {
             current = Math.max(0, current - 1);
-        }
-
-        // Frontline duty fatigue: +0.5/turn for front-assigned brigades
-        if (isFrontAssigned) {
-            current = Math.min(FATIGUE_MAX, current + FRONTLINE_FATIGUE_PER_TURN);
         }
 
         if (hasLateWarExhaustedRecentCombatStrain(state, formation, currentTurn)) {

@@ -1,0 +1,94 @@
+{
+  "schema": "awwv.directive-selector-repair.historian-review.v1",
+  "date": "2026-10-25",
+  "head_reviewed": "a3063366a",
+  "seat": "historian",
+  "review_mode": "preimplementation read-only review; this review artifact is the only write",
+  "verdict": "GO",
+  "decision": "GO only for the exact selector correction defined here. Reusing the existing isBrigadeEligibleForOperationObjectives predicate unchanged preserves the settled enclave boundary: an enclave-tagged brigade may support an objective within its current enclave perimeter, including the already-defined Srebrenica member op:srebrenica:obadi, but may not be recruited for a remote objective such as op:brcko:bukvik_gornji_2. The proposal does not create a reward-for-atrocity effect.",
+  "gate": {
+    "authority": "docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md section 6",
+    "trigger": "The selector affects operation eligibility for Srebrenica/Žepa-tagged formations, so the historian seat is mandatory even though the enclave predicate is reused unchanged.",
+    "required_companion_seat": "gameplay-programmer",
+    "companion_evidence": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/directive-selector-repair-v1/PREIMPLEMENTATION_CANON_REVIEW.json",
+    "bright_line_ruling": "NO_REWARD_FOR_ATROCITY_EFFECT",
+    "panel_escalation": "not triggered by this exact proposal; any relaxation of the enclave predicate, survivor conversion, or post-fall remote offensive reuse would reopen the bright line and require the full section 6 panel"
+  },
+  "historical_findings": [
+    {
+      "finding": "Local military action by Srebrenica-enclave forces is historically supportable. The December 1992-January 1993 ARBiH offensive sought to link Srebrenica with the nearby Cerska-Kamenica pocket and expand territorial control in the immediate region; the March 1993 fighting then contracted that perimeter toward Srebrenica.",
+      "sources": [
+        "Balkan Battlegrounds, vol. II, p. 404 (KB: data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0404.json)",
+        "Balkan Battlegrounds, vol. II, p. 407 (KB: data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0407.json)"
+      ],
+      "application": "A same-enclave objective is not intrinsically an invented offensive role. The existing enclave predicate's local-perimeter allowance remains historically defensible."
+    },
+    {
+      "finding": "The July 1995 fall dispersed the Srebrenica-based 28th Division. BB records 2,700 survivors joining a newly reconstituted 28th Division, about 3,200 ARBiH soldiers unaccounted for, and the later 28th Independent Division as a merger of the 24th Division with remnants of the Srebrenica-based 28th Division under General Staff authority.",
+      "sources": [
+        "Balkan Battlegrounds, vol. I, p. 443, endnote 268 (KB: data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0443.json)",
+        "Balkan Battlegrounds, vol. I, p. 446, endnote 427 (KB: data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0446.json)",
+        "Balkan Battlegrounds, vol. I, p. 514 (KB: data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0514.json)"
+      ],
+      "application": "The record supports survival and later institutional reconstitution, but it does not support treating the unchanged enclave brigades as a free generic corps pool for remote operations. The existing predicate's continued exclusion of displaced enclave-tagged formations from unrelated objectives preserves the prior section 6 ruling."
+    },
+    {
+      "finding": "The judicial record identifies the 28th Division as the enclave force, records its six subordinate brigades, the July 1995 attack and column, and the systematic targeting of Bosnian Muslim men after the fall. This is the factual setting in which remote offensive reuse must not turn the enclave's destruction into a mechanical territorial benefit.",
+      "sources": [
+        "ICTY, Prosecutor v. Popović et al., Trial Judgement, IT-05-88-T, 10 June 2010, paragraphs 246-247 (28th Division composition and enclave role), 554-558 (column fighting and passage), official PDF: https://www.icty.org/x/cases/popovic/tjug/en/100610judgement.pdf",
+        "ICTY, Prosecutor v. Krstić, Trial Judgement, IT-98-33-T, 2 August 2001, paragraphs 546 and 598 (systematic targeting and destruction of the Srebrenica community), official PDF: https://www.icty.org/x/cases/krstic/tjug/en/krs-tj010802e.pdf"
+      ],
+      "application": "The proposal neither changes victim-side loss/reconstitution nor creates a positive output from the fall. It adds the settled enclave eligibility guard to a previously unguarded player request path."
+    }
+  ],
+  "existing_single_source_of_truth": {
+    "code": "src/sim/combat/enclave_resilience.ts:isBrigadeEligibleForOperationObjectives",
+    "rule": "An enclave-tagged brigade is eligible only when at least one declared objective lies in the brigade's current enclave; non-enclave brigades are unaffected.",
+    "prior_ruling_record": "The function header records the 2026-08-26 section 6 NON-COMPLIANT finding: displaced Srebrenica survivors had joined remote 2nd Corps operations and converted the enclave's destruction into offensive capacity on ground that never changed hands.",
+    "supporting_project_record": "docs/PROJECT_LEDGER_KNOWLEDGE.md, 'Enclave brigades in sector operations (2026-03-14)', records the earlier corridor-widening-only rule.",
+    "geometry_checked": {
+      "local_allowed_example": "op:srebrenica:obadi is already a member of ENCLAVE_DEFINITIONS.srebrenica.osid_list",
+      "remote_rejected_example": "op:brcko:bukvik_gornji_2 is not a member of the Srebrenica enclave definition"
+    }
+  },
+  "approved_scope": {
+    "production_file": "src/sim/turn_phases/war_phases.ts",
+    "planner": "planDirectiveOperation remains the single pure plan shared by query and consume",
+    "eligibility": "Use the existing available, uncommitted, active/live same-corps pool and call isBrigadeEligibleForOperationObjectives unchanged against the requested target before feasibility and roster selection.",
+    "reachability": "Require deterministic normal friendly/allied connected-component reachability to a friendly adjacent staging cell; sort staging cells and select the first with a feasible legal pool.",
+    "roster": "Require at least 3 and at most 12 participants; rank with the established ordinary equipment offensive-priority comparator, strictCompare as tie-break, then strictCompare-sort the final participant IDs.",
+    "examples": [
+      "A Srebrenica enclave brigade may remain eligible for op:srebrenica:obadi only when the unchanged predicate finds brigade location and objective inside the existing Srebrenica definition and every ordinary availability, route, minimum, ceiling, validation, and slot guard also passes.",
+      "A Srebrenica/Žepa enclave-tagged brigade must be excluded from an operation against op:brcko:bukvik_gornji_2 even if a broader friendly route exists."
+    ]
+  },
+  "forbidden_expansion": [
+    "No change to enclave definitions, OSID membership, tags, isBrigadeEligibleForOperationObjectives, or its no-objective behavior.",
+    "No survivor conversion, casualty, displacement, reconstitution, rupture, condemnation, attribution, control, movement, supply, attrition, combat, or force-delivery change.",
+    "No direct or forced control flip, movement bypass, teleport, or commander-objection override of any hard eligibility guard.",
+    "No change to authored, triggered, queued, opportunity, bot, or generic sector-offensive paths or minima.",
+    "No new historical claim, capture, enclave boundary, operation, or named formation assignment.",
+    "No positive score, capability, territorial preference, or other benefit keyed to an enclave fall, casualty, displacement, war-crime event, or rupture."
+  ],
+  "reward_for_atrocity_review": {
+    "verdict": "NO_EFFECT_IN_APPROVED_SCOPE",
+    "reasoning": [
+      "The selector reads ordinary current military legality and route feasibility; it does not read atrocity, casualty, displacement, war-crime, rupture, or condemnation state as a positive input.",
+      "Reusing the unchanged enclave predicate closes a bypass. It prevents remote recruitment of enclave-tagged formations rather than granting capacity after an enclave's destruction.",
+      "Allowing an already-defined same-enclave perimeter objective is based on current location and existing enclave geometry, not on the occurrence of an atrocity or fall.",
+      "The participant minimum, ceiling, priority comparator, and deterministic staging choice apply as ordinary CorpsOperation rules and create no faction-specific or history-triggered bonus."
+    ],
+    "automatic_block_conditions": [
+      "Any implementation omits or weakens isBrigadeEligibleForOperationObjectives on the request-op path.",
+      "Any force-over-objection path bypasses enclave eligibility, route reachability, minimum three, or maximum twelve.",
+      "Any displaced Srebrenica/Žepa enclave-tagged formation becomes eligible for a remote objective because of the fall, displacement, reconstitution, or survivor status.",
+      "Any change adds a new enclave member or asserts a new historical capture without a separate historian review and the applicable canon process."
+    ]
+  },
+  "limitations": [
+    "This is a preimplementation historian ruling. It does not verify code that does not yet exist.",
+    "It does not establish delivery, capture, checkpoint 707, calibration improvement, campaign acceptance, package correctness, or test sufficiency.",
+    "The ruling depends on exact reuse of the current enclave predicate and current enclave geometry; a change to either requires renewed review."
+  ],
+  "implementation_review_required": "After implementation, verify by source diff and focused fixtures that Obadi remains only conditionally local-eligible and Bukvik cannot recruit enclave-tagged brigades. Any scope drift changes this verdict to BLOCK pending review."
+}

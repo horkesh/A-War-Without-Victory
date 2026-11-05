@@ -1,0 +1,393 @@
+{
+  "pass": false,
+  "failures": [
+    {
+      "code": "floor",
+      "detail": "jan1993:705"
+    },
+    {
+      "code": "lost",
+      "detail": "jan1993:op:foca:donje_zesce,op:trnovo:tosici"
+    },
+    {
+      "code": "floor",
+      "detail": "apr1994:704"
+    },
+    {
+      "code": "lost",
+      "detail": "apr1994:op:srebrenica:obadi,op:srebrenica:sulice_2,op:trnovo:trnovo"
+    },
+    {
+      "code": "floor",
+      "detail": "apr1995:703"
+    },
+    {
+      "code": "lost",
+      "detail": "apr1995:op:srebrenica:obadi,op:srebrenica:sulice_2,op:trnovo:trnovo"
+    },
+    {
+      "code": "floor",
+      "detail": "oct1995:686"
+    },
+    {
+      "code": "lost",
+      "detail": "oct1995:op:bihac:trubar,op:bosanski_novi:krslje_2,op:bosanski_novi:matavazi_2,op:bosanski_samac:domaljevac_2,op:bosansko_grahovo:bosansko_grahovo_2,op:bosansko_grahovo:crni_lug,op:bosansko_grahovo:malesevci,op:bosansko_grahovo:ugarci,op:kljuc:donji_vrbljani_2,op:kljuc:krasulje_2,op:mrkonjic_grad:baljvine_2,op:mrkonjic_grad:bjelajce_2,op:mrkonjic_grad:mrkonjic_grad_2,op:mrkonjic_grad:podrasnica_2,op:orasje:ostra_luka,op:sanski_most:ilidza_2,op:sanski_most:kljevci,op:titov_drvar:drvar_2,op:titov_drvar:sipovljani_2,op:trnovo:trnovo"
+    },
+    {
+      "code": "seven",
+      "detail": [
+        {
+          "id": "op:bosanski_novi:krslje_2",
+          "expected": "RBiH",
+          "actual": "RS",
+          "ok": false
+        },
+        {
+          "id": "op:kljuc:krasulje_2",
+          "expected": "RBiH",
+          "actual": "RS",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "code": "named",
+      "detail": [
+        {
+          "id": "op:titov_drvar:drvar_2",
+          "expected": "HRHB",
+          "actual": "RS",
+          "ok": false
+        }
+      ]
+    }
+  ],
+  "coverage": {
+    "authoritative21": {
+      "defined": 21,
+      "applicable": 21,
+      "rows": [
+        {
+          "id": "op:jablanica:doljani_2",
+          "week": 104,
+          "expected": "RBiH",
+          "actual": "RBiH",
+          "ok": true
+        },
+        {
+          "id": "op:donji_vakuf:prusac_2",
+          "week": 39,
+          "expected": "RBiH",
+          "actual": "RBiH",
+          "ok": true
+        },
+        {
+          "id": "op:donji_vakuf:prusac_2",
+          "week": 104,
+          "expected": "RBiH",
+          "actual": "RBiH",
+          "ok": true
+        },
+        {
+          "id": "op:donji_vakuf:prusac_2",
+          "week": 156,
+          "expected": "RBiH",
+          "actual": "RBiH",
+          "ok": true
+        },
+        {
+          "id": "op:donji_vakuf:prusac_2",
+          "week": 188,
+          "expected": "RBiH",
+          "actual": "RBiH",
+          "ok": true
+        },
+        {
+          "id": "op:prozor:ljubunci_2",
+          "week": 39,
+          "expected": "HRHB",
+          "actual": "HRHB",
+          "ok": true
+        },
+        {
+          "id": "op:prozor:ljubunci_2",
+          "week": 104,
+          "expected": "HRHB",
+          "actual": "HRHB",
+          "ok": true
+        },
+        {
+          "id": "op:prozor:ljubunci_2",
+          "week": 156,
+          "expected": "HRHB",
+          "actual": "HRHB",
+          "ok": true
+        },
+        {
+          "id": "op:prozor:ljubunci_2",
+          "week": 188,
+          "expected": "HRHB",
+          "actual": "HRHB",
+          "ok": true
+        },
+        {
+          "id": "op:prozor:lug_2",
+          "week": 39,
+          "expected": "RBiH",
+          "actual": "RBiH",
+          "ok": true
+        },
+        {
+          "id": "op:prozor:lug_2",
+          "week": 104,
+          "expected": "HRHB",
+          "actual": "HRHB",
+          "ok": true
+        },
+        {
+          "id": "op:prozor:lug_2",
+          "week": 156,
+          "expected": "HRHB",
+          "actual": "HRHB",
+          "ok": true
+        },
+        {
+          "id": "op:prozor:lug_2",
+          "week": 188,
+          "expected": "HRHB",
+          "actual": "HRHB",
+          "ok": true
+        },
+        {
+          "id": "op:prozor:paros",
+          "week": 39,
+          "expected": "RBiH",
+          "actual": "RBiH",
+          "ok": true
+        },
+        {
+          "id": "op:prozor:paros",
+          "week": 104,
+          "expected": "HRHB",
+          "actual": "HRHB",
+          "ok": true
+        },
+        {
+          "id": "op:prozor:paros",
+          "week": 156,
+          "expected": "HRHB",
+          "actual": "HRHB",
+          "ok": true
+        },
+        {
+          "id": "op:prozor:paros",
+          "week": 188,
+          "expected": "HRHB",
+          "actual": "HRHB",
+          "ok": true
+        },
+        {
+          "id": "op:trnovo:gornja_presjenica",
+          "week": 39,
+          "expected": "RS",
+          "actual": "RS",
+          "ok": true
+        },
+        {
+          "id": "op:trnovo:gornja_presjenica",
+          "week": 104,
+          "expected": "RS",
+          "actual": "RS",
+          "ok": true
+        },
+        {
+          "id": "op:trnovo:gornja_presjenica",
+          "week": 156,
+          "expected": "RS",
+          "actual": "RS",
+          "ok": true
+        },
+        {
+          "id": "op:trnovo:gornja_presjenica",
+          "week": 188,
+          "expected": "RS",
+          "actual": "RS",
+          "ok": true
+        }
+      ]
+    },
+    "legacy11": {
+      "defined": 11,
+      "applicable": 11,
+      "rows": [
+        {
+          "id": "op:jablanica:doljani_2",
+          "week": 104,
+          "expected": "RBiH",
+          "actual": "RBiH",
+          "ok": true
+        },
+        {
+          "id": "op:donji_vakuf:prusac_2",
+          "week": 39,
+          "expected": "RBiH",
+          "actual": "RBiH",
+          "ok": true
+        },
+        {
+          "id": "op:donji_vakuf:prusac_2",
+          "week": 104,
+          "expected": "RBiH",
+          "actual": "RBiH",
+          "ok": true
+        },
+        {
+          "id": "op:prozor:ljubunci_2",
+          "week": 39,
+          "expected": "HRHB",
+          "actual": "HRHB",
+          "ok": true
+        },
+        {
+          "id": "op:prozor:ljubunci_2",
+          "week": 104,
+          "expected": "HRHB",
+          "actual": "HRHB",
+          "ok": true
+        },
+        {
+          "id": "op:prozor:lug_2",
+          "week": 39,
+          "expected": "RBiH",
+          "actual": "RBiH",
+          "ok": true
+        },
+        {
+          "id": "op:prozor:lug_2",
+          "week": 104,
+          "expected": "HRHB",
+          "actual": "HRHB",
+          "ok": true
+        },
+        {
+          "id": "op:prozor:paros",
+          "week": 39,
+          "expected": "RBiH",
+          "actual": "RBiH",
+          "ok": true
+        },
+        {
+          "id": "op:prozor:paros",
+          "week": 104,
+          "expected": "HRHB",
+          "actual": "HRHB",
+          "ok": true
+        },
+        {
+          "id": "op:trnovo:gornja_presjenica",
+          "week": 39,
+          "expected": "RS",
+          "actual": "RS",
+          "ok": true
+        },
+        {
+          "id": "op:trnovo:gornja_presjenica",
+          "week": 104,
+          "expected": "RS",
+          "actual": "RS",
+          "ok": true
+        }
+      ]
+    },
+    "seven": [
+      {
+        "id": "op:bosanski_novi:krslje_2",
+        "expected": "RBiH",
+        "actual": "RS",
+        "ok": false
+      },
+      {
+        "id": "op:bosanski_petrovac:bosanski_petrovac_2",
+        "expected": "RBiH",
+        "actual": "RBiH",
+        "ok": true
+      },
+      {
+        "id": "op:bosanski_petrovac:dobro_selo_2",
+        "expected": "RBiH",
+        "actual": "RBiH",
+        "ok": true
+      },
+      {
+        "id": "op:bosanski_petrovac:jasenovac_2",
+        "expected": "RBiH",
+        "actual": "RBiH",
+        "ok": true
+      },
+      {
+        "id": "op:kljuc:hadzici",
+        "expected": "RBiH",
+        "actual": "RBiH",
+        "ok": true
+      },
+      {
+        "id": "op:kljuc:kljuc_2",
+        "expected": "RBiH",
+        "actual": "RBiH",
+        "ok": true
+      },
+      {
+        "id": "op:kljuc:krasulje_2",
+        "expected": "RBiH",
+        "actual": "RS",
+        "ok": false
+      }
+    ],
+    "jajce5": [
+      {
+        "id": "op:jajce:bravnice",
+        "expected": "HRHB",
+        "actual": "HRHB",
+        "ok": true
+      },
+      {
+        "id": "op:jajce:vinac_2",
+        "expected": "HRHB",
+        "actual": "HRHB",
+        "ok": true
+      },
+      {
+        "id": "op:jajce:jajce_3",
+        "expected": "HRHB",
+        "actual": "HRHB",
+        "ok": true
+      },
+      {
+        "id": "op:jajce:lupnica",
+        "expected": "HRHB",
+        "actual": "HRHB",
+        "ok": true
+      },
+      {
+        "id": "op:jajce:barevo_2",
+        "expected": "HRHB",
+        "actual": "HRHB",
+        "ok": true
+      }
+    ],
+    "named": [
+      {
+        "id": "op:mrkonjic_grad:majdan_2",
+        "expected": "HRHB",
+        "actual": "HRHB",
+        "ok": true
+      },
+      {
+        "id": "op:titov_drvar:drvar_2",
+        "expected": "HRHB",
+        "actual": "RS",
+        "ok": false
+      }
+    ]
+  }
+}

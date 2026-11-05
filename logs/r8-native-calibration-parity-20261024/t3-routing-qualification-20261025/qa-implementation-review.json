@@ -1,0 +1,90 @@
+{
+  "schema": "awwv.native-capture-repair-independent-review.v1",
+  "reviewer": {
+    "identity": "receipt-integration-independent-reviewer",
+    "role": "independent implementation reviewer",
+    "distinctFromImplementer": true
+  },
+  "reviewedAt": "2026-10-25T05:32:49+01:00",
+  "source": {
+    "worktree": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+    "head": "fd061e898ad3de942d62c016547a5e453ddd9422",
+    "trackedFiles": [
+      {
+        "path": "tools/ui/paradox_local_qa.cjs",
+        "bytes": 361860,
+        "sha256": "71a9bbb675d4c33d290e92e97c7e3780211e5ce3c500f37c637bf46ef8e32503"
+      },
+      {
+        "path": "tests/paradox_local_qa_harness.test.ts",
+        "bytes": 215682,
+        "sha256": "a99e082264f586128dbe8c8d476bbfced16777c1deb073cb652c0f5f84dae33c"
+      }
+    ],
+    "diffStat": "219 insertions, 3 deletions across 2 tracked files",
+    "diffCheckExit": 0
+  },
+  "verdict": "GO",
+  "findings": [],
+  "checks": {
+    "failedResultFinalization": {
+      "pass": true,
+      "detail": "The top-level catch writes the same in-memory result object to the normal result path, removes completedAt, adds failed/error/failedAt, and preserves a strict nonzero process exit. It does not reconstruct faction, event, runtime, or SaveLoad evidence."
+    },
+    "capturePrototype": {
+      "pass": true,
+      "detail": "The private helper copies only existing external artifacts, inventories the existing evidence tree, records missing artifacts and capture errors, preserves child nonzero/timeout failure, and uses exclusive writes/copies so existing destinations are not overwritten.",
+      "files": [
+        {
+          "path": "tmp/player-bot-capability-parity-20261024/native-capture-repair/v1/native_capture.cjs",
+          "bytes": 4161,
+          "sha256": "97825da3f5beee5cf96a3be85d934e8ff67a8b48fa352fe60ee918e8323a4f86"
+        },
+        {
+          "path": "tmp/player-bot-capability-parity-20261024/native-capture-repair/v1/native_entry.cjs",
+          "bytes": 2237,
+          "sha256": "10485374cc166beae03ac421da10ea2ef48a4131231fa58c6834aae22f2efa98"
+        }
+      ]
+    },
+    "selectorAdmission": {
+      "pass": true,
+      "detail": "The new selector accepts exactly always_allow, only with Historical mode and sole RBiH selection, and rejects bare, empty, duplicate, unsupported, non-Historical, wrong-faction, and multi-faction requests before evidence-directory reservation or launch preparation. Omission leaves default Historical behavior and provenance shape unchanged."
+    },
+    "visiblePlayerControlAndReceipt": {
+      "pass": true,
+      "detail": "For rbih_paramilitary_policy_1992 the harness authenticates the exact RBiH player decision, a unique existing option id, its authored counterfactual marker, and one exact visible label. It clicks that UI control and accepts the choice only after the canonical event-decision receipt reports the same response id. No hidden state mutation or preseed path was added."
+    },
+    "counterfactualHonesty": {
+      "pass": true,
+      "detail": "The transcript and provenance label this as an explicit visible player selector with basis player_selected_counterfactual and historicityClaim none_counterfactual_player_choice. The implementation does not present always_allow as historical and does not alter the authored default always_deny choice."
+    },
+    "scopeAndDeterminism": {
+      "pass": true,
+      "detail": "The diff changes only harness selection/evidence handling and focused tests. Existing runtime classifiers, CDP collection, engine, scenario data, dependency pins, gameplay rules, and event ordering are unchanged. Selection is fixed by exact argument, event id, faction, option id, and unique visible label."
+    }
+  },
+  "validationEvidence": [
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native-capture-repair/evidence/green-harness-final-2.log",
+      "sha256": "59f6d1858650d33b6e5f9d91175aa97359e13c0c4a7f7b04ca58e68c48465ee7",
+      "result": "101/101 focused tests passed"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native-capture-repair/evidence/green-capture-final-3.log",
+      "sha256": "6c0418a9ba34bb42d3c5c644a470290c5a052d1ce86c41cf0364d9832cb321c6",
+      "result": "6/6 private capture self-test checks passed"
+    },
+    {
+      "result": "three supplied syntax checks exited 0"
+    },
+    {
+      "result": "independent git diff --check exited 0"
+    }
+  ],
+  "limits": [
+    "This review did not launch Electron, build/package, run a native attempt, or rerun a campaign.",
+    "The private capture prototype is reviewed as retained preparation evidence; this verdict does not require using it for the next probe.",
+    "GO covers implementation correctness for the authorized bounded normal-choice experiment. It does not qualify a gameplay outcome or waive existing score, runtime, preservation, canon, or historical acceptance gates."
+  ]
+}

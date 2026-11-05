@@ -18,7 +18,9 @@
  *   - DETERMINISM EARLY-OUT: state untouched when nothing is staged
  */
 import { describe, it, expect } from 'vitest';
-import { warPhases } from '../src/sim/turn_phases/war_phases.js';
+import { planDirectiveOperation, warPhases } from '../src/sim/turn_phases/war_phases.js';
+import { runTurn } from '../src/sim/turn_pipeline.js';
+import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
 const STEP = warPhases.find((p) => p.name === 'inject-op-directive')!;
 
@@ -32,7 +34,7 @@ function runStep(state: any, adjacency?: Map<string, string[]>) {
 }
 
 /**
- * Minimal war-phase state: RBiH 1st Corps with two eligible brigades, a friendly
+ * Minimal war-phase state: RBiH 1st Corps with three eligible brigades, a friendly
  * staging OSID (bihac_2, RBiH-held) adjacent to an enemy target (bihac_1, RS-held).
  */
 function makeState(opts: {
@@ -44,6 +46,7 @@ function makeState(opts: {
   const brigades = opts.brigades ?? {
     rbih_b1: { id: 'rbih_b1', faction: 'RBiH', kind: 'brigade', status: 'active', corps_id: 'rbih_1st_corps', personnel: 2000, location_osid: 'bihac_2' },
     rbih_b2: { id: 'rbih_b2', faction: 'RBiH', kind: 'brigade', status: 'active', corps_id: 'rbih_1st_corps', personnel: 2000, location_osid: 'bihac_2' },
+    rbih_b3: { id: 'rbih_b3', faction: 'RBiH', kind: 'brigade', status: 'active', corps_id: 'rbih_1st_corps', personnel: 2000, location_osid: 'bihac_2' },
   };
   const controllers = opts.controllers ?? { bihac_1: 'RS', bihac_2: 'RBiH' };
   return {
@@ -87,7 +90,7 @@ describe('REQUEST-OP inject step (inject-op-directive)', () => {
     // Provenance tag — the president named the objective, the engine built the op.
     expect(op.requested_by_president).toBe(true);
     // Force AUTO-SELECTED (president did not pick brigades).
-    expect(op.participating_brigades.sort()).toEqual(['rbih_b1', 'rbih_b2']);
+    expect(op.participating_brigades).toEqual(['rbih_b1', 'rbih_b2', 'rbih_b3']);
     // Objective = the named target.
     expect(op.objectives).toContain('bihac_1');
     // Axis built toward the target; staging is the friendly neighbor (reachable).
@@ -138,7 +141,7 @@ describe('REQUEST-OP inject step (inject-op-directive)', () => {
   it('rejects when too few brigades are available (no force)', () => {
     const state = makeState({
       brigades: {
-        // Only one eligible brigade — below the 2-participant attack floor.
+        // Only one eligible brigade — below the 3-participant attack floor.
         rbih_b1: { id: 'rbih_b1', faction: 'RBiH', kind: 'brigade', status: 'active', corps_id: 'rbih_1st_corps', personnel: 2000, location_osid: 'bihac_2' },
       },
       pendingDirective: { target_osid: 'bihac_1', turn: 14, ca_cost: 25 },
@@ -150,6 +153,85 @@ describe('REQUEST-OP inject step (inject-op-directive)', () => {
     expect(cc.active_operations).toHaveLength(0);
     expect(cc.op_directive_rejection).toEqual({ target_osid: 'bihac_1', reason: 'no_available_force', turn: 14 });
     expect(cc.pending_op_directive).toBeUndefined();
+  });
+
+  it('consumes a normal pending directive with two usable and eight understrength brigades without creating operation attack ownership', () => {
+    const brigades: Record<string, any> = {};
+    for (let index = 1; index <= 10; index += 1) {
+      brigades[`rbih_b${index}`] = {
+        id: `rbih_b${index}`,
+        faction: 'RBiH',
+        kind: 'brigade',
+        status: 'active',
+        corps_id: 'rbih_1st_corps',
+        personnel: index <= 2 ? 500 : 499,
+        location_osid: 'bihac_2',
+      };
+    }
+    const state = makeState({
+      brigades,
+      pendingDirective: { target_osid: 'bihac_1', turn: 14, ca_cost: 25 },
+    });
+    const cc = state.military.corps_command.rbih_1st_corps;
+
+    runStep(state, ADJ);
+
+    expect(cc.pending_op_directive).toBeUndefined();
+    expect(cc.op_directive_rejection).toEqual({ target_osid: 'bihac_1', reason: 'no_available_force', turn: 14 });
+    expect(cc.active_operations).toEqual([]);
+    expect(state.military.brigade_attack_order_owners).toBeUndefined();
+  });
+
+  it('public runTurn rejects and consumes the same understrength normal directive without operation attack ownership', async () => {
+    const target = 'op:banja_luka:dragocaj';
+    const staging = 'op:banja_luka:banja_luka_2';
+    const brigades: Record<string, any> = {};
+    for (let index = 1; index <= 10; index += 1) {
+      brigades[`rbih_b${index}`] = {
+        id: `rbih_b${index}`,
+        faction: 'RBiH',
+        kind: 'brigade',
+        status: 'active',
+        corps_id: 'rbih_1st_corps',
+        personnel: index <= 2 ? 500 : 499,
+        location_osid: staging,
+      };
+    }
+    const state = makeState({
+      brigades,
+      controllers: { [target]: 'RS', [staging]: 'RBiH' },
+      pendingDirective: { target_osid: target, turn: 14, ca_cost: 25 },
+    });
+    state.schema_version = CURRENT_SCHEMA_VERSION;
+    state.meta = {
+      ...state.meta,
+      seed: 'request-op-personnel-floor-public-turn',
+      referendum_held: true,
+      referendum_turn: 0,
+      war_start_turn: 0,
+    };
+    state.factions = [
+      { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
+      { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
+      { id: 'HRHB', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
+    ];
+    Object.assign(state.military, {
+      front_segments: {},
+      front_posture: {},
+      front_posture_regions: {},
+      front_pressure: {},
+      militia_pools: {},
+    });
+    state.military.corps_command.rbih_1st_corps.active_ogs = [];
+    state.displacement = {};
+
+    const { nextState } = await runTurn(state, { seed: 'request-op-personnel-floor-public-turn' });
+    const cc = nextState.military.corps_command!.rbih_1st_corps!;
+
+    expect(cc.pending_op_directive).toBeUndefined();
+    expect(cc.op_directive_rejection).toEqual({ target_osid: target, reason: 'no_available_force', turn: 15 });
+    expect(cc.active_operations).toEqual([]);
+    expect(nextState.military.brigade_attack_order_owners).toBeUndefined();
   });
 
   it('rejects when no adjacency graph is available (cannot prove reachability)', () => {
@@ -166,7 +248,7 @@ describe('REQUEST-OP inject step (inject-op-directive)', () => {
   });
 
   it('does not auto-select brigades already committed to an active op anywhere', () => {
-    // b1 is already committed to a live op → only b2 free → below floor → reject.
+    // b1 is already committed to a live op → only b2+b3 free → below floor → reject.
     const state = makeState({
       ops: [{ name: 'Existing Op', participating_brigades: ['rbih_b1'], objectives: ['kljuc_1'], axes: [{ objectives: ['kljuc_1'], assigned_brigades: ['rbih_b1'] }] }],
       pendingDirective: { target_osid: 'bihac_1', turn: 14, ca_cost: 25 },
@@ -175,15 +257,15 @@ describe('REQUEST-OP inject step (inject-op-directive)', () => {
 
     runStep(state, ADJ);
 
-    // Existing op preserved; no new op (only b2 was free).
+    // Existing op preserved; no new op (only b2+b3 were free).
     expect(cc.active_operations).toHaveLength(1);
     expect(cc.op_directive_rejection.reason).toBe('no_available_force');
     expect(cc.pending_op_directive).toBeUndefined();
   });
 
   it('rejects with no_available_slot when the corps is at its operation-slot limit even though force is available', () => {
-    // 4 corps brigades → getMaxOperationSlots(4)=1. b3+b4 already committed to a live op
-    // (filling the single slot); b1+b2 are free → plan IS buildable (force ok), but the
+    // 5 corps brigades → getMaxOperationSlots(5)=1. b4+b5 already committed to a live op
+    // (filling the single slot); b1+b2+b3 are free → plan IS buildable (force ok), but the
     // slot gate rejects. This is the exact gap queryDirectiveObjection now mirrors: a
     // buildable plan that injection still rejects with no_available_slot.
     const state = makeState({
@@ -192,8 +274,9 @@ describe('REQUEST-OP inject step (inject-op-directive)', () => {
         rbih_b2: { id: 'rbih_b2', faction: 'RBiH', kind: 'brigade', status: 'active', corps_id: 'rbih_1st_corps', personnel: 2000, location_osid: 'bihac_2' },
         rbih_b3: { id: 'rbih_b3', faction: 'RBiH', kind: 'brigade', status: 'active', corps_id: 'rbih_1st_corps', personnel: 2000, location_osid: 'bihac_2' },
         rbih_b4: { id: 'rbih_b4', faction: 'RBiH', kind: 'brigade', status: 'active', corps_id: 'rbih_1st_corps', personnel: 2000, location_osid: 'bihac_2' },
+        rbih_b5: { id: 'rbih_b5', faction: 'RBiH', kind: 'brigade', status: 'active', corps_id: 'rbih_1st_corps', personnel: 2000, location_osid: 'bihac_2' },
       },
-      ops: [{ name: 'Existing Op', participating_brigades: ['rbih_b3', 'rbih_b4'], objectives: ['kljuc_1'], axes: [{ objectives: ['kljuc_1'], assigned_brigades: ['rbih_b3', 'rbih_b4'] }] }],
+      ops: [{ name: 'Existing Op', participating_brigades: ['rbih_b4', 'rbih_b5'], objectives: ['kljuc_1'], axes: [{ objectives: ['kljuc_1'], assigned_brigades: ['rbih_b4', 'rbih_b5'] }] }],
       pendingDirective: { target_osid: 'bihac_1', turn: 14, ca_cost: 25 },
     });
     const cc = state.military.corps_command.rbih_1st_corps;
@@ -211,6 +294,37 @@ describe('REQUEST-OP inject step (inject-op-directive)', () => {
     const before = JSON.stringify(state);
     runStep(state, ADJ);
     expect(JSON.stringify(state)).toBe(before);
+  });
+
+  it('consumes exactly the roster and staging accepted by the shared pure planner', () => {
+    const state = makeState({
+      brigades: {
+        rbih_a: { id: 'rbih_a', faction: 'RBiH', kind: 'brigade', status: 'active', corps_id: 'rbih_1st_corps', personnel: 2000, location_osid: 'bihac_2', equipment_class: 'motorized' },
+        rbih_b: { id: 'rbih_b', faction: 'RBiH', kind: 'brigade', status: 'active', corps_id: 'rbih_1st_corps', personnel: 2000, location_osid: 'bihac_2', equipment_class: 'mechanized' },
+        rbih_c: { id: 'rbih_c', faction: 'RBiH', kind: 'brigade', status: 'active', corps_id: 'rbih_1st_corps', personnel: 2000, location_osid: 'bihac_2' },
+        rbih_remote: { id: 'rbih_remote', faction: 'RBiH', kind: 'brigade', status: 'active', corps_id: 'rbih_1st_corps', personnel: 2000, location_osid: 'remote_owned' },
+      },
+      controllers: { bihac_1: 'RS', bihac_2: 'RBiH', remote_owned: 'RBiH' },
+      pendingDirective: { target_osid: 'bihac_1', turn: 14, ca_cost: 25 },
+    });
+    const adjacency = new Map<string, string[]>([
+      ['bihac_1', ['bihac_2']],
+      ['bihac_2', ['bihac_1']],
+      ['remote_owned', []],
+    ]);
+    const cc = state.military.corps_command.rbih_1st_corps;
+    const accepted = planDirectiveOperation(state, cc, 'rbih_1st_corps', 'bihac_1', adjacency);
+    expect(accepted.ok).toBe(true);
+
+    runStep(state, adjacency);
+
+    expect(cc.active_operations).toHaveLength(1);
+    if (accepted.ok) {
+      const consumed = cc.active_operations[0];
+      expect(consumed.participating_brigades).toEqual(accepted.participants);
+      expect(consumed.staging_osid).toBe(accepted.stagingOsid);
+      expect(consumed.axes[0].assigned_brigades).toEqual(accepted.axes[0].assigned_brigades);
+    }
   });
 });
 
@@ -242,6 +356,20 @@ function makeStateWithCO(opts: { forced?: boolean; coState?: any } = {}): any {
 }
 
 describe('REQUEST-OP inject step — forced_over_objection consequence', () => {
+  it('does not force through a hard selector rejection or record an override', () => {
+    const state = makeStateWithCO({ forced: true });
+    delete state.military.formations.rbih_b3;
+    const cc = state.military.corps_command.rbih_1st_corps;
+
+    runStep(state, ADJ);
+
+    expect(cc.active_operations).toHaveLength(0);
+    expect(cc.op_directive_rejection).toEqual({ target_osid: 'bihac_1', reason: 'no_available_force', turn: 14 });
+    expect(cc.pending_op_directive).toBeUndefined();
+    expect(state.military.named_officers.off_co.override_count).toBeUndefined();
+    expect(cc.command_friction_record).toBeUndefined();
+  });
+
   it('forced directive → op tagged was_force_launched + commander_assessment_at_launch, and bumps the CO override count + appends recent_overrides', () => {
     const state = makeStateWithCO({ forced: true });
     const cc = state.military.corps_command.rbih_1st_corps;

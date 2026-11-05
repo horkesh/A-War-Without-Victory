@@ -1,0 +1,63 @@
+{
+  "turn": 24,
+  "operation": {
+    "operationId": "arbih_4th_corps:Presidential Directive — op:trnovo:tosici:t17",
+    "name": "Presidential Directive — op:trnovo:tosici",
+    "type": "sector_attack",
+    "phase": "recovery",
+    "startedTurn": 17,
+    "requestedByPresident": true,
+    "forced": true,
+    "commanderOfficerId": "arbih_malkic",
+    "roster": [
+      "arbih_441st_vitezka_mountain",
+      "arbih_442nd_mountain",
+      "arbih_443rd_mountain",
+      "arbih_444th_mountain",
+      "arbih_445th_mountain",
+      "arbih_447th_liberation",
+      "arbih_448th_liberation",
+      "arbih_449th_eastern_herzegovina_mountain",
+      "arbih_450th_light",
+      "arbih_4th_muslim_light"
+    ],
+    "axes": [
+      {
+        "axisId": "main",
+        "stagingOsid": "op:trnovo:delijas",
+        "objectives": [
+          "op:trnovo:tosici"
+        ],
+        "assignedBrigades": [
+          "arbih_441st_vitezka_mountain",
+          "arbih_442nd_mountain",
+          "arbih_443rd_mountain",
+          "arbih_444th_mountain",
+          "arbih_445th_mountain",
+          "arbih_447th_liberation",
+          "arbih_448th_liberation",
+          "arbih_449th_eastern_herzegovina_mountain",
+          "arbih_450th_light",
+          "arbih_4th_muslim_light"
+        ]
+      }
+    ]
+  },
+  "lineage": {
+    "turn": 24,
+    "moves": [],
+    "ownedBattles": [],
+    "beforeController": "RS",
+    "afterController": "RS",
+    "controlEvents": []
+  },
+  "event": null,
+  "canonical": {
+    "bytes": 5153485,
+    "sha256": "190847eea44a84529199e5fd2f337714a22ad73ecc906c6a5320ec23a4fd6140"
+  },
+  "report": {
+    "bytes": 668774,
+    "sha256": "bd93dda8bc4dd686f5804109c73098234979561f175e20cd7dcbe4e53f6f5c1d"
+  }
+}

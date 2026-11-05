@@ -6,7 +6,9 @@ import { describe, it, expect } from 'vitest';
 import {
     computeDeployPriority,
     deployEliteLoan,
+    enforceGuardsEnclaveBoundary,
     recallEliteLoan,
+    retaskEliteLoan,
     tickEliteLoans,
     evaluateArmyReserveAssignments,
     generateArmyReserveRequests,
@@ -24,14 +26,17 @@ import {
     createEliteLoanState,
     ELITE_LOAN_MIN_DURATION,
     ELITE_CASUALTY_THRESHOLD,
+    ELITE_COHESION_RECALL,
     ELITE_MORALE_RECALL,
     MAX_AUTO_DEPLOY_HOPS,
 } from '../src/state/elite_loan_types.js';
-import type { CorpsFrontSector, FactionId, GameState, FormationState } from '../src/state/game_state.js';
+import type { CorpsFrontSector, CorpsOperation, FactionId, FormationId, GameState, FormationState, BrigadeMovementOrder } from '../src/state/game_state.js';
+import { isVlasicCohaExceptionOperation } from '../src/sim/combat/coha_operation_exception.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
 import type { OperationalToCanonicalReverseMap } from '../src/data/operational_data.js';
 import type { TerrainScalars, TerrainScalarsData } from '../src/map/terrain_scalars.js';
 import type { Osid } from '../src/sim/combat/osid_adjacency.js';
+import { warPhases } from '../src/sim/turn_phases/war_phases.js';
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
@@ -479,6 +484,248 @@ describe('deployEliteLoan', () => {
         });
     });
 
+    it('routes the ARBiH General Staff Guards to a central sector instead of the Goražde enclave', () => {
+        const brigade = makeElite('arbih_guards_brigade', 'RBiH', 'op:visoko:visoko_2', { corps_id: 'arbih_general_staff' });
+        const enclave = makeSector('arbih_1st_corps', 'RBiH', 'op:gorazde:bacci', { threat_ratio: 100 });
+        const central = makeSector('arbih_1st_corps', 'RBiH', 'op:visoko:gornja_vratnica_2', {
+            sector_id: 'sector:arbih_1st_corps:1', threat_ratio: 1,
+        });
+        const state = makeState({
+            formations: { arbih_guards_brigade: brigade },
+            corps_front_sectors: { [enclave.sector_id]: enclave, [central.sector_id]: central },
+            turn: 22,
+        });
+        expect(deployEliteLoan(state, 'arbih_guards_brigade', 'arbih_1st_corps', 'defensive_gap', 1, 22)).toBe(true);
+        expect(state.military.brigade_movement_orders?.arbih_guards_brigade?.destination_sids).toEqual(['op:visoko:gornja_vratnica_2']);
+        state.military.brigade_movement_orders!.arbih_guards_brigade = {
+            destination_sids: ['op:gorazde:bacci'], stance: 'column',
+        } as never;
+        tickEliteLoans(state, 22);
+        expect(state.military.brigade_movement_orders?.arbih_guards_brigade?.destination_sids).toEqual(['op:visoko:gornja_vratnica_2']);
+    });
+
+    it('does not reroute Guards to an unrelated sector when the receiving corps is running an enclave operation', () => {
+        const brigade = makeElite('arbih_guards_brigade', 'RBiH', 'op:visoko:visoko_2', {
+            corps_id: 'arbih_general_staff',
+        });
+        const nearby = makeSector('arbih_1st_corps', 'RBiH', 'op:rogatica:brcigovo');
+        const state = makeState({
+            formations: { arbih_guards_brigade: brigade },
+            corps_front_sectors: { [nearby.sector_id]: nearby },
+            corps_command: {
+                arbih_1st_corps: {
+                    active_operations: [{
+                        name: 'Operation Circle', phase: 'execution',
+                        participating_brigades: [],
+                        staging_osid: 'op:gorazde:gorazde_2',
+                        objectives: ['op:gorazde:bacci'],
+                        axes: [],
+                    }],
+                },
+            },
+            turn: 22,
+        });
+
+        expect(deployEliteLoan(state, 'arbih_guards_brigade', 'arbih_1st_corps', 'offensive_support', 1, 22)).toBe(false);
+        expect(brigade.elite_loan_state?.on_loan).toBe(false);
+        expect(state.military.brigade_movement_orders?.arbih_guards_brigade).toBeUndefined();
+    });
+
+    it('allows Guards to reinforce a safe central sector while the corps runs an eastern operation', () => {
+        const brigade = makeElite('arbih_guards_brigade', 'RBiH', 'op:visoko:visoko_2', {
+            corps_id: 'arbih_general_staff',
+        });
+        const central = makeSector('arbih_1st_corps', 'RBiH', 'op:visoko:gornja_vratnica_2');
+        const operation = {
+            name: 'Operation Circle', phase: 'execution', participating_brigades: [],
+            staging_osid: 'op:gorazde:gorazde_2', objectives: ['op:gorazde:bacci'], axes: [],
+        } as any;
+        const state = makeState({
+            formations: { arbih_guards_brigade: brigade },
+            corps_front_sectors: { [central.sector_id]: central },
+            corps_command: { arbih_1st_corps: { active_operations: [operation] } },
+            turn: 22,
+        });
+        expect(deployEliteLoan(state, 'arbih_guards_brigade', 'arbih_1st_corps', 'defensive_gap', 1, 22))
+            .toBe(true);
+        expect(state.military.brigade_movement_orders?.arbih_guards_brigade?.destination_sids)
+            .toEqual(['op:visoko:gornja_vratnica_2']);
+        expect(operation.participating_brigades).not.toContain('arbih_guards_brigade');
+    });
+
+    it('excludes the Bihać pocket while retaining the Sarajevo core as a Guards destination', () => {
+        const brigade = makeElite('arbih_guards_brigade', 'RBiH', 'op:centar_sarajevo:centar_sarajevo', {
+            corps_id: 'arbih_general_staff',
+        });
+        const pocket = makeSector('arbih_1st_corps', 'RBiH', 'op:bihac:bihac_2');
+        const state = makeState({
+            formations: { arbih_guards_brigade: brigade },
+            corps_front_sectors: { [pocket.sector_id]: pocket },
+            turn: 22,
+        });
+        expect(deployEliteLoan(state, 'arbih_guards_brigade', 'arbih_1st_corps', 'defensive_gap', 1, 22)).toBe(false);
+
+        const sarajevo = makeSector('arbih_1st_corps', 'RBiH', 'op:centar_sarajevo:centar_sarajevo');
+        state.military.corps_front_sectors = { [sarajevo.sector_id]: sarajevo };
+        expect(deployEliteLoan(state, 'arbih_guards_brigade', 'arbih_1st_corps', 'defensive_gap', 1, 22)).toBe(true);
+    });
+
+    it('excludes the outer Goražde and upper Drina pocket even when connected', () => {
+        const brigade = makeElite('arbih_guards_brigade', 'RBiH', 'op:visoko:visoko_2', {
+            corps_id: 'arbih_general_staff',
+        });
+        const state = makeState({ formations: { arbih_guards_brigade: brigade }, turn: 22 });
+        for (const osid of [
+            'op:rogatica:brcigovo', 'op:foca:donje_zesce',
+            'op:visegrad:drinsko', 'op:foca:mazlina', 'op:pale:praca',
+            'op:vlasenica:cerska_2', 'op:bratunac:pobudje_2',
+            'op:bratunac:jezestica_2',
+        ]) {
+            const sector = makeSector('arbih_1st_corps', 'RBiH', osid);
+            state.military.corps_front_sectors = { [sector.sector_id]: sector };
+            expect(deployEliteLoan(state, 'arbih_guards_brigade', 'arbih_1st_corps', 'defensive_gap', 1, 22))
+                .toBe(false);
+        }
+    });
+
+    it('uses the safe front of a mixed Goražde and central sector', () => {
+        const brigade = makeElite('arbih_guards_brigade', 'RBiH', 'op:visoko:visoko_2', {
+            corps_id: 'arbih_general_staff',
+        });
+        const sector = makeSector('arbih_1st_corps', 'RBiH', 'op:gorazde:bacci', {
+            territory_osids: ['op:gorazde:bacci', 'op:visoko:gornja_vratnica_2'],
+        });
+        sector.sub_segments[0]!.friendly_osids = ['op:gorazde:bacci', 'op:visoko:gornja_vratnica_2'];
+        const state = makeState({
+            formations: { arbih_guards_brigade: brigade },
+            corps_front_sectors: { [sector.sector_id]: sector },
+            turn: 22,
+        });
+        expect(deployEliteLoan(state, 'arbih_guards_brigade', 'arbih_1st_corps', 'defensive_gap', 1, 22)).toBe(true);
+        expect(state.military.brigade_movement_orders?.arbih_guards_brigade?.destination_sids)
+            .toEqual(['op:visoko:gornja_vratnica_2']);
+    });
+
+    it('removes Guards from a forbidden operation roster and attack order before combat', () => {
+        const brigade = makeElite('arbih_guards_brigade', 'RBiH', 'op:visoko:visoko_2', {
+            corps_id: 'arbih_general_staff',
+        });
+        const operation = {
+            name: 'Goražde relief', phase: 'execution', participating_brigades: ['arbih_guards_brigade'],
+            target_settlements: ['op:gorazde:bacci'],
+            axes: [{ axis_id: 'relief', assigned_brigades: ['arbih_guards_brigade'], objectives: [] }],
+        } as any;
+        const state = makeState({
+            formations: { arbih_guards_brigade: brigade },
+            corps_command: { arbih_1st_corps: { active_operations: [operation] } },
+            turn: 22,
+        });
+        state.military.brigade_attack_orders = { arbih_guards_brigade: 'op:gorazde:bacci' } as any;
+        enforceGuardsEnclaveBoundary(state, 22);
+        expect(operation.participating_brigades).not.toContain('arbih_guards_brigade');
+        expect(operation.axes[0].assigned_brigades).not.toContain('arbih_guards_brigade');
+        expect(state.military.brigade_attack_orders?.arbih_guards_brigade).toBeUndefined();
+        operation.participating_brigades = ['arbih_guards_brigade'];
+        operation.schwerpunkt_osid = 'op:gorazde:bacci';
+        delete operation.target_settlements;
+        enforceGuardsEnclaveBoundary(state, 22);
+        expect(operation.participating_brigades).not.toContain('arbih_guards_brigade');
+        operation.participating_brigades = [];
+        operation.axes[0].assigned_brigades = ['arbih_guards_brigade'];
+        enforceGuardsEnclaveBoundary(state, 22);
+        expect(operation.axes[0].assigned_brigades).not.toContain('arbih_guards_brigade');
+    });
+
+    it('orders an enclave-stranded Guards brigade home without moving it on paper', () => {
+        const enclave = 'op:gorazde:bacci';
+        const corridor = 'op:pale:brezovice';
+        const base = 'op:visoko:visoko_2';
+        const guard = makeElite('arbih_guards_brigade', 'RBiH', enclave, {
+            corps_id: 'arbih_general_staff', home_osid: base, base_osid: base,
+        });
+        const state = makeState({ formations: { arbih_guards_brigade: guard }, turn: 22 });
+        state.political.political_controllers = {
+            [enclave]: 'RBiH', [corridor]: 'RBiH', [base]: 'RBiH',
+        } as any;
+        const adjacency = new Map<Osid, Osid[]>([
+            [enclave, [corridor]], [corridor, [enclave, base]], [base, [corridor]],
+        ]);
+        state.military.brigade_movement_orders = {
+            arbih_guards_brigade: { destination_sids: [enclave], stance: 'column' } as any,
+        };
+        state.military.brigade_movement_state = {
+            arbih_guards_brigade: {
+                destination_sids: [enclave], path: [corridor, enclave], stance: 'column',
+                status: 'in_transit', turns_remaining: 2,
+            } as any,
+        };
+
+        enforceGuardsEnclaveBoundary(state, 22, adjacency);
+
+        expect(guard.location_osid).toBe(enclave);
+        expect(state.military.brigade_movement_orders?.arbih_guards_brigade).toEqual({
+            destination_sids: [base], stance: 'column',
+        });
+        expect(state.military.brigade_movement_state?.arbih_guards_brigade).toBeUndefined();
+    });
+
+    it('leaves enclave-stranded Guards in place when no friendly route exists', () => {
+        const enclave = 'op:gorazde:bacci';
+        const blocked = 'op:pale:brezovice';
+        const base = 'op:visoko:visoko_2';
+        const guard = makeElite('arbih_guards_brigade', 'RBiH', enclave, {
+            corps_id: 'arbih_general_staff', home_osid: base, base_osid: base,
+        });
+        const state = makeState({ formations: { arbih_guards_brigade: guard }, turn: 22 });
+        state.political.political_controllers = {
+            [enclave]: 'RBiH', [blocked]: 'RS', [base]: 'RBiH',
+        } as any;
+        const adjacency = new Map<Osid, Osid[]>([
+            [enclave, [blocked]], [blocked, [enclave, base]], [base, [blocked]],
+        ]);
+
+        enforceGuardsEnclaveBoundary(state, 22, adjacency);
+
+        expect(guard.location_osid).toBe(enclave);
+        expect(state.military.brigade_movement_orders?.arbih_guards_brigade).toBeUndefined();
+    });
+
+    it('clears a forbidden Guards attack before the compatibility combat resolver', async () => {
+        const guard = makeElite('arbih_guards_brigade', 'RBiH', 'op:visoko:visoko_2', {
+            corps_id: 'arbih_general_staff',
+        });
+        const state = makeState({ formations: { arbih_guards_brigade: guard }, turn: 22 });
+        state.military.brigade_attack_orders = { arbih_guards_brigade: 'op:gorazde:bacci' } as any;
+        const phase = warPhases.find((entry) => entry.name === 'resolve-attack-orders')!;
+        const context = {
+            state,
+            input: { settlementGraph: { settlements: new Map(), edges: [] }, settlementEdges: [] },
+            report: {},
+        } as unknown as Parameters<typeof phase.run>[0];
+
+        await phase.run(context);
+
+        expect(state.military.brigade_attack_orders?.arbih_guards_brigade).toBeUndefined();
+        expect(context.report.resolve_attack_orders?.orders_processed).toBe(0);
+    });
+
+    it('rejects an enclave retask without closing the existing Guards loan', () => {
+        const brigade = makeElite('arbih_guards_brigade', 'RBiH', 'op:visoko:visoko_2', {
+            corps_id: 'arbih_general_staff',
+        });
+        const safe = makeSector('arbih_1st_corps', 'RBiH', 'op:visoko:gornja_vratnica_2');
+        const enclave = makeSector('arbih_2nd_corps', 'RBiH', 'op:gorazde:bacci');
+        const state = makeState({
+            formations: { arbih_guards_brigade: brigade },
+            corps_front_sectors: { [safe.sector_id]: safe, [enclave.sector_id]: enclave },
+            turn: 22,
+        });
+        expect(deployEliteLoan(state, 'arbih_guards_brigade', 'arbih_1st_corps', 'defensive_gap', 1, 22)).toBe(true);
+        const episode = brigade.elite_loan_state!.current_episode_id;
+        expect(retaskEliteLoan(state, 'arbih_guards_brigade', 'arbih_2nd_corps', 'defensive_gap', 1, 23)).toBe(false);
+        expect(brigade.elite_loan_state).toMatchObject({ on_loan: true, loaned_to_corps: 'arbih_1st_corps', current_episode_id: episode });
+    });
+
     const eliteLoanCases: Array<[string, string, string, string]> = [
         ['arbih_guards_brigade', 'RBiH', 'arbih_general_staff', 'arbih_1st_corps'],
         ['arbih_120th_liberation_black_swans', 'RBiH', 'arbih_general_staff', 'arbih_2nd_corps'],
@@ -811,6 +1058,91 @@ describe('recallEliteLoan', () => {
         expect(activeOp.axes?.[0]?.assigned_brigades).toEqual([]);
         expect(activeOp.axes?.[1]?.assigned_brigades).toEqual(['arbih_line_1']);
     });
+
+    it('invalidates an active loan journey when recall changes location and preserves pending orders', () => {
+        const base = 'op:staff:base';
+        const current = 'op:loan:front';
+        const brigade = makeElite('arbih_guards', 'RBiH', current, {
+            base_osid: base,
+            home_osid: base,
+        });
+        brigade.elite_loan_state = {
+            ...createEliteLoanState(),
+            on_loan: true,
+            loaned_to_corps: 'arbih_1st_corps' as any,
+        };
+        const other = makeElite('arbih_unrelated', 'RBiH', 'op:unrelated:hold', {
+            base_osid: 'op:unrelated:hold',
+        });
+        const state = makeState({ formations: { arbih_guards: brigade, arbih_unrelated: other }, turn: 12 });
+        const loanOrder: BrigadeMovementOrder = { destination_sids: [base as any], stance: 'column' };
+        const unrelatedOrder: BrigadeMovementOrder = { destination_sids: ['op:unrelated:dest' as any], stance: 'combat' };
+        state.military.brigade_movement_orders = {
+            arbih_guards: loanOrder,
+            arbih_unrelated: unrelatedOrder,
+        };
+        state.military.brigade_movement_state = {
+            arbih_guards: {
+                status: 'in_transit', stance: 'column', destination_sids: ['op:other:dest' as any],
+                path: [current as any, 'op:other:dest' as any], turns_remaining: 2, owner: 'bot_discretionary',
+            },
+            arbih_unrelated: {
+                status: 'in_transit', stance: 'column', destination_sids: ['op:unrelated:dest' as any],
+                path: ['op:unrelated:hold' as any, 'op:unrelated:dest' as any], turns_remaining: 1,
+            },
+        };
+
+        recallEliteLoan(state, 'arbih_guards', 'op_complete', 12);
+
+        expect(brigade.location_osid).toBe(base);
+        expect(state.military.brigade_movement_state?.arbih_guards).toBeUndefined();
+        expect(state.military.brigade_movement_state?.arbih_unrelated).toBeDefined();
+        expect(state.military.brigade_movement_orders?.arbih_guards).toEqual(loanOrder);
+        expect(state.military.brigade_movement_orders?.arbih_unrelated).toEqual(unrelatedOrder);
+    });
+
+    it('invalidates an active loan journey even when recall returns to the current cell', () => {
+        const base = 'op:staff:base';
+        const brigade = makeElite('arbih_guards', 'RBiH', base, { base_osid: base, home_osid: base });
+        brigade.elite_loan_state = {
+            ...createEliteLoanState(),
+            on_loan: true,
+            loaned_to_corps: 'arbih_1st_corps' as any,
+        };
+        const state = makeState({ formations: { arbih_guards: brigade }, turn: 12 });
+        const order: BrigadeMovementOrder = { destination_sids: ['op:staff:dest' as any], stance: 'column' };
+        state.military.brigade_movement_orders = { arbih_guards: order };
+        state.military.brigade_movement_state = {
+            arbih_guards: {
+                status: 'in_transit', stance: 'column', destination_sids: ['op:staff:dest' as any],
+                path: [base as any, 'op:staff:dest' as any], turns_remaining: 1,
+            },
+        };
+
+        recallEliteLoan(state, 'arbih_guards', 'op_complete', 12);
+
+        expect(brigade.location_osid).toBe(base);
+        expect(state.military.brigade_movement_state?.arbih_guards).toBeUndefined();
+        expect(state.military.brigade_movement_orders?.arbih_guards).toEqual(order);
+    });
+
+    it('does not invalidate any journey when recall finds no active loan', () => {
+        const brigade = makeElite('arbih_guards', 'RBiH', 'op:staff:base', { base_osid: 'op:staff:base' });
+        const state = makeState({ formations: { arbih_guards: brigade }, turn: 12 });
+        const order: BrigadeMovementOrder = { destination_sids: ['op:staff:dest' as any] };
+        state.military.brigade_movement_orders = { arbih_guards: order };
+        state.military.brigade_movement_state = {
+            arbih_guards: {
+                status: 'in_transit', stance: 'column', destination_sids: ['op:staff:dest' as any],
+                path: ['op:staff:base' as any, 'op:staff:dest' as any], turns_remaining: 2,
+            },
+        };
+
+        recallEliteLoan(state, 'arbih_guards', 'op_complete', 12);
+
+        expect(state.military.brigade_movement_state?.arbih_guards).toBeDefined();
+        expect(state.military.brigade_movement_orders?.arbih_guards).toEqual(order);
+    });
 });
 
 // ── tickEliteLoans — force recalls ────────────────────────────────────────────
@@ -884,6 +1216,81 @@ describe('elite loan per-turn reconciliation and tick', () => {
         expect(brigade.elite_loan_state!.on_loan).toBe(false);
     });
 
+    it('does not immediately recall a combat-capable elite rostered in its authored historical operation', () => {
+        const brigade = makeOnLoanBrigade('rs_1st_guards_motorized', { loanStartTurn: 93 });
+        brigade.cohesion = ELITE_COHESION_RECALL - 1;
+        const state = makeState({
+            formations: { rs_1st_guards_motorized: brigade },
+            corps_command: {
+                vrs_drina: {
+                    active_operations: [{
+                        name: 'Operation Zvezda 94',
+                        phase: 'planning',
+                        participating_brigades: ['rs_1st_guards_motorized'],
+                    }],
+                },
+            },
+            turn: 93,
+        });
+
+        tickEliteLoans(state, 93);
+
+        expect(brigade.elite_loan_state!.on_loan).toBe(true);
+        expect(brigade.elite_loan_state!.last_recall_turn).toBeNull();
+    });
+
+    it('retains a still-combat-capable elite through an authored operation execution', () => {
+        const brigade = makeOnLoanBrigade('rs_65th_protection_motorized_regiment', { loanStartTurn: 93 });
+        brigade.personnel = Math.ceil((brigade.elite_loan_state!.loan_start_personnel ?? 1000) * 0.6);
+        brigade.cohesion = ELITE_COHESION_RECALL - 1;
+        const state = makeState({
+            formations: { rs_65th_protection_motorized_regiment: brigade },
+            corps_command: {
+                vrs_drina: {
+                    active_operations: [{
+                        name: 'Operation Zvezda 94',
+                        phase: 'execution',
+                        participating_brigades: ['rs_65th_protection_motorized_regiment'],
+                        axes: [{
+                            axis_id: 'gorazde_encirclement',
+                            assigned_brigades: ['rs_65th_protection_motorized_regiment'],
+                            objectives: ['op:gorazde:sopotnica'],
+                        }],
+                    }],
+                },
+            },
+            turn: 100,
+        });
+
+        tickEliteLoans(state, 100);
+
+        expect(brigade.elite_loan_state!.on_loan).toBe(true);
+        expect(brigade.elite_loan_state!.last_recall_turn).toBeNull();
+    });
+
+    it('retains an authored elite through recovery so the operation AAR keeps its assault group', () => {
+        const brigade = makeOnLoanBrigade('rs_1st_guards_motorized', { loanStartTurn: 93 });
+        const state = makeState({
+            formations: { rs_1st_guards_motorized: brigade },
+            corps_command: {
+                vrs_drina: {
+                    active_operations: [{
+                        name: 'Operation Zvezda 94',
+                        phase: 'recovery',
+                        participating_brigades: ['rs_1st_guards_motorized'],
+                    }],
+                },
+            },
+            corps_front_sectors: {},
+            turn: 100,
+        });
+
+        tickEliteLoans(state, 100);
+
+        expect(brigade.elite_loan_state!.on_loan).toBe(true);
+        expect(brigade.elite_loan_state!.last_recall_turn).toBeNull();
+    });
+
     it('does NOT recall before min duration even if op ended', () => {
         const brigade = makeOnLoanBrigade('rs_1st_guards', { loanStartTurn: 8 });
         const state = makeState({
@@ -934,6 +1341,96 @@ describe('elite loan per-turn reconciliation and tick', () => {
 
         expect(brigade.elite_loan_state!.on_loan).toBe(true);
         expect(brigade.elite_loan_state!.last_recall_turn).toBeNull();
+    });
+
+    it('does not attach a historically reserved Zvezda elite to an unrelated executing operation', () => {
+        const brigade = makeOnLoanBrigade('rs_1st_guards_motorized', { loanStartTurn: 40 });
+        brigade.elite_loan_state!.loaned_to_corps = 'vrs_drina';
+        const state = makeState({
+            formations: { rs_1st_guards_motorized: brigade },
+            corps_command: {
+                vrs_drina: {
+                    active_operations: [{
+                        name: 'Unrelated Drina Offensive',
+                        phase: 'execution',
+                        participating_brigades: ['rs_1st_podrinje'],
+                        axes: [{
+                            axis_id: 'pracha_encirclement',
+                            assigned_brigades: ['rs_1st_podrinje'],
+                            objectives: ['op:rogatica:brcigovo'],
+                        }],
+                    }],
+                },
+            },
+            corps_front_sectors: {},
+            turn: 54,
+        });
+
+        generateArmyReserveRequests(state);
+        tickEliteLoans(state, 54);
+
+        const operation = state.military.corps_command!.vrs_drina!.active_operations[0]!;
+        expect(operation.participating_brigades).not.toContain('rs_1st_guards_motorized');
+        expect(operation.axes?.[0]!.assigned_brigades).not.toContain('rs_1st_guards_motorized');
+        expect(brigade.elite_loan_state!.on_loan).toBe(false);
+    });
+
+    it('recalls a Zvezda-reserved elite between operations even while the receiving front is threatened', () => {
+        const brigade = makeOnLoanBrigade('rs_65th_protection_motorized_regiment', { loanStartTurn: 40 });
+        brigade.elite_loan_state!.loaned_to_corps = 'vrs_drina';
+        const state = makeState({
+            formations: { rs_65th_protection_motorized_regiment: brigade },
+            corps_command: { vrs_drina: { active_operations: [] } },
+            corps_front_sectors: {
+                drina_front: {
+                    corps_id: 'vrs_drina',
+                    threat_ratio: 2,
+                    assigned_brigade_ids: ['rs_65th_protection_motorized_regiment'],
+                },
+            },
+            turn: 54,
+        });
+
+        tickEliteLoans(state, 54);
+
+        expect(brigade.elite_loan_state!.on_loan).toBe(false);
+        expect(brigade.elite_loan_state!.last_recall_turn).toBe(54);
+    });
+
+    it('does not issue generic reserve routing for an active-operation participant', () => {
+        const brigade = makeOnLoanBrigade('rs_1st_guards', { loanStartTurn: 0 });
+        brigade.location_osid = 'op:mun:o0';
+        const state = makeState({
+            formations: { rs_1st_guards: brigade },
+            corps_command: {
+                vrs_drina: {
+                    active_operations: [{
+                        name: 'active_operation',
+                        phase: 'execution',
+                        participating_brigades: ['rs_1st_guards'],
+                    }],
+                },
+            },
+            corps_front_sectors: {
+                sector_a: {
+                    corps_id: 'vrs_drina',
+                    territory_osids: ['op:mun:o2'],
+                    threat_ratio: 2,
+                    assigned_brigade_ids: ['rs_1st_guards'],
+                },
+            },
+            turn: 10,
+        });
+        state.political.political_controllers = {
+            'op:mun:o0': 'RS',
+            'op:mun:o1': 'RS',
+            'op:mun:o2': 'RS',
+        } as any;
+        state.military.brigade_movement_orders = {};
+
+        tickEliteLoans(state, 10, chainAdj(3));
+
+        expect(state.military.brigade_movement_orders.rs_1st_guards).toBeUndefined();
     });
 
     it('voluntary recalls after min duration when op ended and threat low', () => {
@@ -1193,6 +1690,47 @@ describe('elite loan per-turn reconciliation and tick', () => {
         expect(activeOp.axes?.[1]?.assigned_brigades).toEqual(['rs_1st_guards']);
     });
 
+    it.each([
+        { turn: 154, brigadeId: 'hv_4th_guards_split', operationName: 'Generic June Offensive', joined: false },
+        { turn: 160, brigadeId: 'hv_4th_guards_split', operationName: 'Operation Mistral 1', joined: true },
+        { turn: 113, brigadeId: 'rs_1st_guards_motorized', operationName: 'Operation Zvezda 94', joined: true },
+    ])('$operationName auto-join joined=$joined at t$turn', ({ turn, brigadeId, operationName, joined }) => {
+        const brigade = makeOnLoanBrigade(brigadeId, { loanStartTurn: turn - 1 });
+        const state = makeState({
+            formations: { [brigadeId]: brigade },
+            corps_command: {
+                vrs_drina: {
+                    active_operations: [{
+                        name: operationName,
+                        phase: 'execution',
+                        participating_brigades: ['rs_line_1'],
+                        axes: [{
+                            axis_id: 'axis:a',
+                            assigned_brigades: ['rs_line_1'],
+                            objectives: ['enemy_a'],
+                            current_objective_index: 0,
+                            status: 'executing',
+                            failure_count: 0,
+                            consecutive_failures_on_current: 0,
+                            momentum: 0,
+                            attack_attempt_count: 0,
+                            objective_capture_count: 0,
+                            movement_only_execution_turns: 0,
+                            idle_execution_turn_streak: 0,
+                        }],
+                    }],
+                },
+            },
+            turn,
+        });
+
+        generateArmyReserveRequests(state);
+
+        const op = state.military.corps_command!.vrs_drina.active_operations[0]!;
+        expect(op.participating_brigades.includes(brigadeId)).toBe(joined);
+        expect(op.axes?.[0]?.assigned_brigades.includes(brigadeId)).toBe(joined);
+    });
+
     it('does not auto-join a second operation when the live loan is already committed', () => {
         const brigade = makeOnLoanBrigade('rs_1st_guards', { loanStartTurn: 0 });
         const operation = (name: string, assignedBrigades: string[]) => ({
@@ -1276,6 +1814,35 @@ describe('elite loan per-turn reconciliation and tick', () => {
 // ── evaluateArmyReserveAssignments ────────────────────────────────────────────
 
 describe('evaluateArmyReserveAssignments', () => {
+    it('keeps a Guards request pending when the only reachable corps front is an enclave', () => {
+        const start = 'op:visoko:visoko_2' as Osid;
+        const destination = 'op:gorazde:bacci' as Osid;
+        const brigade = makeElite('arbih_guards_brigade', 'RBiH', start, { corps_id: 'arbih_general_staff' });
+        const corps = {
+            id: 'arbih_1st_corps', faction: 'RBiH', kind: 'corps_hq', status: 'active',
+            corps_id: 'arbih_1st_corps', location_osid: destination,
+        } as unknown as FormationState;
+        const sector = makeSector('arbih_1st_corps', 'RBiH', destination);
+        const request = {
+            corps_id: 'arbih_1st_corps', faction: 'RBiH', reason: 'defensive_gap', priority: 70,
+            raw_priority: 70, travel_hops: 1, turn_requested: 22, description: 'test',
+            suggested_brigade_id: 'arbih_guards_brigade',
+        };
+        const state = makeState({
+            formations: { arbih_guards_brigade: brigade, arbih_1st_corps: corps },
+            corps_front_sectors: { [sector.sector_id]: sector },
+            pending_reserve_requests: [request], player_faction: 'RS', turn: 22,
+        });
+        state.political.political_controllers = { [start]: 'RBiH', [destination]: 'RBiH' } as any;
+        const adjacency = new Map<Osid, Osid[]>([[start, [destination]], [destination, [start]]]);
+
+        evaluateArmyReserveAssignments(state, adjacency);
+
+        expect(brigade.elite_loan_state!.on_loan).toBe(false);
+        expect(state.military.pending_reserve_requests).toEqual([request]);
+        expect(state.military.reserve_request_history).toEqual([]);
+    });
+
     it('auto-assigns bot faction request when elite is available and nearby', () => {
         const adj = chainAdj(10);
         const brigadeOsid = 'op:mun:o1' as Osid;
@@ -2124,5 +2691,365 @@ describe('generateArmyReserveRequests', () => {
             commander_request_priority: 'critical',
             suggested_brigade_id: 'rs_1st_guards',
         });
+    });
+});
+
+describe('COHA reserve admission invariant', () => {
+    const VLASIC_OBJECTIVES = [
+        'op:travnik:paklarevo',
+        'op:travnik:varosluk',
+        'op:travnik:gornje_krcevine',
+    ];
+    const RETAINED_VLASIC_BRIGADES = [
+        'arbih_17th_vitezka_mountain',
+        'arbih_705th_slavna_mountain',
+        'arbih_737th_muslim_light',
+    ] as FormationId[];
+
+    function makeVlasicOperation(turn: number): CorpsOperation {
+        return {
+            name: 'Operation Vlasic Ridge',
+            type: 'sector_attack',
+            phase: 'execution',
+            started_turn: 150,
+            phase_started_turn: turn - 1,
+            participating_brigades: [...RETAINED_VLASIC_BRIGADES],
+            objectives: [...VLASIC_OBJECTIVES],
+            current_objective_index: 0,
+            staging_osid: 'op:travnik:travnik_2',
+            axes: [{
+                axis_id: 'vlasic_travnik_ridge',
+                name: 'Travnik Ridge Line',
+                assigned_brigades: [...RETAINED_VLASIC_BRIGADES],
+                objectives: [...VLASIC_OBJECTIVES],
+                staging_osid: 'op:travnik:turbe_2',
+                current_objective_index: 0,
+                status: 'executing',
+                failure_count: 0,
+                consecutive_failures_on_current: 0,
+                momentum: 0,
+                attack_attempt_count: 0,
+                objective_capture_count: 0,
+                movement_only_execution_turns: 0,
+                idle_execution_turn_streak: 0,
+            }],
+            failure_count: 0,
+            consecutive_failures_on_current: 0,
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 0,
+            idle_execution_turn_streak: 0,
+        } as CorpsOperation;
+    }
+
+    function makeOrdinaryOperation(name: string, brigadeId: string): CorpsOperation {
+        return {
+            name,
+            type: 'sector_attack',
+            phase: 'execution',
+            started_turn: 151,
+            phase_started_turn: 152,
+            participating_brigades: [brigadeId as FormationId],
+            objectives: ['op:travnik:paklarevo'],
+            current_objective_index: 0,
+            staging_osid: 'op:travnik:travnik_2',
+            axes: [{
+                axis_id: `axis:${name}`,
+                name,
+                assigned_brigades: [brigadeId as FormationId],
+                objectives: ['op:travnik:paklarevo'],
+                staging_osid: 'op:travnik:turbe_2',
+                current_objective_index: 0,
+                status: 'executing',
+                failure_count: 0,
+                consecutive_failures_on_current: 0,
+                momentum: 0,
+                attack_attempt_count: 0,
+                objective_capture_count: 0,
+                movement_only_execution_turns: 0,
+                idle_execution_turn_streak: 0,
+            }],
+            failure_count: 0,
+            consecutive_failures_on_current: 0,
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 0,
+            idle_execution_turn_streak: 0,
+        } as CorpsOperation;
+    }
+
+    function makeVlasicLine(id: string): FormationState {
+        return {
+            id,
+            faction: 'RBiH',
+            name: id,
+            created_turn: 0,
+            status: 'active',
+            kind: 'brigade',
+            assignment: null,
+            personnel: 1200,
+            morale: 70,
+            cohesion: 60,
+            corps_id: 'arbih_3rd_corps',
+            location_osid: 'op:travnik:turbe_2',
+            home_osid: 'op:travnik:turbe_2',
+        } as FormationState;
+    }
+
+    function makeVlasicReserveState(turn = 153) {
+        const vlasic = makeVlasicOperation(turn);
+        const guard = makeElite('arbih_guards_brigade', 'RBiH', 'op:travnik:travnik_2', {
+            corps_id: 'arbih_general_staff',
+        });
+        const formations: Record<string, FormationState> = {
+            arbih_3rd_corps: {
+                id: 'arbih_3rd_corps',
+                faction: 'RBiH',
+                name: '3rd Corps',
+                created_turn: 0,
+                status: 'active',
+                kind: 'corps',
+                assignment: null,
+                personnel: 0,
+                location_osid: 'op:travnik:travnik_2',
+                home_osid: 'op:travnik:travnik_2',
+            } as FormationState,
+            [guard.id]: guard,
+        };
+        for (const id of RETAINED_VLASIC_BRIGADES) formations[id] = makeVlasicLine(id);
+
+        const state = makeState({
+            formations,
+            corps_command: { arbih_3rd_corps: { active_operations: [vlasic] } },
+            corps_front_sectors: {
+                'sector:arbih_3rd_corps:0': makeSector('arbih_3rd_corps', 'RBiH', 'op:travnik:turbe_2', {
+                    threat_ratio: 0.5,
+                }),
+            },
+            turn,
+        });
+        state.military.event_flags = { coha_active: true };
+        state.political.political_controllers = {
+            'op:travnik:travnik_2': 'RBiH',
+            'op:travnik:turbe_2': 'RBiH',
+            'op:travnik:paklarevo': 'RS',
+            'op:travnik:varosluk': 'RS',
+            'op:travnik:gornje_krcevine': 'RS',
+        } as any;
+        return { state, vlasic, guard };
+    }
+
+    it('auto-attaches authored Guards to an active Vlasic COHA exception without revoking it', () => {
+        const { state, vlasic, guard } = makeVlasicReserveState(155);
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(true);
+
+        expect(deployEliteLoan(
+            state,
+            'arbih_guards_brigade',
+            'arbih_3rd_corps',
+            'offensive_support',
+            1,
+            155,
+        )).toBe(true);
+
+        expect(vlasic.participating_brigades).toContain('arbih_guards_brigade');
+        expect(vlasic.axes![0]!.assigned_brigades).toContain('arbih_guards_brigade');
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(true);
+        expect(guard.elite_loan_state).toMatchObject({
+            on_loan: true,
+            loaned_to_corps: 'arbih_3rd_corps',
+            current_episode_id: 0,
+            last_recall_turn: null,
+        });
+    });
+
+    it('reconciles an authored already-loaned Guards into an active Vlasic COHA exception', () => {
+        const { state, vlasic, guard } = makeVlasicReserveState(155);
+        guard.elite_loan_state = {
+            ...createEliteLoanState(),
+            on_loan: true,
+            loaned_to_corps: 'arbih_3rd_corps',
+            loan_start_turn: 150,
+            loan_start_personnel: guard.personnel ?? null,
+            current_episode_id: 0,
+        };
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(true);
+
+        generateArmyReserveRequests(state);
+
+        expect(vlasic.participating_brigades).toContain('arbih_guards_brigade');
+        expect(vlasic.axes![0]!.assigned_brigades).toContain('arbih_guards_brigade');
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(true);
+        expect(guard.elite_loan_state).toMatchObject({
+            on_loan: true,
+            loaned_to_corps: 'arbih_3rd_corps',
+            current_episode_id: 0,
+            last_recall_turn: null,
+        });
+    });
+
+    it('does not reconcile an unauthored already-loaned 327 into an active Vlasic COHA exception', () => {
+        const { state, vlasic } = makeVlasicReserveState(155);
+        const unauthorized = makeElite('arbih_327th_vitezka_mountain', 'RBiH', 'op:travnik:travnik_2', {
+            corps_id: 'arbih_general_staff',
+        });
+        unauthorized.elite_loan_state = {
+            ...createEliteLoanState(),
+            on_loan: true,
+            loaned_to_corps: 'arbih_3rd_corps',
+            loan_start_turn: 150,
+            loan_start_personnel: unauthorized.personnel ?? null,
+            current_episode_id: 0,
+        };
+        state.military.formations!['arbih_327th_vitezka_mountain'] = unauthorized;
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(true);
+
+        generateArmyReserveRequests(state);
+
+        expect(vlasic.participating_brigades).not.toContain('arbih_327th_vitezka_mountain');
+        expect(vlasic.axes![0]!.assigned_brigades).not.toContain('arbih_327th_vitezka_mountain');
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(true);
+    });
+
+    it('still admits an authored Vlasic reinforcement without revoking the exception', () => {
+        const { state, vlasic } = makeVlasicReserveState(155);
+        const authored = makeElite('arbih_712th_mountain', 'RBiH', 'op:travnik:turbe_2', {
+            corps_id: 'arbih_general_staff',
+        });
+        state.military.formations!['arbih_712th_mountain'] = authored;
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(true);
+
+        expect(deployEliteLoan(
+            state,
+            'arbih_712th_mountain',
+            'arbih_3rd_corps',
+            'offensive_support',
+            1,
+            155,
+        )).toBe(true);
+
+        expect(vlasic.participating_brigades).toContain('arbih_712th_mountain');
+        expect(vlasic.axes![0]!.assigned_brigades).toContain('arbih_712th_mountain');
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(true);
+        expect(authored.elite_loan_state!.on_loan).toBe(true);
+    });
+
+    it('auto-attaches Guards normally to an ordinary non-exception operation', () => {
+        const { state, guard } = makeVlasicReserveState(153);
+        const ordinary = makeOrdinaryOperation('Operation Ordinary', 'arbih_17th_vitezka_mountain');
+        state.military.corps_command!.arbih_3rd_corps.active_operations = [ordinary];
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', ordinary)).toBe(false);
+
+        expect(deployEliteLoan(
+            state,
+            'arbih_guards_brigade',
+            'arbih_3rd_corps',
+            'offensive_support',
+            1,
+            153,
+        )).toBe(true);
+
+        expect(ordinary.participating_brigades).toContain('arbih_guards_brigade');
+        expect(ordinary.axes![0]!.assigned_brigades).toContain('arbih_guards_brigade');
+        expect(guard.elite_loan_state!.on_loan).toBe(true);
+    });
+
+    it('leaves auto-join unchanged outside the receipt-155 COHA window', () => {
+        const { state, vlasic, guard } = makeVlasicReserveState(156);
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(false);
+
+        expect(deployEliteLoan(
+            state,
+            'arbih_guards_brigade',
+            'arbih_3rd_corps',
+            'offensive_support',
+            1,
+            156,
+        )).toBe(true);
+
+        expect(vlasic.participating_brigades).toContain('arbih_guards_brigade');
+        expect(vlasic.axes![0]!.assigned_brigades).toContain('arbih_guards_brigade');
+        expect(guard.elite_loan_state!.on_loan).toBe(true);
+    });
+
+    it('attaches non-authored 327 to the Vlasic operation at receipts 153 and 154 outside the exception window', () => {
+        for (const turn of [153, 154]) {
+            const { state, vlasic } = makeVlasicReserveState(turn);
+            const unauthorized = makeElite('arbih_327th_vitezka_mountain', 'RBiH', 'op:travnik:travnik_2', {
+                corps_id: 'arbih_general_staff',
+            });
+            state.military.formations!['arbih_327th_vitezka_mountain'] = unauthorized;
+            expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(false);
+
+            expect(deployEliteLoan(
+                state,
+                'arbih_327th_vitezka_mountain',
+                'arbih_3rd_corps',
+                'offensive_support',
+                1,
+                turn,
+            )).toBe(true);
+
+            expect(vlasic.participating_brigades).toContain('arbih_327th_vitezka_mountain');
+            expect(vlasic.axes![0]!.assigned_brigades).toContain('arbih_327th_vitezka_mountain');
+            expect(unauthorized.elite_loan_state!.on_loan).toBe(true);
+            expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(false);
+
+            state.meta.turn = 155;
+            expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(false);
+        }
+    });
+
+    it('reconciles an already-loaned non-authored 327 before the window and remains exception-ineligible at 155', () => {
+        const { state, vlasic } = makeVlasicReserveState(154);
+        const unauthorized = makeElite('arbih_327th_vitezka_mountain', 'RBiH', 'op:travnik:travnik_2', {
+            corps_id: 'arbih_general_staff',
+        });
+        unauthorized.elite_loan_state = {
+            ...createEliteLoanState(),
+            on_loan: true,
+            loaned_to_corps: 'arbih_3rd_corps',
+            loan_start_turn: 150,
+            loan_start_personnel: unauthorized.personnel ?? null,
+            current_episode_id: 0,
+        };
+        state.military.formations!['arbih_327th_vitezka_mountain'] = unauthorized;
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(false);
+
+        generateArmyReserveRequests(state);
+
+        expect(vlasic.participating_brigades).toContain('arbih_327th_vitezka_mountain');
+        expect(vlasic.axes![0]!.assigned_brigades).toContain('arbih_327th_vitezka_mountain');
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(false);
+
+        state.meta.turn = 155;
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(false);
+    });
+
+    it('skips the incompatible Vlasic exception and selects a compatible alternative operation', () => {
+        const { state, vlasic } = makeVlasicReserveState(155);
+        const unauthorized = makeElite('arbih_327th_vitezka_mountain', 'RBiH', 'op:travnik:travnik_2', {
+            corps_id: 'arbih_general_staff',
+        });
+        state.military.formations!['arbih_327th_vitezka_mountain'] = unauthorized;
+        const alternative = makeOrdinaryOperation('Operation Zulu Support', 'arbih_705th_slavna_mountain');
+        state.military.corps_command!.arbih_3rd_corps.active_operations.push(alternative);
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(true);
+
+        expect(deployEliteLoan(
+            state,
+            'arbih_327th_vitezka_mountain',
+            'arbih_3rd_corps',
+            'offensive_support',
+            1,
+            155,
+        )).toBe(true);
+
+        expect(vlasic.participating_brigades).not.toContain('arbih_327th_vitezka_mountain');
+        expect(vlasic.axes![0]!.assigned_brigades).not.toContain('arbih_327th_vitezka_mountain');
+        expect(alternative.participating_brigades).toContain('arbih_327th_vitezka_mountain');
+        expect(alternative.axes![0]!.assigned_brigades).toContain('arbih_327th_vitezka_mountain');
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(true);
+        expect(unauthorized.elite_loan_state!.on_loan).toBe(true);
     });
 });

@@ -1,0 +1,81 @@
+{
+  "start_tip": "933132e909ad9d5380c2452ee29396d92a8b0bd9",
+  "command": "$env:PATH = 'C:\\Program Files\\Git\\bin;' + $env:PATH; npm.cmd run test:vitest:balanced",
+  "expanded_runner_command": "node tools/test/run_vitest_balanced.mjs --shards=4 -- --reporter=dot --silent",
+  "started_at_local": "2026-09-12T23:26:50+02:00",
+  "finished_at_local": "2026-09-12T23:59:14+02:00",
+  "wall_evidence_duration": "00:32:24",
+  "outer_exit": 1,
+  "files": {
+    "failed": 8,
+    "passed": 1379,
+    "skipped": 4,
+    "total": 1391
+  },
+  "tests": {
+    "failed": 9,
+    "passed": 13935,
+    "skipped": 43,
+    "total": 13987
+  },
+  "raw_log": {
+    "path": "logs/roadmap-integration-20260912/full-suite.log",
+    "sha256": "8747229abbca1e3fe52b6e58a8c2c3bde5280e0fa0645382c8c56593d95a43bc"
+  },
+  "intentional_child_control_excluded": "tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts",
+  "failure_groups": [
+    {
+      "group": "historical_operation_map_focus_exact_fixture",
+      "failed_files": ["tests/ui/historical_operation_map_focus.test.ts"],
+      "failed_tests": 2,
+      "disposition": "corrected_and_independently_reviewed",
+      "focused_evidence": "logs/roadmap-integration-20260912/fixture-correction-tests.log (8 files, 39 tests passed, exit 0)"
+    },
+    {
+      "group": "startup_snapshot_stale",
+      "failed_files": ["tests/desktop_sim_bundle_smoke.test.ts", "tests/startup_snapshot_contract.test.ts"],
+      "failed_tests": 3,
+      "serial_failure_evidence": "logs/roadmap-integration-20260912/full-suite.log lines 3071 and 46922 (startup_snapshot_contract serial failures); desktop bundle failure at line 1663",
+      "disposition": "regenerated_and_independently_reviewed",
+      "focused_evidence": "logs/roadmap-integration-20260912/fixture-correction-tests.log; includes startup_snapshot_contract.ts 19/19 and desktop_sim_bundle_smoke.test.ts 1/1 within 39/39 total"
+    },
+    {
+      "group": "hover_map_merge_map_path",
+      "failed_files": ["tests/generate_apr1994_hover_map.test.ts"],
+      "failed_tests": 1,
+      "disposition": "corrected_and_independently_reviewed",
+      "focused_evidence": "logs/roadmap-integration-20260912/fixture-correction-tests.log (generator 1/1 within 39/39 total)"
+    },
+    {
+      "group": "q2_faction_literal_in_shared_briefing",
+      "failed_files": ["tests/q2_deviation_reason.test.ts"],
+      "failed_tests": 1,
+      "disposition": "corrected_and_independently_reviewed_after_fixture_literal_correction",
+      "focused_evidence": [
+        "logs/roadmap-integration-20260912/q2-correction-tests.log (4 files, 40 tests passed, exit 0)",
+        "logs/roadmap-integration-20260912/q2-fixture-correction-tests.log (2 files, 26 tests passed, exit 0; SHA-256 9cadd2d9996811b6ae202ff793a5e764b19dbc4eaa21f0eda47a7c672b11f886)"
+      ]
+    },
+    {
+      "group": "runtime_dependency_before_all_timeout",
+      "failed_files": ["tests/runtime_dependency_resolution.test.ts"],
+      "failed_tests": 0,
+      "failed_suites": 1,
+      "disposition": "parallel_resource_contention_isolated_without_timeout_change",
+      "focused_evidence": "logs/roadmap-integration-20260912/runtime-dependency-isolated.log (1 file, 12 tests passed, exit 0, 3.12 seconds)"
+    },
+    {
+      "group": "forty_week_large_empty_sector_cap",
+      "failed_files": ["tests/integration_deployment_health.test.ts", "tests/integration_run_diagnostics.test.ts"],
+      "failed_tests": 2,
+      "disposition": "held_for_owner_acceptance_decision",
+      "focused_evidence": [
+        "logs/roadmap-integration-20260912/coverage-40w.log (no-map run exit 0; final hash 1735518d58ea4444)",
+        "logs/roadmap-integration-20260912/coverage-40w-gaps.json",
+        "logs/roadmap-integration-20260912/coverage-40w-donor-classification.json",
+        "logs/roadmap-integration-20260912/coverage-40w-connectivity.json"
+      ],
+      "finding": "All 9 sectors are explicitly unstaffed and disconnected from 3-25 otherwise-legal same-corps donors through faction-controlled graph components; the <=2 count cap remains unchanged."
+    }
+  ]
+}

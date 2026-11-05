@@ -1,0 +1,3 @@
+stderr | tests/turn_result_production_callers.test.ts > TurnResult production caller handling > deterministic scenario CLI stops on the first invariant failure without advancing its input
+[displacement_triggers] hasLiveSectorFrontlineTruth=false — using legacy pressure eligibility fallback. Activity counts may differ from canonical sector truth.
+

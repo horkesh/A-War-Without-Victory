@@ -1,0 +1,131 @@
+{
+  "schema": "awwv.790.closing-manifest.v1",
+  "head": "e5a1fb7b83d9ff3c6c6b07ceaa6ab52d5d9e33e1",
+  "pass": true,
+  "pinned": [
+    {
+      "path": "src/sim/combat/commander/emit.ts",
+      "sha256": "76351f818c3403fcc23bf5b51f30c467bd42886d68f1e6b754d9f90baa58746b",
+      "actual_sha256": "76351f818c3403fcc23bf5b51f30c467bd42886d68f1e6b754d9f90baa58746b",
+      "pass": true
+    },
+    {
+      "path": "src/sim/combat/commander/commander_loop.ts",
+      "sha256": "f2625d3ff3399f5ba4b8c8a7aacf251f6b60a897c8e41102a4de366f8dfd881d",
+      "actual_sha256": "f2625d3ff3399f5ba4b8c8a7aacf251f6b60a897c8e41102a4de366f8dfd881d",
+      "pass": true
+    },
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "sha256": "beabdcaa779995ed93d820a957b0fd4cbd1e662d47502b0c0374b28819880484",
+      "actual_sha256": "beabdcaa779995ed93d820a957b0fd4cbd1e662d47502b0c0374b28819880484",
+      "pass": true
+    },
+    {
+      "path": "data/scenarios/apr1992_definitive_188w.json",
+      "sha256": "4257b039f5b1dbb7f21d940ec656b2d0b787856f27e7c26b6f3f57f256d82ecf",
+      "actual_sha256": "4257b039f5b1dbb7f21d940ec656b2d0b787856f27e7c26b6f3f57f256d82ecf",
+      "pass": true
+    },
+    {
+      "path": "logs/claude-channel-20261004/203-commander-creation-reader.cjs",
+      "sha256": "250816bce802f41a02a3f6d8b215b0747fbf6c67466e8f2e588e30e40a629078",
+      "actual_sha256": "250816bce802f41a02a3f6d8b215b0747fbf6c67466e8f2e588e30e40a629078",
+      "pass": true
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-commander-semantics-c.cjs",
+      "sha256": "1ba4681d043138991d930947fd29513ce06c9b22307e0d81dee8adc644609e83",
+      "actual_sha256": "1ba4681d043138991d930947fd29513ce06c9b22307e0d81dee8adc644609e83",
+      "pass": true
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-commander-semantics-d.cjs",
+      "sha256": "bd4543832b9cca7905fe420f91cafb6315fb4eb0f03f498048496a376dac5cd2",
+      "actual_sha256": "bd4543832b9cca7905fe420f91cafb6315fb4eb0f03f498048496a376dac5cd2",
+      "pass": true
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-stateful-readers-b.cjs",
+      "sha256": "e3d837c7f193c7a4fc052eb6b0fc4745ab5b04e85c9bbd43c3d0d9fbdb93759f",
+      "actual_sha256": "e3d837c7f193c7a4fc052eb6b0fc4745ab5b04e85c9bbd43c3d0d9fbdb93759f",
+      "pass": true
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-postrun-gates-d.cjs",
+      "sha256": "9ebe604392e40838766ff2efade828d5c689a7b9ae5db0f742116c722dcacf6d",
+      "actual_sha256": "9ebe604392e40838766ff2efade828d5c689a7b9ae5db0f742116c722dcacf6d",
+      "pass": true
+    },
+    {
+      "path": "logs/claude-channel-20261004/787-status-contract-audit.json",
+      "sha256": "72fd18d6d646007acb5f6296427389d6ebe0e89cbfa349f0b8e83cdf4965e3f9",
+      "actual_sha256": "72fd18d6d646007acb5f6296427389d6ebe0e89cbfa349f0b8e83cdf4965e3f9",
+      "pass": true
+    },
+    {
+      "path": "logs/claude-channel-20261004/787-status-contract-audit.md",
+      "sha256": "4d16cc5eda580e2df4f96592703ae30a7bd3a801adc9085990dcf86a08bc936e",
+      "actual_sha256": "4d16cc5eda580e2df4f96592703ae30a7bd3a801adc9085990dcf86a08bc936e",
+      "pass": true
+    }
+  ],
+  "copied_203": {
+    "original": "logs/claude-channel-20261004/203-commander-creation-reader.cjs",
+    "tracked": "tools/diagnostics/commander_creation_reader_203.cjs",
+    "original_sha256": "250816bce802f41a02a3f6d8b215b0747fbf6c67466e8f2e588e30e40a629078",
+    "tracked_sha256": "250816bce802f41a02a3f6d8b215b0747fbf6c67466e8f2e588e30e40a629078",
+    "byte_identical": true
+  },
+  "changed": [
+    {
+      "path": "tests/commander/probe_target_selection_filter.test.ts",
+      "sha256": "e2a59b0b987c4ed11dc5fee66f274865b7852883856d6d9a615194097febd318",
+      "bytes": 29422
+    },
+    {
+      "path": "tools/diagnostics/commander_creation_reader_203.cjs",
+      "sha256": "250816bce802f41a02a3f6d8b215b0747fbf6c67466e8f2e588e30e40a629078",
+      "bytes": 27523
+    },
+    {
+      "path": "tools/diagnostics/commander_target_selection_postrun.cjs",
+      "sha256": "d4274e6c786a37ab7037feb85d2e1dd4ed590391aa8db67f6c38bc1591d95329",
+      "bytes": 2363
+    },
+    {
+      "path": "tools/diagnostics/commander_target_selection_reader.cjs",
+      "sha256": "98c9613c0d8fe2ce875cd14a75803f21c3cfbd96f7563e7851fe76740d3db21e",
+      "bytes": 20326
+    }
+  ],
+  "git_status_short": [
+    "M tests/commander/probe_target_selection_filter.test.ts",
+    "?? tools/diagnostics/commander_creation_reader_203.cjs",
+    "?? tools/diagnostics/commander_target_selection_postrun.cjs",
+    "?? tools/diagnostics/commander_target_selection_reader.cjs"
+  ],
+  "producer_rows": {
+    "count": 9,
+    "statuses": [
+      "not_reached",
+      "no_brigade",
+      "no_sector",
+      "missing_adjacency_or_friendly_set_or_location",
+      "local_occupation_bypass",
+      "empty_enemy_set",
+      "empty_direct_set",
+      "all_filtered",
+      "generic_search"
+    ]
+  },
+  "controls": {
+    "contradictory_and_malformed_negative_count": 23
+  },
+  "composition": {
+    "path": "tools/diagnostics/commander_target_selection_postrun.cjs",
+    "status": "REQUIRE_SAFE_READY__ACTUAL_POSTRUN_UNREACHED_NO_CAMPAIGN",
+    "stateful_reader_dependency": "logs/claude-channel-20261004/786-stateful-readers-b.cjs"
+  },
+  "scope": "Commander target-selection completion-row stage only; no whole personnel/stateful pipeline or campaign readiness claim."
+}

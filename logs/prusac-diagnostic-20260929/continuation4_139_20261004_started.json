@@ -1,0 +1,32 @@
+{
+  "owner_message": "Go for it",
+  "date": "2026-10-04",
+  "authorized_scope": "exactly one139-week dispatcher diagnostic; no188/full-suite/retry",
+  "question": "actual737 ordinary eligibility and first handled branch at completed137/138/139",
+  "command": "node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_188w.json --weeks 139 --out runs --unique",
+  "debug_topics": "dispatcher_decision",
+  "pass_criteria": [
+    "runner0",
+    "clean candidate provenance",
+    "31 consumed-input digest and initial save equal n39",
+    "strict737 named boundaries137/138/139 with0 inconsistencies",
+    "no unexplained pre139 control/checkpoint drift"
+  ],
+  "expected_cost": "approximately3-5 minutes plus artifact inspection; observation output can add cost",
+  "stop_rule": "first failed run/provenance/coverage gate; preserve and diagnose; no automatic retry",
+  "candidate_commit": "fe828b9e0222a80238dbe60c22391fae53c48039",
+  "tracked_clean": true,
+  "node_version": "v22.23.2",
+  "checked_source_files": 8,
+  "checked_normalized_inputs": 31,
+  "hash_mismatches": [],
+  "expected_input_digest": "8f13061b19ed9fd2d899f77f0115fdd4c5379e52cb058b3edadbd00e0e41af20",
+  "expected_initial_save_sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+  "reuse": [
+    "22/22 dispatcher correction and independent preparationGO",
+    "typecheck/commit0 and54 unaffected tests",
+    "n39 late517/towns/belt/Jajce/matches/protected/critical/Farz",
+    "prior36 retained fingerprints"
+  ],
+  "baseline_acceptance": false
+}

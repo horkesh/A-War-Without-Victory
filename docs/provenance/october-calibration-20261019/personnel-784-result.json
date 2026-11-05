@@ -1,0 +1,620 @@
+{
+  "schema": "awwv.784.reviewed-personnel-probe-observers.v1",
+  "captured_utc": "2026-10-21T10:45:13.524Z",
+  "writes_closed": true,
+  "verdict": "PASS_OBSERVER_READINESS_ONLY__NO_CAMPAIGN_OR_ADOPTION",
+  "summary": "Default-off stdout-only personnel and generic-probe selection observers are implemented and independently verified. Independent AWWV_DEBUG_PERSONNEL_FORMATIONS allows Sarajevo observation while the existing ABB movement-report payload stays exact. No gameplay, threshold, GameState/save/report/weekly or file-telemetry change; no campaign or historical-cause finding.",
+  "inputs": [
+    {
+      "path": "logs/claude-channel-20261004/781-root-plan.md",
+      "sha256": "500eeca06b207e99667cc5bacac539db09dbe36bc2d2a80d702901f92f5270e4"
+    },
+    {
+      "path": "logs/claude-channel-20261004/782-result.json",
+      "sha256": "30271a1fed415c5790bc789fe7699262ea929a374d67558f5662ea589b1e5266"
+    },
+    {
+      "path": "logs/claude-channel-20261004/782-inventory.json",
+      "sha256": "7eaeb3c1366533425090313180297cc417ed69d492b8f382a316e458e5cbc3d5"
+    },
+    {
+      "path": "logs/claude-channel-20261004/782-closed.json",
+      "sha256": "182e0f57d7c29c2bccda1a61922ab281c2cffc8be2ceb660df09d917aee47695"
+    },
+    {
+      "path": "logs/claude-channel-20261004/782-correction-783-result.json",
+      "sha256": "2fc90ba76fa838c267774d38a5e3eec4154e65e741122476d87e8de166ba6e56"
+    },
+    {
+      "path": "logs/claude-channel-20261004/782-correction-783-inventory.json",
+      "sha256": "925603f06f72217efc5946cb3daedb85c7039c346ac1f68b86b369f201fc5b09"
+    },
+    {
+      "path": "logs/claude-channel-20261004/782-correction-783-closed.json",
+      "sha256": "dea157b515233fcff59200429f4033d9cf94b6057acee97c1144d0bd2248c49d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/783-independent-review.json",
+      "sha256": "d0e438bc6c77ccf8d4821b204b977ed37593ee1292c8b94c706934465b4ebec8"
+    },
+    {
+      "path": "logs/claude-channel-20261004/783-targeted-verification.json",
+      "sha256": "405efd53e004e07895eb60835f09c4a1182c708c276bcea6b408b5f7e50e1bf5"
+    },
+    {
+      "path": "logs/claude-channel-20261004/784-raw-inventory.json",
+      "sha256": "1a74ca84e2a9d558f4156098e466043924b4b1f576c767060394d5e2e840808c"
+    }
+  ],
+  "files": [
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "bytes": 20210,
+      "sha256": "beabdcaa779995ed93d820a957b0fd4cbd1e662d47502b0c0374b28819880484"
+    },
+    {
+      "path": "src/sim/combat/personnel_diagnostic.ts",
+      "bytes": 5870,
+      "sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3"
+    },
+    {
+      "path": "src/sim/turn_pipeline.ts",
+      "bytes": 11675,
+      "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25"
+    },
+    {
+      "path": "src/sim/formation_spawn.ts",
+      "bytes": 44692,
+      "sha256": "d8586722b72a3345c610d422f4e069fe2150748a316cbe8d1fc8c4fcfd86c072"
+    },
+    {
+      "path": "src/sim/combat/strategic_reserve.ts",
+      "bytes": 10755,
+      "sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae"
+    },
+    {
+      "path": "src/sim/combat/frontline_attrition.ts",
+      "bytes": 21594,
+      "sha256": "0cc09b4eca821d2dce287893fdde312239c2b8be495ed02e36b8a23ba59f5ee1"
+    },
+    {
+      "path": "src/sim/combat/morale_drift.ts",
+      "bytes": 17730,
+      "sha256": "cb7720d5da303e02d89fb3aaf034488a340a51155dfd6dbfc4839cf9cedcdc5c"
+    },
+    {
+      "path": "src/sim/combat/commander/emit.ts",
+      "bytes": 202428,
+      "sha256": "76351f818c3403fcc23bf5b51f30c467bd42886d68f1e6b754d9f90baa58746b"
+    },
+    {
+      "path": "tests/personnel_diagnostic.test.ts",
+      "bytes": 19693,
+      "sha256": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b"
+    },
+    {
+      "path": "tests/reason_code_debug.test.ts",
+      "bytes": 10403,
+      "sha256": "189ba6da07dc0b931e4e98c54565e50bd8182299843606cefccbc113e972bf08"
+    },
+    {
+      "path": "tests/commander_creation_observer.test.ts",
+      "bytes": 100803,
+      "sha256": "05bfd3cf245aa0f929c44d6efff8abdf7316e0fb54b415f25a3c48c9e0f8bb86"
+    }
+  ],
+  "reviewed_files": [
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "bytes": 20210,
+      "sha256": "beabdcaa779995ed93d820a957b0fd4cbd1e662d47502b0c0374b28819880484"
+    },
+    {
+      "path": "src/sim/combat/movement_phase_diagnostic.ts",
+      "bytes": 7386,
+      "sha256": "cac140facd432e206a079093514702237f7690088b92eac10a556de9e6ba62d8"
+    },
+    {
+      "path": "src/sim/combat/personnel_diagnostic.ts",
+      "bytes": 5870,
+      "sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3"
+    },
+    {
+      "path": "src/sim/turn_pipeline.ts",
+      "bytes": 11675,
+      "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25"
+    },
+    {
+      "path": "src/sim/formation_spawn.ts",
+      "bytes": 44692,
+      "sha256": "d8586722b72a3345c610d422f4e069fe2150748a316cbe8d1fc8c4fcfd86c072"
+    },
+    {
+      "path": "src/sim/combat/strategic_reserve.ts",
+      "bytes": 10755,
+      "sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae"
+    },
+    {
+      "path": "src/sim/combat/frontline_attrition.ts",
+      "bytes": 21594,
+      "sha256": "0cc09b4eca821d2dce287893fdde312239c2b8be495ed02e36b8a23ba59f5ee1"
+    },
+    {
+      "path": "src/sim/combat/morale_drift.ts",
+      "bytes": 17730,
+      "sha256": "cb7720d5da303e02d89fb3aaf034488a340a51155dfd6dbfc4839cf9cedcdc5c"
+    },
+    {
+      "path": "src/sim/combat/commander/emit.ts",
+      "bytes": 202428,
+      "sha256": "76351f818c3403fcc23bf5b51f30c467bd42886d68f1e6b754d9f90baa58746b"
+    },
+    {
+      "path": "tests/personnel_diagnostic.test.ts",
+      "bytes": 19693,
+      "sha256": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b"
+    },
+    {
+      "path": "tests/reason_code_debug.test.ts",
+      "bytes": 10403,
+      "sha256": "189ba6da07dc0b931e4e98c54565e50bd8182299843606cefccbc113e972bf08"
+    },
+    {
+      "path": "tests/commander_creation_observer.test.ts",
+      "bytes": 100803,
+      "sha256": "05bfd3cf245aa0f929c44d6efff8abdf7316e0fb54b415f25a3c48c9e0f8bb86"
+    }
+  ],
+  "telemetry": {
+    "C": {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 102001043,
+      "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899",
+      "before_archive": "logs/claude-channel-20261004/782-preservation-before/C-before.jsonl",
+      "after_archive": "logs/claude-channel-20261004/782-preservation-final/C-after.jsonl"
+    },
+    "D": {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "before_archive": "logs/claude-channel-20261004/782-preservation-before/D-before.jsonl",
+      "after_archive": "logs/claude-channel-20261004/782-preservation-final/D-after.jsonl"
+    }
+  },
+  "personnel": {
+    "topic": "personnel",
+    "selector": "AWWV_DEBUG_PERSONNEL_FORMATIONS",
+    "phase_receipts": [
+      "phase_start",
+      "phase_end_executed",
+      "phase_end_skipped",
+      "terminal"
+    ],
+    "presence": [
+      "formation_absent",
+      "formation_present_undefined",
+      "formation_present_null",
+      "personnel_absent",
+      "present_undefined",
+      "present_null",
+      "present_nonfinite",
+      "present_value"
+    ],
+    "covered_direct_writers": [
+      "formation_spawn.reinforce:bottom_up",
+      "formation_spawn.reinforce:regular",
+      "formation_spawn.reinforce:enclave",
+      "formation_spawn.wia_trickleback",
+      "strategic_reserve.reinforce",
+      "frontline_attrition",
+      "morale_drift.desertion:collapse",
+      "morale_drift.desertion:low_morale"
+    ],
+    "uncovered_limits": [
+      "combat resolution casualty and retreat writers",
+      "brigade dissolution, formation merge, lifecycle-event, and paramilitary personnel writers",
+      "militia-pool-only mutations",
+      "a phase delta does not identify a unique writer"
+    ],
+    "prefix": "[personnel]"
+  },
+  "commander_generic_probe": {
+    "hardcoded_turn_corps_selector_removed": true,
+    "records": [
+      "original_surplus_ordinal",
+      "actual_reached_filter_results",
+      "NOT_REACHED",
+      "actual_fitness_with_nonfinite_tags",
+      "survivor_sorted_rank",
+      "selected_identity",
+      "local_occupation_bypass",
+      "fallback_not_reached",
+      "existing_target_filters_and_selected_tuple"
+    ],
+    "filter_order_helper_count_sort_comparator_and_short_circuit_preserved": true
+  },
+  "initial_validation": [
+    {
+      "attempt": "782-red-personnel-01",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "result": "genuine RED: personnel module/topic absent"
+    },
+    {
+      "attempt": "782-red-probe-bypass-01",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "result": "genuine RED: bypass candidate inventory empty"
+    },
+    {
+      "attempt": "782-green-targeted-correction-02",
+      "child_exit": 0,
+      "wrapper_exit": 0
+    },
+    {
+      "attempt": "782-green-focused-final-02",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "tests": 146,
+      "passed": 146,
+      "failed": 0
+    },
+    {
+      "attempt": "782-typecheck-final-02",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "mode": "noEmit with private typecheck.tsbuildinfo"
+    },
+    {
+      "check": "git diff --check",
+      "exit": 0
+    }
+  ],
+  "correction": {
+    "task": "782-correction-783",
+    "status": "corrected_and_focused_verified",
+    "opening_head": "e95a1df818f5a8ba77b134926bc7c17a388ec8e1",
+    "current_head": "e95a1df818f5a8ba77b134926bc7c17a388ec8e1",
+    "review": {
+      "path": "logs/claude-channel-20261004/783-independent-review.json",
+      "sha256": "d0e438bc6c77ccf8d4821b204b977ed37593ee1292c8b94c706934465b4ebec8",
+      "findings_closed": [
+        "all actual generic-probe filter false and NOT_REACHED stage transitions, nonfinite fitness tags, and reached helper single-evaluation behavior",
+        "all bounded personnel writer branches and formation/personnel presence distinctions"
+      ]
+    },
+    "selector_correction": {
+      "personnel_selector": "AWWV_DEBUG_PERSONNEL_FORMATIONS",
+      "movement_selector": "AWWV_DEBUG_MOVEMENT_FORMATIONS",
+      "own_selector_only": true,
+      "simultaneous_fixture": {
+        "movement": "abb",
+        "personnel": "rs4"
+      },
+      "movement_phase_diagnostics_exactly_equal_with_personnel_off_or_on": true,
+      "personnel_phase_sources_only_selected_rs4": true,
+      "personnel_real_writer_selected_rs4": "formation_spawn.wia_trickleback"
+    },
+    "claims": {
+      "observability_readiness_only": true,
+      "historical_cause_or_recovery_claim": false,
+      "gameplay_or_threshold_change": false,
+      "game_state_save_report_weekly_schema_change": false,
+      "existing_movement_phase_weekly_payload_changed": false,
+      "production_behavior_correction_limited_to_diagnostic_selector": true
+    },
+    "coverage": {
+      "personnel_presence": [
+        "formation_absent",
+        "formation_present_undefined",
+        "formation_present_null",
+        "personnel_absent",
+        "present_undefined",
+        "present_null",
+        "present_nonfinite",
+        "present_value"
+      ],
+      "personnel_direct_writers": [
+        "formation_spawn.reinforce:bottom_up",
+        "formation_spawn.reinforce:regular",
+        "formation_spawn.reinforce:enclave",
+        "formation_spawn.wia_trickleback",
+        "strategic_reserve.reinforce",
+        "frontline_attrition",
+        "morale_drift.desertion:collapse",
+        "morale_drift.desertion:low_morale"
+      ],
+      "commander_probe": [
+        "disrupted_and_effective false then later stages NOT_REACHED",
+        "elite_available false then later stages NOT_REACHED",
+        "historical_queue_free false then combat_ready NOT_REACHED",
+        "combat_ready false",
+        "NaN Infinity and -Infinity explicit tags",
+        "original duplicate-preserving surplus ordinals",
+        "actual survivor ranks and selected identity",
+        "each reached filter helper evaluated once"
+      ],
+      "uncovered_limits": [
+        "combat resolution casualty and retreat writers",
+        "brigade dissolution, formation merge, lifecycle-event, and paramilitary personnel writers",
+        "militia-pool-only mutations",
+        "a phase delta does not identify a unique writer"
+      ]
+    },
+    "verification": [
+      {
+        "attempt": "782-correction-783-targeted-01",
+        "exit": 1,
+        "test_process_started": false,
+        "evidence": "logs/claude-channel-20261004/782-correction-783-targeted-01-invocation-rejection.json"
+      },
+      {
+        "attempt": "782-correction-783-targeted-02",
+        "child_exit": 1,
+        "wrapper_exit": 1,
+        "tests": 68,
+        "passed": 66,
+        "failed": 2,
+        "diagnosis": "fixture-only formation map and morale transition assumptions"
+      },
+      {
+        "attempt": "782-correction-783-targeted-03",
+        "child_exit": 0,
+        "wrapper_exit": 0,
+        "tests": 68,
+        "passed": 68,
+        "failed": 0
+      },
+      {
+        "attempt": "782-correction-783-commander-compilefix-01",
+        "child_exit": 0,
+        "wrapper_exit": 0,
+        "tests": 60,
+        "passed": 60,
+        "failed": 0
+      },
+      {
+        "attempt": "782-correction-783-focused-final-02",
+        "child_exit": 0,
+        "wrapper_exit": 0,
+        "tests": 148,
+        "passed": 148,
+        "failed": 0
+      },
+      {
+        "attempt": "782-correction-783-typecheck-final-01",
+        "child_exit": 2,
+        "wrapper_exit": 2,
+        "diagnosis": "test fixture wrote readonly arrays directly"
+      },
+      {
+        "attempt": "782-correction-783-typecheck-final-02",
+        "child_exit": 0,
+        "wrapper_exit": 0,
+        "mode": "project noEmit with private typecheck.tsbuildinfo"
+      },
+      {
+        "check": "git diff --check",
+        "exit": 0
+      }
+    ],
+    "omitted_by_authority": [
+      "full suite",
+      "campaign",
+      "scenario advance",
+      "replay",
+      "runTurn scenario campaign",
+      "package build"
+    ],
+    "retained_prior_posture": "n80 retained 703/712 NO-GO and unadopted; n81/n82 rejected 689; unmet gates remain unmet"
+  },
+  "targeted_review": {
+    "task": "783-targeted-verification",
+    "reviewed_correction": "782-correction-783",
+    "base_head": "e95a1df818f5a8ba77b134926bc7c17a388ec8e1",
+    "verdict": "PASS_OBSERVER_READINESS_ONLY",
+    "writes_closed": true,
+    "blockers": [],
+    "verified_corrections": [
+      {
+        "finding": "independent personnel selector and movement-payload isolation",
+        "verdict": "PASS",
+        "evidence": "AWWV_DEBUG_PERSONNEL_FORMATIONS is parsed, deduplicated, and strict-sorted in personnel_diagnostic.ts only after the personnel topic gate. Both phase and direct-writer paths use that selector. A real unit runTurn fixture selects movement actor abb and personnel actor rs4, proves the movement_phase_diagnostics object is equal with personnel OFF/ON, excludes abb from personnel rows, and observes rs4 through phase plus formation_spawn.wia_trickleback writer rows."
+      },
+      {
+        "finding": "personnel presence and eight direct-writer branches",
+        "verdict": "PASS",
+        "evidence": "The corrected fixture covers formation absent/undefined/null, personnel absent/undefined/null/nonfinite/value and directly executes/asserts bottom_up, regular, enclave, WIA, strategic reserve, frontline attrition, collapse desertion, and low-morale desertion operands/results."
+      },
+      {
+        "finding": "generic-probe stage, fitness, rank, and helper-count matrix",
+        "verdict": "PASS",
+        "evidence": "The corrected table reaches each successive filter failure, preserves later NOT_REACHED fields, tags NaN/Infinity/-Infinity, preserves original ordinals including duplicate identities, asserts the actual surviving rank/winner, and uses counted brigade-id access plus direct source comparison to establish one evaluation at each reached filter."
+      }
+    ],
+    "default_off_and_semantics": {
+      "verdict": "PASS",
+      "details": [
+        "With the personnel topic off, createPersonnelObserver returns before selector parsing/copying and isPersonnelDiagnosticSelected returns before selector evaluation.",
+        "The selector correction changes diagnostic routing only. Gameplay predicates, writer assignments, phase order, mutation order, ordinary return identity, commander selection, and movement payload construction are unchanged.",
+        "No GameState, save, report, weekly, schema, telemetry, threshold, or gameplay field was added."
+      ]
+    },
+    "focused_test_scope": {
+      "path": "logs/claude-channel-20261004/782-correction-783-focused-final-02",
+      "files": [
+        "tests/personnel_diagnostic.test.ts",
+        "tests/reason_code_debug.test.ts",
+        "tests/movement_phase_diagnostic.test.ts",
+        "tests/commander_creation_observer.test.ts",
+        "tests/troop_balance_lifecycle.test.ts",
+        "tests/wia_trickleback.test.ts",
+        "tests/morale_combat.test.ts"
+      ],
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "tests": 148,
+      "passed": 148,
+      "failed": 0,
+      "receipt_sha256": "a77609ff518f305a6fc8da708b35aa004ef71595a7fd4ed6545b4499baad504c",
+      "vitest_sha256": "25fb05c17d3b60a614f13d0a306fc959dfd189f240f5aa25576fd41d50420748",
+      "controlled_unit_runTurn_invocations": 7,
+      "controlled_unit_runTurn_breakdown": {
+        "tests/personnel_diagnostic.test.ts": 4,
+        "tests/movement_phase_diagnostic.test.ts": 3
+      },
+      "historical_scenario_or_campaign_runTurn_invocations": 0
+    },
+    "typecheck": {
+      "path": "logs/claude-channel-20261004/782-correction-783-typecheck-final-02",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "mode": "project noEmit with private typecheck.tsbuildinfo",
+      "receipt_sha256": "01007933ee35f3e62e9c8f6a696e051b568c1abd0941e32994b819cc229f2c3c",
+      "buildinfo_sha256": "6a99ef5602459ef1db33d19663ef237f2455626c545424a01235d179fddf5c52"
+    },
+    "correction_attempts": [
+      {
+        "attempt": "782-correction-783-targeted-01-invocation-rejection.json",
+        "status": "retained_declaration_only",
+        "test_process_started": false,
+        "note": "Six-field declarative JSON reporting exit 1 and missing child evidence placeholder. It is not a preserved-preflight receipt and does not independently prove wrapper exit or argv."
+      },
+      {
+        "attempt": "782-correction-783-targeted-02",
+        "child_exit": 1,
+        "wrapper_exit": 1,
+        "tests": 68,
+        "passed": 66,
+        "failed": 2,
+        "categories": [
+          "commander fixture formation-map assumption",
+          "personnel fixture morale-transition assumption"
+        ],
+        "resolved_by": "782-correction-783-targeted-03"
+      },
+      {
+        "attempt": "782-correction-783-targeted-03",
+        "child_exit": 0,
+        "wrapper_exit": 0,
+        "tests": 68,
+        "passed": 68,
+        "failed": 0,
+        "receipt_sha256": "2fd3f0d70b349a75a4a3f0206756873fdf95772d239573eb221c9732c6dee658",
+        "vitest_sha256": "c77aaa2228597a550492d141c00dcb618f18355ebe8a2a3ce70e60fb2db07ede"
+      },
+      {
+        "attempt": "782-correction-783-typecheck-final-01",
+        "child_exit": 2,
+        "wrapper_exit": 2,
+        "errors": 2,
+        "category": "test fixture assigned readonly arrays",
+        "resolved_by": "782-correction-783-typecheck-final-02"
+      }
+    ],
+    "sealed_artifacts": {
+      "result": {
+        "sha256": "2fc90ba76fa838c267774d38a5e3eec4154e65e741122476d87e8de166ba6e56"
+      },
+      "inventory": {
+        "sha256": "925603f06f72217efc5946cb3daedb85c7039c346ac1f68b86b369f201fc5b09",
+        "all_12_file_hashes_match": true,
+        "all_10_telemetry_archive_hashes_match": true
+      },
+      "closed": {
+        "sha256": "dea157b515233fcff59200429f4033d9cf94b6057acee97c1144d0bd2248c49d",
+        "writes_closed": true
+      }
+    },
+    "final_file_hashes": [
+      {
+        "path": "src/sim/combat/reason_code_debug.ts",
+        "sha256": "beabdcaa779995ed93d820a957b0fd4cbd1e662d47502b0c0374b28819880484"
+      },
+      {
+        "path": "src/sim/combat/movement_phase_diagnostic.ts",
+        "sha256": "cac140facd432e206a079093514702237f7690088b92eac10a556de9e6ba62d8"
+      },
+      {
+        "path": "src/sim/combat/personnel_diagnostic.ts",
+        "sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3"
+      },
+      {
+        "path": "src/sim/turn_pipeline.ts",
+        "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25"
+      },
+      {
+        "path": "src/sim/formation_spawn.ts",
+        "sha256": "d8586722b72a3345c610d422f4e069fe2150748a316cbe8d1fc8c4fcfd86c072"
+      },
+      {
+        "path": "src/sim/combat/strategic_reserve.ts",
+        "sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae"
+      },
+      {
+        "path": "src/sim/combat/frontline_attrition.ts",
+        "sha256": "0cc09b4eca821d2dce287893fdde312239c2b8be495ed02e36b8a23ba59f5ee1"
+      },
+      {
+        "path": "src/sim/combat/morale_drift.ts",
+        "sha256": "cb7720d5da303e02d89fb3aaf034488a340a51155dfd6dbfc4839cf9cedcdc5c"
+      },
+      {
+        "path": "src/sim/combat/commander/emit.ts",
+        "sha256": "76351f818c3403fcc23bf5b51f30c467bd42886d68f1e6b754d9f90baa58746b"
+      },
+      {
+        "path": "tests/personnel_diagnostic.test.ts",
+        "sha256": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b"
+      },
+      {
+        "path": "tests/reason_code_debug.test.ts",
+        "sha256": "189ba6da07dc0b931e4e98c54565e50bd8182299843606cefccbc113e972bf08"
+      },
+      {
+        "path": "tests/commander_creation_observer.test.ts",
+        "sha256": "05bfd3cf245aa0f929c44d6efff8abdf7316e0fb54b415f25a3c48c9e0f8bb86"
+      }
+    ],
+    "telemetry_protection": {
+      "c_bytes": 102001043,
+      "c_sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899",
+      "d_bytes": 1041,
+      "d_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "current_and_all_listed_before_final_396_archives_match": true
+    },
+    "fresh_static_check": {
+      "command": "git diff --check --no-ext-diff e95a1df818f5a8ba77b134926bc7c17a388ec8e1 --",
+      "exit": 0
+    },
+    "provenance_residual": "The correction inventory pins final source/test and telemetry/archive files, not every raw attempt file. Task 784 will add the supplemental raw inventory. The targeted-01 declaration remains qualified as non-receipt evidence.",
+    "not_claimed": [
+      "campaign neutrality",
+      "historical first writer or rank causality",
+      "full-suite acceptance",
+      "scenario advance, replay, package, or adoption readiness"
+    ],
+    "retained_posture": "Historical writer/rank remain UNMEASURED. n80 remains retained at 703/712 and unadopted; n81/n82 remain rejected at 689."
+  },
+  "source_review": "783 original HEAD comparison found original filter stages/helper calls/comparator/assignment/return order preserved. Targeted review covers the independent selector and corrected fixtures.",
+  "raw_inventory": "logs/claude-channel-20261004/784-raw-inventory.json",
+  "retained_failures": "Original782 planned REDs, green-focused-01 3/142 failures, typecheck-01 2 errors, and all correction failures remain in raw inventory at actual scopes. Initial783 CHANGES_REQUIRED is retained; later checks do not erase it.",
+  "scope": {
+    "new_campaigns": 0,
+    "full_suites": 0,
+    "builds": 0,
+    "replays": 0,
+    "unit_fixture_runTurn": "Controlled real-entry fixture used for selector/report neutrality; do not claim zero engine/test entry calls.",
+    "gameplay_threshold_control_data_save_canon_changes": 0
+  },
+  "limits": [
+    "Fixtures/source review establish preparation, not campaign-neutrality of this new implementation or historical writer/rank causality.",
+    "Direct write coverage is limited to eight named routine assignment branches; phase deltas outside them do not identify a unique writer.",
+    "Repeated call/turn context is not a unique invocation ID; preserve ordered records and require complete coverage in a future reader.",
+    "n80 remains retained703/712 NO-GO/unadopted; n81/n82 remain rejected689. All inherited unmet gates remain.",
+    "Raw evidence staysLOCAL with pushed identities, not a remote raw-byte backup.",
+    "No abbreviated or188-week measurement is authorized or run by this task."
+  ],
+  "next_action": "A separately authorized bounded instrumented diagnostic against n82, with unchanged movement selector/environment and independent personnel selector, cheapest reader/coverage controls first; no automatic retry.",
+  "provenance_limit": "782-correction-783-targeted-01-invocation-rejection.json retains a declaration of a pre-test wrapper invocation rejection, not a complete argv/start/end/stdout/stderr/runtime receipt. Its reported exit1 is not independently established as the child or wrapper exit; test process did not start. Preserve that missing-receipt scope rather than manufacture a rerun or treat it as a green runtime check."
+}

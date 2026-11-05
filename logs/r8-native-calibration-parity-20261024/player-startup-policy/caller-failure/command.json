@@ -1,0 +1,16 @@
+{
+  "command": "node",
+  "args": [
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "tests/ui/event_decision_auto_launch_contract.test.ts",
+    "tests/desktop_start_campaign_authorization.test.ts",
+    "tests/desktop_persisted_sector_continuity.test.ts",
+    "tests/desktop_player_visible_state.test.ts",
+    "tests/officer_state_persistence.test.ts",
+    "tests/officer_bio_read_model.test.ts",
+    "tests/warroom_new_campaign_flow_truth.test.ts",
+    "--pool=forks",
+    "--maxWorkers=1"
+  ]
+}

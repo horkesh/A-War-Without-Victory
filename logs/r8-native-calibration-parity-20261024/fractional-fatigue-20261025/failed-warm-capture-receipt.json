@@ -1,0 +1,114 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T11:49:11.733Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm-capture-01",
+  "timeout_ms": 180000,
+  "original_argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "node_modules/tsx/dist/cli.mjs",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm_turn16_snapshot.mts",
+    "--evidence-dir",
+    "{evidenceDir}",
+    "--expected-head",
+    "f7c40a0d1e28fde596f217b2c297b0734ec67470"
+  ],
+  "argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "node_modules/tsx/dist/cli.mjs",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm_turn16_snapshot.mts",
+    "--evidence-dir",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\cold-load-validation-v2\\native39-validation-v1\\warm-normalization-probe-v1\\warm-capture-01",
+    "--expected-head",
+    "f7c40a0d1e28fde596f217b2c297b0734ec67470"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "prerequisites.json",
+    "raw-turn16.NOT_GAME_SAVE.v8",
+    "diagnostic.json",
+    "result.json",
+    "run/activity_summary.json",
+    "run/brigade_temporal_log.jsonl",
+    "run/control_delta.json",
+    "run/destroyed_brigades.json",
+    "run/displacement_event_log.jsonl",
+    "run/end_report.md",
+    "run/final_save.json",
+    "run/formation_delta.json",
+    "run/initial_save.json",
+    "run/operation_aars.json",
+    "run/replay_save_manifest.json",
+    "run/run_meta.json",
+    "run/run_summary.json",
+    "run/save_w15.json",
+    "run/save_w16.json",
+    "run/watched_operations.json",
+    "run/weekly_report.jsonl"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm_turn16_snapshot.mts",
+    "bytes": 16291,
+    "raw_sha256": "b9a3ef9eb5429e38cd685866f6b08414acf2f6b112c13046492310d542b99c48",
+    "normalized_text_sha256": "b9a3ef9eb5429e38cd685866f6b08414acf2f6b112c13046492310d542b99c48",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 16291,
+      "sha256": "b9a3ef9eb5429e38cd685866f6b08414acf2f6b112c13046492310d542b99c48"
+    }
+  },
+  "end_utc": "2026-10-25T11:49:12.179Z",
+  "pid": 8476,
+  "child_exit": 1,
+  "wrapper_exit": 126,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm_turn16_snapshot.mts",
+    "bytes": 16291,
+    "raw_sha256": "b9a3ef9eb5429e38cd685866f6b08414acf2f6b112c13046492310d542b99c48",
+    "normalized_text_sha256": "b9a3ef9eb5429e38cd685866f6b08414acf2f6b112c13046492310d542b99c48",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 1174,
+    "sha256": "78f4e684746e0a10270f83d6c5570b2c4b08b7cbf0413b51836d56071312fe29"
+  },
+  "retained_artifacts": [],
+  "artifact_contract": {
+    "pass": false,
+    "unexpected": [],
+    "missing_allowed": [
+      "prerequisites.json",
+      "raw-turn16.NOT_GAME_SAVE.v8",
+      "diagnostic.json",
+      "result.json",
+      "run/activity_summary.json",
+      "run/brigade_temporal_log.jsonl",
+      "run/control_delta.json",
+      "run/destroyed_brigades.json",
+      "run/displacement_event_log.jsonl",
+      "run/end_report.md",
+      "run/final_save.json",
+      "run/formation_delta.json",
+      "run/initial_save.json",
+      "run/operation_aars.json",
+      "run/replay_save_manifest.json",
+      "run/run_meta.json",
+      "run/run_summary.json",
+      "run/save_w15.json",
+      "run/save_w16.json",
+      "run/watched_operations.json",
+      "run/weekly_report.jsonl"
+    ]
+  }
+}

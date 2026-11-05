@@ -1094,14 +1094,15 @@ const HISTORICAL_ANCHORS = Object.freeze([
     anchor_id: 'grabovica_uzdol_massacres_1993',
     event_file: 'data/scenarios/events/war_1993.json',
     essay_file: 'data/scenarios/essays/grabovica_uzdol_massacres_1993.json',
-    expected_turn_min: 74,
-    expected_turn_max: 76,
+    // Owner stagger ruling ([024]/[025]): the combined record follows Neretva one turn later.
+    expected_turn_min: 77,
+    expected_turn_max: 77,
   }),
   Object.freeze({
     anchor_id: 'operation_neretva_93_1993',
     event_file: 'data/scenarios/events/war_1993.json',
     essay_file: 'data/scenarios/essays/operation_neretva_93_1993.json',
-    expected_turn_min: 74,
+    expected_turn_min: 76,
     expected_turn_max: 76,
   }),
 ]);

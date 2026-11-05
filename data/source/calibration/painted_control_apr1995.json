@@ -6,13 +6,48 @@
     "description": "Painted control target: April 1995",
     "total_osids": 712,
     "counts": {
-      "RS": 388,
-      "RBiH": 248,
+      "RS": 387,
+      "RBiH": 249,
       "HRHB": 76
     },
     "source": "painted_control_targets",
-    "revision": 4,
+    "revision": 9,
     "changelog": [
+      {
+        "date": "2026-11-02",
+        "osid": "op:brcko:brka_2",
+        "from": "RS",
+        "to": "RBiH",
+        "rationale": "Owner determination, 2026-11-02 (reference rebase; not a gameplay, simulation, geometry, weighting, or direct-controller change): paint op:brcko:brka_2 RBiH in the April 1995 painted reference. CIA Balkan Battlegrounds II Annex 35 printed p381 records Donja Brka captured by 27 July 1993 in Sadejstvo 93 and renamed Srpska Brka; Gornja was an intended convergence point, not confirmed captured. CIA Balkan Battlegrounds I printed pp.235-236 records the ARBiH 2nd Corps attack on Donja Brka on 3 August 1994 from government-held Gornja, about 4 km2 taken, and failed VRS counterattacks in August-September 1994; the government still held both Gornja and Donja. Vol I p257 notes 106-111 cite Tanjug 3 August and Sarajevo Radio 5 August, 8 August and 12 September 1994. April 1995 continuity is an inference, not a direct exact April map; this is the owner's whole-OSID reference determination, not proof that every constituent was uniform. The actual Brka (+4) cell of 40.474 km2 contains S300187 Brka, S300195 Brod, S300250 Cadavac, S300497 Omerbegovaca and S300675 Ulovici; Donja/Gornja are not separate named census rows. Retained Brod/Omer RS July 1993 and post-Dayton context leaves a mixed-constituent caveat. There is no hard wrong-locality contradiction; this does not claim the whole 40 km2 was captured from the 4 km2 locality gain. Only this OSID differs between the old and new April references; Jan1993 and Oct1995 remain byte-identical. The old qualified 708 receipt and old reference bytes/hashes are preserved; this is a reference rebase, not a gameplay improvement or new qualification. The previously paused autumn-1994 RS attack candidate remains unmeasured and must not be resumed under changed paint. Sources: https://pdfcoffee.com/balkan-battlegrounds-vol-2-pdf-free.html ; https://www.scribd.com/document/525984217/Balkan-Battlegrounds"
+      },
+      {
+        "date": "2026-10-23",
+        "osid": "op:vares:toljenak",
+        "from": "RS",
+        "to": "RBiH",
+        "rationale": "Owner determination, 2026-10-23: repaint April 1995 so Toljenak is RBiH. This supersedes only the April RS reference for the 14-settlement aggregate. The 1st Corps monograph printed p279 names Toljenak among the 5-6 November 1994 Nisici plateau gains and subsequent firm defence; Delic vol2 pp68-69 dates Behar-I to 6-7 November; Balkan Battlegrounds vol1 pp237-238 corroborates the regional clearing and retained gains. Applying this result to the aggregate is a medium-confidence reference allocation, not a common constituent capture date, an exact capturing-unit attribution, or independently documented continuous possession of every constituent. See docs/40_reports/implemented/20261023_BEHAR_I_TOLJENAK_CANDIDATE.md."
+      },
+      {
+        "date": "2026-09-29",
+        "osid": "op:donji_vakuf:prusac_2",
+        "from": "RS",
+        "to": "RBiH",
+        "rationale": "Owner determination, 2026-09-29: paint Prusac RBiH at all four checkpoints, superseding the earlier Prusac RS paint, including the 2026-08-24 apr1995 owner-paint entry retained below. ICTY Stanišić & Župljanin Trial Judgement Vol I para 242 directly establishes that the 17 August 1992 attack failed; local BB2 printed p466 directly places ARBiH at Prusac in 1994. Neither source directly proves every aggregate constituent at every checkpoint; the all-checkpoint RBiH paint is the owner's reference determination."
+      },
+      {
+        "date": "2026-09-27",
+        "osid": "op:trnovo:gornja_presjenica",
+        "from": "RBiH",
+        "to": "RS",
+        "rationale": "Owner determination, 2026-09-27: paint the Gornja Presjenica operational cell RS at the April 1995 checkpoint. The constituent-level historical boundary has not been independently established; this is a reference correction, not a simulation or geometry change."
+      },
+      {
+        "date": "2026-09-24",
+        "osid": "op:mostar:vranjevici_2",
+        "from": "RBiH",
+        "to": "RS",
+        "rationale": "Owner determination, 2026-09-24: paint the Mostar Vranjevići operational cell RS at every calibration checkpoint. This supersedes the owner-authored RBiH paint of 2026-08-24 for this reference only. The aggregate's constituent-level historical boundary remains uncertain; this is a reference decision, not a simulation or geometry change."
+      },
       {
         "date": "2026-08-24",
         "osid": "op:kladanj:kladanj_3",
@@ -313,7 +348,7 @@
     "op:brcko:boce_2": "RBiH",
     "op:brcko:brcko": "RS",
     "op:brcko:brezovo_polje_selo_2": "RS",
-    "op:brcko:brka_2": "RS",
+    "op:brcko:brka_2": "RBiH",
     "op:brcko:bukvik_gornji_2": "RBiH",
     "op:brcko:donji_rahic": "RS",
     "op:brcko:gornji_rahic_2": "RBiH",
@@ -400,7 +435,7 @@
     "op:donji_vakuf:kutanja": "RS",
     "op:donji_vakuf:oborci_2": "RS",
     "op:donji_vakuf:pribraca_2": "RS",
-    "op:donji_vakuf:prusac_2": "RS",
+    "op:donji_vakuf:prusac_2": "RBiH",
     "op:donji_vakuf:torlakovac_2": "RS",
     "op:duvno:dobrici": "HRHB",
     "op:duvno:kongora": "HRHB",
@@ -650,7 +685,7 @@
     "op:mostar:mostar_istok_2": "RBiH",
     "op:mostar:mostar_zapad_2": "HRHB",
     "op:mostar:potoci": "RBiH",
-    "op:mostar:vranjevici_2": "RBiH",
+    "op:mostar:vranjevici_2": "RS",
     "op:mrkonjic_grad:baljvine_2": "RS",
     "op:mrkonjic_grad:bjelajce_2": "RS",
     "op:mrkonjic_grad:gerzovo_2": "RS",
@@ -831,7 +866,7 @@
     "op:trebinje:velicani": "RS",
     "op:trebinje:zakovo_2": "RS",
     "op:trnovo:delijas": "RS",
-    "op:trnovo:gornja_presjenica": "RBiH",
+    "op:trnovo:gornja_presjenica": "RS",
     "op:trnovo:kijevo_2": "RS",
     "op:trnovo:tosici": "RS",
     "op:trnovo:trnovo": "RS",
@@ -852,7 +887,7 @@
     "op:vares:budozelje_2": "RBiH",
     "op:vares:gornja_borovica_2": "RBiH",
     "op:vares:ravne": "RBiH",
-    "op:vares:toljenak": "RS",
+    "op:vares:toljenak": "RBiH",
     "op:vares:vares_2": "RBiH",
     "op:velika_kladusa:poljana_2": "RBiH",
     "op:velika_kladusa:vejinac_2": "RBiH",

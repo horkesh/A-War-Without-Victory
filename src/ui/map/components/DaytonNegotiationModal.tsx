@@ -272,21 +272,22 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                     {headerImage && (
                         <img
                             src={headerImage}
-                            alt={t('dayton.headerAlt')}
-                            className="absolute inset-x-0 top-0 h-28 w-full object-cover opacity-35"
+                            alt=""
+                            aria-hidden="true"
+                            className="pointer-events-none select-none absolute inset-x-0 top-0 h-28 w-full object-cover opacity-35"
                         />
                     )}
-                    <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#1b130c]/35 to-transparent" />
-                    <div className="absolute top-4 right-4 text-xs uppercase tracking-widest text-[#8a7a60]/60 font-bold rotate-[-8deg] border-2 border-[#8a7a60]/30 px-2 py-1 rounded">
+                    <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#1b130c]/35 to-transparent" />
+                    <div className="absolute z-10 top-4 right-4 text-xs uppercase tracking-widest text-[#8a7a60]/60 font-bold rotate-[-8deg] border-2 border-[#8a7a60]/30 px-2 py-1 rounded">
                         {t('dayton.classified')}
                     </div>
-                    <div className="text-xs uppercase tracking-[0.2em] text-[#8a7a60] font-bold mb-1">
+                    <div className="relative z-10 text-xs uppercase tracking-[0.2em] text-[#8a7a60] font-bold mb-1">
                         {t('dayton.subtitle')}
                     </div>
-                    <h2 id="dayton-negotiation-title" className="text-[22px] font-bold text-[#2a2016] leading-tight">
+                    <h2 id="dayton-negotiation-title" className="relative z-10 text-[22px] font-bold text-[#2a2016] leading-tight">
                         {t('dayton.title')}
                     </h2>
-                    <div className="text-xs text-[#6a5a40] mt-1" style={{ fontFamily: 'var(--font-command)' }}>
+                    <div className="relative z-10 text-xs text-[#6a5a40] mt-1" style={{ fontFamily: 'var(--font-command)' }}>
                         {t('dayton.location')}
                     </div>
                 </div>

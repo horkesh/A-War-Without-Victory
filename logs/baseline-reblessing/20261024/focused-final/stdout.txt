@@ -1,0 +1,17 @@
+
+ RUN  v2.1.9 C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory
+
+ ✓ tests/receipt_citations.test.ts (43 tests) 230ms
+ ✓ tests/baseline_regression_collects_all_failures.test.ts (9 tests) 14ms
+ ✓ tests/open_gates_register.test.ts (18 tests) 267ms
+ ✓ tests/plan_index.test.ts (13 tests) 70ms
+ ✓ tests/docs_desktop_v09_truth.test.ts (7 tests) 16ms
+ ✓ tests/ci_workflow_test_paths_exist.test.ts (3 tests) 20ms
+ ✓ tests/baseline_regression_ci_guardrails.test.ts (4 tests) 5ms
+
+ Test Files  7 passed (7)
+      Tests  97 passed (97)
+   Start at  16:03:04
+   Duration  10.01s (transform 2.67s, setup 26ms, collect 7.71s, tests 622ms, environment 1ms, prepare 500ms)
+
+{"child_exit":0,"signal":null}

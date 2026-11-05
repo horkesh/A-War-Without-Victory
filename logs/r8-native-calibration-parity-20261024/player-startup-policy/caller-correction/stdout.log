@@ -1,0 +1,11 @@
+
+ RUN  v2.1.9 C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory
+
+ ✓ tests/ui/event_decision_auto_launch_contract.test.ts (18 tests) 12ms
+
+ Test Files  1 passed (1)
+      Tests  18 passed (18)
+   Start at  00:40:01
+   Duration  585ms (transform 54ms, setup 12ms, collect 74ms, tests 12ms, environment 0ms, prepare 73ms)
+
+{"child_exit":0,"signal":null}

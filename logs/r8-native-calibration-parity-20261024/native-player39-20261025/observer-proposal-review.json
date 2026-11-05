@@ -1,0 +1,96 @@
+{
+  "schema": "awwv.warm-normalization-observer-proposal-review.v1",
+  "reviewer": "desktop_terrain_canon_review",
+  "independent": true,
+  "verdict": "GO_WITH_FIDELITY_GATES",
+  "implementation_authorized": true,
+  "authorized_scope": "Add the optional diagnosticTurnBoundaryObserver surface to RunScenarioOptions, invoke it at the existing end-of-week boundary with detached fidelity-preserving copies, and add focused observer tests. No diagnostic run, gameplay change, state transform, new artifact, IPC/schema/save field, campaign, native run, or full suite is authorized by this review.",
+  "reviewed_authority": {
+    "head": "77a2cc8e6b270474d0c3beef48b655c2903192e8",
+    "stop_json": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/WARM_NORMALIZATION_PROBE_STOP.json",
+      "bytes": 1638,
+      "sha256": "54659148475618d22ec51b322fd3b21bdb1a3fdc3934c7f2f4f5218819e40122"
+    },
+    "stop_markdown": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/WARM_NORMALIZATION_PROBE_STOP.md",
+      "bytes": 3803,
+      "sha256": "190bc2e120596b1cae0b882c966ac303cbac3c581030f2abe1c3e5670650e4e7"
+    },
+    "prerequisite_audit": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/PREREQUISITE_AUDIT.txt",
+      "bytes": 1106,
+      "sha256": "1d2c5e04902a18a2dea3c7f7897a8eab4b936edb319b6c5a1205e3a394c16624"
+    }
+  },
+  "boundary_review": {
+    "source": "src/scenario/scenario_runner.ts",
+    "option_surface": "RunScenarioOptions at lines 381-432",
+    "proposed_invocation": "After checkpointSnapshots capture at the end of each weekly-loop body and before the loop closes at current lines 3470-3482.",
+    "corresponds_to_live_continuation": true,
+    "reason": "At this point runTurn, headless opportunity decisions, reporting, save/replay reads, and historical checkpoint capture are complete. The loop performs no later mutation before the next iteration applies that next week's scenario actions and smart-bot decisions. A week_index 15 observation therefore represents the in-memory state entering the authentic week-17 iteration, before that next iteration's actions and bots.",
+    "post_loop_caveat": "With weeksOverride 16, post-loop close-out and finalization may subsequently mutate or serialize the runner's own state. The observer must deliver a detached copy synchronously, so those later actions cannot alter the retained warm boundary.",
+    "report_identity": "Pass the completed turnReport associated with the observed week, also as a detached copy. Do not substitute the derived weekly report row."
+  },
+  "state_ownership_and_determinism": {
+    "default_absence": "When the option is absent, do not call structuredClone, cloneGameState, or any observer helper. No added state read, output, artifact, ordering step, or callback occurs.",
+    "detached_delivery": "When present, synchronously construct detached state and report copies before invoking the callback. Callback mutation must be unable to reach the runner's GameState, report, streams, checkpoint map, or later finalization.",
+    "fidelity_requirement": "The detached state must preserve own-property presence and own undefined values because those values are the normalization question. Prefer direct structuredClone for this diagnostic boundary. cloneGameState is acceptable only if the implementation proves that its JSON fallback was not used and that the clone is deep-strict-equal to the source including own undefined properties; silent JSON fallback is disallowed.",
+    "failure_semantics": "A clone or callback exception must fail the diagnostic run rather than continue with partial evidence or a normalized fallback. No callback-produced value may be consumed by simulation.",
+    "new_randomness_or_time": false,
+    "new_ordering": false,
+    "new_serialized_or_derived_state": false,
+    "default_determinism_risk": "none if the absent branch is truly inert and focused byte-neutrality tests pass",
+    "enabled_scope": "trusted diagnostic/test callback only; its external side effects are evidence tooling, not simulation truth"
+  },
+  "canon_mapping": [
+    {
+      "authority": "docs/10_canon/Engine_Invariants_v0_9_0.md sections 11.1-11.4",
+      "assessment": "The hook adds no randomness, timestamps, collection iteration, or simulation input. Identical ordinary inputs remain identical because the default path is absent and the enabled callback receives detached copies only."
+    },
+    {
+      "authority": "docs/10_canon/Engine_Invariants_v0_9_0.md sections 13.1-13.2",
+      "assessment": "No diagnostic or derived field enters GameState or serialization; the observer exports an ephemeral copy only."
+    },
+    {
+      "authority": "docs/20_engineering/CODE_CANON.md Determinism Contract, lines 69-75",
+      "assessment": "The permitted design preserves byte-identical ordinary runs and adds no source-of-truth state."
+    },
+    {
+      "authority": "docs/20_engineering/DETERMINISM_TEST_MATRIX.md lines 93-108 and docs/20_engineering/AGENT_WORKFLOW.md lines 33, 53-58",
+      "assessment": "Existing observer precedent requires detached copies and enabled/disabled state/report equality. Observer-only diagnostics may reuse unaffected broad gameplay evidence at its actual scope."
+    }
+  ],
+  "required_focused_tests": [
+    "Option absent: prove the clone helper and callback are not invoked and ordinary final state, reports, and scenario artifacts are byte-identical to the pre-hook path.",
+    "Option present: prove exactly one synchronous callback per executed week, ascending zero-based week_index, with state.meta.turn equal to the completed elapsed-turn boundary.",
+    "Boundary placement: prove the observed state includes completed weekly processing and matches the state that would enter the next loop iteration before next-week actions and bots.",
+    "Detached ownership: mutate nested state and report properties inside the callback and prove the runner's final state, emitted reports, checkpoint results, and artifacts remain byte-identical to an enabled callback that does not mutate its copies.",
+    "Undefined fidelity: prove an own undefined formation property remains own-and-undefined in the delivered snapshot; fail rather than use JSON cloning if a fidelity-preserving clone cannot be made.",
+    "Failure honesty: prove clone/callback failure rejects the diagnostic run and cannot emit a successful or partially interpretable observation.",
+    "Surface containment: prove no GameState schema, save/runtime serializer, IPC, run result, weekly row, replay row, or on-disk artifact shape changes."
+  ],
+  "fork_fidelity_gate": {
+    "current_observer_sufficiency": "Sufficient to capture the authentic warm turn-16 state, but not by itself sufficient to prove that a separate caller reproduces the authentic headless week-17 execution context.",
+    "reason": "The next scenario-runner iteration applies scenario actions, retained baseline-ops locals, BotManager decisions, graph and operational contexts, historical lookups, event definitions, and the exact runTurn options. desktop_sim.advanceTurn is a different caller and the retained cold probe already failed the n98 Foča/Faocići control.",
+    "mandatory_control": "Before interpreting the normalized branch, the raw warm fork must reproduce the retained n98 turn-17 Foča Brigade / Faocići probe and the relevant commander receipt under matched policy and input context. If raw fails, stop; the normalization hypothesis remains untested.",
+    "allowed_first_attempt": "Use existing public production APIs and the exact scenario/policy inputs. Record every context/source binding and the raw control result before comparing the normalized fork.",
+    "if_public_context_is_insufficient": "Stop and request a separate design review. The smallest possible follow-up is a read-only diagnostic snapshot of the exact immutable runTurn input context already assembled by scenario_runner, with the displacement sink replaced by an evidence-local sink. Do not expose mutable runner locals, add a state-transform hook, or broaden the observer under this approval.",
+    "not_authorized": [
+      "state transformation inside runScenario",
+      "normalization injection into the authentic runner",
+      "claiming a normalization defect when raw does not reproduce n98",
+      "using desktop advanceTurn parity as a substitute for headless context fidelity"
+    ]
+  },
+  "validation_cadence": {
+    "postimplementation": "Independent diff review plus the focused tests above, typecheck, and relevant scenario-runner contract tests.",
+    "broad_suite_or_new_188": "Not required for this diagnostic-only, default-inert hook if byte-neutrality and containment pass. Any later gameplay/state-transform change would require fresh scope review.",
+    "warm_probe": "May be proposed only after the implementation review and clean provenance. It must be one bounded preserved attempt with the raw-control stop rule; this artifact does not itself launch or authorize that attempt."
+  },
+  "blockers": [],
+  "residuals": [
+    "The observer exposes the authentic warm state but does not solve headless fork-context fidelity.",
+    "The uninterrupted first cause and the serialize/deserialize normalization hypothesis remain unestablished until the raw warm control reproduces n98."
+  ]
+}

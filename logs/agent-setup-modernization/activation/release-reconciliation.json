@@ -1,0 +1,320 @@
+{
+  "owner_handoff": "Sorry, what do you need from me? Claude completed his work in the meantime, repo is all yours.",
+  "scope": "Coordinated handoff for reviewed local repository and user-skill activation; no remote push.",
+  "captured_utc": "2026-09-12T20:30:23.958Z",
+  "released_root": "F:/A-War-Without-Victory",
+  "released_head": "e607508bc65dad1950d560d8b5b628da89674360",
+  "released_branch": "main",
+  "released_tree": "18dc95d18253465c174298c7c7e9bd7f3b009047",
+  "released_status": "?? docs/plans/2026-09-12-agent-setup-modernization-plan.md",
+  "reviewed_worktree": "F:/AWWV-worktrees/agent-setup-modernization",
+  "reviewed_commit": "23e26d2b41373825e722c5a40231dd8b2414eb88",
+  "integration_worktree": "F:/AWWV-worktrees/agent-setup-activation",
+  "proposed_files": [
+    {
+      "path": ".agent/codex-skill-adapters/awwv-make-cursor-prompt/SKILL.md",
+      "candidate_sha256": "A45CE8471BEA4480ADAE6DF1953B6C2C2951AEE99A19749BC0ABDC7D3224F790",
+      "live_sha256": null
+    },
+    {
+      "path": ".agent/codex-skill-adapters/awwv-read-first/SKILL.md",
+      "candidate_sha256": "0B3CFF9F919E90F1B537BAF0C552EDBEB77C356FA76BAD81B9F29E68B7B50AF1",
+      "live_sha256": null
+    },
+    {
+      "path": ".agent/codex-skill-adapters/brainstorming/SKILL.md",
+      "candidate_sha256": "40A957F8C50725B7234735CD71BCF769934F79124B9820A25691D3910AC8C6AB",
+      "live_sha256": null
+    },
+    {
+      "path": ".agent/codex-skill-adapters/executing-plans/SKILL.md",
+      "candidate_sha256": "314E9850D68F97B332C69CBBA775BB5466B397D571B6D6DF5F7460811F0022F6",
+      "live_sha256": null
+    },
+    {
+      "path": ".agent/codex-skill-adapters/napkin/SKILL.md",
+      "candidate_sha256": "1C99DD4CFCA2B7EE3C0E8B82D748273666499E3131AEE5A4C612D802A31430D1",
+      "live_sha256": null
+    },
+    {
+      "path": ".agent/codex-skill-adapters/prompt-construction/SKILL.md",
+      "candidate_sha256": "3B96DB5187928BA15C7D4EF9B2631A8BB0913409F0FA6F7EC19A1AF566E0DD4C",
+      "live_sha256": null
+    },
+    {
+      "path": ".agent/codex-skill-adapters/using-superpowers/SKILL.md",
+      "candidate_sha256": "A705BD742BBCC18D3A98CBA66ACF29967D29C99B5DCF86323BBFD8E2BBF2F1BB",
+      "live_sha256": null
+    },
+    {
+      "path": ".agent/codex-skill-adapters/verification-before-completion/SKILL.md",
+      "candidate_sha256": "1791FE2E6DCC813810936CCB944475A4B84652FC2ED1793C52CA13FF3CA42442",
+      "live_sha256": null
+    },
+    {
+      "path": ".agent/codex-skill-adapters/writing-plans/SKILL.md",
+      "candidate_sha256": "41C42E3838C3A51A8C02676975BB4D9AE57E36C0B8A4AB6CFDA09C065C20C66D",
+      "live_sha256": null
+    },
+    {
+      "path": ".agent/skill-distribution.json",
+      "candidate_sha256": "3F875CB21E6BFC7FF1F8A1D1E99BCAFBB7B33FE12FABFD83C0909ECE5F661DDB",
+      "live_sha256": null
+    },
+    {
+      "path": ".agent/skills-catalog.md",
+      "candidate_sha256": "AC91EA0EA37B17139D4D35874D54D542088CE6F61B28B005714B2355DE11EEAB",
+      "live_sha256": "31C476C28C93931090B942A64E8D26F62B6BAC4408F3AAE0ACE4170C0953747D"
+    },
+    {
+      "path": ".claude/AGENT_TEAM_ROSTER.md",
+      "candidate_sha256": "7523E700B14F67245698BC4A37B2BD97413FDE47EA3DDBD4B3D2865E6106E48F",
+      "live_sha256": "F599D5CB7D85D359C39144AAA44923879EF0CF8028378F1BB974B4A56271DE20"
+    },
+    {
+      "path": ".claude/README.md",
+      "candidate_sha256": "13D542898EFA91F5E367014B0376D74BF3AEF0CEA9944F284E812B297933AD08",
+      "live_sha256": "6C92027732DABFDEE142C4694061F8224CA09E0E5E89DBBED127BDA6336310A9"
+    },
+    {
+      "path": ".claude/agents/orchestrator-dispatcher.md",
+      "candidate_sha256": "E352F502FC51A4740E99DDB2A699DC018259B548414CA595AC074661C5E45324",
+      "live_sha256": "142F4E95229B830A48D4932F56BE45D46D8ED8D9F2FE05311EC78B2F0196EC66"
+    },
+    {
+      "path": ".claude/commands/orchestrator.md",
+      "candidate_sha256": "06DE004FE0109CE89743144627B3EBFAB990A29A6C604FB3216E8D0C2B119066",
+      "live_sha256": "BB61EDF44297A5AEB8BF3ABCA12E127977700D6201641BC7790B9BE2BDF3B0E3"
+    },
+    {
+      "path": ".claude/napkin.md",
+      "candidate_sha256": "47BAD120BA81E21F3F9DA2E380C7F98BBA29911A4667CA765C2204B435B399B8",
+      "live_sha256": "13E36FE5B7DA21707EE0A1792FC25D4B74FEA13E62345BDFF37AB3520B86BFEC"
+    },
+    {
+      "path": ".claude/napkin/engine_runtime.md",
+      "candidate_sha256": "AF59CE9BAA0BCA6AF56D266E34E551219CE5C8097ADC904BFD1610BC54CE61C5",
+      "live_sha256": "5F14C36F7683DA853E8DC8C0C5B22906D5CB2A1EBB8C1D666C8394194AA2539E"
+    },
+    {
+      "path": ".claude/napkin/entry_detail.md",
+      "candidate_sha256": "BA903C38659A5AAEDE9003683F160558C412D3680FDE21A5ED2A3F03E0A3927A",
+      "live_sha256": "FF9C47856FE179E591C4769C4386748C3971A92D1EC20E66F2662C4ABB104DB1"
+    },
+    {
+      "path": ".claude/napkin/map_counters.md",
+      "candidate_sha256": "BEA64C711F1BD9A99B8EE6968E36E165A09612B228E40D835BDB148B21CBD63B",
+      "live_sha256": "A5DE0744FB38EEC07DFE9746B718B86BC60668A552C58E9B647AC4A1BFF6576C"
+    },
+    {
+      "path": ".claude/napkin/qa_gates.md",
+      "candidate_sha256": "08ACA9F95C03AB6A7D10C3D3A3389F7B929BAF23AB7E8FEFB3E063010206A2E1",
+      "live_sha256": "5BB71C89748BA7224E5EE09ACEAE9587ED628929DBE4D4B196BFE7AC1211A739"
+    },
+    {
+      "path": ".claude/napkin/release_process.md",
+      "candidate_sha256": "2BDE141508E0967B9027300DBB7E55C01AAF77DE62B607BD3995168FB95D9D67",
+      "live_sha256": "A7ACC87CA038E6EDB9E7500795EADE45EF7DC9816148F66178DB6957FEE28202"
+    },
+    {
+      "path": ".claude/napkin/warroom_and_legacy.md",
+      "candidate_sha256": "6B6A7451FD4CF1BB4397CABA0AA234A394F02FA83E45FC50C2054AC0288B33FE",
+      "live_sha256": "FE7EAA663B9266F145E2434CB6C113D2040049FFFC50EA95D5E62BB77FD66FEC"
+    },
+    {
+      "path": ".claude/skills.md",
+      "candidate_sha256": "10AA04EE8ABE597CE85F60843FC0958F54CA080F958B34A85EAB5834A54B5DFE",
+      "live_sha256": "38DCAA0E6636F39C8B8777B9FA2BF0AD17758A836AA336AA1288E5C2BD6739F8"
+    },
+    {
+      "path": ".claude/skills/awwv-make-cursor-prompt/SKILL.md",
+      "candidate_sha256": "441BE59C1DA977EE2CCB091D0854877F8DD85C3E8A785DB635342492D6E0F55D",
+      "live_sha256": "29B668CC6F040B2224308BC4C1893F43CFA1E816220BA01BF560E03F70E354F8"
+    },
+    {
+      "path": ".claude/skills/awwv-read-first/SKILL.md",
+      "candidate_sha256": "1A0F4209101BA8C54F5E85E5B6187877EC47356D930C9AF5A889A13E0971FC24",
+      "live_sha256": "600FA34C46176DC9D336BE418A384A0CFDB45043C8E8968DA39051CA7185AEFD"
+    },
+    {
+      "path": ".claude/skills/brainstorming/SKILL.md",
+      "candidate_sha256": "7135D7D147980AE381C53EB98C59E71294D5350D5AE352E80B435A84D525F33C",
+      "live_sha256": "206C63E80D38C57E6AFC657296332B1D0FF75572435D75C079E7407B26762ECD"
+    },
+    {
+      "path": ".claude/skills/executing-plans/SKILL.md",
+      "candidate_sha256": "5778D99DA5F7317D62BE2F250A953C0ADFAC143356E6EE8D4E9513788EB73F0C",
+      "live_sha256": "D099FA42FD7518F4DAFA9F2D51C1C08FCE970490D57682B6ACD3E7A57BB55B52"
+    },
+    {
+      "path": ".claude/skills/napkin/SKILL.md",
+      "candidate_sha256": "E34590A8EBA63C928F64725EE8DD43ED8EA46DA0ED3CA03BBE58E711C02B7D54",
+      "live_sha256": "C63508F893CCFFFF0603C08894ADE93376581DDDCD9230E5945EC9B7FCBB9B4F"
+    },
+    {
+      "path": ".claude/skills/orchestrator/SKILL.md",
+      "candidate_sha256": "398BAFFA4C9D522E9FF96255BBD2B3FBAB6B5964C98E9B381550C1DEC80CB9F1",
+      "live_sha256": "8FA615DA5133D830577BB33E93E57543EB8012D2ADECD83776BF972A4575D2EA"
+    },
+    {
+      "path": ".claude/skills/prompt-construction/SKILL.md",
+      "candidate_sha256": "BAFFC1BBB8B492AA04F1D4940A14CEE1D3E89E117C5B88884D3C524CD2830E4A",
+      "live_sha256": "A80B37A0B8BAF101E14B4895A6FCA11C1307B9BBE0AFA0AF95AC9AACED507F5C"
+    },
+    {
+      "path": ".claude/skills/using-superpowers/SKILL.md",
+      "candidate_sha256": "E562A9917C6B6D51CDD8ED31727611E6D362751A6B3272701A5EBEDB77D5B61D",
+      "live_sha256": "81D921B16502091F44E8669BBCFAE74B87BBF4295D03FFF70A98E81D73AF60A6"
+    },
+    {
+      "path": ".claude/skills/verification-before-completion/SKILL.md",
+      "candidate_sha256": "A6995BD77EA12282061FF0D9106107771B07D1A761A4AF961659D287883932ED",
+      "live_sha256": "EA52D15AABAF72BC6B558EFE2C126F161B53961090DDCD712000273BFE8C7B6C"
+    },
+    {
+      "path": ".claude/skills/writing-plans/SKILL.md",
+      "candidate_sha256": "127E09A1E8FB5BDAF4F2B5023F7F70C68A79F99F760DAE028AFD07EBABBF421A",
+      "live_sha256": "8A9198D4D9EFBCAD6E019B17C422C182113062C864B6154EC2A3BA2ED0B6B9D0"
+    },
+    {
+      "path": ".cursor/AGENT_TEAM_ROSTER.md",
+      "candidate_sha256": "64FF4905BCF635A816ECDFEEC4527EF49CD008FCFF0FCEDB443402604D2491BF",
+      "live_sha256": "BA0AB890B923123B07AEC9249166A1667ABADB3CAA004EBB0902A5EB988619B4"
+    },
+    {
+      "path": ".cursor/TASK_SUBAGENT_TYPES.md",
+      "candidate_sha256": "9A124AA0BB5656533939BEA9997B827B5CCF6C0CE7D3E2366880AE1AC3FE4556",
+      "live_sha256": "E043AECFA0560B76AE9C22788DC94EF9600AE604AE09135C01307366CEEE258B"
+    },
+    {
+      "path": ".cursor/rules/napkin-session-start.mdc",
+      "candidate_sha256": "6B8667603295A913F4557747EEFD8175F23FCD06A8C3C093781AB07279B12195",
+      "live_sha256": "C24ABB6147E4AE349BB30E77A6CF21E3EB0F869C6411F2BFF5482F8451434DED"
+    },
+    {
+      "path": ".cursor/rules/ui-gui-invoke-ux-developer.mdc",
+      "candidate_sha256": "60F3007BAD4D582C742B40CF88FFB4F68083404D1F5E6E592763000FBF6B076A",
+      "live_sha256": "4977D1C75BDB3E15F0FB46AC336A1145F339B8D9A818FCAE54A2673640E48B99"
+    },
+    {
+      "path": "AGENTS.md",
+      "candidate_sha256": "58CCAB35547EC1422F66F09048408284C0AA9B5B4DFB4F081747C66FA5825938",
+      "live_sha256": "B366990D0D56335F258050618DF10139F408F5C3E07EDB7CD085C768CEFD314D"
+    },
+    {
+      "path": "CLAUDE.md",
+      "candidate_sha256": "3FE577B9286A684DA4AC1C425FEA5630FA5CE2505CFE31ED22D46732387D2D3C",
+      "live_sha256": "AB98A8ACE6CDD61B2470CBD9E61E944FBC57B5372EBB9010A05B5A1E2CBA03FD"
+    },
+    {
+      "path": "docs/20_engineering/AGENT_WORKFLOW.md",
+      "candidate_sha256": "F610CB6AFFE6D123DB4D7D2D014488B9AF5B86FA06621E6ACB7C85442A2C5663",
+      "live_sha256": "5435D8E754E1CF176835E4E182DF609A8B4DFD9E07F12FE125C1BD5675A92F88"
+    },
+    {
+      "path": "docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md",
+      "candidate_sha256": "91A0554A100632E7D74464948866598472D97D2C2DAA43900162F1F5379D627B",
+      "live_sha256": "AF5CB9CF22398A81C45C08A4D0FD0F6C92E49D68AD615792B5B78209F5C5A66F"
+    },
+    {
+      "path": "docs/30_planning/_task_artifacts/ACTIVE_TASK_GOVERNANCE.md",
+      "candidate_sha256": "BA83C012B5E961AA35E306DE168BBD61E2FF517254C14FC2AA5789115EFA642C",
+      "live_sha256": "87B71FCABE619250B76A13472FA1A73C613BAA183759F9749A5F3E48AC72ABDE"
+    },
+    {
+      "path": "docs/PROJECT_LEDGER.md",
+      "candidate_sha256": "43A2B7D6256FC7AE78ED48773B4205D560E9274506793A60F611E8443D0FB94D",
+      "live_sha256": "9250D519975A89EE2A7E879B7FDDD5BFEA146E46C0B2F922AC5CDFB656B8CA77"
+    },
+    {
+      "path": "docs/plans/2026-09-12-agent-setup-modernization-plan.md",
+      "candidate_sha256": "CF6E3E3E0D12F7DC42AEC422C236517765264AE9CB83F4FFE2515985E5FCAB33",
+      "live_sha256": "BF4B06BD14BF51BA536AABD3A60CA9DF06EF4E3DFC8FF101E95C6BF6E7CBABCA"
+    },
+    {
+      "path": "tests/agent_skill_import.test.ts",
+      "candidate_sha256": "F188DADD8E0AB75140DD3F67926B855859EDBA2AA2B3F5D20DF7E1DC1BE83C6D",
+      "live_sha256": null
+    },
+    {
+      "path": "tools/install_superpowers.ps1",
+      "candidate_sha256": "4B6C4BA39515FF8FA2CD743E1BC10DEEE7C4C092DDFD3D903E5A3331BDF38A37",
+      "live_sha256": "C8512851747969BE8E0862347FF86057C46FC26062E4173CC7D672A5819F2A00"
+    }
+  ],
+  "preserved_local_originals": [
+    {
+      "path": "docs/plans/2026-09-12-agent-setup-modernization-plan.md",
+      "absolute": "F:\\A-War-Without-Victory\\docs\\plans\\2026-09-12-agent-setup-modernization-plan.md",
+      "backup": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\activation\\released-local-originals\\docs\\plans\\2026-09-12-agent-setup-modernization-plan.md",
+      "sha256": "BF4B06BD14BF51BA536AABD3A60CA9DF06EF4E3DFC8FF101E95C6BF6E7CBABCA"
+    },
+    {
+      "path": ".cursor/TASK_SUBAGENT_TYPES.md",
+      "absolute": "F:\\A-War-Without-Victory\\.cursor\\TASK_SUBAGENT_TYPES.md",
+      "backup": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\activation\\released-local-originals\\.cursor\\TASK_SUBAGENT_TYPES.md",
+      "sha256": "E043AECFA0560B76AE9C22788DC94EF9600AE604AE09135C01307366CEEE258B"
+    },
+    {
+      "path": ".cursor/rules/ui-gui-invoke-ux-developer.mdc",
+      "absolute": "F:\\A-War-Without-Victory\\.cursor\\rules\\ui-gui-invoke-ux-developer.mdc",
+      "backup": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\activation\\released-local-originals\\.cursor\\rules\\ui-gui-invoke-ux-developer.mdc",
+      "sha256": "4977D1C75BDB3E15F0FB46AC336A1145F339B8D9A818FCAE54A2673640E48B99"
+    },
+    {
+      "path": ".cursor/rules/napkin-session-start.mdc",
+      "absolute": "F:\\A-War-Without-Victory\\.cursor\\rules\\napkin-session-start.mdc",
+      "backup": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\activation\\released-local-originals\\.cursor\\rules\\napkin-session-start.mdc",
+      "sha256": "C24ABB6147E4AE349BB30E77A6CF21E3EB0F869C6411F2BFF5482F8451434DED"
+    }
+  ],
+  "user_trees_before": [
+    {
+      "path": "C:\\Users\\User\\.codex\\skills\\awwv-make-cursor-prompt\\SKILL.md",
+      "relative": "awwv-make-cursor-prompt/SKILL.md",
+      "sha256": "29B668CC6F040B2224308BC4C1893F43CFA1E816220BA01BF560E03F70E354F8"
+    },
+    {
+      "path": "C:\\Users\\User\\.codex\\skills\\awwv-read-first\\SKILL.md",
+      "relative": "awwv-read-first/SKILL.md",
+      "sha256": "600FA34C46176DC9D336BE418A384A0CFDB45043C8E8968DA39051CA7185AEFD"
+    },
+    {
+      "path": "C:\\Users\\User\\.codex\\skills\\brainstorming\\SKILL.md",
+      "relative": "brainstorming/SKILL.md",
+      "sha256": "206C63E80D38C57E6AFC657296332B1D0FF75572435D75C079E7407B26762ECD"
+    },
+    {
+      "path": "C:\\Users\\User\\.codex\\skills\\executing-plans\\SKILL.md",
+      "relative": "executing-plans/SKILL.md",
+      "sha256": "D099FA42FD7518F4DAFA9F2D51C1C08FCE970490D57682B6ACD3E7A57BB55B52"
+    },
+    {
+      "path": "C:\\Users\\User\\.codex\\skills\\napkin\\SKILL.md",
+      "relative": "napkin/SKILL.md",
+      "sha256": "C63508F893CCFFFF0603C08894ADE93376581DDDCD9230E5945EC9B7FCBB9B4F"
+    },
+    {
+      "path": "C:\\Users\\User\\.codex\\skills\\prompt-construction\\SKILL.md",
+      "relative": "prompt-construction/SKILL.md",
+      "sha256": "A80B37A0B8BAF101E14B4895A6FCA11C1307B9BBE0AFA0AF95AC9AACED507F5C"
+    },
+    {
+      "path": "C:\\Users\\User\\.codex\\skills\\using-superpowers\\SKILL.md",
+      "relative": "using-superpowers/SKILL.md",
+      "sha256": "81D921B16502091F44E8669BBCFAE74B87BBF4295D03FFF70A98E81D73AF60A6"
+    },
+    {
+      "path": "C:\\Users\\User\\.codex\\skills\\verification-before-completion\\SKILL.md",
+      "relative": "verification-before-completion/SKILL.md",
+      "sha256": "EA52D15AABAF72BC6B558EFE2C126F161B53961090DDCD712000273BFE8C7B6C"
+    },
+    {
+      "path": "C:\\Users\\User\\.codex\\skills\\writing-plans\\SKILL.md",
+      "relative": "writing-plans/SKILL.md",
+      "sha256": "8A9198D4D9EFBCAD6E019B17C422C182113062C864B6154EC2A3BA2ED0B6B9D0"
+    }
+  ],
+  "failures": [],
+  "exit": 0
+}

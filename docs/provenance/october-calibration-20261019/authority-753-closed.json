@@ -1,0 +1,42 @@
+{
+  "schema": "awwv.753.prisoje-scope-authority-closed-receipt.v1",
+  "writes_closed": true,
+  "verdict": "PASS_EXACT_GUARD_IDENTIFIED__STALE_BRAVNICE_ORDER_ADMITTED_BEFORE_SCOPE_REBUILD__T6_LAWFULLY_DELETES_AFTER_SCOPE_REBUILD",
+  "result": {
+    "path": "logs/claude-channel-20261004/753-authority-seal-a/result.json",
+    "bytes": 11138,
+    "sha256": "54796c0cb94abd08dd450c7376c6fc33e114137520e6ce65868ed1009174c880"
+  },
+  "inventory": {
+    "path": "logs/claude-channel-20261004/753-authority-seal-a/inventory.json",
+    "bytes": 3655,
+    "sha256": "c0b9f9ea1845dc83603e8281cfe1372dcef28439e88a0c3b51369c1079ec9cc2"
+  },
+  "checks": {
+    "exact_save184_prefix_child_exit_0": true,
+    "exact_save184_prefix_wrapper_exit_0": true,
+    "artifact_contract_pass": true,
+    "entry_script_preserved": true,
+    "scope_writer_pinned": true,
+    "operation_guard_operands_pinned": true,
+    "hash_inference_corrected": true,
+    "candidate_not_implemented": true,
+    "git_status_clean": true,
+    "protected_3_exact": true,
+    "native_31_exact": true,
+    "receipt_files_recursive_count_179": true,
+    "C_opening_prefix_archived_and_append_retained": true,
+    "D_exact": true,
+    "restore_truncate_cleanup_delete": false
+  },
+  "telemetry_final": {
+    "C": {
+      "bytes": 100107701,
+      "sha256": "8d242e18f199a54c26f755e648fe4612159563ec0b606930112653770d725f3c"
+    },
+    "D": {
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    }
+  }
+}

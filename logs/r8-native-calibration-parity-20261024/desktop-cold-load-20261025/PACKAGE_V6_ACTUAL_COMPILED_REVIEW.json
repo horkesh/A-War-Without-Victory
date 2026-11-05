@@ -1,0 +1,82 @@
+{
+  "schema": "awwv.desktop-terrain-package.independent-compiled-review.v1",
+  "verdict": "GO",
+  "independent": true,
+  "reviewerIdentity": "desktop-terrain-canon-review",
+  "reviewedAt": "2026-10-25T09:24:48.1022130+01:00",
+  "expectedHead": "2ca7d7bcdf795f20c5c15f0004b3c72019f98337",
+  "launchConfigSha256": "f1908e91074ca618848b94af8253eded546999ab6e2fb38586de761424162d8c",
+  "scenario188Sha256": "bf9da89f4b66247975c339746b0d34deed0ee77b4c6927a875a15f0a93f3bf89",
+  "fullSuiteSha256": "224a6eb43dd0c9bea748fbeae2f07057bcc9145fadf2890a8c5828b5ebe003a5",
+  "consumerComparisonSha256": "dc83a3723ec529823a8feb40f4356f09a00719279f136eb3dd905ccbad0f114d",
+  "packageBuildReceiptSha256": "615dffa028f8f4e8affcdbebd3c9ab2c5367d0834878f7bdbebc1b511ab1e73f",
+  "sourceConsumerResultSha256": "137673aba5ecebad5f1e5538b531d4976082d3c71e8694740bf43492dae93923",
+  "sourceConsumerReceiptSha256": "0806655b1fb0e98d679dcc3a0b82687b85bd10f28aca476e0a2dc65deb0d3252",
+  "packageConsumerResultSha256": "affaf45e8b980bf2bd9d3fc512a9f43d35a9327fa2b83552e387c4d55be93c2a",
+  "packageConsumerReceiptSha256": "529e101db3bb12d17b6ae3bba97f27006c6e256400496a6f5120a602280da6c2",
+  "binderSha256": "6b7ed24600064bd6007850356cb0bfc6c4f7317a98b73fa0b23bcbea5293f979",
+  "sourceComparisonPolicySha256": "f255579a9f97fc55b2bdd66e1590cfaed59ad91967248521c28955198d26711e",
+  "checks": [
+    {
+      "name": "source_consumer_receipt",
+      "pass": true,
+      "evidence": "The unchanged exact preserved-receipt verifier accepts source-consumer-01 with its exact entry, argv, four allowed artifacts, and 180,000 ms timeout. child_exit=0, wrapper_exit=0, timed_out=false, and artifact contract pass. The source result is 2,792 bytes / 137673aba5ecebad5f1e5538b531d4976082d3c71e8694740bf43492dae93923; its receipt is 4,096 bytes / 0806655b1fb0e98d679dcc3a0b82687b85bd10f28aca476e0a2dc65deb0d3252."
+    },
+    {
+      "name": "package_consumer_receipt",
+      "pass": true,
+      "evidence": "The unchanged exact preserved-receipt verifier accepts package-consumer-01 with its exact entry, argv, four allowed artifacts, and 180,000 ms timeout. child_exit=0, wrapper_exit=0, timed_out=false, and artifact contract pass. The package result is 2,871 bytes / affaf45e8b980bf2bd9d3fc512a9f43d35a9327fa2b83552e387c4d55be93c2a; its receipt is 4,099 bytes / 529e101db3bb12d17b6ae3bba97f27006c6e256400496a6f5120a602280da6c2."
+    },
+    {
+      "name": "comparison_receipt",
+      "pass": true,
+      "evidence": "The unchanged exact preserved-receipt verifier accepts consumer-comparison-01 with the exact launch, execution-review, source result/receipt, and package result/receipt bindings. child_exit=0, wrapper_exit=0, timed_out=false, artifact contract pass, and COMPARISON.json is the sole allowed artifact. The comparison is 2,679 bytes / dc83a3723ec529823a8feb40f4356f09a00719279f136eb3dd905ccbad0f114d; its receipt is 5,106 bytes / 6a3fa3b9028ed735dab463e0e5164f9e3fa542a8cebea9ab9d728e630fa8d9d7."
+    },
+    {
+      "name": "cold_unprimed_exact_input",
+      "pass": true,
+      "evidence": "Both results use the same n97 save_w16.json input, 4,493,938 bytes / 22ef518bb1f894d0afb450643a21d4a628f8f5c1462a80ebda498f81ece943ca, report turn 16 to 17, set externalTerrainPriming=false, and bind the actual package resources directory as baseDir."
+    },
+    {
+      "name": "exact_terrain_prerequisites",
+      "pass": true,
+      "evidence": "Both consumers bind identical canonical, urban, and forest package assets with the reviewed hashes: d8ca46cf1a5f425cd1ffd45eef3d99b19247128e6fe5ff28e0cad4d3f76fe1ef, 6c5fbdf22a7b837917422b11eb53a975bb855c027cd4c92cb7158fafd9c42e4c, and f458666662a072c65b7d5c5e4b89c261399fca0f10476736b83fd914e651fa49."
+    },
+    {
+      "name": "source_and_package_bundles",
+      "pass": true,
+      "evidence": "The source and packaged desktop_sim.cjs bundles each contain 4,487,890 bytes and SHA-256 fc3eda67a9e499dd0f01cbcbe210b41fe2b3a4b37dbcc85447916bbc12116979. The source child loads the source bundle; the package child loads the packaged bundle."
+    },
+    {
+      "name": "raw_serialized_state_exact",
+      "pass": true,
+      "evidence": "The actual source and package state.json artifacts are each 4,853,142 bytes with SHA-256 7b668a000a8e85a77b4874564b9ade6949abe6d71082a56805a8779f89d7889c. Each raw artifact record exactly matches its consumer result and the retained comparison."
+    },
+    {
+      "name": "raw_report_exact",
+      "pass": true,
+      "evidence": "The actual source and package report.json artifacts are each 387,556 bytes with SHA-256 ba831eb810d9cf756303794be55d6398398d8640f340fd2d9d1b5c8324ad3ceb. Each raw artifact record exactly matches its consumer result and the retained comparison."
+    },
+    {
+      "name": "comparison_checks",
+      "pass": true,
+      "evidence": "All eight comparison checks are true: sourceColdAndUnprimed, packageColdAndUnprimed, exactInput, samePackageBaseDir, exactAssets, oneTurnEach, exactSerializedState, and exactReport."
+    },
+    {
+      "name": "actual_execution_authority",
+      "pass": true,
+      "evidence": "TERRAIN_PACKAGE_EXECUTION_REVIEW_V6.json is 1,533 bytes / 0c9fec5d792e08a4f70be5dfe221f8b229828829e640c1efcc5805968dabffca. It derives from the accepted post-build review 25ca799d2e4e3b1b07aeef60022333884c75ebaa605aa7cbed6841e72bfed39e, inventory 28c16a1460ccdc6442c9848f241d5f9b45a6b845f1176ccfe985d32d58c2a49f, and build receipt 615dffa028f8f4e8affcdbebd3c9ab2c5367d0834878f7bdbebc1b511ab1e73f."
+    },
+    {
+      "name": "independent_check_artifact",
+      "pass": true,
+      "evidence": "package-v6-actual-compiled-review-check.json is 25,220 bytes, SHA-256 d354dd0a1925b4c2d5281e3d6216e816253ceadfb8146215dca8703a28f403b3, with pass=true and no receipt-verifier failures."
+    }
+  ],
+  "findings": [],
+  "limits": [
+    "Package and one-turn compiled-consumer scope only.",
+    "This review establishes exact source/package compiled parity for one cold turn from the bound n97 save. It does not make a native, n94 diagnostic, all-faction runtime, calibration, baseline, release, signing, upload, or publication claim.",
+    "Physical package binding, preservation closing, v7 terminal composition, and native opening/calibration gates remain required."
+  ]
+}

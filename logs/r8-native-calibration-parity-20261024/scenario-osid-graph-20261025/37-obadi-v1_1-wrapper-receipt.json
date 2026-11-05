@@ -1,0 +1,10 @@
+{
+  "schema": "awwv.directive-obadi-diagnostic-v1_1.wrapper.v1",
+  "kind": "production",
+  "wrapperExit": 2,
+  "childExit": 2,
+  "timedOut": false,
+  "signal": null,
+  "elapsedMs": 3599,
+  "noRetry": true
+}

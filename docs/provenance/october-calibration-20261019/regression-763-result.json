@@ -1,0 +1,365 @@
+{
+  "schema": "awwv.763.reviewed-n81-regression-rejection.v1",
+  "writes_closed": true,
+  "verdict": "REJECTED__703_FLOOR_AND_ZERO_LOSS_FAILED",
+  "summary": "One approved n81 regression failed:689/712 versus retained n80 703/712, with14 formerly correct October OSIDs lost and zero gains. Earlier checkpoints and four anchor checks also fail. Candidate rejected, no retry or adoption. ABB does not reach Prisoje; thresholds and every telemetry byte preserved.",
+  "inputs": [
+    {
+      "path": "logs/claude-channel-20261004/761-seal-a/result.json",
+      "sha256": "f81f2464c5f7055c7f0548ccb441972d1bf8a935aafbc36672e106d12af2ce70"
+    },
+    {
+      "path": "logs/claude-channel-20261004/761-seal-a/inventory.json",
+      "sha256": "ec0ac3516faceacfa2953b30366be8f9b5628cb3d32dcdd4bebcbbb60e536ef5"
+    },
+    {
+      "path": "logs/claude-channel-20261004/761-seal-a/closed-receipt.json",
+      "sha256": "6a29cb278435f24f1e454f8e01bf8f9ba72ecdb9c37940a5d4e1974ca81b98b3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/762-independent-review.json",
+      "sha256": "59162ba2964c7a492720777495db351199504db87f9c3593564f9e0922cc85ab"
+    }
+  ],
+  "campaign": {
+    "baseline": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80",
+    "candidate": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n81",
+    "actual_stdout_derived_run_dir": true,
+    "start_utc": "2026-10-20T19:41:59.632Z",
+    "end_utc": "2026-10-20T19:48:20.789Z",
+    "argv": [
+      "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+      "node_modules/tsx/dist/cli.mjs",
+      "tools/scenario_runner/run_scenario_with_preflight.ts",
+      "--scenario",
+      "data/scenarios/apr1992_definitive_188w.json",
+      "--weeks",
+      "188",
+      "--out",
+      "runs",
+      "--unique",
+      "--save-weeks",
+      "39,104,111,112,113,156,178,179,180,181,182,183,184,185,186,187"
+    ],
+    "timeout_ms": 600000,
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "timed_out": false,
+    "native_count": 31,
+    "final_state_hash": "a8fee534fb0089f5"
+  },
+  "acceptance": {
+    "pass": false,
+    "checkpoints": [
+      {
+        "label": "jan1993",
+        "turn": 39,
+        "reference_count": 712,
+        "score": 706,
+        "floor": 707,
+        "gross_formerly_correct_lost": 1,
+        "lost": [
+          {
+            "id": "op:pale:praca",
+            "baseline": "RS",
+            "candidate": "RBiH",
+            "reference": "RS"
+          }
+        ],
+        "gross_gained": 0,
+        "gained": [],
+        "pass": false
+      },
+      {
+        "label": "apr1994",
+        "turn": 104,
+        "reference_count": 712,
+        "score": 704,
+        "floor": 707,
+        "gross_formerly_correct_lost": 3,
+        "lost": [
+          {
+            "id": "op:pale:podgrab",
+            "baseline": "RS",
+            "candidate": "RBiH",
+            "reference": "RS"
+          },
+          {
+            "id": "op:pale:praca",
+            "baseline": "RS",
+            "candidate": "RBiH",
+            "reference": "RS"
+          },
+          {
+            "id": "op:prozor:paros",
+            "baseline": "HRHB",
+            "candidate": "RBiH",
+            "reference": "HRHB"
+          }
+        ],
+        "gross_gained": 0,
+        "gained": [],
+        "pass": false
+      },
+      {
+        "label": "apr1995",
+        "turn": 156,
+        "reference_count": 712,
+        "score": 703,
+        "floor": 706,
+        "gross_formerly_correct_lost": 4,
+        "lost": [
+          {
+            "id": "op:pale:podgrab",
+            "baseline": "RS",
+            "candidate": "RBiH",
+            "reference": "RS"
+          },
+          {
+            "id": "op:pale:praca",
+            "baseline": "RS",
+            "candidate": "RBiH",
+            "reference": "RS"
+          },
+          {
+            "id": "op:prozor:paros",
+            "baseline": "HRHB",
+            "candidate": "RBiH",
+            "reference": "HRHB"
+          },
+          {
+            "id": "op:travnik:gornje_krcevine",
+            "baseline": "RBiH",
+            "candidate": "RS",
+            "reference": "RBiH"
+          }
+        ],
+        "gross_gained": 1,
+        "gained": [
+          {
+            "id": "op:glamoc:vidimlije_2",
+            "baseline": "HRHB",
+            "candidate": "RS",
+            "reference": "RS"
+          }
+        ],
+        "pass": false
+      },
+      {
+        "label": "oct1995",
+        "turn": 188,
+        "reference_count": 712,
+        "score": 689,
+        "floor": 703,
+        "gross_formerly_correct_lost": 14,
+        "lost": [
+          {
+            "id": "op:bosanski_novi:matavazi_2",
+            "baseline": "RBiH",
+            "candidate": "RS",
+            "reference": "RBiH"
+          },
+          {
+            "id": "op:jajce:jezero_2",
+            "baseline": "HRHB",
+            "candidate": "RS",
+            "reference": "HRHB"
+          },
+          {
+            "id": "op:mrkonjic_grad:baljvine_2",
+            "baseline": "HRHB",
+            "candidate": "RS",
+            "reference": "HRHB"
+          },
+          {
+            "id": "op:mrkonjic_grad:mrkonjic_grad_2",
+            "baseline": "HRHB",
+            "candidate": "RS",
+            "reference": "HRHB"
+          },
+          {
+            "id": "op:mrkonjic_grad:podrasnica_2",
+            "baseline": "HRHB",
+            "candidate": "RS",
+            "reference": "HRHB"
+          },
+          {
+            "id": "op:pale:podgrab",
+            "baseline": "RS",
+            "candidate": "RBiH",
+            "reference": "RS"
+          },
+          {
+            "id": "op:pale:praca",
+            "baseline": "RS",
+            "candidate": "RBiH",
+            "reference": "RS"
+          },
+          {
+            "id": "op:prozor:paros",
+            "baseline": "HRHB",
+            "candidate": "RBiH",
+            "reference": "HRHB"
+          },
+          {
+            "id": "op:sanski_most:sanski_most_2",
+            "baseline": "RBiH",
+            "candidate": "RS",
+            "reference": "RBiH"
+          },
+          {
+            "id": "op:sanski_most:stari_majdan",
+            "baseline": "RBiH",
+            "candidate": "RS",
+            "reference": "RBiH"
+          },
+          {
+            "id": "op:titov_drvar:drvar_2",
+            "baseline": "HRHB",
+            "candidate": "RS",
+            "reference": "HRHB"
+          },
+          {
+            "id": "op:titov_drvar:sipovljani_2",
+            "baseline": "HRHB",
+            "candidate": "RS",
+            "reference": "HRHB"
+          },
+          {
+            "id": "op:travnik:gornje_krcevine",
+            "baseline": "RBiH",
+            "candidate": "RS",
+            "reference": "RBiH"
+          },
+          {
+            "id": "op:travnik:varosluk",
+            "baseline": "RBiH",
+            "candidate": "RS",
+            "reference": "RBiH"
+          }
+        ],
+        "gross_gained": 0,
+        "gained": [],
+        "pass": false
+      }
+    ],
+    "anchor_failures": [
+      {
+        "id": "op:bosanski_novi:matavazi_2",
+        "expected": "RBiH",
+        "actual": "RS",
+        "pass": false
+      },
+      {
+        "id": "op:mrkonjic_grad:podrasnica_2",
+        "expected": "HRHB",
+        "actual": "RS",
+        "pass": false
+      },
+      {
+        "id": "op:mrkonjic_grad:mrkonjic_grad_2",
+        "expected": "HRHB",
+        "actual": "RS",
+        "pass": false
+      },
+      {
+        "id": "op:mrkonjic_grad:baljvine_2",
+        "expected": "HRHB",
+        "actual": "RS",
+        "pass": false
+      }
+    ],
+    "initial": {
+      "controller_count": 712,
+      "control_equal": true,
+      "raw_equal": true
+    },
+    "provenance": {
+      "count": 32,
+      "digest": "7986f05230e1d526e1794673e796dcb77730501d4958e435970c4ec806cc8039",
+      "all_match": true,
+      "exact_baseline": true
+    }
+  },
+  "gates": {
+    "stop_after_first_acceptance_failure": true,
+    "checkpoint_evaluation_exit": 2,
+    "timeline": "UNREACHED_AFTER_CHECKPOINT_FAILURE",
+    "checkpoint_cli": "UNREACHED_AFTER_CHECKPOINT_FAILURE",
+    "consistency": "UNREACHED_AFTER_CHECKPOINT_FAILURE",
+    "health": "UNREACHED_AFTER_CHECKPOINT_FAILURE",
+    "protected": "UNREACHED_AFTER_CHECKPOINT_FAILURE",
+    "producer": "UNREACHED_AFTER_CHECKPOINT_FAILURE",
+    "consumer": "UNMEASURED_NOT_RUN",
+    "fingerprint": "UNMEASURED_NOT_RUN",
+    "full_suite": "NOT_AUTHORIZED_NOT_RUN__MANDATORY_BEFORE_ACCEPTANCE"
+  },
+  "abb_finding": "n81 already differs from n80 at retained turn104 in ABB actor and relevant-operation projection. At 178–186 n81 has no ABB order/transit while Mistral progresses planning to execution; n80 queues successive Mistral-route orders and has Jajce_3 transit by186. In n81 bot order generation at187 queues Bosansko Grahovo_2, and the named osid-column-movement phase at188 changes that pending order to one-turn transit from Maleševci. The phase receipt encloses reconciliation before the consumer; it does not directly identify the helper writer. Prisoje remains RS with no candidate control event or engagement.",
+  "abb_semantics": {
+    "receipt_boundary": "Each receipt is the named phase entry/exit state. The osid-column-movement receipt encloses reconciliation immediately before the movement consumer.",
+    "direct_helper_writer_measurement": false,
+    "causal_proof": false,
+    "location_origin_not_progress": true,
+    "emitted_not_admitted": true,
+    "missing_is_unmeasured": true
+  },
+  "preservation": {
+    "capture_pass": true,
+    "before": {
+      "C": {
+        "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+        "archive": "logs/claude-channel-20261004/396-varosluk-761-one188-telemetry/C-before.jsonl",
+        "bytes": 100107701,
+        "sha256": "8d242e18f199a54c26f755e648fe4612159563ec0b606930112653770d725f3c"
+      },
+      "D": {
+        "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+        "archive": "logs/claude-channel-20261004/396-varosluk-761-one188-telemetry/D-before.jsonl",
+        "bytes": 1041,
+        "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+      }
+    },
+    "after": {
+      "C": {
+        "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+        "archive": "logs/claude-channel-20261004/396-varosluk-761-one188-telemetry/C-after.jsonl",
+        "bytes": 101054372,
+        "sha256": "b11e26cdda6948e8a0c6812a1e5563578d8de42d4cc4f235a25598d075acc8be",
+        "appended_bytes": 946671
+      },
+      "D": {
+        "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+        "archive": "logs/claude-channel-20261004/396-varosluk-761-one188-telemetry/D-after.jsonl",
+        "bytes": 1041,
+        "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+        "appended_bytes": 0
+      }
+    },
+    "full_before_after_archives_retained": true,
+    "old_failures_retained": true,
+    "no_restore_truncate_delete": true
+  },
+  "independent_review": {
+    "verdict": "PASS_FAILED_RUN_REJECTION",
+    "scope": "evidence and failed-candidate rejection, not gameplay GO"
+  },
+  "disposition": {
+    "retained_baseline": "n80 703/712, NO-GO/unadopted",
+    "candidate": "n81 rejected; tested source preserved unchanged for diagnosis, not promoted",
+    "next_smallest_scope": "Use retained n80/n81 evidence to locate the early divergence affecting Prača before any revised global reconciliation or another campaign. No first helper writer or complete causal chain is measured.",
+    "new_expensive_work": "none authorized by this spent allowance"
+  },
+  "scope": {
+    "campaigns": 1,
+    "retries": 0,
+    "full_suites": 0,
+    "source_data_threshold_canon_changes": 0
+  },
+  "limits": [
+    "t104 is the earliest differing retained ABB actor/operation projection, not the first actual divergence or a measured writer.",
+    "Named osid-column phase encloses prepass and consumer; no separate helper-call observation.",
+    "Later acceptance gates are unreached, consumer/fingerprint unmeasured, full qualifying suite not run.",
+    "All inherited unmet gates, n42 observational-only GO, Farz second-OR-third and122 STOP remain unchanged.",
+    "Raw evidence remains LOCAL with pushed inventory per owner; this is not remote raw-byte backup."
+  ]
+}

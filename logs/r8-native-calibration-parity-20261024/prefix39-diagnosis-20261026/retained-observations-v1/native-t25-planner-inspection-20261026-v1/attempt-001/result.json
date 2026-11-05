@@ -1,0 +1,694 @@
+{
+  "schema": "awwv.native-t25-request-op-planner-inspection.v1",
+  "read_only_scope": {
+    "turn": 25,
+    "player_faction": "RBiH",
+    "target_osid": "op:trnovo:tosici",
+    "corps_ids": [
+      "arbih_1st_corps",
+      "arbih_4th_corps"
+    ],
+    "planner_call_count": 2,
+    "no_engine_advance_query_or_stage": true
+  },
+  "runtime": {
+    "node_version": "v22.23.2",
+    "exec_path": "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe"
+  },
+  "frozen_files": [
+    {
+      "path": "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+      "bytes": 86997320,
+      "sha256": "0d0f5e39f9f3d9587bc19f73eab3c2c9c4903fd02d6dbf9c853dd81b3d95fad4"
+    },
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/node_modules/tsx/dist/cli.mjs",
+      "bytes": 120402,
+      "sha256": "8729ecfb90d9d568939e4190e6f1d3317c946583b7d37a776e0c23a21c021cf8"
+    },
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/src/sim/turn_phases/war_phases.ts",
+      "bytes": 233941,
+      "sha256": "8a085a37835541f4dc267e5c1f7f75a714bafc596e21d43b1467cb8ee62d7fcd"
+    },
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/src/data/operational_data.ts",
+      "bytes": 8243,
+      "sha256": "9156b352188b2ecec91ae3451da73cd6cdea1f51a3a802042bfecb15b34d4cd9"
+    },
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/src/sim/combat/osid_adjacency.ts",
+      "bytes": 4964,
+      "sha256": "61860301594e9dc6d982a45d909176158a50ac9b67eea1b77fff0019ec3d0eb5"
+    },
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/src/sim/early_war/alliance_update.ts",
+      "bytes": 19034,
+      "sha256": "57835c7b4a0f61916f4568c9d0aa2c71af4c725b0d6948fa5cb9df765bb18849"
+    },
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/src/sim/combat/sector_utils.ts",
+      "bytes": 16450,
+      "sha256": "4abb513284b2e43998146452edd9a673611aad71c8079ba002454eea9802d2cc"
+    },
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp-paradox-qa-20260710/evidence/fractional-fatigue-p03-rbih-t39-01/rbih/turn-autosaves/turn-025.json",
+      "bytes": 5146025,
+      "sha256": "d384bd9f7f24ebd044fd13bc3b123ad05f51aa074c0d44faedbe99075ac6adcc"
+    },
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/data/derived/operational/operational_contact_graph.json",
+      "bytes": 356375,
+      "sha256": "f7f9aaeea51710fda376234d79945b51dfea31a16ebca948ffd8dc54f3ce0c46"
+    }
+  ],
+  "graph_precheck": {
+    "edge_count": 2047,
+    "endpoint_count": 712,
+    "controller_key_count": 712,
+    "endpoint_domain_equals_controller_domain": true,
+    "non_operational_endpoint_count": 0,
+    "non_operational_controller_key_count": 0,
+    "target_controller": "RS",
+    "target_neighbors": [
+      {
+        "id": "op:kalinovik:golubici_2",
+        "controller": "RS"
+      },
+      {
+        "id": "op:kalinovik:varos_2",
+        "controller": "RS"
+      },
+      {
+        "id": "op:kalinovik:vlaholje",
+        "controller": "RS"
+      },
+      {
+        "id": "op:trnovo:delijas",
+        "controller": "RBiH"
+      },
+      {
+        "id": "op:trnovo:kijevo_2",
+        "controller": "RS"
+      },
+      {
+        "id": "op:trnovo:trnovo",
+        "controller": "RBiH"
+      }
+    ]
+  },
+  "planner_results": [
+    {
+      "corps_id": "arbih_1st_corps",
+      "target_osid": "op:trnovo:tosici",
+      "purity": {
+        "before_bytes": 3174202,
+        "after_bytes": 3174202,
+        "before_sha256": "d49f0f547d121c031282ffd20511f12dbe5ff4b0b5323d4be49cf619def07886",
+        "after_sha256": "d49f0f547d121c031282ffd20511f12dbe5ff4b0b5323d4be49cf619def07886",
+        "byte_identical": true
+      },
+      "full_plan_return": {
+        "ok": true,
+        "corpsFaction": "RBiH",
+        "participants": [
+          "arbih_101st_mountain",
+          "arbih_102nd_motorized",
+          "arbih_10th_mountain",
+          "arbih_115th_mountain",
+          "arbih_124th_light_king_tvrtko",
+          "arbih_131st_light",
+          "arbih_143rd_light",
+          "arbih_146th_light",
+          "arbih_164th_mountain",
+          "arbih_165th_mountain",
+          "arbih_2nd_mountain",
+          "arbih_hvo_kralj_tvrtko"
+        ],
+        "stagingOsid": "op:trnovo:trnovo",
+        "axes": [
+          {
+            "axis_id": "main",
+            "name": "Main Advance",
+            "assigned_brigades": [
+              "arbih_101st_mountain",
+              "arbih_102nd_motorized",
+              "arbih_10th_mountain",
+              "arbih_115th_mountain",
+              "arbih_124th_light_king_tvrtko",
+              "arbih_131st_light",
+              "arbih_143rd_light",
+              "arbih_146th_light",
+              "arbih_164th_mountain",
+              "arbih_165th_mountain",
+              "arbih_2nd_mountain",
+              "arbih_hvo_kralj_tvrtko"
+            ],
+            "main_brigade": "arbih_124th_light_king_tvrtko",
+            "support_brigades": [
+              "arbih_101st_mountain",
+              "arbih_102nd_motorized",
+              "arbih_10th_mountain",
+              "arbih_115th_mountain",
+              "arbih_131st_light",
+              "arbih_143rd_light",
+              "arbih_146th_light",
+              "arbih_164th_mountain",
+              "arbih_165th_mountain",
+              "arbih_2nd_mountain",
+              "arbih_hvo_kralj_tvrtko"
+            ],
+            "objectives": [
+              "op:trnovo:tosici"
+            ],
+            "current_objective_index": 0,
+            "status": "executing",
+            "failure_count": 0,
+            "consecutive_failures_on_current": 0,
+            "momentum": 0,
+            "attack_attempt_count": 0,
+            "objective_capture_count": 0,
+            "movement_only_execution_turns": 0,
+            "idle_execution_turn_streak": 0,
+            "staging_osid": "op:trnovo:trnovo"
+          }
+        ],
+        "opName": "Presidential Directive — op:trnovo:tosici",
+        "corpsBrigadeCount": 34
+      },
+      "roster": [
+        {
+          "id": "arbih_101st_mountain",
+          "personnel": 1290,
+          "location_osid": "op:hadzici:binjezevo",
+          "supply_at_location": "adequate",
+          "assignment": {
+            "formation_assignment": {
+              "kind": "sector",
+              "role": "front",
+              "sector_id": "sector:arbih_1st_corps:2"
+            },
+            "assigned_sub_segment_id": "subseg:sector:arbih_1st_corps:2:0",
+            "live_sector_memberships": [
+              {
+                "sector_id": "sector:arbih_1st_corps:2",
+                "role": "line"
+              }
+            ],
+            "legacy_front_assignment": null
+          },
+          "current_movement_order": null,
+          "current_movement_state": null,
+          "normal_friendly_hops_to_staging": 3,
+          "normal_friendly_route_exists": true,
+          "already_at_staging": false,
+          "adjacent_to_staging": false
+        },
+        {
+          "id": "arbih_102nd_motorized",
+          "personnel": 1070,
+          "location_osid": "op:hadzici:tarcin_2",
+          "supply_at_location": "adequate",
+          "assignment": {
+            "formation_assignment": {
+              "kind": "sector",
+              "role": "front",
+              "sector_id": "sector:arbih_1st_corps:2"
+            },
+            "assigned_sub_segment_id": "subseg:sector:arbih_1st_corps:2:0",
+            "live_sector_memberships": [
+              {
+                "sector_id": "sector:arbih_1st_corps:2",
+                "role": "line"
+              }
+            ],
+            "legacy_front_assignment": null
+          },
+          "current_movement_order": null,
+          "current_movement_state": null,
+          "normal_friendly_hops_to_staging": 4,
+          "normal_friendly_route_exists": true,
+          "already_at_staging": false,
+          "adjacent_to_staging": false
+        },
+        {
+          "id": "arbih_10th_mountain",
+          "personnel": 1056,
+          "location_osid": "op:hadzici:binjezevo",
+          "supply_at_location": "adequate",
+          "assignment": {
+            "formation_assignment": {
+              "kind": "sector",
+              "role": "front",
+              "sector_id": "sector:arbih_1st_corps:2"
+            },
+            "assigned_sub_segment_id": "subseg:sector:arbih_1st_corps:2:0",
+            "live_sector_memberships": [
+              {
+                "sector_id": "sector:arbih_1st_corps:2",
+                "role": "line"
+              }
+            ],
+            "legacy_front_assignment": null
+          },
+          "current_movement_order": null,
+          "current_movement_state": null,
+          "normal_friendly_hops_to_staging": 3,
+          "normal_friendly_route_exists": true,
+          "already_at_staging": false,
+          "adjacent_to_staging": false
+        },
+        {
+          "id": "arbih_115th_mountain",
+          "personnel": 1199,
+          "location_osid": "op:hadzici:binjezevo",
+          "supply_at_location": "adequate",
+          "assignment": {
+            "formation_assignment": {
+              "kind": "sector",
+              "role": "front",
+              "sector_id": "sector:arbih_1st_corps:2"
+            },
+            "assigned_sub_segment_id": "subseg:sector:arbih_1st_corps:2:0",
+            "live_sector_memberships": [
+              {
+                "sector_id": "sector:arbih_1st_corps:2",
+                "role": "line"
+              }
+            ],
+            "legacy_front_assignment": null
+          },
+          "current_movement_order": null,
+          "current_movement_state": null,
+          "normal_friendly_hops_to_staging": 3,
+          "normal_friendly_route_exists": true,
+          "already_at_staging": false,
+          "adjacent_to_staging": false
+        },
+        {
+          "id": "arbih_124th_light_king_tvrtko",
+          "personnel": 1800,
+          "location_osid": "op:hadzici:binjezevo",
+          "supply_at_location": "adequate",
+          "assignment": {
+            "formation_assignment": {
+              "kind": "sector",
+              "role": "front",
+              "sector_id": "sector:arbih_1st_corps:2"
+            },
+            "assigned_sub_segment_id": "subseg:sector:arbih_1st_corps:2:0",
+            "live_sector_memberships": [
+              {
+                "sector_id": "sector:arbih_1st_corps:2",
+                "role": "line"
+              }
+            ],
+            "legacy_front_assignment": null
+          },
+          "current_movement_order": null,
+          "current_movement_state": null,
+          "normal_friendly_hops_to_staging": 3,
+          "normal_friendly_route_exists": true,
+          "already_at_staging": false,
+          "adjacent_to_staging": false
+        },
+        {
+          "id": "arbih_131st_light",
+          "personnel": 512,
+          "location_osid": "op:fojnica:turkovici",
+          "supply_at_location": "adequate",
+          "assignment": {
+            "formation_assignment": {
+              "kind": "sector",
+              "role": "rear",
+              "sector_id": "sector:arbih_1st_corps:8"
+            },
+            "assigned_sub_segment_id": null,
+            "live_sector_memberships": [
+              {
+                "sector_id": "sector:arbih_1st_corps:8",
+                "role": "rear"
+              }
+            ],
+            "legacy_front_assignment": null
+          },
+          "current_movement_order": null,
+          "current_movement_state": null,
+          "normal_friendly_hops_to_staging": 7,
+          "normal_friendly_route_exists": true,
+          "already_at_staging": false,
+          "adjacent_to_staging": false
+        },
+        {
+          "id": "arbih_143rd_light",
+          "personnel": 612,
+          "location_osid": "op:hadzici:binjezevo",
+          "supply_at_location": "adequate",
+          "assignment": {
+            "formation_assignment": {
+              "kind": "sector",
+              "role": "front",
+              "sector_id": "sector:arbih_1st_corps:2"
+            },
+            "assigned_sub_segment_id": "subseg:sector:arbih_1st_corps:2:0",
+            "live_sector_memberships": [
+              {
+                "sector_id": "sector:arbih_1st_corps:2",
+                "role": "line"
+              }
+            ],
+            "legacy_front_assignment": null
+          },
+          "current_movement_order": null,
+          "current_movement_state": null,
+          "normal_friendly_hops_to_staging": 3,
+          "normal_friendly_route_exists": true,
+          "already_at_staging": false,
+          "adjacent_to_staging": false
+        },
+        {
+          "id": "arbih_146th_light",
+          "personnel": 1800,
+          "location_osid": "op:visoko:gornja_vratnica_2",
+          "supply_at_location": "adequate",
+          "assignment": {
+            "formation_assignment": {
+              "kind": "sector",
+              "role": "reserve",
+              "sector_id": "sector:arbih_1st_corps:7"
+            },
+            "assigned_sub_segment_id": null,
+            "live_sector_memberships": [
+              {
+                "sector_id": "sector:arbih_1st_corps:7",
+                "role": "reserve"
+              }
+            ],
+            "legacy_front_assignment": null
+          },
+          "current_movement_order": null,
+          "current_movement_state": null,
+          "normal_friendly_hops_to_staging": 8,
+          "normal_friendly_route_exists": true,
+          "already_at_staging": false,
+          "adjacent_to_staging": false
+        },
+        {
+          "id": "arbih_164th_mountain",
+          "personnel": 537,
+          "location_osid": "op:breza:koritnik",
+          "supply_at_location": "adequate",
+          "assignment": {
+            "formation_assignment": {
+              "kind": "sector",
+              "role": "rear",
+              "sector_id": "sector:arbih_1st_corps:7"
+            },
+            "assigned_sub_segment_id": null,
+            "live_sector_memberships": [
+              {
+                "sector_id": "sector:arbih_1st_corps:7",
+                "role": "rear"
+              }
+            ],
+            "legacy_front_assignment": null
+          },
+          "current_movement_order": null,
+          "current_movement_state": null,
+          "normal_friendly_hops_to_staging": 10,
+          "normal_friendly_route_exists": true,
+          "already_at_staging": false,
+          "adjacent_to_staging": false
+        },
+        {
+          "id": "arbih_165th_mountain",
+          "personnel": 1800,
+          "location_osid": "op:visoko:rajcici_2",
+          "supply_at_location": "adequate",
+          "assignment": {
+            "formation_assignment": {
+              "kind": "sector",
+              "role": "front",
+              "sector_id": "sector:arbih_1st_corps:8"
+            },
+            "assigned_sub_segment_id": "subseg:sector:arbih_1st_corps:8:0",
+            "live_sector_memberships": [
+              {
+                "sector_id": "sector:arbih_1st_corps:8",
+                "role": "line"
+              }
+            ],
+            "legacy_front_assignment": null
+          },
+          "current_movement_order": null,
+          "current_movement_state": null,
+          "normal_friendly_hops_to_staging": 7,
+          "normal_friendly_route_exists": true,
+          "already_at_staging": false,
+          "adjacent_to_staging": false
+        },
+        {
+          "id": "arbih_2nd_mountain",
+          "personnel": 582,
+          "location_osid": "op:hadzici:binjezevo",
+          "supply_at_location": "adequate",
+          "assignment": {
+            "formation_assignment": {
+              "kind": "sector",
+              "role": "front",
+              "sector_id": "sector:arbih_1st_corps:2"
+            },
+            "assigned_sub_segment_id": "subseg:sector:arbih_1st_corps:2:0",
+            "live_sector_memberships": [
+              {
+                "sector_id": "sector:arbih_1st_corps:2",
+                "role": "line"
+              }
+            ],
+            "legacy_front_assignment": null
+          },
+          "current_movement_order": null,
+          "current_movement_state": null,
+          "normal_friendly_hops_to_staging": 3,
+          "normal_friendly_route_exists": true,
+          "already_at_staging": false,
+          "adjacent_to_staging": false
+        },
+        {
+          "id": "arbih_hvo_kralj_tvrtko",
+          "personnel": 656,
+          "location_osid": "op:hadzici:binjezevo",
+          "supply_at_location": "adequate",
+          "assignment": {
+            "formation_assignment": {
+              "kind": "sector",
+              "role": "front",
+              "sector_id": "sector:arbih_1st_corps:2"
+            },
+            "assigned_sub_segment_id": "subseg:sector:arbih_1st_corps:2:0",
+            "live_sector_memberships": [
+              {
+                "sector_id": "sector:arbih_1st_corps:2",
+                "role": "line"
+              }
+            ],
+            "legacy_front_assignment": null
+          },
+          "current_movement_order": null,
+          "current_movement_state": null,
+          "normal_friendly_hops_to_staging": 3,
+          "normal_friendly_route_exists": true,
+          "already_at_staging": false,
+          "adjacent_to_staging": false
+        }
+      ],
+      "physical_summary": {
+        "roster_count": 12,
+        "already_at_staging_count": 0,
+        "adjacent_to_staging_count": 0,
+        "hop_metric_note": "BFS hops through territory accepted by the existing isFriendlyFaction route predicate; proxy distance only, not ETA or delivery proof."
+      }
+    },
+    {
+      "corps_id": "arbih_4th_corps",
+      "target_osid": "op:trnovo:tosici",
+      "purity": {
+        "before_bytes": 3174202,
+        "after_bytes": 3174202,
+        "before_sha256": "d49f0f547d121c031282ffd20511f12dbe5ff4b0b5323d4be49cf619def07886",
+        "after_sha256": "d49f0f547d121c031282ffd20511f12dbe5ff4b0b5323d4be49cf619def07886",
+        "byte_identical": true
+      },
+      "full_plan_return": {
+        "ok": true,
+        "corpsFaction": "RBiH",
+        "participants": [
+          "arbih_441st_vitezka_mountain",
+          "arbih_443rd_mountain",
+          "arbih_446th_light",
+          "arbih_450th_light"
+        ],
+        "stagingOsid": "op:trnovo:trnovo",
+        "axes": [
+          {
+            "axis_id": "main",
+            "name": "Main Advance",
+            "assigned_brigades": [
+              "arbih_441st_vitezka_mountain",
+              "arbih_443rd_mountain",
+              "arbih_446th_light",
+              "arbih_450th_light"
+            ],
+            "main_brigade": "arbih_443rd_mountain",
+            "support_brigades": [
+              "arbih_441st_vitezka_mountain",
+              "arbih_446th_light",
+              "arbih_450th_light"
+            ],
+            "objectives": [
+              "op:trnovo:tosici"
+            ],
+            "current_objective_index": 0,
+            "status": "executing",
+            "failure_count": 0,
+            "consecutive_failures_on_current": 0,
+            "momentum": 0,
+            "attack_attempt_count": 0,
+            "objective_capture_count": 0,
+            "movement_only_execution_turns": 0,
+            "idle_execution_turn_streak": 0,
+            "staging_osid": "op:trnovo:trnovo"
+          }
+        ],
+        "opName": "Presidential Directive — op:trnovo:tosici",
+        "corpsBrigadeCount": 11
+      },
+      "roster": [
+        {
+          "id": "arbih_441st_vitezka_mountain",
+          "personnel": 1770,
+          "location_osid": "op:mostar:blagaj_2",
+          "supply_at_location": "adequate",
+          "assignment": {
+            "formation_assignment": {
+              "kind": "sector",
+              "role": "front",
+              "sector_id": "sector:arbih_4th_corps:1"
+            },
+            "assigned_sub_segment_id": "subseg:sector:arbih_4th_corps:1:0",
+            "live_sector_memberships": [
+              {
+                "sector_id": "sector:arbih_4th_corps:1",
+                "role": "line"
+              }
+            ],
+            "legacy_front_assignment": null
+          },
+          "current_movement_order": null,
+          "current_movement_state": null,
+          "normal_friendly_hops_to_staging": 7,
+          "normal_friendly_route_exists": true,
+          "already_at_staging": false,
+          "adjacent_to_staging": false
+        },
+        {
+          "id": "arbih_443rd_mountain",
+          "personnel": 1800,
+          "location_osid": "op:trnovo:trnovo",
+          "supply_at_location": "adequate",
+          "assignment": {
+            "formation_assignment": {
+              "kind": "sector",
+              "role": "reserve",
+              "sector_id": "sector:arbih_4th_corps:0"
+            },
+            "assigned_sub_segment_id": null,
+            "live_sector_memberships": [
+              {
+                "sector_id": "sector:arbih_4th_corps:0",
+                "role": "reserve"
+              }
+            ],
+            "legacy_front_assignment": null
+          },
+          "current_movement_order": {
+            "destination_sids": [
+              "op:konjic:glavaticevo_2"
+            ],
+            "stance": "column"
+          },
+          "current_movement_state": null,
+          "normal_friendly_hops_to_staging": 0,
+          "normal_friendly_route_exists": true,
+          "already_at_staging": true,
+          "adjacent_to_staging": false
+        },
+        {
+          "id": "arbih_446th_light",
+          "personnel": 539,
+          "location_osid": "op:konjic:konjic_2",
+          "supply_at_location": "adequate",
+          "assignment": {
+            "formation_assignment": {
+              "kind": "sector",
+              "role": "front",
+              "sector_id": "sector:arbih_4th_corps:1"
+            },
+            "assigned_sub_segment_id": "subseg:sector:arbih_4th_corps:1:0",
+            "live_sector_memberships": [
+              {
+                "sector_id": "sector:arbih_4th_corps:1",
+                "role": "line"
+              }
+            ],
+            "legacy_front_assignment": null
+          },
+          "current_movement_order": null,
+          "current_movement_state": null,
+          "normal_friendly_hops_to_staging": 3,
+          "normal_friendly_route_exists": true,
+          "already_at_staging": false,
+          "adjacent_to_staging": false
+        },
+        {
+          "id": "arbih_450th_light",
+          "personnel": 820,
+          "location_osid": "op:konjic:ljuta",
+          "supply_at_location": "adequate",
+          "assignment": {
+            "formation_assignment": {
+              "kind": "sector",
+              "role": "front",
+              "sector_id": "sector:arbih_4th_corps:0"
+            },
+            "assigned_sub_segment_id": "subseg:sector:arbih_4th_corps:0:0",
+            "live_sector_memberships": [
+              {
+                "sector_id": "sector:arbih_4th_corps:0",
+                "role": "line"
+              }
+            ],
+            "legacy_front_assignment": null
+          },
+          "current_movement_order": null,
+          "current_movement_state": null,
+          "normal_friendly_hops_to_staging": 1,
+          "normal_friendly_route_exists": true,
+          "already_at_staging": false,
+          "adjacent_to_staging": true
+        }
+      ],
+      "physical_summary": {
+        "roster_count": 4,
+        "already_at_staging_count": 1,
+        "adjacent_to_staging_count": 1,
+        "hop_metric_note": "BFS hops through territory accepted by the existing isFriendlyFaction route predicate; proxy distance only, not ETA or delivery proof."
+      }
+    }
+  ],
+  "claim_limits": [
+    "Planner output is read-only eligibility/roster/staging evidence for this frozen T25 state.",
+    "Friendly BFS hops are a physical-distance proxy, not ETA or delivery proof.",
+    "No capture, admission, combat, movement execution, or command-authority claim follows."
+  ]
+}

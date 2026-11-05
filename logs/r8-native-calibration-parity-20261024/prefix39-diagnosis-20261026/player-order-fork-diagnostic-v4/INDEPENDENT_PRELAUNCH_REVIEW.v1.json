@@ -1,0 +1,113 @@
+{
+  "schema": "awwv.independent-player-order-fork-prelaunch-review.v1",
+  "reviewed_utc": "2026-10-26T00:22:45.612Z",
+  "verdict": "GO_ONE_FRESH_FORK_ONLY_ATTEMPT",
+  "pass": true,
+  "scope": {
+    "authorized_question": "Can one ordinary RBiH player REQUEST-OP from 4th Corps to Tosici, started from the actual Package03 T16 state and carried through the current-source production interfaces, reach T39 at 707/712 or better with zero formerly-correct losses against n91 and n92?",
+    "attempts_authorized": 1,
+    "automatic_retry_authorized": false,
+    "baseline_fidelity_repeat_authorized": false,
+    "native_campaign_authorized": false,
+    "package_build_authorized": false,
+    "campaign_188_authorized": false,
+    "full_native_campaign_qualification": "unmet and outside this experiment",
+    "reviewer_executed_engine_test_query_stage_or_advance": false
+  },
+  "frozen_packet": {
+    "root": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+    "head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+    "packet": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4",
+    "freeze": { "bytes": 3561, "sha256": "1619235da0c921147a59036cdd6595f0d8f1102de1c231bed075b818ae46d226" },
+    "config": { "bytes": 11831, "sha256": "3a7d5da59090d9a2dbadbe74b15650a7e02af1deb5b561766f3b66b0026a9e04" },
+    "entry": { "bytes": 21168, "sha256": "44f8ab993d3a2da913679b7386f1485062bf01e27882cb5cf356356c94b0ecd5" },
+    "launcher": { "bytes": 5370, "sha256": "2375a655c56de59853d29531f9196dea792d3e3ec5e0e8d121097dcae76dbb51" },
+    "frozen_file_count": 7,
+    "frozen_file_mismatches": 0,
+    "bound_file_count": 23,
+    "bound_file_mismatches": 0,
+    "separately_named_runtime_input_score_rows": 11,
+    "separately_named_row_mismatches": 0,
+    "runtime_package_aggregate_count": 5,
+    "runtime_package_aggregate_mismatches": 0,
+    "source_and_data_status": "clean at frozen HEAD",
+    "fixed_attempt_leaf_absent": true,
+    "attempt_parent_present": true
+  },
+  "reused_fidelity_prerequisite": {
+    "reused_without_repeating": true,
+    "v3_freeze_sha256": "0b978915642590a9c6457c4395f875206afd93407c2f96cfcd777c7adc4e9dbd",
+    "receipt_sha256": "75edc31c43c9710608a10448e19d8ff99aa1a020a12453b4d1c8f0345de6a5aa",
+    "result_sha256": "244603b9406f4fd3ea4d4840f00c075db2ba133246ab0c8bf42b1b273c727f6b",
+    "actual_review_sha256": "c4604af9987fd77634e0b11cefdf31239437697b858578e2d7fb28d9c20a3a92",
+    "produced_t17_sha256": "32d5b1bbcdb74bb2f7a2c5dbc9bca40bd5237cab318052c90c0abe9c0f184cf1",
+    "produced_t17_bytes": 4790188,
+    "differing_path_count": 0,
+    "outer_child_wrapper_exit": [0, 0, 0],
+    "v4_baseline_advance_path_present": false
+  },
+  "static_flow_review": {
+    "accepted_mode": "fork-only",
+    "query_invocation_count": 1,
+    "stage_invocation_count": 1,
+    "advance_call_sites": 1,
+    "maximum_advances": 23,
+    "query_runs_on_dedicated_runtime_clone": true,
+    "query_purity_compares_complete_runtime_serialization_before_and_after": true,
+    "query_rejection_or_missing_finite_physics_fails_before_staging": true,
+    "force_confirmation_is_present_only_for_query_recommendation_delay_or_abort": true,
+    "staging_uses_production_stageOpDirective_owner": true,
+    "required_command_authority_transition": "94/0/25 -> 69/25/50",
+    "pending_directive_round_tripped_before_advance": true,
+    "first_advance_requires_exactly_once_consumption_and_no_rejection": true,
+    "force_is_selected_only_by_current_source_shared_production_planner": true,
+    "roster_contract": "canonical 3..12 brigade roster, active and non-enclave at T16, initially uncommitted statewide, same 4th Corps, selected from the production reachable pool",
+    "staging_contract": "single axis from op:trnovo:delijas to op:trnovo:tosici",
+    "cross_corps_overlap": "Operation Circle is owned by 1st Corps; validateOpAtInjection receives the 4th Corps command, so the ordinary same-corps overlap guard permits this disclosed cross-corps duplicate target without an exemption",
+    "runtime_handoff_each_turn": true,
+    "turn_artifacts": "canonical state, phase report, and operation/lineage/event receipt for every T17 through T39 turn",
+    "operation_lineage": "roster movement receipts plus operation-id-owned or contributing target battles; any Tosici controller change must be RBiH and have this operation's winning battle and a control event",
+    "ordered_player_event_inputs": [
+      { "turn": 20, "event_id": "london_conference_1992", "response_id": "accept_principles" },
+      { "turn": 38, "event_id": "ic_pressure_vopp_engagement", "response_id": "acknowledge_pressure" },
+      { "turn": 39, "event_id": "vance_owen_plan_1993", "response_id": "accept" }
+    ],
+    "event_contract": "production consumer only; missing, extra, reordered, unresolved, non-player-source, or blocking events fail closed",
+    "success_child_artifact_count": 73,
+    "success_attempt_file_count_including_wrapper_reserved_files": 78,
+    "partial_failure_retention": "RESULT.json records the primary child error; every reached artifact is retained. Missing success artifacts may additionally produce wrapper exit 126 and do not replace the child failure classification."
+  },
+  "acceptance": {
+    "actual_package03_retained_native_turn39_sha256": "623cbaed0e6186bc5f2c4a18fd5e9b22836db9343df0e4122316c92e5c9902e8",
+    "retained_native_score": 704,
+    "reference_sha256": "6a64300a599aa0b75833d5232bf9f08a1ab97085746337e622d54fb1a4a0ddc7",
+    "n91_sha256": "e51224ac22a839d4c1af35a0ea828afb79b62f0ed56559c3b47dcda45578eec5",
+    "n92_sha256": "e51224ac22a839d4c1af35a0ea828afb79b62f0ed56559c3b47dcda45578eec5",
+    "candidate_minimum_score": 707,
+    "denominator": 712,
+    "formerly_correct_max_losses": 0,
+    "retained_native_loss_ids": [
+      "op:donji_vakuf:korenici",
+      "op:foca:donje_zesce",
+      "op:trnovo:tosici"
+    ],
+    "partial_delivery_disposition": "Movement, combat, capture, or another delivery signal without the score and zero-loss gates is a failed or partial result, not parity and not baseline adoption."
+  },
+  "launch_contract": {
+    "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+    "outer_argv": [
+      "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+      "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/launch_fork_v4.cjs"
+    ],
+    "hard_timeout_ms": 180000,
+    "expected_under_ms": 120000,
+    "fixed_attempt": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01",
+    "prelaunch_recheck": "Immediately before launch, require the exact FREEZE, CONFIG, entry, and launcher hashes in this review; exact HEAD; clean src/data; unchanged 23 bindings, 11 named rows, local loader, five runtime package aggregates, bound v3 fidelity receipt/artifacts/review; and absent fixed attempt leaf.",
+    "stopping_rule": "Run once. Stop on success, child failure, wrapper failure, timeout, or any preflight mismatch. Preserve all evidence and do not retry."
+  },
+  "nonblocking_disclosures": [
+    "The bound PLAYER_INPUT_FEASIBILITY_SUPPLEMENT.md is preserved historical proposal evidence and contains the earlier wrong-cohort T16/T17 path identities. V4 does not consume those identities: its CONFIG binds the corrected actual Package03 T16/T17/T39 files and the 704 comparator directly.",
+    "This experiment can establish bounded player-input delivery at current source. It cannot establish native full-campaign or same-input full-state parity.",
+    "No production output format changes are introduced; this packet adds diagnostic evidence artifacts only."
+  ]
+}

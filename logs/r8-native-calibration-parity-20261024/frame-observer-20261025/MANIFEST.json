@@ -1,0 +1,1051 @@
+{
+  "schema": "awwv.frame-observer.evidence-inventory.v1",
+  "scope": "Selected exact-byte failed native23, fixture, diagnostic, focused repair and review evidence. All raw states, profiles, screenshots, telemetry and failed attempts remain local; this is not a remote backup.",
+  "noGameplayChange": true,
+  "nativeQualification": false,
+  "focusedTests": {
+    "passed": 159,
+    "failed": 0
+  },
+  "preservedRuns": "n91-n97",
+  "files": [
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-green-01/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-green-01/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-green-01/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-green-01/receipt.json",
+      "bytes": 2826,
+      "sha256": "30fa4aa49bf236a8a97d5d817f6bc1f68e1e24f98a9f334391f1aa39aa49f1d8"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-green-01/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-green-01/start.json",
+      "bytes": 1657,
+      "sha256": "2f62a4e6adc5a48f771d397a4af9a7b6876f672ad298d9a1553e964aa0d383cb"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-green-01/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-green-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-green-01/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-green-01/stdout.log",
+      "bytes": 203,
+      "sha256": "8c551f37662101b8aba57d0aa77878b49db0518ec1aeb0466e769c9714398d49"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-green-01/vitest.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-green-01/vitest.json",
+      "bytes": 49953,
+      "sha256": "bc9363aab4acf1f6968fd6828b417028635feeea25b89be1a2a5e0a26ed331a8"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-green-02/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-green-02/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-green-02/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-green-02/receipt.json",
+      "bytes": 2826,
+      "sha256": "433191f65d49c5a1af72af2667ffac9200001d3be325d82805d1408ae879aecb"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-green-02/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-green-02/start.json",
+      "bytes": 1657,
+      "sha256": "5cc81a69eba8bd929734557f2715e869ab0537052294aa8f29a38ef6b9b9e4d1"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-green-02/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-green-02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-green-02/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-green-02/stdout.log",
+      "bytes": 203,
+      "sha256": "e02586d0bac50b19d94104daf2b50f6798f83e899b6cdebc23823c5c391c543d"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-green-02/vitest.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-green-02/vitest.json",
+      "bytes": 47306,
+      "sha256": "1125a3d1950cf43ee9400770b1a645f1a6cb80046aa5676ea09d643530bef81d"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-red-01/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-red-01/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-red-01/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-red-01/receipt.json",
+      "bytes": 2823,
+      "sha256": "dcf2cb416e14dc924af3b19ef2e722f37d8a714e1eef1b8ee588bbdf3edd4265"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-red-01/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-red-01/start.json",
+      "bytes": 1653,
+      "sha256": "45e387aadb08547a6408ac49c52e0346bff76771057eedf28243d767a2dca3bb"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-red-01/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-red-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-red-01/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-red-01/stdout.log",
+      "bytes": 201,
+      "sha256": "9959611706e3c421b17ae39303296af0a3c69d971c6d9f858b8be1c2cafebef0"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-red-01/vitest.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-red-01/vitest.json",
+      "bytes": 53228,
+      "sha256": "8743a7f631f90b19d6945a2002c283f3a069bcb6b36b3af70bd8e650a4ec6ef3"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-syntax-01/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-syntax-01/entry-script.snapshot",
+      "bytes": 466,
+      "sha256": "77c816ba639e8771101480846e5f3c4d16179bfeaaeacdc825572b7aa2c547a1"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-syntax-01/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-syntax-01/receipt.json",
+      "bytes": 2556,
+      "sha256": "d5836a0c2d34c4c3244aa8382d67c9e0b5ac8a6d6e8d794c259e6e29730b3dc0"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-syntax-01/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-syntax-01/start.json",
+      "bytes": 1488,
+      "sha256": "8701f38d430e44a1b347dc6da988202878e9281afcdef3cfd2a132d682aa7a68"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-syntax-01/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-syntax-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-syntax-01/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-syntax-01/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-typecheck-01/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-typecheck-01/entry-script.snapshot",
+      "bytes": 417,
+      "sha256": "45cba96258db6e51111c31146dd5741c29b4901b4a8b8b28fe6fc04f8b3078d0"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-typecheck-01/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-typecheck-01/receipt.json",
+      "bytes": 2577,
+      "sha256": "2ad088e9320bb6d35f42b24e07db50b59438a185e8e6ecbeedffe0922efe66cc"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-typecheck-01/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-typecheck-01/start.json",
+      "bytes": 1504,
+      "sha256": "26d08196f694d5c8b6142da3c25d93ebdfb1b02182cc5f7433a4ff3c0e310f7c"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-typecheck-01/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-typecheck-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-typecheck-01/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/correction-typecheck-01/stdout.log",
+      "bytes": 118,
+      "sha256": "60fd5f777c7ec7eb9efa480980067a18191bbee7cc0a9601cd3b670afce39775"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/final-focused-01/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/final-focused-01/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/final-focused-01/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/final-focused-01/receipt.json",
+      "bytes": 2821,
+      "sha256": "9ff4cf91d523a213076173de3b6f3748f0202b5ce18fce46f70052bc545aa50e"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/final-focused-01/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/final-focused-01/start.json",
+      "bytes": 1651,
+      "sha256": "f65a72ec5ddf24d56ff7087a04495fd7c621e158b04e46b39783a69d61a89871"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/final-focused-01/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/final-focused-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/final-focused-01/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/final-focused-01/stdout.log",
+      "bytes": 200,
+      "sha256": "16961f1ab42a803092dbee8bb8a2e6f0242aaf93407a0066750f2015fcd4b58c"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/final-focused-01/vitest.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/final-focused-01/vitest.json",
+      "bytes": 47313,
+      "sha256": "3a869772c519aea4ceb9c7df9b43eb4c6831029a04636e6bb3d700fe71cf99c2"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/final-typecheck-01/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/final-typecheck-01/entry-script.snapshot",
+      "bytes": 417,
+      "sha256": "45cba96258db6e51111c31146dd5741c29b4901b4a8b8b28fe6fc04f8b3078d0"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/final-typecheck-01/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/final-typecheck-01/receipt.json",
+      "bytes": 2565,
+      "sha256": "7a5321e05fffd1aac7dcf2ec89d65c3cf622039200d60933f87695676706b6b9"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/final-typecheck-01/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/final-typecheck-01/start.json",
+      "bytes": 1494,
+      "sha256": "35eb9807740eb311d545c7f6b2601545642541918044eb1d16c84e3b75765040"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/final-typecheck-01/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/final-typecheck-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/final-typecheck-01/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/final-typecheck-01/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/green-01/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/green-01/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/green-01/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/green-01/receipt.json",
+      "bytes": 2805,
+      "sha256": "c9c1b78f91ba4053950aa0320ee9eacf27c98153bff57dd172b0cfbef3939938"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/green-01/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/green-01/start.json",
+      "bytes": 1635,
+      "sha256": "ec861c05ce90b7b7f39f0b73fd3b04e5abc382cbc51c08814e3ca7e28e5d79ae"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/green-01/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/green-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/green-01/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/green-01/stdout.log",
+      "bytes": 192,
+      "sha256": "d883ed0218f5ce903e426ab04daf8c595aed385604078f78a0ae17b30203abb0"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/green-01/vitest.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/green-01/vitest.json",
+      "bytes": 47665,
+      "sha256": "fe9ae9f5b3bc8e2177372b0dfd67134df4b650f4875f0a8136932604736505ff"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/green-02/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/green-02/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/green-02/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/green-02/receipt.json",
+      "bytes": 2805,
+      "sha256": "246e736d5017ae1e1cb1a0e201ce889447bdadc49d8d90a347130f7f75e7bd83"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/green-02/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/green-02/start.json",
+      "bytes": 1635,
+      "sha256": "e7ede84275a3609689360e70eff31a02db8eb819031f182a426f240fee4bb03a"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/green-02/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/green-02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/green-02/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/green-02/stdout.log",
+      "bytes": 192,
+      "sha256": "9da1aef4229d3b70bc423a40f8e5f8a7d12b8a76a0eab45a5e9b69822f74b719"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/green-02/vitest.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/green-02/vitest.json",
+      "bytes": 46132,
+      "sha256": "4a4c8a62d18d69187b6b5ef69fe6547ebdbb5f9d8715ddfaf3165fd909279dfd"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/green-03/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/green-03/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/green-03/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/green-03/receipt.json",
+      "bytes": 2805,
+      "sha256": "95fca678dccaa5c5bddeaa696dbfde7d228561ad058858f54eca881b89222bb1"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/green-03/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/green-03/start.json",
+      "bytes": 1635,
+      "sha256": "f7e01fdc0ae4be066b2bc1419dc018a9f292db30910f5674e050cff4aa4a3863"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/green-03/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/green-03/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/green-03/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/green-03/stdout.log",
+      "bytes": 192,
+      "sha256": "0291d56a73d5bd8786a419c38125ce0441b4869de50e7797fc4f36c27b144001"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/green-03/vitest.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/green-03/vitest.json",
+      "bytes": 46127,
+      "sha256": "6d1301b54cf57491027f4be74a81571afcd6ab03ba952d0d35de2994be6cda1d"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/IMPLEMENTATION_REPORT.md",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/IMPLEMENTATION_REPORT.md",
+      "bytes": 1951,
+      "sha256": "f5d84409e9708495386522c866fb7ac29d368d8c401992ab6bd538f166ccc14c"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/INDEPENDENT_REVIEW.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/INDEPENDENT_REVIEW.json",
+      "bytes": 6937,
+      "sha256": "ee02707c3e02be5088eefd580f481e0bd657de10bc24bfdde7d66b623223c6ba"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/red-01/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/red-01/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/red-01/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/red-01/receipt.json",
+      "bytes": 2801,
+      "sha256": "22e6090d896a6bbfcff7b4c7e93d14886a71da2aca8c0265fa7f7ad4b717abec"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/red-01/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/red-01/start.json",
+      "bytes": 1631,
+      "sha256": "2217f64533105150060c2d41e2b79324065ee3d9b2479b25dc6f53224662cb9c"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/red-01/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/red-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/red-01/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/red-01/stdout.log",
+      "bytes": 190,
+      "sha256": "91efecb336507927dd61b7cd093e5bc877731631efc0f9da0d1735185c578bfc"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/red-01/vitest.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/red-01/vitest.json",
+      "bytes": 68650,
+      "sha256": "aae14bfd0f672829bfca67dccfdd605dcb5acefa93670aa20f169db361974dad"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/RESULT.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/RESULT.json",
+      "bytes": 2598,
+      "sha256": "abca4eb1ecb2fd9e695375735f1301c0b7695ba60b39f9f43d449584d384c9c9"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-green-01/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/setup-policy-green-01/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-green-01/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/setup-policy-green-01/receipt.json",
+      "bytes": 2831,
+      "sha256": "ed293a8858b2b9ff16d6c86ffed85741490b3b1efd498ad3a43fff0cda8c880c"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-green-01/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/setup-policy-green-01/start.json",
+      "bytes": 1661,
+      "sha256": "cd0f0e00a43ebc5c661fd358cb329be527013238a1b945f3cf50d25a8fb93323"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-green-01/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/setup-policy-green-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-green-01/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/setup-policy-green-01/stdout.log",
+      "bytes": 205,
+      "sha256": "e7b7ac472efa03213b26e744e67f748a9d6dc89c26d212d27b3b5bcc271e1d28"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-green-01/vitest.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/setup-policy-green-01/vitest.json",
+      "bytes": 47550,
+      "sha256": "6b920d472d15d706d5a46bd3b1e5810edec567a59b4b879ce5080e766eca0e17"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-red-01/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/setup-policy-red-01/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-red-01/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/setup-policy-red-01/receipt.json",
+      "bytes": 2897,
+      "sha256": "901f37860798edae76aa700bb0a7222ccdee3e1cf0ec0a2e5c60cbbd2d3d12d0"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-red-01/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/setup-policy-red-01/start.json",
+      "bytes": 1727,
+      "sha256": "87d13982cc9746010c319b5c50ddc7515ce10ee2c0992efc4581853ca909770a"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-red-01/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/setup-policy-red-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-red-01/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/setup-policy-red-01/stdout.log",
+      "bytes": 203,
+      "sha256": "b524a00e8494badcbd6281aa9e421f85d19877cbf5b0e39b38cbda29a2eac74a"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-red-01/vitest.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/setup-policy-red-01/vitest.json",
+      "bytes": 15072,
+      "sha256": "03aecba236817f8014b5dce24754238dc5b820645e74bee341c5ad10761d64b5"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-syntax-01/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/setup-policy-syntax-01/entry-script.snapshot",
+      "bytes": 466,
+      "sha256": "77c816ba639e8771101480846e5f3c4d16179bfeaaeacdc825572b7aa2c547a1"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-syntax-01/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/setup-policy-syntax-01/receipt.json",
+      "bytes": 2560,
+      "sha256": "5861e7594416c26502f02a79f10912f29d0d438aa81ba574e780992f349aac5b"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-syntax-01/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/setup-policy-syntax-01/start.json",
+      "bytes": 1492,
+      "sha256": "a69af1d6b905e042281666ae197cdcf4fdccc5b27a87f78bcd7c4bc741543d9b"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-syntax-01/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/setup-policy-syntax-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-syntax-01/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/setup-policy-syntax-01/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-typecheck-01/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/setup-policy-typecheck-01/entry-script.snapshot",
+      "bytes": 417,
+      "sha256": "45cba96258db6e51111c31146dd5741c29b4901b4a8b8b28fe6fc04f8b3078d0"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-typecheck-01/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/setup-policy-typecheck-01/receipt.json",
+      "bytes": 2578,
+      "sha256": "8f2329d76b43dd416b3c6d0a532459256c31fdf82aff87dcf203f94accb8260a"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-typecheck-01/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/setup-policy-typecheck-01/start.json",
+      "bytes": 1508,
+      "sha256": "e0d7a8d8b1b0d1bea94f58ff3d7e480299080c71e82117dda58e5ef6c3ee5518"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-typecheck-01/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/setup-policy-typecheck-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/setup-policy-typecheck-01/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/setup-policy-typecheck-01/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/SETUP_POLICY_CORRECTION_REPORT.md",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/SETUP_POLICY_CORRECTION_REPORT.md",
+      "bytes": 1775,
+      "sha256": "2b859d9bcd8e0592bcf6408db201e905e3faad73da4207ee8811097f57739a9a"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/SETUP_POLICY_RESULT.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/SETUP_POLICY_RESULT.json",
+      "bytes": 2910,
+      "sha256": "da47f4d71174c7bfd65e98211138b87e52d0aad526c8ceb5fb48efe28f7e66ca"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/SETUP_POLICY_TARGETED_REVIEW.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/SETUP_POLICY_TARGETED_REVIEW.json",
+      "bytes": 6755,
+      "sha256": "02a6633338e87b2197f0d954224b8ab19aa23c3b0e37d421844a1e9f3bcbbb0c"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/syntax-01/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/syntax-01/entry-script.snapshot",
+      "bytes": 466,
+      "sha256": "77c816ba639e8771101480846e5f3c4d16179bfeaaeacdc825572b7aa2c547a1"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/syntax-01/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/syntax-01/receipt.json",
+      "bytes": 2534,
+      "sha256": "6015a6dd42087cf8b0ccbe1eb9d97056ce620985f01f8d0340aaf8551cf8d690"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/syntax-01/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/syntax-01/start.json",
+      "bytes": 1466,
+      "sha256": "2ed872e532c95e11650b55f73abb1730edb62604a2a83adb73f4519510f9bc88"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/syntax-01/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/syntax-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/syntax-01/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/syntax-01/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/TARGETED_CORRECTION_VERIFICATION.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/TARGETED_CORRECTION_VERIFICATION.json",
+      "bytes": 5945,
+      "sha256": "8379941dd3160d7f5624b825919f208e74101fa0865fd7c07cd202c80f84fd09"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/typecheck-01/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/typecheck-01/entry-script.snapshot",
+      "bytes": 45,
+      "sha256": "8d5fa5bd883fec0979fc2004f1fe1d99aef40570155d550eadc0b03b55513bf0"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/typecheck-01/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/typecheck-01/receipt.json",
+      "bytes": 2520,
+      "sha256": "57aa33ac50eb1e96854078d6d5923053add5e91bfdf2a609a72fdbb4c7871f86"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/typecheck-01/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/typecheck-01/start.json",
+      "bytes": 1498,
+      "sha256": "a2965df394e4d7c5fc8096b08f83b4f9d0ebeee0d4581853bc22fdcf6b12967b"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/typecheck-01/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/typecheck-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/typecheck-01/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/typecheck-01/stdout.log",
+      "bytes": 240,
+      "sha256": "dd6de6e495d787842ac83b2bd714cd503a09e826b6182bd4e7e2d0d23ad6d043"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/typecheck-02/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/typecheck-02/entry-script.snapshot",
+      "bytes": 417,
+      "sha256": "45cba96258db6e51111c31146dd5741c29b4901b4a8b8b28fe6fc04f8b3078d0"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/typecheck-02/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/typecheck-02/receipt.json",
+      "bytes": 2553,
+      "sha256": "9d53fb49b833d1380d3d24b56634f5fc1e3eda34d76821518afaddfb25680664"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/typecheck-02/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/typecheck-02/start.json",
+      "bytes": 1482,
+      "sha256": "ba8f59114a6684dd35ac7f66c757232db85b4295ecf6ce4cf4621faaede65cb2"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/typecheck-02/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/typecheck-02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/typecheck-02/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/observer/typecheck-02/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/REPORT.md",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/REPORT.md",
+      "bytes": 9460,
+      "sha256": "c104dee56916f65c7b5a091c5f20a494c04c5981b3c0e877983ae94b5d24521e"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/SOURCE_BINDINGS.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/SOURCE_BINDINGS.json",
+      "bytes": 2600,
+      "sha256": "3c7668cf153a1cb2e00112857e9adc57602392a7155f951b3e041aa3dc339416"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/RAW_INVENTORY.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/RAW_INVENTORY.json",
+      "bytes": 46680,
+      "sha256": "dc2a0dfdfcc7fe2e8a833830795406b109109bf2cfc5f992c938dddef45585eb"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/MANIFEST.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/MANIFEST.json",
+      "bytes": 943,
+      "sha256": "c99c9ce50d7b94ea6a29ad677ba7c5b638beac139039c5d0ed7c0a6fbcce27a1"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/ADAPTER_ATTEMPT_REPORT.md",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/ADAPTER_ATTEMPT_REPORT.md",
+      "bytes": 2909,
+      "sha256": "4e56665bdb4fd4e9b4c8cfa8721bdb67d1259e6a2a1ecbc86ce3095e20d0d7ef"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/ADAPTER_ATTEMPT_BINDING.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/ADAPTER_ATTEMPT_BINDING.json",
+      "bytes": 2090,
+      "sha256": "93e2555572e585e991a2becae9b0a2d5efce825bed56a49a068df67c6c3b84f6"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/ADAPTER_ATTEMPT_02_REPORT.md",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/ADAPTER_ATTEMPT_02_REPORT.md",
+      "bytes": 5374,
+      "sha256": "f818212b9d0857b53b3c1bb0b975c16eb8427363804f237a3e020df82b34afc9"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/ADAPTER_ATTEMPT_02_BINDING.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/ADAPTER_ATTEMPT_02_BINDING.json",
+      "bytes": 4941,
+      "sha256": "739f7086dfb5e0860ac94f56e0f21de0dd80e6417968044988ff03ffff19d293"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/ADAPTER_ATTEMPT_02_MANIFEST.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/ADAPTER_ATTEMPT_02_MANIFEST.json",
+      "bytes": 2615,
+      "sha256": "da45adaa5f226e018410e8dd8f233bf1b9186b643ad5f90038fcbe3031409918"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/ADAPTER_ATTEMPT_03_REPORT.md",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/ADAPTER_ATTEMPT_03_REPORT.md",
+      "bytes": 3880,
+      "sha256": "7e83a86f5a9d2caa20266aab77ea4d95d5e48dcae478b891c0f90cffd408ec68"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/ADAPTER_ATTEMPT_03_BINDING.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/ADAPTER_ATTEMPT_03_BINDING.json",
+      "bytes": 6244,
+      "sha256": "29f2f24ef2850a617d3032092e6b6a448523ddd00f2b2f7cec75c7558b015126"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/ADAPTER_ATTEMPT_03_MANIFEST.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/ADAPTER_ATTEMPT_03_MANIFEST.json",
+      "bytes": 2862,
+      "sha256": "187b4381fbc777ae8737e41679e8e50f74726bd91c13cb5c214515ac1ab09e10"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/INDEPENDENT_CONTRACT_REVIEW.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/INDEPENDENT_CONTRACT_REVIEW.json",
+      "bytes": 6621,
+      "sha256": "f479be76bb54251933c875da33f5a831daaff62af661d898ef528a3a932f4641"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/installed_adapter_fixture.cjs",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/installed_adapter_fixture.cjs",
+      "bytes": 9695,
+      "sha256": "ade69c4df452439f63d7c94e633f8de48a48bf8f26968a2491ba84b07884c184"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/installed_adapter_fixture_v2.cjs",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/installed_adapter_fixture_v2.cjs",
+      "bytes": 9692,
+      "sha256": "05eb133820853f60b7b93b5fa0c00b50674b7a53b7c23ae5cccb4f8b449f8f73"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/installed_adapter_fixture_v3.cjs",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/installed_adapter_fixture_v3.cjs",
+      "bytes": 12283,
+      "sha256": "ad76ae67887a674b12f23564bc52d6da9898c2937aa235b1ca6da7b6f5345080"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-01/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/attempt-01/entry-script.snapshot",
+      "bytes": 9695,
+      "sha256": "ade69c4df452439f63d7c94e633f8de48a48bf8f26968a2491ba84b07884c184"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-01/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/attempt-01/receipt.json",
+      "bytes": 2868,
+      "sha256": "d071b9205eda246aef5813a80ed4639aa3300a10c00afb1374e3bb634f590e5d"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-01/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/attempt-01/start.json",
+      "bytes": 1744,
+      "sha256": "341aeed185febd8fff2e4a6e9ded4c7a6557d8fd2b6ecdfcbe53fca8ee46036d"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-01/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/attempt-01/stderr.log",
+      "bytes": 1448,
+      "sha256": "35141caf04bd6ad2fa6755df814fed31d77f51d88c164e9ad102ce3ef0c54ca8"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-01/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/attempt-01/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-02/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/attempt-02/entry-script.snapshot",
+      "bytes": 9692,
+      "sha256": "05eb133820853f60b7b93b5fa0c00b50674b7a53b7c23ae5cccb4f8b449f8f73"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-02/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/attempt-02/receipt.json",
+      "bytes": 2997,
+      "sha256": "b266c9ba27e5b2ed1d4e6d727360ed49a62355241df3600c2532290f2bcf789e"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-02/RESULT.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/attempt-02/RESULT.json",
+      "bytes": 4191,
+      "sha256": "a3bce7fc158abea601054c5ffc1197826dca0cbaaae0acb53d261ceda9fc9610"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-02/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/attempt-02/start.json",
+      "bytes": 1753,
+      "sha256": "c2d4b303380c2fc5fc4f1c777b88bb594a07d01d301bb6fa7713b9f4a909d559"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-02/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/attempt-02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-02/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/attempt-02/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-03/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/attempt-03/entry-script.snapshot",
+      "bytes": 12283,
+      "sha256": "ad76ae67887a674b12f23564bc52d6da9898c2937aa235b1ca6da7b6f5345080"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-03/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/attempt-03/receipt.json",
+      "bytes": 3000,
+      "sha256": "216a4030183cf0bd546c4163453db088e59f323f4cc31ee30d0c74444a7002d7"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-03/RESULT.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/attempt-03/RESULT.json",
+      "bytes": 6065,
+      "sha256": "1b36e6631ba2c1bc99bf917ee6b26fdf3d6f679c530d41ca73f09b8a7b00dc14"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-03/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/attempt-03/start.json",
+      "bytes": 1755,
+      "sha256": "bbec516311c9ad1bd4cf0a2ee5260975eac3aec936626d20cf40991efadc882a"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-03/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/attempt-03/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-03/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/cdp/attempt-03/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/RESULT.md",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/diagnosis/RESULT.md",
+      "bytes": 10544,
+      "sha256": "88c5ebe834e89880d42097cf400d053af3beed862d9f0921dc316af15e09aab5"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/RESULT-v2.md",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/diagnosis/RESULT-v2.md",
+      "bytes": 11877,
+      "sha256": "0f2b834e0eb355904af13bd5eb2310d04bee296649ae67c333ecee6f5d7c8216"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/RESUME-PROBE-CONTRACT.md",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/diagnosis/RESUME-PROBE-CONTRACT.md",
+      "bytes": 5581,
+      "sha256": "3761c90c61edc7fabb08f620cc55e0e7df02bee8c43e1fe3baf26038eb14791e"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/replay-n94-power-seam.mts",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/diagnosis/replay-n94-power-seam.mts",
+      "bytes": 17967,
+      "sha256": "4ce5cd903c00f9fc1a89f0cc4b03b48f511e4e574572c8f7f872b2ce93bcffd6"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/INDEPENDENT_RESUME_PROBE_REVIEW.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/diagnosis/INDEPENDENT_RESUME_PROBE_REVIEW.json",
+      "bytes": 6523,
+      "sha256": "56980fb1e23ccaa57a74a4563d4c99c9db0b09180001bbef7d87b1babe2ec94a"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/RESUME-FAILURE-DIAGNOSIS.md",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/diagnosis/RESUME-FAILURE-DIAGNOSIS.md",
+      "bytes": 5301,
+      "sha256": "707ab2e539d6978dc463380c134b159ac2fcb569f36ece83605d307df5f22cb5"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/n94-resume-power-seam-wrapper-01/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/diagnosis/failed-resume-01/entry-script.snapshot",
+      "bytes": 17967,
+      "sha256": "4ce5cd903c00f9fc1a89f0cc4b03b48f511e4e574572c8f7f872b2ce93bcffd6"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/n94-resume-power-seam-wrapper-01/launch.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/diagnosis/failed-resume-01/launch.json",
+      "bytes": 9821,
+      "sha256": "a722705e25c93d464ed79c37f5222e77edb75a7abf5039409b9edcbf0f6b8145"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/n94-resume-power-seam-wrapper-01/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/diagnosis/failed-resume-01/receipt.json",
+      "bytes": 3501,
+      "sha256": "b8c29ca97ce07a44f62e3d2b5b1ae971f146e3fa40fac8197dcd5cd3dfea83c8"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/n94-resume-power-seam-wrapper-01/result.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/diagnosis/failed-resume-01/result.json",
+      "bytes": 5237,
+      "sha256": "3520d3f37e033db41a88b2507ea49ea05e767dbd25cdee20dede23f9a4649a21"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/n94-resume-power-seam-wrapper-01/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/diagnosis/failed-resume-01/start.json",
+      "bytes": 2111,
+      "sha256": "d8327cdfcefc807fea98814186154be3591d839baa1d271dda4e22b8feff3a03"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/n94-resume-power-seam-wrapper-01/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/diagnosis/failed-resume-01/stderr.log",
+      "bytes": 4890,
+      "sha256": "786707fc2c99340831cbfb212255ea93848318d33fabccd9db85e4106786c2b5"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/n94-resume-power-seam-wrapper-01/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/diagnosis/failed-resume-01/stdout.log",
+      "bytes": 8044,
+      "sha256": "fb6b8677618c7641caa741bc7882c8a3febec6a890902840d04195c565645d2d"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/explicit-allow-native23-20261025/RAW_FAILED_NATIVE23_DIAGNOSTIC.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/native23/RAW_FAILED_NATIVE23_DIAGNOSTIC.json",
+      "bytes": 3613,
+      "sha256": "ace12ba237ce643a8a04c6338af173a955d2dd01bb368ed46797d16897a94b9c"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/explicit-allow-native23-20261025/RAW_FAILED_NATIVE23_DIAGNOSTIC_CORRECTION.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/native23/RAW_FAILED_NATIVE23_DIAGNOSTIC_CORRECTION.json",
+      "bytes": 1162,
+      "sha256": "d5aa5b22313f94ff638c9ceb689084cbbaf7c4b7761eca778b47c3ecfc35f797"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/explicit-allow-native23-20261025/INDEPENDENT_PRELAUNCH_REVIEW.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/native23/INDEPENDENT_PRELAUNCH_REVIEW.json",
+      "bytes": 7095,
+      "sha256": "91db1f157d15dd2cbbc2c997c419d1e83dc5b86f9eeed7c00c8b113cc5cdc777"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/explicit-allow-native23-20261025/run-config-v2.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/native23/run-config-v2.json",
+      "bytes": 4322,
+      "sha256": "82748a0dadedf305b00bee0b7df52c89a55b21e8792672f55a84331e630019f2"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/explicit-allow-native23-20261025/LAUNCH_READY.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/native23/LAUNCH_READY.json",
+      "bytes": 494,
+      "sha256": "a5399b785f96464cdfacfdb96c9cf1b71b132f3050fa780dad5d46736078e11c"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/explicit-allow-native23-20261025/native-attempt-01/command.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/native23/attempt-01/command.json",
+      "bytes": 4370,
+      "sha256": "cc61f09252e108fc25a54ee1e87aabd272cfd1bc93b18da4a9219494769f1b8c"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/explicit-allow-native23-20261025/native-attempt-01/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/native23/attempt-01/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/explicit-allow-native23-20261025/native-attempt-01/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/native23/attempt-01/receipt.json",
+      "bytes": 2948,
+      "sha256": "0191d65718c6517d2e572ba607ea3289ff033a4006891b54e59ad500a73a2064"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/explicit-allow-native23-20261025/native-attempt-01/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/native23/attempt-01/start.json",
+      "bytes": 1760,
+      "sha256": "270563a254df6c508cba071bc9985e511e7897ecac5d4a9585bb20c432cbbf23"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/explicit-allow-native23-20261025/native-attempt-01/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/native23/attempt-01/stderr.log",
+      "bytes": 334,
+      "sha256": "3c81c5e819548b01ec772b6c3d1c68eeb1d4bcff36fc17c2d9f10db516a14c53"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/explicit-allow-native23-20261025/native-attempt-01/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/native23/attempt-01/stdout.log",
+      "bytes": 31,
+      "sha256": "935f5e7229c60dd0425c7096c17f97493c1e4300c3cbf04a2e4ccb94d625d945"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/root/preservation-after-frame-repair-01/PRESERVATION.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/preservation/PRESERVATION.json",
+      "bytes": 2161,
+      "sha256": "73ea38ac40e0d1c5d2da49c9edda5ae16c0a964ec1f08aa6fc08c8acdeccafde"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/root/preservation-after-frame-repair-01/RETAINED_RUN_PACKAGE_NATIVE23.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/preservation/RETAINED_RUN_PACKAGE_NATIVE23.json",
+      "bytes": 1462,
+      "sha256": "be495b2f1629a23fa5857b3a3216d0b419239405ffb2c65b01e59deffef1fe41"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/root/frame-docs-focused-01/command.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/docs/command.json",
+      "bytes": 357,
+      "sha256": "e59adb3ebc179a05f50cc18284093a8fc6eef192c0bc0a2207ce99f16d62c1c5"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/root/frame-docs-focused-01/entry-script.snapshot",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/docs/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/root/frame-docs-focused-01/receipt.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/docs/receipt.json",
+      "bytes": 2849,
+      "sha256": "853f688a10f94f53534980f878613c02b55dbe735a87c37782d8761df63260c5"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/root/frame-docs-focused-01/start.json",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/docs/start.json",
+      "bytes": 1663,
+      "sha256": "b5353bf5883a792a4ed4e46748efca982a3b067c5604c1952d4335371b284772"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/root/frame-docs-focused-01/stderr.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/docs/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "sourcePath": "tmp/player-bot-capability-parity-20261024/root/frame-docs-focused-01/stdout.log",
+      "portablePath": "logs/r8-native-calibration-parity-20261024/frame-observer-20261025/docs/stdout.log",
+      "bytes": 627,
+      "sha256": "14c930c281dca5c599e83286f585423cfef9bcaf5f44f0a94b5b0afecb5a0725"
+    }
+  ],
+  "documentationTests": {
+    "passed": 40,
+    "failed": 0,
+    "childExit": 0,
+    "wrapperExit": 0
+  }
+}

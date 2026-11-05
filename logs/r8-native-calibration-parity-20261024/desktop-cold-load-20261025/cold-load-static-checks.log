@@ -1,0 +1,5 @@
+
+> awwv@0.9.9-beta.1 typecheck
+> tsc --noEmit -p tsconfig.json --pretty false
+
+typecheck_exit=0 cdp_node_check_exit=0 qa_node_check_exit=0 electron_node_check_exit=0

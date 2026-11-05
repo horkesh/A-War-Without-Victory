@@ -1,0 +1,108 @@
+{
+  "schema": "awwv.814.preflight-correction-proof.v1",
+  "captured_utc": "2026-10-22T14:23:46.083Z",
+  "pass": true,
+  "verdict": "CORRECTED_CHECKER_READY_NO_CAMPAIGN",
+  "scope": "Checker-only targeted proof; no full preflight or campaign launch.",
+  "campaign_invocations": 0,
+  "measurement": "UNMEASURED",
+  "hashes": {
+    "original_script": "3e1fd6cc8ce58bb250311713dfdd14d60fc2bca4dc50129ff5660085289ce3c2",
+    "corrected_script": "b2cae2a97a3eaf031536e08cf2a03fad13f19f8ecd30b3c8e16db8729123a22a",
+    "original_preflight_json": "9e67d755e6ddfcf00d56c460c639327878f7ce6ea433cc4baf02494c30cc8e0e",
+    "original_receipt": "a4ef65612c07ad7aea9d3745fd53bf63aafee1b116ee29d9b259ef505f944c38"
+  },
+  "difference": {
+    "exact_single_clause": true,
+    "removed": "weekly.length===188&&weekly.every((w,i)=>w.week_index===i+1&&w.turn===i+1)",
+    "replacement": "weekly.length===188&&weekly.every((w,i)=>w.week_index===i+1)",
+    "bytes_old": 7376,
+    "bytes_new": 7362,
+    "delta_bytes": -14
+  },
+  "controls": {
+    "actual": {
+      "accepted": true,
+      "rows": 188,
+      "first": 1,
+      "last": 188,
+      "serialized_turn_present": false
+    },
+    "missing_rejected": true,
+    "wrong_rejected": true,
+    "duplicate_rejected": true,
+    "truncated_rejected": true
+  },
+  "source_binding": {
+    "weekly_reads_state_turn": true,
+    "weekly_comment_binding": true,
+    "formation_reads_state_turn": true,
+    "formation_passes_observer_turn": true,
+    "personnel_completed_turn": true,
+    "observer_completed_turn": true
+  },
+  "original_failure": {
+    "preserved": true,
+    "child_exit": 2,
+    "wrapper_exit": 2,
+    "artifact_contract_pass": true,
+    "passed_checks": 99,
+    "total_checks": 100,
+    "failure": "weekly188_binding: 188/1/undefined"
+  },
+  "unchanged_gates": {
+    "statement": "Corrected copy is byte-for-byte the original except for removal of the unsupported w.turn predicate; therefore the original 99 passing gates and their implementation are unchanged.",
+    "original_other_passed": 99
+  },
+  "dependencies": [
+    {
+      "path": "logs/claude-channel-20261004/814-preflight.cjs",
+      "snapshot": "dependency-00.snapshot",
+      "bytes": 7376,
+      "sha256": "3e1fd6cc8ce58bb250311713dfdd14d60fc2bca4dc50129ff5660085289ce3c2"
+    },
+    {
+      "path": "logs/claude-channel-20261004/814-preflight-corrected.cjs",
+      "snapshot": "dependency-01.snapshot",
+      "bytes": 7362,
+      "sha256": "b2cae2a97a3eaf031536e08cf2a03fad13f19f8ecd30b3c8e16db8729123a22a"
+    },
+    {
+      "path": "src/scenario/scenario_reporting.ts",
+      "snapshot": "dependency-02.snapshot",
+      "bytes": 18242,
+      "sha256": "df0c17f6473f80ad2867106749d07ceda18fef1a53a68097586d3231e4f521c2"
+    },
+    {
+      "path": "src/sim/formation_spawn.ts",
+      "snapshot": "dependency-03.snapshot",
+      "bytes": 47679,
+      "sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa"
+    },
+    {
+      "path": "src/sim/combat/reinforcement_allocation_diagnostic.ts",
+      "snapshot": "dependency-04.snapshot",
+      "bytes": 7113,
+      "sha256": "12d24113946ad414ae3f310a45c9d7f52e0a24bde916ed60f0001d18d4bacdc6"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n83/weekly_report.jsonl",
+      "snapshot": "dependency-05.snapshot",
+      "bytes": 32887671,
+      "sha256": "b3510073a304411fb2d5cafbcbb45d980c6c4d9f8888962039c1bd4852ea79de"
+    },
+    {
+      "path": "logs/claude-channel-20261004/814-preflight-a/preflight.json",
+      "snapshot": "dependency-06.snapshot",
+      "bytes": 9483,
+      "sha256": "9e67d755e6ddfcf00d56c460c639327878f7ce6ea433cc4baf02494c30cc8e0e"
+    },
+    {
+      "path": "logs/claude-channel-20261004/814-preflight-a/receipt.json",
+      "snapshot": "dependency-07.snapshot",
+      "bytes": 6226,
+      "sha256": "a4ef65612c07ad7aea9d3745fd53bf63aafee1b116ee29d9b259ef505f944c38"
+    }
+  ],
+  "next_action": "Independent review may verify this checker-only correction. Any campaign remains separately unauthorized and unmeasured."
+}

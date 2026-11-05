@@ -1,6 +1,71 @@
 # Active Task Governance
 
-## Owner override — planning-duration disposition (2026-08-30)
+## Task
+
+**Name:** Agent setup modernization preparation (P0–P4)
+
+Prepare the owner-authorized instruction modernization in the isolated worktree from base
+`8913cca6f714e07acf59785ce526c19dc5fc9973`. The active scope is documentation, project skill
+semantics, napkin routing, discovery/import preparation, disposable verification, and retained
+evidence. This task does not change game code, scenarios, baselines, saves, packages, releases, or
+live runtime settings. Preparation does not itself activate instructions in Claude, Codex, or Cursor.
+
+## Canonical owner
+
+- `docs/20_engineering/AGENT_WORKFLOW.md` owns the shared agent execution contract.
+- `docs/plans/2026-09-12-agent-setup-modernization-plan.md`, as explicitly activated by the owner
+  for isolated preparation, owns this packet's scope, sequence, checks, and activation boundary.
+- Host-specific entrypoints own only their runtime tools, models, permissions, and actual hook
+  coverage; they may not weaken the shared contract.
+
+## Demoted path
+
+Universal startup reading, dispatcher-only synthesis, fixed multi-role review loops, automatic
+napkin rewrites, fixed three-task stops, and unconditional smoke checks are demoted from active
+entrypoints. Detailed local-executor instructions remain owned by `tools/local_executor/README.md`.
+The preexisting RE governance record below is historical continuity and grants no authority to this
+task.
+
+## Decision boundary
+
+Routine reversible preparation decisions follow the authorized plan and project evidence. Canon
+authority, acceptance criteria, costly scope expansion, merge/push/release/publication, user-level
+skill replacement, and live instruction activation retain their recorded owner or panel boundaries.
+`.claude/settings.json` hooks remain unchanged and enforce only in Claude hosts that load them.
+
+## Done means
+
++ P0 records a semantic disposition for every unequal same-name skill pair.
++ P1–P4 have scoped, reviewable diffs with valid metadata, working references, retained napkin
+  provenance, preview/refusal import evidence where owned, focused checks, and independent review
+  where required.
++ Host-specific adapters remain deliberate wrappers; live installation and coordinated activation
+  remain explicit later actions.
+
+## UI/report truth
+
+No game UI, player-visible behavior, scenario output, baseline, save, or product report truth
+changes. The only user-facing effect after a future coordinated activation is agent instruction and
+skill routing.
+
+## Roadmap slot
+
+This is process maintenance outside R6–R9 product acceptance. It does not change command-board
+priority, close a release gate, or authorize a build, package, scenario campaign, baseline run, or
+publication.
+
+## What this unlocks
+
+A coordinated owner can review one compact shared contract, host-specific entrypoints, narrowed
+process skills, a routed napkin index, and preview-first skill import evidence before deciding
+whether and when to deploy and activate them in affected runtimes.
+
+## Historical record — RE 1.0 Engine Integrity
+
+The following is the complete preexisting tracked governance record from the inspected base. Its
+original title was **Active Task Governance**. It is retained for continuity, is historical in this
+packet, and does not identify or authorize the active modernization task.
+### Owner override — planning-duration disposition (2026-08-30)
 
 The owner accepted the RE S0 historical/casualty investigation recommendation and explicitly
 authorized its implementation, one controlled 188-week validation, conditional January-threshold
@@ -30,14 +95,14 @@ Verification limitation: the 92-test focused set and typecheck exited zero. Both
 and fast slice emitted no assertion failure but failed to terminate after their listed tests became
 CPU-idle; they were interrupted and are recorded as hangs, never as passes.
 
-## Task
+### Task
 
 **Name:** RE — 1.0 Engine Integrity
 **Owner intent:** Engine health is sacrosanct, but RE must not become general cleanup or optimization.
 The owner delegated scope ownership to Architect and Orchestrator and approved the reduced contract
 on 2026-08-27.
 
-## Current state
+### Current state
 
 The old T0–T14 execution rail is superseded. RE now has seven release outcomes delivered through
 eight serial packets: P1 release-path truth; P2A/P2B one player command authority; P3 threat
@@ -62,7 +127,7 @@ evidence, and is nontransferable and nonreusable. The authorized diff-check budg
 No long run is authorized until the one final
 RE A/B pair. **RE CLOSED 2026-09-01; calibration OPEN** — calibration is no longer paused.
 
-## Packet governance
+### Packet governance
 
 - `RE_SCOPE_LOCK.json` binds one packet, exact base, and exact files. A completed packet grants no
   authority for the next.
@@ -103,7 +168,7 @@ non-authorizing. **RE CLOSED 2026-09-01; calibration OPEN.** Historically RE was
 remains paused. Disjoint R7 may continue. There is no rerun, diagnosis, instrumentation, supervisor
 redesign, correction, P2B/P3 execution, or successor authority.
 
-## Active machine lock
+### Active machine lock
 
 The active receipt-only lock is `RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE-ROLLBACK-RECEIPT` /
 `record-exact-rollback-and-synchronize-roadmap-disposition`, based on exact rollback commit
@@ -114,7 +179,7 @@ records the exact restored config blob `7a098b350461cdbb47ec94d453ff35ec655c7b91
 packaged-proof route. It grants no continuing implementation, execution, rerun, diagnosis,
 instrumentation, supervisor redesign, P2B/P3, or successor authority.
 
-## Deferred and retired
+### Deferred and retired
 
 Deferred beyond 1.0: active-formation patron strength pending a live artifact, dissolution salvage,
 presidential enclave targeting, hostile breakout, and all speculative mechanics.
@@ -123,7 +188,7 @@ Retired: the 2% threshold as a gate on the corrected baseline, further pre-1.0 p
 diagnosis, SpatialContext optimization, the broad T2 audit, T13 essays, standalone T14, per-packet
 campaigns, duplicate evidence commits, and full-team review for each packet.
 
-## Final handoff
+### Final handoff
 
 After all eight packets: run retained focused/Core/save-replay and desktop package proof, confirm
 no growth, run one final clean Node-22 188-week A/B pair and one 40-week profile, synchronize docs
@@ -132,7 +197,7 @@ disposition only when workload and output are comparable; otherwise the delta is
 player-visible latency in R8 may open future bounded performance work, and no measurement authorizes
 automatic diagnosis. R8 bugs receive their own bounded packet and never reopen RE wholesale.
 
-## Canonical owner
+### Canonical owner
 
 - `docs/plans/MASTER_ROADMAP.md` owns workstream order and status.
 - `docs/plans/2026-08-26-engine-integrity-plan.md` is the sole executable RE contract.
@@ -141,7 +206,7 @@ automatic diagnosis. R8 bugs receive their own bounded packet and never reopen R
 
 Remote push, merge, release, tag, signing, upload, and publication remain unauthorized.
 
-## Authoritative terminal discovery receipt — 2026-08-28
+### Authoritative terminal discovery receipt — 2026-08-28
 
 `RE-PACKAGED-PROOF-ALTERNATE-DISCOVERY` / `select-no-instrumentation-p2b-proof-route` is **CLOSED/BLOCKED** at `C_P2B_BLOCKED`. The result is `RECOMMENDATION_ONLY_NOT_AUTHORIZED`; there is no active successor.
 

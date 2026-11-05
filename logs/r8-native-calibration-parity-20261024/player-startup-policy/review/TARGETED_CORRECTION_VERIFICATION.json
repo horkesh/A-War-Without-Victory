@@ -1,0 +1,75 @@
+{
+  "schema": "awwv.startup-policy-repair-v2.targeted-correction-verification.v1",
+  "verdict": "NO_GO_BOUNDED_CORRECTION_REQUIRED",
+  "reviewed_head": "b371adc3e0935825649e5eda4e6bbd45a44a359d",
+  "scope": "targeted correction verification only; no calibration/native/package/campaign/global-suite certification",
+  "findings": {
+    "critical": [
+      {
+        "id": "legacy-identity-production-adapter-regression",
+        "evidence": [
+          "src/desktop/desktop_sim.ts:789-800",
+          "src/ui/map/desktop/campaignRecruitmentActions.ts:132-141",
+          "src/sim/events/opening_policy_transition.ts:155-167",
+          "src/sim/events/opening_policy_transition.ts:183-192",
+          "tests/pre_first_advance_paramilitary_policy.test.ts:274-303"
+        ],
+        "condition": "Distinguish the exact turn-0 opening tuple from catalog-authored turn-2-5 legacy identity decisions; preserve ordinary adapter resolution and absent-headless save compatibility for the legacy lane, queue no early policy there, reject mixed tuples, and prove both adapters plus no-mutation failures."
+      },
+      {
+        "id": "all-faction-all-option-binding-still-incomplete",
+        "evidence": [
+          "tests/player_start_surface_contracts.test.ts:8-10",
+          "tests/player_start_surface_contracts.test.ts:91-121",
+          "tests/player_start_surface_contracts.test.ts:123-152"
+        ],
+        "condition": "Exercise every foundational option through Electron and browser production adapters; prove canonical parity, all authored flags/effects/dimensions/notifications/clocks, first-Advance persistence, and displayed safe consequence equality."
+      }
+    ],
+    "closed": [
+      {
+        "id": "policy-response-guard-gap",
+        "evidence": [
+          "src/sim/events/opening_policy_transition.ts:124-153",
+          "tests/pre_first_advance_paramilitary_policy.test.ts:193-272"
+        ]
+      },
+      {
+        "id": "compute-prelude-exact-differential",
+        "evidence": [
+          "tests/negotiation_capital.test.ts:33-68",
+          "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/correction-01/legacy/SOURCE_BINDING.json",
+          "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/correction-01/legacy/DIFFERENTIAL_RESULT.json"
+        ]
+      },
+      {
+        "id": "typed-exit-receipt",
+        "evidence": [
+          "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/correction-01/diagnostic-correction-02/tsc.receipt.json",
+          "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/correction-01/diagnostic-correction-02/FINAL_HASHES.json"
+        ]
+      }
+    ]
+  },
+  "candidate_sha256": {
+    "src/sim/events/opening_policy_transition.ts": "6d04d782057fad310edbd7fb56de1c649860713966a144299c426ceee3efe911",
+    "tests/negotiation_capital.test.ts": "42289b4ee9ed1b0483852f0ca6b4f811225a9094339dc2fe7f3d4a071509b9e3",
+    "tests/player_start_surface_contracts.test.ts": "7ee6d5ac3c2f9b42af364cb3ffd06524959d609046b1c0e9941eb7f0ba6fcb1d",
+    "tests/pre_first_advance_paramilitary_policy.test.ts": "a553bb855a953d160633f289bc651f4e5fc491c9de779d687ab1dd5866816f0b"
+  },
+  "typed_pass": true,
+  "retained_checks": {
+    "policy": { "passed": 32, "failed": 0, "exit_code": 0 },
+    "focused": { "files_passed": 6, "passed": 92, "failed": 0, "exit_code": 0 },
+    "tsc_nonincremental": { "exit_code": 0 }
+  },
+  "validation_repeated": {
+    "focused_tests": false,
+    "typecheck": false,
+    "full_suite": false,
+    "build": false,
+    "native": false,
+    "package": false,
+    "campaign": false
+  }
+}

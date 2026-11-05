@@ -1,0 +1,74 @@
+{
+  "schema": "awwv.player-campaign-acceptance-disposition.v1",
+  "ownerDecision": "Keep n94 as the no-player benchmark; define separate player-campaign criteria",
+  "status": "CONTRACT_DEFINED_VALIDATION_INCOMPLETE",
+  "supersedes": "Owner-decision-pending status only; original failed parity experiment and core64-file manifest remain immutable",
+  "contract": "docs/plans/2026-07-31-full-campaign-electron-validation-plan.md#player-campaign-acceptance-contract--owner-decision-2026-10-24",
+  "noPlayerBenchmark": "n94 unchanged",
+  "playerOutcomes": "Exact n94 daily/map/score/loss comparison retired only for normal player pass/fail; report scores diagnostically; no700floor",
+  "retainedHardGates": [
+    "canonical visible input authority",
+    "same-input exact canonical state/artifacts for all captured settled turns",
+    "per-faction exact real Save/load",
+    "unconditional protected/canon/enclave/supply/alliance invariants",
+    "source-authorized conditions on historical outcomes",
+    "strict runtime/audio and engine health",
+    "three24-turn and three188-turn sessions plus existing product quality",
+    "provenance and preservation"
+  ],
+  "currentEvidence": "RBiH t39 partial infrastructure proof only; full qualification not claimed",
+  "verification": {
+    "unchangedPins": 8,
+    "originalGovernance": "39pass1fail retained; roadmap base-plan link corrected without changing tests",
+    "targeted": "20/20 passed (docs truth and index)",
+    "finalIndex": "13/13 passed after final content edit and rederivation; overlaps targeted",
+    "independentReview": "GO"
+  },
+  "scope": {
+    "sourceOrTestChanges": false,
+    "newNativeOrCampaignRuns": false,
+    "committed": false,
+    "pushed": false,
+    "gameplayChanges": false,
+    "baselineOrReferenceChanges": false
+  },
+  "next": "Cheap retained-evidence coverage and reader-applicability audit before costed player sessions",
+  "documentation": [
+    {
+      "path": "docs/plans/2026-07-31-full-campaign-electron-validation-plan.md",
+      "sha256": "52ccc5f17f164e8f02711563b960f14950dc3db4bbaadde18f09f4546e700803"
+    },
+    {
+      "path": "docs/plans/MASTER_ROADMAP.md",
+      "sha256": "818623054a1fb99738dacd2cc399d2d809f604af012c2a8dc631030fd2da121a"
+    },
+    {
+      "path": "docs/plans/COMMAND_BOARD.md",
+      "sha256": "d2d63e1f8bd81a1a6dc861747291f6dbad56970d0427f0c665b899037cfa121c"
+    },
+    {
+      "path": "docs/plans/plan_index.yml",
+      "sha256": "5ef9128b59cf040aca9189826ffc491af629ccd3385748d1d1007ad33dbe9b95"
+    },
+    {
+      "path": "docs/40_reports/CALIBRATION_MASTER.md",
+      "sha256": "5d1c6f287154876dc8aeefeb824ebedb431e390894320ee9e89bef3f36a3b7fa"
+    },
+    {
+      "path": "docs/PROJECT_LEDGER.md",
+      "sha256": "d0d6f9587535900740fe124a02a1cb18ac2f93a7a24fc61a47e0223a2059ee04"
+    },
+    {
+      "path": "docs/PROJECT_LEDGER_KNOWLEDGE.md",
+      "sha256": "52eac928260cb2808908d41e3e3e3911d0fdbaae783b46973328734d33059023"
+    },
+    {
+      "path": ".claude/napkin/qa_gates.md",
+      "sha256": "bc8f0bfd91874078094c3864861d16ff648b56c0f3120b436ca44a3c3d233b04"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "4121db8cc3d0dde2b442bb880db956b533fb365d325ccbf8f3860a02ae4c4b65"
+    }
+  ]
+}

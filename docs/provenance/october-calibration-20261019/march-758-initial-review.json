@@ -1,0 +1,104 @@
+{
+  "schema": "awwv.758.pre-t3-stale-operation-march-independent-review.v1",
+  "writes_closed": true,
+  "verdict": "BLOCK_TARGETED_CORRECTION_REQUIRED",
+  "reviewer_role": "independent_sol_correctness_canon_movement_determinism_process",
+  "scope": {
+    "worktree": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+    "opening_head": "eed73dc0c66ed291b67b9547b96702ecb2797d73",
+    "changed_paths_reviewed": [
+      "src/sim/combat/commander_march_correction.ts",
+      "src/sim/turn_phases/war_phases.ts",
+      "tests/mistral_prisoje_turn_order.test.ts",
+      "tests/stale_operation_march_reconciliation.test.ts"
+    ],
+    "tests_run_by_review": 0,
+    "probes_run_by_review": 0,
+    "suites_run_by_review": 0,
+    "campaigns_run_by_review": 0,
+    "builds_run_by_review": 0,
+    "source_docs_or_git_mutations": 0,
+    "review_outputs_only": [
+      "logs/claude-channel-20261004/758-independent-review.json",
+      "logs/claude-channel-20261004/758-independent-review.md"
+    ]
+  },
+  "findings": [
+    {
+      "priority": "critical",
+      "id": "state-wide-operation-membership-not-unique",
+      "file": "src/sim/combat/commander_march_correction.ts",
+      "lines": "88-98",
+      "finding": "The eligibility proof searches only the effective corps command and drops recovery/completed operations before counting. A brigade with a competing lifecycle or cross-host operation membership can be retargeted despite ambiguous ownership.",
+      "required_correction": "Fail closed on any competing state-wide participant or axis membership across all operation phases, while retaining exactly one eligible effective-corps planning/execution operation and one axis. Add focused overlap tests; do not add new eligible cases.",
+      "evidence": [
+        "src/sim/combat/corps_operation_helpers.ts:158-205",
+        "src/sim/combat/operation_phase_gate.ts:78-87",
+        "logs/claude-channel-20261004/756-root-plan.md"
+      ]
+    },
+    {
+      "priority": "suggestion_required_for_seal_accuracy",
+      "id": "n80-save184-provenance-mispin",
+      "file": "tests/mistral_prisoje_turn_order.test.ts",
+      "lines": "205-210",
+      "finding": "0ab3... is the raw hash of the separate logs/174 fixture, not the authoritative retained n80 full save. The actual n80 full save is e97ed2...; both currently agree on the five relevant controller values.",
+      "required_correction": "Cite the authoritative n80 path/hash for copied controls, or accurately label the 0ab3 fixture. Correct the 757 result claim during correction sealing."
+    },
+    {
+      "priority": "suggestion_required_for_ownership_docs",
+      "id": "module-ownership-header-incomplete",
+      "file": "src/sim/combat/commander_march_correction.ts",
+      "lines": "1-35",
+      "finding": "The header describes only T6 repair although the new pre-T3 function performs a narrow T2 command-owner/routing reconciliation.",
+      "required_correction": "Distinguish the T2 prepass from the existing T6 functions in the source header; root may update MOVEMENT_AUTHORITY.md at closeout."
+    }
+  ],
+  "passed_lenses": {
+    "current_objective_only": true,
+    "no_staging_fallback": true,
+    "friendly_path_and_connectivity_reused": true,
+    "existing_t3_t6_guards_not_relaxed_in_covered_paths": true,
+    "stable_iteration_and_tie_breaking": true,
+    "pure_mutation_surface_order_only": true,
+    "portable_registered_wiring_covered": true,
+    "canon_compatible_after_blocker_fix": true,
+    "additional_canon_panel_required": false
+  },
+  "canon_mapping": [
+    "Rulebook_v0_9_0.md §§6.4 and 7.1: corps-operation ownership and friendly-territory approach",
+    "Engine_Invariants_v0_9_0.md §§14.9, 14.11 and 16.2: movement order, lifecycle and loan invariants",
+    "MOVEMENT_AUTHORITY.md §§1, 2a, 4 and 5: T2 destination authority, T3 consumer order and bounded T6 repair",
+    "CODE_CANON.md and DETERMINISM_TEST_MATRIX.md: stable deterministic simulation output"
+  ],
+  "sealed_757_evidence": {
+    "final_targeted": { "passed": 25, "failed": 0, "composition": "21 new reconciliation assertions plus 4 Mistral assertions" },
+    "unaffected_affected_assertions_reused": 158,
+    "first_affected": { "passed": 179, "failed": 1, "failure": "superseded old 749 expectation" },
+    "noemit_c": { "child_exit": 0, "wrapper_exit": 0, "stdout_bytes": 0, "stderr_bytes": 0 },
+    "full_suite": 0,
+    "campaigns": 0,
+    "saved184_prefix_runs": 0
+  },
+  "pins": {
+    "authoritative_n80_save184": { "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w184.json", "bytes": 8704869, "sha256": "e97ed2e154be0738773e326392347741d7aa17e730138b1f669008d045a879b4" },
+    "separate_174_fixture_save184": { "path": "logs/claude-channel-20261004/174-fixtures/save_w184.json", "bytes": 8643715, "sha256": "0ab3bc2723bd8430466bea6c933aef38801edfef914392d0fc1a024e2b1f75d5" },
+    "C_before_after": { "bytes": 100107701, "sha256": "8d242e18f199a54c26f755e648fe4612159563ec0b606930112653770d725f3c" },
+    "D_before_after": { "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3" }
+  },
+  "reviewed_source_hashes": [
+    { "path": "src/sim/combat/commander_march_correction.ts", "sha256": "fd115016cd2ee2ac3128b1cd6bb1cdb09544d4235885c6ba3adc648a5155ffcd" },
+    { "path": "src/sim/turn_phases/war_phases.ts", "sha256": "93fcb005fa725c8a45269370c8319ca34779d1e032624fee08a4ae5800baa04a" },
+    { "path": "tests/stale_operation_march_reconciliation.test.ts", "sha256": "cad8b5a30c71ceee68d1dd1e38deda4fb712366c76b16fb195695e29edd32a33" },
+    { "path": "tests/mistral_prisoje_turn_order.test.ts", "sha256": "910cc665f64afc776b36f562fa3d79ba38ef82c40067e3dde6fdf1187619a1e0" },
+    { "path": "logs/claude-channel-20261004/756-root-plan.md", "sha256": "aea32af21fea121361c0bc5d6b4f036a5a0ddf668d5b659e81ac92c55934ad82" }
+  ],
+  "preservation": {
+    "protected_emit_reference_threshold_reused": true,
+    "native_31_reused": true,
+    "sealed_179_receipts_retained": true,
+    "new_gameplay_regression_measured": false,
+    "retained_score": "703/712 prior evidence only; unadopted"
+  },
+  "next_action": "One targeted implementation correction, then one read-only correction verification against this sealed review."
+}

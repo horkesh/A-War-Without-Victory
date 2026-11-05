@@ -1,0 +1,13 @@
+{
+  "schema": "awwv.combat-fatigue-owner-diagnosis.corrected-precheck.v1",
+  "attempt_001_preserved": true,
+  "attempt_002_exists_before_run": false,
+  "correction": "New launcher normalizes path.resolve values before case-insensitive comparison; no prior file was changed.",
+  "launcher_node_check_exit": 0,
+  "precheck_only_exit": 0,
+  "precheck_only_result": { "pass": true, "fixtureReadable": true, "syntax": true, "cwdMatchesRoot": true, "resolverImportedOrRun": false },
+  "launcher": { "path": "run_red_once_v2.cjs", "bytes": 3193, "sha256": "766563ed127dde851bb3db2a902b44cea42ca6fd0235ca8e56e26af7ad6fd23b" },
+  "command": { "path": "RUN_COMMAND.v2.txt", "bytes": 576, "sha256": "b2676a0aff8daf8760c6110497b1c9d71c9032903cae96b4fbde25ab49921737" },
+  "red_test_sha256": "5078ba027029675d714bb69ddfb79c8bc3cba828d29cf12e9a29c0abed586d3e",
+  "attempt": { "path": "attempt-002", "maximum_invocations": 1, "timeout_ms": 60000, "retry": false }
+}

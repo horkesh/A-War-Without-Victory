@@ -185,8 +185,15 @@ export function emitOperationReadinessTrace(
     op: CorpsOperation,
     anyExecutable: boolean,
     anyApproaching: boolean,
+    /**
+     * Opt-in phase gate only: the subset of the raw approach that actually BLOCKS this launch (a
+     * holding axis's approach does not). `any_approaching` always stays the RAW truth; when this is
+     * supplied `executed`/`held_by_approaching` follow the blocking value and the field is emitted.
+     */
+    anyBlockingApproach?: boolean,
 ): void {
     if (!isAxisReadinessDebugEnabled(op.name)) return;
+    const blocking = anyBlockingApproach ?? anyApproaching;
     emit({
         kind: 'operation',
         turn: state.meta.turn,
@@ -195,7 +202,8 @@ export function emitOperationReadinessTrace(
         phase: op.phase,
         any_executable: anyExecutable,
         any_approaching: anyApproaching,
-        executed: anyExecutable && !anyApproaching,
-        held_by_approaching: anyExecutable && anyApproaching,
+        ...(anyBlockingApproach !== undefined ? { any_blocking_approach: anyBlockingApproach } : {}),
+        executed: anyExecutable && !blocking,
+        held_by_approaching: anyExecutable && blocking,
     });
 }

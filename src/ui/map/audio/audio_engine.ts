@@ -17,6 +17,12 @@ export type AudioVolumeKind = 'master' | AudioCueCategory;
 interface AudioBusState {
     enabled: boolean;
     muted: boolean;
+    /**
+     * Reversible ambience-only playback policy gate. Defaults off so ambient
+     * beds are silent regardless of global audio enable/mute/volume; UI, music,
+     * and stinger cues are unaffected. Owning callers may explicitly opt in.
+     */
+    ambientPlaybackEnabled: boolean;
     userGestureUnlocked: boolean;
     lastCueId: string | null;
     /**
@@ -43,11 +49,19 @@ const DEFAULT_VOLUMES: Record<AudioVolumeKind, number> = {
     stinger: 0,
 };
 
+type PlaybackAttemptStatus = 'pending' | 'success' | 'failure';
+
+interface PlaybackAttempt {
+    status: PlaybackAttemptStatus;
+}
+
 const playbackElementsByCueId = new Map<string, HTMLAudioElement>();
+const playbackAttemptByElement = new Map<HTMLAudioElement, PlaybackAttempt>();
 
 let state: AudioBusState = {
     enabled: false,
     muted: true,
+    ambientPlaybackEnabled: false,
     userGestureUnlocked: false,
     lastCueId: null,
     lastResolvedAssetUrl: null,
@@ -68,23 +82,55 @@ function getPlaybackElement(cueId: string, resolvedAssetUrl: string): HTMLAudioE
     if (typeof Audio === 'undefined') return null;
     const existing = playbackElementsByCueId.get(cueId);
     if (existing?.src === resolvedAssetUrl) return existing;
+    if (existing) playbackAttemptByElement.delete(existing);
     const element = new Audio(resolvedAssetUrl);
     element.preload = 'auto';
     playbackElementsByCueId.set(cueId, element);
     return element;
 }
 
+function isHealthyRunningLoop(element: HTMLAudioElement): boolean {
+    const attempt = playbackAttemptByElement.get(element);
+    return attempt?.status === 'success'
+        && element.loop === true
+        && element.paused === false
+        && element.ended === false
+        && element.error === null;
+}
+
+function settlePlaybackAttempt(
+    element: HTMLAudioElement,
+    attempt: PlaybackAttempt,
+    status: 'success' | 'failure',
+): void {
+    if (playbackAttemptByElement.get(element) !== attempt) return;
+    attempt.status = status;
+}
+
 function playResolvedAsset(cueId: string, resolvedAssetUrl: string, category: AudioCueCategory, defaultVolume: number, loop = false): void {
     const element = getPlaybackElement(cueId, resolvedAssetUrl);
     if (!element) return;
-    element.loop = loop;
+    const loopChanged = element.loop !== loop;
+    if (loopChanged) element.loop = loop;
     element.volume = clampVolume(state.volumes.master * state.volumes[category] * defaultVolume);
+    if (!loopChanged && loop && isHealthyRunningLoop(element)) {
+        return;
+    }
+    const attempt: PlaybackAttempt = { status: 'pending' };
+    playbackAttemptByElement.set(element, attempt);
     try {
         if (!loop) element.currentTime = 0;
-        void element.play()?.catch(() => undefined);
+        const playResult: Promise<void> | undefined = element.play();
+        if (playResult && typeof playResult.then === 'function') {
+            void playResult.then(
+                () => settlePlaybackAttempt(element, attempt, 'success'),
+                () => settlePlaybackAttempt(element, attempt, 'failure'),
+            );
+        }
     } catch {
         // Playback is best-effort. Autoplay or decode failures must not surface
         // as console noise or block UI flow.
+        settlePlaybackAttempt(element, attempt, 'failure');
     }
 }
 
@@ -147,6 +193,31 @@ export function isAudioEnabled(): boolean {
     return state.enabled;
 }
 
+export function isAmbientPlaybackEnabled(): boolean {
+    return state.ambientPlaybackEnabled;
+}
+
+/**
+ * Reversible ambience-only policy gate. Disabling pauses every cached
+ * ambient-category element (including beds started through the generic cue
+ * path) and clears the active bed id; UI, music, and stinger elements and
+ * state are left untouched. Global enable/mute/volume are independent.
+ */
+export function setAmbientPlaybackEnabled(enabled: boolean): void {
+    if (!enabled && state.ambientPlaybackEnabled) {
+        for (const cueId of playbackElementsByCueId.keys()) {
+            if (getCueConfig(cueId)?.category === 'ambient') {
+                stopPlayback(cueId);
+            }
+        }
+    }
+    state = {
+        ...state,
+        ambientPlaybackEnabled: enabled,
+        currentAmbientId: enabled ? state.currentAmbientId : null,
+    };
+}
+
 export function setVolume(kind: AudioVolumeKind, value: number): void {
     state = {
         ...state,
@@ -161,6 +232,7 @@ export async function playCue(id: string, nowMs?: number): Promise<void> {
     if (!state.enabled || state.muted || !state.userGestureUnlocked) return;
     const cue = getCueConfig(id);
     if (!cue) return;
+    if (cue.category === 'ambient' && !state.ambientPlaybackEnabled) return;
     const normalizedNowMs = Number.isFinite(nowMs) ? Math.max(0, Math.floor(nowMs as number)) : null;
     const previousAcceptedAtMs = state.lastCueAcceptedAtMsById[cue.id];
     if (
@@ -207,6 +279,7 @@ export function stopMusic(): void {
 
 export async function playAmbientBed(id: string): Promise<void> {
     state = { ...state, requestedAmbientId: id };
+    if (!state.ambientPlaybackEnabled) return;
     if (!state.enabled || state.muted || !state.userGestureUnlocked) return;
     const cue = getCueConfig(id);
     if (!cue || cue.category !== 'ambient') return;
@@ -267,9 +340,11 @@ export function getAudioState(): AudioBusState {
 export function resetAudioForTests(): void {
     stopAllPlayback();
     playbackElementsByCueId.clear();
+    playbackAttemptByElement.clear();
     state = {
         enabled: false,
         muted: true,
+        ambientPlaybackEnabled: false,
         userGestureUnlocked: false,
         lastCueId: null,
         lastResolvedAssetUrl: null,

@@ -1,0 +1,63 @@
+=== AWWV Run Consistency Validation ===
+Run: C:\Users\User\.codex\worktrees\october-calibration-checkpoint\A-War-Without-Victory\runs\player-parity-fatigue-owner-39-20261026-01\apr1992_definitive_188w__2272e1011ba35428__w39_n0
+Turn: 39
+
+--- Casualty Accounting ---
+  HRHB   taken=12879  inflicted=3289
+  RBiH   taken=59566  inflicted=11947
+  RS     taken=26250  inflicted=46152
+  Total taken: 98695  Total inflicted: 61388  Gap: 37307
+  NOTE: Gap includes friction/siege attrition (no opposing brigade)
+
+--- Peak Personnel ---
+  OK: 0 violations
+
+--- Brigade Assignment ---
+  ? NOT ESTABLISHED: military.unresolved_sector_brigades is absent from this artifact
+
+--- Ghost Paramilitaries ---
+  OK: 0 ghosts
+
+--- Intel System ---
+  Offensive signs: 14/112 records
+  OK: Intel system functional (turn 39)
+
+--- Assignment Sync ---
+  OK: 0 missing
+
+--- Sector Role Buckets ---
+  OK: sector bucket roles match formation assignment and physical position
+
+--- Reserve Cap ---
+  OK: 0 sectors with >1 reserve
+
+--- Physical Sector Ownership ---
+  OK: 0 false owners
+
+--- War-Front Faction-Side Coverage ---
+  OK: sector faction-side coverage exactly matches military.war_front_edges_osid
+
+--- Sector Geometry ---
+  OK: 0 disconnected sectors
+
+--- Empty Contested Sectors ---
+  OK: 0 empty contested sectors with missed legal donors
+  OK: 0 unavoidable empty contested sectors
+
+--- Sector Floor Shortfalls ---
+  OK: 0 below-floor sectors with missed legal donors
+  ~ sector:arbih_1st_corps:0 remains below floor 1/2 with no legal same-corps donor under current rules
+  ~ sector:arbih_1st_corps:3 remains below floor 2/3 with no legal same-corps donor under current rules
+  ~ sector:vrs_drina:1 remains below floor 2/3 with no legal same-corps donor under current rules
+  ~ sector:vrs_drina:4 remains below floor 1/2 with no legal same-corps donor under current rules
+
+--- Undefended Front Subsegments ---
+  OK: 0 wide gap=true subsegments with missed legal donors
+  OK: 0 wide gap=true subsegments inside partially covered sectors
+  OK: 0 unavoidable wide gap=true subsegments
+
+--- Adjacent Uncontested Territory ---
+  OK: 0 actionable undefended OSIDs adjacent to enemy brigades
+  OK: 0 unavoidable adjacent exposures
+
+=== RESULT: PASS ===

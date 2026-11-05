@@ -1,0 +1,121 @@
+{
+  "turn": 22,
+  "operation": {
+    "operationId": "arbih_4th_corps:Presidential Directive — op:trnovo:tosici:t17",
+    "name": "Presidential Directive — op:trnovo:tosici",
+    "type": "sector_attack",
+    "phase": "execution",
+    "startedTurn": 17,
+    "requestedByPresident": true,
+    "forced": true,
+    "commanderOfficerId": "arbih_malkic",
+    "roster": [
+      "arbih_441st_vitezka_mountain",
+      "arbih_442nd_mountain",
+      "arbih_443rd_mountain",
+      "arbih_444th_mountain",
+      "arbih_445th_mountain",
+      "arbih_447th_liberation",
+      "arbih_448th_liberation",
+      "arbih_449th_eastern_herzegovina_mountain",
+      "arbih_450th_light",
+      "arbih_4th_muslim_light"
+    ],
+    "axes": [
+      {
+        "axisId": "main",
+        "stagingOsid": "op:trnovo:delijas",
+        "objectives": [
+          "op:trnovo:tosici"
+        ],
+        "assignedBrigades": [
+          "arbih_441st_vitezka_mountain",
+          "arbih_442nd_mountain",
+          "arbih_443rd_mountain",
+          "arbih_444th_mountain",
+          "arbih_445th_mountain",
+          "arbih_447th_liberation",
+          "arbih_448th_liberation",
+          "arbih_449th_eastern_herzegovina_mountain",
+          "arbih_450th_light",
+          "arbih_4th_muslim_light"
+        ]
+      }
+    ]
+  },
+  "lineage": {
+    "turn": 22,
+    "moves": [],
+    "ownedBattles": [
+      {
+        "battle_id": "22:op:trnovo:tosici:arbih_443rd_mountain:rs_bilea_brigade",
+        "attacker_brigade": "arbih_443rd_mountain",
+        "attacker_brigades": [
+          "arbih_443rd_mountain"
+        ],
+        "contributing_operation_ids": [
+          "arbih_4th_corps:Presidential Directive — op:trnovo:tosici:t17"
+        ],
+        "attacker_faction": "RBiH",
+        "defender_faction": "RS",
+        "target_osid": "op:trnovo:tosici",
+        "outcome": "catastrophic",
+        "power_ratio": 0.1385149112526484,
+        "attacker_won": false,
+        "defender_brigade": "rs_bilea_brigade",
+        "defender_kind": "formation",
+        "snap_events": [],
+        "attacker_casualties": 920,
+        "defender_casualties": 62,
+        "defender_contributions": [
+          {
+            "brigade_id": "rs_bilea_brigade",
+            "distance_hops": 2,
+            "is_home_municipality": false,
+            "reactive_weight": 204.29,
+            "casualties_taken": 57
+          },
+          {
+            "brigade_id": "rs_foa_brigade",
+            "distance_hops": 4,
+            "is_home_municipality": false,
+            "reactive_weight": 16.26,
+            "casualties_taken": 5
+          }
+        ],
+        "execution_friction": {
+          "labels": [
+            "stale_intel"
+          ],
+          "attacker_confidence_band": "low"
+        },
+        "defending_sub_segment_id": "subseg:sector:vrs_herzegovina:0:0",
+        "equipment": {
+          "attacker_tanks_lost": 0,
+          "attacker_artillery_lost": 0,
+          "defender_tanks_lost": 0,
+          "defender_artillery_lost": 1,
+          "scavenged_tanks": 0,
+          "scavenged_artillery": 0,
+          "captured_tanks": 0,
+          "captured_artillery": 0,
+          "captured_by": "RS"
+        },
+        "operation_id": "arbih_4th_corps:Presidential Directive — op:trnovo:tosici:t17",
+        "operation_name": "Presidential Directive — op:trnovo:tosici"
+      }
+    ],
+    "beforeController": "RS",
+    "afterController": "RS",
+    "controlEvents": []
+  },
+  "event": null,
+  "canonical": {
+    "bytes": 5067776,
+    "sha256": "61e03ebb6a04e21eafbae4a403de4a48005454b621170db2b9e718f724a6a2dc"
+  },
+  "report": {
+    "bytes": 669688,
+    "sha256": "f88f1308fae149f1d9ba41677cb4a81843c47c6c51a831f51b10226d95824973"
+  }
+}

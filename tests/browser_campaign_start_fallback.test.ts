@@ -8,6 +8,14 @@ import {
 } from '../src/ui/map/desktop/campaignRecruitmentActions';
 import { parseGameState } from '../src/ui/map/data/GameStateAdapter';
 import type { IPC } from '../src/ui/map/desktop/useIPC';
+import {
+  advanceTurn,
+  deserializeState,
+  resolveDesktopEventDecision,
+  serializeState,
+  startNewCampaign,
+} from '../src/desktop/desktop_sim';
+import type { EventDefinition } from '../src/sim/events/event_types';
 
 const STARTUP = JSON.parse(readFileSync(
   join(process.cwd(), 'data', 'derived', 'startup', 'apr_1992_initial_save.json'),
@@ -105,6 +113,9 @@ describe('browser new-campaign fallback', () => {
       expect(state.meta.player_faction).toBe(faction);
       expect(state.meta.decision_mode).toBe('emergent');
       expect(state.meta.headless_scenario_auto_control).not.toBe(true);
+      expect(Object.keys((state.military as any).negotiation?.capital ?? {})).toEqual(['RBiH', 'RS', 'HRHB']);
+      expect(Object.keys((state.military as any).negotiation?.patron_relationships ?? {})).toEqual(['RBiH', 'RS', 'HRHB']);
+      expect(Object.keys((state.military as any).negotiation?.strategic_dimensions ?? {})).toEqual(['RBiH', 'RS', 'HRHB']);
       expect(state.political?.control_events ?? []).toHaveLength(0);
       expect(pending).toHaveLength(1);
       expect(pending[0]).toMatchObject({
@@ -215,5 +226,159 @@ describe('browser new-campaign fallback', () => {
       title: 'The Assembly Speaks',
       narrative: 'Presidential response filed in the campaign record.',
     });
+  });
+
+  it('keeps every foundational option byte-identical across Electron and browser adapters', async () => {
+    const catalog = WAR_1992 as EventDefinition[];
+    const openingProjection = (state: any) => ({
+      negotiation: state.military.negotiation,
+      pending_event_decisions: state.military.pending_event_decisions,
+      fired_event_ids: state.military.fired_event_ids,
+      event_fire_counts: state.military.event_fire_counts,
+      event_last_fired_turn: state.military.event_last_fired_turn,
+      event_readiness: state.military.event_readiness,
+      event_flags: state.military.event_flags,
+      enabled_event_ids: state.military.enabled_event_ids,
+      closed_event_ids: state.military.closed_event_ids,
+      event_decision_log: state.military.event_decision_log,
+      pending_event_notifications: state.military.pending_event_notifications,
+      recruitment_modifiers: state.military.recruitment_modifiers,
+      bot_priority_shifts: state.military.bot_priority_shifts,
+      event_aggression_modifiers: state.military.event_aggression_modifiers,
+      equipment_quality_modifiers: state.military.equipment_quality_modifiers,
+      formation_morale: Object.fromEntries(Object.entries(state.military.formations)
+        .map(([id, formation]: [string, any]) => [id, formation.morale])),
+      war_alliance_rbih_hrhb: state.political.war_alliance_rbih_hrhb,
+      paramilitary_policy: state.paramilitary_policy,
+    });
+    for (const { faction, eventId } of [
+      { faction: 'RBiH' as const, eventId: 'rbih_state_identity' },
+      { faction: 'RS' as const, eventId: 'rs_strategic_goals' },
+      { faction: 'HRHB' as const, eventId: 'hrhb_political_goal' },
+    ]) {
+      const loaded: unknown[] = [];
+      vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.endsWith('/data/derived/startup/apr_1992_initial_save.json')) return response(STARTUP);
+        if (url.endsWith('/data/scenarios/events/war_1992.json')) return response(WAR_1992);
+        throw new Error(`Unexpected fetch: ${url}`);
+      });
+      await startCampaignFromSidePicker({
+        ipc: { isAvailable: false } as IPC,
+        loadSave: async (state) => { loaded.push(state); },
+        setLoadError: vi.fn(),
+      }, { playerFaction: faction, decisionMode: 'emergent', scenarioKey: 'apr_1992' });
+      const browserStart = loaded[0] as typeof STARTUP;
+      const desktopStart = (await startNewCampaign(process.cwd(), faction, 'apr_1992', 'emergent')).state;
+      expect(openingProjection(browserStart)).toEqual(openingProjection(desktopStart));
+
+      const definition = catalog.find((entry) => entry.id === eventId)!;
+      expect(browserStart.military.pending_event_decisions[0].response_options).toEqual(definition.response_options);
+      for (const option of definition.response_options ?? []) {
+        const browser = structuredClone(browserStart);
+        const desktop = structuredClone(desktopStart);
+        resolveBrowserEventDecision(browser, eventId, option.id, catalog);
+        const desktopResolved = resolveDesktopEventDecision(desktop, eventId, option.id, process.cwd());
+        expect(openingProjection(browser), `${eventId}:${option.id}`).toEqual(openingProjection(desktopResolved));
+        expect(openingProjection(JSON.parse(serializeState(browser)))).toEqual(openingProjection(browser));
+        expect(browser.military.event_decision_log.filter((receipt: any) => receipt.event_id === eventId)).toEqual([{
+          event_id: eventId,
+          response_id: option.id,
+          decision_source: 'player',
+          faction,
+          turn: 0,
+        }]);
+        expect(browser.military.event_fire_counts[eventId]).toBe(1);
+        expect(browser.military.event_last_fired_turn[eventId]).toBe(0);
+        expect(browser.military.event_readiness[eventId]).toBe(0);
+
+        const authoredNotifications = definition.notifications_to_other_factions?.[option.id] ?? {};
+        expect(browser.military.pending_event_notifications
+          .filter((notification: any) => notification.event_id === eventId && notification.response_id === option.id)
+          .sort((a: any, b: any) => a.target_faction.localeCompare(b.target_faction)))
+          .toEqual(Object.entries(authoredNotifications)
+            .map(([target, content]) => {
+              if (!content) throw new Error(`Missing authored notification ${eventId}:${option.id}:${target}`);
+              return {
+                notification_id: `${eventId}:${faction}:${target}`,
+                event_id: eventId,
+                response_id: option.id,
+                source_faction: faction,
+                target_faction: target,
+                headline: content.headline,
+                body: content.body,
+                surfaced_on_turn: 1,
+                consumed: false,
+              };
+            })
+            .sort((a, b) => a.target_faction.localeCompare(b.target_faction)));
+
+        for (const effect of option.effects ?? []) {
+          if (effect.kind === 'morale_change') {
+            for (const [formationId, beforeFormation] of Object.entries(browserStart.military.formations) as Array<[string, any]>) {
+              if (beforeFormation.faction !== effect.faction || beforeFormation.status !== 'active' || beforeFormation.morale == null) continue;
+              expect(browser.military.formations[formationId].morale, `${eventId}:${option.id}:morale:${formationId}`)
+                .toBe(Math.max(0, Math.min(100, beforeFormation.morale + effect.delta)));
+            }
+          } else if (effect.kind === 'alliance_change') {
+            const beforeAlliance = browserStart.political.war_alliance_rbih_hrhb ?? 0;
+            expect(browser.political.war_alliance_rbih_hrhb).toBe(Math.max(-1, Math.min(1, beforeAlliance + effect.delta)));
+          } else if (effect.kind === 'aggression_modifier') {
+            expect(browser.military.event_aggression_modifiers).toContainEqual({
+              faction: effect.faction,
+              delta: effect.delta,
+              expires_turn: effect.duration_turns,
+            });
+          } else if (effect.kind === 'equipment_quality_modifier') {
+            expect(browser.military.equipment_quality_modifiers).toContainEqual({
+              faction: effect.faction,
+              multiplier: effect.multiplier,
+              expires_turn: effect.duration_turns,
+            });
+          }
+        }
+
+        let browserReady = deserializeState(serializeState(browser));
+        let desktopReady = deserializeState(serializeState(desktopResolved));
+        if (faction === 'RBiH') {
+          resolveBrowserEventDecision(browserReady, 'rbih_paramilitary_policy_1992', 'always_deny', catalog);
+          desktopReady = resolveDesktopEventDecision(
+            desktopReady,
+            'rbih_paramilitary_policy_1992',
+            'always_deny',
+            process.cwd(),
+          );
+        }
+        const [browserAdvanced, desktopAdvanced] = await Promise.all([
+          advanceTurn(browserReady, process.cwd()),
+          advanceTurn(desktopReady, process.cwd()),
+        ]);
+        expect(browserAdvanced.error, `browser advance ${eventId}:${option.id}`).toBeUndefined();
+        expect(desktopAdvanced.error, `desktop advance ${eventId}:${option.id}`).toBeUndefined();
+        for (const effect of option.effects ?? []) {
+          if (effect.kind === 'aggression_modifier') {
+            const expected = { faction: effect.faction, delta: effect.delta, expires_turn: effect.duration_turns };
+            expect(browserAdvanced.state.military.event_aggression_modifiers).toContainEqual(expected);
+            expect(desktopAdvanced.state.military.event_aggression_modifiers).toContainEqual(expected);
+          } else if (effect.kind === 'equipment_quality_modifier') {
+            const expected = { faction: effect.faction, multiplier: effect.multiplier, expires_turn: effect.duration_turns };
+            expect(browserAdvanced.state.military.equipment_quality_modifiers).toContainEqual(expected);
+            expect(desktopAdvanced.state.military.equipment_quality_modifiers).toContainEqual(expected);
+          }
+        }
+        for (const [flag, value] of Object.entries(option.sets_flags ?? {})) {
+          expect(browserAdvanced.state.military.event_flags[flag]).toEqual(value);
+          expect(desktopAdvanced.state.military.event_flags[flag]).toEqual(value);
+        }
+        for (const shift of option.dimension_shifts ?? []) {
+          const before = browserReady.military.negotiation!.strategic_dimensions![shift.faction][shift.dimension].event_modifier;
+          expect(browserAdvanced.state.military.negotiation!.strategic_dimensions![shift.faction][shift.dimension].event_modifier)
+            .toBe(before);
+          expect(desktopAdvanced.state.military.negotiation!.strategic_dimensions![shift.faction][shift.dimension].event_modifier)
+            .toBe(before);
+        }
+      }
+      vi.restoreAllMocks();
+    }
   });
 });

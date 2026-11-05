@@ -112,7 +112,7 @@ export interface BrigadePostureOrder {
 export type BrigadeMovementStatus = 'deployed' | 'packing' | 'in_transit' | 'unpacking';
 
 /** Authority that created a brigade movement record. Untagged legacy records are protected. */
-export type BrigadeMovementOwner = 'bot_discretionary';
+export type BrigadeMovementOwner = 'bot_discretionary' | 'authored_preplanned';
 
 /** Deployment posture action staged by UI/IPC. */
 export type BrigadeDeployAction = 'deploy' | 'undeploy';
@@ -171,6 +171,21 @@ export interface OperationActiveProbe {
     started_turn: number;
     resolved: boolean;
     result_confidence_gain?: number;
+}
+
+/** Persisted ownership link for a preparation probe temporarily detached from a planning parent. */
+export interface PreparationProbeLink {
+    parent_operation_name: string;
+    parent_started_turn: number;
+    request_started_turn: number;
+    target_osid: string;
+    source_axes: Array<{
+        brigade_id: FormationId;
+        axis_id?: string;
+    }>;
+    entered_execution_turn?: number;
+    order_opportunity_turn?: number;
+    restored_to_parent?: boolean;
 }
 
 // --- Sector-facing intelligence (replaces legacy SID-keyed recon_intelligence) ---
@@ -269,6 +284,69 @@ export interface SectorIntelRecord {
 }
 
 /**
+ * One operation-owned capture receipt: this exact operation instance's resolving lead,
+ * acting on its own surviving emitted order, flipped `osid` from an enemy to the acting
+ * faction in ordinary combat. Written by the resolver only for operations that carry a
+ * phase gate (`OperationAxis.late_phase`); absent everywhere else.
+ */
+export interface OperationCaptureReceipt {
+    osid: string;
+    turn: number;
+    /** Deterministic battle join key: {turn}:{osid}:{lead brigade}:{defender|null}. */
+    battle_id: string;
+    /** The ACTUAL resolving lead (lexicographically first attacker) whose emitted order owned the capture. */
+    attacker_brigade: string;
+    /** Exact operation instance: "{host corps}:{operation name}:t{started_turn}". */
+    operation_id: string;
+    /** Axis of the lead at consumption (must be the gate's main axis). */
+    axis_id: string;
+}
+
+/** Authored same-operation brigade transfer performed atomically when a phase gate activates. */
+export interface OperationAxisHandoff {
+    brigade_id: FormationId;
+    source_axis_id: string;
+}
+
+/**
+ * Opt-in phase gate on a multi-axis operation axis (authored on the opportunity axis as
+ * `phase_gate`). While `phase === 'holding'` the axis may lawfully approach/hold but may
+ * not capture ANY of `gated_objectives`; it activates exactly once when this operation's
+ * main axis has produced owned, still-held captures of every `requires` OSID, and stalls if
+ * the main axis becomes terminal without them. Absent on every axis without the opt-in.
+ */
+export interface OperationAxisLatePhase {
+    phase: 'holding' | 'capture';
+    /** Axis whose owned captures satisfy `requires`. */
+    main_axis_id: string;
+    /** OSIDs this operation's main axis must capture (owned receipts) before capture authority. */
+    requires: string[];
+    /** Complete capture-authority target set: every authored objective of the gated axis at spawn. */
+    gated_objectives: string[];
+    receipts: OperationCaptureReceipt[];
+    /** Optional exact-once source-to-this-axis transfer. Gate phase is the persisted applied truth. */
+    handoff?: OperationAxisHandoff;
+    /** Set once at the planning->execution transition. */
+    hold_started_turn?: number;
+    /** Set exactly once at activation. */
+    activated_turn?: number;
+    /** Set when the held phase ended terminally (main axis terminal without the owned captures). */
+    terminal_reason?: 'main_axis_terminal_without_prerequisites';
+}
+
+/**
+ * Pending emitted-order ownership for one brigade's attack order (this turn only). Written by
+ * the operation evaluator ONLY for brigades of operations that carry a phase gate; validated at
+ * resolver consumption against the surviving order (same turn, same target) before any receipt.
+ */
+export interface BrigadeAttackOrderOwner {
+    operation_id: string;
+    axis_id: string;
+    target: string;
+    turn: number;
+}
+
+/**
  * Independent axis of advance within a multi-axis operation.
  * Each axis has its own contiguous objective chain and assigned brigades.
  * Multiple axes can converge on a shared terminal objective.
@@ -281,6 +359,14 @@ export interface OperationAxis {
     main_brigade?: FormationId;
     /** All other brigades on this axis. Reduced combat power, reduced casualties. */
     support_brigades?: FormationId[];
+    /** Authored physical assembly floor at an approach to the current objective. */
+    minimum_staged_brigades?: number;
+    /** Assigned brigades required on friendly approaches before a new objective is attacked. */
+    minimum_forward_brigades?: number;
+    /** Authored axis sequence must not skip forward while its current objective is unreachable. */
+    preserve_objective_sequence?: boolean;
+    /** Opt-in phase gate (see OperationAxisLatePhase). Absent => today's behavior. */
+    late_phase?: OperationAxisLatePhase;
     objectives: string[];
     current_objective_index: number;
     status: 'executing' | 'stalled' | 'complete';
@@ -296,6 +382,11 @@ export interface OperationAxis {
      *  After 2 consecutive catastrophics on the same target, axis stalls — no commander
      *  sends men to die at the same fortified position three turns running. */
     consecutive_catastrophic_on_current?: number;
+    /** Turns spent waiting for a sibling axis to capture a shared current objective.
+     *  When an axis is idle and about to stall, but another executing axis in the same
+     *  operation is advancing on the same objective, the idle axis waits up to
+     *  MAX_SHARED_OBJECTIVE_WAIT_TURNS before stalling. Reset on objective advance. */
+    shared_objective_wait_turns?: number;
     /** Friendly OSID where this axis's brigades stage during planning. */
     staging_osid?: string;
     /** Diagnostic (write-only): set true at launch-readiness check when this axis's
@@ -305,8 +396,23 @@ export interface OperationAxis {
      *  never attacks. Persists through to AxisAAR for post-mortem visibility.
      *  See LATE_WAR_OPERATION_COMBAT_DELIVERY_MEGA_LANE Phase C, sector_offensive_launch_helpers.ts. */
     unreachable_at_launch?: boolean;
-    /** Typed diagnostic for axes that fail the opening-attack launch gate. */
-    launch_blocker?: 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'recent_catastrophic_losses_at_objective' | 'insufficient_donation';
+    /** Typed diagnostic for axes that fail the opening-attack launch gate.
+     *  ENGINE-HEALTH B3 (2026-09-19): `'insufficient_donation'` is RETIRED — nothing
+     *  writes it any more. Inadequate donor support now declines the Tactical Group
+     *  augmentation (see `tg_formation_decline`) instead of refusing the axis. The
+     *  literal is retained so saves and run artifacts written before the repair still
+     *  load and read back correctly. */
+    launch_blocker?: 'participants_below_attack_floor' | 'participants_below_assembly_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'recent_catastrophic_losses_at_objective' | 'insufficient_donation';
+    /**
+     * REASON-CODE INSTRUMENTATION, topic `tg_formation` — ENGINE-HEALTH B3 (2026-09-19).
+     * Written ONLY when `AWWV_DEBUG_REASON_CODES` requests it, so a default run never
+     * carries this field and the save hash is unmoved.
+     *
+     * Why this axis's Tactical Group AUGMENTATION was declined. A decline is not an
+     * operation failure: the axis continues under the ordinary opening-attack gates with
+     * its own participants at their real strength, and no donor cost is paid.
+     */
+    tg_formation_decline?: TgFormationDeclineDetail;
     /**
      * REASON-CODE INSTRUMENTATION, topic `axis_reject` — item 3. Written ONLY
      * when `AWWV_DEBUG_REASON_CODES` requests it, so a default run never carries
@@ -339,6 +445,35 @@ export interface OperationAxis {
     objective_battles_this_turn?: number;
     /** Total battles conducted by this axis since operation start. */
     total_battles?: number;
+}
+
+/**
+ * REASON-CODE INSTRUMENTATION (topic `tg_formation`) — ENGINE-HEALTH B3 (2026-09-19).
+ *
+ * Why a Tactical Group augmentation was declined at `formTgsAtReadyTransition`. Replaces
+ * the retired `insufficient_donation` launch blocker, which reported an OPERATION failure
+ * for what is only a declined augmentation — hence `operation_remains_executable`, which
+ * is the fact the old reason code got wrong.
+ *
+ * Every field is a value the formation path already computes. Nothing here is read by any
+ * predicate, and the whole object is absent on a default run.
+ */
+export interface TgFormationDeclineDetail {
+    declined: true;
+    /** `no_eligible_donors` = the pool was empty; `donation_below_readiness` = it was too weak. */
+    reason: 'no_eligible_donors' | 'donation_below_readiness';
+    anchor_brigade_id: string;
+    anchor_personnel: number;
+    faction: string | null;
+    donor_count: number;
+    /** Sum of `personnel_lent` over the candidate pool (falloff/cap/floor already applied). */
+    donated_personnel: number;
+    /** Faction's readiness fraction — the HRHB band is visible here rather than implied. */
+    readiness_fraction: number;
+    /** `readiness_fraction * anchor_personnel`. */
+    required_donation: number;
+    /** Always true: a declined augmentation never refuses the underlying operation. */
+    operation_remains_executable: true;
 }
 
 /**
@@ -509,12 +644,18 @@ export interface CorpsOperation {
     current_objective_index?: number;
     /** Turns of preparation required (from scope). */
     planning_duration?: number;
+    /** Explicit authored delivery mode for an operation-owned preparation probe. */
+    preparation_probe_delivery?: 'subordinate';
     /** Authored live-roster floor; when absent, the operation type default applies. */
     minimum_viable_participants?: number;
     /** Active, non-disrupted, non-empty authored formations required before planning may transition to execution. */
     minimum_assembled_participants?: number;
+    /** Authored synchronized operation: every live axis must have an executable opening attack before launch. */
+    require_all_axes_ready?: boolean;
     /** Authored execution quality for exceptional operations; defaults to 1.0. */
     execution_attack_power_mult?: number;
+    /** A decisive same-axis breach may advance a second participating brigade. */
+    coordinated_advance?: boolean;
     /** Fraction of participating brigades with adequate supply (0-1). */
     supply_readiness?: number;
     /** Consecutive objective captures (legacy — used when axes is absent). */
@@ -554,8 +695,18 @@ export interface CorpsOperation {
     force_launch_consequence_applied?: boolean;
     /** Internal consumption flag for artillery preparation. */
     artillery_preparation_consumed?: boolean;
-    /** Reason the operation entered recovery. */
+    /** Reason the operation entered recovery.
+     *  ENGINE-HEALTH B3 (2026-09-19): `'insufficient_donation'` is RETIRED as a producible
+     *  reason — it reached this union only by being propagated from the removed
+     *  opening-attack donation gate. Retained so pre-repair saves and run artifacts still
+     *  load and read back correctly. */
     recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete' | 'brigade_attrition' | 'political_blocked' | 'planning_invalidated' | 'no_launch_readiness' | 'defender_power_too_high' | 'participants_below_attack_floor' | 'participants_below_assembly_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'insufficient_donation' | 'offensive_ops_suppressed' | 'tg_cohesion_exhausted' | 'tg_max_lifecycle';
+    /**
+     * REASON-CODE INSTRUMENTATION, topic `tg_formation` — ENGINE-HEALTH B3 (2026-09-19).
+     * Legacy single-axis counterpart of `OperationAxis.tg_formation_decline`. Absent on a
+     * default run.
+     */
+    tg_formation_decline?: TgFormationDeclineDetail;
     /** Named officer commanding this operation (if any). */
     commander_officer_id?: string;
     /** Named tactical_commander leading this op's Tactical Group anchor assault (ADR-0006 Phase 3A).
@@ -606,6 +757,8 @@ export interface CorpsOperation {
     postponement_count?: number;
     /** Active probe sub-action within preparation. */
     active_probe?: OperationActiveProbe;
+    /** Ownership link for a subordinate probe created by an opted-in planning parent. */
+    preparation_probe_link?: PreparationProbeLink;
 
     // --- AAR accumulator fields (populated during lifecycle) ---
     /** Per-turn log entries for the operation AAR. */
@@ -961,8 +1114,10 @@ export interface CorpsCommandState {
     /**
      * Append-only log of operations the president has halted via STOP-OP (one entry
      * per applied halt). Surfaced to the UI and consumed by the (follow-up) political
-     * consequence wiring. Optional — absent in headless scenarios. */
-    halted_op_record?: { op_name: string; turn: number }[];
+     * consequence wiring. Optional — absent in headless scenarios. `operation_id`
+     * (AAR id format) and `executed_attacks` keep a halted op's attack evidence,
+     * since a halt writes no AAR; both are absent in records from older saves. */
+    halted_op_record?: { op_name: string; turn: number; operation_id?: string; executed_attacks?: number }[];
     /**
      * REQUEST-OP presidential lever (Presidential Command Model slice 2/N). The
      * president names a strategic OBJECTIVE (target_osid) for this corps; the engine
@@ -1067,7 +1222,7 @@ export interface FormationAssignment {
 }
 
 export interface FormationOpsState {
-    fatigue: number; // integer >= 0, irreversible in Phase 10
+    fatigue: number; // finite number >= 0; persisted operational fatigue may be fractional
     last_supplied_turn: number | null; // null or <= current turn
 }
 
@@ -2615,6 +2770,8 @@ export interface CausalityLogEntry {
 
 export interface MilitaryState {
 formations: Record<FormationId, FormationState>;
+/** Stable lifecycle directive receipts (directive id -> firing turn). Optional for legacy saves. @persistence optional-persisted */
+formation_lifecycle_events_fired?: Record<string, number>;
 front_segments: Record<string, FrontSegmentState>;
 front_posture: Record<FactionId, FrontPostureState>;
 front_posture_regions: Record<FactionId, FrontRegionPostureState>;
@@ -2682,6 +2839,8 @@ brigade_desired_aor_cap?: Record<FormationId, number>;
 brigade_posture_orders?: BrigadePostureOrder[];
 /** Attack orders: one target settlement per brigade per turn; null = no attack (Brigade Realism plan §3.4). Consumed once per turn. */
 brigade_attack_orders?: Record<FormationId, SettlementId | null>;
+/** Pending emitted-order ownership for this turn's attack orders; present ONLY while an operation with a phase gate has pending orders (opt-in), deleted when orders are consumed. */
+brigade_attack_order_owners?: Record<FormationId, BrigadeAttackOrderOwner>;
 /**
      * Corps-level attack axis orders: target geometry compressed as ordered edge_ids.
      * Intent-only order surface; translated to brigade orders by deterministic assignment.

@@ -1,0 +1,22 @@
+{
+  "run": ".worktrees\\prusac-validation-20260922\\runs\\apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0",
+  "commit": "efa53f55c34e4e9fe8ec8d4fe99ec01502ba1ed1",
+  "git_dirty": false,
+  "consumed_inputs_digest": "f8ace65496620fad1c8219a9dcaa8e2c5cdba2f3f541b156c7ba112b4748caaf",
+  "all31_inputs_identical_to_n427": true,
+  "node": "v22.23.2",
+  "final_hash": "575254183566bf2c",
+  "final_save_sha256": "575254183566bf2c7b4db3946217ddcce014317eb2232997e003964919cf10c3",
+  "prefix_weekly_report_count": 39,
+  "full_weekly_report_count": 188,
+  "all_prefix_weekly_records_equal": true,
+  "differing_prefix_weekly_rows": [],
+  "injection_errors_identical": true,
+  "health_exit": 0,
+  "checkpoint_exit": 1,
+  "source_commit_only_files": [
+    "src/sim/combat/pre_planned_operations.ts",
+    "tests/pre_planned_operations.test.ts",
+    "tests/donji_vakuf_no_authored_takeover.test.ts"
+  ]
+}

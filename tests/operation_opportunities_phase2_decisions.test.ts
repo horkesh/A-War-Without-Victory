@@ -157,6 +157,48 @@ function fixtureOpp(overrides: Partial<OperationOpportunityDef> = {}): Operation
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
 describe('operation_opportunities — Phase 2 decision surface', () => {
+    it('bot decision outcome reports an insufficient proposal as unapplied without mutation', () => {
+        const state = buildMinimalState(175, 'HRHB', 1);
+        const def = fixtureOpp();
+        state.military.corps_command![def.primary_corps].active_operations.push({
+            name: 'existing_commitment', type: 'sector_attack', phase: 'execution',
+            started_turn: 170, phase_started_turn: 171,
+            participating_brigades: ['b_b'], objectives: ['op:old'], current_objective_index: 0,
+        });
+        runOpportunityEvaluationStep(state, 175, [def]);
+        const proposal = state.military.operation_opportunities![0]!;
+        const before = JSON.stringify(state);
+
+        expect(applyBotOpportunityDecisions(state, 175, 'HRHB', [def])).toEqual([{
+            proposal,
+            decision_applied: false,
+            reason: 'below_minimum_brigades (1/2)',
+        }]);
+        expect(JSON.stringify(state)).toBe(before);
+    });
+
+    it('resolved player decision returns the exact insufficient reason without mutation', () => {
+        const state = buildMinimalState(175, 'RBiH', 1);
+        const def = fixtureOpp();
+        state.military.corps_command![def.primary_corps].active_operations.push({
+            name: 'existing_commitment', type: 'sector_attack', phase: 'execution',
+            started_turn: 170, phase_started_turn: 171,
+            participating_brigades: ['b_b'], objectives: ['op:old'], current_objective_index: 0,
+        });
+        runOpportunityEvaluationStep(state, 175, [def]);
+        state.meta.pending_proposal_reviews = generateOpportunityProposalReviews(state, 'RBiH', [def]);
+        state.meta.pending_proposal_reviews[0]!.accepted = true;
+        const proposal = state.military.operation_opportunities![0]!;
+        const before = JSON.stringify(state);
+
+        expect(applyResolvedOpportunityDecisions(state, 175, [def])).toEqual([{
+            proposal,
+            decision_applied: false,
+            reason: 'below_minimum_brigades (1/2)',
+        }]);
+        expect(JSON.stringify(state)).toBe(before);
+    });
+
     it('bot opportunity is auto-approved on the same turn it becomes eligible', () => {
         // Player is HRHB; the catalog opportunity belongs to RBiH (a bot from this lens).
         const state = buildMinimalState(175, 'HRHB', 1);
@@ -285,7 +327,18 @@ describe('operation_opportunities — Phase 2 decision surface', () => {
 
     it('apply-resolved consumer routes explicit opportunity_decision=under_resource through the normal approval path', () => {
         const state = buildMinimalState(175, 'RBiH', 1);
-        const def = fixtureOpp();
+        state.military.formations!.b_c = {
+            ...state.military.formations!.b_a!, id: 'b_c', name: 'Brigade C',
+        };
+        state.military.formations!.b_d = {
+            ...state.military.formations!.b_b!, id: 'b_d', name: 'Brigade D',
+        };
+        const def = fixtureOpp({
+            axes: [{
+                ...fixtureOpp().axes[0]!,
+                brigades: ['b_a', 'b_b', 'b_c', 'b_d'],
+            }],
+        });
         runOpportunityEvaluationStep(state, 175, [def]);
         const reviews = generateOpportunityProposalReviews(state, 'RBiH', [def]);
         state.meta.pending_proposal_reviews = reviews.map(r => ({
@@ -424,17 +477,22 @@ describe('operation_opportunities — Phase 2 decision surface', () => {
         const state = buildMinimalState(175, 'HRHB', 1);
         runOpportunityEvaluationStep(state, 175, [def_b, def_a]);
 
-        applyBotOpportunityDecisions(state, 175, 'HRHB', [def_b, def_a]);
+        const outcomes = applyBotOpportunityDecisions(state, 175, 'HRHB', [def_b, def_a]);
 
         const cmd = state.military.corps_command!['arbih_5th_corps'];
         expect(cmd.active_operations.map(op => op.name)).toEqual(['A Op']);
         const proposals = state.military.operation_opportunities!;
         expect(proposals.find(p => p.opportunity_id === 'a_op')?.executed_op_id).toBe('A Op');
         expect(proposals.find(p => p.opportunity_id === 'b_op')?.executed_op_id).toBeUndefined();
-        expect(state.military.operation_opportunity_traces).toContainEqual(expect.objectContaining({
-            opportunity_id: 'b_op',
-            event: 'spawn_failed',
-        }));
+        expect(proposals.find(p => p.opportunity_id === 'b_op')?.status).toBe('eligible_pending_review');
+        expect(outcomes).toEqual([
+            { proposal: proposals.find(p => p.opportunity_id === 'a_op'), decision_applied: true, reason: null },
+            {
+                proposal: proposals.find(p => p.opportunity_id === 'b_op'),
+                decision_applied: false,
+                reason: 'below_minimum_brigades (0/2)',
+            },
+        ]);
     });
 
     it('player opportunity proposals are absent when the catalog has no matching def', () => {
@@ -499,6 +557,14 @@ describe('BC01 opportunity ownership', () => {
         const real = OPERATION_OPPORTUNITY_CATALOG.find(d => d.faction === 'RBiH' && d.staff_recommendation === 'approve')!;
         const def = fixtureOpp({ opportunity_id: real.opportunity_id });
         const state = buildMinimalState(175, 'RBiH', level);
+        for (const brigadeId of new Set(real.axes.flatMap(axis => axis.brigades))) {
+            state.military.formations![brigadeId] = {
+                ...state.military.formations!.b_a!,
+                id: brigadeId,
+                name: brigadeId,
+                corps_id: real.primary_corps,
+            };
+        }
         runOpportunityEvaluationStep(state, 175, [def]);
         const context = { state, report: {} } as any;
         for (let repeat = 0; repeat < 2; repeat++) {

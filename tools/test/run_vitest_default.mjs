@@ -7,12 +7,12 @@
  *
  *   - NO ARGUMENTS — "run the suite". Routes to the BALANCED runner, which is what CI's
  *     full-suite gate (.github/workflows/full-suite-and-fingerprint.yml) executes. It
- *     partitions the ~1,290 discovered files into duration-balanced shards and runs them
+ *     partitions the currently discovered files into four duration-balanced shards and runs them
  *     as separate vitest processes. Each shard keeps `fileParallelism: false` and
  *     `maxWorkers: 1` internally, so the serialisation those settings exist to guarantee
- *     is preserved WITHIN a shard; the parallelism is only ACROSS shards. Measured on the
- *     stored inventory: ~7.1 min per shard against ~28.4 min summed serially, and far more
- *     than that in practice once per-file startup under `maxWorkers: 1` is included.
+ *     is preserved WITHIN a shard; the parallelism is only ACROSS shards. Versioned weights
+ *     guide assignment, but process startup, collection, and changing test costs mean the
+ *     planner makes no wall-time guarantee.
  *
  *   - WITH ARGUMENTS — "run these tests". Routes to plain `vitest run <args>`. It MUST NOT
  *     go through the balanced runner: that runner hands each shard an EXPLICIT file list,

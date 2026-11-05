@@ -1,0 +1,100 @@
+{
+  "schema": "n102-retained-early-boundary-diagnosis-v1",
+  "date": "2026-10-25",
+  "scope": "Read-only retained evidence for the Donje Zesce/Tosici early chain only; no code, simulation, replay, campaign, suite, native run, baseline change, or tuning.",
+  "verdict": "PARITY_CHAIN_ESTABLISHED_SELECTOR_OPERAND_UNRECORDED",
+  "answer": "Yes. Corrected headless n102 follows the ordinary native-702 failed Circle/Jackal chain at the recorded semantic boundaries. It is not byte-identical because the deliberate policy inputs differ and some combat numbers differ, but n102 and native-702 select the same turn-7 probe branch, delay Jackal by one turn, reach the same turn-15 Nevesinje state, reject Herzegovina Consolidation at turn 16 for the same recorded reason, retain the same Bileca/Foca standing defense, lose both Circle attacks at turn 18, and leave both cells RS at turn 39.",
+  "earliest_retained_divergence": {
+    "turn": 7,
+    "n101": {
+      "operation": "probe_hvo_southeast_herzegovina_t7",
+      "objective": "op:ljubinje:bancici",
+      "participant": "hv_4th_guards_tg"
+    },
+    "n102": {
+      "operation": "probe_hvo_southeast_herzegovina_t7",
+      "objective": "op:capljina:tasovcici_2",
+      "participant": "hv_113th_brigade_tg"
+    },
+    "native702": {
+      "objective": "op:capljina:tasovcici_2",
+      "participant": "hv_113th_brigade_tg",
+      "authority": "retained native diagnosis bound in RAW_EXTRACT.json"
+    },
+    "first_selector_predicate": "UNRECORDED",
+    "limit": "The retained weekly operation diagnostics contain the selected probe but no candidate scores or first failed/accepted selector operand. No exact earlier selector predicate may be claimed."
+  },
+  "causal_chain": [
+    {
+      "boundary": "turn_7_probe",
+      "finding": "n101 chooses Bancici/4th Guards. n102 and native-702 choose Tasovcici/113th Brigade. Turns 3 and 5 probe choices match between n101 and n102, making turn 7 the earliest retained operation divergence in this chain."
+    },
+    {
+      "boundary": "jackal_delay",
+      "finding": "Tasovcici overlaps Operation Jackal. Retained native diagnosis binds the existing noncapturing-objective-overlap rule: native and n102 defer Jackal at turn 8 and start at turn 9; n101 starts at turn 8."
+    },
+    {
+      "boundary": "stolac_and_nevesinje",
+      "finding": "n101 reaches the decisive Stolac result at turn 14; n102/native-702 reach it at turn 15. At save 15, Nevesinje is identical in n102/native-702: personnel 294, disrupted_turns 2, fatigue 9, location op:mostar:vranjevici_2. n101 has personnel 510, disrupted_turns 1, fatigue 5."
+    },
+    {
+      "boundary": "turn_16_first_recorded_rejection",
+      "finding": "Movement decrements disruption by one. n101 reaches disrupted_turns 0 and launches Operation Herzegovina Consolidation. n102/native-702 remain at disrupted_turns 1. triggered_operations.ts line 973 returns an empty axis for any formation with disrupted_turns > 0; line 1022 returns build_insufficient_participants when the aggregate falls below MIN_OPERATION_PARTICIPANTS. Both n102/native-702 retain exactly that blocker at turn 16."
+    },
+    {
+      "boundary": "turn_18_circle",
+      "finding": "Without Consolidation removing the relevant defenders, n102 attacks Donje Zesce and Tosici against Bileca plus Foca contributions and suffers catastrophic outcomes (power ratios 0.46 and 0.27). The bound native diagnosis reports the same Bileca/Foca catastrophic branch. n101 instead wins both attacks at ratios 1.55 and 1.70."
+    },
+    {
+      "boundary": "turn_39",
+      "finding": "n101 controls both cells as RBiH. n102 and native-702 control both as RS."
+    }
+  ],
+  "classification": {
+    "deliberate_policy_inputs": {
+      "finding": "Different but not causal for the n101-to-n102 branch.",
+      "evidence": "n101 and n102 both use paramilitary_policy=ask, so their turn-7 divergence cannot be attributed to policy. Native-702 uses always_deny, which prevents byte/numeric equivalence, yet its relevant turn-15 and turn-16 VRS state matches n102 exactly."
+    },
+    "restored_sector_fatigue_effects": {
+      "finding": "Established at the system boundary; exact turn-7 selector operand remains unrecorded.",
+      "evidence": "The sole source repair changes repairScenarioArtifactState at scenario_runner.ts line 3245 to use operationalSettlementGraph.edges. This restores nonempty OSID front/sector truth after each turn. n102 then converges with native-702 on the recorded probe/Jackal branch and exact relevant save-15/16 personnel, disruption, fatigue, location, and Consolidation blocker, while n101 differs."
+    },
+    "genuine_production_bug": {
+      "finding": "The n101 scenario artifact repair graph mismatch was a genuine harness production bug and is repaired. No new gameplay production bug is established in probe selection, triggered-operation eligibility, or standing defense.",
+      "evidence": "Corrected n102 reproduces the already retained ordinary native failed chain. The downstream disrupted exclusion and aggregate participant floor are exact source predicates with matching retained state. Calibration remains failed, but the failure is now a measured native-parity behavior rather than evidence that the repaired headless runner still follows the n101 artifact-only branch."
+    }
+  },
+  "source_predicates": {
+    "scenario_runner_repair": {
+      "path": "src/scenario/scenario_runner.ts",
+      "line": 3245,
+      "text": "operationalSettlementGraph.edges,",
+      "sha256": "209effd648d90f7f0b64e5b36f7e4b868f5a3a603786bf50e812298e987dc63c"
+    },
+    "formation_rejection": {
+      "path": "src/sim/combat/triggered_operations.ts",
+      "line": 973,
+      "text": "if ((formation.disrupted_turns ?? 0) > 0) return [];",
+      "sha256": "22507f2eccce354f8ca5580352a504c6c4a8b32c376ecc8860dc89b10054b59d"
+    },
+    "aggregate_rejection": {
+      "path": "src/sim/combat/triggered_operations.ts",
+      "line": 1022,
+      "text": "if (allParticipating.length < MIN_OPERATION_PARTICIPANTS) return { failure: 'build_insufficient_participants' };"
+    }
+  },
+  "retained_execution": {
+    "command_receipt": "COMMAND_RECEIPT.json",
+    "exit": 0,
+    "stderr_bytes": 0,
+    "raw_extract": "RAW_EXTRACT.json",
+    "raw_extract_sha256": "05422154ad55e5827ebcd67f071a524077175d0dea879180b815aa99f5a17696"
+  },
+  "minimal_next_cheap_check": {
+    "question": "Which exact generic-probe candidate score or first predicate selects Tasovcici/113th instead of Bancici/4th Guards at turn 7?",
+    "method": "Add one selector reason receipt and execute one production turn from the retained native turn-007 autosave through turn 8, binding the selected candidate and Jackal noncapturing_objective_overlap exit.",
+    "cost": "One production turn plus a narrow diagnostic receipt.",
+    "stop_condition": "Stop after the selector operand and overlap exit are recorded; diagnostic only, with no gameplay correction or tuning.",
+    "executed_here": false
+  }
+}

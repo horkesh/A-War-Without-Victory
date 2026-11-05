@@ -1,0 +1,177 @@
+{
+  "schema": "pale-810.strict-allocation-reader-correction-result.v1",
+  "writes_closed": true,
+  "captured_utc": "2026-10-22T11:23:49.897Z",
+  "verdict": "READY_FOR_811_TARGETED_VERIFICATION",
+  "rejected_review": {
+    "path": "logs/claude-channel-20261004/811-allocation-reader-review/811-review.json",
+    "bytes": 8239,
+    "sha256": "46dd0e7918636328d249a4a515c952db8577150dcb471b3eb4d51c3f75044aef",
+    "expected_bytes": 8239,
+    "expected_sha256": "46dd0e7918636328d249a4a515c952db8577150dcb471b3eb4d51c3f75044aef",
+    "matches": true
+  },
+  "preserved_original_packet": {
+    "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-17-seal/810-result.json",
+    "bytes": 7441,
+    "sha256": "ea62ebabf5672e7e953b806d084e1fb42287f470f71024e7b5e8a8a4891a2fa3",
+    "expected_bytes": 7441,
+    "expected_sha256": "ea62ebabf5672e7e953b806d084e1fb42287f470f71024e7b5e8a8a4891a2fa3",
+    "matches": true
+  },
+  "changed": [
+    {
+      "path": "tools/diagnostics/reinforcement_allocation_reader.cjs",
+      "bytes": 20532,
+      "sha256": "9739fe2e8ff59d2cf1896b9c177c3a6ac9ef1c84e9c03c2097da44f523c10840"
+    },
+    {
+      "path": "tests/reinforcement_allocation_diagnostic.test.ts",
+      "bytes": 36000,
+      "sha256": "6eff326a27cc9892aa45a6d84ae018afd19ecba18af65896ce050f7a05a094df"
+    }
+  ],
+  "protected": [
+    {
+      "path": "src/sim/combat/reinforcement_allocation_diagnostic.ts",
+      "bytes": 7113,
+      "sha256": "12d24113946ad414ae3f310a45c9d7f52e0a24bde916ed60f0001d18d4bacdc6",
+      "expected_bytes": 7113,
+      "expected_sha256": "12d24113946ad414ae3f310a45c9d7f52e0a24bde916ed60f0001d18d4bacdc6",
+      "matches": true
+    },
+    {
+      "path": "src/sim/formation_spawn.ts",
+      "bytes": 47679,
+      "sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa",
+      "expected_bytes": 47679,
+      "expected_sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa",
+      "matches": true
+    },
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "bytes": 20275,
+      "sha256": "b7467c47f97c5c349535b59aaeafa3dea0bc5d03314961c5ac17ef3a4283434a",
+      "expected_bytes": 20275,
+      "expected_sha256": "b7467c47f97c5c349535b59aaeafa3dea0bc5d03314961c5ac17ef3a4283434a",
+      "matches": true
+    },
+    {
+      "path": "src/sim/combat/personnel_diagnostic.ts",
+      "bytes": 5870,
+      "sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3",
+      "expected_bytes": 5870,
+      "expected_sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3",
+      "matches": true
+    },
+    {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 102947714,
+      "sha256": "edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9",
+      "expected_bytes": 102947714,
+      "expected_sha256": "edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9",
+      "matches": true
+    },
+    {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "expected_bytes": 1041,
+      "expected_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "matches": true
+    },
+    {
+      "path": "data/calibration/engine_health_thresholds.json",
+      "bytes": 3775,
+      "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d",
+      "expected_bytes": 3775,
+      "expected_sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d",
+      "matches": true
+    },
+    {
+      "path": "data/source/calibration/painted_control_oct1995.json",
+      "bytes": 35266,
+      "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b",
+      "expected_bytes": 35266,
+      "expected_sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b",
+      "matches": true
+    }
+  ],
+  "correction": {
+    "scope": "strict reader parsing only",
+    "behavior": "Every nonempty line that is a proper prefix of the target topic marker fails closed; empty and complete unrelated lines remain ignored.",
+    "fragments_tested": [
+      "[",
+      "[r",
+      "[reinforcement_",
+      "[reinforcement_alloc",
+      "[reinforcement_allocation"
+    ],
+    "added_negative_controls": 5,
+    "cumulative_negative_controls": 36
+  },
+  "checks": {
+    "retained_red": {
+      "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-18-red-partial-prefix/receipt.json",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "artifact_contract_pass": true,
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 569,
+        "sha256": "cfd9cacac0c96accac8a369510f2fc9822bd26df6da317df47b4bf2111366f51"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 869,
+        "sha256": "661f4d4ec1ec400d965cb216b42d896c0ac9c6e67016cb91cec4cc6c360f81f1"
+      }
+    },
+    "final_affected": {
+      "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-19-green-partial-prefix/receipt.json",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract_pass": true,
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 357,
+        "sha256": "c9adc88161a8566cc2fe89ff979043a6e2b97038e4caedb339f1a4c28de3fcf0"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "final_typecheck": {
+      "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-20-correction-typecheck/receipt.json",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract_pass": true,
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "focused_counts": {
+      "files": 1,
+      "tests": 18,
+      "passed": 18,
+      "failed": 0
+    }
+  },
+  "reused_evidence": {
+    "original_final_focused": "attempt-15-final-focused: 3 files, 67/67, exits 0/0",
+    "reason": "Observer, formation, reason, and personnel sources were unchanged by the reader-only correction."
+  },
+  "campaign_invocations": 0,
+  "replay_invocations": 0,
+  "full_suite_invocations": 0,
+  "build_invocations": 0
+}

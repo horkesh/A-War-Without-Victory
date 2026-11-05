@@ -1,0 +1,132 @@
+{
+  "schema": "awwv.native23-cdp-installed-adapter-fixture.v1",
+  "command": [
+    "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\native23-cdp-failure-diagnosis\\installed_adapter_fixture_v2.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\native23-cdp-failure-diagnosis\\adapter-attempt-02"
+  ],
+  "playwright_version": "1.60.0",
+  "browser_executable": "C:/Users/User/AppData/Local/ms-playwright/chromium-1223/chrome-win64/chrome.exe",
+  "asset": {
+    "bytes": 26,
+    "sha256": "3910462cf065a7e2dd8305280146b3221d0f449105a2bd3299263b5549238824",
+    "range": "bytes=0-"
+  },
+  "launch_count": 1,
+  "adapter": {
+    "pass": false,
+    "outer_url": "http://localhost:61868/outer.html",
+    "frame_url": "http://127.0.0.1:61867/frame.html",
+    "page_frame_count": 2,
+    "target_info": {
+      "outer": {
+        "ok": true,
+        "target_id": "1327DBAE2FC9110F47573141E369B733",
+        "type": "page",
+        "url": "http://localhost:61868/outer.html"
+      },
+      "frame": {
+        "ok": true,
+        "target_id": "1903DBDC29163B87F515BEEF1698DB28",
+        "type": "iframe",
+        "url": "http://127.0.0.1:61867/frame.html"
+      }
+    },
+    "browser_result": {
+      "status": 206,
+      "bytes": 26,
+      "sha256": "3910462cf065a7e2dd8305280146b3221d0f449105a2bd3299263b5549238824"
+    },
+    "direct_same_session_body": null,
+    "event_counts": {
+      "outer": {
+        "Network.requestWillBeSent": 0,
+        "Network.responseReceived": 0,
+        "Network.loadingFinished": 0,
+        "Network.loadingFailed": 0
+      },
+      "frame": {
+        "Network.requestWillBeSent": 1,
+        "Network.responseReceived": 1,
+        "Network.loadingFinished": 0,
+        "Network.loadingFailed": 0
+      }
+    },
+    "events": {
+      "outer": [],
+      "frame": [
+        {
+          "kind": "Network.requestWillBeSent",
+          "request_id": "20836.2",
+          "frame_id": "1903DBDC29163B87F515BEEF1698DB28",
+          "loader_id": "B509A7FB2E4E4FBA71C2DE00BC4F0B0A",
+          "timestamp": 294504.939744,
+          "type": "Fetch",
+          "url": "http://127.0.0.1:61867/asset.bin",
+          "method": "GET",
+          "request_range": "bytes=0-",
+          "status": null,
+          "encoded_data_length": null,
+          "error_text": null
+        },
+        {
+          "kind": "Network.responseReceived",
+          "request_id": "20836.2",
+          "frame_id": "1903DBDC29163B87F515BEEF1698DB28",
+          "loader_id": "B509A7FB2E4E4FBA71C2DE00BC4F0B0A",
+          "timestamp": 294504.943327,
+          "type": "Fetch",
+          "url": "http://127.0.0.1:61867/asset.bin",
+          "method": null,
+          "request_range": null,
+          "status": 206,
+          "encoded_data_length": null,
+          "error_text": null
+        }
+      ]
+    },
+    "server_witnesses": [
+      {
+        "server": "outer",
+        "method": "GET",
+        "url": "/outer.html",
+        "range": null
+      },
+      {
+        "server": "frame",
+        "method": "GET",
+        "url": "/frame.html",
+        "range": null
+      },
+      {
+        "server": "frame",
+        "method": "GET",
+        "url": "/asset.bin",
+        "range": "bytes=0-"
+      }
+    ]
+  },
+  "midflight_negative": {
+    "pass": true,
+    "status": "inconsistent",
+    "rows_by_kind": {
+      "request": 0,
+      "response": 1,
+      "failure": 0,
+      "finish": 0
+    },
+    "inconsistency": {
+      "sequence": 1,
+      "code": "response-without-request",
+      "request_id": "fixture-midflight-request"
+    },
+    "sends": [
+      {
+        "method": "Network.enable",
+        "params": {}
+      }
+    ]
+  },
+  "pass": false,
+  "error": "AssertionError [ERR_ASSERTION]: fixture acceptance failed\n    at run (C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\native23-cdp-failure-diagnosis\\installed_adapter_fixture_v2.cjs:193:12)"
+}

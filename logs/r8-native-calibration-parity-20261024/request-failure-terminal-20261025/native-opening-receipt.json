@@ -1,0 +1,126 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T09:56:49.170Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native-opening-actual-01",
+  "timeout_ms": 600000,
+  "original_argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/validation.cjs",
+    "native",
+    "{evidenceDir}",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/config.template.json",
+    "3440441d753e47827dd0ab0f8075719668bedffcdbb75415b0ad2ecb42b2ee56",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native-preflight-actual-01/receipt.json",
+    "7f22bf81b619c63a2b7deedc7e1eaae311a8d228927559e5dd5521ccdad80177",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native-preflight-actual-01/NATIVE_READY.json",
+    "0a37df7f89f230442c3e679955b69db1f425a09fb6e6c300c312b95cca430013"
+  ],
+  "argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/validation.cjs",
+    "native",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\cold-load-validation-v2\\native-opening-actual-01",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/config.template.json",
+    "3440441d753e47827dd0ab0f8075719668bedffcdbb75415b0ad2ecb42b2ee56",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native-preflight-actual-01/receipt.json",
+    "7f22bf81b619c63a2b7deedc7e1eaae311a8d228927559e5dd5521ccdad80177",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native-preflight-actual-01/NATIVE_READY.json",
+    "0a37df7f89f230442c3e679955b69db1f425a09fb6e6c300c312b95cca430013"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "config.json",
+    "result.json",
+    "progress.json",
+    "netlog.json",
+    "harness.stdout.log",
+    "harness.stderr.log",
+    "external-inventory.json",
+    "exit.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/validation.cjs",
+    "bytes": 28911,
+    "raw_sha256": "c576efe024c90c4a05f4a0762c8944d0dae1c0014d098dc14dc18e33299525c2",
+    "normalized_text_sha256": "c576efe024c90c4a05f4a0762c8944d0dae1c0014d098dc14dc18e33299525c2",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 28911,
+      "sha256": "c576efe024c90c4a05f4a0762c8944d0dae1c0014d098dc14dc18e33299525c2"
+    }
+  },
+  "end_utc": "2026-10-25T09:59:49.340Z",
+  "pid": 27624,
+  "child_exit": 1,
+  "wrapper_exit": 1,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/validation.cjs",
+    "bytes": 28911,
+    "raw_sha256": "c576efe024c90c4a05f4a0762c8944d0dae1c0014d098dc14dc18e33299525c2",
+    "normalized_text_sha256": "c576efe024c90c4a05f4a0762c8944d0dae1c0014d098dc14dc18e33299525c2",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "config.json",
+      "bytes": 4463,
+      "sha256": "3440441d753e47827dd0ab0f8075719668bedffcdbb75415b0ad2ecb42b2ee56"
+    },
+    {
+      "path": "result.json",
+      "bytes": 1945801,
+      "sha256": "3d51bac94a9110a1b7dc083218913dd18f312ae751ca10aa486c20c26d674d4e"
+    },
+    {
+      "path": "progress.json",
+      "bytes": 1945373,
+      "sha256": "0db7f0703f13cf8649dcb17801b3da5cd77cd22faef31d15fa5417d2a2d465eb"
+    },
+    {
+      "path": "netlog.json",
+      "bytes": 3878523,
+      "sha256": "9b3ccb1d675ee66190ec17e286c6100104a46897bbbbb34041dc1ed8b676c417"
+    },
+    {
+      "path": "harness.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "harness.stderr.log",
+      "bytes": 334,
+      "sha256": "549cac7fef809f7299531c5fdfdd752a3f000df399b98030e24802f15019ffe3"
+    },
+    {
+      "path": "external-inventory.json",
+      "bytes": 44914,
+      "sha256": "4d10d9d98d9cc64fc2baa6c2162a1a52465189ab57d9b17583a8bcfbf922e836"
+    },
+    {
+      "path": "exit.json",
+      "bytes": 593,
+      "sha256": "e6af1cb6593c7398dde9c431060bd4fb28df02e90fe5679a66d9ac535682b1e2"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

@@ -1,5 +1,6 @@
 import assert from 'node:assert';
 import { describe, expect, test } from 'vitest';
+import { loadOobBrigades } from '../src/scenario/oob_loader.js';
 import type { OobBrigade } from '../src/scenario/oob_loader.js';
 import { initializeRecruitmentResources } from '../src/sim/recruitment_engine.js';
 import { accrueRecruitmentResources, runOngoingRecruitment, selectAutomaticRecruitmentFactions } from '../src/sim/recruitment_turn.js';
@@ -109,6 +110,105 @@ describe('accrueRecruitmentResources', () => {
 });
 
 describe('runOngoingRecruitment', () => {
+    test('prioritizes the source-dated 31st Drina lineage within the real cap-2 mandatory queue', async () => {
+        const loaded = await loadOobBrigades(process.cwd());
+        const lineage = loaded.find((brigade) => brigade.id === 'arbih_831st_drina_lineage');
+        expect(lineage).toBeDefined();
+        expect(lineage!.priority).toBe(49);
+
+        const queuePeer = (id: string): OobBrigade => ({
+            id,
+            faction: 'RBiH',
+            name: id,
+            home_mun: 'gorazde',
+            kind: 'brigade',
+            manpower_cost: 800,
+            capital_cost: 10,
+            default_equipment_class: 'light_infantry',
+            home_osid: 'op:gorazde:gorazde_2',
+            priority: 50,
+            mandatory: true,
+            available_from: 7,
+            initial_personnel: 600,
+            max_personnel: 1800,
+        });
+        const runQueue = (turn: number, lineagePriority: number) => {
+            const state = makeState();
+            state.meta.turn = turn;
+            state.military.formations = {};
+            state.military.militia_pools = {
+                [militiaPoolKey('gorazde', 'RBiH')]: {
+                    mun_id: 'gorazde',
+                    faction: 'RBiH',
+                    available: 34,
+                    committed: 5500,
+                    exhausted: 92,
+                    updated_turn: 7,
+                },
+            };
+            state.military.recruitment_state = initializeRecruitmentResources(
+                ['RBiH'],
+                { RBiH: 0 },
+                { RBiH: 0 },
+                { RBiH: 0 },
+                { RBiH: 0 },
+                2,
+            );
+            state.political.political_controllers = {
+                'op:gorazde:gorazde_2': 'RBiH',
+            };
+            const report = runOngoingRecruitment(
+                state,
+                [],
+                [
+                    queuePeer('arbih_212th_mountain'),
+                    queuePeer('arbih_223rd_mountain'),
+                    { ...lineage!, priority: lineagePriority },
+                ],
+                new Map([['op:gorazde:gorazde_2', 'gorazde']]),
+                { gorazde: 'op:gorazde:gorazde_2' },
+            );
+            const pool = state.military.militia_pools?.[militiaPoolKey('gorazde', 'RBiH')];
+            return {
+                actionIds: report?.actions.map((action) => action.brigade_id),
+                mandatoryRecruited: report?.mandatory_recruited,
+                formationIds: Object.keys(state.military.formations).sort(),
+                lineagePersonnel: state.military.formations.arbih_831st_drina_lineage?.personnel,
+                poolAvailable: pool?.available,
+                poolCommitted: pool?.committed,
+            };
+        };
+
+        expect(runQueue(6, 49)).toEqual({
+            actionIds: [],
+            mandatoryRecruited: 0,
+            formationIds: [],
+            lineagePersonnel: undefined,
+            poolAvailable: 34,
+            poolCommitted: 5500,
+        });
+
+        const defaultPriority = runQueue(7, 50);
+        expect(defaultPriority).toMatchObject({
+            actionIds: ['arbih_212th_mountain', 'arbih_223rd_mountain'],
+            mandatoryRecruited: 2,
+            formationIds: ['arbih_212th_mountain', 'arbih_223rd_mountain'],
+            lineagePersonnel: undefined,
+        });
+
+        const prioritized = runQueue(7, lineage!.priority);
+        expect(prioritized).toEqual({
+            actionIds: ['arbih_831st_drina_lineage', 'arbih_212th_mountain'],
+            mandatoryRecruited: 2,
+            formationIds: ['arbih_212th_mountain', 'arbih_831st_drina_lineage'],
+            lineagePersonnel: 900,
+            poolAvailable: 0,
+            poolCommitted: 7000,
+        });
+        expect(runQueue(7, lineage!.priority)).toEqual(prioritized);
+        expect(prioritized.formationIds).not.toContain('arbih_223rd_mountain');
+    });
+
     test('keeps player recruitment manual at autonomy 0-1 and delegates it at 2-3 or headless', () => {
         const state = makeState();
         state.meta.player_faction = 'RBiH';

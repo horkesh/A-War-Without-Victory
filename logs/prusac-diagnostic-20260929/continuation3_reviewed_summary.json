@@ -1,0 +1,1910 @@
+{
+  "scope": "Reviewed retained chronology only; no unique original code-cause attribution",
+  "denominator": 712,
+  "initial_receipt_sha256": "dbc147130f07cfef8b9cf44d66b4ab49b26eb25d05e1f999b97ace8a27d75ef8",
+  "corrected_receipt_sha256": "115e5b97c42359c8a9afe5e49e72f14871b257383bf1174f7fb2e09d6ff1be13",
+  "consumed_artifact_sha256": {
+    "n25": {
+      "weekly_report.jsonl": "c6aace6723ab5bf1e371963606592dbbca1a2c830e54e9be8ec6a17c9752ecee",
+      "brigade_temporal_log.jsonl": "63ac73be7f54cdcae74fcb51b29c603cbac007d75dcfe9513bd0be09d4580bfa",
+      "operation_aars.json": "46b2c852263c936be5b1f552e09d06a44bb746287c31372e37e07df8ff6942fb",
+      "watched_operations.json": "41d0d2a62eac1d57c3d0bd1f53d5a46df3857b0d3598bc971af7bfa96b9858b6",
+      "destroyed_brigades.json": "2a3655d44d4bd213cf9c99611300539db08606ca99ae503ef26bb2b8f21e4155",
+      "control_delta.json": "e5b4a614bd5bceeb149207ddcfa69aa9f56c6d9892a82194b81a4cfc340f9fc5",
+      "final_save.json": "95499ed6dfaea616ea5bc714f026367e89ee301b5a1ef33f2a6611cbcbcb4957",
+      "initial_save.json": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+      "run_meta.json": "d76ae86d434acf019795b2f1cac41b38822d9acea80ca70bd39fe7edf4e72fea"
+    },
+    "n37": {
+      "weekly_report.jsonl": "81e0988f1a4b512e46002c936c137a2bce55131b8d9e9d753a34907011506bbf",
+      "brigade_temporal_log.jsonl": "094976ad026b8bfa486ee41bac6878ce168b105e444ddeddef4db318ad431cc4",
+      "operation_aars.json": "679f332b10a04809bce5a335b0a26268b4ad778744ea98923c3a88cce38ebbbf",
+      "watched_operations.json": "41d0d2a62eac1d57c3d0bd1f53d5a46df3857b0d3598bc971af7bfa96b9858b6",
+      "destroyed_brigades.json": "0f451bb76674855179df60133737b51a2039b68a7b9a9ddf4b730f169684e729",
+      "control_delta.json": "499c6824a2513dcda638862f12cefaaf728baddf09ef636a530cac847ac25949",
+      "final_save.json": "2e3ad11b585560cff93876a275163faa17d044e68c403245c36df55dda0e5731",
+      "initial_save.json": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+      "run_meta.json": "cfcf51799b61ade6a5d7e51a73448d1d616dfc565df0b28ed3adc486bd47d6e2"
+    },
+    "n29": {
+      "weekly_report.jsonl": "cbf8049beaeac3df88e12a8d30286d18ec69ee9a4c198af422b685b05e490b3b",
+      "brigade_temporal_log.jsonl": "a93c16a69d8c53397e1474521fd611ef9ffd5f478836fce1eebf43ed4b2781fb",
+      "operation_aars.json": "8cfd076925f182357342f0c89067df5bf42d62f62edd42bdda9064e8d3268bf6",
+      "watched_operations.json": "41d0d2a62eac1d57c3d0bd1f53d5a46df3857b0d3598bc971af7bfa96b9858b6",
+      "destroyed_brigades.json": "a16c0b9bf637c56a6464a32e43665960a0d04c95e9794e3050eee16cf5949898",
+      "control_delta.json": "72160a4ffe5bc516f9b9fc0178de1081c90576c7a82c8c6a00d591e8fa6a9214",
+      "final_save.json": "18f86eba335bcec61aef84adb9fa7aea4f25a5a13e19c3b9ead4314ed2efced0",
+      "initial_save.json": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+      "run_meta.json": "c6a952f20178aec61a03dbb928fd13d645b5c7ddc4b51c49f8b4c290dd3166e9"
+    },
+    "n30": {
+      "weekly_report.jsonl": "000648b36672d2e3ea2b4b250b11d6ad215c639075625dcbfb9be4eca62b32eb",
+      "brigade_temporal_log.jsonl": "27a6061937e4e93dfa6dcce165911431779170291be804ec8bc2ac557b7c1cb3",
+      "operation_aars.json": "679f332b10a04809bce5a335b0a26268b4ad778744ea98923c3a88cce38ebbbf",
+      "watched_operations.json": "41d0d2a62eac1d57c3d0bd1f53d5a46df3857b0d3598bc971af7bfa96b9858b6",
+      "destroyed_brigades.json": "86cf82e872a9b2c567cb3db7e2c03842f112bcb14d892279188dd4468539e3d7",
+      "control_delta.json": "6546afb23943c6649df85b3605ef2a08ed9fd2a07f23fe58a3cfced9b13dd296",
+      "final_save.json": "56fb8b44d7bc9ece432436ee9015033afb564de4591b1557159e01fed8d63fbf",
+      "initial_save.json": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+      "run_meta.json": "e2b02fecaa5294bd52beec7540d4e9bcd77aa5ef5b6d05b1c3f289afb7c35cc7"
+    }
+  },
+  "preserved_input_hash_checks": 36,
+  "targets": [
+    {
+      "osid": "op:jajce:barevo_2",
+      "reference": "HRHB",
+      "n25": "HRHB",
+      "n37": "RS"
+    },
+    {
+      "osid": "op:jajce:lupnica",
+      "reference": "HRHB",
+      "n25": "HRHB",
+      "n37": "RS"
+    },
+    {
+      "osid": "op:mrkonjic_grad:majdan_2",
+      "reference": "HRHB",
+      "n25": "HRHB",
+      "n37": "RS"
+    },
+    {
+      "osid": "op:travnik:varosluk",
+      "reference": "RBiH",
+      "n25": "RBiH",
+      "n37": "RS"
+    }
+  ],
+  "indexing": {
+    "temporal": "raw turn = week_index + 1; initial/corrected helper temporal turn labels are week_index",
+    "weekly": "weekly_report.week_index is the completed turn; preserve this distinct schema",
+    "initial_window": "temporal week_index170–188 filter; not run-earliest causal divergence"
+  },
+  "first_737_recorded_route_state_difference": {
+    "turn": 138,
+    "n25": {
+      "location_osid": "op:busovaca:gornja_rovna",
+      "active_op_id": null,
+      "current_op_phase": null,
+      "mv_state": null,
+      "mv_destinations": null
+    },
+    "n37": {
+      "location_osid": "op:busovaca:gornja_rovna",
+      "active_op_id": null,
+      "current_op_phase": null,
+      "mv_state": null,
+      "mv_destinations": [
+        "op:bugojno:udurlije"
+      ]
+    },
+    "limitation": "First difference for the named actor in recorded post-turn state, not a selector cause"
+  },
+  "runs": {
+    "n25": {
+      "operations": [
+        {
+          "name": "Operation Mistral 2",
+          "first_planning_turn": 175,
+          "first_execution_turn": 178,
+          "attack_chronology": [
+            {
+              "turn": 178,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_112th_infantry_1995",
+                  "location_osid": "op:titov_drvar:prekaja_2",
+                  "resolver_seen_target_osid": "op:titov_drvar:prekaja_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:titov_drvar:prekaja_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:sipovo:brdjani",
+                  "resolver_seen_target_osid": "op:sipovo:brdjani",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:brdjani"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hvo_rama_brigade",
+                  "location_osid": "op:glamoc:pribelja",
+                  "resolver_seen_target_osid": "op:sipovo:brdjani",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:brdjani"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 179,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_112th_infantry_1995",
+                  "location_osid": "op:bosanski_petrovac:jasenovac_2",
+                  "resolver_seen_target_osid": "op:bosanski_petrovac:jasenovac_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:bosanski_petrovac:jasenovac_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:sipovo:gornji_mujdzici_2",
+                  "resolver_seen_target_osid": "op:sipovo:gornji_mujdzici_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:gornji_mujdzici_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hvo_rama_brigade",
+                  "location_osid": "op:glamoc:pribelja",
+                  "resolver_seen_target_osid": "op:sipovo:gornji_mujdzici_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:gornji_mujdzici_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 180,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_112th_infantry_1995",
+                  "location_osid": "op:titov_drvar:drvar_2",
+                  "resolver_seen_target_osid": "op:titov_drvar:drvar_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:titov_drvar:drvar_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:sipovo:sipovo_2",
+                  "resolver_seen_target_osid": "op:sipovo:sipovo_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:sipovo_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 181,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_112th_infantry_1995",
+                  "location_osid": "op:titov_drvar:sipovljani_2",
+                  "resolver_seen_target_osid": "op:titov_drvar:sipovljani_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:titov_drvar:sipovljani_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:sipovo:volari_2",
+                  "resolver_seen_target_osid": "op:sipovo:volari_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:volari_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 182,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_112th_infantry_1995",
+                  "location_osid": "op:bosansko_grahovo:bosansko_grahovo_2",
+                  "resolver_seen_target_osid": "op:bosansko_grahovo:bosansko_grahovo_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:bosansko_grahovo:bosansko_grahovo_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:sipovo:pribeljci_2",
+                  "resolver_seen_target_osid": "op:sipovo:pribeljci_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:pribeljci_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 183,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_112th_infantry_1995",
+                  "location_osid": "op:bosansko_grahovo:malesevci",
+                  "resolver_seen_target_osid": "op:bosansko_grahovo:malesevci",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:bosansko_grahovo:malesevci"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:jajce:bravnice",
+                  "resolver_seen_target_osid": "op:jajce:bravnice",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:jajce:bravnice"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 184,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_112th_infantry_1995",
+                  "location_osid": "op:bosansko_grahovo:ugarci",
+                  "resolver_seen_target_osid": "op:bosansko_grahovo:ugarci",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:bosansko_grahovo:ugarci"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:jajce:vinac_2",
+                  "resolver_seen_target_osid": "op:jajce:vinac_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:jajce:vinac_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 185,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:jajce:jajce_3",
+                  "resolver_seen_target_osid": "op:jajce:jajce_3",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:jajce:jajce_3"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 186,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:jajce:lupnica",
+                  "resolver_seen_target_osid": "op:jajce:lupnica",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:jajce:lupnica"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 187,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:jajce:barevo_2",
+                  "resolver_seen_target_osid": "op:jajce:barevo_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:jajce:barevo_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            }
+          ],
+          "launch_detail_fields_present": false,
+          "watched_records": []
+        },
+        {
+          "name": "Operation Southern Move",
+          "first_planning_turn": 183,
+          "first_execution_turn": 188,
+          "attack_chronology": [
+            {
+              "turn": 188,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hrhb_kralj_petar_kreimir_iv_brigade",
+                  "location_osid": "op:mrkonjic_grad:majdan_2",
+                  "resolver_seen_target_osid": "op:mrkonjic_grad:majdan_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:mrkonjic_grad:majdan_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_guards_tigers",
+                  "location_osid": "op:sipovo:sipovo_2",
+                  "resolver_seen_target_osid": "op:mrkonjic_grad:majdan_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:mrkonjic_grad:majdan_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_4th_guards_split",
+                  "location_osid": "op:mrkonjic_grad:gerzovo_2",
+                  "resolver_seen_target_osid": "op:mrkonjic_grad:majdan_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:mrkonjic_grad:majdan_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_5th_guards_karlovac",
+                  "location_osid": "op:mrkonjic_grad:gerzovo_2",
+                  "resolver_seen_target_osid": "op:mrkonjic_grad:majdan_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:mrkonjic_grad:majdan_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            }
+          ],
+          "launch_detail_fields_present": false,
+          "watched_records": []
+        }
+      ],
+      "actor_737_route_transitions": [
+        {
+          "turn": 1,
+          "week_index": 0,
+          "location_osid": "op:travnik:travnik_2",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 60,
+          "week_index": 59,
+          "location_osid": "op:travnik:travnik_2",
+          "active_op_id": "arbih_3rd_corps:Central Bosnia Counteroffensive:t60",
+          "current_op_phase": "planning",
+          "mv_state": null,
+          "mv_destinations": [
+            "op:fojnica:fojnica_2"
+          ]
+        },
+        {
+          "turn": 61,
+          "week_index": 60,
+          "location_osid": "op:travnik:travnik_2",
+          "active_op_id": "arbih_3rd_corps:Central Bosnia Counteroffensive:t60",
+          "current_op_phase": "planning",
+          "mv_state": "in_transit",
+          "mv_destinations": [
+            "op:fojnica:fojnica_2"
+          ]
+        },
+        {
+          "turn": 63,
+          "week_index": 62,
+          "location_osid": "op:travnik:travnik_2",
+          "active_op_id": "arbih_3rd_corps:Central Bosnia Counteroffensive:t60",
+          "current_op_phase": "execution",
+          "mv_state": "in_transit",
+          "mv_destinations": [
+            "op:fojnica:fojnica_2"
+          ]
+        },
+        {
+          "turn": 64,
+          "week_index": 63,
+          "location_osid": "op:fojnica:fojnica_2",
+          "active_op_id": "arbih_3rd_corps:Central Bosnia Counteroffensive:t60",
+          "current_op_phase": "recovery",
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 65,
+          "week_index": 64,
+          "location_osid": "op:fojnica:fojnica_2",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:busovaca:gornja_rovna"
+          ]
+        },
+        {
+          "turn": 66,
+          "week_index": 65,
+          "location_osid": "op:fojnica:fojnica_2",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": "in_transit",
+          "mv_destinations": [
+            "op:busovaca:gornja_rovna"
+          ]
+        },
+        {
+          "turn": 67,
+          "week_index": 66,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 98,
+          "week_index": 97,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:bugojno:udurlije"
+          ]
+        },
+        {
+          "turn": 136,
+          "week_index": 135,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 150,
+          "week_index": 149,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": "arbih_3rd_corps:Operation Vlasic Ridge:t150",
+          "current_op_phase": "planning",
+          "mv_state": null,
+          "mv_destinations": [
+            "op:travnik:paklarevo"
+          ]
+        },
+        {
+          "turn": 151,
+          "week_index": 150,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": "arbih_3rd_corps:Operation Vlasic Ridge:t150",
+          "current_op_phase": "planning",
+          "mv_state": "in_transit",
+          "mv_destinations": [
+            "op:travnik:paklarevo"
+          ]
+        },
+        {
+          "turn": 153,
+          "week_index": 152,
+          "location_osid": "op:travnik:paklarevo",
+          "active_op_id": "arbih_3rd_corps:Operation Vlasic Ridge:t150",
+          "current_op_phase": "planning",
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 154,
+          "week_index": 153,
+          "location_osid": "op:travnik:paklarevo",
+          "active_op_id": "arbih_3rd_corps:Operation Vlasic Ridge:t150",
+          "current_op_phase": "recovery",
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 155,
+          "week_index": 154,
+          "location_osid": "op:travnik:paklarevo",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 162,
+          "week_index": 161,
+          "location_osid": "op:travnik:paklarevo",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:travnik:turbe_2"
+          ]
+        },
+        {
+          "turn": 163,
+          "week_index": 162,
+          "location_osid": "op:travnik:paklarevo",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": "in_transit",
+          "mv_destinations": [
+            "op:travnik:turbe_2"
+          ]
+        },
+        {
+          "turn": 164,
+          "week_index": 163,
+          "location_osid": "op:travnik:turbe_2",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 180,
+          "week_index": 179,
+          "location_osid": "op:travnik:turbe_2",
+          "active_op_id": "arbih_3rd_corps:Operacija Plamičak:t180",
+          "current_op_phase": "planning",
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 181,
+          "week_index": 180,
+          "location_osid": "op:travnik:varosluk",
+          "active_op_id": "arbih_3rd_corps:Operacija Plamičak:t180",
+          "current_op_phase": "recovery",
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 182,
+          "week_index": 181,
+          "location_osid": "op:travnik:gornje_krcevine",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": null
+        }
+      ],
+      "ghost_evidence": [
+        {
+          "id": "hv_1st_hgz_1995",
+          "temporal_row_count": 0,
+          "destroyed_records": []
+        },
+        {
+          "id": "hv_112th_infantry_1995",
+          "temporal_row_count": 0,
+          "destroyed_records": []
+        }
+      ]
+    },
+    "n37": {
+      "operations": [
+        {
+          "name": "Operation Mistral 2",
+          "first_planning_turn": 175,
+          "first_execution_turn": 180,
+          "attack_chronology": [
+            {
+              "turn": 180,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_112th_infantry_1995",
+                  "location_osid": "op:titov_drvar:drvar_2",
+                  "resolver_seen_target_osid": "op:titov_drvar:drvar_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:titov_drvar:drvar_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:sipovo:brdjani",
+                  "resolver_seen_target_osid": "op:sipovo:brdjani",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:brdjani"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_4th_guards_split",
+                  "location_osid": "op:bosansko_grahovo:bosansko_grahovo_2",
+                  "resolver_seen_target_osid": "op:titov_drvar:drvar_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:titov_drvar:drvar_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 181,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_112th_infantry_1995",
+                  "location_osid": "op:titov_drvar:sipovljani_2",
+                  "resolver_seen_target_osid": "op:titov_drvar:sipovljani_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:titov_drvar:sipovljani_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:sipovo:gornji_mujdzici_2",
+                  "resolver_seen_target_osid": "op:sipovo:gornji_mujdzici_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:gornji_mujdzici_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_4th_guards_split",
+                  "location_osid": "op:bosansko_grahovo:bosansko_grahovo_2",
+                  "resolver_seen_target_osid": "op:titov_drvar:sipovljani_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:titov_drvar:sipovljani_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 182,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:sipovo:sipovo_2",
+                  "resolver_seen_target_osid": "op:sipovo:sipovo_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:sipovo_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 183,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:sipovo:volari_2",
+                  "resolver_seen_target_osid": "op:sipovo:volari_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:volari_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 184,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:sipovo:pribeljci_2",
+                  "resolver_seen_target_osid": "op:sipovo:pribeljci_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:pribeljci_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 185,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:jajce:bravnice",
+                  "resolver_seen_target_osid": "op:jajce:bravnice",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:jajce:bravnice"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 186,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:jajce:vinac_2",
+                  "resolver_seen_target_osid": "op:jajce:vinac_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:jajce:vinac_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 187,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:jajce:jajce_3",
+                  "resolver_seen_target_osid": "op:jajce:jajce_3",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:jajce:jajce_3"
+                }
+              ],
+              "skipped_attack_orders": []
+            }
+          ],
+          "launch_detail_fields_present": false,
+          "watched_records": []
+        },
+        {
+          "name": "Operation Southern Move",
+          "first_planning_turn": 185,
+          "first_execution_turn": null,
+          "attack_chronology": [],
+          "launch_detail_fields_present": false,
+          "watched_records": []
+        }
+      ],
+      "actor_737_route_transitions": [
+        {
+          "turn": 1,
+          "week_index": 0,
+          "location_osid": "op:travnik:travnik_2",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 60,
+          "week_index": 59,
+          "location_osid": "op:travnik:travnik_2",
+          "active_op_id": "arbih_3rd_corps:Central Bosnia Counteroffensive:t60",
+          "current_op_phase": "planning",
+          "mv_state": null,
+          "mv_destinations": [
+            "op:fojnica:fojnica_2"
+          ]
+        },
+        {
+          "turn": 61,
+          "week_index": 60,
+          "location_osid": "op:travnik:travnik_2",
+          "active_op_id": "arbih_3rd_corps:Central Bosnia Counteroffensive:t60",
+          "current_op_phase": "planning",
+          "mv_state": "in_transit",
+          "mv_destinations": [
+            "op:fojnica:fojnica_2"
+          ]
+        },
+        {
+          "turn": 63,
+          "week_index": 62,
+          "location_osid": "op:travnik:travnik_2",
+          "active_op_id": "arbih_3rd_corps:Central Bosnia Counteroffensive:t60",
+          "current_op_phase": "execution",
+          "mv_state": "in_transit",
+          "mv_destinations": [
+            "op:fojnica:fojnica_2"
+          ]
+        },
+        {
+          "turn": 64,
+          "week_index": 63,
+          "location_osid": "op:fojnica:fojnica_2",
+          "active_op_id": "arbih_3rd_corps:Central Bosnia Counteroffensive:t60",
+          "current_op_phase": "recovery",
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 65,
+          "week_index": 64,
+          "location_osid": "op:fojnica:fojnica_2",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:busovaca:gornja_rovna"
+          ]
+        },
+        {
+          "turn": 66,
+          "week_index": 65,
+          "location_osid": "op:fojnica:fojnica_2",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": "in_transit",
+          "mv_destinations": [
+            "op:busovaca:gornja_rovna"
+          ]
+        },
+        {
+          "turn": 67,
+          "week_index": 66,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 98,
+          "week_index": 97,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:bugojno:udurlije"
+          ]
+        },
+        {
+          "turn": 136,
+          "week_index": 135,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 138,
+          "week_index": 137,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:bugojno:udurlije"
+          ]
+        },
+        {
+          "turn": 150,
+          "week_index": 149,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": "arbih_3rd_corps:Operation Vlasic Ridge:t150",
+          "current_op_phase": "planning",
+          "mv_state": null,
+          "mv_destinations": [
+            "op:travnik:paklarevo"
+          ]
+        },
+        {
+          "turn": 151,
+          "week_index": 150,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": "arbih_3rd_corps:Operation Vlasic Ridge:t150",
+          "current_op_phase": "planning",
+          "mv_state": "in_transit",
+          "mv_destinations": [
+            "op:travnik:paklarevo"
+          ]
+        },
+        {
+          "turn": 153,
+          "week_index": 152,
+          "location_osid": "op:travnik:paklarevo",
+          "active_op_id": "arbih_3rd_corps:Operation Vlasic Ridge:t150",
+          "current_op_phase": "recovery",
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 154,
+          "week_index": 153,
+          "location_osid": "op:travnik:paklarevo",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 155,
+          "week_index": 154,
+          "location_osid": "op:travnik:paklarevo",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:bugojno:medini"
+          ]
+        },
+        {
+          "turn": 156,
+          "week_index": 155,
+          "location_osid": "op:travnik:paklarevo",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": "in_transit",
+          "mv_destinations": [
+            "op:bugojno:medini"
+          ]
+        },
+        {
+          "turn": 157,
+          "week_index": 156,
+          "location_osid": "op:bugojno:medini",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 180,
+          "week_index": 179,
+          "location_osid": "op:bugojno:brizina",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:bugojno:udurlije"
+          ]
+        },
+        {
+          "turn": 187,
+          "week_index": 186,
+          "location_osid": "op:bugojno:brizina",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:donji_vakuf:komar_2"
+          ]
+        },
+        {
+          "turn": 188,
+          "week_index": 187,
+          "location_osid": "op:bugojno:brizina",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:travnik:gornje_krcevine"
+          ]
+        }
+      ],
+      "ghost_evidence": [
+        {
+          "id": "hv_1st_hgz_1995",
+          "temporal_row_count": 0,
+          "destroyed_records": []
+        },
+        {
+          "id": "hv_112th_infantry_1995",
+          "temporal_row_count": 0,
+          "destroyed_records": []
+        }
+      ]
+    },
+    "n29": {
+      "operations": [
+        {
+          "name": "Operation Mistral 2",
+          "first_planning_turn": 175,
+          "first_execution_turn": 178,
+          "attack_chronology": [
+            {
+              "turn": 178,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:sipovo:brdjani",
+                  "resolver_seen_target_osid": "op:sipovo:brdjani",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:brdjani"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hvo_rama_brigade",
+                  "location_osid": "op:glamoc:pribelja",
+                  "resolver_seen_target_osid": "op:sipovo:brdjani",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:brdjani"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 179,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:sipovo:gornji_mujdzici_2",
+                  "resolver_seen_target_osid": "op:sipovo:gornji_mujdzici_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:gornji_mujdzici_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hvo_rama_brigade",
+                  "location_osid": "op:glamoc:pribelja",
+                  "resolver_seen_target_osid": "op:sipovo:gornji_mujdzici_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:gornji_mujdzici_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 180,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:sipovo:sipovo_2",
+                  "resolver_seen_target_osid": "op:sipovo:sipovo_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:sipovo_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 181,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:sipovo:volari_2",
+                  "resolver_seen_target_osid": "op:sipovo:volari_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:volari_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 182,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:sipovo:pribeljci_2",
+                  "resolver_seen_target_osid": "op:sipovo:pribeljci_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:pribeljci_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 183,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:jajce:bravnice",
+                  "resolver_seen_target_osid": "op:jajce:bravnice",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:jajce:bravnice"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 184,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:jajce:vinac_2",
+                  "resolver_seen_target_osid": "op:jajce:vinac_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:jajce:vinac_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 185,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:jajce:jajce_3",
+                  "resolver_seen_target_osid": "op:jajce:jajce_3",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:jajce:jajce_3"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 186,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:jajce:lupnica",
+                  "resolver_seen_target_osid": "op:jajce:lupnica",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:jajce:lupnica"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 187,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:jajce:barevo_2",
+                  "resolver_seen_target_osid": "op:jajce:barevo_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:jajce:barevo_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hvo_rama_brigade",
+                  "location_osid": "op:jajce:bravnice",
+                  "resolver_seen_target_osid": "op:jajce:barevo_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:jajce:barevo_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 188,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hvo_rama_brigade",
+                  "location_osid": "op:jajce:jezero_2",
+                  "resolver_seen_target_osid": "op:jajce:jezero_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:jajce:jezero_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            }
+          ],
+          "launch_detail_fields_present": false,
+          "watched_records": []
+        },
+        {
+          "name": "Operation Southern Move",
+          "first_planning_turn": 183,
+          "first_execution_turn": 188,
+          "attack_chronology": [
+            {
+              "turn": 188,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "F_HRHB_0001",
+                  "location_osid": "op:mrkonjic_grad:gerzovo_2",
+                  "resolver_seen_target_osid": "op:mrkonjic_grad:gerzovo_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:mrkonjic_grad:gerzovo_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hrhb_kralj_petar_kreimir_iv_brigade",
+                  "location_osid": "op:sipovo:brdjani",
+                  "resolver_seen_target_osid": "op:mrkonjic_grad:gerzovo_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:mrkonjic_grad:gerzovo_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_guards_tigers",
+                  "location_osid": "op:sipovo:brdjani",
+                  "resolver_seen_target_osid": "op:mrkonjic_grad:gerzovo_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:mrkonjic_grad:gerzovo_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_5th_guards_karlovac",
+                  "location_osid": "op:sipovo:brdjani",
+                  "resolver_seen_target_osid": "op:mrkonjic_grad:gerzovo_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:mrkonjic_grad:gerzovo_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            }
+          ],
+          "launch_detail_fields_present": false,
+          "watched_records": []
+        }
+      ],
+      "actor_737_route_transitions": [
+        {
+          "turn": 1,
+          "week_index": 0,
+          "location_osid": "op:travnik:travnik_2",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 60,
+          "week_index": 59,
+          "location_osid": "op:travnik:travnik_2",
+          "active_op_id": "arbih_3rd_corps:Central Bosnia Counteroffensive:t60",
+          "current_op_phase": "planning",
+          "mv_state": null,
+          "mv_destinations": [
+            "op:fojnica:fojnica_2"
+          ]
+        },
+        {
+          "turn": 61,
+          "week_index": 60,
+          "location_osid": "op:travnik:travnik_2",
+          "active_op_id": "arbih_3rd_corps:Central Bosnia Counteroffensive:t60",
+          "current_op_phase": "planning",
+          "mv_state": "in_transit",
+          "mv_destinations": [
+            "op:fojnica:fojnica_2"
+          ]
+        },
+        {
+          "turn": 63,
+          "week_index": 62,
+          "location_osid": "op:travnik:travnik_2",
+          "active_op_id": "arbih_3rd_corps:Central Bosnia Counteroffensive:t60",
+          "current_op_phase": "execution",
+          "mv_state": "in_transit",
+          "mv_destinations": [
+            "op:fojnica:fojnica_2"
+          ]
+        },
+        {
+          "turn": 64,
+          "week_index": 63,
+          "location_osid": "op:fojnica:fojnica_2",
+          "active_op_id": "arbih_3rd_corps:Central Bosnia Counteroffensive:t60",
+          "current_op_phase": "recovery",
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 65,
+          "week_index": 64,
+          "location_osid": "op:fojnica:fojnica_2",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:busovaca:gornja_rovna"
+          ]
+        },
+        {
+          "turn": 66,
+          "week_index": 65,
+          "location_osid": "op:fojnica:fojnica_2",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": "in_transit",
+          "mv_destinations": [
+            "op:busovaca:gornja_rovna"
+          ]
+        },
+        {
+          "turn": 67,
+          "week_index": 66,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 98,
+          "week_index": 97,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:bugojno:udurlije"
+          ]
+        },
+        {
+          "turn": 136,
+          "week_index": 135,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 138,
+          "week_index": 137,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:bugojno:udurlije"
+          ]
+        },
+        {
+          "turn": 150,
+          "week_index": 149,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": "arbih_3rd_corps:Operation Vlasic Ridge:t150",
+          "current_op_phase": "planning",
+          "mv_state": null,
+          "mv_destinations": [
+            "op:travnik:paklarevo"
+          ]
+        },
+        {
+          "turn": 151,
+          "week_index": 150,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": "arbih_3rd_corps:Operation Vlasic Ridge:t150",
+          "current_op_phase": "planning",
+          "mv_state": "in_transit",
+          "mv_destinations": [
+            "op:travnik:paklarevo"
+          ]
+        },
+        {
+          "turn": 153,
+          "week_index": 152,
+          "location_osid": "op:travnik:paklarevo",
+          "active_op_id": "arbih_3rd_corps:Operation Vlasic Ridge:t150",
+          "current_op_phase": "recovery",
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 154,
+          "week_index": 153,
+          "location_osid": "op:travnik:paklarevo",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 155,
+          "week_index": 154,
+          "location_osid": "op:travnik:paklarevo",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:bugojno:medini"
+          ]
+        },
+        {
+          "turn": 156,
+          "week_index": 155,
+          "location_osid": "op:travnik:paklarevo",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": "in_transit",
+          "mv_destinations": [
+            "op:bugojno:medini"
+          ]
+        },
+        {
+          "turn": 157,
+          "week_index": 156,
+          "location_osid": "op:bugojno:medini",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 180,
+          "week_index": 179,
+          "location_osid": "op:bugojno:brizina",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:bugojno:udurlije"
+          ]
+        },
+        {
+          "turn": 187,
+          "week_index": 186,
+          "location_osid": "op:bugojno:brizina",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:donji_vakuf:komar_2"
+          ]
+        },
+        {
+          "turn": 188,
+          "week_index": 187,
+          "location_osid": "op:bugojno:brizina",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:travnik:gornje_krcevine"
+          ]
+        }
+      ],
+      "ghost_evidence": [
+        {
+          "id": "hv_1st_hgz_1995",
+          "temporal_row_count": 0,
+          "destroyed_records": []
+        },
+        {
+          "id": "hv_112th_infantry_1995",
+          "temporal_row_count": 0,
+          "destroyed_records": []
+        }
+      ]
+    },
+    "n30": {
+      "operations": [
+        {
+          "name": "Operation Mistral 2",
+          "first_planning_turn": 175,
+          "first_execution_turn": 180,
+          "attack_chronology": [
+            {
+              "turn": 180,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_112th_infantry_1995",
+                  "location_osid": "op:titov_drvar:drvar_2",
+                  "resolver_seen_target_osid": "op:titov_drvar:drvar_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:titov_drvar:drvar_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:sipovo:brdjani",
+                  "resolver_seen_target_osid": "op:sipovo:brdjani",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:brdjani"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_4th_guards_split",
+                  "location_osid": "op:bosansko_grahovo:bosansko_grahovo_2",
+                  "resolver_seen_target_osid": "op:titov_drvar:drvar_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:titov_drvar:drvar_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 181,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_112th_infantry_1995",
+                  "location_osid": "op:titov_drvar:sipovljani_2",
+                  "resolver_seen_target_osid": "op:titov_drvar:sipovljani_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:titov_drvar:sipovljani_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:sipovo:gornji_mujdzici_2",
+                  "resolver_seen_target_osid": "op:sipovo:gornji_mujdzici_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:gornji_mujdzici_2"
+                },
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_4th_guards_split",
+                  "location_osid": "op:bosansko_grahovo:bosansko_grahovo_2",
+                  "resolver_seen_target_osid": "op:titov_drvar:sipovljani_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:titov_drvar:sipovljani_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 182,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:sipovo:sipovo_2",
+                  "resolver_seen_target_osid": "op:sipovo:sipovo_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:sipovo_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 183,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:sipovo:volari_2",
+                  "resolver_seen_target_osid": "op:sipovo:volari_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:volari_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 184,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:sipovo:pribeljci_2",
+                  "resolver_seen_target_osid": "op:sipovo:pribeljci_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:sipovo:pribeljci_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 185,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:jajce:bravnice",
+                  "resolver_seen_target_osid": "op:jajce:bravnice",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:jajce:bravnice"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 186,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:jajce:vinac_2",
+                  "resolver_seen_target_osid": "op:jajce:vinac_2",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:jajce:vinac_2"
+                }
+              ],
+              "skipped_attack_orders": []
+            },
+            {
+              "turn": 187,
+              "phase": "execution",
+              "participant_attack_orders": [
+                {
+                  "battle_count": 1,
+                  "brigade_id": "hv_1st_hgz_1995",
+                  "location_osid": "op:jajce:jajce_3",
+                  "resolver_seen_target_osid": "op:jajce:jajce_3",
+                  "target_is_current_objective": false,
+                  "target_osid": "op:jajce:jajce_3"
+                }
+              ],
+              "skipped_attack_orders": []
+            }
+          ],
+          "launch_detail_fields_present": false,
+          "watched_records": []
+        },
+        {
+          "name": "Operation Southern Move",
+          "first_planning_turn": 185,
+          "first_execution_turn": null,
+          "attack_chronology": [],
+          "launch_detail_fields_present": false,
+          "watched_records": []
+        }
+      ],
+      "actor_737_route_transitions": [
+        {
+          "turn": 1,
+          "week_index": 0,
+          "location_osid": "op:travnik:travnik_2",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 60,
+          "week_index": 59,
+          "location_osid": "op:travnik:travnik_2",
+          "active_op_id": "arbih_3rd_corps:Central Bosnia Counteroffensive:t60",
+          "current_op_phase": "planning",
+          "mv_state": null,
+          "mv_destinations": [
+            "op:fojnica:fojnica_2"
+          ]
+        },
+        {
+          "turn": 61,
+          "week_index": 60,
+          "location_osid": "op:travnik:travnik_2",
+          "active_op_id": "arbih_3rd_corps:Central Bosnia Counteroffensive:t60",
+          "current_op_phase": "planning",
+          "mv_state": "in_transit",
+          "mv_destinations": [
+            "op:fojnica:fojnica_2"
+          ]
+        },
+        {
+          "turn": 63,
+          "week_index": 62,
+          "location_osid": "op:travnik:travnik_2",
+          "active_op_id": "arbih_3rd_corps:Central Bosnia Counteroffensive:t60",
+          "current_op_phase": "execution",
+          "mv_state": "in_transit",
+          "mv_destinations": [
+            "op:fojnica:fojnica_2"
+          ]
+        },
+        {
+          "turn": 64,
+          "week_index": 63,
+          "location_osid": "op:fojnica:fojnica_2",
+          "active_op_id": "arbih_3rd_corps:Central Bosnia Counteroffensive:t60",
+          "current_op_phase": "recovery",
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 65,
+          "week_index": 64,
+          "location_osid": "op:fojnica:fojnica_2",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:busovaca:gornja_rovna"
+          ]
+        },
+        {
+          "turn": 66,
+          "week_index": 65,
+          "location_osid": "op:fojnica:fojnica_2",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": "in_transit",
+          "mv_destinations": [
+            "op:busovaca:gornja_rovna"
+          ]
+        },
+        {
+          "turn": 67,
+          "week_index": 66,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 98,
+          "week_index": 97,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:bugojno:udurlije"
+          ]
+        },
+        {
+          "turn": 136,
+          "week_index": 135,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 138,
+          "week_index": 137,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:bugojno:udurlije"
+          ]
+        },
+        {
+          "turn": 150,
+          "week_index": 149,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": "arbih_3rd_corps:Operation Vlasic Ridge:t150",
+          "current_op_phase": "planning",
+          "mv_state": null,
+          "mv_destinations": [
+            "op:travnik:paklarevo"
+          ]
+        },
+        {
+          "turn": 151,
+          "week_index": 150,
+          "location_osid": "op:busovaca:gornja_rovna",
+          "active_op_id": "arbih_3rd_corps:Operation Vlasic Ridge:t150",
+          "current_op_phase": "planning",
+          "mv_state": "in_transit",
+          "mv_destinations": [
+            "op:travnik:paklarevo"
+          ]
+        },
+        {
+          "turn": 153,
+          "week_index": 152,
+          "location_osid": "op:travnik:paklarevo",
+          "active_op_id": "arbih_3rd_corps:Operation Vlasic Ridge:t150",
+          "current_op_phase": "recovery",
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 154,
+          "week_index": 153,
+          "location_osid": "op:travnik:paklarevo",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 155,
+          "week_index": 154,
+          "location_osid": "op:travnik:paklarevo",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:bugojno:medini"
+          ]
+        },
+        {
+          "turn": 156,
+          "week_index": 155,
+          "location_osid": "op:travnik:paklarevo",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": "in_transit",
+          "mv_destinations": [
+            "op:bugojno:medini"
+          ]
+        },
+        {
+          "turn": 157,
+          "week_index": 156,
+          "location_osid": "op:bugojno:medini",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": null
+        },
+        {
+          "turn": 180,
+          "week_index": 179,
+          "location_osid": "op:bugojno:brizina",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:bugojno:udurlije"
+          ]
+        },
+        {
+          "turn": 187,
+          "week_index": 186,
+          "location_osid": "op:bugojno:brizina",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:donji_vakuf:komar_2"
+          ]
+        },
+        {
+          "turn": 188,
+          "week_index": 187,
+          "location_osid": "op:bugojno:brizina",
+          "active_op_id": null,
+          "current_op_phase": null,
+          "mv_state": null,
+          "mv_destinations": [
+            "op:travnik:gornje_krcevine"
+          ]
+        }
+      ],
+      "ghost_evidence": [
+        {
+          "id": "hv_1st_hgz_1995",
+          "temporal_row_count": 0,
+          "destroyed_records": []
+        },
+        {
+          "id": "hv_112th_infantry_1995",
+          "temporal_row_count": 0,
+          "destroyed_records": []
+        }
+      ]
+    }
+  },
+  "limits": [
+    "Initial aggregate earliest-divergence claims are superseded by this scoped chronology.",
+    "Corrected full-history aggregate comparisons are not accepted as causal first divergence.",
+    "Ghost temporal absence is absence of logging, not evidence of destruction or withdrawal.",
+    "Current HV withdrawal_turn188 definition is context, not a retained runtime receipt.",
+    "Selector rejection, launch predicate and unique route/lifecycle code cause remain unreported.",
+    "n37 dirty executable continuity remains unproved."
+  ],
+  "disposition": "STOP_CAUSAL_ATTRIBUTION_NO_PRODUCTION_CORRECTION"
+}

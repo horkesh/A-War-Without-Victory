@@ -1,0 +1,305 @@
+{
+  "scope": "GO for dispatcher observation preparation only; calibration NO-GO; no new campaign authorized",
+  "base_commit": "da7df7c36c2b6eb09a68daff37177eca4d5d8d7e",
+  "authorization": {
+    "owner_message": "Proceed",
+    "scope": "bounded observation preparation, proof, review, local integration",
+    "future_139w_authorized": false
+  },
+  "implementation": {
+    "topic": "dispatcher_decision",
+    "ordinary_pass_only": true,
+    "later_assist_passes_separate": true,
+    "default_absent": true,
+    "pre_order_eligibility_filter_context_first_handler": true,
+    "output_boundaries": [
+      "pre_cap_output",
+      "final_generated_output",
+      "snapshot_output"
+    ],
+    "gameplay_correction": false,
+    "save_schema_changed": false,
+    "old_route_consumer_unchanged": true,
+    "source_files": {
+      "src/sim/combat/bot_brigade_ai_osid.ts": {
+        "sha256": "1a5e12d9198c4743955e579440e3bc7f9cc777e5c486fe3cef5842d80af7014e",
+        "bytes": 57294
+      },
+      "src/sim/combat/reason_code_debug.ts": {
+        "sha256": "a72fe590c87947ff355e9b53996d9ad92c30722fd8862ab5c99648420b6245cb",
+        "bytes": 9548
+      },
+      "src/scenario/combat_causality.ts": {
+        "sha256": "37382226bde0e855a487754ccacd162fa220cd98fd55877a776a74c444ddbe7e",
+        "bytes": 25109
+      },
+      "src/scenario/scenario_reporting.ts": {
+        "sha256": "a24c5402f3d003e1be93e5520076c66a39d870fed7da600589c3770679f0b3ed",
+        "bytes": 17393
+      },
+      "tests/bot_dispatcher_decision_diagnostic.test.ts": {
+        "sha256": "ab058607071929b3434caef0a46c3dd501e553619b40724e551fad7a9f825876",
+        "bytes": 14038
+      },
+      "tests/bot_dispatcher_decision_coverage_diagnostic.test.ts": {
+        "sha256": "a4720a71c03176a9bb8c225144b65524645178c6c4c89f574bd5324f971c27e5",
+        "bytes": 6494
+      },
+      "tests/reason_code_debug.test.ts": {
+        "sha256": "c71cfc3d1da2411d593ed5373c0feaf88d0634cf56e3397eea178d91788dce53",
+        "bytes": 9128
+      },
+      "tools/diagnostics/bot_dispatcher_decision_coverage.cjs": {
+        "sha256": "47e93ebd0d7c16b73ead993b828517a1cddcd9ba0c2b6a0a3669a7dbaf0deca0",
+        "bytes": 12592
+      }
+    }
+  },
+  "proof": {
+    "prior_combined": {
+      "files": 5,
+      "tests": 54,
+      "exit": 0,
+      "reuse": "unchanged route/reason and production writer proof; not a final combined rerun"
+    },
+    "prior_reader": {
+      "tests": 15,
+      "exit": 0,
+      "historical": true
+    },
+    "targeted_red": {
+      "tests": 22,
+      "passed": 19,
+      "failed": 3,
+      "exit": 1,
+      "diagnosis": "two intended consumer failures plus disproved movement merge fixture premise"
+    },
+    "targeted_green": {
+      "files": 2,
+      "tests": 22,
+      "exit": 0,
+      "controls": [
+        "global completed-turn actor/pass duplicates",
+        "bidirectional active-column skip",
+        "actual generator to weekly JSON to strict reader",
+        "real cap two pre-cap vs one final/snapshot",
+        "merge generated T1 vs retained MANUAL snapshot",
+        "focused complete off/on state and order equality"
+      ]
+    },
+    "syntax_exit": 0,
+    "typecheck_reused_exit": 0,
+    "independent_review": "initial NO-GO preserved; one targeted verification GO for preparation only",
+    "legacy_n39_negative": {
+      "exit": 1,
+      "receipts": 0,
+      "missing_formation": "arbih_737th_muslim_light",
+      "missing_turns": [
+        137,
+        138,
+        139
+      ],
+      "causal_proof": false,
+      "reused_after_correction": true
+    }
+  },
+  "opencode": {
+    "implementation": {
+      "exit": 126,
+      "error": "provider.no-route",
+      "model": "opencode-go/gpt-5.6-sol#medium",
+      "tools_used": 0
+    },
+    "negative_check": {
+      "exit": 126,
+      "error": "provider.quota",
+      "status": 429,
+      "model": "opencode-go/gpt-5.6-luna#medium",
+      "tools_used": 0
+    },
+    "fallback": "fresh Sol implementation/review; root negative consumer once",
+    "catalog": "owned session Ctrl-C; tool exit1/no child marker; no route conclusion"
+  },
+  "reused_evidence": [
+    "n39 bound late517/towns2of3/belt4of4/Jajce3of5/four lost matches",
+    "n39 protected controls and critical0of27",
+    "Farz receipts under2026-09-29 owner ruling",
+    "31 normalized consumed inputs",
+    "36 retained comparison fingerprints"
+  ],
+  "remaining_gaps": [
+    "continuous current-source737 pre-order branch",
+    "original dirty n37 source continuity/unique cause",
+    "Sanski town and strict Ključ-before-Sanski ordinary combat by188",
+    "five Jajce gains and every n25 matching OSID",
+    "launch14/70 exact branches and axis joins",
+    "explicit HV withdrawal receipt",
+    "full-suite/default campaign neutrality",
+    "complete receipts/final independent calibration acceptance"
+  ],
+  "future_proposal": {
+    "weeks": 139,
+    "authorized": false,
+    "question": "actual737 eligibility and first handler at completed137-139",
+    "cost": "approximately3-5 minutes; new output can add cost",
+    "stop": "one invocation; stop on first run/provenance/coverage failure; diagnose before retry",
+    "acceptance_claim": false
+  },
+  "exits": {
+    "continuation4_dispatcher_focused_final2": 0,
+    "continuation4_dispatcher_reader_correction": 0,
+    "continuation4_dispatcher_typecheck2": 0,
+    "continuation4_dispatcher_review_red": 1,
+    "continuation4_dispatcher_review_green": 0,
+    "continuation4_dispatcher_review_green_syntax": 0,
+    "continuation4_dispatcher_review_green_diffcheck": 0,
+    "continuation4_dispatcher_n39_negative": 1,
+    "continuation4_dispatcher_opencode": 126,
+    "continuation4_dispatcher_negative_opencode": 126
+  },
+  "parent_artifact_fingerprints": {
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_independent_review.md": {
+      "sha256": "5441b9508eab26641fb3cc82b38e89fabbf1bd95b41557a67b3584fc27c0f8e1",
+      "bytes": 10466
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_implementation_summary.md": {
+      "sha256": "b75b03053970ebb116e7eabf65a42965d8d797fec8453b6c8e259677813f3266",
+      "bytes": 5641
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_n39_negative.stdout.log": {
+      "sha256": "9d3652b2f48fef0796efcdc4495df9d37100e184a66920be1537b0a8f4934acf",
+      "bytes": 616
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_opencode.stdout.log": {
+      "sha256": "d3bcbfcbd69703e39762893d8ee1c6b548ca0b05e29f7171d767aa2ae17d1c02",
+      "bytes": 181
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_negative_opencode.stdout.log": {
+      "sha256": "181891cde5f62e5070df8901274936fb8b1f20800882229001d04c830d3b248f",
+      "bytes": 477
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_focused_final2.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_focused_final2.stdout.log": {
+      "sha256": "2e5a7650cc781f3b16ee72693af53f749115bf487e9c96d553a1f3d4841d230b",
+      "bytes": 627
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_reader_correction.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_reader_correction.stdout.log": {
+      "sha256": "684b9b36b1a5c631f387bc12cdf2fc7ca3a46ff611ad3df8087d72e89329c32b",
+      "bytes": 365
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_typecheck2.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_typecheck2.stdout.log": {
+      "sha256": "ad26f101dea593e022fc76afa42842e903522b5bd95e8432c6f31b3e6bf16b21",
+      "bytes": 64
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_review_red.exit.txt": {
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_review_red.stdout.log": {
+      "sha256": "5002cdefe0c6d9167705250d4f93fede6e8356fa95311e8cfc94be258dcf5446",
+      "bytes": 1060
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_review_green.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_review_green.stdout.log": {
+      "sha256": "d73a998124b7034f5ae492d218492d1fec257112b1665e57bbe58a030cfa92bb",
+      "bytes": 436
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_review_green_syntax.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_review_green_syntax.stdout.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_review_green_diffcheck.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_review_green_diffcheck.stdout.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_n39_negative.exit.txt": {
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_opencode.exit.txt": {
+      "sha256": "fbe19c200e734215fe6b74c5dec8f80687b358afb910717a5292505c3796c4c4",
+      "bytes": 5
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_negative_opencode.exit.txt": {
+      "sha256": "fbe19c200e734215fe6b74c5dec8f80687b358afb910717a5292505c3796c4c4",
+      "bytes": 5
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_closeout_inventory.json": {
+      "sha256": "b71cc534e1d35338b5e9d7c073cf5de7dadcbd713098b77ffaec56a08982b988",
+      "bytes": 698
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_closeout_docs.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_closeout_citations.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_closeout_index.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_closeout_inventory.exit.txt": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_closeout_working_diff.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_dispatcher_closeout_staged_diff.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    }
+  },
+  "closeout_initial_staged_diff": {
+    "exit": 1,
+    "diagnosis": "two Markdown hard-break trailing spaces in new implementation summary",
+    "correction": "removed trailing spaces; production/proof unchanged"
+  },
+  "closeout": {
+    "docs_tests": {
+      "files": 3,
+      "tests": 63,
+      "exit": 0
+    },
+    "strict_citations": {
+      "count": 130,
+      "exit": 0
+    },
+    "index_exit": 0,
+    "inventory_exit": 0,
+    "working_diff_exit": 0,
+    "staged_diff_exit": 0,
+    "source_hashes_checked": 8,
+    "parent_hashes_checked": 22,
+    "n39_hashes_checked": 7,
+    "hash_mismatches": 0,
+    "protected_diff_empty": true,
+    "node_version": "v22.23.2",
+    "required_commit_hook": "retained; actual outcome recorded separately in local commit logs"
+  }
+}

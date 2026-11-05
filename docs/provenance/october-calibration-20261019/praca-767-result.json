@@ -1,0 +1,113 @@
+{
+  "schema": "awwv.767.reviewed-praca-diagnosis.v1",
+  "captured_utc": "2026-10-20T22:57:22.506Z",
+  "writes_closed": true,
+  "verdict": "MISSED_CAPTURE_AND_ROSTER_DIFFERENCE_ESTABLISHED__UPSTREAM_WRITER_UNMEASURED",
+  "summary": "Prača divergence traced to a missed RS capture: n80 captures it on turn26 through Kijevo; n81 never captures it. n81 lacks Kijevo's Prača axis while the 4th Sarajevo Brigade is committed to a turn23 probe. Existing commitment filters explain that omission, but their actual rejection call and the first reconciliation write remain unmeasured. No gameplay fix is yet justified; retain703/712 and keep n81 rejected.",
+  "inputs": [
+    {
+      "path": "logs/claude-channel-20261004/765-result.json",
+      "sha256": "c7ee12b646286fcd721876c17bcb3a7b816691b618177fd179e5bdd034ab514f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-inventory.json",
+      "sha256": "e468e71a9651f17dd9e45a80c76d47e9b515ae9c4cc205c4a254373543665ac1"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-closed.json",
+      "sha256": "a753f61fa98036458ddc7b7ddc66a5ebe42413bdd452fe6a31bc1bff400138ae"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-corrected-result.json",
+      "sha256": "ae8aba85cbe3b94f079881a75a7997156e04f29576c45a447dbf56b5024a0d57"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-correction-inventory.json",
+      "sha256": "6ccc7766955135ad997f1e53762ea81d346c8d48a7891c3b2029cf407eecc447"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-correction-closed.json",
+      "sha256": "8e3ceff9a79306081bf8e3606b8acaaaba416b9ae85b3b294a6032a0b1ca8a39"
+    },
+    {
+      "path": "logs/claude-channel-20261004/766-independent-review.json",
+      "sha256": "11947d83ad8af30b443fc18e950165ba4c6563cdda8a4c48a8e7de7bf456d1e1"
+    },
+    {
+      "path": "logs/claude-channel-20261004/766-targeted-verification.json",
+      "sha256": "e17de8242b309b04471fe6a2db1e41b704d9c853e36d0954f002c0e7ec8c50de"
+    }
+  ],
+  "measured": {
+    "initial": "Both initial saves are byte-identical and place Prača under RBiH.",
+    "capture": "n80 turn26 rs_4th_sarajevo_light_infantry wins combat and flips Prača RBiH→RS; n81 has no Prača control event and remains RBiH.",
+    "roster_scope": "Kijevo starts at24. n80 AAR weekly_log counts2brigades at24 and3at25; retained/final participant and axis inventory includesrs_4th andpraca_approach, and temporal24 bindsrs_4th toKijevo. Do not call all3 its initialturn24 roster. n81 retained inventory has the other2 andkijevo_shoulder only.",
+    "probe": "n81 exactrs_4th probe identity is planning at23 and recovery at24, concurrent with Kijevo injection.",
+    "earliest_selected_projection": "Turn4/week_index3 is earliest difference in the extractor-selected compact brigade projection only: Prijedor rs_1st_armored/rs_5th_kozara targetKozarac in n80 versusLjubija in n81. It is not a first complete-state divergence or observed helper write.",
+    "later_actor_difference": "At temporal22 rs_4th personnel differs1405versus1516; replenishment writer and probe-selection cause are not observed.",
+    "time_binding": "Native control and AAR turn 26; weekly week_index 26 contains the battle; temporal turn 26 carries week_index 25; save_w39 evaluates turn 39."
+  },
+  "source_supported_inference": "Active-probe commitment is a strong explanation for rs_4th omission under collectCommittedFormationIds/buildAxesFromDef. No injection-boundary receipt proves which runtime predicate fired. Do not relax exclusive operation ownership.",
+  "unmeasured": [
+    "Actual first reconciliation call/write, order producer and every preservation guard result.",
+    "Causal connection from turn4 selected destination difference to turn22 personnel, turn23 probe selection and missedPrača capture.",
+    "Sole-executable-source counterfactual: n80 run metadata is dirty without executable source-tree hash; the examined records do not establish sole delta."
+  ],
+  "correction_history": {
+    "original765_timestamps": "Manually assumed future values invalid; exact original seal times unestablished. Original bytes retained.",
+    "established_extractor_interval": {
+      "start_utc": "2026-10-20T22:46:47.668Z",
+      "trace_capture_utc": "2026-10-20T22:46:53.893Z",
+      "receipt_end_utc": "2026-10-20T22:46:53.991Z"
+    },
+    "controls": "PARTIAL; positive target and absent target lookups effective, malformed-input rejection was not tested.",
+    "targeted766_residual": "Corrected765 still overstates n80 initialturn24 three-brigade roster. This767 synthesis explicitly supersedes that wording using AAR24count2/25count3 and temporal binding. No third review cycle or evidence rewrite."
+  },
+  "disposition": {
+    "n80": "703/712 retained, NO-GO/unadopted",
+    "n81": "689/712 rejected/unadopted",
+    "source": "unchanged; global prepass not adopted, no rollback implemented",
+    "smallest_justified_mechanic_fix": null,
+    "next_scope": "Observer-only receipts at the reconciliation pre/post write boundary and Kijevo formation-eligibility/commitment boundary. Prepare focused coverage before seeking a separately authorized bounded measurement. No date/name/OSID exception, ownership bypass or threshold change justified."
+  },
+  "preservation": {
+    "thresholds_and_raw_telemetry_untouched": true,
+    "C": {
+      "bytes": 101054372,
+      "sha256": "b11e26cdda6948e8a0c6812a1e5563578d8de42d4cc4f235a25598d075acc8be"
+    },
+    "D": {
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    },
+    "helper_source": {
+      "bytes": 16668,
+      "sha256": "9db5d8b250fc606c00a2e8d7327d2ff4113cb1048414d7f1532c1f9cb6d0a68d"
+    },
+    "war_phases_source": {
+      "bytes": 231691,
+      "sha256": "93fcb005fa725c8a45269370c8319ca34779d1e032624fee08a4ae5800baa04a"
+    },
+    "campaigns": 0,
+    "runTurn_calls": 0,
+    "replays": 0,
+    "tests": 0,
+    "builds": 0,
+    "noEmit": 0,
+    "gameplay_test_data_docs_git_changes": 0
+  },
+  "scope": {
+    "new_campaigns": 0,
+    "replays": 0,
+    "runTurn_calls": 0,
+    "tests": 0,
+    "builds": 0,
+    "noEmit": 0,
+    "gameplay_data_threshold_canon_changes": 0
+  },
+  "limits": [
+    "Retained703/712 is prior evidence, not a newly verified result or a recovery claim.",
+    "All inherited unmet gates and original failed receipts remain.",
+    "Raw evidence stays LOCAL with published inventory; no remote raw-byte backup claim."
+  ]
+}

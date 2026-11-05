@@ -1,0 +1,553 @@
+{
+  "schema": "retained-observations-copies.v1",
+  "recorded": "2026-10-26",
+  "files": [
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/native-t25-planner-inspection-20261026-v1/attempt-001/entry-script.snapshot",
+        "bytes": 11505,
+        "sha256": "f08fc9b43021caba98b0d02ab09cef39b37af5e6cc9e5213c186814acfaffcea"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/native-t25-planner-inspection-20261026-v1/attempt-001/entry-script.snapshot",
+        "bytes": 11505,
+        "sha256": "f08fc9b43021caba98b0d02ab09cef39b37af5e6cc9e5213c186814acfaffcea"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/native-t25-planner-inspection-20261026-v1/attempt-001/receipt.json",
+        "bytes": 3948,
+        "sha256": "4ed4728eefb1c25344d0dc2757ca88bef0550b56a00fe0456492a583ce52f7d3"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/native-t25-planner-inspection-20261026-v1/attempt-001/receipt.json",
+        "bytes": 3948,
+        "sha256": "4ed4728eefb1c25344d0dc2757ca88bef0550b56a00fe0456492a583ce52f7d3"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/native-t25-planner-inspection-20261026-v1/attempt-001/result.json",
+        "bytes": 24288,
+        "sha256": "26941cc304639e16591146b06d59168013030e435a47a74e9d09a9452abe9541"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/native-t25-planner-inspection-20261026-v1/attempt-001/result.json",
+        "bytes": 24288,
+        "sha256": "26941cc304639e16591146b06d59168013030e435a47a74e9d09a9452abe9541"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/native-t25-planner-inspection-20261026-v1/attempt-001/start.json",
+        "bytes": 2701,
+        "sha256": "26755f965b627ed7077465c723c874be3d21a196777f0231aed8036cf20c65e1"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/native-t25-planner-inspection-20261026-v1/attempt-001/start.json",
+        "bytes": 2701,
+        "sha256": "26755f965b627ed7077465c723c874be3d21a196777f0231aed8036cf20c65e1"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/native-t25-planner-inspection-20261026-v1/attempt-001/stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/native-t25-planner-inspection-20261026-v1/attempt-001/stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/native-t25-planner-inspection-20261026-v1/attempt-001/stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/native-t25-planner-inspection-20261026-v1/attempt-001/stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/native-t25-planner-inspection-20261026-v1/inspect_t25_planner.ts",
+        "bytes": 11505,
+        "sha256": "f08fc9b43021caba98b0d02ab09cef39b37af5e6cc9e5213c186814acfaffcea"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/native-t25-planner-inspection-20261026-v1/inspect_t25_planner.ts",
+        "bytes": 11505,
+        "sha256": "f08fc9b43021caba98b0d02ab09cef39b37af5e6cc9e5213c186814acfaffcea"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/native-t25-planner-inspection-20261026-v1/inspection.config.json",
+        "bytes": 2487,
+        "sha256": "8b6c151b30aaf5b4d2a447fb7ccd8cd42a6780e1bb68a6a0bf8b4287c89d3e29"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/native-t25-planner-inspection-20261026-v1/inspection.config.json",
+        "bytes": 2487,
+        "sha256": "8b6c151b30aaf5b4d2a447fb7ccd8cd42a6780e1bb68a6a0bf8b4287c89d3e29"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/native-t25-planner-inspection-20261026-v1/PRECHECK.json",
+        "bytes": 2182,
+        "sha256": "5920587a238ba571528036ae19f270efedbe3f59e42ef8e218bb1566b936fd6f"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/native-t25-planner-inspection-20261026-v1/PRECHECK.json",
+        "bytes": 2182,
+        "sha256": "5920587a238ba571528036ae19f270efedbe3f59e42ef8e218bb1566b936fd6f"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/native-t25-planner-inspection-20261026-v1/PREPARED_MANIFEST.json",
+        "bytes": 1592,
+        "sha256": "16e778260007d8e00bd0c8e665eeef5f2ed0e75e55fc7bc5e714d75374e88d6c"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/native-t25-planner-inspection-20261026-v1/PREPARED_MANIFEST.json",
+        "bytes": 1592,
+        "sha256": "16e778260007d8e00bd0c8e665eeef5f2ed0e75e55fc7bc5e714d75374e88d6c"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/native-t25-planner-inspection-20261026-v1/review-001/INDEPENDENT_PRELAUNCH_REVIEW.md",
+        "bytes": 5293,
+        "sha256": "65ae0836bb7f7951164da17ea59216e5acf4bdc7b748582b11738fc5d3aa62fd"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/native-t25-planner-inspection-20261026-v1/review-001/INDEPENDENT_PRELAUNCH_REVIEW.md",
+        "bytes": 5293,
+        "sha256": "65ae0836bb7f7951164da17ea59216e5acf4bdc7b748582b11738fc5d3aa62fd"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/native-t25-planner-inspection-20261026-v1/review-002/RUNTIME_BINDING_CORRECTION_REVIEW.md",
+        "bytes": 2201,
+        "sha256": "eb306d1bd57f33df458043b0b603f34ab6ca3295b85f8410ec5d2a12022e0722"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/native-t25-planner-inspection-20261026-v1/review-002/RUNTIME_BINDING_CORRECTION_REVIEW.md",
+        "bytes": 2201,
+        "sha256": "eb306d1bd57f33df458043b0b603f34ab6ca3295b85f8410ec5d2a12022e0722"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/native-t25-planner-inspection-20261026-v1/review-003/INDEPENDENT_ACTUAL_RESULT_REVIEW.md",
+        "bytes": 5476,
+        "sha256": "094e8b9e50414bed3d9176550d2806718a168208c647a54b514339ba1d4b910a"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/native-t25-planner-inspection-20261026-v1/review-003/INDEPENDENT_ACTUAL_RESULT_REVIEW.md",
+        "bytes": 5476,
+        "sha256": "094e8b9e50414bed3d9176550d2806718a168208c647a54b514339ba1d4b910a"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/native-t25-planner-inspection-20261026-v1/RUN_COMMAND.txt",
+        "bytes": 585,
+        "sha256": "c378f2a1fab06e0e376953f2ad5ef2225c20bc4e5034ab9fa4b3c26ddd339947"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/native-t25-planner-inspection-20261026-v1/RUN_COMMAND.txt",
+        "bytes": 585,
+        "sha256": "c378f2a1fab06e0e376953f2ad5ef2225c20bc4e5034ab9fa4b3c26ddd339947"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/native-t25-planner-inspection-20261026-v1/STOPPING_CRITERIA.md",
+        "bytes": 1179,
+        "sha256": "2a24ea86c8b246a27ba54cc55cb394655892433278c54a40211ad160496ab145"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/native-t25-planner-inspection-20261026-v1/STOPPING_CRITERIA.md",
+        "bytes": 1179,
+        "sha256": "2a24ea86c8b246a27ba54cc55cb394655892433278c54a40211ad160496ab145"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-retained-provenance-20261026-v1/attempt-001/entry-script.snapshot",
+        "bytes": 9458,
+        "sha256": "27d6b0ed64f3353569530784781ce2c65ec44225811de3c46cfcdfaaeab887a1"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-retained-provenance-20261026-v1/attempt-001/entry-script.snapshot",
+        "bytes": 9458,
+        "sha256": "27d6b0ed64f3353569530784781ce2c65ec44225811de3c46cfcdfaaeab887a1"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-retained-provenance-20261026-v1/attempt-001/receipt.json",
+        "bytes": 3046,
+        "sha256": "6edf18fc21ee1fdc53d757f33fa9a4f20527a78531840a5f290606d0a153a010"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-retained-provenance-20261026-v1/attempt-001/receipt.json",
+        "bytes": 3046,
+        "sha256": "6edf18fc21ee1fdc53d757f33fa9a4f20527a78531840a5f290606d0a153a010"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-retained-provenance-20261026-v1/attempt-001/RESULT.json",
+        "bytes": 159244,
+        "sha256": "3944d63c399a00be38a1a374d301bdd2dc861401d1542ce4ba2025749dbbe606"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-retained-provenance-20261026-v1/attempt-001/RESULT.json",
+        "bytes": 159244,
+        "sha256": "3944d63c399a00be38a1a374d301bdd2dc861401d1542ce4ba2025749dbbe606"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-retained-provenance-20261026-v1/attempt-001/start.json",
+        "bytes": 1789,
+        "sha256": "38876f69e631b8b9b73c2b384b32b33cc207b689bcd6c12baa2fa3f2f93eb4c5"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-retained-provenance-20261026-v1/attempt-001/start.json",
+        "bytes": 1789,
+        "sha256": "38876f69e631b8b9b73c2b384b32b33cc207b689bcd6c12baa2fa3f2f93eb4c5"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-retained-provenance-20261026-v1/attempt-001/stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-retained-provenance-20261026-v1/attempt-001/stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-retained-provenance-20261026-v1/attempt-001/stdout.log",
+        "bytes": 243,
+        "sha256": "89e84af891d68f599e25d50ea9b4a9d4fa98009ebaa75dad657d6879cb06e6d5"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-retained-provenance-20261026-v1/attempt-001/stdout.log",
+        "bytes": 243,
+        "sha256": "89e84af891d68f599e25d50ea9b4a9d4fa98009ebaa75dad657d6879cb06e6d5"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-retained-provenance-20261026-v1/extract_retained_provenance.cjs",
+        "bytes": 9458,
+        "sha256": "27d6b0ed64f3353569530784781ce2c65ec44225811de3c46cfcdfaaeab887a1"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-retained-provenance-20261026-v1/extract_retained_provenance.cjs",
+        "bytes": 9458,
+        "sha256": "27d6b0ed64f3353569530784781ce2c65ec44225811de3c46cfcdfaaeab887a1"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-retained-provenance-20261026-v1/MACHINE_RECEIPT.json",
+        "bytes": 2614,
+        "sha256": "0266e8cf8aeef05d7bf67bc07e2a122ecae960d5d74b293017a29727980c0e8a"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-retained-provenance-20261026-v1/MACHINE_RECEIPT.json",
+        "bytes": 2614,
+        "sha256": "0266e8cf8aeef05d7bf67bc07e2a122ecae960d5d74b293017a29727980c0e8a"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-retained-provenance-20261026-v1/REPORT.md",
+        "bytes": 3172,
+        "sha256": "7922385ae25f9fd8cb48603e345c38cb9def35826361ca92a86e1ce9ca3295f5"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-retained-provenance-20261026-v1/REPORT.md",
+        "bytes": 3172,
+        "sha256": "7922385ae25f9fd8cb48603e345c38cb9def35826361ca92a86e1ce9ca3295f5"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-retained-provenance-20261026-v1/RUN_COMMAND.txt",
+        "bytes": 442,
+        "sha256": "f82f8bb58bce726969de25b6e8def82c833a8aa984f8e9a0d47162d7ec7732c4"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-retained-provenance-20261026-v1/RUN_COMMAND.txt",
+        "bytes": 442,
+        "sha256": "f82f8bb58bce726969de25b6e8def82c833a8aa984f8e9a0d47162d7ec7732c4"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-combat-input-audit-20261026-v1/attempt-001/entry-script.snapshot",
+        "bytes": 10249,
+        "sha256": "59238f25c49645561846d290e61dfc50969924fe56a789425bbc35d6776742e2"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-combat-input-audit-20261026-v1/attempt-001/entry-script.snapshot",
+        "bytes": 10249,
+        "sha256": "59238f25c49645561846d290e61dfc50969924fe56a789425bbc35d6776742e2"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-combat-input-audit-20261026-v1/attempt-001/receipt.json",
+        "bytes": 3019,
+        "sha256": "ab715ffcf544cda5bcff65e7d93d6ab4500b65541ca582867569648539de414e"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-combat-input-audit-20261026-v1/attempt-001/receipt.json",
+        "bytes": 3019,
+        "sha256": "ab715ffcf544cda5bcff65e7d93d6ab4500b65541ca582867569648539de414e"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-combat-input-audit-20261026-v1/attempt-001/RESULT.json",
+        "bytes": 146433,
+        "sha256": "5ed380101c6231ee11da316ebd0917cebcdbacc4517b86a3ee0579b48b103077"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-combat-input-audit-20261026-v1/attempt-001/RESULT.json",
+        "bytes": 146433,
+        "sha256": "5ed380101c6231ee11da316ebd0917cebcdbacc4517b86a3ee0579b48b103077"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-combat-input-audit-20261026-v1/attempt-001/start.json",
+        "bytes": 1768,
+        "sha256": "3fe3b409d4267b030bb9c47b929120c929ae43cb69209d3ad082ca9785b45274"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-combat-input-audit-20261026-v1/attempt-001/start.json",
+        "bytes": 1768,
+        "sha256": "3fe3b409d4267b030bb9c47b929120c929ae43cb69209d3ad082ca9785b45274"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-combat-input-audit-20261026-v1/attempt-001/stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-combat-input-audit-20261026-v1/attempt-001/stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-combat-input-audit-20261026-v1/attempt-001/stdout.log",
+        "bytes": 259,
+        "sha256": "234eacb72ad08ad6a23f4858bfdad55767532885455aa6d4a0b882c335debc5d"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-combat-input-audit-20261026-v1/attempt-001/stdout.log",
+        "bytes": 259,
+        "sha256": "234eacb72ad08ad6a23f4858bfdad55767532885455aa6d4a0b882c335debc5d"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-combat-input-audit-20261026-v1/extract_combat_inputs.cjs",
+        "bytes": 10249,
+        "sha256": "59238f25c49645561846d290e61dfc50969924fe56a789425bbc35d6776742e2"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-combat-input-audit-20261026-v1/extract_combat_inputs.cjs",
+        "bytes": 10249,
+        "sha256": "59238f25c49645561846d290e61dfc50969924fe56a789425bbc35d6776742e2"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-combat-input-audit-20261026-v1/MACHINE_AMENDMENT.v1.json",
+        "bytes": 2128,
+        "sha256": "333b155b6ac5b056b0e5d1c4aeff675c0db52c71c5edbeb74a709b5ae5296c65"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-combat-input-audit-20261026-v1/MACHINE_AMENDMENT.v1.json",
+        "bytes": 2128,
+        "sha256": "333b155b6ac5b056b0e5d1c4aeff675c0db52c71c5edbeb74a709b5ae5296c65"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-combat-input-audit-20261026-v1/MACHINE_RECEIPT.json",
+        "bytes": 1417,
+        "sha256": "c110bbde48209983774aa2f1fdb76fdea046b1362420eee3b3af40776f957ba1"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-combat-input-audit-20261026-v1/MACHINE_RECEIPT.json",
+        "bytes": 1417,
+        "sha256": "c110bbde48209983774aa2f1fdb76fdea046b1362420eee3b3af40776f957ba1"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-combat-input-audit-20261026-v1/REPORT.md",
+        "bytes": 3402,
+        "sha256": "37607371f27c2f11f0fa4d42eba5f182c7dd8c94c1b524132cecdb28125850c2"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-combat-input-audit-20261026-v1/REPORT.md",
+        "bytes": 3402,
+        "sha256": "37607371f27c2f11f0fa4d42eba5f182c7dd8c94c1b524132cecdb28125850c2"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-combat-input-audit-20261026-v1/REPORT.v2.md",
+        "bytes": 2879,
+        "sha256": "71c43d7c6059aabbbecc2b74933632e3cc686ce252509e90cd11b97e884ef846"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-combat-input-audit-20261026-v1/REPORT.v2.md",
+        "bytes": 2879,
+        "sha256": "71c43d7c6059aabbbecc2b74933632e3cc686ce252509e90cd11b97e884ef846"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-combat-input-audit-20261026-v1/review-001/INDEPENDENT_RETAINED_COMBAT_REVIEW.md",
+        "bytes": 5898,
+        "sha256": "0038bacb1ab5f87d673bbc12609f80325e7c535c04c5d20631da43464ff06645"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-combat-input-audit-20261026-v1/review-001/INDEPENDENT_RETAINED_COMBAT_REVIEW.md",
+        "bytes": 5898,
+        "sha256": "0038bacb1ab5f87d673bbc12609f80325e7c535c04c5d20631da43464ff06645"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/korenici-combat-input-audit-20261026-v1/RUN_COMMAND.txt",
+        "bytes": 435,
+        "sha256": "c190844b5da0624273d93122dd06b3db4566a8061b53bdb2d2c764906a34e877"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/korenici-combat-input-audit-20261026-v1/RUN_COMMAND.txt",
+        "bytes": 435,
+        "sha256": "c190844b5da0624273d93122dd06b3db4566a8061b53bdb2d2c764906a34e877"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/t25-request-op-fork-20261026-v1/CONFIG.json",
+        "bytes": 6542,
+        "sha256": "cc1b7d9da81655be7c2ed053ab796cb4865135fda5e5e0ce093e0668aadf8bbd"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/t25-request-op-fork-20261026-v1/CONFIG.json",
+        "bytes": 6542,
+        "sha256": "cc1b7d9da81655be7c2ed053ab796cb4865135fda5e5e0ce093e0668aadf8bbd"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/t25-request-op-fork-20261026-v1/launch_request_op_fork_t25.cjs",
+        "bytes": 5902,
+        "sha256": "bbc09756f600be8ccefd33b016483b473fbf6c591874c2f49677349370d39f9b"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/t25-request-op-fork-20261026-v1/launch_request_op_fork_t25.cjs",
+        "bytes": 5902,
+        "sha256": "bbc09756f600be8ccefd33b016483b473fbf6c591874c2f49677349370d39f9b"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/t25-request-op-fork-20261026-v1/PRECHECK.json",
+        "bytes": 2244,
+        "sha256": "d5ac91515cdae691911530b0468223a16b9fe999d2ed7d23d53f7a95feae028b"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/t25-request-op-fork-20261026-v1/PRECHECK.json",
+        "bytes": 2244,
+        "sha256": "d5ac91515cdae691911530b0468223a16b9fe999d2ed7d23d53f7a95feae028b"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/t25-request-op-fork-20261026-v1/PREPARED_MANIFEST.json",
+        "bytes": 1186,
+        "sha256": "767ebfcdaed9d52eb18b38d7533380385b6ed0f207bea3bcbaf9c9e4ff2b01df"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/t25-request-op-fork-20261026-v1/PREPARED_MANIFEST.json",
+        "bytes": 1186,
+        "sha256": "767ebfcdaed9d52eb18b38d7533380385b6ed0f207bea3bcbaf9c9e4ff2b01df"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/t25-request-op-fork-20261026-v1/request_op_fork_t25.cjs",
+        "bytes": 27287,
+        "sha256": "f7036cfb6a48e789b63843e93a03e7b37507b04994985d5dbcea1e4e8d07b872"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/t25-request-op-fork-20261026-v1/request_op_fork_t25.cjs",
+        "bytes": 27287,
+        "sha256": "f7036cfb6a48e789b63843e93a03e7b37507b04994985d5dbcea1e4e8d07b872"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/t25-request-op-fork-20261026-v1/RUN_COMMAND.txt",
+        "bytes": 179,
+        "sha256": "5ff6e0829279fd6507856d45ad953987d9da4df311ee214ffbe813b92c6e9e0e"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/t25-request-op-fork-20261026-v1/RUN_COMMAND.txt",
+        "bytes": 179,
+        "sha256": "5ff6e0829279fd6507856d45ad953987d9da4df311ee214ffbe813b92c6e9e0e"
+      }
+    },
+    {
+      "source": {
+        "path": "tmp/player-bot-capability-parity-20261024/t25-request-op-fork-20261026-v1/STOPPING_CRITERIA.md",
+        "bytes": 2614,
+        "sha256": "5a1433a475ec5994134d7d20be11a57c9841e4e0574ddde74f2f67148c58758f"
+      },
+      "copy": {
+        "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/retained-observations-v1/t25-request-op-fork-20261026-v1/STOPPING_CRITERIA.md",
+        "bytes": 2614,
+        "sha256": "5a1433a475ec5994134d7d20be11a57c9841e4e0574ddde74f2f67148c58758f"
+      }
+    }
+  ],
+  "limits": [
+    "T25 planner: two pure selections only, not admission/delivery/capture.",
+    "Korenici provenance: valid movement/attacks, different outcomes.",
+    "Combat REPORT.v2 and independent review supersede original overcausal conclusion. Fatigue multiplier examples use preturn states, not phase-exact combat inputs.",
+    "T25 fork remains prepared only and parked, no attempt executed.",
+    "Initial pre-Node-pin planner preparation was superseded without byte copies; reviews retain hashes. This gap is not reconstructed."
+  ]
+}

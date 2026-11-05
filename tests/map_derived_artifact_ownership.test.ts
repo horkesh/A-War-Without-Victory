@@ -29,6 +29,7 @@ const EXPECTED_OPERATIONAL_FILES = [
     'data/derived/operational/operational_political_control.json',
     'data/derived/operational/operational_settlements.geojson',
     'data/derived/operational/osid_areas.json',
+    'data/derived/operational/osid_exterior_border.json',
     'data/derived/operational/triple_junctions.json',
     'data/derived/operational/urban_osids.json',
 ];

@@ -16,6 +16,7 @@ import type { GameState, MilitiaPoolState } from '../../state/game_state.js';
 import { parseMilitiaPoolKey } from '../../state/militia_pool_key.js';
 import { ENCLAVE_MUNICIPALITY_IDS } from '../../state/formation_constants.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { beginPoolFlowMutation } from './pool_flow_diagnostic.js';
 
 /**
  * Faction-differentiated pool decay rates (per turn, i.e. per week).
@@ -73,8 +74,12 @@ export function applyPoolWarWearinessDecay(state: GameState): PoolDecayReport {
         const decayed = Math.floor(pool.available * rate);
         if (decayed <= 0) continue;
 
+        const poolFlow = beginPoolFlowMutation(state, key);
         pool.available = Math.max(0, pool.available - decayed);
         pool.updated_turn = state.meta.turn;
+        poolFlow?.complete('pool_decay', 'war_weariness', 'debited', {
+            rate, debit: decayed,
+        }, 'decay');
 
         report.total_decayed += decayed;
         report.by_faction[faction] = (report.by_faction[faction] ?? 0) + decayed;

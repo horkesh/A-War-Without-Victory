@@ -1,0 +1,510 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-26T00:23:38.801Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01",
+  "timeout_ms": 180000,
+  "original_argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "--import",
+    "file:///C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/node_modules/tsx/dist/loader.mjs",
+    "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/diagnostic_entry_v4.cjs",
+    "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/CONFIG.json",
+    "{evidenceDir}",
+    "fork-only"
+  ],
+  "argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "--import",
+    "file:///C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/node_modules/tsx/dist/loader.mjs",
+    "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/diagnostic_entry_v4.cjs",
+    "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/CONFIG.json",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\r8-native-calibration-parity-20261024\\prefix39-diagnosis-20261026\\player-order-fork-diagnostic-v4\\attempts\\player-order-fork-current-source-01",
+    "fork-only"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "RUNTIME_PROVENANCE.json",
+    "staged-state-turn-016.json",
+    "QUERY_AND_STAGE.json",
+    "RESULT.json",
+    "state-turn-017.json",
+    "report-turn-017.json",
+    "receipt-turn-017.json",
+    "state-turn-018.json",
+    "report-turn-018.json",
+    "receipt-turn-018.json",
+    "state-turn-019.json",
+    "report-turn-019.json",
+    "receipt-turn-019.json",
+    "state-turn-020.json",
+    "report-turn-020.json",
+    "receipt-turn-020.json",
+    "state-turn-021.json",
+    "report-turn-021.json",
+    "receipt-turn-021.json",
+    "state-turn-022.json",
+    "report-turn-022.json",
+    "receipt-turn-022.json",
+    "state-turn-023.json",
+    "report-turn-023.json",
+    "receipt-turn-023.json",
+    "state-turn-024.json",
+    "report-turn-024.json",
+    "receipt-turn-024.json",
+    "state-turn-025.json",
+    "report-turn-025.json",
+    "receipt-turn-025.json",
+    "state-turn-026.json",
+    "report-turn-026.json",
+    "receipt-turn-026.json",
+    "state-turn-027.json",
+    "report-turn-027.json",
+    "receipt-turn-027.json",
+    "state-turn-028.json",
+    "report-turn-028.json",
+    "receipt-turn-028.json",
+    "state-turn-029.json",
+    "report-turn-029.json",
+    "receipt-turn-029.json",
+    "state-turn-030.json",
+    "report-turn-030.json",
+    "receipt-turn-030.json",
+    "state-turn-031.json",
+    "report-turn-031.json",
+    "receipt-turn-031.json",
+    "state-turn-032.json",
+    "report-turn-032.json",
+    "receipt-turn-032.json",
+    "state-turn-033.json",
+    "report-turn-033.json",
+    "receipt-turn-033.json",
+    "state-turn-034.json",
+    "report-turn-034.json",
+    "receipt-turn-034.json",
+    "state-turn-035.json",
+    "report-turn-035.json",
+    "receipt-turn-035.json",
+    "state-turn-036.json",
+    "report-turn-036.json",
+    "receipt-turn-036.json",
+    "state-turn-037.json",
+    "report-turn-037.json",
+    "receipt-turn-037.json",
+    "state-turn-038.json",
+    "report-turn-038.json",
+    "receipt-turn-038.json",
+    "state-turn-039.json",
+    "report-turn-039.json",
+    "receipt-turn-039.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/diagnostic_entry_v4.cjs",
+    "bytes": 21168,
+    "raw_sha256": "44f8ab993d3a2da913679b7386f1485062bf01e27882cb5cf356356c94b0ecd5",
+    "normalized_text_sha256": "44f8ab993d3a2da913679b7386f1485062bf01e27882cb5cf356356c94b0ecd5",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 21168,
+      "sha256": "44f8ab993d3a2da913679b7386f1485062bf01e27882cb5cf356356c94b0ecd5"
+    }
+  },
+  "end_utc": "2026-10-26T00:24:13.501Z",
+  "pid": 2252,
+  "child_exit": 2,
+  "wrapper_exit": 2,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/diagnostic_entry_v4.cjs",
+    "bytes": 21168,
+    "raw_sha256": "44f8ab993d3a2da913679b7386f1485062bf01e27882cb5cf356356c94b0ecd5",
+    "normalized_text_sha256": "44f8ab993d3a2da913679b7386f1485062bf01e27882cb5cf356356c94b0ecd5",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 39156,
+    "sha256": "3823a6d172515b3649c8690c932e4529c5591eef04461ef45a8b96d903421b1b"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "RUNTIME_PROVENANCE.json",
+      "bytes": 10227,
+      "sha256": "1201cd8a7faab5cc602c847eef108bc1f07b44018fced70884b03e3c830c3085"
+    },
+    {
+      "path": "staged-state-turn-016.json",
+      "bytes": 4756863,
+      "sha256": "f7a6930d8e15c28fc0756e0c0622315a4a06b8d53cec9981c374908e52b8d771"
+    },
+    {
+      "path": "QUERY_AND_STAGE.json",
+      "bytes": 1905,
+      "sha256": "207ce456016899f833a88a4fc91d296f2c12228f03e256013251f9763e4c125a"
+    },
+    {
+      "path": "RESULT.json",
+      "bytes": 40205,
+      "sha256": "2557bee230ed5d478e2be116988995e5d79d6e1dd6479f7ae3c039b623137c70"
+    },
+    {
+      "path": "state-turn-017.json",
+      "bytes": 4795153,
+      "sha256": "da64e5a190da2e80e137c46fd1eb3924ae7ecd4b5a3e8eedce2d27f00a796c92"
+    },
+    {
+      "path": "report-turn-017.json",
+      "bytes": 654434,
+      "sha256": "fa76b5aff1f06e1b3cb53d226399ca11812ecea1f6a1712ffa2b56b296551ad2"
+    },
+    {
+      "path": "receipt-turn-017.json",
+      "bytes": 1713,
+      "sha256": "82ecbf3df0da9ec5e531271baf41615cbf7de4dde40ff49e16d61c3b52a017ae"
+    },
+    {
+      "path": "state-turn-018.json",
+      "bytes": 4890880,
+      "sha256": "be8fdde18082c49a2001d969fab8c797abcfbf18052f01c8dbc3d964b94ed16a"
+    },
+    {
+      "path": "report-turn-018.json",
+      "bytes": 662431,
+      "sha256": "b2adabdc2fa036482264630b670f076413b8d9cd7b9301faa684a7924ffabb7c"
+    },
+    {
+      "path": "receipt-turn-018.json",
+      "bytes": 1713,
+      "sha256": "afcd8031c2c89144125ce1a8ebf03c63ab05443f6532080d57eaa28fb1b881a4"
+    },
+    {
+      "path": "state-turn-019.json",
+      "bytes": 5002091,
+      "sha256": "3ce99cf5b937e73a6e57f33857555438551e93df7b2be7f06d6d84071be8dc28"
+    },
+    {
+      "path": "report-turn-019.json",
+      "bytes": 660112,
+      "sha256": "0e07a59a5e802d995369be6e1553b342746bb0ef618b218a720617586d2cffe0"
+    },
+    {
+      "path": "receipt-turn-019.json",
+      "bytes": 1713,
+      "sha256": "5e733f3547a9fa466286ed02a4a87b91536a679889d37273693113ffb7cbbe83"
+    },
+    {
+      "path": "state-turn-020.json",
+      "bytes": 5019829,
+      "sha256": "a097add0d3b6617d2236007fc87443d9698c759575331beacfa5678f3cd82c95"
+    },
+    {
+      "path": "report-turn-020.json",
+      "bytes": 661543,
+      "sha256": "2b7efbadd8fccaafbf83884185021bf475fd9290c3576f04f67aac5e8429b435"
+    },
+    {
+      "path": "receipt-turn-020.json",
+      "bytes": 1809,
+      "sha256": "81b7ecd364331c8f1a977f3e347081c9d1ee560c98610694d01fe499fb611b0a"
+    },
+    {
+      "path": "state-turn-021.json",
+      "bytes": 5041772,
+      "sha256": "a5e25b25f49027b3da08d7c8334afd66f9458fb37fd08560355752e68a0273cc"
+    },
+    {
+      "path": "report-turn-021.json",
+      "bytes": 658794,
+      "sha256": "e821db52cd449a8794230e62517b29603fea8a45a9f329de8fa84370d7c310de"
+    },
+    {
+      "path": "receipt-turn-021.json",
+      "bytes": 3172,
+      "sha256": "a2eefe160b2f5c62236dd3714d8b930705d1ac6ebc5f17d9210a364ba32c6430"
+    },
+    {
+      "path": "state-turn-022.json",
+      "bytes": 5067776,
+      "sha256": "61e03ebb6a04e21eafbae4a403de4a48005454b621170db2b9e718f724a6a2dc"
+    },
+    {
+      "path": "report-turn-022.json",
+      "bytes": 669688,
+      "sha256": "f88f1308fae149f1d9ba41677cb4a81843c47c6c51a831f51b10226d95824973"
+    },
+    {
+      "path": "receipt-turn-022.json",
+      "bytes": 3693,
+      "sha256": "d82a2ac280d4662efe10769a8784bdb9eba8f67489bb9a5aa5fa909c59b87134"
+    },
+    {
+      "path": "state-turn-023.json",
+      "bytes": 5104314,
+      "sha256": "08d0650f4ad2ed7e305ec620de306122f52e155ed8206024548548e7767c18c1"
+    },
+    {
+      "path": "report-turn-023.json",
+      "bytes": 666280,
+      "sha256": "30376adadad11ce92b61439617d7add10abefe3ecfe5631000a993d360e1f67c"
+    },
+    {
+      "path": "receipt-turn-023.json",
+      "bytes": 4333,
+      "sha256": "4b389c58eba58777020857904088c1823a9cdffed344c59a1953e56500656e1d"
+    },
+    {
+      "path": "state-turn-024.json",
+      "bytes": 5153485,
+      "sha256": "190847eea44a84529199e5fd2f337714a22ad73ecc906c6a5320ec23a4fd6140"
+    },
+    {
+      "path": "report-turn-024.json",
+      "bytes": 668774,
+      "sha256": "bd93dda8bc4dd686f5804109c73098234979561f175e20cd7dcbe4e53f6f5c1d"
+    },
+    {
+      "path": "receipt-turn-024.json",
+      "bytes": 1713,
+      "sha256": "2b9e59e9ae2d2e90bdf8e22712f38d7be8394343fbead373bffac1396ea855ed"
+    },
+    {
+      "path": "state-turn-025.json",
+      "bytes": 5191350,
+      "sha256": "bf6d83f97c017e986983233c33d6b13f1a5223670aa0d9fbf8869bc27b9091b6"
+    },
+    {
+      "path": "report-turn-025.json",
+      "bytes": 668981,
+      "sha256": "312c271c4561f785c2a8ef264fc4f1c559fb471bfa2c8aa4b50edb673c3ced8c"
+    },
+    {
+      "path": "receipt-turn-025.json",
+      "bytes": 461,
+      "sha256": "41f79407256a4c600c0ad71c082b790b9c5290c0351b0706833a9ef44a563ffa"
+    },
+    {
+      "path": "state-turn-026.json",
+      "bytes": 5213423,
+      "sha256": "48fcdda6a247a2ac0cca96ba8d348ea205408ec3d9589336cbbfed9d74887edd"
+    },
+    {
+      "path": "report-turn-026.json",
+      "bytes": 663741,
+      "sha256": "500eca0aff56f1cb909239c440f5836f6bbfb2a92af705aea2e254261719ffda"
+    },
+    {
+      "path": "receipt-turn-026.json",
+      "bytes": 858,
+      "sha256": "fb3089a501274c5b1d8c7d54ad49c2b4556598bb042f394b9e944325bc3285fa"
+    },
+    {
+      "path": "state-turn-027.json",
+      "bytes": 5204838,
+      "sha256": "bda7a8b4ce5c7778d9dcaa9dbe34dadb6bcb42509b2d9b0a198605e0d454af41"
+    },
+    {
+      "path": "report-turn-027.json",
+      "bytes": 657976,
+      "sha256": "ecd0cc490c9f6b0dcfaacaf31db2e03e07985c0cb98b2057320b7ea25e275b9d"
+    },
+    {
+      "path": "receipt-turn-027.json",
+      "bytes": 856,
+      "sha256": "b114b97315d9ed447825602f745af1993165de4e373bf6782bdaddbb2c30b41e"
+    },
+    {
+      "path": "state-turn-028.json",
+      "bytes": 5240736,
+      "sha256": "1112dae224398b0b0b5ddf81cf87941404d7bbb8b834b1736677d022943b38f3"
+    },
+    {
+      "path": "report-turn-028.json",
+      "bytes": 660542,
+      "sha256": "ea81d3833b9cec23a79d710024e922d8f506efecc19f5179b72686ae9ee46835"
+    },
+    {
+      "path": "receipt-turn-028.json",
+      "bytes": 858,
+      "sha256": "54d1f069d9d18b0c55023fc181dbf507d64187dc40bc400ee29a3f24fcf4e758"
+    },
+    {
+      "path": "state-turn-029.json",
+      "bytes": 5265564,
+      "sha256": "42c91fa9e5f9355b4620693a3eacad80293750354eae3510973ceebe62c782b1"
+    },
+    {
+      "path": "report-turn-029.json",
+      "bytes": 670361,
+      "sha256": "2d3ee59224c8177708c0df7dae7f778e756c7ee2187af9295074bff57e497e54"
+    },
+    {
+      "path": "receipt-turn-029.json",
+      "bytes": 461,
+      "sha256": "e625941c1c11c26e51c8c692676c1c2869b8677974665c417e3337595896eb73"
+    },
+    {
+      "path": "state-turn-030.json",
+      "bytes": 5259928,
+      "sha256": "40d89739c50b636d0bcb3e086f68dde89c14ae87e8ff78c334323d0fb3cbee7f"
+    },
+    {
+      "path": "report-turn-030.json",
+      "bytes": 660861,
+      "sha256": "ad589a3453a615a9fa3e23d4518e7740bb9de310973aeebaeeb9b8dca1d25352"
+    },
+    {
+      "path": "receipt-turn-030.json",
+      "bytes": 461,
+      "sha256": "2b3c96cc6f147dd253e02df1883f2078e5e9ee90df8a42c3de84347816a14187"
+    },
+    {
+      "path": "state-turn-031.json",
+      "bytes": 5291025,
+      "sha256": "d977d4fcc6756f08dc50d5548e771a7dea9ee6ebf90ae1176693be633476197a"
+    },
+    {
+      "path": "report-turn-031.json",
+      "bytes": 663695,
+      "sha256": "48f9cb063c9f05537476e98921aa60d9dd406acfcfec91425f50d407f2944882"
+    },
+    {
+      "path": "receipt-turn-031.json",
+      "bytes": 461,
+      "sha256": "f40e5e81e0d5458a7138e252bf640335a20f2f9a30b3d6c510485a40c5bf3c53"
+    },
+    {
+      "path": "state-turn-032.json",
+      "bytes": 5301200,
+      "sha256": "0261dedd91ea115b884ef0b1bb4a4ec362a878e5857570ddd69e36fc60643b0a"
+    },
+    {
+      "path": "report-turn-032.json",
+      "bytes": 659591,
+      "sha256": "b13ccf69412f24a63a9a9762bcb5367d505b4fa7056499418d7688471e33e633"
+    },
+    {
+      "path": "receipt-turn-032.json",
+      "bytes": 461,
+      "sha256": "bb6d3c7a3128ab8353dab2a44b1fdb5cc695ce25d5e9fd828eb69b7c5a9c1cdd"
+    },
+    {
+      "path": "state-turn-033.json",
+      "bytes": 5315193,
+      "sha256": "7e69769d2eca3cb1292d2ff11450776bf7544ec899e7183a4a6b8cd6c306aa5e"
+    },
+    {
+      "path": "report-turn-033.json",
+      "bytes": 662837,
+      "sha256": "cdfac2ef4328752f1134f0c0454253fb5e8f58e6d293524b0dd9c91829174490"
+    },
+    {
+      "path": "receipt-turn-033.json",
+      "bytes": 461,
+      "sha256": "9bf2d8348b4e6d954ca5367ddf712c40f16d307047e5e8c95645cc0778591935"
+    },
+    {
+      "path": "state-turn-034.json",
+      "bytes": 5322192,
+      "sha256": "895559a36d4d792c92cc89f1380edf345a62a1be8bd1f71e4764659c83111491"
+    },
+    {
+      "path": "report-turn-034.json",
+      "bytes": 660573,
+      "sha256": "e0cf46fd271fac35f7463ad1bf83e30a622f848f2474cf8cbabb1b8111e7383a"
+    },
+    {
+      "path": "receipt-turn-034.json",
+      "bytes": 461,
+      "sha256": "217e43e646e9aec27b6fa32cfe0c999ff6aa8671b3fa58a111a3895bd417f085"
+    },
+    {
+      "path": "state-turn-035.json",
+      "bytes": 5341913,
+      "sha256": "9700177f2c63019e3c0fe927ceaca1fe935cf12fb34f47e7eb828d6ac7022370"
+    },
+    {
+      "path": "report-turn-035.json",
+      "bytes": 662197,
+      "sha256": "a1a8c296631069fef5e75675579aefecf385c7f82c03bcfb1cf84dff40f02721"
+    },
+    {
+      "path": "receipt-turn-035.json",
+      "bytes": 461,
+      "sha256": "23f561cd6233e86c91728050b32034e6e29fb9b7b1f342b504fadac934d917c7"
+    },
+    {
+      "path": "state-turn-036.json",
+      "bytes": 5349667,
+      "sha256": "94c183ab9410a334d710db5268d6b3a4d3b16b83843cbfaf380bce4f19a18f75"
+    },
+    {
+      "path": "report-turn-036.json",
+      "bytes": 656830,
+      "sha256": "7a2651f139b87da34436f46517185cf4315e60ba3cae9d350a300fe5e77d35a5"
+    },
+    {
+      "path": "receipt-turn-036.json",
+      "bytes": 461,
+      "sha256": "d761a66a672242dcba9dee43de439a872b291d0b597a6c07c0d87224df2395f6"
+    },
+    {
+      "path": "state-turn-037.json",
+      "bytes": 5375998,
+      "sha256": "a97e78763396fd51a5f39a6180ff659c4e547c5d73bf2ef0a62b1921d2ec0e69"
+    },
+    {
+      "path": "report-turn-037.json",
+      "bytes": 660620,
+      "sha256": "b309f315ea80e8d91bba882f79427add1dae05910d292a625c491b1b04fdade9"
+    },
+    {
+      "path": "receipt-turn-037.json",
+      "bytes": 461,
+      "sha256": "f8b10d8ea7d1d58870f2ff2117d277ebfd59d69985d1f5de6542b32903437cd9"
+    },
+    {
+      "path": "state-turn-038.json",
+      "bytes": 5386953,
+      "sha256": "d701dddbf222000dd691f004e06f441343a90a14137a31d2142f75f64dcce6e6"
+    },
+    {
+      "path": "report-turn-038.json",
+      "bytes": 654213,
+      "sha256": "85bd2e62f5434ac1c7cedc1273c95b056fea163c2e15815b68c627a3a42f8aca"
+    },
+    {
+      "path": "receipt-turn-038.json",
+      "bytes": 565,
+      "sha256": "85173eb2ada4d0393fc415f494c426d4daaacacaa0c912be63c019ad9ced43db"
+    },
+    {
+      "path": "state-turn-039.json",
+      "bytes": 5409065,
+      "sha256": "222c45c7dfc5c91c30c197cc0083c3b31bac29f5d20d39e72999cf03fe243547"
+    },
+    {
+      "path": "report-turn-039.json",
+      "bytes": 658859,
+      "sha256": "ed33db16e947217a4a28985aec9663f39e26ce725e7286631d77b9ea39c76a63"
+    },
+    {
+      "path": "receipt-turn-039.json",
+      "bytes": 544,
+      "sha256": "7a888515c79fab6837eee29e31a5917d3b6e686ca0b3ecb0e675013eb3445df9"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

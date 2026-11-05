@@ -1,0 +1,19 @@
+{
+  "schema": "awwv.baseline-rebless-update-launch.v1",
+  "start_utc": "2026-10-24T13:47:55.728Z",
+  "deadline_utc": "2026-10-24T14:22:55.728Z",
+  "cap_ms": 2100000,
+  "cwd": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory",
+  "expected_head": "a913286803a095b6dc3f57a44175081d6ae4b8eb",
+  "expected_manifest_sha256": "67774c275f206633a931d1d1aa3990336d1dd0e0877ebaaf924feb6f75378888",
+  "argv": [
+    "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "node_modules/tsx/dist/cli.mjs",
+    "tools/scenario_runner/run_baseline_regression.ts"
+  ],
+  "invocation_limit": 1,
+  "automatic_retry": false,
+  "diagnostics": "forced_off",
+  "s6_grade_env": true,
+  "note": "run_baseline_regression calls runScenario directly; wrapper enforces clean git before launch and output run_meta must record git_dirty=false"
+}

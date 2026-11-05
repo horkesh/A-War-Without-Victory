@@ -340,6 +340,11 @@ export function getMilitaryStrengthRatio(state: GameState, faction: FactionId): 
     for (const fid of Object.keys(formations).sort(strictCompare)) {
         const f = formations[fid];
         if (!f || f.faction !== faction || (f.kind ?? 'brigade') !== 'brigade') continue;
+        // Active-formation contract: explicit inactive formations are not fielded
+        // strength, even when an old/incomplete record has no lifecycle_status or a
+        // nonterminal label. Legacy records with no status remain counted, matching
+        // existing compatibility semantics; terminal lifecycle labels stay excluded.
+        if (f.status === 'inactive') continue;
         const ls = f.lifecycle_status ?? 'active';
         if (ls === 'destroyed' || ls === 'disbanded' || ls === 'merged' || ls === 'withdrawn') continue;
         totalPersonnel += f.personnel ?? 0;

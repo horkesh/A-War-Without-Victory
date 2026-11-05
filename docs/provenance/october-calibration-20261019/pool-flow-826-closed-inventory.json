@@ -1,0 +1,2386 @@
+{
+  "schema": 1,
+  "closed_streams": true,
+  "entries": [
+    {
+      "dir": "logs/claude-channel-20261004/826-correction-final",
+      "files": [
+        {
+          "name": "dependencies.json",
+          "bytes": 1810,
+          "sha256": "17d574788ba8e74c91e6881761ed5388b63e89e2c77d9269f2fc6806ed99dd06"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 23509,
+          "sha256": "0cf1323690dac8ca0dc58641088a1c0bf6aacc571637890c6ed17f2f37911e8e"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 3417,
+          "sha256": "74c15ff78413d6669813fc5babbda59c2817987fa3bc4c2b52de9efbee8d7c63"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 20310,
+          "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd"
+        },
+        {
+          "name": "dependency-03.snapshot",
+          "bytes": 8463,
+          "sha256": "361340959524b05c2f9dce73c5a2867dce2f2b72014e4036747c5d0ce82ea054"
+        },
+        {
+          "name": "dependency-04.snapshot",
+          "bytes": 21692,
+          "sha256": "340eb0a7b695e174bfaa3234244df7217264ac0169ef120d89cc779f4e9d5fe7"
+        },
+        {
+          "name": "dependency-05.snapshot",
+          "bytes": 48051,
+          "sha256": "44236006a3d5ae5346421096b58aad5cc189bfe93f5f05c116d8016344c53e16"
+        },
+        {
+          "name": "dependency-06.snapshot",
+          "bytes": 12734,
+          "sha256": "a22b38b5a65bc1b60c745fb4dfe95469bd53f51599b6f9b682ab44df8b458009"
+        },
+        {
+          "name": "dependency-07.snapshot",
+          "bytes": 20948,
+          "sha256": "47697dd6198ba4d6c08025e6b91afe18c9dad2b2d4f2c13469fc63531b15682e"
+        },
+        {
+          "name": "dependency-08.snapshot",
+          "bytes": 12724,
+          "sha256": "d5bce9c409a639dd68a97c0cb05e4a279ee985fdacfcfdaeb1ac7e1d572b6528"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 7685,
+          "sha256": "25665bd0ac7a90a8c25a2c44f47e02dd38797988987cb8664325a1a9bba271a4"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 4585,
+          "sha256": "a8551c63ce839a4bba1bdd166730a3dcb0a4386de4fb7dce523ab7fcb00b544b"
+        },
+        {
+          "name": "result.json",
+          "bytes": 14253,
+          "sha256": "136409a5667ab23bdca4fd317eb5a5e4e3f9243ece4d1cf2f0658a564dde4410"
+        },
+        {
+          "name": "start.json",
+          "bytes": 1815,
+          "sha256": "32895e69ceda03345d86af264d548f47e1f2d532aee31da933136bfa57d363bf"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 146,
+          "sha256": "0021b623f19cd915adbd7a0c529536e7fc434752400dda80a61b434e536c3ebc"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-correction-final-b",
+      "files": [
+        {
+          "name": "dependencies.json",
+          "bytes": 1810,
+          "sha256": "2b8e59b448acbb3de74231711bf3e61f69a2d9bf58da3a5d976d18592299bdaa"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 23509,
+          "sha256": "0cf1323690dac8ca0dc58641088a1c0bf6aacc571637890c6ed17f2f37911e8e"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 3417,
+          "sha256": "74c15ff78413d6669813fc5babbda59c2817987fa3bc4c2b52de9efbee8d7c63"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 20310,
+          "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd"
+        },
+        {
+          "name": "dependency-03.snapshot",
+          "bytes": 8634,
+          "sha256": "96d910eb2f7461459a142d1ff3924a88f44f186ef3ecc31ea8c9cd6870d0252e"
+        },
+        {
+          "name": "dependency-04.snapshot",
+          "bytes": 21692,
+          "sha256": "340eb0a7b695e174bfaa3234244df7217264ac0169ef120d89cc779f4e9d5fe7"
+        },
+        {
+          "name": "dependency-05.snapshot",
+          "bytes": 48051,
+          "sha256": "44236006a3d5ae5346421096b58aad5cc189bfe93f5f05c116d8016344c53e16"
+        },
+        {
+          "name": "dependency-06.snapshot",
+          "bytes": 12975,
+          "sha256": "6ef907e1835cbddba5a5faa550e7ad47dc934ff1e9720a5344b7a142fe2c2e9d"
+        },
+        {
+          "name": "dependency-07.snapshot",
+          "bytes": 21596,
+          "sha256": "b696a4815cde262b67c40d6f9a80985377d45a1bcdaea80d7f33968efa23bcc2"
+        },
+        {
+          "name": "dependency-08.snapshot",
+          "bytes": 12724,
+          "sha256": "d5bce9c409a639dd68a97c0cb05e4a279ee985fdacfcfdaeb1ac7e1d572b6528"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 9136,
+          "sha256": "399c1ab43fca9ba440301a851cb578f1a6a19e527889ebf371ff9d962d3f70c2"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 4597,
+          "sha256": "f8c437ae22385d0e591e8e7392b72dc52219b3204e10281d81c2173af66cb64c"
+        },
+        {
+          "name": "result.json",
+          "bytes": 18102,
+          "sha256": "f9d34dae4d36034589785dc2a5070aea999ee77118f8b602c511c299a087785b"
+        },
+        {
+          "name": "start.json",
+          "bytes": 1825,
+          "sha256": "3419de3d256f55e26f92ce63e7d7baf32bf2bd3f25102d1187c35cc60b0389ab"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 146,
+          "sha256": "9e2b865295c90ed20580b327dede8750016656ecf7ddada8af64c22687be4a82"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-correction-focused-final",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "5be607aa6069756a424013851e837a1d6719ca60a53323cc1dcdd74f0dd1cb8a"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 2843,
+          "sha256": "47ccbd2e0d86308af015e3d72917c1c2742f17e4312ef540074c636ff7dc7ab2"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 20933,
+          "sha256": "9f9a9b14bb163d67901aaf852bcedcbd20e3898e29df6ee122cb96a4e7dc51ad"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 10435,
+          "sha256": "44a60e84d8b22d1cb629364a84e10257d3454531678b987a75582ddaee9a756c"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 36000,
+          "sha256": "6eff326a27cc9892aa45a6d84ae018afd19ecba18af65896ce050f7a05a094df"
+        },
+        {
+          "name": "dependency-03.snapshot",
+          "bytes": 7826,
+          "sha256": "4e2830f0bac9063f305b1486b00738d50b4becc776aa01bddf7146a15cda270e"
+        },
+        {
+          "name": "dependency-04.snapshot",
+          "bytes": 8089,
+          "sha256": "7dc8f2852af9fc95d757b609ce200a2dc50d0d1025e727208bf3df7b1da66253"
+        },
+        {
+          "name": "dependency-05.snapshot",
+          "bytes": 23633,
+          "sha256": "9f6185e2769e26afca3cc9a0de52639ee0829bbb616f28709508aa4cfd64e530"
+        },
+        {
+          "name": "dependency-06.snapshot",
+          "bytes": 8463,
+          "sha256": "361340959524b05c2f9dce73c5a2867dce2f2b72014e4036747c5d0ce82ea054"
+        },
+        {
+          "name": "dependency-07.snapshot",
+          "bytes": 20310,
+          "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd"
+        },
+        {
+          "name": "dependency-08.snapshot",
+          "bytes": 12734,
+          "sha256": "a22b38b5a65bc1b60c745fb4dfe95469bd53f51599b6f9b682ab44df8b458009"
+        },
+        {
+          "name": "dependency-09.snapshot",
+          "bytes": 23509,
+          "sha256": "0cf1323690dac8ca0dc58641088a1c0bf6aacc571637890c6ed17f2f37911e8e"
+        },
+        {
+          "name": "dependency-10.snapshot",
+          "bytes": 21692,
+          "sha256": "340eb0a7b695e174bfaa3234244df7217264ac0169ef120d89cc779f4e9d5fe7"
+        },
+        {
+          "name": "dependency-11.snapshot",
+          "bytes": 3417,
+          "sha256": "74c15ff78413d6669813fc5babbda59c2817987fa3bc4c2b52de9efbee8d7c63"
+        },
+        {
+          "name": "dependency-12.snapshot",
+          "bytes": 48051,
+          "sha256": "44236006a3d5ae5346421096b58aad5cc189bfe93f5f05c116d8016344c53e16"
+        },
+        {
+          "name": "dependency-13.snapshot",
+          "bytes": 12724,
+          "sha256": "d5bce9c409a639dd68a97c0cb05e4a279ee985fdacfcfdaeb1ac7e1d572b6528"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1529,
+          "sha256": "a4368e51680e3396b74f82bbb57dfb25e78719cb6e2ade910a071eff08fa0e08"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 7565,
+          "sha256": "96d5fefa8aec158ea36320469c040b8fabba2126840e34a20ec064d5c7d5f0b1"
+        },
+        {
+          "name": "start.json",
+          "bytes": 4014,
+          "sha256": "d2916963707ada31c84818db5b3770d7f04e69562da028ae7052df5d37ee1315"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 648,
+          "sha256": "cc2cf04c7010690c1f6cd638799f694fb832933dc717e07f84631652c09dcee1"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-correction-focused-final-b",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "5be607aa6069756a424013851e837a1d6719ca60a53323cc1dcdd74f0dd1cb8a"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 2843,
+          "sha256": "c64f5f9f9edb8a312b2f7f788b91bf238c2c39a5fd5607b79e72fc2866f217dd"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 20948,
+          "sha256": "47697dd6198ba4d6c08025e6b91afe18c9dad2b2d4f2c13469fc63531b15682e"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 10435,
+          "sha256": "44a60e84d8b22d1cb629364a84e10257d3454531678b987a75582ddaee9a756c"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 36000,
+          "sha256": "6eff326a27cc9892aa45a6d84ae018afd19ecba18af65896ce050f7a05a094df"
+        },
+        {
+          "name": "dependency-03.snapshot",
+          "bytes": 7826,
+          "sha256": "4e2830f0bac9063f305b1486b00738d50b4becc776aa01bddf7146a15cda270e"
+        },
+        {
+          "name": "dependency-04.snapshot",
+          "bytes": 8089,
+          "sha256": "7dc8f2852af9fc95d757b609ce200a2dc50d0d1025e727208bf3df7b1da66253"
+        },
+        {
+          "name": "dependency-05.snapshot",
+          "bytes": 23633,
+          "sha256": "9f6185e2769e26afca3cc9a0de52639ee0829bbb616f28709508aa4cfd64e530"
+        },
+        {
+          "name": "dependency-06.snapshot",
+          "bytes": 8463,
+          "sha256": "361340959524b05c2f9dce73c5a2867dce2f2b72014e4036747c5d0ce82ea054"
+        },
+        {
+          "name": "dependency-07.snapshot",
+          "bytes": 20310,
+          "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd"
+        },
+        {
+          "name": "dependency-08.snapshot",
+          "bytes": 12734,
+          "sha256": "a22b38b5a65bc1b60c745fb4dfe95469bd53f51599b6f9b682ab44df8b458009"
+        },
+        {
+          "name": "dependency-09.snapshot",
+          "bytes": 23509,
+          "sha256": "0cf1323690dac8ca0dc58641088a1c0bf6aacc571637890c6ed17f2f37911e8e"
+        },
+        {
+          "name": "dependency-10.snapshot",
+          "bytes": 21692,
+          "sha256": "340eb0a7b695e174bfaa3234244df7217264ac0169ef120d89cc779f4e9d5fe7"
+        },
+        {
+          "name": "dependency-11.snapshot",
+          "bytes": 3417,
+          "sha256": "74c15ff78413d6669813fc5babbda59c2817987fa3bc4c2b52de9efbee8d7c63"
+        },
+        {
+          "name": "dependency-12.snapshot",
+          "bytes": 48051,
+          "sha256": "44236006a3d5ae5346421096b58aad5cc189bfe93f5f05c116d8016344c53e16"
+        },
+        {
+          "name": "dependency-13.snapshot",
+          "bytes": 12724,
+          "sha256": "d5bce9c409a639dd68a97c0cb05e4a279ee985fdacfcfdaeb1ac7e1d572b6528"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1529,
+          "sha256": "a4368e51680e3396b74f82bbb57dfb25e78719cb6e2ade910a071eff08fa0e08"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 7569,
+          "sha256": "8be089b83322902f73e56d3fbd743d1a9842a6b3b78dc171debd3c7896a856ec"
+        },
+        {
+          "name": "start.json",
+          "bytes": 4018,
+          "sha256": "b186ecf05a598a8c3a32b57897e06fcc4a7fd7262a3dd6b25ebd84198fb95241"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 648,
+          "sha256": "915829c61ab23a8bfc97435041ee01e2d3ae621bf4b9721774489b7e40e31e6d"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-correction-focused-final-c",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "5be607aa6069756a424013851e837a1d6719ca60a53323cc1dcdd74f0dd1cb8a"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 2843,
+          "sha256": "79ceebc6e86d7164f6f8a3e66d9fb11baa55b922983e9cd65ecd76bbd97b1515"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 21596,
+          "sha256": "b696a4815cde262b67c40d6f9a80985377d45a1bcdaea80d7f33968efa23bcc2"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 10435,
+          "sha256": "44a60e84d8b22d1cb629364a84e10257d3454531678b987a75582ddaee9a756c"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 36000,
+          "sha256": "6eff326a27cc9892aa45a6d84ae018afd19ecba18af65896ce050f7a05a094df"
+        },
+        {
+          "name": "dependency-03.snapshot",
+          "bytes": 7826,
+          "sha256": "4e2830f0bac9063f305b1486b00738d50b4becc776aa01bddf7146a15cda270e"
+        },
+        {
+          "name": "dependency-04.snapshot",
+          "bytes": 8089,
+          "sha256": "7dc8f2852af9fc95d757b609ce200a2dc50d0d1025e727208bf3df7b1da66253"
+        },
+        {
+          "name": "dependency-05.snapshot",
+          "bytes": 23633,
+          "sha256": "9f6185e2769e26afca3cc9a0de52639ee0829bbb616f28709508aa4cfd64e530"
+        },
+        {
+          "name": "dependency-06.snapshot",
+          "bytes": 8634,
+          "sha256": "96d910eb2f7461459a142d1ff3924a88f44f186ef3ecc31ea8c9cd6870d0252e"
+        },
+        {
+          "name": "dependency-07.snapshot",
+          "bytes": 20310,
+          "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd"
+        },
+        {
+          "name": "dependency-08.snapshot",
+          "bytes": 12975,
+          "sha256": "6ef907e1835cbddba5a5faa550e7ad47dc934ff1e9720a5344b7a142fe2c2e9d"
+        },
+        {
+          "name": "dependency-09.snapshot",
+          "bytes": 23509,
+          "sha256": "0cf1323690dac8ca0dc58641088a1c0bf6aacc571637890c6ed17f2f37911e8e"
+        },
+        {
+          "name": "dependency-10.snapshot",
+          "bytes": 21692,
+          "sha256": "340eb0a7b695e174bfaa3234244df7217264ac0169ef120d89cc779f4e9d5fe7"
+        },
+        {
+          "name": "dependency-11.snapshot",
+          "bytes": 3417,
+          "sha256": "74c15ff78413d6669813fc5babbda59c2817987fa3bc4c2b52de9efbee8d7c63"
+        },
+        {
+          "name": "dependency-12.snapshot",
+          "bytes": 48051,
+          "sha256": "44236006a3d5ae5346421096b58aad5cc189bfe93f5f05c116d8016344c53e16"
+        },
+        {
+          "name": "dependency-13.snapshot",
+          "bytes": 12724,
+          "sha256": "d5bce9c409a639dd68a97c0cb05e4a279ee985fdacfcfdaeb1ac7e1d572b6528"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1529,
+          "sha256": "a4368e51680e3396b74f82bbb57dfb25e78719cb6e2ade910a071eff08fa0e08"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 5396,
+          "sha256": "e6f04877c23a98b0e64311063b1cea919c7077069333b876969bdfeca6e4d0ca"
+        },
+        {
+          "name": "start.json",
+          "bytes": 3598,
+          "sha256": "9301f7c99620237d4ac6ce865b9b4501f1befd81e4ca8823937cde4a17a5cdfd"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 648,
+          "sha256": "9ea0f3234f231800e778e001e34b03904f5792240eb89a7abbc84e1cfc338a90"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-correction-focused-final-d",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "5be607aa6069756a424013851e837a1d6719ca60a53323cc1dcdd74f0dd1cb8a"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 2843,
+          "sha256": "79ceebc6e86d7164f6f8a3e66d9fb11baa55b922983e9cd65ecd76bbd97b1515"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 21596,
+          "sha256": "b696a4815cde262b67c40d6f9a80985377d45a1bcdaea80d7f33968efa23bcc2"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 10435,
+          "sha256": "44a60e84d8b22d1cb629364a84e10257d3454531678b987a75582ddaee9a756c"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 36000,
+          "sha256": "6eff326a27cc9892aa45a6d84ae018afd19ecba18af65896ce050f7a05a094df"
+        },
+        {
+          "name": "dependency-03.snapshot",
+          "bytes": 7826,
+          "sha256": "4e2830f0bac9063f305b1486b00738d50b4becc776aa01bddf7146a15cda270e"
+        },
+        {
+          "name": "dependency-04.snapshot",
+          "bytes": 8089,
+          "sha256": "7dc8f2852af9fc95d757b609ce200a2dc50d0d1025e727208bf3df7b1da66253"
+        },
+        {
+          "name": "dependency-05.snapshot",
+          "bytes": 23633,
+          "sha256": "9f6185e2769e26afca3cc9a0de52639ee0829bbb616f28709508aa4cfd64e530"
+        },
+        {
+          "name": "dependency-06.snapshot",
+          "bytes": 8634,
+          "sha256": "96d910eb2f7461459a142d1ff3924a88f44f186ef3ecc31ea8c9cd6870d0252e"
+        },
+        {
+          "name": "dependency-07.snapshot",
+          "bytes": 20310,
+          "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd"
+        },
+        {
+          "name": "dependency-08.snapshot",
+          "bytes": 12975,
+          "sha256": "6ef907e1835cbddba5a5faa550e7ad47dc934ff1e9720a5344b7a142fe2c2e9d"
+        },
+        {
+          "name": "dependency-09.snapshot",
+          "bytes": 23509,
+          "sha256": "0cf1323690dac8ca0dc58641088a1c0bf6aacc571637890c6ed17f2f37911e8e"
+        },
+        {
+          "name": "dependency-10.snapshot",
+          "bytes": 21692,
+          "sha256": "340eb0a7b695e174bfaa3234244df7217264ac0169ef120d89cc779f4e9d5fe7"
+        },
+        {
+          "name": "dependency-11.snapshot",
+          "bytes": 3417,
+          "sha256": "74c15ff78413d6669813fc5babbda59c2817987fa3bc4c2b52de9efbee8d7c63"
+        },
+        {
+          "name": "dependency-12.snapshot",
+          "bytes": 48051,
+          "sha256": "44236006a3d5ae5346421096b58aad5cc189bfe93f5f05c116d8016344c53e16"
+        },
+        {
+          "name": "dependency-13.snapshot",
+          "bytes": 12724,
+          "sha256": "d5bce9c409a639dd68a97c0cb05e4a279ee985fdacfcfdaeb1ac7e1d572b6528"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1529,
+          "sha256": "a4368e51680e3396b74f82bbb57dfb25e78719cb6e2ade910a071eff08fa0e08"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 7568,
+          "sha256": "89f537b07beeac8f9347c9e9ef40ee5263d62d0d884aeaf481dcbb62d6ebd3f4"
+        },
+        {
+          "name": "start.json",
+          "bytes": 4018,
+          "sha256": "1481600645f68236eb762239bd0eea0ecb1fd0bcc92918f74cdbc2d67eb81a62"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 648,
+          "sha256": "859ffe0d4548dfd2b43bb6ff8de4a4d4a937ad5dd6e5894bbacd2aa8bab22059"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-correction-green-01",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "d5504ab8b261de7d382c049b3ef86058206fb362cb1e70c7f15d934b284f8471"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 797,
+          "sha256": "9ee5cce22ea436994ea34c6cb447b7669140c929729ebbd7bd990bdb57c57f3a"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 16664,
+          "sha256": "127804fd8e4c1a9cd08d40c3342778210e1b0346aa5d855f47453398bfb1f3d0"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 8015,
+          "sha256": "617d1306099219b20265bbd661130b0cb8c259093cced10d32a54f59e19067c8"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 3417,
+          "sha256": "74c15ff78413d6669813fc5babbda59c2817987fa3bc4c2b52de9efbee8d7c63"
+        },
+        {
+          "name": "dependency-03.snapshot",
+          "bytes": 12734,
+          "sha256": "a22b38b5a65bc1b60c745fb4dfe95469bd53f51599b6f9b682ab44df8b458009"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1529,
+          "sha256": "a4368e51680e3396b74f82bbb57dfb25e78719cb6e2ade910a071eff08fa0e08"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 4311,
+          "sha256": "96c407b40bce7f4a97dcc6a437c59f7ab453ab888775f37cd0eb8b6f38c2fdbe"
+        },
+        {
+          "name": "start.json",
+          "bytes": 2337,
+          "sha256": "024e8d90fd6e6e301990302853736ce6cd25a8719243a3375a4f2513c848564c"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 966,
+          "sha256": "a858f427a5411cb1c5b6d80a829f8527f5da52f3948f1b623ca2b3ff9edbb52d"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 986,
+          "sha256": "ceef614dd6b57d636a8a8ec39090fb8708091db0ebb34f8bfb4586705413b68c"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-correction-green-02",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "d5504ab8b261de7d382c049b3ef86058206fb362cb1e70c7f15d934b284f8471"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 1415,
+          "sha256": "fbee1e91a846888f176700282d0a7cdad6ff1b0df5c955ebac11b54fcfc29351"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 20530,
+          "sha256": "1d2155ad9c648e7844ec0d73da9190c422e168a633b2e5af5c7705579fb8caa3"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 8463,
+          "sha256": "361340959524b05c2f9dce73c5a2867dce2f2b72014e4036747c5d0ce82ea054"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 11546,
+          "sha256": "0e3e39dd5827525c1894f39c8cdfeefb9244d2f80c003a0f494747c62dc147de"
+        },
+        {
+          "name": "dependency-03.snapshot",
+          "bytes": 23509,
+          "sha256": "0cf1323690dac8ca0dc58641088a1c0bf6aacc571637890c6ed17f2f37911e8e"
+        },
+        {
+          "name": "dependency-04.snapshot",
+          "bytes": 21692,
+          "sha256": "340eb0a7b695e174bfaa3234244df7217264ac0169ef120d89cc779f4e9d5fe7"
+        },
+        {
+          "name": "dependency-05.snapshot",
+          "bytes": 3417,
+          "sha256": "74c15ff78413d6669813fc5babbda59c2817987fa3bc4c2b52de9efbee8d7c63"
+        },
+        {
+          "name": "dependency-06.snapshot",
+          "bytes": 48051,
+          "sha256": "44236006a3d5ae5346421096b58aad5cc189bfe93f5f05c116d8016344c53e16"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1529,
+          "sha256": "a4368e51680e3396b74f82bbb57dfb25e78719cb6e2ade910a071eff08fa0e08"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 5152,
+          "sha256": "f0a7481a82e79e4fefe5aba94ce394014da34d521e08ddf9c99678c693ff1eb5"
+        },
+        {
+          "name": "start.json",
+          "bytes": 2703,
+          "sha256": "fe959a829a52a1081aba6a5ebdfea696e9a67f605330eac103a95718e6468613"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 893,
+          "sha256": "ac4552b1082a3aea85d924534b4413798413040dc5f58de2e1abc3db8a3f86ae"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 567,
+          "sha256": "f957502273977e9d8c1e06cee6268d4587e2cb2b731b81f826d96be3218a68f3"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-correction-green-03",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "d5504ab8b261de7d382c049b3ef86058206fb362cb1e70c7f15d934b284f8471"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 616,
+          "sha256": "85504fe4ee341763577d4b09837e41506c3d8b988ff7dd2b1b321933b841214e"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 20530,
+          "sha256": "1d2155ad9c648e7844ec0d73da9190c422e168a633b2e5af5c7705579fb8caa3"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 8463,
+          "sha256": "361340959524b05c2f9dce73c5a2867dce2f2b72014e4036747c5d0ce82ea054"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 11810,
+          "sha256": "36844fd1ece8eb7798214ea0865297dd97813ce7d91493531cc6311821e4f58b"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1529,
+          "sha256": "a4368e51680e3396b74f82bbb57dfb25e78719cb6e2ade910a071eff08fa0e08"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 4080,
+          "sha256": "c036dccd23c4d873fcc7a843377b84ad2f0a3d0000e4f805ce55a9ba3caccec5"
+        },
+        {
+          "name": "start.json",
+          "bytes": 2263,
+          "sha256": "5a4c0c712247351ab1cea4ae06c4952e2984fecfd1fe7d04fc84270d50c7ec0d"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 831,
+          "sha256": "67ab623127b986577e24113e91ad19c22e19ed86bb0b052c11a8158bd3089b28"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 590,
+          "sha256": "1063ae23b026c02dbbebc9e841d10963bb2b2671151b56b9768d49383e20e274"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-correction-green-04",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "5be607aa6069756a424013851e837a1d6719ca60a53323cc1dcdd74f0dd1cb8a"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 616,
+          "sha256": "3c153ced8b0a58b06796e7155216c1f61154eb5c0a091525c15df80d3a5c0ccc"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 20933,
+          "sha256": "9f9a9b14bb163d67901aaf852bcedcbd20e3898e29df6ee122cb96a4e7dc51ad"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 8463,
+          "sha256": "361340959524b05c2f9dce73c5a2867dce2f2b72014e4036747c5d0ce82ea054"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 12724,
+          "sha256": "d5bce9c409a639dd68a97c0cb05e4a279ee985fdacfcfdaeb1ac7e1d572b6528"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1529,
+          "sha256": "a4368e51680e3396b74f82bbb57dfb25e78719cb6e2ade910a071eff08fa0e08"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 4077,
+          "sha256": "2885e75babf90a830695bad769cef6f8685254a4d19a9d30ac1af45b074a6745"
+        },
+        {
+          "name": "start.json",
+          "bytes": 2263,
+          "sha256": "acc602611f71db17ef4a26358e7b0a55980c4230c501b911066e101bce8a105a"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 342,
+          "sha256": "cedade56470a7bc0ad3bb8bdcf1fb31272d2be33c254f7ec0fffd1bdb6f47055"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-correction-green-05",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "5be607aa6069756a424013851e837a1d6719ca60a53323cc1dcdd74f0dd1cb8a"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 602,
+          "sha256": "1ef6297990673bd0b9bcd848564d39d55709d0b9a060469f9bad1f74b47f49a3"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 21596,
+          "sha256": "b696a4815cde262b67c40d6f9a80985377d45a1bcdaea80d7f33968efa23bcc2"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 8634,
+          "sha256": "96d910eb2f7461459a142d1ff3924a88f44f186ef3ecc31ea8c9cd6870d0252e"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 12975,
+          "sha256": "6ef907e1835cbddba5a5faa550e7ad47dc934ff1e9720a5344b7a142fe2c2e9d"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1529,
+          "sha256": "a4368e51680e3396b74f82bbb57dfb25e78719cb6e2ade910a071eff08fa0e08"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 4050,
+          "sha256": "20fe1b08137d870ad9c94ff9b89ea01105fff89b1d2bd0d16ed717a50080376a"
+        },
+        {
+          "name": "start.json",
+          "bytes": 2235,
+          "sha256": "c2a7e9f2d7b6e875b4fcce2fd808238ecde37f6ee292d963a5fb7820a603c1aa"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 342,
+          "sha256": "009027aade753b806988bd2b351cc1c96abf4de06df08b059a9cf041eb40a733"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-correction-inventory",
+      "files": [
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1022,
+          "sha256": "6f23d6dde1376d33ab4ab2482e449d46715b64f417a5b931b58331c572cfe111"
+        },
+        {
+          "name": "inventory.json",
+          "bytes": 61688,
+          "sha256": "34549d13d77f24050c1e09762860618e2eed848bf1a4c956210d279929346cb1"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 2690,
+          "sha256": "a68268751ac8d3f1ba2387fd75e4b2500447f5c6ec0f9a2414b4e0841d784164"
+        },
+        {
+          "name": "start.json",
+          "bytes": 1501,
+          "sha256": "6ed4a1caffbed0a0569ed673a33e6066a33612641babb8218843ec7961baa81a"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 15,
+          "sha256": "5c9606d4c4172f751a909f726f7d38eba2b66172b3cb16a7d6064b4a7fd1bf78"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-correction-red-01",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "d5504ab8b261de7d382c049b3ef86058206fb362cb1e70c7f15d934b284f8471"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 605,
+          "sha256": "d0c42a5c2f24970a8b3a834a74616ddb6b25b03c6736a71fb8d8efdff0fd8961"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 16664,
+          "sha256": "127804fd8e4c1a9cd08d40c3342778210e1b0346aa5d855f47453398bfb1f3d0"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 5745,
+          "sha256": "a3ded36652e28b2bfe47da236b05d62df19903d2af3d93028e7d31ce460a26c6"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 3519,
+          "sha256": "2e1f070a25545263786b27ea1b569bfe8a71216f380bf231edea209f56fc8b81"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1529,
+          "sha256": "a4368e51680e3396b74f82bbb57dfb25e78719cb6e2ade910a071eff08fa0e08"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 4056,
+          "sha256": "e7f707c686b189a3145182a804cc89d03025aaecd9eda4419605a8f11d3232f8"
+        },
+        {
+          "name": "start.json",
+          "bytes": 2239,
+          "sha256": "3049fab36c20a6724edac20dd57b2f17cfbd508e7dbdb507a97b2145952f2b3a"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 1674,
+          "sha256": "147ab156d4d2d2a24ae849098c3f35a0d72bc7e3dfb0c51859575b2aeac8e6d4"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 838,
+          "sha256": "42cfe59c48195f07c78fb69a97ba17466259e9fae57568ae54a2de000799a532"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-correction-red-02",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "d5504ab8b261de7d382c049b3ef86058206fb362cb1e70c7f15d934b284f8471"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 1414,
+          "sha256": "d2f32dbd0f67e32a4e0a97ae4033cf6b0e8a86f8eeeb1f88c254a999d27f5408"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 20530,
+          "sha256": "1d2155ad9c648e7844ec0d73da9190c422e168a633b2e5af5c7705579fb8caa3"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 8463,
+          "sha256": "361340959524b05c2f9dce73c5a2867dce2f2b72014e4036747c5d0ce82ea054"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 7493,
+          "sha256": "3fcaf815c6f7aa86d16ce5fcb7cd1c06d7330057c45f19ecc27c1e03ab4e9154"
+        },
+        {
+          "name": "dependency-03.snapshot",
+          "bytes": 23509,
+          "sha256": "0cf1323690dac8ca0dc58641088a1c0bf6aacc571637890c6ed17f2f37911e8e"
+        },
+        {
+          "name": "dependency-04.snapshot",
+          "bytes": 21692,
+          "sha256": "340eb0a7b695e174bfaa3234244df7217264ac0169ef120d89cc779f4e9d5fe7"
+        },
+        {
+          "name": "dependency-05.snapshot",
+          "bytes": 3417,
+          "sha256": "74c15ff78413d6669813fc5babbda59c2817987fa3bc4c2b52de9efbee8d7c63"
+        },
+        {
+          "name": "dependency-06.snapshot",
+          "bytes": 48051,
+          "sha256": "44236006a3d5ae5346421096b58aad5cc189bfe93f5f05c116d8016344c53e16"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1529,
+          "sha256": "a4368e51680e3396b74f82bbb57dfb25e78719cb6e2ade910a071eff08fa0e08"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 5146,
+          "sha256": "86ceb1a4cdcb251ddd47886681aae1191670cb3f9876a1e4846e070eb6561cb3"
+        },
+        {
+          "name": "start.json",
+          "bytes": 2699,
+          "sha256": "bcd453db2d2d8c676fcbfc9138768067bdb0ed3e803644a82b6df8d3b4aca98f"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 873,
+          "sha256": "d80a5ddc8dec5e0929839e10b621ac7a1685bdae347b62f9145e8248b2022b76"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 549,
+          "sha256": "dd995973898968628c053b675ab6cbca286a0ec03c4cdc4a6b3726fdd1353ed5"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-correction-red-03",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "d5504ab8b261de7d382c049b3ef86058206fb362cb1e70c7f15d934b284f8471"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 411,
+          "sha256": "4f8527791229f8f66701ce9c9eab5fe60319765581e414b27c79c6c5157eb15e"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 20933,
+          "sha256": "9f9a9b14bb163d67901aaf852bcedcbd20e3898e29df6ee122cb96a4e7dc51ad"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 11810,
+          "sha256": "36844fd1ece8eb7798214ea0865297dd97813ce7d91493531cc6311821e4f58b"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1529,
+          "sha256": "a4368e51680e3396b74f82bbb57dfb25e78719cb6e2ade910a071eff08fa0e08"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 3796,
+          "sha256": "97efc5cf8d86349f9731cc55cb1d5122257b1c006ea5773a7647637024dbe0f9"
+        },
+        {
+          "name": "start.json",
+          "bytes": 2137,
+          "sha256": "d01695e059232eeb5b7c50ef5b7a9d4195a73777df054d7cd3806917249b24cd"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 914,
+          "sha256": "e3ac97b54e93b2089c6037cf6b352836142ae691d4915ce3031b3d55aac6cc95"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 574,
+          "sha256": "654cea09c9a670ca3101cf7615540af77927e931d2e91a3cc4e8b4efe3d642ba"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-correction-red-04",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "d5504ab8b261de7d382c049b3ef86058206fb362cb1e70c7f15d934b284f8471"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 602,
+          "sha256": "e412799e09fa05b54a94253211bf80c097f25c44eb3740bf99e904da28ef5918"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 21596,
+          "sha256": "b696a4815cde262b67c40d6f9a80985377d45a1bcdaea80d7f33968efa23bcc2"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 8463,
+          "sha256": "361340959524b05c2f9dce73c5a2867dce2f2b72014e4036747c5d0ce82ea054"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 12734,
+          "sha256": "a22b38b5a65bc1b60c745fb4dfe95469bd53f51599b6f9b682ab44df8b458009"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1529,
+          "sha256": "a4368e51680e3396b74f82bbb57dfb25e78719cb6e2ade910a071eff08fa0e08"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 4048,
+          "sha256": "c18a8bbff6de68a676a51b18644088d43152c5464f827a9ae3451164840b1d76"
+        },
+        {
+          "name": "start.json",
+          "bytes": 2231,
+          "sha256": "e8aba112fb8d9429849fc6f7f3d607fb11ddee5cf3fc023d59f8b4b79f8ef394"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 676,
+          "sha256": "5243041a3004d98d0e13e8f9ad84f37e023eb976057383c80ee621fce190eb43"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 543,
+          "sha256": "5e51e54702e3d7c15dc81c25c473e625754beec26b3a430ebf03c5e017ed0245"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-correction-typecheck-final",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "974dcd8f2d65200efa76d24a339999753339ec6e1f058958c82291dd272f4991"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 1989,
+          "sha256": "1c4e1644aaa7c3ba0d213b325498ed6f9b355d32ca165f622d2eb0de6c1f5465"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 520,
+          "sha256": "6df86a88fe8a1d28dbbeebaa31cf8c0c02b1c3a02b51ea4977f5d4f22aad3528"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 8463,
+          "sha256": "361340959524b05c2f9dce73c5a2867dce2f2b72014e4036747c5d0ce82ea054"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 20310,
+          "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd"
+        },
+        {
+          "name": "dependency-03.snapshot",
+          "bytes": 12734,
+          "sha256": "a22b38b5a65bc1b60c745fb4dfe95469bd53f51599b6f9b682ab44df8b458009"
+        },
+        {
+          "name": "dependency-04.snapshot",
+          "bytes": 23509,
+          "sha256": "0cf1323690dac8ca0dc58641088a1c0bf6aacc571637890c6ed17f2f37911e8e"
+        },
+        {
+          "name": "dependency-05.snapshot",
+          "bytes": 21692,
+          "sha256": "340eb0a7b695e174bfaa3234244df7217264ac0169ef120d89cc779f4e9d5fe7"
+        },
+        {
+          "name": "dependency-06.snapshot",
+          "bytes": 3417,
+          "sha256": "74c15ff78413d6669813fc5babbda59c2817987fa3bc4c2b52de9efbee8d7c63"
+        },
+        {
+          "name": "dependency-07.snapshot",
+          "bytes": 48051,
+          "sha256": "44236006a3d5ae5346421096b58aad5cc189bfe93f5f05c116d8016344c53e16"
+        },
+        {
+          "name": "dependency-08.snapshot",
+          "bytes": 20933,
+          "sha256": "9f9a9b14bb163d67901aaf852bcedcbd20e3898e29df6ee122cb96a4e7dc51ad"
+        },
+        {
+          "name": "dependency-09.snapshot",
+          "bytes": 12724,
+          "sha256": "d5bce9c409a639dd68a97c0cb05e4a279ee985fdacfcfdaeb1ac7e1d572b6528"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1529,
+          "sha256": "a4368e51680e3396b74f82bbb57dfb25e78719cb6e2ade910a071eff08fa0e08"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 5977,
+          "sha256": "679074265699b04856c30703f67d25376ee24c8d03ee27dc03c3ca373196beef"
+        },
+        {
+          "name": "start.json",
+          "bytes": 3058,
+          "sha256": "fdcde956295b425cf8e02affdb5c0ba0ea92818a774562424c552d8f32ed6bc4"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 406,
+          "sha256": "af426bf11a07551cfb795631f8c2943b6fb0fbc6ee9f05178ff87380c14ec6d8"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-correction-typecheck-final-b",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "5be607aa6069756a424013851e837a1d6719ca60a53323cc1dcdd74f0dd1cb8a"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 1989,
+          "sha256": "a140ba34bc21acade04a10d114fe5192ba7bc6ec54193d319c99c0f21f990cdf"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 520,
+          "sha256": "6df86a88fe8a1d28dbbeebaa31cf8c0c02b1c3a02b51ea4977f5d4f22aad3528"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 8463,
+          "sha256": "361340959524b05c2f9dce73c5a2867dce2f2b72014e4036747c5d0ce82ea054"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 20310,
+          "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd"
+        },
+        {
+          "name": "dependency-03.snapshot",
+          "bytes": 12734,
+          "sha256": "a22b38b5a65bc1b60c745fb4dfe95469bd53f51599b6f9b682ab44df8b458009"
+        },
+        {
+          "name": "dependency-04.snapshot",
+          "bytes": 23509,
+          "sha256": "0cf1323690dac8ca0dc58641088a1c0bf6aacc571637890c6ed17f2f37911e8e"
+        },
+        {
+          "name": "dependency-05.snapshot",
+          "bytes": 21692,
+          "sha256": "340eb0a7b695e174bfaa3234244df7217264ac0169ef120d89cc779f4e9d5fe7"
+        },
+        {
+          "name": "dependency-06.snapshot",
+          "bytes": 3417,
+          "sha256": "74c15ff78413d6669813fc5babbda59c2817987fa3bc4c2b52de9efbee8d7c63"
+        },
+        {
+          "name": "dependency-07.snapshot",
+          "bytes": 48051,
+          "sha256": "44236006a3d5ae5346421096b58aad5cc189bfe93f5f05c116d8016344c53e16"
+        },
+        {
+          "name": "dependency-08.snapshot",
+          "bytes": 20948,
+          "sha256": "47697dd6198ba4d6c08025e6b91afe18c9dad2b2d4f2c13469fc63531b15682e"
+        },
+        {
+          "name": "dependency-09.snapshot",
+          "bytes": 12724,
+          "sha256": "d5bce9c409a639dd68a97c0cb05e4a279ee985fdacfcfdaeb1ac7e1d572b6528"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1529,
+          "sha256": "a4368e51680e3396b74f82bbb57dfb25e78719cb6e2ade910a071eff08fa0e08"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 5979,
+          "sha256": "e09ae8be4b994d7fc73a39e738583eef2a6f6c42d71d57bfd6382d4752d0b870"
+        },
+        {
+          "name": "start.json",
+          "bytes": 3062,
+          "sha256": "fb51b61938599608499a4a328d2c334c7754cb64305f70dad13c5f9ff87aca91"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-correction-typecheck-final-c",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "5be607aa6069756a424013851e837a1d6719ca60a53323cc1dcdd74f0dd1cb8a"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 1989,
+          "sha256": "44fc22b8321e72a93af604e171c32ed5abcfc7a4fb104d04e064860479755fb4"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 520,
+          "sha256": "6df86a88fe8a1d28dbbeebaa31cf8c0c02b1c3a02b51ea4977f5d4f22aad3528"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 8634,
+          "sha256": "96d910eb2f7461459a142d1ff3924a88f44f186ef3ecc31ea8c9cd6870d0252e"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 20310,
+          "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd"
+        },
+        {
+          "name": "dependency-03.snapshot",
+          "bytes": 12975,
+          "sha256": "6ef907e1835cbddba5a5faa550e7ad47dc934ff1e9720a5344b7a142fe2c2e9d"
+        },
+        {
+          "name": "dependency-04.snapshot",
+          "bytes": 23509,
+          "sha256": "0cf1323690dac8ca0dc58641088a1c0bf6aacc571637890c6ed17f2f37911e8e"
+        },
+        {
+          "name": "dependency-05.snapshot",
+          "bytes": 21692,
+          "sha256": "340eb0a7b695e174bfaa3234244df7217264ac0169ef120d89cc779f4e9d5fe7"
+        },
+        {
+          "name": "dependency-06.snapshot",
+          "bytes": 3417,
+          "sha256": "74c15ff78413d6669813fc5babbda59c2817987fa3bc4c2b52de9efbee8d7c63"
+        },
+        {
+          "name": "dependency-07.snapshot",
+          "bytes": 48051,
+          "sha256": "44236006a3d5ae5346421096b58aad5cc189bfe93f5f05c116d8016344c53e16"
+        },
+        {
+          "name": "dependency-08.snapshot",
+          "bytes": 21596,
+          "sha256": "b696a4815cde262b67c40d6f9a80985377d45a1bcdaea80d7f33968efa23bcc2"
+        },
+        {
+          "name": "dependency-09.snapshot",
+          "bytes": 12724,
+          "sha256": "d5bce9c409a639dd68a97c0cb05e4a279ee985fdacfcfdaeb1ac7e1d572b6528"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1529,
+          "sha256": "a4368e51680e3396b74f82bbb57dfb25e78719cb6e2ade910a071eff08fa0e08"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 5979,
+          "sha256": "c87a8562f1894a01017af751be6b65b1fc7a7372c3a91390ffd7efe94d6cb40e"
+        },
+        {
+          "name": "start.json",
+          "bytes": 3062,
+          "sha256": "fbd4ce740cded92f513ededf16479a027c873c7db4ab4c7af014b475f4d64e61"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-final",
+      "files": [
+        {
+          "name": "dependencies.json",
+          "bytes": 1809,
+          "sha256": "4da886e3e0c46828061d91339dd8ca204c9c80698e6c560f37989b850fecb216"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 23557,
+          "sha256": "96ab1158ab2684a14ff617f55561b097d070f41beb39171c2a7a20d6ada69f44"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 3519,
+          "sha256": "2e1f070a25545263786b27ea1b569bfe8a71216f380bf231edea209f56fc8b81"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 20310,
+          "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd"
+        },
+        {
+          "name": "dependency-03.snapshot",
+          "bytes": 5745,
+          "sha256": "a3ded36652e28b2bfe47da236b05d62df19903d2af3d93028e7d31ce460a26c6"
+        },
+        {
+          "name": "dependency-04.snapshot",
+          "bytes": 21958,
+          "sha256": "6c6f17ff8ee0825b988de239fa3f2c3cdfdcd3fe1b32dccd377ff232155bb2b9"
+        },
+        {
+          "name": "dependency-05.snapshot",
+          "bytes": 48167,
+          "sha256": "86a4247c15820892013c8ab853e8fb62646a5db5d152868d5316965c63b4fe94"
+        },
+        {
+          "name": "dependency-06.snapshot",
+          "bytes": 12385,
+          "sha256": "75b0b6fe0eed8105f1fd154fc7b2ee6cc79bb816629df732d707a9d06d8f5eb6"
+        },
+        {
+          "name": "dependency-07.snapshot",
+          "bytes": 13629,
+          "sha256": "0859c579f4b3a0491d8bc340ed96fd3b7e5c0c47d914acb436fe2036019d8add"
+        },
+        {
+          "name": "dependency-08.snapshot",
+          "bytes": 7493,
+          "sha256": "3fcaf815c6f7aa86d16ce5fcb7cd1c06d7330057c45f19ecc27c1e03ab4e9154"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 6757,
+          "sha256": "c2beffc4f2cd2ada03a8fd2b178593c5ab7369fc5d855ef3424f87a4650778f1"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 4400,
+          "sha256": "c9349e1a2b07170f931f076d4346b213e2631425dba64ac241b5205d47424397"
+        },
+        {
+          "name": "start.json",
+          "bytes": 1760,
+          "sha256": "f08b972dbd8499d45b0b1d6fc265df950803d6981fc4c805982569b9d569feba"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 1365,
+          "sha256": "ff196fdde4282cf3a208d987af61e87a4a062251a32bc57e38fb66021b62d0b7"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-final-b",
+      "files": [
+        {
+          "name": "dependencies.json",
+          "bytes": 1809,
+          "sha256": "4da886e3e0c46828061d91339dd8ca204c9c80698e6c560f37989b850fecb216"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 23557,
+          "sha256": "96ab1158ab2684a14ff617f55561b097d070f41beb39171c2a7a20d6ada69f44"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 3519,
+          "sha256": "2e1f070a25545263786b27ea1b569bfe8a71216f380bf231edea209f56fc8b81"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 20310,
+          "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd"
+        },
+        {
+          "name": "dependency-03.snapshot",
+          "bytes": 5745,
+          "sha256": "a3ded36652e28b2bfe47da236b05d62df19903d2af3d93028e7d31ce460a26c6"
+        },
+        {
+          "name": "dependency-04.snapshot",
+          "bytes": 21958,
+          "sha256": "6c6f17ff8ee0825b988de239fa3f2c3cdfdcd3fe1b32dccd377ff232155bb2b9"
+        },
+        {
+          "name": "dependency-05.snapshot",
+          "bytes": 48167,
+          "sha256": "86a4247c15820892013c8ab853e8fb62646a5db5d152868d5316965c63b4fe94"
+        },
+        {
+          "name": "dependency-06.snapshot",
+          "bytes": 12385,
+          "sha256": "75b0b6fe0eed8105f1fd154fc7b2ee6cc79bb816629df732d707a9d06d8f5eb6"
+        },
+        {
+          "name": "dependency-07.snapshot",
+          "bytes": 13629,
+          "sha256": "0859c579f4b3a0491d8bc340ed96fd3b7e5c0c47d914acb436fe2036019d8add"
+        },
+        {
+          "name": "dependency-08.snapshot",
+          "bytes": 7493,
+          "sha256": "3fcaf815c6f7aa86d16ce5fcb7cd1c06d7330057c45f19ecc27c1e03ab4e9154"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 6899,
+          "sha256": "2739a677bd4aa67f0a33774ff0c09eb11d59afd7ede7a47ce5b7244ddc033f14"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 4522,
+          "sha256": "f1054ac804f527dacc72ae2caf3789d1c1254e726ccf83fc74cac5ffb762a5b1"
+        },
+        {
+          "name": "result.json",
+          "bytes": 10105,
+          "sha256": "19db5a57abcd5998ddce9fbe8014ed77ab6152270651af9a2ba1103b451184fb"
+        },
+        {
+          "name": "start.json",
+          "bytes": 1764,
+          "sha256": "46309b3d5b5849256706f060ca13fdb3a5f4c68e614c836aa9c74d79bbfeaacf"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 130,
+          "sha256": "6bd2f76d916f258bbf927e5861e16472942b154a3bb41c4a54db4516412bc974"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-focused-final",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "5be607aa6069756a424013851e837a1d6719ca60a53323cc1dcdd74f0dd1cb8a"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 2842,
+          "sha256": "75938eadd3416f10986286d8a55ba5c2f1eaf6970c43742daf2113bc218196f5"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 13629,
+          "sha256": "0859c579f4b3a0491d8bc340ed96fd3b7e5c0c47d914acb436fe2036019d8add"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 10435,
+          "sha256": "44a60e84d8b22d1cb629364a84e10257d3454531678b987a75582ddaee9a756c"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 36000,
+          "sha256": "6eff326a27cc9892aa45a6d84ae018afd19ecba18af65896ce050f7a05a094df"
+        },
+        {
+          "name": "dependency-03.snapshot",
+          "bytes": 7826,
+          "sha256": "4e2830f0bac9063f305b1486b00738d50b4becc776aa01bddf7146a15cda270e"
+        },
+        {
+          "name": "dependency-04.snapshot",
+          "bytes": 8089,
+          "sha256": "7dc8f2852af9fc95d757b609ce200a2dc50d0d1025e727208bf3df7b1da66253"
+        },
+        {
+          "name": "dependency-05.snapshot",
+          "bytes": 23633,
+          "sha256": "9f6185e2769e26afca3cc9a0de52639ee0829bbb616f28709508aa4cfd64e530"
+        },
+        {
+          "name": "dependency-06.snapshot",
+          "bytes": 5745,
+          "sha256": "a3ded36652e28b2bfe47da236b05d62df19903d2af3d93028e7d31ce460a26c6"
+        },
+        {
+          "name": "dependency-07.snapshot",
+          "bytes": 20310,
+          "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd"
+        },
+        {
+          "name": "dependency-08.snapshot",
+          "bytes": 12385,
+          "sha256": "75b0b6fe0eed8105f1fd154fc7b2ee6cc79bb816629df732d707a9d06d8f5eb6"
+        },
+        {
+          "name": "dependency-09.snapshot",
+          "bytes": 23557,
+          "sha256": "96ab1158ab2684a14ff617f55561b097d070f41beb39171c2a7a20d6ada69f44"
+        },
+        {
+          "name": "dependency-10.snapshot",
+          "bytes": 21958,
+          "sha256": "6c6f17ff8ee0825b988de239fa3f2c3cdfdcd3fe1b32dccd377ff232155bb2b9"
+        },
+        {
+          "name": "dependency-11.snapshot",
+          "bytes": 3519,
+          "sha256": "2e1f070a25545263786b27ea1b569bfe8a71216f380bf231edea209f56fc8b81"
+        },
+        {
+          "name": "dependency-12.snapshot",
+          "bytes": 48167,
+          "sha256": "86a4247c15820892013c8ab853e8fb62646a5db5d152868d5316965c63b4fe94"
+        },
+        {
+          "name": "dependency-13.snapshot",
+          "bytes": 7493,
+          "sha256": "3fcaf815c6f7aa86d16ce5fcb7cd1c06d7330057c45f19ecc27c1e03ab4e9154"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1529,
+          "sha256": "a4368e51680e3396b74f82bbb57dfb25e78719cb6e2ade910a071eff08fa0e08"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 7542,
+          "sha256": "b7569e0fb2ceb167f1741720994c92b7d522ba4122cc7948d27ee641164d202c"
+        },
+        {
+          "name": "start.json",
+          "bytes": 3992,
+          "sha256": "28b02a314c5b614c89144295e495034cabe7af8af777d7c15c186dce65562eb2"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 645,
+          "sha256": "e4a2fbd6894a8c6ac6ea5dc6296d6443e8e2660fb22a7b9f3e9170a893757257"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-green-01",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "5be607aa6069756a424013851e837a1d6719ca60a53323cc1dcdd74f0dd1cb8a"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 612,
+          "sha256": "bb4fd4a3317e32733f13eed0969927045f9073ab3d5cbccc475dae6bd82f1d70"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 4852,
+          "sha256": "03bd983d36173b1c889b78202c5faae32debb0e50ac463764f7cea9c56f33071"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 20310,
+          "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 5745,
+          "sha256": "a3ded36652e28b2bfe47da236b05d62df19903d2af3d93028e7d31ce460a26c6"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1434,
+          "sha256": "2700398afd88f6ae0aa6fc185334b3b52ff073c5054ef55b870ec3d691755583"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 3939,
+          "sha256": "e51895acd49a6f6a811e579cd1d991135e971d3217e73026e0feef045a0ad9d6"
+        },
+        {
+          "name": "start.json",
+          "bytes": 2125,
+          "sha256": "1c07d46a3faa87c11316a753ee8a3685cfc87194bfeee2d079959e76c412dd31"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 335,
+          "sha256": "cd15551bf9a4605f572d183bc56b6a6705b01509b833bc0f9c15dc7ef21e2a1e"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-green-02",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "5be607aa6069756a424013851e837a1d6719ca60a53323cc1dcdd74f0dd1cb8a"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 1195,
+          "sha256": "9431e9a836d65b4e8e9e89e5921a0355a37a6e763a2327b385a6291774004e12"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 8561,
+          "sha256": "16a577789942d700fe1b6aaa4805a5cd6ac45380ade9fc110ad6a32d4bd08224"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 12385,
+          "sha256": "75b0b6fe0eed8105f1fd154fc7b2ee6cc79bb816629df732d707a9d06d8f5eb6"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 23557,
+          "sha256": "96ab1158ab2684a14ff617f55561b097d070f41beb39171c2a7a20d6ada69f44"
+        },
+        {
+          "name": "dependency-03.snapshot",
+          "bytes": 21958,
+          "sha256": "6c6f17ff8ee0825b988de239fa3f2c3cdfdcd3fe1b32dccd377ff232155bb2b9"
+        },
+        {
+          "name": "dependency-04.snapshot",
+          "bytes": 3519,
+          "sha256": "2e1f070a25545263786b27ea1b569bfe8a71216f380bf231edea209f56fc8b81"
+        },
+        {
+          "name": "dependency-05.snapshot",
+          "bytes": 48167,
+          "sha256": "86a4247c15820892013c8ab853e8fb62646a5db5d152868d5316965c63b4fe94"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1434,
+          "sha256": "2700398afd88f6ae0aa6fc185334b3b52ff073c5054ef55b870ec3d691755583"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 4710,
+          "sha256": "d5136952b30c627c315307722436591f9de4394c388d76d816ecb8db4cb9d2bf"
+        },
+        {
+          "name": "start.json",
+          "bytes": 2421,
+          "sha256": "6bcc1ba9ec5c79d810c0186dda7523a0b188a0ba933b30a8526597a9b451537f"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 337,
+          "sha256": "9918aa295d4091feef46765d73451d083df8fc78f902defa30fa8f8b755a27f0"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-green-03",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "5be607aa6069756a424013851e837a1d6719ca60a53323cc1dcdd74f0dd1cb8a"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 615,
+          "sha256": "b8df53c718981365b86ab042bff3cee034342429f3a9a166c6612ffd944e6e89"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 11372,
+          "sha256": "c72a3161014362a1aad058c0b1f92bbe43f74eea4942b88d7d8237d332a48108"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 5745,
+          "sha256": "a3ded36652e28b2bfe47da236b05d62df19903d2af3d93028e7d31ce460a26c6"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 7175,
+          "sha256": "0a74ce1abb268bfe2e4ecdf69e25ecf9895d7b1ff91179b663723b068273690a"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1434,
+          "sha256": "2700398afd88f6ae0aa6fc185334b3b52ff073c5054ef55b870ec3d691755583"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 3945,
+          "sha256": "b44e9dc5447582ac30052f41970c98d2ddc651fa8c918bbcb1c86984541c4bf7"
+        },
+        {
+          "name": "start.json",
+          "bytes": 2131,
+          "sha256": "31f18064e88681e72b093ad09183db9d94f921c42d1cdfc8d32d87d12ca6f5d9"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 339,
+          "sha256": "8ed66ff494e47207f117cee0a25be183c79adfc24571987d183baaa7f1952b72"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-green-04",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "d5504ab8b261de7d382c049b3ef86058206fb362cb1e70c7f15d934b284f8471"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 615,
+          "sha256": "aaea9cd744963cdfaa10cb74987fa102f90269e99af0d82071d60a8f24850122"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 13536,
+          "sha256": "33d687f7573edec432eb64ed579aaac67229b44cbefb162fb325505bc9c9a544"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 5745,
+          "sha256": "a3ded36652e28b2bfe47da236b05d62df19903d2af3d93028e7d31ce460a26c6"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 7493,
+          "sha256": "3fcaf815c6f7aa86d16ce5fcb7cd1c06d7330057c45f19ecc27c1e03ab4e9154"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1434,
+          "sha256": "2700398afd88f6ae0aa6fc185334b3b52ff073c5054ef55b870ec3d691755583"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 3948,
+          "sha256": "fb55b2100f91a1f8ad5f123ce38bb210c100bbd1f145d6fa4e2bea33873398c5"
+        },
+        {
+          "name": "start.json",
+          "bytes": 2131,
+          "sha256": "dea0594ad0a1003b81283d61d577c45d11bfbc9c2a3144fb28b445ff52fa390d"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 1087,
+          "sha256": "7bc7b308400b83f96daded7494e878e57c52d247582f65fb18e87b58470c4bde"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 611,
+          "sha256": "a8f6b5b3c2c0dd294d167e189aa65fc32c01f4064b416b7130d9a20a1716f953"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-green-05",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "5be607aa6069756a424013851e837a1d6719ca60a53323cc1dcdd74f0dd1cb8a"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 615,
+          "sha256": "bf1ed0995fd6ec36d3873d1e99996a874dbe58a69ae205b0912528d1f848d505"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 13629,
+          "sha256": "0859c579f4b3a0491d8bc340ed96fd3b7e5c0c47d914acb436fe2036019d8add"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 5745,
+          "sha256": "a3ded36652e28b2bfe47da236b05d62df19903d2af3d93028e7d31ce460a26c6"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 7493,
+          "sha256": "3fcaf815c6f7aa86d16ce5fcb7cd1c06d7330057c45f19ecc27c1e03ab4e9154"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1434,
+          "sha256": "2700398afd88f6ae0aa6fc185334b3b52ff073c5054ef55b870ec3d691755583"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 3944,
+          "sha256": "7eb48c637d37a4cfb777cdfd1a9af5595aa6892b41c1b769e5b213989750064c"
+        },
+        {
+          "name": "start.json",
+          "bytes": 2131,
+          "sha256": "38e75c9d0dd83493c5b974cc3389643a264440bc230f3d5ab5b0fc3fcddf3fbf"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 339,
+          "sha256": "06a8ba4cfcfc22ce69eae3a1b0d8cee8bbc32ea875fe18ac322c24b80860ea6e"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-red-01",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "d5504ab8b261de7d382c049b3ef86058206fb362cb1e70c7f15d934b284f8471"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 407,
+          "sha256": "4559fda58a362da294409c5797807f8c9f984244b3673042466e4062b803fd0e"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 4852,
+          "sha256": "03bd983d36173b1c889b78202c5faae32debb0e50ac463764f7cea9c56f33071"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 20275,
+          "sha256": "b7467c47f97c5c349535b59aaeafa3dea0bc5d03314961c5ac17ef3a4283434a"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1434,
+          "sha256": "2700398afd88f6ae0aa6fc185334b3b52ff073c5054ef55b870ec3d691755583"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 3658,
+          "sha256": "4ee170c1dc2ab01545ac0806c4c50468b4786221d7dadb3cc27504d0aaed881e"
+        },
+        {
+          "name": "start.json",
+          "bytes": 1999,
+          "sha256": "9475951bbe87472413df8cbc1bcdf939f79d2f7aa8440f1942f1b609ea05d268"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 619,
+          "sha256": "afed2d1fc15d19debe1d1d52543cf68ee8167c9b03dcce51fcf0684b87871e09"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 325,
+          "sha256": "7a34320b57952c240d3c6fe0cb397676ee15fed885474ee1eb6746fa4a731b1c"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-red-02",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "d5504ab8b261de7d382c049b3ef86058206fb362cb1e70c7f15d934b284f8471"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 1195,
+          "sha256": "911ea459d6f71afcd44de9624612240f518321c0f891da131db16e40623b7ff7"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 8561,
+          "sha256": "16a577789942d700fe1b6aaa4805a5cd6ac45380ade9fc110ad6a32d4bd08224"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 11675,
+          "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 22839,
+          "sha256": "e1f41af529c78077882a3b282461314a41b4015dea6f4ab858cbe605ed3afb32"
+        },
+        {
+          "name": "dependency-03.snapshot",
+          "bytes": 20841,
+          "sha256": "d1874728bcade108c694a02735099322ca6bd58cc871dc0f0628bab1516a51e7"
+        },
+        {
+          "name": "dependency-04.snapshot",
+          "bytes": 3164,
+          "sha256": "925e711289cbd63d3305484133d984205d727d3a72dc533e468938523a367afb"
+        },
+        {
+          "name": "dependency-05.snapshot",
+          "bytes": 47679,
+          "sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1434,
+          "sha256": "2700398afd88f6ae0aa6fc185334b3b52ff073c5054ef55b870ec3d691755583"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 4778,
+          "sha256": "c946b59efbefd9574a5349c84f751e6212d8f955ee8231d1c6ed2171b22dd06e"
+        },
+        {
+          "name": "start.json",
+          "bytes": 2447,
+          "sha256": "aa752243aed4f1007ef079910fd35149fcd79bc44cfdd6049729366a9e5e05b7"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 1824,
+          "sha256": "13769d98700dedf893a3147b09508486af5e1d6cb8be8c08c1a7679f83dfdedf"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 782,
+          "sha256": "8ee86a1f05fcc50a982fbbdbdc4f28922831d2681db0795c0636c8e6a214a135"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-red-03",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "d5504ab8b261de7d382c049b3ef86058206fb362cb1e70c7f15d934b284f8471"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 410,
+          "sha256": "f61798edc39bd94f13c8b26b2f4759f227d342bfed3493d9b4aa2859e9563404"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 11372,
+          "sha256": "c72a3161014362a1aad058c0b1f92bbe43f74eea4942b88d7d8237d332a48108"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 5745,
+          "sha256": "a3ded36652e28b2bfe47da236b05d62df19903d2af3d93028e7d31ce460a26c6"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1434,
+          "sha256": "2700398afd88f6ae0aa6fc185334b3b52ff073c5054ef55b870ec3d691755583"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 3665,
+          "sha256": "046d660946d415a076b4c75c0c96f500c6e5e36f670e51bf17e0ebe22d06677f"
+        },
+        {
+          "name": "start.json",
+          "bytes": 2005,
+          "sha256": "9c6a96d1a8df43ce9d23466434c2a909f46e6287535a0523ddee30c5208cdcef"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 2067,
+          "sha256": "593a28af484ea62be29cfaab43193f806dc4b28ce72ddfe5244c7ad2df449e34"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 955,
+          "sha256": "feb8da42b4fc89b5375e12952b874508ac4bb0cca2b7c1c9b5f447cf482f4c59"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-red-04",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "5be607aa6069756a424013851e837a1d6719ca60a53323cc1dcdd74f0dd1cb8a"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 615,
+          "sha256": "faea1ef340c5679eff03ebbfc2c42d3c3bcd16808dac93d0930c997150fecbad"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 11968,
+          "sha256": "bc6d167cf442da490a4fc04c56bc7c6e44bcf66939cbe0c06e0f48dfaab36338"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 5745,
+          "sha256": "a3ded36652e28b2bfe47da236b05d62df19903d2af3d93028e7d31ce460a26c6"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 7175,
+          "sha256": "0a74ce1abb268bfe2e4ecdf69e25ecf9895d7b1ff91179b663723b068273690a"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1434,
+          "sha256": "2700398afd88f6ae0aa6fc185334b3b52ff073c5054ef55b870ec3d691755583"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 3941,
+          "sha256": "c075c75d6651844b6e9d7a991e61fc4981eb8dc70861386f8567dbfb176fac90"
+        },
+        {
+          "name": "start.json",
+          "bytes": 2127,
+          "sha256": "6fb3f2844783b71c4ccffada551f5fa8daa46d53b15329a8961d3e664d185077"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 339,
+          "sha256": "656c5d8a1bebda4adca38e7a2882f5b67f3f314387e0086d63cd778ddab9169e"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-red-05",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "d5504ab8b261de7d382c049b3ef86058206fb362cb1e70c7f15d934b284f8471"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 615,
+          "sha256": "184f58b7b010f4089ee4ef986d6619b45fb3064b79ff5a40e501a2e228c1c0b5"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 12305,
+          "sha256": "9616e758def051195946c6797489f2d2e9988a17d02a307aada5f538b58badb8"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 5745,
+          "sha256": "a3ded36652e28b2bfe47da236b05d62df19903d2af3d93028e7d31ce460a26c6"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 7175,
+          "sha256": "0a74ce1abb268bfe2e4ecdf69e25ecf9895d7b1ff91179b663723b068273690a"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1434,
+          "sha256": "2700398afd88f6ae0aa6fc185334b3b52ff073c5054ef55b870ec3d691755583"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 3942,
+          "sha256": "639c779ce919910508c75b5d741f9e014b2a240a510b3dc1bb665ad714f63bdb"
+        },
+        {
+          "name": "start.json",
+          "bytes": 2127,
+          "sha256": "11195b3c40350b8e44d8c158eb5d2cb93b2943a5569ab7248f3bd000017be030"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 867,
+          "sha256": "5a27ab293c422f4516ca1b93f714841ae26f4683af05aebf54b887cd1b5f9255"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 570,
+          "sha256": "e8944dae78c4e25008422286eb7a1b528fd4b057d0d5db0800ba8bc98527450d"
+        }
+      ]
+    },
+    {
+      "dir": "logs/claude-channel-20261004/826-typecheck-final",
+      "files": [
+        {
+          "name": "child-result.json",
+          "bytes": 53,
+          "sha256": "5be607aa6069756a424013851e837a1d6719ca60a53323cc1dcdd74f0dd1cb8a"
+        },
+        {
+          "name": "dependencies.json",
+          "bytes": 1783,
+          "sha256": "144ff0898ec8afad4939901154f111f12815a82e27e8fa9a6a44a9c470a546f2"
+        },
+        {
+          "name": "dependency-00.snapshot",
+          "bytes": 520,
+          "sha256": "6df86a88fe8a1d28dbbeebaa31cf8c0c02b1c3a02b51ea4977f5d4f22aad3528"
+        },
+        {
+          "name": "dependency-01.snapshot",
+          "bytes": 5745,
+          "sha256": "a3ded36652e28b2bfe47da236b05d62df19903d2af3d93028e7d31ce460a26c6"
+        },
+        {
+          "name": "dependency-02.snapshot",
+          "bytes": 20310,
+          "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd"
+        },
+        {
+          "name": "dependency-03.snapshot",
+          "bytes": 12385,
+          "sha256": "75b0b6fe0eed8105f1fd154fc7b2ee6cc79bb816629df732d707a9d06d8f5eb6"
+        },
+        {
+          "name": "dependency-04.snapshot",
+          "bytes": 23557,
+          "sha256": "96ab1158ab2684a14ff617f55561b097d070f41beb39171c2a7a20d6ada69f44"
+        },
+        {
+          "name": "dependency-05.snapshot",
+          "bytes": 21958,
+          "sha256": "6c6f17ff8ee0825b988de239fa3f2c3cdfdcd3fe1b32dccd377ff232155bb2b9"
+        },
+        {
+          "name": "dependency-06.snapshot",
+          "bytes": 3519,
+          "sha256": "2e1f070a25545263786b27ea1b569bfe8a71216f380bf231edea209f56fc8b81"
+        },
+        {
+          "name": "dependency-07.snapshot",
+          "bytes": 48167,
+          "sha256": "86a4247c15820892013c8ab853e8fb62646a5db5d152868d5316965c63b4fe94"
+        },
+        {
+          "name": "dependency-08.snapshot",
+          "bytes": 13629,
+          "sha256": "0859c579f4b3a0491d8bc340ed96fd3b7e5c0c47d914acb436fe2036019d8add"
+        },
+        {
+          "name": "entry-script.snapshot",
+          "bytes": 1529,
+          "sha256": "a4368e51680e3396b74f82bbb57dfb25e78719cb6e2ade910a071eff08fa0e08"
+        },
+        {
+          "name": "receipt.json",
+          "bytes": 5673,
+          "sha256": "7b2c90340e4ac715a1288d0903e61c4b8dc70aa82d59f8b72f5278d46822ab7b"
+        },
+        {
+          "name": "start.json",
+          "bytes": 2914,
+          "sha256": "4c8e1ae55bc57e86c2929ac414414c9e7bd77e131fcb630f1e99b486112d4485"
+        },
+        {
+          "name": "stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    }
+  ]
+}

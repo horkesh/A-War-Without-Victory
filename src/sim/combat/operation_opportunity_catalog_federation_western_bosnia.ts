@@ -79,6 +79,17 @@ const MISTRAL_SIPOVO_OBJECTIVES: readonly string[] = [
     'op:sipovo:sipovo_2',
     'op:sipovo:volari_2',
     'op:sipovo:pribeljci_2',
+    // BB1 pp.417-418: the joint HV/HVO Maestral advance continued from
+    // Sipovo toward Jajce, restored to Croat hands on 13 September 1995.
+    // The operational contact graph supplies this contiguous ordinary-combat
+    // walk from the captured Pribeljci shoulder.
+    'op:jajce:bravnice',
+    'op:jajce:vinac_2',
+    'op:jajce:jajce_3',
+    'op:jajce:lupnica',
+    'op:jajce:barevo_2',
+    'op:jajce:jezero_2',
+    'op:jajce:prisoje',
 ];
 
 const SOUTHERN_MOVE_STAGING_ANCHORS: readonly string[] = [
@@ -124,6 +135,22 @@ const MISTRAL_AXES: readonly OpportunityAxisDef[] = [
         ],
         objectives: MISTRAL_DRVAR_GRAHOVO_OBJECTIVES,
         staging_osid: STAGING_LIVNO_MISI,
+        // Historically phased Mistral 2 (opt-in, multi-axis copy ONLY): the Sipovo/Jajce main effort
+        // executes when ready while this axis lawfully approaches/holds; Drvar CAPTURE authority
+        // follows this operation's OWN captures of the Sipovo and Jajce town cells.
+        // History: BB1 digital pp.417-418 (printed 380-381) — phase two (Jajce-Sipovo) from 12 Sept,
+        // Drvar capture the third phase after the fall of Sipovo and Jajce. MODEL INFERENCE: exact
+        // actor/location/timing, Barevo/Lupnica timing and the 4th/112th mass are not in that excerpt.
+        // OSIDs: `op:jajce:jajce_3` = Jajce town (reviewed n39 identity, CALIBRATION_MASTER);
+        // `op:sipovo:sipovo_2` = the cell whose member settlements (data/source/settlements_initial_master.json
+        // via data/derived/operational/canonical_to_operational_map.json) include Šipovo town
+        // (S230138, mun1990 sipovo); `op:jajce:jajce_3` likewise includes Jajce town (S121851).
+        // Receipt: logs/claude-channel-20261004/163-sipovo-identity.*. The cell is a multi-settlement
+        // aggregate, so "town cell" means the cell containing the town, not the town alone.
+        phase_gate: {
+            main_axis_id: 'mistral_sipovo',
+            requires_operation_captures: ['op:sipovo:sipovo_2', 'op:jajce:jajce_3'],
+        },
     },
     {
         axis_id: 'mistral_sipovo',
@@ -314,6 +341,7 @@ export const MISTRAL_2_95_OPPORTUNITY: OperationOpportunityDef = {
     staging_osid: STAGING_LIVNO_MISI,
     planning_duration: 4,
     min_attack_outcome: 'repulsed',
+    coordinated_advance: true,
     citations: [
         'Balkan Battlegrounds, Volume I, pp.380-381 (digital pp.417-418) - 1st HGZ on the Vitorog-Sipovo main effort',
         'docs/research/2026-05-01-late-war-operation-opportunity-research.md - Federation / Western Bosnia candidates',
@@ -428,8 +456,38 @@ const SOUTHERN_MOVE_AXES: readonly OpportunityAxisDef[] = [
         name: 'Mrkonjic Grad Axis',
         corps: SECONDARY_CORPS,
         brigades: _SOUTHERN_MOVE_BRIGADES,
-        objectives: SOUTHERN_MOVE_MRKONJIC_OBJECTIVES,
+        objectives: SOUTHERN_MOVE_MRKONJIC_OBJECTIVES.slice(0, 4),
         staging_osid: 'op:sipovo:sipovo_2',
+    },
+    {
+        axis_id: 'southern_move_bjelajce_baljvine',
+        name: 'Bjelajce-Baljvine Axis',
+        corps: SECONDARY_CORPS,
+        brigades: [],
+        objectives: SOUTHERN_MOVE_MRKONJIC_OBJECTIVES.slice(4),
+        phase_gate: {
+            main_axis_id: 'southern_move_mrkonjic',
+            requires_operation_captures: ['op:mrkonjic_grad:majdan_2'],
+            handoff: {
+                brigade_id: 'hrhb_kralj_tomislav_brigade' as FormationId,
+                source_axis_id: 'southern_move_mrkonjic',
+            },
+        },
+    },
+    {
+        axis_id: 'southern_move_donji_vrbljani',
+        name: 'Donji Vrbljani Axis',
+        corps: SECONDARY_CORPS,
+        brigades: [],
+        objectives: ['op:kljuc:donji_vrbljani_2'],
+        phase_gate: {
+            main_axis_id: 'southern_move_mrkonjic',
+            requires_operation_captures: ['op:mrkonjic_grad:podrasnica_2'],
+            handoff: {
+                brigade_id: 'hvo_rama_brigade' as FormationId,
+                source_axis_id: 'southern_move_mrkonjic',
+            },
+        },
     },
 ];
 
@@ -528,6 +586,7 @@ export const SOUTHERN_MOVE_95_OPPORTUNITY: OperationOpportunityDef = {
     axes: SOUTHERN_MOVE_AXES,
     staging_osid: 'op:sipovo:sipovo_2',
     planning_duration: 2,
+    preparation_probe_delivery: 'subordinate',
     min_attack_outcome: 'repulsed',
     citations: [
         'Balkan Battlegrounds, Volume I, p.390 (digital p.427) - 1st HGZ as a Southern Move main shock formation on the Mrkonjic Grad assault',
@@ -588,7 +647,11 @@ const MISTRAL_1_KUPRES_DEPENDENCY_ANCHORS: readonly string[] = [
     'op:kupres:bucovaca',
 ];
 
+// Post-health sequencing experiment: Gubin is already an authored Mistral 1
+// objective and the nearest legal Livno approach target before Crni Lug. This
+// changes only objective order; it adds no target, force or combat entitlement.
 const MISTRAL_1_GRAHOVO_OBJECTIVES: readonly string[] = [
+    'op:livno:gubin_2',
     'op:bosansko_grahovo:crni_lug',
     'op:bosansko_grahovo:malesevci',
     'op:bosansko_grahovo:bosansko_grahovo_2',
@@ -1012,8 +1075,8 @@ const JAJCE_OBJECTIVES: readonly string[] = [
 // Donji Vakuf / Gornji Vakuf zone. These are the historical 7th Corps brigades
 // (rolled into 3rd Corps in our reduced-OOB scenario per user directive
 // 2026-05-19). Composition mirrors the Vlašić 95 (skender_vakuf axis) and
-// Donji Vakuf 95 pools — these are the same brigades that historically broke
-// the Komar line in September 1995 and pushed into Jajce.
+// Donji Vakuf 95 pools and covers the shoulders feeding the live Grdovo
+// approach; it is not exact Jajce-town captor attribution.
 //   - arbih_770th_slavna_mountain  — home op:donji_vakuf:donji_vakuf_2
 //   - arbih_705th_slavna_mountain  — home op:bugojno:gracanica
 //   - arbih_707th_slavna_mountain  — home op:bugojno:kopcic_2
@@ -1022,8 +1085,8 @@ const JAJCE_OBJECTIVES: readonly string[] = [
 //   - arbih_737th_muslim_light     — home op:travnik:travnik_2
 //
 // Wave 14 brigade split:
-//   - NEAR axis (Donji Vakuf shoulder): three brigades home to that ring
-//     (770th Donji Vakuf town, 705th Bugojno, 707th Bugojno-Kopčić). They
+//   - NEAR axis (Donji Vakuf shoulder): four brigades on the live approach
+//     (770th Donji Vakuf town, 705th/707th Bugojno, 717th Gornji Vakuf). They
 //     have the shortest column-march to oborci_2 / torlakovac_2 / grdovo.
 //   - RING axis (deep Jajce): three brigades home to the Gornji Vakuf /
 //     Travnik shoulder (717th, 727th, 737th). They follow the corridor once
@@ -1033,6 +1096,7 @@ const JAJCE_NEAR_AXIS_BRIGADES: readonly FormationId[] = [
     'arbih_770th_slavna_mountain' as FormationId,
     'arbih_705th_slavna_mountain' as FormationId,
     'arbih_707th_slavna_mountain' as FormationId,
+    'arbih_717th_slavna_mountain' as FormationId,
 ];
 
 const JAJCE_RING_AXIS_BRIGADES: readonly FormationId[] = [

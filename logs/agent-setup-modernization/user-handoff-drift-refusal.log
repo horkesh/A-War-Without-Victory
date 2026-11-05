@@ -1,0 +1,8 @@
+Installed file changed since inventory: awwv-make-cursor-prompt; preserve it and reconcile manually
+At F:\AWWV-worktrees\agent-setup-modernization\logs\agent-setup-modernization\user-skill-handoff.ps1:51 char:9
++         throw "Installed file changed since inventory: $($adapter.nam ...
++         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Installed file ...oncile manually:String) [], RuntimeException
+    + FullyQualifiedErrorId : Installed file changed since inventory: awwv-make-cursor-prompt; preserve it and reconci 
+   le manually
+ 

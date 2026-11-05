@@ -1,6 +1,8 @@
 import type { AttackResolutionOsidReport } from '../sim/combat/attack_resolution_osid.js';
 import type { AxisLaunchReadinessDetail, AxisOrderGenerationDetail, CorpsOperation, FactionId, FormationId, FormationState, GameState } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
+import { isVlasicCohaExceptionOperation } from '../sim/combat/coha_operation_exception.js';
+import type { BotDispatcherDecisionDetail, BotRouteDecisionDetail } from '../sim/combat/bot_brigade_ai_osid.js';
 
 export interface BotOrderDiagnosticsSnapshot {
     attack_orders_by_brigade: Record<FormationId, string>;
@@ -8,6 +10,10 @@ export interface BotOrderDiagnosticsSnapshot {
     attack_orders_by_corps: Record<FormationId, number>;
     attack_orders_by_faction: Record<FactionId, number>;
     eligible_attackers_by_corps: Record<FormationId, number>;
+    /** Env-gated pre-order generic route decisions; absent on default runs. */
+    route_decision_details?: BotRouteDecisionDetail[];
+    /** Env-gated dispatcher eligibility and first-handler receipts. */
+    dispatcher_decision_details?: BotDispatcherDecisionDetail[];
 }
 
 export type OperationCombatInvalidationReason =
@@ -123,7 +129,11 @@ function getCurrentObjectives(operation: CorpsOperation): string[] {
 
 export function createBotOrderDiagnosticsSnapshot(
     state: GameState,
-    extras?: { eligible_attackers_by_corps?: Record<FormationId, number> }
+    extras?: {
+        eligible_attackers_by_corps?: Record<FormationId, number>;
+        route_decision_details?: BotRouteDecisionDetail[];
+        dispatcher_decision_details?: BotDispatcherDecisionDetail[];
+    }
 ): BotOrderDiagnosticsSnapshot {
     const attackOrdersByBrigade: Record<FormationId, string> = {};
     const movementOrdersByBrigade: Record<FormationId, string> = {};
@@ -170,7 +180,29 @@ export function createBotOrderDiagnosticsSnapshot(
         movement_orders_by_brigade: movementOrdersByBrigade,
         attack_orders_by_corps: attackOrdersByCorps,
         attack_orders_by_faction: attackOrdersByFaction,
-        eligible_attackers_by_corps: { ...(extras?.eligible_attackers_by_corps ?? {}) }
+        eligible_attackers_by_corps: { ...(extras?.eligible_attackers_by_corps ?? {}) },
+        ...(extras?.route_decision_details === undefined ? {} : {
+            route_decision_details: [...extras.route_decision_details]
+                .sort((a, b) => strictCompare(a.brigade_id, b.brigade_id)),
+        }),
+        ...(extras?.dispatcher_decision_details === undefined ? {} : {
+            dispatcher_decision_details: extras.dispatcher_decision_details
+                .map((detail) => ({
+                    ...detail,
+                    snapshot_output: {
+                        attack_target_osid: attackOrdersByBrigade[detail.formation_id] ?? null,
+                        movement_destination_osid: movementOrdersByBrigade[detail.formation_id] ?? null,
+                        column_march_destination_osid:
+                            state.military.brigade_movement_orders?.[detail.formation_id]?.stance === 'column'
+                                ? state.military.brigade_movement_orders[detail.formation_id]?.destination_sids?.[0] ?? null
+                                : null,
+                        postures: (state.military.brigade_posture_orders ?? [])
+                            .filter((order) => order.brigade_id === detail.formation_id)
+                            .map((order) => order.posture),
+                    },
+                }))
+                .sort((a, b) => strictCompare(a.formation_id, b.formation_id)),
+        }),
     };
 }
 
@@ -179,7 +211,6 @@ export function buildOperationCombatDiagnostics(
     orderSnapshot: BotOrderDiagnosticsSnapshot | undefined,
     osidResolution: AttackResolutionOsidReport | undefined
 ): OperationCombatDiagnostic[] {
-    const lifecyclePaused = osidResolution?.operation_lifecycle_paused_reason !== undefined;
     const suppressedAttackOrders = new Set(
         (osidResolution?.suppressed_attack_orders ?? [])
             .map((order) => `${order.brigade_id}|${order.target_osid}`)
@@ -251,6 +282,8 @@ export function buildOperationCombatDiagnostics(
             const attackTargetCounts = new Map<string, number>();
             const participantAttackOrders: OperationCombatDiagnostic['participant_attack_orders'] = [];
             const participantSet = new Set(brigades);
+            const lifecyclePaused = osidResolution?.operation_lifecycle_paused_reason !== undefined
+                && !isVlasicCohaExceptionOperation(state, corpsId, operation, state.meta?.turn ?? 0);
             const skippedAttackOrders = (osidResolution?.skipped_attack_orders ?? [])
                 .filter((skip) => participantSet.has(skip.brigade_id))
                 .sort((a, b) => {

@@ -1,0 +1,138 @@
+{
+  "schema": "pale-811.allocation-reader-independent-review.v1",
+  "captured_utc": "2026-10-22T11:20:17.0492976Z",
+  "verdict": "REJECT_BLOCKING_FINDING",
+  "head": "f7d5609fd5c11197c963c4ca9d2e94d0630e814a",
+  "workspace": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "reviewed_packet": {
+    "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-17-seal/810-result.json",
+    "bytes": 7441,
+    "sha256": "ea62ebabf5672e7e953b806d084e1fb42287f470f71024e7b5e8a8a4891a2fa3"
+  },
+  "reviewed_files": [
+    {
+      "path": "src/sim/combat/reinforcement_allocation_diagnostic.ts",
+      "bytes": 7113,
+      "sha256": "12d24113946ad414ae3f310a45c9d7f52e0a24bde916ed60f0001d18d4bacdc6"
+    },
+    {
+      "path": "tools/diagnostics/reinforcement_allocation_reader.cjs",
+      "bytes": 20358,
+      "sha256": "f3a5959c79f4514843c779e0a73c9e2febe34358fcffb981466d7e14d7ae0237"
+    },
+    {
+      "path": "tests/reinforcement_allocation_diagnostic.test.ts",
+      "bytes": 35098,
+      "sha256": "2fa7cd7770a5af6fe32ccd6a4b57689a3640e11188257b30983e4bddb30a33d9"
+    }
+  ],
+  "blocking_findings": [
+    {
+      "severity": "critical",
+      "path": "tools/diagnostics/reinforcement_allocation_reader.cjs",
+      "line": 237,
+      "title": "Byte-level truncation inside the target topic prefix is silently ignored",
+      "detail": "The parser returns for every line that does not start with the complete `[reinforcement_allocation]` token. A valid real-producer stream followed by the partial target prefix `[reinforcement_alloc` therefore qualifies, even though it represents a target record truncated before its JSON payload. This violates the required fail-closed handling of truncated allocation records and permits a source-truncated stdout artifact to pass.",
+      "proof": {
+        "attempt": "logs/claude-channel-20261004/811-allocation-reader-review/attempt-01-partial-prefix",
+        "child_exit": 1,
+        "wrapper_exit": 1,
+        "artifact_contract_pass": true,
+        "stderr": "FAIL: reader accepted a stream truncated inside the target topic prefix",
+        "stderr_sha256": "5fd44d00bbe3e9224dc1b8060ff93b8d6ea5196752de523bd4b549a431e7d094"
+      },
+      "required_correction": "Reject a line that is an identifiable partial target-topic prefix instead of classifying it as unrelated output, and add real-fixture negative controls covering truncation within the prefix as well as within JSON. Re-run only the affected focused test and one targeted correction verification."
+    }
+  ],
+  "positive_review_results": {
+    "schema_v1_rejected_explicitly": true,
+    "schema_v2_manifest_compares_attempted_recipients_to_emitted_rows": true,
+    "diagnostic_errors_fail_qualification": true,
+    "all_complete_observed_blocks_are_validated_before_turn_selection": true,
+    "completed_turn_order_is_checked_without_deduplicating_observed_invocations": true,
+    "requested_turn_cardinality_is_explicit": true,
+    "cli_is_require_safe_and_uses_wx_output": true,
+    "formation_spawn_access_order_and_gameplay_file_are_unchanged": true,
+    "scope_is_three_files": true
+  },
+  "reused_prior_evidence": {
+    "final_focused": {
+      "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-15-final-focused/receipt.json",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract_pass": true,
+      "files": 3,
+      "tests": 67,
+      "passed": 67,
+      "failed": 0
+    },
+    "final_typecheck": {
+      "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-16-final-typecheck/receipt.json",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract_pass": true,
+      "nonincremental": true,
+      "no_emit": true
+    },
+    "retained_reds": [
+      "attempt-01-red-completeness",
+      "attempt-03-red-reader-absent",
+      "attempt-04-red-reader-contract",
+      "attempt-06-red-cli",
+      "attempt-10-red-observed-scope",
+      "attempt-13-red-turn-order"
+    ],
+    "retained_red_exit_contract": "Each listed red has child_exit 1, wrapper_exit 1, and artifact_contract_pass true.",
+    "negative_control_count": 31,
+    "raw_fixture_hashes": {
+      "raw-two-pool-fixture.log": "3aaf06a1ea18a6ad27dbb481ba47cd1807dbb2075c0a9a2594008855f724f8c",
+      "raw-guard-fixture.log": "c8001bf02656354b50a50d3c91860acb0ed12cf2b61c296ea51ada8b38ae4303",
+      "raw-turns-21-22-fixture.log": "948a1b54b58edc85e0079d2ffb6f64d7fc3d7ea4600a9b9adb9dfa241301d10b"
+    },
+    "reason_not_repeated": "The final focused run and nonincremental noEmit check snapshot the exact reviewed hashes. The independent question was the uncovered partial-prefix truncation edge, so no unchanged broad rerun was warranted."
+  },
+  "independent_probe": {
+    "question": "Does a valid real-producer receipt followed by a target topic prefix truncated before JSON fail closed?",
+    "entry": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/retained_runner.cjs",
+    "entry_sha256": "c284f847bc8a67c5588b712877c41870253c2fcfde04e781a1214fa785269c2d",
+    "probe": "logs/claude-channel-20261004/811-allocation-reader-review/partial_prefix_probe.cjs",
+    "probe_sha256": "11ff400ea882f9665d773d1140fa3e300102ef52a3f7aa46858cff677a052de3",
+    "receipt": "logs/claude-channel-20261004/811-allocation-reader-review/attempt-01-partial-prefix/receipt.json",
+    "child_exit": 1,
+    "wrapper_exit": 1,
+    "artifact_contract_pass": true,
+    "expected_pass_exit": 0,
+    "result": "DISPROVED"
+  },
+  "closed_probe_inventory": [
+    { "path": "dependencies.json", "bytes": 1104, "sha256": "ccddc28f46942bf88aa6b72e0fc80ac2e8d71a0e68251eb89a85afb5e5391302" },
+    { "path": "dependency-01.snapshot", "bytes": 882, "sha256": "11ff400ea882f9665d773d1140fa3e300102ef52a3f7aa46858cff677a052de3" },
+    { "path": "dependency-02.snapshot", "bytes": 20358, "sha256": "f3a5959c79f4514843c779e0a73c9e2febe34358fcffb981466d7e14d7ae0237" },
+    { "path": "dependency-03.snapshot", "bytes": 4544, "sha256": "3aaf06a1ea18a6ad27dbb481ba47cd1807dbb2075c0a9b9adb9dfa241301d10b" },
+    { "path": "entry-script.snapshot", "bytes": 1459, "sha256": "c284f847bc8a67c5588b712877c41870253c2fcfde04e781a1214fa785269c2d" },
+    { "path": "receipt.json", "bytes": 4524, "sha256": "a0d8e5156be05a4ce2964e5fae4b9f04716055c358a678687d53294520d04d70" },
+    { "path": "start.json", "bytes": 2823, "sha256": "bb714150186c6b0ccc9eb49ae5267f26f04d0af0ef7b46f32d0a4fca8f528006" },
+    { "path": "stderr.log", "bytes": 72, "sha256": "5fd44d00bbe3e9224dc1b8060ff93b8d6ea5196752de523bd4b549a431e7d094" },
+    { "path": "stdout.log", "bytes": 0, "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" }
+  ],
+  "protected_pins": [
+    { "path": "src/sim/formation_spawn.ts", "bytes": 47679, "sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa", "matches": true },
+    { "path": "src/sim/combat/reason_code_debug.ts", "bytes": 20275, "sha256": "b7467c47f97c5c349535b59aaeafa3dea0bc5d03314961c5ac17ef3a4283434a", "matches": true },
+    { "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl", "bytes": 102947714, "sha256": "edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9", "matches": true },
+    { "path": "data/derived/_debug/d_lane_persona_decisions.jsonl", "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3", "matches": true },
+    { "path": "data/calibration/engine_health_thresholds.json", "bytes": 3775, "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d", "matches": true },
+    { "path": "data/source/calibration/painted_control_oct1995.json", "bytes": 35266, "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b", "matches": true }
+  ],
+  "scope_and_claim_boundaries": {
+    "production_test_or_docs_edited_by_reviewer": false,
+    "campaign_invocations": 0,
+    "replay_invocations": 0,
+    "full_suite_invocations": 0,
+    "build_invocations": 0,
+    "campaign_readiness": "NOT_READY",
+    "preserved_703_712": "NO-GO and unadopted",
+    "historical_n80_cause_claim": false,
+    "adoption_claim": false,
+    "acceptance_waiver_claim": false
+  }
+}

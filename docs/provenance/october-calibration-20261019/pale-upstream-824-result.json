@@ -1,0 +1,993 @@
+{
+  "writes_closed": true,
+  "captured_utc": "2026-10-22T17:47:23.823Z",
+  "client_date": "2026-10-22",
+  "verdict": "SUPPORTED_MOBILIZATION_WRITER_PHASE_EXACT_BRANCH_UNMEASURED",
+  "summary": "Source and retained n84 records support turn-22 ongoing-mobilization as the positive writer phase for pale:RS before regular reinforcement opens at available111. This is an exclusive-path deduction under the observed canonical OSID battle path, not a literal pool-write receipt. Direct RS controller credit versus shared displaced-in credit, gross amounts/operands and any subsequent pool decay remain UNMEASURED. No gameplay defect or allocation fix is established.",
+  "proof": "The measured interval is turn21 regular close0/1600 to turn22 regular open111/1600. Initial Pale wounded_pending is0. Militia casualties are the sole positive pending producer; the canonical OSID battle resolver emits defender_militia_pool_key and the scenario runner forwards that key into the retained weekly battle ledger. Zero pale:RS militia battle rows through22 therefore exclude turn21 WIA trickleback, provided that canonical projection is complete for this run. This is the explicit source-and-ledger assumption. Other bounded alternatives are nonpositive, gated by an already-active sole authored Pale brigade/player_choice mode, or the observed takeover arrival24 with floor-zero one-turn credit. Ongoing mobilization remains the surviving positive phase; decay can reduce its gross credit before available111 is observed.",
+  "boundary": "Retained weekly artifacts omit the relevant phase reports, and the personnel observer records brigade strength rather than pool balances. Pale pool before/after values and actual exhaustion, displaced-in, controller/modifier and decay operands are absent at the credit/debit boundaries. Source formulas, numeric coincidences and synthetic/replayed reconstructions do not establish the missing branch-level write. No n80 counterfactual or historical cause is recovered.",
+  "validation": "822-A extraction exited child/wrapper0/0. 822-B and822-C finalizers each exited1/126, respectively at takeover-displacement and phase-key assertions, with result.json absent. The final frozen822 synthesis was written outside a successful finalizer receipt; its hash identifies the reviewed text, and must not be described as finalizer0/0. All three receipts, snapshots and failures remain intact. Independent823 review supplies the explicit WIA exclusion and accepts the writer phase with these provenance qualifications. This new824 synthesis is generated in its own preserved wrapper, without erasing the earlier gap or claiming a rerun.",
+  "next_action": "Smallest justified next fix is observability only: a default-off, stdout-only receipt selected for pale:RS and completed turns21–22, using the existing selector. Capture before/after balances, reached gates and actual direct/shared mobilization and decay operands across the relevant chain, including inherited close/WIA qualification/recruitment/reroute/spawn/regular-open continuity. Do not instrument every municipality or repository writer. Prove selector isolation, source access order and default-off neutrality with focused producer/reader tests and independent review before proposing any separately authorized measurement. No gameplay/threshold change, observer implementation or new campaign is authorized by this diagnosis.",
+  "preservation": "Production/source, tests, reader, threshold/reference and C/D telemetry hashes remain exact; telemetry append0. C103894385/00d6d7e65832a45e4b8ddc34e077c228b9496ca8f1068a6b9633571b4bae5557; D1041/ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3. No campaign, replay, runTurn, build or full suite. Retained n80 703/712 remains NO-GO/unadopted, rejected n83/n84 trajectory unchanged and all inherited acceptance gates remain.",
+  "actual_run_dir": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n84",
+  "source_inference": {
+    "actual_supported_writer_class": "turn-22 ongoing-mobilization credited pale:RS before the observed regular-stage opening",
+    "receipt_status": "SOURCE_INFERENCE_WITH_COMPLETE_EXCLUSION_CHAIN; no literal selected-pool writer receipt",
+    "unmeasured": [
+      "direct RS controller credit versus shared displaced-in credit",
+      "gross ongoing-mobilization credit",
+      "pool-war-weariness decay debit",
+      "the exact before/after selected-pool values at those writer boundaries"
+    ]
+  },
+  "review_qualifications": [
+    {
+      "severity": "material-qualification",
+      "title": "The 822 summary and reached-writer audit require an explicit WIA exclusion chain",
+      "evidence": [
+        "The observed interval begins after turn-21 brigade-reinforcement and therefore includes turn-21 wia-trickleback.",
+        "initial_save records pale:RS wounded_pending=0.",
+        "src/sim/combat/militia_casualties.ts:134-142 makes militia combat the sole positive producer of pool wounded_pending; src/sim/formation_spawn.ts:985-1004 only converts that pending value back to available.",
+        "src/sim/combat/attack_resolution_osid.ts:1412-1427 emits defender_militia_pool_key on every canonical militia battle and src/scenario/scenario_runner.ts:3271-3308 forwards it into every retained weekly battle row.",
+        "The retained weekly ledger contains zero defender_militia_pool_key=pale:RS rows through turn 22; the canonical OSID resolver clears attack orders before the compatibility resolver at src/sim/combat/attack_resolution_osid.ts:1872 and src/sim/turn_phases/war_phases.ts:3004-3046."
+      ],
+      "conclusion": "Under the observed canonical OSID path, pale:RS wounded_pending remains zero through the disputed interval, so turn-21 WIA trickleback contributed zero. This closes the apparent contradiction in 822, but the assumption that the retained weekly OSID battle projection is complete for this run must remain stated."
+    },
+    {
+      "severity": "material-qualification",
+      "title": "The final 822 synthesis is frozen but lacks a successful finalizer receipt",
+      "evidence": [
+        "822-pale-upstream-a receipt: child_exit=0, wrapper_exit=0, artifact contract pass; it produced the initial UNMEASURED result.",
+        "822-pale-upstream-b receipt: child_exit=1, wrapper_exit=126, failed takeover-displacement assertion, no result.json.",
+        "822-pale-upstream-c receipt: child_exit=1, wrapper_exit=126, failed phase-key assertion, no result.json.",
+        "The reviewed final result was written after those failed attempts and is not listed as an output of a successful preserved-preflight receipt."
+      ],
+      "conclusion": "Use the frozen hash as the identity of the reviewed synthesis and preserve all three actual receipts. Do not describe the final synthesis itself as receipt 0/0. This provenance gap does not overturn the source-and-retained-data exclusion chain, but it must remain visible."
+    },
+    {
+      "severity": "accepted",
+      "title": "The actual positive writer phase is supported; the exact writer line is not",
+      "evidence": [
+        "Direct retained receipts establish pale:RS available 0 at turn-21 regular close and 111 at turn-22 regular open, with committed unchanged at 1600 across the opening boundary.",
+        "Turn-21 strategic-reserve collection, turn-22 reconstitution, pool decay, formation spawn, and elective recruitment writes are nonpositive.",
+        "Turn-22 takeover arrival is 24 and the governing one-turn floor contribution is 0.",
+        "Pale has one authored OOB brigade and it is active in the initial save, excluding the pending-authored-brigade gates for mandatory accrual and reroute deficit credit.",
+        "The actual recruitment mode is player_choice, excluding the early-war pool-population tail.",
+        "After the WIA exclusion above, ongoing-mobilization is the sole surviving positive writer and therefore necessarily credited pale:RS; later decay may have reduced its gross credit to the observed 111."
+      ],
+      "conclusion": "Report ongoing-mobilization as the actual supported positive writer class by exclusive-path deduction. Keep direct-controller versus shared displaced-in credit, amounts, operands, and decay unmeasured."
+    }
+  ],
+  "smallest_justified_next_fix": {
+    "authorization": "proposal only; current diagnosis does not authorize implementation or another run",
+    "scope": "A default-off, stdout-only observer selected by the existing diagnostic selector for pale:RS and completed turns 21-22. Record the inherited turn-21 close, WIA boundary qualification, and turn-22 selected-pool before/after plus credit/debit operands only for recruitment gates, ongoing-mobilization direct/shared credits, pool decay, reroute gate, spawn, and regular open. Do not instrument every militia pool or every repository writer.",
+    "state_boundary": "No GameState, save, production artifact, test fixture, data, threshold, or file telemetry writes.",
+    "validation_before_measurement": "Prove default-off byte neutrality and selector isolation cheaply. A separately authorized measurement would then use a fresh preserved-preflight attempt. No campaign is authorized by this review."
+  },
+  "retained_record_coverage": {
+    "weekly_rows": 188,
+    "weekly_sequence_1_to_188": true,
+    "phase_manifest_rows_turn21": 190,
+    "phase_manifest_rows_turn22": 190,
+    "allocation_rows": 564,
+    "allocation_schema": 2,
+    "allocation_invocations": 188,
+    "personnel_records": 71931,
+    "personnel_faction_passes": 564,
+    "displacement_rows": 92174,
+    "native_inventory": 31,
+    "consumed_inputs": 32
+  },
+  "campaign_invocations": 0,
+  "replay_invocations": 0,
+  "run_turn_invocations": 0,
+  "full_suite_invocations": 0,
+  "files": [],
+  "protected_source_pins": [
+    {
+      "path": "src/scenario/turn_inputs.ts",
+      "bytes": 17275,
+      "sha256": "4f385b0b5f32d82e38b0dea8a7d7a54f5b2f48687c8cbf1ef2c73af93725ba6c"
+    },
+    {
+      "path": "src/sim/combat/brigade_reconstitution.ts",
+      "bytes": 23654,
+      "sha256": "95648226f916e0404c630e0384539c88f7befe4cb8e8e387be988552c8d2fba2"
+    },
+    {
+      "path": "src/sim/combat/militia_casualties.ts",
+      "bytes": 8134,
+      "sha256": "3c5d461a187fc8690e6c12d586195ed7c8afd18be1e03cbb41a139ea0478f00f"
+    },
+    {
+      "path": "src/sim/combat/ongoing_mobilization.ts",
+      "bytes": 22839,
+      "sha256": "e1f41af529c78077882a3b282461314a41b4015dea6f4ab858cbe605ed3afb32"
+    },
+    {
+      "path": "src/sim/combat/personnel_diagnostic.ts",
+      "bytes": 5870,
+      "sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3"
+    },
+    {
+      "path": "src/sim/combat/pool_decay.ts",
+      "bytes": 3164,
+      "sha256": "925e711289cbd63d3305484133d984205d727d3a72dc533e468938523a367afb"
+    },
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "bytes": 20275,
+      "sha256": "b7467c47f97c5c349535b59aaeafa3dea0bc5d03314961c5ac17ef3a4283434a"
+    },
+    {
+      "path": "src/sim/combat/reinforcement_allocation_diagnostic.ts",
+      "bytes": 7113,
+      "sha256": "12d24113946ad414ae3f310a45c9d7f52e0a24bde916ed60f0001d18d4bacdc6"
+    },
+    {
+      "path": "src/sim/combat/strategic_reserve.ts",
+      "bytes": 10755,
+      "sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae"
+    },
+    {
+      "path": "src/sim/early_war/minority_militia_decay.ts",
+      "bytes": 4026,
+      "sha256": "166ac9cc394ace45e208551620ec43ae070af6461617acb926199f3741df4064"
+    },
+    {
+      "path": "src/sim/early_war/pool_population.ts",
+      "bytes": 20841,
+      "sha256": "d1874728bcade108c694a02735099322ca6bd58cc871dc0f0628bab1516a51e7"
+    },
+    {
+      "path": "src/sim/formation_spawn.ts",
+      "bytes": 47679,
+      "sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa"
+    },
+    {
+      "path": "src/sim/recruitment_engine.ts",
+      "bytes": 55659,
+      "sha256": "c657b778736fe9599395b48968702e45ca4d1141de6112990942ce3a744ae4d9"
+    },
+    {
+      "path": "src/sim/recruitment_turn.ts",
+      "bytes": 13674,
+      "sha256": "d807e44faac2aabe3cde46bd0ab775b34738e2d6a10b608ec9589ac2589e62c3"
+    },
+    {
+      "path": "src/sim/turn_phases/early_war_phases.ts",
+      "bytes": 15623,
+      "sha256": "1a1061dc850edc23d58abb59bcc730b604c7a4389201ef63941d405ddd863f50"
+    },
+    {
+      "path": "src/sim/turn_phases/war_phases.ts",
+      "bytes": 231691,
+      "sha256": "93fcb005fa725c8a45269370c8319ca34779d1e032624fee08a4ae5800baa04a"
+    },
+    {
+      "path": "src/sim/turn_pipeline.ts",
+      "bytes": 11675,
+      "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25"
+    },
+    {
+      "path": "src/state/displacement.ts",
+      "bytes": 43147,
+      "sha256": "d992a11227b4728dafe9006519bdeb4ca8bb90490e7d4f55fb7865ac034fa7b2"
+    },
+    {
+      "path": "src/state/displacement_takeover.ts",
+      "bytes": 42755,
+      "sha256": "5f3717d4ab04592aacfba9ecc82a67459d28fbc9e4dfad2eba14ee5826a8bf3a"
+    },
+    {
+      "path": "src/state/formation_constants.ts",
+      "bytes": 25491,
+      "sha256": "985eeaa427a356e83db5b384a9fbe5533c6bb4eb385855eb4f025a0ed7c11c32"
+    },
+    {
+      "path": "tests/personnel_diagnostic.test.ts",
+      "bytes": 19693,
+      "sha256": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b"
+    },
+    {
+      "path": "tests/reason_code_debug.test.ts",
+      "bytes": 10435,
+      "sha256": "44a60e84d8b22d1cb629364a84e10257d3454531678b987a75582ddaee9a756c"
+    },
+    {
+      "path": "tests/reinforcement_allocation_diagnostic.test.ts",
+      "bytes": 36000,
+      "sha256": "6eff326a27cc9892aa45a6d84ae018afd19ecba18af65896ce050f7a05a094df"
+    },
+    {
+      "path": "tools/diagnostics/reinforcement_allocation_reader.cjs",
+      "bytes": 20531,
+      "sha256": "bf1e94e52c2efb447041161fa6e14de2d078f2177d7392209344acc746c71c86"
+    }
+  ],
+  "protected_controls": [
+    {
+      "path": "data/calibration/engine_health_thresholds.json",
+      "bytes": 3775,
+      "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d",
+      "expected_bytes": 3775,
+      "expected_sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d",
+      "matches": true
+    },
+    {
+      "path": "data/source/calibration/painted_control_oct1995.json",
+      "bytes": 35266,
+      "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b",
+      "expected_bytes": 35266,
+      "expected_sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b",
+      "matches": true
+    }
+  ],
+  "telemetry": [
+    {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "archive": "c-after.bin",
+      "bytes": 103894385,
+      "sha256": "00d6d7e65832a45e4b8ddc34e077c228b9496ca8f1068a6b9633571b4bae5557"
+    },
+    {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "archive": "d-after.bin",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    }
+  ],
+  "telemetry_append_bytes": {
+    "C": 0,
+    "D": 0
+  },
+  "worker": {
+    "path": "logs/claude-channel-20261004/822-pale-upstream/result.json",
+    "sha256": "ed23ebe66e4c2d0c8bccfe089275a29666f063469c016cd2dcd9950d3e48514f",
+    "finalizer_receipt_status": "OUTSIDE_SUCCESSFUL_FINALIZER_RECEIPT"
+  },
+  "review": {
+    "path": "logs/claude-channel-20261004/823-pale-upstream-review/823-review.json",
+    "sha256": "78f4c02477e525adfbde6ceb8225b5af518f5ce511075b29ee45e0b6ee1db974",
+    "verdict": "APPROVE_SUPPORTED_WRITER_PHASE_WITH_PROVENANCE_QUALIFICATION"
+  },
+  "actual_attempt_receipts": [
+    {
+      "attempt": "logs/claude-channel-20261004/822-pale-upstream-a",
+      "receipt_sha256": "0b14ae5a289c847fac4bc18250f61bfc90e94fa2944d845f79ced2519ff5fdf9",
+      "receipt": {
+        "schema": "awwv.preserved-preflight.receipt.v1",
+        "start_utc": "2026-10-22T17:32:26.721Z",
+        "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+        "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/822-pale-upstream",
+        "timeout_ms": 60000,
+        "original_argv": [
+          "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+          "logs/claude-channel-20261004/822-pale-upstream-audit.cjs",
+          "{evidenceDir}"
+        ],
+        "argv": [
+          "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+          "logs/claude-channel-20261004/822-pale-upstream-audit.cjs",
+          "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\claude-channel-20261004\\822-pale-upstream"
+        ],
+        "placeholder_contract": "{evidenceDir}",
+        "allowed_artifacts": [
+          "dependencies.json",
+          "dependency-00.snapshot",
+          "dependency-01.snapshot",
+          "dependency-02.snapshot",
+          "dependency-03.snapshot",
+          "dependency-04.snapshot",
+          "dependency-05.snapshot",
+          "dependency-06.snapshot",
+          "dependency-07.snapshot",
+          "dependency-08.snapshot",
+          "dependency-09.snapshot",
+          "dependency-10.snapshot",
+          "dependency-11.snapshot",
+          "dependency-12.snapshot",
+          "dependency-13.snapshot",
+          "dependency-14.snapshot",
+          "dependency-15.snapshot",
+          "dependency-16.snapshot",
+          "dependency-17.snapshot",
+          "dependency-18.snapshot",
+          "dependency-19.snapshot",
+          "dependency-20.snapshot",
+          "dependency-21.snapshot",
+          "dependency-22.snapshot",
+          "result.json"
+        ],
+        "entry_script": {
+          "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/822-pale-upstream-audit.cjs",
+          "bytes": 14318,
+          "raw_sha256": "eec1e2ab62835c01ae4463187856bda6d9fb798972156ac8313453b2f3e5ca23",
+          "normalized_text_sha256": "eec1e2ab62835c01ae4463187856bda6d9fb798972156ac8313453b2f3e5ca23",
+          "snapshot": {
+            "path": "entry-script.snapshot",
+            "bytes": 14318,
+            "sha256": "eec1e2ab62835c01ae4463187856bda6d9fb798972156ac8313453b2f3e5ca23"
+          }
+        },
+        "end_utc": "2026-10-22T17:32:28.007Z",
+        "pid": 6276,
+        "child_exit": 0,
+        "wrapper_exit": 0,
+        "signal": null,
+        "timed_out": false,
+        "timeout_cleanup": null,
+        "spawn_error": null,
+        "entry_script_post": {
+          "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/822-pale-upstream-audit.cjs",
+          "bytes": 14318,
+          "raw_sha256": "eec1e2ab62835c01ae4463187856bda6d9fb798972156ac8313453b2f3e5ca23",
+          "normalized_text_sha256": "eec1e2ab62835c01ae4463187856bda6d9fb798972156ac8313453b2f3e5ca23",
+          "matches_start_raw_sha256": true,
+          "read_error": null
+        },
+        "stdout": {
+          "path": "stdout.log",
+          "bytes": 205,
+          "sha256": "f2f6419fe4406f290a0da82430097f7a5ff23e087ec597ed70494ec92e5e4be5"
+        },
+        "stderr": {
+          "path": "stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "retained_artifacts": [
+          {
+            "path": "dependencies.json",
+            "bytes": 6938,
+            "sha256": "28cfdea5bf99324abb71485fee74e193c189f1d010e8906dbf1bbf539c47d4b2"
+          },
+          {
+            "path": "dependency-00.snapshot",
+            "bytes": 388155,
+            "sha256": "a87a4ae9995d7cc1cc6099242e45de00bd615ba0c93cfd4bf7ced20e469388b5"
+          },
+          {
+            "path": "dependency-01.snapshot",
+            "bytes": 1886,
+            "sha256": "dedf8f58014d9769b885848b45c085ea5f36252e3489e839d2cf5639132061a2"
+          },
+          {
+            "path": "dependency-02.snapshot",
+            "bytes": 36348,
+            "sha256": "66c081b063566d605d4873f5c4031c3dca6bce26e6957f8bc2ed4c7900a5ce96"
+          },
+          {
+            "path": "dependency-03.snapshot",
+            "bytes": 6545,
+            "sha256": "d1a4c8974e4cfd92d824178cb45168c1b0dbf80b41e3be6db436eac2605a11fb"
+          },
+          {
+            "path": "dependency-04.snapshot",
+            "bytes": 34340,
+            "sha256": "96db9ccc3562c973ea79f4c9c174d35899052bd8d3f72617a827858627d4b6be"
+          },
+          {
+            "path": "dependency-05.snapshot",
+            "bytes": 4234,
+            "sha256": "29229e757fe29fec26d9abc6afb7b777d95079035c517d2ae17f47615dd32298"
+          },
+          {
+            "path": "dependency-06.snapshot",
+            "bytes": 1373722,
+            "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+          },
+          {
+            "path": "dependency-07.snapshot",
+            "bytes": 32887671,
+            "sha256": "b3510073a304411fb2d5cafbcbb45d980c6c4d9f8888962039c1bd4852ea79de"
+          },
+          {
+            "path": "dependency-08.snapshot",
+            "bytes": 23654,
+            "sha256": "95648226f916e0404c630e0384539c88f7befe4cb8e8e387be988552c8d2fba2"
+          },
+          {
+            "path": "dependency-09.snapshot",
+            "bytes": 8134,
+            "sha256": "3c5d461a187fc8690e6c12d586195ed7c8afd18be1e03cbb41a139ea0478f00f"
+          },
+          {
+            "path": "dependency-10.snapshot",
+            "bytes": 22839,
+            "sha256": "e1f41af529c78077882a3b282461314a41b4015dea6f4ab858cbe605ed3afb32"
+          },
+          {
+            "path": "dependency-11.snapshot",
+            "bytes": 3164,
+            "sha256": "925e711289cbd63d3305484133d984205d727d3a72dc533e468938523a367afb"
+          },
+          {
+            "path": "dependency-12.snapshot",
+            "bytes": 10755,
+            "sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae"
+          },
+          {
+            "path": "dependency-13.snapshot",
+            "bytes": 4026,
+            "sha256": "166ac9cc394ace45e208551620ec43ae070af6461617acb926199f3741df4064"
+          },
+          {
+            "path": "dependency-14.snapshot",
+            "bytes": 20841,
+            "sha256": "d1874728bcade108c694a02735099322ca6bd58cc871dc0f0628bab1516a51e7"
+          },
+          {
+            "path": "dependency-15.snapshot",
+            "bytes": 47679,
+            "sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa"
+          },
+          {
+            "path": "dependency-16.snapshot",
+            "bytes": 55659,
+            "sha256": "c657b778736fe9599395b48968702e45ca4d1141de6112990942ce3a744ae4d9"
+          },
+          {
+            "path": "dependency-17.snapshot",
+            "bytes": 13674,
+            "sha256": "d807e44faac2aabe3cde46bd0ab775b34738e2d6a10b608ec9589ac2589e62c3"
+          },
+          {
+            "path": "dependency-18.snapshot",
+            "bytes": 15623,
+            "sha256": "1a1061dc850edc23d58abb59bcc730b604c7a4389201ef63941d405ddd863f50"
+          },
+          {
+            "path": "dependency-19.snapshot",
+            "bytes": 231691,
+            "sha256": "93fcb005fa725c8a45269370c8319ca34779d1e032624fee08a4ae5800baa04a"
+          },
+          {
+            "path": "dependency-20.snapshot",
+            "bytes": 11675,
+            "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25"
+          },
+          {
+            "path": "dependency-21.snapshot",
+            "bytes": 43147,
+            "sha256": "d992a11227b4728dafe9006519bdeb4ca8bb90490e7d4f55fb7865ac034fa7b2"
+          },
+          {
+            "path": "dependency-22.snapshot",
+            "bytes": 42755,
+            "sha256": "5f3717d4ab04592aacfba9ecc82a67459d28fbc9e4dfad2eba14ee5826a8bf3a"
+          },
+          {
+            "path": "result.json",
+            "bytes": 39780,
+            "sha256": "ff118d29191ade8ca29db74370218494ce450e7414d0f763525710d7ec957cdd"
+          }
+        ],
+        "artifact_contract": {
+          "pass": true,
+          "unexpected": [],
+          "missing_allowed": []
+        }
+      }
+    },
+    {
+      "attempt": "logs/claude-channel-20261004/822-pale-upstream-b",
+      "receipt_sha256": "94be75813b94f5958479f9fa1eaa75abeb6554b1fc86b6b6cdca8af6d7605164",
+      "receipt": {
+        "schema": "awwv.preserved-preflight.receipt.v1",
+        "start_utc": "2026-10-22T17:37:36.979Z",
+        "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+        "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/822-pale-upstream",
+        "timeout_ms": 60000,
+        "original_argv": [
+          "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+          "logs/claude-channel-20261004/822-pale-upstream-finalize.cjs",
+          "{evidenceDir}"
+        ],
+        "argv": [
+          "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+          "logs/claude-channel-20261004/822-pale-upstream-finalize.cjs",
+          "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\claude-channel-20261004\\822-pale-upstream"
+        ],
+        "placeholder_contract": "{evidenceDir}",
+        "allowed_artifacts": [
+          "dependencies.json",
+          "dependency-00.snapshot",
+          "dependency-01.snapshot",
+          "dependency-02.snapshot",
+          "dependency-03.snapshot",
+          "dependency-04.snapshot",
+          "dependency-05.snapshot",
+          "dependency-06.snapshot",
+          "dependency-07.snapshot",
+          "dependency-08.snapshot",
+          "dependency-09.snapshot",
+          "dependency-10.snapshot",
+          "dependency-11.snapshot",
+          "dependency-12.snapshot",
+          "dependency-13.snapshot",
+          "dependency-14.snapshot",
+          "dependency-15.snapshot",
+          "dependency-16.snapshot",
+          "dependency-17.snapshot",
+          "dependency-18.snapshot",
+          "dependency-19.snapshot",
+          "dependency-20.snapshot",
+          "dependency-21.snapshot",
+          "dependency-22.snapshot",
+          "dependency-23.snapshot",
+          "dependency-24.snapshot",
+          "dependency-25.snapshot",
+          "dependency-26.snapshot",
+          "dependency-27.snapshot",
+          "dependency-28.snapshot",
+          "dependency-29.snapshot",
+          "result.json"
+        ],
+        "entry_script": {
+          "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/822-pale-upstream-finalize.cjs",
+          "bytes": 16414,
+          "raw_sha256": "5c96215346757f755c46a1d32e294894d0f4f49330eca9828d8d9a234291645a",
+          "normalized_text_sha256": "5c96215346757f755c46a1d32e294894d0f4f49330eca9828d8d9a234291645a",
+          "snapshot": {
+            "path": "entry-script.snapshot",
+            "bytes": 16414,
+            "sha256": "5c96215346757f755c46a1d32e294894d0f4f49330eca9828d8d9a234291645a"
+          }
+        },
+        "end_utc": "2026-10-22T17:37:37.925Z",
+        "pid": 21168,
+        "child_exit": 1,
+        "wrapper_exit": 126,
+        "signal": null,
+        "timed_out": false,
+        "timeout_cleanup": null,
+        "spawn_error": null,
+        "entry_script_post": {
+          "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/822-pale-upstream-finalize.cjs",
+          "bytes": 16414,
+          "raw_sha256": "5c96215346757f755c46a1d32e294894d0f4f49330eca9828d8d9a234291645a",
+          "normalized_text_sha256": "5c96215346757f755c46a1d32e294894d0f4f49330eca9828d8d9a234291645a",
+          "matches_start_raw_sha256": true,
+          "read_error": null
+        },
+        "stdout": {
+          "path": "stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "path": "stderr.log",
+          "bytes": 906,
+          "sha256": "f39e54daa87850ecb76973a421c1e8cf51a4de05e0daa55b60de1eaaeba71406"
+        },
+        "retained_artifacts": [
+          {
+            "path": "dependencies.json",
+            "bytes": 9094,
+            "sha256": "4d21c9007353cf8ac335f1f805866dd9bb292d6051692a799cb9554d6c9ef58c"
+          },
+          {
+            "path": "dependency-00.snapshot",
+            "bytes": 52944,
+            "sha256": "b475f88f15b130a626d1699f9d3064a2e64c70e816b67b608d734b10763a7c7b"
+          },
+          {
+            "path": "dependency-01.snapshot",
+            "bytes": 115874,
+            "sha256": "e01b58c71b0d51daadf1796ba21a02d0cca04509add1ef706f3b8a350f7c513d"
+          },
+          {
+            "path": "dependency-02.snapshot",
+            "bytes": 388155,
+            "sha256": "a87a4ae9995d7cc1cc6099242e45de00bd615ba0c93cfd4bf7ced20e469388b5"
+          },
+          {
+            "path": "dependency-03.snapshot",
+            "bytes": 1886,
+            "sha256": "dedf8f58014d9769b885848b45c085ea5f36252e3489e839d2cf5639132061a2"
+          },
+          {
+            "path": "dependency-04.snapshot",
+            "bytes": 658,
+            "sha256": "a983136b285381a37ec0910801d60270d59e423fee5e26893da75f1224e8bb24"
+          },
+          {
+            "path": "dependency-05.snapshot",
+            "bytes": 36348,
+            "sha256": "66c081b063566d605d4873f5c4031c3dca6bce26e6957f8bc2ed4c7900a5ce96"
+          },
+          {
+            "path": "dependency-06.snapshot",
+            "bytes": 6545,
+            "sha256": "d1a4c8974e4cfd92d824178cb45168c1b0dbf80b41e3be6db436eac2605a11fb"
+          },
+          {
+            "path": "dependency-07.snapshot",
+            "bytes": 34340,
+            "sha256": "96db9ccc3562c973ea79f4c9c174d35899052bd8d3f72617a827858627d4b6be"
+          },
+          {
+            "path": "dependency-08.snapshot",
+            "bytes": 4234,
+            "sha256": "29229e757fe29fec26d9abc6afb7b777d95079035c517d2ae17f47615dd32298"
+          },
+          {
+            "path": "dependency-09.snapshot",
+            "bytes": 39780,
+            "sha256": "ff118d29191ade8ca29db74370218494ce450e7414d0f763525710d7ec957cdd"
+          },
+          {
+            "path": "dependency-10.snapshot",
+            "bytes": 16327575,
+            "sha256": "94d4b2e2f1a9f4a30c64e75fbc1b264a15802314a810a4d146ecc300f2bc75c9"
+          },
+          {
+            "path": "dependency-11.snapshot",
+            "bytes": 1373722,
+            "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+          },
+          {
+            "path": "dependency-12.snapshot",
+            "bytes": 32887671,
+            "sha256": "b3510073a304411fb2d5cafbcbb45d980c6c4d9f8888962039c1bd4852ea79de"
+          },
+          {
+            "path": "dependency-13.snapshot",
+            "bytes": 17275,
+            "sha256": "4f385b0b5f32d82e38b0dea8a7d7a54f5b2f48687c8cbf1ef2c73af93725ba6c"
+          },
+          {
+            "path": "dependency-14.snapshot",
+            "bytes": 23654,
+            "sha256": "95648226f916e0404c630e0384539c88f7befe4cb8e8e387be988552c8d2fba2"
+          },
+          {
+            "path": "dependency-15.snapshot",
+            "bytes": 8134,
+            "sha256": "3c5d461a187fc8690e6c12d586195ed7c8afd18be1e03cbb41a139ea0478f00f"
+          },
+          {
+            "path": "dependency-16.snapshot",
+            "bytes": 22839,
+            "sha256": "e1f41af529c78077882a3b282461314a41b4015dea6f4ab858cbe605ed3afb32"
+          },
+          {
+            "path": "dependency-17.snapshot",
+            "bytes": 3164,
+            "sha256": "925e711289cbd63d3305484133d984205d727d3a72dc533e468938523a367afb"
+          },
+          {
+            "path": "dependency-18.snapshot",
+            "bytes": 10755,
+            "sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae"
+          },
+          {
+            "path": "dependency-19.snapshot",
+            "bytes": 4026,
+            "sha256": "166ac9cc394ace45e208551620ec43ae070af6461617acb926199f3741df4064"
+          },
+          {
+            "path": "dependency-20.snapshot",
+            "bytes": 20841,
+            "sha256": "d1874728bcade108c694a02735099322ca6bd58cc871dc0f0628bab1516a51e7"
+          },
+          {
+            "path": "dependency-21.snapshot",
+            "bytes": 47679,
+            "sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa"
+          },
+          {
+            "path": "dependency-22.snapshot",
+            "bytes": 55659,
+            "sha256": "c657b778736fe9599395b48968702e45ca4d1141de6112990942ce3a744ae4d9"
+          },
+          {
+            "path": "dependency-23.snapshot",
+            "bytes": 13674,
+            "sha256": "d807e44faac2aabe3cde46bd0ab775b34738e2d6a10b608ec9589ac2589e62c3"
+          },
+          {
+            "path": "dependency-24.snapshot",
+            "bytes": 15623,
+            "sha256": "1a1061dc850edc23d58abb59bcc730b604c7a4389201ef63941d405ddd863f50"
+          },
+          {
+            "path": "dependency-25.snapshot",
+            "bytes": 231691,
+            "sha256": "93fcb005fa725c8a45269370c8319ca34779d1e032624fee08a4ae5800baa04a"
+          },
+          {
+            "path": "dependency-26.snapshot",
+            "bytes": 11675,
+            "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25"
+          },
+          {
+            "path": "dependency-27.snapshot",
+            "bytes": 43147,
+            "sha256": "d992a11227b4728dafe9006519bdeb4ca8bb90490e7d4f55fb7865ac034fa7b2"
+          },
+          {
+            "path": "dependency-28.snapshot",
+            "bytes": 42755,
+            "sha256": "5f3717d4ab04592aacfba9ecc82a67459d28fbc9e4dfad2eba14ee5826a8bf3a"
+          },
+          {
+            "path": "dependency-29.snapshot",
+            "bytes": 25491,
+            "sha256": "985eeaa427a356e83db5b384a9fbe5533c6bb4eb385855eb4f025a0ed7c11c32"
+          }
+        ],
+        "artifact_contract": {
+          "pass": false,
+          "unexpected": [],
+          "missing_allowed": [
+            "result.json"
+          ]
+        }
+      }
+    },
+    {
+      "attempt": "logs/claude-channel-20261004/822-pale-upstream-c",
+      "receipt_sha256": "f10a27bd3bc9e7e24e6da7ec95b3297d1013394f74a6088d899974a1eac160ea",
+      "receipt": {
+        "schema": "awwv.preserved-preflight.receipt.v1",
+        "start_utc": "2026-10-22T17:38:19.200Z",
+        "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+        "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/822-pale-upstream",
+        "timeout_ms": 60000,
+        "original_argv": [
+          "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+          "logs/claude-channel-20261004/822-pale-upstream-finalize.cjs",
+          "{evidenceDir}"
+        ],
+        "argv": [
+          "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+          "logs/claude-channel-20261004/822-pale-upstream-finalize.cjs",
+          "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\claude-channel-20261004\\822-pale-upstream"
+        ],
+        "placeholder_contract": "{evidenceDir}",
+        "allowed_artifacts": [
+          "dependencies.json",
+          "dependency-00.snapshot",
+          "dependency-01.snapshot",
+          "dependency-02.snapshot",
+          "dependency-03.snapshot",
+          "dependency-04.snapshot",
+          "dependency-05.snapshot",
+          "dependency-06.snapshot",
+          "dependency-07.snapshot",
+          "dependency-08.snapshot",
+          "dependency-09.snapshot",
+          "dependency-10.snapshot",
+          "dependency-11.snapshot",
+          "dependency-12.snapshot",
+          "dependency-13.snapshot",
+          "dependency-14.snapshot",
+          "dependency-15.snapshot",
+          "dependency-16.snapshot",
+          "dependency-17.snapshot",
+          "dependency-18.snapshot",
+          "dependency-19.snapshot",
+          "dependency-20.snapshot",
+          "dependency-21.snapshot",
+          "dependency-22.snapshot",
+          "dependency-23.snapshot",
+          "dependency-24.snapshot",
+          "dependency-25.snapshot",
+          "dependency-26.snapshot",
+          "dependency-27.snapshot",
+          "dependency-28.snapshot",
+          "dependency-29.snapshot",
+          "result.json"
+        ],
+        "entry_script": {
+          "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/822-pale-upstream-finalize.cjs",
+          "bytes": 16443,
+          "raw_sha256": "494f5de6a51e22707fccbcec0956aa0b3b48f4060024249be7879ee0a2184059",
+          "normalized_text_sha256": "494f5de6a51e22707fccbcec0956aa0b3b48f4060024249be7879ee0a2184059",
+          "snapshot": {
+            "path": "entry-script.snapshot",
+            "bytes": 16443,
+            "sha256": "494f5de6a51e22707fccbcec0956aa0b3b48f4060024249be7879ee0a2184059"
+          }
+        },
+        "end_utc": "2026-10-22T17:38:20.141Z",
+        "pid": 1376,
+        "child_exit": 1,
+        "wrapper_exit": 126,
+        "signal": null,
+        "timed_out": false,
+        "timeout_cleanup": null,
+        "spawn_error": null,
+        "entry_script_post": {
+          "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/822-pale-upstream-finalize.cjs",
+          "bytes": 16443,
+          "raw_sha256": "494f5de6a51e22707fccbcec0956aa0b3b48f4060024249be7879ee0a2184059",
+          "normalized_text_sha256": "494f5de6a51e22707fccbcec0956aa0b3b48f4060024249be7879ee0a2184059",
+          "matches_start_raw_sha256": true,
+          "read_error": null
+        },
+        "stdout": {
+          "path": "stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "path": "stderr.log",
+          "bytes": 953,
+          "sha256": "b894311366a28b476b4e9c527726a36e8357a6ec6ec93b353f3f3c67d9be98e6"
+        },
+        "retained_artifacts": [
+          {
+            "path": "dependencies.json",
+            "bytes": 9094,
+            "sha256": "4d21c9007353cf8ac335f1f805866dd9bb292d6051692a799cb9554d6c9ef58c"
+          },
+          {
+            "path": "dependency-00.snapshot",
+            "bytes": 52944,
+            "sha256": "b475f88f15b130a626d1699f9d3064a2e64c70e816b67b608d734b10763a7c7b"
+          },
+          {
+            "path": "dependency-01.snapshot",
+            "bytes": 115874,
+            "sha256": "e01b58c71b0d51daadf1796ba21a02d0cca04509add1ef706f3b8a350f7c513d"
+          },
+          {
+            "path": "dependency-02.snapshot",
+            "bytes": 388155,
+            "sha256": "a87a4ae9995d7cc1cc6099242e45de00bd615ba0c93cfd4bf7ced20e469388b5"
+          },
+          {
+            "path": "dependency-03.snapshot",
+            "bytes": 1886,
+            "sha256": "dedf8f58014d9769b885848b45c085ea5f36252e3489e839d2cf5639132061a2"
+          },
+          {
+            "path": "dependency-04.snapshot",
+            "bytes": 658,
+            "sha256": "a983136b285381a37ec0910801d60270d59e423fee5e26893da75f1224e8bb24"
+          },
+          {
+            "path": "dependency-05.snapshot",
+            "bytes": 36348,
+            "sha256": "66c081b063566d605d4873f5c4031c3dca6bce26e6957f8bc2ed4c7900a5ce96"
+          },
+          {
+            "path": "dependency-06.snapshot",
+            "bytes": 6545,
+            "sha256": "d1a4c8974e4cfd92d824178cb45168c1b0dbf80b41e3be6db436eac2605a11fb"
+          },
+          {
+            "path": "dependency-07.snapshot",
+            "bytes": 34340,
+            "sha256": "96db9ccc3562c973ea79f4c9c174d35899052bd8d3f72617a827858627d4b6be"
+          },
+          {
+            "path": "dependency-08.snapshot",
+            "bytes": 4234,
+            "sha256": "29229e757fe29fec26d9abc6afb7b777d95079035c517d2ae17f47615dd32298"
+          },
+          {
+            "path": "dependency-09.snapshot",
+            "bytes": 39780,
+            "sha256": "ff118d29191ade8ca29db74370218494ce450e7414d0f763525710d7ec957cdd"
+          },
+          {
+            "path": "dependency-10.snapshot",
+            "bytes": 16327575,
+            "sha256": "94d4b2e2f1a9f4a30c64e75fbc1b264a15802314a810a4d146ecc300f2bc75c9"
+          },
+          {
+            "path": "dependency-11.snapshot",
+            "bytes": 1373722,
+            "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+          },
+          {
+            "path": "dependency-12.snapshot",
+            "bytes": 32887671,
+            "sha256": "b3510073a304411fb2d5cafbcbb45d980c6c4d9f8888962039c1bd4852ea79de"
+          },
+          {
+            "path": "dependency-13.snapshot",
+            "bytes": 17275,
+            "sha256": "4f385b0b5f32d82e38b0dea8a7d7a54f5b2f48687c8cbf1ef2c73af93725ba6c"
+          },
+          {
+            "path": "dependency-14.snapshot",
+            "bytes": 23654,
+            "sha256": "95648226f916e0404c630e0384539c88f7befe4cb8e8e387be988552c8d2fba2"
+          },
+          {
+            "path": "dependency-15.snapshot",
+            "bytes": 8134,
+            "sha256": "3c5d461a187fc8690e6c12d586195ed7c8afd18be1e03cbb41a139ea0478f00f"
+          },
+          {
+            "path": "dependency-16.snapshot",
+            "bytes": 22839,
+            "sha256": "e1f41af529c78077882a3b282461314a41b4015dea6f4ab858cbe605ed3afb32"
+          },
+          {
+            "path": "dependency-17.snapshot",
+            "bytes": 3164,
+            "sha256": "925e711289cbd63d3305484133d984205d727d3a72dc533e468938523a367afb"
+          },
+          {
+            "path": "dependency-18.snapshot",
+            "bytes": 10755,
+            "sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae"
+          },
+          {
+            "path": "dependency-19.snapshot",
+            "bytes": 4026,
+            "sha256": "166ac9cc394ace45e208551620ec43ae070af6461617acb926199f3741df4064"
+          },
+          {
+            "path": "dependency-20.snapshot",
+            "bytes": 20841,
+            "sha256": "d1874728bcade108c694a02735099322ca6bd58cc871dc0f0628bab1516a51e7"
+          },
+          {
+            "path": "dependency-21.snapshot",
+            "bytes": 47679,
+            "sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa"
+          },
+          {
+            "path": "dependency-22.snapshot",
+            "bytes": 55659,
+            "sha256": "c657b778736fe9599395b48968702e45ca4d1141de6112990942ce3a744ae4d9"
+          },
+          {
+            "path": "dependency-23.snapshot",
+            "bytes": 13674,
+            "sha256": "d807e44faac2aabe3cde46bd0ab775b34738e2d6a10b608ec9589ac2589e62c3"
+          },
+          {
+            "path": "dependency-24.snapshot",
+            "bytes": 15623,
+            "sha256": "1a1061dc850edc23d58abb59bcc730b604c7a4389201ef63941d405ddd863f50"
+          },
+          {
+            "path": "dependency-25.snapshot",
+            "bytes": 231691,
+            "sha256": "93fcb005fa725c8a45269370c8319ca34779d1e032624fee08a4ae5800baa04a"
+          },
+          {
+            "path": "dependency-26.snapshot",
+            "bytes": 11675,
+            "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25"
+          },
+          {
+            "path": "dependency-27.snapshot",
+            "bytes": 43147,
+            "sha256": "d992a11227b4728dafe9006519bdeb4ca8bb90490e7d4f55fb7865ac034fa7b2"
+          },
+          {
+            "path": "dependency-28.snapshot",
+            "bytes": 42755,
+            "sha256": "5f3717d4ab04592aacfba9ecc82a67459d28fbc9e4dfad2eba14ee5826a8bf3a"
+          },
+          {
+            "path": "dependency-29.snapshot",
+            "bytes": 25491,
+            "sha256": "985eeaa427a356e83db5b384a9fbe5533c6bb4eb385855eb4f025a0ed7c11c32"
+          }
+        ],
+        "artifact_contract": {
+          "pass": false,
+          "unexpected": [],
+          "missing_allowed": [
+            "result.json"
+          ]
+        }
+      }
+    }
+  ],
+  "raw_inventory": {
+    "path": "logs/claude-channel-20261004/824-raw-inventory.json",
+    "sha256": "2bbdaa9674b0010c3c4de048b45ad0de7c54e885059e72d4d5ed45f97e1f83dc",
+    "entries": 145
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "scope": "observer preparation; immutable parent and baseline blobs, not campaign execution",
+  "base_commit": "bdb3acc9cc14d09f1eed8a5691d6451a4fcb7af1",
+  "parent_fingerprints": {
+    "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_reviewed_summary.json": {
+      "sha256": "e0406841a817f319c89d402c4218acdbedcd6a3f4f29a15d332ae759762f7b7b",
+      "bytes": 26122
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_table_reviewed.md": {
+      "sha256": "03759831b5e5fb03c6c008060a5ba75011587de2d81242f9fe56af58dfce998d",
+      "bytes": 8409
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_independent_review.md": {
+      "sha256": "61bd9a1a0aa45dd3977dd9619ab9db7bd353f6b0bd91376d7a65e3cd8ecffe22",
+      "bytes": 6759
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_correction_verification.md": {
+      "sha256": "2c794d4d384caf2d6dc2dcad6d4092050a6fe97285c00f22418300364e395c99",
+      "bytes": 2884
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_139_20261004_reviewed_summary.json": {
+      "sha256": "c80aef69ea3bd8fa378aab235b03c3af4c58c74da7bfda3d4b0bf99fbcec5f50",
+      "bytes": 25964
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_campaign_reviewed_summary.json": {
+      "sha256": "2efec3c3e1c910da881f9ba9da70cc27ec256865ae58ebc019bfecb05c5b74e5",
+      "bytes": 29249
+    }
+  },
+  "baseline_source_blobs": {
+    "src/sim/turn_pipeline.ts": "63712f69b824e4345e7baba36cf893b4c6a8af13",
+    "src/sim/turn_pipeline_types.ts": "da15f8e947f2326de1cf1523605b228e2bff2096",
+    "src/sim/combat/reason_code_debug.ts": "d883b571235180dcea83465b1efef0ed498a76da",
+    "src/scenario/scenario_reporting.ts": "5837c5280176d003204bc5172f18b629bbd81736",
+    "src/state/game_state.ts": "09b47b74df937c392190243803be459910c1a57e",
+    "src/state/serializeGameState.ts": "80462edb9c1c7d6e2a5851fe40a99364a07ae528",
+    "src/sim/combat/bot_brigade_ai_osid.ts": "33b7c97aa9f330cb43a336cbc42bacb0f9d50b8f",
+    "src/sim/combat/bot_brigade_eval_attack.ts": "7c7cb9085131b3e491e1a5f960ed896840f39af4",
+    "src/sim/combat/brigade_front_distribution.ts": "7b679d178d3ca4caef3391f07d8ad125040c8c25",
+    "src/sim/turn_phases/war_phases.ts": "1da8bc8d60af67ad4e394ccb148bbf2f8117618f",
+    "src/sim/turn_phases/war_phase_reconciliation_steps.ts": "adfa26a54ad1f537b98a2b064d7c2ccd108e4aa1"
+  },
+  "node": "v22.23.2",
+  "retained_runs": [
+    "apr1992_definitive_188w__0b1f040ff4abe835__w139_n40",
+    "apr1992_definitive_188w__4658849344f21642__w186_n38",
+    "apr1992_definitive_188w__6deb5845c150c196__w188_n37",
+    "apr1992_definitive_188w__6deb5845c150c196__w188_n39"
+  ],
+  "campaign_authorized": false
+}

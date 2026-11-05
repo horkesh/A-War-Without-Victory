@@ -1,3 +1,4 @@
+import { initializeMilitiaPoolDefaults } from '../../state/militia_pool_defaults.js';
 /**
  * War phase: Per-turn pool growth from conscription, displacement, and cross-ethnic contributions.
  * Runs before phase-ii-brigade-reinforcement so freshly mobilized manpower is available same turn.
@@ -25,6 +26,7 @@ import {
 } from '../early_war/pool_population.js';
 import type { MunicipalityPopulation1991Map } from '../early_war/pool_population.js';
 import { getActiveRecruitmentMultiplier } from '../events/active_modifiers.js';
+import { beginPoolFlowMutation } from './pool_flow_diagnostic.js';
 
 /**
  * Weekly mobilization rate as fraction of eligible military-age population.
@@ -324,8 +326,16 @@ export function runOngoingMobilization(
                 : 0;
         if (mobilized + shipmentBonus <= 0) continue;
 
+        const poolFlow = beginPoolFlowMutation(state, key);
         pool.available += mobilized + shipmentBonus;
         pool.updated_turn = currentTurn;
+        poolFlow?.complete('ongoing_mobilization', 'direct_controller', 'credited', {
+            census_eligible: censusEligible, base_rate: BASE_MOBILIZATION_RATE, faction_scale: factionScale,
+            surge, exhaustion_multiplier: exhaustionMult, pocket_multiplier: pocketMult,
+            authority_multiplier: authorityMult, event_multiplier: eventMult, raw,
+            mobilization_cap: MAX_MOBILIZATION_PER_MUN_PER_TURN,
+            mobilized, shipment_bonus: shipmentBonus, credit: mobilized + shipmentBonus,
+        }, 'direct');
         report.total_mobilized += mobilized + shipmentBonus;
         report.by_faction[controller] = (report.by_faction[controller] ?? 0) + mobilized + shipmentBonus;
         report.municipalities_contributing += 1;
@@ -372,6 +382,7 @@ export function runOngoingMobilization(
         const key = militiaPoolKey(munId, poolFaction);
         if (!pools[key]) {
             pools[key] = { mun_id: munId, faction: poolFaction, available: 0, committed: 0, exhausted: 0, updated_turn: currentTurn };
+            initializeMilitiaPoolDefaults(pools[key]);
         }
         const pool = pools[key];
 
@@ -417,6 +428,7 @@ export function runOngoingMobilization(
                 const key = militiaPoolKey(target, 'RBiH');
                 if (!pools[key]) {
                     pools[key] = { mun_id: target, faction: 'RBiH', available: 0, committed: 0, exhausted: 0, updated_turn: currentTurn };
+                    initializeMilitiaPoolDefaults(pools[key]);
                 }
                 pools[key].available += perTarget;
                 pools[key].updated_turn = currentTurn;

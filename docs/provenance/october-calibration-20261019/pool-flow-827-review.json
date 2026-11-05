@@ -1,0 +1,197 @@
+{
+  "verdict": "APPROVE",
+  "scope": "final residual-only verification completing bounded Pale pool-flow readiness review",
+  "head": "9ea5d278c481324172d8ada8b32fc188de55a0e2",
+  "conclusion": "The sole residual callback exception boundary is resolved. Together with the independently closed key scoping, selected-pool access ordering, phase/writer completeness, and source arithmetic findings, the bounded default-off stdout-only pale:RS turns 21-22 readiness change is approved.",
+  "residual_verification": {
+    "verdict": "RESOLVED",
+    "callback_builds": 2,
+    "completed_phase_counts": [
+      1,
+      1
+    ],
+    "balances": [
+      98,
+      97
+    ],
+    "mutation_count": 2,
+    "terminals": [
+      {
+        "completed_turn": 21,
+        "status": "success",
+        "expected_phase_manifest": null,
+        "diagnostic_error_count": 1
+      },
+      {
+        "completed_turn": 22,
+        "status": "success",
+        "expected_phase_manifest": null,
+        "diagnostic_error_count": 1
+      }
+    ],
+    "reader_rejection": "turn 21 terminal manifest mismatch",
+    "explanation": "The injected expected-phase callback threw on both turns. The observer contained both errors, the real decay phase and mutation continued, terminals remained successful but explicitly invalid with a null manifest and diagnostic_error_count 1, and the reader rejected the stream fail-closed."
+  },
+  "reused_original_findings": [
+    {
+      "original": "mutation hooks attribute every pool write to pale:RS",
+      "verdict": "RESOLVED",
+      "evidence": "Fresh real two-pool decay controls in both insertion orders emitted exactly one selected Pale mutation, 100 to 98."
+    },
+    {
+      "original": "selected-pool snapshots change access and exception order",
+      "verdict": "RESOLVED_FOR_SELECTED_POOL_SNAPSHOTS",
+      "evidence": "Fresh OFF and ON controls both mutated aaa:RS 100 to 98, recorded one phase, then propagated the same original Pale getter exception."
+    },
+    {
+      "original": "reader falsely qualifies incomplete or operand-poisoned evidence",
+      "verdict": "RESOLVED",
+      "evidence": "Fresh real-producer two-turn envelope accepted 22 rows/7 mutations with an explicit lawful turn-22 WIA unreached qualification; nine negative controls rejected missing phase, missing writer, poisoned direct/shared/decay/WIA/binding arithmetic, and invented skip semantics."
+    },
+    {
+      "original": "default-OFF observer must not evaluate diagnostic-only manifest inputs",
+      "verdict": "RESOLVED",
+      "evidence": "Fresh gate control built the manifest zero times OFF, zero times with another selector, and once only after the complete ON gate."
+    }
+  ],
+  "checks": {
+    "residual_targeted": {
+      "file": "tests/pool_flow_diagnostic.test.ts",
+      "tests": 13,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "receipt_sha256": "3f7d62fc3a4d7e6fabb250723cd07383ccbac8a55fc284ce255db303bf57fcfe"
+    },
+    "residual_scoped": {
+      "files": 2,
+      "tests": 55,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "receipt_sha256": "5db9486b756996c3b385c314eaffc2302fb1362fa224414d0f05add25014cae9"
+    },
+    "residual_typecheck": {
+      "command": "tsc --noEmit --incremental false -p tsconfig.json",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "receipt_sha256": "86e21613fdca03b7b814f75827d7ddab304d6fecfccc5b8fed1eb85533d1ba13"
+    },
+    "reused_correction_scope": {
+      "files": 6,
+      "tests": 102,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "receipt_sha256": "89f537b07beeac8f9347c9e9ef40ee5263d62d0d884aeaf481dcbb62d6ebd3f4"
+    },
+    "independent_residual": {
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "receipt_sha256": "5179203bf58039a88b4b2f514994506ac588b498765e3b2e21c2db266cf4f777",
+      "probe_sha256": "75fbb3856a133e18f1ec169f4e364bf9faec0384a00a37e0a438c45101116229"
+    },
+    "retained_probe_setup_failure": {
+      "child_exit": 1,
+      "wrapper_exit": 126,
+      "receipt_sha256": "364ede55ea8facf1901eee4ccc2590e09dc1c5ec6d3ac6062afa13100ff43cc5",
+      "reason": "Assertion expected phase-manifest wording; the reader correctly failed earlier with terminal manifest mismatch. No probe or stream artifact was retained."
+    }
+  },
+  "packet": {
+    "result": {
+      "path": "logs/claude-channel-20261004/826-residual-final/result.json",
+      "bytes": 21495,
+      "sha256": "0e6a1fe4a04d0015fe4632e3e44877ae88241beefa238c8b0d563b3d44e3e82c"
+    },
+    "receipt": {
+      "path": "logs/claude-channel-20261004/826-residual-final/receipt.json",
+      "bytes": 4576,
+      "sha256": "7ef6b1158b31a39b39715691dbe392d52175db536f3a0354271ee2f251461ef4"
+    },
+    "inventory": {
+      "path": "logs/claude-channel-20261004/826-residual-inventory/inventory.json",
+      "bytes": 92051,
+      "sha256": "6d800f9c7fd2186723077f4eba49f47774b0ec2558d46a1d6278a84c30babb2f"
+    }
+  },
+  "final_files": [
+    {
+      "path": "src/sim/combat/ongoing_mobilization.ts",
+      "bytes": 23509,
+      "sha256": "0cf1323690dac8ca0dc58641088a1c0bf6aacc571637890c6ed17f2f37911e8e"
+    },
+    {
+      "path": "src/sim/combat/pool_decay.ts",
+      "bytes": 3417,
+      "sha256": "74c15ff78413d6669813fc5babbda59c2817987fa3bc4c2b52de9efbee8d7c63"
+    },
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "bytes": 20310,
+      "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd"
+    },
+    {
+      "path": "src/sim/combat/pool_flow_diagnostic.ts",
+      "bytes": 8979,
+      "sha256": "fc485758d68b360ff34b922d30fbc2edc6cfd86fc4ce75e680ec38f28d8691fc"
+    },
+    {
+      "path": "src/sim/early_war/pool_population.ts",
+      "bytes": 21692,
+      "sha256": "340eb0a7b695e174bfaa3234244df7217264ac0169ef120d89cc779f4e9d5fe7"
+    },
+    {
+      "path": "src/sim/formation_spawn.ts",
+      "bytes": 48051,
+      "sha256": "44236006a3d5ae5346421096b58aad5cc189bfe93f5f05c116d8016344c53e16"
+    },
+    {
+      "path": "src/sim/turn_pipeline.ts",
+      "bytes": 12975,
+      "sha256": "6ef907e1835cbddba5a5faa550e7ad47dc934ff1e9720a5344b7a142fe2c2e9d"
+    },
+    {
+      "path": "tests/pool_flow_diagnostic.test.ts",
+      "bytes": 23447,
+      "sha256": "9f1a41062d154650e49d322d66cf8df6885f46a96ffe305c6b5c7eca96518eb2"
+    },
+    {
+      "path": "tools/diagnostics/pool_flow_reader.cjs",
+      "bytes": 12724,
+      "sha256": "d5bce9c409a639dd68a97c0cb05e4a279ee985fdacfcfdaeb1ac7e1d572b6528"
+    }
+  ],
+  "telemetry": {
+    "C": {
+      "before_bytes": 103894385,
+      "before_sha256": "00d6d7e65832a45e4b8ddc34e077c228b9496ca8f1068a6b9633571b4bae5557",
+      "after_bytes": 103894385,
+      "after_sha256": "00d6d7e65832a45e4b8ddc34e077c228b9496ca8f1068a6b9633571b4bae5557",
+      "append_bytes": 0,
+      "exact_prefix": true
+    },
+    "D": {
+      "before_bytes": 1041,
+      "before_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "after_bytes": 1041,
+      "after_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "append_bytes": 0,
+      "exact_prefix": true
+    }
+  },
+  "telemetry_current": {
+    "C": {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 103894385,
+      "sha256": "00d6d7e65832a45e4b8ddc34e077c228b9496ca8f1068a6b9633571b4bae5557"
+    },
+    "D": {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    },
+    "append_bytes": {
+      "C": 0,
+      "D": 0
+    }
+  },
+  "qualification_limits": "Readiness verification only. No campaign, full suite, build, replay, or runTurn was executed. This does not establish campaign neutrality, actual retained-run n84 writer values, historical causality, n80 causality, or acceptance of 703/712. The retained 703 remains NO-GO/unadopted; thresholds and prior telemetry gates remain in force."
+}

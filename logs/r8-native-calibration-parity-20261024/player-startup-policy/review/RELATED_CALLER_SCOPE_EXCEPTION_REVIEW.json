@@ -1,0 +1,55 @@
+{
+  "schema": "awwv.targeted-scope-exception-review.v1",
+  "verdict": "GO_NARROW_TEST_ONLY_EXCEPTION",
+  "review_lenses": [
+    "systems",
+    "canon_compliance"
+  ],
+  "allowed_path": "tests/ui/event_decision_auto_launch_contract.test.ts",
+  "allowed_change": {
+    "line": 162,
+    "from": "resolveBrowserEventDecision(nextState, eventId, responseId)",
+    "to": "resolveBrowserEventDecision(nextState, eventId, responseId, eventCatalogFull)"
+  },
+  "forbidden_expansion": [
+    "production edits",
+    "assertion removal",
+    "matcher broadening",
+    "fixture changes",
+    "other changes in the allowed test file"
+  ],
+  "pre_edit_hashes": {
+    "tests/ui/event_decision_auto_launch_contract.test.ts": "834b13dd48be89769a0bef2df02e7726cc3dc521706843fccdb9ddec9e94dda1",
+    "src/ui/map/App.tsx": "8cfae1653dcd81fde35f25af60624aef6da479c5188ca06b50d51a56c0dea672"
+  },
+  "retained_failure": {
+    "receipt": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/related-callers-01/receipt.json",
+    "child_exit": 1,
+    "wrapper_exit": 1,
+    "artifact_contract_pass": true,
+    "files_passed": 6,
+    "files_failed": 1,
+    "tests_passed": 60,
+    "tests_failed": 1,
+    "stdout_sha256": "b17e6c22be2e635fff64b3a1f8e8ec489da28d941f853d23363a0b148005acbc",
+    "stderr_sha256": "d7c544577676e24e10bad6ebe032a29a61e5fa44184d4cfd8027c4fbf7028904"
+  },
+  "required_post_edit_evidence": [
+    "preserved focused rerun of the changed test",
+    "preserved cheap rerun of the remaining three startup caller tests",
+    "changed-test SHA-256 bound in a targeted final-review addendum"
+  ],
+  "reused_evidence": [
+    "unchanged 94/94 focused source proof",
+    "unchanged TypeScript 0/0 proof",
+    "unchanged original 13 candidate hashes"
+  ],
+  "authority_assessment": "No additional seat or panel is required for the exact string-literal-only test correction; runtime behavior, types, determinism, canon, and the existing six-seat historical/UI conditions are unchanged.",
+  "excluded_claims": [
+    "campaign",
+    "full suite",
+    "package",
+    "build",
+    "native run"
+  ]
+}

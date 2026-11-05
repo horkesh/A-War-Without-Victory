@@ -13,6 +13,8 @@
 *.cjs text eol=lf
 *.mjs text eol=lf
 *.json text eol=lf
+data/source/boundaries/bih_adm0.geojson text eol=lf
+data/source/boundaries/geoboundaries_adm0_2023/*.geojson text eol=lf
 *.md text eol=lf
 *.css text eol=lf
 *.html text eol=lf
@@ -23,5 +25,10 @@
 *.ps1 text eol=lf
 
 data/derived/startup/*.json text eol=lf
+logs/branch-hygiene/20260924-parallel-audit/r8-uncommitted.patch -text -diff
 *.pmtiles filter=lfs diff=lfs merge=lfs -text
 *.osm.pbf filter=lfs diff=lfs merge=lfs -text
+
+logs/r8-native-calibration-parity-20261026/initial-calibration-packet/** -text -diff
+# Preserve the archived R8 draft patch's recorded SHA-256 on every checkout.
+logs/branch-hygiene/20260924-parallel-audit/r8-uncommitted.patch -text

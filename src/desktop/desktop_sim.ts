@@ -1,3 +1,7 @@
+import {loadSettlementEthnicityData} from '../data/settlement_ethnicity.js';
+import {computeOsidEthnicComposition} from '../sim/combat/bot_brigade_supply_ethnic.js';
+import {buildSlopeByOsid} from '../sim/combat/attack_retreat_displacement.js';
+import {computeSupplyReachabilityOsid} from '../state/supply_reachability_osid.js';
 import { OPERATION_OPPORTUNITY_CATALOG } from '../sim/combat/operation_opportunities.js';
 /**
  * Desktop (Electron main) sim API: load scenario/state, advance turn.
@@ -5,8 +9,8 @@ import { OPERATION_OPPORTUNITY_CATALOG } from '../sim/combat/operation_opportuni
  */
 
 import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
-import { loadOperationalCentroids, loadOperationalData, loadOperationalEdges } from '../data/operational_data.js';
+import { join, resolve } from 'node:path';
+import { computeOsidPopulation, loadOperationalCentroids, loadOperationalData, loadOperationalEdges } from '../data/operational_data.js';
 import { buildAdjacencyMap } from '../map/adjacency_map.js';
 import { loadSettlementGraph } from '../map/settlements.js';
 import { loadTerrainScalars } from '../map/terrain_scalars_node.js';
@@ -23,6 +27,8 @@ import { shortestPathThroughFriendly } from '../sim/combat/brigade_movement.js';
 import { isSrkStranglePostureEnabled } from '../sim/combat/contain_posture_gate.js';
 import { buildAdjacencyFromEdges, isSettlementSetContiguous } from '../sim/combat/war_adjacency.js';
 import { estimateAttackCost, type AttackEstimate } from '../sim/combat/combat_estimate.js';
+import { setForestOsidSet, setUrbanOsidSet } from '../sim/combat/combat_math.js';
+import { loadForestOsidSet, loadUrbanOsidSet } from '../sim/combat/combat_terrain_sets_node.js';
 import { computeFrontWidthMetrics } from '../sim/combat/front_width_metrics.js';
 import { computeSectorCombatRatings } from '../sim/combat/sector_combat_rating.js';
 import { applyRecruitment, evaluateRecruitmentEligibility, initializeRecruitmentResources, recruitBrigade } from '../sim/recruitment_engine.js';
@@ -31,11 +37,14 @@ import { assertTurnSuccess, runTurn } from '../sim/turn_pipeline.js';
 import { loadEventDefinitionsFromDir } from '../sim/events/event_loader.js';
 import { applyEventEffects } from '../sim/events/apply_effects.js';
 import { resolveEventDecision } from '../sim/events/resolve_decision.js';
+import { resolvePlayerEventDecisionWithOpeningPolicy } from '../sim/events/opening_policy_transition.js';
+import { initializeNegotiationState } from '../sim/negotiation/initialize_negotiation_state.js';
 import { deferUnauthorizedHistoricalOperationsForPlayer } from '../sim/combat/historical_operation_authorization.js';
 import {
     applyDefinitionDimensionShifts,
     applyDefinitionFlags,
 } from '../sim/events/evaluate_events.js';
+import { writeOwedRecordsAtTermination } from '../sim/endgame/owed_termination_records.js';
 import type { EventDefinition, EventEffect, PendingEventDecision } from '../sim/events/event_types.js';
 import {
     queryMovementPath as computeMovementPathQuery,
@@ -47,6 +56,8 @@ import { computeSupplyReachability, type SupplyReachabilityReport } from '../sta
 import {
     deriveCorridors,
     deriveSupplyState,
+    deriveCorridorsOsid,
+    deriveSupplyStateByOsid,
     type CorridorDerivationReport,
     type SupplyStateDerivationReport
 } from '../state/supply_state_derivation.js';
@@ -351,15 +362,22 @@ export async function startNewCampaign(
     const canonicalState = canonicalizeStartupState(state).state;
     canonicalState.political.control_events = [];
     if (key === 'apr_1992') {
+        initializeNegotiationState(canonicalState);
         queueOpeningFoundationalDecision(canonicalState, loadDesktopEventDefinitions(baseDir), playerFaction);
     }
     return { state: canonicalizeStartupState(canonicalState).state };
 }
 
 /** Load a saved state file (final_save.json or any GameState JSON). */
-export async function loadStateFromPath(statePath: string): Promise<{ state: GameState }> {
+export function primeCombatTerrain(baseDir: string): void {
+    setUrbanOsidSet(loadUrbanOsidSet(baseDir));
+    setForestOsidSet(loadForestOsidSet(baseDir));
+}
+
+export async function loadStateFromPath(statePath: string, baseDir: string): Promise<{ state: GameState }> {
     const content = await readFile(statePath, 'utf8');
     const state = deserializeState(content);
+    primeCombatTerrain(baseDir);
     computeSectorCombatRatings(state, null);
     return { state };
 }
@@ -371,6 +389,8 @@ export async function loadStateFromPath(statePath: string): Promise<{ state: Gam
 export async function advanceTurn(state: GameState, baseDir: string): Promise<DesktopSimAdvanceResult> {
     const phase = state.meta?.phase ?? 'war';
     const seed = state.meta?.seed ?? 'desktop-seed';
+
+    primeCombatTerrain(baseDir);
 
     const [graph, operationalSettlementGraph, operationalData, operationalCentroids] = await Promise.all([
         loadSettlementGraph(settlementGraphOptions(baseDir)),
@@ -435,6 +455,7 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
             });
 
             const result = await runTurn(turnState, {
+                dataBaseDir: baseDir,
                 seed,
                 settlementGraph: graphForBrowser,
                 operationalSettlementGraph,
@@ -451,6 +472,7 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
                 historicalNameLookup: sharedTurnInputs.historicalNameLookup,
                 historicalCorpsLookup: sharedTurnInputs.historicalCorpsLookup,
                 historicalOobIdLookup: sharedTurnInputs.historicalOobIdLookup,
+                historicalEquipmentClassLookup: sharedTurnInputs.historicalEquipmentClassLookup,
                 eventDefinitions: loadDesktopEventDefinitions(baseDir),
             });
             assertTurnSuccess(result);
@@ -772,6 +794,30 @@ export async function getPlayerRecruitmentCatalog(state: GameState, baseDir: str
     };
 }
 
+/**
+ * Once play has ended (decision, peace plan or Dayton IPC), no further turn runs, so
+ * write the no-choice records play already owes before the terminal state is saved.
+ * Idempotent (once-only rows); a no-op while the war continues. Returns ids written.
+ */
+export function writeOwedTerminationRecords(state: GameState, baseDir: string): string[] {
+    return writeOwedRecordsAtTermination(state, loadDesktopEventDefinitions(baseDir))
+        .map((fired) => fired.id);
+}
+
+export function resolveDesktopEventDecision(
+    state: GameState,
+    eventId: string,
+    responseId: string,
+    baseDir: string,
+): GameState {
+    return resolvePlayerEventDecisionWithOpeningPolicy(
+        state,
+        loadDesktopEventDefinitions(baseDir),
+        eventId,
+        responseId,
+    );
+}
+
 /** Re-export for main process (serialize/deserialize state for IPC). */
 export {
     deserializeState,
@@ -819,12 +865,53 @@ import { hasAvailableSlot } from '../sim/combat/corps_operation_helpers.js';
  * Loads operational data, builds adjacency + terrain cache, delegates to computeOperationPrediction.
  */
 /** Cached operational data for prediction queries (immutable during gameplay). */
-let cachedOpData: Awaited<ReturnType<typeof loadOperationalData>> | null = null;
-let cachedEdges: Awaited<ReturnType<typeof loadOperationalEdges>> | null = null;
+const cachedPredictionDataByRoot = new Map<string, Promise<{
+    opData: Awaited<ReturnType<typeof loadOperationalData>>;
+    edges: Awaited<ReturnType<typeof loadOperationalEdges>>;
+}>>();
+
+async function getCachedPredictionData(baseDir: string) {
+    const root = resolve(baseDir);
+    let entry = cachedPredictionDataByRoot.get(root);
+    if (!entry) {
+        entry = Promise.all([loadOperationalData(root), loadOperationalEdges(root)])
+            .then(([opData, edges]) => ({opData, edges}));
+        cachedPredictionDataByRoot.set(root, entry);
+        const pending = entry;
+        void pending.catch(() => { if (cachedPredictionDataByRoot.get(root) === pending) cachedPredictionDataByRoot.delete(root); });
+    }
+    return entry;
+}
 
 async function getCachedOsidAdjacency(baseDir: string): Promise<Map<Osid, Osid[]>> {
-    if (!cachedEdges) cachedEdges = await loadOperationalEdges(baseDir);
-    return buildOsidAdjacency(cachedEdges);
+    return buildOsidAdjacency((await getCachedPredictionData(baseDir)).edges);
+}
+
+async function loadOperationPredictionInputs(state: GameState, baseDir: string) {
+    const {opData, edges} = await getCachedPredictionData(baseDir);
+    const terrain = await loadTerrainScalars(terrainScalarsPath(baseDir));
+    primeCombatTerrain(baseDir);
+    const canonicalSids = new Set([...opData.operationalToCanonical.values()].flat());
+    const shared = await loadSharedTurnInputs(baseDir, canonicalSids);
+    const osidPopulationMap = shared?.municipalityPopulation1991
+        ? computeOsidPopulation(opData.operationalToCanonical, shared.municipalityPopulation1991) : undefined;
+    let ethnicComposition: ReturnType<typeof computeOsidEthnicComposition> | undefined;
+    try {
+        ethnicComposition = computeOsidEthnicComposition(opData.operationalToCanonical,
+            await loadSettlementEthnicityData(join(baseDir, 'data/derived/settlement_ethnicity_data.json')));
+    } catch { /* Same optional-census fixture fallback as war execution. */ }
+    let supplyStateByOsid: ReturnType<typeof deriveSupplyStateByOsid> | undefined;
+    if (opData.canonicalToOperational && opData.operationalToCanonical && edges.length > 0) {
+        const reach = computeSupplyReachabilityOsid(state, edges, opData.canonicalToOperational, opData.operationalToCanonical);
+        const corridors = deriveCorridorsOsid(state, edges, reach);
+        supplyStateByOsid = deriveSupplyStateByOsid(state, edges, reach, corridors);
+    }
+    return {
+        adjacency: buildOsidAdjacency(edges), reverseMap: opData.operationalToCanonical,
+        terrainCache: buildTerrainCache(opData.operationalToCanonical, terrain),
+        slopeByOsid: buildSlopeByOsid(opData.operationalToCanonical, terrain),
+        supplyStateByOsid, osidPopulationMap, ethnicComposition,
+    };
 }
 
 export async function queryOperationPrediction(
@@ -832,18 +919,13 @@ export async function queryOperationPrediction(
     request: OperationPredictionRequest,
     baseDir: string
 ): Promise<OperationPredictionResponse> {
-    if (!cachedOpData) cachedOpData = await loadOperationalData(baseDir);
-    if (!cachedEdges) cachedEdges = await loadOperationalEdges(baseDir);
-    const adjacency = buildOsidAdjacency(cachedEdges);
-    const terrain = await loadTerrainScalars(terrainScalarsPath(baseDir));
-    const terrainCache = buildTerrainCache(cachedOpData.operationalToCanonical, terrain);
+    const inputs = await loadOperationPredictionInputs(state, baseDir);
 
     return computeOperationPrediction(
         state,
         request,
-        adjacency,
-        cachedOpData.operationalToCanonical,
-        terrainCache,
+        inputs.adjacency, inputs.reverseMap, inputs.terrainCache,
+        inputs.supplyStateByOsid, inputs.osidPopulationMap, inputs.slopeByOsid, inputs.ethnicComposition,
     );
 }
 
@@ -889,9 +971,8 @@ export async function queryDirectiveObjection(
     payload: { corpsId: string; targetOsid: string },
     baseDir: string,
 ): Promise<DirectiveObjectionResult> {
-    if (!cachedOpData) cachedOpData = await loadOperationalData(baseDir);
-    if (!cachedEdges) cachedEdges = await loadOperationalEdges(baseDir);
-    const adjacency = buildOsidAdjacency(cachedEdges);
+    const {edges} = await getCachedPredictionData(baseDir);
+    const adjacency = buildOsidAdjacency(edges);
 
     const cmd = state.military?.corps_command?.[payload.corpsId];
     if (!cmd) {
@@ -915,8 +996,7 @@ export async function queryDirectiveObjection(
         return { rejectionReason: 'no_available_slot', forceRatio: 0, estimatedCasualties: 0, recommendedAction: 'abort' };
     }
 
-    const terrain = await loadTerrainScalars(terrainScalarsPath(baseDir));
-    const terrainCache = buildTerrainCache(cachedOpData.operationalToCanonical, terrain);
+    const inputs = await loadOperationPredictionInputs(state, baseDir);
 
     const request: OperationPredictionRequest = {
         corpsId: payload.corpsId,
@@ -933,9 +1013,8 @@ export async function queryDirectiveObjection(
     const prediction = computeOperationPrediction(
         state,
         request,
-        adjacency,
-        cachedOpData.operationalToCanonical,
-        terrainCache,
+        inputs.adjacency, inputs.reverseMap, inputs.terrainCache,
+        inputs.supplyStateByOsid, inputs.osidPopulationMap, inputs.slopeByOsid, inputs.ethnicComposition,
     );
 
     return {

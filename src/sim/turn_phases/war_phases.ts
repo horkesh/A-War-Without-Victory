@@ -1,3 +1,7 @@
+import {buildSlopeByOsid} from '../combat/attack_retreat_displacement.js';
+import {selectStaffControlledFactions as selectBotBrigadeOrderFactions} from '../bot/staff_control.js';
+export {selectStaffControlledFactions as selectBotBrigadeOrderFactions} from '../bot/staff_control.js';
+import {turnDataFilePath} from '../turn_pipeline_types.js';
 /** War-phase pipeline steps. Extracted from turn_pipeline.ts (R7). */
 
 // --- Domain imports (paths adjusted: one directory deeper than turn_pipeline.ts) ---
@@ -31,6 +35,7 @@ import { applyGuerrillaAttrition } from '../combat/guerrilla_attrition.js';
 import { cleanupExpiredEventModifiers } from '../events/active_modifiers.js';
 import { attributeOperationCasualties } from '../combat/operation_casualty_attribution.js';
 import { recordOperationWeeklyEntries } from '../combat/operation_aar.js';
+import { operationExecutedAttackCount } from '../combat/operation_attack_count.js';
 import { buildAdjacencyMapCached } from '../../map/adjacency_map.js';
 import { computeFrontEdges, computeFrontEdgesOsid } from '../../map/front_edges.js';
 import { computeFrontRegions } from '../../map/front_regions.js';
@@ -50,7 +55,7 @@ import { getDoctrineTempoMultiplier, updateDoctrineState } from '../../state/doc
 import { updateEmbargoProfiles } from '../../state/embargo.js';
 import { updateEnclaveIntegrity, computeEnclaveResilienceFallbackPressure } from '../../state/enclave_integrity.js';
 import { accumulateExhaustion } from '../../state/exhaustion.js';
-import { applyFatigueRecovery, updateFormationFatigue } from '../../state/formation_fatigue.js';
+import { applyFatigueRecovery, applyFrontlineDutyFatigue, updateFormationFatigue } from '../../state/formation_fatigue.js';
 import { deriveMunicipalityAuthorityMap, updateFormationLifecycle } from '../../state/formation_lifecycle.js';
 import { normalizeFrontPosture } from '../../state/front_posture.js';
 import { applyFormationCommitment } from '../../state/front_posture_commitment.js';
@@ -82,11 +87,14 @@ import { migratePoliticalControllersToOsidIfNeeded } from '../../state/political
 import { updateSarajevoState, refreshSarajevoLifelineCache } from '../../state/sarajevo_exception.js';
 import { updateSustainability } from '../../state/sustainability.js';
 import { updateLossOfControlTrends } from '../../state/loss_of_control_trends.js';
+import { isFriendlyFaction } from '../early_war/alliance_update.js';
+import { buildFriendlyComponents } from '../combat/sector_utils.js';
 import { calculateFactionProductionBonus, ensureProductionFacilities } from '../../state/production_facilities.js';
 import { computeSupplyReachability } from '../../state/supply_reachability.js';
 import { computeSupplyReachabilityOsid, type SupplyReachabilityOsidReport } from '../../state/supply_reachability_osid.js';
 import { buildContainDiagnostic } from '../combat/contain_diagnostic.js';
-import { computeContainedOsidsForFaction } from '../combat/enclave_resilience.js';
+import { computeContainedOsidsForFaction, isBrigadeEligibleForOperationObjectives } from '../combat/enclave_resilience.js';
+import { getEquipmentOffensivePriority, resolveEquipmentClass } from '../combat/sector_offensive_launch_helpers.js';
 import { isVrsContainPostureEnabled, isArbihContainPostureEnabled, isSrkStranglePostureEnabled } from '../combat/contain_posture_gate.js';
 import { computeSrkStrangleOsids } from '../combat/srk_strangle.js';
 import {
@@ -156,7 +164,11 @@ import { buildCorpsFrontSectors, assignBrigadesToSubSegments, REASSIGNMENT_ENTRE
 import { ENABLE_TG_OG_PROMOTION } from '../combat/tactical_group_config.js';
 import { applyOgPromotions, projectPromotionDisplayNames } from '../combat/tactical_group_promotion.js';
 import { distributeBrigadesToFront } from '../combat/brigade_front_distribution.js';
-import { correctMarchOrders, correctTransitStates } from '../combat/commander_march_correction.js';
+import { mergeFrontDistributionDiagnostics, nextFrontDistributionInvocationOrdinal } from '../combat/front_distribution_diagnostic.js';
+import {
+    correctMarchOrders,
+    correctTransitStates,
+} from '../combat/commander_march_correction.js';
 import { evaluateHomeReturn } from '../combat/brigade_home_return.js';
 import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
 import { advanceSectorOffensives, updateSectorOffensiveResults, reevaluateWeakenedOperations } from '../combat/sector_offensive.js';
@@ -170,6 +182,7 @@ import {
     admitAuthoredPrePlannedReinforcements,
     injectPrePlannedOperations,
     injectQueuedOperation,
+    prestageDeferredPrePlannedElites,
 } from '../combat/pre_planned_operations.js';
 import { isSlot0AvailableForQueue, hasAvailableSlot, getAvailableBrigades, buildCorpsOperation, findBrigadeOperationAnywhere, removeOperation } from '../combat/corps_operation_helpers.js';
 import { validateOpAtInjection, hasBlockingOpInjectionWarnings } from '../combat/operation_validation.js';
@@ -177,7 +190,7 @@ import { createSingleAxis } from '../combat/sector_offensive_axis_helpers.js';
 import { getCorpsSubordinates } from '../combat/bot_corps_helpers.js';
 import { assignOperationCommander, releaseOperationCommander, releaseTacticalCommander } from '../combat/officer_system.js';
 import { completeOperationLifecycle, enterOperationRecovery } from '../combat/tactical_group_lifecycle.js';
-import { isEligibleOperationFormation } from '../../state/formation_constants.js';
+import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import {
     checkTriggeredOperations,
@@ -202,11 +215,10 @@ import {
     updateSupplyReserves
 } from '../../state/supply_reserves.js';
 import type { Osid } from '../combat/osid_adjacency.js';
-import { generateArmyReserveRequests, evaluateArmyReserveAssignments, tickEliteLoans } from '../combat/army_reserve_system.js';
+import { enforceGuardsEnclaveBoundary, generateArmyReserveRequests, evaluateArmyReserveAssignments, tickEliteLoans } from '../combat/army_reserve_system.js';
 import { buildHomeDistanceCache } from '../combat/home_distance.js';
 import { computeSectorCombatRatings } from '../combat/sector_combat_rating.js';
 import { detectParamilitaryTargets, advanceParamilitaries } from '../combat/paramilitary_sweep.js';
-import { consolidateRearPockets } from '../combat/rear_pocket_consolidation.js';
 import { updateStrandedBrigadeLifecycle } from '../combat/stranded_brigade_lifecycle.js';
 import {
     PARAMILITARY_FADE_WEEK,
@@ -235,6 +247,7 @@ import {
     getOperationalData,
     getOrLoadOperationalData,
     getOrLoadOperationalMapping,
+    getOrLoadOperationalEdges,
     getOperationalSettlementGraph,
     getGraphAndEdges,
     getSiegeStateCache,
@@ -257,6 +270,10 @@ interface WarPhaseContextExtensions {
  *  pre_planned_operations.ts / triggered_operations.ts (kept as a local const because
  *  the engine constant is not exported). */
 const AUTHORED_OP_MIN_PARTICIPANTS = 2;
+
+/** Regular sector-attack bounds for presidential REQUEST-OP directives. */
+const DIRECTIVE_OP_MIN_PARTICIPANTS = 3;
+const DIRECTIVE_OP_MAX_PARTICIPANTS = 12;
 
 /**
  * Consume player-authored operations staged on cc.pending_authored_op (Free War
@@ -485,7 +502,15 @@ function applyOpHalts(state: GameState): void {
             removeOperation(cmd, op);
 
             // Append the halt record (op_name + turn) for the UI / follow-up consequence.
-            const record = { op_name: op.name ?? staged.op_name ?? 'Operation', turn };
+            // The halt writes no AAR, so the record keeps the op's identity and executed
+            // attacks (read by the `operation_attacked` event condition).
+            const opName = op.name ?? staged.op_name ?? 'Operation';
+            const record = {
+                op_name: opName,
+                turn,
+                operation_id: `${corpsId}:${opName}:t${op.started_turn}`,
+                executed_attacks: operationExecutedAttackCount(op),
+            };
             if (Array.isArray(cmd.halted_op_record)) cmd.halted_op_record.push(record);
             else cmd.halted_op_record = [record];
 
@@ -727,13 +752,14 @@ export type DirectivePlanResult =
  * plan; the staged directive only carries a target OSID).
  *
  * Identical selection to the consume path (`injectOpDirectives`):
- *  1. AUTO-SELECT participant brigades: this corps's subordinates (getCorpsSubordinates)
- *     that are available in their own corps (getAvailableBrigades), not committed in ANY
- *     corps (findBrigadeOperationAnywhere), and eligible (isEligibleOperationFormation).
- *     Require ≥ AUTHORED_OP_MIN_PARTICIPANTS.
- *  2. BUILD a reachable axis toward target_osid: the smallest FRIENDLY OSID adjacent to
- *     the target (controller === corps faction) as staging (deterministic).
- *  3. Validate via validateOpAtInjection (blocking errors reject).
+ *  1. Build the legal pool from this corps's available, uncommitted, active brigades,
+ *     applying the shared enclave/objective guard.
+ *  2. For each own-controlled target-adjacent staging OSID in strict order, retain pool
+ *     brigades connected to it through normal friendly/allied territory. Choose the first
+ *     staging OSID with at least three candidates.
+ *  3. Rank by the ordinary sector-attack equipment priority, cap at 12, then canonicalize
+ *     participant IDs with strictCompare.
+ *  4. Validate via validateOpAtInjection (blocking errors reject).
  *
  * Returns a discriminated plan; NEVER mutates `state` or `cmd`. The mutation (push op,
  * assign commander, set stance, clear staged field) lives ONLY in the consume step so
@@ -756,35 +782,78 @@ export function planDirectiveOperation(
     if (targetController === null) return { ok: false, reason: 'objective_uncontrolled' };
     if (targetController === corpsFaction) return { ok: false, reason: 'objective_already_owned' };
 
-    // 1. AUTO-SELECT the force — the commander picks brigades, not the president.
-    //    Eligible + available in own corps + not committed anywhere.
+    // A graph is required to prove both staging adjacency and formation reachability.
+    if (!adjacency) return { ok: false, reason: 'no_adjacency' };
+
+    // 1. Build the legal force pool — the commander picks brigades, not the president.
+    //    Eligibility includes availability, state-wide non-commitment, live formation
+    //    status, the canonical attack-personnel floor, and the shared enclave/objective
+    //    boundary.
     const corpsBrigadeIds = new Set(
         getCorpsSubordinates(state, corpsId).map((f) => f.id),
     );
     const available = new Set(getAvailableBrigades(cmd, [...corpsBrigadeIds]));
-    const participants = [...corpsBrigadeIds]
+    const legalPool = [...corpsBrigadeIds]
         .filter((bid) => {
             if (!available.has(bid)) return false;                       // free in own corps
             if (findBrigadeOperationAnywhere(state, bid)) return false;   // not committed in ANY corps
             const f = formations[bid];
-            return !!f && isEligibleOperationFormation(f);                // brigade-only, active
+            return !!f
+                && isEligibleOperationFormation(f)                       // brigade-only, active
+                && (f.personnel ?? 0) >= MIN_ATTACK_PERSONNEL
+                && isBrigadeEligibleForOperationObjectives(f, [targetOsid]);
         })
-        .sort(strictCompare);
+        .map((bid) => formations[bid]!);
 
-    if (participants.length < AUTHORED_OP_MIN_PARTICIPANTS) {
-        return { ok: false, reason: 'no_available_force' };
-    }
-
-    // 2. BUILD the axis — find a FRIENDLY OSID adjacent to the target through the
-    //    static adjacency graph. That neighbor is the staging zone; the target is the
-    //    single objective. Smallest friendly neighbor (deterministic). With no
-    //    adjacency graph available we cannot prove reachability → reject.
-    if (!adjacency) return { ok: false, reason: 'no_adjacency' };
+    // 2. Candidate staging remains own-controlled. Route feasibility may traverse the
+    //    faction's own or currently allied territory under the existing alliance rule.
     const neighbors = adjacency.get(targetOsid) ?? [];
-    const stagingOsid = [...neighbors]
+    const stagingCandidates = [...neighbors]
         .filter((n) => getPoliticalControllerOSID(state, n, undefined) === corpsFaction)
-        .sort(strictCompare)[0];
-    if (!stagingOsid) return { ok: false, reason: 'objective_unreachable' };
+        .sort(strictCompare);
+    if (stagingCandidates.length === 0) return { ok: false, reason: 'objective_unreachable' };
+
+    const graphOsids = new Set<string>();
+    for (const [osid, adjacent] of adjacency) {
+        graphOsids.add(osid);
+        for (const neighbor of adjacent) graphOsids.add(neighbor);
+    }
+    const friendlyOsids = new Set(
+        [...graphOsids].filter((osid) => isFriendlyFaction(
+            getPoliticalControllerOSID(state, osid, undefined),
+            corpsFaction,
+            state,
+        )),
+    );
+    const componentOf = buildFriendlyComponents(adjacency, friendlyOsids);
+
+    let stagingOsid: string | undefined;
+    let reachablePool: FormationState[] = [];
+    for (const candidate of stagingCandidates) {
+        const stagingComponent = componentOf.get(candidate);
+        if (stagingComponent === undefined) continue;
+        const reachable = legalPool.filter((formation) => {
+            const location = formation.location_osid;
+            return location !== undefined && componentOf.get(location) === stagingComponent;
+        });
+        if (reachable.length < DIRECTIVE_OP_MIN_PARTICIPANTS) continue;
+        stagingOsid = candidate;
+        reachablePool = reachable;
+        break;
+    }
+    if (!stagingOsid) return { ok: false, reason: 'no_available_force' };
+
+    // 3. Reuse the ordinary sector-attack commander preference, then cap and store a
+    //    canonical ID roster independent of object insertion order.
+    const participants = reachablePool
+        .sort((a, b) => {
+            const priorityDelta = getEquipmentOffensivePriority(resolveEquipmentClass(b))
+                - getEquipmentOffensivePriority(resolveEquipmentClass(a));
+            return priorityDelta !== 0 ? priorityDelta : strictCompare(a.id, b.id);
+        })
+        .slice(0, DIRECTIVE_OP_MAX_PARTICIPANTS)
+        .map((formation) => formation.id)
+        .sort(strictCompare);
 
     const axes: OperationAxis[] = [createSingleAxis(participants, [targetOsid], stagingOsid, formations)];
 
@@ -930,18 +999,6 @@ function getRoutineEquipmentOperationalFloor(state: GameState, formation: Format
     return timelineDecay?.floor ?? VRS_EQUIPMENT_DECAY_FLOOR;
 }
 
-export function selectBotBrigadeOrderFactions(state: GameState): FactionId[] {
-    const playerFaction = state.meta.headless_scenario_auto_control
-        ? null
-        : state.meta.player_faction ?? null;
-    const assistedExecutionActive = (state.meta.autonomy_level ?? 0) >= 1;
-    return (state.factions ?? [])
-        .map(f => f.id)
-        .filter((fid): fid is FactionId =>
-            playerFaction == null || assistedExecutionActive || fid !== playerFaction
-        )
-        .sort(strictCompare);
-}
 
 function isPlayerHistoricalOperationAssistOperation(
     state: GameState,
@@ -983,6 +1040,26 @@ function hasPlayerHistoricalOperationAssistWork(state: GameState): boolean {
 // ---------------------------------------------------------------------------
 // War-phase step array
 // ---------------------------------------------------------------------------
+
+/**
+ * Rebuild the transient home-distance cache from the current pre-combat
+ * adjacency and the current formation placements. EngineInvariant 13.1 treats
+ * the cache as derived state: segment ratings, movement/spawn/lifecycle and
+ * preparation all run between the end-of-turn rebuild and the next consumer,
+ * so every consumer refreshes it immediately before reading.
+ */
+function refreshHomeDistanceCache(context: TurnContext): void {
+    if (context.state.meta.phase !== 'war') return;
+    const spatial = getSpatialContextCache(context);
+    if (!spatial) return;
+    const adjacency = spatial.preCombat.adjacency as Map<Osid, Osid[]>;
+    const sortedIds = Object.keys(context.state.military.formations ?? {}).sort(strictCompare);
+    context.state.military.home_distance_cache = buildHomeDistanceCache(
+        context.state.military.formations ?? {},
+        adjacency,
+        sortedIds,
+    );
+}
 
 export const warPhases: NamedPhase[] = [
     {
@@ -1137,10 +1214,9 @@ export const warPhases: NamedPhase[] = [
     {
         name: 'update-formation-fatigue',
         run: (context) => {
-            // Apply per-turn recovery first (combat fatigue accumulated during attack resolution).
-            // Pass engaged formation IDs so recovery is blocked for brigades that fought this turn.
-            const engagedIds = new Set<string>(context.report.attack_resolution_osid?.engaged_formation_ids ?? []);
-            applyFatigueRecovery(context.state, engagedIds);
+            // Duty belongs to the state planners and combat will read, even in
+            // explicit fixtures without a settlement supply graph.
+            applyFrontlineDutyFatigue(context.state);
             const edges = context.input.settlementEdges;
             if (!edges) return;
             const derivedFrontEdges = computeFrontEdges(context.state, edges);
@@ -1209,7 +1285,9 @@ export const warPhases: NamedPhase[] = [
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const { dissolveCombatIneffectiveBrigades } = await import('../combat/brigade_dissolution.js');
-            const dissolutionReport = dissolveCombatIneffectiveBrigades(context.state);
+            const edges = await getOrLoadOperationalEdges(context);
+            const adjacency = edges ? buildStaticOsidAdjacency(edges) : undefined;
+            const dissolutionReport = dissolveCombatIneffectiveBrigades(context.state, adjacency);
             if (dissolutionReport.dissolved_count > 0) {
                 context.report.brigade_dissolution = dissolutionReport;
             }
@@ -1272,7 +1350,7 @@ export const warPhases: NamedPhase[] = [
             // Key case: hvo_central_bosnia (available_from:10) — peace-phase activate-corps
             // never runs when scenario starts directly in war phase.
             // Idempotent: skips corps that already exist.
-            const catalog = await loadRecruitmentCatalog();
+            const catalog = await loadRecruitmentCatalog(context.input.dataBaseDir);
             if (!catalog?.corps?.length) return;
             const { activateCorpsForTurn } = await import('../early_war/activate_corps.js');
             activateCorpsForTurn(
@@ -1527,17 +1605,38 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'prestage-deferred-historical-elites',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const spatial = getSpatialContextCache(context);
+            const od = getOperationalData(context);
+            prestageDeferredPrePlannedElites(
+                context.state,
+                spatial?.preCombat.adjacency as Map<Osid, Osid[]> | undefined,
+                od?.opData?.operationalToCanonical,
+            );
+        }
+    },
+    {
         name: 'osid-column-movement',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const od = getOperationalData(context);
             if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
+            const moveSpatial = getSpatialContextCache(context);
+            enforceGuardsEnclaveBoundary(
+                context.state,
+                context.state.meta.turn,
+                moveSpatial?.preCombat.adjacency as Map<Osid, Osid[]> | undefined,
+            );
             let terrainData;
             try {
-                terrainData = await loadTerrainScalars();
+                terrainData = await loadTerrainScalars(turnDataFilePath(context, 'data/derived/terrain/settlements_terrain_scalars.json'));
             } catch {
                 terrainData = { by_sid: {} };
             }
+            const movementAdjacency = moveSpatial?.preCombat.adjacency
+                ?? buildStaticOsidAdjacency(od.edges);
             const report = processOsidColumnMovement(
                 context.state,
                 od.edges,
@@ -1649,9 +1748,13 @@ export const warPhases: NamedPhase[] = [
             const spatial = getSpatialContextCache(context);
             if (!spatial) return;
             const adjacency = spatial.preCombat.adjacency as Map<Osid, Osid[]>;
-            distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency, {
+            const diagnostics = distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency, {
                 population1991ByMun: context.input.municipalityPopulation1991,
+                diagnosticCallsite: 'distribute-brigades-to-front', completedTurn: context.state.meta.turn,
+                invocationOrdinal: nextFrontDistributionInvocationOrdinal(context.report.front_distribution_diagnostics),
             });
+            const mergedDiagnostics = mergeFrontDistributionDiagnostics(context.report.front_distribution_diagnostics, diagnostics);
+            if (mergedDiagnostics) context.report.front_distribution_diagnostics = mergedDiagnostics;
         }
     },
 
@@ -1672,6 +1775,7 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             if (!context.state.military.corps_front_sectors) return;
             const supplyByOsid = context.report?.supply_resolution?.supply_state_by_osid ?? null;
+            refreshHomeDistanceCache(context);
             const ratingReport = computeSectorCombatRatings(context.state, supplyByOsid);
             if (ratingReport.sectors_rated > 0) {
                 context.report.sector_combat_ratings = ratingReport;
@@ -1716,24 +1820,6 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'rear-pocket-consolidation',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            if ((context.state.meta?.turn ?? 0) <= PARAMILITARY_FADE_WEEK) return;
-            const od = getOperationalData(context);
-            if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
-
-            const report = consolidateRearPockets(
-                context.state,
-                od.edges,
-                od.opData.operationalToCanonical,
-            );
-            if (report.total_flipped > 0) {
-                context.report.rear_pocket_consolidation = report;
-            }
-        }
-    },
-    {
         name: 'process-brigade-movement',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -1741,7 +1827,7 @@ export const warPhases: NamedPhase[] = [
             const { edges } = await getGraphAndEdges(context);
             let terrainData;
             try {
-                terrainData = await loadTerrainScalars();
+                terrainData = await loadTerrainScalars(turnDataFilePath(context, 'data/derived/terrain/settlements_terrain_scalars.json'));
             } catch {
                 terrainData = { by_sid: {} };
             }
@@ -1828,22 +1914,24 @@ export const warPhases: NamedPhase[] = [
             // LANE-2026-05-02: build defender terrain multiplier cache (mirrors
             // combat_predictor.buildTerrainCache call shape used elsewhere).
             let terrainMultByOsid: Record<string, number> | undefined;
+            let slopeByOsid: Record<string, number> | undefined;
             const od = getOperationalData(context);
             if (od?.opData?.operationalToCanonical) {
                 let terrainData;
                 try {
-                    terrainData = await loadTerrainScalars();
+                    terrainData = await loadTerrainScalars(turnDataFilePath(context, 'data/derived/terrain/settlements_terrain_scalars.json'));
                 } catch {
                     terrainData = { by_sid: {} };
                 }
                 terrainMultByOsid = buildTerrainCache(od.opData.operationalToCanonical, terrainData);
+                slopeByOsid = buildSlopeByOsid(od.opData.operationalToCanonical, terrainData);
             }
             const staticAdjacency = od?.edges ? buildStaticOsidAdjacency(od.edges) : undefined;
             let openingAttackPredictionContext;
             if (od?.opData?.operationalToCanonical) {
                 let ethnicComposition;
                 try {
-                    const ethnicityData = await loadSettlementEthnicityData();
+                    const ethnicityData = await loadSettlementEthnicityData(turnDataFilePath(context, 'data/derived/settlement_ethnicity_data.json'));
                     ethnicComposition = computeOsidEthnicComposition(
                         od.opData.operationalToCanonical,
                         ethnicityData,
@@ -1856,11 +1944,10 @@ export const warPhases: NamedPhase[] = [
                         ?? staticAdjacency
                         ?? new Map()) as Map<string, string[]>,
                     reverseMap: od.opData.operationalToCanonical,
-                    // Must match generateAllBotOrdersOsid exactly. Preparation's
-                    // separately-loaded terrain cache remains authoritative for
-                    // force-ratio preparation, but launch and brigade orders must
-                    // judge the same tactical attack with the same predictor inputs.
-                    terrainMultByOsid: buildTerrainCache(od.opData.operationalToCanonical),
+                    // Reuse the loaded terrain substrate for preparation, opening
+                    // admission and brigade execution prediction.
+                    terrainMultByOsid: terrainMultByOsid ?? {},
+                    slopeByOsid,
                     supplyStateByOsid: supplyByOsid,
                     osidPopulationMap: context.input.municipalityPopulation1991
                         ? computeOsidPopulation(
@@ -1874,12 +1961,14 @@ export const warPhases: NamedPhase[] = [
                         : undefined,
                 };
             }
+            refreshHomeDistanceCache(context);
             const prepEvents = advanceSectorOffensives(
                 context.state,
                 supplyByOsid,
                 terrainMultByOsid,
                 staticAdjacency,
                 openingAttackPredictionContext,
+                context.completedOperationParticipantIds ??= new Set(),
             );
             if (prepEvents.length > 0) {
                 context.report.preparation_events = prepEvents;
@@ -2092,12 +2181,7 @@ export const warPhases: NamedPhase[] = [
     {
         name: 'compute-home-distance-cache',
         run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const spatial = getSpatialContextCache(context);
-            if (!spatial) return;
-            const adjacency = spatial.preCombat.adjacency as Map<Osid, Osid[]>;
-            const sortedIds = Object.keys(context.state.military.formations ?? {}).sort(strictCompare);
-            context.state.military.home_distance_cache = buildHomeDistanceCache(context.state.military.formations ?? {}, adjacency, sortedIds);
+            refreshHomeDistanceCache(context);
         }
     },
     {
@@ -2340,9 +2424,10 @@ export const warPhases: NamedPhase[] = [
         name: 'evaluate-army-hq-gathering',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
+            const botFactions = new Set(selectBotBrigadeOrderFactions(context.state));
             const factions: FactionId[] = ['RS', 'RBiH', 'HRHB'];
             for (const faction of factions) {
-                if (faction === context.state.meta.player_faction) continue;
+                if (!botFactions.has(faction)) continue;
                 evaluateArmyHQGathering(context.state, faction, context.state.meta.turn);
             }
         },
@@ -2456,7 +2541,7 @@ export const warPhases: NamedPhase[] = [
             let corpsEthnicMap;
             if (od?.opData?.operationalToCanonical) {
                 try {
-                    const ethnicityData = await loadSettlementEthnicityData();
+                    const ethnicityData = await loadSettlementEthnicityData(turnDataFilePath(context, 'data/derived/settlement_ethnicity_data.json'));
                     corpsEthnicMap = computeOsidEthnicComposition(od.opData.operationalToCanonical, ethnicityData);
                 } catch {
                     // Non-fatal: ethnic intelligence is a bonus, not a requirement
@@ -2465,9 +2550,21 @@ export const warPhases: NamedPhase[] = [
             const corpsReport: CorpsAiReportEntry[] = [];
             const corpsSpatial = getSpatialContextCache(context);
             const corpsAdjacency = corpsSpatial?.preCombat.adjacency;
+            const corpsOsidPopulationMap = reverseMap && context.input.municipalityPopulation1991
+                ? computeOsidPopulation(reverseMap, context.input.municipalityPopulation1991)
+                : undefined;
+            // Terrain scalars for the P-A time-bounded participant-admission check: the creator
+            // must estimate column transit with the same terrain-weighted model the execution
+            // step uses. Non-fatal — falls back to default terrain.
+            let corpsTerrainData;
+            try {
+                corpsTerrainData = await loadTerrainScalars(turnDataFilePath(context, 'data/derived/terrain/settlements_terrain_scalars.json'));
+            } catch {
+                corpsTerrainData = { by_sid: {} };
+            }
             for (const faction of factions) {
                 const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
-                generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges, supplyByOsid, corpsEthnicMap, corpsAdjacency, corpsSpatial?.preCombat);
+                generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges, supplyByOsid, corpsEthnicMap, corpsAdjacency, corpsSpatial?.preCombat, corpsOsidPopulationMap, corpsTerrainData);
                 corpsReport.push(...extractCorpsAiReport(context.state, faction));
             }
             if (corpsReport.length > 0) {
@@ -2652,7 +2749,7 @@ export const warPhases: NamedPhase[] = [
                 // Load ethnic composition data for co-ethnic attack/defend scoring
                 let ethnicCompositionByOsid;
                 try {
-                    const ethnicityData = await loadSettlementEthnicityData();
+                    const ethnicityData = await loadSettlementEthnicityData(turnDataFilePath(context, 'data/derived/settlement_ethnicity_data.json'));
                     ethnicCompositionByOsid = computeOsidEthnicComposition(od.opData.operationalToCanonical, ethnicityData);
                 } catch {
                     // Non-fatal: ethnic scoring is a bonus, not a requirement
@@ -2661,7 +2758,14 @@ export const warPhases: NamedPhase[] = [
                     ? computeOsidPopulation(od.opData.operationalToCanonical, context.input.municipalityPopulation1991)
                     : undefined;
                 const spatialCache = getSpatialContextCache(context);
+                let botTerrainData: Awaited<ReturnType<typeof loadTerrainScalars>>;
+                try {
+                    botTerrainData = await loadTerrainScalars(turnDataFilePath(context, 'data/derived/terrain/settlements_terrain_scalars.json'));
+                } catch {
+                    botTerrainData = { by_sid: {} };
+                }
                 const osidCtx: OsidBotContext = {
+                    terrainData: botTerrainData,
                     edges: od.edges,
                     reverseMap: od.opData.operationalToCanonical,
                     adjacency: spatialCache?.preCombat.adjacency,
@@ -2941,11 +3045,17 @@ export const warPhases: NamedPhase[] = [
         name: 'resolve-attack-orders',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
+            const attackSpatial = getSpatialContextCache(context);
+            enforceGuardsEnclaveBoundary(
+                context.state,
+                context.state.meta.turn,
+                attackSpatial?.preCombat.adjacency as Map<Osid, Osid[]> | undefined,
+            );
             const od = getOperationalData(context);
             if (od?.opData?.operationalToCanonical && od?.edges?.length) {
                 let terrainData: Awaited<ReturnType<typeof loadTerrainScalars>> | undefined;
                 try {
-                    terrainData = await loadTerrainScalars();
+                    terrainData = await loadTerrainScalars(turnDataFilePath(context, 'data/derived/terrain/settlements_terrain_scalars.json'));
                 } catch {
                     terrainData = { by_sid: {} };
                 }
@@ -2955,14 +3065,13 @@ export const warPhases: NamedPhase[] = [
                 // Ethnic composition for homeland defense bonus in combat resolution
                 let ethnicComp;
                 try {
-                    const ethnicityData = await loadSettlementEthnicityData();
+                    const ethnicityData = await loadSettlementEthnicityData(turnDataFilePath(context, 'data/derived/settlement_ethnicity_data.json'));
                     ethnicComp = computeOsidEthnicComposition(od.opData.operationalToCanonical, ethnicityData);
                 } catch {
                     // Non-fatal: ethnic defense bonus simply not applied
                 }
                 // Control events are persisted for the full game — no trimming.
                 // They feed the settlement timeline ("The Story of This Place").
-                const attackSpatial = getSpatialContextCache(context);
                 context.report.attack_resolution_osid = resolveAttackOrdersOsid(
                     context.state,
                     od.edges,
@@ -2996,7 +3105,7 @@ export const warPhases: NamedPhase[] = [
 
             let terrainData;
             try {
-                terrainData = await loadTerrainScalars();
+                terrainData = await loadTerrainScalars(turnDataFilePath(context, 'data/derived/terrain/settlements_terrain_scalars.json'));
             } catch {
                 terrainData = { by_sid: {} };
             }
@@ -3006,6 +3115,15 @@ export const warPhases: NamedPhase[] = [
             context.report.resolve_attack_orders = resolveAttackOrders(
                 context.state, edges, terrainData, settlementToMun
             );
+        }
+    },
+    {
+        name: 'recover-formation-fatigue',
+        run: (context) => {
+            // Current-turn engagements exist only after the actual battle consumer.
+            // Duty already ran before planning; preserve the exact-once battle fatigue owner.
+            const engagedIds = new Set(context.report.attack_resolution_osid?.engaged_formation_ids ?? []);
+            applyFatigueRecovery(context.state, engagedIds);
         }
     },
     {
@@ -3168,7 +3286,11 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             const engagedIds = context.report.attack_resolution_osid?.engaged_formation_ids ?? [];
-            context.report.cohesion_drift_report = runCohesionDrift(context.state, engagedIds);
+            context.report.cohesion_drift_report = runCohesionDrift(
+                context.state,
+                engagedIds,
+                context.report.stranded_brigade_lifecycle?.still_holding ?? [],
+            );
         }
     },
     {
@@ -3207,7 +3329,9 @@ export const warPhases: NamedPhase[] = [
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const { dissolveCombatIneffectiveBrigades } = await import('../combat/brigade_dissolution.js');
-            const dissolutionReport = dissolveCombatIneffectiveBrigades(context.state);
+            const edges = await getOrLoadOperationalEdges(context);
+            const adjacency = edges ? buildStaticOsidAdjacency(edges) : undefined;
+            const dissolutionReport = dissolveCombatIneffectiveBrigades(context.state, adjacency);
             if (dissolutionReport.dissolved_count > 0) {
                 // Merge into existing dissolution report if present
                 const existing = context.report.brigade_dissolution;
@@ -3410,7 +3534,7 @@ export const warPhases: NamedPhase[] = [
             const recruited_by_faction: Record<FactionId, number> = {} as Record<FactionId, number>;
             for (const factionId of factions) recruited_by_faction[factionId] = 0;
 
-            const catalog = await loadRecruitmentCatalog();
+            const catalog = await loadRecruitmentCatalog(context.input.dataBaseDir);
             if (catalog) {
                 const opDataCache = getOperationalData(context);
                 const recruitmentContext = buildRecruitmentContext(
@@ -3496,7 +3620,7 @@ export const warPhases: NamedPhase[] = [
         name: 'reroute-pool-surplus',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const catalog = await loadRecruitmentCatalog();
+            const catalog = await loadRecruitmentCatalog(context.input.dataBaseDir);
             if (!catalog?.brigades?.length) return;
             const activeIds = new Set(Object.keys(context.state.military.formations ?? {}));
             for (const faction of ['HRHB', 'RBiH', 'RS'] as const) {
@@ -3539,6 +3663,7 @@ export const warPhases: NamedPhase[] = [
                 historicalNameLookup: context.input.historicalNameLookup ?? undefined,
                 historicalCorpsLookup: context.input.historicalCorpsLookup ?? undefined,
                 historicalOobIdLookup: context.input.historicalOobIdLookup ?? undefined,
+                historicalEquipmentClassLookup: context.input.historicalEquipmentClassLookup ?? undefined,
                 population1991ByMun: context.input.municipalityPopulation1991 ?? undefined,
                 canonicalToOperational
             }, getSiegeStateCache(context)?.siegeRatios);
@@ -4407,19 +4532,8 @@ export function recallDriftedBrigades(state: GameState, adjacency?: Map<string, 
     const pc = (state.political.political_controllers ?? {}) as Record<string, string>;
     const moveOrders = state.military.brigade_movement_orders ??= {};
 
-    for (const [fid, order] of Object.entries(moveOrders)) {
-        const formation = formations[fid];
-        const dest = order?.destination_sids?.[0];
-        if (!formation || !dest || !formation.faction) continue;
-        const controller = pc[dest];
-        if (controller != null && controller !== formation.faction) {
-            delete moveOrders[fid];
-        }
-    }
-
-    if (!adjacency || adjacency.size === 0) return;
-
-    // Build set of brigades in active operations
+    // Operation-backed movement has higher precedence than drift cleanup. Build this
+    // before validating destinations because column movement runs next turn.
     const inOp = new Set<string>();
     const corpsCmd = state.military.corps_command ?? {};
     for (const cmd of Object.values(corpsCmd)) {
@@ -4432,6 +4546,22 @@ export function recallDriftedBrigades(state: GameState, adjacency?: Map<string, 
             }
         }
     }
+
+    for (const [fid, order] of Object.entries(moveOrders)) {
+        const formation = formations[fid];
+        const dest = order?.destination_sids?.[0];
+        if (!formation || !dest || !formation.faction) continue;
+        const controller = pc[dest];
+        const preservesAlliedOperationMarch = controller != null
+            && controller !== formation.faction
+            && inOp.has(fid)
+            && isFriendlyFaction(controller, formation.faction, state);
+        if (controller != null && controller !== formation.faction && !preservesAlliedOperationMarch) {
+            delete moveOrders[fid];
+        }
+    }
+
+    if (!adjacency || adjacency.size === 0) return;
 
     const adj = adjacency;
 
@@ -4449,6 +4579,16 @@ export function recallDriftedBrigades(state: GameState, adjacency?: Map<string, 
         if (f.kind !== 'brigade' && f.kind !== 'og') continue;
         if (!f.home_osid || !f.location_osid) continue;
         if (f.home_osid === f.location_osid) continue;
+        const transit = state.military.brigade_movement_state?.[fid];
+        if (transit?.status === 'in_transit' && transit.owner === 'authored_preplanned') {
+            const order = moveOrders[fid];
+            if (order && order.owner !== 'authored_preplanned'
+                && order.destination_sids?.[0] !== transit.destination_sids?.[0]) {
+                delete moveOrders[fid];
+            }
+            continue;
+        }
+        if (moveOrders[fid]?.owner === 'authored_preplanned') continue;
         if (inOp.has(fid)) continue;
         if ((f.disrupted_turns ?? 0) > 0) continue;
         if (sectorOwned.has(fid) || f.assignment?.kind === 'sector') {

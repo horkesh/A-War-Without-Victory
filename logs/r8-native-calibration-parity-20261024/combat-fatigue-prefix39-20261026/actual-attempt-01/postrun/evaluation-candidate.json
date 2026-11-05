@@ -1,0 +1,89 @@
+{
+  "schema": "awwv.scenario-postturn-prefix39.canonical-jan-adapter.v2",
+  "label": "candidate",
+  "source": {
+    "path": "tmp/player-bot-capability-parity-20261024/policy-clean-validation/evaluate_candidate.cjs",
+    "checkpoint_excerpt_sha256": "6a19943b3419ea8fcd505f5fdbfe8b1435905a69d1d3f5072b3494d43f6e70d6",
+    "control_fixture_manifest_sha256": "60814b13684919e58b877e717ad50ff0d4b888f7342c0c6d02b4672a50d5a079"
+  },
+  "turn": 39,
+  "denominator": 712,
+  "floor": 707,
+  "score": 703,
+  "against": {
+    "n91": {
+      "formerly_correct": 707,
+      "lost": [
+        {
+          "id": "op:donji_vakuf:korenici",
+          "baseline": "RS",
+          "candidate": "RBiH",
+          "expected": "RS"
+        },
+        {
+          "id": "op:foca:donje_zesce",
+          "baseline": "RBiH",
+          "candidate": "RS",
+          "expected": "RBiH"
+        },
+        {
+          "id": "op:gorazde:kolovarice",
+          "baseline": "RS",
+          "candidate": "RBiH",
+          "expected": "RS"
+        },
+        {
+          "id": "op:trnovo:tosici",
+          "baseline": "RBiH",
+          "candidate": "RS",
+          "expected": "RBiH"
+        }
+      ]
+    },
+    "n92": {
+      "formerly_correct": 707,
+      "lost": [
+        {
+          "id": "op:donji_vakuf:korenici",
+          "baseline": "RS",
+          "candidate": "RBiH",
+          "expected": "RS"
+        },
+        {
+          "id": "op:foca:donje_zesce",
+          "baseline": "RBiH",
+          "candidate": "RS",
+          "expected": "RBiH"
+        },
+        {
+          "id": "op:gorazde:kolovarice",
+          "baseline": "RS",
+          "candidate": "RBiH",
+          "expected": "RS"
+        },
+        {
+          "id": "op:trnovo:tosici",
+          "baseline": "RBiH",
+          "candidate": "RS",
+          "expected": "RBiH"
+        }
+      ]
+    }
+  },
+  "n91_losses": 4,
+  "n92_losses": 4,
+  "n91_lost_osids": [
+    "op:donji_vakuf:korenici",
+    "op:foca:donje_zesce",
+    "op:gorazde:kolovarice",
+    "op:trnovo:tosici"
+  ],
+  "n92_lost_osids": [
+    "op:donji_vakuf:korenici",
+    "op:foca:donje_zesce",
+    "op:gorazde:kolovarice",
+    "op:trnovo:tosici"
+  ],
+  "pass": false,
+  "later_horizons_evaluated": false
+}

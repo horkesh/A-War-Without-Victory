@@ -1,0 +1,16 @@
+{
+  "writes_closed": true,
+  "scope": "Administrative removal of one surplus terminal blank line only. Exact reviewed bytes archived before edit; all non-terminal-whitespace bytes identical. No semantic implementation/review change.",
+  "path": "tools/diagnostics/reinforcement_allocation_reader.cjs",
+  "before": {
+    "bytes": 20532,
+    "sha256": "9739fe2e8ff59d2cf1896b9c177c3a6ac9ef1c84e9c03c2097da44f523c10840"
+  },
+  "after": {
+    "bytes": 20531,
+    "sha256": "bf1e94e52c2efb447041161fa6e14de2d078f2177d7392209344acc746c71c86"
+  },
+  "syntax_exit": 0,
+  "review_reused": "811-correction-verification at unchanged non-whitespace bytes",
+  "cause": "812-preserve-a staged whitespace check exited2; no commit or push reached. Wrapper126 also records expected later artifacts absent after stop."
+}

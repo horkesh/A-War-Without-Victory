@@ -530,4 +530,60 @@ describe('SettlementDetailContent supply status surface', () => {
     expect(screen.getByText('Pre-war ethnic structure')).toBeTruthy();
     expect(screen.queryByText('Current ethnic structure')).toBeNull();
   });
+
+  it('renders the full localized brigade name with natural wrapping while preserving drilldown identity', () => {
+    setLocale('en');
+    const onFormationClick = vi.fn();
+    render(createElement(SettlementDetailContent, {
+      ...BASE_PROPS,
+      formationsAtOsid: [{
+        id: 'bde_kralj_petar_kresimir_iv',
+        faction: 'HRHB',
+        name: 'Kralj Petar Krešimir IV Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        personnel: 1_250,
+        cohesion: 80,
+      }],
+      onFormationClick,
+    }));
+
+    const name = screen.getByText('Kralj Petar Krešimir IV Brigade');
+    expect(name.textContent).toBe('Kralj Petar Krešimir IV Brigade');
+    expect(name.className).not.toContain('truncate');
+    expect(name.className).toMatch(/break-words|whitespace-normal/);
+    expect(name.parentElement?.className).toContain('min-w-0');
+
+    // Readiness, personnel chip/metric and drilldown identity survive the wrap repair.
+    expect(screen.getByText('1.3k')).toBeTruthy();
+    const row = screen.getByRole('button', { name: /Kralj Petar Krešimir IV Brigade/i });
+    expect(row.getAttribute('type')).toBe('button');
+    fireEvent.click(row);
+    expect(onFormationClick).toHaveBeenCalledTimes(1);
+    expect(onFormationClick).toHaveBeenCalledWith('bde_kralj_petar_kresimir_iv');
+  });
+
+  it('keeps a long localized brigade name complete and noninteractive without a click handler', () => {
+    setLocale('en');
+    render(createElement(SettlementDetailContent, {
+      ...BASE_PROPS,
+      formationsAtOsid: [{
+        id: 'bde_kralj_petar_kresimir_iv',
+        faction: 'HRHB',
+        name: 'Kralj Petar Krešimir IV Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        personnel: 1_250,
+        cohesion: 80,
+      }],
+    }));
+
+    const name = screen.getByText('Kralj Petar Krešimir IV Brigade');
+    expect(name.textContent).toBe('Kralj Petar Krešimir IV Brigade');
+    expect(name.className).not.toContain('truncate');
+    expect(name.className).toMatch(/break-words|whitespace-normal/);
+    expect(name.closest('button')).toBeNull();
+    expect(name.closest('[role="button"]')).toBeNull();
+    expect(screen.queryByRole('button', { name: /Kralj Petar Krešimir IV Brigade/i })).toBeNull();
+  });
 });

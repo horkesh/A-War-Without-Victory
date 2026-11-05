@@ -542,10 +542,8 @@ describe('sector-partition instrumentation — env-flag gating', () => {
             'ensureMinimumSectorCoverage:severe-rescue:severe-relief',
             'ensureMinimumSectorCoverage:territory-claim-rescue',
             'ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned',
+            'ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:promote-rear',
             'ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:promote-reserve',
-            'ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:pull-rear',
-            'ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:pull-reserve',
-            'ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:transfer-surplus',
             'ensureMinimumSectorCoverage:territory-claim-rescue:zero-front',
         ];
 
@@ -651,11 +649,17 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(endIdx).toBeGreaterThan(startIdx);
 
         const region = raw.slice(startIdx, endIdx);
+        const normalized = region.replace(/\s+/g, ' ');
+        // The eligibility guard is part of the reviewed correctness contract, not a
+        // performance waiver: both origin and neighbor candidates must pass it.
+        expect(normalized).toContain('eligibility?: (target: string) => boolean');
+        expect(normalized).toContain('vacantTargets.has(formation.location_osid) && (!eligibility || eligibility(formation.location_osid))');
+        expect(normalized).toContain('vacantTargets.has(neighbor) && (!eligibility || eligibility(neighbor))');
         expect(region).toContain('const vacantTargets = new Set<string>();');
         expect(region).toContain('for (const target of sectorFrontOsids) {');
-        expect(region).toContain('if (vacantTargets.has(formation.location_osid)) {');
+        expect(normalized).toContain('if (vacantTargets.has(formation.location_osid) && (!eligibility || eligibility(formation.location_osid))) {');
         expect(region).toContain('for (let dist = 1; dist <= maxHops; dist++) {');
-        expect(region).toContain('if (vacantTargets.has(neighbor)) {');
+        expect(normalized).toContain('if (vacantTargets.has(neighbor) && (!eligibility || eligibility(neighbor))) {');
         expect(region).toContain('candidates.sort(strictCompare);');
         expect(region).not.toContain('.filter((target)');
         expect(region).not.toContain('.map((target)');
@@ -670,14 +674,21 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(endIdx).toBeGreaterThan(startIdx);
 
         const region = raw.slice(startIdx, endIdx);
+        const normalized = region.replace(/\s+/g, ' ');
         expect(raw).toContain('const pickVacantLocalFrontTargetFromFrontSet = (');
         // Front-OSID lookup routes through the per-invocation `frontOsidsFor(...)`
         // memoization boundary. Both accepted occupancy strategies share this
         // read-only lookup; only their active-formation counting differs.
         expect(region).toContain('const sectorFrontOsids = frontOsidsFor(sector);');
-        expect(region).toContain('const sameComponentDonors = corpsSectors');
         expect(region).toContain('const activeCounts = freshActiveCounts();');
-        expect(region).toContain('pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, activeCounts)');
+        expect(region).toContain('Empty-sector relief belongs to T1 intent -> T2 column');
+        expect(region).toContain('continue;');
+        const callStarts = normalized.match(/pickVacantLocalFrontTargetFromFrontSet\(/g) ?? [];
+        const guardedCalls = normalized.match(
+            /pickVacantLocalFrontTargetFromFrontSet\( bid, sectorFrontOsids, activeCounts, LOCAL_FRONT_RELIEF_MAX_HOPS, \(candidate\) => targetPreservesHomeDistance\(bid, candidate\), \)/g,
+        ) ?? [];
+        expect(callStarts.length).toBeGreaterThan(0);
+        expect(guardedCalls.length).toBe(callStarts.length);
         expect(region).toContain('moveBrigadeToFrontTarget(bid, target, activeCounts);');
         expect(region).not.toContain('stepActiveCounts');
         expect(region).not.toContain('moveBrigadeToFrontTarget(bid, target, countActiveBrigadesByOsid');

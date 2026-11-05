@@ -1,0 +1,45 @@
+{
+  "schema": "awwv.eof-format-addendum.v1",
+  "verdict": "GO",
+  "path": "tests/pre_first_advance_paramilitary_policy.test.ts",
+  "before": {
+    "path": "tmp/player-bot-capability-parity-20261024/root/policy-test-before-eof-format.ts",
+    "sha256": "a6f66ba823871b72bac3ccabee5ccca36d59b845d63a7394898476dee96feae1",
+    "bytes": 20282
+  },
+  "after": {
+    "sha256": "d6a1eec5caeeef79380ac38a1f238c33e6721a916250e81b9489a38e31054c6a",
+    "bytes": 20280
+  },
+  "byte_comparison": {
+    "all_current_bytes_match_preserved_prefix": true,
+    "removed_suffix_hex": "0a0a",
+    "ordinary_final_lf_retained": true,
+    "nontrailing_changes": 0
+  },
+  "correction_record": {
+    "path": "tmp/player-bot-capability-parity-20261024/root/STARTUP_EOF_FORMAT_CORRECTION.json",
+    "sha256": "5f0a9ed7584d7a677a0ee84cc0446f006fd2cc229dae4c5bde4818abc5b93419"
+  },
+  "scoped_staged_diff_check": {
+    "paths": [
+      "src",
+      "docs",
+      "tests"
+    ],
+    "exit": 0
+  },
+  "semantic_delta": false,
+  "rerun_required": false,
+  "reused_checks": [
+    "94/94 focused",
+    "TypeScript 0/0"
+  ],
+  "excluded_claims": [
+    "campaign",
+    "build",
+    "native",
+    "baseline",
+    "calibration"
+  ]
+}

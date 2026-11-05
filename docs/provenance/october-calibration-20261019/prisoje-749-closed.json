@@ -1,0 +1,27 @@
+{
+  "schema": "awwv.749.closed-receipt.correction.v1",
+  "writes_closed": true,
+  "verdict": "PASS_EXACT_CLONED_N80_SAVE184_PREFIX__ABB_TRANSIT_FIRST_REMOVED_AT_T6__BOT_WRITES_JAJCE3",
+  "result": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/749-correction-seal-c/result.json",
+    "bytes": 12956,
+    "sha256": "25614deb57a22679071129a44cfbe9702806c9c080385f53a6ed074076fdb64a"
+  },
+  "inventory": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/749-correction-seal-c/inventory.json",
+    "bytes": 16497,
+    "sha256": "c3a856f92fe9dd2e8eb03158e9275c12332d82fb2e40973e741d621b57679262"
+  },
+  "checks": {
+    "diff_only_test": true,
+    "diff_check": true,
+    "original_seal_exact": true,
+    "test_before_image_exact": true,
+    "actor_identity_exact": true,
+    "protected_3_exact": true,
+    "native_31_exact": true,
+    "receipt_count_179": true,
+    "C_prefix_archived_and_append_retained": true,
+    "D_exact": true
+  }
+}

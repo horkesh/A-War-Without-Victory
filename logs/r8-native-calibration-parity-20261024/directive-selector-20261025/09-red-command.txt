@@ -1,0 +1,1 @@
+npx vitest run tests/op_directive_objection.test.ts -t "selects only objective-legal brigades connected to staging and remains JSON-pure" --reporter=dot

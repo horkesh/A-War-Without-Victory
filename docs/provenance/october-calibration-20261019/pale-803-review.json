@@ -1,0 +1,120 @@
+{
+  "schema": "awwv.803.pale-allocation-review.v1",
+  "captured_utc": "2026-10-22T05:45:10.102Z",
+  "head": "ad8789c2ca5c66064a5b7b2cb596fa917f91f93b",
+  "verdict": "ACCEPT_NO_PROVEN_ENGINE_DEFECT_RETAINED_N80_ASSIGNMENT_BOUNDARY_MISSING",
+  "findings": [],
+  "accepted": true,
+  "evidence": {
+    "worker": {
+      "json_path": "logs/claude-channel-20261004/802-extract-b/802-result.json",
+      "json_sha256": "d6d7e444a0a0b0713332916cf158169cff0941443cfd744dcc7ceddda15b21d9",
+      "markdown_path": "logs/claude-channel-20261004/802-extract-b/802-result.md",
+      "markdown_sha256": "3e1cdc1d92ab79550ee532be1134e1c768954ab99341aedcf80f27d331ce9b70",
+      "manifest_path": "logs/claude-channel-20261004/802-seal-a/802-final-manifest.json",
+      "manifest_sha256": "b11700d31435fc0c9608695b2c8f4ccd306ae4cbf3fcff7f8188a52de92eb3e0",
+      "manifest_entries_verified": 15
+    },
+    "actual_counts": {
+      "n80_weekly_records": 188,
+      "n80_temporal_records": 45229,
+      "n83_temporal_records_independently_counted_before_failed_harness_gate": 45220,
+      "n80_weekly_battles_key_positive_control": 162,
+      "n80_temporal_brigade_id_positive_control": 45229,
+      "n80_temporal_personnel_positive_control": 45229,
+      "n80_target_turn21_22_rows": 2,
+      "n80_native_direct_writer_fields": 0,
+      "n80_retained_save_snapshots": 16
+    },
+    "first_measured_target_divergence": {
+      "turn": 22,
+      "n80": 1405,
+      "n83": 1516
+    },
+    "n83_actual_direct_writer": {
+      "stdout_line": 10082,
+      "after": 1516,
+      "available": 111,
+      "before": 1405,
+      "branch": "regular",
+      "cap": 2200,
+      "completed_turn": 22,
+      "event": "writer",
+      "formation_id": "rs_4th_sarajevo_light_infantry",
+      "need": 400,
+      "pool_key": "pale:RS",
+      "rate": 400,
+      "schema_version": 1,
+      "source": "formation_spawn.reinforce",
+      "transfer": 111
+    },
+    "source_semantics": "The regular loop uses strict sorted brigade IDs, then eligibility/cap/pool guards, effective available=max(0,pool.available-reserveForSpawn), transfer=min(need,effective), and immediate pool debit.",
+    "reserve_boundary": "The retained writer field available=111 is effective availability at rs4 evaluation. The static always-active spawn directive does not resolve the dynamic emergent-suppression/headroom predicates. No retained turn21/22 snapshot or reserve field binds them, so raw opening availability and reserve=0 remain unproven.",
+    "absence_scope": "Only the retained n80 weekly_report, brigade_temporal_log, and run_summary schemas, with the stated positive controls; this is not a global absence claim.",
+    "protected_pins_verified": [
+      {
+        "path": "data/calibration/engine_health_thresholds.json",
+        "bytes": 3775,
+        "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d"
+      },
+      {
+        "path": "data/source/calibration/painted_control_oct1995.json",
+        "bytes": 35266,
+        "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b"
+      },
+      {
+        "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+        "bytes": 102947714,
+        "sha256": "edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9"
+      },
+      {
+        "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+        "bytes": 1041,
+        "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+      }
+    ]
+  },
+  "review_harness_failures": {
+    "retained": true,
+    "attempts": [
+      {
+        "attempt": "803-review-a",
+        "child_exit": 1,
+        "wrapper_exit": 126,
+        "stderr_sha256": "bf2872cdd365d1253b7c8f755438855459e880384a3b9fcb11499617df2b7866",
+        "receipt_sha256": "e4c300a1576cf5fe523540c8449edc64448b219759b43775cee8a5cf5db4e52d"
+      },
+      {
+        "attempt": "803-review-b",
+        "child_exit": 1,
+        "wrapper_exit": 126,
+        "stderr_sha256": "0551a8c88b72f3e4a4c2b59f95c16400a830f6048898365d0863196821aa0e76",
+        "receipt_sha256": "5211c64078ffde6305a17230b6414a838f4f881b25be15a9bd5694a4a444f7fb"
+      },
+      {
+        "attempt": "803-review-c",
+        "child_exit": 1,
+        "wrapper_exit": 126,
+        "stderr_sha256": "cb85845eb941679f758349e2599335045fb5b06c337c5d44f09c201fe4400a3b",
+        "receipt_sha256": "110feaccbd40a9e349adb13544535aa89350edd83bd4ad4b9a8c5000a8a87aa7"
+      },
+      {
+        "attempt": "803-finalize-a",
+        "child_exit": 1,
+        "wrapper_exit": 126,
+        "stderr_sha256": "fa24919332a7fce812854d04e162c4bfdef0b789ab599e505b0b9cbebbee1a4c",
+        "receipt_sha256": "b0524c0f9533bf44cdbecb11f571c3858b2b5663132f8c123e73b3f6655a9351"
+      }
+    ],
+    "classification": "local assertion-shape errors: n83 count assumption, battle-array sum vs field occurrence, combined-schema positive-control scope, then worker snapshot representation; none contradicts the substantive retained evidence"
+  },
+  "assessment": "No material finding. The worker correctly avoids converting the n80 endpoint into a zero-transfer claim. Earlier legal sorted consumers, reserve, eligibility, and pool mutations remain unbound at the historical n80 assignment boundary, so there is no proven engine defect and no justified gameplay fix.",
+  "recommendation": "If separately authorized, add only a deterministic source-level fixture or observer recording raw opening pool, reserve, every ordered recipient plus eligibility/skip reason, effective availability, transfer, and closing pool. This would validate current algorithm behavior but cannot retroactively close dirty-source n80 causality. Do not alter gameplay, thresholds, telemetry, force zero transfer, or start a new campaign.",
+  "invocations": {
+    "campaigns": 0,
+    "replays": 0,
+    "runTurn": 0,
+    "full_suites": 0
+  },
+  "pass": true
+}

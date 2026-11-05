@@ -1,0 +1,98 @@
+{
+  "schema": "awwv.cold-load-validation.preservation-closing.v2",
+  "match": true,
+  "head": "12a4680f04fc3e4cbd8b2fb5f5133b472afd1fd6",
+  "configSha256": "3440441d753e47827dd0ab0f8075719668bedffcdbb75415b0ad2ecb42b2ee56",
+  "preflightReceiptSha256": "70fd1f4c320fc1ac340b86a7fe4ef9983c49905df3baa01e667864c302f5c89a",
+  "openingSha256": "279d1be95d25c3d7de9fa5ab1fd0f7210f31a2d2806450da5c54e458d9cb311a",
+  "packageReceiptSha256": "28e5fc15644482c6ad8abc42cb66e47868e765f15140f7ecaf8561b9ecc5723e",
+  "packageBindingSha256": "d336895a95e03be095ae76e7b654d152beae008ce93497a48ad8bb6cdf78051b",
+  "compareReceiptSha256": "fcd4813b151c8ec9033588c5971354acd1781ac374350384f17c6bc45576b489",
+  "comparisonSha256": "a34e490b4aaceb3926b8988b5084f8c9c03aa55fc405de7e2d617d48d9f0acdc",
+  "roots": [
+    {
+      "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n91",
+      "count": 31,
+      "bytes": 211174391,
+      "aggregateSha256": "fac9375f265a3c89478766a7a1f9bafcc10a73d403f98d741de4b8a3892d1c32"
+    },
+    {
+      "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n92",
+      "count": 38,
+      "bytes": 262006649,
+      "aggregateSha256": "285d5ebd24062dd4150674022a5ec2837851fc2673fe755f9671d86d3b96bc90"
+    },
+    {
+      "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n93",
+      "count": 40,
+      "bytes": 270873605,
+      "aggregateSha256": "3bd2bc44aec4a405dc52fcef428fae9de03122f382f79644b35db9b13f5c54f1"
+    },
+    {
+      "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n94",
+      "count": 40,
+      "bytes": 270873606,
+      "aggregateSha256": "11fdee36fc76f13395cc631edbe160d0b2ea2461aebe0352de74a37bbfd0c699"
+    },
+    {
+      "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n95",
+      "count": 40,
+      "bytes": 270873606,
+      "aggregateSha256": "18dcbcc47c05c4d2e746e1c04b7ba48d99ea793b596c5c929cd66880447affcd"
+    },
+    {
+      "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n96",
+      "count": 40,
+      "bytes": 270873606,
+      "aggregateSha256": "1672efa42319ade7ae97e56f7e5effaa898b658657f31047459e6b7c3ba6f031"
+    },
+    {
+      "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n97",
+      "count": 40,
+      "bytes": 270873606,
+      "aggregateSha256": "9489fc50f21ff336d399ae0053af6c839417e8389171617dee43ec2cb3a7580a"
+    },
+    {
+      "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n98",
+      "count": 40,
+      "bytes": 270873606,
+      "aggregateSha256": "3e6b7c3899bf722697c96c9f0abe25a1e9834d4b8cb117840c5b3dd0bafe454f"
+    },
+    {
+      "root": "tmp/player-bot-capability-parity-20261024",
+      "count": 28491,
+      "bytes": 3855127337,
+      "aggregateSha256": "8bd384e344ac8780f33fb891d29ef89cdeb9719bd4bd3de78f026b7a9f377486"
+    },
+    {
+      "root": "tmp-paradox-qa-20260710/evidence",
+      "count": 444,
+      "bytes": 1805930369,
+      "aggregateSha256": "1de23cd5eb3ed382701e1e54b66deb4a39a002d8add0793b82e812c63337ea4b"
+    },
+    {
+      "root": "tmp-paradox-qa-20260710/user-data",
+      "count": 4295,
+      "bytes": 1342715725,
+      "aggregateSha256": "d44284edaf12ac3c5477f42d7bfd0fcc3a34d0aaf84d932e739548b02d4cd75e"
+    },
+    {
+      "root": "tmp-paradox-qa-20260710/main-process-output",
+      "count": 25,
+      "bytes": 946148,
+      "aggregateSha256": "73eeaae53106898b1c071418fdf8f5521ba9ea3bfd27fcc91d8f081e3e0fbb48"
+    },
+    {
+      "root": "tmp-paradox-qa-20260710/save-menu-inspection-payloads",
+      "count": 132,
+      "bytes": 185591760,
+      "aggregateSha256": "a65e3973ecd3683851603e2c4885c0948eae7f168a3b8911565dde8d2c154ac5"
+    },
+    {
+      "root": "dist-packaged/desktop-terrain-prerequisite-20261025-01",
+      "count": 1229,
+      "bytes": 1968456790,
+      "aggregateSha256": "e1aaacb2ca62b2fe3f604b9701f404cf5ba702e105d44d8a67ddf6edda4507a5"
+    }
+  ]
+}

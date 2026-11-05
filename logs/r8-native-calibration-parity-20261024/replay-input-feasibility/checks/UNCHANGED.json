@@ -1,0 +1,82 @@
+[
+  {
+    "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\data\\derived\\_debug\\c_lane_corps_directive_telemetry.jsonl",
+    "bytes": 123007933,
+    "sha256": "b6abcbe9523fe1d07694684ff5a0e61d69505a70958dab3c3383d5da30d4fb54",
+    "currentBytes": 123007933,
+    "currentSha256": "b6abcbe9523fe1d07694684ff5a0e61d69505a70958dab3c3383d5da30d4fb54",
+    "pass": true
+  },
+  {
+    "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\data\\derived\\_debug\\d_lane_persona_decisions.jsonl",
+    "bytes": 1041,
+    "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+    "currentBytes": 1041,
+    "currentSha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+    "pass": true
+  },
+  {
+    "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tools\\ui\\paradox_local_qa.cjs",
+    "bytes": 343860,
+    "sha256": "e47dce360ea538ccdae4fff4cc183d4c6166c64c4dd7f46585db285fc9ab6086",
+    "currentBytes": 343860,
+    "currentSha256": "e47dce360ea538ccdae4fff4cc183d4c6166c64c4dd7f46585db285fc9ab6086",
+    "pass": true
+  },
+  {
+    "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tools\\ui\\cdp_network_collector.cjs",
+    "bytes": 26866,
+    "sha256": "02e5d8306a0f8e3ac082a56d33e12898d9d88bc54f9a0023d79ccf9af82c6607",
+    "currentBytes": 26866,
+    "currentSha256": "02e5d8306a0f8e3ac082a56d33e12898d9d88bc54f9a0023d79ccf9af82c6607",
+    "pass": true
+  },
+  {
+    "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tools\\diagnostics\\native_calibration_outcome_compare.cjs",
+    "bytes": 24284,
+    "sha256": "ab2afc3f8b3106b33db55c3235f4bd10bd130b998d11cb919be981e6640d79b8",
+    "currentBytes": 24284,
+    "currentSha256": "ab2afc3f8b3106b33db55c3235f4bd10bd130b998d11cb919be981e6640d79b8",
+    "pass": true
+  },
+  {
+    "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tests\\paradox_local_qa_harness.test.ts",
+    "bytes": 186066,
+    "sha256": "9e978fd94759b767dfbf3acd37eb6b9c23a81bd702acc1f806d836c6acd6e955",
+    "currentBytes": 186066,
+    "currentSha256": "9e978fd94759b767dfbf3acd37eb6b9c23a81bd702acc1f806d836c6acd6e955",
+    "pass": true
+  },
+  {
+    "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tests\\cdp_network_collector.test.ts",
+    "bytes": 30395,
+    "sha256": "c34f24f38a75f856204b4d5d2005d4fc13a4c46534b578d5da702b2d4a3bc772",
+    "currentBytes": 30395,
+    "currentSha256": "c34f24f38a75f856204b4d5d2005d4fc13a4c46534b578d5da702b2d4a3bc772",
+    "pass": true
+  },
+  {
+    "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tests\\native_calibration_outcome_compare.test.ts",
+    "bytes": 7013,
+    "sha256": "7fe58af33bc554035a78b97ff470aa24a96346589c3d07ad3e3f5b6a7268bc39",
+    "currentBytes": 7013,
+    "currentSha256": "7fe58af33bc554035a78b97ff470aa24a96346589c3d07ad3e3f5b6a7268bc39",
+    "pass": true
+  },
+  {
+    "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\r8-native-calibration-parity-20261024\\RESULT.json",
+    "bytes": 6717,
+    "sha256": "4e098fb39c1333aa1ca5b6a8244d3f7ca753b939b38dcb7e75ee9ff865fa040f",
+    "currentBytes": 6717,
+    "currentSha256": "4e098fb39c1333aa1ca5b6a8244d3f7ca753b939b38dcb7e75ee9ff865fa040f",
+    "pass": true
+  },
+  {
+    "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\r8-native-calibration-parity-20261024\\MANIFEST.json",
+    "bytes": 11662,
+    "sha256": "18571c16ed920afaaaac7ec3fa272e7e8705a12d2384cd2cd5093beb75425a04",
+    "currentBytes": 11662,
+    "currentSha256": "18571c16ed920afaaaac7ec3fa272e7e8705a12d2384cd2cd5093beb75425a04",
+    "pass": true
+  }
+]

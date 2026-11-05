@@ -1,0 +1,25 @@
+# Independent review — bounded local occupation
+
+Verdict: **GO** for the corrected working-tree candidate. No blocking correctness, canon, authority, or determinism finding remains in the reviewed scope.
+
+Reviewed tracked source/test diff hash: `a5668e6415987314ba790b061381f83e957a3d59` (`git diff --binary ... | git hash-object --stdin`). The new production-threading test is currently untracked and therefore outside that Git diff hash; its SHA-256 is `C0857143E03836583E15B67D4D87C45CB51D7702FC87E6D914825ACAA1ECED03`. It must be included with the candidate.
+
+## Acceptance findings
+
+- The exception is limited to turns after 20 (`emit.ts:257`), fails closed without state, reverse-map, OSID-population, finite target population, or a prediction (`emit.ts:254-257,317-344`), and production derives OSID population through the canonical `computeOsidPopulation` boundary (`war_phases.ts:2457-2462`).
+- Donor selection uses the allocation-owned surplus pool and retains combat-effectiveness, disruption, normal participant readiness, positive-personnel/transit, same-corps, enclave, active-operation, head historical commitment, and local on-loan exclusions (`emit.ts:261-321`). A front-floor allocation that withholds the brigade cannot use the route.
+- The one-brigade route requires an adjacent donor-target pair, an all-attacker shared-boundary ring around a same-controller component of at most six, adequate sector intelligence, a finite population-aware prediction of at least costly victory, and no physical or reactively reachable organized defender (`emit.ts:285-345`; `combat_predictor.ts:375-435,576`). This does not equate an empty target roster with an undefended sector.
+- It emits an ordinary `sector_attack`, changing viable/assembled minimums only on the proven local candidate and setting its already-verified preparation state ready (`emit.ts:1506-1588`). `advanceSectorOffensives` still requires one elapsed planning turn and rechecks normal participant/opening readiness before execution (`sector_offensive.ts:1467-1490`). The lifecycle test proves operation -> generated attack order -> resolver battle -> `mechanism: combat` control event (`elite_formation_utilization.test.ts:1873-1909`).
+- Player authority is closed: the selector emits no standalone local task at autonomy level 1 (`emit.ts:257-260`); at level 0 the selected player faction is excluded by the existing corps-order faction selector; levels 2+ retain staff execution per Engine Invariants 14.10b. No manual order path is added.
+- RBiH-HRHB and ceasefire controls remain centralized in the normal lifecycle. `advanceSectorOffensives` tests the shared `isRbihHrhbCombatBlocked` predicate and recovers blocked planning objectives (`sector_offensive.ts:1421-1427,2023-2045`); attack resolution independently rejects a slipped RBiH-HRHB attack (`attack_resolution_osid.ts:670-677`). During COHA, operation clocks pause (`sector_offensive.ts:1195-1218`), brigade AI clears attacks, and the resolver suppresses/consumes orders (`attack_resolution_osid.ts:529-550`). The local selector can create a normal operation before those centralized gates run, but cannot launch combat or change control through them; this matches the canon contract that purpose classification grants no bypass.
+- Deterministic ordering is explicit: sectors by ID, donor evaluations by descending fitness then brigade ID, and direct targets by ID. The local candidate is evaluated independently of probe cooldown; the unchanged generic fallback remains cooldown-governed. The local on-loan exclusion is scoped to the exception, so generic probe behavior is not retuned.
+- The generic offensive floor remains `MIN_BRIGADES_FOR_PLAN = 3`; the prior bounded-position escalation still requires two brigades, while only the proven local candidate receives one-participant minima. Existing generic/defended-path tests passed.
+- The source/test diff contains no `FORAWWV`, map/control data, reference, or pin changes. Root-owned Engine Invariants 14.8b and Systems Manual 6.4 wording matches the implemented restrictions and ordinary resolver ownership.
+
+## Independent checks
+
+- `npm.cmd run test:vitest -- --run tests/commander/elite_formation_utilization.test.ts tests/commander/local_occupation_population_threading.test.ts tests/commander/operation_emit_overlap_guards.test.ts tests/probe_territory_flip.test.ts tests/uncontested_occupation_priority.test.ts tests/enclave_operation_eligibility.test.ts` — exit 0, 6 files / 93 tests. Log: `independent-review-targeted.log`.
+- `npm.cmd run test:vitest -- --run tests/coha_operation_pause.test.ts tests/rear_pocket_consolidation_alliance_gate.test.ts tests/alliance_lifecycle.test.ts` — exit 0, 3 files / 46 tests. Log: `independent-review-political-guards.log`.
+- `git diff --check` — exit 0.
+
+This review did not run a full suite or campaign. Root owns those already-authorized validations. The new population-threading test remains untracked at review time and must be staged with the implementation.

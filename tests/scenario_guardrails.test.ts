@@ -18,9 +18,10 @@ const ACTIVE_SCENARIO_FILES = getAvailableScenarios()
 // 639 where the 188w line scored 647 at the same week 104). Canon is one definitive
 // 188-week scenario with intermediate checkpoints taken as snapshots of ITS runs, so a
 // separate 104-week campaign has nothing left to answer for.
+// `apr1992_definitive_40w.json` / `_40w_emergent.json` were RETIRED 2026-09-19 for the
+// same reason: short diagnostics now run the definitive 188w scenario with a duration
+// override instead of keeping a second scenario definition.
 const ACTIVE_APRIL_DEFINITIVE_SCENARIOS = [
-    'apr1992_definitive_40w.json',
-    'apr1992_definitive_40w_emergent.json',
     'apr1992_definitive_52w.json',
     'apr1992_definitive_188w.json',
     'apr1992_definitive_188w_dayton_close.json',

@@ -1,0 +1,35 @@
+{
+  "turn": 26,
+  "operation": null,
+  "lineage": {
+    "turn": 26,
+    "moves": [
+      {
+        "formationId": "arbih_441st_vitezka_mountain",
+        "from": "op:trnovo:trnovo",
+        "to": "op:trnovo:tusila",
+        "receipts": [
+          {
+            "formation_id": "arbih_441st_vitezka_mountain",
+            "formation_name": "441st Mountain",
+            "from_osid": "op:trnovo:trnovo",
+            "to_osid": "op:trnovo:tusila"
+          }
+        ]
+      }
+    ],
+    "ownedBattles": [],
+    "beforeController": "RS",
+    "afterController": "RS",
+    "controlEvents": []
+  },
+  "event": null,
+  "canonical": {
+    "bytes": 5213423,
+    "sha256": "48fcdda6a247a2ac0cca96ba8d348ea205408ec3d9589336cbbfed9d74887edd"
+  },
+  "report": {
+    "bytes": 663741,
+    "sha256": "500eca0aff56f1cb909239c440f5836f6bbfb2a92af705aea2e254261719ffda"
+  }
+}

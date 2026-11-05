@@ -1,0 +1,60 @@
+Orašac axis in Bosanska Krupa Takeover — validation receipt, 2026-09-23
+
+Change: add rs_1st_drvar_light_infantry from RS-held Trubar to the Orašac
+objective as a second axis of the existing vrs_2nd_krajina operation. The
+Bosanska Krupa town axis is unchanged. Refresh the derived April 1992 desktop
+startup snapshot, which includes the operation at turn zero.
+
+Validation root: F:\A-War-Without-Victory\.worktrees\prusac-validation-20260922
+Evidence root: logs\orasac-op-probe-20260923 under that validation root,
+unless the file is listed below as this main-workspace receipt.
+
+- git diff --check: exit 0 in main and validation checkout.
+- Preplanned operation catalog: 76/76 passed; preplanned-tests.log.
+- TypeScript noEmit: exit 0; typecheck.log is empty on success.
+- Eight-week probe: exit 0, Orašac captured t1 by normal operation-owned
+  combat, one attack on its axis; eight-week.log and
+  runs\apr1992_definitive_188w__4feb2b7a956faec6__w8_n0.
+- 39-week probe: exit 0, hash d776e8a709febc09, health true, January
+  703/712 versus prior 702/712, all 8/8 named captures by t39, 31/31
+  anchors. Orašac is the only political-control difference at t39;
+  thirty-nine-week.log and
+  runs\apr1992_definitive_188w__9137f75e9f35be20__w39_n1.
+- Full 188-week run: exit 0, hash 0c86638f9e2042d5, health true,
+  checkpoint scores 703/692/688/654 versus prior 702/694/689/651;
+  9/9 enclave guards hold. First 39 weekly records match the 39-week probe
+  byte-for-byte. 29 political-control cells differ by t188, including the
+  intended Orašac capture. one-eighty-eight-week.log and
+  runs\apr1992_definitive_188w__6898d6d2e324c7a3__w188_n2.
+- Checkpoint validator: exit 1, inherited Farz P-A attribution gate:
+  arbih_3rd_corps takes the discriminator at t167; requires a 2nd Corps
+  capture. Western cascade 28, below floor 38; checkpoints.log. Full-campaign
+  acceptance remains NO-GO. No merge or pin adoption.
+- Independent source review: no defect in the axis, adjacency, corps,
+  deterministic catalog or operation-owned battle. Later campaign divergence
+  and incomplete acceptance remain material limitations.
+- Full suite, main workspace: exit 1; full-suite-main.log. The run includes
+  Windows shell/hook failures, runtime dependency setup timeout and an
+  intentional child-process failure. It also detected a stale startup snapshot
+  and desktop bundle smoke failure caused by the new operation.
+- Derived snapshot rebuilt: exit 0; startup-snapshot-build.log. Its diff adds
+  only the second Bosanska Krupa operation axis, objective and participant.
+  Snapshot check exit 0; startup-snapshot-check.log. The two affected test
+  files then pass 20/20; startup-targeted-tests.log. No unchanged full-suite
+  retry was run.
+- Roadmap/board documentation truth test: exit 0; docs-truth-test.log. The
+  derived command board is 19,851 characters after the status update.
+
+The validation worktree consumed the same 31 simulation inputs as its prior
+clean 188-week baseline (input digest
+f8ace65496620fad1c8219a9dcaa8e2c5cdba2f3f541b156c7ba112b4748caaf),
+plus the two-file operation/test patch. Main source/test files match that patch.
+
+External map publication, 2026-09-23: gh-pages commit 73ea7440a updates only
+index.html and README.md. URL:
+https://horkesh.github.io/A-War-Without-Victory/?run=orasac-axis-20260923
+Generated and live HTML are byte-identical (720692 bytes, SHA-256
+a6ad8ed9b7eda5a41e495029236416c35d2a46c607f2dac7d8bdab9f5ada3cd3).
+Marker verifier checked 712/712 markers and 68 mismatch anchors, none missing
+or outside its cell. Embedded script syntax passes. This publishes the dirty
+candidate for inspection, not an adopted calibration baseline.

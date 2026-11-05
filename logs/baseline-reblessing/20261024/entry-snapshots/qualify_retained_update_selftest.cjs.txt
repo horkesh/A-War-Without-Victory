@@ -1,0 +1,28 @@
+'use strict';
+
+const assert = require('node:assert/strict');
+const { assessManifestOnlyStatus, parsePorcelainV1, proveRawManifestHashReplacement } = require('./qualify_retained_update.cjs');
+
+assert.deepEqual(parsePorcelainV1(' M data/derived/scenario/baselines/manifest.json\n'), [
+  { index: ' ', worktree: 'M', path: 'data/derived/scenario/baselines/manifest.json', raw: ' M data/derived/scenario/baselines/manifest.json' },
+]);
+assert.equal(assessManifestOnlyStatus(' M data/derived/scenario/baselines/manifest.json\n').pass, true);
+assert.equal(assessManifestOnlyStatus(' M data/derived/scenario/baselines/manifest.json\r\n').pass, true);
+assert.equal(assessManifestOnlyStatus('M  data/derived/scenario/baselines/manifest.json\n').pass, false);
+assert.equal(assessManifestOnlyStatus('MM data/derived/scenario/baselines/manifest.json\n').pass, false);
+assert.equal(assessManifestOnlyStatus(' M data/derived/scenario/baselines/manifest.json\n?? other.txt\n').pass, false);
+assert.equal(assessManifestOnlyStatus(' M docs/other.md\n').pass, false);
+assert.equal(assessManifestOnlyStatus('').pass, false);
+assert.throws(() => parsePorcelainV1('bad'), /malformed/i);
+
+const names = ['activity_summary.json', 'control_delta.json', 'end_report.md', 'final_save.json', 'formation_delta.json', 'run_summary.json', 'watched_operations.json', 'weekly_report.jsonl'];
+const before = Object.fromEntries(names.map((name, index) => [name, String.fromCharCode(97 + index).repeat(64)]));
+const after = Object.fromEntries(names.map((name, index) => [name, String.fromCharCode(105 + index).repeat(64)]));
+const oldBytes = Buffer.from(JSON.stringify({ hashes: before }, null, 2) + '\n');
+const currentBytes = Buffer.from(JSON.stringify({ hashes: after }, null, 2) + '\n');
+assert.equal(proveRawManifestHashReplacement(oldBytes, currentBytes, before, after).pass, true);
+assert.equal(proveRawManifestHashReplacement(oldBytes, Buffer.concat([currentBytes, Buffer.from(' ')]), before, after).pass, false);
+const duplicate = Buffer.from(currentBytes.toString('utf8').replace(after[names[0]], `${after[names[0]]}${after[names[0]]}`));
+assert.equal(proveRawManifestHashReplacement(oldBytes, duplicate, before, after).pass, false);
+
+process.stdout.write('retained-update qualifier selftest: 12 checks passed\n');

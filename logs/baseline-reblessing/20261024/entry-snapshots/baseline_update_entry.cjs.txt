@@ -1,0 +1,155 @@
+'use strict';
+
+const assert = require('node:assert/strict');
+const cp = require('node:child_process');
+const fs = require('node:fs');
+const path = require('node:path');
+const {
+  BASELINE_ARTIFACTS,
+  ACCEPTED_CI_HASHES,
+  assertNoFilesRecursively,
+  buildUpdateEnvironment,
+  fileRecord,
+  parseAuthorizedArgs,
+  sha256,
+  snapshotTree,
+  validateEightHashManifestDelta,
+  verifyPreservationInventory,
+  verifyDependencyInventory,
+} = require('./packet_common.cjs');
+
+const ROOT = path.resolve(__dirname, '..', '..');
+const MANIFEST = path.join(ROOT, 'data', 'derived', 'scenario', 'baselines', 'manifest.json');
+const TARGET = path.join(ROOT, 'data', 'derived', 'scenario', '_baseline_tmp', 'apr1992_188w');
+const CAP_MS = 35 * 60 * 1000;
+const TELEMETRY = [
+  path.join(ROOT, 'data', 'derived', '_debug', 'c_lane_corps_directive_telemetry.jsonl'),
+  path.join(ROOT, 'data', 'derived', '_debug', 'd_lane_persona_decisions.jsonl'),
+];
+
+const writeExclusive = (file, value) => fs.writeFileSync(file, JSON.stringify(value, null, 2) + '\n', { flag: 'wx' });
+const git = (args) => cp.execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', windowsHide: true }).trim();
+const readJson = (file) => JSON.parse(fs.readFileSync(file, 'utf8'));
+const normalizedSha = (file) => sha256(Buffer.from(fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n').replace(/\r/g, '\n'), 'utf8'));
+
+function requiredArg(argv, name) {
+  const at = argv.indexOf(name);
+  if (at < 0 || !argv[at + 1]) throw new Error(`${name} is required`);
+  return argv[at + 1];
+}
+
+function trackedSnapshot() {
+  const names = cp.execFileSync('git', ['ls-files', '-z'], { cwd: ROOT, encoding: 'buffer', windowsHide: true }).toString('utf8').split('\0').filter(Boolean).sort();
+  return names.map((name) => fileRecord(ROOT, path.join(ROOT, name)));
+}
+
+function recordsWithoutManifest(rows) {
+  return rows.filter((row) => row.path !== 'data/derived/scenario/baselines/manifest.json');
+}
+
+function optionalRecord(file) {
+  return fs.existsSync(file) ? fileRecord(ROOT, file) : { path: path.relative(ROOT, file).replaceAll('\\', '/'), absent: true, bytes: 0, sha256: null };
+}
+
+function prefixRecord(file, opening) {
+  if (opening.absent) return optionalRecord(file);
+  const fd = fs.openSync(file, 'r');
+  try {
+    const bytes = Buffer.alloc(opening.bytes);
+    const read = fs.readSync(fd, bytes, 0, opening.bytes, 0);
+    const current = fileRecord(ROOT, file);
+    return { ...current, opening_bytes: opening.bytes, opening_sha256: opening.sha256, opening_prefix_sha256: sha256(bytes.subarray(0, read)), opening_prefix_exact: read === opening.bytes && sha256(bytes) === opening.sha256, append_bytes: current.bytes - opening.bytes };
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
+function main() {
+  const argv = process.argv.slice(2);
+  const { evidenceDir, expectedHead } = parseAuthorizedArgs(argv);
+  const evidence = path.resolve(evidenceDir);
+  const expectedManifestSha = requiredArg(argv, '--expected-manifest-sha').toLowerCase();
+  const preservationPath = path.resolve(requiredArg(argv, '--preservation-inventory'));
+  const dependencyPath = path.resolve(requiredArg(argv, '--dependency-inventory'));
+  if (!/^[0-9a-f]{64}$/.test(expectedManifestSha)) throw new Error('expected manifest SHA must be 64 hexadecimal characters');
+  if (!fs.statSync(evidence, { throwIfNoEntry: false })?.isDirectory()) throw new Error(`evidence directory does not exist: ${evidence}`);
+  const dependencyVerification = verifyDependencyInventory(dependencyPath, [path.join(__dirname, 'packet_common.cjs')]);
+  writeExclusive(path.join(evidence, 'dependency-verification.json'), dependencyVerification);
+  if (!dependencyVerification.pass) throw new Error(`packet dependency inventory has ${dependencyVerification.failures.length} mismatch(es)`);
+  if (path.resolve(process.cwd()).toLowerCase() !== ROOT.toLowerCase()) throw new Error(`wrong worktree: ${process.cwd()}`);
+  if (!/^v22\./.test(process.version)) throw new Error(`Node 22 required, actual ${process.version}`);
+  const head = git(['rev-parse', 'HEAD']).toLowerCase();
+  if (head !== expectedHead) throw new Error(`HEAD mismatch: expected ${expectedHead}, actual ${head}`);
+  const dirty = git(['status', '--porcelain=v1']);
+  if (dirty) throw new Error(`clean baseline update required; git status is not empty:\n${dirty}`);
+  const manifestBeforeBytes = fs.readFileSync(MANIFEST);
+  const manifestBeforeSha = sha256(manifestBeforeBytes);
+  if (manifestBeforeSha !== expectedManifestSha) throw new Error(`manifest prehash mismatch: expected ${expectedManifestSha}, actual ${manifestBeforeSha}`);
+  const targetBefore = snapshotTree(ROOT, TARGET);
+  writeExclusive(path.join(evidence, 'baseline-target-before.json'), targetBefore);
+  assertNoFilesRecursively(TARGET);
+  const preservationBefore = verifyPreservationInventory(preservationPath, TELEMETRY);
+  writeExclusive(path.join(evidence, 'preservation-before.json'), preservationBefore);
+  if (!preservationBefore.pass) throw new Error(`opening preservation inventory has ${preservationBefore.failures.length} mismatch(es)`);
+
+  const trackedBefore = trackedSnapshot();
+  const telemetryBefore = TELEMETRY.map(optionalRecord);
+  const manifestBefore = JSON.parse(manifestBeforeBytes.toString('utf8'));
+  const beforeHashes = manifestBefore.scenarios?.[0]?.hashes ?? {};
+  const started = Date.now();
+  const deadline = started + CAP_MS;
+  const command = [process.execPath, 'node_modules/tsx/dist/cli.mjs', 'tools/scenario_runner/run_baseline_regression.ts'];
+  writeExclusive(path.join(evidence, 'update-launch.json'), {
+    schema: 'awwv.baseline-rebless-update-launch.v1',
+    start_utc: new Date(started).toISOString(),
+    deadline_utc: new Date(deadline).toISOString(),
+    cap_ms: CAP_MS,
+    cwd: ROOT,
+    expected_head: expectedHead,
+    expected_manifest_sha256: expectedManifestSha,
+    argv: command,
+    invocation_limit: 1,
+    automatic_retry: false,
+    diagnostics: 'forced_off',
+    s6_grade_env: true,
+    note: 'run_baseline_regression calls runScenario directly; wrapper enforces clean git before launch and output run_meta must record git_dirty=false',
+  });
+  const child = cp.spawnSync(process.execPath, command.slice(1), { cwd: ROOT, env: buildUpdateEnvironment(process.env), stdio: 'inherit', windowsHide: true, timeout: CAP_MS, killSignal: 'SIGKILL' });
+  const exit = child.error?.code === 'ETIMEDOUT' ? 124 : child.status;
+  writeExclusive(path.join(evidence, 'update-execution.json'), { exit, signal: child.signal, timed_out: exit === 124, error: child.error ? String(child.error.message) : null, remaining_ms: Math.max(0, deadline - Date.now()) });
+  if (exit !== 0) throw new Error(`UPDATE_BASELINES invocation failed with exit ${exit}`);
+
+  const manifestAfter = readJson(MANIFEST);
+  const afterHashes = manifestAfter.scenarios?.[0]?.hashes ?? {};
+  const delta = validateEightHashManifestDelta(beforeHashes, afterHashes);
+  assert.deepEqual(afterHashes, ACCEPTED_CI_HASHES, 'updated hashes must exactly match accepted CI actuals');
+  const shapeAfter = structuredClone(manifestAfter);
+  shapeAfter.scenarios[0].hashes = beforeHashes;
+  assert.deepEqual(shapeAfter, manifestBefore, 'manifest may change only the eight hash values');
+  const targetHashes = Object.fromEntries(BASELINE_ARTIFACTS.map((name) => [name, sha256(fs.readFileSync(path.join(TARGET, name)))]));
+  assert.deepEqual(targetHashes, ACCEPTED_CI_HASHES, 'baseline target artifacts must match accepted hashes');
+  const runMeta = readJson(path.join(TARGET, 'run_meta.json'));
+  const provenance = runMeta.provenance ?? {};
+  const inputRows = provenance.consumed_inputs?.files ?? [];
+  const inputMismatches = inputRows.filter((row) => !fs.existsSync(path.join(ROOT, row.path)) || normalizedSha(path.join(ROOT, row.path)) !== row.sha256);
+  const recomputedDigest = sha256(Buffer.from(inputRows.map((row) => `${row.path} ${row.sha256 ?? 'ABSENT'}\n`).join(''), 'utf8'));
+  if (provenance.git_commit !== expectedHead || provenance.git_dirty !== false || inputRows.length !== 32 || inputMismatches.length || provenance.consumed_inputs?.digest !== recomputedDigest) {
+    throw new Error(`invalid update-run provenance: ${JSON.stringify({ git_commit: provenance.git_commit, git_dirty: provenance.git_dirty, input_count: inputRows.length, input_mismatches: inputMismatches, recorded_digest: provenance.consumed_inputs?.digest, recomputed_digest: recomputedDigest })}`);
+  }
+
+  const trackedAfter = trackedSnapshot();
+  assert.deepEqual(recordsWithoutManifest(trackedAfter), recordsWithoutManifest(trackedBefore), 'tracked source outside manifest must remain byte-identical');
+  const status = git(['status', '--porcelain=v1']);
+  if (status !== ' M data/derived/scenario/baselines/manifest.json') throw new Error(`only manifest may be tracked-dirty after update, actual:\n${status}`);
+  const telemetryAfter = TELEMETRY.map((file, index) => prefixRecord(file, telemetryBefore[index]));
+  assert.ok(telemetryAfter.every((row) => row.absent || row.opening_prefix_exact), 'telemetry must retain the exact old prefix');
+  const preservationAfter = verifyPreservationInventory(preservationPath, TELEMETRY, [MANIFEST]);
+  writeExclusive(path.join(evidence, 'preservation-after.json'), preservationAfter);
+  if (!preservationAfter.pass) throw new Error(`post-update preservation inventory has ${preservationAfter.failures.length} mismatch(es)`);
+
+  const result = { schema: 'awwv.baseline-rebless-update-result.v1', pass: true, head, manifest_before_sha256: manifestBeforeSha, manifest_after_sha256: sha256(fs.readFileSync(MANIFEST)), changed_hashes: delta.changed, hashes: afterHashes, target: snapshotTree(ROOT, TARGET), provenance: { git_commit: provenance.git_commit, git_dirty: provenance.git_dirty, input_count: inputRows.length, input_mismatches: inputMismatches, recorded_digest: provenance.consumed_inputs.digest, recomputed_digest: recomputedDigest }, telemetry_after: telemetryAfter, telemetry_old_prefixes_exact: true, source_outside_manifest_exact: true, preservation_inventory_exact_except_manifest: true };
+  writeExclusive(path.join(evidence, 'update-result.json'), result);
+  process.stdout.write(JSON.stringify(result) + '\n');
+}
+
+try { main(); } catch (error) { process.stderr.write(String(error.stack ?? error) + '\n'); process.exit(1); }

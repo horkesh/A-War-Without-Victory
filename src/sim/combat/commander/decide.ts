@@ -451,6 +451,11 @@ function classifySectorActivity(
 
     const sectorIntel = briefing.intel_data?.sector_intel ?? {};
 
+    // Authoritative own-faction control set. A cell can leave this corps' zones
+    // (e.g. same-faction corps responsibility transfer or zone reshape) while
+    // remaining faction-held; such cells are not territorial losses.
+    const factionHeldOsids = briefing.spatial.friendlyOsidsByFaction.get(briefing.faction);
+
     // Process sectors deterministically
     const sectors = [...briefing.sectors].sort((a, b) => strictCompare(a.sector_id, b.sector_id));
 
@@ -477,7 +482,8 @@ function classifySectorActivity(
                     if (sector.territory_osids.includes(osid)) continue;
                     // This OSID was in a previous zone — check if it's still in any current zone
                     const stillHeld = zones.some(z => z.osids.includes(osid));
-                    if (!stillHeld) {
+                    const stillFactionHeld = factionHeldOsids?.has(osid) ?? false;
+                    if (!stillHeld && !stillFactionHeld) {
                         osidsLost++;
                     }
                 }

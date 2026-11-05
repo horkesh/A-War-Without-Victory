@@ -1133,6 +1133,16 @@
       "source_basis": "catalogued_designation"
     },
     {
+      "id": "arbih_831st_drina_lineage",
+      "faction": "RBiH",
+      "designation_code": "AWWV-BDE-ARBIH-31ST-DRINA-LINEAGE",
+      "english_gloss": "31st Drina Lineage",
+      "official_bcs": "31. drinska brigada (prethodnica kasnije 831. lahke)",
+      "unit_type": "light",
+      "echelon": "brigade",
+      "source_basis": "sourced_predecessor_lineage"
+    },
+    {
       "id": "arbih_803rd_light",
       "faction": "RBiH",
       "designation_code": "AWWV-BDE-ARBIH-803RD-LIGHT",

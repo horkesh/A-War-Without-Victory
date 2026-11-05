@@ -1,0 +1,297 @@
+{
+  "verdict": "PASS_TARGETED_TEMPORAL_ALIGNMENT_CORRECTION",
+  "scope": "reviewed supplemental proof; reuses first-run zero-difference evidence and does not rerun the strict consumer, provenance guard, scenario, or full audit",
+  "first_run": {
+    "helper_exit": 1,
+    "stdout_path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\prusac-diagnostic-20260929\\continuation4_139_20261004_audit.stdout.json",
+    "stdout_sha256": "f13d8c588794f8e616e412921e2b42438aae3bc0cef15c46c3256f11655107b7",
+    "retained_failure": [
+      "candidate.brigade_temporal_log missing arbih_737th_muslim_light completed week_index 139"
+    ],
+    "disposition": "helper label error: temporal row.turn is the completed boundary and equals weekly_report.week_index; temporal row.week_index is the zero-based loop argument and equals turn-1"
+  },
+  "artifact_binding": {
+    "weekly_report_sha256": "10cc0729966a4f45eeb6ea22bf61da5901d9e34ecebd0287ded5c3cecccc8058",
+    "brigade_temporal_log_sha256": "521677bf5d4303e056a843626889d829a01dfb614435a59cf4de9aff258bc9f7"
+  },
+  "source_observations": {
+    "bounded_loop": {
+      "file": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\src\\scenario\\scenario_runner.ts",
+      "line": 2615,
+      "text": "for (let week_index = startWeekIndex; week_index < weeks; week_index++) {"
+    },
+    "temporal_called_with_zero_based_loop_index": {
+      "file": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\src\\scenario\\scenario_runner.ts",
+      "line": 3144,
+      "text": "const brigadeTemporalRows = buildBrigadeTemporalRows(state, week_index);"
+    },
+    "temporal_completed_turn_from_post_turn_state": {
+      "file": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\src\\scenario\\brigade_temporal_emit.ts",
+      "line": 171,
+      "text": "const turn = state.meta?.turn ?? 0;"
+    },
+    "temporal_raw_week_index_from_loop_argument": {
+      "file": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\src\\scenario\\brigade_temporal_emit.ts",
+      "line": 198,
+      "text": "week_index: weekIndex,"
+    },
+    "weekly_completed_index_from_post_turn_state": {
+      "file": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\src\\scenario\\scenario_reporting.ts",
+      "line": 257,
+      "text": "const week_index = state.meta.turn;"
+    }
+  },
+  "actor_737th_temporal_aligned": [
+    {
+      "completed_week_index": 137,
+      "raw_zero_based_loop_week_index": 136,
+      "location_osid": "op:busovaca:gornja_rovna",
+      "movement_state": null,
+      "movement_destinations": null,
+      "sector_id": "sector:arbih_3rd_corps:1",
+      "active_op_id": null
+    },
+    {
+      "completed_week_index": 138,
+      "raw_zero_based_loop_week_index": 137,
+      "location_osid": "op:busovaca:gornja_rovna",
+      "movement_state": null,
+      "movement_destinations": [
+        "op:bugojno:udurlije"
+      ],
+      "sector_id": "sector:arbih_3rd_corps:1",
+      "active_op_id": null
+    },
+    {
+      "completed_week_index": 139,
+      "raw_zero_based_loop_week_index": 138,
+      "location_osid": "op:busovaca:gornja_rovna",
+      "movement_state": null,
+      "movement_destinations": [
+        "op:bugojno:udurlije"
+      ],
+      "sector_id": "sector:arbih_3rd_corps:1",
+      "active_op_id": null
+    }
+  ],
+  "actual_actor_temporal_terminal": {
+    "completed_week_index": 139,
+    "raw_zero_based_loop_week_index": 138,
+    "brigade_id": "arbih_737th_muslim_light"
+  },
+  "reached_checkpoint_reuse": [
+    {
+      "name": "jan1993",
+      "completed_week_index": 39,
+      "denominator": 712,
+      "baseline_match_count": 707,
+      "candidate_match_count": 707,
+      "lost_baseline_matches": [],
+      "gained_vs_baseline": [],
+      "controller_difference_count_on_reference_osids": 0
+    },
+    {
+      "name": "apr1994",
+      "completed_week_index": 104,
+      "denominator": 712,
+      "baseline_match_count": 707,
+      "candidate_match_count": 707,
+      "lost_baseline_matches": [],
+      "gained_vs_baseline": [],
+      "controller_difference_count_on_reference_osids": 0
+    }
+  ],
+  "prefix_difference_reuse": {
+    "control_event_ordered_differences": 0,
+    "reported_control_count_week_differences": 0,
+    "reconstructed_territory_week_differences": 0,
+    "protected_control_differences": []
+  },
+  "actor_737th_receipts_compact_complete_fields": [
+    {
+      "completed_week_index": 137,
+      "formation_id": "arbih_737th_muslim_light",
+      "pass": "bot_dispatcher",
+      "scope": "replace",
+      "phase": "war",
+      "eligibility": "eligible",
+      "caller_filter": "not_present",
+      "first_handler": "offensive",
+      "formation_faction": "RBiH",
+      "formation_kind": "brigade",
+      "formation_status": "active",
+      "location_osid": "op:busovaca:gornja_rovna",
+      "corps_id": "arbih_3rd_corps",
+      "corps_stance": "balanced",
+      "assigned_sector_id": null,
+      "assigned_sector_role": null,
+      "operation_name": null,
+      "operation_axis_id": null,
+      "operation_current_objective": null,
+      "transit_status": null,
+      "transit_stance": null,
+      "preexisting_movement_order_destination_osid": null,
+      "directive_assigned_front_ids_count": 40,
+      "directive_assigned_front_ids_sha256": "90a49fbd32e52d8d38360bf09b0f0f75683e962706b70236ee894502cf10f759",
+      "directive_offensive_targets": [],
+      "directive_hold_osids": [],
+      "directive_avoid_osids": [],
+      "persistent_destination_osids": [],
+      "pre_cap_output": {
+        "attack_target_osid": null,
+        "column_march_destination_osid": null,
+        "movement_destination_osid": null,
+        "postures": [
+          "dig_in"
+        ]
+      },
+      "final_generated_output": {
+        "attack_target_osid": null,
+        "column_march_destination_osid": null,
+        "movement_destination_osid": null,
+        "postures": [
+          "dig_in"
+        ]
+      },
+      "snapshot_output": {
+        "attack_target_osid": null,
+        "column_march_destination_osid": null,
+        "movement_destination_osid": null,
+        "postures": [
+          "dig_in"
+        ]
+      }
+    },
+    {
+      "completed_week_index": 138,
+      "formation_id": "arbih_737th_muslim_light",
+      "pass": "bot_dispatcher",
+      "scope": "replace",
+      "phase": "war",
+      "eligibility": "eligible",
+      "caller_filter": "not_present",
+      "first_handler": "offensive",
+      "formation_faction": "RBiH",
+      "formation_kind": "brigade",
+      "formation_status": "active",
+      "location_osid": "op:busovaca:gornja_rovna",
+      "corps_id": "arbih_3rd_corps",
+      "corps_stance": "balanced",
+      "assigned_sector_id": null,
+      "assigned_sector_role": null,
+      "operation_name": null,
+      "operation_axis_id": null,
+      "operation_current_objective": null,
+      "transit_status": null,
+      "transit_stance": null,
+      "preexisting_movement_order_destination_osid": null,
+      "directive_assigned_front_ids_count": 40,
+      "directive_assigned_front_ids_sha256": "90a49fbd32e52d8d38360bf09b0f0f75683e962706b70236ee894502cf10f759",
+      "directive_offensive_targets": [],
+      "directive_hold_osids": [],
+      "directive_avoid_osids": [],
+      "persistent_destination_osids": [],
+      "pre_cap_output": {
+        "attack_target_osid": null,
+        "column_march_destination_osid": null,
+        "movement_destination_osid": null,
+        "postures": [
+          "dig_in"
+        ]
+      },
+      "final_generated_output": {
+        "attack_target_osid": null,
+        "column_march_destination_osid": null,
+        "movement_destination_osid": null,
+        "postures": [
+          "dig_in"
+        ]
+      },
+      "snapshot_output": {
+        "attack_target_osid": null,
+        "column_march_destination_osid": null,
+        "movement_destination_osid": null,
+        "postures": [
+          "dig_in"
+        ]
+      }
+    },
+    {
+      "completed_week_index": 139,
+      "formation_id": "arbih_737th_muslim_light",
+      "pass": "bot_dispatcher",
+      "scope": "replace",
+      "phase": "war",
+      "eligibility": "eligible",
+      "caller_filter": "not_present",
+      "first_handler": "offensive",
+      "formation_faction": "RBiH",
+      "formation_kind": "brigade",
+      "formation_status": "active",
+      "location_osid": "op:busovaca:gornja_rovna",
+      "corps_id": "arbih_3rd_corps",
+      "corps_stance": "balanced",
+      "assigned_sector_id": null,
+      "assigned_sector_role": null,
+      "operation_name": null,
+      "operation_axis_id": null,
+      "operation_current_objective": null,
+      "transit_status": null,
+      "transit_stance": null,
+      "preexisting_movement_order_destination_osid": null,
+      "directive_assigned_front_ids_count": 40,
+      "directive_assigned_front_ids_sha256": "90a49fbd32e52d8d38360bf09b0f0f75683e962706b70236ee894502cf10f759",
+      "directive_offensive_targets": [],
+      "directive_hold_osids": [],
+      "directive_avoid_osids": [],
+      "persistent_destination_osids": [],
+      "pre_cap_output": {
+        "attack_target_osid": null,
+        "column_march_destination_osid": null,
+        "movement_destination_osid": null,
+        "postures": [
+          "dig_in"
+        ]
+      },
+      "final_generated_output": {
+        "attack_target_osid": null,
+        "column_march_destination_osid": null,
+        "movement_destination_osid": null,
+        "postures": [
+          "dig_in"
+        ]
+      },
+      "snapshot_output": {
+        "attack_target_osid": null,
+        "column_march_destination_osid": null,
+        "movement_destination_osid": null,
+        "postures": [
+          "dig_in"
+        ]
+      }
+    }
+  ],
+  "full_receipts_source": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\prusac-diagnostic-20260929\\continuation4_139_20261004_audit.stdout.json#actor_737th.dispatcher_receipts_full",
+  "checks": {
+    "raw_helper_exit_was_one": true,
+    "raw_only_missing_item_was_mislabeled_temporal_boundary": true,
+    "raw_control_events_equal": true,
+    "raw_reported_control_counts_equal": true,
+    "raw_reconstructed_territory_equal": true,
+    "raw_reached_checkpoint_sets_and_controllers_equal": true,
+    "raw_protected_controls_equal": true,
+    "raw_weekly_hash_still_matches_candidate": true,
+    "raw_temporal_hash_still_matches_candidate": true,
+    "actor_terminal_temporal_pair_is_completed139_loop138": true,
+    "actor_temporal_boundaries_137_139_present": true,
+    "three_named_weekly_receipts": true,
+    "emitter_source_mapping_present": true
+  },
+  "claim_limits": [
+    "No whole-state or debug-neutrality claim.",
+    "No strict receipt-schema or provenance adjudication.",
+    "Only reached checkpoints 39 and 104 are compared; 156 and 188 are not reached.",
+    "The n40 terminal historical-fit reference is not compared with the n39 terminal oct1995 score.",
+    "No selector-cause or same-turn movement-write origin claim."
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "schema": "awwv.732.review-correction.closed-receipt.v1",
+  "writes_closed": true,
+  "result": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/732-review-seal-d/732-correction-result.json",
+    "bytes": 5211,
+    "sha256": "d49820c439d3ec3382626434aeac63d9f317fca8e54ca46f6c6e07f7b3f78f8e"
+  },
+  "markdown": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/732-review-seal-d/732-correction-result.md",
+    "bytes": 1002,
+    "sha256": "a9d50381cdf7c456018dd3cfb4e6088621f8f5d8fa7d9e9f15c63c85932957e1"
+  },
+  "inventory": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/732-review-seal-d/inventory.json",
+    "bytes": 85739,
+    "sha256": "deae9f457d52fddcf7820cf2dcee7b35f4a84cdd7f4e70758059c3cec005c602"
+  },
+  "source_pins": [
+    {
+      "path": "tests/fixtures/vitest_balanced/receipt_block.fixture.ts",
+      "bytes": 161,
+      "sha256": "ef296256b7e3126c99ec5fa2ffc754c7cb2c42d607c5b85685dd279fa6b67ffc"
+    },
+    {
+      "path": "tests/fixtures/vitest_balanced/receipt_fail.fixture.ts",
+      "bytes": 104,
+      "sha256": "9ffe1f33806b87228b7e46bef81327e930d18d266a1d17b8342e6eb980c7ede2"
+    },
+    {
+      "path": "tests/fixtures/vitest_balanced/receipt_fake_clock.fixture.ts",
+      "bytes": 182,
+      "sha256": "06ba7821839b1c41b470c17bce532aaf95860862102c7eef49e8de406e4b9065"
+    },
+    {
+      "path": "tests/fixtures/vitest_balanced/receipt_finalize_error_runner.fixture.mjs",
+      "bytes": 396,
+      "sha256": "9982c4f38918ab07f4cf945aec822d52382b6e5d91f0b2b8f9d8765b7abfa2b9"
+    },
+    {
+      "path": "tests/fixtures/vitest_balanced/receipt_import_error.fixture.ts",
+      "bytes": 58,
+      "sha256": "0e6705c6d25df7da834963fabad324c6a49547daba36e8818235479cfa2e8843"
+    },
+    {
+      "path": "tests/fixtures/vitest_balanced/receipt_nested_child.fixture.ts",
+      "bytes": 892,
+      "sha256": "342d422e5dac08ce40c943d1b02be0ac569b53a00f98ef51af1786076e66b388"
+    },
+    {
+      "path": "tests/fixtures/vitest_balanced/receipt_pass.fixture.ts",
+      "bytes": 92,
+      "sha256": "301438ddcd166f29f0ed8600f7bbc9f75344bc8241bd3f96dda66deaf717b27d"
+    },
+    {
+      "path": "tests/fixtures/vitest_balanced/receipt_pass_second.fixture.ts",
+      "bytes": 110,
+      "sha256": "56dc6e08d8150fe35e417a5a4d3b8d5790b0a87b783d51630c2dc1249b6feaf7"
+    },
+    {
+      "path": "tests/fixtures/vitest_balanced/receipt_skip.fixture.ts",
+      "bytes": 118,
+      "sha256": "7d7e10d3f7e76747b30e78f8d29bce76dc620005da4180bd11849119a7b6aa1b"
+    },
+    {
+      "path": "tests/run_vitest_balanced.test.ts",
+      "bytes": 11131,
+      "sha256": "e75679b9962de2612233198284996adab5bacbfb1708fc9f23442276d46f2874"
+    },
+    {
+      "path": "tests/test_suite_inventory.test.ts",
+      "bytes": 5001,
+      "sha256": "9fcdb7545fce83322205ed981d4e004b71fac5718bb0861a8d7d86e517737476"
+    },
+    {
+      "path": "tests/vitest_balanced_receipts.test.ts",
+      "bytes": 8326,
+      "sha256": "c13a198258744e0e7230b270b1eb89e1ee89d8047563fd26cdd1b0287a102a1c"
+    },
+    {
+      "path": "tools/test/run_vitest_balanced.d.mts",
+      "bytes": 1352,
+      "sha256": "1df42219cfbf13413d5af895a722d0b4c7b4cb3794b12b272bb8eb31ec4a46a4"
+    },
+    {
+      "path": "tools/test/run_vitest_balanced.mjs",
+      "bytes": 10894,
+      "sha256": "146949d484bc99fdcf99729cef2a3b35ca0c532e1b795a6d73e71459788ff24b"
+    },
+    {
+      "path": "tools/test/run_vitest_default.mjs",
+      "bytes": 2857,
+      "sha256": "d8c2a39cbf10805eef6a7a4790a3cc90f5cd4fde823d159badef3bf0797f9804"
+    },
+    {
+      "path": "tools/test/test_duration_baseline.json",
+      "bytes": 72834,
+      "sha256": "1a9bc22004c6555c03fca839dfbbdff5c37b19b813c208716c0b0ffd5b8d6e43"
+    },
+    {
+      "path": "tools/test/vitest_file_receipts.d.mts",
+      "bytes": 602,
+      "sha256": "dc8c59083095d752e50ac7f0a6040dd39b9b9d0554ca9f8e106707771ec04c72"
+    },
+    {
+      "path": "tools/test/vitest_file_receipts.mjs",
+      "bytes": 2515,
+      "sha256": "70e20b08cb265ac9fd0bd98363ce259aa552d05599186a023fc247b907839b69"
+    },
+    {
+      "path": "tools/test/vitest_receipt_runner.mjs",
+      "bytes": 5294,
+      "sha256": "c54b6d4f0d7c143522a99249bf741892fcc24b2aa03682ed9e8365afdaac4f78"
+    }
+  ]
+}

@@ -147,7 +147,7 @@ describe('shouldGather', () => {
 describe('canCorpsAttendGathering', () => {
     it('ARBiH 1st Corps returns radio early, full after tunnel', () => {
         // Comms constraint is now scenario-driven via state.military.comms_override_by_corps.
-        // before_turn: 18 matches the scenario JSON (apr1992_definitive_40w.json).
+        // before_turn: 18 matches the canonical scenario JSON (apr1992_definitive_188w.json).
         const commsOverride = { arbih_1st_corps: { before_turn: 18, mode: 'radio' as const } };
         const stateEarly = makeMinimalState({ turn: 10, commsOverrideByCorps: commsOverride });
         expect(canCorpsAttendGathering('arbih_1st_corps', 'RBiH', stateEarly)).toBe('radio');

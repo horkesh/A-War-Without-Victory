@@ -1,0 +1,41 @@
+{
+  "schema": "retained-ajnie-participation-hashes-v1",
+  "note": "Manifest excludes itself.",
+  "files": [
+    {
+      "name": "argv.json",
+      "bytes": 968,
+      "sha256": "c2aca9fd1f4b6347522f46ce9cd6d5a4074dcb4ddd1b57318dc9e1f125479b68"
+    },
+    {
+      "name": "extract-retained.ps1",
+      "bytes": 8155,
+      "sha256": "0f84173fa7a4aa78863c53e21fcd8843ba0791e61f2790f96e4a345de26b05a7"
+    },
+    {
+      "name": "FINDING.md",
+      "bytes": 2480,
+      "sha256": "fce0faceb7bcc7532c83613640b221b76eb32ae6c32846f818c6edddeabd75c7"
+    },
+    {
+      "name": "MACHINE_EVIDENCE.v1.json",
+      "bytes": 189755,
+      "sha256": "db0395bc85b1603519a2d70617e4774f9b2118a729eb329186248acff47fd331"
+    },
+    {
+      "name": "receipt.json",
+      "bytes": 938,
+      "sha256": "12a37a09c4c366fdf8b2e2764287a67be68215f29798f846546d07983e7e6f79"
+    },
+    {
+      "name": "stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "stdout.log",
+      "bytes": 226,
+      "sha256": "70280b864709fe4ddc8668af6712a8f8404d2a6a2929e74e27e82b8620a7ea0a"
+    }
+  ]
+}

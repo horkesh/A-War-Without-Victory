@@ -1,0 +1,12 @@
+{
+  "schema": "awwv.798.closed.v1",
+  "captured_utc": "2026-10-22T05:23:57.743Z",
+  "writes_closed": true,
+  "result_sha256": "2e03cbbe69e4319f570e2f078cf13956d32d4b338f221a5b776d7028179d1e44",
+  "inventory_sha256": "306b8688624968eaa5875ea983dd811c7331aa7bb39b6769f19bfe9950681a99",
+  "actual_run_dir": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n83",
+  "campaign_invocations": 1,
+  "retries": 0,
+  "full_suite_invocations": 0,
+  "required_independent_review": "799"
+}

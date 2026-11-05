@@ -1,8 +1,22 @@
+**Latest implementation report — corrected-engine calibration packet (2026-10-26):** [Report](implemented/20261026_CORRECTED_ENGINE_CALIBRATION_PACKET.md) records retained audits, the focused zero-drift morale correction, the blocked Circle/HVO proposals, and the unchanged 703/712, four-loss, health13>3 failure.
 # docs/40_reports — Master Index and Structure
+
+**Latest implementation report — combat fatigue single owner (2026-10-26):** [Report](implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md) records focused RED/GREEN results, independent source GO, and the 703/712 STOP_NO_RETRY prefix result with four protected losses, health13>3 and open global gates.
+
+**2026-10-23 Toljenak-only Behar-I n92:** [Implementation and measured evidence](implemented/20261023_BEHAR_I_TOLJENAK_CANDIDATE.md) proves November capture, October retention and707/707/706/706 after the owner's April repaint. Zero formerly correct losses; full-suite coverage and targeted documentation corrections retained. n91 remains unchanged. Global standing: [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md).
 
 **BC01 implementation verification (2026-09-07):** [Report](audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md) records restored catalog launches, neutral canonical POST and observer parity, but **BC01 is CLOSED by owner approval; territory-similarity requirement retired**. Raw suite exit 1 was limited to five missing BCS keys, resolved by a translation-only change with 29 focused tests and fresh build; the raw run is not relabeled green. CSS supplement 222/222 closes the junction scanner difference. [Current roadmap](../plans/MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) controls disposition.
 
 **Purpose:** Single entrypoint for implementation reports, handovers, convenes, investigations, and audits. Use consolidated summaries for quick reference; use individual reports for detail.
+
+**2026-09-27 April 1995 reopened:** [Delay-30 owner handover](handovers/20260927_APRIL_1995_DELAY30_CLOSEOUT_DRAFT.md) records the Gornja reference correction, unchanged-run 704/712 score, and reopened Donja Mahala anomaly; no baseline adoption.
+
+**2026-09-02 April 1994 operational calibration history:**
+[implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md)
+consolidates the three requested lanes, Lopare/Brčko mechanism corrections, deterministic v72/v73
+branch evidence, 703/712 week-104 measurement, nine remaining OSID mismatches, and the authenticated
+interactive map publication. The integrated tree must be measured afresh; `CALIBRATION_MASTER.md`
+remains the living baseline authority.
 
 **BC08 verification history and control (2026-09-07; current BC01 verification above):** [BC08 audit](audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md) closes only bounded verification/disposition. Full suite remains RED (one Windows Bash-resolution failure); unchanged focused file passes 8/8 with child-scoped Git Bash. [Master §4.1](../plans/MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) retains BC01 CLOSED by owner approval; territory-similarity requirement retired ([verification](audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)); BC02–BC07 remain pending. R7 art/packaged first-paint passed; readability/audio closeout remains. RE closed 2026-09-01 and gates nothing; [old contract](../plans/2026-08-26-engine-integrity-plan.md), [recovery record](../plans/2026-08-28-packaged-probe-recovery-plan.md) and [audit](audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md) are history, with no successor proof route active. Calibration remains open on [n392](CALIBRATION_MASTER.md); final acceptance follows behavior settlement.
 
@@ -793,6 +807,8 @@ Nine overlapping live-inspection audits of the tactical map and warroom from the
 
 ## 3. Classification (by status)
 
+Latest combat fatigue implementation report: [20261026_COMBAT_FATIGUE_SINGLE_OWNER.md](implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md). It records focused source proof and keeps calibration, full-suite, package, and native gates open.
+
 Classification is authoritative in the three consolidation docs. Summary:
 
 - **Implemented:** Work reflected in code and/or canon; see [CONSOLIDATED_IMPLEMENTED.md](CONSOLIDATED_IMPLEMENTED.md).
@@ -864,3 +880,5 @@ Latest shell-ownership work:
 - [implemented/20260527_CODEX_SENSITIVE_HISTORY_SOURCE_NOTES_PHASE1.md](implemented/20260527_CODEX_SENSITIVE_HISTORY_SOURCE_NOTES_PHASE1.md) - Codex sensitive-history source notes Phase 1: seven Srebrenica/Zepa event rows now carry provenance-only source notes with a bounded regression test.
 - [implemented/20260527_CODEX_EVENT_SOURCE_NOTES_PHASE2.md](implemented/20260527_CODEX_EVENT_SOURCE_NOTES_PHASE2.md) - Codex event source notes Phase 2: 15 additional cleared event rows now carry provenance-only source notes; remaining uncited event rows are explicitly gated.
 - [proposals/20260527_CODEX_GATED_EVENT_ROW_REVIEW_PACKET.md](proposals/20260527_CODEX_GATED_EVENT_ROW_REVIEW_PACKET.md) - Review packet for the three remaining uncited event rows that need historian/canon/design review before runtime edits.
+
+**2026-10-27 execution consistency — calibration HOLD:** [Candidate coverage and unresolved contracts](audits/20261027_EXECUTION_CONSISTENCY_CONTRACT.md) records known-input/authority/root repairs, owner-ratified fatigue rates, actual adapter/cold-reload checks and unresolved garrison/definitive-harness equivalence. Source review and aggregate acceptance remain required.

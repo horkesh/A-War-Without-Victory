@@ -1,0 +1,50 @@
+{
+  "schema": "audit-output-boundary-incident.v1",
+  "recorded": "2026-10-26",
+  "explanation": "Both delegated retained audits wrote new output files under C:/tmp instead of inside the authorized worktree. Root copied only those explicitly identified output directories into the intended worktree, verifying every byte. The outside originals remain untouched; no deletion or move was performed.",
+  "limits": "This is an output-location instruction violation. It does not establish a broad outside-worktree filesystem audit. The workers report no gameplay/source/test changes. Future handoffs must give the full absolute destination, with readable instructions.",
+  "files": [
+    {
+      "original": "C:\\tmp\\player-bot-capability-parity-20261026\\calibration-health-resolution-v1\\extract_retained.cjs",
+      "copy": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261026\\calibration-health-resolution-v1\\extract_retained.cjs",
+      "bytes": 3702,
+      "sha256": "f98de68553d5dd7d0adf0d35e113fa294059c24901da8151bb6c1c60ce39d049"
+    },
+    {
+      "original": "C:\\tmp\\player-bot-capability-parity-20261026\\calibration-health-resolution-v1\\MACHINE.json",
+      "copy": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261026\\calibration-health-resolution-v1\\MACHINE.json",
+      "bytes": 2071,
+      "sha256": "86e709fb04ee4e0fa2dce1d8c8f8d6cd9c3456f5a1f9fd645b26974d2fb2b4cb"
+    },
+    {
+      "original": "C:\\tmp\\player-bot-capability-parity-20261026\\calibration-health-resolution-v1\\REPORT.md",
+      "copy": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261026\\calibration-health-resolution-v1\\REPORT.md",
+      "bytes": 3726,
+      "sha256": "28540564e41e529e3134041c4c0e818f77f31ff71c41c4bca852a41845cfb659"
+    },
+    {
+      "original": "C:\\tmp\\player-bot-capability-parity-20261026\\calibration-health-resolution-v1\\retained-extraction.json",
+      "copy": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261026\\calibration-health-resolution-v1\\retained-extraction.json",
+      "bytes": 289169,
+      "sha256": "3b9b8aa8476a70679602419ba8648ff5d69e48df424cfe9c2c9d13027428a5ca"
+    },
+    {
+      "original": "C:\\tmp\\player-bot-capability-parity-20261026\\calibration-health-resolution-v1\\SOURCE_BINDINGS.json",
+      "copy": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261026\\calibration-health-resolution-v1\\SOURCE_BINDINGS.json",
+      "bytes": 2487,
+      "sha256": "9e0dccecc7c5b2beaaff2fe7447aa6c3e8d6af3376dd85b35cd25418c50fb4ab"
+    },
+    {
+      "original": "C:\\tmp\\player-bot-capability-parity-20261026\\calibration-circle-delivery-v1\\EVIDENCE.json",
+      "copy": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261026\\calibration-circle-delivery-v1\\EVIDENCE.json",
+      "bytes": 14024,
+      "sha256": "e606b67e5b870154da98ca49def306010323c1f3570a7e1c6eb8fcb15646506f"
+    },
+    {
+      "original": "C:\\tmp\\player-bot-capability-parity-20261026\\calibration-circle-delivery-v1\\FINDING.md",
+      "copy": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261026\\calibration-circle-delivery-v1\\FINDING.md",
+      "bytes": 3574,
+      "sha256": "69254c12498aeecaa4ad6c1864b38f8c231c65822ecc2c0714c0c23d79a4d40f"
+    }
+  ]
+}

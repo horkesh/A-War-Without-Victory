@@ -1,0 +1,53 @@
+{
+  "schema": "awwv.postturn-gate.retention-correction-preexecution-review.v1",
+  "reviewed_at": "2026-10-25",
+  "base_head": "b30597f49aad99032781c251b41a9de886cce3be",
+  "decision": "GO_EXACT_FROZEN_SEQUENCE_ONCE",
+  "simulation_executed_by_reviewer": false,
+  "frozen_plan": {
+    "path": "FROZEN_COMMANDS.json",
+    "sha256": "47cd2d9a0b9ccd43a4abd6e7a03f83a8b52b01f4cecac426fee4089ab203e247"
+  },
+  "verified_bindings_sha256": {
+    "src/scenario/scenario_runner.ts": "b811a55f165a1664e87b48be28008ada9fec7486ddb5c049b2013fbf78bd0972",
+    "tests/current-scenario-postturn-boundary.test.ts": "246259561471affbaa7617f4c92ef6f67a6101abf1aa64b669e18c6acd5b61e3",
+    "retention-correction-v1/launch.cjs": "de73b3e5feb3d359b55e24635c8c7ea34ccd9a052f274cd9e15dee032321b914",
+    "retention-correction-v1/invoke-frozen.cjs": "491233cf16677c644f55127d6bd429536dba1bf28398c8f92ad46a33418e32a2",
+    "tools/diagnostics/run_preserved_preflight.cjs": "3933e010daf15938d026692e732e401d5ce50e1e0656d546e4697723e9a7779e",
+    "test-source-before-correction/current-scenario-postturn-boundary.pre-retention-correction.test.ts": "e8aee8edf75ca336aa98f76bf98872aa4587dc9452e5a8a51ee2c442f84d0c34"
+  },
+  "review": {
+    "optional_mode": "Retention activates only when AWWV_POSTTURN_GATE_TEST_OUTPUT_ROOT is supplied. With the variable absent, the test still uses OS mkdtemp roots and removes them in its existing finally blocks, so default CI cleanup behavior is preserved.",
+    "exclusive_root": "The frozen launcher derives a sibling root from the fresh wrapper attempt directory and rejects any pre-existing root. The test creates that root and every sequenced child directory with non-recursive mkdir, so existing paths cannot be silently reused or overwritten.",
+    "owned_paths": "All retained labels are fixed test constants without path separators. The registry is written inside the exclusive root and records each owned directory immediately after creation.",
+    "no_delete": "cleanupTemporaryArtifactDirectory performs recursive removal only when retention is disabled. In the frozen retained run every scenario output and the generated peace fixture remain under the new sibling root; no retained or protected path is deleted.",
+    "failure_preservation": "If a scenario or assertion fails after an owned directory is registered, finally cleanup is a no-op and the directory remains. Vitest afterAll normally writes the recursive manifest even after assertion/test failures. On abrupt worker termination or timeout, partial registered artifacts remain but a final manifest may be absent; CHILD_RESULT records root/registry/manifest presence as null/false rather than fabricating completion.",
+    "manifest": "On normal suite completion, afterAll recursively enumerates files in deterministic sorted path order, excludes only the manifest being created, and writes a write-once manifest containing relative path, byte count, and SHA-256 for every file, including the final registry. The launcher hashes both registry and manifest and records the manifest artifact_count in CHILD_RESULT.",
+    "wrapper_contract": "The preserved wrapper retains raw FD stdout and stderr separately, snapshots the launcher, allows only CHILD_RESULT in the attempt directory, enforces 180000 ms, records exit/signal/spawn/timeout and artifact-contract state, and never inventories the sibling root as if it were an attempt artifact. CHILD_RESULT cryptographically links that sibling through registry/manifest hashes.",
+    "source_test_scope": "Production source remains at the reviewed b811a55f hash. The pre-retention maintained test is preserved byte-exact at e8aee8...; the test-only diff adds retention plumbing and labels without changing the three behavioral assertions.",
+    "gap_honesty": "GAP.json explicitly records that earlier RED/GREEN scenario directories were deleted, merged console logs are not raw separated streams, and no reconstruction occurred. New retained output must not be represented as the missing earlier state."
+  },
+  "freshness": {
+    "attempt_06_focused_green_absent": true,
+    "attempt_06_scenario_artifacts_absent": true,
+    "attempt_07_typecheck_absent": true
+  },
+  "exact_execution": [
+    "Recheck FROZEN_COMMANDS.json and every verified binding hash above immediately before execution.",
+    "Execute only the frozen focused-green argv once, either directly as the JSON argument array or through invoke-frozen.cjs focused-green at its reviewed hash.",
+    "Stop on any focused-green wrapper/child/test/artifact/manifest failure; preserve all evidence and do not retry or run TypeScript.",
+    "Only after focused-green passes, execute only the frozen typecheck argv once, directly or through invoke-frozen.cjs typecheck at its reviewed hash.",
+    "Stop on any typecheck failure; preserve evidence and do not retry."
+  ],
+  "pass_criteria": {
+    "focused_green": "wrapper_exit=0, child_exit=0, three tests pass, artifact contract passes, CHILD_RESULT matches source/test hashes, and the sibling root has a registry plus a recursive manifest whose entries and hashes verify against every retained file.",
+    "typecheck": "wrapper_exit=0, child_exit=0, TypeScript exits 0, and artifact contract passes."
+  },
+  "limits": [
+    "This run repairs evidence retention only; it does not recreate or replace the deleted earlier RED/GREEN states.",
+    "An abrupt killed process can preserve partial outputs without a final manifest. Such a result is a failure with partial evidence, not a complete artifact set.",
+    "Existing six-contract evidence is reused and must not be rerun here.",
+    "No source, campaign, native, package, full-suite, history, tuning, or calibration work is authorized by this GO."
+  ],
+  "reviewer_source_or_test_changes": false
+}

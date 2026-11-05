@@ -1,0 +1,34 @@
+{
+  "schema": "awwv.757.pre-t3-stale-operation-march-correction-inventory.v1",
+  "head": "eed73dc0c66ed291b67b9547b96702ecb2797d73",
+  "outputs": ["result.json", "inventory.json", "closed-receipt.json"],
+  "changed_paths": [
+    "src/sim/combat/commander_march_correction.ts",
+    "src/sim/turn_phases/war_phases.ts",
+    "tests/mistral_prisoje_turn_order.test.ts",
+    "tests/stale_operation_march_reconciliation.test.ts"
+  ],
+  "correction_attempts": [
+    { "path": "logs/claude-channel-20261004/757-correction-red-a", "child_exit": 1, "wrapper_exit": 1 },
+    { "path": "logs/claude-channel-20261004/757-correction-green-a", "child_exit": 0, "wrapper_exit": 0 },
+    { "path": "logs/claude-channel-20261004/757-correction-noemit-a", "child_exit": 0, "wrapper_exit": 0 }
+  ],
+  "telemetry_archives": [
+    { "path": "479C-before-full.jsonl", "bytes": 100107701, "sha256": "8d242e18f199a54c26f755e648fe4612159563ec0b606930112653770d725f3c" },
+    { "path": "479C-after-full.jsonl", "bytes": 100107701, "sha256": "8d242e18f199a54c26f755e648fe4612159563ec0b606930112653770d725f3c" },
+    { "path": "479D-before-full.jsonl", "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3" },
+    { "path": "479D-after-full.jsonl", "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3" }
+  ],
+  "review_pins": [
+    { "path": "logs/claude-channel-20261004/758-independent-review.json", "bytes": 6277, "sha256": "34053ad3ff0453acc8e400f62385973742edba97e54d7f2c425e6ac395bf88c1" },
+    { "path": "logs/claude-channel-20261004/758-independent-review.md", "bytes": 5726, "sha256": "e3555f8d385788006c0e8df0c2918a28dcc8bc355239e3efc28e945bb47a31b1" }
+  ],
+  "original_757_seal_unchanged": true,
+  "preservation": {
+    "C_prefix_preserved": true,
+    "C_append_bytes": 0,
+    "D_exact": true,
+    "protected_native_and_receipt_pins_reused": true,
+    "restore_truncate_cleanup_delete": false
+  }
+}

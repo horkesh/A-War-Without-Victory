@@ -1,0 +1,86 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T05:26:33.044Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/n94-resume-power-seam-wrapper-01",
+  "timeout_ms": 120000,
+  "original_argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "--import",
+    "tsx",
+    "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/replay-n94-power-seam.mts",
+    "--evidence-dir",
+    "{evidenceDir}",
+    "--run-dir",
+    "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/n94-resume-power-seam-run-01"
+  ],
+  "argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "--import",
+    "tsx",
+    "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/replay-n94-power-seam.mts",
+    "--evidence-dir",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\native703-capability-diagnosis\\n94-resume-power-seam-wrapper-01",
+    "--run-dir",
+    "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/n94-resume-power-seam-run-01"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "launch.json",
+    "result.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/replay-n94-power-seam.mts",
+    "bytes": 17967,
+    "raw_sha256": "4ce5cd903c00f9fc1a89f0cc4b03b48f511e4e574572c8f7f872b2ce93bcffd6",
+    "normalized_text_sha256": "4ce5cd903c00f9fc1a89f0cc4b03b48f511e4e574572c8f7f872b2ce93bcffd6",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 17967,
+      "sha256": "4ce5cd903c00f9fc1a89f0cc4b03b48f511e4e574572c8f7f872b2ce93bcffd6"
+    }
+  },
+  "end_utc": "2026-10-25T05:26:39.570Z",
+  "pid": 24172,
+  "child_exit": 1,
+  "wrapper_exit": 1,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/replay-n94-power-seam.mts",
+    "bytes": 17967,
+    "raw_sha256": "4ce5cd903c00f9fc1a89f0cc4b03b48f511e4e574572c8f7f872b2ce93bcffd6",
+    "normalized_text_sha256": "4ce5cd903c00f9fc1a89f0cc4b03b48f511e4e574572c8f7f872b2ce93bcffd6",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 8044,
+    "sha256": "fb6b8677618c7641caa741bc7882c8a3febec6a890902840d04195c565645d2d"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 4890,
+    "sha256": "786707fc2c99340831cbfb212255ea93848318d33fabccd9db85e4106786c2b5"
+  },
+  "retained_artifacts": [
+    {
+      "path": "launch.json",
+      "bytes": 9821,
+      "sha256": "a722705e25c93d464ed79c37f5222e77edb75a7abf5039409b9edcbf0f6b8145"
+    },
+    {
+      "path": "result.json",
+      "bytes": 5237,
+      "sha256": "3520d3f37e033db41a88b2507ea49ea05e767dbd25cdee20dede23f9a4649a21"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

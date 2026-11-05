@@ -1294,6 +1294,46 @@ async function runFoundationalFlow(page, summary) {
   await dismissTutorialIfPresent(page);
   summary.evidence.warStartFoundationalFlow = true;
   await captureEvidence(page, summary, 'after_foundational_decision');
+  await resolveParamilitaryOpeningPolicyWithHistoricalDefault(page, summary);
+}
+
+// Since 4af70df91 the player also answers the pre-first-advance "Paramilitary Authorization
+// Policy" decision before the surfaces are usable. Answer only that named decision, with the one
+// option the game itself badges "Historical default"; record it; fail if the badge is ambiguous.
+// Mirrors tools/ui/first_hour_browser_gate.cjs.
+const PARAMILITARY_OPENING_POLICY_TITLE = 'Paramilitary Authorization Policy';
+async function resolveParamilitaryOpeningPolicyWithHistoricalDefault(page, summary) {
+  const appeared = await page.waitForFunction(
+    (title) => document.body.innerText.includes(title),
+    { timeout: 5000 },
+    PARAMILITARY_OPENING_POLICY_TITLE,
+  ).then(() => true, () => false);
+  if (!appeared) {
+    summary.evidence.paramilitaryOpeningPolicy = { presented: false };
+    return;
+  }
+  const chosen = await page.evaluate(() => {
+    const buttons = Array.from(document.querySelectorAll('[data-testid="event-decision-response"]'))
+      .filter((el) => {
+        const rect = el.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0 && /historical default/i.test(el.textContent || '');
+      });
+    if (buttons.length !== 1) return { ok: false, count: buttons.length };
+    const label = (buttons[0].getAttribute('aria-label') || buttons[0].textContent || '').replace(/\s+/g, ' ').trim();
+    buttons[0].click();
+    return { ok: true, label };
+  });
+  if (!chosen.ok) {
+    throw new Error(`${PARAMILITARY_OPENING_POLICY_TITLE}: expected exactly one visible historical-default response, found ${chosen.count}`);
+  }
+  await page.waitForFunction(
+    (title) => !document.body.innerText.includes(title),
+    { timeout: 15000 },
+    PARAMILITARY_OPENING_POLICY_TITLE,
+  );
+  await dismissTutorialIfPresent(page);
+  summary.evidence.paramilitaryOpeningPolicy = { presented: true, response: chosen.label };
+  await captureEvidence(page, summary, 'after_paramilitary_opening_policy');
 }
 
 async function runSurfaceSweep(page, summary) {

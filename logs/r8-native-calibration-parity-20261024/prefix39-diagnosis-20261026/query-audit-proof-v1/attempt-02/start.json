@@ -1,0 +1,41 @@
+{
+  "schema": "awwv.preserved-preflight.start.v1",
+  "start_utc": "2026-10-26T00:52:17.696Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/later-native-force-query-20261026-v1/attempt-02",
+  "timeout_ms": 60000,
+  "original_argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "--import",
+    "file:///C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/node_modules/tsx/dist/loader.mjs",
+    "tmp/player-bot-capability-parity-20261024/later-native-force-query-20261026-v1/query_only.cjs",
+    "{evidenceDir}"
+  ],
+  "argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "--import",
+    "file:///C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/node_modules/tsx/dist/loader.mjs",
+    "tmp/player-bot-capability-parity-20261024/later-native-force-query-20261026-v1/query_only.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\later-native-force-query-20261026-v1\\attempt-02"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "PRECHECK.json",
+    "turn-016-STATIC.json",
+    "turn-025-STATIC.json",
+    "turn-030-STATIC.json",
+    "final-039-STATIC.json",
+    "RESULT.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/later-native-force-query-20261026-v1/query_only.cjs",
+    "bytes": 5510,
+    "raw_sha256": "13da2fc5d9b8cbb8eacf92c78bdfcf5c4f7fe226463b9ede0d6ca4d2ce2cd853",
+    "normalized_text_sha256": "ac945d3b77a56db9977fcbf827f4c36db59cd81db87b95303eba8af34596ae7c",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 5510,
+      "sha256": "13da2fc5d9b8cbb8eacf92c78bdfcf5c4f7fe226463b9ede0d6ca4d2ce2cd853"
+    }
+  }
+}

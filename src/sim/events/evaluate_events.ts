@@ -419,6 +419,120 @@ const DEFAULT_BOT_COMMANDER = { aggressiveness: 3, competence: 3 };
  */
 const POLITICAL_LOGICS = new Set<string>(['strategic_weighted', 'capital_based', 'capital_weighted']);
 
+/** Firing, part 1: mechanical effects, definition-level shifts/flags and flag causality. */
+function applyFiringEffects(state: GameState, def: EventDefinition, currentTurn: number): void {
+    // Collect all effects and apply mechanical ones (primary + additional)
+    const effects = collectEffects(def);
+    applyEventEffects(state, effects);
+
+    // Apply dimension_shifts and sets_flags from the definition itself
+    applyDefinitionDimensionShifts(state, def.dimension_shifts);
+    applyDefinitionFlags(state, def.sets_flags);
+    // Phase B Sub-slice B3: record flag-open causality entries for
+    // event-level `sets_flags` (packet §3.4). Iteration over Object.keys
+    // sorted via strictCompare for determinism (CLAUDE.md sacred rules).
+    if (def.sets_flags) {
+        const flagKeys = Object.keys(def.sets_flags).slice().sort(strictCompare);
+        for (const flagKey of flagKeys) {
+            recordCausality(state, {
+                turn: currentTurn,
+                from_event: def.id,
+                to_event: null,
+                to_flag: flagKey,
+                kind: 'opens_flag',
+            });
+        }
+    }
+}
+
+/** Firing, part 2: once-only receipt, fire count/turn, enables causality, pressure reset. */
+function recordFiringReceipts(
+    state: GameState,
+    def: EventDefinition,
+    currentTurn: number,
+    firedIds: string[],
+): void {
+    // Track once-only events
+    if (def.once) {
+        firedIds.push(def.id);
+    }
+
+    // Record fire count and last-fired turn (for ALL events, not just recurring)
+    recordEventFiring(state, def.id, currentTurn);
+
+    // Record enabled events (event-level `enables_events`).
+    // Phase B Sub-slice B3: Append causality entries for each enabled target
+    // (packet §3.4). Iteration uses authored order; recordCausality sorts
+    // the log canonically before write.
+    if (def.enables_events && def.enables_events.length > 0) {
+        for (const targetId of def.enables_events) {
+            recordCausality(state, {
+                turn: currentTurn,
+                from_event: def.id,
+                to_event: targetId,
+                to_flag: null,
+                kind: 'enables',
+            });
+        }
+    }
+    recordEnabledEvents(state, def.enables_events);
+
+    // Reset pressure readiness after firing (pressure events only)
+    if (def.pressure && state.military.event_readiness) {
+        state.military.event_readiness[def.id] = 0;
+    }
+}
+
+/**
+ * Causally-owed follow-ups at war termination.
+ *
+ * When play ends (`meta.game_over`) on `terminalTurn`, no later turn evaluates events,
+ * so a no-choice record whose prerequisite fired on that very turn and whose window
+ * opens on the next turn would be silently lost. This writes each such record once,
+ * stamped at its own opening turn (`terminalTurn + 1`, its retrospective date).
+ *
+ * Owed means ALL of: once-only, not yet fired, no response options, no pressure gate,
+ * a single-turn window at `terminalTurn + 1`, every `requires_events` entry fired, at
+ * least one of them fired on `terminalTurn`, every prerequisite's own window closing
+ * on `terminalTurn` (so the record is a dated retrospective of a parent that could
+ * only have fired then — not an open-ended future consequence such as a later
+ * atrocity whose trigger merely opened), and the row is otherwise eligible at
+ * `terminalTurn + 1` (closure, requires_enabled, window, phase, condition). No combat,
+ * no decision, no other event evaluation. Canonical order → deterministic.
+ */
+export function fireOwedFollowUpsAtTermination(
+    state: GameState,
+    registry: EventDefinition[],
+    terminalTurn: number,
+    edges?: EdgeRecord[],
+): FiredEvent[] {
+    if (state.meta.game_over !== true) return [];
+    const owedTurn = terminalTurn + 1;
+    const firedIds = (state.military.fired_event_ids ??= []);
+    const lastFired = state.military.event_last_fired_turn ?? {};
+    const byId = new Map(registry.map((def) => [def.id, def]));
+    const owed = [...registry].sort(compareEventCandidates).filter((def) => {
+        const requires = def.trigger.requires_events ?? [];
+        return def.once === true
+            && !firedIds.includes(def.id)
+            && !(def.response_options && def.response_options.length > 0)
+            && !def.pressure
+            && def.trigger.turn_min === owedTurn
+            && def.trigger.turn_max === owedTurn
+            && requires.length > 0
+            && requires.every((id) => firedIds.includes(id) && byId.get(id)?.trigger.turn_max === terminalTurn)
+            && requires.some((id) => lastFired[id] === terminalTurn)
+            && isCandidateEligible(def, state, owedTurn, edges);
+    });
+    const fired: FiredEvent[] = [];
+    for (const def of owed) {
+        applyFiringEffects(state, def, owedTurn);
+        fired.push({ id: def.id, text: getNarrativeText(def) });
+        recordFiringReceipts(state, def, owedTurn, firedIds);
+    }
+    return fired;
+}
+
 /**
  * Evaluate events for the current turn. Deterministic: same state and turn -> same fired list.
  * Phase 1: Collect candidates (recurrence gating and trigger/pressure matching).
@@ -577,28 +691,7 @@ export function evaluateEvents(
 
     // Phase 3: Fire selected events through one shared effect/receipt writer.
     const fireEvent = (def: EventDefinition): void => {
-        // Collect all effects and apply mechanical ones (primary + additional)
-        const effects = collectEffects(def);
-        applyEventEffects(state, effects);
-
-        // Apply dimension_shifts and sets_flags from the definition itself
-        applyDefinitionDimensionShifts(state, def.dimension_shifts);
-        applyDefinitionFlags(state, def.sets_flags);
-        // Phase B Sub-slice B3: record flag-open causality entries for
-        // event-level `sets_flags` (packet §3.4). Iteration over Object.keys
-        // sorted via strictCompare for determinism (CLAUDE.md sacred rules).
-        if (def.sets_flags) {
-            const flagKeys = Object.keys(def.sets_flags).slice().sort(strictCompare);
-            for (const flagKey of flagKeys) {
-                recordCausality(state, {
-                    turn: currentTurn,
-                    from_event: def.id,
-                    to_event: null,
-                    to_flag: flagKey,
-                    kind: 'opens_flag',
-                });
-            }
-        }
+        applyFiringEffects(state, def, currentTurn);
 
         const text = getNarrativeText(def);
         fired.push({ id: def.id, text });
@@ -770,35 +863,7 @@ export function evaluateEvents(
             }
         }
 
-        // Track once-only events
-        if (def.once) {
-            firedIds.push(def.id);
-        }
-
-        // Record fire count and last-fired turn (for ALL events, not just recurring)
-        recordEventFiring(state, def.id, currentTurn);
-
-        // Record enabled events (event-level `enables_events`).
-        // Phase B Sub-slice B3: Append causality entries for each enabled target
-        // (packet §3.4). Iteration uses authored order; recordCausality sorts
-        // the log canonically before write.
-        if (def.enables_events && def.enables_events.length > 0) {
-            for (const targetId of def.enables_events) {
-                recordCausality(state, {
-                    turn: currentTurn,
-                    from_event: def.id,
-                    to_event: targetId,
-                    to_flag: null,
-                    kind: 'enables',
-                });
-            }
-        }
-        recordEnabledEvents(state, def.enables_events);
-
-        // Reset pressure readiness after firing (pressure events only)
-        if (def.pressure && state.military.event_readiness) {
-            state.military.event_readiness[def.id] = 0;
-        }
+        recordFiringReceipts(state, def, currentTurn, firedIds);
     };
 
     for (const def of toFire) {

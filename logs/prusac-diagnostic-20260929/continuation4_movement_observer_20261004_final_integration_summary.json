@@ -1,0 +1,162 @@
+{
+  "scope": "final terminal type-only integration supplement; preparation only",
+  "base_commit": "bdb3acc9cc14d09f1eed8a5691d6451a4fcb7af1",
+  "pre_hook_parent": "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_reviewed_summary.json",
+  "preparation_review": "GO; accepted observer/reader evidence reused",
+  "type_only_review": "GO; four fixture annotations/casts, no runtime change",
+  "current_focused": {
+    "exit": 0,
+    "files": 2,
+    "tests": 32,
+    "log": "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_type_fix_green.log"
+  },
+  "reader_syntax": {
+    "exit": 0,
+    "reused": "reader unchanged since actor_syntax0"
+  },
+  "final_weekly_bridge": {
+    "exit": 0,
+    "selected_tests": 1,
+    "skipped_tests": 3,
+    "log": "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_final_bridge.log",
+    "scope": "controlled fixture, existing legacy-pressure fallback notice; no campaign health claim"
+  },
+  "required_hook": {
+    "first_exit": 1,
+    "first_errors": 4,
+    "diagnosis": "test fixture annotations only",
+    "retry_command": "git -c core.hooksPath=.husky commit -m \"Add opt-in named movement phase diagnostics\"",
+    "retry_result": "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_commit_retry2.exit.txt",
+    "final_binding": "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_final_binding.json",
+    "first_retry_exit": 1,
+    "first_retry_diagnosis": "TS2532: Array.at optional result after diagnostic type annotation; one erased nonnull assertion"
+  },
+  "preservation": "six parent/seven protected-source inventory reused; raw logs/runs intact; initial-summary overwrite/no-byte-backup exception retained",
+  "remaining_acceptance": [
+    "Original dirty n37 517th pre-order source/context/cause unbound; complete evaluator inputs still missing.",
+    "737th post-dispatch writer137-139 and subsequent Varosluk operation admission unmeasured.",
+    "Petrovac/Kljuc/Sanski ordinary combat by188 and strict Kljuc-before-Sanski; retained towns2/3.",
+    "All n25 matching OSIDs: Barevo/Lupnica/Majdan/Varosluk remain lost; separate timing/objective/route diagnoses.",
+    "Five Jajce HRHB gains: retained3/5; belt4/4 retained evidence is not new acceptance.",
+    "Protected controls, critical0, current Farz ruling/receipts, paint/control references, denominators and save compatibility remain required; retained passing receipts are reused.",
+    "Launch/axis join and explicit HV withdrawal receipts remain incomplete; literal31-input139 provenance criterion remains failed without waiver.",
+    "Required final full-suite/campaign/provenance/review acceptance is not granted by focused preparation."
+  ],
+  "campaign_authorized": false,
+  "push_merge_adoption": false,
+  "source_fingerprints": {
+    "src/sim/combat/movement_phase_diagnostic.ts": {
+      "sha256": "2bd875e6ca9df60838ad2e9ae2f29aba3129761ac515b5dd072387a5c6d49cb1",
+      "bytes": 7090
+    },
+    "src/sim/combat/reason_code_debug.ts": {
+      "sha256": "6d9f085f43e75c9166fe05fcdb39bb7666e194a1e17cfc5a9eb3637d259a810f",
+      "bytes": 9700
+    },
+    "src/sim/turn_pipeline.ts": {
+      "sha256": "df4f7a8815995bc05d7bfa0bd3d9b2b6d65d1ff53e181e09c62a4478d15d9076",
+      "bytes": 10991
+    },
+    "src/sim/turn_pipeline_types.ts": {
+      "sha256": "88fafd1665da2197e30596a259c4515072936ef0394bf94097dd06cd0875caa6",
+      "bytes": 36668
+    },
+    "src/scenario/scenario_reporting.ts": {
+      "sha256": "4462d71be7f1aee1edbd7d35019ab419ef154ef197c68dce1407102101ddbc91",
+      "bytes": 17851
+    },
+    "src/scenario/scenario_runner.ts": {
+      "sha256": "5a3ae5ab8cc00c4f8b9b8abe3368cad6f75c489bf3b38302d1ed2300dfe0b462",
+      "bytes": 197363
+    },
+    "tools/diagnostics/movement_phase_coverage.cjs": {
+      "sha256": "88cffc40abc12dcca52667f0d3293bcc3aba43f030bf8e5f65eaca614fbc474d",
+      "bytes": 11023
+    },
+    "tests/movement_phase_diagnostic.test.ts": {
+      "sha256": "3542ed2a7a012fe76eb4fb30d06a72c2198a47e9e376c327a6a8127ee333bc01",
+      "bytes": 9451
+    },
+    "tests/movement_phase_coverage_diagnostic.test.ts": {
+      "sha256": "563d0ee73b8b92c797b1acfb520ad8a9d83e1c38702880f8255403a2953fa978",
+      "bytes": 10771
+    },
+    "tests/reason_code_debug.test.ts": {
+      "sha256": "63d8aab3b3915c840f685a62946a75b2b0937871c41c4395c91d6c81d80e05d8",
+      "bytes": 9150
+    }
+  },
+  "artifact_fingerprints": {
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_reviewed_summary.json": {
+      "sha256": "9e3e41435ac875ac665a8a770b456d3d89c574727cb60ce69d590a7aeebd42ff",
+      "bytes": 20474
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_actor_correction_verification.md": {
+      "sha256": "b636787a625bb58c00033461676b6e2febd6aecc9d8553cbd7c6974527b3380a",
+      "bytes": 4712
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_type_fix_summary.md": {
+      "sha256": "5ae391c69592806503a4bb5adc1fb9df7c4ed17708344b4ad522528bfdbdd028",
+      "bytes": 2050
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_type_fix_verification.md": {
+      "sha256": "f78ac6210f6495a4a4144708bc4059851a7c9958562a111b4f84ae33b2884e0a",
+      "bytes": 3257
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_type_fix_green.log": {
+      "sha256": "f3a2bee17470cc10ff21c9fd9c7f2a19505e9df7686548276c8b3141110552c8",
+      "bytes": 1687
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_type_fix_green.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_commit.log": {
+      "sha256": "6616f1d67ec752a671e11e3963424bc75998235073888cfab7ea80e1389617d1",
+      "bytes": 511
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_commit.exit.txt": {
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_final_bridge.log": {
+      "sha256": "bae8a168892b144e1c216110595e9fac4cff48343aafb0bb10249d98b3892761",
+      "bytes": 1199
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_final_bridge.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_integration_summary.json": {
+      "sha256": "6b974972f1882c12bbafa8af95a068d64199f39429cbeb6ceb8a85bfdc50e72a",
+      "bytes": 6587
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_terminal_type_verification.md": {
+      "sha256": "d13baedba7734810e12b8be84e1de30a47a04253a9234b20240052c7890dac00",
+      "bytes": 2696
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_terminal_type_green.log": {
+      "sha256": "b34bc4ef5d3e592f66db5cf01d0dcac7f989034fa8386b41ff739f873deff0bc",
+      "bytes": 1199
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_terminal_type_green.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_commit_retry.log": {
+      "sha256": "71d11c7d897e0143e1c4b83e957a20aba01956f19f44ccfbde17a4554e7fb190",
+      "bytes": 96
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_commit_retry.exit.txt": {
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+      "bytes": 3
+    }
+  },
+  "parent_integration": "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_integration_summary.json",
+  "final_terminal_bridge": {
+    "exit": 0,
+    "selected_tests": 1,
+    "skipped_tests": 3,
+    "scope": "same successful producer/reader fixture after erased nonnull annotation"
+  }
+}

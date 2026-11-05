@@ -1,3 +1,295 @@
+## 2026-10-30 - Continuous ambient requests need command idempotence
+
+A repeated surface or gesture request may target an element already playing. Update volume without reissuing loop/play only after successful playback and explicit healthy state. Keep pending/rejected retries and stale-promise identity controls; paused=false alone is insufficient. This reduces redundant commands without exempting actual playback mutations from native QA. Mock tests prove command semantics; package/browser evidence remains separate. See [ambient reentry](PROJECT_LEDGER.md#2026-10-30---idempotent-continuous-ambient-playback-requests).
+
+## 2026-10-26 — Follow exact operation participation across command and projection boundaries
+
+A brigade's own corps may differ from the corps hosting its joint operation.
+Use the existing deterministic state-wide owner lookup for casualty/AAR credit;
+do not infer absence of an operation from a corps-local miss. Conversely, a generic
+movement-owner label and absence from the direct attacker array do not prove a
+handoff failure: exact producer and tactical-group donor receipts can establish
+lawful assembly and indirect combat participation. Krug's31st lineage contributed
+540/533/7 through its exact tactical-group/battle chain. The suspected movement
+bug was disproved, while the independent secondary-corps casualty drop was
+reproduced and repaired. [Dated evidence](PROJECT_LEDGER.md#2026-10-26--joint-casualty-host-ownership-source-repair).
+
+## 2026-10-23 — Treat operation completion as an ownership handoff
+
+An already disconnected participant can be exempt while its operation remains in recovery, then become genuinely unresolved when completion removes that owner after the sole stranded pass. A friendly controller at the current OSID does not prove reachability to same-corps sectors. Inspect raw pre/post-completion saves and final-seal output; load-time rebuilding can mask the gap. A repair must classify released participants using final topology, preserve surviving operation/movement owners and avoid a second attrition tick. Lighter UI observation can also change recruitment success: identical flags and initial bytes do not prove identical trajectories. See [Ajnie diagnostic](PROJECT_LEDGER.md#2026-10-23--ajnie-diagnostic-02-operation-release-gap-reproduced).
+
+The focused repair captures only current-pass completion IDs on transient TurnContext and folds classification into the existing final-distribution phase. Preserve conservative assignment/movement/loan/operation/enclave guards; stale records should remain visible to the unchanged collector. A positive no-receipt production control proves that classification is not a global rescan or warning waiver. See [focused handoff repair](PROJECT_LEDGER.md#2026-10-23--operation-completion-handoff-focused-repair).
+
+## 2026-10-23 — Bind desktop route, state and lifecycle evidence at the failed boundary
+
+A retained native save resumes the tactical surface: use the actual Desk transition before waiting for Warroom controls. Field Records -> exact Resume quicksave is the supported native load route; a stale Load Save locator or browser file-input import cannot prove it. Scope text measurements to the active dossier and exact instruction, not a broad first matching ancestor/title. Preserve before/after canonical bytes and derive expected hydrated projection from the frozen authoritative loader rather than deleting transient differences. Keep per-turn states and complete buffered process lines: a later repaired assignment cannot excuse an earlier final-seal warning. Keep provenance fingerprinting sequential with live probes whose profiles are included in that fingerprint. See [R8 follow-up](PROJECT_LEDGER.md#2026-10-23--r8-saveload-prerequisites-and-reviewed-shakedown-follow-up).
+
+## 2026-10-23 — Keep a reference correction distinct from historical run provenance
+
+For an explicitly owner-approved paint correction, preserve the original reference and raw run metadata. Prove that the controller map changes only the named cell, metadata remains consistent, and every other consumed input is exact. If consumer review proves paint is post-simulation scoring only, re-evaluate the retained campaign with one exact old/new reference-hash exception; do not relabel its historical stamp current-exact or rerun unchanged gameplay for reassurance. Keep raw failed suites RED and close documentation-only corrections with fresh affected checks plus unaffected broad coverage. See [Toljenak repaint](PROJECT_LEDGER.md#2026-10-23--owner-approved-toljenak-april-repaint-and-validation-closure).
+
+## 2026-10-23 — Separate native causality from an overconstrained calibration reader
+
+An authored staging anchor need not be a mandatory waypoint for a brigade already adjacent to the objective. Inspect ordinary column orders/transit and the full contact graph before treating saved positions as failed delivery. Nongated ownership can be proven by exact native operation/attacker/battle/control-event joins; do not demand a gated receipt or invent an absent artifact. Check reference chronology before expensive validation: a historically earlier capture held continuously cannot also match an intervening enemy-painted checkpoint. Preserve the failed reader and record the explicit authority conflict instead of manufacturing a recapture or silently waiving a gate. See [n92 measurement](PROJECT_LEDGER.md#2026-10-23--toljenak-n92-measured-result-and-reference-conflict).
+
+## 2026-10-23 — Date opportunity admission from the real operation clock
+
+`planning_duration` is a march/preparation budget, not a mandatory delay: ready operations may execute after one full planning turn. Prove authored timing with the real preparation, movement and order-emission chain before selecting a date window. A late `ALL_PRE_PLANNED` roster can reserve participants from the start of a campaign; a dated opportunity avoids that earlier reservation effect. Modern OOB availability does not establish historical formation existence: label predecessor/model allocations and reject later-created formations. See [Toljenak Behar-I](PROJECT_LEDGER.md#2026-10-23--toljenak-behar-i-focused-candidate).
+
+## 2026-10-22 — Pair selected-pool write operands with phase continuity
+
+A transfer receipt cannot identify earlier pool credits. Record actual reached write operands alongside selected-pool phase snapshots and terminal attempt/error manifests; reject missing zero-change records and cross-turn discontinuity. Default-off hooks must preserve original guard/access order, and output errors must remain outside gameplay. This qualifies future measurement, not a recovered historical writer receipt. See [Pale observer](PROJECT_LEDGER.md#2026-10-22--pale-pool-flow-observer-preparation-825828).
+
+## 2026-10-22 — Preserve the distinction between writer class and branch receipt
+
+An initial wounded count plus a complete canonical militia-battle projection can exclude later WIA return, supporting a positive writer phase by elimination. State the projection assumption. That does not reveal direct/shared mobilization amounts or subsequent decay. Also, a frozen synthesis after failed finalizers must retain those exits and must not inherit an unrelated passing receipt. See [Pale source trace](PROJECT_LEDGER.md#2026-10-22--retained-pale-upstream-writer-phase-trace-821824).
+
+## 2026-10-22 — Measure pool availability before attributing a short transfer
+
+The n84 Pale receipt has no earlier recipient and zero reserve at turn22: raw111 equals effective111 and all111 transfers lawfully. A shortfall against need400 therefore does not establish competition or a reservation defect. Trace the upstream net pool balance between observed stage boundaries before proposing an allocation fix. See [Pale measurement](PROJECT_LEDGER.md#2026-10-22--n84-pale-allocation-diagnostic-817820).
+
+## 2026-10-22 — Check serialized fields against the real artifact contract
+
+WeeklyReportRow exposes week_index copied from state.meta.turn; it does not serialize row.turn. A preflight must verify that actual contract rather than requiring both names. A false checker failure is not engine evidence or campaign coverage; preserve the failure and prove the smallest correction against retained positive and mutated negative artifacts. See [prelaunch stop](PROJECT_LEDGER.md#2026-10-22--pale-diagnostic-prelaunch-stop-and-checker-correction-813816).
+
+## 2026-10-22 — Balance conservation cannot prove receipt completeness
+
+Removing a skipped or zero-transfer recipient preserves pool balances. Strict allocation coverage therefore needs a producer-side ordered attempt manifest and diagnostic-error flag, followed by whole-stream semantic validation before selection. Explicit invocation counts and completed-turn ordering catch duplicate/reordered blocks. See [reader closeout](PROJECT_LEDGER.md#2026-10-22--strict-allocation-reader-and-completeness-contract-809812).
+
+## 2026-10-22 — Neutrality includes guard access order
+
+Ordinary state/report parity can miss a metadata hook that reads a field or helper before an existing early guard. Preserve production access order; resolve optional skip metadata lazily inside caught observer code, and pin access counts with a skipped-path throwing getter control. See [allocation observer](PROJECT_LEDGER.md#2026-10-22--shared-pool-allocation-receipt-and-fixture-805808).
+
+## 2026-10-22 — Effective availability is not raw pool opening
+
+A recipient writer may report pool availability after earlier recipients and spawn reserves. Do not call that raw opening, infer reserve0 or infer a different historical transfer from end-of-turn strength. Preserve raw/reserve/effective/ordered-recipient/debit/closing boundaries and check conservation in focused fixtures. See [Pale allocation trace](PROJECT_LEDGER.md#2026-10-22--pale-allocation-boundary-remains-unmeasured-801804).
+
+## 2026-10-22 — Inventory only closed output streams
+
+A sealing process can hash its own stdout before its final line arrives. Preserve the original claim and use a fresh post-close inventory outside the inventoried scope; verify final bytes, including seal outputs. Matching endpoints do not prove an unobserved historical writer or allocation. See [n83 measurement](PROJECT_LEDGER.md#2026-10-22--n83-personnel-and-probe-measurement-797800).
+
+## 2026-10-22 — Fixture faction maps must agree with control ownership
+
+A second Map entry with the same faction key can overwrite its own friendly set and make a passing receipt test classify friendly territory as an enemy objective. Build unique faction sets from the fixture control map and assert own/enemy membership before validating emitted detail. See [selector reconciliation](PROJECT_LEDGER.md#2026-10-22--receipt-selector-assertion-reconciled-793796).
+
+## 2026-10-21 — Reader positives must come from the producer
+
+A hand-authored valid-status label does not prove that its fields can occur. Capture each reachable branch through the actual emitter, then mutate copies to reject contradictory stage, filter, rank and selection fields. Include zero-coverage and fresh-checkout dependency controls. A Vitest launcher snapshot does not preserve evolving test/tool versions; capture those separately when intermediate reproduction is required. See [reader repair](PROJECT_LEDGER.md#2026-10-21--producer-bound-reader-repair-789792).
+
+## 2026-10-05 — A capture hash and execution linkage are separate evidence
+
+A hash can verify a source archive's bytes without proving a particular run used
+them. Commit plus dirty=true records neither the dirty patch nor its execution
+identity. Request the capture and its run linkage; bounded absence does not prove
+global unrecoverability, and a new clean run does not supply historical linkage.
+See [provenance disposition](PROJECT_LEDGER.md#2026-10-05--original-dirty517-source-provenance-requested-criterion-remains-open).
+
+## 2026-10-05 — Shared selection models do not bind historical selected sets
+
+Two callers can share a multi-member model while filters, phase or modifiers
+produce different actual sets. Reject a fixed one-member design only; source
+similarity cannot establish historical cardinality or reconcile a ratio gap.
+Diagnostic topics that add report fields are not automatically stdout-only or
+state-neutral observations.
+See [qualified source comparison](PROJECT_LEDGER.md#2026-10-05--defender-source-comparison-qualified-dirty517-provenance-next).
+
+## 2026-10-05 — A primary defender label does not define a prediction set
+
+A weekly battle row can name one primary defender while participant histories
+record several defenders. Those summaries do not reveal which defenders the
+order predictor selected. Compare actual selection functions and phases before
+proposing instrumentation or treating a ratio difference as a defect.
+See [battle tuple disposition](PROJECT_LEDGER.md#2026-10-05--battle-tuple-gate-and-multiple-defender-summaries-bounded).
+
+## 2026-10-05 — Keep forecast and resolved battle quantities separate
+
+A recorded forecast and a resolved battle ratio can differ without identifying
+the reason. Bind both input tuples and their phases before classifying that gap.
+A rounded ratio can fit an outcome band without proving the exact resolver call;
+an unchanged objective index does not establish a universal capture prerequisite.
+See [Sanski disposition](PROJECT_LEDGER.md#2026-10-05--stari-majdan-battle-and-sanski-endpoint-bounded-battle-tuple-next).
+
+## 2026-10-05 — Positive order decisions refine an aggregate zero
+
+Authored withdrawal and endpoint absence support a reconstruction without
+a captured action. Positive survivor order labels distinguish no current objective
+from transit; aggregate eligibility zero alone cannot do this. Launch-time details
+can retain removed members. Bind source and exact generator phase separately.
+See [Jajce disposition](PROJECT_LEDGER.md#2026-10-05--jajce-withdrawal-and-survivor-orders-bounded-sanski-combat-next).
+
+## 2026-10-05 — Stop endpoint confirmation and reuse actor receipts
+
+A final-save confidence calculation supports a conditional comparison, not its earlier
+binding cause. Distinguish explicit absent-ID defaults from an unreported officer;
+do not universalize a comment's attribute range. Probe timestamps do not replace
+ordering receipts. Once the endpoint is settled, move to an actionable different
+gap and reuse earlier actor/roster extractions. See the [endpoint disposition](PROJECT_LEDGER.md#2026-10-05--southern-move-endpoint-intel-settled-jajce-producer-gap-next).
+
+## 2026-10-05 — Source agreement is not higher-precedence canon adjudication
+
+A max-budget implementation matching the Systems Manual does not settle ambiguous
+Invariants wording. A flag chosen for slot ownership can also control preparation;
+that coupling is observed, its intent needs authority. Constructor false differs
+from an absent serialized field. Proposal expiry is not active-operation expiry.
+Read tests as finite contract text until actually executed; apply panels only to
+their governed scope. See the [budget disposition](PROJECT_LEDGER.md#2026-10-05--generic-preparation-rule-documented-no-budget-lever-adopted).
+
+## 2026-10-05 — A final preparation state is not a per-tick trace
+
+An intel_gathering/3of5 endpoint and an earlier not-ready continue explain a
+coherent preparation hold; they do not capture every earlier predicate, reset or
+intraturn transition. Null readiness detail is unreported, not proof the evaluator
+never ran. Keep conditional timeout arithmetic distinct from actual launch.
+Align derived temporal loop+1 labels with weekly/meta.turn before causality.
+Opportunity admission dates are not active-operation deadlines without a consumer.
+Applied in the [preparation endpoint](PROJECT_LEDGER.md#2026-10-05--southern-move-preparation-endpoint-authored-budget-contract-next).
+
+## 2026-10-05 — Separate opportunity eligibility from execution latency
+
+A stored failed required axis can explain eligibility timing without proving a
+production defect. Southern Move's two staging anchors fall182/184, approval is185,
+and planning persists through188. Bind the guard to the actual source and distinguish
+approval/creation from first execution. A dirty run's five-turn latency is neither
+a clean forecast nor the cause of a missing launch. Inspect actual gate requirements
+and correctly phased actor inputs before changing timing to fit a checkpoint.
+Applied in the [staging discriminator](PROJECT_LEDGER.md#2026-10-05--southern-move-staging-dates-measured-post-creation-gate-next).
+
+## 2026-10-05 — Operation names are not behavior identities
+
+Exact-name absence cannot establish absent behavior: clean runs had Kamen ordinary
+sector_attack/Gerzovo172 although the Bljesak name was absent. Compare actual
+operation type, phase, objectives, participants, battles and control events first.
+Different names and matching output types do not prove identical creator semantics.
+First capture does not prove later persistence; post-turn recovery/planning rows
+do not capture internal overlap/slot/allocation guards. Choose the next receipt at
+the actual failed outcome boundary, not a successful earlier operation.
+Applied in the [clean commander correction](PROJECT_LEDGER.md#2026-10-05--clean-kamen-evidence-corrects-name-inference-southern-move-gate-next).
+
+## 2026-10-04 — Search serialized state by its schema and preserve temporal limits
+
+Weekly operation diagnostics use operation_name; CorpsOperation saves use name
+under military.corps_command[].active_operations. A miss with the diagnostic
+field does not establish absent save state. Inspect the real address, all
+relevant small watched records and a positive-control operation before closing
+a bounded missing-input gate. Replay manifests may contain only summaries.
+Late assessment fields and elapsed preparation establish a measured difference,
+not the earlier gate or its cause; require correctly phased decision inputs
+before a gameplay correction. Applied in the
+[October retained audit](PROJECT_LEDGER.md#2026-10-04--retained-october-admission-and-jajce-gates-settled).
+
+Full provenance keys are required: a600-character sample missed the clean
+n39 git_commit/git_dirty binding. Compare exact relevant blobs, then retain
+dirty-source and external-dependency limits. Weekly week_index is meta.turn;
+loop and temporal indices are zero-based. An endpoint reference picker can
+stamp a future checkpoint's input before the checkpoint is reached; distinguish
+declared hashes, actual reads and reached acceptance. A previous non-ready
+line is not necessary for a global timeout when callers can hold ready ops.
+Applied in the [revised observer proposal](PROJECT_LEDGER.md#2026-10-04--clean-mistral-preparation-binding-and-revised-observer-proposal).
+
+A debug environment can add gated operation fields, temporal actor rows and
+serialized trace keys without changing the observed shared artifacts. Classify
+all differences and bind the topic parser/writers before changing a comparator.
+Prefer matching baseline topics and direct content comparison. Equal initial
+maps and ordered events support reconstructed-map equality; final reconciliation
+does not prove every intermediate map or all-writers coverage. Applied in the
+[revised observer proposal](PROJECT_LEDGER.md#2026-10-04--clean-mistral-preparation-binding-and-revised-observer-proposal).
+
+A fixture using the real opt-in emitter proves output shape and collector
+compatibility; an authored phase trajectory remains constructed input. Use
+gate-off access tripwires and gate-on frozen state/report to test observer
+isolation, then retain the distinction between post-tick events, post-turn
+state and uncaptured internal branches. Applied in the
+[observer preparation](PROJECT_LEDGER.md#2026-10-05--default-off-mistral-observer-preparation-campaign-unapproved).
+
+Measured ready state can coexist with continued planning: identify the outer
+launch predicate using its actual decision-time inputs before changing the
+preparation state machine. A timeout assessment write and roster change on the
+execution turn are not proof of which predicate released it. Distinguish raw
+stderr from explicitly filtered simulation categories. Considered-brigade
+diagnostics are not full assigned rosters. Follow timeout writes to their actual
+consumers; event-return force ratio and stored assessment ratio may differ.
+Reconstructing controllers/static contacts alone does not recover live front,
+sector fallback or gate-time movement/pool inputs. A specific edge/filter can
+admit membership without proving the gate set; check the temporal serializer's
+field sources before attempting a movement-state lifetime proof. Applied in the
+[reviewed n43 observation](PROJECT_LEDGER.md#2026-10-05--authorized-n43-mistral-measurement-bounded-review-go)
+and [qualified caller diagnosis](PROJECT_LEDGER.md#2026-10-05--retained-mistral-approaching-veto-diagnosis-conditional-go).
+
+A deletion-only later writer can support a backward argument for a surviving
+record only if later creation/retargeting is excluded; finite grep/tool inventory
+remains a premise, not an exhaustive proof. Final absence does not establish
+earlier absence. Applied in the [P4 boundary](PROJECT_LEDGER.md#2026-10-05--p4-finite-writer-argument-reviewed-stop-static-expansion).
+
+
+Stop a diagnosis lane when the next measurement would only strengthen an
+explanation without changing a concrete implementation or acceptance decision.
+A future-run probe does not directly capture a retained run's old gate inputs.
+Applied in the [Mistral disposition](PROJECT_LEDGER.md#2026-10-05--mistral-hold-lane-stops-on-retained-evidence).
+
+Constant post-turn objective snapshots show no observed inter-snapshot change;
+they do not exclude intraturn mutation. A current authored catalog does not bind
+an incompletely fingerprinted dirty run. Applied in the
+[Majdan qualification](PROJECT_LEDGER.md#2026-10-05--majdan-finite-discriminator-clean-commander-gate-dispatched).
+
+## 2026-10-03 - A selected-save boundary is not a pre-turn decision receipt
+
+When a retained prefix is saved after turn execution, matching its consumed-input
+digest, initial-save hash, and control totals proves provenance and boundary
+reproducibility, not the unique selector decision that produced the next order.
+Use the post-turn artifact to enumerate lawful route alternatives and to reject
+unsupported bug claims; require a retained pre-order state or explicit decision
+receipt before changing a selector or order-lifecycle rule. Applied in the
+[Sana continuation diagnosis](PROJECT_LEDGER.md#2026-10-03--sana-continuation-pre-order-diagnosis).
+
+A resumed trace can reproduce a local decision while failing whole-state
+equivalence. Treat the decision as an explanation in that resumed context until
+source continuity and the full boundary are proved. Remove only named diagnostic
+receipt fields during comparison; retain and classify every behavioral mismatch.
+A dirty commit marker plus matching consumed data does not fingerprint the
+uncommitted executable source. In this continuation, t188 fails equivalence
+despite matching Sana outcomes; no retarget/clear-order correction follows.
+
+A candidate-scoped byte hash is partial source evidence, not a complete
+run-bound fingerprint. Preserve it and state its coverage; do not claim no
+source receipt exists merely because the executed dirty tree remains unbound.
+An incomplete search or timed-out object scan cannot prove evidence absent.
+
+Temporal and weekly receipts may use different counters: these retained
+temporal rows record completed `turn = week_index + 1`, while weekly reports
+use `week_index` as completed turn. Preserve both schema meanings; a filter
+floor is not a run-earliest divergence. Missing ghost rows are a logging gap,
+not a withdrawal/destruction receipt. Applied in the retained western audit.
+
+A temporal destination can prefer movement state and fall back to movement
+orders. Observe the two fields separately across phase boundaries before
+assigning an order writer. Static branch predicates do not establish a named
+actor's eligibility, and an emitted decision does not serialize all evaluator
+inputs. A fixture with reconstructed inputs proves that constructed context.
+Applied in the [bounded causal diagnosis](PROJECT_LEDGER.md#2026-10-04--bounded-causal-diagnosis).
+
+## 2026-09-02 - Calibration must preserve causal ownership, not merely painted control
+
+**A correct endpoint produced by the wrong mechanism is still a defect.** April 1994 initially
+looked stronger when rear-pocket consolidation and abandonment awarded territory, but those gains
+did not represent operations. Accept the temporary score regression when removing invalid control
+authority, then recover only the historically supported positions through forces, staging,
+objectives, and normal battle resolution. Topology may establish operational purpose; it cannot
+write political control. Applied in the [April 1994 operational calibration ledger sequence](PROJECT_LEDGER.md#2026-09-02--correction-brčko-requires-an-operation-zvezda-retains-its-main-staff-group)
+and consolidated in [the implementation report](40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md).
+
+**Operational purpose and feasibility are distinct gates.** Exposure, adjacency, or a favorable
+ratio can make an attack feasible without making the target strategically sensible. Ordinary
+emergent operations need a live-state purpose before tactical ranking can authorize execution, and
+an unpurposed first proposal should end the cycle rather than search the whole map for a convenient
+substitute. Historical catalog names are identity-bearing data and must remain reserved to their
+authored operations. Applied in the [purpose/name ledger entry](PROJECT_LEDGER.md#2026-09-02--purposeful-emergent-operations-and-reserved-historical-names).
+
+**Determinism requires source-state identity as well as save identity.** Two runs with identical
+serialized starts may still diverge if their executable catalog definitions differ. When the first
+divergence is an operation roster, compare source revisions before diagnosing RNG or unstable
+iteration, then pin the accepted roster in a direct test. Applied in the [Derventa/Liše/Prozor
+ledger entry](PROJECT_LEDGER.md#2026-09-02--april-derventa-liše-and-prozor-operational-corrections).
+
 ## 2026-09-09 - Measure the text clipping box and the final scroll position
 
 For UI readability proof, wait for fonts and entry animation, compare drawn text with its
@@ -1542,7 +1834,8 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
 8. **[2026-03-18] Operations are corps-level â€” brigades from entire corps pool**
    Do instead: Operations launch from `generateCorpsDirectives` via `evaluateCorpsOffensiveLaunch`. Corps-wide brigade pool: all active subordinates with persâ‰¥400, not disrupted, sorted by equipment priority. Contiguity seeded from ALL corps sectors' friendly OSIDs. `MAX_PARTICIPATING_BRIGADES=12`. Old catalog-based `generateCorpsOperationOrders` disabled. Probes remain sector-scoped (small recon actions). Per-sector cluster expansion and `computeReinforcementPool` REMOVED (n915).
 9. **[2026-03-08] Player operations support multi-axis advance with per-axis staging**
-   Do instead: OpsPlanningModal exposes the engine's existing `CorpsOperation.axes` system to the player. Each axis has independent brigade assignment, ordered objective chain, and optional staging OSID. Single-axis operations omit the `axes` payload for backward compatibility. IPC: `stage-corps-operation-order` in `electron-main.cjs`. Force-ratio preview aggregates enemy formations per objective OSID for planning intelligence.
+
+    Do instead: OpsPlanningModal exposes the engine's existing `CorpsOperation.axes` system to the player. Each axis has independent brigade assignment, ordered objective chain, and optional staging OSID. Single-axis operations omit the `axes` payload for backward compatibility. IPC: `stage-corps-operation-order` in `electron-main.cjs`. Force-ratio preview aggregates enemy formations per objective OSID for planning intelligence.
 10. **[2026-03-08] Frontline attrition uses corps_front_sectors, not legacy brigade_front_assignment**
    Do instead: Build `brigadeSector` lookup from `sector.assigned_brigade_ids` across `state.corps_front_sectors`. A brigade takes passive attrition if it appears in any sector's assigned list (location-validated by `classifyBrigadesByTerritory()`). Reserves exempt. Density from `sector.assigned_brigade_ids.length / sector.length_edges`. `isColdFront()` uses structured `CorpsFrontSector` data (faction, opposing_factions, sub_segments) â€” no legacy front_id string parsing. Key design decision: `assigned_brigade_ids` (all brigades in sector territory) not `sub_segments[].friendly_osids` (border-adjacent only â€” too narrow, dropped casualties ~50%). n366 = 88.2%.
 11. **[2026-03-08] Sector classification: front/reserve/deep-rear three-tier system**
@@ -5151,3 +5444,874 @@ Inspect ancestor clipping and stacking, then confirm actual pixels at initial an
 Keep false-green receipts and record their invalidation; do not replace image review with DOM
 presence, `getClientRects()` or theoretical color ratios. See the existing
 [R7 report](40_reports/implemented/20260905_R7_PRESENTATION_ENGLISH_READABILITY.md).
+
+## 2026-09-16 — Canon can describe a behavior correctly while one creation path never calls it
+
+Systems Manual §7.5 has specified since 2026-03-07 that named operations receive a reserve
+commander on creation, and it names all four creation paths: pre-planned, triggered,
+**bot-generated**, and queued injection. Three of them called `assignOperationCommander`.
+`applyCommanderOutput` — the bot-generated path — pushed the admitted operation straight into
+`corps.active_operations` and never did, so every emergent bot operation ran on the unnamed
+3/3 preparation default instead of its officer-derived value.
+
+The cost was not a missing feature but a silently wrong number: five preparation turns where
+the selected officer's competence 4 gives four. At Orašac that one turn moved the opening from
+turn 30 to turn 29, across the week-30 seasonal boundary (attack 0.95→0.75, defense 1.00→1.05),
+which is the difference between three failed attacks at 0.84/0.67/0.71 and a `costly_victory`
+at 1.17. Six earlier diagnostics (A–F) had read the failure as insufficient attacking strength
+and spent their scope on force selection, admission predicates and staging.
+
+Two things follow. **A canon statement is not evidence the code implements it** — §7.5 read as
+a description of working behavior for six months and was really a specification the bot path
+had never satisfied; the enumerated list of creation paths was the thing worth grepping.
+**When a lifecycle writer exists, check every admission site calls it**, rather than treating a
+persistent wrong-looking constant as a tuning target: the 3/3 default was visible in saved
+operations the whole time and read as "the officer selector chose poorly" rather than "no
+selector ran". See the [January-1993 repair record](40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#owner-authorized-january-only-operations-repair--2026-09-14).
+
+## 2026-09-17 — Keep the measured candidate distinct from the documentation HEAD
+
+Synchronizing records after a calibration change makes it easy to blur three different things: the
+**measured production source**, the **documentation commit**, and the **evidence**. A docs commit is not a
+new simulation measurement. State them separately — production candidate (e.g. `41a148bf9`), documentation
+HEAD (e.g. `0893bfa50` plus the sync commit), and the run that actually measured it (n403, `--weeks 39`,
+final-save SHA-256 `e3b6…`). Do not let a later documentation edit imply a re-measurement, and do not
+attribute a full-duration campaign's later-checkpoint outcomes to a candidate that was never run past its
+checkpoint.
+
+Three traps recurred here:
+- **A truncated candidate has NO later checkpoints.** `tools/verify_checkpoints.cjs` replays the terminal
+  control log against the later painted references and prints numbers (e.g. 666/658/569) that look like
+  later results. They are the t39 map scored against later references, not those weeks. Record the later
+  periods as **NOT REACHED**. Do not "fix" the tool for this; document the limitation.
+- **A stale source comment can reverse an actor and a page.** The Mostar comment said the JNA "seizes Hum"
+  and cited "BB1 p.193"; the printed folio is p.156, and BB records the *Croats* capturing Hum (23 May
+  1992) while the JNA/Serbs merely occupied it. Cite printed folios; keep repository PDF/KB indices
+  separate; do not apply one scan's page offset universally.
+- **A documentation-only change can still fail a check.** A live guard caps `COMMAND_BOARD.md` under
+  20,000 characters; an over-long status paragraph tripped it. Trim the prose — never raise the threshold
+  or bypass the check.
+
+Owner direction recorded in the calibration record: **later territorial outcomes do not veto a January
+correction** — without waiving determinism, valid state, legal movement/capture, population accounting,
+political permissions or command ownership. Evidence should live in the repo (`logs/<lane>/` for raw
+patches/logs plus a compact record), not only in chat or `%TEMP%`.
+
+## 2026-09-28 - Operation identity and axis execution are separate contracts
+
+An authored operation can carry a canonical operation-level `staging_osid` that
+differs from the executing axis's `staging_osid`. Identity gates must use the
+catalog/live operation field, while order admission must resolve the brigade's
+executing axis and its current objective; accepting any authored future axis
+objective can reopen a broader COHA bypass. Resolver-level suppression receipts
+are aggregate, so scenario diagnostics must scope lifecycle-paused interpretation
+to suppressed participants of the operation being diagnosed rather than applying
+one global reason to every active operation. Evidence: the retained n7
+`Operation Vlasic Ridge` save and `logs/vlasic-march-timing-20260928/opencode_coha_exception_impl_result.md`.
+
+## 2026-09-30 — Ključ-first catalog candidates must separate pursuit from coverage
+
+The source-grounded Petrovac→Ključ shortcut can preserve previously matching
+approach cells only by giving them a legal adjacent authored flank axis with a
+disjoint brigade roster. A roster swap alone is insufficient evidence: the
+focused retained-style admission fixture must prove unique ownership and show
+which authored participants are actually admitted. The candidate route's
+8/8 contact-graph edges and 501st/510th Petrovac allocation are covered by
+`october_kljuc_first_candidate_result.md`; no campaign result is implied.
+
+## 2026-10-01 — Planning reconciliation is contact-state driven, not staging driven
+
+`reconcilePlanningObjectives` selects the first objective with a lawful friendly approach in the live contact/controller state. It does not read brigade locations or `staging_osid` from its inputs. In the bounded Sana fixture, the real graph edge `jasenovac_2 -> hadzici` is supplied as live in a bounded synthetic state and therefore prunes the preceding Sanski prefix, while changing Bihać staging to Otoka leaves the selector unchanged. Movement receipts can establish an earlier trajectory difference, but without the serialized planning-boundary contact state they cannot by themselves attribute the selector result to Otoka or prove that edge was the retained t175 front edge.
+
+The later one-prefix n30 replay serialized that missing boundary state. At t176,
+the **actual** first lawful approach was HRHB Prekaja across a bidirectional live edge with RS
+Hadžići; the 11 preceding Sanski-axis objectives had no approach and were
+pruned. Operacija Kamen's ordinary HRHB capture of Prekaja at t175 supplied
+this contact. The prior Jasenovac fixture remains a synthetic selector example,
+not the measured edge. The replay's first 177 weekly reports matched n30
+exactly. This does not establish why Kamen differed upstream or prove that
+Otoka staging alone caused it. Receipt: `sana_boundary_177w_result.md`.
+
+## 2026-10-02 — Flagged no-approach axes may stage lawfully without attacking through
+
+Unmeasured candidate pending real transit: when a sequence-preserving operation axis has no friendly approach to its current
+objective, a hostile authored staging cell does not justify attacking an off-axis
+intermediate. Prefer the exact staging OSID when friendly and reachable; otherwise
+inspect only its deterministic tactical/static neighbors, filter them to friendly
+control, and path to one through the existing friendly-only route. If none is
+reachable, hold. This preserves objective sequence and control authority while
+allowing lawful forward staging. This remains an unmeasured candidate pending real
+transit. Evidence: `sana_axis_staging_neighbor_*`.
+
+## 2026-10-06 — Environment proxies and diagnostic receipt preservation
+
+Node's `process.env` is an exotic object. A read-observing Proxy without an
+explicit set trap can create an absent key yet reject overwriting an existing
+key with a descriptor error. Pass writes to the real target receiver and test
+both absent and present keys before a runner launch. Node subprocess spawning
+also reads environment properties; preserve raw stacks and distinguish its
+direct serialization frame from the runner's gate sample.
+
+Copy detailed child result files into retained evidence before deleting an
+owned output root. Artifact equality and passing assertions do not preserve
+the event/gate records needed for a later audit. The121 runtime artifacts match,
+but raw case-log retention remains OPEN after successful cleanup. See the
+[2026-10-06 ledger entry](PROJECT_LEDGER.md#2026-10-06--scenario-read-diagnostic-runtime-proof-qualified-go).
+
+## 2026-10-08 — Preserve raw status, executor ownership and actual selection boundaries
+
+Parse git porcelain with NUL records and preserve leading status spaces;trimming the whole stream can corrupt the first path. Verify every retained path by bytes before expensive validation. Gate coverage comes from fixed required inventories and bound raw evidence;caller-supplied counts or pass booleans can accept fabricated campaigns.
+
+A long child needs one executor through its actual close event and retained raw logs/exit receipt. A tool session identifier alone did not preserve225 across agent completion;the cause remains unproved. Short owned-child controls prove the recorder path only,not completion of a full suite. Missing final receipts remain UNMEASURED.
+
+An observer must classify the result the algorithm actually returned. Array.slice truncates a fractional end2.5 to2;testing index<cap incorrectly labels3 selected. Compare diagnostic membership with selected.length while preserving the selector. This is local observer correctness,not live rejection measurement or campaign neutrality. See [ledger closeout](PROJECT_LEDGER.md#2026-10-08--october221233-validation-failures-and-donor-observer-closeout).
+
+## 2026-10-08 — Validate full conditional relations before selecting diagnostic rows
+
+Semantic checks apply to every recognized row before selector filtering. Finite numbers alone do not establish integer BFS hops or positive survivor contributions. Conditional metadata needs both directions:with the pinned Army-HQ flag enabled,normal HQ calls have null scope and normal regular calls have nonempty scope;early terminals have null because computation was unreached. Exhaust the finite terminal/HQ/scope product instead of patching only the last accepted example.
+
+An undefined argument selects a JavaScript default parameter. To produce a missing field,delete it explicitly and assert the actual input property is absent before invoking the source helper. Require complete genuine producer bases before a finite-product proof;helper exit0 alone can conceal the wrong branch. See [ledger entry](PROJECT_LEDGER.md#2026-10-08--october235243-local-donor-reader-preparation).
+
+## 2026-10-08 — Reject cheap observer and document regressions before a full suite
+
+Default-off observers still count against existing strict-null escape limits. Check the existing source inventory and live board/roadmap character budgets before a costly whole suite;typecheck alone does not enforce those contracts. Preserve exact pre-edit bytes and narrow optional locals rather than increasing ratchet limits. A second diagnostic log appended by tests is a frozen-input failure when only one named telemetry exception was approved;retain the full stream and bind the actual writer before proposing a future exception.
+
+Use UTC epoch milliseconds for execution deadlines. A corrected supervisor does not erase the original wrong timeout input. Keep all five canonical outer outcomes separate from nested negative fixtures,then bind actual numeric exit/raw coverage/final inventory before reporting. See [245 evidence](../logs/claude-channel-20261004/245-own-suite/result.json).
+
+## 2026-10-08 — Narrow optional diagnostic bundles without hiding corrupt rows
+
+Bundle an enabled observer population with its lookup so one actual presence guard narrows both;keep that bundle absent when the topic is off. Enumerate sorted owner entries rather than asserting an optional map after separately enumerating its keys. A missing survivor observation is an explicit failure,not a silent dropped row. Reuse unchanged local reader semantics only with current producer hash binding and preserve actual full-suite/preservation failures. See [249 correction](../logs/claude-channel-20261004/249-null-correction/report.md).
+
+## 2026-10-08 — Mock incidental persistent telemetry in unit fixtures
+
+A mocked SDK response can still reach a real synchronous telemetry appender. Keep directive/persona unit checks separate from the existing telemetry-wire payload suite by mocking the emitter at its module seam. A selective append interception can prove the original side effect and reject it without touching retained logs;capture evidence at the interception point because an exception may prevent a worker exit hook from flushing. An identical guard/config passing after isolation proves zero default-path attempts in that control,not a retroactive historical writer or a whole-suite pass. See [252 controlled proof](../logs/claude-channel-20261004/252-persona-test-isolation/report.md).
+
+## 2026-10-08 — Bind settled inventory and scoped append rules consistently
+
+Use the settled post-document inventory when checking a frozen run;the earlier pre-document snapshot cannot represent the later tree. Apply an authorized exact-prefix append rule at every duplicate occurrence of the same telemetry pin. An exact full-file hash at another occurrence would contradict that scoped contract. Preserve the failed helper receipt and prove the corrected rule independently;do not waive a real preservation failure or rerun the campaign for reassurance. See [255 proof](../logs/claude-channel-20261004/255-own-suite/report.md) and [ledger entry](PROJECT_LEDGER.md#2026-10-08--october255-corrected-full-suite256-review257-closeout).
+
+## 2026-10-08 — Validate producer truth before candidate readiness
+
+A green control count can miss assertion-only semantics. Review259 reproduced four false greens despite 258 controls45/45. Fixed categories, exact commands and raw hashes are necessary; native artifact recomputation and prospective source/input capture must also be measured. A source snapshot qualifies bytes around its owned execution; it does not identify historical actual reads or reconstruct missing dirty-source provenance. LOCAL_ONLY fixture proof must never authorize a campaign candidate. Missing evidence remains UNMEASURED=FAIL. See [ledger entry](PROJECT_LEDGER.md#2026-10-08--receipt-false-green-diagnosis-correction-and-native-producer-proofs).
+
+## 2026-10-08 — Distinguish launch claims from observed process evidence
+
+Process counts, claimed CIM exit codes, empty strings and environment key counts do not establish observed process identity or child environment. Bind raw native observations to owned PID, exact argv, parent chain and creation interval, then validate values and final absence from those same bytes. Native CIM dates may already be DateTime; prove conversion before launching a longer capture. Keep an opening failure and its justified targeted correction separate. See [ledger entry](PROJECT_LEDGER.md#2026-10-08--observed-own-child-process-and-environment-producer).
+
+## 2026-10-08 — Test the public admission path and its data interface
+
+An exported stricter semantic function may be bypassed by an older lexical callback. Test the real public loading/dispatch path and the loaded object shape. Mutations rejected by stale hashes do not establish semantic rejection. Keep deterministic comparison baselines aligned with the governing plan: changed behavior uses its new same-input A/B pair; n44 supplies territory regression reference here. Keep all gate requirements when retiring a convenience helper. See [ledger entry](PROJECT_LEDGER.md#2026-10-08--final-admission-helper-attempt-helper-shelved).
+
+## 2026-10-08 — Separate native provenance conventions from raw preservation
+
+The run_provenance native stamp intentionally normalizes CRLF to LF before hashing and uses ordered path/hash rows for its digest. Compare that stamp under its exact source definition while requiring raw source/input buffers separately unchanged. A mismatched raw SHA is not an actual native-stamp mismatch. Keep the false rejection and correction separate; neither qualifies a complete historical actual-read trace. A successful territory check also cannot waive the native engine-health rejection. See [ledger entry](PROJECT_LEDGER.md#2026-10-08--one40-native-validation-stranded-brigade-health-rejection).
+## 2026-10-08 — Bind native diagnosis to the saved phase inputs
+
+A post-turn component probe measures that saved input, not the original live phase entry. Native stranded probes on n50 differ: week39 has zero affected-corps targets and reconnects strained Travnik; final40 has targets but no reachable same-faction target, so holds it. Critical12 reject before either shortcut. The pipeline rebuilds sectors before lifecycle; the cause of missing saved targets is unmeasured. Supply is intentionally evaluated before later control flips. Keep native current-input reasons, local counterfactual controls, stored timestamps and actual historical/writer causality distinct. See [ledger entry](PROJECT_LEDGER.md#2026-10-08--native-stranded-brigade-diagnosis-and-saved-input-coverage).
+
+## 2026-10-08 — Supply permission and saved-input audit boundaries
+
+288/289: movement friendliness does not authorize OSID supply transit. Empty supply-right arrays establish no applicable negotiated right in the measured saves; they do not establish a universal canon ban. SID supply consumes negotiated rights while current OSID supply does not; this inactive gap is not the cause of isolation in saves with empty rights. Local production may mitigate but never replace external/corridor supply (Systems Manual 866/874). A source-free faction-controlled pocket and a geometric route through allied control explain the current predicate without proving historical legitimacy. Bind historical permission and genuine Historian/Canon mechanism rulings before a correction. Numeric process exit 0 is insufficient: the initial preservation output had five dirty diffs and remains FAIL; corrected output against the post-document baseline passed. See [independent review](../logs/claude-channel-20261004/289-independent-supply-contract-review.md).
+
+## 2026-10-09 — Allied supply transit, topology and acceptance boundaries
+
+Owner-intended live RBiH/HRHB transit requires full reachable allied topology for corridor bridges, heartland and adequate-state derivation, while retaining own-controlled source seeding and own-only controlled/reachable/isolated/by-OSID domains. Cache keys must include transit permission effects. Pure function no-write proof does not establish save-byte neutrality: the existing war supply stage persists derived values into last_supply_state_by_osid and downstream enclave/event/fatigue behavior can change. General supply changes can require distinct gameplay/historian §6 seats even when enclave formulas are untouched. A historical test of a hardcoded old artifact neither covers the edited functions nor becomes a pass when skipped. Reuse unchanged property-helper evidence narrowly; retain aggregate timeout as failed and fresh whole-suite/campaign gates as pending. See [gameplay seat](../logs/claude-channel-20261004/292b-gameplay-seat.md) and [code/canon review](../logs/claude-channel-20261004/292-allied-supply-independent-review.md).
+
+## 2026-10-09 — Test intended supply rules before changing canonical contracts
+
+The reviewed allied OSID transit candidate restores local source connectivity but the fresh original40 trajectory loses five formerly matched January cells:702/712 below707. Local route correctness does not prove calibration benefit. Keep canonical amendments deferred when the owner requests measurement first; retain actual negative outcomes and unreached gates. Classify authorized telemetry append separately from frozen non-output inputs, and query actual owned PIDs without matching the observer itself. The corrected evidence collector may repair a false preservation rejection without another campaign or rewriting original failed evidence. See [294 actual result](../logs/claude-channel-20261004/294-executor-result-corrected.json) and [295 review](../logs/claude-channel-20261004/295-evidence-review.md).
+
+## 2026-10-09 — Capture tracing and post-turn observations
+
+A final controller delta may represent an old-run capture absent from the candidate, not a new candidate gain. Join control events to exact battle operation/contributor/order/AAR target receipts. The brigade temporal log uses loop-index week0 for completedturn1; the weekly report uses week_index1 for completedturn1. Capture-turn temporal location/personnel can be post-combat effects. Compare all recorded attackers/defenders before claiming earliest participant divergence. No retained target/operation chain establishes a missing observation, not the actual commander rejection. A reconstruction from n44 events is corroboration and never a physical save39 or live phase input. See [298 qualifications](../logs/claude-channel-20261004/298-five-cell-trace-review.md).
+
+## 2026-10-09 — Capped supply does not establish calibration neutrality
+
+Keeping primary reachability/corridors own-only and capping allied sustainment atstrained reduces the affected surface but still changes combat/AI/attrition. Measured n52 improves storedstranded13→5 and broadcandidate territory702→704, yet fails bothunchanged707floor/zero-loss andmax3storedpredicate. A strainedbrigade may stillbe inholding; donotclear markers or inferlive rejection orhistoricallegitimacy fromterminalstate. Rejectfailedcandidate withoutnewownerapproval underdelegatedunchangedcriteria; do notspend fullsuite188 afterfirstgatefailure. Use post-closeoutdirtybaseline; knownabsentphysicaln44save39mustnotbecomeapreflightprerequisite. See [ledger2026-10-09](PROJECT_LEDGER.md) and [n52 evidence](../logs/claude-channel-20261004/304-result-corrected.json).
+
+## 2026-10-09 — Corps identity belongs in reachability evidence
+
+A friendly path from a shared location to one corps front does not prove another co-located formation can reconnect. Bind formationID→corpsID→actualsector targetset→current friendlygraph, then confirm with the native lifecycle. In n52 Rat2, Central Bosnia Travnik has a route while two Northwest Bosnia brigades cannot reach their Orasje targets. Empty savedsectors can make a local nativecall reconnect even when the storedmarker remains; postturn inputs are not the historical lifecycle-entry inputs. A negative control that staysholding when targetreachability alreadyfails does not independently identify the criticalguard. [307 evidence](../logs/claude-channel-20261004/307-result.json), [ledger2026-10-09](PROJECT_LEDGER.md).
+
+### HVO origin, successor identity and evacuation destination (2026-10-09)
+
+An authored home is not a later retreat destination:102nd is April Odžak and later Orašje; the named Hrvoje post-fall brigade must not be conflated with earlier Jajce defenders or every dispersed survivor. Read the existing T6/OOB provenance before calling its deliberate Odžak divergence an overlooked error. A faction-wide main-component evacuation can preserve friendly control while stranding a formation outside its corps; native reproduction on reconstructed inputs does not identify the original live writer. Source310/native311/review312 retain the evidence and limits; graph-unreachable Orašje cannot be supplied by a forced location rewrite.
+
+### Faction-wide evacuation can retain an incompatible corps (2026-10-09)
+
+Actual n53 Garevac10 writer moves102nd/Hrvoje to Rat2 along16 legal neck/allied hops while preserving NW corps. Rank selects faction main component, not corps theatre. Friendly evacuation is not proof of historically appropriate placement or later corps reachability. Five raw artifact pairs prove selected artifacts only; do not extrapolate unsaved frames or October1995 acceptance. Read310–312 history and316 live receipts together before proposing a corps-aware destination or cross-border route.
+
+
+## 2026-10-10 — Loss-order integration and Windows suite prerequisites
+
+- Authored cadre lifecycle must be tested after the real no-destination emergency-retreat handler in native phase order. Active-only fixture success does not cover the same-turn nonterminal inactive signature. Terminal/stale/unrelated/located/zero-personnel cases must remain excluded;100 personnel is an engine floor, not historical headcount.
+- On this Windows host the default Bash resolved to System32/WSL. The successful child uses one normalized PATH key prefixed with Git/bin; prove executable/version and detector readability before expensive suites. Remove AWWV_* without printing secret values.
+- Whole inventories must compare by path, distinguish test-owned generated output/telemetry appends from retained source, and preserve current generated bytes before repeat. Process identity requires parent/name and creation evidence when PIDs are reused.
+- Native lifecycle-reader0 proves extraction coverage, not deployment; all five absent receipts in325 are a functional failure. Keep raw receipt absence and direct phase-input limits explicit. Additional costly validation requires a new bounded decision after an allowance is spent; prior suite/campaign evidence becomes stale after production correction.
+
+
+## 2026-10-10 — Reformation receipts do not establish brigade survival or deployment
+
+See the2026-10-10 corrected HVO lifecycle validation entry in PROJECT_LEDGER.md.331 proves both conserved cadre reformations, but102nd is destroyed next turn and Hrvoje never starts Rama deployment. Validate authored lifecycle against subsequent native maintenance, not receipt presence alone. A100-personnel remnant is an engine floor, not historical strength; no historical headcount/resource grant follows from it.
+
+Movement intent must retain destination ownership and corps-territory guards. Save62 establishes enemy Rama ownership/outside-zone blockers; it does not identify first false predicate at turn60. Likewise native destruction/no battle plus current source supports a dissolution attribution, while exact phase-entry locals remain unmeasured. Corrected extraction and independent review prove the failed evidence package, not calibration acceptance. Bind counts to actual inventory (45218 temporal rows in331), rather than prior campaign shorthand (45201 in325). Parallel stage completion must be checked as a multiset; retain checker failures and correct them cheaply.
+
+
+## 2026-10-10 — Compare control writers separately from upstream campaign causes
+
+See ownership-regression335–339 in PROJECT_LEDGER.md. Historical match regression requires gross losses AND gains:18 lost/1 gained is17 net; correction0 lost/4 gained is4 recovered. Trace all checkpoint owner differences, including wrong-to-wrong changes, with original same-turn event order and exact battle IDs. Reconcile every available save before diagnosing an accounting gap;335's first false gap was its raw settlement_id/compact osid extractor error.
+
+Native capture receipts identify immediate writers, not absent-battle or selection causes. Temporal probe/defender differences narrow the next measurement. Observed n48 fallback branch plus selected n44 output equality does not prove n44's unobserved branch or dirty source identity. Missing manifest rows are not proof of unread inputs when tracking changed. Renumbered sectors with identical edges/roles are not geographic reassignment. Use existing default-off observers for actual predicate measurements; retain UNMEASURED rather than inferring rejection from missing warnings.
+
+
+## 2026-10-10 — Recover the calibration candidate before pursuing a different-era defect
+
+See340–346 in PROJECT_LEDGER.md. Archive exact experimental originals and restore only established source/data hunks; retain unrelated work and candidate-save readers. Withdraw feature-only tests with their feature, preserving both in the archive. A restored calibration workaround remains historically unresolved. Dirty output identity never retroactively binds old source bytes.
+
+Budget a full default suite from actual whole-suite duration, including serial work and variance.344 completed four parallel stages but timed out after44/67 serial names;23 later targeted successes could diagnose coverage but could not turn that interrupted invocation into a full-suite pass. Actual child1, wrapper124 and taskkill255 are different facts; independent observed process absence proves closure, not cleanup-command success. Preserve raw streams and every earlier failure. Do not retry merely with a larger timeout before consolidated diagnosis and a justified bounded decision.
+
+Prioritize owner target interval: retained n44 has16 newly exposed April–October1995 mismatches andfour inherited April mismatches. That is reference comparison, not engine causality. Existing Mistral2/175–181 trace cannot answer Southern Move183–187; observe its actual preparation locals/probe-credit before changing dates or thresholds. Keep healthy-engine and historical gates separate from calibration scores.
+
+
+## 2026-10-10 — Separate territory reproduction from full saved-state identity
+
+See347–349 in PROJECT_LEDGER.md. A complete-current default suite requires its own successful exit, exact filename execution multiset and all stage summaries.347 proves that gate with14,493 passed tests; earlier incomplete invocations remain failures. An archive preserves historical candidate bytes and must be checked against its manifest, not current restored source. Input stamp ordering follows the producer's deterministic code-point contract; locale ordering can create a false gate failure. Preserve both original and corrected diagnostic receipts.
+
+n56 reproduces n44's control-event trajectory and707/707/706/692 with no gross historical losses or gains, while9 of10 required saves differ in military/history state. A control comparator cannot waive raw Buffer.equals, establish an unknown dirty-source identity or attribute saved differences to live writers. Keep all consumer, fingerprint and stricter health failures visible; archived-feature readers can fail their input contract without proving an engine defect. The next calibration question remains Southern Move preparation183–187, not a reopened1992 regression investigation.
+
+
+## 2026-10-11 — Separate preparation evidence from caller coverage
+
+See350–352 in PROJECT_LEDGER.md. A complete caller inventory can establish that an operation was absent or bypassed; it cannot manufacture an upstream rejection predicate. Observe only reached locals at the actual return, and bind actual probe writes to stored stable own/enemy sector keys, entrypoint and before/gain/after. Missing or invalid coverage remains UNMEASURED=FAIL. state.meta.turn binds weekly week_index; do not select by the runner's preceding loop index.
+
+An environment-sanitizing native capture wrapper can retain its exact bytes while Node --env-file supplies one public diagnostic topic after sanitization. Positive and negative child-startup controls must prove effective environment, canonical PATH and intended flag; parent environment or wrapper pre-start metadata alone is insufficient. A later n56 equality comparison would address observer neutrality only; it cannot waive an independently failed n44 gate.
+
+
+## 2026-10-11 — Probe credit and operation confidence are distinct observations
+
+See353–355 in PROJECT_LEDGER.md. A successful actual probe write to a stable-pair record does not establish that the operation's confidence reader selected that record. n57 records five real writes, while confidence remains below0.54 and later reads0; retain the read/write mapping as an unresolved question unless the actual lookup inputs or equivalent retained-state evidence bind it. A preparation ready return plus caller-end execution phase proves that stored lifecycle transition; it does not establish downstream attack delivery or capture causality. Selected-save byte equality against the preceding run measures observer neutrality only, not adoption or another failed recovery gate. Preserve original cheap diagnostic mistakes and corrected receipts separately, and never rerun a valid campaign to repair a local validator.
+
+
+## 2026-10-11 — Match inventory absence contracts; distinguish post-turn objective counters
+
+See357–358 in PROJECT_LEDGER.md. A baseline row with absent:true is an expected absence, not a missing-file failure; verify it separately from bytes/hash rows. Retain incorrect receipts and issue an explicit correction instead of restoring deliberately withdrawn fixtures.
+
+For a still-active operation, completed operation_aars.json can omit it while final-save weekly entries and operation-bound battle receipts prove delivery. Post-turn current_objective may advance after a capture; compare attack_order_targets, resolver battle operation IDs and the weekly capture receipt before interpreting zero current-objective counts. Broad probe credit plus a zero objective-filtered confidence read does not identify actual rejected keys unless the reached read's objective mapping and per-record decisions were retained. Do not substitute adjacent-turn geometry or lower a threshold from that evidence gap.
+
+
+## 2026-10-11 — Isolate actual confidence-read receipts from existing observer schemas
+
+See359–361 in PROJECT_LEDGER.md. A separate default-off topic/prefix can add actual confidence-selection evidence without changing an accepted preparation reader's event schema. Gate before observer context/payload allocation, distinguish each reached initial/current/pre-planned call, and capture the existing selection/match result during its original traversal. Record the requested sector ID even when its current sector object is absent. Name a filtered-best return neutrally:zero with all candidates rejected is not evidence of a match. Synthetic ON/OFF serialization equality and independent LOCAL review establish diagnostic readiness; they cannot establish an unobserved live predicate or campaign neutrality. Keep focused pre-correction counts separate from final-byte fixture checks.
+
+
+## 2026-10-11 — Bind probe writes to the actual confidence reader before choosing a correction
+
+See362–364 in PROJECT_LEDGER.md. Positive probe writes are not proof of usable objective intel. Actual Southern Move187 selected its own stable records but rejected both positive enemy records against current objective-sector stable keys. Current sectors are rebuilt before preparation while sector intel is derived afterward; phase-order and topology lineage must distinguish stale identity from incorrect objective mapping before fixing either. Keep the strict matcher;target-specific current-pair probe credit is a candidate requiring changed-topology and absent-record tests,not permission to accept unrelated intel or lower readiness thresholds. Extra saves can omit runtime geometry;inspect serialization before treating them as decision snapshots. Preserve administrative helper failures and cheaply prove corrected predicates on the same run;do not spend another campaign on a path/variable typo.
+
+
+## 2026-10-11 — Separate fresh intel derivation from restored confidence history
+
+See365–367 in PROJECT_LEDGER.md. A changed enemy-sector anchor can leave a current objective without a matching intel record while broad auto-probe credit still raises stale-target and unrelated records. A minimal derive-first fixture creates a fresh target record and makes its credit readable;it does not recover prior confidence or establish global phase-reorder neutrality. Report the actual baselines (.20 stale versus .26 fresh here). Keep timing/identity and broad writer scope as separate mechanisms. Prefer proving a local target-specific current-pair proposal,with explicit missing-record initialization,over weakening the objective matcher or moving global derivation from a synthetic case.
+
+
+## 2026-10-11 — Repair probe ownership without granting stale confidence
+
+See368–372 in PROJECT_LEDGER.md. Resolve probe credit to the current target-facing own/enemy stable pair; initialize absent records at existing faction floors,then let scheduled derivation own its one passive/contact update. Do not copy stale confidence or weaken objective matching. n59 proves readable target credit(.325 vs0) and zero territory regression while unchanged.54 readiness still causes the same187 fallback launch. Engine repair,calibration preservation and historical improvement are separate claims. A full-suite failure can be a stale observer fixture or inherited documentation constraint; retain every category,prove minimal corrections cheaply,and preserve generated artifacts and the complete telemetry suffix across corrective runs. Hash summaries must be bound to actual linked artifacts,not manually copied.
+
+
+## 2026-10-11 — Diagnose operation creation before tuning preparation
+
+373–375:Southern Move's five-tick fallback was canonical behavior with a null commander;the opportunity factory omitted the existing assignment helper. Check creation contracts and both operation/officer ownership fields before adding a timeout exception. Authored planning duration is a floor,not a launch date. Retained available officers prove eligibility,not future assignment after earlier operations change the pool. Unchanged formulas do not guarantee unchanged derived gates,combat or calibration. Two observed captures do not establish five consecutive wins;require zero gross formerly correct OSID losses as well as checkpoint totals. Keep unwired real-probe delivery separate from the narrower assignment repair.
+
+
+## 2026-10-11 — Restore commander ownership before adjusting readiness
+
+See376–381 in PROJECT_LEDGER.md. The existing deterministic assignment helper writes both operation commander ID and officer status/assigned_operation; use it after successful operation insertion and prove rejection/no-candidate behavior. Southern Move's missing call caused fallback max5;actual4/4 commander gives max4 under unchanged formulas. n60 measured earlier launch and one operation-owned gain with zero gross formerly correct losses. Opportunity status continuity does not prove other officer selections unchanged. Extend diagnostic windows through the actual campaign horizon before spending a one-shot run; accept absence only from complete envelopes plus saves,and fail missing/truncated evidence. Expected absent inventory sentinels need their own positive/negative controls. Local engine repair and measured improvement do not adopt a baseline or close unrelated gates.
+
+
+## 2026-10-12 — Distinguish opportunity admission from execution timing
+
+See382–384 in PROJECT_LEDGER.md. A date-window prerequisite admits a proposal;approval creates a planning operation and standard preparation follows. A research expectation of success at a date does not mean implementation starts execution then. Trace the actual gate→creation→preparation→orders→combat→axis advancement chain. An observation horizon is not the earliest blocking predicate;never-attempted targets are not measured combat rejections. Do not infer future attack legality or victory from front contact,or fit earlier admission to target count. Establish the historical/canon timing contract before a timing patch. Preserve original review versions instead of overwriting evidence;bind actual current bytes and disclose stale bindings.
+
+
+## 2026-10-12 — Historical order intervals are not mandatory preparation budgets
+
+See385–387 in PROJECT_LEDGER.md. A dated order followed by combat4/5days later does not establish the first staff planning date or a maximum total preparation duration. Distinguish campaign forward readiness from operation-specific orders. In the current opportunity lifecycle,a ready operation can transit preparation in one tick and launch after one full planning turn;the commander-derived four-tick value is an anti-paralysis timeout,not a mandatory delay. Shortening it can launch below confidence thresholds even if their constants remain unchanged. Check actual returned paths before proposing a clock fix. Receipt dates cover the preceding week;do not substitute boundary labels for battle intervals or silently redate fixed calibration acceptance.
+
+
+## 2026-10-12 — A probe request is not delivered reconnaissance
+
+See388–390 in PROJECT_LEDGER.md. Trace active_probe through the selected brigade dispatcher, lawful order admission, resolver and both probe/combat intel writers. Age-based auto credit is not proof of contact. Exact stable-pair changes can yield repeated fresh-floor credits while prior records remain valid for other targets; do not call that a lost write or transfer confidence without source-bounded correspondence. Ordinary combat may write confidence1.0 independently of fixed probe gain, so adding the probe bonus alone is an incomplete counterfactual. A missing request/order bridge can be established while its ability to advance readiness remains unmeasured. Later successful force/assembly/opening gates cannot stand in for blocked earlier ticks.
+
+
+## 2026-10-12 — Preparation probes need actual lifecycle capacity and exclusive ownership
+
+See391–393 in PROJECT_LEDGER.md. A factory-shaped transient executing object is not a substitute for canonical active/history truth. Check actual retained corps capacity before designing a persisted child:at n60 turn183,14 brigades allowed one ordinary slot while two operations were already live. Exclusive runtime brigade transfer can solve double commitment without solving slot admission,parent request pruning,duplicate exhaustion,return orders or archive visibility. Separate optional bookkeeping from substantive lifecycle exceptions and surface the latter as one concrete decision. Do not spend a campaign on a prerequisite that already fails cheaply.
+
+
+## 2026-10-12 — Real reconnaissance delivery can regress the campaign
+
+See394–398 in PROJECT_LEDGER.md. A generic probe bridge changes every eligible operation, even when the motivating defect is late1995: n61's first child is turn20. Prove the behavior envelope before spending a full campaign. Exclusive ownership and genuine combat receipts do not prove parent readiness advances; a waiting parent can remain planning while repeated children consume turns and exhaustion. Retain actual clocks and requests before proposing a correction. Keep diagnostic false negatives separate from real gameplay regressions; fixing a reader cannot erase control losses. On failed preservation, archive the exact candidate and restore only verified original owned preimages, including pre-existing dirty bytes; recovered inverses must match independent baseline pins.
+
+
+## 2026-10-12 — A preparation wait must not erase elapsed time
+
+See399–401 in PROJECT_LEDGER.md. Trace guards before the sole clock writer: a linked recovery child can keep a planning parent from consuming both elapsed time and a resolved request even after brigades return. Count deferred and normal turns exactly once across the recovery handoff. Separate the explicit state-field contract from a canon interpretation. Retained contact confidence is not proof of a skipped getter's current pair; missing serialized front mappings leave that counterfactual unmeasured. Restoring a timeout opportunity is not proving earlier readiness or preserving calibration. Bound generic engine improvements by an explicit semantic capability rather than dates, names or correlated fields when the authorized correction is narrow.
+
+
+## 2026-10-12 — Make delivery capability explicit and credit the winning order
+
+See402–404 in PROJECT_LEDGER.md. Carry a semantic opt-in from authored opportunity through actual construction into optional operation state; absence must retain legacy behavior and serialized shape. Gate child admission and every related lifecycle path, not merely the emitter. A generated target surviving by equality does not prove its order won a merge: an authoritative existing order may target the same place. Tie opportunity credit to winner provenance and test the real collision through recovery with zero credit. Deferred-clock and ordinary-clock branches must be mutually exclusive on each parent visit. Focused lifecycle and default-path proof do not certify campaign calibration; retain the full-suite/control gates for adoption.
+
+
+## 2026-10-12 — Freeze observer coverage before consuming a campaign
+
+See405–408 in PROJECT_LEDGER.md. n62 preserved n60 calibration exactly while its runtime receipt gate correctly failed: saved child lifecycle existed but source emitted no linked creation/execution/order receipts. Negative reader controls prove rejection, not source emission. Bind child diagnostics through the persisted parent link and test each actual mutation point before a campaign. Saved execution/order/battle fields support bounded facts; they cannot replace missing causal receipts. Parent launch186 is unchanged despite repaired clock accounting. No automatic expensive retry.
+
+
+## 2026-10-13 — Observe contributor identity without rewriting valid contact
+
+See409–412 in PROJECT_LEDGER.md. A mixed battle has one lead operation but several validated contributors. Bind diagnostic contact to battle ID/target/turn/faction and exact child operation+brigade membership in the existing plural provenance arrays. Do not suppress a true contact or alter gameplay credit to satisfy a lead-only proxy. Reject malformed/partial plural fields; legacy singular fallback requires both plural fields absent. Reader controls that import ignored evidence belong in explicit local configurations, not tracked CI tests. Default-off observers need real mutation-path coverage and enabled/disabled serialized equality before campaign use.
+
+
+## 2026-10-13 — Prefix preservation must retain append bytes
+
+See413–420 in PROJECT_LEDGER.md. C-lane telemetry is append-only evidence. Verify its opening prefix and retain the entire new suffix; never truncate it to restore an earlier whole-file hash. Exact opening inventory equality can coexist with irreversible post-run evidence loss and cannot certify preservation. n63 lost946,671 unretained appended bytes; this failure remains explicit despite independently usable runner/saves/receipts and calibration PASS. Keep preservation and diagnostic verdicts separate. Numeric credit0.15→0.50 on one strict pair does not prove the parent consumed it on another pair, or satisfy a0.52 gate. Trace key identity before proposing transfer or threshold changes.
+
+
+## 2026-10-13 — Content-derived keys require measured rebinding provenance
+
+See421–423 in PROJECT_LEDGER.md. A changed positional sector ID alone does not prove intelligence identity changed; compare both content-derived own/enemy keys. Conversely, changed anchors do not prove disjoint frontage without retained topology. Runtime getter rows and saved post-turn assignments show different observation points and cannot identify the first writer without a direct receipt. Whole-operation confidence can match a later objective such as Baljvine while the probed current target maps elsewhere. Empty corps_front_sectors in retained saves is an observation, not proof of intentional serializer behavior. Avoid confidence migration or current-target-only changes until authority and exact provenance support them.
+
+
+## 2026-10-13 — Reject non-causal accounting fixes before calibration campaigns
+
+See424–432 in PROJECT_LEDGER.md. A false stalemate label is an accounting defect, not proof of lost movement or capture. Map every changed counter to downstream consumers and actual threshold crossings before spending a full suite/campaign. The retired425 patch changed no relevant Sana gate and also credited a stale hostile approach. Actual column orders were delivered normally. Historical route direction and force retasking can expose an authored campaign-design limitation; do not invent brigade-specific routes from group-level history, retire targets without owner authority, or transfer a live-operation brigade through catalog duplication. Same-operation phase handoff is a material mechanic proposal requiring explicit owner/canon design authority and atomic ownership/save/ordering tests.
+
+
+## 2026-10-13 — Bind process parents by same-sample identity; enumerate every opt-in inventory
+
+See433–443 in PROJECT_LEDGER.md. Retaining a dead process PID in a discovered family is not authority to adopt a later child of a reused PID. Require its actual parent PID+CreationDate in the same sample, enforce birth ordering and account for cmd intermediates. The CUA server false adoption was unrelated and was not terminated. For authored capability changes, search all inventory/exception-list assertions before a long suite: the missed preserve-sequence Sana-axis expectation caused the sole suite failure. A corrected17/17 fixture does not rewrite the original full-suite exit1. Preserve no-retry authority and unspent campaign separately. Telemetry prefix verification must retain the complete suffix and bind full post-suite bytes before campaign. Same-operation handoff needs exact capture ownership, atomic unique membership/roles and absent-opt-in save compatibility.
+
+
+## 2026-10-13 — Deferred membership must survive generic empty-axis pruning
+
+See444–452 in PROJECT_LEDGER.md. An intentionally empty handoff axis can pass isolated admission tests yet be stalled by generic lifecycle reevaluation before its trigger. Test actual launch→reevaluation→owned capture→handoff, alongside ordinary-empty and already-stalled controls. Exempt only the explicit waiting lifecycle; do not revive arbitrary stalled axes. Retained n64 proves the stalled status blocks admission, while the individual turn177 mutation remains unmeasured. Preserve failed campaign acceptance even when no regressions occur. Validate capture timeouts and config keys cheaply before long work.
+
+
+## 2026-10-13 — Validate deferred handoffs across the complete lifecycle
+
+See453–459 in PROJECT_LEDGER.md. The explicit Sana handoff succeeds only after the generic empty-axis stall respects its holding lifecycle. Retained n65 measures exact owned capture185→atomic510-only transfer185→destination victories186–188 and three correct October gains, with zero formerly-correct losses at all four checkpoints. Keep code tests, actual runtime activation, calibration acceptance and baseline adoption distinct. Expected consumer/fingerprint residual exits passing content checks do not retire those gates. Preserve raw failed n64 and the earlier suite failure when recording the successful correction.
+
+
+## 2026-10-13 — Trace generic attrition labels to the exact lifecycle predicate
+
+See460–463 in PROJECT_LEDGER.md. Jajce Recovery was labeled brigade_attrition after admitting one healthy1800-person brigade into a two-brigade sector_attack lifecycle, with zero attacks and unchanged strength. The actual below_minimum_brigades(1/2) log establishes an admission consistency defect. Reuse the effective minimum, including overrides and probe/type exceptions, in any future pure preflight before approval/resolution/spawn/preemption/loan. Do not promise a later capture from deferral without measuring availability and horizon timing. Classify late painted-target changes separately from actual losses, and do not reorder a working route merely to trade a newly correct OSID for another at the horizon.
+
+
+## 2026-10-13 — A helper reason is not delivery through the decision boundary
+
+See464–468 in PROJECT_LEDGER.md. A pure viability helper correctly rejecting a proposal does not prove callers can see its reason. Independent465 found applyOpportunityDecision discarded the reason. The compatible detailed result now exposes proposal/decision_applied/reason, and bot/resolved callers return ordered outcomes without treating a pending proposal as applied. Keep saved-state rejection byte-identical, and distinguish caller availability from persistence, display or stdout logging. Share the exact existing effective minimum policy, including overrides and probe/type exceptions; test admission, expiry and live-roster contention before any campaign.
+
+
+## 2026-10-14 — Never alter telemetry to satisfy a stale exact-file checker
+
+See470–478 in PROJECT_LEDGER.md. A failed exact-C comparison after tests append telemetry is a verifier-premise problem, not permission to truncate the file.473deleted5181bytes without an archive, repeating the historical suffix-loss failure despite explicit full-retention instructions. Verify the entire opening prefix, retain every suffix byte and hash/archive the full post-test file before any closeout. Current prefix identity cannot restore lost history or justify preservationPASS. Keep erroneous rawPASS reports intact with an explicit superseding failure record.476full copies prove only later retention. Functional fixtures can pass while overall acceptance remainsblocked.
+
+
+## 2026-10-14 — Sector target snapshots can omit a newly isolated adjacent pocket
+
+See479–486 in PROJECT_LEDGER.md. Retained n65 isolates Varošluk after Komar180, but sector enemy lists omit it until188. Bounded local discovery may use actual eligible same-corps adjacency under real sector association while preserving downstream guards. A missing sector-derived approach must not reject a brigade already physically on a live friendly approach. Test new discovery paths with their own negative fixtures; old listed-target negatives do not prove them. Provide a viable alternate fallback to distinguish local rejection from an inactive builder. Current diagnostic append retention never repairs an older deleted suffix.
+
+
+## 2026-10-14 — Availability tests need a viable baseline roster
+
+See487–495 in PROJECT_LEDGER.md. When testing exclusion or loan behavior for a sector_attack, keep enough other eligible participants to satisfy its existing lifecycle minimum. A one-brigade test operation should be rejected; fix fixture viability instead of weakening the production minimum. Whole-suite audits must parse red summaries in either status order and preserve a red suite verdict after corrected log accounting. A focused correction cannot retroactively green the original suite or authorize an automatic expensive retry.
+
+
+## 2026-10-14 — A local gain cannot waive broad regression
+
+See496–502 in PROJECT_LEDGER.md. n66 takes Varošluk180 but loses19 previously correct October OSIDs and diverges by23, so reject despite fullsuite/native/health/provenance passes. Distinguish operation names from officer identities, creation/planning from actual attacks, and absent execution snapshots from measured transitions. Missing n65 observer coverage is UNMEASURED. Recover the first comparable decision before tuning downstream combat or running another campaign. Multiple post-baseline changes require combined-result attribution. Retain every telemetry append and every failed or superseded receipt.
+
+
+## 2026-10-14 — Separate candidate-discovery expansion from existing priority
+
+See503–505 in PROJECT_LEDGER.md. A new adjacency-only single candidate can return before an older sector-listed group; a conditional compatibility fix is sector single/group first,then adjacency-only single/group fallback. This is a proposal,not measured restoration of a baseline whose constructor path is absent. Active/fatigue0/uncommitted does not prove full eligibility:staffing,garrison,sector and allocation predicates still matter. Equality of complete retained brigade/operation products bounds observable state without proving complete GameState identity. Keep failed administrative reads and corrected exits explicit.
+
+
+## 2026-10-14 — Preserve exact opening bytes before editing retained work
+
+See506–509 in PROJECT_LEDGER.md. A HEAD diff is not a task-scoped diff in a dirty worktree. Save exact opening bytes before edits and hash both ends. If a snapshot was omitted, a posthoc reconstruction can establish byte identity only when independent opening hashes match exactly and input patches/preimages are pinned; label it posthoc.507openings were recovered from481/484retainedpatches and verified independently. This source recovery does not recover or waive prior473losttelemetry. Failed and nonterminating capture errors remain failures even when C/D copies are exact. Consolidate every type-error category before another verification.
+
+
+## 2026-10-14 — Final improvement does not waive checkpoint preservation
+
+See510–514 in PROJECT_LEDGER.md. n67 improved October696→697 with no final losses, but a six-turn recapture delay crossed April checkpoint156 and violated the unchanged zero-loss/floor gate. Evaluate every agreed checkpoint and retain the rejected run; do not relabel a higher final score as acceptance. Compare actual operation objectives/participants and target orders before attributing the delay to a patch. A missing execution phase row leaves the transition unmeasured. Freeze direct gate input paths, not just matching basenames; verify the actual source dependency.
+
+
+## 2026-10-14 — Trace controller preconditions before changing authored order
+
+See515–517 in PROJECT_LEDGER.md. The same opportunity footprint can produce different built objectives because an earlier capture removes a now-friendly target. Compare control history before attributing a later attack sequence to the current planner. A null local candidate records an outcome, not its rejecting predicate. Bind current source separately from unavailable historical preimages, and retain that inference boundary.
+
+
+## 2026-10-14 — Observe roster rejection before reporting an undersized group
+
+See518–521 in PROJECT_LEDGER.md. minimum_group_roster=false reports a consequence; it does not identify which actual eligibility/staffing/approach/travel check removed a brigade. Observe the original per-brigade predicates once, preserve short-circuit order, and keep incomplete/unreached roster fields unknown. Require qualified and rejected real group fixtures alongside single-candidate fixtures. Candidate qualification does not prove downstream operation admission, and logging readiness does not measure a historical rejection.
+
+
+## 2026-10-15 — Resolve compound rejection with retained witnesses before adding observers
+
+See522–528 in PROJECT_LEDGER.md. A first failed compound predicate is a measured boundary. A source-bound sufficient witness can resolve its first failing subcondition without another campaign: seven connected same-controller positions exceed the six-position pocket cap before later ring/alliance checks. Prove exact graph,controller-history completeness and phase timing,then preserve the guard. Validate readers against actual producer fixtures rather than guessed terminal schemas. Separate raw artifact pins from normalized provenance stamps and honor absent:true inventories. A process wrapper may embed the real runner argv; bind the receipt PID to the exact entry-point child with its parent/creation chain,retaining and separately superseding verifier failures.
+
+
+## 2026-10-15 — A sufficient state bound can establish a blocker without exact telemetry
+
+See529–532 in PROJECT_LEDGER.md. An exhaustion value100, eight maximum decay steps of3, add-only other writers and persistent command identity establish a lower bound76. Against a30 limit this is a sufficient inhibitor even when the exact first-returned reason is absent. Prove writer completeness, initialization and phase timing; distinguish an inequality from an exact value and an inhibitor from the first executed guard. Snapshot labels such as at_launch do not override the snapshot input timestamp: a turn111 plan snapshot carried into a112 operation is not a fresh112 state measurement. Correlated probe counts do not establish the source of accumulated exhaustion.
+
+
+## 2026-10-15 — Sector attack type does not establish its commander creation path
+
+See533–537 in PROJECT_LEDGER.md. Use actual commander_creation site plus weekly/AAR identity before attributing a sector_attack to a general plan. Eight repeated zero-attack operations were local reductions with no plan. Creation checked Graz while execution also checked the RBiH–HRHB alliance gate; diagnose admission consistency before changing cancellation cost or exhaustion thresholds. Equal target-control endpoints alone do not prove continuous control: bind retained control history and writer coverage. Scalar accounting establishes actual contributions, not a counterfactual calibration recovery.
+
+
+## 2026-10-15 — End-to-end admission and cheap inventory preflight
+
+See 538–543 in PROJECT_LEDGER.md. A correct branch-local rejection can still be bypassed by same-call fallback. Assert final emitted and stored operation sets with fallback eligible, with combat-enabled positives in both directions. Include strict-null source-inventory checks before a costly suite when editing an inventory-owned file; typecheck alone does not enforce that gate. Compare scanner results on archived preimages before attributing an inherited failure to the change. Progress must count failure rows as well as green rows; only actual process exits and complete coverage can establish a passing suite. Keep original receipts and failures with explicit superseding corrections.
+
+
+## 2026-10-15 — Archive actual selection configs before runner cleanup
+
+See 544–546 in PROJECT_LEDGER.md. Retain the live per-shard and serial configs before the canonical runner removes its temporary directory. Reconcile submitted files with the approved manifest, including intentional partition repeats, and distinguish file executions from unique files. When child statuses are not individually logged, label all-zero statuses as source-bound through the pinned aggregate function and actual outer zero exit; do not invent direct exit observations. Reuse settled complete preservation hashes for unaffected archives and freshly verify changed metadata and owned closeout files.
+
+
+## 2026-10-15 — Match evidence adapters to explicit snapshot selection
+
+See PROJECT_LEDGER.md,547–549. When a bounded diagnostic adds selected saves, update only native inventory cardinality expectations and validate exact requested turns; preserve score floors, zero-loss, provenance and replay criteria. Use each retained evidence artifact's actual schema (relative all_files versus full-path files; verdict/exits versus absent pass boolean). Complete current-input, retained-file and reader controls before launch; disclose late verification rather than describing it as preflight. The n69 measurement passes697/712 with zero checkpoint losses despite the different t112 plan path; a calibration result is not proof that a desired internal operation was restored.
+
+
+## 2026-10-15 — Correlated observer fields do not identify a compound blocker
+
+See PROJECT_LEDGER.md,550–552. A false local-eligibility composite and true probe cooldown in the same row do not prove cooldown causality when cooldown is not an operand of that composite. Preserve evaluator-before-combat versus post-turn-save boundaries: the ring can become bounded in combat after that turn's candidate evaluation. An overlap boolean proves rejection but not the matching operation or clause; saved volatile sector fields cannot supply missing evaluator-time provenance. Preserve original evidence and add explicit timing corrections. Never bypass a measured political stop to satisfy a calibration target.
+
+
+## 2026-10-15 — Bind diagnostic reasons to tuples and caller identity
+
+See PROJECT_LEDGER.md,553–555. Internal consistency between booleans and a first-reason label cannot prove a recorded overlap. Recompute reached predicates from detached tuples in original order, bind the candidate to the actual built operation and host corps, and match the reported conflict to the first matching existing tuple. Use null for unreached predicates and test every suppression callsite. Preserve old readers and raw failures; a corrected validator does not retroactively measure missing campaign-time data.
+
+
+## 2026-10-15 — Scenario-first gates and exact metadata classification
+
+See PROJECT_LEDGER.md,556–558. Focused checks plus bounded scenario comparison form the calibration inner loop; retain the full suite for qualifying final gameplay acceptance and reuse unaffected evidence explicitly. Match provenance hashing to its actual CRLF normalization; preserve raw archive/artifact hashes separately. When excluding a whole run identity/provenance file from gameplay equality, retain its raw inequality and identify the exact differing JSON paths. A same-sector rejection and a post-turn sector-label difference do not establish a false-positive guard; preserve evaluator-time tuples and timing boundaries.
+
+
+## 2026-10-16 — Bind sector identities and alternatives to the live decision frame
+
+See PROJECT_LEDGER.md,559–561. Sector suffixes are deterministic rebuild-local ordinals, not persistent content identifiers. Compare operation and candidate mappings inside the same live evaluator frame and bind intervening rebuild/reanchor writers before treating saved labels as contradictory. A skipped branch has no measured eligibility: first-local-qualifier followed by overlap abort proves a search limitation, but does not prove an independently lawful alternative or a beneficial gameplay fix. Preserve all guards until that evidence exists.
+
+
+## 2026-10-16 — Detached observers need a complete failure and telemetry boundary
+
+See PROJECT_LEDGER.md,562–564. Cloning a simulation graph isolates its fields but not global profiling counters or exceptions. Contain the entire shadow evaluation, suppress production profiling attribution and fail closed on unusable coverage while preserving the real return. Stream readers must validate every sequential invocation packet, including repeated same-turn identities, and recompute reached overlap clauses from validated tuples. Partial shadow local eligibility is not actual selection, emission, admission or full lawfulness.
+
+
+## 2026-10-16 — Shadow class restrictions must guard every earlier search
+
+See PROJECT_LEDGER.md,565–567. A class-only observer option checked late in a selector can still execute earlier classes. Test every emitted candidate class, including rejected attempts, rather than only qualified alternatives. Structurally complete packets and unchanged gameplay do not establish diagnostic semantic validity. Keep strict readers and the original failed run intact; identify the producer control-flow defect instead of filtering or relabelling foreign rows to pass acceptance.
+
+
+## 2026-10-16 — Validate the actual emitted diagnostic packet
+
+See PROJECT_LEDGER.md,568–570. Class assertions and separate literal reader controls do not prove emitter-to-reader integration. An evidence-only test setup can tee actual intercepted diagnostic rows from the unchanged fixture into the unchanged reader, preserving CI independence from local evidence paths. Keep the original failed campaign and its strict rejection intact when validating a corrected producer locally.
+
+
+## 2026-10-16 — Local group qualification does not cancel an earlier overlap clause
+
+See PROJECT_LEDGER.md,571–573. The accepted n72 skipped-group observation qualifies only Varošluk at both required turns, then fails same_sector. Disjoint objective and participant tuples do not make that group independent under the existing short-circuit guard; those later evaluated fields stay null. Keep roster-eligibility failures separate from candidate rejections, preserve unmeasured downstream boundaries and retire an exhausted diagnostic question without weakening gameplay rules.
+
+
+## 2026-10-16 — Negative candidate receipts distinguish coverage from selection
+
+See PROJECT_LEDGER.md,574–576. Absence of an exact catalog or execution link does not establish absence of evaluator visits. Bind negative candidate receipts and their first reached predicate before adding instrumentation or proposing a rule fix. Research historical operation ownership before authoring objectives; already-approved painted goals do not need reapproval. A closed diagnostic branch remains a calibration mismatch when expected and actual controllers differ.
+
+
+## 2026-10-16 — Bind historical evidence to aggregate extent
+
+See PROJECT_LEDGER.md,577–579. A representative village name may label a much larger multi-settlement OSID. Bind its constituent geography before assigning operation ownership; regional advances and adjacent targets do not establish the whole aggregate capture chain. Keep printed book pages distinct from PDF/KB page indices, disclose geographically irrelevant substring hits, use actual timestamps and explicit all-untracked status selectors, and retain rendered source evidence. Unsupported history remains unknown without changing already-authoritative painted goals.
+
+
+## 2026-10-16 — Separate missed admission from later scheduling symptoms
+
+See PROJECT_LEDGER.md,580–582. A delayed proposal scheduled beyond the horizon may be a consequence of a closed historical window rather than the cause of missing that window. Bind earlier participant ownership, productive operation lifecycle and pipeline order first. Pure predicate evaluation on cloned retained saves can validate a deterministic reconstruction without a replay, but must remain distinct from original in-turn rejection telemetry. Do not turn dead reevaluation housekeeping into a promised calibration fix.
+
+
+## 2026-10-17 — Match historical precision to the proposed simulation claim
+
+See PROJECT_LEDGER.md,583–585. Corps-level operational geography plus an already-authoritative target can support a bounded regional objective candidate without inventing an exact capturing brigade or requiring every constituent name in narrative text. Keep individual capture chronology unknown. A reserve participant is not disproved merely by reserve status. Pure admission success remains distinct from downstream axis eligibility, especially where sectors differ. Preserve stable operation identity when evaluating a single additive roster change.
+
+
+## 2026-10-17 — Prove the actual writer and canonical fixture shape
+
+See PROJECT_LEDGER.md,589–591. A generic movement owner label cannot identify its producer: bind the dispatcher handler and operation/axis/objective tuple, with an otherwise-identical no-operation control. Typed portable fixtures must match canonical assignment and ops shapes; casts can hide role contradictions that materially change tested behavior. Pin actual transit/arrival/phase-transition turns instead of an eventual-success loop. A local production-path pass still does not prove campaign score preservation.
+
+
+## 2026-10-17 — Test ordering at its actual ownership boundary
+
+See PROJECT_LEDGER.md, 596–598. Authored admission priority and canonical persisted ordering are separate contracts: test priority at the selector and stored order at final reconciliation, keeping exact membership and ownership checks. A source/fixture contract must not be described as an observed pre-reconciliation campaign event. An agreed incorrect proxy still requires owner correction; preserve the original failed evaluation and add a superseding result rather than rewriting history.
+
+
+## 2026-10-17 — Review command references are evidence, never execution authority
+
+See PROJECT_LEDGER.md, 599–601. A review handoff included an imperative-style full-suite command after prohibiting execution. The reviewer launched it, violating a one-invocation owner allowance. Label referenced commands as HISTORICAL EVIDENCE — DO NOT EXECUTE, avoid imperative execution verbs, and give a reviewer an explicit allowlist of read-only operations. A role prompt is not technical access control. Once the invocation limit is violated, retain all available output, stop expensive work and keep the gate failed; matching final bytes cannot waive the contract or prove concurrency neutral. Do not promise hard prevention without enforceable tool permissions.
+
+
+## 2026-10-17 — Full-suite fixtures can overwrite retained scratch output
+
+See PROJECT_LEDGER.md, final 604 retention exception. The _sarajevo_override_test fixture writes fixed generated paths. Preserving live C/D telemetry, production/source dirty files and the candidate run is insufficient to prove preservation of every older generated output. Archive retained fixed scratch outputs before a future suite or isolate the fixture in temporary output directories; do not repair old bytes by rerunning and claiming recovery. When historical hashes exist, use their pinned index to find exact retained duplicates and report unlocated older bytes at that narrower scope.
+
+
+## 2026-10-18 — Separate constructed mechanics tests from retained-state feasibility
+
+See PROJECT_LEDGER.md, focused HVO handoff tests617–621. A single slow donor does not rule out all donors, and a constructed combat fixture with stronger morale/cohesion, invented defenders or lower fixture thresholds is not a retained-state counterfactual. Keep copied actual positions, commitments and capture issuers distinct from synthetic controls; unresolved replacement of a forward brigade remains UNMEASURED. Same-operation axis transfer preserves movement/pending orders; transit attack eligibility is a separate contract. A five-to-four fixture count does not establish a minimum-force guard. Compare identical git status selectors before inferring mutation.
+
+
+## 2026-10-18 — Grouped battle participation does not imply territorial advance
+
+See PROJECT_LEDGER.md, retained Southern Move donor trace622–623. The resolver records all valid grouped attackers as participants, then normally advances the first strict-ID-sorted attacker; the coordinated_advance exception has separate outcome/operation/axis conditions. A brigade can fight in a successful attack and remain at its previous location. Check its actual battle history, location and next-turn orders before calling it unready or immobile. Newly generated column orders are consumed on a later movement pass. Removing the lead changes combat strength, so the next sorted participant is a test candidate, not a proven replacement.
+
+
+## 2026-10-18 — Authored formation IDs and affected-family coverage (627–631)
+
+Authored participant selection and handoff construction must use the same exact-key-first, unique-OOB-alias binding. Count ownership with resolved runtime IDs; persist that runtime ID and reject ambiguous/missing mappings. A synthetic formation ID is not a stable catalog identifier. When changing a named operation's catalog shape, include the catalog's own family spawn test in focused selectors: generic admission tests can pass while that direct fixture still uses an obsolete roster and old axis shape. Prove admission with prerequisites still hostile and the gated axis holding, separately from post-capture delivery. Assert optional-property absence explicitly rather than matching a property set to undefined. See PROJECT_LEDGER.md entry627–631 and the retained628/629 failures; this lesson does not waive campaign/full-suite gates.
+
+
+## 2026-10-18 — Hash domain and failed-reader retention (632–635)
+
+Provenance consumed-input hashes use run_provenance.normalizeForHash (CRLF→LF); raw preservation hashes use original bytes. Compare within the same hash domain. A raw-versus-normalized mismatch is not an input change. Preserve a failed readiness script and its exact output with create-new paths before correcting either; a hash and prose summary cannot replace overwritten bytes. Validate final inventories only after redirected command logs close, excluding active/self-referential outputs. A real score gain and intact telemetry do not waive a failed independent reader-evidence retention requirement. See PROJECT_LEDGER.md entry632–635.
+
+
+## 2026-10-18 — Fresh-attempt capture and withdrawal frontier (636–640)
+
+Use run_preserved_preflight.cjs with an explicit fresh attempt directory, exact entry script, {evidenceDir} child argv and safe declared artifact names. A failed attempt is immutable; corrections create a new one. Check terminal receipt schema and boolean fields, not only process exit. Reuse pinned historical archive hashes; freshly hash current inputs/native artifacts instead of rehashing the whole archive. A current end-save objective can have had an actual earlier opportunity: join its predecessor capture to the next-turn roster/withdrawal and physical transit. A supplied, assigned unit may still be unable to deliver an order in time. No catalog/saved-operation match is a coverage-bounded absence, not proof about all unlogged admissions. See PROJECT_LEDGER.md entry636–640;703 remains unadopted and prior failed gates remain.
+
+
+## 2026-10-18 — Component controls and strategic-target handoff (641–644)
+
+A positive movement-helper control from a complete post-turn save excludes omitted saved-state context at that seam, but cannot establish live pipeline inputs or writer ordering. Keep projected arrival separate from retained history. Campaign target membership can feed candidate priority without creating a mission; inspect general guards before asserting target-specific rejection. A launch-window field with no current-turn consumer cannot explain timing. See PROJECT_LEDGER.md entry 641–644.
+
+
+## 2026-10-18 — Local diagnostics versus portable phase tests (645–648)
+
+Keep ignored full-save reconstructions in retained local evidence; checked-in tests require tracked inputs or bounded embedded scalars. Preserve superseded test bytes before correction. A successful current caller-order reconstruction that contradicts retained history establishes non-reproduction, not a historical source mismatch or a fix. Prove campaign intent delivery and general plan guards separately from target-specific selection/admission; counterfactual guard controls do not authorize rule overrides. See PROJECT_LEDGER.md entry 645–648.
+
+
+## 2026-10-18 — Compare equivalent phase boundaries (649–651)
+
+A successful mid-turn component call and a different end-of-turn save are not contradictory until intervening writers are traced. A later correction may cancel a valid transit, and a still-later bot writer may replace the order with a different owner. Record each writer separately; order-owner tags cannot identify an earlier deletion. Serializer omissions do not establish live absence when the runner continues from un-serialized state. Source binding must distinguish dirty raw pins, complete-inventory/HEAD inference and normalized data hashes. See PROJECT_LEDGER.md entry 649–651.
+
+
+## 2026-10-18 — Loan ownership across movement writers (652–654)
+
+An intact operation roster does not ensure every movement writer recognizes its authorization. Compare effective active-loan ownership in correction and order generation; checking only the home corps can disagree with the later bot. Keep participant, axis, phase and destination semantics strict when proposing ownership alignment. A valid-destination preservation control proves that predicate only, not operation-ownership correctness. Before proposing lookup alignment, exercise the unchanged strict destination helper: an old objective can still be a lawful approach to a later objective, and its membership must be measured rather than guessed from its old index. Counterfactual subsegment scope and serialized stale assignments must not be reported as historical live inputs. See PROJECT_LEDGER.md entry 652–654.
+
+
+## 2026-10-18 — Align loan owner before applying movement gates (655–657)
+
+A shared operation-authorization lookup must use the same effective active-loan corps as order generation. Resolve ownership first, then apply the existing strict participant, phase, axis and destination helper unchanged; do not replace a lookup mismatch with a global operation search or an authorization bypass. A committed transit regression should also run the following bot phase and prove active-column skip with no replacement. Fixture correctness and affected-test passes do not establish campaign score preservation. See PROJECT_LEDGER.md entry 655–657.
+
+
+## 2026-10-18 — n76 rejection and retained 717th trace boundary
+
+The active-loan movement lookup candidate's one bounded n76 regression produced 702/712, losing Varosluk against n75 703/712 with zero gains; do not adopt or describe calibration as preserved. 717th's earliest observed saved-state divergence is t181 Jajce Recovery phase/axis and sector, with the same location/transit. Subsequent n75 Varosluk assignment/capture versus n76 Grdovo attack does not identify an unlogged writer. Corrected static receipt uses settlement_id for control events; superseded attempt remains immutable. Checkpoint-tool exit0 is not the strict acceptance verdict (direct evaluator1). C telemetry +946671 bytes retained in full with exact prefix; D unchanged. Candidate consumer/fingerprint UNMEASURED. See 658b-result.json, 658b-loss-receipt-b.json and 659-loss-receipt-verification.json under logs/claude-channel-20261004.
+
+
+## 2026-10-18 — reserve-pool scheduling can change preparation limits
+
+See PROJECT_LEDGER.md entry 2026-10-18, 661–663. Jajce's retained n75/n76 commanders differ because a4thCorps probe binds S Delic at different saved turns. Hodzic/aggressiveness5 max3 versus S Delic/aggressiveness4 max4 is consistent with intentional deterministic pool/personality rules. Observed 770th/717th Grdovo capture181/182 and later Varosluk loss do not expose the earliest probe-emission predicate or prove source655 caused it. End-state probe counters are not pre-decision inputs. Do not tune limits or pin commanders to recover a score without a root defect. Evidence: logs/claude-channel-20261004/661-result.json and 662-independent-review.json.
+
+
+## 2026-10-18 — exact-window probe receipts and officer sequence fixture
+
+See PROJECT_LEDGER.md entry2026-10-18,664–666. tests/commander/probe_officer_preparation_sequence.test.ts reproduces the reserve allocation/preparation coupling through real admission and initialization, including release ownership. commander_creation's additive probe_gate_receipt is restricted to RBiH arbih_4th_corps177–179; optional shouldLaunchProbeInstead callback exposes the real first return and null skipped checks without recomputing the decision. A fallback probe may be created without calling that predicate; receipt must preserve that distinction. Build completion/returned operations do not prove admission or historical causality. No campaign/restoration703 is implied by local observer parity. Evidence: logs/claude-channel-20261004/664-result.json and665-independent-review.json.
+
+
+## 2026-10-19 — actual fallback probe need not call intel predicate
+
+See PROJECT_LEDGER.md667–669entry. n77 raw30artifacts match n76; metadata out_dir-only difference is reported separately. Actual4thCorps177–178 exits with empty probe objectives;179createsfallbackprobe while targetIsBoundedPosition=false prevents shouldLaunchProbeInstead evaluation. Nullcallreceipt is not false predicate; historicaln75cause remainsunmeasured. Comparator178consolelabels n44 generically; realargv identify comparison. Source-reached branch evidence must survive strictreader fieldshape controls. Reviewer-owned checkers obey the same immutable entry/argv/stdout/stderr/exit preservation contract as execution diagnostics;668failure remainsunmet and does not erase valid worker runner telemetry. Evidence667-result.json/668-independent-review.json underlogs/claude-channel-20261004.
+
+
+## 2026-10-19 — fallback target selection requires an evaluator candidate receipt
+
+See PROJECT_LEDGER.md entry670–672,correction673. Empty probe objectives plus selected-brigade=true cannot name a rejecting filter without the brigade ID/direct-target set/live per-candidate inputs. Direct candidates in emit.ts are already direct/reachable; cooldown/politics/prediction or an earlier empty set remain. The portable characterization demonstrates boundaries without historical attribution. Political rejection can occur despite a victory prediction; do not insist on exact stalemate when the unchanged criterion is at least stalemate. Preserve failed test bytes in evidence archives, then fix one canonical active test; immutable evidence does not require duplicate broken suites to remain active. Broad compile timeout and overwritten helper-input preservation remain unmet at original scope. Evidence670/671/673 under logs/claude-channel-20261004.
+
+
+## 2026-10-19 — log pre-direct rejection at the actual screen
+
+Turn178 fallback logging must include enemy candidates rejected before direct enumeration; an empty direct set alone cannot name each target's first filter. Record actual adjacency results and leave downstream predicate inputs null/unreached for excluded targets. Values eagerly computed during mapping differ from later filters being reached. Sort detached diagnostic inventories without reordering production collections. Positive selector controls should keep the old177/179 receipt while excluding new178-only detail. A metadata hash is not an archive; exact-hash reconstruction into separate files can prove recovery but must not be described as successful pre-edit preservation. See ledger674–677 and evidence677/675; no historical rejection attribution without actual run evidence.
+
+
+## 2026-10-19 — empty direct set measured, ignored telemetry checked separately
+
+The live n77-equivalent turn178 receipt now proves441st atJasenik2 has no adjacency to any of10sector enemy candidates. Do not attribute this decision to cooldown/politics/prediction; those filters were never reached. Next trace must establish lawful brigade eligibility/ranking, not weaken attack thresholds or claim a historical n75 counterfactual. Git-ignored telemetry may legitimately be absent from dirty-status differences: require unchanged tracked dirtybytes and independently verify full telemetry prefix/current/archive/appendedtail. Keep an incorrect checker failure and its immutable corrected suffix separate; neither requires repeating the campaign. See ledger678–680 and sealed678/678b/679 evidence.
+
+
+## 2026-10-19 — direct capability and fitness are separate selection gates
+
+Retained n78 persists actualturn178 forces/zones and turnstamps, permitting fitness/allocation diagnosis when bound through increment→corpsphase→emit/apply→save. FitnessDESC/IDASC before adjacency can nominate a rearbrigade and suppressalltargets despite equallyfit direct alternatives. Protectgarrison exclusions and the existing lawfulpool; smallestproposal prefiltersdirectcapability before ranking, preservinglaterfilters. Eligibility/directadjacency does not establish alternativeprediction orlaunch. Do not generalize this proof into retryingotherbrigades after cooldown/politics/prediction failures. Seeledger681–683 andindependent682review.
+
+
+## 2026-10-19 — direct availability belongs before generic probe ranking
+
+The generic fallback now narrows only the existing lawful brigade pool to direct-capable members when possible, then preserves fitness/ID ranking and all later target filters. It does not replace eligibility, steal garrison units, cross a brigade's derived sector or retry another brigade after later rejection. Missing context/emptydirectsubset keeps priorfallback. Fixtures must separate formation-object insertion differences from eligible-pool order, use the actual real-predictor outcome against unchanged sufficiency, and respect the exact178 observer selector. Focused proof is not campaign calibration evidence. Seeledger684–686 andindependent685review.
+
+
+## 2026-10-19 — global selector fixes require checkpoint gross-loss proof
+
+The direct-target prefilter changed n79 earlier than the motivating turn178:4thprobesalreadyoccur177/179, so178selectionisnotreached. Never use a synthetic motivating fixture as evidence that its live boundary remains the first affected event. Grosslosses atallcheckpoints matter: n79addsno reference-correct OSIDs and losesRS LopareSelo2 aftercombat89, failing703/zero-loss. Trace that new capture's actual order chain before broadening the fix. Bind helper schemas to retainedsavepositivecontrols before extraction, keep initial-save/inputidentity separate from gameplaybyteequality, and compare frozen docs against finalsettledinventory ratherthan pre-editpreservation. Keep failedcheapchecks and unfiredgates explicit. Seeledger687–689.
+
+
+### 2026-10-19 — distinguish a global deterministic divergence from a local capture chain
+
+Retained n78/n79 commander streams first diverge at6, but the supported Lopare chain is2ndCorps opportunity85/emission86, BlackSwans elite loan87, live roster88 and combat89. No retained live inputs establish the6→60 missing-plan bridge. End-state AAR membership cannot replace intermediate commander/loan/temporal evidence. A generic early selector correction can fail late calibration without directly selecting the eventual target; preserve the failed candidate and avoid OSID-specific prohibitions unsupported by mechanics or history. See690-result.json and691-independent-review.json under logs/claude-channel-20261004.
+
+
+### 2026-10-19 — local first-candidate rejection and sector identity
+
+As recorded in the2026-10-19 ledger rollback entry, n78 commander at183–185 constructs the first local candidate already covered by executing DonjiVakuf, then suppresses it without continuing search. An overlap-aware candidate search must preserve the later full overlap guard and cannot assume a different target is lawful. At187 equal stored/current ordinal sector strings trigger recovery overlap; stripped sector footprints prevent proving geographic identity or stale reuse. Built candidate membership is not admission or launch. Preserve original sealed reports plus explicit errata for terminology corrections; do not rewrite executed or sealed evidence. See logs/claude-channel-20261004/694-result.json and694-erratum.json.
+
+
+### 2026-10-19 — distinguish search starvation proof from historical target eligibility
+
+The2026-10-19 claimed-objective fixture ledger entry proves a real production first-qualified return followed by overlap suppression can hide a synthetic later viable target. A positive control must alter an explicit eligibility input and use the same production emitter; test-only desired continuation remains RED until gameplay is changed. Exact selected/suppressed receipts and expected failing assertion must be separate. Same-sector short-circuit means shared-objective is unobserved, even when a tuple independently lists that objective. Missing detailed alternative telemetry is unmeasured historical eligibility, not evidence of rejection. See698-result.json/699-independent-review.json under logs/claude-channel-20261004.
+
+
+### 2026-10-19 — overlap-consistent local admission and truthful rejectors
+
+The2026-10-19 implementation ledger entry records claimed execution-objective rejection at the last eligibility step before a local candidate is accepted, covering single/staged-group/direct-group paths. Earlier placement can mask existing observer rejectors even when gameplay intent is equivalent. Preserve the established diagnostic predicate order, all downstream overlap checks and participant exclusions. All local targets being claimed does not imply an empty output: a different unclaimed generic probe may lawfully pass unchanged fallback guards. Use exact final receipts rather than failed expectations. Root-configured typecheck also covers readonly fixture APIs; replace readonly briefing objects rather than mutating fields. See702-result.json and703-independent-review.json under logs/claude-channel-20261004.
+
+
+### 2026-10-19 — claimed-objective regression evidence
+
+The703-restoring run n80 reaches a qualified Varosluk local single185 and770th captures186; emitted/returned, saved planning and battle/control receipts are distinct evidence. The selected185trace contains no preceding claimed-target rejection, so a healthy source correction and improved campaign result do not prove an exclusive direct same-pass causal chain. Full core-gate success still leaves separately unmeasured consumer/fingerprint and final fullsuite requirements.
+
+See the2026-10-19 ledger regression entry and706-seal-a/result.json and707-independent-review.json under logs/claude-channel-20261004.
+
+### 2026-10-19 — 710 bounded full suite and native-summary accounting
+
+Do not count nested deliberate-failure Vitest summaries as native shard terminals. ONE of five native groups completed; strict-null inventory has2 genuine failures and incomplete lanes remain unmeasured. UTC timeout arithmetic must use DateTimeOffset or numeric Node Date.parse; retained native-budget defect was bounded by owned-process external watchdog, not rerun. All n80 native31 and703/712 preserved, C append2063809 fully archived. See709–712 in CALIBRATION_MASTER.
+
+### 2026-10-19 — Commander cooldown observer non-null assertion
+
+The cooldownRawPresent own-property ternary permits safe optional access with the same raw null/zero/missing behavior, avoiding an added strict-null escape. One-byte assertion-to-optional-access correction restored strict-null90/90 and root noEmit0 without moving floors or changing gameplay. Do not confuse the focused correction with a passing full suite or new calibration measurement. Evidence713–716 in CALIBRATION_MASTER; n80 retained703/712 and full telemetry unchanged.
+
+### 2026-10-19 — 718 full-suite cap and scratch telemetry retention
+
+Default suite reached native35-minute cap with3/5groupsgreen;oneparallel+serialremainunmeasured despite0observedgenuinefailures. Never combinepartialgroupsorintentionalnestedcontrolstoforgefullsuitecounts. C/Darchives+n80nativepreservation do not prove ALLtelemetryretention ifignoredscenariofixturebrigade/weeklylogsareoverwritten. Volatileclassificationdoesnotwaiveownerrequirement; preserveoldpinsandnewbytes,checkexactopeningcopies,retainunmetcriterion. See717–720 in CALIBRATION_MASTER.
+
+718specificresolution:14nonemptyopeningstateshaveexactphysical324archivecopies,and3openingstatesareemptyper716pins. Usefreshhashmatchingbeforeclaimingrecovery; priorhashmetadataaloneisinsufficient. Newcurrent17bytecopiesarepreservedin720attempt. Thisdoesnotcureearlierhistoricalpreservationfailures.
+
+
+### 2026-10-20 — Shard duration skew is not exact wall-cause proof
+
+Retainedcompletiontimescanprovebadestimates/unevenknownwork,notanexacthung/inflightfile. Globallyinterleavedcompletion-onlystdout lacksstartownership; missingcompletiondoesnotprovestart. Cross-workerfilesumsversuswallmarginarenotstrictboundswhenoverheads/order/resourcesareunknown. Preservecoveragepositivecontrols,skipsandnestedfailureownership. Offlinebalancemodelcanvalidate1440coverage/determinismwithunknownsensitivity,notpromise35minutecompletion. Preferfuturetimingrefresh+perfilereceiptswithfocusedchecks; unchangedshardreplayanswersadifferenthistoricalcausequestion,dontautorunboth. Owner2026-10-20acceptsrawLOCALwithpushedinventory; remote-bytebackupnotpromised. See727–730masterandledger.
+
+
+## 2026-10-20 — Durable Vitest file receipts require real multi-file and nested-child proof
+
+See PROJECT_LEDGER.md, 2026-10-20, 731–734. With Vitest 2.1.9 isolation, one sequential lane can construct a fresh runner for every file: a constructor-local counter is not a lane sequence. Recover the prior durable tail under the one-active-writer contract. Strip inherited receipt identity from ordinary nested children; explicitly assign owned contexts. Await native finalization before recording finish, and capture intrinsic clocks before tests can fake them. Real-child negative controls exposed all four errors missed by a one-file, context-free green check. Keep receipt output outside generated-config cleanup and retain failed controls. Refreshed completion timings can improve workload estimates, but neither offline balance nor focused tests prove full-suite wall time or the exact cause of a historical timeout.
+
+
+## 2026-10-20 — Complete suite coverage can expose previously unreached failures
+
+See PROJECT_LEDGER.md, 2026-10-20, 735–738. Refreshed weights and durable receipts allowed one full suite to reach every lane within its cap, exposing a real roadmap length breach and an exact-list fixture stale against intentional retained Sana behavior. Completion is not acceptance: retain both failures, preserve the limit and production rules, and correct the smallest documented/test contract before any separately authorized expensive rerun. One run cannot establish general runtime bounds or prove why an earlier run timed out.
+
+
+## 2026-10-20 — Persisted empty topology and telemetry status must be inspected directly
+
+See PROJECT_LEDGER.md, 2026-10-20, 748–751. A field persisted as {} is not an omitted field. Injecting a restrictive topology can directly manufacture a scope rejection; label such tests counterfactual and use an exact saved-state production-prefix probe to locate the actual boundary. Here T3 admits transit while rebuilt T6 scope later cancels it. Also, a successful child exit must never mask a failed preservation check: test the status truth table. Appended telemetry is preserved by exact prefix plus full current/archive bytes, not by restoring an old hash.
+
+
+## 2026-10-21 — Repeated observer context is not a unique invocation
+
+A caller/turn/corps/operation tuple may repeat within one turn. Keep every ordered start/candidate/terminal block and label contiguous_unsequenced rather than deduplicating by that tuple or adding a persisted game counter. Reached guard values must come from the existing evaluation; later guards remain NOT_REACHED. Neutrality at a queued entry point does not cover the direct entry point: compare complete state, ordinary return and serialized bytes at both, and inspect the original source order as well. Applied in the [2026-10-21 boundary observer entry](PROJECT_LEDGER.md#2026-10-21--boundary-observer-preparation-768-771).
+
+
+## 2026-10-21 — Validate nested diagnostic frames and the actual decision boundary
+
+Consuming every JSON record and closing caller blocks does not prove nested build/axis completeness. Reconcile declared axes and candidate ordinals with ordered start/terminal records, and test missing/reordered/duplicate frames before endorsing coverage. A commitment can be execution at injection and recovery in the completed-turn report; use the actual predicate receipt for the decision. Applied in [instrumented n82 diagnostic](PROJECT_LEDGER.md#2026-10-21--instrumented-n82-diagnostic-772-776).
+
+
+## 2026-10-23 — Keep authored handoff, preparation and movement authority proofs separate
+
+An authored axis is omitted from the current preparation view only when `late_phase.phase === 'holding'`, a handoff exists and `assigned_brigades.length === 0`. Sector selection, intel confidence, defender/enclave aggregation, terrain/force ratio and in-transit relevance consume that view; they are not additional exclusion predicates. Staffed or held axes, all stored objectives, ownership reconciliation and execution state remain available. A successful handoff changes axis membership and roles exactly once; it does not itself move a formation or assign historical credit for a later capture.
+
+Elite-loan ownership is equally local. Resolve the receiving corps only to validate one unique active operation/axis for the loaned formation; do not turn that rule into a global operation search or alter ordinary home-corps movement policy. When an authored operation enables coordinated advance, it still depends on ordinary operation-owned combat resolution and admits at most one same-axis supporter with the lead. See the [2026-10-23 ledger closeout](PROJECT_LEDGER.md#2026-10-23--two-hvo-target-implementation-validation-and-portable-closeout-829881).
+
+## 2026-10-24 — Capture the counter activation boundary before guessing a fix
+
+A valid canonical brigade and a unique visible DOM counter do not prove that an imperatively redrawn overlay preserves the same activation target. Preserve target/node identity, rect, hit-test owner, overlay readiness, selected state and the identity-bound detail panel at failure; keep the single activation and fail-closed coverage. A prior successful screenshot cannot establish the later failed click's cause. Compare renderer projection with canonical projection, rather than full-save bytes, while keeping native Save/load acceptance separate. See [native blocker](PROJECT_LEDGER.md#2026-10-24--native-shakedown-initial-counter-blocker).
+
+## 2026-10-24 — Persist boundary diagnostics before screenshot enrichment
+
+A screenshot/event helper can fail before appending its event. Write compact structured failure evidence atomically before invoking screenshots and secondary readers; test the actual filesystem output with enrichment deliberately throwing. For imperatively replaced controls, keep the sampled element handle, include current exact-ID match count in both settled reads, and never re-resolve a new target for activation. Visible rail identity is evidence about rendering, not internal selection-store truth. See the [counter-selection ledger entry](PROJECT_LEDGER.md#2026-10-24--counter-selection-harness-synchronization-and-durable-failure-evidence).
+
+## 2026-10-24 — Observe detached media at its actual owner
+
+Document capture listeners cannot observe events from detached new Audio elements. A connected-markup fixture can falsely qualify an observer used by a detached production audio bus. Exercise the actual creation/preload/play path; bind real element listeners before existing playback/load calls, deduplicate connected delivery, and preserve native returns/errors. Missing lifecycle evidence never justifies inventing an abort pair or reclassifying a retained failure. See the [detached-media ledger entry](PROJECT_LEDGER.md#2026-10-24--detached-ambient-media-observation-repair-native-acceptance-unchanged).
+
+## 2026-10-24 — Keep telemetry identities separate until a real join is proved
+
+Playwright/CDP request identity and Chromium NetLog source identity are separate in the inspected producer. Same URL, nearby times, Range and complete byte counts can support a hypothesis without establishing a unique cross-layer join. Preserve that distinction in fixtures and admission rules; an authentic-looking synthetic identifier cannot prove a producer contract. The warroom v2 development stopped at that approved evidence boundary. See the [warroom ledger entry](PROJECT_LEDGER.md#2026-10-24--warroom-loop-diagnosis-diagnostic-repair-go-and-v2-identity-hard-stop).
+
+## 2026-10-24 — Preserve Git porcelain status columns in validation
+
+Git porcelain begins with two meaningful status columns. Calling trim() destroys a leading blank index column and can reject the intended ` M path` state. Keep the raw prefix, remove only terminal newlines, then parse the two columns and path separately. Positive expected-path and negative staged/extra-path controls must exercise the parser before costly work. The retained baseline producer succeeded; its faulty wrapper stays RED while a separate reviewed read-only qualifier proves the resulting state. See the [baseline adoption ledger](PROJECT_LEDGER.md#2026-10-24--eight-pin-baseline-adoption-qualified-without-gameplay-changes).
+
+## 2026-10-24 — Separate passive evidence collection from abort admission
+
+In installed Playwright1.60, public `Response.body()` can fall back from `Network.getResponseBody` to `Network.loadNetworkResource`; wrapper identity does not prove returned bytes came from the original request. Passive collection uses genuine public CDP session IDs and direct `Network.getResponseBody` only, with explicit unavailable/error/pending outcomes and no inferred Playwright/NetLog join. CDP redirect history must survive terminal cleanup; bound live requests separately from lifetime history. A page session may miss OOPIF network activity, so absence requires target-coverage evidence. Diagnostic qualification cannot waive a retained runtime failure. [Reviewed evidence](../logs/r8-warroom-collection-v3-20261024/RESULT.json).
+
+## 2026-10-24 — Equal seed and engine do not erase player-policy inputs
+
+A packaged Historical run can use the same startup, seed, autonomy and engine yet diverge from a
+no-player calibration before turn1 because the player route owns visible identity timing and sensitive
+event authorization. Compare the actual ordered inputs before attributing endpoint deltas to
+nondeterminism. Preserve daily mismatches, separate directly caused endpoints from downstream
+correlation, and require owner/canon/calibration authority before defining a new player-mode target.
+Do not silently adopt the observed score or add hidden approvals to manufacture parity. See the
+[native parity result](../logs/r8-native-calibration-parity-20261024/RESULT.json).
+
+## 2026-10-24 — Separate no-player calibration from player-campaign acceptance
+
+The owner explicitly retained n94 for no-player calibration while defining player criteria
+separately. Exact headless-map equality cannot judge unequal player choices/timing. Retiring that
+comparison is not adopting the observed score, waiving protected invariants, or relabeling a failed
+experiment. Judge player sessions through recorded canonical choices, same-input determinism,
+lawful production outcomes, exact per-faction Save/load and unchanged runtime/coverage gates.
+Use historical scores diagnostically and preserve original negative evidence. See the
+[owner-disposition ledger](PROJECT_LEDGER.md#2026-10-24--owner-separates-no-player-calibration-from-player-campaign-acceptance).
+
+## 2026-10-24 — Replay names do not prove player-input replay
+
+A replay viewer may consume state snapshots or summaries rather than rerun ordered inputs.
+Separate record producer, serialization, phase/actor binding and actual production consumer before
+claiming same-input determinism. Save/load proves reconstruction, not repeatability. Equally,
+headless-map “protected” equality and a small native infrastructure checker do not substitute for
+canonical protection/full-health readers. Older faction-specific zero-turn receipts can be reused
+only at their bound package/turn scope. See the [audit ledger](PROJECT_LEDGER.md#2026-10-24--cheap-player-validation-coverage-and-reader-audit).
+
+### Replay-input feasibility result — 2026-10-24
+
+The inspected native player packet splits pre-tour/post-loop choices and loop actions across
+arrays without a complete shared consumed ordinal. Its production ReplayScrubber consumers
+select stored frames/summaries rather than calling the real Advance path. Any future recorder
+must bind successful mutation-commit order, exact payloads and authoritative receipts; neither
+wall-clock order nor final-state reconstruction supplies missing inputs. Existing runs remain
+valuable evidence, but this contract does not prove same-input reexecution. See the
+[feasibility ledger](PROJECT_LEDGER.md#2026-10-24--offline-player-replay-input-feasibility).
+
+
+### Player parity and clean qualification — 2026-10-24
+
+Use the production delegated-faction selector consistently at Army HQ and downstream staff boundaries; a missing plan producer is distinct from consent or operation admission. Compare actual player inputs before attributing bot/player divergence to engine nondeterminism. Native inbox grouping uses the canonical incumbent and latest event, not the proposed successor. File Import must update both canonical desktop state and the outer host projection. Current S6 production grading requires clean Git: old dirty-run metadata is not authority to bypass it. Tests must allocate fresh retained fixtures rather than overwrite historical evidence. See the player-capability checkpoint ledger.
+
+### Opening consequences and legacy decision lanes — 2026-10-25
+
+Lazily created negotiation stores can silently drop authored opening effects and early harm counters. Materialize only absent substrate before ordinary choices; calling the derived computation would add an unintended tick. Prove extraction against immutable pre-update and final whole-state bytes, including partial/sentinel/extra-key compatibility shapes. A new turn0 decision lane must preserve catalog-authored pending decisions from older saves through the actual adapters, not a core-only fixture. Distinguish coherent opening and legacy tuples before mutation; retain explicit consent and full consequences. Direct machine exit receipts are useful evidence but cannot be relabeled as preserved-wrapper envelopes. Source-string contracts must follow the real catalog argument without weakening the assertion. See the [checkpoint ledger](PROJECT_LEDGER.md#2026-10-25--ordinary-player-startup-policy-and-legacy-save-checkpoint).
+
+## 2026-10-25 — Distinguish assignment footprint from physical transit permission
+
+The normal-player 182nd order matched bot production and survived the adapter, then T3 rejected its seven-node friendly route because three intermediate cells lay outside a corps-sector footprint. Diagnose order production, adapter persistence and consuming phase separately. A valid destination restriction is not an intermediate-node restriction; follow MOVEMENT_AUTHORITY section2a and preserve friendly/allied path legality and movement timing. The bounded correction restores normal delivery and the subsequent181st/109th coverage chain in a retained four-turn production proof. That prefix does not qualify a new campaign or packaged score; the last native39 result remains700/712. See the dated PROJECT_LEDGER entry and logs/r8-native-calibration-parity-20261024/t3-routing-20261025/MANIFEST.json.
+
+## 2026-10-25 — Bounded T3 qualification does not qualify player39
+
+Treat the physical column-routing correction as qualified only at its measured scope: compiled package 0→1 and four-turn delivery prove the normal T2 seven-node route, while n97 supplies the clean188 no-player reference-equivalent result. A fresh player39 can still fail strict finalization independently of exact39+39 saves and in-memory Save/load; record the runtime failure, measured score/losses and missing final result without promoting the score to a floor. Visible `always_deny` choice effects and unresolved cell roots must remain separate from Historical policy or sensitive-consent claims. The next explicit normal-UI `always_allow` turn23 run tests one bounded policy question; a mismatch falsifies policy-alone sufficiency, not every downstream cause, and requires diagnosis before another39 launch.
+
+## 2026-10-25 — Observe the actual target and preserve the first fatal boundary
+
+A parent-page CDP session cannot establish embedded-gameplay coverage. Bind the resolved Frame, declare the post-readiness window and keep lifecycle guards until owned detach. Terminal CDP events have no URL: join them only to an observed request within the same session/request namespace, never filter them away by URL or reconstruct a missing start. Generic Fetch completion/body proof does not prove Media abort eligibility. Centralize setup-failure recording so timeout cannot overwrite an earlier runtime loss; exercise unresolved setup plus close and timeout together. Preserve the exact returned playtest on later failure without synthesizing an unreached manifest.
+
+Before a historical-input replay, test a zero-turn startup/resume roundtrip: the consumed-input inventory can omit an unconditional startup dependency even when resume hydration follows. Bind those extra reads explicitly. Check the reference owner before authoring a local proxy: Kolovarice RS matches n94, so demanding RBiH would invert the intended calibration. See the [dated ledger entry](PROJECT_LEDGER.md#2026-10-25--frame-observer-repair-and-retained-player23-diagnosis).
+
+## 2026-10-25 — Rebuild desktop terrain at its first consumer
+
+Scenario startup can initialize process globals that baked New Campaign and Load State bypass. Rebuild authoritative derived terrain sets from the Advance call's explicit data root before prediction/combat; replace stale sets when switching roots and bind omitted terrain dependencies alongside standard input provenance. A copied historical input inventory is not automatically a complete runtime root. Compare retained JSON outputs at serialized semantics: own undefined properties disappear in JSON, so a runtime-object versus parsed-object deep check can fail despite byte-identical persisted state and report. Preserve the failed check and establish any narrower conclusion through a separate reviewed offline audit; do not rerun the engine for this observer error. See the [dated ledger entry](PROJECT_LEDGER.md#2026-10-25--desktop-terrain-prerequisite-candidate-and-retained-replay-diagnosis).
+
+
+## 2026-10-25 — Terrain-aware load and protocol-first diagnostic projection
+
+Desktop load hydration computes terrain-dependent sector ratings. Prime both existing sets from the selected explicit root before hydration, independently of prior Advance. Warm-game versus cold-observer comparison can disagree only in ratings while canonical save bytes match. Test cold/warm/stale/missing/malformed roots and exact next-advance equality. Classify non-HTTP CDP URLs before HTTP pathname bounds; record bounded protocol/length/hash, keep HTTP caps fatal, and never infer the discarded overflow value as fact. [selected proof](../logs/r8-native-calibration-parity-20261024/desktop-cold-load-20261025/MANIFEST.json)
+
+
+## 2026-10-25 — Failed request is a lawful observed terminal sequence
+
+CDP loadingFailed can follow a known request before response headers. Preserve the failure row without inventing a completeness error; require response count/timestamp for body admission, and keep requestless failures inconsistent. Zero body attempts is expected when observed OGG requests finish206 and body retrieval is failure-triggered. A failure before finalization does not manufacture success-only normalized audio/stderr fields. Package EXE integrity metadata must be proved against actual ASAR-header hashes, not dismissed as build noise. [selected proof](../logs/r8-native-calibration-parity-20261024/request-failure-terminal-20261025/MANIFEST.json)
+
+
+## 2026-10-25 — Match producer success shapes and raw-state boundaries
+
+Success may omit failure-only own properties: require the actual producer shape rather than false/null fields invented by a fixture. Compute empty-list hashes from bytes. Preserve a rejected reader result and qualify the same raw run through a separately reviewed offline amendment. Runtime success and calibration failure are separate verdicts. Historical operation admission does not prove its combat outcome. Canonical saves that normalize/default fields cannot stand in for pre-serialization runtime state; a fidelity refusal is evidence, not a reason to weaken the gate. A synchronous optional observer must receive direct defensive structured clones and preserve own undefined properties; state alone does not bind the next turn's orders/context. [dated ledger](PROJECT_LEDGER.md#2026-10-25--qualified-native-opening-retained-player705-raw-boundary-observer)
+
+
+## 2026-10-25 — Persist the live producer domain
+
+Formation operational fatigue is continuous: a half-point writer cannot share an integer-only migration/validator contract. Preserve finite nonnegative values without changing rates or consumers, and test real writer→canonical/runtime→load→next-advance fidelity. A canonical byte-equality test can hide the same erasure on both sides; compare authentic raw property presence and values too. Match consumed-input producer hashing (CRLF→LF) while retaining additional raw hashes; keep raw source/terrain bindings strict. Record old-versus-new representation changes by exact decoded paths, never a blanket hash waiver. [dated ledger](PROJECT_LEDGER.md#2026-10-25--fractional-fatigue-persistence-candidate-qualification-pending)
+
+## 2026-10-25 — Keep qualification attached to the exact source boundary
+
+A clean no-player campaign, complete suite and package qualification do not automatically cover a later focused gameplay patch. Record which source each proof qualifies, and reopen gameplay188/full-suite/package/native gates when the source changes. Likewise, a runtime-clean player session can still fail calibration, and equal turn timing can contain different admission outcomes. Here headless admits Jackal at turn8 while native records a rejected noncapturing overlap; no admitted-force-count equality follows. The earlier fatigue delta is not rounding: different sector assignment feeds the normal recovery writer, while the first writer remains unknown until a bounded T0→T2 diagnostic identifies it. Keep counterfactual policy runs diagnostic and preserve formerly-correct losses. For REQUEST-OP selection, preview and consumption must share one deterministic planner; use the existing regular bounds, physical friendly/allied route rule, equipment priority and enclave eligibility, while hard rejections remain unforceable. See the [dated ledger](PROJECT_LEDGER.md#2026-10-25--n101package03-qualification-retained-player702-and-request-op-selector-candidate) and [portable proof](../logs/r8-native-calibration-parity-20261024/directive-selector-20261025/MANIFEST.v2.json).
+
+## 2026-10-25 — Keep graph identifiers in the consumer's domain
+
+Canonical graph endpoints are settlement IDs; front and sector functions consume operational settlement IDs. Passing the former into the latter can make every controller lookup null, produce zero fronts and cause a fresh reconciliation to erase all sector assignments. Trace the first consuming boundary and compare the native path before attributing downstream fatigue or operation differences. A failed shadow that repeats the producer's wrong graph input remains failed; preserve it, then use a separately reviewed input-correct shadow to isolate the boundary. Prove a one-argument repair through the real public runner before any campaign rerun, and keep prior campaign, suite and package results attached to the defective producer's exact scope. See the [dated ledger](PROJECT_LEDGER.md#2026-10-25--scenario-osid-graph-cause-and-finite-qualifier-preparation) and [portable proof](../logs/r8-native-calibration-parity-20261024/scenario-osid-graph-20261025/MANIFEST.json).
+
+## 2026-10-25 — Gate scenario-only repair on the mutation that requires it
+
+A scenario harness can call the canonical public war turn and then perform its own artifact repair. If the public turn already produced valid topology and the harness applied no later control flips, the second repair is an extra writer and can change next-turn sector assignment, fatigue and operation selection. Record the successful public-war branch and the real applied-mutation count at the caller, then run the scenario repair only when a post-turn scenario mutation requires it. Preserve legacy peace/transition handling and the final-save projection separately; a dormant branch needs source/fixture coverage, not a fabricated runtime claim.
+
+Evidence retention is part of the result. Temporary test outputs removed by cleanup cannot be reconstructed from merged logs or replaced by a later green run. Record the gap explicitly, switch to retained-output mode, bind raw wrapper/child streams and inventory every retained artifact, while leaving the missing earlier bytes unwaived. See the [dated ledger](PROJECT_LEDGER.md#2026-10-25--n102-no-go-and-scenario-post-turn-caller-candidate) and [portable proof](../logs/r8-native-calibration-parity-20261024/scenario-postturn-parity-20261025/MANIFEST.json).
+## 2026-10-26 — REQUEST-OP personnel-floor selector/consumer alignment
+
+The retained T16 movement handoff diagnosis shows a selector/consumer contract mismatch: eight of ten selected 4th Corps brigades were below the canonical `MIN_ATTACK_PERSONNEL = 500` offensive floor, so garrison/detachment rejected them before operation routing while the planner had admitted them. The bounded correction applies that existing floor before physical reachability and minimum-three selection. It preserves 3–12 bounds, deterministic sorting and equipment priority, routes, commitments, enclave/objective eligibility, consumption and attack ownership. On the retained request, only the 441st and 443rd qualify; the ordinary query and public injection fail closed as `no_available_force` without operation or attack-owner mutation. This is a source-scope correction with independent GO; it does not change assembly, anti-paralysis, movement, supply, health, schema or calibration gates. Evidence and exact hashes are in [source-fix-proof-20261026](../logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/source-fix-proof-20261026/) and [PROJECT_LEDGER.md](PROJECT_LEDGER.md#2026-10-26--request-op-personnel-floor-source-correction).
+
+## 2026-10-26 — Keep resolved-battle fatigue single-owned
+
+When a battle resolver and its aftermath both write the same formation fatigue, the production value can diverge from the established per-battle delta even when the helper's own tests pass. Retain a real-resolver regression for defended, shared-attacker and undefended cases, and keep the helper as the single owner. A focused fatigue proof does not establish a controller change unless its fixture explicitly asserts that output; keep calibration/full-suite/package/native gates attached to the exact final source. [Dated ledger entry](PROJECT_LEDGER.md#2026-10-26--combat-fatigue-single-owner-correction-and-proof-limits) · [Implementation report](40_reports/implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md).
+
+## 2026-10-26 — Separate authored operation pools from historical OOB claims
+
+A geographically coherent scenario force pool is a model allocation, not evidence of an exact wartime order of battle. Keep later-period OOB sources and non-exhaustive witness lists at their actual scope; do not turn them into a complete contemporary roster or settlement-control proof. Distinguish authored operation forces from separate manual request/planner forks. Where retrieved transcript metadata corrects a witness identity, retain the earlier artifact unchanged and record the correction as a bounded amendment. See the [Circle historical review closure](PROJECT_LEDGER.md#2026-10-26--circle-historical-review-closed-without-amendment) and [portable evidence inventory](../logs/r8-native-calibration-parity-20261024/circle-historical-admission-20261026/PORTABLE_MANIFEST.v2.json).
+## 2026-10-26 — Separate premature identity from duplicated personnel
+
+A source can prove an organizational designation is anachronistic without proving that modeled personnel are duplicated or identifying a safe replacement roster. Keep lineage, date, local precursor representation, personnel allocation, and lifecycle implementation as separate claims. BB2's Ban Jelačić→94th/95th lineage dates do not by themselves license deleting April counters or assigning their people elsewhere. Likewise, a source correction to a morale invariant is not evidence that a separate engine-health cap can be met. See the [calibration packet report](40_reports/implemented/20261026_CORRECTED_ENGINE_CALIBRATION_PACKET.md) and [dated ledger entry](PROJECT_LEDGER.md#2026-10-26--corrected-engine-calibration-packet-and-zero-drift-morale-correction).
+## 2026-10-26 — Keep predicate tracing outside canonical state
+
+A diagnostic flag is not necessarily byte-neutral when enabled. The legacy axis_reject recorder writes facts into OperationAxis and serialized GameState. Its separate axis_order_trace mode emits those existing facts only to caught, stable stdout and preserves the legacy mode for its original consumers. For strict reproduction, leave stateful topics disabled and compare whole canonical state and ordinary reports to the exact control; do not erase diagnostic differences after the fact or infer a missing upstream refusal. Source-level parity tests do not replace the planned campaign comparison. See [the dated entry](PROJECT_LEDGER.md#2026-10-26--axis-order-stdout-only-diagnostics) and [CODE_CANON](20_engineering/CODE_CANON.md#axis-order-stdout-trace-2026-10-26).
+
+## 2026-10-29 - Separate nominal sector power from combat participation
+A roster can influence an existing nominal power cap/floor without being physically/reactively reachable. Do not let that roster membership choose an ineligible primary, inflate engaged personnel, receive capped casualty overflow or create battle-history participation. Keep positive-contributor membership explicit, zero diagnostic rows truthful, and actual losses bounded by removable personnel. A deterministic fallback remainder owner must preserve the existing policy, not maximize losses across spare capacity. A remote-unit invariant test must start in friendly territory or legitimate final enemy-territory cleanup confounds it. See [dated repair evidence](PROJECT_LEDGER.md#2026-10-29---positive-contributor-defender-eligibility-repair---not-adopted).
+
+
+## 2026-10-30 - Disable ambience before resolution, not by zero volume
+Zero bus volume still creates, preloads and plays media. A reversible category-specific gate must act before resolution/construction in both generic cue and bed entry points, stop cached beds, and remain independent of global enable/unmute/settings/gesture state. Keep provided assets and enabled-path tests intact. Bind a disabled-profile package separately, require complete zero-ambient request observations and actual nonambient playback, and never use that profile to close older enabled-audio failures. See the [dated policy entry](PROJECT_LEDGER.md#2026-10-30---reversible-ambience-disabled-native-gameplay-profile).
+
+
+## 2026-10-30 - A modal must cover its actual opener
+A valid canonical z-index token can still be the wrong tier for a component. Check relative sibling stacking and DOM order against the actual opener; preserving the token table does not prove physical reachability. The Settings8500/MainMenu9000 regression passed old isolated controls tests but failed native unforced clicks. Keep a relative-order regression and require the real rendered route. See the [dated repair](PROJECT_LEDGER.md#2026-10-30---settings-above-its-main-menu-opener).
+
+
+## 2026-10-30 - Audit semantic palettes at their actual surface
+Small outcome badges can fail contrast even when unrelated canonical palette tokens pass. Import the real semantic palette, pin all keys and check both actual dark backgrounds; do not fix a rendered failure by weakening the native readability guard. Existing audited good/danger colors can repair presentation without altering outcome classifications or simulation. See [dated repair](PROJECT_LEDGER.md#2026-10-30---readable-native-army-hq-outcome-badges).
+
+## 2026-11-02 - Rebuild transient home-distance state before its consumers
+
+Canonical saves deliberately exclude home_distance_cache. Rebuild it from current formation placements and the existing deterministic graph before sector combat ratings and again before operation preparation: intervening movement, spawn and lifecycle steps can invalidate an earlier value. Retain the existing later refresh for subsequent combat consumers. Do not persist the cache or normalize away forecast differences to claim save/load parity; prove absent/stale-cache equivalence through actual consumers and retain the original failing state/report. See [home-distance cache repair](PROJECT_LEDGER.md#2026-11-02---home-distance-preparation-cache-ordering-repair).
+
+This records the existing derived-state invariant and the proved first-consumer timing pitfall, not new combat math or a numeric acceptance change. Baseline preservation and native requalification remain measured gates.
+
+## 2026-11-02 - Historical OOB class must travel with matched identity
+
+A shared OOB lookup that keeps id/name/corps but drops `default_equipment_class` yields a classless emergent brigade even when identity matches; militia-only promotion propagation and `initializeFormationDefaults` do not repair it. Carry the class from the same sorted matched record through the shared inputs, and add the `equip:` tag only when a matched identity, a class and no explicit custom override are all present. Explicit custom equip tags remain authoritative, unmatched records stay priority 0, and numeric formation fields/hardware do not move. The uncommitted repair based on `cc5016` keeps the qualified 709/709/708 measurement and qualification established; only new metadata-repair allocation/score/health/requalification remain UNMEASURED. See [dated ledger](PROJECT_LEDGER.md#2026-11-02---emergent-oob-equipment-metadata-propagation-repair-bounded).
+
+## 2026-11-03 - Recovery state must not shadow a live operation
+
+A recovery-phase operation is a lifecycle tail, not a live commitment. When a brigade appears in both an earlier recovery operation and a later planning/execution operation, reader priority must select the live match; among live matches preserve local-array and state-wide strictCompare corps order rather than ranking execution above planning. A corps-local recovery fast path must not hide a foreign-corps live mission, but a corps-local live match stays authoritative. Recovery-only behavior remains defend and the 0.6 operations multiplier. Keep malformed/empty guards, manual/admission/objective/COHA/multiplier/force data unchanged. See [dated repair](PROJECT_LEDGER.md#2026-11-03---operation-recovery-shadowing-reader-repair).

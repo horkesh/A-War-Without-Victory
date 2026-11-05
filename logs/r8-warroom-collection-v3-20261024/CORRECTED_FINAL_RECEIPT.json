@@ -1,0 +1,99 @@
+{
+  "schema": "awwv.r8-warroom.collection-v3.corrected-final.v1",
+  "generated_utc": "2026-10-24T14:57:36.9335942Z",
+  "changed_files": [
+    {
+      "path": "tools/ui/cdp_network_collector.cjs",
+      "bytes": 26876,
+      "sha256": "2f85f696bb94e20ba5654c4826b1c3d297a352968f564b40ae2b0e43523c42d9"
+    },
+    {
+      "path": "tools/ui/paradox_local_qa.cjs",
+      "bytes": 325225,
+      "sha256": "f2e5c9681d449fc4aec1271a7e9152cdeeaf50bca0925c1d6827bf3745d4ecd0"
+    },
+    {
+      "path": "tests/cdp_network_collector.test.ts",
+      "bytes": 28608,
+      "sha256": "eacca88c35057704c78e3666215a3030c886a8dfdf574341c743adf1d6e9b9b0"
+    },
+    {
+      "path": "tests/paradox_local_qa_harness.test.ts",
+      "bytes": 161910,
+      "sha256": "d1a4288ece34f43dd3d944f9c3f1c51e12dc36ad6a756ce5a5a08166197fa061"
+    }
+  ],
+  "focused_tests": {
+    "passed": 128,
+    "failed": 0,
+    "files": 2,
+    "attempt": "correction-focused-final"
+  },
+  "attempts": [
+    {
+      "name": "correction-red-01",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "timed_out": false,
+      "receipt": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-red-01/receipt.json"
+    },
+    {
+      "name": "correction-green-01",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "timed_out": false,
+      "receipt": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-green-01/receipt.json"
+    },
+    {
+      "name": "correction-green-02",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "receipt": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-green-02/receipt.json"
+    },
+    {
+      "name": "correction-focused-01",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "receipt": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-focused-01/receipt.json"
+    },
+    {
+      "name": "correction-helper-syntax",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "receipt": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-helper-syntax/receipt.json"
+    },
+    {
+      "name": "correction-harness-syntax",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "receipt": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-harness-syntax/receipt.json"
+    },
+    {
+      "name": "correction-focused-final",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "receipt": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-focused-final/receipt.json"
+    },
+    {
+      "name": "correction-typecheck",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "receipt": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-typecheck/receipt.json"
+    },
+    {
+      "name": "correction-diff-check",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "receipt": "tmp/r8-warroom-collection-v3-20261024/implementation/correction-diff-check/receipt.json"
+    }
+  ],
+  "reviewed_candidate_manifest": "tmp/r8-warroom-collection-v3-20261024/candidate-before-correction/MANIFEST.json",
+  "independent_review": "tmp/r8-warroom-collection-v3-20261024/review/INDEPENDENT_REVIEW.md"
+}

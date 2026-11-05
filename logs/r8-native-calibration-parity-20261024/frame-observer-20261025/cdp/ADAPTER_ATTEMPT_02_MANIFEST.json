@@ -1,0 +1,56 @@
+{
+  "schema": "awwv.native23-cdp-installed-adapter-attempt-manifest.v1",
+  "root": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis",
+  "files": [
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/installed_adapter_fixture.cjs",
+      "bytes": 9695,
+      "sha256": "ade69c4df452439f63d7c94e633f8de48a48bf8f26968a2491ba84b07884c184"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/installed_adapter_fixture_v2.cjs",
+      "bytes": 9692,
+      "sha256": "05eb133820853f60b7b93b5fa0c00b50674b7a53b7c23ae5cccb4f8b449f8f73"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-02/entry-script.snapshot",
+      "bytes": 9692,
+      "sha256": "05eb133820853f60b7b93b5fa0c00b50674b7a53b7c23ae5cccb4f8b449f8f73"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-02/start.json",
+      "bytes": 1753,
+      "sha256": "c2d4b303380c2fc5fc4f1c777b88bb594a07d01d301bb6fa7713b9f4a909d559"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-02/receipt.json",
+      "bytes": 2997,
+      "sha256": "b266c9ba27e5b2ed1d4e6d727360ed49a62355241df3600c2532290f2bcf789e"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-02/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/adapter-attempt-02/RESULT.json",
+      "bytes": 4191,
+      "sha256": "a3bce7fc158abea601054c5ffc1197826dca0cbaaae0acb53d261ceda9fc9610"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/ADAPTER_ATTEMPT_02_REPORT.md",
+      "bytes": 5374,
+      "sha256": "f818212b9d0857b53b3c1bb0b975c16eb8427363804f237a3e020df82b34afc9"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/native23-cdp-failure-diagnosis/ADAPTER_ATTEMPT_02_BINDING.json",
+      "bytes": 4941,
+      "sha256": "739f7086dfb5e0860ac94f56e0f21de0dd80e6417968044988ff03ffff19d293"
+    }
+  ]
+}

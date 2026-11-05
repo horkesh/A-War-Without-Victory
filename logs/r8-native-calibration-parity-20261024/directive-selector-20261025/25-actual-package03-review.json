@@ -1,0 +1,140 @@
+{
+  "schema": "awwv.fractional-fatigue-package-postbuild-independent-review.v1",
+  "verdict": "GO",
+  "independent": true,
+  "reviewerTask": "/root/postbuild_actual_contract_review",
+  "candidateHead": "a3063366ae094468fbb2ede143f9ced3a1ed2f68",
+  "scope": "ACTUAL_PACKAGE_COLD_LOAD_QUALIFICATION",
+  "bindings": {
+    "coreConfig": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/postbuild-actual-binding-v1/attempts/bind-config-01/CORE_CONFIG.json",
+      "bytes": 10768,
+      "sha256": "52dc9f6470c4dca539a3652666cd051fd77d0a0ffcc8fad3f96cddf6365f8a6f"
+    },
+    "coreBinding": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/postbuild-actual-binding-v1/attempts/core-binding-02/CORE_BINDING.json",
+      "bytes": 5291,
+      "sha256": "e7d5f0beafa9646c98d0d38bf12e38df91ab0aca8a76f3d77cfb7f3a1fad515f"
+    },
+    "seal": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/postbuild-actual-binding-v1/attempts/seal-01/SEAL.json",
+      "bytes": 1670,
+      "sha256": "3121e82f5a0ada0bd1512e7c8980ddd17607e4fab32e9e88aa8c9a5f130a9b94"
+    },
+    "sourceReceipt": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/postbuild-actual-binding-v1/attempts/source-consumer-01/receipt.json",
+      "bytes": 6080,
+      "sha256": "c28ef2df348e8f6bad87cb1b76b3dd3714990026c27db017a40b5bfaf7887488"
+    },
+    "sourceResult": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/postbuild-actual-binding-v1/attempts/source-consumer-01/result.json",
+      "bytes": 14572,
+      "sha256": "dc6280cfbddcd1c17efcb3a6e581c0a8bacc6e400b1d36465cb25601d978a0b7"
+    },
+    "packageReceipt": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/postbuild-actual-binding-v1/attempts/package-consumer-01/receipt.json",
+      "bytes": 6084,
+      "sha256": "388ec2561dfc4875bb60c417f977e9e79fa6ec2de908a23f85028011655311c5"
+    },
+    "packageResult": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/postbuild-actual-binding-v1/attempts/package-consumer-01/result.json",
+      "bytes": 14573,
+      "sha256": "1edf2d37cc25bbb09eb8be9c842cfc2aa93c9014ed7fd317506b9e5f5b478c7a"
+    },
+    "comparisonReceipt": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/postbuild-actual-binding-v1/attempts/comparison-01/receipt.json",
+      "bytes": 5664,
+      "sha256": "3f6cdc72f87ff5cc22a705d0afe7e34a5fda59efca580c041309a685a4496ad8"
+    },
+    "comparisonResult": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/postbuild-actual-binding-v1/attempts/comparison-01/COMPARISON.json",
+      "bytes": 2410,
+      "sha256": "3d83837df548ea4ae95c86f2a9bc180f92dbc8014401dab3856452e9f238252b"
+    },
+    "preservationOpening": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/attempts/preservation-opening-01/PRESERVATION_OPENING.json",
+      "bytes": 6660,
+      "sha256": "b557f3d552d7c46603ce5bcf1d2d38080f696178359ee629dc5fc01767200727"
+    },
+    "preservationClosing": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/postbuild-actual-binding-v1/attempts/preservation-closing-01/PRESERVATION_CLOSING.json",
+      "bytes": 6360,
+      "sha256": "0fa76190e088e96a328c168133c5e4fe185d9b59b40648292a040f73010d2ead"
+    }
+  },
+  "package03": {
+    "root": "dist-packaged/desktop-fractional-fatigue-20261025-03/win-unpacked",
+    "files": 1228,
+    "aggregateSha256": "a709150291af72559ad37c1d060647070795af2e422cb29b448eff79090f3bc1",
+    "changedPaths": [
+      "resources/app/warroom/assets/main-CNNjns4S.js",
+      "resources/app/warroom/assets/main-DzpJQ3Nq.js",
+      "resources/app/warroom/index.html",
+      "resources/dist/desktop/desktop_sim.cjs"
+    ]
+  },
+  "reviewEvidence": {
+    "request": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/postbuild-actual-binding-v1/POSTBUILD_REVIEW_REQUEST.json",
+      "bytes": 3220,
+      "sha256": "76f6b51cf02fa9682be242b4dd24678d7a645240751b2a2fa2b38cdeed9f7447"
+    },
+    "coreReview": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/postbuild-actual-binding-v1/INDEPENDENT_CORE_REVIEW.json",
+      "bytes": 3144,
+      "sha256": "e75f4da561ce2eca873d99fc4a74e22417450773c9bc9262941cb26356e1ddea"
+    },
+    "sealReceipt": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/postbuild-actual-binding-v1/attempts/seal-01/receipt.json",
+      "bytes": 3369,
+      "sha256": "4990f6de1f4448964eed4eb1ec5856bab4fe5eb80eba006d48bfa5a49c79252b"
+    },
+    "comparisonAuthority": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/postbuild-actual-binding-v1/COMPARE_AUTHORITY.json",
+      "bytes": 1804,
+      "sha256": "a33ccc9d4700eec45bfc9945345005f092a0bb55c44c56670e8d8f0f694742b2"
+    },
+    "preservationClosingHelper": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/postbuild-actual-binding-v1/close_preservation.cjs",
+      "bytes": 4081,
+      "sha256": "61b09254943a09cbe7ad0a0e379899053094eba666356321f89121e1a973b491"
+    },
+    "preservationClosingReceipt": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/postbuild-actual-binding-v1/attempts/preservation-closing-01/receipt.json",
+      "bytes": 3208,
+      "sha256": "9d7d4d67e6a2a1ae6d890bd707d53b652f020fd2d275903d9ea02abc4fb06905"
+    }
+  },
+  "checks": {
+    "authorityRowsRehashed": 13,
+    "authorityRowMismatches": 0,
+    "allPreservedReceiptsAuthenticated": true,
+    "sealPass": true,
+    "sourceConsumerPass": true,
+    "packageConsumerPass": true,
+    "comparisonPass": true,
+    "factions": ["HRHB", "RBiH", "RS"],
+    "canonicalByteIdentity": true,
+    "projectionByteExact": true,
+    "nextStateByteExact": true,
+    "nextReportByteExact": true,
+    "explicitProjectionContext": true,
+    "externalPriming": false,
+    "fractionalFatigueRecordsEveryStage": 25,
+    "fractionalValuesSha256": "64ab35a416ec9afd287d6a8168fb53511baaa9696699c921a24289491d95eff7",
+    "preservationRootsRecomputed": 18,
+    "legacyGroups": 22,
+    "legacyFileRecords": 1213,
+    "appendOnlyTelemetryPrefixes": 2,
+    "trackedHeadClean": true,
+    "newBuildRun": false,
+    "nativeStarted": false,
+    "suiteStarted": false,
+    "campaignStarted": false
+  },
+  "findings": [],
+  "residuals": [
+    "This review qualifies the actual package cold-load evidence and does not replace the separately staged native acceptance sequence.",
+    "The existing native-successor-v2 producer helper calls its JSON-reading exact() function on .cjs producer rows before require(); that separate native-stage validator defect must be corrected or bypassed before native admission validation."
+  ]
+}

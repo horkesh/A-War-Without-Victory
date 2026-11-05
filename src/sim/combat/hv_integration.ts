@@ -1,3 +1,4 @@
+import { initializeFormationDefaults } from '../../state/formation_defaults.js';
 /**
  * HV (Croatian Army) Integration — Post-Washington Agreement brigade spawning.
  *
@@ -31,8 +32,19 @@ import { strictCompare } from '../../state/validateGameState.js';
 // Constants
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Weeks after Washington Agreement before HV brigades arrive. */
-export const HV_PREPARATION_DELAY = 6;
+/**
+ * Weeks after Washington Agreement before HV brigades arrive.
+ * Calibrated model choice: the retained baseline Washington is t98, so
+ * 98 + 32 gives modeled HV availability at t130. The earlier adjacent
+ * t100 + 32 = t132 rationale was inaccurate and remains preserved in the
+ * 1b95 branch history rather than being treated as fact.
+ *
+ * Timing 32 is a scenario model choice, not a claim of exact historical HV
+ * arrival. BB1 printed p.243 supports Cincar beginning 1 Nov 1994 and HVO
+ * gathering Guards through October; it does not source the modeled roster
+ * arrival tick or unit involvement.
+ */
+export const HV_PREPARATION_DELAY = 32;
 
 /** Corps assignment for spawned HV brigades. */
 export const HV_CORPS_ID = 'hvo_tomislavgrad' as FormationId;
@@ -209,6 +221,7 @@ function spawnHvBrigade(state: GameState, def: HvBrigadeDef, locationOsid: strin
         formation.is_elite = true;
     }
 
+    initializeFormationDefaults(formation, turn);
     state.military.formations[def.id] = formation;
 }
 

@@ -1,0 +1,106 @@
+{
+  "schema": "awwv.player-order-fork-diagnostic-v1.config.v1",
+  "status": "HOLD_FOR_INDEPENDENT_PRELAUNCH_REVIEW_AND_ROOT_LAUNCH",
+  "root": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+  "scope": "offline public-production-API fork; not native campaign qualification or same-input full-campaign proof",
+  "node": {
+    "path": "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "version": "v22.23.2",
+    "bytes": 86997320,
+    "sha256": "0d0f5e39f9f3d9587bc19f73eab3c2c9c4903fd02d6dbf9c853dd81b3d95fad4"
+  },
+  "run": {
+    "attempt": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v1/attempts/player-order-fork-01",
+    "wrapperCapMs": 180000,
+    "expectedUnderMs": 120000,
+    "maxCandidateAdvances": 23,
+    "retry": false,
+    "alternateTarget": false,
+    "nativeRun": false,
+    "packageRun": false,
+    "campaign188": false
+  },
+  "input": {
+    "turn16": {
+      "path": "tmp-paradox-qa-20260710/evidence/player-parity-rbih-t39-20261025-04/rbih/turn-autosaves/turn-016.json",
+      "bytes": 4743547,
+      "sha256": "87cb05d1f4abbecffe73b7938b3357e5c267551d12c5f0fc80548e7c34ff3bf9"
+    },
+    "turn17": {
+      "path": "tmp-paradox-qa-20260710/evidence/player-parity-rbih-t39-20261025-04/rbih/turn-autosaves/turn-017.json",
+      "bytes": 4775257,
+      "sha256": "83c656d4bfb26028485d1a66d72be5350f7f70a8d7a8d273fbecc52fb081b974"
+    },
+    "nativeTurn39": {
+      "path": "tmp-paradox-qa-20260710/evidence/player-parity-rbih-t39-20261025-04/rbih/turn-autosaves/turn-039.json",
+      "bytes": 5328576,
+      "sha256": "e58b94766763a10f80dc9bb69a2cb0a8ddde6436f22b12465b4035da63f38340"
+    },
+    "playerFaction": "RBiH",
+    "autonomyLevel": 2
+  },
+  "request": {
+    "corpsId": "arbih_4th_corps",
+    "targetOsid": "op:trnovo:tosici",
+    "targetController": "RS",
+    "expectedStagingOsid": "op:trnovo:delijas",
+    "requestCost": 25,
+    "minimumRoster": 3,
+    "maximumRoster": 12,
+    "expectedCommandAuthority": {
+      "before": { "current": 94, "spent_this_turn": 0, "lifetime_spent": 25 },
+      "afterStage": { "current": 69, "spent_this_turn": 25, "lifetime_spent": 50 }
+    },
+    "crossCorpsOverlap": {
+      "corpsId": "arbih_1st_corps",
+      "operationName": "Operation Circle",
+      "targetOsid": "op:trnovo:tosici",
+      "ordinaryGuardScope": "same CorpsCommandState passed as cmd to validateOpAtInjection"
+    }
+  },
+  "events": [
+    { "turn": 20, "eventId": "london_conference_1992", "responseId": "accept_principles" },
+    { "turn": 38, "eventId": "ic_pressure_vopp_engagement", "responseId": "acknowledge_pressure" },
+    { "turn": 39, "eventId": "vance_owen_plan_1993", "responseId": "accept" }
+  ],
+  "score": {
+    "reference": {
+      "path": "data/source/calibration/painted_control_jan1993.json",
+      "bytes": 34371,
+      "sha256": "6a64300a599aa0b75833d5232bf9f08a1ab97085746337e622d54fb1a4a0ddc7"
+    },
+    "denominator": 712,
+    "minimum": 707,
+    "formerlyCorrectMaxLosses": 0,
+    "n91": {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n91/save_w39.json",
+      "bytes": 5105717,
+      "sha256": "e51224ac22a839d4c1af35a0ea828afb79b62f0ed56559c3b47dcda45578eec5"
+    },
+    "n92": {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n92/save_w39.json",
+      "bytes": 5105717,
+      "sha256": "e51224ac22a839d4c1af35a0ea828afb79b62f0ed56559c3b47dcda45578eec5"
+    },
+    "retainedNativeBaselineScore": 704
+  },
+  "bindings": [
+    { "path": "dist/desktop/desktop_sim.cjs", "bytes": 4488453, "sha256": "4eff10162c0b7db939a667972f796099df196e7ff8af997a94474c32d1b408a2" },
+    { "path": "src/desktop/desktop_sim.ts", "bytes": 59490, "sha256": "91e3163da0aeddca169deabf0b73c47216800f0e6dee0ddc63de5d98f7416954" },
+    { "path": "src/desktop/op_directive_staging.cjs", "bytes": 6784, "sha256": "cfd1deb864063153cbe128af3a0297c4f2f73b3baed39e4ec97894cc92bb344c" },
+    { "path": "src/sim/turn_phases/war_phases.ts", "bytes": 233809, "sha256": "d9ec4ee736cf5ac2c05508bddc5a94bcda0897a9fbe0e09d63dfaa7dfe6cd456" },
+    { "path": "src/sim/combat/operation_validation.ts", "bytes": 14068, "sha256": "55d376b10f41fa671f559175c033ce2070e96dc78dcf14aeb71c4a5d6468734c" },
+    { "path": "tools/diagnostics/run_preserved_preflight.cjs", "bytes": 9536, "sha256": "3933e010daf15938d026692e732e401d5ce50e1e0656d546e4697723e9a7779e" },
+    { "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/jackal-boundary-replay-v3/attempts/postcheck-01/POSTCHECK.json", "bytes": 4159, "sha256": "cdc4267af0150df9e414ac124a4dcfc95fc4360a136347bf2284d3f859a305ab" },
+    { "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/native-successor-v3/postchecks/calibration39-01/diagnosis/PLAYER_INPUT_FEASIBILITY_SUPPLEMENT.md", "bytes": 4293, "sha256": "103fc6217edfb46b22b030cfb0325f383d7d5b2914dbae0aaec67015ed1bd1ba" }
+  ],
+  "excludedDirtyPaths": [
+    "docs/40_reports/CALIBRATION_MASTER.md",
+    "docs/PROJECT_LEDGER.md",
+    "docs/plans/2026-07-31-full-campaign-electron-validation-plan.md",
+    "docs/plans/COMMAND_BOARD.md",
+    "docs/plans/MASTER_ROADMAP.md",
+    "docs/plans/plan_index.yml"
+  ]
+}

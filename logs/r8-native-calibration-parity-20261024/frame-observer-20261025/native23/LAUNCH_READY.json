@@ -1,0 +1,19 @@
+{
+  "pass": true,
+  "checks": {
+    "config": true,
+    "review": true,
+    "head": true,
+    "clean": true,
+    "harness": true,
+    "launcher": true,
+    "externalFresh": true,
+    "nativeFresh": true,
+    "screenshotsFresh": true,
+    "noApp": true,
+    "package": true
+  },
+  "configSha256": "82748a0dadedf305b00bee0b7df52c89a55b21e8792672f55a84331e630019f2",
+  "observerHead": "bff97de7af9406dc2cb907674e2463fccb43052a",
+  "packageSourceHead": "fd061e898ad3de942d62c016547a5e453ddd9422"
+}

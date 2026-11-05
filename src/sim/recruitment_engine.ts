@@ -1,3 +1,5 @@
+import { initializeMilitiaPoolDefaults } from '../state/militia_pool_defaults.js';
+import { initializeFormationDefaults } from '../state/formation_defaults.js';
 /**
  * Recruitment engine: setup-phase brigade activation from OOB catalog.
  *
@@ -218,6 +220,7 @@ function buildRecruitedFormation(
     state: GameState,
     brigade: OobBrigade,
     equipClass: EquipmentClass,
+    composition: BrigadeComposition,
     personnel: number,
     currentTurn: number,
     hqSid: string | undefined,
@@ -250,7 +253,7 @@ function buildRecruitedFormation(
         personnel: effectivePersonnel,
         readiness: isMandatory ? 'active' : 'forming',
         cohesion: effectiveCohesion,
-        composition: buildBrigadeComposition(equipClass, brigade.faction, true),
+        composition: structuredClone(composition),
         corps_id: (brigade.corps as FormationId) ?? null,
         origin_mun: brigade.home_mun,
         officer_quality: brigade.initial_officer_quality ?? getFactionDefaultOfficerQuality(brigade.faction, currentTurn),
@@ -268,6 +271,7 @@ function buildRecruitedFormation(
         max_personnel: brigade.max_personnel ?? deriveMaxPersonnel(equipClass, brigade.faction),
         home_osid: exactHomeOsid ?? locationOsid
     };
+    initializeFormationDefaults(formation, currentTurn);
     initializeEquipmentStateForFormation(formation, brigade.faction, state);
     initializeDoctrineStateForFormation(formation);
     return formation;
@@ -654,7 +658,7 @@ export function recruitBrigade(
     // they don't inherit JNA heavy equipment. Only initial OOB brigades get JNA kit.
     const composition = buildBrigadeComposition(chosenClass, faction, false);
     const formation = buildRecruitedFormation(
-        state, brigade, chosenClass, composition.infantry, state.meta.turn, hq_sid, brigade.mandatory, location_osid
+        state, brigade, chosenClass, composition, composition.infantry, state.meta.turn, hq_sid, brigade.mandatory, location_osid
     );
 
     const action: RecruitmentAction = {
@@ -842,6 +846,7 @@ export function runBotRecruitment(
                 // Corps/army HQ formations are command structures, not map entities.
                 // No location_osid — BFS seeding uses subordinate brigade positions.
             };
+            initializeFormationDefaults(state.military.formations[c.id], currentTurn);
         }
     }
 
@@ -980,6 +985,7 @@ export function runBotRecruitment(
                             exhausted: 0,
                             updated_turn: state.meta.turn,
                         };
+                        initializeMilitiaPoolDefaults(pools[poolKey]);
                     }
                     const seededPool = pools[poolKey];
                     pool = seededPool;
@@ -990,8 +996,12 @@ export function runBotRecruitment(
             }
 
             // Build formation directly for mandatory (bypass normal cost checks)
+            // Explicit authored composition wins; otherwise retain the historical
+            // initial-OOB profile (RS JNA heavy/mountain override included).
+            const composition = brigade.composition
+                ?? buildBrigadeComposition(brigade.default_equipment_class, brigade.faction, true);
             const formation = buildRecruitedFormation(
-                state, brigade, brigade.default_equipment_class, effectiveManpower, currentTurn, hq_sid, true, location_osid
+                state, brigade, brigade.default_equipment_class, composition, effectiveManpower, currentTurn, hq_sid, true, location_osid
             );
 
             state.military.formations[brigade.id] = formation;
@@ -1235,6 +1245,7 @@ export function reroutePoolSurplus(
                     exhausted: 0,
                     updated_turn: state.meta?.turn ?? 0,
                 };
+                initializeMilitiaPoolDefaults(pools[deficit.poolKey]);
             }
             pools[deficit.poolKey].available += amount;
             deficit.needed -= amount;

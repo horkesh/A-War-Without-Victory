@@ -1,0 +1,188 @@
+{
+  "schema": "awwv.desktop-terrain-postfix-proof.offline-independent-review.v1",
+  "reviewer": "/root/desktop_terrain_canon_review",
+  "reviewed_at": "2026-10-25T07:53:36.1373551+01:00",
+  "worktree": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "verdict": "GO_RECORDED_STATE_PREREQUISITE_ESTABLISHED_AT_PERSISTED_STATE_AND_REPORT_SCOPE",
+  "decision": {
+    "implemented_recorded_state_consumer_prerequisite_established": true,
+    "decisive_scope": "The reviewed desktop.advanceTurn(baseDir) implementation, from the exact recorded n97 save-16 input and fresh complete explicit 35-file root, produced persisted week-17 state and report JSON that are independently verified byte-for-byte identical to the retained successful primed proof.",
+    "report_exclusions_required": false,
+    "attempt_02_reclassified_as_passing": false,
+    "attempt_02_preserved_status": "FAILED_CHILD_EXIT_1_AND_WRAPPER_EXIT_1",
+    "interpretation": "The offline evidence establishes the persisted-output prerequisite without changing attempt-02/result.json, its failed in-memory assertion, or its exits."
+  },
+  "reviewed_evidence": {
+    "offline_composition": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/OFFLINE_SERIALIZED_REPORT_COMPOSITION.json",
+      "bytes": 4274,
+      "sha256": "530e7bd618c4bded26ef902674392be3352707c54faab34df915629bf8595644"
+    },
+    "portable_manifest": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/PORTABLE_MANIFEST.json",
+      "bytes": 3503,
+      "sha256": "cf3e59175ba1294342c0134c7efe945ac386530d62e4e5d16a25976e7c8b66e3",
+      "portable_records_checked": 13,
+      "hash_or_size_mismatches": 0
+    },
+    "attempt_02": {
+      "launch": {
+        "bytes": 23003,
+        "sha256": "85ad0574204f9c56433b5b8c4fc99d9e2c770a404e039d6f02f4efee316a238f"
+      },
+      "receipt": {
+        "bytes": 5701,
+        "sha256": "78c24959c8760ffb89929d12c4b59731ce7345e15160af528f1046642ada4a66",
+        "child_exit": 1,
+        "wrapper_exit": 1,
+        "timed_out": false,
+        "spawn_error": null,
+        "entry_script_stable": true,
+        "artifact_contract_pass": true
+      },
+      "result": {
+        "bytes": 37952,
+        "sha256": "0d978a2b8d50ee3398e2012067adde07fec809f0f0f04244a1203e5f62d30599",
+        "prerequisite_restored": false,
+        "interpretation_allowed": false
+      },
+      "entry_script": {
+        "bytes": 30780,
+        "sha256": "d7ccae50ab8395964bf53975cdd60f6341277391f860a2c41eb4b48b3c91f920",
+        "snapshot_matches_live": true
+      },
+      "stdout_sha256": "5d0c56226f74f0e44ca015c6191b2f6776120c79ecdd415feba213484a0a001a",
+      "stderr_sha256": "95ddffefd30dca0d9bb79ec46c8f9c6ba8cc6e1a1a2d88c6f10103d0932f421b"
+    },
+    "prior_failed_launches": {
+      "prestart_refusal": {
+        "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/PRESTART_REFUSAL.json",
+        "sha256": "82858c2fe09dcb1725352b5b2c7fe3bb7d56717b053e450bfe330b062c06e2a8",
+        "wrapper_exit": 3,
+        "engine_advances": 0,
+        "attempt_directory_created": false
+      },
+      "attempt_01_receipt": {
+        "sha256": "ed1b32367ad5074fc37916098d281321841b685c0326b1339a1ed6eeb199eea4",
+        "child_exit": 125,
+        "wrapper_exit": 125,
+        "spawn_error": "EINVAL",
+        "timed_out": false,
+        "retained_artifact_count": 0
+      }
+    }
+  },
+  "independent_comparisons": {
+    "raw_persisted_state": {
+      "postfix_path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/attempt-02/postfix-state.json",
+      "primed_path": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/n97-w17-desktop-terrain-prerequisite-probe-01/terrain-state.json",
+      "postfix_bytes": 4895623,
+      "primed_bytes": 4895623,
+      "postfix_sha256": "0ce35ee15a27708bc873f81f56a0d6f4af0ccc3f8032ab4682ff6da4e38f666e",
+      "primed_sha256": "0ce35ee15a27708bc873f81f56a0d6f4af0ccc3f8032ab4682ff6da4e38f666e",
+      "byte_sequence_equal": true
+    },
+    "raw_persisted_report": {
+      "postfix_path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/postfix-state-proof/attempt-02/postfix-report.json",
+      "primed_path": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/n97-w17-desktop-terrain-prerequisite-probe-01/terrain-report.json",
+      "postfix_bytes": 627214,
+      "primed_bytes": 627214,
+      "postfix_sha256": "328b28120bdeeff11e2c913a5e6409040e6def1c5f99986e141e5e563db01bd7",
+      "primed_sha256": "328b28120bdeeff11e2c913a5e6409040e6def1c5f99986e141e5e563db01bd7",
+      "byte_sequence_equal": true,
+      "exclusions": []
+    },
+    "supporting_diffs": {
+      "state_diff_vs_primed": {
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+        "rows": 0
+      },
+      "operation_diff_vs_v4": {
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+        "rows": 0
+      },
+      "battle_diff_vs_v4": {
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+        "rows": 0
+      },
+      "report_diff_vs_primed": {
+        "sha256": "83082d6d1f8c6fc3a873c5042f2b434b1cb445fb68cc307a5be72d826653bde1",
+        "rows": 10,
+        "meaning": "Runtime-object-only differences caused by actual own properties whose values are undefined versus a comparator parsed from JSON, where such properties are absent. These rows do not appear in either persisted report, which is why the complete persisted report files are byte-identical."
+      }
+    }
+  },
+  "attempt_02_failure_accounting": {
+    "single_failed_check": "exact_primed_canonical_report",
+    "passed_checks": [
+      "input_unmutated",
+      "exact_primed_canonical_serialized_state",
+      "exact_v4_operation_envelope",
+      "target_probe_absent_as_in_v4",
+      "exact_v4_canonical_battle_rows",
+      "exact_n97_canonical_battle_rows",
+      "exact_v4_control_row",
+      "exact_n97_control_row",
+      "differs_from_retained_a_operations",
+      "differs_from_retained_a_battles",
+      "required_forest_members_in_consumed_asset"
+    ],
+    "runtime_only_diff_paths": [
+      "/attack_resolution_osid/battles/0/equipment/scavenged_by",
+      "/attack_resolution_osid/battles/1/equipment/scavenged_by",
+      "/attack_resolution_osid/battles/2/defender_contributions",
+      "/attack_resolution_osid/battles/2/equipment/scavenged_by",
+      "/preparation_events/0/commander_assessment",
+      "/preparation_events/0/probe_ordered",
+      "/preparation_events/1/commander_assessment",
+      "/preparation_events/1/probe_ordered",
+      "/preparation_events/2/probe_ordered",
+      "/preparation_events/3/commander_assessment"
+    ],
+    "runtime_only_diff_shape": {
+      "all_baseline_present": false,
+      "all_actual_values": "undefined and therefore omitted by JSON serialization",
+      "gameplay_difference_count": 0
+    },
+    "original_failure_preserved": true
+  },
+  "bindings_and_immutability": {
+    "candidate_head": "86b693a9423de6a2be13174c36f96ee6a8430801",
+    "source_bindings_checked": 9,
+    "other_input_and_evidence_bindings_checked": 16,
+    "historical_root_manifest_files_checked": 33,
+    "complete_explicit_root_manifest_files_checked": 35,
+    "complete_explicit_root_actual_files": 35,
+    "hash_or_byte_count_mismatches": 0,
+    "post_advance_input_unmutated": true,
+    "source_hashes": {
+      "src/desktop/desktop_sim.ts": "db0f4b31bf51b23ca85197ea81509b122ebd26b053e93671884014a5755cb5fd",
+      "src/scenario/scenario_runner.ts": "74125b6227ab10516466621a66b55e1fd698f7e6abdbe3e5468947a510684a86",
+      "src/scenario/combat_causality.ts": "37382226bde0e855a487754ccacd162fa220cd98fd55877a776a74c444ddbe7e",
+      "src/scenario/scenario_reporting.ts": "df0c17f6473f80ad2867106749d07ceda18fef1a53a68097586d3231e4f521c2",
+      "src/sim/combat/combat_math.ts": "35a5240f49cd1b659cce6264a844549765b4edf0117b8181a76535e6d5cbe48e",
+      "src/sim/combat/combat_terrain_sets_node.ts": "a9b367adf78e8b18d5a626427d7746e8a32f988b53896be16aec4a984658e091",
+      "src/state/serialize.ts": "c5d0b1c6d265c188d5380702fd4b6c55bedf8b5b750c5d4d87151e59edf483e6",
+      "src/state/serializeGameState.ts": "a4010315c439eb0901a53d8166a8c44cb08427aff5d994e51e05ddb64657be97",
+      "tests/desktop_combat_terrain_prerequisite.test.ts": "6ddf6526ce794ead58a01d49d7471365a455a2de47c5f84aca875b5a1286a8fd"
+    },
+    "terrain_assets": {
+      "urban_sha256": "6c5fbdf22a7b837917422b11eb53a975bb855c027cd4c92cb7158fafd9c42e4c",
+      "forest_sha256": "f458666662a072c65b7d5c5e4b89c261399fca0f10476736b83fd914e651fa49",
+      "source_equals_consumed_copy": true,
+      "required_forest_members_present": true
+    }
+  },
+  "wrapper_review": {
+    "direct_receipt_reconciliation": "The receipt hashes all 14 allowed retained artifacts; the entry script snapshot and post-run source match; there was no timeout or spawn error; child and wrapper exits are correctly retained as 1.",
+    "policy_helper_note": "The generic policy verifyPreservedWrapperReceipt helper returns false for this flat attempt layout because it assumes allowed child artifacts live under attempt/child. The invoked preserved wrapper itself substitutes the attempt directory directly and records artifact_contract.pass=true. This review therefore rehashed every receipt-retained artifact directly and does not use the helper's layout-dependent result to relabel the failed attempt.",
+    "evidence_integrity_sufficient_for_offline_composition": true
+  },
+  "residual_limits": [
+    "This verdict applies only to the recorded n97 save-16 to week-17 desktop consumer at persisted state/report scope.",
+    "It does not make attempt-02 a passing execution and does not erase its failed in-memory comparison.",
+    "It does not qualify a scenario campaign, full suite, package, native runtime, fresh-player path, or calibration baseline.",
+    "The terrain qualification and full-suite tooling remain blocked by the separate TOOLING_REVIEW.json findings.",
+    "No new engine, campaign, suite, build, package, browser, or native execution was performed for this review."
+  ]
+}

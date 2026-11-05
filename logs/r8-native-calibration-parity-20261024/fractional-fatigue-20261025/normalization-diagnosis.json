@@ -1,0 +1,270 @@
+{
+  "schema": "awwv.actual-normalization-diagnosis.v1",
+  "status": "FROZEN_READ_ONLY_DIAGNOSIS",
+  "head": "f7c40a0d1e28fde596f217b2c297b0734ec67470",
+  "verdict": "CONFIRMED_PERSISTED_FRACTIONAL_FATIGUE_LOSS_AT_SERIALIZATION_MIGRATION_BOUNDARY",
+  "scope": {
+    "question": "Does the authentic turn-16 serializer/migration seam alter commander-relevant formation operands for Foča, Gacko, Nevesinje, or Čajniče?",
+    "week_17_executed": false,
+    "candidate_selection_or_rank_observed": false,
+    "score_gap_causality_proved": false,
+    "new_simulation_executed_for_analysis": false
+  },
+  "confidence": {
+    "fractional_fatigue_loss_is_real_production_invariant_defect": "confirmed_high",
+    "normalization_changes_commander_fitness_operands": "confirmed_high",
+    "normalization_changes_actual_week_17_candidate_rank_or_selection": "not_proved",
+    "normalization_causes_the_705_score_or_two_missing_cells": "not_proved"
+  },
+  "retained_evidence": {
+    "attempt": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/warm-normalization-probe-v1/warm-capture-02",
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "artifact_contract_pass": true,
+    "result_status": "PASS_FIDELITY_CHARACTERIZED",
+    "observer_count": 16,
+    "boundary_turn": 16,
+    "state_path_difference_count": 386,
+    "formation_count": 279,
+    "formation_difference_count": 107,
+    "fractional_fatigue_reset_path_count": 25,
+    "artifacts": [
+      {
+        "path": "warm-capture-02/diagnostic.json",
+        "bytes": 22080915,
+        "sha256": "4ace77267dc108e95a39f1f3f1982bb63a5b4535f8e80030e7c7f057d08e11f5"
+      },
+      {
+        "path": "warm-capture-02/raw-turn16.NOT_GAME_SAVE.v8",
+        "bytes": 2917513,
+        "sha256": "dc7f155e8ace4bdffa173701186f69e40d06b833b1331e54d468b0bdb3c1f63e"
+      },
+      {
+        "path": "warm-capture-02/result.json",
+        "bytes": 566,
+        "sha256": "b0693b42638ad890318a39d2541f9fd32746892308e0d671cad3e8dbc1b16137"
+      },
+      {
+        "path": "warm-capture-02/receipt.json",
+        "bytes": 7407,
+        "sha256": "3cfd16046d29ac9aabbb6b15b4e3c8bb75be0b8ac1276d67ae2916805b0fb1f9"
+      },
+      {
+        "path": "warm-capture-02/prerequisites.json",
+        "bytes": 16383,
+        "sha256": "315278506f74caf934d7ad2d5a89f73a6ea1f02026f2b08cec27c77f355db0e0"
+      },
+      {
+        "path": "warm-capture-02/run/save_w16.json",
+        "bytes": 4493938,
+        "sha256": "22ef518bb1f894d0afb450643a21d4a628f8f5c1462a80ebda498f81ece943ca"
+      }
+    ]
+  },
+  "target_formations": [
+    {
+      "id": "rs_foa_brigade",
+      "label": "Foča Brigade",
+      "changed_paths": [
+        {
+          "path": "/military/formations/rs_foa_brigade/ops/fatigue",
+          "raw": 10.5,
+          "normalized": 0
+        }
+      ],
+      "unchanged_commander_fields": {
+        "personnel": 751,
+        "cohesion": 35,
+        "morale": 62,
+        "readiness": "active",
+        "kind": "brigade",
+        "activation_gated": false,
+        "activation_turn": null,
+        "location_osid": "op:foca:ustikolina"
+      },
+      "diagnostic_only_null_zone_unknown_supply_fitness": {
+        "offense_raw": 0.09042039999999998,
+        "offense_normalized": 0.10513999999999998,
+        "defense_raw": 0.075217156,
+        "defense_normalized": 0.08242975999999999,
+        "tier_raw": "garrison",
+        "tier_normalized": "garrison"
+      }
+    },
+    {
+      "id": "rs_gacko_brigade",
+      "label": "Gacko Brigade",
+      "changed_paths": [
+        {
+          "path": "/military/formations/rs_gacko_brigade/ops/fatigue",
+          "raw": 2.5,
+          "normalized": 0
+        }
+      ],
+      "unchanged_commander_fields": {
+        "personnel": 790,
+        "cohesion": 36.349999999999994,
+        "morale": 78,
+        "readiness": "active",
+        "kind": "brigade",
+        "activation_gated": false,
+        "activation_turn": null,
+        "location_osid": "op:kalinovik:sela_2"
+      },
+      "diagnostic_only_null_zone_unknown_supply_fitness": {
+        "offense_raw": 0.11103713333333333,
+        "offense_normalized": 0.114866,
+        "defense_raw": 0.07738139533333334,
+        "defense_normalized": 0.079027808,
+        "tier_raw": "garrison",
+        "tier_normalized": "garrison"
+      }
+    },
+    {
+      "id": "rs_nevesinje_brigade",
+      "label": "Nevesinje Brigade",
+      "changed_paths": [],
+      "fatigue_raw_and_normalized": 4,
+      "fitness_unchanged": true
+    },
+    {
+      "id": "rs_ajnie_brigade",
+      "label": "Čajniče Brigade",
+      "changed_paths": [],
+      "fatigue_raw_and_normalized": 8,
+      "fitness_unchanged": true
+    }
+  ],
+  "rank_statement": {
+    "candidate_field_changed": true,
+    "field": "BrigadeEvaluation.fitness_offense and fitness_defense through formation.ops.fatigue",
+    "four_formation_diagnostic_order_raw": [
+      "rs_gacko_brigade",
+      "rs_foa_brigade",
+      "rs_nevesinje_brigade",
+      "rs_ajnie_brigade"
+    ],
+    "four_formation_diagnostic_order_normalized": [
+      "rs_gacko_brigade",
+      "rs_foa_brigade",
+      "rs_nevesinje_brigade",
+      "rs_ajnie_brigade"
+    ],
+    "actual_rank_changed": "unknown_not_observed",
+    "reason": "The retained fitness characterization intentionally used null zone and unknown supply and did not execute the week-17 commander candidate pool, eligibility filters, zone assignment, supply narrowing, or sort. It proves an operand change, not an actual rank or selection change."
+  },
+  "causal_chain": [
+    {
+      "owner": "live producer",
+      "source": "src/state/formation_fatigue.ts:254-260,303-334",
+      "fact": "Frontline duty deliberately adds 0.5 fatigue per turn and stores the resulting number directly in formation.ops.fatigue."
+    },
+    {
+      "owner": "persisted-state contract",
+      "source": "src/state/game_state.ts:1224-1243; src/state/serializeGameState.ts:32-50; tests/collapse_consumer_manifest.test.ts:59-63",
+      "fact": "FormationState owns ops as operational degradation state. Canonical serialization strips only five named derived military projections, none of which is formations or ops; the repository's consumer manifest explicitly calls formation.ops.fatigue persisted. The integer-only inline comment conflicts with the live half-point writer and is stale, rather than evidence that fractional fatigue is transient or deprecated."
+    },
+    {
+      "owner": "serializer preparation",
+      "source": "src/state/serialize.ts:13-37",
+      "fact": "Both serializeState and serializeRuntimeState call serializePreparedState, which clones through migrateState with schema_version forced to 0."
+    },
+    {
+      "owner": "version-9 migration",
+      "source": "src/state/save_migration.ts:186-215,303-316,469-475",
+      "fact": "Forcing version 0 reruns defaultFormations; line 207 maps every non-integer fatigue to 0. The reset was introduced by commit 143ce96556 after the half-point producer introduced by commit 6f3c186824."
+    },
+    {
+      "owner": "commander consumer",
+      "source": "src/sim/combat/commander/force_eval.ts:76-81,92-124,193-224",
+      "fact": "Commander force evaluation reads formation.ops.fatigue as a continuous numeric multiplier for offense and defense."
+    },
+    {
+      "owner": "desktop boundary",
+      "source": "src/desktop/electron-main.cjs:420-456,2389-2425",
+      "fact": "Every successful Advance writes serializeRuntimeState(state) into currentGameStateJson and deserializes that JSON before the next Advance, committing the lossy migration between turns."
+    },
+    {
+      "owner": "headless boundary",
+      "source": "src/scenario/scenario_runner.ts:2881-2891,2952-2983,3422-3468",
+      "fact": "The scenario runner assigns runResult.nextState directly to state for the next loop iteration. Its serializeState calls emit artifacts and do not replace the live state."
+    }
+  ],
+  "classification": {
+    "legitimate_canonical_normalization": false,
+    "production_invariant_defect": true,
+    "why": [
+      "ops.fatigue is persisted formation truth read by combat and commander systems, not one of the five disposable derived military caches.",
+      "The live producer intentionally creates valid half-point values, so non-integer does not mean malformed.",
+      "The seam loses 10.5 and 2.5 despite Engine Invariants section 11.4 requiring save/load to fully reconstruct formation state.",
+      "runtime_bytes_equal_after_roundtrip and canonical_bytes_equal_after_roundtrip only prove idempotence after the first lossy reset; they do not prove fidelity to the raw in-memory state."
+    ],
+    "persistence_authorities": [
+      "src/state/game_state.ts:1224-1243 declares ops on persisted FormationState.",
+      "src/state/serializeGameState.ts:32-50 enumerates the complete named transient military projection list; formations and ops are not stripped.",
+      "tests/collapse_consumer_manifest.test.ts:59-63 explicitly labels formation.ops.fatigue persisted.",
+      "docs/10_canon/Systems_Manual_v0_9_0.md:1105 distinguishes the five derived caches from persisted gameplay state."
+    ],
+    "governing_clauses": [
+      "docs/10_canon/Engine_Invariants_v0_9_0.md:295-301",
+      "docs/10_canon/Engine_Invariants_v0_9_0.md:303-305",
+      "docs/10_canon/Systems_Manual_v0_9_0.md:1105",
+      "docs/20_engineering/DETERMINISM_TEST_MATRIX.md:97-107"
+    ]
+  },
+  "cohesion_and_morale_defaults": {
+    "relevant_four_cohesion_defaulted": 0,
+    "relevant_four_morale_defaulted": 0,
+    "all_state_cohesion_defaults_observed": 0,
+    "all_state_morale_defaults_observed": 2,
+    "unrelated_morale_default_ids": [
+      "arbih_351st_liberation",
+      "arbih_373rd_slavna_mountain"
+    ],
+    "constructor_owner": "src/scenario/oob_early_war_entry.ts:331-364 creates cohesion unconditionally but omits morale when OOB initial_morale is absent",
+    "migration_owner": "src/state/save_migration.ts:214-216 adds missing morale as 60 in version-9 defaultFormations",
+    "causal_relevance_to_named_rs_candidates": "none_observed"
+  },
+  "smallest_grounded_fix_proposal": {
+    "decision": "PRESERVE_VALID_FRACTIONAL_FATIGUE_AT_THE_EXISTING_SERIALIZER_MIGRATION_BOUNDARY",
+    "tuning_change": false,
+    "mechanic_change": false,
+    "required_source_scope": [
+      {
+        "path": "src/state/save_migration.ts",
+        "change": "In defaultFormations, preserve every finite fatigue >= 0; default only missing, non-number, non-finite, or negative values to 0. Do not round or rescale."
+      },
+      {
+        "path": "src/state/game_state.ts",
+        "change": "Correct the stale integer-only FormationOpsState contract to finite non-negative number."
+      },
+      {
+        "path": "src/validate/formations.ts",
+        "change": "Make validation match the actual half-point producer: finite number >= 0, retaining rejection of NaN, infinities, negative, and non-number values."
+      }
+    ],
+    "explicitly_deferred_from_smallest_fix": [
+      "No fatigue coefficient, recovery cadence, commander threshold, cohesion, morale, terrain, or operation tuning.",
+      "Integer-only reporting guards in scenario_runner.ts and cli/sim_scenario.ts, plus the legacy region/edge front_posture_commitment.ts guard, should receive a separate bounded contract-consistency review because changing them is broader than the proved desktop/headless persistence seam."
+    ]
+  },
+  "focused_production_test_plan": [
+    "RED then GREEN: a current-schema GameState containing fatigue 10.5 and 2.5 must preserve both exact numbers across deserializeState(serializeState(state)) and deserializeState(serializeRuntimeState(state)).",
+    "Exercise the real applyFatigueRecovery producer from an integer starting value to create a half point, then require exact canonical and runtime round-trip preservation.",
+    "Keep legacy/malformed behavior: absent ops defaults to fatigue 0; non-number, NaN, infinities, and negative values fail closed to 0 under the migration contract.",
+    "Prove integer values remain byte-identical and serializer ordering/hash determinism remains stable across repeated calls.",
+    "Pin the Electron source contract that currentGameStateJson uses serializeRuntimeState and the next Advance uses deserializeState, reusing the existing desktop persistence contract test."
+  ],
+  "preservation_prefix_check_after_reviewed_fix": {
+    "scope": "one authentic 0-to-16 diagnostic prefix using the existing observer; no week 17",
+    "pass_conditions": [
+      "Input digest, clean HEAD/source bindings, turn count, observer count, initial state hash, and ordinary control/report outputs retain their applicable pre-fix values.",
+      "Foča 10.5 and Gacko 2.5 survive both runtime and canonical round trips exactly; Nevesinje 4 and Čajniče 8 remain unchanged.",
+      "The 25 observed fractional ops.fatigue reset paths disappear and no new formation value/presence difference is introduced.",
+      "Repeated runtime and canonical serialization remains byte-identical after round trip.",
+      "The turn-16 canonical save hash is expected to move because the old hash encoded lossy zeroes; review the decoded old/new save diff and require it to be limited to the authorized preserved fatigue values plus directly derived hash metadata."
+    ],
+    "stop": "Stop on any unrelated gameplay, control, report, or state-path drift. Do not infer week-17 branch repair from a passing prefix."
+  },
+  "smallest_next_step": "Route this diagnosis through canon/determinism review. If accepted, implement the three-file persistence-contract correction with focused RED/GREEN serializer tests, then run only the bounded 0-to-16 preservation prefix before considering a separately authorized real-runtime week-17 or full native calibration check."
+}

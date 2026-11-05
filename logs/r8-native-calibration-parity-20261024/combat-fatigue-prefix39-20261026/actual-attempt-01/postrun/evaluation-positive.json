@@ -1,0 +1,29 @@
+{
+  "schema": "awwv.scenario-postturn-prefix39.canonical-jan-adapter.v2",
+  "label": "positive",
+  "source": {
+    "path": "tmp/player-bot-capability-parity-20261024/policy-clean-validation/evaluate_candidate.cjs",
+    "checkpoint_excerpt_sha256": "6a19943b3419ea8fcd505f5fdbfe8b1435905a69d1d3f5072b3494d43f6e70d6",
+    "control_fixture_manifest_sha256": "60814b13684919e58b877e717ad50ff0d4b888f7342c0c6d02b4672a50d5a079"
+  },
+  "turn": 39,
+  "denominator": 712,
+  "floor": 707,
+  "score": 707,
+  "against": {
+    "n91": {
+      "formerly_correct": 707,
+      "lost": []
+    },
+    "n92": {
+      "formerly_correct": 707,
+      "lost": []
+    }
+  },
+  "n91_losses": 0,
+  "n92_losses": 0,
+  "n91_lost_osids": [],
+  "n92_lost_osids": [],
+  "pass": true,
+  "later_horizons_evaluated": false
+}

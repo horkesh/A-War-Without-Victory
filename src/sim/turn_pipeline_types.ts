@@ -67,6 +67,8 @@ import type { OperationStormCheckReport } from './combat/operation_storm.js';
 import type { AttackResolutionOsidReport } from './combat/attack_resolution_osid.js';
 import type { BotOrderDiagnosticsSnapshot } from '../scenario/combat_causality.js';
 import type { BotOrderGenerationDiagnostics } from './combat/bot_brigade_ai_osid.js';
+import type { MovementPhaseDiagnostics } from './combat/movement_phase_diagnostic.js';
+import type { FrontDistributionDiagnostics } from './combat/front_distribution_diagnostic.js';
 import type { CorpsAiReportEntry } from './combat/bot_corps_ai.js';
 import type { CohesionDriftReport } from './combat/cohesion_drift.js';
 import type { EnclaveResilienceReport } from './combat/enclave_resilience.js';
@@ -108,6 +110,8 @@ export type MunicipalityPopulation1991 = Record<
 
 export interface TurnInput {
     seed: string;
+    /** Explicit caller root for combat scalar/census files and fallback OSID data; omitted means CWD. */
+    dataBaseDir?: string;
     settlementEdges?: EdgeRecord[];
     /** Canonical SID graph used by campaign/peace mechanics. Its edge identity is deep-frozen at the turn boundary. */
     settlementGraph?: LoadedSettlementGraph;
@@ -128,6 +132,8 @@ export interface TurnInput {
     historicalCorpsLookup?: (faction: string, mun_id: string, ordinal: number) => string | null;
     /** When provided, emergent brigades retain the canonical OOB identity they already represent. */
     historicalOobIdLookup?: (faction: string, mun_id: string, ordinal: number) => string | null;
+    /** When provided, emergent brigades inherit the authored equipment class from the same matched OOB record. */
+    historicalEquipmentClassLookup?: (faction: string, mun_id: string, ordinal: number) => string | null;
     /** When provided, Peace phase wave flip uses ethnicity for holdout decisions (avoids 0/0 → all flips). */
     settlementDataRaw?: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }>;
     /** When provided, historical event definitions loaded from scenario JSON files. */
@@ -213,6 +219,8 @@ export interface TurnReport {
     phase_e_pressure_update?: PhaseEPressureDiffusionReport;
     front_emergence_report?: FrontDescriptor[];
     bot_order_diagnostics?: BotOrderDiagnosticsSnapshot;
+    movement_phase_diagnostics?: MovementPhaseDiagnostics;
+    front_distribution_diagnostics?: FrontDistributionDiagnostics;
     /** Legacy SID combat fallback; canonical war-phase combat lives in attack_resolution_osid. */
     resolve_attack_orders?: ResolveAttackOrdersReport;
     attack_resolution_osid?: AttackResolutionOsidReport;
@@ -358,6 +366,8 @@ export interface TurnContext {
     finalSectorReconciliationSession?: FinalSectorReconciliationSession;
     /** Internal side-effect batch withheld until post-turn validation succeeds. */
     pendingDisplacementEventStream?: DisplacementEvent[];
+    /** Formation IDs released by operations completed in this turn's offensive advance. */
+    completedOperationParticipantIds?: Set<FormationId>;
 }
 
 export type PhaseHandler = (context: TurnContext) => void | Promise<void>;
@@ -420,7 +430,15 @@ export function setOperationalData(context: TurnContext, data: OperationalDataCa
     (context as OperationalDataContext).operationalData = data;
 }
 
-function operationalDataBaseDir(): string | undefined {
+/** Resolve a caller-owned combat data file without importing Node path in browser types. */
+export function turnDataFilePath(context: TurnContext, relativePath: string): string | undefined {
+    return context.input.dataBaseDir
+        ? `${context.input.dataBaseDir.replace(/[/\\]+$/, '')}/${relativePath}`
+        : undefined;
+}
+
+function operationalDataBaseDir(context: TurnContext): string | undefined {
+    if (context.input.dataBaseDir) return context.input.dataBaseDir;
     const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function'
         ? process.cwd()
         : '';
@@ -433,7 +451,7 @@ export function getOrLoadOperationalMapping(context: TurnContext): Promise<Opera
     if (existing) return Promise.resolve(existing.opData);
 
     const cachedContext = context as OperationalDataContext;
-    cachedContext.operationalMappingPromise ??= loadOperationalData(operationalDataBaseDir());
+    cachedContext.operationalMappingPromise ??= loadOperationalData(operationalDataBaseDir(context));
     return cachedContext.operationalMappingPromise;
 }
 
@@ -443,7 +461,7 @@ export function getOrLoadOperationalEdges(context: TurnContext): Promise<Operati
     if (existing) return Promise.resolve(existing.edges);
 
     const cachedContext = context as OperationalDataContext;
-    cachedContext.operationalEdgesPromise ??= loadOperationalEdges(operationalDataBaseDir());
+    cachedContext.operationalEdgesPromise ??= loadOperationalEdges(operationalDataBaseDir(context));
     return cachedContext.operationalEdgesPromise;
 }
 
@@ -453,7 +471,7 @@ export function getOrLoadOperationalCentroids(context: TurnContext): Promise<Ope
     if (existing) return Promise.resolve(existing.centroids);
 
     const cachedContext = context as OperationalDataContext;
-    cachedContext.operationalCentroidsPromise ??= loadOperationalCentroids(operationalDataBaseDir());
+    cachedContext.operationalCentroidsPromise ??= loadOperationalCentroids(operationalDataBaseDir(context));
     return cachedContext.operationalCentroidsPromise;
 }
 
@@ -670,19 +688,19 @@ export interface RecruitmentCatalogCache {
 
 let recruitmentCatalogCache: RecruitmentCatalogCache | null = null;
 
-export async function loadRecruitmentCatalog(): Promise<RecruitmentCatalogCache | null> {
-    const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
-    if (!baseDir) return null;
-    if (recruitmentCatalogCache && recruitmentCatalogCache.base_dir === baseDir) {
+export async function loadRecruitmentCatalog(baseDir?: string): Promise<RecruitmentCatalogCache | null> {
+    const selectedBaseDir = baseDir ?? (typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '');
+    if (!selectedBaseDir) return null;
+    if (recruitmentCatalogCache && recruitmentCatalogCache.base_dir === selectedBaseDir) {
         return recruitmentCatalogCache;
     }
     try {
         const [brigades, corps, municipality_hq_settlement] = await Promise.all([
-            loadOobBrigades(baseDir),
-            loadOobCorps(baseDir),
-            loadMunicipalityHqSettlement(baseDir)
+            loadOobBrigades(selectedBaseDir),
+            loadOobCorps(selectedBaseDir),
+            loadMunicipalityHqSettlement(selectedBaseDir)
         ]);
-        recruitmentCatalogCache = { base_dir: baseDir, brigades, corps, municipality_hq_settlement };
+        recruitmentCatalogCache = { base_dir: selectedBaseDir, brigades, corps, municipality_hq_settlement };
         return recruitmentCatalogCache;
     } catch {
         return null;

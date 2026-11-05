@@ -1,0 +1,37 @@
+{
+  "schema": "awwv.786.partial-reader-seal.v1",
+  "sealed_utc": "2026-10-21T11:15:00.167Z",
+  "writes_closed": true,
+  "verdict": "PARTIAL_CORRECTION__NO_GO_REMAINING_COMMANDER_SEMANTIC_CONTROLS",
+  "reader": {
+    "path": "logs/claude-channel-20261004/786-stateful-readers-b.cjs",
+    "bytes": 7405,
+    "sha256": "a63d09b8d0c81c5d34fdab7587fcaa6f34cb04382d7e2311c529aad111c8d2d2"
+  },
+  "controls": {
+    "path": "logs/claude-channel-20261004/786-reader-controls-b/controls.json",
+    "bytes": 723,
+    "sha256": "159776758f1a89975760f2b19a5d0fad2b515fa224331b0bbd67405a5a4d0641",
+    "child_exit": 0,
+    "wrapper_exit": 0
+  },
+  "closed_findings": [
+    "P1 phase manifest binding",
+    "P2 cross-boundary continuity",
+    "P3 legal presence and bounded source-specific writer arithmetic",
+    "C1 188x3 pass schedule and exact inventories"
+  ],
+  "remaining_blockers": [
+    "compose 203 semantic validation over every completion row",
+    "validate probe detail status enum and legal fitness tags",
+    "enforce filter false then later NOT_REACHED",
+    "enforce eligibility/rank/fitness descending plus brigade-id tie-break and selected identity",
+    "positive and negative controls for not-reached, nonfallback, all-filtered, and local-occupation bypass"
+  ],
+  "runner_invocations": 0,
+  "allowance_unspent": true,
+  "no_active_runner": true,
+  "head": "cd65b0f20b045378342c8cd1f224f46649d368cf",
+  "clean": true,
+  "gates": "UNREACHED"
+}

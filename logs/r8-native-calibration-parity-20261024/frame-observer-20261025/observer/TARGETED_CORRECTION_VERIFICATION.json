@@ -1,0 +1,100 @@
+{
+  "schema": "awwv.frame-observer-repair.targeted-correction-verification.v1",
+  "reviewed_head": "bff97de7af9406dc2cb907674e2463fccb43052a",
+  "prior_review": {
+    "path": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/INDEPENDENT_REVIEW.json",
+    "sha256": "ee02707c3e02be5088eefd580f481e0bd657de10bc24bfdde7d66b623223c6ba",
+    "verdict": "CORRECTION_REQUIRED"
+  },
+  "verdict": "NO_GO",
+  "decision": "The targeted correction closes the flush-before-owned-detach loss window and replaces the source-only readiness claim with executed production-helper fixtures, but the explicitly required setup-close-plus-timeout path still overwrites runtime-error with setup-error. Stop this correction/review cycle and use the bounded revised approach below.",
+  "targeted_findings": [
+    {
+      "severity": "critical",
+      "status": "persistent",
+      "title": "Setup timeout overwrites a previously observed unexpected-session-close runtime error",
+      "evidence": [
+        "tools/ui/cdp_network_collector.cjs:284-287 records unexpected-session-close through failClosed, which sets status to runtime-error.",
+        "tools/ui/cdp_network_collector.cjs:610-617 handles awaitReady timeout by unconditionally assigning setup-error.",
+        "tests/cdp_network_collector.test.ts:213-232 emits close but then resolves Target.getTargetInfo, so setup rejects through the catch path before timeout and does not test the combined close-plus-timeout path."
+      ],
+      "impact": "When the target closes while Target.getTargetInfo or Network.enable remains unresolved until the setup deadline, the retained artifact loses the contract-required runtime-error classification even though unexpected-session-close remains in the inconsistency list.",
+      "revised_approach": "In the awaitReady timeout branch, preserve runtime-error when unexpectedSessionClosed is already true, while retaining setup timeout metadata. Add one focused production-helper test that leaves Target.getTargetInfo or Network.enable unresolved, emits close, lets awaitReady reach its deadline, finalizes, and asserts runtime-error plus unexpected-session-close. Do not rerun unrelated broad evidence."
+    }
+  ],
+  "resolved_findings": [
+    {
+      "title": "Flush-before-owned-detach lifecycle window",
+      "status": "resolved_by_inspection_and_focused_test",
+      "evidence": "Network ingestion now stops separately while the session-close listener and external failClosed path remain active until detachStarted; the focused test holds body settlement open and proves both session-close and external-frame-loss remain runtime-error."
+    },
+    {
+      "title": "Collector-owned detach and disabled mode",
+      "status": "resolved_by_inspection_and_focused_test",
+      "evidence": "detachStarted is set before session.detach, so its close event is ignored; idempotent finalization remains covered, and disabled lifecycle installs no guards or collector."
+    },
+    {
+      "title": "Fresh/resume readiness ordering",
+      "status": "resolved_by_executed_production_helper_fixture",
+      "evidence": "resolveGameplayFrameAndStartCdpCollection is extracted from production and executed for fresh and resume fixtures; both record frame resolution, lifecycle construction, and awaited readiness before the first caller action with no Advance/turn dispatch."
+    }
+  ],
+  "verified_evidence": {
+    "implementation_report": {
+      "path": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/IMPLEMENTATION_REPORT.md",
+      "sha256": "f5d84409e9708495386522c866fb7ac29d368d8c401992ab6bd538f166ccc14c"
+    },
+    "result": {
+      "path": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/RESULT.json",
+      "sha256": "abca4eb1ecb2fd9e695375735f1301c0b7695ba60b39f9f43d449584d384c9c9"
+    },
+    "focused_tests": {
+      "receipt": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/final-focused-01/receipt.json",
+      "receipt_sha256": "9ff4cf91d523a213076173de3b6f3748f0202b5ce18fce46f70052bc545aa50e",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "passed": 158,
+      "failed": 0,
+      "test_files": 2,
+      "limitation": "The passing set does not contain the combined unexpected-close followed by setup-timeout case."
+    },
+    "typecheck": {
+      "receipt": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/final-typecheck-01/receipt.json",
+      "receipt_sha256": "7a5321e05fffd1aac7dcf2ec89d65c3cf622039200d60933f87695676706b6b9",
+      "child_exit": 0,
+      "wrapper_exit": 0
+    },
+    "syntax": {
+      "receipt": "tmp/player-bot-capability-parity-20261024/frame-observer-repair/correction-syntax-01/receipt.json",
+      "receipt_sha256": "d5836a0c2d34c4c3244aa8382d67c9e0b5ac8a6d6e8d794c259e6e29730b3dc0",
+      "child_exit": 0,
+      "wrapper_exit": 0
+    },
+    "diff_check_exit": 0,
+    "tracked_diff": {
+      "files": 4,
+      "insertions": 457,
+      "deletions": 53
+    }
+  },
+  "actual_sha256": {
+    "tools/ui/cdp_network_collector.cjs": "bf4e97c25229ac0feb11e7fb379ef273171fe216bf3017bae919b5d49ee494b0",
+    "tools/ui/paradox_local_qa.cjs": "52b6537caa3f147deca68fef752a39884c7da5f8ca4d23ac46fc0a3a9baf671f",
+    "tests/cdp_network_collector.test.ts": "a7de91a75710a5c640b5327a6ecc51f7ffff8c3fe1111d19ad9005c4f4b6c835",
+    "tests/paradox_local_qa_harness.test.ts": "65974985ab9c233ac1ff77020fb30ea5c68287b70f9ace1cd06297dd249e7f86"
+  },
+  "preserved_scope": {
+    "only_four_tracked_observer_files_changed": true,
+    "native_browser_build_package_campaign_rerun": false,
+    "gameplay_data_source_runtime_package_changed": false,
+    "ambient_abort_admission_changed": false,
+    "n91_n97_telemetry_and_tuning_baseline_policy_unchanged": true,
+    "unaffected_broad_evidence_reused": true
+  },
+  "review_actions": {
+    "source_modified": false,
+    "new_test_run": false,
+    "commit_created": false,
+    "further_review_loop_started": false
+  }
+}

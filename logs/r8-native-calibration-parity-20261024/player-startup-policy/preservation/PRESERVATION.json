@@ -1,0 +1,63 @@
+{
+  "pass": true,
+  "telemetry": [
+    {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 123007933,
+      "sha256": "b6abcbe9523fe1d07694684ff5a0e61d69505a70958dab3c3383d5da30d4fb54",
+      "currentBytes": 126988202,
+      "prefixSha256": "b6abcbe9523fe1d07694684ff5a0e61d69505a70958dab3c3383d5da30d4fb54",
+      "pass": true
+    },
+    {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "currentBytes": 1041,
+      "prefixSha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "pass": true
+    }
+  ],
+  "legacyClassifiers": [
+    {
+      "name": "classifyExpectedRequestAbort",
+      "sha256": "a03d822e51df091f2bda2b5e54dbef2b41b9f2406b535538669d0dd586a933cd",
+      "currentSha256": "a03d822e51df091f2bda2b5e54dbef2b41b9f2406b535538669d0dd586a933cd",
+      "pass": true
+    },
+    {
+      "name": "classifyExpectedTileFetchAbort",
+      "sha256": "2bd31503104a27700e1f66ff0a77ffabe44c7dfa08a59f777f8cfee769a63d1c",
+      "currentSha256": "2bd31503104a27700e1f66ff0a77ffabe44c7dfa08a59f777f8cfee769a63d1c",
+      "pass": true
+    },
+    {
+      "name": "attributeTileFetchAborts",
+      "sha256": "9d66905adfdd048ee508794fac81c98cb36f96452f8e771b201a8441d30f6a18",
+      "currentSha256": "9d66905adfdd048ee508794fac81c98cb36f96452f8e771b201a8441d30f6a18",
+      "pass": true
+    },
+    {
+      "name": "classifyExpectedAmbientLifecycleAbort",
+      "sha256": "23e953c3b0c697f256c81085eaa4ae1d97c9ca1068d788d292e28eefa7db91f6",
+      "currentSha256": "23e953c3b0c697f256c81085eaa4ae1d97c9ca1068d788d292e28eefa7db91f6",
+      "pass": true
+    },
+    {
+      "name": "attributeAmbientLifecycleAborts",
+      "sha256": "769f36c4c94ff5548da8eff6f944e3106ab59eb89004c2cabde1edeb294f26d2",
+      "currentSha256": "769f36c4c94ff5548da8eff6f944e3106ab59eb89004c2cabde1edeb294f26d2",
+      "pass": true
+    }
+  ],
+  "priorBindings": {
+    "count": 3226,
+    "excluded": 0,
+    "pass": true,
+    "failures": []
+  },
+  "n94": {
+    "count": 40,
+    "failures": []
+  }
+}

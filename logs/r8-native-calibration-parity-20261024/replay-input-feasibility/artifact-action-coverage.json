@@ -1,0 +1,490 @@
+{
+  "stepCounts": [
+    {
+      "step": "advance-click",
+      "count": 39
+    },
+    {
+      "step": "handled",
+      "count": 36
+    },
+    {
+      "step": "settled-turn-archive",
+      "count": 39
+    }
+  ],
+  "handledActions": [
+    {
+      "guard": 4,
+      "action": "event-ui:rbih_paramilitary_policy_1992",
+      "beforeTurn": 3,
+      "afterTurn": 3,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 5,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 3,
+      "afterTurn": 3,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 6,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 3,
+      "afterTurn": 3,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 7,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 3,
+      "afterTurn": 3,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 9,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 4,
+      "afterTurn": 4,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 11,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 5,
+      "afterTurn": 5,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 13,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 6,
+      "afterTurn": 6,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 14,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 6,
+      "afterTurn": 6,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 16,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 7,
+      "afterTurn": 7,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 17,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 7,
+      "afterTurn": 7,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 18,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 7,
+      "afterTurn": 7,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 21,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 9,
+      "afterTurn": 9,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 24,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 11,
+      "afterTurn": 11,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 26,
+      "action": "event-ui:rbih_minority_retention_1992",
+      "beforeTurn": 12,
+      "afterTurn": 12,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 27,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 12,
+      "afterTurn": 12,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 28,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 12,
+      "afterTurn": 12,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 30,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 13,
+      "afterTurn": 13,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 32,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 14,
+      "afterTurn": 14,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 33,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 14,
+      "afterTurn": 14,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 34,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 14,
+      "afterTurn": 14,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 35,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 14,
+      "afterTurn": 14,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 37,
+      "action": "reserve-issue:req:15:arbih_2nd_corps:offensive_support",
+      "beforeTurn": 15,
+      "afterTurn": 15,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 42,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 19,
+      "afterTurn": 19,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 44,
+      "action": "event-ui:london_conference_1992",
+      "beforeTurn": 20,
+      "afterTurn": 20,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 45,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 20,
+      "afterTurn": 20,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 47,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 21,
+      "afterTurn": 21,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 49,
+      "action": "reserve-issue:req:22:arbih_1st_corps:defensive_gap",
+      "beforeTurn": 22,
+      "afterTurn": 22,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 50,
+      "action": "officer-acknowledge:arrival_arbih_hadzihasanovic_t22",
+      "beforeTurn": 22,
+      "afterTurn": 22,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 51,
+      "action": "reserve-cautious-action",
+      "beforeTurn": 22,
+      "afterTurn": 22,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 53,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 23,
+      "afterTurn": 23,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 55,
+      "action": "officer-acknowledge:arrival_arbih_pasalic_t24",
+      "beforeTurn": 24,
+      "afterTurn": 24,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 57,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 25,
+      "afterTurn": 25,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 61,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 28,
+      "afterTurn": 28,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 64,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 30,
+      "afterTurn": 30,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 70,
+      "action": "acknowledge-visible-event-notice",
+      "beforeTurn": 35,
+      "afterTurn": 35,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    },
+    {
+      "guard": 74,
+      "action": "event-ui:ic_pressure_vopp_engagement",
+      "beforeTurn": 38,
+      "afterTurn": 38,
+      "beforePhase": "war",
+      "afterPhase": "war",
+      "playerFaction": "RBiH"
+    }
+  ],
+  "advanceCount": 39,
+  "advanceFirst": {
+    "guard": 1,
+    "dispatchTurn": 1,
+    "beforeTurn": 0,
+    "afterTurn": 1,
+    "phase": "war",
+    "playerFaction": "RBiH",
+    "clicked": true,
+    "action": "advance-direct-transition",
+    "outcomeKind": "direct-turn-transition"
+  },
+  "advanceLast": {
+    "guard": 75,
+    "dispatchTurn": 39,
+    "beforeTurn": 38,
+    "afterTurn": 39,
+    "phase": "war",
+    "playerFaction": "RBiH",
+    "clicked": true,
+    "action": "advance-direct-transition",
+    "outcomeKind": "direct-turn-transition"
+  },
+  "archiveCount": 39,
+  "archiveFirst": {
+    "guard": 2,
+    "turn": 1,
+    "kind": "settled",
+    "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-001.json",
+    "sha256": "0b67f4bfb319a524251bc4941e17414fa122bb8f8a9058a9860d9d1f4228e64f"
+  },
+  "archiveLast": {
+    "guard": 75,
+    "turn": 39,
+    "kind": "settled",
+    "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-039.json",
+    "sha256": "52dead08cc8e6f1d33ca26e1585666ee1db84fc4edb7bef59647449f69a1fc7e"
+  },
+  "eventChoiceCoverage": [
+    {
+      "eventId": "rbih_state_identity",
+      "turn": 0,
+      "faction": "RBiH",
+      "actor": null,
+      "playerInput": true,
+      "selection": "civic",
+      "receipt": {
+        "eventId": "rbih_state_identity",
+        "responseId": "civic",
+        "decisionSource": "player",
+        "faction": "RBiH",
+        "turn": 0
+      },
+      "phase": null,
+      "archive": null
+    },
+    {
+      "eventId": "rbih_paramilitary_policy_1992",
+      "turn": 3,
+      "faction": "RBiH",
+      "actor": null,
+      "playerInput": true,
+      "selection": "always_deny",
+      "receipt": {
+        "eventId": "rbih_paramilitary_policy_1992",
+        "responseId": "always_deny",
+        "decisionSource": "player",
+        "faction": "RBiH",
+        "turn": 3
+      },
+      "phase": null,
+      "archive": null
+    },
+    {
+      "eventId": "rbih_minority_retention_1992",
+      "turn": 12,
+      "faction": "RBiH",
+      "actor": null,
+      "playerInput": true,
+      "selection": "retain_minorities",
+      "receipt": {
+        "eventId": "rbih_minority_retention_1992",
+        "responseId": "retain_minorities",
+        "decisionSource": "player",
+        "faction": "RBiH",
+        "turn": 12
+      },
+      "phase": null,
+      "archive": null
+    },
+    {
+      "eventId": "london_conference_1992",
+      "turn": 20,
+      "faction": "RBiH",
+      "actor": null,
+      "playerInput": true,
+      "selection": "accept_principles",
+      "receipt": {
+        "eventId": "london_conference_1992",
+        "responseId": "accept_principles",
+        "decisionSource": "player",
+        "faction": "RBiH",
+        "turn": 20
+      },
+      "phase": null,
+      "archive": null
+    },
+    {
+      "eventId": "ic_pressure_vopp_engagement",
+      "turn": 38,
+      "faction": "RBiH",
+      "actor": null,
+      "playerInput": true,
+      "selection": "acknowledge_pressure",
+      "receipt": {
+        "eventId": "ic_pressure_vopp_engagement",
+        "responseId": "acknowledge_pressure",
+        "decisionSource": "player",
+        "faction": "RBiH",
+        "turn": 38
+      },
+      "phase": null,
+      "archive": null
+    },
+    {
+      "eventId": "vance_owen_plan_1993",
+      "turn": 39,
+      "faction": "RBiH",
+      "actor": null,
+      "playerInput": true,
+      "selection": "accept",
+      "receipt": {
+        "eventId": "vance_owen_plan_1993",
+        "responseId": "accept",
+        "decisionSource": "player",
+        "faction": "RBiH",
+        "turn": 39
+      },
+      "phase": null,
+      "archive": null
+    }
+  ],
+  "finalReceiptCounts": {
+    "events": 6,
+    "reserves": 2,
+    "officers": 2,
+    "proposals": 4
+  }
+}

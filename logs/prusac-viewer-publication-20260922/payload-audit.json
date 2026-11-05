@@ -1,0 +1,33 @@
+{
+  "source": "efa53f55c34e4e9fe8ec8d4fe99ec01502ba1ed1",
+  "run_dirty": false,
+  "scores": [
+    702,
+    694,
+    689,
+    651
+  ],
+  "mismatches": [
+    10,
+    18,
+    23,
+    61
+  ],
+  "events": 216,
+  "all_initial_owners_and_events_match": true,
+  "geometry_markers_references_colors_unchanged": true,
+  "no_absolute_host_paths": true,
+  "no_external_assets": true,
+  "prusac": [
+    {
+      "t": 30,
+      "o": "op:donji_vakuf:prusac_2",
+      "f": "RBiH",
+      "x": "RS",
+      "m": "combat"
+    }
+  ],
+  "html_sha256": "3e80eacf3d98e05e7088ec404f43b89e5c98a3dfb2028b16c0f9048cbd2fb02a",
+  "html_bytes": 713283,
+  "source_save_sha256": "575254183566bf2c7b4db3946217ddcce014317eb2232997e003964919cf10c3"
+}

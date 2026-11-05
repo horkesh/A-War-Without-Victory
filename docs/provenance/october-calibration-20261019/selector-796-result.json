@@ -1,0 +1,136 @@
+{
+  "writes_closed": true,
+  "captured_utc": "2026-10-21T23:08:15.675Z",
+  "client_date": "2026-10-22",
+  "verdict": "ACCEPT_SELECTOR_ASSERTION_RECONCILED",
+  "summary": "The inherited selector assertion is reconciled with the existing topic-wide receipt contract. Only the probe fixture changed: topic-OFF absence, enabled exact faction/corps/turn identity and full detail semantics are checked across formerly excluded contexts. Canonical controller-derived friendly sets fix the RS fixture overwrite; own APPROACH/REAR and enemy TARGET are explicitly checked. No production behavior changed.",
+  "files": [
+    {
+      "path": "tests/commander/probe_target_selection_filter.test.ts",
+      "bytes": 33157,
+      "sha256": "ae8697168b590f3e6eb8f8af5994f0a892ba482e31be03b8ea8073dfd33c8457",
+      "diff_numstat": "102\t17",
+      "only_changed_tracked_file": true
+    }
+  ],
+  "review": "logs/claude-channel-20261004/795-review.json",
+  "review_sha256": "bb009d14587dcd78acb77e54882b73028b8176eaaa5e2d90f2fb2333b7220ff8",
+  "corrected_manifest": "logs/claude-channel-20261004/794-corrected-final-freeze-13/manifest.json",
+  "corrected_manifest_sha256": "7ccb06f12ddb537aec567a515dad96d76e1d04c2b74fa1d9e2a95b1fbe2186d1",
+  "checks": {
+    "fresh_red": {
+      "tests": 16,
+      "passed": 15,
+      "failed": 1,
+      "child": 1,
+      "wrapper": 1
+    },
+    "final_affected": {
+      "passed": 16,
+      "failed": 0,
+      "child": 0,
+      "wrapper": 0
+    },
+    "observer": {
+      "passed": 60,
+      "failed": 0,
+      "child": 0,
+      "wrapper": 0,
+      "reused": "794-green-observer-05 unaffected by later change in a different test file"
+    },
+    "final_typecheck": {
+      "child": 0,
+      "wrapper": 0
+    },
+    "independent_correction_verification": {
+      "passed": 16,
+      "failed": 0,
+      "child": 0,
+      "wrapper": 0
+    }
+  },
+  "retained_failures": "Originalred, initial795 semantic finding, intermediate794 typecheck2/2 retained separately; not combined into final pass counts.",
+  "raw_inventory": "logs/claude-channel-20261004/796-raw-inventory.json",
+  "raw_inventory_sha256": "02c1576c0ea61264da8db5c6d3a4f059daa99bb00689548f32507fd46c86a0f4",
+  "protected_source_pins": [
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "bytes": 20210,
+      "sha256": "beabdcaa779995ed93d820a957b0fd4cbd1e662d47502b0c0374b28819880484"
+    },
+    {
+      "path": "src/sim/combat/movement_phase_diagnostic.ts",
+      "bytes": 7386,
+      "sha256": "cac140facd432e206a079093514702237f7690088b92eac10a556de9e6ba62d8"
+    },
+    {
+      "path": "src/sim/combat/personnel_diagnostic.ts",
+      "bytes": 5870,
+      "sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3"
+    },
+    {
+      "path": "src/sim/turn_pipeline.ts",
+      "bytes": 11675,
+      "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25"
+    },
+    {
+      "path": "src/sim/formation_spawn.ts",
+      "bytes": 44692,
+      "sha256": "d8586722b72a3345c610d422f4e069fe2150748a316cbe8d1fc8c4fcfd86c072"
+    },
+    {
+      "path": "src/sim/combat/strategic_reserve.ts",
+      "bytes": 10755,
+      "sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae"
+    },
+    {
+      "path": "src/sim/combat/frontline_attrition.ts",
+      "bytes": 21594,
+      "sha256": "0cc09b4eca821d2dce287893fdde312239c2b8be495ed02e36b8a23ba59f5ee1"
+    },
+    {
+      "path": "src/sim/combat/morale_drift.ts",
+      "bytes": 17730,
+      "sha256": "cb7720d5da303e02d89fb3aaf034488a340a51155dfd6dbfc4839cf9cedcdc5c"
+    },
+    {
+      "path": "src/sim/combat/commander/emit.ts",
+      "bytes": 202428,
+      "sha256": "76351f818c3403fcc23bf5b51f30c467bd42886d68f1e6b754d9f90baa58746b"
+    },
+    {
+      "path": "tests/personnel_diagnostic.test.ts",
+      "bytes": 19693,
+      "sha256": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b"
+    },
+    {
+      "path": "tests/reason_code_debug.test.ts",
+      "bytes": 10403,
+      "sha256": "189ba6da07dc0b931e4e98c54565e50bd8182299843606cefccbc113e972bf08"
+    },
+    {
+      "path": "tests/commander_creation_observer.test.ts",
+      "bytes": 100803,
+      "sha256": "05bfd3cf245aa0f929c44d6efff8abdf7316e0fb54b415f25a3c48c9e0f8bb86"
+    }
+  ],
+  "telemetry": [
+    {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 102001043,
+      "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899"
+    },
+    {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    }
+  ],
+  "threshold_reference_exact": true,
+  "campaign_invocations": 0,
+  "full_suite_invocations": 0,
+  "calibration": "n80 retained703/712 NO-GO unadopted; n81/n82 rejected689",
+  "scope": "Test-only selector/fixture residual closed; older stateful reader, whole personnel pipeline and actual postrun are not newly qualified; historical cause remainsUNMEASURED.",
+  "preservation": "All current red/green/correction source snapshots, exact commands and receipts retained. Previous intermediateB/790 source-version gaps remain historical and are not repaired or waived.",
+  "next_action": "No further selector correction needed. Any future instrumented188 diagnostic requires its fixed prerequisites and explicit campaign scope; none is authorized here."
+}

@@ -1,0 +1,38 @@
+{
+  "schema": "awwv.baseline-rebless-campaign-result.v1",
+  "pass": true,
+  "expected_head": "a913286803a095b6dc3f57a44175081d6ae4b8eb",
+  "candidate": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n94",
+  "campaign_exit": 0,
+  "postrun": {
+    "exit": 0,
+    "signal": null,
+    "error": null
+  },
+  "source_stable": true,
+  "telemetry_after": [
+    {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 122061262,
+      "sha256": "a270eb4f4fa32757e734300871b617c0486f3a411848ee73e50fdf2cc5f44a92",
+      "opening_bytes": 121114591,
+      "opening_sha256": "7160ff4b4c13f564a5ef25986b96e95004b39707dde5fffb067c471b77fe7e20",
+      "opening_prefix_sha256": "7160ff4b4c13f564a5ef25986b96e95004b39707dde5fffb067c471b77fe7e20",
+      "opening_prefix_exact": true,
+      "append_bytes": 946671
+    },
+    {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "opening_bytes": 1041,
+      "opening_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "opening_prefix_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "opening_prefix_exact": true,
+      "append_bytes": 0
+    }
+  ],
+  "preservation_inventory_exact_or_append_prefix": true,
+  "baseline_target_stable_and_empty": true,
+  "remaining_ms": 1929340
+}

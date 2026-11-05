@@ -1,0 +1,68 @@
+{
+  "schema": "awwv.native23-cdp-failure-diagnosis.source-bindings.v1",
+  "source_head": "bff97de7af9406dc2cb907674e2463fccb43052a",
+  "gameplay_and_package_source_head": "fd061e898ad3de942d62c016547a5e453ddd9422",
+  "selected_sources": {
+    "name": "selected_sources",
+    "count": 11,
+    "bytes": 938029,
+    "aggregate_sha256": "e4c5221f4aec4dc6eae383c3dd8b3d7feef1cf3b1e5dccffd44de978ee965506",
+    "files": [
+      {
+        "path": "logs/r8-native-calibration-parity-20261024/t3-routing-qualification-20261025/native-historical39-failure-review.json",
+        "bytes": 10665,
+        "sha256": "4d0cad6f3b9a0482d5e505549d450483b7eb8fbffe0f8cd14ee90a29fec30ef6"
+      },
+      {
+        "path": "logs/r8-native-calibration-parity-20261024/t3-routing-qualification-20261025/native703-diagnosis.md",
+        "bytes": 10544,
+        "sha256": "88c5ebe834e89880d42097cf400d053af3beed862d9f0921dc316af15e09aab5"
+      },
+      {
+        "path": "logs/r8-warroom-collection-v3-20261024/CONTRACT.md",
+        "bytes": 24218,
+        "sha256": "1b8bd2f1dfcf757c802599d8723b60b670e381dc5132c440c992b1911e92de37"
+      },
+      {
+        "path": "logs/r8-warroom-collection-v3-20261024/INDEPENDENT_REVIEW.md",
+        "bytes": 12266,
+        "sha256": "f7433e0eed92679c1074788da967ac7397f94e5de3a10589392149621fe3deda"
+      },
+      {
+        "path": "logs/r8-warroom-collection-v3-20261024/RESULT.json",
+        "bytes": 6325,
+        "sha256": "c8389f1828a848244b8ac53a8829a959b0859170b09ac49243f920c3d8e9b17e"
+      },
+      {
+        "path": "src/desktop/electron-main.cjs",
+        "bytes": 185043,
+        "sha256": "3d68cf41fc91e27876d3c8191907e4ba6bfb58557b93f5733353e3c8f0ee2345"
+      },
+      {
+        "path": "src/ui/warroom/warroom.ts",
+        "bytes": 52935,
+        "sha256": "3cfc9e2cc2f941f8d60a553b74ac7e1c110913df34eb2d362edee57a821f1302"
+      },
+      {
+        "path": "tests/cdp_network_collector.test.ts",
+        "bytes": 31602,
+        "sha256": "6aa71a0d84b765487d329a02c3250f6427ef601332e80a58d41b9588a237e454"
+      },
+      {
+        "path": "tests/paradox_local_qa_harness.test.ts",
+        "bytes": 215705,
+        "sha256": "d4976d34beb002dd847682154886c8bed5b1f2c4412e1ff3ce97de5535fa2d53"
+      },
+      {
+        "path": "tools/ui/cdp_network_collector.cjs",
+        "bytes": 26866,
+        "sha256": "02e5d8306a0f8e3ac082a56d33e12898d9d88bc54f9a0023d79ccf9af82c6607"
+      },
+      {
+        "path": "tools/ui/paradox_local_qa.cjs",
+        "bytes": 361860,
+        "sha256": "71a9bbb675d4c33d290e92e97c7e3780211e5ce3c500f37c637bf46ef8e32503"
+      }
+    ]
+  }
+}

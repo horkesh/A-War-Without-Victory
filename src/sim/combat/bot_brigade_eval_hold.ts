@@ -3,6 +3,7 @@ import { getFormationTier, MIN_ATTACK_PERSONNEL } from '../../state/formation_co
 import { predictAllAdjacentTargets } from './combat_predictor.js';
 import { isOutcomeSufficientForAttack } from './bot_brigade_targeting.js';
 import { assignedBrigadeNotOnSectorFrontOsids } from './bot_brigade_eval_front.js';
+import { hasActiveOperationCommitment } from './brigade_routine_scope.js';
 
 export function evaluateGarrisonAndDetachments(ctx: BrigadeEvaluationContext): boolean {
     const { brigade, state, loc, result, assignedSectorFrontOsids } = ctx;
@@ -36,12 +37,13 @@ export function evaluateGarrisonAndDetachments(ctx: BrigadeEvaluationContext): b
 }
 
 export function evaluateReserve(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, corpsId, directive, adjEnemy, corpsReserve, graphAnalysis, loc, adjacency, result, isActiveSectorOperationParticipant } = ctx;
+    const { brigade, corpsId, directive, adjEnemy, corpsReserve, graphAnalysis, loc, adjacency, result, activeOp } = ctx;
 
     // --- Operation participants bypass reserve ---
     // Brigades committed to a sector offensive have explicit march orders toward an objective.
     // Holding them as corps reserve prevents them from reaching the front — entirely wrong.
-    if (isActiveSectorOperationParticipant) return false;
+    // Authority here is the movement reading (ANY active op type), not the sector-attack flag.
+    if (hasActiveOperationCommitment(activeOp, brigade.id)) return false;
 
     // --- Reserve check: should this brigade be in reserve? ---
     if (directive && corpsId) {
@@ -72,7 +74,7 @@ export function evaluateReserve(ctx: BrigadeEvaluationContext): boolean {
 }
 
 export function evaluateHold(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, directive, loc, counterAttackTarget, adjEnemy, state, reverseMap, terrainCache, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, corpsStance, result, adjacency } = ctx;
+    const { brigade, directive, loc, counterAttackTarget, adjEnemy, state, reverseMap, terrainCache, slopeByOsid, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, corpsStance, result, adjacency } = ctx;
 
     // --- Rule 2: Hold OSID — defend by default, but offensive corps can attack from hold ---
     // Chokepoints are important to hold, but during a corps offensive the brigade should
@@ -82,7 +84,7 @@ export function evaluateHold(ctx: BrigadeEvaluationContext): boolean {
     if (directive && directive.hold_osids.includes(loc)) {
         // Counter-attack exception: if THIS brigade retreated from an adjacent OSID last turn, counter-attack
         if (counterAttackTarget && adjEnemy.includes(counterAttackTarget)) {
-            const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap);
+            const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, slopeByOsid, ethnicMap);
             const counter = targets.find(t => t.osid === counterAttackTarget &&
                 isOutcomeSufficientForAttack(t.prediction.predicted_outcome, 'costly_victory'));
             if (counter && (chosenTargets.get(counter.osid) ?? 0) < (directive.max_attackers_per_target)) {

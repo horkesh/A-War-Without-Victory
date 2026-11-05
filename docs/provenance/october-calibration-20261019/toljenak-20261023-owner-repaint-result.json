@@ -1,0 +1,197 @@
+{
+  "schema": "awwv.toljenak-owner-repaint-result.v1",
+  "date": "2026-10-23",
+  "scope": "Toljenak implementation validation only; global calibration remains NO_GO_UNADOPTED",
+  "owner_authorization": "repaint April 1995 so Toljenak is RBiH",
+  "reference": {
+    "path": "data/source/calibration/painted_control_apr1995.json",
+    "osid": "op:vares:toljenak",
+    "from": "RS",
+    "to": "RBiH",
+    "old_normalized_sha256": "59f05f4919e8e4b6cfd81fe63958a9cd07406acbdb4aa8a4edd1a14596cba44d",
+    "new_normalized_sha256": "5ea9bc9a00ebfb80eb7611468340e604e155f24b225f39b06f7178c0937293ff",
+    "revision": 8,
+    "counts": {
+      "RS": 388,
+      "RBiH": 248,
+      "HRHB": 76
+    },
+    "controller_differences": 1
+  },
+  "n92": {
+    "run_dir": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n92",
+    "capture_turn": 135,
+    "held_through_turn": 188,
+    "original_reference_scores": [
+      707,
+      707,
+      705,
+      706
+    ],
+    "owner_corrected_reference_scores": [
+      707,
+      707,
+      706,
+      706
+    ],
+    "formerly_correct_losses": 0,
+    "unrelated_shared_control_deltas": 0,
+    "anchors": 16,
+    "native_files": 38
+  },
+  "n91": {
+    "run_dir": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n91",
+    "historical_scores": [
+      707,
+      707,
+      706,
+      705
+    ],
+    "owner_corrected_reference_scores": [
+      707,
+      707,
+      705,
+      705
+    ],
+    "native_files": 31,
+    "native_files_unchanged": true
+  },
+  "provenance": {
+    "historical_input_count": 32,
+    "historical_digest": "7986f05230e1d526e1794673e796dcb77730501d4958e435970c4ec806cc8039",
+    "historical_run_metadata_unchanged": true,
+    "current_exact_unaffected_inputs": 31,
+    "approved_reference_differences": 1,
+    "current_reference_is_not_historical_stamp": true,
+    "new_campaign_required": false,
+    "paint_consumer_scope": "post-simulation scoring and diagnostic checks"
+  },
+  "suite": {
+    "raw_pass": false,
+    "raw_child_exit": 1,
+    "raw_wrapper_exit": 1,
+    "tests": {
+      "pass": 14884,
+      "fail": 2,
+      "skip": 33,
+      "todo": 0,
+      "total": 14919
+    },
+    "files": {
+      "pass": 1440,
+      "fail": 2,
+      "skip": 4,
+      "todo": 0,
+      "total": 1446
+    },
+    "checks": {
+      "opening_exact": true,
+      "candidate_bound": true,
+      "no_suite_args": true,
+      "child_zero": false,
+      "no_timeout": true,
+      "closing_exact": true,
+      "telemetry_prefixes": true,
+      "source_stable": true,
+      "five_native_summaries": true,
+      "receipt_coverage": true,
+      "finalization_clean": true
+    },
+    "failure_files": [
+      "tests/receipt_citations.test.ts",
+      "tests/docs_desktop_v09_truth.test.ts"
+    ],
+    "correction_scope": "documentation only; archived original ledger and board",
+    "affected_verification": {
+      "files": 2,
+      "passed_tests": 50,
+      "failed_tests": 0,
+      "child_exit": 0,
+      "wrapper_exit": 0
+    },
+    "unaffected_broad_coverage_reused": true,
+    "raw_failed_attempt_retained": true,
+    "fictional_green_rerun": false
+  },
+  "preservation": {
+    "checks": {
+      "head_unchanged": true,
+      "n91_31_exact": true,
+      "n92_38_exact": true,
+      "retained_preexisting_exact": true,
+      "production_same_as_n92": true,
+      "current_inputs_exact_with_one_authorized_reference": true,
+      "only_authorized_cell_changed": true,
+      "reference_counts_consistent": true,
+      "telemetry_prefixes_exact": true
+    },
+    "telemetry": [
+      {
+        "path": "data\\derived\\_debug\\c_lane_corps_directive_telemetry.jsonl",
+        "bytes": 117772472,
+        "sha256": "2afbe1311c972fa9f36534d0b004abaacbbd9d1981b744e8dcfe0b0a5dc17cff",
+        "repaint_opening_bytes": 115377024,
+        "repaint_prefix_exact": true,
+        "original_prefix_exact": true,
+        "suite_append_bytes": 2395448
+      },
+      {
+        "path": "data\\derived\\_debug\\d_lane_persona_decisions.jsonl",
+        "bytes": 1041,
+        "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+        "repaint_opening_bytes": 1041,
+        "repaint_prefix_exact": true,
+        "original_prefix_exact": true,
+        "suite_append_bytes": 0
+      }
+    ]
+  },
+  "evidence": [
+    {
+      "path": "tmp/behar-i-toljenak-20261023/repaint-evaluation/evaluation-01/evaluation.json",
+      "bytes": 10749,
+      "sha256": "c292930d615aa66d2cd1f9b8dc3d18e2a472b3065d324591b63d7156aab72a03"
+    },
+    {
+      "path": "tmp/behar-i-toljenak-20261023/repaint-evaluation/evaluation-01/receipt.json",
+      "bytes": 2728,
+      "sha256": "b4841c71b01bbc953e0473526cf0d7e2c4f33a6895483c6068eb7a94556f7bd6"
+    },
+    {
+      "path": "tmp/behar-i-toljenak-20261023/repaint-review/QUALIFICATION_REVIEW.md",
+      "bytes": 4245,
+      "sha256": "447847f5dd14fc2fcd2ed96dbeb502f7a239112b2189454b029493ad5a80290e"
+    },
+    {
+      "path": "tmp/behar-i-toljenak-20261023/repaint-suite-01/result.json",
+      "bytes": 96090,
+      "sha256": "dcfda2b9a225bd4bd98a96f41acbaf49f40c7c7acf9e053ab43ef35ada95a8e4"
+    },
+    {
+      "path": "tmp/behar-i-toljenak-20261023/repaint-suite-01/receipt.json",
+      "bytes": 3598,
+      "sha256": "e7c622c87b1170e7e06d16f9813793198b14e3d428cfecb8b66c5ce1cf7725c4"
+    },
+    {
+      "path": "tmp/behar-i-toljenak-20261023/repaint-doc-correction-tests-02/tests.json",
+      "bytes": 16297,
+      "sha256": "69e0f47d0922c7ae41951177a3cf784c1747bcc308f0c10de4f95649a47ab3f7"
+    },
+    {
+      "path": "tmp/behar-i-toljenak-20261023/repaint-doc-correction-tests-02/receipt.json",
+      "bytes": 2791,
+      "sha256": "702f1a2c2d5ff150749adc402325df0f453a9e7f9432112d154f1fa52db081db"
+    },
+    {
+      "path": "tmp/behar-i-toljenak-20261023/repaint-final-preservation-01/preservation.json",
+      "bytes": 14225,
+      "sha256": "337a72c6ecb1d5661868284017b1154d0c8ca2ed051eba195569c57b28501c21"
+    },
+    {
+      "path": "tmp/behar-i-toljenak-20261023/repaint-final-preservation-01/receipt.json",
+      "bytes": 3167,
+      "sha256": "6e954d7efbaec4a35e4cf3944ada9767ce2c4b50af71f0e984a38b9a51650523"
+    }
+  ],
+  "raw_evidence": "LOCAL; pins are an index, not a remote byte backup; all failed attempts remain retained"
+}

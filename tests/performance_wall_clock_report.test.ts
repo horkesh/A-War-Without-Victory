@@ -28,7 +28,7 @@ function timing(total: number, serialization: number): ScenarioTimingJson {
     return {
         schema_version: 1,
         run_id: `run-${total}`,
-        scenario_id: 'apr1992_definitive_40w',
+        scenario_id: 'apr1992_definitive_188w',
         weeks: 40,
         final_state_hash: 'samehash',
         buckets_ms: {
@@ -52,7 +52,7 @@ describe('Phase 0 performance wall-clock report', () => {
             ],
             profile: {
                 path: 'data/derived/_debug/r5_phase0_profile.json',
-                scenario: 'data/scenarios/apr1992_definitive_40w.json',
+                scenario: 'data/scenarios/apr1992_definitive_188w.json',
                 totalWallMs: 4800,
                 phaseBoundarySampledPeakHeapMB: 512,
                 phaseTotals: [
@@ -146,7 +146,7 @@ describe('Phase 0 performance wall-clock report', () => {
             ],
             profile: {
                 path: 'profile.json',
-                scenario: 'data/scenarios/apr1992_definitive_40w.json',
+                scenario: 'data/scenarios/apr1992_definitive_188w.json',
                 totalWallMs: 4800,
                 phaseBoundarySampledPeakHeapMB: 512,
                 phaseTotals: [],

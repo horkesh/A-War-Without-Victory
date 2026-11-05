@@ -21,13 +21,15 @@ describe('packaged campaign replacement metadata', () => {
     expect(handler(main, 'start-new-campaign', 'load-state-dialog')).toContain('CAMPAIGN_REPLACEMENT_UPDATE');
     expect(handler(main, 'start-new-campaign', 'load-state-dialog')).toContain('excludeSenderFromBroadcast: true');
     expect(handler(main, 'start-new-campaign', 'load-state-dialog')).toContain('stateJson: projectCurrentGameStateForRenderer()');
-    expect(handler(main, 'load-state-dialog', 'advance-turn')).toContain('CAMPAIGN_REPLACEMENT_UPDATE');
+    expect(main).toContain('sendGameStateToRenderer(currentGameStateJson, excludeSender, CAMPAIGN_REPLACEMENT_UPDATE);');
+    expect(handler(main, 'load-state-dialog', 'advance-turn')).toContain('loadStatePathIntoDesktop(result.filePaths[0], _event.sender)');
     expect(handler(main, 'advance-turn', 'save-game')).not.toContain('CAMPAIGN_REPLACEMENT_UPDATE');
 
     const menuStart = main.indexOf("label: 'Load scenario...'");
     const menuEnd = main.indexOf("label: 'Open tactical map window'", menuStart);
     const menu = main.slice(menuStart, menuEnd);
-    expect(menu.match(/CAMPAIGN_REPLACEMENT_UPDATE/g)).toHaveLength(2);
+    expect(menu.match(/CAMPAIGN_REPLACEMENT_UPDATE/g)).toHaveLength(1);
+    expect(menu).toContain('loadStatePathIntoDesktop(result.filePaths[0])');
   });
 
   it('preserves replacement identity while coalescing a newer ordinary state', () => {

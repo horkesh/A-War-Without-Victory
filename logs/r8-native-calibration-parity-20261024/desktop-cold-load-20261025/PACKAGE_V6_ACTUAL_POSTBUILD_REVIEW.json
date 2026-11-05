@@ -1,0 +1,64 @@
+{
+  "schema": "awwv.desktop-terrain-package.independent-postbuild-review.v6",
+  "verdict": "GO",
+  "independent": true,
+  "reviewerIdentity": "desktop-terrain-canon-review",
+  "reviewedAt": "2026-10-25T09:22:37.7152048+01:00",
+  "expectedHead": "2ca7d7bcdf795f20c5c15f0004b3c72019f98337",
+  "launchConfigSha256": "f1908e91074ca618848b94af8253eded546999ab6e2fb38586de761424162d8c",
+  "packageBuildReceiptSha256": "615dffa028f8f4e8affcdbebd3c9ab2c5367d0834878f7bdbebc1b511ab1e73f",
+  "postbuildInventorySha256": "28c16a1460ccdc6442c9848f241d5f9b45a6b845f1176ccfe985d32d58c2a49f",
+  "sourceConsumerEntrySha256": "b94865e19aca8ccd70d2d883821b496aa9de277e848a85e97d4bdb8309d30a7d",
+  "checks": [
+    {
+      "name": "exact_preserved_build_receipt",
+      "pass": true,
+      "evidence": "The unchanged verifyExactPreservedReceipt implementation accepts build-01 with the exact original invoke_package_build.cjs argv, 2,100,000 ms timeout, command.json as the sole allowed artifact, and entry path/hash 19dfdfe9013b0c173f6fb41f15f99b0c667f76a7fd569430c8dc2e31c92bd1cc. child_exit=0, wrapper_exit=0, timed_out=false, artifact contract pass, stable entry snapshot/post-image, and empty stderr. The retained receipt is 4,709 bytes, SHA-256 615dffa028f8f4e8affcdbebd3c9ab2c5367d0834878f7bdbebc1b511ab1e73f."
+    },
+    {
+      "name": "exact_inventory",
+      "pass": true,
+      "evidence": "The new and retained packages each contain exactly 1,228 files with the identical ordered path set. A fresh run of the frozen v6 post-build inventory producer reproduced count 1,228 and aggregate SHA-256 08b571ad577b091926518097f40b651e9c636ef055a8d12ca3a8382d01fadc68 exactly. The retained post-build inventory is 1,919 bytes, SHA-256 28c16a1460ccdc6442c9848f241d5f9b45a6b845f1176ccfe985d32d58c2a49f."
+    },
+    {
+      "name": "only_expected_payload_delta",
+      "pass": true,
+      "evidence": "An independent file-by-file bytes/SHA comparison against dist-packaged/player-column-routing-20261025-01/win-unpacked found exactly one changed path: resources/dist/desktop/desktop_sim.cjs. All other 1,227 files are byte-identical, with no added or removed path."
+    },
+    {
+      "name": "candidate_compiled_payload",
+      "pass": true,
+      "evidence": "dist/desktop/desktop_sim.cjs and the packaged resources/dist/desktop/desktop_sim.cjs are both 4,487,890 bytes with SHA-256 fc3eda67a9e499dd0f01cbcbe210b41fe2b3a4b37dbcc85447916bbc12116979. The retained package payload is 4,487,693 bytes with SHA-256 af676459d15888e67821284d7e546ccc0e96925767f6764149aa0ecd21163c69."
+    },
+    {
+      "name": "reviewed_source_map_contents",
+      "pass": true,
+      "evidence": "dist/desktop/desktop_sim.cjs.map is 11,616,802 bytes, SHA-256 e07f91e5d6bd51893b67b597cf6eb194f61d5c91d60e4160814a7b1cd81f997b. Its sources array contains exactly one suffix match for each reviewed source and the embedded sourcesContent hashes exactly match src/desktop/desktop_sim.ts (59,344 bytes, db0f4b31bf51b23ca85197ea81509b122ebd26b053e93671884014a5755cb5fd) and src/sim/combat/combat_terrain_sets_node.ts (695 bytes, a9b367adf78e8b18d5a626427d7746e8a32f988b53896be16aec4a984658e091)."
+    },
+    {
+      "name": "terrain_assets_exact",
+      "pass": true,
+      "evidence": "The packaged and retained canonical_to_operational_map.json are 221,196 bytes / d8ca46cf1a5f425cd1ffd45eef3d99b19247128e6fe5ff28e0cad4d3f76fe1ef; urban_osids.json are 641 bytes / 6c5fbdf22a7b837917422b11eb53a975bb855c027cd4c92cb7158fafd9c42e4c; forest_osids.json are 2,796 bytes / f458666662a072c65b7d5c5e4b89c261399fca0f10476736b83fd914e651fa49."
+    },
+    {
+      "name": "unchanged_executable_and_asar",
+      "pass": true,
+      "evidence": "A War Without Victory.exe is a valid x64 PE, 222,836,736 bytes, SHA-256 3d0a4cecdaa5b647eda0882a2867ba6da1092d77d91602f67f03ddab6938d7de, byte-identical to the retained package. resources/app.asar is 196,688,692 bytes, SHA-256 f4b01445048ec8df0108218f3b83ba201d1cd0ebdc1e032bc417b2b503529e59, also byte-identical. The complete 1,227-file equality proves the remaining package payload unchanged."
+    },
+    {
+      "name": "cold_consumer_entry_bound",
+      "pass": true,
+      "evidence": "The approved cold-consumer entry tmp/player-bot-capability-parity-20261024/terrain-parity-repair/package-prep/terrain_consumer_child.cjs is 6,728 bytes, SHA-256 b94865e19aca8ccd70d2d883821b496aa9de277e848a85e97d4bdb8309d30a7d, exactly matching the post-build inventory binding."
+    },
+    {
+      "name": "independent_check_artifact",
+      "pass": true,
+      "evidence": "The consolidated independent post-build check is package-v6-postbuild-review-check-v2.json, 10,551 bytes, SHA-256 3a97bc01569161fb789b065fe99b42485f72ebaf894e6915b003b02e9e3105b5, with pass=true. The initial alternate flattened-sort aggregate diagnostic is preserved separately; the frozen inventory producer rerun established the authoritative traversal-order aggregate exactly."
+    }
+  ],
+  "limits": [
+    "Authorizes the two cold one-turn consumers only.",
+    "This review establishes package inventory, payload provenance, build receipt integrity, reviewed source-map content, and terrain prerequisites. It makes no native, calibration, baseline, release, signing, upload, or publication claim.",
+    "The two cold-consumer receipts, exact serialized-state/report comparison, independent compiled review, physical binding, preservation closing, and terminal binding remain required. The separately identified terminal consumerComparison validator correction is outside this review and is not waived."
+  ]
+}

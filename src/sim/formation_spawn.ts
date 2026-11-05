@@ -1,3 +1,4 @@
+import { initializeFormationDefaults } from '../state/formation_defaults.js';
 /**
  * Shared formation spawn from militia pools (plan: militia_and_brigade_formation_system).
  * Used by CLI sim_generate_formations and by turn pipeline when formation_spawn_directive is active.
@@ -40,12 +41,15 @@ import { type SiegeRatioByMunFaction, getSiegeRatio } from './early_war/compute_
 import { isEmergentFormationSuppressed } from './recruitment_engine.js';
 import { ensureBrigadeHistory } from './combat/brigade_history_recorder.js';
 import { getFactionDefaultOfficerQuality } from './combat/combat_math.js';
+import { beginPoolFlowMutation } from './combat/pool_flow_diagnostic.js';
 import {
     getActiveMunicipalitySupport,
     HRHB_SUPPORT_PACKAGE_COHESION_BONUS,
     RS_STAFF_PRIORITY_RATE_BONUS
 } from './combat/municipality_support.js';
 import { getEnclaveIdForOsid, getEnclaveMaxPersonnel, isEnclaveBrigade } from './combat/enclave_resilience.js';
+import { emitPersonnelWriterRecord, isPersonnelDiagnosticSelected } from './combat/personnel_diagnostic.js';
+import { createReinforcementAllocationObserver } from './combat/reinforcement_allocation_diagnostic.js';
 
 /**
  * Shared pocket pool: besieged municipalities where brigades can draw reinforcements
@@ -124,6 +128,8 @@ export interface SpawnFormationsOptions {
     historicalCorpsLookup?: ((faction: string, mun_id: string, ordinal: number) => string | null) | null;
     /** When set, emergent brigades retain the canonical OOB identity they already represent. */
     historicalOobIdLookup?: ((faction: string, mun_id: string, ordinal: number) => string | null) | null;
+    /** When set, emergent brigades inherit the authored equipment class from the same matched OOB record. */
+    historicalEquipmentClassLookup?: ((faction: string, mun_id: string, ordinal: number) => string | null) | null;
     /** When set, emergent brigades get historical HQ settlement ID for (faction, mun_id, ordinal) from OOB when available. */
     historicalHqLookup?: ((faction: string, mun_id: string, ordinal: number) => string | null) | null;
     /** When set, emergent spawn is gated by demographics: skip (mun, faction) where 1991 eligible population < MIN_ELIGIBLE_POPULATION_FOR_BRIGADE. */
@@ -358,6 +364,12 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
             if (transfer <= 0) continue;
 
             (f as FormationState & { personnel: number }).personnel = current + transfer;
+            if (isPersonnelDiagnosticSelected(id)) emitPersonnelWriterRecord(id, {
+                source: 'formation_spawn.reinforce', branch: 'bottom_up', completed_turn: currentTurn,
+                before: current, tier_cap: tierCap, rate, need, available: availableForReinforcement,
+                transfer, after: current + transfer, pool_mun_id: pool.mun_id ?? null,
+                pool_faction: pool.faction, used_pocket_fallback: usedPocketFallback,
+            });
             // Track peak personnel after reinforcement
             const newPers1 = current + transfer;
             const h1 = ensureBrigadeHistory(f);
@@ -394,22 +406,54 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         })
         .sort(strictCompare);
 
-    for (const id of brigadeIds) {
+    const allocationObserver = createReinforcementAllocationObserver(currentTurn, pools);
+    allocationObserver?.stageOpen();
+
+    for (let globalOrder = 0; globalOrder < brigadeIds.length; globalOrder += 1) {
+        const id = brigadeIds[globalOrder];
         const f = formations[id] as FormationState;
         const mun_id = getMunIdFromFormation(f);
         const faction = f.faction;
         if (!mun_id || !faction) continue;
 
-        if (!isEligibleForExternalReinforcement(state, f)) continue;
+        if (!isEligibleForExternalReinforcement(state, f)) {
+            allocationObserver?.recordRecipientBeforePoolSelection(mun_id, faction, () => f.recruit_pool_faction, () => ({
+                formation_id: id, global_order: globalOrder, disposition: 'skipped', reason: 'ineligible',
+            }));
+            continue;
+        }
 
         const current = f.personnel ?? MIN_BRIGADE_SPAWN;
         const cap = getMaxPersonnel(f);
-        if (current >= cap) continue;
+        if (current >= cap) {
+            allocationObserver?.recordRecipientBeforePoolSelection(mun_id, faction, () => f.recruit_pool_faction, () => ({
+                formation_id: id, global_order: globalOrder, disposition: 'skipped', reason: 'at_cap',
+                numbers: { current_personnel: current, cap },
+            }));
+            continue;
+        }
 
         const poolFaction = f.recruit_pool_faction ?? faction;
         const key = militiaPoolKey(mun_id, poolFaction);
+
         const pool = pools[key];
-        if (!pool || pool.available <= 0) continue;
+        if (!pool) {
+            allocationObserver?.recordRecipient(key, () => ({
+                formation_id: id, global_order: globalOrder, disposition: 'skipped', reason: 'pool_missing',
+                numbers: { current_personnel: current, cap },
+            }));
+            continue;
+        }
+        if (pool.available <= 0) {
+            allocationObserver?.recordRecipient(key, () => ({
+                formation_id: id, global_order: globalOrder, disposition: 'skipped', reason: 'pool_empty',
+                numbers: {
+                    current_personnel: current, cap,
+                    pool_available_before: pool.available, pool_committed_before: pool.committed,
+                },
+            }));
+            continue;
+        }
 
         // Rate limit: combat brigades get half rate; faction-specific mobilization multiplier
         const currentTurnNum = state.meta?.turn ?? 0;
@@ -427,9 +471,27 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         const availableForReinforcement = Math.max(0, pool.available - reserveForSpawn);
         const transfer = Math.min(need, availableForReinforcement);
 
-        if (transfer <= 0) continue;
+        if (transfer <= 0) {
+            allocationObserver?.recordRecipient(key, () => ({
+                formation_id: id, global_order: globalOrder, disposition: 'skipped',
+                reason: availableForReinforcement <= 0 ? 'reserve_exhausted' : 'no_transfer',
+                numbers: {
+                    current_personnel: current, cap, rate, need, reserve_for_spawn: reserveForSpawn,
+                    effective_available: availableForReinforcement, transfer,
+                    pool_available_before: pool.available, pool_committed_before: pool.committed,
+                },
+            }));
+            continue;
+        }
 
+        const poolAvailableBefore = pool.available;
+        const poolCommittedBefore = pool.committed;
         (f as FormationState & { personnel: number }).personnel = current + transfer;
+        if (isPersonnelDiagnosticSelected(id)) emitPersonnelWriterRecord(id, {
+            source: 'formation_spawn.reinforce', branch: 'regular', completed_turn: currentTurn,
+            before: current, cap, rate, need, available: availableForReinforcement, transfer,
+            after: current + transfer, pool_key: key,
+        });
         // Track peak personnel after reinforcement
         const newPers2 = current + transfer;
         const h2 = ensureBrigadeHistory(f);
@@ -438,6 +500,15 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         pool.available -= transfer;
         pool.committed += transfer;
         pool.updated_turn = currentTurn;
+        allocationObserver?.recordRecipient(key, () => ({
+            formation_id: id, global_order: globalOrder, disposition: 'transferred', reason: null,
+            numbers: {
+                current_personnel: current, cap, rate, need, reserve_for_spawn: reserveForSpawn,
+                effective_available: availableForReinforcement, transfer, personnel_after: current + transfer,
+                pool_available_before: poolAvailableBefore, pool_committed_before: poolCommittedBefore,
+                pool_available_after: pool.available, pool_committed_after: pool.committed,
+            },
+        }));
         if (localSupport?.type === 'croatian_support_package' && faction === 'HRHB') {
             const cohesion = typeof f.cohesion === 'number' ? f.cohesion : 0;
             f.cohesion = Math.min(100, cohesion + HRHB_SUPPORT_PACKAGE_COHESION_BONUS);
@@ -447,6 +518,8 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         report.manpower_added += transfer;
         report.pools_touched += 1;
     }
+
+    allocationObserver?.stageClose();
 
     // --- Enclave local reinforcement: enclave brigades recruit from local pools ---
     // Enclave brigades are isolated (no strategic reserve, no cross-mun pools) but
@@ -484,6 +557,11 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         if (transfer <= 0) continue;
 
         (f as FormationState & { personnel: number }).personnel = current + transfer;
+        if (isPersonnelDiagnosticSelected(id)) emitPersonnelWriterRecord(id, {
+            source: 'formation_spawn.reinforce', branch: 'enclave', completed_turn: currentTurn,
+            before: current, cap: maxPers, rate, need, available: pool.available, transfer,
+            after: current + transfer, pool_key: key,
+        });
         // Track peak personnel after reinforcement
         const newPers3 = current + transfer;
         const h3 = ensureBrigadeHistory(f);
@@ -626,6 +704,7 @@ export function spawnFormationsFromPools(
             report.pools_touched += 1;
 
             if (applyChanges) {
+                initializeFormationDefaults(formation, currentTurn);
                 formations[formationId] = formation;
                 pool.available -= MIN_DETACHMENT_SPAWN;
                 pool.committed += MIN_DETACHMENT_SPAWN;
@@ -706,6 +785,7 @@ export function spawnFormationsFromPools(
                     ...(dispLocationOsid != null ? { location_osid: dispLocationOsid } : {})
                 };
 
+                initializeFormationDefaults(dispFormation, currentTurn);
                 formations[dispFormationId] = dispFormation;
                 pool.available -= MIN_DETACHMENT_SPAWN;
                 pool.committed += MIN_DETACHMENT_SPAWN;
@@ -776,6 +856,8 @@ export function spawnFormationsFromPools(
             const historicalCorps = options.historicalCorpsLookup?.(faction, mun_id, ordinal) ?? null;
             const historicalHqSid = options.historicalHqLookup?.(faction, mun_id, ordinal) ?? null;
             const historicalOobId = options.historicalOobIdLookup?.(faction, mun_id, ordinal) ?? null;
+            const historicalEquipmentClass = options.historicalEquipmentClassLookup?.(faction, mun_id, ordinal) ?? null;
+            const hasExplicitEquipTag = customTags.some(t => typeof t === 'string' && t.startsWith('equip:'));
 
             const name = historicalName ?? resolveFormationName(faction, mun_id, kind, ordinal);
 
@@ -784,6 +866,7 @@ export function spawnFormationsFromPools(
                 `kind:${kind}`,
                 `mun:${mun_id}`,
                 ...(historicalOobId ? [`oob:${historicalOobId}`] : []),
+                ...(historicalOobId && historicalEquipmentClass && !hasExplicitEquipTag ? [`equip:${historicalEquipmentClass}`] : []),
             ];
             const allTags = Array.from(new Set([...baseTags, ...customTags])).sort(strictCompare);
 
@@ -824,6 +907,7 @@ export function spawnFormationsFromPools(
             createdInPool += 1;
 
             if (applyChanges) {
+                initializeFormationDefaults(formation, currentTurn);
                 formations[formationId] = formation;
                 pool.available -= batchSize;
                 pool.committed += batchSize;
@@ -878,6 +962,11 @@ export function applyWiaTrickleback(state: GameState): WiaTricklebackReport {
 
         f.wounded_pending = pending - returned;
         f.personnel = current + returned;
+        if (isPersonnelDiagnosticSelected(id)) emitPersonnelWriterRecord(id, {
+            source: 'formation_spawn.wia_trickleback', completed_turn: state.meta.turn,
+            before: current, pending_before: pending, cap, returned, after: current + returned,
+            pending_after: pending - returned,
+        });
         // Track peak personnel after WIA return
         const newPers4 = current + returned;
         const h4 = ensureBrigadeHistory(f);
@@ -920,9 +1009,14 @@ export function applyMilitiaWiaTrickleback(state: GameState, report: WiaTrickleb
         const returned = Math.min(pending, WIA_TRICKLE_RATE);
         if (returned <= 0) continue;
 
+        const poolFlow = beginPoolFlowMutation(state, key);
         pool.wounded_pending = pending - returned;
         pool.available = Math.max(0, (pool.available ?? 0) + returned);
         pool.updated_turn = state.meta?.turn ?? pool.updated_turn ?? 0;
+        poolFlow?.complete('formation_spawn', 'militia_wia', 'credited', {
+            wounded_pending_before: pending, trickle_rate: WIA_TRICKLE_RATE, returned,
+            wounded_pending_after: pool.wounded_pending,
+        }, 'wia');
 
         poolsReturned += 1;
         personnelReturned += returned;

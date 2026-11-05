@@ -17,6 +17,7 @@
 import { describe, it, expect } from 'vitest';
 import { warPhases } from '../src/sim/turn_phases/war_phases.js';
 import { getAvailableBrigades } from '../src/sim/combat/corps_operation_helpers.js';
+import { evaluateCondition } from '../src/sim/events/event_types.js';
 
 const STEP = warPhases.find((p) => p.name === 'apply-op-halts')!;
 
@@ -38,6 +39,7 @@ function makeState(opts: {
     name: 'Operation Live',
     type: 'sector_attack',
     phase: 'execution',
+    started_turn: 10,
     participating_brigades: ['rbih_b1', 'rbih_b2'],
     ...(opts.withCommander !== false ? { commander_officer_id: commanderId } : {}),
     ...(opts.withTgCommander === true ? { tg_commander_officer_id: tgCommanderId } : {}),
@@ -70,6 +72,14 @@ function makeState(opts: {
   };
 }
 
+/** Fixture op carries no attack counters, so it records zero executed attacks. */
+const HALT_RECORD_NO_ATTACKS = {
+  op_name: 'Operation Live',
+  turn: 12,
+  operation_id: 'rbih_1st_corps:Operation Live:t10',
+  executed_attacks: 0,
+};
+
 describe('STOP-OP apply step (apply-op-halts)', () => {
   it('removes the matching live op, releases its commander, records the halt, and clears the staged field', () => {
     const state = makeState({
@@ -90,7 +100,7 @@ describe('STOP-OP apply step (apply-op-halts)', () => {
     const freed = getAvailableBrigades(cc as any, ['rbih_b1', 'rbih_b2']);
     expect(freed.sort()).toEqual(['rbih_b1', 'rbih_b2']);
     // Halt recorded.
-    expect(cc.halted_op_record).toEqual([{ op_name: 'Operation Live', turn: 12 }]);
+    expect(cc.halted_op_record).toEqual([HALT_RECORD_NO_ATTACKS]);
     // Staged field consumed.
     expect(cc.pending_op_halt).toBeUndefined();
   });
@@ -116,7 +126,7 @@ describe('STOP-OP apply step (apply-op-halts)', () => {
     expect(tgOfficer.status).toBe('reserve');
     expect(tgOfficer.assigned_operation).toBeUndefined();
     // Halt recorded, staged field consumed.
-    expect(cc.halted_op_record).toEqual([{ op_name: 'Operation Live', turn: 12 }]);
+    expect(cc.halted_op_record).toEqual([HALT_RECORD_NO_ATTACKS]);
     expect(cc.pending_op_halt).toBeUndefined();
   });
 
@@ -127,7 +137,7 @@ describe('STOP-OP apply step (apply-op-halts)', () => {
     const cc = state.military.corps_command.rbih_1st_corps;
     runStep(state);
     expect(cc.active_operations).toHaveLength(0);
-    expect(cc.halted_op_record).toEqual([{ op_name: 'Operation Live', turn: 12 }]);
+    expect(cc.halted_op_record).toEqual([HALT_RECORD_NO_ATTACKS]);
     expect(cc.pending_op_halt).toBeUndefined();
   });
 
@@ -160,5 +170,55 @@ describe('STOP-OP apply step (apply-op-halts)', () => {
     runStep(state);
     // The political-consequence dimension is a deliberate FOLLOW-UP, not this slice.
     expect(state.meta.patron_confidence).toBe(patronBefore);
+  });
+
+  describe('halted ops keep their attack evidence for operation_attacked', () => {
+    const LIVE_ATTACKED = { type: 'operation_attacked', operation_name_pattern: 'Operation Live', min_attacks: 1 } as const;
+
+    function haltAt(turn: number, opOverrides: Record<string, unknown>): any {
+      const state = makeState({
+        ops: [{
+          id: 'op_live_1',
+          name: 'Operation Live',
+          type: 'sector_attack',
+          started_turn: 70,
+          commander_officer_id: 'rbih_officer_1',
+          participating_brigades: ['rbih_b1', 'rbih_b2'],
+          ...opOverrides,
+        }],
+        pendingHalt: { op_name: 'Operation Live', turn, ca_cost: 25 },
+      });
+      state.meta.turn = turn;
+      runStep(state);
+      return state;
+    }
+
+    it.each([74, 75])('attack then halt at t%i: record keeps the executed attacks and the condition stays true', (turn) => {
+      const state = haltAt(turn, { phase: 'execution', axes: [{ axis_id: 'a', attack_attempt_count: 1 }] });
+      const cc = state.military.corps_command.rbih_1st_corps;
+      expect(cc.active_operations).toHaveLength(0);
+      expect(state.operation_history).toBeUndefined();
+      expect(cc.halted_op_record).toEqual([{
+        op_name: 'Operation Live',
+        turn,
+        operation_id: 'rbih_1st_corps:Operation Live:t70',
+        executed_attacks: 1,
+      }]);
+      expect(evaluateCondition(LIVE_ATTACKED, state)).toBe(true);
+    });
+
+    it('planning-only halt records zero attacks and does not satisfy the condition', () => {
+      const state = haltAt(74, { phase: 'planning', axes: [{ axis_id: 'a', attack_attempt_count: 0 }] });
+      expect(state.military.corps_command.rbih_1st_corps.halted_op_record[0].executed_attacks).toBe(0);
+      expect(evaluateCondition(LIVE_ATTACKED, state)).toBe(false);
+    });
+
+    it('a halted non-matching operation does not satisfy another operation condition', () => {
+      const state = haltAt(74, { phase: 'execution', axes: [{ axis_id: 'a', attack_attempt_count: 3 }] });
+      expect(evaluateCondition(
+        { type: 'operation_attacked', operation_name_pattern: "Operation Neretva '93", min_attacks: 1 },
+        state,
+      )).toBe(false);
+    });
   });
 });

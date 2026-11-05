@@ -3,12 +3,13 @@
  * Deterministic: effects sorted by kind before application; no timestamps or randomness.
  */
 
-import type { GameState, FactionId, ControlEvent } from '../../state/game_state.js';
+import type { GameState, FactionId, FormationId, ControlEvent } from '../../state/game_state.js';
 import type { EventEffect } from './event_types.js';
 import type { EventConstraints } from './event_constraints.js';
 import { getActiveAllianceBounds } from './active_modifiers.js';
 import { recordBattleCasualties } from '../../state/casualty_ledger.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { invalidateBrigadeJourney } from '../combat/brigade_journey_lifecycle.js';
 
 /** Deterministic kind ordering for effect application (alphabetical).
  *  NOTE: alphabetic insertion shifts indices of every kind sorted after the
@@ -262,6 +263,9 @@ function applyEnclaveFormationDisplacement(
         if (effect.reconstitute_as === 'reduced') {
             // Survivors break out and reform at reduced strength in their own corps AOR.
             (f as { personnel?: number }).personnel = Math.max(0, personnel - lost);
+            if (f.location_osid !== effect.destination_osid) {
+                invalidateBrigadeJourney(state, fid as FormationId);
+            }
             (f as { location_osid?: string }).location_osid = effect.destination_osid;
             (f as { home_osid?: string }).home_osid = effect.destination_osid;
             (f as { assignment: unknown }).assignment = null; // re-slotted by sector assignment next turn

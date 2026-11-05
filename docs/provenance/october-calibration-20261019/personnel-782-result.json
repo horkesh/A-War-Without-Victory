@@ -1,0 +1,51 @@
+{
+  "task": 782,
+  "status": "implemented_and_focused_verified",
+  "opening_head": "e95a1df818f5a8ba77b134926bc7c17a388ec8e1",
+  "current_head": "e95a1df818f5a8ba77b134926bc7c17a388ec8e1",
+  "scope": "default-off stdout-only selected-formation personnel phase/writer receipts and actual reached commander generic-probe selection receipts",
+  "claims": {
+    "observability_readiness_only": true,
+    "historical_cause_or_recovery_claim": false,
+    "gameplay_or_threshold_change": false,
+    "game_state_save_report_weekly_schema_change": false,
+    "existing_movement_phase_weekly_payload_changed": false
+  },
+  "personnel": {
+    "topic": "personnel",
+    "selector": "AWWV_DEBUG_MOVEMENT_FORMATIONS",
+    "phase_receipts": ["phase_start", "phase_end_executed", "phase_end_skipped", "terminal"],
+    "presence": ["formation_absent", "formation_present_undefined", "formation_present_null", "personnel_absent", "present_undefined", "present_null", "present_nonfinite", "present_value"],
+    "covered_direct_writers": [
+      "formation_spawn.reinforce:bottom_up",
+      "formation_spawn.reinforce:regular",
+      "formation_spawn.reinforce:enclave",
+      "formation_spawn.wia_trickleback",
+      "strategic_reserve.reinforce",
+      "frontline_attrition",
+      "morale_drift.desertion:collapse",
+      "morale_drift.desertion:low_morale"
+    ],
+    "uncovered_limits": [
+      "combat resolution casualty and retreat writers",
+      "brigade dissolution, formation merge, lifecycle-event, and paramilitary personnel writers",
+      "militia-pool-only mutations",
+      "a phase delta does not identify a unique writer"
+    ]
+  },
+  "commander_generic_probe": {
+    "hardcoded_turn_corps_selector_removed": true,
+    "records": ["original_surplus_ordinal", "actual_reached_filter_results", "NOT_REACHED", "actual_fitness_with_nonfinite_tags", "survivor_sorted_rank", "selected_identity", "local_occupation_bypass", "fallback_not_reached", "existing_target_filters_and_selected_tuple"],
+    "filter_order_helper_count_sort_comparator_and_short_circuit_preserved": true
+  },
+  "verification": [
+    { "attempt": "782-red-personnel-01", "child_exit": 1, "wrapper_exit": 1, "result": "genuine RED: personnel module/topic absent" },
+    { "attempt": "782-red-probe-bypass-01", "child_exit": 1, "wrapper_exit": 1, "result": "genuine RED: bypass candidate inventory empty" },
+    { "attempt": "782-green-targeted-correction-02", "child_exit": 0, "wrapper_exit": 0 },
+    { "attempt": "782-green-focused-final-02", "child_exit": 0, "wrapper_exit": 0, "tests": 146, "passed": 146, "failed": 0 },
+    { "attempt": "782-typecheck-final-02", "child_exit": 0, "wrapper_exit": 0, "mode": "noEmit with private typecheck.tsbuildinfo" },
+    { "check": "git diff --check", "exit": 0 }
+  ],
+  "omitted_by_authority": ["full suite", "campaign", "scenario advance", "replay", "runTurn scenario campaign", "package build"],
+  "retained_prior_posture": "n80 retained 703/712 NO-GO and unadopted; n81/n82 rejected 689; unmet gates remain unmet"
+}

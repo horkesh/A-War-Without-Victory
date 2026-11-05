@@ -1,0 +1,32 @@
+{
+  "scope": "final causal-pass preservation inventory; no raw campaign reparse",
+  "fingerprints_checked": 35,
+  "receipt_inputs_checked": 7,
+  "source_files_checked": 16,
+  "raw_originals_preserved": true,
+  "production_diff": [],
+  "retained_runs": [
+    "apr1992_definitive_188w__0b1f040ff4abe835__w139_n40",
+    "apr1992_definitive_188w__4658849344f21642__w186_n38",
+    "apr1992_definitive_188w__6deb5845c150c196__w188_n37",
+    "apr1992_definitive_188w__6deb5845c150c196__w188_n39"
+  ],
+  "retained_partial52": "runs/apr1992_historical_52w__434fe8ff83b7b523__w52",
+  "junctions": {
+    "runs": {
+      "symlink": true,
+      "target": "C:\\Users\\User\\.codex\\worktrees\\april-1995-glamoc\\A-War-Without-Victory\\runs"
+    },
+    "node_modules": {
+      "symlink": true,
+      "target": "C:\\Users\\User\\.codex\\worktrees\\april-1995-glamoc\\A-War-Without-Victory\\node_modules"
+    }
+  },
+  "node": "v22.23.2",
+  "doc_chars": {
+    "roadmap": 59937,
+    "board": 19698
+  },
+  "unaffected_run_artifact_hashes_and_prior36_comparisons": "reused, no re-audit",
+  "errors": []
+}

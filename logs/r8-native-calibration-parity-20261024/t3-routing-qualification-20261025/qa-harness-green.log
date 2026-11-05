@@ -1,0 +1,10 @@
+
+ RUN  v2.1.9 C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory
+
+ ✓ tests/paradox_local_qa_harness.test.ts (101 tests) 565ms
+
+ Test Files  1 passed (1)
+      Tests  101 passed (101)
+   Start at  05:30:35
+   Duration  3.83s (transform 1.05s, setup 12ms, collect 2.77s, tests 565ms, environment 0ms, prepare 70ms)
+

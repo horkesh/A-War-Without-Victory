@@ -630,6 +630,122 @@ describe('attributeOperationCasualties', () => {
         expect(pc.suffered.killed).toBe(5 + 7);
     });
 
+    it('credits a joint operation hosted by another corps to the secondary brigade axis', () => {
+        const joint = makeOp({
+            name: 'Joint operation',
+            participating_brigades: ['bde_primary', 'bde_secondary'],
+            axes: [
+                {
+                    axis_id: 'axis_primary',
+                    name: 'Primary axis',
+                    assigned_brigades: ['bde_primary'],
+                    objectives: ['op:test:objective'],
+                    current_objective_index: 0,
+                    status: 'executing',
+                    failure_count: 0,
+                    consecutive_failures_on_current: 0,
+                    momentum: 0,
+                    attack_attempt_count: 0,
+                    objective_capture_count: 0,
+                    movement_only_execution_turns: 0,
+                    idle_execution_turn_streak: 0,
+                },
+                {
+                    axis_id: 'axis_secondary',
+                    name: 'Secondary axis',
+                    assigned_brigades: ['bde_secondary'],
+                    objectives: ['op:test:objective'],
+                    current_objective_index: 0,
+                    status: 'executing',
+                    failure_count: 0,
+                    consecutive_failures_on_current: 0,
+                    momentum: 0,
+                    attack_attempt_count: 0,
+                    objective_capture_count: 0,
+                    movement_only_execution_turns: 0,
+                    idle_execution_turn_streak: 0,
+                },
+            ],
+        });
+        const unrelated = makeOp({
+            name: 'Secondary corps unrelated operation',
+            participating_brigades: ['bde_other'],
+        });
+        const state = makeState(
+            { corps_primary: joint, corps_secondary: unrelated },
+            {
+                bde_primary: { personnel: 1000, corps_id: 'corps_primary', composition: { tanks: 0, artillery: 0 } },
+                bde_secondary: { personnel: 800, corps_id: 'corps_secondary', composition: { tanks: 8, artillery: 4 } },
+                bde_other: { personnel: 900, corps_id: 'corps_secondary' },
+                bde_def: { personnel: 700, corps_id: 'corps_def' },
+            },
+        );
+        const report = makeReport([{
+            attacker_brigade: 'bde_secondary',
+            attacker_faction: 'RBiH',
+            defender_faction: 'RS',
+            target_osid: 'op:test:objective',
+            outcome: 'victory',
+            power_ratio: 1.5,
+            attacker_won: true,
+            defender_brigade: 'bde_def',
+            snap_events: [],
+            attacker_casualties: 32,
+            defender_casualties: 16,
+        }]);
+
+        attributeOperationCasualties(state, report);
+
+        expect(joint.pending_casualties).toMatchObject({
+            suffered: { killed: 7, wounded: 24 },
+            inflicted: { killed: 4, wounded: 12 },
+            attacks: 1,
+            by_axis: {
+                axis_secondary: {
+                    suffered: { killed: 7, wounded: 24 },
+                    inflicted: { killed: 4, wounded: 12 },
+                    attacks: 1,
+                },
+            },
+        });
+        expect(joint.pending_casualties?.by_axis?.axis_primary).toBeUndefined();
+        expect(unrelated.pending_casualties).toBeUndefined();
+        expect(JSON.parse(JSON.stringify(joint.pending_casualties))).toEqual(joint.pending_casualties);
+    });
+
+    it('uses deterministic host ownership once and handles missing commands safely', () => {
+        const first = makeOp({ name: 'First host', participating_brigades: ['bde_shared'] });
+        const second = makeOp({ name: 'Second host', participating_brigades: ['bde_shared'] });
+        const state = makeState(
+            { zzz_host: second, aaa_host: first },
+            {
+                bde_shared: { personnel: 1000, corps_id: 'missing_secondary', composition: { tanks: 0, artillery: 0 } },
+                bde_def: { personnel: 1000, corps_id: 'corps_def' },
+            },
+        );
+        const report = makeReport([{
+            attacker_brigade: 'bde_shared',
+            attacker_faction: 'RS',
+            defender_faction: 'RBiH',
+            target_osid: 'op:test:objective',
+            outcome: 'victory',
+            power_ratio: 1.5,
+            attacker_won: true,
+            defender_brigade: 'bde_def',
+            snap_events: [],
+            attacker_casualties: 10,
+            defender_casualties: 20,
+        }]);
+
+        attributeOperationCasualties(state, report);
+        expect(first.pending_casualties?.attacks).toBe(1);
+        expect(second.pending_casualties).toBeUndefined();
+
+        const missingHost = makeState({}, state.military.formations);
+        expect(() => attributeOperationCasualties(missingHost, report)).not.toThrow();
+        expect(missingHost.military.corps_command).toEqual({});
+    });
+
     it('skips brigades not in a sector_attack operation', () => {
         const op = makeOp({
             type: 'general_offensive',
@@ -1436,6 +1552,59 @@ describe('finalizeOperationAAR', () => {
         expect(aar.objectives_captured).toEqual([]);
         expect(aar.outcome).toBe('failure');
         expect(aar.grade.stars).toBeLessThan(5);
+    });
+
+    it('uses a same-operation battle flip receipt when weekly attack telemetry lags', () => {
+        const op = makeFinalizableOp({
+            objectives: ['op:visegrad:center'],
+            participating_brigades: ['bde_1'],
+            weekly_log: [{
+                turn: 6,
+                phase: 'execution',
+                attacks_this_turn: 0,
+                objectives_captured_this_turn: ['op:visegrad:center'],
+                objectives_lost_this_turn: [],
+                casualties_suffered: { killed: 0, wounded: 0 },
+                casualties_inflicted: { killed: 0, wounded: 0 },
+                equipment_lost: { tanks: 0, artillery: 0 },
+                equipment_destroyed: { tanks: 0, artillery: 0 },
+                equipment_captured: { tanks: 0, artillery: 0 },
+                brigade_count: 1,
+                momentum: 1,
+                notable_events: [],
+            }],
+        });
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: {
+                    personnel: 1300,
+                    faction: 'RS',
+                    status: 'active',
+                    brigade_history: {
+                        engagements: [{
+                            battle_id: '6:op:visegrad:center:bde_1:defender',
+                            turn: 6,
+                            osid: 'op:visegrad:center',
+                            role: 'attacker',
+                            outcome: 'decisive_victory',
+                            enemy_faction: 'RBiH',
+                            casualties_taken: 0,
+                            casualties_inflicted: 10,
+                            equipment_destroyed: { tanks: 0, artillery: 0 },
+                            equipment_captured: { tanks: 0, artillery: 0 },
+                            territory_flipped: true,
+                        }],
+                    },
+                } as any,
+            },
+            { 'op:visegrad:center': 'RS' },
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        expect(state.operation_history[0].objectives_captured).toEqual(['op:visegrad:center']);
+        expect(state.operation_history[0].outcome).toBe('success');
     });
 
     it('builds axis_summaries for multi-axis ops', () => {

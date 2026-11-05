@@ -1,0 +1,19 @@
+{
+  "schema": "awwv.775.closed.v1",
+  "sealed_utc": "2026-10-21T06:46:38.306Z",
+  "writes_closed": true,
+  "verdict": "PASS_TARGETED_READER_CORRECTION__773_RUNTIME_AND_TARGET_FINDINGS_REVALIDATED_AT_RETAINED_SCOPE",
+  "result": {
+    "path": "logs/claude-channel-20261004/775-result.json",
+    "bytes": 25055,
+    "sha256": "8131fa5115a439d14fb06cae93d72150d8cf67bb941f58e5e67fbd6b5446735f"
+  },
+  "inventory": {
+    "path": "logs/claude-channel-20261004/775-inventory.json",
+    "bytes": 5039,
+    "sha256": "1d0ea3c95f5e6d706f882a18338d36519e1bc5e12ddcd162104be9f02e87fc5d"
+  },
+  "original_773_seals_unchanged": true,
+  "head": "7d1e7054b658c81a7d875b12a4c1fb115bc88c88",
+  "clean": true
+}

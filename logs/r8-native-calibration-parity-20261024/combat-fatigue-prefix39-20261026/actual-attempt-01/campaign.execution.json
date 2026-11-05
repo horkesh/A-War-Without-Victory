@@ -1,0 +1,24 @@
+{
+  "name": "campaign",
+  "status": "PASS",
+  "pass": true,
+  "exit": 0,
+  "process_status": 0,
+  "signal": null,
+  "spawn_error": null,
+  "timed_out": false,
+  "argv": [
+    "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "node_modules/tsx/dist/cli.mjs",
+    "tools/scenario_runner/run_scenario_with_preflight.ts",
+    "--scenario",
+    "data/scenarios/apr1992_definitive_188w.json",
+    "--weeks",
+    "39",
+    "--out",
+    "runs/player-parity-fatigue-owner-39-20261026-01",
+    "--unique",
+    "--save-weeks",
+    "15,16,33,34"
+  ]
+}

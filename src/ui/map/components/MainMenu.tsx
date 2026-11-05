@@ -75,6 +75,8 @@ export function MainMenu({ hasSave, starting = false, errorMessage, onNewGame, o
     const [recordsLoading, setRecordsLoading] = useState(false);
     const [recordLoadingFilename, setRecordLoadingFilename] = useState<string | null>(null);
     const [recordsError, setRecordsError] = useState<string | null>(null);
+    const [desktopImporting, setDesktopImporting] = useState(false);
+    const desktopImportPendingRef = useRef(false);
     const primaryActionRef = useRef<HTMLButtonElement>(null);
     const ipc = useIPC();
 
@@ -124,6 +126,26 @@ export function MainMenu({ hasSave, starting = false, errorMessage, onNewGame, o
             setRecordsError(t('mainMenu.recordsUnavailable'));
         } finally {
             setRecordLoadingFilename(null);
+        }
+    };
+
+    const importDesktopState = async () => {
+        if (!ipc.isAvailable || desktopImportPendingRef.current) return;
+        desktopImportPendingRef.current = true;
+        setDesktopImporting(true);
+        setRecordsError(null);
+        try {
+            const result = await ipc.loadStateDialog();
+            if (!result.ok || !result.stateJson) {
+                setRecordsError(t('mainMenu.recordsUnavailable'));
+                return;
+            }
+            onLoadGame(result.stateJson);
+        } catch {
+            setRecordsError(t('mainMenu.recordsUnavailable'));
+        } finally {
+            desktopImportPendingRef.current = false;
+            setDesktopImporting(false);
         }
     };
 
@@ -195,7 +217,7 @@ export function MainMenu({ hasSave, starting = false, errorMessage, onNewGame, o
                     {view === 'factions' && <FactionStandby />}
                     {view === 'dossier' && selectedFaction && <FactionDossier faction={selectedFaction} onBack={back} onTakeCommand={() => setView('mode')} primaryActionRef={primaryActionRef} />}
                     {view === 'mode' && selectedFaction && <ModeChoice faction={selectedFaction} mode={decisionMode} starting={starting || submitted} onModeChange={setDecisionMode} onBack={back} onBegin={beginCampaign} primaryActionRef={primaryActionRef} />}
-                    {view === 'records' && <FieldRecords hasSave={hasSave} records={records} loading={recordsLoading} loadingFilename={recordLoadingFilename} error={recordsError} onResume={onContinue} onLoadRecord={loadRecord} onImport={onLoadGame} onBack={back} />}
+                    {view === 'records' && <FieldRecords hasSave={hasSave} records={records} loading={recordsLoading} loadingFilename={recordLoadingFilename} importing={desktopImporting} error={recordsError} onResume={onContinue} onLoadRecord={loadRecord} onImport={onLoadGame} onDesktopImport={ipc.isAvailable ? importDesktopState : null} onBack={back} />}
                 </div>
             </section>
             <div className="main-menu-opening__version">{AWWV_APP_VERSION}</div>
@@ -269,7 +291,7 @@ function ModeRadio({ checked, title, body, onClick }: { checked: boolean; title:
     return <button type="button" role="radio" aria-checked={checked} aria-label={title} onClick={onClick} className="command-mode"><span className="command-mode__title"><span aria-hidden="true" className="command-mode__indicator">{checked ? '●' : '○'}</span><strong>{title}</strong></span><span className="command-mode__body">{body}</span></button>;
 }
 
-function FieldRecords({ hasSave, records, loading, loadingFilename, error, onResume, onLoadRecord, onImport, onBack }: { hasSave: boolean; records: SaveRecord[]; loading: boolean; loadingFilename: string | null; error: string | null; onResume: () => void; onLoadRecord: (filename: string) => void; onImport: (json: unknown) => void; onBack: () => void }) {
+function FieldRecords({ hasSave, records, loading, loadingFilename, importing, error, onResume, onLoadRecord, onImport, onDesktopImport, onBack }: { hasSave: boolean; records: SaveRecord[]; loading: boolean; loadingFilename: string | null; importing: boolean; error: string | null; onResume: () => void; onLoadRecord: (filename: string) => void; onImport: (json: unknown) => void; onDesktopImport: (() => Promise<void>) | null; onBack: () => void }) {
     const inputRef = useRef<HTMLInputElement>(null);
     return <div className="command-console-stack">
         <CommandHeading eyebrow={t('mainMenu.archive')} title={t('mainMenu.fieldRecords')} />
@@ -292,11 +314,11 @@ function FieldRecords({ hasSave, records, loading, loadingFilename, error, onRes
             {!loading && records.length === 0 && !hasSave && <div className="record-list__empty">{t('mainMenu.noRecords')}</div>}
         </div>
         <input ref={inputRef} type="file" accept=".json" aria-label={t('sidePicker.loadSaveAria')} className="hidden" onChange={(event) => { const file = event.target.files?.[0]; event.currentTarget.value = ''; if (!file) return; const reader = new FileReader(); reader.onload = (readerEvent) => { try { onImport(JSON.parse(String(readerEvent.target?.result ?? 'null'))); } catch (err) { console.error('Failed to parse save file:', err); } }; reader.readAsText(file); }} />
-        <div className="command-console-footer"><BackButton onClick={onBack} compact /><QuietButton onClick={() => inputRef.current?.click()}>{t('mainMenu.importFile')}</QuietButton></div>
+        <div className="command-console-footer"><BackButton onClick={onBack} compact /><QuietButton disabled={importing} onClick={() => { if (onDesktopImport) void onDesktopImport(); else inputRef.current?.click(); }}>{t('mainMenu.importFile')}</QuietButton></div>
     </div>;
 }
 
 function CommandHeading({ eyebrow, title }: { eyebrow: string; title: string }) { return <div className="command-heading"><div className="command-eyebrow">{eyebrow}</div><h2>{title}</h2></div>; }
 function MenuButton({ children, onClick, primary = false }: { children: ReactNode; onClick: () => void; primary?: boolean }) { return <button type="button" onClick={onClick} className={`command-menu-button${primary ? ' command-menu-button--primary' : ''}`}><span>{children}</span><span aria-hidden="true">→</span></button>; }
-function QuietButton({ children, onClick }: { children: ReactNode; onClick: () => void }) { return <button type="button" onClick={onClick} className="command-quiet-button">{children}</button>; }
+function QuietButton({ children, onClick, disabled = false }: { children: ReactNode; onClick: () => void; disabled?: boolean }) { return <button type="button" disabled={disabled} onClick={onClick} className="command-quiet-button disabled:cursor-wait disabled:opacity-60">{children}</button>; }
 function BackButton({ onClick, compact = false }: { onClick: () => void; compact?: boolean }) { return <button type="button" onClick={onClick} className={`command-back-button${compact ? '' : ' command-back-button--spaced'}`}>← {t('mainMenu.back')}</button>; }

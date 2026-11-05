@@ -110,10 +110,19 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
         /route:\s*warroomUrl[\s\S]*status:\s*'did-finish-load'/,
         'packaged runtime probe should assert the real packaged warroom window reaches did-finish-load',
     );
-    assert.match(
-        source,
-        /app\.whenReady\(\)\.then\(\s*\(\)\s*=>\s*\{\s*alignPackagedProcessCwdWithResources\(\);\s*registerProtocol\(\);[\s\S]*if \(RUNTIME_PROBE_MODE\)/,
-        'probe mode must align packaged cwd and register the awwv protocol before trying to load the packaged main window',
+    const readyStart = source.indexOf('app.whenReady().then(() => {');
+    const readyBlock = source.slice(readyStart);
+    const configureOutputRootIndex = readyBlock.indexOf('configurePackagedRuntimeOutputRoot();');
+    const alignCwdIndex = readyBlock.indexOf('alignPackagedProcessCwdWithResources();');
+    const registerProtocolIndex = readyBlock.indexOf('registerProtocol();');
+    const runtimeProbeIndex = readyBlock.indexOf('if (RUNTIME_PROBE_MODE)');
+    assert.ok(
+        readyStart >= 0
+        && configureOutputRootIndex >= 0
+        && configureOutputRootIndex < alignCwdIndex
+        && alignCwdIndex < registerProtocolIndex
+        && registerProtocolIndex < runtimeProbeIndex,
+        'probe mode must configure its output root, align packaged cwd, and register the awwv protocol before trying to load the packaged main window',
     );
     assert.match(
         source,
@@ -515,10 +524,23 @@ test('packaged electron aligns process cwd with resource base before runtime han
         /if \(app\.isPackaged\)[\s\S]*process\.chdir\(getBaseDir\(\)\)/,
         'packaged Electron must chdir to getBaseDir() so legacy resolve("data/...") loaders read resources/data instead of the user profile',
     );
-    assert.match(
-        source,
-        /app\.whenReady\(\)\.then\(\s*\(\)\s*=>\s*\{\s*alignPackagedProcessCwdWithResources\(\);[\s\S]*registerProtocol\(\);/,
-        'cwd alignment must run before protocol registration, map server startup, IPC handlers, and runtime probe work',
+    const readyStart = source.indexOf('app.whenReady().then(() => {');
+    const readyBlock = source.slice(readyStart);
+    const configureOutputRootIndex = readyBlock.indexOf('configurePackagedRuntimeOutputRoot();');
+    const alignCwdIndex = readyBlock.indexOf('alignPackagedProcessCwdWithResources();');
+    const registerProtocolIndex = readyBlock.indexOf('registerProtocol();');
+    const firstHandlerIndex = readyBlock.indexOf('registerProbeSafeIpcHandlers();');
+    const runtimeProbeIndex = readyBlock.indexOf('if (RUNTIME_PROBE_MODE)');
+    const mapServerIndex = readyBlock.indexOf('startMapServer().then(() => {');
+    assert.ok(
+        readyStart >= 0
+        && configureOutputRootIndex >= 0
+        && configureOutputRootIndex < alignCwdIndex
+        && alignCwdIndex < registerProtocolIndex
+        && registerProtocolIndex < firstHandlerIndex
+        && firstHandlerIndex < runtimeProbeIndex
+        && runtimeProbeIndex < mapServerIndex,
+        'output-root configuration and cwd alignment must run before protocol registration, map server startup, IPC handlers, and runtime probe work',
     );
 });
 

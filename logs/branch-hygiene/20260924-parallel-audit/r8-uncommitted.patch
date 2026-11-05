@@ -1,0 +1,172 @@
+diff --git a/docs/40_reports/implemented/20260905_R7_PRESENTATION_ENGLISH_READABILITY.md b/docs/40_reports/implemented/20260905_R7_PRESENTATION_ENGLISH_READABILITY.md
+index 7459c5de0..c68d4a3c3 100644
+--- a/docs/40_reports/implemented/20260905_R7_PRESENTATION_ENGLISH_READABILITY.md
++++ b/docs/40_reports/implemented/20260905_R7_PRESENTATION_ENGLISH_READABILITY.md
+@@ -8,6 +8,16 @@ Earlier receipts and clean POST-A remain evidence for their original revisions,
+ The inherited baseline gate remains open, so this is not R7 closure.
+ Prior global Vitest/player-experience receipts are reused only for unaffected scope.
+ 
++**Record synchronized 2026-09-10:** the owner authorizes committing/pushing the existing
++R7/R8 work and these records. Inbox/build/source review is GO; RBiH shakedown, package
++directory, runtime and Save/load acceptance remain blocked as detailed below. Final
++disclosure commits are `c1c382cf9` and `e659a6b63`. The cost-control rules are now versioned
++in repository `AGENTS.md`. Selected original text receipts/manifests are committed under
++`logs/r7-english-readability/` and `logs/r8-decision-command-usability/`; the latter's
++`documentation-sync-manifest.json` enumerates their byte identities. Raw screenshots,
++saves, profiles and package outputs remain in their preserved local locations. Historical
++no-push statements below describe prior authorization; no merge, release or gate waiver follows.
++
+ ## Inbox/package continuation — 2026-09-10
+ 
+ The owner authorized the minimal Inbox/Desk repair, one replacement package and the
+diff --git a/docs/PROJECT_LEDGER.md b/docs/PROJECT_LEDGER.md
+index d1bcf8c0b..d91aecda7 100644
+--- a/docs/PROJECT_LEDGER.md
++++ b/docs/PROJECT_LEDGER.md
+@@ -35400,3 +35400,31 @@ in place and manifest2 is not refreshed. The observed tree has 1,201 files and S
+ explains the delta without clearing the package-directory gate. Output placement joins
+ the proposed follow-up. Independent targeted delta/disclosure review and the normal
+ docs hook use new `inbox-postrun-*` receipts; no unchanged package retry or product edit.
++
++## 2026-09-10 — Cost-control rules and owner-authorized documentation/branch synchronization
++
++The owner first requested a standing rule after excessive orchestration overhead. Eight
++mandatory cost-control gates were added to the global Codex instructions, then mirrored
++in repository `AGENTS.md` under the owner's subsequent request to document, synchronize,
++commit and push all completed work. They require cheap preflight, consolidated failure
++diagnosis before expensive retries, reuse of unaffected evidence, compact orchestration,
++bounded waiting/review and final package/runtime checks before final-result documentation.
++They are behavioral requirements, not a technical weekly-usage cap.
++
++Original R7 remains tracked-clean at `bd7b81975`; R8 starts this documentation slice
++tracked-clean at `e659a6b63`, containing all reviewed usability, date, Inbox and harness
++work. The existing report, both R7 plans, R8 plan, board and roadmap now agree on the
++current status and latest authorization. Selected text receipts/manifests are copied
++byte-for-byte into the R8 branch and indexed in
++`logs/r8-decision-command-usability/documentation-sync-manifest.json`; all original
++evidence and raw packages/screenshots/save profiles remain preserved.
++
++The new authorization permits normal pushes of these two existing branches, superseding
++prior no-push wording; it does not permit merge, release, further fixes or campaigns.
++Focused docs checks, source/evidence identity, whitespace, normal commit/LFS hooks and
++remote-tip equality supply this administrative slice's verification. Earlier tests and
++independent reviews are reused for unchanged implementation. RBiH6 remains exit 1 after
++turn 24/577 captures; Save/load and final runtime were not reached, RS/HRHB unlaunched.
++The 53 readability findings, 19 request aborts, one final-sector warning and added package
++telemetry remain undisposed. R7 PRE/clean POST-A/dirty POST-B equality, accepted n392,
++the six-pin baseline/calibration gate and exhausted PRE/two-POST budget are unchanged.
+diff --git a/docs/plans/2026-07-31-content-history-localization-audio-plan.md b/docs/plans/2026-07-31-content-history-localization-audio-plan.md
+index fb8994715..bf5e5c2f5 100644
+--- a/docs/plans/2026-07-31-content-history-localization-audio-plan.md
++++ b/docs/plans/2026-07-31-content-history-localization-audio-plan.md
+@@ -29,6 +29,12 @@ The post-run replacement inventory also fails strict directory identity: all 1,2
+ original files match, but runtime added one debug telemetry file. Its retained delta
+ and required output-placement disposition are recorded in R8; no manifest refresh.
+ 
++**Documentation/push authorization, 2026-09-10:** the owner now authorizes publishing the
++existing R7/R8 branch history and synchronized records. Selected text receipts are retained
++in Git; raw runtime/image archives stay local. The global cost-control rules are mirrored
++in repository `AGENTS.md`. This supersedes earlier no-push wording only; audio, baseline,
++package-directory and shakedown acceptance remain open, with no new campaign or repair.
++
+ ### Bounded closeout audit — authorized 2026-09-09
+ 
+ **Question:** Which R7 acceptance gates are established by retained evidence, and exactly
+diff --git a/docs/plans/2026-07-31-full-campaign-electron-validation-plan.md b/docs/plans/2026-07-31-full-campaign-electron-validation-plan.md
+index 2eefd1ee5..a38176398 100644
+--- a/docs/plans/2026-07-31-full-campaign-electron-validation-plan.md
++++ b/docs/plans/2026-07-31-full-campaign-electron-validation-plan.md
+@@ -9,12 +9,40 @@
+ **Tech stack:** Electron, Playwright/CDP, packaged directory build, `paradox_local_qa.cjs`, deterministic autosave/replay comparison, Markdown diary template.
+ 
+ **Date:** 2026-07-31
+-**Status:** ACTIVE — Inbox repair/package verified; fresh RBiH shakedown blocked at final readability, with runtime disposition also open. Full campaigns remain deferred.
++**Status:** ACTIVE — Inbox repair/build verified; package-directory identity and RBiH shakedown acceptance remain blocked. Readability, runtime disposition and Save/load are open; RS/HRHB and full campaigns remain deferred.
+ **Roadmap workstream:** R8
+ **Canonical owner:** packaged Electron UI and bound autosave/replay; diary is the product verdict
+ **Collision rule:** This plan does not repair source while a session is running. Findings are routed to the owning plan, verified, then the affected session restarts from a fresh campaign.
+ **Activation:** `Execute the master roadmap` authorizes transient local directory packages for this validation, but not installer publication, signing, upload, tag, or release.
+ 
++## Documentation synchronization and branch push — owner authorized 2026-09-10
++
++The owner requests that completed work be documented, synchronized, committed and pushed.
++This supersedes earlier no-push instructions for the two existing R7/R8 branches only;
++it does not authorize merge, release, another package/campaign or repair of the open gates.
++Starting tracked trees are clean: R7 `bd7b81975`, R8 `e659a6b63`. No intervening commits.
++
++**Question / scope / cost / checks / stop before edits:** reconcile the eight repository
++instruction/continuity files, mirror the owner's global cost-control rules in `AGENTS.md`,
++and include selected existing text receipts/manifests so the pushed record is auditable.
++Raw packages, screenshots and save/profile archives remain preserved locally. Reuse all
++unchanged implementation, image, campaign and baseline evidence. Run the three focused
++documentation test files, `git diff --check`, exact source-freeze/evidence-copy checks,
++the normal commit hook and normal non-force push with the LFS hook; verify both remote
++branch tips equal the intended local commits. Expected local checks: seconds to a minute;
++network transfer depends on Git/LFS. Stop on unrelated changes, hash drift or remote
++divergence; do not force-push, rebuild, rerun campaigns or waive a gate. This small
++administrative synchronization is handled directly under the small-team policy.
++
++The retained final source/docs commits are `7d97b72fc` (Inbox), `650798fdd` and `c31135f35`
++(harness), `c1c382cf9` and `e659a6b63` (final failure disclosures); the R8 branch also
++contains the earlier reviewed four usability fixes and on-whiteboard date correction.
++The repository's cost-control rules now require cheap preflight, consolidated diagnosis,
++evidence reuse, compact orchestration and final checks before final documentation.
++`logs/r8-decision-command-usability/documentation-sync-manifest.json` lists the exact
++copied receipts and byte hashes. Push verification is recorded separately after commit;
++no passing package/shakedown or R7/R8 closure is implied by publication of branch history.
++
+ ## Opening Inbox / package blocker — owner authorized 2026-09-10
+ 
+ The owner now says, "Let's solve the inbox/package blocker." This authorizes the previously
+diff --git a/docs/plans/2026-09-05-r7-presentation-and-english-readability-amendment-plan.md b/docs/plans/2026-09-05-r7-presentation-and-english-readability-amendment-plan.md
+index 8dcc67970..fdd44fce7 100644
+--- a/docs/plans/2026-09-05-r7-presentation-and-english-readability-amendment-plan.md
++++ b/docs/plans/2026-09-05-r7-presentation-and-english-readability-amendment-plan.md
+@@ -20,6 +20,13 @@ runtime dependency.
+ 
+ ## 1. Header Contract
+ 
++**Documentation/push authorization — 2026-09-10:** the owner authorizes synchronization
++and publication of the existing R7/R8 branches. Selected text receipts/manifests are
++included in Git and the cost-control rules are mirrored in repository `AGENTS.md`.
++This supersedes historical no-push wording only; date evidence retains its source scope,
++and all open baseline, runtime, package and shakedown gates remain open. The current
++[R8 closeout](2026-07-31-full-campaign-electron-validation-plan.md#documentation-synchronization-and-branch-push--owner-authorized-2026-09-10) owns the sync/push receipt.
++
+ **Inbox/package continuation — 2026-09-10:** the owner subsequently authorized the
+ separate Inbox/Desk repair and one replacement package in the existing R8 worktree.
+ Inbox source commit `7d97b72fc` includes the reviewed on-whiteboard correction
+diff --git a/docs/plans/COMMAND_BOARD.md b/docs/plans/COMMAND_BOARD.md
+index d95aeaa3e..3afeb4868 100644
+--- a/docs/plans/COMMAND_BOARD.md
++++ b/docs/plans/COMMAND_BOARD.md
+@@ -1,6 +1,11 @@
+ # AWWV Command Board
+ 
+-**Status:** Derived dispatch view, synchronized 2026-09-09.
++**Status:** Derived dispatch view, synchronized 2026-09-10.
++
++**Owner-authorized synchronization:** publish the reviewed R7/R8 branch history and current
++documentation, with the cost-control rules versioned in [AGENTS.md](../../AGENTS.md).
++R8's readability, runtime, Save/load and package-directory gates remain open; no new
++repair/campaign or merge/release is activated. See the [current closeout](2026-07-31-full-campaign-electron-validation-plan.md#documentation-synchronization-and-branch-push--owner-authorized-2026-09-10).
+ 
+ **Authority:** [MASTER_ROADMAP.md](MASTER_ROADMAP.md) is the sole authority for unfinished work and wins if this board differs.
+ 
+diff --git a/docs/plans/MASTER_ROADMAP.md b/docs/plans/MASTER_ROADMAP.md
+index 614ad8ccb..051297950 100644
+--- a/docs/plans/MASTER_ROADMAP.md
++++ b/docs/plans/MASTER_ROADMAP.md
+@@ -13,7 +13,11 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
+ their original wording as a record of how decisions were reached; where they say calibration is
+ paused or RE is blocked, they are describing 2026-08-28, not today.
+ 
+-**Last updated:** 2026-09-08 (cleanup Tasks 1–7 reviewed GO within existing R8/R9 ownership)
++**Last updated:** 2026-09-10 (R7/R8 Inbox/date evidence and open package/shakedown gates reconciled; branch push authorized)
++
++The owner authorizes committing/pushing the existing R7/R8 work and synchronized records.
++The cost-control rules are versioned in [AGENTS.md](../../AGENTS.md). This changes no
++acceptance gate or implementation scope; the R8 packet remains blocked as recorded below.
+ 
+ **Execution branch:** `codex/master-roadmap-execution` (integration target: `main` after all workstreams are green)
+ 

@@ -191,3 +191,54 @@ test('validateFormations accepts valid formations', () => {
     const errors = issues.filter((i) => i.severity === 'error');
     assert.strictEqual(errors.length, 0, `Expected no errors but got: ${JSON.stringify(errors)}`);
 });
+
+test('validateFormations accepts finite non-negative fractional fatigue and rejects malformed values', () => {
+    const state = {
+        schema_version: CURRENT_SCHEMA_VERSION,
+        meta: { turn: 5, seed: 'fractional-fatigue-validation' },
+        factions: ALL_FACTIONS_FOR_FATIGUE_VALIDATION,
+        military: {
+            formations: {},
+            front_segments: {},
+            front_posture: {},
+            front_posture_regions: {},
+            front_pressure: {},
+            militia_pools: {},
+        },
+        political: {},
+        displacement: {},
+    } as unknown as GameState;
+    const accepted = [0, 0.5, 2.5, 10.5];
+    const rejected: unknown[] = [-0.5, Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, '2.5', {}, null];
+
+    for (const [index, fatigue] of [...accepted, ...rejected].entries()) {
+        state.military.formations[`formation-${index}`] = {
+            id: `formation-${index}`,
+            faction: 'RBiH',
+            name: `Formation ${index}`,
+            created_turn: 1,
+            status: 'active',
+            assignment: null,
+            ops: { fatigue: fatigue as number, last_supplied_turn: null },
+        };
+    }
+
+    const issues = validateFormations(state, { schema: 1, turn: 5, regions: [] }, []);
+    const fatigueIssuePaths = issues
+        .filter((issue) => issue.code === 'formations.ops.fatigue.invalid')
+        .map((issue) => issue.path);
+
+    assert.deepStrictEqual(
+        fatigueIssuePaths,
+        rejected.map((_, index) => `formations.formation-${accepted.length + index}.ops.fatigue`).sort(),
+    );
+    for (const issue of issues.filter((candidate) => candidate.code === 'formations.ops.fatigue.invalid')) {
+        assert.strictEqual(issue.message, 'ops.fatigue must be a finite number >= 0');
+    }
+});
+
+const ALL_FACTIONS_FOR_FATIGUE_VALIDATION = [
+    { id: 'RBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
+    { id: 'RS', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
+    { id: 'HRHB', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
+] as GameState['factions'];

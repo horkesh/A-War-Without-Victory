@@ -1,7 +1,16 @@
+import { existsSync } from 'node:fs';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
+import { loadOperationalData } from '../src/data/operational_data.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
 import type { GameState } from '../src/state/game_state.js';
-import { repairScenarioArtifactState } from '../src/scenario/scenario_runner.js';
+import { repairScenarioArtifactState, runScenario } from '../src/scenario/scenario_runner.js';
+
+const SCENARIO_PATH = join(process.cwd(), 'data', 'scenarios', 'apr1992_definitive_188w.json');
+const RETAINED_OUTPUT_ROOT = process.env.AWWV_SCENARIO_OSID_REPAIR_TEST_OUTPUT_ROOT;
 
 describe('scenario runner artifact repair', () => {
     it('displaces active formations out of enemy-controlled OSIDs before artifact serialization', () => {
@@ -55,4 +64,49 @@ describe('scenario runner artifact repair', () => {
             },
         ]);
     });
+
+    it('preserves operational front and HVO sector truth at the real one-week artifact boundary', async () => {
+        const ownedOutDir = RETAINED_OUTPUT_ROOT
+            ?? await mkdtemp(join(tmpdir(), 'awwv-scenario-osid-repair-'));
+        const shouldCleanup = RETAINED_OUTPUT_ROOT === undefined;
+        let observedState: GameState | undefined;
+
+        try {
+            const operationalData = await loadOperationalData(process.cwd());
+            const result = await runScenario({
+                scenarioPath: SCENARIO_PATH,
+                outDirOverride: ownedOutDir,
+                weeksOverride: 1,
+                emitSaveAtWeeks: [1],
+                consoleDiagnostics: false,
+                diagnosticTurnBoundaryObserver: ({ state }) => {
+                    observedState = state;
+                },
+            });
+            const weeklySavePath = result.paths.weekly_saves?.[0];
+            expect(weeklySavePath).toBeDefined();
+            expect(observedState).toBeDefined();
+            const weeklySave = JSON.parse(await readFile(weeklySavePath!, 'utf8')) as GameState;
+
+            for (const state of [observedState!, weeklySave]) {
+                expect(state.military.war_front_edges_osid?.length).toBeGreaterThan(0);
+                for (const edge of state.military.war_front_edges_osid ?? []) {
+                    expect(operationalData.operationalToCanonical.has(edge.a)).toBe(true);
+                    expect(operationalData.operationalToCanonical.has(edge.b)).toBe(true);
+                }
+                expect(Object.keys(state.military.corps_front_sectors ?? {}).length).toBeGreaterThan(0);
+                const sector = state.military.corps_front_sectors?.['sector:hvo_southeast_herzegovina:0'];
+                expect(sector).toBeDefined();
+                for (const formationId of ['hv_113th_brigade_tg', 'hv_4th_guards_tg']) {
+                    expect(state.military.formations[formationId]?.assignment?.sector_id)
+                        .toBe('sector:hvo_southeast_herzegovina:0');
+                    expect(sector?.assigned_brigade_ids).toContain(formationId);
+                }
+            }
+        } finally {
+            if (shouldCleanup && existsSync(ownedOutDir)) {
+                await rm(ownedOutDir, { recursive: true, force: true });
+            }
+        }
+    }, 120_000);
 });

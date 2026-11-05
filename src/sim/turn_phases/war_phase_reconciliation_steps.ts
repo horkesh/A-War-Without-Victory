@@ -2,6 +2,7 @@ import { assertControlEventConsistency } from '../combat/assert_control_events.j
 import { assertFormationsInFriendlyTerritory } from '../combat/assert_formation_territory.js';
 import { assertOperationLifecycle } from '../combat/assert_operation_lifecycle.js';
 import { distributeBrigadesToFront } from '../combat/brigade_front_distribution.js';
+import { mergeFrontDistributionDiagnostics, nextFrontDistributionInvocationOrdinal } from '../combat/front_distribution_diagnostic.js';
 import { reconcileFinalOperationTruth } from '../combat/final_operation_truth_reconciliation.js';
 import {
     createFinalSectorReconciliationSession,
@@ -25,6 +26,7 @@ import { CANONICAL_FACTIONS } from '../../state/game_state.js';
 import { computeFrontEdgesOsid } from '../../map/front_edges.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { ValidationIssue } from '../../validate/validate.js';
+import { classifyReleasedOperationParticipants } from '../combat/stranded_brigade_lifecycle.js';
 
 function compareIssues(a: ValidationIssue, b: ValidationIssue): number {
     return strictCompare(a.path ?? '', b.path ?? '')
@@ -175,9 +177,31 @@ export const warPhaseReconciliationSteps: NamedPhase[] = [
             const spatial = getSpatialContextCache(context);
             const adjacency = spatial?.postCombat?.adjacency ?? spatial?.preCombat.adjacency;
             if (!adjacency) return;
-            distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency as Map<string, string[]>, {
+            const releasedParticipantIds = context.completedOperationParticipantIds;
+            if (releasedParticipantIds && releasedParticipantIds.size > 0) {
+                const handoff = classifyReleasedOperationParticipants(
+                    context.state,
+                    releasedParticipantIds,
+                    adjacency,
+                );
+                if (handoff.updated > 0) {
+                    const report = context.report.stranded_brigade_lifecycle;
+                    if (report) {
+                        report.updated += handoff.updated;
+                        report.newly_stranded.push(...handoff.newly_stranded);
+                        report.newly_stranded.sort(strictCompare);
+                    } else {
+                        context.report.stranded_brigade_lifecycle = handoff;
+                    }
+                }
+            }
+            const diagnostics = distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency as Map<string, string[]>, {
                 population1991ByMun: context.input.municipalityPopulation1991,
+                diagnosticCallsite: 'final-distribute-brigades-to-front', completedTurn: context.state.meta.turn,
+                invocationOrdinal: nextFrontDistributionInvocationOrdinal(context.report.front_distribution_diagnostics),
             });
+            const mergedDiagnostics = mergeFrontDistributionDiagnostics(context.report.front_distribution_diagnostics, diagnostics);
+            if (mergedDiagnostics) context.report.front_distribution_diagnostics = mergedDiagnostics;
             const reconciliationSession = context.finalSectorReconciliationSession;
             if (reconciliationSession) {
                 recordFinalSectorReconciliationMutation(

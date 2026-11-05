@@ -46,7 +46,7 @@
 
 import type { TerrainScalarsData } from '../../map/terrain_scalars.js';
 import { getTerrainScalarsForSid, type TerrainScalars } from '../../map/terrain_scalars.js';
-import type { BrigadeMovementOrder, FactionId, FormationId, FormationState, GameState } from '../../state/game_state.js';
+import type { BrigadeMovementOrder, CorpsOperation, FactionId, FormationId, FormationState, GameState } from '../../state/game_state.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
@@ -55,6 +55,10 @@ import { buildOsidAdjacency, type Osid } from './osid_adjacency.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
 import { isFriendlyFaction } from '../early_war/alliance_update.js';
 import { whenReasonCodeTopic } from './reason_code_debug.js';
+import {
+    getOperationAuthorizedDestinations,
+    isRoutineScopeEnforcedForOrder,
+} from './brigade_routine_scope.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Corps boundary helpers
@@ -69,7 +73,7 @@ import { whenReasonCodeTopic } from './reason_code_debug.js';
  * callers can safely pass `undefined` to dijkstraFriendlyPath and get
  * faction-wide BFS (graceful degradation for orphan brigades).
  */
-function buildCorpsAllowedOsids(corpsId: string, state: GameState): Set<string> | undefined {
+export function buildCorpsAllowedOsids(corpsId: string, state: GameState): Set<string> | undefined {
     const allowed = new Set<string>();
     for (const sector of Object.values(state.military.corps_front_sectors ?? {})) {
         if (sector.corps_id !== corpsId) continue;
@@ -311,6 +315,7 @@ export interface OsidColumnMovementReport {
             | 'missing_location'
             | 'invalid_destination'
             | 'destination_equals_location'
+            | 'routine_destination_out_of_scope'
             | 'no_friendly_path';
         location_osid: string | null;
         destination_osid: string | null;
@@ -321,6 +326,120 @@ export interface OsidColumnMovementReport {
         source_in_routing_scope: boolean | null;
         destination_in_routing_scope: boolean | null;
     }>;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Operation-authorized column destinations
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Opportunity responses that authorize the CorpsOperation the approval spawned. `approve`,
+ * `redirect` and `under_resource` all spawn an operation; `decline` and `expire` do not.
+ */
+const APPROVING_OPPORTUNITY_RESPONSES: ReadonlySet<string> = new Set([
+    'approve',
+    'redirect',
+    'under_resource',
+]);
+
+/**
+ * True when an active operation carries an authorization record already represented in
+ * persisted state — the operation was genuinely authored, ordered or approved, rather than
+ * emerging from the bot evaluators:
+ *
+ *  - `is_pre_planned` — a scenario-authored pre-planned operation;
+ *  - `authored_by_player` / `requested_by_president` — an owner order;
+ *  - `triggered_operations_accepted` — a triggered or Army-HQ historical operation that was
+ *    accepted and injected (the same ledger
+ *    `war_phases.isPlayerHistoricalOperationAssistOperation` reads). This ledger is name →
+ *    accepted launch turn, and the injected operation's `started_turn` is that same turn, so the
+ *    entry authorizes only when the recorded launch turn matches `op.started_turn` — a same-name
+ *    entry from a different launch turn is a different operation;
+ *  - an `operation_opportunity_resolutions` row whose executed name AND response turn match the
+ *    operation and whose response is an approval class. Name alone is not identity: the
+ *    response turn (`started_turn`) and status pin it, mirroring the codebase's
+ *    `{corps_id}:{op_name}:t{started_turn}` operation join convention.
+ *
+ * An emergent, never-authorized bot `sector_attack` satisfies none of these: it never passed
+ * an authorization surface. (`Operation Jajce` is NOT such an operation — it is a queued
+ * scenario-authored pre-planned op and satisfies `is_pre_planned === true`.)
+ */
+function isOperationAuthorized(state: GameState, op: CorpsOperation): boolean {
+    if (op.is_pre_planned === true || op.authored_by_player === true || op.requested_by_president === true) return true;
+    if (state.military.triggered_operations_accepted?.[op.name] === op.started_turn) return true;
+    return (state.military.operation_opportunity_resolutions ?? []).some((resolution) =>
+        resolution.executed_op_name === op.name
+        && resolution.response_turn === op.started_turn
+        && APPROVING_OPPORTUNITY_RESPONSES.has(resolution.response),
+    );
+}
+
+/**
+ * True when a pending column order's destination is authorized by an ACTIVE, AUTHORIZED
+ * operation this brigade participates in — its staging OSID, an approach OSID, or a
+ * flagged-axis friendly staging neighbor.
+ *
+ * An operation-authorized order is a higher-priority commitment that a stale defensive posture
+ * must not veto. The movement-side counterpart of the `dig_in → defend` release in
+ * `army_reserve_system.issueEliteDeploymentOrder`: a rear-role brigade's posture is frozen
+ * (`applyPostureOrders` skips brigades failing `isBrigadeAssignedToFront`), so without this the
+ * operation's own staging/approach order is deleted as `posture_dig_in` every turn and the
+ * brigade never marches (measured Vlašić defect).
+ *
+ * The destination test uses `getOperationAuthorizedDestinations`. What this gate adds is that
+ * the authorizing operation must carry an authorization
+ * record (`isOperationAuthorized`), so an emergent bot operation cannot uproot a dug-in
+ * brigade just because the destination lies inside its plan footprint. Named so the posture
+ * release below applies to EXACTLY the condition this gate exempts, and only after the order
+ * passes the remaining gates — an unauthorized, out-of-scope or pathfinding-invalid order must
+ * never silently un-dig a brigade.
+ */
+function isOperationAuthorizedColumnOrder(
+    state: GameState,
+    formation: FormationState,
+    order: BrigadeMovementOrder | undefined,
+    adjacency: Map<Osid, Osid[]>,
+    reverseMap: OperationalToCanonicalReverseMap,
+): boolean {
+    const destination = order?.destination_sids?.[0];
+    if (!destination) return false;
+
+    const corpsId = formation.corps_id;
+    if (!corpsId) return false;
+    const cmd = state.military.corps_command?.[corpsId];
+    if (!cmd) return false;
+
+    return (cmd.active_operations ?? []).some((op) => {
+        if (!isOperationAuthorized(state, op)) return false;
+        return getOperationAuthorizedDestinations(state, formation.id, op, adjacency, reverseMap).has(destination);
+    });
+}
+
+function recordedTransitRouteIsValid(
+    state: GameState,
+    formation: FormationState,
+    path: readonly string[],
+    reverseMap: OperationalToCanonicalReverseMap,
+    adjacency: Map<Osid, Osid[]>,
+): boolean {
+    const factionId = formation.faction;
+    if (!factionId) return false;
+
+    // Every recorded edge must still exist. A column cannot traverse a broken graph.
+    for (let index = 1; index < path.length; index += 1) {
+        if (!(adjacency.get(path[index - 1] as Osid) ?? []).includes(path[index] as Osid)) return false;
+    }
+
+    // The origin and every intermediate node must still be traversable under the same
+    // controller/null + isFriendlyFaction semantics used when the route was accepted.
+    // The terminal is deliberately excluded: normal Dijkstra permits a hostile destination,
+    // and the existing arrival/fallback policy below remains authoritative for it.
+    for (let index = 0; index < path.length - 1; index += 1) {
+        const controller = getPoliticalControllerOSID(state, path[index]!, reverseMap);
+        if (controller !== null && !isFriendlyFaction(controller, factionId, state)) return false;
+    }
+
+    return true;
 }
 
 /**
@@ -360,7 +479,6 @@ export function processOsidColumnMovement(
         formation: FormationState | undefined,
         locationOsid: string | null,
         destinationOsid: string | null,
-        allowedOsids?: Set<string>,
     ): void => {
         if (!report.column_rejections) return;
         const corpsId = formation?.corps_id ?? null;
@@ -374,9 +492,9 @@ export function processOsidColumnMovement(
                 ? formation.elite_loan_state.loaned_to_corps ?? null
                 : null,
             routing_corps_id: corpsId,
-            routing_scope_osid_count: allowedOsids?.size ?? null,
-            source_in_routing_scope: allowedOsids && locationOsid ? allowedOsids.has(locationOsid) : null,
-            destination_in_routing_scope: allowedOsids && destinationOsid ? allowedOsids.has(destinationOsid) : null,
+            routing_scope_osid_count: null,
+            source_in_routing_scope: null,
+            destination_in_routing_scope: null,
         });
     };
 
@@ -388,6 +506,39 @@ export function processOsidColumnMovement(
 
         const f = formations[formationId];
         if (!f || f.status !== 'active') {
+            delete movementState[formationId];
+            continue;
+        }
+
+        // T4 combat consequence can move location_osid after T3 created this transit (retreat,
+        // displacement, advance). The path is the only record of the physical march: its first
+        // node must still equal the brigade's actual location and its last node must still be
+        // the recorded destination. If the origin no longer matches, the column is stale and must
+        // not execute the old path from a new location. Cancel only the transit: do not choose a
+        // new destination, do not relocate the brigade, and do not touch independent pending
+        // orders. Missing/malformed legacy paths are equally unverifiable and are cancelled
+        // rather than allowed to teleport on arrival.
+        const currentLocation = (f as { location_osid?: string }).location_osid;
+        const recordedDestination = ms.destination_sids?.[0];
+        const recordedPath = ms.path;
+        const validRecordedTransit = typeof currentLocation === 'string'
+            && ms.destination_sids?.length === 1
+            && Array.isArray(recordedPath)
+            && recordedPath.length >= 2
+            && recordedPath.every((node) => typeof node === 'string')
+            && recordedPath[0] === currentLocation
+            && recordedPath[recordedPath.length - 1] === recordedDestination;
+        if (!validRecordedTransit) {
+            delete movementState[formationId];
+            continue;
+        }
+
+        // Revalidate the accepted route's current physical legality before any countdown or
+        // arrival. This is not a reroute: if the graph edge or any source/intermediate control
+        // changed since acceptance, stop the column at its actual location and leave independent
+        // pending orders and other journeys untouched. A hostile terminal remains allowed so the
+        // existing predecessor fallback can run only after this full prefix check succeeds.
+        if (!recordedTransitRouteIsValid(state, f, recordedPath, reverseMap, adjacency)) {
             delete movementState[formationId];
             continue;
         }
@@ -458,8 +609,15 @@ export function processOsidColumnMovement(
             continue;
         }
 
-        // dig_in lockout: brigades actively fortifying cannot be ordered to move
-        if (f.posture === 'dig_in') {
+        // dig_in lockout: brigades actively fortifying cannot be ordered to move — EXCEPT when the
+        // pending destination is authorized by an active, AUTHORIZED operation this brigade
+        // participates in (its staging or an approach OSID). Such an order is the operation's own
+        // commitment and must not be vetoed by a stale defensive posture; the posture is released
+        // further below, and only once the order is actually accepted for transit. An emergent,
+        // never-authorized operation leaves a dug-in brigade exactly where it was.
+        const digInAuthorizedForOperation = f.posture === 'dig_in'
+            && isOperationAuthorizedColumnOrder(state, f, order, adjacency, reverseMap);
+        if (f.posture === 'dig_in' && !digInAuthorizedForOperation) {
             report.column_blocked += 1;
             recordRejection(
                 formationId,
@@ -497,19 +655,33 @@ export function processOsidColumnMovement(
             continue;
         }
 
+        // ROUTINE SCOPE REVALIDATION (movement authority, owner packet 2026-09-17/18). At the
+        // transition from pending order to transit, a ROUTINE discretionary order must still
+        // satisfy its formation's current assigned sub-segment scope before any
+        // brigade_movement_state is written — so a prohibited routine journey never creates the
+        // transit that would falsely make the brigade unavailable to operation admission
+        // (`check-triggered-operations` runs later this same turn).
+        //
+        // `isRoutineScopeEnforcedForOrder` is the shared decision and is the ONLY thing that
+        // decides applicability: `owner: 'bot_discretionary'` marks bot output rather than
+        // routine output, so it exempts destinations backed by an active operation or by a
+        // corps directive that names a sector. Accept/reject only — this never chooses a new
+        // destination and never relocates anyone.
+        if (isRoutineScopeEnforcedForOrder(state, f, order, adjacency, reverseMap)) {
+            report.column_blocked += 1;
+            recordRejection(formationId, 'routine_destination_out_of_scope', f, loc, destOsid);
+            delete movementOrders[formationId];
+            continue;
+        }
+
         const factionId = f.faction;
 
-        // Corps boundary guard: build the allowed OSID set for this brigade's corps so
-        // that Dijkstra cannot route through another corps' territory.
-        // Falls back to undefined (faction-wide BFS) for orphan brigades or corps with no sectors.
-        const corpsId = (f as { corps_id?: string | null }).corps_id;
-        const allowedOsids = corpsId ? buildCorpsAllowedOsids(corpsId, state) : undefined;
-
-        // Compute terrain-weighted path through friendly territory (corps-restricted)
-        const result = dijkstraFriendlyPath(loc, destOsid, factionId, adjacency, state, reverseMap, terrainData, allowedOsids);
+        // Compute a terrain-weighted path through friendly territory. Corps sectors constrain
+        // routine destinations above; they are frontage context, not physical route ownership.
+        const result = dijkstraFriendlyPath(loc, destOsid, factionId, adjacency, state, reverseMap, terrainData);
         if (!result || result.path.length <= 1) {
             report.column_blocked += 1;
-            recordRejection(formationId, 'no_friendly_path', f, loc, destOsid, allowedOsids);
+            recordRejection(formationId, 'no_friendly_path', f, loc, destOsid);
             delete movementOrders[formationId];
             continue;
         }
@@ -527,6 +699,15 @@ export function processOsidColumnMovement(
             turns_remaining: transitTurns,
             owner: order.owner,
         };
+
+        // The accepted operation-authorized order supersedes the stale defensive posture. Only
+        // reached after the order passed the scope and pathfinding gates above, so a rejected
+        // order cannot silently un-dig the brigade (mirrors the `issueEliteDeploymentOrder`
+        // release, `army_reserve_system.ts`).
+        if (digInAuthorizedForOperation) {
+            f.posture = 'defend';
+            f.dig_in_progress = 0;
+        }
 
         // Remove consumed order
         delete movementOrders[formationId];

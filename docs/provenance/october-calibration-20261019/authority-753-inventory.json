@@ -1,0 +1,98 @@
+{
+  "schema": "awwv.753.prisoje-scope-authority-inventory.v1",
+  "outputs": [
+    "result.json",
+    "inventory.json",
+    "closed-receipt.json"
+  ],
+  "head": "130ffb29213a6d2e2a2a8f823339b102a371a066",
+  "git_status_clean": true,
+  "diagnostic_files": [
+    {
+      "path": "logs/claude-channel-20261004/753-exact-save184-authority-probe.ts",
+      "bytes": 14171,
+      "sha256": "6cf2e56f2bc667881578d0b70dffd894ee1f02d6c4248ad42ba2f292c30c4357"
+    },
+    {
+      "path": "logs/claude-channel-20261004/753-authority-capture.cjs",
+      "bytes": 2444,
+      "sha256": "8de902cf3d1bde311f9f32a8433916aea3380ee7f46460b975b4a33f39769c90"
+    },
+    {
+      "path": "logs/claude-channel-20261004/753-authority-probe-a/753-exact-save184-authority-probe.json",
+      "bytes": 253261,
+      "sha256": "bb180a407ab6ff8dce4ff7bca360eaa108068202f191759d1c49934b7084512a"
+    },
+    {
+      "path": "logs/claude-channel-20261004/753-authority-probe-a/753-authority-capture.json",
+      "bytes": 1405,
+      "sha256": "7ec30738063207d740992835dd78c523b0381ccb2d0f6a102891032daed7694d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/753-authority-probe-a/receipt.json",
+      "bytes": 3574,
+      "sha256": "579c53e64cc09685c185944534883040f3f10b1750d996a47a32cedb1cb31f7a"
+    }
+  ],
+  "production_pins": [
+    {
+      "path": "src/sim/combat/brigade_routine_scope.ts",
+      "bytes": 27703,
+      "sha256": "b379ccc4eb12cffce18656f41707b02ea22ef28db975ac4496e78e9fa90e6cc8"
+    },
+    {
+      "path": "src/sim/combat/operation_approach_osids.ts",
+      "bytes": 5676,
+      "sha256": "16659ec430d399c2f32d1b115ed7c4df74e96fa2cd42fdf611f32fcb6e505646"
+    },
+    {
+      "path": "src/sim/combat/commander_march_correction.ts",
+      "bytes": 10353,
+      "sha256": "3967fa770a5bb5e9a57899e7bc5135b64552bdc5f1c711c53b1d25f4940917d3"
+    },
+    {
+      "path": "src/sim/combat/subsegment_assignment.ts",
+      "bytes": 15516,
+      "sha256": "d67c2e4bd6ded11c7475b1f06ab45d2bbb2e3258ba9823885b754411bb41b78d"
+    },
+    {
+      "path": "src/sim/combat/osid_column_movement.ts",
+      "bytes": 32573,
+      "sha256": "a3600a86885ecd34bb976dd92e784c0f01fe8c1796d66bd2039cf5bae46a6489"
+    },
+    {
+      "path": "src/sim/turn_phases/war_phases.ts",
+      "bytes": 231312,
+      "sha256": "5ae935c3db6bc80e0b1f878a1871067fb6ffdcb239dcf317574433acfb8f2709"
+    }
+  ],
+  "reused_evidence": {
+    "749_correction_seal": "logs/claude-channel-20261004/749-correction-seal-c",
+    "750_targeted_review": "docs/provenance/october-calibration-20261019/prisoje-750-targeted-review.json",
+    "749_exact_t3": "logs/claude-channel-20261004/749-correction-exact-t3-b/749-exact-save184-t3-probe.json",
+    "749_exact_tail": "logs/claude-channel-20261004/749-correction-exact-tail-a/749-exact-save184-tail-probe.json"
+  },
+  "runtime_attempt": {
+    "path": "logs/claude-channel-20261004/753-authority-probe-a",
+    "timeout_ms": 120000,
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "timed_out": false,
+    "artifact_contract_pass": true,
+    "entry_script_matches_start": true
+  },
+  "preservation": {
+    "C_before_bytes": 100102520,
+    "C_before_sha256": "5b225eededbb39e6a08fd0231dc1e5ff14a6c1a401b292c684f91419c2c3adf3",
+    "C_after_bytes": 100107701,
+    "C_after_sha256": "8d242e18f199a54c26f755e648fe4612159563ec0b606930112653770d725f3c",
+    "C_prefix_preserved": true,
+    "C_append_bytes": 5181,
+    "D_bytes": 1041,
+    "D_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+    "protected_3_exact": true,
+    "native_31_exact": true,
+    "receipt_files_recursive_count": 179,
+    "no_restore_truncate_cleanup_delete": true
+  }
+}

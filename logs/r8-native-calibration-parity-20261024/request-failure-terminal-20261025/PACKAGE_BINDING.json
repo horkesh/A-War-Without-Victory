@@ -1,0 +1,281 @@
+{
+  "schema": "awwv.cold-load-validation.package-binding.v2",
+  "pass": true,
+  "head": "12a4680f04fc3e4cbd8b2fb5f5133b472afd1fd6",
+  "configSha256": "3440441d753e47827dd0ab0f8075719668bedffcdbb75415b0ad2ecb42b2ee56",
+  "buildReceiptSha256": "592fcdecabc9eb48846cb44b33e14f6ad08b27c495ab011e0f8b7054db66f6a5",
+  "root": "dist-packaged/desktop-cold-load-20261025-02/win-unpacked",
+  "inventory": {
+    "count": 1228,
+    "aggregateSha256": "306895aa25404df21e16968be2863ccd7dd4b9571ab02a6c4248ed679948208b",
+    "changedPaths": [
+      "A War Without Victory.exe",
+      "resources/app.asar",
+      "resources/dist/desktop/desktop_sim.cjs"
+    ],
+    "byteIdenticalFiles": 1225
+  },
+  "asar": {
+    "entries": 14818,
+    "directories": 2565,
+    "files": 12253,
+    "aggregateSha256": "d84c486677be7cc331f979e40f990da2b498326caffa9d20724dc4fb20267a06",
+    "changedPaths": [
+      "src/desktop/electron-main.cjs"
+    ],
+    "byteIdenticalFiles": 12252
+  },
+  "files": {
+    "executable": {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/dist-packaged/desktop-cold-load-20261025-02/win-unpacked/A War Without Victory.exe",
+      "bytes": 222836736,
+      "sha256": "c97f9aee446b2931d01bfb5b5a4ac9d802500fcacb734ea3a00523ba236c9539"
+    },
+    "asar": {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/dist-packaged/desktop-cold-load-20261025-02/win-unpacked/resources/app.asar",
+      "bytes": 196688720,
+      "sha256": "ba64264b9611870214490cb433e9698fd82862fdf2cfd5c2c8272d51a2d1ed9f"
+    },
+    "desktopBundle": {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/dist-packaged/desktop-cold-load-20261025-02/win-unpacked/resources/dist/desktop/desktop_sim.cjs",
+      "bytes": 4488072,
+      "sha256": "7c602d335da7726fb3a5f595d27d3e5789ba67da3dddeaee34ba8cc89c8b6339"
+    },
+    "localDesktopBundle": {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/dist/desktop/desktop_sim.cjs",
+      "bytes": 4488072,
+      "sha256": "7c602d335da7726fb3a5f595d27d3e5789ba67da3dddeaee34ba8cc89c8b6339"
+    },
+    "desktopSourceMap": {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/dist/desktop/desktop_sim.cjs.map",
+      "bytes": 11617029,
+      "sha256": "c636b7c868df1b39492baa0929951ef83a0e6851f97c492db400f4ec5c3f1618"
+    }
+  },
+  "compiled": {
+    "reviewedDesktopSimSource": {
+      "bytes": 59490,
+      "sha256": "91e3163da0aeddca169deabf0b73c47216800f0e6dee0ddc63de5d98f7416954"
+    },
+    "localBundle": {
+      "bytes": 4488072,
+      "sha256": "7c602d335da7726fb3a5f595d27d3e5789ba67da3dddeaee34ba8cc89c8b6339"
+    },
+    "packagedBundle": {
+      "bytes": 4488072,
+      "sha256": "7c602d335da7726fb3a5f595d27d3e5789ba67da3dddeaee34ba8cc89c8b6339",
+      "byteIdenticalToLocal": true
+    },
+    "sourceMap": {
+      "bytes": 11617029,
+      "sha256": "c636b7c868df1b39492baa0929951ef83a0e6851f97c492db400f4ec5c3f1618",
+      "sources": 508,
+      "desktopSimSourceIndex": 182,
+      "embeddedDesktopSimBytes": 59490,
+      "embeddedDesktopSimSha256": "91e3163da0aeddca169deabf0b73c47216800f0e6dee0ddc63de5d98f7416954",
+      "embeddedSourceByteExact": true
+    }
+  },
+  "criticalFiles": [
+    {
+      "path": "resources/data/derived/operational/canonical_to_operational_map.json",
+      "bytes": 221196,
+      "sha256": "d8ca46cf1a5f425cd1ffd45eef3d99b19247128e6fe5ff28e0cad4d3f76fe1ef",
+      "byteIdentical": true
+    },
+    {
+      "path": "resources/data/derived/operational/urban_osids.json",
+      "bytes": 641,
+      "sha256": "6c5fbdf22a7b837917422b11eb53a975bb855c027cd4c92cb7158fafd9c42e4c",
+      "byteIdentical": true
+    },
+    {
+      "path": "resources/data/derived/operational/forest_osids.json",
+      "bytes": 2796,
+      "sha256": "f458666662a072c65b7d5c5e4b89c261399fca0f10476736b83fd914e651fa49",
+      "byteIdentical": true
+    }
+  ],
+  "uiAndMedia": [
+    {
+      "prefix": "resources/app/",
+      "files": 218,
+      "byteIdenticalFiles": 218
+    },
+    {
+      "prefix": "resources/assets/",
+      "files": 75,
+      "byteIdenticalFiles": 75
+    },
+    {
+      "prefix": "resources/data/ui/",
+      "files": 5,
+      "byteIdenticalFiles": 5
+    }
+  ],
+  "integrityProof": {
+    "sha256": "2dde3793883b07fca9cf0fda00e2ad14d1f648aa87d5273cf9fd864dfdb15e77",
+    "value": {
+      "schema": "awwv.cold-load-validation.reused-executable-integrity-proof.v1",
+      "diagnosisSha256": "f0ecf937754cef6b0755d99c461f87c45a6e39fc6ec566776f622b64909c4547",
+      "binaryReviewSha256": "be65fab987a4e1793a64260b7cd88e108e6373a47956729a7826805b592dc4b4",
+      "asarInventory": {
+        "referenceEntries": 14818,
+        "candidateEntries": 14818,
+        "directories": 2565,
+        "files": 12253,
+        "sameRelativePaths": true,
+        "byteIdenticalFiles": 12252,
+        "changedFiles": [
+          {
+            "path": "src/desktop/electron-main.cjs",
+            "referenceBytes": 185043,
+            "candidateBytes": 185071,
+            "referenceSha256": "3d68cf41fc91e27876d3c8191907e4ba6bfb58557b93f5733353e3c8f0ee2345",
+            "candidateSha256": "8b5e218e6b6f0ccede988bb2f68c782468e8001b1957030ed889c2ada914c258",
+            "candidateMatchesReviewedSource": true
+          }
+        ],
+        "referenceAggregateSha256": "9920b2e7b28407f3179068285beef8cff5b678cedc977e838f51cfa7069d7e5b",
+        "candidateAggregateSha256": "d84c486677be7cc331f979e40f990da2b498326caffa9d20724dc4fb20267a06",
+        "archiveFiles": {
+          "reference": {
+            "bytes": 196688692,
+            "sha256": "f4b01445048ec8df0108218f3b83ba201d1cd0ebdc1e032bc417b2b503529e59"
+          },
+          "candidate": {
+            "bytes": 196688720,
+            "sha256": "ba64264b9611870214490cb433e9698fd82862fdf2cfd5c2c8272d51a2d1ed9f"
+          }
+        }
+      },
+      "executableProof": {
+        "reference": {
+          "bytes": 222836736,
+          "sha256": "3d0a4cecdaa5b647eda0882a2867ba6da1092d77d91602f67f03ddab6938d7de"
+        },
+        "candidate": {
+          "bytes": 222836736,
+          "sha256": "c97f9aee446b2931d01bfb5b5a4ac9d802500fcacb734ea3a00523ba236c9539"
+        },
+        "peResourceSection": {
+          "name": ".rsrc",
+          "rawStart": 221569536,
+          "rawBytes": 99328,
+          "rawEndExclusive": 221668864
+        },
+        "resourceEntries": {
+          "reference": 52,
+          "candidate": 52,
+          "byteIdentical": 51,
+          "changed": 1
+        },
+        "changedResource": {
+          "type": "INTEGRITY",
+          "id": "ELECTRONASAR",
+          "lang": 1033,
+          "codepage": 1200,
+          "rawOffset": 221668728,
+          "bytes": 122,
+          "referenceSha256": "531871feb96bcd4163429f1277c3cad22538b8c43537570daa8a1c2d6ff9c4d4",
+          "candidateSha256": "67d38011752453c451e6eaf5b4bcbd66a8730c890845982c1fde8dfa3cc9ad94"
+        },
+        "integrityValue": {
+          "rawOffset": 221668783,
+          "bytes": 64,
+          "reference": "d009c76bc23107088f217ce4c234823c03987d5a9bd6055cd5b8aa70d1680e9f",
+          "candidate": "3653af1289f5b9ad5ceb27cf77373b7649715fa4e77014f078af329c2558fbc3",
+          "referenceEqualsComputedReferenceAsarHeaderSha256": true,
+          "candidateEqualsComputedCandidateAsarHeaderSha256": true,
+          "differingCharacters": 62,
+          "equalCharacters": 2
+        },
+        "rawByteDiff": {
+          "differingBytes": 62,
+          "contiguousRuns": 3,
+          "runsInclusive": [
+            {
+              "start": 221668783,
+              "end": 221668808,
+              "bytes": 26
+            },
+            {
+              "start": 221668810,
+              "end": 221668841,
+              "bytes": 32
+            },
+            {
+              "start": 221668843,
+              "end": 221668846,
+              "bytes": 4
+            }
+          ],
+          "referenceWithOnlyFull64ByteIntegrityValueReplacedEqualsCandidateExecutable": true,
+          "allBytesOutsideIntegrityValueIdentical": true
+        }
+      },
+      "builderCause": {
+        "electronBuilderVersion": "25.1.8",
+        "electronVersion": "41.0.3",
+        "configSignAndEditExecutable": false,
+        "finding": "signAndEditExecutable=false does not suppress ElectronFramework.beforeCopyExtraFiles. With ASAR enabled, platformPackager computes the SHA-256 of the serialized ASAR header; ElectronFramework invokes addWinAsarIntegrity; electronWin writes that value to the PE INTEGRITY/ELECTRONASAR resource.",
+        "installedSources": [
+          {
+            "path": "node_modules/app-builder-lib/out/asar/integrity.js",
+            "sha256": "d1b6da36a27a8825e9697f24d949fdac97387fcf66be1fc50552e5dc9fb6eb50"
+          },
+          {
+            "path": "node_modules/app-builder-lib/out/electron/ElectronFramework.js",
+            "sha256": "a7d73d9a92df1aab84ff5cc272694dc700f5258239b1f0b42dd34b61d13102a7"
+          },
+          {
+            "path": "node_modules/app-builder-lib/out/electron/electronWin.js",
+            "sha256": "6d718f9cfbc752533c13d7c303b765de8c7aecb36febfe627ef5182afdf64005"
+          }
+        ]
+      }
+    }
+  },
+  "provenance": {
+    "diagnosis": {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/exe-integrity-diagnosis-01/DIAGNOSIS.json",
+      "bytes": 8573,
+      "sha256": "f0ecf937754cef6b0755d99c461f87c45a6e39fc6ec566776f622b64909c4547"
+    },
+    "binaryReview": {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/EXE_INTEGRITY_AMENDMENT_REVIEW.json",
+      "bytes": 7007,
+      "sha256": "be65fab987a4e1793a64260b7cd88e108e6373a47956729a7826805b592dc4b4"
+    },
+    "materializerReview": {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/package-binding-materializer-v1/INDEPENDENT_MATERIALIZER_REVIEW.json",
+      "bytes": 7764,
+      "sha256": "3029fb77edcd32054453136b5521a6f4739d78152ad09811b673966dd3805e8a"
+    },
+    "materializer": {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/package-binding-materializer-v1/materialize.cjs",
+      "bytes": 16872,
+      "sha256": "781ce1d58dccf967551cf33035a8f32bc2d5af1fe6239d994280201c591fff91"
+    },
+    "materializerManifest": {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/package-binding-materializer-v1/FINAL_MANIFEST.json",
+      "bytes": 1847,
+      "sha256": "37b29be0c75634b62fab1d003e44ecd5326695a5b351619cf85a26bdfa38cbd0"
+    },
+    "sourceReview": {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/TERRAIN_COLD_LOAD_POSTIMPLEMENTATION_REVIEW.json",
+      "bytes": 13790,
+      "sha256": "1ff29d05020f214a1356dda88e131381b3be00989b5a1facbee53bbc006ec715"
+    },
+    "ci": {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/root/COLD_LOAD_CI_TERMINAL.json",
+      "bytes": 944,
+      "sha256": "3fc6869ecbe3d2d950ef5fb8794be61d274bf4fe1ca8a19ade84d312c65d8305"
+    },
+    "evidenceReuse": {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/root/COLD_LOAD_EVIDENCE_REUSE.json",
+      "bytes": 4223,
+      "sha256": "94d77307150fd181be61b15e22fd3149d34fed802f0c5a9d6a8f6226125ff597"
+    }
+  }
+}

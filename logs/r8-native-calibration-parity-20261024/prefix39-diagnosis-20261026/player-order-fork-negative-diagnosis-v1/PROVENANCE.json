@@ -1,0 +1,34 @@
+{
+  "schema": "awwv.player-order-fork-negative-diagnosis.provenance.v1",
+  "head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+  "preserved_attempt": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/attempts/player-order-fork-current-source-01",
+  "attempt_files": [
+    {"path":"QUERY_AND_STAGE.json","bytes":1905,"sha256":"207ce456016899f833a88a4fc91d296f2c12228f03e256013251f9763e4c125a"},
+    {"path":"RESULT.json","bytes":40205,"sha256":"2557bee230ed5d478e2be116988995e5d79d6e1dd6479f7ae3c039b623137c70"},
+    {"path":"state-turn-020.json","bytes":5019829,"sha256":"a097add0d3b6617d2236007fc87443d9698c759575331beacfa5678f3cd82c95"},
+    {"path":"state-turn-021.json","bytes":5041772,"sha256":"a5e25b25f49027b3da08d7c8334afd66f9458fb37fd08560355752e68a0273cc"},
+    {"path":"state-turn-022.json","bytes":5067776,"sha256":"61e03ebb6a04e21eafbae4a403de4a48005454b621170db2b9e718f724a6a2dc"},
+    {"path":"state-turn-023.json","bytes":5104314,"sha256":"08d0650f4ad2ed7e305ec620de306122f52e155ed8206024548548e7767c18c1"},
+    {"path":"state-turn-025.json","bytes":5191350,"sha256":"bf6d83f97c017e986983233c33d6b13f1a5223670aa0d9fbf8869bc27b9091b6"},
+    {"path":"report-turn-021.json","bytes":658794,"sha256":"e821db52cd449a8794230e62517b29603fea8a45a9f329de8fa84370d7c310de"},
+    {"path":"report-turn-022.json","bytes":669688,"sha256":"f88f1308fae149f1d9ba41677cb4a81843c47c6c51a831f51b10226d95824973"},
+    {"path":"report-turn-023.json","bytes":666280,"sha256":"30376adadad11ce92b61439617d7add10abefe3ecfe5631000a993d360e1f67c"}
+  ],
+  "independent_actual_review": {
+    "path": "logs/r8-native-calibration-parity-20261024/prefix39-diagnosis-20261026/player-order-fork-diagnostic-v4/INDEPENDENT_ACTUAL_RESULT_REVIEW.v1.json",
+    "bytes": 11380,
+    "sha256": "c85b9a89bb253e3f9d79cbecb4a153a529c2a36a6feee281a0fdb9ba735b7cc5"
+  },
+  "source_bindings": [
+    {"path":"src/sim/combat/operation_prediction.ts","bytes":17975,"sha256":"e48dc04f6d6d22c5e0324df8c639562ce834720bef26cff80a991b59aef6f6ab"},
+    {"path":"src/sim/combat/combat_predictor.ts","bytes":30038,"sha256":"d73c9067461753165794d3e0f8275e13d30df4c35b040230ada248ab0c8383f2"},
+    {"path":"src/sim/combat/operation_preparation.ts","bytes":89767,"sha256":"78f0ff42751a12c3e6e616536461a879e77ffd8f009801b08c97a33da72bbc62"},
+    {"path":"src/sim/combat/sector_offensive.ts","bytes":159029,"sha256":"acbfec9cd1f7e604da913108b29d001e98ff7bfd44a17048b08bb5d9f1f40d21"},
+    {"path":"src/sim/combat/sector_offensive_launch_helpers.ts","bytes":73545,"sha256":"7c86a56bda1dfbca6894eaa64059f7c030b37ee8db140d41ad931b221aa01e19"}
+  ],
+  "original_feasibility_unchanged": {
+    "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/native-successor-v3/postchecks/calibration39-01/diagnosis/PLAYER_INPUT_FEASIBILITY_SUPPLEMENT.md",
+    "bytes": 4293,
+    "sha256": "103fc6217edfb46b22b030cfb0325f383d7d5b2914dbae0aaec67015ed1bd1ba"
+  }
+}

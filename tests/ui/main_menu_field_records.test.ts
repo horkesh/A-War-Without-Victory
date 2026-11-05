@@ -50,4 +50,78 @@ describe('MainMenu Field Records', () => {
         await waitFor(() => expect(loadSaveRecord).toHaveBeenCalledWith('quicksave.json'));
         expect(onLoadGame).toHaveBeenCalledWith('{"meta":{"turn":12}}');
     });
+
+    it.each(['RBiH', 'RS', 'HRHB'])('imports %s through the canonical desktop dialog result', async (faction) => {
+        const stateJson = JSON.stringify({ meta: { turn: 39, player_faction: faction } });
+        const onLoadGame = vi.fn();
+        const loadStateDialog = vi.fn(async () => ({ ok: true, stateJson }));
+        (window as Window & { awwv?: unknown }).awwv = {
+            listSaveRecords: vi.fn(async () => ({ ok: true, records: [] })),
+            loadStateDialog,
+        };
+        render(createElement(MainMenu, {
+            hasSave: false,
+            onNewGame: vi.fn(),
+            onContinue: vi.fn(),
+            onLoadGame,
+            onSettings: vi.fn(),
+            onCredits: vi.fn(),
+            onQuit: vi.fn(),
+        }));
+
+        fireEvent.click(screen.getByRole('button', { name: 'Assume responsibility' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Field Records' }));
+        const importButton = screen.getByRole('button', { name: /Import file/i });
+        fireEvent.click(importButton);
+        fireEvent.click(importButton);
+
+        await waitFor(() => expect(loadStateDialog).toHaveBeenCalledTimes(1));
+        await waitFor(() => expect(onLoadGame).toHaveBeenCalledWith(stateJson));
+    });
+
+    it.each([
+        { ok: false, error: 'Canceled' },
+        { ok: false, error: 'Bad save' },
+        { ok: true },
+    ])('keeps the Main Menu open when desktop import does not return canonical state: %j', async (result) => {
+        const onLoadGame = vi.fn();
+        (window as Window & { awwv?: unknown }).awwv = {
+            listSaveRecords: vi.fn(async () => ({ ok: true, records: [] })),
+            loadStateDialog: vi.fn(async () => result),
+        };
+        render(createElement(MainMenu, {
+            hasSave: false,
+            onNewGame: vi.fn(),
+            onContinue: vi.fn(),
+            onLoadGame,
+            onSettings: vi.fn(),
+            onCredits: vi.fn(),
+            onQuit: vi.fn(),
+        }));
+        fireEvent.click(screen.getByRole('button', { name: 'Assume responsibility' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Field Records' }));
+        fireEvent.click(screen.getByRole('button', { name: /Import file/i }));
+
+        expect(await screen.findByRole('alert')).toBeTruthy();
+        expect(onLoadGame).not.toHaveBeenCalled();
+    });
+
+    it('retains the exact FileReader import path in browser mode', async () => {
+        const onLoadGame = vi.fn();
+        render(createElement(MainMenu, {
+            hasSave: false,
+            onNewGame: vi.fn(),
+            onContinue: vi.fn(),
+            onLoadGame,
+            onSettings: vi.fn(),
+            onCredits: vi.fn(),
+            onQuit: vi.fn(),
+        }));
+        fireEvent.click(screen.getByRole('button', { name: 'Assume responsibility' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Field Records' }));
+        const input = screen.getByLabelText('Load save file') as HTMLInputElement;
+        const bytes = '{"meta":{"turn":39,"player_faction":"RBiH"},"sentinel":"browser-fallback"}';
+        fireEvent.change(input, { target: { files: [new File([bytes], 'resume.json', { type: 'application/json' })] } });
+        await waitFor(() => expect(onLoadGame).toHaveBeenCalledWith(JSON.parse(bytes)));
+    });
 });

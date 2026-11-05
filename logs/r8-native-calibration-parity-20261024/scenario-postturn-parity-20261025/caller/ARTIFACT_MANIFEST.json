@@ -1,0 +1,346 @@
+{
+  "schema": "awwv.postturn-gate.artifact-manifest.v1",
+  "artifact_count": 68,
+  "artifacts": [
+    {
+      "path": "01-zero-flip-run-a/activity_summary.json",
+      "bytes": 433,
+      "sha256": "531f22dc1c740e07d9f85a14067bd6f2aebaa8a78482aa2ed3f3e69bc34aa131"
+    },
+    {
+      "path": "01-zero-flip-run-a/brigade_temporal_log.jsonl",
+      "bytes": 201263,
+      "sha256": "72a7b088b26a79187eda70a0be14ff88b7a9e581560bd8afe866657846395069"
+    },
+    {
+      "path": "01-zero-flip-run-a/control_delta.json",
+      "bytes": 5610,
+      "sha256": "e2706504f4e9c3d9950e32c7a1e61e32498568b4f56acd63cc76ceeb02e801ad"
+    },
+    {
+      "path": "01-zero-flip-run-a/destroyed_brigades.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "01-zero-flip-run-a/displacement_event_log.jsonl",
+      "bytes": 1507,
+      "sha256": "9b4e85384ae57b98c65b552c61269106d28e6e92d82a89c9ed4ef89a112e6e8d"
+    },
+    {
+      "path": "01-zero-flip-run-a/end_report.md",
+      "bytes": 29308,
+      "sha256": "5edc2ee5a28c4339725ac180c1dd1da4e0ce69833706dda0068391537ad341bc"
+    },
+    {
+      "path": "01-zero-flip-run-a/final_save.json",
+      "bytes": 3648454,
+      "sha256": "a54939b4d38b68b8f7ca7146f2c8f164787629392daba453d40c301ddb3a0a6f"
+    },
+    {
+      "path": "01-zero-flip-run-a/formation_delta.json",
+      "bytes": 833,
+      "sha256": "2871a96d3e3e84a5c25687d8113fc7afd8aba12f07f0f2d14bb492c5485ad715"
+    },
+    {
+      "path": "01-zero-flip-run-a/initial_save.json",
+      "bytes": 1373722,
+      "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+    },
+    {
+      "path": "01-zero-flip-run-a/operation_aars.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "01-zero-flip-run-a/replay_save_manifest.json",
+      "bytes": 441,
+      "sha256": "e106bfefbf7f9cdc9f3e9bc289b3f22df201e06ed08ddfc04a585e076a1a245d"
+    },
+    {
+      "path": "01-zero-flip-run-a/run_meta.json",
+      "bytes": 10433,
+      "sha256": "4ef45e3154c25f7132e4a87c2509167bbe46baa5a5af8dd0ceda234a00c0a0df"
+    },
+    {
+      "path": "01-zero-flip-run-a/run_summary.json",
+      "bytes": 52715,
+      "sha256": "5d4be6f9ca0d6adede4b76a03a518f3688e41d8aa607a8e5f19d90207e45ba77"
+    },
+    {
+      "path": "01-zero-flip-run-a/save_w1.json",
+      "bytes": 3545416,
+      "sha256": "2ec88cecd9d68dbcc6105768a8a929d3e4b542e171b4d63e67b5a54cb4aa0cb4"
+    },
+    {
+      "path": "01-zero-flip-run-a/save_w2.json",
+      "bytes": 3644163,
+      "sha256": "1e0f0f5360641bf8f26eab92fa3e20adc1c8e5914d433168af3cf68c781b2d41"
+    },
+    {
+      "path": "01-zero-flip-run-a/watched_operations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "01-zero-flip-run-a/weekly_report.jsonl",
+      "bytes": 44654,
+      "sha256": "036abb254096e4829eabf0aca4191302317ed9b4f7df48cd427c4f0a2b8dc516"
+    },
+    {
+      "path": "02-zero-flip-run-b/activity_summary.json",
+      "bytes": 433,
+      "sha256": "531f22dc1c740e07d9f85a14067bd6f2aebaa8a78482aa2ed3f3e69bc34aa131"
+    },
+    {
+      "path": "02-zero-flip-run-b/brigade_temporal_log.jsonl",
+      "bytes": 201263,
+      "sha256": "72a7b088b26a79187eda70a0be14ff88b7a9e581560bd8afe866657846395069"
+    },
+    {
+      "path": "02-zero-flip-run-b/control_delta.json",
+      "bytes": 5610,
+      "sha256": "e2706504f4e9c3d9950e32c7a1e61e32498568b4f56acd63cc76ceeb02e801ad"
+    },
+    {
+      "path": "02-zero-flip-run-b/destroyed_brigades.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "02-zero-flip-run-b/displacement_event_log.jsonl",
+      "bytes": 1507,
+      "sha256": "9b4e85384ae57b98c65b552c61269106d28e6e92d82a89c9ed4ef89a112e6e8d"
+    },
+    {
+      "path": "02-zero-flip-run-b/end_report.md",
+      "bytes": 29308,
+      "sha256": "5edc2ee5a28c4339725ac180c1dd1da4e0ce69833706dda0068391537ad341bc"
+    },
+    {
+      "path": "02-zero-flip-run-b/final_save.json",
+      "bytes": 3648454,
+      "sha256": "a54939b4d38b68b8f7ca7146f2c8f164787629392daba453d40c301ddb3a0a6f"
+    },
+    {
+      "path": "02-zero-flip-run-b/formation_delta.json",
+      "bytes": 833,
+      "sha256": "2871a96d3e3e84a5c25687d8113fc7afd8aba12f07f0f2d14bb492c5485ad715"
+    },
+    {
+      "path": "02-zero-flip-run-b/initial_save.json",
+      "bytes": 1373722,
+      "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+    },
+    {
+      "path": "02-zero-flip-run-b/operation_aars.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "02-zero-flip-run-b/replay_save_manifest.json",
+      "bytes": 441,
+      "sha256": "e106bfefbf7f9cdc9f3e9bc289b3f22df201e06ed08ddfc04a585e076a1a245d"
+    },
+    {
+      "path": "02-zero-flip-run-b/run_meta.json",
+      "bytes": 10433,
+      "sha256": "566f300845ac7540c7cfc0d94a5018607addd65ae4c7340cf6ff11163b2f7d1b"
+    },
+    {
+      "path": "02-zero-flip-run-b/run_summary.json",
+      "bytes": 52715,
+      "sha256": "5d4be6f9ca0d6adede4b76a03a518f3688e41d8aa607a8e5f19d90207e45ba77"
+    },
+    {
+      "path": "02-zero-flip-run-b/save_w1.json",
+      "bytes": 3545416,
+      "sha256": "2ec88cecd9d68dbcc6105768a8a929d3e4b542e171b4d63e67b5a54cb4aa0cb4"
+    },
+    {
+      "path": "02-zero-flip-run-b/save_w2.json",
+      "bytes": 3644163,
+      "sha256": "1e0f0f5360641bf8f26eab92fa3e20adc1c8e5914d433168af3cf68c781b2d41"
+    },
+    {
+      "path": "02-zero-flip-run-b/watched_operations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "02-zero-flip-run-b/weekly_report.jsonl",
+      "bytes": 44654,
+      "sha256": "036abb254096e4829eabf0aca4191302317ed9b4f7df48cd427c4f0a2b8dc516"
+    },
+    {
+      "path": "03-positive-flip-run/activity_summary.json",
+      "bytes": 427,
+      "sha256": "792017acf43a24c045a305b0c4a00bd7354a3c131d0ee374ea3ed9aeb98c4094"
+    },
+    {
+      "path": "03-positive-flip-run/brigade_temporal_log.jsonl",
+      "bytes": 99304,
+      "sha256": "d8dfa8511f8a179285226f3aa3e3e04e51032859327e9c17f0a0e180ad826a0a"
+    },
+    {
+      "path": "03-positive-flip-run/control_delta.json",
+      "bytes": 3995,
+      "sha256": "6b3e5f885081fa16bc52f6c6a807adb2b848db557d9b30d6b16a958dccbe0aa6"
+    },
+    {
+      "path": "03-positive-flip-run/destroyed_brigades.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "03-positive-flip-run/displacement_event_log.jsonl",
+      "bytes": 777,
+      "sha256": "c280aacd129955e9ed3a3965511861f0b2eecf4f41361ce0a0e58ddf2023d511"
+    },
+    {
+      "path": "03-positive-flip-run/end_report.md",
+      "bytes": 28568,
+      "sha256": "147b8ee95bfe26bb53c178080a9449238079c9eb54cd24ecdcc2952d95c5b6ab"
+    },
+    {
+      "path": "03-positive-flip-run/final_save.json",
+      "bytes": 3552005,
+      "sha256": "04191667e5bb4f517960a1459a6f1f2b769b9212ae2913824e92b3c9483e7b6c"
+    },
+    {
+      "path": "03-positive-flip-run/formation_delta.json",
+      "bytes": 691,
+      "sha256": "790304fe1a3ecf51f481c88e60705eddd73e3a20d3715578cb7f9f2526f51b1e"
+    },
+    {
+      "path": "03-positive-flip-run/initial_save.json",
+      "bytes": 1373722,
+      "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+    },
+    {
+      "path": "03-positive-flip-run/operation_aars.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "03-positive-flip-run/replay_save_manifest.json",
+      "bytes": 244,
+      "sha256": "6afa7347e943319abfc19529169e53a789f6abb266f61db915784fbc35e1a629"
+    },
+    {
+      "path": "03-positive-flip-run/run_meta.json",
+      "bytes": 10435,
+      "sha256": "a54f0ee2dafeb8d93ea54542e460c0fd95db271a6a7e6aa02ea6a5136c1a1d30"
+    },
+    {
+      "path": "03-positive-flip-run/run_summary.json",
+      "bytes": 52598,
+      "sha256": "c92d921c9eb35e34b33663fc8250219b6550c27862720c2c4e484896aa46a31e"
+    },
+    {
+      "path": "03-positive-flip-run/save_w1.json",
+      "bytes": 3548723,
+      "sha256": "94ae086ceead3859346a2a68eb7cf54432913045d9915fcc09f520c7ece6f0b3"
+    },
+    {
+      "path": "03-positive-flip-run/watched_operations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "03-positive-flip-run/weekly_report.jsonl",
+      "bytes": 24215,
+      "sha256": "595059f65aafc094c2a0b2a14453c480673c1de0234d6a37b7d36a0f81f75cd9"
+    },
+    {
+      "path": "04-remaining-peace-fixture/remaining-peace.json",
+      "bytes": 356,
+      "sha256": "bed16b5ac8b10604f7113a61bf387146b36d8dc343919f4dbd554a8c8b091049"
+    },
+    {
+      "path": "05-remaining-peace-run/activity_summary.json",
+      "bytes": 400,
+      "sha256": "75c8482852802642c10ca278784a7c541376ab96a541ecafd412a33c0922b2eb"
+    },
+    {
+      "path": "05-remaining-peace-run/brigade_temporal_log.jsonl",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "05-remaining-peace-run/control_delta.json",
+      "bytes": 558,
+      "sha256": "0eeab7c6a931d9b41588cce63af57b3bb56ef811d445a84e267bcbacc9ef2c29"
+    },
+    {
+      "path": "05-remaining-peace-run/destroyed_brigades.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "05-remaining-peace-run/displacement_event_log.jsonl",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "05-remaining-peace-run/end_report.md",
+      "bytes": 2885,
+      "sha256": "5f9fa23016bf1483daf896c6f9527f05e9f76b2ee21c1a27e1fad81060f55d3d"
+    },
+    {
+      "path": "05-remaining-peace-run/final_save.json",
+      "bytes": 139484,
+      "sha256": "66b0ab18b1e9c12aa891d7c16385fa2e051b6d902182ae01fb0458c99fda1c2e"
+    },
+    {
+      "path": "05-remaining-peace-run/formation_delta.json",
+      "bytes": 180,
+      "sha256": "6197f0a4facd726575e4769f6a66d6e91e02c2b2189766aa37efaeb26ba9c3f6"
+    },
+    {
+      "path": "05-remaining-peace-run/initial_save.json",
+      "bytes": 139484,
+      "sha256": "ce5a1b3e4b1578cf5572e19e5984548170a1d455350ec0321608dda6744a4793"
+    },
+    {
+      "path": "05-remaining-peace-run/operation_aars.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "05-remaining-peace-run/replay_save_manifest.json",
+      "bytes": 242,
+      "sha256": "f4efc59fb9f6e33b6a3a9868cdfddab6513572de74d4cec7b1a947dd7c347c77"
+    },
+    {
+      "path": "05-remaining-peace-run/run_meta.json",
+      "bytes": 10136,
+      "sha256": "ebbe3244606ceb7721dd44d40225b1945dffe8f2a26ed96d1be78560b2d7c9af"
+    },
+    {
+      "path": "05-remaining-peace-run/run_summary.json",
+      "bytes": 20195,
+      "sha256": "9acc9e5a18d80c723cee45c6e356c3de1b19ce317cdf5fbf977fa77e4c487b9c"
+    },
+    {
+      "path": "05-remaining-peace-run/save_w1.json",
+      "bytes": 139484,
+      "sha256": "66b0ab18b1e9c12aa891d7c16385fa2e051b6d902182ae01fb0458c99fda1c2e"
+    },
+    {
+      "path": "05-remaining-peace-run/watched_operations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "05-remaining-peace-run/weekly_report.jsonl",
+      "bytes": 426,
+      "sha256": "58efe3e280986ecdfdeec8cf199549fb680e01c2203d81b44b203d99673fa0a4"
+    },
+    {
+      "path": "ARTIFACT_REGISTRY.json",
+      "bytes": 1898,
+      "sha256": "ed133eb37b8bfedab247d2c407860fa56d11bc6bc1e96530bd1df8811d0cc95a"
+    }
+  ]
+}

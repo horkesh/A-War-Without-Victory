@@ -1,0 +1,5 @@
+{
+  "command": "node node_modules/vitest/vitest.mjs run tests/scenario_runner_artifact_repair.test.ts tests/scenario_runner_final_seal_contract.test.ts tests/scenario_turn_boundary_observer.test.ts --reporter=verbose",
+  "exit_code": 0,
+  "elapsed_seconds": 30.3982871
+}

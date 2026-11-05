@@ -1,0 +1,60 @@
+{
+  "schema": "awwv.boundary-observer-result.v1",
+  "sealed_utc": "2026-10-21T05:10:06.3815574Z",
+  "head": "7de47be2050cbe2efee78b9028bf6b3a03bf3fca",
+  "branch": "codex/october-calibration-continuation-20261003",
+  "verdict": "IMPLEMENTATION_GREEN_PENDING_INDEPENDENT_770_REVIEW",
+  "topics": ["reconciliation_write", "preplanned_eligibility"],
+  "behavior": {
+    "default_off": true,
+    "sink_failure_isolated": true,
+    "stdout_stable_json_only": true,
+    "game_state_fields_added": 0,
+    "weekly_report_fields_added": 0,
+    "schema_changes": 0,
+    "gameplay_predicate_changes": 0,
+    "threshold_changes": 0,
+    "phase_order_changes": 0,
+    "file_telemetry_changes": 0,
+    "caller_linkage": "deterministic caller/turn/corps/operation key with contiguous_unsequenced marker; repeated same-turn attempts are not falsely numbered or claimed unique",
+    "candidate_order": "authored declaration and existing decision order unchanged; only detached diagnostic identity copies are sorted"
+  },
+  "coverage": {
+    "reconciliation": [
+      "call start/no-orders/completion",
+      "sorted real order candidates and every existing terminal guard",
+      "global participant/axis memberships across phases",
+      "effective loan/home corps",
+      "selected operation/axis/objective/capture prefix/controller",
+      "approach set and selected replacement",
+      "immediate-before and actual-after real orders assignment"
+    ],
+    "preplanned": [
+      "public queued injection and direct preplanned construction callers",
+      "outer exits before build",
+      "shared build start/end",
+      "each authored candidate first actual rejection or selection with NOT_REACHED later guards",
+      "exact active commitment identities including recovery",
+      "axis no-formation/no-hostile-objective/built outcomes",
+      "build returned versus viable-floor defer versus stored/admitted caller outcome"
+    ]
+  },
+  "tests": {
+    "red_reconciliation": { "attempt": "769-red-reconciliation-c", "total": 32, "passed": 26, "failed_expected_observer_absence": 6, "child_exit": 1, "wrapper_exit": 1 },
+    "red_preplanned": { "attempt": "769-red-preplanned-a", "total": 95, "passed": 91, "failed_expected_observer_absence": 4, "child_exit": 1, "wrapper_exit": 1 },
+    "focused_combined": { "attempt": "769-focused-combined-a", "total": 159, "passed": 159, "failed": 0, "child_exit": 0, "wrapper_exit": 0 },
+    "targeted_correction": { "attempt": "769-correction-focused-a", "total": 132, "passed": 132, "failed": 0, "child_exit": 0, "wrapper_exit": 0 },
+    "final_off_allocation_correction": { "attempt": "769-off-allocation-correction-a", "total": 100, "passed": 100, "failed": 0, "child_exit": 0, "wrapper_exit": 0 },
+    "typecheck": { "attempt": "769-typecheck-d", "child_exit": 0, "wrapper_exit": 0, "private_build_info": "tsconfig.tsbuildinfo" }
+  },
+  "neutrality_proof": {
+    "reconciliation": "topic-OFF absence plus full state, ordinary void return, and serializeState equality; topic-ON equals OFF after real replacement; throwing stdout does not escape",
+    "preplanned": "topic-OFF absence plus full state, boolean/void ordinary return, and stable full-state bytes; topic-ON equals OFF through public queued/direct paths; repeated receipts byte-stable; throwing stdout does not escape"
+  },
+  "limitations": [
+    "No campaign, replay, runTurn, full suite, package build, gameplay fix, rollback, baseline adoption, or acceptance claim.",
+    "Retained n80 remains 703/712 and unadopted; rejected n81 remains 689/712.",
+    "Contiguous stdout blocks link repeated identical same-turn attempts without inventing a unique counter.",
+    "Focused fixture proof does not establish campaign neutrality or historical causality."
+  ]
+}

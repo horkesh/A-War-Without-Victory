@@ -1,0 +1,110 @@
+{
+  "schema": "awwv.fatigue-repair-targeted-correction-review.v1",
+  "reviewer": "desktop_terrain_canon_review",
+  "independent": true,
+  "verdict": "GO",
+  "scope": "Targeted verification of the sole next-advance evidence correction identified in FATIGUE_REPAIR_POSTIMPLEMENTATION_REVIEW.json. Unaffected source, validator, raw-snapshot, canon, and broad-gate review findings are reused without repetition. No source, test, scenario, suite, build, package, or native action was performed by this review.",
+  "authority": {
+    "base_head": "f7c40a0d1e28fde596f217b2c297b0734ec67470",
+    "blocking_review_sha256": "981a0c9469628db5aa5711e8cb27de2e8ec5f7237c5cea9bfe294a5b2e28f8ed",
+    "targeted_freeze": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-repair-20261025/FINAL_SOURCE_TEST_FREEZE_TARGETED_CORRECTION_01.json",
+      "bytes": 3747,
+      "sha256": "bc1ec87a5680a61127f2d3a27ef9558c5b754b8130fcf2180f0b5c8f02343b0d"
+    }
+  },
+  "unchanged_approved_files": [
+    {
+      "path": "src/state/save_migration.ts",
+      "bytes": 37330,
+      "sha256": "1afdc7dafe9f84d65338bac8ecf693f608ffea7460a9d9c14c5f6c55a21870b4"
+    },
+    {
+      "path": "src/state/game_state.ts",
+      "bytes": 184596,
+      "sha256": "87595a7300faf4e1f8d3fb84e022d11a62c61e6aa63fa8cef5d596ec7c9a671f"
+    },
+    {
+      "path": "src/validate/formations.ts",
+      "bytes": 18275,
+      "sha256": "2b11179f4175cd25e547e9d3f4a4125c8c45b510ac92ae2a6987d1491f766864"
+    },
+    {
+      "path": "tests/formations_validate.test.ts",
+      "bytes": 8997,
+      "sha256": "8fac517aefbce8e5144182842daf79e535a5caf91ce1c6fb54ae04af7214483b"
+    }
+  ],
+  "corrected_test": {
+    "path": "tests/formation_fatigue_persistence.test.ts",
+    "bytes": 9053,
+    "sha256": "59990a35f700c858502108d0c7dee48bd939326141efab2881eb78d2ea8419d8",
+    "change_scope": "Only the previously missing valid-source next-advance branch and full-runtime comparisons were added to the reviewed persistence test.",
+    "verified_behavior": [
+      "The pre-load valid source, loadStateFromPath state, and runtime-serialized then loadStateFromPath state all use the same baseDir and production advanceTurn entrypoint.",
+      "All three advances explicitly require no error.",
+      "serializeRuntimeState of the loaded advance result is exact to the source advance result.",
+      "serializeRuntimeState of the runtime-reloaded advance result is exact to the source advance result.",
+      "The full loaded report and full runtime-reloaded report are each deep-equal to the source report.",
+      "The existing explicit all-three-faction fractional assertions remain before advance for loaded and runtime-reloaded states."
+    ],
+    "blocker_closed": true
+  },
+  "targeted_evidence": {
+    "focused_green": {
+      "receipt_sha256": "8d521fea98679378120c3d6f39a9c6cf7b70dc61b034cffd4d4f06299e5c763b",
+      "vitest_sha256": "9127180553cf6a75beaf63c67d9fbef91461dc1cf0715bf054028485fdd17190",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "artifact_contract_pass": true,
+      "tests": 8,
+      "passed": 8,
+      "failed": 0,
+      "explicit_assertions": 60
+    },
+    "typecheck": {
+      "receipt_sha256": "8c081a7010cbe91c67e94ec319da16b92432f89e72dd9fdbf691e8c870b9e166",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "artifact_contract_pass": true
+    },
+    "diff_check": {
+      "receipt_sha256": "9592f4f3eea5cdf3a9097ee0bc8883c9553ed6bb791ea8bdfb6391b395d89843",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "artifact_contract_pass": true
+    }
+  },
+  "reused_evidence": {
+    "actual_snapshot_receipt_sha256": "a698f5d0a386fae2f828ffc3c92aa2dff041a69df62824a547f9cb203b668468",
+    "actual_snapshot_result_sha256": "fa771460ccf59dd55af949be8ed09a057e4d1a886662043d55005fb0fa56841c",
+    "reason": "The three production files are hash-identical to the approved implementation, so repeating the 279-formation/25-fraction authentic raw-snapshot proof would not answer a new question.",
+    "still_established": "All 25 fractional fatigue paths survive canonical and runtime serialization with zero remaining fatigue-path differences; named 10.5, 2.5, 4, and 8 controls remain exact."
+  },
+  "final_implementation_review": {
+    "production_source": "GO",
+    "focused_tests": "GO",
+    "validator_alignment": "GO",
+    "canon_and_determinism": "GO",
+    "raw_snapshot_proof": "GO_REUSED_UNCHANGED",
+    "required_gaps": []
+  },
+  "remaining_gates": {
+    "bounded_turn16_prefix": "PENDING",
+    "authoritative_188_week": "NOT_RUN",
+    "full_suite": "NOT_RUN",
+    "clean_commit_push_ci": "PENDING",
+    "build_package_native": "NOT_RUN",
+    "native39_707": "UNMET",
+    "no_acceptance_criterion_waived": true
+  },
+  "authorization": {
+    "retain_reviewed_five_file_delta": true,
+    "proceed_to_documentation_provenance_and_clean_candidate_qualification_preparation": true,
+    "claim_707_or_gameplay_calibration_success": false
+  },
+  "findings": []
+}

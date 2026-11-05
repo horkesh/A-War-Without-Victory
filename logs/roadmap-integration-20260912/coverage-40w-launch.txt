@@ -1,0 +1,5 @@
+head=933132e909ad9d5380c2452ee29396d92a8b0bd9
+started=
+2026-09-13T00:01:27.0396338+02:00
+command=.\\node_modules\\.bin\\tsx.cmd tools/scenario_runner/run_scenario.ts --scenario data/scenarios/apr1992_definitive_40w.json --out logs/roadmap-integration-20260912/coverage-40w-runs --unique
+finished=2026-09-13T00:02:40.2232856+02:00 exit=0

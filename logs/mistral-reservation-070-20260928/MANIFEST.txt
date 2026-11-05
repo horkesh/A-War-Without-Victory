@@ -1,0 +1,57 @@
+# Receipt manifest for logs/mistral-reservation-070-20260928
+#
+# The evidence itself is NOT tracked: it is too large to commit, and committing it would
+# bloat every clone for the benefit of one citation. This file is the tracked record of
+# what was there — the file list and sizes, nothing else. It proves the shape of the
+# evidence, not its contents.
+#
+# Regenerate with: node tools/write_receipt_manifest.cjs logs/mistral-reservation-070-20260928
+# Deterministic: sorted, no timestamps. An unchanged directory yields an identical file.
+#
+# 45 file(s), 1907632 bytes
+
+  1327  analysis-188w.log
+  5164  analyze_188.ts
+  1961  analyze_prefix.mjs
+  1192  analyzer-positive-control.json
+   441  border-data.log
+957384  campaign-188w.log
+   342  campaign-window-analysis.json
+     0  diff-check-post-review.log
+     3  green-focused-tests-final.exit
+   723  green-focused-tests-final.log
+     3  green-focused-tests.exit
+  1674  green-focused-tests.log
+     3  green-probe-preparation-targeted.exit
+   358  green-probe-preparation-targeted.log
+   357  green-sector-reservation-targeted.log
+  3509  implementation_summary.md
+ 65011  measurement_analysis.json
+   342  prefix-analysis.json
+841037  prefix-run.log
+  1387  red-active-probe-carryover.log
+     3  red-focused-tests.exit
+  7799  red-focused-tests.log
+     3  red-replacement-test.exit
+  1363  red-replacement-test.log
+   918  required-focused-final-after-probe.log
+   918  required-focused-final.log
+   919  required-focused-post-review.log
+   347  review-fixture-correction.log
+   651  review-green-affected.log
+   419  review-green-targets.log
+  1199  review-red-cincar-probe.log
+  2855  review-red-targets.log
+  1126  startup-snapshot-final.log
+  1126  startup-snapshot-post-review.log
+  1126  startup-snapshot.log
+    64  typecheck-corrected.log
+     3  typecheck-correction-targeted.exit
+   382  typecheck-correction-targeted.log
+    64  typecheck-final-after-probe.log
+   347  typecheck-final.log
+    64  typecheck-post-review-final.log
+   345  typecheck-post-review.log
+     3  typecheck.exit
+   351  typecheck.log
+  3019  verifier-188w.log

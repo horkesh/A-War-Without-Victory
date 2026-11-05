@@ -897,8 +897,8 @@ export function SettlementDetailContent({
                   <>
                     <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${f.faction === 'RBiH' ? 'bg-green-600' : f.faction === 'RS' ? 'bg-red-600' : 'bg-blue-600'}`} />
                     <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-text-primary font-medium truncate">{getLocalizedFormationName(f, locale)}</span>
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span className="min-w-0 flex-1 text-xs text-text-primary font-medium whitespace-normal break-words">{getLocalizedFormationName(f, locale)}</span>
                         {isPanel && f.readiness && (
                           <span className="text-xs px-1 py-0.5 rounded bg-white/10 text-text-secondary flex-shrink-0">
                             {getPlayerSafeFormationReadinessLabel(f.readiness)}

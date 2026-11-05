@@ -1,0 +1,130 @@
+{
+  "schema": "awwv.scenario-postturn-parity.actual-implementation-decision.v1",
+  "reviewed_at": "2026-10-25",
+  "head": "b30597f49aad99032781c251b41a9de886cce3be",
+  "decision": "GO_IMPLEMENT_EXACT_APPLIED_CONTROL_FLIP_GATE",
+  "evidence_authenticity": {
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "timed_out": false,
+    "spawn_error": null,
+    "artifact_contract_pass": true,
+    "entry_script_unchanged": true,
+    "retained_artifacts": 23,
+    "public_run_turn_calls": 2,
+    "public_run_turn_statuses": ["success", "success"],
+    "source_head_unchanged": true
+  },
+  "findings": {
+    "retained_b1": {
+      "clone_exact_read_only": true,
+      "state_shape_ok": true,
+      "operation_issue_count": 0,
+      "friendly_territory_issue_count": 0,
+      "sector_truth_ok": true,
+      "sector_truth_nonzero_counts": 0,
+      "created_formations": [
+        {
+          "id": "hvo_hrvoje_vukcic_brigade",
+          "status": "active",
+          "readiness": "forming",
+          "assignment": null,
+          "assigned_sub_segment_id": null
+        },
+        {
+          "id": "hvo_nikola_subic_zrinski_brigade",
+          "status": "active",
+          "readiness": "forming",
+          "assignment": null,
+          "assigned_sub_segment_id": null
+        }
+      ],
+      "conclusion": "The actual T1 OOB additions do not invalidate the persisted front/sector/location state. The full repair neither assigns nor otherwise changes those formations. Any-OOB-created is therefore not a genuine repair condition for this boundary."
+    },
+    "t1": {
+      "a_to_b_persisted_leaf_count": 3589,
+      "a_to_b_topology_leaf_count": 2,
+      "topology_changes": "the two validated forming formation additions only",
+      "applied_control_flips": 0,
+      "b_to_c_runtime_leaf_count": 174,
+      "b_to_c_disposable_rating_leaf_count": 172,
+      "b_to_c_persisted": [
+        "sector:hvo_central_bosnia:8 threat_ratio 0 -> 9999",
+        "rs_22nd_krajina_infantry location_osid op:travnik:varosluk -> op:donji_vakuf:komar_2"
+      ],
+      "c_equals_observer": true
+    },
+    "t2": {
+      "topology_clean": true,
+      "a_to_b_persisted_leaf_count": 2701,
+      "a_to_b_topology_leaf_count": 0,
+      "created_formation_ids": [],
+      "removed_formation_ids": [],
+      "applied_control_flips": 0,
+      "changed_controller_ids": [],
+      "a_to_b_classification": "baseline displacement/exhaustion only",
+      "b_to_c_runtime_leaf_count": 171,
+      "b_to_c_persisted_leaf_count": 2,
+      "b_to_c_persisted": [
+        "sector:hvo_central_bosnia:4 threat_ratio 0 -> 9999",
+        "rs_22nd_krajina_infantry location_osid op:travnik:varosluk -> op:donji_vakuf:komar_2"
+      ],
+      "c_equals_observer": true,
+      "conclusion": "The sessionless helper mutates persisted gameplay state on a proven topology-clean boundary. Its invocation cannot be justified as invariant repair."
+    }
+  },
+  "canon_systems_decision": [
+    "The successful public runTurn.nextState remains the canonical settled boundary. Scenario baseline exhaustion/displacement may intentionally mutate other state afterward, but it does not invalidate front/sector/location truth.",
+    "The retained T1 B state proves that the actual forming OOB additions are valid without a full rebuild. Do not gate on OOB call occurrence, formation-count change alone, baseline activity, week number, or generic A-to-B inequality.",
+    "applyControlFlipProposals is the only current post-run caller that directly changes political controllers. A positive applied count is a source-proven invalidator of derived front/sector truth and is the exact supported reason to invoke the scenario repair.",
+    "No evidence supports moving repair into runTurn, changing the helper's mechanics, or changing native/desktop behavior."
+  ],
+  "exact_implementation_scope": {
+    "owner": "src/scenario/scenario_runner.ts weekly scenario caller only",
+    "steps": [
+      "Initialize a deterministic per-week appliedScenarioControlFlips count to zero before the shouldApplyBreaches block.",
+      "Capture applyControlFlipProposals(state, proposalsFile).applied into that count when the block executes.",
+      "Invoke repairScenarioArtifactState exactly once only when appliedScenarioControlFlips > 0.",
+      "When the count is zero, do not displace, recompute fronts, reconcile sectors, or rebuild ratings after the successful public turn; weekly reports, saves, replay/checkpoint artifacts, and the observer consume the post-handler state directly.",
+      "Preserve repairScenarioArtifactState unchanged and exported for its explicit artifact/test use.",
+      "Preserve the dedicated final-save operational-edge projection, reconciliation session, and seal unchanged."
+    ],
+    "explicitly_excluded_conditions": [
+      "any OOB call or any created formation",
+      "baseline_ops_enabled or any displacement/exhaustion delta",
+      "any A-to-B difference",
+      "week/turn number",
+      "opportunity decision presence"
+    ],
+    "forbidden_scope": [
+      "runTurn or war-phase changes",
+      "native/desktop consumer changes",
+      "helper algorithm changes",
+      "sector/displacement/control mechanics changes",
+      "data, coefficient, threshold, schema, save-format, baseline, or acceptance-criterion changes"
+    ]
+  },
+  "required_focused_tests_before_expensive_validation": [
+    "Canonical one- and two-week boundary characterization: applied control flips zero, helper entries zero, observer/weekly save state equals the post-handler B state, rs_22nd remains at Varosluk, and no scenario-only threat_ratio sentinel is introduced.",
+    "T1 forming OOB additions remain present, friendly, unassigned/forming as authored, and the existing state/operation/friendly/sector validators remain green without helper repair.",
+    "Synthetic applied-control case: applyControlFlipProposals returns applied > 0, the scenario caller invokes repair exactly once with operational OSID edges, and final fronts/sectors pass focused validators.",
+    "Synthetic zero-proposal and zero-applied cases skip repair.",
+    "Existing direct repairScenarioArtifactState enemy-territory/artifact test remains green, proving explicit helper behavior is preserved.",
+    "Final-save projection/session/seal and canonical save-load checks remain green and distinct from the weekly caller gate.",
+    "TypeScript and affected scenario-harness/determinism tests pass."
+  ],
+  "remaining_acceptance_gates": [
+    "Independent review of the implemented caller-only diff and focused evidence.",
+    "Because removing the weekly mutation changes the canonical calibration trajectory, run the already-authorized authoritative 188-week qualifier and evaluate every existing score, OSID-loss, anchor, provenance, graph, consistency, preservation, and artifact criterion without tuning or waiver.",
+    "Run the required full suite only after the authoritative candidate qualifies, reusing unaffected evidence where allowed."
+  ],
+  "evidence_hashes_sha256": {
+    "attempt-01/receipt.json": "1c75598581f4725652f3eb96cb470260c62d9edfff1ec970f1310727058be15d",
+    "attempt-01/BINDING.json": "afcd9178d1e9527762967849cdd1e79b2fcb727ade412d93c4698e65070939ec",
+    "attempt-01/REPORT.json": "6603145cc775151ccc8bb0770ded15e55cef87417d752d93d065f848070a7a83",
+    "attempt-01/PER_TURN_DIFFS.json": "c15b75d52c1b963fc0223e9afedef71353170fab069e97b3f333be0fc0a0b51c",
+    "attempt-01/MUTATOR_RECEIPTS.json": "164c74ef5334e0b262a31b3a64fcf39b833db3d1a2712b9bcd6cf7d121bcc626",
+    "attempt-01/RETAINED_B1_READ_ONLY_VALIDATION.json": "897f5ab2b1efeb4e9308306d8a8ea1738f01af872e3bbdeee347172bea8ca831"
+  },
+  "reviewer_source_or_test_changes": false
+}

@@ -1,0 +1,148 @@
+{
+  "schema": "awwv.player-order-fork-negative-diagnosis.v1",
+  "scope": "retained V4 artifacts and current source inspection only; no engine, query, stage, advance, test, retry, or source edit",
+  "verdict": "VALID_ORDINARY_FAILED_ASSAULT_WITH_UNCONCENTRATED_ROSTER",
+  "query": {
+    "rejection_reason": null,
+    "force_ratio": 0,
+    "estimated_casualties": 0,
+    "recommended_action": "delay",
+    "forced_over_objection": true,
+    "zero_contract_reason": "primary brigade arbih_441st_vitezka_mountain was not target-adjacent, so predictCombatOutcome returned null and predictAxisOutcome emitted finite zeroes"
+  },
+  "launch": {
+    "operation_started_turn": 17,
+    "execution_started_turn": 21,
+    "was_force_launched_receipt_tag": true,
+    "hard_force_launch_gate_bypass": false,
+    "commander": "arbih_malkic",
+    "commander_aggressiveness": 4,
+    "preparation_turns_elapsed": 4,
+    "preparation_max_turns": 4,
+    "preparation_sub_phase": "ready",
+    "commander_assessment": "launch",
+    "commander_assessment_at_request": "abort",
+    "supply_readiness": 1,
+    "local_supply": {
+      "staging_delijas": "strained",
+      "attack_approach_trnovo": "adequate",
+      "other_roster_locations": "adequate"
+    },
+    "intel_confidence": 0,
+    "stored_force_ratio_estimate": 1,
+    "roster_count": 10,
+    "assembled_by_existing_sector_set": 5,
+    "existing_assembly_threshold_fraction": 0.6,
+    "existing_assembly_threshold_count": 6,
+    "launch_path": "anti_paralysis_launch_before_force_staging",
+    "preparation_defender_mapping": {
+      "objective_first_matching_enemy_sector": "sector:vrs_herzegovina:0",
+      "own_sector_intel_enemy_sector": "sector:vrs_herzegovina:1",
+      "filtered_defender_count": 0,
+      "sentinel_at_confidence_zero": 1
+    }
+  },
+  "concentration": {
+    "staging_osid": "op:trnovo:delijas",
+    "roster_arrivals_at_staging": 0,
+    "t16_roster_already_at_approach": ["arbih_443rd_mountain"],
+    "later_roster_arrivals_at_approach": ["arbih_441st_vitezka_mountain"],
+    "never_moved_during_assault_count": 8,
+    "moving_brigade": {
+      "id": "arbih_441st_vitezka_mountain",
+      "movement_owner": "bot_discretionary",
+      "movement_started_turn": 18,
+      "arrival_turn": 23,
+      "route_hops": 7,
+      "route": [
+        "op:mostar:blagaj_2",
+        "op:mostar:mostar_istok_2",
+        "op:mostar:potoci",
+        "op:konjic:celebici_2",
+        "op:konjic:konjic_2",
+        "op:konjic:dzepi_2",
+        "op:trnovo:tusila",
+        "op:trnovo:trnovo"
+      ]
+    }
+  },
+  "owned_attacks": [
+    {
+      "turn": 21,
+      "attacker": "arbih_443rd_mountain",
+      "attacker_count": 1,
+      "defender": "rs_foa_brigade",
+      "defender_contributors": [],
+      "power_ratio": 0.806394287977693,
+      "outcome": "stalemate",
+      "attacker_casualties": 202,
+      "defender_casualties": 37,
+      "friction": ["stale_intel"]
+    },
+    {
+      "turn": 22,
+      "attacker": "arbih_443rd_mountain",
+      "attacker_count": 1,
+      "defender": "rs_bilea_brigade",
+      "defender_contributors": ["rs_bilea_brigade", "rs_foa_brigade"],
+      "power_ratio": 0.1385149112526484,
+      "outcome": "catastrophic",
+      "attacker_casualties": 920,
+      "defender_casualties": 62,
+      "friction": ["stale_intel"]
+    },
+    {
+      "turn": 23,
+      "attacker": "arbih_441st_vitezka_mountain",
+      "attacker_count": 1,
+      "defender": "rs_bilea_brigade",
+      "defender_contributors": ["rs_ajnie_brigade", "rs_bilea_brigade", "rs_foa_brigade"],
+      "power_ratio": 0.19296037208757802,
+      "outcome": "catastrophic",
+      "attacker_casualties": 920,
+      "defender_casualties": 65,
+      "friction": ["stale_intel"]
+    }
+  ],
+  "operation_end": {
+    "recovery_started_turn": 23,
+    "recovery_reason": "max_failures",
+    "ended_turn": 25,
+    "duration_turns": 8,
+    "total_attacks": 3,
+    "objectives_captured": 0,
+    "initial_strength": 6237,
+    "final_strength": 5089,
+    "casualties_suffered_killed": 448,
+    "casualties_suffered_wounded": 1511,
+    "casualties_inflicted_killed": 36,
+    "casualties_inflicted_wounded": 121,
+    "grade_stars": 1,
+    "grade_verdict": "Catastrophic Failure"
+  },
+  "checkpoint": {
+    "turn": 39,
+    "score": 704,
+    "denominator": 712,
+    "required_score": 707,
+    "tosici_controller": "RS",
+    "protected_loss_ids": [
+      "op:donji_vakuf:korenici",
+      "op:foca:donje_zesce",
+      "op:trnovo:tosici"
+    ]
+  },
+  "cohort_correction": {
+    "reference_korenici": "RS",
+    "accepted_p03_t16_korenici": "RBiH",
+    "accepted_p03_t39_korenici": "RBiH",
+    "rejected_705_t16_korenici": "RBiH",
+    "rejected_705_t39_korenici": "RS",
+    "instruction": "do not plan capture of Korenici for accepted P03; it would worsen fit"
+  },
+  "candidate": {
+    "description": "Require the existing 60% assembled predicate before anti_paralysis_launch for this ordinary preparation path; add no new threshold.",
+    "status": "investigation_candidate_only",
+    "limit": "Anti-paralysis intentionally forces a decision; canon and broad behavior review are required before treating this as a defect or implementing it."
+  }
+}

@@ -231,7 +231,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm"
-             style={{ zIndex: Z.MODAL_HARD }}>
+             style={{ zIndex: Z.HARD_MODAL }}>
             <button
                 type="button"
                 className="absolute inset-0 z-0 cursor-default border-0 bg-transparent p-0"

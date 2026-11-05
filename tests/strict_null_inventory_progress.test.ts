@@ -768,19 +768,54 @@ describe('strict null inventory progress', () => {
             // new type escape. All three land in the `sim` domain (343 -> 346); `state`
             // is unchanged at 187, because classifyDomain routes MilitiaPoolState by its
             // interface-name rule rather than by the file it lives in.
-            optional_fields_game_state: 543,
+            // April-1994 operation calibration adds three absent-safe operation fields on
+            // top of the mainline 543 count: all-axis synchronization, assembly floors,
+            // and per-objective forward floors. 543 -> 546; no type escapes.
+            // ENGINE-HEALTH B3 (2026-09-19) adds +2: `tg_formation_decline` on
+            // `OperationAxis` and on `CorpsOperation` — the reason-code record for a
+            // declined Tactical Group augmentation, replacing the retired
+            // `insufficient_donation` launch blocker. Both are OPTIONAL and written ONLY
+            // under `AWWV_DEBUG_REASON_CODES=tg_formation`, so they are absent on every
+            // default run and on every legacy save; the save hash is unmoved by
+            // construction (`whenReasonCodeTopic` spreads an empty object when the topic
+            // is off, so the keys are absent rather than present-and-null). 546 -> 548.
+            // as_any / as_factionid / as_unknown / non_null_assertions are ALL unchanged
+            // at 0 / 3 / 5 / 7 — no new type escape. `classifyDomain` routes both to `sim`
+            // on the /Corps|Operation/ interface-name rule, so sim 349 -> 351 and `state`
+            // is unchanged at 187.
+            // Lukavac calibration adds optional CorpsOperation.coordinated_advance;
+            // OperationAxis.shared_objective_wait_turns adds the next absent-safe
+            // operation field, and triggered-operation sequence preservation adds
+            // CorpsOperation.preserve_objective_sequence. Both are source-confirmed
+            // optional sim fields and change no cast category: 548 -> 551.
+            // Opt-in phased-operation gate (operation_phase_gate.ts): +5 optional fields, all absent
+            // on every operation/save without the opt-in: OperationAxis.late_phase,
+            // OperationAxisLatePhase.{hold_started_turn,activated_turn,terminal_reason} (sim) and
+            // MilitaryState.brigade_attack_order_owners (state interface, counted in sim by the
+            // inventory's interface rule). No new type escape. 551 -> 556.
+            // Formation cadre lifecycle receipts add the absent-safe optional
+            // MilitaryState.formation_lifecycle_events_fired field. 556 -> 557.
+            // Subordinate preparation probes add six absent-safe fields:
+            // CorpsOperation.preparation_probe_delivery and preparation_probe_link,
+            // plus PreparationProbeLink.{source_axes[].axis_id,entered_execution_turn,
+            // order_opportunity_turn,restored_to_parent}. Legacy operations omit both
+            // top-level keys. 557 -> 563 / sim 360 -> 362 / state 187 -> 191.
+            // Sana's owner-approved phase-gate handoff adds the absent-safe optional
+            // OperationAxisLatePhase.handoff field. It is opt-in on Sana only and adds
+            // no type escape. 563 -> 564 / sim 362 -> 363.
+            optional_fields_game_state: 564,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
         // so sim 335->336 and state is UNCHANGED at 186. Gated by
         // `AWWV_DEBUG_REASON_CODES=axis_reject`; absent on every default run.
-        expect(current.optional_field_domains.total).toBe(543);
+        expect(current.optional_field_domains.total).toBe(564);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 346,
-            state: 187,
+            sim: 363,
+            state: 191,
             ui_adapter: 0,
             unknown: 0,
         });

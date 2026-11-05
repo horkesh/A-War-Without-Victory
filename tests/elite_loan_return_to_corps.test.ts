@@ -91,7 +91,16 @@ function makeContext(overrides: Partial<BrigadeEvaluationContext> = {}): Brigade
 
 describe('evaluateReturnToCorps', () => {
     it('does not recall an active operation participant away from its staging area', () => {
-        const ctx = makeContext({ isActiveSectorOperationParticipant: true });
+        const ctx = makeContext({
+            isActiveSectorOperationParticipant: true,
+            // Movement authority is read from a live operation commitment, of any type.
+            activeOp: {
+                name: 'Test Op', type: 'sector_attack', phase: 'planning',
+                started_turn: 0, phase_started_turn: 0,
+                participating_brigades: ['arbih_120th_liberation_black_swans'],
+                axes: [],
+            } as any,
+        });
 
         const handled = evaluateReturnToCorps(ctx);
 

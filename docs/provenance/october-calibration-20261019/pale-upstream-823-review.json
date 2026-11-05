@@ -1,0 +1,88 @@
+{
+  "schema": "awwv.independent-review.v1",
+  "captured_date": "2026-10-22",
+  "reviewed_artifact": {
+    "path": "logs/claude-channel-20261004/822-pale-upstream/result.json",
+    "sha256": "ed23ebe66e4c2d0c8bccfe089275a29666f063469c016cd2dcd9950d3e48514f",
+    "immutable_during_review": true
+  },
+  "head": "49bc34cad43929a5033819d9c51c88a9782552e8",
+  "verdict": "APPROVE_SUPPORTED_WRITER_PHASE_WITH_PROVENANCE_QUALIFICATION",
+  "decision": {
+    "actual_supported_writer_class": "turn-22 ongoing-mobilization credited pale:RS before the observed regular-stage opening",
+    "receipt_status": "SOURCE_INFERENCE_WITH_COMPLETE_EXCLUSION_CHAIN; no literal selected-pool writer receipt",
+    "unmeasured": [
+      "direct RS controller credit versus shared displaced-in credit",
+      "gross ongoing-mobilization credit",
+      "pool-war-weariness decay debit",
+      "the exact before/after selected-pool values at those writer boundaries"
+    ]
+  },
+  "findings": [
+    {
+      "severity": "material-qualification",
+      "title": "The 822 summary and reached-writer audit require an explicit WIA exclusion chain",
+      "evidence": [
+        "The observed interval begins after turn-21 brigade-reinforcement and therefore includes turn-21 wia-trickleback.",
+        "initial_save records pale:RS wounded_pending=0.",
+        "src/sim/combat/militia_casualties.ts:134-142 makes militia combat the sole positive producer of pool wounded_pending; src/sim/formation_spawn.ts:985-1004 only converts that pending value back to available.",
+        "src/sim/combat/attack_resolution_osid.ts:1412-1427 emits defender_militia_pool_key on every canonical militia battle and src/scenario/scenario_runner.ts:3271-3308 forwards it into every retained weekly battle row.",
+        "The retained weekly ledger contains zero defender_militia_pool_key=pale:RS rows through turn 22; the canonical OSID resolver clears attack orders before the compatibility resolver at src/sim/combat/attack_resolution_osid.ts:1872 and src/sim/turn_phases/war_phases.ts:3004-3046."
+      ],
+      "conclusion": "Under the observed canonical OSID path, pale:RS wounded_pending remains zero through the disputed interval, so turn-21 WIA trickleback contributed zero. This closes the apparent contradiction in 822, but the assumption that the retained weekly OSID battle projection is complete for this run must remain stated."
+    },
+    {
+      "severity": "material-qualification",
+      "title": "The final 822 synthesis is frozen but lacks a successful finalizer receipt",
+      "evidence": [
+        "822-pale-upstream-a receipt: child_exit=0, wrapper_exit=0, artifact contract pass; it produced the initial UNMEASURED result.",
+        "822-pale-upstream-b receipt: child_exit=1, wrapper_exit=126, failed takeover-displacement assertion, no result.json.",
+        "822-pale-upstream-c receipt: child_exit=1, wrapper_exit=126, failed phase-key assertion, no result.json.",
+        "The reviewed final result was written after those failed attempts and is not listed as an output of a successful preserved-preflight receipt."
+      ],
+      "conclusion": "Use the frozen hash as the identity of the reviewed synthesis and preserve all three actual receipts. Do not describe the final synthesis itself as receipt 0/0. This provenance gap does not overturn the source-and-retained-data exclusion chain, but it must remain visible."
+    },
+    {
+      "severity": "accepted",
+      "title": "The actual positive writer phase is supported; the exact writer line is not",
+      "evidence": [
+        "Direct retained receipts establish pale:RS available 0 at turn-21 regular close and 111 at turn-22 regular open, with committed unchanged at 1600 across the opening boundary.",
+        "Turn-21 strategic-reserve collection, turn-22 reconstitution, pool decay, formation spawn, and elective recruitment writes are nonpositive.",
+        "Turn-22 takeover arrival is 24 and the governing one-turn floor contribution is 0.",
+        "Pale has one authored OOB brigade and it is active in the initial save, excluding the pending-authored-brigade gates for mandatory accrual and reroute deficit credit.",
+        "The actual recruitment mode is player_choice, excluding the early-war pool-population tail.",
+        "After the WIA exclusion above, ongoing-mobilization is the sole surviving positive writer and therefore necessarily credited pale:RS; later decay may have reduced its gross credit to the observed 111."
+      ],
+      "conclusion": "Report ongoing-mobilization as the actual supported positive writer class by exclusive-path deduction. Keep direct-controller versus shared displaced-in credit, amounts, operands, and decay unmeasured."
+    }
+  ],
+  "smallest_justified_next_fix": {
+    "authorization": "proposal only; current diagnosis does not authorize implementation or another run",
+    "scope": "A default-off, stdout-only observer selected by the existing diagnostic selector for pale:RS and completed turns 21-22. Record the inherited turn-21 close, WIA boundary qualification, and turn-22 selected-pool before/after plus credit/debit operands only for recruitment gates, ongoing-mobilization direct/shared credits, pool decay, reroute gate, spawn, and regular open. Do not instrument every militia pool or every repository writer.",
+    "state_boundary": "No GameState, save, production artifact, test fixture, data, threshold, or file telemetry writes.",
+    "validation_before_measurement": "Prove default-off byte neutrality and selector isolation cheaply. A separately authorized measurement would then use a fresh preserved-preflight attempt. No campaign is authorized by this review."
+  },
+  "evidence_integrity": {
+    "retained_counts": {
+      "weekly_rows": 188,
+      "allocation_rows": 564,
+      "personnel_records": 71931,
+      "displacement_rows": 92174,
+      "native_inventory": 31,
+      "consumed_inputs": 32
+    },
+    "protected_pins_equal": true,
+    "telemetry": {
+      "c": {
+        "bytes": 103894385,
+        "sha256": "00d6d7e65832a45e4b8ddc34e077c228b9496ca8f1068a6b9633571b4bae5557"
+      },
+      "d": {
+        "bytes": 1041,
+        "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+      }
+    },
+    "forbidden_invocations_or_mutations_observed": 0,
+    "review_commands": "read-only source/artifact inspection and hashing only; no simulation, runTurn, replay, build, suite, campaign, or Git mutation"
+  }
+}

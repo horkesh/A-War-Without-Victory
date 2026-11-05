@@ -1,0 +1,12 @@
+{
+  "pass": true,
+  "front_edges": 291,
+  "sectors": 69,
+  "rostered_formations": 232,
+  "invalid_endpoints": [],
+  "duplicate_edges": [],
+  "missing_sector_edges": [],
+  "malformed_rosters": [],
+  "roster_mismatches": [],
+  "duplicate_membership": []
+}

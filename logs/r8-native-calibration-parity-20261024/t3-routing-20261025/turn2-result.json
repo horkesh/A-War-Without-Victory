@@ -1,0 +1,14 @@
+{
+  "schema": "awwv.player-turn2-182-routing-repair.v2",
+  "verdict": "PASS_PLAYER_TURN2_T3_FACTION_FRIENDLY_TRANSIT",
+  "turns_run": 1,
+  "qualification_claim": false,
+  "column_phase_index": 34,
+  "transit_started": true,
+  "exact_path": true,
+  "owner_preserved": true,
+  "location_unchanged": true,
+  "no_column_rejection": true,
+  "later_generator_reissued": false,
+  "controls_match_expected": true
+}

@@ -1,0 +1,56 @@
+{
+  "schema": "awwv.native23-cdp-independent-contract-review.v1",
+  "reviewed_head": "bff97de7af9406dc2cb907674e2463fccb43052a",
+  "verdict": "GO",
+  "decision": "Proceed with the bounded harness repair only under the required scope below. This is approval to implement and test the observation contract, not evidence that a production ambient abort is admissible or that a native campaign now passes.",
+  "established_evidence": {
+    "generic_frame_attachment": "Playwright 1.60.0 context.newCDPSession(actual cross-origin Frame) captured one request, one response, one finish, zero failures, and the exact 26-byte response body on the same session.",
+    "outer_page_control": "The simultaneous outer Page session captured zero matching events, so the existing page-bound collector cannot establish embedded gameplay-frame coverage.",
+    "strict_negative": "A response observed without its request in the declared window remained inconsistent as response-without-request.",
+    "limits": [
+      "The fixture used a generic Fetch and did not exercise the ambient-media abort classifier.",
+      "It did not prove production abort body eligibility, classifier admission, startup coverage, or multi-target coverage.",
+      "No Playwright/CDP/NetLog identity join or reconstruction is supported."
+    ]
+  },
+  "required_implementation_scope": {
+    "attachment_location": "Resolve the final gameplay Frame through the existing fresh-start or resume branch, then construct the opt-in collector with page.context().newCDPSession(frame) and await Network.enable before initial-state reads, tours, strategic configuration, playTurns, Save/load proof, or any later gameplay action. Keep the existing page-level request diagnostics and startup init-script observers where they are.",
+    "declared_window": "The sidecar must state that coverage begins only after the selected gameplay Frame exists and collector readiness completes. Outer-page load, campaign bootstrap, intro/resume routing, and any earlier frame traffic are outside the window.",
+    "fresh_resume_boundary": "startCampaign performs campaign/bootstrap UI actions and intro dismissal before returning; resumeThroughObservedMainMenu performs the import/route and identity checks before returning. Neither function dispatches an engine turn. The smallest common safe location is immediately after lines 7376-7400 resolve frame and before current initial evidence work at line 7401. The contract must not claim coverage of the pre-return UI/bootstrap actions.",
+    "target_provenance": "Record bounded selected-frame URL plus CDP Target.getTargetInfo targetId/type when available, and fail setup when the attached session cannot establish the intended gameplay target identity. Do not treat the outer Page identity as the gameplay target.",
+    "lifecycle_fail_closed": [
+      "An unexpected CDPSession close before collector-owned detach is a fatal runtime error.",
+      "framenavigated for the exact observed Frame after readiness is fatal, even if the Playwright Frame object survives.",
+      "framedetached for the exact observed Frame, replacement by another gameplay frame, or loss from the owning page is fatal.",
+      "Setup timeout/error, listener error, orphan response/terminal, cap overflow, body/flush timeout, sidecar write/digest failure, and collector detach error remain fatal.",
+      "Collector-owned detach during idempotent finalization must not self-report as an unexpected target loss."
+    ],
+    "preserved_boundaries": [
+      "Opt-in remains --cdp-network-collection-v3; disabled output and runtime behavior remain unchanged.",
+      "No multi-target auto-attach.",
+      "No ambient classifier or request-failure admission change.",
+      "No reconstruction or URL-based joining of url-null terminal rows.",
+      "No GameState, save, simulation, baseline, or existing Playwright diagnostic semantics change."
+    ],
+    "failure_evidence_repair": "Hoist one nullable playtest binding outside runFaction's try, assign the exact object returned by await playTurns, continue mutating that same object for Save/load proof, and include that exact object in the failure entry when present. This preserves completed gameplay evidence when later collector finalization fails. Do not synthesize evidenceManifest when finalizeEvidenceManifest was not reached and do not manufacture a partial playtest when playTurns itself rejects."
+  },
+  "required_tests_before_runtime": [
+    "Harness wiring proves newCDPSession receives the resolved gameplay Frame on both fresh and resume paths, and readiness completes before initial evidence/tours/playTurns.",
+    "Disabled mode starts no collector, installs no target guard, writes no sidecar, and preserves the prior result shape.",
+    "Fresh and resume fixtures prove no Advance/turn dispatch occurs before collector readiness; pre-attachment bootstrap traffic is explicitly absent from sidecar claims.",
+    "Exact-frame navigation, detach/replacement, and unexpected CDPSession close each produce a fatal retained collector result; unrelated frame lifecycle events do not.",
+    "Expected collector-owned detach is nonfatal and finalization remains idempotent.",
+    "Response/finish without a request inside the new declared window remains inconsistent; no classifier/admission tests are weakened.",
+    "A finalize failure after successful playTurns retains object identity/content in the failure entry and leaves evidenceManifest absent; a playTurns rejection does not invent playtest evidence.",
+    "Existing cdp_network_collector and paradox_local_qa_harness focused suites pass. Reuse unaffected gameplay/full-suite/package evidence because this is observer-only."
+  ],
+  "evidence_hashes_sha256": {
+    "ADAPTER_ATTEMPT_03_REPORT.md": "7e83a86f5a9d2caa20266aab77ea4d95d5e48dcae478b891c0f90cffd408ec68",
+    "ADAPTER_ATTEMPT_03_BINDING.json": "29f2f24ef2850a617d3032092e6b6a448523ddd00f2b2f7cec75c7558b015126",
+    "ADAPTER_ATTEMPT_03_MANIFEST.json": "187b4381fbc777ae8737e41679e8e50f74726bd91c13cb5c214515ac1ab09e10",
+    "installed_adapter_fixture_v3.cjs": "ad76ae67887a674b12f23564bc52d6da9898c2937aa235b1ca6da7b6f5345080",
+    "adapter-attempt-03/RESULT.json": "1b36e6631ba2c1bc99bf917ee6b26fdf3d6f679c530d41ca73f09b8a7b00dc14",
+    "adapter-attempt-03/receipt.json": "216a4030183cf0bd546c4163453db088e59f323f4cc31ee30d0c74444a7002d7"
+  },
+  "stopping_rule": "One bounded implementation and focused correction verification only. Do not run a browser, build, package, or campaign until the focused source/tests establish this contract; do not rerun unaffected broad evidence."
+}

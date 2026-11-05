@@ -1,0 +1,342 @@
+{
+  "schema": "awwv.combat-fatigue-prefix39.retained-failure-classification.machine-evidence.v1",
+  "scope": {
+    "retained_only": true,
+    "new_run": false,
+    "api_or_query": false,
+    "source_edit": false,
+    "threshold_or_paint_tuning": false,
+    "broad_supply_investigation": false
+  },
+  "provenance": {
+    "source_commit": "0278c956d3fce3cdb62161a282f3936eaa0c66c1",
+    "candidate": "runs/player-parity-fatigue-owner-39-20261026-01/apr1992_definitive_188w__2272e1011ba35428__w39_n0",
+    "raw_extraction": {
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\combat-fatigue-prefix39-20261026-v1\\retained-failure-classification-v1\\stdout.json",
+      "sha256": "df911352684d3707ab00036b561504a6e2fc2715fad2bca4bb71df34fd5c7c7a"
+    },
+    "receipt": {
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\combat-fatigue-prefix39-20261026-v1\\retained-failure-classification-v1\\receipt.json",
+      "sha256": "45a86acb556ccac61987a80ccc4f5bdf058b55624126b8720f94f5894d4429cc"
+    },
+    "result": {
+      "status": "STOP_NO_RETRY",
+      "score": 703,
+      "denominator": 712,
+      "required": [
+        {
+          "name": "scoring",
+          "pass": false
+        },
+        {
+          "name": "consistency",
+          "pass": true
+        },
+        {
+          "name": "health",
+          "pass": false
+        },
+        {
+          "name": "movement",
+          "pass": true
+        },
+        {
+          "name": "graph-roster",
+          "pass": true
+        },
+        {
+          "name": "save-provenance",
+          "pass": true
+        },
+        {
+          "name": "control-attribution",
+          "pass": true
+        }
+      ],
+      "preservation_equal": true
+    }
+  },
+  "control_maps": {
+    "reference_ids": 712,
+    "new_score": 703,
+    "parent_score": 704,
+    "new_mismatch_ids": [
+      "op:donji_vakuf:korenici",
+      "op:foca:donje_zesce",
+      "op:gorazde:kolovarice",
+      "op:ilijas:krivajevici",
+      "op:kalesija:seher_2",
+      "op:konjic:glavaticevo_2",
+      "op:konjic:ljuta",
+      "op:maglaj:jablanica",
+      "op:trnovo:tosici"
+    ],
+    "parent_mismatch_ids": [
+      "op:donji_vakuf:korenici",
+      "op:foca:donje_zesce",
+      "op:ilijas:krivajevici",
+      "op:kalesija:seher_2",
+      "op:konjic:glavaticevo_2",
+      "op:konjic:ljuta",
+      "op:maglaj:jablanica",
+      "op:trnovo:tosici"
+    ],
+    "exact_new_vs_parent_deltas": [
+      {
+        "id": "op:gorazde:kolovarice",
+        "parent": "RS",
+        "new": "RBiH",
+        "expected": "RS"
+      }
+    ],
+    "new_map_sha256": "00d098510c8a1224b9aa1e1e034a401ac01dff9d8047c29c450647bcfbabb058",
+    "parent_map_sha256": "c995640006694a2ced096683b7d7dc17384a99031d9064a751d558cc6aedb5d9",
+    "classification": "KOLOVARICE_IS_THE_ONLY_NEW_MISMATCH; NO_COMPENSATING_712_MAP_CHANGE"
+  },
+  "kolovarice": {
+    "new": {
+      "initial_controller": "RBiH",
+      "final_controller": "RBiH",
+      "control_events": [],
+      "battles": [
+        {
+          "turn": 9,
+          "battle_id": "9:op:gorazde:kolovarice:rs_ajnie_brigade:arbih_801st_light",
+          "attacker_brigade": "rs_ajnie_brigade",
+          "attacker_brigades": [
+            "rs_ajnie_brigade",
+            "rs_foa_brigade"
+          ],
+          "attacker_faction": "RS",
+          "operation_id": "vrs_herzegovina:Operation Foca:t4",
+          "operation_name": "Operation Foca",
+          "attacker_won": false,
+          "outcome": "stalemate",
+          "attacker_power": 191.33940441442817,
+          "attacker_power_raw": 215.2299262254535,
+          "defender_power": 265.8115351444628,
+          "power_ratio": 0.72
+        },
+        {
+          "turn": 10,
+          "battle_id": "10:op:gorazde:kolovarice:rs_ajnie_brigade:arbih_801st_light",
+          "attacker_brigade": "rs_ajnie_brigade",
+          "attacker_brigades": [
+            "rs_ajnie_brigade"
+          ],
+          "attacker_faction": "RS",
+          "operation_id": "vrs_herzegovina:Operation Foca:t4",
+          "operation_name": "Operation Foca",
+          "attacker_won": false,
+          "outcome": "catastrophic",
+          "attacker_power": 83.63795624413531,
+          "attacker_power_raw": 98.39759558133566,
+          "defender_power": 340.4705262459046,
+          "power_ratio": 0.25
+        },
+        {
+          "turn": 14,
+          "battle_id": "14:op:gorazde:kolovarice:rs_foa_brigade:null",
+          "attacker_brigade": "rs_foa_brigade",
+          "attacker_brigades": [
+            "rs_foa_brigade"
+          ],
+          "attacker_faction": "RS",
+          "operation_id": "vrs_herzegovina:Operation Foca:t4",
+          "operation_name": "Operation Foca",
+          "attacker_won": false,
+          "outcome": "stalemate",
+          "attacker_power": 77.64063368535002,
+          "attacker_power_raw": 91.34192198276475,
+          "defender_power": 86.13595,
+          "power_ratio": 0.9
+        }
+      ]
+    },
+    "parent": {
+      "initial_controller": "RBiH",
+      "final_controller": "RS",
+      "control_events": [
+        {
+          "attacker_brigade": "rs_ajnie_brigade",
+          "battle_id": "14:op:gorazde:kolovarice:rs_ajnie_brigade:null",
+          "from": "RBiH",
+          "mechanism": "combat",
+          "mun_id": "gorazde",
+          "settlement_id": "op:gorazde:kolovarice",
+          "to": "RS",
+          "turn": 14
+        }
+      ],
+      "battles": [
+        {
+          "turn": 9,
+          "battle_id": "9:op:gorazde:kolovarice:rs_ajnie_brigade:arbih_801st_light",
+          "attacker_brigade": "rs_ajnie_brigade",
+          "attacker_brigades": [
+            "rs_ajnie_brigade",
+            "rs_foa_brigade"
+          ],
+          "attacker_faction": "RS",
+          "operation_id": "vrs_herzegovina:Operation Foca:t4",
+          "operation_name": "Operation Foca",
+          "attacker_won": false,
+          "outcome": "repulsed",
+          "attacker_power": null,
+          "attacker_power_raw": null,
+          "defender_power": null,
+          "power_ratio": 0.69
+        },
+        {
+          "turn": 14,
+          "battle_id": "14:op:gorazde:kolovarice:rs_ajnie_brigade:null",
+          "attacker_brigade": "rs_ajnie_brigade",
+          "attacker_brigades": [
+            "rs_ajnie_brigade",
+            "rs_foa_brigade"
+          ],
+          "attacker_faction": "RS",
+          "operation_id": "vrs_herzegovina:Operation Foca:t4",
+          "operation_name": "Operation Foca",
+          "attacker_won": true,
+          "outcome": "victory",
+          "attacker_power": null,
+          "attacker_power_raw": null,
+          "defender_power": null,
+          "power_ratio": 1.56
+        }
+      ]
+    },
+    "classification": "NEW_RUN_RETAINED_INITIAL_RBiH_AFTER_FAILED_RS_OPERATION_FOCA_ATTACKS; PARENT_RECORDED_LAWFULLY_ATTRIBUTED_RS_TURN14_COMBAT_CAPTURE"
+  },
+  "stranded": {
+    "exact_sets": {
+      "new": {
+        "count": 13,
+        "ids": [
+          "arbih_1st_cerska",
+          "arbih_1st_kamenica",
+          "arbih_246th_vitezka_mountain",
+          "hrhb_94th_brigade",
+          "hrhb_95th_brigade",
+          "hrhb_ban_jelai_brigade",
+          "hrhb_jure_franceti_brigade",
+          "hrhb_kiseljak_brigade",
+          "hrhb_kreevo_brigade",
+          "hrhb_stjepan_tomaevi_brigade",
+          "hrhb_travnik_brigade",
+          "hrhb_vitezovi_brigade_vitez",
+          "hvo_nikola_subic_zrinski_brigade"
+        ]
+      },
+      "parent": {
+        "count": 13,
+        "ids": [
+          "arbih_1st_cerska",
+          "arbih_1st_kamenica",
+          "arbih_246th_vitezka_mountain",
+          "hrhb_94th_brigade",
+          "hrhb_95th_brigade",
+          "hrhb_ban_jelai_brigade",
+          "hrhb_jure_franceti_brigade",
+          "hrhb_kiseljak_brigade",
+          "hrhb_kreevo_brigade",
+          "hrhb_stjepan_tomaevi_brigade",
+          "hrhb_travnik_brigade",
+          "hrhb_vitezovi_brigade_vitez",
+          "hvo_nikola_subic_zrinski_brigade"
+        ]
+      },
+      "n101": {
+        "count": 13,
+        "ids": [
+          "arbih_1st_cerska",
+          "arbih_1st_kamenica",
+          "arbih_246th_vitezka_mountain",
+          "hrhb_94th_brigade",
+          "hrhb_95th_brigade",
+          "hrhb_ban_jelai_brigade",
+          "hrhb_jure_franceti_brigade",
+          "hrhb_kiseljak_brigade",
+          "hrhb_kreevo_brigade",
+          "hrhb_stjepan_tomaevi_brigade",
+          "hrhb_travnik_brigade",
+          "hrhb_vitezovi_brigade_vitez",
+          "hvo_nikola_subic_zrinski_brigade"
+        ]
+      },
+      "n102": {
+        "count": 13,
+        "ids": [
+          "arbih_1st_cerska",
+          "arbih_1st_kamenica",
+          "arbih_246th_vitezka_mountain",
+          "hrhb_94th_brigade",
+          "hrhb_95th_brigade",
+          "hrhb_ban_jelai_brigade",
+          "hrhb_jure_franceti_brigade",
+          "hrhb_kiseljak_brigade",
+          "hrhb_kreevo_brigade",
+          "hrhb_stjepan_tomaevi_brigade",
+          "hrhb_travnik_brigade",
+          "hrhb_vitezovi_brigade_vitez",
+          "hvo_nikola_subic_zrinski_brigade"
+        ]
+      }
+    },
+    "all_four_sets_identical": true,
+    "lawfulness_basis": "The owner task reports an existing canon/supply review declared this identical baseline lawful. This classification verifies exact set identity only and performs no fresh supply review."
+  },
+  "production_boundary": {
+    "new_event_count": 120,
+    "new_combat_event_count": 85,
+    "new_malformed_required_field_count": 0,
+    "parent_malformed_required_field_count": 0,
+    "final_formation_lookup_anomalies_new": [
+      "1|op:ilidza:sarajevo_dio_ilidza_2|jna_4th_corps_tg|RS",
+      "1|op:ilijas:medojevici|jna_ilijas_garrison_det|RS",
+      "1|op:prijedor:ljubija_2|jna_2nd_md_tg|RS",
+      "1|op:visegrad:visegrad_2|jna_uzice_corps_tg|RS",
+      "1|op:vogosca:svrake|jna_vogosca_to_tg|RS",
+      "2|op:ilidza:rakovica_2|jna_4th_corps_tg|RS",
+      "2|op:ilijas:dragoradi|jna_ilijas_garrison_det|RS",
+      "2|op:mostar:vranjevici_2|jna_nevesinje_garrison|RS",
+      "2|op:visegrad:prelovo_2|jna_uzice_corps_tg|RS",
+      "3|op:ilijas:sirovine|jna_ilijas_garrison_det|RS",
+      "3|op:visegrad:kamenica_2|jna_uzice_corps_tg|RS",
+      "4|op:prijedor:raljas|jna_2nd_md_tg|RS"
+    ],
+    "final_formation_lookup_anomalies_parent": [
+      "1|op:ilidza:sarajevo_dio_ilidza_2|jna_4th_corps_tg|RS",
+      "1|op:ilijas:medojevici|jna_ilijas_garrison_det|RS",
+      "1|op:prijedor:ljubija_2|jna_2nd_md_tg|RS",
+      "1|op:visegrad:visegrad_2|jna_uzice_corps_tg|RS",
+      "1|op:vogosca:svrake|jna_vogosca_to_tg|RS",
+      "2|op:ilidza:rakovica_2|jna_4th_corps_tg|RS",
+      "2|op:ilijas:dragoradi|jna_ilijas_garrison_det|RS",
+      "2|op:mostar:vranjevici_2|jna_nevesinje_garrison|RS",
+      "2|op:visegrad:prelovo_2|jna_uzice_corps_tg|RS",
+      "3|op:ilijas:sirovine|jna_ilijas_garrison_det|RS",
+      "3|op:visegrad:kamenica_2|jna_uzice_corps_tg|RS",
+      "4|op:prijedor:raljas|jna_2nd_md_tg|RS"
+    ],
+    "new_only_final_formation_lookup_anomalies": [],
+    "parent_only_final_formation_lookup_anomalies": [],
+    "interpretation": "The identical 12 entries are turns 1-4 JNA combat actors absent from both final formation tables. This final-state lookup cannot label them illegal; it supplies no NEW anomaly. Graph/roster, consistency, movement, save provenance, control attribution, and 14-root preservation passed.",
+    "new_malformed_boundary_or_illegal_actor_evidenced": false
+  },
+  "battle_power_diagnostic": {
+    "requested_reason_code": "battle_power",
+    "stderr_bytes": 0,
+    "stdout_battle_power_marker_count": 0,
+    "korenici_turn34_battle_power_records": [],
+    "conclusion": "ABSENT_FROM_RETAINED_STREAMS__NO_POWERS_RATIO_OR_ACTOR_CLAIMED"
+  },
+  "classification": {
+    "evidenced_new_code_defect": false,
+    "failure_kind": "UNCHANGED_ACCEPTANCE_FAILURE_PLUS_LAWFUL_OUTCOME_DRIFT_UNDER_CHANGED_FATIGUE",
+    "health": "13 > 3 remains an unmet gate; exact stranded IDs are unchanged across new, parent, n101 and n102.",
+    "score": "703 < 707 with four formerly-correct losses; Kolovarice is the sole additional loss versus parent.",
+    "remaining_owner_decision": "Abandon this fatigue candidate, or authorize a separately scoped causal investigation into the lawful Kolovarice outcome drift. No retained evidence justifies a code fix, threshold change, painted-reference change, or baseline adoption."
+  }
+}

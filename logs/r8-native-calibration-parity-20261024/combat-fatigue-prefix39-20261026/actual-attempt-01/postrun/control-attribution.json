@@ -1,0 +1,19 @@
+{
+  "schema": "awwv.scenario-postturn-prefix39.control-attribution.v1",
+  "pass": true,
+  "authority": [
+    "src/scenario/control_change_attribution.ts",
+    "tests/scenario_control_change_attribution_contract.test.ts"
+  ],
+  "summary": {
+    "abandoned": 0,
+    "combat": 85,
+    "consolidation": 0,
+    "init_overrides": 23,
+    "other": 1,
+    "paramilitary": 34,
+    "total_changes": 143
+  },
+  "weekly_rows": 39,
+  "failures": []
+}

@@ -1,0 +1,9 @@
+[BOT-COL-DIAG] bid=rs_19th_krajina_light_infantry dest=op:donji_vakuf:pribraca_2
+[BOT-COL-DIAG] bid=rs_2nd_banja_luka_light_infantry dest=op:donji_vakuf:pribraca_2
+[CORR-DIAG] bid=rs_19th_krajina_light_infantry loc=op:donji_vakuf:jemanlici ss=subseg:sector:vrs_1st_krajina:16:0 front=["op:donji_vakuf:jemanlici"] transitDest=op:donji_vakuf:pribraca_2 atValidFront=true destInFront=false owner=bot_discretionary
+[BOT-COL-DIAG] bid=rs_19th_krajina_light_infantry dest=op:donji_vakuf:pribraca_2
+[CORR-DIAG] bid=rs_19th_krajina_light_infantry loc=op:donji_vakuf:jemanlici ss=subseg:sector:vrs_1st_krajina:17:0 front=["op:donji_vakuf:jemanlici"] transitDest=op:donji_vakuf:pribraca_2 atValidFront=true destInFront=false owner=bot_discretionary
+[BOT-COL-DIAG] bid=rs_11th_mrkonji_light_infantry dest=op:donji_vakuf:pribraca_2
+[BOT-COL-DIAG] bid=rs_19th_krajina_light_infantry dest=op:donji_vakuf:pribraca_2
+[CORR-DIAG] bid=rs_19th_krajina_light_infantry loc=op:donji_vakuf:jemanlici ss=subseg:sector:vrs_1st_krajina:13:0 front=["op:donji_vakuf:jemanlici"] transitDest=op:donji_vakuf:pribraca_2 atValidFront=true destInFront=false owner=bot_discretionary
+[BOT-COL-DIAG] bid=rs_19th_krajina_light_infantry dest=op:donji_vakuf:pribraca_2

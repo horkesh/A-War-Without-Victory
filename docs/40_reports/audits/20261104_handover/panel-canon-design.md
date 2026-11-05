@@ -1,0 +1,22 @@
+# W3 panel — Canon Compliance / Game Design seat
+
+**Vote: 1 KEEP. Confidence: medium.**
+
+**Load-bearing reason.** Canon has already settled this trade-off, and it sits at the top of the precedence order. Engine Invariants §14.9 (`docs/10_canon/Engine_Invariants_v0_9_0.md:447`) says an empty, reachable, same-corps sector is resolved "through movement authority rather than a direct location rewrite", and that isolation is "not a teleport exception". It makes no exception for sector construction. The engineering contract states the rule directly: "unresolved-is-honest is preferable to paper staffing" (`docs/20_engineering/MOVEMENT_AUTHORITY.md:154`, and `:125` says "no engine tier may teleport"). If we PARK, the integration branch's 709/708/710/694 floor and the Ozren 4/4 still depend on that teleport. That is buying score with a broken mechanic, which the binding owner directive forbids. Every later measured run would then be calibrating against the violation.
+
+## Supporting findings
+
+1. **Measured: the pre-W3 code is a real violation, not a gap in canon.** `moveBrigadeToFrontTarget` (`src/sim/combat/brigade_assignment.ts:1762-1779`) writes `formation.location_osid = target` directly. The removed steps 1c, 1d and 2 (`git show 054da07e7`) used it to pull another sector's rear, reserve or line brigade into an empty sector. The caller `corps_front_sectors.ts` is classed as "Derived truth" (`MOVEMENT_AUTHORITY.md:43`), and its stated job is to classify and mark `unstaffed_front`. It is not a location-writing tier (`:8`, `:14-19`). The Systems Manual repeats the same rule: "no phase directly rewrites a donor brigade's location" (`Systems_Manual_v0_9_0.md:213`). The same wording appears in `context.md:83`.
+2. **Measured: no process rule forbids either path, but the gates still apply.** `AGENT_WORKFLOW.md:53,56` requires one change per measured run. W3 meets that: C against B. The workflow also requires a 188-week run, protected anchors, a check of every formerly-correct loss, and the full suite on the final candidate before acceptance or integration. The packet shows focused tests (121/121) but no full-suite result for C, so that gate is still open. Counter-precedent: the n81 stale-operation prepass was rejected for a calibration drop and kept dormant (`MOVEMENT_AUTHORITY.md:129`). n81 was an optional new heuristic, though. W3 removes a behaviour that canon forbids, so it fits the owner rule "engine soundness over %" rather than the n81 pattern. KEEP on this local, unpushed integration branch is not adoption on main or a new baseline.
+3. **Game design: staying visibly `unstaffed_front` until relief marches in is the intended behaviour.** The Game Bible says "Military control cannot exist without force presence" and treats delay as being as influential as decisive moves (`Game_Bible_v0_9_0.md:61,31`). The player commands by approval, not by moving units, and orders take time and suffer friction (`Rulebook_v0_9_0.md:521,480,35`). With KEEP, the player sees the real gap, sees the staff send relief, and watches it arrive over later turns. That makes thin coverage something the player is responsible for. With PARK, holes are silently filled by brigades that were never there, and calibration hides the cost. REJECT would mean amending the top canon tier to allow paper staffing, which goes against the thesis above. I find no ground for it.
+
+## Inference (not measured)
+
+- The Ozren 1/4 loss and the scorer's note that 2nd/3rd Corps are suppressed suggest the canonical relief path (T1 → T2 → T3) is not delivering for some reachable sectors. Read that way, W3 exposes a second defect. §14.9 also requires T1 to send relief when a legal donor exists, so this should be treated as a blocking follow-up for main adoption, not as a reason to keep the teleport. The scorer's line "a fix that breaks this is the WRONG fix" is a scorer heuristic, and it ranks below Engine Invariants.
+- W3 is a partial fix. It keeps the sector's own reserve/rear promotion (`brigade_assignment.ts:1900-1951`), which still rewrites location directly within `LOCAL_FRONT_RELIEF_MAX_HOPS` from the derived-truth caller. This is defensible as T6-style local repair (`MOVEMENT_AUTHORITY.md:19,143`), but it should be recorded as residual.
+
+## Conditions on KEEP
+
+- Record Ozren 4/4 as an open, blocking item for main adoption. The relief path must be fixed, not the teleport restored.
+- Run the full suite on C before W3 leaves the integration branch.
+- Record the own-sector promotion residual.

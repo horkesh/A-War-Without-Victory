@@ -1,0 +1,84 @@
+{
+  "schema": "awwv.787.preflight-review.v1",
+  "captured_utc": "2026-10-21T11:10:35.568Z",
+  "writes_closed": true,
+  "verdict": "NO_GO_READER_CONTROLS_UNDER_ENFORCE_FIXED_PLAN",
+  "campaign_authorized_to_start": false,
+  "scope": "Independent pre-run review of task 786 canonical provenance correction, stateful readers, and 14 reader controls against fixed plan 785.",
+  "bindings": {
+    "plan": "logs/claude-channel-20261004/785-root-plan.md",
+    "reader": {
+      "path": "logs/claude-channel-20261004/786-stateful-readers.cjs",
+      "sha256": "fbdd5ce0ee14cde3ec3195c82da1fec41f00d7eeffd807fed3cd8159ca45c797"
+    },
+    "preflight_b": {
+      "path": "logs/claude-channel-20261004/786-preflight-b.json",
+      "sha256": "2003128a630f783a69a6b8a7f21d8e51c0cb6c410d4fb3f2cacd066b7c93a438"
+    },
+    "controls": "logs/claude-channel-20261004/786-reader-controls-a/controls.json",
+    "canonical_source": "src/scenario/run_provenance.ts"
+  },
+  "accepted_preflight_evidence": {
+    "canonical_crlf_to_lf_normalizer_binding": true,
+    "changed_content_negative_control": true,
+    "ordered_32_row_digest_recomputed": true,
+    "all_32_normalized_input_hashes_match": true,
+    "geo_raw_sha256": "03713c8e80ba7111ff64ad0bd69b70db4c7e2b30e22f23b8c4e2c11be60baa1a",
+    "geo_normalized_sha256": "c03cc9ce4286b779139ce460e5f515d67415fe633e4ed2dbda1764b9440338c8",
+    "baseline_geo_sha256": "c03cc9ce4286b779139ce460e5f515d67415fe633e4ed2dbda1764b9440338c8",
+    "consumed_input_digest": "7986f05230e1d526e1794673e796dcb77730501d4958e435970c4ec806cc8039",
+    "note": "The original raw-byte NO-GO remains preserved as a checker failure; the corrected canonical-text comparison is sound and does not edit data."
+  },
+  "blocking_findings": [
+    {
+      "id": "P1",
+      "severity": "blocking",
+      "finding": "Personnel coverage is not bound to the real runTurn phase manifest. The positive fixture repeats one synthetic phase per turn for 188 turns, while the reader merely records the set of phase counts and never asserts expected phase names, groups, counts, or ordering beyond sequential indices.",
+      "evidence": ["786-stateful-readers.cjs:7-17", "786-stateful-readers.cjs:23-25"]
+    },
+    {
+      "id": "P2",
+      "severity": "blocking",
+      "finding": "Personnel state continuity is not enforced. The accepted positive fixture ends every turn at personnel 22 and begins the next at 21. The reader does not bind phase_end.after to the next phase_start.before or terminal actors to the final phase_end, so fabricated or dropped transitions can pass.",
+      "evidence": ["786-stateful-readers.cjs:7-17", "786-stateful-readers.cjs:23-25"]
+    },
+    {
+      "id": "P3",
+      "severity": "blocking",
+      "finding": "Presence and direct-writer semantics are under-validated. Any string is accepted as a presence enum; writer rows need only finite before/after and a nonzero change. The reader does not validate allowed presence shapes, source-specific transfer/casualty/branch operands, writer before/after continuity, or reconciliation with the enclosing phase delta.",
+      "evidence": ["786-stateful-readers.cjs:6", "786-stateful-readers.cjs:10", "786-stateful-readers.cjs:16", "786-stateful-readers.cjs:23"]
+    },
+    {
+      "id": "C1",
+      "severity": "blocking",
+      "finding": "Commander caller-pass coverage is local rather than campaign-complete. Actual mode accepts any set of internally complete passes as long as exactly five RS Sarajevo-Romanija rows exist for turns 20 through 24. It does not enforce the expected turn/faction pass schedule or full corps inventories across the 188-week stream.",
+      "evidence": ["786-stateful-readers.cjs:19-22"]
+    },
+    {
+      "id": "C2",
+      "severity": "blocking",
+      "finding": "Commander target-selection semantics are only type checked. The reader accepts any status string and any string actual_fitness, and does not enforce filter short-circuit progression, eligibility-to-rank consistency, selected_brigade_id agreement, local-occupation bypass semantics, or fitness plus brigade-id ranking order.",
+      "evidence": ["786-stateful-readers.cjs:18-20", "src/sim/combat/commander/emit.ts:2004-2088", "src/sim/combat/commander/emit.ts:2870-2957"]
+    },
+    {
+      "id": "C3",
+      "severity": "blocking",
+      "finding": "The only commander positive control is one synthetic fallback-created pass and is invoked with target coverage disabled. There are no positive controls for valid not-reached, non-fallback completion, generic all-filtered/no-brigade, or local-occupation-bypass records, so tightening the reader cannot be shown to accept production-valid alternate shapes.",
+      "evidence": ["786-stateful-readers.cjs:23-25"]
+    },
+    {
+      "id": "G1",
+      "severity": "blocking",
+      "finding": "Preflight-b reduces the reader gate to controls.pass plus a count of 14; it does not inspect which semantic controls ran. Therefore the green preflight does not establish the fixed-plan reader requirements.",
+      "evidence": ["786-preflight-b.cjs:13"]
+    }
+  ],
+  "required_targeted_correction": [
+    "Bind personnel records to the actual ordered phase manifest for each runTurn call and validate actor order, legal presence variants, cross-boundary continuity, terminal equality, and source-specific writer arithmetic against phase deltas.",
+    "Bind commander passes to the expected 188-week turn/faction caller schedule and exact per-pass corps inventories, then validate status enums, finite markers, short-circuit NOT_REACHED rules, ordinal/rank/fitness ordering, selected identity, and local-occupation bypass semantics.",
+    "Add focused positive and negative controls for those rules, including valid alternate production paths; retain the existing 14 cases but do not count them as sufficient by number alone."
+  ],
+  "stopping_rule": "Do not invoke the sole 188-week campaign until one targeted reader/control correction passes a fresh cheap review. Do not rerun the campaign or broaden to suites/builds/replays.",
+  "runner_invocations_observed": 0,
+  "original_786_false_failure_unchanged": true
+}

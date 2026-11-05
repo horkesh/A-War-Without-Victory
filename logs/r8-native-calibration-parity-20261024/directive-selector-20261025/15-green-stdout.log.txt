@@ -1,0 +1,11 @@
+
+ RUN  v2.1.9 C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory
+
+ ✓ tests/op_directive_objection.test.ts (21 tests) 12ms
+ ✓ tests/op_directive_injection.test.ts (13 tests) 11ms
+
+ Test Files  2 passed (2)
+      Tests  34 passed (34)
+   Start at  20:33:02
+   Duration  7.68s (transform 2.39s, setup 14ms, collect 6.93s, tests 23ms, environment 0ms, prepare 146ms)
+

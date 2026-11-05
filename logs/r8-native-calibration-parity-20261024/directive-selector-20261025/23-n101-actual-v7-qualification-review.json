@@ -1,0 +1,296 @@
+{
+  "schema": "awwv.fractional-fatigue-actual-v7-qualification-independent-review.v1",
+  "verdict": "GO",
+  "independent": true,
+  "reviewer": "desktop_terrain_canon_review",
+  "reviewed_at_utc": "2026-10-25T13:31:10.9501131Z",
+  "candidateHead": "a3063366ae094468fbb2ede143f9ced3a1ed2f68",
+  "candidateRun": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n101",
+  "qualification": "SCENARIO_FIRST_QUALIFIED",
+  "fullSuiteAuthorization": "GO_FOR_ONE_REQUIRED_QUALIFYING_FULL_SUITE_UNDER_ITS_SEPARATELY_REVIEWED_CONTRACT",
+  "bindings": {
+    "receipt": {
+      "path": "tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-validation-v1\\campaign-v7-01/receipt.json",
+      "bytes": 15126,
+      "sha256": "59c0e25683978b3657210a904c675e3ad579b10cb0b386a2a78da7b9aa71eb5e"
+    },
+    "result": {
+      "path": "tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-validation-v1\\campaign-v7-01/result.json",
+      "bytes": 24771,
+      "sha256": "393cb94e3034b4799b736f70337b72901a2bfa2167a3c7e758f6eaf4a3377b01"
+    },
+    "config": {
+      "path": "tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-validation-v1/CAMPAIGN_CONFIG_V7.bound.json",
+      "bytes": 26272,
+      "sha256": "80a70b4409552290528a579a8765517a765a8ae531ff525170fb941c020c61ea"
+    },
+    "entry": {
+      "path": "tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-validation-v1/fractional_fatigue_qualification_v7.mts",
+      "bytes": 39189,
+      "sha256": "3421ae13909f01de64799e3cdf485c716c6b515802c89b0533c0b7ee71925f72"
+    },
+    "wrapper": {
+      "path": "tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-validation-v1/CAMPAIGN_WRAPPER_CONFIG_V7.json",
+      "bytes": 3129,
+      "sha256": "9115ebfdd0e8f7791db4d68a461ee4e8472e3f4db9b4892d1a3a4ac87f8c4627"
+    },
+    "preflight": {
+      "path": "tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-validation-v1\\campaign-v7-01/preflight.json",
+      "bytes": 12085,
+      "sha256": "fdd4f3417a8606d5bd9fee8f0f8737112d5b836a691a74b73982dd0a8c672994"
+    },
+    "launch": {
+      "path": "tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-validation-v1\\campaign-v7-01/launch.json",
+      "bytes": 908,
+      "sha256": "fc92f6beaa5d67cdfe5895ed4efd5826e204953edb82124538bfdd0da37a5ab2"
+    },
+    "campaign_execution": {
+      "path": "tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-validation-v1\\campaign-v7-01/campaign.execution.json",
+      "bytes": 618,
+      "sha256": "7de5809041dbea5ba3cc7fd053d71a0374021ded3f781ca4160127d3d69281ef"
+    },
+    "closing": {
+      "path": "tmp\\player-bot-capability-parity-20261024\\fractional-fatigue-validation-v1\\campaign-v7-01/closing-preservation.json",
+      "bytes": 2939,
+      "sha256": "82d482c6cf40306a8ee4facc968df760e39d6c15ab792e4fd2ba3b1fd6bfd414"
+    }
+  },
+  "wrapper_and_inventory": {
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "timed_out": false,
+    "duration_seconds": 159.957,
+    "artifact_contract_pass": true,
+    "retained_artifact_count": 58,
+    "unexpected_artifacts": 0,
+    "missing_allowed_artifacts": 0,
+    "retained_artifact_records_aggregate_sha256": "e5c56630e463c9c81f9d7da067fac0b6b4fde3397e303beeb8dd35225acf6bb8",
+    "attempt_tree_file_count": 63
+  },
+  "candidate_provenance": {
+    "file_count": 40,
+    "tree_aggregate_sha256": "14ad078deb0a9b722c32f9889048045a88d68c7be4dc35ed331141c78aaf7d1c",
+    "run_meta_sha256": "7765ad56b5ae787964715270d4fa3d99bb7b6a5166569fd38fa09c36eea5cdc0",
+    "git_commit": "a3063366ae094468fbb2ede143f9ced3a1ed2f68",
+    "git_dirty": false,
+    "node_version": "v22.23.2",
+    "weeks": 188,
+    "consumed_input_count": 32,
+    "consumed_input_digest": "88cf2d9ad4913bc62dde684d71465a28622c28b559713e4d0f13124ad8031c69",
+    "weekly_report_sha256": "08b8e8cc74f7945ac4066edbce6cddfce74c40180c6fa013a6cb6c9997637669",
+    "final_save_sha256": "3c9be45e01aa0bf87fa7409d9695c0a3a9da4583ed9cb5188c0cca2491a201be",
+    "operation_aars_sha256": "d9184f9c87628aa200674558154973644bc286f773bef147b589c4c5d6019175",
+    "run_summary_sha256": "fbfcbb314fb6912e6f5cba13b74630cb0257e1ad7e8e7ef4686a3e04c3738893"
+  },
+  "gate_summary": {
+    "count": 14,
+    "passed": 14,
+    "failed": 0,
+    "timed_out": 0,
+    "records": [
+      {
+        "name": "evaluation",
+        "status": "PASS",
+        "exit": 0,
+        "timed_out": false,
+        "execution_sha256": "9420fdc19ec9c703c25c991ac8e82302b51db071ce5243857d49766d777e5609"
+      },
+      {
+        "name": "timeline-vs-n91",
+        "status": "PASS",
+        "exit": 0,
+        "timed_out": false,
+        "execution_sha256": "5f5996e94bc409862fd08eb7115a990a1ad94d97da3a57f6048a1caee5afcd70"
+      },
+      {
+        "name": "timeline-vs-n92",
+        "status": "PASS",
+        "exit": 0,
+        "timed_out": false,
+        "execution_sha256": "8614e06bbe51412f433d0e5566ab3f592ad4d7ea8139bfbf06de3838ccf3f036"
+      },
+      {
+        "name": "timeline-vs-n94",
+        "status": "PASS",
+        "exit": 0,
+        "timed_out": false,
+        "execution_sha256": "eef91e7aa4dd58891c80a7f4fc9e4b0e65991343f1648a8aa4608b07884a0605"
+      },
+      {
+        "name": "timeline-vs-n98",
+        "status": "PASS",
+        "exit": 0,
+        "timed_out": false,
+        "execution_sha256": "549a6ba0403acdbcda3b3774f8f88806cf20228bd815bc3ef4a68fa9eaeb5308"
+      },
+      {
+        "name": "fatigue-domain-vs-n94",
+        "status": "PASS",
+        "exit": 0,
+        "timed_out": false,
+        "execution_sha256": "ea60e73685f68b8cec897a706e0c01e448ba14912ed5643564af247cbec798ad"
+      },
+      {
+        "name": "fatigue-domain-vs-n98",
+        "status": "PASS",
+        "exit": 0,
+        "timed_out": false,
+        "execution_sha256": "5c4c0c9b0bced2941fc625325772f3693e07bc6da9ecb137079567d8d897885d"
+      },
+      {
+        "name": "checkpoints",
+        "status": "PASS",
+        "exit": 0,
+        "timed_out": false,
+        "execution_sha256": "1ce63ceab41d8bebc1c545adb44ed18d451e330395a1800daaa359e55517c515"
+      },
+      {
+        "name": "consistency",
+        "status": "PASS",
+        "exit": 0,
+        "timed_out": false,
+        "execution_sha256": "bcea1fe15eea78e0c1ae69b6e3cd0835df70077607b2357cda36e74f003245b7"
+      },
+      {
+        "name": "health",
+        "status": "PASS",
+        "exit": 0,
+        "timed_out": false,
+        "execution_sha256": "31cb2573dad2f565a7b1c998184b9a32244ca39322182e53e7148e073f52445b"
+      },
+      {
+        "name": "protected-vs-n91",
+        "status": "PASS",
+        "exit": 0,
+        "timed_out": false,
+        "execution_sha256": "84288d2276d1d0023e4c6d391b76c23e7b7828384c1ad234b61b9f46a0b54a85"
+      },
+      {
+        "name": "protected-vs-n92",
+        "status": "PASS",
+        "exit": 0,
+        "timed_out": false,
+        "execution_sha256": "e3e403adece50107e596050264ed54298ee0ddb0302b93feaae599f6d8a88da0"
+      },
+      {
+        "name": "producer",
+        "status": "PASS",
+        "exit": 0,
+        "timed_out": false,
+        "execution_sha256": "4faee43f561f30e9382371ceec398def5e66742fe4c2ad24283bac049cb61071"
+      },
+      {
+        "name": "movement",
+        "status": "PASS",
+        "exit": 0,
+        "timed_out": false,
+        "execution_sha256": "17ca9b28824b0bb21c01109744b37cb7194392c297473192ccfd0a2f7bc86d5d"
+      }
+    ]
+  },
+  "gameplay_acceptance": {
+    "checkpoint_scores": {
+      "jan1993": 707,
+      "apr1994": 707,
+      "apr1995": 706,
+      "oct1995": 706
+    },
+    "formerly_correct_losses": {
+      "n91": [],
+      "n92": []
+    },
+    "protected_anchors": 16,
+    "Toljenak": {
+      "timeline_pass": true,
+      "battle_count": 1,
+      "event_count": 1,
+      "attacker_brigades": [
+        "arbih_162nd_mountain",
+        "arbih_164th_mountain"
+      ],
+      "control_mechanism": "combat",
+      "operation_diagnostic_attack_attempt_count": 2,
+      "logged_capture_AAR": true
+    },
+    "timelines": [
+      "n91 exact",
+      "n92 exact",
+      "n94 exact",
+      "n98 exact"
+    ],
+    "fatigue_domain": {
+      "state_files_per_baseline": 27,
+      "n94_pass": true,
+      "n98_pass": true,
+      "differences_per_comparison": 257,
+      "allowed_scope": "reviewed finite nonnegative formation.ops.fatigue values only"
+    },
+    "consistency": "PASS",
+    "health": "PASS",
+    "producer": "PASS",
+    "evaluation_sha256": "6a3a4dd85a1f1a2258e3110f59fb837b44c89776a53e2e98003cdfec8d9d651c",
+    "failures": []
+  },
+  "movement_contract_resolution": {
+    "verdict": "PASS_COMPLETE_OBSERVATIONAL_COVERAGE_WITH_EXPLICIT_NONCAUSAL_SEMANTICS",
+    "actual": {
+      "receipts_seen": 35720,
+      "coverage": 188,
+      "inactive_coverage": 79,
+      "active_coverage": 109,
+      "inconsistencies": 0,
+      "missing_expected_boundaries": 0,
+      "causal_proof": false,
+      "stdout_sha256": "1ae4d5d9623a4d22d4d9c2b6f7ac8a0c6d4878c15ffed75b9df01a38d1b9f5e0",
+      "execution_sha256": "17ca9b28824b0bb21c01109744b37cb7194392c297473192ccfd0a2f7bc86d5d"
+    },
+    "source_owned_meaning": [
+      "MovementPhaseDiagnostics declares causal_proof as the literal type false and finish() always emits false.",
+      "movement_phase_coverage.cjs rejects any value other than false, validates every receipt and terminal receipt, and exits 0 only when inconsistencies and missing expected boundaries are both empty.",
+      "The field prevents these before/after observational snapshots from being promoted into a causal attribution claim; it is not a boolean pass flag.",
+      "Operation attack/capture causality is established separately by evaluation through the exact Toljenak battle stack, matching combat control event, operation diagnostics, and logged-capture AAR."
+    ],
+    "correction_to_prior_review": "ACTUAL_N99_OFFLINE_DIAGNOSIS_REVIEW.json incorrectly stated that a corrected campaign must emit causal_proof true. That phrase is withdrawn. The valid requirement is literal false plus complete 188-boundary coverage, all receipt schema/order/continuity checks, and zero inconsistencies/missing boundaries. The prior n99 NO_GO remains correct because n99 had zero receipts, zero coverage, and 188 missing boundaries.",
+    "no_tool_change_required": true,
+    "no_offline_substitute_required": true
+  },
+  "preservation": {
+    "opening_equals_closing": true,
+    "legacy_groups": 22,
+    "legacy_records": 1213,
+    "prior_failure_roots": 9,
+    "v6_tree_preserved": true,
+    "n100_partial_preserved": true,
+    "closing_sha256": "82d482c6cf40306a8ee4facc968df760e39d6c15ab792e4fd2ba3b1fd6bfd414"
+  },
+  "ci_envelope": {
+    "snapshot_sha256": "63650966b0bc3eee366ba4948538bad0c7cdf6a62fd5889b790cb29809c5352e",
+    "admission_review_sha256": "e4c860ffcea201f0f035932b572208d83e0b6bfa53f2daaa7923516238093d27",
+    "event_system_ci": {
+      "run": 40193465730,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    "baseline_pins": {
+      "run": 40193465729,
+      "status": "completed",
+      "conclusion": "failure",
+      "exact_two_expected_fatigue_output_hash_mismatches_admitted": true
+    },
+    "claim": "This is the previously reviewed conditional diagnostic CI envelope; it is not a claim that both workflows are green and it does not adopt new pins."
+  },
+  "decision": {
+    "candidate": "GO",
+    "required_full_suite": "AUTHORIZED_ONCE_AFTER_ITS_CORRECTED_STATIC_TOOLING_REVIEW_IS_GO",
+    "package": "HOLD_PENDING_FULL_SUITE",
+    "native": "HOLD_PENDING_NEW_PACKAGE_AND_PACKAGE_REVIEW",
+    "baseline_adoption": "NOT_AUTHORIZED",
+    "reason": "The actual candidate is complete, clean, deterministic at the required retained comparisons, and passes every canonical scenario-first gate under the source-owned movement coverage semantics."
+  },
+  "limitations": [
+    "This review qualifies the n101 scenario-first candidate only.",
+    "It makes no general causal claim from movement snapshots.",
+    "It does not qualify a full suite, package, native run, calibration 39, or baseline adoption.",
+    "V5/n99 and V6/n100 retain their original failed/partial statuses."
+  ]
+}

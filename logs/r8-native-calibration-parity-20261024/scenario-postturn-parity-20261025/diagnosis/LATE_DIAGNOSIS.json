@@ -1,0 +1,50 @@
+{
+  "schema": "awwv.n102-retained-late-diagnosis.v1",
+  "scope": "read-only retained evidence; no replay, simulation, harness, or campaign",
+  "verdict": "First retained operation boundary is Mistral 1 turn 161: identical offer/approval/admission, then n101 executes while n102 is blocked at opening readiness. Southern Move turn 182 is offered/approved in both, but n102 cannot receive Rama or construct the Donji Vrbljani handoff axis while Rama is committed to Mistral 2.",
+  "first_boundary": {
+    "turn": 161,
+    "operation": "Operation Mistral 1",
+    "n101": { "phase": "execution", "captured": ["op:glamoc:glamoc_2"] },
+    "n102": {
+      "phase": "planning",
+      "grahovo": { "executable": false, "blocker": "no_approach_osid" },
+      "glamoc": {
+        "executable": false,
+        "gate_adjacent": 2,
+        "staged_adjacent": 0,
+        "collapsed_state": "STATE_2_not_reachable_from_position",
+        "blocker": "zero_eligible_axis",
+        "predictor_found": { "F_HRHB_0001": false, "hrhb_kralj_petar_kreimir_iv_brigade": false }
+      },
+      "operation_result": { "any_executable": false, "any_approaching": true, "executed": false }
+    }
+  },
+  "offer_and_admission": {
+    "mistral_1": { "both": "eligible and approved at turn 160; ten of ten authored gate evaluations green; same five eventual participants" },
+    "southern_move": { "both": "eligible and approved at turn 182; ten of ten authored gate evaluations green; authored footprint includes op:kljuc:donji_vrbljani_2" }
+  },
+  "combat_delivery": {
+    "mistral_1": {
+      "n101": { "outcome": "success", "recovery_reason": "completed", "attacks": 11, "captures": 10, "grahovo_attacks": 5, "grahovo_captures": 4 },
+      "n102": { "outcome": "partial", "recovery_reason": "max_failures", "attacks": 6, "captures": 6, "grahovo_attacks": 0, "grahovo_captures": 0 }
+    },
+    "southern_move": {
+      "n101": { "participants": 5, "axes": 3, "rama_present": true, "donji_axis_present": true, "donji_final_controller": "HRHB" },
+      "n102": { "participants": 4, "axes": 2, "rama_present": false, "donji_axis_present": false, "donji_final_controller": "RS" }
+    }
+  },
+  "predicate": {
+    "facts": [
+      "n102 Rama is active and has 1261 personnel at save_w181, but participates in live Operation Mistral 2; the commitment persists at save_w182.",
+      "n101 Rama has 1500 personnel and no live operation commitment at save_w181, and is delivered to Southern Move at turn 182.",
+      "n102 Southern Move omits Rama and southern_move_donji_vrbljani."
+    ],
+    "inference": "operation_opportunities.ts rejects Rama as committed_to_live_operation at lines 1796-1798; phase-handoff validation then removes the Donji axis because its source axis does not include Rama at lines 1552-1564.",
+    "unrecorded": [
+      "The exact n102 participant-evaluation rejection event; opportunity_roster reason telemetry was not enabled.",
+      "The causal step from the OSID repair to the already-different pre-offer brigade positions."
+    ]
+  },
+  "smallest_next_question": "With existing opportunity_roster observation enabled only for production-path turns 175 and 182, are Rama's Mistral 2 admission, Southern Move committed_to_live_operation rejection, and Donji handoff-axis removal all emitted? Stop after those records; do not run a campaign or alter gameplay."
+}

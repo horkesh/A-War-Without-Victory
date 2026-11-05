@@ -1,0 +1,405 @@
+{
+  "schema": "awwv.736.fullsuite-result.v1",
+  "captured_utc": "2026-10-20T06:30:03.110Z",
+  "verdict": "FAIL_COMPLETE_TWO_NATIVE_ASSERTIONS",
+  "question": "Does the reviewed harness complete every native balanced/serial lane inside 2,100,000 ms with zero genuine failures, full discovery/partition coverage, truthful file receipts and complete telemetry preservation?",
+  "answer": "No. All lanes completed inside the cap with complete coverage and valid receipts/preservation, but two genuine native assertions failed.",
+  "command": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tools/test/run_vitest_default.mjs"
+  ],
+  "start_utc": "2026-10-20T05:56:30.564Z",
+  "end_utc": "2026-10-20T06:26:21.797Z",
+  "wall_duration_ms": 1791233,
+  "timeout_ms": 2100000,
+  "timed_out": false,
+  "exits": {
+    "suite_child": 1,
+    "suite_wrapper": 1,
+    "preserving_capture": 1
+  },
+  "coverage": {
+    "unique_files": 1438,
+    "executions": 1441,
+    "parallel_shards": 4,
+    "partitioned_files": 1,
+    "indexed_partition_executions": 4,
+    "serial_files": 74,
+    "omitted_default_opt_in": "tests/scenario_runner_read_context_wiring.test.ts"
+  },
+  "native_groups": [
+    {
+      "lane": "parallel-0",
+      "files": {
+        "pass": 340,
+        "fail": 0,
+        "skip": 1,
+        "total": 341
+      },
+      "tests": {
+        "pass": 3428,
+        "fail": 0,
+        "skip": 7,
+        "todo": 0,
+        "total": 3435
+      },
+      "duration_seconds": 1650.32,
+      "summary": "Test Files  340 passed | 1 skipped (341)"
+    },
+    {
+      "lane": "parallel-1",
+      "files": {
+        "pass": 340,
+        "fail": 0,
+        "skip": 1,
+        "total": 341
+      },
+      "tests": {
+        "pass": 3350,
+        "fail": 0,
+        "skip": 3,
+        "todo": 0,
+        "total": 3353
+      },
+      "duration_seconds": 1679.01,
+      "summary": "Test Files  340 passed | 1 skipped (341)"
+    },
+    {
+      "lane": "parallel-2",
+      "files": {
+        "pass": 340,
+        "fail": 1,
+        "skip": 2,
+        "total": 343
+      },
+      "tests": {
+        "pass": 3255,
+        "fail": 1,
+        "skip": 10,
+        "todo": 0,
+        "total": 3266
+      },
+      "duration_seconds": 1632.06,
+      "summary": "Test Files  1 failed | 340 passed | 2 skipped (343)"
+    },
+    {
+      "lane": "parallel-3",
+      "files": {
+        "pass": 342,
+        "fail": 0,
+        "skip": 0,
+        "total": 342
+      },
+      "tests": {
+        "pass": 3504,
+        "fail": 0,
+        "skip": 13,
+        "todo": 0,
+        "total": 3517
+      },
+      "duration_seconds": 1641.53,
+      "summary": "Test Files  342 passed (342)"
+    },
+    {
+      "lane": "serial",
+      "files": {
+        "pass": 73,
+        "fail": 1,
+        "skip": 0,
+        "total": 74
+      },
+      "tests": {
+        "pass": 1189,
+        "fail": 1,
+        "skip": 0,
+        "todo": 0,
+        "total": 1190
+      },
+      "duration_seconds": 107.6,
+      "summary": "Test Files  1 failed | 73 passed (74)"
+    }
+  ],
+  "aggregate": {
+    "files": {
+      "pass": 1435,
+      "fail": 2,
+      "skip": 4,
+      "total": 1441
+    },
+    "tests": {
+      "pass": 14726,
+      "fail": 2,
+      "skip": 33,
+      "todo": 0,
+      "total": 14761
+    }
+  },
+  "native_failures": [
+    {
+      "file": "tests/docs_desktop_v09_truth.test.ts",
+      "lane": "parallel-2",
+      "test": "desktop and roadmap truth docs > defines one authoritative roadmap and one derived command board",
+      "assertion_line": 35,
+      "expected": "roadmap.length < 60000",
+      "actual": 60637,
+      "excerpt": "AssertionError: expected 60637 to be less than 60000"
+    },
+    {
+      "file": "tests/sector_offensive_planning_objective_reconciliation.test.ts",
+      "lane": "serial",
+      "test": "planning objective reconciliation > marks both authored Sana fixed-route axes for sequence commitment",
+      "assertion_line": 128,
+      "expected": [
+        "sana_west_sana_510th",
+        "sana_sanski_most_kljuc"
+      ],
+      "actual": [
+        "sana_veliki_badic_505th",
+        "sana_west_sana_510th",
+        "sana_sanski_most_kljuc"
+      ],
+      "excerpt": "expected [ 'sana_veliki_badic_505th', …(2) ] to deeply equal [ 'sana_west_sana_510th', …(1) ]"
+    }
+  ],
+  "failure_categories": {
+    "native_assertion_failures": 2,
+    "native_suite_collection_failures": 0,
+    "native_unhandled_errors": 0,
+    "native_incomplete_unstarted": 0,
+    "intentional_nested_controls": [
+      {
+        "diagnostic": "deliberate_failure.fixture.ts",
+        "parent_native_test": "tests/run_vitest_balanced.test.ts",
+        "parent_status": "pass",
+        "classification": "intentional nested failure propagation control"
+      },
+      {
+        "diagnostic": "receipt_fail.fixture.ts",
+        "parent_native_test": "tests/vitest_balanced_receipts.test.ts",
+        "parent_status": "pass",
+        "classification": "intentional nested receipt fail control"
+      },
+      {
+        "diagnostic": "receipt_import_error.fixture.ts",
+        "parent_native_test": "tests/vitest_balanced_receipts.test.ts",
+        "parent_status": "pass",
+        "classification": "intentional nested collection-error control"
+      },
+      {
+        "diagnostic": "receipt_finalize_error_runner.fixture.mjs",
+        "parent_native_test": "tests/vitest_balanced_receipts.test.ts",
+        "parent_status": "pass",
+        "classification": "intentional nested native-finalization error control"
+      }
+    ],
+    "stderr_classification": "Intentional nested child failure, collection-error and native-finalization controls plus routine Git working-copy warnings; their native parent files passed."
+  },
+  "receipts": {
+    "run_dir": ".tmp_vitest_balanced_receipts/run-20261020055631692-22968-a3c9bf68-1ad9-4154-b745-5ddcd7ab12e6",
+    "checks": {
+      "manifest_binding": true,
+      "manifest_matches_preflight": true,
+      "five_native_lanes": true,
+      "lane_identity_sequence_files_phases": true,
+      "indexed_property_four_lanes": true,
+      "native_file_state_totals": true,
+      "failures_exact": true
+    },
+    "lanes": [
+      {
+        "receipt": {
+          "path": ".tmp_vitest_balanced_receipts/run-20261020055631692-22968-a3c9bf68-1ad9-4154-b745-5ddcd7ab12e6/worker-0-parallel-0.jsonl",
+          "bytes": 465144,
+          "sha256": "f47232758eccd72697adb8fdf9c98d587941a1ab79c9c6060b3d2e75709e2f36"
+        },
+        "worker_id": "worker-0",
+        "lane": "parallel-0",
+        "expected_file_count": 341,
+        "actual_file_count": 341,
+        "event_count": 1364,
+        "last_sequence": 1364,
+        "identity_exact": true,
+        "sequence_strict": true,
+        "file_set_exact": true,
+        "phase_complete": true,
+        "incomplete_files": [],
+        "states": {
+          "pass": 340,
+          "fail": 0,
+          "skip": 1
+        },
+        "failed_files": [],
+        "skipped_files": [
+          "tests/supply_sensitive_history_smoke.test.ts"
+        ],
+        "partitioned_case_present": true
+      },
+      {
+        "receipt": {
+          "path": ".tmp_vitest_balanced_receipts/run-20261020055631692-22968-a3c9bf68-1ad9-4154-b745-5ddcd7ab12e6/worker-1-parallel-1.jsonl",
+          "bytes": 465221,
+          "sha256": "5b26c50f97d24fb2dc2f368c33247e3af06f1a209ca304990d6dbfd147e09a8f"
+        },
+        "worker_id": "worker-1",
+        "lane": "parallel-1",
+        "expected_file_count": 341,
+        "actual_file_count": 341,
+        "event_count": 1364,
+        "last_sequence": 1364,
+        "identity_exact": true,
+        "sequence_strict": true,
+        "file_set_exact": true,
+        "phase_complete": true,
+        "incomplete_files": [],
+        "states": {
+          "pass": 340,
+          "fail": 0,
+          "skip": 1
+        },
+        "failed_files": [],
+        "skipped_files": [
+          "tests/sector_drina_frontline_integrity.test.ts"
+        ],
+        "partitioned_case_present": true
+      },
+      {
+        "receipt": {
+          "path": ".tmp_vitest_balanced_receipts/run-20261020055631692-22968-a3c9bf68-1ad9-4154-b745-5ddcd7ab12e6/worker-2-parallel-2.jsonl",
+          "bytes": 466838,
+          "sha256": "302b2e1d37b5c28d5b0426bb9cb58659aa411aad1baf0f38b569a28bf75be122"
+        },
+        "worker_id": "worker-2",
+        "lane": "parallel-2",
+        "expected_file_count": 343,
+        "actual_file_count": 343,
+        "event_count": 1372,
+        "last_sequence": 1372,
+        "identity_exact": true,
+        "sequence_strict": true,
+        "file_set_exact": true,
+        "phase_complete": true,
+        "incomplete_files": [],
+        "states": {
+          "pass": 340,
+          "fail": 1,
+          "skip": 2
+        },
+        "failed_files": [
+          "tests/docs_desktop_v09_truth.test.ts"
+        ],
+        "skipped_files": [
+          "tests/sector_front_role_truth_real_save.test.ts",
+          "tests/scenario_golden_baselines_h2_3.test.ts"
+        ],
+        "partitioned_case_present": true
+      },
+      {
+        "receipt": {
+          "path": ".tmp_vitest_balanced_receipts/run-20261020055631692-22968-a3c9bf68-1ad9-4154-b745-5ddcd7ab12e6/worker-3-parallel-3.jsonl",
+          "bytes": 466657,
+          "sha256": "86dca4fbd9dc2b27066727d3ff76ffc955e3981e5e94d8287e9ea8199584f58c"
+        },
+        "worker_id": "worker-3",
+        "lane": "parallel-3",
+        "expected_file_count": 342,
+        "actual_file_count": 342,
+        "event_count": 1368,
+        "last_sequence": 1368,
+        "identity_exact": true,
+        "sequence_strict": true,
+        "file_set_exact": true,
+        "phase_complete": true,
+        "incomplete_files": [],
+        "states": {
+          "pass": 342,
+          "fail": 0,
+          "skip": 0
+        },
+        "failed_files": [],
+        "skipped_files": [],
+        "partitioned_case_present": true
+      },
+      {
+        "receipt": {
+          "path": ".tmp_vitest_balanced_receipts/run-20261020055631692-22968-a3c9bf68-1ad9-4154-b745-5ddcd7ab12e6/serial-serial.jsonl",
+          "bytes": 99324,
+          "sha256": "99cda811af705c52a5c658f3dd33efbe03700d686d720e3406f83b3b835eb13b"
+        },
+        "worker_id": "serial",
+        "lane": "serial",
+        "expected_file_count": 74,
+        "actual_file_count": 74,
+        "event_count": 296,
+        "last_sequence": 296,
+        "identity_exact": true,
+        "sequence_strict": true,
+        "file_set_exact": true,
+        "phase_complete": true,
+        "incomplete_files": [],
+        "states": {
+          "pass": 73,
+          "fail": 1,
+          "skip": 0
+        },
+        "failed_files": [
+          "tests/sector_offensive_planning_objective_reconciliation.test.ts"
+        ],
+        "skipped_files": [],
+        "partitioned_case_present": null
+      }
+    ]
+  },
+  "preservation": {
+    "checks": {
+      "before_backup_pass": true,
+      "after_backup_pass": true,
+      "capture_preserved": true,
+      "C_opening_pin": true,
+      "D_opening_pin": true,
+      "C_before_archive_exact": true,
+      "D_before_archive_exact": true,
+      "C_prefix_exact": true,
+      "C_after_archive_current": true,
+      "C_every_appended_byte": true,
+      "D_unchanged": true,
+      "old_receipts_exact": true,
+      "all_receipts_archived_after": true,
+      "source_pins_exact": true,
+      "protected_stable_exact": true,
+      "n80_exact": true
+    },
+    "C_appended_bytes": 2395448,
+    "D_appended_bytes": 0,
+    "old_receipts_retained": 146,
+    "current_receipts_retained": 179
+  },
+  "reused": {
+    "focused": "732 final 38/38",
+    "typecheck": "732 root noEmit exit 0",
+    "review": "733 PASS_SCOPED_HARNESS",
+    "campaign": "703/712 retained old measurement; no new campaign"
+  },
+  "inherited_limits": [
+    "No retry, campaign, build, source fix, documentation edit, staging, commit, push, merge, adoption, threshold change, or acceptance change.",
+    "All inherited unmet calibration and adoption gates remain open."
+  ],
+  "checks": {
+    "readiness": true,
+    "exact_command": true,
+    "exact_timeout": true,
+    "terminal_before_cap": true,
+    "exits": true,
+    "wall_duration": true,
+    "complete_native_coverage": true,
+    "exact_native_test_totals": true,
+    "native_summary_lines_present": true,
+    "native_failure_excerpts_present": true,
+    "nested_controls_present": true,
+    "no_owned_residual": true,
+    "clean_head": true,
+    "receipts": true,
+    "preservation": true
+  },
+  "pass": false,
+  "writes_closed": false
+}

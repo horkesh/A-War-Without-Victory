@@ -1,0 +1,81 @@
+{
+  "schema": "awwv.native703-capability-diagnosis.independent-review.v1",
+  "reviewerIdentity": "receipt-integration-independent-reviewer",
+  "independent": true,
+  "date": "2026-10-25",
+  "scope": "Bounded review of retained-evidence capability claims and the proposed normal visible-choice turn-23 experiment. No implementation review, launch, source edit, package action, or qualification claim.",
+  "verdict": "GO",
+  "reviewedReport": {
+    "path": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/RESULT.md",
+    "bytes": 10544,
+    "sha256": "88c5ebe834e89880d42097cf400d053af3beed862d9f0921dc316af15e09aab5"
+  },
+  "reviewedExtraction": {
+    "path": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/retained-extraction.json",
+    "bytes": 5284160,
+    "sha256": "f33de72593ccee62c32d1bfae8a42ab766358de98a084a296d893b0c09d8a911"
+  },
+  "findings": [
+    {
+      "claim": "Native 703 remains diagnostic-only and does not qualify.",
+      "verdict": "SUPPORTED",
+      "basis": "The retained wrapper is child 1 / wrapper 126 on one strict network failure; no final result exists. The actual final autosave is inventory-bound at a983480115319876428342cbd040ebc91c40766d544930ba075c4185bffd9d73."
+    },
+    {
+      "claim": "Bukvik Gornji and Obadi are direct opening-policy input effects.",
+      "verdict": "SUPPORTED",
+      "basis": "The actual normal-player receipt is civic plus player-authored always_deny at turn 0, with empty deployment count and 712 controllers. The preserved production always_allow prefix records exact turn-1 paramilitary flips at both OSIDs and the same two further turn-2 flips; n94 records the same mechanism and timing. This proves the input effect, not qualification or historical desirability."
+    },
+    {
+      "claim": "Kolovarice first diverges in the retained combat path at turns 9-10, while its root remains unproven.",
+      "verdict": "SUPPORTED",
+      "basis": "Actual and n94 retain the same named turn-8 local brigade locations and near-identical values, then the same turn-9 participants/outcome with slightly different casualties and a larger turn-10 casualty divergence. Later attack and capture chronology differs. The selected rows are not complete byte-identical pre-battle states and n94 lacks an exact turn-8 save, so neither policy nor fd061 timing is proven as the root."
+    },
+    {
+      "claim": "The Tosici player capability path succeeds through delivery, selection, admission, axis assignment, and attack; the actual loss uses live RS reactive defense.",
+      "verdict": "SUPPORTED",
+      "basis": "The actual states retain the 109th at Lokve turn 8 and Kijevo turn 9, Circle admission at turn 17, assignment to the Delijas-to-Tosici axis, and attacks on turns 19-20. The target remains RS in a live VRS Herzegovina sector containing Ajnie and Foča; production sector lookup and distance-weighted defense admit that roster, and both battle records name Ajnie as primary defender. n94 instead has Ajnie moved to Kolovarice and a turn-18 Tosici victory with no primary defender."
+    },
+    {
+      "claim": "Visoko-Breza delays Circle from turn 16 to turn 17.",
+      "verdict": "SUPPORTED_AS_CHRONOLOGY_ONLY",
+      "basis": "The retained operation histories show Visoko-Breza completing one turn later and Circle starting one turn later in actual. The report correctly leaves the causal root of the earlier operation delay unresolved and does not treat it as a failed Circle admission."
+    }
+  ],
+  "productionPredicateReview": {
+    "operationAdmission": "The cited production paths require resolved eligible formations, available transit authority, no conflicting commitment, reachable staging, sufficient personnel, and live hostile objectives. Actual Circle creation and its assigned 109th are positive evidence that these gates passed.",
+    "reactiveDefense": "The cited sector lookup selects a defender-faction sector owning the target and prefers a live roster; attack resolution then filters standing brigades and applies distance-weighted reactive response. This supports the Ajnie-defense interpretation without claiming the earlier reason Ajnie remained available.",
+    "policyChoice": "The existing event contract has authored options always_deny, ask, and always_allow; always_deny remains historical and always_allow counterfactual. The proposed selector must operate the visible pending event and preserve a player-authored receipt."
+  },
+  "experimentDecision": {
+    "verdict": "GO",
+    "question": "Under the same fd061 packaged production path, is the explicit normal UI choice civic plus always_allow sufficient to reproduce the four direct policy flips and change the later Kolovarice/Tosici combat trajectory while preserving the corrected 109th delivery path?",
+    "boundedHorizon": "Fresh states 0 through settled turn 23 only.",
+    "requiredControls": [
+      "RBiH, non-headless, autonomy 2, unchanged package and source candidate.",
+      "Explicit visible civic and always_allow selection with player-authored turn-0 receipts; no default, preselection, hidden consent, direct state write, or target selection.",
+      "Exact controller cardinality 712 and exact four known direct paramilitary flips through turn 2.",
+      "109th at Lokve turn 8 and Kijevo turn 9.",
+      "Retain strict runtime diagnostics, per-turn states, Operation Foca/Kolovarice, and Circle/Tosici through terminal turn 23.",
+      "Stop on any choice, receipt, cardinality, direct-flip, delivery, or runtime diagnostic failure; no automatic retry."
+    ],
+    "interpretationBoundary": "If always_allow does not reproduce the later n94 Kolovarice or Tosici outcomes, the experiment falsifies policy-alone sufficiency in the fd061 path; it does not prove the policy had no causal contribution. If both outcomes match, the A/B result establishes sufficiency in this current path, not a unique historical root, reward claim, or qualification.",
+    "qualificationBoundary": "A passing turn-23 prefix answers only the causal experiment. It does not waive the failed native39 runtime gate, change the 707-of-712 acceptance criterion, or qualify the candidate."
+  },
+  "authority": {
+    "status": "BOUND",
+    "basis": "INTEGRATION_DECISION_V2 records GO with binding conditions from six distinct seats: Game Design, UI/UX, Historian, Calibration, Systems, and Red Team.",
+    "optionContract": "The approved surface retains all three options in authored order, default ask/unresolved before choice, historical always_deny, counterfactual always_allow, explicit consent, full harms, and no score-linked recommendation.",
+    "scopeConclusion": "The experiment exercises an already approved production choice and adds only an observable harness selector. It does not revise mechanics, canon, history, defaults, or player-facing choice semantics."
+  },
+  "nonBlockingPrecision": [
+    "Read the report phrase '703/707 result' as actual score 703 against the unchanged 707-of-712 floor; it is not a 707-point denominator.",
+    "Read 'opening-policy causality falsified' in the stop condition as policy-alone sufficiency falsified. Causal contribution under interaction remains unresolved unless later evidence isolates it."
+  ],
+  "limits": [
+    "No claim is made that always_allow is historical, desirable, optimal, or acceptable for adoption.",
+    "No claim is made that Kolovarice or Tosici is rooted uniquely in opening policy.",
+    "No implementation or final diff was reviewed in this artifact.",
+    "No native, scenario, package, build, suite, or probe was launched."
+  ]
+}

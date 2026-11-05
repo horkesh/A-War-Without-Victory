@@ -1,0 +1,694 @@
+{
+  "schema": "awwv.combat-fatigue-prefix39.retained-failure-classification.v1",
+  "scope": {
+    "retained_only": true,
+    "new_run": false,
+    "api_or_query": false,
+    "source_edit": false,
+    "broad_supply_investigation": false
+  },
+  "inputs": {
+    "reference": "data/source/calibration/painted_control_jan1993.json",
+    "new_final": "runs/player-parity-fatigue-owner-39-20261026-01/apr1992_definitive_188w__2272e1011ba35428__w39_n0/final_save.json",
+    "new_weekly": "runs/player-parity-fatigue-owner-39-20261026-01/apr1992_definitive_188w__2272e1011ba35428__w39_n0/weekly_report.jsonl",
+    "parent_final": "runs/player-parity-postturn-39-20261025-01/apr1992_definitive_188w__2272e1011ba35428__w39_n0/final_save.json",
+    "parent_weekly": "runs/player-parity-postturn-39-20261025-01/apr1992_definitive_188w__2272e1011ba35428__w39_n0/weekly_report.jsonl",
+    "n101_w39": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n101/save_w39.json",
+    "n102_w39": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n102/save_w39.json",
+    "result": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/result.json",
+    "scoring": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/postrun/scoring.json",
+    "health_stdout": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/postrun/health.stdout.log",
+    "campaign_stdout": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/campaign.stdout.log",
+    "campaign_stderr": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/actual-attempt-01/campaign.stderr.log"
+  },
+  "attempt": {
+    "source_commit": null,
+    "candidate": "runs/player-parity-fatigue-owner-39-20261026-01/apr1992_definitive_188w__2272e1011ba35428__w39_n0",
+    "result_status": "STOP_NO_RETRY",
+    "required": [
+      {
+        "name": "scoring",
+        "pass": false
+      },
+      {
+        "name": "consistency",
+        "pass": true
+      },
+      {
+        "name": "health",
+        "pass": false
+      },
+      {
+        "name": "movement",
+        "pass": true
+      },
+      {
+        "name": "graph-roster",
+        "pass": true
+      },
+      {
+        "name": "save-provenance",
+        "pass": true
+      },
+      {
+        "name": "control-attribution",
+        "pass": true
+      }
+    ],
+    "preservation_equal": true,
+    "score": 703,
+    "denominator": 712
+  },
+  "control_map_comparison": {
+    "reference_id_count": 712,
+    "new_score": 703,
+    "parent_score": 704,
+    "new_mismatches": [
+      {
+        "id": "op:donji_vakuf:korenici",
+        "actual": "RBiH",
+        "expected": "RS"
+      },
+      {
+        "id": "op:foca:donje_zesce",
+        "actual": "RS",
+        "expected": "RBiH"
+      },
+      {
+        "id": "op:gorazde:kolovarice",
+        "actual": "RBiH",
+        "expected": "RS"
+      },
+      {
+        "id": "op:ilijas:krivajevici",
+        "actual": "RBiH",
+        "expected": "RS"
+      },
+      {
+        "id": "op:kalesija:seher_2",
+        "actual": "RBiH",
+        "expected": "RS"
+      },
+      {
+        "id": "op:konjic:glavaticevo_2",
+        "actual": "RBiH",
+        "expected": "RS"
+      },
+      {
+        "id": "op:konjic:ljuta",
+        "actual": "RBiH",
+        "expected": "RS"
+      },
+      {
+        "id": "op:maglaj:jablanica",
+        "actual": "RS",
+        "expected": "RBiH"
+      },
+      {
+        "id": "op:trnovo:tosici",
+        "actual": "RS",
+        "expected": "RBiH"
+      }
+    ],
+    "parent_mismatches": [
+      {
+        "id": "op:donji_vakuf:korenici",
+        "actual": "RBiH",
+        "expected": "RS"
+      },
+      {
+        "id": "op:foca:donje_zesce",
+        "actual": "RS",
+        "expected": "RBiH"
+      },
+      {
+        "id": "op:ilijas:krivajevici",
+        "actual": "RBiH",
+        "expected": "RS"
+      },
+      {
+        "id": "op:kalesija:seher_2",
+        "actual": "RBiH",
+        "expected": "RS"
+      },
+      {
+        "id": "op:konjic:glavaticevo_2",
+        "actual": "RBiH",
+        "expected": "RS"
+      },
+      {
+        "id": "op:konjic:ljuta",
+        "actual": "RBiH",
+        "expected": "RS"
+      },
+      {
+        "id": "op:maglaj:jablanica",
+        "actual": "RS",
+        "expected": "RBiH"
+      },
+      {
+        "id": "op:trnovo:tosici",
+        "actual": "RS",
+        "expected": "RBiH"
+      }
+    ],
+    "exact_new_vs_parent_deltas": [
+      {
+        "id": "op:gorazde:kolovarice",
+        "parent": "RS",
+        "new": "RBiH",
+        "expected": "RS"
+      }
+    ],
+    "new_map_sha256": "00d098510c8a1224b9aa1e1e034a401ac01dff9d8047c29c450647bcfbabb058",
+    "parent_map_sha256": "c995640006694a2ced096683b7d7dc17384a99031d9064a751d558cc6aedb5d9"
+  },
+  "kolovarice_trace": {
+    "new_initial_controller": "RBiH",
+    "new_final_controller": "RBiH",
+    "new_control_events": [],
+    "new_battles": [
+      {
+        "week": 9,
+        "battle": {
+          "attacker_brigade": "rs_ajnie_brigade",
+          "attacker_brigades": [
+            "rs_ajnie_brigade",
+            "rs_foa_brigade"
+          ],
+          "attacker_casualties": 195,
+          "attacker_faction": "RS",
+          "attacker_won": false,
+          "battle_id": "9:op:gorazde:kolovarice:rs_ajnie_brigade:arbih_801st_light",
+          "defender_brigade": "arbih_801st_light",
+          "defender_casualties": 90,
+          "defender_faction": "RBiH",
+          "equipment": {
+            "attacker_artillery_lost": 2,
+            "attacker_tanks_lost": 0,
+            "captured_artillery": 0,
+            "captured_tanks": 0,
+            "defender_artillery_lost": 1,
+            "defender_tanks_lost": 0,
+            "scavenged_artillery": 0,
+            "scavenged_tanks": 0
+          },
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
+          "operation_id": "vrs_herzegovina:Operation Foca:t4",
+          "operation_name": "Operation Foca",
+          "outcome": "stalemate",
+          "power_breakdown": {
+            "attacker_count": 2,
+            "attacker_power": 191.33940441442817,
+            "attacker_power_raw": 215.2299262254535,
+            "defender_power": 265.8115351444628,
+            "defender_power_path": "sector",
+            "defending_sector_id": "sector:arbih_1st_corps:3",
+            "min_floor_applied": false,
+            "physical_power": 242.9214601444628,
+            "reactive_response": 0,
+            "sector_brigade_count": 1,
+            "sector_stance": "fortify"
+          },
+          "power_ratio": 0.72,
+          "target_osid": "op:gorazde:kolovarice"
+        }
+      },
+      {
+        "week": 10,
+        "battle": {
+          "attacker_brigade": "rs_ajnie_brigade",
+          "attacker_brigades": [
+            "rs_ajnie_brigade"
+          ],
+          "attacker_casualties": 313,
+          "attacker_faction": "RS",
+          "attacker_won": false,
+          "battle_id": "10:op:gorazde:kolovarice:rs_ajnie_brigade:arbih_801st_light",
+          "defender_brigade": "arbih_801st_light",
+          "defender_casualties": 32,
+          "defender_faction": "RBiH",
+          "equipment": {
+            "attacker_artillery_lost": 1,
+            "attacker_tanks_lost": 0,
+            "captured_artillery": 1,
+            "captured_by": "RBiH",
+            "captured_tanks": 0,
+            "defender_artillery_lost": 0,
+            "defender_tanks_lost": 0,
+            "scavenged_artillery": 0,
+            "scavenged_tanks": 0
+          },
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
+          "operation_id": "vrs_herzegovina:Operation Foca:t4",
+          "operation_name": "Operation Foca",
+          "outcome": "catastrophic",
+          "power_breakdown": {
+            "attacker_count": 1,
+            "attacker_power": 83.63795624413531,
+            "attacker_power_raw": 98.39759558133566,
+            "defender_power": 340.4705262459046,
+            "defender_power_path": "sector",
+            "defending_sector_id": "sector:arbih_1st_corps:2",
+            "min_floor_applied": false,
+            "physical_power": 317.4312762459046,
+            "reactive_response": 0,
+            "sector_brigade_count": 1,
+            "sector_stance": "fortify"
+          },
+          "power_ratio": 0.25,
+          "target_osid": "op:gorazde:kolovarice"
+        }
+      },
+      {
+        "week": 14,
+        "battle": {
+          "attacker_brigade": "rs_foa_brigade",
+          "attacker_brigades": [
+            "rs_foa_brigade"
+          ],
+          "attacker_casualties": 23,
+          "attacker_faction": "RS",
+          "attacker_won": false,
+          "battle_id": "14:op:gorazde:kolovarice:rs_foa_brigade:null",
+          "defender_brigade": null,
+          "defender_casualties": 19,
+          "defender_faction": "RBiH",
+          "defender_kind": "militia",
+          "defender_militia_pool_key": "gorazde:RBiH",
+          "equipment": {
+            "attacker_artillery_lost": 1,
+            "attacker_tanks_lost": 0,
+            "captured_artillery": 0,
+            "captured_tanks": 0,
+            "defender_artillery_lost": 0,
+            "defender_tanks_lost": 0,
+            "scavenged_artillery": 0,
+            "scavenged_tanks": 0
+          },
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
+          "operation_id": "vrs_herzegovina:Operation Foca:t4",
+          "operation_name": "Operation Foca",
+          "outcome": "stalemate",
+          "power_breakdown": {
+            "attacker_count": 1,
+            "attacker_power": 77.64063368535002,
+            "attacker_power_raw": 91.34192198276475,
+            "defender_power": 86.13595,
+            "defender_power_path": "militia_only",
+            "defending_sector_id": null,
+            "min_floor_applied": false,
+            "physical_power": 0,
+            "reactive_response": 0,
+            "sector_brigade_count": 0,
+            "sector_stance": null
+          },
+          "power_ratio": 0.9,
+          "target_osid": "op:gorazde:kolovarice"
+        }
+      }
+    ],
+    "parent_initial_controller": "RBiH",
+    "parent_final_controller": "RS",
+    "parent_control_events": [
+      {
+        "attacker_brigade": "rs_ajnie_brigade",
+        "battle_id": "14:op:gorazde:kolovarice:rs_ajnie_brigade:null",
+        "from": "RBiH",
+        "mechanism": "combat",
+        "mun_id": "gorazde",
+        "settlement_id": "op:gorazde:kolovarice",
+        "to": "RS",
+        "turn": 14
+      }
+    ],
+    "parent_battles": [
+      {
+        "week": 9,
+        "battle": {
+          "attacker_brigade": "rs_ajnie_brigade",
+          "attacker_brigades": [
+            "rs_ajnie_brigade",
+            "rs_foa_brigade"
+          ],
+          "attacker_casualties": 328,
+          "attacker_faction": "RS",
+          "attacker_won": false,
+          "battle_id": "9:op:gorazde:kolovarice:rs_ajnie_brigade:arbih_801st_light",
+          "defender_brigade": "arbih_801st_light",
+          "defender_casualties": 62,
+          "defender_faction": "RBiH",
+          "equipment": {
+            "attacker_artillery_lost": 2,
+            "attacker_tanks_lost": 0,
+            "captured_artillery": 0,
+            "captured_by": "RBiH",
+            "captured_tanks": 0,
+            "defender_artillery_lost": 1,
+            "defender_tanks_lost": 0,
+            "scavenged_artillery": 0,
+            "scavenged_tanks": 0
+          },
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
+          "operation_id": "vrs_herzegovina:Operation Foca:t4",
+          "operation_name": "Operation Foca",
+          "outcome": "repulsed",
+          "power_ratio": 0.69,
+          "target_osid": "op:gorazde:kolovarice"
+        }
+      },
+      {
+        "week": 14,
+        "battle": {
+          "attacker_brigade": "rs_ajnie_brigade",
+          "attacker_brigades": [
+            "rs_ajnie_brigade",
+            "rs_foa_brigade"
+          ],
+          "attacker_casualties": 42,
+          "attacker_faction": "RS",
+          "attacker_won": true,
+          "battle_id": "14:op:gorazde:kolovarice:rs_ajnie_brigade:null",
+          "defender_brigade": null,
+          "defender_casualties": 50,
+          "defender_faction": "RBiH",
+          "defender_kind": "militia",
+          "defender_militia_pool_key": "gorazde:RBiH",
+          "equipment": {
+            "attacker_artillery_lost": 2,
+            "attacker_tanks_lost": 0,
+            "captured_artillery": 0,
+            "captured_tanks": 0,
+            "defender_artillery_lost": 0,
+            "defender_tanks_lost": 0,
+            "scavenged_artillery": 0,
+            "scavenged_tanks": 0
+          },
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
+          "operation_id": "vrs_herzegovina:Operation Foca:t4",
+          "operation_name": "Operation Foca",
+          "outcome": "victory",
+          "power_ratio": 1.56,
+          "target_osid": "op:gorazde:kolovarice"
+        }
+      }
+    ]
+  },
+  "stranded_sets": {
+    "new": {
+      "count": 13,
+      "ids": [
+        "arbih_1st_cerska",
+        "arbih_1st_kamenica",
+        "arbih_246th_vitezka_mountain",
+        "hrhb_94th_brigade",
+        "hrhb_95th_brigade",
+        "hrhb_ban_jelai_brigade",
+        "hrhb_jure_franceti_brigade",
+        "hrhb_kiseljak_brigade",
+        "hrhb_kreevo_brigade",
+        "hrhb_stjepan_tomaevi_brigade",
+        "hrhb_travnik_brigade",
+        "hrhb_vitezovi_brigade_vitez",
+        "hvo_nikola_subic_zrinski_brigade"
+      ]
+    },
+    "parent": {
+      "count": 13,
+      "ids": [
+        "arbih_1st_cerska",
+        "arbih_1st_kamenica",
+        "arbih_246th_vitezka_mountain",
+        "hrhb_94th_brigade",
+        "hrhb_95th_brigade",
+        "hrhb_ban_jelai_brigade",
+        "hrhb_jure_franceti_brigade",
+        "hrhb_kiseljak_brigade",
+        "hrhb_kreevo_brigade",
+        "hrhb_stjepan_tomaevi_brigade",
+        "hrhb_travnik_brigade",
+        "hrhb_vitezovi_brigade_vitez",
+        "hvo_nikola_subic_zrinski_brigade"
+      ]
+    },
+    "n101": {
+      "count": 13,
+      "ids": [
+        "arbih_1st_cerska",
+        "arbih_1st_kamenica",
+        "arbih_246th_vitezka_mountain",
+        "hrhb_94th_brigade",
+        "hrhb_95th_brigade",
+        "hrhb_ban_jelai_brigade",
+        "hrhb_jure_franceti_brigade",
+        "hrhb_kiseljak_brigade",
+        "hrhb_kreevo_brigade",
+        "hrhb_stjepan_tomaevi_brigade",
+        "hrhb_travnik_brigade",
+        "hrhb_vitezovi_brigade_vitez",
+        "hvo_nikola_subic_zrinski_brigade"
+      ]
+    },
+    "n102": {
+      "count": 13,
+      "ids": [
+        "arbih_1st_cerska",
+        "arbih_1st_kamenica",
+        "arbih_246th_vitezka_mountain",
+        "hrhb_94th_brigade",
+        "hrhb_95th_brigade",
+        "hrhb_ban_jelai_brigade",
+        "hrhb_jure_franceti_brigade",
+        "hrhb_kiseljak_brigade",
+        "hrhb_kreevo_brigade",
+        "hrhb_stjepan_tomaevi_brigade",
+        "hrhb_travnik_brigade",
+        "hrhb_vitezovi_brigade_vitez",
+        "hvo_nikola_subic_zrinski_brigade"
+      ]
+    }
+  },
+  "stranded_baseline_interpretation": "IDENTICAL_EXACT_SET_ACROSS_NEW_PARENT_N101_N102; owner task states existing canon/supply review declared this baseline lawful; no fresh supply review performed.",
+  "control_event_boundary": {
+    "new": {
+      "event_count": 120,
+      "combat_event_count": 85,
+      "malformed_required_field_events": [],
+      "combat_actor_faction_mismatches": [
+        {
+          "settlement_id": "op:ilidza:sarajevo_dio_ilidza_2",
+          "turn": 1,
+          "to": "RS",
+          "attacker_brigade": "jna_4th_corps_tg",
+          "actor_faction": null
+        },
+        {
+          "settlement_id": "op:ilijas:medojevici",
+          "turn": 1,
+          "to": "RS",
+          "attacker_brigade": "jna_ilijas_garrison_det",
+          "actor_faction": null
+        },
+        {
+          "settlement_id": "op:prijedor:ljubija_2",
+          "turn": 1,
+          "to": "RS",
+          "attacker_brigade": "jna_2nd_md_tg",
+          "actor_faction": null
+        },
+        {
+          "settlement_id": "op:visegrad:visegrad_2",
+          "turn": 1,
+          "to": "RS",
+          "attacker_brigade": "jna_uzice_corps_tg",
+          "actor_faction": null
+        },
+        {
+          "settlement_id": "op:vogosca:svrake",
+          "turn": 1,
+          "to": "RS",
+          "attacker_brigade": "jna_vogosca_to_tg",
+          "actor_faction": null
+        },
+        {
+          "settlement_id": "op:ilidza:rakovica_2",
+          "turn": 2,
+          "to": "RS",
+          "attacker_brigade": "jna_4th_corps_tg",
+          "actor_faction": null
+        },
+        {
+          "settlement_id": "op:ilijas:dragoradi",
+          "turn": 2,
+          "to": "RS",
+          "attacker_brigade": "jna_ilijas_garrison_det",
+          "actor_faction": null
+        },
+        {
+          "settlement_id": "op:mostar:vranjevici_2",
+          "turn": 2,
+          "to": "RS",
+          "attacker_brigade": "jna_nevesinje_garrison",
+          "actor_faction": null
+        },
+        {
+          "settlement_id": "op:visegrad:prelovo_2",
+          "turn": 2,
+          "to": "RS",
+          "attacker_brigade": "jna_uzice_corps_tg",
+          "actor_faction": null
+        },
+        {
+          "settlement_id": "op:ilijas:sirovine",
+          "turn": 3,
+          "to": "RS",
+          "attacker_brigade": "jna_ilijas_garrison_det",
+          "actor_faction": null
+        },
+        {
+          "settlement_id": "op:visegrad:kamenica_2",
+          "turn": 3,
+          "to": "RS",
+          "attacker_brigade": "jna_uzice_corps_tg",
+          "actor_faction": null
+        },
+        {
+          "settlement_id": "op:prijedor:raljas",
+          "turn": 4,
+          "to": "RS",
+          "attacker_brigade": "jna_2nd_md_tg",
+          "actor_faction": null
+        }
+      ]
+    },
+    "parent": {
+      "event_count": 121,
+      "combat_event_count": 87,
+      "malformed_required_field_events": [],
+      "combat_actor_faction_mismatches": [
+        {
+          "settlement_id": "op:ilidza:sarajevo_dio_ilidza_2",
+          "turn": 1,
+          "to": "RS",
+          "attacker_brigade": "jna_4th_corps_tg",
+          "actor_faction": null
+        },
+        {
+          "settlement_id": "op:ilijas:medojevici",
+          "turn": 1,
+          "to": "RS",
+          "attacker_brigade": "jna_ilijas_garrison_det",
+          "actor_faction": null
+        },
+        {
+          "settlement_id": "op:prijedor:ljubija_2",
+          "turn": 1,
+          "to": "RS",
+          "attacker_brigade": "jna_2nd_md_tg",
+          "actor_faction": null
+        },
+        {
+          "settlement_id": "op:visegrad:visegrad_2",
+          "turn": 1,
+          "to": "RS",
+          "attacker_brigade": "jna_uzice_corps_tg",
+          "actor_faction": null
+        },
+        {
+          "settlement_id": "op:vogosca:svrake",
+          "turn": 1,
+          "to": "RS",
+          "attacker_brigade": "jna_vogosca_to_tg",
+          "actor_faction": null
+        },
+        {
+          "settlement_id": "op:ilidza:rakovica_2",
+          "turn": 2,
+          "to": "RS",
+          "attacker_brigade": "jna_4th_corps_tg",
+          "actor_faction": null
+        },
+        {
+          "settlement_id": "op:ilijas:dragoradi",
+          "turn": 2,
+          "to": "RS",
+          "attacker_brigade": "jna_ilijas_garrison_det",
+          "actor_faction": null
+        },
+        {
+          "settlement_id": "op:mostar:vranjevici_2",
+          "turn": 2,
+          "to": "RS",
+          "attacker_brigade": "jna_nevesinje_garrison",
+          "actor_faction": null
+        },
+        {
+          "settlement_id": "op:visegrad:prelovo_2",
+          "turn": 2,
+          "to": "RS",
+          "attacker_brigade": "jna_uzice_corps_tg",
+          "actor_faction": null
+        },
+        {
+          "settlement_id": "op:ilijas:sirovine",
+          "turn": 3,
+          "to": "RS",
+          "attacker_brigade": "jna_ilijas_garrison_det",
+          "actor_faction": null
+        },
+        {
+          "settlement_id": "op:visegrad:kamenica_2",
+          "turn": 3,
+          "to": "RS",
+          "attacker_brigade": "jna_uzice_corps_tg",
+          "actor_faction": null
+        },
+        {
+          "settlement_id": "op:prijedor:raljas",
+          "turn": 4,
+          "to": "RS",
+          "attacker_brigade": "jna_2nd_md_tg",
+          "actor_faction": null
+        }
+      ]
+    }
+  },
+  "battle_power_trace": {
+    "requested_reason_code": "battle_power",
+    "stderr_bytes": 0,
+    "stdout_battle_power_marker_count": 0,
+    "korenici_turn34_battle_power_records": [],
+    "conclusion": "ABSENT_FROM_RETAINED_STREAMS__NO_POWERS_RATIO_OR_ACTOR_CLAIMED"
+  },
+  "conclusion": {
+    "new_vs_parent_only_control_delta_is_kolovarice": true,
+    "kolovarice_is_missing_parent_rs_capture_not_new_rbih_capture": true,
+    "exact_stranded_set_unchanged": true,
+    "new_malformed_or_illegal_combat_actor_evidenced": true
+  }
+}

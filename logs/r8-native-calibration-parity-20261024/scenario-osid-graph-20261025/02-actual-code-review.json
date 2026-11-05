@@ -1,0 +1,123 @@
+{
+  "schema": "awwv.scenario-osid-repair.actual-code-review.v1",
+  "reviewed_at": "2026-10-25",
+  "verdict": "GO_FOCUSED_CODE_FIX_NOT_CAMPAIGN_ACCEPTANCE",
+  "head": "295d5f7290b1085dc76bbebb41df72386cd6b705",
+  "reviewed_worktree_state": {
+    "tracked_modified_files": [
+      "src/scenario/scenario_runner.ts",
+      "tests/scenario_runner_artifact_repair.test.ts"
+    ],
+    "unexpected_tracked_changes": []
+  },
+  "findings": [],
+  "source_review": {
+    "change": "The weekly scenario artifact repair now receives operationalSettlementGraph.edges instead of the startup canonical graph.edges.",
+    "correctness": "The replacement is the exact graph domain required by displaceFormationsInEnemyTerritory, computeFrontEdgesOsid, and reconcileFinalSectorTruth. operationalSettlementGraph is already loaded before the weekly loop from the operational settlements and operational contact graph and is the same domain used by the public runTurn pipeline.",
+    "scope": "One caller argument changed. repairScenarioArtifactState's API, subcall ordering, state ownership, save schema, serialization, final-save repair, desktop/native paths, combat, movement, control, fatigue, and sector algorithms are unchanged.",
+    "determinism": "The change substitutes an already-loaded deterministic edge array and adds no random source, time source, iteration rule, or persistence field. The expected output change is restoration of materialized OSID front and sector truth at the weekly artifact boundary."
+  },
+  "regression_test_review": {
+    "caller_path": "The new test invokes public runScenario on data/scenarios/apr1992_definitive_188w.json with weeksOverride=1, emitSaveAtWeeks=[1], and the ordinary diagnosticTurnBoundaryObserver.",
+    "boundaries_checked": [
+      "The post-repair observer state",
+      "The emitted save_w1.json"
+    ],
+    "assertions": [
+      "OSID front edges are nonempty.",
+      "Every front endpoint belongs to the operational reverse-map domain.",
+      "corps_front_sectors is nonempty.",
+      "sector:hvo_southeast_herzegovina:0 exists.",
+      "hv_113th_brigade_tg and hv_4th_guards_tg retain both formation assignment and sector roster membership."
+    ],
+    "fixture_independence": "The test uses the repository scenario and public loaders; it does not depend on the n101 calibration output, a native replay, or a hand-authored local state fixture. Temporary output is cleaned in normal test runs; the optional retained-output root is diagnostic-only.",
+    "meaning": "The test reaches the production weekly caller that held the defect and validates both the in-memory observer and serialized boundary. The existing helper-only test remains intact."
+  },
+  "retained_failure_history": {
+    "red_definitive": {
+      "receipt_child_exit": 1,
+      "receipt_wrapper_exit": 1,
+      "tests_passed": 1,
+      "tests_failed": 1,
+      "failure": "The real one-week caller produced zero war_front_edges_osid entries before the fix.",
+      "save_w1_front_edges": 0,
+      "save_w1_sectors": 0
+    },
+    "green_definitive": {
+      "receipt_child_exit": 0,
+      "receipt_wrapper_exit": 0,
+      "tests_passed": 2,
+      "tests_failed": 0,
+      "save_w1_front_edges": 587,
+      "save_w1_sectors": 157,
+      "invalid_front_endpoints": 0,
+      "hv_113th_brigade_tg": {
+        "sector_id": "sector:hvo_southeast_herzegovina:0",
+        "location_osid": "op:capljina:capljina_2",
+        "fatigue": 0.5,
+        "present_in_sector_roster": true
+      },
+      "hv_4th_guards_tg": {
+        "sector_id": "sector:hvo_southeast_herzegovina:0",
+        "location_osid": "op:capljina:capljina_2",
+        "fatigue": 0.5,
+        "present_in_sector_roster": true
+      }
+    },
+    "earlier_fixture_failures": {
+      "preserved": true,
+      "disposition": "The apr1992_4w fixture produced no front or sector state for this question even after the source correction, including the green-01 failure where the expected sector was undefined. It was not accepted as proof. The definitive April 1992 scenario was then used for the red/green caller-path comparison.",
+      "no_waiver": true
+    }
+  },
+  "checks": {
+    "focused_red_green": "RED 1 failed/1 passed, then GREEN 2 passed/0 failed on the definitive one-week caller path.",
+    "typecheck": {
+      "exit": 0,
+      "receipt_child_exit": 0,
+      "receipt_wrapper_exit": 0
+    },
+    "diff_check": {
+      "exit": 0,
+      "receipt_child_exit": 0,
+      "receipt_wrapper_exit": 0,
+      "independent_current_check_exit": 0
+    },
+    "additional_scenario_or_suite_run_by_reviewer": false
+  },
+  "evidence_hashes_sha256": {
+    "src/scenario/scenario_runner.ts": "209effd648d90f7f0b64e5b36f7e4b868f5a3a603786bf50e812298e987dc63c",
+    "tests/scenario_runner_artifact_repair.test.ts": "45af607c3a1e865b8659dab1c5837482eb698585788e7b1e287043c3426dda63",
+    "implementation-v1/red-definitive-01/receipt.json": "b7bde40985cf58714d71f9fd014395235cb2bda7bc1cb16b8413793aa117cfb7",
+    "implementation-v1/green-definitive-01/receipt.json": "463ff81bbbbe5cf4a257714119979983d956f23e8a452168648b320a8ab0eb7f",
+    "implementation-v1/typecheck-01/receipt.json": "be098c8a1905526b09f1bc487631b350f8f99abca0780d4042cbb89b9ae852f4",
+    "implementation-v1/diff-check-01/receipt.json": "27e7bcb8d759f646acc2006b54c6ac762182bf8f77f65d5fb475ad69fdbbeea3",
+    "implementation-v1/definitive-fixture-fixed-preflight-01/receipt.json": "844b80e777d3ccfdf8e64e7fe72c0195b854162568306bb9fe892037f9106a0e",
+    "implementation-v1/red-definitive-scenario-output-01/save_w1.json": "417a9f24b42f1bfa8d41507528ddd0b5f34a84eb0a3213ff6b3128212e995afb",
+    "implementation-v1/green-definitive-scenario-output-01/save_w1.json": "e0576a9fecc0127be320025196f388d34682ed7d2cafca07f087a4e671d73e74"
+  },
+  "next_gate": {
+    "authorized_by_this_review": false,
+    "required_question": "Does the focused graph-domain repair qualify over the complete authoritative 188-week campaign while preserving calibration, protected history, ordinary operation behavior, provenance, and health?",
+    "required_acceptance": {
+      "all_four_scores": [
+        707,
+        707,
+        706,
+        706
+      ],
+      "formerly_correct_n91_n92_cells_lost": 0,
+      "protected_anchors": 16,
+      "normal_operations_preserved": true,
+      "provenance_preserved": true,
+      "health_preserved": true,
+      "retry": false
+    },
+    "stop": "One authoritative attempt only when separately authorized and frozen. On any missed score, formerly-correct cell, anchor, normal-operation, provenance, or health gate, preserve evidence and stop without tuning, baseline/reference adoption, threshold change, or retry."
+  },
+  "claim_limits": [
+    "GO accepts the two-file focused implementation and retained one-week regression evidence only.",
+    "No 188-week campaign, full suite, package, native replay, baseline adoption, or tuning was performed by this review.",
+    "The source remains unqualified for calibration, adoption, package/native parity, and global release until the separately authorized 188-week acceptance gate and its downstream required checks pass."
+  ]
+}

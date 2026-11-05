@@ -6,13 +6,34 @@
     "description": "Painted control target: October 1995",
     "total_osids": 712,
     "counts": {
-      "RS": 307,
-      "RBiH": 296,
+      "RS": 310,
+      "RBiH": 293,
       "HRHB": 109
     },
     "source": "painted_control_targets",
-    "revision": 4,
+    "revision": 7,
     "changelog": [
+      {
+        "date": "2026-10-17",
+        "osid": "op:sanski_most:ostra_luka",
+        "from": "RBiH",
+        "to": "RS",
+        "rationale": "Owner determination, 2026-10-17: paint the Sanski Most Oštra Luka operational cell RS at the October 1995 checkpoint. This is an owner reference correction, not an engine capture; the constituent-level history has not been independently verified."
+      },
+      {
+        "date": "2026-09-27",
+        "osid": "op:trnovo:gornja_presjenica",
+        "from": "RBiH",
+        "to": "RS",
+        "rationale": "Owner determination, 2026-09-27: paint the Gornja Presjenica operational cell RS at the October 1995 checkpoint. The constituent-level historical boundary has not been independently established; this is a reference correction, not a simulation or geometry change."
+      },
+      {
+        "date": "2026-09-24",
+        "osid": "op:mostar:vranjevici_2",
+        "from": "RBiH",
+        "to": "RS",
+        "rationale": "Owner determination, 2026-09-24: paint the Mostar Vranjevići operational cell RS at every calibration checkpoint. This supersedes the owner-authored RBiH paint of 2026-08-24 for this reference only. The aggregate's constituent-level historical boundary remains uncertain; this is a reference decision, not a simulation or geometry change."
+      },
       {
         "date": "2026-08-12",
         "osid": "op:gorazde:kolovarice",
@@ -570,7 +591,7 @@
     "op:mostar:mostar_istok_2": "RBiH",
     "op:mostar:mostar_zapad_2": "HRHB",
     "op:mostar:potoci": "RBiH",
-    "op:mostar:vranjevici_2": "RBiH",
+    "op:mostar:vranjevici_2": "RS",
     "op:mrkonjic_grad:baljvine_2": "HRHB",
     "op:mrkonjic_grad:bjelajce_2": "HRHB",
     "op:mrkonjic_grad:gerzovo_2": "HRHB",
@@ -661,7 +682,7 @@
     "op:sanski_most:jelasinovci": "RBiH",
     "op:sanski_most:kljevci": "RBiH",
     "op:sanski_most:lusci_palanka_2": "RBiH",
-    "op:sanski_most:ostra_luka": "RBiH",
+    "op:sanski_most:ostra_luka": "RS",
     "op:sanski_most:sanski_most_2": "RBiH",
     "op:sanski_most:skucani_vakuf_2": "RBiH",
     "op:sanski_most:stari_majdan": "RBiH",
@@ -751,7 +772,7 @@
     "op:trebinje:velicani": "RS",
     "op:trebinje:zakovo_2": "RS",
     "op:trnovo:delijas": "RS",
-    "op:trnovo:gornja_presjenica": "RBiH",
+    "op:trnovo:gornja_presjenica": "RS",
     "op:trnovo:kijevo_2": "RS",
     "op:trnovo:tosici": "RS",
     "op:trnovo:trnovo": "RS",

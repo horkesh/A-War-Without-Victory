@@ -1,0 +1,89 @@
+{
+  "stop": "first failed runner/provenance/coverage gate; diagnose no retry",
+  "authorized_scope": "one recorded known-source 188-week diagnostic campaign; no retry/full suite",
+  "owner_message": "Next it is",
+  "pass": "runner0, source/input/artifact binding, named coverage and consistent receipts; calibration independent",
+  "debug_reason_codes": "axis_reject,opportunity_roster,formation_lifecycle,movement_reject,route_decision",
+  "git_status": [],
+  "question": "known-source pre-order routes, launch/roster and lifecycle coverage",
+  "started_utc": "2026-10-03T19:52:42.4251774Z",
+  "source_binding": {
+    "local_commit_exit": "0",
+    "campaign_authorized": false,
+    "git_dirty": false,
+    "commit": "7b9c242a3d3942a8a64673457c4e75b545dab6e4",
+    "scope": "known-source observation preparation only",
+    "files": [
+      {
+        "path": "data/scenarios/apr1992_definitive_188w.json",
+        "sha256": "4257B039F5B1DBB7F21D940EC656B2D0B787856F27E7C26B6F3F57F256D82ECF"
+      },
+      {
+        "path": "node_modules/tsx/dist/cli.mjs",
+        "sha256": "8729ECFB90D9D568939E4190E6F1D3317C946583B7D37A776E0C23A21C021CF8"
+      },
+      {
+        "path": "package-lock.json",
+        "sha256": "3BED66FE10B593A7889E90863C3FCB0990BB1AE244DC559EF30E21232C5D8CA5"
+      },
+      {
+        "path": "src/scenario/combat_causality.ts",
+        "sha256": "2C73FDB12642EA95EF6CF7031A98D8BCD4C1A57C90D5BAE014B3EEB20D4ED7C3"
+      },
+      {
+        "path": "src/scenario/scenario_reporting.ts",
+        "sha256": "D1C28641ED5C6C67F2399A7C50A54BDD575C457F86692B56003C0BA5096EF7C4"
+      },
+      {
+        "path": "src/scenario/scenario_runner.ts",
+        "sha256": "1A8ECB7D53C8FDA218B3A1ECD9085501C99F85C2B2CB1CFF95B62887A090A933"
+      },
+      {
+        "path": "src/sim/combat/bot_brigade_ai_osid.ts",
+        "sha256": "3E07F14A1A4F3538E2D64886CEC68BD768345BFED15302B10DC8EDD406465145"
+      },
+      {
+        "path": "src/sim/combat/bot_brigade_eval_movement.ts",
+        "sha256": "D2EBA5104D1E30B0D1D754DBEA8CA66ACBF18F91DA9F0612B35C2E5AE3EAD938"
+      },
+      {
+        "path": "src/sim/combat/reason_code_debug.ts",
+        "sha256": "547089CEB0ECD8660A46E2304854349EFEC0DA5EF967E9B47AA9786D49D171A5"
+      },
+      {
+        "path": "tests/bot_route_decision_coverage_diagnostic.test.ts",
+        "sha256": "A095D7BF441070F2D46B54C657DD228D8CCFACD6E3A6D319997AC5EE9AAAB40D"
+      },
+      {
+        "path": "tests/bot_route_decision_diagnostic.test.ts",
+        "sha256": "A8F0934D8A23828C275CA44E3B43AC36818FF9952119822E92F07FE7B16C3F3A"
+      },
+      {
+        "path": "tests/reason_code_debug.test.ts",
+        "sha256": "7DC0912642502A47DB76139E929AEF591A349336AC6480C0DDBB787657A6B6E5"
+      },
+      {
+        "path": "tools/diagnostics/bot_route_decision_coverage.cjs",
+        "sha256": "E5FBBB636F64C6B208210CB75E1A0078366A87C0F272217F08A98F08E07E38BF"
+      },
+      {
+        "path": "tools/scenario_runner/run_scenario_with_preflight.ts",
+        "sha256": "1329BD3D611C40C5FF24536DC02E5A84845786C1E9627FC76A1073FD00399992"
+      }
+    ],
+    "branch": "codex/october-calibration-continuation-20261003",
+    "git_status": [],
+    "validation": {
+      "unaffected_reused": 86,
+      "tracked_citations": "128 exit0",
+      "independent_review": "GO preparation only",
+      "docs": "63/63 exit0",
+      "focused_correction": "15/15 exit0"
+    }
+  },
+  "commit": "7b9c242a3d3942a8a64673457c4e75b545dab6e4",
+  "command": "node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_188w.json --weeks 188 --out runs --unique",
+  "npm": "10.9.8",
+  "expected_cost": "about five minutes plus postprocessing",
+  "node": "v22.23.2"
+}

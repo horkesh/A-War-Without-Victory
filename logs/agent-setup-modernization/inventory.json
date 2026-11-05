@@ -1,0 +1,3375 @@
+{
+  "captured_utc": "2026-09-12T19:24:14.6858206Z",
+  "base_commit": "8913cca6f714e07acf59785ce526c19dc5fc9973",
+  "source_root": "F:/A-War-Without-Victory",
+  "source_branch": "chore/repin-188w-baselines",
+  "source_head_observed": "8913cca6f714e07acf59785ce526c19dc5fc9973",
+  "source_status": [
+    "?? docs/plans/2026-09-12-agent-setup-modernization-plan.md"
+  ],
+  "worktrees": [
+    "worktree F:/A-War-Without-Victory",
+    "HEAD 8913cca6f714e07acf59785ce526c19dc5fc9973",
+    "branch refs/heads/chore/repin-188w-baselines",
+    "",
+    "worktree C:/Users/User/.codex/worktrees/21d7/A-War-Without-Victory",
+    "HEAD 61db7e9dfe9508a52851d20b1b3e4cd0b1bba697",
+    "detached",
+    "",
+    "worktree C:/Users/User/.codex/worktrees/40ef/A-War-Without-Victory",
+    "HEAD 2d4efeb6f8f22910e18958cd708a638403bbf503",
+    "detached",
+    "",
+    "worktree C:/Users/User/.codex/worktrees/A-War-Without-Victory/bc02-load-ratings",
+    "HEAD be5d7690470e9ce38a6fe98abd08199137bb5386",
+    "branch refs/heads/codex/bc02-load-ratings",
+    "",
+    "worktree C:/Users/User/.codex/worktrees/e1e5/A-War-Without-Victory",
+    "HEAD cdc8659b12c9be141fa0f55f8f6fc9aceab7db7d",
+    "detached",
+    "",
+    "worktree F:/AWWV-worktrees/agent-setup-modernization",
+    "HEAD 8913cca6f714e07acf59785ce526c19dc5fc9973",
+    "branch refs/heads/codex/agent-setup-modernization",
+    "",
+    "worktree F:/AWWV-worktrees/apr1994-calibration-investigation",
+    "HEAD f30ce94c858266bd3afc2c82c48d224cff927d12",
+    "branch refs/heads/codex/apr1994-operational-corrections",
+    "",
+    "worktree F:/AWWV-worktrees/bc01-player-opportunities",
+    "HEAD 01550ac275b1b3b17b91c05043bb82719a65353f",
+    "branch refs/heads/codex/bc01-player-opportunities",
+    "",
+    "worktree F:/AWWV-worktrees/bc01-pre-controls",
+    "HEAD 534d86bd8147ba9f647b2ea598cac161c2d839c0",
+    "detached",
+    "",
+    "worktree F:/AWWV-worktrees/bc09-shared-inputs",
+    "HEAD cdc8659b12c9be141fa0f55f8f6fc9aceab7db7d",
+    "branch refs/heads/codex/cleanup-event-registry",
+    "",
+    "worktree F:/AWWV-worktrees/calibration-timeline-viewer",
+    "HEAD 7634c193a88e34f620ac34e44525471c3179ad36",
+    "branch refs/heads/calibration-timeline-viewer",
+    "",
+    "worktree F:/AWWV-worktrees/r7-arbih-honorific-names",
+    "HEAD 1ddf6f01a2a4b5cc09bbf32373e4656c71f26969",
+    "branch refs/heads/r7-arbih-honorific-names",
+    "",
+    "worktree F:/AWWV-worktrees/r7-readability-post-a",
+    "HEAD 88996a23d2441a391b25706c734626b5732e37b5",
+    "detached",
+    "",
+    "worktree F:/AWWV-worktrees/r7-readability-pre",
+    "HEAD 16389f6c9c66f13517806bae30ac78165563b66e",
+    "detached",
+    "",
+    "worktree F:/AWWV-worktrees/r8-decision-command-usability",
+    "HEAD e659a6b63e760340f5b842485c18846354a8862d",
+    "branch refs/heads/codex/r8-decision-command-usability",
+    "",
+    "worktree F:/AWWV-worktrees/r9-phase1-install-proof",
+    "HEAD f22bcbb63af7c5d017c59cfc3fe29838e3af1508",
+    "detached",
+    "",
+    "worktree F:/AWWV-worktrees/task3-parent-check",
+    "HEAD 223d9797003a634402ccdcef03def8837cc7c6aa",
+    "detached",
+    ""
+  ],
+  "migration_root": "F:/AWWV-worktrees/agent-setup-modernization",
+  "migration_branch": "codex/agent-setup-modernization",
+  "ownership_receipt": "Owner authorizes isolated preparation only; no release receipt from Claude; all shared paths remain unowned for activation",
+  "runtime_skill_root": "C:/Users/User/.codex/skills",
+  "backup_root": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6",
+  "files": [
+    {
+      "path": ".agent/skills-catalog.md",
+      "observed_sha256": "31C476C28C93931090B942A64E8D26F62B6BAC4408F3AAE0ACE4170C0953747D",
+      "base_blob": "4d75a838da62f75ee86d2a41ac5a6526c21a4d1e",
+      "last_write_utc": "2026-03-23T23:25:51.6267120Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/AGENT_TEAM_ROSTER.md",
+      "observed_sha256": "F599D5CB7D85D359C39144AAA44923879EF0CF8028378F1BB974B4A56271DE20",
+      "base_blob": "c32784aa588efe85bd3c5e2d808fbaad937886ff",
+      "last_write_utc": "2026-06-11T00:09:04.6258656Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/README.md",
+      "observed_sha256": "6C92027732DABFDEE142C4694061F8224CA09E0E5E89DBBED127BDA6336310A9",
+      "base_blob": "b95e5441ef6124628cca4b0e4913db0c7d95222a",
+      "last_write_utc": "2026-03-30T21:37:28.1541115Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/agents/README.md",
+      "observed_sha256": "45D4613C3BFA9E3C96D0642A5A524944362FD4540D4994805087D0731874A5D9",
+      "base_blob": "b5037c1dc9e8137727df49f5e9c801e24d83a146",
+      "last_write_utc": "2026-04-03T13:52:51.9062027Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/agents/authority-auditor.md",
+      "observed_sha256": "217F2ED5A9799B27865EA6429D4AB48F37FA5FE646DC8B72FDCA7C7F50BA6BD8",
+      "base_blob": "6affa7a056a0f60567f7177629691f34ca0f79c7",
+      "last_write_utc": "2026-03-30T20:26:23.5283566Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/agents/operations-reality-checker.md",
+      "observed_sha256": "3A5E2AFFA8FC93A04A7EE4EC65EE0A200AB4DEA4913CA974984F645CB6E57391",
+      "base_blob": "a724369f9fde17369aa6cc56596b63585ae2bc89",
+      "last_write_utc": "2026-03-30T20:26:23.5345122Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/agents/orchestrator-dispatcher.md",
+      "observed_sha256": "142F4E95229B830A48D4932F56BE45D46D8ED8D9F2FE05311EC78B2F0196EC66",
+      "base_blob": "d6a2fd212d3d34519593754d7c7f2f157e626f88",
+      "last_write_utc": "2026-04-03T13:52:39.9384154Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/agents/roadmap-slotter.md",
+      "observed_sha256": "1CC590DB5B5EC73499C54F012FF2C5E1C80A253ACDC86868B762520C597A913E",
+      "base_blob": "dccaaef9ae822f321d13a9addd838c31adb1ef9c",
+      "last_write_utc": "2026-03-30T20:26:23.5375644Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/agents/self-correcting-implementer.md",
+      "observed_sha256": "E004C0A92333EE62464CE11601106FE6D9DE781B15300B2ADB17494A9A585498",
+      "base_blob": "14b80bd8f02851565f9dd99176b60905582ab2b3",
+      "last_write_utc": "2026-03-30T20:26:23.5267505Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/agents/ui-truth-keeper.md",
+      "observed_sha256": "87A613D87E236FEDEA468CEA3698AF842130C1202EA44612066E5E68A04EB5B2",
+      "base_blob": "3c7feea9ac9cd6cf157660f506eda9cc7c1cb3c9",
+      "last_write_utc": "2026-03-30T20:26:23.5314433Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/architect_notes.md",
+      "observed_sha256": "27107382BBB0C6D1B6F5635774D0B02E1A004C56916FC652DB24D85112CAFB00",
+      "base_blob": "65619d3bdaffffd26162fb8f446347d3ed4d7f52",
+      "last_write_utc": "2026-07-31T09:21:24.4911685Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/commands/checkpoint.md",
+      "observed_sha256": "96EA6A3004385040349CFA9891413E6E4951A626681EDD013D5CFD077584F1F4",
+      "base_blob": "a476700f10d7afeb1ea59039816b22027c43c20c",
+      "last_write_utc": "2026-03-30T20:26:23.5390786Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/commands/governance-review.md",
+      "observed_sha256": "23B3F998EB026AEAAA0FA36D22F1E5F5D6B5A187CF4E57DC4ED980ECF7BABC95",
+      "base_blob": "daab6ff8a0a68a12d4acc0bbb5a035631fdb86b3",
+      "last_write_utc": "2026-04-03T13:45:54.2485987Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/commands/orchestrator.md",
+      "observed_sha256": "BB61EDF44297A5AEB8BF3ABCA12E127977700D6201641BC7790B9BE2BDF3B0E3",
+      "base_blob": "8b6fb6d59791964d7546b4dc0f2a5c45d67d2db1",
+      "last_write_utc": "2026-04-04T18:16:36.9921335Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/commands/refactor-pass.md",
+      "observed_sha256": "AD8EF7173CD70469F5AA3E8DEB3B0B7EA48D4E8CBD6010D0C7AE94847974AD30",
+      "base_blob": "04d5baaf84e6771a25896814aaf29024c9eeec7e",
+      "last_write_utc": "2026-02-11T18:54:35.2248759Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/commands/roadmap-patch.md",
+      "observed_sha256": "5C4BADA8E742029D6DE371AAA3BA52B7B5572699EB64DEB86B855C816ECA90EB",
+      "base_blob": "78700f54ae01913d1ae48c5961a4422a06762a14",
+      "last_write_utc": "2026-03-30T21:37:28.1525779Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/commands/taskforce.md",
+      "observed_sha256": "1AEDEBC27EAA687B72FECE0773AEF67835692BB15927752DC58CA2637D171D8A",
+      "base_blob": "61dd616b37ad8a03ebc7e7ac4562fa36c7fa4abe",
+      "last_write_utc": "2026-04-03T13:45:45.2059765Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/current-lane.txt",
+      "observed_sha256": "2B4D0A27F90C8BDECC69CA5FB677958E7799DCD8AAF847903B5A3420344642A5",
+      "base_blob": "336c44bc4835ae9e95f96a08d56a5cda5cda11eb",
+      "last_write_utc": "2026-09-11T14:04:37.2792821Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/launch.json",
+      "observed_sha256": "A084AAD73DB727B1EF9752CF3563DF939C0F518DB7F9A7B9CC4463C1503732A5",
+      "base_blob": "b11b6bd1d25e1f583dee4283f81197e7bc95edf0",
+      "last_write_utc": "2026-04-14T12:13:05.6142407Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/napkin.md",
+      "observed_sha256": "13E36FE5B7DA21707EE0A1792FC25D4B74FEA13E62345BDFF37AB3520B86BFEC",
+      "base_blob": "77a79ad1b395dd898fac8b0770f194ed5eb417b3",
+      "last_write_utc": "2026-09-12T15:33:11.4060190Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/napkin/engine_runtime.md",
+      "observed_sha256": "5F14C36F7683DA853E8DC8C0C5B22906D5CB2A1EBB8C1D666C8394194AA2539E",
+      "base_blob": "614f613ac02454d3e15d8f744a0414cb006c4f29",
+      "last_write_utc": "2026-09-10T12:27:23.3987681Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/napkin/entry_detail.md",
+      "observed_sha256": "FF9C47856FE179E591C4769C4386748C3971A92D1EC20E66F2662C4ABB104DB1",
+      "base_blob": "4c034df2ee87dc4fadb50018bcec0e5242743b0e",
+      "last_write_utc": "2026-09-10T12:27:23.3997686Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/napkin/full_archive_20260708.md",
+      "observed_sha256": "F99D97601F4043D8340A698CFDD96C98771E5D1257B6B179FEC77F61835DCC72",
+      "base_blob": "9069143be6e0a89ae1c558fe96a5c58ff443fead",
+      "last_write_utc": "2026-09-05T09:25:02.0008935Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/napkin/map_counters.md",
+      "observed_sha256": "A5DE0744FB38EEC07DFE9746B718B86BC60668A552C58E9B647AC4A1BFF6576C",
+      "base_blob": "8f03430ead1c0eadc48b8f17770450e79b56d631",
+      "last_write_utc": "2026-09-03T11:30:38.6547424Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/napkin/qa_gates.md",
+      "observed_sha256": "5BB71C89748BA7224E5EE09ACEAE9587ED628929DBE4D4B196BFE7AC1211A739",
+      "base_blob": "8f841cd1699399b5305f711193d7690c5a87d172",
+      "last_write_utc": "2026-08-12T15:27:53.4861387Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/napkin/release_process.md",
+      "observed_sha256": "A7ACC87CA038E6EDB9E7500795EADE45EF7DC9816148F66178DB6957FEE28202",
+      "base_blob": "996d06850c188ec5d6cc55e6d5e1a9be26b57cd1",
+      "last_write_utc": "2026-07-08T16:20:35.1028722Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/napkin/unreported.md",
+      "observed_sha256": "90AE7A281EDC1645981179156C47C6AA18E078C91F3AAF905BD0638461EE469E",
+      "base_blob": "1509db0ec922e56f75a161139558e5ee34da89b0",
+      "last_write_utc": "2026-07-08T16:20:35.0988731Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/napkin/warroom_and_legacy.md",
+      "observed_sha256": "FE7EAA663B9266F145E2434CB6C113D2040049FFFC50EA95D5E62BB77FD66FEC",
+      "base_blob": "4a6a55e612ab83ce1806a619a1775eb03e81a2dc",
+      "last_write_utc": "2026-07-08T16:20:35.1068724Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/scheduled_tasks.lock",
+      "observed_sha256": "866735DF0DB124094643DB4BE01A67D9BF19A4D33FC1C2304F75C940FDBAAE4A",
+      "base_blob": "1862478a7e2729a8f75e98c0a5de9567b8546d5c",
+      "last_write_utc": "2026-09-06T14:08:02.8538602Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/settings.json",
+      "observed_sha256": "CD989421F8B4FCDDDC082DB26BBBE062BDDE9DFDF3B76037A55F51D5F17D8393",
+      "base_blob": "ad37724349e37f5045e943551d5e0dbeb8d522e4",
+      "last_write_utc": "2026-09-11T18:09:46.1085347Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/settings.local.json",
+      "observed_sha256": "DAE9C7CE9063606E8B52C4FBDB29E57018ECD58E27680993A80586004C877ED6",
+      "base_blob": "7368520c84c1eb52f84d1bcda7e22f8dd8d6576d",
+      "last_write_utc": "2026-05-23T11:31:00.1993336Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills.md",
+      "observed_sha256": "38DCAA0E6636F39C8B8777B9FA2BF0AD17758A836AA336AA1288E5C2BD6739F8",
+      "base_blob": "88e1e95e79449055ca33b3d8f382004fae7de775",
+      "last_write_utc": "2026-02-18T15:24:12.1617418Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/anomaly-triage/SKILL.md",
+      "observed_sha256": "41CDA90FC2B0B6DE6EE6589D25B60C44E4E99AF56BB24775C35590DD28B403EF",
+      "base_blob": "68a79234087c19e5a2e25b9cf193f02cc335a6b8",
+      "last_write_utc": "2026-03-28T16:41:25.9364735Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/architect/SKILL.md",
+      "observed_sha256": "70F87263CFFE516A1EAD419D9E9D9CD4B2B1F351653C2236044B15E07A2820E5",
+      "base_blob": "6af5abd11ed2fbe18c4cf2edd4165b257c79d93a",
+      "last_write_utc": "2026-03-15T16:32:14.1544295Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/asset-integration/SKILL.md",
+      "observed_sha256": "526D1DE70E45C36FA8CE017B25FA1760F905C69DA4692AD2EA28EFC14623C107",
+      "base_blob": "9c7855e73c43fb2d9e03e305ac42d3f334b648a9",
+      "last_write_utc": "2026-02-12T17:20:02.3820628Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/awwv-ledger-entry/SKILL.md",
+      "observed_sha256": "6431C42D162B56F0CCDFC82D5B66F3C245A7FD98BB144F63C98A8DE8D82EF840",
+      "base_blob": "af9ed0938307dd03d0c3ca6cf5f69c416a711888",
+      "last_write_utc": "2026-02-12T17:20:02.3851707Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/awwv-make-cursor-prompt/SKILL.md",
+      "observed_sha256": "29B668CC6F040B2224308BC4C1893F43CFA1E816220BA01BF560E03F70E354F8",
+      "base_blob": "43fd3b2e44aa5c6c2c0e4e73f28ea172c601437c",
+      "last_write_utc": "2026-02-12T17:20:02.3959037Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/awwv-plan-change/SKILL.md",
+      "observed_sha256": "8C34BE87560E82F41669091B2EE6CAD705E3C97962680DAAF099C3C91B9682F6",
+      "base_blob": "dd7007f91a5756d93a844bb4e09fba736742be32",
+      "last_write_utc": "2026-02-12T17:20:02.4062508Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/awwv-pre-commit-check/SKILL.md",
+      "observed_sha256": "8454B99F77F025E459BC72F941113BFDB17272B6930BC50AA81942AF628C3D25",
+      "base_blob": "b5b45df2bdabe3bb8f0a66efb8ee8f475150cd80",
+      "last_write_utc": "2026-03-09T13:02:42.3791705Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/awwv-read-first/SKILL.md",
+      "observed_sha256": "600FA34C46176DC9D336BE418A384A0CFDB45043C8E8968DA39051CA7185AEFD",
+      "base_blob": "cb2995f229aefd2bf071c713c0c0821aaa505810",
+      "last_write_utc": "2026-02-12T17:20:02.4185868Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/balkan-battlegrounds-historical-extractor/SKILL.md",
+      "observed_sha256": "C0B80D2AD8DBE2AC934C6E52BBF43A056AB8C315EF6D24F980220B80202847E4",
+      "base_blob": "b1080eb0faf6fb8cfc4e01172a61673c42ff5d43",
+      "last_write_utc": "2026-02-12T17:20:02.4305782Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/brainstorming/SKILL.md",
+      "observed_sha256": "206C63E80D38C57E6AFC657296332B1D0FF75572435D75C079E7407B26762ECD",
+      "base_blob": "2fd19ba1e67d66ee97b178e6691611b9975a82d3",
+      "last_write_utc": "2026-02-12T17:20:02.4336911Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/brainstorming/visual-companion.md",
+      "observed_sha256": "FE910708896E18CA7E6615D235EA71690B7431D193A9251AFCCD3A802B166103",
+      "base_blob": "54538fc0eebf274148ee4ff97acabfd6f1ce2a90",
+      "last_write_utc": "2026-03-20T18:22:26.1769963Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/build-engineer/SKILL.md",
+      "observed_sha256": "CACB0379FDFE79F24D51B11EFBCC9E0A4A3F424756D54447CC54F96C9553D39D",
+      "base_blob": "3d67eae0c8ba1bf04dc5debc7ae9d40dc85a6823",
+      "last_write_utc": "2026-02-12T17:20:02.4426417Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/canon-compliance-review/SKILL.md",
+      "observed_sha256": "4A835ED0CCCD844008F729042E78D08CCBC94D33AAC6B97CE95AE1219A948B0A",
+      "base_blob": "b2509ec251b4ebbda66855138bc74fa5faa31646",
+      "last_write_utc": "2026-02-12T17:20:02.4536145Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/canon-compliance-reviewer/SKILL.md",
+      "observed_sha256": "A68B2F49730DAEC8102854DCF646182321D46A680AB01BB86A8A8D082A2E3443",
+      "base_blob": "dbb66f74892ad3190035ccf4750e2292a6afc03c",
+      "last_write_utc": "2026-06-20T14:11:57.5617751Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/code-review/SKILL.md",
+      "observed_sha256": "5CC907F8F7E816124ABB8C7BF5459250F7D76B71C67ECC255A512B1BAD49D22D",
+      "base_blob": "7a6750a586b5bba518538490f667d8dfc1e04bbc",
+      "last_write_utc": "2026-06-08T20:23:31.5924663Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/code-simplifier/SKILL.md",
+      "observed_sha256": "2950A47634214055B835472E7BE0396AAF902E8556C00B3252416316992AF736",
+      "base_blob": "eb3e8541480c4270c06205cbfb41a8a76cbf3c55",
+      "last_write_utc": "2026-05-24T19:08:52.3007413Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/corps-army-commander/SKILL.md",
+      "observed_sha256": "B06048AA84D30E474FD6985686A3F8AB429DE28A01F89D18FA946E1F9DCAC607",
+      "base_blob": "28667a1add3a44a1ce2f95c20efed2d61398fb0b",
+      "last_write_utc": "2026-06-08T21:44:54.7265588Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/create-report/SKILL.md",
+      "observed_sha256": "4638307028B480E5CB8D52C6D464DF777B670ED50CECFF47E29A822881DA9E17",
+      "base_blob": "7efe00e67e618448970968a7b0c2d0aec042e16f",
+      "last_write_utc": "2026-03-01T21:14:19.8938036Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/data-pipeline-engineer/SKILL.md",
+      "observed_sha256": "8495E6A78E74967FBF42E52E04C0FBB9AF0A384B922B3BAF8BB983B5FF1782A3",
+      "base_blob": "880bf2ae3d21d8ae097e0fdcb406285e38d6c8ee",
+      "last_write_utc": "2026-03-29T12:06:52.0709414Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/determinism-auditor/SKILL.md",
+      "observed_sha256": "A9641D548B4EE30B5AED3A86290A2D342B205C57416A234EEC63AE4761830A4A",
+      "base_blob": "0542ea951e7bbbef941df21f78dc128e89230006",
+      "last_write_utc": "2026-05-24T19:08:52.3027462Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/deterministic-script-implementation/SKILL.md",
+      "observed_sha256": "975DD252CA7F88687F0E8811B107C4D228231690D90829A23ECEC39021F5F363",
+      "base_blob": "2f700043e29fe5b2734f0e7aacbb4171e07b53f7",
+      "last_write_utc": "2026-02-12T17:20:02.5004571Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/devops-specialist/SKILL.md",
+      "observed_sha256": "3ABE23FE7633CDA960D82B6BDDFA7BE0F658C7ACAAE96E97700EDC0DC3680A27",
+      "base_blob": "733127cb7e2867408d5ba9f7e011cb63719641e4",
+      "last_write_utc": "2026-02-12T17:20:02.5098018Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/dispatching-parallel-agents/SKILL.md",
+      "observed_sha256": "C628917689CCC12CE9991615DB6824D44C4FE71F8427CD959560AEBE6A1A6476",
+      "base_blob": "33b14859f2bcd944e800d9f4dc4d71940100effa",
+      "last_write_utc": "2026-02-12T17:20:02.5129180Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/docs-only-ledger-handling/SKILL.md",
+      "observed_sha256": "EB394B5A54C4357DEFD6B193F3EAFEC234DCF2BFD345F7C7B1296B3451C15286",
+      "base_blob": "4db8605f13235f6fdd379786eb069f18ebc2e54b",
+      "last_write_utc": "2026-02-12T17:20:02.5227488Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/documentation-specialist/SKILL.md",
+      "observed_sha256": "806821FB42C7EA1716FF04BE67969C0D9E64D3609E6DB89504985A6D4BDB4EEC",
+      "base_blob": "5731795bc0eef382a9aa3d992a202c4d4d536687",
+      "last_write_utc": "2026-02-12T17:20:02.5336335Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/executing-plans/SKILL.md",
+      "observed_sha256": "D099FA42FD7518F4DAFA9F2D51C1C08FCE970490D57682B6ACD3E7A57BB55B52",
+      "base_blob": "c1b2533f489ab7f8fd01225a0edfd709271c0a39",
+      "last_write_utc": "2026-02-12T17:20:02.5367418Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/finishing-a-development-branch/SKILL.md",
+      "observed_sha256": "DD2F82C6DC8582B621F9EB57FCB65F557F88EADF872727AC81D0840AE12C504E",
+      "base_blob": "c308b43b4b6a856f8d721c594f0907af614b8e2e",
+      "last_write_utc": "2026-02-12T17:20:02.5382986Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/formation-expert/SKILL.md",
+      "observed_sha256": "6221B0DE79114C0C05BD6CAC1CB390EC1EF9C7332936C06BB88ECB34DA090DD0",
+      "base_blob": "f594cd9559978bd83b3dac0989f5050d09af03c0",
+      "last_write_utc": "2026-05-24T19:08:52.3047530Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/frontend-design/SKILL.md",
+      "observed_sha256": "8BF9905DBCD9B1EDB47F2A44CADBB9BB66314F73A8E3631EC7FEEE913777CEB8",
+      "base_blob": "43aec9ae8e8ed6b2e5a4706f811c4c88ffad5e81",
+      "last_write_utc": "2026-02-12T17:20:02.5569712Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/game-designer/SKILL.md",
+      "observed_sha256": "45CB02598B057D2914601B4A42D72A3CC52322BB71E8FEE07780421B7247CCFA",
+      "base_blob": "073572fa89886d67a617ec881d6e7e39b7acf341",
+      "last_write_utc": "2026-06-08T21:44:54.7310701Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/gameplay-programmer/SKILL.md",
+      "observed_sha256": "B16F6B447C6A668D464F51306D2B4A24F4BBC007A30D86B011BBF5CBF15F9AFC",
+      "base_blob": "b5d4e86ce15e092cef050d9265efce090358511c",
+      "last_write_utc": "2026-06-08T21:44:54.7335810Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/gap-finder/SKILL.md",
+      "observed_sha256": "6228E355D99E41DF978B2E51794B8F496CC10266C9CCA136D0CE28ADCCBDF221",
+      "base_blob": "9469a0a8cdd6d531a70e15fd85cbbc55e030348e",
+      "last_write_utc": "2026-05-05T06:51:09.8733660Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/graphics-programmer/SKILL.md",
+      "observed_sha256": "AA93467C15F53442A4CF3441CBA504B29670B57E4B3C01A57A01F51DD2B29045",
+      "base_blob": "403bf1c6ffec8f5e4824fc0cff975fedf2cad326",
+      "last_write_utc": "2026-02-12T17:20:02.5904115Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/historian/SKILL.md",
+      "observed_sha256": "5E5DBC46CF4491F6C34FCFBFEADEB93CDD8E528DA78BE420155267A6A1F62AB6",
+      "base_blob": "0942809de44fec29c02b3dad1d80f57e078b0725",
+      "last_write_utc": "2026-08-23T09:18:18.5202188Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/integration-tester/SKILL.md",
+      "observed_sha256": "CC719B80ECD86082F46AC682BA8CED4C41D1FE35842EFE8A9D954FA8C11F7D06",
+      "base_blob": "09c0413804a4bcd85bebd806fb89a24e87d04945",
+      "last_write_utc": "2026-03-23T23:23:45.9898449Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/ledger-process-scribe/SKILL.md",
+      "observed_sha256": "7F0C3B0216E76E7BB3E460F5AC811BEE0FA8CA00F9AAA814C7583A437BCDEF3B",
+      "base_blob": "674269a4db2143c04371000be1bfd5fe11e3d2b1",
+      "last_write_utc": "2026-05-24T19:08:52.3112992Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/lua-scripting/SKILL.md",
+      "observed_sha256": "60717AE2A4823342CC6034D3551145CF63810775BC90B53E9BE676C3C84F3B1F",
+      "base_blob": "69146f87e23cce0be6a2ca25acf3a641b77ec717",
+      "last_write_utc": "2026-05-24T19:08:52.3133054Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/map-geometry-integrity-reviewer/SKILL.md",
+      "observed_sha256": "F718168B5727D4D180A8A05CBE4E6F2A0C2400A412046C672891C9BF3CB5ACE4",
+      "base_blob": "458bbbac0d11506d5123d03cb794b82145f12547",
+      "last_write_utc": "2026-05-24T19:08:52.3142894Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/modern-wargame-expert/SKILL.md",
+      "observed_sha256": "3DD817D2B1A311BE2A0EC004ED911E4355F548FA6DA20215AAAE7F571A54543A",
+      "base_blob": "45671e24377b3d706171fbde728069203377d088",
+      "last_write_utc": "2026-02-25T22:43:49.4964821Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/napkin/SKILL.md",
+      "observed_sha256": "C63508F893CCFFFF0603C08894ADE93376581DDDCD9230E5945EC9B7FCBB9B4F",
+      "base_blob": "315a95f9194483e287231c43b76fdce0758984b9",
+      "last_write_utc": "2026-07-08T16:21:28.7344876Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/narrative-designer/SKILL.md",
+      "observed_sha256": "5D1AF4D5BB84F9A36D3FD2CE56F965809964E4D09703BF94252EEDA9086FA754",
+      "base_blob": "46656a8929295ccdc0867dadcefe988398f9d30a",
+      "last_write_utc": "2026-08-23T09:18:18.5222204Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/nightshift/SKILL.md",
+      "observed_sha256": "E950C1764ABA5A77E90EA727FCECFE8276C16C74A8E0CFE2A1D2FAA0DEC0720B",
+      "base_blob": "0200e14041f48d09ba7f3ff5822ab57dabb9fe50",
+      "last_write_utc": "2026-03-20T12:45:13.8561456Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/operations-expert/SKILL.md",
+      "observed_sha256": "1979722FE85776E5BC0242EC2184674B8A2031A42D037BD7E522CEC58CA667E9",
+      "base_blob": "1342eb234b9dd2b2c9db552a05940bfee54159b5",
+      "last_write_utc": "2026-08-31T08:14:28.7427101Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/orchestrator/SKILL.md",
+      "observed_sha256": "8FA615DA5133D830577BB33E93E57543EB8012D2ADECD83776BF972A4575D2EA",
+      "base_blob": "b0c954276d25600b7cba441662e0fe19d6ce2e76",
+      "last_write_utc": "2026-06-08T21:44:54.7461014Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/performance-engineer/SKILL.md",
+      "observed_sha256": "036548863539050F1189F16FB5798E6D49268D33079115C005A160D5C8CBB850",
+      "base_blob": "457c3ef777a917824aa5ad109f59451e01a7ad13",
+      "last_write_utc": "2026-02-12T17:20:02.6479451Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/platform-specialist/SKILL.md",
+      "observed_sha256": "58BAB1A76499D400AC97FFE8F215758746CD76C9DEA8961F478CCB49BEA3168A",
+      "base_blob": "3dde32d26af26beebcb35111acea975a9c50d9d3",
+      "last_write_utc": "2026-02-12T17:20:02.6568347Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/product-manager/SKILL.md",
+      "observed_sha256": "C42CBBCEC6DC1D32CF1B34F6CA93EDC62CC2E65CCEB35480C22A3B73CCED4FA7",
+      "base_blob": "d492c714fe6cca54ce94e6cc4e5de4a481992abd",
+      "last_write_utc": "2026-02-12T17:20:02.6677848Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/prompt-construction/SKILL.md",
+      "observed_sha256": "A80B37A0B8BAF101E14B4895A6FCA11C1307B9BBE0AFA0AF95AC9AACED507F5C",
+      "base_blob": "e98d7b9d30a6d2d9f87b44043d7a960aefacb326",
+      "last_write_utc": "2026-02-12T17:20:02.6796812Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/propagate-to-canon/SKILL.md",
+      "observed_sha256": "1351A7506F8A9CA058176EE23728AA16E74E26DA9034E5874178A9FA96B17FB5",
+      "base_blob": "68b96cf164da9edbf59a1e52a54b41b520bb94de",
+      "last_write_utc": "2026-06-20T14:11:57.5637743Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/qa-engineer/SKILL.md",
+      "observed_sha256": "6A866931682E21E76536506CB6FD66A6E13ADBF9BCB38C0CDD4A0338C5855F84",
+      "base_blob": "4bd9f4bcfc0ced72123b6f84f01f62d8e7144698",
+      "last_write_utc": "2026-06-08T20:23:31.6145193Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/quality-assurance-process/SKILL.md",
+      "observed_sha256": "833AAC78FD4D7AF7E1BEE93D2260F854941500913071FED29ED245109EA427E1",
+      "base_blob": "91e0a7cbf678d67df9e6027e82b88077f4ed071b",
+      "last_write_utc": "2026-05-24T19:08:52.3203049Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/railroad-hunter/SKILL.md",
+      "observed_sha256": "7378174E6D973C2799AE4E82E78B26632AF639674CA70556EC6F3EC045B7FDAE",
+      "base_blob": "6dee176748f932430e79f0cb98895667845d4c2e",
+      "last_write_utc": "2026-03-30T19:10:06.9917081Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/receiving-code-review/SKILL.md",
+      "observed_sha256": "C9382E92B8F32363566068ECFED19D3B2651EAF40D3942B24840F839DEDFC406",
+      "base_blob": "4ea72cdf014d6b18223e4248ed9444bd3953445a",
+      "last_write_utc": "2026-02-12T17:20:02.7036395Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/refactor-pass/SKILL.md",
+      "observed_sha256": "32B5AFB19EE5D7135B7E2071C5B9F965CBA1789331A8382EF4C2C81941DCB8D3",
+      "base_blob": "7f0d850bd446d6fb867c1679e596481880489efa",
+      "last_write_utc": "2026-02-12T17:20:02.7139740Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/reports-custodian/SKILL.md",
+      "observed_sha256": "D9B28E8EFFC0291DC248007E05F1C190C76ACE60673A97EC54FF2316F1A288BD",
+      "base_blob": "8680cf6552ad21b1656a091a6a10966621ebf3b6",
+      "last_write_utc": "2026-02-25T22:43:49.5190967Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/requesting-code-review/SKILL.md",
+      "observed_sha256": "2DA31AF22A58938AB78F3EE6D5B4687FCCA062B923B646459EB52BA72117EF97",
+      "base_blob": "f0e33952c8d614b8d0d3fd3f037b81c91b148f39",
+      "last_write_utc": "2026-02-12T17:20:02.7259585Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/requesting-code-review/code-reviewer.md",
+      "observed_sha256": "7F5328DCA12CB200005AE9D4386F63A9B0ACB735ECE57F82DB206B4A3189CCAE",
+      "base_blob": "3c427c91b269a61b3033abf6357a3048319caacc",
+      "last_write_utc": "2026-02-12T17:20:02.7259585Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/retrospective-analyst/SKILL.md",
+      "observed_sha256": "4C3C1A6EC3E6992F4814969CD64AAC57612F5C83212B43EADF7A632761F0118F",
+      "base_blob": "fc60d034303ec0e0b8b8877e9e8582fbad2fcb28",
+      "last_write_utc": "2026-02-12T17:20:02.7380380Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/scenario-creator-runner-tester/SKILL.md",
+      "observed_sha256": "C574EF3C02721704603AEBB24FA5007C3EA175EFE70417E589D85B21934211DB",
+      "base_blob": "e76bf43a730ce09b7decb964e679055d3e9171bd",
+      "last_write_utc": "2026-08-23T09:19:07.1392047Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/scenario-harness-engineer/SKILL.md",
+      "observed_sha256": "97795B3269AA26870F5D43814B609D643DEDBF4EA13C93938F4E52C80806D652",
+      "base_blob": "0c471591a5c1f4a2a5d0dc5c163fd8922e5c18f5",
+      "last_write_utc": "2026-06-08T21:44:54.7576198Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/scenario-report/SKILL.md",
+      "observed_sha256": "C59BE0E8230EC6D7B1935CC78CD21A4216B37AD15E32B701EA3D8DD92AE82CB5",
+      "base_blob": "937aedd2d7011d00b6b957b18b3d3ccacb420f98",
+      "last_write_utc": "2026-05-24T19:08:52.3243172Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/sector-expert/SKILL.md",
+      "observed_sha256": "4E1D8A86246880875C7E5FDA205BA0BA3DEB41A8E8BB3AF859D9B74139DBFE1B",
+      "base_blob": "b6712dd23b9f855b4724d972c60dc7e18026727f",
+      "last_write_utc": "2026-04-01T07:09:40.2475106Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/session-closeout/SKILL.md",
+      "observed_sha256": "8D5925BE0032FDD792A9C3C11532CD1B8165480F78D0D847622624550652DF02",
+      "base_blob": "28c4c26ae97f6d638cdc0acc929f909cbbbf05b1",
+      "last_write_utc": "2026-06-11T00:09:04.6339952Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/subagent-driven-development/SKILL.md",
+      "observed_sha256": "994B89A5D294EADD6A1611EDB51377BAC748D5F5FB7F4139D3C736B616B3A46A",
+      "base_blob": "b578dfa48a9a7c657b81916cad2b072c5934b1eb",
+      "last_write_utc": "2026-02-12T17:20:02.7792822Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/subagent-driven-development/code-quality-reviewer-prompt.md",
+      "observed_sha256": "11DE35DBA7990F9DEF49B90039F1F2D8E7F546AE42CA8E1105D308F09456803E",
+      "base_blob": "d029ea299cd7f44a903e1c079df8aae782ad7fd8",
+      "last_write_utc": "2026-02-12T17:20:02.7685545Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/subagent-driven-development/implementer-prompt.md",
+      "observed_sha256": "9740DC8E425F9E1D6DC34599E0BA82E93AAD7FEDBCBB27B0BD67A4FA0E15A85E",
+      "base_blob": "db5404b3066a786e5d967d1b81a581ff6a9c7166",
+      "last_write_utc": "2026-02-12T17:20:02.7792822Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/subagent-driven-development/spec-reviewer-prompt.md",
+      "observed_sha256": "631980E472EEC5394DE8B89B69D432E54FD3F7F523ECF9AFA7EB4CDA0C9B2BAF",
+      "base_blob": "ab5ddb8a5594d0655ff2e7e6aa1ec097eaf16b48",
+      "last_write_utc": "2026-02-12T17:20:02.7897232Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/systematic-debugging/CREATION-LOG.md",
+      "observed_sha256": "B482EF9A918FBFC6C369729E8160633DDFA2332466DD362EE73F1527C239EF8B",
+      "base_blob": "024d00a5ee4082a22ffb79cc961297f22404d0da",
+      "last_write_utc": "2026-02-12T17:20:02.8322966Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/systematic-debugging/SKILL.md",
+      "observed_sha256": "4999CB851360485ECA5074E727BBDD62EF20549C5D5B01216FCBF5831BADB473",
+      "base_blob": "111d2a98c2698b5a202ddae8906f75f16ecfcffd",
+      "last_write_utc": "2026-02-12T17:20:02.8731027Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/systematic-debugging/condition-based-waiting-example.ts",
+      "observed_sha256": "40AE5EBE497FDF310200E43FE986552546D0A22837C0D39E855DB1CFD33EB88E",
+      "base_blob": "703a06b653160d060bbf46ab5c6e0cd7446bd592",
+      "last_write_utc": "2026-02-12T17:20:02.8080152Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/systematic-debugging/condition-based-waiting.md",
+      "observed_sha256": "E89FEC8400D6CD50F43407CEC9FAB50976BA4D55D0EC2EB51C0BD68036B54C26",
+      "base_blob": "70994f777c586f7d4c43033aac34c7cf0da6688b",
+      "last_write_utc": "2026-02-12T17:20:02.8218770Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/systematic-debugging/defense-in-depth.md",
+      "observed_sha256": "1E175FB86FC357E58C6AEBF5441E481E1B7868B4380C0456B63A17EEFBD18BA7",
+      "base_blob": "e2483354dc2b62478a2624e34ca18bc0efe887b2",
+      "last_write_utc": "2026-02-12T17:20:02.8472827Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/systematic-debugging/find-polluter.sh",
+      "observed_sha256": "6462747EAE9B175AC145B78BCFAEAB755654A75E32637F08EB633F065A9E1D7C",
+      "base_blob": "1d71c56077dd819f0966cdae353fb142201611c6",
+      "last_write_utc": "2026-02-12T17:20:02.8565662Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/systematic-debugging/root-cause-tracing.md",
+      "observed_sha256": "A81BEE9448794D261B4ACA8487C595D11FF4BD4E10A5F96BCA1117DD32527050",
+      "base_blob": "948477497bb13c06f572defb5a55b4a11bbd5e25",
+      "last_write_utc": "2026-02-12T17:20:02.8715636Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/systematic-debugging/test-academic.md",
+      "observed_sha256": "FE2BA480D78AC0D686DC025F41C2A32A43D642BF533F91B0C6053A04D35D6486",
+      "base_blob": "23a6ed7a2044e0c44d74c3101406140f4851aa41",
+      "last_write_utc": "2026-02-12T17:20:02.8820732Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/systematic-debugging/test-pressure-1.md",
+      "observed_sha256": "0B6A915DB0054577819834C79BE9EB614E97BDDBA10D73768E1FBE91CFED048A",
+      "base_blob": "8d13b467e4a98abfffd12161cbc3c418021d6023",
+      "last_write_utc": "2026-02-12T17:20:02.8919531Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/systematic-debugging/test-pressure-2.md",
+      "observed_sha256": "B2030AEFFBA07050E8AD573DDF87486457C4A016A786BB326235BEBD856F2016",
+      "base_blob": "2d2315ec8a24ca872bc80d2f4056468ba051462a",
+      "last_write_utc": "2026-02-12T17:20:02.9019501Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/systematic-debugging/test-pressure-3.md",
+      "observed_sha256": "96B50A52E2C7989C9CF20FB752C47C1E9A3A70DC362F8F7989F8F5B64DAC7708",
+      "base_blob": "89734b86fdc756488df315d53e5c3ac2d3752cd8",
+      "last_write_utc": "2026-02-12T17:20:02.9123008Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/systems-programmer/SKILL.md",
+      "observed_sha256": "035C775B5856E56DC94745307FA138B0261F7C72B4A1102F428192761190B54F",
+      "base_blob": "e21f4e07973b4ba6992a7eb45b4915dcbed860e8",
+      "last_write_utc": "2026-06-08T21:44:54.7606180Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/technical-architect/SKILL.md",
+      "observed_sha256": "D1246829C8F565F84CC9D47A4AEE99EBC3D0CA80473413B3A5DE06208FAB711F",
+      "base_blob": "75fe7cd1dd09ae3c88dd1b1fc5ebe9bf87d1b85c",
+      "last_write_utc": "2026-06-08T21:44:54.7631232Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/test-driven-development/SKILL.md",
+      "observed_sha256": "7DEE67B4AF6BDCCC7A914CA34533184D64592D0F5B23AEAE631538168DB14994",
+      "base_blob": "7a751fa946b7fd801feb504cb1af6b5b62adcf43",
+      "last_write_utc": "2026-02-12T17:20:02.9417159Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/test-driven-development/testing-anti-patterns.md",
+      "observed_sha256": "BDE453BC258F06543987477C837939AFAA774EA2ACBD9F308D702FC452BC4283",
+      "base_blob": "e77ab6b6d65ecfb0d8212a32186bf68d18b5eade",
+      "last_write_utc": "2026-02-12T17:20:02.9613081Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/ui-ux-developer/SKILL.md",
+      "observed_sha256": "95674B139E1C35048FC4C9031EB8934A7E2FBD45CACB436BC6872445D8F9DD45",
+      "base_blob": "0dcb28921ec4289c12378fc920ab021e3d3a26bb",
+      "last_write_utc": "2026-06-08T21:44:54.7651334Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/using-git-worktrees/SKILL.md",
+      "observed_sha256": "7BCD36E73EE7FEA2F7BBD42497E6F5F94A6E55438729F2AE9D6E6421E15C0FAA",
+      "base_blob": "58889f75ad73bedd440217e5380757b334558d10",
+      "last_write_utc": "2026-05-24T19:08:52.3283294Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/using-superpowers/SKILL.md",
+      "observed_sha256": "81D921B16502091F44E8669BBCFAE74B87BBF4295D03FFF70A98E81D73AF60A6",
+      "base_blob": "7867fcfc0f7e5e9110c3083fbfff201353586965",
+      "last_write_utc": "2026-02-12T17:20:02.9816193Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/verification-before-completion/SKILL.md",
+      "observed_sha256": "EA52D15AABAF72BC6B558EFE2C126F161B53961090DDCD712000273BFE8C7B6C",
+      "base_blob": "2f14076e59e6ce5cd6f88007421a85f0bd772520",
+      "last_write_utc": "2026-02-12T17:20:02.9843384Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/visual-explainer/SKILL.md",
+      "observed_sha256": "A458BCF6F73D951D0CAC57533C48BD22F701C24687ACE4E340D89D56203B904C",
+      "base_blob": "3c8a0c101972dc6d51cd6f2a11e9fbc23d14dad6",
+      "last_write_utc": "2026-03-01T20:59:10.3659724Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/visual-explainer/prompts/diff-review.md",
+      "observed_sha256": "64F97F334A070CFE3F0F50EDDF5A1ABCA3322CE4D92767681C5F5BB600F147BC",
+      "base_blob": "ffa11a5561ce4451ace95e046a3120f436ec893e",
+      "last_write_utc": "2026-03-01T20:59:12.2248686Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/visual-explainer/prompts/fact-check.md",
+      "observed_sha256": "3E70B47EF210BF9696D3AEC2C0C62A86BCBDF35D63B2A04C25668BE684F5B315",
+      "base_blob": "b4ff7f6fdb3b6bb28748bbad6eb60ed52d0e5a3b",
+      "last_write_utc": "2026-03-01T20:59:12.4266261Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/visual-explainer/prompts/generate-slides.md",
+      "observed_sha256": "980D281D33C4B1A94C47CE72AD18BEFBD07493DF3B4A1AF8F314BD9D1BA5C35C",
+      "base_blob": "0109be1c5d392e37f31f48bc11f5a622e7dc3002",
+      "last_write_utc": "2026-03-01T20:59:12.6198301Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/visual-explainer/prompts/generate-visual-plan.md",
+      "observed_sha256": "1C2146ECA7A8F7FFF0171075450EF90A623C5F239EA5280E22DC08EA0602F88B",
+      "base_blob": "e3ef62cf209e8f7457671910ff791353327fbc99",
+      "last_write_utc": "2026-03-01T20:59:12.7926936Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/visual-explainer/prompts/generate-web-diagram.md",
+      "observed_sha256": "B23769667B464E29E4D382E76DC8414A729756F23E745452BCFE634C495C8901",
+      "base_blob": "64e5e1d652fba99b35895a883f2e43862e68dc82",
+      "last_write_utc": "2026-03-01T20:59:12.9984971Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/visual-explainer/prompts/plan-review.md",
+      "observed_sha256": "4C32CE83CBC41CD4E777E75022AF65CB22B134562E4E91CCA75BFD0E517599D5",
+      "base_blob": "f42c7716daf07e67bfa66732f2268059e6296714",
+      "last_write_utc": "2026-03-01T20:59:13.1706855Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/visual-explainer/prompts/project-recap.md",
+      "observed_sha256": "A7DE16370F3A8843F509B19086C7DE5A4DC227408C4FFDB14851A45C8D9E8347",
+      "base_blob": "71adf07177b4e3f56178b1e122726ad23fa59312",
+      "last_write_utc": "2026-03-01T20:59:13.3695028Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/visual-explainer/references/css-patterns.md",
+      "observed_sha256": "C64FE50C327869DD30F127BB0C0892A29F8135626A0BCA62873A607C510C27C6",
+      "base_blob": "757957fe92af9db5d19586326b93bc9817612cd2",
+      "last_write_utc": "2026-03-01T20:59:10.6297206Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/visual-explainer/references/libraries.md",
+      "observed_sha256": "B133305306418786C320E5A189C96BD3FC206BE179B46AFA08052B5463DB75C7",
+      "base_blob": "04a1fa48378e5b5eeaa4781efa70d2c913a16a0d",
+      "last_write_utc": "2026-03-01T20:59:10.8436108Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/visual-explainer/references/responsive-nav.md",
+      "observed_sha256": "C2507C5A468632EAB14028780898422B1A6D7A2E3D1708933BD294F2CF6989C3",
+      "base_blob": "75563f459fb679b63269eab7db3dd1b92903ee8e",
+      "last_write_utc": "2026-03-01T20:59:11.0200718Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/visual-explainer/references/slide-patterns.md",
+      "observed_sha256": "67C2CE53BDF302334F5C9BAFC812BA526D9F7AFD33E55DD5F6D9323C44D8135C",
+      "base_blob": "d98f19ce67beb13c5695e284d61bc5c37d2e0816",
+      "last_write_utc": "2026-03-01T20:59:11.2543269Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/visual-explainer/templates/architecture.html",
+      "observed_sha256": "805319310B450B7F7E659CAD1AA3B5209ACAA64C67777D0A151C565F6ECED1D4",
+      "base_blob": "edc1b439996dac239e2445de0bf1ba7f7b7022c4",
+      "last_write_utc": "2026-03-01T20:59:11.4442340Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/visual-explainer/templates/data-table.html",
+      "observed_sha256": "820468DCFB9EDB7FC1FE2B75B105539224F574FF6DDF719F1637B7C189C06E7C",
+      "base_blob": "42ab0691603a3d557769e74212625f16eddfd10b",
+      "last_write_utc": "2026-03-01T20:59:11.6349422Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/visual-explainer/templates/mermaid-flowchart.html",
+      "observed_sha256": "D1609F8E021C300A063948221FC805205C63C85785D8D3A4F8D789E13A2A9B66",
+      "base_blob": "89f4b4226f67928d602f709f7f6a20a540030949",
+      "last_write_utc": "2026-03-01T20:59:11.8386530Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/visual-explainer/templates/slide-deck.html",
+      "observed_sha256": "9C66FDA980D0727BEA5DCED57B53AEB5A04873E2319C1A4382DCCC090C093A5A",
+      "base_blob": "19e25b783493c6e29b02f116b1bcdbab5adb00d1",
+      "last_write_utc": "2026-03-01T20:59:12.0515900Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/wake-up/SKILL.md",
+      "observed_sha256": "4356B64D667677D955B801CA32FE39ADE9271F8B817469AB62100E141F058F7B",
+      "base_blob": "e9ecb451b8701fc7bcd2b17ad5a5468bdbe89a4b",
+      "last_write_utc": "2026-03-15T16:32:14.3725203Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/war-or-game/SKILL.md",
+      "observed_sha256": "04BC8586B8B618EADB02DFFC5EE70DF8264499DCD44B5939F81689D6DB6E6A6F",
+      "base_blob": "a4cf12aee835d025f4c53cbfcf9960133b1d879b",
+      "last_write_utc": "2026-08-23T09:19:07.1412041Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/writing-plans/SKILL.md",
+      "observed_sha256": "8A9198D4D9EFBCAD6E019B17C422C182113062C864B6154EC2A3BA2ED0B6B9D0",
+      "base_blob": "5fc45b6ff6cf36442472cf2656aec9c3ae0ec0b2",
+      "last_write_utc": "2026-02-12T17:20:02.9865630Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/writing-skills/SKILL.md",
+      "observed_sha256": "0E9FBC1E9DF94AE8B8F1335E10DCA0B82EA91E17473ACA66DEE74C9498748469",
+      "base_blob": "b540fe236cc1d92675ea15e2ff46d97ed77b7c43",
+      "last_write_utc": "2026-05-24T19:08:52.3310652Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/writing-skills/anthropic-best-practices.md",
+      "observed_sha256": "3E8B909316D7FF2084F04947E85D4FD1691C9CEB02105542139FE2E3A0E26C26",
+      "base_blob": "a5a7d07a4e3137f300a65dd01571e1f6e0e14788",
+      "last_write_utc": "2026-02-12T17:20:03.0067036Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/writing-skills/examples/CLAUDE_MD_TESTING.md",
+      "observed_sha256": "0B379A3415E185D3C434B3AD283D8AA132F3022C2A4F210F168865B5986BCEF0",
+      "base_blob": "47881fc85bd6c01b32b84d52ed9a0c73c8d6a089",
+      "last_write_utc": "2026-02-12T17:20:03.1014964Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/writing-skills/graphviz-conventions.dot",
+      "observed_sha256": "B18A02773875F6C7B92F2A260E88550C92A62549B0009DF9D680F7E9541D0ECC",
+      "base_blob": "3509e2f028cacaa8118cbc8c80025efb089ec28e",
+      "last_write_utc": "2026-02-12T17:20:03.0262187Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/writing-skills/persuasion-principles.md",
+      "observed_sha256": "C3C84F572A51DD8B6D4FC6E5CBDC2BC3B9E07BA381A45BDABFCE7AD2894DD828",
+      "base_blob": "9818a5f951b66d02d288c56fd1941b6b5f5478f1",
+      "last_write_utc": "2026-02-12T17:20:03.0397023Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/writing-skills/render-graphs.js",
+      "observed_sha256": "CCDA971A87BB185F8FEBF81C56B556A20D026FA980C17B35FA3E8824FBB37852",
+      "base_blob": "1d670fbb356553f898b9f8273f8b314f35ef1a59",
+      "last_write_utc": "2026-02-12T17:20:03.0716603Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".claude/skills/writing-skills/testing-skills-with-subagents.md",
+      "observed_sha256": "C711346852C911B24A84AA161E0CFF06A4CD7F4E2FA9E9C0A266CEAD5AFCBADE",
+      "base_blob": "a5acfeac86f34c7bc625d064e10c8a2f8180b696",
+      "last_write_utc": "2026-02-12T17:20:03.0874103Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".cursor/AGENT_TEAM_ROSTER.md",
+      "observed_sha256": "BA0AB890B923123B07AEC9249166A1667ABADB3CAA004EBB0902A5EB988619B4",
+      "base_blob": "80b13da17c9dbb4f44df92f9c70b32181c7a50d8",
+      "last_write_utc": "2026-03-23T23:25:13.1455946Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".githooks/README.md",
+      "observed_sha256": "5DE2B83475BC96177346133C6F1B93A7A551F393A02D3B636C5871E86A246647",
+      "base_blob": "e175b4139cb10bf891bde0b8f57c8b659f4ca4ef",
+      "last_write_utc": "2026-09-10T12:27:23.4017683Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".githooks/pre-commit",
+      "observed_sha256": "AC96C63B6603629DC11D67483BA504F82C992EE704F084102A80D78CD9EC9690",
+      "base_blob": "016bb2d6a97d37d500a3086c7ae69a7cc948b0ee",
+      "last_write_utc": "2026-03-30T21:37:28.1495440Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".husky/post-checkout",
+      "observed_sha256": "8D606E58CCE98604696A4ABCF3AE1EBDE6F9F31AC72BB0D44E2444CC39F26030",
+      "base_blob": "5abf8ed93f76109d8270e5d2e10f295745a21c61",
+      "last_write_utc": "2026-03-29T13:02:34.2794093Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".husky/post-commit",
+      "observed_sha256": "765C239BB2831EB34BFEA68436F6AAEA0FFCCC1FF9FEC6E05B4B659D449254A7",
+      "base_blob": "9fc17be2673109c97d6e26563c86f7308e364ac3",
+      "last_write_utc": "2026-03-30T18:28:23.7862836Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".husky/post-merge",
+      "observed_sha256": "CECB594E8FA65831654FC95E96DB9F1249E09C52810C6FBB2B428280AAC22158",
+      "base_blob": "726f909891ab62484cd9f93df2baa57e2e94c7a4",
+      "last_write_utc": "2026-03-29T13:02:34.6727251Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".husky/pre-commit",
+      "observed_sha256": "0021C1C7CE668825355895FD79B406D64428C92329164FB1E93231557D8A6D7B",
+      "base_blob": "c47ad6456947d09b51cc56116eb79807331c1388",
+      "last_write_utc": "2026-09-10T12:27:23.4147947Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": ".husky/pre-push",
+      "observed_sha256": "A52D0510D0F8C75E27852156EC6F7791F0D8ED65FC58FCC368DD1DE0A60A1D74",
+      "base_blob": "5f26dc455231b6a363ef5a92ff94e5d00f0b42bb",
+      "last_write_utc": "2026-03-29T13:02:34.0413551Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "AGENTS.md",
+      "observed_sha256": "B366990D0D56335F258050618DF10139F408F5C3E07EDB7CD085C768CEFD314D",
+      "base_blob": "b508f97ca1bf19b0d74dce8bb9822e12f645bf01",
+      "last_write_utc": "2026-09-07T12:35:26.5786190Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "CLAUDE.md",
+      "observed_sha256": "AB98A8ACE6CDD61B2470CBD9E61E944FBC57B5372EBB9010A05B5A1E2CBA03FD",
+      "base_blob": "816646bc11e3651e9447c9db4dbbe2194969d5bb",
+      "last_write_utc": "2026-09-11T18:09:46.1120568Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "docs/20_engineering/AGENT_WORKFLOW.md",
+      "observed_sha256": "5435D8E754E1CF176835E4E182DF609A8B4DFD9E07F12FE125C1BD5675A92F88",
+      "base_blob": "afb3cd72af8c14dffe55046b12f0ac2504b6965e",
+      "last_write_utc": "2026-05-24T19:08:52.3337060Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md",
+      "observed_sha256": "AF5CB9CF22398A81C45C08A4D0FD0F6C92E49D68AD615792B5B78209F5C5A66F",
+      "base_blob": "dccfd11c93059b1dfa312b98c1789d2b17484084",
+      "last_write_utc": "2026-04-03T13:45:37.1881370Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "docs/30_planning/_task_artifacts/ACTIVE_TASK_GOVERNANCE.md",
+      "observed_sha256": "87B71FCABE619250B76A13472FA1A73C613BAA183759F9749A5F3E48AC72ABDE",
+      "base_blob": "62b9b7c9434b56bd80abb001daff4d873f0cedc7",
+      "last_write_utc": "2026-09-03T09:38:43.2926128Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "docs/PROJECT_LEDGER.md",
+      "observed_sha256": "9250D519975A89EE2A7E879B7FDDD5BFEA146E46C0B2F922AC5CDFB656B8CA77",
+      "base_blob": "4aff35b8feabaa165e24a9373bc45727ad6ebb97",
+      "last_write_utc": "2026-09-12T19:09:50.7431470Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "scripts/repo/check_claude_governance.ps1",
+      "observed_sha256": "266CB60497FF6677AD9ABE171282DF8C386E424CE6420E0A4BDDC2FEE086BDA5",
+      "base_blob": "f68e2c45c4b0dec5da3f6e6ea051884e69b4001e",
+      "last_write_utc": "2026-03-30T21:37:28.1449592Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tests/hook_registry.test.ts",
+      "observed_sha256": "9886F256828B0ED32206A7D2FE5E6BF895DE740AE0379A87E5240F0CD8991475",
+      "base_blob": "4fc31f87a7ae0b1b095d72622bd60ede6d6d96e0",
+      "last_write_utc": "2026-09-11T18:09:46.1397168Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/architect/hooks/notify.ps1",
+      "observed_sha256": "5D25F95CCEF923D1B90303539B77309A86253C3B6FCD6431372A25450993388A",
+      "base_blob": "13c0285113c2a0d61fc9dc7cacec33ef52dccfbd",
+      "last_write_utc": "2026-04-04T07:43:14.2835004Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/architect/hooks/notify_slack.ps1",
+      "observed_sha256": "5FE4BE9498AC2729092D3F26E230CEAFD6FB63E7DEF38A3E372F4F08E8317009",
+      "base_blob": "6146eb358952b44380645455978591057dfe3553",
+      "last_write_utc": "2026-04-03T18:26:53.4211809Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/architect/hooks/on_notification.ps1",
+      "observed_sha256": "89A775B68425D3519A8F4EBE6DEB4414C8AB21E7E5DC669194A9F7EF20A589C1",
+      "base_blob": "d0cd0ae83e98bacb6c97c0e6faf8b86e5b37efb7",
+      "last_write_utc": "2026-04-03T18:09:38.8757419Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/architect/hooks/on_stop.ps1",
+      "observed_sha256": "4E77F389B8248441A2BE123294DE2D7FE1821FD555C191646C80489AC4AAE955",
+      "base_blob": "5d451763b113a7e58ec949ed74d869f65a220dac",
+      "last_write_utc": "2026-04-04T07:43:14.2861176Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/architect/hooks/write_review.ps1",
+      "observed_sha256": "E1272E57AD1D915F3B8CBB10F82BFEC4792A259310A2FC286937C797DAAB3E5B",
+      "base_blob": "b24cb527dfcc185e92a9f78815d5e4127690b57f",
+      "last_write_utc": "2026-04-03T17:26:09.2766193Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/hooks/README.md",
+      "observed_sha256": "A3C81D1F668A5651FBC56235D4D268D348B65C592F805005E8A2AC6A8032E2C4",
+      "base_blob": "abc9238107527b9be4fe3f915028995f61894145",
+      "last_write_utc": "2026-09-11T14:04:37.7784339Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/hooks/floor_vs_dissolution.ts",
+      "observed_sha256": "C3BB0BC003B96B35DECF8E47C5AFB6A7801BE93EF1E7B9A0F6F986D9EBFD240B",
+      "base_blob": "df9f778ed8c36b9ad3ff93196cc55654101ffdb0",
+      "last_write_utc": "2026-08-26T14:05:16.8199966Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/hooks/guard_dirty_citation.sh",
+      "observed_sha256": "79BBF920F3CE0E1F2C8C715E897B83B3F5A686C05DCBA1EBBD56126DFED730A8",
+      "base_blob": "988444f1d5e07e81c56694444c417f5fe2758698",
+      "last_write_utc": "2026-08-26T11:39:14.6864133Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/hooks/guard_heredoc_code_edit.sh",
+      "observed_sha256": "F7F5CB021328A07F79107A6FA90ED667D75C76C5FF2D233B35EDCDBE68D64CCD",
+      "base_blob": "f5896c31cbeb7d549a8a7f91641813cb0392415b",
+      "last_write_utc": "2026-09-11T18:09:46.1457183Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/hooks/guard_inline_script.sh",
+      "observed_sha256": "C4F0EEFAC01EAE652061DFC0DC11C389899932CFEB36CADD7172E95E177E07D2",
+      "base_blob": "48b98d82121b4aeb2830ff1b497bb487d90f5c31",
+      "last_write_utc": "2026-09-11T14:04:37.7804339Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/hooks/guard_large_read.sh",
+      "observed_sha256": "00880EF2BFE904BDAA07A4C97DBC4186F253F6B6D5D6FAC8EF17FAF325FFB58D",
+      "base_blob": "bc3fa2ab60fe463328f1a6bb01c58243ff7148d1",
+      "last_write_utc": "2026-09-11T14:04:37.7814349Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/hooks/guard_lookup_absence.sh",
+      "observed_sha256": "D9A4DCC574CA5134AC95F55FC812F6270DE66E4799D01B670EAB8441BC50A776",
+      "base_blob": "3ff699c61ccb21e7f5df8e3330b18aa7aa421a34",
+      "last_write_utc": "2026-08-26T11:39:14.6885959Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/hooks/guard_pipe_exit_code.sh",
+      "observed_sha256": "2BDDA68407A229CC7A958C5E8CAC5D245A602FFA624536AF19F11F45F60C3F4A",
+      "base_blob": "c74ee0fbb041dc63628097395799f89d87ad3367",
+      "last_write_utc": "2026-09-11T05:03:21.2673924Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/hooks/guard_scenario_artifacts.sh",
+      "observed_sha256": "5CDFFC826F3CB627140A02A5A7BE372467F23A0093A129CCC7304E309CD7B001",
+      "base_blob": "474cff5e51957247cc6d3ab1164f2b54c5215cef",
+      "last_write_utc": "2026-09-11T14:04:37.7824337Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/hooks/guard_scope_drift.sh",
+      "observed_sha256": "8A084AC0846DEE5E351B7F9ED93B070354CE93F3B30F6FBCD3E33BD4E915FDC8",
+      "base_blob": "ec7fa8f27effdb67477c3d2a7032a10c828a3d31",
+      "last_write_utc": "2026-09-11T14:04:37.7834374Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/hooks/guard_stash_pop.sh",
+      "observed_sha256": "260D2FD890D89EFE7417556A07025570E7961E3523A188678132CD95A65C36A3",
+      "base_blob": "2ac24f3266f282d6cd5ff80f2f2e78b9f99e2afe",
+      "last_write_utc": "2026-09-11T14:04:37.7854337Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/hooks/guard_truncated_search.sh",
+      "observed_sha256": "8E73D617D7455C94413416A5C14899A40AB7C9938BE1225D9ED86D82E1D4EF5F",
+      "base_blob": "e69fb4ac5a7c3f1f64448f10d92c7a8fe66aaf81",
+      "last_write_utc": "2026-09-11T18:09:46.1467175Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/hooks/lib/command_segments.sh",
+      "observed_sha256": "7248FE5652F5FFA0CB39A2EFE4BCF29FEFA0EB0C56EFCEED08CCD4CB4A4FB7B6",
+      "base_blob": "6d5d1d6e0750329c1e39a979e73e584e6b3baba0",
+      "last_write_utc": "2026-09-11T14:04:37.7869447Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/hooks/lib/find_multiline_eval.awk",
+      "observed_sha256": "079C3DD4028F587C5E86545191D441624BE2216E455526870118A5D914C3C93D",
+      "base_blob": "f39fb014a3a8aa49c9606ecbcda7df03b76cbf94",
+      "last_write_utc": "2026-09-11T14:04:37.7874495Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/hooks/lib/strip_heredocs.awk",
+      "observed_sha256": "14AD2D708F36F1DB2AAE9E3AC599F7ECD6B7610ACA1EA1A8C7D073143FFBCBAE",
+      "base_blob": "404dfa6839d91e29441b3897a8db0192f77c1825",
+      "last_write_utc": "2026-09-11T05:03:21.2713996Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/hooks/whowrites.mjs",
+      "observed_sha256": "690803DF8774DC60C801198180F78147F99ACDB15F8EC0C3AEA9A3A0F719AE23",
+      "base_blob": "d766ee2cacb029684ce3a6578d40f74bce466ed8",
+      "last_write_utc": "2026-08-26T07:57:04.1433194Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/install_superpowers.ps1",
+      "observed_sha256": "C8512851747969BE8E0862347FF86057C46FC26062E4173CC7D672A5819F2A00",
+      "base_blob": "5806d693d2a4e81f0e7b3b6e48674dd4158269ec",
+      "last_write_utc": "2026-03-04T21:09:57.3698216Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    },
+    {
+      "path": "tools/local_executor/README.md",
+      "observed_sha256": "0ACD1A3D67305B77B29E81A50E4E16B2E6F8725E0C58932A65AA2B62DC70141C",
+      "base_blob": "16aa11bf52449bb11353b9eeab539547e8fbe4a4",
+      "last_write_utc": "2026-09-11T14:04:37.7904555Z",
+      "owner": "Claude in shared checkout; migration preparation only in isolated worktree",
+      "disposition": "read-only inventory; reconcile against committed base and later live hash before activation"
+    }
+  ],
+  "skills": [
+    {
+      "name": "architect",
+      "repo_path": ".claude/skills/architect/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\architect\\SKILL.md",
+      "repo_sha256": "70F87263CFFE516A1EAD419D9E9D9CD4B2B1F351653C2236044B15E07A2820E5",
+      "user_sha256": "C14FB392FC248AD4056516F4921FB6E507A63B9837E9D1EA9BB75E4FC98CD83D",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\architect",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "architect",
+        "classification": "stale copy",
+        "stale_side": "runtime user copy",
+        "preserve": "Preserve the repo copy as the project semantic source and retain the user original for later reviewed import work.",
+        "rationale": "Frontmatter matches. The repo body uses the current Pyrrhic team name and the current split war-phase pipeline; the runtime body retains the older Paradox name and an older pipeline description."
+      }
+    },
+    {
+      "name": "asset-integration",
+      "repo_path": ".claude/skills/asset-integration/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\asset-integration\\SKILL.md",
+      "repo_sha256": "526D1DE70E45C36FA8CE017B25FA1760F905C69DA4692AD2EA28EFC14623C107",
+      "user_sha256": "526D1DE70E45C36FA8CE017B25FA1760F905C69DA4692AD2EA28EFC14623C107",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\asset-integration",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "awwv-ledger-entry",
+      "repo_path": ".claude/skills/awwv-ledger-entry/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\awwv-ledger-entry\\SKILL.md",
+      "repo_sha256": "6431C42D162B56F0CCDFC82D5B66F3C245A7FD98BB144F63C98A8DE8D82EF840",
+      "user_sha256": "6431C42D162B56F0CCDFC82D5B66F3C245A7FD98BB144F63C98A8DE8D82EF840",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\awwv-ledger-entry",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "awwv-make-cursor-prompt",
+      "repo_path": ".claude/skills/awwv-make-cursor-prompt/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\awwv-make-cursor-prompt\\SKILL.md",
+      "repo_sha256": "29B668CC6F040B2224308BC4C1893F43CFA1E816220BA01BF560E03F70E354F8",
+      "user_sha256": "29B668CC6F040B2224308BC4C1893F43CFA1E816220BA01BF560E03F70E354F8",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\awwv-make-cursor-prompt",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "awwv-plan-change",
+      "repo_path": ".claude/skills/awwv-plan-change/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\awwv-plan-change\\SKILL.md",
+      "repo_sha256": "8C34BE87560E82F41669091B2EE6CAD705E3C97962680DAAF099C3C91B9682F6",
+      "user_sha256": "8C34BE87560E82F41669091B2EE6CAD705E3C97962680DAAF099C3C91B9682F6",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\awwv-plan-change",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "awwv-pre-commit-check",
+      "repo_path": ".claude/skills/awwv-pre-commit-check/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\awwv-pre-commit-check\\SKILL.md",
+      "repo_sha256": "8454B99F77F025E459BC72F941113BFDB17272B6930BC50AA81942AF628C3D25",
+      "user_sha256": "CF747F7C81F26B7BF06A778592D03B7A9B633A7F8A09CB5EF4794113755DB82F",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\awwv-pre-commit-check",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "awwv-pre-commit-check",
+        "classification": "stale copy",
+        "stale_side": "repo copy",
+        "preserve": "Keep both originals; retire the repo body's obsolete life_lessons.md checklist only in a separately owned process-skill packet.",
+        "rationale": "The repo frontmatter/body still makes the retired life-lessons checklist a pre-commit gate. The runtime copy has the narrower current canon/determinism/test/ledger scope."
+      }
+    },
+    {
+      "name": "awwv-read-first",
+      "repo_path": ".claude/skills/awwv-read-first/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\awwv-read-first\\SKILL.md",
+      "repo_sha256": "600FA34C46176DC9D336BE418A384A0CFDB45043C8E8968DA39051CA7185AEFD",
+      "user_sha256": "600FA34C46176DC9D336BE418A384A0CFDB45043C8E8968DA39051CA7185AEFD",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\awwv-read-first",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "balkan-battlegrounds-historical-extractor",
+      "repo_path": ".claude/skills/balkan-battlegrounds-historical-extractor/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\balkan-battlegrounds-historical-extractor\\SKILL.md",
+      "repo_sha256": "C0B80D2AD8DBE2AC934C6E52BBF43A056AB8C315EF6D24F980220B80202847E4",
+      "user_sha256": "2F436E46417948B6EDF12883731F4EF4C6B97966D8091F8FE7F60038F5C7AD2B",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\balkan-battlegrounds-historical-extractor",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "balkan-battlegrounds-historical-extractor",
+        "classification": "stale copy",
+        "stale_side": "repo copy",
+        "preserve": "Preserve the runtime relationship text for a future reviewed repo reconciliation; do not replace either file automatically.",
+        "rationale": "Frontmatter and extraction rules match, but the runtime body adds the maintained boundary between new BB extraction and querying the Historian knowledge base."
+      }
+    },
+    {
+      "name": "brainstorming",
+      "repo_path": ".claude/skills/brainstorming/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\brainstorming\\SKILL.md",
+      "repo_sha256": "206C63E80D38C57E6AFC657296332B1D0FF75572435D75C079E7407B26762ECD",
+      "user_sha256": "206C63E80D38C57E6AFC657296332B1D0FF75572435D75C079E7407B26762ECD",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\brainstorming",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "build-engineer",
+      "repo_path": ".claude/skills/build-engineer/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\build-engineer\\SKILL.md",
+      "repo_sha256": "CACB0379FDFE79F24D51B11EFBCC9E0A4A3F424756D54447CC54F96C9553D39D",
+      "user_sha256": "CACB0379FDFE79F24D51B11EFBCC9E0A4A3F424756D54447CC54F96C9553D39D",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\build-engineer",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "canon-compliance-review",
+      "repo_path": ".claude/skills/canon-compliance-review/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\canon-compliance-review\\SKILL.md",
+      "repo_sha256": "4A835ED0CCCD844008F729042E78D08CCBC94D33AAC6B97CE95AE1219A948B0A",
+      "user_sha256": "4A835ED0CCCD844008F729042E78D08CCBC94D33AAC6B97CE95AE1219A948B0A",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\canon-compliance-review",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "canon-compliance-reviewer",
+      "repo_path": ".claude/skills/canon-compliance-reviewer/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\canon-compliance-reviewer\\SKILL.md",
+      "repo_sha256": "A68B2F49730DAEC8102854DCF646182321D46A680AB01BB86A8A8D082A2E3443",
+      "user_sha256": "496D3FA995F0BB2846A9710C020D085F91CD15FDC90A48CA0874C9DFF5D14E5B",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\canon-compliance-reviewer",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "canon-compliance-reviewer",
+        "classification": "stale copy",
+        "stale_side": "runtime user copy",
+        "preserve": "Preserve the repo canon-panel and sensitive-history rules; retain the user original as backup evidence.",
+        "rationale": "The repo body carries current canon precedence, FORAWWV panel authority, faction IDs, sensitive-history and endgame routing. The runtime body omits those safeguards and duplicates an old phase-spec reference while naming retired V0.4/Phase A documents."
+      }
+    },
+    {
+      "name": "code-review",
+      "repo_path": ".claude/skills/code-review/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\code-review\\SKILL.md",
+      "repo_sha256": "5CC907F8F7E816124ABB8C7BF5459250F7D76B71C67ECC255A512B1BAD49D22D",
+      "user_sha256": "29B416D179F31D9BD30712E3EB972C34F37A5EA91E34A71841A840524410D43B",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\code-review",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "code-review",
+        "classification": "stale copy",
+        "stale_side": "runtime user copy",
+        "preserve": "Preserve the repo's production, determinism, 188-week and provenance gates; later reconcile them through the shared change-specific validation policy.",
+        "rationale": "Frontmatter matches. The runtime body lacks the repo's current combat horizon, full-suite calibration, determinism and pushed-commit integrity requirements."
+      }
+    },
+    {
+      "name": "code-simplifier",
+      "repo_path": ".claude/skills/code-simplifier/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\code-simplifier\\SKILL.md",
+      "repo_sha256": "2950A47634214055B835472E7BE0396AAF902E8556C00B3252416316992AF736",
+      "user_sha256": "D9EB913BC6C666483EF0DE74DBC58CADC585470E411B49E2C553D3347A551AA7",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\code-simplifier",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "code-simplifier",
+        "classification": "intentional host specialization",
+        "stale_side": null,
+        "preserve": "Keep separate copies.",
+        "rationale": "The bodies are otherwise the same; the runtime copy says active developer instructions while the repo-shipped Claude copy says repo instructions. This is a valid host authority distinction."
+      }
+    },
+    {
+      "name": "create-report",
+      "repo_path": ".claude/skills/create-report/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\create-report\\SKILL.md",
+      "repo_sha256": "4638307028B480E5CB8D52C6D464DF777B670ED50CECFF47E29A822881DA9E17",
+      "user_sha256": "4638307028B480E5CB8D52C6D464DF777B670ED50CECFF47E29A822881DA9E17",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\create-report",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "determinism-auditor",
+      "repo_path": ".claude/skills/determinism-auditor/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\determinism-auditor\\SKILL.md",
+      "repo_sha256": "A9641D548B4EE30B5AED3A86290A2D342B205C57416A234EEC63AE4761830A4A",
+      "user_sha256": "A9641D548B4EE30B5AED3A86290A2D342B205C57416A234EEC63AE4761830A4A",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\determinism-auditor",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "deterministic-script-implementation",
+      "repo_path": ".claude/skills/deterministic-script-implementation/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\deterministic-script-implementation\\SKILL.md",
+      "repo_sha256": "975DD252CA7F88687F0E8811B107C4D228231690D90829A23ECEC39021F5F363",
+      "user_sha256": "975DD252CA7F88687F0E8811B107C4D228231690D90829A23ECEC39021F5F363",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\deterministic-script-implementation",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "devops-specialist",
+      "repo_path": ".claude/skills/devops-specialist/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\devops-specialist\\SKILL.md",
+      "repo_sha256": "3ABE23FE7633CDA960D82B6BDDFA7BE0F658C7ACAAE96E97700EDC0DC3680A27",
+      "user_sha256": "3ABE23FE7633CDA960D82B6BDDFA7BE0F658C7ACAAE96E97700EDC0DC3680A27",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\devops-specialist",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "dispatching-parallel-agents",
+      "repo_path": ".claude/skills/dispatching-parallel-agents/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\dispatching-parallel-agents\\SKILL.md",
+      "repo_sha256": "C628917689CCC12CE9991615DB6824D44C4FE71F8427CD959560AEBE6A1A6476",
+      "user_sha256": "C628917689CCC12CE9991615DB6824D44C4FE71F8427CD959560AEBE6A1A6476",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\dispatching-parallel-agents",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "docs-only-ledger-handling",
+      "repo_path": ".claude/skills/docs-only-ledger-handling/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\docs-only-ledger-handling\\SKILL.md",
+      "repo_sha256": "EB394B5A54C4357DEFD6B193F3EAFEC234DCF2BFD345F7C7B1296B3451C15286",
+      "user_sha256": "EB394B5A54C4357DEFD6B193F3EAFEC234DCF2BFD345F7C7B1296B3451C15286",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\docs-only-ledger-handling",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "documentation-specialist",
+      "repo_path": ".claude/skills/documentation-specialist/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\documentation-specialist\\SKILL.md",
+      "repo_sha256": "806821FB42C7EA1716FF04BE67969C0D9E64D3609E6DB89504985A6D4BDB4EEC",
+      "user_sha256": "806821FB42C7EA1716FF04BE67969C0D9E64D3609E6DB89504985A6D4BDB4EEC",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\documentation-specialist",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "executing-plans",
+      "repo_path": ".claude/skills/executing-plans/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\executing-plans\\SKILL.md",
+      "repo_sha256": "D099FA42FD7518F4DAFA9F2D51C1C08FCE970490D57682B6ACD3E7A57BB55B52",
+      "user_sha256": "D099FA42FD7518F4DAFA9F2D51C1C08FCE970490D57682B6ACD3E7A57BB55B52",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\executing-plans",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "finishing-a-development-branch",
+      "repo_path": ".claude/skills/finishing-a-development-branch/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\finishing-a-development-branch\\SKILL.md",
+      "repo_sha256": "DD2F82C6DC8582B621F9EB57FCB65F557F88EADF872727AC81D0840AE12C504E",
+      "user_sha256": "DD2F82C6DC8582B621F9EB57FCB65F557F88EADF872727AC81D0840AE12C504E",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\finishing-a-development-branch",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "formation-expert",
+      "repo_path": ".claude/skills/formation-expert/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\formation-expert\\SKILL.md",
+      "repo_sha256": "6221B0DE79114C0C05BD6CAC1CB390EC1EF9C7332936C06BB88ECB34DA090DD0",
+      "user_sha256": "B19008176D4F5925BB7600A3B2DD222E336F20C9984471BDF0B5544888F46F36",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\formation-expert",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "formation-expert",
+        "classification": "unresolved",
+        "stale_side": null,
+        "preserve": "Preserve both until a domain owner reconciles current pipeline/OOB facts and relocates session lessons to maintained knowledge.",
+        "rationale": "The repo body has newer pipeline routing and movement lessons; the runtime body has additional OOB totals and corps-mapping policy. Each contains unique project semantics, so neither can safely replace the other."
+      }
+    },
+    {
+      "name": "frontend-design",
+      "repo_path": ".claude/skills/frontend-design/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\frontend-design\\SKILL.md",
+      "repo_sha256": "8BF9905DBCD9B1EDB47F2A44CADBB9BB66314F73A8E3631EC7FEEE913777CEB8",
+      "user_sha256": "E161F0147E8001B771EA41A2C4CC0B0B5B018C769BB797E7FC862BCF31A7B421",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\frontend-design",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "frontend-design",
+        "classification": "unresolved",
+        "stale_side": null,
+        "preserve": "Keep both; normalize line endings only when each owner next edits its file.",
+        "rationale": "Frontmatter and normalized body text are identical; the unequal hash is line-ending/byte representation only and does not establish a stale semantic copy."
+      }
+    },
+    {
+      "name": "game-designer",
+      "repo_path": ".claude/skills/game-designer/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\game-designer\\SKILL.md",
+      "repo_sha256": "45CB02598B057D2914601B4A42D72A3CC52322BB71E8FEE07780421B7247CCFA",
+      "user_sha256": "10680E506B87E6895D015B9C546E1E57A0CD526CA2336E02524C04F08B087F42",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\game-designer",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "game-designer",
+        "classification": "stale copy",
+        "stale_side": "runtime user copy",
+        "preserve": "Preserve the repo's current calibration and sensitive-history routing.",
+        "rationale": "The runtime copy lacks the repo's live-source routing, calibration-last guardrail and atrocity consequence boundary."
+      }
+    },
+    {
+      "name": "gameplay-programmer",
+      "repo_path": ".claude/skills/gameplay-programmer/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\gameplay-programmer\\SKILL.md",
+      "repo_sha256": "B16F6B447C6A668D464F51306D2B4A24F4BBC007A30D86B011BBF5CBF15F9AFC",
+      "user_sha256": "CF323119336FEDEB08CF6C681D79C7738AD47118BC5A1E9B4D1E38DFB09A48FC",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\gameplay-programmer",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "gameplay-programmer",
+        "classification": "stale copy",
+        "stale_side": "runtime user copy",
+        "preserve": "Preserve current repo invariants and session lessons, relocating conditional detail rather than discarding it.",
+        "rationale": "The runtime body omits current determinism, ops-only, protected-control, 188-week and one-change-per-run rules plus movement authority lessons; it also duplicates a phase-spec link."
+      }
+    },
+    {
+      "name": "graphics-programmer",
+      "repo_path": ".claude/skills/graphics-programmer/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\graphics-programmer\\SKILL.md",
+      "repo_sha256": "AA93467C15F53442A4CF3441CBA504B29670B57E4B3C01A57A01F51DD2B29045",
+      "user_sha256": "AA93467C15F53442A4CF3441CBA504B29670B57E4B3C01A57A01F51DD2B29045",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\graphics-programmer",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "historian",
+      "repo_path": ".claude/skills/historian/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\historian\\SKILL.md",
+      "repo_sha256": "5E5DBC46CF4491F6C34FCFBFEADEB93CDD8E528DA78BE420155267A6A1F62AB6",
+      "user_sha256": "58E1EC05BB462933B29A1029E788D2AA674BA2C97A27A21FCEEEC4B631F12C04",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\historian",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "historian",
+        "classification": "stale copy",
+        "stale_side": "runtime user copy",
+        "preserve": "Preserve the repo source hierarchy, OOB authority and settled-modeling facts; retain the runtime original for later audited import.",
+        "rationale": "Both preserve judicial procedural posture, but the runtime copy omits current live routing, the full judicial/BB/OOB hierarchy and settled cohesion-floor history carried by the repo copy."
+      }
+    },
+    {
+      "name": "ledger-process-scribe",
+      "repo_path": ".claude/skills/ledger-process-scribe/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\ledger-process-scribe\\SKILL.md",
+      "repo_sha256": "7F0C3B0216E76E7BB3E460F5AC811BEE0FA8CA00F9AAA814C7583A437BCDEF3B",
+      "user_sha256": "19CEAEFC0D7677AFB388EACD6AD16441BED61EA6DAE1BE11E232D04F10FEEC17",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\ledger-process-scribe",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "ledger-process-scribe",
+        "classification": "stale copy",
+        "stale_side": "repo copy",
+        "preserve": "Adopt the runtime copy's more discriminating trigger when this skill is next owned; bodies are otherwise equivalent.",
+        "rationale": "Only frontmatter differs materially. The runtime trigger covers explicit commit, validation and ledger/process requests; the repo description is narrower and process-summary shaped."
+      }
+    },
+    {
+      "name": "lua-scripting",
+      "repo_path": ".claude/skills/lua-scripting/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\lua-scripting\\SKILL.md",
+      "repo_sha256": "60717AE2A4823342CC6034D3551145CF63810775BC90B53E9BE676C3C84F3B1F",
+      "user_sha256": "60717AE2A4823342CC6034D3551145CF63810775BC90B53E9BE676C3C84F3B1F",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\lua-scripting",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "map-geometry-integrity-reviewer",
+      "repo_path": ".claude/skills/map-geometry-integrity-reviewer/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\map-geometry-integrity-reviewer\\SKILL.md",
+      "repo_sha256": "F718168B5727D4D180A8A05CBE4E6F2A0C2400A412046C672891C9BF3CB5ACE4",
+      "user_sha256": "0F603EC727187858E65A9B2A8F190298BE74F2DB49A4074C29552C793F90687B",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\map-geometry-integrity-reviewer",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "map-geometry-integrity-reviewer",
+        "classification": "stale copy",
+        "stale_side": "repo copy",
+        "preserve": "Keep the runtime's scoped canon/determinism reads; route historical lessons through the napkin/topic index.",
+        "rationale": "The repo body alone mandates broad life-lessons files. The runtime body otherwise matches and reflects the adopted conditional-reading policy."
+      }
+    },
+    {
+      "name": "modern-wargame-expert",
+      "repo_path": ".claude/skills/modern-wargame-expert/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\modern-wargame-expert\\SKILL.md",
+      "repo_sha256": "3DD817D2B1A311BE2A0EC004ED911E4355F548FA6DA20215AAAE7F571A54543A",
+      "user_sha256": "3DD817D2B1A311BE2A0EC004ED911E4355F548FA6DA20215AAAE7F571A54543A",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\modern-wargame-expert",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "napkin",
+      "repo_path": ".claude/skills/napkin/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\napkin\\SKILL.md",
+      "repo_sha256": "C63508F893CCFFFF0603C08894ADE93376581DDDCD9230E5945EC9B7FCBB9B4F",
+      "user_sha256": "C63508F893CCFFFF0603C08894ADE93376581DDDCD9230E5945EC9B7FCBB9B4F",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\napkin",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "orchestrator",
+      "repo_path": ".claude/skills/orchestrator/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\orchestrator\\SKILL.md",
+      "repo_sha256": "8FA615DA5133D830577BB33E93E57543EB8012D2ADECD83776BF972A4575D2EA",
+      "user_sha256": "BBD36DBF36E41EF83DE639CF2CB3B6ED0F736E9E83B53FF8B02B3FEA769BE960",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\orchestrator",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "orchestrator",
+        "classification": "intentional host specialization",
+        "stale_side": "repo shared-policy sections before P1 reconciliation",
+        "preserve": "Keep separate host entrypoints. Reconcile shared authority/cost/review semantics in the repo copy without copying Codex model or tool syntax into Claude.",
+        "rationale": "The runtime copy contains Codex-specific Astra/Sol/Luna and collaboration-tool policy. The repo copy contains Claude-oriented dispatch concepts and current project routes, but its dispatcher-only ban on analysis/synthesis and mandatory twelve-role post-run loop conflict with the adopted policy."
+      }
+    },
+    {
+      "name": "performance-engineer",
+      "repo_path": ".claude/skills/performance-engineer/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\performance-engineer\\SKILL.md",
+      "repo_sha256": "036548863539050F1189F16FB5798E6D49268D33079115C005A160D5C8CBB850",
+      "user_sha256": "036548863539050F1189F16FB5798E6D49268D33079115C005A160D5C8CBB850",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\performance-engineer",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "platform-specialist",
+      "repo_path": ".claude/skills/platform-specialist/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\platform-specialist\\SKILL.md",
+      "repo_sha256": "58BAB1A76499D400AC97FFE8F215758746CD76C9DEA8961F478CCB49BEA3168A",
+      "user_sha256": "58BAB1A76499D400AC97FFE8F215758746CD76C9DEA8961F478CCB49BEA3168A",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\platform-specialist",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "product-manager",
+      "repo_path": ".claude/skills/product-manager/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\product-manager\\SKILL.md",
+      "repo_sha256": "C42CBBCEC6DC1D32CF1B34F6CA93EDC62CC2E65CCEB35480C22A3B73CCED4FA7",
+      "user_sha256": "C42CBBCEC6DC1D32CF1B34F6CA93EDC62CC2E65CCEB35480C22A3B73CCED4FA7",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\product-manager",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "prompt-construction",
+      "repo_path": ".claude/skills/prompt-construction/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\prompt-construction\\SKILL.md",
+      "repo_sha256": "A80B37A0B8BAF101E14B4895A6FCA11C1307B9BBE0AFA0AF95AC9AACED507F5C",
+      "user_sha256": "A80B37A0B8BAF101E14B4895A6FCA11C1307B9BBE0AFA0AF95AC9AACED507F5C",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\prompt-construction",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "propagate-to-canon",
+      "repo_path": ".claude/skills/propagate-to-canon/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\propagate-to-canon\\SKILL.md",
+      "repo_sha256": "1351A7506F8A9CA058176EE23728AA16E74E26DA9034E5874178A9FA96B17FB5",
+      "user_sha256": "AC27FEA2F2D52111A1A843FCFEE21938FC2205BE5413E711948C02596A02D15D",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\propagate-to-canon",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "propagate-to-canon",
+        "classification": "unresolved",
+        "stale_side": null,
+        "preserve": "Preserve both and require an authority decision before reconciling FORAWWV wording; do not edit FORAWWV in this packet.",
+        "rationale": "The runtime body adds host-specific skill paths but says never auto-edit FORAWWV, while the repo body permits edits after mandatory panel sign-off. The current user directive and delegated panel authority need explicit wording together; neither file alone is a safe replacement."
+      }
+    },
+    {
+      "name": "qa-engineer",
+      "repo_path": ".claude/skills/qa-engineer/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\qa-engineer\\SKILL.md",
+      "repo_sha256": "6A866931682E21E76536506CB6FD66A6E13ADBF9BCB38C0CDD4A0338C5855F84",
+      "user_sha256": "AD9AB82444423DC71F95D8B66CC1F3B14739240F089E295D24BDE3F35EA425D0",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\qa-engineer",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "qa-engineer",
+        "classification": "stale copy",
+        "stale_side": "runtime user copy",
+        "preserve": "Preserve the repo's production/calibration/determinism gates while moving the unconditional smoke triad to change-specific validation in P1.",
+        "rationale": "The runtime body lacks current 188-week, full-suite calibration, determinism and one-change-per-run requirements. The repo also contains an overbroad every-change triad, so reconciliation must narrow applicability without deleting production gates."
+      }
+    },
+    {
+      "name": "quality-assurance-process",
+      "repo_path": ".claude/skills/quality-assurance-process/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\quality-assurance-process\\SKILL.md",
+      "repo_sha256": "833AAC78FD4D7AF7E1BEE93D2260F854941500913071FED29ED245109EA427E1",
+      "user_sha256": "4C6E4B2414EE21708008B2C6637188A47BED255485D14CC10E5F20756F158431",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\quality-assurance-process",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "quality-assurance-process",
+        "classification": "stale copy",
+        "stale_side": "runtime user copy",
+        "preserve": "Preserve the repo's current Pyrrhic identity and active routing, then simplify duplicated startup policy through P1.",
+        "rationale": "The runtime body retains the older Paradox team name and removes current command-board routing. The repo body has the current identity but still duplicates broad read requirements."
+      }
+    },
+    {
+      "name": "receiving-code-review",
+      "repo_path": ".claude/skills/receiving-code-review/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\receiving-code-review\\SKILL.md",
+      "repo_sha256": "C9382E92B8F32363566068ECFED19D3B2651EAF40D3942B24840F839DEDFC406",
+      "user_sha256": "C9382E92B8F32363566068ECFED19D3B2651EAF40D3942B24840F839DEDFC406",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\receiving-code-review",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "refactor-pass",
+      "repo_path": ".claude/skills/refactor-pass/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\refactor-pass\\SKILL.md",
+      "repo_sha256": "32B5AFB19EE5D7135B7E2071C5B9F965CBA1789331A8382EF4C2C81941DCB8D3",
+      "user_sha256": "A63C272EA7A3D521C111036E239368C435C0593C2BBF4AA13D1B90093DC068B2",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\refactor-pass",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "refactor-pass",
+        "classification": "unresolved",
+        "stale_side": null,
+        "preserve": "Keep both; normalize line endings only during an owned edit.",
+        "rationale": "Frontmatter and normalized body text are identical; the hash difference is non-semantic."
+      }
+    },
+    {
+      "name": "reports-custodian",
+      "repo_path": ".claude/skills/reports-custodian/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\reports-custodian\\SKILL.md",
+      "repo_sha256": "D9B28E8EFFC0291DC248007E05F1C190C76ACE60673A97EC54FF2316F1A288BD",
+      "user_sha256": "D9B28E8EFFC0291DC248007E05F1C190C76ACE60673A97EC54FF2316F1A288BD",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\reports-custodian",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "requesting-code-review",
+      "repo_path": ".claude/skills/requesting-code-review/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\requesting-code-review\\SKILL.md",
+      "repo_sha256": "2DA31AF22A58938AB78F3EE6D5B4687FCCA062B923B646459EB52BA72117EF97",
+      "user_sha256": "2DA31AF22A58938AB78F3EE6D5B4687FCCA062B923B646459EB52BA72117EF97",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\requesting-code-review",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "retrospective-analyst",
+      "repo_path": ".claude/skills/retrospective-analyst/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\retrospective-analyst\\SKILL.md",
+      "repo_sha256": "4C3C1A6EC3E6992F4814969CD64AAC57612F5C83212B43EADF7A632761F0118F",
+      "user_sha256": "E9D49C8C8EA9C033386C49CBF5A90ADE099B4745276B043122E02DC7FCA635F2",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\retrospective-analyst",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "retrospective-analyst",
+        "classification": "stale copy",
+        "stale_side": "repo copy",
+        "preserve": "Use the runtime frontmatter trigger on the next owned update; bodies are equivalent.",
+        "rationale": "The runtime description is a concise trigger for milestone/comprehensive/periodic review. The repo description mixes trigger and workflow summary."
+      }
+    },
+    {
+      "name": "scenario-creator-runner-tester",
+      "repo_path": ".claude/skills/scenario-creator-runner-tester/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\scenario-creator-runner-tester\\SKILL.md",
+      "repo_sha256": "C574EF3C02721704603AEBB24FA5007C3EA175EFE70417E589D85B21934211DB",
+      "user_sha256": "B3DA933A4F6B2B214C01092AE2980A022144F164EE3751728FBE1739D56C5022",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\scenario-creator-runner-tester",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "scenario-creator-runner-tester",
+        "classification": "unresolved",
+        "stale_side": null,
+        "preserve": "Preserve both; reconcile current calibration safeguards with the runtime's explicit Historian boundary under domain ownership.",
+        "rationale": "The repo body has current protected-control, source hierarchy, 188-week and calibration-last constraints plus session lessons. The runtime body uniquely adds explicit Historian invocation. Neither side is a complete replacement."
+      }
+    },
+    {
+      "name": "scenario-harness-engineer",
+      "repo_path": ".claude/skills/scenario-harness-engineer/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\scenario-harness-engineer\\SKILL.md",
+      "repo_sha256": "97795B3269AA26870F5D43814B609D643DEDBF4EA13C93938F4E52C80806D652",
+      "user_sha256": "C8B712E56D3AFA6154CAC772FD23F8C5846D115401A9F17AD27D50DE11B722E1",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\scenario-harness-engineer",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "scenario-harness-engineer",
+        "classification": "stale copy",
+        "stale_side": "runtime user copy",
+        "preserve": "Preserve repo pipeline determinism, byte-identity, 188-week and direct-tool fallback rules.",
+        "rationale": "Frontmatter matches; the runtime body omits the repo's current live sources and durable harness constraints."
+      }
+    },
+    {
+      "name": "scenario-report",
+      "repo_path": ".claude/skills/scenario-report/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\scenario-report\\SKILL.md",
+      "repo_sha256": "C59BE0E8230EC6D7B1935CC78CD21A4216B37AD15E32B701EA3D8DD92AE82CB5",
+      "user_sha256": "700F0E11FD72444582FB4D9FCA7CFFEF4D3AD3A6723E5819B85CF418692ABA7A",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\scenario-report",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "scenario-report",
+        "classification": "intentional host specialization",
+        "stale_side": "runtime team-name wording only",
+        "preserve": "Keep separate tool-specific instructions; update the stale Paradox label only during a future owned runtime import.",
+        "rationale": "The runtime copy correctly describes its Task/mcp_task/generalPurpose enum and discovery behavior, while the repo copy uses Claude's Task wording. The runtime's Paradox label is stale, but the principal semantic difference is host tool specialization."
+      }
+    },
+    {
+      "name": "subagent-driven-development",
+      "repo_path": ".claude/skills/subagent-driven-development/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\subagent-driven-development\\SKILL.md",
+      "repo_sha256": "994B89A5D294EADD6A1611EDB51377BAC748D5F5FB7F4139D3C736B616B3A46A",
+      "user_sha256": "994B89A5D294EADD6A1611EDB51377BAC748D5F5FB7F4139D3C736B616B3A46A",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\subagent-driven-development",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "systematic-debugging",
+      "repo_path": ".claude/skills/systematic-debugging/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\systematic-debugging\\SKILL.md",
+      "repo_sha256": "4999CB851360485ECA5074E727BBDD62EF20549C5D5B01216FCBF5831BADB473",
+      "user_sha256": "4999CB851360485ECA5074E727BBDD62EF20549C5D5B01216FCBF5831BADB473",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\systematic-debugging",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "systems-programmer",
+      "repo_path": ".claude/skills/systems-programmer/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\systems-programmer\\SKILL.md",
+      "repo_sha256": "035C775B5856E56DC94745307FA138B0261F7C72B4A1102F428192761190B54F",
+      "user_sha256": "45BC56CFF01C207CE24A9298DB71F931ACC334044E54F9414FF7DD733974C96D",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\systems-programmer",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "systems-programmer",
+        "classification": "stale copy",
+        "stale_side": "runtime user copy",
+        "preserve": "Preserve the repo engine invariants, baseline provenance and worktree safeguards.",
+        "rationale": "The runtime body omits current live-source, determinism, byte-identical refactor and worktree rules."
+      }
+    },
+    {
+      "name": "technical-architect",
+      "repo_path": ".claude/skills/technical-architect/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\technical-architect\\SKILL.md",
+      "repo_sha256": "D1246829C8F565F84CC9D47A4AEE99EBC3D0CA80473413B3A5DE06208FAB711F",
+      "user_sha256": "4BE75CAD08C8C271F701F85447B00C9245C5521D8396C75FB1076078CA83A6CF",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\technical-architect",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "technical-architect",
+        "classification": "stale copy",
+        "stale_side": "runtime user copy",
+        "preserve": "Preserve the repo current-state, determinism and worktree-routing text while consolidating shared process in P1.",
+        "rationale": "The runtime body lacks the repo's current live sources and durable architecture/worktree constraints."
+      }
+    },
+    {
+      "name": "test-driven-development",
+      "repo_path": ".claude/skills/test-driven-development/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\test-driven-development\\SKILL.md",
+      "repo_sha256": "7DEE67B4AF6BDCCC7A914CA34533184D64592D0F5B23AEAE631538168DB14994",
+      "user_sha256": "7DEE67B4AF6BDCCC7A914CA34533184D64592D0F5B23AEAE631538168DB14994",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\test-driven-development",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "ui-ux-developer",
+      "repo_path": ".claude/skills/ui-ux-developer/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\ui-ux-developer\\SKILL.md",
+      "repo_sha256": "95674B139E1C35048FC4C9031EB8934A7E2FBD45CACB436BC6872445D8F9DD45",
+      "user_sha256": "03079EF14D2F504290F72A40DB5B9D46AE3F0C6AF86F384376B11398E2AA1637",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\ui-ux-developer",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "ui-ux-developer",
+        "classification": "stale copy",
+        "stale_side": "runtime user copy",
+        "preserve": "Preserve the repo UI review seat, player-safe information boundary, MapLibre constraint and current GUI authorities.",
+        "rationale": "The runtime copy is substantially older and generic: it omits mandatory UI consultation, current GUI/WARROOM sources, player information-control rules, palette/design language and concrete accessibility review duties."
+      }
+    },
+    {
+      "name": "using-git-worktrees",
+      "repo_path": ".claude/skills/using-git-worktrees/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\using-git-worktrees\\SKILL.md",
+      "repo_sha256": "7BCD36E73EE7FEA2F7BBD42497E6F5F94A6E55438729F2AE9D6E6421E15C0FAA",
+      "user_sha256": "7BCD36E73EE7FEA2F7BBD42497E6F5F94A6E55438729F2AE9D6E6421E15C0FAA",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\using-git-worktrees",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "using-superpowers",
+      "repo_path": ".claude/skills/using-superpowers/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\using-superpowers\\SKILL.md",
+      "repo_sha256": "81D921B16502091F44E8669BBCFAE74B87BBF4295D03FFF70A98E81D73AF60A6",
+      "user_sha256": "81D921B16502091F44E8669BBCFAE74B87BBF4295D03FFF70A98E81D73AF60A6",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\using-superpowers",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "verification-before-completion",
+      "repo_path": ".claude/skills/verification-before-completion/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\verification-before-completion\\SKILL.md",
+      "repo_sha256": "EA52D15AABAF72BC6B558EFE2C126F161B53961090DDCD712000273BFE8C7B6C",
+      "user_sha256": "EA52D15AABAF72BC6B558EFE2C126F161B53961090DDCD712000273BFE8C7B6C",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\verification-before-completion",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "visual-explainer",
+      "repo_path": ".claude/skills/visual-explainer/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\visual-explainer\\SKILL.md",
+      "repo_sha256": "A458BCF6F73D951D0CAC57533C48BD22F701C24687ACE4E340D89D56203B904C",
+      "user_sha256": "9BD22B1A409048B4A160AB51266513E9285171A9EB893201CA6378E3C7958C5A",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\visual-explainer",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "visual-explainer",
+        "classification": "stale copy",
+        "stale_side": "runtime user copy",
+        "preserve": "Preserve the repo v0.4.2 metadata and current design/accessibility rules; later import only through reviewed preview/backup flow.",
+        "rationale": "The repo copy is the newer upstream-shaped body with slide/prose modes, stronger Mermaid/layout checks and explicit anti-template guidance. The runtime copy allows aesthetics the repo version explicitly retired and lacks metadata."
+      }
+    },
+    {
+      "name": "writing-plans",
+      "repo_path": ".claude/skills/writing-plans/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\writing-plans\\SKILL.md",
+      "repo_sha256": "8A9198D4D9EFBCAD6E019B17C422C182113062C864B6154EC2A3BA2ED0B6B9D0",
+      "user_sha256": "8A9198D4D9EFBCAD6E019B17C422C182113062C864B6154EC2A3BA2ED0B6B9D0",
+      "identical": true,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\writing-plans",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "classification": "identical",
+        "preserve": "retain unchanged unless named adapter explicitly modernizes the process"
+      }
+    },
+    {
+      "name": "writing-skills",
+      "repo_path": ".claude/skills/writing-skills/SKILL.md",
+      "user_path": "C:\\Users\\User\\.codex\\skills\\writing-skills\\SKILL.md",
+      "repo_sha256": "0E9FBC1E9DF94AE8B8F1335E10DCA0B82EA91E17473ACA66DEE74C9498748469",
+      "user_sha256": "3286310AA84F3E37CD98766AE0A1D4DB664E46CC3B98DD0E73A19A92BAD3BC92",
+      "identical": false,
+      "original_directory": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\writing-skills",
+      "classification": "pending semantic comparison",
+      "disposition": "no live updates authorized before coordinated handoff",
+      "semantic": {
+        "name": "writing-skills",
+        "classification": "intentional host specialization",
+        "stale_side": null,
+        "preserve": "Keep separate path wording.",
+        "rationale": "The only semantic difference is which active skill root is foregrounded: repo-shipped Claude skills versus desktop Codex custom skills. Both explicitly require verifying the live path."
+      }
+    }
+  ],
+  "counts": {
+    "repo_skills": 75,
+    "paired": 62,
+    "different": 27,
+    "napkin_words": 6214
+  },
+  "shared_user_files": [
+    {
+      "path": "C:/Users/User/.codex/config.toml",
+      "sha256": "785D2A87BD5F9C043EC457ECE313C86AE62155ABE7A13710A228B5741E2CFB2D",
+      "disposition": "unchanged; content excluded from evidence"
+    },
+    {
+      "path": "C:/Users/User/.codex/AGENTS.md",
+      "sha256": "D3E9C59A628319D0BE927E466CF54E5737D07BFCC8105194AB7E66AAC0BDF547",
+      "disposition": "unchanged; content excluded from evidence"
+    }
+  ],
+  "semantic_counts": {
+    "paired": 62,
+    "unequal": 27,
+    "intentional_host_specialization": 4,
+    "stale_copy": 18,
+    "unresolved": 5
+  },
+  "napkin_relocation": {
+    "source": ".claude/napkin.md at base 8913cca6f714e07acf59785ce526c19dc5fc9973",
+    "method": "Each listed section, including its heading and all entry text, was copied to the destination under a dated HTML marker before the index was replaced. Index-relative napkin/ link prefixes were rebased for the topic-file location; linked targets and prose were preserved.",
+    "records": [
+      {
+        "section": "Curation Rules",
+        "destination": ".claude/napkin/qa_gates.md",
+        "entries": 0,
+        "retained_lessons": 3,
+        "workflow_status": "automatic session reading and fixed caps superseded; enforcement/count/predicate lessons active"
+      },
+      {
+        "section": "Current Release State",
+        "destination": ".claude/napkin/release_process.md",
+        "entries": 8
+      },
+      {
+        "section": "Execution & Validation",
+        "destination": ".claude/napkin/qa_gates.md",
+        "entries": 8
+      },
+      {
+        "section": "Diagnostic Reasoning",
+        "destination": ".claude/napkin/entry_detail.md",
+        "entries": 9
+      },
+      {
+        "section": "Evidence & Tooling Discipline",
+        "destination": ".claude/napkin/qa_gates.md",
+        "entries": 12
+      },
+      {
+        "section": "Domain Behavior Guardrails",
+        "destination": ".claude/napkin/entry_detail.md",
+        "entries": 6
+      },
+      {
+        "section": "Player & Runtime Truth",
+        "destination": ".claude/napkin/engine_runtime.md",
+        "entries": 8
+      },
+      {
+        "section": "Operations & Narrative Truth",
+        "destination": ".claude/napkin/engine_runtime.md",
+        "entries": 3
+      },
+      {
+        "section": "Map & UI Shell",
+        "destination": ".claude/napkin/map_counters.md",
+        "entries": 15
+      },
+      {
+        "section": "Engine Runtime Patterns",
+        "destination": ".claude/napkin/engine_runtime.md",
+        "entries": 10
+      },
+      {
+        "section": "Shell & Command Reliability",
+        "destination": ".claude/napkin/qa_gates.md",
+        "entries": 10
+      },
+      {
+        "section": "User Directives",
+        "destination": ".claude/napkin/entry_detail.md",
+        "entries": 3
+      },
+      {
+        "section": "Visual Art Direction",
+        "destination": ".claude/napkin/warroom_and_legacy.md",
+        "entries": 1
+      }
+    ],
+    "entry_total": 93,
+    "curation_lessons": 3,
+    "preservation": "No source section was dropped. All 93 numbered entry texts plus the three high-value Curation Rules lessons, dates, citations and targets were retained; only relative link paths changed. Superseded automatic-reading/cap directives are labeled historical rather than active. Existing topic content was retained and relocation markers make duplicate detection deterministic."
+  },
+  "ignored_cursor_originals": [
+    {
+      "path": ".cursor/TASK_SUBAGENT_TYPES.md",
+      "base": null,
+      "original_sha256": "E043AECFA0560B76AE9C22788DC94EF9600AE604AE09135C01307366CEEE258B",
+      "original_backup": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\ignored-cursor-originals\\.cursor\\TASK_SUBAGENT_TYPES.md",
+      "disposition": "Newly authored tracked replacement in migration; existing ignored live file must be released and reconciled before integration"
+    },
+    {
+      "path": ".cursor/rules/ui-gui-invoke-ux-developer.mdc",
+      "base": null,
+      "original_sha256": "4977D1C75BDB3E15F0FB46AC336A1145F339B8D9A818FCAE54A2673640E48B99",
+      "original_backup": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\ignored-cursor-originals\\.cursor\\rules\\ui-gui-invoke-ux-developer.mdc",
+      "disposition": "Newly authored tracked replacement in migration; existing ignored live file must be released and reconciled before integration"
+    },
+    {
+      "path": ".cursor/rules/napkin-session-start.mdc",
+      "base": null,
+      "original_sha256": "C24ABB6147E4AE349BB30E77A6CF21E3EB0F869C6411F2BFF5482F8451434DED",
+      "original_backup": "F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\ignored-cursor-originals\\.cursor\\rules\\napkin-session-start.mdc",
+      "disposition": "Newly authored tracked replacement in migration; existing ignored live file must be released and reconciled before integration"
+    }
+  ],
+  "proposed_files": [
+    {
+      "path": ".agent/codex-skill-adapters/awwv-make-cursor-prompt/SKILL.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": null,
+      "candidate_sha256": "A45CE8471BEA4480ADAE6DF1953B6C2C2951AEE99A19749BC0ABDC7D3224F790",
+      "shared_exists": false,
+      "shared_sha256": null,
+      "shared_drift_since_capture": null
+    },
+    {
+      "path": ".agent/codex-skill-adapters/awwv-read-first/SKILL.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": null,
+      "candidate_sha256": "0B3CFF9F919E90F1B537BAF0C552EDBEB77C356FA76BAD81B9F29E68B7B50AF1",
+      "shared_exists": false,
+      "shared_sha256": null,
+      "shared_drift_since_capture": null
+    },
+    {
+      "path": ".agent/codex-skill-adapters/brainstorming/SKILL.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": null,
+      "candidate_sha256": "40A957F8C50725B7234735CD71BCF769934F79124B9820A25691D3910AC8C6AB",
+      "shared_exists": false,
+      "shared_sha256": null,
+      "shared_drift_since_capture": null
+    },
+    {
+      "path": ".agent/codex-skill-adapters/executing-plans/SKILL.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": null,
+      "candidate_sha256": "314E9850D68F97B332C69CBBA775BB5466B397D571B6D6DF5F7460811F0022F6",
+      "shared_exists": false,
+      "shared_sha256": null,
+      "shared_drift_since_capture": null
+    },
+    {
+      "path": ".agent/codex-skill-adapters/napkin/SKILL.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": null,
+      "candidate_sha256": "1C99DD4CFCA2B7EE3C0E8B82D748273666499E3131AEE5A4C612D802A31430D1",
+      "shared_exists": false,
+      "shared_sha256": null,
+      "shared_drift_since_capture": null
+    },
+    {
+      "path": ".agent/codex-skill-adapters/prompt-construction/SKILL.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": null,
+      "candidate_sha256": "3B96DB5187928BA15C7D4EF9B2631A8BB0913409F0FA6F7EC19A1AF566E0DD4C",
+      "shared_exists": false,
+      "shared_sha256": null,
+      "shared_drift_since_capture": null
+    },
+    {
+      "path": ".agent/codex-skill-adapters/using-superpowers/SKILL.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": null,
+      "candidate_sha256": "A705BD742BBCC18D3A98CBA66ACF29967D29C99B5DCF86323BBFD8E2BBF2F1BB",
+      "shared_exists": false,
+      "shared_sha256": null,
+      "shared_drift_since_capture": null
+    },
+    {
+      "path": ".agent/codex-skill-adapters/verification-before-completion/SKILL.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": null,
+      "candidate_sha256": "1791FE2E6DCC813810936CCB944475A4B84652FC2ED1793C52CA13FF3CA42442",
+      "shared_exists": false,
+      "shared_sha256": null,
+      "shared_drift_since_capture": null
+    },
+    {
+      "path": ".agent/codex-skill-adapters/writing-plans/SKILL.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": null,
+      "candidate_sha256": "41C42E3838C3A51A8C02676975BB4D9AE57E36C0B8A4AB6CFDA09C065C20C66D",
+      "shared_exists": false,
+      "shared_sha256": null,
+      "shared_drift_since_capture": null
+    },
+    {
+      "path": ".agent/skill-distribution.json",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": null,
+      "candidate_sha256": "3F875CB21E6BFC7FF1F8A1D1E99BCAFBB7B33FE12FABFD83C0909ECE5F661DDB",
+      "shared_exists": false,
+      "shared_sha256": null,
+      "shared_drift_since_capture": null
+    },
+    {
+      "path": ".agent/skills-catalog.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "4d75a838da62f75ee86d2a41ac5a6526c21a4d1e",
+      "candidate_sha256": "AC91EA0EA37B17139D4D35874D54D542088CE6F61B28B005714B2355DE11EEAB",
+      "shared_exists": true,
+      "shared_sha256": "31C476C28C93931090B942A64E8D26F62B6BAC4408F3AAE0ACE4170C0953747D",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".claude/AGENT_TEAM_ROSTER.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "c32784aa588efe85bd3c5e2d808fbaad937886ff",
+      "candidate_sha256": "7523E700B14F67245698BC4A37B2BD97413FDE47EA3DDBD4B3D2865E6106E48F",
+      "shared_exists": true,
+      "shared_sha256": "F599D5CB7D85D359C39144AAA44923879EF0CF8028378F1BB974B4A56271DE20",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".claude/README.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "b95e5441ef6124628cca4b0e4913db0c7d95222a",
+      "candidate_sha256": "13D542898EFA91F5E367014B0376D74BF3AEF0CEA9944F284E812B297933AD08",
+      "shared_exists": true,
+      "shared_sha256": "6C92027732DABFDEE142C4694061F8224CA09E0E5E89DBBED127BDA6336310A9",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".claude/agents/orchestrator-dispatcher.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "d6a2fd212d3d34519593754d7c7f2f157e626f88",
+      "candidate_sha256": "E352F502FC51A4740E99DDB2A699DC018259B548414CA595AC074661C5E45324",
+      "shared_exists": true,
+      "shared_sha256": "142F4E95229B830A48D4932F56BE45D46D8ED8D9F2FE05311EC78B2F0196EC66",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".claude/commands/orchestrator.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "8b6fb6d59791964d7546b4dc0f2a5c45d67d2db1",
+      "candidate_sha256": "06DE004FE0109CE89743144627B3EBFAB990A29A6C604FB3216E8D0C2B119066",
+      "shared_exists": true,
+      "shared_sha256": "BB61EDF44297A5AEB8BF3ABCA12E127977700D6201641BC7790B9BE2BDF3B0E3",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".claude/napkin.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "77a79ad1b395dd898fac8b0770f194ed5eb417b3",
+      "candidate_sha256": "47BAD120BA81E21F3F9DA2E380C7F98BBA29911A4667CA765C2204B435B399B8",
+      "shared_exists": true,
+      "shared_sha256": "13E36FE5B7DA21707EE0A1792FC25D4B74FEA13E62345BDFF37AB3520B86BFEC",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".claude/napkin/engine_runtime.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "614f613ac02454d3e15d8f744a0414cb006c4f29",
+      "candidate_sha256": "AF59CE9BAA0BCA6AF56D266E34E551219CE5C8097ADC904BFD1610BC54CE61C5",
+      "shared_exists": true,
+      "shared_sha256": "5F14C36F7683DA853E8DC8C0C5B22906D5CB2A1EBB8C1D666C8394194AA2539E",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".claude/napkin/entry_detail.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "4c034df2ee87dc4fadb50018bcec0e5242743b0e",
+      "candidate_sha256": "BA903C38659A5AAEDE9003683F160558C412D3680FDE21A5ED2A3F03E0A3927A",
+      "shared_exists": true,
+      "shared_sha256": "FF9C47856FE179E591C4769C4386748C3971A92D1EC20E66F2662C4ABB104DB1",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".claude/napkin/map_counters.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "8f03430ead1c0eadc48b8f17770450e79b56d631",
+      "candidate_sha256": "BEA64C711F1BD9A99B8EE6968E36E165A09612B228E40D835BDB148B21CBD63B",
+      "shared_exists": true,
+      "shared_sha256": "A5DE0744FB38EEC07DFE9746B718B86BC60668A552C58E9B647AC4A1BFF6576C",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".claude/napkin/qa_gates.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "8f841cd1699399b5305f711193d7690c5a87d172",
+      "candidate_sha256": "08ACA9F95C03AB6A7D10C3D3A3389F7B929BAF23AB7E8FEFB3E063010206A2E1",
+      "shared_exists": true,
+      "shared_sha256": "5BB71C89748BA7224E5EE09ACEAE9587ED628929DBE4D4B196BFE7AC1211A739",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".claude/napkin/release_process.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "996d06850c188ec5d6cc55e6d5e1a9be26b57cd1",
+      "candidate_sha256": "2BDE141508E0967B9027300DBB7E55C01AAF77DE62B607BD3995168FB95D9D67",
+      "shared_exists": true,
+      "shared_sha256": "A7ACC87CA038E6EDB9E7500795EADE45EF7DC9816148F66178DB6957FEE28202",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".claude/napkin/warroom_and_legacy.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "4a6a55e612ab83ce1806a619a1775eb03e81a2dc",
+      "candidate_sha256": "6B6A7451FD4CF1BB4397CABA0AA234A394F02FA83E45FC50C2054AC0288B33FE",
+      "shared_exists": true,
+      "shared_sha256": "FE7EAA663B9266F145E2434CB6C113D2040049FFFC50EA95D5E62BB77FD66FEC",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".claude/skills.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "88e1e95e79449055ca33b3d8f382004fae7de775",
+      "candidate_sha256": "10AA04EE8ABE597CE85F60843FC0958F54CA080F958B34A85EAB5834A54B5DFE",
+      "shared_exists": true,
+      "shared_sha256": "38DCAA0E6636F39C8B8777B9FA2BF0AD17758A836AA336AA1288E5C2BD6739F8",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".claude/skills/awwv-make-cursor-prompt/SKILL.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "43fd3b2e44aa5c6c2c0e4e73f28ea172c601437c",
+      "candidate_sha256": "441BE59C1DA977EE2CCB091D0854877F8DD85C3E8A785DB635342492D6E0F55D",
+      "shared_exists": true,
+      "shared_sha256": "29B668CC6F040B2224308BC4C1893F43CFA1E816220BA01BF560E03F70E354F8",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".claude/skills/awwv-read-first/SKILL.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "cb2995f229aefd2bf071c713c0c0821aaa505810",
+      "candidate_sha256": "1A0F4209101BA8C54F5E85E5B6187877EC47356D930C9AF5A889A13E0971FC24",
+      "shared_exists": true,
+      "shared_sha256": "600FA34C46176DC9D336BE418A384A0CFDB45043C8E8968DA39051CA7185AEFD",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".claude/skills/brainstorming/SKILL.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "2fd19ba1e67d66ee97b178e6691611b9975a82d3",
+      "candidate_sha256": "7135D7D147980AE381C53EB98C59E71294D5350D5AE352E80B435A84D525F33C",
+      "shared_exists": true,
+      "shared_sha256": "206C63E80D38C57E6AFC657296332B1D0FF75572435D75C079E7407B26762ECD",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".claude/skills/executing-plans/SKILL.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "c1b2533f489ab7f8fd01225a0edfd709271c0a39",
+      "candidate_sha256": "5778D99DA5F7317D62BE2F250A953C0ADFAC143356E6EE8D4E9513788EB73F0C",
+      "shared_exists": true,
+      "shared_sha256": "D099FA42FD7518F4DAFA9F2D51C1C08FCE970490D57682B6ACD3E7A57BB55B52",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".claude/skills/napkin/SKILL.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "315a95f9194483e287231c43b76fdce0758984b9",
+      "candidate_sha256": "E34590A8EBA63C928F64725EE8DD43ED8EA46DA0ED3CA03BBE58E711C02B7D54",
+      "shared_exists": true,
+      "shared_sha256": "C63508F893CCFFFF0603C08894ADE93376581DDDCD9230E5945EC9B7FCBB9B4F",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".claude/skills/orchestrator/SKILL.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "b0c954276d25600b7cba441662e0fe19d6ce2e76",
+      "candidate_sha256": "398BAFFA4C9D522E9FF96255BBD2B3FBAB6B5964C98E9B381550C1DEC80CB9F1",
+      "shared_exists": true,
+      "shared_sha256": "8FA615DA5133D830577BB33E93E57543EB8012D2ADECD83776BF972A4575D2EA",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".claude/skills/prompt-construction/SKILL.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "e98d7b9d30a6d2d9f87b44043d7a960aefacb326",
+      "candidate_sha256": "BAFFC1BBB8B492AA04F1D4940A14CEE1D3E89E117C5B88884D3C524CD2830E4A",
+      "shared_exists": true,
+      "shared_sha256": "A80B37A0B8BAF101E14B4895A6FCA11C1307B9BBE0AFA0AF95AC9AACED507F5C",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".claude/skills/using-superpowers/SKILL.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "7867fcfc0f7e5e9110c3083fbfff201353586965",
+      "candidate_sha256": "E562A9917C6B6D51CDD8ED31727611E6D362751A6B3272701A5EBEDB77D5B61D",
+      "shared_exists": true,
+      "shared_sha256": "81D921B16502091F44E8669BBCFAE74B87BBF4295D03FFF70A98E81D73AF60A6",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".claude/skills/verification-before-completion/SKILL.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "2f14076e59e6ce5cd6f88007421a85f0bd772520",
+      "candidate_sha256": "A6995BD77EA12282061FF0D9106107771B07D1A761A4AF961659D287883932ED",
+      "shared_exists": true,
+      "shared_sha256": "EA52D15AABAF72BC6B558EFE2C126F161B53961090DDCD712000273BFE8C7B6C",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".claude/skills/writing-plans/SKILL.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "5fc45b6ff6cf36442472cf2656aec9c3ae0ec0b2",
+      "candidate_sha256": "127E09A1E8FB5BDAF4F2B5023F7F70C68A79F99F760DAE028AFD07EBABBF421A",
+      "shared_exists": true,
+      "shared_sha256": "8A9198D4D9EFBCAD6E019B17C422C182113062C864B6154EC2A3BA2ED0B6B9D0",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".cursor/AGENT_TEAM_ROSTER.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "80b13da17c9dbb4f44df92f9c70b32181c7a50d8",
+      "candidate_sha256": "64FF4905BCF635A816ECDFEEC4527EF49CD008FCFF0FCEDB443402604D2491BF",
+      "shared_exists": true,
+      "shared_sha256": "BA0AB890B923123B07AEC9249166A1667ABADB3CAA004EBB0902A5EB988619B4",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": ".cursor/TASK_SUBAGENT_TYPES.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": null,
+      "candidate_sha256": "9A124AA0BB5656533939BEA9997B827B5CCF6C0CE7D3E2366880AE1AC3FE4556",
+      "shared_exists": true,
+      "shared_sha256": "E043AECFA0560B76AE9C22788DC94EF9600AE604AE09135C01307366CEEE258B",
+      "shared_drift_since_capture": null
+    },
+    {
+      "path": ".cursor/rules/napkin-session-start.mdc",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": null,
+      "candidate_sha256": "6B8667603295A913F4557747EEFD8175F23FCD06A8C3C093781AB07279B12195",
+      "shared_exists": true,
+      "shared_sha256": "C24ABB6147E4AE349BB30E77A6CF21E3EB0F869C6411F2BFF5482F8451434DED",
+      "shared_drift_since_capture": null
+    },
+    {
+      "path": ".cursor/rules/ui-gui-invoke-ux-developer.mdc",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": null,
+      "candidate_sha256": "60F3007BAD4D582C742B40CF88FFB4F68083404D1F5E6E592763000FBF6B076A",
+      "shared_exists": true,
+      "shared_sha256": "4977D1C75BDB3E15F0FB46AC336A1145F339B8D9A818FCAE54A2673640E48B99",
+      "shared_drift_since_capture": null
+    },
+    {
+      "path": "AGENTS.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "b508f97ca1bf19b0d74dce8bb9822e12f645bf01",
+      "candidate_sha256": "58CCAB35547EC1422F66F09048408284C0AA9B5B4DFB4F081747C66FA5825938",
+      "shared_exists": true,
+      "shared_sha256": "B366990D0D56335F258050618DF10139F408F5C3E07EDB7CD085C768CEFD314D",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": "CLAUDE.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "816646bc11e3651e9447c9db4dbbe2194969d5bb",
+      "candidate_sha256": "3FE577B9286A684DA4AC1C425FEA5630FA5CE2505CFE31ED22D46732387D2D3C",
+      "shared_exists": true,
+      "shared_sha256": "AB98A8ACE6CDD61B2470CBD9E61E944FBC57B5372EBB9010A05B5A1E2CBA03FD",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": "docs/20_engineering/AGENT_WORKFLOW.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "afb3cd72af8c14dffe55046b12f0ac2504b6965e",
+      "candidate_sha256": "F610CB6AFFE6D123DB4D7D2D014488B9AF5B86FA06621E6ACB7C85442A2C5663",
+      "shared_exists": true,
+      "shared_sha256": "5435D8E754E1CF176835E4E182DF609A8B4DFD9E07F12FE125C1BD5675A92F88",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": "docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "dccfd11c93059b1dfa312b98c1789d2b17484084",
+      "candidate_sha256": "91A0554A100632E7D74464948866598472D97D2C2DAA43900162F1F5379D627B",
+      "shared_exists": true,
+      "shared_sha256": "AF5CB9CF22398A81C45C08A4D0FD0F6C92E49D68AD615792B5B78209F5C5A66F",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": "docs/30_planning/_task_artifacts/ACTIVE_TASK_GOVERNANCE.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "62b9b7c9434b56bd80abb001daff4d873f0cedc7",
+      "candidate_sha256": "BA83C012B5E961AA35E306DE168BBD61E2FF517254C14FC2AA5789115EFA642C",
+      "shared_exists": true,
+      "shared_sha256": "87B71FCABE619250B76A13472FA1A73C613BAA183759F9749A5F3E48AC72ABDE",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": "docs/PROJECT_LEDGER.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "4aff35b8feabaa165e24a9373bc45727ad6ebb97",
+      "candidate_sha256": "43A2B7D6256FC7AE78ED48773B4205D560E9274506793A60F611E8443D0FB94D",
+      "shared_exists": true,
+      "shared_sha256": "9250D519975A89EE2A7E879B7FDDD5BFEA146E46C0B2F922AC5CDFB656B8CA77",
+      "shared_drift_since_capture": false
+    },
+    {
+      "path": "docs/plans/2026-09-12-agent-setup-modernization-plan.md",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": null,
+      "candidate_sha256": "CF6E3E3E0D12F7DC42AEC422C236517765264AE9CB83F4FFE2515985E5FCAB33",
+      "shared_exists": true,
+      "shared_sha256": "BF4B06BD14BF51BA536AABD3A60CA9DF06EF4E3DFC8FF101E95C6BF6E7CBABCA",
+      "shared_drift_since_capture": null
+    },
+    {
+      "path": "tests/agent_skill_import.test.ts",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": null,
+      "candidate_sha256": "F188DADD8E0AB75140DD3F67926B855859EDBA2AA2B3F5D20DF7E1DC1BE83C6D",
+      "shared_exists": false,
+      "shared_sha256": null,
+      "shared_drift_since_capture": null
+    },
+    {
+      "path": "tools/install_superpowers.ps1",
+      "owner": "migration worktree only; shared activation requires release receipt",
+      "base_blob": "5806d693d2a4e81f0e7b3b6e48674dd4158269ec",
+      "candidate_sha256": "4B6C4BA39515FF8FA2CD743E1BC10DEEE7C4C092DDFD3D903E5A3331BDF38A37",
+      "shared_exists": true,
+      "shared_sha256": "C8512851747969BE8E0862347FF86057C46FC26062E4173CC7D672A5819F2A00",
+      "shared_drift_since_capture": false
+    }
+  ],
+  "reconciliation_observation": {
+    "live_head": "e607508bc65dad1950d560d8b5b628da89674360",
+    "live_branch": "main",
+    "live_tree": "18dc95d18253465c174298c7c7e9bd7f3b009047",
+    "base_tree": "18dc95d18253465c174298c7c7e9bd7f3b009047",
+    "live_status": "?? docs/plans/2026-09-12-agent-setup-modernization-plan.md",
+    "tracked_changes_from_base": "",
+    "captured_utc": "2026-09-12T20:12:16.026Z",
+    "activation": "not authorized or performed; a clean status is not a file release receipt",
+    "paths_with_observed_drift": []
+  },
+  "user_preservation": [
+    {
+      "name": "architect",
+      "current_matches_original": true
+    },
+    {
+      "name": "asset-integration",
+      "current_matches_original": true
+    },
+    {
+      "name": "awwv-ledger-entry",
+      "current_matches_original": true
+    },
+    {
+      "name": "awwv-make-cursor-prompt",
+      "current_matches_original": true
+    },
+    {
+      "name": "awwv-plan-change",
+      "current_matches_original": true
+    },
+    {
+      "name": "awwv-pre-commit-check",
+      "current_matches_original": true
+    },
+    {
+      "name": "awwv-read-first",
+      "current_matches_original": true
+    },
+    {
+      "name": "balkan-battlegrounds-historical-extractor",
+      "current_matches_original": true
+    },
+    {
+      "name": "brainstorming",
+      "current_matches_original": true
+    },
+    {
+      "name": "build-engineer",
+      "current_matches_original": true
+    },
+    {
+      "name": "canon-compliance-review",
+      "current_matches_original": true
+    },
+    {
+      "name": "canon-compliance-reviewer",
+      "current_matches_original": true
+    },
+    {
+      "name": "code-review",
+      "current_matches_original": true
+    },
+    {
+      "name": "code-simplifier",
+      "current_matches_original": true
+    },
+    {
+      "name": "create-report",
+      "current_matches_original": true
+    },
+    {
+      "name": "determinism-auditor",
+      "current_matches_original": true
+    },
+    {
+      "name": "deterministic-script-implementation",
+      "current_matches_original": true
+    },
+    {
+      "name": "devops-specialist",
+      "current_matches_original": true
+    },
+    {
+      "name": "dispatching-parallel-agents",
+      "current_matches_original": true
+    },
+    {
+      "name": "docs-only-ledger-handling",
+      "current_matches_original": true
+    },
+    {
+      "name": "documentation-specialist",
+      "current_matches_original": true
+    },
+    {
+      "name": "executing-plans",
+      "current_matches_original": true
+    },
+    {
+      "name": "finishing-a-development-branch",
+      "current_matches_original": true
+    },
+    {
+      "name": "formation-expert",
+      "current_matches_original": true
+    },
+    {
+      "name": "frontend-design",
+      "current_matches_original": true
+    },
+    {
+      "name": "game-designer",
+      "current_matches_original": true
+    },
+    {
+      "name": "gameplay-programmer",
+      "current_matches_original": true
+    },
+    {
+      "name": "graphics-programmer",
+      "current_matches_original": true
+    },
+    {
+      "name": "historian",
+      "current_matches_original": true
+    },
+    {
+      "name": "ledger-process-scribe",
+      "current_matches_original": true
+    },
+    {
+      "name": "lua-scripting",
+      "current_matches_original": true
+    },
+    {
+      "name": "map-geometry-integrity-reviewer",
+      "current_matches_original": true
+    },
+    {
+      "name": "modern-wargame-expert",
+      "current_matches_original": true
+    },
+    {
+      "name": "napkin",
+      "current_matches_original": true
+    },
+    {
+      "name": "orchestrator",
+      "current_matches_original": true
+    },
+    {
+      "name": "performance-engineer",
+      "current_matches_original": true
+    },
+    {
+      "name": "platform-specialist",
+      "current_matches_original": true
+    },
+    {
+      "name": "product-manager",
+      "current_matches_original": true
+    },
+    {
+      "name": "prompt-construction",
+      "current_matches_original": true
+    },
+    {
+      "name": "propagate-to-canon",
+      "current_matches_original": true
+    },
+    {
+      "name": "qa-engineer",
+      "current_matches_original": true
+    },
+    {
+      "name": "quality-assurance-process",
+      "current_matches_original": true
+    },
+    {
+      "name": "receiving-code-review",
+      "current_matches_original": true
+    },
+    {
+      "name": "refactor-pass",
+      "current_matches_original": true
+    },
+    {
+      "name": "reports-custodian",
+      "current_matches_original": true
+    },
+    {
+      "name": "requesting-code-review",
+      "current_matches_original": true
+    },
+    {
+      "name": "retrospective-analyst",
+      "current_matches_original": true
+    },
+    {
+      "name": "scenario-creator-runner-tester",
+      "current_matches_original": true
+    },
+    {
+      "name": "scenario-harness-engineer",
+      "current_matches_original": true
+    },
+    {
+      "name": "scenario-report",
+      "current_matches_original": true
+    },
+    {
+      "name": "subagent-driven-development",
+      "current_matches_original": true
+    },
+    {
+      "name": "systematic-debugging",
+      "current_matches_original": true
+    },
+    {
+      "name": "systems-programmer",
+      "current_matches_original": true
+    },
+    {
+      "name": "technical-architect",
+      "current_matches_original": true
+    },
+    {
+      "name": "test-driven-development",
+      "current_matches_original": true
+    },
+    {
+      "name": "ui-ux-developer",
+      "current_matches_original": true
+    },
+    {
+      "name": "using-git-worktrees",
+      "current_matches_original": true
+    },
+    {
+      "name": "using-superpowers",
+      "current_matches_original": true
+    },
+    {
+      "name": "verification-before-completion",
+      "current_matches_original": true
+    },
+    {
+      "name": "visual-explainer",
+      "current_matches_original": true
+    },
+    {
+      "name": "writing-plans",
+      "current_matches_original": true
+    },
+    {
+      "name": "writing-skills",
+      "current_matches_original": true
+    }
+  ],
+  "shared_settings_preservation": [
+    {
+      "path": "C:/Users/User/.codex/config.toml",
+      "unchanged": true
+    },
+    {
+      "path": "C:/Users/User/.codex/AGENTS.md",
+      "unchanged": true
+    }
+  ]
+}

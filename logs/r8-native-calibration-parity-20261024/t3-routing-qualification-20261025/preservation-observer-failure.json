@@ -1,0 +1,139 @@
+{
+  "runs": [
+    {
+      "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n91",
+      "count": 31,
+      "exactTree": true,
+      "mismatches": [],
+      "pass": true
+    },
+    {
+      "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n92",
+      "count": 38,
+      "exactTree": true,
+      "mismatches": [],
+      "pass": true
+    },
+    {
+      "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n93",
+      "count": 40,
+      "exactTree": true,
+      "mismatches": [],
+      "pass": true
+    },
+    {
+      "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n94",
+      "count": 40,
+      "exactTree": true,
+      "mismatches": [],
+      "pass": true
+    },
+    {
+      "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n95",
+      "count": 40,
+      "exactTree": true,
+      "mismatches": [],
+      "pass": true
+    },
+    {
+      "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n96",
+      "count": 40,
+      "exactTree": true,
+      "mismatches": [],
+      "pass": true
+    },
+    {
+      "root": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n97",
+      "count": 40,
+      "exactTree": true,
+      "mismatches": [],
+      "pass": true
+    }
+  ],
+  "package": {
+    "root": "dist-packaged/player-column-routing-20261025-01/win-unpacked",
+    "count": 1228,
+    "exactTree": true,
+    "mismatches": [],
+    "pass": true
+  },
+  "failedNativeTrees": [
+    {
+      "root": "tmp-paradox-qa-20260710/evidence/player-column-fresh-rbih-t39-20261025-01",
+      "count": 82,
+      "exactTree": true,
+      "mismatches": [],
+      "pass": true
+    },
+    {
+      "root": "tmp-paradox-qa-20260710/screenshots",
+      "count": 132,
+      "exactTree": false,
+      "mismatches": [],
+      "pass": false
+    },
+    {
+      "root": "tmp-paradox-qa-20260710/user-data/player-column-fresh-rbih-t39-20261025-01-rbih",
+      "count": 137,
+      "exactTree": true,
+      "mismatches": [],
+      "pass": true
+    },
+    {
+      "root": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-01",
+      "count": 8,
+      "exactTree": true,
+      "mismatches": [],
+      "pass": true
+    }
+  ],
+  "failedStandalone": [
+    {
+      "path": "tmp-paradox-qa-20260710/paradox-local-qa-progress-player-column-fresh-rbih-t39-20261025-01.json",
+      "pass": true
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/paradox-local-qa-netlog-player-column-fresh-rbih-t39-20261025-01.json",
+      "pass": true
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/main-process-output/player-column-fresh-rbih-t39-20261025-01-rbih.jsonl",
+      "pass": true
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/paradox-local-qa-save-menu-inspection-player-column-fresh-rbih-t39-20261025-01.json",
+      "pass": true
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/harness-snapshots/player-column-fresh-rbih-t39-20261025-01-9a1befed6caa79cd617ef8598546f5bd00752b64b73403e683a2caf90b52fd10.cjs",
+      "pass": true
+    }
+  ],
+  "failedAbsence": [
+    {
+      "path": "tmp-paradox-qa-20260710/paradox-local-qa-player-column-fresh-rbih-t39-20261025-01.json",
+      "pass": true
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-01/child/result.json",
+      "pass": true
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-01/child/progress.json",
+      "pass": true
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-01/child/netlog.json",
+      "pass": true
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-01/child/external-inventory.json",
+      "pass": true
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-01/child/exit.json",
+      "pass": true
+    }
+  ],
+  "pass": false
+}

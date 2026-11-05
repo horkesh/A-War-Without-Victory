@@ -1,0 +1,38 @@
+{
+  "schema": "n102-retained-early-boundary-final-receipt-v1",
+  "json_valid": true,
+  "source_head": "b30597f49aad99032781c251b41a9de886cce3be",
+  "tracked_status": [],
+  "bindings": [
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/n102-retained-early-diagnosis-v1/DIAGNOSIS.json",
+      "bytes": 7002,
+      "sha256": "0cb0de567cc7f8f4e0202ee513517806111bc72e3b801d520535d601948bff7b"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/n102-retained-early-diagnosis-v1/RAW_EXTRACT.json",
+      "bytes": 148007,
+      "sha256": "05422154ad55e5827ebcd67f071a524077175d0dea879180b815aa99f5a17696"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/n102-retained-early-diagnosis-v1/COMMAND_RECEIPT.json",
+      "bytes": 1269,
+      "sha256": "5771f040ead241cb3d0f7c0b2bdf6a17871bdc26dd2eb40bed74ea0beaa885fe"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/n102-retained-early-diagnosis-v1/extract.mjs",
+      "bytes": 5450,
+      "sha256": "eb3b369bf25762404509fb1d031090f077c71e65dddb87e8c8751a09b18d8b61"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/n102-retained-early-diagnosis-v1/extract.stdout.log",
+      "bytes": 232,
+      "sha256": "5e31ecbcfff7d5c8eef1dbe353444989256497f5709aed7cba053e3358ea8a97"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-osid-repair-v1/n102-retained-early-diagnosis-v1/extract.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

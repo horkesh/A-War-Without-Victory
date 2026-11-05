@@ -1,0 +1,113 @@
+{
+  "base_commit": "bdb3acc9cc14d09f1eed8a5691d6451a4fcb7af1",
+  "pass": true,
+  "parents": [
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_reviewed_summary.json",
+      "sha256": "e0406841a817f319c89d402c4218acdbedcd6a3f4f29a15d332ae759762f7b7b",
+      "bytes": 26122,
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_table_reviewed.md",
+      "sha256": "03759831b5e5fb03c6c008060a5ba75011587de2d81242f9fe56af58dfce998d",
+      "bytes": 8409,
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_independent_review.md",
+      "sha256": "61bd9a1a0aa45dd3977dd9619ab9db7bd353f6b0bd91376d7a65e3cd8ecffe22",
+      "bytes": 6759,
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_correction_verification.md",
+      "sha256": "2c794d4d384caf2d6dc2dcad6d4092050a6fe97285c00f22418300364e395c99",
+      "bytes": 2884,
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_139_20261004_reviewed_summary.json",
+      "sha256": "c80aef69ea3bd8fa378aab235b03c3af4c58c74da7bfda3d4b0bf99fbcec5f50",
+      "bytes": 25964,
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_campaign_reviewed_summary.json",
+      "sha256": "2efec3c3e1c910da881f9ba9da70cc27ec256865ae58ebc019bfecb05c5b74e5",
+      "bytes": 29249,
+      "intact": true
+    }
+  ],
+  "protected_sources": [
+    {
+      "path": "src/state/game_state.ts",
+      "git_blob": "09b47b74df937c392190243803be459910c1a57e",
+      "intact": true
+    },
+    {
+      "path": "src/state/serializeGameState.ts",
+      "git_blob": "80462edb9c1c7d6e2a5851fe40a99364a07ae528",
+      "intact": true
+    },
+    {
+      "path": "src/sim/combat/bot_brigade_ai_osid.ts",
+      "git_blob": "33b7c97aa9f330cb43a336cbc42bacb0f9d50b8f",
+      "intact": true
+    },
+    {
+      "path": "src/sim/combat/bot_brigade_eval_attack.ts",
+      "git_blob": "7c7cb9085131b3e491e1a5f960ed896840f39af4",
+      "intact": true
+    },
+    {
+      "path": "src/sim/combat/brigade_front_distribution.ts",
+      "git_blob": "7b679d178d3ca4caef3391f07d8ad125040c8c25",
+      "intact": true
+    },
+    {
+      "path": "src/sim/turn_phases/war_phases.ts",
+      "git_blob": "1da8bc8d60af67ad4e394ccb148bbf2f8117618f",
+      "intact": true
+    },
+    {
+      "path": "src/sim/turn_phases/war_phase_reconciliation_steps.ts",
+      "git_blob": "adfa26a54ad1f537b98a2b064d7c2ccd108e4aa1",
+      "intact": true
+    }
+  ],
+  "retained_runs": [
+    {
+      "name": "apr1992_definitive_188w__0b1f040ff4abe835__w139_n40",
+      "present": true
+    },
+    {
+      "name": "apr1992_definitive_188w__4658849344f21642__w186_n38",
+      "present": true
+    },
+    {
+      "name": "apr1992_definitive_188w__6deb5845c150c196__w188_n37",
+      "present": true
+    },
+    {
+      "name": "apr1992_definitive_188w__6deb5845c150c196__w188_n39",
+      "present": true
+    },
+    {
+      "name": "apr1992_historical_52w__434fe8ff83b7b523__w52",
+      "present": true
+    }
+  ],
+  "junctions": [
+    {
+      "path": "runs",
+      "target": "C:\\Users\\User\\.codex\\worktrees\\april-1995-glamoc\\A-War-Without-Victory\\runs"
+    },
+    {
+      "path": "node_modules",
+      "target": "C:\\Users\\User\\.codex\\worktrees\\april-1995-glamoc\\A-War-Without-Victory\\node_modules"
+    }
+  ],
+  "unexpected_changed_paths": [],
+  "reuse": "Prior retained full-run hashes/comparisons remain evidence; this check confirms parents/protected sources/run presence and junctions without reparsing campaigns."
+}

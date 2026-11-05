@@ -1,0 +1,65 @@
+=== AWWV Run Consistency Validation ===
+Run: F:\A-War-Without-Victory\runs\january_operations_20260914\post_a\apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0
+Turn: 188
+
+--- Casualty Accounting ---
+  HRHB   taken=43808  inflicted=28388
+  RBiH   taken=306305  inflicted=86125
+  RS     taken=153561  inflicted=142146
+  Total taken: 503674  Total inflicted: 256659  Gap: 247015
+  NOTE: Gap includes friction/siege attrition (no opposing brigade)
+
+--- Peak Personnel ---
+  OK: 0 violations
+
+--- Brigade Assignment ---
+  ? NOT ESTABLISHED: military.unresolved_sector_brigades is absent from this artifact
+
+--- Ghost Paramilitaries ---
+  OK: 0 ghosts
+
+--- Intel System ---
+  Offensive signs: 18/82 records
+  OK: Intel system functional (turn 188)
+
+--- Assignment Sync ---
+  OK: 0 missing
+
+--- Sector Role Buckets ---
+  OK: sector bucket roles match formation assignment and physical position
+
+--- Reserve Cap ---
+  OK: 0 sectors with >1 reserve
+
+--- Physical Sector Ownership ---
+  OK: 0 false owners
+
+--- War-Front Faction-Side Coverage ---
+  OK: sector faction-side coverage exactly matches military.war_front_edges_osid
+
+--- Sector Geometry ---
+  OK: 0 disconnected sectors
+
+--- Empty Contested Sectors ---
+  OK: 0 empty contested sectors with missed legal donors
+  OK: 0 unavoidable empty contested sectors
+
+--- Sector Floor Shortfalls ---
+  OK: 0 below-floor sectors with missed legal donors
+  ~ sector:arbih_1st_corps:0 remains below floor 1/2 with no legal same-corps donor under current rules
+  ~ sector:vrs_drina:1 remains below floor 2/3 with no legal same-corps donor under current rules
+  ~ sector:vrs_herzegovina:2 remains below floor 1/2 with no legal same-corps donor under current rules
+  ~ sector:vrs_herzegovina:3 remains below floor 1/2 with no legal same-corps donor under current rules
+  ~ sector:vrs_sarajevo_romanija:2 remains below floor 1/2 with no legal same-corps donor under current rules
+
+--- Undefended Front Subsegments ---
+  OK: 0 wide gap=true subsegments with missed legal donors
+  OK: 0 wide gap=true subsegments inside partially covered sectors
+  OK: 0 unavoidable wide gap=true subsegments
+
+--- Adjacent Uncontested Territory ---
+  OK: 0 actionable undefended OSIDs adjacent to enemy brigades
+  ~ op:bihac:trubar (RS) is exposed to op:bihac:orasac_2 (RBiH) with no legal same-corps donor under current rules
+  ~ op:bihac:trubar (RS) is exposed to op:bosanski_petrovac:vodjenica (RBiH) with no legal same-corps donor under current rules
+
+=== RESULT: PASS ===

@@ -1,0 +1,8 @@
+{
+  "pass": true,
+  "manifest": "tmp/r8-native-shakedown-20261024/root/package-bind-02/package-manifest.json",
+  "package": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\dist-packaged\\r8-native-shakedown-20261024-qualified\\win-unpacked",
+  "files": 1213,
+  "bytes": 1914184685,
+  "failures": []
+}

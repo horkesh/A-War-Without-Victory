@@ -1,0 +1,123 @@
+{
+  "schema": "awwv.cold-load-validation.package-binding-materializer-review.v1",
+  "verdict": "GO",
+  "independent": true,
+  "reviewerIdentity": "/root/desktop_terrain_canon_review",
+  "reviewedAt": "2026-10-25T10:55:00+01:00",
+  "candidateHead": "12a4680f04fc3e4cbd8b2fb5f5133b472afd1fd6",
+  "scope": "Independent review of the fresh Node-builtins-only package02 binding materializer as a data-only replacement for the rejected dependency-adapter chain. Accepted internal PE, ASAR, compiled-source, and package proof semantics are reused only at their exact whole-file bytes. No binder write, rebuild, consumer, engine, native process, campaign, or suite was run by this review.",
+  "entry": {
+    "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/package-binding-materializer-v1/materialize.cjs",
+    "bytes": 16872,
+    "sha256": "781ce1d58dccf967551cf33035a8f32bc2d5af1fe6239d994280201c591fff91"
+  },
+  "manifest": {
+    "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/package-binding-materializer-v1/FINAL_MANIFEST.json",
+    "bytes": 1847,
+    "sha256": "37b29be0c75634b62fab1d003e44ecd5326695a5b351619cf85a26bdfa38cbd0"
+  },
+  "diagnosis": {
+    "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/exe-integrity-diagnosis-01/DIAGNOSIS.json",
+    "sha256": "f0ecf937754cef6b0755d99c461f87c45a6e39fc6ec566776f622b64909c4547"
+  },
+  "binaryReview": {
+    "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/EXE_INTEGRITY_AMENDMENT_REVIEW.json",
+    "sha256": "be65fab987a4e1793a64260b7cd88e108e6373a47956729a7826805b592dc4b4"
+  },
+  "config": {
+    "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/package-binding-materializer-v1/CONFIG.json",
+    "bytes": 4382,
+    "sha256": "67e4a9fbdce156dde56efb9258c2abf34eef0f8bb65c3857e739c1dda1aecd18"
+  },
+  "actualDefaultCheck": {
+    "receipt": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/package-binding-materializer-v1/check-actual-01/receipt.json",
+      "bytes": 3234,
+      "sha256": "c2ac47213fa6b5a594c2e6d3aed36c344e81542273ddd07d79d60f81ea28d479",
+      "childExit": 0,
+      "wrapperExit": 0,
+      "timedOut": false,
+      "artifactContractPass": true
+    },
+    "result": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/package-binding-materializer-v1/check-actual-01/CHECK.json",
+      "bytes": 2443,
+      "sha256": "9caa3c68977ed5947ee41a3c7660626c02e3fc3907bd2b5e0d8f38fd6a43ee6e",
+      "pass": true,
+      "packageBindingWritten": false,
+      "referenceCount": 1228,
+      "candidateCount": 1228,
+      "byteIdenticalFiles": 1225,
+      "reviewedFiles": 12
+    }
+  },
+  "findings": [
+    {
+      "id": "REAL-DEFAULT-PATHS",
+      "status": "PASS",
+      "finding": "The materializer uses the literal authorized C-worktree root, rejects any other cwd, rejects absolute/empty/dot/dot-dot repository inputs, requires Node v22.23.2 and clean exact HEAD, and the preserved actual-default CHECK completed 0/0 at those real paths without writing a package binding. This directly closes the v3 fixture-only root failure."
+    },
+    {
+      "id": "DATA-ONLY-AUTHORITY",
+      "status": "PASS",
+      "finding": "The entry imports only Node built-ins and reads no repository-private executable module. It hash-binds the original v2 config, successful build receipt/result, diagnosis, binary review, postimplementation review, terminal CI, reuse authority, all twelve reviewed source files, and every reuse evidence record."
+    },
+    {
+      "id": "LIVE-PACKAGE-BYTES",
+      "status": "PASS",
+      "finding": "The retained actual check recursively hashes both live 1,228-file trees, requires identical path sets, exactly 1,225 byte-identical files, the exact three diagnosed changes, and exact old/new aggregate hashes. It independently checks whole old/new executable and ASAR records plus local bundle, packaged bundle, source map, and reviewed desktop source against fixed config and diagnosis records."
+    },
+    {
+      "id": "PROOF-REUSE-SCOPE",
+      "status": "PASS",
+      "finding": "The writer does not parse or claim a new PE or ASAR proof. It copies the previously reviewed diagnosis's ASAR inventory, executable proof, and builder cause only after the complete live package aggregates and all whole-file hashes equal that diagnosis, and identifies the result as a reused executable-integrity proof bound to both diagnosis and binary-review hashes."
+    },
+    {
+      "id": "DOWNSTREAM-COMPATIBILITY",
+      "status": "PASS",
+      "finding": "Write mode emits only PACKAGE_BINDING.json with schema awwv.cold-load-validation.package-binding.v2, the original config hash, original successful build receipt hash, candidate root, inventory, ASAR summary, required absolute file records, compiled/source evidence, critical inputs, UI/media counts, canonical integrity proof, and exact provenance. These preserve the unchanged v2 consumer, comparison, preservation-closing, and later native-preflight input fields."
+    },
+    {
+      "id": "WRITE-AUTHORITY",
+      "status": "PASS_WITH_OUTER_GATE",
+      "finding": "Write mode requires a hash-bound independent GO with exact candidate, entry, manifest, diagnosis, and binary-review fields and uses exclusive output creation. Per the frozen contract, the trusted outer launcher must compare the live entry, every manifest row including CONFIG.json, this review, and the supplied hashes immediately before invoking the preserved wrapper."
+    }
+  ],
+  "focusedControls": {
+    "checks": 9,
+    "covered": [
+      "actual default production paths",
+      "wrong cwd",
+      "unsafe repository path",
+      "package aggregate drift",
+      "whole ASAR drift",
+      "whole executable drift",
+      "reviewed source drift",
+      "HEAD drift",
+      "missing review hash before output"
+    ],
+    "sourceOrPackageMutationPerformed": false
+  },
+  "authorization": {
+    "actualMaterializationAuthorized": true,
+    "attemptLimit": 1,
+    "retry": false,
+    "requiredPrelaunch": "Immediately before the preserved wrapper, independently hash the live materialize.cjs, FINAL_MANIFEST.json, CONFIG.json, selftest.cjs, and this review; require all manifest rows and this review's entry/manifest/config records to match, then pass this review SHA, entry SHA, and manifest SHA to write mode.",
+    "allowedArtifact": "PACKAGE_BINDING.json",
+    "afterSuccess": "Run the unchanged separate source and package cold consumers, exact comparison, and preservation closing against the actual retained materializer receipt and package binding.",
+    "nativeAuthorized": false,
+    "nativeHoldReason": "Native remains blocked until actual cold-consumer comparison and preservation closing pass and a separate independent actual package review binds the resulting package binding."
+  },
+  "preservation": {
+    "olderNoGoPacketsRetained": ["postbuild-integrity-amendment-v1", "postbuild-integrity-amendment-v2", "postbuild-integrity-amendment-v3"],
+    "originalFailedPostbuildRetained": true,
+    "rebuildRequired": false,
+    "sourceReviewInvalidated": false,
+    "n98OrSuiteInvalidated": false
+  },
+  "limits": [
+    "This GO authorizes one small data-materialization run only; it is not yet actual package acceptance or native parity evidence.",
+    "No new claim is made about internal PE or ASAR structure beyond the exact-byte diagnosis and binary review already accepted.",
+    "No build, rebuild, consumer, engine, native process, campaign, or full-suite action was performed by this review."
+  ]
+}

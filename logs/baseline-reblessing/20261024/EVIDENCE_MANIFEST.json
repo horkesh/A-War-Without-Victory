@@ -1,0 +1,179 @@
+{
+  "scope": "Selected portable receipts/reviews. All full raw attempts, runs, profiles, source inventories and telemetry remain in retained local paths; originals are untouched.",
+  "files": [
+    {
+      "source": "tmp/baseline-rebless-20261024/review/ENGINE_POSTRUN.md",
+      "path": "logs/baseline-reblessing/20261024/ENGINE_POSTRUN.md",
+      "bytes": 6560,
+      "sha256": "f1354ae11a7743f1201aee8e5e07c19eead19457b5580df6752c9b6956d50410"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/review/SCENARIO_POSTRUN.md",
+      "path": "logs/baseline-reblessing/20261024/SCENARIO_POSTRUN.md",
+      "bytes": 7367,
+      "sha256": "77f1f98e1dab543087bec20c6e741737941470d8f99203c16e52001ceeb45b1c"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/review/ENGINE_FINAL.md",
+      "path": "logs/baseline-reblessing/20261024/ENGINE_FINAL.md",
+      "bytes": 3629,
+      "sha256": "72d1224c8f266da1712ceb43506b094085b7118433667e67c9b2b3292e481e8d"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/review/SCENARIO_FINAL.md",
+      "path": "logs/baseline-reblessing/20261024/SCENARIO_FINAL.md",
+      "bytes": 6806,
+      "sha256": "0d73ae677a787b8a94a5d82eb81589c45175327f62439e33d3185356d20ebc67"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/campaign-01/receipt.json",
+      "path": "logs/baseline-reblessing/20261024/campaign/receipt.json",
+      "bytes": 12250,
+      "sha256": "9453c76e9bb2ef777e211827ea909474c566e7eaaa2872e9c7549f3f4e998151"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/campaign-01/campaign-launch.json",
+      "path": "logs/baseline-reblessing/20261024/campaign/launch.json",
+      "bytes": 7583,
+      "sha256": "7ea31fc1e340965f2fdc478618f10ff9141ff0151cd81c7b2ad81a6b869d4dda"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/campaign-01/campaign-execution.json",
+      "path": "logs/baseline-reblessing/20261024/campaign/execution.json",
+      "bytes": 233,
+      "sha256": "b59c3099b97e7cf52e5cbc4842b356d508201cfe106544c9816b125ab01066f0"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/campaign-01/packet-summary.json",
+      "path": "logs/baseline-reblessing/20261024/campaign/result.json",
+      "bytes": 1443,
+      "sha256": "03bf9b008c8d5f2b85d4ab4984d318bb03a4bb19c32bb7bba09bcf669973a0bb"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/campaign-01/postrun/summary.json",
+      "path": "logs/baseline-reblessing/20261024/campaign/readers.json",
+      "bytes": 19029,
+      "sha256": "333bbb9efa0da0663353ebc7825d5ccc3eeeea36d18fde13f7865c8a272d3b2b"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/campaign-01/postrun/evaluation.json",
+      "path": "logs/baseline-reblessing/20261024/campaign/evaluation.json",
+      "bytes": 23069,
+      "sha256": "b64ad7bc6465d186130a72d243711b1622f52707a96803ad62312e46b5eed280"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/campaign-01/postrun/checkpoints.stdout.log",
+      "path": "logs/baseline-reblessing/20261024/campaign/checkpoints.txt",
+      "bytes": 3100,
+      "sha256": "0ff1fb1da0f26ae7cf641e6f5d7db8a3f51f21cf0ba5208a17f29f8d8ca8673b"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/campaign-01/postrun/health.stdout.log",
+      "path": "logs/baseline-reblessing/20261024/campaign/health.txt",
+      "bytes": 2301,
+      "sha256": "cfa27a45942f49ff0cbe2db32b130f4b43e596eb57584acc26534839cec5e0e0"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/update-01/receipt.json",
+      "path": "logs/baseline-reblessing/20261024/update-red/receipt.json",
+      "bytes": 4325,
+      "sha256": "23220ec0415c802306d25b5647ea65f301c3234dc37ad516ea3abfb35c032dac"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/update-01/update-launch.json",
+      "path": "logs/baseline-reblessing/20261024/update-red/launch.json",
+      "bytes": 886,
+      "sha256": "7e1efb34637d9a1b8513ea3a723aeec1c9820b14f4f0f72f98c4d4e40f03f2ab"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/update-01/update-execution.json",
+      "path": "logs/baseline-reblessing/20261024/update-red/execution.json",
+      "bytes": 100,
+      "sha256": "adec593c1276cab529f5603b6ddaa00d8a2b8b9a9a568faf55a8959470d9dfb2"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/update-01/stderr.log",
+      "path": "logs/baseline-reblessing/20261024/update-red/stderr.txt",
+      "bytes": 1145,
+      "sha256": "6eafa0368876d800975c78fa89b1f735e6f9c4b9f823eafd6ebbebab471b7b08"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/update-qualification-01/receipt.json",
+      "path": "logs/baseline-reblessing/20261024/qualification/receipt.json",
+      "bytes": 7140,
+      "sha256": "7cbb1c42d22399ce748f2264f7a17a85d8b59665e21334155cdbf0d45f63df85"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/update-qualification-01/QUALIFICATION.json",
+      "path": "logs/baseline-reblessing/20261024/qualification/QUALIFICATION.json",
+      "bytes": 16589,
+      "sha256": "2a0b004e899f55a6048f8297457a8f68d2da4ff0c8be9fb26c13de9d7261b605"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/update-qualification-01/DIAGNOSIS.md",
+      "path": "logs/baseline-reblessing/20261024/qualification/DIAGNOSIS.md",
+      "bytes": 775,
+      "sha256": "450f957e6595f2558522218971aeb14a3fbd1d55715b4baafa74959ce5f00c00"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/update-qualification-01/consistency.stdout.log",
+      "path": "logs/baseline-reblessing/20261024/qualification/consistency.txt",
+      "bytes": 2086,
+      "sha256": "b8c2371708c9fb66c7a31cf448a957f559f112b472e93310d0632f15247b640e"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/qualify_retained_update.cjs",
+      "path": "logs/baseline-reblessing/20261024/entry-snapshots/qualify_retained_update.cjs.txt",
+      "bytes": 21837,
+      "sha256": "1aed441a1d420b7504e1b4b5a8943c1889a37ae76862a527e552da5052084645"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/qualify_retained_update_selftest.cjs",
+      "path": "logs/baseline-reblessing/20261024/entry-snapshots/qualify_retained_update_selftest.cjs.txt",
+      "bytes": 2290,
+      "sha256": "5cd0a5ad98083c43e38515f25a5ee2bb62ef0980eaaf7b3578f8268bb89f13aa"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/QUALIFIER_COMMANDS.md",
+      "path": "logs/baseline-reblessing/20261024/QUALIFIER_COMMANDS.md",
+      "bytes": 1647,
+      "sha256": "34ae6db7967426880f58a747cd2223bf600d17df8baf1d9a03a3f6dac8ed0f90"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/n94-before-update.json",
+      "path": "logs/baseline-reblessing/20261024/n94-inventory.json",
+      "bytes": 8443,
+      "sha256": "6ddd321c4e5f48d8b47768483141e1a124883b3dcdf4cba458018f5851988f90"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/launcher-noop-01.json",
+      "path": "logs/baseline-reblessing/20261024/launcher-noop-01.json",
+      "bytes": 294,
+      "sha256": "e20fb7a839d4f0405cb7943dfebb923dba2ce1bfd7f1fe46b497faab0bf3767d"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/launch-campaign.ps1",
+      "path": "logs/baseline-reblessing/20261024/entry-snapshots/launcher-noop.ps1.txt",
+      "bytes": 1535,
+      "sha256": "0bd1c363a367005ddd5783441888b9bfca546c6473d7905af25a3d47394d2dda"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/docs-final-01/receipt.json",
+      "path": "logs/baseline-reblessing/20261024/focused-final/receipt.json",
+      "bytes": 2638,
+      "sha256": "f934c3ef83e46e0422070ab3efacb1466016a07d358b35b901839c8381b684ca"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/docs-final-01/stdout.log",
+      "path": "logs/baseline-reblessing/20261024/focused-final/stdout.txt",
+      "bytes": 737,
+      "sha256": "5cf97cedec5eaac4c4333686bbf9c65b7750ba86788c7d32aca303403cdab67f"
+    },
+    {
+      "source": "tmp/baseline-rebless-20261024/review/FINAL_INTEGRATION.md",
+      "path": "logs/baseline-reblessing/20261024/FINAL_INTEGRATION.md",
+      "bytes": 3105,
+      "sha256": "c9279ba6f082cc0b7d2c057efc5f5673644b226d8e9680a8d980d1f04142c284"
+    }
+  ]
+}

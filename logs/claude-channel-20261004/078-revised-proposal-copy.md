@@ -1,0 +1,45 @@
+<!-- Durable presentation copy of original077-revised-proposal.md; original SHA256 0493EE4447B1941826B321D61FD28FBB5BC15083616923F184B84B74215D9463 retained unchanged. Trailing whitespace normalized. -->
+
+Codex qualification: predicted input stamps do not prove actual consumption.
+The literal31 input criterion stays open until measured; it is not categorically
+impossible at181. Passing that input proof would not reach the188 checkpoint or
+accept calibration. The existing frozen Sana plan governs authorization and limits.
+
+# [077] Revised observation proposal — corrected indexing, prefix inputs, branch wording (no run, no applied change)
+
+Author: Claude (f75b0a11). Supersedes the corrected points of `077-observation-proposal.md`; that file, `077-mistral-prep-trace.draft.patch` and `077-scratch/` are preserved unchanged. Everything not repeated here (question, gate, scope 175–181, field list, run shape, controls) stands as in the original. No source edit applied, no test/run, no commit, no worker. Base HEAD `6ca84e29e30fc78cd14793d88a9ca234e8710fba`.
+
+## 1. Indexing corrected (measured)
+My earlier claim that the weekly `operation_diagnostics` row lags by one was wrong; it came from reading the weekly `week_index` as the loop index.
+- `buildWeeklyReport` sets `week_index = state.meta.turn` (`scenario_reporting.ts:273`). Retained rows: n39 `week_index` 1..188 (188 rows), n42 1..139 (139 rows).
+- Temporal rows use the zero-based loop index: n39 first `week_index 0, turn 1`, last `187, 188`; n42 `0/1` .. `138/139`. So `turn = loop_index + 1`, weekly row index `= turn`, temporal `week_index = loop_index`.
+- n39 Mistral 2: `started_turn 175`, `phase_started_turn 180`; first weekly row `week_index 175` (planning), first execution row `week_index 180` — equal to the op's own turns, no lag. Ticks therefore occur at turns 176–180 (n39) / 176–178 (n25/n29). The trace window (post-run turn 175–181) is unchanged; only its labels change.
+- Draft change: the observer argument is `loopIndex`; the payload field is `loop_index` (not `week_index`); the contract comment now states `turn = loop_index + 1`, weekly `week_index = turn`, temporal `week_index = loop_index`. Call site passes the loop variable with a `/* zero-based loop index */` note.
+- For a 181-week run (`--weeks 181`, loop 0..180): weekly rows 1..181, temporal rows 0..180; compare only after checking each artifact's schema, mapping weekly `week_index == temporal week_index + 1`.
+- Cheap controls before any campaign (done on synthetic data, exit 0): collector `077-revised-collect-trace.cjs` (read-only; requires exactly 7 lines, turns 175–181 once each, `loop_index == turn - 1`, valid JSON, and the turn-175 control: Mistral 2 present, phase `planning`, `started_turn 175`, sub-phase and elapsed null). `077-revised-synth.cjs` ran it on 1 positive and 6 negative synthetic logs (missing turn, duplicate turn, `loop_index == turn`, bad JSON, turn-175 not planning/null, extra turn 182): positive exit 0, all six negatives exit 1 with the expected reasons (`077-revised-synth/summary.json`). Limit: the synthetic positive mimics the emitter's shape; the real emitter output is checked only by the draft focused test, so the independent reviewer must also feed one real emitter line (from the test) through the collector.
+- The test file now also asserts `turn == loop_index + 1` and a negative case where the caller's loop index is emitted verbatim (so the collector can reject a mismatch).
+
+## 2. Prefix input binding (source model validated on retained stamps)
+Source: stamp keys = `checkpointsForScenario` (checkpoint weeks 39/104/156/188 with `week <= weeks`, `scenario_runner.ts:793-822`) ∪ `pickHistoricalReferenceKey(weeks)` (`<=56` jan1993, `<=108` apr1994, `<=160` apr1995, else oct1995; lines 757-763), unioned at `scenario_runner.ts:2292-2299`, mapped to `data/source/calibration/painted_control_<key>.json` (`run_provenance.ts:435-437`).
+Model check against retained data (`077-revised-model-out.json`, exit 0): the model reproduces n42's painted set for 139 weeks (jan1993, apr1994, apr1995 → 30 inputs) and n39's for 188 (all four → 31). The 30 files shared by n39 and n42 have identical hashes; the only n39-only input is `painted_control_oct1995.json` (`59e4b17aa8f437c28b5c248bb799abfed8b0cd6823cceda23c36491617200528`).
+Prediction for `--weeks 181`: reached checkpoints = jan1993, apr1994, apr1995 (188 not reached); the pick rule returns `oct1995` for weeks > 160, so the stamp is predicted to list **31 paths, the same as n39**, expected digest `8f13061b19ed9fd2d899f77f0115fdd4c5379e52cb058b3edadbd00e0e41af20` if all files are byte-unchanged. That equality would be an incidental stamp equality from the pick rule, not evidence that a 188-week run happened. Do not require it as a pass condition and do not extend the horizon or fake consumption to get it. Compare the predicted path+hash set with the actual `provenance.consumed_inputs.files` (shared files must match n39); report any declared-but-unconsumed reference (here `oct1995`, declared by the pick rule while checkpoint scoring stops at 156) separately. The literal 31-file criterion stays failed/unwaived for calibration acceptance; this measurement-only run cannot pass it (it does not reach 188 and the late receipts are out of scope).
+
+## 3. Branch wording (conditional only)
+The previous "anti-paralysis iff previous sub-phase != ready" rule is removed. A ready operation held by the caller re-ticks and can hit the global timeout too, and post-turn operation state and the events are observations, not pre-tick state or a captured internal branch of `tickPreparation`. What the trace can establish, per turn: the post-tick event results (`sub_phase`, intel, supply, force ratio, assessment, probe), the post-turn operation fields (elapsed vs max, sub-phase, assessment, postponement, flags), assembled-brigade locations and the late sector-intel records. Inference about which exit fired remains conditional on the n39-bound source, the absent `is_pre_planned`/sync flags and the elapsed/max evidence. The fixed question is the actual early hold trajectory (which sub-phase persisted, with what intel/assembly), not a branch capture.
+
+## 4. Focused test, type check, review
+- Focused test, direct: `node node_modules/vitest/vitest.mjs run tests/scenario_runner_mistral_prep_trace.test.ts` (equivalent to `npm run test:vitest -- <file>`, which `tools/test/run_vitest_default.mjs` routes to plain `vitest run <args>`, never the balanced runner). Check `(Get-Command bash).Source` is Git Bash first. Not run.
+- Type check: one required commit hook only (the repo's pre-commit typecheck); no duplicate manual `tsc` unless a condition changes.
+- One independent reviewer covering: code correctness and gate-off inertness, determinism (no wall-clock/RNG/unordered iteration, stdout only), the collector positive/negative controls including a real emitter line through the collector, and the corrected indexing labels.
+
+## 5. Run, estimate, passes, stop (unchanged shape; no run authorized)
+Exact command and file scheme as in `077-observation-proposal.md` §4 (`AWWV_MISTRAL_PREP_TRACE=1`, `run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_188w.json --weeks 181 --out runs --unique`, unique command/stdout/stderr/exit files, no other `AWWV_*` variable). Estimate 5–8 min (linear scaling of n42's measured 139 weeks = 235.644 s gives ~307 s; later weeks heavier; label: estimate).
+- Coverage pass: collector exit 0 (7 lines, turns 175–181, `loop_index == turn - 1`, turn-175 control).
+- Reproduction pass: first Mistral 2 weekly execution row at `week_index 180` (= `phase_started_turn 180`), consistent with n39.
+- Neutrality pass: weekly rows 1..181 (normalized only for documented diagnostics, none expected), control events, temporal rows 0..180 and the Mistral 2 phase timeline equal n39's; run is from a clean commit (`git_dirty=false`) with the four preparation/caller blobs matching `7b9c242a3`; predicted-vs-actual consumed-input comparison per §2. No whole-state equality is claimed (n39 has no save at turn 181).
+- First-failure stop: non-zero runner/preflight exit, dirty provenance, occupied output path, collector failure, any first divergence from n39 (record first week/field; do not interpret the trace as explaining n39), no retry, no extension to 188.
+- Reused evidence: 072–076, n39 binding, n42 observational GO. Not closed: original 517, 737/Varošluk, Majdan, Sanski/Jajce 5/5, the four lost matches, literal-31 provenance, late-188/Farz/HV receipts, calibration acceptance (NO-GO).
+
+## 6. Revised deliverables and receipts (all exits 0)
+- Patch: `077-revised-mistral-prep-trace.draft.patch` (sha256 prefix `fee9c904aa97d386`, +242 / −0, `git apply --check` exit 0, not applied); scratch `077-revised-scratch/{orig,new}`.
+- Receipts: `077-revised-model.*` (model check), `077-revised-edit.*`, `077-revised-edit2.*`, `077-revised-make-patch.*`, `077-revised-apply-check.exit.txt`, `077-revised-synth.*`, `077-revised-synth/`, collector `077-revised-collect-trace.cjs`.

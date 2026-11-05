@@ -1,0 +1,13 @@
+[brigade_assignment] UNRESOLVED hrhb_travnik_brigade (1311 pers): fell through sector pipeline, corps=hvo_central_bosnia
+[brigade_assignment] UNRESOLVED hrhb_travnik_brigade (1370 pers): fell through sector pipeline, corps=hvo_central_bosnia
+Error: only manifest may be tracked-dirty after update, actual:
+M data/derived/scenario/baselines/manifest.json
+    at main (C:\Users\User\.codex\worktrees\october-calibration-checkpoint\A-War-Without-Victory\tmp\baseline-rebless-20261024\baseline_update_entry.cjs:143:76)
+    at Object.<anonymous> (C:\Users\User\.codex\worktrees\october-calibration-checkpoint\A-War-Without-Victory\tmp\baseline-rebless-20261024\baseline_update_entry.cjs:155:7)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49

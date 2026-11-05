@@ -1,0 +1,63 @@
+{
+  "status": "BASELINE_ADOPTION_QUALIFIED",
+  "sourceCommit": "a913286803a095b6dc3f57a44175081d6ae4b8eb",
+  "candidate": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n94",
+  "scores": [
+    707,
+    707,
+    706,
+    706
+  ],
+  "formerlyCorrectLossesVsN91": 0,
+  "formerlyCorrectLossesVsN92": 0,
+  "qualificationCampaign": {
+    "child": 0,
+    "wrapper": 0
+  },
+  "baselineProducer": {
+    "exit": 0,
+    "invocations": 1
+  },
+  "retainedOriginalUpdateWrapper": {
+    "child": 1,
+    "wrapper": 126,
+    "status": "RED",
+    "reason": "trim() removed leading Git porcelain status column"
+  },
+  "readOnlyQualification": {
+    "child": 0,
+    "wrapper": 0,
+    "pass": true,
+    "elapsedMs": 11825
+  },
+  "changedManifestValues": 8,
+  "actualArtifactsEqualLinuxCI": 8,
+  "gameplayChanges": 0,
+  "calibrationTuning": false,
+  "protectedGates": "PASS",
+  "n94FilesPreserved": 40,
+  "oldBindingsPreserved": 3226,
+  "telemetry": "original prefixes exact; normal append-only output retained",
+  "reviews": [
+    "HISTORIAN.md",
+    "ENGINE_FINAL.md",
+    "SCENARIO_FINAL.md"
+  ],
+  "reuse": "n93 unchanged gameplay/composed-suite evidence only; raw historical failures retained",
+  "ciVerification": "Normal Baseline Pins and Event System CI must pass on the pushed adoption commit; GitHub commit checks are authoritative for their conclusions.",
+  "residuals": [
+    "native warroom identity/strict gate",
+    "Ajnie native and RS/HRHB Save/load/24-week gates",
+    "six October mismatches and inherited global calibration gates",
+    "consistency optional unresolved_sector_brigades field NOT ESTABLISHED"
+  ],
+  "finalFocused": {
+    "tests": 97,
+    "failed": 0,
+    "child": 0,
+    "wrapper": 0,
+    "receipt": "focused-final/receipt.json"
+  },
+  "consumedInputsExact": 32,
+  "inputMismatches": 0
+}

@@ -1,0 +1,30 @@
+# Receipt manifest for logs/mistral-reservation-067-20260928
+#
+# The evidence itself is NOT tracked: it is too large to commit, and committing it would
+# bloat every clone for the benefit of one citation. This file is the tracked record of
+# what was there — the file list and sizes, nothing else. It proves the shape of the
+# evidence, not its contents.
+#
+# Regenerate with: node tools/write_receipt_manifest.cjs logs/mistral-reservation-067-20260928
+# Deterministic: sorted, no timestamps. An unchanged directory yields an identical file.
+#
+# 18 file(s), 993012 bytes
+
+  5162  analyze.ts
+  1235  analyzer-selfcheck.log
+  1392  analyzer.log
+   452  border-data-vitest.log
+908957  campaign.log
+   566  correction-final-vitest.log
+   362  correction-green-focused.log
+  2423  correction-red-vitest.log
+    81  correction-typecheck.log
+   538  focused-vitest-final.log
+   362  green-vitest-initial.log
+ 63518  measurement_analysis.json
+   398  named-operation-vitest.log
+  1414  operation_readout.json
+  1853  red-vitest.log
+  1143  startup-snapshot.log
+    68  typecheck.log
+  3088  verifier.log

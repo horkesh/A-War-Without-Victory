@@ -72,6 +72,7 @@ export interface SectorTopologyNarrowOperation {
 export interface SectorTopologyNarrowCorpsCommand {
     readonly directive?: { readonly priority_sector_id?: string } | null;
     readonly active_operations?: readonly SectorTopologyNarrowOperation[];
+    readonly queued_operations?: readonly string[];
 }
 
 export interface SectorTopologyNarrowNamedOfficerState {

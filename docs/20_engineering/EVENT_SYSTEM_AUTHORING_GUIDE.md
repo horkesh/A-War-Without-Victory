@@ -4,7 +4,7 @@
 **Audience:** Anyone authoring a new event packet (Phase D Packet 45+), wiring a new political dimension consumer (Phase E continuation), or extending the canon-gate enforcement surface
 **Pairs with (WHY):** `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md` — the canonical moral and design gate
 **This document (HOW):** Step-by-step workflow for adding to the event system without spelunking transcripts, ledger entries, and memory files
-**Last updated:** 2026-05-28
+**Last updated:** 2026-09-27 (candidate integration note)
 **Authority:** Engineering reference; the canon docs and source files cited here are the binding authorities. When this guide and a source disagree, the source wins.
 
 ---
@@ -12,6 +12,8 @@
 ## 1. Overview
 
 The event system is the deterministic causal political layer of AWWV. Events are authored as JSON rows in `data/scenarios/events/war_*.json`, loaded by `event_loader.ts`, evaluated each turn by `evaluate_events.ts`, and consumed by player UI surfaces (modal-ready acceptance) plus, when feature-flag activated, by bot operational decision making (Phase E political-dimension propagation).
+
+**Current candidate condition and termination contract (2026-09-27):** `operation_completed` reads ended AARs and can require `min_attacks`; `operation_attacked` requires at least one recorded attack by default and reads live operations, ended AARs, and halted-operation receipts. A queued or merely planned operation cannot satisfy it. The Neretva '93 event uses the attack condition at turn 76; its no-choice Grabovica/Uzdol follow-up is authored for turn 77. When a terminal turn prevents ordinary next-turn evaluation, the bounded owed-record writer may persist only a causally due once-only, no-choice retrospective row before the final save. These are current candidate implementation rules, not permission to move historical windows without source and the applicable §6 review; see Systems Manual §7.10 and the 2026-09-27 calibration entry.
 
 ### Three-layer architecture
 

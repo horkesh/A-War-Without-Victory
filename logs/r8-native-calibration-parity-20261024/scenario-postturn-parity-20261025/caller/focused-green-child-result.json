@@ -1,0 +1,36 @@
+{
+  "schema": "awwv.postturn-gate.preserved-launch.v1",
+  "mode": "focused-green",
+  "node_version": "v22.23.2",
+  "child_exit": 0,
+  "child_signal": null,
+  "child_error": null,
+  "command": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/node_modules/vitest/vitest.mjs",
+    "run",
+    "tests/current-scenario-postturn-boundary.test.ts",
+    "--reporter=verbose"
+  ],
+  "source": {
+    "path": "src/scenario/scenario_runner.ts",
+    "sha256": "b811a55f165a1664e87b48be28008ada9fec7486ddb5c049b2013fbf78bd0972"
+  },
+  "test": {
+    "path": "tests/current-scenario-postturn-boundary.test.ts",
+    "sha256": "246259561471affbaa7617f4c92ef6f67a6101abf1aa64b669e18c6acd5b61e3"
+  },
+  "scenario_artifacts": {
+    "root": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/implementation-v1/retention-correction-v1/attempt-06-focused-green-scenario-artifacts",
+    "exists": true,
+    "registry": {
+      "path": "ARTIFACT_REGISTRY.json",
+      "sha256": "ed133eb37b8bfedab247d2c407860fa56d11bc6bc1e96530bd1df8811d0cc95a"
+    },
+    "manifest": {
+      "path": "ARTIFACT_MANIFEST.json",
+      "sha256": "2324554287871f90361346a3f0acf9a97dfb963ae57df19d7dcd9426090f24d4",
+      "artifact_count": 68
+    }
+  }
+}

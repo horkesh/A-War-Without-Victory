@@ -1,0 +1,139 @@
+{
+  "schema": "pale-811.allocation-reader-correction-verification.v1",
+  "captured_utc": "2026-10-22T11:24:57.6347715Z",
+  "verdict": "APPROVED",
+  "head": "f7d5609fd5c11197c963c4ca9d2e94d0630e814a",
+  "workspace": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "correction_packet": {
+    "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-21-correction-seal/810-correction-result.json",
+    "bytes": 6585,
+    "sha256": "01fcec63e08e661d62d8ad413145ccbc1b583728e383b45b8719ef760f66af79"
+  },
+  "corrected_files": [
+    {
+      "path": "tools/diagnostics/reinforcement_allocation_reader.cjs",
+      "bytes": 20532,
+      "sha256": "9739fe2e8ff59d2cf1896b9c177c3a6ac9ef1c84e9c03c2097da44f523c10840"
+    },
+    {
+      "path": "tests/reinforcement_allocation_diagnostic.test.ts",
+      "bytes": 36000,
+      "sha256": "6eff326a27cc9892aa45a6d84ae018afd19ecba18af65896ce050f7a05a094df"
+    }
+  ],
+  "resolved_finding": {
+    "original_review": "logs/claude-channel-20261004/811-allocation-reader-review/811-review.json",
+    "original_review_sha256": "46dd0e7918636328d249a4a515c952db8577150dcb471b3eb4d51c3f75044aef",
+    "finding": "Byte-level truncation inside the target topic prefix was silently ignored.",
+    "resolution": "The reader now rejects every nonempty line that is a proper prefix of `[reinforcement_allocation]` before unrelated-output filtering.",
+    "reader_lines": [237, 238],
+    "artifact_format_or_header_ambiguity": "Resolved for all nonempty proper target-marker prefixes, including a single `[`. Empty lines and complete unrelated stdout remain accepted."
+  },
+  "targeted_verification": {
+    "question": "Does the final reader reject every nonempty proper target-marker prefix while preserving allowed unrelated and empty stdout lines?",
+    "attempt": "logs/claude-channel-20261004/811-allocation-reader-review/attempt-02-correction-prefix",
+    "receipt": "logs/claude-channel-20261004/811-allocation-reader-review/attempt-02-correction-prefix/receipt.json",
+    "probe_result": "logs/claude-channel-20261004/811-allocation-reader-review/attempt-02-correction-prefix/probe-result.json",
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "artifact_contract_pass": true,
+    "proper_prefix_count": 25,
+    "rejected_with_expected_error": 25,
+    "includes_original_fragment": true,
+    "includes_single_open_bracket": true,
+    "unrelated_complete_and_empty_lines_allowed": true,
+    "valid_fixture_result": {
+      "observed_invocation_count": 1,
+      "invocation_count": 1,
+      "recipient_count": 3
+    },
+    "stdout": {
+      "bytes": 90,
+      "sha256": "5b44d930f177825b327718a29a53cb11a67c45ce9e647acc41d8609f34fb81f0"
+    },
+    "stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "closed_targeted_inventory": [
+    { "path": "dependencies.json", "bytes": 1108, "sha256": "6d6211c76179191add4f5812a15bc10ed6bd792e20bb2c71e5aad495712899f1" },
+    { "path": "dependency-01.snapshot", "bytes": 2630, "sha256": "748c5f75492f7b700db82b636096cb42aefa2ef8a3fdb10bbf56404c638b1d57" },
+    { "path": "dependency-02.snapshot", "bytes": 20532, "sha256": "9739fe2e8ff59d2cf1896b9c177c3a6ac9ef1c84e9c03c2097da44f523c10840" },
+    { "path": "dependency-03.snapshot", "bytes": 4544, "sha256": "3aaf06a1ea18a6ad27dbb481ba47cd1807dbb2075c0a9a2594008855f724f8c" },
+    { "path": "entry-script.snapshot", "bytes": 1459, "sha256": "c284f847bc8a67c5588b712877c41870253c2fcfde04e781a1214fa785269c2d" },
+    { "path": "probe-result.json", "bytes": 695, "sha256": "b2a44259d6fe6f45f2e8e4b26ad03d7ca70450084a5c56fbf943b5243e659db7" },
+    { "path": "receipt.json", "bytes": 4928, "sha256": "0778672ff7716167f2473cc29d273777b5656ef3b54b78c2618c334c6c3e71bc" },
+    { "path": "start.json", "bytes": 3075, "sha256": "f813a4e78815a82fa83daed5f2e4154970ee910323d690f0592016b438401340" },
+    { "path": "stderr.log", "bytes": 0, "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" },
+    { "path": "stdout.log", "bytes": 90, "sha256": "5b44d930f177825b327718a29a53cb11a67c45ce9e647acc41d8609f34fb81f0" }
+  ],
+  "reused_evidence": {
+    "correction_red": {
+      "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-18-red-partial-prefix/receipt.json",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "artifact_contract_pass": true,
+      "old_reader_sha256": "f3a5959c79f4514843c779e0a73c9e2febe34358fcffb981466d7e14d7ae0237"
+    },
+    "correction_affected": {
+      "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-19-green-partial-prefix/receipt.json",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract_pass": true,
+      "files": 1,
+      "tests": 18,
+      "passed": 18,
+      "failed": 0
+    },
+    "correction_typecheck": {
+      "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-20-correction-typecheck/receipt.json",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract_pass": true,
+      "nonincremental": true,
+      "no_emit": true
+    },
+    "original_focused": "attempt-15-final-focused: 3 files, 67/67, child/wrapper 0/0; reused for unchanged observer, formation, reason, and personnel scope.",
+    "original_independent_review": "811-review.json reused for the unaffected general-review scope; this correction verification addresses only its sole blocker."
+  },
+  "preservation": {
+    "original_packet": {
+      "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-17-seal/810-result.json",
+      "bytes": 7441,
+      "sha256": "ea62ebabf5672e7e953b806d084e1fb42287f470f71024e7b5e8a8a4891a2fa3",
+      "matches": true
+    },
+    "original_review": {
+      "path": "logs/claude-channel-20261004/811-allocation-reader-review/811-review.json",
+      "bytes": 8239,
+      "sha256": "46dd0e7918636328d249a4a515c952db8577150dcb471b3eb4d51c3f75044aef",
+      "matches": true
+    },
+    "original_disproof_receipt": {
+      "path": "logs/claude-channel-20261004/811-allocation-reader-review/attempt-01-partial-prefix/receipt.json",
+      "sha256": "a0d8e5156be05a4ce2964e5fae4b9f04716055c358a678687d53294520d04d70",
+      "matches": true
+    }
+  },
+  "protected_pins": [
+    { "path": "src/sim/combat/reinforcement_allocation_diagnostic.ts", "bytes": 7113, "sha256": "12d24113946ad414ae3f310a45c9d7f52e0a24bde916ed60f0001d18d4bacdc6", "matches": true },
+    { "path": "src/sim/formation_spawn.ts", "bytes": 47679, "sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa", "matches": true },
+    { "path": "src/sim/combat/reason_code_debug.ts", "bytes": 20275, "sha256": "b7467c47f97c5c349535b59aaeafa3dea0bc5d03314961c5ac17ef3a4283434a", "matches": true },
+    { "path": "src/sim/combat/personnel_diagnostic.ts", "bytes": 5870, "sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3", "matches": true },
+    { "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl", "bytes": 102947714, "sha256": "edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9", "matches": true },
+    { "path": "data/derived/_debug/d_lane_persona_decisions.jsonl", "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3", "matches": true },
+    { "path": "data/calibration/engine_health_thresholds.json", "bytes": 3775, "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d", "matches": true },
+    { "path": "data/source/calibration/painted_control_oct1995.json", "bytes": 35266, "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b", "matches": true }
+  ],
+  "scope_boundaries": {
+    "production_test_or_docs_edited_by_reviewer": false,
+    "general_review_repeated": false,
+    "suite_invocations": 0,
+    "campaign_invocations": 0,
+    "replay_invocations": 0,
+    "build_invocations": 0,
+    "remaining_blockers": [],
+    "approval_scope": "Strict allocation reader readiness only; no campaign execution or historical/adoption conclusion."
+  }
+}

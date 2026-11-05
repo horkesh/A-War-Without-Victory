@@ -1,0 +1,207 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-24T20:45:19.402Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/hq-validation/campaign-01",
+  "timeout_ms": 2100000,
+  "original_argv": [
+    "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\hq-validation\\campaign_entry.cjs",
+    "--evidence-dir",
+    "{evidenceDir}/child",
+    "--owner-authorized-once",
+    "hq-campaign-188"
+  ],
+  "argv": [
+    "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\hq-validation\\campaign_entry.cjs",
+    "--evidence-dir",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\hq-validation\\campaign-01/child",
+    "--owner-authorized-once",
+    "hq-campaign-188"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "child/preflight.json",
+    "child/source-before.json",
+    "child/launch.json",
+    "child/campaign.stdout.log",
+    "child/campaign.stderr.log",
+    "child/campaign-execution.json",
+    "child/postrun/evaluation.stdout.log",
+    "child/postrun/evaluation.stderr.log",
+    "child/postrun/evaluation.execution.json",
+    "child/postrun/evaluation.json",
+    "child/postrun/timeline-vs-n91.stdout.log",
+    "child/postrun/timeline-vs-n91.stderr.log",
+    "child/postrun/timeline-vs-n91.execution.json",
+    "child/postrun/timeline-vs-n91.json",
+    "child/postrun/timeline-vs-n92.stdout.log",
+    "child/postrun/timeline-vs-n92.stderr.log",
+    "child/postrun/timeline-vs-n92.execution.json",
+    "child/postrun/timeline-vs-n92.json",
+    "child/postrun/timeline-vs-n94.stdout.log",
+    "child/postrun/timeline-vs-n94.stderr.log",
+    "child/postrun/timeline-vs-n94.execution.json",
+    "child/postrun/timeline-vs-n94.json",
+    "child/postrun/exact-state-vs-n94.stdout.log",
+    "child/postrun/exact-state-vs-n94.stderr.log",
+    "child/postrun/exact-state-vs-n94.execution.json",
+    "child/postrun/exact-state-vs-n94.json",
+    "child/postrun/checkpoints.stdout.log",
+    "child/postrun/checkpoints.stderr.log",
+    "child/postrun/checkpoints.execution.json",
+    "child/postrun/consistency.stdout.log",
+    "child/postrun/consistency.stderr.log",
+    "child/postrun/consistency.execution.json",
+    "child/postrun/health.stdout.log",
+    "child/postrun/health.stderr.log",
+    "child/postrun/health.execution.json",
+    "child/postrun/protected-vs-n91.stdout.log",
+    "child/postrun/protected-vs-n91.stderr.log",
+    "child/postrun/protected-vs-n91.execution.json",
+    "child/postrun/protected-vs-n91.json",
+    "child/postrun/protected-vs-n92.stdout.log",
+    "child/postrun/protected-vs-n92.stderr.log",
+    "child/postrun/protected-vs-n92.execution.json",
+    "child/postrun/protected-vs-n92.json",
+    "child/postrun/producer.stdout.log",
+    "child/postrun/producer.stderr.log",
+    "child/postrun/producer.execution.json",
+    "child/postrun/movement.stdout.log",
+    "child/postrun/movement.stderr.log",
+    "child/postrun/movement.execution.json",
+    "child/postrun/summary.json",
+    "child/source-after.json",
+    "child/result.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/hq-validation/campaign_entry.cjs",
+    "bytes": 8638,
+    "raw_sha256": "11dda0d158d6de6b3e508ec326b2965f7b22ad785df4375202a9383656d04bc0",
+    "normalized_text_sha256": "11dda0d158d6de6b3e508ec326b2965f7b22ad785df4375202a9383656d04bc0",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 8638,
+      "sha256": "11dda0d158d6de6b3e508ec326b2965f7b22ad785df4375202a9383656d04bc0"
+    }
+  },
+  "end_utc": "2026-10-24T20:45:33.757Z",
+  "pid": 17892,
+  "child_exit": 2,
+  "wrapper_exit": 126,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/hq-validation/campaign_entry.cjs",
+    "bytes": 8638,
+    "raw_sha256": "11dda0d158d6de6b3e508ec326b2965f7b22ad785df4375202a9383656d04bc0",
+    "normalized_text_sha256": "11dda0d158d6de6b3e508ec326b2965f7b22ad785df4375202a9383656d04bc0",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 158,
+    "sha256": "70a732169210da7680eb9917cbb1d24ada86f26a2703800ac33a831fa5b10278"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "child/preflight.json",
+      "bytes": 37612,
+      "sha256": "f5497cb9f185f01e65102675181eca07b7618bbba566eefe89fb8d6a8b511d31"
+    },
+    {
+      "path": "child/source-before.json",
+      "bytes": 1336359,
+      "sha256": "04f3672a23b6df6c5e8f3ac68016cd1ff543be7bd506293f201b2ae39f33af4e"
+    },
+    {
+      "path": "child/launch.json",
+      "bytes": 7545,
+      "sha256": "ab79d96c229dee99e9def11284181e4f88dbd3b13861388e05c1e4b8a448e137"
+    },
+    {
+      "path": "child/campaign.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "child/campaign.stderr.log",
+      "bytes": 2300,
+      "sha256": "fb70dedb1fbbbd4d9112656d5f46e5384b572e29af16c9ea513b329e623ebc47"
+    },
+    {
+      "path": "child/campaign-execution.json",
+      "bytes": 167,
+      "sha256": "8077a77635c758dc34a72ea76a9df2a3b6a351f4120b94e835a1f14fd68df6fb"
+    },
+    {
+      "path": "child/source-after.json",
+      "bytes": 1336359,
+      "sha256": "04f3672a23b6df6c5e8f3ac68016cd1ff543be7bd506293f201b2ae39f33af4e"
+    },
+    {
+      "path": "child/result.json",
+      "bytes": 73933,
+      "sha256": "2051b727e1cd65351eddd09e26b3aeaecab331c5954b3e1fe6c4602e77f526d0"
+    }
+  ],
+  "artifact_contract": {
+    "pass": false,
+    "unexpected": [],
+    "missing_allowed": [
+      "child/postrun/evaluation.stdout.log",
+      "child/postrun/evaluation.stderr.log",
+      "child/postrun/evaluation.execution.json",
+      "child/postrun/evaluation.json",
+      "child/postrun/timeline-vs-n91.stdout.log",
+      "child/postrun/timeline-vs-n91.stderr.log",
+      "child/postrun/timeline-vs-n91.execution.json",
+      "child/postrun/timeline-vs-n91.json",
+      "child/postrun/timeline-vs-n92.stdout.log",
+      "child/postrun/timeline-vs-n92.stderr.log",
+      "child/postrun/timeline-vs-n92.execution.json",
+      "child/postrun/timeline-vs-n92.json",
+      "child/postrun/timeline-vs-n94.stdout.log",
+      "child/postrun/timeline-vs-n94.stderr.log",
+      "child/postrun/timeline-vs-n94.execution.json",
+      "child/postrun/timeline-vs-n94.json",
+      "child/postrun/exact-state-vs-n94.stdout.log",
+      "child/postrun/exact-state-vs-n94.stderr.log",
+      "child/postrun/exact-state-vs-n94.execution.json",
+      "child/postrun/exact-state-vs-n94.json",
+      "child/postrun/checkpoints.stdout.log",
+      "child/postrun/checkpoints.stderr.log",
+      "child/postrun/checkpoints.execution.json",
+      "child/postrun/consistency.stdout.log",
+      "child/postrun/consistency.stderr.log",
+      "child/postrun/consistency.execution.json",
+      "child/postrun/health.stdout.log",
+      "child/postrun/health.stderr.log",
+      "child/postrun/health.execution.json",
+      "child/postrun/protected-vs-n91.stdout.log",
+      "child/postrun/protected-vs-n91.stderr.log",
+      "child/postrun/protected-vs-n91.execution.json",
+      "child/postrun/protected-vs-n91.json",
+      "child/postrun/protected-vs-n92.stdout.log",
+      "child/postrun/protected-vs-n92.stderr.log",
+      "child/postrun/protected-vs-n92.execution.json",
+      "child/postrun/protected-vs-n92.json",
+      "child/postrun/producer.stdout.log",
+      "child/postrun/producer.stderr.log",
+      "child/postrun/producer.execution.json",
+      "child/postrun/movement.stdout.log",
+      "child/postrun/movement.stderr.log",
+      "child/postrun/movement.execution.json",
+      "child/postrun/summary.json"
+    ]
+  }
+}

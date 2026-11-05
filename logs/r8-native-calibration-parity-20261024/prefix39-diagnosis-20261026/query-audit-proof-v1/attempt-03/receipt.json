@@ -1,0 +1,104 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-26T00:52:31.954Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/later-native-force-query-20261026-v1/attempt-03",
+  "timeout_ms": 60000,
+  "original_argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "--import",
+    "file:///C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/node_modules/tsx/dist/loader.mjs",
+    "tmp/player-bot-capability-parity-20261024/later-native-force-query-20261026-v1/query_only.cjs",
+    "{evidenceDir}"
+  ],
+  "argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "--import",
+    "file:///C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/node_modules/tsx/dist/loader.mjs",
+    "tmp/player-bot-capability-parity-20261024/later-native-force-query-20261026-v1/query_only.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\later-native-force-query-20261026-v1\\attempt-03"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "PRECHECK.json",
+    "turn-016-STATIC.json",
+    "turn-025-STATIC.json",
+    "turn-030-STATIC.json",
+    "final-039-STATIC.json",
+    "RESULT.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/later-native-force-query-20261026-v1/query_only.cjs",
+    "bytes": 5528,
+    "raw_sha256": "49bdd1a108efe2bc25c0be952943a81bea804d4134231430d24fbf32bd3a5c38",
+    "normalized_text_sha256": "3f391d00a507dfc7d8f4640abcf370665054211f8b6c144f9d81ff529d80c87c",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 5528,
+      "sha256": "49bdd1a108efe2bc25c0be952943a81bea804d4134231430d24fbf32bd3a5c38"
+    }
+  },
+  "end_utc": "2026-10-26T00:52:45.669Z",
+  "pid": 9296,
+  "child_exit": 0,
+  "wrapper_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/later-native-force-query-20261026-v1/query_only.cjs",
+    "bytes": 5528,
+    "raw_sha256": "49bdd1a108efe2bc25c0be952943a81bea804d4134231430d24fbf32bd3a5c38",
+    "normalized_text_sha256": "3f391d00a507dfc7d8f4640abcf370665054211f8b6c144f9d81ff529d80c87c",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 54,
+    "sha256": "b27e6aeac2aac5d6e9d0837a20a91ab307eb12b30bc4cfbad4f6abbfe2a78f28"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "PRECHECK.json",
+      "bytes": 3760,
+      "sha256": "ebe27413f280a6775a84e562d3e32e1117ddb45917f2b420ad84c9fbd83347b8"
+    },
+    {
+      "path": "turn-016-STATIC.json",
+      "bytes": 3899,
+      "sha256": "a163e70ee1cbc254a40302a102af9f8aaa2a7f6e0f7c5b68a55a1945c8175343"
+    },
+    {
+      "path": "turn-025-STATIC.json",
+      "bytes": 4563,
+      "sha256": "a69c43af8121f808b47549d084b19d1ce2f5d6c782a9f5d8c015a8f054b96524"
+    },
+    {
+      "path": "turn-030-STATIC.json",
+      "bytes": 4833,
+      "sha256": "8abeba92acc5979834b2582619f8875873a3534b1049f6217feea00ea70d5116"
+    },
+    {
+      "path": "final-039-STATIC.json",
+      "bytes": 5275,
+      "sha256": "e2a540127e99ed10857c4eabb06b5479c3ada83dd3afe86c947eb6b16c2eaa7f"
+    },
+    {
+      "path": "RESULT.json",
+      "bytes": 68060,
+      "sha256": "e783d1ab81c8ea97545221bfd9e76cb47a1a0412af960570625459a0e68710b1"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

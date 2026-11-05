@@ -1,0 +1,42 @@
+[
+  {
+    "pointer": "/attack_resolution_osid/battles/0/equipment/scavenged_by",
+    "baseline_present": false
+  },
+  {
+    "pointer": "/attack_resolution_osid/battles/1/equipment/scavenged_by",
+    "baseline_present": false
+  },
+  {
+    "pointer": "/attack_resolution_osid/battles/2/defender_contributions",
+    "baseline_present": false
+  },
+  {
+    "pointer": "/attack_resolution_osid/battles/2/equipment/scavenged_by",
+    "baseline_present": false
+  },
+  {
+    "pointer": "/preparation_events/0/commander_assessment",
+    "baseline_present": false
+  },
+  {
+    "pointer": "/preparation_events/0/probe_ordered",
+    "baseline_present": false
+  },
+  {
+    "pointer": "/preparation_events/1/commander_assessment",
+    "baseline_present": false
+  },
+  {
+    "pointer": "/preparation_events/1/probe_ordered",
+    "baseline_present": false
+  },
+  {
+    "pointer": "/preparation_events/2/probe_ordered",
+    "baseline_present": false
+  },
+  {
+    "pointer": "/preparation_events/3/commander_assessment",
+    "baseline_present": false
+  }
+]

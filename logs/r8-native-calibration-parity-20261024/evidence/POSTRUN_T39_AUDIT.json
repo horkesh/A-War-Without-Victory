@@ -1,0 +1,4980 @@
+{
+  "schema": "awwv.native-t39.postrun-audit.v1",
+  "createdAt": "2026-10-24T17:09:20.339Z",
+  "target": {
+    "faction": "RBiH",
+    "turn": 39
+  },
+  "inputs": {
+    "result": {
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\paradox-local-qa-native-calibration-rbih-t39-20261024-03.json",
+      "bytes": 24118454,
+      "sha256": "4cd3b3b1c02975cb52003154a314ae395f8e3769c345b6f4f4c5251ec7bb26d5"
+    },
+    "progress": {
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\paradox-local-qa-progress-native-calibration-rbih-t39-20261024-03.json",
+      "bytes": 24118172,
+      "sha256": "cbc7ec0d07caebe911bab3cf9a9672cf3a976ce2d21ecf962d706e00fa056409"
+    },
+    "preflightReceipt": {
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\r8-native-calibration-parity-20261024\\native-t39-03\\receipt.json",
+      "bytes": 2695,
+      "sha256": "04d444ccabee50f4214faf58deca91d63b6374df8bc629945d450cf151c0f7aa"
+    }
+  },
+  "gates": [
+    {
+      "name": "preserved-preflight",
+      "pass": true,
+      "details": {
+        "childExit": 0,
+        "wrapperExit": 0,
+        "timedOut": false,
+        "signal": null,
+        "spawnError": null,
+        "artifactContract": {
+          "pass": true,
+          "unexpected": [],
+          "missing_allowed": []
+        }
+      }
+    },
+    {
+      "name": "final-result-single-successful-faction",
+      "pass": true,
+      "details": {
+        "completedAt": "2026-10-24T17:09:06.057Z",
+        "factionCount": 1,
+        "faction": "RBiH",
+        "failed": false,
+        "error": null,
+        "hasPlaytest": true
+      }
+    },
+    {
+      "name": "progress-correspondence",
+      "pass": true,
+      "details": {
+        "factionCount": 1,
+        "faction": "RBiH",
+        "failed": false,
+        "error": null,
+        "commandMatches": true,
+        "provenanceMatches": true
+      }
+    },
+    {
+      "name": "settled-archives-exact",
+      "pass": true,
+      "details": {
+        "pass": true,
+        "expectedTurns": "1..39",
+        "kind": "settled",
+        "count": 39,
+        "rows": [
+          {
+            "turn": 1,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-001.json",
+            "recordedSha256": "0b67f4bfb319a524251bc4941e17414fa122bb8f8a9058a9860d9d1f4228e64f",
+            "recordedBytes": 3476848,
+            "exists": true,
+            "actualSha256": "0b67f4bfb319a524251bc4941e17414fa122bb8f8a9058a9860d9d1f4228e64f",
+            "actualBytes": 3476848,
+            "metaTurn": 1,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 2,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-002.json",
+            "recordedSha256": "096ce25ef4af5959d89a270589f246069cf8181a444f3d0728d997f7880f554b",
+            "recordedBytes": 3583830,
+            "exists": true,
+            "actualSha256": "096ce25ef4af5959d89a270589f246069cf8181a444f3d0728d997f7880f554b",
+            "actualBytes": 3583830,
+            "metaTurn": 2,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 3,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-003.json",
+            "recordedSha256": "c2235be1a52fba0303506507192ca832f5c2cf739a66a32931e9c80851ad420e",
+            "recordedBytes": 3668247,
+            "exists": true,
+            "actualSha256": "c2235be1a52fba0303506507192ca832f5c2cf739a66a32931e9c80851ad420e",
+            "actualBytes": 3668247,
+            "metaTurn": 3,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 4,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-004.json",
+            "recordedSha256": "0fbd987d3482fbd1414f90e10e51dbcf15d198efa6051e406fc7d9c3da457bbc",
+            "recordedBytes": 3752315,
+            "exists": true,
+            "actualSha256": "0fbd987d3482fbd1414f90e10e51dbcf15d198efa6051e406fc7d9c3da457bbc",
+            "actualBytes": 3752315,
+            "metaTurn": 4,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 5,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-005.json",
+            "recordedSha256": "e5bada02c23ecc1ef0140f18739a6586169bf9406d2f41a4a8243d06ec293ed1",
+            "recordedBytes": 4006157,
+            "exists": true,
+            "actualSha256": "e5bada02c23ecc1ef0140f18739a6586169bf9406d2f41a4a8243d06ec293ed1",
+            "actualBytes": 4006157,
+            "metaTurn": 5,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 6,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-006.json",
+            "recordedSha256": "03ed38de0e8d694f6ccb847ba383df31e23849e7d296c8b0450fe0b20d22918f",
+            "recordedBytes": 4042934,
+            "exists": true,
+            "actualSha256": "03ed38de0e8d694f6ccb847ba383df31e23849e7d296c8b0450fe0b20d22918f",
+            "actualBytes": 4042934,
+            "metaTurn": 6,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 7,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-007.json",
+            "recordedSha256": "33c0aa8aef7675cdf3df4e3d30ac07948768c754b313f43fe8c18152c9cb3fb7",
+            "recordedBytes": 4059347,
+            "exists": true,
+            "actualSha256": "33c0aa8aef7675cdf3df4e3d30ac07948768c754b313f43fe8c18152c9cb3fb7",
+            "actualBytes": 4059347,
+            "metaTurn": 7,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 8,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-008.json",
+            "recordedSha256": "572eb04543f5199725c9c3d0cc59285d7667c369f856958f4962f06bd5a58272",
+            "recordedBytes": 4131038,
+            "exists": true,
+            "actualSha256": "572eb04543f5199725c9c3d0cc59285d7667c369f856958f4962f06bd5a58272",
+            "actualBytes": 4131038,
+            "metaTurn": 8,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 9,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-009.json",
+            "recordedSha256": "432946c94abbed60d2ca2ce2c791a49c69ccf58aadc29e4583f494b4e2b2ba85",
+            "recordedBytes": 4182339,
+            "exists": true,
+            "actualSha256": "432946c94abbed60d2ca2ce2c791a49c69ccf58aadc29e4583f494b4e2b2ba85",
+            "actualBytes": 4182339,
+            "metaTurn": 9,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 10,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-010.json",
+            "recordedSha256": "74abac39adf5db943b2808452cfa3c23c15e8951ce584bd3c1bc50db0afa5bdc",
+            "recordedBytes": 4299885,
+            "exists": true,
+            "actualSha256": "74abac39adf5db943b2808452cfa3c23c15e8951ce584bd3c1bc50db0afa5bdc",
+            "actualBytes": 4299885,
+            "metaTurn": 10,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 11,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-011.json",
+            "recordedSha256": "51815d797e3a174899a4f3f30acd2517f8da12aeb10b9df99455131588353637",
+            "recordedBytes": 4361252,
+            "exists": true,
+            "actualSha256": "51815d797e3a174899a4f3f30acd2517f8da12aeb10b9df99455131588353637",
+            "actualBytes": 4361252,
+            "metaTurn": 11,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 12,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-012.json",
+            "recordedSha256": "9e3445b8880d8ca37db818364a6cf5c15e3e664b4f6d9e15698b1d10608fb466",
+            "recordedBytes": 4419622,
+            "exists": true,
+            "actualSha256": "9e3445b8880d8ca37db818364a6cf5c15e3e664b4f6d9e15698b1d10608fb466",
+            "actualBytes": 4419622,
+            "metaTurn": 12,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 13,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-013.json",
+            "recordedSha256": "d13de42af711276048b28104d6a966703cdc15cb86a596d282c554d793c73828",
+            "recordedBytes": 4503037,
+            "exists": true,
+            "actualSha256": "d13de42af711276048b28104d6a966703cdc15cb86a596d282c554d793c73828",
+            "actualBytes": 4503037,
+            "metaTurn": 13,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 14,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-014.json",
+            "recordedSha256": "f3f7d816ecfd563b296f28e81d27b7bef531c2a74d2d93675b7c2302130fa799",
+            "recordedBytes": 4550991,
+            "exists": true,
+            "actualSha256": "f3f7d816ecfd563b296f28e81d27b7bef531c2a74d2d93675b7c2302130fa799",
+            "actualBytes": 4550991,
+            "metaTurn": 14,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 15,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-015.json",
+            "recordedSha256": "593a277d2fc2fdd270f2e9bacf747eba2ebe83d48afcbe7f5fc794dcb74966a3",
+            "recordedBytes": 4584827,
+            "exists": true,
+            "actualSha256": "593a277d2fc2fdd270f2e9bacf747eba2ebe83d48afcbe7f5fc794dcb74966a3",
+            "actualBytes": 4584827,
+            "metaTurn": 15,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 16,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-016.json",
+            "recordedSha256": "eae2ac6303196ac3515f2e58f7cfea609e50d60b1cc877eed5a03a926f8928a3",
+            "recordedBytes": 4679737,
+            "exists": true,
+            "actualSha256": "eae2ac6303196ac3515f2e58f7cfea609e50d60b1cc877eed5a03a926f8928a3",
+            "actualBytes": 4679737,
+            "metaTurn": 16,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 17,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-017.json",
+            "recordedSha256": "bbd9b8906d44cafe262b844ec3e1b86b3568a69f8da8ec43934befacfaee3ffe",
+            "recordedBytes": 4760739,
+            "exists": true,
+            "actualSha256": "bbd9b8906d44cafe262b844ec3e1b86b3568a69f8da8ec43934befacfaee3ffe",
+            "actualBytes": 4760739,
+            "metaTurn": 17,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 18,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-018.json",
+            "recordedSha256": "dc5ae33795b1aa1f3a1661d7116b243ec079f4d07efb60d93be115be7648d093",
+            "recordedBytes": 4861871,
+            "exists": true,
+            "actualSha256": "dc5ae33795b1aa1f3a1661d7116b243ec079f4d07efb60d93be115be7648d093",
+            "actualBytes": 4861871,
+            "metaTurn": 18,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 19,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-019.json",
+            "recordedSha256": "e3b4fc4b1b8a4b0eab87cff57a6a63efbd908c4b2052a7af03f42363ca702953",
+            "recordedBytes": 4915713,
+            "exists": true,
+            "actualSha256": "e3b4fc4b1b8a4b0eab87cff57a6a63efbd908c4b2052a7af03f42363ca702953",
+            "actualBytes": 4915713,
+            "metaTurn": 19,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 20,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-020.json",
+            "recordedSha256": "74ccb87e8e9c7e9898eb970d1b1d7739b85a8d343ba42e2c935824fd561c7b86",
+            "recordedBytes": 4964031,
+            "exists": true,
+            "actualSha256": "74ccb87e8e9c7e9898eb970d1b1d7739b85a8d343ba42e2c935824fd561c7b86",
+            "actualBytes": 4964031,
+            "metaTurn": 20,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 21,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-021.json",
+            "recordedSha256": "5e72ff6265f0731967f0dd11d45ab09c3822e9edc8539e42e884d8cefa34d105",
+            "recordedBytes": 4998702,
+            "exists": true,
+            "actualSha256": "5e72ff6265f0731967f0dd11d45ab09c3822e9edc8539e42e884d8cefa34d105",
+            "actualBytes": 4998702,
+            "metaTurn": 21,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 22,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-022.json",
+            "recordedSha256": "fa373f6b8871dd8cc8d7810c377348871086286d9f6525bc1e3010206b299d7f",
+            "recordedBytes": 5013651,
+            "exists": true,
+            "actualSha256": "fa373f6b8871dd8cc8d7810c377348871086286d9f6525bc1e3010206b299d7f",
+            "actualBytes": 5013651,
+            "metaTurn": 22,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 23,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-023.json",
+            "recordedSha256": "fc80928c36789f297ec3e23b14ba750ce32243e23231010f443b0733f8e3fbdd",
+            "recordedBytes": 5069923,
+            "exists": true,
+            "actualSha256": "fc80928c36789f297ec3e23b14ba750ce32243e23231010f443b0733f8e3fbdd",
+            "actualBytes": 5069923,
+            "metaTurn": 23,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 24,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-024.json",
+            "recordedSha256": "174751cd45fad256384bab54728ab99a681d633d661fba0032cacbffd605d3e6",
+            "recordedBytes": 5080196,
+            "exists": true,
+            "actualSha256": "174751cd45fad256384bab54728ab99a681d633d661fba0032cacbffd605d3e6",
+            "actualBytes": 5080196,
+            "metaTurn": 24,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 25,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-025.json",
+            "recordedSha256": "9370bb5a0b54423bfaeac98d376683885ccc6017939b37913fa16f3e42e734ce",
+            "recordedBytes": 5084880,
+            "exists": true,
+            "actualSha256": "9370bb5a0b54423bfaeac98d376683885ccc6017939b37913fa16f3e42e734ce",
+            "actualBytes": 5084880,
+            "metaTurn": 25,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 26,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-026.json",
+            "recordedSha256": "2567d27eec329761ea733c4b414ceb44ac237125df44bdc13f6504b0099eae8c",
+            "recordedBytes": 5092010,
+            "exists": true,
+            "actualSha256": "2567d27eec329761ea733c4b414ceb44ac237125df44bdc13f6504b0099eae8c",
+            "actualBytes": 5092010,
+            "metaTurn": 26,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 27,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-027.json",
+            "recordedSha256": "b6553bec221b9d916147793482111129f79010a6add549387e7dc0e246b334e2",
+            "recordedBytes": 5084502,
+            "exists": true,
+            "actualSha256": "b6553bec221b9d916147793482111129f79010a6add549387e7dc0e246b334e2",
+            "actualBytes": 5084502,
+            "metaTurn": 27,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 28,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-028.json",
+            "recordedSha256": "d4401eb6e84bb3bd72a147d4ab034996feb6867d48ffcc170aaa2cbc1bce852b",
+            "recordedBytes": 5134450,
+            "exists": true,
+            "actualSha256": "d4401eb6e84bb3bd72a147d4ab034996feb6867d48ffcc170aaa2cbc1bce852b",
+            "actualBytes": 5134450,
+            "metaTurn": 28,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 29,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-029.json",
+            "recordedSha256": "6a7ccdd9bbcf7c6766378e26833f4a167ddea0f3a3dda1d8e9acbdfaae929d65",
+            "recordedBytes": 5133531,
+            "exists": true,
+            "actualSha256": "6a7ccdd9bbcf7c6766378e26833f4a167ddea0f3a3dda1d8e9acbdfaae929d65",
+            "actualBytes": 5133531,
+            "metaTurn": 29,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 30,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-030.json",
+            "recordedSha256": "097caa7d0ffc5f3d12bc48e3644cf592f8ee68981573e1123e018b8560df7b56",
+            "recordedBytes": 5121004,
+            "exists": true,
+            "actualSha256": "097caa7d0ffc5f3d12bc48e3644cf592f8ee68981573e1123e018b8560df7b56",
+            "actualBytes": 5121004,
+            "metaTurn": 30,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 31,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-031.json",
+            "recordedSha256": "b7bd7344a80684283d98b76538d55bd5ae0b9be17fa8a9124e528c0a513f74d5",
+            "recordedBytes": 5133565,
+            "exists": true,
+            "actualSha256": "b7bd7344a80684283d98b76538d55bd5ae0b9be17fa8a9124e528c0a513f74d5",
+            "actualBytes": 5133565,
+            "metaTurn": 31,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 32,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-032.json",
+            "recordedSha256": "faf63a16abb4d5fa5442cf1ef73a88e7913d5b95669255eb9aeda29fdfc09a33",
+            "recordedBytes": 5172497,
+            "exists": true,
+            "actualSha256": "faf63a16abb4d5fa5442cf1ef73a88e7913d5b95669255eb9aeda29fdfc09a33",
+            "actualBytes": 5172497,
+            "metaTurn": 32,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 33,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-033.json",
+            "recordedSha256": "2bc0dd1d801fb77431369b6c11e9501b8a5f67ba254bc4d266cb4e2c1ce7df2c",
+            "recordedBytes": 5190017,
+            "exists": true,
+            "actualSha256": "2bc0dd1d801fb77431369b6c11e9501b8a5f67ba254bc4d266cb4e2c1ce7df2c",
+            "actualBytes": 5190017,
+            "metaTurn": 33,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 34,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-034.json",
+            "recordedSha256": "d1ded1879657049893364378321dc3f5c37379dab38c8cb2169d88767fc6217d",
+            "recordedBytes": 5214384,
+            "exists": true,
+            "actualSha256": "d1ded1879657049893364378321dc3f5c37379dab38c8cb2169d88767fc6217d",
+            "actualBytes": 5214384,
+            "metaTurn": 34,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 35,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-035.json",
+            "recordedSha256": "c3dea455f5937c93e11e994a996d9bd53c4dd6ac68af40ad3d10f2da2a8ad1a2",
+            "recordedBytes": 5224798,
+            "exists": true,
+            "actualSha256": "c3dea455f5937c93e11e994a996d9bd53c4dd6ac68af40ad3d10f2da2a8ad1a2",
+            "actualBytes": 5224798,
+            "metaTurn": 35,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 36,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-036.json",
+            "recordedSha256": "a8313d2e8603c83673a10fc0cec37d9ead1119cedc954e65fb560a057df2c902",
+            "recordedBytes": 5221034,
+            "exists": true,
+            "actualSha256": "a8313d2e8603c83673a10fc0cec37d9ead1119cedc954e65fb560a057df2c902",
+            "actualBytes": 5221034,
+            "metaTurn": 36,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 37,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-037.json",
+            "recordedSha256": "42e2130bfe2edab953e558b872015bbfabbae49db211565f0d1fe2c11e60d942",
+            "recordedBytes": 5225791,
+            "exists": true,
+            "actualSha256": "42e2130bfe2edab953e558b872015bbfabbae49db211565f0d1fe2c11e60d942",
+            "actualBytes": 5225791,
+            "metaTurn": 37,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 38,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-038.json",
+            "recordedSha256": "4d1b7c2d47528f2da2441a8fb1f46b1b37e433fd6bc41f74733a21c17b1fb2b7",
+            "recordedBytes": 5264378,
+            "exists": true,
+            "actualSha256": "4d1b7c2d47528f2da2441a8fb1f46b1b37e433fd6bc41f74733a21c17b1fb2b7",
+            "actualBytes": 5264378,
+            "metaTurn": 38,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 39,
+            "kind": "settled",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-039.json",
+            "recordedSha256": "52dead08cc8e6f1d33ca26e1585666ee1db84fc4edb7bef59647449f69a1fc7e",
+            "recordedBytes": 5249464,
+            "exists": true,
+            "actualSha256": "52dead08cc8e6f1d33ca26e1585666ee1db84fc4edb7bef59647449f69a1fc7e",
+            "actualBytes": 5249464,
+            "metaTurn": 39,
+            "error": null,
+            "pass": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "provisional-snapshots-exact",
+      "pass": true,
+      "details": {
+        "pass": true,
+        "expectedTurns": "1..39",
+        "kind": "provisional",
+        "count": 39,
+        "rows": [
+          {
+            "turn": 1,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-001.json",
+            "recordedSha256": "0b67f4bfb319a524251bc4941e17414fa122bb8f8a9058a9860d9d1f4228e64f",
+            "recordedBytes": 3476848,
+            "exists": true,
+            "actualSha256": "0b67f4bfb319a524251bc4941e17414fa122bb8f8a9058a9860d9d1f4228e64f",
+            "actualBytes": 3476848,
+            "metaTurn": 1,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 2,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-002.json",
+            "recordedSha256": "096ce25ef4af5959d89a270589f246069cf8181a444f3d0728d997f7880f554b",
+            "recordedBytes": 3583830,
+            "exists": true,
+            "actualSha256": "096ce25ef4af5959d89a270589f246069cf8181a444f3d0728d997f7880f554b",
+            "actualBytes": 3583830,
+            "metaTurn": 2,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 3,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-003.json",
+            "recordedSha256": "0e97450b75b8aefcb236effaaf8a920be9958252d716a14a0596928a04e6d5fc",
+            "recordedBytes": 3680325,
+            "exists": true,
+            "actualSha256": "0e97450b75b8aefcb236effaaf8a920be9958252d716a14a0596928a04e6d5fc",
+            "actualBytes": 3680325,
+            "metaTurn": 3,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 4,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-004.json",
+            "recordedSha256": "0fbd987d3482fbd1414f90e10e51dbcf15d198efa6051e406fc7d9c3da457bbc",
+            "recordedBytes": 3752315,
+            "exists": true,
+            "actualSha256": "0fbd987d3482fbd1414f90e10e51dbcf15d198efa6051e406fc7d9c3da457bbc",
+            "actualBytes": 3752315,
+            "metaTurn": 4,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 5,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-005.json",
+            "recordedSha256": "e5bada02c23ecc1ef0140f18739a6586169bf9406d2f41a4a8243d06ec293ed1",
+            "recordedBytes": 4006157,
+            "exists": true,
+            "actualSha256": "e5bada02c23ecc1ef0140f18739a6586169bf9406d2f41a4a8243d06ec293ed1",
+            "actualBytes": 4006157,
+            "metaTurn": 5,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 6,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-006.json",
+            "recordedSha256": "03ed38de0e8d694f6ccb847ba383df31e23849e7d296c8b0450fe0b20d22918f",
+            "recordedBytes": 4042934,
+            "exists": true,
+            "actualSha256": "03ed38de0e8d694f6ccb847ba383df31e23849e7d296c8b0450fe0b20d22918f",
+            "actualBytes": 4042934,
+            "metaTurn": 6,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 7,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-007.json",
+            "recordedSha256": "33c0aa8aef7675cdf3df4e3d30ac07948768c754b313f43fe8c18152c9cb3fb7",
+            "recordedBytes": 4059347,
+            "exists": true,
+            "actualSha256": "33c0aa8aef7675cdf3df4e3d30ac07948768c754b313f43fe8c18152c9cb3fb7",
+            "actualBytes": 4059347,
+            "metaTurn": 7,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 8,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-008.json",
+            "recordedSha256": "572eb04543f5199725c9c3d0cc59285d7667c369f856958f4962f06bd5a58272",
+            "recordedBytes": 4131038,
+            "exists": true,
+            "actualSha256": "572eb04543f5199725c9c3d0cc59285d7667c369f856958f4962f06bd5a58272",
+            "actualBytes": 4131038,
+            "metaTurn": 8,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 9,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-009.json",
+            "recordedSha256": "432946c94abbed60d2ca2ce2c791a49c69ccf58aadc29e4583f494b4e2b2ba85",
+            "recordedBytes": 4182339,
+            "exists": true,
+            "actualSha256": "432946c94abbed60d2ca2ce2c791a49c69ccf58aadc29e4583f494b4e2b2ba85",
+            "actualBytes": 4182339,
+            "metaTurn": 9,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 10,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-010.json",
+            "recordedSha256": "74abac39adf5db943b2808452cfa3c23c15e8951ce584bd3c1bc50db0afa5bdc",
+            "recordedBytes": 4299885,
+            "exists": true,
+            "actualSha256": "74abac39adf5db943b2808452cfa3c23c15e8951ce584bd3c1bc50db0afa5bdc",
+            "actualBytes": 4299885,
+            "metaTurn": 10,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 11,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-011.json",
+            "recordedSha256": "51815d797e3a174899a4f3f30acd2517f8da12aeb10b9df99455131588353637",
+            "recordedBytes": 4361252,
+            "exists": true,
+            "actualSha256": "51815d797e3a174899a4f3f30acd2517f8da12aeb10b9df99455131588353637",
+            "actualBytes": 4361252,
+            "metaTurn": 11,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 12,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-012.json",
+            "recordedSha256": "446bca6dab382ec8d2f8fbbc36b85f2b4055e7e0e88299df3696af947e5e0871",
+            "recordedBytes": 4436903,
+            "exists": true,
+            "actualSha256": "446bca6dab382ec8d2f8fbbc36b85f2b4055e7e0e88299df3696af947e5e0871",
+            "actualBytes": 4436903,
+            "metaTurn": 12,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 13,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-013.json",
+            "recordedSha256": "d13de42af711276048b28104d6a966703cdc15cb86a596d282c554d793c73828",
+            "recordedBytes": 4503037,
+            "exists": true,
+            "actualSha256": "d13de42af711276048b28104d6a966703cdc15cb86a596d282c554d793c73828",
+            "actualBytes": 4503037,
+            "metaTurn": 13,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 14,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-014.json",
+            "recordedSha256": "f3f7d816ecfd563b296f28e81d27b7bef531c2a74d2d93675b7c2302130fa799",
+            "recordedBytes": 4550991,
+            "exists": true,
+            "actualSha256": "f3f7d816ecfd563b296f28e81d27b7bef531c2a74d2d93675b7c2302130fa799",
+            "actualBytes": 4550991,
+            "metaTurn": 14,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 15,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-015.json",
+            "recordedSha256": "ec50684612e05ce295fbad6bdd7d5eb0b0a6421a3a182581ad9db78aa2d086e2",
+            "recordedBytes": 4583438,
+            "exists": true,
+            "actualSha256": "ec50684612e05ce295fbad6bdd7d5eb0b0a6421a3a182581ad9db78aa2d086e2",
+            "actualBytes": 4583438,
+            "metaTurn": 15,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 16,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-016.json",
+            "recordedSha256": "eae2ac6303196ac3515f2e58f7cfea609e50d60b1cc877eed5a03a926f8928a3",
+            "recordedBytes": 4679737,
+            "exists": true,
+            "actualSha256": "eae2ac6303196ac3515f2e58f7cfea609e50d60b1cc877eed5a03a926f8928a3",
+            "actualBytes": 4679737,
+            "metaTurn": 16,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 17,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-017.json",
+            "recordedSha256": "bbd9b8906d44cafe262b844ec3e1b86b3568a69f8da8ec43934befacfaee3ffe",
+            "recordedBytes": 4760739,
+            "exists": true,
+            "actualSha256": "bbd9b8906d44cafe262b844ec3e1b86b3568a69f8da8ec43934befacfaee3ffe",
+            "actualBytes": 4760739,
+            "metaTurn": 17,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 18,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-018.json",
+            "recordedSha256": "dc5ae33795b1aa1f3a1661d7116b243ec079f4d07efb60d93be115be7648d093",
+            "recordedBytes": 4861871,
+            "exists": true,
+            "actualSha256": "dc5ae33795b1aa1f3a1661d7116b243ec079f4d07efb60d93be115be7648d093",
+            "actualBytes": 4861871,
+            "metaTurn": 18,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 19,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-019.json",
+            "recordedSha256": "e3b4fc4b1b8a4b0eab87cff57a6a63efbd908c4b2052a7af03f42363ca702953",
+            "recordedBytes": 4915713,
+            "exists": true,
+            "actualSha256": "e3b4fc4b1b8a4b0eab87cff57a6a63efbd908c4b2052a7af03f42363ca702953",
+            "actualBytes": 4915713,
+            "metaTurn": 19,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 20,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-020.json",
+            "recordedSha256": "03faf8afa17f8092b64d4ff2458f0e63612b382fbb681af76d68b15a067e75a4",
+            "recordedBytes": 4967846,
+            "exists": true,
+            "actualSha256": "03faf8afa17f8092b64d4ff2458f0e63612b382fbb681af76d68b15a067e75a4",
+            "actualBytes": 4967846,
+            "metaTurn": 20,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 21,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-021.json",
+            "recordedSha256": "5e72ff6265f0731967f0dd11d45ab09c3822e9edc8539e42e884d8cefa34d105",
+            "recordedBytes": 4998702,
+            "exists": true,
+            "actualSha256": "5e72ff6265f0731967f0dd11d45ab09c3822e9edc8539e42e884d8cefa34d105",
+            "actualBytes": 4998702,
+            "metaTurn": 21,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 22,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-022.json",
+            "recordedSha256": "bf1ff0bda15a1854e884e8f0b6834f0183c5f8d0c5e5dcb6b33877cd68f23271",
+            "recordedBytes": 5012135,
+            "exists": true,
+            "actualSha256": "bf1ff0bda15a1854e884e8f0b6834f0183c5f8d0c5e5dcb6b33877cd68f23271",
+            "actualBytes": 5012135,
+            "metaTurn": 22,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 23,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-023.json",
+            "recordedSha256": "fc80928c36789f297ec3e23b14ba750ce32243e23231010f443b0733f8e3fbdd",
+            "recordedBytes": 5069923,
+            "exists": true,
+            "actualSha256": "fc80928c36789f297ec3e23b14ba750ce32243e23231010f443b0733f8e3fbdd",
+            "actualBytes": 5069923,
+            "metaTurn": 23,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 24,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-024.json",
+            "recordedSha256": "027e8ba87d132d2e442d56491c56b8de9dc34810ec6cce3105c6672356b200ce",
+            "recordedBytes": 5079900,
+            "exists": true,
+            "actualSha256": "027e8ba87d132d2e442d56491c56b8de9dc34810ec6cce3105c6672356b200ce",
+            "actualBytes": 5079900,
+            "metaTurn": 24,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 25,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-025.json",
+            "recordedSha256": "9370bb5a0b54423bfaeac98d376683885ccc6017939b37913fa16f3e42e734ce",
+            "recordedBytes": 5084880,
+            "exists": true,
+            "actualSha256": "9370bb5a0b54423bfaeac98d376683885ccc6017939b37913fa16f3e42e734ce",
+            "actualBytes": 5084880,
+            "metaTurn": 25,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 26,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-026.json",
+            "recordedSha256": "2567d27eec329761ea733c4b414ceb44ac237125df44bdc13f6504b0099eae8c",
+            "recordedBytes": 5092010,
+            "exists": true,
+            "actualSha256": "2567d27eec329761ea733c4b414ceb44ac237125df44bdc13f6504b0099eae8c",
+            "actualBytes": 5092010,
+            "metaTurn": 26,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 27,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-027.json",
+            "recordedSha256": "b6553bec221b9d916147793482111129f79010a6add549387e7dc0e246b334e2",
+            "recordedBytes": 5084502,
+            "exists": true,
+            "actualSha256": "b6553bec221b9d916147793482111129f79010a6add549387e7dc0e246b334e2",
+            "actualBytes": 5084502,
+            "metaTurn": 27,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 28,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-028.json",
+            "recordedSha256": "d4401eb6e84bb3bd72a147d4ab034996feb6867d48ffcc170aaa2cbc1bce852b",
+            "recordedBytes": 5134450,
+            "exists": true,
+            "actualSha256": "d4401eb6e84bb3bd72a147d4ab034996feb6867d48ffcc170aaa2cbc1bce852b",
+            "actualBytes": 5134450,
+            "metaTurn": 28,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 29,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-029.json",
+            "recordedSha256": "6a7ccdd9bbcf7c6766378e26833f4a167ddea0f3a3dda1d8e9acbdfaae929d65",
+            "recordedBytes": 5133531,
+            "exists": true,
+            "actualSha256": "6a7ccdd9bbcf7c6766378e26833f4a167ddea0f3a3dda1d8e9acbdfaae929d65",
+            "actualBytes": 5133531,
+            "metaTurn": 29,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 30,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-030.json",
+            "recordedSha256": "097caa7d0ffc5f3d12bc48e3644cf592f8ee68981573e1123e018b8560df7b56",
+            "recordedBytes": 5121004,
+            "exists": true,
+            "actualSha256": "097caa7d0ffc5f3d12bc48e3644cf592f8ee68981573e1123e018b8560df7b56",
+            "actualBytes": 5121004,
+            "metaTurn": 30,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 31,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-031.json",
+            "recordedSha256": "b7bd7344a80684283d98b76538d55bd5ae0b9be17fa8a9124e528c0a513f74d5",
+            "recordedBytes": 5133565,
+            "exists": true,
+            "actualSha256": "b7bd7344a80684283d98b76538d55bd5ae0b9be17fa8a9124e528c0a513f74d5",
+            "actualBytes": 5133565,
+            "metaTurn": 31,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 32,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-032.json",
+            "recordedSha256": "faf63a16abb4d5fa5442cf1ef73a88e7913d5b95669255eb9aeda29fdfc09a33",
+            "recordedBytes": 5172497,
+            "exists": true,
+            "actualSha256": "faf63a16abb4d5fa5442cf1ef73a88e7913d5b95669255eb9aeda29fdfc09a33",
+            "actualBytes": 5172497,
+            "metaTurn": 32,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 33,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-033.json",
+            "recordedSha256": "2bc0dd1d801fb77431369b6c11e9501b8a5f67ba254bc4d266cb4e2c1ce7df2c",
+            "recordedBytes": 5190017,
+            "exists": true,
+            "actualSha256": "2bc0dd1d801fb77431369b6c11e9501b8a5f67ba254bc4d266cb4e2c1ce7df2c",
+            "actualBytes": 5190017,
+            "metaTurn": 33,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 34,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-034.json",
+            "recordedSha256": "d1ded1879657049893364378321dc3f5c37379dab38c8cb2169d88767fc6217d",
+            "recordedBytes": 5214384,
+            "exists": true,
+            "actualSha256": "d1ded1879657049893364378321dc3f5c37379dab38c8cb2169d88767fc6217d",
+            "actualBytes": 5214384,
+            "metaTurn": 34,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 35,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-035.json",
+            "recordedSha256": "c3dea455f5937c93e11e994a996d9bd53c4dd6ac68af40ad3d10f2da2a8ad1a2",
+            "recordedBytes": 5224798,
+            "exists": true,
+            "actualSha256": "c3dea455f5937c93e11e994a996d9bd53c4dd6ac68af40ad3d10f2da2a8ad1a2",
+            "actualBytes": 5224798,
+            "metaTurn": 35,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 36,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-036.json",
+            "recordedSha256": "a8313d2e8603c83673a10fc0cec37d9ead1119cedc954e65fb560a057df2c902",
+            "recordedBytes": 5221034,
+            "exists": true,
+            "actualSha256": "a8313d2e8603c83673a10fc0cec37d9ead1119cedc954e65fb560a057df2c902",
+            "actualBytes": 5221034,
+            "metaTurn": 36,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 37,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-037.json",
+            "recordedSha256": "42e2130bfe2edab953e558b872015bbfabbae49db211565f0d1fe2c11e60d942",
+            "recordedBytes": 5225791,
+            "exists": true,
+            "actualSha256": "42e2130bfe2edab953e558b872015bbfabbae49db211565f0d1fe2c11e60d942",
+            "actualBytes": 5225791,
+            "metaTurn": 37,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 38,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-038.json",
+            "recordedSha256": "ee2c3fa833587860d6128d37155dc9ff5b55a4cefe5b3d0af03c10c02e416c00",
+            "recordedBytes": 5267551,
+            "exists": true,
+            "actualSha256": "ee2c3fa833587860d6128d37155dc9ff5b55a4cefe5b3d0af03c10c02e416c00",
+            "actualBytes": 5267551,
+            "metaTurn": 38,
+            "error": null,
+            "pass": true
+          },
+          {
+            "turn": 39,
+            "kind": "provisional",
+            "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-039.json",
+            "recordedSha256": "be80460273546f53c3297ae3730ec77f0e5f3b1ef9172b51d5187f666e7ee699",
+            "recordedBytes": 5252719,
+            "exists": true,
+            "actualSha256": "be80460273546f53c3297ae3730ec77f0e5f3b1ef9172b51d5187f666e7ee699",
+            "actualBytes": 5252719,
+            "metaTurn": 39,
+            "error": null,
+            "pass": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "progress-archive-identity",
+      "pass": true,
+      "details": {
+        "settledMatches": true,
+        "provisionalMatches": true
+      }
+    },
+    {
+      "name": "final-runtime-diagnostics",
+      "pass": true,
+      "details": {
+        "consoleMessages": 0,
+        "pageErrors": 0,
+        "unmatchedNetworkFailures": 0,
+        "unexpectedMainProcessStderr": 0,
+        "expectedTileFetchAborts": 0,
+        "expectedAmbientLifecycleAborts": 0
+      }
+    },
+    {
+      "name": "evidence-manifest-file",
+      "pass": true,
+      "details": {
+        "recordSha256": "c23800eb6531937da8e95cf39b9ce634ed0418e295095ada8ef2ce0c8aa3aeff",
+        "actual": {
+          "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\manifest.json",
+          "bytes": 2415,
+          "sha256": "c23800eb6531937da8e95cf39b9ce634ed0418e295095ada8ef2ce0c8aa3aeff"
+        },
+        "embeddedMatchesFile": true
+      }
+    },
+    {
+      "name": "main-process-stream-health",
+      "pass": true,
+      "details": {
+        "pass": true,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\main-process-output\\native-calibration-rbih-t39-20261024-03-rbih.jsonl",
+        "identity": {
+          "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\main-process-output\\native-calibration-rbih-t39-20261024-03-rbih.jsonl",
+          "bytes": 220458,
+          "sha256": "54c0e2c8b16d00a8e79ac4b01adccb577f2589f34ad7a77a69efc534fed2f53b"
+        },
+        "records": 1188,
+        "sequence": true,
+        "stderrLines": [
+          "Debugger ending on ws://127.0.0.1:65057/75281ecc-e64b-4008-8155-f21f10168f62",
+          "For help, see: https://nodejs.org/en/docs/inspector"
+        ],
+        "expectedStderr": [
+          "Debugger ending on ws://127.0.0.1:65057/75281ecc-e64b-4008-8155-f21f10168f62",
+          "For help, see: https://nodejs.org/en/docs/inspector"
+        ],
+        "stderrMatchesFinalClassification": true,
+        "seals": [
+          {
+            "turn": 1,
+            "unresolved": 0,
+            "sequence": 4
+          },
+          {
+            "turn": 2,
+            "unresolved": 0,
+            "sequence": 31
+          },
+          {
+            "turn": 3,
+            "unresolved": 0,
+            "sequence": 77
+          },
+          {
+            "turn": 4,
+            "unresolved": 0,
+            "sequence": 131
+          },
+          {
+            "turn": 5,
+            "unresolved": 0,
+            "sequence": 181
+          },
+          {
+            "turn": 6,
+            "unresolved": 0,
+            "sequence": 237
+          },
+          {
+            "turn": 7,
+            "unresolved": 0,
+            "sequence": 295
+          },
+          {
+            "turn": 8,
+            "unresolved": 0,
+            "sequence": 356
+          },
+          {
+            "turn": 9,
+            "unresolved": 0,
+            "sequence": 395
+          },
+          {
+            "turn": 10,
+            "unresolved": 0,
+            "sequence": 452
+          },
+          {
+            "turn": 11,
+            "unresolved": 0,
+            "sequence": 473
+          },
+          {
+            "turn": 12,
+            "unresolved": 0,
+            "sequence": 488
+          },
+          {
+            "turn": 13,
+            "unresolved": 0,
+            "sequence": 512
+          },
+          {
+            "turn": 14,
+            "unresolved": 0,
+            "sequence": 551
+          },
+          {
+            "turn": 15,
+            "unresolved": 0,
+            "sequence": 584
+          },
+          {
+            "turn": 16,
+            "unresolved": 0,
+            "sequence": 619
+          },
+          {
+            "turn": 17,
+            "unresolved": 0,
+            "sequence": 640
+          },
+          {
+            "turn": 18,
+            "unresolved": 0,
+            "sequence": 650
+          },
+          {
+            "turn": 19,
+            "unresolved": 0,
+            "sequence": 660
+          },
+          {
+            "turn": 20,
+            "unresolved": 0,
+            "sequence": 663
+          },
+          {
+            "turn": 21,
+            "unresolved": 0,
+            "sequence": 666
+          },
+          {
+            "turn": 22,
+            "unresolved": 0,
+            "sequence": 669
+          },
+          {
+            "turn": 23,
+            "unresolved": 0,
+            "sequence": 672
+          },
+          {
+            "turn": 24,
+            "unresolved": 0,
+            "sequence": 678
+          },
+          {
+            "turn": 25,
+            "unresolved": 0,
+            "sequence": 682
+          },
+          {
+            "turn": 26,
+            "unresolved": 0,
+            "sequence": 686
+          },
+          {
+            "turn": 27,
+            "unresolved": 0,
+            "sequence": 715
+          },
+          {
+            "turn": 28,
+            "unresolved": 0,
+            "sequence": 746
+          },
+          {
+            "turn": 29,
+            "unresolved": 0,
+            "sequence": 775
+          },
+          {
+            "turn": 30,
+            "unresolved": 0,
+            "sequence": 804
+          },
+          {
+            "turn": 31,
+            "unresolved": 0,
+            "sequence": 870
+          },
+          {
+            "turn": 32,
+            "unresolved": 0,
+            "sequence": 921
+          },
+          {
+            "turn": 33,
+            "unresolved": 0,
+            "sequence": 973
+          },
+          {
+            "turn": 34,
+            "unresolved": 0,
+            "sequence": 1018
+          },
+          {
+            "turn": 35,
+            "unresolved": 0,
+            "sequence": 1052
+          },
+          {
+            "turn": 36,
+            "unresolved": 0,
+            "sequence": 1085
+          },
+          {
+            "turn": 37,
+            "unresolved": 0,
+            "sequence": 1121
+          },
+          {
+            "turn": 38,
+            "unresolved": 0,
+            "sequence": 1154
+          },
+          {
+            "turn": 39,
+            "unresolved": 0,
+            "sequence": 1186
+          }
+        ],
+        "sealPass": true
+      }
+    },
+    {
+      "name": "reader-canonicalConsistency",
+      "pass": true,
+      "details": {
+        "command": [
+          "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+          "tools/validate_run_consistency.cjs",
+          "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-039.json"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "stdout": {
+          "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\r8-native-calibration-parity-20261024\\native-t39-03-postrun-audit-01\\VALIDATE_RUN_CONSISTENCY.stdout.log",
+          "bytes": 2446,
+          "sha256": "5d875ff0b6ddfbdeda99412b9e140da6f0e12aec39f7b70d0e11299209bcc88a"
+        },
+        "stderr": {
+          "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\r8-native-calibration-parity-20261024\\native-t39-03-postrun-audit-01\\VALIDATE_RUN_CONSISTENCY.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "pass": true
+      }
+    },
+    {
+      "name": "reader-januaryAnchors",
+      "pass": true,
+      "details": {
+        "command": [
+          "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+          "node_modules/tsx/dist/cli.mjs",
+          "-e",
+          "import fs from 'node:fs'; import { resolveEpochOsidAnchors, HISTORICAL_CONTROL_BAND_ANCHORS_APR1992_TO_DEC1992, evaluateHistoricalControlBand } from './src/scenario/historical_anchors.ts'; const state=JSON.parse(fs.readFileSync(process.env.AWWV_NATIVE_SAVE39,'utf8')); const map=state.political?.political_controllers??{}; const osid=resolveEpochOsidAnchors('jan1993').map(a=>({...a,actual:map[a.osid]??null,passed:map[a.osid]===a.expected_controller})); const bands=HISTORICAL_CONTROL_BAND_ANCHORS_APR1992_TO_DEC1992.map(a=>({anchor_id:a.anchor_id,...evaluateHistoricalControlBand(a,map)})); const out={turn:state.meta?.turn,osidPassed:osid.filter(x=>x.passed).length,osidTotal:osid.length,bands,failures:[...osid.filter(x=>!x.passed),...bands.filter(x=>!x.passed)]}; console.log(JSON.stringify(out,null,2)); if(state.meta?.turn!==39||out.osidTotal!==30||out.osidPassed!==30||out.failures.length) process.exit(1);"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "stdout": {
+          "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\r8-native-calibration-parity-20261024\\native-t39-03-postrun-audit-01\\JAN1993_ANCHORS.stdout.log",
+          "bytes": 496,
+          "sha256": "de1b3cecf6f698ab2e7577e78d502fd404dac8d567c2d86dfdda8fe71de54816"
+        },
+        "stderr": {
+          "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\r8-native-calibration-parity-20261024\\native-t39-03-postrun-audit-01\\JAN1993_ANCHORS.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "pass": true
+      }
+    },
+    {
+      "name": "reader-januaryEvents",
+      "pass": true,
+      "details": {
+        "command": [
+          "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+          "node_modules/tsx/dist/cli.mjs",
+          "-e",
+          "import fs from 'node:fs'; import { HISTORICAL_EVENT_ANCHORS_JAN1993 } from './src/scenario/historical_anchors.ts'; const s=JSON.parse(fs.readFileSync(process.env.AWWV_NATIVE_SAVE39,'utf8')); const m=s.military??{}; const rows=HISTORICAL_EVENT_ANCHORS_JAN1993.map(a=>{const ids=[a.event_id,...(a.xor_with??[])]; const fired=ids.find(id=>(m.fired_event_ids??[]).includes(id))??null; const turn=fired ? m.event_last_fired_turn?.[fired]??null:null; return {eventId:a.event_id,firedId:fired,turn,deadline:a.expected_week_max+a.tolerance,passed:!!fired&&Number.isInteger(turn)&&turn<=a.expected_week_max+a.tolerance};}); const out={turn:s.meta?.turn,rows,passed:rows.every(r=>r.passed)}; console.log(JSON.stringify(out,null,2)); if(s.meta?.turn!==39||rows.length!==5||!out.passed) process.exit(1);"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "stdout": {
+          "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\r8-native-calibration-parity-20261024\\native-t39-03-postrun-audit-01\\JAN1993_EVENT_ANCHORS.stdout.log",
+          "bytes": 853,
+          "sha256": "7fe99fcd804495fbb046549a57c9138f20a173c5f0595ea78ed4021fe90bddea"
+        },
+        "stderr": {
+          "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\r8-native-calibration-parity-20261024\\native-t39-03-postrun-audit-01\\JAN1993_EVENT_ANCHORS.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "pass": true
+      }
+    }
+  ],
+  "rawAttribution": {
+    "consoleMessages": [],
+    "pageErrors": [],
+    "networkFailures": [],
+    "expectedStartupAborts": [],
+    "expectedTeardownAborts": [],
+    "expectedNavigationAborts": [],
+    "expectedTileFetchAborts": [],
+    "tileFetchAbortSignals": [],
+    "expectedAmbientLifecycleAborts": [],
+    "ambientLifecycleSignals": [
+      {
+        "kind": "play",
+        "signalSequence": 1,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861017248,
+        "mediaState": {
+          "networkState": 3,
+          "readyState": 0,
+          "paused": true,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": null,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [
+          "duration"
+        ],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 2,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861017252,
+        "mediaState": {
+          "networkState": 2,
+          "readyState": 0,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": null,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [
+          "duration"
+        ],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "request-start",
+        "signalSequence": 3,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861017252,
+        "mediaState": {
+          "networkState": 2,
+          "readyState": 0,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": null,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [
+          "duration"
+        ],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "progress",
+        "signalSequence": 4,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861017255,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 0,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": null,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [
+          "duration"
+        ],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "suspend",
+        "signalSequence": 5,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861017255,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 0,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": null,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [
+          "duration"
+        ],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "loadedmetadata",
+        "signalSequence": 6,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861017257,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "loadeddata",
+        "signalSequence": 7,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861017307,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 8,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861017307,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 9,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861017307,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "pause",
+        "signalSequence": 10,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861031846,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 14.458155,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "play",
+        "signalSequence": 11,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861031846,
+        "mediaState": {
+          "networkState": 3,
+          "readyState": 0,
+          "paused": true,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": null,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [
+          "duration"
+        ],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 12,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861031981,
+        "mediaState": {
+          "networkState": 2,
+          "readyState": 0,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": null,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [
+          "duration"
+        ],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "request-start",
+        "signalSequence": 13,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861032045,
+        "mediaState": {
+          "networkState": 2,
+          "readyState": 0,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": null,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [
+          "duration"
+        ],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "progress",
+        "signalSequence": 14,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861032097,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 0,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": null,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [
+          "duration"
+        ],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "suspend",
+        "signalSequence": 15,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861032097,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 0,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": null,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [
+          "duration"
+        ],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "loadedmetadata",
+        "signalSequence": 16,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861032099,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "loadeddata",
+        "signalSequence": 17,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861032111,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 18,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861032111,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 19,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861032111,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "play",
+        "signalSequence": 20,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861035359,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 3.191523,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "play",
+        "signalSequence": 21,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861037747,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 5.580016,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 22,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861062195,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 23,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861062195,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 24,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861062195,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 25,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861062195,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 26,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861062195,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 27,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861093287,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 28,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861093287,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 29,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861093329,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0.020285,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 30,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861093329,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0.02031,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 31,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861093329,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0.020324,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 32,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861123336,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 33,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861123336,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 34,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861123336,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 35,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861123337,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 36,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861123337,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "pause",
+        "signalSequence": 37,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861140836,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 17.426085,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "play",
+        "signalSequence": 38,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861140836,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": true,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 14.458192,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 39,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861140928,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 14.458204,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "progress",
+        "signalSequence": 40,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861142180,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 15.7282,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "suspend",
+        "signalSequence": 41,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861142180,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 15.728237,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "play",
+        "signalSequence": 42,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861142202,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 15.750238,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 43,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861160077,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 44,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861160077,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "progress",
+        "signalSequence": 45,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861160288,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "suspend",
+        "signalSequence": 46,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861160288,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 47,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861160293,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 48,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861160293,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 49,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861160293,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 50,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861190359,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 51,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861190359,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 52,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861190359,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 53,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861190359,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 54,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861190359,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 55,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861223379,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 56,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861223379,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 57,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861223554,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 1.56353,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 58,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861223554,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 1.563555,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 59,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861223554,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 1.563569,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 60,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861252038,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 61,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861252038,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 62,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861252039,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 63,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861252039,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 64,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861252039,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 65,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861284903,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 66,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861284903,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 67,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861284940,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0.187986,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 68,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861284940,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0.188086,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 69,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861284940,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0.18812,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 70,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861314810,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 71,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861314810,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 72,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861314811,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 73,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861314811,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 74,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861314811,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 75,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861345164,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 76,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861345164,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 77,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861345170,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0.009779,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 78,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861345170,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0.009811,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 79,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861345170,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0.009827,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 80,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861375202,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 81,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861375202,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 82,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861375202,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 83,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861375202,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 84,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861375202,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 85,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861405282,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 86,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861405282,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 87,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861405282,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 88,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861405282,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 89,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861405282,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 90,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861435364,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 91,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861435364,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 92,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861435367,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 93,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861435367,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 94,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861435367,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 95,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861465443,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 96,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861465443,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 97,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861465443,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 98,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861465443,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 99,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861465443,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 100,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861495581,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 101,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861495581,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 102,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861495585,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0.00128,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 103,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861495585,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0.001307,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 104,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861495585,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0.00132,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 105,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861526306,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 106,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861526306,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 107,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861526307,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0.003594,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 108,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861526307,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0.003612,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 109,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861526307,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0.003623,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 110,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861556345,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 111,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861556345,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 112,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861556346,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 113,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861556346,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 114,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861556346,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 115,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861586425,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 116,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861586425,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 117,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861586425,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 118,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861586425,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 119,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861586425,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 120,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861616506,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 121,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861616506,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 122,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861616507,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 123,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861616507,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 124,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861616507,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 125,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861646595,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 126,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861646595,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 127,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861646596,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 128,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861646596,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 129,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861646596,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 130,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861676667,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 131,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861676667,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 132,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861676667,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 133,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861676667,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 134,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861676667,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 135,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861706747,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 136,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861706747,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 137,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861706747,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 138,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861706747,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 139,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861706747,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "pause",
+        "signalSequence": 140,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861727185,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 20.366203,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "play",
+        "signalSequence": 141,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861727185,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": true,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 17.426105,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 142,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861727277,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 17.426116,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "progress",
+        "signalSequence": 143,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861727314,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 17.434253,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "suspend",
+        "signalSequence": 144,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861727314,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 17.434282,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "play",
+        "signalSequence": 145,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861727346,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 17.434282,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "play",
+        "signalSequence": 146,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861728701,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 18.768886,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "pause",
+        "signalSequence": 147,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861737691,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 27.756486,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "play",
+        "signalSequence": 148,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861742854,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": true,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 27.756516,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 149,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861743055,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 27.960377,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeking",
+        "signalSequence": 150,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861745089,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 151,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861745089,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "progress",
+        "signalSequence": 152,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861745091,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "suspend",
+        "signalSequence": 153,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861745091,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 154,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861745092,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 155,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861745092,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 156,
+        "elementId": "media:2",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:65061/assets/ambient_field-5Mv-hV7p.ogg",
+        "origin": "http://127.0.0.1:65061",
+        "observedAtMs": 1792861745092,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      }
+    ],
+    "expectedMainProcessStderr": [
+      "Debugger ending on ws://127.0.0.1:65057/75281ecc-e64b-4008-8155-f21f10168f62",
+      "For help, see: https://nodejs.org/en/docs/inspector"
+    ],
+    "unexpectedMainProcessStderr": []
+  },
+  "readers": {
+    "canonicalConsistency": {
+      "command": [
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "tools/validate_run_consistency.cjs",
+        "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-039.json"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\r8-native-calibration-parity-20261024\\native-t39-03-postrun-audit-01\\VALIDATE_RUN_CONSISTENCY.stdout.log",
+        "bytes": 2446,
+        "sha256": "5d875ff0b6ddfbdeda99412b9e140da6f0e12aec39f7b70d0e11299209bcc88a"
+      },
+      "stderr": {
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\r8-native-calibration-parity-20261024\\native-t39-03-postrun-audit-01\\VALIDATE_RUN_CONSISTENCY.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "pass": true
+    },
+    "januaryAnchors": {
+      "command": [
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "node_modules/tsx/dist/cli.mjs",
+        "-e",
+        "import fs from 'node:fs'; import { resolveEpochOsidAnchors, HISTORICAL_CONTROL_BAND_ANCHORS_APR1992_TO_DEC1992, evaluateHistoricalControlBand } from './src/scenario/historical_anchors.ts'; const state=JSON.parse(fs.readFileSync(process.env.AWWV_NATIVE_SAVE39,'utf8')); const map=state.political?.political_controllers??{}; const osid=resolveEpochOsidAnchors('jan1993').map(a=>({...a,actual:map[a.osid]??null,passed:map[a.osid]===a.expected_controller})); const bands=HISTORICAL_CONTROL_BAND_ANCHORS_APR1992_TO_DEC1992.map(a=>({anchor_id:a.anchor_id,...evaluateHistoricalControlBand(a,map)})); const out={turn:state.meta?.turn,osidPassed:osid.filter(x=>x.passed).length,osidTotal:osid.length,bands,failures:[...osid.filter(x=>!x.passed),...bands.filter(x=>!x.passed)]}; console.log(JSON.stringify(out,null,2)); if(state.meta?.turn!==39||out.osidTotal!==30||out.osidPassed!==30||out.failures.length) process.exit(1);"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\r8-native-calibration-parity-20261024\\native-t39-03-postrun-audit-01\\JAN1993_ANCHORS.stdout.log",
+        "bytes": 496,
+        "sha256": "de1b3cecf6f698ab2e7577e78d502fd404dac8d567c2d86dfdda8fe71de54816"
+      },
+      "stderr": {
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\r8-native-calibration-parity-20261024\\native-t39-03-postrun-audit-01\\JAN1993_ANCHORS.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "pass": true
+    },
+    "januaryEvents": {
+      "command": [
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "node_modules/tsx/dist/cli.mjs",
+        "-e",
+        "import fs from 'node:fs'; import { HISTORICAL_EVENT_ANCHORS_JAN1993 } from './src/scenario/historical_anchors.ts'; const s=JSON.parse(fs.readFileSync(process.env.AWWV_NATIVE_SAVE39,'utf8')); const m=s.military??{}; const rows=HISTORICAL_EVENT_ANCHORS_JAN1993.map(a=>{const ids=[a.event_id,...(a.xor_with??[])]; const fired=ids.find(id=>(m.fired_event_ids??[]).includes(id))??null; const turn=fired ? m.event_last_fired_turn?.[fired]??null:null; return {eventId:a.event_id,firedId:fired,turn,deadline:a.expected_week_max+a.tolerance,passed:!!fired&&Number.isInteger(turn)&&turn<=a.expected_week_max+a.tolerance};}); const out={turn:s.meta?.turn,rows,passed:rows.every(r=>r.passed)}; console.log(JSON.stringify(out,null,2)); if(s.meta?.turn!==39||rows.length!==5||!out.passed) process.exit(1);"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": {
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\r8-native-calibration-parity-20261024\\native-t39-03-postrun-audit-01\\JAN1993_EVENT_ANCHORS.stdout.log",
+        "bytes": 853,
+        "sha256": "7fe99fcd804495fbb046549a57c9138f20a173c5f0595ea78ed4021fe90bddea"
+      },
+      "stderr": {
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\r8-native-calibration-parity-20261024\\native-t39-03-postrun-audit-01\\JAN1993_EVENT_ANCHORS.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "pass": true
+    }
+  },
+  "outcomeComparator": {
+    "status": "SEPARATE_REQUIRED",
+    "pass": null,
+    "note": "Daily controller parity is already known failed. Run the separate outcome comparator and independently inspect its t39, score, protected-row, input/reference, archive, save/load, and manifest gates."
+  },
+  "overallPass": true
+}

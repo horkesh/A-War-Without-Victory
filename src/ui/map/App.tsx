@@ -1973,7 +1973,7 @@ function App() {
               }
               try {
                 const nextState = structuredClone(rawGameState);
-                resolveBrowserEventDecision(nextState, eventId, responseId);
+                resolveBrowserEventDecision(nextState, eventId, responseId, eventCatalogFull);
                 await loadSave(nextState);
                 setRecentlyAcceptedEventDecisionId(eventId);
                 setActiveEventDecisionId(null);
@@ -2027,7 +2027,7 @@ function App() {
         <DaytonNegotiationModal dayton={loadedGameState.pendingDayton} />
       )}
       <PeaceWarTransitionOverlay />
-      <VerdictScreen />
+      <VerdictScreen onLoadSaveState={handleMainMenuLoadGame} onLoadSaveError={setLoadError} />
       <ReplayInspectionBanner />
       {/* Warroom shell: advance-turn confirmation modal — triggered by wall_calendar_area hotspot */}
       <AdvanceTurnModal

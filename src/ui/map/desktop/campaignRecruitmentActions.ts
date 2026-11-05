@@ -1,10 +1,15 @@
 import type { IPC } from './useIPC';
 import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './types';
-import type { CausalityLogEntry, FactionId, GameState } from '../../../state/game_state.js';
-import type { DimensionShift, EventDefinition, EventEffect, EventResponseOption, PendingEventDecision } from '../../../sim/events/event_types.js';
+import type { FactionId, GameState } from '../../../state/game_state.js';
+import type { DimensionShift, EventDefinition, EventEffect, PendingEventDecision } from '../../../sim/events/event_types.js';
 import { applyEventEffects } from '../../../sim/events/apply_effects.js';
 import { applyDimensionShift, type DimensionStore } from '../../../sim/events/strategic_dimensions.js';
 import { deferUnauthorizedHistoricalOperationsForPlayer } from '../../../sim/combat/historical_operation_authorization.js';
+import { initializeNegotiationState } from '../../../sim/negotiation/initialize_negotiation_state.js';
+import {
+    resolvePlayerEventDecisionWithOpeningPolicy,
+    type EventDefinitionCatalog,
+} from '../../../sim/events/opening_policy_transition.js';
 
 const BROWSER_STARTUP_SNAPSHOT_PATH = '/data/derived/startup/apr_1992_initial_save.json';
 const BROWSER_EVENT_CATALOG_PATH = '/data/scenarios/events/war_1992.json';
@@ -60,100 +65,6 @@ function applyBrowserDefinitionFlags(state: GameState, flags: Record<string, str
     }
     for (const [key, value] of Object.entries(flags)) {
         state.military.event_flags[key] = value;
-    }
-}
-
-function strictTextCompare(a: string, b: string): number {
-    return a < b ? -1 : a > b ? 1 : 0;
-}
-
-function recordBrowserEventDecision(
-    state: GameState,
-    eventId: string,
-    responseId: string,
-    faction: FactionId | null,
-    currentTurn: number,
-): void {
-    state.military.event_decision_log ??= [];
-    state.military.event_decision_log.push({
-        event_id: eventId,
-        response_id: responseId,
-        decision_source: 'player',
-        faction,
-        turn: currentTurn,
-    });
-}
-
-function sortedUniqueAppend(target: string[] | undefined, values: readonly string[] | undefined): string[] {
-    const arr = target ? [...target] : [];
-    let mutated = false;
-    for (const value of values ?? []) {
-        if (!arr.includes(value)) {
-            arr.push(value);
-            mutated = true;
-        }
-    }
-    return mutated ? arr.sort(strictTextCompare) : arr;
-}
-
-function compareBrowserCausality(a: CausalityLogEntry, b: CausalityLogEntry): number {
-    if (a.turn !== b.turn) return a.turn - b.turn;
-    return (
-        strictTextCompare(a.from_event, b.from_event) ||
-        strictTextCompare(a.to_event ?? '', b.to_event ?? '') ||
-        strictTextCompare(a.to_flag ?? '', b.to_flag ?? '') ||
-        strictTextCompare(a.kind, b.kind) ||
-        strictTextCompare(a.source_response_id ?? '', b.source_response_id ?? '')
-    );
-}
-
-function recordBrowserCausality(state: GameState, entry: CausalityLogEntry): void {
-    state.military.event_causality_log ??= [];
-    const exists = state.military.event_causality_log
-        .some((existing) => compareBrowserCausality(existing, entry) === 0);
-    if (exists) return;
-    state.military.event_causality_log.push(entry);
-    state.military.event_causality_log.sort(compareBrowserCausality);
-}
-
-function applyBrowserResponseRuntimeCausality(
-    state: GameState,
-    eventId: string,
-    responseId: string,
-    chosen: EventResponseOption,
-    turn: number,
-): void {
-    const firedIds = state.military.fired_event_ids ?? [];
-    const enablesToWrite: string[] = [];
-    for (const targetId of chosen.enables_events_runtime ?? []) {
-        if (!firedIds.includes(targetId)) enablesToWrite.push(targetId);
-        recordBrowserCausality(state, {
-            turn,
-            from_event: eventId,
-            to_event: targetId,
-            to_flag: null,
-            kind: 'enables',
-            source_response_id: responseId,
-        });
-    }
-    if (enablesToWrite.length > 0) {
-        state.military.enabled_event_ids = sortedUniqueAppend(state.military.enabled_event_ids, enablesToWrite);
-    }
-
-    const closesToWrite: string[] = [];
-    for (const targetId of chosen.closes_events_runtime ?? []) {
-        if (!firedIds.includes(targetId)) closesToWrite.push(targetId);
-        recordBrowserCausality(state, {
-            turn,
-            from_event: eventId,
-            to_event: targetId,
-            to_flag: null,
-            kind: 'closes',
-            source_response_id: responseId,
-        });
-    }
-    if (closesToWrite.length > 0) {
-        state.military.closed_event_ids = sortedUniqueAppend(state.military.closed_event_ids, closesToWrite);
     }
 }
 
@@ -222,28 +133,12 @@ export function resolveBrowserEventDecision(
     state: GameState,
     eventId: string,
     responseId: string,
-): void {
-    const pending = state.military.pending_event_decisions;
-    if (!pending) {
-        throw new Error(`No pending event decisions found (looking for ${eventId})`);
-    }
-    const idx = pending.findIndex((decision) => decision.event_id === eventId);
-    if (idx === -1) {
-        throw new Error(`No pending decision for event_id "${eventId}"`);
-    }
-    const decision = pending[idx];
-    const chosen = decision.response_options.find((option) => option.id === responseId);
-    if (!chosen) {
-        throw new Error(`No response option "${responseId}" for event "${eventId}"`);
-    }
-
-    applyEventEffects(state, chosen.effects ?? []);
-    applyBrowserDefinitionFlags(state, chosen.sets_flags);
-    applyBrowserDefinitionDimensionShifts(state, chosen.dimension_shifts);
-    const turn = state.meta.turn ?? decision.turn_fired;
-    recordBrowserEventDecision(state, eventId, chosen.id, decision.faction, turn);
-    applyBrowserResponseRuntimeCausality(state, eventId, chosen.id, chosen, turn);
-    pending.splice(idx, 1);
+    eventCatalog?: EventDefinitionCatalog,
+): GameState {
+    const candidate = resolvePlayerEventDecisionWithOpeningPolicy(state, eventCatalog, eventId, responseId);
+    for (const key of Object.keys(state) as Array<keyof GameState>) delete state[key];
+    Object.assign(state, candidate);
+    return state;
 }
 
 /**
@@ -306,6 +201,7 @@ export async function startCampaignFromSidePicker(
             state.meta.decision_mode = decisionMode;
             state.political = { ...(state.political ?? {}), control_events: [] };
             deferUnauthorizedHistoricalOperationsForPlayer(state as GameState);
+            initializeNegotiationState(state as GameState);
             const eventResponse = await fetch(BROWSER_EVENT_CATALOG_PATH);
             if (!eventResponse.ok) {
                 setLoadError(`Browser event catalog unavailable (${eventResponse.status}).`);

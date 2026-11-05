@@ -1,0 +1,20 @@
+{
+  "schema": "awwv.desktop-terrain-postfix-proof.launcher-correction-review.v1",
+  "reviewer": "/root",
+  "reviewed_at_local_date": "2026-10-25",
+  "verdict": "GO_FOR_FRESH_ATTEMPT_02",
+  "script_sha256": "d7ccae50ab8395964bf53975cdd60f6341277391f860a2c41eb4b48b3c91f920",
+  "diagnosis": "attempt-01 used a Windows .cmd shim with spawn shell:false and failed EINVAL before child start; the earlier bare placeholder command was refused before attempt-directory creation",
+  "approved_correction": "Use C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe for both the preserved wrapper and child, with node_modules/tsx/dist/cli.mjs as the child entry, matching the successful retained primed probe.",
+  "preconditions": [
+    "Pinned Node reports v22.23.2.",
+    "node_modules/tsx/dist/cli.mjs exists as a file.",
+    "Quoted placeholder reaches Node argv as literal {evidenceDir}."
+  ],
+  "attempt": "attempt-02",
+  "timeout_ms": 15000,
+  "retry_allowed": false,
+  "engine_advances": 1,
+  "scope_and_artifacts_unchanged": true,
+  "stop": "Do not repeat either failed launcher route and do not invent a third launcher. Stop after attempt-02 with its actual outcome."
+}

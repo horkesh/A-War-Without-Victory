@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -8,7 +8,9 @@ import { deserializeState } from '../src/state/serialize.js';
 
 describe('Sarajevo override regression scenario', () => {
     it('runs deterministically and exercises the defense-bonus override during the siege', async () => {
-        const outDirBase = join('data', 'derived', 'scenario', '_sarajevo_override_test');
+        const fixtureRoot = join(process.cwd(), 'tmp', 'sarajevo-override-fixtures');
+        mkdirSync(fixtureRoot, { recursive: true });
+        const outDirBase = mkdtempSync(join(fixtureRoot, 'case-'));
         const base = await runScenario({
             scenarioPath: 'data/scenarios/apr1992_phase_ii_4w.json',
             outDirBase,

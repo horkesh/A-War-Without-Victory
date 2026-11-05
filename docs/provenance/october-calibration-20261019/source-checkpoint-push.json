@@ -1,0 +1,29 @@
+{
+  "captured_utc": "2026-10-19T20:32:20.7181862+00:00",
+  "scope": "Owner-authorized source/tests/data/docs/images preservation checkpoint, not calibration acceptance or complete ignored-raw backup.",
+  "opening_head": "47872b8c66f17cde8101a5aba81be59c5d1ac62a",
+  "commit": "a9c92d82076700c77859376789979beb76d6d214",
+  "commit_timestamp": "2026-10-19T22:31:46+02:00",
+  "branch": "codex/october-calibration-continuation-20261003",
+  "commit_exit": 0,
+  "push_exit": 0,
+  "remote_verification_exit": 0,
+  "remote_head_verified": "a9c92d82076700c77859376789979beb76d6d214",
+  "remote": "https://github.com/horkesh/A-War-Without-Victory.git",
+  "staged_committed_paths": 106,
+  "working_tree_status": [],
+  "raw_evidence_remote": "NOT_INCLUDED; archive feasibility723pending",
+  "independent_review": "724-independent-review.json",
+  "precommit_typecheck_child_exit": 0,
+  "precommit_typecheck_wrapper_exit": 0,
+  "fullsuite": "718TIMEOUT3/5nativegroupscomplete,notwaived",
+  "calibration": "n80retained703/712 NO-GO_UNADOPTED",
+  "C": {
+    "bytes": 97701891,
+    "sha256": "294077be226a772639eb03d89216b9e8d11d4e1d97e8b29abccfbf45440142df"
+  },
+  "D": {
+    "bytes": 1041,
+    "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+  }
+}

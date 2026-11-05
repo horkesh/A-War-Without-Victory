@@ -1,0 +1,108 @@
+{
+  "status": "GO_TO_BOUNDED_REVISED_IMPLEMENTATION_SUBJECT_TO_ALL_BINDINGS",
+  "supersedesForNewScope": "INTEGRATION_DECISION.json; initial queue-only candidate failed and removed, exact bytes preserved",
+  "authority": "Latest owner full investigation and recommended-fix authorization; all six distinct roles renewed GO for initialization scope",
+  "reviews": [
+    {
+      "seat": "GAME_DESIGN",
+      "scope": "ORIGINAL_QUEUE",
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/GAME_DESIGN.json",
+      "bytes": 6010,
+      "sha256": "2ebd8cf4890112f30cf9f3a9576503abbb24c6230e05358656aefb25f531d366",
+      "verdict": "GO_WITH_CONDITIONS"
+    },
+    {
+      "seat": "GAME_DESIGN",
+      "scope": "REVISED_INITIALIZATION",
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/GAME_DESIGN_INITIALIZATION_ADDENDUM.json",
+      "bytes": 9589,
+      "sha256": "9c44b49479730b5f689dc29a2498d9aa68d5d5a63e49b98523fb309528ea76fd",
+      "verdict": "GO_WITH_BINDING_CONDITIONS"
+    },
+    {
+      "seat": "UI_UX",
+      "scope": "ORIGINAL_QUEUE",
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/UI_UX.json",
+      "bytes": 4297,
+      "sha256": "2d78935d9e84550a917700432d7f625fa4d6c6475c67bdeca3cdfa64592b9401",
+      "verdict": "GO_WITH_BINDING_CONDITIONS"
+    },
+    {
+      "seat": "UI_UX",
+      "scope": "REVISED_INITIALIZATION",
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/UI_UX_INITIALIZATION_ADDENDUM.json",
+      "bytes": 8827,
+      "sha256": "7f914517b47b414dbb3706224edd3dd0ad484e9c99867f16dfb97f6012acdf42",
+      "verdict": "GO_WITH_BINDING_CONDITIONS"
+    },
+    {
+      "seat": "HISTORIAN",
+      "scope": "ORIGINAL_QUEUE",
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/HISTORIAN.json",
+      "bytes": 6216,
+      "sha256": "fef9ca9be2e910e5d20c631908e44c350cee7dff221a128ad62ef8ad4e015ac5",
+      "verdict": "GO_WITH_BINDING_CONDITIONS"
+    },
+    {
+      "seat": "HISTORIAN",
+      "scope": "REVISED_INITIALIZATION",
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/HISTORIAN_INITIALIZATION_ADDENDUM.json",
+      "bytes": 7651,
+      "sha256": "22bcebd59fa0624c77568326312b00f52745511b54b4ef3112080f75f356fe9d",
+      "verdict": "GO_WITH_BINDING_CONDITIONS"
+    },
+    {
+      "seat": "CALIBRATION",
+      "scope": "ORIGINAL_QUEUE",
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/CALIBRATION.json",
+      "bytes": 8811,
+      "sha256": "bb5673f48163071a3ed4942ebaa75a9f0d699aadeb9e611f337f6dfeed550995",
+      "verdict": "GO_WITH_BINDING_CONDITIONS"
+    },
+    {
+      "seat": "CALIBRATION",
+      "scope": "REVISED_INITIALIZATION",
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/CALIBRATION_INITIALIZATION_ADDENDUM.json",
+      "bytes": 11892,
+      "sha256": "53b42c2f24cf5582806d79049cf656a957dc1ce69fe8b27e069038ca6d7c6607",
+      "verdict": "GO_WITH_BINDING_CONDITIONS"
+    },
+    {
+      "seat": "SYSTEMS",
+      "scope": "ORIGINAL_QUEUE",
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/SYSTEMS.json",
+      "bytes": 13357,
+      "sha256": "7cee7ca703fa87912093e0bcb7713919e07480e646d614ad4d8372527c4dd3d6",
+      "verdict": "GO_WITH_BINDING_CONDITIONS"
+    },
+    {
+      "seat": "SYSTEMS",
+      "scope": "REVISED_INITIALIZATION",
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/SYSTEMS_INITIALIZATION_ADDENDUM.json",
+      "bytes": 13222,
+      "sha256": "40e0d4670c885c05d0e927486da934024a58b9767d145af941af8a9543c73591",
+      "verdict": "GO_WITH_BINDING_CONDITIONS"
+    },
+    {
+      "seat": "RED_TEAM",
+      "scope": "ORIGINAL_QUEUE",
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/RED_TEAM.json",
+      "bytes": 7418,
+      "sha256": "3c6fd84bd3dc7dcff16dc8960876c8798ba784cbe3c7bdf1dfad1a82fdb21047",
+      "verdict": "GO_WITH_BINDING_CONDITIONS"
+    },
+    {
+      "seat": "RED_TEAM",
+      "scope": "REVISED_INITIALIZATION",
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/RED_TEAM_INITIALIZATION_ADDENDUM.json",
+      "bytes": 8962,
+      "sha256": "d399c582952a2d5302d0cf8d636a751e207e801ae3a7417ea482bd4f84024465",
+      "verdict": "GO_WITH_BINDING_CONDITIONS"
+    }
+  ],
+  "scope": "Seven production/six test allowlist in Systems initialization addendum includes separate opening_policy_transition.ts omitted by proposal. One fill-only browser-safe initializer before ordinary-player opening choices plus original explicit policy transition. Existing per-turn compute semantics must remain exact.",
+  "preCodeGates": "Static pre-compute reader/writer and compute-dimension-bases activation inventory; old compute characterization before extraction. STOP on extra unreviewed event/command/AI/control/score/UI action or any headless/compute delta.",
+  "mandatoryProof": "All factions/all authored opening options including HRHB cross-faction effect; same serialized pre-policy fork all3choices, correct dimension/effect clocks, existing harm+crime accounting200/+2/+2; hostile IPC, persistence, notification, browser equivalence and idempotence. Preserve all prior state and telemetry.",
+  "headlessKnownDefect": "Early war-crime undercount remains known and unchanged in n94/n95; not moral/historical/comparative acceptance evidence. No tuning/adoption.",
+  "validation": "Cheap RED/GREEN and nonincremental tsc cap180sec each; fresh independent implementation review before any long run/build/native. Prior n95 and full-suite child15020pass do not qualify new behavior; fullsuite overall126 remains failed. No automatic retry."
+}

@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "head": "6b36ba312b88c431088856743437aaf643f7243a",
+  "sources": [
+    {"path":"src/sim/combat/stranded_brigade_lifecycle.ts","sha256":"fad05b7f4294726ddd757a798756ffb04b243c02b6a57e93f76aae196ea74f59","lines":"13, 116-180, 318-381"},
+    {"path":"src/state/formation_constants.ts","sha256":"985eeaa427a356e83db5b384a9fbe5533c6bb4eb385855eb4f025a0ed7c11c32","lines":"187-209"},
+    {"path":"src/sim/combat/brigade_dissolution.ts","sha256":"2cea30a0a67682bd755f84b45c4eb30c94af92f9b67eb7980b8927a705a9d094","lines":"51-60, 129-174"},
+    {"path":"src/sim/combat/morale_drift.ts","sha256":"cb7720d5da303e02d89fb3aaf034488a340a51155dfd6dbfc4839cf9cedcdc5c","lines":"266, 291-339, 342-363"},
+    {"path":"src/sim/combat/frontline_attrition.ts","sha256":"0cc09b4eca821d2dce287893fdde312239c2b8be495ed02e36b8a23ba59f5ee1","lines":"192-236, 285-382"},
+    {"path":"src/sim/formation_spawn.ts","sha256":"44236006a3d5ae5346421096b58aad5cc189bfe93f5f05c116d8016344c53e16","lines":"278-573"},
+    {"path":"src/sim/combat/strategic_reserve.ts","sha256":"e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae","lines":"170-236"},
+    {"path":"src/sim/formation_lifecycle_events.ts","sha256":"4192fb2dc830defb4328e891e51d1ab04ace44fbf2b2268bfed790cec9de92a3","lines":"1-122"},
+    {"path":"data/source/formation_lifecycle_events.json","sha256":"f70b3f5b48196eedda02602b2a454dbfba83e2d3de7147854143e0b75247f90b","finding":"none of the 13 IDs occur"},
+    {"path":"docs/10_canon/Systems_Manual_v0_9_0.md","sha256":"727fa778f0030b02d2a15de2dbc3049282dbc3d3ee2fbb00e4f7b51dd2aace18","lines":"209-225, 393"},
+    {"path":"tools/engine_health_gate.cjs","sha256":"2c56657c5b8da6145ff88525a8b062366061addeed161391ca115e4a91c2b612","lines":"100-134, 591"}
+  ],
+  "retained_evidence": {
+    "run": "runs/player-parity-fatigue-owner-39-20261026-01/apr1992_definitive_188w__2272e1011ba35428__w39_n0",
+    "save_sha256": {
+      "save_w15.json": "dae65bd362a14bcc2d3733657e0125d424725e7d226cf0f92b6a58a01a16c6cb",
+      "save_w16.json": "1db44a4198219e3fba517051befafcacb54e34069723d1976aa88f6593fce0ba",
+      "save_w33.json": "9596f93605e1662bcd773b2cd5ac78e509e098348c1465389a9a48f1207a79be",
+      "save_w34.json": "0a02ed5022bb5b6c6f684632ac04e6f59572d7e4f29c99e81dfabcdf3012cc7e",
+      "final_save.json": "f522f1bef4137a6972ad2d6761acf4e1ce0218d50123d5a35b92922f302ef6e3"
+    },
+    "extraction_sha256": "3b9b8aa8476a70679602419ba8648ff5d69e48df424cfe9c2c9d13027428a5ca"
+  }
+}

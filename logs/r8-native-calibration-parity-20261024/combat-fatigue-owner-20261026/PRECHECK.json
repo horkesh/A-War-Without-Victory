@@ -1,0 +1,21 @@
+{
+  "schema": "awwv.combat-fatigue-owner-diagnosis.precheck.v1",
+  "prepared_at": "2026-10-26",
+  "attempt_exists_before_run": false,
+  "head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+  "source_status": " M src/sim/turn_phases/war_phases.ts",
+  "syntax": { "test_esbuild_transform_exit": 0, "launcher_node_check_exit": 0 },
+  "runtime": { "node_path": "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe", "version": "v22.23.2", "sha256": "0d0f5e39f9f3d9587bc19f73eab3c2c9c4903fd02d6dbf9c853dd81b3d95fad4" },
+  "frozen": {
+    "red_test": "5078ba027029675d714bb69ddfb79c8bc3cba828d29cf12e9a29c0abed586d3e",
+    "red_launcher": "8e9920fa010e3d5297a7090120828f18487e60b8d423ad4feef818e10b2eda2a",
+    "resolver": "5b0d61371b7d0d828ed2b06ffd5d11354629ded288632f26cbfe9d22c1ce2f16",
+    "aftermath_helper": "55cfee4c0184cef025734afdf5a0b764152f4cabcd41f4473b5e084a3938bd56",
+    "systems_manual": "727fa778f0030b02d2a15de2dbc3049282dbc3d3ee2fbb00e4f7b51dd2aace18",
+    "context": "c19e26eb0f1f91812f250437559f24bbbfdcc9865aa0b37afd835464f0afee9f",
+    "preimplementation_review": "bf5b2ec78618c278a8faeb2f88eb362ff70bbf5501e4d6cc5850192e17a7c4ad"
+  },
+  "run": { "attempt": "attempt-001", "maximum_invocations": 1, "timeout_ms": 60000, "retry": false },
+  "pass_criterion": "The real resolver processes one defended battle and the canonical +2/+1 assertions fail with actual +4/+2.",
+  "stop_rule": "Any startup, fixture, timeout, battle-count, or non-fatigue failure stops without production mutation or retry."
+}

@@ -1,3 +1,7 @@
+import { isSupportBrigadeOnActiveOp } from './sector_offensive_axis_helpers.js';
+import {computeAttackForcePower, findTgForAnchor} from './attack_force_power.js';
+import { getAttackIntelConfidence } from './attack_intel_context.js';
+import { collectSectorDefenseBrigades } from './sector_defense_roster.js';
 /**
  * ═══════════════════════════════════════════════════════════════
  * OWNERSHIP: Execution-Only
@@ -37,18 +41,26 @@ import {
     initializeCasualtyLedger,
     recordBattleCasualties,
 } from '../../state/casualty_ledger.js';
-import { recordFormationFatigue } from '../../state/formation_fatigue.js';
 import type {
     ControlEvent,
     FactionId,
     FormationId,
     FormationState,
     GameState,
-    TacticalGroup,
+    CorpsOperation,
 } from '../../state/game_state.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { isVlasicCohaExceptionAttackOrder } from './coha_operation_exception.js';
+import {
+    anyOperationHasPhaseGate,
+    clearAttackOrderOwners,
+    invalidateReceiptsOnControlChange,
+    isHeldCaptureOrder,
+    pruneAttackOrderOwners,
+    recordOwnedCaptureReceipt,
+} from './operation_phase_gate.js';
 import type { OperationalToCanonicalReverseMap, OsidPopulationMap } from '../../data/operational_data.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
 import {
@@ -63,8 +75,9 @@ import {
 } from './ethnic_defense.js';
 import { isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
 import { getPostWashingtonJointPressureMultiplier } from '../early_war/washington_agreement.js';
-import { findBrigadeOperationAnywhere, countAxisConcentrationSupport, getBrigadeExecutionAttackPowerMult } from './corps_operation_helpers.js';
+import { findBrigadeOperationAnywhere } from './corps_operation_helpers.js';
 import { getBrigadeAxis } from './bot_brigade_ai_osid.js';
+import { resolveLinkedPreparationProbeBattle } from './operation_preparation.js';
 import { evacuateFormationsSeveredByCapture } from './salient_withdrawal.js';
 
 // ── Shared combat math ──────────────────────────────────────────────────
@@ -73,19 +86,14 @@ import {
     // Constants used directly in resolver
     MILITIA_DEFENSE_RATIO,
     computeMilitiaDefensePower,
-    COORDINATION_PENALTY_2,
-    COORDINATION_PENALTY_3PLUS,
     STACKING_DEFENDER_SUPPORT,
-    POSTURE_ATTACK,
     COHESION_ATTACKER,
     // Functions (getMoraleResistFloor moved to attack_morale_absorption.ts)
-    getConcentrationBonus,
     getArtillerySuppression,
     getBombardmentCasualtyMult,
     getDefensiveFireMult,
     getSupplyMult,
     classifyOutcome,
-    computeAttackerPower,
     computeDefenderPower,
     getAttackerFirepowerDeficitMult,
     buildTerrainMultByOsid,
@@ -101,10 +109,8 @@ import {
     DEFENDER_CASUALTY_ENGAGEMENT_CAP,
     bfsDistanceFriendly,
     getReactiveDistanceWeight,
-    ANCHOR_GARRISON_LOAN_MAX_HOPS,
     HOME_DEFENSE_REACTIVE_BONUS,
     SECTOR_STANCE_REACTIVE_BONUS,
-    getWarExhaustionTempoMult,
     getIntelAmbushAttackerCasualtyMult,
     getIntelAmbushDefenderCasualtyMult,
     getIntelExecutionFrictionMultipliers,
@@ -113,17 +119,13 @@ import {
 // Nested default-OFF ambush-DEPTH amplifier (packet 20260605_INTEL_AMBUSH_FRICTION_DESIGN).
 import { isIntelAmbushDepthEnabled } from './intel_ambush_depth_gate.js';
 import { getAmbushDepthFactor } from './intel_ambush_depth.js';
-import { isSupportBrigadeOnActiveOp } from './sector_offensive_axis_helpers.js';
-import { SUPPORT_POWER_MULT } from './bot_constants.js';
 // REASON-CODE INSTRUMENTATION: env-gated, inert by default. See reason_code_debug.ts.
-import { whenReasonCodeTopic } from './reason_code_debug.js';
+import { emitOperationCaptureOwnershipRecord, isReasonCodeTopicEnabled, whenReasonCodeTopic } from './reason_code_debug.js';
 // ADR-0005 v2.2b: TG combat-power synthesis + casualty distribution. Flag-gated.
 import { ENABLE_TG_COMBAT_SYNTHESIS } from './tactical_group_config.js';
 import { distributeCasualtiesAcrossTg } from './tactical_group_casualties.js';
 import {
-    getStandingOgDefenseBrigadeIds,
     getStandingOgEngagedDefenseBrigadeIds,
-    isStandingOgDefenseBrigadeAvailable,
 } from './standing_og_defense.js';
 // ADR-0005 v2.2c #2: Hard Invariant #6 — immediate dissolution on anchor destruction.
 import { dissolveTacticalGroup, TG_ANCHOR_DISSOLVE_COHESION_FLOOR } from './tactical_group_lifecycle.js';
@@ -141,6 +143,7 @@ import {
     getFriendlyRetreatDestinations,
     resetFormationEntrenchment,
     forceRetreatWithPenalties,
+    relocateFormationAfterCombat,
     applyDefeatPenalties,
     applyPersonnelLoss,
     findEmergencyRetreatOsid as _findEmergencyRetreatOsid,
@@ -222,15 +225,6 @@ export { _displaceFormationsInEnemyTerritory as displaceFormationsInEnemyTerrito
  * Returns null when no TG matches — caller treats the attacker as a solo
  * physical brigade (v1 behavior).
  */
-function findTgForAnchor(state: GameState, brigadeId: string): TacticalGroup | null {
-    const tgs = state.military?.tactical_groups;
-    if (!tgs) return null;
-    for (const id of Object.keys(tgs).sort(strictCompare)) {
-        const tg = tgs[id];
-        if (tg && tg.anchor_brigade_id === brigadeId && tg.status !== 'dissolved') return tg;
-    }
-    return null;
-}
 
 /**
  * ADR-0005 Phase 4 (Fix 4) — territory-revert support. True if a friendly NON-TG
@@ -276,125 +270,6 @@ export function hasFriendlyNonTgHolder(
         return true;
     }
     return false;
-}
-
-/**
- * ADR-0005 v2.2c: aggregate donor combat power for all TG anchors in an attack,
- * using each donor's OWN stats (true per-donor power).
- *
- * For each donor of a TG anchored on an attacker, the contribution is the donor's
- * full-force power — `computeAttackerPower(donor, ...)`, which bakes in the donor's
- * equipment ratio (basePower), supply, disruption, fatigue, officer quality,
- * heavy-weapons-vs-target-terrain, home-distance (≈1.0 since donors stay home),
- * and morale — scaled by the donated fraction `personnel_lent / donor.personnel`.
- * The donated element fights at the ANCHOR's effective posture against the target's
- * terrain (it reinforces the anchor's assault), but is NOT a physical brigade, so it
- * does not receive the concentration multiplier (applied by the caller to physical
- * brigades only, per ADR-0005 §Battle resolution).
- *
- * This replaces the v2.2b proxy (which scaled the ANCHOR's per-personnel power by the
- * total donated fraction); v2.2c reflects donor-specific equipment/supply/cohesion so a
- * well-equipped donor lends more punch than a militia donor of equal headcount.
- *
- * Returned value is the SUM of donor contributions across all TG anchors in
- * `attackerFormations`. Caller multiplies by coordPenalty × seasonal × tempo.
- */
-function computeTgDonorPower(
-    state: GameState,
-    attackerFormations: FormationState[],
-    supplyStateByOsid: SupplyStateByOsidReport | null | undefined,
-    targetTerrainMult: number,
-    targetOsid: string,
-): number {
-    const formations = state.military?.formations ?? {};
-    let total = 0;
-    for (const a of attackerFormations) {
-        const tg = findTgForAnchor(state, a.id);
-        if (!tg) continue;
-        const anchorPosture = a.posture ?? 'defend';
-        const atkMult = POSTURE_ATTACK[anchorPosture] ?? 0;
-        const effectivePosture = atkMult > 0 ? anchorPosture : 'attack';
-        for (const d of tg.donor_contributions) {
-            const lent = d.personnel_lent;
-            if (lent <= 0) continue;
-            const donor = formations[d.brigade_id];
-            if (!donor) continue;
-            const donorPersonnel = donor.personnel ?? 0;
-            if (donorPersonnel <= 0) continue;
-            const donorRaw = computeAttackerPower(state, donor, supplyStateByOsid, effectivePosture, targetTerrainMult, targetOsid);
-            // Cap the lent fraction at 1.0: donor.personnel can drop below personnel_lent
-            // mid-op via the donor's own attrition; a donor never lends more than its current force.
-            const lentFraction = Math.min(1, lent / donorPersonnel);
-            total += donorRaw * lentFraction;
-        }
-    }
-    return total;
-}
-
-function findFriendlySectorIdForOsid(state: GameState, osid: string): string | null {
-    const sectors = state.military.corps_front_sectors;
-    if (!sectors) return null;
-    const sectorIds = Object.keys(sectors).sort(strictCompare);
-    for (const sectorId of sectorIds) {
-        const sector = sectors[sectorId];
-        if (!sector) continue;
-        for (const subSegment of sector.sub_segments ?? []) {
-            if (subSegment.friendly_osids.includes(osid)) return sectorId;
-        }
-    }
-    return null;
-}
-
-function getAttackIntelConfidence(
-    state: GameState,
-    attackerOsid: string,
-    defenderSectorId: string | undefined,
-    targetOsid: string,
-): number {
-    if (!defenderSectorId) return 0;
-    const attackerSectorId = findFriendlySectorIdForOsid(state, attackerOsid);
-    if (!attackerSectorId) return 0;
-    const record = state.military.sector_intel?.[attackerSectorId]
-        ?.find(rec => rec.enemy_sector_id === defenderSectorId);
-    if (!record) return 0;
-    const osidConfidence = record.osid_confidence
-        ?.find(entry => entry.osid === targetOsid)
-        ?.confidence;
-    return osidConfidence ?? record.confidence;
-}
-
-function formationBelongsToCorps(formation: FormationState, corpsId: string): boolean {
-    if ((formation as { corps_id?: string }).corps_id === corpsId) return true;
-    return (formation.tags ?? []).includes(`corps:${corpsId}`);
-}
-
-function findEmptySectorAdjacentDefenders(
-    state: GameState,
-    sector: NonNullable<GameState['military']['corps_front_sectors']>[string] | undefined,
-    targetOsid: string,
-    controller: FactionId,
-    adjacency: Map<string, string[]>,
-): FormationState[] {
-    if (!sector) return [];
-    const territory = new Set<string>(sector.territory_osids ?? []);
-    for (const segment of sector.sub_segments ?? []) {
-        for (const osid of segment.friendly_osids ?? []) territory.add(osid);
-    }
-
-    return Object.values(state.military.formations ?? {})
-        .filter((formation): formation is FormationState => {
-            if (!formation || formation.status !== 'active') return false;
-            if (formation.faction !== controller) return false;
-            if (!formationBelongsToCorps(formation, sector.corps_id)) return false;
-            if (!isStandingOgDefenseBrigadeAvailable(state, formation.id)) return false;
-            if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) return false;
-            const locOsid = (formation as { location_osid?: string }).location_osid;
-            if (!locOsid || locOsid === targetOsid) return false;
-            if (!territory.has(locOsid)) return false;
-            if (getPoliticalControllerOSID(state, locOsid, undefined) !== controller) return false;
-            return bfsDistanceFriendly(locOsid, targetOsid, adjacency, state.political?.political_controllers ?? {}, controller) === 1;
-        })
-        .sort((a, b) => strictCompare(a.id, b.id));
 }
 
 function getIntelConfidenceBand(confidence: number): IntelConfidenceBand {
@@ -525,16 +400,33 @@ export function resolveAttackOrdersOsid(
         skipped_attack_orders: [],
         battles: []
     };
+    const currentTurn = state.meta?.turn ?? 0;
+    const observeOwnership = isReasonCodeTopicEnabled('operation_capture_ownership');
+    const initialOwnerInventory = observeOwnership
+        ? Object.entries(state.military.brigade_attack_order_owners ?? {}).sort(([a], [b]) => strictCompare(a, b)).map(([brigadeId, owner]) => {
+            return { brigade_id: brigadeId, final_target: state.military.brigade_attack_orders?.[brigadeId as FormationId] ?? null, ...owner };
+        })
+        : [];
+    if (observeOwnership) emitOperationCaptureOwnershipRecord({ kind: 'resolver_pass_start', turn: currentTurn, owner_inventory: initialOwnerInventory });
+    const emitOwnershipPassEnd = (terminal: string): void => {
+        if (!observeOwnership) return;
+        emitOperationCaptureOwnershipRecord({ kind: 'resolver_pass_end', turn: currentTurn, terminal, orders_processed: report.orders_processed, flips_applied: report.flips_applied });
+    };
 
-    // COHA suppresses combat, but the attempted orders remain auditable and
-    // must be consumed so they cannot leak into a later turn.
+    // COHA suppresses combat, except for the one authored Vlašić operation
+    // window. Generic and unrelated orders remain auditable and are consumed.
     if (state.military.event_flags?.coha_active === true) {
         report.combat_suppressed_reason = 'coha_ceasefire';
         report.operation_lifecycle_paused_reason = 'coha_ceasefire';
         const suppressedOrders = state.military.brigade_attack_orders ?? {};
+        const permittedOrders: Record<FormationId, Osid> = {};
         for (const brigadeId of Object.keys(suppressedOrders).sort(strictCompare) as FormationId[]) {
             const target = suppressedOrders[brigadeId];
             if (!target) continue;
+            if (isVlasicCohaExceptionAttackOrder(state, brigadeId, target)) {
+                permittedOrders[brigadeId] = target;
+                continue;
+            }
             (report.orders_seen_by_brigade ??= {})[brigadeId] = target;
             (report.suppressed_attack_orders ??= []).push({
                 brigade_id: brigadeId,
@@ -546,14 +438,16 @@ export function resolveAttackOrdersOsid(
                 report.orders_by_faction[faction] = (report.orders_by_faction[faction] ?? 0) + 1;
             }
         }
-        state.military.brigade_attack_orders = undefined;
-        return report;
+        state.military.brigade_attack_orders = Object.keys(permittedOrders).length > 0
+            ? permittedOrders
+            : undefined;
+        pruneAttackOrderOwners(state);
+        if (Object.keys(permittedOrders).length === 0) { emitOwnershipPassEnd('coha_suppressed'); return report; }
     }
 
     const terrainMultByOsid = buildTerrainMultByOsid(reverseMap, terrainData);
     const slopeByOsid = buildSlopeByOsid(reverseMap, terrainData);
 
-    const currentTurn = state.meta?.turn ?? 0;
     const startDate = state.meta?.scenario_start_date;
 
     const orders = state.military.brigade_attack_orders;
@@ -573,6 +467,7 @@ export function resolveAttackOrdersOsid(
         return s;
     };
     if (!orders || typeof orders !== 'object') {
+        clearAttackOrderOwners(state);
         // No orders this turn — still run displacement pass so formations left in enemy territory from a previous turn are fixed
         for (const f of allFormations) {
             if (!f || f.status !== 'active') continue;
@@ -584,20 +479,30 @@ export function resolveAttackOrdersOsid(
             const retreatDests = getFriendlyRetreatDestinations(state, otherFormation, adjacency, reverseMap);
             const dest = retreatDests[0];
             if (dest != null) {
-                otherFormation.location_osid = dest;
+                relocateFormationAfterCombat(state, otherFormation, dest);
                 resetFormationEntrenchment(otherFormation);
             } else {
                 forceRetreatWithPenalties(state, otherFormation, reverseMap, loc, { adjacency, friendlyOsids: getFriendlyForFaction(factionId) });
             }
         }
+        emitOwnershipPassEnd('no_orders');
         return report;
     }
 
     const formationIds = Object.keys(orders).sort(strictCompare) as FormationId[];
     const targetToAttackers = new Map<Osid, FormationId[]>();
+    // Opt-in phase gate (operation_phase_gate.ts): the FINAL consumer refuses capture orders onto a
+    // gated objective of a still-holding axis regardless of which writer produced the order.
+    const phaseGateActive = anyOperationHasPhaseGate(state);
+    const heldCaptureOrders: Array<{ brigadeId: FormationId; target: string }> = [];
     for (const fid of formationIds) {
         const target = orders[fid] as string | undefined;
         if (!target) continue;
+        if (phaseGateActive && isHeldCaptureOrder(state, fid, target)) {
+            heldCaptureOrders.push({ brigadeId: fid, target });
+            (report.orders_seen_by_brigade ??= {})[fid] = target as Osid;
+            continue;
+        }
         const list = targetToAttackers.get(target) ?? [];
         list.push(fid);
         targetToAttackers.set(target, list);
@@ -605,6 +510,41 @@ export function resolveAttackOrdersOsid(
     }
     const targetOsids = Array.from(targetToAttackers.keys()).sort(strictCompare);
     report.unique_attack_targets = targetOsids.length;
+    // A sector's mobile reserves cannot answer separate axes of the same
+    // operation at full strength in the same week. Count only current,
+    // executable axis objectives with a physically adjacent attacker; a
+    // planning axis or a paper objective does not dilute the defense.
+    const sectorAxesByOperation = new Map<CorpsOperation, Map<string, Set<string>>>();
+    const targetOperationSector = new Map<Osid, { operation: CorpsOperation; sectorId: string }>();
+    for (const target of targetOsids) {
+        const controller = getPoliticalControllerOSID(state, target, reverseMap);
+        if (!controller) continue;
+        const sector = findSectorForEnemyOsid(state, target, controller);
+        if (!sector) continue;
+        for (const brigadeId of targetToAttackers.get(target) ?? []) {
+            const brigade = fmts[brigadeId];
+            if (!brigade || brigade.status !== 'active' || brigade.faction === controller) continue;
+            if (!brigade.location_osid || !getTacticalAdjacentOsids(state, brigade.location_osid as Osid, adjacency).includes(target)) continue;
+            if (isRbihHrhbCombatBlocked(state, brigade.faction, controller)) continue;
+            const match = findBrigadeOperationAnywhere(state, brigadeId);
+            if (!match || match.op.phase !== 'execution' || match.op.type !== 'sector_attack') continue;
+            const axis = getBrigadeAxis(match.op, brigadeId);
+            if (!axis || axis.status !== 'executing' || axis.objectives[axis.current_objective_index] !== target) continue;
+            let sectors = sectorAxesByOperation.get(match.op);
+            if (!sectors) {
+                sectors = new Map();
+                sectorAxesByOperation.set(match.op, sectors);
+            }
+            let axes = sectors.get(sector.sector_id);
+            if (!axes) {
+                axes = new Set();
+                sectors.set(sector.sector_id, axes);
+            }
+            axes.add(axis.axis_id);
+            targetOperationSector.set(target, { operation: match.op, sectorId: sector.sector_id });
+            break;
+        }
+    }
     for (const fid of formationIds) {
         const f = state.military.formations?.[fid];
         if (!f) continue;
@@ -627,6 +567,10 @@ export function resolveAttackOrdersOsid(
             ...(targetController !== undefined ? { target_controller: targetController } : {}),
         });
     };
+
+    for (const held of heldCaptureOrders) {
+        recordSkippedOrder(held.brigadeId, held.target as Osid, 'capture_phase_held');
+    }
 
     if (!state.military.casualty_ledger) {
         const factionIds = (state.factions ?? []).map(f => f.id);
@@ -722,46 +666,11 @@ export function resolveAttackOrdersOsid(
             // Phase B: identify which sub-segment is responsible for this OSID
             const defendingSubSeg = sector ? findSubSegmentForOsid(sector, targetOsid) : undefined;
             defendingSubSegmentId = defendingSubSeg?.sub_segment_id;
-            // Anchor-garrison guard: a brigade standing on its own corps's scenario-authored
-            // must-hold OSID is that anchor's dedicated garrison. It remains fully available
-            // to defend its own OSID, and may still reactively help a genuinely nearby fight
-            // (within ANCHOR_GARRISON_LOAN_MAX_HOPS), but is not loaned out as a distance-
-            // weighted contributor (and casualty-share recipient) to a DISTANT OSID under
-            // attack elsewhere in the sector — that grinds down the very unit the anchor
-            // depends on, by proxy, before its own position is ever directly assaulted.
-            const corpsMustHoldOsids = sector ? (state.military.must_hold_osids_by_corps?.[sector.corps_id] ?? []) : [];
-            const sectorBrigades = sector
-                ? getStandingOgDefenseBrigadeIds(sector)
-                    .map(id => state.military.formations?.[id])
-                    .filter((f): f is FormationState =>
-                        f != null
-                        && f.status === 'active'
-                        && isStandingOgDefenseBrigadeAvailable(state, f.id)
-                    )
-                    .filter((f) => {
-                        const bLoc = (f as { location_osid?: string }).location_osid;
-                        if (!bLoc || !corpsMustHoldOsids.includes(bLoc) || bLoc === targetOsid) return true;
-                        const loanHops = bfsDistanceFriendly(bLoc, targetOsid, adjacency, pc, controller!);
-                        return loanHops <= ANCHOR_GARRISON_LOAN_MAX_HOPS;
-                    })
-                : [];
-            for (const physicalDefender of defenderFormations) {
-                if (!sectorBrigades.some((brigade) => brigade.id === physicalDefender.id)) {
-                    sectorBrigades.push(physicalDefender);
-                }
-            }
-            if (sectorBrigades.length === 0 && sector) {
-                sectorBrigades.push(...findEmptySectorAdjacentDefenders(
-                    state,
-                    sector,
-                    targetOsid,
-                    controller!,
-                    adjacency,
-                ));
-            }
-            sectorBrigades.sort((a, b) => strictCompare(a.id, b.id));
+            const sectorBrigades = collectSectorDefenseBrigades(
+                state, sector, targetOsid, controller!, adjacency, defenderFormations,
+            );
             if (sectorBrigades.length > 0) {
-                const { primary, totalPower } = rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
+                const { primary, totalPower, rankedDefenders } = rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
                 const avgBrigadePower = totalPower / sectorBrigades.length;
                 const targetMun = munFromOsid(targetOsid);
 
@@ -798,7 +707,11 @@ export function resolveAttackOrdersOsid(
 
                 // Apply sector stance reactive bonus (Layer B)
                 const stanceReactiveBonus = SECTOR_STANCE_REACTIVE_BONUS[sector?.sector_stance ?? 'defend'];
-                const boostedReserves = effectiveReserves * stanceReactiveBonus;
+                const commitment = targetOperationSector.get(targetOsid);
+                const simultaneousAxes = commitment && commitment.sectorId === sector?.sector_id
+                    ? (sectorAxesByOperation.get(commitment.operation)?.get(commitment.sectorId)?.size ?? 1)
+                    : 1;
+                const boostedReserves = effectiveReserves * stanceReactiveBonus / simultaneousAxes;
 
                 // Cap reactive response proportional to attack size
                 const avgReactivePower = avgBrigadePower;
@@ -830,7 +743,14 @@ export function resolveAttackOrdersOsid(
                 // zero weighted contribution must not make them the physical
                 // defender or route militia casualties into remote brigades.
                 if (contributingBrigadeCount > 0) {
-                    defenderFormation = primary;
+                    // Power/caps/floors above still use the nominal full roster.
+                    // Only a positive contributor may carry primary-defender
+                    // effects; pick it with the existing nominal power ranking
+                    // (stable tie order) rather than introducing a new score.
+                    const eligiblePrimary = rankedDefenders
+                        .map((entry) => sectorBrigades.find((b) => b.id === entry.id))
+                        .find((b): b is FormationState => b !== undefined && (brigadeWeights.get(b.id) ?? 0) > 0);
+                    defenderFormation = eligiblePrimary ?? primary;
                     isSectorCoverageDefense = true;
                     sectorDefenseBrigades = sectorBrigades;
                     sectorBrigadeWeights = brigadeWeights;
@@ -946,60 +866,18 @@ export function resolveAttackOrdersOsid(
             }
         }
 
-        const coordPenalty = attackerFormations.length >= 3 ? COORDINATION_PENALTY_3PLUS : attackerFormations.length === 2 ? COORDINATION_PENALTY_2 : 1.0;
         const targetSlope = slopeByOsid[targetOsid] ?? 0;
         const seasonal = getSeasonalModifiers(currentTurn, startDate, targetSlope);
         const targetTerrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
-        // R13b op-level concentration mirror: amplify the concentration bonus
-        // when same-axis op-mates are within 2 hops of the target (theater
-        // coordination). Capped at 4 effective via Math.min to stay within
-        // the existing CONCENTRATION_BONUS_CAP=0.30. Same-axis (not whole op)
-        // scope prevents cross-axis amplification on Sarajevo ring / Drina.
-        let effectiveAttackerCount = attackerFormations.length;
         const opMatch = attackerOperationMatches.get(firstAttacker.id);
-        if (opMatch) {
-            const axis = getBrigadeAxis(opMatch.op, firstAttacker.id);
-            const sameAxisBrigades = axis?.assigned_brigades ?? opMatch.op.participating_brigades ?? [];
-            const attackerIds = new Set<FormationId>(attackerFormations.map(a => a.id));
-            effectiveAttackerCount += countAxisConcentrationSupport(
-                state,
-                sameAxisBrigades,
-                attackerIds,
-                adjacency,
-                targetOsid,
-            );
-        }
-        const concentrationBonus = getConcentrationBonus(Math.min(4, effectiveAttackerCount));
-        // Formations with attack orders attack at their posture — but postures with
-        // zero attack mult (defend, hold, dig_in) use 'attack' as minimum, since the
-        // attack order itself implies attack intent. Preserves 'assault' (1.2×) bonus.
-        const physicalPower = attackerFormations.reduce((s, a) => {
-            const posture = a.posture ?? 'defend';
-            const atkMult = POSTURE_ATTACK[posture] ?? 0;
-            const effectivePosture = atkMult > 0 ? posture : 'attack';
-            const rawPower = computeAttackerPower(state, a, supplyStateByOsid, effectivePosture, targetTerrainMult, targetOsid);
-            // Support brigades contribute reduced power — main brigade carries the assault
-            const supportMult = isSupportBrigadeOnActiveOp(state, a.id, a.corps_id) ? SUPPORT_POWER_MULT : 1.0;
-            const executionMult = getBrigadeExecutionAttackPowerMult(state, a.id);
-            return s + rawPower * supportMult * executionMult;
-        }, 0);
-        const tempoMult = getWarExhaustionTempoMult(state, attackerFaction); // P7: war exhaustion → attack tempo penalty
-        // Attacker firepower-deficit penalty: no-op (1.0) unless
-        // firepower_deficit_penalty_enabled and the defender has real heavy
-        // weapons the attacker cannot match. See getAttackerFirepowerDeficitMult doc.
         const firepowerDeficitMult = getAttackerFirepowerDeficitMult(
-            state,
-            attackerFormations,
+            state, attackerFormations,
             sectorDefenseBrigades ?? (defenderFormation ? [defenderFormation] : []),
         );
-        let attackerPower = physicalPower * coordPenalty * seasonal.attack_mult * concentrationBonus * tempoMult * firepowerDeficitMult;
-        // ADR-0005 v2.2b: TG donor personnel scales anchor combat output. Donors are
-        // NOT physical brigades sharing frontage; they do NOT get concentrationBonus.
-        // Flag-off: donor branch dead; attackerPower equals the original expression.
-        if (ENABLE_TG_COMBAT_SYNTHESIS) {
-            const donorPower = computeTgDonorPower(state, attackerFormations, supplyStateByOsid, targetTerrainMult, targetOsid);
-            attackerPower += donorPower * coordPenalty * seasonal.attack_mult * tempoMult;
-        }
+        const attackerPower = computeAttackForcePower(
+            state, attackerFormations, targetOsid, adjacency, targetTerrainMult,
+            seasonal.attack_mult, supplyStateByOsid, undefined, firepowerDeficitMult,
+        );
         defenderPower *= seasonal.defense_mult;
         const attackerIntelConfidence = getAttackIntelConfidence(
             state,
@@ -1071,8 +949,15 @@ export function resolveAttackOrdersOsid(
         // personnel — applied unconditionally (was previously skipped for single-brigade sectors,
         // allowing 109 attackers to generate 900+ defender casualties from an uncapped 3,000-person
         // brigade, producing 0.07:1 att:def ratios).
-        const rawPersonnelDefender = sectorDefenseBrigades && sectorDefenseBrigades.length > 0
-            ? sectorDefenseBrigades.reduce((s, b) => s + (b.personnel ?? 0), 0)
+        // Only positive contributors form the engaged casualty base. The full
+        // roster remains on sectorDefenseBrigades for diagnostics and nominal
+        // power; zero-weight entries cannot inflate defender casualties.
+        const engagementWeights = sectorBrigadeWeights;
+        const engagedDefenseBrigades = sectorDefenseBrigades && engagementWeights
+            ? sectorDefenseBrigades.filter((b) => (engagementWeights.get(b.id) ?? 0) > 0)
+            : sectorDefenseBrigades;
+        const rawPersonnelDefender = engagedDefenseBrigades && engagedDefenseBrigades.length > 0
+            ? engagedDefenseBrigades.reduce((s, b) => s + (b.personnel ?? 0), 0)
             : defenderFormation ? (defenderFormation.personnel ?? 0) : 5000 * MILITIA_DEFENSE_RATIO;
         const personnelDefender = Math.min(rawPersonnelDefender, personnelAttacker * DEFENDER_CASUALTY_ENGAGEMENT_CAP);
         const bombardmentMult = getBombardmentCasualtyMult(attackerFormations, attackerFaction, state);
@@ -1200,10 +1085,6 @@ export function resolveAttackOrdersOsid(
                 }
             }
 
-            // Sweeping undefended territory is less exhausting than real combat but not free —
-            // logistics, occupation duties, scattered resistance, and advance tempo take a toll.
-            recordFormationFatigue(a, defenderFormation ? 2 : 0.5);
-
             // Record battle outcome for morale drift (victory boost / defeat penalty).
             (a as { recent_battle_outcome?: string }).recent_battle_outcome = outcome;
 
@@ -1236,8 +1117,6 @@ export function resolveAttackOrdersOsid(
                 turn: state.meta?.turn ?? 0,
                 warTimeline: state.military.war_timeline,
             });
-            recordFormationFatigue(defenderFormation, 1);
-
             // Record battle outcome for morale drift — defender's perspective is inverted
             // Defender equipment losses (extracted to attack_equipment_effects.ts)
             for (const defender of defenderAftermathFormations) {
@@ -1393,6 +1272,27 @@ export function resolveAttackOrdersOsid(
             })),
         });
 
+        const linkedChildren = new Map<string, { corpsId: FormationId; op: CorpsOperation }>();
+        for (const attacker of attackerFormations) {
+            const match = attackerOperationMatches.get(attacker.id);
+            if (!match || match.op.phase !== 'execution' || !match.op.preparation_probe_link) continue;
+            linkedChildren.set(`${match.corps_id}:${match.op.name}:t${match.op.started_turn}`, {
+                corpsId: match.corps_id,
+                op: match.op,
+            });
+        }
+        for (const operationId of [...linkedChildren.keys()].sort(strictCompare)) {
+            const linked = linkedChildren.get(operationId)!;
+            resolveLinkedPreparationProbeBattle(
+                state,
+                linked.corpsId,
+                linked.op,
+                targetOsid,
+                attackerBrigadeIds,
+                battleId,
+            );
+        }
+
         const ammoCrisis = attackerLost && getSupplyMult(firstAttacker, state, 'attack', supplyStateByOsid) < 0.5;
         const pyrrhic = attackerWon && personnelAttacker > 0 && finalAttackerCas / personnelAttacker > 0.15;
         const crisisEvent = applyAmmoCrisisPyrrhicEffects({
@@ -1529,9 +1429,14 @@ export function resolveAttackOrdersOsid(
                         targetOsid,
                         prevController,
                         adjacency,
+                        reverseMap,
                     );
                 }
                 emitCascadePenaltiesOnFlip(state, targetOsid, prevController, adjacency);
+                // Opt-in phase gate: a standing capture receipt for this OSID is void once control
+                // changes to another faction (the capturing operation's own new receipt, if any, is
+                // written later in this function, after this invalidation).
+                if (phaseGateActive) invalidateReceiptsOnControlChange(state, targetOsid, attackerFaction);
             }
         }
 
@@ -1558,6 +1463,32 @@ export function resolveAttackOrdersOsid(
             if (flip) {
                 activeOp.territory_gained_this_turn = (activeOp.territory_gained_this_turn ?? 0) + 1;
                 activeOp.total_territory_gained = (activeOp.total_territory_gained ?? 0) + 1;
+                // Opt-in phase gate: operation-owned capture receipt, recorded only AFTER all
+                // result/revert handling (flip is the post-revert value) for a real
+                // enemy-to-friendly combat flip whose ACTUAL resolving lead's surviving emitted
+                // order belongs to this exact operation instance, axis and target.
+                if (phaseGateActive && controller != null && controller !== attackerFaction) {
+                    const survivingTarget = state.military.brigade_attack_orders?.[firstAttacker.id as FormationId] ?? null;
+                    const owner = state.military.brigade_attack_order_owners?.[firstAttacker.id as FormationId] ?? null;
+                    const receiptRecorded = recordOwnedCaptureReceipt(state, {
+                        op: activeOp,
+                        corpsId: attackerCorpsId as string,
+                        leadId: firstAttacker.id,
+                        targetOsid,
+                        battleId,
+                        turn: currentTurn,
+                    });
+                    if (observeOwnership) emitOperationCaptureOwnershipRecord({
+                        kind: 'owned_capture_resolution', turn: currentTurn, corps_id: attackerCorpsId,
+                        operation_id: `${attackerCorpsId}:${activeOp.name}:t${activeOp.started_turn}`,
+                        operation_name: activeOp.name, battle_id: battleId, resolving_lead: firstAttacker.id,
+                        attacker_faction: attackerFaction,
+                        target_osid: targetOsid, controller_before: controller,
+                        controller_after: state.political.political_controllers?.[targetOsid] ?? null,
+                        flip_after_revert: flip, surviving_target: survivingTarget, owner,
+                        receipt_recorded: receiptRecorded,
+                    });
+                }
             }
         }
 
@@ -1604,7 +1535,7 @@ export function resolveAttackOrdersOsid(
                 const retreatDests = surrenderCascade ? [] : getFriendlyRetreatDestinations(state, defenderFormation, adjacency, reverseMap);
                 const dest = retreatDests[0];
                 if (dest != null) {
-                    (defenderFormation as { location_osid?: string }).location_osid = dest;
+                    relocateFormationAfterCombat(state, defenderFormation, dest);
                     applyDefeatPenalties(defenderFormation, targetOsid, state.meta?.turn ?? 0, outcome);
                 } else {
                     forceRetreatWithPenalties(state, defenderFormation, reverseMap, targetOsid, { adjacency, friendlyOsids: getFriendlyForFaction(defenderFormation.faction as string) });
@@ -1614,7 +1545,9 @@ export function resolveAttackOrdersOsid(
                 // Apply morale/disruption penalties at their current position —
                 // losing a covered OSID is demoralizing and disrupts the formation,
                 // but the brigade stays where it physically is.
-                applyDefeatPenalties(defenderFormation, targetOsid, state.meta?.turn ?? 0, outcome);
+                applyDefeatPenalties(defenderFormation, targetOsid, state.meta?.turn ?? 0, outcome, {
+                    recordRetreatOrigin: false,
+                });
             }
         }
 
@@ -1624,8 +1557,22 @@ export function resolveAttackOrdersOsid(
         if (flip) {
             const advanceFormation = attackerFormations[0];
             if (advanceFormation) {
-                (advanceFormation as { location_osid?: string }).location_osid = targetOsid;
+                relocateFormationAfterCombat(state, advanceFormation, targetOsid);
                 (advanceFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
+            }
+            // A decisive operation breach can carry one supporting brigade
+            // through the same opening. Both formations must have fought on
+            // the same axis; this keeps an unrelated adjacent attack from
+            // inheriting the operation's pursuit and caps the stack at two.
+            if (outcome === 'decisive_victory' && opMatch?.op.phase === 'execution' && opMatch.op.coordinated_advance === true) {
+                const leadAxis = getBrigadeAxis(opMatch.op, firstAttacker.id);
+                const support = leadAxis && attackerFormations.slice(1).find((attacker) =>
+                    getBrigadeAxis(opMatch.op, attacker.id)?.axis_id === leadAxis.axis_id
+                );
+                if (support) {
+                    relocateFormationAfterCombat(state, support, targetOsid);
+                    support.entrenchment_turns = 0;
+                }
             }
             // Displace any other formations still in the flipped OSID (invariant: no brigade in enemy territory)
             const formations = state.military.formations ?? {};
@@ -1637,7 +1584,7 @@ export function resolveAttackOrdersOsid(
                 const retreatDests = getFriendlyRetreatDestinations(state, otherFormation, adjacency, reverseMap);
                 const dest = retreatDests[0];
                 if (dest != null) {
-                    otherFormation.location_osid = dest;
+                    relocateFormationAfterCombat(state, otherFormation, dest);
                     resetFormationEntrenchment(otherFormation);
                 } else {
                     forceRetreatWithPenalties(state, otherFormation, reverseMap, targetOsid, { adjacency, friendlyOsids: getFriendlyForFaction(f.faction as string) });
@@ -1649,7 +1596,7 @@ export function resolveAttackOrdersOsid(
         recordBattleHistory({
             attackerFormations,
             defenderFormation,
-            sectorDefenseBrigades,
+            sectorDefenseBrigades: engagedDefenseBrigades,
             sectorBrigadeWeights,
             currentTurn,
             targetOsid,
@@ -1707,7 +1654,7 @@ export function resolveAttackOrdersOsid(
         const retreatDests = getFriendlyRetreatDestinations(state, otherFormation, adjacency, reverseMap);
         const dest = retreatDests[0];
         if (dest != null) {
-            otherFormation.location_osid = dest;
+            relocateFormationAfterCombat(state, otherFormation, dest);
             resetFormationEntrenchment(otherFormation);
         } else {
             forceRetreatWithPenalties(state, otherFormation, reverseMap, loc, { adjacency, friendlyOsids: getFinalFriendly(factionId) });
@@ -1721,6 +1668,8 @@ export function resolveAttackOrdersOsid(
         return strictCompare(a.trigger_phase, b.trigger_phase);
     });
     state.military.brigade_attack_orders = undefined;
+    emitOwnershipPassEnd('complete');
+    clearAttackOrderOwners(state);
     // (defense path logging removed)
     return report;
 }

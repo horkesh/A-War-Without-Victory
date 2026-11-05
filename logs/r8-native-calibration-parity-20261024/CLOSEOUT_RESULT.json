@@ -1,0 +1,58 @@
+{
+  "schema": "awwv.r8-native-calibration-closeout.v1",
+  "result": "FAILED_OWNER_TARGET_DECISION_REQUIRED",
+  "primaryResult": "RESULT.json",
+  "primaryResultSha256": "4e098fb39c1333aa1ca5b6a8244d3f7ca753b939b38dcb7e75ee9ff865fa040f",
+  "coreManifest": "MANIFEST.json",
+  "coreManifestSha256": "18571c16ed920afaaaac7ec3fa272e7e8705a12d2384cd2cd5093beb75425a04",
+  "coreManifestScope": "Frozen64filecore;closeoutsupplementlistedhere separately",
+  "documentationGovernance": {
+    "childExit": 0,
+    "wrapperExit": 0,
+    "passed": 40,
+    "tests": 40
+  },
+  "targetedIndexAfterCorrection": {
+    "childExit": 0,
+    "wrapperExit": 0,
+    "overlapsGovernance": true,
+    "passed": 13,
+    "tests": 13
+  },
+  "finalIndependentDocReview": "GO",
+  "gameplayAndCalibration": "No gameplay/reference/baseline changes; strictcalibration700vs707 remainsfailed;188/allfactionsunreached",
+  "ownerDecision": "Async product-targetquestion pending;noanswerinferred",
+  "git": {
+    "pushed": false,
+    "ciForWorkingChanges": "NOT_RUN_UNCOMMITTED",
+    "committed": false,
+    "head": "81a65d76fce4936ea39c6d4b4d5df144139c8ba5"
+  },
+  "supplement": [
+    {
+      "path": "closeout/FINAL_PORTABLE_AND_DOCS_REVIEW.md",
+      "bytes": 2462,
+      "sha256": "f2e29880876418f9a24dda2e81211652007ecef1f52998bd4e2ad5c6dbd4fbdc"
+    },
+    {
+      "path": "closeout/governance-receipt.json",
+      "bytes": 2692,
+      "sha256": "31848fc17876ecc9ef7efcfc38bcc1efa2e24f8a9757b06ee1217fd6b0511ad8"
+    },
+    {
+      "path": "closeout/governance.stdout.log",
+      "bytes": 534,
+      "sha256": "95c75ae27d805710dbacb1be1ecd0d2a00a7afd1cd3b6040cbc8ca50a6c49787"
+    },
+    {
+      "path": "closeout/targeted-plan-index-receipt.json",
+      "bytes": 2728,
+      "sha256": "bba553e28d69a9c7cec75031669fa5243fe798193a16a453c16029cf54361109"
+    },
+    {
+      "path": "closeout/targeted-plan-index.stdout.log",
+      "bytes": 359,
+      "sha256": "0b4ccc00a7d04f16b2c2e8e1e0136c60fd1ed8c87276e197c83f486e81e9fa02"
+    }
+  ]
+}

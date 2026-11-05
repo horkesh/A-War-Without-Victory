@@ -1,0 +1,961 @@
+{
+  "writes_closed": true,
+  "scope": "Existing bounded789/790/791 evidence; raw bytes LOCAL, inventory is not a remote backup",
+  "entries": [
+    {
+      "path": "logs/claude-channel-20261004/789-root-plan.md",
+      "bytes": 2489,
+      "sha256": "00eba662609da6a53d92956e1a5d42f90db7becb77f6e66fab0ef570d6a21576"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-closing-manifest/closing-manifest.json",
+      "bytes": 5389,
+      "sha256": "186b508f1556358600aaef29526d76214567010829963a96dac9a47887f8b80f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-closing-manifest/entry-script.snapshot",
+      "bytes": 3112,
+      "sha256": "03113d8380dd862d69c560edf60e9b832f008a1e916705d9babf89dcacbb88c1"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-closing-manifest/receipt.json",
+      "bytes": 2673,
+      "sha256": "d8c39ffb95670d3211556b471b1f9de7b4e784d413c338085cac67d6ed3c067e"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-closing-manifest/start.json",
+      "bytes": 1477,
+      "sha256": "8e2eb415fb21fd3fed2c28ccfd1ebae479cf1931e9cf4329d6c3f5c6039495a3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-closing-manifest/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-closing-manifest/stdout.log",
+      "bytes": 248,
+      "sha256": "76d2aaad3eb13784894c621b224b60fa5461ceb409260179691c534d8b1c314b"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-exact-final-cli/entry-script.snapshot",
+      "bytes": 20326,
+      "sha256": "98c9613c0d8fe2ce875cd14a75803f21c3cfbd96f7563e7851fe76740d3db21e"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-exact-final-cli/reader.json",
+      "bytes": 63,
+      "sha256": "712862ddb03c0fbab6d23f81571383daec81772afcab175c826bd7892dfe3105"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-exact-final-cli/receipt.json",
+      "bytes": 2871,
+      "sha256": "edd056d6c5eba4ce9416569aafb78ccdb38caf7c912a0778a47af57092e39017"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-exact-final-cli/start.json",
+      "bytes": 1677,
+      "sha256": "f92a4c9a81608ae1775ecc323e8d2fa2ff246e55f29f1c3c7bf7109d634f7539"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-exact-final-cli/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-exact-final-cli/stdout.log",
+      "bytes": 61,
+      "sha256": "fd21ea006e86b7ae388643dfe1edbd924d7efd74769939d989d6ef79e6614938"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-exact-final-typecheck/entry-script.snapshot",
+      "bytes": 45,
+      "sha256": "8d5fa5bd883fec0979fc2004f1fe1d99aef40570155d550eadc0b03b55513bf0"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-exact-final-typecheck/receipt.json",
+      "bytes": 2738,
+      "sha256": "ff1869343bb3113bd3cbcb5959d30d25e91d0518376b9e948980b97ab4a83543"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-exact-final-typecheck/start.json",
+      "bytes": 1719,
+      "sha256": "2dee395eabda0b9e7a2dd264c86c5a736ccc1dc48273e27e1d865958c40d3b39"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-exact-final-typecheck/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-exact-final-typecheck/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-final-controls/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-final-controls/receipt.json",
+      "bytes": 2888,
+      "sha256": "af5dbea1b7a5397477ec033648ee1a25b3957f18f51ab7c696de6a5cd5a3cd57"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-final-controls/start.json",
+      "bytes": 1719,
+      "sha256": "300c943f08a5d3e9365f530ba9814595aac1062eada23166ca96d5e37524b140"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-final-controls/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-final-controls/stdout.log",
+      "bytes": 167,
+      "sha256": "163b8600a506a08f5f1abe0fe36f7729848731c1115773b7cc904a2b80fcf17a"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-final-controls/vitest.json",
+      "bytes": 6240,
+      "sha256": "0c385abcc6a36b266c689d81791ca18673dd3c4391ce5f3cea6211f65ff0b1c6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-final-reader/actual-producer-rows.log",
+      "bytes": 18441,
+      "sha256": "0837a8d40083ededc821dddfe92b42dfcdf4326382b78e175aab7e0c69ff2e67"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-final-reader/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-final-reader/receipt.json",
+      "bytes": 3076,
+      "sha256": "3b57043be30f35b692711b6053a9e80358c40300583aee9026aace2b3f9c04be"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-final-reader/start.json",
+      "bytes": 1747,
+      "sha256": "03fa914a21b554ed3e8b856240073d10286fe9643329cc2eab8e6ae3f3dc9cc3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-final-reader/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-final-reader/stdout.log",
+      "bytes": 165,
+      "sha256": "ef90d1e0aca2cedf20e3829c942b4b48f8814433dce7f8c49e01552e95da0811"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-final-reader/vitest.json",
+      "bytes": 6240,
+      "sha256": "dae25611b1badb56f8c33e74c553d9ba6eb106b57f62a7092eb06a57a56fe93f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-final-typecheck/entry-script.snapshot",
+      "bytes": 45,
+      "sha256": "8d5fa5bd883fec0979fc2004f1fe1d99aef40570155d550eadc0b03b55513bf0"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-final-typecheck/receipt.json",
+      "bytes": 2726,
+      "sha256": "58c85951c966e1166fcb3c868c6c413e43cfaecc08d945900c498e57f634c5e1"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-final-typecheck/start.json",
+      "bytes": 1707,
+      "sha256": "f990ae904cbf9241bb2b90695b307b26376fd9bfccbb0b35810bb117316d8ca9"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-final-typecheck/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-final-typecheck/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-final/actual-producer-rows.log",
+      "bytes": 18441,
+      "sha256": "0837a8d40083ededc821dddfe92b42dfcdf4326382b78e175aab7e0c69ff2e67"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-final/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-final/receipt.json",
+      "bytes": 3074,
+      "sha256": "a634aa560a26d98f0f8bc14518871a803d98919387434d32b299700cc664d564"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-final/start.json",
+      "bytes": 1745,
+      "sha256": "57a73dda0d2c5fb31d4c0daac40bfdaa1c4686299459ce5d7e1816314874cdb0"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-final/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-final/stdout.log",
+      "bytes": 164,
+      "sha256": "8256231befbb92d0baf3cce7141e56bfdf8ff229c1df7304dd064e0684226ef8"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-final/vitest.json",
+      "bytes": 6238,
+      "sha256": "02db17a0b0019db1a9c6f29e460f5856bd751b432d8359716b9c9884b036d351"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-portable-final/actual-producer-rows.log",
+      "bytes": 18441,
+      "sha256": "0837a8d40083ededc821dddfe92b42dfcdf4326382b78e175aab7e0c69ff2e67"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-portable-final/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-portable-final/receipt.json",
+      "bytes": 3092,
+      "sha256": "43e32c75db611d9b7f471e9ae6ad3ff1d52ddab81d18641ac8b803c7fd0d2d98"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-portable-final/start.json",
+      "bytes": 1763,
+      "sha256": "ff902f66106c3257148b00a26c568ac822c6e7bcaa4b3ffaaf707b28bf9e306f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-portable-final/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-portable-final/stdout.log",
+      "bytes": 173,
+      "sha256": "2106ccaa7dca916774a2fb875ccd7b51a47379b3acf9b08d010050376c544ce4"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-portable-final/vitest.json",
+      "bytes": 6239,
+      "sha256": "ec4e1d335f5348380192f30761f984ad7f9a158109d535fe06e0b9be5b391ddd"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-portable/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-portable/receipt.json",
+      "bytes": 2961,
+      "sha256": "9027b6d0aad124e8e3617aab4dbfbc946b25f3a7f860e703022ee36194df1cd9"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-portable/start.json",
+      "bytes": 1751,
+      "sha256": "35cdf71b69a55354181688f893dd6c66db8b13ef54a839dd93ef4df9edffb78c"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-portable/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-portable/stdout.log",
+      "bytes": 167,
+      "sha256": "3cccc53468d290cc4a8f961981f63c6cef38dd90b750667efc50d96ef51c76bb"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-portable/vitest.json",
+      "bytes": 7780,
+      "sha256": "6148e539dc89897ca98e5d1f4910f6e68225e848fb0d15a2d7eec3d44fccc1f7"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-1/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-1/receipt.json",
+      "bytes": 2964,
+      "sha256": "140a737108e8ce5a73f7ce3c9c7fafdd12b6124c3e9a736ecde350f2d197c932"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-1/start.json",
+      "bytes": 1753,
+      "sha256": "4789638a9ee64aa82ba7a48cff7c92fb42a94e3e30dfe1a518513e03398c9ff5"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-1/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-1/stdout.log",
+      "bytes": 167,
+      "sha256": "017ad8a895a212c0e0ba61e499c37df28703267991dfd8cf3252c7dd6b3c7404"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-1/vitest.json",
+      "bytes": 9088,
+      "sha256": "52ef36ac2ff8d9d4fed393544fcbaba500b733cdbf74a9160059731da7e9c0dd"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-2/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-2/receipt.json",
+      "bytes": 2964,
+      "sha256": "1b6a0ac74458d984c1565d86a81bb1934807e6050cb0e6c1688dc80fa333dfcb"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-2/start.json",
+      "bytes": 1753,
+      "sha256": "55ffcbcdc7d67915529c521a2c9c4677b3945da121190b7961c36b593d61ee52"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-2/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-2/stdout.log",
+      "bytes": 167,
+      "sha256": "8981b54c8a353d96387f5fe580431e723f0cf0821ee9d7dc84b7b557f796619f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-2/vitest.json",
+      "bytes": 9089,
+      "sha256": "1d52a1118dc10f989996c37f5f4425605d161acb8dd9861fe7d9abdeb5b350ad"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-3/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-3/receipt.json",
+      "bytes": 2965,
+      "sha256": "671cf9160fd732bf01c4cd5891a644b3b2bfc5d36fc62c291bc5aa7d71bb0965"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-3/start.json",
+      "bytes": 1753,
+      "sha256": "fd7c9b9bcfedbaa854664ec6e1caf90609fcfcdd3d1151d571e11bf6b6032b00"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-3/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-3/stdout.log",
+      "bytes": 167,
+      "sha256": "3c58073b3ed82b38085b99693dd9786ac81a68d734f30fe332dcac1ac4d7b3de"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-3/vitest.json",
+      "bytes": 9088,
+      "sha256": "d5fedda42b15378cd51f80d76b81e0e64f3ec0fef446b1108f67c80c278f1848"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-4/actual-producer-rows.jsonl",
+      "bytes": 18252,
+      "sha256": "a2e6f96f4f5ef605b6ed01f29c4af8d9896d915b0660388b11f71f544b488e06"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-4/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-4/receipt.json",
+      "bytes": 3083,
+      "sha256": "97e2f7b4c185cec156870affeeddf216459cf830195b860a81ee012b3d5596bb"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-4/start.json",
+      "bytes": 1753,
+      "sha256": "e21195e5388247d3a34219ae854fc8e3c643b8374a1998c0c3e57b6cd960de62"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-4/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-4/stdout.log",
+      "bytes": 167,
+      "sha256": "965bd4356add22fe397e3c96fdcabfac5e181ae8e9f72af9b66b4bbf6518b92f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-4/vitest.json",
+      "bytes": 6239,
+      "sha256": "80ea40601397ab7d8f2371f235d73855f3ee124eade6811268f7ac174a1b34da"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-final/actual-producer-rows.jsonl",
+      "bytes": 18252,
+      "sha256": "a2e6f96f4f5ef605b6ed01f29c4af8d9896d915b0660388b11f71f544b488e06"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-final/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-final/receipt.json",
+      "bytes": 3092,
+      "sha256": "351c9f829693dfb607b40e01227d2d42344f646a1cfe7cc824bb7682a8e859e3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-final/start.json",
+      "bytes": 1761,
+      "sha256": "328976b2b2d63019aa9449246e6a4a50b230118fa2f78e09f8a00f75ece10255"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-final/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-final/stdout.log",
+      "bytes": 171,
+      "sha256": "0c46ec7b03cf932d5a2f462659ad32421256f3fba421fe50c3298a9a6d978e89"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-green-reader-final/vitest.json",
+      "bytes": 6239,
+      "sha256": "b40d142a18839cecc153eb0b2537c3ad5a4745c524bfc5924ad7bb0336ec717d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-head-baseline-probe-test/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-head-baseline-probe-test/receipt.json",
+      "bytes": 2862,
+      "sha256": "a606c17e2d06d559a3b597d4991a22b7f57ea885222b9997eb2e36713419e791"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-head-baseline-probe-test/start.json",
+      "bytes": 1693,
+      "sha256": "cbdb9821a0d4ed9433030aa8ef2959c202d9f83f69c1125c04c2e9532a323a12"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-head-baseline-probe-test/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-head-baseline-probe-test/stdout.log",
+      "bytes": 177,
+      "sha256": "b33261caacb9427afc3e5a8af7925ba794e2c030268852f92f211e7a7b8aa136"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-head-baseline-probe-test/vitest.json",
+      "bytes": 7313,
+      "sha256": "a2caf27563f8491d94327848bd156ef677378043a50c9e0b207979aa13eb7784"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-observer-vitest/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-observer-vitest/receipt.json",
+      "bytes": 2803,
+      "sha256": "74014231bd02731225b7f815feb44b1fd1acf698d470098f974767dd9d41e36c"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-observer-vitest/start.json",
+      "bytes": 1633,
+      "sha256": "708692a03283a14b2ef433b5bc3b34a2051a9178d24c3cf1ef68da31ac8e9cee"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-observer-vitest/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-observer-vitest/stdout.log",
+      "bytes": 168,
+      "sha256": "8a86d65d89326e50c0b004103b4e1d1a9e8bbc97be08c2d143715c1f0099c654"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-observer-vitest/vitest.json",
+      "bytes": 27973,
+      "sha256": "41f9a5e5b1ab61d10b7132f9f9350189ae81a08447df770fa04cf4500017e0ab"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-opening-pins.json",
+      "bytes": 1995,
+      "sha256": "d47ccfba81610e2dbb6354c3a61eee01336bccffde2908255e82b5213d4dbfcd"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-pin-seal.cjs",
+      "bytes": 3112,
+      "sha256": "03113d8380dd862d69c560edf60e9b832f008a1e916705d9babf89dcacbb88c1"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-postrun-require-safe/entry-script.snapshot",
+      "bytes": 2363,
+      "sha256": "d4274e6c786a37ab7037feb85d2e1dd4ed590391aa8db67f6c38bc1591d95329"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-postrun-require-safe/receipt.json",
+      "bytes": 2756,
+      "sha256": "f6f70790ad8e85cb7ef947167496c6d4f5a467af271e1a6ac2d4f93be40d32fe"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-postrun-require-safe/start.json",
+      "bytes": 1709,
+      "sha256": "0192a77739034656b5ed636b6c79a0edd1c1ebfe7907575662429ff9568aaf78"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-postrun-require-safe/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-postrun-require-safe/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-reader-cli/entry-script.snapshot",
+      "bytes": 20522,
+      "sha256": "f24095390cba021021a3128b36fc175b3ec85fde7190e6e229a5e294959a1e8f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-reader-cli/reader.json",
+      "bytes": 63,
+      "sha256": "712862ddb03c0fbab6d23f81571383daec81772afcab175c826bd7892dfe3105"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-reader-cli/receipt.json",
+      "bytes": 2859,
+      "sha256": "6a263082ba675afb87c424c0de2037172e5d30ad0201ef3d8b16ccfdc3aab276"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-reader-cli/start.json",
+      "bytes": 1665,
+      "sha256": "0124b4165529846cef688aeefbd8db6ba99b065904bdf5916630e556b7fc19b0"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-reader-cli/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-reader-cli/stdout.log",
+      "bytes": 61,
+      "sha256": "fd21ea006e86b7ae388643dfe1edbd924d7efd74769939d989d6ef79e6614938"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-reader-require-safe/entry-script.snapshot",
+      "bytes": 17815,
+      "sha256": "4ae55636b4ac65f141c855549aaeb3e3efce790e23fc663268375d43693d3e77"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-reader-require-safe/receipt.json",
+      "bytes": 2847,
+      "sha256": "7ea4bb6cd350d52f7ac70aefc59cd3fd38666d147e3e56ebf28ac346b8859a1a"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-reader-require-safe/start.json",
+      "bytes": 1800,
+      "sha256": "05e5119015f6b45ca8c149bb86a31053b232c7403b2a19523b540fba24b6c4e0"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-reader-require-safe/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-reader-require-safe/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-reader-zero-coverage/entry-script.snapshot",
+      "bytes": 20522,
+      "sha256": "f24095390cba021021a3128b36fc175b3ec85fde7190e6e229a5e294959a1e8f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-reader-zero-coverage/reader.json",
+      "bytes": 116,
+      "sha256": "2defb2846189ae528f765507e38214b5bb2da587bb5587c0be0fccc5e08278ad"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-reader-zero-coverage/receipt.json",
+      "bytes": 2841,
+      "sha256": "2ec51cc6a11e4af59f035c43d8de304c6c1d010a02fc76d391f9657e3bbf6dcd"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-reader-zero-coverage/start.json",
+      "bytes": 1647,
+      "sha256": "0e8a062f1e035c5c18d1b38713f18671a67102ceb953cc6353dbc9f6c7eefd95"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-reader-zero-coverage/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-reader-zero-coverage/stdout.log",
+      "bytes": 62,
+      "sha256": "7ace1da62876bbcb540b8cdaaf3c24549a3ee07a8334f64e8a225fb83de20c76"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-red-reader-missing/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-red-reader-missing/receipt.json",
+      "bytes": 2833,
+      "sha256": "07598b4997d50fc5b9133ef3e1848dba427d063fb3c6b59a8f608ee88a92dad4"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-red-reader-missing/start.json",
+      "bytes": 1663,
+      "sha256": "4cde5508c45acb757a18ca342b1517e5dd7fdf5197197c2a9bd26a3b6ef7e073"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-red-reader-missing/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-red-reader-missing/stdout.log",
+      "bytes": 171,
+      "sha256": "bb824270c06e7db8e56777266e622e808dcb3e3c76a86e8c41be9cce8fd67237"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-red-reader-missing/vitest.json",
+      "bytes": 10450,
+      "sha256": "9d2c5095799a9da63785a8dd55af9bd4b39ba6dbed45bd7584350305b7859343"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-seal-reader/actual-producer-rows.log",
+      "bytes": 18441,
+      "sha256": "0837a8d40083ededc821dddfe92b42dfcdf4326382b78e175aab7e0c69ff2e67"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-seal-reader/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-seal-reader/receipt.json",
+      "bytes": 3073,
+      "sha256": "3ab1b1c431e61fda72939530db06ecda90254e3439e1f560ce457c48df9ed48a"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-seal-reader/start.json",
+      "bytes": 1745,
+      "sha256": "2b737cac483a6277dd4215f8fe292cb5144e0d45679ff40ceb0d3949e1d017ab"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-seal-reader/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-seal-reader/stdout.log",
+      "bytes": 164,
+      "sha256": "ff1f3771d3a1c73d87de7072478bae111a63fc82bd02cbf7104c216e57f206b5"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-seal-reader/vitest.json",
+      "bytes": 6241,
+      "sha256": "f342a4c8437655ae305857a3b729bc5c2611c50fe756e554b957b84d64ada163"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-typecheck-final/entry-script.snapshot",
+      "bytes": 45,
+      "sha256": "8d5fa5bd883fec0979fc2004f1fe1d99aef40570155d550eadc0b03b55513bf0"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-typecheck-final/receipt.json",
+      "bytes": 2727,
+      "sha256": "1b556dda8bb4e7fa3a4ee32ae1b255130b7f84610d6935e97a7938bc18ab87d6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-typecheck-final/start.json",
+      "bytes": 1707,
+      "sha256": "b144cc432f323b5535210f829b7d12e658aa081372de796136dce4963a53e7bc"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-typecheck-final/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-typecheck-final/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-typecheck-seal/entry-script.snapshot",
+      "bytes": 45,
+      "sha256": "8d5fa5bd883fec0979fc2004f1fe1d99aef40570155d550eadc0b03b55513bf0"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-typecheck-seal/receipt.json",
+      "bytes": 2725,
+      "sha256": "63d91b8212bd874bd28415b5de27cd333094772258243c06cac36bb7bfd180f7"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-typecheck-seal/start.json",
+      "bytes": 1705,
+      "sha256": "ea51fbe1d2a0db3dd75fa397f157fda74a8da4fb6230990f9ea881fa7cc3daa2"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-typecheck-seal/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-typecheck-seal/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-typecheck/entry-script.snapshot",
+      "bytes": 45,
+      "sha256": "8d5fa5bd883fec0979fc2004f1fe1d99aef40570155d550eadc0b03b55513bf0"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-typecheck/receipt.json",
+      "bytes": 2887,
+      "sha256": "bafbe7fe97902c555adb4106c5f39cfe642c23804a9d7715a36f5f237fa2e802"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-typecheck/start.json",
+      "bytes": 1706,
+      "sha256": "8ae668dccf770cceadc87e0c241f762bc91dd2205f4ad63bb39e58f5c5453d4d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-typecheck/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-typecheck/stdout.log",
+      "bytes": 153,
+      "sha256": "dacf7915995ba74486454141e379afd534436fcf3f2d9473965fd21a7fb0770b"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-typecheck/typecheck.tsbuildinfo",
+      "bytes": 645613,
+      "sha256": "2dca827d79d7b93d8f194c2768137a3993553524398f6b2ca0dd9176cbaf2efd"
+    },
+    {
+      "path": "logs/claude-channel-20261004/790-worker-plan.md",
+      "bytes": 2151,
+      "sha256": "18e64dd573142082df26b210d6fd2d2ac5b2548772e849b812dd4b7bbba90461"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-baseline-selector-control/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-baseline-selector-control/receipt.json",
+      "bytes": 2955,
+      "sha256": "b52efeb6b576e39b1a1cbf05fcdc6c30dc88428e0e5f1a5dd395acf6d4c407d3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-baseline-selector-control/start.json",
+      "bytes": 1787,
+      "sha256": "4b63c3c342a1b4b226e14139bbd9607db864e1e9a0a1d9c254ef5a132e3bfc33"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-baseline-selector-control/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-baseline-selector-control/stdout.log",
+      "bytes": 178,
+      "sha256": "4402d9ebf324a1b9b18ba31650a023af78c0149688ac3d64bd16931e49b9ebaf"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-baseline-selector-control/vitest.json",
+      "bytes": 7690,
+      "sha256": "568a5dcb3d36c21ecc46c68d741a58a007266da4bca3139d14d3b47a6c402afa"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-focused-final/actual-producer-rows.jsonl",
+      "bytes": 18441,
+      "sha256": "0837a8d40083ededc821dddfe92b42dfcdf4326382b78e175aab7e0c69ff2e67"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-focused-final/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-focused-final/receipt.json",
+      "bytes": 3082,
+      "sha256": "5ee5fdd5ac6ff49797e330ad3803b514ce27353ababb2118c69ab1775120c6df"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-focused-final/start.json",
+      "bytes": 1751,
+      "sha256": "dc120d250fc6a980c3217cb0ea62eee78a7b83ea42ca69069eae33d5fe58168b"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-focused-final/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-focused-final/stdout.log",
+      "bytes": 166,
+      "sha256": "e48721ec7bc5ea0da8551e012659a03aa29ad64c9fb23408d92647d07073f68a"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-focused-final/vitest.json",
+      "bytes": 6241,
+      "sha256": "d30887e31780397ccb59a3311b7d87cce26ccfef8ba9954b2654e2d50b1bb276"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-reader-binding-controls/entry-script.snapshot",
+      "bytes": 19913,
+      "sha256": "fbd3007c83c7054ae1215b46197e19c6c5e0f21cc07d1967ba8253c469bd1fad"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-reader-binding-controls/receipt.json",
+      "bytes": 4593,
+      "sha256": "cb3a62d3f8cbbc352c2b7730d21436b70610a47bd95bb06280aa9f6bc3b21575"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-reader-binding-controls/start.json",
+      "bytes": 3544,
+      "sha256": "214c460b94cdf981f9e04e3eb5320a8060cec54570fd9ccd1ae7917b94717938"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-reader-binding-controls/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-reader-binding-controls/stdout.log",
+      "bytes": 565,
+      "sha256": "8348cdb9b07cc4a6e404c9aa37f736da6a92e08e83f06fa806982e3440ed4aff"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-reader-cli-final/entry-script.snapshot",
+      "bytes": 20326,
+      "sha256": "98c9613c0d8fe2ce875cd14a75803f21c3cfbd96f7563e7851fe76740d3db21e"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-reader-cli-final/reader.json",
+      "bytes": 63,
+      "sha256": "712862ddb03c0fbab6d23f81571383daec81772afcab175c826bd7892dfe3105"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-reader-cli-final/receipt.json",
+      "bytes": 2878,
+      "sha256": "2698842c31071c74d54348faa785839daeed24a856cbef14017f8a11df14794e"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-reader-cli-final/start.json",
+      "bytes": 1685,
+      "sha256": "37f9f78e9bd9067b8e67459f57ac3c3f7b74b903f450eb4115eee67f26cca6ae"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-reader-cli-final/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-reader-cli-final/stdout.log",
+      "bytes": 61,
+      "sha256": "fd21ea006e86b7ae388643dfe1edbd924d7efd74769939d989d6ef79e6614938"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-reader-negative-controls/empty.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-reader-negative-controls/entry-script.snapshot",
+      "bytes": 18434,
+      "sha256": "df1f8e534d81d9351c3bded434a173e39decd38e11f15eb41b218ce2401deb06"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-reader-negative-controls/receipt.json",
+      "bytes": 4878,
+      "sha256": "83e928dce75af25b218bb9114f75abfce6dd08fd6b54a4bfdf2fb30e17fc6ab4"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-reader-negative-controls/start.json",
+      "bytes": 3685,
+      "sha256": "4c79f6b3faa17ad88b5390d97c52118e30acf9b84cbfbdacd6b82482703e1a19"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-reader-negative-controls/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-reader-negative-controls/stdout.log",
+      "bytes": 1029,
+      "sha256": "d239f1ea0dbf8faca8f5a000e109d070989f49ccfd33a8a76ca011370fcffb7e"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-require-safe-final/entry-script.snapshot",
+      "bytes": 20326,
+      "sha256": "98c9613c0d8fe2ce875cd14a75803f21c3cfbd96f7563e7851fe76740d3db21e"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-require-safe-final/receipt.json",
+      "bytes": 3145,
+      "sha256": "5e35c6f2ccbeeab0a976f9a445fd48f0c409d99785e1e4d05cb62ce817088b7f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-require-safe-final/start.json",
+      "bytes": 2098,
+      "sha256": "0be0f4e320ada91aa310c044df6b76f477764549903e7f0af3821e5b3319d355"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-require-safe-final/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-require-safe-final/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-review.json",
+      "bytes": 6696,
+      "sha256": "1c984ad8fd9222b404349aa6d20ccadce1d03fd7f575d7a64541b26612763ce6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/791-review.md",
+      "bytes": 3633,
+      "sha256": "72b970f78dbe8454850303900e9651f54464f65366aadee4a8becd5d085a5869"
+    }
+  ]
+}

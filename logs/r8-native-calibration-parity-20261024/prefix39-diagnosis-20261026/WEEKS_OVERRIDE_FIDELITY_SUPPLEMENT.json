@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "review_kind": "retained_read_only_weeks_override_fidelity_supplement",
+  "verdict": "AFFIRMED_FOR_TURNS_1_TO_39_CONTROL_AND_COMBAT__TERMINAL_GEOMETRY_LIMIT",
+  "head": "33f99fc5aac9a620a7bb0000cf233d86f270ce24",
+  "source": {
+    "path": "src/scenario/scenario_runner.ts",
+    "sha256": "b811a55f165a1664e87b48be28008ada9fec7486ddb5c049b2013fbf78bd0972"
+  },
+  "retained_initial_state_identity": {
+    "prefix39_initial_save_bytes": 1373722,
+    "prefix39_initial_save_sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+    "n102_initial_save_bytes": 1373722,
+    "n102_initial_save_sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+    "shared_fields": {
+      "seed": "harness-seed",
+      "phase": "war",
+      "turn": 0,
+      "playerFaction": null,
+      "calendar_start": "1992-04-06"
+    }
+  },
+  "source_trace": {
+    "original_scenario_loaded": "scenario_runner.ts:2470-2478",
+    "effective_scenario_duration_copy_and_run_id": "scenario_runner.ts:2500-2508",
+    "startup_uses_original_scenario": "scenario_runner.ts:2602-2608",
+    "events_use_original_scenario_start": "scenario_runner.ts:2873-2878",
+    "loop_bound_only": "scenario_runner.ts:2881",
+    "actions_use_original_scenario_turns": "scenario_runner.ts:2883-2890",
+    "bots_receive_state_and_graph_context_without_horizon": "scenario_runner.ts:2893-2902",
+    "public_turn_receives_state_graph_data_events_without_horizon": "scenario_runner.ts:2953-2972",
+    "effective_scenario_checkpoint_and_reference_consumers": [
+      "scenario_runner.ts:2549-2551",
+      "scenario_runner.ts:2575",
+      "scenario_runner.ts:2878",
+      "scenario_runner.ts:3688-3692",
+      "scenario_runner.ts:3731"
+    ],
+    "week39_save_precedes_terminal_projection": "scenario_runner.ts:3465-3498",
+    "terminal_projection": "scenario_runner.ts:3553-3606",
+    "terminal_projection_is_excluded_from_live_loop": "src/sim/combat/corps_front_sectors.ts:745-750"
+  },
+  "conclusion": "The exact initial-save identity is corroborating evidence, and the source trace closes the behavioral question: weeksOverride leaves the declared 188-week scenario in buildScenarioStartupState, uses the original scenario for per-week actions and event definitions, and passes no horizon value into bots, runOneTurn, or public runTurn. The override supplies the effective run fingerprint/reference/checkpoint horizon and the week_index < weeks stop, so turns 1-39 control and combat are a valid prefix comparison; fingerprint 2272 versus 6deb is not a different seed or startup state. The limit is terminal state: save_w39/checkpoint capture occurs before a post-loop final-save-only geometry projection that source explicitly excludes from the live loop because it changes long-horizon calibration. Therefore the 704 controller result and three n91/n92 losses are genuine first-39 rejection evidence, while final_save roster/sector-derived health, including stranded_brigades, is not by itself a like-for-like predictor of an intermediate week-39 state in the 188-week campaign. This supplement does not waive the failed gate, authorize 188, or establish full-save, timeline, policy, native-runtime, or 188-week parity; the retained native cohort policy/source/runtime caveat remains."
+}

@@ -1,0 +1,38 @@
+{
+  "scope": "Diagnostic raw retained states from FAILED native attempt, not qualification",
+  "turn": 39,
+  "score": 703,
+  "losses": [
+    "op:brcko:bukvik_gornji_2",
+    "op:gorazde:kolovarice",
+    "op:srebrenica:obadi",
+    "op:trnovo:tosici"
+  ],
+  "stateSha256": "a983480115319876428342cbd040ebc91c40766d544930ba075c4185bffd9d73",
+  "formations": [
+    {
+      "turn": 2,
+      "locations": {
+        "arbih_109th_mountain": "op:hadzici:hadzici",
+        "arbih_181st_mountain": "op:hadzici:lokve",
+        "arbih_182nd_vitezka_light": "op:hadzici:luke"
+      }
+    },
+    {
+      "turn": 6,
+      "locations": {
+        "arbih_109th_mountain": "op:hadzici:lokve",
+        "arbih_181st_mountain": "op:trnovo:kijevo_2",
+        "arbih_182nd_vitezka_light": "op:trnovo:delijas"
+      }
+    },
+    {
+      "turn": 16,
+      "locations": {
+        "arbih_109th_mountain": "op:trnovo:kijevo_2",
+        "arbih_181st_mountain": "op:foca:mazlina",
+        "arbih_182nd_vitezka_light": "op:trnovo:delijas"
+      }
+    }
+  ]
+}

@@ -17,6 +17,7 @@
 - **Mid-April:** **Foča falls** — "Serbs captured Foca in April" (BB1 p.187)
 - **Mid-April:** **Višegrad falls** to JNA/VRS [GK; BB1 p.187 confirms Drina valley fighting]
 - **16 April:** Bihać established as one of seven territorial districts (okrug) under Bosnian TD Staff (BB1 p.184)
+- **17 April:** **Donji Vakuf town taken by the Serb SJB** — "The Serb SJB of Donji Vakuf was set up on 17 April 1992 and took control of the entire town the same day"; the municipality is renamed *Srbobran* (ICTY Stanišić & Župljanin TJ Vol I ¶238; Krajišnik TJ ¶438 — note both rest on the **same** SJB Srbobran report to the Banja Luka CSB of 4 October 1993, P1799 / P758.F, and are not independent). An institutional takeover, not a battle. The town then serves as the VRS springboard for the southern axis of Vrbas 92 (BB2 printed p.330: "from the direction of Serb-held Donji Vakuf (Srbobran)")
 - **April:** Kupres battle [map reference BB1 TOC]
 - **April:** JNA formations support SDS political takeovers in Prijedor-Sanski Most-Kljuc region — seizing government offices, police, utilities (BB1 p.181)
 - **April–May:** First clashes at Bosanski Brod; HVO/HV stop Serb takeover of municipality (BB1 p.181)
@@ -47,6 +48,9 @@
 - **23 May:** VRS military operations begin in Prijedor area — "invaded several villages and towns near Prijedor, Sanski Most, and Kljuc" (BB1 p.181)
 - **30 May:** Muslim/Croat counterattack seizes part of Prijedor city before being overwhelmed (BB1 p.181)
 - **12 May:** VRS formally created from JNA Second Military District [GK; BB1 p.177 describes formation]
+- **6–7 May:** Donji Vakuf — general Serb mobilisation declared; Muslims told to hand in their weapons; the Serb flag is raised over the municipality building the following day (ICTY Stanišić & Župljanin TJ Vol I ¶239; Krajišnik TJ ¶439)
+- **21 May:** Donji Vakuf — **Korenići attacked** by 18 Donji Vakuf Serb police and 12 Banja Luka CSB members; station commander Jovan Šatara reports "no great resistance by Muslim extremists" (Stanišić TJ ¶242). A police action, not a brigade assault
+- **May–September (whole period):** "the 19th Infantry Brigade of the VRS and Serb police, fighting together, took control of the territory of Donji Vakuf"; **at least seven clashes** between the Serb police (sometimes with VRS support) and Muslims (Stanišić TJ ¶242; Krajišnik TJ ¶439). This municipality-wide summary is the SJB's **own report** and is contradicted at village level for Prusac — see 17 August below
 
 **Territorial picture:** RS ~45–55% by area. Eastern towns held but Drina valley heavily contested. Srebrenica was initially seized, then recaptured by ARBiH on 8-10 May; it is not VRS-held in the May end-state. Corridor still severed. Goražde uncaptured. Prijedor area being consolidated through ethnic cleansing.
 
@@ -61,6 +65,8 @@
 - **Early June:** 1st Krajina Corps under General Momir Talić begins preliminary operations between Doboj and Derventa (BB1 p.182)
 - **20 June:** Kotorsko and Johovac (north of Doboj) fall, clearing the path for corridor operation (BB1 p.182)
 - **24 June:** **Operation "Corridor 92" launched** — 1st Krajina Corps first phase, attempting breakthrough to East Bosnian Corps NE of Gradačac (BB1 p.182)
+- **3 June:** Donji Vakuf — **Torlakovac attacked by Serb police and the VRS**; Jovan Šatara reports "no serious resistance" was put up by the Muslim villagers **who fled** (ICTY Stanišić & Župljanin TJ Vol I ¶242). The Sokolina mosque, in the same operational cell, is set on fire in June 1992 (¶249)
+- **13 June:** Donji Vakuf — the 19th Partisan Division establishes a **town command** for Donji Vakuf under the 30th Division. Prosecution military expert Ewan Brown: town commands were set up "where there was little civilian presence or in areas that had been recently captured by the military" (Stanišić TJ ¶240–241)
 - **26 June:** Breakthrough achieved — "Two days of heavy fighting enabled the units to link up and cut the connection between enemy-held Modrica and Gradacac" (BB1 p.182)
 - **28 June:** **Modriča falls** to VRS (BB1 p.182)
 - Supporting attacks near Derventa–Bosanski Brod "achieved little gain against strong HV/HVO resistance" (BB1 p.182)
@@ -97,6 +103,7 @@
 - **Mid-August:** Jajce campaign "began in earnest" — VRS launches first major attack, advancing to within 2 km of town (BB1 p.183)
 - VRS deploys 7,000–8,000 troops from 30th Infantry Division, 1st Krajina Corps. 20–30 tanks, 30–50 field artillery >100mm (BB1 p.183)
 - Defenders: "over 5,500 highly motivated HVO and Bosnian Territorial Defense troops" (BB1 p.183)
+- **17 August:** Donji Vakuf — **the attack on Prusac FAILS.** "Prusac village was attacked by 56 Serb policemen and a number of RS soldiers, but by nightfall, after hand-to-hand combat, the Serbs had to return to their original positions" (ICTY Stanišić & Župljanin TJ Vol I ¶242). The RS MUP's own account agrees: "the operation was not successful because of poor command and preparation" (Exhibit P1757, RS MUP Srbobran, 4 October 1993, read into the Brđanin transcript of 3 March 2003, pp. 15031–15034). **No Serb capture of Prusac is established anywhere in the 1992 record**; three Prusac mosques were *damaged* — not the village taken — in August or September (¶249, ¶264)
 - Attacks around Bosanski Brod during August achieve "only limited success" (BB1 p.182)
 - Drina valley: ARBiH attacks from late August begin retaking territory near Višegrad (BB1 p.187)
 

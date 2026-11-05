@@ -1,0 +1,132 @@
+{
+  "schema": "awwv.pale.806.correction-result.v1",
+  "writes_closed": true,
+  "opening_head": "78fc1a1d25ec64573e276e4d667f328d155bdc17",
+  "review_addressed": "807 blocking default-off evaluation-order and missing differential regression only",
+  "verdict": "CORRECTED_FOCUSED_GREEN_PENDING_807_TARGETED_VERIFICATION",
+  "correction": {
+    "production_order_restored": true,
+    "ordered_indices": {
+      "eligibility": 793,
+      "cap": 1187,
+      "production_pool_field": 1595
+    },
+    "regular_production_militia_pool_key_calls": 1,
+    "lazy_early_skip_calls": 2,
+    "off_contract": "Invalid/ineligible/at-cap production guards retain opening-HEAD pool-field/key/helper reachability; optional observer call does not evaluate lazy arguments when absent.",
+    "on_contract": "Selected ineligible/at-cap pool association is resolved once inside observer-owned try/catch; association failures cannot escape.",
+    "post_cap_contract": "Missing/empty/reserve/transfer rows reuse the single already-evaluated production key."
+  },
+  "validation": {
+    "retained_red": {
+      "path": "attempt-01-red",
+      "exit": 1,
+      "result": "8 tests; 1 expected failure: pool selection evaluated"
+    },
+    "corrected_observer": {
+      "path": "attempt-03-final-observer",
+      "exit": 0,
+      "result": "1 file; 8 passed"
+    },
+    "final_typecheck": {
+      "path": "attempt-04-final-typecheck",
+      "exit": 0,
+      "command": "node node_modules/typescript/bin/tsc --noEmit --incremental false -p tsconfig.json"
+    },
+    "reused_unaffected": {
+      "path": "../806-reinforcement-allocation/attempt-08-final-focused",
+      "result": "7 files; 96 passed",
+      "reason": "Correction touches only early observer association and its dedicated regression."
+    }
+  },
+  "field_contract": {
+    "unchanged_from_806": true,
+    "prefix": "[reinforcement_allocation]",
+    "topic": "reinforcement_allocation",
+    "selector": "AWWV_DEBUG_REINFORCEMENT_POOLS",
+    "source": "formation_spawn.reinforce",
+    "branch": "regular",
+    "events": [
+      "stage_open",
+      "recipient",
+      "stage_close"
+    ],
+    "stage_close_scope": "regular stage before enclave reinforcement"
+  },
+  "source_pins": [
+    {
+      "path": "src/sim/combat/reinforcement_allocation_diagnostic.ts",
+      "bytes": 6244,
+      "sha256": "f98037e0ab7def9cc09695431a150263b9c35957da13084a158bbed5f104b039"
+    },
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "bytes": 20275,
+      "sha256": "b7467c47f97c5c349535b59aaeafa3dea0bc5d03314961c5ac17ef3a4283434a"
+    },
+    {
+      "path": "src/sim/formation_spawn.ts",
+      "bytes": 47679,
+      "sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa"
+    },
+    {
+      "path": "tests/reinforcement_allocation_diagnostic.test.ts",
+      "bytes": 20408,
+      "sha256": "682027bd41c1dc84817166847a1a0a5e388aa0170b96149e4a9b56a924c48a75"
+    },
+    {
+      "path": "tests/reason_code_debug.test.ts",
+      "bytes": 10435,
+      "sha256": "44a60e84d8b22d1cb629364a84e10257d3454531678b987a75582ddaee9a756c"
+    }
+  ],
+  "protected_controls": [
+    {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 102947714,
+      "sha256": "edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9",
+      "expected_bytes": 102947714,
+      "expected_sha256": "edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9",
+      "matches": true
+    },
+    {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "expected_bytes": 1041,
+      "expected_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "matches": true
+    },
+    {
+      "path": "data/calibration/engine_health_thresholds.json",
+      "bytes": 3775,
+      "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d",
+      "expected_bytes": 3775,
+      "expected_sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d",
+      "matches": true
+    },
+    {
+      "path": "data/source/calibration/painted_control_oct1995.json",
+      "bytes": 35266,
+      "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b",
+      "expected_bytes": 35266,
+      "expected_sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b",
+      "matches": true
+    }
+  ],
+  "old_806_seal": {
+    "path": "logs/claude-channel-20261004/806-reinforcement-allocation/attempt-13-seal/806-result.json",
+    "bytes": 19046,
+    "sha256": "2a664bb4da698504eb3ca3d7f5f19b1165c41b34507655e7d6ae114d3100fa1a"
+  },
+  "git_status_short": [
+    "M src/sim/combat/reason_code_debug.ts",
+    " M src/sim/formation_spawn.ts",
+    " M tests/reason_code_debug.test.ts",
+    "?? src/sim/combat/reinforcement_allocation_diagnostic.ts",
+    "?? tests/reinforcement_allocation_diagnostic.test.ts"
+  ],
+  "campaigns_run": 0,
+  "full_suite_runs": 0,
+  "residual_scope": "No n80 history recovery, 703 campaign neutrality measurement, historical causality claim, threshold change, or campaign authorization."
+}

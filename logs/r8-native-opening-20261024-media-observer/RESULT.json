@@ -1,0 +1,2158 @@
+{
+  "schema": "awwv.r8.media-observed-native-opening.v1",
+  "status": "BLOCKED_UNPAIRED_WARROOM_MEDIA_ABORT",
+  "sourceCommit": "7e51339e2e90e035748d2a3d19827cd55d05e284",
+  "integration": "retained uncommitted repaired harness; no commit or push",
+  "nativeInvocations": 1,
+  "nativeRetries": 0,
+  "packageBuilds": 0,
+  "campaigns": 0,
+  "calibrationTuning": false,
+  "baselineAdoption": false,
+  "sourceChangesThisPacket": false,
+  "push": false,
+  "label": "r8-native-opening-20261024-media-observer-rbih-01",
+  "faction": "RBiH",
+  "turn": 0,
+  "native": {
+    "path": "tmp/r8-native-opening-20261024-media-observer/root/opening-rbih-01/receipt.json",
+    "bytes": 2725,
+    "sha256": "075b78f73cb2abb0bfcff62c456320c2b191497aacb308c59423ba9dbf8794e3",
+    "childExit": 1,
+    "wrapperExit": 1,
+    "timedOut": false,
+    "capMs": 900000,
+    "start": "2026-10-24T09:13:46.033Z",
+    "end": "2026-10-24T09:19:23.273Z"
+  },
+  "elapsedSeconds": 337.24,
+  "review": {
+    "prelaunch": "GO",
+    "pre": {
+      "path": "tmp/r8-native-opening-20261024-media-observer/review/PRELAUNCH_REVIEW.md",
+      "bytes": 4616,
+      "sha256": "909409947ef08458e3bcb92b819ec027df8ac945b3339cf9f293c7e07369fade"
+    },
+    "overall": "NO-GO",
+    "partial": "GO for measured observer reach/full tour/counters/RBiHturn0 Save-load",
+    "post": {
+      "path": "tmp/r8-native-opening-20261024-media-observer/review/POSTRESULT_REVIEW.md",
+      "bytes": 5149,
+      "sha256": "643e6dfec62b5935338145d82da15a5c6e0c6a6bed33991b4c2d59e02b8a4d3e"
+    }
+  },
+  "source": [
+    {
+      "path": "tools/ui/paradox_local_qa.cjs",
+      "bytes": 321118,
+      "sha256": "2dcf3219852bbe97712de54ad5d65d503b382a8b06729fbc72b72ebb59b239b3",
+      "expected": "2dcf3219852bbe97712de54ad5d65d503b382a8b06729fbc72b72ebb59b239b3",
+      "exact": true
+    },
+    {
+      "path": "tests/paradox_local_qa_harness.test.ts",
+      "bytes": 154125,
+      "sha256": "9c8cc0eb0f9010f54b3db7adfcf4edd5c3a2d4943227cb629fef298960cc7790",
+      "expected": "9c8cc0eb0f9010f54b3db7adfcf4edd5c3a2d4943227cb629fef298960cc7790",
+      "exact": true
+    }
+  ],
+  "reader": {
+    "path": "tmp/r8-native-shakedown-20261024/prep/read_native_result.cjs",
+    "bytes": 7150,
+    "sha256": "4acc5c288d25aefaba70231bd2646cd871fdd39083bc9d5173639bad2e5e590d"
+  },
+  "events": 81,
+  "counterCoverage": {
+    "frozen": 12,
+    "available": 11,
+    "attempted": 11,
+    "verified": 11,
+    "unavailable": "arbih_17th_vitezka_mountain",
+    "substitution": false
+  },
+  "saveLoad": {
+    "beforeStateHash": "b4005fbfe98470c55efc5fec50ccf5708cbbddb4f5eebb90e7a53f4a069951b6",
+    "expectedStateHash": "9f2bd525a43f9c21402b572b32428d7417af40716123aa5f368033087beaef6b",
+    "afterStateHash": "9f2bd525a43f9c21402b572b32428d7417af40716123aa5f368033087beaef6b",
+    "beforeAutosaveHash": "3407a8e6590eb0124d36ee3c359f36055a673e9548d59324793c9b1d19feb0bc",
+    "afterAutosaveHash": "3407a8e6590eb0124d36ee3c359f36055a673e9548d59324793c9b1d19feb0bc",
+    "loadedProjectionProof": {
+      "actualHash": "9f2bd525a43f9c21402b572b32428d7417af40716123aa5f368033087beaef6b",
+      "expectedHash": "9f2bd525a43f9c21402b572b32428d7417af40716123aa5f368033087beaef6b",
+      "exactBytes": true
+    },
+    "canonicalBytesEqual": true
+  },
+  "manualSavedEvidence": {
+    "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\r8-native-opening-20261024-media-observer-rbih-01\\rbih\\manual-quicksave.json",
+    "sha256": "3407a8e6590eb0124d36ee3c359f36055a673e9548d59324793c9b1d19feb0bc",
+    "bytes": 1379940
+  },
+  "strictReader": {
+    "path": "tmp/r8-native-opening-20261024-media-observer/root/strict-rbih-01/receipt.json",
+    "bytes": 2941,
+    "sha256": "5683c6199e31cc0f6b905eea7baa95c7a654eb5a150c0940651a2c2c78567c8a",
+    "childExit": 2,
+    "wrapperExit": 2,
+    "timedOut": false,
+    "capMs": 60000,
+    "start": "2026-10-24T09:19:38.415Z",
+    "end": "2026-10-24T09:19:38.487Z",
+    "checks": {
+      "single_success_entry": true,
+      "exact_faction_turn": true,
+      "exact_save_route": true,
+      "canonical_bytes_equal": true,
+      "manual_saved_evidence_bound": true,
+      "exact_hydrated_projection": true,
+      "strict_runtime_diagnostics": false,
+      "expected_abort_records_named": true,
+      "lifecycle_signal_pool_present": true,
+      "lifecycle_signal_pool_has_no_error": true,
+      "ambient_lifecycle_pairs_exact": true,
+      "no_unresolved_lines": true,
+      "final_seal_zero": true,
+      "raw_archives_exact": true
+    },
+    "diagnostics": {
+      "console": 0,
+      "page": 0,
+      "unresolved_network": 1,
+      "unexpected_main_stderr": 0,
+      "expected_startup": 0,
+      "expected_teardown": 0,
+      "expected_navigation": 0,
+      "expected_tile": 0,
+      "expected_ambient": 0,
+      "lifecycle_signals": 175,
+      "lifecycle_errors": 0,
+      "ambient_pair_checks": [],
+      "unconsumed_lifecycle_signals": 175
+    }
+  },
+  "observer": {
+    "realSignals": 175,
+    "kinds": {
+      "canplay": 12,
+      "loadeddata": 3,
+      "loadedmetadata": 3,
+      "pause": 28,
+      "play": 58,
+      "playing": 38,
+      "progress": 9,
+      "request-start": 3,
+      "suspend": 9,
+      "waiting": 12
+    },
+    "browserAbortSignals": 0,
+    "errorSignals": 0,
+    "matchingRequestStartOffsets": [
+      {
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "offsetMs": -192167
+      }
+    ],
+    "nearFailureSignals": [
+      {
+        "kind": "play",
+        "signalSequence": 75,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:64245/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:64245",
+        "observedAtMs": 1792833429701,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": true,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 29.015026,
+          "duration": 30,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 76,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:64245/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:64245",
+        "observedAtMs": 1792833429780,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 29.092338,
+          "duration": 30,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 77,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:64245/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:64245",
+        "observedAtMs": 1792833430676,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "progress",
+        "signalSequence": 78,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:64245/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:64245",
+        "observedAtMs": 1792833430678,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "suspend",
+        "signalSequence": 79,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:64245/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:64245",
+        "observedAtMs": 1792833430678,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 80,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:64245/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:64245",
+        "observedAtMs": 1792833430678,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 81,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:64245/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:64245",
+        "observedAtMs": 1792833430678,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "play",
+        "signalSequence": 82,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:64245/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:64245",
+        "observedAtMs": 1792833430954,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0.205598,
+          "duration": 30,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      },
+      {
+        "kind": "pause",
+        "signalSequence": 83,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:64245/assets/ambient_warroom-CO4FPnyV.ogg",
+        "origin": "http://127.0.0.1:64245",
+        "observedAtMs": 1792833430986,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0.237837,
+          "duration": 30,
+          "mediaError": null
+        },
+        "mediaStateUnavailable": [],
+        "mediaStateReadErrors": {}
+      }
+    ],
+    "limit": "Observed waiting/progress/suspend/canplay/playing is not an approved abort pair or general playback-health proof."
+  },
+  "blockingNetworkFailures": [
+    {
+      "kind": "requestfailed",
+      "method": "GET",
+      "url": "http://127.0.0.1:64245/assets/ambient_warroom-CO4FPnyV.ogg",
+      "resourceType": "media",
+      "isMainFrame": false,
+      "failure": {
+        "errorText": "net::ERR_ABORTED"
+      },
+      "eventCount": 36,
+      "teardownStarted": false,
+      "observedAtMs": 1792833430678,
+      "requestInitiatedAtMs": 1792833430676,
+      "mapNavigationWindow": null,
+      "tileFetchIdentity": null
+    }
+  ],
+  "expectedAmbientLifecycleAborts": [],
+  "consoleMessages": [],
+  "pageErrors": [],
+  "fieldAbort": "not observed in this run; no causal improvement claim",
+  "package": {
+    "pre": {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/package-check-pre-01/receipt.json",
+      "bytes": 2816,
+      "sha256": "968ad4c5424f526278bfa8d2d3d2622c034b69b63e1fb30ed308475bc1830c00",
+      "childExit": 0,
+      "wrapperExit": 0,
+      "timedOut": false,
+      "capMs": 120000,
+      "start": "2026-10-24T09:09:39.759Z",
+      "end": "2026-10-24T09:09:43.365Z"
+    },
+    "post": {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/package-check-post-01/receipt.json",
+      "bytes": 2818,
+      "sha256": "927e8d34bc9bddd54861ccca4d2c41689a527fb1d48379d034057224bec8c292",
+      "childExit": 0,
+      "wrapperExit": 0,
+      "timedOut": false,
+      "capMs": 120000,
+      "start": "2026-10-24T09:19:53.239Z",
+      "end": "2026-10-24T09:19:56.751Z"
+    },
+    "inventory": {
+      "schema": "awwv.r8-native-package-check.v1",
+      "pass": true,
+      "manifest": "tmp/r8-native-shakedown-20261024/root/package-bind-02/package-manifest.json",
+      "expected_files": 1213,
+      "actual_files": 1213,
+      "missing": [],
+      "extra": [],
+      "changed": []
+    },
+    "manifest": {
+      "path": "tmp/r8-native-shakedown-20261024/root/package-bind-02/package-manifest.json",
+      "bytes": 253075,
+      "sha256": "14a29eaee1a2e8b272cd98f992b4e3784e90507dc9340f5e1a0c41f7b0fac25f"
+    }
+  },
+  "preservation": {
+    "session": {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/postrun-preservation-01/postrun-preservation.json",
+      "bytes": 39493,
+      "sha256": "56d2cc194cb0df8e93ad5575be2ed5a80791cd54ee1acf89b965a2fc797fc2e9"
+    },
+    "guard": {
+      "path": "tmp/r8-native-opening-20261024-media-observer/final-preservation.json",
+      "bytes": 1339,
+      "sha256": "e641d408883e2c7621b3c596440b3405e9d46f32d5b55154fda942819d7642ad"
+    },
+    "pass": true,
+    "priorBindings": 2811,
+    "runs": {
+      "n91": {
+        "files": 31,
+        "mismatches": 0
+      },
+      "n92": {
+        "files": 38,
+        "mismatches": 0
+      },
+      "n93": {
+        "files": 40,
+        "mismatches": 0
+      }
+    },
+    "packages": [
+      {
+        "manifest": "tmp/r8-shakedown-20261023/root/package-freeze.json",
+        "files": 1213,
+        "expected": 1213,
+        "extra": [],
+        "mismatches": [],
+        "pass": true
+      },
+      {
+        "manifest": "tmp/r8-shakedown-20261023/root/package-freeze-02.json",
+        "files": 1213,
+        "expected": 1213,
+        "extra": [],
+        "mismatches": [],
+        "pass": true
+      },
+      {
+        "manifest": "tmp/r8-native-shakedown-20261024/root/package-bind-02/package-manifest.json",
+        "files": 1213,
+        "expected": 1213,
+        "extra": [],
+        "mismatches": [],
+        "pass": true
+      }
+    ],
+    "telemetry": [
+      {
+        "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+        "bytes": 121114591,
+        "sha256": "7160ff4b4c13f564a5ef25986b96e95004b39707dde5fffb067c471b77fe7e20",
+        "exact": true
+      },
+      {
+        "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+        "bytes": 1041,
+        "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+        "exact": true
+      }
+    ],
+    "runningNative": 0,
+    "openingGuard": {
+      "path": "tmp/r8-native-opening-20261024-media-observer/opening-preservation.json",
+      "bytes": 625203,
+      "sha256": "584f62178a69cc0dd220d5914d325a108feb97bcd01c4da48a65e48b5f4ddebd"
+    }
+  },
+  "documentation": {
+    "tests": 81,
+    "path": "tmp/r8-native-opening-20261024-media-observer/root/docs-final-01/receipt.json",
+    "bytes": 2711,
+    "sha256": "d7ad7529b38b4fb7c477c2cacf746b3f8c703ba4848f64824317c7832fab45fa",
+    "childExit": 0,
+    "wrapperExit": 0,
+    "timedOut": false,
+    "capMs": 180000,
+    "start": "2026-10-24T09:24:33.700Z",
+    "end": "2026-10-24T09:24:36.493Z",
+    "index": {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/index-final-02/receipt.json",
+      "bytes": 2713,
+      "sha256": "d42ff0717312f6c8d1b8d883a67f881ee77a15572472acde46c9bc76b253b7b6",
+      "childExit": 0,
+      "wrapperExit": 0,
+      "timedOut": false,
+      "capMs": 180000,
+      "start": "2026-10-24T09:24:33.464Z",
+      "end": "2026-10-24T09:24:33.566Z"
+    },
+    "files": [
+      {
+        "path": "docs/PROJECT_LEDGER.md",
+        "bytes": 1247422,
+        "sha256": "406efb6bd661bfe223af3ca579dfd0915942bae39639e3d1304c2d8c2588c308"
+      },
+      {
+        "path": "docs/PROJECT_LEDGER_KNOWLEDGE.md",
+        "bytes": 1337573,
+        "sha256": "005e7612f9dc85491b07215eb951eecff62bdadeb86b37d4bc082ccfd41f28b9"
+      },
+      {
+        "path": "docs/plans/2026-07-31-full-campaign-electron-validation-plan.md",
+        "bytes": 195215,
+        "sha256": "28ef840819b7b810d83d9667bcbe78e27d440debbacb6a9a4a38b0bb028be11f"
+      },
+      {
+        "path": "docs/plans/COMMAND_BOARD.md",
+        "bytes": 19540,
+        "sha256": "1c65f28fc2409c19b070dca77feb9fe67dc3bb00b0f095a72ec2dc62dd871434"
+      },
+      {
+        "path": "docs/plans/MASTER_ROADMAP.md",
+        "bytes": 58554,
+        "sha256": "6cc5b2a34969c0c58e136e7499fc95f28be6e145829fcf8cdc652a1a8e66b687"
+      },
+      {
+        "path": "docs/plans/plan_index.yml",
+        "bytes": 7155,
+        "sha256": "eff9d1ca2c13e1578d25cdec957765df6622b406d4a8326ef4198bd14fa16cb3"
+      }
+    ]
+  },
+  "reused": [
+    {
+      "path": "logs/r8-media-abort-20261024/RESULT.json",
+      "bytes": 46821,
+      "sha256": "756ef5e3710898b5b8219e057063f5ae7963e708c654733cdbddb0adfe3f3b13"
+    },
+    {
+      "path": "logs/r8-native-opening-20261024-counter-repair/RESULT.json",
+      "bytes": 88785,
+      "sha256": "f33a346872972f697d938d355855459ca94c10de2f964e9f487c0fae33b7bbc3"
+    },
+    {
+      "path": "logs/r8-operation-release-regression-20261024/RESULT.json",
+      "bytes": 271796,
+      "sha256": "c228e045ab277024b1660ffa311c847824a6604f4802b0d19c9ec6626c16040e"
+    },
+    {
+      "path": "tmp/r8-native-shakedown-20261024/reader-closure-03/CLOSURE.json",
+      "bytes": 10683,
+      "sha256": "8a923d09836a443d569d69ee67399f12e5d402129738ec2e0efdb8d4219518d8"
+    }
+  ],
+  "unreached": [
+    "Ajnie native turn15/16 handoff proof",
+    "RBiH/RS/HRHB24-week and turn24 Save/load",
+    "RS/HRHB opening Save/load",
+    "Final native acceptance"
+  ],
+  "stop": "Exactly one opening authority consumed; no retry, source fix, threshold change or reclassification follows. Retained evidence must resolve the unpaired warroom request before another separately authorized native attempt.",
+  "runtimeEvidence": [
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-native-opening-20261024-media-observer-rbih-01/rbih/final-autosave.json",
+      "bytes": 1379940,
+      "sha256": "3407a8e6590eb0124d36ee3c359f36055a673e9548d59324793c9b1d19feb0bc"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-native-opening-20261024-media-observer-rbih-01/rbih/initial-autosave.json",
+      "bytes": 1456427,
+      "sha256": "bfc75b4717a2d781a7b374e059e23128436ad62789eea04df465aad6bc25a920"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-native-opening-20261024-media-observer-rbih-01/rbih/manifest.json",
+      "bytes": 2298,
+      "sha256": "f5ae85e5293d7d47978f15398badeedec22751b61c6da40f95b894ab4884784c"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-native-opening-20261024-media-observer-rbih-01/rbih/manual-quicksave.json",
+      "bytes": 1379940,
+      "sha256": "3407a8e6590eb0124d36ee3c359f36055a673e9548d59324793c9b1d19feb0bc"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/harness-snapshots/r8-native-opening-20261024-media-observer-rbih-01-2dcf3219852bbe97712de54ad5d65d503b382a8b06729fbc72b72ebb59b239b3.cjs",
+      "bytes": 321118,
+      "sha256": "2dcf3219852bbe97712de54ad5d65d503b382a8b06729fbc72b72ebb59b239b3"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/main-process-output/r8-native-opening-20261024-media-observer-rbih-01-rbih.jsonl",
+      "bytes": 529,
+      "sha256": "9ff5be4aafc47d25332147238178e7fafb4b5602a26bb5ecd55c3eda91e13f30"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/paradox-local-qa-error-r8-native-opening-20261024-media-observer-rbih-01.txt",
+      "bytes": 413,
+      "sha256": "554150a7396baaaf60bb9cb0d972a991673653425ff8ef6f581368aca23ea1b4"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/paradox-local-qa-netlog-r8-native-opening-20261024-media-observer-rbih-01.json",
+      "bytes": 4307377,
+      "sha256": "65a287c0e66efb153c16af1b1ff575eaa91aadacd7bffd9aae13bb564e8d87e9"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/paradox-local-qa-progress-r8-native-opening-20261024-media-observer-rbih-01.json",
+      "bytes": 3827304,
+      "sha256": "e07a82a2775a8908e33b67e29aac7fd4bac6fd4795ac2b11bbdf7730f2c0a8ff"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/paradox-local-qa-save-menu-inspection-r8-native-opening-20261024-media-observer-rbih-01.json",
+      "bytes": 98181,
+      "sha256": "5b9afd1e8c3a5dbb39893dbcf85f974bc362559521c17a301c2eea2f3f2675c2"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/save-menu-inspection-payloads/r8-native-opening-20261024-media-observer-rbih-01/after-canonical-autosave.json",
+      "bytes": 1379940,
+      "sha256": "3407a8e6590eb0124d36ee3c359f36055a673e9548d59324793c9b1d19feb0bc"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/save-menu-inspection-payloads/r8-native-opening-20261024-media-observer-rbih-01/after-projected.json",
+      "bytes": 479227,
+      "sha256": "9f2bd525a43f9c21402b572b32428d7417af40716123aa5f368033087beaef6b"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/save-menu-inspection-payloads/r8-native-opening-20261024-media-observer-rbih-01/before-canonical-autosave.json",
+      "bytes": 1379940,
+      "sha256": "3407a8e6590eb0124d36ee3c359f36055a673e9548d59324793c9b1d19feb0bc"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/save-menu-inspection-payloads/r8-native-opening-20261024-media-observer-rbih-01/before-projected.json",
+      "bytes": 459522,
+      "sha256": "b4005fbfe98470c55efc5fec50ccf5708cbbddb4f5eebb90e7a53f4a069951b6"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/save-menu-inspection-payloads/r8-native-opening-20261024-media-observer-rbih-01/expected-hydrated-projected.json",
+      "bytes": 479227,
+      "sha256": "9f2bd525a43f9c21402b572b32428d7417af40716123aa5f368033087beaef6b"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/save-menu-inspection-payloads/r8-native-opening-20261024-media-observer-rbih-01/packaged-player-visible-state.cjs",
+      "bytes": 38994,
+      "sha256": "1d6bc289b0b8768fd9883133447a93517abaf2c95ea71c580ad960dc0d43a33e"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/save-menu-inspection-payloads/r8-native-opening-20261024-media-observer-rbih-01/structural-diff.json",
+      "bytes": 78393,
+      "sha256": "fdfb6e37ab281c3b10d44141a234766104375f5553d73791087f7921095b36f3"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-000-launch-screen.png",
+      "bytes": 2615343,
+      "sha256": "bc01bde8696b86099f86ac58cf256ffeb0ad5f102b2e579312d629b8d1c8f3ed"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-001-side-picker.png",
+      "bytes": 2415380,
+      "sha256": "f5c5addb3ad9d712511c647a3721eb963ba45824746de9f43fa984c5fb83d692"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-002-faction-dossier.png",
+      "bytes": 2570517,
+      "sha256": "c8bb34c4d51b8f84e17ca7f11eb05723b1435ed857d621d4ee82a57dfed9c837"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-003-command-mode.png",
+      "bytes": 1559743,
+      "sha256": "8de97baa367d407345c72df879a627f4c354d6633ab063b1903d8dc2ed48a364"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-004-intro-before-dismiss.png",
+      "bytes": 1323246,
+      "sha256": "0c2df166ba53f1c428978fe5457a11794ce23bfb96cda7ccbe08634d1bda8882"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-005-command-post-after-intro.png",
+      "bytes": 2064346,
+      "sha256": "f74c666f6db4aff7808b069981de970d95d44b9e2c99ae9c1140a5a008119122"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-006-initial-state-evidence.png",
+      "bytes": 2064346,
+      "sha256": "f74c666f6db4aff7808b069981de970d95d44b9e2c99ae9c1140a5a008119122"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-007-pre-tour-event-before-response.png",
+      "bytes": 891452,
+      "sha256": "4c0866ae4a670c45b63e51a69d335872f84ac566f69ff7bdf871538e36495a7f"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-008-pre-tour-event-after-response.png",
+      "bytes": 2063618,
+      "sha256": "fa5e3e21a53d9a861bda2fd9205f45ac3d9cd2f3338ca0fd5cbe75aea73acc9b"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-009-war-map.png",
+      "bytes": 3724670,
+      "sha256": "37f0c956058b5853b73e3d497b4e7d4788896082708b65da27fc68a73c323e27"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-010-initial-map-probe-overview.png",
+      "bytes": 3724748,
+      "sha256": "074db6e07bfeadcccf405ebe18c1cabbb691b158df5789330555649ad1528acb"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-011-initial-map-probe-counter-arbih_109th_mountain.png",
+      "bytes": 4013731,
+      "sha256": "86f084cd199dcd42a54d002a8d30dbf49aa0cafd04a52b18720e9ac6f46a2cf3"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-012-initial-map-probe-counter-arbih_10th_mountain.png",
+      "bytes": 4063684,
+      "sha256": "c3a1ebe715c8f2460cc9f93281c939473ba969079949b7e90d793fda92927af8"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-013-initial-map-probe-counter-arbih_123rd_light.png",
+      "bytes": 4073702,
+      "sha256": "6dec204a533b23ae2d947075b170f8b53ef918a819f112432e05a23107551fce"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-014-initial-map-probe-counter-arbih_131st_light.png",
+      "bytes": 4079673,
+      "sha256": "035964931d718c9076333862bbf6548476b974879dae9630da554cc9e6d9ccfb"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-015-initial-map-probe-counter-arbih_146th_light.png",
+      "bytes": 4072531,
+      "sha256": "3592984711f0f912fa371efc963e76f28a08556f2a14fe2cb17405ab37944311"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-016-initial-map-probe-counter-arbih_152nd_mountain.png",
+      "bytes": 4076714,
+      "sha256": "2e68204e57cac3c80f3d28c4d73b2f969d8bb4b49136bdcc18505c400ed32ae8"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-017-initial-map-probe-counter-arbih_161st_slavna_olovo_mountain.png",
+      "bytes": 4057565,
+      "sha256": "df88cbc4e9dd398feba0acc6230a325cb04dbf34ba56a1c1ae0989574fbb1670"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-018-initial-map-probe-counter-arbih_162nd_mountain.png",
+      "bytes": 4048777,
+      "sha256": "f0487355ceaa08e27dfc74b9fdf452a6a14613436c5a9e51aae142802f569938"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-019-initial-map-probe-counter-arbih_164th_mountain.png",
+      "bytes": 4065327,
+      "sha256": "cf0e43453283c3e3a0df04867467253707a8017059466898d2ebc7abdd7af1c7"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-020-initial-map-probe-counter-arbih_165th_mountain.png",
+      "bytes": 4081228,
+      "sha256": "12dd8504e77e7f6b5ca900450d1da925baa01bda07b4076ac5c1d6be0d85aa96"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-021-initial-map-probe-counter-arbih_17th_muslim_light.png",
+      "bytes": 4028450,
+      "sha256": "eb0b86552380827a3247144aaa88a96a00f2f325ec4bea482f19d9aaaa9bf2a4"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-022-initial-map-probe-counter-coverage.png",
+      "bytes": 3655389,
+      "sha256": "bb53966dce85445812039bc78bfc69702f0fcb5c2a5723de4b2742cd0a1c1003"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-023-initial-map-probe-map-click-center-formation.png",
+      "bytes": 4014701,
+      "sha256": "7bab007366530fc8c62c671e915f4f2267accb3ec91d47c1dbbc7963ccb7bf80"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-024-initial-map-probe-map-click-north-west.png",
+      "bytes": 3615998,
+      "sha256": "1cfd9231f8b9ba94b93bd809db7adb3971140cd3cfcd36e8a901cb75fe420279"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-025-initial-map-probe-map-click-north-east-sector.png",
+      "bytes": 3352210,
+      "sha256": "df7344d19ffead1cb30f399df2e3a515b29d0b2359d8dc908f3f26eb4ff1729c"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-026-initial-map-probe-map-click-south-west-empty.png",
+      "bytes": 3604044,
+      "sha256": "cef6d44f1dd5a5594b64a06f3f6d74d190a8acb8b12d0c844cb0c123fb9f9e0c"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-027-initial-map-probe-map-click-south-east-sector.png",
+      "bytes": 3667819,
+      "sha256": "111d106f2af3e2f74abe3938f3775e45fa758e4f6a87b49fa4607772d82ceb70"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-028-route-president-desk.png",
+      "bytes": 1979329,
+      "sha256": "24a5213d0b6081ee23b7ebbbd0363683374c23bdd6c7d9b2ec53d92963a1307a"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-029-route-president-desk-drill.png",
+      "bytes": 296586,
+      "sha256": "96d8f577fbf1abd03752a2ebb985d0db09dd0b060a68f5bf9686dd376c96541b"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-030-route-command-surface.png",
+      "bytes": 2018116,
+      "sha256": "a17706d4b37c2d0d64c7e2b29e28da4b2be4d5f89e79bb90796cb6cea50b5f43"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-031-route-diplomacy.png",
+      "bytes": 1491307,
+      "sha256": "0ad996d6b37188ad4bd05f96ebca1ef86782101723b760542e3769120189ac30"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-032-route-intelligence.png",
+      "bytes": 1997992,
+      "sha256": "ce1b99689c928fdd80ced1bd9f60146733c7d1d326746c02410543390ff7e908"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-033-route-intelligence-drill.png",
+      "bytes": 136910,
+      "sha256": "992643fa0152a74f897fc3995782da0aa24e2635249eb66e6161d065c5371fad"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-034-route-faction.png",
+      "bytes": 2001512,
+      "sha256": "b904654baf6a21380edf9f6e56cb8ca3b0e9d9067bd4b8774c583a2798218c3b"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-035-route-faction-drill.png",
+      "bytes": 157685,
+      "sha256": "10ad9b3ea5f36c589744527815f8dd754ab1c4a049f86deb88c1f3791cf2fd40"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-036-route-chronicle-route.png",
+      "bytes": 121147,
+      "sha256": "6b74d1f2d273b22dbd51ec17e28035adc68edb0078a886a604833cc5153ef5c1"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-037-route-war-map-route.png",
+      "bytes": 3649674,
+      "sha256": "fb342500f114a0b4ed95f273cff0d77c84d36d42d6b995c31ade5a5e157df487"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-038-presidents-desk.png",
+      "bytes": 1979329,
+      "sha256": "24a5213d0b6081ee23b7ebbbd0363683374c23bdd6c7d9b2ec53d92963a1307a"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-039-command-surface-start.png",
+      "bytes": 2018116,
+      "sha256": "a17706d4b37c2d0d64c7e2b29e28da4b2be4d5f89e79bb90796cb6cea50b5f43"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-040-command-card-command-card-cat_war_direction.png",
+      "bytes": 1597958,
+      "sha256": "0c0053d6afa53625098f0d4c7aeb4a34fbeb77d37e73630f2c3e886b2ad3d112"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-041-command-card-command-card-cat_diplomacy.png",
+      "bytes": 1599026,
+      "sha256": "c5e9ce7ef79923423658a61d8a38d22eb3f95561315568a4363f22a24ba943fd"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-042-command-card-command-card-cat_home_front.png",
+      "bytes": 1597025,
+      "sha256": "284dcf52bf1221ec760d6df79f2babbc76cbc19e37afeec0a988cd7bc3ebe52c"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-043-command-card-command-card-cat_command.png",
+      "bytes": 1255067,
+      "sha256": "0f066f4a7bd19b5e43e3ae030b704a6f5a474ef25a9904100bcf3ef7e1f28d36"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-044-command-surface-empty-cat_conscience.png",
+      "bytes": 1599622,
+      "sha256": "1190bff5c3f1cf0dd7b8dc07e55bb21389d80fb3a1fde03a774b133e28ecd25c"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-045-command-card-command-card-cat_conscience.png",
+      "bytes": 1599622,
+      "sha256": "1190bff5c3f1cf0dd7b8dc07e55bb21389d80fb3a1fde03a774b133e28ecd25c"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-046-command-card-command-card-cat_record.png",
+      "bytes": 1393282,
+      "sha256": "1c7117f60b464e374038764b25faad80af351bcac0b1bbfee5c01b3281a4e416"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-047-command-surface-after-deep-dive.png",
+      "bytes": 2018116,
+      "sha256": "a17706d4b37c2d0d64c7e2b29e28da4b2be4d5f89e79bb90796cb6cea50b5f43"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-048-decision-room-war-direction.png",
+      "bytes": 1597958,
+      "sha256": "0c0053d6afa53625098f0d4c7aeb4a34fbeb77d37e73630f2c3e886b2ad3d112"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-049-decision-room-direct-lens-all.png",
+      "bytes": 1248175,
+      "sha256": "59ad56e63d8802a4138f38feccabe1c29405b164ea28267504cbcddf7126604d"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-050-decision-room-direct-lens-command.png",
+      "bytes": 1248700,
+      "sha256": "c3844c165fe8ca15b94a9fee02f7d5ecbfc2f9958422a785643a33ccc0cd3bb8"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-051-decision-room-direct-lens-memory.png",
+      "bytes": 1390539,
+      "sha256": "8a90f4f167ab4ab3e0af76ed166872e9a5141d5e016c8928b2562f1126fd53cf"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-052-decision-room-direct-review-action.png",
+      "bytes": 121147,
+      "sha256": "6b74d1f2d273b22dbd51ec17e28035adc68edb0078a886a604833cc5153ef5c1"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-053-army-hq-open.png",
+      "bytes": 296573,
+      "sha256": "87a449960c597bb5af700b7b21bc16d336ae8c4cecfc8b7859fe43a50275850a"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-054-army-hq-tab-briefing.png",
+      "bytes": 296586,
+      "sha256": "96d8f577fbf1abd03752a2ebb985d0db09dd0b060a68f5bf9686dd376c96541b"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-055-army-hq-tab-summary.png",
+      "bytes": 157685,
+      "sha256": "10ad9b3ea5f36c589744527815f8dd754ab1c4a049f86deb88c1f3791cf2fd40"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-056-army-hq-tab-records.png",
+      "bytes": 136910,
+      "sha256": "992643fa0152a74f897fc3995782da0aa24e2635249eb66e6161d065c5371fad"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-057-army-hq-tab-personnel.png",
+      "bytes": 150052,
+      "sha256": "7b147cb8d0fc86722d18bad29ad373ff496c20f8d69af42de2d751c8965b5c62"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-058-army-hq-recruitment-route.png",
+      "bytes": 2154691,
+      "sha256": "e97ed802545c5f5127705bc709416ae1b6462ef68c5dba8140e9dc61787cba22"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-059-army-hq-autonomy-return.png",
+      "bytes": 296573,
+      "sha256": "87a449960c597bb5af700b7b21bc16d336ae8c4cecfc8b7859fe43a50275850a"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-060-army-hq-autonomy-route.png",
+      "bytes": 3758877,
+      "sha256": "716e74d24d1d596cf0b48e5bb154d44b1296d7d87393b8cc3b2f924840a680fb"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-061-army-hq-corps-1.png",
+      "bytes": 122163,
+      "sha256": "ac7a89c580c72c9b1ef49f7ef2803d6e46eea88820c32e66311c14fd500314ce"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-062-army-hq-corps-2.png",
+      "bytes": 129922,
+      "sha256": "33ce506863430e87d3992c418dfdfe4f5c593577ddcf30c3eeff8ecaa16b8b88"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-063-army-hq-corps-3.png",
+      "bytes": 127243,
+      "sha256": "616046af8e1f0d66e70d779ab86ecd61235036f9328e75c8bee7ba8bddba2de7"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-064-army-hq-corps-4.png",
+      "bytes": 123826,
+      "sha256": "23bc8dbb776daa79038b953080a8410eedbda94f8b7f81848e1926e57b83d747"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-065-army-hq-corps-5.png",
+      "bytes": 124545,
+      "sha256": "272959b7eeadb1196eb7bb0c07400be479fde53486b2fd46ceac550cb758ae31"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-066-army-hq-decision-room-handoff.png",
+      "bytes": 1248175,
+      "sha256": "59ad56e63d8802a4138f38feccabe1c29405b164ea28267504cbcddf7126604d"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-067-decision-room-from-army-hq-lens-all.png",
+      "bytes": 1248175,
+      "sha256": "59ad56e63d8802a4138f38feccabe1c29405b164ea28267504cbcddf7126604d"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-068-decision-room-from-army-hq-lens-command.png",
+      "bytes": 1248700,
+      "sha256": "c3844c165fe8ca15b94a9fee02f7d5ecbfc2f9958422a785643a33ccc0cd3bb8"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-069-decision-room-from-army-hq-lens-memory.png",
+      "bytes": 1390539,
+      "sha256": "8a90f4f167ab4ab3e0af76ed166872e9a5141d5e016c8928b2562f1126fd53cf"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-070-decision-room-from-army-hq-review-action.png",
+      "bytes": 121147,
+      "sha256": "6b74d1f2d273b22dbd51ec17e28035adc68edb0078a886a604833cc5153ef5c1"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-071-army-hq-after-deep-dive.png",
+      "bytes": 3650162,
+      "sha256": "fcd7e4984386012419cf87c878e5a93204341a5a7c3881f34bad523756103b99"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-072-records.png",
+      "bytes": 136923,
+      "sha256": "e310d1fcb89358dd0fde767af8f0b20a7031e517ecfd689c75a7dddce7d4c12f"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-073-chronicle.png",
+      "bytes": 121147,
+      "sha256": "6b74d1f2d273b22dbd51ec17e28035adc68edb0078a886a604833cc5153ef5c1"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-074-codex.png",
+      "bytes": 993071,
+      "sha256": "7b20bb292486667dfac36a048b7b553d079bb8c108f9f186bf4159e16ef0d0cb"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-075-advance-probe-skipped-final-state.png",
+      "bytes": 3649674,
+      "sha256": "fb342500f114a0b4ed95f273cff0d77c84d36d42d6b995c31ade5a5e157df487"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-076-turn-0-pre-final-tour-drain-after-drain.png",
+      "bytes": 2088442,
+      "sha256": "7aac2c36a66815837877738b3ca1ccf3060e08d395eee13924a154607f505f96"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-077-turn-0-final-drain-after-drain.png",
+      "bytes": 2088442,
+      "sha256": "7aac2c36a66815837877738b3ca1ccf3060e08d395eee13924a154607f505f96"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-078-playthrough-final.png",
+      "bytes": 2088442,
+      "sha256": "7aac2c36a66815837877738b3ca1ccf3060e08d395eee13924a154607f505f96"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-079-save-load-pause.png",
+      "bytes": 2815597,
+      "sha256": "c08d6bc7fe42eafc796fc07f9b90f42d711752d4f8580224f33f174933fc3a28"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-rbih-080-save-load-post-save.png",
+      "bytes": 3649674,
+      "sha256": "fb342500f114a0b4ed95f273cff0d77c84d36d42d6b995c31ade5a5e157df487"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-save-menu-00-before-main-menu-click-page-0.png",
+      "bytes": 2815597,
+      "sha256": "c08d6bc7fe42eafc796fc07f9b90f42d711752d4f8580224f33f174933fc3a28"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-save-menu-01-after-main-menu-click-page-0.png",
+      "bytes": 2614226,
+      "sha256": "874a87544e562e2822701c3d721b8cb712d28cdea8dd9ebdfd6e48dd723d5b1f"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-save-menu-02-after-main-menu-entry-page-0.png",
+      "bytes": 3011744,
+      "sha256": "8f50bd219c17d27d4a96f98dab8192ba91c45c4e559b0725ebc7804610301591"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-save-menu-03-after-field-records-click-page-0.png",
+      "bytes": 3008797,
+      "sha256": "dc1d024b111efc6e7c66a134ab973feb1de17e1d8c9c1ed805a468cb2449d3bc"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-save-menu-04-resume-quicksave-visible-page-0.png",
+      "bytes": 3008797,
+      "sha256": "dc1d024b111efc6e7c66a134ab973feb1de17e1d8c9c1ed805a468cb2449d3bc"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-native-opening-20261024-media-observer-rbih-01-save-menu-05-after-resume-click-page-0.png",
+      "bytes": 299724,
+      "sha256": "d52455d88da5ff2d4b79edde72d9314a7e4b034076e2946c68e8b1c877ad8df9"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/data_0",
+      "bytes": 45056,
+      "sha256": "1b11392cc38c9c6a11df62f48b4d76729c10da6ff3d299b7e2ad2aa204acf85d"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/data_1",
+      "bytes": 270336,
+      "sha256": "ea528b9bfaccf0c794583f236d576d678cb459682d401220d3c7ecb74a0da896"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/data_2",
+      "bytes": 1056768,
+      "sha256": "662347a48b0cacfbfbe6aa5f605a677745dc04c50e85af5552c53dc7a041c231"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/data_3",
+      "bytes": 4202496,
+      "sha256": "714b6fed3608c8ee6e83e8e0b86d8b15e4be2e4fd8497aa14818c9731bbdf03d"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000001",
+      "bytes": 92022,
+      "sha256": "a5c8822b9bd679a6848ae7790da5fc73f74e4defaf612b169326dda0ecc2a580"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000002",
+      "bytes": 141963,
+      "sha256": "6529d6f4e25b87a8ae73ce042da57b8da353b02f6bdb5324e2fb1bf43f8b4e98"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000003",
+      "bytes": 37416,
+      "sha256": "f7449664e941b96988a7d5c45db7008b4e56f4f27a18eab05a8db2b5d7be20b7"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000004",
+      "bytes": 293328,
+      "sha256": "25eafb259ed246a37059eaf82e2bb1ec1f9c5782fc38a6e3ff7413b6701a6a9f"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000005",
+      "bytes": 65483,
+      "sha256": "3edcbcd6b0a106fa9987ba8b5edbeaab8aaa53db0bc7c93aa9fc47e1d6e0c495"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000006",
+      "bytes": 152213,
+      "sha256": "089bbb07258564c6e238895c1928bc685c704e536031e70650bc9a3eac51c39b"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000007",
+      "bytes": 133639,
+      "sha256": "d6facd83449bc7c09a10b8bbd83080d62274c046af7b811fade2e3683d91d6da"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000008",
+      "bytes": 2820321,
+      "sha256": "d5f97e2eaca98b63d4e077ce6f889725d1cbbcc38445193845c677116ed541b1"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000009",
+      "bytes": 105941,
+      "sha256": "9f2d04b030976d3ff645a37fe9d6ed0397b4a7fe6f03b12acf13ea26d0867b58"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00000a",
+      "bytes": 344547,
+      "sha256": "9a79afb027e855b161be4c7a9df4f924e636e36fd074d31b495aa71c85dc2380"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00000b",
+      "bytes": 84036,
+      "sha256": "1f5daecda821ec17acc50f1b869b9057bcba3c02a901ba8f0fe3e9a938e3d6d7"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00000c",
+      "bytes": 332431,
+      "sha256": "de70df7a6e79f37f489b21dde3842517c1f04ba0d2624ae2610124a4dd84457f"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00000d",
+      "bytes": 27337,
+      "sha256": "98654b9a1e00a16294f66e4d5241719bc9b54eadd83b07c00253b77ddbbd295c"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00000e",
+      "bytes": 63194,
+      "sha256": "257e0a69954c5d578a994092db4246d0465772cf0c2eacb51001cae08db4ec80"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00000f",
+      "bytes": 22735,
+      "sha256": "ffa01cb9f38bb133c7d8d55034d689239cb10de3db911d8f640aae1a478ce471"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000010",
+      "bytes": 283343,
+      "sha256": "5d02c26186609c23d506a04a09a875715c2916876d88fb6bfb359fa4976f45c7"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000011",
+      "bytes": 431894,
+      "sha256": "2cd0cc87a5f862c378fe5d3fc935a24c8263905fe1e26d1947302691039a4a2f"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000012",
+      "bytes": 801920,
+      "sha256": "5004215652cfe4519bce9e9694c869bda9440f33ef6fedd5317d192ee3c6b4a0"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000013",
+      "bytes": 902911,
+      "sha256": "c8230ef5779d691011241f2b055b45107513b03cac0aa5a35247dbb963cdf897"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000014",
+      "bytes": 701924,
+      "sha256": "d7328e8d5411e28c468aae106d935f13757a6184e8d120301bc5af0785f92fd9"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000015",
+      "bytes": 45771,
+      "sha256": "de9bfc484847caa911d6921424b80ddcf8754219fffc016bdd346f80028d99e2"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000016",
+      "bytes": 359907,
+      "sha256": "7596df56b934be4334ab8bffe51cf92f439c1fec238d6b82c21e68f25c61162a"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000017",
+      "bytes": 172195,
+      "sha256": "aef6d5321f41224953c311b2194ac71eb8b42e6e63c3a501fdacd79d1ce29449"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000018",
+      "bytes": 136904,
+      "sha256": "b16b52e0a25c4312c2dc146e824c46fe3b5d8b567907d443304bb8dbb4958dc4"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000019",
+      "bytes": 442648,
+      "sha256": "d31a781fc2479546a217f8cc82f958783c283345a1e1122c68d7b9dfd1bc46d2"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00001a",
+      "bytes": 17712,
+      "sha256": "1ce95cff1c5056cb0fed049c2912823293b158b816e193a6f937f2d92b1e0f39"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00001b",
+      "bytes": 419911,
+      "sha256": "17ee0a0aaaf9162e550db85081a513c4b764ee042a50a0f663198de884300b0b"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00001c",
+      "bytes": 218372,
+      "sha256": "f633eb42e8c22da21dbf2a494c1073100b5a4fdc24463d62862fedab705cf617"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00001d",
+      "bytes": 218360,
+      "sha256": "964e32e6ed80b2b4f439156970ac66343ebb817a9178faa211c3eaaac523bc40"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00001e",
+      "bytes": 471376,
+      "sha256": "454e8218012921dcf5e23d40bfb9e0745d0a07c5340325709d0b146067441aba"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00001f",
+      "bytes": 1045176,
+      "sha256": "cef8772559cba17846ff8f6c79d9c177868266745e695da58dd0a8ad863a5349"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000020",
+      "bytes": 17268,
+      "sha256": "10d3c7fa7eaf48e78db24f317b64f008a75e00f63a68bb3c2afc6ef51e58674f"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000021",
+      "bytes": 387128,
+      "sha256": "e0e32252d5d17d1ea24fd5da0a3e9d3941eea38298feb264ef40ce801d8fc59f"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000022",
+      "bytes": 403590,
+      "sha256": "50760b8e0d13d437bc65d36ead9e044a1cb68dd73b1534ab8620a67b595421b3"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000023",
+      "bytes": 426168,
+      "sha256": "a7f5df93b73202acc388abe171cc3ec3d4beb980378e70f808c5ad50eefc67ea"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000024",
+      "bytes": 218256,
+      "sha256": "750124fb67e5cdd48192d7ad0d232fdca795acccc65ccacb5a1e8010ddbe39e9"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000025",
+      "bytes": 264668,
+      "sha256": "64dc37e2c2c085666a811616c112a243fe2edc3275fd9186448a84c380490e95"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000026",
+      "bytes": 26572,
+      "sha256": "309af26381cb36126f5c80b2327035865b4ac9c467cda66211f35516949a0a3d"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000027",
+      "bytes": 51020,
+      "sha256": "15f9638095ad5ec9816f93d66805ca1a87e71dc5a76b596bfce1c78d4704c405"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000028",
+      "bytes": 221196,
+      "sha256": "d8ca46cf1a5f425cd1ffd45eef3d99b19247128e6fe5ff28e0cad4d3f76fe1ef"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000029",
+      "bytes": 3222754,
+      "sha256": "03713c8e80ba7111ff64ad0bd69b70db4c7e2b30e22f23b8c4e2c11be60baa1a"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00002a",
+      "bytes": 1376913,
+      "sha256": "cfcf257bf6daa325aa239330742163a54985f5ff882109598ddeeb13e812563f"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00002b",
+      "bytes": 1990421,
+      "sha256": "6fd73f83c9d9f1da132e458e3b64c7f6ac94d62183fcef277f2675d63e664e0f"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00002c",
+      "bytes": 81062,
+      "sha256": "e8001127b3a5d56e507ea8680711212023c28a3394133f4a98ec0b2f44bc93b5"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00002d",
+      "bytes": 80025,
+      "sha256": "b3a5c066b416d69012009e3446ddd9544607ceb7355734922635521b6834c4d8"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00002e",
+      "bytes": 70900,
+      "sha256": "910a9d831040b8accfc9d70cf235dd4822e59a24e0d5e1736cee5d501c3d17a7"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00002f",
+      "bytes": 206420,
+      "sha256": "fc757905f285f0cde1274e4fc832a39764bfb11f7053e0cae558c986ac00c82b"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000030",
+      "bytes": 22040,
+      "sha256": "d5ec0c683b2d19c1ce7048dd6681fcc5213a50a829185250ebb398a8e0c4a113"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000031",
+      "bytes": 27012,
+      "sha256": "147c09e0ea70fe0f95693e209d4cde014e21d705109a424d42ec375fff0db119"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000032",
+      "bytes": 67258,
+      "sha256": "89ef05626759d850ee843ef7a9ce3f0b69a31aae868dd789424f0cfe7c64a3be"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000033",
+      "bytes": 261512,
+      "sha256": "7500c93d423cd066432736442beeecb237553b2613976fd177667e530d528217"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000034",
+      "bytes": 196084,
+      "sha256": "c7d4bf4537728de6878b77fea0ed28e7bfeb35e26e4f2817ae0d6092cd800dd6"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000035",
+      "bytes": 613296,
+      "sha256": "97fb492dd9a2a0c409f9203fb471e26d2383e63de0ecfc865d5dca7e8d1fe928"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000036",
+      "bytes": 55880,
+      "sha256": "7c3f68fd94809aaef36bebcd9d0f73ceb53baa789964d05de1d7a45a21474c9b"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000037",
+      "bytes": 96386,
+      "sha256": "51623f54e3a672a1283c4d8a24840e7bf4269fd097584b12f1ceaba81c1bb380"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000038",
+      "bytes": 62822,
+      "sha256": "de2921c4b56c3f4dc21c22732d1454fb0fb410804b7f12f84e0791e5c6d022dc"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_000039",
+      "bytes": 65934,
+      "sha256": "a80283294c4c5015814b4e21fe1e81eeeacb9082ce71a461804ca5f6f5aad175"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00003a",
+      "bytes": 28770,
+      "sha256": "dbddbb6748e4c9fe3342a3ed5b6f259dcbfe1ce60149f82399d0aad37c5f5bd9"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00003b",
+      "bytes": 110990,
+      "sha256": "118be4ab7c82be4018dcc39b32b01fbf144973386fff3b333327580f6b372744"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00003c",
+      "bytes": 134552,
+      "sha256": "a9fd0fd953c85703be724682aee696c8bcaddccc349950ad5f299501e6a3526f"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00003d",
+      "bytes": 211346,
+      "sha256": "4ec9ecdd528d4bbf2880713d63846da87daa85565aea544163774f418a236316"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/f_00003e",
+      "bytes": 154442,
+      "sha256": "a8b7e8f1c31a646435209de52050c8b3bce18ddc68d0fce35823dab46419cef9"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/Cache_Data/index",
+      "bytes": 524656,
+      "sha256": "509bc2fb9340e9bc53aacd19e6f08568ebe170ab31559ac64a256ca72f7d6ea7"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/No_Vary_Search/journal.baj",
+      "bytes": 4,
+      "sha256": "9c169428d852e25bd59b27652ed533d2a1f09f96e4c329fa5e06f47e16731543"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Cache/No_Vary_Search/snapshot.baf",
+      "bytes": 20,
+      "sha256": "0c2dd377ed0cc66161e9db8f89f7d8bcb3ad8c06c4a054bdcba214ab05f58c9a"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Code Cache/js/0d751d1fa2f9019f_0",
+      "bytes": 217,
+      "sha256": "1d9b7ecb6e78faf8e7563f9cfe35e6fdce7b7117b73aebea0cffb6557b7e8002"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Code Cache/js/10e11c906569d651_0",
+      "bytes": 222,
+      "sha256": "aeee48117bc4adb7fe8ee81dccf7bb6dc227fe8e3f47529b819f9fb70d8b737e"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Code Cache/js/16ee1dc0bb2fb15a_0",
+      "bytes": 227,
+      "sha256": "dd7488f8784a183f78533b6ebc35642a5f8267ed69e9e926fb0bfc548f5564bc"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Code Cache/js/193e5c02c1c3bcb3_0",
+      "bytes": 216,
+      "sha256": "9c65df9a075f79cfb53c4f80e42a23082a85a506691ae4ed1e86dcf8e39ce58f"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Code Cache/js/26b9ff7d40b18f3c_0",
+      "bytes": 217,
+      "sha256": "b1331d778e63765f544cb2cbb3aa696b6cf11e009874ff39d8ff2fa020c2c13c"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Code Cache/js/345d55955f7c19e1_0",
+      "bytes": 227,
+      "sha256": "049fc33f9799890e7cbee9864c9e43984a9bbe46ac56c875e7d8efd7fad85b19"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Code Cache/js/3c3d096967cc92b9_0",
+      "bytes": 229,
+      "sha256": "ca1f2539c927f6cb4d34a3061a5b430e0ca3b36ac1c7145db2ec310ca7ceffb2"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Code Cache/js/3e00dc577873a5eb_0",
+      "bytes": 239,
+      "sha256": "b38605e6916704baa1913026f19650bcb69b05f795f3dbb35e4ae594611a3ca8"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Code Cache/js/69a8c168838d1544_0",
+      "bytes": 217,
+      "sha256": "3a10b3897ca15a22162e77a2f06e8fc4b93b0e14037e2cb7b28b9095b9a67d52"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Code Cache/js/72da2306731695ca_0",
+      "bytes": 227,
+      "sha256": "3a8f0f604c57c8b5dc17d3ed5cb19cfd510b5cf6de6a3589327b370db5d6519b"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Code Cache/js/7dac7fd28a112736_0",
+      "bytes": 217,
+      "sha256": "6771bbfe08d31f4bfaf6724fb78425a4f51416fbf98d2fde5908152ecea96404"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Code Cache/js/7fb9613983040c2c_0",
+      "bytes": 227,
+      "sha256": "bfa835896dc9affa4885e44231cad8100baa01b4466f3556dc85d5c1ce8addbe"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Code Cache/js/88c682559cb0fe26_0",
+      "bytes": 220,
+      "sha256": "b8420c9088be45e93c6ca7e9fdf6c34e7ef799fa8c4783f5b06fc18b46b8a1a4"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Code Cache/js/a0d3b0793560ad07_0",
+      "bytes": 216,
+      "sha256": "4ce54348f84b569921823317a5d84efe679c0dd5ab422f18d237a259c1df070a"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Code Cache/js/bcd03775ed3ead40_0",
+      "bytes": 227,
+      "sha256": "f83091194fc85ee7ce9222d90fc629d4be7453910996045f1ca8dcf0ef4e4bbb"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Code Cache/js/c32fc0f01e22cc43_0",
+      "bytes": 219,
+      "sha256": "39bec079e233ce5747853286e89bb11646a59604daea704f277f4aecc591c010"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Code Cache/js/d1665790548f91a8_0",
+      "bytes": 216,
+      "sha256": "a483b65acacde3d40892621aea9448162afd2898957747c7e2ef5568d632a3a2"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Code Cache/js/ffaa0921a79e6f07_0",
+      "bytes": 231,
+      "sha256": "609722b37b6f9e7084aef3a102bcf3f6f7fe4cb2f28e56e135ca59f3795487fa"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Code Cache/js/index",
+      "bytes": 24,
+      "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Code Cache/js/index-dir/the-real-index",
+      "bytes": 480,
+      "sha256": "646b45706a0156879031b8efe59482537a6c08dd47847d967e9c764d571b98c8"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Code Cache/wasm/index",
+      "bytes": 24,
+      "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Code Cache/wasm/index-dir/the-real-index",
+      "bytes": 48,
+      "sha256": "1a7aa1d0e8e861ca4741000db8545bea79218bd3f8e6104093e9ccb5063aaece"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/DIPS",
+      "bytes": 36864,
+      "sha256": "3e9f9ccdc82799c1204087d65434998146fda7e3691ddc8c0776edaa910faabb"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/DawnGraphiteCache/data_0",
+      "bytes": 8192,
+      "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/DawnGraphiteCache/data_1",
+      "bytes": 270336,
+      "sha256": "43ef4c8ff5ac2848cdd536121271728ebd3077ea50a799b5fcd0f31c3b790406"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/DawnGraphiteCache/data_2",
+      "bytes": 8192,
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/DawnGraphiteCache/data_3",
+      "bytes": 8192,
+      "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/DawnGraphiteCache/index",
+      "bytes": 262512,
+      "sha256": "51fc6336f6c337e9d2f9ce952e4486f154256bb585c403e96b4df31c5678d726"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/DawnWebGPUCache/data_0",
+      "bytes": 8192,
+      "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/DawnWebGPUCache/data_1",
+      "bytes": 270336,
+      "sha256": "b8614a8edfc131e652091f29d1eb18a8e611e7621398a05ef6303696258e0786"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/DawnWebGPUCache/data_2",
+      "bytes": 8192,
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/DawnWebGPUCache/data_3",
+      "bytes": 8192,
+      "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/DawnWebGPUCache/index",
+      "bytes": 262512,
+      "sha256": "9758967ca0aca4ecc90b537d9962bb4b0f429831dcc9d310d432a0a00bef9806"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/DevToolsActivePort",
+      "bytes": 60,
+      "sha256": "3af8b97a11f83bbae7a76bb055036d468ab4461dfcf836994deea21b5aa34bb1"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/GPUCache/data_0",
+      "bytes": 45056,
+      "sha256": "29a75ce63df23eca8981e1781b380cd8d551b2626fc3ed86e723ca9b1b858221"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/GPUCache/data_1",
+      "bytes": 270336,
+      "sha256": "4b158ab4d01397dd8e3b26e6b544a20996b71d2a6a4c9b3e4ac4641ab0cde289"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/GPUCache/data_2",
+      "bytes": 1056768,
+      "sha256": "8570ba682ad8f038ccae5b8733e4b0f217f06d56da4f887816a0cefe1e13a59e"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/GPUCache/data_3",
+      "bytes": 4202496,
+      "sha256": "10d0da706b8307e56d323044c4ea792dc503f3169827f50c3f578967d78890be"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/GPUCache/index",
+      "bytes": 262512,
+      "sha256": "b4ab7223d483067254e2c33914e2977f7b00f5ac90c2e16b8e22b6fd546d75ca"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Local State",
+      "bytes": 434,
+      "sha256": "ae0f712ed04be9e44a69edaf4c1cec4ee7ac90462135a9d8b038b0670f0aa83f"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Local Storage/leveldb/000003.log",
+      "bytes": 49,
+      "sha256": "af47b5d07d2f1aa55711e00774a429289267a82e604602df8fdd2c5047626159"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Local Storage/leveldb/CURRENT",
+      "bytes": 16,
+      "sha256": "0f1bad70c7bd1e0a69562853ec529355462fcd0423263a3d39d6d0d70b780443"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Local Storage/leveldb/LOCK",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Local Storage/leveldb/LOG",
+      "bytes": 515,
+      "sha256": "5ab841768cae317ac709aab8da958d37d37650bceeb95d83c6895c8cf129afd3"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Local Storage/leveldb/MANIFEST-000001",
+      "bytes": 41,
+      "sha256": "f9d31b278e215eb0d0e9cd709edfa037e828f36214ab7906f612160fead4b2b4"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Network/Cookies",
+      "bytes": 20480,
+      "sha256": "d8f47f256c6c76e93615ae3f6de9155006c96b7c94f92b039d8f8d9c3a851135"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Network/Cookies-journal",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Network/Network Persistent State",
+      "bytes": 111,
+      "sha256": "5dfc321417fc31359f23320ea68014ebfd793c5bbed55f77dab4180bbd4a2026"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Network/NetworkDataMigrated",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Network/Trust Tokens",
+      "bytes": 36864,
+      "sha256": "fe03fb82cfe74a64c7094c810f9e8167c3b61c254c27569cc6b7db5ed84b0b18"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Network/Trust Tokens-journal",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Preferences",
+      "bytes": 93,
+      "sha256": "529b6595a4727a6b2d6cc154ae51f426216c01fc7fda02de2460abfb3de118a4"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Session Storage/000003.log",
+      "bytes": 304,
+      "sha256": "13b983188a9719620185a8ee8e22746a0ebcf3ba3d2f8ddf0a8ed443c6f529b3"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Session Storage/CURRENT",
+      "bytes": 16,
+      "sha256": "0f1bad70c7bd1e0a69562853ec529355462fcd0423263a3d39d6d0d70b780443"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Session Storage/LOCK",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Session Storage/LOG",
+      "bytes": 503,
+      "sha256": "2c5b15575cee7b7b2917341d6b5e74cc1b9018951ce18a613be747078cc0b9e6"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Session Storage/MANIFEST-000001",
+      "bytes": 41,
+      "sha256": "f9d31b278e215eb0d0e9cd709edfa037e828f36214ab7906f612160fead4b2b4"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Shared Dictionary/cache/index",
+      "bytes": 24,
+      "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Shared Dictionary/cache/index-dir/the-real-index",
+      "bytes": 48,
+      "sha256": "0e2d8e4d5c3b9e37424f6c4029a7fc213502c10f402d183d256f5b0394b9bfc8"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Shared Dictionary/db",
+      "bytes": 45056,
+      "sha256": "9dfba1d139c9933668e58e9c7777804c8ae01b2942dcc2dfaaa65ac139853a59"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/Shared Dictionary/db-journal",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/SharedStorage",
+      "bytes": 4096,
+      "sha256": "5c9dec1886cc01f5f2307ee1ea87f9b32a4cef0f8f9a2c68beebc558013bedab"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/saves/autosave.json",
+      "bytes": 1379940,
+      "sha256": "3407a8e6590eb0124d36ee3c359f36055a673e9548d59324793c9b1d19feb0bc"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-native-opening-20261024-media-observer-rbih-01-rbih/saves/quicksave.json",
+      "bytes": 1379940,
+      "sha256": "3407a8e6590eb0124d36ee3c359f36055a673e9548d59324793c9b1d19feb0bc"
+    }
+  ],
+  "packetEvidence": [
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/final-preservation.json",
+      "bytes": 1339,
+      "sha256": "e641d408883e2c7621b3c596440b3405e9d46f32d5b55154fda942819d7642ad"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/opening-preservation.json",
+      "bytes": 625203,
+      "sha256": "584f62178a69cc0dd220d5914d325a108feb97bcd01c4da48a65e48b5f4ddebd"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/prep/PRELAUNCH_PLAN.md",
+      "bytes": 1788,
+      "sha256": "373c540c8286600658493b4fe0a7797d4da7ca47059e46a7583afeb8a86cf602"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/prep/check_prerequisites.cjs",
+      "bytes": 4881,
+      "sha256": "fa9d2b410154efc7b9da6330f1cab346a9e3fc952568b86d5bd1a5f3c2f69454"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/prep/opening-rbih-01.json",
+      "bytes": 1128,
+      "sha256": "0feb2eea3e6e1f983da77d8b73b4159e6913efed7d09ed4329c59798ebd08e86"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/prep/postrun_preservation.cjs",
+      "bytes": 6853,
+      "sha256": "1f9f1bc36041178173c0848de35c95a985570a73af7dc8068e8ae3b6af178303"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/prep/prelaunch_inventory.cjs",
+      "bytes": 6808,
+      "sha256": "da76349f37ce2cd1c4cfb292428d235612c1dc3899aca4d4fdf04e1a3f2a0e9d"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/review/POSTRESULT_REVIEW.md",
+      "bytes": 5149,
+      "sha256": "643e6dfec62b5935338145d82da15a5c6e0c6a6bed33991b4c2d59e02b8a4d3e"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/review/PRELAUNCH_REVIEW.md",
+      "bytes": 4616,
+      "sha256": "909409947ef08458e3bcb92b819ec027df8ac945b3339cf9f293c7e07369fade"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/closeout-docs.cjs",
+      "bytes": 6398,
+      "sha256": "89efc7dac67fbfd958827d79ceb968f91f1b89a566a42446b2a8a99873f6bb39"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/docs-config.json",
+      "bytes": 276,
+      "sha256": "5845be7c6a6b2b1f483914774b0038dfb0a1fd0fc05f053e0f0b6b373859175d"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/docs-final-01/command.json",
+      "bytes": 331,
+      "sha256": "468acef293cff86bc1301aad9d548f74ee99501c7b0d8f750bb0546bf7586e97"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/docs-final-01/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/docs-final-01/receipt.json",
+      "bytes": 2711,
+      "sha256": "d7ad7529b38b4fb7c477c2cacf746b3f8c703ba4848f64824317c7832fab45fa"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/docs-final-01/start.json",
+      "bytes": 1525,
+      "sha256": "df919816a73f91735ae23c95661df164b2a1e70a9189a46fa78066f7e807cfac"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/docs-final-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/docs-final-01/stdout.log",
+      "bytes": 529,
+      "sha256": "c51f9b8445f28bb608491a8aa7868d33b46d73e55f458303205c6e3407285ff0"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/index-config.json",
+      "bytes": 58,
+      "sha256": "e4ee75d984a075615da246791edceef3b96cedd6c3803ee7c2aa3a05f75572f3"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/index-final-01/command.json",
+      "bytes": 75,
+      "sha256": "ddecba25e8a17c4626a18320bff01f5461bba3f4c4994288b7ddedd675206dce"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/index-final-01/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/index-final-01/receipt.json",
+      "bytes": 2712,
+      "sha256": "821e98ff87150a2ac1bba0eeea7e67fc28f83f4632842d076323076c898e9395"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/index-final-01/start.json",
+      "bytes": 1529,
+      "sha256": "08f838c367908c11c5c3018160b937eb6f31c5712815a181dc346e74d4928e74"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/index-final-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/index-final-01/stdout.log",
+      "bytes": 88,
+      "sha256": "7d7dffb5d8435c8284802747afcbce5d80d67756ebd3ef4043b0cb2b79743c5c"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/index-final-02/command.json",
+      "bytes": 75,
+      "sha256": "ddecba25e8a17c4626a18320bff01f5461bba3f4c4994288b7ddedd675206dce"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/index-final-02/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/index-final-02/receipt.json",
+      "bytes": 2713,
+      "sha256": "d42ff0717312f6c8d1b8d883a67f881ee77a15572472acde46c9bc76b253b7b6"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/index-final-02/start.json",
+      "bytes": 1529,
+      "sha256": "417542697a7bd0963674e945b5a77155d9b3741cd47bb1e1507ae72ed3539126"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/index-final-02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/index-final-02/stdout.log",
+      "bytes": 88,
+      "sha256": "7d7dffb5d8435c8284802747afcbce5d80d67756ebd3ef4043b0cb2b79743c5c"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/opening-rbih-01/command.json",
+      "bytes": 1128,
+      "sha256": "0feb2eea3e6e1f983da77d8b73b4159e6913efed7d09ed4329c59798ebd08e86"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/opening-rbih-01/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/opening-rbih-01/receipt.json",
+      "bytes": 2725,
+      "sha256": "075b78f73cb2abb0bfcff62c456320c2b191497aacb308c59423ba9dbf8794e3"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/opening-rbih-01/start.json",
+      "bytes": 1537,
+      "sha256": "4413cb9bbf8af9f67e2c46969cc227ffadaa04f9e92bba13cdbec14b618c047b"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/opening-rbih-01/stderr.log",
+      "bytes": 414,
+      "sha256": "4d598100474c7c07f90bd79765f31815c31393039aabd470f49a5709bf62249e"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/opening-rbih-01/stdout.log",
+      "bytes": 31,
+      "sha256": "935f5e7229c60dd0425c7096c17f97493c1e4300c3cbf04a2e4ccb94d625d945"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/package-check-post-01/entry-script.snapshot",
+      "bytes": 10092,
+      "sha256": "de5f63bf76ebc24b32c4ea6e253e26e137c1ef7977ca6dc6488d42ba2d422fe0"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/package-check-post-01/package-check.json",
+      "bytes": 258,
+      "sha256": "ea2cf3c9a052c259e8354ff8a06c452c4f1731d4cb22509936c8007d34163404"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/package-check-post-01/receipt.json",
+      "bytes": 2818,
+      "sha256": "927e8d34bc9bddd54861ccca4d2c41689a527fb1d48379d034057224bec8c292"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/package-check-post-01/start.json",
+      "bytes": 1617,
+      "sha256": "2c70d9f16730dfa489fd59b683894980615c307be905c36632d2b047b1a9e9fc"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/package-check-post-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/package-check-post-01/stdout.log",
+      "bytes": 225,
+      "sha256": "7b47e690660a7b16892da3b3f8b154f1804dbe70a051683495e86acb96980783"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/package-check-pre-01/entry-script.snapshot",
+      "bytes": 10092,
+      "sha256": "de5f63bf76ebc24b32c4ea6e253e26e137c1ef7977ca6dc6488d42ba2d422fe0"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/package-check-pre-01/package-check.json",
+      "bytes": 258,
+      "sha256": "ea2cf3c9a052c259e8354ff8a06c452c4f1731d4cb22509936c8007d34163404"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/package-check-pre-01/receipt.json",
+      "bytes": 2816,
+      "sha256": "968ad4c5424f526278bfa8d2d3d2622c034b69b63e1fb30ed308475bc1830c00"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/package-check-pre-01/start.json",
+      "bytes": 1615,
+      "sha256": "fb802d0d6e85faafbfa39e76b315f846c0736bb0b144bc48ea943b6106600d08"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/package-check-pre-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/package-check-pre-01/stdout.log",
+      "bytes": 225,
+      "sha256": "7b47e690660a7b16892da3b3f8b154f1804dbe70a051683495e86acb96980783"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/postrun-preservation-01/entry-script.snapshot",
+      "bytes": 6853,
+      "sha256": "1f9f1bc36041178173c0848de35c95a985570a73af7dc8068e8ae3b6af178303"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/postrun-preservation-01/postrun-preservation.json",
+      "bytes": 39493,
+      "sha256": "56d2cc194cb0df8e93ad5575be2ed5a80791cd54ee1acf89b965a2fc797fc2e9"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/postrun-preservation-01/receipt.json",
+      "bytes": 2728,
+      "sha256": "574069773b810d9fe7558497257e3fe08ba13945ec9cf075ea317426da249fc1"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/postrun-preservation-01/start.json",
+      "bytes": 1497,
+      "sha256": "5994ea2231698ab904245ad72bc9fe5f3b5baf1284e8a23954a6967c18c93bbd"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/postrun-preservation-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/postrun-preservation-01/stdout.log",
+      "bytes": 2025,
+      "sha256": "4a8f2d2990870e0a6d6fbac4aaae4ce430aa4339f5edc38c415e69c879bd1c05"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/prelaunch-inventory-01/PRELAUNCH_INVENTORY.json",
+      "bytes": 689511,
+      "sha256": "8a6384df3c4a8c7387aeb31b7c7902aa824df4cadae1667bd8d3c3f22a654f62"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/prelaunch-inventory-01/entry-script.snapshot",
+      "bytes": 6808,
+      "sha256": "da76349f37ce2cd1c4cfb292428d235612c1dc3899aca4d4fdf04e1a3f2a0e9d"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/prelaunch-inventory-01/receipt.json",
+      "bytes": 2772,
+      "sha256": "3730f5165ae9ca35133838534a16b9cd3d2374bfb2dd408c412e7c4ac2601859"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/prelaunch-inventory-01/start.json",
+      "bytes": 1541,
+      "sha256": "6871a92d5a57ff56e421b6ecd5dbc6baf7c1656e56ec5cd686aa7a96b13d3e9f"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/prelaunch-inventory-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/prelaunch-inventory-01/stdout.log",
+      "bytes": 33412,
+      "sha256": "e716247087b85a3067bd70fb213ef93ebdee02c41e7db76dea4c0be33b40d1a8"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/prerequisites-01/entry-script.snapshot",
+      "bytes": 4881,
+      "sha256": "fa9d2b410154efc7b9da6330f1cab346a9e3fc952568b86d5bd1a5f3c2f69454"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/prerequisites-01/prerequisites.json",
+      "bytes": 2987,
+      "sha256": "879cbe4f209c4d021107467eaf6f1c9bf686dbe358015bdd999185951eaf0a58"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/prerequisites-01/receipt.json",
+      "bytes": 2695,
+      "sha256": "4131f071ac0eaff846014818302b67d6b350d3799b636d85fcb73388e7c7861c"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/prerequisites-01/start.json",
+      "bytes": 1473,
+      "sha256": "e2bdab11896089aba6ccc189def57a6fee24741b2cf70424f3048bf6b729b7f3"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/prerequisites-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/prerequisites-01/stdout.log",
+      "bytes": 2270,
+      "sha256": "2f8d0d0d170d7e97f56eaa859b32f5c29511266efebbbed9c0e7ba5191f48d33"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/retained-guard-config.json",
+      "bytes": 108,
+      "sha256": "4708693bf63607e5b6a85049698306fe8756f470c48722dc629a1c5100b33814"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/retained-guard-post-01/command.json",
+      "bytes": 130,
+      "sha256": "eeec521c78268b82b1115e30b8a7e4088e96eb2de07f0ffe50e55f81323d2e34"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/retained-guard-post-01/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/retained-guard-post-01/receipt.json",
+      "bytes": 2751,
+      "sha256": "a365aa86ed46c4dadf5ccd163377471ba6943b98acde7359014c5c25b2b94c45"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/retained-guard-post-01/start.json",
+      "bytes": 1563,
+      "sha256": "0bbc8c99075d98603d7f559db2ae349d718120509fd4f831a6762ad6588545d0"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/retained-guard-post-01/stderr.log",
+      "bytes": 240,
+      "sha256": "97f0bac2fa0cb77e3609203b39ccbe9d33607ba491999482dc82b3925458cfff"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/retained-guard-post-01/stdout.log",
+      "bytes": 1025,
+      "sha256": "2582bfe5e5a0c064b2cfad52d10e5cf8aea64475ff504d4e52d1daeedda0184f"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/retained-guard.cjs",
+      "bytes": 5152,
+      "sha256": "e627f914d4dad92ca81c60c30daefb59071d2c2be7b2cf336381b0e7ad49ed4e"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/strict-rbih-01/entry-script.snapshot",
+      "bytes": 7150,
+      "sha256": "4acc5c288d25aefaba70231bd2646cd871fdd39083bc9d5173639bad2e5e590d"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/strict-rbih-01/receipt.json",
+      "bytes": 2941,
+      "sha256": "5683c6199e31cc0f6b905eea7baa95c7a654eb5a150c0940651a2c2c78567c8a"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/strict-rbih-01/start.json",
+      "bytes": 1888,
+      "sha256": "e78de52cbd181ba53be8a3b3ebbfefb5c04cca186e57f03575b5b97bc94f455a"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/strict-rbih-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/strict-rbih-01/stdout.log",
+      "bytes": 2638,
+      "sha256": "9f733cf83bd2ce7c43c7c06ad614bd0b70f539a7bfcaa41bda0a0fd24f5ebbb3"
+    },
+    {
+      "path": "tmp/r8-native-opening-20261024-media-observer/root/write-result.cjs",
+      "bytes": 7400,
+      "sha256": "6ad81484ded6aa80df125fd0b0a7b8a59e633d26acb6182ac32d1b43944dc94c"
+    }
+  ]
+}

@@ -1,0 +1,359 @@
+{
+  "schema": "awwv.749.prisoje-turn185-production-path-fixture.correction.v1",
+  "verdict": "PASS_EXACT_CLONED_N80_SAVE184_PREFIX__ABB_TRANSIT_FIRST_REMOVED_AT_T6__BOT_WRITES_JAJCE3",
+  "writes_closed": true,
+  "scope": {
+    "changed_paths": [
+      "tests/mistral_prisoje_turn_order.test.ts"
+    ],
+    "production_source_edits": 0,
+    "gameplay_edits": 0,
+    "data_edits": 0,
+    "canon_edits": 0,
+    "threshold_edits": 0,
+    "save_edits": 0,
+    "runTurn": 0,
+    "campaigns": 0,
+    "turn186": 0,
+    "full_suite": 0,
+    "build": 0
+  },
+  "correction": {
+    "original_premise_error": "`save_w184.json` persists `corps_front_sectors: {}`; the fixture one-cell Maleševci sector is wholly injected counterfactual topology.",
+    "fixture_label": "counterfactual current-source branch-selectivity fixture; not historical topology reconstruction",
+    "original_seal_and_candidate_before_image_preserved": {
+      "result": {
+        "path": "logs/claude-channel-20261004/749-seal-a/result.json",
+        "bytes": 8671,
+        "sha256": "e1e7e21da0d30dfd93fdb46dd5312dd42199ae3fd5cd915f6d973252573310c8"
+      },
+      "inventory": {
+        "path": "logs/claude-channel-20261004/749-seal-a/inventory.json",
+        "bytes": 15581,
+        "sha256": "2f4d4e02c85b7c5e2956627a48ab418aa0440d6068d5eccb42de2da736325f5c"
+      },
+      "closed": {
+        "path": "logs/claude-channel-20261004/749-seal-a/closed-receipt.json",
+        "bytes": 925,
+        "sha256": "0818055478acd170722a899874f6961cde1e836702646197180410f7b8b2f373"
+      },
+      "test_before_correction": {
+        "path": "logs/claude-channel-20261004/749-correction-prereq-a/749-before-correction.test.ts.snapshot",
+        "bytes": 23974,
+        "sha256": "8a94c36ff6b864d5455a9ecf9a181fb451333a3685923c3989c64f7fa97cd875"
+      }
+    },
+    "failure_categories": {
+      "first_exact_probe_shell_invocation": "PowerShell split an unquoted Node path; diagnostic did not start and no attempt directory was produced.",
+      "tail_capture": {
+        "preservation": false,
+        "C_growth_bytes": 5181,
+        "D_unchanged": true
+      },
+      "wrapper_bug": "`result.status ?? 2` returned zero when child_exit was zero even though preservation was false; receipt therefore recorded child_exit=0/wrapper_exit=0.",
+      "downstream_gate_miss": "The first corrected seal rejected the changed live C hash; the capture wrapper should have rejected it earlier.",
+      "failed_seal": {
+        "evidence": "749-correction-seal-a",
+        "child_exit": 1,
+        "wrapper_exit": 126
+      },
+      "corrected_status_helper": {
+        "pin": {
+          "path": "logs/claude-channel-20261004/749-preservation-exit.cjs",
+          "bytes": 191,
+          "sha256": "79e73cad6e62ab110e07550bb20ecdc368ba795cacc6c0f8de96cf1a51e44095"
+        },
+        "controls": {
+          "child0_preserved": 0,
+          "child0_not_preserved": 2,
+          "child1_preserved": 1
+        }
+      }
+    }
+  },
+  "exact_probe": {
+    "evidence": "749-correction-exact-tail-a/749-exact-save184-tail-probe.json",
+    "probe_pin": {
+      "path": "logs/claude-channel-20261004/749-correction-exact-tail-a/749-exact-save184-tail-probe.json",
+      "bytes": 261392,
+      "sha256": "affb9e11a0c4653726453542656c506252d2d0682051f63a5479f00c8e848b27"
+    },
+    "t3_prefix_archive": {
+      "evidence": "749-correction-exact-t3-b/749-exact-save184-t3-probe.json",
+      "pin": {
+        "path": "logs/claude-channel-20261004/749-correction-exact-t3-b/749-exact-save184-t3-probe.json",
+        "bytes": 58403,
+        "sha256": "cafcc8feb30da5166e23456a210d5197e126187e987bd44a252e9c6ef8dc542b"
+      },
+      "child_exit": 0,
+      "wrapper_exit": 0
+    },
+    "source_save": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w184.json",
+    "source_save_sha256": "e97ed2e154be0738773e326392347741d7aa17e730138b1f669008d045a879b4",
+    "scenario": "data/scenarios/apr1992_definitive_188w.json",
+    "week_index": 184,
+    "target_identity": {
+      "formation_id": "hvo_1st_guard_abb",
+      "formation_map_key": "hvo_1st_guard_abb",
+      "order_map_key": "hvo_1st_guard_abb",
+      "movement_map_key": "hvo_1st_guard_abb"
+    },
+    "prefix": "runTurn clone/turn increment plus every registered warPhase through generate-bot-brigade-orders only",
+    "phase_count": 85,
+    "injected_sectors": false
+  },
+  "first_boundary": {
+    "T3": {
+      "phase": "osid-column-movement",
+      "result": "ABB order consumed and active Bravnice transit created",
+      "path": [
+        "op:bosansko_grahovo:malesevci",
+        "op:bosansko_grahovo:crni_lug",
+        "op:glamoc:halapic",
+        "op:sipovo:brdjani",
+        "op:sipovo:gornji_mujdzici_2",
+        "op:sipovo:pribeljci_2",
+        "op:jajce:bravnice"
+      ],
+      "turns_remaining": 4,
+      "scope": {
+        "restricted": false,
+        "source": "stale_assignment",
+        "destinations": []
+      },
+      "operation_authorized": false,
+      "reassignment_authorized": false,
+      "routine_scope_enforced": false
+    },
+    "loan_commitment_change": {
+      "first_observed_phase": "advance-sector-offensives",
+      "before_sha256": "cfa971f3ae18ec9c5fd17a093b53dc3a94030893898e4d2d2d2b7a375c724356",
+      "after_sha256": "c5d28337e3d74cd9c4e49b1a57311932263c96336da7337dd485eaaea4824543",
+      "attribution_limit": "The snapshot proves the serialized receiving-corps active_operations change at this registered phase; the exact operation/axis field mutation was not separately captured."
+    },
+    "first_removal": {
+      "phase": "commander-correct-march-orders",
+      "function_source": "src/sim/combat/commander_march_correction.ts",
+      "before": "ABB active Bravnice transit, remaining4",
+      "after": {
+        "order": null,
+        "movement": null,
+        "location_osid": "op:bosansko_grahovo:malesevci"
+      },
+      "operands": {
+        "scope": {
+          "restricted": true,
+          "source": "assigned_sub_segment",
+          "destinations": [
+            "op:bosansko_grahovo:bosansko_grahovo_2",
+            "op:bosansko_grahovo:malesevci",
+            "op:titov_drvar:prekaja_2"
+          ]
+        },
+        "operation_authorized": false,
+        "reassignment_authorized": false,
+        "home_commitments_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "loan_commitments_sha256": "c5d28337e3d74cd9c4e49b1a57311932263c96336da7337dd485eaaea4824543"
+      },
+      "reason_limit": "The capture proves operation authorization is false at correction; it does not isolate which operation-field mutation made it false."
+    },
+    "following_writer": {
+      "phase": "generate-bot-brigade-orders",
+      "actor": "hvo_1st_guard_abb",
+      "queued_destination": "op:jajce:jajce_3",
+      "owner": "bot_discretionary",
+      "diagnostics_receipt": "op:jajce:jajce_3"
+    }
+  },
+  "validation": {
+    "focused": {
+      "files": 1,
+      "tests": 4,
+      "passed": 4,
+      "exit": 0,
+      "evidence": "749-correction-focused-a"
+    },
+    "affected_reused": {
+      "files": 3,
+      "tests": 12,
+      "passed": 12,
+      "exit": 0,
+      "evidence": "749-attempt-affected-a",
+      "reason": "correction changed only fixture naming/comments/test title"
+    },
+    "no_emit_reused": {
+      "diagnostics": 0,
+      "exit": 0,
+      "evidence": "749-attempt-tsc-b",
+      "reason": "no executable production or type-shape change after this check"
+    },
+    "exact_t3": {
+      "exit": 0,
+      "evidence": "749-correction-exact-t3-b"
+    },
+    "exact_tail": {
+      "exit": 0,
+      "evidence": "749-correction-exact-tail-a"
+    }
+  },
+  "residual": [
+    "The exact prefix explains end-185 queued Jajce_3/no transit. No turn 186 or later phase was run.",
+    "The end-186 Jajce_3 transit remains a retained observation outside this stopped boundary.",
+    "703/712 remains retained measurement; no gain is claimed."
+  ],
+  "preservation": {
+    "head": "e803b7660b1774bcfafd949fc0c991f69dc2715b",
+    "diff_paths": [
+      "tests/mistral_prisoje_turn_order.test.ts"
+    ],
+    "test": {
+      "path": "tests/mistral_prisoje_turn_order.test.ts",
+      "bytes": 23927,
+      "sha256": "7ac25f8ab4d5ad462e7ec9dd98c74ba17db1b8950e5192518bda1ad7c18e5f58"
+    },
+    "production_pins": [
+      {
+        "path": "src/sim/turn_phases/war_phases.ts",
+        "bytes": 231312,
+        "sha256": "5ae935c3db6bc80e0b1f878a1871067fb6ffdcb239dcf317574433acfb8f2709"
+      },
+      {
+        "path": "src/sim/combat/osid_column_movement.ts",
+        "bytes": 32573,
+        "sha256": "a3600a86885ecd34bb976dd92e784c0f01fe8c1796d66bd2039cf5bae46a6489"
+      },
+      {
+        "path": "src/sim/combat/brigade_routine_scope.ts",
+        "bytes": 27703,
+        "sha256": "b379ccc4eb12cffce18656f41707b02ea22ef28db975ac4496e78e9fa90e6cc8"
+      },
+      {
+        "path": "src/sim/combat/commander_march_correction.ts",
+        "bytes": 10353,
+        "sha256": "3967fa770a5bb5e9a57899e7bc5135b64552bdc5f1c711c53b1d25f4940917d3"
+      },
+      {
+        "path": "src/sim/combat/bot_brigade_ai_osid.ts",
+        "bytes": 60028,
+        "sha256": "c88b20ec9135838cc33f1b05caa41b9dc3e62e36ecf77d89a741e5a89d096c3d"
+      }
+    ],
+    "protected_3_exact": true,
+    "native_31_exact": true,
+    "receipt_count_179": true,
+    "telemetry": {
+      "C": {
+        "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+        "bytes": 100102520,
+        "sha256": "5b225eededbb39e6a08fd0231dc1e5ff14a6c1a401b292c684f91419c2c3adf3"
+      },
+      "D": {
+        "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+        "bytes": 1041,
+        "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+      }
+    },
+    "current_C_opening_prefix": {
+      "bytes": 100097339,
+      "sha256": "05e6cf95acda31236a719f4a8ab775d3b9514945ec7d777c39afc9db942ba011"
+    },
+    "telemetry_prefix_archive": {
+      "C": {
+        "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+        "bytes": 100097339,
+        "sha256": "05e6cf95acda31236a719f4a8ab775d3b9514945ec7d777c39afc9db942ba011"
+      },
+      "D": {
+        "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+        "bytes": 1041,
+        "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+      }
+    },
+    "retained_telemetry_append": {
+      "C_bytes": 5181,
+      "C_before_sha256": "05e6cf95acda31236a719f4a8ab775d3b9514945ec7d777c39afc9db942ba011",
+      "C_after_sha256": "5b225eededbb39e6a08fd0231dc1e5ff14a6c1a401b292c684f91419c2c3adf3",
+      "D_unchanged": true,
+      "cleanup_restore_delete": false
+    },
+    "attempts": {
+      "correction_prerequisites": "749-correction-prereq-a",
+      "failed_shell_invocation_no_attempt_created": "749-correction-exact-t3-a",
+      "exact_t3": "749-correction-exact-t3-b",
+      "corrected_focused": "749-correction-focused-a",
+      "exact_tail": "749-correction-exact-tail-a",
+      "failed_seal_old_C_expectation": "749-correction-seal-a"
+    },
+    "retained_original_attempts": {
+      "projection_wrong_n75_retained": {
+        "path": "749-attempt-projection-a",
+        "child_exit": 0,
+        "wrapper_exit": 0,
+        "retained": true
+      },
+      "projection_n80": {
+        "path": "749-attempt-projection-b",
+        "child_exit": 0,
+        "wrapper_exit": 0
+      },
+      "prerequisites": {
+        "path": "749-attempt-prereq-a",
+        "child_exit": 0,
+        "wrapper_exit": 0
+      },
+      "red": {
+        "path": "749-attempt-red-a",
+        "child_exit": 1,
+        "wrapper_exit": 1,
+        "expected_claim_failures": 2
+      },
+      "green_initial": {
+        "path": "749-attempt-green-a",
+        "child_exit": 0,
+        "wrapper_exit": 0
+      },
+      "operand_extension_fixture_error": {
+        "path": "749-attempt-green-b",
+        "child_exit": 1,
+        "wrapper_exit": 1,
+        "error": "missing portable hvo_main_staff command snapshot prerequisite"
+      },
+      "green_operands": {
+        "path": "749-attempt-green-c",
+        "child_exit": 0,
+        "wrapper_exit": 0
+      },
+      "green_provenance_comments": {
+        "path": "749-attempt-green-d",
+        "child_exit": 0,
+        "wrapper_exit": 0
+      },
+      "affected": {
+        "path": "749-attempt-affected-a",
+        "child_exit": 0,
+        "wrapper_exit": 0,
+        "files": 3,
+        "tests": 12
+      },
+      "no_emit_type_failure": {
+        "path": "749-attempt-tsc-a",
+        "child_exit": 2,
+        "wrapper_exit": 2,
+        "diagnostic": "sector_stance 'attack' outside SectorStance"
+      },
+      "final_focused": {
+        "path": "749-attempt-green-e",
+        "child_exit": 0,
+        "wrapper_exit": 0,
+        "files": 1,
+        "tests": 4
+      },
+      "final_no_emit": {
+        "path": "749-attempt-tsc-b",
+        "child_exit": 0,
+        "wrapper_exit": 0,
+        "diagnostics": 0
+      }
+    }
+  }
+}

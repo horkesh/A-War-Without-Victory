@@ -1,0 +1,21 @@
+{
+  "schema": "awwv.retained-extraction.receipt.v1",
+  "started_utc": "2026-10-26T02:04:48.5343354+00:00",
+  "ended_utc": "2026-10-26T02:04:51.4172916+00:00",
+  "elapsed_ms": 2883,
+  "timeout_ms": 60000,
+  "timed_out": false,
+  "exit_code": 0,
+  "attempts": 1,
+  "retries": 0,
+  "stdout": {
+    "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\combat-fatigue-prefix39-20261026-v1\\retained-failure-classification-v1\\stdout.json",
+    "bytes": 22169,
+    "sha256": "df911352684d3707ab00036b561504a6e2fc2715fad2bca4bb71df34fd5c7c7a"
+  },
+  "stderr": {
+    "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\combat-fatigue-prefix39-20261026-v1\\retained-failure-classification-v1\\stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

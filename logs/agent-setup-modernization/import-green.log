@@ -1,0 +1,150 @@
+
+> awwv@0.9.9-beta.1 test:vitest
+> node tools/test/run_vitest_default.mjs tests/agent_skill_import.test.ts
+
+
+ RUN  v2.1.9 F:/AWWV-worktrees/agent-setup-modernization
+
+ ❯ tests/agent_skill_import.test.ts (12 tests | 7 failed) 9255ms
+   × explicit skill import in disposable paths > previews a named import without writing any destination 733ms
+     → expected 1 to be +0 // Object.is equality
+   ✓ explicit skill import in disposable paths > requires a preview receipt before applying 663ms
+   × explicit skill import in disposable paths > applies only the named skill after review, including its support files 664ms
+     → expected 1 to be +0 // Object.is equality
+   ✓ explicit skill import in disposable paths > refuses replacement of locally edited skills by default 1277ms
+   × explicit skill import in disposable paths > requires a backup for explicit replacement 644ms
+     → expected 1 to be +0 // Object.is equality
+   × explicit skill import in disposable paths > replaces with a reviewed diff and preserves the full old directory 682ms
+     → expected 1 to be +0 // Object.is equality
+   × explicit skill import in disposable paths > rejects source drift after preview 722ms
+     → expected 1 to be +0 // Object.is equality
+   × explicit skill import in disposable paths > rejects target drift after preview 683ms
+     → expected 1 to be +0 // Object.is equality
+   × explicit skill import in disposable paths > rejects a modified review diff 650ms
+     → expected 1 to be +0 // Object.is equality
+   ✓ explicit skill import in disposable paths > rejects nested source/destination trees 579ms
+   ✓ explicit skill import in disposable paths > refuses reused backup paths without losing local edits 1333ms
+   ✓ explicit skill import in disposable paths > rejects linked source directories before traversing them 625ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent_skill_import.test.ts > explicit skill import in disposable paths > previews a named import without writing any destination
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tests/agent_skill_import.test.ts:48:28
+     46|   it('previews a named import without writing any destination', () => {
+     47|     const f = fixture();
+     48|     expect(f.run().status).toBe(0);
+       |                            ^
+     49|     expect(readdirSync(f.target)).toEqual([]);
+     50|     expect(readdirSync(join(f.root, '.claude/skills'))).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  tests/agent_skill_import.test.ts > explicit skill import in disposable paths > applies only the named skill after review, including its support files
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tests/agent_skill_import.test.ts:63:28
+     61|     mkdirSync(join(f.source, 'unselected'));
+     62|     writeFileSync(join(f.source, 'unselected/SKILL.md'), 'Must stay un…
+     63|     expect(f.run().status).toBe(0);
+       |                            ^
+     64|     const result = f.run('-Apply');
+     65|     expect(result.status, result.stderr).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  tests/agent_skill_import.test.ts > explicit skill import in disposable paths > requires a backup for explicit replacement
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tests/agent_skill_import.test.ts:77:38
+     75|   it('requires a backup for explicit replacement', () => {
+     76|     const f = fixture(true);
+     77|     expect(f.run('-Replace').status).toBe(0);
+       |                                      ^
+     78|     expect(f.run('-Apply', '-Replace').status).not.toBe(0);
+     79|     expect(readFileSync(join(f.target, 'sample/local-only.md'), 'utf8'…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  tests/agent_skill_import.test.ts > explicit skill import in disposable paths > replaces with a reviewed diff and preserves the full old directory
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tests/agent_skill_import.test.ts:83:38
+     81|   it('replaces with a reviewed diff and preserves the full old directo…
+     82|     const f = fixture(true);
+     83|     expect(f.run('-Replace').status).toBe(0);
+       |                                      ^
+     84|     const diff = readFileSync(`${f.review}.diff`, 'utf8');
+     85|     expect(diff).toContain('Locally edited instructions.');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  tests/agent_skill_import.test.ts > explicit skill import in disposable paths > rejects source drift after preview
+ FAIL  tests/agent_skill_import.test.ts > explicit skill import in disposable paths > rejects target drift after preview
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tests/agent_skill_import.test.ts:96:38
+     94|   it.each(['source', 'target'] as const)('rejects %s drift after previ…
+     95|     const f = fixture(true);
+     96|     expect(f.run('-Replace').status).toBe(0);
+       |                                      ^
+     97|     writeFileSync(join(f[side], 'sample/SKILL.md'), 'Intervening edit.…
+     98|     expect(f.run('-Apply', '-Replace', '-BackupRoot', f.backup).status…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  tests/agent_skill_import.test.ts > explicit skill import in disposable paths > rejects a modified review diff
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tests/agent_skill_import.test.ts:103:28
+    101|   it('rejects a modified review diff', () => {
+    102|     const f = fixture();
+    103|     expect(f.run().status).toBe(0);
+       |                            ^
+    104|     writeFileSync(`${f.review}.diff`, 'Unreviewed replacement.');
+    105|     expect(f.run('-Apply').status).not.toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ Test Files  1 failed (1)
+      Tests  7 failed | 5 passed (12)
+   Start at  21:32:46
+   Duration  10.03s (transform 57ms, setup 17ms, collect 56ms, tests 9.25s, environment 0ms, prepare 97ms)
+

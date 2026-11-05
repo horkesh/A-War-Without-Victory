@@ -1,0 +1,108 @@
+{
+  "schema": "awwv.766.targeted-correction-verification.v1",
+  "captured_utc": "2026-10-20T22:56:01.843Z",
+  "writes_closed": true,
+  "verdict": "PASS_CORRECTIONS_WITH_ONE_EXPLICIT_ROOT_WORDING_NARROWING",
+  "scope": {
+    "worktree": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+    "head": "9d291ff4ce30bc3cf376dedb77ffee10747e38bc",
+    "git_status_before_review_outputs": "clean",
+    "review": "One targeted read-only verification of the 765 correction package against the consolidated 766 findings.",
+    "campaigns": 0,
+    "runTurn_calls": 0,
+    "replays": 0,
+    "tests": 0,
+    "probes": 0,
+    "builds": 0,
+    "noEmit": 0,
+    "source_data_docs_git_changes": 0
+  },
+  "inputs": [
+    {
+      "path": "logs/claude-channel-20261004/765-corrected-result.json",
+      "bytes": 7954,
+      "sha256": "ae8aba85cbe3b94f079881a75a7997156e04f29576c45a447dbf56b5024a0d57"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-correction-inventory.json",
+      "bytes": 2432,
+      "sha256": "6ccc7766955135ad997f1e53762ea81d346c8d48a7891c3b2029cf407eecc447"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-correction-closed.json",
+      "bytes": 724,
+      "sha256": "8e3ceff9a79306081bf8e3606b8acaaaba416b9ae85b3b294a6032a0b1ca8a39"
+    },
+    {
+      "path": "logs/claude-channel-20261004/766-independent-review.json",
+      "bytes": 11488,
+      "sha256": "11947d83ad8af30b443fc18e950165ba4c6563cdda8a4c48a8e7de7bf456d1e1"
+    }
+  ],
+  "integrity": {
+    "correction_json_parse": true,
+    "correction_package_handoff_hashes_match": true,
+    "inventory_entries_checked": 12,
+    "inventory_all_paths_present": true,
+    "inventory_all_bytes_match": true,
+    "inventory_all_sha256_match": true,
+    "original_765_result_sha256": "c7ee12b646286fcd721876c17bcb3a7b816691b618177fd179e5bdd034ab514f",
+    "original_765_inventory_sha256": "e468e71a9651f17dd9e45a80c76d47e9b515ae9c4cc205c4a254373543665ac1",
+    "original_765_closed_sha256": "a753f61fa98036458ddc7b7ddc66a5ebe42413bdd452fe6a31bc1bff400138ae",
+    "original_trace_sha256": "d4919792ef84c03c1ce69859ee8844fb9fec97414ec69cfd5580b1f3530defa7",
+    "originals_intact": true,
+    "C_exact": true,
+    "D_exact": true,
+    "helper_source_exact": true,
+    "war_phases_source_exact": true
+  },
+  "verified_corrections": [
+    {
+      "id": "timestamp_provenance",
+      "status": "PASS",
+      "finding": "The correction explicitly marks the manually drafted 22:55/22:56/22:57 original values invalid, preserves the original bytes, leaves their exact later creation times unestablished, and uses only the preserved extractor interval 22:46:47.668Z through 22:46:53.991Z as established. The correction's own timestamp was dynamically sampled and is not used to backfill the original seal times."
+    },
+    {
+      "id": "selector_controls",
+      "status": "PASS",
+      "finding": "Controls are now PARTIAL. The positive and absent-target observations are retained, while the supposed malformed-target check is accurately identified as missing rather than claimed as validation."
+    },
+    {
+      "id": "turn4_scope",
+      "status": "PASS",
+      "finding": "Turn 4/week_index 3 is narrowed to the earliest extractor-selected compact brigade projection difference, with the separate selected weekly comparison first differing at week_index 7. No complete GameState or first-writer claim remains."
+    },
+    {
+      "id": "probe_exclusion_boundary",
+      "status": "PASS",
+      "finding": "The probe commitment is described as a strong source-supported explanation. The correction expressly states that no injectQueuedOperation receipt observed execution of committedElsewhere or every alternative guard."
+    },
+    {
+      "id": "helper_counterfactual",
+      "status": "PASS",
+      "finding": "The helper is reduced to the strongest associated candidate. Its call and guard results, the turn-22 replenishment writer, the turn-23 probe-selection cause, and the chain to Prača remain unmeasured. Dirty n80 executable-source provenance is explicitly retained, so no sole-source-delta or sole-counterfactual claim remains."
+    },
+    {
+      "id": "disposition",
+      "status": "PASS",
+      "finding": "n81 remains rejected/unadopted at 689/712; n80 remains the 703/712 NO-GO/unadopted baseline; no mechanic fix, adoption, recovery, repaint, rollback, or acceptance is claimed."
+    }
+  ],
+  "residual_wording_finding": {
+    "status": "REQUIRES_EXPLICIT_ROOT_NARROWING_ONLY",
+    "path": "logs/claude-channel-20261004/765-corrected-result.json",
+    "field": "preserved_measured_facts.kijevo",
+    "unsupported_wording": "n80 Operation Kijevo begins turn 24 with three named brigades",
+    "evidence": "The n80 AAR says started_turn 24, but weekly_log reports brigade_count 2 at turn 24 and 3 at turn 25. The retained final participant/axis inventory includes rs_4th and praca_approach, and the temporal turn-24 row binds rs_4th to Kijevo.",
+    "accepted_replacement": "Kijevo starts at turn 24. The n80 AAR weekly log counts two brigades at turn 24 and three at turn 25; its retained/final participant and axis inventory includes rs_4th and praca_approach, and the temporal turn-24 row binds rs_4th to Kijevo. The n81 retained inventory has only the first two brigades and kijevo_shoulder. The actual n80 turn-26 Prača capture is measured.",
+    "handling": "Root 767 will apply this exact narrowing in synthesis without replacing the closed correction artifacts or starting another review cycle."
+  },
+  "final_assessment": {
+    "correction_accuracy": "Pass subject to the one explicit roster-at-start wording narrowing above.",
+    "claim_boundaries": "All material provenance and causality boundaries requested by 766 are corrected.",
+    "new_overclaim": "No new material overclaim beyond the carried-forward Kijevo opening-roster wording.",
+    "mechanic_fix_justified": false,
+    "restoration_703_claimed": false,
+    "further_review_required": false
+  }
+}

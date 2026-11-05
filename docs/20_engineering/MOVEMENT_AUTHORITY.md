@@ -25,6 +25,8 @@ Every writer of `sector_reassignment_orders`, `brigade_movement_orders`, `brigad
 | `src/sim/combat/commander/decide.ts` | T1 | Computes commander intent, including one legal same-corps donor for each empty staffable front sector. |
 | `src/sim/combat/commander/emit.ts` | T1 | Emits `sector_reassignment_orders`; direct empty-sector relief has precedence over generic reserve shifts and is deduplicated by brigade. |
 | `src/sim/combat/bot_corps_ai.ts` | T1 | Produces corps directives and invokes the commander loop from `generate-bot-corps-orders`. |
+| `src/sim/combat/brigade_routine_scope.ts` | T2/T3/T6 shared | Single side-effect-free routine-movement scope and authority decision consumed by all three tiers (see section 2a). Decides nothing strategic and mutates nothing. |
+| `src/sim/combat/operation_approach_osids.ts` | Shared predicate | Operation approach/staging geometry (`getSectorOffensiveApproachOsids`), used by both the attack evaluator and the scope decision so the two cannot diverge. |
 | `src/sim/combat/bot_brigade_ai_osid.ts` | T2 | Converts sector reassignments and other legal staff intent into movement orders during `generate-bot-brigade-orders`. |
 | `src/sim/combat/bot_brigade_eval_front.ts` | T2 | Chooses a reachable destination on the assigned sector front. |
 | `src/sim/combat/bot_brigade_eval_movement.ts` | T2 | Handles rear-area repositioning within legal friendly connectivity. |
@@ -35,10 +37,84 @@ Every writer of `sector_reassignment_orders`, `brigade_movement_orders`, `brigad
 | `src/sim/combat/sector_offensive.ts` | T4 | Applies operation movement clauses owned by an active operation. |
 | `src/sim/combat/brigade_reconstitution.ts` | T5 | Places newly reconstituted brigades. |
 | `src/sim/combat/army_reserve_system.ts` | T5 | Applies reserve assignment and recall lifecycle effects. |
-| `src/sim/combat/commander_march_correction.ts` | T6 | Repairs invalid march paths and transit state. |
+| `src/sim/combat/commander_march_correction.ts` | T6 repair; dormant rejected T2 helper | Production repairs invalid march paths and transit state at T6. The rejected global pre-T3 reconciliation helper remains for local tests but is absent from the War pipeline. |
 | `src/sim/combat/brigade_front_distribution.ts` | T6 | Performs bounded local front distribution without paper transfers. |
 | `src/sim/combat/brigade_home_return.ts` | T6 | Routes eligible idle displaced brigades home. |
 | `src/sim/combat/corps_front_sectors.ts` | Derived truth | Classifies only roster-eligible, legally reachable formations as potential sector staff and marks a sector `unstaffed_front` when no legal donor exists. |
+
+## 2a. Routine movement scope (selected 2026-09-18)
+
+Canon previously did not settle whether the legal march scope of a non-operation line brigade
+was its **assigned sub-segment**, its **sector**, or its **corps**. Section 2 said T2 chooses "on
+the assigned sector front"; section 4 let T6 repair inside "assignment bounds"; the T2 code pooled
+every sub-segment of the corps while T6 validated only `assigned_sub_segment_id`. The two tiers
+therefore never converged on a brigade whose assigned sub-segment was a single OSID: T2 issued a
+destination T6 rejected, T3 created a transit, T6 cancelled it and T2 reissued it, indefinitely —
+and the spurious intra-turn transit made the brigade look unavailable to operation admission.
+This section records the choice made to end that contradiction. It was a policy decision, not the
+restoration of an existing rule.
+
+**Policy.** For an ordinary line brigade with a valid current `assigned_sub_segment_id`,
+discretionary front repositioning is limited to the friendly front destinations of that assigned
+sub-segment. Tactical routing does not implicitly reassign the brigade to another sub-segment,
+sector or corps.
+
+**Single owner.** `src/sim/combat/brigade_routine_scope.ts` is the one side-effect-free decision;
+T2 (order production), T3 (`osid_column_movement` pending-order → transit revalidation) and T6
+(`commander_march_correction`) all consult it rather than each approximating the boundary.
+
+**Three distinctions it must keep making:**
+
+1. *Routine discretionary movement* under a valid line assignment — restricted.
+2. *Movement backed by an actual existing higher-priority authority* — exempt. This covers active
+   operation staging and approach OSIDs, and any sector the corps commander names for the brigade
+   via `sector_reassignment_orders`, `priority_sector_id` or `reinforce_sector_ids`, as well as
+   authored pre-planned pre-staging, player orders and reserve/loan lifecycle movement.
+3. *Missing or stale assignments, reserves and other established special cases* — unrestricted,
+   with their prior behaviour preserved.
+
+**This policy is not a garrison rule.** A restricted brigade may still cross intermediate cells:
+the restriction applies to the routine **destination**, never to every node of a permitted route.
+Several movement helpers return the *first step* of a multi-hop path rather than a destination;
+scope-checking such a return value forbids legal journeys and is a defect, not an enforcement of
+this policy. Likewise `friendly_osids` and `enemy_osids` are disjoint, so a set of enemy offensive
+targets is scoped by **adjacency** to a legally occupiable cell, never by intersection.
+
+**`owner: 'bot_discretionary'` does not mean "routine."** The T2 aggregator stamps that tag on
+every evaluator's output alike, so it distinguishes bot orders from authored ones and nothing
+more. Authority exemptions, not the tag, decide whether the T3 revalidation applies.
+
+**Physical column routing (2026-10-25 qualified at bounded scope).** After the existing destination and authority
+checks, T3 uses the normal friendly/allied weighted pathfinder without a corps-sector node mask.
+Sector footprints describe assignments, not territorial transit permissions. Hostile intermediate
+nodes remain illegal; travel costs, movement ownership and arrival timing remain unchanged.
+The retained normal-player Delijaš order exposed the defect: its destination was authorized, but
+three friendly intermediate cells fell outside the corps footprint. Routing-scope diagnostics are
+`null` when no such mask is applied. This correction does not broaden offensive admission. The compiled
+package and retained 0→1/turn6 proof qualify the routing correction only; fresh39 fails the strict
+media/runtime gate after Save/load with four measured losses, so no campaign parity or703 floor is qualified.
+
+**Operation movement authority is type-agnostic; the sector-attack evaluator flag is not.**
+`isActiveSectorOperationParticipant` means "this formation's attack behaviour is owned by the
+sector-attack evaluator" and is deliberately restricted to `sector_attack` / `probe`. It must not
+be used as the movement-authority reading: T3/T6 (`isDestinationAuthorizedByOperation`) authorise
+an operation's staging/approach destinations for ANY active operation type in
+planning/execution. The T2 movement guards therefore use `hasActiveOperationCommitment`
+(any-type membership) and the T2 destination scope is unioned with
+`getOperationAuthorizedDestinations` for the brigade's active operation, so `general_offensive`,
+`feint` and the other operation types retain their movement authority at every tier. Attack
+consumers (home defense, supply gate, off-front gate, sector-attack execution) keep the narrower
+flag; broadening it would hand those types the attack evaluator's gates. Destination authority
+remains phase-gated to planning/execution exactly as at T3/T6; the guard predicate preserves its
+pre-existing treatment of recovery-phase participants.
+
+**Active-loan operation ownership.** Operation authorization uses the receiving corps in `elite_loan_state.loaned_to_corps` when `on_loan` is true and a receiving corps is present; otherwise it uses the formation's home `corps_id`, matching brigade bot dispatch. This resolves the operation owner only. Participant, phase, axis, objective-index, staging/approach, adjacency and exact-destination checks remain unchanged; it does not authorize a global operation search or arbitrary cross-corps movement.
+
+**Single-cell assignment.** When a brigade's assigned sub-segment contains only its current
+location and no authorized alternative destination exists, no discretionary relocation is emitted.
+The brigade stays physically where it is; no transit or completed move is fabricated, and its
+staffed position is not reported unstaffed. This is not a statement that the position should be
+held forever — leaving requires an authorized order or a combat consequence.
 
 ## 3. Empty-sector relief lifecycle
 
@@ -47,6 +123,18 @@ Every writer of `sector_reassignment_orders`, `brigade_movement_orders`, `brigad
 3. During `generate-bot-brigade-orders`, T2 translates the reassignment into a column movement order after revalidating the destination and route.
 4. On later turns, `osid-column-movement` and `apply-brigade-movement` perform T3 movement. Arrival is proven by physical `location_osid`, not by assignment metadata.
 5. If no legal donor exists, the sector remains empty and is marked `unstaffed_front: true`. The UI may report the gap, but no engine tier may teleport a brigade or fabricate staffing.
+
+## 3a. Rejected stale-operation prepass (2026-10-20; dormant 2026-10-23)
+
+**Candidate calibration rejected:** n81 measures689/712 versus n80 703/712, with14 previously correct October cells lost. The implementation below remains preserved source for diagnosis; focused fixtures are not campaign acceptance. See CALIBRATION_MASTER760–763.
+
+The rejected candidate would have replaced a pending bot-discretionary column destination immediately before T3 only when state proved a completed earlier objective of the same unique operation and axis. It inventoried participant or axis memberships across every command and phase and required exactly one live planning/execution membership hosted by the effective valid loan/home corps. n81 rejected that global behavior; the production War pipeline no longer imports or calls it.
+
+The dormant helper's local fixtures retain its deterministic selection and guard contract for diagnosis. They do not describe an active phase or authorize future reactivation. Current production retains existing T3 route/scope/political/ownership checks and the narrower T6 invalid-transit repair. Focused historical candidate proof remains in `tests/stale_operation_march_reconciliation.test.ts` and `tests/mistral_prisoje_turn_order.test.ts`.
+
+Observer-only topic `reconciliation_write` records actual command-owner pre/post assignment and existing guard outcomes before T3 consumption. `preplanned_eligibility` observes direct/queued historical-operation eligibility, commitment and admission boundaries. Both are default-off stable JSON stdout only; neither changes authority, thresholds, phase order, GameState/save/weekly fields or existing movement guards. Repeated context keys are not unique invocation IDs. See CODE_CANON observer boundaries and CALIBRATION_MASTER768–771 for proof and limits.
+
+**Current disposition (2026-10-23):** the global pre-T3 call/import was rejected and is absent from `war_phases.ts`; the helper remains dormant outside local tests. The accepted narrow behavior is T6 preservation of already-valid active elite-loan transit when the receiving corps owns one unique executing operation/axis and the completed-prefix proof is satisfied. Graz fallback lookup uses that same receiving-corps resolution only for a valid unique active elite-loan operation-owned attack. It does not authorize a global operation search, replace ordinary home policy, or relax participant, axis, objective, adjacency or destination guards.
 
 ## 4. Pipeline constraints
 

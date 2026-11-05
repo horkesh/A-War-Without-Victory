@@ -1,0 +1,68 @@
+Jemanlići local-axis candidate — 2026-09-23
+
+Change: append op:donji_vakuf:jemanlici after Prusac on the existing
+prusac_local axis of Operation Donji Vakuf. Same 19th/31st brigades, staging,
+corps, main sweep, planning budget and combat parameters. No control writer,
+force input or reference change. Main source/test files match the validation
+worktree byte-for-byte.
+
+Validation worktree: F:\A-War-Without-Victory\.worktrees\prusac-validation-20260922
+Evidence below is under its logs\jemanlici-op-probe-20260923 unless noted.
+
+- Test-first catalog proof: red 2 failed / 74 passed before source change;
+  green 76/76 after. preplanned-red.log, preplanned-green.log.
+- TypeScript noEmit and diff check exit 0 in validation and main checkouts.
+- 39-week definitive-scenario probe: exit 0, final hash 7fef64c8b0337083.
+  RBiH takes RS-held Jemanlići at t25; the RS 19th Krajina retakes it at t31
+  through operation-owned combat, decisive victory versus RBiH militia.
+  January 704/712 versus Orašac candidate 703/712, 31/31 anchors, no new
+  wrong control cells; Jemanlići is the sole t39 control difference.
+  thirty-nine-week.log and runs\apr1992_definitive_188w__9137f75e9f35be20__w39_n0.
+- Full 188-week run: exit 0, final hash 60d3f5732705ef90; checkpoint scores
+  704/697/692/657 versus 703/692/688/654. First 39 weekly records match
+  the 39-week probe byte-for-byte. Health true; checkpoint anchors
+  31/31, 32/32, 39/40, 31/31 (same anchor results as prior candidate);
+  nine enclave guards hold. Ten t188 control cells differ. Input set matches
+  prior candidate: 31 files, digest
+  f8ace65496620fad1c8219a9dcaa8e2c5cdba2f3f541b156c7ba112b4748caaf.
+  one-eighty-eight-week.log and runs\apr1992_definitive_188w__6898d6d2e324c7a3__w188_n1.
+- Checkpoint validator exit 1: inherited Farz P-A wrong-corps attribution;
+  western cascade 26/38, versus 28/38 prior. Inherited Prozor t41 op_empty
+  remains the sole operation-injection error in both 188-week runs.
+  checkpoints.log. Full-campaign acceptance remains NO-GO.
+- Independent read-only review: GO for adjacency, corps/roster, ordered axis,
+  attack-driven capture and January scope; full-campaign acceptance held.
+- Main focused tests: 96/96 across preplanned operations, startup snapshot and
+  desktop bundle; main typecheck and snapshot check exit 0. The snapshot builder
+  first hit a transient Windows UNKNOWN file-open error; exclusive open then
+  succeeded and one retry completed. The derived snapshot did not acquire a
+  Jemanlići delta because Donji Vakuf is queued at startup.
+- Required full suite ran once in Git Bash: exit 1. Direct failures were two
+  stale Donji Vakuf catalog assertions, two preexisting generated plan-index
+  checks and the runtime-dependency setup timeout. The intentional Vitest
+  child failure is a passing parent control. full-suite.log (main workspace).
+  Corrected guard assertions pass 10/10; isolated runtime dependency passes
+  12/12. Regenerated plan index passes `npm run plans:check` and its focused
+  test 13/13; the desktop documentation truth test passes 7/7.
+
+External map publication, 2026-09-23:
+- User requested the usual external map. Generated control_timeline.html from
+  the retained 188-week run without a simulation rerun. The saved run's SHA-256
+  is 60d3f5732705ef90a6965e84363013bb2e9178c6341ca82154e1c33948a762a8.
+- Payload audit confirms all initial owners and 224 control events match the
+  saved run. Geometry, painted references, markers and colors match the prior
+  Orašac viewer. Embedded script syntax passes, with no external assets or
+  absolute host paths. viewer-payload-audit.json and viewer-embedded.js.
+- Marker verifier: 712/712 markers, 63 distinct mismatch anchors, zero
+  missing/outside. Local and live browser checks at desktop, touch and dark
+  touch sizes pass: 704/712 in January, Jemanlići RS from t31, zoom/reset,
+  checkpoint-only mismatches, no console errors, failed requests or overflow.
+  browser-local.json and browser-live.json.
+- Published only index.html and README.md on gh-pages commit
+  649b2b18ed0f0c2864d5fa08c020d0de10e2165d. Pages build status: built.
+  URL: https://horkesh.github.io/A-War-Without-Victory/?run=jemanlici-axis-20260923
+  Generated, committed and live HTML are byte-identical: 720075 bytes,
+  SHA-256 60f98d545ce43bdd62f6913fb94e05cd5af22c9c291609c372e7a8b1839a02c8.
+
+No source/main push, merge, baseline adoption or reference change. The
+published dirty candidate remains full-campaign NO-GO.

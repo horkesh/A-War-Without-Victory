@@ -3,12 +3,12 @@ import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { getAdjacentEnemyOsids } from './bot_brigade_context.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
+import { isGatedObjectiveHeld, recordOperationOrderOwner } from './operation_phase_gate.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { findNearestFriendlyOsidDestination } from './bot_brigade_context.js';
 import { predictAllAdjacentTargets, predictCombatOutcome } from './combat_predictor.js';
 import {
     scoreTargetFromDirective,
-    estimateConcentratedOutcome,
     isOutcomeSufficientForAttack,
     outcomeRank,
     outcomeFromRank,
@@ -64,23 +64,35 @@ import {
     getBrigadeAxis,
 } from './bot_brigade_ai_osid.js'; // Will need to export these from bot_brigade_ai_osid.ts
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
-import { countAxisConcentrationSupport, getConvergingOperationBrigades } from './corps_operation_helpers.js';
-import { isReasonCodeTopicEnabled } from './reason_code_debug.js';
+import { getConvergingOperationBrigades, getSynchronizedOperationBrigadesAtObjective } from './corps_operation_helpers.js';
+import { emitAxisOrderTraceRecord, isReasonCodeTopicEnabled } from './reason_code_debug.js';
 
 export function recordAxisOrderGenerationDetail(
     activeOp: CorpsOperation,
     brigadeId: FormationId,
     detail: Omit<AxisOrderGenerationDetail, 'brigade_id'>,
 ): void {
-    if (!isReasonCodeTopicEnabled('axis_reject')) return;
+    const persistLegacyDetail = isReasonCodeTopicEnabled('axis_reject');
+    const emitTrace = isReasonCodeTopicEnabled('axis_order_trace');
+    if (!persistLegacyDetail && !emitTrace) return;
     const axis = getBrigadeAxis(activeOp, brigadeId);
     if (!axis) return;
+    const fact = { brigade_id: brigadeId, ...detail };
+    if (emitTrace) {
+        emitAxisOrderTraceRecord({
+            operation_name: activeOp.name,
+            operation_started_turn: activeOp.started_turn,
+            operation_phase: activeOp.phase,
+            axis_id: axis.axis_id,
+            ...fact,
+        });
+    }
+    if (!persistLegacyDetail) return;
     if (axis.order_generation_details?.[0]?.turn !== detail.turn) {
         axis.order_generation_details = [];
     }
     const facts = axis.order_generation_details ??= [];
     const existing = facts.findIndex((fact) => fact.brigade_id === brigadeId);
-    const fact = { brigade_id: brigadeId, ...detail };
     if (existing >= 0) facts[existing] = fact;
     else facts.push(fact);
     facts.sort((a, b) => strictCompare(a.brigade_id, b.brigade_id));
@@ -162,6 +174,40 @@ function buildObjectivePathDistances(
     return distances;
 }
 
+function findFlaggedAxisStagingDestination(
+    state: GameState,
+    faction: FactionId,
+    loc: Osid,
+    stagingOsid: Osid | undefined,
+    adjacency: Map<Osid, Osid[]>,
+    reverseMap: OperationalToCanonicalReverseMap,
+): Osid | null {
+    if (!stagingOsid) return null;
+
+    const stagingController = getPoliticalControllerOSID(state, stagingOsid, reverseMap);
+    const stagingIsFriendly = stagingController === faction
+        || (stagingController != null && isFriendlyFaction(stagingController, faction, state));
+    if (stagingIsFriendly) {
+        const exactDestination = findNearestFriendlyOsidDestination(
+            state, faction, loc, adjacency, reverseMap, new Set([stagingOsid]),
+        );
+        if (exactDestination) return exactDestination;
+    }
+
+    const friendlyNeighbors = new Set(
+        getTacticalAdjacentOsids(state, stagingOsid, adjacency).filter((neighbor) => {
+            const controller = getPoliticalControllerOSID(state, neighbor, reverseMap);
+            return controller === faction
+                || (controller != null && isFriendlyFaction(controller, faction, state));
+        }),
+    );
+    if (friendlyNeighbors.size === 0) return null;
+    const neighborDestination = findNearestFriendlyOsidDestination(
+        state, faction, loc, adjacency, reverseMap, friendlyNeighbors,
+    );
+    return neighborDestination && neighborDestination !== loc ? neighborDestination : null;
+}
+
 function wasRecentlyRepulsedFromTarget(
     brigade: FormationState,
     targetOsid: string,
@@ -173,8 +219,54 @@ function wasRecentlyRepulsedFromTarget(
         && repulseInfo.turn >= currentTurn - cooldownTurns;
 }
 
+/**
+ * Real joint-attacker cohort for a direct-objective forecast.
+ *
+ * Candidates are same-objective operation/sync peers that the caller actually accepted
+ * this pass, plus prior authored orders that win the upcoming merge. A candidate counts
+ * only if it is the same faction, active, at least MIN_ATTACK_PERSONNEL, tactically
+ * adjacent to the objective, and not currently in transit. No hypothetical or filtered
+ * brigades are imputed. Deterministic: deduped and sorted by brigade id.
+ */
+function collectActualJointDirectObjectiveAttackers(
+    state: GameState,
+    faction: FactionId,
+    targetOsid: Osid,
+    brigadeId: FormationId,
+    operationCohort: readonly FormationId[],
+    processedBrigadeIds: readonly FormationId[] | undefined,
+    authoritativePriorAttackOrders: Readonly<Record<string, string>> | undefined,
+    adjacency: Map<Osid, Osid[]>,
+): FormationId[] {
+    const cohort = new Set<FormationId>();
+    const processed = processedBrigadeIds ? new Set(processedBrigadeIds) : null;
+    for (const peerId of operationCohort) {
+        if (processed && !processed.has(peerId)) continue;
+        cohort.add(peerId);
+    }
+    if (authoritativePriorAttackOrders) {
+        for (const [peerId, target] of Object.entries(authoritativePriorAttackOrders)) {
+            if (target === targetOsid) cohort.add(peerId as FormationId);
+        }
+    }
+    cohort.delete(brigadeId);
+
+    const supporters: FormationId[] = [];
+    for (const peerId of [...cohort].sort(strictCompare)) {
+        const formation = state.military.formations?.[peerId];
+        if (!formation || formation.status !== 'active' || formation.faction !== faction) continue;
+        if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
+        const peerLoc = formation.location_osid;
+        if (!peerLoc) continue;
+        if (state.military.brigade_movement_state?.[peerId]?.status === 'in_transit') continue;
+        if (!getTacticalAdjacentOsids(state, peerLoc as Osid, adjacency).includes(targetOsid)) continue;
+        supporters.push(peerId);
+    }
+    return supporters;
+}
+
 export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, activeOp, isActiveSectorOperationParticipant, loc, faction, adjacency, state, reverseMap, terrainCache, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result, officerCombatLookup, getOfficerCombatLookup } = ctx;
+    const { brigade, activeOp, isActiveSectorOperationParticipant, loc, faction, adjacency, state, reverseMap, terrainCache, slopeByOsid, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result, officerCombatLookup, getOfficerCombatLookup } = ctx;
 
     // Combat ineffective gate: brigades below minimum personnel (500) defend only.
     // A sub-battalion unit cannot execute an attack — it needs to reconstitute.
@@ -223,7 +315,17 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
             } else if (planningApproachOsids.size === 0) {
                 // No approach OSIDs found — fall back to staging area
                 sectorAttackProfileTime('.sectorAttack.planningApproachPath', () => {
-                    const axisStaging = getBrigadeAxis(activeOp, brigade.id)?.staging_osid ?? activeOp.staging_osid;
+                    const operationAxis = getBrigadeAxis(activeOp, brigade.id);
+                    const axisStaging = operationAxis?.staging_osid ?? activeOp.staging_osid;
+                    if (operationAxis?.preserve_objective_sequence === true) {
+                        const stagingDestination = findFlaggedAxisStagingDestination(
+                            state, faction, loc, axisStaging, adjacency, reverseMap,
+                        );
+                        if (stagingDestination && stagingDestination !== loc) {
+                            result.column_march_orders[brigade.id] = stagingDestination;
+                        }
+                        return;
+                    }
                     if (axisStaging && loc !== axisStaging) {
                         const nearestStaging = findNearestFriendlyOsidDestination(
                             state,
@@ -250,6 +352,14 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
         }
 
         if (activeOp.phase === 'execution') {
+            const assignedAxis = getBrigadeAxis(activeOp, brigade.id);
+            // Terminal axes no longer own fresh attack or approach orders. Their
+            // result updater intentionally skips them while executing siblings
+            // continue; issuing orders here would create untracked assaults.
+            if (assignedAxis && assignedAxis.status !== 'executing') {
+                result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                return true;
+            }
             const currentObjective = getSectorOffensiveCurrentObjective(activeOp, brigade.id);
             // Skip objective if controlled by own faction OR by an allied faction.
             // Allied capture counts as mission success — advance to next objective.
@@ -285,6 +395,19 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 '.sectorAttack.executionTacticalAdjacency',
                 () => getTacticalAdjacentOsids(state, loc as Osid, adjacency).includes(currentObjective)
             );
+            const operationAxis = getBrigadeAxis(activeOp, brigade.id);
+            const minimumForwardBrigades = operationAxis?.minimum_forward_brigades;
+            const forwardAssaultGroupReady = minimumForwardBrigades == null || operationAxis == null
+                || operationAxis.assigned_brigades.filter((brigadeId) => {
+                    const axisBrigade = state.military.formations?.[brigadeId];
+                    const axisLocation = axisBrigade?.location_osid as Osid | undefined;
+                    if (!axisLocation) return false;
+                    const locationController = getPoliticalControllerOSID(state, axisLocation, reverseMap);
+                    if (locationController !== faction && !isFriendlyFaction(locationController, faction, state)) {
+                        return false;
+                    }
+                    return getTacticalAdjacentOsids(state, axisLocation, adjacency).includes(currentObjective);
+                }).length >= minimumForwardBrigades;
             const avoidedOsidsForFaction = state.meta?.avoided_osids_by_faction?.[faction];
             const directObjectiveAttack = tacticallyAdjacentToObjective
                 ? sectorAttackProfileTime('.sectorAttack.executionDirectObjective', () => {
@@ -301,10 +424,10 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                         },
                     );
                     if (skipDirectObjective) return undefined;
+                    const combatOfficerLookup = getOfficerCombatLookup?.() ?? officerCombatLookup;
                     const prediction = sectorAttackProfileTime(
                         '.sectorAttack.executionDirectObjective.predict',
                         () => {
-                            const combatOfficerLookup = getOfficerCombatLookup?.() ?? officerCombatLookup;
                             return predictCombatOutcome(
                                 state,
                                 brigade.id,
@@ -316,7 +439,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                                 undefined,
                                 supplyStateByOsid,
                                 osidPopulationMap,
-                                undefined,
+                                slopeByOsid,
                                 ethnicMap,
                                 SECTOR_ATTACK_DIRECT_OBJECTIVE_PREDICT_PROFILE_PREFIX,
                                 combatOfficerLookup,
@@ -334,35 +457,54 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 const probeThreshold = getSectorOffensiveProbeThreshold(activeOp, brigade.id);
                 directAttackThreshold = probeThreshold;
                 const predictedOutcome = directObjectiveAttack.prediction.predicted_outcome;
-                const axisBrigades = getConvergingOperationBrigades(activeOp, brigade.id);
-                // R13b op-level concentration: count op-mates on every axis sharing
-                // this current objective within 2 hops
-                // of the objective with distance weighting (1-hop=1.0, 2-hop=0.5,
-                // floored). Replaces prior tactical-adjacency check which excluded
-                // op-mates staged 2+ hops away (e.g. HV phantoms at livno/duvno
-                // staging for drvar/glamoc objectives, where Mistral 1/2/SM ops
-                // never accumulated >1 supporter and concentratedOutcome stayed null).
-                const adjacentOperationParticipants = sectorAttackProfileTime(
+                const axisBrigades = activeOp.sync_operation_name
+                    ? getSynchronizedOperationBrigadesAtObjective(state, activeOp, faction, currentObjective)
+                    : getConvergingOperationBrigades(activeOp, brigade.id);
+                // Joint forecast uses actual physically eligible brigades that the caller
+                // accepted (operation/sync peers) plus prior authored same-target orders
+                // that win the merge. No count-based copies of this brigade are imputed.
+                const jointAttackers = sectorAttackProfileTime(
                     '.sectorAttack.executionAdjacentParticipants',
-                    () => countAxisConcentrationSupport(
+                    () => collectActualJointDirectObjectiveAttackers(
                         state,
-                        axisBrigades,
-                        new Set([brigade.id]),
-                        adjacency,
+                        faction,
                         currentObjective as Osid,
-                    )
+                        brigade.id,
+                        axisBrigades,
+                        ctx.processedBrigadeIds,
+                        ctx.authoritativePriorAttackOrders,
+                        adjacency,
+                    ),
                 );
-                const additionalAttackers = Math.max(alreadyAssigned, adjacentOperationParticipants);
-                const concentratedOutcome = additionalAttackers > 0
-                    ? estimateConcentratedOutcome(
-                        directObjectiveAttack.prediction.power_ratio,
-                        additionalAttackers
+                const combatOfficerLookup = getOfficerCombatLookup?.() ?? officerCombatLookup;
+                const concentratedOutcome = jointAttackers.length > 0
+                    ? sectorAttackProfileTime(
+                        '.sectorAttack.executionDirectObjective.predictJoint',
+                        () => predictCombatOutcome(
+                            state,
+                            brigade.id,
+                            currentObjective as Osid,
+                            adjacency,
+                            reverseMap,
+                            terrainCache,
+                            'attack',
+                            jointAttackers,
+                            supplyStateByOsid,
+                            osidPopulationMap,
+                            slopeByOsid,
+                            ethnicMap,
+                            `${SECTOR_ATTACK_DIRECT_OBJECTIVE_PREDICT_PROFILE_PREFIX}.joint`,
+                            combatOfficerLookup,
+                        )?.predicted_outcome ?? null,
                     )
                     : null;
-                const canDirectAttackObjective =
+                const canDirectAttackObjective = forwardAssaultGroupReady
+                    && !isGatedObjectiveHeld(operationAxis, currentObjective)
+                    && (
                     isOutcomeSufficientForAttack(predictedOutcome, probeThreshold) ||
                     (concentratedOutcome != null &&
-                        isOutcomeSufficientForAttack(concentratedOutcome, probeThreshold));
+                        isOutcomeSufficientForAttack(concentratedOutcome, probeThreshold))
+                );
                 directAttackSufficient = canDirectAttackObjective;
                 directConcentratedOutcome = concentratedOutcome;
                 if (canDirectAttackObjective && brigade.corps_id) {
@@ -382,6 +524,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                     result.posture_orders.push({ brigade_id: brigade.id, posture: attackPosture });
                     result.attack_orders[brigade.id] = currentObjective;
                     result.attack_scores[brigade.id] = 900;
+                    recordOperationOrderOwner(state, result, brigade.id, currentObjective);
                     chosenTargets.set(currentObjective, alreadyAssigned + 1);
                     return true;
                 }
@@ -447,6 +590,25 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 }
             }
 
+            // A sequence-committed axis must not attack through a sibling axis while
+            // its own current objective has no lawful approach.  The authored staging
+            // cell may still be enemy-held (Sana: Ivanjska before the sibling capture),
+            // so the friendly-only route can legitimately produce no order; hold until
+            // the current objective or its real approach opens instead.
+            if (operationAxis?.preserve_objective_sequence === true) {
+                const stagingDestination = findFlaggedAxisStagingDestination(
+                    state, faction, loc, operationAxis.staging_osid, adjacency, reverseMap,
+                );
+                if (stagingDestination && stagingDestination !== loc) {
+                    recordOrderDecision('march_to_approach', { issued_target_osid: stagingDestination });
+                    result.column_march_orders[brigade.id] = stagingDestination;
+                } else {
+                    recordOrderDecision('defend_no_route_or_viable_target');
+                }
+                result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                return true;
+            }
+
             // ── Attack through: last resort when march path blocked ──
             // No friendly path to objective — must fight through enemy
             // territory to open a route. Only attack intermediates held
@@ -479,7 +641,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                     'attack',
                     supplyStateByOsid,
                     osidPopulationMap,
-                    undefined,
+                    slopeByOsid,
                     ethnicMap
                 )
             );
@@ -499,6 +661,9 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                         ? targets.filter(t => getPoliticalControllerOSID(state, t.osid, reverseMap) === objectiveController)
                         : targets).filter(t => {
                             if (_avoidedOsids?.includes(t.osid)) return false;
+                            // Phase gate: a holding axis may not capture a gated objective through the
+                            // attack-through fallback either (lawful approach captures elsewhere stay).
+                            if (isGatedObjectiveHeld(operationAxis, t.osid)) return false;
                             const targetDistance = objectivePathDistances.get(t.osid);
                             return targetDistance !== undefined
                                 && locObjectiveDistance !== undefined
@@ -525,6 +690,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                     result.posture_orders.push({ brigade_id: brigade.id, posture: attackPosture });
                     result.attack_orders[brigade.id] = bestIntermediate.osid;
                     result.attack_scores[brigade.id] = 800;
+                    recordOperationOrderOwner(state, result, brigade.id, bestIntermediate.osid);
                     chosenTargets.set(bestIntermediate.osid, (chosenTargets.get(bestIntermediate.osid) ?? 0) + 1);
                     return true;
                 }
@@ -613,7 +779,7 @@ export function getEnemyOsidsWithinHops(
 }
 
 export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, corpsStance, counterAttackTarget, adjEnemy, directive, faction, isAlliedWithRBiH, state, reverseMap, terrainCache, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result, adjacency, loc, graphAnalysis, sectorRecentRetreats, sectorCounterAttackCount } = ctx;
+    const { brigade, corpsStance, counterAttackTarget, adjEnemy, directive, faction, isAlliedWithRBiH, state, reverseMap, terrainCache, slopeByOsid, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result, adjacency, loc, graphAnalysis, sectorRecentRetreats, sectorCounterAttackCount } = ctx;
 
     // --- Rule 4: Defensive stance → defend, with retreat-based counter-attack only ---
 
@@ -641,7 +807,7 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
         if (counterAttackTarget && adjEnemy.includes(counterAttackTarget) && disruptedTurns === 0) {
             const targets = defensiveProfileTime(
                 '.defensive.selfRetreatPredictTargets',
-                () => predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap)
+                () => predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, slopeByOsid, ethnicMap)
             );
             const counter = targets.find(t => t.osid === counterAttackTarget &&
                 (chosenTargets.get(t.osid) ?? 0) < maxAtt &&
@@ -704,7 +870,7 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
                             '.defensive.sectorCounterAttackPredictTargets',
                             () => predictAllAdjacentTargets(
                                 state, brigade.id, adjacency, reverseMap, terrainCache,
-                                'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap,
+                                'attack', supplyStateByOsid, osidPopulationMap, slopeByOsid, ethnicMap,
                             )
                         );
 

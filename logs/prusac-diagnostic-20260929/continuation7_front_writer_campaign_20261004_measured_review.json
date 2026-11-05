@@ -1,0 +1,101 @@
+{
+  "scope": "independent review of the single completed n42 139-turn diagnostic",
+  "verdict": "GO_BOUNDED_MEASUREMENT_ONLY",
+  "candidate_run": "runs/apr1992_definitive_188w__0b1f040ff4abe835__w139_n42",
+  "baseline_run": "runs/apr1992_definitive_188w__0b1f040ff4abe835__w139_n40",
+  "commit": "2a1554a50866af292b949d3668ae45aec4e861fa",
+  "runner_exit": 0,
+  "coverage_exit": 0,
+  "compare_exit": 0,
+  "control_exit": 0,
+  "inventory_exit": 0,
+  "review_reran_checks": false,
+  "review_reran_campaign": false,
+  "artifact_sha256": {
+    "coverage_json": "ca4455d3809d52903672378bc48b0a78b50487fd71d797628e45ab5503516a76",
+    "compare_json": "82f8bacc9c4b48abeeec8ae70bea437f087fa0b99eb50b3efbac4cc11fc87bbf",
+    "control_json": "33fa61f3383f2badfc39c5945f2deef99f4668bb33b9f7cac37b9defe4f8231b",
+    "root_preservation_json": "297ae0b3381574aebfb3c6c983ed300dda460f69db08d49dbddbbb20ff2f2ee3",
+    "candidate_weekly_report": "d1dbee254d62fb3303ad3523944a6118fc101264d1e2eea9852f9c43bf7690bb",
+    "candidate_initial_save": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+    "candidate_final_save": "d6715e9cefa14d0cf88b1af34d12c38c231186b6cf44cbb71e87636c0a6b04b9"
+  },
+  "coverage": {
+    "actor_turn_rows": 139,
+    "invocations": 278,
+    "writes": 41,
+    "inconsistencies": 0,
+    "missing_expected_boundaries": 0,
+    "causal_proof": false
+  },
+  "comparison": {
+    "input_count": 30,
+    "normalized_input_digest": "ed7fa30986392451f797708a5a0fe9d3ac83f284692be04e199305c533a1f0b6",
+    "ordinary_weekly_rows_equal": 139,
+    "all_reconstructed_controller_maps_equal": 139,
+    "ordered_control_events_equal": 173,
+    "checkpoint_39_matches": "707/712",
+    "checkpoint_104_matches": "707/712",
+    "lost_checkpoint_matches": 0,
+    "gained_checkpoint_matches": 0,
+    "protected_controls_equal": 11,
+    "anomalies": {
+      "critical": 0,
+      "warning": 3,
+      "info": 21
+    },
+    "stderr_unresolved_hrhb_travnik": 2
+  },
+  "actor_receipts": {
+    "137": {
+      "production_calls": 2,
+      "writes": 0,
+      "rejections": 0
+    },
+    "138": {
+      "callsite": "final-distribute-brigades-to-front",
+      "helper": "empty_front_subsegment_fill",
+      "action": "column_order",
+      "source_snapshot": "op:busovaca:gornja_rovna",
+      "target": "op:bugojno:udurlije",
+      "distance": 6,
+      "score": 6,
+      "active_sector_pool_count": 8,
+      "frontline_width": 5,
+      "front_gap_repair_max_hops": 20,
+      "rear": true,
+      "operation_participant": false,
+      "movement_order_before": "absent",
+      "movement_state_before": "absent"
+    },
+    "139": {
+      "rejection_source": "op:busovaca:gornja_rovna",
+      "rejection_destination": "op:bugojno:udurlije",
+      "rejection_reason": "posture_dig_in",
+      "callsite": "final-distribute-brigades-to-front",
+      "helper": "empty_front_subsegment_fill",
+      "reissued_target": "op:bugojno:udurlije",
+      "distance": 6,
+      "score": 6,
+      "movement_order_before_reissue": "absent",
+      "movement_state_before_reissue": "absent"
+    }
+  },
+  "preservation": {
+    "accepted_source_bindings": 11,
+    "parent_artifacts": 119,
+    "retained_prior_runs": 6,
+    "intact_junctions": 2,
+    "protected_boundary_diff_empty": true,
+    "exception": "Earlier worker preflight and pre-refactor helper artifacts were overwritten; tool readback is not original-byte recovery."
+  },
+  "unproved": [
+    "original dirty n37/517th pre-order cause",
+    "later 737th admission",
+    "Jajce and four retained losses",
+    "n40 literal-31 provenance criterion",
+    "late-188, Farz, and HV gates",
+    "full calibration acceptance",
+    "gameplay defect or corrective predicate"
+  ]
+}

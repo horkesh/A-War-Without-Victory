@@ -1,3 +1,4 @@
+import type { TerrainScalarsData } from '../../map/terrain_scalars.js';
 /**
  * Bot brigade AI — supply state and ethnic composition helpers.
  *
@@ -31,6 +32,8 @@ export type SupplyConnectivityByFaction = Map<FactionId, Set<Osid>>;
 
 /** Context needed for OSID bot decisions. Passed from the pipeline. */
 export interface OsidBotContext {
+    /** Same terrain substrate as combat resolution; optional for minimal fixtures. */
+    terrainData?: TerrainScalarsData | null;
     edges: EdgeRecord[];
     reverseMap: OperationalToCanonicalReverseMap;
     /** Pre-computed OSID adjacency from SpatialContext. If absent, built from edges. */

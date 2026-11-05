@@ -41,6 +41,7 @@ export interface SharedTurnInputs {
     historicalNameLookup: HistoricalOrdinalLookup | undefined;
     historicalCorpsLookup: HistoricalOrdinalLookup | undefined;
     historicalOobIdLookup: HistoricalOrdinalLookup | undefined;
+    historicalEquipmentClassLookup?: HistoricalOrdinalLookup | undefined;
 }
 
 export interface SharedTurnInputRequirements {
@@ -260,20 +261,34 @@ export async function loadSettlementDataRaw(
 }
 
 /**
- * Build the three historical emergent-brigade ordinal lookups from an OOB list.
+ * Build the historical emergent-brigade ordinal lookups from an OOB list.
  * Entries are grouped by `faction:home_mun` and sorted by NAME, so the ordinal a
- * caller passes selects the same brigade on every run.
+ * caller passes selects the same brigade on every run. Identity, corps and the
+ * authored equipment class all come from that same sorted record.
  */
 export function buildHistoricalOobLookups(oobBrigades: readonly OobBrigade[]): {
     historicalNameLookup: HistoricalOrdinalLookup | undefined;
     historicalCorpsLookup: HistoricalOrdinalLookup | undefined;
     historicalOobIdLookup: HistoricalOrdinalLookup | undefined;
+    historicalEquipmentClassLookup: HistoricalOrdinalLookup | undefined;
 } {
-    const oobEntriesByFactionMun = new Map<string, Array<{ id: string; name: string; corps: string | null }>>();
+    const oobEntriesByFactionMun = new Map<string, Array<{
+        id: string;
+        name: string;
+        corps: string | null;
+        equipmentClass: string | null;
+    }>>();
     for (const b of oobBrigades) {
         const key = `${b.faction}:${b.home_mun}`;
         const list = oobEntriesByFactionMun.get(key) ?? [];
-        list.push({ id: b.id, name: b.name, corps: b.corps ?? null });
+        list.push({
+            id: b.id,
+            name: b.name,
+            corps: b.corps ?? null,
+            equipmentClass: typeof b.default_equipment_class === 'string' && b.default_equipment_class.length > 0
+                ? b.default_equipment_class
+                : null,
+        });
         oobEntriesByFactionMun.set(key, list);
     }
     for (const list of oobEntriesByFactionMun.values()) {
@@ -284,9 +299,10 @@ export function buildHistoricalOobLookups(oobBrigades: readonly OobBrigade[]): {
             historicalNameLookup: undefined,
             historicalCorpsLookup: undefined,
             historicalOobIdLookup: undefined,
+            historicalEquipmentClassLookup: undefined,
         };
     }
-    const pick = (field: 'id' | 'name' | 'corps'): HistoricalOrdinalLookup =>
+    const pick = (field: 'id' | 'name' | 'corps' | 'equipmentClass'): HistoricalOrdinalLookup =>
         (faction: string, mun_id: string, ordinal: number): string | null => {
             const list = oobEntriesByFactionMun.get(`${faction}:${mun_id}`);
             return list != null && ordinal >= 1 && ordinal <= list.length
@@ -297,6 +313,7 @@ export function buildHistoricalOobLookups(oobBrigades: readonly OobBrigade[]): {
         historicalNameLookup: pick('name'),
         historicalCorpsLookup: pick('corps'),
         historicalOobIdLookup: pick('id'),
+        historicalEquipmentClassLookup: pick('equipmentClass'),
     };
 }
 

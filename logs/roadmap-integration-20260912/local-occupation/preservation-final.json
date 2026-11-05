@@ -1,0 +1,16 @@
+{
+  "head": "8db3055962143af8f272ef7cf5d95414e6c5a601",
+  "branch": "codex/jajce-local-occupation-20260914",
+  "status": [
+    "A  logs/roadmap-integration-20260912/approved-coverage-tests.log",
+    " M tests/tg_schema_freeze.test.ts"
+  ],
+  "checked_dirty_paths": 28,
+  "preservation_failures": [],
+  "stash_count": 22,
+  "ordered_stashes_preserved": true,
+  "other_worktrees_checked": 17,
+  "worktree_errors": [],
+  "main": "9588876bc58b09adea89e48d9520be427e270f20",
+  "protected_drift": []
+}

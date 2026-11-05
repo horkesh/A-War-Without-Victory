@@ -1,0 +1,54 @@
+{
+  "document_chars": {
+    "roadmap": 59917,
+    "board": 19920
+  },
+  "npm": "10.9.8",
+  "validation_evidence": false,
+  "row_counts": {
+    "weekly_report.jsonl": 4,
+    "brigade_temporal_log.jsonl": 1000
+  },
+  "partial_directory": "runs/apr1992_historical_52w__434fe8ff83b7b523__w52",
+  "files": [
+    {
+      "name": "brigade_temporal_log.jsonl",
+      "bytes": 513474,
+      "sha256": "A02FB2D964792E5D44FF515FD0346A5DAF9CBD677A240B7BF00C8D14E3CB2779"
+    },
+    {
+      "name": "displacement_event_log.jsonl",
+      "bytes": 5586,
+      "sha256": "3BA5F01D75F9CCDC0DAC2255E282EB68525195300EFD4DBA9809092AE58B4FE9"
+    },
+    {
+      "name": "initial_save.json",
+      "bytes": 1124102,
+      "sha256": "4B4B1FDA9300F877F69BBF4470734F73E0D5132250DB64B70CA85220AF546E0D"
+    },
+    {
+      "name": "run_meta.json",
+      "bytes": 9382,
+      "sha256": "7124D75E99041E00E14853BF039325991227381A102D0421B3D358FCF5EF8B36"
+    },
+    {
+      "name": "weekly_report.jsonl",
+      "bytes": 64430,
+      "sha256": "932C9D8ED34DCF4D3A7A5041764706B1840EBB3DF238A5BACCE10C8E5B4A4A67"
+    }
+  ],
+  "node": "v22.23.2",
+  "retained_fingerprint_check_reused": "continuation4_incident_retained_hash_check.exit.txt",
+  "junctions": [
+    {
+      "link_type": "Junction",
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\runs",
+      "target": "C:\\Users\\User\\.codex\\worktrees\\april-1995-glamoc\\A-War-Without-Victory\\runs"
+    },
+    {
+      "link_type": "Junction",
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\node_modules",
+      "target": "C:\\Users\\User\\.codex\\worktrees\\april-1995-glamoc\\A-War-Without-Victory\\node_modules"
+    }
+  ]
+}

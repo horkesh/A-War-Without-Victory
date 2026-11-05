@@ -1,0 +1,38 @@
+{
+  "verdict": "NO_GO_COMPARATOR_PROXY_GATES",
+  "campaign_launched": false,
+  "authorized_campaign_count": 1,
+  "authorized_campaign_consumed": 0,
+  "head": "2a1554a50866af292b949d3668ae45aec4e861fa",
+  "normalizer_ready": true,
+  "normalizer_fixture_assertions": 13,
+  "root_preflight": {
+    "exit": 0,
+    "pass": true,
+    "sources": 11,
+    "inputs": 30,
+    "input_digest": "ed7fa30986392451f797708a5a0fe9d3ac83f284692be04e199305c533a1f0b6"
+  },
+  "authoritative_hashes": {
+    "normalizer": "c3cb5e54e3a5ded5149e987582add7ed9eca71aa140e392fd8c3a46c09bd3990",
+    "normalizer_fixture": "7014df810e3255573c926792398a5e6b0118751c14b5d82e800a8e06bb24b69c",
+    "compare_extract": "8e57420073add4f7cbfaee4b2feb42e84860c9b9215ff2d321617d3117e8b0ee"
+  },
+  "blocking_findings": [
+    {
+      "category": "turn_138_exact_write_identity",
+      "required": "actor 737 column_order to op:bugojno:udurlije with recognized helper and boundary labels",
+      "current": "any nonempty actor write array passes"
+    },
+    {
+      "category": "turn_139_exact_rejection_identity",
+      "required": "actor 737 rejection from op:busovaca:gornja_rovna to op:bugojno:udurlije with recognized actual reason",
+      "current": "any nonempty actor rejection array passes"
+    }
+  ],
+  "limits": [
+    "No campaign has run and no historical helper or rejection reason has been measured.",
+    "A future pass is bounded diagnostic evidence, not calibration acceptance.",
+    "The overwritten original worker preflight bytes remain unrecovered; the fresh root preflight is separate evidence."
+  ]
+}

@@ -1,0 +1,155 @@
+{
+  "schema": "awwv.historical-default-native39-v1.independent-actual39-review.v1",
+  "verdict": "NO_GO",
+  "independent": true,
+  "head": "a3063366ae094468fbb2ede143f9ced3a1ed2f68",
+  "scope": "Independent review of the sole corrected Historical-default native39 attempt, its authenticated receipt and artifacts, actual player-input schemas, archived control result, operation lifecycles, runtime gates, and terminal bound postcheck. No retry, source change, gameplay change, package build, tuning, baseline change, documentation change, or causal correction is included.",
+  "attempt": {
+    "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/historical-default-native39-v1/attempts/historical-default-p03-rbih-t39-01",
+    "attempt": 1,
+    "retry": false,
+    "childExit": 0,
+    "wrapperExit": 0,
+    "timedOut": false,
+    "elapsedMs": 742699
+  },
+  "bindings": {
+    "receipt": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/historical-default-native39-v1/attempts/historical-default-p03-rbih-t39-01/receipt.json",
+      "bytes": 4618,
+      "sha256": "115180aeed3b4b36f42a763854dfe4e0b4be49319d9d82a3c4d3064d745c1fd8"
+    },
+    "result": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/historical-default-native39-v1/attempts/historical-default-p03-rbih-t39-01/result.json",
+      "bytes": 24179452,
+      "sha256": "98e5631a1aeb15dcf6cc6351097b43aff276c90dfa77f01f79b555cd775efc04"
+    },
+    "externalInventory": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/historical-default-native39-v1/attempts/historical-default-p03-rbih-t39-01/external-inventory.json",
+      "bytes": 765,
+      "sha256": "87bf0cfcf49bb2b415517ea7b43a889d61489bb1c60dbe8bdffdf4a480d45146"
+    },
+    "exit": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/historical-default-native39-v1/attempts/historical-default-p03-rbih-t39-01/exit.json",
+      "bytes": 246,
+      "sha256": "5918d4766777f2df762da9085bc6345a3c89e6ec9979378f766140cfd1ac7b96"
+    },
+    "postcheck": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/historical-default-native39-v1/postcheck-01/POSTCHECK.json",
+      "bytes": 10858,
+      "sha256": "2397578bf07f7b98a832993e585403b8589eb3bfc2510c43529e40fd42583edb",
+      "exit": 2,
+      "pass": false
+    }
+  },
+  "decision": {
+    "pass": false,
+    "acceptanceContractExact": true,
+    "parserOrReaderDefectFound": false,
+    "officialPostcheckAgreement": true,
+    "rejectingCategories": [
+      {
+        "gate": "painted-score-minimum",
+        "actual": 702,
+        "requiredMinimum": 707,
+        "controllers": 712,
+        "shortfall": 5
+      },
+      {
+        "gate": "formerly-correct-n91-losses",
+        "actualCount": 5,
+        "requiredCount": 0,
+        "osids": [
+          "op:brcko:bukvik_gornji_2",
+          "op:foca:donje_zesce",
+          "op:mrkonjic_grad:baljvine_2",
+          "op:srebrenica:obadi",
+          "op:trnovo:tosici"
+        ]
+      },
+      {
+        "gate": "formerly-correct-n92-losses",
+        "actualCount": 5,
+        "requiredCount": 0,
+        "osids": [
+          "op:brcko:bukvik_gornji_2",
+          "op:foca:donje_zesce",
+          "op:mrkonjic_grad:baljvine_2",
+          "op:srebrenica:obadi",
+          "op:trnovo:tosici"
+        ]
+      },
+      {
+        "gate": "protected-tosici-controller",
+        "osid": "op:trnovo:tosici",
+        "actual": "RS",
+        "required": "RBiH"
+      }
+    ],
+    "passingProtectedController": {
+      "osid": "op:gorazde:kolovarice",
+      "actual": "RS",
+      "required": "RS"
+    }
+  },
+  "passingCategories": {
+    "terminalReceiptAuthenticated": true,
+    "externalLiveAndRetainedCopiesExact": true,
+    "exactCommand": true,
+    "controllerUniverse": 712,
+    "archiveTurns": "1..39 exact",
+    "initialAutonomyLevel": 2,
+    "initialCommandAuthority": {
+      "current": 100,
+      "lifetime_spent": 0
+    },
+    "finalTurn": 39,
+    "sixAppliedHistoricalPlayerReceiptsExact": true,
+    "openingChoices": {
+      "rbih_state_identity": "civic",
+      "rbih_paramilitary_policy_1992": "always_deny",
+      "turn": 0
+    },
+    "counterfactualOverrideAbsent": true,
+    "officerAcknowledgementsExact": true,
+    "generatedReserveInputsBounded": true,
+    "fullInputOrderParity": "NOT_ESTABLISHED",
+    "fourOperationLifecycleExact": true,
+    "operations": [
+      "Maglaj Local Counterattack",
+      "Operation Circle",
+      "Srebrenica–Cerska Link-Up",
+      "Visoko–Breza Line Clearing"
+    ],
+    "saveLoadExact": true,
+    "cdpComplete": true,
+    "audioComplete": true,
+    "diagnosticsClean": true,
+    "finalBlockersZero": true,
+    "fieldAbsence": true,
+    "sourcePackageHarnessProvenanceExact": true,
+    "preservationExact": true,
+    "t1BattleDiagnostic": {
+      "acceptanceGate": false,
+      "count": 12,
+      "targetsOutcomesExact": true
+    }
+  },
+  "independentRecomputation": {
+    "exit": 0,
+    "score": 702,
+    "controllers": 712,
+    "n91Losses": 5,
+    "n92Losses": 5,
+    "tosici": "RS",
+    "kolovarice": "RS",
+    "evaluationPass": false,
+    "sameFailureCategoriesAsOfficialPostcheck": true
+  },
+  "retainedPriorResults": [
+    "The original always_allow native39 result remains NO_GO at 704/712 with three n91/n92 losses and Tosici RS.",
+    "The actual Historical-default T1 postcheck remains false with its documented two-cell control delta versus n101; its eight runtime gates and twelve battle anchors remain reusable diagnostic evidence.",
+    "The prelaunch ENOENT wrapper failure and its additive launch-parent repair records remain preserved; neither changes this campaign result."
+  ],
+  "stop": "NO_GO is final for this sole campaign attempt. Do not retry, waive the 707 floor, waive either zero-loss gate, change Tosici, tune gameplay, alter baselines, or infer a correction from this review. Preserve the evidence for a distinct retained diagnosis."
+}

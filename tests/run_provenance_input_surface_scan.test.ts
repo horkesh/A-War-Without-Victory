@@ -226,11 +226,6 @@ const EXCLUSION_REGISTER: readonly Exclusion[] = [
         reason: 'Read by anomaly_checks_extended.ts as a mid-war reference map.',
     },
     {
-        path: 'data/source/formation_lifecycle_events.json',
-        kind: 'deferred_stamp',
-        reason: 'Read by formation_lifecycle_events.ts; scripted formation births and deaths.',
-    },
-    {
         path: 'data/source/municipalities_1990_initial_political_controllers.json',
         kind: 'deferred_stamp',
         reason: 'The non-keyed default control file in political_control_init.ts. The apr1992-keyed variant IS stamped via init_control; this fallback is not.',
@@ -355,7 +350,7 @@ describe('★ input-surface scan: every data read on the headless path is stampe
             `${deferred.length} real run inputs are read but NOT hashed:\n  ${deferred.join('\n  ')}\n`
             + 'Stamping any of them changes consumed_inputs.digest and moves the row count, which '
             + 'is why it is a deliberate follow-up rather than a silent fix.'
-        ).toBe(16);
+        ).toBe(15);
         expect(EXCLUSION_REGISTER.filter(e => e.kind === 'not_an_input')).toHaveLength(1);
     });
 

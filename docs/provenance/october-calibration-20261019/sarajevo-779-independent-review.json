@@ -1,0 +1,104 @@
+{
+  "schema": "awwv.779.independent-review.v1",
+  "reviewed_utc": "2026-10-21T08:15:23.4700420Z",
+  "reviewer_scope": "Independent read-only review of sealed 778 retained evidence and bounded diagnostic controls",
+  "verdict": "QUALIFIED_PASS_FACTS__PROCESS_SEQUENCE_AND_NEXT_SCOPE_REQUIRE_CORRECTION",
+  "reviewed_artifacts": {
+    "result": {
+      "path": "logs/claude-channel-20261004/778-result.json",
+      "bytes": 29579,
+      "sha256": "58877156bca2d77fefb20457cdd17b028d2e7cf999e7ac901bb350865bf6ba2d"
+    },
+    "inventory": {
+      "path": "logs/claude-channel-20261004/778-inventory.json",
+      "bytes": 9005,
+      "sha256": "d5f2b2e4957db9094b84c0c36f696c26033d0afd2470b53d32fabf7dbf5cfc7d",
+      "entries_checked": 46,
+      "missing_or_mismatched": 0
+    },
+    "closed": {
+      "path": "logs/claude-channel-20261004/778-closed.json",
+      "bytes": 1063,
+      "sha256": "865c49746afd96125e13e0cf8b4cbe87686c232c0f239b3fb26614e7d60e8587"
+    }
+  },
+  "established_facts": [
+    {
+      "fact": "Each n80/n81/n82 brigade temporal log contains 188 valid rows for rs_4th_sarajevo_light_infantry, covering unique turns 1 through 188.",
+      "scope": "Actor projection only; this is not whole-GameState equality."
+    },
+    {
+      "fact": "At turn 21 / week_index 20, n80 and n81 have equal complete actor rows and personnel 1411. At turn 22 / week_index 21, the complete 21-key actor rows differ only in personnel: n80=1405 and n81=1516.",
+      "scope": "The sealed trace compared 16 named state fields; independent full-row key/value comparison also found personnel as the sole difference at turn 22. This does not establish the global first run divergence."
+    },
+    {
+      "fact": "The stored planning record at weekly_report week_index 23 names n80 participant rs_1st_romanija_infantry with objective op:hadzici:lokve, while n81 and n82 name rs_4th_sarajevo_light_infantry with objective op:gorazde:osjecani_2.",
+      "scope": "Stored operation tuple and creation outcome are known; the actual candidate population, reached filters, scores and sorted rank are not recorded."
+    },
+    {
+      "fact": "For the named actor, weekly reports through week_index 24 contain no battle, dissolution or reconstitution receipt before the turn-22/week_index-21 personnel split. n81/n82 first record its battle at week_index 24, after the week_index-23 planning tuple; n80 records no such actor receipt through 24.",
+      "scope": "Absence is limited to those logged receipt categories and weeks 1 through 24."
+    },
+    {
+      "fact": "The retained n82 turn-24 Kijevo eligibility record exits committed_elsewhere and names the executing turn-23 probe commitment.",
+      "scope": "This proves the Kijevo exclusion is downstream for n82; it does not explain the earlier personnel or probe-selection divergence."
+    },
+    {
+      "fact": "n81 and n82 actor rows are byte-equivalent as parsed objects for all 188 turns; the previously sealed 773 result separately reports all 30 n81/n82 gameplay artifacts raw-equal.",
+      "scope": "Prior 773-776 neutrality evidence was reused and not rerun."
+    }
+  ],
+  "inference_limits": {
+    "personnel_to_selection": "Source inspection shows fitness_offense includes personnel and the generic probe fallback sorts eligible surplus evaluations by fitness_offense, so personnel is a possible contributor. Retained runtime evidence does not establish that rs4 reached that fallback, its actual rank, or that personnel caused selection.",
+    "personnel_writer": "UNMEASURED. Existing movement_phase snapshots omit personnel. Adding before/after personnel can identify a phase interval in which the value changed, but cannot by itself identify the actual assignment/writer if multiple writers execute inside that phase.",
+    "n80_reconstruction": "UNMEASURED because n80 records git_dirty=true and retained artifacts do not reconstruct its exact uncommitted source state.",
+    "source_is_not_runtime_predicate": true
+  },
+  "findings": [
+    {
+      "severity": "process",
+      "finding": "778-result pass=true overstates compliance with the ordered plan. Trace extraction started at 08:05:31Z and targeted extraction at 08:08:55Z; selector/schema controls started later at 08:10:26Z. The controls passed, but the required controls-before-extraction sequence was not met.",
+      "disposition": "Retain as a process residual. Do not rerun unchanged extraction merely to manufacture false preflight provenance."
+    },
+    {
+      "severity": "process",
+      "finding": "The exploratory PowerShell parser failure exited 1 before the retained scripts and has no preserved-preflight receipt.",
+      "disposition": "778 reports it accurately. Do not invent a receipt or recast it as a preserved attempt."
+    },
+    {
+      "severity": "scope",
+      "finding": "The 778 recommendation combines diagnostic source preparation with an unapproved preserved 24-week observer run and hard-codes turn-23 Sarajevo-Romanija rows in the proposed production observer path.",
+      "disposition": "Correct the next action to observer-only preparation at the two precise missing boundaries. Use generic configured selectors, keep diagnostics default-off, preserve thresholds and selection behavior, and make no Sarajevo/turn-23 production branch. A measurement run or horizon requires a separate owner decision."
+    }
+  ],
+  "corrected_next_scope": {
+    "authorized_interpretation": "No gameplay fix is justified. Prepare observer-only diagnostics, without changing thresholds, selection, state, saves, or outputs when disabled.",
+    "personnel_boundary": "Add generic, selector-scoped, default-off personnel presence/value and pre/post phase deltas. Treat a changing phase only as localization; add a more precise assignment/writer receipt if actual writer identity is required.",
+    "probe_boundary": "At the reached generic probe fallback, emit the complete reached candidate/filter/fitness/rank/selected tuple through commander_creation under generic selectors. Do not hard-code Sarajevo, turn 23, brigade IDs or objectives in production source.",
+    "measurement_boundary": "Do not run the proposed 24-week observer reproduction under authority 777. Present a separate measurement question, cost and stopping rule for owner approval. Any later abbreviated observer run is diagnostic only and cannot waive the authoritative 188-week acceptance criterion.",
+    "stop_condition": "Stop after observer preparation and cheap source/control verification. Do not execute an engine run, replay, runTurn, campaign, suite, test or build in this review."
+  },
+  "preservation": {
+    "sealed_head": "26431de4d1c63c6b585e9b318974bf1ceecd3e41",
+    "sealed_status_porcelain": "",
+    "telemetry_C": {
+      "bytes": 102001043,
+      "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899"
+    },
+    "telemetry_D": {
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    },
+    "retained_posture": "n80=703 remains NO-GO/unadopted; n81/n82=689 remain rejected. All telemetry, source and thresholds remain preserved.",
+    "review_actions": {
+      "engine_runs": 0,
+      "replays": 0,
+      "runTurn_calls": 0,
+      "campaigns": 0,
+      "suites": 0,
+      "tests": 0,
+      "builds": 0,
+      "source_data_canon_docs_git_edits": 0
+    }
+  }
+}

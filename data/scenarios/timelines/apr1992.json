@@ -397,6 +397,23 @@
         "prijedor"
       ],
       "combat_multiplier": 1.26
+    },
+    {
+      "faction": "RS",
+      "role": "attack",
+      "osid_attack_support": true,
+      "start_turn": 69,
+      "end_turn": 79,
+      "municipalities": ["trnovo"],
+      "combat_multiplier": 1.6
+    },
+    {
+      "faction": "RS",
+      "role": "defend",
+      "start_turn": 70,
+      "end_turn": 104,
+      "municipalities": ["brcko"],
+      "combat_multiplier": 1.75
     }
   ],
   "maintenance_decay": [

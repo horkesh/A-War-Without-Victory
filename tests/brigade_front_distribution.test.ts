@@ -1209,4 +1209,228 @@ describe('distributeBrigadesToFront', () => {
         expect(state.military.brigade_movement_orders?.brig_reserve).toBeUndefined();
     });
 
+    it('excludes in-transit and pending-order-owned brigades from Phase A while distributing an unowned stack peer', () => {
+        const state = makeState({
+            brig_a_transit: makeFormation({ location_osid: 'op:test:a', home_osid: 'op:test:a' }),
+            brig_b_order: makeFormation({ location_osid: 'op:test:a', home_osid: 'op:test:a' }),
+            brig_c_free: makeFormation({ location_osid: 'op:test:a', home_osid: 'op:test:a' }),
+        });
+        state.political.political_controllers = {
+            'op:test:a': 'RS',
+            'op:test:b': 'RS',
+            'op:test:c': 'RS',
+        };
+        state.military.brigade_movement_state = {
+            brig_a_transit: {
+                status: 'in_transit', stance: 'column', destination_sids: ['op:test:c'],
+                path: ['op:test:a', 'op:test:c'], turns_remaining: 1, owner: 'bot_discretionary',
+            },
+        };
+        state.military.brigade_movement_orders = {
+            brig_b_order: { destination_sids: ['op:test:c'], stance: 'column' },
+        };
+        const sectors = [
+            makeSector({
+                assigned_brigade_ids: ['brig_a_transit', 'brig_b_order', 'brig_c_free'],
+                sub_segments: [{
+                    sub_segment_id: 'subseg:test:0',
+                    friendly_osids: ['op:test:a', 'op:test:b', 'op:test:c'],
+                    enemy_osids: ['op:enemy:x'],
+                    primary_brigade_ids: ['brig_a_transit', 'brig_b_order', 'brig_c_free'],
+                    edge_ids: [],
+                    length_edges: 3,
+                }],
+            }),
+        ];
+        const adjacency = makeAdjacency([
+            ['op:test:a', 'op:test:b'],
+            ['op:test:a', 'op:test:c'],
+            ['op:test:b', 'op:test:c'],
+        ]);
+
+        distributeBrigadesToFront(state, sectors, adjacency);
+
+        expect(state.military.formations.brig_a_transit.location_osid).toBe('op:test:a');
+        expect(state.military.formations.brig_b_order.location_osid).toBe('op:test:a');
+        expect(state.military.formations.brig_c_free.location_osid).toBe('op:test:b');
+        expect(state.military.brigade_movement_state?.brig_a_transit).toBeDefined();
+        expect(state.military.brigade_movement_orders?.brig_b_order).toEqual({
+            destination_sids: ['op:test:c'],
+            stance: 'column',
+        });
+    });
+
+});
+
+function buildRearStackAuthorityFixture({
+    branch,
+    formations,
+    orders = {},
+    movementState = null,
+}: {
+    branch: 'direct' | 'column';
+    formations: Record<string, any>;
+    orders?: Record<string, any>;
+    movementState?: Record<string, any> | null;
+}): { state: any; sector: any; adjacency: Map<string, string[]> } {
+    const direct = branch === 'direct';
+    const state = makeState({
+        brig_front: makeFormation({ location_osid: 'op:test:front' }),
+        ...formations,
+    });
+    state.military.brigade_movement_orders = orders;
+    if (movementState) state.military.brigade_movement_state = movementState;
+    const rearIds = Object.keys(formations).filter((id) => id !== 'brig_other' && id !== 'brig_blocker');
+    const sector = makeSector({
+        assigned_brigade_ids: ['brig_front'],
+        rear_brigade_ids: rearIds,
+        territory_osids: direct
+            ? ['op:test:front', 'op:test:rear_a', 'op:test:rear_b']
+            : ['op:test:front', 'op:test:rear_1', 'op:test:rear_2', 'op:test:rear_3'],
+        sub_segments: [{
+            sub_segment_id: 'subseg:test:rear-authority',
+            friendly_osids: ['op:test:front'],
+            enemy_osids: ['op:enemy:x'],
+            primary_brigade_ids: ['brig_front'],
+            edge_ids: [],
+            length_edges: 1,
+        }],
+    });
+    const adjacency = makeAdjacency(direct
+        ? [['op:test:rear_a', 'op:test:rear_b'], ['op:test:rear_a', 'op:test:front']]
+        : [['op:test:front', 'op:test:rear_1'], ['op:test:rear_1', 'op:test:rear_2'], ['op:test:rear_2', 'op:test:rear_3']]);
+    return { state, sector, adjacency };
+}
+
+describe('rear-stack movement authority', () => {
+    it('preserves a manual pending order and directly disperses an idle mixed-stack peer', () => {
+        const manualOrder = { destination_sids: ['op:test:manual_hold'], stance: 'column' as const };
+        const { state, sector, adjacency } = buildRearStackAuthorityFixture({
+            branch: 'direct',
+            formations: {
+                brig_a_manual: makeFormation({ location_osid: 'op:test:rear_a' }),
+                brig_b_idle: makeFormation({ location_osid: 'op:test:rear_a' }),
+                brig_other: makeFormation({ location_osid: 'op:test:rear_a' }),
+            },
+            orders: { brig_a_manual: manualOrder },
+        });
+
+        distributeBrigadesToFront(state, [sector], adjacency);
+
+        expect(state.military.formations.brig_a_manual.location_osid).toBe('op:test:rear_a');
+        expect(state.military.brigade_movement_orders?.brig_a_manual).toEqual(manualOrder);
+        expect(state.military.formations.brig_b_idle.location_osid).toBe('op:test:rear_b');
+        expect(state.military.formations.brig_other.location_osid).toBe('op:test:rear_a');
+        expect(state.military.brigade_movement_orders?.brig_b_idle).toBeUndefined();
+    });
+
+    it('preserves a manual pending order and issues the >1-hop column order to the idle peer', () => {
+        const manualOrder = { destination_sids: ['op:test:manual_hold'], stance: 'column' as const };
+        const { state, sector, adjacency } = buildRearStackAuthorityFixture({
+            branch: 'column',
+            formations: {
+                brig_a_manual: makeFormation({ location_osid: 'op:test:rear_3' }),
+                brig_b_idle: makeFormation({ location_osid: 'op:test:rear_3' }),
+                brig_other: makeFormation({ location_osid: 'op:test:rear_3' }),
+                brig_blocker: makeFormation({ location_osid: 'op:test:rear_2' }),
+            },
+            orders: { brig_a_manual: manualOrder },
+        });
+
+        distributeBrigadesToFront(state, [sector], adjacency);
+
+        expect(state.military.formations.brig_a_manual.location_osid).toBe('op:test:rear_3');
+        expect(state.military.brigade_movement_orders?.brig_a_manual).toEqual(manualOrder);
+        expect(state.military.formations.brig_b_idle.location_osid).toBe('op:test:rear_3');
+        expect(state.military.brigade_movement_orders?.brig_b_idle).toEqual({
+            destination_sids: ['op:test:rear_1'],
+            stance: 'column',
+        });
+        expect(state.military.formations.brig_blocker.location_osid).toBe('op:test:rear_2');
+    });
+
+    it('preserves a bot-owned pending order while an idle mixed-stack peer takes the direct repair', () => {
+        const botOrder = { destination_sids: ['op:test:bot_hold'], stance: 'column' as const, owner: 'bot_discretionary' as const };
+        const { state, sector, adjacency } = buildRearStackAuthorityFixture({
+            branch: 'direct',
+            formations: {
+                brig_a_bot: makeFormation({ location_osid: 'op:test:rear_a' }),
+                brig_b_idle: makeFormation({ location_osid: 'op:test:rear_a' }),
+                brig_other: makeFormation({ location_osid: 'op:test:rear_a' }),
+            },
+            orders: { brig_a_bot: botOrder },
+        });
+
+        distributeBrigadesToFront(state, [sector], adjacency);
+
+        expect(state.military.formations.brig_a_bot.location_osid).toBe('op:test:rear_a');
+        expect(state.military.brigade_movement_orders?.brig_a_bot).toEqual(botOrder);
+        expect(state.military.formations.brig_b_idle.location_osid).toBe('op:test:rear_b');
+    });
+
+    it('leaves an in-transit rear-stack formation and its journey untouched while the idle peer moves', () => {
+        const transit = {
+            status: 'in_transit' as const,
+            stance: 'column' as const,
+            destination_sids: ['op:test:front'],
+            path: ['op:test:rear_a', 'op:test:front'],
+            turns_remaining: 1,
+            owner: 'bot_discretionary' as const,
+        };
+        const { state, sector, adjacency } = buildRearStackAuthorityFixture({
+            branch: 'direct',
+            formations: {
+                brig_a_transit: makeFormation({ location_osid: 'op:test:rear_a' }),
+                brig_b_idle: makeFormation({ location_osid: 'op:test:rear_a' }),
+                brig_other: makeFormation({ location_osid: 'op:test:rear_a' }),
+            },
+            movementState: { brig_a_transit: transit },
+        });
+
+        distributeBrigadesToFront(state, [sector], adjacency);
+
+        expect(state.military.formations.brig_a_transit.location_osid).toBe('op:test:rear_a');
+        expect(state.military.brigade_movement_state?.brig_a_transit).toEqual(transit);
+        expect(state.military.formations.brig_b_idle.location_osid).toBe('op:test:rear_b');
+        expect(state.military.brigade_movement_orders?.brig_a_transit).toBeUndefined();
+    });
+
+    it('still directly disperses an ordinary idle rear stack with no pending or transit authority', () => {
+        const { state, sector, adjacency } = buildRearStackAuthorityFixture({
+            branch: 'direct',
+            formations: {
+                brig_a_idle: makeFormation({ location_osid: 'op:test:rear_a' }),
+                brig_b_idle: makeFormation({ location_osid: 'op:test:rear_a' }),
+            },
+        });
+
+        distributeBrigadesToFront(state, [sector], adjacency);
+
+        const locations = [
+            state.military.formations.brig_a_idle.location_osid,
+            state.military.formations.brig_b_idle.location_osid,
+        ].sort();
+        expect(locations).toEqual(['op:test:rear_a', 'op:test:rear_b']);
+        expect(state.military.brigade_movement_orders?.brig_a_idle).toBeUndefined();
+        expect(state.military.brigade_movement_orders?.brig_b_idle).toBeUndefined();
+    });
+
+    it('preserves a manual zero-destination order rather than treating it as absent', () => {
+        const emptyOrder = { destination_sids: [], stance: 'column' as const };
+        const { state, sector, adjacency } = buildRearStackAuthorityFixture({
+            branch: 'direct',
+            formations: {
+                brig_a_manual: makeFormation({ location_osid: 'op:test:rear_a' }),
+                brig_b_idle: makeFormation({ location_osid: 'op:test:rear_a' }),
+                brig_other: makeFormation({ location_osid: 'op:test:rear_a' }),
+            },
+            orders: { brig_a_manual: emptyOrder },
+        });
+
+        distributeBrigadesToFront(state, [sector], adjacency);
+
+        expect(state.military.formations.brig_a_manual.location_osid).toBe('op:test:rear_a');
+        expect(state.military.brigade_movement_orders?.brig_a_manual).toEqual(emptyOrder);
+        expect(state.military.formations.brig_b_idle.location_osid).toBe('op:test:rear_b');
+    });
 });

@@ -1,0 +1,12 @@
+
+ RUN  v2.1.9 C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory
+
+ ❯ tests/scenario_runner_artifact_repair.test.ts (2 tests | 1 failed) 3152ms
+   × scenario runner artifact repair > preserves operational front and HVO sector truth at the real one-week artifact boundary 3145ms
+     → expected 0 to be greater than 0
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  21:30:18
+   Duration  11.11s (transform 2.83s, setup 14ms, collect 7.38s, tests 3.15s, environment 0ms, prepare 74ms)
+

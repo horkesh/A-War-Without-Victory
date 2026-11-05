@@ -80,19 +80,6 @@ export function WrappedOverlay({ eventCatalog }: WrappedOverlayProps = {}) {
 
     const isLastSlide = currentSlide === slides.length - 1;
 
-    const handleClick = (e: React.MouseEvent) => {
-        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const half = rect.width / 2;
-
-        if (x >= half) {
-            if (isLastSlide) return; // Don't advance past last slide
-            goNext();
-        } else {
-            goPrev();
-        }
-    };
-
     return (
         <div
             className="fixed inset-0"
@@ -101,13 +88,13 @@ export function WrappedOverlay({ eventCatalog }: WrappedOverlayProps = {}) {
             <button
                 type="button"
                 className="absolute left-0 top-0 z-10 h-full w-1/2 cursor-pointer border-0 bg-transparent p-0"
-                onClick={handleClick}
+                onClick={goPrev}
                 aria-label={t('wrapped.previousSlide')}
             />
             <button
                 type="button"
                 className="absolute right-0 top-0 z-10 h-full w-1/2 cursor-pointer border-0 bg-transparent p-0"
-                onClick={handleClick}
+                onClick={goNext}
                 aria-label={t('wrapped.nextSlide')}
             />
             <WrappedSlideComponent

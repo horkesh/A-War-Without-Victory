@@ -1,0 +1,244 @@
+{
+  "schema": "awwv.cold-load-validation.actual-package-review.v1",
+  "verdict": "GO",
+  "independent": true,
+  "reviewerIdentity": "/root/desktop_terrain_canon_review",
+  "reviewedAt": "2026-10-25T11:16:00+01:00",
+  "expectedHead": "12a4680f04fc3e4cbd8b2fb5f5133b472afd1fd6",
+  "scope": "Independent actual review of package02 materialization, separate source/package cold-load consumers, exact comparison, and preservation closing. Accepted executable-integrity internals are reused only because the live package whole-file bytes remain exact. This review authorizes one fresh normal RBiH 0-to-1 native opening after native preflight; it does not claim native success, t39 parity, calibration adoption, or a new campaign/suite result.",
+  "packageBindingSha256": "d336895a95e03be095ae76e7b654d152beae008ce93497a48ad8bb6cdf78051b",
+  "materialization": {
+    "receipt": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/postbuild-materialized-actual-01/receipt.json",
+      "sha256": "28e5fc15644482c6ad8abc42cb66e47868e765f15140f7ecaf8561b9ecc5723e",
+      "childExit": 0,
+      "wrapperExit": 0,
+      "timedOut": false,
+      "spawnError": null,
+      "artifactContractPass": true
+    },
+    "binding": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/postbuild-materialized-actual-01/PACKAGE_BINDING.json",
+      "bytes": 12109,
+      "sha256": "d336895a95e03be095ae76e7b654d152beae008ce93497a48ad8bb6cdf78051b",
+      "schema": "awwv.cold-load-validation.package-binding.v2",
+      "pass": true,
+      "configSha256": "3440441d753e47827dd0ab0f8075719668bedffcdbb75415b0ad2ecb42b2ee56",
+      "buildReceiptSha256": "592fcdecabc9eb48846cb44b33e14f6ad08b27c495ab011e0f8b7054db66f6a5"
+    },
+    "launcher": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/stage-launch-logs/materialize.command.json",
+      "entrySha256": "781ce1d58dccf967551cf33035a8f32bc2d5af1fe6239d994280201c591fff91",
+      "manifestSha256": "37b29be0c75634b62fab1d003e44ecd5326695a5b351619cf85a26bdfa38cbd0",
+      "independentReviewSha256": "3029fb77edcd32054453136b5521a6f4739d78152ad09811b673966dd3805e8a",
+      "receiptEntrySnapshotAndPostMatch": true
+    },
+    "manifestRowsVerified": [
+      {
+        "path": "materialize.cjs",
+        "bytes": 16872,
+        "sha256": "781ce1d58dccf967551cf33035a8f32bc2d5af1fe6239d994280201c591fff91"
+      },
+      {
+        "path": "CONFIG.json",
+        "bytes": 4382,
+        "sha256": "67e4a9fbdce156dde56efb9258c2abf34eef0f8bb65c3857e739c1dda1aecd18"
+      },
+      {
+        "path": "selftest.cjs",
+        "bytes": 2548,
+        "sha256": "72e30a4c5cfde81cec9d2dfdcec1650f3c384407ce46e6a045b0430e26cddd80"
+      }
+    ]
+  },
+  "package": {
+    "root": "dist-packaged/desktop-cold-load-20261025-02/win-unpacked",
+    "inventory": {
+      "count": 1228,
+      "byteIdenticalToReference": 1225,
+      "aggregateSha256": "306895aa25404df21e16968be2863ccd7dd4b9571ab02a6c4248ed679948208b",
+      "changedPaths": [
+        "A War Without Victory.exe",
+        "resources/app.asar",
+        "resources/dist/desktop/desktop_sim.cjs"
+      ]
+    },
+    "files": {
+      "executable": {
+        "bytes": 222836736,
+        "sha256": "c97f9aee446b2931d01bfb5b5a4ac9d802500fcacb734ea3a00523ba236c9539"
+      },
+      "asar": {
+        "bytes": 196688720,
+        "sha256": "ba64264b9611870214490cb433e9698fd82862fdf2cfd5c2c8272d51a2d1ed9f"
+      },
+      "desktopBundle": {
+        "bytes": 4488072,
+        "sha256": "7c602d335da7726fb3a5f595d27d3e5789ba67da3dddeaee34ba8cc89c8b6339"
+      },
+      "localDesktopBundle": {
+        "bytes": 4488072,
+        "sha256": "7c602d335da7726fb3a5f595d27d3e5789ba67da3dddeaee34ba8cc89c8b6339"
+      },
+      "desktopSourceMap": {
+        "bytes": 11617029,
+        "sha256": "c636b7c868df1b39492baa0929951ef83a0e6851f97c492db400f4ec5c3f1618"
+      },
+      "reviewedDesktopSourceSha256": "91e3163da0aeddca169deabf0b73c47216800f0e6dee0ddc63de5d98f7416954"
+    },
+    "asar": {
+      "entries": 14818,
+      "directories": 2565,
+      "files": 12253,
+      "byteIdenticalToReference": 12252,
+      "aggregateSha256": "d84c486677be7cc331f979e40f990da2b498326caffa9d20724dc4fb20267a06",
+      "changedPaths": ["src/desktop/electron-main.cjs"]
+    },
+    "reusedIntegrityProof": {
+      "sha256": "2dde3793883b07fca9cf0fda00e2ad14d1f648aa87d5273cf9fd864dfdb15e77",
+      "diagnosisSha256": "f0ecf937754cef6b0755d99c461f87c45a6e39fc6ec566776f622b64909c4547",
+      "binaryReviewSha256": "be65fab987a4e1793a64260b7cd88e108e6373a47956729a7826805b592dc4b4",
+      "reuseJustification": "The live old/new executable, ASAR, local and packaged bundle, source map, reviewed source, complete path sets, and package aggregates exactly match the independently reviewed diagnosis. No new internal PE or ASAR parse is claimed."
+    },
+    "criticalTerrainInputsByteIdentical": true,
+    "uiMediaByteIdentical": true
+  },
+  "coldConsumers": {
+    "source": {
+      "receiptSha256": "f4ccf494776ce1111b8c245a7634638edfc207a5262293c5cdc2243479ef9e37",
+      "resultSha256": "a1a20738dc019841af80b4a7b66190e16e37d3ed9776289c659edadb584186e2",
+      "childExit": 0,
+      "wrapperExit": 0,
+      "timedOut": false,
+      "baseDir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory"
+    },
+    "package": {
+      "receiptSha256": "c832e75e13dfc45c9b337485434bfa376d3ed39b2b1b6467dc045a95ffc4ddcb",
+      "resultSha256": "1f9589c49fdec79f1982e921ef7c552c72aa6063d16cedc1dc28f32a25fc25be",
+      "childExit": 0,
+      "wrapperExit": 0,
+      "timedOut": false,
+      "baseDir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/dist-packaged/desktop-cold-load-20261025-02/win-unpacked/resources"
+    },
+    "commonInput": {
+      "saveSha256": "35f9adabc947cb67bf0e0d288bf3aae273be2f668f609cd164b2c0abca3411c9",
+      "packageBindingSha256": "d336895a95e03be095ae76e7b654d152beae008ce93497a48ad8bb6cdf78051b",
+      "canonicalByteIdentity": true,
+      "externalPriming": false
+    },
+    "rawArtifacts": {
+      "projector": {
+        "bytes": 38994,
+        "sha256": "1d6bc289b0b8768fd9883133447a93517abaf2c95ea71c580ad960dc0d43a33e",
+        "sourceAndPackageByteExact": true
+      },
+      "runtimeProjection": {
+        "bytes": 800626,
+        "sha256": "a641db55bf56b06d551bd6f539014994303c429490932d929be198c893bd0c65",
+        "sourceAndPackageByteExact": true
+      },
+      "nextState": {
+        "bytes": 3570968,
+        "sha256": "665943988e4f413dae058e413e064832ff98693d7f71600a3b535e69ad0453e8",
+        "sourceAndPackageByteExact": true
+      },
+      "nextReport": {
+        "bytes": 340738,
+        "sha256": "9c73ed2c9ec51f42d8f0c777111254606b5367ca61486d0b1376a8207bb60382",
+        "sourceAndPackageByteExact": true
+      }
+    }
+  },
+  "comparison": {
+    "receipt": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/compare-actual-01/receipt.json",
+      "sha256": "fcd4813b151c8ec9033588c5971354acd1781ac374350384f17c6bc45576b489",
+      "childExit": 0,
+      "wrapperExit": 0,
+      "timedOut": false,
+      "artifactContractPass": true
+    },
+    "artifact": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/compare-actual-01/COMPARISON.json",
+      "bytes": 840,
+      "sha256": "a34e490b4aaceb3926b8988b5084f8c9c03aa55fc405de7e2d617d48d9f0acdc",
+      "pass": true,
+      "canonicalByteIdentity": true,
+      "runtimeProjectionByteExact": true,
+      "nextStateByteExact": true,
+      "nextReportByteExact": true,
+      "externalPriming": false
+    },
+    "receiptAndResultBindingsExact": true
+  },
+  "preservation": {
+    "closingReceipt": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/preserve-close-actual-01/receipt.json",
+      "sha256": "9baed9a394726d443143865fb047bdb12e725850b04a6215aed2be20735fa170",
+      "childExit": 0,
+      "wrapperExit": 0,
+      "timedOut": false,
+      "artifactContractPass": true
+    },
+    "closing": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/preserve-close-actual-01/PRESERVATION_CLOSING.json",
+      "bytes": 3863,
+      "sha256": "b99d18be4b05025f90538d4fbaa2d677ba0b940973a67259f717e4c2aa5da144",
+      "match": true,
+      "openingRootsByteExact": true,
+      "packageReceiptSha256": "28e5fc15644482c6ad8abc42cb66e47868e765f15140f7ecaf8561b9ecc5723e",
+      "packageBindingSha256": "d336895a95e03be095ae76e7b654d152beae008ce93497a48ad8bb6cdf78051b",
+      "compareReceiptSha256": "fcd4813b151c8ec9033588c5971354acd1781ac374350384f17c6bc45576b489",
+      "comparisonSha256": "a34e490b4aaceb3926b8988b5084f8c9c03aa55fc405de7e2d617d48d9f0acdc"
+    },
+    "legacyTelemetrySupplement": {
+      "before": {
+        "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/LEGACY_TELEMETRY_PRESERVATION_BEFORE_BUILD.json",
+        "bytes": 325943,
+        "sha256": "033431217385ba1f4d63f3b2bfcd8c0ee88075effd1b69fe3c11ae0eb9fcc065"
+      },
+      "after": {
+        "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/LEGACY_TELEMETRY_PRESERVATION_AFTER_COLD_PROOF.json",
+        "bytes": 325943,
+        "sha256": "26c4f3dd2eda428601eb4c48b109d54cf38cf9efe11c4f716299b4b7267ee486"
+      },
+      "runsN91ThroughN98ByteExact": true,
+      "failedAttemptsByteExact": true,
+      "rawProfilesByteExact": true,
+      "priorPackageByteExact": true,
+      "cLaneTelemetry": {
+        "beforeBytes": 140090423,
+        "afterBytes": 140097015,
+        "priorPrefixSha256": "05b49ba743304dda94ec324716f40289147d83269164bfb62fc275d11d33fde9",
+        "priorPrefixPreserved": true,
+        "interpretation": "The two authorized cold next-turn consumers append telemetry; all pre-existing bytes remain an exact prefix."
+      },
+      "dLaneTelemetry": {
+        "bytes": 1041,
+        "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+        "byteExact": true
+      }
+    }
+  },
+  "findings": [
+    "Package02 is bound to the successful original build, exact reviewed source, exact CI/reuse authority, and the independently accepted executable-integrity explanation at unchanged whole-file bytes.",
+    "Source and packaged production consumers loaded the same canonical save through explicit source/package base roots, required canonical serialized identity, and produced byte-identical player projection, next state, and next report without external priming.",
+    "The runtime projection hash a641db55bf56b06d551bd6f539014994303c429490932d929be198c893bd0c65 is the corrected projection previously identified by the retained native failure diagnosis; this review makes no claim about the yet-unrun corrected native opening.",
+    "Preservation closing binds the actual materialized package receipt and comparison and exactly matches its opening roots. The supplemental legacy inventory confirms unchanged historical runs, failed attempts, raw profiles, prior package, and telemetry prefixes."
+  ],
+  "authorization": {
+    "nativePreflightAuthorized": true,
+    "nativeOpeningAuthorized": true,
+    "nativeOpeningAttempts": 1,
+    "retry": false,
+    "expectedDurationMs": 180000,
+    "timeoutMs": 600000,
+    "scope": "One fresh normal RBiH turn-0-to-turn-1 opening using package02 and the existing historical-choice, always_allow paramilitary policy, historical officer succession, Save/Load proof, CDP v3, archive, audio, provenance, and 25 practical gates.",
+    "stopRule": "Stop after the single opening regardless of outcome. Retain every artifact and inspect all failed or unreached gates before any further costly action."
+  },
+  "limits": [
+    "No native execution was performed by this review.",
+    "No t39, campaign, calibration, tuning, baseline adoption, or forced-control claim is made.",
+    "The original failed native opening, failed original postbuild, adapter NO_GO packets, and all earlier evidence remain preserved."
+  ]
+}

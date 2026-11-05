@@ -1,10 +1,10 @@
 /**
  * operation_opportunity_catalog_central_bosnia.ts
  *
- * Phase 2 operation-opportunity family: Central Bosnia / Vlasic / Kupres.
+ * Phase 2 operation-opportunity family: Central Bosnia / Konjic / Vlasic / Kupres.
  *
  * Non-sensitive Ring 1 territorial operation family. The proposal authorizes
- * ARBiH 3rd Corps and HRHB/HVO/HV territorial military operations in Central
+ * ARBiH 1st/3rd/4th Corps and HRHB/HVO/HV territorial military operations in Central
  * Bosnia. It does not add civilian-harm levers, new rupture behavior, or
  * combat math.
  */
@@ -17,8 +17,11 @@ import type {
     OpportunityAxisDef,
 } from './operation_opportunities.js';
 import { computeCorpsOperationReadiness } from './corps_operation_readiness.js';
+import { findBrigadeLiveOperationAnywhere } from './corps_operation_helpers.js';
 import { isWesternTheaterRuptured } from './operation_storm_theater.js';
 import { getFactionLiveSupplyPressure } from './supply_condition.js';
+import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
+import { MAX_EXHAUSTION_FOR_OPERATION } from './bot_constants.js';
 
 const PRIMARY_CORPS = 'arbih_3rd_corps';
 // The historical Donji Vakuf push is associated with the 7th Corps under
@@ -28,19 +31,84 @@ const PRIMARY_CORPS = 'arbih_3rd_corps';
 // operation empty before launch.
 const DONJI_VAKUF_PRIMARY_CORPS = 'arbih_3rd_corps';
 const KUPRES_CINCAR_PRIMARY_CORPS = 'hvo_tomislavgrad';
+const BEHAR_I_PRIMARY_CORPS = 'arbih_1st_corps';
+
+const BEHAR_I_STAGING_BUDOZELJE = 'op:vares:budozelje_2';
+const BEHAR_I_OBJECTIVE_TOLJENAK = 'op:vares:toljenak';
+const BEHAR_I_READINESS_FLOOR = 0.36;
+const BEHAR_I_AXIS_COORDINATION_FLOOR = 0.35;
+const BEHAR_I_SUPPLY_PRESSURE_CEILING = 90;
+
+// Source facts: BB1 printed pp.239 / PDF pp.276 records the 4th Corps main
+// offensive on 11-12 September 1994, Bijela occupied on 15 September, and the
+// renewed Borci-Glavaticevo line offensive on 23 September. BB2 printed
+// pp.495-497 / PDF pp.514-516 lists the 443rd (Suad Alic) and 450th light in
+// the Konjic OOB. Model assumptions, not source claims: preparation from turn
+// 127, allocation of these three brigades, the Bijela then Glavaticevo
+// OSID sequence, and Glavaticevo as regional coverage. Exact town-capture date
+// and exclusive participation are not proved.
+const KONJIC_PRIMARY_CORPS = 'arbih_4th_corps';
+const KONJIC_STAGING = 'op:konjic:konjic_2';
+const KONJIC_OBJECTIVES: readonly string[] = [
+    'op:konjic:bijela_2',
+    'op:konjic:glavaticevo_2',
+];
+const KONJIC_READINESS_FLOOR = 0.36;
+const KONJIC_AXIS_COORDINATION_FLOOR = 0.35;
+const KONJIC_SUPPLY_PRESSURE_CEILING = 90;
+
+const KONJIC_AXES: readonly OpportunityAxisDef[] = [{
+    axis_id: 'bijela_glavaticevo',
+    name: 'Bijela-Glavaticevo Line',
+    corps: KONJIC_PRIMARY_CORPS,
+    // Model allocation: the 443rd and 450th are the authored core. BBII printed
+    // pp.495-497 / PDF pp.514-516 states the 43rd and 49th were probably
+    // reinforced by corps-level reserves including at least the 4th Muslimski.
+    // This supports likely reinforcement, not proved exact brigade participation
+    // or an exclusive roster.
+    brigades: [
+        'arbih_443rd_mountain' as FormationId,
+        'arbih_450th_light' as FormationId,
+        'arbih_4th_muslim_light' as FormationId,
+    ],
+    objectives: KONJIC_OBJECTIVES,
+    staging_osid: KONJIC_STAGING,
+}];
+
+const BEHAR_I_AXES: readonly OpportunityAxisDef[] = [{
+    axis_id: 'nisici_plateau',
+    name: 'Nišići Plateau',
+    corps: BEHAR_I_PRIMARY_CORPS,
+    // These are current-model allocations for the Vareš/Breza predecessor force
+    // pool. Their displayed later formation names are not claims that a historical
+    // 162nd, 164th, or 126th Brigade captured Toljenak in November 1994.
+    brigades: [
+        'arbih_162nd_mountain' as FormationId,
+        'arbih_164th_mountain' as FormationId,
+    ],
+    objectives: [BEHAR_I_OBJECTIVE_TOLJENAK],
+    staging_osid: BEHAR_I_STAGING_BUDOZELJE,
+}];
 
 const STAGING_TRAVNIK = 'op:travnik:travnik_2';
 const STAGING_TURBE = 'op:travnik:turbe_2';
 const STAGING_CUKLE = 'op:travnik:cukle_2';
 
-// Wave 24C (2026-05-23): reordered for OSID-adjacency reachability per the
+// Wave 24C (2026-05-23): ordered for OSID-adjacency reachability per the
 // catalog-sweep audit (docs/40_reports/audits/20260523_CATALOG_ADJACENCY_SWEEP.md
-// §c-vlasic). gornje_krcevine has no baseline-HRHB/RBiH neighbor — axis aborts
-// at step 1 with 0 captures. paklarevo is adjacent to STAGING_TURBE, captures
-// expose varosluk, then varosluk exposes gornje_krcevine.
+// §c-vlasic). gornje_krcevine has no baseline-HRHB/RBiH neighbor, so starting
+// there would abort the axis at step 1 with 0 captures. paklarevo is adjacent to
+// STAGING_TURBE and is therefore the first target; its capture advances the axis
+// to gornje_krcevine.
+//
+// 2026-09-28 owner-approved scope correction (PROJECT_LEDGER.md "Owner approval
+// for March Vlašić objective scope"; 2026-09-02 Historian ruling
+// docs/PROJECT_LEDGER_ARCHIVE_2026Q3.md:8714-8781): removed `op:travnik:varosluk`
+// (Komar). Domet-1 (20-24 Mar 1995) took the Vlašić massif and stopped at
+// Sečevo/Kostolac (inside paklarevo) plus Vitovlje (inside gornje_krcevine);
+// Komar belongs to the September 1995 Donji Vakuf advance and is NOT re-homed here.
 const VLASIC_TRAVNIK_RIDGE_OBJECTIVES: readonly string[] = [
     'op:travnik:paklarevo',
-    'op:travnik:varosluk',
     'op:travnik:gornje_krcevine',
 ];
 
@@ -167,6 +235,20 @@ const VLASIC_AXES: readonly OpportunityAxisDef[] = [
             'arbih_712th_mountain' as FormationId,
             'arbih_737th_muslim_light' as FormationId,
             'arbih_705th_slavna_mountain' as FormationId,
+            // MODELED theater allocation under owner paint-calibration
+            // authority, not a documented March 1995 order. The 314th is an
+            // existing mandatory 3rd Corps active unit; the 717th and 303rd
+            // are existing 3rd Corps reserve units. Eleven authored IDs
+            // include the inactive 706th, leaving ten potentially active
+            // catalogue slots before availability; the actual retained Guards
+            // loan means only nine expected participants here. The existing
+            // minimum formula stays Math.floor(11/2) = 5, with no guarantee of
+            // admission, delivery or historic participation.
+            'arbih_7th_vitezka_muslim_liberation' as FormationId,
+            'arbih_guards_brigade' as FormationId,
+            'arbih_314th_slavna_liberation' as FormationId,
+            'arbih_717th_slavna_mountain' as FormationId,
+            'arbih_303rd_vitezka_mountain' as FormationId,
         ],
         objectives: VLASIC_TRAVNIK_RIDGE_OBJECTIVES,
         staging_osid: STAGING_TURBE,
@@ -197,11 +279,12 @@ const VLASIC_AXES: readonly OpportunityAxisDef[] = [
 // javorani_2 t160 and knezevo_2 t161 each captured a cell painted RS at oct1995 (-3), and
 // donji_koricani t156 did the same at apr1995 (-1).
 //
-// DELIBERATELY NOT DONE HERE — 1995 calibration is a later lane. The ridge axis is still
-// MISTIMED (fires t157-t160; Domet-1 is ~w152), and op:travnik:varosluk/Komar belongs to the
-// SEPTEMBER 1995 Donji Vakuf advance (~w180), not to Domet-1 at all. The catalog currently
-// compresses two historically distinct operations into one mid-1995 window. Retiming and
-// splitting those is queued, not attempted in this change.
+// UPDATE 2026-09-28: the Komar misattribution is corrected — op:travnik:varosluk is no
+// longer an objective of the ridge axis (see VLASIC_TRAVNIK_RIDGE_OBJECTIVES above and
+// PROJECT_LEDGER.md "Owner approval for March Vlašić objective scope"). Re-homing Komar to
+// the SEPTEMBER 1995 Donji Vakuf advance (~w180) still is not done here. Retiming the ridge
+// axis to Domet-1 (~w152) is a separate candidate and is likewise not part of this change:
+// this change only narrows the March target set.
 //
 // donji_koricani carries one caveat: the Historian seat marked its wartime control NOT
 // ESTABLISHED. It is Croat-majority (5,088/5,566), painted RS at oct1995, and Federation
@@ -261,8 +344,12 @@ const DONJI_VAKUF_AXES: readonly OpportunityAxisDef[] = [
 //   - hvo_rama_brigade — HVO Tomislavgrad, af=0 (BB v2 ch. 28: Rama covered
 //     Prozor-Kupres approach for the Cincar axis; ICTY Prlić IT-04-74-T
 //     trial record on HVO Tomislavgrad operative group composition)
-//   - hv_4th_guards_split — HV loan brigade, hvo_tomislavgrad after WA+6
-//     (BB v2 ch. 28; ICTY Gotovina IT-06-90-T §44-58 confirms HV 4th Guards
+//   - hv_4th_guards_split — HV loan brigade, hvo_tomislavgrad after
+//     HV_PREPARATION_DELAY. Its retained-n13 four-turn lead before the t132
+//     Cincar window is a scenario choice anchored to BB1 printed p.243, which
+//     dates Cincar beginning 1 Nov 1994 and says Croatian Army forces almost
+//     certainly helped plan and probably execute it. ICTY Gotovina IT-06-90-T
+//     §44-58 confirms HV 4th Guards
 //     cross-border employment on the Livno-Kupres-Grahovo axis from late 1994)
 //   - hv_5th_guards_karlovac, hv_7th_guards_varazdin — retained for plausibility
 //     symmetry; currently inactive at runtime but become available once HV
@@ -319,10 +406,14 @@ const KUPRES_GLAMOC_SHOULDER_AXES: readonly OpportunityAxisDef[] = [
     },
 ];
 
+// Calibrated allocation choice: 146 is the last measured free week before
+// Strijela claims the 712th/727th at 147. This reserves the existing authored
+// ridge force; it is not a sourced historical preparation date.
 const dateWindowVlasic: AxisPredicate = (_state, turn) => {
-    if (turn < 152) return { green: false, reason: 'spring 1995 Central Bosnia window not yet open' };
-    if (turn > 166) return { green: false, reason: 'spring 1995 Central Bosnia window has closed' };
-    return { green: true, reason: 'within spring 1995 Central Bosnia operation window' };
+    if (turn < 146) return { green: false, reason: 'February 1995 planning window for spring Central Bosnia operation not yet open' };
+    if (turn > 166) return { green: false, reason: 'spring 1995 Central Bosnia operation window has closed' };
+    if (turn < 150) return { green: true, reason: 'within calibrated advance-preparation window for spring Central Bosnia operation' };
+    return { green: true, reason: 'within February 1995 planning / spring Central Bosnia operation window' };
 };
 
 const allianceContextVlasic: AxisPredicate = (state) => {
@@ -407,8 +498,112 @@ const weatherSeasonVlasic: AxisPredicate = (_state, turn) => {
     return { green: true, reason: 'spring mountain conditions are acceptable for ridge action' };
 };
 
+// ─── Paklarevo local concentration model ─────────────────────────────────────
+// MODELED allocation, not an attested historical order. The retained trace has
+// the ridge's first Paklarevo fall at155 with nine attackers and no force
+// shortage; the published profile had already taken Paklarevo at113 through a
+// generated operation. This one-turn local model tests whether the existing
+// supplied 3rd Corps trio can deliver the same target at the first fresh
+// post-exhaustion eligibility, without reserving them earlier or changing any
+// force, supply, intel or combat rule.
+const PAKLAREVO_MODEL_OBJECTIVE = 'op:travnik:paklarevo';
+const PAKLAREVO_MODEL_STAGING = STAGING_TURBE;
+const PAKLAREVO_MODEL_TRIO = [
+    'arbih_712th_mountain',
+    'arbih_727th_slavna',
+    'arbih_770th_slavna_mountain',
+] as const;
+const PAKLAREVO_MODEL_READINESS_FLOOR = 0.36;
+const PAKLAREVO_MODEL_SUPPLY_CEILING = 90;
+const PAKLAREVO_MODEL_AXES: readonly OpportunityAxisDef[] = [{
+    axis_id: 'paklarevo_local_concentration',
+    name: 'Paklarevo Local Concentration',
+    corps: PRIMARY_CORPS,
+    // Exact local trio only. 708th is deliberately excluded: it is the sole
+    // Medini defender against six RS formations in Komar. This is a modeled
+    // local allocation, not a named historical offensive or order.
+    brigades: [...PAKLAREVO_MODEL_TRIO] as FormationId[],
+    objectives: [PAKLAREVO_MODEL_OBJECTIVE],
+    staging_osid: PAKLAREVO_MODEL_STAGING,
+}];
+
+const dateWindowPaklarevoModel: AxisPredicate = (_state, turn) => {
+    if (turn < 123) return { green: false, reason: 'Paklarevo local model window not yet open' };
+    if (turn > 123) return { green: false, reason: 'Paklarevo local model window has closed' };
+    return { green: true, reason: 'within the single turn 123 Paklarevo local model window' };
+};
+
+const stagingAccessPaklarevoModel: AxisPredicate = (state) => {
+    const controller = getPoliticalControllerOSID(state, PAKLAREVO_MODEL_STAGING, undefined);
+    return controller === 'RBiH'
+        ? { green: true, reason: 'Turbe remains an ordinary friendly assembly approach' }
+        : { green: false, reason: 'Turbe is not friendly-held for the local Paklarevo assembly' };
+};
+
+const enemyWeaknessPaklarevoModel: AxisPredicate = (state) => {
+    const controller = getPoliticalControllerOSID(state, PAKLAREVO_MODEL_OBJECTIVE, undefined);
+    return controller === 'RS'
+        ? { green: true, reason: 'Paklarevo remains in enemy hands' }
+        : { green: false, reason: 'Paklarevo is no longer an enemy-held objective' };
+};
+
+const corpsReadinessPaklarevoModel: AxisPredicate = (state) => {
+    const cmd = state.military.corps_command?.[PRIMARY_CORPS];
+    if (!cmd) return { green: false, reason: '3rd Corps command not present in this scenario' };
+    if (cmd.corps_exhaustion > MAX_EXHAUSTION_FOR_OPERATION) {
+        return { green: false, reason: `3rd Corps exhaustion ${cmd.corps_exhaustion} above ordinary operation threshold ${MAX_EXHAUSTION_FOR_OPERATION}` };
+    }
+    const traits = computeCorpsOperationReadiness(state, PRIMARY_CORPS as FormationId);
+    if (traits.operation_readiness < PAKLAREVO_MODEL_READINESS_FLOOR) {
+        return { green: false, reason: '3rd Corps readiness below Paklarevo local operation floor' };
+    }
+    return { green: true, reason: '3rd Corps exhaustion and readiness permit ordinary local preparation' };
+};
+
+const logisticsPaklarevoModel: AxisPredicate = (state) => {
+    const pressure = getFactionLiveSupplyPressure(state, 'RBiH');
+    return pressure >= PAKLAREVO_MODEL_SUPPLY_CEILING
+        ? { green: false, reason: 'RBiH supply pressure too high for the Paklarevo local operation' }
+        : { green: true, reason: 'RBiH supply pressure within the ordinary Paklarevo margin' };
+};
+
+const forceQualityPaklarevoModel: AxisPredicate = (state) => {
+    const cmd = state.military.corps_command?.[PRIMARY_CORPS];
+    if (!cmd) return { green: false, reason: '3rd Corps command not present in this scenario' };
+    if (cmd.og_slots > 0 && cmd.active_ogs.length >= cmd.og_slots) {
+        return { green: false, reason: 'No ordinary operational-group slot remains for the Paklarevo model' };
+    }
+    for (const brigadeId of PAKLAREVO_MODEL_TRIO) {
+        const formation = state.military.formations?.[brigadeId as FormationId];
+        if (!formation) return { green: false, reason: `${brigadeId} is missing` };
+        if (formation.faction !== 'RBiH') return { green: false, reason: `${brigadeId} is not RBiH` };
+        const owner = formation.corps_id ?? (formation as { own_corps_cmd?: string }).own_corps_cmd;
+        if (owner !== PRIMARY_CORPS) return { green: false, reason: `${brigadeId} is not a 3rd Corps formation` };
+        if (!isEligibleOperationFormation(formation)) return { green: false, reason: `${brigadeId} is not eligible for an operation` };
+        if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) return { green: false, reason: `${brigadeId} is below the ordinary attack floor` };
+        if ((formation.disrupted_turns ?? 0) > 0) return { green: false, reason: `${brigadeId} is disrupted` };
+        const movement = state.military.brigade_movement_state?.[brigadeId as FormationId]?.status;
+        if (movement === 'in_transit' || movement === 'packing') {
+            return { green: false, reason: `${brigadeId} is already moving` };
+        }
+        if (findBrigadeLiveOperationAnywhere(state, brigadeId as FormationId)) {
+            return { green: false, reason: `${brigadeId} is already committed to a live operation` };
+        }
+    }
+    return { green: true, reason: 'All exact local trio formations are available and unconflicted' };
+};
+
 const dateWindowDonjiVakuf: AxisPredicate = (_state, turn) => {
-    if (turn < 177) return { green: false, reason: 'September 1995 Donji Vakuf window not yet open' };
+    // Balkan Battlegrounds I printed p.382 (notes680-681/685-688, p.420):
+    // earlier 24 July and 12 August attacks failed; renewed 7th Corps attacks
+    // around Donji Vakuf/Komar began 10 September, with town entry/capture
+    // 13-14 September. A local retrospective places initial fighting on 9
+    // September, the same modeled week. Completed turn179 covers 4-10 September.
+    // Lower bound178 is only a weekly approximation allowing ordinary earliest
+    // execution on179; it does not assert a historical preparation day, force
+    // execution, or change the upper bound, planning_duration, evaluators,
+    // readiness/logistics gates, 7th Corps proxy representation or any other field.
+    if (turn < 178) return { green: false, reason: 'September 1995 Donji Vakuf window not yet open' };
     if (turn > 180) return { green: false, reason: 'September 1995 Donji Vakuf window has closed' };
     return { green: true, reason: 'within September 1995 Donji Vakuf operation window' };
 };
@@ -567,6 +762,115 @@ const weatherSeasonKupresCincar: AxisPredicate = (_state, turn) => {
 
 const alwaysGreen: AxisPredicate = () => ({ green: true, reason: 'not applicable for this family' });
 
+// One admission week keeps the canonical earliest-ready boundary at t134 and,
+// on the retained-like two-proxy route, delivers both brigades for t135 execution.
+const dateWindowBeharI: AxisPredicate = (_state, turn) => {
+    if (turn < 133) return { green: false, reason: 'BEHAR-I preparation window not yet open' };
+    if (turn > 133) return { green: false, reason: 'BEHAR-I preparation window has closed' };
+    return { green: true, reason: 'within the bounded BEHAR-I preparation window' };
+};
+
+const stagingAccessBeharI: AxisPredicate = (state) => {
+    return getPoliticalControllerOSID(state, BEHAR_I_STAGING_BUDOZELJE, undefined) === 'RBiH'
+        ? { green: true, reason: 'Budoželje assembly area remains RBiH-held' }
+        : { green: false, reason: 'Budoželje assembly area is not RBiH-held' };
+};
+
+const enemyWeaknessBeharI: AxisPredicate = (state) => {
+    return getPoliticalControllerOSID(state, BEHAR_I_OBJECTIVE_TOLJENAK, undefined) === 'RS'
+        ? { green: true, reason: 'Toljenak remains an RS-held objective' }
+        : { green: false, reason: 'Toljenak is no longer an RS-held objective' };
+};
+
+const corpsReadinessBeharI: AxisPredicate = (state) => {
+    if (!state.military.corps_command?.[BEHAR_I_PRIMARY_CORPS]) {
+        return { green: false, reason: '1st Corps command not present in this scenario' };
+    }
+    const traits = computeCorpsOperationReadiness(state, BEHAR_I_PRIMARY_CORPS as FormationId);
+    return traits.operation_readiness >= BEHAR_I_READINESS_FLOOR
+        ? { green: true, reason: '1st Corps readiness sufficient for BEHAR-I allocation' }
+        : { green: false, reason: '1st Corps readiness below BEHAR-I operation floor' };
+};
+
+const logisticsBeharI: AxisPredicate = (state) => {
+    const pressure = getFactionLiveSupplyPressure(state, 'RBiH');
+    return pressure < BEHAR_I_SUPPLY_PRESSURE_CEILING
+        ? { green: true, reason: 'RBiH live supply pressure within ordinary operation margin' }
+        : { green: false, reason: 'RBiH live supply pressure too high for BEHAR-I allocation' };
+};
+
+const commanderConfidenceBeharI: AxisPredicate = (state) => {
+    return state.military.corps_command?.[BEHAR_I_PRIMARY_CORPS]?.commander_state
+        ? { green: true, reason: '1st Corps commander state present' }
+        : { green: false, reason: '1st Corps commander state unavailable' };
+};
+
+const forceQualityBeharI: AxisPredicate = (state) => {
+    if (!state.military.corps_command?.[BEHAR_I_PRIMARY_CORPS]) {
+        return { green: false, reason: '1st Corps command not present in this scenario' };
+    }
+    const traits = computeCorpsOperationReadiness(state, BEHAR_I_PRIMARY_CORPS as FormationId);
+    return traits.axis_coordination >= BEHAR_I_AXIS_COORDINATION_FLOOR
+        ? { green: true, reason: '1st Corps axis coordination supports BEHAR-I allocation' }
+        : { green: false, reason: '1st Corps axis coordination below BEHAR-I threshold' };
+};
+
+const allianceContextBeharI: AxisPredicate = (state) => {
+    return (state.political?.war_alliance_rbih_hrhb ?? 0) >= FEDERATION_ALLIANCE_FLOOR
+        ? { green: true, reason: 'post-Washington Federation context holds' }
+        : { green: false, reason: 'post-Washington Federation context below threshold' };
+};
+
+const weatherSeasonBeharI: AxisPredicate = () => ({
+    green: true,
+    reason: 'bounded October-November mountain operation window',
+});
+
+export const BEHAR_I_94_OPPORTUNITY: OperationOpportunityDef = {
+    opportunity_id: 'behar_i_94',
+    name: 'Operation Behar-I',
+    tier: 'T1',
+    faction: 'RBiH',
+    primary_corps: BEHAR_I_PRIMARY_CORPS,
+    family: 'central_bosnia_vlasic',
+    axes: BEHAR_I_AXES,
+    staging_osid: BEHAR_I_STAGING_BUDOZELJE,
+    planning_duration: 3,
+    citations: [
+        'docs/40_reports/implemented/20261023_BEHAR_I_TOLJENAK_CANDIDATE.md - medium-confidence Nišići/Toljenak regional allocation; current-model predecessor allocation only, with no exact capturing formation claim',
+        'Prvi korpus ARBiH, printed p.279 / PDF p.281 - 5-6 November Nišići plateau offensive and Toljenak result',
+        'Rasim Delić vol. 2 pp.68-69 - BEHAR-I, 6-7 November, Toljenak among captured places',
+        'Balkan Battlegrounds vol. 1, printed pp.237-238 / PDF pp.274-275 - regional offensive and retained gains',
+    ],
+    historical_exit_class: 'partial_success',
+    prerequisites: {
+        date_window: 'required',
+        political_authorization: 'n_a',
+        corps_readiness: 'required',
+        logistics: 'optional',
+        staging_access: 'required',
+        weather_season: 'optional',
+        commander_confidence: 'optional',
+        enemy_weakness: 'required',
+        alliance_context: 'required',
+        force_quality: 'optional',
+        min_optional_axes: 2,
+    },
+    evaluators: {
+        date_window: dateWindowBeharI,
+        political_authorization: alwaysGreen,
+        corps_readiness: corpsReadinessBeharI,
+        logistics: logisticsBeharI,
+        staging_access: stagingAccessBeharI,
+        weather_season: weatherSeasonBeharI,
+        commander_confidence: commanderConfidenceBeharI,
+        enemy_weakness: enemyWeaknessBeharI,
+        alliance_context: allianceContextBeharI,
+        force_quality: forceQualityBeharI,
+    },
+    staff_recommendation: 'approve',
+};
+
 export const KUPRES_CINCAR_94_OPPORTUNITY: OperationOpportunityDef = {
     opportunity_id: 'kupres_cincar_94',
     name: 'Operation Cincar / Kupres',
@@ -635,7 +939,12 @@ export const VLASIC_RIDGE_95_OPPORTUNITY: OperationOpportunityDef = {
     family: 'central_bosnia_vlasic',
     axes: VLASIC_AXES,
     staging_osid: STAGING_TRAVNIK,
-    planning_duration: 4,
+    // 2026-09-28 timing candidate: planning 4→2 so a t152-approved Vlašić
+    // operation can begin executing in the week completed by receipt 155
+    // (20-26 March 1995, the documented Domet-1 opening) rather than waiting
+    // out a 4-turn planning window. The two-turn preparation is an explicit
+    // model assumption, not a sourced historical preparation period.
+    planning_duration: 2,
     min_attack_outcome: 'repulsed',
     citations: [
         'docs/research/2026-05-01-late-war-operation-opportunity-research.md - Central Bosnia / Vlasic-Kupres family backlog',
@@ -676,6 +985,49 @@ export const VLASIC_RIDGE_95_OPPORTUNITY: OperationOpportunityDef = {
             staging_osid: STAGING_TURBE,
         },
     ],
+    staff_recommendation: 'approve',
+};
+
+// Explicit model-only baseline. `did_not_launch` records that no sourced named
+// historical offensive is being claimed here; it is NOT evidence that local
+// combat did not occur around Paklarevo.
+export const PAKLAREVO_LOCAL_94_MODEL_OPPORTUNITY: OperationOpportunityDef = {
+    opportunity_id: 'paklarevo_local_94_model',
+    name: 'Paklarevo Local Concentration (Model)',
+    tier: 'T1',
+    faction: 'RBiH',
+    primary_corps: PRIMARY_CORPS,
+    family: 'central_bosnia_vlasic',
+    axes: PAKLAREVO_MODEL_AXES,
+    staging_osid: PAKLAREVO_MODEL_STAGING,
+    planning_duration: 2,
+    citations: [],
+    historical_exit_class: 'did_not_launch',
+    prerequisites: {
+        date_window: 'required',
+        political_authorization: 'n_a',
+        corps_readiness: 'required',
+        logistics: 'required',
+        staging_access: 'required',
+        weather_season: 'n_a',
+        commander_confidence: 'n_a',
+        enemy_weakness: 'required',
+        alliance_context: 'n_a',
+        force_quality: 'required',
+        min_optional_axes: 0,
+    },
+    evaluators: {
+        date_window: dateWindowPaklarevoModel,
+        political_authorization: alwaysGreen,
+        corps_readiness: corpsReadinessPaklarevoModel,
+        logistics: logisticsPaklarevoModel,
+        staging_access: stagingAccessPaklarevoModel,
+        weather_season: alwaysGreen,
+        commander_confidence: alwaysGreen,
+        enemy_weakness: enemyWeaknessPaklarevoModel,
+        alliance_context: alwaysGreen,
+        force_quality: forceQualityPaklarevoModel,
+    },
     staff_recommendation: 'approve',
 };
 
@@ -720,6 +1072,128 @@ export const DONJI_VAKUF_95_OPPORTUNITY: OperationOpportunityDef = {
         enemy_weakness: enemyWeaknessDonjiVakuf,
         alliance_context: allianceContextDonjiVakuf,
         force_quality: forceQualityDonjiVakuf,
+    },
+    staff_recommendation: 'approve',
+};
+
+const dateWindowKonjic: AxisPredicate = (_state, turn) => {
+    if (turn < 127) return { green: false, reason: 'September 1994 Konjic operation window not yet open' };
+    if (turn > 130) return { green: false, reason: 'September 1994 Konjic operation window has closed' };
+    return { green: true, reason: 'within September 1994 Konjic operation window' };
+};
+
+const allianceContextKonjic: AxisPredicate = (state) => {
+    const alliance = state.political?.war_alliance_rbih_hrhb ?? 0;
+    if (alliance < FEDERATION_ALLIANCE_FLOOR) {
+        return { green: false, reason: 'post-Washington Federation coordination below Konjic threshold' };
+    }
+    return { green: true, reason: 'post-Washington Federation coordination supports the Konjic operation' };
+};
+
+const stagingAccessKonjic: AxisPredicate = (state) => {
+    const control = getPoliticalControllerOSID(state, KONJIC_STAGING, undefined);
+    return control === 'RBiH'
+        ? { green: true, reason: 'Konjic assembly area remains RBiH-held' }
+        : { green: false, reason: 'Konjic assembly area is not RBiH-held' };
+};
+
+const enemyWeaknessKonjic: AxisPredicate = (state) => {
+    const enemyHeld = KONJIC_OBJECTIVES.filter(
+        (osid) => getPoliticalControllerOSID(state, osid, undefined) === 'RS',
+    ).length;
+    return enemyHeld > 0
+        ? { green: true, reason: 'Bijela-Glavaticevo objectives remain in enemy hands' }
+        : { green: false, reason: 'no Bijela-Glavaticevo objectives remain in enemy hands' };
+};
+
+const corpsReadinessKonjic: AxisPredicate = (state) => {
+    if (!state.military.corps_command?.[KONJIC_PRIMARY_CORPS]) {
+        return { green: false, reason: '4th Corps command not present in this scenario' };
+    }
+    const traits = computeCorpsOperationReadiness(state, KONJIC_PRIMARY_CORPS as FormationId);
+    if (traits.operation_readiness < KONJIC_READINESS_FLOOR) {
+        return { green: false, reason: '4th Corps readiness below Konjic operation floor' };
+    }
+    return { green: true, reason: '4th Corps readiness sufficient for the Konjic operation' };
+};
+
+const logisticsKonjic: AxisPredicate = (state) => {
+    const pressure = getFactionLiveSupplyPressure(state, 'RBiH');
+    if (pressure >= KONJIC_SUPPLY_PRESSURE_CEILING) {
+        return { green: false, reason: 'RBiH supply pressure too high for the Konjic operation' };
+    }
+    return { green: true, reason: 'RBiH supply pressure within Konjic operation margin' };
+};
+
+const commanderConfidenceKonjic: AxisPredicate = (state) => {
+    const commanderState = state.military.corps_command?.[KONJIC_PRIMARY_CORPS]?.commander_state;
+    if (!commanderState) {
+        return { green: false, reason: '4th Corps commander state unavailable' };
+    }
+    return { green: true, reason: '4th Corps commander state present' };
+};
+
+const forceQualityKonjic: AxisPredicate = (state) => {
+    if (!state.military.corps_command?.[KONJIC_PRIMARY_CORPS]) {
+        return { green: false, reason: '4th Corps command not present in this scenario' };
+    }
+    const traits = computeCorpsOperationReadiness(state, KONJIC_PRIMARY_CORPS as FormationId);
+    if (traits.axis_coordination < KONJIC_AXIS_COORDINATION_FLOOR) {
+        return { green: false, reason: '4th Corps axis coordination below Konjic threshold' };
+    }
+    return { green: true, reason: '4th Corps axis coordination supports the Konjic operation' };
+};
+
+const weatherSeasonKonjic: AxisPredicate = () => ({
+    green: true,
+    reason: 'bounded September conditions are acceptable for the Konjic operation',
+});
+
+export const KONJIC_SEPTEMBER_94_OPPORTUNITY: OperationOpportunityDef = {
+    opportunity_id: 'konjic_september_94',
+    name: 'Konjic September Offensive',
+    tier: 'T1',
+    faction: 'RBiH',
+    primary_corps: KONJIC_PRIMARY_CORPS,
+    family: 'central_bosnia_vlasic',
+    axes: KONJIC_AXES,
+    staging_osid: KONJIC_STAGING,
+    planning_duration: 2,
+    // Existing authored option only: after a decisive actual capture, advance
+    // at most one same-axis supporter. This is a model coordination choice for
+    // the concentration problem, not proved exact historical orders. It does
+    // not change power, outcomes, occupation permissions, or other-axis units.
+    coordinated_advance: true,
+    citations: [
+        'Balkan Battlegrounds I printed pp.239 / PDF pp.276 - 4th Corps main offensive 11-12 Sep 1994, Bijela occupied 15 Sep, renewed Borci-Glavaticevo line offensive 23 Sep',
+        'Balkan Battlegrounds II printed pp.495-497 / PDF pp.514-516 - 443rd (Suad Alic) and 450th light in the Konjic OOB; the 43rd and 49th were probably reinforced by corps-level reserves including at least the 4th Muslimski (likely reinforcement, not proved exact brigade participation or an exclusive roster)',
+        'Model assumptions only: turn 127 preparation, the three-brigade allocation, the Bijela then Glavaticevo OSID sequence and Glavaticevo regional coverage are calibration choices; exact town-capture date and exclusive participation are not proved',
+    ],
+    historical_exit_class: 'partial_success',
+    prerequisites: {
+        date_window: 'required',
+        political_authorization: 'n_a',
+        corps_readiness: 'required',
+        logistics: 'optional',
+        staging_access: 'required',
+        weather_season: 'optional',
+        commander_confidence: 'optional',
+        enemy_weakness: 'required',
+        alliance_context: 'required',
+        force_quality: 'optional',
+        min_optional_axes: 2,
+    },
+    evaluators: {
+        date_window: dateWindowKonjic,
+        political_authorization: alwaysGreen,
+        corps_readiness: corpsReadinessKonjic,
+        logistics: logisticsKonjic,
+        staging_access: stagingAccessKonjic,
+        weather_season: weatherSeasonKonjic,
+        commander_confidence: commanderConfidenceKonjic,
+        enemy_weakness: enemyWeaknessKonjic,
+        alliance_context: allianceContextKonjic,
+        force_quality: forceQualityKonjic,
     },
     staff_recommendation: 'approve',
 };
@@ -1034,7 +1508,10 @@ export const KUPRES_PHASE_2_94_OPPORTUNITY: OperationOpportunityDef = {
 // Removing the array entry is the smallest surface-area fix; re-enable by
 // reintroducing one identifier in the array.
 export const CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES: readonly OperationOpportunityDef[] = [
+    BEHAR_I_94_OPPORTUNITY,
     KUPRES_CINCAR_94_OPPORTUNITY,
     VLASIC_RIDGE_95_OPPORTUNITY,
     DONJI_VAKUF_95_OPPORTUNITY,
+    KONJIC_SEPTEMBER_94_OPPORTUNITY,
+    PAKLAREVO_LOCAL_94_MODEL_OPPORTUNITY,
 ];

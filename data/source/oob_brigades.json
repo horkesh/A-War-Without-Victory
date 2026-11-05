@@ -128,8 +128,24 @@
     "default_equipment_class": "motorized",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 800,
-    "initial_cohesion": 45
+    "initial_personnel": 1800,
+    "initial_cohesion": 45,
+    "composition": {
+      "infantry": 850,
+      "tanks": 8,
+      "artillery": 8,
+      "aa_systems": 1,
+      "tank_condition": {
+        "operational": 1,
+        "degraded": 0,
+        "non_operational": 0
+      },
+      "artillery_condition": {
+        "operational": 1,
+        "degraded": 0,
+        "non_operational": 0
+      }
+    }
   },
   {
     "id": "arbih_105th_motorized",
@@ -254,6 +270,22 @@
     "mandatory": true,
     "initial_personnel": 800,
     "initial_cohesion": 50,
+    "composition": {
+      "infantry": 850,
+      "tanks": 0,
+      "artillery": 0,
+      "aa_systems": 1,
+      "tank_condition": {
+        "operational": 1,
+        "degraded": 0,
+        "non_operational": 0
+      },
+      "artillery_condition": {
+        "operational": 1,
+        "degraded": 0,
+        "non_operational": 0
+      }
+    },
     "distinction_potential": "tier_2",
     "initial_officer_quality": 0.15,
     "defense_terrain_bonus": 0.25
@@ -348,7 +380,7 @@
     "default_equipment_class": "light_infantry",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 400,
+    "initial_personnel": 650,
     "initial_cohesion": 35
   },
   {
@@ -426,7 +458,7 @@
     "default_equipment_class": "light_infantry",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 400,
+    "initial_personnel": 650,
     "initial_cohesion": 35
   },
   {
@@ -1666,6 +1698,22 @@
     ]
   },
   {
+    "id": "arbih_831st_drina_lineage",
+    "faction": "RBiH",
+    "name": "31st Drina Lineage",
+    "corps": "arbih_1st_corps",
+    "home_mun": "gorazde",
+    "home_settlement": "Goražde",
+    "home_osid": "op:gorazde:gorazde_2",
+    "kind": "brigade",
+    "default_equipment_class": "light_infantry",
+    "available_from": 7,
+    "priority": 49,
+    "mandatory": true,
+    "initial_personnel": 900,
+    "max_personnel": 2000
+  },
+  {
     "id": "arbih_803rd_light",
     "faction": "RBiH",
     "name": "803rd Light",
@@ -2016,7 +2064,7 @@
     "default_equipment_class": "mountain",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 1000,
+    "initial_personnel": 2000,
     "initial_cohesion": 67
   },
   {
@@ -2888,7 +2936,8 @@
     "default_equipment_class": "mountain",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 1000,
+    "initial_personnel": 3000,
+    "max_personnel": 3000,
     "initial_cohesion": 67,
     "distinction_potential": "tier_1",
     "initial_officer_quality": 0.6
@@ -2905,7 +2954,7 @@
     "default_equipment_class": "mountain",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 1000,
+    "initial_personnel": 1800,
     "initial_cohesion": 67
   },
   {
@@ -2935,7 +2984,7 @@
     "default_equipment_class": "mountain",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 800,
+    "initial_personnel": 2000,
     "initial_cohesion": 55,
     "defense_terrain_bonus": 0.25,
     "initial_officer_quality": 0.15,
@@ -3546,9 +3595,9 @@
     "id": "hvo_ante_starcevic_brigade",
     "faction": "HRHB",
     "name": "Ante Starčević Brigade",
-    "corps": "hvo_central_bosnia",
-    "home_mun": "kiseljak",
-    "home_osid": "op:kiseljak:gromiljak_2",
+    "corps": "hvo_tomislavgrad",
+    "home_mun": "gornji_vakuf",
+    "home_osid": "op:gornji_vakuf:vaganjac",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
     "available_from": 0,
@@ -3872,7 +3921,7 @@
     "corps": "arbih_2nd_corps",
     "home_mun": "vlasenica",
     "home_settlement": "Cerska",
-    "home_osid": "op:vlasenica:sebiocina",
+    "home_osid": "op:vlasenica:cerska_2",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
     "available_from": 4,

@@ -1,0 +1,354 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-24T13:41:46.567Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/baseline-rebless-20261024/campaign-01",
+  "timeout_ms": 2100000,
+  "original_argv": [
+    "C:\\Program Files\\Volta\\node.exe",
+    "tmp/baseline-rebless-20261024/campaign_entry.cjs",
+    "{evidenceDir}",
+    "--expected-head",
+    "a913286803a095b6dc3f57a44175081d6ae4b8eb",
+    "--preservation-inventory",
+    "logs/baseline-reblessing/20261024/PRESERVATION_BEFORE.json",
+    "--dependency-inventory",
+    "logs/baseline-reblessing/20261024/PACKET_DEPENDENCIES.json",
+    "--owner-authorized-once"
+  ],
+  "argv": [
+    "C:\\Program Files\\Volta\\node.exe",
+    "tmp/baseline-rebless-20261024/campaign_entry.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\baseline-rebless-20261024\\campaign-01",
+    "--expected-head",
+    "a913286803a095b6dc3f57a44175081d6ae4b8eb",
+    "--preservation-inventory",
+    "logs/baseline-reblessing/20261024/PRESERVATION_BEFORE.json",
+    "--dependency-inventory",
+    "logs/baseline-reblessing/20261024/PACKET_DEPENDENCIES.json",
+    "--owner-authorized-once"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "dependency-verification.json",
+    "baseline-target-before.json",
+    "baseline-target-after.json",
+    "preservation-before.json",
+    "preservation-after.json",
+    "source-before.json",
+    "source-after.json",
+    "campaign-launch.json",
+    "campaign-execution.json",
+    "packet-summary.json",
+    "postrun/evaluation.json",
+    "postrun/timeline-vs-n91.json",
+    "postrun/timeline-vs-n92.json",
+    "postrun/protected-vs-n91.json",
+    "postrun/protected-vs-n92.json",
+    "postrun/summary.json",
+    "postrun/evaluation.stdout.log",
+    "postrun/evaluation.stderr.log",
+    "postrun/evaluation.execution.json",
+    "postrun/timeline-vs-n91.stdout.log",
+    "postrun/timeline-vs-n91.stderr.log",
+    "postrun/timeline-vs-n91.execution.json",
+    "postrun/timeline-vs-n92.stdout.log",
+    "postrun/timeline-vs-n92.stderr.log",
+    "postrun/timeline-vs-n92.execution.json",
+    "postrun/checkpoints.stdout.log",
+    "postrun/checkpoints.stderr.log",
+    "postrun/checkpoints.execution.json",
+    "postrun/consistency.stdout.log",
+    "postrun/consistency.stderr.log",
+    "postrun/consistency.execution.json",
+    "postrun/health.stdout.log",
+    "postrun/health.stderr.log",
+    "postrun/health.execution.json",
+    "postrun/protected-vs-n91.stdout.log",
+    "postrun/protected-vs-n91.stderr.log",
+    "postrun/protected-vs-n91.execution.json",
+    "postrun/protected-vs-n92.stdout.log",
+    "postrun/protected-vs-n92.stderr.log",
+    "postrun/protected-vs-n92.execution.json",
+    "postrun/producer.stdout.log",
+    "postrun/producer.stderr.log",
+    "postrun/producer.execution.json",
+    "postrun/movement.stdout.log",
+    "postrun/movement.stderr.log",
+    "postrun/movement.execution.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/baseline-rebless-20261024/campaign_entry.cjs",
+    "bytes": 9913,
+    "raw_sha256": "fb8c791c7089a7f557807cb628d3289158c00569664a8d88eda113ff5808e04f",
+    "normalized_text_sha256": "fb8c791c7089a7f557807cb628d3289158c00569664a8d88eda113ff5808e04f",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 9913,
+      "sha256": "fb8c791c7089a7f557807cb628d3289158c00569664a8d88eda113ff5808e04f"
+    }
+  },
+  "end_utc": "2026-10-24T13:44:49.105Z",
+  "pid": 19872,
+  "child_exit": 0,
+  "wrapper_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/baseline-rebless-20261024/campaign_entry.cjs",
+    "bytes": 9913,
+    "raw_sha256": "fb8c791c7089a7f557807cb628d3289158c00569664a8d88eda113ff5808e04f",
+    "normalized_text_sha256": "fb8c791c7089a7f557807cb628d3289158c00569664a8d88eda113ff5808e04f",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 17785712,
+    "sha256": "d55d140d619d48eb9cc1f431118299ee2d3754bd2971fe1fc6dfb75eb51dc434"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 242,
+    "sha256": "8340826c7feeee649a14146b3bc233a71bb2b2de45c9421136944e37ccbf2561"
+  },
+  "retained_artifacts": [
+    {
+      "path": "dependency-verification.json",
+      "bytes": 1783,
+      "sha256": "f6e7e5d33aa550ff446c616a203d3f03b260fb40fb8fba28f02a39b06cb0afbf"
+    },
+    {
+      "path": "baseline-target-before.json",
+      "bytes": 191,
+      "sha256": "b70b99e596ccedc4cadf50d031c066294a94f26a1f86b3391523609e1d8cc991"
+    },
+    {
+      "path": "baseline-target-after.json",
+      "bytes": 191,
+      "sha256": "b70b99e596ccedc4cadf50d031c066294a94f26a1f86b3391523609e1d8cc991"
+    },
+    {
+      "path": "preservation-before.json",
+      "bytes": 1916740,
+      "sha256": "a900d554a8a710baf5c6ea997b1144bacb9e25ec8df267f93c2e96bc2a2a8fc3"
+    },
+    {
+      "path": "preservation-after.json",
+      "bytes": 1916745,
+      "sha256": "9e4bddb626dce0368bd973c6fde028ab7f6b5946b79d9825887b419b5db9dac5"
+    },
+    {
+      "path": "source-before.json",
+      "bytes": 1967514,
+      "sha256": "1dd3a789300ed1cbb68b059c82f7c2bc703b350c4c861faf049dc3ef016712c5"
+    },
+    {
+      "path": "source-after.json",
+      "bytes": 1967514,
+      "sha256": "1dd3a789300ed1cbb68b059c82f7c2bc703b350c4c861faf049dc3ef016712c5"
+    },
+    {
+      "path": "campaign-launch.json",
+      "bytes": 7583,
+      "sha256": "7ea31fc1e340965f2fdc478618f10ff9141ff0151cd81c7b2ad81a6b869d4dda"
+    },
+    {
+      "path": "campaign-execution.json",
+      "bytes": 233,
+      "sha256": "b59c3099b97e7cf52e5cbc4842b356d508201cfe106544c9816b125ab01066f0"
+    },
+    {
+      "path": "packet-summary.json",
+      "bytes": 1443,
+      "sha256": "03bf9b008c8d5f2b85d4ab4984d318bb03a4bb19c32bb7bba09bcf669973a0bb"
+    },
+    {
+      "path": "postrun/evaluation.json",
+      "bytes": 23069,
+      "sha256": "b64ad7bc6465d186130a72d243711b1622f52707a96803ad62312e46b5eed280"
+    },
+    {
+      "path": "postrun/timeline-vs-n91.json",
+      "bytes": 11634,
+      "sha256": "16f1018b12b1276939672bf60e217c6793e5c1858c77970c592f593f555c7d83"
+    },
+    {
+      "path": "postrun/timeline-vs-n92.json",
+      "bytes": 10245,
+      "sha256": "d372b5ddec8996c7a1713c29d3c372949278d1c1532134cdffd1153f95824ece"
+    },
+    {
+      "path": "postrun/protected-vs-n91.json",
+      "bytes": 7935,
+      "sha256": "ea54b339198d8c57624883dfa0e9ed8ab2d93359294a91dfae6aa4a7c7fee710"
+    },
+    {
+      "path": "postrun/protected-vs-n92.json",
+      "bytes": 7935,
+      "sha256": "738fb2cedef9270e7a91697aae4d59ae56bb5a93b2cec226a2481e0fd6b855ed"
+    },
+    {
+      "path": "postrun/summary.json",
+      "bytes": 19029,
+      "sha256": "333bbb9efa0da0663353ebc7825d5ccc3eeeea36d18fde13f7865c8a272d3b2b"
+    },
+    {
+      "path": "postrun/evaluation.stdout.log",
+      "bytes": 553,
+      "sha256": "895f46e0782cc559a53a955a3bed2c8d22b6da0e7ffce206ee4d8e29a31c09cf"
+    },
+    {
+      "path": "postrun/evaluation.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "postrun/evaluation.execution.json",
+      "bytes": 689,
+      "sha256": "d7466fb2ec876ecc236dd75d4179b2cbadb0856eac5cf5febca4ec017206cbcc"
+    },
+    {
+      "path": "postrun/timeline-vs-n91.stdout.log",
+      "bytes": 327,
+      "sha256": "9bd4412b07a4d2a6f65ffef1fff63009baf8ce73432e266fb03c5c870a026e68"
+    },
+    {
+      "path": "postrun/timeline-vs-n91.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "postrun/timeline-vs-n91.execution.json",
+      "bytes": 613,
+      "sha256": "ed4cef29ae2f2c1b8adff30f768feb46f9af2c2bf41def5599849c53ff76c050"
+    },
+    {
+      "path": "postrun/timeline-vs-n92.stdout.log",
+      "bytes": 327,
+      "sha256": "834ae7a4069d121e993bc8f46d753dfd2b6ab14835f545c0c1a9e8ae21a0692a"
+    },
+    {
+      "path": "postrun/timeline-vs-n92.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "postrun/timeline-vs-n92.execution.json",
+      "bytes": 613,
+      "sha256": "9ab0a421fcbe1881c55524579d5b9c0f4c56f06281d37221f7a18b45357eea88"
+    },
+    {
+      "path": "postrun/checkpoints.stdout.log",
+      "bytes": 3100,
+      "sha256": "0ff1fb1da0f26ae7cf641e6f5d7db8a3f51f21cf0ba5208a17f29f8d8ca8673b"
+    },
+    {
+      "path": "postrun/checkpoints.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "postrun/checkpoints.execution.json",
+      "bytes": 396,
+      "sha256": "49e92203fdc71ce62fb759ac4ba59201ec4eb423394f2d42ac7e2a7a9d46f7cf"
+    },
+    {
+      "path": "postrun/consistency.stdout.log",
+      "bytes": 2094,
+      "sha256": "5596e17768166088e9f1ec969a19dd456bd0e2ac3fef2d9b5c7e5bf49b062e5c"
+    },
+    {
+      "path": "postrun/consistency.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "postrun/consistency.execution.json",
+      "bytes": 313,
+      "sha256": "b849be899dde36a46ced460224ad49379c583628cedd9de13196c52213cc6582"
+    },
+    {
+      "path": "postrun/health.stdout.log",
+      "bytes": 2301,
+      "sha256": "cfa27a45942f49ff0cbe2db32b130f4b43e596eb57584acc26534839cec5e0e0"
+    },
+    {
+      "path": "postrun/health.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "postrun/health.execution.json",
+      "bytes": 350,
+      "sha256": "8592532ace11b0e1292f87b4ad27e83226c0252a5dacb21853a822f18a108446"
+    },
+    {
+      "path": "postrun/protected-vs-n91.stdout.log",
+      "bytes": 7322,
+      "sha256": "4129bf93fe2ecb66675ed3bb171f3378f6353c1668df9c854543e41af166d5e1"
+    },
+    {
+      "path": "postrun/protected-vs-n91.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "postrun/protected-vs-n91.execution.json",
+      "bytes": 611,
+      "sha256": "db730aaa517696c99634f683a33b9c48a6bc9c5d12e4d2745e115374977475ba"
+    },
+    {
+      "path": "postrun/protected-vs-n92.stdout.log",
+      "bytes": 7322,
+      "sha256": "4129bf93fe2ecb66675ed3bb171f3378f6353c1668df9c854543e41af166d5e1"
+    },
+    {
+      "path": "postrun/protected-vs-n92.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "postrun/protected-vs-n92.execution.json",
+      "bytes": 611,
+      "sha256": "bd53f4575647c33aaa8a37bd80b30a02f8874e535097a474f53f06661850eea4"
+    },
+    {
+      "path": "postrun/producer.stdout.log",
+      "bytes": 14925,
+      "sha256": "99c2acb341d617a5ecfe5d036a6329007769be6e51b6c54d7cd3dbeb232a750f"
+    },
+    {
+      "path": "postrun/producer.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "postrun/producer.execution.json",
+      "bytes": 386,
+      "sha256": "fac26137c04874c92da83cc44325a4f114af3b89c71454f3c6195864746b00a0"
+    },
+    {
+      "path": "postrun/movement.stdout.log",
+      "bytes": 8962,
+      "sha256": "1ae4d5d9623a4d22d4d9c2b6f7ac8a0c6d4878c15ffed75b9df01a38d1b9f5e0"
+    },
+    {
+      "path": "postrun/movement.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "postrun/movement.execution.json",
+      "bytes": 11856,
+      "sha256": "6cb71fc64971248e2d98e6634345b00e25d7f8751a46978bcdf129091eadf7fa"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

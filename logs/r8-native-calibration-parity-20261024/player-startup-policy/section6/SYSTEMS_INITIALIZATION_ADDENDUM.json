@@ -1,0 +1,254 @@
+{
+  "schema": "awwv.sensitive-history.engine-systems-initialization-addendum.v1",
+  "date": "2026-10-24",
+  "seat": "Engine/systems",
+  "independent": true,
+  "implementerExcluded": true,
+  "scope": "static_read_only_revised_initializer_delta_review",
+  "reviewedHead": "b371adc3e0935825649e5eda4e6bbd45a44a359d",
+  "verdict": "GO_WITH_BINDING_CONDITIONS",
+  "implementationAuthorizedByThisSeat": false,
+  "originalSystemsVerdictPreserved": true,
+  "automaticBlockConditions": [
+    "any canonical state delta at the existing computeNegotiationBreakdown initialization point for a valid current or migrated input",
+    "any new headless, observer-parity, scenario-factory, snapshot-generation, migration, deserialization, load, runTurn, or phase call",
+    "any overwrite or merge into an existing capital, patron, history, strategic-dimension, optional, extra-faction, or forward-compatible field",
+    "any repair of a present partial strategic-dimension store",
+    "any schema, event-data, phase-order, paramilitary-writer, control, displacement, casualty, war-crime-writer, scoring, baseline, reference, or telemetry change",
+    "any implementation or test file outside the exact allowlists without a new owner decision and renewed review"
+  ],
+  "systemsRuling": {
+    "rootCauseConfirmed": true,
+    "fillOnlyInitializerAcceptable": true,
+    "headlessLatentWarCrimeCounterLossConfirmed": true,
+    "headlessLatentBugRepairAuthorized": false,
+    "ordinaryPlayerInitializationAuthorizedInPrinciple": true,
+    "allThreePlayableFactionsCovered": [
+      "RBiH",
+      "RS",
+      "HRHB"
+    ],
+    "schemaChangeRequired": false,
+    "phaseChangeAllowed": false,
+    "writerChangeAllowed": false,
+    "eventDataChangeAllowed": false
+  },
+  "findings": [
+    {
+      "id": "SYS-INIT-F1",
+      "risk": "missing_shared_policy_transition_from_allowlist",
+      "resolution": "Explicitly allow src/sim/events/opening_policy_transition.ts as the sole browser-safe policy queue/resolver owner; do not hide it in the negotiation initializer."
+    },
+    {
+      "id": "SYS-INIT-F2",
+      "risk": "fill_only_helper_becomes_implicit_migration",
+      "resolution": "Create absent required containers only; preserve every present valid container and nested object by identity; fail on a present malformed container rather than overwriting it."
+    },
+    {
+      "id": "SYS-INIT-F3",
+      "risk": "partial_dimension_store_repair_changes_headless_or_compatibility_behavior",
+      "resolution": "Initialize only when the entire strategic_dimensions property is absent; preserve a present partial store byte-for-byte."
+    },
+    {
+      "id": "SYS-INIT-F4",
+      "risk": "compute_prelude_extraction_changes_headless_state",
+      "resolution": "Characterize the current prelude before editing and require exact canonical pre-update and final-output equality on absent, empty, complete, missing-entry, sentinel-rich, extra-key, and partial-dimension fixtures. Any delta is BLOCK."
+    },
+    {
+      "id": "SYS-INIT-F5",
+      "risk": "opening_consequences_remain_partial",
+      "resolution": "Prove all three ordinary faction starts have the complete substrate before response and that authored foundational option dimension shifts no longer no-op."
+    },
+    {
+      "id": "SYS-INIT-F6",
+      "risk": "two_capture_result_overclaimed",
+      "resolution": "Require exactly two war_crimes_events and two war_crimes_events_emergent plus 200 civilian deaths for the allow fork, while limiting claims to immediate consequence integrity."
+    }
+  ],
+  "bindings": [
+    {
+      "id": "SYS-INIT-1",
+      "requirement": "Add one Node-free browser-safe initialize_negotiation_state helper that uses CANONICAL_FACTIONS, createEmptyCapital, createDefaultPatronRelationship, and initializeStrategicDimensions only."
+    },
+    {
+      "id": "SYS-INIT-2",
+      "requirement": "Preserve the existing negotiation object and every present valid container, entry, nested object, array, optional field, counter, value, extra faction, and unknown key by identity; add only absent containers and missing canonical capital/patron entries; never merge defaults into an existing entry; fail closed on present malformed containers."
+    },
+    {
+      "id": "SYS-INIT-3",
+      "requirement": "Initialize strategic_dimensions only when wholly absent, never repair a present partial store, and prove one call versus two calls has identical canonical bytes and unchanged existing references."
+    },
+    {
+      "id": "SYS-INIT-4",
+      "requirement": "Replace only compute_capital's private initialization prelude at the same call position; keep every derived update and faction/phase order unchanged; require exact pre-update and final serialized equality against pre-edit characterization across the full compatibility matrix. Any delta is BLOCK."
+    },
+    {
+      "id": "SYS-INIT-5",
+      "requirement": "Call the initializer in Electron only after observerParity returns and in browser only inside explicit player fallback, after player metadata/defer steps and before foundational queueing. Prohibit every scenario, snapshot, migration, deserialization, load, runTurn, phase, observer, and no-player call."
+    },
+    {
+      "id": "SYS-INIT-6",
+      "requirement": "Before foundational response, ordinary Electron and browser starts for RBiH, RS, and HRHB contain three canonical capital entries, three patron entries, and six dimensions per canonical faction; canonical event resolution produces exact authored dimension deltas and preserves every other authored effect, flag, receipt, and clock."
+    },
+    {
+      "id": "SYS-INIT-7",
+      "requirement": "Restore one shared opening_policy_transition owner and retain every original SYSTEMS.md binding: explicit consent, ask unresolved default, always_deny historical default, fixed option order, no automatic choice, hard block, forged/stale/duplicate guards, browser/Electron notifications and byte parity, exact 0/52/104 clocks, and no direct policy or downstream writer."
+    },
+    {
+      "id": "SYS-INIT-8",
+      "requirement": "From one serialized pre-response RBiH state, prove deny has no request/deployment, ask has exact Obadi/Bukvik Gornji 2 requests without capture, and allow captures only those two through unchanged writers with 200 civilian deaths and exact +2 war_crimes_events/+2 war_crimes_events_emergent. Do not tune on failure."
+    },
+    {
+      "id": "SYS-INIT-9",
+      "requirement": "Preserve the baked snapshot and n94/n95 initial-save SHA-256 413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1 and prove observerParity serialization is byte-identical; preserve n91-n95, telemetry, references, pins, protected controls, and acceptance criteria."
+    },
+    {
+      "id": "SYS-INIT-10",
+      "requirement": "Stop and return BLOCK on any headless/compute delta, overwritten sentinel/reference, partial-store repair, schema or writer need, forbidden call site, broader file need, or incompatible renewed seat. No package/native/full-suite/turn39/188/adoption work follows automatically."
+    }
+  ],
+  "allowedProductionFiles": [
+    "src/sim/negotiation/initialize_negotiation_state.ts",
+    "src/sim/negotiation/compute_capital.ts",
+    "src/sim/events/opening_policy_transition.ts",
+    "src/desktop/desktop_sim.ts",
+    "src/ui/map/desktop/campaignRecruitmentActions.ts",
+    "src/desktop/electron-main.cjs",
+    "src/ui/map/App.tsx"
+  ],
+  "allowedTestFiles": [
+    "tests/negotiation_capital.test.ts",
+    "tests/startup_snapshot_contract.test.ts",
+    "tests/browser_campaign_start_fallback.test.ts",
+    "tests/player_start_surface_contracts.test.ts",
+    "tests/pre_first_advance_paramilitary_policy.test.ts",
+    "tests/desktop_persistence_contract.test.ts"
+  ],
+  "minimumProofs": [
+    "static diff and rg ownership audit for one initializer, exact allowed call sites, removed private compute initializer, and untouched forbidden paths",
+    "pre-edit characterization plus post-edit exact canonical differential proof for compute initialization and final output across absent, empty, complete, missing-entry, sentinel-rich, extra-key, malformed-container rejection, and partial-dimension fixtures",
+    "four-file initializer/startup Vitest command under 180 seconds with frozen hashes, observer parity, all-faction substrate/dimensions, sentinel/reference preservation, partial-store preservation, and idempotence",
+    "three-file policy Vitest command under 180 seconds with exact branches, +2/+2 war-crime counters, 200 civilian deaths, browser/Electron notification parity, hostile inputs, persistence, and duplicate-delivery idempotence",
+    "one nonincremental TypeScript command under 180 seconds with exit 0",
+    "one fresh independent implementation review and at most one targeted correction verification"
+  ],
+  "causalBoundary": {
+    "provenByFailedCandidate": [
+      "allow captures op:srebrenica:obadi",
+      "allow captures op:brcko:bukvik_gornji_2",
+      "ask creates those two requests without capture",
+      "deny creates neither request nor capture",
+      "allow persists 200 civilian deaths"
+    ],
+    "failedByMissingSubstrate": [
+      "foundational and policy dimension deltas",
+      "allow war_crimes_events +2",
+      "allow war_crimes_events_emergent +2"
+    ],
+    "notAuthorizedOrProven": [
+      "repair of latent headless first-turn war-crime loss",
+      "all seven January differences",
+      "score 707",
+      "turn-39 or turn-188 parity",
+      "calibration adoption"
+    ]
+  },
+  "frozenInputs": [
+    {
+      "path": "data/derived/startup/apr_1992_initial_save.json",
+      "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n94/initial_save.json",
+      "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n95/initial_save.json",
+      "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+    }
+  ],
+  "currentSourceHashBindings": [
+    {
+      "path": "src/sim/negotiation/initialize_negotiation_state.ts",
+      "status": "new_absent_at_reviewed_head"
+    },
+    {
+      "path": "src/sim/events/opening_policy_transition.ts",
+      "status": "restore_new_absent_at_reviewed_head",
+      "rejectedCandidateHashForReferenceOnly": "9446c023ed05046815442a6bec279c0e801a448beb06343d707b6810b3efbe5e"
+    },
+    {
+      "path": "src/sim/negotiation/compute_capital.ts",
+      "sha256": "9d819698d632cdfffc41730987be3361d33816d60602e41d041afc77171a1501"
+    },
+    {
+      "path": "src/desktop/desktop_sim.ts",
+      "sha256": "e5954acf23516721bea57c6a1274d184c90358f46e91178770898d3c2eb965a1"
+    },
+    {
+      "path": "src/ui/map/desktop/campaignRecruitmentActions.ts",
+      "sha256": "910e149239bdc7f00a959f27b57a75f33ffe8b905a25b703ffcdf5f07b38d564"
+    },
+    {
+      "path": "src/desktop/electron-main.cjs",
+      "sha256": "3d994d859f251d41d42ea6458629786b432a2d715b3bb7b788fa1dbf8ce20dd0"
+    },
+    {
+      "path": "src/ui/map/App.tsx",
+      "sha256": "66db2a7f9fa465e1ede9b6b9633ea872a6b1712a7712d6c368205b7a07d7c7ad"
+    }
+  ],
+  "currentTestHashBindings": [
+    {
+      "path": "tests/negotiation_capital.test.ts",
+      "sha256": "edd0b44a2fc3bbf611d35fa4cc7d4df95dc742d5f7a286e2478f138dd0640c74"
+    },
+    {
+      "path": "tests/startup_snapshot_contract.test.ts",
+      "sha256": "33746e4db1fb9b77d58c4b4d5ba8430c3a57fc47e1e87b5f44a23d181aeefb63"
+    },
+    {
+      "path": "tests/browser_campaign_start_fallback.test.ts",
+      "sha256": "365a1f407ac0fd4b9fb952fca0a60069ed6a8722b4cd5af669d4ed8ea2edb050"
+    },
+    {
+      "path": "tests/player_start_surface_contracts.test.ts",
+      "sha256": "47132c7b958c4001399886180ef4a995a457a3686b282637610dfe8433f5556d"
+    },
+    {
+      "path": "tests/pre_first_advance_paramilitary_policy.test.ts",
+      "status": "new_absent_at_reviewed_head"
+    },
+    {
+      "path": "tests/desktop_persistence_contract.test.ts",
+      "sha256": "3a385136f9185ff0163050539d98413e449ac8d7076d5c4e961446b7ca2f1ef9"
+    }
+  ],
+  "evidenceHashBindings": [
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/startup-consequence-diagnosis/DIAGNOSIS.md",
+      "sha256": "bab4297842f8434f4cddcacd5b5d93609688cbeff0d51e2df1fe975772b266c9"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/startup-consequence-diagnosis/PROPOSAL.md",
+      "sha256": "270e018da91d48ae350a5460c6fe3d02a892406e53d130d6e609b78942fe24ab"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/startup-consequence-diagnosis/EVIDENCE.json",
+      "sha256": "a1d57ca9210586812424c30aebcb303b75e7b20879dfb8ed72fbec7daf6d6f3d"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/opening-policy-implementation/failed-candidate/FINDINGS.md",
+      "sha256": "2db6dbd68c713be1144ea40a40dbd1be6eb3d31ff33a4622482a16f63446fe12"
+    }
+  ],
+  "execution": {
+    "implementation": false,
+    "tests": false,
+    "build": false,
+    "campaign": false,
+    "native": false,
+    "sourceRuntimeDocsTestBuildRunWrites": false,
+    "reviewArtifactWritesOnly": true
+  }
+}

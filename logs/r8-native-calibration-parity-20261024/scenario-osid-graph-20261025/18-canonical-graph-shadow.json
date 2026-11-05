@@ -1,0 +1,417 @@
+{
+  "schema": "awwv.retained-canonical-graph-shadow.v1",
+  "pass": true,
+  "head": "295d5f7290b1085dc76bbebb41df72386cd6b705",
+  "simulation_executed": false,
+  "state_advanced": false,
+  "deserialize_or_migration_used": false,
+  "graph_authority": {
+    "settlements": "data/source/settlements_initial_master.json",
+    "edges": "data/derived/settlement_edges.json",
+    "edge_count": 17116
+  },
+  "bindings": [
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/pre-t6-causal-capture-v4/attempts/capture-01/PRE_REPAIR_T1.runtime.json",
+      "bytes": 3541400,
+      "sha256": "64643cc6dc8a9ecd9a4972a4af71f752795c7a46ad4be960bbff0ab2478e3ea5"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/pre-t6-causal-capture-v4/attempts/capture-01/POST_REPAIR_T1.runtime.json",
+      "bytes": 3039925,
+      "sha256": "3e449c7e7d1245a939c258e64b0d57d167bad984518beb70864915db328574a6"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/pre-t6-causal-capture-v4/attempts/capture-01/SHADOW_ISOLATION.json",
+      "bytes": 651675,
+      "sha256": "7ce7521d7cfaea36df703cc506521bf875368ca85131c0ca73e8cb75e38a82ff"
+    },
+    {
+      "path": "data/source/settlements_initial_master.json",
+      "bytes": 3570987,
+      "sha256": "0a4fa946436ed525e38d94df0d3afe98ad2cfdd1e0f26f4cad2ae32bc894535d"
+    },
+    {
+      "path": "data/derived/settlement_edges.json",
+      "bytes": 958574,
+      "sha256": "69073545ddac46395019b63295cd0de3a79920771b417178eb06cc38aa9a7cb7"
+    },
+    {
+      "path": "src/scenario/scenario_runner.ts",
+      "bytes": 210445,
+      "sha256": "0003f3b39df003302ffbb8cfaca6709b6f58be40eca447cf9fd2d94b579d2b2c"
+    },
+    {
+      "path": "src/data/operational_data.ts",
+      "bytes": 8243,
+      "sha256": "9156b352188b2ecec91ae3451da73cd6cdea1f51a3a802042bfecb15b34d4cd9"
+    },
+    {
+      "path": "src/sim/combat/attack_resolution_osid.ts",
+      "bytes": 100791,
+      "sha256": "5b0d61371b7d0d828ed2b06ffd5d11354629ded288632f26cbfe9d22c1ce2f16"
+    },
+    {
+      "path": "src/map/front_edges.ts",
+      "bytes": 6389,
+      "sha256": "1a25767d218424da01762b50ceea3de9b0b509e5e2e19824bfee184b134cc7a7"
+    },
+    {
+      "path": "src/sim/combat/final_sector_truth_reconciliation.ts",
+      "bytes": 21752,
+      "sha256": "156cd47f10c7057d7795552425bb13628bc598d73653635628a6a1ffcd22e255"
+    },
+    {
+      "path": "src/sim/combat/corps_front_sectors.ts",
+      "bytes": 193636,
+      "sha256": "a46f78a9248e4333346cd2f3066a10a0c195cf6546e1c6e8b974405129b46d93"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/pre-t6-causal-prefix-v1/phase_trace.mts",
+      "bytes": 4296,
+      "sha256": "8070c1639fc8a6a41475800413fcbf26b97937f356969747ec5e56b47dbe1527"
+    }
+  ],
+  "retained_input_matches_prior_trace": true,
+  "actual_target_tuple": {
+    "turn": 1,
+    "formations": {
+      "hv_113th_brigade_tg": {
+        "present": true,
+        "fatigue": 0.5,
+        "location_osid": "op:capljina:capljina_2",
+        "personnel": 1988,
+        "cohesion": 85,
+        "morale": 90,
+        "disrupted_turns": null,
+        "sector_ids": [],
+        "engaged_this_turn": false
+      },
+      "hv_4th_guards_tg": {
+        "present": true,
+        "fatigue": 0.5,
+        "location_osid": "op:capljina:capljina_2",
+        "personnel": 1989,
+        "cohesion": 85,
+        "morale": 90,
+        "disrupted_turns": null,
+        "sector_ids": [],
+        "engaged_this_turn": false
+      }
+    }
+  },
+  "old_operational_graph_steps": [
+    {
+      "step": "input",
+      "targets": {
+        "turn": 1,
+        "formations": {
+          "hv_113th_brigade_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1988,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [
+              "sector:hvo_southeast_herzegovina:0"
+            ],
+            "engaged_this_turn": false
+          },
+          "hv_4th_guards_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1989,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [
+              "sector:hvo_southeast_herzegovina:0"
+            ],
+            "engaged_this_turn": false
+          }
+        }
+      }
+    },
+    {
+      "step": "after_displace",
+      "targets": {
+        "turn": 1,
+        "formations": {
+          "hv_113th_brigade_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1988,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [
+              "sector:hvo_southeast_herzegovina:0"
+            ],
+            "engaged_this_turn": false
+          },
+          "hv_4th_guards_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1989,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [
+              "sector:hvo_southeast_herzegovina:0"
+            ],
+            "engaged_this_turn": false
+          }
+        }
+      }
+    },
+    {
+      "step": "after_front_edges",
+      "targets": {
+        "turn": 1,
+        "formations": {
+          "hv_113th_brigade_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1988,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [
+              "sector:hvo_southeast_herzegovina:0"
+            ],
+            "engaged_this_turn": false
+          },
+          "hv_4th_guards_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1989,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [
+              "sector:hvo_southeast_herzegovina:0"
+            ],
+            "engaged_this_turn": false
+          }
+        }
+      }
+    },
+    {
+      "step": "after_reconcile",
+      "targets": {
+        "turn": 1,
+        "formations": {
+          "hv_113th_brigade_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1988,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [
+              "sector:hvo_southeast_herzegovina:0"
+            ],
+            "engaged_this_turn": false
+          },
+          "hv_4th_guards_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1989,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [
+              "sector:hvo_southeast_herzegovina:0"
+            ],
+            "engaged_this_turn": false
+          }
+        }
+      }
+    }
+  ],
+  "canonical_graph_steps": [
+    {
+      "step": "input",
+      "targets": {
+        "turn": 1,
+        "formations": {
+          "hv_113th_brigade_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1988,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [
+              "sector:hvo_southeast_herzegovina:0"
+            ],
+            "engaged_this_turn": false
+          },
+          "hv_4th_guards_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1989,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [
+              "sector:hvo_southeast_herzegovina:0"
+            ],
+            "engaged_this_turn": false
+          }
+        }
+      }
+    },
+    {
+      "step": "after_displace",
+      "targets": {
+        "turn": 1,
+        "formations": {
+          "hv_113th_brigade_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1988,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [
+              "sector:hvo_southeast_herzegovina:0"
+            ],
+            "engaged_this_turn": false
+          },
+          "hv_4th_guards_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1989,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [
+              "sector:hvo_southeast_herzegovina:0"
+            ],
+            "engaged_this_turn": false
+          }
+        }
+      }
+    },
+    {
+      "step": "after_front_edges",
+      "targets": {
+        "turn": 1,
+        "formations": {
+          "hv_113th_brigade_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1988,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [
+              "sector:hvo_southeast_herzegovina:0"
+            ],
+            "engaged_this_turn": false
+          },
+          "hv_4th_guards_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1989,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [
+              "sector:hvo_southeast_herzegovina:0"
+            ],
+            "engaged_this_turn": false
+          }
+        }
+      }
+    },
+    {
+      "step": "after_reconcile",
+      "targets": {
+        "turn": 1,
+        "formations": {
+          "hv_113th_brigade_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1988,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [],
+            "engaged_this_turn": false
+          },
+          "hv_4th_guards_tg": {
+            "present": true,
+            "fatigue": 0.5,
+            "location_osid": "op:capljina:capljina_2",
+            "personnel": 1989,
+            "cohesion": 85,
+            "morale": 90,
+            "disrupted_turns": null,
+            "sector_ids": [],
+            "engaged_this_turn": false
+          }
+        }
+      }
+    }
+  ],
+  "canonical_sequential_matches_composite": true,
+  "canonical_composite_matches_actual_postrepair": true,
+  "transitions": [
+    {
+      "from": "input",
+      "to": "after_displace",
+      "both_nonempty_before": true,
+      "both_empty_after": false,
+      "exact_actual_after": false
+    },
+    {
+      "from": "after_displace",
+      "to": "after_front_edges",
+      "both_nonempty_before": true,
+      "both_empty_after": false,
+      "exact_actual_after": false
+    },
+    {
+      "from": "after_front_edges",
+      "to": "after_reconcile",
+      "both_nonempty_before": true,
+      "both_empty_after": true,
+      "exact_actual_after": true
+    }
+  ],
+  "exact_both_target_erasure_transition": {
+    "from": "after_front_edges",
+    "to": "after_reconcile",
+    "both_nonempty_before": true,
+    "both_empty_after": true,
+    "exact_actual_after": true
+  },
+  "reconciliation_report": {
+    "sectors_rebuilt": 0,
+    "sectors_rated": 0,
+    "unresolved_brigades": 0,
+    "geometry_input_mutations": 0
+  },
+  "public_target_diagnostics": [],
+  "public_trace": [],
+  "predicate_status": "PREDICATE_NOT_EXPOSED_BY_PUBLIC_DIAGNOSTICS",
+  "claim_limit": "Retained-state offline reproduction only: identifies the first public subcall whose exact two-target tuple matches the retained scenario post-repair tuple under the runner canonical graph. It does not establish the correct production repair policy."
+}

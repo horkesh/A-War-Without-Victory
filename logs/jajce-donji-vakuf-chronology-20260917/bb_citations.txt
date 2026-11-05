@@ -1,0 +1,156 @@
+# Balkan Battlegrounds citations — Jajce / Donji Vakuf, 1992
+#
+# CITATION CONVENTION. Every folio below was read off the page itself (the bare page number printed
+# on that page), NOT computed from an offset. The offset is NOT constant and must never be applied
+# blindly: BB1 printed 147 sits on scan 183/184 (offset 36/37 depending on the index used), while
+# BB1 printed 461 sits on scan 498 (offset 37); BB2 runs at offset 19 in the annex range.
+#
+# THREE INDEXES EXIST AND THEY DISAGREE:
+#   printed folio          the number printed on the page — the citable one, used below
+#   KB page_number         data/derived/knowledge_base/.../pages/BB1_p####.json
+#   pdftotext page index   1-based page of `pdftotext -layout`
+# Measured: KB page_number == pdftotext index for BB1 pages >= ~450, but KB 183 == pdftotext 184
+# and KB 184 == pdftotext 185 in the chapter range. The drift is real and varies within one volume.
+#
+# THE REPOSITORY CITES KB/SCAN INDEXES, NOT PRINTED FOLIOS. "BB1 p.183" in
+# docs/10_canon/HISTORICAL_TIMELINE_MASTER.md is KB page 183 = printed folio 147. "BB1 p.498" in
+# the Operation Donji Vakuf comment is KB page 498 = printed folio 461. Both are the scan index.
+#
+# Reproduce: pdftotext -layout docs/Balkan_BattlegroundsI.pdf BB1.txt  (likewise II), then
+#   node logs/jajce-donji-vakuf-chronology-20260917/bbfolio.cjs BB1.txt "<phrase>"
+# which prints the scan page and the folio candidates printed on it.
+
+================================================================================
+BB1, printed folio 147-148  (KB page 183-184; repo citation "BB1 p.183")
+Chapter 26, "The VRS Assault on Jajce, July-November 1992"
+================================================================================
+
+"While operations in the Posavina continued, the VRS began preparations during June and July to
+eliminate the large Croat-Muslim salient at Jajce, northwest of Travnik. ... The VRS was able to
+deploy some 7,000 to 8,000 of its troops from the 30th Infantry Division of the 1st Krajina Corps."
+
+"Preliminary operations in July, however, failed to gain significant ground and the VRS switched
+instead to a straightforward attack toward Jajce itself."
+
+"This slow campaign began in earnest in mid-August when the VRS launched its first major attack ...
+advancing to within 2 kilometers of the town. The second step came in early/mid-September ...
+pushing to within a kilometer of Jajce from that direction."
+
+"On 21 October, Croat and Muslim units holding the main supply route to Jajce opened fire on each
+other. The VRS took advantage of the discord and launched a final push to seize the enclave on
+25 October, attacking hard along all three axes. ... VRS troops entered the center of town on
+29 October while a bedraggled column ... some 40,000 panicked civilians made their way out of the
+enclave to Travnik."
+
+================================================================================
+BB2, printed folio 329-330  (pdftotext scan 348-349)
+Annex 29, "Operation 'Vrbas 92': The VRS Assault on Jajce, July-November 1992"
+================================================================================
+
+"The 30th Division chose three primary attack routes toward Jajce town, running from the north,
+the west, and the south/southwest."
+
+"The third route, from the south/southwest, began at the initial frontline some five to seven
+kilometers outside of town. This route actually was split into two parallel routes, one running
+along the Selinac River valley and the other along the Vrbas River valley FROM THE DIRECTION OF
+SERB-HELD DONJI VAKUF (SRBOBRAN)."
+
+"Two light infantry brigades, the 19th at Donji Vakuf and the 22nd at Mount Vlasic near Travnik,
+protected the flanks of the assault forces."
+
+"... the HVO and TO hoped to disrupt its preparations with an attack in central Bosnia against VRS
+positions between Donji Vakuf and Mount Vlasic, north of Travnik. Launched about 9 September, it
+fizzled out on 12 September with little or nothing gained."
+
+================================================================================
+BB2, printed folio 332  (pdftotext scan 351)
+Annex 29 — the campaign's last act, and where the 1st Krajina Corps STOPPED
+================================================================================
+
+"The last act in the campaign came in mid-November. VRS forces had occupied nearly all of the
+former enclave, but the stub of the neck that had led into it still stuck out stubbornly near
+Turbe. Eliminating this stub would place VRS forces in a position to pressure not only Turbe but
+Travnik, if they wanted that option. So, on 12 November, 30th Division forces began grinding away
+at the awkward salient at Karaula, and erased it from the map 18 November. HERE THE VRS HALTED,
+APPARENTLY CONTENT WITH ITS GAINS."
+
+================================================================================
+BB2, printed folio 465  (pdftotext scan 484)
+Annex 50, "'Just Out of Reach': Donji Vakuf, 1994"
+================================================================================
+
+"Before the war, Donji Vakuf had had a population of some 25,000 residents, a little over half of
+them Muslim and the remainder Croats and Serbs. THE BOSNIAN SERBS, HOWEVER, TOOK OVER THE TOWN
+EARLY IN 1992, driving thousands of Muslims from their homes to join the thousands of other
+refugees in the Travnik area. The triumphant Serbs renamed the town 'Srbobran' and incorporated it
+into their expanding republic. After the Bosnian Government's capture of Bugojno in July 1993,
+however, the Serb-Muslim frontline had been pushed back to within a few kilometers of the
+outskirts of Donji Vakuf."
+
+"On the Bosnian Serb Army side, the 19th Krajina and 11th Mrkonjic Grad Light Infantry Brigades of
+the 1st Krajina Corps's 30th Light Infantry Division, commanded by Colonel Jovo Blazanovic, bore
+the weight of the defense of the Donji Vakuf area. The 19th Brigade was deployed directly in front
+of the town ... Still further north was the 30th Division's other brigade, the 1st Sipovo Light
+Infantry Brigade, facing the town of Turbe west of Travnik."
+
+"... the newly established 7th Corps ... Composed largely of Muslims evicted from the Donji Vakuf
+area (including the displaced 770th 'Donji Vakuf' brigade)"
+
+================================================================================
+BB2, printed folio 466  (pdftotext scan 485)
+Annex 50 — Prusac is the BOSNIAN ARMY's forward position, 1994
+================================================================================
+
+April 1994: "Alagic's forces pressed the attack from two directions, advancing FROM PRUSAC to the
+south and Bugojno to the east."
+
+November 1994: "But despite a day of heavy shelling, the Bosnian Army COULD NOT PUSH PAST PRUSAC,
+7 km south of Donji Vakuf. The ARBiH and VRS tried to push each other off the strategic high
+ground over the next few days, but neither could dislodge the other."
+
+Same passage: "On 4 November the 7th Corps mounted determined infantry assaults against the 19th
+Brigade defenders of Koscani (about 7km southwest of Donji Vakuf), Kopcici, and Urije." — Koscani
+is SERB-held in November 1994; it is a member settlement of op:donji_vakuf:pribraca_2.
+
+================================================================================
+BB1, printed folio 382  (pdftotext scan 419)
+"The 7th Corps Captures Donji Vakuf, 10-14 September 1995"
+================================================================================
+
+"... General Zec at last had to give up Donji Vakuf and swing his right flank back toward Jajce on
+13 September to avoid envelopment."
+
+================================================================================
+ORDER-OF-BATTLE TABLES — what they are, and what they are dated
+================================================================================
+
+BB2, printed folio 277-279: "Skeleton Order of Battle, Bosnian Serb Army, June 1992-October 1995".
+A SPAN, not a snapshot. Entries relevant here:
+    16th Krajina Motorized Brigade, HQ Banja Luka
+    11th Mrkonjic Light Infantry Brigade, HQ Mrkonjic Grad
+    19th Krajina Light Infantry Brigade, HQ Srbobran (Donji Vakuf)
+    22nd Krajina Infantry Brigade, HQ Knezevo (Skender Vakuf)
+    31st Light Infantry Brigade, HQ Srbobran (Donji Vakuf)
+    43rd Prijedor Motorized Brigade, HQ Prijedor
+    5th Kozara Light Infantry Brigade, HQ Prijedor-Omarska
+The table's own start date, June 1992, already carries the Serb renaming "Srbobran" for Donji
+Vakuf — the takeover predates the table.
+
+BB1, printed folio 459-461 (KB page 496-498): "Appendix G — Skeleton Bosnian Serb Army Order of
+Battle, JULY 1995". This is the table the Operation Donji Vakuf comment cites as "BB1 p.498" for a
+November-1992 roster. It is a JULY 1995 snapshot and cannot establish 1992 deployment.
+
+================================================================================
+BB1, printed folio 198  (pdftotext scan 235)
+Chapter 45, "The ARBiH Captures Bugojno, 18-25 July [1993]" — the front south of Donji Vakuf
+================================================================================
+
+"Until then [mid-1993], the town [Bugojno] was jointly defended FROM THE BOSNIAN SERBS by the
+HVO's 'Eugen Kvaternik' Brigade and the Bosnian Army's 307th 'Bugojno' Mountain Brigade.
+Interethnic relations remained relatively good until the first Croat-Muslim fighting in Gornji
+Vakuf in January 1993, after which they became extremely tense."
+
+Read with BB2 p.465 ("After the Bosnian Government's capture of Bugojno in July 1993 ... the
+Serb-Muslim frontline had been pushed back to within a few kilometers of the outskirts of Donji
+Vakuf"), this establishes a STATIC Serb-vs-Croat/Muslim front north of Bugojno through the
+1992-93 winter — a defended confrontation line, not a VRS advance.

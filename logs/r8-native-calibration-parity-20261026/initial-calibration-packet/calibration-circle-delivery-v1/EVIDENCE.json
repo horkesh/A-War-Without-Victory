@@ -1,0 +1,169 @@
+{
+  "schema": "awwv.calibration-circle-delivery-diagnosis.v1",
+  "recorded": "2026-10-26",
+  "scope": "Retained production-path diagnosis only; no replay, campaign, API query, production/test/data edit, threshold change, baseline adoption, or historical-content amendment.",
+  "workspace_head_observed": "6b36ba312b88c431088856743437aaf643f7243a",
+  "candidate_run": {
+    "path": "runs/player-parity-fatigue-owner-39-20261026-01/apr1992_definitive_188w__2272e1011ba35428__w39_n0",
+    "provenance_git_commit": "0278c956d3fce3cdb62161a282f3936eaa0c66c1",
+    "provenance_git_dirty": false,
+    "node": "v22.23.2",
+    "weeks": 39,
+    "score": 703,
+    "qualification_floor": 707,
+    "status": "STOP_NO_RETRY"
+  },
+  "historical_boundary": {
+    "turn_16_date": "1992-07-27",
+    "verdict": "UNRESOLVED_NO_CONTENT_CHANGE",
+    "facts": [
+      "BB1 supports a late-July regional Goražde-Trnovo counteroffensive.",
+      "Exact named brigades, formal July 1992 chain, and Donje Zesce/Tosici aggregate captures remain unverified.",
+      "The seven-brigade pool is a geographically coherent model allocation, not a verified July 1992 OOB."
+    ]
+  },
+  "authored_operation": {
+    "corps": "arbih_1st_corps",
+    "name": "Operation Circle",
+    "available_from": 8,
+    "planning_duration": 4,
+    "injection_reachability_max_hops": 3,
+    "min_attack_outcome": "repulsed",
+    "execution_attack_power_mult": 1.35,
+    "minimum_viable_participants_effective": 2,
+    "minimum_assembled_participants": null,
+    "require_all_axes_ready": false,
+    "axes": [
+      {
+        "axis": "gorazde_perimeter",
+        "authored": ["arbih_801st_light", "arbih_802nd_light", "arbih_851st_vitezka_liberation"],
+        "selected_t16": ["arbih_801st_light", "arbih_802nd_light", "arbih_851st_vitezka_liberation"]
+      },
+      {
+        "axis": "foca_corridor",
+        "staging": "op:gorazde:faocici_2",
+        "objective": "op:foca:donje_zesce",
+        "authored": ["arbih_843rd_light", "arbih_808th_liberation"],
+        "selected_t16": ["arbih_843rd_light"]
+      },
+      {
+        "axis": "trnovo_corridor",
+        "staging": "op:trnovo:delijas",
+        "objective": "op:trnovo:tosici",
+        "authored": ["arbih_102nd_motorized", "arbih_109th_mountain"],
+        "selected_t16": ["arbih_109th_mountain"]
+      }
+    ]
+  },
+  "admission_chain_from_retained_t15_state_and_consumed_graph": [
+    {
+      "brigade": "arbih_808th_liberation",
+      "t15": {"status": "active", "corps": "arbih_1st_corps", "location": "op:gorazde:slatina_2", "personnel": 927, "cohesion": 79.5, "fatigue": 1},
+      "forward_deployed_same_objective_municipality": false,
+      "friendly_path_to_exact_staging": ["op:gorazde:slatina_2", "op:gorazde:ustipraca_2", "op:gorazde:kolovarice", "op:gorazde:kola", "op:gorazde:faocici_2"],
+      "hops": 4,
+      "predicate": "4 > planning_duration - 1 (3)",
+      "reconstructed_actual_exit": "staging_unreachable",
+      "selected": false
+    },
+    {
+      "brigade": "arbih_102nd_motorized",
+      "t15": {"status": "active", "corps": "arbih_1st_corps", "location": "op:hadzici:tarcin_2", "personnel": 751, "cohesion": 43.23076923076923, "fatigue": 3, "disrupted_turns": 0},
+      "forward_deployed_same_objective_municipality": false,
+      "friendly_path_to_exact_staging": ["op:hadzici:tarcin_2", "op:hadzici:budmolici", "op:hadzici:lokve", "op:trnovo:tusila", "op:trnovo:trnovo", "op:trnovo:kijevo_2", "op:trnovo:delijas"],
+      "hops": 6,
+      "predicate": "6 > planning_duration - 1 (3)",
+      "reconstructed_actual_exit": "staging_unreachable",
+      "selected": false
+    },
+    {
+      "brigade": "arbih_843rd_light",
+      "t15": {"status": "active", "location": "op:gorazde:osjecani_2", "personnel": 933, "cohesion": 80.9, "fatigue": 1},
+      "friendly_staging_hops": 2,
+      "selected": true,
+      "t16_postturn_order": {"owner": "bot_discretionary", "destination": "op:pale:podgrab"},
+      "t18_attack_location": "op:pale:podgrab",
+      "t18_location_adjacent_to_objective": true
+    },
+    {
+      "brigade": "arbih_109th_mountain",
+      "t15": {"status": "active", "location": "op:trnovo:kijevo_2", "personnel": 689, "cohesion": 43.23076923076923, "fatigue": 1},
+      "forward_deployed_same_objective_municipality": true,
+      "exact_staging_hops": 1,
+      "selected": true,
+      "t18_attack_location": "op:trnovo:kijevo_2",
+      "t18_location_adjacent_to_objective": true
+    }
+  ],
+  "actual_attack_results": [
+    {"turn": 18, "target": "op:foca:donje_zesce", "attackers": ["arbih_843rd_light"], "defender": "rs_bilea_brigade", "outcome": "repulsed", "power_ratio": 0.60, "attacker_power": 135.17266812246925, "defender_power": 224.575154413868, "attacker_casualties": 236, "defender_casualties": 50},
+    {"turn": 19, "target": "op:foca:donje_zesce", "attackers": ["arbih_843rd_light"], "defender": "rs_ajnie_brigade", "outcome": "stalemate", "power_ratio": 0.93, "attacker_power": 89.51561278508554, "defender_power": 96.20142560447297, "attacker_casualties": 86, "defender_casualties": 56},
+    {"turn": 20, "target": "op:foca:donje_zesce", "attackers": ["arbih_843rd_light"], "defender": "rs_ajnie_brigade", "outcome": "repulsed", "power_ratio": 0.61, "attacker_power": 60.82720184077403, "defender_power": 99.26861453857282, "attacker_casualties": 151, "defender_casualties": 32},
+    {"turn": 18, "target": "op:trnovo:tosici", "attackers": ["arbih_109th_mountain"], "defender": "rs_bilea_brigade", "outcome": "catastrophic", "power_ratio": 0.46, "attacker_power": 50.094081266545864, "defender_power": 107.73457422863068, "attacker_casualties": 284, "defender_casualties": 34}
+  ],
+  "operation_terminal": {
+    "started_turn": 16,
+    "ended_turn": 24,
+    "participating_brigades": ["arbih_109th_mountain", "arbih_801st_light", "arbih_802nd_light", "arbih_843rd_light", "arbih_851st_vitezka_liberation"],
+    "recovery_reason": "max_failures",
+    "total_attacks": 7,
+    "captured": ["op:gorazde:glamoc", "op:gorazde:kamen", "op:gorazde:sopotnica"],
+    "not_captured": ["op:foca:donje_zesce", "op:trnovo:tosici"]
+  },
+  "retained_postturn_snapshots": [
+    {"turn": 15, "donje_zesce_controller": "RS", "tosici_controller": "RS", "arbih_843rd_light": {"location": "op:gorazde:osjecani_2", "personnel": 933}, "arbih_808th_liberation": {"location": "op:gorazde:slatina_2", "personnel": 927}, "arbih_109th_mountain": {"location": "op:trnovo:kijevo_2", "personnel": 689}, "arbih_102nd_motorized": {"location": "op:hadzici:tarcin_2", "personnel": 751}},
+    {"turn": 16, "donje_zesce_controller": "RS", "tosici_controller": "RS", "arbih_843rd_light": {"location": "op:gorazde:osjecani_2", "personnel": 922}, "arbih_808th_liberation": {"location": "op:gorazde:slatina_2", "personnel": 918}, "arbih_109th_mountain": {"location": "op:trnovo:kijevo_2", "personnel": 682}, "arbih_102nd_motorized": {"location": "op:hadzici:tarcin_2", "personnel": 750}},
+    {"turn": 33, "donje_zesce_controller": "RS", "tosici_controller": "RS", "arbih_843rd_light": {"location": "op:gorazde:hrancici", "personnel": 282}, "arbih_808th_liberation": {"location": "op:gorazde:slatina_2", "personnel": 670}, "arbih_109th_mountain": {"location": "op:trnovo:trnovo", "personnel": 351}, "arbih_102nd_motorized": {"location": "op:hadzici:tarcin_2", "personnel": 827}},
+    {"turn": 34, "donje_zesce_controller": "RS", "tosici_controller": "RS", "arbih_843rd_light": {"location": "op:gorazde:hrancici", "personnel": 160}, "arbih_808th_liberation": {"location": "op:gorazde:slatina_2", "personnel": 527}, "arbih_109th_mountain": {"location": "op:trnovo:trnovo", "personnel": 394}, "arbih_102nd_motorized": {"location": "op:hadzici:tarcin_2", "personnel": 951}},
+    {"turn": 39, "donje_zesce_controller": "RS", "tosici_controller": "RS", "arbih_843rd_light": {"location": "op:gorazde:hrancici", "personnel": 447}, "arbih_808th_liberation": {"location": "op:gorazde:slatina_2", "personnel": 789}, "arbih_109th_mountain": {"location": "op:trnovo:trnovo", "personnel": 606}, "arbih_102nd_motorized": {"location": "op:hadzici:tarcin_2", "personnel": 1427}}
+  ],
+  "predicate_status": {
+    "actual_and_retained": [
+      "Operation Circle was admitted at t16 with five brigades.",
+      "808th and 102nd were excluded by the deterministic injection reachability predicate reconstructed from exact t15 state, exact consumed graph, and unchanged candidate source.",
+      "843rd and 109th were physically objective-adjacent when they attacked.",
+      "The four target attacks and their combat outcomes are retained."
+    ],
+    "unreported": [
+      "The default candidate did not enable preplanned_eligibility, axis_reject, or route_decision reason-code topics.",
+      "Therefore the phase-exact t16 candidate terminal receipts, t17 per-axis opening-predictor values, and the exact rule that issued 843rd's t16 Podgrab movement order are UNREPORTED, not zero or favorable."
+    ]
+  },
+  "new_candidate_vs_old_parent": {
+    "unchanged": ["t16 start", "five-brigade roster", "three axes", "single-brigade Foça and Trnovo axes", "three Goražde captures", "Donje Zesce/Tosici failures", "t24 max_failures terminal"],
+    "old_parent": {"score": 704, "circle_total_attacks": 6, "circle_initial_strength": 4365, "circle_final_strength": 3352, "foca_attacks": 2, "trnovo_attacks": 1},
+    "new_candidate": {"score": 703, "circle_total_attacks": 7, "circle_initial_strength": 4313, "circle_final_strength": 3499, "foca_attacks": 3, "trnovo_attacks": 1},
+    "interpretation": "The fatigue-owner correction changed combat values and added one Foça retry; it did not change Circle's delivery topology or recover either target."
+  },
+  "smallest_plausible_calibration_lever": {
+    "status": "PROPOSAL_REQUIRES_INDEPENDENT_REVIEW_BEFORE_IMPLEMENTATION",
+    "knob": "Operation Circle planning_duration",
+    "domain": "existing operation assembly budget and its existing planning_duration-minus-one injection reachability cap",
+    "candidate_value_to_review": 7,
+    "basis": "A value of 7 admits the observed six-hop 102nd route and the four-hop 808th route without changing available_from, the authored pool, targets, combat thresholds, control ownership, or baseline. Planning duration is already treated as a maximum assembly budget rather than a mandatory delay, and t16 remains the dated operation start.",
+    "not_claimed": "No success, score recovery, or historical unit identity is inferred without a separately authorized measured candidate."
+  },
+  "smallest_diagnostic_replay_if_phase_exact_predicates_are_required": {
+    "status": "NOT_RUN",
+    "window": "resume exact save_w15 through completed turn 18 only",
+    "topics": ["preplanned_eligibility", "axis_reject", "route_decision"],
+    "required_pre_state": ["t15 formations/location/personnel/cohesion/fatigue/disruption", "movement orders/state and owners", "active/queued operations and commitments", "political control", "exact operational graph hash"],
+    "required_post_state": ["t16 candidate receipts for all seven authored brigades", "stored Circle roster/axes", "t16-t18 movement owner/destination/location per authored brigade", "t17 opening gate adjacency/staged counts and per-brigade predicted outcome/power ratio", "t18 attack orders and battles"],
+    "pass": "default-off neutrality plus receipts naming the exact exclusion, routing, and launch predicates without changing save/gameplay artifacts",
+    "expected_cost": "one three-turn preserved replay from save_w15; no 39-week or 188-week campaign",
+    "stop": "stop at completed turn 18 or immediately on source/input/hash mismatch; no retry after infrastructure or fidelity failure until reviewed"
+  },
+  "sources": [
+    {"path": "src/sim/combat/pre_planned_operations.ts", "bytes": 150579, "sha256": "5ea85b79e0a2df80bfed1702c7fcceaaf44df5cdc66b661ce6296d0e3e9c392a", "candidate_to_workspace_diff": "none"},
+    {"path": "src/sim/combat/sector_offensive_launch_helpers.ts", "bytes": 73545, "sha256": "7c86a56bda1dfbca6894eaa64059f7c030b37ee8db140d41ad931b221aa01e19", "candidate_to_workspace_diff": "none"},
+    {"path": "src/sim/combat/sector_offensive.ts", "bytes": 159029, "sha256": "acbfec9cd1f7e604da913108b29d001e98ff7bfd44a17048b08bb5d9f1f40d21", "candidate_to_workspace_diff": "none"},
+    {"path": "runs/player-parity-fatigue-owner-39-20261026-01/apr1992_definitive_188w__2272e1011ba35428__w39_n0/save_w15.json", "bytes": 4719326, "sha256": "dae65bd362a14bcc2d3733657e0125d424725e7d226cf0f92b6a58a01a16c6cb"},
+    {"path": "runs/player-parity-fatigue-owner-39-20261026-01/apr1992_definitive_188w__2272e1011ba35428__w39_n0/save_w16.json", "bytes": 4844801, "sha256": "1db44a4198219e3fba517051befafcacb54e34069723d1976aa88f6593fce0ba"},
+    {"path": "runs/player-parity-fatigue-owner-39-20261026-01/apr1992_definitive_188w__2272e1011ba35428__w39_n0/operation_aars.json", "bytes": 307998, "sha256": "4e8f3b58849dbe5f2a4d4218828d060c1bb0b708fc176e94e678dee47f5db2be"},
+    {"path": "runs/player-parity-fatigue-owner-39-20261026-01/apr1992_definitive_188w__2272e1011ba35428__w39_n0/weekly_report.jsonl", "bytes": 4425083, "sha256": "db0fa92ecd88b427e223e61315338bc8488332c099432aa8045762b1fa3772cc"},
+    {"path": "runs/player-parity-fatigue-owner-39-20261026-01/apr1992_definitive_188w__2272e1011ba35428__w39_n0/brigade_temporal_log.jsonl", "bytes": 4723639, "sha256": "83b3fa2544c420961cbb42808dde8da9cdf42ba250b005c1a7c30f09d2225a86"},
+    {"path": "runs/player-parity-fatigue-owner-39-20261026-01/apr1992_definitive_188w__2272e1011ba35428__w39_n0/final_save.json", "bytes": 5468296, "sha256": "f522f1bef4137a6972ad2d6761acf4e1ce0218d50123d5a35b92922f302ef6e3"},
+    {"path": "data/derived/operational/operational_contact_graph.json", "bytes": 356375, "sha256": "f7f9aaeea51710fda376234d79945b51dfea31a16ebca948ffd8dc54f3ce0c46"},
+    {"path": "logs/r8-native-calibration-parity-20261024/circle-historical-admission-20261026/PORTABLE_MANIFEST.v2.json", "bytes": 847, "sha256": "f9cb31f874fe4972826b329d6d3c344f7063432804de38352d3480a6bd13afd9"}
+  ]
+}

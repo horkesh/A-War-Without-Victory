@@ -1,0 +1,260 @@
+{
+  "schema": "awwv.headless_probe_prefix_actual_review.v1",
+  "reviewed_at": "2026-10-25",
+  "reviewer": "independent_review",
+  "verdict": "GO_DIAGNOSTIC",
+  "verdict_scope": "The single frozen 16-week headless prefix is valid evidence for the bounded ordinary-probe/Operation-Jackal causal comparison described here.",
+  "global_go": false,
+  "source_authority": {
+    "repository": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+    "head": "a3063366ae094468fbb2ede143f9ced3a1ed2f68",
+    "clean_at_prefix_launch": true,
+    "post_run_tracked_changes": [
+      "src/sim/turn_phases/war_phases.ts",
+      "tests/op_directive_injection.test.ts",
+      "tests/op_directive_objection.test.ts"
+    ],
+    "post_run_change_treatment": "Ignored for prefix provenance because the receipt binds the already-completed launch to clean HEAD a3063366ae094468fbb2ede143f9ced3a1ed2f68. All source interpretation in this review uses git show HEAD, not the later live worktree.",
+    "head_git_objects": {
+      "src/sim/combat/commander/force_eval.ts": "b848f824b7d393ed93e5c2f1aea359c49ae3870c",
+      "src/sim/combat/commander/emit.ts": "8e5790d07cfb14e05a76ba0e76d70e2c29a5efca",
+      "src/sim/combat/pre_planned_operations.ts": "7908f7fb0db825ebcfe7e6e2d3ca4d75851d5274",
+      "src/sim/combat/sector_offensive_launch_helpers.ts": "15df548795dc8e87ac48e2742645e3636b2a19f5",
+      "src/state/formation_constants.ts": "b5b75d5ed126e597c4d5c5570c7512232a7a3e4d"
+    }
+  },
+  "frozen_controls": {
+    "FREEZE.v3.json": {
+      "bytes": 1925,
+      "sha256": "0404fc4585554565805e09833200ea4cdbcb4b14b2c3fc34346f81bcb316762c"
+    },
+    "INDEPENDENT_REVIEW.v3.json": {
+      "bytes": 3623,
+      "sha256": "5c586697c277c86a0e603d9a2c1cdb67f015a6736b71f7249cf01933f412eeba",
+      "verdict": "GO"
+    },
+    "attempt_count": 1,
+    "retry_count": 0
+  },
+  "prefix_execution": {
+    "attempt": "attempts/prefix-01",
+    "receipt": {
+      "bytes": 7211,
+      "sha256": "52e78ac80c02d221e07a8344c844a4b5dc2aa289d267123436212ab62ed33ba6",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "elapsed_ms": 28822,
+      "artifact_contract": "pass",
+      "stdout_bytes": 1154422,
+      "stdout_sha256": "e14d41b1c27f8fafaea674ef12651902c21fe84e20319e19a892cfef6c963d09",
+      "stderr_bytes": 0
+    },
+    "RESULT.json": {
+      "bytes": 562,
+      "sha256": "d26a4ed0a7019a7057a6c886ba4754655d7f81dccee6f7fb00d5ad7bab12499c",
+      "pass": true,
+      "weeks": 16,
+      "selected_save_weeks": [6, 7, 8, 16]
+    },
+    "OBSERVER_BINDING.json": {
+      "bytes": 1406,
+      "sha256": "8e45a34feb32c2c3515378dbd84299335acc32531b3a687e08c9740968dbc548",
+      "pass": true
+    },
+    "save_bindings": {
+      "initial_save.json": {
+        "bytes": 1373722,
+        "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+        "qualified_n101_byte_exact": true
+      },
+      "save_w6.json": {
+        "bytes": 3619260,
+        "sha256": "34a452dfef93493eda7cd4eced49bd0467af5837521abab05727f3ffa544b7a7"
+      },
+      "save_w7.json": {
+        "bytes": 3680345,
+        "sha256": "245b81c2ac3f66caf6de14a67b18643f2e1bed69a23c2d173ebf5fdbdae2b19c"
+      },
+      "save_w8.json": {
+        "bytes": 3773380,
+        "sha256": "eef0563bfd48e08217aea5bbc63e6d12c991ba7cd911161343ceea286030d7bd"
+      },
+      "save_w16.json": {
+        "bytes": 4493991,
+        "sha256": "d78371940401a11d56b975c45f0181b72ae4fe6f78a662533c0859235576dadd",
+        "qualified_n101_byte_exact": true
+      },
+      "final_save.json": {
+        "bytes": 4812128,
+        "sha256": "1eb99a8e83eaa5d1358b76b4dc59fa7ccde0d7a112f14d5ecaea4bc6842f0a5a"
+      }
+    }
+  },
+  "postcheck": {
+    "attempt": "attempts/postcheck-v3-01",
+    "receipt": {
+      "bytes": 3699,
+      "sha256": "5458684b431f3c43bc997952439cbb0caa5e0a8226bdc5e025529830bcfdb3d3",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "artifact_contract": "pass"
+    },
+    "POSTCHECK.json": {
+      "bytes": 10738,
+      "sha256": "04556c53aadcaefcca950db786565eea619296000bc816af1a0dcdef795f49db",
+      "status": "PASS",
+      "commander_records": 354,
+      "preplanned_records": 420
+    },
+    "turn_7": {
+      "selected_brigade": "hv_4th_guards_tg",
+      "selected_location": "op:neum:gornje_hrasno_2",
+      "selected_sector": "sector:hvo_southeast_herzegovina:0",
+      "selected_fitness": 0.8464399649999997,
+      "runner_up_brigade": "hv_113th_brigade_tg",
+      "runner_up_fitness": 0.8433127499999999,
+      "selected_objective": "op:ljubinje:bancici",
+      "availability": "Both leading brigades have combat_ready=true, disrupted_and_effective=true, elite_available=true, and historical_queue_free=true. Exactly one selected-brigade candidate sector row is present."
+    },
+    "turn_8_jackal": {
+      "operation": "Operation Jackal",
+      "invocation_key": "queued_injection:8:hvo_southeast_herzegovina:Operation Jackal",
+      "focused_start_count": 1,
+      "focused_terminal_count": 1,
+      "linkage": "exact",
+      "actual_exit": "admitted",
+      "build_reached": true,
+      "build_returned": true,
+      "admitted": true,
+      "ordinary_return": true,
+      "stored_planning_started_turn": 8
+    }
+  },
+  "retained_native_contrast": {
+    "packet": "../jackal-boundary-replay-v3",
+    "ACTUAL_REVIEW.json": {
+      "bytes": 7447,
+      "sha256": "24dae04b35bf747319d3c2a2b47b788aa72ea280cf01d559a3a6ed5209c7cccf"
+    },
+    "COVERAGE_ADDENDUM.md": {
+      "bytes": 3241,
+      "sha256": "70bab277ba5c404e8b16c925f6f92e6309bea10900494a721216385a26fea185"
+    },
+    "attempts/postcheck-01/POSTCHECK.json": {
+      "bytes": 4159,
+      "sha256": "cdc4267af0150df9e414ac124a4dcfc95fc4360a136347bf2284d3f859a305ab",
+      "verdict": "PASS_WITH_COVERAGE_GAP",
+      "commander_records": 44,
+      "completion_rows": 32,
+      "violations": 0
+    },
+    "attempts/on-replay-01/stdout.log": {
+      "bytes": 129417,
+      "sha256": "70cc0ec6aa0cddf6fa06bada32beeb0f0adb998f7036c13662e33a63a4bc9696"
+    },
+    "native_turn_6_state": {
+      "path": "tmp-paradox-qa-20260710/evidence/historical-default-p03-rbih-t39-01/rbih/turn-autosaves/turn-006.json",
+      "bytes": 4039882,
+      "sha256": "b6ace00db48f50d75bab986e03392d7095f487f8cdfb88fc153df9fd8d7777ba"
+    },
+    "turn_7": {
+      "selected_brigade": "hv_113th_brigade_tg",
+      "selected_location": "op:capljina:visici_2",
+      "selected_sector": "sector:hvo_southeast_herzegovina:1",
+      "selected_fitness": 0.8316808499999999,
+      "runner_up_brigade": "hv_4th_guards_tg",
+      "runner_up_fitness": 0.8234075849999999,
+      "selected_objective": "op:capljina:tasovcici_2",
+      "availability": "Both leading brigades pass all recorded availability flags. Bancici is outside selected sector 1 and therefore never reaches its per-target filters."
+    },
+    "turn_8_jackal": {
+      "actual_exit": "noncapturing_objective_overlap",
+      "build_reached": false,
+      "ordinary_return": false
+    }
+  },
+  "causal_contrast": {
+    "smallest_observed_state_difference": {
+      "comparison": "Headless save_w6.json versus retained native turn-006.json for hv_113th_brigade_tg and hv_4th_guards_tg.",
+      "result": "After removing ops.fatigue, each brigade formation object is exact across the two states.",
+      "headless_fatigue": {
+        "hv_113th_brigade_tg": 2.5,
+        "hv_4th_guards_tg": 1.5
+      },
+      "native_fatigue": {
+        "hv_113th_brigade_tg": 3,
+        "hv_4th_guards_tg": 3
+      },
+      "availability_difference": "none recorded"
+    },
+    "fitness_reconstruction": {
+      "head_source": "git show HEAD at a3063366ae094468fbb2ede143f9ced3a1ed2f68",
+      "formula": "(personnel / 2500) * supply_multiplier * (cohesion / 100) * (1 + equipment_priority * 0.25) * (1 - min(1, fatigue / 30) * (1 - 0.6)) * disruption_multiplier",
+      "shared_inputs": {
+        "supply_status": "strained",
+        "supply_multiplier": 0.75,
+        "cohesion": 87,
+        "equipment_class": "mechanized",
+        "equipment_priority": 3,
+        "disrupted": false
+      },
+      "unit_inputs": {
+        "hv_113th_brigade_tg": {
+          "personnel": 1910,
+          "pre_fatigue_fitness": 0.8723925
+        },
+        "hv_4th_guards_tg": {
+          "personnel": 1891,
+          "pre_fatigue_fitness": 0.86371425
+        }
+      },
+      "headless_evaluation": {
+        "hv_113th_brigade_tg": {
+          "fatigue": 2.5,
+          "fatigue_multiplier": 0.9666666666666667,
+          "fitness": 0.8433127499999999
+        },
+        "hv_4th_guards_tg": {
+          "fatigue": 1.5,
+          "fatigue_multiplier": 0.98,
+          "fitness": 0.8464399649999997
+        },
+        "winner": "hv_4th_guards_tg",
+        "margin": 0.0031272149999998
+      },
+      "native_evaluation": {
+        "hv_113th_brigade_tg": {
+          "fatigue": 3.5,
+          "fatigue_multiplier": 0.9533333333333334,
+          "fitness": 0.8316808499999999
+        },
+        "hv_4th_guards_tg": {
+          "fatigue": 3.5,
+          "fatigue_multiplier": 0.9533333333333334,
+          "fitness": 0.8234075849999999
+        },
+        "winner": "hv_113th_brigade_tg",
+        "margin": 0.008273265
+      },
+      "finding": "The headless path's 1.0 relative fatigue advantage for hv_4th_guards_tg is sufficient to overcome hv_113th_brigade_tg's 19-person advantage. In the native evaluation both have fatigue 3.5, so the personnel advantage determines the order."
+    },
+    "downstream_link": [
+      "The headless winner is located at Gornje Hrasno in sector 0; its surviving direct objective set includes Bancici, which the ordinary probe selects.",
+      "The native winner is located at Visici in sector 1; Tasovcici is the selected direct objective and Bancici is outside that sector's candidate set.",
+      "HEAD pre-planned eligibility blocks a queued operation when an active probe or feint shares any queued objective.",
+      "Operation Jackal declares Tasovcici among its objectives and does not declare Bancici. Therefore the native Tasovcici probe produces noncapturing_objective_overlap, while the headless Bancici probe permits Jackal to build and be admitted."
+    ],
+    "diagnostic_cause": "The observed ordinary-player/bot divergence at the Jackal boundary is caused by a prior brigade-ranking flip driven by different fractional fatigue histories, followed by sector-local target selection and the existing noncapturing objective-overlap guard. No availability-gate difference was observed."
+  },
+  "claim_limits": [
+    "This is a diagnostic result for one canonical 16-week prefix and one retained native T6-to-T8 replay at HEAD a3063366ae094468fbb2ede143f9ced3a1ed2f68.",
+    "It establishes the smallest observed causal contrast for the two leading brigade candidates and the downstream Jackal admission difference.",
+    "It does not establish why the two execution paths accumulated different fatigue before the comparison boundary.",
+    "It does not authorize tuning, baseline replacement, gameplay changes, calibration acceptance, packaging, or a global parity claim.",
+    "No new native replay, campaign, package build, full suite, or simulation was run for this review."
+  ],
+  "findings": [],
+  "residual": "Trace the pre-T6 fatigue-history divergence only if the owner authorizes that next bounded investigation; the current evidence is sufficient to explain the observed selection and Jackal-boundary contrast but not the earlier fatigue accumulation cause."
+}

@@ -1,0 +1,171 @@
+{
+  "schema": "awwv.815.pale-stop-review.v1",
+  "reviewed_utc": "2026-10-22T14:25:45.361Z",
+  "reviewer": "815-pale-stop-review",
+  "verdict": "ACCEPT_BOUNDED_STOPPED_RESULT_AND_CHECKER_CORRECTION",
+  "pass": true,
+  "findings": [],
+  "scope": {
+    "question": "Whether the stopped 814 diagnostic packet and its cheap checker-only correction are accurate, preserved, source-bound, and within the fixed 813 plan.",
+    "campaign_run": false,
+    "full_preflight_rerun": false,
+    "full_suite": false,
+    "build": false,
+    "replay": false,
+    "mutations": [
+      "logs/claude-channel-20261004/815-pale-stop-review/815-review.json",
+      "logs/claude-channel-20261004/815-pale-stop-review/815-review.md"
+    ]
+  },
+  "authorization": {
+    "ack_utc": "2026-10-22T14:16:22Z",
+    "hard_deadline_utc": "2026-10-22T14:51:22Z",
+    "approved_campaign_invocations": 1,
+    "actual_campaign_invocations": 0,
+    "no_retry_after_prerequisite_failure": true,
+    "review_completed_before_deadline": true
+  },
+  "reviewed_hashes": {
+    "fixed_plan": {
+      "path": "logs/claude-channel-20261004/813-root-plan.md",
+      "sha256": "7a3a33a1c9feaab3dcd837d83a35faf1070243df4e88ba9921edb2994ed64be6"
+    },
+    "stopped_result": {
+      "path": "logs/claude-channel-20261004/814-pale-diagnostic/result.json",
+      "sha256": "5180182236cc30e818e6be4d2cc8394c58b60f8fb25100362ef74c48f543276b"
+    },
+    "correction_result": {
+      "path": "logs/claude-channel-20261004/814-correction-proof/result.json",
+      "sha256": "214684d700d6a3fc280ef038a391ee0cea606f78e603907e3949e39f05bf33ef"
+    },
+    "original_checker": {
+      "path": "logs/claude-channel-20261004/814-preflight.cjs",
+      "bytes": 7376,
+      "sha256": "3e1fd6cc8ce58bb250311713dfdd14d60fc2bca4dc50129ff5660085289ce3c2"
+    },
+    "corrected_checker": {
+      "path": "logs/claude-channel-20261004/814-preflight-corrected.cjs",
+      "bytes": 7362,
+      "sha256": "b2cae2a97a3eaf031536e08cf2a03fad13f19f8ecd30b3c8e16db8729123a22a"
+    },
+    "original_preflight_result": {
+      "path": "logs/claude-channel-20261004/814-preflight-a/preflight.json",
+      "sha256": "9e67d755e6ddfcf00d56c460c639327878f7ce6ea433cc4baf02494c30cc8e0e"
+    },
+    "original_preflight_receipt": {
+      "path": "logs/claude-channel-20261004/814-preflight-a/receipt.json",
+      "sha256": "a4ef65612c07ad7aea9d3745fd53bf63aafee1b116ee29d9b259ef505f944c38"
+    },
+    "weekly_report": {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n83/weekly_report.jsonl",
+      "bytes": 32887671,
+      "sha256": "b3510073a304411fb2d5cafbcbb45d980c6c4d9f8888962039c1bd4852ea79de"
+    },
+    "final_reader": {
+      "path": "tools/diagnostics/reinforcement_allocation_reader.cjs",
+      "sha256": "bf1e94e52c2efb447041161fa6e14de2d078f2177d7392209344acc746c71c86"
+    }
+  },
+  "evidence_checks": {
+    "repository": {
+      "head": "99dfe31c437a85c19abd393255491a5ebaf9e78f",
+      "branch": "codex/october-calibration-continuation-20261003",
+      "worktree_clean_before_review_outputs": true,
+      "sole_worktree_confirmed": true
+    },
+    "original_preflight": {
+      "pass": false,
+      "passed_checks": 99,
+      "total_checks": 100,
+      "only_failure": "weekly188_binding: 188/1/undefined",
+      "child_exit": 2,
+      "wrapper_exit": 2,
+      "artifact_contract_pass": true,
+      "entry_snapshot_matches_start_and_end": true,
+      "dependency_snapshots": 18,
+      "dependency_snapshot_hashes_match": true,
+      "dependency_snapshot_sizes_match": true
+    },
+    "stopped_result": {
+      "verdict": "PRELAUNCH_GATE_FAILED_NO_RUN",
+      "campaign_invocations": 0,
+      "active_runners_at_preflight": 0,
+      "active_runners_at_close": 0,
+      "campaign_measurement": "UNMEASURED",
+      "native_identity": "UNREACHED",
+      "ten_identity": "UNREACHED",
+      "reader_coverage": "UNREACHED",
+      "telemetry_archives_created": false,
+      "telemetry_append_bytes_C": 0,
+      "telemetry_append_bytes_D": 0
+    },
+    "closed_receipts": {
+      "preflight_retained_artifacts": 20,
+      "diagnostic_retained_artifacts": 4,
+      "correction_retained_artifacts": 10,
+      "all_recorded_hashes_match": true,
+      "all_recorded_sizes_match": true,
+      "all_artifact_contracts_pass": true,
+      "all_entry_scripts_match_pre_and_post": true,
+      "own_live_stdout_inventoried": false
+    },
+    "checker_correction": {
+      "exact_single_change": true,
+      "removed_predicate": "&&w.turn===i+1",
+      "delta_bytes": -14,
+      "actual_rows_accepted": 188,
+      "actual_first_week_index": 1,
+      "actual_last_week_index": 188,
+      "serialized_turn_field_present": false,
+      "missing_rejected": true,
+      "wrong_rejected": true,
+      "duplicate_rejected": true,
+      "truncated_rejected": true,
+      "other_99_gate_implementations_unchanged": true,
+      "corrected_full_preflight_executed": false
+    },
+    "source_binding": {
+      "weekly_row_schema_serializes_week_index_not_turn": true,
+      "weekly_report_assigns_week_index_from_state_meta_turn": true,
+      "turn_pipeline_increments_state_meta_turn_before_phases": true,
+      "formation_spawn_reads_current_turn_from_state_meta_turn": true,
+      "allocation_observer_receives_current_turn": true,
+      "personnel_and_observer_records_use_completed_turn": true,
+      "reviewed_source_snapshots_match_current_files": true
+    },
+    "baseline_and_protected_reuse": {
+      "native_files_readable": 31,
+      "consumed_inputs": 32,
+      "consumed_input_digest": "7986f05230e1d526e1794673e796dcb77730501d4958e435970c4ec806cc8039",
+      "comparator_selfcheck_exit": 0,
+      "protected_reader_pin_matches": true,
+      "protected_source_and_data_pins_passed_in_original_preflight": true
+    }
+  },
+  "review_reasoning": [
+    "The original gate failure is real and preserved, but its sole predicate required a field that WeeklyReportRow does not serialize.",
+    "Production source binds weekly_report.week_index directly to state.meta.turn, and formation/allocation diagnostics use that same completed-turn counter.",
+    "The correction removes only the unsupported turn-field conjunct. Its actual 188-row fixture passes and missing, wrong, duplicate, and truncated mutations fail.",
+    "Because the fixed plan required stopping after any prerequisite failure and prohibited retry, zero campaign invocations is the correct outcome. The corrected checker proof does not authorize or imply a campaign result."
+  ],
+  "residuals": {
+    "pale_allocation_question": "UNMEASURED",
+    "n83": "rejected689",
+    "retained_n80": "703/712, unadopted NO-GO",
+    "acceptance_criteria": "unchanged and unmet",
+    "unreached_gates": [
+      "campaign runner",
+      "actual run-directory provenance",
+      "31-file gameplay identity against a new run",
+      "TEN selected gameplay identity",
+      "allocation reader coverage",
+      "Pale turn 21-22 extraction"
+    ]
+  },
+  "reuse": [
+    "Reused the original 99 passing prerequisite results at their actual implementation and frozen-input scope.",
+    "Reused the closed 31-file n83 inventory and 32-input provenance digest; no whole preflight or campaign was repeated.",
+    "Reused preserved source snapshots and receipts after independently verifying their hashes and sizes."
+  ],
+  "next_smallest_action": "Root 816 may integrate and preserve this accepted stopped result. Do not launch a campaign from this review. Any future Pale measurement requires new owner authorization, a new fixed clock, and a fresh full prerequisite pass using the corrected checker before exactly one launch."
+}

@@ -1,0 +1,14 @@
+{
+  "pass": true,
+  "stop": null,
+  "expected": {
+    "bytes": 4790188,
+    "sha256": "32d5b1bbcdb74bb2f7a2c5dbc9bca40bd5237cab318052c90c0abe9c0f184cf1"
+  },
+  "actual": {
+    "bytes": 4790188,
+    "sha256": "32d5b1bbcdb74bb2f7a2c5dbc9bca40bd5237cab318052c90c0abe9c0f184cf1"
+  },
+  "differingPathCount": 0,
+  "differingPaths": []
+}

@@ -1,0 +1,125 @@
+{
+  "schema": "awwv.765.praca-retained-diagnosis.correction.v1",
+  "correction_timestamp_utc": "2026-10-20T22:55:13.997Z",
+  "writes_closed": true,
+  "supersedes_claims_not_bytes": "logs/claude-channel-20261004/765-result.json",
+  "verdict": "DOWNSTREAM_FACTS_MEASURED__PROBE_EXCLUSION_SOURCE_SUPPORTED__FIRST_WRITER_UNMEASURED",
+  "provenance_correction": {
+    "invalid_original_metadata": {
+      "result_captured_utc": "2026-10-20T22:55:00Z",
+      "inventory_captured_utc": "2026-10-20T22:56:00Z",
+      "closed_captured_utc": "2026-10-20T22:57:00Z",
+      "status": "invalid future-dated metadata; none is an established seal time",
+      "origin": "These values were manually inserted as assumed drafting times instead of being sampled from the clock."
+    },
+    "established_extractor_interval": {
+      "start_utc": "2026-10-20T22:46:47.668Z",
+      "trace_capture_utc": "2026-10-20T22:46:53.893Z",
+      "receipt_end_utc": "2026-10-20T22:46:53.991Z"
+    },
+    "exact_later_original_result_inventory_closed_creation_times": "unestablished",
+    "scope": "The defect affects original seal metadata only; it does not imply fabricated simulation timestamps.",
+    "immutable_originals_preserved": [
+      {
+        "path": "logs/claude-channel-20261004/765-result.json",
+        "bytes": 9868,
+        "sha256": "c7ee12b646286fcd721876c17bcb3a7b816691b618177fd179e5bdd034ab514f"
+      },
+      {
+        "path": "logs/claude-channel-20261004/765-inventory.json",
+        "bytes": 2048,
+        "sha256": "e468e71a9651f17dd9e45a80c76d47e9b515ae9c4cc205c4a254373543665ac1"
+      },
+      {
+        "path": "logs/claude-channel-20261004/765-closed.json",
+        "bytes": 1103,
+        "sha256": "a753f61fa98036458ddc7b7ddc66a5ebe42413bdd452fe6a31bc1bff400138ae"
+      },
+      {
+        "path": "logs/claude-channel-20261004/765-praca-extract-a/trace.json",
+        "bytes": 132839,
+        "sha256": "d4919792ef84c03c1ce69859ee8844fb9fec97414ec69cfd5580b1f3530defa7"
+      }
+    ]
+  },
+  "corrected_controls": {
+    "status": "PARTIAL",
+    "positive": "The selector finds one n80 Prača native control event and one Operation Kijevo AAR containing Prača.",
+    "negative": "The absent-target lookup returns zero.",
+    "schema": "Both weekly files have 188 parseable rows and both temporal logs parse.",
+    "missing": "malformed_target_rejected checked the real target shape; it did not submit or reject malformed selector input."
+  },
+  "preserved_measured_facts": {
+    "initial_state": "Both byte-identical initial saves place op:pale:praca under RBiH.",
+    "n80": "At turn 26, combat flips op:pale:praca RBiH→RS. The attacker is rs_4th_sarajevo_light_infantry; battle 26:op:pale:praca:rs_4th_sarajevo_light_infantry:arbih_851st_vitezka_liberation includes defenders arbih_851st_vitezka_liberation and arbih_181st_mountain.",
+    "n81": "No Prača control change occurs before save_w39, so Prača remains RBiH. Its only Prača battle is a failed turn-172 RS probe by rs_5th_podrinje.",
+    "kijevo": "n80 Operation Kijevo begins turn 24 with rs_1st_romanija_infantry, rs_2nd_sarajevo_light_infantry, and rs_4th_sarajevo_light_infantry; its praca_approach captures Prača. n81 begins with only the first two and contains only kijevo_shoulder.",
+    "probe_timing": "In n81, rs_4th retains vrs_sarajevo_romanija:probe_vrs_sarajevo_romanija_t23:t23 in planning at temporal turn 23 and recovery at turn 24, concurrent with Kijevo injection.",
+    "turn_week_binding": "Native control and AAR turn 26; weekly week_index 26 contains the battle; temporal turn 26 carries week_index 25; save_w39 evaluates turn 39."
+  },
+  "corrected_scope": {
+    "earliest_retained_difference": "Turn 4/week_index 3 is the earliest difference in the extractor-selected compact brigade projection only. It is not the earliest complete GameState divergence or a first-writer observation.",
+    "turn4_detail": "rs_1st_armored and rs_5th_kozara_light_infantry remain Prijedor participants at Rasavci, with n80 destination Kozarac and n81 destination Ljubija.",
+    "weekly_detail": "The separately selected weekly comparison, excluding movement_phase_diagnostics, first differs at week_index 7 in column_movement and movement_report.",
+    "probe_exclusion": "collectCommittedFormationIds and buildAxesFromDef provide a strong source-supported explanation that the active probe commitment excludes rs_4th and empties praca_approach. No retained injectQueuedOperation boundary receipt records execution of that exact predicate or every alternative guard.",
+    "upstream_helper": "The turn-4 shape is consistent with reconcileStaleOperationMarchOrders, but its call, guard outcomes, and pre/post order are absent. The route from turn 4 through the turn-22 personnel difference and turn-23 probe admission is unmeasured.",
+    "counterfactual": "n81 is pinned to the reviewed clean source. n80 records git_dirty=true and no executable source-tree hash, so the helper is not proved to be the sole executable source delta or sole counterfactual cause."
+  },
+  "causal_assessment": {
+    "actual": "The Prača control outcomes, Kijevo rosters/axes, probe identity/status, and turn/week binding are directly measured.",
+    "inferred": "The active probe commitment explains the Kijevo omission under source order and filters, but the exact runtime rejection boundary was not observed.",
+    "associated_only": "The global pre-T3 helper is the strongest candidate associated with the changed trajectory, not a proved first writer or causal chain.",
+    "unresolved": "The first helper write, turn-22 replenishment writer, turn-23 probe-selection cause, and exact Kijevo eligibility rejection remain unmeasured."
+  },
+  "disposition": {
+    "n81": "rejected and unadopted at 689/712",
+    "n80": "retained 703/712 NO-GO/unadopted baseline",
+    "global_pre_t3_prepass": "do not adopt; withdrawal of the unaccepted candidate is a disposition, not a mechanism fix",
+    "smallest_justified_fix": null,
+    "mechanic_fix": "None is justified. Do not propose a date, OSID, operation-name exception, opt-in mechanic, or broad predicate change from this evidence."
+  },
+  "smallest_next_measurement": {
+    "authorization": "requires a separately authorized bounded run",
+    "helper_boundary": "Record an observer-only receipt immediately before and after reconcileStaleOperationMarchOrders, including terminal no-change coverage and each brigade/order/guard/operation/axis/objective/replacement field listed by review 766.",
+    "injection_boundary": "At Kijevo injection, record every rs_4th buildAxesFromDef eligibility result and the committed operation identity.",
+    "stopping_rule": "If the first helper write or injection exclusion is still not directly observed, stop without proposing a mechanic."
+  },
+  "preservation": {
+    "thresholds_and_raw_telemetry_untouched": true,
+    "C": {
+      "bytes": 101054372,
+      "sha256": "b11e26cdda6948e8a0c6812a1e5563578d8de42d4cc4f235a25598d075acc8be"
+    },
+    "D": {
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    },
+    "helper_source": {
+      "bytes": 16668,
+      "sha256": "9db5d8b250fc606c00a2e8d7327d2ff4113cb1048414d7f1532c1f9cb6d0a68d"
+    },
+    "war_phases_source": {
+      "bytes": 231691,
+      "sha256": "93fcb005fa725c8a45269370c8319ca34779d1e032624fee08a4ae5800baa04a"
+    },
+    "campaigns": 0,
+    "runTurn_calls": 0,
+    "replays": 0,
+    "tests": 0,
+    "builds": 0,
+    "noEmit": 0,
+    "gameplay_test_data_docs_git_changes": 0
+  },
+  "reviewed_by": [
+    {
+      "path": "logs/claude-channel-20261004/766-independent-review.json",
+      "bytes": 11488,
+      "sha256": "11947d83ad8af30b443fc18e950165ba4c6563cdda8a4c48a8e7de7bf456d1e1"
+    },
+    {
+      "path": "logs/claude-channel-20261004/766-independent-review.md",
+      "bytes": 2795,
+      "sha256": "125adbd518e473e86481cfa85db4711ffc860dbd48c99400c2f77433e4efc4d9"
+    }
+  ]
+}

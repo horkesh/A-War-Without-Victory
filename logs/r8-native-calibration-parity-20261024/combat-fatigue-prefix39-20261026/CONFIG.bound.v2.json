@@ -1,0 +1,228 @@
+{
+  "schema": "awwv.combat-fatigue-owner-prefix39.config.v1",
+  "status": "BOUND_REVIEW_REQUIRED",
+  "expected_head": "0278c956d3fce3cdb62161a282f3936eaa0c66c1",
+  "node": {
+    "path": "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "version": "v22.23.2"
+  },
+  "scenario": "data/scenarios/apr1992_definitive_188w.json",
+  "weeks": 39,
+  "save_weeks": [
+    15,
+    16,
+    33,
+    34
+  ],
+  "output_parent": "runs/player-parity-fatigue-owner-39-20261026-01",
+  "diagnostic_environment": {
+    "AWWV_DEBUG_AXIS_READINESS": "Mistral",
+    "AWWV_DEBUG_MOVEMENT_FORMATIONS": "hvo_1st_guard_abb",
+    "AWWV_DEBUG_REASON_CODES": "movement_phase,commander_creation,battle_stack,operation_capture_ownership,mistral_tg_activation,battle_power",
+    "AWWV_MISTRAL_PREP_TRACE": "1",
+    "AWWV_S6_GRADE_RUN": "true"
+  },
+  "score": {
+    "reference": "data/source/calibration/painted_control_jan1993.json",
+    "denominator": 712,
+    "minimum": 707,
+    "semantics": "strict_minimum__no_tolerance__improvements_allowed",
+    "formerly_correct_n91_n92_max_losses": 0,
+    "authoritative_reader": "tmp/player-bot-capability-parity-20261024/policy-clean-validation/evaluate_candidate.cjs",
+    "canonical_excerpt_sha256": "6a19943b3419ea8fcd505f5fdbfe8b1435905a69d1d3f5072b3494d43f6e70d6"
+  },
+  "controls": {
+    "positive": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n101",
+    "positive_expected_score": 707,
+    "negative": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n102",
+    "negative_expected_score": 705,
+    "negative_expected_n91_losses": 2,
+    "negative_expected_n92_losses": 2,
+    "negative_expected_lost_osids": [
+      "op:foca:donje_zesce",
+      "op:trnovo:tosici"
+    ]
+  },
+  "control_fixture": {
+    "manifest": {
+      "path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/CONTROL_FIXTURE_MANIFEST.v2.json",
+      "bytes": 1704,
+      "sha256": "60814b13684919e58b877e717ad50ff0d4b888f7342c0c6d02b4672a50d5a079"
+    },
+    "inputs": {
+      "n91": {
+        "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n91/save_w39.json",
+        "bytes": 5105717,
+        "sha256": "e51224ac22a839d4c1af35a0ea828afb79b62f0ed56559c3b47dcda45578eec5"
+      },
+      "n92": {
+        "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n92/save_w39.json",
+        "bytes": 5105717,
+        "sha256": "e51224ac22a839d4c1af35a0ea828afb79b62f0ed56559c3b47dcda45578eec5"
+      },
+      "n101": {
+        "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n101/save_w39.json",
+        "bytes": 5105750,
+        "sha256": "f459cd050e55e764092010ef79c23a7c629487e3c6a8ea5d3aaf33082dc053e3"
+      },
+      "n102": {
+        "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n102/save_w39.json",
+        "bytes": 5484765,
+        "sha256": "12ae79ebac55cf1287605d3da7f1360e67fafbc0dcb3703bba4ee2537039e628"
+      },
+      "jan1993_reference": {
+        "path": "data/source/calibration/painted_control_jan1993.json",
+        "bytes": 34371,
+        "sha256": "6a64300a599aa0b75833d5232bf9f08a1ab97085746337e622d54fb1a4a0ddc7"
+      }
+    }
+  },
+  "retained_roots": [
+    "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n91",
+    "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n92",
+    "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n93",
+    "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n94",
+    "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n95",
+    "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n96",
+    "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n97",
+    "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n98",
+    "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n99",
+    "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n100",
+    "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n101",
+    "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n102",
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-validation-v1",
+    "logs/r8-native-calibration-parity-20261024/fractional-fatigue-20261025"
+  ],
+  "required_bindings": {
+    "src/scenario/scenario_runner.ts": {
+      "path": "src/scenario/scenario_runner.ts",
+      "bytes": 210791,
+      "sha256": "b811a55f165a1664e87b48be28008ada9fec7486ddb5c049b2013fbf78bd0972"
+    },
+    "tests/current-scenario-postturn-boundary.test.ts": {
+      "path": "tests/current-scenario-postturn-boundary.test.ts",
+      "bytes": 19158,
+      "sha256": "246259561471affbaa7617f4c92ef6f67a6101abf1aa64b669e18c6acd5b61e3"
+    },
+    "src/sim/combat/attack_resolution_osid.ts": {
+      "path": "src/sim/combat/attack_resolution_osid.ts",
+      "bytes": 100392,
+      "sha256": "ff8992ab13f54f7f5b2aea79adc1c2a2a6a4d1f9cb58acd21ed27726ea6069ab"
+    },
+    "src/sim/combat/attack_resource_aftermath.ts": {
+      "path": "src/sim/combat/attack_resource_aftermath.ts",
+      "bytes": 5622,
+      "sha256": "0cad82788378de0c6d1a82d5228eb5c8deac9d5b79263c7cfd860e63f3eab4b4"
+    },
+    "src/sim/turn_phases/war_phases.ts": {
+      "path": "src/sim/turn_phases/war_phases.ts",
+      "bytes": 233941,
+      "sha256": "8a085a37835541f4dc267e5c1f7f75a714bafc596e21d43b1467cb8ee62d7fcd"
+    },
+    "tests/attack_resource_aftermath.test.ts": {
+      "path": "tests/attack_resource_aftermath.test.ts",
+      "bytes": 15518,
+      "sha256": "61f76235330d2c6dcda189d0f7761e7ca78101a885abc1bd11b60eea8e3a534b"
+    },
+    "tests/combat_fatigue_owner.test.ts": {
+      "path": "tests/combat_fatigue_owner.test.ts",
+      "bytes": 7927,
+      "sha256": "3125267ee44e1695ef41ca3b948e523c37cf950b8f07f85068b5fa2ea2f15901"
+    },
+    "tests/op_directive_injection.test.ts": {
+      "path": "tests/op_directive_injection.test.ts",
+      "bytes": 20144,
+      "sha256": "add227b78c06141a2ee501972907dad52caf4edd5069b5244b6f2d6020a01115"
+    },
+    "tests/op_directive_objection.test.ts": {
+      "path": "tests/op_directive_objection.test.ts",
+      "bytes": 22079,
+      "sha256": "892242ebe14ac935581cf218877fa466ca8f1f218e0d97ed9c21f34acc83902f"
+    },
+    "tools/scenario_runner/run_scenario_with_preflight.ts": {
+      "path": "tools/scenario_runner/run_scenario_with_preflight.ts",
+      "bytes": 8261,
+      "sha256": "1329bd3d611c40c5ff24536dc02e5a84845786c1e9627fc76a1073fd00399992"
+    },
+    "tools/diagnostics/run_preserved_preflight.cjs": {
+      "path": "tools/diagnostics/run_preserved_preflight.cjs",
+      "bytes": 9536,
+      "sha256": "3933e010daf15938d026692e732e401d5ce50e1e0656d546e4697723e9a7779e"
+    },
+    "tmp/player-bot-capability-parity-20261024/policy-clean-validation/evaluate_candidate.cjs": {
+      "path": "tmp/player-bot-capability-parity-20261024/policy-clean-validation/evaluate_candidate.cjs",
+      "bytes": 12905,
+      "sha256": "2ece1dc51c310948fa418d5ffc37b971edcbb8ed0418526aeaf8042658248663"
+    },
+    "tools/validate_run_consistency.cjs": {
+      "path": "tools/validate_run_consistency.cjs",
+      "bytes": 62077,
+      "sha256": "741bdd0285d171242e9de1bc250621558f3d468423f09f768b40332ea522e093"
+    },
+    "tools/engine_health_gate.cjs": {
+      "path": "tools/engine_health_gate.cjs",
+      "bytes": 35801,
+      "sha256": "2c56657c5b8da6145ff88525a8b062366061addeed161391ca115e4a91c2b612"
+    },
+    "tools/diagnostics/movement_phase_coverage.cjs": {
+      "path": "tools/diagnostics/movement_phase_coverage.cjs",
+      "bytes": 12579,
+      "sha256": "0407299a7078eabe83dcb3892aaa4829f9e8647a7dd39b318ed0697bd432fecc"
+    },
+    "data/scenarios/apr1992_definitive_188w.json": {
+      "path": "data/scenarios/apr1992_definitive_188w.json",
+      "bytes": 2843,
+      "sha256": "4257b039f5b1dbb7f21d940ec656b2d0b787856f27e7c26b6f3f57f256d82ecf"
+    },
+    "data/source/calibration/painted_control_jan1993.json": {
+      "path": "data/source/calibration/painted_control_jan1993.json",
+      "bytes": 34371,
+      "sha256": "6a64300a599aa0b75833d5232bf9f08a1ab97085746337e622d54fb1a4a0ddc7"
+    },
+    "data/calibration/engine_health_thresholds.json": {
+      "path": "data/calibration/engine_health_thresholds.json",
+      "bytes": 3775,
+      "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d"
+    },
+    "src/scenario/control_change_attribution.ts": {
+      "path": "src/scenario/control_change_attribution.ts",
+      "bytes": 2620,
+      "sha256": "0dc838cfd725a21e48b63568ae9fd22da0298aae9090012a2bc43b572e74796f"
+    },
+    "tests/scenario_control_change_attribution_contract.test.ts": {
+      "path": "tests/scenario_control_change_attribution_contract.test.ts",
+      "bytes": 5463,
+      "sha256": "bb605f4c75000fb1ca2ea1c7119af6e700ea15e8d3fb9f710a7a4b6e01ecd8e5"
+    },
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/implementation-v1/ACTUAL_CODE_REVIEW.json": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/implementation-v1/ACTUAL_CODE_REVIEW.json",
+      "bytes": 6988,
+      "sha256": "a9f985e3b4062c6ad5233c010b77f1322fb443394ca32c608a233b4dabeaf181"
+    },
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/implementation-v1/retention-correction-v1/INDEPENDENT_POSTEXECUTION_VERIFICATION.json": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/implementation-v1/retention-correction-v1/INDEPENDENT_POSTEXECUTION_VERIFICATION.json",
+      "bytes": 4550,
+      "sha256": "1df6ac0be4db48ae07b13129292146bb5fc059f4a7ce5309ca2805417008c07c"
+    },
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/current-boundary-diagnostic-v2/INDEPENDENT_ACTUAL_IMPLEMENTATION_DECISION.json": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/current-boundary-diagnostic-v2/INDEPENDENT_ACTUAL_IMPLEMENTATION_DECISION.json",
+      "bytes": 7694,
+      "sha256": "ff2d4ce8501805a2af87f4cd23072b5b787e48b1f16db80b6c8519116e0c093f"
+    },
+    "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/prefix39-validation-v1/WEEKS_OVERRIDE_FIDELITY_SUPPLEMENT.json": {
+      "path": "tmp/player-bot-capability-parity-20261024/fractional-fatigue-package-v6/scenario-postturn-parity-repair-v1/prefix39-validation-v1/WEEKS_OVERRIDE_FIDELITY_SUPPLEMENT.json",
+      "bytes": 3306,
+      "sha256": "fe92266a86aec4ee953ad07a46730092115d5e987b5d42cc16211090e0de1ab0"
+    },
+    "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/PLAN.md": {
+      "path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/PLAN.md",
+      "bytes": 4591,
+      "sha256": "06adf843ef9856e50ca44ab5daf5c66d67783ef63c4e0a674022327b51e26e38"
+    },
+    "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/qualification.cjs": {
+      "path": "tmp/player-bot-capability-parity-20261024/combat-fatigue-prefix39-20261026-v1/qualification.cjs",
+      "bytes": 28271,
+      "sha256": "97019c6d0a133c9d54ef99574b052ebfb0d954da17f5de79b235af226cd9f6f3"
+    }
+  }
+}

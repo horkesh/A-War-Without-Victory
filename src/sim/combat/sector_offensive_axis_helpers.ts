@@ -29,6 +29,42 @@ export function getAllAxisObjectives(op: CorpsOperation): string[] {
     return result;
 }
 
+export function isAxisExcludedFromPreparation(axis: OperationAxis): boolean {
+    return axis.late_phase?.phase === 'holding'
+        && axis.late_phase.handoff !== undefined
+        && axis.assigned_brigades.length === 0;
+}
+
+/**
+ * Return the objectives that can affect the operation's current preparation.
+ *
+ * An empty holding axis with a future brigade handoff owns durable objectives,
+ * but has no present preparation force. Its exclusively-owned objectives stay
+ * serialized on the operation and axis while remaining outside this read-only
+ * view. Shared objectives remain visible through any included axis.
+ */
+export function getPreparationObjectiveView(
+    op: CorpsOperation,
+    fullObjectives: readonly string[],
+): string[] {
+    const axes = op.axes;
+    if (!axes || axes.length === 0) return [...fullObjectives];
+
+    const excludedObjectives = new Set<string>();
+    const includedObjectives = new Set<string>();
+    let hasExcludedAxis = false;
+    for (const axis of axes) {
+        const excluded = isAxisExcludedFromPreparation(axis);
+        if (excluded) hasExcludedAxis = true;
+        for (const objective of axis.objectives) {
+            (excluded ? excludedObjectives : includedObjectives).add(objective);
+        }
+    }
+    if (!hasExcludedAxis) return [...fullObjectives];
+    return fullObjectives.filter(objective =>
+        !excludedObjectives.has(objective) || includedObjectives.has(objective));
+}
+
 /** Get all participating brigades across all axes (deduplicated, sorted). */
 export function getAllAxisBrigades(op: CorpsOperation): FormationId[] {
     if (!isMultiAxis(op)) return op.participating_brigades;
@@ -176,6 +212,16 @@ export const PLANNING_MARCH_BUFFER = 2;
 
 /** Hard cap preventing long idle planning periods for large operations. */
 export const MAX_PLANNING_DURATION = 4;
+
+/**
+ * Turns of grace beyond a commander-generated operation's `planning_duration` before an
+ * unexecutable plan is invalidated. Single source of truth for the assembly deadline: a
+ * participant that has not physically satisfied the operation's assembly requirement by
+ * `planning_duration + PLANNING_INVALIDATION_GRACE_TURNS` causes the abort. See
+ * `sector_offensive.ts` (the enforcement sites) and `canFormationReachAssemblyInTime`
+ * (`sector_offensive_launch_helpers.ts`), which derives the admission budget from the same value.
+ */
+export const PLANNING_INVALIDATION_GRACE_TURNS = 2;
 
 /** Compute a planning window from objective count, including the march buffer. */
 export function computePlanningDuration(objectiveCount: number): number {

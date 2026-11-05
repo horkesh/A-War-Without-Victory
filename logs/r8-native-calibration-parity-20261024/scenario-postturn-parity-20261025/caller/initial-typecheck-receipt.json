@@ -1,0 +1,6 @@
+{
+  "command": "node node_modules/typescript/bin/tsc --noEmit -p tsconfig.json",
+  "exit_code": 0,
+  "elapsed_seconds": 51.6427964,
+  "node_version": "v22.23.2"
+}

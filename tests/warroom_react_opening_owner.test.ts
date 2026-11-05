@@ -158,6 +158,8 @@ describe('desktop host React opening ownership', () => {
     );
     expect(invoke).toContain('const method = bridge?.[data.method];');
     expect(invoke).toContain("data.method === 'startNewCampaign'");
+    expect(invoke).toContain("data.method === 'loadStateDialog'");
+    expect(invoke).toContain("typeof (result as { stateJson?: unknown }).stateJson === 'string'");
     expect(invoke).toContain("type: 'awwv-bridge:response'");
 
     for (const methodName of ['startNewCampaign', 'listSaveRecords', 'loadSaveRecord']) {

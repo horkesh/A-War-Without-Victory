@@ -1,0 +1,105 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T04:05:22.697Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-01",
+  "timeout_ms": 2100000,
+  "original_argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native_entry.cjs",
+    "{evidenceDir}/child",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-config.actual-01.json",
+    "32a8607ce115323672b954431bb9ec351b35d1365ddbf39ee94bc2a78935470d",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-preflight-01/NATIVE_PREFLIGHT.json",
+    "ee2745b8010d6d242bb7f42258460d807769787db5b33bd05b9862f07cf85db1",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-preflight-01/receipt.json",
+    "989787b63c9955354e7e7544b4dc1bd10923cc84bdab53265bc62d4590ef7e90"
+  ],
+  "argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native_entry.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\t3-routing-native-prep-v2\\native-calibration-01/child",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-config.actual-01.json",
+    "32a8607ce115323672b954431bb9ec351b35d1365ddbf39ee94bc2a78935470d",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-preflight-01/NATIVE_PREFLIGHT.json",
+    "ee2745b8010d6d242bb7f42258460d807769787db5b33bd05b9862f07cf85db1",
+    "tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native-calibration-preflight-01/receipt.json",
+    "989787b63c9955354e7e7544b4dc1bd10923cc84bdab53265bc62d4590ef7e90"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "child/config.json",
+    "child/result.json",
+    "child/progress.json",
+    "child/netlog.json",
+    "child/harness.stdout.log",
+    "child/harness.stderr.log",
+    "child/external-inventory.json",
+    "child/exit.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native_entry.cjs",
+    "bytes": 2689,
+    "raw_sha256": "66da59e80de498a34549007a36acfb6e6c6711b8245967142861f3785d017cfc",
+    "normalized_text_sha256": "66da59e80de498a34549007a36acfb6e6c6711b8245967142861f3785d017cfc",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 2689,
+      "sha256": "66da59e80de498a34549007a36acfb6e6c6711b8245967142861f3785d017cfc"
+    }
+  },
+  "end_utc": "2026-10-25T04:17:45.886Z",
+  "pid": 5940,
+  "child_exit": 1,
+  "wrapper_exit": 126,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/t3-routing-native-prep-v2/native_entry.cjs",
+    "bytes": 2689,
+    "raw_sha256": "66da59e80de498a34549007a36acfb6e6c6711b8245967142861f3785d017cfc",
+    "normalized_text_sha256": "66da59e80de498a34549007a36acfb6e6c6711b8245967142861f3785d017cfc",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 3102,
+    "sha256": "2f10866667835ea969907dc3a57dc8e2aa506574652af1c73d9d565d3578fbde"
+  },
+  "retained_artifacts": [
+    {
+      "path": "child/config.json",
+      "bytes": 3676,
+      "sha256": "32a8607ce115323672b954431bb9ec351b35d1365ddbf39ee94bc2a78935470d"
+    },
+    {
+      "path": "child/harness.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "child/harness.stderr.log",
+      "bytes": 414,
+      "sha256": "76632e547cae983daa15ce63f2367eb53a993e1c745d4e9fa35cbbd50c4f2591"
+    }
+  ],
+  "artifact_contract": {
+    "pass": false,
+    "unexpected": [],
+    "missing_allowed": [
+      "child/result.json",
+      "child/progress.json",
+      "child/netlog.json",
+      "child/external-inventory.json",
+      "child/exit.json"
+    ]
+  }
+}
