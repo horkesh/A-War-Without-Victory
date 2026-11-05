@@ -35,3 +35,7 @@ logs/branch-hygiene/20260924-parallel-audit/r8-uncommitted.patch -text
 
 # Keep the pinned audio sample license hash stable on Windows checkouts.
 docs/audio/LICENSES/VSCO-2-CE-CC0.txt text eol=lf
+
+# Keep revised sampled-score source freezes stable on Windows checkouts.
+tools/audio/create_campaign_suite_v2.py text eol=lf
+tools/audio/test_campaign_suite_v2.py text eol=lf
