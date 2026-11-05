@@ -64,3 +64,9 @@ The whole later Trnovo → Circle → Goražde cascade therefore sits downstream
   - `army_directive_pushback` mentions: 108 (before: 69).
 - Headless 188w is byte-identical to the manifest (final_save 26b80117…, weekly_report 5d25054d…, control_delta 27c9aaef…, activity_summary dbad0370…).
 - Full suite exit 0.
+
+## AAR capture-chronology fix: measured result (this branch)
+
+- Live January 1993: RBiH 698, RS 701, HRHB 703; no-player 702. No change.
+- Headless 188w: byte-identical to the manifest. `verify_checkpoints` 702/704/701/691, exit 0. So no 188w operation hits the capture-then-later-loss case; the fix corrects player-facing AARs and grades where it occurs.
+- Full suite exit 0.
