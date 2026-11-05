@@ -77,6 +77,16 @@ File: `compare-L2-t39-RBiH-corps-trace.json`. It records the `arbih_1st_corps` q
   - Army-directive pushback appears only in the no-player branch.
   - Find the player-gated mechanic before touching any operation.
 
+## Review condition (Codex review on PR #524)
+
+`prestageReservedPrePlannedElites` retargets a pending off-staging order regardless of its owner. Today no player-issued movement order exists:
+- No player path writes `brigade_movement_orders` or `brigade_reposition_orders`.
+- The only movement IPC, `stage-move-order`, writes the legacy `brigade_mun_orders`. The sim never reads that field, save serialization strips it, and no UI component calls the IPC.
+
+**Condition:** a future manual brigade-movement lever must stamp a distinct owner, and this function must skip that owner.
+
+Side finding, for cleanup: `stageMoveOrder` is dead plumbing.
+
 ## Still open (unchanged)
 
 - **Bukvik Gornji and Obadi:** only t1–t2 bot paramilitary captures hold these. A historical `always_deny` RBiH player cannot reproduce them. This is an owner design question.
