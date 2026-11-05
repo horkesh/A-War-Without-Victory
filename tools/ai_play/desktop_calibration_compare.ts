@@ -387,10 +387,12 @@ function applyPlayerPolicy(
     options: CliOptions,
     transcript: DecisionTranscriptRow[],
 ): void {
-    if (options.botParityParamilitaryDiagnostic) applyBotParityParamilitaryDiagnostic(state, options.faction);
     applyEventPolicy(state, options.faction, options.eventPolicy, transcript);
     applyHistoricalOperationPolicy(state, options.faction, options.historicalOperationPolicy, transcript);
     applyParamilitaryPolicy(state, options.faction, options.paramilitaryPolicy, transcript);
+    // Last: resolving an event (e.g. the opening state-identity decision) can re-enable the
+    // paramilitary policy event, which would reopen the pending window for this turn.
+    if (options.botParityParamilitaryDiagnostic) applyBotParityParamilitaryDiagnostic(state, options.faction);
 }
 
 function commandOption(command: string[], name: string): string | undefined {
