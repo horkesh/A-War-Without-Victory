@@ -14,6 +14,7 @@ import { useGameStore } from '../store/gameStore';
 import { deriveInboxItems, countActionableItems } from '../data/inboxItems';
 import type { InboxItem } from '../data/inboxItems';
 import type { EventDefinition } from '../../../sim/events/event_types';
+import type { CSSProperties } from 'react';
 import { DETAIL_PANEL_STYLE } from './panelRail';
 import { resolvePlayerFacingFaction } from '../../shared/playerVisibility';
 import { t, type MessageKey } from '../i18n';
@@ -46,6 +47,30 @@ const OPENING_BRIEFS: Record<string, { titleKey: MessageKey; bulletKeys: Message
         ],
     },
 };
+
+/**
+ * Dossier mount: a folder on the president's desk, lower and narrower than the
+ * map rail, so the Warroom plate stays in view. Exported for the material test.
+ */
+export const DOSSIER_LAYOUT = Object.freeze({
+    top: '34%',
+    width: '20rem',
+    right: '1.25rem',
+    bottomGap: '0.75rem',
+});
+
+const PANEL_STYLE: CSSProperties = { ...DETAIL_PANEL_STYLE, width: '22rem' };
+const DOSSIER_STYLE: CSSProperties = {
+    ...DETAIL_PANEL_STYLE,
+    width: DOSSIER_LAYOUT.width,
+    top: DOSSIER_LAYOUT.top,
+    right: DOSSIER_LAYOUT.right,
+    bottom: `calc(var(--awwv-bottom-bar-clearance, 2.5rem) + ${DOSSIER_LAYOUT.bottomGap})`,
+    overflow: 'visible',
+};
+const PANEL_CLASS = 'bg-panel-bg/95 backdrop-blur-sm border-l border-panel-border flex flex-col';
+const DOSSIER_CLASS = 'flex flex-col rounded-sm border border-accent-gold/40 ring-1 ring-inset ring-accent-gold/15 bg-panel-bg/95 shadow-[0_18px_40px_rgba(0,0,0,0.55)] backdrop-blur-sm';
+const DOSSIER_TAB_CLASS = 'pointer-events-none absolute -top-5 left-3 rounded-t-sm border border-b-0 border-accent-gold/50 bg-paper px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-panel-bg shadow-[0_-1px_2px_rgba(0,0,0,0.25)]';
 
 const PRIORITY_STYLES: Record<InboxItem['priorityBand'], { badge: string; border: string; labelKey: MessageKey }> = {
     required: { badge: 'bg-red-500 text-neutral-950', border: 'border-red-500/40', labelKey: 'decisionRoom.metric.required' },
@@ -255,9 +280,16 @@ function QuietInboxCapsule({ onOpenDesk, recordFiled }: { onOpenDesk: () => void
 interface PresidentialInboxProps {
     onAction: (action: InboxItem['action'], itemId: string) => void;
     eventCatalog?: ReadonlyMap<string, EventDefinition>;
+    /**
+     * `panel` (default): the full-height right rail used on the tactical map.
+     * `dossier`: a folder on the president's desk — lower, narrower, with a tab — so
+     * the Warroom plate (corkboard map, whiteboard date, flag) stays in view.
+     * Presentation only; items, actions and the badge are identical.
+     */
+    material?: 'panel' | 'dossier';
 }
 
-export function PresidentialInbox({ onAction, eventCatalog }: PresidentialInboxProps) {
+export function PresidentialInbox({ onAction, eventCatalog, material = 'panel' }: PresidentialInboxProps) {
     const state = useGameStore((s) => s.loadedGameState);
     const osidNameMap = useGameStore((s) => s.osidDisplayNames);
     const playerFaction = resolvePlayerFacingFaction(useGameStore.getState().loadedGameState);
@@ -272,14 +304,25 @@ export function PresidentialInbox({ onAction, eventCatalog }: PresidentialInboxP
     const situationItems = items.filter(i => i.type === 'situation');
     const openingBriefPending = shouldShowOpeningBrief(state, briefDismissed);
     const recordFiled = hasFiledRecord(state);
+    const dossier = material === 'dossier';
 
     return (
         <div
-            style={{ ...DETAIL_PANEL_STYLE, width: '22rem' }}
-            className="bg-panel-bg/95 backdrop-blur-sm border-l border-panel-border flex flex-col"
+            style={dossier ? DOSSIER_STYLE : PANEL_STYLE}
+            className={dossier ? DOSSIER_CLASS : PANEL_CLASS}
             data-testid="presidential-inbox"
+            data-material={dossier ? 'dossier' : undefined}
             data-awwv-counter-occluder="true"
         >
+            {dossier && (
+                <div
+                    aria-hidden="true"
+                    data-testid="presidential-inbox-tab"
+                    className={DOSSIER_TAB_CLASS}
+                >
+                    {t('inbox.title')}
+                </div>
+            )}
             {/* Header */}
             <div className="px-3 py-2.5 border-b border-panel-border flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2">
