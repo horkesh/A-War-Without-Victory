@@ -55,3 +55,16 @@ Live January 1993, same policies:
 | HRHB | 703 | 702 | 702 | Lupnica, Donji Koričani (both timing-sensitive at t39) |
 
 Headless 188w is byte-identical; the full suite exits 0. Next, the RS-player divergence investigation.
+
+## MILESTONE: live play = headless for every faction (commit 93d3fd122)
+
+After the three war-phase gates (shared order pass, no live-only re-injection, no staff truce break), live January 1993 at production autonomy with historical-default policies scores:
+
+| Player | Live | No-player | Cells differing |
+|---|---|---|---|
+| RBiH | 702 | 702 | none |
+| RS | 702 | 702 | none |
+| HRHB | 702 | 702 | none |
+
+- Headless 188w is byte-identical to the manifest; the full suite exits 0.
+- Codex CX-20261105-011: the 709 desktop results were all-AI observers (player_faction null) on pre-W3 source. Headless/no-player January fell 709 → 702 with W3 no-teleport (handover measurement C vs B). Recovering those cells lawfully is the next calibration lane.
