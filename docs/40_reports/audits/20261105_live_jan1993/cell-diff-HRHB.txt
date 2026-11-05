@@ -1,0 +1,8 @@
+differ: 7 | no-player right & player wrong: 6 | player right & no-player wrong: 1 | neither: 0
+  bosanska_krupa   1 | arapusa_2(ref RS, nopl RS, pl RBiH)
+  jajce            1 | jezero_2(ref RS, nopl RS, pl RBiH)
+  mrkonjic_grad    1 | baljvine_2(ref RS, nopl RS, pl HRHB)
+  sipovo           1 | volari_2(ref RS, nopl RS, pl RBiH)
+  skender_vakuf    1 | donji_koricani(ref RS, nopl RS, pl HRHB)
+  vogosca          1 | hotonj(ref RBiH, nopl RS, pl RBiH)
+  zavidovici       1 | cardak_2(ref RBiH, nopl RBiH, pl RS)

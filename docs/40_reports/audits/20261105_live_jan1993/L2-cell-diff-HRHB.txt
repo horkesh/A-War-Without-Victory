@@ -1,0 +1,2 @@
+differ: 1 | no-player right & player wrong: 0 | player right & no-player wrong: 1 | neither: 0
+  jajce            1 | lupnica(ref RS, nopl HRHB, pl RS)

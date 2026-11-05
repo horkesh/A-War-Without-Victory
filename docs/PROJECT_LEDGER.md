@@ -13488,3 +13488,28 @@ Shared dialog focus eligibility now handles visible eligible controls, native di
 Latest per-file focused evidence covers 19 unique files /226tests, with no latest failure; this reuses bounded runs and is not a full suite. Final TypeScript and frontend map build exit0, with191 transient output files inventoried. Real browser evidence covers all three factions at1366x768 and1920x1080, including a separate six-case visible/unoccluded report capture. Required-decision Escape/backdrop rejection, long-content response access without responding, Recruitment footer access without applying, exact canonical Warroom handoff and focus/navigation are verified. Original save SHA-256 aaebe5bd01d9ac78ffb264b74f3827ba34307c4f5ad312b4e735aa65fdca7062 and measured import/projection identities are preserved; zero turns advance. Independent Sol reviewer /root/command_overview_review approves code and final captures after targeted correction. See docs/40_reports/implemented/20261104_COMMAND_OVERVIEW_USABILITY.md and adjacent compact receipt; raw failures/results remain under logs/command-overview-usability-20261104/ in this worktree.
 
 Determinism/scope: no simulation/state writer, schema, serialization, authored data/history, calibration/reference/baseline, audio/startup/Electron host, map renderer/geometry or dependency manifest/lockfile changed. No full suite, campaign, native/package acceptance, release build, push or merge was performed. The event-catalog checker was not activated. Previous polish branch stays at d7f917853; this branch, its documentation and evidence remain isolated for later integration. Claude's frozen/integration checkouts and processes received no Codex writes or process operations. Owner disposition and task reservation are in the external cooperation file; shared roadmap/board copies were not edited.
+## 2026-11-05 - First valid live-equivalent January 1993 baseline on main (EVIDENCE ONLY, NOT ADOPTED)
+
+The owner directed calibration to resume on valid assumptions, with LIVE play as the target and January 1993 first. Run brief fixed in advance (`docs/40_reports/audits/20261105_live_jan1993/RUN-BRIEF.md`).
+
+The tool `tools/ai_play/desktop_calibration_compare.ts` gains two options:
+- `--final-save-dir`, so each branch can be scored per OSID with `tools/compare_painted_vs_sim.cjs`;
+- `--autonomy-level` (0-3 or `production`; the default stays 1 and is recorded).
+
+New helper: `tools/diagnostics/live_branch_cell_diff.cjs`.
+
+Live player at production autonomy (Level 2), main `b78cdda5a`, 39 turns, historical_default events, paramilitary deny, historical operations accept. January 1993 scores /712:
+
+| | RBiH | RS | HRHB |
+|---|---|---|---|
+| player | 698 | 698 | 703 |
+| no-player desktop branch | 702 | 702 | 702 |
+
+The earlier autonomy-1 run (688/694/697) is INVALID as a baseline. The scenario-tester found that the Level-1 `commander_loop` guard and `emit.ts:775` block have no faction check, so a Level-1 live player freezes BOT corps plans as well. That is recorded as an engine defect, not a lever.
+
+The remaining RBiH gap breaks down as:
+- an owner design question: Bukvik and Obadi are held only by t1-2 bot-paramilitary captures, which a historical always_deny player cannot reproduce;
+- the 801st Goražde captures (Glamoč, Sopotnica);
+- Prača.
+
+The no-player branch reaches 702 with 7/8 named captures (Lupnica). The bar (≥700 plus 8 named captures) and the 707 target are unchanged.

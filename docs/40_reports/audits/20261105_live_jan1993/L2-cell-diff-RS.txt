@@ -1,0 +1,6 @@
+differ: 6 | no-player right & player wrong: 5 | player right & no-player wrong: 1 | neither: 0
+  gorazde          2 | glamoc(ref RBiH, nopl RBiH, pl RS); sopotnica(ref RBiH, nopl RBiH, pl RS)
+  donji_vakuf      1 | korenici(ref RS, nopl RS, pl RBiH)
+  jajce            1 | lupnica(ref RS, nopl HRHB, pl RS)
+  skender_vakuf    1 | donji_koricani(ref RS, nopl RS, pl HRHB)
+  travnik          1 | gornje_krcevine(ref RS, nopl RS, pl RBiH)
