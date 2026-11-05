@@ -149,3 +149,5 @@ Output format and validation: One phase per commit series with /simplify between
 
 ## 11. Execution record
 - 2026-11-05 — Packet registered from the findings record. No phase started. Plan index regenerated.
+- 2026-11-05 — **Phase 0 done.** Worktree `F:/AWWV-worktrees/visual-polish`, branch `claude/visual-polish-art-direction`, own `npm ci`. Baseline screenshots at 1366 and the green `tsc` / contract-test logs are in `F:/AWWV-worktrees/_logs/visual-polish/00_baseline/`.
+- 2026-11-05 — **Phase A done** (report: [20261105_VISUAL_POLISH_PHASE_A_MAP.md](../40_reports/implemented/20261105_VISUAL_POLISH_PHASE_A_MAP.md)). Palette module, style repaint, printed counters, legend/fog/label inks; style contract test RED then GREEN; `tsc` 0, 12 files / 94 tests, map build 0, browser proof at 1366 and 1920, simplify pass applied. **Architect decision flagged:** the inbox-off-map declutter moves to Phase B as an inbox-presentation change because the default `inbox` rail panel is a tested ownership contract (`panel_rail_ownership`, `panel_rail_exclusivity`, `ui_map_panel_rail`). Not started: Phase B.

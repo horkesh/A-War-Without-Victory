@@ -184,6 +184,8 @@ failure remain open; RS/HRHB 24-week sessions are unlaunched. See the [controlli
 
 ## Recent GUI changes
 
+- **Visual polish Phase A, war map as a printed map (2026-11-05, branch `claude/visual-polish-art-direction`, not integrated):** `src/ui/map/map/mapPaperPalette.ts` owns every base-map colour and the counter print inks; `awwv_map_style.json` is pinned to it by `tests/ui/map_style_contract.test.ts` (layer order, named colours, relief ceiling, local glyphs). Faction inks are sepia-pulled projections of `FACTION_GLOW_RGB`, never a second table. Counters print with a bevel, paper symbol, cream strength and gold morale bars (`formationIcons.ts`); the legend sample, fog overlay and Deck settlement labels read the same palette. Layer ids, sources, click routing and counter geometry are unchanged. Report: [implemented/20261105_VISUAL_POLISH_PHASE_A_MAP.md](implemented/20261105_VISUAL_POLISH_PHASE_A_MAP.md).
+
 | Date | Change | Report / spec |
 |------|--------|----------------|
 | 2026-06-21 | **Pre-advance / desk severity chrome:** Advance Clearance review rows/blocker chrome, President's Desk severity badges/packet alt text, and Decision Room priority-card severity badges now render through EN/BCS i18n instead of raw enum or hardcoded English copy. | [implemented/20260621_PRE_ADVANCE_DESK_SEVERITY_CHROME.md](implemented/20260621_PRE_ADVANCE_DESK_SEVERITY_CHROME.md) |
