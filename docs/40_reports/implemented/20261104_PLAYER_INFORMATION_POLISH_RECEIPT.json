@@ -1,0 +1,535 @@
+{
+  "base": "74945d8e0877da2b113cd318d6b7941de0554a5b",
+  "branch": "codex/player-information-polish",
+  "scope": "Browser presentation only; no native/package/campaign qualification",
+  "sourceHashes": {
+    "src/ui/map/utils/formatters.ts": "5ddf55286beea966fdb72d28841b2edf7747e05cef57ca17c503ef54dd85ef4d",
+    "src/ui/map/utils/reportedMetrics.ts": "78b930b4cbcd3120e314ca24ca2e94bc44f2e801a88a7433eddd66c5b88d496a",
+    "src/ui/map/i18n/messages.en.ts": "fafd1b3769c59f8f00f206c61c869edab4bddd17fc5f81705d7437e5e732b4b0",
+    "src/ui/map/i18n/messages.bcs.ts": "34816ddc72071d1954eba6fdb2d27324ebfa219d07050f63493fd91e3879d39a",
+    "src/ui/map/components/BrigadeRow.tsx": "7126937f83d6a9ba45a5d021e279625a3eeadcbfa3595ba9e86a699139f39b42",
+    "src/ui/map/components/FormationDetail.tsx": "970d35b98ab807119e29aad6f1418a9868af750d15f1450511edd85a124b5312",
+    "src/ui/map/components/SettlementDetailContent.tsx": "510d8b874e7182189c9dc21507b54d04fb940e8adbc5f71d08808720eccca816",
+    "src/ui/map/components/TurnAftermathModal.tsx": "fc2566d653722b0c97f0beedfff53ec126507cf8093d0cfcf909a2ea4d83b69b",
+    "src/ui/map/components/army_hq/ArmyHQCorpsCard.tsx": "422cf9a7782b5e1f88c5805640041a884c5b17d0d2273ed52f5cfd186f32fd5a",
+    "src/ui/map/components/army_hq/WarSummaryContent.tsx": "16fae3df65a92a35457109e4137fe8a193d71d8a081050d79c1cb1753f9b702b"
+  },
+  "normalizedSourceHashes": {
+    "src/ui/map/utils/formatters.ts": "ed99c9223d85d7648b4bdecfca7d686630b4c2a5e2ba889f9dfd969c861b6eec",
+    "src/ui/map/utils/reportedMetrics.ts": "bf35d0614cd78f0fe119a6a7f25ddf66e305ce5d31bcab35ca8fe8467bf7daf9",
+    "src/ui/map/i18n/messages.en.ts": "3fed5dd3d5f880eff48bdf66835faf866369e97b86c223b46416d7910c5644ff",
+    "src/ui/map/i18n/messages.bcs.ts": "b02680de6bb2a28c6d891145b203064c1794edcbc67e72e8401abc9ebb760114",
+    "src/ui/map/components/BrigadeRow.tsx": "8abd61076adc824bb6b6d63d9ca3f96401988ce672dbd1dad65a51dc01734323",
+    "src/ui/map/components/FormationDetail.tsx": "2d6b0444c7571e4d004160cc53d9a0f3c3d9ef83d79be325d09e782a9374b13a",
+    "src/ui/map/components/SettlementDetailContent.tsx": "99d20bc9efa2360e421ba92b167b4791c47ce9662be3920197dcf8b70387c12a",
+    "src/ui/map/components/TurnAftermathModal.tsx": "e7a759779c2fceac77a7922d9927e7eb82241b4f1f93e818286434b3ce9ceb8e",
+    "src/ui/map/components/army_hq/ArmyHQCorpsCard.tsx": "b68822ef4fcc19a8f5c4a2b8ff40b900d4e7405b023ffe9b0578dd1322c89d0a",
+    "src/ui/map/components/army_hq/WarSummaryContent.tsx": "5e8e28cf9e6a7596633e3c0cd7a93d399e0d6e66be9e71d0b7fc21831ddd04c2"
+  },
+  "validation": {
+    "implementation": {
+      "uniqueFiles": 25,
+      "uniqueTests": 412,
+      "latestFailingFiles": [],
+      "evidenceByFile": {
+        "tests/ui/formation_detail_parity.test.ts": {
+          "tests": 42,
+          "failed": 0,
+          "log": "focused-final.log"
+        },
+        "tests/ui/turn_aftermath_modal_i18n.test.ts": {
+          "tests": 15,
+          "failed": 0,
+          "log": "weekly-copy-focused.log"
+        },
+        "tests/ui/war_summary_campaign_cost_i18n.test.ts": {
+          "tests": 12,
+          "failed": 0,
+          "log": "weekly-copy-correction.log"
+        },
+        "tests/ui/settlement_supply_status.test.ts": {
+          "tests": 23,
+          "failed": 0,
+          "log": "final-targeted.log"
+        },
+        "tests/ui/brigade_row_supply_labels.test.ts": {
+          "tests": 7,
+          "failed": 0,
+          "log": "row-review-correction-final.log"
+        },
+        "tests/ui_i18n.test.ts": {
+          "tests": 14,
+          "failed": 0,
+          "log": "weekly-invariant-green.log"
+        },
+        "tests/ui/r7_number_formatters.test.ts": {
+          "tests": 5,
+          "failed": 0,
+          "log": "focused-final.log"
+        },
+        "tests/ui/player_information_polish.test.ts": {
+          "tests": 19,
+          "failed": 0,
+          "log": "row-review-correction-final.log"
+        },
+        "tests/ui/army_hq_timing_copy.test.ts": {
+          "tests": 18,
+          "failed": 0,
+          "log": "weekly-copy-correction.log"
+        },
+        "tests/ui/command_strain_i18n_boundary.test.ts": {
+          "tests": 6,
+          "failed": 0,
+          "log": "weekly-copy-focused.log"
+        },
+        "tests/ui/army_hq_readiness_threat_copy.test.ts": {
+          "tests": 13,
+          "failed": 0,
+          "log": "row-review-correction-final.log"
+        },
+        "tests/ui/personnel_player_safe_display.test.ts": {
+          "tests": 16,
+          "failed": 0,
+          "log": "personnel-followthrough.log"
+        },
+        "tests/ui/corps_detail_sector_truth.test.ts": {
+          "tests": 7,
+          "failed": 0,
+          "log": "personnel-followthrough.log"
+        },
+        "tests/ui/own_force_report_gap.test.ts": {
+          "tests": 6,
+          "failed": 0,
+          "log": "personnel-followthrough.log"
+        },
+        "tests/ui/war_summary_personnel_label.test.ts": {
+          "tests": 3,
+          "failed": 0,
+          "log": "personnel-followthrough.log"
+        },
+        "tests/ui/personnel_text_readability.test.ts": {
+          "tests": 2,
+          "failed": 0,
+          "log": "personnel-followthrough.log"
+        },
+        "tests/ui/turn_aftermath_quiet_digest.test.ts": {
+          "tests": 11,
+          "failed": 0,
+          "log": "final-targeted.log"
+        },
+        "tests/ui/presidential_decision_room.test.ts": {
+          "tests": 64,
+          "failed": 0,
+          "log": "weekly-copy-correction.log"
+        },
+        "tests/ui/turn_aftermath.test.ts": {
+          "tests": 25,
+          "failed": 0,
+          "log": "weekly-copy-correction.log"
+        },
+        "tests/ui/operation_aar_records_review.test.ts": {
+          "tests": 30,
+          "failed": 0,
+          "log": "weekly-copy-correction.log"
+        },
+        "tests/ui/ops_planning_target_discovery.test.ts": {
+          "tests": 31,
+          "failed": 0,
+          "log": "weekly-copy-correction.log"
+        },
+        "tests/ui/advance_turn_button_gated_feedback.test.ts": {
+          "tests": 20,
+          "failed": 0,
+          "log": "weekly-copy-correction.log"
+        },
+        "tests/ui/records_button_behavior.test.ts": {
+          "tests": 5,
+          "failed": 0,
+          "log": "weekly-copy-focused.log"
+        },
+        "tests/ui/turn_aftermath_records_panel_i18n.test.ts": {
+          "tests": 5,
+          "failed": 0,
+          "log": "weekly-copy-focused.log"
+        },
+        "tests/ui/shell_navigation_ownership.test.ts": {
+          "tests": 13,
+          "failed": 0,
+          "log": "weekly-copy-correction.log"
+        }
+      },
+      "note": "Latest per-file results across bounded runs; not a single final suite. Unaffected results reused at actual scope."
+    },
+    "extraBoundaryTests": {
+      "files": 3,
+      "passed": 42,
+      "failed": 0,
+      "log": "boundaries.log",
+      "note": "Fourth file shell_navigation_ownership corrected/passed13 in implementation inventory; no double count"
+    },
+    "typecheck": {
+      "exit": 0,
+      "log": "typecheck-reviewed-source.log"
+    },
+    "documentation": {
+      "files": 2,
+      "passed": 31,
+      "exit": 0,
+      "log": "documentation-checks.log",
+      "planIndexExit": 0,
+      "openGatesExit": 0,
+      "stagedWhitespaceExit": 0
+    },
+    "explicitPrecommit": {
+      "exit": 0,
+      "command": "Git Bash .husky/pre-commit",
+      "automaticHookParityClaimed": false
+    },
+    "independentReview": {
+      "agent": "/root/presentation_review",
+      "model": "gpt-6.1-sol",
+      "verdict": "PASS after one targeted correction",
+      "scope": "All six requirements; source, tests, corrected1366 and1920 captures inspected"
+    }
+  },
+  "browser": [
+    {
+      "width": 1366,
+      "evidence": "review-correction-browser/result.json",
+      "passed": true,
+      "surfaces": [
+        {
+          "name": "corps order of battle / keyboard formation selection",
+          "rowBox": {
+            "width": 382,
+            "height": 130,
+            "left": 257,
+            "right": 639,
+            "top": 593,
+            "bottom": 723,
+            "scrollWidth": 380,
+            "clientWidth": 380,
+            "fontSize": "12px"
+          },
+          "nameBox": {
+            "width": 364,
+            "height": 32,
+            "left": 267,
+            "right": 631,
+            "top": 637,
+            "bottom": 669,
+            "scrollWidth": 364,
+            "clientWidth": 364,
+            "fontSize": "12px"
+          },
+          "descBox": {
+            "width": 364,
+            "height": 32,
+            "left": 267,
+            "right": 631,
+            "top": 599,
+            "bottom": 631,
+            "scrollWidth": 364,
+            "clientWidth": 364,
+            "fontSize": "12px"
+          },
+          "focus": {
+            "visible": true,
+            "outlineWidth": "2px"
+          },
+          "formationBox": {
+            "width": 384,
+            "height": 624,
+            "left": 256,
+            "right": 640,
+            "top": 104,
+            "bottom": 728,
+            "scrollWidth": 382,
+            "clientWidth": 382,
+            "fontSize": "16px"
+          }
+        },
+        {
+          "name": "Army HQ corps card / canonical campaign summary",
+          "cardBox": {
+            "width": 329.5,
+            "height": 326,
+            "left": 12,
+            "right": 341.5,
+            "top": 280.5,
+            "bottom": 606.5,
+            "scrollWidth": 328,
+            "clientWidth": 328,
+            "fontSize": "16px"
+          },
+          "hqDescriptionBox": {
+            "width": 327.5,
+            "height": 32,
+            "left": 13,
+            "right": 340.5,
+            "top": 281.5,
+            "bottom": 313.5,
+            "scrollWidth": 328,
+            "clientWidth": 328,
+            "fontSize": "12px"
+          },
+          "costBox": {
+            "width": 637,
+            "height": 100.5,
+            "left": 704,
+            "right": 1341,
+            "top": 200.5,
+            "bottom": 301,
+            "scrollWidth": 637,
+            "clientWidth": 637,
+            "fontSize": "12px"
+          }
+        }
+      ],
+      "preservation": {
+        "turn": 104,
+        "importedSave": "e18f56a68c7457fb017915775efd728130d02cfc477a7342f5c06229b8e3fb3e",
+        "projection": "f84dab1ec801d6368f1702c8976cd85ae8e56f600ea084df011af0c86e0a72a5"
+      }
+    },
+    {
+      "width": 1366,
+      "evidence": "browser-attempt2/result.json",
+      "reusedSurface": {
+        "name": "settlement inspection / exact keyboard selection",
+        "settlementBox": {
+          "width": 262,
+          "height": 106,
+          "left": 1075,
+          "right": 1337,
+          "top": 621,
+          "bottom": 727,
+          "scrollWidth": 260,
+          "clientWidth": 260,
+          "fontSize": "16px"
+        }
+      },
+      "note": "Overall attempt failed at HQ; only unaffected passing settlement proof reused"
+    },
+    {
+      "width": 1366,
+      "evidence": "aftermath-preflight/result.json",
+      "passed": true,
+      "surfaces": [
+        {
+          "name": "aftermath large/missing/zero counts and keyboard dismissal",
+          "aftermathBox": {
+            "width": 1152,
+            "height": 660.46875,
+            "left": 107,
+            "right": 1259,
+            "top": 53.765625,
+            "bottom": 714.234375,
+            "scrollWidth": 1150,
+            "clientWidth": 1150,
+            "fontSize": "16px"
+          }
+        }
+      ],
+      "preservation": {
+        "turn": 104,
+        "importedSave": "e18f56a68c7457fb017915775efd728130d02cfc477a7342f5c06229b8e3fb3e",
+        "projection": "f84dab1ec801d6368f1702c8976cd85ae8e56f600ea084df011af0c86e0a72a5"
+      }
+    },
+    {
+      "width": 1920,
+      "evidence": "browser-1920/result.json",
+      "passed": true,
+      "surfaces": [
+        {
+          "name": "corps order of battle / keyboard formation selection",
+          "rowBox": {
+            "width": 382,
+            "height": 130,
+            "left": 257,
+            "right": 639,
+            "top": 905,
+            "bottom": 1035,
+            "scrollWidth": 380,
+            "clientWidth": 380,
+            "fontSize": "12px"
+          },
+          "nameBox": {
+            "width": 364,
+            "height": 32,
+            "left": 267,
+            "right": 631,
+            "top": 949,
+            "bottom": 981,
+            "scrollWidth": 364,
+            "clientWidth": 364,
+            "fontSize": "12px"
+          },
+          "descBox": {
+            "width": 364,
+            "height": 32,
+            "left": 267,
+            "right": 631,
+            "top": 911,
+            "bottom": 943,
+            "scrollWidth": 364,
+            "clientWidth": 364,
+            "fontSize": "12px"
+          },
+          "focus": {
+            "visible": true,
+            "outlineWidth": "2px"
+          },
+          "formationBox": {
+            "width": 384,
+            "height": 936,
+            "left": 256,
+            "right": 640,
+            "top": 104,
+            "bottom": 1040,
+            "scrollWidth": 382,
+            "clientWidth": 382,
+            "fontSize": "16px"
+          }
+        },
+        {
+          "name": "settlement inspection / exact keyboard selection",
+          "settlementBox": {
+            "width": 262,
+            "height": 106,
+            "left": 1629,
+            "right": 1891,
+            "top": 665,
+            "bottom": 771,
+            "scrollWidth": 260,
+            "clientWidth": 260,
+            "fontSize": "16px"
+          }
+        },
+        {
+          "name": "Army HQ corps card / canonical campaign summary",
+          "cardBox": {
+            "width": 309.328125,
+            "height": 326,
+            "left": 12,
+            "right": 321.328125,
+            "top": 755,
+            "bottom": 1081,
+            "scrollWidth": 307,
+            "clientWidth": 307,
+            "fontSize": "16px"
+          },
+          "hqDescriptionBox": {
+            "width": 307.328125,
+            "height": 32,
+            "left": 13,
+            "right": 320.328125,
+            "top": 756,
+            "bottom": 788,
+            "scrollWidth": 307,
+            "clientWidth": 307,
+            "fontSize": "12px"
+          },
+          "costBox": {
+            "width": 914,
+            "height": 100.5,
+            "left": 981,
+            "right": 1895,
+            "top": 530.5,
+            "bottom": 631,
+            "scrollWidth": 914,
+            "clientWidth": 914,
+            "fontSize": "12px"
+          }
+        },
+        {
+          "name": "aftermath large/missing/zero counts and keyboard dismissal",
+          "aftermathBox": {
+            "width": 1152,
+            "height": 871.59375,
+            "left": 384,
+            "right": 1536,
+            "top": 104.203125,
+            "bottom": 975.796875,
+            "scrollWidth": 1150,
+            "clientWidth": 1150,
+            "fontSize": "16px"
+          }
+        }
+      ],
+      "preservation": {
+        "turn": 104,
+        "importedSave": "e18f56a68c7457fb017915775efd728130d02cfc477a7342f5c06229b8e3fb3e",
+        "projection": "f84dab1ec801d6368f1702c8976cd85ae8e56f600ea084df011af0c86e0a72a5"
+      }
+    }
+  ],
+  "fixture": {
+    "path": "docs/40_reports/playtests/evidence/20260731_session16_rs_104week_player/autosaves/final-autosave.json",
+    "sha256": "aaebe5bd01d9ac78ffb264b74f3827ba34307c4f5ad312b4e735aa65fdca7062",
+    "preserved": true,
+    "advances": 0
+  },
+  "englishAudit": {
+    "changedEnglishValues": 161,
+    "changedTurnUnitValues": 158,
+    "preservedOriginalKeys": true,
+    "tokenChanges": [],
+    "retainedValues": [
+      {
+        "key": "armyHq.armyCommander.role",
+        "value": "'The Army commander turns presidential intent into army-level direction. The Chief of Staff briefing is staff advice; you retain authority over intent and authorization.'"
+      }
+    ]
+  },
+  "protectedPaths": [],
+  "changedFilesAtInventory": [
+    ".gitignore",
+    "docs/40_reports/CONSOLIDATED_IMPLEMENTED.md",
+    "docs/40_reports/GUI_MASTER.md",
+    "docs/40_reports/README.md",
+    "docs/40_reports/implemented/20261104_PLAYER_INFORMATION_POLISH.md",
+    "docs/40_reports/implemented/20261104_PLAYER_INFORMATION_POLISH_RECEIPT.json",
+    "docs/PROJECT_LEDGER.md",
+    "docs/plans/2026-11-04-player-information-polish-plan.md",
+    "docs/plans/plan_index.yml",
+    "src/ui/map/components/BrigadeRow.tsx",
+    "src/ui/map/components/FormationDetail.tsx",
+    "src/ui/map/components/SettlementDetailContent.tsx",
+    "src/ui/map/components/TurnAftermathModal.tsx",
+    "src/ui/map/components/army_hq/ArmyHQCorpsCard.tsx",
+    "src/ui/map/components/army_hq/WarSummaryContent.tsx",
+    "src/ui/map/i18n/messages.bcs.ts",
+    "src/ui/map/i18n/messages.en.ts",
+    "src/ui/map/utils/formatters.ts",
+    "src/ui/map/utils/reportedMetrics.ts",
+    "tests/ui/advance_turn_button_gated_feedback.test.ts",
+    "tests/ui/army_hq_timing_copy.test.ts",
+    "tests/ui/brigade_row_supply_labels.test.ts",
+    "tests/ui/formation_detail_parity.test.ts",
+    "tests/ui/operation_aar_records_review.test.ts",
+    "tests/ui/ops_planning_target_discovery.test.ts",
+    "tests/ui/player_information_polish.test.ts",
+    "tests/ui/presidential_decision_room.test.ts",
+    "tests/ui/settlement_supply_status.test.ts",
+    "tests/ui/shell_navigation_ownership.test.ts",
+    "tests/ui/turn_aftermath.test.ts",
+    "tests/ui/turn_aftermath_modal_i18n.test.ts",
+    "tests/ui/war_summary_campaign_cost_i18n.test.ts",
+    "tests/ui_i18n.test.ts",
+    "tools/ui/player_information_browser_proof.mjs"
+  ],
+  "failuresRetained": [
+    "dependencies.log",
+    "red.log",
+    "focused-final.log",
+    "weekly-copy-focused.log",
+    "boundaries.log",
+    "browser-attempt1/result.json",
+    "browser-attempt2/result.json",
+    "browser-final/result.json",
+    "browser-complete/result.json",
+    "hq-focus-red.log"
+  ]
+}

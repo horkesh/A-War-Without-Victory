@@ -202,7 +202,7 @@ describe('Presidential Inbox officer event dedupe', () => {
         expect(screen.getByText("President's Desk")).toBeTruthy();
         expect(screen.getByText('Chronicle')).toBeTruthy();
         expect(screen.getByText('No decisions block advance.')).toBeTruthy();
-        expect(screen.getByText('Staff reports and optional reviews remain available before you end the turn.')).toBeTruthy();
+        expect(screen.getByText('Staff reports and optional reviews remain available before you end the week.')).toBeTruthy();
         expect(screen.queryByText('No pending decisions.')).toBeNull();
 
         fireEvent.click(screen.getByRole('button', { name: /open desk/i }));
@@ -297,7 +297,7 @@ describe('Presidential Inbox officer event dedupe', () => {
 
         expect(screen.getByTestId('presidential-inbox-quiet-capsule')).toBeTruthy();
         expect(screen.getByText('No record filed yet.')).toBeTruthy();
-        expect(screen.queryByText('Latest turn record is filed below.')).toBeNull();
+        expect(screen.queryByText('Latest week record is filed below.')).toBeNull();
     });
 
     it('treats filed decision receipts as quiet-inbox records', () => {
@@ -325,7 +325,7 @@ describe('Presidential Inbox officer event dedupe', () => {
         render(createElement(PresidentialInbox, { onAction }));
 
         expect(screen.getByTestId('presidential-inbox-quiet-capsule')).toBeTruthy();
-        expect(screen.getByText('Latest turn record is filed below.')).toBeTruthy();
+        expect(screen.getByText('Latest week record is filed below.')).toBeTruthy();
         expect(screen.queryByText('No record filed yet.')).toBeNull();
     });
 

@@ -340,7 +340,7 @@ describe('buildPresidentialDecisionRoomView', () => {
       sourceHandoffTarget: { kind: 'army-hq-tab', tab: 'briefing' },
     });
     expect(view.cards.find((card) => card.id === 'turn:24:hard-turn')).toMatchObject({
-      sourceOwner: 'Turn Aftermath records',
+      sourceOwner: 'Week Aftermath records',
       navigationTarget: { kind: 'decision-room', lens: 'turn', cardId: 'turn:24:hard-turn' },
       sourceHandoffTarget: { kind: 'army-hq-aftermath-record', turn: 24 },
     });
@@ -636,7 +636,7 @@ describe('buildPresidentialDecisionRoomView', () => {
       navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
     });
     expect(byId['turn-aftermath-records']).toMatchObject({
-      label: 'Turn Aftermath Records',
+      label: 'Week Aftermath Records',
       cardIds: ['turn:24:hard-turn'],
       navigationTarget: { kind: 'army-hq-aftermath-record', turn: 24 },
     });
@@ -1318,7 +1318,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(selectedView.cards.map((card) => card.id)).toEqual(defaultView.cards.map((card) => card.id));
     expect(selectedView.activeDossier).toMatchObject({
       cardId: 'turn:24:hard-turn',
-      sourceOwner: 'Turn Aftermath records',
+      sourceOwner: 'Week Aftermath records',
       sourceHandoff: {
         id: 'turn-aftermath-records',
         cardIds: ['turn:24:hard-turn'],
@@ -2176,7 +2176,7 @@ describe('buildPresidentialDecisionRoomView — proactive force-launch (override
     expect(reviewCard?.severity).toBe('blocking');
     expect(reviewCard?.actionLabel).toBe('Authorize before advance');
     expect(reviewCard?.sourceLabel).toBe('Operation authorization');
-    expect(reviewCard?.explanation).toBe('This historical operation is ready for presidential authorization. Sign or withhold before ending the turn.');
+    expect(reviewCard?.explanation).toBe('This historical operation is ready for presidential authorization. Sign or withhold before ending the week.');
     expect(reviewCard?.evidence.join(' ')).toContain('Historical operation authorization');
     expect(reviewCard?.evidence.join(' ')).toContain('Recommended staff review');
     expect(reviewCard?.evidence.join(' ')).toContain('1 operation authorization unresolved');

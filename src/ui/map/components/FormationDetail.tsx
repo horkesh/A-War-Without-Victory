@@ -5,7 +5,7 @@ import { sortRecentEngagements } from '../utils/recentEngagements';
 import { FACTION_COLORS_SUBTLE } from '../utils/theme';
 import { useIPC } from '../desktop/useIPC';
 import { getPanelRailStyle } from './panelRail';
-import { turnToDateString } from '../utils/formatters';
+import { turnToDateString, formatCount } from '../utils/formatters';
 import { getArmyCrest } from '../utils/factionAssets';
 import { getFormationCommander, resolveCorpsCommanderDisplay } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
@@ -120,7 +120,7 @@ function formatEffectivenessModifierLabel(key: string): string {
 }
 
 function formatOptionalInteger(value: number | null | undefined): string {
-  return Number.isFinite(value) ? Math.round(value as number).toLocaleString() : t('corpsFront.unreported');
+  return Number.isFinite(value) ? formatCount(value) : t('corpsFront.unreported');
 }
 
 function formatCampaignLossInteger(value: number | null | undefined, derived: boolean): string {
@@ -143,7 +143,7 @@ function formatReportedCommandSpan(value: number | null | undefined): string {
 }
 
 function formatHomePower(value: number | null | undefined): string {
-  return Number.isFinite(value) ? Math.round(value as number).toLocaleString() : t('corpsFront.unreported');
+  return Number.isFinite(value) ? formatCount(value) : t('corpsFront.unreported');
 }
 
 function formatLoanCommandDestination(corpsId: string | null | undefined, formations: FormationView[]): string {
@@ -631,7 +631,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
             )}
 
             {/* Stats grid */}
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs px-2 py-1 bg-black/10 rounded">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs [&>span]:min-w-0 [&>span]:break-words px-2 py-1 bg-black/10 rounded">
               {Number.isFinite(formation.cohesion) && (
                 <>
                   <span className="text-text-secondary flex items-center gap-1"><Icon name="cohesion" size={12} /> {t('formationDetail.cohesion')}</span>
@@ -680,11 +680,11 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                   <span className="text-text-primary tabular-nums">{Math.round(formation.fatigue)}</span>
                 </>
               )}
-              {formation.personnel != null && (
+              {(
                 <>
                   <span className="text-text-secondary flex items-center gap-1"><Icon name="personnel" size={12} /> {t('formationDetail.personnel')}</span>
                   <span className="text-text-primary tabular-nums">
-                    {t('formationDetail.personnelMen', { count: formation.personnel.toLocaleString() })}
+                    {Number.isFinite(formation.personnel) ? t('formationDetail.personnelMen', { count: formatCount(formation.personnel) }) : t('corpsFront.unreported')}
                   </span>
                 </>
               )}
@@ -703,18 +703,21 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                   ? `${formatEffectivenessModifierLabel(worst[0])} ${Math.round(worst[1] * 100)}%`
                   : '';
                 const title = worstLabel
-                  ? `${t('effectiveness.exactTooltip', { value: Math.round(eff.value).toLocaleString() })} - ${worstLabel}`
-                  : t('effectiveness.exactTooltip', { value: Math.round(eff.value).toLocaleString() });
+                  ? `${t('effectiveness.exactTooltip', { value: formatCount(eff.value) })} - ${worstLabel}`
+                  : t('effectiveness.exactTooltip', { value: formatCount(eff.value) });
                 return (
                   <>
                     <span className="text-text-secondary flex items-center gap-1"><Icon name="star" size={12} /> {t('formationDetail.effectiveness')}</span>
                     <span
                       data-testid="formation-detail-effectiveness"
-                      className="font-semibold"
                       style={{ color }}
                       title={title}
+                      tabIndex={0}
+                      aria-label={title}
+                      className="group font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-gold"
                     >
                       {band.grade} <span className="text-text-primary">{t(band.labelKey)}</span>
+                      <span className="sr-only group-focus:not-sr-only group-focus:block text-xs font-normal text-text-secondary">{title}</span>
                     </span>
                   </>
                 );
@@ -722,7 +725,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
               {formation.entrenchment_turns != null && formation.entrenchment_turns > 0 && (
                 <>
                   <span className="text-text-secondary flex items-center gap-1"><Icon name="entrenchment" size={12} /> {t('formationDetail.entrenched')}</span>
-                  <span className="text-text-primary tabular-nums">{t('formationDetail.turnCount', { count: Math.round(formation.entrenchment_turns!).toString() })}</span>
+                  <span className="text-text-primary tabular-nums">{t(formation.entrenchment_turns === 1 ? 'formationDetail.turnCount.one' : 'formationDetail.turnCount', { count: Math.round(formation.entrenchment_turns!).toString() })}</span>
                 </>
               )}
               {formation.dig_in_progress != null && formation.dig_in_progress > 0 && (
@@ -735,7 +738,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                 <>
                   <span className="font-bold uppercase flex items-center gap-1" style={{ color: '#d45555' }}><Icon name="disrupted" size={12} /> {t('formationDetail.disrupted')}</span>
                   <span className="tabular-nums font-semibold" style={{ color: '#d45555' }}>
-                    {t('formationDetail.turnsRemaining', { count: formation.disrupted_turns.toString() })}
+                    {t(formation.disrupted_turns === 1 ? 'formationDetail.turnsRemaining.one' : 'formationDetail.turnsRemaining', { count: formation.disrupted_turns.toString() })}
                   </span>
                 </>
               )}
@@ -886,7 +889,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                     <div className="text-text-secondary italic">{t('formationDetail.combatRecordUnavailable')}</div>
                   </div>
                 )}
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs px-1">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs [&>span]:min-w-0 [&>span]:break-words px-1">
                   {formation.brigade_history && (
                     <>
                       {formation.brigade_history.longest_victory_streak > 0 && (

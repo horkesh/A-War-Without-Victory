@@ -1,0 +1,325 @@
+{
+  "base": "d7f917853bc665ac4352796620332e302eb8e61f",
+  "branch": "codex/command-overview-usability",
+  "scope": "UI reporting/navigation only, no simulation/native/campaign acceptance",
+  "ownerRuling": "Existing operational pool percentage plus report completeness; no new readiness bands",
+  "sourceHashes": {
+    "src/ui/shared/Modal.tsx": "f24e3405b328af3138589b94edd37136ea95ba23e17b78c027fbc37f7214ca78",
+    "src/ui/shared/equipmentSummary.ts": "f18aadb2cdf0e332213d805f8cd374b698401e1beba94a12956c0041c3571561",
+    "src/ui/map/data/GameStateAdapter.ts": "1950fac29bb1d4ad38da425e8339f7bd6f1c7290200ce517fc766588c26ddd53",
+    "src/ui/map/data/types.ts": "4c990c3ba88c83fd45dc6dedf22697eb37aa204b1ed8448d4c5849060d2ce028",
+    "src/ui/map/components/WarSummaryModal.tsx": "a970907ab2a4b4336ceea2c8c707a2aeed15d0a4d1e3001f208a6eb7a1eb25e4",
+    "src/ui/map/components/army_hq/ArmyHQModal.tsx": "cab329fe1103d59b8890bee0af41f5d69ed9509d2774fd57c02e0c7161bd1261",
+    "src/ui/map/components/army_hq/WarSummaryContent.tsx": "9765a3438187ed6d9239ee1d46322b9c77293c2dc2efa049bb5e0622575111db",
+    "src/ui/map/components/army_hq/EquipmentSummary.tsx": "ccfe6c077b0a38cc9e04c77e377cbfe8b03f4e450f7894ca2970ac84f06f4685",
+    "src/ui/map/i18n/messages.en.ts": "2baecb21ba74af3fc9ee367765fbbcd492f6ccfbf12910d14723aff52f841746",
+    "src/ui/map/i18n/messages.bcs.ts": "98b2784c88125dd0024d18c1334e47840be3a82fffdf11a423284cb816ceac32",
+    "src/ui/warroom/data/war_data_extractor.ts": "4852ad06a30e3a3e777f93cd56d86934cf84e932016bb51300333e9c3a40ce09"
+  },
+  "tests": {
+    "files": 19,
+    "tests": 226,
+    "failed": 0,
+    "perFile": {
+      "tests/ui_map_game_state_adapter.test.ts": {
+        "tests": 70,
+        "failed": 0,
+        "log": "worker-adapter-correction.log"
+      },
+      "tests/ui_army_hq_war_summary_visibility.test.ts": {
+        "tests": 8,
+        "failed": 0,
+        "log": "worker-focused-final.log"
+      },
+      "tests/ui/army_hq_role_clarity.test.ts": {
+        "tests": 7,
+        "failed": 0,
+        "log": "worker-focused-final.log"
+      },
+      "tests/ui/equipment_reporting_surfaces.test.ts": {
+        "tests": 3,
+        "failed": 0,
+        "log": "worker-test-type-correction.log"
+      },
+      "tests/ui/equipment_summary.test.ts": {
+        "tests": 3,
+        "failed": 0,
+        "log": "worker-focused-final.log"
+      },
+      "tests/warroom_player_visibility.test.ts": {
+        "tests": 22,
+        "failed": 0,
+        "log": "worker-focused-final.log"
+      },
+      "tests/v093_a11y_lane_c_warroom_decision_room.test.ts": {
+        "tests": 10,
+        "failed": 0,
+        "log": "worker-focused-final.log"
+      },
+      "tests/v093_a11y_lane_a_modal_stack.test.ts": {
+        "tests": 8,
+        "failed": 0,
+        "log": "worker-focused-final.log"
+      },
+      "tests/modal_wrapper.test.ts": {
+        "tests": 10,
+        "failed": 0,
+        "log": "worker-green-required-capture.log"
+      },
+      "tests/ui/peace_plan_modal.test.ts": {
+        "tests": 9,
+        "failed": 0,
+        "log": "worker-green-required-capture.log"
+      },
+      "tests/ui/event_decision_modal_decision_context.test.ts": {
+        "tests": 7,
+        "failed": 0,
+        "log": "worker-green-required-capture.log"
+      },
+      "tests/modal_dismissible.test.ts": {
+        "tests": 8,
+        "failed": 0,
+        "log": "worker-green-required-capture.log"
+      },
+      "tests/ui/army_hq_ultrawide_layout.test.ts": {
+        "tests": 9,
+        "failed": 0,
+        "log": "worker-focused-final.log"
+      },
+      "tests/ui/recruitment_modal_player_copy.test.ts": {
+        "tests": 2,
+        "failed": 0,
+        "log": "worker-focused-final.log"
+      },
+      "tests/command_dialog_usability.test.ts": {
+        "tests": 3,
+        "failed": 0,
+        "log": "worker-native-summary-correction.log"
+      },
+      "tests/modal_focus_eligibility.test.ts": {
+        "tests": 5,
+        "failed": 0,
+        "log": "worker-native-summary-correction.log"
+      },
+      "tests/ui_player_visibility.test.ts": {
+        "tests": 19,
+        "failed": 0,
+        "log": "visibility-boundaries.log"
+      },
+      "tests/ui_map_tooltip_player_visibility.test.ts": {
+        "tests": 18,
+        "failed": 0,
+        "log": "visibility-boundaries.log"
+      },
+      "tests/ui/panel_rail_ownership.test.ts": {
+        "tests": 5,
+        "failed": 0,
+        "log": "visibility-boundaries.log"
+      }
+    },
+    "note": "Latest per-file results across retained bounded runs; not one full suite"
+  },
+  "browser": {
+    "captures": "report-captures/result.json",
+    "captureCases": 6,
+    "behavioralMatrix": "browser-matrix/result.json",
+    "behavioralCases": 5,
+    "reusedPrefix": {
+      "path": "browser-smoke3/result.json",
+      "checks": [
+        {
+          "name": "briefing equipment",
+          "text": "EQUIPMENT REPORT\n\nHoldings count weapons. The operational percentage describes a separate abstract heavy-equipment pool, not the condition of each weapon type.\n\nTanks held\n15\nReports: 125 / 125 active brigades\nArtillery held\n20 reported (partial)\nReports: 124 / 125 active brigades\nAA systems held\n3\nReports: 125 / 125 active brigades\nHeavy equipment operational pool\n60% reported (partial)\nReports: 124 / 125 active brigades",
+          "bounds": {
+            "left": 12,
+            "right": 1354,
+            "width": 1342,
+            "height": 130,
+            "scrollWidth": 1340,
+            "clientWidth": 1340
+          }
+        },
+        {
+          "name": "canonical summary equipment",
+          "text": "EQUIPMENT REPORT\n\nHoldings count weapons. The operational percentage describes a separate abstract heavy-equipment pool, not the condition of each weapon type.\n\nTanks held\n15\nReports: 125 / 125 active brigades\nArtillery held\n20 reported (partial)\nReports: 124 / 125 active brigades\nAA systems held\n3\nReports: 125 / 125 active brigades\nHeavy equipment operational pool\n60% reported (partial)\nReports: 124 / 125 active brigades",
+          "bounds": {
+            "left": 12,
+            "right": 1354,
+            "width": 1342,
+            "height": 130,
+            "scrollWidth": 1340,
+            "clientWidth": 1340
+          }
+        },
+        {
+          "name": "HQ keyboard trap / named close / opener focus",
+          "passed": true
+        },
+        {
+          "name": "War Summary named close / modal focus trap",
+          "passed": true
+        },
+        {
+          "name": "Recruitment focus / reachable footer / no apply",
+          "passed": true
+        }
+      ],
+      "note": "Overall attempt failed on required Tab trap; only earlier passing reporting/HQ/Summary/Recruitment checks reused"
+    },
+    "requiredDialogCorrection": "browser-dialog-correction/result.json",
+    "preservation": [
+      {
+        "faction": "RBiH",
+        "viewport": {
+          "width": 1366,
+          "height": 768
+        },
+        "turn": 104,
+        "save": "15040ebfe84101bdae73b4ecd7062b140aaebbf4a0b26f1be33dcb5e7f7208fe",
+        "projection": "ce6908ab28596fcc6277e13a984a47d25f363be9702e96b4fc9b0170495c48a2"
+      },
+      {
+        "faction": "RS",
+        "viewport": {
+          "width": 1366,
+          "height": 768
+        },
+        "turn": 104,
+        "save": "773cb48a56efa90e64b0b8bd6bf8bac929e549b5b22c25d71347797bdd825234",
+        "projection": "e3c3bf9bbc5c4978a2bd1744ef89cf2bb6005e6cad0acbcca19a7dda99c69143"
+      },
+      {
+        "faction": "HRHB",
+        "viewport": {
+          "width": 1366,
+          "height": 768
+        },
+        "turn": 104,
+        "save": "befd9fd247287659acd081fc25be9e1b7d358ddb4756d743ae969356bb7bd000",
+        "projection": "d160c58316b3d2f89fcc0500decc36f5abeab6f6c19f120de7e7ca20bead0dd6"
+      },
+      {
+        "faction": "RBiH",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "turn": 104,
+        "save": "15040ebfe84101bdae73b4ecd7062b140aaebbf4a0b26f1be33dcb5e7f7208fe",
+        "projection": "ce6908ab28596fcc6277e13a984a47d25f363be9702e96b4fc9b0170495c48a2"
+      },
+      {
+        "faction": "RS",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "turn": 104,
+        "save": "773cb48a56efa90e64b0b8bd6bf8bac929e549b5b22c25d71347797bdd825234",
+        "projection": "e3c3bf9bbc5c4978a2bd1744ef89cf2bb6005e6cad0acbcca19a7dda99c69143"
+      },
+      {
+        "faction": "HRHB",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "turn": 104,
+        "save": "befd9fd247287659acd081fc25be9e1b7d358ddb4756d743ae969356bb7bd000",
+        "projection": "d160c58316b3d2f89fcc0500decc36f5abeab6f6c19f120de7e7ca20bead0dd6"
+      }
+    ],
+    "fixtureSha256": "aaebe5bd01d9ac78ffb264b74f3827ba34307c4f5ad312b4e735aa65fdca7062",
+    "advances": 0
+  },
+  "independentReview": {
+    "agent": "/root/command_overview_review",
+    "model": "gpt-6.1-sol",
+    "verdict": "PASS after one targeted correction; final visible reports inspected",
+    "focusProofs": [
+      {
+        "before": "summary",
+        "after": "last",
+        "expected": "last",
+        "corrected": true
+      },
+      {
+        "before": "first",
+        "after": "summary",
+        "expected": "summary",
+        "corrected": true
+      }
+    ]
+  },
+  "validation": {
+    "typecheckExit": 0,
+    "mapBuildExit": 0,
+    "typecheckLog": "typecheck-reviewed.log",
+    "mapBuildLog": "map-build-reviewed.log",
+    "documentation": {
+      "files": 2,
+      "tests": 31,
+      "exit": 0,
+      "log": "documentation-checks.log"
+    },
+    "explicitPrecommitExit": 0,
+    "precommitLog": "precommit-hook.log",
+    "automaticHookParityClaimed": false,
+    "planIndexExit": 0,
+    "openGatesExit": 0,
+    "stagedWhitespaceExit": 0
+  },
+  "buildInventory": {
+    "files": 191,
+    "bytes": 28504450,
+    "html": [
+      {
+        "file": "dist/tactical-map/index.html",
+        "bytes": 5772
+      }
+    ]
+  },
+  "protectedPaths": [],
+  "changedFilesAtInventory": [
+    ".gitignore",
+    "docs/20_engineering/PLAYER_VISIBLE_STATE.md",
+    "docs/20_engineering/UI_OWNERSHIP_MATRIX.md",
+    "docs/40_reports/CONSOLIDATED_IMPLEMENTED.md",
+    "docs/40_reports/GUI_MASTER.md",
+    "docs/40_reports/README.md",
+    "docs/40_reports/implemented/20261104_COMMAND_OVERVIEW_USABILITY.md",
+    "docs/40_reports/implemented/20261104_COMMAND_OVERVIEW_USABILITY_RECEIPT.json",
+    "docs/PROJECT_LEDGER.md",
+    "docs/plans/2026-08-05-faction-equipment-totals-visibility-design.md",
+    "docs/plans/2026-11-04-command-overview-usability-plan.md",
+    "src/ui/map/components/WarSummaryModal.tsx",
+    "src/ui/map/components/army_hq/ArmyHQModal.tsx",
+    "src/ui/map/components/army_hq/EquipmentSummary.tsx",
+    "src/ui/map/components/army_hq/WarSummaryContent.tsx",
+    "src/ui/map/data/GameStateAdapter.ts",
+    "src/ui/map/data/types.ts",
+    "src/ui/map/i18n/messages.bcs.ts",
+    "src/ui/map/i18n/messages.en.ts",
+    "src/ui/shared/Modal.tsx",
+    "src/ui/shared/equipmentSummary.ts",
+    "src/ui/warroom/data/war_data_extractor.ts",
+    "tests/command_dialog_usability.test.ts",
+    "tests/modal_focus_eligibility.test.ts",
+    "tests/ui/equipment_reporting_surfaces.test.ts",
+    "tests/ui/equipment_summary.test.ts",
+    "tests/ui_map_game_state_adapter.test.ts",
+    "tools/ui/command_overview_browser_proof.mjs"
+  ],
+  "failuresRetained": [
+    "worker-focused-final.log",
+    "worker-base-b4.log",
+    "typecheck.log",
+    "browser-smoke/result.json",
+    "browser-smoke2/result.json",
+    "browser-smoke3/result.json",
+    "worker-red-required-capture.log",
+    "reviewer-summary-focus.json",
+    "reviewer-closed-details-focus.json",
+    "worker-red-native-summary.log"
+  ]
+}

@@ -176,11 +176,11 @@ describe('Decision Room — proposal-review lever (single-surface approval)', ()
     });
     expect(rejectProposal).not.toHaveBeenCalled();
     expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
-      'Directive staged for next turn',
+      'Directive staged for next week',
     );
     expect(onReceipt).toHaveBeenCalledWith({
       kind: 'success',
-      message: expect.stringContaining('Directive staged for next turn'),
+      message: expect.stringContaining('Directive staged for next week'),
     });
   });
 
@@ -196,7 +196,7 @@ describe('Decision Room — proposal-review lever (single-surface approval)', ()
     });
     expect(acceptProposal).not.toHaveBeenCalled();
     expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
-      'Directive staged for next turn',
+      'Directive staged for next week',
     );
   });
 

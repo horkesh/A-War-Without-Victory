@@ -1,6 +1,17 @@
 import type { MessageKey } from './messages.en';
 
 export const bcsMessages: Partial<Record<MessageKey, string>> = {
+    'equipmentReport.title': 'Izvještaj o opremi',
+    'equipmentReport.tanks': 'Tenkovi na stanju',
+    'equipmentReport.artillery': 'Artiljerija na stanju',
+    'equipmentReport.aa_systems': 'PVO sistemi na stanju',
+    'equipmentReport.pool': 'Operativni fond teške opreme',
+    'equipmentReport.explanation': 'Stanje prikazuje broj oruđa. Operativni postotak opisuje zaseban apstraktni fond teške opreme, a ne stanje svake vrste oružja.',
+    'equipmentReport.reports': 'Izvještaji: {reported} / {total} aktivnih brigada',
+    'equipmentReport.partial': '{count} prijavljeno (djelimično)',
+    'equipmentReport.zeroPool': 'Nema teške opreme u prijavljenom fondu',
+    'equipmentReport.close': 'Zatvori ratni pregled',
+
     'settings.title': 'Postavke',
     'settings.tab.gameplay': 'Igra',
     'settings.tab.display': 'Prikaz',
@@ -2122,9 +2133,11 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'formationDetail.personnelMen': '{count} ljudi',
     'formationDetail.effectiveness': 'Efektivnost',
     'formationDetail.entrenched': 'Ukopano',
+    'formationDetail.turnCount.one': '{count} potez',
     'formationDetail.turnCount': '{count} poteza',
     'formationDetail.digInProgress': 'Napredak ukopavanja',
     'formationDetail.disrupted': 'POREMEĆENO',
+    'formationDetail.turnsRemaining.one': '{count} potez preostao',
     'formationDetail.turnsRemaining': '{count} poteza preostalo',
     'formationDetail.exhaustion': 'Iscrpljenost',
     'formationDetail.commandSpan': 'Komandni raspon',
@@ -4951,6 +4964,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'eventDecision.effect.dimensionShift': '{faction} {dimension} {delta}',
     'eventDecision.effect.recorded': 'Efekat evidentiran',
     'eventModal.effect.duration': ' tokom {turns} poteza',
+    'eventModal.effect.duration.one': ' tokom {turns} poteza',
     'eventModal.effect.moraleChange': '{faction}moral{delta}',
     'eventModal.effect.supplyDelta': '{faction}snabdijevanje{delta}',
     'eventModal.effect.cohesionChange': '{faction}kohezija{delta}',

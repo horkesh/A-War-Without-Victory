@@ -1175,7 +1175,7 @@ describe('CorpsFrontPanel field routing', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
 
-    expect(container.textContent).toContain('Partial 3.0 turns');
+    expect(container.textContent).toContain('Partial 3.0 wk');
     expect(container.textContent).toMatch(/Avg Dig-in\s*No staff report/i);
     expect(container.textContent).not.toContain('Average dig-in0%');
   });
@@ -1193,8 +1193,8 @@ describe('CorpsFrontPanel field routing', () => {
     const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
     expect(container.textContent).toMatch(/Date:\s*1 Jun 1992/i);
-    expect(container.textContent).toMatch(/Turn:\s*8/i);
-    expect(container.textContent).not.toMatch(/Turn:\s*\d+\s+\w+\s+1991/i);
+    expect(container.textContent).toMatch(/Week:\s*8/i);
+    expect(container.textContent).not.toMatch(/Week:\s*\d+\s+\w+\s+1991/i);
   });
 
   it('routes operation objective focus through settlement inspection and clears stale shell context', () => {

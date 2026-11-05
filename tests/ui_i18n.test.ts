@@ -26,6 +26,17 @@ const INTENTIONAL_EN_ONLY = new Set<string>([
 ]);
 
 describe('UI localization substrate', () => {
+    it('renders weekly durations with singular English units while preserving tokens and locale', () => {
+        // Singular is selected by the caller (App.tsx formatEventDuration) via the `.one` key;
+        // plural covers every other value. Avoids both "1 weeks" and "a 8-week".
+        expect(t('eventModal.effect.duration.one', { turns: 1 }, 'en')).toBe(' for 1 week');
+        expect(t('eventModal.effect.duration', { turns: 21 }, 'en')).toBe(' for 21 weeks');
+        expect(t('eventModal.effect.duration', { turns: 8 }, 'en')).toBe(' for 8 weeks');
+        expect(t('eventModal.effect.duration', { turns: 1.1 }, 'en')).toBe(' for 1.1 weeks');
+        expect(t('turnAftermath.records.hardTurnsDetail', { hardTurns: 1 }, 'en')).toBe('Hard weeks: 1');
+        expect(t('eventModal.effect.duration', { turns: 1 }, 'bcs')).toBe(' tokom 1 poteza');
+    });
+
     it('defaults to English when no locale is provided', () => {
         expect(DEFAULT_LOCALE).toBe('en');
         expect(t('settings.title')).toBe('Settings');

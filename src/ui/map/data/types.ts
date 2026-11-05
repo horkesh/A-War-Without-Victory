@@ -1,3 +1,4 @@
+import type { OwnEquipmentSummary } from '../../shared/equipmentSummary';
 /**
  * Type definitions for the MapLibre map application.
  * Migrated from legacy types.ts — only game-state and map-relevant types.
@@ -1049,6 +1050,8 @@ export interface SectorIntelRecordView {
 }
 
 export interface LoadedGameState {
+    /** Own active brigade holdings and abstract condition reports; UI-only, explicit player scope. */
+    equipmentSummary?: OwnEquipmentSummary;
     label: string;
     turn: number;
     phase: string;

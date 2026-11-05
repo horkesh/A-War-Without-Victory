@@ -40,6 +40,8 @@ export function WarSummaryModal({ isOpen, focusSection = 'overview', onClose, on
                 borderRadius: 8,
                 padding: '18px 20px',
                 width: 'min(1040px, 90vw)',
+                maxHeight: '90vh',
+                overflowY: 'auto',
                 boxShadow: '0 8px 32px rgba(0,0,0,0.7)',
                 backdropFilter: 'blur(8px)',
                 color: '#d5c9bc',
@@ -53,6 +55,8 @@ export function WarSummaryModal({ isOpen, focusSection = 'overview', onClose, on
                     </div>
                 </div>
                 <button
+                    type="button"
+                    aria-label={t('equipmentReport.close')}
                     onClick={onClose}
                     style={{ background: 'none', border: 'none', color: '#8a7d70', cursor: 'pointer', fontSize: 16, lineHeight: 1 }}
                 >

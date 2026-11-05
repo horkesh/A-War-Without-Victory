@@ -62,7 +62,7 @@ describe('War Summary empty states', () => {
 
     it.each([
         ['convoys', 'No convoy decisions are pending.'],
-        ['support', 'No local support order is staged this turn.'],
+        ['support', 'No local support order is staged this week.'],
         ['capital', 'Diplomacy capital is not available in this view.'],
     ] as const)('renders an EmptyState for the empty %s section', (section, message) => {
         storeState.loadedGameState = stateForEmptySummary();

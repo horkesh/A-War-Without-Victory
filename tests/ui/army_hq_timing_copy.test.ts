@@ -346,7 +346,7 @@ describe('Army HQ timing copy', () => {
     expect(copy).toContain('Disrupted');
     expect(copy).toContain('3 killed / 8 wounded');
     expect(copy).toContain('4 killed / 9 wounded');
-    expect(copy).toContain('4 turns / 2 attacks');
+    expect(copy).toContain('4-week duration / 2 attacks');
     expect(copy).toContain('1 / 1 held at close');
     expect(copy).not.toContain('corps_commander');
     expect(copy).not.toMatch(/\bCOMP\b|\bAGGR\b|\bDEF\b|\bOPS\b|\bINTEL\b|\bCOHESN\b|\bPRIMARY OBJ\b|\bOBJ\b|\bMOM\b|\bPERS\b|\bCOH\b|\bMOR\b|\bSTS\b|\bCMDR\b|\bKIA\b|\bWIA\b|\b2W\b/);

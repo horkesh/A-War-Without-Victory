@@ -1,3 +1,5 @@
+import { formatCount } from './formatters';
+
 export interface ReportedMetricSummary {
     reportedTotal: number;
     reportedCount: number;
@@ -30,9 +32,9 @@ export function formatReportedPersonnel(
     labels: { partial: (personnel: string) => string; unreported: string },
 ): string {
     if (summary.unreportedCount > 0) {
-        return summary.reportedTotal > 0 ? labels.partial(summary.reportedTotal.toLocaleString()) : labels.unreported;
+        return summary.reportedTotal > 0 ? labels.partial(formatCount(summary.reportedTotal)) : labels.unreported;
     }
-    return summary.reportedTotal.toLocaleString();
+    return formatCount(summary.reportedTotal);
 }
 
 export function formatCompactReportedPersonnel(

@@ -171,6 +171,7 @@ export interface ModalProps {
 
 const FOCUSABLE_SELECTOR = [
     'a[href]',
+    'details > summary:first-of-type',
     'button:not([disabled])',
     'textarea:not([disabled])',
     'input:not([disabled])',
@@ -183,7 +184,42 @@ const FOCUSABLE_SELECTOR = [
  */
 function getFocusableElements(panel: HTMLElement | null): HTMLElement[] {
     if (!panel) return [];
-    return Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
+    return Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter((element) => {
+        if (element.tabIndex < 0 || element.matches(':disabled') || element.closest('[hidden], [inert], [aria-hidden="true"]')) return false;
+        for (let node: HTMLElement | null = element; node; node = node.parentElement) {
+            // A closed disclosure exposes only its first summary subtree;
+            // computed display/visibility alone does not reflect this browser rule.
+            if (node instanceof HTMLDetailsElement && !node.open) {
+                const summary = Array.from(node.children).find(child => child.tagName === 'SUMMARY');
+                if (!summary?.contains(element)) return false;
+            }
+            const style = window.getComputedStyle(node);
+            if (style.display === 'none' || style.visibility === 'hidden' || style.visibility === 'collapse') return false;
+        }
+        return true;
+    });
+}
+
+/** Focus contract for full-screen command dialogs that retain their existing dismissal owner. */
+export function useDialogFocus(isOpen: boolean) {
+    const ref = useRef<HTMLDivElement | null>(null);
+    useEffect(() => {
+        if (!isOpen) return;
+        const previous = document.activeElement as HTMLElement | null;
+        (getFocusableElements(ref.current)[0] ?? ref.current)?.focus();
+        return () => { if (previous?.isConnected) previous.focus(); };
+    }, [isOpen]);
+    const onKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+        if (event.key !== 'Tab' || (event.target as HTMLElement).closest('[role="dialog"]') !== ref.current) return;
+        const controls = getFocusableElements(ref.current);
+        const current = document.activeElement as HTMLElement;
+        if (!controls.length) { event.preventDefault(); ref.current?.focus(); return; }
+        if (!controls.includes(current) || (event.shiftKey ? current === controls[0] : current === controls[controls.length - 1])) {
+            event.preventDefault();
+            (event.shiftKey ? controls[controls.length - 1] : controls[0]).focus();
+        }
+    };
+    return { ref, onKeyDown };
 }
 
 /**
@@ -244,7 +280,7 @@ export function Modal({
             ? panelRef.current?.querySelector<HTMLElement>(`[data-testid="${initialFocusTestId}"]`) ?? null
             : null;
         const focusables = getFocusableElements(panelRef.current);
-        const target = requestedTarget ?? focusables[0] ?? panelRef.current;
+        const target = (requestedTarget && focusables.includes(requestedTarget) ? requestedTarget : null) ?? focusables[0] ?? panelRef.current;
         if (target && typeof target.focus === 'function') {
             target.focus();
         }
@@ -277,10 +313,10 @@ export function Modal({
         const current = (typeof document !== 'undefined'
             ? (document.activeElement as HTMLElement | null)
             : null);
-        if (e.shiftKey && current === first) {
+        if (e.shiftKey && (current === first || !focusables.includes(current as HTMLElement))) {
             e.preventDefault();
             last.focus();
-        } else if (!e.shiftKey && current === last) {
+        } else if (!e.shiftKey && (current === last || !focusables.includes(current as HTMLElement))) {
             e.preventDefault();
             first.focus();
         }
@@ -315,7 +351,9 @@ export function Modal({
                 className={`modal-panel-in ${panelClassName ?? ''}`}
                 style={{ ...(panelStyle ?? {}), zIndex: zIndex + 1 }}
                 onClick={(e) => e.stopPropagation()}
-                onKeyDown={handlePanelKeyDown}
+                // Contain Tab before required-decision children shield shell hotkeys
+                // in their own capture handlers. Dismissal remains independently owned.
+                onKeyDownCapture={handlePanelKeyDown}
                 data-testid={testIdPanel ?? 'modal-panel'}
             >
                 {children}

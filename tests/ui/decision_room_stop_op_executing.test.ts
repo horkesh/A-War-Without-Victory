@@ -205,7 +205,7 @@ describe('Decision Room stop-op reachability for executing operations', () => {
       });
     });
     expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
-      'Directive staged for next turn',
+      'Directive staged for next week',
     );
   });
 });

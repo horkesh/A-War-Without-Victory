@@ -87,15 +87,15 @@ function describeEffect(effect: EventEffect): string | null {
       ].filter(Boolean).join(', ');
       return `${faction} equipment added: ${granted || 'support'}`;
     }
-    case 'aggression_modifier': return `${faction} operational aggression ${signedDelta(effect.delta)} for ${effect.duration_turns} turns`;
+    case 'aggression_modifier': return `${faction} operational aggression ${signedDelta(effect.delta)} for ${effect.duration_turns} weeks`;
     case 'control_change': return `${faction} territorial control changes in ${effect.osids.length} area${effect.osids.length === 1 ? '' : 's'}`;
-    case 'guerrilla_threat': return `${faction} rear-area threat for ${effect.duration_turns} turns`;
-    case 'recruitment_modifier': return `${faction} recruitment ${Math.round(effect.pool_multiplier * 100)}% for ${effect.duration_turns} turns`;
-    case 'equipment_quality_modifier': return `${faction} combat effectiveness ${Math.round(effect.multiplier * 100)}% for ${effect.duration_turns} turns`;
-    case 'doctrine_constraint': return `${faction} doctrine constraint for ${effect.duration_turns} turns`;
-    case 'offensive_ops_suppression': return `${faction} offensive operations suppressed for ${effect.duration_turns} turns`;
-    case 'alliance_lock': return `Alliance ${effect.mode === 'floor' ? 'floor' : 'ceiling'} ${effect.value} for ${effect.duration_turns} turns`;
-    case 'bot_priority_shift': return `${getPlayerSafePoliticalFactionName(effect.faction)} staff priorities shift for ${effect.duration_turns} turns`;
+    case 'guerrilla_threat': return `${faction} rear-area threat for ${effect.duration_turns} weeks`;
+    case 'recruitment_modifier': return `${faction} recruitment ${Math.round(effect.pool_multiplier * 100)}% for ${effect.duration_turns} weeks`;
+    case 'equipment_quality_modifier': return `${faction} combat effectiveness ${Math.round(effect.multiplier * 100)}% for ${effect.duration_turns} weeks`;
+    case 'doctrine_constraint': return `${faction} doctrine constraint for ${effect.duration_turns} weeks`;
+    case 'offensive_ops_suppression': return `${faction} offensive operations suppressed for ${effect.duration_turns} weeks`;
+    case 'alliance_lock': return `Alliance ${effect.mode === 'floor' ? 'floor' : 'ceiling'} ${effect.value} for ${effect.duration_turns} weeks`;
+    case 'bot_priority_shift': return `${getPlayerSafePoliticalFactionName(effect.faction)} staff priorities shift for ${effect.duration_turns} weeks`;
     case 'cost_ledger_annotation': return effect.text ?? 'Campaign cost ledger annotation recorded';
   }
   return 'Effect recorded';

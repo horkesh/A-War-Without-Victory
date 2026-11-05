@@ -68,9 +68,9 @@ describe('ops modal BrigadeCard i18n', () => {
 
     const card = screen.getByRole('button', { name: /1st Test Mechanized Brigade/i });
     expect(card.getAttribute('title')).toContain('Personnel: 1,450');
-    expect(card.getAttribute('title')).toContain('March: 1 turn');
+    expect(card.getAttribute('title')).toContain('March: 1 week');
     expect(screen.getByText('Mechanized')).toBeTruthy();
-    expect(screen.getByText('1 turn march')).toBeTruthy();
+    expect(screen.getByText('1 week march')).toBeTruthy();
   });
 
   it('renders missing BrigadeCard strength fields as unreported instead of zero or healthy defaults', () => {

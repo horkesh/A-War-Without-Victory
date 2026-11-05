@@ -2,10 +2,11 @@
  * War Summary content — extracted from WarSummaryModal for inline rendering
  * inside Army HQ SUMMARY tab. Same data, no modal wrapper.
  */
+import { EquipmentSummary } from './EquipmentSummary';
 import { useEffect, useMemo, useState } from 'react';
 import type { SummaryFocusSection } from '../../data/types';
 import { useGameStore } from '../../store/gameStore';
-import { formatPersonnel, formatTurnLabel, fmtK, fmtPct } from '../../utils/formatters';
+import { formatPersonnel, formatCount, formatTurnLabel, fmtK, fmtPct } from '../../utils/formatters';
 import { getFactionFlag } from '../../utils/factionAssets';
 import { FACTION_COLORS, FACTION_SHORT_LABELS } from '../../utils/theme';
 import { getPlayerSafeMilitaryFactionName } from '../../utils/playerSafeText';
@@ -18,7 +19,7 @@ import {
     type StrategicObjectiveStatus,
     type StrategicObjectiveTrend,
 } from '../../data/GameStateAdapter';
-import { getActiveLocale, t, useLocale, type MessageKey } from '../../i18n';
+import { t, useLocale, type MessageKey } from '../../i18n';
 import { localizedOperationalSitrepCopy } from '../../utils/operationalSitrepCopy';
 import { openPresidentialDecisionRoomNavigationTarget } from '../../utils/presidentialDecisionRoomNavigation';
 import type { PresidentialDecisionRoomNavigationTarget } from '../../data/presidentialDecisionRoom';
@@ -59,11 +60,11 @@ function campaignCostSeverityLabel(severity: TurnAftermathCostSeverity): string 
 }
 
 function reportedK(value: number | undefined, reported: boolean): string {
-    return reported ? fmtK(value ?? 0) : t('corpsFront.unreported');
+    return reported ? fmtK(value) : t('corpsFront.unreported');
 }
 
 function localizedInteger(value: number): string {
-    return value.toLocaleString(getActiveLocale() === 'bcs' ? 'bs-BA' : 'en-US');
+    return formatCount(value);
 }
 
 interface WarSummaryContentProps {
@@ -158,6 +159,7 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
                 <div className="grid grid-cols-1 xl:grid-cols-2 min-[2200px]:grid-cols-3 gap-4">
                     {playerFaction ? (
                         <>
+                            <EquipmentSummary summary={loadedGameState.equipmentSummary} />
                             {strategicObjectives.length > 0 && (
                                 <StrategicObjectivesSection objectives={strategicObjectives} onNavigateTarget={onNavigateTarget} />
                             )}

@@ -157,7 +157,7 @@ describe('DirectiveCard stop-op action host', () => {
       });
     });
     expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
-      'Directive staged for next turn',
+      'Directive staged for next week',
     );
   });
 
@@ -190,7 +190,7 @@ describe('DirectiveCard stop-op action host', () => {
     });
     expect(acceptProposal).not.toHaveBeenCalled();
     expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
-      'Directive staged for next turn',
+      'Directive staged for next week',
     );
   });
 
@@ -227,7 +227,7 @@ describe('DirectiveCard stop-op action host', () => {
       expect(stageOpDirectiveOrder).toHaveBeenCalledWith({ corpsId: 'arbih_3rd_corps', targetOsid: 'zenica' });
     });
     expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
-      'Directive staged for next turn',
+      'Directive staged for next week',
     );
   });
 
@@ -406,7 +406,7 @@ describe('DirectiveCard stop-op action host', () => {
       });
     });
     expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
-      'Directive staged for next turn',
+      'Directive staged for next week',
     );
   });
 
@@ -486,7 +486,7 @@ describe('DirectiveCard stop-op action host', () => {
       }
     });
     expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
-      'Directive staged for next turn',
+      'Directive staged for next week',
     );
   });
 
@@ -535,7 +535,7 @@ describe('DirectiveCard stop-op action host', () => {
     });
     expect(bridge._unexpectedInvocations).toEqual([]);
     expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
-      'Directive staged for next turn',
+      'Directive staged for next week',
     );
   });
 
@@ -557,7 +557,7 @@ describe('DirectiveCard stop-op action host', () => {
     expect(bridge._unexpectedInvocations).toEqual([]);
     expect(bridge.forceLaunchProposal).not.toHaveBeenCalled();
     expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
-      'Directive staged for next turn',
+      'Directive staged for next week',
     );
   });
 

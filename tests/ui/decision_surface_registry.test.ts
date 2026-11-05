@@ -123,7 +123,7 @@ describe('decision surface registry', () => {
       summary: 'resolve-paramilitary-requests for vrs_drina_corps',
     })).toEqual({
       title: 'Paramilitary authorization',
-      summary: 'A deployment request requires a presidential instruction before the turn can advance.',
+      summary: 'A deployment request requires a presidential instruction before the week can advance.',
     });
   });
 

@@ -146,7 +146,7 @@ function formatSignedEventDelta(delta: number | undefined): string {
 
 function formatEventDuration(turns: number | undefined): string {
   return typeof turns === 'number' && Number.isFinite(turns) && turns > 0
-    ? t('eventModal.effect.duration', { turns })
+    ? t(turns === 1 ? 'eventModal.effect.duration.one' : 'eventModal.effect.duration', { turns })
     : '';
 }
 
