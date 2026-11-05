@@ -25,7 +25,7 @@ import { useGameStore } from '../store/gameStore';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { DecisionModalImageHeader } from './DecisionModalImageHeader';
-import { resolveEventIllustration } from '../data/eventIllustrationArt';
+import { resolveEventIllustration, section6StillAlt } from '../data/eventIllustrationArt';
 import { getDecisionHeaderForEventCategory } from '../data/presidentialDeskAssets';
 import { isDisplayEventEffect } from '../utils/eventEffectDisplay';
 import { turnToDateString } from '../utils/formatters';
@@ -558,8 +558,12 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
     const safeSourceNote = sourceNote ? playerSafeDossierText(sourceNote, diagMode) : null;
     // Art: the event's own documentary still when it authors one, otherwise the
     // decision plate for its category. Presentation only; the dossier is unchanged.
-    const headerArt = resolveEventIllustration(eventCatalog?.get(decision.event_id)?.image)
+    const authoredImage = eventCatalog?.get(decision.event_id)?.image;
+    const headerArt = resolveEventIllustration(authoredImage)
         ?? getDecisionHeaderForEventCategory(localizedDecision.category);
+    // A §6 still is record, not decoration: it carries its factual alt and the eyebrow drops
+    // the faction colour for the neutral accent, so no faction brands the atrocity (D8 panel).
+    const section6Alt = section6StillAlt(authoredImage);
 
     return (
         <Modal
@@ -580,12 +584,12 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
             >
                 <DecisionModalImageHeader
                     imageUrl={headerArt}
-                    imageAlt=""
+                    imageAlt={section6Alt ?? ''}
                     imageTestId="event-decision-header-art"
                     eyebrow={`${t('eventDecision.decisionRequired')} · ${eventDecisionFactionLabel(localizedDecision.faction)} · ${decisionDate}`}
                     title={localizedDecision.event_title}
                     titleId="event-decision-title"
-                    accentClassName={factionColor}
+                    accentClassName={section6Alt ? 'text-accent-gold' : factionColor}
                 />
                 <div className="p-6">
 

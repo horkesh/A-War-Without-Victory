@@ -13,7 +13,7 @@ import React from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { EventDecisionModal } from '../../src/ui/map/components/EventDecisionModal.js';
-import { resolveEventIllustration } from '../../src/ui/map/data/eventIllustrationArt.js';
+import { resolveEventIllustration, section6StillAlt } from '../../src/ui/map/data/eventIllustrationArt.js';
 import {
   getConsequenceStillForTone,
   getDecisionHeaderForEventCategory,
@@ -102,6 +102,31 @@ describe('EventDecisionModal image header', () => {
     }));
     const art = screen.getByTestId('event-decision-header-art') as HTMLImageElement;
     expect(art.getAttribute('src')).toBe(expected);
+    expect(art.getAttribute('alt')).toBe('');
+  });
+
+  // §6 panel on D8 (2026-11-06): a gated still is record, never decoration.
+  it('gives a §6 still a factual alt and a neutral eyebrow, in both languages', () => {
+    const base = fixtureEvent('rbih_state_identity');
+    const def: EventDefinition = { ...base, image: 'event_concentration_camps_revealed_1992.webp' };
+    for (const locale of ['en', 'bcs'] as const) {
+      setLocale(locale);
+      render(React.createElement(EventDecisionModal, {
+        decision: decisionFor(def),
+        eventCatalog: new Map([[def.id, def]]),
+        onRespond: () => undefined,
+      }));
+      const art = screen.getByTestId('event-decision-header-art') as HTMLImageElement;
+      const alt = art.getAttribute('alt') ?? '';
+      expect(alt).toBe(section6StillAlt(def.image));
+      expect(alt).toMatch(/Prijedor/);
+      const eyebrow = art.parentElement?.querySelector('.uppercase') as HTMLElement;
+      expect(eyebrow.className).toContain('text-accent-gold');
+      expect(eyebrow.className).not.toContain('text-faction-');
+      cleanup();
+    }
+    expect(section6StillAlt('event_referendum.webp')).toBeNull();
+    expect(section6StillAlt(undefined)).toBeNull();
   });
 });
 
