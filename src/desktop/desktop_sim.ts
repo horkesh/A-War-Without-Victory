@@ -33,7 +33,7 @@ import { computeFrontWidthMetrics } from '../sim/combat/front_width_metrics.js';
 import { computeSectorCombatRatings } from '../sim/combat/sector_combat_rating.js';
 import { applyRecruitment, evaluateRecruitmentEligibility, initializeRecruitmentResources, recruitBrigade } from '../sim/recruitment_engine.js';
 import { buildRecruitmentContext } from '../sim/recruitment_context.js';
-import { assertTurnSuccess, runTurn } from '../sim/turn_pipeline.js';
+import { assertTurnSuccess, runTurn, type TurnInput } from '../sim/turn_pipeline.js';
 import { loadEventDefinitionsFromDir } from '../sim/events/event_loader.js';
 import { applyEventEffects } from '../sim/events/apply_effects.js';
 import { resolveEventDecision } from '../sim/events/resolve_decision.js';
@@ -386,7 +386,22 @@ export async function loadStateFromPath(statePath: string, baseDir: string): Pro
  * Advance one war-phase turn via the war pipeline (`runTurn`).
  * Returns new state; does not mutate the argument.
  */
-export async function advanceTurn(state: GameState, baseDir: string): Promise<DesktopSimAdvanceResult> {
+export interface DesktopAdvanceTurnOptions {
+    /**
+     * PAUSE BEFORE COMBAT: forwarded to `runTurn` as `TurnInput.onPlayerDecisionsPending`.
+     * Called with the pipeline's working state right after `evaluate-events` when that step
+     * queued player decisions this turn; resolve them in place with
+     * `resolveDesktopEventDecisionInPlace` (or `resolveEventDecision`) and the rest of the
+     * turn (movement, combat, ...) runs on the answered state. Unset ⇒ unchanged behaviour.
+     */
+    onPlayerDecisionsPending?: TurnInput['onPlayerDecisionsPending'];
+}
+
+export async function advanceTurn(
+    state: GameState,
+    baseDir: string,
+    options: DesktopAdvanceTurnOptions = {},
+): Promise<DesktopSimAdvanceResult> {
     const phase = state.meta?.phase ?? 'war';
     const seed = state.meta?.seed ?? 'desktop-seed';
 
@@ -474,6 +489,9 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
                 historicalOobIdLookup: sharedTurnInputs.historicalOobIdLookup,
                 historicalEquipmentClassLookup: sharedTurnInputs.historicalEquipmentClassLookup,
                 eventDefinitions: loadDesktopEventDefinitions(baseDir),
+                ...(options.onPlayerDecisionsPending
+                    ? { onPlayerDecisionsPending: options.onPlayerDecisionsPending }
+                    : {}),
             });
             assertTurnSuccess(result);
             const { nextState, report } = result;
@@ -816,6 +834,40 @@ export function resolveDesktopEventDecision(
         eventId,
         responseId,
     );
+}
+
+/**
+ * The same resolution as `resolveDesktopEventDecision`, written back INTO `state`.
+ *
+ * The pause-before-combat callback holds the turn pipeline's working state object, which the
+ * pipeline keeps using after the callback returns, so a resolution there must mutate that
+ * object rather than return a new one. Top-level fields are replaced in their existing key
+ * order (fields the resolution removed are deleted; new ones are appended), so the result is
+ * the same object holding exactly the resolved state.
+ */
+export function resolveDesktopEventDecisionInPlace(
+    state: GameState,
+    eventId: string,
+    responseId: string,
+    baseDir: string,
+): void {
+    const resolved = resolveDesktopEventDecision(state, eventId, responseId, baseDir);
+    replaceGameStateContents(state, resolved);
+}
+
+function replaceGameStateContents(target: GameState, source: GameState): void {
+    const targetRecord = target as unknown as Record<string, unknown>;
+    const sourceRecord = source as unknown as Record<string, unknown>;
+    for (const key of Object.keys(targetRecord)) {
+        if (Object.prototype.hasOwnProperty.call(sourceRecord, key)) {
+            targetRecord[key] = sourceRecord[key];
+        } else {
+            delete targetRecord[key];
+        }
+    }
+    for (const key of Object.keys(sourceRecord)) {
+        if (!Object.prototype.hasOwnProperty.call(targetRecord, key)) targetRecord[key] = sourceRecord[key];
+    }
 }
 
 /** Re-export for main process (serialize/deserialize state for IPC). */
