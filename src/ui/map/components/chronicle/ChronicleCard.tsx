@@ -77,7 +77,7 @@ export const ChronicleCard = React.memo(function ChronicleCard({ entry }: Chroni
 
                 {/* Detail */}
                 {detail && (
-                    <div className={`text-xs font-mono mt-1 leading-tight ${entry.ghost ? 'text-amber-200/80 italic' : 'text-stone-300/90'}`}>
+                    <div className={`text-xs mt-1 leading-tight ${entry.ghost ? 'text-amber-200/80 italic' : 'text-stone-300/90'}`}>
                         {detail}
                     </div>
                 )}

@@ -167,7 +167,7 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
     ];
 
     return (
-        <div className="px-4 py-3 space-y-3 text-xs border-t border-panel-border/50 bg-panel-card font-mono">
+        <div className="px-4 py-3 space-y-3 text-xs border-t border-panel-border/50 bg-panel-card">
             {/* Arc badge + location row */}
             <div className="flex items-center gap-2 flex-wrap">
                 {arc && ARC_BADGE_STYLE[arc] && (
@@ -346,7 +346,7 @@ export function OrbatSection({ corpsId, brigades, sectors }: OrbatSectionProps) 
                     density="compact"
                 />
             ) : (
-            <div className="max-h-[500px] overflow-y-auto space-y-1 pr-2 custom-scrollbar font-mono">
+            <div className="max-h-[500px] overflow-y-auto space-y-1 pr-2 custom-scrollbar">
                 <div className="flex items-center px-4 py-1 text-xs text-text-secondary/60 uppercase tracking-widest font-bold">
                     <span className="w-6 shrink-0" />
                     <span className="flex-1 min-w-0">{t('orbat.unitIdentifier')}</span>

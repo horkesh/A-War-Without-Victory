@@ -821,7 +821,7 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
             <p className="mt-0.5 text-xs text-red-300">{t('directive.stakes.revoltLikely')}</p>
           )}
           {frictionStakes.patronConfidenceAtRisk < 0 && (
-            <p className="mt-0.5 text-xs font-mono text-text-secondary">
+            <p className="mt-0.5 text-xs text-text-secondary">
               {t('directive.stakes.patronAtRisk', { delta: frictionStakes.patronConfidenceAtRisk })}
             </p>
           )}

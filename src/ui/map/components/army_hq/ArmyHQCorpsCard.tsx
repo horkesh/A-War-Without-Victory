@@ -288,7 +288,7 @@ export function ArmyHQCorpsCard({
                 </div>
 
                 {/* Line 2: Commander + grade */}
-                <div className="mt-1.5 flex flex-wrap items-start gap-x-2.5 gap-y-1 text-[12px] text-text-secondary font-mono">
+                <div className="mt-1.5 flex flex-wrap items-start gap-x-2.5 gap-y-1 text-[12px] text-text-secondary">
                     {displayCommanderName ? (
                         <span className="min-w-0 basis-full break-words sm:basis-auto sm:flex-1">
                             {data.syntheticCommand ? `${t('armyHqCorps.operationCommander')}: ` : ''}
@@ -324,13 +324,13 @@ export function ArmyHQCorpsCard({
                 </div>
 
                 {data.commanderDisplay?.source === 'opening_read_model' && (
-                    <div data-testid="army-hq-opening-command-provenance" className="mt-1 text-xs leading-4 text-amber-300/85 font-mono">
+                    <div data-testid="army-hq-opening-command-provenance" className="mt-1 text-xs leading-4 text-amber-300/85">
                         <span className="font-bold uppercase tracking-[0.12em]">{t('commanderDisplay.openingCommand')}</span>
                         <span className="text-text-secondary"> - {t('commanderDisplay.openingCommandHelp')}</span>
                     </div>
                 )}
                 {data.commanderDisplay?.source === 'synthetic' && (
-                    <div data-testid="army-hq-command-staff-provenance" className="mt-1 text-xs leading-4 text-amber-300/85 font-mono">
+                    <div data-testid="army-hq-command-staff-provenance" className="mt-1 text-xs leading-4 text-amber-300/85">
                         <span className="font-bold uppercase tracking-[0.12em]">{t('commanderDisplay.commandStaff')}</span>
                         <span className="text-text-secondary"> - {t('commanderDisplay.commandStaffHelp')}</span>
                     </div>

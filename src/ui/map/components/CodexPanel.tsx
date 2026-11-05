@@ -49,7 +49,7 @@ const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
 function CategoryBadge({ category }: { category: string }) {
     const colors = CATEGORY_COLORS[category] ?? { bg: 'bg-neutral-400/15', text: 'text-neutral-400' };
     return (
-        <span className={`px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.12em] rounded ${colors.bg} ${colors.text}`}>
+        <span className={`shrink-0 whitespace-nowrap px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.12em] rounded ${colors.bg} ${colors.text}`}>
             {category}
         </span>
     );
@@ -118,7 +118,7 @@ function TierBadge({ tier }: { tier: CodexTier }) {
         <span
             data-testid="codex-tier-badge"
             data-tier={tier}
-            className="px-1 py-0.5 text-xs font-bold uppercase tracking-[0.1em] rounded bg-neutral-500/15 text-neutral-400"
+            className="shrink-0 whitespace-nowrap px-1 py-0.5 text-xs font-bold uppercase tracking-[0.1em] rounded bg-neutral-500/15 text-neutral-400"
         >
             {tierLabel(tier)}
         </span>
@@ -760,7 +760,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                                                 : 'hover:bg-white/3 border-l-2 border-l-transparent'
                                                     }`}
                                                 >
-                                                    <div className="flex items-center gap-2 mb-0.5">
+                                                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-0.5">
                                                         <CategoryBadge category={resolved?.category ?? essay.category} />
                                                         <TierBadge tier={row.tier} />
                                                         {ghost && (
@@ -810,7 +810,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                             </div>
                         ) : (
                             <div
-                                className="bg-[#f5f0e8] border border-neutral-300 rounded-lg shadow-md relative max-w-[500px] mx-auto"
+                                className="bg-paper paper-grain border border-neutral-400/60 rounded-lg shadow-md relative overflow-hidden max-w-[560px] mx-auto"
                                 data-testid="codex-selected-essay"
                                 data-essay-id={selectedEssay.id}
                                 data-essay-year={selectedEssay.year}
@@ -820,10 +820,10 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                     {t('codex.title')}
                                 </div>
 
-                                <div className="px-3 py-1.5 border-b border-neutral-300/60 bg-[#ebe5d8] rounded-t-lg">
+                                <div className="px-3 py-1.5 border-b border-neutral-500/30 bg-black/5 rounded-t-lg">
                                     <div className="flex items-center gap-2 mb-1">
                                         <CategoryBadge category={selectedResolvedEssay.category} />
-                                        <span className="text-xs uppercase text-neutral-500 tracking-[0.15em]">
+                                        <span className="text-xs uppercase text-neutral-600 tracking-[0.15em]">
                                             {selectedEssay.year}
                                         </span>
                                         {selectedResolvedEssay.isGhost && (
@@ -835,7 +835,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                     <div className="text-[12px] font-bold text-neutral-800 leading-tight" style={{ fontFamily: 'var(--font-command)' }}>
                                         {selectedResolvedEssay.title}
                                     </div>
-                                    <div className="text-xs text-neutral-500 mt-1 italic">
+                                    <div className="text-xs text-neutral-600 mt-1 italic">
                                         {selectedResolvedEssay.isGhost ? t('codex.historicalGhostEntry') : t('codex.historicalContext')}
                                     </div>
                                 </div>

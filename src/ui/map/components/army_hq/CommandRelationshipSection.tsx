@@ -201,7 +201,7 @@ export function CommandRelationshipSection({
                 {delegationSummaryLabel !== null && (
                     <div className="flex items-center gap-1.5">
                         <span className="text-xs text-blue-400/70 shrink-0">◆</span>
-                        <span className="text-xs text-text-secondary font-mono">
+                        <span className="text-xs text-text-secondary">
                             {t('commandRelationship.activeOperations', { label: delegationSummaryLabel })}
                         </span>
                     </div>
@@ -211,7 +211,7 @@ export function CommandRelationshipSection({
                 {reportedCommandStrain > 0 && recoveryForecast && (
                     <div className="flex items-center gap-1.5">
                         <span className="text-xs text-text-secondary/60 uppercase tracking-wider shrink-0">{t('commandRelationship.recovery')}</span>
-                        <span className="text-xs text-text-secondary font-mono">
+                        <span className="text-xs text-text-secondary">
                             {recoveryForecastToken ? t(recoveryForecastToken.key, recoveryForecastToken.params) : recoveryForecast}
                         </span>
                     </div>
@@ -221,7 +221,7 @@ export function CommandRelationshipSection({
                 {reportedCommandStrain > 0 && exhaustionContributing && (
                     <div className="flex items-center gap-1.5">
                         <span className="text-xs text-amber-500/70 shrink-0">▲</span>
-                        <span className="text-xs text-text-secondary font-mono">
+                        <span className="text-xs text-text-secondary">
                             {t('commandRelationship.corpsExhaustion', { value: Math.round(reportedCorpsExhaustion) })}
                         </span>
                     </div>
@@ -238,7 +238,7 @@ export function CommandRelationshipSection({
                 {factionExhaustionElevated && (
                     <div className="flex items-start gap-1.5" data-testid="faction-campaign-drag">
                         <span className="text-xs text-amber-500/70 mt-0.5 shrink-0">▲</span>
-                        <span className="text-xs text-text-secondary font-mono leading-snug">
+                        <span className="text-xs text-text-secondary leading-snug">
                             {t('commandRelationship.nationalWarStrain', { value: Math.round(factionWarExhaustion!) })}
                         </span>
                     </div>

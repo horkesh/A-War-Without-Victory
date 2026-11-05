@@ -55,7 +55,7 @@ export function CommanderSection({ corps, gameState, operations }: CommanderSect
                     <div className="text-xs font-bold uppercase tracking-widest text-amber-400 bg-amber-500/5 px-3 py-1.5 border border-amber-500/20">
                         {t('commanderSection.syntheticJnaStaff')}
                     </div>
-                    <div className="text-[12px] text-text-primary font-mono p-3 bg-panel-bg border border-panel-border">
+                    <div className="text-[12px] text-text-primary p-3 bg-panel-bg border border-panel-border">
                         <div className="text-xs uppercase tracking-widest text-text-secondary mb-1">
                             {t('commanderSection.operationCommander')}
                         </div>
@@ -72,7 +72,7 @@ export function CommanderSection({ corps, gameState, operations }: CommanderSect
             ) : commanderDisplay ? (
                 commanderDisplay.source === 'unreported' ? (
                 <div className="space-y-4">
-                    <div className="text-[12px] text-text-secondary font-mono italic p-3 bg-panel-bg border border-panel-border">
+                    <div className="text-[12px] text-text-secondary italic p-3 bg-panel-bg border border-panel-border">
                         {t('commanderSection.sourceUnreported')}
                     </div>
                 </div>
@@ -88,7 +88,7 @@ export function CommanderSection({ corps, gameState, operations }: CommanderSect
                 )
             ) : (
                 <div className="space-y-4">
-                    <div className="text-[12px] text-red-500/80 font-mono italic p-3 bg-red-500/5 border border-red-500/20">
+                    <div className="text-[12px] text-red-500/80 italic p-3 bg-red-500/5 border border-red-500/20">
                         {t('commanderSection.vacancy')}
                     </div>
                 </div>

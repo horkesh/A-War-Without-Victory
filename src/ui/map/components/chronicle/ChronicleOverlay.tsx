@@ -178,7 +178,7 @@ function ChronicleChapterView({
     if (chapters.length === 0) {
         return (
             <div className="flex h-full items-center justify-center">
-                <p className="text-xs font-mono text-stone-400">{t('chronicle.noChapters')}</p>
+                <p className="text-xs text-stone-400">{t('chronicle.noChapters')}</p>
             </div>
         );
     }
@@ -231,7 +231,7 @@ function ChronicleChapterView({
                             >
                                 {chapter.title}
                             </h2>
-                            <p className="mt-1 text-xs font-mono text-stone-400">
+                            <p className="mt-1 text-xs text-stone-400">
                                 {chapter.summary} | {formatChronicleChapterDateRange(chapter)}
                             </p>
                         </div>
@@ -767,7 +767,7 @@ export function ChronicleOverlay() {
                             {/* Turn columns with stems and cards */}
                             {filteredEntries.length === 0 ? (
                                 <div className="flex items-center justify-center" style={{ minHeight: '320px' }}>
-                                    <p className="text-stone-400 text-xs font-mono">
+                                    <p className="text-stone-400 text-xs">
                                         {t('chronicle.noEntries')}
                                     </p>
                                 </div>
