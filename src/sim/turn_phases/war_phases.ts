@@ -1893,6 +1893,10 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.headless_scenario_auto_control === true) return;
             const playerFaction = context.state.meta.player_faction;
             if (!playerFaction) return;
+            // Owner calibration directive 2026-11-05: a staff-controlled player (autonomy >= 1)
+            // keeps its operations exactly as bot staff do; headless injects once at load, so
+            // this per-turn re-injection is for a manual (autonomy 0) player only.
+            if (selectBotBrigadeOrderFactions(context.state).includes(playerFaction)) return;
             const hasAcceptedHistoricalOperation = (context.state.meta.pending_proposal_reviews ?? []).some(
                 review => review.faction === playerFaction
                     && review.accepted === true
@@ -2777,24 +2781,19 @@ export const warPhases: NamedPhase[] = [
                 const playerFaction = context.state.meta.headless_scenario_auto_control
                     ? null
                     : context.state.meta.player_faction ?? null;
+                // Owner calibration directive 2026-11-05: live must reproduce headless. A
+                // staff-controlled player faction (autonomy >= 1) is in `factions` and gets its
+                // orders in the same replace-mode pass as bot staff; the former separate
+                // merge pass let last turn's orders beat fresh staff output and was the root
+                // of the live Goražde divergence. Only a manual (autonomy 0) player keeps the
+                // historical-operation assist below.
                 const playerAssistedExecutionActive =
                     playerFaction != null && factions.includes(playerFaction);
-                const ordinaryBotFactions = playerAssistedExecutionActive
-                    ? factions.filter((faction) => faction !== playerFaction)
-                    : factions;
 
-                const botOrderDiagnostics = generateAllBotOrdersOsid(context.state, ordinaryBotFactions, osidCtx);
+                const botOrderDiagnostics = generateAllBotOrdersOsid(context.state, factions, osidCtx);
                 context.report.bot_order_diagnostics = createBotOrderDiagnosticsSnapshot(context.state, botOrderDiagnostics);
 
-                if (playerFaction && playerAssistedExecutionActive) {
-                    const assistDiagnostics = generateAllBotOrdersOsid(
-                        context.state,
-                        [playerFaction],
-                        osidCtx,
-                        { mergeWithExistingOrders: true },
-                    );
-                    context.report.player_assisted_execution = assistDiagnostics;
-                } else if (playerFaction && hasPlayerHistoricalOperationAssistWork(context.state)) {
+                if (playerFaction && !playerAssistedExecutionActive && hasPlayerHistoricalOperationAssistWork(context.state)) {
                     const assistDiagnostics = generateAllBotOrdersOsid(
                         context.state,
                         [playerFaction],
@@ -2938,6 +2937,9 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const playerFaction = context.state.meta.player_faction ?? null;
             if (!playerFaction) return;
+            // Owner calibration directive 2026-11-05: staff-issued orders (autonomy >= 1) do not
+            // break truces in the player's name, exactly as headless (which never runs this).
+            if (selectBotBrigadeOrderFactions(context.state).includes(playerFaction)) return;
             // Check if player has any attack orders targeting a truce-partner OSID
             const orders = context.state.military.brigade_attack_orders;
             if (!orders) return;
