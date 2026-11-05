@@ -2913,6 +2913,8 @@ export function injectPrePlannedOperations(
         if (deferredCorps.has(def.corps)) continue; // first live op is awaiting player authorization
         const cmd = corpsCommand[def.corps];
         if (!cmd) continue;
+        // A running operation is not re-queued by the per-turn live re-injection (mirrors the dated path).
+        if ((cmd.active_operations ?? []).some((op) => op.name === def.name)) continue;
         if (!cmd.queued_operations) cmd.queued_operations = [];
         if (!cmd.queued_operations.includes(def.name)) {
             cmd.queued_operations.push(def.name);
