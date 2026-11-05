@@ -161,3 +161,32 @@ Donji Koričani is Croat-majority and HRHB at startup. At week 39 no brigade sta
 - **Headless 188w:** 712/708/707/697 (base 711/707/706/693, net +7).
 - **October 1995 versus 711:** gains Domaljevac, Krepšić, Slatina, Bjelajce and Ostra Luka; loses Sanski Most Ilidža, a t188 capture before.
 - **Guards:** enclaves on schedule; strict health PASS.
+
+January 1993 signed off by the owner at 712/712 (2026-11-05).
+
+# April 1994: 708 → 711, and live = headless past week 39
+
+## Calibration change: the 444th prestages home (commit 2c821f17c)
+
+April 1994 mismatches at 708 were Brka, Doljani, Turija and Kreševo. The investigator traced them with the eligibility trace (`AWWV_DEBUG_REASON_CODES=preplanned_eligibility`) and state snapshots.
+
+- **Doljani and Turija.** The 4th Corps queue head, "Jablanica–Doljani Local Attack", failed to build every turn from t66 to t94 with `staging_unreachable`. The 444th sat at `op:trnovo:tusila`, 4 hops from Jablanica, and `planning_duration: 3` allows only 2. From t95, Washington makes every objective "already controlled", so the head never clears and Operation Neretva '93 behind it never runs. With `prestage_from: 58`, the 444th returns home to Jablanica. The local attack launches at t66 and fails twice, the queue advances, and Neretva '93 takes Doljani (444th, ratio 3.4) and Turija (Upper Neretva axis, ratio 35) at t74 by ordinary combat.
+- **Kreševo.** In the baseline, the commander AI's "Operacija Gazija" (441st and 444th) took it at t75. With the change, both brigades are committed to Doljani and Neretva from t66 to t74, so Gazija never forms. Kreševo stays HRHB at w104, w156 and w188. This is a side effect, and fragile: the HVO garrison is at cohesion 1.
+- **Brka is not fixable lawfully.** No pre-planned operation targets it. Four variants (an extra objective, Semberija brigades, `min_attack_outcome`, earlier timing) produced no battle: the VRS East Bosnian Corps brigades sit at morale and cohesion 20 against the 108th Brčko (1,800 men, cohesion 62), a predicted ratio of about 0.16. Brka is also painted RBiH → RS → RBiH → RS across the four checkpoints, so it is treated as a reference-map question.
+
+**Headless 188w** (base 712/708/707/697): **712/711/710/693**, net +2. Strict health PASS; enclaves on schedule. October 1995 −4 is the late-1995 timing knife-edge: Donji Vakuf 95's roster drifts and executes at t182 instead of about t179. `verify_checkpoints` exits 1 on the October regression beyond tolerance; this is accepted and will be reworked at the October 1995 checkpoint.
+
+## Live = headless past week 39
+
+Live 104-week runs first showed the player branch diverging (RBiH 5 cells, RS 1, HRHB 0). Three causes:
+
+1. **Officer succession and army-commander tenure were player-only (commit 42771b594).** A staff-controlled player kept outgoing commanders behind an unanswered `replacement_suggested` card: Sipčić kept the Sarajevo-Romanija Corps after t18 instead of Galić. `selectManualPlayerFaction()` now means only a manual (autonomy 0) player gets the card.
+2. **The harness never answered peace plans.** A pending Vance-Owen blocked every later plan. The harness now gives the documented historical response.
+3. **Player decisions landed one turn late.** Bots answer events in-turn before combat; the player answered between turns. The owner chose to **pause before combat**. When a player decision fires, the turn pauses right after `evaluate-events`, the player answers or presses Continue turn, and the rest of the turn runs.
+   - The pause is in-memory only: the saved state stays pre-turn, so a quit mid-pause replays the turn deterministically.
+   - Commits: e6ea0d7f7, e80980792, 688582232, 07ad774bf, dd99832a5 and 5a408376a.
+   - Two real-app fixes followed. The embedded-map bridge gave `advanceTurn` a 15-second deadline and did not forward the pause status (commit 346843346). The warroom shell also held the paused state back while the advance call was in flight (commit dc03f1166).
+
+**Measured, 104 weeks, player versus no-player, 0 cells differing for all three factions** (RBiH, RS and HRHB each 711/712), using the `bot_equivalent` policy. This policy answers with the engine's own bot response selector. With `historical_default`, RBiH and RS still differ by 1 cell (Goražde Slatina). That comes from a different chosen answer on events with no authored default, not from timing. Headless is unchanged: the 188w control map is identical before and after the pause work.
+
+**Real app:** `tools/ui/pause_before_combat_probe.cjs` drives the Electron app. In click/desk/map × answer/continue modes, the paused card is visible over the active surface, answering finishes the turn, and Continue turn finishes it with the decision left pending.
