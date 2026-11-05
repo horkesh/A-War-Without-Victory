@@ -308,6 +308,13 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 staging_osid: 'op:rogatica:stara_gora',
             },
             {
+                axis_id: 'kalesija_seher',
+                name: 'Kalesija Seher',
+                brigades: ['rs_1st_zvornik'],
+                objectives: ['op:kalesija:seher_2'],
+                staging_osid: 'op:zvornik:krizevici',
+            },
+            {
                 axis_id: 'srebrenica_ring',
                 name: 'Srebrenica Ring',
                 brigades: [
@@ -631,6 +638,13 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 objectives: ['op:pale:praca'],
                 staging_osid: 'op:pale:bulozi',
             },
+            {
+                axis_id: 'ilijas_krivajevici',
+                name: 'Ilijaš Krivajevići',
+                brigades: ['rs_ilijas_brigade'],
+                objectives: ['op:ilijas:krivajevici'],
+                staging_osid: 'op:ilijas:medojevici',
+            },
         ],
     },
     {
@@ -814,6 +828,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 brigades: ['rs_ajnie_brigade'],
                 objectives: [
                     'op:cajnice:batotici',
+                    'op:cajnice:miljeno_2',
                     'op:foca:brusna_2',
                     'op:gorazde:kolovarice',
                 ],
@@ -1501,7 +1516,7 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
             {
                 axis_id: 'gorazde_local_counterattack',
                 name: 'Local Gorazde Counterattack',
-                brigades: ['arbih_851st_vitezka_liberation'],
+                brigades: ['arbih_851st_vitezka_liberation', 'arbih_802nd_light'],
                 objectives: ['op:gorazde:kamen'],
                 staging_osid: 'op:gorazde:bacci',
             },
