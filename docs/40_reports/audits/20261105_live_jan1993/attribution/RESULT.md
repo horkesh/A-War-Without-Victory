@@ -43,3 +43,15 @@ The owner directed on 2026-11-05 ("this is calibration work now... efficient and
 - Full suite exit 0.
 - Lupnica (Lupnica investigator): a knife-edge cell. Headless captures it at t40, one turn after the checkpoint, and player games tip it 1–3 turns earlier. It needs no lever.
 - Next: the player staff's army-reserve requests are never auto-assigned (`army_reserve_system.ts:1297-1301`, at every autonomy). The RS-player Goražde gap has a further unidentified cause.
+
+## Engine change: player staff auto-assigns army reserve requests (owner directive)
+
+Live January 1993, same policies:
+
+| Player | Before | After | No-player | Cells differing |
+|---|---|---|---|---|
+| RBiH | 702 | 702 | 702 | none |
+| RS | 700 | 700 | 702 | Glamoč, Sopotnica, Lupnica, Volari |
+| HRHB | 703 | 702 | 702 | Lupnica, Donji Koričani (both timing-sensitive at t39) |
+
+Headless 188w is byte-identical; the full suite exits 0. Next, the RS-player divergence investigation.
