@@ -13,7 +13,7 @@ owning_plan: docs/plans/2026-07-31-content-history-localization-audio-plan.md
 # and a fresh filename-only registry/call-site sweep re-derived the current scope below over
 # eight source files. The sweep found AudioSurfaceBedController.tsx, which the old read list
 # omitted; it is included now. This refresh records scope review, not completed inventory work.
-base_commit: 662591ac708fb6cad1bedcb783cdc63004a45a47
+base_commit: 07ad774bf61bdb88a0e8be61e05811ea45e32c2d
 lane: R7
 gate: R7-AUDIO-CUE-WIRING
 

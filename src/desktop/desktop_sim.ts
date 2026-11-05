@@ -856,17 +856,15 @@ export function resolveDesktopEventDecisionInPlace(
 }
 
 function replaceGameStateContents(target: GameState, source: GameState): void {
-    const targetRecord = target as unknown as Record<string, unknown>;
-    const sourceRecord = source as unknown as Record<string, unknown>;
-    for (const key of Object.keys(targetRecord)) {
-        if (Object.prototype.hasOwnProperty.call(sourceRecord, key)) {
-            targetRecord[key] = sourceRecord[key];
+    for (const key of Object.keys(target)) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+            Reflect.set(target, key, Reflect.get(source, key));
         } else {
-            delete targetRecord[key];
+            Reflect.deleteProperty(target, key);
         }
     }
-    for (const key of Object.keys(sourceRecord)) {
-        if (!Object.prototype.hasOwnProperty.call(targetRecord, key)) targetRecord[key] = sourceRecord[key];
+    for (const key of Object.keys(source)) {
+        if (!Object.prototype.hasOwnProperty.call(target, key)) Reflect.set(target, key, Reflect.get(source, key));
     }
 }
 
