@@ -1,6 +1,18 @@
-## Current published snapshot — 2026-11-05 (latest)
+## Current published snapshot — 2026-11-05 (latest, 712)
 
-[Open the current weekly timeline 0–188](control_timeline_jan711_188_20261105.html), with scores of **711/707/706/693** at weeks 39/104/156/188.
+[Open the current weekly timeline 0–188](control_timeline_jan712_188_20261105.html), with scores of **712/708/707/697** at weeks 39/104/156/188. January 1993 matches all 712 cells.
+
+- **Source:** the unpushed local branch `claude/live-jan1993-calibration`; the commit is named in `PUBLICATION-PROVENANCE.json`.
+- **Run:** the 188-week scenario runner with no player; a repeat run is control-identical. The live game (any player faction, production autonomy, historical-default decisions) matches it cell-for-cell at January 1993 (712/712 each).
+- **Checks:** strict engine health passes; enclave guard on schedule; anchors and the full suite pass; 0 markers outside their cell.
+- **What changed since 711:** a one-brigade Skender Vakuf axis on Operation Donji Vakuf. The 3rd Banja Luka takes the HRHB-held Donji Koričani at week 29. This is a calibration assumption: wartime control is not established by a source.
+- **Still open:** the Farz guard is parked until October 1995. Baselines are not yet re-pinned. Not adopted.
+
+The previous [711/707/706/693](control_timeline_jan711_188_20261105.html) page remains available. Its provenance is archived as `PUBLICATION-PROVENANCE-previous-jan711.json`.
+
+## Previous published snapshot — 2026-11-05 (711)
+
+[Open the 711 weekly timeline 0–188](control_timeline_jan711_188_20261105.html), with scores of **711/707/706/693** at weeks 39/104/156/188.
 
 - **Source:** the unpushed local branch `claude/live-jan1993-calibration`; the commit is named in `PUBLICATION-PROVENANCE.json`.
 - **Run:** the 188-week scenario runner with no player. The live game (desktop `advanceTurn`, RBiH, RS or HRHB as player at production autonomy, historical-default decisions) matches it cell-for-cell at January 1993 (711/712 for each faction).
