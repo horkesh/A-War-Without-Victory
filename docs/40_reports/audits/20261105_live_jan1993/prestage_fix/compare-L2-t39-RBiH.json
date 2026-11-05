@@ -1,0 +1,1869 @@
+{
+  "schema_version": 1,
+  "comparison_kind": "player_choice_vs_headless",
+  "execution_profiles": {
+    "gameplay": {
+      "profile_id": "live-equivalent-desktop-v1",
+      "entrypoint": "src/desktop/desktop_sim.ts#advanceTurn",
+      "baseline_ops_applied": false,
+      "scenario_source_sha256": "4257b039f5b1dbb7f21d940ec656b2d0b787856f27e7c26b6f3f57f256d82ecf",
+      "entrypoint_source_sha256": {
+        "src/desktop/desktop_sim.ts": "b4da7ce17aea38863fa33b2a8a8ecac7c155e17691fd489c408a613d19900d56",
+        "src/sim/turn_pipeline.ts": "6ef907e1835cbddba5a5faa550e7ad47dc934ff1e9720a5344b7a142fe2c2e9d",
+        "tools/ai_play/desktop_calibration_compare.ts": "01cf9cdd5941ca1612beefa00f46b294c972d7d72de2eabc108ea8a815e842f1"
+      },
+      "source_binding_scope": "listed_entrypoints_only",
+      "full_candidate_manifest_required": true,
+      "qualification": "evidence_only"
+    },
+    "historical_regression": {
+      "profile_id": "definitive-harness-regression-v1",
+      "entrypoint": "src/scenario/scenario_runner.ts#runScenario",
+      "entrypoint_source_sha256": "03ac2d63c5a60ddbf3f0989a8daede872dbc5185a2acb8ac33e68143df373a8f",
+      "scenario_source_sha256": "4257b039f5b1dbb7f21d940ec656b2d0b787856f27e7c26b6f3f57f256d82ecf",
+      "source_scenario_use_harness_bots": true,
+      "benchmark_authority": "retained_original_targets_and_receipts",
+      "qualifies_gameplay": false
+    }
+  },
+  "scenario": {
+    "key": "apr_1992",
+    "scenario_id": "apr1992_definitive_188w",
+    "source_path": "data/scenarios/apr1992_definitive_188w.json",
+    "startup_snapshot_path": "data/derived/startup/apr_1992_initial_save.json",
+    "startup_snapshot_sha256": "a76ede76cb7dd87a44cace84fd26579233cc4e40e85568a2037c4b316f6744c8"
+  },
+  "player_policy": {
+    "autonomy_level": 2,
+    "event_decisions": "historical_default",
+    "non_player_event_mode": "historical",
+    "player_event_resolution_timing": "between_turns",
+    "historical_operations": "accept",
+    "paramilitary_requests": "deny",
+    "paramilitary_resolution_timing": "between_turns",
+    "paramilitary_target_scope": "player_unrestricted_municipality_scope_undefended_only"
+  },
+  "decision_transcript": [
+    {
+      "turn": 0,
+      "family": "event",
+      "id": "rbih_state_identity",
+      "decision": "historical_default",
+      "value": "civic"
+    },
+    {
+      "turn": 3,
+      "family": "event",
+      "id": "rbih_paramilitary_policy_1992",
+      "decision": "historical_default",
+      "value": "always_deny"
+    },
+    {
+      "turn": 12,
+      "family": "event",
+      "id": "rbih_minority_retention_1992",
+      "decision": "historical_default",
+      "value": "retain_minorities"
+    },
+    {
+      "turn": 20,
+      "family": "event",
+      "id": "london_conference_1992",
+      "decision": "historical_default",
+      "value": "accept_principles"
+    },
+    {
+      "turn": 38,
+      "family": "event",
+      "id": "ic_pressure_vopp_engagement",
+      "decision": "historical_default",
+      "value": "acknowledge_pressure"
+    }
+  ],
+  "branches": {
+    "headless": {
+      "initial": {
+        "control_counts": {
+          "HRHB": 104,
+          "RBiH": 322,
+          "RS": 286
+        },
+        "state_sha256": "a76ede76cb7dd87a44cace84fd26579233cc4e40e85568a2037c4b316f6744c8"
+      },
+      "final": {
+        "control_counts": {
+          "HRHB": 87,
+          "RBiH": 250,
+          "RS": 375
+        },
+        "state_sha256": "b891a013999810b375016796a8cb5b0bbc9614421aeaef4de442cd4a9b791dd6"
+      }
+    },
+    "player": {
+      "initial": {
+        "control_counts": {
+          "HRHB": 104,
+          "RBiH": 322,
+          "RS": 286
+        },
+        "state_sha256": "aca0d6332e791404ecdef72c0debafe0bdf647512dee76e74e4d5f5b7b0bb931"
+      },
+      "final": {
+        "control_counts": {
+          "HRHB": 86,
+          "RBiH": 247,
+          "RS": 379
+        },
+        "state_sha256": "b01755b07b65cdb467784f825cba1c80b851e4334dbdae9e89b336cfe45908ba"
+      }
+    }
+  },
+  "turns": [
+    {
+      "turn": 1,
+      "headless": {
+        "control_counts": {
+          "HRHB": 102,
+          "RBiH": 314,
+          "RS": 296
+        },
+        "attack_orders_processed": 18,
+        "attack_flips_applied": 10,
+        "paramilitary_captures_by_faction": {
+          "RBiH": 2,
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RBiH": [
+            "op:brcko:bukvik_gornji_2",
+            "op:srebrenica:obadi"
+          ],
+          "RS": [
+            "op:banja_luka:potkozarje_3",
+            "op:bosanska_gradiska:orahova"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": null,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 102,
+          "RBiH": 312,
+          "RS": 298
+        },
+        "attack_orders_processed": 18,
+        "attack_flips_applied": 10,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:banja_luka:potkozarje_3",
+            "op:bosanska_gradiska:orahova"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": null,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -2,
+        "RS": 2
+      }
+    },
+    {
+      "turn": 2,
+      "headless": {
+        "control_counts": {
+          "HRHB": 101,
+          "RBiH": 306,
+          "RS": 305
+        },
+        "attack_orders_processed": 11,
+        "attack_flips_applied": 9,
+        "paramilitary_captures_by_faction": {
+          "RBiH": 2,
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RBiH": [
+            "op:kakanj:biljesevo",
+            "op:kladanj:olovci_2"
+          ],
+          "RS": [
+            "op:banja_luka:dragocaj",
+            "op:bileca:zausje"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": null,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 101,
+          "RBiH": 302,
+          "RS": 309
+        },
+        "attack_orders_processed": 11,
+        "attack_flips_applied": 9,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:banja_luka:dragocaj",
+            "op:bileca:zausje"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": null,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 3,
+      "headless": {
+        "control_counts": {
+          "HRHB": 101,
+          "RBiH": 298,
+          "RS": 313
+        },
+        "attack_orders_processed": 8,
+        "attack_flips_applied": 6,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:bosanska_gradiska:gradiska_3",
+            "op:teslic:donji_ruzevic"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": null,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 101,
+          "RBiH": 294,
+          "RS": 317
+        },
+        "attack_orders_processed": 8,
+        "attack_flips_applied": 6,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:bosanska_gradiska:gradiska_3",
+            "op:teslic:donji_ruzevic"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": null,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": [
+          "rbih_paramilitary_policy_1992"
+        ]
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 4,
+      "headless": {
+        "control_counts": {
+          "HRHB": 100,
+          "RBiH": 294,
+          "RS": 318
+        },
+        "attack_orders_processed": 8,
+        "attack_flips_applied": 3,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:gacko:gacko_2",
+            "op:kljuc:krasulje_2"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 4,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 100,
+          "RBiH": 290,
+          "RS": 322
+        },
+        "attack_orders_processed": 8,
+        "attack_flips_applied": 3,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:gacko:gacko_2",
+            "op:kljuc:krasulje_2"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 4,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 5,
+      "headless": {
+        "control_counts": {
+          "HRHB": 100,
+          "RBiH": 290,
+          "RS": 322
+        },
+        "attack_orders_processed": 7,
+        "attack_flips_applied": 2,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:kljuc:hadzici",
+            "op:prnjavor:konjuhovci_2"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 4,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 100,
+          "RBiH": 286,
+          "RS": 326
+        },
+        "attack_orders_processed": 7,
+        "attack_flips_applied": 2,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:kljuc:hadzici",
+            "op:prnjavor:konjuhovci_2"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 4,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 6,
+      "headless": {
+        "control_counts": {
+          "HRHB": 100,
+          "RBiH": 288,
+          "RS": 324
+        },
+        "attack_orders_processed": 3,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:bosanski_novi:suhaca_4",
+            "op:kljuc:kljuc_2"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 4,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 100,
+          "RBiH": 284,
+          "RS": 328
+        },
+        "attack_orders_processed": 3,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:bosanski_novi:suhaca_4",
+            "op:kljuc:kljuc_2"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 4,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 7,
+      "headless": {
+        "control_counts": {
+          "HRHB": 100,
+          "RBiH": 284,
+          "RS": 328
+        },
+        "attack_orders_processed": 4,
+        "attack_flips_applied": 2,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:bosanska_dubica:kozarska_dubica",
+            "op:bosanski_novi:blagaj_japra"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 4,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 100,
+          "RBiH": 280,
+          "RS": 332
+        },
+        "attack_orders_processed": 4,
+        "attack_flips_applied": 2,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:bosanska_dubica:kozarska_dubica",
+            "op:bosanski_novi:blagaj_japra"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 4,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 8,
+      "headless": {
+        "control_counts": {
+          "HRHB": 100,
+          "RBiH": 278,
+          "RS": 334
+        },
+        "attack_orders_processed": 6,
+        "attack_flips_applied": 4,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:bosanski_novi:novi_grad_3",
+            "op:kalinovik:sela_2"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 8,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 100,
+          "RBiH": 274,
+          "RS": 338
+        },
+        "attack_orders_processed": 6,
+        "attack_flips_applied": 4,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:bosanski_novi:novi_grad_3",
+            "op:kalinovik:sela_2"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 8,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 9,
+      "headless": {
+        "control_counts": {
+          "HRHB": 99,
+          "RBiH": 274,
+          "RS": 339
+        },
+        "attack_orders_processed": 12,
+        "attack_flips_applied": 5,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:foca:brusna_2",
+            "op:gacko:bahori"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 8,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 99,
+          "RBiH": 270,
+          "RS": 343
+        },
+        "attack_orders_processed": 12,
+        "attack_flips_applied": 5,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:foca:brusna_2",
+            "op:gacko:bahori"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 8,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 10,
+      "headless": {
+        "control_counts": {
+          "HRHB": 97,
+          "RBiH": 272,
+          "RS": 343
+        },
+        "attack_orders_processed": 11,
+        "attack_flips_applied": 4,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:bosanska_gradiska:mackovac",
+            "op:bosanski_petrovac:bosanski_petrovac_2"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 8,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 97,
+          "RBiH": 268,
+          "RS": 347
+        },
+        "attack_orders_processed": 11,
+        "attack_flips_applied": 4,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:bosanska_gradiska:mackovac",
+            "op:bosanski_petrovac:bosanski_petrovac_2"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {
+          "arbih_1st_corps": 1
+        },
+        "player_faction_campaign_plan_issued_turn": 8,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 11,
+      "headless": {
+        "control_counts": {
+          "HRHB": 98,
+          "RBiH": 270,
+          "RS": 344
+        },
+        "attack_orders_processed": 3,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:glamoc:kovacevci_2",
+            "op:prnjavor:lisnja_2"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 8,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 98,
+          "RBiH": 266,
+          "RS": 348
+        },
+        "attack_orders_processed": 3,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:glamoc:kovacevci_2",
+            "op:prnjavor:lisnja_2"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 8,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 12,
+      "headless": {
+        "control_counts": {
+          "HRHB": 98,
+          "RBiH": 267,
+          "RS": 347
+        },
+        "attack_orders_processed": 6,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:bijeljina:janja_2",
+            "op:foca:kosman"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 8,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 98,
+          "RBiH": 263,
+          "RS": 351
+        },
+        "attack_orders_processed": 6,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:bijeljina:janja_2",
+            "op:foca:kosman"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {
+          "arbih_1st_corps": 1
+        },
+        "player_faction_campaign_plan_issued_turn": 8,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": [
+          "rbih_minority_retention_1992"
+        ]
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 13,
+      "headless": {
+        "control_counts": {
+          "HRHB": 94,
+          "RBiH": 262,
+          "RS": 356
+        },
+        "attack_orders_processed": 14,
+        "attack_flips_applied": 7,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:bijeljina:bijeljina_2",
+            "op:doboj:kotorsko_2"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 8,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 94,
+          "RBiH": 258,
+          "RS": 360
+        },
+        "attack_orders_processed": 14,
+        "attack_flips_applied": 7,
+        "paramilitary_captures_by_faction": {
+          "RS": 2
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:bijeljina:bijeljina_2",
+            "op:doboj:kotorsko_2"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {
+          "arbih_4th_corps": 1
+        },
+        "player_faction_campaign_plan_issued_turn": 8,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 14,
+      "headless": {
+        "control_counts": {
+          "HRHB": 94,
+          "RBiH": 260,
+          "RS": 358
+        },
+        "attack_orders_processed": 14,
+        "attack_flips_applied": 3,
+        "paramilitary_captures_by_faction": {
+          "RS": 1
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:sanski_most:skucani_vakuf_2"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 8,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 94,
+          "RBiH": 256,
+          "RS": 362
+        },
+        "attack_orders_processed": 14,
+        "attack_flips_applied": 3,
+        "paramilitary_captures_by_faction": {
+          "RS": 1
+        },
+        "paramilitary_capture_targets_by_faction": {
+          "RS": [
+            "op:sanski_most:skucani_vakuf_2"
+          ]
+        },
+        "player_eligible_attackers_by_corps": {
+          "arbih_1st_corps": 1
+        },
+        "player_faction_campaign_plan_issued_turn": 8,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 15,
+      "headless": {
+        "control_counts": {
+          "HRHB": 94,
+          "RBiH": 259,
+          "RS": 359
+        },
+        "attack_orders_processed": 11,
+        "attack_flips_applied": 3,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 94,
+          "RBiH": 255,
+          "RS": 363
+        },
+        "attack_orders_processed": 11,
+        "attack_flips_applied": 3,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 16,
+      "headless": {
+        "control_counts": {
+          "HRHB": 93,
+          "RBiH": 261,
+          "RS": 358
+        },
+        "attack_orders_processed": 10,
+        "attack_flips_applied": 3,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 93,
+          "RBiH": 257,
+          "RS": 362
+        },
+        "attack_orders_processed": 10,
+        "attack_flips_applied": 3,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {
+          "arbih_2nd_corps": 5,
+          "arbih_3rd_corps": 3
+        },
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 17,
+      "headless": {
+        "control_counts": {
+          "HRHB": 93,
+          "RBiH": 262,
+          "RS": 357
+        },
+        "attack_orders_processed": 4,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 93,
+          "RBiH": 258,
+          "RS": 361
+        },
+        "attack_orders_processed": 6,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {
+          "arbih_1st_corps": 1,
+          "arbih_2nd_corps": 4
+        },
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 18,
+      "headless": {
+        "control_counts": {
+          "HRHB": 93,
+          "RBiH": 261,
+          "RS": 358
+        },
+        "attack_orders_processed": 2,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 93,
+          "RBiH": 257,
+          "RS": 362
+        },
+        "attack_orders_processed": 2,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 19,
+      "headless": {
+        "control_counts": {
+          "HRHB": 93,
+          "RBiH": 261,
+          "RS": 358
+        },
+        "attack_orders_processed": 1,
+        "attack_flips_applied": 0,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 93,
+          "RBiH": 257,
+          "RS": 362
+        },
+        "attack_orders_processed": 2,
+        "attack_flips_applied": 0,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {
+          "arbih_1st_corps": 1,
+          "arbih_3rd_corps": 1
+        },
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 20,
+      "headless": {
+        "control_counts": {
+          "HRHB": 93,
+          "RBiH": 259,
+          "RS": 360
+        },
+        "attack_orders_processed": 5,
+        "attack_flips_applied": 2,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 93,
+          "RBiH": 255,
+          "RS": 364
+        },
+        "attack_orders_processed": 4,
+        "attack_flips_applied": 2,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": [
+          "london_conference_1992"
+        ]
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 21,
+      "headless": {
+        "control_counts": {
+          "HRHB": 93,
+          "RBiH": 259,
+          "RS": 360
+        },
+        "attack_orders_processed": 0,
+        "attack_flips_applied": 0,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 93,
+          "RBiH": 255,
+          "RS": 364
+        },
+        "attack_orders_processed": 2,
+        "attack_flips_applied": 0,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {
+          "arbih_1st_corps": 2
+        },
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 22,
+      "headless": {
+        "control_counts": {
+          "HRHB": 93,
+          "RBiH": 260,
+          "RS": 359
+        },
+        "attack_orders_processed": 4,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 93,
+          "RBiH": 255,
+          "RS": 364
+        },
+        "attack_orders_processed": 3,
+        "attack_flips_applied": 0,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {
+          "arbih_1st_corps": 2
+        },
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -5,
+        "RS": 5
+      }
+    },
+    {
+      "turn": 23,
+      "headless": {
+        "control_counts": {
+          "HRHB": 93,
+          "RBiH": 259,
+          "RS": 360
+        },
+        "attack_orders_processed": 3,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 93,
+          "RBiH": 256,
+          "RS": 363
+        },
+        "attack_orders_processed": 9,
+        "attack_flips_applied": 3,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {
+          "arbih_2nd_corps": 3,
+          "arbih_3rd_corps": 3
+        },
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -3,
+        "RS": 3
+      }
+    },
+    {
+      "turn": 24,
+      "headless": {
+        "control_counts": {
+          "HRHB": 92,
+          "RBiH": 259,
+          "RS": 361
+        },
+        "attack_orders_processed": 4,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 92,
+          "RBiH": 256,
+          "RS": 364
+        },
+        "attack_orders_processed": 8,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {
+          "arbih_1st_corps": 3,
+          "arbih_2nd_corps": 1,
+          "arbih_3rd_corps": 1
+        },
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -3,
+        "RS": 3
+      }
+    },
+    {
+      "turn": 25,
+      "headless": {
+        "control_counts": {
+          "HRHB": 91,
+          "RBiH": 257,
+          "RS": 364
+        },
+        "attack_orders_processed": 5,
+        "attack_flips_applied": 3,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 91,
+          "RBiH": 255,
+          "RS": 366
+        },
+        "attack_orders_processed": 4,
+        "attack_flips_applied": 2,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -2,
+        "RS": 2
+      }
+    },
+    {
+      "turn": 26,
+      "headless": {
+        "control_counts": {
+          "HRHB": 91,
+          "RBiH": 256,
+          "RS": 365
+        },
+        "attack_orders_processed": 6,
+        "attack_flips_applied": 3,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 91,
+          "RBiH": 254,
+          "RS": 367
+        },
+        "attack_orders_processed": 5,
+        "attack_flips_applied": 3,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {
+          "arbih_3rd_corps": 3
+        },
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -2,
+        "RS": 2
+      }
+    },
+    {
+      "turn": 27,
+      "headless": {
+        "control_counts": {
+          "HRHB": 91,
+          "RBiH": 256,
+          "RS": 365
+        },
+        "attack_orders_processed": 5,
+        "attack_flips_applied": 2,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 91,
+          "RBiH": 253,
+          "RS": 368
+        },
+        "attack_orders_processed": 3,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -3,
+        "RS": 3
+      }
+    },
+    {
+      "turn": 28,
+      "headless": {
+        "control_counts": {
+          "HRHB": 90,
+          "RBiH": 256,
+          "RS": 366
+        },
+        "attack_orders_processed": 6,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 90,
+          "RBiH": 253,
+          "RS": 369
+        },
+        "attack_orders_processed": 6,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {
+          "arbih_2nd_corps": 1
+        },
+        "player_faction_campaign_plan_issued_turn": 15,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -3,
+        "RS": 3
+      }
+    },
+    {
+      "turn": 29,
+      "headless": {
+        "control_counts": {
+          "HRHB": 90,
+          "RBiH": 255,
+          "RS": 367
+        },
+        "attack_orders_processed": 4,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 29,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 90,
+          "RBiH": 251,
+          "RS": 371
+        },
+        "attack_orders_processed": 6,
+        "attack_flips_applied": 2,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 29,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 30,
+      "headless": {
+        "control_counts": {
+          "HRHB": 90,
+          "RBiH": 255,
+          "RS": 367
+        },
+        "attack_orders_processed": 5,
+        "attack_flips_applied": 0,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 29,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 90,
+          "RBiH": 251,
+          "RS": 371
+        },
+        "attack_orders_processed": 2,
+        "attack_flips_applied": 0,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {
+          "arbih_3rd_corps": 1
+        },
+        "player_faction_campaign_plan_issued_turn": 29,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 31,
+      "headless": {
+        "control_counts": {
+          "HRHB": 89,
+          "RBiH": 255,
+          "RS": 368
+        },
+        "attack_orders_processed": 8,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 29,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 89,
+          "RBiH": 251,
+          "RS": 372
+        },
+        "attack_orders_processed": 8,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 29,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 32,
+      "headless": {
+        "control_counts": {
+          "HRHB": 89,
+          "RBiH": 253,
+          "RS": 370
+        },
+        "attack_orders_processed": 8,
+        "attack_flips_applied": 2,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 29,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 89,
+          "RBiH": 249,
+          "RS": 374
+        },
+        "attack_orders_processed": 7,
+        "attack_flips_applied": 2,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {
+          "arbih_1st_corps": 1,
+          "arbih_3rd_corps": 1
+        },
+        "player_faction_campaign_plan_issued_turn": 29,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -4,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 33,
+      "headless": {
+        "control_counts": {
+          "HRHB": 89,
+          "RBiH": 251,
+          "RS": 372
+        },
+        "attack_orders_processed": 6,
+        "attack_flips_applied": 2,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 29,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 89,
+          "RBiH": 248,
+          "RS": 375
+        },
+        "attack_orders_processed": 4,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {
+          "arbih_2nd_corps": 1
+        },
+        "player_faction_campaign_plan_issued_turn": 29,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": 0,
+        "RBiH": -3,
+        "RS": 3
+      }
+    },
+    {
+      "turn": 34,
+      "headless": {
+        "control_counts": {
+          "HRHB": 89,
+          "RBiH": 250,
+          "RS": 373
+        },
+        "attack_orders_processed": 3,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 29,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 88,
+          "RBiH": 248,
+          "RS": 376
+        },
+        "attack_orders_processed": 6,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {
+          "arbih_1st_corps": 1,
+          "arbih_3rd_corps": 1
+        },
+        "player_faction_campaign_plan_issued_turn": 29,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": -1,
+        "RBiH": -2,
+        "RS": 3
+      }
+    },
+    {
+      "turn": 35,
+      "headless": {
+        "control_counts": {
+          "HRHB": 89,
+          "RBiH": 250,
+          "RS": 373
+        },
+        "attack_orders_processed": 2,
+        "attack_flips_applied": 0,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 29,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 87,
+          "RBiH": 248,
+          "RS": 377
+        },
+        "attack_orders_processed": 4,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {
+          "arbih_2nd_corps": 1
+        },
+        "player_faction_campaign_plan_issued_turn": 29,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": -2,
+        "RBiH": -2,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 36,
+      "headless": {
+        "control_counts": {
+          "HRHB": 88,
+          "RBiH": 250,
+          "RS": 374
+        },
+        "attack_orders_processed": 6,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 29,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 87,
+          "RBiH": 247,
+          "RS": 378
+        },
+        "attack_orders_processed": 5,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {
+          "arbih_1st_corps": 1,
+          "arbih_3rd_corps": 1
+        },
+        "player_faction_campaign_plan_issued_turn": 29,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": -1,
+        "RBiH": -3,
+        "RS": 4
+      }
+    },
+    {
+      "turn": 37,
+      "headless": {
+        "control_counts": {
+          "HRHB": 88,
+          "RBiH": 250,
+          "RS": 374
+        },
+        "attack_orders_processed": 2,
+        "attack_flips_applied": 0,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 29,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 86,
+          "RBiH": 247,
+          "RS": 379
+        },
+        "attack_orders_processed": 5,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 29,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": -2,
+        "RBiH": -3,
+        "RS": 5
+      }
+    },
+    {
+      "turn": 38,
+      "headless": {
+        "control_counts": {
+          "HRHB": 88,
+          "RBiH": 250,
+          "RS": 374
+        },
+        "attack_orders_processed": 3,
+        "attack_flips_applied": 0,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 29,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 86,
+          "RBiH": 247,
+          "RS": 379
+        },
+        "attack_orders_processed": 2,
+        "attack_flips_applied": 0,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {
+          "arbih_1st_corps": 1,
+          "arbih_3rd_corps": 1
+        },
+        "player_faction_campaign_plan_issued_turn": 29,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": [
+          "ic_pressure_vopp_engagement"
+        ]
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": -2,
+        "RBiH": -3,
+        "RS": 5
+      }
+    },
+    {
+      "turn": 39,
+      "headless": {
+        "control_counts": {
+          "HRHB": 87,
+          "RBiH": 250,
+          "RS": 375
+        },
+        "attack_orders_processed": 5,
+        "attack_flips_applied": 1,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 29,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": []
+      },
+      "player": {
+        "control_counts": {
+          "HRHB": 86,
+          "RBiH": 247,
+          "RS": 379
+        },
+        "attack_orders_processed": 3,
+        "attack_flips_applied": 0,
+        "paramilitary_captures_by_faction": {},
+        "paramilitary_capture_targets_by_faction": {},
+        "player_eligible_attackers_by_corps": {},
+        "player_faction_campaign_plan_issued_turn": 29,
+        "pending_player_proposals_by_category": {},
+        "pending_player_event_ids": [
+          "vance_owen_plan_1993"
+        ]
+      },
+      "control_delta_player_minus_headless": {
+        "HRHB": -1,
+        "RBiH": -3,
+        "RS": 4
+      }
+    }
+  ]
+}

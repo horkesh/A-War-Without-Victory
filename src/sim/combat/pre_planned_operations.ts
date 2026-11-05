@@ -3335,7 +3335,8 @@ export function getQueuedDatedPrestageBrigadeIds(
     },
 ): Set<FormationId> {
     const reserved = new Set<FormationId>();
-    const staffControlled = new Set(selectStaffControlledFactions(state as GameState));
+    // Resolved lazily: only a matched queued head may read meta (callers pass partial states).
+    let staffControlled: Set<FactionId> | null = null;
     for (const corpsId of Object.keys(state.military.corps_command ?? {}).sort(strictCompare)) {
         const operationName = state.military.corps_command?.[corpsId]?.queued_operations?.[0];
         if (!operationName) continue;
@@ -3346,7 +3347,10 @@ export function getQueuedDatedPrestageBrigadeIds(
         // is never implicitly reserved. Arrival ownership holds while the head queue waits.
         const reserveFrom = def.enqueue_from ?? def.prestage_from;
         if (reserveFrom == null || state.meta.turn < reserveFrom) continue;
-        if (def.enqueue_from == null && !staffControlled.has(def.faction)) continue;
+        if (def.enqueue_from == null) {
+            staffControlled ??= new Set(selectStaffControlledFactions(state as GameState));
+            if (!staffControlled.has(def.faction)) continue;
+        }
         for (const axis of def.axes) for (const brigadeId of axis.brigades) reserved.add(brigadeId);
     }
     return reserved;

@@ -13513,3 +13513,19 @@ The remaining RBiH gap breaks down as:
 - Prača.
 
 The no-player branch reaches 702 with 7/8 named captures (Lupnica). The bar (≥700 plus 8 named captures) and the 707 target are unchanged.
+
+## 2026-11-05 - Player staff executes authored prestage marches at autonomy >= 1 (ENGINE FIX; LIVE EVIDENCE ONLY, NOT ADOPTED)
+
+Three gates skipped authored concentration marches and queued-head reservations whenever the operation belonged to the player faction, at any autonomy level. They now use `selectStaffControlledFactions` and skip only a manual (autonomy 0) player. The gates are the prestage march and queued-head reservation in `pre_planned_operations.ts`, and the triggered elite prestage in `triggered_operations.ts`.
+- The OpenCode job `player-prestage-gates-01` implemented it, in bounds across 3 files.
+- Planner verification: the new test file is RED 3/9 without the fix and GREEN 9/9 with it; tsc 0.
+- The reservation helper reads the staff set lazily. The full suite showed that partial-state callers (unit fixtures with no `meta`) crash on an eager read.
+- `desktop_calibration_compare.ts` gains the diagnostic option `--trace-corps <ids>`, which records each listed corps' queue and live operations every turn.
+
+Live January 1993 at production autonomy (39 turns, policies as in the 2026-11-05 baseline), scores /712: RBiH 698 (=), RS 701 (+3: Korenići, Donji Koričani, Gornje Krčevine), HRHB 703 (=). The no-player branches stay at 702.
+
+Headless 188w is byte-identical to the 2026-11-04 re-pin (702/704/701/691; `final_save`, `weekly_report`, `control_delta` and `activity_summary` match the manifest).
+
+The Goražde gap (Glamoč, Sopotnica) for RBiH and RS players traces to a t1 live/no-player divergence: army-directive pushback appears in the no-player branch only, and by t23 RS 1st Podrinje garrisons Sopotnica. A live-only queue-pollution defect is confirmed and queued for its own run.
+
+Record: `docs/40_reports/audits/20261105_live_jan1993/prestage_fix/RESULT.md`.
