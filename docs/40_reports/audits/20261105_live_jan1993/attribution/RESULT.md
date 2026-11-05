@@ -100,3 +100,42 @@ The fix: the neighbouring same-corps Vareš 147th/185th Light join the Visoko ac
 **Rejected:** the T1 donor ranking with distance before tier. On top of this change it gives January 705 (−2): +Kamen, −Kolovarice, −Jemanlići, −Jablanica.
 
 **Note:** headless output now differs from the pinned regression manifest. The baselines and structural fingerprint need a re-pin as part of the final push, when the owner accepts.
+
+## Last five January cells: 707 → 711
+
+An investigator traced each cell from battle records, then measured about 30 single and combined lawful variants at 39 weeks. All the changes are operation data in `src/sim/combat/pre_planned_operations.ts`. There is no teleport, no direct control write, no `avoided_osids` and no startup edit.
+
+| Cell | Why it was wrong | Change (calibration assumption) | Taken |
+|---|---|---|---|
+| Miljeno (Čajniče) | The Višegrad Brigade attacks alone: it stalls against the 808th at t4. At t5 the ARBiH homeland last-stand rule blocks the flip (working as designed). | Add `op:cajnice:miljeno_2` to Operation Foča `cajnice_south` (the Čajniče Brigade in its home municipality) | t15 combat |
+| Todorovići (Čajniče) | Never attacked | Follows from Miljeno | t16 paramilitary sweep |
+| Kamen (Goražde) | The 851st is bled under the 500-man attack floor at Miljeno/Batotići/Kolovarice, so the t23 counterattack never injects | Add the adjacent `arbih_802nd_light` to the Goražde Local Counterattack | t24 combat |
+| Krivajevići (Ilijaš) | An empty RBiH cell outside Prsten's ring; probes cannot capture | New `ilijas_krivajevici` axis on Operation Kijevo (Ilijaš Brigade, staging Medojevići) | t28 combat |
+| Seher (Kalesija) | The 286th is dug in; no operation targets it | New `kalesija_seher` axis on Operation Podrinje Sweep (1st Zvornik, staging Križevići) | t13 combat |
+
+**Key finding:** Operations Prsten and Drina are already written into `startup_D.json` with their objectives at t0. Editing their code definitions changes nothing in a run. Only operations queued or injected after t0 read their code definitions.
+
+The one new January mismatch is Donji Koričani (Skender Vakuf, painted RS, now HRHB). It is a knock-on effect: the 1st Krajina commander's small t33 action no longer happens. This is a hypothesis, not a fix target.
+
+**Rejected:**
+- X1, relief honouring the pre-planned reservation: −5.
+- X2, a front cell held by a friendly brigade is not "empty": +1/−1.
+- Adding Krivajevići to Prsten, or Seher to Drina, in the startup: each wins its cell but costs Trnovo or the Čajniče result.
+- Combinations M6+S1+G1 = 707; S1+G1+K1 = 708; M6+G1+K1 = 707.
+
+**Headless 188w** (`verify_checkpoints`, base 707/705/703/692):
+
+| Checkpoint | Base | Now | Change |
+|---|---|---|---|
+| jan1993 | 707 | **711** | +4 |
+| apr1994 | 705 | 707 | +2 |
+| apr1995 | 703 | 706 | +3 |
+| oct1995 | 692 | 693 | +1 |
+| **Net** | | | **+10** |
+
+- Enclave guard: Goražde holds; Srebrenica and Žepa fall on schedule.
+- Strict engine health PASS. The Farz guard stays parked until October 1995, unchanged.
+
+**Live January 1993**, production autonomy, historical-default policies: **RBiH 711, RS 711, HRHB 711.** For every faction, 0 cells differ from the no-player branch.
+
+Tests: the Kijevo, `cajnice_south` and Goražde roster pins in `tests/pre_planned_operations.test.ts` are updated. The Goražde floor test now drains both rostered brigades.
