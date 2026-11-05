@@ -14,13 +14,13 @@
  *      ends with the authored `image` key (drop one in and it renders with no code
  *      edit — eager `import.meta.glob`, hashed into dist);
  *   2. otherwise `null` — the caller renders its text-only layout unchanged, so an
- *      event WITHOUT an `image` (every shipped event today) looks byte-identical to
+ *      event WITHOUT an `image` (most shipped events) looks byte-identical to
  *      before, and an event WITH an `image` key that has no asset on disk yet still
  *      degrades gracefully to text-only.
  *
- * No new art is added by this module — it is the WIRING only. The
- * `event_illustrations/` directory is intentionally empty until documentary-realism
- * stills are generated and owner-approved (the §6-sensitive subset is gated).
+ * No new art is added by this module — it is the WIRING only. As of 2026-11-05
+ * the `event_illustrations/` directory ships 31 documentary stills and 28 catalog
+ * events author an `image` key; the §6-sensitive subset stays Historian-gated.
  *
  * Pure presentation: no engine/state touch, no Math.random/Date.now.
  *
@@ -28,8 +28,8 @@
  */
 
 // Eager + ?url so the bundler hashes any committed illustration into dist and we
-// get a plain URL string keyed by the glob path. The directory is empty today;
-// the glob simply resolves to `{}` and every event falls through to text-only.
+// get a plain URL string keyed by the glob path. An `image` with no matching
+// asset resolves to null and that event falls through to text-only.
 const EVENT_ILLUSTRATION_ART = import.meta.glob('../assets/event_illustrations/*.webp', {
   eager: true,
   query: '?url',

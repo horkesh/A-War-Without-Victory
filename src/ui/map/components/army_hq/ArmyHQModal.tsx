@@ -524,7 +524,7 @@ export function ArmyHQModal({
                             </button>
                         )}
                         {crestSrc && (
-                            <img src={crestSrc} alt="" className="w-8 h-8 object-contain opacity-80" draggable={false} />
+                            <img data-testid="army-hq-crest" src={crestSrc} alt="" className="h-11 w-11 object-contain drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]" draggable={false} />
                         )}
                         <div>
                             <div className="text-xs uppercase tracking-[0.22em] text-text-secondary font-bold">
