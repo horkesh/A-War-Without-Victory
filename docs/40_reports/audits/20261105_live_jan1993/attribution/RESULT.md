@@ -278,3 +278,15 @@ The owner signed off April 1994 (711/712; Brka excluded by owner direction) and 
 - **The cell:** ten Ilijaš settlements: Buljetovina, Duboki Potok, Duševine, Hadžići, Kamenica, Krčevine, Krivajevići, Nišići, Šabanci, Zlotege.
 - **Sources:** two 1st Corps accounts of the 5–7 November 1994 Nišići plateau offensive list **Hadžići** among the places taken (Delić vol. 2 pp.68–69, citing the 11 Nov 1994 "Behar-I" report; Karavelić/Rujanac, as republished on veterani.ba). Karavelić also lists Korita, Višnjica and Nasići, which sit in `op:ilijas:podlugovi` (painted RS at all four checkpoints). Neither account names Krivajevići or Nišići village. Karavelić says the 1st Corps *cut the Olovo–Srednje road with artillery* in November 1994, not that it took the road villages. No source found describes fighting there in 1995.
 - **Reading:** the November 1994 offensive reached into this cell (Hadžići) but no source shows it taken whole. No source supports a change between April and October 1995. So the paint is inconsistent in one place or the other: April 1995 RS and October 1995 RBiH cannot both be right unless something happened in 1995 that no source records. Caveat: the sources give no municipality for "Hadžići"; the Ilijaš Hadžići on the plateau is the plausible one. The 1st Corps monograph PDF exceeds the fetch limit and was not read.
+
+## Owner sign-off: October 1995 at 710; calibration closed (2026-11-06)
+
+The owner signed off October 1995 at **710/712** and closed the calibration lane. The two open cells stay as they are:
+- **Brka:** excluded by owner direction.
+- **Krivajevići:** the paint is not changed and Behar-I keeps Toljenak as its only objective. The source conflict above stays on record for a later repaint decision.
+
+**Adopted state (merged with origin/main at 55035d55f; sim-identical to n39):**
+- Headless 188w `__w188_n40`: **712 / 711 / 712 / 710**, 0 cells differ from n39 at any checkpoint. Strict health PASS (stranded 0, ghost 0, zero-eligible 0, invalid op-weeks 0, consistency 0); enclave guard intact.
+- Live = headless: 0 cells differ at 188 turns for RBiH, RS and HRHB as player (every branch 710/712).
+- Re-pinned: `data/derived/scenario/baselines/manifest.json` (8 hashes, verified equal to n40's artifacts) and `data/calibration/structural_fingerprint_188w.json` (`bc629e89a585dfde`, 40w final_state_hash `9f59499d11cf5fa1`).
+- **Still open (carried forward from the 2026-11-04 handover):** Farz P-A finds 0/4 authored Farz AARs on n40, although P1 is 4/4 (all Ozren cells RBiH) and P-B passes. The verifier still parks this guard "until the October 1995 checkpoint". It is an attribution defect, not a map miss, and needs its own lane before `--farz-guard` is enforced.

@@ -93,8 +93,9 @@ const MISTRAL_SIPOVO_OBJECTIVES: readonly string[] = [
 ];
 
 const SOUTHERN_MOVE_STAGING_ANCHORS: readonly string[] = [
+    // Calibration 2026-11-06 (Oct95): Šipovo town only; Pribeljci is the last Mistral objective
+    // (MISTRAL_SIPOVO_OBJECTIVES), not a staging anchor.
     'op:sipovo:sipovo_2',
-    // EXP 'op:sipovo:pribeljci_2',
 ];
 
 const SOUTHERN_MOVE_MRKONJIC_OBJECTIVES: readonly string[] = [
