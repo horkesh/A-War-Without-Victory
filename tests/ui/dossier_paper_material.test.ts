@@ -43,6 +43,15 @@ describe('dossier paper material', () => {
     expect(offenders).toEqual([]);
   });
 
+  it('sets the army commander personnel note and the front-visit sheet on paper', () => {
+    const modal = withoutComments(readFileSync(join(armyHq, 'ArmyHQModal.tsx'), 'utf8'));
+    expect(modal).toContain('<DossierPaper testId="army-hq-officer-note"');
+    const frontVisit = withoutComments(readFileSync(join(armyHq, 'FrontVisitSection.tsx'), 'utf8'));
+    // The sheet is inside the collapsible's content, never around it (CollapsibleSection paints an opaque card).
+    expect(frontVisit).toContain('<DossierPaper testId="front-visit-sheet"');
+    expect(frontVisit.indexOf('<CollapsibleSection')).toBeLessThan(frontVisit.indexOf('<DossierPaper testId="front-visit-sheet"'));
+  });
+
   it('sets the Chief of Staff missive on DossierPaper', () => {
     const source = withoutComments(readFileSync(join(armyHq, 'ChiefOfStaffBriefing.tsx'), 'utf8'));
     expect(source).toContain('<DossierPaper');
