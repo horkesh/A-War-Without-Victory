@@ -1,6 +1,7 @@
 import type { CommandBriefingItemView, CommandBriefingTargetView } from '../../data/types.js';
 import { resolveCommandBriefingItemCopy } from '../../data/commandBriefingCopy';
 import { t, type MessageKey } from '../../i18n';
+import { DOSSIER_BAND_CLASS, DOSSIER_INK, DOSSIER_PAPER_CLASS } from './DossierPaper';
 
 export type BriefingItem = CommandBriefingItemView;
 export type BriefingTarget = CommandBriefingTargetView;
@@ -60,19 +61,20 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
         <details
             data-testid="situation-briefing"
             open={defaultOpen}
-            className="bg-panel-card border border-panel-border rounded-lg mb-4"
+            data-material="paper"
+            className={`${DOSSIER_PAPER_CLASS} mb-4`}
         >
-            <summary className="cursor-pointer list-none flex items-center justify-between px-4 py-2.5 border-b border-panel-border">
-                <span className="text-xs uppercase tracking-[0.25em] font-bold text-text-secondary">
+            <summary className={`cursor-pointer list-none flex items-center justify-between px-4 py-2.5 border-b ${DOSSIER_BAND_CLASS}`}>
+                <span className={`text-xs uppercase tracking-[0.25em] font-bold ${DOSSIER_INK.heading}`}>
                     {t('situationBriefing.title')}
                 </span>
-                <span className="text-xs uppercase tracking-[0.15em] text-text-muted tabular-nums">
+                <span className={`text-xs uppercase tracking-[0.15em] tabular-nums ${DOSSIER_INK.muted}`}>
                     {summaryLabel}
                 </span>
             </summary>
 
             {items.length === 0 ? (
-                <div className="px-4 py-2 text-xs text-text-secondary italic">
+                <div className={`px-4 py-2 text-xs italic ${DOSSIER_INK.muted}`}>
                     {t('situationBriefing.empty')}
                 </div>
             ) : (
@@ -90,7 +92,7 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
                                 ? 'border-red-500/30 hover:border-red-500/50'
                                 : item.severity === 'warning'
                                     ? 'border-amber-500/30 hover:border-amber-500/50'
-                                    : 'border-panel-border hover:border-panel-border';
+                                    : `${DOSSIER_INK.rule} hover:border-neutral-500/70`;
                         const target = enrichTargetWithItemContext(item);
                         const hasTarget = target.type !== 'none';
                         const targetLabel = copy.actionChipLabel ?? target.label ?? fallbackTargetLabel(target.type);
@@ -108,27 +110,27 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
                                 disabled={!hasTarget || !onNavigate}
                                 title={disabledReason ?? undefined}
                                 aria-label={disabledReason ? `${copy.title} - ${disabledReason}` : copy.title}
-                                className={`text-left rounded-md border ${borderColor} bg-panel-bg p-2.5 transition-colors group disabled:cursor-default`}
+                                className={`text-left rounded-md border ${borderColor} bg-white/40 p-2.5 transition-colors group disabled:cursor-default`}
                             >
                                 <div className="flex items-start gap-2">
                                     <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1 ${dotColor}`} />
                                     <div className="min-w-0 flex-1">
-                                        <div className="text-xs text-text-primary leading-snug font-semibold">
+                                        <div className={`text-xs leading-snug font-semibold ${DOSSIER_INK.heading}`}>
                                             {copy.title}
                                         </div>
                                         {copy.detail && (
-                                            <div className="text-xs text-text-secondary leading-snug mt-0.5">
+                                            <div className={`text-xs leading-snug mt-0.5 ${DOSSIER_INK.body}`}>
                                                 {copy.detail}
                                             </div>
                                         )}
                                         {disabledReason && (
-                                            <div className="text-xs text-text-secondary leading-snug mt-1">
+                                            <div className={`text-xs leading-snug mt-1 ${DOSSIER_INK.muted}`}>
                                                 {disabledReason}
                                             </div>
                                         )}
                                     </div>
                                     {hasTarget && onNavigate && targetLabel && (
-                                        <span className="text-amber-300 group-hover:text-amber-200 text-xs font-mono font-bold shrink-0 transition-colors">
+                                        <span className="text-amber-900 group-hover:text-amber-700 text-xs font-mono font-bold shrink-0 transition-colors">
                                             {targetLabel}
                                         </span>
                                     )}

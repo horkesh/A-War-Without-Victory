@@ -31,7 +31,7 @@ describe('RBiH v47 evidence-backed readability floor', () => {
     expect(personnel).toContain('shrink-0 text-xs leading-none font-bold uppercase tracking-[0.12em]');
     expect(personnel).not.toContain('text-[7px] font-bold uppercase tracking-[0.12em] opacity-75');
     expect(personnel).not.toContain('min-w-0 truncate text-xs text-text-primary');
-    expect(briefing).toContain('className="text-xs text-neutral-700 leading-relaxed italic"');
+    expect(briefing).toContain('className={`text-xs leading-relaxed italic ${DOSSIER_INK.body}`}');
     expect(briefing).not.toContain('text-[9.5px]');
   });
 

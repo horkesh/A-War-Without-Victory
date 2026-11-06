@@ -879,7 +879,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                 </div>
 
                                 {selectedResolvedEssay.sources && selectedResolvedEssay.sources.length > 0 && (
-                                    <div className="px-3 py-1.5 border-t border-neutral-300/60 bg-[#ebe5d8] rounded-b-lg">
+                                    <div className="px-3 py-1.5 border-t bg-black/5 border-neutral-500/30 rounded-b-lg">
                                         <div className="text-xs uppercase text-neutral-600 font-bold tracking-[0.15em] mb-1">
                                             {t('codex.sources')}
                                         </div>
