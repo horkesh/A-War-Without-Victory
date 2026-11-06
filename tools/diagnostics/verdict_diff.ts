@@ -37,8 +37,10 @@ for (const f of factions) {
     }
   }
 }
-const flagsA = (a as unknown as { event_flags?: Record<string, unknown> }).event_flags ?? {};
-const flagsB = (b as unknown as { event_flags?: Record<string, unknown> }).event_flags ?? {};
+// Event decisions are stored by applyDefinitionFlags (evaluate_events.ts) on the military state.
+type FlagMap = Record<string, unknown>;
+const flagsA = (a.military as unknown as { event_flags?: FlagMap } | undefined)?.event_flags ?? {};
+const flagsB = (b.military as unknown as { event_flags?: FlagMap } | undefined)?.event_flags ?? {};
 for (const k of ['camps_response', 'hrhb_camps_response', 'rs_paramilitary_policy']) {
   console.log(`flag ${k}: A=${JSON.stringify(flagsA[k])}  B=${JSON.stringify(flagsB[k])}`);
 }
