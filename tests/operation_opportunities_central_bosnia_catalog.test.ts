@@ -718,6 +718,7 @@ function buildKonjicState(opts: {
         'op:konjic:konjic_2': (opts.stagingHeld ?? true) ? 'RBiH' : 'RS',
         'op:konjic:bijela_2': (opts.objectivesHeldByRs ?? true) ? 'RS' : 'RBiH',
         'op:konjic:glavaticevo_2': (opts.objectivesHeldByRs ?? true) ? 'RS' : 'RBiH',
+        'op:konjic:ljuta': (opts.objectivesHeldByRs ?? true) ? 'RS' : 'RBiH',
     };
 
     const formations: Record<string, unknown> = {
@@ -1009,6 +1010,7 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
             DONJI_VAKUF_95_OPPORTUNITY,
             OPERATION_OPPORTUNITY_CATALOG.find(d => d.opportunity_id === 'konjic_september_94')!,
             PAKLAREVO_LOCAL_94_MODEL_OPPORTUNITY,
+            OPERATION_OPPORTUNITY_CATALOG.find(d => d.opportunity_id === 'treskavica_95')!,
         ]);
         expect(OPERATION_OPPORTUNITY_CATALOG.some(d => d.opportunity_id === 'kupres_cincar_94')).toBe(true);
         expect(OPERATION_OPPORTUNITY_CATALOG.some(d => d.opportunity_id === 'vlasic_ridge_95')).toBe(true);
@@ -1774,7 +1776,7 @@ describe('Konjic September 94 opportunity', () => {
         expect(def.axes).toEqual([expect.objectContaining({
             axis_id: 'bijela_glavaticevo',
             brigades: ['arbih_443rd_mountain', 'arbih_450th_light', 'arbih_4th_muslim_light'],
-            objectives: ['op:konjic:bijela_2', 'op:konjic:glavaticevo_2'],
+            objectives: ['op:konjic:bijela_2', 'op:konjic:glavaticevo_2', 'op:konjic:ljuta'],
             staging_osid: 'op:konjic:konjic_2',
         })]);
         expect(CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES).toContain(def);
@@ -1892,7 +1894,7 @@ describe('Konjic September 94 opportunity', () => {
         expect(op.axes![0]).toMatchObject({
             axis_id: 'bijela_glavaticevo',
             assigned_brigades: ['arbih_443rd_mountain', 'arbih_450th_light', 'arbih_4th_muslim_light'],
-            objectives: ['op:konjic:bijela_2', 'op:konjic:glavaticevo_2'],
+            objectives: ['op:konjic:bijela_2', 'op:konjic:glavaticevo_2', 'op:konjic:ljuta'],
         });
         expect(op.min_attack_outcome).toBeUndefined();
         expect(op.preparation_probe_delivery).toBeUndefined();

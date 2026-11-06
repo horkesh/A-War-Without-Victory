@@ -237,3 +237,30 @@ The owner signed off April 1994 (711/712; Brka excluded by owner direction) and 
 **October 1995 starting point:** 697/712, baseline run `apr1992_definitive_188w__6deb5845c150c196__w188_n15`. Of the 15 mismatches, Brka is excluded:
 - **Posavina, wrongly taken by HRHB late (3):** Domaljevac t182, Ostra Luka t183, Krepšić t187. Painted RS at all four checkpoints.
 - **Late-1995 gains not made (11):** Mrkonjić Grad, Podrašnica, Baljvine, Šipovljani and Donji Vrbljani (HRHB); Sanski Most Ilidža, Travnik Varosluk, Konjic Sitnik, Konjic Ljuta, Kalinovik Golubići and Ilijaš Krivajevići (RBiH).
+
+## October 1995: 697 → 709 (2026-11-06)
+
+**Headless 188w:** **712/711/712/709** (base 712/711/711/697). No cell lost at any checkpoint. Strict health PASS; enclave guard intact; every late 2nd Corps capture is reference-warranted. Run `apr1992_definitive_188w__6deb5845c150c196__w188_n32`.
+
+**Changes, each measured on its own 188w run:**
+
+| Change | Cells gained | Notes |
+|---|---|---|
+| Southern Move window opens t180 (was t182) and stages on Šipovo town only (Pribeljci dropped) | Mrkonjić Grad, Podrašnica, Baljvine | Neither change alone moves the launch: the window and the Pribeljci staging cell (t181) each hold it to t182. Mrkonjić now falls t188 (history ≈ t184). |
+| Mistral 2 Šipovo axis walks Volari → Bravnice → Jajce town before the Jajce ring and Pribeljci | Šipovljani | Jajce town falls t182 (history ≈ t180), which opens the sourced Drvar gate two turns earlier. A first order that sent the brigades south to Pribeljci before the ring lost Jezero and Prisoje to the march; the geographic order loses nothing. |
+| Donji Vrbljani hand-off: Kralj Petar Krešimir IV brigade after Majdan (was Rama, after Podrašnica) | Donji Vrbljani | Rama is still in Mistral 2 at t188, so the axis never activated. |
+| Donji Vakuf 95 gains a Paklarevo–Varošluk axis (737th) | Varošluk (t179) | Calibration assumption; exact date and actor unsourced. |
+| Zagreb "Posavina Hold" patron directive for `hvo_northwest_bosnia`, stance ceiling defensive from t100 | Domaljevac, Ostra Luka, Krepšić | The commander-generated Orašje attacks (Sjekira t177, Baklja t186) beat RS defenders whose morale fell 89 → 33 in late 1995. Starting at t170 still let one variant attack at t169–170. The startup snapshot is rebuilt for the timeline change. |
+| Konjic September 1994 offensive adds Ljuta after Glavatičevo | Ljuta (t130); **apr1995 → 712/712** | Calibration assumption; the date is not sourced. |
+| Treskavica 95 (Model) catalog opportunity, t167–175: 4th Muslim → Sitnik, 443rd → Golubići | Sitnik, Golubići (t168) | First built as a pre-planned op: that reserved both brigades from turn 0 (`getReservedPrePlannedBrigadeIds`), the run diverged at t74, and two Brčko cells moved at t105–108. As a catalog opportunity the run first differs at t168. |
+
+**Rejected (no effect):** Southern Move `planning_duration` 2→1 (preparation probe sets the length); closing the bot "Posavina Anti-RS" priority at t170 (the commander does not use it); West Sana hand-off after Hadžići instead of Ključ (the 510th still takes Sanica at t187).
+
+**Remaining at oct1995 (3):**
+- **Brka:** excluded by owner direction.
+- **Sanski Most Ilidža:** one week short. The 5th Corps runs about five weeks behind history (Ključ t186 vs ≈ t180). Reordering the West Sana axis would trade Kljevci for Ilidža.
+- **Ilijaš Krivajevići:** held by a 3,000-strong SRK formation (F_RS_0001) against one 1,800-man ARBiH brigade at Toljenak; no lever without forcing the result.
+
+**Live = headless through October 1995:** at 188 turns (`bot_equivalent`, production autonomy, pause before combat), 0 cells differ from the n32 headless run for RBiH, RS and HRHB as player; every branch scores 709/712.
+
+**Tests updated for the new definitions:** `hv_1995_lifecycle_diagnostic` (Southern Move window t180), `hvo_southern_move_tail_delivery` and the western Bosnia catalog test (Donji Vrbljani hand-off brigade and gate; the Jajce walk is now a frontier walk from Volari, where each cell touches Volari or an earlier objective), the central Bosnia catalog test (Ljuta; Treskavica in the family export). New: `tests/oct1995_calibration_levers.test.ts`.

@@ -85,9 +85,9 @@ describe('HV 1995 lifecycle diagnostic', () => {
                     axis_id: 'southern_move_mrkonjic',
                     route_kind: 'default',
                     variant_id: null,
-                    first_open_turn: 182,
+                    first_open_turn: 180,
                     last_open_turn: 188,
-                    post_spawn_open_turn_count: 7,
+                    post_spawn_open_turn_count: 9,
                 }),
             ],
         });

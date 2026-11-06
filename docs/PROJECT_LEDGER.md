@@ -13541,3 +13541,17 @@ Branch `claude/live-jan1993-calibration` (local, unpushed). Headless 188w: **712
 - Baselines and structural fingerprint are not re-pinned; that happens at the final push.
 
 Record: `docs/40_reports/audits/20261105_live_jan1993/attribution/RESULT.md`.
+
+## 2026-11-06 - Calibration: Apr94 and Apr95 signed off; Oct95 697 -> 709; live = headless through week 188 (LOCAL BRANCH, NOT ADOPTED)
+
+Branch `claude/live-jan1993-calibration` (local, unpushed). The owner signed off April 1994 (711, Brka excluded) and April 1995. Headless 188w: **712/711/712/709**, up from 712/711/711/697. Strict health PASS; enclave guard intact. Live at 188 turns: 0 cells differ for RBiH, RS and HRHB as player.
+
+- Southern Move opens at t180 and stages on Šipovo town only; the Mistral 2 Šipovo axis takes Jajce town before the ring; Donji Vrbljani goes to the Kralj Petar Krešimir IV brigade after Majdan. Gains Mrkonjić Grad, Podrašnica, Baljvine, Šipovljani, Donji Vrbljani.
+- Donji Vakuf 95 gains a Paklarevo–Varošluk axis (737th). Gains Varošluk.
+- New Zagreb "Posavina Hold" patron directive (defensive from t100) for `hvo_northwest_bosnia`. Stops the late-1995 HVO capture of Domaljevac, Ostra Luka and Krepšić. Startup snapshot rebuilt.
+- Ljuta follows Glavatičevo in the September 1994 Konjic offensive: April 1995 reaches 712/712.
+- New Treskavica 95 (Model) catalog opportunity takes Sitnik and Golubići at t168. Not a pre-planned op: those reserve their brigades from turn 0, which moved two Brčko cells when measured.
+- Remaining at oct1995: Brka (owner: ignore), Sanski Most Ilidža (one week short), Ilijaš Krivajevići (no lever without forcing it).
+- All new placements are calibration assumptions with unsourced dates, recorded in the operation comments. Baselines are not re-pinned; that happens at the final push.
+
+Record: `docs/40_reports/audits/20261105_live_jan1993/attribution/RESULT.md`.
