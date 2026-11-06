@@ -229,3 +229,11 @@ The owner asked to sort out Gornje Krčevine (Brka is ignored). It is painted RS
 - Negotiation state is created at t0 only for player campaigns. RS +10 cohesion/credibility from `rs_strategic_goals` shifts that the no-player branch drops; +2 war-crimes counts.
 - A bot RBiH counter-offer is left pending when HRHB is the player.
 - The harness answers peace plans a turn later.
+
+## Owner sign-off: April 1994 and April 1995 (2026-11-06)
+
+The owner signed off April 1994 (711/712; Brka excluded by owner direction) and April 1995 (711/712; Konjic Ljuta left open) and moved the lane to October 1995.
+
+**October 1995 starting point:** 697/712, baseline run `apr1992_definitive_188w__6deb5845c150c196__w188_n15`. Of the 15 mismatches, Brka is excluded:
+- **Posavina, wrongly taken by HRHB late (3):** Domaljevac t182, Ostra Luka t183, Krepšić t187. Painted RS at all four checkpoints.
+- **Late-1995 gains not made (11):** Mrkonjić Grad, Podrašnica, Baljvine, Šipovljani and Donji Vrbljani (HRHB); Sanski Most Ilidža, Travnik Varosluk, Konjic Sitnik, Konjic Ljuta, Kalinovik Golubići and Ilijaš Krivajevići (RBiH).
