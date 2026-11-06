@@ -350,7 +350,8 @@ function handleFormationCounterSelection(
 }
 
 /** Layer IDs for front lines (visibility driven by store frontsVisible). */
-const FRONT_LAYER_IDS = ['faction-border-glow-pos', 'faction-border-glow-neg', 'front-line-base', 'front-line-stripe'];
+/** Every layer the fronts toggle hides. Must list every `front-line-*` layer in the style (pinned by map_style_contract). */
+const FRONT_LAYER_IDS = ['faction-border-glow-pos', 'faction-border-glow-neg', 'front-line-base', 'front-line-stripe', 'front-line-understroke'];
 /** Fill layer for ethnic map mode (majority_ethnic); toggled with osid-control-fill by mapMode. */
 const OSID_ETHNIC_FILL_LAYER_ID = 'osid-ethnic-fill';
 
