@@ -1369,8 +1369,9 @@ async function runPackagedRuntimeProbe() {
       sha256: hashFileSha256(filePath),
       size_bytes: assertReadableFile(filePath, 'packaged audio asset'),
     }));
-  if (packagedAudioAssets.length !== 20) {
-    throw new Error(`packaged runtime probe expected 20 emitted OGG assets, got ${packagedAudioAssets.length}`);
+  // Exact approved inventory: 17 effects, 3 ambient beds, and 10 music assets.
+  if (packagedAudioAssets.length !== 30) {
+    throw new Error(`packaged runtime probe expected 30 emitted OGG assets, got ${packagedAudioAssets.length}`);
   }
 
   const excludedResearchRoots = [

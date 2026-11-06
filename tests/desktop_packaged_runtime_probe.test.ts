@@ -1,7 +1,47 @@
 import assert from 'node:assert';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { runInNewContext } from 'node:vm';
 import { test } from 'vitest';
+
+test('packaged audio count guard accepts exactly the approved 30 emitted assets', async () => {
+    const source = await readFile(join(process.cwd(), 'src/desktop/electron-main.cjs'), 'utf8');
+    const guard = source.match(/if \(packagedAudioAssets\.length !== \d+\) \{[\s\S]*?\n  \}/)?.[0];
+    assert.ok(guard, 'exercise the actual packaged process guard');
+    const check = (count: number) => runInNewContext(guard, { packagedAudioAssets: Array(count) });
+    assert.doesNotThrow(() => check(30));
+    assert.throws(() => check(29), /expected 30 emitted OGG assets, got 29/);
+    assert.throws(() => check(31), /expected 30 emitted OGG assets, got 31/);
+});
+
+test('external audio identity validates all imports and rejects missing, extra, changed, and unordered assets', async () => {
+    const source = await readFile(join(process.cwd(), 'tools/desktop_packaged_runtime_probe.mjs'), 'utf8');
+    const imports = await readFile(join(process.cwd(), 'src/ui/map/audio/audioAssets.ts'), 'utf8');
+    const parser = source.match(/audioAssetsSource\.matchAll\((\/.*?\/gm)\)/)?.[1];
+    assert.ok(parser, 'exercise the actual audio import parser');
+    const paths = Array.from(imports.matchAll(runInNewContext(parser)), (match) => match[1]);
+    assert.strictEqual(paths.length, 30, '17 effects, 3 ambient beds, and 10 approved music assets');
+    assert.strictEqual(paths.filter((path) => path.includes('/music/')).length, 10);
+    const predicate = source.match(/const audioByteIdentical = ([\s\S]*?);\n/)?.[1];
+    assert.ok(predicate, 'exercise the actual external identity predicate');
+    const hashes = paths.map((_, index) => `hash-${index.toString().padStart(2, '0')}`);
+    const check = (sourceCount: number, packagedHashes: string[], packagedPaths = packagedHashes) => runInNewContext(predicate, {
+        sourceAudioPaths: Array(sourceCount),
+        packagedAudioAssets: Array(packagedHashes.length),
+        packagedAudioPaths: packagedPaths,
+        sourceAudioHashes: hashes,
+        packagedAudioHashes: [...packagedHashes].sort(),
+        strictCompare: (a: string, b: string) => a < b ? -1 : a > b ? 1 : 0,
+    });
+    assert.strictEqual(check(30, hashes), true);
+    assert.strictEqual(check(29, hashes), false);
+    assert.strictEqual(check(31, hashes), false);
+    assert.strictEqual(check(30, hashes.slice(1)), false);
+    assert.strictEqual(check(30, [...hashes, 'unexpected']), false);
+    assert.strictEqual(check(30, [...hashes.slice(1), 'wrong-hash'].sort()), false);
+    assert.strictEqual(check(30, [hashes[0], ...hashes.slice(0, -1)].sort()), false);
+    assert.strictEqual(check(30, hashes, [...hashes].reverse()), false);
+});
 
 test('package.json exposes one canonical packaged runtime probe command', async () => {
     const packageJson = JSON.parse(await readFile(join(process.cwd(), 'package.json'), 'utf8')) as {
@@ -72,7 +112,7 @@ test('external packaged probe uses a fresh profile and validates package, BC09, 
     assert.match(source, /byteIdentical[\s\S]*not byte-identical/s);
     assert.match(source, /audioAssetsSourcePath/);
     assert.match(source, /\.matchAll\([\s\S]*\\\.ogg/s);
-    assert.match(source, /sourceAudioHashes[\s\S]*packagedAudioHashes[\s\S]*20/s);
+    assert.match(source, /sourceAudioHashes[\s\S]*packagedAudioHashes[\s\S]*30/s);
     assert.match(source, /expectedExcludedResearchRoots/);
     assert.match(source, /existsSync\(join\(packagedResourcesPath, relativePath\)\)/);
 });
