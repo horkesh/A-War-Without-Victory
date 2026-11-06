@@ -50,7 +50,9 @@ describe('SidePickerOverlay localization', () => {
         expect(screen.getByRole('button', { name: /Učitaj save s diska/ })).toBeTruthy();
         expect(screen.getByRole('button', { name: /Nastavi zadnje pokretanje/ })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Zatvori' })).toBeTruthy();
-        expect(screen.getAllByText(/^Snage /).length).toBeGreaterThan(0);
+        // The picker describes the faction, not its army.
+        expect(screen.queryAllByText(/^Snage /)).toHaveLength(0);
+        expect(screen.getByText('Čvrsta komanda, oskudna sredstva.')).toBeTruthy();
         expect(screen.getByRole('button', { name: /Republika Bosna i Hercegovina/ })).toBeTruthy();
         expect(screen.queryByRole('button', { name: /Republic of Bosnia and Herzegovina/ })).toBeNull();
     });

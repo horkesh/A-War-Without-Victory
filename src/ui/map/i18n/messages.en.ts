@@ -1836,7 +1836,7 @@ export const enMessages = {
     'mainMenu.resume': 'Resume',
     'mainMenu.noRecords': 'No campaign records are available on this desk.',
     'mainMenu.importFile': 'Import file…',
-    'mainMenu.chooseFactionHelp': 'Three commands. Three different limits on what power can accomplish.',
+    'mainMenu.chooseFactionHelp': 'Three factions. Three different limits on what power can accomplish.',
     'mainMenu.commandBrief': 'Command briefing',
     'mainMenu.takeCommand': 'Take command',
     'mainMenu.begin': 'Begin',

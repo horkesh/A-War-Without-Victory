@@ -426,7 +426,6 @@ body {
 .main-menu-opening__version { position: fixed; z-index: 2; /* canonical: Z.MAP_HUD_LOW = 2 (src/ui/shared/zIndex.ts) */ right: 2rem; bottom: 1.25rem; color: #7e8880; }
 
 .command-console-stack { display: flex; min-height: 23rem; flex-direction: column; }
-.command-console-stack--standby { justify-content: center; }
 .command-heading h2 { margin: 0.3rem 0 0; color: #f0f1eb; font-size: clamp(1.45rem, 3vw, 2.15rem); font-weight: 600; letter-spacing: -0.015em; line-height: 1; }
 .command-eyebrow { color: #b0b8af; }
 .command-console-thesis,
@@ -475,8 +474,8 @@ body {
    object-fit: contain, and no border, which would draw a rectangle around a shield. */
 .faction-rail__crest { width: 2rem; height: 2rem; object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55)); }
 .faction-rail__label { min-width: 0; }
-.faction-rail__label strong { display: block; overflow: hidden; color: #e5e8e1; font-size: 0.78rem; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
-.faction-rail__label small { display: block; overflow: hidden; margin-top: 0.25rem; color: #929c94; font-family: var(--font-data); font-size: 0.75rem; letter-spacing: 0.06em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+.faction-rail__label strong { display: block; color: #e5e8e1; font-size: 0.78rem; line-height: 1.15; }
+.faction-rail__label small { display: block; margin-top: 0.25rem; color: #929c94; font-family: var(--font-command); font-size: 0.75rem; line-height: 1.3; letter-spacing: 0.01em; }
 
 .command-dossier__header { display: flex; align-items: flex-start; gap: 1rem; border-bottom: 1px solid rgba(207, 215, 207, 0.16); padding-bottom: 1rem; }
 .command-dossier__crest { width: 2.8rem; height: 2.8rem; object-fit: contain; filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6)); }
@@ -493,8 +492,6 @@ body {
 .command-mode__title { display: flex; align-items: center; gap: 0.65rem; color: #e3e7e0; font-size: 0.9rem; }
 .command-mode__indicator { color: #b7c0b8; font-family: var(--font-data); }
 .command-mode__body { display: block; margin: 0.45rem 0 0 1.35rem; color: #aeb6ae; font-size: 0.75rem; line-height: 1.45; }
-.command-console-signal { display: flex; gap: 0.45rem; margin-top: 2rem; }
-.command-console-signal span { width: 2.5rem; height: 2px; background: #79857c; opacity: 0.45; }
 
 .record-list { display: grid; min-height: 11rem; gap: 0.45rem; margin-top: 1.35rem; }
 .record-list__entry { border: 1px solid rgba(203, 211, 202, 0.18); background: rgba(20, 28, 27, 0.72); padding: 0.9rem; }

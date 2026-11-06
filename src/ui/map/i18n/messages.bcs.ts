@@ -1793,7 +1793,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'mainMenu.resume': 'Nastavi',
     'mainMenu.noRecords': 'Na ovom stolu nema zapisa kampanje.',
     'mainMenu.importFile': 'Uvezi datoteku…',
-    'mainMenu.chooseFactionHelp': 'Tri komande. Tri različita ograničenja onoga što moć može postići.',
+    'mainMenu.chooseFactionHelp': 'Tri frakcije. Tri različita ograničenja onoga što moć može postići.',
     'mainMenu.commandBrief': 'Komandni brifing',
     'mainMenu.takeCommand': 'Preuzmi komandu',
     'mainMenu.begin': 'Počni',
