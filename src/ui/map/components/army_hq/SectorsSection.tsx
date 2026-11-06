@@ -152,7 +152,7 @@ function SectorExpandedDetail({
     const hasThreatIntel = isReportedNumber(sector.intel_confidence) && sector.intel_confidence >= THREAT_INTEL_CONFIDENCE_MIN;
 
     return (
-        <div className="px-4 py-3 space-y-4 text-xs border-t border-panel-border/50 bg-panel-card font-mono">
+        <div className="px-4 py-3 space-y-4 text-xs border-t border-panel-border/50 bg-panel-card">
             <div className="space-y-2">
                 {isReportedNumber(sector.intel_confidence)
                     ? <IntelBar value={sector.intel_confidence} label={t('sectorsSection.intel')} />

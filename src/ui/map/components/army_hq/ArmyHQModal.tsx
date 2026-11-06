@@ -393,7 +393,7 @@ export function ArmyHQModal({
     // so we host only The War's Record (campaign history sourced from loadedGameState).
     if (open && state && isObserver) {
         return (
-            <div ref={dialogFocus.ref} onKeyDown={dialogFocus.onKeyDown} tabIndex={-1} className="fixed inset-0 flex overflow-hidden font-mono" style={{ zIndex: Z.MODAL }} role="dialog" aria-modal="true" aria-label={t('armyHq.dialogTitle')}>
+            <div ref={dialogFocus.ref} onKeyDown={dialogFocus.onKeyDown} tabIndex={-1} className="fixed inset-0 flex overflow-hidden" style={{ zIndex: Z.MODAL }} role="dialog" aria-modal="true" aria-label={t('armyHq.dialogTitle')}>
                 <button
                     type="button"
                     aria-label={t('armyHq.dismissBackdrop')}
@@ -454,7 +454,7 @@ export function ArmyHQModal({
             tabIndex={-1}
             data-testid="army-hq-modal"
             data-expanded-corps-id={expandedCorpsId ?? ''}
-            className="fixed inset-0 flex overflow-hidden font-mono"
+            className="fixed inset-0 flex overflow-hidden"
             style={{ zIndex: Z.MODAL }}
             role="dialog"
             aria-modal="true"

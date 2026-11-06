@@ -124,7 +124,7 @@ export function FrontVisitSection() {
                 </p>
 
                 {/* Availability readout */}
-                <div className="flex flex-col gap-0.5 text-xs text-text-secondary font-mono">
+                <div className="flex flex-col gap-0.5 text-xs text-text-secondary">
                     {avail.firesLeft > 0 ? (
                         <span>{t('frontVisit.firesLeft', { count: avail.firesLeft })}</span>
                     ) : (
