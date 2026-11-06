@@ -70,7 +70,7 @@ const DOSSIER_STYLE: CSSProperties = {
 };
 const PANEL_CLASS = 'bg-panel-bg/95 backdrop-blur-sm border-l border-panel-border flex flex-col';
 const DOSSIER_CLASS = 'flex flex-col rounded-sm border border-accent-gold/40 ring-1 ring-inset ring-accent-gold/15 bg-panel-bg/95 shadow-[0_18px_40px_rgba(0,0,0,0.55)] backdrop-blur-sm';
-const DOSSIER_TAB_CLASS = 'pointer-events-none absolute -top-5 left-3 rounded-t-sm border border-b-0 border-accent-gold/50 bg-paper px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-panel-bg shadow-[0_-1px_2px_rgba(0,0,0,0.25)]';
+const DOSSIER_TAB_CLASS = 'pointer-events-none absolute -top-5 left-3 rounded-t-sm border border-b-0 border-accent-gold/50 bg-paper px-2.5 py-0.5 font-mono text-xs font-bold uppercase tracking-[0.18em] text-panel-bg shadow-[0_-1px_2px_rgba(0,0,0,0.25)]';
 
 const PRIORITY_STYLES: Record<InboxItem['priorityBand'], { badge: string; border: string; labelKey: MessageKey }> = {
     required: { badge: 'bg-red-500 text-neutral-950', border: 'border-red-500/40', labelKey: 'decisionRoom.metric.required' },
