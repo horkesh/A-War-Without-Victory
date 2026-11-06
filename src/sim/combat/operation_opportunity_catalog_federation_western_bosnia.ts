@@ -78,23 +78,23 @@ const MISTRAL_SIPOVO_OBJECTIVES: readonly string[] = [
     'op:sipovo:gornji_mujdzici_2',
     'op:sipovo:sipovo_2',
     'op:sipovo:volari_2',
-    'op:sipovo:pribeljci_2',
     // BB1 pp.417-418: the joint HV/HVO Maestral advance continued from
     // Sipovo toward Jajce, restored to Croat hands on 13 September 1995.
     // The operational contact graph supplies this contiguous ordinary-combat
-    // walk from the captured Pribeljci shoulder.
+    // walk from the captured Volari cell (Volari - Bravnice - Jajce town).
     'op:jajce:bravnice',
-    'op:jajce:vinac_2',
     'op:jajce:jajce_3',
     'op:jajce:lupnica',
     'op:jajce:barevo_2',
     'op:jajce:jezero_2',
     'op:jajce:prisoje',
+    'op:jajce:vinac_2',
+    'op:sipovo:pribeljci_2',
 ];
 
 const SOUTHERN_MOVE_STAGING_ANCHORS: readonly string[] = [
     'op:sipovo:sipovo_2',
-    'op:sipovo:pribeljci_2',
+    // EXP 'op:sipovo:pribeljci_2',
 ];
 
 const SOUTHERN_MOVE_MRKONJIC_OBJECTIVES: readonly string[] = [
@@ -482,9 +482,9 @@ const SOUTHERN_MOVE_AXES: readonly OpportunityAxisDef[] = [
         objectives: ['op:kljuc:donji_vrbljani_2'],
         phase_gate: {
             main_axis_id: 'southern_move_mrkonjic',
-            requires_operation_captures: ['op:mrkonjic_grad:podrasnica_2'],
+            requires_operation_captures: ['op:mrkonjic_grad:majdan_2'],
             handoff: {
-                brigade_id: 'hvo_rama_brigade' as FormationId,
+                brigade_id: 'hrhb_kralj_petar_kreimir_iv_brigade' as FormationId,
                 source_axis_id: 'southern_move_mrkonjic',
             },
         },
@@ -492,7 +492,7 @@ const SOUTHERN_MOVE_AXES: readonly OpportunityAxisDef[] = [
 ];
 
 const dateWindowSouthernMove: AxisPredicate = (_state, turn) => {
-    if (turn < 182) return { green: false, reason: 'Southern Move window not yet open' };
+    if (turn < 180) return { green: false, reason: 'Southern Move window not yet open' };
     if (turn > 188) return { green: false, reason: 'Southern Move window has closed' };
     return { green: true, reason: 'within Southern Move Oct 1995 window' };
 };

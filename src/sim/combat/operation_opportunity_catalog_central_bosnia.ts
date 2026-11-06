@@ -326,6 +326,18 @@ const DONJI_VAKUF_AXES: readonly OpportunityAxisDef[] = [
         objectives: DONJI_VAKUF_OBJECTIVES,
         staging_osid: DONJI_VAKUF_STAGING_TURBE,
     },
+    {
+        // Calibration assumption (oct1995): Varošluk, removed from the March ridge axis by
+        // owner approval (painted RS at apr1995), is painted RBiH at oct1995. It is placed in
+        // the September 1995 Donji Vakuf advance, which takes the adjacent Komar line. The
+        // 737th held the Paklarevo shoulder after Domet-1. Exact date and actor are not sourced.
+        axis_id: 'donji_vakuf_varosluk',
+        name: 'Paklarevo - Varošluk',
+        corps: DONJI_VAKUF_PRIMARY_CORPS,
+        brigades: ['arbih_737th_muslim_light' as FormationId],
+        objectives: ['op:travnik:varosluk'],
+        staging_osid: 'op:travnik:paklarevo',
+    },
 ];
 
 // 2026-05-22 Wave 7 cascade unblock: brigade pool widened from 4 → 6 brigades.
