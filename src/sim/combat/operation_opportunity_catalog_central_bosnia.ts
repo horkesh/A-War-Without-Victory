@@ -1230,6 +1230,96 @@ export const KONJIC_SEPTEMBER_94_OPPORTUNITY: OperationOpportunityDef = {
     staff_recommendation: 'approve',
 };
 
+// Calibration assumption (oct1995): Sitnik and Golubići are painted RS through apr1995
+// and RBiH at oct1995, and no other operation targets them. This is a bounded model of the
+// 4th Corps' summer 1995 pressure on the Treskavica approaches (the June 1995 ARBiH
+// offensive window), not an attested operation, date or roster. The 4th Muslim already
+// probes Sitnik from Bijela; the 443rd takes Ljuta in the September 1994 Konjic offensive.
+// It is a catalog opportunity, not a pre-planned op, because a pre-planned op reserves its
+// named brigades from turn 0 (getReservedPrePlannedBrigadeIds), which moved two Brčko cells
+// at t105-108 when measured. Control changes only through ordinary combat.
+const TRESKAVICA_STAGING = 'op:konjic:ljuta';
+const TRESKAVICA_OBJECTIVES: readonly string[] = ['op:konjic:sitnik', 'op:kalinovik:golubici_2'];
+
+const TRESKAVICA_AXES: readonly OpportunityAxisDef[] = [
+    {
+        axis_id: 'treskavica_sitnik',
+        name: 'Treskavica Sitnik',
+        corps: KONJIC_PRIMARY_CORPS,
+        brigades: ['arbih_4th_muslim_light' as FormationId],
+        objectives: ['op:konjic:sitnik'],
+        staging_osid: 'op:konjic:bijela_2',
+    },
+    {
+        axis_id: 'treskavica_golubici',
+        name: 'Treskavica Golubići',
+        corps: KONJIC_PRIMARY_CORPS,
+        brigades: ['arbih_443rd_mountain' as FormationId],
+        objectives: ['op:kalinovik:golubici_2'],
+        staging_osid: TRESKAVICA_STAGING,
+    },
+];
+
+const dateWindowTreskavica: AxisPredicate = (_state, turn) => {
+    if (turn < 167) return { green: false, reason: 'June 1995 Treskavica window not yet open' };
+    if (turn > 175) return { green: false, reason: 'summer 1995 Treskavica window has closed' };
+    return { green: true, reason: 'within the June-July 1995 Treskavica window' };
+};
+
+const stagingAccessTreskavica: AxisPredicate = (state) => (
+    getPoliticalControllerOSID(state, TRESKAVICA_STAGING, undefined) === 'RBiH'
+        ? { green: true, reason: 'Ljuta assembly area is RBiH-held' }
+        : { green: false, reason: 'Ljuta assembly area is not RBiH-held' }
+);
+
+const enemyWeaknessTreskavica: AxisPredicate = (state) => (
+    TRESKAVICA_OBJECTIVES.some((osid) => getPoliticalControllerOSID(state, osid, undefined) === 'RS')
+        ? { green: true, reason: 'Treskavica approach objectives remain in enemy hands' }
+        : { green: false, reason: 'no Treskavica approach objectives remain in enemy hands' }
+);
+
+export const TRESKAVICA_95_OPPORTUNITY: OperationOpportunityDef = {
+    opportunity_id: 'treskavica_95',
+    name: 'Treskavica 95 (Model)',
+    tier: 'T1',
+    faction: 'RBiH',
+    primary_corps: KONJIC_PRIMARY_CORPS,
+    family: 'central_bosnia_vlasic',
+    axes: TRESKAVICA_AXES,
+    staging_osid: TRESKAVICA_STAGING,
+    planning_duration: 2,
+    citations: [
+        'Model assumption only: painted RS at apr1995 and RBiH at oct1995 for Sitnik and Golubici; the June 1995 window, the two-brigade allocation and the axis split are calibration choices, not sourced facts',
+    ],
+    historical_exit_class: 'partial_success',
+    prerequisites: {
+        date_window: 'required',
+        political_authorization: 'n_a',
+        corps_readiness: 'required',
+        logistics: 'optional',
+        staging_access: 'required',
+        weather_season: 'optional',
+        commander_confidence: 'optional',
+        enemy_weakness: 'required',
+        alliance_context: 'required',
+        force_quality: 'optional',
+        min_optional_axes: 2,
+    },
+    evaluators: {
+        date_window: dateWindowTreskavica,
+        political_authorization: alwaysGreen,
+        corps_readiness: corpsReadinessKonjic,
+        logistics: logisticsKonjic,
+        staging_access: stagingAccessTreskavica,
+        weather_season: weatherSeasonKonjic,
+        commander_confidence: commanderConfidenceKonjic,
+        enemy_weakness: enemyWeaknessTreskavica,
+        alliance_context: allianceContextKonjic,
+        force_quality: forceQualityKonjic,
+    },
+    staff_recommendation: 'approve',
+};
+
 // ═══════════════════════════════════════════════════════════════════════════
 // KUPRES_PHASE_2_94 — Operation Cincar Phase 2 / Kupres Town (Nov 1994)
 //
@@ -1546,4 +1636,5 @@ export const CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES: readonly OperationOpportunityD
     DONJI_VAKUF_95_OPPORTUNITY,
     KONJIC_SEPTEMBER_94_OPPORTUNITY,
     PAKLAREVO_LOCAL_94_MODEL_OPPORTUNITY,
+    TRESKAVICA_95_OPPORTUNITY,
 ];
