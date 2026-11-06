@@ -1017,11 +1017,6 @@
             "faction": "RS",
             "dimension": "international_standing",
             "delta": -10
-          },
-          {
-            "faction": "RS",
-            "dimension": "internal_cohesion",
-            "delta": 5
           }
         ],
         "aggression_affinity": 0.4,
@@ -4872,7 +4867,7 @@
     "requires_player_response": true,
     "responding_faction": "RS",
     "bot_response_logic": "historical",
-    "historical_default_response_id": "deny",
+    "historical_default_response_id": "obstruct",
     "enables_events": [
       "london_conference_1992"
     ],
@@ -4890,9 +4885,9 @@
       {
         "id": "deny",
         "branch_tag": "rs_camps_deny",
-        "historical_marker": "historical_default",
+        "historical_marker": "counterfactual",
         "label": "Deny camp existence; refuse outside access",
-        "description": "RS Crisis Staff issues public denial of detention-camp operations and refuses outside investigator access. The ITN footage is dismissed as Western propaganda. The denial posture is the documented Pale-leadership response per ICTY Karadžić IT-95-5/18-T §§3473-3475.",
+        "description": "RS Crisis Staff issues public denial of detention-camp operations and refuses outside investigator access. The ITN footage is dismissed as Western propaganda. A total refusal of access is the counterfactual; the documented Pale response combined public denial with staged, restricted visits (ICTY Stakić IT-97-24-T; Karadžić IT-95-5/18-T §§3473-3475).",
         "effects": [
           {
             "kind": "patron_pressure",
@@ -4911,11 +4906,6 @@
           },
           {
             "faction": "RS",
-            "dimension": "internal_cohesion",
-            "delta": 5
-          },
-          {
-            "faction": "RS",
             "dimension": "patron_confidence",
             "delta": -10
           }
@@ -4926,7 +4916,7 @@
       {
         "id": "obstruct",
         "branch_tag": "rs_camps_obstruct",
-        "historical_marker": "counterfactual",
+        "historical_marker": "historical_default",
         "label": "Restrict press and ICRC access",
         "description": "RS Crisis Staff restricts press and ICRC access to the Prijedor-area camps and stages limited controlled visits. The restriction posture is documented in ICTY Stakić IT-97-24-T §§220-300 and Kvočka IT-98-30/1-T as Crisis Staff command-responsibility findings on access denial and obstruction of impartial inspection.",
         "effects": [
@@ -4959,7 +4949,7 @@
         "branch_tag": "rs_camps_cooperate",
         "historical_marker": "counterfactual",
         "label": "Permit ICRC and press access",
-        "description": "RS Crisis Staff permits ICRC inspection and press access at the Prijedor-area camps. The counterfactual posture rebuilds international credibility at sharp internal-cohesion cost; Pale hardliners and the VRS Main Staff register the access as institutional weakness.",
+        "description": "RS Crisis Staff permits ICRC inspection and press access at the Prijedor-area camps. Access slows the further loss of international standing; it does not undo what the cameras have already recorded.",
         "effects": [
           {
             "kind": "patron_pressure",
@@ -4975,16 +4965,6 @@
             "faction": "RS",
             "dimension": "international_standing",
             "delta": -3
-          },
-          {
-            "faction": "RS",
-            "dimension": "military_credibility",
-            "delta": -10
-          },
-          {
-            "faction": "RS",
-            "dimension": "internal_cohesion",
-            "delta": -5
           }
         ],
         "aggression_affinity": -0.8,
@@ -5015,11 +4995,11 @@
       "cooperate": {
         "RBiH": {
           "headline": "RS Crisis Staff permits ICRC and press access to camps",
-          "body": "RS Crisis Staff permits ICRC inspection and press access at the Prijedor-area camps. Sarajevo registers a credibility recovery move at sharp internal-cohesion cost for Pale; VRS Main Staff and hardliner factions read the access as institutional weakness."
+          "body": "RS Crisis Staff permits ICRC inspection and press access at the Prijedor-area camps. Sarajevo registers the access; what the inspectors find enters the international record."
         },
         "HRHB": {
           "headline": "RS Crisis Staff permits ICRC and press access to camps",
-          "body": "RS Crisis Staff permits ICRC inspection and press access at the Prijedor-area camps. Mostar registers a credibility recovery move at sharp internal-cohesion cost for Pale; VRS Main Staff and hardliner factions read the access as institutional weakness."
+          "body": "RS Crisis Staff permits ICRC inspection and press access at the Prijedor-area camps. Mostar registers the access; what the inspectors find enters the international record."
         }
       }
     },
