@@ -132,3 +132,9 @@ This matrix is being followed when:
 2. no screen becomes a second hidden logic owner
 3. standalone tactical map, Warroom, Army HQ, and Codex form one coherent shell
 4. future roadmap work can point to a canonical surface instead of inventing one
+
+## Command palette and interface preference (2026-11-06)
+
+`command_palette/` is a navigation index, not an information or order owner. It indexes own active formations and public named geography from the existing projection and routes through canonical shell/inspection handlers. Ctrl/Cmd+K and Find share modal/busy/stale guards; required decisions retain priority. Friendly labels alone match; raw IDs and hidden enemy formations do not.
+
+`preferences/` owns only local 100/125/150% chrome sizing. Browser storage is guarded; native hydration/merged persistence reuses existing getSettings/saveSettings, preserving unknown settings across random renderer ports. No new IPC or save field. Logical viewport/portal coordinates scale chrome; retained main and inverse-compensated OpsMap renderers keep physical hit geometry and lifetime. Generated HTML controls scale exactly once. [Verification](../40_reports/implemented/20261106_COMMAND_PALETTE_UI_SCALE.md).

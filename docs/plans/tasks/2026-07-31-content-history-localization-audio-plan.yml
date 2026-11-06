@@ -17,7 +17,10 @@ owning_plan: docs/plans/2026-07-31-content-history-localization-audio-plan.md
 # docs/plans/2026-11-05-player-experience-completion-plan.md. This task remains OPEN for
 # a current exhaustive quoted inventory; the scope review does not claim that inventory,
 # human listening, offline runtime, or R7 acceptance is complete.
-base_commit: 13f1bda2a1dc2e932ac70609d25b12a55e3fa4e6
+# Read set re-derived at c51125157699a851ca14df69fae0b22e49dd1435: current audio import/API sweep still yields the same
+# thirteen files. UI sizing changes Settings/Onboarding/GameOver/PeacePlan/Advance presentation
+# only; cue/control APIs are unchanged. Open inventory/human/offline gates above remain open.
+base_commit: c51125157699a851ca14df69fae0b22e49dd1435
 lane: R7
 gate: R7-AUDIO-CUE-WIRING
 
