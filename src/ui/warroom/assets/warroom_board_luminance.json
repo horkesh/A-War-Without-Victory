@@ -10,7 +10,7 @@
     "cork": "desk_map"
   },
   "metric": "median CIE L* of region pixels, D65",
-  "source_digest": "b50a6c64fc6d2cfc00d8fda41ce6c2087026eb9ce130c91daefd5dae24ec94cc",
+  "source_digest": "3facf848b152904445fc8eea9b15e01dba63020517d203130113fb8f9b9f2f40",
   "boards": {
     "HRHB": {
       "1991": 60.1,
@@ -66,9 +66,9 @@
     },
     "RBiH": {
       "left": 0.30814,
-      "top": 0.37044,
+      "top": 0.37109,
       "width": 0.22093,
-      "height": 0.22135
+      "height": 0.22005
     },
     "RS": {
       "left": 0.33031,
