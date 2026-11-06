@@ -39868,6 +39868,16 @@
             "name": "Tomislavgrad Hold",
             "stance_ceiling": "balanced",
             "start_week": 40
+          },
+          {
+            "corps_ids": [
+              "hvo_northwest_bosnia"
+            ],
+            "description": "Zagreb: hold the Orasje pocket while the HV effort goes west (Storm, Mistral, Southern Move). Calibration assumption: no Posavina gains are painted at any 1995 checkpoint.",
+            "end_week": 999,
+            "name": "Posavina Hold",
+            "stance_ceiling": "defensive",
+            "start_week": 170
           }
         ]
       },

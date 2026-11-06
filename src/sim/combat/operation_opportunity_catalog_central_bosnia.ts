@@ -52,6 +52,10 @@ const KONJIC_STAGING = 'op:konjic:konjic_2';
 const KONJIC_OBJECTIVES: readonly string[] = [
     'op:konjic:bijela_2',
     'op:konjic:glavaticevo_2',
+    // Calibration assumption (apr1995/oct1995): Ljuta, south of Glavaticevo on the
+    // same Borci-Glavaticevo line, is painted RS through apr1994 and RBiH from apr1995.
+    // Its capture in this offensive is a model placement; the date is not sourced.
+    'op:konjic:ljuta',
 ];
 const KONJIC_READINESS_FLOOR = 0.36;
 const KONJIC_AXIS_COORDINATION_FLOOR = 0.35;
