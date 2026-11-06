@@ -1,6 +1,17 @@
-## Current published snapshot — 2026-11-06 (latest, October 1995 at 709)
+## Current published snapshot — 2026-11-06 (latest, October 1995 at 710)
 
-[Open the current weekly timeline 0–188](control_timeline_oct95_709_188_20261106.html), with scores of **712/711/712/709** at weeks 39/104/156/188. January 1993, April 1994 and April 1995 are signed off.
+[Open the current weekly timeline 0–188](control_timeline_oct95_710_188_20261106.html), with scores of **712/711/712/710** at weeks 39/104/156/188. January 1993, April 1994 and April 1995 are signed off.
+
+- **Sanski Most Ilidža now falls:** after Lušci Palanka the 517th splits off on its own axis, so the 506th reaches Sanski Most a week earlier and Ilidža at week 188.
+- **Live equals headless through October 1995:** 0 cells differ for RBiH, RS or HRHB as player at week 188.
+- **Remaining:** Brka (ignored by owner decision); Ilijaš Krivajevići (painted-map question with the owner).
+- **Checks:** strict engine health passes; enclaves on schedule; full suite passes; 0 markers outside their cell.
+
+The previous [712/711/712/709](control_timeline_oct95_709_188_20261106.html) page remains available; its provenance is archived as `PUBLICATION-PROVENANCE-previous-oct95-709.json`.
+
+## Previous published snapshot — 2026-11-06 (October 1995 at 709)
+
+[Open the 709 weekly timeline 0–188](control_timeline_oct95_709_188_20261106.html), with scores of **712/711/712/709** at weeks 39/104/156/188. January 1993, April 1994 and April 1995 are signed off.
 
 - **October 1995 697 → 709:**
   - Southern Move takes Mrkonjić Grad, Podrašnica and Baljvine.

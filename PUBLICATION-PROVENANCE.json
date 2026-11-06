@@ -2,32 +2,32 @@
  "schema": "awwv.measured-unqualified-live-calibration-publication.v1",
  "prepared": "2026-11-06",
  "artifact": {
-  "name": "control_timeline_oct95_709_188_20261106.html",
-  "bytes": 718408,
-  "sha256": "ee0649a1b7e588642c2183b492842daec7d881e02bba59196fa3aec625f3c38f"
+  "name": "control_timeline_oct95_710_188_20261106.html",
+  "bytes": 718421,
+  "sha256": "ca2f8ef3bc26eb2da27848e06aafa0d9a828ab94f0d7db42b778379fb01449a4"
  },
  "status": "MEASURED_UNQUALIFIED_NOT_ADOPTED",
- "source_commit": "2080b1b7d",
+ "source_commit": "3ccdc699e",
  "source_branch": "claude/live-jan1993-calibration (local, unpushed)",
  "calibration_authority": "definitive-harness-regression-v1 scenario_runner 188w (no player). Live-equivalent desktop advanceTurn with RBiH, RS or HRHB as player at production autonomy (player decisions answered in the pause before combat, bot_equivalent policy) matches it cell-for-cell at week 188 (0 cells differing for all three factions).",
  "completed_week": 188,
  "initial_scored_cells": 712,
  "rendered_polygons": 744,
- "final_save_sha256": "8a4c2acbfee81ca01d7c2c224922361909a388fe3c7171e50c35f2bcc614c401",
+ "final_save_sha256": "e3cf84e7b85a339013cf178e4183ad4f4795d0d56d7236bad3b2b865ed9d5336",
  "scores": [
+  712,
+  711,
+  712,
+  710
+ ],
+ "previous_published_scores": [
   712,
   711,
   712,
   709
  ],
- "previous_published_scores": [
-  712,
-  711,
-  711,
-  697
- ],
  "engine_health_strict": "PASS (0 stranded, 0 ghost, 0 zero-eligible, 0 dead ops, 0 consistency failures)",
  "anchors": "full vitest suite PASS",
- "viewer_markers": "3 mismatch markers checked, 0 anchors outside cell, 0 markers missing",
- "notes": "Owner signed off apr1994 and apr1995. Oct1995 levers: Southern Move window t180 + Sipovo-town staging; Jajce-first Sipovo axis; Donji Vrbljani handoff to Kralj Petar Kresimir IV after Majdan; Donji Vakuf 95 Varosluk axis; Zagreb Posavina Hold directive (defensive from t100); Ljuta in the Sept 1994 Konjic offensive; Treskavica 95 model opportunity (Sitnik, Golubici). All are calibration assumptions with unsourced dates. Remaining: apr1994 Brka (owner: ignore); oct1995 Brka, Sanski Most Ilidza, Ilijas Krivajevici. Baselines not yet re-pinned."
+ "viewer_markers": "2 mismatch markers checked, 0 anchors outside cell, 0 markers missing",
+ "notes": "Ilidza: the 517th splits off the Sanski Most axis after Lusci Palanka; the 506th takes Sanski Most t187 and Ilidza t188; Ostra Luka (painted RS) dropped from that walk. Remaining: Brka (owner: ignore); Krivajevici pending the owner's painted-map decision (Behar-I captures it at t135 but the April 1995 paint is RS). Baselines not yet re-pinned."
 }
