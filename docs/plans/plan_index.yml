@@ -164,7 +164,7 @@ lanes:
         tasks: null
       - path: docs/plans/2026-11-06-visual-polish-follow-ups-plan.md
         exists: true
-        tokens: 1101
+        tokens: 1253
         fits_context: true
         tasks: null
   - lane: R8
