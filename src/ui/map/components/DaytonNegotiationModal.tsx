@@ -260,7 +260,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
             zIndex={Z.CRITICAL_MODAL}
             ariaLabelledBy="dayton-negotiation-title"
             backdropClassName="bg-black/80 backdrop-blur-sm"
-            panelClassName="w-[95%] max-w-[800px] max-h-[92vh] overflow-auto rounded-lg border-2 border-[#8a7a60]/60 shadow-2xl"
+            panelClassName="w-[95%] max-w-[800px] max-h-[calc(var(--interface-viewport-height,100vh)*0.92)] overflow-auto rounded-lg border-2 border-[#8a7a60]/60 shadow-2xl"
             panelStyle={{
                 background: 'linear-gradient(160deg, #f0e8d8 0%, #e0d8c0 50%, #d8ceb8 100%)',
                 fontFamily: 'var(--font-command)',

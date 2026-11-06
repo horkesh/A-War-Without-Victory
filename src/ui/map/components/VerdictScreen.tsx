@@ -529,7 +529,7 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                 zIndex={Z.GAME_OVER}
                 ariaLabel={t('gameOver.title')}
                 backdropClassName="bg-black/90 backdrop-blur-sm"
-                panelClassName="w-[min(980px,calc(100vw-24px))] max-h-[92vh] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden"
+                panelClassName="w-[min(980px,calc(var(--interface-viewport-width,100vw)-24px))] max-h-[calc(var(--interface-viewport-height,100vh)*0.92)] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden"
             >
                 <CinematicVerdict
                     verdict={verdict}
@@ -1191,7 +1191,7 @@ function FallbackGameOver({
                 zIndex={Z.GAME_OVER}
                 ariaLabel={t('gameOver.title')}
                 backdropClassName="bg-black/80 backdrop-blur-sm"
-                panelClassName="w-[560px] max-h-[85vh] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden"
+                panelClassName="w-[560px] max-h-[calc(var(--interface-viewport-height,100vh)*0.85)] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden"
             >
                 <div className="px-8 py-6 border-b border-panel-border bg-panel-card/50 text-center">
                     <div className="text-xs font-mono uppercase tracking-[0.4em] text-accent-gold/60 mb-2">

@@ -83,7 +83,7 @@ export function RecruitmentModal({
       zIndex={Z.OVERLAY_LIGHT}
       ariaLabelledBy="recruitment-title"
       backdropClassName="bg-black/60"
-      panelClassName="w-full max-w-2xl max-h-[min(760px,calc(100vh-2rem))] mx-4 bg-panel-card border border-panel-border rounded-lg shadow-xl overflow-hidden flex flex-col"
+      panelClassName="w-full max-w-2xl max-h-[min(760px,calc(var(--interface-viewport-height,100vh)-2rem))] mx-4 bg-panel-card border border-panel-border rounded-lg shadow-xl overflow-hidden flex flex-col"
     >
       <>
         <div className="px-4 py-3 border-b border-panel-border bg-panel-bg flex items-center justify-between">

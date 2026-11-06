@@ -381,7 +381,7 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
       closeOnBackdropClick={false}
       ariaLabelledBy="advance-turn-title"
       backdropClassName="bg-black/65 px-4"
-      panelClassName="max-h-[calc(100vh-2rem)] w-full max-w-lg overflow-y-auto border border-panel-border bg-panel-bg/97 text-text-primary shadow-2xl backdrop-blur-md"
+      panelClassName="max-h-[calc(var(--interface-viewport-height,100vh)-2rem)] w-full max-w-lg overflow-y-auto border border-panel-border bg-panel-bg/97 text-text-primary shadow-2xl backdrop-blur-md"
     >
       <>
         <div className="border-b border-panel-border bg-panel-card/70 px-4 py-3">

@@ -115,7 +115,7 @@ export function OfficerMatterModal({ itemId, state, onClose, onOpenPersonnel }: 
       zIndex={Z.CRITICAL_MODAL}
       ariaLabelledBy="officer-matter-modal-title"
       backdropClassName="bg-black/75 backdrop-blur-sm"
-      panelClassName="w-[min(92vw,560px)] overflow-hidden rounded-lg border border-amber-400/35 bg-panel-bg text-text-primary shadow-2xl"
+      panelClassName="w-[min(calc(var(--interface-viewport-width,100vw)*0.92),560px)] overflow-hidden rounded-lg border border-amber-400/35 bg-panel-bg text-text-primary shadow-2xl"
     >
       {headerImage && (
         <DecisionModalImageHeader
