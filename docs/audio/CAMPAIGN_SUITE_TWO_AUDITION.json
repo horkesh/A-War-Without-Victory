@@ -1,7 +1,7 @@
 {
   "title": "A War Without Victory \u2014 Campaign Auditions Revised v2",
   "scope": "Eight revised complete original campaign auditions addressing musician feedback; all original titles retained. No comparison reel or runtime adoption.",
-  "status": "Eight complete revised expert auditions delivered; technical source/artifact/continuity review GO. Musical/sensitivity approval and Lines/Table mix balance remain open; no runtime adoption.",
+  "status": "Owner reports Almedin approved all eight Revised v2 tracks as a musical package. Technical review GO; runtime adoption and separate global acceptance gates remain unchanged.",
   "feedback_and_response": {
     "feedback": "Almedin liked the recorded instruments but heard broken/fading sound and too-similar themes. Owner explicitly required keeping all eight.",
     "response": "New independent melodies and phrase-level arrangements; no unconditional bar-end cropping; sustained bowed/wind sample bodies extended with crossfaded stable interior regions, musical releases/ties and deliberate wind breaths. Piano/harp remain naturally decaying.",
@@ -1430,7 +1430,7 @@
       "table_lufs": -22.3,
       "true_peak_dbtp": -2.1,
       "reason": "Natural piano attack peaks constrain common gain; no limiter/rounded-target chasing",
-      "status": "Explicit expert mix-balance question, not level-target success",
+      "status": "Measured deviations unchanged. Owner reports expert package approval; no additional mix correction requested. This is not numerical level-target success.",
       "evidence": "logs/player-experience-completion-20261105/campaign-suite-two/independent-piano-peak-context.json"
     },
     "source_hygiene": {
@@ -1446,5 +1446,19 @@
       "path": "logs/player-experience-completion-20261105/campaign-suite-two/precommit01.log",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
+  },
+  "musical_approval": {
+    "reported_date": "2026-11-06",
+    "reviewer": "Almedin",
+    "evidence": "Owner message: Almedin approved the package.",
+    "attribution": "Approval reported by the owner; no separate expert report or detailed verdict supplied.",
+    "scope": "Musical approval of the existing eight-track Revised v2 package as delivered; no new edits or renders requested.",
+    "revision": "Revised v2",
+    "track_count": 8,
+    "approved_bundle_sha256": "bfa6bf05ac50e54695aaa6bc8bdce22a1d772d1e23823c6c5077348655e24536",
+    "approved_bundle_bytes": 33083240,
+    "artifact_bindings": "The existing per-track export hashes and final_evidence.delivery bind the approved audio.",
+    "runtime_adoption": false,
+    "limits": "Does not by itself close separate historical-sensitivity, packaged/runtime, canon, release or global R7 gates."
   }
 }
