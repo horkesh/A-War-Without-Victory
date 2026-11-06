@@ -167,10 +167,12 @@ test('startNewCampaign records historical mode explicitly', async () => {
 }, 120_000);
 
 test('startNewCampaign queues the selected faction foundational decision at campaign birth', async () => {
+    // hrhb_political_goal (window t3-7) is NOT pre-fired at birth: it fires through
+    // evaluate-events in its window, the turn a bot answers it (preFiresOpeningDecisionAtBirth).
     const cases = [
-        { faction: 'RBiH' as const, eventId: 'rbih_state_identity' },
-        { faction: 'RS' as const, eventId: 'rs_strategic_goals' },
-        { faction: 'HRHB' as const, eventId: 'hrhb_political_goal' },
+        { faction: 'RBiH' as const, eventId: 'rbih_state_identity', atBirth: true },
+        { faction: 'RS' as const, eventId: 'rs_strategic_goals', atBirth: true },
+        { faction: 'HRHB' as const, eventId: 'hrhb_political_goal', atBirth: false },
     ];
     const allFoundationalIds = cases.map((entry) => entry.eventId);
     const gatedFollowUpIds = [
@@ -179,10 +181,15 @@ test('startNewCampaign queues the selected faction foundational decision at camp
         'hrhb_1992_graz_cooperation_collapse',
     ];
 
-    for (const { faction, eventId } of cases) {
+    for (const { faction, eventId, atBirth } of cases) {
         const { state } = await startNewCampaign(process.cwd(), faction, 'apr_1992');
         const pending = state.military.pending_event_decisions ?? [];
 
+        if (!atBirth) {
+            assert.strictEqual(pending.length, 0, `${eventId} must wait for its authored trigger window`);
+            assert.ok(!state.military.fired_event_ids.includes(eventId), `${eventId} must not be pre-fired at birth`);
+            continue;
+        }
         assert.strictEqual(
             pending.length,
             1,

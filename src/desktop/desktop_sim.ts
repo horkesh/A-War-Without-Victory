@@ -37,7 +37,10 @@ import { assertTurnSuccess, runTurn, type TurnInput } from '../sim/turn_pipeline
 import { loadEventDefinitionsFromDir } from '../sim/events/event_loader.js';
 import { applyEventEffects } from '../sim/events/apply_effects.js';
 import { resolveEventDecision } from '../sim/events/resolve_decision.js';
-import { resolvePlayerEventDecisionWithOpeningPolicy } from '../sim/events/opening_policy_transition.js';
+import {
+    preFiresOpeningDecisionAtBirth,
+    resolvePlayerEventDecisionWithOpeningPolicy,
+} from '../sim/events/opening_policy_transition.js';
 import { initializeNegotiationState } from '../sim/negotiation/initialize_negotiation_state.js';
 import { deferUnauthorizedHistoricalOperationsForPlayer } from '../sim/combat/historical_operation_authorization.js';
 import {
@@ -262,6 +265,9 @@ function queueOpeningFoundationalDecision(
     }
 
     const turn = state.meta?.turn ?? 0;
+    // Bot-equivalent timing: an event whose authored window opens after the first turn fires
+    // through evaluate-events in that window instead (see preFiresOpeningDecisionAtBirth).
+    if (!preFiresOpeningDecisionAtBirth(def, turn)) return;
     applyEventEffects(state, collectEventDefinitionEffects(def));
     applyDefinitionDimensionShifts(state, def.dimension_shifts);
     applyDefinitionFlags(state, def.sets_flags);

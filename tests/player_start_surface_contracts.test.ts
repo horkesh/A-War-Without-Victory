@@ -12,10 +12,12 @@ import type { DimensionShift, EventDefinition, EventEffect, PendingEventDecision
 import { isDisplayEventEffect } from '../src/ui/map/utils/eventEffectDisplay';
 import war1992Events from '../data/scenarios/events/war_1992.json';
 
+// atBirth: pre-fired at campaign birth. hrhb_political_goal (window t3-7) instead fires
+// through evaluate-events in its window, the turn a bot answers it.
 const FOUNDATIONAL_FLOWS = [
-  { faction: 'RBiH', eventId: 'rbih_state_identity' },
-  { faction: 'RS', eventId: 'rs_strategic_goals' },
-  { faction: 'HRHB', eventId: 'hrhb_political_goal' },
+  { faction: 'RBiH', eventId: 'rbih_state_identity', atBirth: true },
+  { faction: 'RS', eventId: 'rs_strategic_goals', atBirth: true },
+  { faction: 'HRHB', eventId: 'hrhb_political_goal', atBirth: false },
 ] as const;
 
 const FORBIDDEN_PRE_CHOICE_PATTERNS = [
@@ -173,6 +175,10 @@ describe('player start surface contracts', () => {
       expect(eventDef, `missing ${flow.eventId}`).toBeTruthy();
       const { state } = await startNewCampaign(resolve('.'), flow.faction, 'apr_1992');
       const pending = state.military.pending_event_decisions ?? [];
+      if (!flow.atBirth) {
+        expect(pending).toHaveLength(0);
+        continue;
+      }
       expect(pending.map((decision) => decision.event_id)).toEqual([flow.eventId]);
       expect(pending[0]?.faction).toBe(flow.faction);
 

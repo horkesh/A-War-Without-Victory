@@ -66,14 +66,15 @@ describe('browser new-campaign fallback', () => {
   });
 
   it('queues the selected faction foundational decision when Electron IPC is unavailable', async () => {
+    // hrhb_political_goal (window t3-7) is not pre-fired at birth — same rule as Electron.
     const expected = [
-      { faction: 'RBiH' as const, eventId: 'rbih_state_identity' },
-      { faction: 'RS' as const, eventId: 'rs_strategic_goals' },
-      { faction: 'HRHB' as const, eventId: 'hrhb_political_goal' },
+      { faction: 'RBiH' as const, eventId: 'rbih_state_identity', atBirth: true },
+      { faction: 'RS' as const, eventId: 'rs_strategic_goals', atBirth: true },
+      { faction: 'HRHB' as const, eventId: 'hrhb_political_goal', atBirth: false },
     ];
     const ipc = { isAvailable: false } as IPC;
 
-    for (const { faction, eventId } of expected) {
+    for (const { faction, eventId, atBirth } of expected) {
       const loaded: unknown[] = [];
       const setLoadError = vi.fn();
       vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL) => {
@@ -117,13 +118,18 @@ describe('browser new-campaign fallback', () => {
       expect(Object.keys((state.military as any).negotiation?.patron_relationships ?? {})).toEqual(['RBiH', 'RS', 'HRHB']);
       expect(Object.keys((state.military as any).negotiation?.strategic_dimensions ?? {})).toEqual(['RBiH', 'RS', 'HRHB']);
       expect(state.political?.control_events ?? []).toHaveLength(0);
-      expect(pending).toHaveLength(1);
-      expect(pending[0]).toMatchObject({
-        event_id: eventId,
-        faction,
-        requires_player_response: true,
-      });
-      expect(state.military.fired_event_ids).toContain(eventId);
+      if (atBirth) {
+        expect(pending).toHaveLength(1);
+        expect(pending[0]).toMatchObject({
+          event_id: eventId,
+          faction,
+          requires_player_response: true,
+        });
+        expect(state.military.fired_event_ids).toContain(eventId);
+      } else {
+        expect(pending).toHaveLength(0);
+        expect(state.military.fired_event_ids).not.toContain(eventId);
+      }
       const playerCorpsOps = Object.entries(state.military.corps_command ?? {})
         .flatMap(([corpsId, command]) => (command.active_operations ?? [])
           .map((operation) => ({ corpsId, operation })))
@@ -251,10 +257,10 @@ describe('browser new-campaign fallback', () => {
       war_alliance_rbih_hrhb: state.political.war_alliance_rbih_hrhb,
       paramilitary_policy: state.paramilitary_policy,
     });
-    for (const { faction, eventId } of [
-      { faction: 'RBiH' as const, eventId: 'rbih_state_identity' },
-      { faction: 'RS' as const, eventId: 'rs_strategic_goals' },
-      { faction: 'HRHB' as const, eventId: 'hrhb_political_goal' },
+    for (const { faction, eventId, atBirth } of [
+      { faction: 'RBiH' as const, eventId: 'rbih_state_identity', atBirth: true },
+      { faction: 'RS' as const, eventId: 'rs_strategic_goals', atBirth: true },
+      { faction: 'HRHB' as const, eventId: 'hrhb_political_goal', atBirth: false },
     ]) {
       const loaded: unknown[] = [];
       vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL) => {
@@ -271,6 +277,13 @@ describe('browser new-campaign fallback', () => {
       const browserStart = loaded[0] as typeof STARTUP;
       const desktopStart = (await startNewCampaign(process.cwd(), faction, 'apr_1992', 'emergent')).state;
       expect(openingProjection(browserStart)).toEqual(openingProjection(desktopStart));
+      if (!atBirth) {
+        // Not pre-fired at birth in either adapter (it fires in its authored window).
+        expect(browserStart.military.pending_event_decisions ?? []).toHaveLength(0);
+        expect(browserStart.military.fired_event_ids).not.toContain(eventId);
+        vi.restoreAllMocks();
+        continue;
+      }
 
       const definition = catalog.find((entry) => entry.id === eventId)!;
       expect(browserStart.military.pending_event_decisions[0].response_options).toEqual(definition.response_options);
