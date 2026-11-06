@@ -1,3 +1,11 @@
+**RE-TUNED after merging the camps rebalance — 2026-11-07 (owner: "Retune it"): scores restored to 712 / 711 / 712 / 710:**
+- Merging #538 (camps rebalance, event data) dropped the signed-off scores to 712/711/709/703 and broke live = headless.
+- Root cause of the live break: an engine defect. Headless dropped the turn-1 event dimension shifts (RS `all_six`: +10 credibility, +10 cohesion, −5 standing), because its startup snapshot has no negotiation store. A new `ensure-negotiation-state` war-phase step fixes it.
+- Five operation levers on the fixed engine restore **Jan 1993 712, Apr 1994 711, Apr 1995 712, Oct 1995 710** (`__w188_n60`): 0 cells differ from the signed-off n42 at every checkpoint. Strict health PASS; enclave guard intact.
+- Live = headless: 0 cells differ at 188 turns for RBiH, RS and HRHB as player (all 710/712).
+- Re-pinned on this source: baseline manifest and structural fingerprint (these supersede the n40 pins below). The Farz P-A defect below is still open.
+- Record: [RESULT.md](audits/20261105_live_jan1993/attribution/RESULT.md), section "Re-tune after merging the camps rebalance".
+
 **LIVE CALIBRATION ADOPTED — all four checkpoints signed off by the owner, 2026-11-06 (`live-equivalent-desktop-v1`):**
 - Scores out of 712: **Jan 1993 712, Apr 1994 711, Apr 1995 712, Oct 1995 710**. Each checkpoint was signed off in order: Jan93 on 2026-11-05; Apr94, Apr95 and Oct95 on 2026-11-06. The owner then closed the calibration lane.
 - **Live = headless:** at 188 turns (`bot_equivalent` events, production autonomy, pause before combat), 0 cells differ between the live game and headless for RBiH, RS and HRHB as player.

@@ -308,3 +308,30 @@ PR #540's CI full suite failed the first-hour browser gate for HRHB. The fix `9f
 - Live 188 turns: 0 cells differ for RBiH, RS and HRHB. The HRHB player save files `croat_republic` at turn 0, and the event fires at turn 4.
 - First-hour browser gate: passes locally for all three factions (it was the CI failure).
 - Tests: `hrhb_opening_decision_bot_timing` now answers at birth and matches the no-player game through t5 (fire turns, every HRHB morale, the alliance value). The three start-surface tests expect the HRHB card at birth, unfired, with the answer only filed.
+
+## Re-tune after merging the camps rebalance (owner: "Retune it", 2026-11-06/07)
+
+Merging main into PR #540 brought in the camps rebalance (#538). Its only simulation change is event data (`war_1992.json`, `war_1993.json`) that removes RS internal-cohesion gains from the camps responses. On the merged branch headless 188w `__w188_n43` scored **712 / 711 / 709 / 703** against the signed-off 712/711/712/710, and live no longer matched headless (7 cells at Oct95, the same 7 for every player faction).
+
+**Engine defect found: headless dropped the turn-1 event dimension shifts.**
+- A desktop campaign creates the negotiation/strategic-dimension store at birth (`initializeNegotiationState`, `desktop_sim.ts`). The headless startup snapshot has none.
+- At t1, `rs_strategic_goals` (bot answer `all_six`: RS military credibility +10, internal cohesion +10, international standing −5) fired before compute-capital created the store, so headless lost all three shifts. Live kept them.
+- Measured: at t5 RS internal-cohesion event modifier was 10 live and 0 headless; at t89 live 39 against headless 29.
+- Before the camps change both games stayed above the internal-cohesion < 30 threshold of the RS "Address the Nation" / "Visit the Front" pressure, so territory matched. With the camps change, headless fell just under it: the RS address fired at t90 headless against t96 live, and the paths split.
+- Fix: a new `ensure-negotiation-state` war-phase step creates the store before `update-event-readiness`. Headless now applies the shifts exactly as live does. The pipeline step count goes 191 → 192.
+- Ruled out on the way: the RBiH counter-offer default (`player_faction ?? 'RBiH'` in `counter_offer_generator.ts`). Changing it left the headless hash identical, because headless never holds a pending plan for that branch; reverted.
+
+**Re-tune levers (one measured run each; the first four were found on the merged path):**
+- **Paklarevo model window 133–139 → 139 only.** At t137 the op opened before the 770th reached Turbe, and the higher-morale 712th attacked alone and was repulsed. A failed Paklarevo kept three brigades off the Vlašić ridge.
+- **Vlašić COHA exception receipts 155 → 155–156.** The serial ridge axis takes Paklarevo at t155 and Gornje Krčevine at t156, inside the April 1995 checkpoint. Calibration assumption: the fighting on Vlašić did not stop after the opening week; no sourced end date.
+- **Donji Vakuf 95:** Oborci moves from tenth to third objective; Koreniči and Jemanlići go to a 707th handoff axis (`donji_vakuf_east_707th`, gated on Donji Vakuf town). The tail had fallen at t186–188.
+- **Sana Krupa (on the fixed engine):** the 505th took Veliki Badić at t180 and then stood idle. Its axis now continues Gornja Suvaja → Krnjeuša → Jasenica → Vranjska (each step adjacent). The Krupa axis (503rd + 511th) keeps Ivanjska → Arapuša → Donji Dubovik → Krslje → Matavazi. Measured n59: Vranjska t184, Krslje t186, Matavazi t187, Trubar t187.
+- **Sana west (510th):** Ilidža moves before Kljevci (Sanica → Ilidža → Kljevci → Sanski Most → Ostra Luka, all adjacent). At t188 the 510th joins the 506th on Ilidža, which falls; the 517th takes Kljevci from Jelašinovci.
+
+**Measured and rejected:**
+- Paklarevo `planning_duration` 2 → 4: no effect (it is a maximum preparation budget, not a delay).
+- Paklarevo without the 712th: worse (Oct95 705).
+- A Bosanski Novi 511th handoff axis: worked on the defective path, but on the fixed engine it left the 503rd alone, and it stalled at Vranjska (Oct95 705).
+- An RS triggered "Corridor Restore" counterattack for Brčko: never launched (six ARBiH defenders, power ≈1844 against 236). It became unnecessary: with the engine fix RS keeps its 1992 cohesion, the 1994 2nd Corps attack fails as in the signed-off run, and Skakava Donja and Pelagićevo hold.
+
+**Result, final source (`__w188_n60`):** **712 / 711 / 712 / 710**, 0 cells different from the signed-off `__w188_n42` at every checkpoint. Strict health PASS; enclave guard intact. Live = headless: 0 cells differ at 188 turns for RBiH, RS and HRHB as player (`bot_equivalent`, production autonomy), all 710/712. Open cells unchanged: Brka (owner: ignore) and Ilijaš Krivajevići (paint question above). The Farz P-A receipt defect is still open.
