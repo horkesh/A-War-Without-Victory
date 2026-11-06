@@ -9,6 +9,8 @@
  * game state and clears `gameOver`). No `onClose` callback exists or is
  * needed.
  */
+import { useEffect } from 'react';
+import { playCue } from '../audio/audio_engine';
 import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
 import { useIPC } from '../desktop/useIPC';
@@ -44,6 +46,8 @@ export function GameOverModal() {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const ipc = useIPC();
     const [locale] = useLocale();
+    const gameOver = loadedGameState?.gameOver === true;
+    useEffect(() => { if (gameOver) void playCue('game_over'); }, [gameOver]);
 
     if (!loadedGameState?.gameOver) return null;
     const isOpen = true;

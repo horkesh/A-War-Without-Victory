@@ -33,7 +33,7 @@ describe('audio preference persistence', () => {
     it('defaults to enabled soundscape with a conservative master volume preference', () => {
         const prefs = loadAudioPreferences(new MemoryStorage());
 
-        expect(prefs).toEqual({ muted: false, masterVolume: 0.5 });
+        expect(prefs).toEqual({ musicEnabled: false, musicVolume: 0.5, muted: false, masterVolume: 0.5 });
     });
 
     it('persists normalized mute and master volume preferences', () => {
@@ -41,7 +41,7 @@ describe('audio preference persistence', () => {
 
         const saved = saveAudioPreferences({ muted: false, masterVolume: 2 }, storage);
 
-        expect(saved).toEqual({ muted: false, masterVolume: 1 });
+        expect(saved).toEqual({ musicEnabled: false, musicVolume: 0.5, muted: false, masterVolume: 1 });
         expect(JSON.parse(storage.getItem(AUDIO_PREFERENCES_STORAGE_KEY) ?? '{}')).toEqual(saved);
         expect(loadAudioPreferences(storage)).toEqual(saved);
     });
@@ -52,7 +52,7 @@ describe('audio preference persistence', () => {
 
         const prefs = loadAudioPreferences(storage);
 
-        expect(prefs).toEqual({ muted: false, masterVolume: 0.5 });
+        expect(prefs).toEqual({ musicEnabled: false, musicVolume: 0.5, muted: false, masterVolume: 0.5 });
         expect(JSON.parse(storage.getItem(AUDIO_PREFERENCES_STORAGE_KEY) ?? '{}')).toEqual(prefs);
     });
 
@@ -62,7 +62,7 @@ describe('audio preference persistence', () => {
 
         const prefs = loadAudioPreferences(storage);
 
-        expect(prefs).toEqual({ muted: true, masterVolume: 0.7 });
+        expect(prefs).toEqual({ musicEnabled: false, musicVolume: 0.5, muted: true, masterVolume: 0.7 });
         expect(JSON.parse(storage.getItem(AUDIO_PREFERENCES_STORAGE_KEY) ?? '{}')).toEqual(prefs);
     });
 
@@ -70,7 +70,7 @@ describe('audio preference persistence', () => {
         const storage = new MemoryStorage();
         storage.setItem(AUDIO_PREFERENCES_STORAGE_KEY_V1, JSON.stringify({ muted: false, masterVolume: 0.25 }));
 
-        expect(loadAudioPreferences(storage)).toEqual({ muted: false, masterVolume: 0.25 });
+        expect(loadAudioPreferences(storage)).toEqual({ musicEnabled: false, musicVolume: 0.5, muted: false, masterVolume: 0.25 });
     });
 
     it('uses v2 preferences when both v1 and v2 exist', () => {
@@ -78,21 +78,21 @@ describe('audio preference persistence', () => {
         storage.setItem(AUDIO_PREFERENCES_STORAGE_KEY_V1, JSON.stringify({ muted: true, masterVolume: 0.7 }));
         storage.setItem(AUDIO_PREFERENCES_STORAGE_KEY, JSON.stringify({ muted: false, masterVolume: 0.35 }));
 
-        expect(loadAudioPreferences(storage)).toEqual({ muted: false, masterVolume: 0.35 });
+        expect(loadAudioPreferences(storage)).toEqual({ musicEnabled: false, musicVolume: 0.5, muted: false, masterVolume: 0.35 });
     });
 
     it('falls back to defaults for corrupt v1 JSON', () => {
         const storage = new MemoryStorage();
         storage.setItem(AUDIO_PREFERENCES_STORAGE_KEY_V1, '{not-json');
 
-        expect(loadAudioPreferences(storage)).toEqual({ muted: false, masterVolume: 0.5 });
+        expect(loadAudioPreferences(storage)).toEqual({ musicEnabled: false, musicVolume: 0.5, muted: false, masterVolume: 0.5 });
         expect(storage.getItem(AUDIO_PREFERENCES_STORAGE_KEY)).toBeNull();
     });
 
     it('applies preferences to the silent bus without browser audio or network IO', () => {
         const prefs = applyAudioPreferences({ muted: false, masterVolume: 0.35 });
 
-        expect(prefs).toEqual({ muted: false, masterVolume: 0.35 });
+        expect(prefs).toEqual({ musicEnabled: false, musicVolume: 0.5, muted: false, masterVolume: 0.35 });
         expect(getAudioState()).toMatchObject({
             enabled: true,
             muted: false,

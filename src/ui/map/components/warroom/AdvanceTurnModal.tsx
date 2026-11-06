@@ -324,6 +324,9 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
     if (advancing) return;
     if (review.status === 'blocked' || blockers.length > 0) return;
     setAdvancing(true);
+    // Acknowledge the explicit request. The completed turn has its own cue
+    // from the authoritative player-visible summary observer.
+    void playCue('turn_advance');
     try {
       await advanceTurnAndSync({
         ipc,

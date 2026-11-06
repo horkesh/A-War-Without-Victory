@@ -1796,6 +1796,7 @@
   },
   {
     "id": "srebrenica_demilitarization_1993",
+    "image": "event_un_presence.webp",
     "title": "Srebrenica Demilitarization Agreement",
     "narrative": "Under intense international pressure following the VRS assault on Srebrenica, Generals Mladic and Halilovic sign a demilitarization agreement on April 17-18: the ARBiH is to surrender weapons under UNPROFOR supervision in exchange for a ceasefire and UN troop deployment. Implementation is flawed on both sides — the ARBiH hides weapons while the VRS continues to restrict humanitarian convoys.",
     "source_note": "ICTY Krstic and the Halilovic-Mladic agreement ground the row's demilitarization context. Per UN A/54/549 (Secretary-General's report on the fall of Srebrenica, 15 November 1999), paragraphs 57-98, and ICTY Krstic IT-98-33-T paragraphs 16-28, fuller compliance under hollow UN protection historically INCREASED enclave vulnerability. The enclave_resilience direction on comply_fully reflects this empirical history, consistent with SENSITIVE_HISTORY_DESIGN_GATE Ring 3 item 10 (no gamified atrocity-prevention surface; the only outcome is the absence of a genocide_condemnation flag). This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
@@ -4284,11 +4285,6 @@
         "dimension_shifts": [
           {
             "faction": "HRHB",
-            "dimension": "patron_confidence",
-            "delta": 5
-          },
-          {
-            "faction": "HRHB",
             "dimension": "international_standing",
             "delta": -15
           },
@@ -4296,11 +4292,6 @@
             "faction": "HRHB",
             "dimension": "military_credibility",
             "delta": -5
-          },
-          {
-            "faction": "HRHB",
-            "dimension": "internal_cohesion",
-            "delta": 5
           }
         ],
         "aggression_affinity": 0.3,
@@ -4361,11 +4352,6 @@
           },
           {
             "faction": "HRHB",
-            "dimension": "internal_cohesion",
-            "delta": -30
-          },
-          {
-            "faction": "HRHB",
             "dimension": "military_credibility",
             "delta": -10
           },
@@ -4403,7 +4389,7 @@
       "cooperate": {
         "RBiH": {
           "headline": "HVO permits unrestricted ICRC inspection of detention facilities",
-          "body": "HZ HB Presidency opens Heliodrom, Dretelj, and Gabela to full ICRC and international press access. Sarajevo registers a credibility recovery move at sharp internal-cohesion cost for Mostar; HVO hardliner factions and Zagreb read the access as institutional weakness."
+          "body": "HZ HB Presidency opens Heliodrom, Dretelj, and Gabela to full ICRC and international press access. Sarajevo registers the access; what the inspectors find enters the international record."
         },
         "RS": {
           "headline": "HVO permits unrestricted ICRC inspection of detention facilities",

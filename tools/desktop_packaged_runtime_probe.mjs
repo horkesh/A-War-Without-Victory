@@ -162,12 +162,13 @@ const sourceAudioHashes = sourceAudioAssets.map((entry) => entry.sha256).sort(st
 const packagedAudioAssets = Array.isArray(manifest?.audio_assets) ? manifest.audio_assets : [];
 const packagedAudioPaths = packagedAudioAssets.map((entry) => entry?.relative_path);
 const packagedAudioHashes = packagedAudioAssets.map((entry) => entry?.sha256).sort(strictCompare);
-const audioByteIdentical = sourceAudioPaths.length === 20
-  && packagedAudioAssets.length === 20
+// Exact approved inventory: 17 effects, 3 ambient beds, and 10 music assets.
+const audioByteIdentical = sourceAudioPaths.length === 30
+  && packagedAudioAssets.length === 30
   && JSON.stringify(packagedAudioPaths) === JSON.stringify([...packagedAudioPaths].sort(strictCompare))
   && JSON.stringify(sourceAudioHashes) === JSON.stringify(packagedAudioHashes);
 if (!audioByteIdentical) {
-  throw new Error('Packaged OGG hash multiset is not byte-identical to all 20 audioAssets.ts imports');
+  throw new Error('Packaged OGG hash multiset is not byte-identical to all 30 audioAssets.ts imports');
 }
 manifest.audio_identity = {
   byte_identical: true,

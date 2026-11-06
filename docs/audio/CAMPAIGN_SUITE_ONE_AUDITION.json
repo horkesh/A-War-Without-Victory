@@ -1,0 +1,1033 @@
+{
+  "title": "A War Without Victory \u2014 Campaign Soundtrack Auditions",
+  "scope": "Eight complete original campaign auditions; owner expert feedback packet. No runtime adoption.",
+  "status": "Eight complete technical/provenance-qualified expert auditions; private delivery verified. Artistic and sensitivity feedback pending; no runtime adoption.",
+  "sample_library": {
+    "repository": "https://github.com/sgossner/VSCO-2-CE",
+    "commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+    "license": "CC0-1.0",
+    "added_download_bytes": 27114190,
+    "additional_download_cap_bytes": 40000000,
+    "credits": "VSCO2CE: Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote. Upright piano: Ivy Audio / Simon Dalzell, distributed by Versilian Studios. These are recorded sample instruments; no claim of project-recorded orchestra."
+  },
+  "rendering": {
+    "sample_rate": 48000,
+    "channels": 2,
+    "master_bits": 24,
+    "stem_groups": {
+      "piano": "Upright piano or recorded harp; silent where absent",
+      "strings": "Cello/viola/violin; Radio includes its sparse musical timpani",
+      "winds": "F horn/bassoon/clarinet; silent where absent",
+      "room": "Bounded diffuse stereo reflections derived from recorded instrument stems"
+    },
+    "stems": "Four consistent additive PCM24 WAV slots; unused family slots are silent",
+    "source_recipe": "tools/audio/create_campaign_suite.py",
+    "source_freeze": "Per-track source_hashes, retained original and correction recipes in ignored frozen-recipes",
+    "runtime": {
+      "python": "3.14.3 (tags/v3.14.3:323c59a, Feb  3 2026, 16:04:56) [MSC v.1944 64 bit (AMD64)]",
+      "numpy": "2.4.1",
+      "ffmpeg": "ffmpeg version 8.1.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers"
+    }
+  },
+  "total_duration_seconds": 1700.4819563289743,
+  "prior_preservation": {
+    "checked": 177,
+    "unchanged": 177,
+    "evidence": "logs/player-experience-completion-20261105/campaign-suite-one/preservation-after.json"
+  },
+  "validation": {
+    "score_checks": "10 Python unittest checks; RED/GREEN logs retained",
+    "instrument_preflight": "14 newly selected pitched anchors measured by broad normalized autocorrelation, <=12.43 cents from verified rounded anchor; all used source files pinned Git-blob checked",
+    "technical_reports": "Per-track render-report.json, loudness.log, note-sample-assignments.json, sample-sources.json, score.json and source-freeze.json",
+    "browser_input": "logs/player-experience-completion-20261105/campaign-suite-one/browser-input.json",
+    "export_inventory": "logs/player-experience-completion-20261105/campaign-suite-one/final-export-inventory.json"
+  },
+  "retained_failures": [
+    {
+      "path": "table-attempt01",
+      "reason": "Conservative internal -2.5dB ceiling left sparse piano at -20.4LUFS. Root authorized bounded common-gain level matching within the owner-authorized audition plan. Original masters/stems retained. Table-attempt02 reuses original quantized stem performances; no score rerender or compression."
+    },
+    {
+      "path": "pilot.log / preflight01.log / early Python logs",
+      "reason": "Cheap path/encoding/score-range/serialization gates corrected before full rendering; no original caches altered."
+    }
+  ],
+  "tracks": [
+    {
+      "number": 1,
+      "id": "country",
+      "title": "A Country Before Dawn",
+      "creative_intent": "Broad violin melody, restrained sustained F horn answers and evolving strings in D minor / relative-major light; expansive beauty with unease.",
+      "directory": "logs/player-experience-completion-20261105/campaign-suite-one/country-attempt01",
+      "duration_seconds": 209.42860034702122,
+      "meter": "6/8",
+      "tempo_unit": "eighth",
+      "starting_tempo": 100,
+      "sections": [
+        {
+          "name": "Prelude \u2014 distant valley",
+          "bar": 0,
+          "bars": 4,
+          "time": 0.0,
+          "end": 14.4
+        },
+        {
+          "name": "A \u2014 broad country theme",
+          "bar": 4,
+          "bars": 12,
+          "time": 14.4,
+          "end": 57.600000000000016
+        },
+        {
+          "name": "B \u2014 relative-major light",
+          "bar": 16,
+          "bars": 12,
+          "time": 57.600000000000016,
+          "end": 100.79999999999995
+        },
+        {
+          "name": "Development \u2014 horizon darkens",
+          "bar": 28,
+          "bars": 12,
+          "time": 100.79999999999995,
+          "end": 143.9999999999999
+        },
+        {
+          "name": "Return \u2014 beauty with unease",
+          "bar": 40,
+          "bars": 12,
+          "time": 143.9999999999999,
+          "end": 187.19999999999982
+        },
+        {
+          "name": "Coda \u2014 open D and E",
+          "bar": 52,
+          "bars": 4,
+          "time": 187.19999999999982,
+          "end": 203.92860034702122
+        }
+      ],
+      "instrument_routes": [
+        "bassoon",
+        "cello",
+        "horn",
+        "viola",
+        "violin"
+      ],
+      "events": 426,
+      "integrated_lufs": -19.0,
+      "true_peak_dbfs": -3.8,
+      "pcm24_additive_max_lsb": 2,
+      "unexpected_silent_run_seconds": 0,
+      "score_sha256": "fe0099d2b7e5b8d452e530475785a92e7b457b671630d1d2aa2679c2c0ae9516",
+      "source_hashes": {
+        "create_campaign_suite.py": "eb4f69004afddb1c6dbd50805a748387e1b089d42816fed93b22a255171891d6",
+        "create_after_the_silence.py": "a26bc286ba908c6cc3c24075b8211e8b4aef9e7c8e7c568db05735f21fa1e2f8",
+        "create_theme_continuation.py": "82bf4b3355cd914cce09eeec256608ce11b5e055051a585c48021f5355d21be4"
+      },
+      "mastering_origin": null,
+      "exports": {
+        "mix": {
+          "path": "a_country_before_dawn.wav",
+          "bytes": 60315540,
+          "sha256": "25bb292cce52dfd800a2d7f7dc288c30d54484e982796283f31b2cdf41e319c9",
+          "pcm24_sha256": "47cffa5fcacfbd7d6bdd6c73dbd26b13f8b1801c4dbe3aad8066f98d4cecce25"
+        },
+        "piano": {
+          "path": "a_country_before_dawn_piano.wav",
+          "bytes": 60315540,
+          "sha256": "4ed225da9dc6cac07fda7d4926f9393cfe703cf90fb978a4e636d67afd24b12f",
+          "pcm24_sha256": "fba385b64da26f205329182c41b37590ab989b16a2fc22246de6b7d341bba2b0"
+        },
+        "strings": {
+          "path": "a_country_before_dawn_strings.wav",
+          "bytes": 60315540,
+          "sha256": "c2b6422b5fd709c9d24d1ab36b54258ef17d6ee5a88bd0c4b8a3cef661b8b71a",
+          "pcm24_sha256": "5a3e09d2133f373af8c286e713a1ecdf434099db17999db97b6dccf89407be90"
+        },
+        "winds": {
+          "path": "a_country_before_dawn_winds.wav",
+          "bytes": 60315540,
+          "sha256": "4c4e797db557f95766620d656c07b8d83728f9f7bbbd76008e15e0c8b09c2fc2",
+          "pcm24_sha256": "4cd0ff9faba9ca9577c234d46460cf5dd8a89067d63df84eec0928f474ec299e"
+        },
+        "room": {
+          "path": "a_country_before_dawn_room.wav",
+          "bytes": 60315540,
+          "sha256": "98290d4373ff630044bc7031713a01a488d4da25a5aeed217f7cadc7ff7299f8",
+          "pcm24_sha256": "748c0a7754b822792eba049f5ec2f03cd3a25d68a7d6215db80f47b200cbd4c9"
+        },
+        "mp3": {
+          "path": "a_country_before_dawn.mp3",
+          "bytes": 4694106,
+          "sha256": "e6a422d8bfdc9475692e1b6adf5bea0aa0e18d503f18e2fd9e2b3c83ce90dd96"
+        },
+        "ogg": {
+          "path": "a_country_before_dawn.ogg",
+          "bytes": 4361536,
+          "sha256": "789e42ef0c1c7dc7ea09bca8be5b0f33a64eb29a1be45b129bf7079b8801b403"
+        }
+      }
+    },
+    {
+      "number": 2,
+      "id": "winter",
+      "title": "The Long Winter",
+      "creative_intent": "G-minor/modal cello and low bassoon conversation in a small chamber palette, breathing rests, restrained lament and thinning return.",
+      "directory": "logs/player-experience-completion-20261105/campaign-suite-one/winter-attempt01",
+      "duration_seconds": 213.29339316698344,
+      "meter": "3/4",
+      "tempo_unit": "quarter",
+      "starting_tempo": 56,
+      "sections": [
+        {
+          "name": "Prelude \u2014 a single room",
+          "bar": 0,
+          "bars": 4,
+          "time": 0.0,
+          "end": 12.857142857142858
+        },
+        {
+          "name": "A \u2014 winter cello sentence",
+          "bar": 4,
+          "bars": 16,
+          "time": 12.857142857142858,
+          "end": 64.28571428571429
+        },
+        {
+          "name": "B \u2014 low woodwind conversation",
+          "bar": 20,
+          "bars": 12,
+          "time": 64.28571428571429,
+          "end": 102.85714285714279
+        },
+        {
+          "name": "Development \u2014 restrained lament",
+          "bar": 32,
+          "bars": 12,
+          "time": 102.85714285714279,
+          "end": 141.42857142857136
+        },
+        {
+          "name": "Return \u2014 thinning chamber voices",
+          "bar": 44,
+          "bars": 16,
+          "time": 141.42857142857136,
+          "end": 192.85714285714292
+        },
+        {
+          "name": "Coda \u2014 breath and unresolved fifth",
+          "bar": 60,
+          "bars": 4,
+          "time": 192.85714285714292,
+          "end": 207.79339316698344
+        }
+      ],
+      "instrument_routes": [
+        "bassoon",
+        "cello",
+        "viola",
+        "violin"
+      ],
+      "events": 259,
+      "integrated_lufs": -19.0,
+      "true_peak_dbfs": -4.8,
+      "pcm24_additive_max_lsb": 2,
+      "unexpected_silent_run_seconds": 1,
+      "score_sha256": "eaeed4ac3666f5107078ae7868556e0df37c6e60d3159d7f7852b6b682046592",
+      "source_hashes": {
+        "create_campaign_suite.py": "eb4f69004afddb1c6dbd50805a748387e1b089d42816fed93b22a255171891d6",
+        "create_after_the_silence.py": "a26bc286ba908c6cc3c24075b8211e8b4aef9e7c8e7c568db05735f21fa1e2f8",
+        "create_theme_continuation.py": "82bf4b3355cd914cce09eeec256608ce11b5e055051a585c48021f5355d21be4"
+      },
+      "mastering_origin": null,
+      "exports": {
+        "mix": {
+          "path": "the_long_winter.wav",
+          "bytes": 61428600,
+          "sha256": "617dae72bd5933a3a32847b39af22c0434aa24cd31e3e5ca202e5598a57abd4e",
+          "pcm24_sha256": "f349629f65b15a44674bb90b23f1cb136dc5ca5e9619762211d90f7a4c6bb180"
+        },
+        "piano": {
+          "path": "the_long_winter_piano.wav",
+          "bytes": 61428600,
+          "sha256": "6aa70de0fadbf338f0c7fe1869b0bb8fb6b6c6de85186dd47bc595c6dcd2d818",
+          "pcm24_sha256": "d6a77205f88653a11e9d1957dcf1113acdd80249f34e3ec08a5d9cba242a98a6"
+        },
+        "strings": {
+          "path": "the_long_winter_strings.wav",
+          "bytes": 61428600,
+          "sha256": "080965dee4fe8bb935f2f676ea1e565b98edbf3397898e551c96b05939a2e8bb",
+          "pcm24_sha256": "c7d7fea429a3b1da4030f58eeec364cec2655115a8a5a6804de235c389c7a672"
+        },
+        "winds": {
+          "path": "the_long_winter_winds.wav",
+          "bytes": 61428600,
+          "sha256": "b134414bb3ca1362f976a78bcf2ab7fa7eea50553480d1feb6df3ad1733699ba",
+          "pcm24_sha256": "25a5c93574da1e845c2d4489ac6e2bfafc4005737947a543b4bf07f00265e44e"
+        },
+        "room": {
+          "path": "the_long_winter_room.wav",
+          "bytes": 61428600,
+          "sha256": "18f07ff6a8d505d2f53bf7edd692b4ae7006c4ad5d34372a61b71c1ffa8318ab",
+          "pcm24_sha256": "479cfd0082702b349e25184df28d7188e2820bc19025154c97877908143ca03f"
+        },
+        "mp3": {
+          "path": "the_long_winter.mp3",
+          "bytes": 4103076,
+          "sha256": "f7f7c0594e526c956a3c959f6fd42cc53bd2094e1076f7cb97c2dadbb0a6d9ad"
+        },
+        "ogg": {
+          "path": "the_long_winter.ogg",
+          "bytes": 3682989,
+          "sha256": "609b6a481c701b3b91bc5fadd459451873ec6171e84ee499d98ef87cdb42a993"
+        }
+      }
+    },
+    {
+      "number": 3,
+      "id": "lines",
+      "title": "Lines on Paper",
+      "creative_intent": "Purposeful A-minor piano melody, lightly bowed viola figures and measured cello; warmer C-major middle and lower-register return.",
+      "directory": "logs/player-experience-completion-20261105/campaign-suite-one/lines-attempt01",
+      "duration_seconds": 215.16540571803756,
+      "meter": "4/4",
+      "tempo_unit": "quarter",
+      "starting_tempo": 74,
+      "sections": [
+        {
+          "name": "Prelude \u2014 measured lines",
+          "bar": 0,
+          "bars": 4,
+          "time": 0.0,
+          "end": 12.972972972972974
+        },
+        {
+          "name": "A \u2014 purposeful piano",
+          "bar": 4,
+          "bars": 16,
+          "time": 12.972972972972974,
+          "end": 64.86486486486486
+        },
+        {
+          "name": "B \u2014 warmer middle register",
+          "bar": 20,
+          "bars": 12,
+          "time": 64.86486486486486,
+          "end": 103.78378378378376
+        },
+        {
+          "name": "Development \u2014 decisions gather",
+          "bar": 32,
+          "bars": 12,
+          "time": 103.78378378378376,
+          "end": 142.70270270270274
+        },
+        {
+          "name": "Return \u2014 lower recollection rises",
+          "bar": 44,
+          "bars": 16,
+          "time": 142.70270270270274,
+          "end": 194.59459459459484
+        },
+        {
+          "name": "Coda \u2014 unanswered margin",
+          "bar": 60,
+          "bars": 4,
+          "time": 194.59459459459484,
+          "end": 209.66540571803756
+        }
+      ],
+      "instrument_routes": [
+        "bassoon",
+        "cello",
+        "piano",
+        "viola",
+        "violin"
+      ],
+      "events": 530,
+      "integrated_lufs": -19.1,
+      "true_peak_dbfs": -2.5,
+      "pcm24_additive_max_lsb": 2,
+      "unexpected_silent_run_seconds": 1,
+      "score_sha256": "6238266de6b3edb851e831901e86fbecbddd330c93ee0a3b43abfb027ba3da43",
+      "source_hashes": {
+        "create_campaign_suite.py": "eb4f69004afddb1c6dbd50805a748387e1b089d42816fed93b22a255171891d6",
+        "create_after_the_silence.py": "a26bc286ba908c6cc3c24075b8211e8b4aef9e7c8e7c568db05735f21fa1e2f8",
+        "create_theme_continuation.py": "82bf4b3355cd914cce09eeec256608ce11b5e055051a585c48021f5355d21be4"
+      },
+      "mastering_origin": null,
+      "exports": {
+        "mix": {
+          "path": "lines_on_paper.wav",
+          "bytes": 61967736,
+          "sha256": "288a0c6cf06044efbc189eee7671d8e68ed731f6b0fb60cbe84c3992f05ed421",
+          "pcm24_sha256": "b58f8ea09d1b87848d1dfff719abc6b6650e1966c4ef39a5d6658230faf49d24"
+        },
+        "piano": {
+          "path": "lines_on_paper_piano.wav",
+          "bytes": 61967736,
+          "sha256": "0b38b836dc5a74289ccb8516d1cb7b1bd80f0ceebc556204eea4f8ce7b7908d9",
+          "pcm24_sha256": "170390cd4171a01bc5ad910ffcc9ae7a0891e652c89f4516a98be5902d05a442"
+        },
+        "strings": {
+          "path": "lines_on_paper_strings.wav",
+          "bytes": 61967736,
+          "sha256": "c91d33facda4bf6abe4659217cae5e67c2e4d38833f41cd4693b92c2eef20a1a",
+          "pcm24_sha256": "ecf7125bab28569cd4379ae82b60dc981a6308cc871aa309f09ac430cfe4abc4"
+        },
+        "winds": {
+          "path": "lines_on_paper_winds.wav",
+          "bytes": 61967736,
+          "sha256": "9c79fe26af60e03747dc2014b9e70f63413401b8cff6f1513ad3af800fd12da6",
+          "pcm24_sha256": "3b5d1b862468f016c9900b68f0240ebe39b05e95a9c131c39ba860eb9860cdc6"
+        },
+        "room": {
+          "path": "lines_on_paper_room.wav",
+          "bytes": 61967736,
+          "sha256": "b0d4a0ae77a1dd02b57c2fc2cbcd653792e206110047ea1c9aa0897119ca344b",
+          "pcm24_sha256": "6ec33c9cda16fc88b3c5c58ecbce95734718a035ba12bbdf1faa383733090a74"
+        },
+        "mp3": {
+          "path": "lines_on_paper.mp3",
+          "bytes": 4157867,
+          "sha256": "a8fd59d662d0e3a4fac1875e5f84394e82231c7c703ee429fcd0c052c1b933f6"
+        },
+        "ogg": {
+          "path": "lines_on_paper.ogg",
+          "bytes": 4047694,
+          "sha256": "6d0ab313ba2485f84e2e4255f0d354d93105d8fb3d32f322d832cc067f9c6132"
+        }
+      }
+    },
+    {
+      "number": 4,
+      "id": "radio",
+      "title": "No Answer on the Radio",
+      "creative_intent": "Uneven E-minor 7/8 low-string pulse, quiet sustained F horn and sparse musical timpani; held tension without heroic march.",
+      "directory": "logs/player-experience-completion-20261105/campaign-suite-one/radio-attempt01",
+      "duration_seconds": 211.1944700036807,
+      "meter": "7/8",
+      "tempo_unit": "eighth",
+      "starting_tempo": 132,
+      "sections": [
+        {
+          "name": "Prelude",
+          "bar": 0,
+          "bars": 4,
+          "time": 0.0,
+          "end": 12.727272727272727
+        },
+        {
+          "name": "A \u2014 complete principal sentence",
+          "bar": 4,
+          "bars": 16,
+          "time": 12.727272727272727,
+          "end": 63.63636363636361
+        },
+        {
+          "name": "B \u2014 contrasting conversation",
+          "bar": 20,
+          "bars": 12,
+          "time": 63.63636363636361,
+          "end": 101.81818181818186
+        },
+        {
+          "name": "Development \u2014 changed perspective",
+          "bar": 32,
+          "bars": 12,
+          "time": 101.81818181818186,
+          "end": 140.00000000000009
+        },
+        {
+          "name": "Return \u2014 changed recollection",
+          "bar": 44,
+          "bars": 16,
+          "time": 140.00000000000009,
+          "end": 190.90909090909108
+        },
+        {
+          "name": "Coda \u2014 an open question",
+          "bar": 60,
+          "bars": 4,
+          "time": 190.90909090909108,
+          "end": 205.6944700036807
+        }
+      ],
+      "instrument_routes": [
+        "bassoon",
+        "cello",
+        "horn",
+        "timpani",
+        "viola"
+      ],
+      "events": 460,
+      "integrated_lufs": -19.0,
+      "true_peak_dbfs": -6.2,
+      "pcm24_additive_max_lsb": 2,
+      "unexpected_silent_run_seconds": 0,
+      "score_sha256": "9f121e00481e47c220da47d9c3fd658c7a789b69d1e3f82e1521df0ac8550acf",
+      "source_hashes": {
+        "create_campaign_suite.py": "eb4f69004afddb1c6dbd50805a748387e1b089d42816fed93b22a255171891d6",
+        "create_after_the_silence.py": "a26bc286ba908c6cc3c24075b8211e8b4aef9e7c8e7c568db05735f21fa1e2f8",
+        "create_theme_continuation.py": "82bf4b3355cd914cce09eeec256608ce11b5e055051a585c48021f5355d21be4"
+      },
+      "mastering_origin": null,
+      "exports": {
+        "mix": {
+          "path": "no_answer_on_the_radio.wav",
+          "bytes": 60824112,
+          "sha256": "15bc1c6b85e372d8a70d250e0ca1e15d2f761f04120fe937da870dd69c0f4064",
+          "pcm24_sha256": "d2e60c6b33f1c47ecb1690837276317a22232fa937dd2915a24e428bbb741bce"
+        },
+        "piano": {
+          "path": "no_answer_on_the_radio_piano.wav",
+          "bytes": 60824112,
+          "sha256": "c6b46525b34fa7cea699cd38e32d3738fd25e4473cc91d6ca0f59af34dc4be73",
+          "pcm24_sha256": "35ad485903bea9ab632b78f121e4bbdf27e9f9d37b0d9592aceffeac587beede"
+        },
+        "strings": {
+          "path": "no_answer_on_the_radio_strings.wav",
+          "bytes": 60824112,
+          "sha256": "3f2fec5ab459999ce4e1a136e3c1b570523b8794d6ab35096db2ada650ae1484",
+          "pcm24_sha256": "8a03c884a02d3589ad632ed2d197369f91378be27b4d4d8739c6620b6a2e98ee"
+        },
+        "winds": {
+          "path": "no_answer_on_the_radio_winds.wav",
+          "bytes": 60824112,
+          "sha256": "775c8c607dea865be327750af1c419333281bcb28d6385d2fe97e99aa551f8e9",
+          "pcm24_sha256": "5b6c77f8e79b240d608aa3f39700d624e9ce5a7647af820ceaf7ecf307e8db5a"
+        },
+        "room": {
+          "path": "no_answer_on_the_radio_room.wav",
+          "bytes": 60824112,
+          "sha256": "8a21a61ca7841770162b35d261abd63ce01f6ccc6e884b7f1040fc3e7f6e67c8",
+          "pcm24_sha256": "9ecabe4ac88701f62c3ac0567a6c9099d5277ec9b2d9f9c96fd0482a62885a1a"
+        },
+        "mp3": {
+          "path": "no_answer_on_the_radio.mp3",
+          "bytes": 3897979,
+          "sha256": "f67102b46ac78f4d9becf5cb928e38f0581eef53d0cba54438076debfc1cc93f"
+        },
+        "ogg": {
+          "path": "no_answer_on_the_radio.ogg",
+          "bytes": 3804216,
+          "sha256": "774e41347b337870ab079f10f48f6fd276e36dbcf1f72cb58303a340297ce0c2"
+        }
+      }
+    },
+    {
+      "number": 5,
+      "id": "life",
+      "title": "The Life We Remember",
+      "creative_intent": "Recorded harp and clarinet with gentle string counterlines; G-major/modal warmth, a more lyrical central rise and intimate return. No guitar samples.",
+      "directory": "logs/player-experience-completion-20261105/campaign-suite-one/life-attempt01",
+      "duration_seconds": 209.647895041247,
+      "meter": "6/8",
+      "tempo_unit": "eighth",
+      "starting_tempo": 114,
+      "sections": [
+        {
+          "name": "Prelude",
+          "bar": 0,
+          "bars": 4,
+          "time": 0.0,
+          "end": 12.631578947368421
+        },
+        {
+          "name": "A \u2014 complete principal sentence",
+          "bar": 4,
+          "bars": 16,
+          "time": 12.631578947368421,
+          "end": 63.15789473684209
+        },
+        {
+          "name": "B \u2014 contrasting conversation",
+          "bar": 20,
+          "bars": 12,
+          "time": 63.15789473684209,
+          "end": 101.0526315789474
+        },
+        {
+          "name": "Development \u2014 changed perspective",
+          "bar": 32,
+          "bars": 12,
+          "time": 101.0526315789474,
+          "end": 138.94736842105272
+        },
+        {
+          "name": "Return \u2014 changed recollection",
+          "bar": 44,
+          "bars": 16,
+          "time": 138.94736842105272,
+          "end": 189.47368421052647
+        },
+        {
+          "name": "Coda \u2014 an open question",
+          "bar": 60,
+          "bars": 4,
+          "time": 189.47368421052647,
+          "end": 204.147895041247
+        }
+      ],
+      "instrument_routes": [
+        "cello",
+        "clarinet",
+        "harp",
+        "violin"
+      ],
+      "events": 345,
+      "integrated_lufs": -19.0,
+      "true_peak_dbfs": -6.6,
+      "pcm24_additive_max_lsb": 2,
+      "unexpected_silent_run_seconds": 0,
+      "score_sha256": "c8be97aba3935ab1fd0799e4765b3f04422c20d43c25eca070dcdbafe69a01ea",
+      "source_hashes": {
+        "create_campaign_suite.py": "eb4f69004afddb1c6dbd50805a748387e1b089d42816fed93b22a255171891d6",
+        "create_after_the_silence.py": "a26bc286ba908c6cc3c24075b8211e8b4aef9e7c8e7c568db05735f21fa1e2f8",
+        "create_theme_continuation.py": "82bf4b3355cd914cce09eeec256608ce11b5e055051a585c48021f5355d21be4"
+      },
+      "mastering_origin": null,
+      "exports": {
+        "mix": {
+          "path": "the_life_we_remember.wav",
+          "bytes": 60378696,
+          "sha256": "ac86b7c3a86a74e71dcc0324669cae62536f05a26a324ac14d3765cda589ade3",
+          "pcm24_sha256": "4fbd0b4cc7b16bae0a9ebcf96eaf35e8828f13425ed439c7932e023b1e7a9d23"
+        },
+        "piano": {
+          "path": "the_life_we_remember_piano.wav",
+          "bytes": 60378696,
+          "sha256": "dd4ea96b95c1afacd2d4c8057f865b99e4c8c3937eccb55d59c412052002ac10",
+          "pcm24_sha256": "716181ce7e43f98692adf2ff4011f779bf2be66202c9b9a468e3ffd1d1ff8fcc"
+        },
+        "strings": {
+          "path": "the_life_we_remember_strings.wav",
+          "bytes": 60378696,
+          "sha256": "d852f9a34746ace7208add893198e75f99fba5dbf3e872a986cd6e85079bb38b",
+          "pcm24_sha256": "dfbb87a68a78c55d404629622b003b5ea71618fe52c7678a81bc6ea52baec921"
+        },
+        "winds": {
+          "path": "the_life_we_remember_winds.wav",
+          "bytes": 60378696,
+          "sha256": "12d83b46063a420235ec5d6be9556e402be982f3509400c2020ad128455a567e",
+          "pcm24_sha256": "544ced376fa74cb9d141f31f7c9a3e71c22d491bcb125d464c772fec455b5144"
+        },
+        "room": {
+          "path": "the_life_we_remember_room.wav",
+          "bytes": 60378696,
+          "sha256": "77c90c60bd9daccab5d874b8de04283482e4db9c502ae184316d115a40884381",
+          "pcm24_sha256": "457d25d5a312e0306f4496f9a28f875d91e5c4bebd264726c7fd0ff96e1f5c69"
+        },
+        "mp3": {
+          "path": "the_life_we_remember.mp3",
+          "bytes": 4459649,
+          "sha256": "d2a2b142ab07bdfa82789e72bf0aa8730eda27d29bb7342f511710befdc4f4fe"
+        },
+        "ogg": {
+          "path": "the_life_we_remember.ogg",
+          "bytes": 4172066,
+          "sha256": "df42dc977ed32f83919956b7fd07d7d7ced03cee142722ef807bfac538f84a97"
+        }
+      }
+    },
+    {
+      "number": 6,
+      "id": "table",
+      "title": "A Table for Strangers",
+      "creative_intent": "Sparse B-minor chamber piano with ambiguous suspensions, measured cello/viola and distant clarinet; diplomacy and institutional unease.",
+      "directory": "logs/player-experience-completion-20261105/campaign-suite-one/table-attempt02",
+      "duration_seconds": 213.29339316698344,
+      "meter": "3/2",
+      "tempo_unit": "quarter",
+      "starting_tempo": 112,
+      "sections": [
+        {
+          "name": "Prelude",
+          "bar": 0,
+          "bars": 4,
+          "time": 0.0,
+          "end": 12.857142857142858
+        },
+        {
+          "name": "A \u2014 complete principal sentence",
+          "bar": 4,
+          "bars": 16,
+          "time": 12.857142857142858,
+          "end": 64.28571428571429
+        },
+        {
+          "name": "B \u2014 contrasting conversation",
+          "bar": 20,
+          "bars": 12,
+          "time": 64.28571428571429,
+          "end": 102.85714285714279
+        },
+        {
+          "name": "Development \u2014 changed perspective",
+          "bar": 32,
+          "bars": 12,
+          "time": 102.85714285714279,
+          "end": 141.42857142857136
+        },
+        {
+          "name": "Return \u2014 changed recollection",
+          "bar": 44,
+          "bars": 16,
+          "time": 141.42857142857136,
+          "end": 192.85714285714292
+        },
+        {
+          "name": "Coda \u2014 an open question",
+          "bar": 60,
+          "bars": 4,
+          "time": 192.85714285714292,
+          "end": 207.79339316698344
+        }
+      ],
+      "instrument_routes": [
+        "cello",
+        "clarinet",
+        "piano",
+        "viola"
+      ],
+      "events": 337,
+      "integrated_lufs": -19.9,
+      "true_peak_dbfs": -2.0,
+      "pcm24_additive_max_lsb": 2,
+      "unexpected_silent_run_seconds": 1,
+      "score_sha256": "4acee011997b03afcb6ba78d7fbf43ece40fa1da6e1c62f8bae789dcd26cdb51",
+      "source_hashes": {
+        "create_campaign_suite.py": "50f76d10ebb48eed8f17eb7791f041fe93a8c7bef52573fbc24e9183b3eb8460",
+        "create_after_the_silence.py": "a26bc286ba908c6cc3c24075b8211e8b4aef9e7c8e7c568db05735f21fa1e2f8",
+        "create_theme_continuation.py": "82bf4b3355cd914cce09eeec256608ce11b5e055051a585c48021f5355d21be4"
+      },
+      "mastering_origin": {
+        "attempt": "logs/player-experience-completion-20261105/campaign-suite-one/table-attempt01",
+        "stem_input_sha256": {
+          "a_table_for_strangers_piano.wav": "f068299678adf58398215fe7a7d0e2b9bbbe1f1849df0d27b1bb230173bf2a95",
+          "a_table_for_strangers_strings.wav": "f59df40edf43ac374b81069d8f8e04836314856bdeadccd4a285e6f99452a6ce",
+          "a_table_for_strangers_winds.wav": "c436ffa4ecd059b7e7cab2d43e9e9ab16d3979483433bf20453122264086cb5a",
+          "a_table_for_strangers_room.wav": "718d969bb2a1f747fda4bfe6bfa770c1f9c68850090bc3576292a323f87bf9ab"
+        },
+        "original_recipe_sha256": "eb4f69004afddb1c6dbd50805a748387e1b089d42816fed93b22a255171891d6",
+        "operation": "Common linear gain only; original sample-note render reused, no dynamics compression"
+      },
+      "exports": {
+        "mix": {
+          "path": "a_table_for_strangers.wav",
+          "bytes": 61428600,
+          "sha256": "a4953019c2fbebb097fa753f735c8db29bf709973b2d02a570c161bb0bbc2bf9",
+          "pcm24_sha256": "bffdb72e2769ce2f1a2a5f3f1dce363bb4641fbd099102d68e31a23016a2676d"
+        },
+        "piano": {
+          "path": "a_table_for_strangers_piano.wav",
+          "bytes": 61428600,
+          "sha256": "076f9a651dd78750f72552920d10d19560df00b2899bd04efb329ceeae414c2f",
+          "pcm24_sha256": "6da42ebb0397378946f4fa24f65f06cf5c0063348fbe2fc5ab1814ebecdcf966"
+        },
+        "strings": {
+          "path": "a_table_for_strangers_strings.wav",
+          "bytes": 61428600,
+          "sha256": "648c4e70d234970a7331ed94b5716d8b34d81926833cb2f5258ebed7a17f9a0c",
+          "pcm24_sha256": "2b2e341baebd9ebb77bd3ed374d7fc91ab1c6533129eeb265f6d5beaecdfca8c"
+        },
+        "winds": {
+          "path": "a_table_for_strangers_winds.wav",
+          "bytes": 61428600,
+          "sha256": "492c2b94404c1de43925f39951f7f1c5ab92ec3a86cfb5aaaa77f55066b47df5",
+          "pcm24_sha256": "777fde6d14ed7ee1c12045b51d037f4ff7baaf531f4fc84eac94eeee58310697"
+        },
+        "room": {
+          "path": "a_table_for_strangers_room.wav",
+          "bytes": 61428600,
+          "sha256": "8acc7fc590e6b21a52e273ba632fc47fdb62387ad6d6ebda60062325aef7a1c1",
+          "pcm24_sha256": "e343fb501d9079831d80d48239acc1b506051caebd28cf7130ad824dbd7bbb88"
+        },
+        "mp3": {
+          "path": "a_table_for_strangers.mp3",
+          "bytes": 4269162,
+          "sha256": "1b2fb1a6bec2ce03cac31602c852ecd3ceaf61b105519c42347460f68658550d"
+        },
+        "ogg": {
+          "path": "a_table_for_strangers.ogg",
+          "bytes": 4197005,
+          "sha256": "eee1875a285a7418ab785f746ab5c2ea6dfb7fd52cc888567dd204070c3aa7f4"
+        }
+      }
+    },
+    {
+      "number": 7,
+      "id": "maps",
+      "title": "What the Maps Cannot Show",
+      "creative_intent": "C-minor elegiac cello, growing bowed-string body and higher violin development; emotional centre, then a quieter human-scale return.",
+      "directory": "logs/player-experience-completion-20261105/campaign-suite-one/maps-attempt01",
+      "duration_seconds": 215.16540571803756,
+      "meter": "4/4",
+      "tempo_unit": "quarter",
+      "starting_tempo": 74,
+      "sections": [
+        {
+          "name": "Prelude",
+          "bar": 0,
+          "bars": 4,
+          "time": 0.0,
+          "end": 12.972972972972974
+        },
+        {
+          "name": "A \u2014 complete principal sentence",
+          "bar": 4,
+          "bars": 16,
+          "time": 12.972972972972974,
+          "end": 64.86486486486486
+        },
+        {
+          "name": "B \u2014 contrasting conversation",
+          "bar": 20,
+          "bars": 12,
+          "time": 64.86486486486486,
+          "end": 103.78378378378376
+        },
+        {
+          "name": "Development \u2014 changed perspective",
+          "bar": 32,
+          "bars": 12,
+          "time": 103.78378378378376,
+          "end": 142.70270270270274
+        },
+        {
+          "name": "Return \u2014 changed recollection",
+          "bar": 44,
+          "bars": 16,
+          "time": 142.70270270270274,
+          "end": 194.59459459459484
+        },
+        {
+          "name": "Coda \u2014 an open question",
+          "bar": 60,
+          "bars": 4,
+          "time": 194.59459459459484,
+          "end": 209.66540571803756
+        }
+      ],
+      "instrument_routes": [
+        "cello",
+        "piano",
+        "viola",
+        "violin"
+      ],
+      "events": 324,
+      "integrated_lufs": -19.0,
+      "true_peak_dbfs": -4.6,
+      "pcm24_additive_max_lsb": 2,
+      "unexpected_silent_run_seconds": 1,
+      "score_sha256": "572183e8cfc104b117b20ab19d049414c607cdc31bd95928d93aee3ef98f463b",
+      "source_hashes": {
+        "create_campaign_suite.py": "50f76d10ebb48eed8f17eb7791f041fe93a8c7bef52573fbc24e9183b3eb8460",
+        "create_after_the_silence.py": "a26bc286ba908c6cc3c24075b8211e8b4aef9e7c8e7c568db05735f21fa1e2f8",
+        "create_theme_continuation.py": "82bf4b3355cd914cce09eeec256608ce11b5e055051a585c48021f5355d21be4"
+      },
+      "mastering_origin": null,
+      "exports": {
+        "mix": {
+          "path": "what_the_maps_cannot_show.wav",
+          "bytes": 61967736,
+          "sha256": "009c892b5f3508567dcbe214ad175c40475c2ec838452f02f1332632b8671fdb",
+          "pcm24_sha256": "8406a97eb06c426f602a4bef65fd174c5f641224f268f9e90ba3e3e7fc7bc428"
+        },
+        "piano": {
+          "path": "what_the_maps_cannot_show_piano.wav",
+          "bytes": 61967736,
+          "sha256": "15da269e5998536d13a22ecbd6734dfc355d490349a1a59c20ae7c8e2ce56ee6",
+          "pcm24_sha256": "c6d98f9fc9e7f6fbd220dbf8abadcd29eef8a7171e0d1e992249183bb53a9da6"
+        },
+        "strings": {
+          "path": "what_the_maps_cannot_show_strings.wav",
+          "bytes": 61967736,
+          "sha256": "e32549f17fd51c188347e05dc37026ffc5678d4333f5627e6bc9818c79d407b9",
+          "pcm24_sha256": "5c8d848cb2fc3d629009efe51717c2fc4fbb5010340be62db1d0ffc5fc5a927c"
+        },
+        "winds": {
+          "path": "what_the_maps_cannot_show_winds.wav",
+          "bytes": 61967736,
+          "sha256": "eee98dcf93b3805eb3b04c4846c8900faa3f4a4670f506e022431391258435b1",
+          "pcm24_sha256": "c8be47ecbd12e97211229c1c7bdc07bad8b17b865717a64de97557f7af9ddd7d"
+        },
+        "room": {
+          "path": "what_the_maps_cannot_show_room.wav",
+          "bytes": 61967736,
+          "sha256": "c8b911e4c761211a029028600702751d4127af6d390c7ed5be8a71885d365f6e",
+          "pcm24_sha256": "bb7821c08bb5d9812fac4bfa11e86550459dc82808fb7bf4a8be5aedde9b9da6"
+        },
+        "mp3": {
+          "path": "what_the_maps_cannot_show.mp3",
+          "bytes": 4542982,
+          "sha256": "62e8ea6eb63b8aa69d620d31d6665fe6c4d91f1e9ee6e28e06e73a14fd88219d"
+        },
+        "ogg": {
+          "path": "what_the_maps_cannot_show.ogg",
+          "bytes": 4135319,
+          "sha256": "e61fa01bfb69ff8f220a4b164065bd157c20a1620c96f796715807a36ecfe320"
+        }
+      }
+    },
+    {
+      "number": 8,
+      "id": "after",
+      "title": "After the Guns",
+      "creative_intent": "Fragile D-modal hope through low bassoon, recorded harp and warm clarinet; a brief transformed A-to-D menu-identity fragment near the coda.",
+      "directory": "logs/player-experience-completion-20261105/campaign-suite-one/after-attempt01",
+      "duration_seconds": 213.29339316698344,
+      "meter": "6/8",
+      "tempo_unit": "eighth",
+      "starting_tempo": 112,
+      "sections": [
+        {
+          "name": "Prelude",
+          "bar": 0,
+          "bars": 4,
+          "time": 0.0,
+          "end": 12.857142857142858
+        },
+        {
+          "name": "A \u2014 complete principal sentence",
+          "bar": 4,
+          "bars": 16,
+          "time": 12.857142857142858,
+          "end": 64.28571428571429
+        },
+        {
+          "name": "B \u2014 contrasting conversation",
+          "bar": 20,
+          "bars": 12,
+          "time": 64.28571428571429,
+          "end": 102.85714285714279
+        },
+        {
+          "name": "Development \u2014 changed perspective",
+          "bar": 32,
+          "bars": 12,
+          "time": 102.85714285714279,
+          "end": 141.42857142857136
+        },
+        {
+          "name": "Return \u2014 changed recollection",
+          "bar": 44,
+          "bars": 16,
+          "time": 141.42857142857136,
+          "end": 192.85714285714292
+        },
+        {
+          "name": "Coda \u2014 an open question",
+          "bar": 60,
+          "bars": 4,
+          "time": 192.85714285714292,
+          "end": 207.79339316698344
+        }
+      ],
+      "instrument_routes": [
+        "bassoon",
+        "cello",
+        "clarinet",
+        "harp",
+        "horn",
+        "viola"
+      ],
+      "events": 285,
+      "integrated_lufs": -19.0,
+      "true_peak_dbfs": -6.3,
+      "pcm24_additive_max_lsb": 2,
+      "unexpected_silent_run_seconds": 1,
+      "score_sha256": "cb5918d83796123d4134a511763af4c2653d52e9affcf27474c17f2afd3fb5c7",
+      "source_hashes": {
+        "create_campaign_suite.py": "50f76d10ebb48eed8f17eb7791f041fe93a8c7bef52573fbc24e9183b3eb8460",
+        "create_after_the_silence.py": "a26bc286ba908c6cc3c24075b8211e8b4aef9e7c8e7c568db05735f21fa1e2f8",
+        "create_theme_continuation.py": "82bf4b3355cd914cce09eeec256608ce11b5e055051a585c48021f5355d21be4"
+      },
+      "mastering_origin": null,
+      "exports": {
+        "mix": {
+          "path": "after_the_guns.wav",
+          "bytes": 61428600,
+          "sha256": "968868f519d8fb09576d691ab88201da794765d335a028802503987b109dbecd",
+          "pcm24_sha256": "dfc4056c43b30541f73bb21dc1a1b8b856567529db08bb8d5652e09abe0f0c04"
+        },
+        "piano": {
+          "path": "after_the_guns_piano.wav",
+          "bytes": 61428600,
+          "sha256": "c5ac9f59644764527063535d725468edb38000dec07a907a29479386ad88bf11",
+          "pcm24_sha256": "32bd05cfa7c25922d86247615daf398ed50621156f912cf564471de343a4f66f"
+        },
+        "strings": {
+          "path": "after_the_guns_strings.wav",
+          "bytes": 61428600,
+          "sha256": "b9cd62d7dd4aafcc577b916b6f5603c531d770f66cac81a14d1f9607388fa643",
+          "pcm24_sha256": "61642f28f8441a46f2996095757bac18adaf44b4f06512ffd7777799c2affee6"
+        },
+        "winds": {
+          "path": "after_the_guns_winds.wav",
+          "bytes": 61428600,
+          "sha256": "ccdb834a69b0131097c2811f3482a3c5677a480767908b79069d689b038e7ec8",
+          "pcm24_sha256": "f6b6b71ff5213a0ffc4696d7c377c7ba7ce12816fe5f907c6814a9f050da2b98"
+        },
+        "room": {
+          "path": "after_the_guns_room.wav",
+          "bytes": 61428600,
+          "sha256": "ea274109cdbc0fefb4dae15fb7682cffc040a1fb74c11197a57beb5233b94773",
+          "pcm24_sha256": "054e5f168900dd3dffe25dc61dfe292d494544e2d451d3c85fac56750a5f0dda"
+        },
+        "mp3": {
+          "path": "after_the_guns.mp3",
+          "bytes": 3989699,
+          "sha256": "aae667336ff7edb7fe8aeb9f9b1ad875cced179cd54b0a384ed2113016ed5c85"
+        },
+        "ogg": {
+          "path": "after_the_guns.ogg",
+          "bytes": 3739430,
+          "sha256": "fd68020047b3e8014824850d5aa9af2ca33fd8d4308a110ed9bab455dd27ef4e"
+        }
+      }
+    }
+  ],
+  "final_evidence": {
+    "independent_review": {
+      "verdict": "GO",
+      "path": "logs/player-experience-completion-20261105/campaign-suite-one/independent-review.md",
+      "sha256": "49c69beb52946df0f2a302725466b7e0ec8e2c87367014707daa3fbe34ade8f6"
+    },
+    "actual_exported_pcm24": {
+      "path": "logs/player-experience-completion-20261105/campaign-suite-one/independent-artifact-verification.json",
+      "sha256": "43cb7bdd4c12579c74079e3f7c73268eb5a944487fd083fbf2f509119370100e",
+      "maximum_stem_reconstruction_error_lsb": 2,
+      "all_eight_endpoint_frames_zero": true
+    },
+    "table_true_peak": {
+      "path": "logs/player-experience-completion-20261105/campaign-suite-one/independent-table-truepeak.log",
+      "dbtp": -2.05,
+      "integrated_lufs": -19.97
+    },
+    "browser": {
+      "path": "logs/player-experience-completion-20261105/campaign-suite-one/browser-final.json",
+      "sha256": "21216fcf873700a28f0e454aa8971dd33a8307f8220cb6a07cace8223afe3917",
+      "passing_compressed_exports": 16,
+      "reused_unchanged_positive_cases": 1,
+      "retained_failure": "browser01 OGG metadata discovery required local HTTP byte ranges; corrected server only, no audio byte change"
+    },
+    "delivery": {
+      "full_mp3s": 8,
+      "zip_bytes": 34127144,
+      "zip_sha256": "170c442376ae1d564a88335ff744189b6eb83342f11af1ddf9ec1d7ced512f63",
+      "zip_crc_and_member_hashes_verified": true,
+      "expert_notes_and_source_credits_included": true,
+      "drive_uploads_metadata_verified": 9,
+      "permissions": "owner-only",
+      "personal_links": "Retained only in ignored drive-delivery.json; owner forwards downloaded files"
+    },
+    "runtime_adoption": false,
+    "precommit": {
+      "exit": 0,
+      "path": "logs/player-experience-completion-20261105/campaign-suite-one/precommit01.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}
