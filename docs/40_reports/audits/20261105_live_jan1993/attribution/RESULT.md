@@ -290,3 +290,21 @@ The owner signed off October 1995 at **710/712** and closed the calibration lane
 - Live = headless: 0 cells differ at 188 turns for RBiH, RS and HRHB as player (every branch 710/712).
 - Re-pinned: `data/derived/scenario/baselines/manifest.json` (8 hashes, verified equal to n40's artifacts) and `data/calibration/structural_fingerprint_188w.json` (`bc629e89a585dfde`, 40w final_state_hash `9f59499d11cf5fa1`).
 - **Still open (carried forward from the 2026-11-04 handover):** Farz P-A finds 0/4 authored Farz AARs on n40, although P1 is 4/4 (all Ozren cells RBiH) and P-B passes. The verifier still parks this guard "until the October 1995 checkpoint". It is an attribution defect, not a map miss, and needs its own lane before `--farz-guard` is enforced.
+
+## HRHB opening decision: answered at the start, applied in week 4 (owner decision, 2026-11-06)
+
+PR #540's CI full suite failed the first-hour browser gate for HRHB. The fix `9f07ff02a` (HRHB opening decision fires in its authored window) had also removed the "What Is Herceg-Bosna?" card from campaign start, so an HRHB player began with no decision. The owner chose to keep the card at the start and hold its effects until the event's window.
+
+**Engine (`src/sim/events/answer_ahead_of_firing.ts`):**
+- At campaign birth, an opening decision whose window opens after turn 1 (only `hrhb_political_goal`, t3–7) is queued as a card but not fired.
+- Answering it files the choice in `event_decision_log` at turn 0, so the Chronicle and Army HQ records show it, and applies nothing.
+- When evaluate-events fires the event in its window (t4), the filed answer is applied where and as a bot's answer is applied, and the player is not asked again.
+- An unanswered birth card stays pending: it is not duplicated, and an Observer resolves it at fire time.
+- No new state field: "answered ahead" is a player entry in the log for an opening event that has not fired.
+- RBiH and RS are unchanged (they still fire at birth). Headless is unaffected (no player).
+
+**Measured:**
+- Headless 188w `__w188_n42`: 712/711/712/710, and 8/8 artifacts are byte-identical to the pinned manifest (no re-pin).
+- Live 188 turns: 0 cells differ for RBiH, RS and HRHB. The HRHB player save files `croat_republic` at turn 0, and the event fires at turn 4.
+- First-hour browser gate: passes locally for all three factions (it was the CI failure).
+- Tests: `hrhb_opening_decision_bot_timing` now answers at birth and matches the no-player game through t5 (fire turns, every HRHB morale, the alliance value). The three start-surface tests expect the HRHB card at birth, unfired, with the answer only filed.

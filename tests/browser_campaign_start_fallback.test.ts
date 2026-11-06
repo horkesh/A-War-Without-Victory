@@ -66,7 +66,8 @@ describe('browser new-campaign fallback', () => {
   });
 
   it('queues the selected faction foundational decision when Electron IPC is unavailable', async () => {
-    // hrhb_political_goal (window t3-7) is not pre-fired at birth — same rule as Electron.
+    // Every card is queued at birth; hrhb_political_goal (window t3-7) is not FIRED at birth
+    // (answered ahead, applied in its window) — same rule as Electron.
     const expected = [
       { faction: 'RBiH' as const, eventId: 'rbih_state_identity', atBirth: true },
       { faction: 'RS' as const, eventId: 'rs_strategic_goals', atBirth: true },
@@ -118,18 +119,13 @@ describe('browser new-campaign fallback', () => {
       expect(Object.keys((state.military as any).negotiation?.patron_relationships ?? {})).toEqual(['RBiH', 'RS', 'HRHB']);
       expect(Object.keys((state.military as any).negotiation?.strategic_dimensions ?? {})).toEqual(['RBiH', 'RS', 'HRHB']);
       expect(state.political?.control_events ?? []).toHaveLength(0);
-      if (atBirth) {
-        expect(pending).toHaveLength(1);
-        expect(pending[0]).toMatchObject({
-          event_id: eventId,
-          faction,
-          requires_player_response: true,
-        });
-        expect(state.military.fired_event_ids).toContain(eventId);
-      } else {
-        expect(pending).toHaveLength(0);
-        expect(state.military.fired_event_ids).not.toContain(eventId);
-      }
+      expect(pending).toHaveLength(1);
+      expect(pending[0]).toMatchObject({
+        event_id: eventId,
+        faction,
+        requires_player_response: true,
+      });
+      expect(state.military.fired_event_ids.includes(eventId)).toBe(atBirth);
       const playerCorpsOps = Object.entries(state.military.corps_command ?? {})
         .flatMap(([corpsId, command]) => (command.active_operations ?? [])
           .map((operation) => ({ corpsId, operation })))
@@ -277,15 +273,35 @@ describe('browser new-campaign fallback', () => {
       const browserStart = loaded[0] as typeof STARTUP;
       const desktopStart = (await startNewCampaign(process.cwd(), faction, 'apr_1992', 'emergent')).state;
       expect(openingProjection(browserStart)).toEqual(openingProjection(desktopStart));
+      const definition = catalog.find((entry) => entry.id === eventId)!;
       if (!atBirth) {
-        // Not pre-fired at birth in either adapter (it fires in its authored window).
-        expect(browserStart.military.pending_event_decisions ?? []).toHaveLength(0);
+        // Queued but not fired at birth in either adapter. Answering files the choice (turn 0
+        // receipt) and applies nothing; the event fires in its authored window.
         expect(browserStart.military.fired_event_ids).not.toContain(eventId);
+        for (const option of definition.response_options ?? []) {
+          const browser = structuredClone(browserStart);
+          const desktop = structuredClone(desktopStart);
+          resolveBrowserEventDecision(browser, eventId, option.id, catalog);
+          const desktopResolved = resolveDesktopEventDecision(desktop, eventId, option.id, process.cwd());
+          expect(openingProjection(browser), `${eventId}:${option.id}`).toEqual(openingProjection(desktopResolved));
+          expect(browser.military.event_decision_log.filter((receipt: any) => receipt.event_id === eventId)).toEqual([{
+            event_id: eventId,
+            response_id: option.id,
+            decision_source: 'player',
+            faction,
+            turn: 0,
+          }]);
+          expect(browser.military.event_fire_counts[eventId] ?? 0).toBe(0);
+          expect((browser.military.pending_event_notifications ?? [])
+            .filter((notification: any) => notification.event_id === eventId)).toEqual([]);
+          for (const [formationId, formation] of Object.entries(browserStart.military.formations) as Array<[string, any]>) {
+            expect(browser.military.formations[formationId].morale, `${eventId}:${option.id}:${formationId}`).toBe(formation.morale);
+          }
+        }
         vi.restoreAllMocks();
         continue;
       }
 
-      const definition = catalog.find((entry) => entry.id === eventId)!;
       expect(browserStart.military.pending_event_decisions[0].response_options).toEqual(definition.response_options);
       for (const option of definition.response_options ?? []) {
         const browser = structuredClone(browserStart);

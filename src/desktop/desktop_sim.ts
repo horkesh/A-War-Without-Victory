@@ -265,15 +265,20 @@ function queueOpeningFoundationalDecision(
     }
 
     const turn = state.meta?.turn ?? 0;
-    // Bot-equivalent timing: an event whose authored window opens after the first turn fires
-    // through evaluate-events in that window instead (see preFiresOpeningDecisionAtBirth).
-    if (!preFiresOpeningDecisionAtBirth(def, turn)) return;
+    state.military.pending_event_decisions ??= [];
+    // Bot-equivalent timing: an event whose authored window opens after the first turn is NOT
+    // fired at birth. Its card is still queued here, so the player answers it at the start; the
+    // answer is filed and applied when evaluate-events fires the event in its window
+    // (preFiresOpeningDecisionAtBirth, answer_ahead_of_firing.ts).
+    if (!preFiresOpeningDecisionAtBirth(def, turn)) {
+        state.military.pending_event_decisions.push(buildOpeningPendingDecision(def, playerFaction, turn));
+        return;
+    }
     applyEventEffects(state, collectEventDefinitionEffects(def));
     applyDefinitionDimensionShifts(state, def.dimension_shifts);
     applyDefinitionFlags(state, def.sets_flags);
     recordOpeningEventFiring(state, eventId, turn);
 
-    state.military.pending_event_decisions ??= [];
     state.military.pending_event_decisions.push(buildOpeningPendingDecision(def, playerFaction, turn));
 }
 

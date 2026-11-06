@@ -167,8 +167,9 @@ test('startNewCampaign records historical mode explicitly', async () => {
 }, 120_000);
 
 test('startNewCampaign queues the selected faction foundational decision at campaign birth', async () => {
-    // hrhb_political_goal (window t3-7) is NOT pre-fired at birth: it fires through
-    // evaluate-events in its window, the turn a bot answers it (preFiresOpeningDecisionAtBirth).
+    // Every card is queued at birth. hrhb_political_goal (window t3-7) is NOT fired at birth: the
+    // player answers it at the start, and it fires (applying that answer) through evaluate-events
+    // in its window, the turn a bot answers it (preFiresOpeningDecisionAtBirth, answer_ahead_of_firing.ts).
     const cases = [
         { faction: 'RBiH' as const, eventId: 'rbih_state_identity', atBirth: true },
         { faction: 'RS' as const, eventId: 'rs_strategic_goals', atBirth: true },
@@ -185,11 +186,6 @@ test('startNewCampaign queues the selected faction foundational decision at camp
         const { state } = await startNewCampaign(process.cwd(), faction, 'apr_1992');
         const pending = state.military.pending_event_decisions ?? [];
 
-        if (!atBirth) {
-            assert.strictEqual(pending.length, 0, `${eventId} must wait for its authored trigger window`);
-            assert.ok(!state.military.fired_event_ids.includes(eventId), `${eventId} must not be pre-fired at birth`);
-            continue;
-        }
         assert.strictEqual(
             pending.length,
             1,
@@ -207,9 +203,12 @@ test('startNewCampaign queues the selected faction foundational decision at camp
                 && Object.keys(pending[0].notifications_to_other_factions ?? {}).length > 0,
             `${eventId} should carry authored notification text in the packaged startup path`,
         );
-        assert.ok(
+        assert.strictEqual(
             state.military.fired_event_ids.includes(eventId),
-            `${eventId} should be marked fired when queued so once-only gating holds`,
+            atBirth,
+            atBirth
+                ? `${eventId} should be marked fired when queued so once-only gating holds`
+                : `${eventId} must not fire before its authored trigger window`,
         );
         for (const otherEventId of allFoundationalIds.filter((id) => id !== eventId)) {
             assert.ok(

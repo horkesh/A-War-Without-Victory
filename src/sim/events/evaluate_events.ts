@@ -19,6 +19,7 @@ import { applyDimensionShift, type DimensionStore } from './strategic_dimensions
 import { getPoliticalPersonality, computePoliticalAssessment } from '../political/political_personality.js';
 import { pickPoliticalResponse } from '../political/political_event_decision.js';
 import { compareCausalityEntries, strictCompare } from '../../state/validateGameState.js';
+import { findAnswerAheadOfFiring, isAnswerAheadOfFiringDecision } from './answer_ahead_of_firing.js';
 
 /**
  * Maximum PLAYER-FACING DECISION events that can fire in a single turn.
@@ -658,7 +659,9 @@ export function evaluateEvents(
             // `requires_player_response` included. A decision with no authored default is left
             // pending rather than guessed at — the scorer's pick would not be "the historical
             // option", which is the only thing this mode is licensed to choose.
-            if (!def || !hasAuthoredAIDefaultResponse(def)) {
+            // A birth card for an opening event that has not fired yet is resolved when it fires
+            // (fire-time branch below), not here: applying it now would land its effects early.
+            if (!def || !hasAuthoredAIDefaultResponse(def) || isAnswerAheadOfFiringDecision(state, pending.event_id)) {
                 stillPending.push(pending);
                 continue;
             }
@@ -753,6 +756,9 @@ export function evaluateEvents(
 
     // Phase 3: Fire selected events through one shared effect/receipt writer.
     const fireEvent = (def: EventDefinition): void => {
+        // Read before this firing is receipted: an answer filed ahead of the event's first firing.
+        const answeredAheadResponseId = findAnswerAheadOfFiring(state, def.id);
+        const openingFirstFiring = isAnswerAheadOfFiringDecision(state, def.id);
         applyFiringEffects(state, def, currentTurn);
 
         const text = getNarrativeText(def);
@@ -821,7 +827,32 @@ export function evaluateEvents(
             // docs/plans/2026-08-31-s6-ring3-half-migration-packet.md is what fixes it.
             const observerAutoResolves = isPlayerRespondent && autonomyLevel >= 3;
             const mustShowPlayer = isPlayerRespondent && !observerAutoResolves;
-            if (mustShowPlayer) {
+            const answeredAhead = isPlayerRespondent && answeredAheadResponseId != null
+                ? def.response_options.find((option) => option.id === answeredAheadResponseId) ?? null
+                : null;
+            // The opening card, if still unanswered, was queued at campaign birth: never queue twice.
+            const birthCardPending = openingFirstFiring
+                && (state.military.pending_event_decisions ?? []).some((pending) => pending.event_id === def.id);
+            if (answeredAhead) {
+                // ANSWER AHEAD OF FIRING (answer_ahead_of_firing.ts): the player answered this
+                // opening decision at campaign birth and it was filed then. Apply it now, where and
+                // as a bot's answer is applied below; the decision is already in the log.
+                applyEventEffects(state, answeredAhead.effects ?? []);
+                applyDefinitionFlags(state, answeredAhead.sets_flags);
+                applyDefinitionDimensionShifts(state, answeredAhead.dimension_shifts);
+                applyResponseRuntimeCausality(state, def.id, answeredAhead.id, answeredAhead, currentTurn);
+                if (respondingFaction !== null) {
+                    emitEventNotifications(
+                        state,
+                        { event_id: def.id, notifications_to_other_factions: def.notifications_to_other_factions },
+                        answeredAhead.id,
+                        respondingFaction,
+                        currentTurn,
+                    );
+                }
+            } else if (mustShowPlayer && birthCardPending) {
+                // Unanswered birth card: it stays pending and resolves normally when answered.
+            } else if (mustShowPlayer) {
                 // Player faction (levels 0-2) OR high-stakes event at any level: queue as pending decision
                 if (!state.military.pending_event_decisions) {
                     state.military.pending_event_decisions = [];
@@ -884,6 +915,12 @@ export function evaluateEvents(
                         respondingFaction,
                         currentTurn,
                     );
+                }
+                if (isPlayerRespondent && openingFirstFiring && state.military.pending_event_decisions) {
+                    // Observer resolved an opening event whose birth card was never answered:
+                    // drop that card, the decision is now made.
+                    state.military.pending_event_decisions = state.military.pending_event_decisions
+                        .filter((pending) => pending.event_id !== def.id);
                 }
             }
         }
