@@ -196,12 +196,14 @@ const SANSKI_KLJUC_OBJECTIVES = [
     'op:bosanska_krupa:donji_dubovik_2',
     'op:sanski_most:budimlic_japra_2',
     'op:sanski_most:lusci_palanka_2',
-    'op:sanski_most:jelasinovci',
     'op:sanski_most:skucani_vakuf_2',
     'op:sanski_most:stari_majdan',
     'op:sanski_most:sanski_most_2',
-    'op:sanski_most:ostra_luka',
+    // Calibration (oct1995): Ilidža before Ostra Luka. Ostra Luka is painted RS at every
+    // checkpoint; with the 517th split the 506th reaches the town at t187, and taking
+    // Ostra Luka next cost a cell while Ilidža (painted RBiH) stayed RS.
     'op:sanski_most:ilidza_2',
+    'op:sanski_most:ostra_luka',
     'op:sanski_most:kljevci',
     'op:kljuc:sanica_2',
     'op:kljuc:hadzici',
@@ -370,6 +372,31 @@ const SANA_AXES: readonly OpportunityAxisDef[] = [
         objectives: SANSKI_KLJUC_OBJECTIVES,
         staging_osid: STAGING_KRUPA_OTOKA,
         preserve_objective_sequence: true,
+    },
+    {
+        // Calibration assumption (oct1995): once Lušci Palanka is taken the two brigades of
+        // the Sanski Most axis split. The 506th keeps the town walk; the 517th turns east
+        // along Jelašinovci - Kljevci - Ilidža (a contiguous graph walk). Measured: on one
+        // axis the pair moves together and Ilidža falls one week after the oct1995 checkpoint.
+        // The split itself is a model choice, not a sourced order.
+        axis_id: 'sana_jelasinovci_517th',
+        name: 'Jelašinovci - Ilidža (517th split)',
+        corps: PRIMARY_CORPS,
+        brigades: [],
+        objectives: [
+            'op:sanski_most:jelasinovci',
+            'op:sanski_most:kljevci',
+            'op:sanski_most:ilidza_2',
+        ],
+        preserve_objective_sequence: true,
+        phase_gate: {
+            main_axis_id: 'sana_sanski_most_kljuc',
+            requires_operation_captures: ['op:sanski_most:lusci_palanka_2'],
+            handoff: {
+                brigade_id: 'arbih_517th_light' as FormationId,
+                source_axis_id: 'sana_sanski_most_kljuc',
+            },
+        },
     },
 ];
 
