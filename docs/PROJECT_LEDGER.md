@@ -13529,3 +13529,15 @@ Headless 188w is byte-identical to the 2026-11-04 re-pin (702/704/701/691; `fina
 The Goražde gap (Glamoč, Sopotnica) for RBiH and RS players traces to a t1 live/no-player divergence: army-directive pushback appears in the no-player branch only, and by t23 RS 1st Podrinje garrisons Sopotnica. A live-only queue-pollution defect is confirmed and queued for its own run.
 
 Record: `docs/40_reports/audits/20261105_live_jan1993/prestage_fix/RESULT.md`.
+
+## 2026-11-06 - Calibration: Jan93 712 signed off, Apr94 711, Apr95 711; live = headless through week 156 (LOCAL BRANCH, NOT ADOPTED)
+
+Branch `claude/live-jan1993-calibration` (local, unpushed). Headless 188w: **712/711/711/697**, up from 707/705/703/692 at the start of 2026-11-05. Strict health PASS; enclave guard on schedule; full suite PASS. The owner signed off January 1993 at 712/712 and asked to ignore Brka.
+
+- January 1993 711 -> 712: a one-brigade Skender Vakuf axis on Operation Donji Vakuf (3rd Banja Luka, Donji Koričani).
+- April 1994 708 -> 711: the Jablanica-Doljani Local Attack prestages the 444th home from t58, unblocking the 4th Corps queue; Neretva '93 takes Doljani and Turija at t74. Kreševo stays HRHB as a side effect.
+- April 1995 710 -> 711: the Paklarevo local model window moves to t133-139, so Domet-1 takes Gornje Krčevine at t155 instead of t161. Calibration assumption: Paklarevo falls in December 1994.
+- Live = headless (0 cells differ, all three factions, at 39, 104 and 156 turns, `bot_equivalent` policy). Changes: staff-controlled players follow the bot officer schedule; the harness answers peace plans; a new **pause before combat** lands player event answers in-turn (engine, Electron main, embedded bridge and React UI; verified in the real app); the HRHB opening decision fires in its authored window instead of at campaign birth.
+- Baselines and structural fingerprint are not re-pinned; that happens at the final push.
+
+Record: `docs/40_reports/audits/20261105_live_jan1993/attribution/RESULT.md`.

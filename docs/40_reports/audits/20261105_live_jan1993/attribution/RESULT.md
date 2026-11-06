@@ -190,3 +190,42 @@ Live 104-week runs first showed the player branch diverging (RBiH 5 cells, RS 1,
 **Measured, 104 weeks, player versus no-player, 0 cells differing for all three factions** (RBiH, RS and HRHB each 711/712), using the `bot_equivalent` policy. This policy answers with the engine's own bot response selector. With `historical_default`, RBiH and RS still differ by 1 cell (Goražde Slatina). That comes from a different chosen answer on events with no authored default, not from timing. Headless is unchanged: the 188w control map is identical before and after the pause work.
 
 **Real app:** `tools/ui/pause_before_combat_probe.cjs` drives the Electron app. In click/desk/map × answer/continue modes, the paused card is visible over the active surface, answering finishes the turn, and Continue turn finishes it with the decision left pending.
+
+# April 1995: Gornje Krčevine (710 → 711)
+
+The owner asked to sort out Gornje Krčevine (Brka is ignored). It is painted RS at Jan93 and Apr94 and RBiH at Apr95 and Oct95. It contains Vitovlje, the VRS "Vlašić" OG headquarters that Domet-1 (20–24 March 1995, about week 155) took. The sim retook it only at t161.
+
+**Root cause** (proven with the `axis_order_trace` debug topic plus scratch instrumentation):
+- The COHA ceasefire filter deletes attack orders while `coha_active` is set. The Vlašić exception (`isVlasicCohaWindow`) opens t155 only.
+- Operation Vlasic Ridge is serial: Paklarevo, then Gornje Krčevine, whose only Federation-reachable neighbour is Paklarevo.
+- From an RS-held Paklarevo, the op takes Paklarevo at t155. Its lone forward brigade's t156 attack (ratio 1.05) is absorbed; the other six arrive at t158. COHA ends t161, and Gornje Krčevine falls then.
+- In the 707-era run, the 712th happened to take Paklarevo at t125, so Vlašić Ridge went straight for Gornje Krčevine at t155.
+
+**Rejected:** widening the COHA exception to 155–156 or 155–157 changes nothing (712/711/710/693, same cells).
+
+**Adopted (commit 511085c2e, calibration assumption):** the never-fired `paklarevo_local_94_model` window moves from the single turn 123 to t133–139.
+- It was always blocked at t123: Operacija Ihlas and Sjena held the 712th.
+- Inside the new window, the ordinary exhaustion gate admits it at t139, and Paklarevo falls at t142. Vlašić Ridge then takes Gornje Krčevine at t155.
+- Historical cost: Paklarevo (Sečevo/Kostolac) now falls in December 1994, about three months before Domet-1 took it.
+
+**Headless 188w:** **712/711/711/697** (base 712/711/710/693, net +5, no cell lost). The October gains are late Donji Vakuf captures (t184–188). Strict health PASS; enclaves on schedule; full suite PASS.
+
+## Live = headless through April 1995 (HRHB opening decision)
+
+**Live 156 turns** (`bot_equivalent`): RBiH 0 and RS 0 cells differ, but HRHB 1 (Gornje Krčevine). In the HRHB-player branch, Paklarevo fell after COHA began, not before it.
+
+**Root cause:** the HRHB divergence started at t1.
+- `startNewCampaign` and the browser fallback pre-fired the player's opening decision at turn 0, whatever its window. `hrhb_political_goal` is authored t3–7, and the bot answers it at t4.
+- So the player's identical answer landed four turns early. Its +5 morale missed four HVO brigades raised before t4, and Graz fired a week early.
+- The drift grew until the t142 Paklarevo capture slipped past COHA.
+
+**Fixed (commit 9f07ff02a):**
+- `preFiresOpeningDecisionAtBirth()` pre-fires only when the window opens by turn 1. RS `rs_strategic_goals` is unchanged, and the reviewed RBiH identity flow always pre-fires.
+- The HRHB card now arrives in the week-4 pause before combat.
+- **Measured at 156 turns:** 0 cells differ for all three factions; the no-player branch is byte-identical.
+
+**Remaining state differences that cost no cells:**
+- RBiH identity at t0 vs t3: two RBiH brigades carry −4 morale.
+- Negotiation state is created at t0 only for player campaigns. RS +10 cohesion/credibility from `rs_strategic_goals` shifts that the no-player branch drops; +2 war-crimes counts.
+- A bot RBiH counter-offer is left pending when HRHB is the player.
+- The harness answers peace plans a turn later.
