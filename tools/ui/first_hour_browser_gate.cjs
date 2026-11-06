@@ -1357,8 +1357,9 @@ async function runFoundationalFlow(page, summary, flow) {
   summary.evidence.decisionKnowledgeLeaksAbsentByFaction[flow.faction] = true;
   await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_foundational_decision`);
 
+  // The next required decision can immediately reuse the Presidential Response heading.
   await clickByText(page, flow.responseLabel);
-  await waitUntilDialogTextAbsent(page, 'Presidential Response');
+  await waitUntilDialogTextAbsent(page, flow.decisionTitle);
   await dismissTutorialIfPresent(page);
   summary.evidence.allFactionFoundationalFlows ??= {};
   summary.evidence.allFactionFoundationalFlows[flow.faction] = {
