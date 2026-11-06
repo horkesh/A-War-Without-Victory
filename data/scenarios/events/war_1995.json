@@ -1,6 +1,7 @@
 [
   {
     "id": "coha_ceasefire_begins_1995",
+    "image": "event_ceasefire.webp",
     "title": "Cessation of Hostilities Takes Effect",
     "narrative": "At noon on New Year's Day, the guns fall silent across most of Bosnia. The four-month cessation of hostilities agreement is imperfect -- snipers still shoot, mortars still fall on Sarajevo's outskirts -- but the wholesale combat operations that have defined the war pause. Both sides know this is a breathing space, not peace. The question is who will use it better.",
     "category": "diplomatic",
@@ -1162,6 +1163,7 @@
   },
   {
     "id": "hv_hvo_cooperation_1995",
+    "image": "event_patron_relations_HRHB.webp",
     "title": "Croatian Army Crosses the Border",
     "narrative": "Zagreb is on the line. With Operation Storm launching on 4 August 1995, HV Guards Brigades have already crossed the international border into Bosnia-Herzegovina to support HVO formations in Livno, Glamoc, and Bosansko Grahovo. Defense Minister Gojko Susak is coordinating directly with Boban's successor and HVO Main Staff in Mostar; Tudjman's transcripts treat the operation as a joint HV-HVO undertaking. The 4th and 7th Guards Brigades — the same elite formations that took Knin — are being readied for the September push into western Bosnia. The HZ HB Presidency must decide the command relationship: accept HV command and integrate openly with Zagreb's operational direction, run HVO operations independently of HV columns, coordinate with the ARBiH 5th Corps inside the Federation framework, or pull HVO back to a neutral observer posture and let the HV operate alone.",
     "category": "military",
@@ -1680,6 +1682,7 @@
   },
   {
     "id": "holbrooke_us_belgrade_channel_1995",
+    "image": "event_patron_relations_RS.webp",
     "title": "Holbrooke Routes Pressure Through Belgrade",
     "narrative": "Holbrooke has arrived in Belgrade. Milosevic, not Karadzic, is now America's contact for Republika Srpska. The message is clear: accept the US framework or face combined diplomatic and military pressure.",
     "category": "diplomatic",
@@ -2076,6 +2079,7 @@
   },
   {
     "id": "ceasefire_1995",
+    "image": "event_ceasefire.webp",
     "title": "General Ceasefire Takes Effect",
     "narrative": "A general ceasefire takes effect across Bosnia-Herzegovina. After three and a half years of fighting, the parties prepare for negotiations intended to turn the military halt into a peace settlement.",
     "category": "diplomatic",
@@ -2120,6 +2124,7 @@
   },
   {
     "id": "us_halts_federation_advance_1995",
+    "image": "event_patron_relations_RBiH.webp",
     "title": "Washington Halts the Federation Advance",
     "narrative": "Banja Luka is within reach. Federation forces have driven the VRS from a third of its territory in six weeks. But the phone rings from Washington. Holbrooke is blunt: take Banja Luka and you will have 200,000 Serb refugees, a humanitarian catastrophe, and no peace agreement. Sarajevo bows, reluctantly, and sets conditions the Serbs can argue over so the offensive has a few more days to run. Zagreb listens, agrees, and orders one more operation anyway. The front lines freeze where the ceasefire date finds them, not where Washington asked. The 51/49 line that has defined every peace plan since July 1994 becomes reality not through negotiation, but through the calculated halt of a military advance.",
     "category": "diplomatic",
@@ -2267,6 +2272,7 @@
   },
   {
     "id": "holbrooke_ceasefire_demand_oct95",
+    "image": "event_patron_relations_RBiH.webp",
     "source_tier": "corroborated_participant",
     "title": "Holbrooke: Agree to the Ceasefire",
     "narrative": "Holbrooke demands a two-month ceasefire to create space for Dayton negotiations. ARBiH is advancing in northwestern Bosnia. Complying sacrifices military momentum; refusing risks losing US air support and international legitimacy.",
@@ -2384,6 +2390,7 @@
   },
   {
     "id": "dayton_talks_begin_1995",
+    "image": "event_dayton_signed_1995.webp",
     "title": "Dayton Peace Talks Convene",
     "narrative": "The presidents of Bosnia, Croatia, and Serbia arrive at Wright-Patterson Air Force Base in Dayton, Ohio, for proximity peace talks brokered by US envoy Richard Holbrooke. The military situation — NATO air power, Federation ground gains, and VRS exhaustion — has finally created the conditions for a negotiated settlement. The outcome will define Bosnia's future.",
     "category": "diplomatic",
@@ -2594,6 +2601,7 @@
   },
   {
     "id": "rs_dayton_acceptance_1995",
+    "image": "event_political_session.webp",
     "title": "Pale Ratifies the Patriarch Paper",
     "narrative": "Milošević has initialed the General Framework Agreement at Wright-Patterson on 21 November 1995 under the Patriarch Paper joint-delegation authority granted by the Pale leadership on 30 August 1995. The text is on the table: Annex 1-A (IFOR, Zone of Separation, heavy-weapons cantonment), Annex 2 (the 51:49 Inter-Entity Boundary Line), Annex 4 (BiH Constitution — Federation/RS dual entities inside a unitary BiH), Annex 7 (refugee return), Annex 10 (the High Representative). Karadžić's objections are loud — Sarajevo unified under Federation control, eastern enclaves lost, the entity inside BiH rather than annexed to FRY. Mladić's reservations on the IFOR terms are recorded. The RS National Assembly must vote: ratify Milošević's signature, or repudiate the delegation and reject the framework.",
     "category": "diplomatic",
@@ -2759,6 +2767,7 @@
   },
   {
     "id": "hrhb_dayton_acceptance_1995",
+    "image": "event_dayton_signed_1995.webp",
     "title": "Federation Channel — Croat Delegation at Dayton",
     "narrative": "HR HB acts at Dayton through the Federation channel established by the Washington Agreement of 1 March 1994. Tudjman's directive is clear: the Federation entity within Bosnia-Herzegovina will constitutionally protect Croat constitutive-nation status under Annex 4; HR HB dissolves formally as a parallel state; in exchange Croatia accepts the Federation as the durable Croat political vehicle inside BiH rather than the abandoned 1939 Banovina maximalist project. The post-Storm / Mistral-2 HV-HVO-ARBiH coalition position has maximized Zagreb's leverage. Zubak's HR HB Presidency must record its posture — accept the Federation framework as ratified by Dayton, or capture the Croat delegation position toward rejection.",
     "category": "diplomatic",

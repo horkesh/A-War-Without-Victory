@@ -52,6 +52,7 @@
   },
   {
     "id": "csq_bosniak_unity_1993",
+    "image": "event_siege_city_RBiH.webp",
     "title": "A Nation Under Siege",
     "narrative": "The identity decision hardens into resolve. By late 1993 the civic republican rhetoric has faded; the mosque, the neighborhood, and the language carry the appeal to arms. Mobilization offices see longer queues and shorter discussions. What has been lost in international legitimacy is recovered, at least for now, in the willingness of the survivors to fight.",
     "category": "political",
@@ -416,6 +417,7 @@
   },
   {
     "id": "csq_bihac_refugee_crisis_1994",
+    "image": "event_displacement_column.webp",
     "title": "A Quarter Million on the Move",
     "narrative": "The displaced of Bihac do not stop at the first line of safety. Croatia's temporary camps overflow within weeks; the columns reach the Neretva, the Lasva, the Bosna. ARBiH supply officers compete with UNHCR for the same trucks, the same fuel, the same calories. International coverage hardens — but the people are already cold, and damage to the RBiH manpower system is already done.",
     "category": "humanitarian",
@@ -583,6 +585,7 @@
   },
   {
     "id": "csq_accelerated_safe_areas_1993",
+    "image": "event_un_presence.webp",
     "title": "Safe Areas With Teeth",
     "narrative": "UNSCR 819, 824, and 836 arrive in the counterfactual with the mandate and the rules of engagement the historical resolutions lacked. Dutch and French detachments arrive at Srebrenica, Gorazde, Zepa, and Bihac with artillery and close-air-support tasking, not only with logistic and observer roles. VRS corps commanders in Drinski and eastern axes receive written guidance that operations against those perimeters will be met with NATO response. The arithmetic of the enclaves changes: they cease to be siege objectives and begin to be diplomatic preconditions.",
     "category": "diplomatic",
@@ -765,6 +768,7 @@
   },
   {
     "id": "csq_drina_supply_disruption_1993",
+    "image": "event_supply_convoy_RS.webp",
     "title": "The Corridor Costs More",
     "narrative": "The ambush pattern proves chronic. The Foca-Visegrad-Zvornik corridor, never paved and always exposed, takes losses at a rate the VRS cannot replace from a VJ whose own political calculations are shifting. Belgrade, which had sustained the VRS through 1992 on the assumption the rear was secure, begins to treat Drina logistics as a separate and more expensive problem. Convoys leave later, arrive lighter, and return with casualties.",
     "category": "military",
@@ -808,6 +812,7 @@
   },
   {
     "id": "csq_drina_corps_pinned_1993",
+    "image": "event_siege_city_RS.webp",
     "title": "Drina Corps on Interior Lines",
     "narrative": "Drina Corps returns its quarterly readiness report with a line the VRS general staff has not seen before: more than half of the corps is committed to rear-security and anti-partisan tasks. The Podrinje Detachment is reformed and permanently redeployed from offensive tasks to interior lines. Whatever campaign Mladic's staff had projected for the eastern axis in 1993 becomes an operational impossibility; Drina Corps will hold what it has and not move from it.",
     "category": "military",
@@ -947,6 +952,7 @@
   },
   {
     "id": "csq_enclave_drain_continues_1995",
+    "image": "event_siege_city_RS.webp",
     "title": "Fixed on Interior Lines",
     "narrative": "What had been assumed to be a three-month operational detour becomes a permanent commitment. The forces Drina Corps tasked against Srebrenica cannot be withdrawn without collapsing the siege perimeter, and the perimeter cannot be collapsed without either taking the enclave or withdrawing from the eastern axis. Neither option is available. The formations remain in place: fixed, frustrated, and unavailable to the wider war.",
     "category": "military",
@@ -1067,6 +1073,7 @@
   },
   {
     "id": "csq_prolonged_war_exhaustion_1995",
+    "image": "event_siege_city_RBiH.webp",
     "title": "A Fourth Summer",
     "narrative": "Three summers of war without the turning point that in the historical record closed it. Populations in Sarajevo, Banja Luka, and Mostar cross into the fourth year of casualty lists, shortages, and negotiations that settle nothing. Conscription offices on every side report longer queues for deferments and shorter ones at the intake desk. This is not judgement; it is exhaustion. Every faction's field army is holding the line it held in the spring, and every faction's politicians are having the same conversations in different cities about how a war this expensive ends.",
     "category": "political",
@@ -1215,6 +1222,7 @@
   },
   {
     "id": "csq_zagreb_displeasure_1993",
+    "image": "event_patron_relations_HRHB.webp",
     "title": "Susak's Quiet Adjustment",
     "narrative": "Through the early months of 1993 the cargo manifests from Split arrive in Herzegovina with fewer pallets than the autumn's planning had assumed. Ministers in Zagreb who had briefed Tudjman on a Croat entity within Bosnia now brief him on a junior partnership inside someone else's republic, and his response is to let the supply arithmetic speak the policy. HVO brigades draw on smaller stocks, replace equipment more slowly, and discover which of their depot arrangements were built on Zagreb's priorities and which on their own.",
     "category": "diplomatic",
@@ -1642,6 +1650,7 @@
   },
   {
     "id": "csq_enclave_held_alt_intervention",
+    "image": "event_un_presence.webp",
     "title": "Safe Areas Still Standing",
     "narrative": "By turn 145 the enclaves are not the museum exhibits the world expected to inspect after the fact. Resilience indices are running well above the floor. The columns have not marched out. The lists have not been compiled. The UN Safe Areas designation, which on the historical path became a euphemism for unfinished obligation, is still — for now — an enforced reality.",
     "category": "humanitarian",
@@ -2147,6 +2156,7 @@
   },
   {
     "id": "csq_patron_arms_review_imposed",
+    "image": "event_patron_relations_RS.webp",
     "title": "The Arms Review Comes Down",
     "narrative": "The patron has run out of patient briefings. A formal arms review is announced — not a cutoff, but a procedural slowdown that reaches every depot and every transit lane. Mobilization officers will spend the next quarter explaining missing inventories. The message is clear: comply or be cut.",
     "category": "diplomatic",
@@ -2205,6 +2215,7 @@
   },
   {
     "id": "csq_patron_disavowal_partial",
+    "image": "event_patron_relations_RS.webp",
     "title": "Partial Disavowal",
     "narrative": "The patron stops short of a public break — but the formal language hardens. Diplomatic representatives in capitals abroad are pulled back; sanctions cooperation widens; the public statements draw a careful distance. International standing improves on one side, declines on the other. The flow of arms and recruits both feel the chill.",
     "category": "diplomatic",
@@ -2278,6 +2289,7 @@
   },
   {
     "id": "csq_patron_recovery_offer",
+    "image": "event_patron_relations_RS.webp",
     "source_tier": "design_counterfactual",
     "title": "Patron Recovery Offer",
     "narrative": "The patron's emissary returns with terms: structural concessions in exchange for a managed recovery of the relationship. Acceptance buys back arms, briefings, and the soft cover of recognized backing. Refusal locks in the disavowal. Either way the choice is binding for the rest of the war.",
@@ -2382,6 +2394,7 @@
   },
   {
     "id": "csq_patron_arms_review_imposed_RBiH",
+    "image": "event_patron_relations_RBiH.webp",
     "title": "Channel Review Notice",
     "narrative": "External backers move from warning to procedure. Shipment lists are rechecked, intermediaries demand cleaner routing, and mobilization officers lose time to the politics of every crate. This is not abandonment, but the pipeline now carries conditions.",
     "category": "diplomatic",
@@ -2440,6 +2453,7 @@
   },
   {
     "id": "csq_patron_disavowal_partial_RBiH",
+    "image": "event_patron_relations_RBiH.webp",
     "title": "Conditional Support Statement",
     "narrative": "The language of support narrows. Envoys still speak of survival and legitimacy, but every sentence now carries reservations. The material channel does not close, yet the relationship becomes conditional enough to shape mobilization and bargaining alike.",
     "category": "diplomatic",
@@ -2508,6 +2522,7 @@
   },
   {
     "id": "csq_patron_arms_review_imposed_HRHB",
+    "image": "event_patron_relations_HRHB.webp",
     "title": "Pipeline Review From Zagreb",
     "narrative": "The review arrives as administration: convoy lists, liaison approvals, and sharper questions from the rear. The channel remains open, but its political owner has made the cost of defiance visible to every quartermaster.",
     "category": "diplomatic",
@@ -2566,6 +2581,7 @@
   },
   {
     "id": "csq_patron_disavowal_partial_HRHB",
+    "image": "event_patron_relations_HRHB.webp",
     "title": "Distance From The Patron",
     "narrative": "The patron does not close the door, but the corridor grows narrower. Liaison officers speak in conditions; shipments arrive with explanations attached. Autonomy is preserved, yet the cost is now carried by recruitment offices and negotiating rooms.",
     "category": "diplomatic",
@@ -3446,6 +3462,7 @@
   },
   {
     "id": "csq_late_war_volunteer_surge",
+    "image": "event_mobilization_RBiH.webp",
     "title": "The Last Wave",
     "narrative": "The recruitment offices that had grown quiet for a quarter see queues again. The cause is not patriotic so much as territorial: the loss of one more municipality has crossed a threshold. Older men sign on. Veterans who had been demobilized return. The wave is short — these are not new bodies, they are the last available ones — but it buys a season.",
     "category": "political",
@@ -3503,6 +3520,7 @@
   },
   {
     "id": "csq_reservist_exhaustion_callup",
+    "image": "event_mobilization_RS.webp",
     "title": "The Reserves Are Called",
     "narrative": "The reserve categories that the mobilization order had spared are formally called. Men in their forties and fifties report to depots. The numbers are real but the cohesion is brittle: these are not the volunteers, they are the called. The recruitment columns rise; the morale columns thin. The political bill will arrive in the next quarter.",
     "category": "political",
@@ -3575,6 +3593,7 @@
   },
   {
     "id": "csq_partition_referendum_proposal",
+    "image": "event_referendum.webp",
     "title": "The Partition Question",
     "narrative": "A draft proposal circulates in three languages. It does not name a settlement — it names a question, to be put to the populations. The mediators frame it as legitimacy; the parties read it as either a foothold or a precipice. The decision is whether the question gets asked at all. Refusal is a posture; engagement is, in its own way, an answer the parties have not given before.",
     "category": "diplomatic",
@@ -3697,6 +3716,7 @@
   },
   {
     "id": "csq_arms_pipeline_disrupted",
+    "image": "event_supply_shortage_RS.webp",
     "title": "The Pipeline Goes Quiet",
     "narrative": "The route that had supplied a quarter of the heavy munitions stops moving. Embargoes tighten at one customs post; a brokered shipment is impounded at another. There is no announcement — the absence is the announcement. Combat units rotating through the depot find the manifests thin. The shortfall registers as a small but durable downgrade in firepower, and the recruitment offices feel the shift before the front does.",
     "category": "economic",
@@ -4292,6 +4312,7 @@
   },
   {
     "id": "csq_patron_arms_pipeline_attenuated",
+    "image": "event_supply_shortage_RS.webp",
     "title": "The Pipeline Trickles",
     "narrative": "The patron's confidence has been below water for three quarters. The arms pipeline did not formally close — it simply became less reliable. Manifests run light. The high-end calibres are reserved for capital-city ceremonial use. The combat units that depended on the pipeline learn to substitute. The substitutes work, until they don't. The combat-power column registers the attrition; the recruitment offices, watching the equipment problem feed back into morale, register a smaller but parallel decline.",
     "category": "diplomatic",
@@ -4366,6 +4387,7 @@
   },
   {
     "id": "csq_supply_corridor_chronic_strain",
+    "image": "event_supply_convoy_HRHB.webp",
     "title": "The Corridor That Bled Slow",
     "narrative": "The corridor never closed. It also never quite worked. Trucks moved, but in fits. Ammunition arrived, but in the wrong calibres. Spare parts arrived, but late. The chronic strain on the corridor manifested in cohesion: each unit's logistics officer learned to hoard, to substitute, to improvise. The improvisation worked, mostly. But the institutional confidence that the supply system would function decayed turn over turn, and the recruitment narrative — which had emphasized adequate equipment — quietly stopped emphasizing it.",
     "category": "economic",
@@ -4505,6 +4527,7 @@
   },
   {
     "id": "csq_political_split_temporary",
+    "image": "event_political_session.webp",
     "title": "Cabinet Crisis",
     "narrative": "The political class fractures over a question that — taken in isolation — should have been routine. The casualty totals; the patron's latest demand; the alliance's latest concession. The argument is held in private, then in committees, then in the press. A working consensus is restored within the quarter, but the institutional cohesion records the dispute. The international observers note the fracture and revise their estimates of the political class's room to maneuver.",
     "category": "political",
@@ -4582,6 +4605,7 @@
   },
   {
     "id": "csq_winter_supply_attrition",
+    "image": "event_supply_shortage_RS.webp",
     "title": "The Winter Bill",
     "narrative": "The first hard freeze finds the supply system already stretched. Generators run; fuel runs out. The roads that worked for trucks in the autumn now require four-wheel-drive. The depots that had been adequate for summer-rate operations are not adequate for winter-rate. The combat units in the high country burn through fuel faster than the supply column can deliver it. The bill comes in cohesion. The political class issues a calm communiqué; the front-line officers know what the calm communiqué is for.",
     "category": "military",
@@ -5255,6 +5279,7 @@
   },
   {
     "id": "csq_iran_arms_channel_attenuation",
+    "image": "event_supply_shortage_RBiH.webp",
     "title": "The Pipeline Cools",
     "narrative": "The night-flights to Tuzla airfield have been registering pressure for two quarters. The mediator capitals that have known about the channel and pretended not to begin to make calls. The aircraft do not stop arriving immediately. The manifests, however, change. The quantities decline; the quality declines faster. The combat units that had been substituting around the principal-pipeline gaps with the third-party channel begin substituting around the third-party channel. The brigades on the line do not see a sudden cliff; they see a gradient.",
     "category": "diplomatic",
@@ -5317,6 +5342,7 @@
   },
   {
     "id": "csq_political_split_temporary_RBiH",
+    "image": "event_political_session.webp",
     "title": "Sarajevo Caucus Rifts",
     "narrative": "Late in the campaign, the political class in Sarajevo registers a fracture along old lines. The unitary-state caucus and the federalization caucus both publish positions. The negotiating team in Geneva is given two sets of instructions, neither of which can be reconciled. The military command wires that the political-fracture noise has begun to interfere with logistics priorities. The negotiation column registers the discount. The cohesion column registers the spillover. Internal mediators close the rift in days, but the cost is on the books.",
     "category": "political",
@@ -5533,6 +5559,7 @@
   },
   {
     "id": "csq_political_split_temporary_RS",
+    "image": "event_political_session.webp",
     "title": "The Pale–Banja Luka Rift",
     "narrative": "Late in the campaign, the political leadership in Pale registers a fracture along old lines. The Banja Luka civilian caucus and the Pale war-party caucus both publish positions. The negotiating team is given two sets of instructions, neither of which can be reconciled. The military command wires that the political-fracture noise has begun to interfere with operational priorities. The negotiation column registers the discount. The cohesion column registers the spillover. Internal mediators close the rift in days, but the cost is on the books.",
     "category": "political",
@@ -5745,6 +5772,7 @@
   },
   {
     "id": "csq_iran_arms_channel_attenuation_HRHB",
+    "image": "event_supply_shortage_HRHB.webp",
     "title": "The Croatia Pipeline Cools",
     "narrative": "The Croatia-side pipeline that had substituted around the principal-patron gaps for two quarters begins to register pressure. The mediator capitals that have known about the channel and pretended not to begin to make calls. The crates do not stop arriving immediately. The manifests, however, change. The quantities decline; the quality declines faster. The combat units that had been substituting around the principal-pipeline gaps begin substituting around the substitute. The brigades on the line do not see a sudden cliff; they see a gradient.",
     "category": "diplomatic",
@@ -6211,6 +6239,7 @@
   },
   {
     "id": "csq_patron_arms_pipeline_attenuated_HRHB",
+    "image": "event_supply_shortage_HRHB.webp",
     "title": "The Croatia Pipeline Trickles",
     "narrative": "The patron's confidence has been below water for three quarters. The arms pipeline did not formally close — it simply became less reliable. Manifests run light. The high-end calibres are reserved for the HV's own ceremonial use. The combat units that depended on the pipeline learn to substitute. The substitutes work, until they don't. The combat-power column registers the attrition; the recruitment offices, watching the equipment problem feed back into morale, register a smaller but parallel decline.",
     "category": "diplomatic",
@@ -6346,6 +6375,7 @@
   },
   {
     "id": "csq_arbih_resistance_revival_RS",
+    "image": "event_mobilization_RS.webp",
     "title": "The Krajina Volunteer Surge",
     "narrative": "Territory has slipped — slowly at first, then in the August window. Morale across the active brigades is sub-baseline, and the press has stopped leading with weekly maps. Then the volunteer offices, which had been quiet for two quarters, begin to fill again. Some of the volunteers are first-time, drawn by the existential framing of refugee columns from the Krajina. Some are returning, drawn back by the sense that this time the war is at the door. The recruitment column registers the inflection. The morale column registers it a turn later.",
     "category": "military",
@@ -6486,6 +6516,7 @@
   },
   {
     "id": "csq_back_channel_communication_HRHB",
+    "image": "event_patron_relations_HRHB.webp",
     "title": "The Mostar Side-Door",
     "narrative": "A quiet line opens between the patron capital and the West Mostar offices. It is not a partnership revival. It is deconfliction: a channel for messages that cannot be sent through the formal Croatian state apparatus and cannot be sent through the international mediators. The leverage accrues quietly — not in declarations, but in the small concessions the patron stops pressing for. The political officer in West Mostar registers the shift; the Croatian Defence Council does not announce it.",
     "category": "diplomatic",
@@ -6560,6 +6591,7 @@
   },
   {
     "id": "csq_extended_truce_streak_RBiH",
+    "image": "event_ceasefire.webp",
     "title": "The Federation Quarter Holds",
     "narrative": "The alliance holds across a full quarter without major casualties. The recruitment offices in Sarajevo and Tuzla report stabilization rather than droop. The training cycles, which had been compressed under combat-replacement pressure, lengthen again. The brigade staffs catch up on the paperwork they had been deferring. The cohesion column, which had been drifting downward for six quarters, drifts upward by a small but measurable amount. The war continues; the institution recovers some breath.",
     "category": "political",
@@ -6615,6 +6647,7 @@
   },
   {
     "id": "csq_mediator_engagement_streak_RBiH",
+    "image": "event_patron_relations_RBiH.webp",
     "title": "The Geneva Channel Stays Open",
     "narrative": "The mediator engagement holds across the quarter. Patron confidence stays above the threshold the foreign-ministry analysts call \"engaged\" rather than \"performative\". War-exhaustion is moderate — not so high that the population pushes for any peace, not so low that the political class feels diplomatically weightless. The negotiating-leverage column accrues by a small but measurable amount. The diplomats register the inflection; the front-line officers do not.",
     "category": "diplomatic",
@@ -6678,6 +6711,7 @@
   },
   {
     "id": "csq_extended_truce_streak_HRHB",
+    "image": "event_ceasefire.webp",
     "title": "The Mostar Quarter Holds",
     "narrative": "The alliance with the Federation holds across a full quarter without major casualties on the Croat-majority axis. The HVO recruitment offices in West Mostar and Posusje report stabilization rather than droop. The training cycles, which had been compressed under combat-replacement pressure during the Lasva-Vitez period, lengthen again. The brigade staffs catch up on the paperwork they had been deferring. The cohesion column, which had been drifting downward for six quarters, drifts upward by a small but measurable amount. The war continues; the institution recovers some breath.",
     "category": "political",
@@ -6733,6 +6767,7 @@
   },
   {
     "id": "csq_extended_truce_streak_RS",
+    "image": "event_ceasefire.webp",
     "title": "The Banja Luka Quarter Holds",
     "narrative": "A long quiet stretch holds across most of the contact lines. Posavina is calm; the Sarajevo TEZ holds; the Drina sector reduces to local skirmishes. The recruitment offices in Banja Luka and Pale stop pushing the volunteer push. The training cycles, which had been compressed under combat-replacement pressure, lengthen again. The brigade staffs catch up on the paperwork they had been deferring. The cohesion column, which had been drifting downward for six quarters, drifts upward by a small but measurable amount. The war continues; the institution recovers some breath.",
     "category": "political",
@@ -6788,6 +6823,7 @@
   },
   {
     "id": "csq_mediator_engagement_streak_HRHB",
+    "image": "event_patron_relations_HRHB.webp",
     "title": "The Zagreb Channel Stays Open",
     "narrative": "The mediator engagement holds across the quarter. Patron confidence in Zagreb stays above the threshold the foreign-ministry analysts call \"engaged\" rather than \"performative\". War-exhaustion is moderate — not so high that the population pushes for any peace, not so low that the political class feels diplomatically weightless. The negotiating-leverage column accrues by a small but measurable amount. The diplomats register the inflection; the front-line officers do not.",
     "category": "diplomatic",
@@ -6851,6 +6887,7 @@
   },
   {
     "id": "csq_mediator_engagement_streak_RS",
+    "image": "event_patron_relations_RS.webp",
     "title": "The Belgrade Channel Stays Open",
     "narrative": "The mediator engagement holds across the quarter. Patron confidence in Belgrade stays above the threshold the foreign-ministry analysts call \"engaged\" rather than \"performative\". War-exhaustion is moderate — not so high that the population pushes for any peace, not so low that the political class feels diplomatically weightless. The negotiating-leverage column accrues by a small but measurable amount. The diplomats register the inflection; the front-line officers do not.",
     "category": "diplomatic",
@@ -6914,6 +6951,7 @@
   },
   {
     "id": "csq_back_channel_communication_RS",
+    "image": "event_patron_relations_RS.webp",
     "title": "The Pale Side-Door",
     "narrative": "A quiet line opens between the patron capital and the Pale offices. It is not a partnership revival. It is deconfliction: a channel for messages that cannot be sent through the formal Yugoslav state apparatus and cannot be sent through the international mediators. The leverage accrues quietly — not in declarations, but in the small concessions the patron stops pressing for. The political officer in Pale registers the shift; the Republika Srpska assembly does not announce it.",
     "category": "diplomatic",
@@ -7642,6 +7680,7 @@
   },
   {
     "id": "csq_spring_thaw_supply_recovery_RBiH",
+    "image": "event_supply_convoy_RBiH.webp",
     "title": "The Spring Thaw (RBiH)",
     "narrative": "The roads dry. The hand-trucks come out of storage. The relief routes that had required sleds in the worst weeks of the winter now move at hand-truck speed, and the depots that had been chronically below summer-rate adequacy refill at the marginal pace the route can sustain. The combat units in the central enclaves note the difference in their breakfast rations. The political class issues no communique; the front-line quartermasters do not need one.",
     "category": "military",
@@ -7713,6 +7752,7 @@
   },
   {
     "id": "csq_spring_thaw_supply_recovery_RS",
+    "image": "event_supply_convoy_RS.webp",
     "title": "The Spring Thaw (RS)",
     "narrative": "The roads dry. The trucks come back out of mothballs. The supply routes that had required four-wheel-drive in the worst weeks of the winter now move at truck speed, and the depots that had been chronically below summer-rate adequacy refill at the marginal pace the route can sustain. The combat units in the high country note the difference in their breakfast rations. The political class issues no communique; the front-line quartermasters do not need one.",
     "category": "military",
@@ -7852,6 +7892,7 @@
   },
   {
     "id": "csq_spring_thaw_supply_recovery_HRHB",
+    "image": "event_supply_convoy_HRHB.webp",
     "title": "The Spring Thaw (HRHB)",
     "narrative": "The Lasva Valley roads dry. The two-axle trucks come back out of mothballs. The supply routes that had required four-wheel-drive in the worst weeks of the winter now move at truck speed, and the Lasva and Posušje depots that had been chronically below summer-rate adequacy refill at the marginal pace the route can sustain. The combat units in the central enclaves note the difference in their breakfast rations. The political class issues no communique; the front-line quartermasters do not need one.",
     "category": "military",
@@ -8126,6 +8167,7 @@
   },
   {
     "id": "csq_grain_corridor_reopened_HRHB",
+    "image": "event_supply_convoy_HRHB.webp",
     "title": "Grain Corridor Reopened (HRHB)",
     "narrative": "A long-disused supply lane through the Neretva valley reopens — quietly, through municipal-level arrangements that the formal war has not abolished. Convoys move under flag-of-grain through the Adriatic-coast spine, and the receiving towns count the difference in markets that begin to function again. The international observers note the change with cautious approval; Zagreb does not object.",
     "category": "economic",
@@ -8193,6 +8235,7 @@
   },
   {
     "id": "csq_arms_pipeline_disrupted_RBiH",
+    "image": "event_supply_shortage_RBiH.webp",
     "title": "The Pipeline Goes Quiet (RBiH)",
     "narrative": "The Iran-routed pipeline that had supplied a quarter of the heavy munitions stops moving. Embargoes tighten at one Adriatic customs post; a brokered shipment is impounded at another. There is no announcement — the absence is the announcement. ARBiH combat units rotating through the Travnik depot find the manifests thin. The shortfall registers as a small but durable downgrade in firepower, and the recruitment offices feel the shift before the front does.",
     "category": "economic",
@@ -8261,6 +8304,7 @@
   },
   {
     "id": "csq_arms_pipeline_disrupted_HRHB",
+    "image": "event_supply_shortage_HRHB.webp",
     "title": "The Pipeline Goes Quiet (HRHB)",
     "narrative": "The Croatia-routed pipeline that had supplied a quarter of the heavy munitions stops moving. Embargoes tighten at one Adriatic customs post; a brokered shipment is impounded at another. There is no announcement — the absence is the announcement. HVO combat units rotating through the Mostar depot find the manifests thin. The shortfall registers as a small but durable downgrade in firepower, and the recruitment offices feel the shift before the front does.",
     "category": "economic",
