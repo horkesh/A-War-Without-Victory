@@ -1,6 +1,6 @@
 # AWWV Warroom Master Reference
 
-**Updated:** 2026-11-05 (visual polish packet registered: Phase B diegetic warroom chrome is PLANNED, see [../plans/2026-11-05-visual-polish-art-direction-plan.md](../plans/2026-11-05-visual-polish-art-direction-plan.md); nothing in this file's contracts changed)
+**Updated:** 2026-11-05 (visual polish Phase B landed on branch `claude/visual-polish-phase-b`: the inbox mounts as a dossier on the desk, the navigation is a brass rail, command cards are art first; the WR01 corkboard map and every hotspot, docket and dismissal contract are unchanged. See [../plans/2026-11-05-visual-polish-art-direction-plan.md](../plans/2026-11-05-visual-polish-art-direction-plan.md) and [implemented/20261105_VISUAL_POLISH_PHASE_B_WARROOM_CHROME.md](implemented/20261105_VISUAL_POLISH_PHASE_B_WARROOM_CHROME.md))
 
 ## Current shell-transition contract
 
