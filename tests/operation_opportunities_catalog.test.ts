@@ -1173,6 +1173,7 @@ describe('entry-specific: sana_95 family', () => {
                 assigned_brigades: approach!.brigades.filter(brigade => brigade !== 'hvo_101st_bihac'),
             },
             { axis_id: 'sana_sanski_most_kljuc', assigned_brigades: sanski.brigades },
+            { axis_id: 'sana_jelasinovci_517th', assigned_brigades: [] },
         ]);
     });
 
@@ -1225,7 +1226,7 @@ describe('entry-specific: sana_95 family', () => {
         // 2026-08-11: the Ključ interior was restored additively as a second,
         // faster path after the Petrovac axis proved saturated in the 188w trace.
         // Friendly-controlled objectives are filtered when the operation spawns.
-        expect(skParent.objectives).toHaveLength(15);
+        expect(skParent.objectives).toHaveLength(13);
         expect(skParent.objectives[0]).toBe('op:bosanska_krupa:ivanjska_2');
         expect(skParent.objectives[1]).toBe('op:bosanska_krupa:donji_dubovik_2');
         expect(skParent.objectives).toContain('op:kljuc:hadzici');

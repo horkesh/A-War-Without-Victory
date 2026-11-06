@@ -199,11 +199,11 @@ const SANSKI_KLJUC_OBJECTIVES = [
     'op:sanski_most:skucani_vakuf_2',
     'op:sanski_most:stari_majdan',
     'op:sanski_most:sanski_most_2',
-    // Calibration (oct1995): Ilidža before Ostra Luka. Ostra Luka is painted RS at every
+    // Calibration (oct1995): Ostra Luka removed from this walk. It is painted RS at every
     // checkpoint; with the 517th split the 506th reaches the town at t187, and taking
-    // Ostra Luka next cost a cell while Ilidža (painted RBiH) stayed RS.
+    // Ostra Luka next cost a cell while Ilidža (painted RBiH) stayed RS. Ilidža now follows
+    // the town directly (Sanski Most - Ilidža - Kljevci is a contiguous graph walk).
     'op:sanski_most:ilidza_2',
-    'op:sanski_most:ostra_luka',
     'op:sanski_most:kljevci',
     'op:kljuc:sanica_2',
     'op:kljuc:hadzici',

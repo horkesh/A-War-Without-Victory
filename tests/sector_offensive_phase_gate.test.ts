@@ -1121,6 +1121,7 @@ describe('canonical Mistral 2 spawn propagates the opt-in to exactly the intende
         }
         expect([...new Set(gated)].sort()).toEqual([
             'mistral_2_95#0:mistral_drvar_grahovo',
+            'sana_95#0:sana_jelasinovci_517th',
             'sana_95#0:sana_veliki_badic_503rd_late',
             'sana_95#0:sana_veliki_badic_505th',
             'sana_95#0:sana_west_sana_510th',
