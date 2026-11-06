@@ -39,3 +39,7 @@ After the fixes: `tsc` exit 0, 13 files / 162 tests pass, `desktop:map:build` ex
 
 - No additional `image` keys were authored on events; the plan's decision packet for which events should carry an illustration (Historian and canon seats for §6 events) is still to be written.
 - Effect rows keep their exact copy and layout; the "typed staff memo" rewording waits for the Game Designer seat.
+
+## §6 panel conditions applied (2026-11-06)
+
+The §6 chain confirmed this header for gated stills on two conditions ([panel record](../governance/20261106_SECTION6_D8_DECISION_HEADER_PANEL.md)): a gated still is record, not decoration, so it carries a factual alt (`section6StillAlt` in `eventIllustrationArt.ts`, EN and BCS under `eventArt.alt.*`), and the eyebrow over it uses the neutral accent instead of the faction class. Category plates are never in the gated table. `tests/ui/decision_modal_art_wiring.test.ts` pins both in both locales; `tsc` 0. Only `concentration_camps_revealed_1992` reaches this header today.
