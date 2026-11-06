@@ -4284,11 +4284,6 @@
         "dimension_shifts": [
           {
             "faction": "HRHB",
-            "dimension": "patron_confidence",
-            "delta": 5
-          },
-          {
-            "faction": "HRHB",
             "dimension": "international_standing",
             "delta": -15
           },
@@ -4296,11 +4291,6 @@
             "faction": "HRHB",
             "dimension": "military_credibility",
             "delta": -5
-          },
-          {
-            "faction": "HRHB",
-            "dimension": "internal_cohesion",
-            "delta": 5
           }
         ],
         "aggression_affinity": 0.3,
@@ -4361,11 +4351,6 @@
           },
           {
             "faction": "HRHB",
-            "dimension": "internal_cohesion",
-            "delta": -30
-          },
-          {
-            "faction": "HRHB",
             "dimension": "military_credibility",
             "delta": -10
           },
@@ -4403,7 +4388,7 @@
       "cooperate": {
         "RBiH": {
           "headline": "HVO permits unrestricted ICRC inspection of detention facilities",
-          "body": "HZ HB Presidency opens Heliodrom, Dretelj, and Gabela to full ICRC and international press access. Sarajevo registers a credibility recovery move at sharp internal-cohesion cost for Mostar; HVO hardliner factions and Zagreb read the access as institutional weakness."
+          "body": "HZ HB Presidency opens Heliodrom, Dretelj, and Gabela to full ICRC and international press access. Sarajevo registers the access; what the inspectors find enters the international record."
         },
         "RS": {
           "headline": "HVO permits unrestricted ICRC inspection of detention facilities",
