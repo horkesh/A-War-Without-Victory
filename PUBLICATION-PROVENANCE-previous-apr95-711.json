@@ -1,0 +1,33 @@
+{
+ "schema": "awwv.measured-unqualified-live-calibration-publication.v1",
+ "prepared": "2026-11-06",
+ "artifact": {
+  "name": "control_timeline_apr95_711_188_20261106.html",
+  "bytes": 718649,
+  "sha256": "cc4c9bbd047bcdd895f39b426d3969c698ceda4abe4dda80f318f634d19711e1"
+ },
+ "status": "MEASURED_UNQUALIFIED_NOT_ADOPTED",
+ "source_commit": "3d6021b3f",
+ "source_branch": "claude/live-jan1993-calibration (local, unpushed)",
+ "calibration_authority": "definitive-harness-regression-v1 scenario_runner 188w (no player). Live-equivalent desktop advanceTurn with RBiH, RS or HRHB as player at production autonomy (player decisions answered in the pause before combat, bot_equivalent policy) matches it cell-for-cell at weeks 39, 104 and 156 (0 cells differing for all three factions).",
+ "completed_week": 188,
+ "initial_scored_cells": 712,
+ "rendered_polygons": 744,
+ "final_save_sha256": "88dce4825cb27ab87baed0d3c19cd526a28e4f44b7e70aea8eff04f608e1bc4b",
+ "scores": [
+  712,
+  711,
+  711,
+  697
+ ],
+ "previous_published_scores": [
+  712,
+  711,
+  710,
+  693
+ ],
+ "engine_health_strict": "PASS (0 stranded, 0 ghost, 0 zero-eligible, 0 dead ops, 0 consistency failures)",
+ "anchors": "PASS (scenario anchor contract); full vitest suite PASS",
+ "viewer_markers": "15 mismatch markers checked, 0 anchors outside cell, 0 markers missing",
+ "notes": "Gornje Krcevine (Vitovlje, VRS OG Vlasic HQ) now falls at t155, Domet-1's week: the Paklarevo local model window moved to t133-139, so Paklarevo falls t142 (Dec 1994, ~3 months before Domet-1 - calibration assumption) and Vlasic Ridge goes straight for Gornje Krcevine. Live parity fix: the HRHB opening decision fires in its authored window (t4) instead of at campaign birth. Remaining mismatches: apr1994 Brka (owner: ignore), apr1995 Konjic Ljuta. Farz guard parked; baselines not yet re-pinned."
+}

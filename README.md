@@ -1,6 +1,28 @@
-## Current published snapshot — 2026-11-06 (latest, April 1995 at 711)
+## Current published snapshot — 2026-11-06 (latest, October 1995 at 709)
 
-[Open the current weekly timeline 0–188](control_timeline_apr95_711_188_20261106.html), with scores of **712/711/711/697** at weeks 39/104/156/188. January 1993 is signed off at 712/712.
+[Open the current weekly timeline 0–188](control_timeline_oct95_709_188_20261106.html), with scores of **712/711/712/709** at weeks 39/104/156/188. January 1993, April 1994 and April 1995 are signed off.
+
+- **October 1995 697 → 709:**
+  - Southern Move takes Mrkonjić Grad, Podrašnica and Baljvine.
+  - Mistral 2 reaches Jajce earlier, so Šipovljani falls.
+  - Donji Vrbljani and Varošluk fall.
+  - A Zagreb "hold the Orašje pocket" directive stops the late HVO capture of three Posavina cells.
+  - A small summer 1995 ARBiH Treskavica operation takes Sitnik and Golubići.
+- **April 1995 reaches 712/712:** Ljuta now falls in the September 1994 Konjic offensive.
+- **Live equals headless through October 1995:** 0 cells differ for RBiH, RS or HRHB as player at week 188.
+- **Remaining mismatches:**
+  - Brka (ignored by owner decision);
+  - Sanski Most Ilidža (one week short);
+  - Ilijaš Krivajevići.
+- **Calibration assumptions:** the new placements have unsourced dates; each is recorded in the operation's comment.
+- **Checks:** strict engine health passes; enclaves on schedule; full suite passes; 0 markers outside their cell.
+- **Not adopted:** baselines are not yet re-pinned.
+
+The previous [712/711/711/697](control_timeline_apr95_711_188_20261106.html) page remains available; its provenance is archived as `PUBLICATION-PROVENANCE-previous-apr95-711.json`.
+
+## Previous published snapshot — 2026-11-06 (April 1995 at 711)
+
+[Open the earlier 2026-11-06 weekly timeline 0–188](control_timeline_apr95_711_188_20261106.html), with scores of **712/711/711/697** at weeks 39/104/156/188. January 1993 is signed off at 712/712.
 
 - **Gornje Krčevine:** it contains Vitovlje, the VRS Vlašić headquarters, and now falls in Domet-1's week (week 155). A small ARBiH Paklarevo operation now takes Paklarevo in December 1994 (about three months before Domet-1 did; a calibration assumption). Domet-1 can then go straight for Gornje Krčevine inside its one-week ceasefire exception.
 - **Live equals headless through April 1995:** 0 cells differ for RBiH, RS or HRHB as player at weeks 39, 104 and 156. The last fix was that the HRHB opening decision now arrives in its historical week instead of at campaign start.
