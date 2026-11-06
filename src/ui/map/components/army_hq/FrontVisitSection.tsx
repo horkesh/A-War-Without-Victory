@@ -21,7 +21,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { CollapsibleSection } from './CollapsibleSection';
-import { DOSSIER_INK, DOSSIER_PAPER_CLASS } from './DossierPaper';
+import { DOSSIER_INK, DossierPaper } from './DossierPaper';
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
 import { turnToDateString } from '../../utils/formatters';
@@ -113,13 +113,15 @@ export function FrontVisitSection() {
     const unreachableLabels = avail.unreachableBranchIds.map(frontLabel).sort(strictCompare).join(', ');
 
     return (
-        <div data-material="paper" className={DOSSIER_PAPER_CLASS}>
+        <div className="bg-panel-card border border-panel-border rounded-lg overflow-hidden">
         <CollapsibleSection
             sectionKey="front-visit"
             title={t('frontVisit.title')}
             defaultOpen={true}
         >
-            <div className="flex flex-col gap-2">
+            {/* The sheet sits inside the collapsible's content: CollapsibleSection paints an
+                opaque dark card, so paper around it would be covered (Codex review on #536). */}
+            <DossierPaper testId="front-visit-sheet" className="flex flex-col gap-2 px-3 py-2">
                 <p className={`text-xs leading-snug ${DOSSIER_INK.body}`}>
                     {t('frontVisit.stake')}
                 </p>
@@ -165,7 +167,7 @@ export function FrontVisitSection() {
                 >
                     {t('frontVisit.button')} {t('frontVisit.cost', { cost: FRONT_VISIT_COST })}
                 </button>
-            </div>
+            </DossierPaper>
         </CollapsibleSection>
         </div>
     );
