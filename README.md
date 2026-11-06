@@ -1,6 +1,21 @@
-## Current published snapshot — 2026-11-05 (latest, April 1994 at 711)
+## Current published snapshot — 2026-11-06 (latest, April 1995 at 711)
 
-[Open the current weekly timeline 0–188](control_timeline_apr711_188_20261105.html), with scores of **712/711/710/693** at weeks 39/104/156/188. January 1993 is signed off at 712/712.
+[Open the current weekly timeline 0–188](control_timeline_apr95_711_188_20261106.html), with scores of **712/711/711/697** at weeks 39/104/156/188. January 1993 is signed off at 712/712.
+
+- **Gornje Krčevine:** it contains Vitovlje, the VRS Vlašić headquarters, and now falls in Domet-1's week (week 155). A small ARBiH Paklarevo operation now takes Paklarevo in December 1994 (about three months before Domet-1 did; a calibration assumption). Domet-1 can then go straight for Gornje Krčevine inside its one-week ceasefire exception.
+- **Live equals headless through April 1995:** 0 cells differ for RBiH, RS or HRHB as player at weeks 39, 104 and 156. The last fix was that the HRHB opening decision now arrives in its historical week instead of at campaign start.
+- **Remaining mismatches:**
+  - April 1994: Brka (ignored by owner decision);
+  - April 1995: Konjic Ljuta;
+  - October 1995: 15 late-war cells, to be addressed at that checkpoint.
+- **Checks:** strict engine health passes; enclaves on schedule; full suite passes; 0 markers outside their cell.
+- **Not adopted:** baselines are not yet re-pinned.
+
+The previous [712/711/710/693](control_timeline_apr711_188_20261105.html) page remains available; its provenance is archived as `PUBLICATION-PROVENANCE-previous-apr711.json`.
+
+## Previous published snapshot — 2026-11-05 (April 1994 at 711)
+
+[Open the 2026-11-05 weekly timeline 0–188](control_timeline_apr711_188_20261105.html), with scores of **712/711/710/693** at weeks 39/104/156/188. January 1993 is signed off at 712/712.
 
 - **Source:** the unpushed local branch `claude/live-jan1993-calibration`; the commit is named in `PUBLICATION-PROVENANCE.json`.
 - **Live equals headless through April 1994.** For RBiH, RS and HRHB as the player at production autonomy, 0 cells differ at weeks 39 and 104. Three fixes made this hold past week 39:
