@@ -122,7 +122,8 @@ describe('EventDecisionModal image header', () => {
       expect(alt).toMatch(/Prijedor/);
       const eyebrow = art.parentElement?.querySelector('.uppercase') as HTMLElement;
       expect(eyebrow.className).toContain('text-accent-gold');
-      expect(eyebrow.className).not.toContain('text-faction-');
+      // A rendered className, not source text: no faction class may sit over a §6 still.
+      expect(eyebrow.className.includes('text-faction-')).toBe(false);
       cleanup();
     }
     expect(section6StillAlt('event_referendum.webp')).toBeNull();
