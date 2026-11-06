@@ -89,12 +89,22 @@ const STAGING_IVANJSKA = 'op:bosanska_krupa:ivanjska_2';
 const KRUPA_VALLEY_OBJECTIVES = [
     'op:bosanska_krupa:ivanjska_2',
     'op:bosanska_krupa:arapusa_2',
-    'op:bosanska_krupa:donji_dubovik_2',
+    // Donji Dubovik moved to the Bosanski Novi axis below (arapusa_2 adj vranjska_2 ✓).
     'op:bosanska_krupa:vranjska_2',
     'op:bosanska_krupa:jasenica_2',
-    'op:bosanska_krupa:gornja_suvaja',
+    // Calibration 2026-11-06: Krnjeusa (adj jasenica_2 and gornja_suvaja) before Gornja
+    // Suvaja, because the Gornja Suvaja capture detaches the 503rd and empties this axis.
     'op:bosanski_petrovac:krnjeusa',
-    // Bosanski Novi extension — adjacent to donji_dubovik_2 (live axis terminus):
+    'op:bosanska_krupa:gornja_suvaja',
+];
+
+// Calibration 2026-11-06: the Bosanski Novi extension (above) moved off the serial Krupa
+// list onto its own 511th axis, gated on Donji Dubovik. As the last two of nine serial
+// objectives they fell at t187-188 and missed October 1995 whenever the axis ran late.
+// The gate is Arapusa, which the Krupa axis itself takes; another Sana axis (the 506th)
+// sometimes takes Donji Dubovik first, and a gate on it then never opens.
+const BOSANSKI_NOVI_OBJECTIVES = [
+    'op:bosanska_krupa:donji_dubovik_2', // adj arapusa_2 ✓
     'op:bosanski_novi:krslje_2',   // adj donji_dubovik_2 ✓
     'op:bosanski_novi:matavazi_2', // adj donji_dubovik_2 + krslje_2 ✓
 ];
@@ -288,6 +298,25 @@ const SANA_AXES: readonly OpportunityAxisDef[] = [
             requires_operation_captures: ['op:bosanska_krupa:gornja_suvaja'],
             handoff: {
                 brigade_id: 'arbih_503rd_slavna_mountain' as FormationId,
+                source_axis_id: 'sana_krupa',
+            },
+        },
+    },
+    {
+        axis_id: 'sana_bosanski_novi_511th',
+        name: 'Bosanski Novi Strip (511th handoff)',
+        corps: PRIMARY_CORPS,
+        // MODELED allocation (calibration 2026-11-06): the 511th detaches once the Krupa
+        // axis holds Arapusa. It does not claim the 511th took these villages.
+        brigades: [],
+        objectives: BOSANSKI_NOVI_OBJECTIVES,
+        staging_osid: 'op:bosanska_krupa:arapusa_2',
+        preserve_objective_sequence: true,
+        phase_gate: {
+            main_axis_id: 'sana_krupa',
+            requires_operation_captures: ['op:bosanska_krupa:arapusa_2'],
+            handoff: {
+                brigade_id: 'arbih_511th_slavna_mountain' as FormationId,
                 source_axis_id: 'sana_krupa',
             },
         },

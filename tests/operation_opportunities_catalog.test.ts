@@ -998,8 +998,24 @@ describe('entry-specific: sana_95 family', () => {
             'arbih_505th_vitezka_mountain',
             'arbih_503rd_slavna_mountain',
         ]);
-        expect(krupa.objectives).toHaveLength(9);
+        expect(krupa.objectives).toHaveLength(6);
         expect(SANA_95_OPPORTUNITY.planning_duration).toBe(5);
+        // Calibration 2026-11-06: the Bosanski Novi strip is a 511th handoff gated on Arapusa.
+        expect(SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_bosanski_novi_511th')).toMatchObject({
+            brigades: [],
+            objectives: [
+                'op:bosanska_krupa:donji_dubovik_2',
+                'op:bosanski_novi:krslje_2',
+                'op:bosanski_novi:matavazi_2',
+            ],
+            staging_osid: 'op:bosanska_krupa:arapusa_2',
+            preserve_objective_sequence: true,
+            phase_gate: {
+                main_axis_id: 'sana_krupa',
+                requires_operation_captures: ['op:bosanska_krupa:arapusa_2'],
+                handoff: { brigade_id: 'arbih_511th_slavna_mountain', source_axis_id: 'sana_krupa' },
+            },
+        });
         expect(badic505).toMatchObject({
             brigades: [],
             staging_osid: 'op:bosanska_krupa:ivanjska_2',
@@ -1166,6 +1182,7 @@ describe('entry-specific: sana_95 family', () => {
             { axis_id: 'sana_krupa', assigned_brigades: krupa.brigades },
             { axis_id: 'sana_veliki_badic_505th', assigned_brigades: [] },
             { axis_id: 'sana_veliki_badic_503rd_late', assigned_brigades: [] },
+            { axis_id: 'sana_bosanski_novi_511th', assigned_brigades: [] },
             { axis_id: 'sana_bihac_petrovac', assigned_brigades: bp.brigades },
             { axis_id: 'sana_west_sana_510th', assigned_brigades: [] },
             {
@@ -1187,13 +1204,10 @@ describe('entry-specific: sana_95 family', () => {
         expect(krupa.objectives).toEqual([
             'op:bosanska_krupa:ivanjska_2',
             'op:bosanska_krupa:arapusa_2',
-            'op:bosanska_krupa:donji_dubovik_2',
             'op:bosanska_krupa:vranjska_2',
             'op:bosanska_krupa:jasenica_2',
-            'op:bosanska_krupa:gornja_suvaja',
             'op:bosanski_petrovac:krnjeusa',
-            'op:bosanski_novi:krslje_2',
-            'op:bosanski_novi:matavazi_2',
+            'op:bosanska_krupa:gornja_suvaja',
         ]);
         expect(SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_veliki_badic_505th'))
             .toMatchObject({ brigades: [], objectives: ['op:bosanska_krupa:veliki_badic'] });

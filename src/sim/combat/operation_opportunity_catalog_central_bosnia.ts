@@ -140,17 +140,23 @@ const DONJI_VAKUF_STAGING_ANCHORS: readonly string[] = [
     DONJI_VAKUF_STAGING_KOPCIC,
 ];
 
+// Calibration 2026-11-06: Oborci (adj donji_vakuf_2 and babin_potok_2) moved from tenth to
+// third, and Korenici + Jemanlici moved to a parallel 707th axis (below). As the tail of a
+// ten-objective serial axis they fell at t186-188 and missed October 1995 when it ran late.
 const DONJI_VAKUF_OBJECTIVES: readonly string[] = [
     'op:donji_vakuf:komar_2',
     'op:donji_vakuf:donji_vakuf_2',
+    'op:donji_vakuf:oborci_2',
     'op:donji_vakuf:babin_potok_2',
     'op:donji_vakuf:kutanja',
     'op:donji_vakuf:torlakovac_2',
     'op:donji_vakuf:pribraca_2',
     'op:donji_vakuf:prusac_2',
-    'op:donji_vakuf:jemanlici',
-    'op:donji_vakuf:korenici',
-    'op:donji_vakuf:oborci_2',
+];
+
+const DONJI_VAKUF_EAST_OBJECTIVES: readonly string[] = [
+    'op:donji_vakuf:korenici',  // adj donji_vakuf_2 ✓
+    'op:donji_vakuf:jemanlici', // adj donji_vakuf_2 + korenici ✓
 ];
 
 const DONJI_VAKUF_READINESS_FLOOR = 0.36;
@@ -329,6 +335,25 @@ const DONJI_VAKUF_AXES: readonly OpportunityAxisDef[] = [
         ],
         objectives: DONJI_VAKUF_OBJECTIVES,
         staging_osid: DONJI_VAKUF_STAGING_TURBE,
+    },
+    {
+        // MODELED allocation (calibration 2026-11-06): the 707th detaches once the Komar
+        // line holds Donji Vakuf town. It does not claim the 707th took these villages.
+        axis_id: 'donji_vakuf_east_707th',
+        name: 'Donji Vakuf East (707th handoff)',
+        corps: DONJI_VAKUF_PRIMARY_CORPS,
+        brigades: [],
+        objectives: DONJI_VAKUF_EAST_OBJECTIVES,
+        staging_osid: 'op:donji_vakuf:donji_vakuf_2',
+        preserve_objective_sequence: true,
+        phase_gate: {
+            main_axis_id: 'donji_vakuf_komar_line',
+            requires_operation_captures: ['op:donji_vakuf:donji_vakuf_2'],
+            handoff: {
+                brigade_id: 'arbih_707th_slavna_mountain' as FormationId,
+                source_axis_id: 'donji_vakuf_komar_line',
+            },
+        },
     },
     {
         // Calibration assumption (oct1995): Varošluk, removed from the March ridge axis by
@@ -545,10 +570,11 @@ const PAKLAREVO_MODEL_AXES: readonly OpportunityAxisDef[] = [{
 
 // 2026-11-06 re-timing (calibration assumption, not a sourced date). The old
 // single turn 123 never fired: Operacija Ihlas (123-128) and Sjena (128-133)
-// held the 712th. 133 is the first turn Sjena has released the trio; 139 is the
-// last turn before Operacija Slap claims the 712th at 140. Inside the window the
-// ordinary exhaustion gate decides (measured: 3rd Corps exhaustion 46 at 133,
-// first eligible at 139, Paklarevo falls 142 = 19-25 Dec 1994).
+// held the 712th. 139 is the last turn before Operacija Slap claims the 712th at
+// 140 (measured: first eligible at 139, Paklarevo falls 142 = 19-25 Dec 1994).
+// Narrowed from 133-139 to 139 after the camps rebalance merge: the 3rd Corps
+// became eligible at 137, opened before the 770th reached Turbe, and the 712th's
+// lone attacks were repulsed (188w n43). Opening at 139 restores the joint attack.
 //
 // Why Gornje Krcevine needs this: the COHA exception admits Operation Vlasic
 // Ridge at receipt 155 only, and its serial axis can take one objective per
@@ -557,12 +583,12 @@ const PAKLAREVO_MODEL_AXES: readonly OpportunityAxisDef[] = [{
 // of the group arrives at 158, so Gornje Krcevine waits for COHA expiry (161).
 // With Paklarevo already held, Vlasic planning stages the group INTO Paklarevo
 // and the 155 opening takes Gornje Krcevine (Vitovlje) in the Domet-1 week.
-const PAKLAREVO_MODEL_FIRST_TURN = 133;
+const PAKLAREVO_MODEL_FIRST_TURN = 139;
 const PAKLAREVO_MODEL_LAST_TURN = 139;
 const dateWindowPaklarevoModel: AxisPredicate = (_state, turn) => {
     if (turn < PAKLAREVO_MODEL_FIRST_TURN) return { green: false, reason: 'Paklarevo local model window not yet open' };
     if (turn > PAKLAREVO_MODEL_LAST_TURN) return { green: false, reason: 'Paklarevo local model window has closed' };
-    return { green: true, reason: 'within the turn 133-139 Paklarevo local model window' };
+    return { green: true, reason: 'within the turn-139 Paklarevo local model window' };
 };
 
 const stagingAccessPaklarevoModel: AxisPredicate = (state) => {
@@ -659,7 +685,7 @@ const stagingAccessDonjiVakuf: AxisPredicate = (state) => {
 
 const enemyWeaknessDonjiVakuf: AxisPredicate = (state) => {
     let enemyHeld = 0;
-    for (const osid of DONJI_VAKUF_OBJECTIVES) {
+    for (const osid of [...DONJI_VAKUF_OBJECTIVES, ...DONJI_VAKUF_EAST_OBJECTIVES]) {
         const ctrl = getPoliticalControllerOSID(state, osid, undefined);
         if (ctrl === 'RS') enemyHeld++;
     }

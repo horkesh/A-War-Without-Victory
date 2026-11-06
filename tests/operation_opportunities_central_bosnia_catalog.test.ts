@@ -82,14 +82,12 @@ const DONJI_VAKUF_STAGING_ANCHORS = [
 const DONJI_VAKUF_OBJECTIVES = [
     'op:donji_vakuf:komar_2',
     'op:donji_vakuf:donji_vakuf_2',
+    'op:donji_vakuf:oborci_2',
     'op:donji_vakuf:babin_potok_2',
     'op:donji_vakuf:kutanja',
     'op:donji_vakuf:torlakovac_2',
     'op:donji_vakuf:pribraca_2',
     'op:donji_vakuf:prusac_2',
-    'op:donji_vakuf:jemanlici',
-    'op:donji_vakuf:korenici',
-    'op:donji_vakuf:oborci_2',
 ];
 
 const DONJI_VAKUF_BRIGADES = [
@@ -492,7 +490,7 @@ function buildPaklarevoState(opts: {
     activeOgs?: string[];
     lowReadiness?: boolean;
 } = {}): GameState {
-    const turn = opts.turn ?? 133;
+    const turn = opts.turn ?? 139;
     const plan = {
         plan_id: 'ai-plan-123-unrelated',
         objective_description: 'Unrelated pre-123 plan',
@@ -1046,7 +1044,7 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         expect(PAKLAREVO_LOCAL_94_MODEL_OPPORTUNITY.axes[0]!.brigades).toEqual(expected);
     });
 
-    it('admits the modeled Paklarevo local trio at turn 133 with ordinary planning and no state side effects', () => {
+    it('admits the modeled Paklarevo local trio at turn 139 with ordinary planning and no state side effects', () => {
         const def = PAKLAREVO_LOCAL_94_MODEL_OPPORTUNITY;
         expect(def.opportunity_id).toBe('paklarevo_local_94_model');
         expect(def.name).toBe('Paklarevo Local Concentration (Model)');
@@ -1073,22 +1071,22 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         ]));
         const attackBefore = structuredClone(state.military.brigade_attack_orders);
         const movementBefore = structuredClone(state.military.brigade_movement_orders);
-        expect(preflightOpportunityAdmission(state, def, def.axes, 'standard', 133)).toEqual({
+        expect(preflightOpportunityAdmission(state, def, def.axes, 'standard', 139)).toEqual({
             admitted: true,
             selected_participants: 3,
             required_participants: 2,
             reason: null,
         });
 
-        runOpportunityEvaluationStep(state, 133);
+        runOpportunityEvaluationStep(state, 139);
         const proposal = state.military.operation_opportunities
             ?.find((entry) => entry.opportunity_id === 'paklarevo_local_94_model');
         expect(proposal).toBeDefined();
         expect(proposal!.status).toBe('eligible_pending_review');
         const approved = applyOpportunityDecision(
             state,
-            133,
-            buildProposalId('paklarevo_local_94_model', 133),
+            139,
+            buildProposalId('paklarevo_local_94_model', 139),
             'approve',
         );
         expect(approved?.status).toBe('approved');
@@ -1130,10 +1128,10 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         const attackBefore = structuredClone(state.military.brigade_attack_orders);
         const movementBefore = structuredClone(state.military.brigade_movement_orders);
 
-        runOpportunityEvaluationStep(state, 133);
+        runOpportunityEvaluationStep(state, 139);
         const outcomes = applyBotOpportunityDecisions(
             state,
-            133,
+            139,
             null,
             [PAKLAREVO_LOCAL_94_MODEL_OPPORTUNITY],
         );
@@ -1157,19 +1155,24 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         expect(state.military.brigade_movement_orders).toEqual(movementBefore);
     });
 
-    it('opens the Paklarevo model exactly on turns 133-139 (after Sjena releases the 712th, before Slap claims it at 140)', () => {
+    it('opens the Paklarevo model on turn 139 only (before Slap claims the 712th at 140)', () => {
         const def = PAKLAREVO_LOCAL_94_MODEL_OPPORTUNITY;
-        for (const turn of [133, 136, 139]) {
+        for (const turn of [139]) {
             const state = buildPaklarevoState({ turn });
             expect(isOpportunityEligible(def, evaluateAxes(state, turn, def)), `turn ${turn}`).toBe(true);
         }
         // The old single turn 123 is now closed: it never fired in the measured
         // campaign because Operacija Ihlas held the 712th.
         expect(isOpportunityEligible(def, evaluateAxes(buildPaklarevoState({ turn: 123 }), 123, def))).toBe(false);
+        // Calibration 2026-11-06: 133-138 closed. Opening at 137 attacked before the 770th
+        // arrived and failed, which kept three brigades out of the Vlasic ridge operation.
+        for (const turn of [133, 136, 138]) {
+            expect(isOpportunityEligible(def, evaluateAxes(buildPaklarevoState({ turn }), turn, def)), `turn ${turn}`).toBe(false);
+        }
     });
 
-    it('rejects the Paklarevo model before and after its 133-139 window without reserving the trio', () => {
-        for (const turn of [132, 140]) {
+    it('rejects the Paklarevo model before and after its turn-139 window without reserving the trio', () => {
+        for (const turn of [138, 140]) {
             const state = buildPaklarevoState({ turn });
             const def = PAKLAREVO_LOCAL_94_MODEL_OPPORTUNITY;
             expect(isOpportunityEligible(def, evaluateAxes(state, turn, def))).toBe(false);
@@ -1646,6 +1649,17 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
             .toBe('Operation Donji Vakuf 95');
         expect(state.military.corps_command!.arbih_3rd_corps.active_operations[0].axes![0].objectives)
             .toEqual(DONJI_VAKUF_OBJECTIVES);
+        // Calibration 2026-11-06: Korenici and Jemanlici are a 707th handoff gated on the town.
+        expect(DONJI_VAKUF_95_OPPORTUNITY.axes.find((axis) => axis.axis_id === 'donji_vakuf_east_707th')).toMatchObject({
+            brigades: [],
+            objectives: ['op:donji_vakuf:korenici', 'op:donji_vakuf:jemanlici'],
+            staging_osid: 'op:donji_vakuf:donji_vakuf_2',
+            phase_gate: {
+                main_axis_id: 'donji_vakuf_komar_line',
+                requires_operation_captures: ['op:donji_vakuf:donji_vakuf_2'],
+                handoff: { brigade_id: 'arbih_707th_slavna_mountain', source_axis_id: 'donji_vakuf_komar_line' },
+            },
+        });
     });
 
     it('spawns Donji Vakuf 95 against the source-OOB 3rd Corps brigade owner', () => {
