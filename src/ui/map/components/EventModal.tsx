@@ -14,7 +14,7 @@ import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import type { EventEffect } from '../../../sim/events/event_types';
 import { getPlayerSafeDisplayLabel, getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
-import { resolveEventIllustration } from '../data/eventIllustrationArt';
+import { resolveEventIllustration, section6StillAlt } from '../data/eventIllustrationArt';
 import { t, type MessageKey } from '../i18n';
 import { isDisplayEventEffectKind } from '../utils/eventEffectDisplay';
 
@@ -116,6 +116,9 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
     // authors no `image` key (every shipped event today) OR the asset is not yet
     // on disk — in both cases the text-only layout below is unchanged.
     const illustration = resolveEventIllustration(event.image);
+    // A §6 still is record, never decoration: it carries its factual alt and is read by
+    // assistive technology. Any other still is decorative beside the narrative.
+    const illustrationAlt = section6StillAlt(event.image);
 
     return (
         <Modal
@@ -170,8 +173,8 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
                     <div className="relative w-full" data-testid="event-modal-illustration">
                         <img
                             src={illustration}
-                            alt=""
-                            aria-hidden="true"
+                            alt={illustrationAlt ?? ''}
+                            aria-hidden={illustrationAlt ? undefined : 'true'}
                             className="block w-full object-cover"
                             style={{ aspectRatio: '16 / 9' }}
                         />

@@ -87,6 +87,7 @@ describe('EventModal illustration rendering', () => {
     vi.doMock('../../src/ui/map/data/eventIllustrationArt.js', () => ({
       resolveEventIllustration: (key: string | null | undefined) =>
         key ? '/assets/event_illustrations/jna_withdrawal_1992-abc123.webp' : null,
+      section6StillAlt: () => null,
     }));
     const { EventModal } = await import('../../src/ui/map/components/EventModal.js');
     const html = renderToStaticMarkup(
@@ -100,5 +101,30 @@ describe('EventModal illustration rendering', () => {
     expect(html).toContain('jna_withdrawal_1992-abc123.webp');
     // Narrative still renders alongside the illustration.
     expect(html).toContain('The JNA announces a phased withdrawal');
+  });
+
+  // §6 chain on the gated event art (2026-11-06): a gated still in EventModal must be record,
+  // not decoration. Before this, every still rendered with alt="" and aria-hidden.
+  it('gives a §6 still its factual alt and leaves a non-gated still decorative', async () => {
+    setLocale('en');
+    vi.doUnmock('../../src/ui/map/data/eventIllustrationArt.js');
+    vi.resetModules();
+    const { EventModal } = await import('../../src/ui/map/components/EventModal.js');
+    const gated = renderToStaticMarkup(
+      React.createElement(EventModal, {
+        event: { ...BASE_EVENT, image: 'event_concentration_camps_revealed_1992.webp' },
+        onAcknowledge: () => {},
+      }),
+    );
+    expect(gated).toContain('alt="Camp perimeter seen from outside the wire, Prijedor area, 1992"');
+    expect(gated.match(/<img[^>]*aria-hidden/)).toBeNull();
+    const plain = renderToStaticMarkup(
+      React.createElement(EventModal, {
+        event: { ...BASE_EVENT, image: 'event_referendum.webp' },
+        onAcknowledge: () => {},
+      }),
+    );
+    expect(plain).toContain('alt=""');
+    expect(plain.match(/<img[^>]*aria-hidden="true"/)).not.toBeNull();
   });
 });
