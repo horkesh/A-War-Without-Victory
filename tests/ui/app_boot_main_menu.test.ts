@@ -152,7 +152,7 @@ describe('App boot - Main Menu first, faction choice menu-only (#80)', () => {
         expect(warroomStart).toBeGreaterThan(-1);
         expect(menuStart).toBeGreaterThan(warroomStart);
         expect(warroomBlock).toContain('!peaceWarTransitionActive && openingBriefPending && !warroomDeskOpen && (');
-        expect(warroomBlock).toContain('<PresidentialInbox onAction={handlePresidentialInboxAction} eventCatalog={eventCatalogFull} />');
+        expect(warroomBlock).toContain('<PresidentialInbox onAction={handlePresidentialInboxAction} eventCatalog={eventCatalogFull} material="dossier" />');
     });
 
     it('honors ?view=game and ?view=warroom deep-link overrides for dev/automation', () => {
