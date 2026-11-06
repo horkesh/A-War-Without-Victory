@@ -1,16 +1,12 @@
 /**
- * Deterministic audio bus stub.
- *
- * Audio is disabled by default and this module performs no network, Web Audio,
- * timestamp, or random work. It exposes the bus shape that later asset-backed
- * audio can implement without changing call sites.
- *
- * Howler.js is intentionally not added for this kickoff pass: there are no
- * real assets to load yet, and adding a runtime dependency would increase
- * packaging scope before playback requirements are proven.
+ * Renderer-only, best-effort audio bus using bundled media URLs.
+ * Playback requires enabled sound and a user gesture. Music additionally
+ * requires explicit opt-in; the separate ambience policy defaults off.
+ * Playback never writes simulation state or blocks a player action.
  */
 
 import { getCueConfig, getMusicConfig, getSfxConfig, resolveCuePlaybackUrl, type AudioCueCategory } from './sound_manifest.js';
+import { CAMPAIGN_MUSIC_IDS, createMusicShuffleBag } from './music_shuffle_bag.js';
 
 export type AudioVolumeKind = 'master' | AudioCueCategory;
 
@@ -36,6 +32,8 @@ interface AudioBusState {
     currentMusicId: string | null;
     currentAmbientId: string | null;
     requestedAmbientId: string | null;
+    requestedMusicId: string | null;
+    musicPlaybackEnabled: boolean;
     acceptedCueCount: number;
     lastCueAcceptedAtMsById: Record<string, number>;
     volumes: Record<AudioVolumeKind, number>;
@@ -57,6 +55,14 @@ interface PlaybackAttempt {
 
 const playbackElementsByCueId = new Map<string, HTMLAudioElement>();
 const playbackAttemptByElement = new Map<HTMLAudioElement, PlaybackAttempt>();
+const musicFailureByElement = new Map<HTMLAudioElement, () => void>();
+// Exactly one owner holds continuation listeners, including paused music.
+let openingContinuation: (() => void) | null = null;
+let musicSurface: 'mainMenu' | 'campaign' | null = null;
+let nextCampaignTrack = createMusicShuffleBag(CAMPAIGN_MUSIC_IDS);
+let campaignTrackId: string | null = null;
+let consecutiveCampaignFailures = 0;
+let campaignExhausted = false;
 
 let state: AudioBusState = {
     enabled: false,
@@ -68,6 +74,8 @@ let state: AudioBusState = {
     currentMusicId: null,
     currentAmbientId: null,
     requestedAmbientId: null,
+    requestedMusicId: null,
+    musicPlaybackEnabled: false,
     acceptedCueCount: 0,
     lastCueAcceptedAtMsById: {},
     volumes: { ...DEFAULT_VOLUMES },
@@ -81,8 +89,14 @@ function clampVolume(value: number): number {
 function getPlaybackElement(cueId: string, resolvedAssetUrl: string): HTMLAudioElement | null {
     if (typeof Audio === 'undefined') return null;
     const existing = playbackElementsByCueId.get(cueId);
-    if (existing?.src === resolvedAssetUrl) return existing;
-    if (existing) playbackAttemptByElement.delete(existing);
+    // Browser src is absolute even when the bundled URL is relative. The
+    // cue's cached element already owns its URL; only failed decodes need a
+    // fresh element to reset the browser's terminal media-error state.
+    if (existing && !existing.error) return existing;
+    if (existing) {
+        stopPlayback(cueId);
+        playbackAttemptByElement.delete(existing);
+    }
     const element = new Audio(resolvedAssetUrl);
     element.preload = 'auto';
     playbackElementsByCueId.set(cueId, element);
@@ -102,41 +116,63 @@ function settlePlaybackAttempt(
     element: HTMLAudioElement,
     attempt: PlaybackAttempt,
     status: 'success' | 'failure',
-): void {
-    if (playbackAttemptByElement.get(element) !== attempt) return;
+): boolean {
+    if (playbackAttemptByElement.get(element) !== attempt) {
+        // A late play promise may settle after pause. Do not let an ownerless
+        // media element resume; a newer attempt on this element keeps ownership.
+        if (status === 'success' && !playbackAttemptByElement.has(element)) {
+            try { element.pause(); } catch { /* best effort */ }
+        }
+        return false;
+    }
     attempt.status = status;
+    return true;
 }
 
-function playResolvedAsset(cueId: string, resolvedAssetUrl: string, category: AudioCueCategory, defaultVolume: number, loop = false): void {
-    const element = getPlaybackElement(cueId, resolvedAssetUrl);
-    if (!element) return;
-    const loopChanged = element.loop !== loop;
-    if (loopChanged) element.loop = loop;
-    element.volume = clampVolume(state.volumes.master * state.volumes[category] * defaultVolume);
-    if (!loopChanged && loop && isHealthyRunningLoop(element)) {
-        return;
-    }
-    const attempt: PlaybackAttempt = { status: 'pending' };
-    playbackAttemptByElement.set(element, attempt);
+function playResolvedAsset(cueId: string, resolvedAssetUrl: string, category: AudioCueCategory, defaultVolume: number, loop = false, resume = false): void {
     try {
-        if (!loop) element.currentTime = 0;
-        const playResult: Promise<void> | undefined = element.play();
-        if (playResult && typeof playResult.then === 'function') {
-            void playResult.then(
-                () => settlePlaybackAttempt(element, attempt, 'success'),
-                () => settlePlaybackAttempt(element, attempt, 'failure'),
-            );
+        const element = getPlaybackElement(cueId, resolvedAssetUrl);
+        if (!element) return;
+        const loopChanged = element.loop !== loop;
+        if (loopChanged) element.loop = loop;
+        const volume = clampVolume(state.volumes.master * state.volumes[category] * defaultVolume);
+        if (element.volume !== volume) element.volume = volume;
+        if (resume && playbackAttemptByElement.get(element)?.status === 'pending') return;
+        if (resume && playbackAttemptByElement.get(element)?.status === 'success'
+            && element.paused === false && !element.ended && !element.error) return;
+        if (!loopChanged && loop && isHealthyRunningLoop(element)) return;
+        const attempt: PlaybackAttempt = { status: 'pending' };
+        playbackAttemptByElement.set(element, attempt);
+        try {
+            if ((!loop && !resume) || element.ended) element.currentTime = 0;
+            const playResult: Promise<void> | undefined = element.play();
+            if (playResult && typeof playResult.then === 'function') {
+                void playResult.then(
+                    () => settlePlaybackAttempt(element, attempt, 'success'),
+                    (reason: unknown) => {
+                        if (settlePlaybackAttempt(element, attempt, 'failure')
+                            && reason instanceof Error && reason.name === 'NotSupportedError') {
+                            musicFailureByElement.get(element)?.();
+                        }
+                    },
+                );
+            }
+        } catch (reason) {
+            if (settlePlaybackAttempt(element, attempt, 'failure')
+                && reason instanceof Error && reason.name === 'NotSupportedError') {
+                musicFailureByElement.get(element)?.();
+            }
+            // Autoplay/decode failures cannot interrupt the player action.
         }
     } catch {
-        // Playback is best-effort. Autoplay or decode failures must not surface
-        // as console noise or block UI flow.
-        settlePlaybackAttempt(element, attempt, 'failure');
+        // Media construction and property setters can fail as well as play().
     }
 }
 
 function stopPlayback(cueId: string): void {
     const element = playbackElementsByCueId.get(cueId);
     if (!element) return;
+    playbackAttemptByElement.delete(element);
     try {
         element.pause();
     } catch {
@@ -162,21 +198,26 @@ export function installAudioGestureUnlockListeners(
     target: Pick<EventTarget, 'addEventListener' | 'removeEventListener'> | null =
         typeof window === 'undefined' ? null : window,
     onUnlock?: () => void,
+    retryPlaybackOnGesture = false,
 ): () => void {
     if (!target) return () => undefined;
-    const unlock = () => {
-        unlockAudioForUserGesture();
-        onUnlock?.();
-    };
-    target.addEventListener('pointerdown', unlock, { once: true });
-    target.addEventListener('keydown', unlock, { once: true });
-    return () => {
+    const cleanup = () => {
         target.removeEventListener('pointerdown', unlock);
         target.removeEventListener('keydown', unlock);
     };
+    const unlock = () => {
+        if (!retryPlaybackOnGesture) cleanup();
+        unlockAudioForUserGesture();
+        onUnlock?.();
+    };
+    target.addEventListener('pointerdown', unlock, { once: !retryPlaybackOnGesture });
+    target.addEventListener('keydown', unlock, { once: !retryPlaybackOnGesture });
+    return cleanup;
 }
 
 export function setEnabled(enabled: boolean): void {
+    if (state.enabled === enabled) return;
+    if (!enabled) stopAllPlayback();
     state = {
         ...state,
         enabled,
@@ -226,6 +267,12 @@ export function setVolume(kind: AudioVolumeKind, value: number): void {
             [kind]: clampVolume(value),
         },
     };
+    for (const [cueId, element] of playbackElementsByCueId) {
+        const cue = getCueConfig(cueId);
+        if (!cue || (kind !== 'master' && cue.category !== kind)) continue;
+        const volume = clampVolume(state.volumes.master * state.volumes[cue.category] * cue.defaultVolume);
+        try { if (element.volume !== volume) element.volume = volume; } catch { /* best effort */ }
+    }
 }
 
 export async function playCue(id: string, nowMs?: number): Promise<void> {
@@ -233,6 +280,7 @@ export async function playCue(id: string, nowMs?: number): Promise<void> {
     const cue = getCueConfig(id);
     if (!cue) return;
     if (cue.category === 'ambient' && !state.ambientPlaybackEnabled) return;
+    if (cue.category === 'music' && !state.musicPlaybackEnabled) return;
     const normalizedNowMs = Number.isFinite(nowMs) ? Math.max(0, Math.floor(nowMs as number)) : null;
     const previousAcceptedAtMs = state.lastCueAcceptedAtMsById[cue.id];
     if (
@@ -266,15 +314,143 @@ export async function playSFX(id: string): Promise<void> {
     await playCue(id);
 }
 
+/** Request the short opening identity once for the owning controller lifetime. */
+export function playOpeningMusic(): void {
+    void playMusic('opening_titles');
+}
+
+/** Select presentation music without changing simulation or saved campaign state. */
+export function setMusicSurface(surface: 'mainMenu' | 'campaign', allowOpening = false): void {
+    if (musicSurface === surface) return;
+    const previousSurface = musicSurface;
+    musicSurface = surface;
+    if (surface === 'campaign') {
+        const opening = playbackElementsByCueId.get('opening_titles');
+        const openingStarted = opening && !opening.error
+            && (playbackAttemptByElement.get(opening)?.status === 'success' || opening.currentTime > 0);
+        if (state.requestedMusicId === 'opening_titles' && openingStarted) return;
+        requestCampaignMusic();
+    } else if (previousSurface === null && allowOpening) {
+        playOpeningMusic();
+    } else {
+        void playMusic('menu_theme');
+    }
+}
+
+function requestCampaignMusic(): void {
+    if (campaignExhausted) return;
+    campaignTrackId ??= nextCampaignTrack();
+    void playMusic(campaignTrackId);
+}
+
+/** Compatibility entry point: entering play changes the opening successor. */
+export function leaveOpeningMusicWindow(): void {
+    setMusicSurface('campaign');
+}
+
+function continueMusicAfterOpening(): void {
+    if (musicSurface === 'campaign') requestCampaignMusic();
+    else void playMusic('menu_theme');
+}
+
+function advanceCampaignMusic(failed: boolean): void {
+    consecutiveCampaignFailures = failed ? consecutiveCampaignFailures + 1 : 0;
+    campaignTrackId = null;
+    if (consecutiveCampaignFailures >= CAMPAIGN_MUSIC_IDS.length) {
+        // Eight consecutive media failures: remain silent until a new
+        // controller lifetime instead of retrying forever on gestures.
+        campaignExhausted = true;
+        stopMusicPlayback();
+        return;
+    }
+    requestCampaignMusic();
+}
+
+/** Retry the existing owner request after a trusted gesture, without replacing it. */
+export function retryRequestedMusic(): void {
+    if (state.requestedMusicId) void playMusic(state.requestedMusicId);
+}
+
 export async function playMusic(id: string): Promise<void> {
-    if (!state.enabled || state.muted || !state.userGestureUnlocked) return;
-    if (!getMusicConfig(id)) return;
-    await playCue(id);
-    state = { ...state, currentMusicId: id };
+    const cue = getCueConfig(id);
+    if (!getMusicConfig(id) || !cue) return;
+    if (state.requestedMusicId !== id) {
+        openingContinuation?.();
+        openingContinuation = null;
+        // The previous request may still be pending and lack a current ID.
+        if (state.requestedMusicId) stopPlayback(state.requestedMusicId);
+    }
+    state = { ...state, requestedMusicId: id };
+    if (!state.musicPlaybackEnabled || !state.enabled || state.muted || !state.userGestureUnlocked) return;
+    const resolvedAssetUrl = resolveCuePlaybackUrl(id);
+    if (!resolvedAssetUrl) return;
+    let element: HTMLAudioElement | null;
+    try { element = getPlaybackElement(id, resolvedAssetUrl); } catch { return; }
+    if (!element) return;
+    const campaign = CAMPAIGN_MUSIC_IDS.includes(id);
+    if ((id === 'opening_titles' || campaign) && !openingContinuation) {
+        let active = true;
+        const finish = () => {
+            if (!element.ended || !active || state.requestedMusicId !== id || !state.enabled || state.muted || !state.musicPlaybackEnabled) return;
+            if (campaign) advanceCampaignMusic(false);
+            else continueMusicAfterOpening();
+        };
+        const fail = () => {
+            // Unplayable media is skipped even while preferences pause playback.
+            // The successor remains silent under the same playback gates.
+            if (!active || state.requestedMusicId !== id) return;
+            if (campaign) advanceCampaignMusic(true);
+            else continueMusicAfterOpening();
+        };
+        // Queued terminal notifications can outlive the former surface owner.
+        // Only current terminal media state may advance healthy resumed media.
+        const mediaError = () => { if (element.error) fail(); };
+        musicFailureByElement.set(element, fail);
+        element.addEventListener?.('ended', finish);
+        element.addEventListener?.('error', mediaError);
+        openingContinuation = () => {
+            active = false;
+            musicFailureByElement.delete(element);
+            element.removeEventListener?.('ended', finish);
+            element.removeEventListener?.('error', mediaError);
+        };
+    }
+    state = { ...state, currentMusicId: id, lastResolvedAssetUrl: resolvedAssetUrl };
+    playResolvedAsset(id, resolvedAssetUrl, cue.category, cue.defaultVolume, cue.loop === true, true);
+}
+
+function stopMusicPlayback(): void {
+    openingContinuation?.();
+    openingContinuation = null;
+    // Stop cached music as well as committed playback so cleanup cannot
+    // leave an in-flight request running without an owner.
+    for (const cueId of playbackElementsByCueId.keys()) {
+        if (getCueConfig(cueId)?.category === 'music') stopPlayback(cueId);
+    }
+    state = { ...state, currentMusicId: null, requestedMusicId: null };
 }
 
 export function stopMusic(): void {
-    state = { ...state, currentMusicId: null };
+    stopMusicPlayback();
+    musicSurface = null;
+    // A remounted owner receives fresh media so queued old events cannot reach
+    // its listeners. Mute and room changes retain their current media/position.
+    for (const cueId of playbackElementsByCueId.keys()) {
+        if (getCueConfig(cueId)?.category === 'music') playbackElementsByCueId.delete(cueId);
+    }
+    // An exhausted set is retried only by a new controller owner.
+    campaignExhausted = false;
+    consecutiveCampaignFailures = 0;
+}
+
+export function setMusicPlaybackEnabled(enabled: boolean): void {
+    if (!enabled) {
+        for (const cueId of playbackElementsByCueId.keys()) {
+            if (getCueConfig(cueId)?.category === 'music') stopPlayback(cueId);
+        }
+    }
+    state = { ...state, musicPlaybackEnabled: enabled, currentMusicId: enabled ? state.currentMusicId : null };
+    if (enabled && state.requestedMusicId) void playMusic(state.requestedMusicId);
 }
 
 export async function playAmbientBed(id: string): Promise<void> {
@@ -283,6 +459,7 @@ export async function playAmbientBed(id: string): Promise<void> {
     if (!state.enabled || state.muted || !state.userGestureUnlocked) return;
     const cue = getCueConfig(id);
     if (!cue || cue.category !== 'ambient') return;
+    if (state.currentAmbientId && state.currentAmbientId !== id) stopPlayback(state.currentAmbientId);
     const resolvedAssetUrl = resolveCuePlaybackUrl(cue.id);
     state = {
         ...state,
@@ -313,6 +490,7 @@ export function setSFXVolume(value: number): void {
 }
 
 export function muteAudio(): void {
+    if (state.muted) return;
     stopAllPlayback();
     state = { ...state, muted: true, currentAmbientId: null, currentMusicId: null };
 }
@@ -338,9 +516,13 @@ export function getAudioState(): AudioBusState {
 }
 
 export function resetAudioForTests(): void {
+    stopMusic();
+    nextCampaignTrack = createMusicShuffleBag(CAMPAIGN_MUSIC_IDS);
+    campaignTrackId = null;
     stopAllPlayback();
     playbackElementsByCueId.clear();
     playbackAttemptByElement.clear();
+    musicFailureByElement.clear();
     state = {
         enabled: false,
         muted: true,
@@ -351,6 +533,8 @@ export function resetAudioForTests(): void {
         currentMusicId: null,
         currentAmbientId: null,
         requestedAmbientId: null,
+        requestedMusicId: null,
+        musicPlaybackEnabled: false,
         acceptedCueCount: 0,
         lastCueAcceptedAtMsById: {},
         volumes: { ...DEFAULT_VOLUMES },

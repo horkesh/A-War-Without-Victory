@@ -1,0 +1,1475 @@
+{
+  "title": "A War Without Victory — Campaign Auditions Revised v2",
+  "scope": "Eight revised complete original campaign compositions; all original titles retained. Approved final OGG exports adopted byte-for-byte for renderer campaign rotation; no new audio rendering or mix.",
+  "status": "Owner-approved eight-track Revised v2 package integrated byte-for-byte into renderer campaign rotation. Scoped source/lifecycle/build/native verification GO; separate global/package/sensitivity gates remain unchanged.",
+  "feedback_and_response": {
+    "feedback": "Almedin liked the recorded instruments but heard broken/fading sound and too-similar themes. Owner explicitly required keeping all eight.",
+    "response": "New independent melodies and phrase-level arrangements; no unconditional bar-end cropping; sustained bowed/wind sample bodies extended with crossfaded stable interior regions, musical releases/ties and deliberate wind breaths. Piano/harp remain naturally decaying.",
+    "not_an_acceptance_claim": "Energy, seam, hash and codec checks establish technical behavior. They cannot establish natural expression, distinct emotional character, memorability or expert approval."
+  },
+  "sample_library": {
+    "repository": "https://github.com/sgossner/VSCO-2-CE",
+    "commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+    "license": "CC0-1.0",
+    "new_download_bytes": 0,
+    "credits": "VSCO2CE, recorded by Sam Gossner and Simon Dalzell; sample cutting Elan Hickler / Soundemote; Versilian Studios. Upright piano: Ivy Audio / Simon Dalzell, distributed by Versilian Studios. These are third-party recorded sample resources, not project-recorded orchestral performances.",
+    "reuse": "Previously pinned and measured v3/v4/first-suite sample caches; no new downloads. Fourteen first-suite added anchors and earlier string/piano pitch proof are reused; needed files verified against pinned Git blob hashes.",
+    "sources": [
+      {
+        "path": "Brass/F Horn/sus/MOHorn_sus_A2_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Brass/F%20Horn/sus/MOHorn_sus_A2_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2672192,
+        "sha256": "897ffa7cfdf4e0413e4c80e7fa935f28e0a0971691e112f1516c6102da61809f",
+        "git_blob_sha1": "d358aadfb3bb1e0f28ab742d96f5418dc750057b",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/campaign-suite-one/sample-cache/Brass/F Horn/sus/MOHorn_sus_A2_v1_1.wav"
+      },
+      {
+        "path": "Brass/F Horn/sus/MOHorn_sus_C3_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Brass/F%20Horn/sus/MOHorn_sus_C3_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2519448,
+        "sha256": "d96bc1821e46352e620fc0e3eaa9bbc415824e0f84f19aac6373c54c6aaa34da",
+        "git_blob_sha1": "e53d2d03f0902c9f3a6add7c6bf51122bcc7d573",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/campaign-suite-one/sample-cache/Brass/F Horn/sus/MOHorn_sus_C3_v1_1.wav"
+      },
+      {
+        "path": "Brass/F Horn/sus/MOHorn_sus_D2_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Brass/F%20Horn/sus/MOHorn_sus_D2_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2500360,
+        "sha256": "c8a320cff7c6d19f7089c374e3041b1cbbc73718ba9de37149a82a1117866015",
+        "git_blob_sha1": "e63cadc76d2b3e56ee26ad558e52fd633cc8c4b1",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/campaign-suite-one/sample-cache/Brass/F Horn/sus/MOHorn_sus_D2_v1_1.wav"
+      },
+      {
+        "path": "Keys/Upright Piano/Info.txt",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Info.txt",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 220,
+        "sha256": "a3bd9d49720187b10269e78b091316d043dcd7b059ec77edb582195152aaf1ce",
+        "git_blob_sha1": "088d6fa7eaf935e2fce9ecd8b59aa08b3011e109",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "logs/player-experience-completion-20261105/theme-v3/sample-cache/Keys/Upright Piano/Info.txt"
+      },
+      {
+        "path": "Keys/Upright Piano/MappingChart.txt",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/MappingChart.txt",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 338,
+        "sha256": "9ccfbdee3d58873e9632ba188ed5837979948eb7868e824ec24e0d3eb4e3fda8",
+        "git_blob_sha1": "e59ab607be6408ba065ba80f34f315c62548f879",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "logs/player-experience-completion-20261105/theme-v3/sample-cache/Keys/Upright Piano/MappingChart.txt"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn2_rr1_012.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn2_rr1_012.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 6306106,
+        "sha256": "9accd92b779985736589d7bf25b93f1d6d508830d2f2aad3e76a481549cc1ca2",
+        "git_blob_sha1": "fd035ea95dc49897c9be8627b8124b73c56221db",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "logs/player-experience-completion-20261105/theme-v3/sample-cache/Keys/Upright Piano/Player_dyn2_rr1_012.wav"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn2_rr1_014.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn2_rr1_014.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 6180628,
+        "sha256": "0bdf66b89c2cd8042118b2cf9898aab334820fff7538b8553655a3d11d2ba107",
+        "git_blob_sha1": "2f341c6fca30ac8a6ae977cf97e93538f6c1e75b",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "logs/player-experience-completion-20261105/theme-v3/sample-cache/Keys/Upright Piano/Player_dyn2_rr1_014.wav"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn2_rr1_016.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn2_rr1_016.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 4643212,
+        "sha256": "87b90b8161b5ddac5f1e81cce7895c726aff220e735586059c7ed684a5ae82dc",
+        "git_blob_sha1": "a2fc6927cb562424c17b213e4cb47353d65e9cc5",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "logs/player-experience-completion-20261105/theme-v3/sample-cache/Keys/Upright Piano/Player_dyn2_rr1_016.wav"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn2_rr1_018.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn2_rr1_018.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 5748202,
+        "sha256": "fb39ae501f7dde4aa3626d2e382b3709962cbe5d48b6c001ba7c911d1ffb6aeb",
+        "git_blob_sha1": "c8da939be405e5f6dd7b13b99aedfef76d5c56aa",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "logs/player-experience-completion-20261105/theme-v3/sample-cache/Keys/Upright Piano/Player_dyn2_rr1_018.wav"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn2_rr1_020.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn2_rr1_020.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 4346848,
+        "sha256": "dc314226819e7af0768cd7fc08933f5e5b550083145e05af630fd7556f4d3913",
+        "git_blob_sha1": "e6027651b23024f343a8eb7823f32b49742a35fe",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "logs/player-experience-completion-20261105/theme-v3/sample-cache/Keys/Upright Piano/Player_dyn2_rr1_020.wav"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn2_rr1_022.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn2_rr1_022.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 4476550,
+        "sha256": "9a4e03fa389b7e59ea6b3a6719eef52be8d607844283c7163662030f57b60942",
+        "git_blob_sha1": "521353ee671854c74478c330df9195d17261193c",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "logs/player-experience-completion-20261105/theme-v3/sample-cache/Keys/Upright Piano/Player_dyn2_rr1_022.wav"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn2_rr1_024.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn2_rr1_024.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 3204940,
+        "sha256": "a00ae1a2b2a78c154b067a9709afc1ce2d3be9f08d9f4ad3c9c869a7db80eb75",
+        "git_blob_sha1": "77f7bc50e751c377f8e3db7c88c14861395d1288",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "logs/player-experience-completion-20261105/theme-v3/sample-cache/Keys/Upright Piano/Player_dyn2_rr1_024.wav"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn2_rr1_026.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn2_rr1_026.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2656870,
+        "sha256": "4e668e75c3922c79ef06bd46806224dbf8dbfa0be1569847a1cd17e573a967ec",
+        "git_blob_sha1": "946de9950a88c228d6f764e6789efb7d0147cffa",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "logs/player-experience-completion-20261105/theme-v3/sample-cache/Keys/Upright Piano/Player_dyn2_rr1_026.wav"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn2_rr1_028.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn2_rr1_028.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 3008866,
+        "sha256": "84fe87bd24dc93d354213f730517a29f485c40715d5959af97976b364110b70a",
+        "git_blob_sha1": "3a9f1381ca8a1a35ac4acdbf0d954e6aeb507dea",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "logs/player-experience-completion-20261105/theme-v3/sample-cache/Keys/Upright Piano/Player_dyn2_rr1_028.wav"
+      },
+      {
+        "path": "LICENSE",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/LICENSE",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 6555,
+        "sha256": "36ffd9dc085d529a7e60e1276d73ae5a030b020313e6c5408593a6ae2af39673",
+        "git_blob_sha1": "670154e3538863b2d9891fd5483160fbdfc89164",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/theme-v3/sample-cache/LICENSE"
+      },
+      {
+        "path": "README.md",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/README.md",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 751,
+        "sha256": "8fbf399338661e6c76585ad9e75eb10324f823935168e0567553293a83f200a0",
+        "git_blob_sha1": "64362229eaee3d93aae6cb86446b6b5f4f0a1170",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/theme-v3/sample-cache/README.md"
+      },
+      {
+        "path": "Readme.txt",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Readme.txt",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 1838,
+        "sha256": "101ddb88eb013900cc911834ecbdfbd49497bcd913bf09417160b9677952bb38",
+        "git_blob_sha1": "72e2bfeac69f91a77497254c4991a3c5fbb87bfb",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/theme-v3/sample-cache/Readme.txt"
+      },
+      {
+        "path": "Strings/Cello Section/susvib/susvib_A2_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/susvib/susvib_A2_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2336738,
+        "sha256": "c97a003184fdcb153d6b6c0bae8d82a90592a1b04b06bd7caaeda8b9776d5284",
+        "git_blob_sha1": "76df6b474aff133b2ac9d96bf2466cb6fd865c72",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/theme-v3/sample-cache/Strings/Cello Section/susvib/susvib_A2_v1_1.wav"
+      },
+      {
+        "path": "Strings/Cello Section/susvib/susvib_C1_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/susvib/susvib_C1_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2347376,
+        "sha256": "abdcea431f384e135c469b0f3e4ac2a437f282f521dc5bcbe22abc221536e8de",
+        "git_blob_sha1": "ff87d1ae488d87189f33a0d18550d3bcde012f3d",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/theme-v3/sample-cache/Strings/Cello Section/susvib/susvib_C1_v1_1.wav"
+      },
+      {
+        "path": "Strings/Cello Section/susvib/susvib_D2_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/susvib/susvib_D2_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2550956,
+        "sha256": "e8640dec9febc6e39fcf06b19d2c95a85d5ff8c38f13c9879e69f551eaf38ab8",
+        "git_blob_sha1": "8076f809d4f6a8057f3835e12d22751a25e39252",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/theme-v3/sample-cache/Strings/Cello Section/susvib/susvib_D2_v1_1.wav"
+      },
+      {
+        "path": "Strings/Cello Section/susvib/susvib_G1_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/susvib/susvib_G1_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2161700,
+        "sha256": "9e5d24e8e28d6c7f650f9bb2b33d43c13e341a8bd33124c64e23881378b181ba",
+        "git_blob_sha1": "42a2731d11a4749c3026f0618e21a8c9370c2024",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/theme-v3/sample-cache/Strings/Cello Section/susvib/susvib_G1_v1_1.wav"
+      },
+      {
+        "path": "Strings/Harp/KSHarp_A4_mf.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Harp/KSHarp_A4_mf.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2143618,
+        "sha256": "3665f3975cad4a33f46784aa4f896f4b4319ba2b7831e892d975bc38c9f09f23",
+        "git_blob_sha1": "acbece38a84e886cb5516e0f29d6ff5d38900fe1",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/campaign-suite-one/sample-cache/Strings/Harp/KSHarp_A4_mf.wav"
+      },
+      {
+        "path": "Strings/Harp/KSHarp_D4_mf.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Harp/KSHarp_D4_mf.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 1921690,
+        "sha256": "ebfde8aab4411019e37e3426f4dd88d6a52a38c2d0261d7f10ec63d8ff584dc7",
+        "git_blob_sha1": "342eec5072e2c0a7fb7cb03b6f5b46d84ed6ac69",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/campaign-suite-one/sample-cache/Strings/Harp/KSHarp_D4_mf.wav"
+      },
+      {
+        "path": "Strings/Harp/KSHarp_G3_mf.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Harp/KSHarp_G3_mf.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 1806874,
+        "sha256": "62600eb1b37bc2829ca65351f7ca7e506c9ae472abd5bea0765a8b8fa7df2772",
+        "git_blob_sha1": "a2f7fcc2bce81d039d9c0c529a94159f589f36e1",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/campaign-suite-one/sample-cache/Strings/Harp/KSHarp_G3_mf.wav"
+      },
+      {
+        "path": "Strings/Viola Section/susvib/ViolaEns_susvib_D3_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/susvib/ViolaEns_susvib_D3_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2789648,
+        "sha256": "61ab4cfc0ea90c683433a7c50b3bb4fa86a81c9d4854589562707d54ed028349",
+        "git_blob_sha1": "9a3a65b93d871964a666d6a86deec4d29425d828",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/theme-v4/sample-cache/Strings/Viola Section/susvib/ViolaEns_susvib_D3_v1_1.wav"
+      },
+      {
+        "path": "Strings/Viola Section/susvib/ViolaEns_susvib_G2_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/susvib/ViolaEns_susvib_G2_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2001644,
+        "sha256": "557c2e033951015c30765bf18266bce0dd0412e3ca646dd1a225c32422c60662",
+        "git_blob_sha1": "7c6dbafbe1f5de539b5861515f1bf39987e354cb",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/theme-v4/sample-cache/Strings/Viola Section/susvib/ViolaEns_susvib_G2_v1_1.wav"
+      },
+      {
+        "path": "Strings/Violin Section/susVib/VlnEns_susVib_A3_v1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_A3_v1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 1890316,
+        "sha256": "72817a53dfd2eb61eca94658c14e1cab6017629ca2f27bab8e394c6675bfaad7",
+        "git_blob_sha1": "ec84b89a4b93ecdc7e23d0c023b897b6f151bca7",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/theme-v3/sample-cache/Strings/Violin Section/susVib/VlnEns_susVib_A3_v1.wav"
+      },
+      {
+        "path": "Strings/Violin Section/susVib/VlnEns_susVib_D3_v1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_D3_v1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2061808,
+        "sha256": "583e660bc5daa4e094aef5fc014fbb92751040be8741ed7a16847306a1fe0a99",
+        "git_blob_sha1": "e47f9a53d487475fb049039ca7846e11c1ff830a",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/theme-v3/sample-cache/Strings/Violin Section/susVib/VlnEns_susVib_D3_v1.wav"
+      },
+      {
+        "path": "Strings/Violin Section/susVib/VlnEns_susVib_E4_v1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_E4_v1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2315540,
+        "sha256": "787fb4bcfb47d5c88ee1573c8db15f32d345386301be4a8eea6a825847413ae2",
+        "git_blob_sha1": "838b43d3c9e763898817869d411ab26463b7464f",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/theme-v3/sample-cache/Strings/Violin Section/susVib/VlnEns_susVib_E4_v1.wav"
+      },
+      {
+        "path": "Strings/Violin Section/susVib/VlnEns_susVib_G2_v1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_G2_v1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2341712,
+        "sha256": "feb96c5064fbef43087c495d61a9cab9f70ff1be5b22905147c1f86d5f89547c",
+        "git_blob_sha1": "e2de84e8b912dbfb8df3efe7b8ee241e2bcfa027",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/theme-v3/sample-cache/Strings/Violin Section/susVib/VlnEns_susVib_G2_v1.wav"
+      },
+      {
+        "path": "Woodwinds/Bassoon/sus/PSBassoon_C2_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Woodwinds/Bassoon/sus/PSBassoon_C2_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 1121404,
+        "sha256": "709401175aa7010b579e3bd1b5b9709797e489cbfdb9b5c4a8ab504098a61239",
+        "git_blob_sha1": "10ff119e43e0785b606bd4c1586dcb62bf6be6b5",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/campaign-suite-one/sample-cache/Woodwinds/Bassoon/sus/PSBassoon_C2_v1_1.wav"
+      },
+      {
+        "path": "Woodwinds/Bassoon/sus/PSBassoon_F1_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Woodwinds/Bassoon/sus/PSBassoon_F1_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 1751604,
+        "sha256": "608e46b7b18cee5ebfe6a8d385eb57038cc3ef89f408c1448ded53e1cc123a29",
+        "git_blob_sha1": "ef632d2b0dc9970afb62c5945413d4da628883fb",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/campaign-suite-one/sample-cache/Woodwinds/Bassoon/sus/PSBassoon_F1_v1_1.wav"
+      },
+      {
+        "path": "Woodwinds/Bassoon/sus/PSBassoon_G2_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Woodwinds/Bassoon/sus/PSBassoon_G2_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 1509644,
+        "sha256": "ab779b251e22d0e39dfacd9b760d032ab9c3381eda89c86236c28ae14cfbfcf4",
+        "git_blob_sha1": "1802d35ea36b486169050595296b758b41b3bfc7",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/campaign-suite-one/sample-cache/Woodwinds/Bassoon/sus/PSBassoon_G2_v1_1.wav"
+      },
+      {
+        "path": "Woodwinds/Clarinet/susLong/DCClar_susLong_A#3_v1_rr1_sum.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Woodwinds/Clarinet/susLong/DCClar_susLong_A%233_v1_rr1_sum.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 1599888,
+        "sha256": "c314aa26ec148ffa30afe988d7f4f178941a38ca401f487ea2633ce635e78d3f",
+        "git_blob_sha1": "f8db827226f661779d8965737fa0850d8275be9a",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/campaign-suite-one/sample-cache/Woodwinds/Clarinet/susLong/DCClar_susLong_A#3_v1_rr1_sum.wav"
+      },
+      {
+        "path": "Woodwinds/Clarinet/susLong/DCClar_susLong_D3_v1_rr1_sum.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Woodwinds/Clarinet/susLong/DCClar_susLong_D3_v1_rr1_sum.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2230948,
+        "sha256": "74ba0ec6cb0698f314b07cee2f63cd309d5fd30db262d10d1f69e6aec9cd5896",
+        "git_blob_sha1": "8f3f973a0d69c3c721f1eb8b27f208c80bd17ceb",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/campaign-suite-one/sample-cache/Woodwinds/Clarinet/susLong/DCClar_susLong_D3_v1_rr1_sum.wav"
+      },
+      {
+        "path": "Woodwinds/Clarinet/susLong/DCClar_susLong_D4_v1_rr1_sum.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Woodwinds/Clarinet/susLong/DCClar_susLong_D4_v1_rr1_sum.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 1987372,
+        "sha256": "61ff877d4b500c2e1b6b51f693cd1ea8df05c7473c2ea458a207b1450495e430",
+        "git_blob_sha1": "c3284691eb2dfe4f1be1b116b804a2e41062bb9c",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/campaign-suite-one/sample-cache/Woodwinds/Clarinet/susLong/DCClar_susLong_D4_v1_rr1_sum.wav"
+      },
+      {
+        "path": "Woodwinds/Clarinet/susLong/DCClar_susLong_F3_v1_rr1_sum.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Woodwinds/Clarinet/susLong/DCClar_susLong_F3_v1_rr1_sum.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 1762976,
+        "sha256": "0677787afa8d1fdc99e267a1518a49dacf3f1899dc27239c1fbe93568fda2222",
+        "git_blob_sha1": "31ac755ac1dff319c409505d26706d9851bb7e92",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "logs/player-experience-completion-20261105/campaign-suite-one/sample-cache/Woodwinds/Clarinet/susLong/DCClar_susLong_F3_v1_rr1_sum.wav"
+      }
+    ]
+  },
+  "rendering": {
+    "sample_rate": 48000,
+    "channels": 2,
+    "master_bits": 24,
+    "stem_groups": {
+      "piano": "Recorded upright piano and/or harp; unused slot silent",
+      "strings": "Recorded cello, viola and violin; no percussion in this revision",
+      "winds": "Recorded sustained F horn, clarinet and bassoon; unused slot silent",
+      "room": "Bounded additive stereo reflections derived from recorded instruments"
+    },
+    "stems": "Four additive PCM24 WAV slots per track, plus master WAV, MP3 and OGG; 56 exports total.",
+    "method": "Retained recorded attack. Stable interior body for bow/wind sustain, stereo phase-error endpoint search and 80ms raised-cosine linear overlap. No bar-based envelope/reset. Phrase-level linear releases with original source texture, bounded winds and explicit breaths. Natural piano/harp never loop. Common mastering gain preserves dynamics; no limiter.",
+    "limits": "Continuity diagnostics establish signal behavior only, not musical taste. Bow/wind extension repeats a crossfaded real recorded interior body. No physical modelling, new recording or piano/harp infinite sustain. Actual sustained F horn, not a physical muted horn; harp, not guitar.",
+    "source_recipe": "tools/audio/create_campaign_suite_v2.py",
+    "tests": "tools/audio/test_campaign_suite_v2.py",
+    "editable_score_notes": "Each retained score.json includes explicit event time/duration/pitch/velocity/voice/phrase/articulation/release and section/harmony/tempo maps. Authored source phrase scores are in SCORES. These audition inputs are frozen; changes require a new reviewed freeze and new attempt, never overwriting these artifacts.",
+    "source_hashes": {
+      "create_campaign_suite_v2.py": "26cad1a46f199049a6cc36b6013a76f45bd26c1d84097ab34d99f091b817b2d4",
+      "create_campaign_suite.py": "50f76d10ebb48eed8f17eb7791f041fe93a8c7bef52573fbc24e9183b3eb8460",
+      "create_theme_continuation.py": "82bf4b3355cd914cce09eeec256608ce11b5e055051a585c48021f5355d21be4",
+      "create_after_the_silence.py": "a26bc286ba908c6cc3c24075b8211e8b4aef9e7c8e7c568db05735f21fa1e2f8"
+    },
+    "archived_frozen_recipes": "logs/player-experience-completion-20261105/campaign-suite-two/frozen-recipes/",
+    "runtime": {
+      "python": "3.14.3 (tags/v3.14.3:323c59a, Feb  3 2026, 16:04:56) [MSC v.1944 64 bit (AMD64)]",
+      "numpy": "2.4.1",
+      "ffmpeg": "ffmpeg version 8.1.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers"
+    }
+  },
+  "total_duration_seconds": 1600.876314140568,
+  "prior_preservation": {
+    "before": "logs/player-experience-completion-20261105/campaign-suite-two/original-preservation-before.json",
+    "files": 349,
+    "after": "logs/player-experience-completion-20261105/campaign-suite-two/independent-artifact-verification.json",
+    "result": "349 prior files remain byte-exact; root separately checks runtime audio assets and approved opening exports."
+  },
+  "validation": {
+    "tests": "Seven targeted unittest checks: retained RED, failing pitch-range gate then GREEN. tests-red.log, tests-green01.log, tests-green02.log.",
+    "held_proof": "continuity-proof/*_held_v2.wav and preflight.json: ten-second held-note diagnostic, no bar-boundary reset, phrase-end fade, naturally decaying piano/harp. Comparison is against old two-second-bar clip mechanism, not a new user comparison reel.",
+    "independent_pre_render": "Reviewer tested all 84 used bowed/wind variants, including viola: continuous late bodies, bounded seam differences and no silent joins. independent-continuity.json/log. Technical readiness only.",
+    "render_reports": "Each KEY-attempt01 contains render-report.json, loudness logs, frozen score, full note-to-sample and sustain-loop assignments, pinned sample-source credits and hashes, CC0 license and all seven exports.",
+    "browser_input": "logs/player-experience-completion-20261105/campaign-suite-two/browser-input.json",
+    "export_inventory": "logs/player-experience-completion-20261105/campaign-suite-two/final-export-inventory.json",
+    "pending": "Final independent source/provenance verdict, real-browser 16-file proof and private delivery receipts are added by root.",
+    "independent_final_artifacts": "independent-artifact-verification.json/log: all 8 tracks, 56 export hashes, 40 actual WAV PCM hashes/formats/endpoints, stem reconstruction within 2 LSB, 37 pinned source files and all 349 prior files passed; exit 0. This independent evidence is reused, not duplicated."
+  },
+  "retained_failures": [
+    {
+      "path": "tests-red.log",
+      "reason": "New functionality absent before implementation; seven required behavior checks failed."
+    },
+    {
+      "path": "tests-green01.log",
+      "reason": "Cheap full-score range validation rejected pitches beyond existing verified anchors. Explicit authored pitches/registers corrected before prepare/freeze/full rendering; no new samples fetched or prior source changed."
+    }
+  ],
+  "tracks": [
+    {
+      "number": 1,
+      "id": "country",
+      "title": "A Country Before Dawn",
+      "revision": "Revised v2",
+      "creative_intent": "Broad string melody with rising fifth and suspended falls, long bowed floor, restrained sustained F horn answers; expansive 6/8 horizon.",
+      "directory": "logs/player-experience-completion-20261105/campaign-suite-two/country-attempt01",
+      "duration_seconds": 201.39608739837396,
+      "meter": "6/8",
+      "tempo_unit": "eighth",
+      "starting_tempo": 96,
+      "key": "D minor / F light",
+      "bars": 52,
+      "events": 119,
+      "sections": [
+        {
+          "name": "Mist over the valley",
+          "time": 0,
+          "end": 15,
+          "bars": 4,
+          "bar": 0
+        },
+        {
+          "name": "The long horizon",
+          "time": 15,
+          "end": 60,
+          "bars": 12,
+          "bar": 4
+        },
+        {
+          "name": "A remembered distance",
+          "time": 60,
+          "end": 97.5,
+          "bars": 10,
+          "bar": 16
+        },
+        {
+          "name": "The valley opens",
+          "time": 97.5,
+          "end": 142.5,
+          "bars": 12,
+          "bar": 26
+        },
+        {
+          "name": "A changed horizon",
+          "time": 142.5,
+          "end": 180,
+          "bars": 10,
+          "bar": 38
+        },
+        {
+          "name": "Still before dawn",
+          "time": 180,
+          "end": 196.39608739837396,
+          "bars": 4,
+          "bar": 48
+        }
+      ],
+      "actual_instruments": [
+        "cello",
+        "horn",
+        "viola",
+        "violin"
+      ],
+      "integrated_lufs": -19,
+      "true_peak_dbfs": -4.3,
+      "level_note": "Around -19 LUFS target reached using common linear gain.",
+      "score_sha256": "b00f53a875d45d79dbc9d9476538c668159b9b9983f62d6d59ba6be58f839e86",
+      "assignment_sha256": "5a1cd6a910da04272eb0e41cd7dd0564bc46bf025bc3d03166362ce9d777ca7f",
+      "exports": {
+        "mix": {
+          "path": "a_country_before_dawn.wav",
+          "bytes": 58002174,
+          "sha256": "44b9e395f28a54e1a40ad0e8d6d96c4cfa6817b88bb4a58e9ed7570aef8ab0fb",
+          "pcm24_sha256": "c5f862decbac06f26e7bfd86b42c050f5ed54f4ed5c4c73d5121a5dd76d2cc18"
+        },
+        "piano": {
+          "path": "a_country_before_dawn_piano.wav",
+          "bytes": 58002174,
+          "sha256": "5a17f2fc10b053bb631ff73a0b927b67ccb38f2cabbaf13a4ab107bc4d805104",
+          "pcm24_sha256": "e06a60b9006cfdb8f1f6b231f2fd04ab96f34993e52f0b96a0ac5f9cb0be6548"
+        },
+        "strings": {
+          "path": "a_country_before_dawn_strings.wav",
+          "bytes": 58002174,
+          "sha256": "2efd444adf4bdb01f73a4058cd6885ded6801f7d49ec71f5d3faaecbe17373ac",
+          "pcm24_sha256": "c620a5b0addbdd54203500a498ac2765983f4f9885d42fb8d8fb92d4d9d985ee"
+        },
+        "winds": {
+          "path": "a_country_before_dawn_winds.wav",
+          "bytes": 58002174,
+          "sha256": "fc8041617ea057c6c667c624c72ab6912da4e8a122192da3ed1641ee614e4a1f",
+          "pcm24_sha256": "a4275330f9a870740ae275182916e435948fa3d59455503af299e5491fdbf8fe"
+        },
+        "room": {
+          "path": "a_country_before_dawn_room.wav",
+          "bytes": 58002174,
+          "sha256": "f2d252d6dbb0b4d80c41202c0891919b9127e0b03c67ab1c8943cd971642ba39",
+          "pcm24_sha256": "644777418915e757d7d52d222639a71f066ecf323eb5343651c25255f2f83edb"
+        },
+        "mp3": {
+          "path": "a_country_before_dawn.mp3",
+          "bytes": 4643370,
+          "sha256": "1b1e10bb95b3ec5d1e6b18ff96cd00302d7890f5ea9951b15b15af9628ef7f93"
+        },
+        "ogg": {
+          "path": "a_country_before_dawn.ogg",
+          "bytes": 4306764,
+          "sha256": "3387043565fb58a1da81863ef24c0a7319f23e2cad2a60ca43464d8dd779c235"
+        }
+      }
+    },
+    {
+      "number": 2,
+      "id": "lines",
+      "title": "Lines on Paper",
+      "revision": "Revised v2",
+      "creative_intent": "Measured piano counterpoint in 4/4; irregular right-hand sentences against an independent left hand and a long string pedal.",
+      "directory": "logs/player-experience-completion-20261105/campaign-suite-two/lines-attempt01",
+      "duration_seconds": 190.76089222430676,
+      "meter": "4/4",
+      "tempo_unit": "quarter",
+      "starting_tempo": 78,
+      "key": "A minor / C",
+      "bars": 60,
+      "events": 220,
+      "sections": [
+        {
+          "name": "A blank margin",
+          "time": 0,
+          "end": 12.307692307692308,
+          "bars": 4,
+          "bar": 0
+        },
+        {
+          "name": "Two measured lines",
+          "time": 12.307692307692308,
+          "end": 55.38461538461541,
+          "bars": 14,
+          "bar": 4
+        },
+        {
+          "name": "The second hand answers",
+          "time": 55.38461538461541,
+          "end": 92.30769230769236,
+          "bars": 12,
+          "bar": 18
+        },
+        {
+          "name": "The figures gather",
+          "time": 92.30769230769236,
+          "end": 135.38461538461544,
+          "bars": 14,
+          "bar": 30
+        },
+        {
+          "name": "What remains on the page",
+          "time": 135.38461538461544,
+          "end": 172.30769230769224,
+          "bars": 12,
+          "bar": 44
+        },
+        {
+          "name": "An unfinished sum",
+          "time": 172.30769230769224,
+          "end": 185.76089222430676,
+          "bars": 4,
+          "bar": 56
+        }
+      ],
+      "actual_instruments": [
+        "cello",
+        "piano",
+        "viola"
+      ],
+      "integrated_lufs": -20.6,
+      "true_peak_dbfs": -2.1,
+      "level_note": "Sparse naturally decaying piano is peak-limited by common linear gain; target around -19 LUFS is not reached. Dynamics retained; no limiter or claim of equal perceived loudness.",
+      "score_sha256": "f0457d04bbeaa13f6c9e8f647c0ad59387b3e1577cdc873185a2731e3bbaafb9",
+      "assignment_sha256": "0708a861ec438b9ef7684f0e17091ced3fdde9442c04f29904597d5a07f6b7eb",
+      "exports": {
+        "mix": {
+          "path": "lines_on_paper.wav",
+          "bytes": 54939240,
+          "sha256": "b8b1c2487df42db8a347ec2bc49daed1efe064376ad12d4dad83e5b12244129f",
+          "pcm24_sha256": "73fcbd7ae81bd3cf91ba8a24adeabbe0e2a75372f93e90b5ea72c13a108794f5"
+        },
+        "piano": {
+          "path": "lines_on_paper_piano.wav",
+          "bytes": 54939240,
+          "sha256": "33c8d9bf2d430a6ed3f4f6614fdecef9c439729d65a4a22c3dd9138f1aaeff79",
+          "pcm24_sha256": "ec62820ae655cad5f4cf861063beb58b4ef1d187efb5d3f0cb2b100d6e02ec9f"
+        },
+        "strings": {
+          "path": "lines_on_paper_strings.wav",
+          "bytes": 54939240,
+          "sha256": "cd4360b96a8be2b2806cc465ca14b514e1c9585d34b87cd7374271f41361d679",
+          "pcm24_sha256": "a55a9a79e195baaca040f72d194b982ba8d7b396d7bd968994a254032e03a03e"
+        },
+        "winds": {
+          "path": "lines_on_paper_winds.wav",
+          "bytes": 54939240,
+          "sha256": "5b8b835104ba620091ce894994ef90a846640f50210b1fc63aacaab894171bd8",
+          "pcm24_sha256": "93c52e419e791dd89396389591dba0d6fecb66d20bd443234a364eec1e1b6e73"
+        },
+        "room": {
+          "path": "lines_on_paper_room.wav",
+          "bytes": 54939240,
+          "sha256": "56fbe088d677b87b26f40e19ddb7d0831901374d5678f5eea6168bc7d2fb3eee",
+          "pcm24_sha256": "ba5067c5ca9330b9e315ffb3269caea014f59ad669c280d7c9e532b42843e829"
+        },
+        "mp3": {
+          "path": "lines_on_paper.mp3",
+          "bytes": 3837827,
+          "sha256": "6f186d1538006c2130753622f50b51c8841896bce760f46a96151a0c315bf108"
+        },
+        "ogg": {
+          "path": "lines_on_paper.ogg",
+          "bytes": 3705724,
+          "sha256": "380f076131b203930303a51f9c2135b80cbe5fa8837c7c9def9295ac26d8ae23"
+        }
+      }
+    },
+    {
+      "number": 3,
+      "id": "winter",
+      "title": "The Long Winter",
+      "revision": "Revised v2",
+      "creative_intent": "Low cello lament in slow 3/4, descending and withheld notes, separate bassoon breaths and sparse chamber support.",
+      "directory": "logs/player-experience-completion-20261105/campaign-suite-two/winter-attempt01",
+      "duration_seconds": 197.14024390243884,
+      "meter": "3/4",
+      "tempo_unit": "quarter",
+      "starting_tempo": 50,
+      "key": "G minor",
+      "bars": 53,
+      "events": 56,
+      "sections": [
+        {
+          "name": "An empty room",
+          "time": 0,
+          "end": 18,
+          "bars": 5,
+          "bar": 0
+        },
+        {
+          "name": "The withheld answer",
+          "time": 18,
+          "end": 61.20000000000002,
+          "bars": 12,
+          "bar": 5
+        },
+        {
+          "name": "Breath at the window",
+          "time": 61.20000000000002,
+          "end": 93.59999999999997,
+          "bars": 9,
+          "bar": 17
+        },
+        {
+          "name": "The cold reaches inward",
+          "time": 93.59999999999997,
+          "end": 136.7999999999999,
+          "bars": 12,
+          "bar": 26
+        },
+        {
+          "name": "One voice returns",
+          "time": 136.7999999999999,
+          "end": 172.79999999999984,
+          "bars": 10,
+          "bar": 38
+        },
+        {
+          "name": "The unlit room",
+          "time": 172.79999999999984,
+          "end": 192.14024390243884,
+          "bars": 5,
+          "bar": 48
+        }
+      ],
+      "actual_instruments": [
+        "bassoon",
+        "cello",
+        "viola"
+      ],
+      "integrated_lufs": -19,
+      "true_peak_dbfs": -5.5,
+      "level_note": "Around -19 LUFS target reached using common linear gain.",
+      "score_sha256": "868969a32174c571e7925551f4ce8d300c1aa999fb32a4e57bed82a9b008e47e",
+      "assignment_sha256": "f13102c5ce780809442aa2af9c66694c412b1a58195900a773bb267a0252b19f",
+      "exports": {
+        "mix": {
+          "path": "the_long_winter.wav",
+          "bytes": 56776494,
+          "sha256": "446af0df44584549de84967d9aca775a7e515fa7a9cb573761181959e5ad6129",
+          "pcm24_sha256": "95f1a3ea6ea7b0fea33f7fffcc65429026e5970dcf4127ce4f572e36f8317f58"
+        },
+        "piano": {
+          "path": "the_long_winter_piano.wav",
+          "bytes": 56776494,
+          "sha256": "1420be8517cbdbb70af5a44591a602b7a33ea97c846c7dc391250bdf25a7dcc8",
+          "pcm24_sha256": "d13bfb5695bc94b79ddb6e6bf3ca127676964917f8774930de8ca02c5ad15696"
+        },
+        "strings": {
+          "path": "the_long_winter_strings.wav",
+          "bytes": 56776494,
+          "sha256": "fbad04a030f3e7c16db9363c71193ee5d129e04db66c712ff3fdcdcf24c05eda",
+          "pcm24_sha256": "4844794df157f43d5642ad6ca9b5ecd0d5628c633ac2ce3a18996ba58cc8d293"
+        },
+        "winds": {
+          "path": "the_long_winter_winds.wav",
+          "bytes": 56776494,
+          "sha256": "1d08928842a6896b688b5ad20191d329ec014118fdf4d32cfc6f238422be262b",
+          "pcm24_sha256": "e96c6654ec5d51d43fe37f714aae9c5653eff3e4e234c3c912fcc367c5a6a5d6"
+        },
+        "room": {
+          "path": "the_long_winter_room.wav",
+          "bytes": 56776494,
+          "sha256": "5ab60bd67e2df82655fcb1cb05a2adea59016c6653e4c513403c33a457149dad",
+          "pcm24_sha256": "30841cccdf6f33b6742d5c4d4a1e6ae73ea73dae341e6e71f1353212380d4999"
+        },
+        "mp3": {
+          "path": "the_long_winter.mp3",
+          "bytes": 3853932,
+          "sha256": "86c7cdd88f747a226cdaf8e71047d2d1723cb6a2ef10182279a9ac343ba6915b"
+        },
+        "ogg": {
+          "path": "the_long_winter.ogg",
+          "bytes": 3310987,
+          "sha256": "ef81e0498335f18e5189d6b6f10abeb3d0373853cbc60177093f14a8ffebfa8e"
+        }
+      }
+    },
+    {
+      "number": 4,
+      "id": "radio",
+      "title": "No Answer on the Radio",
+      "revision": "Revised v2",
+      "creative_intent": "Low suspense in 7/8 with continuous E carrier pedal, chromatic horn questions and unequal 3+2+2 piano punctuation.",
+      "directory": "logs/player-experience-completion-20261105/campaign-suite-two/radio-attempt01",
+      "duration_seconds": 194.828708613173,
+      "meter": "7/8",
+      "tempo_unit": "eighth",
+      "starting_tempo": 138,
+      "key": "E pedal / semitone tension",
+      "bars": 62,
+      "events": 108,
+      "sections": [
+        {
+          "name": "Carrier without a voice",
+          "time": 0,
+          "end": 15.217391304347828,
+          "bars": 5,
+          "bar": 0
+        },
+        {
+          "name": "Three then two then two",
+          "time": 15.217391304347828,
+          "end": 54.782608695652165,
+          "bars": 13,
+          "bar": 5
+        },
+        {
+          "name": "A signal displaced",
+          "time": 54.782608695652165,
+          "end": 88.26086956521736,
+          "bars": 11,
+          "bar": 18
+        },
+        {
+          "name": "The interference thickens",
+          "time": 88.26086956521736,
+          "end": 130.86956521739125,
+          "bars": 14,
+          "bar": 29
+        },
+        {
+          "name": "Waiting without an answer",
+          "time": 130.86956521739125,
+          "end": 170.43478260869557,
+          "bars": 13,
+          "bar": 43
+        },
+        {
+          "name": "The carrier remains",
+          "time": 170.43478260869557,
+          "end": 189.828708613173,
+          "bars": 6,
+          "bar": 56
+        }
+      ],
+      "actual_instruments": [
+        "cello",
+        "horn",
+        "piano",
+        "viola"
+      ],
+      "integrated_lufs": -19,
+      "true_peak_dbfs": -4.7,
+      "level_note": "Around -19 LUFS target reached using common linear gain.",
+      "score_sha256": "e632c6376c36f3b3f07dda8aaeeae38e5adeb27fcfeee8c2fc1e034b1c8fb2be",
+      "assignment_sha256": "764ad514dcb89808e950c7f6f0259d7365ba714193c674d4934f67e2ce4682dd",
+      "exports": {
+        "mix": {
+          "path": "no_answer_on_the_radio.wav",
+          "bytes": 56110770,
+          "sha256": "0c0d20e1ba3ceeb9f25590ea8f6e6893109b20f9b62b317c4a643ce08c56b0e3",
+          "pcm24_sha256": "ebe016569a8674680a2514d8b00c9f157544a5ff6079660ed38506d95c187541"
+        },
+        "piano": {
+          "path": "no_answer_on_the_radio_piano.wav",
+          "bytes": 56110770,
+          "sha256": "7f7739186b0ad16e9953d54bef15877bf967b72e228cd87b89ff039b44d5ab08",
+          "pcm24_sha256": "c6a69ceff2e1b8dd60fd62b1703befbedba50ec1d6049c9e8b68428a3866693e"
+        },
+        "strings": {
+          "path": "no_answer_on_the_radio_strings.wav",
+          "bytes": 56110770,
+          "sha256": "365e4ca58fbc6cfe4a3a518b0eb1db092a7aa88489416290080b9f716952c912",
+          "pcm24_sha256": "53e2137d6849e46f2d8ff08c263e906b801bbcaf96adc69a3c9baffd61608602"
+        },
+        "winds": {
+          "path": "no_answer_on_the_radio_winds.wav",
+          "bytes": 56110770,
+          "sha256": "c5bd5dbe383acaca6c794e41317a0cae92361ef1db1178237df8c19f7f7d457b",
+          "pcm24_sha256": "e1960732db99dbed81570d11703b2efc89fa19fce51210e488d399d16d65bb2a"
+        },
+        "room": {
+          "path": "no_answer_on_the_radio_room.wav",
+          "bytes": 56110770,
+          "sha256": "a7d8acaa80ce954e0493cb3def18161b66a2028074f99af8c7274ca4dc57590c",
+          "pcm24_sha256": "ae68f1b5ca9f3446cffcf59c32ba20d3137c96e7b97d2219e9d70f08cdefdf03"
+        },
+        "mp3": {
+          "path": "no_answer_on_the_radio.mp3",
+          "bytes": 3828571,
+          "sha256": "99d8ee3090cb98a3eb1fafd628bbcc8ee09b42a82ad28ffd6c46f45b7b70ea06"
+        },
+        "ogg": {
+          "path": "no_answer_on_the_radio.ogg",
+          "bytes": 3605221,
+          "sha256": "0e16b362e1d54d75ca1bff44dad423be2c907f534bdb106410e697d78d61e05f"
+        }
+      }
+    },
+    {
+      "number": 5,
+      "id": "life",
+      "title": "The Life We Remember",
+      "revision": "Revised v2",
+      "creative_intent": "Warm G-major clarinet arches in 6/8, recorded harp figures, slowly moving cello and viola warmth.",
+      "directory": "logs/player-experience-completion-20261105/campaign-suite-two/life-attempt01",
+      "duration_seconds": 201.39608739837396,
+      "meter": "6/8",
+      "tempo_unit": "eighth",
+      "starting_tempo": 96,
+      "key": "G major / E minor shade",
+      "bars": 52,
+      "events": 169,
+      "sections": [
+        {
+          "name": "Light on a familiar wall",
+          "time": 0,
+          "end": 15,
+          "bars": 4,
+          "bar": 0
+        },
+        {
+          "name": "The remembered garden",
+          "time": 15,
+          "end": 60,
+          "bars": 12,
+          "bar": 4
+        },
+        {
+          "name": "Someone opens the door",
+          "time": 60,
+          "end": 97.5,
+          "bars": 10,
+          "bar": 16
+        },
+        {
+          "name": "The memory becomes clear",
+          "time": 97.5,
+          "end": 142.5,
+          "bars": 12,
+          "bar": 26
+        },
+        {
+          "name": "The garden after rain",
+          "time": 142.5,
+          "end": 180,
+          "bars": 10,
+          "bar": 38
+        },
+        {
+          "name": "A small warmth remains",
+          "time": 180,
+          "end": 196.39608739837396,
+          "bars": 4,
+          "bar": 48
+        }
+      ],
+      "actual_instruments": [
+        "cello",
+        "clarinet",
+        "harp",
+        "viola"
+      ],
+      "integrated_lufs": -19,
+      "true_peak_dbfs": -4.8,
+      "level_note": "Around -19 LUFS target reached using common linear gain.",
+      "score_sha256": "fa88eb7fdff9fd68ce89a712f4265873dd28efd44e7e85d6de48eee63b194489",
+      "assignment_sha256": "4a305c02d30a5803134cafd3ead80afc5176b1fe4acc6da55c156551fa67ae57",
+      "exports": {
+        "mix": {
+          "path": "the_life_we_remember.wav",
+          "bytes": 58002174,
+          "sha256": "e536ced2d88e88f1f1bb35e95d36ac6779aa3da7451d2e0f59a5a237b6fd70e5",
+          "pcm24_sha256": "bb52d831b9826a53091dc3711dac7e500a12ba0fb103ef28445210fc1780869c"
+        },
+        "piano": {
+          "path": "the_life_we_remember_piano.wav",
+          "bytes": 58002174,
+          "sha256": "11bdea947f5c258a8f75f6c2666317395e36a852ed1ebfdb8c8f2d101335b320",
+          "pcm24_sha256": "a132754f5a45aa7b8c8633cfc202a27e23ce0224ffdfa3feb5afb499786368b2"
+        },
+        "strings": {
+          "path": "the_life_we_remember_strings.wav",
+          "bytes": 58002174,
+          "sha256": "40e6644ab89e9e278e32faea346a24334eebd2fc1a340bca0f6b23991cd3a23c",
+          "pcm24_sha256": "ae9fcf079d199b5f6c3f84dea769d016d737c2537cea428942fd133e0c5c520f"
+        },
+        "winds": {
+          "path": "the_life_we_remember_winds.wav",
+          "bytes": 58002174,
+          "sha256": "dc8dbf91b8af1547c38f534736f38ca1bec0d9feffdacdca7c40877dfa842aa7",
+          "pcm24_sha256": "01733e08cef86c839cc803c64459270ef73f18a6bc3acbefdef29f38a232febb"
+        },
+        "room": {
+          "path": "the_life_we_remember_room.wav",
+          "bytes": 58002174,
+          "sha256": "d5f18af3debd4a502c7744c00b3c0b961ecadd5d08530ea37043d867256e6ab8",
+          "pcm24_sha256": "5684a7c6e6f868b963c5ef85c3a819abcc8b51e72ce96a879c4cd01333252da4"
+        },
+        "mp3": {
+          "path": "the_life_we_remember.mp3",
+          "bytes": 4464473,
+          "sha256": "3163651e862a00b236d4b7d3112cf2657de2b585bf7ee09d5cb284bcc69332e3"
+        },
+        "ogg": {
+          "path": "the_life_we_remember.ogg",
+          "bytes": 4050280,
+          "sha256": "c3555b4f837fb7c9b8f1ead97aa65b4b4c098583cce4d2abc1d6f4722fe81f10"
+        }
+      }
+    },
+    {
+      "number": 6,
+      "id": "table",
+      "title": "A Table for Strangers",
+      "revision": "Revised v2",
+      "creative_intent": "Conversational piano and clarinet in 3/2, chamber bass and long viola suspensions; deliberately spacious, unresolved exchanges.",
+      "directory": "logs/player-experience-completion-20261105/campaign-suite-two/table-attempt01",
+      "duration_seconds": 197.9397634885441,
+      "meter": "3/2",
+      "tempo_unit": "quarter",
+      "starting_tempo": 66,
+      "key": "B minor / suspended D",
+      "bars": 35,
+      "events": 90,
+      "sections": [
+        {
+          "name": "Chairs drawn together",
+          "time": 0,
+          "end": 16.363636363636363,
+          "bars": 3,
+          "bar": 0
+        },
+        {
+          "name": "A question in one voice",
+          "time": 16.363636363636363,
+          "end": 59.99999999999999,
+          "bars": 8,
+          "bar": 3
+        },
+        {
+          "name": "The other voice waits",
+          "time": 59.99999999999999,
+          "end": 92.72727272727272,
+          "bars": 6,
+          "bar": 11
+        },
+        {
+          "name": "An unresolved agreement",
+          "time": 92.72727272727272,
+          "end": 136.36363636363637,
+          "bars": 8,
+          "bar": 17
+        },
+        {
+          "name": "The question is changed",
+          "time": 136.36363636363637,
+          "end": 174.54545454545465,
+          "bars": 7,
+          "bar": 25
+        },
+        {
+          "name": "Nothing signed",
+          "time": 174.54545454545465,
+          "end": 192.9397634885441,
+          "bars": 3,
+          "bar": 32
+        }
+      ],
+      "actual_instruments": [
+        "cello",
+        "clarinet",
+        "piano",
+        "viola"
+      ],
+      "integrated_lufs": -22.3,
+      "true_peak_dbfs": -2.1,
+      "level_note": "Sparse naturally decaying piano is peak-limited by common linear gain; target around -19 LUFS is not reached. Dynamics retained; no limiter or claim of equal perceived loudness.",
+      "score_sha256": "2c4faff70e43a9b45c27c8c15324f72afe1394afb246648bb77d4f47df5ee67f",
+      "assignment_sha256": "e1e3ef44be61ce12da06458dabf787b8f5bab8165e55f08477712122cb3ac2f8",
+      "exports": {
+        "mix": {
+          "path": "a_table_for_strangers.wav",
+          "bytes": 57006756,
+          "sha256": "2420dc5b0f994d490dddfdce2fbc48825da9edd96e134d470fbb069cce995006",
+          "pcm24_sha256": "8126b6d0d12a26b45a886fef9039cb704d79569477c3231a8a0ae91c53d116d6"
+        },
+        "piano": {
+          "path": "a_table_for_strangers_piano.wav",
+          "bytes": 57006756,
+          "sha256": "0e19c0cc35efdc0aa2862e7152875be47eef923cc07fd077aaa157cd7f94814b",
+          "pcm24_sha256": "936ebbf7142087493307fe79523be575e3afb5380e4570770daff6e552a60c2c"
+        },
+        "strings": {
+          "path": "a_table_for_strangers_strings.wav",
+          "bytes": 57006756,
+          "sha256": "0b7e2422898c55caf75a54e8e06d77cb03c32dc1f64113eb57b671a7cfefe675",
+          "pcm24_sha256": "7868088482a0c3b6f16e9a486c5be6f824eeca55f70016ff3bc7a8b275104158"
+        },
+        "winds": {
+          "path": "a_table_for_strangers_winds.wav",
+          "bytes": 57006756,
+          "sha256": "d4ba8cff9a0b908ba4bbf6e5942ab6a0e9e58da9730e0163d1cd8fa5124576bb",
+          "pcm24_sha256": "ec97f959ccc16e8837654914ce6554245f0b6475019f949176d369a3d114e954"
+        },
+        "room": {
+          "path": "a_table_for_strangers_room.wav",
+          "bytes": 57006756,
+          "sha256": "803a63fecc22a07744fd6dfe28a3076b878cf22577669ce52197f4ca227daf9d",
+          "pcm24_sha256": "590a935998a70a77f7bcd11d3275aa5ee7e05da25d08bb18e63220537e472a77"
+        },
+        "mp3": {
+          "path": "a_table_for_strangers.mp3",
+          "bytes": 3836394,
+          "sha256": "0e0d6de27fce561b1c7e0220d29bb5f74a6d300d7d154cbe001319e866cf2ed3"
+        },
+        "ogg": {
+          "path": "a_table_for_strangers.ogg",
+          "bytes": 3757286,
+          "sha256": "b38961a8c3fce96f5fd2bd0aaf27138327c7a93603ec7279cf6ba6ba7546dd22"
+        }
+      }
+    },
+    {
+      "number": 7,
+      "id": "maps",
+      "title": "What the Maps Cannot Show",
+      "revision": "Revised v2",
+      "creative_intent": "A broad slow 4/4 cello elegy in C minor that grows into divided full strings, then returns to one voice.",
+      "directory": "logs/player-experience-completion-20261105/campaign-suite-two/maps-attempt01",
+      "duration_seconds": 225.16695702671305,
+      "meter": "4/4",
+      "tempo_unit": "quarter",
+      "starting_tempo": 56,
+      "key": "C minor / Ab",
+      "bars": 51,
+      "events": 74,
+      "sections": [
+        {
+          "name": "Beyond the markings",
+          "time": 0,
+          "end": 17.142857142857142,
+          "bars": 4,
+          "bar": 0
+        },
+        {
+          "name": "The first name remembered",
+          "time": 17.142857142857142,
+          "end": 68.57142857142857,
+          "bars": 12,
+          "bar": 4
+        },
+        {
+          "name": "What distance conceals",
+          "time": 68.57142857142857,
+          "end": 111.42857142857149,
+          "bars": 10,
+          "bar": 16
+        },
+        {
+          "name": "The names become many",
+          "time": 111.42857142857149,
+          "end": 162.85714285714286,
+          "bars": 12,
+          "bar": 26
+        },
+        {
+          "name": "One name again",
+          "time": 162.85714285714286,
+          "end": 201.42857142857136,
+          "bars": 9,
+          "bar": 38
+        },
+        {
+          "name": "An unmarked place",
+          "time": 201.42857142857136,
+          "end": 220.16695702671305,
+          "bars": 4,
+          "bar": 47
+        }
+      ],
+      "actual_instruments": [
+        "cello",
+        "piano",
+        "viola",
+        "violin"
+      ],
+      "integrated_lufs": -19,
+      "true_peak_dbfs": -4.6,
+      "level_note": "Around -19 LUFS target reached using common linear gain.",
+      "score_sha256": "56afc7e455d23f84b161f87a722e7ad9f1e6ab6b52c216838dd843de7676ebff",
+      "assignment_sha256": "119455cce53cbd57a77044d634bfa14c305fe6dabf15ffade5a4b4ababa4c1cc",
+      "exports": {
+        "mix": {
+          "path": "what_the_maps_cannot_show.wav",
+          "bytes": 64848186,
+          "sha256": "7f693a071738d459ed94065dec94170730acab8c8055b334ef0927e11f2fd7b5",
+          "pcm24_sha256": "d9ba4b0d72b2cd30782ac1647b164a6a48879f1eaba9d4b6619178f0b646e1cb"
+        },
+        "piano": {
+          "path": "what_the_maps_cannot_show_piano.wav",
+          "bytes": 64848186,
+          "sha256": "8507bbf45a18197b81c87acd31dfe226321da07990303a12874e64677f452624",
+          "pcm24_sha256": "37c0c91d4fb231357b48abf5938add26c705087c5719ff49ae0450b940308d8c"
+        },
+        "strings": {
+          "path": "what_the_maps_cannot_show_strings.wav",
+          "bytes": 64848186,
+          "sha256": "9e0bcea94fe553aaf0608ed05726c034f8aa2e0609baebc7aa44baf767c70a0b",
+          "pcm24_sha256": "2c150d0d690343f1fc8576e030963eb494cb387e145c463e85ce1acc815ba789"
+        },
+        "winds": {
+          "path": "what_the_maps_cannot_show_winds.wav",
+          "bytes": 64848186,
+          "sha256": "a0f6ec0aaaf7ffc32a7d0b992ac171b76d9f64be79e4cdc1e499546fe423216a",
+          "pcm24_sha256": "1edcbce08af3e653a880ed822a6bcac7cb36408f96b94e65196f1d8b76995a20"
+        },
+        "room": {
+          "path": "what_the_maps_cannot_show_room.wav",
+          "bytes": 64848186,
+          "sha256": "6290af1657f7e44520349f13c0eba1a316df6330c358af746d6570b4a9fe7e7a",
+          "pcm24_sha256": "5cbd9810ac6a28b3b5e7d4b628b29dde22373d53d2fc1cded6d6a1b85f303591"
+        },
+        "mp3": {
+          "path": "what_the_maps_cannot_show.mp3",
+          "bytes": 4799950,
+          "sha256": "912eb4b442aacbc51aba6a568466e3bd60e21f1d49a522d590c6b56fa92ba69c"
+        },
+        "ogg": {
+          "path": "what_the_maps_cannot_show.ogg",
+          "bytes": 4259594,
+          "sha256": "11d07c1af9062c34539bdecd1bdb4c6543dbf389c92c42ca2990926b3111f2b3"
+        }
+      }
+    },
+    {
+      "number": 8,
+      "id": "after",
+      "title": "After the Guns",
+      "revision": "Revised v2",
+      "creative_intent": "Tentative low woodwind voice opens into warmer clarinet, quiet harp and fragile string warmth in 6/8; no victory cadence or borrowed theme.",
+      "directory": "logs/player-experience-completion-20261105/campaign-suite-two/after-attempt01",
+      "duration_seconds": 192.24757408864426,
+      "meter": "6/8",
+      "tempo_unit": "eighth",
+      "starting_tempo": 93,
+      "key": "D minor / F open light",
+      "bars": 48,
+      "events": 123,
+      "sections": [
+        {
+          "name": "The first quiet morning",
+          "time": 0,
+          "end": 15.483870967741936,
+          "bars": 4,
+          "bar": 0
+        },
+        {
+          "name": "A tentative step outside",
+          "time": 15.483870967741936,
+          "end": 54.1935483870968,
+          "bars": 10,
+          "bar": 4
+        },
+        {
+          "name": "A little more sky",
+          "time": 54.1935483870968,
+          "end": 89.03225806451618,
+          "bars": 9,
+          "bar": 14
+        },
+        {
+          "name": "The door left open",
+          "time": 89.03225806451618,
+          "end": 131.61290322580655,
+          "bars": 11,
+          "bar": 23
+        },
+        {
+          "name": "The step is remembered",
+          "time": 131.61290322580655,
+          "end": 170.32258064516142,
+          "bars": 10,
+          "bar": 34
+        },
+        {
+          "name": "A future without certainty",
+          "time": 170.32258064516142,
+          "end": 187.24757408864426,
+          "bars": 4,
+          "bar": 44
+        }
+      ],
+      "actual_instruments": [
+        "bassoon",
+        "cello",
+        "clarinet",
+        "harp",
+        "viola"
+      ],
+      "integrated_lufs": -19,
+      "true_peak_dbfs": -5.4,
+      "level_note": "Around -19 LUFS target reached using common linear gain.",
+      "score_sha256": "8cba826d45e3809040ea39663144acc3dfce53c4e21ef527a8180756d6bde679",
+      "assignment_sha256": "3ecd40735f5853dd333fbd36a89ebd6c1d56f49fb9b477f6083af91ff22c2db5",
+      "exports": {
+        "mix": {
+          "path": "after_the_guns.wav",
+          "bytes": 55367406,
+          "sha256": "e27dcda8c3bd3877a9e1e85843a7465edfb6bdb4cbe4dc81c5661af9e619c99a",
+          "pcm24_sha256": "7ddbc4b1c03db0c0059b70f9490f460fa9008372268efa90595c5b29f339922d"
+        },
+        "piano": {
+          "path": "after_the_guns_piano.wav",
+          "bytes": 55367406,
+          "sha256": "7a29862b848e696bde3902568b29e842feda5d9f4815093634f3de391fa76a2b",
+          "pcm24_sha256": "6681f76c5d7498bb37cc99716b053ac47d07d4b2ee902396c00234bd34021e42"
+        },
+        "strings": {
+          "path": "after_the_guns_strings.wav",
+          "bytes": 55367406,
+          "sha256": "3c29a77c9805e0dc706a981c7772c56a5d48678b7ad9a18634c297fe4fe56236",
+          "pcm24_sha256": "29f76a73302ca87f95d1c8275cf95adc82027c73c450cdf56b02e36bd78858e3"
+        },
+        "winds": {
+          "path": "after_the_guns_winds.wav",
+          "bytes": 55367406,
+          "sha256": "ec0288245b704c0a8bb58aed15d2496d64ef66a129803c8780ea66dcfa1abeff",
+          "pcm24_sha256": "f0106d6d1b4354509b9fcfa141bc61638b5b1afcd1525c7f9c93358a4c3cd9f0"
+        },
+        "room": {
+          "path": "after_the_guns_room.wav",
+          "bytes": 55367406,
+          "sha256": "6821faa38a498a1fa35b8b12a3db89362794cf1ff86d34ebbf7da9b040fd9cf9",
+          "pcm24_sha256": "518a3c6332771051c55a2a84b19ad9301bad2d60037f3a61b428bdf2c13f71c9"
+        },
+        "mp3": {
+          "path": "after_the_guns.mp3",
+          "bytes": 3805859,
+          "sha256": "a9bbc09237a59a65d8c942cbf0e0384de438b63aa27c57df6c65b4b39664a11a"
+        },
+        "ogg": {
+          "path": "after_the_guns.ogg",
+          "bytes": 3606543,
+          "sha256": "24fc3b4109a8ef9b850aeaada9683021a088e6c3d02a31c3bc6705ced090ef6c"
+        }
+      }
+    }
+  ],
+  "approval": "Auditions only. Instruments include actual harp and sustained F horn; no guitar/physical muted-horn claim, borrowed melody, anthem, voice, folk quotation or triumphant combat cue. All previous auditions and game music remain unchanged.",
+  "completed_date": "2026-11-06",
+  "final_evidence": {
+    "independent_review": {
+      "verdict": "GO",
+      "path": "logs/player-experience-completion-20261105/campaign-suite-two/independent-review.md",
+      "sha256": "7c9966b9ff85501ade61714894611d76afdc4e7ee39fa06822e54b15e7e06e16"
+    },
+    "real_sustain_and_seams": {
+      "path": "logs/player-experience-completion-20261105/campaign-suite-two/independent-continuity.json",
+      "sha256": "3b831863794006a4707b5bba1d2fe3e015454dbc805a496eee92ddcbf8090ffc",
+      "used_pitch_variants": 84,
+      "scope": "Technical continuity only; audible looping/expressiveness needs expert listening"
+    },
+    "actual_exported_pcm": {
+      "path": "logs/player-experience-completion-20261105/campaign-suite-two/independent-artifact-verification.json",
+      "sha256": "dfdbb42cc8a9c5464f008daa436fa1f254f84538155d1fffef5ed5a72d1fa85e",
+      "exports": 56,
+      "wav_payloads": 40,
+      "maximum_stem_reconstruction_lsb": 2,
+      "prior_snapshot_files_preserved": 349
+    },
+    "additional_runtime_preservation": {
+      "path": "logs/player-experience-completion-20261105/campaign-suite-two/runtime-preservation.json",
+      "runtime_audio_files": 32,
+      "prior_opening_exports": 3,
+      "protected_production_diff_empty": true
+    },
+    "browser": {
+      "path": "logs/player-experience-completion-20261105/campaign-suite-two/browser01/receipt.json",
+      "sha256": "a4095eeb7de5ff9307ef15f773f0ca7f6aa938432bd79f56d3e768a8ba76474f",
+      "compressed_exports": 16,
+      "trusted_click_and_time_advance": true,
+      "remote_requests": 0,
+      "page_errors": 0
+    },
+    "delivery": {
+      "full_mp3s": 8,
+      "zip_bytes": 33083240,
+      "zip_sha256": "bfa6bf05ac50e54695aaa6bc8bdce22a1d772d1e23823c6c5077348655e24536",
+      "zip_crc_and_member_hashes_verified": true,
+      "versioned_filenames": true,
+      "feedback_notes_include_balance_deviations": true,
+      "metadata_size_type_verified": 9,
+      "zip_permission": "Owner plus previously authorized expert reader",
+      "other_files": "owner-only",
+      "personal_links_and_recipient": "Ignored drive-delivery.json only; first-set links/bytes unchanged"
+    },
+    "approximate_loudness_target_deviations": {
+      "lines_lufs": -20.6,
+      "table_lufs": -22.3,
+      "true_peak_dbtp": -2.1,
+      "reason": "Natural piano attack peaks constrain common gain; no limiter/rounded-target chasing",
+      "status": "Measured deviations unchanged. Owner reports expert package approval; no additional mix correction requested. This is not numerical level-target success.",
+      "evidence": "logs/player-experience-completion-20261105/campaign-suite-two/independent-piano-peak-context.json"
+    },
+    "source_hygiene": {
+      "pass": true,
+      "change": "EOF blank lines only; frozen audio recipe archive unchanged",
+      "archived_sha256": "26cad1a46f199049a6cc36b6013a76f45bd26c1d84097ab34d99f091b817b2d4",
+      "canonical_sha256": "48244aac5816428f6e41ae4795fd3f982ded78b4e5c78d088bb6b563563c1b36"
+    },
+    "source_checkout_policy": "Specific LF rules for the two new Python files; archived rendered source retains its original hash. Canonical source differs only in EOF blank lines.",
+    "game_runtime_adoption": false,
+    "precommit": {
+      "exit": 0,
+      "path": "logs/player-experience-completion-20261105/campaign-suite-two/precommit01.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "historical_scope": "Audition revision verification before renderer adoption; earlier game_runtime_adoption=false is historical. Current adoption evidence is runtime_adoption and the integration receipt."
+  },
+  "musical_approval": {
+    "reported_date": "2026-11-06",
+    "reviewer": "Almedin",
+    "evidence": "Owner message: Almedin approved the package.",
+    "attribution": "Approval reported by the owner; no separate expert report or detailed verdict supplied.",
+    "scope": "Musical approval of the existing eight-track Revised v2 package as delivered; no new edits or renders requested.",
+    "revision": "Revised v2",
+    "track_count": 8,
+    "approved_bundle_sha256": "bfa6bf05ac50e54695aaa6bc8bdce22a1d772d1e23823c6c5077348655e24536",
+    "approved_bundle_bytes": 33083240,
+    "artifact_bindings": "The existing per-track export hashes and final_evidence.delivery bind the approved audio.",
+    "runtime_adoption": true,
+    "limits": "Does not by itself close separate historical-sensitivity, packaged/runtime, canon, release or global R7 gates."
+  },
+  "runtime_adoption": {
+    "authorized_date": "2026-11-06",
+    "authorization": "Owner explicitly authorized approved eight-track in-game rotation after reporting Almedin package approval.",
+    "approved_bundle_sha256": "bfa6bf05ac50e54695aaa6bc8bdce22a1d772d1e23823c6c5077348655e24536",
+    "assets": "Eight final OGG exports copied byte-for-byte to src/ui/map/assets/audio/music; per-cue hashes and licensing in AUDIO_ASSET_PROVENANCE.json.",
+    "policy": "In-memory renderer-only shuffled bag, all eight before repetition, no adjacent repeat across bags. Main menu retains opening/calm; audible opening finishes before campaign. Music remains opt-in OFF by default.",
+    "validation_status": "Scoped integration verified: combined102 tests/14 files, typecheck/lint/build/chunks, exact emitted hashes and actual native natural opening/menu/Country-to-Table handoff. No full26min native cycle or release qualification claim.",
+    "limits": "No new mix or normalization. Lines/Table measured target deviations retained. No claim of packaged/release/global acceptance.",
+    "integration_receipt": "docs/40_reports/implemented/20261105_PLAYER_EXPERIENCE_COMPLETION_RECEIPT.json"
+  }
+}

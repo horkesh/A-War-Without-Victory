@@ -31,6 +31,8 @@ export interface AudioCueLike {
 }
 
 export interface AudioAssetProvenanceEntry {
+    /** Prior cue binaries retained unchanged for source/license preservation. */
+    previous_versions?: AudioAssetProvenanceEntry[];
     file: string;
     original_filename: string | null;
     original_sha256: string | null;
@@ -212,6 +214,25 @@ export function buildAudioAssetProvenanceReport(input: AudioAssetProvenanceInput
         const bundleResolved = resolvedCueIds.has(cue.id);
         const violations: AudioAssetViolation[] = [];
 
+        for (const previous of entry?.previous_versions ?? []) {
+            const safe = isRepoRelativePosixPath(previous.file)
+                && previous.file.startsWith(`${AUDIO_BINARY_ROOT}/`)
+                && previous.file.endsWith('.ogg');
+            const absolute = safe ? resolve(rootDir, ...previous.file.split('/')) : null;
+            if (!absolute || !existsSync(absolute)
+                || inspectAudioBinary(absolute).sha256 !== previous.processed_sha256
+                || !inspectAudioBinary(absolute).hasOggSignature) {
+                violations.push(violation('invalid_previous_audio_binary', `${cue.id} retained binary is absent, unsafe, or has changed.`));
+            }
+            if (!previous.license || !ALLOWED_LICENSES.has(previous.license)
+                || !asNonEmpty(previous.author) || !asNonEmpty(previous.source_url)
+                || !asNonEmpty(previous.attribution) || !previous.license_note
+                || !isRepoRelativePosixPath(previous.license_note)
+                || !existsSync(resolve(rootDir, ...previous.license_note.split('/')))) {
+                violations.push(violation('invalid_previous_audio_license', `${cue.id} retained binary lacks allowed, preserved source/license evidence.`));
+            }
+        }
+
         if ((cueIdCounts.get(cue.id) ?? 0) > 1) {
             violations.push(violation('duplicate_cue_id', `Cue registry repeats immutable cue id ${cue.id}.`));
         }
@@ -390,6 +411,14 @@ export function buildAudioAssetProvenanceReport(input: AudioAssetProvenanceInput
             .map(expectedAssetPath)
             .filter((file): file is string => file != null),
     );
+    // Only explicit prior versions of real registered cues own retained binaries.
+    // Their hashes and licenses are checked above; arbitrary filesystem files
+    // still produce unregistered_audio_binary violations.
+    for (const cueId of cuesById.keys()) {
+        for (const previous of input.manifest.cues[cueId]?.previous_versions ?? []) {
+            if (isRepoRelativePosixPath(previous.file)) registeredFiles.add(previous.file);
+        }
+    }
     for (const file of listAudioBinaries(rootDir)) {
         if (registeredFiles.has(file)) continue;
         const absoluteFile = resolve(rootDir, ...file.split('/'));

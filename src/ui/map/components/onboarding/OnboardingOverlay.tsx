@@ -41,6 +41,7 @@ import { OnboardingStep } from './OnboardingStep';
 import { ONBOARDING_STEPS, resolveNextStep } from './onboardingSteps';
 import { Z } from '../../../shared/zIndex';
 import { t } from '../../i18n';
+import { playCue } from '../../audio/audio_engine';
 
 /** Minimal tutorial-state shape mirrored from `StateMeta.tutorial_state`. */
 export interface TutorialStateShape {
@@ -297,11 +298,13 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
         if (!ipc) {
             const advanced = applyAdvanceStepPure(previewTutorialState ?? effectiveTutorialState, next.id);
             commitPreviewTutorialState(isFinalStep(next.id) ? applyDismissPure(advanced) : advanced);
+            void playCue('tutorial_objective_complete');
             return;
         }
         setPending(true);
         try {
-            await ipc.advanceStep(next.id);
+            const result = await ipc.advanceStep(next.id);
+            if (result.ok) void playCue('tutorial_objective_complete');
             // LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-B-SUBSET: auto-dismiss on
             // final step. After appending the last authored step to
             // `completed_steps`, also write `dismissed=true` so the overlay
