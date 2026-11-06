@@ -13555,3 +13555,12 @@ Branch `claude/live-jan1993-calibration` (local, unpushed). The owner signed off
 - All new placements are calibration assumptions with unsourced dates, recorded in the operation comments. Baselines are not re-pinned; that happens at the final push.
 
 Record: `docs/40_reports/audits/20261105_live_jan1993/attribution/RESULT.md`.
+
+## 2026-11-06 - Calibration: Oct95 709 -> 710 (Ilidža); Krivajevići paint question (LOCAL BRANCH, NOT ADOPTED)
+
+Headless 188w **712/711/712/710**. Live at 188 turns: 0 cells differ for all three player factions. Strict health PASS; full suite PASS.
+
+- Sana: the 517th splits off the Sanski Most axis after Lušci Palanka (new `sana_jelasinovci_517th`), so the 506th reaches Sanski Most at t187 and Ilidža at t188. Ostra Luka (painted RS at every checkpoint) is dropped from that walk.
+- Krivajevići: on Behar-I it falls at t135 (October 1995 +1, April 1995 −1 against the current paint). Two 1st Corps accounts put Hadžići, one of the cell's ten villages, among the November 1994 gains. No source records a 1995 change, so April 1995 RS and October 1995 RBiH cannot both be right. Parked for the owner's paint decision.
+
+Record: `docs/40_reports/audits/20261105_live_jan1993/attribution/RESULT.md`.

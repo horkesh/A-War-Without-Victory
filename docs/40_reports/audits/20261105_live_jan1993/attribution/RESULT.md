@@ -264,3 +264,17 @@ The owner signed off April 1994 (711/712; Brka excluded by owner direction) and 
 **Live = headless through October 1995:** at 188 turns (`bot_equivalent`, production autonomy, pause before combat), 0 cells differ from the n32 headless run for RBiH, RS and HRHB as player; every branch scores 709/712.
 
 **Tests updated for the new definitions:** `hv_1995_lifecycle_diagnostic` (Southern Move window t180), `hvo_southern_move_tail_delivery` and the western Bosnia catalog test (Donji Vrbljani hand-off brigade and gate; the Jajce walk is now a frontier walk from Volari, where each cell touches Volari or an earlier objective), the central Bosnia catalog test (Ljuta; Treskavica in the family export). New: `tests/oct1995_calibration_levers.test.ts`.
+
+## October 1995: Ilidža (709 → 710) and the Krivajevići question (2026-11-06)
+
+**Ilidža:** the 506th and 517th moved as one pair on the Sanski Most axis, so the town fell at t188 and Ilidža a week later.
+- **Change:** after Lušci Palanka (t184) the 517th is handed to a new axis, `sana_jelasinovci_517th` (Jelašinovci → Kljevci → Ilidža). The 506th then takes Škućani Vakuf t185, Stari Majdan t186, Sanski Most t187 (history ≈ t184) and Ilidža t188.
+- **Ostra Luka:** removed from the Sanski Most walk. It is painted RS at every checkpoint; once the 506th was faster it took Ostra Luka at t188 (−1) instead of Ilidža.
+- **Rejected:** Ilidža after Krasulje on the Bihać–Petrovac axis (the tired 501st only stalemates at t188); swapping Kljevci and Ilidža between the 510th and 501st (a straight trade).
+- **Headless 188w:** **712/711/712/710**; only Ilidža moves. Strict health PASS; enclave guard intact.
+
+**Krivajevići (owner question: "it was part of the Nišići operation"):**
+- **Measured:** adding `op:ilijas:krivajevici` after Toljenak on Behar-I (Nov 1994) captures it at t135 with the 162nd and changes nothing else. October 1995 gains it (710 → 711) but April 1995 loses it (712 → 711), because the April 1995 paint says RS. Parked pending the owner's decision.
+- **The cell:** ten Ilijaš settlements: Buljetovina, Duboki Potok, Duševine, Hadžići, Kamenica, Krčevine, Krivajevići, Nišići, Šabanci, Zlotege.
+- **Sources:** two 1st Corps accounts of the 5–7 November 1994 Nišići plateau offensive list **Hadžići** among the places taken (Delić vol. 2 pp.68–69, citing the 11 Nov 1994 "Behar-I" report; Karavelić/Rujanac, as republished on veterani.ba). Karavelić also lists Korita, Višnjica and Nasići, which sit in `op:ilijas:podlugovi` (painted RS at all four checkpoints). Neither account names Krivajevići or Nišići village. Karavelić says the 1st Corps *cut the Olovo–Srednje road with artillery* in November 1994, not that it took the road villages. No source found describes fighting there in 1995.
+- **Reading:** the November 1994 offensive reached into this cell (Hadžići) but no source shows it taken whole. No source supports a change between April and October 1995. So the paint is inconsistent in one place or the other: April 1995 RS and October 1995 RBiH cannot both be right unless something happened in 1995 that no source records. Caveat: the sources give no municipality for "Hadžići"; the Ilijaš Hadžići on the plateau is the plausible one. The 1st Corps monograph PDF exceeds the fetch limit and was not read.
