@@ -4,7 +4,7 @@
 
 **Audience:** UI/UX, frontend, product, and design owners (Pyrrhic Games team). Use as a punch-list when prioritizing polish-phase work between v0.9.x and v1.0.
 
-**Updated:** 2026-05-16
+**Updated:** 2026-11-05 — a fresh live inspection superseded the open P1/P2 art-direction items here; its findings and the executable packet live in [working/20261105_VISUAL_INSPECTION_AND_ART_DIRECTION.md](working/20261105_VISUAL_INSPECTION_AND_ART_DIRECTION.md) and [../plans/2026-11-05-visual-polish-art-direction-plan.md](../plans/2026-11-05-visual-polish-art-direction-plan.md). Older rows below remain the historical punch-list.
 
 **Ownership:** This file is a **one-shot observation/punch-list**, not a competing canonical owner of GUI status. [GUI_MASTER.md](GUI_MASTER.md) remains the single living reference for GUI status, gates, and recent changes. Findings here should be closed out one at a time and the resolution logged in `GUI_MASTER.md` under "Recent GUI changes" with a link to the implementation report; once a finding is closed, mark it `RESOLVED — see [report link]` in this file (do not delete — keeps the historical audit traceable). Once the punch-list is fully drained, archive this file to `docs/40_reports/archive/`.
 

@@ -1,5 +1,6 @@
 import { useGameStore } from '../store/gameStore';
 import { t, type MessageKey } from '../i18n';
+import { COUNTER_PRINT } from '../map/mapPaperPalette';
 
 interface LegendStop {
   color: string;
@@ -84,8 +85,8 @@ export function MapModeLegend() {
           >
             <span className="absolute left-1/2 top-0 -translate-x-1/2 text-xs font-bold leading-none text-white">X</span>
             <span className="absolute inset-0 flex items-center justify-center text-lg font-bold leading-none text-white">×</span>
-            <span className="absolute bottom-1 left-2 h-1 w-5 bg-emerald-300" />
-            <span className="absolute bottom-1 right-2 h-1 w-4 bg-cyan-300" />
+            <span className="absolute bottom-1 left-2 h-1 w-5" style={{ backgroundColor: COUNTER_PRINT.strengthBar }} />
+            <span className="absolute bottom-1 right-2 h-1 w-4" style={{ backgroundColor: COUNTER_PRINT.moraleBar }} />
             <span
               data-testid="map-counter-stack-badge"
               className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full border border-white bg-black px-1 text-xs font-bold leading-none text-white"

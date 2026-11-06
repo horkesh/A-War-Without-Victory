@@ -1,6 +1,6 @@
 /**
  * Chief of Staff Briefing — paper missive from the named deputy.
- * Styled like a formal military document (cream paper, neutral tones, stamp).
+ * A formal military document on the shared paper material (DossierPaper).
  * Template-based personality-driven narrative from game state.
  * Inline clickable links for corps, sectors, operations.
  */
@@ -16,6 +16,7 @@ import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard'
 import { getActiveLocale, t, type MessageKey } from '../../i18n';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
 import { projectOperationLifecycle } from '../../data/operationLifecycleProjection';
+import { DOSSIER_INK, DossierPaper } from './DossierPaper';
 
 // ── CoS identity ────────────────────────────────────────────────────
 
@@ -446,25 +447,29 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
     if (!profile || paragraphs.length === 0) return null;
 
     return (
-        <div className="bg-[#f5f0e8] border border-neutral-300 rounded-lg overflow-hidden flex flex-col min-h-[150px] max-h-[220px] shadow-md relative">
-            {/* Stamp */}
-            <div className="absolute top-2 right-3 opacity-[0.08] font-black text-xl -rotate-12 select-none uppercase text-neutral-800 pointer-events-none">
-                {t('chiefOfStaff.header.stamp')}
-            </div>
-
-            {/* Header */}
-            <div className="px-3 py-1.5 border-b border-neutral-300/60 bg-[#ebe5d8]">
-                <div className="text-xs uppercase font-bold text-neutral-600 tracking-[0.2em]">{t('chiefOfStaff.header.dailyBriefing')} — {turnToDateString(turn)}</div>
-                <div className="text-xs font-bold text-neutral-800 mt-0.5">
-                    {profile.rank} {profile.name}
+        <DossierPaper
+            testId="chief-of-staff-briefing"
+            className="flex flex-col min-h-[150px] max-h-[220px]"
+            stamp={t('chiefOfStaff.header.stamp')}
+            header={(
+                <>
+                    <div className={`text-xs uppercase font-bold tracking-[0.2em] ${DOSSIER_INK.muted}`}>{t('chiefOfStaff.header.dailyBriefing')} — {turnToDateString(turn)}</div>
+                    <div className={`text-xs font-bold mt-0.5 ${DOSSIER_INK.heading}`}>
+                        {profile.rank} {profile.name}
+                    </div>
+                    <div className={`text-xs italic ${DOSSIER_INK.muted}`}>{profileTitle}</div>
+                </>
+            )}
+            footer={(
+                <div className={`text-xs italic text-right ${DOSSIER_INK.muted}`}>
+                    — {profile.rank} {profile.name.split(' ').pop()}, {profileTitle}
                 </div>
-                <div className="text-xs text-neutral-600 italic">{profileTitle}</div>
-            </div>
-
+            )}
+        >
             {/* Body — missive text with inline links */}
             <div className="px-3 py-1.5 flex-1 overflow-y-auto">
                 {paragraphs.map((segments, i) => (
-                    <p key={i} className="text-[12px] text-neutral-700 leading-relaxed mb-2 last:mb-0" style={{ fontFamily: 'var(--font-command)' }}>
+                    <p key={i} className={`text-[12px] leading-relaxed mb-2 last:mb-0 ${DOSSIER_INK.body}`} style={{ fontFamily: 'var(--font-command)' }}>
                         {i === 0 && <>&ldquo;</>}
                         {segments.map((seg, j) =>
                             seg.type === 'link' && onCorpsClick ? (
@@ -472,7 +477,7 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
                                     key={j}
                                     type="button"
                                     onClick={() => onCorpsClick(seg.corpsId)}
-                                    className="underline decoration-amber-700/40 hover:decoration-amber-700 text-amber-900 font-semibold hover:text-amber-700 transition-colors cursor-pointer"
+                                    className={`font-semibold transition-colors cursor-pointer ${DOSSIER_INK.link}`}
                                     style={{ fontFamily: 'var(--font-command)' }}
                                 >
                                     {seg.label}
@@ -487,9 +492,9 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
 
                 {/* Letter Home — casualty vignette */}
                 {letterHomeText && (
-                    <div className="mt-2 pt-2 border-t border-neutral-300/40">
+                    <div className={`mt-2 pt-2 border-t ${DOSSIER_INK.rule}`}>
                         <p
-                            className="text-xs text-neutral-700 leading-relaxed italic"
+                            className={`text-xs leading-relaxed italic ${DOSSIER_INK.body}`}
                             style={{ fontFamily: 'var(--font-command)', borderLeft: '2px solid #b8860b44', paddingLeft: '8px' }}
                         >
                             {letterHomeText}
@@ -497,13 +502,6 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
                     </div>
                 )}
             </div>
-
-            {/* Footer — signature line */}
-            <div className="px-3 py-1 border-t border-neutral-300/60 bg-[#ebe5d8]">
-                <div className="text-xs text-neutral-600 italic text-right">
-                    — {profile.rank} {profile.name.split(' ').pop()}, {profileTitle}
-                </div>
-            </div>
-        </div>
+        </DossierPaper>
     );
 }

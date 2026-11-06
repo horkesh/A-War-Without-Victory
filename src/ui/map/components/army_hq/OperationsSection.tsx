@@ -453,7 +453,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
     const completedAarGrade = getRecordedAarGrade(completedAAR);
 
     return (
-        <div className="px-4 py-3 space-y-4 text-xs border-t border-panel-border/50 bg-panel-card font-mono">
+        <div className="px-4 py-3 space-y-4 text-xs border-t border-panel-border/50 bg-panel-card">
             {/* Commander personality card */}
             {commanderDisplay.kind === 'assigned' ? (
                 <div className="flex items-start gap-4 px-3 py-2.5 border border-panel-border/50 bg-panel-bg rounded-md">
@@ -742,7 +742,7 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                     {/* Command-risk inline reminder — demoted in Wave 10 (Standing section owns detail).
                         Silence = healthy: no notice at strain 0. */}
                     {hasReportedCommandStrain && commandStrain > 0 && (
-                        <p className={`text-xs font-mono italic ${
+                        <p className={`text-xs italic ${
                             normalizedCommandStrainLabel === 'compromised' ? 'text-red-400/70' : 'text-amber-400/70'
                         }`}>
                             {t('operationsSection.commandStrainNotice')}

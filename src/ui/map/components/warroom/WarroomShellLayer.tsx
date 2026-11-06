@@ -907,27 +907,58 @@ export interface WarroomShellLayerProps {
   statusDock?: ReactNode;
 }
 
+/** The brass the warroom chrome already uses elsewhere in this file. */
+const BRASS_RGB = '214,174,76';
+
+// A brass-edged lacquered rail, not a glass toolbar: it belongs to the room.
+const TOOLBAR_STYLE: CSSProperties = {
+  position: 'absolute',
+  left: '50%',
+  top: '1.6%',
+  transform: 'translateX(-50%)',
+  zIndex: 6,
+  display: 'flex',
+  maxWidth: 'calc(100% - 32px)',
+  gap: '2px',
+  overflowX: 'auto',
+  border: `1px solid rgba(${BRASS_RGB},0.55)`,
+  borderRadius: '2px',
+  background: 'linear-gradient(180deg, rgba(46,33,22,0.95), rgba(22,16,12,0.95))',
+  padding: '4px 8px',
+  boxShadow: '0 10px 28px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,226,170,0.16), inset 0 -1px 0 rgba(0,0,0,0.55)',
+};
+
+const TOOLBAR_ITEM_STYLE: CSSProperties = {
+  flex: '0 0 auto',
+  cursor: 'pointer',
+  border: 'none',
+  borderBottom: '1px solid transparent',
+  background: 'transparent',
+  color: 'rgba(236,222,186,0.92)',
+  padding: '7px 9px 6px',
+  fontFamily: 'var(--font-command)',
+  fontSize: '12px',
+  fontWeight: 700,
+  letterSpacing: '0.08em',
+  lineHeight: 1,
+  textTransform: 'uppercase',
+  whiteSpace: 'nowrap',
+  textShadow: '0 1px 0 rgba(0,0,0,0.6)',
+};
+
+const TOOLBAR_ADVANCE_STYLE: CSSProperties = {
+  ...TOOLBAR_ITEM_STYLE,
+  borderBottom: '1px solid rgba(255,170,140,0.7)',
+  color: 'rgba(255,200,176,0.98)',
+};
+
 function WarroomToolbar({ onNavigate }: { onNavigate: (command?: WarroomNavigationCommand) => void }) {
   return (
     <nav
       aria-label={t('warroomShell.navigation')}
       data-testid="warroom-toolbar"
-      style={{
-        position: 'absolute',
-        left: '50%',
-        top: '1.6%',
-        transform: 'translateX(-50%)',
-        zIndex: 6,
-        display: 'flex',
-        maxWidth: 'calc(100% - 32px)',
-        gap: '6px',
-        overflowX: 'auto',
-        border: '1px solid rgba(214,174,76,0.34)',
-        background: 'rgba(13,16,20,0.84)',
-        padding: '6px',
-        boxShadow: '0 16px 42px rgba(0,0,0,0.42)',
-        backdropFilter: 'blur(8px)',
-      }}
+      data-material="rail"
+      style={TOOLBAR_STYLE}
     >
       {WARROOM_ROUTE_ENTRIES.map((entry) => (
         <button
@@ -935,21 +966,7 @@ function WarroomToolbar({ onNavigate }: { onNavigate: (command?: WarroomNavigati
           type="button"
           data-testid={`warroom-toolbar-${entry.id}`}
           onClick={() => onNavigate(commandForWarroomRoute(entry.id))}
-          style={{
-            flex: '0 0 auto',
-            cursor: 'pointer',
-            border: '1px solid rgba(214,174,76,0.26)',
-            background: 'rgba(0,0,0,0.24)',
-            color: entry.id === 'advance' ? 'rgba(255,214,190,0.96)' : 'rgba(236,220,174,0.96)',
-            padding: '7px 9px',
-            fontFamily: 'var(--font-command)',
-            fontSize: '12px',
-            fontWeight: 700,
-            letterSpacing: '0.04em',
-            lineHeight: 1,
-            textTransform: 'uppercase',
-            whiteSpace: 'nowrap',
-          }}
+          style={entry.id === 'advance' ? TOOLBAR_ADVANCE_STYLE : TOOLBAR_ITEM_STYLE}
         >
           {t(entry.labelKey)}
         </button>

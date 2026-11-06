@@ -1,8 +1,12 @@
 import type { Map as MapLibreMap } from 'maplibre-gl';
 import { normalizeFactionId } from '../../../state/identity.js';
 import { UI_DATA_FONT_FAMILY } from '../styles/typography';
+import { COUNTER_PRINT, factionBorderInk, factionInk, rgbaString } from './mapPaperPalette';
 
 // Spec §2.4: rectangular HoI-style counters — faction-colored fill, white abbreviation.
+// Printed-counter rendition (2026-11-05): the body is a faction print ink on a paper
+// halo with a bevelled edge, the status bars are cream and gold, and the symbol is
+// paper-coloured. Geometry, size curve, halo opacity and icon-id grammar are unchanged.
 // Canvas is 160×80 at pixelRatio 2 → displayed as 80×40 CSS px per icon-size unit.
 export const ICON_WIDTH = 160;
 export const ICON_HEIGHT = 80;
@@ -13,23 +17,6 @@ const COUNTER_BODY_X = COUNTER_BODY_INSET;
 const COUNTER_BODY_Y = COUNTER_BODY_INSET;
 const COUNTER_BODY_WIDTH = ICON_WIDTH - COUNTER_BODY_INSET * 2;
 const COUNTER_BODY_HEIGHT = ICON_HEIGHT - COUNTER_BODY_INSET * 2;
-const COUNTER_HALO_FILL = 'rgba(235, 225, 205, 0.98)';
-const COUNTER_HALO_BORDER = 'rgba(18, 14, 10, 0.72)';
-const FORMING_FILL = 'rgba(104, 108, 112, 1)';
-const FORMING_BORDER = 'rgba(54, 58, 62, 1)';
-
-const FACTION_FILL: Record<string, string> = {
-  RS: 'rgba(178, 60, 60, 1)',
-  RBiH: 'rgba(55, 135, 70, 1)',
-  HRHB: 'rgba(50, 108, 168, 1)',
-};
-
-const FACTION_BORDER: Record<string, string> = {
-  RS: 'rgba(120, 30, 30, 1)',
-  RBiH: 'rgba(30, 90, 45, 1)',
-  HRHB: 'rgba(25, 65, 115, 1)',
-};
-
 export function drawTacticalSymbol(ctx: CanvasRenderingContext2D, kind: string, w: number, h: number): void {
   const normalized = kind.toLowerCase();
   // Colors are now handled by drawFormationIcon via context settings or manual overrides
@@ -123,22 +110,48 @@ function roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: num
   ctx.closePath();
 }
 
+/** Printed-edge bevel: a light line along the top-left edges, a shade along the bottom-right. */
+function drawPrintBevel(ctx: CanvasRenderingContext2D): void {
+  const x = COUNTER_BODY_X + 3;
+  const y = COUNTER_BODY_Y + 3;
+  const w = COUNTER_BODY_WIDTH - 6;
+  const h = COUNTER_BODY_HEIGHT - 6;
+  ctx.save();
+  roundedRect(ctx, COUNTER_BODY_X, COUNTER_BODY_Y, COUNTER_BODY_WIDTH, COUNTER_BODY_HEIGHT, CORNER_RADIUS);
+  ctx.clip();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = COUNTER_PRINT.bevelLight;
+  ctx.beginPath();
+  ctx.moveTo(x, y + h);
+  ctx.lineTo(x, y);
+  ctx.lineTo(x + w, y);
+  ctx.stroke();
+  ctx.strokeStyle = COUNTER_PRINT.bevelShade;
+  ctx.beginPath();
+  ctx.moveTo(x + w, y);
+  ctx.lineTo(x + w, y + h);
+  ctx.lineTo(x, y + h);
+  ctx.stroke();
+  ctx.restore();
+}
+
 export function drawFormationIcon(ctx: CanvasRenderingContext2D, iconId: string): void {
   const isWhiteVariant = iconId.startsWith('white__');
   const actualIconId = isWhiteVariant ? iconId.slice(7) : iconId;
   const { kind, faction, posture, forming } = parseIconId(actualIconId);
   const canonicalFaction = normalizeFactionId(faction);
-  const fill = isWhiteVariant ? 'rgba(255, 255, 255, 1)' : forming ? FORMING_FILL : (FACTION_FILL[canonicalFaction] ?? 'rgba(90, 90, 100, 1)');
-  const border = isWhiteVariant ? 'rgba(20, 20, 20, 1)' : forming ? FORMING_BORDER : (FACTION_BORDER[canonicalFaction] ?? 'rgba(50, 50, 60, 1)');
-  const symbolColor = isWhiteVariant ? 'rgba(20, 20, 20, 1)' : 'rgba(255, 255, 255, 1)';
+  // Faction bodies are opaque print inks (alpha 1); an unknown faction prints neutral.
+  const fill = isWhiteVariant ? 'rgba(255, 255, 255, 1)' : forming ? COUNTER_PRINT.formingFill : rgbaString(factionInk(canonicalFaction), 1);
+  const border = isWhiteVariant ? 'rgba(20, 20, 20, 1)' : forming ? COUNTER_PRINT.formingBorder : rgbaString(factionBorderInk(canonicalFaction), 1);
+  const symbolColor = isWhiteVariant ? 'rgba(20, 20, 20, 1)' : COUNTER_PRINT.symbol;
 
   ctx.clearRect(0, 0, ICON_WIDTH, ICON_HEIGHT);
 
   // Screen-space counters need their own opaque backing over pitched relief.
   roundedRect(ctx, 0, 0, ICON_WIDTH, ICON_HEIGHT, CORNER_RADIUS + 4);
-  ctx.fillStyle = COUNTER_HALO_FILL;
+  ctx.fillStyle = COUNTER_PRINT.haloFill;
   ctx.fill();
-  ctx.strokeStyle = COUNTER_HALO_BORDER;
+  ctx.strokeStyle = COUNTER_PRINT.haloBorder;
   ctx.lineWidth = 2;
   ctx.stroke();
 
@@ -158,6 +171,8 @@ export function drawFormationIcon(ctx: CanvasRenderingContext2D, iconId: string)
     ctx.restore();
   }
 
+  if (!isWhiteVariant && !forming) drawPrintBevel(ctx);
+
   // Border
   ctx.save();
   if (forming) ctx.setLineDash([10, 8]);
@@ -175,24 +190,24 @@ export function drawFormationIcon(ctx: CanvasRenderingContext2D, iconId: string)
     const barX = COUNTER_BODY_X + 16;
     const totalW = COUNTER_BODY_WIDTH - 24; // Account for posture stripe and padding
 
-    // Health (Green/Red)
+    // Strength (cream; alarm red below 40%)
     if (health !== undefined) {
       const hW = (totalW / 2) - 4;
       const hPct = health / 100;
-      ctx.fillStyle = 'rgba(20, 20, 20, 0.6)';
+      ctx.fillStyle = COUNTER_PRINT.barTrack;
       ctx.fillRect(barX, barY, hW, barH);
-      ctx.fillStyle = hPct > 0.4 ? 'rgba(50, 200, 50, 0.9)' : 'rgba(200, 50, 50, 0.9)';
+      ctx.fillStyle = hPct > 0.4 ? COUNTER_PRINT.strengthBar : COUNTER_PRINT.strengthBarLow;
       ctx.fillRect(barX, barY, hW * hPct, barH);
     }
 
-    // Morale (Cyan)
+    // Morale (gold)
     if (morale !== undefined) {
       const mW = (totalW / 2) - 4;
       const mPct = morale / 100;
       const mX = barX + (totalW / 2) + 4;
-      ctx.fillStyle = 'rgba(20, 20, 20, 0.6)';
+      ctx.fillStyle = COUNTER_PRINT.barTrack;
       ctx.fillRect(mX, barY, mW, barH);
-      ctx.fillStyle = 'rgba(50, 200, 255, 0.9)';
+      ctx.fillStyle = COUNTER_PRINT.moraleBar;
       ctx.fillRect(mX, barY, mW * mPct, barH);
     }
   }

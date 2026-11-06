@@ -23,6 +23,7 @@ import { SituationBriefing, type BriefingTarget } from './SituationBriefing';
 import { PresidentialAttentionPanel } from './PresidentialAttentionPanel';
 import { StrategicPosition } from './StrategicPosition';
 import { ChiefOfStaffBriefing } from './ChiefOfStaffBriefing';
+import { DOSSIER_INK, DossierPaper } from './DossierPaper';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
 import { getArmyCrest, getArmyName } from '../../utils/factionAssets';
 import { turnToDateString } from '../../utils/formatters';
@@ -112,27 +113,26 @@ function DecisionRoomHandoff({
     );
 }
 
+/** The commander's personnel note: prose on paper beneath the dark stat card. */
 function OfficerMiniBio({ officer }: { officer: NamedOfficerView }) {
+    const rows: Array<[string, string | undefined]> = [
+        [t('armyHq.officer.style'), officer.command_style],
+        [t('armyHq.officer.known'), officer.known_for],
+        [t('armyHq.officer.command'), officer.political_alignment_note],
+        [t('armyHq.officer.note'), officer.sensitive_history_note],
+    ];
+    const present = rows.filter((row): row is [string, string] => Boolean(row[1]));
     return (
-        <div className="mt-1.5 space-y-1 border-t border-panel-border/30 pt-1.5 text-xs leading-snug">
-            <div className="text-text-primary">{officer.bio_short ?? t('armyHq.officer.servicePending')}</div>
-            {(officer.command_style || officer.known_for || officer.political_alignment_note || officer.sensitive_history_note) && (
-                <div className="grid grid-cols-1 gap-0.5">
-                    {officer.command_style && (
-                        <div><span className="text-text-secondary uppercase tracking-wide">{t('armyHq.officer.style')} </span><span className="text-text-primary">{officer.command_style}</span></div>
-                    )}
-                    {officer.known_for && (
-                        <div><span className="text-text-secondary uppercase tracking-wide">{t('armyHq.officer.known')} </span><span className="text-text-primary">{officer.known_for}</span></div>
-                    )}
-                    {officer.political_alignment_note && (
-                        <div><span className="text-text-secondary uppercase tracking-wide">{t('armyHq.officer.command')} </span><span className="text-text-primary">{officer.political_alignment_note}</span></div>
-                    )}
-                    {officer.sensitive_history_note && (
-                        <div><span className="text-text-secondary uppercase tracking-wide">{t('armyHq.officer.note')} </span><span className="text-text-primary">{officer.sensitive_history_note}</span></div>
-                    )}
+        <DossierPaper testId="army-hq-officer-note" className="mt-2 px-3 py-2 text-xs leading-snug">
+            <div className={DOSSIER_INK.body}>{officer.bio_short ?? t('armyHq.officer.servicePending')}</div>
+            {present.length > 0 && (
+                <div className={`mt-1.5 grid grid-cols-1 gap-0.5 border-t pt-1.5 ${DOSSIER_INK.rule}`}>
+                    {present.map(([label, value]) => (
+                        <div key={label}><span className={`uppercase tracking-wide ${DOSSIER_INK.muted}`}>{label} </span><span className={DOSSIER_INK.heading}>{value}</span></div>
+                    ))}
                 </div>
             )}
-        </div>
+        </DossierPaper>
     );
 }
 
@@ -393,7 +393,7 @@ export function ArmyHQModal({
     // so we host only The War's Record (campaign history sourced from loadedGameState).
     if (open && state && isObserver) {
         return (
-            <div ref={dialogFocus.ref} onKeyDown={dialogFocus.onKeyDown} tabIndex={-1} className="fixed inset-0 flex overflow-hidden font-mono" style={{ zIndex: Z.MODAL }} role="dialog" aria-modal="true" aria-label={t('armyHq.dialogTitle')}>
+            <div ref={dialogFocus.ref} onKeyDown={dialogFocus.onKeyDown} tabIndex={-1} className="fixed inset-0 flex overflow-hidden" style={{ zIndex: Z.MODAL }} role="dialog" aria-modal="true" aria-label={t('armyHq.dialogTitle')}>
                 <button
                     type="button"
                     aria-label={t('armyHq.dismissBackdrop')}
@@ -454,7 +454,7 @@ export function ArmyHQModal({
             tabIndex={-1}
             data-testid="army-hq-modal"
             data-expanded-corps-id={expandedCorpsId ?? ''}
-            className="fixed inset-0 flex overflow-hidden font-mono"
+            className="fixed inset-0 flex overflow-hidden"
             style={{ zIndex: Z.MODAL }}
             role="dialog"
             aria-modal="true"
@@ -524,7 +524,7 @@ export function ArmyHQModal({
                             </button>
                         )}
                         {crestSrc && (
-                            <img src={crestSrc} alt="" className="w-8 h-8 object-contain opacity-80" draggable={false} />
+                            <img data-testid="army-hq-crest" src={crestSrc} alt="" className="h-11 w-11 object-contain drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]" draggable={false} />
                         )}
                         <div>
                             <div className="text-xs uppercase tracking-[0.22em] text-text-secondary font-bold">

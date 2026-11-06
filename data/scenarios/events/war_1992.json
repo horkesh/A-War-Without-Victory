@@ -1,6 +1,7 @@
 [
   {
     "id": "rs_strategic_goals",
+    "image": "event_political_session.webp",
     "title": "The Assembly Speaks",
     "narrative": "The National Assembly has convened. Six strategic goals for the Serb people in Bosnia have been drafted: state separation, the Posavina corridor, the Drina valley border, the Una-Neretva border, the division of Sarajevo, and access to the sea. General Ratko Mladic, commander of the VRS Main Staff, has reviewed them. He warns the Assembly plainly: pursuing these goals — particularly the Drina corridor and Sarajevo — will require actions that constitute genocide. The Assembly awaits your decision.",
     "localizations": {
@@ -2346,6 +2347,7 @@
   },
   {
     "id": "hrhb_political_goal",
+    "image": "event_patron_relations_HRHB.webp",
     "title": "What Is Herceg-Bosna?",
     "narrative": "Zagreb is on the line. Your patron's directive is clear: Herceg-Bosna exists to secure Croat territory in Bosnia, with a view toward eventual unification with Croatia. But on the ground, your HVO fights alongside the ARBiH against Serb forces. Some of your commanders — notably Kljuic — argue the Croat future lies in a unified Bosnia, not a separate statelet. Your patron disagrees. Choose your path: it will define your alliances, your wars, and your fate at the negotiating table.",
     "localizations": {
@@ -3247,6 +3249,7 @@
   },
   {
     "id": "arms_embargo_impact_1992",
+    "image": "event_supply_shortage_RBiH.webp",
     "title": "UN Arms Embargo Strangles Bosnia",
     "narrative": "The UN arms embargo, originally imposed on all of Yugoslavia, disproportionately impacts the fledgling Bosnian government. While the VRS inherits vast JNA stockpiles and the HVO receives supplies from Croatia, the ARBiH faces severe weapons shortages across all fronts.",
     "category": "military",
@@ -4648,6 +4651,7 @@
   },
   {
     "id": "omarska_camp_1992",
+    "image": "event_concentration_camps_revealed_1992.webp",
     "title": "The Omarska Camp",
     "narrative": "Reports reach the outside world of a detention facility at the Omarska iron-ore complex south of Prijedor. The International Criminal Tribunal for the former Yugoslavia later established, across the Tadić, Stakić and Kvočka judgments, that the facility held some three thousand Bosniak and Croat detainees in conditions found to constitute crimes against humanity. The historical record of Omarska is documented here as part of the Prijedor camp system.",
     "source_note": "ICTY findings in Prosecutor v. Tadic (IT-94-1-T), Prosecutor v. Stakic (IT-97-24-T), Prosecutor v. Kvocka et al. (IT-98-30/1-T), and Prosecutor v. Karadzic (IT-95-5/18-T) ground this row's provenance for the Omarska detention facility. Per Sensitive History Design Gate §1.3 Ring 3 #2 and §3.6: this is a representation-only historical-record row with no player response options; any descendant row MUST NOT re-author cleansing, forced-displacement, civilian-targeting, paramilitary deployment, detention-camp expansion, or detainee-population selection — the camp-system process is canon-refused. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
@@ -5067,6 +5071,7 @@
   },
   {
     "id": "milosevic_isolation_warning_aug92",
+    "image": "event_patron_relations_RS.webp",
     "title": "Belgrade Warns Pale: International Isolation Is Growing",
     "narrative": "Milošević privately warns Karadžić that the ITN footage of Omarska and Trnopolje has triggered international revulsion. Serbia cannot shield Pale indefinitely from consequences — the pace of events must slow.",
     "category": "diplomatic",

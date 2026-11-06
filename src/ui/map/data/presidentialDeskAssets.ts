@@ -24,6 +24,7 @@ import packetThumbReserveRequest from '../assets/presidential_desk/packet_thumbn
 import type { InboxItemType } from './inboxItems';
 import type { DecisionSurfaceFamilyId } from './decisionSurfaceRegistry';
 import type { DecisionConsequenceRecord } from './decisionConsequenceLedger';
+import type { TurnAftermathTone } from './turnAftermath';
 
 export const PRESIDENTIAL_DESK_BACKGROUND = presidentialDeskBackground;
 
@@ -53,6 +54,37 @@ const PACKET_THUMBNAILS: Partial<Record<InboxItemType, string>> = {
   reserve_request: packetThumbReserveRequest,
   situation: packetThumbEventDecision,
 };
+
+/**
+ * Decision plate for a required event decision, chosen by the event's authored
+ * category. Used when the event carries no illustration of its own.
+ */
+const EVENT_CATEGORY_HEADERS: Readonly<Record<string, string>> = Object.freeze({
+  command: decisionHeaderPersonnel,
+  diplomatic: decisionHeaderDiplomacy,
+  economic: decisionHeaderIntelligence,
+  humanitarian: decisionHeaderHumanitarianConvoy,
+  military: decisionHeaderMilitaryStaff,
+  political: decisionHeaderDiplomacy,
+  territorial: decisionHeaderMilitaryStaff,
+});
+
+export function getDecisionHeaderForEventCategory(category: string | null | undefined): string {
+  // Catalog categories are authored lowercase; exact match, like the label lookup.
+  return EVENT_CATEGORY_HEADERS[category ?? ''] ?? decisionHeaderMilitaryStaff;
+}
+
+/** Consequence still drawn behind the turn-aftermath header, by the turn's tone. */
+const TONE_STILLS: Readonly<Record<TurnAftermathTone, string>> = Object.freeze({
+  gain: consequenceReserveDeployment,
+  loss: consequencePublicPressure,
+  mixed: consequenceHumanitarianAccess,
+  quiet: consequenceNegotiatedSettlement,
+});
+
+export function getConsequenceStillForTone(tone: TurnAftermathTone): string {
+  return TONE_STILLS[tone];
+}
 
 export function getDecisionHeaderForFamily(familyId: DecisionSurfaceFamilyId): string | null {
   return DECISION_HEADERS[familyId] ?? null;

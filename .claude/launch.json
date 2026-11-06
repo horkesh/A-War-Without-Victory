@@ -3,9 +3,8 @@
   "configurations": [
     {
       "name": "tactical-map",
-      "runtimeExecutable": "node",
-      "runtimeArgs": ["node_modules/vite/bin/vite.js"],
-      "cwd": "src/ui/map",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:map"],
       "port": 3002
     }
   ]

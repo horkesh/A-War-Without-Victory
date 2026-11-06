@@ -75,6 +75,7 @@ import { buildFormationsGeoJSON } from './builders/buildFormationsGeoJSON';
 import { buildOsidCentroidLookup } from './builders/geojsonLookup';
 import { resolveFormationNavigationAnchor } from './builders/resolveFormationLocationOsid';
 import { ensureFormationIcons, ensureTacticalIcons } from './formationIcons';
+import { MAP_PAPER_PALETTE } from './mapPaperPalette';
 import { buildFogOfWarGeoJSON } from './builders/buildFogOfWarGeoJSON';
 import { buildEnclaveGeoJSON } from './builders/buildEnclaveGeoJSON';
 import { buildBattleMarkersGeoJSON } from './builders/buildBattleMarkersGeoJSON';
@@ -349,7 +350,8 @@ function handleFormationCounterSelection(
 }
 
 /** Layer IDs for front lines (visibility driven by store frontsVisible). */
-const FRONT_LAYER_IDS = ['faction-border-glow-pos', 'faction-border-glow-neg', 'front-line-base', 'front-line-stripe'];
+/** Every layer the fronts toggle hides. Must list every `front-line-*` layer in the style (pinned by map_style_contract). */
+const FRONT_LAYER_IDS = ['faction-border-glow-pos', 'faction-border-glow-neg', 'front-line-base', 'front-line-stripe', 'front-line-understroke'];
 /** Fill layer for ethnic map mode (majority_ethnic); toggled with osid-control-fill by mapMode. */
 const OSID_ETHNIC_FILL_LAYER_ID = 'osid-ethnic-fill';
 
@@ -2701,7 +2703,7 @@ export function MapContainer({
                       ?? (safeHasLayer(m, 'formation-markers') ? 'formation-markers' : undefined);
                     safeEnsureLayer(
                       m,
-                      { id: FOG_FILL_LAYER_ID, type: 'fill', source: FOG_OVERLAY_SOURCE_ID, paint: { 'fill-color': 'rgba(0, 0, 0, 0.42)' } },
+                      { id: FOG_FILL_LAYER_ID, type: 'fill', source: FOG_OVERLAY_SOURCE_ID, paint: { 'fill-color': MAP_PAPER_PALETTE.fog } },
                       fogBeforeId,
                     );
                     if (m.getSource(FOG_OVERLAY_SOURCE_ID)) (m.getSource(FOG_OVERLAY_SOURCE_ID) as GeoJSONSource).setData(fogGeoJson);
