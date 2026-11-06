@@ -12,6 +12,7 @@ import type { OfficerResentmentReceipt } from '../data/officerResentmentReceipts
 import { getDecisionSurfaceForInboxType } from '../data/decisionSurfaceRegistry';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
+import { getConsequenceStillForTone } from '../data/presidentialDeskAssets';
 import { t, type MessageKey } from '../i18n';
 import { formatPersonnel, formatCount, turnToDateString } from '../utils/formatters';
 
@@ -181,8 +182,18 @@ export function TurnAftermathModal({
       panelClassName="w-full max-w-6xl max-h-[86vh] overflow-hidden border border-white/15 bg-[#101018] shadow-2xl"
     >
       <>
-        <div className="flex items-start justify-between gap-4 border-b border-white/10 bg-black/30 px-5 py-4">
-          <div className="min-w-0">
+        <div className="relative flex items-start justify-between gap-4 overflow-hidden border-b border-white/10 bg-black/30 px-5 py-4">
+          {/* Image-plus-fade band, kept inline because this header lays the close
+              button beside the title; DecisionModalImageHeader owns the shared recipe. */}
+          <img
+            data-testid="turn-aftermath-header-art"
+            src={getConsequenceStillForTone(view.tone)}
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40"
+          />
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#101018]/95 via-[#101018]/85 to-[#101018]/45" />
+          <div className="relative min-w-0">
             <div id="turn-aftermath-title" className="text-xs font-mono uppercase tracking-[0.28em] text-amber-400/70">
               {t('turnAftermath.title')}
             </div>
@@ -199,7 +210,7 @@ export function TurnAftermathModal({
             type="button"
             data-testid="turn-aftermath-close"
             onClick={onClose}
-            className="shrink-0 rounded border border-white/10 px-3 py-1.5 text-xs font-mono uppercase tracking-[0.18em] text-text-secondary hover:border-white/25 hover:text-text-primary"
+            className="relative shrink-0 rounded border border-white/10 px-3 py-1.5 text-xs font-mono uppercase tracking-[0.18em] text-text-secondary hover:border-white/25 hover:text-text-primary"
           >
             {t('turnAftermath.continue')}
           </button>

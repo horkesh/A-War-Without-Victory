@@ -113,26 +113,30 @@ it('base deck counters stay faction-colored while selected formations get a whit
 it('formation counter bodies are opaque so terrain and labels cannot bleed through unit icons', () => {
     const source = readFileSync('src/ui/map/map/formationIcons.ts', 'utf8');
 
-    expect(source).toContain("const COUNTER_HALO_FILL = 'rgba(235, 225, 205, 0.98)'");
-    expect(source).toContain("const COUNTER_HALO_BORDER = 'rgba(18, 14, 10, 0.72)'");
+    const palette = readFileSync('src/ui/map/map/mapPaperPalette.ts', 'utf8');
+
+    // The halo and body inks are owned by the paper palette; the painter reads them.
+    expect(palette).toContain('export const COUNTER_HALO_RGB: Rgb = [235, 225, 205]');
+    expect(palette).toContain('haloFill: rgbaString(COUNTER_HALO_RGB, 0.98)');
+    expect(palette).toContain("haloBorder: 'rgba(18, 14, 10, 0.72)'");
+    expect(source).toContain('ctx.fillStyle = COUNTER_PRINT.haloFill');
+    expect(source).toContain('ctx.strokeStyle = COUNTER_PRINT.haloBorder');
     expect(source).toContain('roundedRect(ctx, 0, 0, ICON_WIDTH, ICON_HEIGHT, CORNER_RADIUS + 4)');
     expect(source).toContain('roundedRect(ctx, COUNTER_BODY_X, COUNTER_BODY_Y, COUNTER_BODY_WIDTH, COUNTER_BODY_HEIGHT, CORNER_RADIUS)');
-    expect(source).toContain("RS: 'rgba(178, 60, 60, 1)'");
-    expect(source).toContain("RBiH: 'rgba(55, 135, 70, 1)'");
-    expect(source).toContain("HRHB: 'rgba(50, 108, 168, 1)'");
-    expect(source).toContain("RS: 'rgba(120, 30, 30, 1)'");
-    expect(source).toContain("RBiH: 'rgba(30, 90, 45, 1)'");
-    expect(source).toContain("HRHB: 'rgba(25, 65, 115, 1)'");
-    expect(source).toContain("const fill = isWhiteVariant ? 'rgba(255, 255, 255, 1)' : forming ? FORMING_FILL : (FACTION_FILL[canonicalFaction] ?? 'rgba(90, 90, 100, 1)')");
-    expect(source).toContain("const border = isWhiteVariant ? 'rgba(20, 20, 20, 1)' : forming ? FORMING_BORDER : (FACTION_BORDER[canonicalFaction] ?? 'rgba(50, 50, 60, 1)')");
-    expect(source).toContain("const symbolColor = isWhiteVariant ? 'rgba(20, 20, 20, 1)' : 'rgba(255, 255, 255, 1)'");
+    // Faction bodies are fully opaque projections of the canonical palette (alpha 1).
+    expect(source).toContain("const fill = isWhiteVariant ? 'rgba(255, 255, 255, 1)' : forming ? COUNTER_PRINT.formingFill : rgbaString(factionInk(canonicalFaction), 1)");
+    expect(source).toContain("const border = isWhiteVariant ? 'rgba(20, 20, 20, 1)' : forming ? COUNTER_PRINT.formingBorder : rgbaString(factionBorderInk(canonicalFaction), 1)");
+    expect(source).toContain("const symbolColor = isWhiteVariant ? 'rgba(20, 20, 20, 1)' : COUNTER_PRINT.symbol");
+    expect(palette).toContain("symbol: 'rgba(240, 232, 214, 1)'");
     expect(source).not.toContain('0.92');
 });
 
 it('forming counters use a gray fill, dashed border, and explicit label', () => {
     const source = readFileSync('src/ui/map/map/formationIcons.ts', 'utf8');
+    const palette = readFileSync('src/ui/map/map/mapPaperPalette.ts', 'utf8');
 
-    expect(source).toContain("const FORMING_FILL = 'rgba(104, 108, 112, 1)'");
+    expect(palette).toContain("formingFill: 'rgba(104, 108, 112, 1)'");
+    expect(source).toContain('forming ? COUNTER_PRINT.formingFill');
     expect(source).toContain('ctx.setLineDash([10, 8])');
     expect(source).toContain("ctx.fillText('FORMING'");
 });

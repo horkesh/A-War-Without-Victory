@@ -1,6 +1,7 @@
 [
   {
     "id": "ic_pressure_vopp_engagement",
+    "image": "event_patron_relations_RBiH.webp",
     "source_tier": "agreement_text",
     "title": "Western Powers Press Sarajevo: Engage with Vance-Owen",
     "narrative": "Western capitals and mediators increase pressure on Sarajevo to engage seriously with the Vance-Owen Peace Plan. The diplomatic sequence signals that refusal would risk isolating the government internationally.",
@@ -1497,6 +1498,7 @@
   },
   {
     "id": "croatia_herceg_bosna_control_1993",
+    "image": "event_patron_relations_HRHB.webp",
     "title": "Croatia Tightens Control over Herceg-Bosna",
     "narrative": "The Republic of Croatia deepens its de facto control over the Croatian Community of Herceg-Bosna: HV officers serve in HVO command positions, Croatian state resources flow across the border, and Zagreb's directives increasingly drive HVO military strategy. The ICTY Prlic trial establishes a Joint Criminal Enterprise involving Tudjman's inner circle and HVO commanders aimed at creating ethnically homogeneous Croat territory for eventual annexation.",
     "category": "political",
@@ -1985,6 +1987,7 @@
   },
   {
     "id": "milosevic_vopp_pressure",
+    "image": "event_patron_relations_RS.webp",
     "title": "Milošević Orders Karadžić: Accept Vance-Owen",
     "narrative": "Milošević and Bulatović fly to Zvornik to personally demand that the Bosnian Serb Assembly accept the Vance-Owen Plan. Belgrade cannot sustain UN sanctions indefinitely — Pale's intransigence is destroying Serbia's economy.",
     "category": "diplomatic",
@@ -3105,6 +3108,7 @@
   },
   {
     "id": "milosevic_owen_stoltenberg_distancing",
+    "image": "event_patron_relations_RS.webp",
     "title": "Belgrade Grows Distant: Milošević Signals Exhaustion",
     "narrative": "After the Owen-Stoltenberg plan collapses, Milošević signals through back-channels that Serbia's patience is exhausted. UN sanctions are cratering the Serbian economy — Pale's demands are no longer Belgrade's priority.",
     "category": "diplomatic",
@@ -4411,6 +4415,7 @@
   },
   {
     "id": "rs_belgrade_pressure_response_1993",
+    "image": "event_patron_relations_RS.webp",
     "title": "Belgrade Calls: Pale Records Its Posture",
     "narrative": "Milosevic's envoys arrive at Pale through the FRY-RS channel. The directive is unambiguous: ease the Drina-corridor tempo, signal flexibility on Sarajevo division, and accept the corridor-narrowing implied by the Owen-Stoltenberg track and the diplomatic envelope Belgrade is brokering. The pressure is diplomatic, not material — no embargo, no border closure, no supply rupture. But Belgrade is exhausted by sanctions and the patron channel matters for ammunition reliability and political cover at the Security Council. Karadzic, Krajisnik, and Mladic disagree on the response. The Pale Assembly must record its posture: defy the directive on principle, accept the directive and adjust operations, partially comply by signaling some flexibility without breaking the platform, or attempt to broker a compromise that preserves Pale's leverage.",
     "category": "diplomatic",
@@ -4741,6 +4746,7 @@
   },
   {
     "id": "abdic_apwb_declared_1993",
+    "image": "event_political_session.webp",
     "title": "Abdic Declares the Autonomous Province",
     "narrative": "Sarajevo Presidency files, 27 September 1993. Fikret Abdic — the Velika Kladusa industrialist who polled ahead of Izetbegovic on the joint Presidency list in November 1990, and who has rejected the Presidency's positions on the Owen-Stoltenberg framework — has today declared the Autonomous Province of Western Bosnia centered on Velika Kladusa. Una-Sana economic ties with the Republic of Serbian Krajina and Pale-aligned channels are documented. The 5th Corps in Bihac now faces a second internal front to the north as well as the external siege from the south and west. The Presidency must record a posture toward the breakaway entity: suppress it militarily through 5th Corps clearance operations, tolerate it for now and concentrate on the external siege, offer Federation-line negotiating channels, or open formal talks on a negotiated autonomy that recognizes Abdic's seat at the table.",
     "category": "political",
@@ -4999,6 +5005,7 @@
   },
   {
     "id": "bosnian_assembly_rejects_os_1993",
+    "image": "event_political_session.webp",
     "title": "Bosnian Parliament Rejects Owen-Stoltenberg Plan",
     "narrative": "After sessions aboard HMS Invincible on September 20, the Bosnian government assembly in Sarajevo votes to reject the Owen-Stoltenberg plan's ethnic partition, demanding additional territory and access to the sea. The rejection prolongs the war and frustrates international mediators but preserves the principle of a unified, multi-ethnic Bosnia.",
     "category": "political",
@@ -5426,6 +5433,7 @@
   },
   {
     "id": "mostar_bridge_destroyed_1993",
+    "image": "event_siege_city_HRHB.webp",
     "title": "Stari Most Destroyed in Mostar",
     "narrative": "HVO forces destroy the iconic Stari Most, the 16th-century Ottoman bridge spanning the Neretva River in Mostar. The deliberate demolition of this UNESCO-recognized cultural monument becomes a global symbol of the war's cultural devastation. The act draws widespread international condemnation and deepens the stigma on the Bosnian Croat war effort.",
     "category": "humanitarian",
@@ -8255,6 +8263,7 @@
   },
   {
     "id": "hrhb_federation_overture_1993",
+    "image": "event_patron_relations_HRHB.webp",
     "title": "Federation Backchannel: Boban Tests The Language",
     "narrative": "In late autumn 1993, the diplomatic ground beneath Herceg-Bosna shifts. Tudjman, recalculating after the failed Owen-Stoltenberg Union of Three Republics framework, the territorial setbacks in central Bosnia following the ARBiH September-October counter-offensive, and the tightening US sanctions pressure on Croatia, signals to Boban that a federation overture to Sarajevo would buy diplomatic room. The channel is back: through Peter Galbraith (the new US Ambassador to Zagreb, accredited 28 June 1993), through Hannes Swoboda's German Christian Democratic foreign-policy office, through the Holbrooke Bonn-Geneva shuttle. Boban convenes the HZ HB Presidency. The Washington Agreement is still months away. The decision is whether to extend the federation overture NOW (October-December 1993) — pre-empting US pressure, capturing diplomatic credit, and creating the negotiating space that will eventually produce the formal Washington signature in March 1994. Or maintain the separate-state line and let Zagreb-hawks dictate the pace. Or condition federation acceptance on canton-level Croat institutional protections. Or reject the federation path entirely and commit to a permanent separate Croat republic. The choice DOES NOT replace H4 (Zagreb-ordered ceasefire, February 1994) or H9 (Washington Agreement, March 1994) — it captures the BACKCHANNEL window BEFORE both, where the diplomatic ground was being prepared.",
     "category": "diplomatic",
@@ -8536,6 +8545,7 @@
   },
   {
     "id": "rs_autonomy_path_decision_1993",
+    "image": "event_political_session.webp",
     "title": "Independence Or Autonomy: Pale Crystallizes Its Path",
     "narrative": "Between the May 1993 Pale Assembly's rejection of Vance-Owen at Bijeljina and the looming Contact Group framework, the RS leadership crystallizes its general posture decision. Karadzic, Krajisnik, and Mladic confer at Pale. Belgrade's intermittent signalling — through the Owen-Stoltenberg envelope, through Patriarch Pavle, through Milosevic's private envoys — has made clear that a negotiated-autonomy framework within Bosnia and Herzegovina (Knin-style autonomous province, asymmetric federation entity status, or minority-rights-only constitutional package) is the path of least international resistance and could end the FRY sanctions regime that is exhausting the patron state. The platform faction (Pale hawks, Assembly hardliners, the VRS Main Staff) reads any autonomy framework as a betrayal of the Six Strategic Goals. The decision is not specific to any one peace plan — it is the GENERAL posture between specific plan-response windows. Pursue full independent state status. Negotiate autonomy within BiH. Accept Federation entity status. Or accept minority rights only.",
     "category": "political",

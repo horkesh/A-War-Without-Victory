@@ -24,6 +24,9 @@ import { getPlayerSafePoliticalFactionName, getPlayerSafeOfficerName, getPlayerS
 import { useGameStore } from '../store/gameStore';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
+import { DecisionModalImageHeader } from './DecisionModalImageHeader';
+import { resolveEventIllustration, section6StillAlt } from '../data/eventIllustrationArt';
+import { getDecisionHeaderForEventCategory } from '../data/presidentialDeskAssets';
 import { isDisplayEventEffect } from '../utils/eventEffectDisplay';
 import { turnToDateString } from '../utils/formatters';
 import { t, useLocale, type Locale, type MessageKey } from '../i18n';
@@ -560,6 +563,14 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
     const diagMode = useGameStore((s) => s.diagMode);
     const decisionDate = turnToDateString(localizedDecision.turn_fired);
     const safeSourceNote = sourceNote ? playerSafeDossierText(sourceNote, diagMode) : null;
+    // Art: the event's own documentary still when it authors one, otherwise the
+    // decision plate for its category. Presentation only; the dossier is unchanged.
+    const authoredImage = eventCatalog?.get(decision.event_id)?.image;
+    const headerArt = resolveEventIllustration(authoredImage)
+        ?? getDecisionHeaderForEventCategory(localizedDecision.category);
+    // A §6 still is record, not decoration: it carries its factual alt and the eyebrow drops
+    // the faction colour for the neutral accent, so no faction brands the atrocity (D8 panel).
+    const section6Alt = section6StillAlt(authoredImage);
 
     return (
         <Modal
@@ -571,7 +582,6 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
             panelClassName="bg-panel-bg border border-panel-border rounded-lg max-w-[720px] w-[92%] max-h-[88vh] overflow-y-auto shadow-xl backdrop-blur-sm"
         >
             <div
-                className="p-6"
                 onKeyDownCapture={(event) => {
                     const key = event.key.toLowerCase();
                     if (SHELL_HOTKEYS_BLOCKED_BY_REQUIRED_DECISION.has(key) || /^[1-9]$/.test(key)) {
@@ -579,164 +589,160 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                     }
                 }}
             >
-                {/* Category stamp */}
-                <div className="flex items-center gap-3 mb-4">
-                    <span className="text-xs font-bold uppercase tracking-[0.2em] text-panel-bg bg-accent-gold px-2 py-0.5 rounded"
-                          style={{ transform: 'rotate(-2deg)' }}>
-                        {t('eventDecision.decisionRequired')}
-                    </span>
-                    <span className={`text-xs font-mono ${factionColor}`}>
-                        {eventDecisionFactionLabel(localizedDecision.faction)} · {decisionDate}
-                    </span>
-                </div>
+                <DecisionModalImageHeader
+                    imageUrl={headerArt}
+                    imageAlt={section6Alt ?? ''}
+                    imageTestId="event-decision-header-art"
+                    eyebrow={`${t('eventDecision.decisionRequired')} · ${eventDecisionFactionLabel(localizedDecision.faction)} · ${decisionDate}`}
+                    title={localizedDecision.event_title}
+                    titleId="event-decision-title"
+                    accentClassName={section6Alt ? 'text-accent-gold' : factionColor}
+                />
+                <div className="p-6">
 
-                {/* Title */}
-                <h3 id="event-decision-title" className="font-sans text-lg text-text-primary font-semibold mb-3">
-                    {localizedDecision.event_title}
-                </h3>
-
-                {turnPause && (
-                    <div
-                        className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded border border-accent-gold/45 bg-accent-gold/10 px-4 py-3"
-                        data-testid="event-decision-turn-paused"
-                        role="status"
-                    >
-                        <div className="min-w-0 flex-1">
-                            <div className="text-xs font-bold uppercase tracking-[0.15em] text-accent-gold">
-                                {t('eventDecision.turnPaused.title')}
-                            </div>
-                            <p className="mt-1 text-[12px] leading-relaxed text-text-secondary">
-                                {t('eventDecision.turnPaused.body')}
-                            </p>
-                        </div>
-                        <button
-                            type="button"
-                            onClick={turnPause.onContinue}
-                            data-testid="event-decision-continue-turn"
-                            className="shrink-0 border border-panel-border/70 bg-panel-bg/70 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-text-secondary transition-colors hover:border-accent-gold/60 hover:text-text-primary"
+                    {turnPause && (
+                        <div
+                            className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded border border-accent-gold/45 bg-accent-gold/10 px-4 py-3"
+                            data-testid="event-decision-turn-paused"
+                            role="status"
                         >
-                            {t('eventDecision.turnPaused.continue')}
-                        </button>
-                    </div>
-                )}
-
-                {/* Response options are first-class controls, not footnotes below
-                    long dossier copy. Keeping them directly under the title
-                    prevents required decisions from looking non-actionable. */}
-                <div
-                    className="mb-4"
-                    data-testid="event-decision-response-rail"
-                    data-event-id={localizedDecision.event_id}
-                >
-                    <div className="text-xs font-bold uppercase tracking-[0.15em] text-accent-gold mb-3">
-                        {t('eventDecision.presidentialResponse')}
-                    </div>
-                    <div className="space-y-3">
-                    {localizedDecision.response_options.map(option => (
-                        <ResponseButton
-                            key={option.id}
-                            option={option}
-                            decision={localizedDecision}
-                            sourceNote={safeSourceNote}
-                            showDiagnostics={diagMode}
-                            onChoose={() => onRespond(localizedDecision.event_id, option.id)}
-                        />
-                    ))}
-                    </div>
-                </div>
-
-                <div className="mb-4 grid gap-3 md:grid-cols-[1fr_220px]">
-                    <section className="rounded border border-panel-border bg-panel-card/80 p-4">
-                        <div className="mb-2 text-xs font-bold uppercase tracking-[0.15em] text-accent-gold">
-                            {t('eventDecision.situation')}
-                        </div>
-                        <p className="text-[13px] leading-relaxed text-text-primary">
-                            {localizedDecision.narrative || localizedDecision.situation || t('eventDecision.defaultSituation')}
-                        </p>
-                        {localizedDecision.staff_assessment && (
-                            <div className="mt-3 rounded border border-panel-border/70 bg-panel-bg/60 px-3 py-2">
-                                <div className="mb-1 text-xs font-bold uppercase tracking-[0.12em] text-text-muted">
-                                    {assessmentLabel === 'Staff assessment' ? t('eventDecision.staffAssessment') : assessmentLabel}
+                            <div className="min-w-0 flex-1">
+                                <div className="text-xs font-bold uppercase tracking-[0.15em] text-accent-gold">
+                                    {t('eventDecision.turnPaused.title')}
                                 </div>
-                                <p className="text-[12px] leading-relaxed text-text-secondary">
-                                    {playerSafeDossierText(localizedDecision.staff_assessment, diagMode)}
+                                <p className="mt-1 text-[12px] leading-relaxed text-text-secondary">
+                                    {t('eventDecision.turnPaused.body')}
                                 </p>
                             </div>
-                        )}
-                        {localizedDecision.trigger_evidence && localizedDecision.trigger_evidence.length > 0 && (
-                            <div className="mt-3 rounded border border-panel-border/70 bg-panel-bg/60 px-3 py-2">
-                                <div className="mb-1 text-xs font-bold uppercase tracking-[0.12em] text-text-muted">
-                                    {t('eventDecision.triggerEvidence')}
-                                </div>
-                                <ul className="space-y-1 text-[12px] leading-relaxed text-text-secondary">
-                                    {localizedDecision.trigger_evidence.map((evidence) => (
-                                        <li key={evidence}>{playerSafeDossierText(evidence, diagMode)}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                    </section>
-                    <aside className="rounded border border-panel-border bg-panel-card/80 p-4 text-xs text-text-secondary">
-                        <div className="mb-2 text-xs font-bold uppercase tracking-[0.15em] text-accent-gold">
-                            {t('eventDecision.dossier')}
-                        </div>
-                        <div className="space-y-2">
-                            <div>
-                                <span className="block text-xs uppercase tracking-[0.12em] text-text-muted">{t('eventDecision.category')}</span>
-                                <span className="text-text-primary">{category}</span>
-                            </div>
-                            <div>
-                                <span className="block text-xs uppercase tracking-[0.12em] text-text-muted">{t('eventDecision.factionDate')}</span>
-                                <span className="text-text-primary">
-                                    {eventDecisionFactionLabel(localizedDecision.faction)} / {decisionDate}
-                                </span>
-                            </div>
-                            {safeSourceNote && (
-                                <div>
-                                    <span className="block text-xs uppercase tracking-[0.12em] text-text-muted">{t('eventDecision.sourceNote')}</span>
-                                    <span className="text-text-primary">{safeSourceNote}</span>
-                                </div>
-                            )}
-                        </div>
-                    </aside>
-                </div>
-
-                {/* Phase H Packet 3 — Decision Context (Component A) renders
-                    after the dossier sidebar / source-note, before the
-                    response option list. See H1 scoping §4.2A. */}
-                <DecisionContextSection
-                    decision={localizedDecision}
-                    eventCatalog={eventCatalog}
-                    state={state}
-                    diagMode={diagMode}
-                    locale={locale}
-                />
-
-                {!hasHistoricalDefault && (
-                    <div className="mb-4 rounded border border-accent-gold/30 bg-accent-gold/10 px-4 py-3 text-[12px] leading-relaxed text-text-secondary">
-                        {t('eventDecision.historicalDefaultSourceReview')}
-                    </div>
-                )}
-
-                {errorMessage && (
-                    <div className="mb-4 rounded border border-red-400/45 bg-red-950/35 px-4 py-3">
-                        <div role="alert" className="text-[12px] leading-relaxed text-red-100">
-                            {errorMessage}
-                        </div>
-                        {onDismissError && (
                             <button
                                 type="button"
-                                className="mt-3 rounded border border-red-300/45 bg-black/25 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-red-50 transition-colors hover:border-red-200 hover:bg-red-900/35"
-                                onClick={onDismissError}
+                                onClick={turnPause.onContinue}
+                                data-testid="event-decision-continue-turn"
+                                className="shrink-0 border border-panel-border/70 bg-panel-bg/70 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-text-secondary transition-colors hover:border-accent-gold/60 hover:text-text-primary"
                             >
-                                Return to map
+                                {t('eventDecision.turnPaused.continue')}
                             </button>
-                        )}
-                    </div>
-                )}
+                        </div>
+                    )}
 
-                <div className="rounded border border-panel-border bg-panel-card/70 px-4 py-3 text-xs leading-relaxed text-text-secondary">
-                    {t('eventDecision.recordTrail')}
+                    {/* Response options are first-class controls, not footnotes below
+                        long dossier copy. Keeping them directly under the title
+                        prevents required decisions from looking non-actionable. */}
+                    <div
+                        className="mb-4"
+                        data-testid="event-decision-response-rail"
+                        data-event-id={localizedDecision.event_id}
+                    >
+                        <div className="text-xs font-bold uppercase tracking-[0.15em] text-accent-gold mb-3">
+                            {t('eventDecision.presidentialResponse')}
+                        </div>
+                        <div className="space-y-3">
+                        {localizedDecision.response_options.map(option => (
+                            <ResponseButton
+                                key={option.id}
+                                option={option}
+                                decision={localizedDecision}
+                                sourceNote={safeSourceNote}
+                                showDiagnostics={diagMode}
+                                onChoose={() => onRespond(localizedDecision.event_id, option.id)}
+                            />
+                        ))}
+                        </div>
+                    </div>
+
+                    <div className="mb-4 grid gap-3 md:grid-cols-[1fr_220px]">
+                        <section className="rounded border border-panel-border bg-panel-card/80 p-4">
+                            <div className="mb-2 text-xs font-bold uppercase tracking-[0.15em] text-accent-gold">
+                                {t('eventDecision.situation')}
+                            </div>
+                            <p className="text-[13px] leading-relaxed text-text-primary">
+                                {localizedDecision.narrative || localizedDecision.situation || t('eventDecision.defaultSituation')}
+                            </p>
+                            {localizedDecision.staff_assessment && (
+                                <div className="mt-3 rounded border border-panel-border/70 bg-panel-bg/60 px-3 py-2">
+                                    <div className="mb-1 text-xs font-bold uppercase tracking-[0.12em] text-text-muted">
+                                        {assessmentLabel === 'Staff assessment' ? t('eventDecision.staffAssessment') : assessmentLabel}
+                                    </div>
+                                    <p className="text-[12px] leading-relaxed text-text-secondary">
+                                        {playerSafeDossierText(localizedDecision.staff_assessment, diagMode)}
+                                    </p>
+                                </div>
+                            )}
+                            {localizedDecision.trigger_evidence && localizedDecision.trigger_evidence.length > 0 && (
+                                <div className="mt-3 rounded border border-panel-border/70 bg-panel-bg/60 px-3 py-2">
+                                    <div className="mb-1 text-xs font-bold uppercase tracking-[0.12em] text-text-muted">
+                                        {t('eventDecision.triggerEvidence')}
+                                    </div>
+                                    <ul className="space-y-1 text-[12px] leading-relaxed text-text-secondary">
+                                        {localizedDecision.trigger_evidence.map((evidence) => (
+                                            <li key={evidence}>{playerSafeDossierText(evidence, diagMode)}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </section>
+                        <aside className="rounded border border-panel-border bg-panel-card/80 p-4 text-xs text-text-secondary">
+                            <div className="mb-2 text-xs font-bold uppercase tracking-[0.15em] text-accent-gold">
+                                {t('eventDecision.dossier')}
+                            </div>
+                            <div className="space-y-2">
+                                <div>
+                                    <span className="block text-xs uppercase tracking-[0.12em] text-text-muted">{t('eventDecision.category')}</span>
+                                    <span className="text-text-primary">{category}</span>
+                                </div>
+                                <div>
+                                    <span className="block text-xs uppercase tracking-[0.12em] text-text-muted">{t('eventDecision.factionDate')}</span>
+                                    <span className="text-text-primary">
+                                        {eventDecisionFactionLabel(localizedDecision.faction)} / {decisionDate}
+                                    </span>
+                                </div>
+                                {safeSourceNote && (
+                                    <div>
+                                        <span className="block text-xs uppercase tracking-[0.12em] text-text-muted">{t('eventDecision.sourceNote')}</span>
+                                        <span className="text-text-primary">{safeSourceNote}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </aside>
+                    </div>
+
+                    {/* Phase H Packet 3 — Decision Context (Component A) renders
+                        after the dossier sidebar / source-note, before the
+                        response option list. See H1 scoping §4.2A. */}
+                    <DecisionContextSection
+                        decision={localizedDecision}
+                        eventCatalog={eventCatalog}
+                        state={state}
+                        diagMode={diagMode}
+                        locale={locale}
+                    />
+
+                    {!hasHistoricalDefault && (
+                        <div className="mb-4 rounded border border-accent-gold/30 bg-accent-gold/10 px-4 py-3 text-[12px] leading-relaxed text-text-secondary">
+                            {t('eventDecision.historicalDefaultSourceReview')}
+                        </div>
+                    )}
+
+                    {errorMessage && (
+                        <div className="mb-4 rounded border border-red-400/45 bg-red-950/35 px-4 py-3">
+                            <div role="alert" className="text-[12px] leading-relaxed text-red-100">
+                                {errorMessage}
+                            </div>
+                            {onDismissError && (
+                                <button
+                                    type="button"
+                                    className="mt-3 rounded border border-red-300/45 bg-black/25 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-red-50 transition-colors hover:border-red-200 hover:bg-red-900/35"
+                                    onClick={onDismissError}
+                                >
+                                    Return to map
+                                </button>
+                            )}
+                        </div>
+                    )}
+
+                    <div className="rounded border border-panel-border bg-panel-card/70 px-4 py-3 text-xs leading-relaxed text-text-secondary">
+                        {t('eventDecision.recordTrail')}
+                    </div>
                 </div>
             </div>
         </Modal>

@@ -1,6 +1,7 @@
 [
   {
     "id": "zagreb_orders_hrhb_ceasefire",
+    "image": "event_patron_relations_HRHB.webp",
     "title": "Zagreb Orders HVO Ceasefire With ARBiH",
     "narrative": "Tuđman accepts a US-brokered ceasefire arrangement and orders Boban to stand down HVO operations against ARBiH. Croatia's EU trajectory and the threat of US sanctions leave Zagreb no choice — the Washington Agreement framework serves Croatian interests better than continued war.",
     "category": "diplomatic",
@@ -457,6 +458,7 @@
   },
   {
     "id": "sarajevo_exclusion_zone_1994",
+    "image": "event_un_presence.webp",
     "title": "Sarajevo Exclusion Zone Takes Effect",
     "narrative": "Under threat of NATO air strikes, the VRS begins withdrawing heavy weapons from a 20-kilometer exclusion zone around Sarajevo. Hundreds of artillery pieces and mortars are moved or placed under UNPROFOR control at collection points. On February 12, Sarajevo experiences its first day without a single casualty since April 1992. The siege is not lifted, but its deadliest instrument is temporarily muzzled.",
     "category": "military",
@@ -1169,6 +1171,7 @@
   },
   {
     "id": "ic_rbih_restraint_post_washington",
+    "image": "event_patron_relations_RBiH.webp",
     "source_tier": "balkan_battlegrounds",
     "title": "Washington to Sarajevo: Don't Exploit the Military Window",
     "narrative": "Western capitals warn Izetbegović not to launch aggressive offensives in the wake of the Washington Agreement. Dramatic ARBiH advances would destabilize the federation, hand RS propaganda victories, and jeopardize the Contact Group process.",
@@ -1279,6 +1282,7 @@
   },
   {
     "id": "milosevic_drina_warning",
+    "image": "event_patron_relations_RS.webp",
     "title": "Milošević's Final Warning: Accept Contact Group or Lose the Drina",
     "narrative": "Milošević warns Pale directly: if RS rejects the upcoming Contact Group Plan, Belgrade will close the Drina — cutting off fuel, ammunition, and the economic lifeline that sustains VRS operations. This is not a request.",
     "category": "diplomatic",
@@ -2801,6 +2805,7 @@
   },
   {
     "id": "anti_sniping_agreement_1994",
+    "image": "event_ceasefire.webp",
     "title": "Anti-Sniping Agreement in Sarajevo",
     "narrative": "An anti-sniping agreement is reached for Sarajevo, aiming to reduce the daily toll of civilians killed by snipers along the city's exposed boulevards and intersections. Compliance is sporadic, but the agreement represents a small step in civilian protection and provides UNPROFOR with additional monitoring authority.",
     "source_note": "Existing event/essay/project sources ground the row's institutional and diplomatic context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",

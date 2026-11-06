@@ -21,6 +21,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { CollapsibleSection } from './CollapsibleSection';
+import { DOSSIER_INK, DossierPaper } from './DossierPaper';
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
 import { turnToDateString } from '../../utils/formatters';
@@ -118,33 +119,35 @@ export function FrontVisitSection() {
             title={t('frontVisit.title')}
             defaultOpen={true}
         >
-            <div className="flex flex-col gap-2">
-                <p className="text-xs text-text-secondary leading-snug">
+            {/* The sheet sits inside the collapsible's content: CollapsibleSection paints an
+                opaque dark card, so paper around it would be covered (Codex review on #536). */}
+            <DossierPaper testId="front-visit-sheet" className="flex flex-col gap-2 px-3 py-2">
+                <p className={`text-xs leading-snug ${DOSSIER_INK.body}`}>
                     {t('frontVisit.stake')}
                 </p>
 
                 {/* Availability readout */}
-                <div className="flex flex-col gap-0.5 text-xs text-text-secondary font-mono">
+                <div className={`flex flex-col gap-0.5 text-xs ${DOSSIER_INK.muted}`}>
                     {avail.firesLeft > 0 ? (
                         <span>{t('frontVisit.firesLeft', { count: avail.firesLeft })}</span>
                     ) : (
-                        <span className="text-red-400/80">{t('frontVisit.firesExhausted')}</span>
+                        <span className="text-red-800">{t('frontVisit.firesExhausted')}</span>
                     )}
                     {avail.onCooldown && avail.cooldownUntil != null && (
-                        <span className="text-amber-400/80">
+                        <span className="text-amber-900">
                             {t('frontVisit.cooldown', { date: turnToDateString(avail.cooldownUntil) })}
                         </span>
                     )}
                     {avail.reachableBranchIds.length === 0 && avail.firesLeft > 0 && !avail.onCooldown && (
-                        <span className="text-red-400/80">{t('frontVisit.allCutOff')}</span>
+                        <span className="text-red-800">{t('frontVisit.allCutOff')}</span>
                     )}
                     {avail.reachableBranchIds.length > 0 && (
-                        <span className="text-emerald-300/75">
+                        <span className="text-emerald-900">
                             {t('frontVisit.reachable', { fronts: reachableLabels })}
                         </span>
                     )}
                     {avail.unreachableBranchIds.length > 0 && (
-                        <span className="text-amber-400/70">
+                        <span className="text-amber-900">
                             {t('frontVisit.someCutOff', { fronts: unreachableLabels })}
                         </span>
                     )}
@@ -157,14 +160,14 @@ export function FrontVisitSection() {
                     onClick={(e) => { e.stopPropagation(); void handleVisit(); }}
                     className={`w-full text-xs font-bold uppercase tracking-wider px-3 py-1.5 border transition-colors text-left ${
                         canVisit
-                            ? 'border-emerald-600/50 text-emerald-400 bg-emerald-900/20 hover:bg-emerald-900/40 hover:border-emerald-500/70 cursor-pointer'
-                            : 'border-panel-border text-text-secondary bg-panel-bg/40 cursor-not-allowed'
+                            ? 'border-emerald-800/50 text-emerald-900 bg-emerald-900/10 hover:bg-emerald-900/20 hover:border-emerald-800/80 cursor-pointer'
+                            : 'border-neutral-400/50 text-neutral-500 bg-black/5 cursor-not-allowed'
                     }`}
                     title={t('frontVisit.buttonTitle', { cost: FRONT_VISIT_COST })}
                 >
                     {t('frontVisit.button')} {t('frontVisit.cost', { cost: FRONT_VISIT_COST })}
                 </button>
-            </div>
+            </DossierPaper>
         </CollapsibleSection>
         </div>
     );

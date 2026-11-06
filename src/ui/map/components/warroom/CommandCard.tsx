@@ -166,9 +166,9 @@ export function CommandCard({ category, playerFaction, onSelect }: CommandCardPr
       {/* Bottom gradient title safe-area */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 h-2/3"
+        className="absolute inset-x-0 bottom-0 h-1/2"
         style={{
-          background: 'linear-gradient(to top, rgba(8,7,5,0.92), rgba(8,7,5,0.55) 45%, rgba(8,7,5,0))',
+          background: 'linear-gradient(to top, rgba(8,7,5,0.9), rgba(8,7,5,0.45) 50%, rgba(8,7,5,0))',
         }}
       />
 
@@ -210,7 +210,11 @@ export function CommandCard({ category, playerFaction, onSelect }: CommandCardPr
         <div className="text-[12px] font-bold leading-tight text-text-primary drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]">
           {title}
         </div>
-        <div className="mt-0.5 line-clamp-2 text-xs leading-snug text-stone-200/85 drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]">
+        {/* Art first: the blurb stays in the card for readers and tests, and is revealed on hover or keyboard focus. */}
+        <div
+          data-testid={`command-card-blurb-${category.id}`}
+          className="mt-0.5 line-clamp-2 text-xs leading-snug text-stone-200/85 opacity-0 transition-opacity drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] group-hover:opacity-100 group-focus-visible:opacity-100"
+        >
           {blurb}
         </div>
         <div className="mt-1 text-xs font-bold uppercase tracking-[0.13em] text-stone-300/80">
