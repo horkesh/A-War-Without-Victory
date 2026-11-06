@@ -220,10 +220,10 @@ describe('audio asset provenance inventory', () => {
         const codes = violationCodes(report);
 
         expect(report.summary).toMatchObject({
-            total_cues: 37,
-            provided_cues: 22,
+            total_cues: 45,
+            provided_cues: 30,
             placeholder_cues: 15,
-            manifest_cues: 37,
+            manifest_cues: 45,
             blocking_violations: 0,
         });
         expect(codes).not.toContain('missing_provenance');
@@ -236,7 +236,7 @@ describe('audio asset provenance inventory', () => {
         expect(codes).not.toContain('unregistered_audio_binary');
 
         const providedRecords = report.records.filter((record) => record.disposition === 'provided');
-        expect(providedRecords).toHaveLength(22);
+        expect(providedRecords).toHaveLength(30);
         for (const record of providedRecords) {
             expect(record.duration_seconds).toBeGreaterThan(0);
             expect(Number.isFinite(record.loudness_lufs)).toBe(true);

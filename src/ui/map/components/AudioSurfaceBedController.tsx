@@ -2,9 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import {
   installAudioGestureUnlockListeners,
   playAmbientBed,
-  playMusic,
-  playOpeningMusic,
-  leaveOpeningMusicWindow,
+  setMusicSurface,
   retryRequestedMusic,
   stopAmbientBed,
   stopMusic,
@@ -46,13 +44,11 @@ export function AudioSurfaceBedController({ appScreen }: AudioSurfaceBedControll
 
   useEffect(() => {
     applyAudioPreferences(loadAudioPreferences());
-    if (startsInOpening.current) playOpeningMusic();
-    else void playMusic('menu_theme');
     return () => stopMusic();
   }, []);
 
   useEffect(() => {
-    if (appScreen !== 'mainMenu') leaveOpeningMusicWindow();
+    setMusicSurface(appScreen === 'mainMenu' ? 'mainMenu' : 'campaign', startsInOpening.current);
   }, [appScreen]);
 
   useEffect(() => {

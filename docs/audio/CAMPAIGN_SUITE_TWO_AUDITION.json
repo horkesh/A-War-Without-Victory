@@ -1,7 +1,7 @@
 {
-  "title": "A War Without Victory \u2014 Campaign Auditions Revised v2",
-  "scope": "Eight revised complete original campaign auditions addressing musician feedback; all original titles retained. No comparison reel or runtime adoption.",
-  "status": "Owner reports Almedin approved all eight Revised v2 tracks as a musical package. Technical review GO; runtime adoption and separate global acceptance gates remain unchanged.",
+  "title": "A War Without Victory — Campaign Auditions Revised v2",
+  "scope": "Eight revised complete original campaign compositions; all original titles retained. Approved final OGG exports adopted byte-for-byte for renderer campaign rotation; no new audio rendering or mix.",
+  "status": "Owner-approved eight-track Revised v2 package integrated byte-for-byte into renderer campaign rotation. Scoped source/lifecycle/build/native verification GO; separate global/package/sensitivity gates remain unchanged.",
   "feedback_and_response": {
     "feedback": "Almedin liked the recorded instruments but heard broken/fading sound and too-similar themes. Owner explicitly required keeping all eight.",
     "response": "New independent melodies and phrase-level arrangements; no unconditional bar-end cropping; sustained bowed/wind sample bodies extended with crossfaded stable interior regions, musical releases/ties and deliberate wind breaths. Piano/harp remain naturally decaying.",
@@ -498,21 +498,21 @@
       "sections": [
         {
           "name": "Mist over the valley",
-          "time": 0.0,
-          "end": 15.0,
+          "time": 0,
+          "end": 15,
           "bars": 4,
           "bar": 0
         },
         {
           "name": "The long horizon",
-          "time": 15.0,
-          "end": 60.0,
+          "time": 15,
+          "end": 60,
           "bars": 12,
           "bar": 4
         },
         {
           "name": "A remembered distance",
-          "time": 60.0,
+          "time": 60,
           "end": 97.5,
           "bars": 10,
           "bar": 16
@@ -527,13 +527,13 @@
         {
           "name": "A changed horizon",
           "time": 142.5,
-          "end": 180.0,
+          "end": 180,
           "bars": 10,
           "bar": 38
         },
         {
           "name": "Still before dawn",
-          "time": 180.0,
+          "time": 180,
           "end": 196.39608739837396,
           "bars": 4,
           "bar": 48
@@ -545,7 +545,7 @@
         "viola",
         "violin"
       ],
-      "integrated_lufs": -19.0,
+      "integrated_lufs": -19,
       "true_peak_dbfs": -4.3,
       "level_note": "Around -19 LUFS target reached using common linear gain.",
       "score_sha256": "b00f53a875d45d79dbc9d9476538c668159b9b9983f62d6d59ba6be58f839e86",
@@ -610,7 +610,7 @@
       "sections": [
         {
           "name": "A blank margin",
-          "time": 0.0,
+          "time": 0,
           "end": 12.307692307692308,
           "bars": 4,
           "bar": 0
@@ -721,14 +721,14 @@
       "sections": [
         {
           "name": "An empty room",
-          "time": 0.0,
-          "end": 18.0,
+          "time": 0,
+          "end": 18,
           "bars": 5,
           "bar": 0
         },
         {
           "name": "The withheld answer",
-          "time": 18.0,
+          "time": 18,
           "end": 61.20000000000002,
           "bars": 12,
           "bar": 5
@@ -767,7 +767,7 @@
         "cello",
         "viola"
       ],
-      "integrated_lufs": -19.0,
+      "integrated_lufs": -19,
       "true_peak_dbfs": -5.5,
       "level_note": "Around -19 LUFS target reached using common linear gain.",
       "score_sha256": "868969a32174c571e7925551f4ce8d300c1aa999fb32a4e57bed82a9b008e47e",
@@ -832,7 +832,7 @@
       "sections": [
         {
           "name": "Carrier without a voice",
-          "time": 0.0,
+          "time": 0,
           "end": 15.217391304347828,
           "bars": 5,
           "bar": 0
@@ -879,7 +879,7 @@
         "piano",
         "viola"
       ],
-      "integrated_lufs": -19.0,
+      "integrated_lufs": -19,
       "true_peak_dbfs": -4.7,
       "level_note": "Around -19 LUFS target reached using common linear gain.",
       "score_sha256": "e632c6376c36f3b3f07dda8aaeeae38e5adeb27fcfeee8c2fc1e034b1c8fb2be",
@@ -944,21 +944,21 @@
       "sections": [
         {
           "name": "Light on a familiar wall",
-          "time": 0.0,
-          "end": 15.0,
+          "time": 0,
+          "end": 15,
           "bars": 4,
           "bar": 0
         },
         {
           "name": "The remembered garden",
-          "time": 15.0,
-          "end": 60.0,
+          "time": 15,
+          "end": 60,
           "bars": 12,
           "bar": 4
         },
         {
           "name": "Someone opens the door",
-          "time": 60.0,
+          "time": 60,
           "end": 97.5,
           "bars": 10,
           "bar": 16
@@ -973,13 +973,13 @@
         {
           "name": "The garden after rain",
           "time": 142.5,
-          "end": 180.0,
+          "end": 180,
           "bars": 10,
           "bar": 38
         },
         {
           "name": "A small warmth remains",
-          "time": 180.0,
+          "time": 180,
           "end": 196.39608739837396,
           "bars": 4,
           "bar": 48
@@ -991,7 +991,7 @@
         "harp",
         "viola"
       ],
-      "integrated_lufs": -19.0,
+      "integrated_lufs": -19,
       "true_peak_dbfs": -4.8,
       "level_note": "Around -19 LUFS target reached using common linear gain.",
       "score_sha256": "fa88eb7fdff9fd68ce89a712f4265873dd28efd44e7e85d6de48eee63b194489",
@@ -1056,7 +1056,7 @@
       "sections": [
         {
           "name": "Chairs drawn together",
-          "time": 0.0,
+          "time": 0,
           "end": 16.363636363636363,
           "bars": 3,
           "bar": 0
@@ -1168,7 +1168,7 @@
       "sections": [
         {
           "name": "Beyond the markings",
-          "time": 0.0,
+          "time": 0,
           "end": 17.142857142857142,
           "bars": 4,
           "bar": 0
@@ -1215,7 +1215,7 @@
         "viola",
         "violin"
       ],
-      "integrated_lufs": -19.0,
+      "integrated_lufs": -19,
       "true_peak_dbfs": -4.6,
       "level_note": "Around -19 LUFS target reached using common linear gain.",
       "score_sha256": "56afc7e455d23f84b161f87a722e7ad9f1e6ab6b52c216838dd843de7676ebff",
@@ -1280,7 +1280,7 @@
       "sections": [
         {
           "name": "The first quiet morning",
-          "time": 0.0,
+          "time": 0,
           "end": 15.483870967741936,
           "bars": 4,
           "bar": 0
@@ -1328,7 +1328,7 @@
         "harp",
         "viola"
       ],
-      "integrated_lufs": -19.0,
+      "integrated_lufs": -19,
       "true_peak_dbfs": -5.4,
       "level_note": "Around -19 LUFS target reached using common linear gain.",
       "score_sha256": "8cba826d45e3809040ea39663144acc3dfce53c4e21ef527a8180756d6bde679",
@@ -1445,7 +1445,8 @@
       "exit": 0,
       "path": "logs/player-experience-completion-20261105/campaign-suite-two/precommit01.log",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    }
+    },
+    "historical_scope": "Audition revision verification before renderer adoption; earlier game_runtime_adoption=false is historical. Current adoption evidence is runtime_adoption and the integration receipt."
   },
   "musical_approval": {
     "reported_date": "2026-11-06",
@@ -1458,7 +1459,17 @@
     "approved_bundle_sha256": "bfa6bf05ac50e54695aaa6bc8bdce22a1d772d1e23823c6c5077348655e24536",
     "approved_bundle_bytes": 33083240,
     "artifact_bindings": "The existing per-track export hashes and final_evidence.delivery bind the approved audio.",
-    "runtime_adoption": false,
+    "runtime_adoption": true,
     "limits": "Does not by itself close separate historical-sensitivity, packaged/runtime, canon, release or global R7 gates."
+  },
+  "runtime_adoption": {
+    "authorized_date": "2026-11-06",
+    "authorization": "Owner explicitly authorized approved eight-track in-game rotation after reporting Almedin package approval.",
+    "approved_bundle_sha256": "bfa6bf05ac50e54695aaa6bc8bdce22a1d772d1e23823c6c5077348655e24536",
+    "assets": "Eight final OGG exports copied byte-for-byte to src/ui/map/assets/audio/music; per-cue hashes and licensing in AUDIO_ASSET_PROVENANCE.json.",
+    "policy": "In-memory renderer-only shuffled bag, all eight before repetition, no adjacent repeat across bags. Main menu retains opening/calm; audible opening finishes before campaign. Music remains opt-in OFF by default.",
+    "validation_status": "Scoped integration verified: combined102 tests/14 files, typecheck/lint/build/chunks, exact emitted hashes and actual native natural opening/menu/Country-to-Table handoff. No full26min native cycle or release qualification claim.",
+    "limits": "No new mix or normalization. Lines/Table measured target deviations retained. No claim of packaged/release/global acceptance.",
+    "integration_receipt": "docs/40_reports/implemented/20261105_PLAYER_EXPERIENCE_COMPLETION_RECEIPT.json"
   }
 }

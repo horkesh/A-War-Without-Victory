@@ -87,9 +87,9 @@ it('contains late play resolution and stale end events after unmount', async () 
   FakeAudio.pending[0].resolve(); await flush(); expect(opening().paused).toBe(true);
   opening().finish(); expect(menu()).toBeUndefined(); expect(bus.getAudioState().requestedMusicId).toBeNull();
 });
-it('starts calm directly for an existing campaign and preserves opt-in defaults', async () => {
+it('starts campaign directly for an existing campaign and preserves opt-in defaults', async () => {
   const view = render(createElement(AudioSurfaceBedController, { appScreen: 'game' })); fireEvent.keyDown(window); await flush();
-  expect(opening()).toBeUndefined(); expect(menu()).toBeDefined(); view.unmount(); bus.resetAudioForTests();
+  expect(opening()).toBeUndefined(); expect(bus.getAudioState().requestedMusicId).toMatch(/^campaign_/); view.unmount(); bus.resetAudioForTests();
   saveAudioPreferences({ ...preferences, musicEnabled: false });
   render(createElement(AudioSurfaceBedController, { appScreen: 'mainMenu' })); fireEvent.keyDown(window);
   expect(bus.getAudioState().musicPlaybackEnabled).toBe(false);
@@ -122,5 +122,5 @@ it('skips an unheard opening when the player enters a campaign before opting in'
   const view = render(createElement(AudioSurfaceBedController, { appScreen: 'mainMenu' })); fireEvent.pointerDown(window);
   view.rerender(createElement(AudioSurfaceBedController, { appScreen: 'game' }));
   applyAudioPreferences(preferences); await flush();
-  expect(opening()).toBeUndefined(); expect(menu().paused).toBe(false);
+  expect(opening()).toBeUndefined(); expect(bus.getAudioState().requestedMusicId).toMatch(/^campaign_/);
 });

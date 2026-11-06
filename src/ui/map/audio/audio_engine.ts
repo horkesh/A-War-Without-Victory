@@ -6,6 +6,7 @@
  */
 
 import { getCueConfig, getMusicConfig, getSfxConfig, resolveCuePlaybackUrl, type AudioCueCategory } from './sound_manifest.js';
+import { CAMPAIGN_MUSIC_IDS, createMusicShuffleBag } from './music_shuffle_bag.js';
 
 export type AudioVolumeKind = 'master' | AudioCueCategory;
 
@@ -54,7 +55,14 @@ interface PlaybackAttempt {
 
 const playbackElementsByCueId = new Map<string, HTMLAudioElement>();
 const playbackAttemptByElement = new Map<HTMLAudioElement, PlaybackAttempt>();
+const musicFailureByElement = new Map<HTMLAudioElement, () => void>();
+// Exactly one owner holds continuation listeners, including paused music.
 let openingContinuation: (() => void) | null = null;
+let musicSurface: 'mainMenu' | 'campaign' | null = null;
+let nextCampaignTrack = createMusicShuffleBag(CAMPAIGN_MUSIC_IDS);
+let campaignTrackId: string | null = null;
+let consecutiveCampaignFailures = 0;
+let campaignExhausted = false;
 
 let state: AudioBusState = {
     enabled: false,
@@ -108,16 +116,17 @@ function settlePlaybackAttempt(
     element: HTMLAudioElement,
     attempt: PlaybackAttempt,
     status: 'success' | 'failure',
-): void {
+): boolean {
     if (playbackAttemptByElement.get(element) !== attempt) {
         // A late play promise may settle after pause. Do not let an ownerless
         // media element resume; a newer attempt on this element keeps ownership.
         if (status === 'success' && !playbackAttemptByElement.has(element)) {
             try { element.pause(); } catch { /* best effort */ }
         }
-        return;
+        return false;
     }
     attempt.status = status;
+    return true;
 }
 
 function playResolvedAsset(cueId: string, resolvedAssetUrl: string, category: AudioCueCategory, defaultVolume: number, loop = false, resume = false): void {
@@ -135,17 +144,25 @@ function playResolvedAsset(cueId: string, resolvedAssetUrl: string, category: Au
         const attempt: PlaybackAttempt = { status: 'pending' };
         playbackAttemptByElement.set(element, attempt);
         try {
-            if (!loop && !resume) element.currentTime = 0;
+            if ((!loop && !resume) || element.ended) element.currentTime = 0;
             const playResult: Promise<void> | undefined = element.play();
             if (playResult && typeof playResult.then === 'function') {
                 void playResult.then(
                     () => settlePlaybackAttempt(element, attempt, 'success'),
-                    () => settlePlaybackAttempt(element, attempt, 'failure'),
+                    (reason: unknown) => {
+                        if (settlePlaybackAttempt(element, attempt, 'failure')
+                            && reason instanceof Error && reason.name === 'NotSupportedError') {
+                            musicFailureByElement.get(element)?.();
+                        }
+                    },
                 );
             }
-        } catch {
+        } catch (reason) {
+            if (settlePlaybackAttempt(element, attempt, 'failure')
+                && reason instanceof Error && reason.name === 'NotSupportedError') {
+                musicFailureByElement.get(element)?.();
+            }
             // Autoplay/decode failures cannot interrupt the player action.
-            settlePlaybackAttempt(element, attempt, 'failure');
         }
     } catch {
         // Media construction and property setters can fail as well as play().
@@ -302,11 +319,51 @@ export function playOpeningMusic(): void {
     void playMusic('opening_titles');
 }
 
-/** Leave an unheard title behind when the player has already entered play. */
-export function leaveOpeningMusicWindow(): void {
-    if (state.requestedMusicId === 'opening_titles' && !playbackElementsByCueId.has('opening_titles')) {
+/** Select presentation music without changing simulation or saved campaign state. */
+export function setMusicSurface(surface: 'mainMenu' | 'campaign', allowOpening = false): void {
+    if (musicSurface === surface) return;
+    const previousSurface = musicSurface;
+    musicSurface = surface;
+    if (surface === 'campaign') {
+        const opening = playbackElementsByCueId.get('opening_titles');
+        const openingStarted = opening && !opening.error
+            && (playbackAttemptByElement.get(opening)?.status === 'success' || opening.currentTime > 0);
+        if (state.requestedMusicId === 'opening_titles' && openingStarted) return;
+        requestCampaignMusic();
+    } else if (previousSurface === null && allowOpening) {
+        playOpeningMusic();
+    } else {
         void playMusic('menu_theme');
     }
+}
+
+function requestCampaignMusic(): void {
+    if (campaignExhausted) return;
+    campaignTrackId ??= nextCampaignTrack();
+    void playMusic(campaignTrackId);
+}
+
+/** Compatibility entry point: entering play changes the opening successor. */
+export function leaveOpeningMusicWindow(): void {
+    setMusicSurface('campaign');
+}
+
+function continueMusicAfterOpening(): void {
+    if (musicSurface === 'campaign') requestCampaignMusic();
+    else void playMusic('menu_theme');
+}
+
+function advanceCampaignMusic(failed: boolean): void {
+    consecutiveCampaignFailures = failed ? consecutiveCampaignFailures + 1 : 0;
+    campaignTrackId = null;
+    if (consecutiveCampaignFailures >= CAMPAIGN_MUSIC_IDS.length) {
+        // Eight consecutive media failures: remain silent until a new
+        // controller lifetime instead of retrying forever on gestures.
+        campaignExhausted = true;
+        stopMusicPlayback();
+        return;
+    }
+    requestCampaignMusic();
 }
 
 /** Retry the existing owner request after a trusted gesture, without replacing it. */
@@ -330,28 +387,39 @@ export async function playMusic(id: string): Promise<void> {
     let element: HTMLAudioElement | null;
     try { element = getPlaybackElement(id, resolvedAssetUrl); } catch { return; }
     if (!element) return;
-    if (id === 'opening_titles' && !openingContinuation) {
+    const campaign = CAMPAIGN_MUSIC_IDS.includes(id);
+    if ((id === 'opening_titles' || campaign) && !openingContinuation) {
+        let active = true;
         const finish = () => {
-            if (state.requestedMusicId !== id || !state.enabled || state.muted || !state.musicPlaybackEnabled) return;
-            void playMusic('menu_theme');
+            if (!element.ended || !active || state.requestedMusicId !== id || !state.enabled || state.muted || !state.musicPlaybackEnabled) return;
+            if (campaign) advanceCampaignMusic(false);
+            else continueMusicAfterOpening();
         };
         const fail = () => {
-            // Decode failure consumes the opening even while preferences pause
-            // playback. The calm successor remains silent under the same gates.
-            if (state.requestedMusicId === id) void playMusic('menu_theme');
+            // Unplayable media is skipped even while preferences pause playback.
+            // The successor remains silent under the same playback gates.
+            if (!active || state.requestedMusicId !== id) return;
+            if (campaign) advanceCampaignMusic(true);
+            else continueMusicAfterOpening();
         };
+        // Queued terminal notifications can outlive the former surface owner.
+        // Only current terminal media state may advance healthy resumed media.
+        const mediaError = () => { if (element.error) fail(); };
+        musicFailureByElement.set(element, fail);
         element.addEventListener?.('ended', finish);
-        element.addEventListener?.('error', fail);
+        element.addEventListener?.('error', mediaError);
         openingContinuation = () => {
+            active = false;
+            musicFailureByElement.delete(element);
             element.removeEventListener?.('ended', finish);
-            element.removeEventListener?.('error', fail);
+            element.removeEventListener?.('error', mediaError);
         };
     }
     state = { ...state, currentMusicId: id, lastResolvedAssetUrl: resolvedAssetUrl };
     playResolvedAsset(id, resolvedAssetUrl, cue.category, cue.defaultVolume, cue.loop === true, true);
 }
 
-export function stopMusic(): void {
+function stopMusicPlayback(): void {
     openingContinuation?.();
     openingContinuation = null;
     // Stop cached music as well as committed playback so cleanup cannot
@@ -360,6 +428,19 @@ export function stopMusic(): void {
         if (getCueConfig(cueId)?.category === 'music') stopPlayback(cueId);
     }
     state = { ...state, currentMusicId: null, requestedMusicId: null };
+}
+
+export function stopMusic(): void {
+    stopMusicPlayback();
+    musicSurface = null;
+    // A remounted owner receives fresh media so queued old events cannot reach
+    // its listeners. Mute and room changes retain their current media/position.
+    for (const cueId of playbackElementsByCueId.keys()) {
+        if (getCueConfig(cueId)?.category === 'music') playbackElementsByCueId.delete(cueId);
+    }
+    // An exhausted set is retried only by a new controller owner.
+    campaignExhausted = false;
+    consecutiveCampaignFailures = 0;
 }
 
 export function setMusicPlaybackEnabled(enabled: boolean): void {
@@ -436,9 +517,12 @@ export function getAudioState(): AudioBusState {
 
 export function resetAudioForTests(): void {
     stopMusic();
+    nextCampaignTrack = createMusicShuffleBag(CAMPAIGN_MUSIC_IDS);
+    campaignTrackId = null;
     stopAllPlayback();
     playbackElementsByCueId.clear();
     playbackAttemptByElement.clear();
+    musicFailureByElement.clear();
     state = {
         enabled: false,
         muted: true,

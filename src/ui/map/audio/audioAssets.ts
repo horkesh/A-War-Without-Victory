@@ -63,6 +63,16 @@ import tutorialCompleteUrl from '../assets/audio/ui/tutorial_complete.ogg';
 import menuThemeUrl from '../assets/audio/music/what_remains_of_home.ogg';
 import openingTitlesUrl from '../assets/audio/music/what_remains_of_home_opening.ogg';
 
+// Approved Revised v2 campaign originals, requested lazily by the bus.
+import campaign0Url from '../assets/audio/music/a_country_before_dawn.ogg';
+import campaign1Url from '../assets/audio/music/lines_on_paper.ogg';
+import campaign2Url from '../assets/audio/music/the_long_winter.ogg';
+import campaign3Url from '../assets/audio/music/no_answer_on_the_radio.ogg';
+import campaign4Url from '../assets/audio/music/the_life_we_remember.ogg';
+import campaign5Url from '../assets/audio/music/a_table_for_strangers.ogg';
+import campaign6Url from '../assets/audio/music/what_the_maps_cannot_show.ogg';
+import campaign7Url from '../assets/audio/music/after_the_guns.ogg';
+
 // --- Required restrained ambient beds (first-party deterministic recipes) ---
 import ambientWarroomUrl from '../assets/audio/ambient/ambient_warroom.ogg';
 import ambientFieldUrl from '../assets/audio/ambient/ambient_field.ogg';
@@ -95,6 +105,14 @@ export const AUDIO_ASSET_URLS: Readonly<Record<string, string>> = Object.freeze(
     tutorial_objective_complete: tutorialCompleteUrl,
     menu_theme: menuThemeUrl,
     opening_titles: openingTitlesUrl,
+    campaign_a_country_before_dawn: campaign0Url,
+    campaign_lines_on_paper: campaign1Url,
+    campaign_the_long_winter: campaign2Url,
+    campaign_no_answer_on_the_radio: campaign3Url,
+    campaign_the_life_we_remember: campaign4Url,
+    campaign_a_table_for_strangers: campaign5Url,
+    campaign_what_the_maps_cannot_show: campaign6Url,
+    campaign_after_the_guns: campaign7Url,
     ambient_warroom: ambientWarroomUrl,
     ambient_field: ambientFieldUrl,
     ambient_archive: ambientArchiveUrl,

@@ -1,6 +1,6 @@
 # Audio provenance: `opening_titles`
 
-- Work: **What Remains of Home**. Opening identity, 35 seconds; non-looping, then calm menu.
+- Work: **What Remains of Home**. Opening identity, 35 seconds; non-looping, then calm menu or campaign rotation according to the current surface.
 - Composition: A War Without Victory project, original authored score. No reference audio/MIDI, anthem, folk quotation, voices or combat imitation.
 - Composition license: FIRST_PARTY, for distribution with AWWV.
 - Recorded sample credit: Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote, **VSCO 2 Community Edition**, CC0-1.0.

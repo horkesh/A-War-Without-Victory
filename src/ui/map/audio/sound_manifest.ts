@@ -1,9 +1,8 @@
 /**
  * Sound manifest for the tactical map audio bus.
  *
- * This kickoff pass defines stable cue metadata only. File paths are optional
- * placeholders for later packaged assets; the current audio bus never fetches
- * or decodes them.
+ * Stable cue metadata and optional placeholder slots. Provided media resolve
+ * through the bundled URL-import map and are requested lazily by the audio bus.
  */
 
 import { resolveCueAssetUrl } from './audioAssets.js';
@@ -170,6 +169,14 @@ registerCue({ id: 'ambient_dayton_aftermath', category: 'ambient', defaultVolume
 
 registerMusic({ id: 'menu_theme', src: 'audio/music/what_remains_of_home.ogg', volume: 0.4, loop: true, assetStatus: 'provided' });
 registerMusic({ id: 'opening_titles', src: 'audio/music/what_remains_of_home_opening.ogg', volume: 0.4, loop: false, assetStatus: 'provided' });
+registerMusic({ id: 'campaign_a_country_before_dawn', src: 'audio/music/a_country_before_dawn.ogg', volume: 0.4, loop: false, assetStatus: 'provided' });
+registerMusic({ id: 'campaign_lines_on_paper', src: 'audio/music/lines_on_paper.ogg', volume: 0.4, loop: false, assetStatus: 'provided' });
+registerMusic({ id: 'campaign_the_long_winter', src: 'audio/music/the_long_winter.ogg', volume: 0.4, loop: false, assetStatus: 'provided' });
+registerMusic({ id: 'campaign_no_answer_on_the_radio', src: 'audio/music/no_answer_on_the_radio.ogg', volume: 0.4, loop: false, assetStatus: 'provided' });
+registerMusic({ id: 'campaign_the_life_we_remember', src: 'audio/music/the_life_we_remember.ogg', volume: 0.4, loop: false, assetStatus: 'provided' });
+registerMusic({ id: 'campaign_a_table_for_strangers', src: 'audio/music/a_table_for_strangers.ogg', volume: 0.4, loop: false, assetStatus: 'provided' });
+registerMusic({ id: 'campaign_what_the_maps_cannot_show', src: 'audio/music/what_the_maps_cannot_show.ogg', volume: 0.4, loop: false, assetStatus: 'provided' });
+registerMusic({ id: 'campaign_after_the_guns', src: 'audio/music/after_the_guns.ogg', volume: 0.4, loop: false, assetStatus: 'provided' });
 registerMusic({ id: 'peace_phase', src: 'audio/music/peace.mp3', volume: 0.3, loop: true });
 registerMusic({ id: 'war_phase', src: 'audio/music/war.mp3', volume: 0.3, loop: true });
 registerMusic({ id: 'tension', src: 'audio/music/tension.mp3', volume: 0.35, loop: true });
