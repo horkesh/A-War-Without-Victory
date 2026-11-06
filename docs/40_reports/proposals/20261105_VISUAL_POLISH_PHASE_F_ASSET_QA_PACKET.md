@@ -105,3 +105,17 @@ Negative prompt for both:
 - No asset was generated, replaced or edited. D1–D7 are the owner's; D8 is the §6 chain's.
 - The officer photographs' licences are not verified; the provenance note says so rather than guessing.
 - Contact sheets are evidence under `_logs`, not committed.
+
+## 8. Owner answers (2026-11-06)
+
+| # | Answer | Follow-through |
+|---|---|---|
+| D1 | **Regenerate** `tutorial_02_map.webp`. | Owner generates from §5.1 at 1200×800 and drops it in place; the resolver picks it up by name. Open until the file lands. |
+| D2 | **In-paint the fold** on `hq_rbih_1991…1995.webp` to read *Oslobođenje*. | Owner edits per §5.2, geometry untouched. Open until the plates land; `warroom_board_luminance` re-measures nothing (cork unchanged). |
+| D3 | **Note only.** | Recorded: any future RS fold reads "Глас српски". No action. |
+| D4 | **Close** the roadmap §10 backlog line. | Done in this PR (`MASTER_ROADMAP.md`, 2026-09-05 row marked CLOSED, superseded by WR01). |
+| D5 | **Delete** the six officer photographs from the tree. | Done in this PR; `PROVENANCE.md` stays as the tombstone and the re-sourcing rule for the portrait lane. |
+| D6 | **Accept** the 1991 rooms as the faction's own room. | Recorded; no action. |
+| D7 | **Re-export opportunistically** at 1200×800. | Tutorial deck with D1; plans whenever touched. Open, not gating. |
+
+Open after this: D1, D2 and D7 are owner art drops; everything else in the packet is closed.
