@@ -6,6 +6,8 @@ interface DecisionModalImageHeaderProps {
   titleId: string;
   description?: string;
   accentClassName?: string;
+  /** Optional test id placed on the image element. */
+  imageTestId?: string;
 }
 
 export function DecisionModalImageHeader({
@@ -16,10 +18,11 @@ export function DecisionModalImageHeader({
   titleId,
   description,
   accentClassName = 'text-accent-gold',
+  imageTestId,
 }: DecisionModalImageHeaderProps) {
   return (
     <div className="relative min-h-36 overflow-hidden border-b border-panel-border">
-      <img src={imageUrl} alt={imageAlt} className="absolute inset-0 h-full w-full object-cover" />
+      <img src={imageUrl} alt={imageAlt} data-testid={imageTestId} className="absolute inset-0 h-full w-full object-cover" />
       <div className="absolute inset-0 bg-gradient-to-r from-black/92 via-black/78 to-black/36" />
       <div className="relative px-5 py-4">
         <div className={`text-xs font-bold uppercase tracking-[0.18em] ${accentClassName}`}>{eyebrow}</div>

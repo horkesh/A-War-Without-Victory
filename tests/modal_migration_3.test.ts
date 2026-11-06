@@ -154,7 +154,11 @@ describe('Modal migration Wave 3 — per-target source contract', () => {
 
             it(`A1 — declares ariaLabelledBy and corresponding id appears inside panel`, () => {
                 expect(src).toContain(`ariaLabelledBy="${target.ariaLabelledBy}"`);
-                expect(src).toContain(`id="${target.ariaLabelledBy}"`);
+                // The id may sit on a heading in this file, or be handed to the shared
+                // DecisionModalImageHeader as titleId, which renders the heading with it.
+                const declaresId = src.includes(`id="${target.ariaLabelledBy}"`)
+                    || src.includes(`titleId="${target.ariaLabelledBy}"`);
+                expect(declaresId, `must declare id or titleId "${target.ariaLabelledBy}"`).toBe(true);
             });
         });
     }

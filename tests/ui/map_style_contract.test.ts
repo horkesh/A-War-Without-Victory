@@ -132,6 +132,17 @@ describe('tactical map style contract', () => {
     expect(withoutBlockComments(styleText)).not.toMatch(/https?:\/\//);
   });
 
+  // Codex review on #525: a front layer the toggle does not know stays visible when fronts are hidden.
+  it('lists every front-line layer in the MapContainer fronts toggle', () => {
+    const container = readFileSync(resolve(stylePath, '..', 'MapContainer.tsx'), 'utf8');
+    const match = container.match(/const FRONT_LAYER_IDS = \[([^\]]*)\]/);
+    expect(match).not.toBeNull();
+    const toggled = Array.from(match![1].matchAll(/'([^']+)'/g), (m) => m[1]);
+    const frontLayers = style.layers.map((layer) => layer.id).filter((id) => id.startsWith('front-line-'));
+    expect(frontLayers.length).toBeGreaterThan(0);
+    for (const id of frontLayers) expect(toggled).toContain(id);
+  });
+
   it('prints faction inks as sepia-pulled projections of the canonical palette', () => {
     expect(toInk([200, 70, 70], 0)).toEqual([200, 70, 70]);
     expect(toInk([200, 70, 70], 1)).toEqual([38, 28, 18]);

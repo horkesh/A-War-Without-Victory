@@ -60,8 +60,12 @@ describe('v0.9.3 a11y Lane A — Modal stack accessibility baseline', () => {
             // same file (`id="..."`). We don't enforce the tag (h1/h2/h3/div)
             // — only the resolved reference. JSX uses double-quoted id
             // attributes throughout this codebase.
-            expect(src, `${name} must declare a node with id="${expectedLabelledBy}" so aria-labelledby resolves`)
-                .toContain(`id="${expectedLabelledBy}"`);
+            // A modal may hand the id to the shared DecisionModalImageHeader as
+            // titleId; that component renders the heading carrying it.
+            const declaresId = src.includes(`id="${expectedLabelledBy}"`)
+                || src.includes(`titleId="${expectedLabelledBy}"`);
+            expect(declaresId, `${name} must declare a node with id="${expectedLabelledBy}" so aria-labelledby resolves`)
+                .toBe(true);
         }
     });
 
