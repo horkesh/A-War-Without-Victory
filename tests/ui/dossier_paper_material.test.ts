@@ -43,6 +43,13 @@ describe('dossier paper material', () => {
     expect(offenders).toEqual([]);
   });
 
+  it('sets the army commander personnel note and the front-visit sheet on paper', () => {
+    const modal = withoutComments(readFileSync(join(armyHq, 'ArmyHQModal.tsx'), 'utf8'));
+    expect(modal).toContain('<DossierPaper testId="army-hq-officer-note"');
+    const frontVisit = withoutComments(readFileSync(join(armyHq, 'FrontVisitSection.tsx'), 'utf8'));
+    expect(frontVisit).toContain('data-material="paper" className={DOSSIER_PAPER_CLASS}');
+  });
+
   it('sets the Chief of Staff missive on DossierPaper', () => {
     const source = withoutComments(readFileSync(join(armyHq, 'ChiefOfStaffBriefing.tsx'), 'utf8'));
     expect(source).toContain('<DossierPaper');
