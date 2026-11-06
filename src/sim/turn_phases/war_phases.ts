@@ -70,6 +70,7 @@ import { ensureMaintenanceCapacity } from '../../state/maintenance.js';
 import { updateMilitiaFatigue } from '../../state/militia_fatigue.js';
 import { buildRecruitmentContext } from '../recruitment_context.js';
 import { updateNegotiationCapital } from '../../state/negotiation_capital.js';
+import { initializeNegotiationState } from '../negotiation/initialize_negotiation_state.js';
 import {
     applyEnforcementPackage,
     checkOfferAcceptance,
@@ -1120,6 +1121,19 @@ export const warPhases: NamedPhase[] = [
         name: 'cleanup-expired-event-modifiers',
         run: (context) => {
             cleanupExpiredEventModifiers(context.state, context.state.meta.turn);
+        }
+    },
+    {
+        // Live = headless (2026-11-06). A desktop campaign initializes negotiation state at
+        // birth (desktop_sim.ts startNewCampaign); the headless startup snapshot has none, so
+        // turn-1 event dimension shifts (RS `rs_strategic_goals` all_six: +10 credibility,
+        // +10 cohesion, -5 standing) hit a missing store and were dropped until
+        // compute-capital created it later in the turn. Create it before events read or write it.
+        name: 'ensure-negotiation-state',
+        run: (context) => {
+            if (!context.state.military.negotiation?.strategic_dimensions) {
+                initializeNegotiationState(context.state);
+            }
         }
     },
     {
