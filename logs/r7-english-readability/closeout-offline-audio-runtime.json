@@ -1,0 +1,78 @@
+{
+  "source_commit": "81ab0051c5804dc0a3f5dc0343b3af4239826668",
+  "package_identity": [
+    {
+      "file": "A War Without Victory.exe",
+      "sha256": "0dc0da808653b7ff6e01e4e92d6529f976d0a838eb5055983e253bfb1b46f9fe"
+    },
+    {
+      "file": "app.asar",
+      "sha256": "5f599d5ab2eedf66057508ab8876a4f1a819eb1751ed9c64c4423393c11ad576"
+    }
+  ],
+  "ogg_files_packaged": 30,
+  "ogg_hashes_match_source": true,
+  "frame_origin": "http://127.0.0.1:60482",
+  "runtime": {
+    "pass": true,
+    "checks": [
+      "Packaged boot, isolated profile, proxy and served bundle identity",
+      "Default music opt-in and real UI opening effect",
+      "Natural opening to calm menu with working master/music volume and mute/resume",
+      "Campaign plays an approved track at turn zero, and open/click/close effects decoded"
+    ],
+    "campaign_track": "the_long_winter-CRQ6dHRh.ogg",
+    "sounds_heard_playing": [
+      "the_long_winter-CRQ6dHRh.ogg",
+      "ui_click-BnyrjKNF.ogg",
+      "ui_close_panel-BNT4O472.ogg",
+      "ui_open_panel-D40muiUY.ogg",
+      "what_remains_of_home-CFrL-rLW.ogg",
+      "what_remains_of_home_opening-CBPeigGT.ogg"
+    ],
+    "page_errors": 0,
+    "console_warnings_errors": 0,
+    "request_failures": 4,
+    "renderer_requests": 109,
+    "renderer_remote_requests": 0,
+    "proxy_denied_requests": 0,
+    "node_denied_requests": 8,
+    "netlog": {
+      "total_events": 11190,
+      "local_ogg_urls": 6,
+      "remote_urls": 0,
+      "remote_ogg_urls": 0,
+      "sha256": "60bcba16d133e90f3a63c9cf3f56f82960631f9d18311fa792c1be492048e365"
+    },
+    "turn0_save_sha256": "265de807c0693e6c5469d660e62687a0ea459ebb9f5d882be92365ceca252a7a",
+    "exit": {
+      "code": 0,
+      "signal": null
+    },
+    "forced_cleanup": false
+  },
+  "relaunch": {
+    "pass": true,
+    "previous_origin": "http://127.0.0.1:60482",
+    "new_origin": "http://127.0.0.1:55149",
+    "expected": {
+      "muted": false,
+      "masterVolume": 0.45,
+      "musicEnabled": true,
+      "musicVolume": 0.45
+    },
+    "observed": {
+      "musicEnabled": true,
+      "masterVolume": 0.45,
+      "musicVolume": 0.45
+    },
+    "save_preserved": true,
+    "proxy_denied_requests": 0,
+    "netlog_remote_urls": 0,
+    "exit": {
+      "code": 0,
+      "signal": null
+    },
+    "forced_cleanup": false
+  }
+}
