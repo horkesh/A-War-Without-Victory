@@ -112,8 +112,9 @@ describe('Brčko international-arbitration outcome (D1)', () => {
         expect(result.brcko_arbitration).toBe(false);
     });
 
-    it('player (RBiH) winning a Brčko demand → federation side', () => {
-        // RS patron override high so the demand carries.
+    it('player (RBiH) demanding Brčko → refused even under patron pressure → arbitration', () => {
+        // Owner ruling 2026-11-07 (patron_leverage.ts): Brčko is the Posavina corridor, protected
+        // ground RS never concedes and Belgrade never forces. As at Dayton, it goes to arbitration.
         const state = makeState({
             player_faction: 'RBiH',
             political_controllers: controllers,
@@ -121,9 +122,9 @@ describe('Brčko international-arbitration outcome (D1)', () => {
         });
         const proposal: DaytonProposal = { territorial_demands: ['brcko_district'], territorial_concessions: [], institutional_choices: {} };
         const result = resolveDaytonNegotiation(state, proposal);
-        expect(result.territorial_packages_accepted).toContain('brcko_district');
-        expect(result.brcko_status).toBe('federation');
-        expect(result.brcko_arbitration).toBe(false);
+        expect(result.territorial_packages_rejected).toContain('brcko_district');
+        expect(result.brcko_status).toBe('arbitration');
+        expect(result.brcko_arbitration).toBe(true);
     });
 
     it('failed Brčko demand (no override) → arbitration', () => {

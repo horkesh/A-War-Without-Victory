@@ -19,6 +19,7 @@ import type { DimensionStore } from '../events/strategic_dimensions.js';
 import { getTerritorialPackageById, getDemandCost, getConcessionCost } from './territorial_packages.js';
 import type { ExtraPackages } from './territorial_packages.js';
 import { frontPackagesForProposal } from './front_packages.js';
+import { isProtectedFor } from './patron_leverage.js';
 import { getInstitutionalPackageById, getInstitutionalCost } from './institutional_packages.js';
 import {
     finalCompetencyCost,
@@ -82,6 +83,16 @@ export function getCompositeCapital(_breakdown: NegotiationBreakdown, faction: s
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
+ * Cost to a holder of conceding a demanded package. Protected ground (patron_leverage.ts:
+ * RS heartland and corridor, Mostar and western Herzegovina) is never conceded voluntarily:
+ * it costs more than any capital, so the holder refuses and its counter-offer drops it first.
+ */
+export const PROTECTED_GROUND_REFUSAL_COST = 1000;
+function concedeCostToHolder(pkg: import('../../state/negotiation_types.js').TerritorialPackage, holder: string): number {
+    return isProtectedFor(pkg, holder) ? PROTECTED_GROUND_REFUSAL_COST : pkg.capital_cost_to_concede;
+}
+
+/**
  * Compute the total capital cost of a proposal to a specific bot faction.
  *
  * Cost comes from:
@@ -102,7 +113,7 @@ export function computeProposalCostToFaction(
         const pkg = getTerritorialPackageById(pkgId, extra);
         if (!pkg) continue;
         if (pkg.default_holder === faction) {
-            totalCost += pkg.capital_cost_to_concede;
+            totalCost += concedeCostToHolder(pkg, faction);
         }
     }
 
@@ -532,7 +543,7 @@ function generateCounterProposal(
         const pkg = getTerritorialPackageById(pkgId, extra);
         if (!pkg) continue;
         if (pkg.default_holder === faction) {
-            costItems.push({ type: 'territorial', id: pkgId, cost: pkg.capital_cost_to_concede });
+            costItems.push({ type: 'territorial', id: pkgId, cost: concedeCostToHolder(pkg, faction) });
         }
     }
 

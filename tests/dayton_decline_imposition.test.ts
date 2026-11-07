@@ -258,34 +258,40 @@ describe('Dayton event records follow the real settlement', () => {
 });
 
 describe('captured ground is negotiable at Dayton (owner, 2026-11-07)', () => {
-    // Prijedor: the Dayton map gives all of it to RS. RBiH holds Kozarac.
-    const PRIJEDOR = ['op:prijedor:brezicani', 'op:prijedor:cejreci', 'op:prijedor:kamicani', 'op:prijedor:kozarac_2'];
-    const KOZARAC = 'op:prijedor:kozarac_2';
-    const ID = 'front:prijedor:RBiH:RS';
-    const withKozarac = (player: 'RBiH' | 'RS' | 'HRHB' = 'RBiH') => {
+    // Šipovo: the Dayton map gives all of it to RS, and it is not protected ground. RBiH holds Pribeljci.
+    const SIPOVO = ['op:sipovo:brdjani', 'op:sipovo:gornji_mujdzici_2', 'op:sipovo:pribeljci_2', 'op:sipovo:sipovo_2', 'op:sipovo:volari_2'];
+    const HELD = 'op:sipovo:pribeljci_2';
+    const ID = 'front:sipovo:RBiH:RS';
+    const withHeld = (player: 'RBiH' | 'RS' | 'HRHB' = 'RBiH', held: string[] = [HELD]) => {
         const state = makeState(player);
         const controllers: Record<string, string> = {};
-        for (const o of PRIJEDOR) controllers[o] = o === KOZARAC ? 'RBiH' : 'RS';
+        for (const o of SIPOVO) controllers[o] = held.includes(o) ? 'RBiH' : 'RS';
         state.political.political_controllers = controllers as never;
         return state;
     };
     const proposal = (demands: string[] = [], concessions: string[] = []) =>
         ({ territorial_demands: demands, territorial_concessions: concessions, institutional_choices: {} });
+    /** RS cannot afford anything (no capital), so only its patron can make it give ground. */
+    const refusingRS = (state: GameState, override: number) => {
+        const neg = state.military.negotiation!;
+        neg.patron_relationships.RS!.override_authority = override;
+        neg.strategic_dimensions = undefined;
+        neg.capital.RS = undefined as never;
+        return state;
+    };
 
     it('each municipality where the front departs from the Dayton map becomes a package', () => {
-        const packages = buildFrontPackages(withKozarac());
+        const packages = buildFrontPackages(withHeld());
         expect(packages.map((p) => p.id)).toEqual([ID]);
         const pkg = packages[0]!;
-        expect(pkg).toMatchObject({ name: 'Prijedor', default_holder: 'RS', claimant: 'RBiH', osids: [KOZARAC], municipality: 'prijedor' });
+        expect(pkg).toMatchObject({ name: 'Šipovo', default_holder: 'RS', claimant: 'RBiH', osids: [HELD], municipality: 'sipovo' });
         expect(pkg.area_pct).toBeGreaterThan(0);
         expect(pkg.capital_cost_to_demand).toBeGreaterThan(pkg.capital_cost_to_concede);
     });
 
     it('cost grows with area', () => {
-        const state = withKozarac();
-        const small = buildFrontPackages(state)[0]!;
-        state.political.political_controllers = { ...state.political.political_controllers, 'op:prijedor:brezicani': 'RBiH' } as never;
-        const large = buildFrontPackages(state)[0]!;
+        const small = buildFrontPackages(withHeld())[0]!;
+        const large = buildFrontPackages(withHeld('RBiH', [HELD, 'op:sipovo:brdjani']))[0]!;
         expect(large.area_pct).toBeGreaterThan(small.area_pct!);
         expect(large.capital_cost_to_demand).toBeGreaterThan(small.capital_cost_to_demand);
         expect(computePlayerProposalSpend(proposal([ID]), 'RBiH', [large])).toBe(large.capital_cost_to_demand);
@@ -300,73 +306,105 @@ describe('captured ground is negotiable at Dayton (owner, 2026-11-07)', () => {
         expect(buildFrontPackages(state)).toEqual([]);
     });
 
+    it('ground between RBiH and HRHB is not negotiable at Dayton (owner ruling 2026-11-07)', () => {
+        const state = makeState('RBiH');
+        // Posušje: the Dayton map gives all of it to HRHB; RBiH holds one cell.
+        state.political.political_controllers = { 'op:posusje:posusje_2': 'RBiH', 'op:posusje:sutina_2': 'HRHB', 'op:posusje:vir_2': 'HRHB' } as never;
+        expect(buildFrontPackages(state)).toEqual([]);
+    });
+
     it('the player sees the ground it holds and the ground the map gives it', () => {
-        expect(frontPackagesForPlayer(withKozarac('RBiH'), 'RBiH').map((p) => p.id)).toEqual([ID]);
-        expect(frontPackagesForPlayer(withKozarac('RS'), 'RS').map((p) => p.id)).toEqual([ID]);
+        expect(frontPackagesForPlayer(withHeld('RBiH'), 'RBiH').map((p) => p.id)).toEqual([ID]);
+        expect(frontPackagesForPlayer(withHeld('RS'), 'RS').map((p) => p.id)).toEqual([ID]);
         // HRHB sees Federation-partner ground that the map gives RS.
-        expect(frontPackagesForPlayer(withKozarac('HRHB'), 'HRHB').map((p) => p.id)).toEqual([ID]);
+        expect(frontPackagesForPlayer(withHeld('HRHB'), 'HRHB').map((p) => p.id)).toEqual([ID]);
     });
 
     it('unraised, captured ground follows the Dayton map (the forced-table fallback)', () => {
-        const state = withKozarac();
+        const state = withHeld();
         declineDaytonNegotiation(state);
         state.meta.turn = 196;
         enforceDaytonImposition(state);
         state.meta.turn = 197;
         enforceDaytonImposition(state);
-        expect(settlementControllersFor(state)?.[KOZARAC]).toBe('RS');
+        expect(settlementControllersFor(state)?.[HELD]).toBe('RS');
         expect(state.military.negotiation!.settlement?.map_overrides ?? {}).toEqual({});
     });
 
     it('demanded and won at the forced table, the claimant keeps it', () => {
-        const state = withKozarac();
+        const state = withHeld();
         declineDaytonNegotiation(state);
         state.meta.turn = 196;
         enforceDaytonImposition(state);
         const result = resolveDaytonNegotiation(state, proposal([ID]));
         expect(result.territorial_packages_accepted).toContain(ID);
-        expect(state.military.negotiation!.settlement?.map_overrides).toEqual({ [KOZARAC]: 'RBiH' });
-        expect(settlementControllersFor(state)?.[KOZARAC]).toBe('RBiH');
+        expect(state.military.negotiation!.settlement?.map_overrides).toEqual({ [HELD]: 'RBiH' });
+        expect(settlementControllersFor(state)?.[HELD]).toBe('RBiH');
     });
 
     it('captured ground is negotiable at an on-time Dayton too', () => {
-        const state = withKozarac();
+        const state = withHeld();
         const result = resolveDaytonNegotiation(state, proposal([ID]));
         expect(result.imposed).toBeUndefined();
-        expect(settlementControllersFor(state)?.[KOZARAC]).toBe('RBiH');
+        expect(settlementControllersFor(state)?.[HELD]).toBe('RBiH');
     });
 
-    it('a demand the map assignee refuses fails unless its patron overrules it', () => {
-        const refuse = (override: number) => {
-            const state = withKozarac();
-            const neg = state.military.negotiation!;
-            neg.patron_relationships.RS!.override_authority = override;
-            // RS has nothing to spend: any cost to it is refused, and no counter is viable.
-            neg.strategic_dimensions = undefined;
-            neg.capital.RS = undefined as never;
-            return { state, result: resolveDaytonNegotiation(state, proposal([ID])) };
-        };
-        const kept = refuse(10);
-        expect(kept.result.territorial_packages_rejected).toContain(ID);
-        expect(settlementControllersFor(kept.state)?.[KOZARAC]).toBe('RS');
-        const overruled = refuse(80);
-        expect(overruled.result.territorial_packages_accepted).toContain(ID);
-        expect(overruled.result.patron_overrides_applied).toContain(`territorial:${ID}:RS`);
-        expect(settlementControllersFor(overruled.state)?.[KOZARAC]).toBe('RBiH');
+    it('a refused demand fails unless the patron overrules it within its area budget', () => {
+        const kept = refusingRS(withHeld(), 10);
+        expect(resolveDaytonNegotiation(kept, proposal([ID])).territorial_packages_rejected).toContain(ID);
+        expect(settlementControllersFor(kept)?.[HELD]).toBe('RS');
+        // Pribeljci is 0.36% of BiH: inside Belgrade's budget at 75 (0.5%).
+        const overruled = refusingRS(withHeld(), 75);
+        const result = resolveDaytonNegotiation(overruled, proposal([ID]));
+        expect(result.territorial_packages_accepted).toContain(ID);
+        expect(result.patron_overrides_applied).toContain(`territorial:${ID}:RS`);
+        expect(settlementControllersFor(overruled)?.[HELD]).toBe('RBiH');
+    });
+
+    it('the patron budget grows with override authority', () => {
+        // Pribeljci + Brđani ≈ 0.57% of BiH: over the budget at 75 (0.5%), within it at 80 (1.25%).
+        const both = [HELD, 'op:sipovo:brdjani'];
+        const at75 = resolveDaytonNegotiation(refusingRS(withHeld('RBiH', both), 75), proposal([ID]));
+        expect(at75.territorial_packages_rejected).toContain(ID);
+        const at80 = resolveDaytonNegotiation(refusingRS(withHeld('RBiH', both), 80), proposal([ID]));
+        expect(at80.territorial_packages_accepted).toContain(ID);
+    });
+
+    it('protected ground (Prijedor) is never given up, voluntarily or under the patron', () => {
+        const state = makeState('RBiH');
+        state.political.political_controllers = {
+            'op:prijedor:brezicani': 'RS', 'op:prijedor:cejreci': 'RS', 'op:prijedor:kamicani': 'RS', 'op:prijedor:kozarac_2': 'RBiH',
+        } as never;
+        state.military.negotiation!.patron_relationships.RS!.override_authority = 95;
+        const result = resolveDaytonNegotiation(state, proposal(['front:prijedor:RBiH:RS']));
+        expect(result.territorial_packages_rejected).toContain('front:prijedor:RBiH:RS');
+        expect(result.patron_overrides_applied).toEqual([]);
+        expect(settlementControllersFor(state)?.['op:prijedor:kozarac_2']).toBe('RS');
+    });
+
+    it('ground taken after a decline is never patron-forced (the United States is the coercing power)', () => {
+        const state = refusingRS(withHeld(), 95);
+        declineDaytonNegotiation(state);
+        state.political.control_events = [{ turn: 190, settlement_id: HELD, from: 'RS', to: 'RBiH', mechanism: 'combat' }] as never;
+        state.meta.turn = 196;
+        enforceDaytonImposition(state);
+        const result = resolveDaytonNegotiation(state, proposal([ID]));
+        expect(result.territorial_packages_rejected).toContain(ID);
+        expect(settlementControllersFor(state)?.[HELD]).toBe('RS');
     });
 
     it('the map assignee may concede captured ground to its holder', () => {
-        const state = withKozarac('RS');
+        const state = withHeld('RS');
         resolveDaytonNegotiation(state, proposal([], [ID]));
-        expect(settlementControllersFor(state)?.[KOZARAC]).toBe('RBiH');
+        expect(settlementControllersFor(state)?.[HELD]).toBe('RBiH');
     });
 
     it('the UI menu carries the captured ground and the forced flag', async () => {
         const { derivePendingDayton } = await import('../src/ui/map/data/GameStateAdapter.js');
-        const onTime = withKozarac();
+        const onTime = withHeld();
         expect(derivePendingDayton(onTime)?.frontPackages?.map((p) => p.id)).toEqual([ID]);
         expect(derivePendingDayton(onTime)?.forced).toBeUndefined();
-        const state = withKozarac();
+        const state = withHeld();
         declineDaytonNegotiation(state);
         state.meta.turn = 196;
         enforceDaytonImposition(state);
@@ -375,33 +413,34 @@ describe('captured ground is negotiable at Dayton (owner, 2026-11-07)', () => {
     });
 
     it('a menu left open while the front moves negotiates the front at signature', () => {
-        const state = withKozarac();
-        state.political.political_controllers = { ...state.political.political_controllers, [KOZARAC]: 'RS' } as never;
+        const state = withHeld();
+        state.political.political_controllers = { ...state.political.political_controllers, [HELD]: 'RS' } as never;
         const result = resolveDaytonNegotiation(state, proposal([ID]));
         expect(result.territorial_packages_accepted).not.toContain(ID);
-        expect(settlementControllersFor(state)?.[KOZARAC]).toBe('RS');
+        expect(settlementControllersFor(state)?.[HELD]).toBe('RS');
     });
 });
 
-describe('encircled pockets travel with the surrounding captured ground (owner, 2026-11-07: Rasavci)', () => {
-    const RASAVCI = 'op:prijedor:rasavci_2';
-    const RING = ['op:prijedor:kozarac_2', 'op:prijedor:ljubija_2', 'op:prijedor:maricka_2', 'op:prijedor:prijedor_2', 'op:sanski_most:ostra_luka'];
-    const ID = 'front:prijedor:RBiH:RS';
+describe('encircled pockets travel with the surrounding captured ground (owner, 2026-11-07)', () => {
+    // Šipovo town, its five neighbours held by RBiH (four in Šipovo, two in Mrkonjić Grad).
+    const POCKET = 'op:sipovo:sipovo_2';
+    const RING = ['op:mrkonjic_grad:gerzovo_2', 'op:mrkonjic_grad:majdan_2', 'op:sipovo:brdjani', 'op:sipovo:gornji_mujdzici_2', 'op:sipovo:pribeljci_2', 'op:sipovo:volari_2'];
+    const ID = 'front:sipovo:RBiH:RS';
     const encircled = (pocketHolder: 'RS' | 'HRHB' = 'RS', ringOverride: Record<string, string> = {}) => {
         const state = makeState('RBiH');
-        const controllers: Record<string, string> = { [RASAVCI]: pocketHolder };
+        const controllers: Record<string, string> = { [POCKET]: pocketHolder };
         for (const o of RING) controllers[o] = 'RBiH';
         state.political.political_controllers = { ...controllers, ...ringOverride } as never;
         return state;
     };
     const proposal = (demands: string[] = []) => ({ territorial_demands: demands, territorial_concessions: [], institutional_choices: {} });
 
-    it('an RS village RBiH ground surrounds joins the Prijedor package and its price', () => {
+    it('an RS town RBiH ground surrounds joins the adjacent package and its price', () => {
         const pkg = buildFrontPackages(encircled()).find((p) => p.id === ID)!;
-        expect(pkg.encircled_osids).toEqual([RASAVCI]);
-        expect(pkg.osids).toContain(RASAVCI);
+        expect(pkg.encircled_osids).toEqual([POCKET]);
+        expect(pkg.osids).toContain(POCKET);
         const noPocket = encircled();
-        delete (noPocket.political.political_controllers as Record<string, string>)[RASAVCI];
+        delete (noPocket.political.political_controllers as Record<string, string>)[POCKET];
         const without = buildFrontPackages(noPocket).find((p) => p.id === ID)!;
         expect(pkg.area_pct).toBeGreaterThan(without.area_pct!);
         expect(pkg.capital_cost_to_demand).toBeGreaterThan(without.capital_cost_to_demand);
@@ -410,14 +449,14 @@ describe('encircled pockets travel with the surrounding captured ground (owner, 
     it('it changes hands only if the package is won', () => {
         const unraised = encircled();
         resolveDaytonNegotiation(unraised, proposal());
-        expect(settlementControllersFor(unraised)?.[RASAVCI]).toBe('RS');
+        expect(settlementControllersFor(unraised)?.[POCKET]).toBe('RS');
         const won = encircled();
         resolveDaytonNegotiation(won, proposal([ID]));
-        expect(settlementControllersFor(won)?.[RASAVCI]).toBe('RBiH');
+        expect(settlementControllersFor(won)?.[POCKET]).toBe('RBiH');
     });
 
     it('a pocket with an open side, or between the Federation parties, is left alone', () => {
-        const open = buildFrontPackages(encircled('RS', { 'op:prijedor:ljubija_2': 'RS' })).find((p) => p.id === ID);
+        const open = buildFrontPackages(encircled('RS', { 'op:sipovo:volari_2': 'RS' })).find((p) => p.id === ID);
         expect(open?.encircled_osids).toBeUndefined();
         const federation = buildFrontPackages(encircled('HRHB')).find((p) => p.id === ID);
         expect(federation?.encircled_osids).toBeUndefined();

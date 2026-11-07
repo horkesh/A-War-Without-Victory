@@ -105,6 +105,9 @@ export function buildFrontPackages(state: GameState): TerritorialPackage[] {
         const claimant = wartime[osid];
         const assignee = map[osid];
         if (!isFaction(claimant) || !isFaction(assignee) || claimant === assignee) continue;
+        // Owner ruling 2026-11-07: Dayton drew the inter-entity line only. RBiH-vs-HRHB
+        // differences follow the researched Dayton map; they are not negotiable here.
+        if (sameEntitySide(claimant, assignee)) continue;
         if (fixed.has(osid)) continue;
         const mun = osid.split(':')[1] ?? '';
         const id = `${FRONT_PACKAGE_PREFIX}${mun}:${claimant}:${assignee}`;

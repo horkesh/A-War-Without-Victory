@@ -40,6 +40,7 @@ import { computePeaceDysfunctionBreakdown } from './peace_dysfunction.js';
 import { getPackageAreaPct, resolveOsidsForKeywords } from './package_area_resolver.js';
 import { applyPeaceSettlement, computeSettlementControllers } from './peace_settlement.js';
 import { frontPackagesForProposal, sameEntitySide } from './front_packages.js';
+import { packageOsids, selectPatronForced } from './patron_leverage.js';
 import type { TerritorialPackage } from '../../state/negotiation_types.js';
 
 import { loadEventDefinitions } from '../events/event_loader.js';
@@ -361,6 +362,22 @@ export function reopenWarAfterDaytonDecline(state: GameState): void {
 }
 
 /**
+ * Cells that changed hands after the player declined Dayton (control-event log). Empty when
+ * Dayton was not declined. Used so no patron is forced to hand over post-decline ground.
+ */
+export function postDeclineChangedCells(state: GameState): Set<string> {
+    const declinedTurn = state.military.negotiation?.dayton_decline?.declined_turn;
+    const out = new Set<string>();
+    if (typeof declinedTurn !== 'number') return out;
+    for (const ev of state.political?.control_events ?? []) {
+        if (typeof ev.turn === 'number' && ev.turn > declinedTurn && typeof ev.settlement_id === 'string') {
+            out.add(ev.settlement_id);
+        }
+    }
+    return out;
+}
+
+/**
  * A player's "hard line" answer to its own Dayton acceptance event (e.g. RBiH at
  * dayton_talks_begin_1995) is a refusal of the settlement and takes the decline path.
  * Bot answers stay narrative. Returns true when it recorded a decline this call.
@@ -489,6 +506,7 @@ export function resolveDaytonNegotiation(
         .map(p => p.id)
         .filter(id => proposal.territorial_demands.includes(id) || proposal.territorial_concessions.includes(id));
     const allTerritorialIds = [...getAllTerritorialPackages().map(p => p.id), ...raisedFront].sort(strictCompare);
+    const refusedByHolder = new Map<string, TerritorialPackage[]>();
 
     for (const pkgId of allTerritorialIds) {
         const isDemanded = proposal.territorial_demands.includes(pkgId);
@@ -531,14 +549,28 @@ export function resolveDaytonNegotiation(
         if ((holderResponse && holderResponse.decision === 'accept') || keptInCounter) {
             acceptedTerritorial.push(pkgId);
         } else {
-            // Check patron override for the holding faction
-            const holderPatron = neg.patron_relationships[holderFaction];
-            if (holderPatron && holderPatron.override_authority >= PATRON_OVERRIDE_THRESHOLD) {
-                // Patron forces acceptance of this specific demand
-                acceptedTerritorial.push(pkgId);
-                patronOverrides.push(`territorial:${pkgId}:${holderFaction}`);
+            const list = refusedByHolder.get(holderFaction) ?? [];
+            list.push(pkg);
+            refusedByHolder.set(holderFaction, list);
+        }
+    }
+
+    // Owner ruling 2026-11-07 (patron_leverage.ts): a patron forces refused demands only up
+    // to its area budget, smallest first, never on protected ground, and never on ground
+    // taken after the player declined Dayton.
+    const postDeclineCells = postDeclineChangedCells(state);
+    const isPostDeclineGround = (p: TerritorialPackage) =>
+        postDeclineCells.size > 0 && packageOsids(p).some((o) => postDeclineCells.has(o));
+    for (const holder of [...refusedByHolder.keys()].sort(strictCompare)) {
+        const refused = refusedByHolder.get(holder)!;
+        const override = neg.patron_relationships[holder]?.override_authority ?? 0;
+        const forced = new Set(selectPatronForced(refused, holder, override, isPostDeclineGround));
+        for (const p of [...refused].sort((a, b) => strictCompare(a.id, b.id))) {
+            if (forced.has(p.id)) {
+                acceptedTerritorial.push(p.id);
+                patronOverrides.push(`territorial:${p.id}:${holder}`);
             } else {
-                rejectedTerritorial.push(pkgId);
+                rejectedTerritorial.push(p.id);
             }
         }
     }
