@@ -2,6 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   getConsequenceStillForRecord,
+  getDecisionHeaderForEventCategory,
   getDecisionHeaderForFamily,
   getPacketThumbnailForInboxType,
   PRESIDENTIAL_DESK_BACKGROUND,
@@ -45,6 +46,13 @@ describe('presidential desk assets', () => {
     expect(getConsequenceStillForRecord(record('Humanitarian convoy', 'humanitarian-convoy'))).toContain('consequence_humanitarian_access');
     expect(getConsequenceStillForRecord(record('Officer personnel', 'officer-personnel'))).toContain('consequence_personnel_change');
     expect(getConsequenceStillForRecord(record('Event decision', 'event-decision'))).toContain('consequence_public_pressure');
+  });
+
+  it('gives economic and territorial events their own decision plates', () => {
+    expect(getDecisionHeaderForEventCategory('economic')).toContain('decision_header_economic');
+    expect(getDecisionHeaderForEventCategory('territorial')).toContain('decision_header_territorial');
+    expect(getDecisionHeaderForEventCategory('military')).toContain('decision_header_military_staff');
+    expect(getDecisionHeaderForEventCategory('unknown')).toContain('decision_header_military_staff');
   });
 
   it('exposes the presidential desk background asset', () => {
