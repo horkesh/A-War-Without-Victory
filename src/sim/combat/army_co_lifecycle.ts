@@ -53,6 +53,7 @@
 
 import type { GameState, FactionId } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { selectManualPlayerFaction } from '../bot/staff_control.js';
 import type {
     NamedOfficer,
     NamedOfficerState,
@@ -451,6 +452,9 @@ export function processArmyCommanderLifecycle(
 
     const turn = state.meta?.turn ?? 0;
     const engagedFactions = engagedFactionsForCorps(state, engagedCorpsIds);
+    // The authored tenure schedule waits on a human only for a manually controlled player; a
+    // staff-controlled player (autonomy >= 1) changes army command on schedule like a bot.
+    const manualPlayerFaction = selectManualPlayerFaction(state);
     for (const faction of [...CANONICAL_FACTIONS].sort(strictCompare)) {
         const commander = findActiveArmyCommander(state, faction);
         if (!commander) continue;
@@ -473,7 +477,7 @@ export function processArmyCommanderLifecycle(
         let cause: ArmyCommanderDepartureCause | null = null;
         if (combatDeath) cause = 'combat_death';
         else if (explicitRelief || botAutoRelief) cause = 'political_relief';
-        else if (authoredScheduleDue && state.meta?.player_faction !== faction) cause = 'authored_schedule';
+        else if (authoredScheduleDue && manualPlayerFaction !== faction) cause = 'authored_schedule';
 
         if (cause) {
             const change = executeArmyCommanderTransition(state, roster, faction, commander, cause);
@@ -483,7 +487,7 @@ export function processArmyCommanderLifecycle(
             continue;
         }
 
-        if (authoredScheduleDue && state.meta?.player_faction === faction) {
+        if (authoredScheduleDue && manualPlayerFaction === faction) {
             emitArmyCommanderScheduleSuggestion(state, roster, faction, commander);
         }
         commander.state.turns_in_command += 1;

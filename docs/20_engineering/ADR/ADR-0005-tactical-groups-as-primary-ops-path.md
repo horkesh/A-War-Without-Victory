@@ -228,7 +228,7 @@ A faction-level command construct for cross-corps offensives. Models the documen
 **Pipeline placement:** new war-phase step `inject-army-hq-operations` immediately after `inject-queued-operations` (war_phases.ts ~line 984). Iterates eligible Army HQ op defs in sorted id order; injects the first that fires the eligibility gate.
 
 **Pyrrhic cost (compounds regular TG costs):**
-1. **Faction TG cap reduction:** while an Army HQ op is `planning` or `executing`, `MAX_CONCURRENT_TGS_PER_FACTION` for that faction is reduced by `ARMY_HQ_TG_CAP_REDUCTION = 2`. Reduction persists for `4 turns` after Army HQ op enters `recovering`. Forces other ops to go quiet during the major effort.
+1. **Faction TG cap reduction:** while an Army HQ op is `planning` or `executing`, `MAX_CONCURRENT_TGS_PER_FACTION` for that faction is reduced by `ARMY_HQ_TG_CAP_REDUCTION = 2`. Reduction persists for `4 turns` after Army HQ op enters `recovering`. Forces other ops to go quiet during the major effort. The Army HQ op's own TG is exempt from its own reduction (it still counts against the base cap and against any other Army HQ op's reduction); without that exemption the op blocked itself whenever two other faction TGs were already live (Farz 95, 2026-11-07).
 2. **Doubled cohesion bleed:** all donor cohesion losses for an Army HQ op are multiplied by `ARMY_HQ_COHESION_BLEED_MULT = 2.0×`. A donor that would lose 11 cohesion for a regular TG loses ~22 for an Army HQ op (still locked 8 turns).
 
 **Frequency cap:** `MAX_ARMY_HQ_OPS_PER_FACTION_PER_YEAR = 2`. Matches the Historian's record (peak years saw 2; average ~1.3). 52-week cooldown between ops prevents back-to-back.

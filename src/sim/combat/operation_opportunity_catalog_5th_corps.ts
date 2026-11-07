@@ -90,10 +90,9 @@ const KRUPA_VALLEY_OBJECTIVES = [
     'op:bosanska_krupa:ivanjska_2',
     'op:bosanska_krupa:arapusa_2',
     'op:bosanska_krupa:donji_dubovik_2',
-    'op:bosanska_krupa:vranjska_2',
-    'op:bosanska_krupa:jasenica_2',
-    'op:bosanska_krupa:gornja_suvaja',
-    'op:bosanski_petrovac:krnjeusa',
+    // Calibration 2026-11-06: Vranjska, Jasenica, Gornja Suvaja and Krnjeusa moved to the
+    // 505th Veliki Badic axis (below). The 505th took Veliki Badic at t180 and then stood
+    // idle to t188, while this serial axis reached the Bosanski Novi strip only at t187-188.
     // Bosanski Novi extension — adjacent to donji_dubovik_2 (live axis terminus):
     'op:bosanski_novi:krslje_2',   // adj donji_dubovik_2 ✓
     'op:bosanski_novi:matavazi_2', // adj donji_dubovik_2 + krslje_2 ✓
@@ -152,12 +151,16 @@ const BIHAC_PETROVAC_APPROACH_OBJECTIVES = [
 // Owner-approved 510th-only post-Ključ handoff. This is a model of the sourced west-Sana
 // push, not a claim that the 510th individually captured each represented settlement.
 // The path is contiguous in the operational contact graph (430 geometry evidence).
+// Calibration 2026-11-06: Ilidza before Kljevci (sanica_2 adj ilidza_2 ✓, ilidza_2 adj
+// kljevci ✓, kljevci adj sanski_most_2 ✓, sanski_most_2 adj ostra_luka ✓). The 510th reached
+// Sanica at t187 and took Kljevci at t188 while the 506th stalled on Ilidza alone; the 517th
+// (Jelasinovci, adj kljevci) still has Kljevci next on its own axis.
 const WEST_SANA_HANDOFF_OBJECTIVES = [
     'op:kljuc:sanica_2',
-    'op:sanski_most:kljevci',
     'op:sanski_most:ilidza_2',
-    'op:sanski_most:ostra_luka',
+    'op:sanski_most:kljevci',
     'op:sanski_most:sanski_most_2',
+    'op:sanski_most:ostra_luka',
 ];
 
 // 2026-06-07: re-ordered into a single verified front-edge adjacency walk
@@ -196,11 +199,13 @@ const SANSKI_KLJUC_OBJECTIVES = [
     'op:bosanska_krupa:donji_dubovik_2',
     'op:sanski_most:budimlic_japra_2',
     'op:sanski_most:lusci_palanka_2',
-    'op:sanski_most:jelasinovci',
     'op:sanski_most:skucani_vakuf_2',
     'op:sanski_most:stari_majdan',
     'op:sanski_most:sanski_most_2',
-    'op:sanski_most:ostra_luka',
+    // Calibration (oct1995): Ostra Luka removed from this walk. It is painted RS at every
+    // checkpoint; with the 517th split the 506th reaches the town at t187, and taking
+    // Ostra Luka next cost a cell while Ilidža (painted RBiH) stayed RS. Ilidža now follows
+    // the town directly (Sanski Most - Ilidža - Kljevci is a contiguous graph walk).
     'op:sanski_most:ilidza_2',
     'op:sanski_most:kljevci',
     'op:kljuc:sanica_2',
@@ -258,7 +263,13 @@ const SANA_AXES: readonly OpportunityAxisDef[] = [
         // owns and still holds Ivanjska. This modeled detachment does not claim
         // that the 505th was the historical captor of Veliki Badić.
         brigades: [],
-        objectives: ['op:bosanska_krupa:veliki_badic'],
+        objectives: [
+            'op:bosanska_krupa:veliki_badic',
+            'op:bosanska_krupa:gornja_suvaja', // adj veliki_badic ✓
+            'op:bosanski_petrovac:krnjeusa',   // adj gornja_suvaja ✓
+            'op:bosanska_krupa:jasenica_2',    // adj krnjeusa ✓
+            'op:bosanska_krupa:vranjska_2',    // adj jasenica_2 ✓
+        ],
         staging_osid: STAGING_IVANJSKA,
         preserve_objective_sequence: true,
         phase_gate: {
@@ -370,6 +381,31 @@ const SANA_AXES: readonly OpportunityAxisDef[] = [
         objectives: SANSKI_KLJUC_OBJECTIVES,
         staging_osid: STAGING_KRUPA_OTOKA,
         preserve_objective_sequence: true,
+    },
+    {
+        // Calibration assumption (oct1995): once Lušci Palanka is taken the two brigades of
+        // the Sanski Most axis split. The 506th keeps the town walk; the 517th turns east
+        // along Jelašinovci - Kljevci - Ilidža (a contiguous graph walk). Measured: on one
+        // axis the pair moves together and Ilidža falls one week after the oct1995 checkpoint.
+        // The split itself is a model choice, not a sourced order.
+        axis_id: 'sana_jelasinovci_517th',
+        name: 'Jelašinovci - Ilidža (517th split)',
+        corps: PRIMARY_CORPS,
+        brigades: [],
+        objectives: [
+            'op:sanski_most:jelasinovci',
+            'op:sanski_most:kljevci',
+            'op:sanski_most:ilidza_2',
+        ],
+        preserve_objective_sequence: true,
+        phase_gate: {
+            main_axis_id: 'sana_sanski_most_kljuc',
+            requires_operation_captures: ['op:sanski_most:lusci_palanka_2'],
+            handoff: {
+                brigade_id: 'arbih_517th_light' as FormationId,
+                source_axis_id: 'sana_sanski_most_kljuc',
+            },
+        },
     },
 ];
 

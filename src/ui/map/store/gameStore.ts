@@ -7,6 +7,7 @@ import type { ArmyHQRecordsSubTab } from '../../shared/shellHandoff';
 import type { FieldInspectionTarget } from '../utils/fieldInspectionTarget';
 import type { ReplaySaveManifest } from '../../../sim/replay/replay_manifest';
 import type { GameState as RawGameState } from '../../../state/game_state';
+import type { TurnPauseStatus } from '../desktop/types';
 
 /** Last turn report shape from desktop (advance-turn). Used for succession in FormationDetail. */
 export interface LastTurnReport {
@@ -182,6 +183,9 @@ export interface GameStore {
   /** True when the player clicked the Warroom wall calendar — triggers AdvanceTurnModal. */
   advanceTurnPending: boolean;
   setAdvanceTurnPending: (v: boolean) => void;
+  /** PAUSE BEFORE COMBAT: status of the in-flight turn (main process 'turn-paused-for-decisions'). */
+  turnPauseStatus: TurnPauseStatus | null;
+  setTurnPauseStatus: (status: TurnPauseStatus | null) => void;
 
   /** Presidential Inbox: opening brief dismissed flag */
   openingBriefDismissed: boolean;
@@ -470,6 +474,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   pauseMenuOpen: false,
   advanceTurnPending: false,
   setAdvanceTurnPending: (v) => set({ advanceTurnPending: v }),
+  turnPauseStatus: null,
+  setTurnPauseStatus: (status) => set({ turnPauseStatus: status }),
   openingBriefDismissed: false,
   openingBriefDismissedFaction: null,
   setOpeningBriefDismissed: (v) => set((state) => ({

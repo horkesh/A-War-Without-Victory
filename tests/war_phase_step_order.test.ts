@@ -278,6 +278,9 @@ describe('war-phase step ordering', () => {
         // +1 from prestage-deferred-historical-elites: emits the dated Main Staff
         // concentration march before column movement consumes it.
         // +1: current-turn-aware fatigue recovery runs after attack resolution.
-        expect(stepNames.length).toBe(191);
+        // +1 from ensure-negotiation-state (2026-11-06, live = headless): creates the
+        //        negotiation/strategic-dimension store before update-event-readiness when a
+        //        headless start has none, so turn-1 event dimension shifts are not dropped.
+        expect(stepNames.length).toBe(192);
     });
 });

@@ -355,8 +355,10 @@ describe('pre-first-Advance RBiH paramilitary policy', () => {
     }
   });
 
-  it('preserves exact deny, ask, and allow first-Advance semantics through existing writers', async () => {
+  it('preserves exact deny, ask, and allow first-Advance semantics for a manual (autonomy 0) player', async () => {
     const pending = await pendingPolicyState();
+    // Owner calibration directive 2026-11-05: the policy gate governs a manual player only.
+    pending.meta.autonomy_level = 0;
     const beforeWarCrimes = pending.military.negotiation?.capital?.RBiH?.war_crimes_events ?? 0;
     const branches = new Map<string, GameState>();
 
@@ -399,5 +401,18 @@ describe('pre-first-Advance RBiH paramilitary policy', () => {
     ).reduce((sum, row) => sum + (row.civilian_casualties_caused ?? 0), 0);
     expect(civilianDeaths).toBe(200);
     expect((allow.military.negotiation?.capital?.RBiH?.war_crimes_events_emergent ?? 0)).toBe(2);
+  }, 120_000);
+
+  it('runs rear-pocket consolidation like bot staff at production autonomy, whatever the policy answer', async () => {
+    const pending = await pendingPolicyState();
+    expect(pending.meta.autonomy_level).toBeGreaterThanOrEqual(1);
+    const resolved = resolveDesktopEventDecision(pending, POLICY_EVENT_ID, 'always_deny', process.cwd());
+    const advanced = await advanceTurn(resolved, process.cwd());
+    expect(advanced.error).toBeUndefined();
+    expect(advanced.state.pending_paramilitary_requests ?? []).toHaveLength(0);
+    expect((advanced.state.political.control_events ?? [])
+      .filter((event) => event.mechanism === 'paramilitary' && event.to === 'RBiH')
+      .map((event) => event.settlement_id)
+      .sort()).toEqual(EXPECTED_TARGETS);
   }, 120_000);
 });

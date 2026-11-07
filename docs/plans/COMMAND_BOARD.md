@@ -1,5 +1,7 @@
 # AWWV Command Board
 
+**Verified local UI packet (2026-11-07):** [Command palette and scalable UI](2026-11-06-command-palette-ui-scale-plan.md) has independent/source, full-suite, browser and isolated-native proof. Local source c51125157; integration pending. This changes no R7/R8/calibration acceptance status.
+
 **Status — 2026-10-27:** Derived dispatch view. Calibration is HOLD for the execution-consistency gate in MASTER_ROADMAP. The owner retained accepted-n101 fatigue coefficients and authorized reconciliation of the manual; engagement timing remains a separately tested correctness repair. Superseded dated status and evidence remain in the [status archive](../_old/plans/superseded/2026-10-27-master-roadmap-status-history.md#superseded-derived-command-board-status). Older measurements below are historical context; the roadmap current scope boundary controls.
 
 **Owner scope ruling — 2026-10-27:** Dynamic enemy garrison forecasts receive the existing confidence uncertainty once; actual resolution is unchanged. Historical harness benchmarks remain regression checks, while gameplay calibration requires live-equivalent execution and matched inputs/policies. No target/reference repaint or artificial overlays in desktop. Consistency review and final aggregate remain pending; calibration stays HOLD.

@@ -552,7 +552,7 @@ describe('opted-in subordinate preparation-probe lifecycle', () => {
 
         expect(result.ok).toBe(false);
         expect(result.ok ? [] : result.errors).toContain(
-            `military.corps_command.${CORPS}.active_operations[1].preparation_probe_link.source_axes brigade ids must equal the child participants`,
+            `military.corps_command.${CORPS}.active_operations[1].preparation_probe_link.source_axes brigade ids must include every child participant`,
         );
     });
 

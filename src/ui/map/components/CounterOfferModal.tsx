@@ -76,7 +76,7 @@ export function CounterOfferModal({ offerId, state, onClose }: CounterOfferModal
       zIndex={Z.CRITICAL_MODAL}
       ariaLabelledBy="counter-offer-modal-title"
       backdropClassName="bg-black/75 backdrop-blur-sm"
-      panelClassName="w-[min(94vw,680px)] overflow-hidden rounded-lg border border-accent-gold/35 bg-panel-bg text-text-primary shadow-2xl"
+      panelClassName="w-[min(calc(var(--interface-viewport-width,100vw)*0.94),680px)] overflow-hidden rounded-lg border border-accent-gold/35 bg-panel-bg text-text-primary shadow-2xl"
     >
       {headerImage && (
         <DecisionModalImageHeader

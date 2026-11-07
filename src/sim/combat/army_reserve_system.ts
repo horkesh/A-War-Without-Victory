@@ -75,6 +75,7 @@ import {
 } from './historical_elite_reservations.js';
 import { isVlasicCohaExceptionOperation } from './coha_operation_exception.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { selectStaffControlledFactions } from '../bot/staff_control.js';
 import { getPrimaryOperation } from './corps_operation_helpers.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { removeFromActiveOperation } from './brigade_dissolution.js';
@@ -1293,10 +1294,16 @@ export function evaluateArmyReserveAssignments(
     const fulfilled: ArmyReserveRequest[] = [];
     const remaining: ArmyReserveRequest[] = [];
 
+    // Auto-assign for every staff-controlled faction: bots, and the player's staff at
+    // autonomy >= 1 (owner calibration directive 2026-11-05: live must reproduce headless).
+    // Only a manual (autonomy 0) player's requests stay pending for the UI.
+    const playerFaction = state.meta.player_faction ?? null;
+    const manualPlayerFaction = playerFaction != null
+        && !selectStaffControlledFactions(state).includes(playerFaction)
+        ? playerFaction
+        : null;
     for (const req of requests) {
-        // Only auto-assign bot factions (player faction surfaces in UI)
-        const playerFaction = state.meta.player_faction ?? null;
-        if (req.faction === playerFaction) {
+        if (manualPlayerFaction != null && req.faction === manualPlayerFaction) {
             remaining.push(req);
             continue;
         }

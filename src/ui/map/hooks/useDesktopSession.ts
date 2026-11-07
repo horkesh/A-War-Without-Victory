@@ -199,6 +199,15 @@ export function useDesktopSession({
             }
         });
 
+        // PAUSE BEFORE COMBAT: the main process reports when the in-flight turn stops for this
+        // turn's player decisions, resumes, and ends. The paused state itself arrives through
+        // game-state-updated above, so the decision modal opens from pendingEventDecisions.
+        const unsubscribeTurnPause = typeof ipc.subscribeTurnPausedForDecisions === 'function'
+            ? ipc.subscribeTurnPausedForDecisions((status) => {
+                if (active) useGameStore.getState().setTurnPauseStatus(status ?? null);
+            })
+            : () => { /* bridge without the pause channel */ };
+
         const initialUpdate = reserveDesktopUpdate(true);
         ipc.getCurrentGameState()
             .then((stateJson) => enqueueStateJson(stateJson, initialUpdate))
@@ -216,6 +225,7 @@ export function useDesktopSession({
             active = false;
             unsubscribeGameState();
             unsubscribeTurnReport();
+            unsubscribeTurnPause();
             unsubscribeReplaySequence();
             unsubscribeReplayManifest();
             if (typeof document !== 'undefined') {

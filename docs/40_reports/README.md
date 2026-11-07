@@ -1,4 +1,6 @@
 **Latest implementation report — corrected-engine calibration packet (2026-10-26):** [Report](implemented/20261026_CORRECTED_ENGINE_CALIBRATION_PACKET.md) records retained audits, the focused zero-drift morale correction, the blocked Circle/HVO proposals, and the unchanged 703/712, four-loss, health13>3 failure.
+
+**Command palette and scalable UI (2026-11-07, verified local branch):** [Report](implemented/20261106_COMMAND_PALETTE_UI_SCALE.md) records friendly-name keyboard navigation, persistent 100/125/150% chrome, nine-case browser/required-decision proof, actual native reload/relaunch and strict save preservation, independent review and full qualification. Integration and global calibration/release gates remain separate.
 # docs/40_reports — Master Index and Structure
 
 **Player experience and original soundscape (2026-11-05, isolated branch):** [Report](implemented/20261105_PLAYER_EXPERIENCE_COMPLETION.md) and [receipt](implemented/20261105_PLAYER_EXPERIENCE_COMPLETION_RECEIPT.json) cover optional music, tactile effects, reliable audio controls, accessible Settings and scoped offline renderer evidence. Human listening, sensitivity/design and packaged acceptance remain open.
