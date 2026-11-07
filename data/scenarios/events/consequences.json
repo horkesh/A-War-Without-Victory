@@ -1173,6 +1173,7 @@
   },
   {
     "id": "csq_joint_operations_agreement_1992",
+    "image": "event_washington_agreement.webp",
     "title": "Joint Operations, Formalized",
     "narrative": "The agreement is signed at Mostar in late spring. HVO and ARBiH commands formalise what has been a working reality in parts of central Bosnia since winter: joint staff liaison at the operational level, combined defensive planning against the VRS, mutual supply arrangements through Split and Ploce. In Zagreb, Defence Minister Susak reads the English-language summary and sets it aside with a look his staff have learned to recognise. In Sarajevo and Mostar, the officers who will have to keep the agreement going read the Bosnian and Croatian summaries and believe at least some of it.",
     "category": "diplomatic",
@@ -1316,6 +1317,7 @@
   },
   {
     "id": "csq_federation_early_1994",
+    "image": "event_washington_agreement.webp",
     "title": "Federation Before Washington",
     "narrative": "The agreement that in the historical record required American pressure and the threat of NATO sanctions on all sides arrives on its own timetable. The united-front soldiers have held a common line against the VRS for the better part of two years; the politicians who follow their lead sign a federation structure that codifies what the armies already practise. The text owes less to the State Department and more to the working arrangements of central Bosnia. It is not the Washington Agreement that the historical record produced. It is an earlier, leaner document that leaves some questions deliberately open because the signatories trust each other enough to come back to them.",
     "category": "diplomatic",
@@ -1748,6 +1750,7 @@
   },
   {
     "id": "csq_early_peace_acceptance_w120",
+    "image": "event_diplomatic_negotiation.webp",
     "title": "Pen Before the Last Offensive",
     "narrative": "The plan is signed before the last offensive runs its course. The ink is dry and the cease-fire boundary is drawn while several axes still have momentum and several enclaves are still intact. The leverage that the late-war battles would have purchased never materializes; what is on the table now is what will be on the table at the final accord. The negotiators understand the trade.",
     "category": "diplomatic",
@@ -1986,6 +1989,7 @@
   },
   {
     "id": "csq_separate_peace_overture",
+    "image": "event_diplomatic_negotiation.webp",
     "title": "Separate Peace Overture",
     "narrative": "A back-channel draft circulates from one capital to the other, and to the mediators. The terms are bilateral. The other partner is not in the room. Negotiating leverage shifts to the faction that holds the initiative; the partner left outside notes the precedent.",
     "category": "diplomatic",
@@ -3100,6 +3104,7 @@
   },
   {
     "id": "csq_tripartite_federation_overture",
+    "image": "event_diplomatic_negotiation.webp",
     "title": "Tripartite Federation Proposal",
     "narrative": "An ambitious draft circulates through three capitals: not a peace plan but a constitutional one. A federation of three communities, each with autonomy, each with a veto, none with a majority. The mediators see in it the only structural answer to the war's grammar; the parties see in it whatever each side most fears or most wants. The decision is not whether the proposal is good — it is whether to keep the door open.",
     "category": "diplomatic",
@@ -3988,6 +3993,7 @@
   },
   {
     "id": "csq_third_party_mediation_offered",
+    "image": "event_diplomatic_negotiation.webp",
     "title": "The Third-Party Mediator",
     "narrative": "A nation with no direct stake in the war — distant, well-resourced, signalling its diplomatic ambition — offers itself as a third-party mediator. The standing mediators are tired; the major capitals are distracted. The offer is genuine but the price is the framing it would impose. The decision is whether to engage or hold to the existing tracks.",
     "category": "diplomatic",
@@ -7476,6 +7482,7 @@
   },
   {
     "id": "csq_negotiating_capital_recovery_RBiH",
+    "image": "event_diplomatic_negotiation.webp",
     "title": "The Geneva Column Steadies (RBiH)",
     "narrative": "The negotiating-leverage column, which had been drifting downward through three quarters of unfavorable communiques, steadies. The patron capital's signals stabilize on the constructive register. The Federation foreign-ministry analysts, who had been forecasting a slow decay, instead register a small recovery. The mediators read the inflection. The front-line officers do not; the diplomats do.",
     "category": "diplomatic",
@@ -7544,6 +7551,7 @@
   },
   {
     "id": "csq_negotiating_capital_recovery_RS",
+    "image": "event_diplomatic_negotiation.webp",
     "title": "The Geneva Column Steadies (RS)",
     "narrative": "The negotiating-leverage column, which had been drifting downward through three quarters of unfavorable communiques, steadies. Belgrade's signals stabilize on the constructive register. The Pale foreign-ministry section, which had been forecasting a slow decay, instead registers a small recovery. The mediators read the inflection. The front-line officers do not; the diplomats do.",
     "category": "diplomatic",
@@ -7612,6 +7620,7 @@
   },
   {
     "id": "csq_negotiating_capital_recovery_HRHB",
+    "image": "event_diplomatic_negotiation.webp",
     "title": "The Geneva Column Steadies (HRHB)",
     "narrative": "The negotiating-leverage column, which had been drifting downward through three quarters of unfavorable communiques, steadies. Zagreb's signals stabilize on the constructive register. The HZ-HB foreign-ministry section, which had been forecasting a slow decay, instead registers a small recovery. The mediators read the inflection. The front-line officers do not; the diplomats do.",
     "category": "diplomatic",

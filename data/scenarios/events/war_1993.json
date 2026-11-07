@@ -113,6 +113,7 @@
   },
   {
     "id": "vance_owen_plan_1993",
+    "image": "event_diplomatic_negotiation.webp",
     "title": "Vance-Owen Peace Plan Presented",
     "narrative": "The Vance-Owen Peace Plan proposes dividing Bosnia into ten semi-autonomous provinces based on ethnic and geographic criteria. The Bosnian Croat leadership endorses it, and RBiH reluctantly signs and accepts under pressure, but the Bosnian Serb assembly in Pale rejects it, dooming the most comprehensive peace effort to date.",
     "category": "diplomatic",
@@ -934,6 +935,7 @@
   },
   {
     "id": "hrhb_vance_owen_acceptance_1993",
+    "image": "event_diplomatic_negotiation.webp",
     "title": "Vance-Owen: Mostar Records Its Posture",
     "narrative": "The Vance-Owen Peace Plan was presented at Geneva on 2 January 1993 — a ten-province framework that ratifies three Croat-majority provinces (Mostar, Central Bosnia, Western Herzegovina) under the constitutional architecture of a decentralized Bosnia. Mate Boban signed the agreed text for the Croatian Community of Herceg-Bosna at Athens on 25 March 1993, with Tudjman's directive transmitted via the Granic-Susak channel: the provincial allocation is the operative territorial basis for HZ HB. The Mostar Presidency must record its posture toward the VOPP framework — accept the ten-province map, reject the plan and break with Zagreb's directive, condition acceptance on amendments, or condition acceptance on a reciprocal ARBiH signature.",
     "category": "diplomatic",
@@ -3244,6 +3246,7 @@
   },
   {
     "id": "owen_stoltenberg_plan_1993",
+    "image": "event_diplomatic_negotiation.webp",
     "source_tier": "agreement_text",
     "title": "Owen-Stoltenberg: Presidency Review",
     "narrative": "International mediators David Owen and Thorvald Stoltenberg present a loose union of three ethnic republics. This is the Presidency stage: Sarajevo may conditionally accept the framework while reserving the Drina-enclaves and Posavina questions for the final Assembly vote.",
@@ -3341,6 +3344,7 @@
   },
   {
     "id": "os_rbih_tactical_acceptance_1993",
+    "image": "event_diplomatic_negotiation.webp",
     "title": "Owen-Stoltenberg: Accept or Resist?",
     "narrative": "Owen and Stoltenberg present their Union of Three Republics plan aboard HMS Invincible (20 September 1993). The Presidency narrowly accepted, conditional on territorial concessions in eastern Bosnia (the Drina enclaves and Posavina corridor). The decision now falls to the Sarajevo Assembly (29 September 1993): ratify the Presidency's conditional acceptance, or reject the partition formula outright.",
     "category": "diplomatic",
@@ -3765,6 +3769,7 @@
   },
   {
     "id": "hrhb_owen_stoltenberg_response_1993",
+    "image": "event_diplomatic_negotiation.webp",
     "title": "Owen-Stoltenberg: Mostar Records Its Posture",
     "narrative": "Owen and Stoltenberg's Union of Three Republics plan was tabled aboard HMS Invincible on 20 September 1993. The map ratifies Herceg-Bosna as one of three constitutive ethnic republics, with the central-Bosnia and western Herzegovina territorial allocation drawn favorably to Croat claims. Zagreb's directive is unambiguous: Tudjman has signaled to Boban that the HZ HB Presidency is to sign. The Mostar Presidency must record its posture toward the Invincible package — accept the Union of Three Republics framework, reject the plan and break with Zagreb's directive, or condition acceptance on territorial amendments in central Bosnia.",
     "category": "diplomatic",
@@ -3976,6 +3981,7 @@
   },
   {
     "id": "rs_owen_stoltenberg_response_1993",
+    "image": "event_diplomatic_negotiation.webp",
     "title": "Owen-Stoltenberg: Pale Records Its Posture",
     "narrative": "Owen and Stoltenberg's Union of Three Republics plan was tabled aboard HMS Invincible on 20 September 1993. The map ratifies Republika Srpska as one of three constitutive ethnic republics, with the corridor narrowed but the Drina-valley axis preserved and Sarajevo division retained inside the tripartite frame. Belgrade's directive is unambiguous: Milosevic has signaled to Karadzic that the Pale Assembly is to sign. The Pale Assembly must record its posture toward the Invincible package — accept the Union of Three Republics framework as the diplomatic legitimization of Republika Srpska, reject the plan and defy Belgrade's directive, or condition acceptance on territorial amendments to the corridor and Sarajevo allocation.",
     "category": "diplomatic",
