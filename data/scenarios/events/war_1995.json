@@ -2612,7 +2612,7 @@
     "id": "us_forces_dayton_rbih_1995",
     "image": "event_diplomatic_negotiation.webp",
     "title": "Washington Ends the Argument",
-    "narrative": "In this campaign, eight weeks after Sarajevo walked away from the Dayton text, Washington stops asking. American aircraft strike Army of the Republic of Bosnia and Herzegovina positions and depots, and the message to the Presidency is delivered in one sentence: return to the table and sign, or fight on alone against everyone. The delegation goes back. The Dayton map is the text on the table; ground taken since the walkout can be kept only by bargaining for it.",
+    "narrative": "In this campaign, eight weeks after Sarajevo walked away from the Dayton text, Washington stops asking. The Equip-and-Train programme is suspended, Zagreb closes the supply corridor through Croatia at American request, and the Presidency is told that further offensives will be met from the air. The message is one sentence: return to the table and sign, or fight on alone against everyone. The delegation goes back. The Dayton map is the text on the table; ground taken since the walkout can be kept only by bargaining for it.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 184,
@@ -2629,10 +2629,12 @@
     "responding_faction": "RBiH",
     "effect": {
       "kind": "narrative",
-      "text": "In this campaign, US air strikes force the Bosnian government back to the Dayton table."
+      "text": "In this campaign, Washington suspends Equip-and-Train and has Zagreb close the supply corridor until the Bosnian government returns to the Dayton table."
     },
     "effects": [
-      { "kind": "morale_change", "faction": "RBiH", "delta": -15 },
+      { "kind": "morale_change", "faction": "RBiH", "delta": -10 },
+      { "kind": "supply_delta", "faction": "RBiH", "delta": -15 },
+      { "kind": "equipment_quality_modifier", "faction": "RBiH", "multiplier": 0.95, "duration_turns": 12 },
       { "kind": "cohesion_change", "faction": "RBiH", "delta": -10 },
       { "kind": "patron_pressure", "faction": "RBiH", "delta": 20 }
     ],
@@ -2644,7 +2646,7 @@
     "sets_flags": { "dayton_imposed_by": "united_states" },
     "historical_source": "Owner design (2026-11-07): a declined Dayton is imposed after eight weeks. Historical anchor for US coercion at Dayton: Holbrooke, 'To End a War' (1998), on the closing days at Wright-Patterson; GFAP initialled 21 November 1995, signed Paris 14 December 1995.",
     "source_tier": "design_counterfactual",
-    "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The Bosnian government accepted Dayton; the United States never bombed it. US pressure on Sarajevo at Dayton was diplomatic. The event fires only after the player declines the settlement."
+    "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The Bosnian government accepted Dayton. US pressure on Sarajevo was diplomatic, with a warning that a continued offensive would be met by air power (autumn 1995); Equip-and-Train was not suspended and Croatia did not close the corridor. The event fires only after the player declines the settlement."
   },
   {
     "id": "belgrade_signs_dayton_for_rs_1995",

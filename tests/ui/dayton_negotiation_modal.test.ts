@@ -126,9 +126,9 @@ describe('DaytonNegotiationModal — Phase-4 player-agency surface', () => {
 
         render(createElement(DaytonNegotiationModal, { dayton: PENDING }));
         fireEvent.click(screen.getByText('Decline Settlement'));
-        // First click only warns: eight more weeks, then the United States imposes it.
+        // First click only warns: eight more weeks, then Washington forces it back to the table.
         expect(screen.getByRole('alert').textContent).toMatch(/eight more weeks/);
-        expect(screen.getByRole('alert').textContent).toMatch(/United States/);
+        expect(screen.getByRole('alert').textContent).toMatch(/Washington/);
         expect(declineDayton).not.toHaveBeenCalled();
         fireEvent.click(screen.getByText('Confirm Decline'));
         await waitFor(() => expect(declineDayton).toHaveBeenCalledTimes(1));
