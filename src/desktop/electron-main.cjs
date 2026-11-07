@@ -3508,10 +3508,10 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle('save-settings', async (_event, payload) => {
+  ipcMain.handle('save-settings', async (_event, payload, options) => {
     try {
       const { saveSettings } = require('./settings_store.cjs');
-      const ok = saveSettings(app, payload);
+      const ok = saveSettings(app, payload, options);
       return { ok };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };

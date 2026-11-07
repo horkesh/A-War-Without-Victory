@@ -40,11 +40,31 @@ function loadSettings(app) {
     return { ...DEFAULT_SETTINGS };
 }
 
-function saveSettings(app, settings) {
+function isRecord(value) {
+    return !!value && typeof value === 'object' && !Array.isArray(value);
+}
+
+function saveSettings(app, settings, options) {
     const filePath = getSettingsPath(app);
     if (!filePath) return false;
     try {
-        fs.writeFileSync(filePath, JSON.stringify(settings, null, 2), 'utf8');
+        let next = settings;
+        if (options?.merge === true) {
+            if (!isRecord(settings)) return false;
+            // Keep this read and write synchronous in main so separate windows share one merge.
+            const current = loadSettings(app);
+            next = { ...current, ...settings };
+            if (isRecord(settings.audioPreferences)) {
+                const existingAudio = isRecord(current.audioPreferences)
+                    ? current.audioPreferences
+                    : options.audioDefaults;
+                next.audioPreferences = {
+                    ...(isRecord(existingAudio) ? existingAudio : {}),
+                    ...settings.audioPreferences,
+                };
+            }
+        }
+        fs.writeFileSync(filePath, JSON.stringify(next, null, 2), 'utf8');
         return true;
     } catch {
         return false;
