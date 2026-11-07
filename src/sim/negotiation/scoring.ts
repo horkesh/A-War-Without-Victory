@@ -23,6 +23,7 @@ import { computePeaceDysfunctionBreakdown, computePeaceDysfunctionIndex, capOutc
 import { DIMENSION_WEIGHTS, computeNegotiatingCapital } from '../events/strategic_dimensions.js';
 import type { DimensionStore } from '../events/strategic_dimensions.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { capGradeBySettlement } from './peace_settlement.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 
@@ -771,8 +772,17 @@ export function computeFactionVerdict(
         };
     }
 
+    // Peace settlement (owner, 2026-11-07): when a plan was accepted or Dayton signed or
+    // imposed, the grade reads the SETTLED territory (the plan's map), not the front line.
+    // Absent on every campaign without a settlement, which keeps those verdicts unchanged.
+    const settlement = neg?.settlement;
+    const settledTerritory = settlement?.territory_pct?.[faction];
+    const gradedCapital = typeof settledTerritory === 'number'
+        ? { ...capital, territory_controlled_pct: settledTerritory }
+        : capital;
+
     const pyrrhicScore = computePyrrhicScore(capital, faction, dimStore);
-    const earned = computeFactionGrade(capital, faction, state);
+    const earned = computeFactionGrade(gradedCapital, faction, state);
 
     // War-cost floor (Free War Phase 3, Part A): a long, bloody war can never
     // read as a clean triumph. Post-termination reflection — reads accrued cost,
@@ -799,7 +809,9 @@ export function computeFactionVerdict(
     // internally inconsistent display. So the displayed breakdown takes the SAME
     // max(capital, fresh) the grade used. EMERGENT-GATED to keep historical mode
     // byte-identical (the term is emergent-only by construction).
-    const displayBreakdown = freshenBreakdownForDisplay(state, faction, capital);
+    const displayBreakdown = typeof settledTerritory === 'number'
+        ? { ...freshenBreakdownForDisplay(state, faction, capital), territory_controlled_pct: settledTerritory }
+        : freshenBreakdownForDisplay(state, faction, capital);
 
     // Collect condemnation flags from rupture consequences (Ring 2)
     const condemnationFlags = collectCondemnationFlags(state, faction);
@@ -831,14 +843,19 @@ export function computeFactionVerdict(
     // §6 bright-line LETTER-grade cap (Pyrrhic scoring panel, red-team L1, 2026-08-10):
     // a condemnation caps the letter grade INDEPENDENT of the cost index, so atrocity can
     // never reach A even once scoring de-saturates. Worst-of cost-cap and condemnation-cap.
-    const grade = capGradeByCondemnation(costCappedGrade, condemnationFlags);
+    const condemnationCappedGrade = capGradeByCondemnation(costCappedGrade, condemnationFlags);
+    // Settlement terms (owner, 2026-11-07): a plan that abolishes or subordinates a party's
+    // polity caps its grade (e.g. RS under Vance-Owen has no entity; only Dayton names it).
+    const grade = capGradeBySettlement(condemnationCappedGrade, settlement, faction);
     const description = grade === earned.grade
         ? earned.description
-        : grade !== costCappedGrade
-            ? `${earned.description} — capped by atrocity condemnation`
-            : scoringSimpleEnabled()
-                ? `${earned.description} — adjusted by human cost vs. the historical war`
-                : `${earned.description} — capped by war cost (index ${costIndex.toFixed(2)})`;
+        : grade !== condemnationCappedGrade
+            ? `${earned.description} — capped by the settlement's terms`
+            : grade !== costCappedGrade
+                ? `${earned.description} — capped by atrocity condemnation`
+                : scoringSimpleEnabled()
+                    ? `${earned.description} — adjusted by human cost vs. the historical war`
+                    : `${earned.description} — capped by war cost (index ${costIndex.toFixed(2)})`;
     const baseOutcomeClass = classifyOutcome(faction, displayBreakdown, dimStore, grade, pyrrhicScore, condemnationFlags);
 
     // Comprehensive Dayton D3 (2026-06-07): a high-dysfunction peace can never read

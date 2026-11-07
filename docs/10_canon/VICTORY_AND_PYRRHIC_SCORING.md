@@ -151,6 +151,19 @@ Grades A+/A/B/C/D/F are assigned by faction-specific anchors (`scoring.ts:71-199
 | D | ≥4% territory |
 | F | fallback |
 
+**Peace settlements (owner, 2026-11-07).** A peace plan accepted by every party, or a signed or imposed Dayton, ends the war on the plan's **map and terms**, not on the front line (`src/sim/negotiation/peace_settlement.ts`).
+- **Territory:** the grade reads the settled territory share, built at OSID level from the researched plan maps (`data/derived/peace/plan_settlement_shares.json`; sources and method in [the peace-plan research](../40_reports/20261107_PEACE_PLANS_RESEARCH.md)). Measured Serb shares: Vance–Owen 43.0%, Owen–Stoltenberg 52.3%, Contact Group 48.9%, Dayton 48.3% (plus the 0.9% Brčko district). Land under shared or international administration (Vance–Owen Sarajevo province, the UN Sarajevo district, the Contact Group neutral zone, the Brčko arbitration district) stays with its wartime holder. Dayton packages the negotiation actually moved override the Dayton map.
+- **Terms:** each plan sets each party's constitutional status, and a plan that abolishes or subordinates a party's polity caps its grade, applied after the cost and condemnation caps (only lowers):
+
+| Plan | RS | RBiH | HRHB |
+|---|---|---|---|
+| Vance–Owen | max C: no entity, no name, three non-contiguous provinces | no cap | no cap |
+| Owen–Stoltenberg | max B: republic inside a Union, no army, no secession | max B: landlocked republic, Sarajevo under the UN | no cap |
+| Contact Group | max B: unnamed entity, no confederal link | no cap | no cap |
+| Dayton | no cap: **Republika Srpska named**, contiguous via the Posavina corridor, keeps its army | no cap | no cap |
+
+- **Ownership:** wartime control (`political_controllers`) is never rewritten; the settlement stores its results (shares, status, special areas, package overrides) and the OSID map is recomputed on demand. Calibration scenarios never reach a settlement, so baseline verdicts are unchanged.
+
 **Anchors are canon.** Changing them changes what the game means by "roughly historical." Any proposed change must go through the sign-off structure in §6.
 
 ### 3.3 Dimension grades

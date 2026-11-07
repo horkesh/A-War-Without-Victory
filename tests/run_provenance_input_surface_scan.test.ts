@@ -216,6 +216,16 @@ const EXCLUSION_REGISTER: readonly Exclusion[] = [
         reason: 'Read by endgame/endgame_snapshot.ts; the reference the endgame verdict is scored against.',
     },
     {
+        path: 'data/derived/peace/plan_settlement_shares.json',
+        kind: 'deferred_stamp',
+        reason: 'Read by negotiation/peace_settlement.ts (2026-11-07); the plan maps a settlement is built from, read by the verdict when a plan is accepted or Dayton resolves. Calibration runs reach neither, but it is a real verdict input, so it belongs with historical_baseline.json in the deferred set.',
+    },
+    {
+        path: 'data/source/peace_plans/plan_maps_research.json',
+        kind: 'not_an_input',
+        reason: 'No code reads it. The scanner reaches it only because plan_settlement_shares.json names it in its `source` metadata field; tools/peace/build_peace_settlement_maps.cjs (a build-time tool, not on the run path) derives the shares file from it.',
+    },
+    {
         path: 'data/scenarios/army_co_roster.json',
         kind: 'deferred_stamp',
         reason: 'Read by army_co_roster_data.ts. This is the R7 Phase 2 elite_commander class — competence and aggressiveness values that are demonstrably NOT run-inert.',
@@ -350,8 +360,9 @@ describe('★ input-surface scan: every data read on the headless path is stampe
             `${deferred.length} real run inputs are read but NOT hashed:\n  ${deferred.join('\n  ')}\n`
             + 'Stamping any of them changes consumed_inputs.digest and moves the row count, which '
             + 'is why it is a deliberate follow-up rather than a silent fix.'
-        ).toBe(15);
-        expect(EXCLUSION_REGISTER.filter(e => e.kind === 'not_an_input')).toHaveLength(1);
+        ).toBe(16); // 15 -> 16 (2026-11-07): plan_settlement_shares.json, a verdict input when a settlement occurs.
+        // 1 -> 2 (2026-11-07): plan_maps_research.json, named only in metadata, read by no code.
+        expect(EXCLUSION_REGISTER.filter(e => e.kind === 'not_an_input')).toHaveLength(2);
     });
 
     /**

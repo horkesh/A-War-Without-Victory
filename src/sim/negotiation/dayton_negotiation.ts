@@ -37,7 +37,11 @@ import type { CompetencyOwnerChoice, EntityAutonomySetting } from '../../state/n
 import { strictCompare } from '../../state/validateGameState.js';
 import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';
 import { computePeaceDysfunctionBreakdown } from './peace_dysfunction.js';
-import { getPackageAreaPct } from './package_area_resolver.js';
+import { getPackageAreaPct, resolveOsidsForKeywords } from './package_area_resolver.js';
+import { applyPeaceSettlement, computeSettlementControllers } from './peace_settlement.js';
+
+/** Territorial package id of the Brčko District (its outcome is brcko_status). */
+const BRCKO_DISTRICT_PACKAGE_ID = 'brcko_district';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -551,12 +555,64 @@ export function resolveDaytonNegotiation(
         delete neg.pending_dayton;
     }
 
+    // Owner, 2026-11-07: Dayton's consequence is its MAP. The settlement is the researched
+    // Dayton map, with the packages this negotiation actually moved overriding it, and
+    // RS recognised by name with the Posavina corridor. Recorded before the freeze.
+    applyPeaceSettlement(state, 'dayton', daytonPackageOverrides(state, result, proposal, playerFaction));
+
     // LANE-NIGHTSHIFT-N3 (D#2, 2026-05-03): freeze endgame snapshot so
     // verdict / cost ledger / historical comparison are preserved across
     // save/load round-trip even if post-Dayton bot drift mutates state.
     freezeEndgameSnapshot(state);
 
     return result;
+}
+
+/**
+ * OSIDs whose Dayton package outcome departs from the historical Dayton map.
+ *  - A package the player DEMANDED from another party and won goes to the player.
+ *    (Demanding a package one already holds costs nothing and moves nothing.)
+ *  - A package the player CONCEDED goes to the other side: to RS when the player is a
+ *    Federation party; when the player is RS, to the Federation party the base map
+ *    already names for that OSID, else RBiH.
+ *  - Brčko follows brcko_status: 'rs' or 'federation' assign the Brčko OSIDs; the
+ *    default 'arbitration' keeps the base map's arbitration district.
+ * Unraised packages follow the historical Dayton map.
+ */
+function daytonPackageOverrides(
+    state: GameState,
+    result: DaytonResult,
+    proposal: DaytonProposal,
+    playerFaction: string,
+): Record<string, FactionId> {
+    const overrides: Record<string, FactionId> = {};
+    const base = computeSettlementControllers(state, 'dayton').controllers;
+    const accepted = new Set(result.territorial_packages_accepted);
+    for (const pkgId of [...accepted].sort(strictCompare)) {
+        if (pkgId === BRCKO_DISTRICT_PACKAGE_ID) continue;
+        const pkg = getTerritorialPackageById(pkgId);
+        if (!pkg) continue;
+        const osids = resolveOsidsForKeywords(pkg.osid_keywords ?? []);
+        if (proposal.territorial_demands.includes(pkgId) && pkg.default_holder !== playerFaction) {
+            for (const o of osids) overrides[o] = playerFaction;
+        } else if (proposal.territorial_concessions.includes(pkgId)) {
+            for (const o of osids) {
+                if (playerFaction === 'RS') {
+                    const b = base[o];
+                    overrides[o] = b === 'RBiH' || b === 'HRHB' ? b : 'RBiH';
+                } else {
+                    overrides[o] = 'RS';
+                }
+            }
+        }
+    }
+    if (result.brcko_status === 'rs' || result.brcko_status === 'federation') {
+        const brcko = getTerritorialPackageById(BRCKO_DISTRICT_PACKAGE_ID);
+        for (const o of resolveOsidsForKeywords(brcko?.osid_keywords ?? [])) {
+            overrides[o] = result.brcko_status === 'rs' ? 'RS' : 'RBiH';
+        }
+    }
+    return overrides;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

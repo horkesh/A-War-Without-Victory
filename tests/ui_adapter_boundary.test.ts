@@ -260,7 +260,7 @@ describe('UI Adapter Boundary Discipline', () => {
 
     const parsed = parseGameState(rawState);
     expect(parsed.pendingPeacePlan?.planName).toContain('Vance Owen');
-    expect(parsed.pendingPeacePlan?.proposedSplit).toEqual({ RBiH: 39, RS: 43, HRHB: 18 });
+    expect(parsed.pendingPeacePlan?.proposedSplit).toEqual({ RBiH: 32, RS: 43, HRHB: 25 });
     expect(parsed.pendingPeacePlan?.institutionalModel).toBe('10_provinces');
   });
 

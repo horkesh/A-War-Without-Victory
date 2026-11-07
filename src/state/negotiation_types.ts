@@ -175,6 +175,13 @@ export interface NegotiationState {
      * faction's coercion event fires and the historical settlement is imposed.
      */
     dayton_decline?: { faction: string; declined_turn: number; imposition_turn: number };
+    /**
+     * The peace settlement (owner, 2026-11-07): set when a plan is accepted by every
+     * party or Dayton is signed/imposed. Holds the plan's map at OSID level, the settled
+     * territory share and each party's constitutional status. Wartime control is not
+     * rewritten; the verdict reads territory and status caps from here.
+     */
+    settlement?: import('../sim/negotiation/peace_settlement.js').PeaceSettlement;
     /** v0.6.0: Strategic dimensions per faction — hybrid base_value + event_modifier. */
     strategic_dimensions?: DimensionStore;
     /** Ring 2: Locked rupture consequences — permanent, non-reversible records. */
