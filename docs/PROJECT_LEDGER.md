@@ -13753,3 +13753,10 @@ Owner asked to fix the two items raised after #540 merged.
 ## 2026-11-07 — Desktop settings and packaged campaign resume
 
 Source 2e6653bad stores audio controls in the Electron profile and starts the state probe's bounded delivery wait after dispatch. The canonical packaged probe passed. A separate packaged relaunch switched ports and preserved both volume levels, mute and the music toggle, then resumed a byte-identical turn-zero autosave. The targeted tests and independent review passed. Determinism impact is limited to local preferences and probe timing. Simulation rules, canonical save format and calibration inputs are outside this change. See the [implementation report](40_reports/implemented/20261105_PLAYER_EXPERIENCE_COMPLETION.md#desktop-settings-and-campaign-resume-2026-11-07).
+
+## 2026-11-07 - Roadmap updated: calibration closed, R8 unblocked (DOCS, ROADMAP)
+
+Owner asked to update the roadmap after the 2026-11-06 sign-off.
+- `MASTER_ROADMAP.md`: new current-state block (calibration closed at 712/711/712/710; live = headless, 0 cells, three player factions; Farz guard enforced on n63). The R8 status now says calibration no longer blocks it and names the packaged work left: three 24-turn shakedowns, three 188-turn campaigns with diaries, per-faction Save/load, same-input determinism, strict runtime/audio. Register row R8 and the program sequence updated to match.
+- The superseded 2026-10-27 hold and the October R6/R8 NO-GO paragraphs moved word for word to the status history archive (links rebased). `plan_index.yml` regenerated (R8 stays open).
+- No code, simulation, scenario or calibration change.

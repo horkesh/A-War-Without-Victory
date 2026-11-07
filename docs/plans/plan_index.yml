@@ -175,7 +175,7 @@ lanes:
   - lane: R8
     title: "Full-campaign packaged-Electron validation and diaries"
     lane_open: true
-    status: "PLAYER/BOT CAPABILITY PARITY ACTIVE — GLOBAL NO-GO. The authorized fatigue candidate39 is STOP_NO_RETRY at703/712 with four protected losses and health13>3. No "
+    status: "PACKAGED CAMPAIGNS NEXT — CALIBRATION BLOCKER CLEARED 2026-11-07. Live-equivalent player/bot map parity holds at 712/711/712/710: 0 cells differ for each player"
     plans:
       - path: docs/plans/2026-07-31-full-campaign-electron-validation-plan.md
         exists: true
