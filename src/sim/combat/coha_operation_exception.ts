@@ -31,8 +31,14 @@ const VLASIC_AUTHORED_BRIGADES = new Set<FormationId>([
     'arbih_303rd_vitezka_mountain' as FormationId,
 ]);
 
+/**
+ * Receipts 155-156 (20 Mar-2 Apr 1995): the Domet-1 opening week and the week after it.
+ * Calibration 2026-11-06, an assumption, not a sourced end date: the Vlasic fighting did not
+ * stop after the opening week, and a one-week window let the serial ridge axis take only
+ * Paklarevo before the ceasefire closed it again until expiry (Gornje Krcevine at 161).
+ */
 export function isVlasicCohaWindow(turn: number): boolean {
-    return turn >= 155 && turn <= 155;
+    return turn >= 155 && turn <= 156;
 }
 
 function operationObjectives(op: CorpsOperation): readonly string[] {

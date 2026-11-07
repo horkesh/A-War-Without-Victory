@@ -1,0 +1,8 @@
+# Seat: historian (blind; packet 6b7b444dd25f3bad)
+- All four cells are small Serb-majority clusters (1991 census): Bukvik Gornji 91%, Obadi 84%, Biljesevo (Kakanj) 84%, Olovci (Kladanj) 97%. At t0 each is enclosed by RBiH ground.
+- History: villages like these inside government-held municipalities were disarmed or taken during 1992 by the municipal TO and police, with Patriotic League and Green Beret cadres absorbed into the TO. That was the state chain of command, NOT the parallel Caco/Celo track that always_deny refuses (the event's own source note). The January 1993 outcome is mostly RIGHT. What is wrong is the "paramilitary" label and the week 1-2 timing.
+  - Obadi: Srebrenica TO under Orić, May-December 1992 (ICTY Orić IT-03-68-T). Medium-high confidence.
+  - Biljesevo and Olovci: interior villages, no VRS front. High confidence on the controller, low on the manner.
+  - Bukvik Gornji: no source names it. Low confidence; it is the only possible front-line Serb salient. Check against BB2 Brčko maps and Court of BiH material.
+- Recommendation: (B) a lawful TO/organised local-consolidation route through ordinary formations and combat. It must be able to fail or be delayed, staggered over weeks to months, and never a control write. (C) on Bukvik: verify the painted cell. Not (A). The bot should obey its policy only AFTER (B) exists, otherwise historically correct outcomes are deleted from the baseline.
+- §6: real expulsions, burnings and camps (Čelebići IT-96-21-T; Srebrenica 1992). The route must carry the full displacement and civilian-harm accounting and must never improve the grade. "Lawful" means chain of command, not conduct. The consolidation sweep (default OFF) needs a faction/period constraint as DATA first.

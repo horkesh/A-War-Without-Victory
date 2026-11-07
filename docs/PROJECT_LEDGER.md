@@ -13657,6 +13657,49 @@ The three owner art drops of the Phase F packet landed through Codex under the c
 
 Follow-ups plan `docs/plans/2026-11-06-visual-polish-follow-ups-plan.md`, five lanes in parallel on `claude/visual-polish-followups` (PR #535): (B) four-seat §6 panel on the held enclave-decision art, HOLD stands 2–2 with an eight-condition revised brief (`docs/40_reports/governance/20261106_SECTION6_HELD_ENCLAVE_ART_PANEL.md`), no art generated; (C) Historian event-art packet (`docs/40_reports/proposals/20261106_EVENT_ART_AUTHORING_PACKET.md`): 270 events without art, 73 wired to existing stills as `image` keys by textual insertion (structural fingerprint `92ff10609b13c5bd` unchanged; new guard `tests/ui/event_art_keys_resolve.test.ts`), 14 new plates briefed and handed to Codex, two shipped stills flagged for breaking the terrain-only map rule, 36 §6 rows routed to the chain, 32 text-only; (D) Army HQ on paper slice 1: `DossierPaper` owns the paper material, Chief of Staff missive and situation briefing on it, Codex essay band shared, `tests/ui/dossier_paper_material.test.ts`, browser proof; (E) Game Designer proposal that the camps decision rewards denial (`docs/40_reports/proposals/20261106_CAMPS_DENY_OPTION_BALANCE.md`), no data changed, routed through the §6 chain and one measured run; (A) two decision headers with Codex. No engine, state or calibration change in any lane.
 
+## 2026-11-06 - Calibration: Jan93 712 signed off, Apr94 711, Apr95 711; live = headless through week 156 (LOCAL BRANCH, NOT ADOPTED)
+
+Branch `claude/live-jan1993-calibration` (local, unpushed). Headless 188w: **712/711/711/697**, up from 707/705/703/692 at the start of 2026-11-05. Strict health PASS; enclave guard on schedule; full suite PASS. The owner signed off January 1993 at 712/712 and asked to ignore Brka.
+
+- January 1993 711 -> 712: a one-brigade Skender Vakuf axis on Operation Donji Vakuf (3rd Banja Luka, Donji Koričani).
+- April 1994 708 -> 711: the Jablanica-Doljani Local Attack prestages the 444th home from t58, unblocking the 4th Corps queue; Neretva '93 takes Doljani and Turija at t74. Kreševo stays HRHB as a side effect.
+- April 1995 710 -> 711: the Paklarevo local model window moves to t133-139, so Domet-1 takes Gornje Krčevine at t155 instead of t161. Calibration assumption: Paklarevo falls in December 1994.
+- Live = headless (0 cells differ, all three factions, at 39, 104 and 156 turns, `bot_equivalent` policy). Changes: staff-controlled players follow the bot officer schedule; the harness answers peace plans; a new **pause before combat** lands player event answers in-turn (engine, Electron main, embedded bridge and React UI; verified in the real app); the HRHB opening decision fires in its authored window instead of at campaign birth.
+- Baselines and structural fingerprint are not re-pinned; that happens at the final push.
+
+Record: `docs/40_reports/audits/20261105_live_jan1993/attribution/RESULT.md`.
+
+## 2026-11-06 - Calibration: Apr94 and Apr95 signed off; Oct95 697 -> 709; live = headless through week 188 (LOCAL BRANCH, NOT ADOPTED)
+
+Branch `claude/live-jan1993-calibration` (local, unpushed). The owner signed off April 1994 (711, Brka excluded) and April 1995. Headless 188w: **712/711/712/709**, up from 712/711/711/697. Strict health PASS; enclave guard intact. Live at 188 turns: 0 cells differ for RBiH, RS and HRHB as player.
+
+- Southern Move opens at t180 and stages on Šipovo town only; the Mistral 2 Šipovo axis takes Jajce town before the ring; Donji Vrbljani goes to the Kralj Petar Krešimir IV brigade after Majdan. Gains Mrkonjić Grad, Podrašnica, Baljvine, Šipovljani, Donji Vrbljani.
+- Donji Vakuf 95 gains a Paklarevo–Varošluk axis (737th). Gains Varošluk.
+- New Zagreb "Posavina Hold" patron directive (defensive from t100) for `hvo_northwest_bosnia`. Stops the late-1995 HVO capture of Domaljevac, Ostra Luka and Krepšić. Startup snapshot rebuilt.
+- Ljuta follows Glavatičevo in the September 1994 Konjic offensive: April 1995 reaches 712/712.
+- New Treskavica 95 (Model) catalog opportunity takes Sitnik and Golubići at t168. Not a pre-planned op: those reserve their brigades from turn 0, which moved two Brčko cells when measured.
+- Remaining at oct1995: Brka (owner: ignore), Sanski Most Ilidža (one week short), Ilijaš Krivajevići (no lever without forcing it).
+- All new placements are calibration assumptions with unsourced dates, recorded in the operation comments. Baselines are not re-pinned; that happens at the final push.
+
+Record: `docs/40_reports/audits/20261105_live_jan1993/attribution/RESULT.md`.
+
+## 2026-11-06 - Calibration: Oct95 709 -> 710 (Ilidža); Krivajevići paint question (LOCAL BRANCH, NOT ADOPTED)
+
+Headless 188w **712/711/712/710**. Live at 188 turns: 0 cells differ for all three player factions. Strict health PASS; full suite PASS.
+
+- Sana: the 517th splits off the Sanski Most axis after Lušci Palanka (new `sana_jelasinovci_517th`), so the 506th reaches Sanski Most at t187 and Ilidža at t188. Ostra Luka (painted RS at every checkpoint) is dropped from that walk.
+- Krivajevići: on Behar-I it falls at t135 (October 1995 +1, April 1995 −1 against the current paint). Two 1st Corps accounts put Hadžići, one of the cell's ten villages, among the November 1994 gains. No source records a 1995 change, so April 1995 RS and October 1995 RBiH cannot both be right. Parked for the owner's paint decision.
+
+Record: `docs/40_reports/audits/20261105_live_jan1993/attribution/RESULT.md`.
+
+## 2026-11-06 - Calibration ADOPTED: Oct95 signed off at 710; all four checkpoints closed; baselines re-pinned
+
+The owner signed off October 1995 at 710/712 and closed the live calibration lane. The adopted scores out of 712 are Jan93 712, Apr94 711, Apr95 712 and Oct95 710; live = headless for all three player factions through week 188. Brka (owner-excluded) and Krivajevići (paint unchanged; source conflict on record) stay open by owner direction. The branch `claude/live-jan1993-calibration` merged origin/main at 55035d55f. Two conflicts were resolved: the pause-before-combat banner was moved into main's new modal header layout, and both ledger sides were kept. The run stayed sim-identical (n40 = n39 at every checkpoint). Re-pinned on this tree: baseline manifest (8 hashes, verified against n40) and structural fingerprint `bc629e89a585dfde`. Strict health PASS. Still open, carried forward: Farz P-A 0/4 authored receipts (P1 4/4 taken), an attribution defect that needs its own lane. Records: `docs/40_reports/CALIBRATION_MASTER.md`, `docs/40_reports/audits/20261105_live_jan1993/attribution/RESULT.md`.
+
+## 2026-11-06 - HRHB opening decision answered at the start, applied in week 4 (owner decision)
+
+PR #540's CI failed the first-hour browser gate: the calibration fix that moved `hrhb_political_goal` into its authored window (t3–7) had also removed the HRHB player's opening card. The owner chose to answer at the start and hold the effects until the window. New `src/sim/events/answer_ahead_of_firing.ts`: the card is queued at birth unfired; answering files the choice at turn 0 (Chronicle and records receipt) and applies nothing; evaluate-events applies the filed answer when the event fires (t4), as a bot's answer is applied. No new state field. Headless is byte-identical (8/8 pins); live = headless for all three factions at 188 turns; the first-hour gate passes locally. Record: `docs/40_reports/audits/20261105_live_jan1993/attribution/RESULT.md`.
+
 ### 2026-11-06 — Approved soundtrack PR integration and packaged inventory correction
 Owner authorized push/PR/merge on green for codex/player-experience-completion (PR #539). Reconciled main without changing Claude worktrees; preserved both complete ledger histories. Fresh merged108focusedtests, typecheck, lint, rendererbuild and independent reconciliation review pass. CI exposed stale20-OGG assumptions in internal/external packaged probes after approved opening/menu/eightcampaign assets increased exact inventory to30. Updated both exact inventory guards; retained path ordering/hash-multiset equality and every downstream runtime guard. Twelve focused tests and actual30source/emitted hash comparison pass; no asset reencoding or gameplay/calibration change. Required corrected-head CI gates remain mandatory. Evidence: logs/player-experience-completion-20261106/pr-integration/. Worktree and ignored evidence retained.
 
@@ -13670,3 +13713,13 @@ PR539 f95a36d45 passed allVitest/fast/package/firsthour/scenario/188weekhealth g
 Owner go on the revised packet of `docs/40_reports/proposals/20261106_CAMPS_DENY_OPTION_BALANCE.md` after the §6 chain (Historian, Narrative Designer, Game Designer) confirmed it. Edit on `claude/camps-rebalance`, `data/scenarios/events/war_1992.json` and `war_1993.json` only: `concentration_camps_revealed_1992` deny loses +5 RS internal_cohesion, cooperate loses −10 military_credibility and −5 internal_cohesion, the cooperate description and the RBiH/HRHB notification bodies no longer promise a cost the option does not pay, and the historical default moves from `deny` to `obstruct` (the documented Pale response was public denial with staged, restricted visits; ICTY Stakić IT-97-24-T), with the deny description restated as the counterfactual; `hrhb_camp_exposure_response_1993` deny loses +5 patron_confidence and +5 internal_cohesion, cooperate loses −30 internal_cohesion; `rs_paramilitary_policy_1992` always_allow loses +5 internal_cohesion. 33 test files pass (sensitive-history gates, event loader, decisions, cadence, provenance scans).
 
 Measured, one 188-week run against the main baseline: checkpoints 702/704/701/691 → 702/704/701/692 (all floors met; the +1 is one cell at Pelagićevo, path variance); HRHB cascade 43 both; RS Pyrrhic 32.9 → 34.8 (grade D, failure, genocide_condemnation both), RS internal_cohesion 13 → 3 (direct), patron_confidence 33.5 → 46.5 (+5 direct, +8 from two consequence events that now fire on the obstruct path), negotiating_leverage 22.2 → 31.0, military_credibility 56.6 → 54.9 (path noise after t90); HRHB 73.1 → 72.3 (deny's +5 cohesion removed); RBiH unchanged. Scenario-tester GO; Game Designer: per-option nets now cooperate 0.0, obstruct −1.0, deny −1.5, intent met, keep obstruct's costs. New read-only tool `tools/diagnostics/verdict_diff.ts`. Queued for the sibling run: HRHB deny patron_confidence −5; the three consequence rows that pay the perpetrator (`csq_hvo_central_bosnia_offensive_1993`, `vrs_cerska_offensive_1993`, `kravica_attack_1993`). `CALIBRATION_MASTER.md` figures are not re-blessed by this entry; the calibration session owns that.
+
+## 2026-11-07 - Calibration re-tuned after merging the camps rebalance; headless turn-1 dimension-shift defect fixed (712/711/712/710)
+
+Merging main (#538 camps rebalance, #539 soundtrack) into PR #540 dropped headless 188w from the signed-off 712/711/712/710 to 712/711/709/703 (`__w188_n43`), and live stopped matching headless (7 cells at Oct95, identical for every player faction). Owner direction: re-tune, including Ilidža.
+
+- Engine fix (`war_phases.ts`, new step `ensure-negotiation-state`): headless created the negotiation store only at compute-capital, after turn-1 events, so the RS `rs_strategic_goals` shifts (+10 credibility, +10 cohesion, −5 standing) were dropped. Desktop creates it at birth. After the camps change the 10-point cohesion gap crossed the RS presidential-event pressure threshold (cohesion < 30) and split the paths.
+- Levers: Paklarevo model window t139 only; Vlašić COHA exception receipts 155–156 (assumption); Donji Vakuf 95 Oborci third plus a 707th Koreniči/Jemanlići handoff axis; Sana 505th continues Gornja Suvaja → Krnjeuša → Jasenica → Vranjska, Krupa keeps Ivanjska → Arapuša → Donji Dubovik → Krslje → Matavazi; the 510th takes Ilidža before Kljevci.
+- Rejected after measurement: a longer Paklarevo planning budget, Paklarevo without the 712th, a Bosanski Novi 511th axis, an RS Brčko counterattack, and the RBiH counter-offer default.
+
+Final `__w188_n60`: **712/711/712/710**, 0 cells different from n42 at every checkpoint; strict health PASS; live = headless (0 cells, all three player factions). Baselines and structural fingerprint re-pinned on this source. Record: `docs/40_reports/audits/20261105_live_jan1993/attribution/RESULT.md`.

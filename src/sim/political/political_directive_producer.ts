@@ -27,7 +27,8 @@
  * `political_leader_data`. `producePoliticalDirective` returns null when
  *   • the env flag B_LANE_POLITICAL_DIRECTIVE_PRODUCER_DISABLED === 'true'
  *     (mirrors A4_ARMY_CO_ROSTER_DISABLED pattern for A/B disable),
- *   • the faction equals the player faction (player issues directives via UI),
+ *   • the faction is a manual (autonomy 0) player faction (at autonomy >= 1 the
+ *     player's staff receives the directive like bot staff; 2026-11-05),
  *   • `state.military.political_leader_data` is missing or has no profile for
  *     the faction (substrate-driven null-return),
  *   • `state.military.political_leaders[faction]` is missing (mutable state
@@ -55,6 +56,7 @@ import type {
     PoliticalDirectiveVerb,
 } from '../combat/army_order_interpretation.js';
 import { strictCompare } from '../../state/turn_phases.js';
+import { selectStaffControlledFactions } from '../bot/staff_control.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Pipeline step name (single canonical owner)
@@ -287,9 +289,12 @@ export function producePoliticalDirective(
 ): PoliticalDirective | null {
     if (process.env.B_LANE_POLITICAL_DIRECTIVE_PRODUCER_DISABLED === 'true') return null;
 
-    // Player issues directives via UI handler, not the bot producer.
+    // A manual (autonomy 0) player is left without a staff directive. At autonomy >= 1 the
+    // player's staff runs the faction like bot staff do, so it receives the same directive
+    // (no player directive-issuing UI exists).
     const playerFaction = state.meta?.player_faction;
-    if (playerFaction && faction === playerFaction) return null;
+    if (playerFaction && faction === playerFaction
+        && !selectStaffControlledFactions(state).includes(faction)) return null;
 
     const mil = state.military as LooseMilitary;
     const pol = (state.political ?? {}) as LoosePolitical;

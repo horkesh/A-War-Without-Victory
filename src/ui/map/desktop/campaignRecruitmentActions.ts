@@ -7,6 +7,7 @@ import { applyDimensionShift, type DimensionStore } from '../../../sim/events/st
 import { deferUnauthorizedHistoricalOperationsForPlayer } from '../../../sim/combat/historical_operation_authorization.js';
 import { initializeNegotiationState } from '../../../sim/negotiation/initialize_negotiation_state.js';
 import {
+    preFiresOpeningDecisionAtBirth,
     resolvePlayerEventDecisionWithOpeningPolicy,
     type EventDefinitionCatalog,
 } from '../../../sim/events/opening_policy_transition.js';
@@ -120,12 +121,18 @@ export function queueBrowserOpeningFoundationalDecision(
     }
 
     const turn = state.meta?.turn ?? 0;
+    state.military.pending_event_decisions ??= [];
+    // Same bot-equivalent timing rule as the Electron adapter (desktop_sim.ts): the card is
+    // queued at birth, the event fires (and the filed answer applies) in its authored window.
+    if (!preFiresOpeningDecisionAtBirth(def, turn)) {
+        state.military.pending_event_decisions.push(buildOpeningPendingDecision(def, playerFaction, turn));
+        return;
+    }
     applyEventEffects(state, collectEventDefinitionEffects(def));
     applyBrowserDefinitionDimensionShifts(state, def.dimension_shifts);
     applyBrowserDefinitionFlags(state, def.sets_flags);
     recordOpeningEventFiring(state, eventId, turn);
 
-    state.military.pending_event_decisions ??= [];
     state.military.pending_event_decisions.push(buildOpeningPendingDecision(def, playerFaction, turn));
 }
 

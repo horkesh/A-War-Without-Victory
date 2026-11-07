@@ -430,7 +430,8 @@
       { "name": "Herzegovina Offensive", "start_week": 40, "end_week": 999, "stance_ceiling": "offensive", "corps_ids": ["hvo_southeast_herzegovina"], "description": "Zagreb: take Mostar hinterland" },
       { "name": "Central Bosnia Restraint", "start_week": 40, "end_week": 50, "stance_ceiling": "balanced", "corps_ids": ["hvo_central_bosnia"], "description": "Zagreb: prepare positions, avoid premature escalation" },
       { "name": "Central Bosnia Offensive", "start_week": 50, "end_week": 999, "stance_ceiling": "offensive", "corps_ids": ["hvo_central_bosnia"], "description": "Zagreb: secure Lasva Valley" },
-      { "name": "Tomislavgrad Hold", "start_week": 40, "end_week": 999, "stance_ceiling": "balanced", "corps_ids": ["hvo_tomislavgrad"], "description": "Zagreb: maintain western positions" }
+      { "name": "Tomislavgrad Hold", "start_week": 40, "end_week": 999, "stance_ceiling": "balanced", "corps_ids": ["hvo_tomislavgrad"], "description": "Zagreb: maintain western positions" },
+      { "name": "Posavina Hold", "start_week": 100, "end_week": 999, "stance_ceiling": "defensive", "corps_ids": ["hvo_northwest_bosnia"], "description": "Zagreb: hold the Orasje pocket while the HV effort goes west (Storm, Mistral, Southern Move). Calibration assumption: no Posavina gains are painted at any 1995 checkpoint." }
     ]
   },
   "dissolution_cohesion_threshold": {

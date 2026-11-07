@@ -22,6 +22,7 @@ import {
 } from './army_co_lifecycle.js';
 import { CANONICAL_ARMY_CO_ROSTER } from './army_co_roster_data.js';
 import { getBrigadeOfficerMod } from './combat_math.js';
+import { selectManualPlayerFaction } from '../bot/staff_control.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -607,6 +608,9 @@ export function processOfficerSuccession(
 
     const turn = state.meta?.turn ?? 0;
     const playerFaction = state.meta?.player_faction ?? null;
+    // Only a manually controlled player decides its own corps successions; a staff-controlled
+    // player (autonomy >= 1) retires on the authored schedule exactly like a bot faction.
+    const manualPlayerFaction = selectManualPlayerFaction(state);
 
     // Ensure pending_officer_events array exists
     if (!state.military.pending_officer_events) {
@@ -623,8 +627,8 @@ export function processOfficerSuccession(
         const os = officers[data.id];
         if (!os || os.status !== 'active' && os.status !== 'reserve') continue;
         if (data.available_until_turn !== undefined && turn >= data.available_until_turn) {
-            // Player faction: don't auto-retire, create a replacement_suggested event instead
-            if (data.faction === playerFaction && os.status === 'active' && os.assigned_corps_id) {
+            // Manual player faction: don't auto-retire, create a replacement_suggested event instead
+            if (data.faction === manualPlayerFaction && os.status === 'active' && os.assigned_corps_id) {
                 // Find the suggested replacement (next officer for this corps by tier)
                 const suggestedReplacement = findHistoricalSuccessor(data, officerData, officers, turn);
                 if (suggestedReplacement) {
