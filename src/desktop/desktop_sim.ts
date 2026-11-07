@@ -88,7 +88,7 @@ export { overrideInterpretation } from '../sim/combat/order_interpretation.js';
 export { dismissEventNotification } from '../sim/events/dismiss_notifications.js';
 export { resolvePeacePlan } from '../sim/negotiation/peace_plans.js';
 export { submitPlayerCounterOffer } from '../sim/negotiation/counter_offer_generator.js';
-export { resolveDaytonNegotiation } from '../sim/negotiation/dayton_negotiation.js';
+export { resolveDaytonNegotiation, declineDaytonNegotiation } from '../sim/negotiation/dayton_negotiation.js';
 export { evaluateBotResponse } from '../sim/negotiation/bot_negotiation.js';
 export { createAiClient } from '../sim/ai_commander/ai_client.js';
 export { getAdvisorRecommendation } from '../sim/ai_commander/player_advisor.js';

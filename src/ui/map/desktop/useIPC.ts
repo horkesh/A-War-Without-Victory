@@ -295,6 +295,8 @@ interface WindowAwwv {
     }) => Promise<{ ok: boolean; counter_offer_id?: string; error?: string }>;
     resolveParamilitaryRequests: (decisions: Array<{ target_osid: string; decision: 'allow' | 'deny' }>, options?: ParamilitaryReviewOptions) => Promise<{ ok: boolean; report?: unknown; error?: string }>;
     resolveDayton: (proposal: { territorial_demands: string[]; territorial_concessions: string[]; institutional_choices: Record<string, 'centralized' | 'decentralized'> }) => Promise<{ ok: boolean; result?: Record<string, unknown>; error?: string }>;
+    /** Decline Dayton: war continues 4 weeks, then the settlement is imposed. */
+    declineDayton: () => Promise<{ ok: boolean; imposition_turn?: number; error?: string }>;
     /** Read-only Dayton preview (Dayton Phase-4): bot responses + authoritative readouts, no state mutation. */
     previewDayton: (proposal: { territorial_demands: string[]; territorial_concessions: string[]; institutional_choices: Record<string, 'centralized' | 'decentralized'> }) => Promise<IpcDaytonPreviewResult>;
     /** Level 2: Presidential acknowledgement of a warlord friction event. Sets resolved: true, reducing command strain. */
@@ -738,6 +740,10 @@ export function useIPC() {
             resolveDayton: awwv
                 ? (proposal: { territorial_demands: string[]; territorial_concessions: string[]; institutional_choices: Record<string, 'centralized' | 'decentralized'> }) => awwv.resolveDayton(proposal)
                 : makeNoop<{ ok: boolean; result?: Record<string, unknown>; error?: string }>(),
+
+            declineDayton: awwv
+                ? () => awwv.declineDayton()
+                : makeNoop<{ ok: boolean; imposition_turn?: number; error?: string }>(),
 
             previewDayton: awwv
                 ? (proposal: { territorial_demands: string[]; territorial_concessions: string[]; institutional_choices: Record<string, 'centralized' | 'decentralized'> }) => awwv.previewDayton(proposal)

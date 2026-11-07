@@ -36,6 +36,11 @@ import { isHistoricalOperationAuthorizationReview } from '../../src/sim/combat/h
 import { resolvePeacePlan } from '../../src/sim/negotiation/peace_plans.js';
 import { getPeacePlanById } from '../../src/sim/negotiation/peace_plan_data.js';
 import { computeFactionVerdict } from '../../src/sim/negotiation/scoring.js';
+import {
+    buildHistoricalDefaultDaytonProposal,
+    declineDaytonNegotiation,
+    resolveDaytonNegotiation,
+} from '../../src/sim/negotiation/dayton_negotiation.js';
 import { loadOperationalEdges } from '../../src/data/operational_data.js';
 import { buildOsidAdjacency } from '../../src/sim/combat/osid_adjacency.js';
 // @ts-ignore -- CommonJS staging modules (the same functions the Electron IPC handlers call)
@@ -75,6 +80,8 @@ interface Strategy {
     accept_all_proposals?: boolean;
     local_support?: { enabled: boolean };
     elite_deploy?: { enabled: boolean };
+    /** Answer to the Dayton menu: leave it pending (default), sign the historical default, or decline. */
+    dayton?: 'pending' | 'sign' | 'decline';
 }
 
 interface Args { strategyPath: string; out: string; turns: number }
@@ -381,6 +388,16 @@ async function main() {
         await requestOps(state, strategy, args.out);
         localSupport(state, strategy);
         await eliteDeploy(state, strategy, args.out);
+        if (state.military.negotiation?.pending_dayton && (strategy.dayton ?? 'pending') !== 'pending') {
+            if (strategy.dayton === 'decline') {
+                const r = declineDaytonNegotiation(state);
+                await logLine(args.out, { turn: state.meta.turn, kind: 'dayton', action: 'decline', ...r });
+            } else {
+                resolveDaytonNegotiation(state, buildHistoricalDefaultDaytonProposal());
+                await logLine(args.out, { turn: state.meta.turn, kind: 'dayton', action: 'sign' });
+            }
+        }
+        if (state.meta.game_over) break;
         const pendingAnswers: Array<Promise<void>> = [];
         const result = await advanceTurn(state, baseDir, {
             onPlayerDecisionsPending: (working, decisions) => {

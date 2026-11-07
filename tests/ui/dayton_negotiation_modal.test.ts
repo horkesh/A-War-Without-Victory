@@ -118,4 +118,20 @@ describe('DaytonNegotiationModal — Phase-4 player-agency surface', () => {
         // The RS counter dropped the gorazde demand → diff names it explicitly.
         expect(screen.getByText('Drops your demands on: Goražde Corridor')).toBeTruthy();
     });
+
+    it('declines in two steps through declineDayton, never by signing an empty proposal', async () => {
+        const declineDayton = vi.fn().mockResolvedValue({ ok: true, imposition_turn: 192 });
+        const resolveDayton = vi.fn().mockResolvedValue({ ok: true });
+        (window as unknown as { awwv: Record<string, unknown> }).awwv = { declineDayton, resolveDayton };
+
+        render(createElement(DaytonNegotiationModal, { dayton: PENDING }));
+        fireEvent.click(screen.getByText('Decline Settlement'));
+        // First click only warns: four more weeks, then the United States imposes it.
+        expect(screen.getByRole('alert').textContent).toMatch(/four more weeks/);
+        expect(screen.getByRole('alert').textContent).toMatch(/United States/);
+        expect(declineDayton).not.toHaveBeenCalled();
+        fireEvent.click(screen.getByText('Confirm Decline'));
+        await waitFor(() => expect(declineDayton).toHaveBeenCalledTimes(1));
+        expect(resolveDayton).not.toHaveBeenCalled();
+    });
 });

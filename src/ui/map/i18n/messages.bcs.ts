@@ -2423,7 +2423,12 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'formationDetail.noActiveSectorHelp': 'Jedinica trenutno nije postavljena u sektor korpusnog fronta.',
     'corpsDetail.closePanel': 'Zatvori detalje korpusa',
     'peace.negotiationCapital': 'Pregovarački kapital:',
-    'peace.declineTalksTitle': 'Predaj prazan prijedlog - odbij smisleno pregovaranje. Uvijek je u budžetu.',
+    'peace.declineTalksTitle': 'Odbij sporazum. Rat se nastavlja još četiri sedmice, a zatim se sporazum nameće.',
+    'dayton.declineSettlement': 'Odbij sporazum',
+    'dayton.declineConfirm': 'Potvrdi odbijanje',
+    'dayton.declineWarningRBiH': 'Ako odbijete, rat se nastavlja još četiri sedmice. Tada Sjedinjene Države nameću sporazum, uz zračne udare na vaše položaje, pod uslovima koje su prihvatile ostale strane.',
+    'dayton.declineWarningRS': 'Ako odbijete, rat se nastavlja još četiri sedmice. Tada Beograd potpisuje u vaše ime, zatvara Drinu i nameće sporazum pod uslovima koje su prihvatile ostale strane.',
+    'dayton.declineWarningHRHB': 'Ako odbijete, rat se nastavlja još četiri sedmice. Tada Zagreb potpisuje za vas, sužava hercegovački put snabdijevanja i nameće sporazum pod uslovima koje su prihvatile ostale strane.',
     // Dayton Phase-4 — pregovaračka površina sa ovlastima predsjednika
     'dayton.title': 'Dejtonski mirovni sporazum',
     'dayton.subtitle': 'Opći okvirni sporazum za mir',

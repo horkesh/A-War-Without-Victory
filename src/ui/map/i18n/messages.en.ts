@@ -2517,7 +2517,12 @@ export const enMessages = {
     'formationDetail.noActiveSectorHelp': 'This unit is not placed in a current corps front OG.',
     'corpsDetail.closePanel': 'Close corps detail',
     'peace.negotiationCapital': 'Negotiation Capital:',
-    'peace.declineTalksTitle': 'Submit an empty proposal - refuse to negotiate meaningfully. Always within budget.',
+    'peace.declineTalksTitle': 'Refuse the settlement. The war continues for four more weeks; then the settlement is imposed.',
+    'dayton.declineSettlement': 'Decline Settlement',
+    'dayton.declineConfirm': 'Confirm Decline',
+    'dayton.declineWarningRBiH': 'If you decline, the war continues for four more weeks. Then the United States forces the settlement through, with air strikes on your positions, on the terms the other parties accepted.',
+    'dayton.declineWarningRS': 'If you decline, the war continues for four more weeks. Then Belgrade signs in your name, closes the Drina and imposes the settlement on the terms the other parties accepted.',
+    'dayton.declineWarningHRHB': 'If you decline, the war continues for four more weeks. Then Zagreb signs for you, narrows the Herzegovina supply road and imposes the settlement on the terms the other parties accepted.',
     // Dayton Phase-4 — player-agency negotiation surface
     'dayton.title': 'Dayton Peace Accords',
     'dayton.subtitle': 'General Framework Agreement for Peace',

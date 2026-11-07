@@ -169,6 +169,12 @@ export interface NegotiationState {
     /** Pending Dayton negotiation menu, persisted by pipeline when trigger fires.
      *  UI adapter reads this — never computes it. Cleared implicitly when dayton_result is set. */
     pending_dayton?: PendingDaytonPacket;
+    /**
+     * Set when the player faction declines Dayton (declineDaytonNegotiation). The menu is
+     * withdrawn and does not reopen; the war continues until `imposition_turn`, when the
+     * faction's coercion event fires and the historical settlement is imposed.
+     */
+    dayton_decline?: { faction: string; declined_turn: number; imposition_turn: number };
     /** v0.6.0: Strategic dimensions per faction — hybrid base_value + event_modifier. */
     strategic_dimensions?: DimensionStore;
     /** Ring 2: Locked rupture consequences — permanent, non-reversible records. */
@@ -297,6 +303,13 @@ export interface DaytonResult {
     brcko_status?: 'federation' | 'rs' | 'arbitration';
     /** True when Brčko resolved to the arbitration condominium district of both Entities. */
     brcko_arbitration?: boolean;
+    /**
+     * Set when the player faction declined Dayton and the settlement was imposed after
+     * the grace period (DAYTON_DECLINE_GRACE_WEEKS). `by` names the coercing power:
+     * the United States for RBiH, Belgrade for RS, Zagreb for HRHB. Absent on a signed
+     * (not imposed) settlement and on older saves.
+     */
+    imposed?: { on_faction: string; by: 'united_states' | 'belgrade' | 'zagreb'; turn: number };
     /**
      * Derived entity-autonomy index (D2, 0-100): weighted mean of the 6
      * institutional choices, where decentralized = high autonomy. 100 = maximally

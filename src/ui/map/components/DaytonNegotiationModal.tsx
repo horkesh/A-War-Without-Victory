@@ -24,11 +24,16 @@
  * Migrated to the shared `<Modal>` wrapper in
  * LANE-V094-MODAL-DISMISSIBLE-EXTENSION. Must-submit modal:
  * `dismissible={false}` (no ESC, no click-outside) — the only valid close
- * paths are (a) `handleSubmit` (Submit Proposal) and (b) `handleDeclineTalks`
- * (Decline Talks — submit empty proposal). Both route through IPC
- * `resolveDayton` and a game-state push that clears `pendingDayton` so the
- * parent stops rendering this modal. No `onClose` prop exists; the bespoke
- * action buttons stay on the inner panel content, NOT on Modal props.
+ * paths are (a) `handleSubmit` (Submit Proposal, IPC `resolveDayton`) and (b)
+ * `handleDeclineTalks` (Decline Settlement, two-step confirm, IPC `declineDayton`).
+ * Both end in a game-state push that clears `pendingDayton` so the parent stops
+ * rendering this modal. No `onClose` prop exists; the bespoke action buttons stay
+ * on the inner panel content, NOT on Modal props.
+ *
+ * 2026-11-07 (owner): Decline is now a real refusal. Previously it signed an empty
+ * proposal (ending the war). Now the engine withdraws the menu, the war continues
+ * four more weeks, and then the faction's coercion event fires and the settlement is
+ * imposed (dayton_negotiation.ts declineDaytonNegotiation / enforceDaytonImposition).
  *
  * 2026-05-16 (decline-talks escape valve): added `handleDeclineTalks` to fix
  * a UX deadlock surfaced during external audit playtest. If the player's
@@ -97,6 +102,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
     // (autonomy dial + competencies + constitutional + return/justice).
     const [instArch, setInstArch] = useState<InstitutionalSelections>(defaultInstitutionalSelections());
     const [submitting, setSubmitting] = useState(false);
+    const [confirmDecline, setConfirmDecline] = useState(false);
     const [probing, setProbing] = useState(false);
     const [botResponses, setBotResponses] = useState<Record<string, IpcDaytonBotResponse> | null>(null);
     /** The demand set that was probed — retained so the counter-offer diff is real. */
@@ -239,16 +245,20 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
      */
     const handleDeclineTalks = async () => {
         if (!ipc.isAvailable || submitting || !playerFaction) return;
+        // 2026-11-07 (owner): Decline is a real refusal, not an empty signature. First
+        // click shows the consequence; the second confirms. The engine withdraws the
+        // menu, the war continues four weeks, then the settlement is imposed.
+        if (!confirmDecline) {
+            setConfirmDecline(true);
+            return;
+        }
         setSubmitting(true);
-        const result = await ipc.resolveDayton({
-            territorial_demands: [],
-            territorial_concessions: [],
-            institutional_choices: {},
-        });
+        const result = await ipc.declineDayton();
         if (!result.ok) {
             setLoadError(result.error ?? 'Failed to decline Dayton negotiation.');
             setSubmitting(false);
         }
+        // On success the state push clears pendingDayton and the parent unmounts this modal.
     };
 
     const patronOverride = playerFaction ? (dayton.patronOverride[playerFaction] ?? 0) : 0;
@@ -525,9 +535,18 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                             }`}
                             style={{ fontFamily: 'var(--font-command)' }}
                         >
-                            Decline Talks
+                            {confirmDecline ? t('dayton.declineConfirm') : t('dayton.declineSettlement')}
                         </button>
                     </div>
+                    {confirmDecline && (
+                        <div className="text-xs text-[#5a1a1a] font-bold" role="alert">
+                            {t(playerFaction === 'RS'
+                                ? 'dayton.declineWarningRS'
+                                : playerFaction === 'HRHB'
+                                    ? 'dayton.declineWarningHRHB'
+                                    : 'dayton.declineWarningRBiH')}
+                        </div>
+                    )}
                     {overBudget && (
                         <div className="text-xs text-red-700 font-bold">
                             Reduce demands — capital spent ({capitalSpent}) exceeds available ({Math.round(capitalAvailable)})

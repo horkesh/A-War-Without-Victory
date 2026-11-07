@@ -3656,6 +3656,26 @@ app.whenReady().then(() => {
     }
   });
 
+  // Decline Dayton (owner, 2026-11-07): the player refuses the settlement. The menu is
+  // withdrawn, the war continues DAYTON_DECLINE_GRACE_WEEKS more weeks, then the
+  // faction's coercion event fires and the settlement is imposed (engine step
+  // enforce-dayton-imposition). Returns only the imposition turn, never state.
+  ipcMain.handle('decline-dayton', async () => {
+    if (!currentGameStateJson) {
+      return { ok: false, error: 'No game loaded' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = readCanonicalCurrentState(sim);
+      const result = sim.declineDaytonNegotiation(state);
+      if (!result.ok) return { ok: false, error: result.error };
+      writeCanonicalCurrentState(sim, state);
+      return { ok: true, imposition_turn: result.imposition_turn };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   // Read-only Dayton PREVIEW (Dayton Phase-4): runs the real resolver + bot
   // evaluation on a THROWAWAY deserialized clone so the negotiation modal can show
   // the authoritative peace_dysfunction_index / entity_autonomy_index / Brčko

@@ -232,6 +232,80 @@ export function resolvePendingDaytonCloseOut(state: GameState): DaytonResult | n
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Decline and imposition (owner, 2026-11-07)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Weeks of war the player gets after declining Dayton before the settlement is
+ * imposed. Owner direction: "he should get 4 more weeks and then an event".
+ */
+export const DAYTON_DECLINE_GRACE_WEEKS = 4;
+
+/** Flag the imposition step raises the turn before imposition; the coercion events trigger on it. */
+export const DAYTON_IMPOSITION_DUE_FLAG = 'dayton_imposition_due';
+
+/** Who forces the settlement on a declining faction. Historically all three signed. */
+export const DAYTON_COERCING_POWER: Record<string, 'united_states' | 'belgrade' | 'zagreb'> = {
+    // Counterfactual: Washington's real coercion of Sarajevo was diplomatic.
+    RBiH: 'united_states',
+    // Milošević held the Bosnian Serb mandate at Dayton (Patriarch letter, Aug 1995).
+    RS: 'belgrade',
+    // Tuđman negotiated for and bound the Bosnian Croats at Dayton.
+    HRHB: 'zagreb',
+};
+
+/**
+ * The player faction declines Dayton. The menu is withdrawn and does not reopen; the
+ * war continues for DAYTON_DECLINE_GRACE_WEEKS more resolutions, and then the
+ * faction's coercion event fires and the historical settlement is imposed
+ * (enforceDaytonImposition). Deterministic; no RNG.
+ */
+export function declineDaytonNegotiation(state: GameState): {
+    ok: boolean;
+    error?: string;
+    imposition_turn?: number;
+} {
+    const neg = state.military.negotiation;
+    if (state.meta.game_over) return { ok: false, error: 'game_over' };
+    if (!neg?.pending_dayton) return { ok: false, error: 'no_pending_dayton' };
+    if (neg.dayton_result) return { ok: false, error: 'already_resolved' };
+    const faction = state.meta.player_faction;
+    if (!faction) return { ok: false, error: 'no_player_faction' };
+    const declinedTurn = state.meta.turn;
+    const impositionTurn = declinedTurn + DAYTON_DECLINE_GRACE_WEEKS;
+    neg.dayton_decline = { faction, declined_turn: declinedTurn, imposition_turn: impositionTurn };
+    delete neg.pending_dayton;
+    return { ok: true, imposition_turn: impositionTurn };
+}
+
+/**
+ * War-phase step: enforce a declined Dayton. One turn before `imposition_turn` it
+ * raises DAYTON_IMPOSITION_DUE_FLAG (= the declining faction) so that faction's
+ * coercion event fires early in the imposition turn; at the end of the imposition
+ * turn it signs the historical-default settlement and stamps `imposed`.
+ * Returns the imposed result when it resolved this call, else null.
+ */
+export function enforceDaytonImposition(state: GameState): DaytonResult | null {
+    const neg = state.military.negotiation;
+    const decline = neg?.dayton_decline;
+    if (!neg || !decline) return null;
+    if (state.meta.game_over || neg.dayton_result) return null;
+    const turn = state.meta.turn;
+    if (turn >= decline.imposition_turn - 1) {
+        if (!state.military.event_flags) state.military.event_flags = {};
+        state.military.event_flags[DAYTON_IMPOSITION_DUE_FLAG] = decline.faction;
+    }
+    if (turn < decline.imposition_turn) return null;
+    const result = resolveDaytonNegotiation(state, buildHistoricalDefaultDaytonProposal());
+    result.imposed = {
+        on_faction: decline.faction,
+        by: DAYTON_COERCING_POWER[decline.faction] ?? 'united_states',
+        turn,
+    };
+    return result;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Resolution
 // ═══════════════════════════════════════════════════════════════════════════
 
