@@ -45,7 +45,7 @@ import { stageMunicipalitySupportOrderOnState, SUPPORT_TYPE_BY_FACTION } from '.
 // @ts-ignore
 import { isNonFieldCommandCorps } from '../../src/desktop/field_command.cjs';
 
-type EventMode = 'bot' | 'historical' | 'staff' | `max:${string}` | `min:${string}`;
+type EventMode = 'bot' | 'historical' | 'staff' | 'martial' | `max:${string}` | `min:${string}`;
 
 interface Strategy {
     name: string;
@@ -55,7 +55,8 @@ interface Strategy {
     events?: { default?: EventMode; overrides?: Record<string, string> };
     historical_ops?: { default?: 'accept' | 'decline'; decline_match?: string[]; accept_match?: string[] };
     paramilitary?: 'defer' | 'allow' | 'deny';
-    peace_plans?: 'historical' | 'reject' | 'accept';
+    /** One answer for every plan, or a per-plan map (plan id -> answer; unlisted plans: historical). */
+    peace_plans?: 'historical' | 'reject' | 'accept' | Record<string, 'historical' | 'accept' | 'reject'>;
     request_ops?: {
         enabled: boolean;
         from_turn?: number;
@@ -70,6 +71,8 @@ interface Strategy {
     };
     /** Explicit priority objectives tried first each turn in their window. */
     priority_targets?: Array<{ osid: string; from_turn?: number; to_turn?: number; corps?: string[] }>;
+    /** Accept every non-historical-op proposal review (APPROVE_OP / OPPORTUNITY / SET_STANCE); used with autonomy 1. */
+    accept_all_proposals?: boolean;
     local_support?: { enabled: boolean };
     elite_deploy?: { enabled: boolean };
 }
@@ -99,6 +102,25 @@ function chooseResponse(state: GameState, strategy: Strategy, d: PendingEventDec
     const mode = strategy.events?.default ?? 'bot';
     if (mode === 'historical') return d.historical_default_response_id ?? d.response_options[0]?.id;
     if (mode === 'staff') return d.staff_recommended_response_id ?? d.historical_default_response_id ?? d.response_options[0]?.id;
+    if (mode === 'martial') {
+        // Own-side direct military effects of each option (catalog definition), bot answer on ties.
+        const def = catalog.get(d.event_id);
+        const bot = botResponse(state, d);
+        const score = (id: string | undefined): number => {
+            const o: any = def?.response_options?.find((x) => x.id === id);
+            if (!o) return -Infinity;
+            let v = 0;
+            for (const e of (o.effects ?? []) as any[]) {
+                if (e.faction && e.faction !== d.faction) continue;
+                if (e.kind === 'morale_change' || e.kind === 'cohesion_change' || e.kind === 'supply_delta') v += Number(e.delta ?? 0);
+                if (e.kind === 'recruitment_modifier') v += (Number(e.pool_multiplier ?? 1) - 1) * 20;
+            }
+            return v;
+        };
+        let best = bot; let bestVal = score(bot);
+        for (const o of d.response_options) { const v = score(o.id); if (v > bestVal) { bestVal = v; best = o.id; } }
+        return best;
+    }
     if (mode.startsWith('max:') || mode.startsWith('min:')) {
         const dim = mode.slice(4);
         const sign = mode.startsWith('max:') ? 1 : -1;
@@ -169,6 +191,30 @@ async function answerHistoricalOps(state: GameState, strategy: Strategy, out: st
     }
 }
 
+/** Mirrors electron-main.cjs accept-proposal: mark accepted, apply SET_STANCE / APPROVE_OP side fields. */
+async function acceptProposals(state: GameState, strategy: Strategy, out: string) {
+    if (!strategy.accept_all_proposals) return;
+    const reviews = [...(state.meta.pending_proposal_reviews ?? [])]
+        .filter((r: any) => r.faction === strategy.faction && !isHistoricalOperationAuthorizationReview(r))
+        .filter((r: any) => r.accepted == null && r.resolved_turn == null)
+        .sort((a: any, b: any) => strictCompare(a.id, b.id));
+    for (const r of reviews as any[]) {
+        r.accepted = true;
+        r.resolved_turn = state.meta.turn;
+        const action: string = r.proposed_action ?? '';
+        if (action.startsWith('SET_STANCE:')) {
+            const [, corpsId, stance] = action.split(':');
+            const cc: any = state.military.corps_command?.[corpsId!];
+            if (cc) { cc.stance = stance; cc.player_ordered_stance = stance; }
+        } else if (action.startsWith('APPROVE_OP:')) {
+            const [, corpsId, planId] = action.split(':');
+            const cc: any = state.military.corps_command?.[corpsId!];
+            if (cc) cc.player_op_response = { plan_id: planId, approved: true, turn: state.meta.turn };
+        }
+        await logLine(out, { turn: state.meta.turn, kind: 'proposal', id: r.id, action });
+    }
+}
+
 function answerParamilitary(state: GameState, strategy: Strategy) {
     const policy = strategy.paramilitary ?? 'defer';
     if (policy === 'defer') return;
@@ -187,7 +233,8 @@ async function answerPeacePlan(state: GameState, strategy: Strategy, out: string
     if (!pending) return;
     const f = strategy.faction;
     if (f === 'RBiH' && (pending.plan_id === 'vance_owen' || pending.plan_id === 'owen_stoltenberg')) return;
-    const mode = strategy.peace_plans ?? 'historical';
+    const cfg = strategy.peace_plans ?? 'historical';
+    const mode = typeof cfg === 'string' ? cfg : (cfg[pending.plan_id] ?? 'historical');
     const plan = getPeacePlanById(pending.plan_id);
     const response = mode === 'historical' ? plan?.historical_responses[f] : mode === 'accept' ? 'accepted' : 'rejected';
     if (!response) return;
@@ -321,11 +368,13 @@ async function main() {
     if (autonomy !== 'production') state.meta.autonomy_level = autonomy;
 
     const trajectory: unknown[] = [];
+    const peak: Record<string, { area_pct: number; osids: number; turn: number }> = {};
     for (let i = 0; i < args.turns; i += 1) {
         await answerEvents(state, strategy, args.out);
         await answerPeacePlan(state, strategy, args.out);
         await answerHistoricalOps(state, strategy, args.out);
         answerParamilitary(state, strategy);
+        await acceptProposals(state, strategy, args.out);
         await requestOps(state, strategy, args.out);
         localSupport(state, strategy);
         await eliteDeploy(state, strategy, args.out);
@@ -355,8 +404,12 @@ async function main() {
         await Promise.all(pendingAnswers);
         if (result.error) throw new Error(`advance failed at turn ${state.meta.turn}: ${result.error}`);
         state = result.state;
+        const now = territory(state);
+        for (const f of ['RBiH', 'RS', 'HRHB']) {
+            if (!peak[f] || now.area_pct[f] > peak[f].area_pct) peak[f] = { area_pct: now.area_pct[f], osids: now.osid_counts[f] ?? 0, turn: state.meta.turn };
+        }
         if (state.meta.turn % 4 === 0 || i === args.turns - 1) {
-            const t = territory(state);
+            const t = now;
             trajectory.push({ turn: state.meta.turn, ...t, ca: state.military.command_authority?.current ?? null });
         }
         if (state.meta.game_over) break;
@@ -374,7 +427,7 @@ async function main() {
             casualties: l ? (l.killed ?? 0) + (l.wounded ?? 0) + (l.missing_captured ?? 0) : null,
         };
     }
-    const summary = { strategy: strategy.name, faction: strategy.faction, final_turn: state.meta.turn, game_over: state.meta.game_over ?? false, ...territory(state), verdicts, trajectory };
+    const summary = { strategy: strategy.name, faction: strategy.faction, final_turn: state.meta.turn, game_over: state.meta.game_over ?? false, outcome: state.meta.outcome ?? null, ...territory(state), peak, verdicts, trajectory };
     await writeFile(resolve(args.out, 'summary.json'), JSON.stringify(summary, null, 2), 'utf8');
     const t = territory(state);
     console.log(`${strategy.name} ${strategy.faction}: area ${t.area_pct[strategy.faction].toFixed(2)}% osids ${t.osid_counts[strategy.faction]} grade ${(verdicts[strategy.faction] as any).grade}`);
