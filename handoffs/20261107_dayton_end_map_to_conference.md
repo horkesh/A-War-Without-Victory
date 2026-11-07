@@ -16,6 +16,18 @@ None of this was on `main` when the conference plan was written. Merge this bran
 - `docs/10_canon/VICTORY_AND_PYRRHIC_SCORING.md`, "Peace settlements" paragraph
 - `docs/PROJECT_LEDGER.md`, entries dated 2026-11-07 (Dayton, settlement, RD)
 
+## Design principle: player agency (owner, 2026-11-07)
+
+> "We have a strong historical simulation engine that can be used by players to achieve ahistorical outcomes should they put their mind to it. Player agency is exactly the point."
+
+Ahistorical outcomes earned through the engine's mechanics are wanted, not corrected. The conference should honour what the player achieved on the ground. Three current rules pull against this and are the redesign's first items:
+
+1. **An enclave held at signature is handed to RS** by the researched Dayton map (it bakes in the July 1995 fall). An RBiH that kept Srebrenica or Žepa should keep it, with a corridor, on the Goražde precedent. Highest priority.
+2. **Protected ground is absolute** (interim owner ruling): Prijedor, Banja Luka, Doboj and the corridor are never negotiable even when the player holds them. Consider making them very expensive instead of impossible, so a strong enough position can win them.
+3. **Declining Dayton is strictly worse for RS**: the VRS has no offensive capacity in the eight extra weeks (measured: zero RS attacks, cohesion 18 → 3). Give the decliner something to do, or make the cost explicit.
+
+Measured example of agency the engine already allows: with the aggressive RBiH strategy, Zvornik never falls in week 1, Srebrenica never becomes an enclave, and RBiH reaches 38.1% of BiH by week 188 and 39.0% by week 196 after refusing Dayton (`docs/40_reports/20261107_RD_CLOSEOUT.md`). Open check (not a blocker): confirm the week-1 Zvornik hold is earned through the mechanics and not a defect.
+
 ## End-map contract (stable; RD owns it)
 
 | Function / record | File | Meaning |

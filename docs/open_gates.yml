@@ -34,10 +34,10 @@
 version: 1
 updated: 2026-11-07
 
-lanes: [R1, R2, R3, R4, R5, R6, R7, R8, R9, RC, RD, RE, REPO]
+lanes: [R1, R2, R3, R4, R5, R6, R7, R8, R9, RC, RD, DC, RE, REPO]
 
 gates:
-  # ── RD — Dayton settlement and endgame (active lane, owner 2026-11-07) ──────────────
+  # ── RD — Dayton settlement and end map (closed, owner 2026-11-07) ───────────────────
 
   - id: RD-PACKAGE-KEYWORD-MATCH
     lane: RD
@@ -86,14 +86,16 @@ gates:
   - id: RD-MAX-TERRITORY-REMEASURE
     lane: RD
     title: Maximum territory per faction re-measured under the settlement rules
-    status: open
+    status: closed
+    closed: 2026-11-07
     kind: acceptance
     opened: 2026-11-07
     blocks: [R8]
     evidence_required: >
       Refreshed player maximum-territory report with RBiH, RS and HRHB decline campaigns
       on the live harness, settled shares per faction.
-    evidence_path: null
+    evidence_path: docs/40_reports/20261107_RD_CLOSEOUT.md
+    notes: Closeout §1, measured at HEAD 34d1f51, map signed, on time and after a decline.
     source: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
 
   - id: RD-SETTLED-MAP-UI
@@ -115,7 +117,8 @@ gates:
   - id: RD-CANON-PROPAGATION
     lane: RD
     title: War termination spec and manuals describe the shipped Dayton behaviour
-    status: open
+    status: closed
+    closed: 2026-11-07
     kind: propagation
     opened: 2026-11-07
     blocks: [R8]
@@ -123,26 +126,36 @@ gates:
       WAR_TERMINATION_SPEC.md, Systems Manual, Rulebook and Phase Specifications updated for
       the forced table, captured-ground packages, the 8-week window, patron budget and
       settlement contiguity.
-    evidence_path: null
+    evidence_path: docs/10_canon/WAR_TERMINATION_SPEC.md
+    notes: >
+      Also Systems Manual §20.2, Rulebook §15.7 and VICTORY_AND_PYRRHIC_SCORING.md.
+      Phase Specifications carry no endgame or negotiation content (single War phase), so
+      nothing there needed changing.
     source: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
 
   - id: RD-INDEPENDENT-REVIEW
     lane: RD
     title: Independent review GO on the Dayton commits
-    status: open
+    status: closed
+    closed: 2026-11-07
     kind: acceptance
     opened: 2026-11-07
     blocks: [R8]
     evidence_required: >
       A recorded independent code/canon review verdict covering the 2026-11-07 Dayton
       commits on claude/loving-knuth-pmx3hi.
-    evidence_path: null
+    evidence_path: docs/40_reports/20261107_RD_CLOSEOUT.md
+    notes: >
+      Closeout §2: GO-WITH-FIXES; F1, F2, F3, F4, F5, F6, F8, F9 fixed
+      (tests/dayton_review_fixes.test.ts); F7, F10 recorded as known limitations in the
+      handoff.
     source: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
 
   - id: RD-SENSITIVE-HISTORY-CHECK
     lane: RD
     title: Sensitive-history gate check for the Dayton changes
-    status: open
+    status: closed
+    closed: 2026-11-07
     kind: acceptance
     opened: 2026-11-07
     blocks: [R8]
@@ -150,34 +163,68 @@ gates:
       SENSITIVE_HISTORY_DESIGN_GATE check of the counterfactual coercion narratives (EN/BCS),
       the Prijedor/Kozarac continuation objectives and the RS grade re-anchor, with
       counterfactual labelling; panels convened where the gate requires them.
-    evidence_path: null
+    evidence_path: docs/40_reports/20261107_RD_CLOSEOUT.md
+    notes: >
+      Closeout §2: coercion events and continuation operations PASS-WITH-CONDITIONS
+      (conditions applied; camp-site exclusion enforced by test), RS re-anchor PASS, no
+      panel required. US air strikes replaced by Equip-and-Train suspension and corridor
+      closure (owner, 2026-11-07).
     source: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
 
   - id: RD-RUN-ARTIFACT-REVIEW
     lane: RD
     title: Scenario seat review of the Dayton decline and calibration runs
-    status: open
+    status: closed
+    closed: 2026-11-07
     kind: acceptance
     opened: 2026-11-07
     blocks: [R8]
     evidence_required: >
       scenario-creator-runner-tester review of the decline campaigns (v4-v7) and the 188w
       runs, findings recorded.
-    evidence_path: null
+    evidence_path: docs/40_reports/20261107_RD_CLOSEOUT.md
+    notes: >
+      Closeout §3: PASS-WITH-NOTES. Enclave-loss tracking and the Srebrenica-aftermath
+      gate fixed (owner); held-enclave handover and VRS passivity after a decline
+      transferred to the conference lane.
     source: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
 
   - id: RD-ACCEPTANCE-ALL-GREEN
     lane: RD
     title: RD all-green acceptance
-    status: blocked
+    status: closed
+    closed: 2026-11-07
     kind: acceptance
     opened: 2026-11-07
     blocks: [R8]
     evidence_required: >
       Every other RD gate closed and the RD plan's acceptance list ticked with evidence.
-    evidence_path: null
+    evidence_path: docs/40_reports/20261107_RD_CLOSEOUT.md
     source: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
-    notes: Roll-up gate; enforced by validate_open_gates.cjs like the R7 roll-up.
+    notes: >
+      Roll-up gate; enforced by validate_open_gates.cjs like the R7 roll-up. Closed with
+      the owner's lane close (2026-11-07): every RD gate closed, baseline re-pinned with the
+      reason recorded (closeout §4), full suite and typecheck run at the closing commit.
+
+  # ── DC — Dayton conference redesign (active lane, owner 2026-11-07; Codex) ──────────
+
+  - id: DC-CONFERENCE-REDESIGN
+    lane: DC
+    title: Dayton conference redesign lands on the RD end-map contract
+    status: open
+    kind: acceptance
+    opened: 2026-11-07
+    blocks: [R8]
+    evidence_required: >
+      The conference plan's slices landed with their tests; signed terms reach the end map
+      through applyPeaceSettlement; the player-agency items in the RD handoff (held enclave,
+      protected ground, the decliner's eight weeks) decided with their panels; 188w pins
+      intact or owner re-pinned.
+    evidence_path: null
+    source: handoffs/20261107_dayton_end_map_to_conference.md
+    notes: >
+      Codex owns the plan (Dragon: F:/AWWV-worktrees/.dayton-design/DAYTON_CONFERENCE_IMPLEMENTATION_PLAN.md).
+      Codex should split this into the plan's own gates when the plan lands in the repo.
 
   # ── R7 — content, historical attribution, audio, accessibility, opening ──────────
 

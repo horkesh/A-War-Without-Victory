@@ -1,6 +1,7 @@
 # RD — Dayton Settlement and Endgame (lane plan)
 
 **Declared:** 2026-11-07 by the owner ("Dayton is our new active lane").
+**Status: CLOSED 2026-11-07** (owner). All `RD-*` gates closed; record in [RD closeout](../40_reports/20261107_RD_CLOSEOUT.md). Next lane: DC, the Dayton conference redesign (Codex).
 **Roadmap row:** [MASTER_ROADMAP.md §5](MASTER_ROADMAP.md) `RD`. **Gates:** [open_gates.yml](../open_gates.yml) `RD-*`.
 **Panel record:** Pyrrhic team convened 2026-11-07 (historian, game designer, QA/systems, UI/UX + modern wargame, product/orchestrator seats). Owner rulings recorded below.
 

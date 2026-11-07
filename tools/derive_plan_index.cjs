@@ -36,7 +36,7 @@ const REPO_ROOT = path.resolve(__dirname, '..');
 const ROADMAP = 'docs/plans/MASTER_ROADMAP.md';
 const INDEX = 'docs/plans/plan_index.yml';
 
-const LANE_ROW = /^\|\s*(R[1-9]|RC|RD|RE|REPO)\s*\|/;
+const LANE_ROW = /^\|\s*(R[1-9]|RC|RD|DC|RE|REPO)\s*\|/;
 const PLAN_LINK = /\]\(([0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]+\.md)\)/g;
 
 /**

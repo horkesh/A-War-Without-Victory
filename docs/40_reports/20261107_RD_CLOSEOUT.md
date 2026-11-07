@@ -4,12 +4,12 @@ Lane plan: [docs/plans/2026-11-07-rd-dayton-settlement-lane.md](../plans/2026-11
 
 ## 1. Maximum territory, re-measured under the settlement rules
 
-Harness: `tools/ai_play/territory_sweep.ts` (live-equivalent desktop `advanceTurn`, production autonomy). Each faction's best strategy from the [earlier sweep](20261107_PLAYER_MAX_TERRITORY_SWEEP.md) (`rbih_aggr_req`, `rs_delay_martial`, `baseline_HRHB`), with Dayton signed on the map and no table demands, so the numbers do not depend on the interim table rules the conference redesign owns. Strategy files: scratch `remeasure/rd_<faction>_<sign|decline>_map.json` (base strategy + `"dayton": "sign" | "decline", "dayton_table": "map"`).
+Measured at HEAD `34d1f51` (after the review fixes, the enclave-loss fix and the Srebrenica-aftermath gate). Harness: `tools/ai_play/territory_sweep.ts` (live-equivalent desktop `advanceTurn`, production autonomy). Each faction's best strategy from the [earlier sweep](20261107_PLAYER_MAX_TERRITORY_SWEEP.md) (`rbih_aggr_req`, `rs_delay_martial`, `baseline_HRHB`), with Dayton signed on the map and no table demands, so the numbers do not depend on the interim table rules the conference redesign owns. Strategy files: scratch `remeasure/rd_<faction>_<sign|decline>_map.json` (base strategy + `"dayton": "sign" | "decline", "dayton_table": "map"`).
 
 | Run | Dayton | Ends | Player's wartime share | Settled RBiH / RS / HRHB | Player grade |
 |---|---|---|---|---|---|
-| RBiH best, on time | signed wk 188 | 188 | RBiH 38.09% | 32.46 / 47.96 / 19.58 | A |
-| RBiH best, declined | imposed by the US, wk 196 | 196 | RBiH 39.16% | 32.59 / 47.83 / 19.58 | A |
+| RBiH best, on time | signed wk 188 | 188 | RBiH 38.09% | 32.89 / 47.49 / 19.62 | A |
+| RBiH best, declined | imposed by the US, wk 196 | 196 | RBiH 39.04% | 33.02 / 47.36 / 19.62 | A |
 | RS best, on time | signed wk 188 | 188 | RS 48.49% | 31.77 / 48.76 / 19.47 | D (genocide condemnation) |
 | RS best, declined | imposed by Belgrade, wk 196 | 196 | RS 45.64% | 32.09 / 48.44 / 19.47 | D (genocide condemnation) |
 | HRHB baseline, on time | signed wk 188 | 188 | HRHB 20.74% | 32.18 / 48.35 / 19.47 | A |
@@ -33,10 +33,21 @@ At the table, with the interim rules (decline campaign v8, RBiH demands its capt
 | Scoring anchors + verdict copy (§8) | game designer, war-or-game, narrative designer, historian | GO / GO-WITH-CHANGES | Applied; recorded in `VICTORY_AND_PYRRHIC_SCORING.md` §8. Known dead band: RS A+ (>55%) unreachable. |
 | Run artifacts | scenario-creator-runner-tester | see §3 | — |
 
-## 3. Run artifact review
+## 3. Run artifact review — PASS-WITH-NOTES
 
-Pending at the time of writing; recorded in the ledger entry that closes RD.
+Scenario seat (scenario-creator-runner-tester + war-or-game). All control changes in weeks 181–196 come from combat and match an active operation objective; nothing changed hands without combat. v8 obeys the final rules; settled maps are contiguous except the Posavina canton. Findings and dispositions:
+
+| Finding | Disposition |
+|---|---|
+| Enclave loss never recorded (`military.enclave_state` had no writer), so RBiH graded as holding every enclave | Fixed (owner): an enclave is lost when another faction holds its capital. Re-pinned (see §4). |
+| `srebrenica_aftermath` fired by calendar even when Srebrenica held (+20 RS patron pressure) | Fixed (owner): fires only after a real fall; default campaign unchanged (falls week 162). |
+| An enclave held at signature is handed to RS by the Dayton map | Transferred to the conference lane (owner), top item under the player-agency principle. |
+| Artifacts predated HEAD | Re-measured at HEAD (table above) and baseline re-run. |
+| VRS passive after a decline; declining strictly worse for RS | Transferred to the conference lane. |
+| HRHB A+ (>20%) unreachable under Dayton | Known ceiling, like RS A+. |
+
+**Player agency (owner, 2026-11-07).** Ahistorical outcomes earned through the mechanics are the point. Example: with the aggressive RBiH strategy Zvornik never falls in week 1, Srebrenica never becomes an enclave, and RBiH holds 39.0% at week 196. Open check, not a blocker: confirm the Zvornik hold is earned, not a defect.
 
 ## 4. Calibration
 
-Every engine change in RD was followed by the pinned baseline gate: `npm run test:baselines` — "Baseline regression: all scenarios match." (steps 2 and 3, and after the contiguity pass). 712/711/712/710 unchanged; the 188-week calibration scenario never resolves Dayton.
+Every engine change in RD was followed by the pinned baseline gate (`npm run test:baselines`). Steps 2 and 3 and the contiguity pass: all scenarios match. The enclave-loss fix moved four pinned artifacts (`final_save.json`, `weekly_report.jsonl`, `end_report.md`, `run_summary.json`) because RBiH's negotiation record now lists Srebrenica and Žepa as lost; `control_delta.json`, `formation_delta.json`, `activity_summary.json` and `watched_operations.json` are byte-identical, October 1995 stays 710/712 and all 31 anchors pass. Re-pinned with owner approval (`UPDATE_BASELINES=1`). The 188-week calibration scenario never resolves Dayton.

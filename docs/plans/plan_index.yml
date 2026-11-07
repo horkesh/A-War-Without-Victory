@@ -173,15 +173,20 @@ lanes:
         fits_context: true
         tasks: null
   - lane: RD
-    title: "Dayton settlement and endgame"
-    lane_open: true
-    status: "ACTIVE — declared by the owner 2026-11-07. Peace plans settle on their maps; Dayton is declinable with a forced table; captured ground is negotiable; the final "
+    title: "Dayton settlement and end map"
+    lane_open: false
+    status: "CLOSED — owner, 2026-11-07. Peace plans settle on their maps; the OSID-level Dayton map has no isolated pockets outside the Posavina canton; the verdict reads t"
     plans:
       - path: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
         exists: true
-        tokens: 1011
+        tokens: 1240
         fits_context: true
         tasks: null
+  - lane: DC
+    title: "Dayton conference redesign"
+    lane_open: true
+    status: "ACTIVE — owner, 2026-11-07. Owned by Codex. Reworks the Dayton table (conference room, live bargaining, data contract) on top of RD's end-map contract. First it"
+    plans: []
   - lane: R8
     title: "Full-campaign packaged-Electron validation and diaries"
     lane_open: true
