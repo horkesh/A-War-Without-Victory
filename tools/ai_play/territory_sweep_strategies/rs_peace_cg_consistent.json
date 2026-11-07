@@ -1,0 +1,13 @@
+{
+  "name": "rs_peace_cg_consistent",
+  "faction": "RS",
+  "events": {
+    "default": "bot",
+    "overrides": {
+      "rs_contact_group_response_1994": "accept_51_49_plan"
+    }
+  },
+  "peace_plans": {
+    "contact_group": "accept"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "activist_HRHB",
+  "faction": "HRHB",
+  "events": {
+    "default": "bot"
+  },
+  "request_ops": {
+    "enabled": true,
+    "max_queries_per_turn": 12,
+    "prefer_consolidation": true
+  },
+  "local_support": {
+    "enabled": true
+  },
+  "elite_deploy": {
+    "enabled": true
+  }
+}

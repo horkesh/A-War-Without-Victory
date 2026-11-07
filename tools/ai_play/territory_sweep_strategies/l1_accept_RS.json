@@ -1,0 +1,9 @@
+{
+  "name": "l1_accept_RS",
+  "faction": "RS",
+  "autonomy": 1,
+  "events": {
+    "default": "bot"
+  },
+  "accept_all_proposals": true
+}

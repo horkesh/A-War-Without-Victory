@@ -1,0 +1,8 @@
+{
+  "name": "emergent_HRHB",
+  "faction": "HRHB",
+  "decision_mode": "emergent",
+  "events": {
+    "default": "bot"
+  }
+}

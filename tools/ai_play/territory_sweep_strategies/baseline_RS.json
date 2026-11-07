@@ -1,0 +1,7 @@
+{
+  "name": "baseline_RS",
+  "faction": "RS",
+  "events": {
+    "default": "bot"
+  }
+}
