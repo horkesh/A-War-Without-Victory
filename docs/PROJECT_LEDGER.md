@@ -13769,3 +13769,12 @@ Codex delivered 17 opaque Q90 plates in #541-#544 under the art work order and t
 - #543 (B2-B8): approved, 58 rows. B2 meets the 2026-11-06 section 6 conditions and serves `un_resolution_819_srebrenica_1993` per that verdict; B5 has no civilian columns (Storm/Neretva flags).
 - #544 (B9-B14): all six approved, 50 rows. B10 `event_arms_pipeline_night` came back once (palms in the treeline); the revision (pine and broadleaf, e0c26c9ee) was approved and its 12 rows wired.
 Image keys only (231 rows now carry art); a wiring script verified no other field changed. Baseline regression on the combined state: all scenarios match (sim byte-identical). 126 event/art test files pass. The Heliodrom plate remains ungenerated (section 6 gated).
+
+## 2026-11-07 - R7: offline audio passes in the packaged app; two audio gates closed (DOCS, EVIDENCE)
+
+Owner asked to close what can be closed in R7 without the listening pass.
+- `R7-AUDIO-CUE-WIRING` closed on the 2026-11-05 disposition (six scoped triggers, four registry-only by decision); re-checked on main, exactly those six have non-test `playCue` call sites.
+- `R7-AUDIO-OFFLINE-RUNTIME` closed. Fresh `desktop:package:dir` build of `81ab0051c`, driven through the real UI with external HTTP(S) denied inside the app only (Codex's harness from CX-20261107-PACKAGED-AUDIO-QA, reused): opening, menu and campaign music, three UI cues, volume, mute/resume and the music switch observed; NetLog and renderer trace 0 remote URLs; a same-profile relaunch on a new port kept music on and both sliders at 45% (failed on `f64ddf748`, fixed by #551). Evidence: `logs/r7-english-readability/closeout-offline-audio-runtime.md`.
+- R7 now waits only on human listening/sensitivity and the roll-up gate. Roadmap R7 row and `plan_index.yml` updated.
+- Found in passing, not fixed here: the packaged app probes `127.0.0.1:3002-3005` for a Vite dev server on every launch (`resolveMapServerBaseUrl`, no `app.isPackaged` check).
+- No code, simulation, scenario or calibration change.
