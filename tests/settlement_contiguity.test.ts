@@ -71,6 +71,55 @@ describe('enforceSettlementContiguity', () => {
     it('caps outright absorption at the pocket size', () => {
         expect(POCKET_MAX_CELLS).toBe(6);
     });
+
+    it('never absorbs protected ground (a won package, an enclave): it gets a corridor instead', () => {
+        // One Federation cell at (6,1) inside RS, two RS cells from the Federation main block.
+        const g = grid(8, 4, (x, y) => (x === 6 && y === 1 ? 'RBiH' : x < 4 ? 'RBiH' : 'RS'));
+        const guarded = enforceSettlementContiguity({ ...g, isProtectedCell: (o) => o === 'c:6:1' });
+        expect(guarded.controllers['c:6:1']).toBe('RBiH');
+        expect(Object.values(guarded.changes).every((f) => f === 'RBiH')).toBe(true);
+        expect(Object.keys(guarded.changes).sort()).toEqual(['c:4:1', 'c:5:1']);
+        expect(enforceSettlementContiguity(g).changes).toEqual({ 'c:6:1': 'RS' });
+    });
+
+    it('a corridor never cuts through the other side\'s protected ground', () => {
+        const g = grid(8, 4, (x, y) => (x === 6 && y === 1 ? 'RBiH' : x < 4 ? 'RBiH' : 'RS'));
+        const result = enforceSettlementContiguity({
+            ...g,
+            isProtectedCell: (o) => o === 'c:6:1' || o === 'c:5:1' || o === 'c:4:1',
+        });
+        expect(result.changes['c:5:1']).toBeUndefined();
+        expect(result.changes['c:4:1']).toBeUndefined();
+        expect(result.controllers['c:6:1']).toBe('RBiH');
+    });
+
+    it('picks the corridor with the smallest area, not the fewest cells', () => {
+        // The Federation island at (6,0) can join through (5,0),(4,0) [2 cells] or a detour;
+        // make the direct cells huge so the corridor goes around through small cells.
+        const g = grid(8, 3, (x, y) => (x === 6 && y === 0 ? 'RBiH' : x < 4 ? 'RBiH' : 'RS'));
+        g.areas['c:4:0'] = 100;
+        g.areas['c:5:0'] = 100;
+        const { changes } = enforceSettlementContiguity({ ...g, isProtectedCell: (o) => o === 'c:6:0' });
+        expect(changes['c:4:0']).toBeUndefined();
+        expect(changes['c:5:0']).toBeUndefined();
+        expect(Object.keys(changes).length).toBeGreaterThan(2);
+    });
+
+    it('moves on past a piece it cannot fix', () => {
+        // A protected Federation island walled off by protected RS ground cannot be joined;
+        // a separate RS pocket inside the Federation is still absorbed.
+        const g = grid(10, 4, (x, y) => {
+            if (x === 1 && y === 1) return 'RS';             // fixable RS pocket
+            if (x === 8 && y === 1) return 'RBiH';           // unfixable protected island
+            return x < 5 ? 'RBiH' : 'RS';
+        });
+        const result = enforceSettlementContiguity({
+            ...g,
+            isProtectedCell: (o, f) => o === 'c:8:1' || (f === 'RS' && o !== 'c:1:1'),
+        });
+        expect(result.changes['c:1:1']).toBe('RBiH');
+        expect(result.controllers['c:8:1']).toBe('RBiH');
+    });
 });
 
 describe('the Dayton settlement map has no isolated pockets', () => {

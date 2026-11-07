@@ -31,6 +31,7 @@ import contactGraphJson from '../../../data/derived/operational/operational_cont
 import { parseEdges } from '../../map/settlements_parse.js';
 import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
 import { enforceSettlementContiguity } from './settlement_contiguity.js';
+import { ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from '../combat/enclave_resilience.js';
 
 const OSID_AREAS: { total_area_km2: number; areas: Record<string, number> } = osidAreasJson;
 function getOsidAreas(): { total: number; areas: Record<string, number> } {
@@ -204,6 +205,8 @@ export function computeSettlementControllers(
             adjacency: getSettlementAdjacency(),
             areas,
             isProtectedExclave: (side, cells) => side === 'FED' && cells.every((o) => POSAVINA_CANTON.has(munOf(o))),
+            // Never absorb ground a package won at the table, or an enclave held by its own side.
+            isProtectedCell: (o, f) => overrides[o] === f || isEnclaveCellOfSide(o, f),
         }).controllers
         : controllers;
     const sorted: Record<string, FactionId> = {};
@@ -217,6 +220,22 @@ export function computeSettlementControllers(
  * to the rest of the Federation, so the contiguity pass keeps them.
  */
 const POSAVINA_CANTON = new Set(['orasje', 'bosanski_samac', 'odzak']);
+
+/**
+ * Enclave cells the contiguity pass must not absorb: enclaves with an explicit cell list or
+ * a capital (Goražde, Srebrenica, Žepa, Teočak, Sarajevo, the Croat pockets), held by their
+ * own entity. Prefix-only definitions (the whole-municipality Bihać pocket) are too broad
+ * here, as in rear_pocket_consolidation.ts. Enclave absorption is §6/enclave-delegated.
+ */
+function isEnclaveCellOfSide(osid: string, faction: FactionId): boolean {
+    const fed = (f: string) => f === 'RBiH' || f === 'HRHB';
+    for (const enclave of ENCLAVE_DEFINITIONS) {
+        if (!enclave.osid_list && !enclave.capital_osid) continue;
+        if (fed(enclave.faction) !== fed(faction)) continue;
+        if (osidBelongsToEnclave(osid, enclave)) return true;
+    }
+    return false;
+}
 
 /** Area-weighted share per faction, 0..100, over the given controller map. */
 export function settlementTerritoryPct(controllers: Record<string, FactionId>): Record<string, number> {

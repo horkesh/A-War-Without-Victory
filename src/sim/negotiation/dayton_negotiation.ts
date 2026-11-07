@@ -103,6 +103,9 @@ export function effectiveDaytonTriggerWeek(state: GameState): number {
 /** Patron override level at which Dayton is forced even before the trigger week. */
 const FORCED_DAYTON_OVERRIDE_THRESHOLD = 95;
 
+/** Patron override at which a patron can force its client to accept a Dayton term. */
+const PATRON_OVERRIDE_THRESHOLD = 75;
+
 /** Historical territory split baseline: Federation 51%, RS 49%. */
 const HISTORICAL_FEDERATION_PCT = 51;
 const HISTORICAL_RS_PCT = 49;
@@ -530,7 +533,7 @@ export function resolveDaytonNegotiation(
         } else {
             // Check patron override for the holding faction
             const holderPatron = neg.patron_relationships[holderFaction];
-            if (holderPatron && holderPatron.override_authority >= 75) {
+            if (holderPatron && holderPatron.override_authority >= PATRON_OVERRIDE_THRESHOLD) {
                 // Patron forces acceptance of this specific demand
                 acceptedTerritorial.push(pkgId);
                 patronOverrides.push(`territorial:${pkgId}:${holderFaction}`);
@@ -572,7 +575,7 @@ export function resolveDaytonNegotiation(
 
                     // Check patron override
                     const botPatron = neg.patron_relationships[botFaction];
-                    if (botPatron && botPatron.override_authority >= 75) {
+                    if (botPatron && botPatron.override_authority >= PATRON_OVERRIDE_THRESHOLD) {
                         objected = false;
                         patronOverrides.push(`institutional:${pkgId}:${botFaction}`);
                     }
@@ -962,8 +965,6 @@ interface ResolvedDimensions {
     return_justice?: Record<string, string>;
 }
 
-/** Patron-override threshold (mirrors the territorial/institutional ≥75 rule). */
-const PATRON_OVERRIDE_THRESHOLD = 75;
 
 /**
  * Resolve + persist the Phase-2 institutional dimensions (Dim 2 dial, Dim 3

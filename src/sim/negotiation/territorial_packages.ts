@@ -38,7 +38,7 @@ export const TERRITORIAL_PACKAGES: readonly TerritorialPackage[] = [
         default_holder: 'RS',
         capital_cost_to_demand: 20,
         capital_cost_to_concede: 18,
-        osid_keywords: ['brcko', 'rahic', 'brezovo_polje'],
+        osid_keywords: ['brcko'],
     },
     {
         id: 'posavina_pocket',
@@ -60,7 +60,7 @@ export const TERRITORIAL_PACKAGES: readonly TerritorialPackage[] = [
         default_holder: 'RS',
         capital_cost_to_demand: 15,
         capital_cost_to_concede: 12,
-        osid_keywords: ['ilidza', 'hadzici', 'vogosca', 'ilijas', 'rajlovac'],
+        osid_keywords: ['ilidza', 'hadzici', 'vogosca', 'ilijas'],
     },
     {
         id: 'western_bosnia',
@@ -104,7 +104,7 @@ export const TERRITORIAL_PACKAGES: readonly TerritorialPackage[] = [
         default_holder: 'RS',
         capital_cost_to_demand: 25,
         capital_cost_to_concede: 15,
-        osid_keywords: ['srebrenica', 'zepa', 'bratunac', 'skelani'],
+        osid_keywords: ['srebrenica', 'zepa', 'bratunac'],
     },
 ] as const;
 
