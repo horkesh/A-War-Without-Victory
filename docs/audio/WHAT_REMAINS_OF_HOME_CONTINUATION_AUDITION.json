@@ -1,0 +1,767 @@
+{
+  "title": "What Remains of Home - Continuation",
+  "date": "2026-11-05",
+  "status": "separate audition; listening/runtime adoption open",
+  "owner_direction": "Musician-feedback development: accelerate later, add timpani, low war-drum pulse and fuller strings; Game of Thrones is an arrangement reference only. No reference score/audio/MIDI imported.",
+  "original_theme_record": "docs/audio/WHAT_REMAINS_OF_HOME_AUDITION.json",
+  "musical_form": {
+    "bars": 44,
+    "base_motif": "Original A4-to-D5 eight-bar theme",
+    "tempo_bpm": [
+      66,
+      80,
+      96,
+      66,
+      62,
+      58,
+      54
+    ],
+    "development_entry_seconds": 58.18181818181818,
+    "full_ensemble_entry_seconds": 82.18181818181819,
+    "preservation_scope": "First144scoreevents/bar<16 retain original identities/timing/duration/velocity. FinalWAVprefix is not claimed byte-identical: gain/mix/tails may differ. Originalv3files/cache/code retained exactly."
+  },
+  "recipe_hashes_normalized_lf": {
+    "tools/audio/create_theme_continuation.py": "b62fec583b47d5a3e92a2e787bcffcba9bc106a5209cf49a93d247b089a7d76f",
+    "tools/audio/create_after_the_silence.py": "a26bc286ba908c6cc3c24075b8211e8b4aef9e7c8e7c568db05735f21fa1e2f8"
+  },
+  "recipe_hashes_raw": {
+    "tools/audio/create_theme_continuation.py": "82bf4b3355cd914cce09eeec256608ce11b5e055051a585c48021f5355d21be4",
+    "tools/audio/create_after_the_silence.py": "a26bc286ba908c6cc3c24075b8211e8b4aef9e7c8e7c568db05735f21fa1e2f8"
+  },
+  "sample_library": {
+    "repository": "https://github.com/sgossner/VSCO-2-CE",
+    "commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+    "license": "CC0-1.0",
+    "performance_scope": "Original authored notes rendered using recorded instrument samples; not a live project orchestral recording.",
+    "sources": [
+      {
+        "path": "Keys/Upright Piano/Info.txt",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Info.txt",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 220,
+        "sha256": "a3bd9d49720187b10269e78b091316d043dcd7b059ec77edb582195152aaf1ce",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Keys/Upright Piano/MappingChart.txt",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/MappingChart.txt",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 338,
+        "sha256": "9ccfbdee3d58873e9632ba188ed5837979948eb7868e824ec24e0d3eb4e3fda8",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn1_rr1_024.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn1_rr1_024.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2222998,
+        "sha256": "916c3ec2d61fb421e74fb4866ef75d3ef17e9d88e9dc858da24159846489d33f",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn2_rr1_004.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn2_rr1_004.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 5625058,
+        "sha256": "ea7f8c8e997794656422b9c19f3a96f8ba03a0282ee664b97437c13b5ed2865c",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn2_rr1_006.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn2_rr1_006.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 4936726,
+        "sha256": "80ade36a6030d83d868b6abbd1e9ab6f85ec2494cfe25d2affffd88f453e81e0",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn2_rr1_008.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn2_rr1_008.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 6862312,
+        "sha256": "52be11ac2a57389f2d12cbd82df9b175da7b60e423d8a1154e1d7fc3340ecd6e",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn2_rr1_010.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn2_rr1_010.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 7572904,
+        "sha256": "324c53abf03b2b32ff74f52886806ab5d4a7a37f6eb9c746558799037d7e12da",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn2_rr1_012.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn2_rr1_012.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 6306106,
+        "sha256": "9accd92b779985736589d7bf25b93f1d6d508830d2f2aad3e76a481549cc1ca2",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn2_rr1_014.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn2_rr1_014.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 6180628,
+        "sha256": "0bdf66b89c2cd8042118b2cf9898aab334820fff7538b8553655a3d11d2ba107",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn2_rr1_016.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn2_rr1_016.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 4643212,
+        "sha256": "87b90b8161b5ddac5f1e81cce7895c726aff220e735586059c7ed684a5ae82dc",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn2_rr1_018.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn2_rr1_018.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 5748202,
+        "sha256": "fb39ae501f7dde4aa3626d2e382b3709962cbe5d48b6c001ba7c911d1ffb6aeb",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn2_rr1_020.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn2_rr1_020.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 4346848,
+        "sha256": "dc314226819e7af0768cd7fc08933f5e5b550083145e05af630fd7556f4d3913",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn2_rr1_022.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn2_rr1_022.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 4476550,
+        "sha256": "9a4e03fa389b7e59ea6b3a6719eef52be8d607844283c7163662030f57b60942",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn2_rr1_024.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn2_rr1_024.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 3204940,
+        "sha256": "a00ae1a2b2a78c154b067a9709afc1ce2d3be9f08d9f4ad3c9c869a7db80eb75",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn2_rr1_026.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn2_rr1_026.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2656870,
+        "sha256": "4e668e75c3922c79ef06bd46806224dbf8dbfa0be1569847a1cd17e573a967ec",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Keys/Upright Piano/Player_dyn2_rr1_028.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Keys/Upright%20Piano/Player_dyn2_rr1_028.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 3008866,
+        "sha256": "84fe87bd24dc93d354213f730517a29f485c40715d5959af97976b364110b70a",
+        "license": "CC0-1.0",
+        "credit": "Ivy Audio / Simon Dalzell; Versilian Studios",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "LICENSE",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/LICENSE",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 6555,
+        "sha256": "36ffd9dc085d529a7e60e1276d73ae5a030b020313e6c5408593a6ae2af39673",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "README.md",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/README.md",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 751,
+        "sha256": "8fbf399338661e6c76585ad9e75eb10324f823935168e0567553293a83f200a0",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Readme.txt",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Readme.txt",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 1838,
+        "sha256": "101ddb88eb013900cc911834ecbdfbd49497bcd913bf09417160b9677952bb38",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Strings/Cello Section/susvib/susvib_A2_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/susvib/susvib_A2_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2336738,
+        "sha256": "c97a003184fdcb153d6b6c0bae8d82a90592a1b04b06bd7caaeda8b9776d5284",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Strings/Cello Section/susvib/susvib_C1_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/susvib/susvib_C1_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2347376,
+        "sha256": "abdcea431f384e135c469b0f3e4ac2a437f282f521dc5bcbe22abc221536e8de",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Strings/Cello Section/susvib/susvib_D2_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/susvib/susvib_D2_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2550956,
+        "sha256": "e8640dec9febc6e39fcf06b19d2c95a85d5ff8c38f13c9879e69f551eaf38ab8",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Strings/Cello Section/susvib/susvib_E3_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/susvib/susvib_E3_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2456672,
+        "sha256": "d2f961e30bf64021cf4acbd88e0e7a1fd1840943ae78c62a711bcce3d109216e",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Strings/Cello Section/susvib/susvib_G1_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/susvib/susvib_G1_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2161700,
+        "sha256": "9e5d24e8e28d6c7f650f9bb2b33d43c13e341a8bd33124c64e23881378b181ba",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Strings/Violin Section/susVib/VlnEns_susVib_A3_v1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_A3_v1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 1890316,
+        "sha256": "72817a53dfd2eb61eca94658c14e1cab6017629ca2f27bab8e394c6675bfaad7",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Strings/Violin Section/susVib/VlnEns_susVib_D3_v1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_D3_v1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2061808,
+        "sha256": "583e660bc5daa4e094aef5fc014fbb92751040be8741ed7a16847306a1fe0a99",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Strings/Violin Section/susVib/VlnEns_susVib_E4_v1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_E4_v1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2315540,
+        "sha256": "787fb4bcfb47d5c88ee1573c8db15f32d345386301be4a8eea6a825847413ae2",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Strings/Violin Section/susVib/VlnEns_susVib_G2_v1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Violin%20Section/susVib/VlnEns_susVib_G2_v1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2341712,
+        "sha256": "feb96c5064fbef43087c495d61a9cab9f70ff1be5b22905147c1f86d5f89547c",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v3/sample-cache (read-only fallback)"
+      },
+      {
+        "path": "Strings/Viola Section/susvib/ViolaEns_susvib_G2_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/susvib/ViolaEns_susvib_G2_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2001644,
+        "sha256": "557c2e033951015c30765bf18266bce0dd0412e3ca646dd1a225c32422c60662",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v4/sample-cache"
+      },
+      {
+        "path": "Strings/Viola Section/susvib/ViolaEns_susvib_D3_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/susvib/ViolaEns_susvib_D3_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2789648,
+        "sha256": "61ab4cfc0ea90c683433a7c50b3bb4fa86a81c9d4854589562707d54ed028349",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v4/sample-cache"
+      },
+      {
+        "path": "Strings/Viola Section/susvib/ViolaEns_susvib_A3_v1_1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Viola%20Section/susvib/ViolaEns_susvib_A3_v1_1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2491352,
+        "sha256": "7cea6482a8f67536e3108f01b688d54d198e5820ffcd0ac5a49652d38f6ec065",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v4/sample-cache"
+      },
+      {
+        "path": "Strings/Cello Section/spic/spic_C1_v1_RR1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_C1_v1_RR1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 825956,
+        "sha256": "3c583eb33a74d04a51a12a933bc9c6b8cf5af0d828f14d374791d8a5c98a06d5",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v4/sample-cache"
+      },
+      {
+        "path": "Strings/Cello Section/spic/spic_G1_v1_RR1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_G1_v1_RR1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 567434,
+        "sha256": "62ad206529cfa2ea5630042f2d23f6442afd1f008435a2c5e79f1b8bc924d3ec",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v4/sample-cache"
+      },
+      {
+        "path": "Strings/Cello Section/spic/spic_D2_v1_RR1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_D2_v1_RR1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 394016,
+        "sha256": "6fe41bb3cf9212480ce2e856b5da3971267f75d64b629e90224cc9c6deeb1cb2",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v4/sample-cache"
+      },
+      {
+        "path": "Strings/Cello Section/spic/spic_A2_v1_RR1.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Strings/Cello%20Section/spic/spic_A2_v1_RR1.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 421418,
+        "sha256": "9d7cde1e9785f468091783946954c390556b72f1e80098f69b0cab38fd64ed08",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v4/sample-cache"
+      },
+      {
+        "path": "Percussion/Timpani/Timpani1_Hit_v3_rr1_Sum.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Percussion/Timpani/Timpani1_Hit_v3_rr1_Sum.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 1602676,
+        "sha256": "8b39a785901d08dee14dd89914bdf2201e16ee418965e4d903fdb8e280a14d24",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v4/sample-cache"
+      },
+      {
+        "path": "Percussion/Timpani/Timpani2_Hit_v3_rr1_Sum.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Percussion/Timpani/Timpani2_Hit_v3_rr1_Sum.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 1895164,
+        "sha256": "69e5d604effd3f29c86117d22ad2335f73e43f5d47868dc57d8fa593975ee241",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v4/sample-cache"
+      },
+      {
+        "path": "Percussion/Timpani/Timpani3_Hit_v3_rr1_Sum.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Percussion/Timpani/Timpani3_Hit_v3_rr1_Sum.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 1608252,
+        "sha256": "46cd2ba3798f9e3a6be515b13dbc37d2ef65c82afb0d0e9e34121e4524bfcd3a",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v4/sample-cache"
+      },
+      {
+        "path": "Percussion/Timpani/Timpani4_Hit_v3_rr1_Sum.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Percussion/Timpani/Timpani4_Hit_v3_rr1_Sum.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 1012976,
+        "sha256": "05170757d30297aa680bfbc082c6e438deb1d1d72c5e757610d0b1bbd525968f",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v4/sample-cache"
+      },
+      {
+        "path": "Percussion/Timpani/Timpani5_Hit_v3_rr1_Sum.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Percussion/Timpani/Timpani5_Hit_v3_rr1_Sum.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 1036528,
+        "sha256": "da8212316bb05e3c06c730d6a67ae4b3c8ed90ca5ec8c52410cb9d0cde1bddb4",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v4/sample-cache"
+      },
+      {
+        "path": "Percussion/Timpani/Rolls/Timpani1_Roll_v3_rr1_Sum.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Percussion/Timpani/Rolls/Timpani1_Roll_v3_rr1_Sum.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 5196524,
+        "sha256": "834f3fcf28a546d854cf3e331cde3d14da68788d130ca306a2ef6f975230566a",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v4/sample-cache"
+      },
+      {
+        "path": "Miscellania Raw/Misc 2/rtomtom_frame.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Miscellania%20Raw/Misc%202/rtomtom_frame.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 2151382,
+        "sha256": "4d8989b6588eba4a13bf0e355dc90db949b4295220cab802a01b60ed51bedc1c",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v4/sample-cache"
+      },
+      {
+        "path": "Miscellania Raw/Misc 2/rtomtom_frame2.wav",
+        "source_url": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/Miscellania%20Raw/Misc%202/rtomtom_frame2.wav",
+        "pinned_commit": "440300901dfe9275fd84e0b7763af1f8443ae62e",
+        "bytes": 521074,
+        "sha256": "563ff2976b50194d1345cdbd63bf444cd5d962264ced46e2382795f40c09854c",
+        "license": "CC0-1.0",
+        "credit": "Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote",
+        "cache": "theme-v4/sample-cache"
+      }
+    ]
+  },
+  "score": {
+    "path": "logs\\player-experience-completion-20261105\\theme-v4\\score.json",
+    "sha256": "cf9c1a9307e60285f3f30be959418fabf77b77f82b9fd48130b6f438e067e178"
+  },
+  "exports": [
+    {
+      "path": "logs\\player-experience-completion-20261105\\theme-v4\\what_remains_of_home_continuation.wav",
+      "sha256": "5a1c557956e1380a544e928dbb2c014e7bbddc42a165dedd1d3e1cafbcabaea1"
+    },
+    {
+      "path": "logs\\player-experience-completion-20261105\\theme-v4\\what_remains_of_home_continuation.mp3",
+      "sha256": "c29b1495591a2e847ef3203e148266b74f6799f7a5c9b30775b5eddbdf9590cd"
+    },
+    {
+      "path": "logs\\player-experience-completion-20261105\\theme-v4\\what_remains_of_home_continuation.ogg",
+      "sha256": "9fd2784fba4b256681fbbe1eac90c792f3e49117e6e09805c170681816912e26"
+    }
+  ],
+  "stems": [
+    {
+      "path": "logs\\player-experience-completion-20261105\\theme-v4\\what_remains_of_home_continuation_piano.wav",
+      "sha256": "6799ff83702f58ca266fc42af07779e870657d0afbaf523d0fa4a0852ae8bb7c"
+    },
+    {
+      "path": "logs\\player-experience-completion-20261105\\theme-v4\\what_remains_of_home_continuation_strings.wav",
+      "sha256": "942394f83bf8056e70bd57ac8cdd19e445c9cef9dbfe219cf906a45d8e2eafa5"
+    },
+    {
+      "path": "logs\\player-experience-completion-20261105\\theme-v4\\what_remains_of_home_continuation_percussion.wav",
+      "sha256": "4f825dfa4cdfcab3d899eb21c05111298256ba1dffd2a9a219db7933cdcaa301"
+    },
+    {
+      "path": "logs\\player-experience-completion-20261105\\theme-v4\\what_remains_of_home_continuation_texture.wav",
+      "sha256": "83d4a7343a48284f7e346fdc22db0cdc34bf515f510f5214b3a5bf2dd22d921c"
+    }
+  ],
+  "render_report": {
+    "title": "What Remains of Home \u2014 Continuation",
+    "duration_seconds": 144.77152083333334,
+    "event_count": 634,
+    "event_counts": {
+      "piano": 314,
+      "cello": 61,
+      "violin": 36,
+      "viola": 24,
+      "cello_spic": 96,
+      "timpani": 20,
+      "timpani_roll": 3,
+      "frame": 80
+    },
+    "source_recipe_sha256": "82bf4b3355cd914cce09eeec256608ce11b5e055051a585c48021f5355d21be4",
+    "frozen_v3_recipe_sha256": "a26bc286ba908c6cc3c24075b8211e8b4aef9e7c8e7c568db05735f21fa1e2f8",
+    "selected_source_bytes": 112780784,
+    "sample_count": 38,
+    "mix_gain": 1.1460660696029663,
+    "metrics": {
+      "mix": {
+        "pcm24_sha256": "ab44f63dea9606f3f9c1acb011b4342e666d0c6893111144de892c85eca826a3",
+        "wav_sha256": "5a1c557956e1380a544e928dbb2c014e7bbddc42a165dedd1d3e1cafbcabaea1",
+        "peak_dbfs": -3.0980401039123535
+      },
+      "piano": {
+        "pcm24_sha256": "9e0d426e26b5fac1ace0a1dcc0c652601be3c46537fee41ad8bac5dbeee5c825",
+        "wav_sha256": "6799ff83702f58ca266fc42af07779e870657d0afbaf523d0fa4a0852ae8bb7c",
+        "peak_dbfs": -3.639540195465088
+      },
+      "strings": {
+        "pcm24_sha256": "b82569efe95613e980d86688cfe60883b2a8428f4c6c4c94a2be1cbc1cfaeff9",
+        "wav_sha256": "942394f83bf8056e70bd57ac8cdd19e445c9cef9dbfe219cf906a45d8e2eafa5",
+        "peak_dbfs": -16.269664764404297
+      },
+      "percussion": {
+        "pcm24_sha256": "40598e1ba88dc35ba1ce21d79fffb60372c2f926d1d1f3a4490b5f4b69a3fc82",
+        "wav_sha256": "4f825dfa4cdfcab3d899eb21c05111298256ba1dffd2a9a219db7933cdcaa301",
+        "peak_dbfs": -7.744441986083984
+      },
+      "texture": {
+        "pcm24_sha256": "56d3eefe6893b2cea95520278578beaadff9f1f3c8b93bfd05a8fa3583edf4fe",
+        "wav_sha256": "83d4a7343a48284f7e346fdc22db0cdc34bf515f510f5214b3a5bf2dd22d921c",
+        "peak_dbfs": -34.93423080444336
+      }
+    },
+    "integrated_lufs": -18.3,
+    "approval": "Separate creative audition; human listening/sensitivity approval open; no game integration"
+  },
+  "technical_verification": {
+    "status": "PASS",
+    "frames": 6949033,
+    "duration_seconds": 144.77152083333334,
+    "master_pcm24_stem_sum_max_lsb": 2,
+    "integrated_lufs": -18.3,
+    "true_peak_dbfs": -3.1,
+    "encoded": [
+      {
+        "file": "what_remains_of_home_continuation.mp3",
+        "codec": "mp3",
+        "duration_seconds": 144.77152083333334,
+        "peak_dbfs": -3.1140494346618652,
+        "sha256": "c29b1495591a2e847ef3203e148266b74f6799f7a5c9b30775b5eddbdf9590cd"
+      },
+      {
+        "file": "what_remains_of_home_continuation.ogg",
+        "codec": "vorbis",
+        "duration_seconds": 144.77152083333334,
+        "peak_dbfs": -3.0853681564331055,
+        "sha256": "9fd2784fba4b256681fbbe1eac90c792f3e49117e6e09805c170681816912e26"
+      }
+    ],
+    "source_recipe_sha256": "82bf4b3355cd914cce09eeec256608ce11b5e055051a585c48021f5355d21be4",
+    "frozen_v3_recipe_sha256": "a26bc286ba908c6cc3c24075b8211e8b4aef9e7c8e7c568db05735f21fa1e2f8",
+    "first16_original_score_events_preserved": 144,
+    "source_runtime_diffs": "",
+    "selected_source_bytes": 112780784,
+    "approval": "Technical verification only; artistic and sensitivity acceptance open"
+  },
+  "browser_verification": {
+    "scope": "Local compressed audition decode and trusted-gesture real-media play promise/time advance; not human listening or game integration",
+    "passed": true,
+    "rows": [
+      {
+        "file": "logs/player-experience-completion-20261105/theme-v4/what_remains_of_home_continuation.mp3",
+        "bytes": 2947581,
+        "sha256": "c29b1495591a2e847ef3203e148266b74f6799f7a5c9b30775b5eddbdf9590cd",
+        "duration": 144.771521,
+        "currentTime": 0.118789,
+        "paused": false,
+        "readyState": 4,
+        "playPromise": "playing"
+      },
+      {
+        "file": "logs/player-experience-completion-20261105/theme-v4/what_remains_of_home_continuation.ogg",
+        "bytes": 2780013,
+        "sha256": "9fd2784fba4b256681fbbe1eac90c792f3e49117e6e09805c170681816912e26",
+        "duration": 144.771521,
+        "currentTime": 0.114247,
+        "paused": false,
+        "readyState": 4,
+        "playPromise": "playing"
+      }
+    ],
+    "errors": []
+  },
+  "v3_preservation": {
+    "original_v3_exact": true,
+    "checked_files": 33,
+    "rows": [
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\what_remains_of_home.mp3",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\what_remains_of_home.ogg",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\what_remains_of_home.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\score.json",
+        "exact": true
+      },
+      {
+        "path": "tools/audio/create_after_the_silence.py",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Keys\\Upright Piano\\Info.txt",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Keys\\Upright Piano\\MappingChart.txt",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Keys\\Upright Piano\\Player_dyn1_rr1_024.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Keys\\Upright Piano\\Player_dyn2_rr1_004.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Keys\\Upright Piano\\Player_dyn2_rr1_006.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Keys\\Upright Piano\\Player_dyn2_rr1_008.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Keys\\Upright Piano\\Player_dyn2_rr1_010.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Keys\\Upright Piano\\Player_dyn2_rr1_012.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Keys\\Upright Piano\\Player_dyn2_rr1_014.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Keys\\Upright Piano\\Player_dyn2_rr1_016.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Keys\\Upright Piano\\Player_dyn2_rr1_018.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Keys\\Upright Piano\\Player_dyn2_rr1_020.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Keys\\Upright Piano\\Player_dyn2_rr1_022.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Keys\\Upright Piano\\Player_dyn2_rr1_024.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Keys\\Upright Piano\\Player_dyn2_rr1_026.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Keys\\Upright Piano\\Player_dyn2_rr1_028.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\LICENSE",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\README.md",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Readme.txt",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Strings\\Cello Section\\susvib\\susvib_A2_v1_1.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Strings\\Cello Section\\susvib\\susvib_C1_v1_1.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Strings\\Cello Section\\susvib\\susvib_D2_v1_1.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Strings\\Cello Section\\susvib\\susvib_E3_v1_1.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Strings\\Cello Section\\susvib\\susvib_G1_v1_1.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Strings\\Violin Section\\susVib\\VlnEns_susVib_A3_v1.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Strings\\Violin Section\\susVib\\VlnEns_susVib_D3_v1.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Strings\\Violin Section\\susVib\\VlnEns_susVib_E4_v1.wav",
+        "exact": true
+      },
+      {
+        "path": "logs\\player-experience-completion-20261105\\theme-v3\\sample-cache\\Strings\\Violin Section\\susVib\\VlnEns_susVib_G2_v1.wav",
+        "exact": true
+      }
+    ]
+  },
+  "review": {
+    "status": "GO for technical correctness, provenance and structure",
+    "path": "logs\\player-experience-completion-20261105\\theme-v4\\independent-review.md",
+    "sha256": "74cdc9796732ec9c986cb00a24e86ba2ec924e578b40765063a21b0d9f56d2fd",
+    "open_actionable_findings": 0,
+    "limits": "Human creative listening, sensitivity approval and runtime adoption remain open"
+  },
+  "evidence_root": "logs\\player-experience-completion-20261105\\theme-v4",
+  "reproducibility_scope": "Fixed authored score, pinned source files and recorded toolchain; not guaranteed encoded-byte identity across platforms/toolchains.",
+  "limits": [
+    "Human creative/sensitivity acceptance remains a listening judgment",
+    "No runtime/UI/state/save/calibration/data/dependency change, no campaigns, package, merge, push or publication"
+  ],
+  "pre_commit": {
+    "exit": 0,
+    "path": "logs/player-experience-completion-20261105/theme-v4/pre-commit.log",
+    "method": "Tracked pre-commit script invoked directly; isolated ignored Husky shim absent; shared hook configuration unchanged"
+  }
+}

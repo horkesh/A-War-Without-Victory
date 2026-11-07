@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Player experience and original soundscape (2026-11-05, isolated branch):** [Report](implemented/20261105_PLAYER_EXPERIENCE_COMPLETION.md) records reliable playback/preferences, default-off music, eight original effects and a haunting 90-second theme, accessible Settings and preserved original assets. Scoped renderer/build evidence is separate from human listening, sensitivity/design and packaged acceptance.
+
 **Command overview usability (2026-11-04, isolated local branch):** [Report](implemented/20261104_COMMAND_OVERVIEW_USABILITY.md) covers own-equipment reporting, the owner-approved percentage/completeness contract, canonical Warroom/HQ routes and dialog focus fixes; final frontend/browser/independent-review evidence passes. Integration remains separate.
 
 **Player information polish (2026-11-04, isolated local branch):** [Report](implemented/20261104_PLAYER_INFORMATION_POLISH.md) records all six presentation improvements, focused 28-file/454-test evidence, two-viewport browser proof and independent review after one targeted correction. No calibration/native/package qualification or integration is claimed.

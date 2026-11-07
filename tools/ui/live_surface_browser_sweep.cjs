@@ -1289,8 +1289,9 @@ async function runFoundationalFlow(page, summary) {
   await waitForVisibleText(page, 'Civic multi-ethnic republic');
   await captureEvidence(page, summary, 'foundational_decision');
 
+  // The next required decision can immediately reuse the Presidential Response heading.
   await clickByText(page, 'Civic multi-ethnic republic');
-  await waitUntilDialogTextAbsent(page, 'Presidential Response');
+  await waitUntilDialogTextAbsent(page, 'What Is Bosnia?');
   await dismissTutorialIfPresent(page);
   summary.evidence.warStartFoundationalFlow = true;
   await captureEvidence(page, summary, 'after_foundational_decision');

@@ -1,9 +1,46 @@
 import { readFileSync } from 'node:fs';
+import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
 
 function read(path: string): string {
   return readFileSync(path, 'utf8');
 }
+
+describe('foundational decision handoff', () => {
+  for (const toolPath of ['tools/ui/first_hour_browser_gate.cjs', 'tools/ui/live_surface_browser_sweep.cjs']) {
+    it(`${toolPath} waits for the answered question while allowing the next required decision`, async () => {
+      const tool = read(toolPath);
+      const responseWait = tool.match(/await clickByText\(page, (?:flow\.responseLabel|'Civic multi-ethnic republic')\);\s*await waitUntilDialogTextAbsent\(page, ([^)]+)\)/);
+      expect(responseWait, 'keep the response click followed by its completion check').not.toBeNull();
+      const needle = runInNewContext(responseWait![1], { flow: { decisionTitle: 'What Is Bosnia?' } });
+      const helperStart = tool.indexOf('async function waitUntilDialogTextAbsent(');
+      const helperEnd = tool.indexOf('\nasync function', helperStart + 1);
+      let visibleDialogs: string[] = [];
+      const check = runInNewContext(`(${tool.slice(helperStart, helperEnd)})`, {
+        document: {
+          querySelectorAll: () => visibleDialogs.map((textContent) => ({
+            textContent,
+            getBoundingClientRect: () => ({ width: 900, height: 600 }),
+          })),
+        },
+      });
+      const page = {
+        waitForFunction: async (predicate: (needle: string) => boolean, _options: unknown, text: string) => {
+          if (!predicate(text)) throw new Error('answered question remains visible');
+        },
+      };
+      const nextDecision = 'Paramilitary Authorization Policy Presidential Response';
+      visibleDialogs = ['What Is Bosnia? Presidential Response', nextDecision];
+      await expect(check(page, needle)).rejects.toThrow('answered question remains visible');
+      visibleDialogs = [nextDecision];
+      await expect(check(page, needle)).resolves.toBeUndefined();
+      visibleDialogs = [];
+      await expect(check(page, needle)).resolves.toBeUndefined();
+      expect(needle).toBe('What Is Bosnia?');
+      expect(tool).toContain('resolveParamilitaryOpeningPolicyWithHistoricalDefault');
+    });
+  }
+});
 
 describe('first-hour browser QA gate contract', () => {
   it('exposes an npm script for the non-destructive first-hour browser gate', () => {

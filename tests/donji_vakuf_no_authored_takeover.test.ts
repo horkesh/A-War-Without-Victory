@@ -198,11 +198,17 @@ describe('Operation Donji Vakuf — ordinary combat configuration stays bounded'
     const sweep = op?.axes?.find((axis) => axis.axis_id === 'donji_vakuf_sweep');
     const pocket = op?.axes?.find((axis) => axis.axis_id === 'vlasic_pocket');
 
-    it('keeps the current two-axis operation bounded and excludes Prusac from authorship', () => {
+    it('keeps the current three-axis operation bounded and excludes Prusac from authorship', () => {
         expect(op, 'Operation Donji Vakuf must exist').toBeTruthy();
         expect(op!.corps).toBe('vrs_1st_krajina');
         expect(op!.faction).toBe('RS');
-        expect(op!.axes.length).toBe(2);
+        expect(op!.axes.length).toBe(3);
+        // Calibration assumption (jan1993 712): a one-brigade Skender Vakuf axis.
+        expect(op!.axes.find((axis) => axis.axis_id === 'skender_vakuf_koricani')).toMatchObject({
+            brigades: ['rs_3rd_banja_luka_light_infantry'],
+            objectives: ['op:skender_vakuf:donji_koricani'],
+            staging_osid: 'op:kotor_varos:krusevo_brdo_i',
+        });
         expect(sweep, 'the donji_vakuf_sweep axis must exist').toBeTruthy();
         expect(pocket, 'the vlasic_pocket axis must exist').toBeTruthy();
         expect(pocket).toMatchObject({
@@ -230,12 +236,12 @@ describe('Operation Donji Vakuf — ordinary combat configuration stays bounded'
 
         const objectiveOccurrences = op!.axes.flatMap((axis) => axis.objectives);
         const brigadeOccurrences = op!.axes.flatMap((axis) => axis.brigades);
-        expect(objectiveOccurrences).toHaveLength(7);
-        expect(new Set(objectiveOccurrences).size).toBe(7);
+        expect(objectiveOccurrences).toHaveLength(8);
+        expect(new Set(objectiveOccurrences).size).toBe(8);
         expect(objectiveOccurrences).not.toContain(PRUSAC);
         expect(objectiveOccurrences).toContain(JEMANLICI);
-        expect(brigadeOccurrences).toHaveLength(5);
-        expect(new Set(brigadeOccurrences).size).toBe(5);
+        expect(brigadeOccurrences).toHaveLength(6);
+        expect(new Set(brigadeOccurrences).size).toBe(6);
     });
 
     it('preserves operation-level combat inputs and gives each combat axis its authored staging', () => {

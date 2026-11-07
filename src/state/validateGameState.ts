@@ -2172,10 +2172,13 @@ function validatePreparationProbeLinks(corpsCommand: unknown, errors: string[]):
                     errors.push(`${path}.source_axes must be unique and sorted by brigade_id`);
                 }
                 const participants = Array.isArray(op.participating_brigades)
-                    ? op.participating_brigades.filter((id): id is string => typeof id === 'string').slice().sort(strictCompare)
+                    ? op.participating_brigades.filter((id): id is string => typeof id === 'string')
                     : [];
-                if (participants.length !== sortedUnique.length || participants.some((id, index) => id !== sortedUnique[index])) {
-                    errors.push(`${path}.source_axes brigade ids must equal the child participants`);
+                const sourceBrigadeIds = new Set(sortedUnique);
+                if (participants.some((id) => !sourceBrigadeIds.has(id))) {
+                    // Participants may be removed legitimately during play (e.g. dissolution);
+                    // source_axes remains a historical receipt, so it may retain extra entries.
+                    errors.push(`${path}.source_axes brigade ids must include every child participant`);
                 }
             }
             if (link.entered_execution_turn !== undefined && !isNonNegativeInteger(link.entered_execution_turn)) {

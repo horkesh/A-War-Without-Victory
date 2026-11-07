@@ -6,6 +6,8 @@ const turnReportUpdatedListeners = new Set();
 // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: optional sidecar broadcast.
 const replaySequenceUpdatedListeners = new Set();
 const replayManifestUpdatedListeners = new Set();
+// PAUSE BEFORE COMBAT: { status: 'paused', turn, eventIds } | { status: 'resumed', turn } | null.
+const turnPausedForDecisionsListeners = new Set();
 
 function emitToListeners(listeners, ...payloads) {
   for (const listener of Array.from(listeners)) {
@@ -41,6 +43,9 @@ ipcRenderer.on('replay-sequence-updated', (_event, sequenceJson) => {
 ipcRenderer.on('replay-manifest-updated', (_event, manifestJson) => {
   emitToListeners(replayManifestUpdatedListeners, manifestJson);
 });
+ipcRenderer.on('turn-paused-for-decisions', (_event, status) => {
+  emitToListeners(turnPausedForDecisionsListeners, status);
+});
 contextBridge.exposeInMainWorld('awwv', {
   loadScenarioDialog: () => ipcRenderer.invoke('load-scenario-dialog'),
   startNewCampaign: (payload) => ipcRenderer.invoke('start-new-campaign', payload),
@@ -52,6 +57,9 @@ contextBridge.exposeInMainWorld('awwv', {
   advanceTurn: (payload) => ipcRenderer.invoke('advance-turn', payload),
   subscribeGameStateUpdated: (cb) => subscribe(gameStateUpdatedListeners, cb),
   subscribeTurnReportUpdated: (cb) => subscribe(turnReportUpdatedListeners, cb),
+  // PAUSE BEFORE COMBAT: the in-flight advance-turn paused for this turn's player decisions.
+  subscribeTurnPausedForDecisions: (cb) => subscribe(turnPausedForDecisionsListeners, cb),
+  continuePausedTurn: () => ipcRenderer.invoke('continue-paused-turn'),
   // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER
   subscribeReplaySequenceUpdated: (cb) => subscribe(replaySequenceUpdatedListeners, cb),
   subscribeReplayManifestUpdated: (cb) => subscribe(replayManifestUpdatedListeners, cb),

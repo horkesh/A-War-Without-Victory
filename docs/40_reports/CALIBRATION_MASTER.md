@@ -1,3 +1,24 @@
+**RE-TUNED after merging the camps rebalance — 2026-11-07 (owner: "Retune it"): scores restored to 712 / 711 / 712 / 710:**
+- Merging #538 (camps rebalance, event data) dropped the signed-off scores to 712/711/709/703 and broke live = headless.
+- Root cause of the live break: an engine defect. Headless dropped the turn-1 event dimension shifts (RS `all_six`: +10 credibility, +10 cohesion, −5 standing), because its startup snapshot has no negotiation store. A new `ensure-negotiation-state` war-phase step fixes it.
+- Five operation levers on the fixed engine restore **Jan 1993 712, Apr 1994 711, Apr 1995 712, Oct 1995 710** (`__w188_n60`): 0 cells differ from the signed-off n42 at every checkpoint. Strict health PASS; enclave guard intact.
+- Live = headless: 0 cells differ at 188 turns for RBiH, RS and HRHB as player (all 710/712).
+- Re-pinned on this source: baseline manifest and structural fingerprint (these supersede the n40 pins below). The Farz P-A defect below is still open.
+- Record: [RESULT.md](audits/20261105_live_jan1993/attribution/RESULT.md), section "Re-tune after merging the camps rebalance".
+
+**LIVE CALIBRATION ADOPTED — all four checkpoints signed off by the owner, 2026-11-06 (`live-equivalent-desktop-v1`):**
+- Scores out of 712: **Jan 1993 712, Apr 1994 711, Apr 1995 712, Oct 1995 710**. Each checkpoint was signed off in order: Jan93 on 2026-11-05; Apr94, Apr95 and Oct95 on 2026-11-06. The owner then closed the calibration lane.
+- **Live = headless:** at 188 turns (`bot_equivalent` events, production autonomy, pause before combat), 0 cells differ between the live game and headless for RBiH, RS and HRHB as player.
+- **Open cells, by owner direction:** Brka (excluded at every checkpoint) and Ilijaš Krivajevići at Oct95. For Krivajevići, sources suggest the April 1995 RS paint is the inconsistent one. It is recorded for a possible later repaint and is not a calibration lever now.
+- **Re-pinned on this source:** baseline manifest (8 hashes from `__w188_n40`) and structural fingerprint `bc629e89a585dfde`. Strict health PASS; floors 694/674/668/641 are all met with large margins; enclave guard intact.
+- **These pins supersede the 2026-11-04 handover re-pin below.**
+- **The Farz P-A receipt defect recorded there is STILL OPEN and is carried forward, not accepted:**
+  - on n40, Farz P1 is 4/4: all four Ozren cells are RBiH by w188;
+  - P-B passes;
+  - P-A finds 0/4 authored Farz AARs. This is an attribution/telemetry defect (the AARs carry no `army_hq_telemetry`), not a territorial miss;
+  - `verify_checkpoints.cjs` still prints the guard as parked "until the October 1995 checkpoint". That checkpoint is now signed off, so this needs its own lane: restore the AAR linkage, then unpark `--farz-guard`.
+- Record: [RESULT.md](audits/20261105_live_jan1993/attribution/RESULT.md) (every lever, its measured run, and the rejected alternatives).
+
 **LIVE January 1993 after the player-staff prestage fix — 2026-11-05 (evidence only; NOT adopted):**
 - Engine fix: authored prestage marches and queued-head reservations now follow `selectStaffControlledFactions`. They previously skipped every player faction; now they skip only a manual (autonomy 0) player.
 - Live production autonomy: RBiH **698** (unchanged), RS **701** (was 698), HRHB **703** (unchanged). The no-player branches score 702 before and after.

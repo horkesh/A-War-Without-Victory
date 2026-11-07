@@ -52,6 +52,10 @@ const KONJIC_STAGING = 'op:konjic:konjic_2';
 const KONJIC_OBJECTIVES: readonly string[] = [
     'op:konjic:bijela_2',
     'op:konjic:glavaticevo_2',
+    // Calibration assumption (apr1995/oct1995): Ljuta, south of Glavaticevo on the
+    // same Borci-Glavaticevo line, is painted RS through apr1994 and RBiH from apr1995.
+    // Its capture in this offensive is a model placement; the date is not sourced.
+    'op:konjic:ljuta',
 ];
 const KONJIC_READINESS_FLOOR = 0.36;
 const KONJIC_AXIS_COORDINATION_FLOOR = 0.35;
@@ -136,17 +140,23 @@ const DONJI_VAKUF_STAGING_ANCHORS: readonly string[] = [
     DONJI_VAKUF_STAGING_KOPCIC,
 ];
 
+// Calibration 2026-11-06: Oborci (adj donji_vakuf_2 and babin_potok_2) moved from tenth to
+// third, and Korenici + Jemanlici moved to a parallel 707th axis (below). As the tail of a
+// ten-objective serial axis they fell at t186-188 and missed October 1995 when it ran late.
 const DONJI_VAKUF_OBJECTIVES: readonly string[] = [
     'op:donji_vakuf:komar_2',
     'op:donji_vakuf:donji_vakuf_2',
+    'op:donji_vakuf:oborci_2',
     'op:donji_vakuf:babin_potok_2',
     'op:donji_vakuf:kutanja',
     'op:donji_vakuf:torlakovac_2',
     'op:donji_vakuf:pribraca_2',
     'op:donji_vakuf:prusac_2',
-    'op:donji_vakuf:jemanlici',
-    'op:donji_vakuf:korenici',
-    'op:donji_vakuf:oborci_2',
+];
+
+const DONJI_VAKUF_EAST_OBJECTIVES: readonly string[] = [
+    'op:donji_vakuf:korenici',  // adj donji_vakuf_2 ✓
+    'op:donji_vakuf:jemanlici', // adj donji_vakuf_2 + korenici ✓
 ];
 
 const DONJI_VAKUF_READINESS_FLOOR = 0.36;
@@ -326,6 +336,37 @@ const DONJI_VAKUF_AXES: readonly OpportunityAxisDef[] = [
         objectives: DONJI_VAKUF_OBJECTIVES,
         staging_osid: DONJI_VAKUF_STAGING_TURBE,
     },
+    {
+        // MODELED allocation (calibration 2026-11-06): the 707th detaches once the Komar
+        // line holds Donji Vakuf town. It does not claim the 707th took these villages.
+        axis_id: 'donji_vakuf_east_707th',
+        name: 'Donji Vakuf East (707th handoff)',
+        corps: DONJI_VAKUF_PRIMARY_CORPS,
+        brigades: [],
+        objectives: DONJI_VAKUF_EAST_OBJECTIVES,
+        staging_osid: 'op:donji_vakuf:donji_vakuf_2',
+        preserve_objective_sequence: true,
+        phase_gate: {
+            main_axis_id: 'donji_vakuf_komar_line',
+            requires_operation_captures: ['op:donji_vakuf:donji_vakuf_2'],
+            handoff: {
+                brigade_id: 'arbih_707th_slavna_mountain' as FormationId,
+                source_axis_id: 'donji_vakuf_komar_line',
+            },
+        },
+    },
+    {
+        // Calibration assumption (oct1995): Varošluk, removed from the March ridge axis by
+        // owner approval (painted RS at apr1995), is painted RBiH at oct1995. It is placed in
+        // the September 1995 Donji Vakuf advance, which takes the adjacent Komar line. The
+        // 737th held the Paklarevo shoulder after Domet-1. Exact date and actor are not sourced.
+        axis_id: 'donji_vakuf_varosluk',
+        name: 'Paklarevo - Varošluk',
+        corps: DONJI_VAKUF_PRIMARY_CORPS,
+        brigades: ['arbih_737th_muslim_light' as FormationId],
+        objectives: ['op:travnik:varosluk'],
+        staging_osid: 'op:travnik:paklarevo',
+    },
 ];
 
 // 2026-05-22 Wave 7 cascade unblock: brigade pool widened from 4 → 6 brigades.
@@ -502,7 +543,7 @@ const weatherSeasonVlasic: AxisPredicate = (_state, turn) => {
 // MODELED allocation, not an attested historical order. The retained trace has
 // the ridge's first Paklarevo fall at155 with nine attackers and no force
 // shortage; the published profile had already taken Paklarevo at113 through a
-// generated operation. This one-turn local model tests whether the existing
+// generated operation. This bounded local model tests whether the existing
 // supplied 3rd Corps trio can deliver the same target at the first fresh
 // post-exhaustion eligibility, without reserving them earlier or changing any
 // force, supply, intel or combat rule.
@@ -527,10 +568,27 @@ const PAKLAREVO_MODEL_AXES: readonly OpportunityAxisDef[] = [{
     staging_osid: PAKLAREVO_MODEL_STAGING,
 }];
 
+// 2026-11-06 re-timing (calibration assumption, not a sourced date). The old
+// single turn 123 never fired: Operacija Ihlas (123-128) and Sjena (128-133)
+// held the 712th. 139 is the last turn before Operacija Slap claims the 712th at
+// 140 (measured: first eligible at 139, Paklarevo falls 142 = 19-25 Dec 1994).
+// Narrowed from 133-139 to 139 after the camps rebalance merge: the 3rd Corps
+// became eligible at 137, opened before the 770th reached Turbe, and the 712th's
+// lone attacks were repulsed (188w n43). Opening at 139 restores the joint attack.
+//
+// Why Gornje Krcevine needs this: the COHA exception admits Operation Vlasic
+// Ridge at receipt 155 only, and its serial axis can take one objective per
+// week. Starting from an RS Paklarevo it takes Paklarevo at 155 and only the
+// 17th is in Paklarevo at 156; its lone attack is morale-absorbed and the rest
+// of the group arrives at 158, so Gornje Krcevine waits for COHA expiry (161).
+// With Paklarevo already held, Vlasic planning stages the group INTO Paklarevo
+// and the 155 opening takes Gornje Krcevine (Vitovlje) in the Domet-1 week.
+const PAKLAREVO_MODEL_FIRST_TURN = 139;
+const PAKLAREVO_MODEL_LAST_TURN = 139;
 const dateWindowPaklarevoModel: AxisPredicate = (_state, turn) => {
-    if (turn < 123) return { green: false, reason: 'Paklarevo local model window not yet open' };
-    if (turn > 123) return { green: false, reason: 'Paklarevo local model window has closed' };
-    return { green: true, reason: 'within the single turn 123 Paklarevo local model window' };
+    if (turn < PAKLAREVO_MODEL_FIRST_TURN) return { green: false, reason: 'Paklarevo local model window not yet open' };
+    if (turn > PAKLAREVO_MODEL_LAST_TURN) return { green: false, reason: 'Paklarevo local model window has closed' };
+    return { green: true, reason: 'within the turn-139 Paklarevo local model window' };
 };
 
 const stagingAccessPaklarevoModel: AxisPredicate = (state) => {
@@ -627,7 +685,7 @@ const stagingAccessDonjiVakuf: AxisPredicate = (state) => {
 
 const enemyWeaknessDonjiVakuf: AxisPredicate = (state) => {
     let enemyHeld = 0;
-    for (const osid of DONJI_VAKUF_OBJECTIVES) {
+    for (const osid of [...DONJI_VAKUF_OBJECTIVES, ...DONJI_VAKUF_EAST_OBJECTIVES]) {
         const ctrl = getPoliticalControllerOSID(state, osid, undefined);
         if (ctrl === 'RS') enemyHeld++;
     }
@@ -1198,6 +1256,96 @@ export const KONJIC_SEPTEMBER_94_OPPORTUNITY: OperationOpportunityDef = {
     staff_recommendation: 'approve',
 };
 
+// Calibration assumption (oct1995): Sitnik and Golubići are painted RS through apr1995
+// and RBiH at oct1995, and no other operation targets them. This is a bounded model of the
+// 4th Corps' summer 1995 pressure on the Treskavica approaches (the June 1995 ARBiH
+// offensive window), not an attested operation, date or roster. The 4th Muslim already
+// probes Sitnik from Bijela; the 443rd takes Ljuta in the September 1994 Konjic offensive.
+// It is a catalog opportunity, not a pre-planned op, because a pre-planned op reserves its
+// named brigades from turn 0 (getReservedPrePlannedBrigadeIds), which moved two Brčko cells
+// at t105-108 when measured. Control changes only through ordinary combat.
+const TRESKAVICA_STAGING = 'op:konjic:ljuta';
+const TRESKAVICA_OBJECTIVES: readonly string[] = ['op:konjic:sitnik', 'op:kalinovik:golubici_2'];
+
+const TRESKAVICA_AXES: readonly OpportunityAxisDef[] = [
+    {
+        axis_id: 'treskavica_sitnik',
+        name: 'Treskavica Sitnik',
+        corps: KONJIC_PRIMARY_CORPS,
+        brigades: ['arbih_4th_muslim_light' as FormationId],
+        objectives: ['op:konjic:sitnik'],
+        staging_osid: 'op:konjic:bijela_2',
+    },
+    {
+        axis_id: 'treskavica_golubici',
+        name: 'Treskavica Golubići',
+        corps: KONJIC_PRIMARY_CORPS,
+        brigades: ['arbih_443rd_mountain' as FormationId],
+        objectives: ['op:kalinovik:golubici_2'],
+        staging_osid: TRESKAVICA_STAGING,
+    },
+];
+
+const dateWindowTreskavica: AxisPredicate = (_state, turn) => {
+    if (turn < 167) return { green: false, reason: 'June 1995 Treskavica window not yet open' };
+    if (turn > 175) return { green: false, reason: 'summer 1995 Treskavica window has closed' };
+    return { green: true, reason: 'within the June-July 1995 Treskavica window' };
+};
+
+const stagingAccessTreskavica: AxisPredicate = (state) => (
+    getPoliticalControllerOSID(state, TRESKAVICA_STAGING, undefined) === 'RBiH'
+        ? { green: true, reason: 'Ljuta assembly area is RBiH-held' }
+        : { green: false, reason: 'Ljuta assembly area is not RBiH-held' }
+);
+
+const enemyWeaknessTreskavica: AxisPredicate = (state) => (
+    TRESKAVICA_OBJECTIVES.some((osid) => getPoliticalControllerOSID(state, osid, undefined) === 'RS')
+        ? { green: true, reason: 'Treskavica approach objectives remain in enemy hands' }
+        : { green: false, reason: 'no Treskavica approach objectives remain in enemy hands' }
+);
+
+export const TRESKAVICA_95_OPPORTUNITY: OperationOpportunityDef = {
+    opportunity_id: 'treskavica_95',
+    name: 'Treskavica 95 (Model)',
+    tier: 'T1',
+    faction: 'RBiH',
+    primary_corps: KONJIC_PRIMARY_CORPS,
+    family: 'central_bosnia_vlasic',
+    axes: TRESKAVICA_AXES,
+    staging_osid: TRESKAVICA_STAGING,
+    planning_duration: 2,
+    citations: [
+        'Model assumption only: painted RS at apr1995 and RBiH at oct1995 for Sitnik and Golubici; the June 1995 window, the two-brigade allocation and the axis split are calibration choices, not sourced facts',
+    ],
+    historical_exit_class: 'partial_success',
+    prerequisites: {
+        date_window: 'required',
+        political_authorization: 'n_a',
+        corps_readiness: 'required',
+        logistics: 'optional',
+        staging_access: 'required',
+        weather_season: 'optional',
+        commander_confidence: 'optional',
+        enemy_weakness: 'required',
+        alliance_context: 'required',
+        force_quality: 'optional',
+        min_optional_axes: 2,
+    },
+    evaluators: {
+        date_window: dateWindowTreskavica,
+        political_authorization: alwaysGreen,
+        corps_readiness: corpsReadinessKonjic,
+        logistics: logisticsKonjic,
+        staging_access: stagingAccessTreskavica,
+        weather_season: weatherSeasonKonjic,
+        commander_confidence: commanderConfidenceKonjic,
+        enemy_weakness: enemyWeaknessTreskavica,
+        alliance_context: allianceContextKonjic,
+        force_quality: forceQualityKonjic,
+    },
+    staff_recommendation: 'approve',
+};
+
 // ═══════════════════════════════════════════════════════════════════════════
 // KUPRES_PHASE_2_94 — Operation Cincar Phase 2 / Kupres Town (Nov 1994)
 //
@@ -1514,4 +1662,5 @@ export const CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES: readonly OperationOpportunityD
     DONJI_VAKUF_95_OPPORTUNITY,
     KONJIC_SEPTEMBER_94_OPPORTUNITY,
     PAKLAREVO_LOCAL_94_MODEL_OPPORTUNITY,
+    TRESKAVICA_95_OPPORTUNITY,
 ];

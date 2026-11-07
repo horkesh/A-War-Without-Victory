@@ -1938,7 +1938,36 @@ describe('evaluateArmyReserveAssignments', () => {
         expect(state.military.pending_reserve_requests).toHaveLength(1);
     });
 
-    it('leaves player faction requests in pending list (not auto-assigned)', () => {
+    it('auto-assigns the player faction request when its staff runs the faction (autonomy >= 1)', () => {
+        const adj = chainAdj(10);
+        const elite = makeElite('rs_1st_guards', 'RS', 'op:mun:o1' as Osid);
+        const corpsHq = {
+            id: 'vrs_2nd_krajina', faction: 'RS', kind: 'corps_hq', status: 'active',
+            corps_id: 'vrs_2nd_krajina', location_osid: 'op:mun:o3', home_osid: 'op:mun:o3', personnel: 1000,
+        } as unknown as FormationState;
+        const state = makeState({
+            formations: { rs_1st_guards: elite, vrs_2nd_krajina: corpsHq },
+            corps_front_sectors: {
+                sec_a: { corps_id: 'vrs_2nd_krajina', territory_osids: ['op:mun:o3'], assigned_brigade_ids: [], reserve_brigade_ids: [] },
+            },
+            pending_reserve_requests: [{
+                corps_id: 'vrs_2nd_krajina', faction: 'RS', reason: 'offensive_support', priority: 70,
+                raw_priority: 70, travel_hops: 2, turn_requested: 10, description: 'test', suggested_brigade_id: 'rs_1st_guards',
+            }],
+            player_faction: 'RS',
+            turn: 10,
+        });
+        (state.meta as unknown as { autonomy_level: number }).autonomy_level = 2;
+        (state as unknown as { factions: Array<{ id: string }> }).factions = [{ id: 'HRHB' }, { id: 'RBiH' }, { id: 'RS' }];
+        state.political.political_controllers = { 'op:mun:o1': 'RS', 'op:mun:o2': 'RS', 'op:mun:o3': 'RS' } as any;
+
+        evaluateArmyReserveAssignments(state, adj);
+
+        expect(state.military.formations!['rs_1st_guards'].elite_loan_state!.on_loan).toBe(true);
+        expect(state.military.pending_reserve_requests).toHaveLength(0);
+    });
+
+    it('leaves a manual (autonomy 0) player faction request pending (not auto-assigned)', () => {
         const adj = chainAdj(5);
         const elite = makeElite('arbih_guards', 'RBiH', 'op:mun:o0');
 
@@ -2954,8 +2983,8 @@ describe('COHA reserve admission invariant', () => {
         expect(guard.elite_loan_state!.on_loan).toBe(true);
     });
 
-    it('leaves auto-join unchanged outside the receipt-155 COHA window', () => {
-        const { state, vlasic, guard } = makeVlasicReserveState(156);
+    it('leaves auto-join unchanged outside the receipt 155-156 COHA window', () => {
+        const { state, vlasic, guard } = makeVlasicReserveState(157);
         expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(false);
 
         expect(deployEliteLoan(
@@ -2964,7 +2993,7 @@ describe('COHA reserve admission invariant', () => {
             'arbih_3rd_corps',
             'offensive_support',
             1,
-            156,
+            157,
         )).toBe(true);
 
         expect(vlasic.participating_brigades).toContain('arbih_guards_brigade');

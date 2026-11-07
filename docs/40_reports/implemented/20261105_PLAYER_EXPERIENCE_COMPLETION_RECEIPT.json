@@ -1,0 +1,452 @@
+{
+  "schema": "awwv.renderer-experience-receipt.v1",
+  "date": "2026-11-05",
+  "branch": "codex/player-experience-completion",
+  "base": "f0d77121cdc0a7fa0ee127230ad35fc71e54c21c",
+  "sourceHashes": {
+    "src/ui/map/assets/audio/compat/game_over.ogg": "e6408e27b1f26126a53b3c8e39ab586b14c02ced74e4849490d3e11f06507aae",
+    "src/ui/map/assets/audio/designed/peace_plan_offered.ogg": "3cef69116a121fabc1b40f558f573b79f221866a4e1fb74aa09efc88788b5ae0",
+    "src/ui/map/assets/audio/designed/turn_advance.ogg": "a52cda0155be546bd29ee7868e64fd71295e1a34bbc7bd3066c73cb5b7904594",
+    "src/ui/map/assets/audio/designed/turn_complete.ogg": "555f01bcfedf73e585a1b3a55f60387732b05ecbefd8570df00f163c0caf9222",
+    "src/ui/map/assets/audio/designed/turn_review_open.ogg": "74aa1b7eadae18648e74814b417ae7c1bc375c415067898e2191a568d96e1ae0",
+    "src/ui/map/assets/audio/designed/ui_click.ogg": "7cd7996547ac2f0a01f9f701dea4e2bf1741bf28d2dfddd08d9fe34056396999",
+    "src/ui/map/assets/audio/designed/ui_close_panel.ogg": "6715afb341a0c912814b9cdf2599f830177952a616a5f4695c3ed40c0a67011d",
+    "src/ui/map/assets/audio/designed/ui_hover.ogg": "80a5fed7a8ffb09c4a95a65b72d66fbeb2e52685f7f5828e87a8784589ef73e6",
+    "src/ui/map/assets/audio/designed/ui_open_panel.ogg": "3d3fe96c511d97102035821fbe91a57ca702e6f8d751660f4477bf539bfb8097",
+    "src/ui/map/assets/audio/music/menu_original.ogg": "5e5381ef95946e39f2ed093120f9a8906e83548fd0e8c514df835b79ebf22cf0",
+    "tools/audio/generate_original_soundscape.py": "17a17d11df405957e7461d735057b2ff47186c575f0901d9855d0fa4de8b1c79",
+    "tools/audio/remux_game_over.py": "52b4ec8161b2434fe6fafa7c55090a43de1a9ccbd8875f6fd1a3fb4724e3f757",
+    "tools/audio/test_game_over_compat.py": "ba428637b3446e6b38eb625140655a12758b23f60c349e3289bcd64b1519c330",
+    "tools/audio/test_original_soundscape.py": "41837f0c9691cb99f28115ba3138c0f48c4f78d8e8236682727d3c2f1001491a",
+    "tools/ui/player_experience_browser_proof.mjs": "af68c9c8cf4909e6bf01bee207a6edabfd3804374751b61d146b2ec7e03d9fc5",
+    "src/ui/map/audio/audioAssets.ts": "0e68ab91f167bc5993f17030bf4658b711472d997a950158e7d2edeb6b49bd11",
+    "src/ui/map/audio/audio_engine.ts": "cc888d3dac46972a73b98283ef2ad65f5914077bfc233cde10f35fa20b746ecc",
+    "src/ui/map/audio/audio_preferences.ts": "adea356d3cf9598601b4d8eb893ee1b1a66097d773fdddbcb1dbb742a8e88b3e",
+    "src/ui/map/audio/sound_manifest.ts": "87375a4ff1d936f5e16e3fe7a34c71d3324e9df8e5ff0694b9d980f2cd25730a",
+    "src/ui/map/components/AudioSurfaceBedController.tsx": "9356c704a544f27de480810ad9026dec19094bb62f5a3ea8e67619d5dea615a5",
+    "src/ui/map/components/GameOverModal.tsx": "32902c89e537802905c256dc19388473941b847e34d58e80ee8750116e68b36d",
+    "src/ui/map/components/SettingsScreen.tsx": "5456ea5d222f845ba1f451ebe4dde80885115f1948759d0b3118d5015004d3b0",
+    "src/ui/map/components/onboarding/OnboardingOverlay.tsx": "39bb2e780fb0894cf512baebff857522b346ec0f20ac390519f232ad6b2e8aac",
+    "src/ui/map/components/warroom/AdvanceTurnModal.tsx": "814d13acfdd9f21e7a4340ef9cf314addc5c77edf2d9905ff1288a780dd1c7e3",
+    "src/ui/map/i18n/messages.bcs.ts": "f34c55b9556ac54fc0609c0a716a3c2802233a8688340f722de455e6238a3856",
+    "src/ui/map/i18n/messages.en.ts": "51c0163ca4eb342dcccce65e8cf98e07e32b1f8fe76a3f2185e84b3152871bb5",
+    "tools/diagnostics/audio_asset_provenance.ts": "ef9ba40ed262b8dff91502e37f714f9832994c2d60b1f1c37a49f7f0d65632ba"
+  },
+  "checks": {
+    "baseline": {
+      "files": 12,
+      "tests": 67,
+      "exit": 0,
+      "path": "logs/player-experience-completion-20261105/baseline.log",
+      "limit": "Controls source baseline; assets changed concurrently"
+    },
+    "controls": {
+      "files": 18,
+      "tests": 121,
+      "exit": 0,
+      "path": "logs/player-experience-completion-20261105/controls-final-focused.log",
+      "filesRun": [
+        "tests/ui/audio_ambient_floor.test.ts",
+        "tests/ui/onboarding_track_d_consolidation.test.ts",
+        "tests/ui/audio_controls_reliability.test.ts",
+        "tests/ui/settings_audio_preferences.test.ts",
+        "tests/ui/onboarding_automount_edge_cases.test.ts",
+        "tests/ui/audio_action_hooks.test.ts",
+        "tests/ui/onboarding_persistence_replacement.test.ts",
+        "tests/ui/game_over_i18n.test.ts",
+        "tests/modal_focus_eligibility.test.ts",
+        "tests/ui/audio_hook_points.test.ts",
+        "tests/ui/audio_cue_observer.test.ts",
+        "tests/ui/settings_screen_shell_cleanup.test.ts",
+        "tests/ui/settings_screen_i18n.test.ts",
+        "tests/ui/app_global_shortcut_focus_contract.test.ts",
+        "tests/ui/pre_advance_command_review.test.ts",
+        "tests/ui/audio_preferences.test.ts",
+        "tests/ui/audio_event_adapter.test.ts",
+        "tests/ui/audio_bus.test.ts"
+      ]
+    },
+    "typeSelectors": {
+      "tests": 2,
+      "exit": 0,
+      "path": "logs/player-experience-completion-20261105/controls-selector-correction.log"
+    },
+    "reviewCorrection": {
+      "files": 4,
+      "tests": 49,
+      "exit": 0,
+      "path": "logs/player-experience-completion-20261105/review-stop-music-green.log",
+      "red": "logs/player-experience-completion-20261105/review-stop-music-red.log"
+    },
+    "assetInitial": {
+      "files": 3,
+      "tests": 20,
+      "exit": 0,
+      "path": "logs/player-experience-completion-20261105/audio-preview/vitest-assets.log"
+    },
+    "musicV2": {
+      "tests": 1,
+      "exit": 0,
+      "path": "logs/player-experience-completion-20261105/audio-preview/music-v2-python.log"
+    },
+    "compat": {
+      "path": "logs/player-experience-completion-20261105/audio-preview/game-over-compat-corrected.log",
+      "browser": "logs/player-experience-completion-20261105/game-over-compat-browser.json",
+      "limit": "Encoded packets preserved;128 additional decoded tail samples documented",
+      "provenance": {
+        "tests": 8,
+        "exit": 0,
+        "path": "logs/player-experience-completion-20261105/audio-preview/game-over-provenance-corrected.log"
+      },
+      "correctedTest": {
+        "tests": 1,
+        "exit": 0,
+        "path": "logs/player-experience-completion-20261105/audio-preview/game-over-compat-corrected.log"
+      }
+    },
+    "typecheck": {
+      "exit": 0,
+      "path": "logs/player-experience-completion-20261105/typecheck-final.log"
+    },
+    "lint": {
+      "exit": 0,
+      "path": "logs/player-experience-completion-20261105/lint.log"
+    },
+    "build": {
+      "exit": 0,
+      "path": "logs/player-experience-completion-20261105/build-final.log",
+      "inventory": "logs/player-experience-completion-20261105/build-inventory.json"
+    },
+    "chunks": {
+      "exit": 0,
+      "path": "logs/player-experience-completion-20261105/chunks-final.log"
+    },
+    "browser": {
+      "exit": 0,
+      "path": "logs/player-experience-completion-20261105/browser-05/result.json",
+      "reusesCompletedControlsFrom": "logs/player-experience-completion-20261105/browser-03/result.json",
+      "currentAssetCount": 21
+    },
+    "preservation": {
+      "path": "logs/player-experience-completion-20261105/preservation.json",
+      "all20OriginalAssetsExact": true,
+      "protectedPathsUnchanged": true
+    },
+    "preCommit": {
+      "exit": 0,
+      "path": "logs/player-experience-completion-20261105/pre-commit.log",
+      "method": "Tracked .husky/pre-commit invoked directly because isolated ignored Husky shim absent; no shared hook configuration changed"
+    },
+    "finalScope": {
+      "exit": 0,
+      "path": "logs/player-experience-completion-20261105/final-scope.json",
+      "stagedFiles": 53,
+      "sourceHashesVerified": 27,
+      "protectedPathsUnchanged": true
+    }
+  },
+  "independentReview": {
+    "status": "GO",
+    "path": "logs/player-experience-completion-20261105/independent-review.md",
+    "sha256": "54dd1a28f1c289dea643c6401bc3427fbbe071f86f425a0e9bcbcd593b0d551c",
+    "openActionableFindings": 0
+  },
+  "limits": [
+    "No simulation/campaign, save/IPC behavior, calibration or authored-data changes",
+    "No packaged/native/offline release qualification",
+    "No human listening, sensitivity/design acceptance or R7 closure",
+    "No merge/push/release"
+  ],
+  "preview": {
+    "musicV2": "logs/player-experience-completion-20261105/audio-preview/menu_theme_v2.mp3",
+    "effects": "logs/player-experience-completion-20261105/audio-preview/effects_reel.mp3"
+  },
+  "sourceHashConvention": "Text normalized to LF; OGG bytes exact",
+  "provenanceHash": "05b609ffc1e471402d1816fde14db4bd2000466d402828f86f19ee9a2b944a81",
+  "openingMusicIntegration": {
+    "date": "2026-11-05",
+    "base": "f3bfb8ee0",
+    "ownerAuthorizedRuntimeAdoption": true,
+    "behavior": "35s opening once for eligible opening session; natural end to calm125s loop; keep started opening through room changes, skip unheard opening on menu exit. Preserve default music off, gesture gate, global mute/master/music controls and existing all-surface scope.",
+    "music": [
+      {
+        "file": "src/ui/map/assets/audio/music/what_remains_of_home.ogg",
+        "bytes": 2410733,
+        "sha256": "03e41ab40866925750f956a6d33a73e07846d33a4cbced71c213a03553b2d81b",
+        "emitted": [
+          {
+            "file": "dist/tactical-map/assets/what_remains_of_home-CFrL-rLW.ogg",
+            "sha256": "03e41ab40866925750f956a6d33a73e07846d33a4cbced71c213a03553b2d81b"
+          }
+        ]
+      },
+      {
+        "file": "src/ui/map/assets/audio/music/what_remains_of_home_opening.ogg",
+        "bytes": 619144,
+        "sha256": "853e1fe7d082e96096960245794307a7b85cb63d4a8d07591cbd996ec114e085",
+        "emitted": [
+          {
+            "file": "dist/tactical-map/assets/what_remains_of_home_opening-CBPeigGT.ogg",
+            "sha256": "853e1fe7d082e96096960245794307a7b85cb63d4a8d07591cbd996ec114e085"
+          }
+        ]
+      }
+    ],
+    "originalAudioFilesPreserved": 30,
+    "tests": {
+      "distinctFiles": 7,
+      "distinctPassing": 76,
+      "fresh": {
+        "files": 3,
+        "passing": 32,
+        "evidence": "logs/player-experience-completion-20261105/opening-integration/focused03.log"
+      },
+      "reusedUnaffected": {
+        "files": 4,
+        "passing": 44,
+        "evidence": "logs/player-experience-completion-20261105/opening-integration/focused01.log"
+      },
+      "retainedFailures": "red*.log and focused01.log; asset expectations and missing behavior corrected, targeted verification retained"
+    },
+    "commands": [
+      {
+        "evidence": "logs/player-experience-completion-20261105/opening-integration/typecheck01.log",
+        "exit": 0,
+        "sha256": "025017ea5dc29eb540825da9ff5c7b5c7d6db81cfd98633b026692edf3831584"
+      },
+      {
+        "evidence": "logs/player-experience-completion-20261105/opening-integration/lint01.log",
+        "exit": 0,
+        "sha256": "87e68f674be77635a7cfc3178b5b0858cba8097cc25e8fee6f889fa3c3e5a78f"
+      },
+      {
+        "evidence": "logs/player-experience-completion-20261105/opening-integration/build01.log",
+        "exit": 0,
+        "sha256": "0e7eedcd5a9707f8bcc08d8df1bb302c31d8e636d7d7b74da21c67c907e83e31"
+      },
+      {
+        "evidence": "logs/player-experience-completion-20261105/opening-integration/chunks01.log",
+        "exit": 0,
+        "sha256": "d54ca0903feef0ebb1791bcd1fbc6355e97fdab471c1d20b47d47dd233869550"
+      },
+      {
+        "evidence": "logs/player-experience-completion-20261105/opening-integration/precommit01.log",
+        "exit": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "native": {
+      "evidence": "logs/player-experience-completion-20261105/opening-integration/native01/receipt.json",
+      "sha256": "8176834c4edaf18ab6ee714b5781a90b7f1e384ed33092610f692a7a5d08038a",
+      "checks": [
+        "Own built JS, isolated native userData/sessionData/save roots",
+        "Fresh profile no pre-gesture playback; music off despite real gestures",
+        "35s non-loop opening progresses across gestures/level changes; mute pauses and resumes",
+        "Actual natural ended event hands off once to calm125s loop, no overlap",
+        "Music off/on resumes calm and does not replay opening",
+        "Persisted opt-in still gesture gated; new app session starts new opening",
+        "Served local music bytes match build; no remote requests or unhandled page errors"
+      ],
+      "observedFullOpening": true,
+      "calmLoopConfigured": true,
+      "observedFullCalmLoopCycle": false,
+      "productionPlayback": true,
+      "previewSoundtrackInjected": false,
+      "campaignInitializations": 0,
+      "advances": 0
+    },
+    "independentReview": {
+      "status": "GO",
+      "evidence": "logs/player-experience-completion-20261105/opening-integration/independent-review.md",
+      "sha256": "186216a54220f3e6bf20dd7707cfa973021335e38611fc0622dca576a50ddb3b",
+      "openActionableFindings": 0
+    },
+    "sourceHashes": {
+      ".gitattributes": "bafc6ef10e31315b562f47746d6156a99b96b5c8dc4676c612bf62406f0cf472",
+      "src/ui/map/audio/audioAssets.ts": "79690590fe7fbc87f9263508210e2a967949473cebf56cfafc0ee8aba891f2ab",
+      "src/ui/map/audio/audio_engine.ts": "b306f9d74f162a0921e01c81e3a4cd49d586461047a1de5261ee2c01a12d1f4f",
+      "src/ui/map/audio/sound_manifest.ts": "f32465eca1bd5f0112771eb92ae7ee62b6033eaa3f2191a833739e6116d87293",
+      "src/ui/map/components/AudioSurfaceBedController.tsx": "6f053bd4cae695725a36863bfa4e4da2108f24e20d2b8bb099872a1832ef575c",
+      "tests/ui/audio_opening_sequence.test.ts": "7ff4a5207028e08ecec4f880d929f296739d658e48e9f1219465a3d4403b522c"
+    },
+    "provenanceHash": "fe60ca6a28f5d87032d25bdbcc4d38ec14bf7b8f55093c238113a151576664c4",
+    "limits": [
+      "Renderer-only adoption; no simulation/state/save/IPC/calibration/data/dependency changes",
+      "Native title/menu development build; no release package qualification, full125s loop observation, broad human sensitivity/global R7 acceptance, merge/push/release",
+      "All earlier receipt sections retain their historical scope; this addendum establishes only the new integration evidence"
+    ]
+  },
+  "campaignRotationIntegration": {
+    "date": "2026-11-06",
+    "base": "f91e9eaf8d8e03a2fd1121a8e3ee2b3c2e747eb9",
+    "ownerAuthorized": true,
+    "approvedAudition": "docs/audio/CAMPAIGN_SUITE_TWO_AUDITION.json",
+    "policy": "Menu opening/calm retained; campaign eight-track shuffled bag, all eight before repeats, no adjacent cycle repeat. Audible opening finishes before campaign; unheard opening skipped; room changes/gestures/mute resume preserve campaign playback. Random order is renderer-only and never persisted in canonical state.",
+    "assets": [
+      {
+        "id": "country",
+        "title": "A Country Before Dawn",
+        "duration": 201.39608739837396,
+        "source": "logs\\player-experience-completion-20261105\\campaign-suite-two\\country-attempt01\\a_country_before_dawn.ogg",
+        "bundled": "src/ui/map/assets/audio/music/a_country_before_dawn.ogg",
+        "sha256": "3387043565fb58a1da81863ef24c0a7319f23e2cad2a60ca43464d8dd779c235",
+        "emittedFile": "dist/tactical-map/assets/a_country_before_dawn-PtkU-Fjj.ogg"
+      },
+      {
+        "id": "lines",
+        "title": "Lines on Paper",
+        "duration": 190.76089222430676,
+        "source": "logs\\player-experience-completion-20261105\\campaign-suite-two\\lines-attempt01\\lines_on_paper.ogg",
+        "bundled": "src/ui/map/assets/audio/music/lines_on_paper.ogg",
+        "sha256": "380f076131b203930303a51f9c2135b80cbe5fa8837c7c9def9295ac26d8ae23",
+        "emittedFile": "dist/tactical-map/assets/lines_on_paper-BwYquPDd.ogg"
+      },
+      {
+        "id": "winter",
+        "title": "The Long Winter",
+        "duration": 197.14024390243884,
+        "source": "logs\\player-experience-completion-20261105\\campaign-suite-two\\winter-attempt01\\the_long_winter.ogg",
+        "bundled": "src/ui/map/assets/audio/music/the_long_winter.ogg",
+        "sha256": "ef81e0498335f18e5189d6b6f10abeb3d0373853cbc60177093f14a8ffebfa8e",
+        "emittedFile": "dist/tactical-map/assets/the_long_winter-CRQ6dHRh.ogg"
+      },
+      {
+        "id": "radio",
+        "title": "No Answer on the Radio",
+        "duration": 194.828708613173,
+        "source": "logs\\player-experience-completion-20261105\\campaign-suite-two\\radio-attempt01\\no_answer_on_the_radio.ogg",
+        "bundled": "src/ui/map/assets/audio/music/no_answer_on_the_radio.ogg",
+        "sha256": "0e16b362e1d54d75ca1bff44dad423be2c907f534bdb106410e697d78d61e05f",
+        "emittedFile": "dist/tactical-map/assets/no_answer_on_the_radio-B2HS6RCd.ogg"
+      },
+      {
+        "id": "life",
+        "title": "The Life We Remember",
+        "duration": 201.39608739837396,
+        "source": "logs\\player-experience-completion-20261105\\campaign-suite-two\\life-attempt01\\the_life_we_remember.ogg",
+        "bundled": "src/ui/map/assets/audio/music/the_life_we_remember.ogg",
+        "sha256": "c3555b4f837fb7c9b8f1ead97aa65b4b4c098583cce4d2abc1d6f4722fe81f10",
+        "emittedFile": "dist/tactical-map/assets/the_life_we_remember-Bcedhsz3.ogg"
+      },
+      {
+        "id": "table",
+        "title": "A Table for Strangers",
+        "duration": 197.9397634885441,
+        "source": "logs\\player-experience-completion-20261105\\campaign-suite-two\\table-attempt01\\a_table_for_strangers.ogg",
+        "bundled": "src/ui/map/assets/audio/music/a_table_for_strangers.ogg",
+        "sha256": "b38961a8c3fce96f5fd2bd0aaf27138327c7a93603ec7279cf6ba6ba7546dd22",
+        "emittedFile": "dist/tactical-map/assets/a_table_for_strangers-DZVdan5L.ogg"
+      },
+      {
+        "id": "maps",
+        "title": "What the Maps Cannot Show",
+        "duration": 225.16695702671305,
+        "source": "logs\\player-experience-completion-20261105\\campaign-suite-two\\maps-attempt01\\what_the_maps_cannot_show.ogg",
+        "bundled": "src/ui/map/assets/audio/music/what_the_maps_cannot_show.ogg",
+        "sha256": "11d07c1af9062c34539bdecd1bdb4c6543dbf389c92c42ca2990926b3111f2b3",
+        "emittedFile": "dist/tactical-map/assets/what_the_maps_cannot_show-1FRXKuTV.ogg"
+      },
+      {
+        "id": "after",
+        "title": "After the Guns",
+        "duration": 192.24757408864426,
+        "source": "logs\\player-experience-completion-20261105\\campaign-suite-two\\after-attempt01\\after_the_guns.ogg",
+        "bundled": "src/ui/map/assets/audio/music/after_the_guns.ogg",
+        "sha256": "24fc3b4109a8ef9b850aeaada9683021a088e6c3d02a31c3bc6705ced090ef6c",
+        "emittedFile": "dist/tactical-map/assets/after_the_guns-Bq18qlzC.ogg"
+      }
+    ],
+    "priorRuntimeAudioPreserved": 32,
+    "sourceHashes": {
+      "src/ui/map/audio/audio_engine.ts": "1e7036abf9c8fc76490339cad97831b6a141f959eff922d3a45bad7c7878cd17",
+      "src/ui/map/audio/audioAssets.ts": "486cf21ef08728e81698899337ebfa00d14f27119efc1b4da476649aabc9c989",
+      "src/ui/map/audio/sound_manifest.ts": "b869ce1f03c72df34c0475cd07b85143ac8f4910d89e32c5fcbe1e96686c481f",
+      "src/ui/map/audio/music_shuffle_bag.ts": "ff6b77b2cb8c84c9ec36a6708dc7739ee65e1dfd8b101c3ab9157fda6eff6514",
+      "src/ui/map/components/AudioSurfaceBedController.tsx": "15205149423e77e2c95e9d32689fb16ab0bcc59f9faf99d710346ab38c2e3afc"
+    },
+    "tests": {
+      "distinctFiles": 14,
+      "distinctPassing": 102,
+      "freshLifecycle": {
+        "files": 3,
+        "passing": 36,
+        "evidence": "logs/player-experience-completion-20261106/campaign-rotation/review-green05-queued-events.log"
+      },
+      "freshProvenanceAdoption": {
+        "files": 2,
+        "passing": 9,
+        "evidence": "logs/player-experience-completion-20261106/campaign-rotation/provenance-hygiene06.log"
+      },
+      "reusedUnaffected": {
+        "passing": 57,
+        "evidence": "logs/player-experience-completion-20261106/campaign-rotation/focused04.log"
+      },
+      "implementationReceipt": {
+        "path": "logs/player-experience-completion-20261106/campaign-rotation/implementation-focused-receipt.json",
+        "sha256": "e0d77b67832437adaa352a944fd9f05e7a743ae50f338e140d4715afac8f26e7"
+      },
+      "limits": "Combined distinct coverage, not a fresh all102 invocation. Original failures and review RED retained."
+    },
+    "staticBuild": [
+      {
+        "path": "logs/player-experience-completion-20261106/campaign-rotation/typecheck01.log",
+        "exit": 0,
+        "sha256": "025017ea5dc29eb540825da9ff5c7b5c7d6db81cfd98633b026692edf3831584"
+      },
+      {
+        "path": "logs/player-experience-completion-20261106/campaign-rotation/lint02.log",
+        "exit": 0,
+        "sha256": "87e68f674be77635a7cfc3178b5b0858cba8097cc25e8fee6f889fa3c3e5a78f"
+      },
+      {
+        "path": "logs/player-experience-completion-20261106/campaign-rotation/build01.log",
+        "exit": 0,
+        "sha256": "f5c700e6bb2cd064016e3e1b8adba350b032b30ec02cfd66e52a8c97883987d1"
+      },
+      {
+        "path": "logs/player-experience-completion-20261106/campaign-rotation/chunks01.log",
+        "exit": 0,
+        "sha256": "d54ca0903feef0ebb1791bcd1fbc6355e97fdab471c1d20b47d47dd233869550"
+      }
+    ],
+    "native": {
+      "path": "logs/player-experience-completion-20261106/campaign-rotation/native01/receipt.json",
+      "sha256": "f0b7ed400d1a50ae60083ac5555cbfd54aaa321a1b69ac4a9ac86b5b65905d01",
+      "checks": [
+        "Own built JS and explicit native profile/session/save roots",
+        "Fresh default music off, gesture prerequisite and real Settings selectors",
+        "Natural35s opening to calm menu; actual volume/global mute/resume position; no campaign media instantiated in menu",
+        "Actual faction/dossier/mode setup selectors reachable before campaign start",
+        "Real zero-turn campaign selects approved non-looping music, stops calm menu; trusted gestures preserve current track",
+        "One full approved campaign track naturally ends into a different approved track, no simultaneous music",
+        "All eight served bytes equal approved build assets; isolated save remains turn0; no remote requests/unhandled page errors"
+      ],
+      "campaignInitializations": 1,
+      "turn": 0,
+      "seeks": false,
+      "fakeEndedEvents": false,
+      "injectedSoundtrack": false,
+      "observedWholeCampaignTrack": "A Country Before Dawn",
+      "observedSuccessor": "A Table for Strangers",
+      "observedFullEightTrackCycle": false
+    },
+    "review": {
+      "status": "GO",
+      "path": "logs/player-experience-completion-20261106/campaign-rotation/independent-review.md",
+      "sha256": "15d8eb9744818c760a886243d055cfaabd3e27b0c4cc297d6e24390eda7cc0ac"
+    },
+    "protectedDiff": "",
+    "limits": [
+      "Existing music opt-in OFF and separate ambient OFF retained",
+      "Exact approved bytes; no remix, normalization or rendering; quiet Lines/Table measurements retained",
+      "No new player UI/i18n or hidden-state music triggers",
+      "Scoped development native proof; no package/full26min playlist/campaign/sensitivity/global acceptance or merge/push/release"
+    ],
+    "precommit": {
+      "path": "logs/player-experience-completion-20261106/campaign-rotation/precommit01.log",
+      "exit": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "method": "Tracked .husky/pre-commit invoked directly; shared hook configuration untouched"
+    }
+  }
+}

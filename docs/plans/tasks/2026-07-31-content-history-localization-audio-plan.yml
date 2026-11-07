@@ -9,17 +9,25 @@
 
 version: 2
 owning_plan: docs/plans/2026-07-31-content-history-localization-audio-plan.md
-# Refreshed from 90da78b: the reviewed ambience-only, default-off gate changed audio_engine.ts,
-# and a fresh filename-only registry/call-site sweep re-derived the current scope below over
-# eight source files. The sweep found AudioSurfaceBedController.tsx, which the old read list
-# omitted; it is included now. This refresh records scope review, not completed inventory work.
-base_commit: 662591ac708fb6cad1bedcb783cdc63004a45a47
+# Scope re-derived 2026-11-06 at 13f1bda2a, replacing the eight-file read set from
+# 662591ac708fb6cad1bedcb783cdc63004a45a47. A complete *.ts/*.tsx audio import/API
+# reference sweep found the GameOver and Onboarding cue hooks plus Settings,
+# preferences and telemetry preference readers. All thirteen source files are named below.
+# The later player-experience plan owns the delivered hook/control/music implementation:
+# docs/plans/2026-11-05-player-experience-completion-plan.md. This task remains OPEN for
+# a current exhaustive quoted inventory; the scope review does not claim that inventory,
+# human listening, offline runtime, or R7 acceptance is complete.
+# Base moved 2026-11-07 to fb293f9d4: of the thirteen named files only AdvanceTurnModal.tsx
+# changed since 13f1bda2a (PR #540 pause-before-combat: the modal hides while a decision is
+# pending). That change touches no audio call; the scope above stands.
+base_commit: fb293f9d4a3045b15a93b41153ececd391d401f2
 lane: R7
 gate: R7-AUDIO-CUE-WIRING
 
 not_delegable:
-  - "R7-AUDIO-HUMAN-ACCEPTANCE, in full. The plan requires a person to PLAY all 20 supplied files
-    and 3 ambient beds and judge them non-silent, non-clipped, and right in tone. No model of any
+  - "R7-AUDIO-HUMAN-ACCEPTANCE, in full. The current inventory has 30 supplied OGG files:
+    17 effects, 3 ambient beds and 10 music assets. Human listening must judge them
+    non-silent, non-clipped, and right in tone. No model of any
     size can listen, and no test encodes 'restrained'. The gate names its own receipt:
     logs/r7-english-readability/closeout-human-audio-listen.md."
   - "The four approval lenses — sensitivity, Design/Game Designer tone, License/provenance, and a
@@ -37,18 +45,22 @@ tasks:
     kind: extract
     status: open
     edit: []
-    # Every file in src/ that references the audio registry, found exhaustively rather than
-    # sampled. A truncated inventory is what produced four verified quotes from the wrong test
-    # on this project's first manifest; guard_truncated_search.sh now refuses that shape.
+    # Current registry/API references, including control and preference-export consumers.
+    # Keep the complete file list: sampling can omit a live cue hook.
     read:
       - src/ui/map/audio/audioAssets.ts
       - src/ui/map/audio/sound_manifest.ts
       - src/ui/map/audio/audio_engine.ts
       - src/ui/map/audio/audio_event_adapter.ts
+      - src/ui/map/audio/audio_preferences.ts
       - src/ui/map/components/AudioCueObserver.tsx
       - src/ui/map/components/AudioSurfaceBedController.tsx
       - src/ui/map/components/PeacePlanModal.tsx
+      - src/ui/map/components/GameOverModal.tsx
+      - src/ui/map/components/onboarding/OnboardingOverlay.tsx
+      - src/ui/map/components/SettingsScreen.tsx
       - src/ui/map/components/warroom/AdvanceTurnModal.tsx
+      - src/ui/map/services/telemetry/playtestEvidencePacket.ts
     change: >
       For every cue key defined in the registry, list every place it is referenced across the
       files given, with the file and a verbatim line. Mark each reference as REGISTRY (it appears
@@ -65,8 +77,8 @@ tasks:
     out_of_scope:
       - Wiring any cue, or editing any audio file or registry
       - Judging whether a cue should exist, or how it should sound
-      - The 20 asset files themselves; this task reads code, not audio
+      - The 30 asset files themselves; this task reads code, not audio
     why_delegable: >
-      Inventory over eight named files that fit the context together. The ledger records extract
+      Inventory over thirteen named files. The ledger records extract
       as the strongest mode. The gate needs exactly this evidence base before any disposition can
       be recorded, and a bounded static search already covered only half the cues.

@@ -308,6 +308,13 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 staging_osid: 'op:rogatica:stara_gora',
             },
             {
+                axis_id: 'kalesija_seher',
+                name: 'Kalesija Seher',
+                brigades: ['rs_1st_zvornik'],
+                objectives: ['op:kalesija:seher_2'],
+                staging_osid: 'op:zvornik:krizevici',
+            },
+            {
                 axis_id: 'srebrenica_ring',
                 name: 'Srebrenica Ring',
                 brigades: [
@@ -631,6 +638,13 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 objectives: ['op:pale:praca'],
                 staging_osid: 'op:pale:bulozi',
             },
+            {
+                axis_id: 'ilijas_krivajevici',
+                name: 'Ilijaš Krivajevići',
+                brigades: ['rs_ilijas_brigade'],
+                objectives: ['op:ilijas:krivajevici'],
+                staging_osid: 'op:ilijas:medojevici',
+            },
         ],
     },
     {
@@ -814,6 +828,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 brigades: ['rs_ajnie_brigade'],
                 objectives: [
                     'op:cajnice:batotici',
+                    'op:cajnice:miljeno_2',
                     'op:foca:brusna_2',
                     'op:gorazde:kolovarice',
                 ],
@@ -1170,6 +1185,18 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 // Supply-corrected coordination experiment: wait for both already-assigned brigades.
                 minimum_forward_brigades: 2,
             },
+            {
+                // Calibration assumption (jan1993 712): the 3rd Banja Luka, which already
+                // fights at Donji Koričani at t23, clears the HRHB-held village from
+                // Kruševo Brdo. Painted RS at all four checkpoints; wartime control is
+                // not established by a source (see the Vlašić note in the central-Bosnia
+                // opportunity catalog).
+                axis_id: 'skender_vakuf_koricani',
+                name: 'Skender Vakuf Koričani',
+                brigades: ['rs_3rd_banja_luka_light_infantry' as FormationId],
+                objectives: ['op:skender_vakuf:donji_koricani'],
+                staging_osid: 'op:kotor_varos:krusevo_brdo_i',
+            },
         ],
     },
     {
@@ -1365,6 +1392,13 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         // Guards Brigade to join the Visoko assembly if it materializes in time.
         min_attack_outcome: 'victory',
         planning_duration: 8,
+        // Calibration assumption (owner directive 2026-11-05), not a sourced roster: the
+        // neighbouring Vareš 147th/185th Light (same corps, two hops from the Visoko
+        // assembly) join the local action and march from turn 4 through ordinary movement,
+        // so the attack clears its 'victory' bar before the RS sector reserve grows. This
+        // replaces the strength W3 removed (a pre-W3 RS teleport had weakened the defence).
+        // Measured +5 January cells, 0 lost (scratch 39-week, no-player).
+        prestage_from: 4,
         axes: [
             {
                 axis_id: 'visoko_breza_perimeter',
@@ -1374,6 +1408,8 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                     'arbih_146th_light',
                     'arbih_164th_mountain',
                     'arbih_guards_brigade',
+                    'arbih_147th_light',
+                    'arbih_185th_light',
                 ],
                 objectives: ['op:visoko:gornja_vratnica_2'],
                 staging_osid: 'op:visoko:visoko_2',
@@ -1492,7 +1528,7 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
             {
                 axis_id: 'gorazde_local_counterattack',
                 name: 'Local Gorazde Counterattack',
-                brigades: ['arbih_851st_vitezka_liberation'],
+                brigades: ['arbih_851st_vitezka_liberation', 'arbih_802nd_light'],
                 objectives: ['op:gorazde:kamen'],
                 staging_osid: 'op:gorazde:bacci',
             },
@@ -1815,11 +1851,21 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         // `planning_duration: 3` was spent marching the 444th from
         // `op:konjic:celebici_2`. A t69 opening attack is NOT established by this
         // definition, and no capture of Doljani is guaranteed by it.
+        //
+        // Calibration assumption (apr1994 711, 2026-11-05): `prestage_from: 58`
+        // returns the 444th to its home at Jablanica before the attack opens.
+        // Without it the 444th sits 4 hops away (op:trnovo:tusila), the build fails
+        // `staging_unreachable` every turn t66–t94, and from t95 Washington makes
+        // every objective "already controlled", so this queue head never clears and
+        // Operation Neretva '93 behind it never runs. With it, the local attack
+        // launches and fails, the queue advances, and Neretva '93 takes Doljani and
+        // Turija at t74 by ordinary combat.
         corps: 'arbih_4th_corps',
         faction: 'RBiH',
         name: 'Jablanica–Doljani Local Attack',
         staging_osid: 'op:jablanica:jablanica_2',
         available_from: 66,
+        prestage_from: 58,
         min_attack_outcome: 'repulsed',
         planning_duration: 3,
         minimum_viable_participants: 1,
@@ -2913,6 +2959,8 @@ export function injectPrePlannedOperations(
         if (deferredCorps.has(def.corps)) continue; // first live op is awaiting player authorization
         const cmd = corpsCommand[def.corps];
         if (!cmd) continue;
+        // A running operation is not re-queued by the per-turn live re-injection (mirrors the dated path).
+        if ((cmd.active_operations ?? []).some((op) => op.name === def.name)) continue;
         if (!cmd.queued_operations) cmd.queued_operations = [];
         if (!cmd.queued_operations.includes(def.name)) {
             cmd.queued_operations.push(def.name);
