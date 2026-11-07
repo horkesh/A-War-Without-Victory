@@ -5,6 +5,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { resolve } from 'node:path';
+import { readFileSync } from 'node:fs';
 
 import type { GameState } from '../src/state/game_state.js';
 import type { NegotiationBreakdown, PatronRelationship } from '../src/state/negotiation_types.js';
@@ -284,10 +285,68 @@ describe('Dayton continuation operations (owner, 2026-11-07: "Resume halted 1995
         }
     });
 
-    it('keep camp geography and Banja Luka out of every objective list', () => {
-        const forbidden = ['op:prijedor:prijedor_2', 'op:prijedor:kozarac_2', 'op:prijedor:omarska_2', 'op:prijedor:kamicani', 'op:banja_luka:banja_luka_2', 'op:banja_luka:kola'];
+    it('Banja Luka and Kola stay out of every objective list (US red line, BB1 p.392)', () => {
+        const forbidden = ['op:banja_luka:banja_luka_2', 'op:banja_luka:kola'];
         const objectives = DAYTON_CONTINUATION_OPPORTUNITIES.flatMap((d) => d.axes.flatMap((a) => a.objectives));
         for (const f of forbidden) expect(objectives).not.toContain(f);
+    });
+
+    const byIdC = (id: string) => DAYTON_CONTINUATION_OPPORTUNITIES.find((d) => d.opportunity_id === id)!;
+    const adjacency = (() => {
+        const g = JSON.parse(readFileSync(resolve(process.cwd(), 'data/derived/operational/operational_contact_graph.json'), 'utf8')) as { edges: { a: string; b: string }[] };
+        const m = new Map<string, Set<string>>();
+        for (const { a, b } of g.edges) {
+            (m.get(a) ?? m.set(a, new Set()).get(a)!).add(b);
+            (m.get(b) ?? m.set(b, new Set()).get(b)!).add(a);
+        }
+        return m;
+    })();
+
+    it('the 5th Corps continuation reaches Prijedor town and Kozarac (owner, 2026-11-07; BB1 p.383)', () => {
+        const sana = byIdC('sana_continuation_95');
+        const axis = (id: string) => sana.axes.find((a) => a.axis_id === id)!;
+        expect(axis('ljubija').objectives).toEqual(['op:sanski_most:ostra_luka', 'op:prijedor:ljubija_2', 'op:prijedor:prijedor_2']);
+        expect(axis('kozarac').objectives).toEqual(['op:prijedor:maricka_2', 'op:prijedor:kozarac_2']);
+        expect(sana.axes.flatMap((a) => a.brigades)).not.toContain('arbih_501st_slavna_mountain'); // holds Krasulje
+    });
+
+    it('every continuation axis is staged next to its first objective and each step is reachable', () => {
+        for (const def of DAYTON_CONTINUATION_OPPORTUNITIES) {
+            for (const axis of def.axes) {
+                const staging = axis.staging_osid ?? def.staging_osid;
+                expect(adjacency.has(staging), `${def.opportunity_id}/${axis.axis_id} staging`).toBe(true);
+                axis.objectives.forEach((o, i) => {
+                    const reach = [staging, ...axis.objectives.slice(0, i)];
+                    expect(reach.some((p) => adjacency.get(p)?.has(o)), `${def.opportunity_id}/${axis.axis_id} ${o}`).toBe(true);
+                });
+                expect(adjacency.get(staging)?.has(axis.objectives[0]!), `${def.opportunity_id}/${axis.axis_id} first`).toBe(true);
+            }
+        }
+    });
+
+    it('rosters are disjoint across continuation operations (the two Southern Move variants are mutually exclusive)', () => {
+        const owner = new Map<string, string>();
+        for (const def of DAYTON_CONTINUATION_OPPORTUNITIES) {
+            const family = def.opportunity_id.startsWith('southern_move_manjaca') ? 'southern_move' : def.opportunity_id;
+            for (const b of new Set(def.axes.flatMap((a) => a.brigades))) {
+                const prior = owner.get(b);
+                expect(prior === undefined || prior === family, `${b}: ${prior} and ${family}`).toBe(true);
+                owner.set(b, family);
+            }
+        }
+    });
+
+    it('the Sarajevo breakout follows the selected June 1995 route and never takes a one-capture link (BB1 pp.310-312)', () => {
+        const op = byIdC('sarajevo_breakout_95');
+        expect(op.faction).toBe('RBiH');
+        expect(op.primary_corps).toBe('arbih_1st_corps');
+        expect(op.supersedes_live_operation).toBeUndefined();
+        const objectives = op.axes.flatMap((a) => a.objectives);
+        for (const o of ['op:ilidza:sarajevo_dio_ilidza_2', 'op:ilidza:sarajevo_dio_novi_grad_sarajevo', 'op:novo_sarajevo:lukavica']) {
+            expect(objectives).not.toContain(o);
+        }
+        expect(adjacency.get('op:novi_grad_sarajevo:recica')?.has('op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo')).toBe(true);
+        expect(adjacency.get('op:vogosca:vogosca_3')?.has('op:vogosca:hotonj')).toBe(true);
     });
 
     it('only the Dayton continuation family may supersede a live operation', () => {

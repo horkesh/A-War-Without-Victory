@@ -23,8 +23,13 @@
  *
  * Counterfactual by design: several objectives are painted RS at every checkpoint. They
  * are lawful only because these operations can never run on the calibrated line.
- * Excluded on purpose: Prijedor town, Kozarac, Omarska, Kamičani (camp geography; ICTY
- * Tadić, Kvočka, Stakić) and Banja Luka with Kola (the US red line, BB1 p.392).
+ * Prijedor town and Kozarac are military objectives (owner, 2026-11-07): canon refuses a
+ * camp system and atrocity targeting (SENSITIVE_HISTORY_DESIGN_GATE §1, Ring 3 #1-#2), not
+ * the capture of a town; the Prijedor camps closed in August 1992 (Ring 2 essays, ICTY
+ * Tadić/Stakić/Kvočka/Sikirica) and BB1 p.383 names Prijedor the 5th Corps' objective.
+ * Omarska and Kamičani are not authored (no BB military authority). Banja Luka and Kola
+ * stay excluded (the US red line, BB1 p.392). Player text names towns only; any framing of
+ * a capture as redress for 1992, or any score keyed to it, needs the §6 panel.
  *
  * MUST NOT: write control, force outcomes, or add atrocity / sensitive-history levers.
  */
@@ -37,7 +42,8 @@ import type { AxisPredicate, OperationOpportunityDef } from './operation_opportu
 const DAYTON_DECLINED_BY_FLAG = 'dayton_declined_by';
 const FAMILY = 'dayton_continuation';
 const CITATION_BB = 'Balkan Battlegrounds I, KB pp.420-429, 462 (late-1995 western Bosnia and Ozren)';
-const CITATION_DESIGN = 'docs/40_reports/20261107_DAYTON_CONTINUATION_OPERATIONS.md';
+const CITATION_DESIGN = 'docs/40_reports/20261107_DAYTON_CONTINUATION_OPERATIONS.md; round 2: docs/40_reports/20261107_DAYTON_CONTINUATION_OPERATIONS_R2.md';
+const CITATION_SARAJEVO = 'Balkan Battlegrounds I, printed pp.309-316 (PDF pp.346-353; outside the KB page extraction) and endnotes 197-204, printed p.404 (KB dig. p.441)';
 
 /** True only while a recorded Dayton decline is open (see file header). */
 export function isDaytonContinuationWindowOpen(state: GameState, turn: number): boolean {
@@ -129,12 +135,14 @@ function evaluators(dateWindow: AxisPredicate): OperationOpportunityDef['evaluat
     };
 }
 
-// ─── C1. ARBiH 5th Corps: Sana continuation toward Ljubija and Bosanski Novi ─────────
-// Takes over the live Operation Sana brigades (supersedes_live_operation). Starts with
-// Oštra Luka, where Sana stalls on objective sequencing, staged on the 506th's cell.
+// ─── C1. ARBiH 5th Corps: Sana continuation toward Prijedor, Kozarac and Bosanski Novi ──
+// Takes over the live Operation Sana brigades (supersedes_live_operation). Oštra Luka first
+// (Sana stalls there on objective sequencing), staged on the 506th's cell; Prijedor town is
+// directly adjacent to Ljubija. Kozarac is reached through Marićka, adjacent to the same
+// staging cell, so the two Prijedor axes share no objective. The 501st stays at Krasulje.
 const SANA_CONTINUATION: OperationOpportunityDef = {
     opportunity_id: 'sana_continuation_95',
-    name: 'Sana Continuation: Ljubija and Novi Grad',
+    name: 'Sana Continuation: Prijedor and Novi Grad',
     tier: 'T1',
     faction: 'RBiH',
     primary_corps: 'arbih_5th_corps',
@@ -146,10 +154,19 @@ const SANA_CONTINUATION: OperationOpportunityDef = {
     axes: [
         {
             axis_id: 'ljubija',
-            name: 'Ljubija',
+            name: 'Ljubija and Prijedor',
             corps: 'arbih_5th_corps',
-            brigades: ['arbih_506th_mountain', 'arbih_510th_bosnian_liberation', 'arbih_517th_light'],
-            objectives: ['op:sanski_most:ostra_luka', 'op:prijedor:ljubija_2', 'op:prijedor:raljas'],
+            brigades: ['arbih_506th_mountain', 'arbih_517th_light', 'arbih_504th_cazin_light'],
+            objectives: ['op:sanski_most:ostra_luka', 'op:prijedor:ljubija_2', 'op:prijedor:prijedor_2'],
+            staging_osid: 'op:sanski_most:ilidza_2',
+            preserve_objective_sequence: true,
+        },
+        {
+            axis_id: 'kozarac',
+            name: 'Kozarac',
+            corps: 'arbih_5th_corps',
+            brigades: ['arbih_510th_bosnian_liberation', 'arbih_502nd_vitezka_mountain'],
+            objectives: ['op:prijedor:maricka_2', 'op:prijedor:kozarac_2'],
             staging_osid: 'op:sanski_most:ilidza_2',
             preserve_objective_sequence: true,
         },
@@ -163,7 +180,7 @@ const SANA_CONTINUATION: OperationOpportunityDef = {
             preserve_objective_sequence: true,
         },
     ],
-    citations: [CITATION_BB + ' — Prijedor next, Banja Luka the corps goal; 503rd/505th toward Ljubija and Bosanski Novi (p.383); Dudaković fought on to 20 Oct (p.391)', CITATION_DESIGN],
+    citations: [CITATION_BB + ' — OGs North and Center: Prijedor the eventual objective, Banja Luka the corps goal; 503rd/505th toward Ljubija and Prijedor (p.383); Dudaković fought on to 20 Oct (p.391)', CITATION_DESIGN],
     historical_exit_class: 'did_not_launch',
     prerequisites: PREREQS,
     evaluators: evaluators(windowOpen),
@@ -315,10 +332,68 @@ const OZREN_CONTINUATION: OperationOpportunityDef = {
     staff_recommendation: 'approve',
 };
 
+// ─── C5. ARBiH 1st Corps: Sarajevo breakout, renewed ────────────────────────────────
+// The June 1995 plan's selected route (Visoko–Ilijaš–Vogošća, BB1 p.310): the largest effort
+// from outside (Breza), a pincer from inside (Hotonj / Novi Grad), and the Hadžići attack
+// that "fared better" (p.312). Ilidža, Nedžarići and Lukavica are deliberately not
+// objectives: in the model each is a one-capture link, while historically they were the
+// hardest points (Stup and Nedžarići "only limited gains", p.312). The June attempt failed
+// with heavy losses (pp.313-316); a success here is a counterfactual of the hollow late VRS.
+// No relieve-the-siege flag or score (sarajevo_lifeline.ts, Gate §3); Sarajevo stays
+// ALWAYS_BESIEGED for supply (Engine Invariants §12.1).
+const SARAJEVO_BREAKOUT: OperationOpportunityDef = {
+    opportunity_id: 'sarajevo_breakout_95',
+    name: 'Sarajevo Breakout: Ilijaš and Vogošća',
+    tier: 'T1',
+    faction: 'RBiH',
+    primary_corps: 'arbih_1st_corps',
+    family: FAMILY,
+    staging_osid: 'op:breza:zupca_2',
+    planning_duration: 1,
+    axes: [
+        {
+            axis_id: 'ilijas',
+            name: 'Ilijaš and Rečica',
+            corps: 'arbih_1st_corps',
+            brigades: ['arbih_146th_light', 'arbih_164th_mountain', 'arbih_123rd_light', 'arbih_guards_brigade'],
+            objectives: ['op:ilijas:podlugovi', 'op:novi_grad_sarajevo:recica'],
+            staging_osid: 'op:breza:zupca_2',
+            preserve_objective_sequence: true,
+        },
+        {
+            axis_id: 'vogosca',
+            name: 'Vogošća',
+            corps: 'arbih_1st_corps',
+            brigades: ['arbih_1st_mountain', 'arbih_111th_vitezka_motorized', 'arbih_112th_vitezka_motorized'],
+            objectives: ['op:vogosca:vogosca_3', 'op:vogosca:svrake'],
+            staging_osid: 'op:vogosca:hotonj',
+            preserve_objective_sequence: true,
+        },
+        {
+            axis_id: 'hadzici',
+            name: 'Hadžići',
+            corps: 'arbih_1st_corps',
+            brigades: ['arbih_104th_vitezka_motorized', 'arbih_109th_mountain', 'arbih_181st_mountain'],
+            objectives: ['op:hadzici:misevici_2', 'op:ilidza:rakovica_2'],
+            staging_osid: 'op:hadzici:binjezevo',
+            preserve_objective_sequence: true,
+        },
+    ],
+    citations: [
+        CITATION_SARAJEVO + ' — break in from outside, largest effort outside (p.309); Visoko–Ilijaš–Vogošća the selected corridor (p.310); north route OG + 16th Division (p.311); Python cut, Hadžići gains, Stup/Nedžarići limited (p.312); stopped 17-22 June, a costly failure (pp.313-316; June reference outcome: failed)',
+        CITATION_DESIGN,
+    ],
+    historical_exit_class: 'did_not_launch',
+    prerequisites: PREREQS,
+    evaluators: evaluators(windowOpen),
+    staff_recommendation: 'approve',
+};
+
 export const DAYTON_CONTINUATION_OPPORTUNITIES: readonly OperationOpportunityDef[] = [
     SANA_CONTINUATION,
     SOUTHERN_MOVE_II,
     SOUTHERN_MOVE_II_HVO_ONLY,
     KRAJINA_COUNTERSTROKE,
     OZREN_CONTINUATION,
+    SARAJEVO_BREAKOUT,
 ];
