@@ -49,6 +49,11 @@ None of this was on `main` when the conference plan was written. Merge this bran
 2. **Open (conference baseline item):** whether non-default institutional fields drop at the desktop boundary on `preview-dayton` / `resolve-dayton` (`src/desktop/electron-main.cjs`). Not traced by RD.
 3. `preview-dayton` resolves on a cloned state, and that clone already holds the full settled map (`applyPeaceSettlement` runs inside the resolver); returning it would give the table a live "result of terms" map.
 
+## Known limitations (independent review, 2026-11-07; not fixed in RD)
+
+- `reopenWarAfterDaytonDecline` removes the Holbrooke-halt aggression modifiers by faction, negative delta and expiry turn, because those records carry no source field; an unrelated RBiH/HRHB negative modifier with the same expiry would also be removed. A `source` field on aggression modifiers would make this exact.
+- The settlement map is recomputed (`settlementControllersFor`), not stored. It is stable after the war (the pipeline stops at `game_over`), but a later change to `plan_settlement_shares.json`, the contact graph or the contiguity rules would re-draw an old save's map while its stored `territory_pct` stays as signed. Freezing the controllers into the endgame snapshot would fix this (a state/serialization change).
+
 ## Transferred to the conference lane (not done in RD)
 
 - Dayton-table map: highlight a package's cells; live result-of-terms map (from the preview clone, never re-derived in the renderer).

@@ -118,7 +118,7 @@ export interface PeaceSettlement {
     special_osids: string[];
     /** Constitutional status per faction. */
     status: Record<string, SettlementStatus>;
-    /** Overrides of the plan map: Dayton package outcomes and, for an imposed Dayton, control changes made after the decline (OSID -> faction, sorted keys). */
+    /** Overrides of the plan map: Dayton package outcomes, fixed and captured ground (OSID -> faction, sorted keys). */
     map_overrides?: Record<string, FactionId>;
 }
 

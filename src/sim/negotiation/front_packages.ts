@@ -220,10 +220,14 @@ function attachEncircledPockets(
  * map, those the map gives it, and Federation-partner ground the map gives RS.
  */
 export function frontPackagesForPlayer(state: GameState, playerFaction: string): TerritorialPackage[] {
-    return buildFrontPackages(state).filter((p) =>
-        p.claimant === playerFaction
+    return buildFrontPackages(state).filter((p) => frontPackageVisibleToPlayer(p, playerFaction));
+}
+
+/** Whether a player faction can act on this captured-ground package (see frontPackagesForPlayer). */
+export function frontPackageVisibleToPlayer(p: TerritorialPackage, playerFaction: string): boolean {
+    return p.claimant === playerFaction
         || p.default_holder === playerFaction
-        || (p.claimant !== undefined && sameEntitySide(p.claimant, playerFaction) && !sameEntitySide(p.default_holder, playerFaction)));
+        || (p.claimant !== undefined && sameEntitySide(p.claimant, playerFaction) && !sameEntitySide(p.default_holder, playerFaction));
 }
 
 /** The captured-ground packages a proposal names, or [] when it names none (cheap path). */

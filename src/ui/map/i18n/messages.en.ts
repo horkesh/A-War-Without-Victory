@@ -2521,6 +2521,7 @@ export const enMessages = {
     'dayton.frontPackagesTitle': 'Ground held against the Dayton map',
     'dayton.frontPackagesHint': 'Left alone, each piece goes as the Dayton map draws it. To keep ground you hold, demand it: the cost grows with its area, and the side the map gives it to must accept, counter with it, or be overruled by its patron.',
     'dayton.frontHeld': 'Held by {holder} · map gives {assignee} · {pct}% of BiH',
+    'dayton.federationPartner': 'Federation partner: not negotiable at Dayton',
     'dayton.forcedTitle': 'Imposed table',
     'dayton.forced.united_states': 'After the air strikes, Washington has brought you back to the table. Declining is no longer possible: submit a settlement.',
     'dayton.forced.belgrade': 'Belgrade has closed the Drina and brought you back to the table. Declining is no longer possible: submit a settlement.',

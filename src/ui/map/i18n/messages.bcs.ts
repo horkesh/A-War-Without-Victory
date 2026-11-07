@@ -2427,6 +2427,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'dayton.frontPackagesTitle': 'Teritorija držana mimo dejtonske mape',
     'dayton.frontPackagesHint': 'Ako ih ne zatražite, svaki dio ide onako kako ga crta dejtonska mapa. Da zadržite teritoriju koju držite, zahtijevajte je: cijena raste s površinom, a strana kojoj je mapa daje mora pristati, uključiti je u kontraprijedlog ili je njen pokrovitelj mora nadglasati.',
     'dayton.frontHeld': 'Drži {holder} · mapa daje {assignee} · {pct}% BiH',
+    'dayton.federationPartner': 'Partner u Federaciji: nije predmet pregovora u Daytonu',
     'dayton.forcedTitle': 'Nametnuti sto',
     'dayton.forced.united_states': 'Nakon zračnih udara Washington vas je vratio za pregovarački sto. Odbijanje više nije moguće: podnesite sporazum.',
     'dayton.forced.belgrade': 'Beograd je zatvorio Drinu i vratio vas za pregovarački sto. Odbijanje više nije moguće: podnesite sporazum.',

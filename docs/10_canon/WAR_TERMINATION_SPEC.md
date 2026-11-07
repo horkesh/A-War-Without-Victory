@@ -24,7 +24,7 @@ Current reference implementation: `src/sim/war_termination.ts:35-91`. First matc
 2. **Negotiated peace**
    - Trigger string: `negotiated_peace:{plan_id}` or `negotiated_peace:negotiated`.
    - Code reference: `src/sim/war_termination.ts:61-71` checks `state.military.event_flags.war_ended_early === true`.
-   - Preconditions: a peace-plan or Dayton resolver sets `war_ended_early`; `peace_plans.ts:239-256` sets `war_ended_early` and freezes the snapshot on accepted early peace; Dayton resolution freezes the snapshot in `dayton_negotiation.ts:280`.
+   - Preconditions: a peace-plan or Dayton resolver sets `war_ended_early`; `peace_plans.ts:239-256` sets `war_ended_early` and freezes the snapshot on accepted early peace; Dayton resolution freezes the snapshot in `resolveDaytonNegotiation` (`dayton_negotiation.ts`).
    - Design status: this is the canonical Dayton-style negotiated end path.
 
 3. **Faction collapse**
@@ -70,7 +70,7 @@ Historical-default resolution rule (2026-07-17): when no player owns the decisio
 
 The War pipeline increments the turn before evaluating negotiation. A one-time Cutileiro catch-up therefore evaluates on the first War turn while preserving offer turn `0`; it must not be silently skipped by the clock transition or offered more than once.
 
-Dayton escape valve: `dayton_negotiation.ts:32-72` sets `DAYTON_TRIGGER_WEEK = 188` and can force Dayton before that only when all canonical factions have patron override authority at or above `FORCED_DAYTON_OVERRIDE_THRESHOLD = 95`.
+Dayton escape valve: `dayton_negotiation.ts` (`shouldInitiateDayton`) sets `DAYTON_TRIGGER_WEEK = 188` and can force Dayton before that only when all canonical factions have patron override authority at or above `FORCED_DAYTON_OVERRIDE_THRESHOLD = 95`.
 
 **Settlement on the plan map (owner, 2026-11-07; RD lane).** A peace accepted by every party, or a signed/imposed Dayton, ends the war on the plan's map and terms, not on the front line. `applyPeaceSettlement` (`src/sim/negotiation/peace_settlement.ts`) records `negotiation.settlement` from the researched plan maps (`data/derived/peace/plan_settlement_shares.json`; [research](../40_reports/20261107_PEACE_PLANS_RESEARCH.md)); `political_controllers` is never rewritten. The Dayton map is made contiguous (`settlement_contiguity.ts`: each entity one piece, small islands absorbed, larger pieces given a smallest-area corridor, won package ground and enclaves never absorbed, the Posavina canton kept). Grading reads the settled share and plan status caps — see `VICTORY_AND_PYRRHIC_SCORING.md`.
 

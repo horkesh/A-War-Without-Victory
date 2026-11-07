@@ -39,7 +39,7 @@ import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';
 import { computePeaceDysfunctionBreakdown } from './peace_dysfunction.js';
 import { getPackageAreaPct, resolveOsidsForKeywords } from './package_area_resolver.js';
 import { applyPeaceSettlement, computeSettlementControllers } from './peace_settlement.js';
-import { frontPackagesForProposal, sameEntitySide } from './front_packages.js';
+import { frontPackagesForProposal, frontPackageVisibleToPlayer, sameEntitySide } from './front_packages.js';
 import { packageOsids, selectPatronForced } from './patron_leverage.js';
 import type { TerritorialPackage } from '../../state/negotiation_types.js';
 
@@ -320,7 +320,7 @@ const DAYTON_ACCEPTANCE_FLAG: Record<string, string> = {
 };
 
 /**
- * Record a decline: withdraw any pending menu, schedule the imposition four weeks out,
+ * Record a decline: withdraw any pending menu, schedule the imposition DAYTON_DECLINE_GRACE_WEEKS out,
  * and reopen the war (owner, 2026-11-07: "declining Dayton would reopen the war and the
  * ops would continue"). Returns the imposition turn.
  */
@@ -387,6 +387,8 @@ export function applyPlayerDaytonHardline(state: GameState): boolean {
     const faction = state.meta.player_faction;
     if (!neg || !faction || state.meta.game_over) return false;
     if (neg.dayton_decline || neg.dayton_result) return false;
+    // An open menu means the talks answer predates this rule (older saves): do not convert it.
+    if (neg.pending_dayton) return false;
     const flag = DAYTON_ACCEPTANCE_FLAG[faction];
     if (!flag || state.military.event_flags?.[flag] !== 'hardline') return false;
     recordDaytonDecline(state, faction);
@@ -502,7 +504,9 @@ export function resolveDaytonNegotiation(
     const patronOverrides: string[] = [];
 
     // Process territorial demands
+    // Only captured ground the player can act on (the menu's list) is negotiable.
     const raisedFront = frontPackages
+        .filter(p => frontPackageVisibleToPlayer(p, playerFaction))
         .map(p => p.id)
         .filter(id => proposal.territorial_demands.includes(id) || proposal.territorial_concessions.includes(id));
     const allTerritorialIds = [...getAllTerritorialPackages().map(p => p.id), ...raisedFront].sort(strictCompare);
@@ -518,21 +522,27 @@ export function resolveDaytonNegotiation(
             continue;
         }
 
-        if (isConceded) {
-            // Player conceded this — accepted by definition
-            acceptedTerritorial.push(pkgId);
-            continue;
-        }
-
-        // Player demanded this — check if bots accept
         const pkg = getTerritorialPackageById(pkgId, frontPackages);
         if (!pkg) {
             rejectedTerritorial.push(pkgId);
             continue;
         }
-
         // The faction that holds this package must accept the demand
         const holderFaction = pkg.default_holder;
+
+        // Owner ruling 2026-11-07: Dayton drew the inter-entity line only. Ground a Federation
+        // partner holds is not negotiable between RBiH and HRHB (independent review F1).
+        if (holderFaction !== playerFaction && sameEntitySide(holderFaction, playerFaction)) {
+            rejectedTerritorial.push(pkgId);
+            continue;
+        }
+
+        if (isConceded) {
+            // Only the holder can concede; conceding someone else's ground moves nothing.
+            if (holderFaction === playerFaction) acceptedTerritorial.push(pkgId);
+            else rejectedTerritorial.push(pkgId);
+            continue;
+        }
 
         if (holderFaction === playerFaction) {
             // Player already holds it — auto-accepted
@@ -684,6 +694,23 @@ export function resolveDaytonNegotiation(
     // Store result on state
     neg.dayton_result = result;
 
+    // Owner, 2026-11-07: Dayton's consequence is its MAP. The settlement is the researched
+    // Dayton map, with the packages this negotiation actually moved overriding it, and RS
+    // recognised by name with the Posavina corridor. The displayed final split and the
+    // dysfunction index read the settled share, the same number the grade reads (review F2);
+    // computeTerritorySplit remains only as the fallback when no settlement is recorded.
+    const settlement = applyPeaceSettlement(state, 'dayton', daytonPackageOverrides(state, result, proposal, playerFaction, frontPackages));
+    // Only a map covering (almost) all of BiH — every real campaign — replaces the split;
+    // a partial fixture map keeps the package-shift estimate.
+    const coveredPct = CANONICAL_FACTIONS.reduce((s, f) => s + (settlement.territory_pct[f] ?? 0), 0);
+    if (coveredPct >= 90) {
+        const settledSplit: Record<string, number> = {};
+        for (const faction of CANONICAL_FACTIONS) {
+            settledSplit[faction] = Math.round(((settlement.territory_pct[faction] ?? 0) / coveredPct) * 100 * 10) / 10;
+        }
+        result.final_territory_split = settledSplit;
+    }
+
     // Comprehensive Dayton D3 (2026-06-07): compute the peace_dysfunction_index +
     // breakdown from the just-signed settlement and stamp it onto the result for
     // display / verdict. Pure read of the result we just assigned to state.
@@ -719,11 +746,6 @@ export function resolveDaytonNegotiation(
     if (!state.military.event_flags) state.military.event_flags = {};
     state.military.event_flags[DAYTON_SETTLEMENT_SIGNED_FLAG] = true;
     fireDaytonSignedRecord(state);
-
-    // Owner, 2026-11-07: Dayton's consequence is its MAP. The settlement is the researched
-    // Dayton map, with the packages this negotiation actually moved overriding it, and
-    // RS recognised by name with the Posavina corridor. Recorded before the freeze.
-    applyPeaceSettlement(state, 'dayton', daytonPackageOverrides(state, result, proposal, playerFaction, frontPackages));
 
     // LANE-NIGHTSHIFT-N3 (D#2, 2026-05-03): freeze endgame snapshot so
     // verdict / cost ledger / historical comparison are preserved across

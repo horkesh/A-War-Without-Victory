@@ -2573,7 +2573,7 @@
     "source_note": "The listed formal instruments bound the dates, terms, and institutional action described; accompanying judgments or participant accounts supply context only. The essay is original synthesis and does not treat proposed or negotiated terms as implemented beyond the cited record.",
     "trigger": {
       "turn_min": 184,
-      "turn_max": 215,
+      "turn_max": 260,
       "phase": "war",
       "condition": {
         "type": "flag_equals",

@@ -32,8 +32,8 @@
  *
  * 2026-11-07 (owner): Decline is now a real refusal. Previously it signed an empty
  * proposal (ending the war). Now the engine withdraws the menu, the war continues
- * four more weeks, and then the faction's coercion event fires and the settlement is
- * imposed (dayton_negotiation.ts declineDaytonNegotiation / enforceDaytonImposition).
+ * eight more weeks, and then the faction's coercion event fires and the table reopens with no decline
+ * (dayton_negotiation.ts declineDaytonNegotiation / enforceDaytonImposition).
  *
  * 2026-05-16 (decline-talks escape valve): added `handleDeclineTalks` to fix
  * a UX deadlock surfaced during external audit playtest. If the player's
@@ -71,6 +71,9 @@ import {
 } from './DaytonInstitutionalDimensions';
 
 type DaytonData = NonNullable<LoadedGameState['pendingDayton']>;
+
+/** The Federation parties; ground between them is not negotiable at Dayton. */
+const FEDERATION = new Set(['RBiH', 'HRHB']);
 
 /** Banner text for the imposed table, by the power that forced it. */
 const FORCED_MESSAGE: Record<string, Parameters<typeof t>[0]> = {
@@ -377,6 +380,9 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                             const isDemand = demands.has(pkg.id);
                             const isConcession = concessions.has(pkg.id);
                             const isPlayerHeld = playerFaction != null && pkg.defaultHolder === playerFaction;
+                            // Dayton drew the inter-entity line only: Federation-partner ground is not negotiable.
+                            const isPartnerHeld = playerFaction != null && !isPlayerHeld
+                                && FEDERATION.has(pkg.defaultHolder) && FEDERATION.has(playerFaction);
                             return (
                                 <div key={pkg.id} className={`p-3 rounded border transition-colors ${
                                     isDemand ? 'border-[#2a6a2a] bg-[#d0e8d0]/60' :
@@ -393,7 +399,10 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                                         </span>
                                     </div>
                                     <div className="flex gap-2 mt-2">
-                                        {!isPlayerHeld && (
+                                        {isPartnerHeld && (
+                                            <span className="text-xs text-[#6a5a40] italic">{t('dayton.federationPartner')}</span>
+                                        )}
+                                        {!isPlayerHeld && !isPartnerHeld && (
                                             <button type="button" onClick={() => toggleDemand(pkg.id)}
                                                 className={`text-xs px-2 py-1 rounded border font-bold uppercase ${
                                                     isDemand ? 'bg-[#2a6a2a] text-white border-[#2a6a2a]' : 'text-[#2a6a2a] border-[#2a6a2a]/40 hover:bg-[#d0e8d0]'

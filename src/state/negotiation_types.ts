@@ -167,7 +167,7 @@ export interface NegotiationState {
     /** Result of the Dayton negotiation (set when Dayton resolves). */
     dayton_result?: DaytonResult;
     /** Pending Dayton negotiation menu, persisted by pipeline when trigger fires.
-     *  UI adapter reads this — never computes it. Cleared implicitly when dayton_result is set. */
+     *  UI adapter reads this; it derives only the captured-ground packages (front_packages.ts) from state. Cleared implicitly when dayton_result is set. */
     pending_dayton?: PendingDaytonPacket;
     /**
      * Set when the player faction declines Dayton (declineDaytonNegotiation). The menu is

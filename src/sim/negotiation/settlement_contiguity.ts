@@ -132,7 +132,11 @@ function cheapestCorridor(
 export function enforceSettlementContiguity(input: ContiguityInput): ContiguityResult {
     const ctl: Record<string, FactionId> = { ...input.controllers };
     const changes: Record<string, FactionId> = {};
-    const isProtectedCell = input.isProtectedCell ?? (() => false);
+    const baseProtected = input.isProtectedCell ?? (() => false);
+    // Corridor cells are protected once drawn, so a later corridor never cuts back through
+    // an earlier one (independent review F6: no ping-pong up to MAX_PASSES).
+    const corridorCells = new Set<string>();
+    const isProtectedCell = (o: string, f: FactionId) => corridorCells.has(o) || baseProtected(o, f);
     const assign = (o: string, f: FactionId) => { ctl[o] = f; changes[o] = f; };
 
     for (let pass = 0; pass < MAX_PASSES; pass++) {
@@ -168,7 +172,7 @@ export function enforceSettlementContiguity(input: ContiguityInput): ContiguityR
             const path = cheapestCorridor(comp.cells, target, comp.side, ctl, input.adjacency, input.areas, isProtectedCell);
             if (!path || path.length === 0) continue; // cannot be joined; leave it and move on
             const owner = majorityFaction(comp.cells, ctl);
-            for (const o of path) assign(o, owner);
+            for (const o of path) { assign(o, owner); corridorCells.add(o); }
             changed = true;
             break;
         }

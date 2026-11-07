@@ -559,7 +559,7 @@ const RS_GRADE_ANCHORS: GradeAnchor[] = [
     // by the same 3 points so the band widths are unchanged. A+ is untouched.
     {
         grade: 'A',
-        description: 'Held the ceasefire line (≥46% territory), entity intact, Belgrade relationship intact',
+        description: 'Ended the war on the pre-Dayton line (≥46% territory), entity intact, internal cohesion held',
         test: (cap, state) => {
             const dimStore = state.military?.negotiation?.strategic_dimensions;
             const cohesion = dimStore?.RS?.internal_cohesion?.effective_value ?? 50;
@@ -568,7 +568,7 @@ const RS_GRADE_ANCHORS: GradeAnchor[] = [
     },
     {
         grade: 'B',
-        description: '42-46% territory, some international concessions',
+        description: '≥42% territory, some international concessions',
         test: (cap) =>
             cap.territory_controlled_pct >= 42,
     },
@@ -850,7 +850,7 @@ export function computeFactionVerdict(
     const description = grade === earned.grade
         ? earned.description
         : grade !== condemnationCappedGrade
-            ? `${earned.description} — capped by the settlement's terms`
+            ? `${earned.description} — capped by the settlement's terms: ${settlement?.status?.[faction]?.summary ?? 'the plan limits this party'}`
             : grade !== costCappedGrade
                 ? `${earned.description} — capped by atrocity condemnation`
                 : scoringSimpleEnabled()

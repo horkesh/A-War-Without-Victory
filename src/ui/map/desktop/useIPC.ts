@@ -295,7 +295,7 @@ interface WindowAwwv {
     }) => Promise<{ ok: boolean; counter_offer_id?: string; error?: string }>;
     resolveParamilitaryRequests: (decisions: Array<{ target_osid: string; decision: 'allow' | 'deny' }>, options?: ParamilitaryReviewOptions) => Promise<{ ok: boolean; report?: unknown; error?: string }>;
     resolveDayton: (proposal: { territorial_demands: string[]; territorial_concessions: string[]; institutional_choices: Record<string, 'centralized' | 'decentralized'> }) => Promise<{ ok: boolean; result?: Record<string, unknown>; error?: string }>;
-    /** Decline Dayton: war continues 4 weeks, then the settlement is imposed. */
+    /** Decline Dayton: war continues 8 weeks, then the table reopens with no decline. */
     declineDayton: () => Promise<{ ok: boolean; imposition_turn?: number; error?: string }>;
     /** Read-only Dayton preview (Dayton Phase-4): bot responses + authoritative readouts, no state mutation. */
     previewDayton: (proposal: { territorial_demands: string[]; territorial_concessions: string[]; institutional_choices: Record<string, 'centralized' | 'decentralized'> }) => Promise<IpcDaytonPreviewResult>;
