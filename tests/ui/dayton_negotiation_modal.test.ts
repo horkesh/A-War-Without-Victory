@@ -134,4 +134,32 @@ describe('DaytonNegotiationModal — Phase-4 player-agency surface', () => {
         await waitFor(() => expect(declineDayton).toHaveBeenCalledTimes(1));
         expect(resolveDayton).not.toHaveBeenCalled();
     });
+
+    const PRIJEDOR = {
+        id: 'front:prijedor:RBiH:RS', name: 'Prijedor', defaultHolder: 'RS',
+        demandCost: 9, concedeCost: 6, claimant: 'RBiH', areaPct: 0.52,
+    };
+
+    it('lists captured ground with its holder, the map assignee and an area-scaled demand', async () => {
+        const resolveDayton = vi.fn().mockResolvedValue({ ok: true });
+        (window as unknown as { awwv: Record<string, unknown> }).awwv = { resolveDayton };
+        render(createElement(DaytonNegotiationModal, { dayton: { ...PENDING, frontPackages: [PRIJEDOR] } }));
+        expect(screen.getByText('Ground held against the Dayton map')).toBeTruthy();
+        expect(screen.getByText('Held by RBiH · map gives RS · 0.52% of BiH')).toBeTruthy();
+        fireEvent.click(screen.getByText('Demand (9)'));
+        expect(screen.queryByText('Over Budget')).toBeNull();
+        fireEvent.click(screen.getByText('Submit Proposal'));
+        await waitFor(() => expect(resolveDayton).toHaveBeenCalledTimes(1));
+        expect(resolveDayton.mock.calls[0]![0].territorial_demands).toEqual(['front:prijedor:RBiH:RS']);
+    });
+
+    it('the forced table after a decline has no decline option', () => {
+        render(createElement(DaytonNegotiationModal, {
+            dayton: { ...PENDING, frontPackages: [PRIJEDOR], forced: { onFaction: 'RBiH', by: 'united_states' } },
+        }));
+        expect(screen.getByText('Imposed table')).toBeTruthy();
+        expect(screen.getByRole('status').textContent).toMatch(/Declining is no longer possible/);
+        expect(screen.queryByText('Decline Settlement')).toBeNull();
+        expect(screen.getByText('Submit Proposal')).toBeTruthy();
+    });
 });

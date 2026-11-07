@@ -1,7 +1,8 @@
 /**
  * Dayton decline and imposition (owner, 2026-11-07): a player who declines Dayton gets
- * four more weeks of war; then the faction's coercion event fires and the historical
- * settlement is imposed (RBiH: United States; RS: Belgrade; HRHB: Zagreb).
+ * eight more weeks of war; then the faction's coercion event fires (RBiH: United States;
+ * RS: Belgrade; HRHB: Zagreb) and the table reopens with no decline. Ground held against
+ * the Dayton map is negotiable there (and at an on-time Dayton) as captured-ground packages.
  */
 import { describe, expect, it } from 'vitest';
 import { resolve } from 'node:path';
@@ -18,11 +19,14 @@ import {
     DAYTON_DECLINED_BY_FLAG,
     DAYTON_SETTLEMENT_SIGNED_FLAG,
     applyPlayerDaytonHardline,
-    postDeclineControlChanges,
     declineDaytonNegotiation,
     enforceDaytonImposition,
     initiateDaytonNegotiation,
+    resolveDaytonNegotiation,
 } from '../src/sim/negotiation/dayton_negotiation.js';
+import { buildFrontPackages, frontPackagesForPlayer } from '../src/sim/negotiation/front_packages.js';
+import { computePlayerProposalSpend } from '../src/sim/negotiation/bot_negotiation.js';
+import { settlementControllersFor } from '../src/sim/negotiation/peace_settlement.js';
 import { warPhaseNegotiationSteps } from '../src/sim/turn_phases/war_phase_negotiation_steps.js';
 import { DAYTON_CONTINUATION_OPPORTUNITIES, isDaytonContinuationWindowOpen } from '../src/sim/combat/operation_opportunity_catalog_dayton_continuation.js';
 import { OPERATION_OPPORTUNITY_CATALOG } from '../src/sim/combat/operation_opportunities.js';
@@ -102,14 +106,33 @@ describe('enforceDaytonImposition', () => {
             expect(enforceDaytonImposition(state)).toBeNull();
             expect(state.military.event_flags?.[DAYTON_IMPOSITION_DUE_FLAG]).toBe(faction);
             expect(state.meta.game_over).toBe(false);
+            // The imposition turn reopens the table as a forced menu (no decline).
             state.meta.turn = 196;
+            expect(enforceDaytonImposition(state)).toBeNull();
+            const menu = state.military.negotiation!.pending_dayton;
+            expect(menu?.forced).toEqual({ on_faction: faction, by: DAYTON_COERCING_POWER[faction], opened_turn: 196 });
+            expect(state.meta.game_over).toBe(false);
+            expect(declineDaytonNegotiation(state)).toEqual({ ok: false, error: 'forced_settlement' });
+            // Left unanswered into the next turn, it is signed on the Dayton map.
+            state.meta.turn = 197;
             const result = enforceDaytonImposition(state);
-            expect(result?.imposed).toEqual({ on_faction: faction, by: DAYTON_COERCING_POWER[faction], turn: 196 });
+            expect(result?.imposed).toEqual({ on_faction: faction, by: DAYTON_COERCING_POWER[faction], turn: 197 });
             expect(state.military.negotiation!.dayton_result?.imposed?.by).toBe(DAYTON_COERCING_POWER[faction]);
+            expect(state.military.negotiation!.pending_dayton).toBeUndefined();
             expect(state.meta.game_over).toBe(true);
             expect(state.meta.outcome).toBe('dayton');
         });
     }
+
+    it('a settlement submitted at the forced table is recorded as imposed', () => {
+        const state = makeState('RBiH');
+        declineDaytonNegotiation(state);
+        state.meta.turn = 196;
+        enforceDaytonImposition(state);
+        const result = resolveDaytonNegotiation(state, { territorial_demands: [], territorial_concessions: [], institutional_choices: {} });
+        expect(result.imposed).toEqual({ on_faction: 'RBiH', by: 'united_states', turn: 196 });
+        expect(state.meta.game_over).toBe(true);
+    });
 
     it('is a no-op without a decline (headless and signed games)', () => {
         const state = makeState('RBiH');
@@ -172,7 +195,7 @@ describe('declining reopens the war (owner, 2026-11-07)', () => {
 });
 
 describe("a player's hard line at its Dayton acceptance event takes the decline path", () => {
-    it('RBiH hard line at the week-184 talks: no menu at 188, imposed by the United States at 192', async () => {
+    it('RBiH hard line at the week-184 talks: no menu at 188, forced table at 192, imposed by the United States', async () => {
         const state = makeState('RBiH', 184);
         delete state.military.negotiation!.pending_dayton;
         state.military.event_flags = { rbih_dayton_acceptance: 'hardline' };
@@ -181,6 +204,10 @@ describe("a player's hard line at its Dayton acceptance event takes the decline 
         state.meta.turn = 192;
         await runStep('evaluate-dayton-trigger', state);
         expect(state.military.negotiation!.pending_dayton).toBeUndefined();
+        expect(enforceDaytonImposition(state)).toBeNull();
+        const menu = (s: GameState) => s.military.negotiation!.pending_dayton; // re-read past the delete's narrowing
+        expect(menu(state)?.forced?.by).toBe('united_states');
+        state.meta.turn = 193;
         expect(enforceDaytonImposition(state)?.imposed?.by).toBe('united_states');
     });
 
@@ -212,6 +239,9 @@ describe('Dayton event records follow the real settlement', () => {
         declineDaytonNegotiation(state);
         state.meta.turn = 196;
         enforceDaytonImposition(state);
+        expect(state.military.fired_event_ids ?? []).not.toContain('dayton_signed_1995');
+        state.meta.turn = 197;
+        enforceDaytonImposition(state);
         expect(state.military.fired_event_ids).toContain('dayton_signed_1995');
         expect(state.military.event_flags?.[DAYTON_SETTLEMENT_SIGNED_FLAG]).toBe(true);
     });
@@ -227,27 +257,129 @@ describe('Dayton event records follow the real settlement', () => {
     });
 });
 
-describe('the imposed settlement keeps what changed hands after the decline (owner, 2026-11-07)', () => {
-    it('postDeclineControlChanges lists only cells that changed after the decline, with their current holder', () => {
-        const state = makeState('RBiH');
-        state.political.political_controllers = { 'op:a:x': 'RBiH', 'op:b:y': 'RS', 'op:c:z': 'HRHB' };
-        state.political.control_events = [
-            { turn: 180, settlement_id: 'op:a:x', from: 'RS', to: 'RBiH' },
-            { turn: 190, settlement_id: 'op:b:y', from: 'RBiH', to: 'RS' },
-            { turn: 191, settlement_id: 'op:c:z', from: 'RS', to: 'HRHB' },
-        ] as never;
-        expect(postDeclineControlChanges(state, 188)).toEqual({ 'op:b:y': 'RS', 'op:c:z': 'HRHB' });
+describe('captured ground is negotiable at Dayton (owner, 2026-11-07)', () => {
+    // Prijedor: the Dayton map gives all of it to RS. RBiH holds Kozarac.
+    const PRIJEDOR = ['op:prijedor:brezicani', 'op:prijedor:cejreci', 'op:prijedor:kamicani', 'op:prijedor:kozarac_2'];
+    const KOZARAC = 'op:prijedor:kozarac_2';
+    const ID = 'front:prijedor:RBiH:RS';
+    const withKozarac = (player: 'RBiH' | 'RS' | 'HRHB' = 'RBiH') => {
+        const state = makeState(player);
+        const controllers: Record<string, string> = {};
+        for (const o of PRIJEDOR) controllers[o] = o === KOZARAC ? 'RBiH' : 'RS';
+        state.political.political_controllers = controllers as never;
+        return state;
+    };
+    const proposal = (demands: string[] = [], concessions: string[] = []) =>
+        ({ territorial_demands: demands, territorial_concessions: concessions, institutional_choices: {} });
+
+    it('each municipality where the front departs from the Dayton map becomes a package', () => {
+        const packages = buildFrontPackages(withKozarac());
+        expect(packages.map((p) => p.id)).toEqual([ID]);
+        const pkg = packages[0]!;
+        expect(pkg).toMatchObject({ name: 'Prijedor', default_holder: 'RS', claimant: 'RBiH', osids: [KOZARAC], municipality: 'prijedor' });
+        expect(pkg.area_pct).toBeGreaterThan(0);
+        expect(pkg.capital_cost_to_demand).toBeGreaterThan(pkg.capital_cost_to_concede);
     });
 
-    it('an imposition stores those changes as overrides of the Dayton map', () => {
+    it('cost grows with area', () => {
+        const state = withKozarac();
+        const small = buildFrontPackages(state)[0]!;
+        state.political.political_controllers = { ...state.political.political_controllers, 'op:prijedor:brezicani': 'RBiH' } as never;
+        const large = buildFrontPackages(state)[0]!;
+        expect(large.area_pct).toBeGreaterThan(small.area_pct!);
+        expect(large.capital_cost_to_demand).toBeGreaterThan(small.capital_cost_to_demand);
+        expect(computePlayerProposalSpend(proposal([ID]), 'RBiH', [large])).toBe(large.capital_cost_to_demand);
+    });
+
+    it('ground inside a fixed package is left to that package', () => {
         const state = makeState('RBiH');
-        const osid = Object.keys(state.political.political_controllers ?? {})[0] ?? 'op:x:y';
+        // Sanski Most is in the fixed Western Bosnia package; Dayton gives most of it to RBiH.
+        state.political.political_controllers = {
+            'op:sanski_most:budimlic_japra_2': 'RS', 'op:sanski_most:donja_kozica': 'RS', 'op:sanski_most:jelasinovci': 'RS',
+        } as never;
+        expect(buildFrontPackages(state)).toEqual([]);
+    });
+
+    it('the player sees the ground it holds and the ground the map gives it', () => {
+        expect(frontPackagesForPlayer(withKozarac('RBiH'), 'RBiH').map((p) => p.id)).toEqual([ID]);
+        expect(frontPackagesForPlayer(withKozarac('RS'), 'RS').map((p) => p.id)).toEqual([ID]);
+        // HRHB sees Federation-partner ground that the map gives RS.
+        expect(frontPackagesForPlayer(withKozarac('HRHB'), 'HRHB').map((p) => p.id)).toEqual([ID]);
+    });
+
+    it('unraised, captured ground follows the Dayton map (the forced-table fallback)', () => {
+        const state = withKozarac();
         declineDaytonNegotiation(state);
-        state.political.political_controllers = { [osid]: 'RS' };
-        state.political.control_events = [{ turn: 190, settlement_id: osid, from: 'RBiH', to: 'RS' }] as never;
         state.meta.turn = 196;
         enforceDaytonImposition(state);
-        expect(state.military.negotiation!.settlement?.map_overrides).toEqual({ [osid]: 'RS' });
+        state.meta.turn = 197;
+        enforceDaytonImposition(state);
+        expect(settlementControllersFor(state)?.[KOZARAC]).toBe('RS');
+        expect(state.military.negotiation!.settlement?.map_overrides ?? {}).toEqual({});
+    });
+
+    it('demanded and won at the forced table, the claimant keeps it', () => {
+        const state = withKozarac();
+        declineDaytonNegotiation(state);
+        state.meta.turn = 196;
+        enforceDaytonImposition(state);
+        const result = resolveDaytonNegotiation(state, proposal([ID]));
+        expect(result.territorial_packages_accepted).toContain(ID);
+        expect(state.military.negotiation!.settlement?.map_overrides).toEqual({ [KOZARAC]: 'RBiH' });
+        expect(settlementControllersFor(state)?.[KOZARAC]).toBe('RBiH');
+    });
+
+    it('captured ground is negotiable at an on-time Dayton too', () => {
+        const state = withKozarac();
+        const result = resolveDaytonNegotiation(state, proposal([ID]));
+        expect(result.imposed).toBeUndefined();
+        expect(settlementControllersFor(state)?.[KOZARAC]).toBe('RBiH');
+    });
+
+    it('a demand the map assignee refuses fails unless its patron overrules it', () => {
+        const refuse = (override: number) => {
+            const state = withKozarac();
+            const neg = state.military.negotiation!;
+            neg.patron_relationships.RS!.override_authority = override;
+            // RS has nothing to spend: any cost to it is refused, and no counter is viable.
+            neg.strategic_dimensions = undefined;
+            neg.capital.RS = undefined as never;
+            return { state, result: resolveDaytonNegotiation(state, proposal([ID])) };
+        };
+        const kept = refuse(10);
+        expect(kept.result.territorial_packages_rejected).toContain(ID);
+        expect(settlementControllersFor(kept.state)?.[KOZARAC]).toBe('RS');
+        const overruled = refuse(80);
+        expect(overruled.result.territorial_packages_accepted).toContain(ID);
+        expect(overruled.result.patron_overrides_applied).toContain(`territorial:${ID}:RS`);
+        expect(settlementControllersFor(overruled.state)?.[KOZARAC]).toBe('RBiH');
+    });
+
+    it('the map assignee may concede captured ground to its holder', () => {
+        const state = withKozarac('RS');
+        resolveDaytonNegotiation(state, proposal([], [ID]));
+        expect(settlementControllersFor(state)?.[KOZARAC]).toBe('RBiH');
+    });
+
+    it('the UI menu carries the captured ground and the forced flag', async () => {
+        const { derivePendingDayton } = await import('../src/ui/map/data/GameStateAdapter.js');
+        const onTime = withKozarac();
+        expect(derivePendingDayton(onTime)?.frontPackages?.map((p) => p.id)).toEqual([ID]);
+        expect(derivePendingDayton(onTime)?.forced).toBeUndefined();
+        const state = withKozarac();
+        declineDaytonNegotiation(state);
+        state.meta.turn = 196;
+        enforceDaytonImposition(state);
+        expect(derivePendingDayton(state)?.forced).toEqual({ onFaction: 'RBiH', by: 'united_states' });
+        expect(derivePendingDayton(state)?.frontPackages?.[0]).toMatchObject({ id: ID, claimant: 'RBiH', defaultHolder: 'RS' });
+    });
+
+    it('a menu left open while the front moves negotiates the front at signature', () => {
+        const state = withKozarac();
+        state.political.political_controllers = { ...state.political.political_controllers, [KOZARAC]: 'RS' } as never;
+        const result = resolveDaytonNegotiation(state, proposal([ID]));
+        expect(result.territorial_packages_accepted).not.toContain(ID);
+        expect(settlementControllersFor(state)?.[KOZARAC]).toBe('RS');
     });
 });
 

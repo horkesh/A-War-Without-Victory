@@ -171,8 +171,8 @@ export interface NegotiationState {
     pending_dayton?: PendingDaytonPacket;
     /**
      * Set when the player faction declines Dayton (declineDaytonNegotiation). The menu is
-     * withdrawn and does not reopen; the war continues until `imposition_turn`, when the
-     * faction's coercion event fires and the historical settlement is imposed.
+     * withdrawn; the war continues until `imposition_turn`, when the faction's coercion
+     * event fires and the table reopens as a forced menu (`pending_dayton.forced`).
      */
     dayton_decline?: { faction: string; declined_turn: number; imposition_turn: number };
     /**
@@ -205,6 +205,12 @@ export interface PendingDaytonPacket {
     }>;
     faction_capital: Record<string, number>;
     patron_override: Record<string, number>;
+    /**
+     * Set on the table reopened after a declined Dayton is enforced (owner, 2026-11-07):
+     * there is no decline option, Submit is the only way out, and a menu left unanswered
+     * into the next turn is signed on the historical Dayton map.
+     */
+    forced?: { on_faction: string; by: 'united_states' | 'belgrade' | 'zagreb'; opened_turn: number };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -224,6 +230,16 @@ export interface TerritorialPackage {
     capital_cost_to_concede: number;
     /** OSID keyword fragments for map matching. */
     osid_keywords: string[];
+    // ── Captured-ground packages (front_packages.ts), derived per state, never persisted.
+    //    For these, default_holder is the Dayton-map assignee (who gets it if unraised).
+    /** Explicit OSIDs, used instead of osid_keywords. */
+    osids?: string[];
+    /** The party holding this ground against the Dayton map. */
+    claimant?: string;
+    /** Share of BiH area, percent. */
+    area_pct?: number;
+    /** Municipality (mun1990 id) the package lies in. */
+    municipality?: string;
 }
 
 /** An institutional negotiation point at Dayton. */
@@ -311,8 +327,9 @@ export interface DaytonResult {
     /** True when Brčko resolved to the arbitration condominium district of both Entities. */
     brcko_arbitration?: boolean;
     /**
-     * Set when the player faction declined Dayton and the settlement was imposed after
-     * the grace period (DAYTON_DECLINE_GRACE_WEEKS). `by` names the coercing power:
+     * Set when the player faction declined Dayton and the settlement was signed at the
+     * forced table after the grace period (DAYTON_DECLINE_GRACE_WEEKS), by the player or
+     * by the unanswered-table fallback. `by` names the coercing power:
      * the United States for RBiH, Belgrade for RS, Zagreb for HRHB. Absent on a signed
      * (not imposed) settlement and on older saves.
      */

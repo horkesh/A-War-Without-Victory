@@ -10,6 +10,9 @@
 
 import type { TerritorialPackage } from '../../state/negotiation_types.js';
 
+/** Per-state captured-ground packages passed alongside the fixed catalog (front_packages.ts). */
+export type ExtraPackages = readonly TerritorialPackage[] | undefined;
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Package definitions
 // ═══════════════════════════════════════════════════════════════════════════
@@ -114,9 +117,15 @@ for (const pkg of TERRITORIAL_PACKAGES) {
     packageMap.set(pkg.id, pkg);
 }
 
-/** Get a territorial package by ID. Returns undefined if not found. */
-export function getTerritorialPackageById(id: string): TerritorialPackage | undefined {
-    return packageMap.get(id);
+/**
+ * Get a territorial package by ID. Returns undefined if not found. `extra` carries the
+ * per-state captured-ground packages (front_packages.ts) when the caller has them.
+ */
+export function getTerritorialPackageById(
+    id: string,
+    extra?: readonly TerritorialPackage[],
+): TerritorialPackage | undefined {
+    return packageMap.get(id) ?? extra?.find((p) => p.id === id);
 }
 
 /** Get all territorial packages. */

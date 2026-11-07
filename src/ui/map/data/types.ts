@@ -1617,6 +1617,21 @@ export interface LoadedGameState {
             demandCost: number;
             concedeCost: number;
         }>;
+        /**
+         * Captured-ground packages: ground one party holds that the Dayton map gives to
+         * another (defaultHolder = the map assignee). Unraised, they follow the map.
+         */
+        frontPackages?: Array<{
+            id: string;
+            name: string;
+            defaultHolder: string;
+            demandCost: number;
+            concedeCost: number;
+            claimant?: string;
+            areaPct?: number;
+        }>;
+        /** Set on the table reopened after a declined Dayton: no decline option. */
+        forced?: { onFaction: string; by: string };
         institutionalPackages: Array<{
             id: string;
             name: string;

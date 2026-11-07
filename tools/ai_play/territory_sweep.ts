@@ -41,6 +41,9 @@ import {
     declineDaytonNegotiation,
     resolveDaytonNegotiation,
 } from '../../src/sim/negotiation/dayton_negotiation.js';
+import { buildFrontPackages } from '../../src/sim/negotiation/front_packages.js';
+import { getCompositeCapital } from '../../src/sim/negotiation/bot_negotiation.js';
+import type { DaytonProposal } from '../../src/state/negotiation_types.js';
 import { loadOperationalEdges } from '../../src/data/operational_data.js';
 import { buildOsidAdjacency } from '../../src/sim/combat/osid_adjacency.js';
 // @ts-ignore -- CommonJS staging modules (the same functions the Electron IPC handlers call)
@@ -82,6 +85,30 @@ interface Strategy {
     elite_deploy?: { enabled: boolean };
     /** Answer to the Dayton menu: leave it pending (default), sign the historical default, or decline. */
     dayton?: 'pending' | 'sign' | 'decline';
+    /**
+     * What the player puts on the table when it signs (and at the forced table after a
+     * decline): 'map' (default) signs the Dayton map; 'demand_holdings' demands the
+     * captured ground it holds, largest first, while its negotiation capital lasts.
+     */
+    dayton_table?: 'map' | 'demand_holdings';
+}
+
+/** The proposal the scripted player submits at the Dayton table. */
+function daytonTableProposal(state: GameState, strategy: Strategy): DaytonProposal {
+    const proposal = buildHistoricalDefaultDaytonProposal();
+    const player = state.meta.player_faction;
+    const neg = state.military.negotiation;
+    if (strategy.dayton_table !== 'demand_holdings' || !player || !neg) return proposal;
+    let budget = neg.capital[player] ? getCompositeCapital(neg.capital[player]!, player, neg.strategic_dimensions) : 0;
+    const held = buildFrontPackages(state)
+        .filter((p) => p.claimant === player)
+        .sort((a, b) => ((b.area_pct ?? 0) - (a.area_pct ?? 0)) || strictCompare(a.id, b.id));
+    for (const p of held) {
+        if (p.capital_cost_to_demand > budget) continue;
+        proposal.territorial_demands.push(p.id);
+        budget -= p.capital_cost_to_demand;
+    }
+    return proposal;
 }
 
 interface Args { strategyPath: string; out: string; turns: number }
@@ -388,13 +415,23 @@ async function main() {
         await requestOps(state, strategy, args.out);
         localSupport(state, strategy);
         await eliteDeploy(state, strategy, args.out);
-        if (state.military.negotiation?.pending_dayton && (strategy.dayton ?? 'pending') !== 'pending') {
+        if (state.military.negotiation?.pending_dayton?.forced) {
+            // The table reopened after a decline: no decline option, submit.
+            const proposal = daytonTableProposal(state, strategy);
+            resolveDaytonNegotiation(state, proposal);
+            await logLine(args.out, {
+                turn: state.meta.turn, kind: 'dayton', action: 'sign_forced',
+                demands: proposal.territorial_demands,
+                accepted: state.military.negotiation?.dayton_result?.territorial_packages_accepted ?? [],
+            });
+        } else if (state.military.negotiation?.pending_dayton && (strategy.dayton ?? 'pending') !== 'pending') {
             if (strategy.dayton === 'decline') {
                 const r = declineDaytonNegotiation(state);
                 await logLine(args.out, { turn: state.meta.turn, kind: 'dayton', action: 'decline', ...r });
             } else {
-                resolveDaytonNegotiation(state, buildHistoricalDefaultDaytonProposal());
-                await logLine(args.out, { turn: state.meta.turn, kind: 'dayton', action: 'sign' });
+                const proposal = daytonTableProposal(state, strategy);
+                resolveDaytonNegotiation(state, proposal);
+                await logLine(args.out, { turn: state.meta.turn, kind: 'dayton', action: 'sign', demands: proposal.territorial_demands });
             }
         }
         if (state.meta.game_over) break;

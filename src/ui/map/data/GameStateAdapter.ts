@@ -84,6 +84,7 @@ import {
     deriveFactionSupplyConditionFromOsidReport,
 } from '../../../sim/combat/supply_condition.js';
 import { PEACE_PLANS } from '../../../sim/negotiation/peace_plan_data.js';
+import { frontPackagesForPlayer } from '../../../sim/negotiation/front_packages.js';
 import war1992Events from '../../../../data/scenarios/events/war_1992.json';
 import war1993Events from '../../../../data/scenarios/events/war_1993.json';
 import war1994Events from '../../../../data/scenarios/events/war_1994.json';
@@ -4139,6 +4140,23 @@ export function derivePendingDayton(state: any): LoadedGameState['pendingDayton'
     if (!neg?.pending_dayton) return undefined;
     if (neg.dayton_result) return undefined;
     const pd = neg.pending_dayton;
+    const playerFaction = typeof state.meta?.player_faction === 'string' ? state.meta.player_faction : null;
+    // Captured-ground packages are derived from the current front and the Dayton map
+    // (sim/negotiation/front_packages.ts); the resolver rebuilds the same set at signature.
+    const frontPackages = playerFaction && state.political?.political_controllers
+        ? frontPackagesForPlayer(state as GameState, playerFaction).map((p) => ({
+            id: p.id,
+            name: p.name,
+            defaultHolder: p.default_holder,
+            demandCost: p.capital_cost_to_demand,
+            concedeCost: p.capital_cost_to_concede,
+            claimant: p.claimant,
+            areaPct: p.area_pct,
+        }))
+        : [];
+    const forced = pd.forced && typeof pd.forced === 'object'
+        ? { onFaction: String(pd.forced.on_faction ?? ''), by: String(pd.forced.by ?? '') }
+        : undefined;
     return {
         territorialPackages: (pd.territorial_packages ?? []).map((p: any) => ({
             id: String(p.id ?? ''),
@@ -4147,6 +4165,8 @@ export function derivePendingDayton(state: any): LoadedGameState['pendingDayton'
             demandCost: Number(p.demand_cost ?? 0),
             concedeCost: Number(p.concede_cost ?? 0),
         })),
+        frontPackages,
+        ...(forced ? { forced } : {}),
         institutionalPackages: (pd.institutional_packages ?? []).map((p: any) => ({
             id: String(p.id ?? ''),
             name: String(p.name ?? ''),
