@@ -9,9 +9,8 @@ function strictCompare(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
 }
 
-const PARTITIONABLE_TEST_FILES = new Set([
-  'tests/sector_partition_buildCorpsFrontSectors_integration.test.ts',
-]);
+export const SECTOR_PROPERTY_TEST = 'tests/sector_partition_buildCorpsFrontSectors_integration.test.ts';
+const PARTITIONABLE_TEST_FILES = new Set([SECTOR_PROPERTY_TEST]);
 
 export function deterministicShardValues(total, shardIndex, shardCount) {
   if (!Number.isInteger(total) || total < 0) throw new Error('total must be a non-negative integer');
