@@ -113,8 +113,8 @@ export interface PeaceSettlement {
     special_osids: string[];
     /** Constitutional status per faction. */
     status: Record<string, SettlementStatus>;
-    /** Dayton package outcomes that override the base map (OSID -> faction, sorted keys). */
-    package_overrides?: Record<string, FactionId>;
+    /** Overrides of the plan map: Dayton package outcomes and, for an imposed Dayton, control changes made after the decline (OSID -> faction, sorted keys). */
+    map_overrides?: Record<string, FactionId>;
 }
 
 interface SharesFile {
@@ -233,7 +233,7 @@ export function applyPeaceSettlement(
         territory_pct: settlementTerritoryPct(controllers),
         special_osids: special,
         status: { ...SETTLEMENT_STATUS[planId] },
-        ...(Object.keys(kept).length > 0 ? { package_overrides: kept } : {}),
+        ...(Object.keys(kept).length > 0 ? { map_overrides: kept } : {}),
     };
     neg.settlement = settlement;
     return settlement;
@@ -243,7 +243,7 @@ export function applyPeaceSettlement(
 export function settlementControllersFor(state: GameState): Record<string, FactionId> | null {
     const s = state.military?.negotiation?.settlement;
     if (!s) return null;
-    return computeSettlementControllers(state, s.plan_id, s.package_overrides ?? {}).controllers;
+    return computeSettlementControllers(state, s.plan_id, s.map_overrides ?? {}).controllers;
 }
 
 /** Grades best → worst; mirrors scoring.ts GRADE_RANK. */

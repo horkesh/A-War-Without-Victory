@@ -17,11 +17,14 @@ import {
     DAYTON_DECLINED_BY_FLAG,
     DAYTON_SETTLEMENT_SIGNED_FLAG,
     applyPlayerDaytonHardline,
+    postDeclineControlChanges,
     declineDaytonNegotiation,
     enforceDaytonImposition,
     initiateDaytonNegotiation,
 } from '../src/sim/negotiation/dayton_negotiation.js';
 import { warPhaseNegotiationSteps } from '../src/sim/turn_phases/war_phase_negotiation_steps.js';
+import { DAYTON_CONTINUATION_OPPORTUNITIES, isDaytonContinuationWindowOpen } from '../src/sim/combat/operation_opportunity_catalog_dayton_continuation.js';
+import { OPERATION_OPPORTUNITY_CATALOG } from '../src/sim/combat/operation_opportunities.js';
 import { loadEventDefinitionsFromDir } from '../src/sim/events/event_loader.js';
 import { evaluateCondition } from '../src/sim/events/event_types.js';
 
@@ -56,13 +59,13 @@ const runStep = (name: string, state: GameState) => {
 };
 
 describe('declineDaytonNegotiation', () => {
-    it('withdraws the menu and schedules imposition four weeks out', () => {
+    it('withdraws the menu and schedules imposition eight weeks out', () => {
         const state = makeState('RBiH');
         const r = declineDaytonNegotiation(state);
-        expect(DAYTON_DECLINE_GRACE_WEEKS).toBe(4);
-        expect(r).toEqual({ ok: true, imposition_turn: 192 });
+        expect(DAYTON_DECLINE_GRACE_WEEKS).toBe(8);
+        expect(r).toEqual({ ok: true, imposition_turn: 196 });
         expect(state.military.negotiation!.pending_dayton).toBeUndefined();
-        expect(state.military.negotiation!.dayton_decline).toEqual({ faction: 'RBiH', declined_turn: 188, imposition_turn: 192 });
+        expect(state.military.negotiation!.dayton_decline).toEqual({ faction: 'RBiH', declined_turn: 188, imposition_turn: 196 });
         expect(state.meta.game_over).toBe(false);
     });
 
@@ -86,21 +89,21 @@ describe('declineDaytonNegotiation', () => {
 
 describe('enforceDaytonImposition', () => {
     for (const faction of ['RBiH', 'RS', 'HRHB'] as const) {
-        it(`${faction}: war continues four weeks, then ${DAYTON_COERCING_POWER[faction]} imposes the settlement`, () => {
+        it(`${faction}: war continues eight weeks, then ${DAYTON_COERCING_POWER[faction]} imposes the settlement`, () => {
             const state = makeState(faction);
             declineDaytonNegotiation(state);
-            for (const turn of [189, 190]) {
+            for (const turn of [189, 190, 191, 192, 193, 194]) {
                 state.meta.turn = turn;
                 expect(enforceDaytonImposition(state)).toBeNull();
                 expect(state.military.event_flags?.[DAYTON_IMPOSITION_DUE_FLAG]).toBeUndefined();
             }
-            state.meta.turn = 191; // the turn before imposition raises the event flag
+            state.meta.turn = 195; // the turn before imposition raises the event flag
             expect(enforceDaytonImposition(state)).toBeNull();
             expect(state.military.event_flags?.[DAYTON_IMPOSITION_DUE_FLAG]).toBe(faction);
             expect(state.meta.game_over).toBe(false);
-            state.meta.turn = 192;
+            state.meta.turn = 196;
             const result = enforceDaytonImposition(state);
-            expect(result?.imposed).toEqual({ on_faction: faction, by: DAYTON_COERCING_POWER[faction], turn: 192 });
+            expect(result?.imposed).toEqual({ on_faction: faction, by: DAYTON_COERCING_POWER[faction], turn: 196 });
             expect(state.military.negotiation!.dayton_result?.imposed?.by).toBe(DAYTON_COERCING_POWER[faction]);
             expect(state.meta.game_over).toBe(true);
             expect(state.meta.outcome).toBe('dayton');
@@ -168,13 +171,13 @@ describe('declining reopens the war (owner, 2026-11-07)', () => {
 });
 
 describe("a player's hard line at its Dayton acceptance event takes the decline path", () => {
-    it('RBiH hard line at the week-184 talks: no menu at 188, imposed by the United States at 188', async () => {
+    it('RBiH hard line at the week-184 talks: no menu at 188, imposed by the United States at 192', async () => {
         const state = makeState('RBiH', 184);
         delete state.military.negotiation!.pending_dayton;
         state.military.event_flags = { rbih_dayton_acceptance: 'hardline' };
         expect(applyPlayerDaytonHardline(state)).toBe(true);
-        expect(state.military.negotiation!.dayton_decline).toEqual({ faction: 'RBiH', declined_turn: 184, imposition_turn: 188 });
-        state.meta.turn = 188;
+        expect(state.military.negotiation!.dayton_decline).toEqual({ faction: 'RBiH', declined_turn: 184, imposition_turn: 192 });
+        state.meta.turn = 192;
         await runStep('evaluate-dayton-trigger', state);
         expect(state.military.negotiation!.pending_dayton).toBeUndefined();
         expect(enforceDaytonImposition(state)?.imposed?.by).toBe('united_states');
@@ -206,7 +209,7 @@ describe('Dayton event records follow the real settlement', () => {
     it('signing or imposing Dayton fires the "Dayton signed" record', () => {
         const state = makeState('RBiH');
         declineDaytonNegotiation(state);
-        state.meta.turn = 192;
+        state.meta.turn = 196;
         enforceDaytonImposition(state);
         expect(state.military.fired_event_ids).toContain('dayton_signed_1995');
         expect(state.military.event_flags?.[DAYTON_SETTLEMENT_SIGNED_FLAG]).toBe(true);
@@ -220,5 +223,75 @@ describe('Dayton event records follow the real settlement', () => {
         state.military.event_flags[DAYTON_DECLINED_BY_FLAG] = 'RBiH';
         expect(evaluateCondition(def('rs_dayton_acceptance_1995').trigger.condition!, state)).toBe(false);
         expect(evaluateCondition(def('hrhb_dayton_acceptance_1995').trigger.condition!, state)).toBe(false);
+    });
+});
+
+describe('the imposed settlement keeps what changed hands after the decline (owner, 2026-11-07)', () => {
+    it('postDeclineControlChanges lists only cells that changed after the decline, with their current holder', () => {
+        const state = makeState('RBiH');
+        state.political.political_controllers = { 'op:a:x': 'RBiH', 'op:b:y': 'RS', 'op:c:z': 'HRHB' };
+        state.political.control_events = [
+            { turn: 180, settlement_id: 'op:a:x', from: 'RS', to: 'RBiH' },
+            { turn: 190, settlement_id: 'op:b:y', from: 'RBiH', to: 'RS' },
+            { turn: 191, settlement_id: 'op:c:z', from: 'RS', to: 'HRHB' },
+        ] as never;
+        expect(postDeclineControlChanges(state, 188)).toEqual({ 'op:b:y': 'RS', 'op:c:z': 'HRHB' });
+    });
+
+    it('an imposition stores those changes as overrides of the Dayton map', () => {
+        const state = makeState('RBiH');
+        const osid = Object.keys(state.political.political_controllers ?? {})[0] ?? 'op:x:y';
+        declineDaytonNegotiation(state);
+        state.political.political_controllers = { [osid]: 'RS' };
+        state.political.control_events = [{ turn: 190, settlement_id: osid, from: 'RBiH', to: 'RS' }] as never;
+        state.meta.turn = 196;
+        enforceDaytonImposition(state);
+        expect(state.military.negotiation!.settlement?.map_overrides).toEqual({ [osid]: 'RS' });
+    });
+});
+
+describe('Dayton continuation operations (owner, 2026-11-07: "Resume halted 1995 pushes")', () => {
+    const ids = DAYTON_CONTINUATION_OPPORTUNITIES.map((d) => d.opportunity_id).sort();
+
+    it('are registered in the opportunity catalog and never open without a decline', () => {
+        for (const id of ids) expect(OPERATION_OPPORTUNITY_CATALOG.some((d) => d.opportunity_id === id)).toBe(true);
+        const state = makeState('RBiH', 190);
+        for (const def of DAYTON_CONTINUATION_OPPORTUNITIES) {
+            expect(def.evaluators.date_window(state, 190, def).green, def.opportunity_id).toBe(false);
+        }
+        expect(isDaytonContinuationWindowOpen(state, 190)).toBe(false);
+    });
+
+    it('open while the decline window runs and close at the imposition', () => {
+        const state = makeState('RBiH');
+        declineDaytonNegotiation(state); // declined 188, imposition 196
+        expect(isDaytonContinuationWindowOpen(state, 188)).toBe(false);
+        expect(isDaytonContinuationWindowOpen(state, 189)).toBe(true);
+        expect(isDaytonContinuationWindowOpen(state, 196)).toBe(true);
+        expect(isDaytonContinuationWindowOpen(state, 197)).toBe(false);
+    });
+
+    it('HV Guards join only when Zagreb is not the coercing power (owner ruling)', () => {
+        const byId = (id: string) => DAYTON_CONTINUATION_OPPORTUNITIES.find((d) => d.opportunity_id === id)!;
+        const joint = byId('southern_move_manjaca_95');
+        const hvoOnly = byId('southern_move_manjaca_hvo_95');
+        expect(hvoOnly.axes.flatMap((a) => a.brigades).some((b) => b.startsWith('hv_'))).toBe(false);
+        for (const decliner of ['RBiH', 'RS', 'HRHB'] as const) {
+            const state = makeState(decliner);
+            declineDaytonNegotiation(state);
+            expect(joint.evaluators.date_window(state, 190, joint).green, `joint/${decliner}`).toBe(decliner !== 'HRHB');
+            expect(hvoOnly.evaluators.date_window(state, 190, hvoOnly).green, `hvo/${decliner}`).toBe(decliner === 'HRHB');
+        }
+    });
+
+    it('keep camp geography and Banja Luka out of every objective list', () => {
+        const forbidden = ['op:prijedor:prijedor_2', 'op:prijedor:kozarac_2', 'op:prijedor:omarska_2', 'op:prijedor:kamicani', 'op:banja_luka:banja_luka_2', 'op:banja_luka:kola'];
+        const objectives = DAYTON_CONTINUATION_OPPORTUNITIES.flatMap((d) => d.axes.flatMap((a) => a.objectives));
+        for (const f of forbidden) expect(objectives).not.toContain(f);
+    });
+
+    it('only the Dayton continuation family may supersede a live operation', () => {
+        const others = OPERATION_OPPORTUNITY_CATALOG.filter((d) => d.family !== 'dayton_continuation');
+        expect(others.every((d) => d.supersedes_live_operation === undefined)).toBe(true);
     });
 });

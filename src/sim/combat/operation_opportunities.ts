@@ -98,6 +98,7 @@ import type { OperationAAR } from './operation_aar.js';
 import { FIFTH_CORPS_OPPORTUNITIES } from './operation_opportunity_catalog_5th_corps.js';
 import { CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES } from './operation_opportunity_catalog_central_bosnia.js';
 import { FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES } from './operation_opportunity_catalog_federation_western_bosnia.js';
+import { DAYTON_CONTINUATION_OPPORTUNITIES } from './operation_opportunity_catalog_dayton_continuation.js';
 import { enterOperationRecovery } from './tactical_group_lifecycle.js';
 import { effectiveOperationMinimum } from './operation_minimum_policy.js';
 
@@ -283,6 +284,16 @@ export interface OperationOpportunityDef {
      * Default `undefined` — Sana 95 and any other entry not setting this is unaffected.
      */
     readonly targets_friendly_overrides?: readonly string[];
+    /**
+     * Explicit handover from a live operation on the same corps (owner, 2026-11-07, Dayton
+     * continuation): roster brigades committed to `operation_name` on `corps_id` are
+     * admitted and stripped from it, as probe participants are; the predecessor enters
+     * recovery ('manual_termination') only if left with no brigades.
+     *
+     * SCOPE-RESTRICTED: honoured only when `tier === 'T1'` AND
+     * `family === 'dayton_continuation'`; ignored elsewhere.
+     */
+    readonly supersedes_live_operation?: { readonly corps_id: string; readonly operation_name: string };
 }
 
 /** Pure predicate: returns whether an axis is green + a player-safe reason. */
@@ -419,6 +430,8 @@ export type OperationParticipantEvaluationReason =
     | 'eligible_roster_attachment'
     | 'eligible_oob_alias_roster_attachment'
     | 'eligible_probe_preemption'
+    /** Handed over from the live operation the opportunity explicitly supersedes (supersedes_live_operation). */
+    | 'eligible_supersession'
     | 'missing_formation'
     | 'ambiguous_oob_reference'
     | 'corps_mismatch_gate_disabled'
@@ -588,6 +601,8 @@ export const OPERATION_OPPORTUNITY_CATALOG: readonly OperationOpportunityDef[] =
     ...FIFTH_CORPS_OPPORTUNITIES,
     ...CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES,
     ...FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES,
+    // Owner, 2026-11-07: only while a refused Dayton is not yet imposed (gated in date_window).
+    ...DAYTON_CONTINUATION_OPPORTUNITIES,
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1354,6 +1369,10 @@ export function preflightOpportunityAdmission(
             def.name,
             turn,
             adjacency,
+            undefined,
+            undefined,
+            undefined,
+            supersessionFor(def),
         );
         if (participants.length === 0 && !handoff) continue;
         const hasObjective = axis.objectives.some((osid) => {
@@ -1468,6 +1487,7 @@ function spawnCorpsOperationFromOpportunity(
             axisLoans,
             participantEvaluations,
             axisProbePreemptions,
+            supersessionFor(def),
         );
         // A handoff destination is intentionally empty until activation. Its brigade is admitted
         // once through the declared source axis and must never be reserved on both axes.
@@ -1614,6 +1634,14 @@ interface ProbePreemption {
     readonly brigadeId: FormationId;
     readonly hostCorpsId: FormationId;
     readonly op: CorpsOperation;
+    /** 'supersession' = explicit handover via supersedes_live_operation. Default: probe. */
+    readonly kind?: 'probe' | 'supersession';
+}
+
+/** The supersession a def may claim, or null outside its authorised scope. */
+function supersessionFor(def: OperationOpportunityDef): OperationOpportunityDef['supersedes_live_operation'] | null {
+    if (def.tier !== 'T1' || def.family !== 'dayton_continuation') return null;
+    return def.supersedes_live_operation ?? null;
 }
 
 function preemptOpportunityProbeParticipants(
@@ -1638,7 +1666,7 @@ function preemptOpportunityProbeParticipants(
                 preemption.hostCorpsId,
                 preemption.op,
                 turn,
-                'probe_complete',
+                preemption.kind === 'supersession' ? 'manual_termination' : 'probe_complete',
             );
         }
     }
@@ -1704,6 +1732,7 @@ function selectEligibleOpportunityParticipants(
     eliteLoansOut?: Array<{ brigadeId: FormationId; corpsId: string }>,
     evaluationsOut?: OperationParticipantEvaluation[],
     probePreemptionsOut?: ProbePreemption[],
+    supersedes?: OperationOpportunityDef['supersedes_live_operation'] | null,
 ): FormationId[] {
     const formations = state.military.formations ?? {};
     const movementState = state.military.brigade_movement_state ?? {};
@@ -1793,7 +1822,11 @@ function selectEligibleOpportunityParticipants(
             }
             admittedByRosterAttachment = true;
         }
-        if (liveCommitment && liveCommitment.op.type !== 'probe') {
+        const supersededCommitment = !!liveCommitment
+            && !!supersedes
+            && liveCommitment.corps_id === supersedes.corps_id
+            && liveCommitment.op.name === supersedes.operation_name;
+        if (liveCommitment && liveCommitment.op.type !== 'probe' && !supersededCommitment) {
             record('rejected', 'committed_to_live_operation');
             continue;
         }
@@ -1821,16 +1854,19 @@ function selectEligibleOpportunityParticipants(
             const loanState = formation.elite_loan_state!;
             eliteLoansOut.push({ brigadeId, corpsId: axis.corps });
         }
-        if (liveCommitment?.op.type === 'probe' && probePreemptionsOut) {
+        if (liveCommitment && (liveCommitment.op.type === 'probe' || supersededCommitment) && probePreemptionsOut) {
             probePreemptionsOut.push({
                 brigadeId,
                 hostCorpsId: liveCommitment.corps_id,
                 op: liveCommitment.op,
+                kind: supersededCommitment ? 'supersession' : 'probe',
             });
         }
 
         selected.push(brigadeId);
-        record('admitted', liveCommitment?.op.type === 'probe'
+        record('admitted', supersededCommitment
+            ? 'eligible_supersession'
+            : liveCommitment?.op.type === 'probe'
             ? 'eligible_probe_preemption'
             : admittedByRosterAttachment
             ? resolvedByOobAlias ? 'eligible_oob_alias_roster_attachment' : 'eligible_roster_attachment'

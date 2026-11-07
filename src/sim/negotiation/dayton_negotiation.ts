@@ -262,9 +262,11 @@ export function resolvePendingDaytonCloseOut(state: GameState): DaytonResult | n
 
 /**
  * Weeks of war the player gets after declining Dayton before the settlement is
- * imposed. Owner direction: "he should get 4 more weeks and then an event".
+ * imposed. Owner direction first set 4 ("he should get 4 more weeks and then an
+ * event"); raised to 8 on 2026-11-07 so the reopened war leaves room for the
+ * continuation operations to plan, attack and draw counterattacks.
  */
-export const DAYTON_DECLINE_GRACE_WEEKS = 4;
+export const DAYTON_DECLINE_GRACE_WEEKS = 8;
 
 /** Flag the imposition step raises the turn before imposition; the coercion events trigger on it. */
 export const DAYTON_IMPOSITION_DUE_FLAG = 'dayton_imposition_due';
@@ -353,6 +355,26 @@ export function reopenWarAfterDaytonDecline(state: GameState): void {
 }
 
 /**
+ * Cells whose control changed after the decline turn, with their current holder
+ * (from the control-event log; the last holder wins). Sorted keys, deterministic.
+ */
+export function postDeclineControlChanges(state: GameState, declinedTurn: number): Record<string, FactionId> {
+    const controllers = state.political?.political_controllers ?? {};
+    const changed = new Set<string>();
+    for (const ev of state.political?.control_events ?? []) {
+        if (typeof ev.turn === 'number' && ev.turn > declinedTurn && typeof ev.settlement_id === 'string') {
+            changed.add(ev.settlement_id);
+        }
+    }
+    const out: Record<string, FactionId> = {};
+    for (const osid of [...changed].sort(strictCompare)) {
+        const holder = controllers[osid];
+        if (holder) out[osid] = holder;
+    }
+    return out;
+}
+
+/**
  * A player's "hard line" answer to its own Dayton acceptance event (e.g. RBiH at
  * dayton_talks_begin_1995) is a refusal of the settlement and takes the decline path.
  * Bot answers stay narrative. Returns true when it recorded a decline this call.
@@ -387,7 +409,11 @@ export function enforceDaytonImposition(state: GameState): DaytonResult | null {
         state.military.event_flags[DAYTON_IMPOSITION_DUE_FLAG] = decline.faction;
     }
     if (turn < decline.imposition_turn) return null;
-    const result = resolveDaytonNegotiation(state, buildHistoricalDefaultDaytonProposal());
+    // Owner, 2026-11-07: the imposed settlement is the Dayton map PLUS whatever changed
+    // hands after the decline, so fighting on can pay off (or backfire).
+    const result = resolveDaytonNegotiation(state, buildHistoricalDefaultDaytonProposal(), {
+        settlementOverrides: postDeclineControlChanges(state, decline.declined_turn),
+    });
     result.imposed = {
         on_faction: decline.faction,
         by: DAYTON_COERCING_POWER[decline.faction] ?? 'united_states',
@@ -421,7 +447,11 @@ export function enforceDaytonImposition(state: GameState): DaytonResult | null {
  */
 export function resolveDaytonNegotiation(
     state: GameState,
-    playerProposal: DaytonProposal
+    playerProposal: DaytonProposal,
+    options: {
+        /** OSID -> faction overrides applied on top of the Dayton map and package outcomes. */
+        settlementOverrides?: Record<string, FactionId>;
+    } = {},
 ): DaytonResult {
     ensureNegotiationState(state);
 
@@ -651,7 +681,10 @@ export function resolveDaytonNegotiation(
     // Owner, 2026-11-07: Dayton's consequence is its MAP. The settlement is the researched
     // Dayton map, with the packages this negotiation actually moved overriding it, and
     // RS recognised by name with the Posavina corridor. Recorded before the freeze.
-    applyPeaceSettlement(state, 'dayton', daytonPackageOverrides(state, result, proposal, playerFaction));
+    applyPeaceSettlement(state, 'dayton', {
+        ...daytonPackageOverrides(state, result, proposal, playerFaction),
+        ...(options.settlementOverrides ?? {}),
+    });
 
     // LANE-NIGHTSHIFT-N3 (D#2, 2026-05-03): freeze endgame snapshot so
     // verdict / cost ledger / historical comparison are preserved across

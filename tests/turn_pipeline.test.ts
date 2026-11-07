@@ -201,15 +201,19 @@ describe('runTurn determinism', () => {
     expect(state.meta.game_over).not.toBe(true);
     // Previously the horizon menu still opened at 188. A player's hard line is now a
     // decline: recorded at the end of the next resolution (185), menu never offered,
-    // settlement imposed four weeks later.
-    expect(state.military.negotiation?.dayton_decline).toEqual({ faction: 'RBiH', declined_turn: 185, imposition_turn: 189 });
+    // settlement imposed eight weeks later (DAYTON_DECLINE_GRACE_WEEKS).
+    expect(state.military.negotiation?.dayton_decline).toEqual({ faction: 'RBiH', declined_turn: 185, imposition_turn: 193 });
     expect(state.military.negotiation?.pending_dayton).toBeUndefined();
     expect(state.military.event_flags?.dayton_declined_by).toBe('RBiH');
 
-    const imposed = await runTurn(state, { seed: 'dayton-hardline-chain', eventDefinitions, settlementEdges: [] });
-    expect(imposed.nextState.meta.turn).toBe(189);
-    expect(imposed.nextState.meta.game_over).toBe(true);
-    expect(imposed.nextState.military.negotiation?.dayton_result?.imposed?.by).toBe('united_states');
+    let next = state;
+    while (next.meta.turn < 193) {
+      next = (await runTurn(next, { seed: 'dayton-hardline-chain', eventDefinitions, settlementEdges: [] })).nextState;
+      if (next.meta.turn < 193) expect(next.meta.game_over).not.toBe(true);
+    }
+    expect(next.meta.turn).toBe(193);
+    expect(next.meta.game_over).toBe(true);
+    expect(next.military.negotiation?.dayton_result?.imposed?.by).toBe('united_states');
   });
 
 });

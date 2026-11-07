@@ -146,7 +146,7 @@ describe('Dayton settles on the Dayton map and names Republika Srpska', () => {
         expect(s.territory_pct.RS).toBeGreaterThan(46.5);
         expect(s.territory_pct.RS).toBeLessThan(50.5);
         expect(SETTLEMENT_STATUS.dayton.RS).toMatchObject({ named: true, contiguous: true, own_army: true, max_grade: null });
-        expect(s.package_overrides).toBeUndefined();
+        expect(s.map_overrides).toBeUndefined();
     });
 
     it('a package the player concedes moves to the other side on the settlement map', () => {
@@ -157,8 +157,8 @@ describe('Dayton settles on the Dayton map and names Republika Srpska', () => {
         const s = state.military.negotiation!.settlement!;
         if (state.military.negotiation!.dayton_result!.territorial_packages_accepted.includes('central_bosnia')) {
             const map = settlementControllersFor(state)!;
-            expect(Object.keys(s.package_overrides ?? {}).length).toBeGreaterThan(0);
-            for (const o of Object.keys(s.package_overrides ?? {})) expect(map[o]).toBe('RS');
+            expect(Object.keys(s.map_overrides ?? {}).length).toBeGreaterThan(0);
+            for (const o of Object.keys(s.map_overrides ?? {})) expect(map[o]).toBe('RS');
         }
     });
 });
