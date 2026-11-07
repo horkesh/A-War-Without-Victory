@@ -20,7 +20,9 @@ owning_plan: docs/plans/2026-07-31-content-history-localization-audio-plan.md
 # Base moved 2026-11-07 to fb293f9d4: of the thirteen named files only AdvanceTurnModal.tsx
 # changed since 13f1bda2a (PR #540 pause-before-combat: the modal hides while a decision is
 # pending). That change touches no audio call; the scope above stands.
-base_commit: fb293f9d4a3045b15a93b41153ececd391d401f2
+# At e69b7d027, the audio API reference sweep still matches the thirteen listed files.
+# UI sizing adjusts presentation and preserves the pause-before-combat hide behavior.
+base_commit: e69b7d02722393504732db948ff29d49aa7f2d0f
 lane: R7
 gate: R7-AUDIO-CUE-WIRING
 
