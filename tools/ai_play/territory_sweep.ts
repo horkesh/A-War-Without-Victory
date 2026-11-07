@@ -304,7 +304,10 @@ async function requestOps(state: GameState, strategy: Strategy, out: string) {
         if (objection.rejectionReason) continue;
         const okAction = objection.recommendedAction === 'launch' || (cfg?.accept_delay && objection.recommendedAction === 'delay');
         if (!okAction || objection.forceRatio < (cfg?.min_force_ratio ?? 0)) continue;
-        const result = stageOpDirective(state, { corpsId: corps, targetOsid: target }, {});
+        // As in the UI: confirming past a shown objection (anything but 'launch') is a forced
+        // launch, which the engine tags and records as a presidential override on the CO.
+        const forced = objection.recommendedAction !== 'launch';
+        const result = stageOpDirective(state, { corpsId: corps, targetOsid: target, ...(forced ? { forced_over_objection: true } : {}) }, {});
         if (result.ok) {
             usedCorps.add(corps); usedTargets.add(target);
             await logLine(out, { turn, kind: 'request_op', corps, target, force_ratio: objection.forceRatio, action: objection.recommendedAction });
