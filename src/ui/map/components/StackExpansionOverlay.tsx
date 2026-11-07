@@ -6,6 +6,8 @@ import { formationIconId } from '../map/builders/buildFormationsGeoJSON';
 import { Z } from '../../shared/zIndex';
 import { t, useLocale } from '../i18n';
 import { getFormationUnitType, getLocalizedFormationName } from '../data/formationNameLocalizations';
+import { createPortal } from 'react-dom';
+import { useInterfaceScale } from '../preferences/interfaceScalePreference';
 
 interface StackExpansionOverlayProps {
     osid: string;
@@ -80,6 +82,9 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
     onSelect,
 }) => {
     const [locale] = useLocale();
+    const preference = useInterfaceScale();
+    const portal = document.querySelector('[data-interface-portal-root]');
+    const factor = portal ? preference / 100 : 1;
     const dialogRef = useRef<HTMLDivElement>(null);
     const previouslyFocusedRef = useRef<HTMLElement | null>(null);
 
@@ -140,12 +145,12 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
         }
     }, [total, onClose]);
 
-    const viewportWidth = typeof window === 'undefined' ? Math.max(1, anchorX * 2) : window.innerWidth;
-    const viewportHeight = typeof window === 'undefined' ? Math.max(1, anchorY * 2) : window.innerHeight;
+    const viewportWidth = (typeof window === 'undefined' ? Math.max(1, anchorX * 2) : window.innerWidth) / factor;
+    const viewportHeight = (typeof window === 'undefined' ? Math.max(1, anchorY * 2) : window.innerHeight) / factor;
     const clampedAnchorX = viewportWidth / 2;
     const clampedAnchorY = viewportHeight / 2;
 
-    return (
+    const content = (
         <div
             ref={dialogRef}
             role="dialog"
@@ -176,7 +181,7 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
             >
                 <div
                     data-stack-picker-panel="true"
-                    className="pointer-events-auto flex max-h-[calc(100vh-2rem)] w-[min(32rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 scale-100 flex-col overflow-hidden rounded border border-accent-gold/45 bg-panel-bg p-3 opacity-100 shadow-2xl"
+                    className="pointer-events-auto flex max-h-[calc(var(--interface-viewport-height,100vh)-2rem)] w-[min(32rem,calc(var(--interface-viewport-width,100vw)-2rem))] -translate-x-1/2 -translate-y-1/2 scale-100 flex-col overflow-hidden rounded border border-accent-gold/45 bg-panel-bg p-3 opacity-100 shadow-2xl"
                 >
                     <div className="mb-2 flex items-center justify-between gap-3 border-b border-panel-border pb-2">
                         <div className="text-[12px] font-bold uppercase tracking-[0.08em] text-text-primary">
@@ -189,7 +194,7 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
 
                     <div
                         data-stack-member-list="true"
-                        className="grid min-h-0 max-h-[min(70vh,36rem)] flex-1 gap-2 overflow-y-auto overscroll-contain pr-1 sm:grid-cols-2"
+                        className="grid min-h-0 max-h-[min(calc(var(--interface-viewport-height,100vh)*0.7),36rem)] flex-1 gap-2 overflow-y-auto overscroll-contain pr-1 sm:grid-cols-2"
                     >
                         {formations.map((formation, index) => {
                             const isEnemyContact = Boolean(playerFaction && formation.faction !== playerFaction);
@@ -243,4 +248,5 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
             </div>
         </div>
     );
+    return portal ? createPortal(content, portal) : content;
 }

@@ -215,7 +215,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
             <div className="absolute inset-0 bg-black/40" />
 
             {/* OPORD Document */}
-            <div className="relative z-10 max-h-[80vh] overflow-y-auto">
+            <div className="relative z-10 max-h-[calc(var(--interface-viewport-height,100vh)*0.8)] overflow-y-auto">
                 <OpordDocument
                     plan={plan}
                     prediction={prediction}
@@ -254,7 +254,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
             {/* Free War Phase 4, #67 (Slice 1): author-new-op eligibility + CA cost.
                 Read-only surfacing — does NOT gate the Authorize button (Slice 2). */}
             {!isStamped && eligibility && (
-                <div className="relative z-10 mt-5 w-[min(90vw,42rem)] rounded-lg border border-[rgba(180,160,130,0.15)]
+                <div className="relative z-10 mt-5 w-[min(calc(var(--interface-viewport-width,100vw)*0.9),42rem)] rounded-lg border border-[rgba(180,160,130,0.15)]
                                 bg-[rgba(20,18,15,0.6)] px-4 py-3 text-left">
                     <div className="flex items-center justify-between mb-2">
                         <span className="text-xs uppercase tracking-[0.2em] text-text-secondary/80">

@@ -1,5 +1,7 @@
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Z } from '../../shared/zIndex';
+import { createPortal } from 'react-dom';
+import { useInterfaceScale } from '../preferences/interfaceScalePreference';
 
 export interface RadialMenuItem {
   id: string;
@@ -18,6 +20,9 @@ interface RadialMenuProps {
 
 export function RadialMenu({ items, position, targetLabel, onClose }: RadialMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const preference = useInterfaceScale();
+  const portal = document.querySelector('[data-interface-portal-root]');
+  const factor = portal ? preference / 100 : 1;
 
   // Close on click outside or Escape
   useEffect(() => {
@@ -40,10 +45,11 @@ export function RadialMenu({ items, position, targetLabel, onClose }: RadialMenu
   const startAngle = -Math.PI / 2; // start from top
 
   // Clamp position to keep menu within viewport
-  const x = Math.min(Math.max(position.x, RADIUS + 20), window.innerWidth - RADIUS - 20);
-  const y = Math.min(Math.max(position.y, RADIUS + 20), window.innerHeight - RADIUS - 20);
+  const margin = RADIUS + 45;
+  const x = Math.min(Math.max(position.x / factor, margin), window.innerWidth / factor - margin);
+  const y = Math.min(Math.max(position.y / factor, margin), window.innerHeight / factor - margin);
 
-  return (
+  const content = (
     <div
       ref={ref}
       data-testid="map-context-menu"
@@ -97,4 +103,5 @@ export function RadialMenu({ items, position, targetLabel, onClose }: RadialMenu
       `}</style>
     </div>
   );
+  return portal ? createPortal(content, portal) : content;
 }

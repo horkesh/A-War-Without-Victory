@@ -146,9 +146,9 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
             zIndex={Z.CRITICAL_MODAL}
             ariaLabelledBy="paramilitary-review-title"
             backdropClassName="bg-black/75 backdrop-blur-sm"
-            panelClassName="w-[min(92vw,680px)] max-h-[88vh] overflow-hidden rounded-lg border border-red-500/35 bg-panel-bg text-text-primary shadow-2xl"
+            panelClassName="w-[min(calc(var(--interface-viewport-width,100vw)*0.92),680px)] max-h-[calc(var(--interface-viewport-height,100vh)*0.88)] overflow-hidden rounded-lg border border-red-500/35 bg-panel-bg text-text-primary shadow-2xl"
         >
-            <div className="flex max-h-[88vh] flex-col">
+            <div className="flex max-h-[calc(var(--interface-viewport-height,100vh)*0.88)] flex-col">
                 {headerImage && (
                     <DecisionModalImageHeader
                         imageUrl={headerImage}

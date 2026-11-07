@@ -21,7 +21,7 @@ export function CreditsScreen({ onClose }: CreditsScreenProps) {
                 onClick={onClose}
                 aria-label={t('credits.closeCredits')}
             />
-            <div className="w-[90%] max-w-[480px] max-h-[80vh] overflow-auto rounded-lg border border-[#8a7a60]/30 shadow-2xl p-8"
+            <div className="w-[90%] max-w-[480px] max-h-[calc(var(--interface-viewport-height,100vh)*0.8)] overflow-auto rounded-lg border border-[#8a7a60]/30 shadow-2xl p-8"
                  style={{
                      background: 'rgba(26, 24, 21, 0.97)',
                      fontFamily: 'var(--font-command)',

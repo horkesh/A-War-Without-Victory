@@ -23,6 +23,7 @@ import {
 } from '../utils/playerSafeText';
 import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
+import { useInterfaceScale } from '../preferences/interfaceScalePreference';
 
 const TOOLTIP_DELAY_MS = 300;
 const TOOLTIP_OFFSET = 12;
@@ -437,6 +438,8 @@ export const Tooltip = React.memo(function Tooltip() {
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const mapMode = useGameStore((s) => s.mapMode);
   const playerFaction = getPlayerFacingFaction(loadedGameState);
+  const interfacePreference = useInterfaceScale();
+  const interfaceFactor = typeof document !== 'undefined' && document.querySelector('[data-interface-portal-root]') ? interfacePreference / 100 : 1;
 
   const [visible, setVisible] = useState(false);
   const [delayedTarget, setDelayedTarget] = useState<typeof tooltipTarget>(null);
@@ -461,12 +464,14 @@ export const Tooltip = React.memo(function Tooltip() {
   if (!delayedTarget || !visible) return null;
 
   const position = tooltipPosition ?? { x: 24, y: 24 };
-  const viewportWidth = typeof window === 'undefined' ? 1280 : window.innerWidth;
-  const viewportHeight = typeof window === 'undefined' ? 720 : window.innerHeight;
+  const viewportWidth = (typeof window === 'undefined' ? 1280 : window.innerWidth) / interfaceFactor;
+  const viewportHeight = (typeof window === 'undefined' ? 720 : window.innerHeight) / interfaceFactor;
   const style: React.CSSProperties = {
     position: 'fixed',
-    left: clampViewportCoordinate(position.x + TOOLTIP_OFFSET, viewportWidth, TOOLTIP_MAX_WIDTH),
-    top: clampViewportCoordinate(position.y + TOOLTIP_OFFSET, viewportHeight, TOOLTIP_MAX_HEIGHT),
+    left: clampViewportCoordinate(position.x / interfaceFactor + TOOLTIP_OFFSET, viewportWidth, TOOLTIP_MAX_WIDTH),
+    top: clampViewportCoordinate(position.y / interfaceFactor + TOOLTIP_OFFSET, viewportHeight, TOOLTIP_MAX_HEIGHT),
+    maxHeight: Math.max(1, viewportHeight - TOOLTIP_VIEWPORT_MARGIN * 2),
+    overflow: 'auto',
     maxWidth: TOOLTIP_MAX_WIDTH,
     zIndex: Z.TOOLTIP,
     pointerEvents: 'none',
