@@ -13847,3 +13847,11 @@ Owner asked to close what can be closed in R7 without the listening pass.
 - R7 now waits only on human listening/sensitivity and the roll-up gate. Roadmap R7 row and `plan_index.yml` updated.
 - Found in passing, not fixed here: the packaged app probes `127.0.0.1:3002-3005` for a Vite dev server on every launch (`resolveMapServerBaseUrl`, no `app.isPackaged` check).
 - No code, simulation, scenario or calibration change.
+
+## 2026-11-07 - RD (Dayton settlement and endgame) declared the active lane; Pyrrhic panel rulings (PROCESS, ROADMAP)
+
+Owner: "Dayton is our new active lane." Pyrrhic team convened (historian, game designer, QA/systems, UI/UX + modern wargame, product/orchestrator; read-only seats). Owner rulings on the panel's recommendation: patron override becomes an area budget with a protected list; no Federation-internal captured-ground packages; post-decline gains not patron-forced; proceed with the RD work order.
+- `origin/main` merged (R7 audio gates #553, event art #541-#544); ledger conflict resolved by keeping both sides.
+- Lane: `.claude/current-lane.txt` now names RD (owner's call); `MASTER_ROADMAP.md` sequence RD → R8 → R9 with R7 listening in parallel, RD register row and current-lane paragraph; `COMMAND_BOARD.md` RD row; plan [2026-11-07-rd-dayton-settlement-lane.md](plans/2026-11-07-rd-dayton-settlement-lane.md).
+- Gates: ten `RD-*` gates in `open_gates.yml`, all blocking R8; `tools/validate_open_gates.cjs` roll-up check generalized from R7 to every `<LANE>-ACCEPTANCE-ALL-GREEN`; `tools/derive_plan_index.cjs` lane pattern admits RD; `plan_index.yml` regenerated. Gate, plan-index and roadmap tests pass (61).
+- Codex's coordination note about forthcoming Dayton work was not reachable from this session (not in the repo or any `origin/codex/*` branch).

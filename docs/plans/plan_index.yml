@@ -172,6 +172,16 @@ lanes:
         tokens: 1479
         fits_context: true
         tasks: null
+  - lane: RD
+    title: "Dayton settlement and endgame"
+    lane_open: true
+    status: "ACTIVE — declared by the owner 2026-11-07. Peace plans settle on their maps; Dayton is declinable with a forced table; captured ground is negotiable; the final "
+    plans:
+      - path: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
+        exists: true
+        tokens: 1011
+        fits_context: true
+        tasks: null
   - lane: R8
     title: "Full-campaign packaged-Electron validation and diaries"
     lane_open: true
