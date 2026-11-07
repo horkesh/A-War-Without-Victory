@@ -387,6 +387,76 @@ describe('Army-HQ operation lifecycle', () => {
         }).tg_id).not.toBeNull();
     });
 
+    it('does not let an Army-HQ operation\'s cap reduction block its own Tactical Group', () => {
+        // Farz 95 (2026-11-07): two live 5th Corps Sana TGs filled the reduced RBiH cap (4-2=2),
+        // so the Army-HQ op that owned the reduction could never form its own TG, and its AAR
+        // carried no army_hq_telemetry. The reduction must quiet OTHER ops only.
+        const state = makeState();
+        state.military.army_hq_operations![AHQ_A]!.status = 'planning';
+        delete state.military.army_hq_operations![AHQ_A]!.tg_id;
+        state.military.army_hq_operations![AHQ_B]!.status = 'completed';
+        delete state.military.army_hq_operations![AHQ_B]!.tg_id;
+        const other = operation('corps_a', AHQ_B);
+        state.military.tactical_groups = {
+            existing_a: { ...tgFor(other, 'corps_a', 'anchor_corps_a'), army_hq_op_id: undefined },
+            existing_b: { ...tgFor(other, 'corps_b', 'anchor_corps_b'), army_hq_op_id: undefined },
+        };
+        state.military.formations!.candidate_anchor = makeFormation({
+            id: 'candidate_anchor', faction: 'RBiH', corps_id: 'corps_c', hq_sid: 'S3',
+            location_osid: 'op:friendly:corps_c', personnel: 1500, cohesion: 70,
+        });
+        state.military.formations!.candidate_donor = makeFormation({
+            id: 'candidate_donor', faction: 'RBiH', corps_id: 'corps_c', hq_sid: 'S3',
+            location_osid: 'op:friendly:corps_c', personnel: 1500, cohesion: 70,
+        });
+        const donor: TgDonorContribution = {
+            brigade_id: 'candidate_donor', source_corps_id: 'corps_c', distance_hops: 0,
+            personnel_lent: 300,
+            heavy_equipment_lent: { tanks: 0, artillery: 0, aa_systems: 0 },
+            casualties_so_far: 0,
+            equipment_losses_so_far: { tanks: 0, artillery: 0, aa_systems: 0 },
+            cohesion_bleed_applied: 0,
+        };
+        const candidate = {
+            op_id: 'Own Army HQ Op', anchor_brigade_id: 'candidate_anchor', donors: [donor], current_turn: 103,
+        } as const;
+
+        expect(formTacticalGroup(structuredClone(state), candidate)).toEqual({
+            tg_id: null,
+            rejection_reason: 'faction_tg_cap_reached',
+        });
+        expect(formTacticalGroup(structuredClone(state), { ...candidate, army_hq_op_id: AHQ_B })).toEqual({
+            tg_id: null,
+            rejection_reason: 'faction_tg_cap_reached',
+        });
+
+        const own = formTacticalGroup(state, { ...candidate, army_hq_op_id: AHQ_A });
+        expect(own.tg_id).not.toBeNull();
+        expect(state.military.army_hq_operations![AHQ_A]!.tg_id).toBe(own.tg_id);
+
+        // The full faction cap still binds the op itself: with four live TGs it is rejected.
+        const full = makeState();
+        full.military.army_hq_operations![AHQ_B]!.status = 'completed';
+        full.military.tactical_groups = {
+            t1: { ...tgFor(other, 'corps_a', 'anchor_corps_a'), army_hq_op_id: undefined },
+            t2: { ...tgFor(other, 'corps_b', 'anchor_corps_b'), army_hq_op_id: undefined },
+            t3: { ...tgFor(other, 'corps_d', 'anchor_corps_a'), army_hq_op_id: undefined },
+            t4: { ...tgFor(other, 'corps_e', 'anchor_corps_b'), army_hq_op_id: undefined },
+        };
+        full.military.formations!.candidate_donor = makeFormation({
+            id: 'candidate_donor', faction: 'RBiH', corps_id: 'corps_c', hq_sid: 'S3',
+            location_osid: 'op:friendly:corps_c', personnel: 1500, cohesion: 70,
+        });
+        full.military.formations!.candidate_anchor = makeFormation({
+            id: 'candidate_anchor', faction: 'RBiH', corps_id: 'corps_c', hq_sid: 'S3',
+            location_osid: 'op:friendly:corps_c', personnel: 1500, cohesion: 70,
+        });
+        expect(formTacticalGroup(full, { ...candidate, army_hq_op_id: AHQ_A })).toEqual({
+            tg_id: null,
+            rejection_reason: 'faction_tg_cap_reached',
+        });
+    });
+
     it('counts overlapping Army-HQ tails as one faction boolean and ignores completed expired tails', () => {
         const state = makeState();
         const receiptA = state.military.army_hq_operations![AHQ_A]!;

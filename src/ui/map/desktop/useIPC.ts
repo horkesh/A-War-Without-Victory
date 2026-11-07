@@ -5,6 +5,7 @@ import type {
     LoadSaveRecordResult,
     StartNewCampaignPayload,
     StartNewCampaignResult,
+    TurnPauseStatus,
 } from './types';
 
 export interface CorpsOperationOrderPayload {
@@ -206,6 +207,10 @@ interface WindowAwwv {
     getRuntimeFeatureFlags: () => Promise<{ srkStranglePostureActive: boolean } | null>;
     subscribeGameStateUpdated: (cb: (stateJson: string, metadata?: GameStateUpdateMetadata) => void) => () => void;
     subscribeTurnReportUpdated: (cb: (report: unknown) => void) => () => void;
+    /** PAUSE BEFORE COMBAT: status of an in-flight turn paused for this turn's player decisions. */
+    subscribeTurnPausedForDecisions: (cb: (status: TurnPauseStatus | null) => void) => () => void;
+    /** PAUSE BEFORE COMBAT: continue the paused turn, leaving its decisions pending. */
+    continuePausedTurn: () => Promise<{ ok: boolean; error?: string }>;
     /**
      * LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: subscribe to optional
      * sidecar broadcasts from `readReplaySaveSequenceSidecar` (raw JSON
@@ -480,6 +485,14 @@ export function useIPC() {
             subscribeTurnReportUpdated: awwv
                 ? (cb: (report: unknown) => void) => awwv.subscribeTurnReportUpdated(cb)
                 : (_cb: (report: unknown) => void) => () => { /* noop */ },
+
+            // PAUSE BEFORE COMBAT (owner decision 2026-11-05)
+            subscribeTurnPausedForDecisions: awwv && typeof awwv.subscribeTurnPausedForDecisions === 'function'
+                ? (cb: (status: TurnPauseStatus | null) => void) => awwv.subscribeTurnPausedForDecisions(cb)
+                : (_cb: (status: TurnPauseStatus | null) => void) => () => { /* noop */ },
+            continuePausedTurn: awwv && typeof awwv.continuePausedTurn === 'function'
+                ? () => awwv.continuePausedTurn()
+                : makeNoop<{ ok: boolean; error?: string }>(),
 
             // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER
             subscribeReplaySequenceUpdated: awwv

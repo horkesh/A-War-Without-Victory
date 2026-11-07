@@ -399,11 +399,26 @@ describe('B1 — backward-compat', () => {
         expect(producePoliticalDirective(state, 'RS')).toBeNull();
     });
 
-    it('T10b — player_faction never receives a directive (player issues via UI)', () => {
+    it('T10b — a manual (autonomy 0) player_faction receives no staff directive', () => {
         const state = withSubstrate(makeBaseState(), 'RS', { hawkishness: 5 });
         (state.meta as unknown as { player_faction: FactionId }).player_faction = 'RS';
         const d = producePoliticalDirective(state, 'RS');
         expect(d).toBeNull();
+    });
+
+    it('T10c — at autonomy >= 1 the player staff receives the same directive as a bot faction', () => {
+        const bot = withSubstrate(makeBaseState(), 'RS', { hawkishness: 5 });
+        const expected = producePoliticalDirective(bot, 'RS');
+        expect(expected).not.toBeNull();
+        const player = withSubstrate(makeBaseState(), 'RS', { hawkishness: 5 });
+        const meta = player.meta as unknown as { player_faction: FactionId; autonomy_level: number };
+        meta.player_faction = 'RS';
+        meta.autonomy_level = 2;
+        // Real GameState always carries the faction roster the staff-control helper reads.
+        (player as unknown as { factions: Array<{ id: FactionId }> }).factions = [
+            { id: 'HRHB' }, { id: 'RBiH' }, { id: 'RS' },
+        ];
+        expect(producePoliticalDirective(player, 'RS')).toEqual(expected);
     });
 });
 

@@ -34,7 +34,11 @@ const { stageOpHalt } = require('./op_halt.cjs');
 const { stageOpDirective } = require('./op_directive_staging.cjs');
 const { stageCoReplacement } = require('./co_replacement.cjs');
 const { createSerialMutex } = require('./ipc_mutex.cjs');
-const { wrapHandlerWithMutationPolicy } = require('./ipc_mutation_policy.cjs');
+const {
+  createPauseAwareMutex,
+  createPausedTurnController,
+  wrapHandlerWithMutationPolicy,
+} = require('./ipc_mutation_policy.cjs');
 const { stageMunicipalitySupportOrderOnState } = require('./municipality_support_staging.cjs');
 const { computeCorpsCommandStrain } = require('./command_strain.cjs');
 const {
@@ -309,8 +313,38 @@ function getActivePlayerFaction() {
 }
 
 function projectCurrentGameStateForRenderer() {
+  // While a turn is paused before combat the player is looking at that turn's working state
+  // (its new decisions); the canonical snapshot is still the pre-turn state.
+  const pausedRuntimeJson = pausedTurn.pausedRuntimeJson();
+  if (pausedRuntimeJson) {
+    return projectPlayerVisibleStateJson(pausedRuntimeJson, undefined, getDesktopSim().getOpportunityOwnershipMetadata());
+  }
   return currentGameStateJson ? projectPlayerVisibleStateJson(currentGameStateJson, undefined, getDesktopSim().getOpportunityOwnershipMetadata()) : null;
 }
+
+// ── PAUSE BEFORE COMBAT (owner decision, 2026-11-05) ──────────────────────────────────
+// When `advance-turn` fires a player decision, the turn pauses right after evaluate-events
+// so the player answers before this turn's movement and combat — as a bot does — instead of
+// one turn late. The paused working state lives ONLY in this controller, in memory. The
+// canonical snapshots (`currentGameStateJson` / `currentCanonicalSaveJson`) stay the
+// pre-turn state until the turn completes, so a save or quit mid-pause stores the pre-turn
+// state and the turn is simply re-run (deterministically) on the next advance. While paused,
+// every other mutating IPC is refused (`ipcStateMutex` below); answers go through
+// `respond-to-event-decision`, and `continue-paused-turn` continues without answering.
+const pausedTurn = createPausedTurnController({
+  // Serialize a clone: serialization migrates/validates its input, and the paused state is
+  // the live pipeline object the rest of the turn runs on.
+  serializeState: (state) => getDesktopSim().serializeRuntimeState(structuredClone(state)),
+  // The same resolver as the between-turn path, written back into the working state.
+  resolveInPlace: (state, eventId, responseId) =>
+    getDesktopSim().resolveDesktopEventDecisionInPlace(state, eventId, responseId, getBaseDir()),
+  sendState: (runtimeJson) => sendGameStateToRenderer(runtimeJson),
+  sendStatus: (status) => {
+    for (const win of [mainWindow, tacticalMapWindow]) {
+      if (win && !win.isDestroyed()) win.webContents.send('turn-paused-for-decisions', status);
+    }
+  },
+});
 
 function sendGameStateToRenderer(stateJson, excludeSender, metadata) {
   const playerVisibleStateJson = projectPlayerVisibleStateJson(stateJson, undefined, getDesktopSim().getOpportunityOwnershipMetadata());
@@ -1938,7 +1972,9 @@ function registerIpcHandler(channel, handler) {
 // interactive queries/saves never wait behind a mutation. Deadlock-free: no mutating handler
 // re-enters another channel (handlers call sim.* / local helpers directly, never
 // ipcMain.invoke), so there is no nested acquire.
-const ipcStateMutex = createSerialMutex();
+// Pause-aware: while a turn is paused before combat, new mutating work is refused rather
+// than queued behind the paused advance-turn (see ipc_mutation_policy.cjs).
+const ipcStateMutex = createPauseAwareMutex(createSerialMutex(), () => pausedTurn.isPaused());
 let ipcMutationSerializationInstalled = false;
 function installIpcMutationSerialization() {
   if (ipcMutationSerializationInstalled) return;
@@ -2420,8 +2456,23 @@ app.whenReady().then(() => {
         };
       }
 
-      const result = await sim.advanceTurn(state, getBaseDir());
-      if (result.error) return { ok: false, error: result.error };
+      // PAUSE BEFORE COMBAT: decisions fired this turn are put to the player right after
+      // evaluate-events; the turn continues once they are answered (respond-to-event-decision)
+      // or the player continues without answering (continue-paused-turn).
+      let result;
+      try {
+        result = await sim.advanceTurn(state, getBaseDir(), {
+          onPlayerDecisionsPending: (workingState, decisions) => pausedTurn.pause(workingState, decisions),
+        });
+      } finally {
+        // The turn is over (finished or failed): no pause can outlive it.
+        pausedTurn.end();
+      }
+      if (result.error) {
+        // The canonical state is still the pre-turn state; put the renderer back on it.
+        if (currentGameStateJson) sendGameStateToRenderer(currentGameStateJson);
+        return { ok: false, error: result.error };
+      }
       writeCanonicalCurrentState(sim, result.state, _event.sender);
       if (result.report) sendTurnReportToRenderer(result.report);
       // TIER1-REPLAY-LIVE: accumulate sparse replay summary for the live-play
@@ -3396,20 +3447,39 @@ app.whenReady().then(() => {
   // (responding to a commander-initiated relief event) is a DISTINCT, still-live mechanism
   // and is retained.
 
+  // Self-serialized (ipc_mutation_policy.cjs PAUSED_TURN_IPC_CHANNELS): during a paused turn
+  // it answers on the paused working state (the paused advance-turn holds the mutex);
+  // otherwise it takes the mutex itself and answers on the canonical state, as before.
   ipcMain.handle('respond-to-event-decision', async (_event, payload) => {
     const { eventId, responseId } = payload || {};
     if (!currentGameStateJson || typeof eventId !== 'string' || typeof responseId !== 'string') {
       return { ok: false, error: 'No game loaded or invalid payload' };
     }
-    try {
-      const sim = getDesktopSim();
-      const state = readCanonicalCurrentState(sim);
-      const nextState = sim.resolveDesktopEventDecision(state, eventId, responseId, getBaseDir());
-      writeCanonicalCurrentState(sim, nextState, _event.sender);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
+    if (pausedTurn.isPaused()) {
+      try {
+        pausedTurn.respond(eventId, responseId);
+        return { ok: true };
+      } catch (e) {
+        return { ok: false, error: e.message || String(e) };
+      }
     }
+    return ipcStateMutex.run(async () => {
+      try {
+        const sim = getDesktopSim();
+        const state = readCanonicalCurrentState(sim);
+        const nextState = sim.resolveDesktopEventDecision(state, eventId, responseId, getBaseDir());
+        writeCanonicalCurrentState(sim, nextState, _event.sender);
+        return { ok: true };
+      } catch (e) {
+        return { ok: false, error: e.message || String(e) };
+      }
+    });
+  });
+
+  // PAUSE BEFORE COMBAT: the player continues the paused turn without answering. The
+  // unanswered decisions stay pending and are answered between turns, as before the pause.
+  ipcMain.handle('continue-paused-turn', async () => {
+    return pausedTurn.resume() ? { ok: true } : { ok: false, error: 'no_paused_turn' };
   });
 
   ipcMain.handle('dismiss-event-notification', async (_event, payload) => {

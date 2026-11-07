@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { createPortal } from 'react-dom';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { t } from '../i18n/index.js';
+import { useInterfaceScale } from '../preferences/interfaceScalePreference';
 
 export interface ActiveBranchPath {
   id: string;
@@ -70,6 +71,7 @@ export function ActiveBranchPathRow({
   faction?: string;
 }) {
   const normalized = useMemo(() => normalizePaths(paths), [paths]);
+  const interfaceFactor = useInterfaceScale() / 100;
   const [layout, setLayout] = useState<{ visibleLimit: 0 | 1 | 2; compact: boolean }>(() => ({
     visibleLimit: typeof window === 'undefined' ? 2 : activeBranchVisibleLimit(window.innerWidth),
     compact: false,
@@ -87,13 +89,13 @@ export function ActiveBranchPathRow({
     const measurements = measurementRef.current;
     if (!row || !measurements) return;
     const chipWidths = Array.from(measurements.querySelectorAll<HTMLElement>('[data-branch-measure-chip]'))
-      .map((node) => node.getBoundingClientRect().width);
+      .map((node) => node.getBoundingClientRect().width / interfaceFactor);
     const remainderWidths: Record<number, number> = {};
     for (const node of measurements.querySelectorAll<HTMLElement>('[data-branch-measure-remainder]')) {
       const count = Number(node.dataset.branchMeasureRemainder);
-      if (Number.isInteger(count) && count > 0) remainderWidths[count] = node.getBoundingClientRect().width;
+      if (Number.isInteger(count) && count > 0) remainderWidths[count] = node.getBoundingClientRect().width / interfaceFactor;
     }
-    const next = activeBranchLayoutForWidth(window.innerWidth, row.clientWidth, {
+    const next = activeBranchLayoutForWidth(window.innerWidth / interfaceFactor, row.clientWidth, {
       chipWidths,
       remainderWidths,
       gapPx: 6,
@@ -101,7 +103,7 @@ export function ActiveBranchPathRow({
     setLayout((current) => (
       current.visibleLimit === next.visibleLimit && current.compact === next.compact ? current : next
     ));
-  }, [normalized]);
+  }, [normalized, interfaceFactor]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -161,7 +163,7 @@ export function ActiveBranchPathRow({
           ))}
         </ul>
       </div>,
-      document.body,
+      document.querySelector('[data-interface-portal-root]') ?? document.body,
     )
     : null;
 

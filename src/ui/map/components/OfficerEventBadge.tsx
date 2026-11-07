@@ -126,7 +126,7 @@ function OfficerEventModal({ events, onClose }: {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm" style={{ zIndex: Z.CRITICAL_MODAL }}>
-      <div className="w-[480px] max-h-[80vh] bg-panel-bg/95 border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden">
+      <div className="w-[480px] max-h-[calc(var(--interface-viewport-height,100vh)*0.8)] bg-panel-bg/95 border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
         <div className="px-5 py-3 border-b border-panel-border bg-panel-card/50 flex items-center justify-between shrink-0">
           <div>

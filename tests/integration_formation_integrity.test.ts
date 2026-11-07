@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { checkDataPrereqs } from '../src/data_prereq/check_data_prereqs.js';
 import { runScenario } from '../src/scenario/scenario_runner.js';
 import {
+    dissolveCombatIneffectiveBrigades,
     resolveDissolutionThreshold,
     DISSOLUTION_COHESION_THRESHOLD,
     DISSOLUTION_MORALE_THRESHOLD,
@@ -67,8 +68,12 @@ describe('formation integrity (canonical 188w @40w)', () => {
         }
     });
 
-    it('no active brigade meets its canonical dissolution criteria', () => {
+    it('every active brigade meeting its canonical dissolution criteria is caught by the next dissolution step', () => {
         if (skipped) return;
+        // Dissolution runs once per turn, before that turn's combat. A brigade can
+        // legitimately cross a threshold in combat AFTER the step (e.g. Kamenica 400 -> 396
+        // during turn 40) and dissolve at the next step. So the invariant is not "no
+        // end-of-turn brigade meets the criteria" but "the next dissolution step catches it".
         const formations = state.military.formations ?? {};
         const violations: string[] = [];
         const timeline = state.military.war_timeline;
@@ -103,7 +108,13 @@ describe('formation integrity (canonical 188w @40w)', () => {
             }
         }
 
-        expect(violations).toEqual([]);
+        const next = structuredClone(state);
+        dissolveCombatIneffectiveBrigades(next);
+        const uncaught = violations.filter((entry) => {
+            const id = entry.slice(0, entry.indexOf(':'));
+            return next.military.formations?.[id]?.status === 'active';
+        });
+        expect(uncaught).toEqual([]);
     });
 
     it.each([

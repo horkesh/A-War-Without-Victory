@@ -141,3 +141,7 @@ invariants, per-faction exact Save/load, strict runtime/audio and24/188 coverage
 Reuse prior t39 infrastructure only at measured scope. Audit source-owned anchor applicability
 before new costly sessions; do not invent choice exceptions after failures. See the
 [player contract](../../docs/plans/2026-07-31-full-campaign-electron-validation-plan.md#player-campaign-acceptance-contract--owner-decision-2026-10-24).
+
+## Windows shell prerequisite before broad qualification (2026-11-07)
+
+Verify which bash the actual child process resolves and prove jq plus one blocking/allowing guard before a broad suite. Windows System32 bash may launch WSL, while MSYS-path contracts require Git Bash; WSL without jq can silently return an allow result. Select the required shell only in the task child environment, without changing shared shell/Git configuration. Retain failed attempts and test every observed failure category cheaply before an affected qualifier retry. [Evidence](../../docs/40_reports/implemented/20261106_COMMAND_PALETTE_UI_SCALE.md).

@@ -223,9 +223,9 @@ describe('test-only Southern Move Bjelajce-Baljvine handoff feasibility', () => 
             objectives: [DONJI_VRBLJANI],
             phase_gate: {
                 main_axis_id: 'southern_move_mrkonjic',
-                requires_operation_captures: [PODRASNICA],
+                requires_operation_captures: [MAJDAN],
                 handoff: {
-                    brigade_id: 'hvo_rama_brigade',
+                    brigade_id: 'hrhb_kralj_petar_kreimir_iv_brigade',
                     source_axis_id: 'southern_move_mrkonjic',
                 },
             },
@@ -256,11 +256,11 @@ describe('test-only Southern Move Bjelajce-Baljvine handoff feasibility', () => 
             assigned_brigades: [], objectives: [DONJI_VRBLJANI],
             late_phase: {
                 phase: 'holding', main_axis_id: 'southern_move_mrkonjic',
-                requires: [PODRASNICA], gated_objectives: [DONJI_VRBLJANI],
-                handoff: { brigade_id: 'hvo_rama_brigade', source_axis_id: 'southern_move_mrkonjic' },
+                requires: [MAJDAN], gated_objectives: [DONJI_VRBLJANI],
+                handoff: { brigade_id: 'hrhb_kralj_petar_kreimir_iv_brigade', source_axis_id: 'southern_move_mrkonjic' },
             },
         });
-        expect(spawned.participating_brigades.filter((id) => id === 'hvo_rama_brigade')).toHaveLength(1);
+        expect(spawned.participating_brigades.filter((id) => id === 'hrhb_kralj_petar_kreimir_iv_brigade')).toHaveLength(1);
     });
 
     it('keeps exact runtime identity ahead of an OOB alias for the handoff binding', () => {
@@ -277,7 +277,7 @@ describe('test-only Southern Move Bjelajce-Baljvine handoff feasibility', () => 
         expect(spawned.axes!.find((axis) => axis.axis_id === 'southern_move_bjelajce_baljvine')!.late_phase?.handoff?.brigade_id)
             .toBe('hrhb_kralj_tomislav_brigade');
         expect(spawned.axes!.find((axis) => axis.axis_id === 'southern_move_donji_vrbljani')!.late_phase?.handoff?.brigade_id)
-            .toBe('hvo_rama_brigade');
+            .toBe('hrhb_kralj_petar_kreimir_iv_brigade');
     });
 
     it.each([
@@ -302,7 +302,7 @@ describe('test-only Southern Move Bjelajce-Baljvine handoff feasibility', () => 
             assigned_brigades: [], objectives: [DONJI_VRBLJANI],
             late_phase: {
                 main_axis_id: 'southern_move_mrkonjic', gated_objectives: [DONJI_VRBLJANI],
-                handoff: { brigade_id: 'hvo_rama_brigade', source_axis_id: 'southern_move_mrkonjic' },
+                handoff: { brigade_id: 'hrhb_kralj_petar_kreimir_iv_brigade', source_axis_id: 'southern_move_mrkonjic' },
             },
         });
     });

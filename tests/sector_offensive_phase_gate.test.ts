@@ -1109,7 +1109,7 @@ describe('canonical Mistral 2 spawn propagates the opt-in to exactly the intende
         expect(isHeldCaptureOrder(state, 'unrelated_brigade', 'op:titov_drvar:drvar_2')).toBe(false);
     });
 
-    it('authors phase_gate only on the approved Drvar, Sana, and Southern Move axes', () => {
+    it('authors phase_gate only on the approved Drvar, Sana, Southern Move and Donji Vakuf axes', () => {
         const gated: string[] = [];
         for (const opportunity of [...OPERATION_OPPORTUNITY_CATALOG, ...FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES]) {
             const axisLists = [opportunity.axes, ...(opportunity.variants ?? []).map((variant) => variant.axes)];
@@ -1120,7 +1120,10 @@ describe('canonical Mistral 2 spawn propagates the opt-in to exactly the intende
             });
         }
         expect([...new Set(gated)].sort()).toEqual([
+            // Calibration 2026-11-07: Koreniči/Jemanlići 707th handoff, gated on Donji Vakuf town.
+            'donji_vakuf_95#0:donji_vakuf_east_707th',
             'mistral_2_95#0:mistral_drvar_grahovo',
+            'sana_95#0:sana_jelasinovci_517th',
             'sana_95#0:sana_veliki_badic_503rd_late',
             'sana_95#0:sana_veliki_badic_505th',
             'sana_95#0:sana_west_sana_510th',

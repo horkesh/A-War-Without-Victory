@@ -329,7 +329,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
 
     return (
         <div data-testid="codex-panel" className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm" style={{ zIndex: Z.CODEX }}>
-            <div className="w-[760px] max-w-[95vw] h-[80vh] bg-[#0c0e14] border border-neutral-700/50 rounded-lg shadow-2xl flex flex-col overflow-hidden">
+            <div className="w-[760px] max-w-[calc(var(--interface-viewport-width,100vw)*0.95)] h-[calc(var(--interface-viewport-height,100vh)*0.8)] bg-[#0c0e14] border border-neutral-700/50 rounded-lg shadow-2xl flex flex-col overflow-hidden">
                 <div className="flex items-center justify-between px-3 py-1.5 border-b border-neutral-700/50 bg-[#10131a]">
                     <div className="flex items-center gap-2.5">
                         <div className="text-amber-400 text-[15px] font-bold tracking-[0.13em] uppercase">

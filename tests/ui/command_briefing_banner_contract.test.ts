@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { parse } from 'postcss';
 
 import { describe, expect, it } from 'vitest';
 
@@ -17,14 +18,36 @@ describe('GUI audit Batch H command briefing banner contract', () => {
         expect(source).toContain('{commandBriefingVisible && (');
     });
 
-    it('centers the command briefing below the army crest without entering side rails', () => {
+    it('centers the non-blocking briefing in the logical viewport with a shared narrow-container fallback', () => {
         const source = readFileSync('src/ui/map/components/CommandBriefingLayer.tsx', 'utf8');
+        const css = parse(readFileSync('src/ui/map/styles/globals.css', 'utf8'));
+        const placement = source.match(/className=\{`(command-briefing-layer[^`]+)`\}/)?.[1] ?? '';
+        const classes = placement.split(/\s+/);
 
         expect(source).toContain('data-testid="command-briefing-banner"');
-        expect(source).toContain('left-1/2');
-        expect(source).toContain('-translate-x-1/2');
-        expect(source).toContain('w-[min(34rem,calc(100vw-48rem))]');
-        expect(source).toContain('max-[1100px]:w-[min(34rem,calc(100vw-2rem))]');
+        expect(classes).toEqual(expect.arrayContaining([
+            'command-briefing-layer', 'fixed', '${topOffset}', 'left-1/2',
+            '-translate-x-1/2', 'pointer-events-none',
+        ]));
+        expect(source).toContain("devMode ? 'top-[8.5rem]' : 'top-[7.5rem]'");
+        expect(source).toContain('className={`pointer-events-auto relative');
+        expect(classes).toContain('w-[min(34rem,calc(var(--interface-viewport-width,100vw)-48rem))]');
+        expect(classes).toContain('max-[1100px]:w-[min(34rem,calc(var(--interface-viewport-width,100vw)-2rem))]');
+
+        const container: Record<string, string> = {};
+        css.walkRules('.interface-scale-layer', rule => {
+            rule.walkDecls(declaration => { container[declaration.prop] = declaration.value; });
+        });
+        expect(container['container-type']).toBe('inline-size');
+        expect(container['container-name']).toBe('interface-viewport');
+        let narrowWidth = '';
+        css.walkAtRules('container', rule => {
+            if (rule.params.replace(/\s+/g, '') !== `${container['container-name']}(max-width:1100px)`) return;
+            rule.walkRules('.command-briefing-layer', banner => {
+                banner.walkDecls('width', declaration => { narrowWidth = declaration.value.replace(/\s+/g, ''); });
+            });
+        });
+        expect(narrowWidth).toBe('min(34rem,calc(var(--interface-viewport-width)-2rem))');
         expect(source).not.toContain('md:right-5');
         expect(source).not.toContain('md:left-auto');
         expect(source).not.toContain('left-[19rem] right-4');

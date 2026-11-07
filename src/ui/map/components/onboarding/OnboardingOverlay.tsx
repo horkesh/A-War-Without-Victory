@@ -42,6 +42,7 @@ import { ONBOARDING_STEPS, resolveNextStep } from './onboardingSteps';
 import { Z } from '../../../shared/zIndex';
 import { t } from '../../i18n';
 import { playCue } from '../../audio/audio_engine';
+import { useInterfaceScale } from '../../preferences/interfaceScalePreference';
 
 /** Minimal tutorial-state shape mirrored from `StateMeta.tutorial_state`. */
 export interface TutorialStateShape {
@@ -171,7 +172,11 @@ export interface TutorialSpotlightRect {
 
 const SPOTLIGHT_PADDING = 12;
 
-export function resolveTutorialSpotlightRect(targetToken: string | null | undefined): TutorialSpotlightRect | null {
+export function resolveTutorialSpotlightRect(
+    targetToken: string | null | undefined,
+    factor = 1,
+    origin = { left: 0, top: 0 },
+): TutorialSpotlightRect | null {
     if (!targetToken || typeof document === 'undefined') return null;
     const selector = '[data-tutorial-step=' + JSON.stringify(targetToken) + ']';
     const target = document.querySelector<HTMLElement>(selector);
@@ -179,10 +184,10 @@ export function resolveTutorialSpotlightRect(targetToken: string | null | undefi
     const rect = target.getBoundingClientRect();
     if (rect.width <= 0 || rect.height <= 0) return null;
     return {
-        left: Math.max(0, Math.round(rect.left - SPOTLIGHT_PADDING)),
-        top: Math.max(0, Math.round(rect.top - SPOTLIGHT_PADDING)),
-        width: Math.round(rect.width + SPOTLIGHT_PADDING * 2),
-        height: Math.round(rect.height + SPOTLIGHT_PADDING * 2),
+        left: Math.max(0, Math.round((rect.left - origin.left) / factor - SPOTLIGHT_PADDING)),
+        top: Math.max(0, Math.round((rect.top - origin.top) / factor - SPOTLIGHT_PADDING)),
+        width: Math.round(rect.width / factor + SPOTLIGHT_PADDING * 2),
+        height: Math.round(rect.height / factor + SPOTLIGHT_PADDING * 2),
     };
 }
 
@@ -196,6 +201,7 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
     const [pending, setPending] = useState(false);
     const [previewTutorialState, setPreviewTutorialState] = useState<TutorialStateShape | null>(null);
     const [spotlightRect, setSpotlightRect] = useState<TutorialSpotlightRect | null>(null);
+    const interfaceScale = useInterfaceScale();
 
     // LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-E refs.
     // overlayRef: the overlay root, used by the focus trap and Tab cycle.
@@ -219,7 +225,12 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
             setSpotlightRect(null);
             return;
         }
-        const update = () => setSpotlightRect(resolveTutorialSpotlightRect(next.target_ui_element));
+        const update = () => {
+            const layer = overlayRef.current?.closest<HTMLElement>('.interface-scale-layer');
+            const factor = layer ? interfaceScale / 100 : 1;
+            const origin = layer?.getBoundingClientRect() ?? { left: 0, top: 0 };
+            setSpotlightRect(resolveTutorialSpotlightRect(next.target_ui_element, factor, origin));
+        };
         update();
         window.addEventListener('resize', update);
         window.addEventListener('scroll', update, true);
@@ -227,7 +238,7 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
             window.removeEventListener('resize', update);
             window.removeEventListener('scroll', update, true);
         };
-    }, [active, next]);
+    }, [active, next, interfaceScale]);
 
     // LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-E — focus capture + restore + first-
     // focusable focus on open. Effect runs while the overlay is `active`; the
