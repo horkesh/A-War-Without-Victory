@@ -203,7 +203,17 @@ function createPausedTurnController({ serializeState, resolveInPlace, sendState,
       resolveInPlace(paused.state, eventId, responseId);
       const runtimeJson = pausedRuntimeJson();
       if (runtimeJson) sendState(runtimeJson);
-      if (stillPendingThisTurn().length === 0) resume();
+      const stillPending = new Set(stillPendingThisTurn());
+      if (stillPending.size === 0) {
+        resume();
+        return;
+      }
+      // Re-announce the pause with only the decisions still open. The embedded Warroom route
+      // holds state updates while the advanceTurn invoke is in flight and releases them on a
+      // status event; without this, the renderer kept the original list and reopened the
+      // decision just answered (Codex review on #540).
+      paused.eventIds = paused.eventIds.filter((id) => stillPending.has(id));
+      sendStatus({ status: 'paused', turn: paused.turn, eventIds: [...paused.eventIds] });
     },
     /** Continue without answering (decisions stay pending). False when nothing is paused. */
     resume,
