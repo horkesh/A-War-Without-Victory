@@ -82,3 +82,21 @@ RS's 49% is the Dayton map. Before Dayton, RS held less:
 - An A/B single-turn test and full 188-week runs confirm no effect.
 - The unit tests set both values to the same turn and skip the pipeline (`tests/phase_e_municipality_support.test.ts`).
 - Not fixed here: a fix changes gameplay for any player who uses Local Support.
+
+## Addendum (later on 2026-11-07): superseded by the settlement and re-anchor changes
+
+Three owner-directed changes landed after this sweep:
+- RS anchors re-anchored to the pre-Dayton line (A ≥46%, B ≥42%, C ≥37%, D ≥27%).
+- Local Support fixed.
+- Accepted peace plans and Dayton now settle on the plan's map and terms ([peace-plan research](20261107_PEACE_PLANS_RESEARCH.md); canon table in `VICTORY_AND_PYRRHIC_SCORING.md` §3.2).
+
+The peace-route results above no longer hold. Re-run on the new source:
+
+| Run | War ends | Wartime RS | Settled RS | RS grade | Why |
+|---|---|---|---|---|---|
+| `rs_peace_cg_consistent` | wk 118, Contact Group | 66.15% | **51.24%** | **B** | earned B (cohesion 26.7 < 30), +1 for low casualties, capped at B by the Contact Group terms (unnamed entity) |
+| `rs_peace_vopp` | wk 40, Vance–Owen | 63.42% | **44.83%** | **C** | earned B, +1 for low casualties, capped at C: no Serb entity under Vance–Owen |
+
+- The settled Contact Group share (51.2%) is above the map's 48.9% because the Sarajevo neutral zone stays with its wartime holder, and RS held most of it.
+- The fought-to-188 maximum for RS (48.49%) and the RBiH and HRHB maxima are unchanged: no settlement is reached in those runs.
+- Freezing a peak front line through peace is no longer possible. RS can now reach A only through a signed Dayton (no cap) with cohesion of 30 or more and no Srebrenica condemnation, and every RS campaign fought to week 188 here carries that condemnation.
