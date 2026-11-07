@@ -9,8 +9,10 @@ import {
 } from '../audio/audio_engine.js';
 import {
   applyAudioPreferences,
+  connectNativeAudioPreferences,
   loadAudioPreferences,
 } from '../audio/audio_preferences.js';
+import { useIPC } from '../desktop/useIPC.js';
 import { useGameStore } from '../store/gameStore.js';
 
 type AppAudioSurface = 'mainMenu' | 'game' | 'warroom';
@@ -34,6 +36,7 @@ function requestAmbientBedPlayback(bedId: AmbientBedId): void {
 }
 
 export function AudioSurfaceBedController({ appScreen }: AudioSurfaceBedControllerProps) {
+  const ipc = useIPC();
   // The opening request belongs to this controller, not to changing room beds.
   const startsInOpening = useRef(appScreen === 'mainMenu' && useGameStore.getState().loadedGameState === null);
   const chronicleOpen = useGameStore((state) => state.chronicleOpen);
@@ -43,9 +46,13 @@ export function AudioSurfaceBedController({ appScreen }: AudioSurfaceBedControll
   const bedId = useMemo(() => selectAmbientBed(appScreen, archiveOpen), [appScreen, archiveOpen]);
 
   useEffect(() => {
-    applyAudioPreferences(loadAudioPreferences());
-    return () => stopMusic();
-  }, []);
+    const disconnect = ipc.isAvailable ? connectNativeAudioPreferences(ipc) : undefined;
+    if (!ipc.isAvailable) applyAudioPreferences(loadAudioPreferences());
+    return () => {
+      disconnect?.();
+      stopMusic();
+    };
+  }, [ipc]);
 
   useEffect(() => {
     setMusicSurface(appScreen === 'mainMenu' ? 'mainMenu' : 'campaign', startsInOpening.current);

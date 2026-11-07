@@ -929,13 +929,8 @@ function armGameStatePushProbe(win) {
         }
 
         window.__awwvProbeGameStatePush = new Promise((resolve, reject) => {
-          const timeoutId = setTimeout(() => {
-            reject(new Error('timed out waiting for game-state-updated'));
-          }, 5000);
-
           const unsubscribe = bridge.subscribeGameStateUpdated((stateJson) => {
             try {
-              clearTimeout(timeoutId);
               if (typeof unsubscribe === 'function') {
                 unsubscribe();
               }
@@ -950,6 +945,8 @@ function armGameStatePushProbe(win) {
             }
           });
         });
+        // A push can arrive before main starts collecting the result.
+        window.__awwvProbeGameStatePush.catch(() => {});
         return true;
       })();
     `,
@@ -957,13 +954,17 @@ function armGameStatePushProbe(win) {
   );
 }
 
-function collectGameStatePushProbe(win, expectedMode, label) {
-  return win.webContents.executeJavaScript(
-    `
-      window.__awwvProbeGameStatePush;
-    `,
-    true,
-  ).then((push) => {
+async function collectGameStatePushProbe(win, expectedMode, label) {
+  // The listener must be armed before dispatch. Start the delivery budget
+  // here, after main has sent the notification.
+  let timeoutId;
+  try {
+    const push = await Promise.race([
+      win.webContents.executeJavaScript('window.__awwvProbeGameStatePush;', true),
+      new Promise((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error(`${label} timed out waiting for game-state-updated`)), 5000);
+      }),
+    ]);
     if (push.route_mode !== expectedMode) {
       throw new Error(`${label} received push for unexpected route mode ${push.route_mode}; expected ${expectedMode}`);
     }
@@ -974,7 +975,9 @@ function collectGameStatePushProbe(win, expectedMode, label) {
       throw new Error(`${label} received push with unexpected turn ${push.turn}; expected 0`);
     }
     return push;
-  });
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 function armTurnReportPushProbe(win) {
@@ -2022,6 +2025,14 @@ async function resolveMapServerBaseUrl() {
 function registerProbeSafeIpcHandlers() {
   registerIpcHandler('get-current-game-state', async () => projectCurrentGameStateForRenderer());
   registerIpcHandler('get-map-server-url', async () => resolveMapServerBaseUrl());
+  registerIpcHandler('get-settings', async () => {
+    try {
+      const { loadSettings } = require('./settings_store.cjs');
+      return { ok: true, settings: loadSettings(app) };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
   registerIpcHandler('get-runtime-feature-flags', async () => {
     const sim = getDesktopSim();
     return typeof sim.getRuntimeFeatureFlags === 'function'
@@ -3499,19 +3510,10 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle('get-settings', async () => {
-    try {
-      const { loadSettings } = require('./settings_store.cjs');
-      return { ok: true, settings: loadSettings(app) };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
-
-  ipcMain.handle('save-settings', async (_event, payload) => {
+  ipcMain.handle('save-settings', async (_event, payload, options) => {
     try {
       const { saveSettings } = require('./settings_store.cjs');
-      const ok = saveSettings(app, payload);
+      const ok = saveSettings(app, payload, options);
       return { ok };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
