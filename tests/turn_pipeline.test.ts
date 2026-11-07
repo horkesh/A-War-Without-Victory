@@ -211,7 +211,12 @@ describe('runTurn determinism', () => {
       next = (await runTurn(next, { seed: 'dayton-hardline-chain', eventDefinitions, settlementEdges: [] })).nextState;
       if (next.meta.turn < 193) expect(next.meta.game_over).not.toBe(true);
     }
+    // The imposition turn reopens the table with no decline (owner, 2026-11-07); left
+    // unanswered, it is signed on the Dayton map at the next turn.
     expect(next.meta.turn).toBe(193);
+    expect(next.meta.game_over).not.toBe(true);
+    expect(next.military.negotiation?.pending_dayton?.forced?.by).toBe('united_states');
+    next = (await runTurn(next, { seed: 'dayton-hardline-chain', eventDefinitions, settlementEdges: [] })).nextState;
     expect(next.meta.game_over).toBe(true);
     expect(next.military.negotiation?.dayton_result?.imposed?.by).toBe('united_states');
   });
