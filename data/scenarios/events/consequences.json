@@ -2783,6 +2783,7 @@
   },
   {
     "id": "csq_grain_corridor_reopened",
+    "image": "event_arms_pipeline_night.webp",
     "title": "Grain Corridor Reopened",
     "narrative": "A long-disused supply lane reopens — quietly, through municipal-level arrangements that the formal war has not abolished. Convoys move under flag-of-grain, and the receiving towns count the difference in markets that begin to function again. The international observers note the change with cautious approval.",
     "category": "economic",
@@ -2909,6 +2910,7 @@
   },
   {
     "id": "csq_weapons_embargo_partial_lift",
+    "image": "event_arms_pipeline_night.webp",
     "title": "Weapons Embargo Partially Lifted",
     "narrative": "Pressure from Washington and the Contact Group cracks the UN arms embargo. Channels that had been informal — Iranian flights through Croatia, Saudi cash, the Pakistani pipeline — are tacitly normalized. Trainers arrive. Equipment that was previously smuggled now arrives by manifest. The embargo on paper survives; the embargo in fact does not.",
     "category": "diplomatic",
@@ -3220,6 +3222,7 @@
   },
   {
     "id": "csq_patron_equipment_delivery_confirmed",
+    "image": "event_arms_pipeline_night.webp",
     "title": "The Delivery Manifest",
     "narrative": "The shipment that had been delayed in customs and renamed in cables finally arrives. Crates marked humanitarian unload as artillery; rifles arrive in numbers the embargo paperwork does not acknowledge. The patron's investment in the war becomes, briefly, a measurable thing. Combat units rotate through the depot and emerge measurably better-armed.",
     "category": "diplomatic",
@@ -3346,6 +3349,7 @@
   },
   {
     "id": "csq_black_market_supply_route",
+    "image": "event_arms_pipeline_night.webp",
     "title": "The Quiet Channel",
     "narrative": "The official supply lanes are constrained; the unofficial ones are not. A municipal-level network — drivers, brokers, customs officers willing to look elsewhere — moves what the formal logistics cannot. The general supply reserve climbs noticeably for a quarter. The cost is a small but measurable cohesion drain: the political truth of the war is that the rear is becoming a market, not a state.",
     "category": "economic",
@@ -3847,6 +3851,7 @@
   },
   {
     "id": "csq_post_dayton_arms_normalization",
+    "image": "event_arms_pipeline_night.webp",
     "title": "The Manifests Run Clean",
     "narrative": "After the agreement the arms paperwork that had been laundered through humanitarian cover or quietly looked-past begins running through proper customs. The headline numbers do not change much; the reliability does. Spare parts arrive on schedule. Calibres that had been rationed appear in adequate quantities. The change is bureaucratic, not heroic, but the depots register it and the front follows by the second quarter.",
     "category": "diplomatic",
@@ -4953,6 +4958,7 @@
   },
   {
     "id": "csq_third_party_arms_channel",
+    "image": "event_arms_pipeline_night.webp",
     "title": "The Other Pipeline",
     "narrative": "The principal patron's pipeline has been registering pressure for two quarters. A third-party channel — never quite acknowledged, never quite formalized — begins running parallel. The aircraft land at night; the manifests describe humanitarian cargo; the depots register a different inventory the next morning. The combat units that had been substituting around the principal-pipeline gaps find the substitutes more reliable. The combat-power column registers the shift. The mediator capitals know about the channel and pretend not to.",
     "category": "diplomatic",
@@ -5152,6 +5158,7 @@
   },
   {
     "id": "csq_post_dayton_train_and_equip_RBiH",
+    "image": "event_arms_pipeline_night.webp",
     "title": "Train and Equip",
     "narrative": "The post-Dayton settlement does not arrive without a back end. The train-and-equip program comes wrapped in conditions, accountants, and instructors. The crates that show up at the depots are not the embargo-era catch-as-catch-can; they are stamped, manifested, and matched to schedules. The brigades cycling through the new training cadre return to their formations recognizable but different. The combat-power column registers the change two quarters in.",
     "category": "diplomatic",
@@ -5716,6 +5723,7 @@
   },
   {
     "id": "csq_post_dayton_train_and_equip_HRHB",
+    "image": "event_arms_pipeline_night.webp",
     "title": "Train and Equip — Federation Side",
     "narrative": "The Federation framework brings a parallel train-and-equip pipeline to the HVO formations that opted into the joint structure. The crates that show up at the Croatia-border depots are stamped, manifested, and matched to schedules — a different rhythm from the embargo-era catch-as-catch-can. The brigades cycling through the new training cadre return to their formations recognizable but different. The combat-power column registers the change two quarters in. The political class in West Mostar treats the pipeline as evidence of the framework's seriousness.",
     "category": "diplomatic",
@@ -8122,6 +8130,7 @@
   },
   {
     "id": "csq_grain_corridor_reopened_RS",
+    "image": "event_arms_pipeline_night.webp",
     "title": "Grain Corridor Reopened (RS)",
     "narrative": "A long-disused supply lane through Posavina reopens — quietly, through municipal-level arrangements that the formal war has not abolished. Convoys move under flag-of-grain through the agricultural belt, and the receiving towns count the difference in markets that begin to function again. The international observers note the change with cautious approval; Belgrade does not object.",
     "category": "economic",
@@ -8463,6 +8472,7 @@
   },
   {
     "id": "csq_third_party_arms_channel_HRHB",
+    "image": "event_arms_pipeline_night.webp",
     "title": "The Croatia Side Channel",
     "narrative": "The principal Croatia-side pipeline has been registering pressure for two quarters. A parallel channel begins running through private brokers, municipal depots, and units whose paperwork no longer matches the cargo. The crates are not formally acknowledged, but the HVO depots in western Herzegovina and Central Bosnia register the difference. The combat-power column ticks upward for a season. The mediator capitals know enough to watch the manifests and not enough to stop them outright.",
     "category": "diplomatic",
