@@ -1800,6 +1800,7 @@
   },
   {
     "id": "csq_force_quality_inversion",
+    "image": "event_staff_planning_room.webp",
     "title": "The Inverted Roster",
     "narrative": "The officer rolls tell the story the front line had begun to suspect. The veteran cadre on the historically dominant side has thinned past the inflection point — not from any single battle, but from accumulation: postings refused, replacements thinned, the senior class retiring into silence. On the other side, new commanders cycle through hard schools and come out the other end. The predictor's confidence in the old assumptions takes a small but real haircut.",
     "category": "military",
@@ -2719,6 +2720,7 @@
   },
   {
     "id": "csq_demobilization_pressure_wave",
+    "image": "event_recruitment_office_empty.webp",
     "title": "Demobilization Pressure Wave",
     "narrative": "After a quiet quarter the families return to the streets and the patron capitals add their voice. The mobilization order is not formally rescinded; it is, in practice, walked back. Recruitment offices reduce quotas. Aggressive doctrine is shelved in favor of holding. The war does not end; it slows.",
     "category": "political",
@@ -4104,6 +4106,7 @@
   },
   {
     "id": "csq_doctrine_reform_initiated",
+    "image": "event_staff_planning_room.webp",
     "title": "The Doctrine Reform",
     "narrative": "The corps that had been improvising for two years initiates a formal doctrine review. Manuals are translated, training cycles formalized, NCO certification standards drafted. The reform is partial — the war has not stopped — but the institution upgrades visibly. Recruitment offices report an uplift in volunteer quality; the existing ranks register the improvement in cohesion within a quarter.",
     "category": "command",
@@ -4173,6 +4176,7 @@
   },
   {
     "id": "csq_corps_reorganization_attempted",
+    "image": "event_staff_planning_room.webp",
     "title": "The Corps Is Re-Drawn",
     "narrative": "Corps boundaries that had been improvised in 1992 are formally re-drawn. Brigades are renumbered; subordination chains shifted; sectors re-allocated. The reorganization is doctrinally correct and operationally disruptive. For one quarter the cohesion column thins as units adjust to new commanders. For the quarter after, the recruitment column ticks up as the new structure absorbs replacements more cleanly.",
     "category": "command",
@@ -4245,6 +4249,7 @@
   },
   {
     "id": "csq_war_exhaustion_high_streak",
+    "image": "event_recruitment_office_empty.webp",
     "title": "The Year That Would Not End",
     "narrative": "The exhaustion column has been pinned at the upper end of its scale for two consecutive quarters. Recruitment offices report an attenuated stream — the cohort that volunteered in the first wave is gone, the cohort that was conscripted in the second has rotated through the casualty lists, and the third cohort understands what it is being asked to do. Quotas are cut. The general staff acknowledges the new constraint. The war continues; the manpower budget contracts.",
     "category": "humanitarian",
@@ -4455,6 +4460,7 @@
   },
   {
     "id": "csq_mobilization_demographics_strained",
+    "image": "event_recruitment_office_empty.webp",
     "title": "The Lists Run Thin",
     "narrative": "The conscription officers no longer ask the question they had been asking for two years — when can the cohort be mobilized? They ask which cohort is left. The age-class registers are running thin past the standard pool: too young, too old, too sick, already mobilized, already lost. The recruitment offices push the boundaries; the volunteers slow; the press does not lead with the numbers. The political class, watching the demographic data, registers what every army watching its own pool eventually registers.",
     "category": "humanitarian",
@@ -4677,6 +4683,7 @@
   },
   {
     "id": "csq_war_exhaustion_high_streak_RS",
+    "image": "event_recruitment_office_empty.webp",
     "title": "The Pale Quotas",
     "narrative": "The recruitment officers in the eastern theatre stop posting the standard quota numbers and start posting a smaller, quieter set. The first wave volunteered in 1992 with the parishes intact; the second was conscripted with the parishes already attriting; the third looks at the casualty lists and at the front lines and at the political class's communiqués and registers what the political class will not say in public. The general staff acknowledges the new constraint. The war continues; the manpower budget contracts.",
     "category": "humanitarian",
@@ -4884,6 +4891,7 @@
   },
   {
     "id": "csq_post_cease_fire_recruitment_decline",
+    "image": "event_recruitment_office_empty.webp",
     "title": "The Demobilization Drift",
     "narrative": "A general cease-fire — formal or de facto — holds for long enough that the political class begins to demobilize the rhetoric. The newspapers shift their lead. The recruitment offices, which had been running on patriotic urgency, find the urgency no longer compounds. Volunteers slow; conscription quotas are quietly relaxed. The front lines remain active; the manpower behind them does not refill at the same rate. The cease-fire is not peace, but the recruitment narrative does not know how to call the war by both names at once.",
     "category": "political",
@@ -5211,6 +5219,7 @@
   },
   {
     "id": "csq_arbih_doctrine_modernization",
+    "image": "event_staff_planning_room.webp",
     "title": "Officer Quality Inflection",
     "narrative": "The officer rolls have absorbed two years of attrition and replacement. The replacements that came up through the war — not through the pre-war academies — have been reorganizing the books in their off-hours. A new manual circulates without a stamp. The brigades that adopt it first are recognizable a quarter later. The combat-power column registers the inflection. The political mobilizers do not understand it; the front-line officers do not explain it.",
     "category": "military",
@@ -5415,6 +5424,7 @@
   },
   {
     "id": "csq_doctrine_drift",
+    "image": "event_staff_planning_room.webp",
     "title": "The Manual on the Shelf",
     "narrative": "The doctrine reform that was initiated two years earlier has drifted off the agenda. The new manual sits on the shelf in the corps headquarters; the cadre that knew it has rotated; the cadre that replaced them never read it. The brigades that had been training to it have stopped. The combat-power column does not register a cliff — it registers a slow droop. The institutional memory of the reform survives in the older officers, who do not all survive. The political class explains the drift away as 'consolidation.'",
     "category": "military",
@@ -5633,6 +5643,7 @@
   },
   {
     "id": "csq_doctrine_drift_HRHB",
+    "image": "event_staff_planning_room.webp",
     "title": "The Manual on the Lasva Shelf",
     "narrative": "The corps reorganization that was attempted two years earlier has drifted off the agenda. The new chain-of-command tables sit on the shelf in the corps headquarters; the cadre that knew the new structure has rotated; the cadre that replaced them never adopted it. The brigades that had been training to it have stopped. The combat-power column does not register a cliff — it registers a slow droop. The institutional memory of the reform survives in the older officers, who do not all survive. The political class explains the drift away as 'consolidation.'",
     "category": "military",
@@ -5903,6 +5914,7 @@
   },
   {
     "id": "csq_war_exhaustion_high_streak_HRHB",
+    "image": "event_recruitment_office_empty.webp",
     "title": "The West Mostar Quotas",
     "narrative": "The recruitment offices in West Mostar and the Lasva Valley stop posting the standard quota numbers and start posting a smaller, quieter set. The first wave that volunteered through the Croat Defence Council in 1992 has aged through the casualty lists. The second cohort, conscripted under emergency mobilization in 1993, has rotated through the same lists. The third cohort looks at the front-line casualty registers and at the political class's communiqués and registers what the political class will not say. The general staff acknowledges the new constraint. The war continues; the manpower budget contracts.",
     "category": "humanitarian",
@@ -6038,6 +6050,7 @@
   },
   {
     "id": "csq_mobilization_demographics_strained_HRHB",
+    "image": "event_recruitment_office_empty.webp",
     "title": "The Croat Lists Run Thin",
     "narrative": "The conscription officers in the Croat-majority municipalities no longer ask the question they had been asking for two years — when can the cohort be mobilized? They ask which cohort is left. The age-class registers are running thin past the standard pool: too young, too old, too sick, already mobilized, already lost. The departure rolls to Croatia and to the Federation territories thin the pool further. The recruitment offices push the boundaries; the volunteers slow; the press does not lead with the numbers. The political class, watching the demographic data, registers what every army watching its own pool eventually registers.",
     "category": "humanitarian",
@@ -6110,6 +6123,7 @@
   },
   {
     "id": "csq_arbih_doctrine_modernization_HRHB",
+    "image": "event_staff_planning_room.webp",
     "title": "The Lasva Manual Ages Up",
     "narrative": "The HVO officer rolls have absorbed two years of attrition and replacement. The replacements that came up through the Lasva Valley combat — not through the pre-war JNA academies or the HV cadre exchange — have been reorganizing the books in their off-hours. A new manual circulates without a stamp. The brigades that adopt it first are recognizable a quarter later. The combat-power column registers the inflection. The political mobilizers in West Mostar do not understand it; the front-line officers do not explain it.",
     "category": "military",
@@ -6178,6 +6192,7 @@
   },
   {
     "id": "csq_post_cease_fire_recruitment_decline_HRHB",
+    "image": "event_recruitment_office_empty.webp",
     "title": "The Federation Demobilization Drift",
     "narrative": "A general cease-fire — formal or de facto — holds for long enough that the political class in West Mostar begins to demobilize the rhetoric. The newspapers shift their lead. The recruitment offices, which had been running on Croat-Defence-Council patriotic urgency, find the urgency no longer compounds. Volunteers slow; conscription quotas are quietly relaxed. The front lines remain active; the manpower behind them does not refill at the same rate. The cease-fire is not peace, but the recruitment narrative does not know how to call the war by both names at once.",
     "category": "political",
@@ -6314,6 +6329,7 @@
   },
   {
     "id": "csq_post_cease_fire_recruitment_decline_RS",
+    "image": "event_recruitment_office_empty.webp",
     "title": "The Pale Quiet",
     "narrative": "A long stretch of cease-fire — formal in the Sarajevo TEZ, de facto along most of the Posavina line — runs longer than the political class in Pale expected. The recruitment offices still open. The volunteers slow. The conscription officers, who had been operating on Republika Srpska existential urgency, find the urgency no longer compounds. The front lines remain active; the cohorts behind them no longer surge in. The general staff acknowledges the new constraint. The war continues; the manpower budget contracts.",
     "category": "political",
@@ -6444,6 +6460,7 @@
   },
   {
     "id": "csq_mobilization_demographics_strained_RS",
+    "image": "event_recruitment_office_empty.webp",
     "title": "The Krajina Lists Run Thin",
     "narrative": "The conscription offices in Banja Luka, Pale, and the rear-area Posavina towns no longer post the rolls outside the door. The age-class registers are running thin past the standard pool: too young, too old, too sick, already mobilized, already lost. The departure rolls to Belgrade and to Krajina Serbia thin the pool further. The recruitment offices push the boundaries; the volunteers slow; the press does not lead with the numbers. The political class in Pale, watching the demographic data, registers what every army watching its own pool eventually registers.",
     "category": "humanitarian",
@@ -7086,6 +7103,7 @@
   },
   {
     "id": "csq_demobilization_pressure_wave_RBiH",
+    "image": "event_recruitment_office_empty.webp",
     "title": "Demobilization Pressure Wave (RBiH)",
     "narrative": "After a quiet quarter the Federation families return to the streets and Washington adds its voice. The general mobilization order is not formally rescinded; it is, in practice, walked back. Recruitment offices in Sarajevo and Tuzla reduce quotas. Aggressive doctrine is shelved in favor of holding the lines won. The war does not end; it slows.",
     "category": "political",
@@ -7152,6 +7170,7 @@
   },
   {
     "id": "csq_demobilization_pressure_wave_HRHB",
+    "image": "event_recruitment_office_empty.webp",
     "title": "Demobilization Pressure Wave (HRHB)",
     "narrative": "After a quiet quarter the West Mostar and Posusje families return to the streets and Zagreb adds its voice. The general mobilization order is not formally rescinded; it is, in practice, walked back. Recruitment offices reduce quotas. Aggressive doctrine is shelved in favor of holding the lines won. The war does not end; it slows.",
     "category": "political",
@@ -7824,6 +7843,7 @@
   },
   {
     "id": "csq_equipment_quality_recovery_streak_RBiH",
+    "image": "event_staff_planning_room.webp",
     "title": "The Cadre Catches Up (RBiH)",
     "narrative": "The equipment-quality column, which had drifted downward through two quarters of pipeline attenuation, steadies. The patron's confidence stays in the constructive register. The training cycles, which had been compressed to combat-replacement pace, lengthen enough that the new cadre actually rotates onto the new manuals before deploying. The brigade staffs note the inflection in the maintenance-availability column, not in the formal communique. The combat-power readout drifts upward by a small but measurable amount.",
     "category": "military",
@@ -7964,6 +7984,7 @@
   },
   {
     "id": "csq_equipment_quality_recovery_streak_RS",
+    "image": "event_staff_planning_room.webp",
     "title": "The Cadre Catches Up (RS)",
     "narrative": "The equipment-quality column, which had drifted downward through two quarters of pipeline attenuation, steadies. Belgrade's confidence stays in the constructive register. The training cycles, which had been compressed to combat-replacement pace, lengthen enough that the new cadre actually rotates onto the new manuals before deploying. The corps staffs note the inflection in the maintenance-availability column, not in the formal communique. The combat-power readout drifts upward by a small but measurable amount.",
     "category": "military",
@@ -8032,6 +8053,7 @@
   },
   {
     "id": "csq_equipment_quality_recovery_streak_HRHB",
+    "image": "event_staff_planning_room.webp",
     "title": "The Cadre Catches Up (HRHB)",
     "narrative": "The equipment-quality column, which had drifted downward through two quarters of pipeline attenuation, steadies. Zagreb's confidence stays in the constructive register. The HV-cadre training cycles, which had been compressed to combat-replacement pace, lengthen enough that the new HVO instructors actually rotate onto the new manuals before deploying. The brigade staffs note the inflection in the maintenance-availability column, not in the formal communique. The combat-power readout drifts upward by a small but measurable amount.",
     "category": "military",
@@ -8644,6 +8666,7 @@
   },
   {
     "id": "csq_doctrine_drift_RS",
+    "image": "event_staff_planning_room.webp",
     "title": "The Manual in Pale",
     "narrative": "The reorganization that had promised cleaner corps-level command has drifted off the agenda. The new tables sit in the headquarters binders while the officers who knew them rotate, fall, or return to local political obligations. Brigades that had been training to the new pattern return to older habits. The combat-power column does not register a cliff. It registers a slow institutional drag.",
     "category": "military",

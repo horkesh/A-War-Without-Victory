@@ -2638,6 +2638,7 @@
   },
   {
     "id": "sarajevo_tunnel_completed_1993",
+    "image": "event_sarajevo_tunnel.webp",
     "title": "Sarajevo Tunnel Completed",
     "narrative": "After four months of secret construction under the codename 'Objekt BD,' the 800-meter tunnel connecting besieged Dobrinja to free territory at Butmir — passing under the UN-controlled airport runway — is completed. The tunnel carries up to 20 tonnes of supplies daily: food, weapons, ammunition, and communications equipment. It transforms Sarajevo's siege from a total blockade into a strangled but survivable containment.",
     "category": "military",
@@ -5460,6 +5461,7 @@
   },
   {
     "id": "strategic_posture_review_rbih",
+    "image": "event_staff_planning_room.webp",
     "title": "Strategic Posture Review",
     "narrative": "The war enters another grinding phase. Your army holds — barely. The international community offers sympathy but not intervention. Your commanders request more men, more guns, more time. The corridors are strained, the enclaves are fragile, and the political situation in Sarajevo grows more tense with each week of siege. What is your posture for the months ahead?",
     "category": "political",
@@ -5720,6 +5722,7 @@
   },
   {
     "id": "strategic_posture_review_rs",
+    "image": "event_staff_planning_room.webp",
     "title": "Strategic Posture Review",
     "narrative": "The international community grows increasingly hostile. Belgrade's patience with Pale is wearing thin. Your generals report that the lines are solid — but the sanctions bite deeper each month, and the VRS cannot sustain current operational tempo indefinitely. The question before you is not whether you can win, but what victory means in a war the world wants to end.",
     "category": "political",
@@ -5984,6 +5987,7 @@
   },
   {
     "id": "strategic_posture_review_hrhb",
+    "image": "event_staff_planning_room.webp",
     "source_tier": "balkan_battlegrounds",
     "title": "Strategic Posture Review",
     "narrative": "Zagreb's expectations grow heavier with each passing month. The HVO holds territory across Herzegovina, but central Bosnia slips away and the war with the Bosniaks bleeds both sides white. Tudjman watches the map. Your assembly watches Tudjman. What direction will Herceg-Bosna take in the months ahead?",
@@ -6252,6 +6256,7 @@
   },
   {
     "id": "visit_to_front_rbih",
+    "image": "event_front_visit.webp",
     "source_tier": "design_counterfactual",
     "title": "Visit to the Front",
     "narrative": "Your chief of staff suggests a presidential visit to the front. The troops have been fighting for months without seeing their president. A visit would lift spirits — but it also means time away from Sarajevo, exposure to risk, and a political signal about which theater you prioritize. Sarajevo, Tuzla, and Bihac each carry different command and diplomatic costs. Where will you go?",
@@ -6543,6 +6548,7 @@
   },
   {
     "id": "visit_to_front_rs",
+    "image": "event_front_visit.webp",
     "source_tier": "design_counterfactual",
     "title": "Visit to the Front",
     "narrative": "Your generals suggest a presidential tour of the front. The VRS soldier is loyal — but loyalty is a currency spent by long campaigns and poor rations. The Posavina corridor is under constant pressure. Sarajevo draws international scrutiny. The Drina Corps holds the east. Where will Republika Srpska's president be seen today?",
@@ -6819,6 +6825,7 @@
   },
   {
     "id": "visit_to_front_hrhb",
+    "image": "event_front_visit.webp",
     "source_tier": "design_counterfactual",
     "title": "Visit to the Front",
     "narrative": "Your defence minister suggests a presidential tour of HVO positions. HVO soldiers have endured a long campaign and expect visible political attention. Central Bosnia is under pressure. Herzegovina holds. The Neretva front shapes Herceg-Bosna's southern position. Where will the president of the Croatian Community be seen?",
@@ -7095,6 +7102,7 @@
   },
   {
     "id": "address_to_nation_rbih",
+    "image": "event_wartime_broadcast.webp",
     "source_tier": "design_counterfactual",
     "title": "Address the Nation",
     "narrative": "Your chief of staff lays a draft speech on the desk. RTV BiH can carry your voice into every cellar and shelter still holding a working radio. An address can steady a frightened, exhausted population and signal resolve abroad — but every word is a promise the war may not let you keep. Defiance hardens the lines and raises expectations that later curdle into disillusion; a sober call for endurance spends political credit; an appeal to the world invites the patron's irritation at being lectured. What does the president say to a people in the fourth year of siege?",
@@ -7319,6 +7327,7 @@
   },
   {
     "id": "address_to_nation_rs",
+    "image": "event_wartime_broadcast.webp",
     "source_tier": "design_counterfactual",
     "title": "Address the Nation",
     "narrative": "Pale radio is ready to carry your words to every Serb household from Banja Luka to the Drina. An address can bind a tired people to the project and steady the assembly — but defiance commits Republika Srpska to a course its sponsors may not fund, and any line you draw tonight you will have to defend or disown. A measured speech spends credit you are short of; a hard one invites the patron's displeasure at being committed without consultation. What does the president tell his nation?",
@@ -7542,6 +7551,7 @@
   },
   {
     "id": "address_to_nation_hrhb",
+    "image": "event_wartime_broadcast.webp",
     "source_tier": "design_counterfactual",
     "title": "Address the Nation",
     "narrative": "Herceg-Bosna's airwaves wait for the president. An address can steady a Croat community stretched between Herzegovina and the central-Bosnia pockets, and reassure Zagreb that the project is in steady hands — but a defiant line commits the HVO publicly and tightens the noose around any reconciliation with Sarajevo, while a conciliatory one risks the hardliners and Zagreb's patrons reading weakness. What does the president of the Croatian Community tell his people?",
@@ -7760,6 +7770,7 @@
   },
   {
     "id": "decorate_a_unit_rbih",
+    "image": "event_front_visit.webp",
     "source_tier": "design_counterfactual",
     "title": "Decorate a Unit",
     "narrative": "Your staff brings forward citations for units that have held the line under impossible conditions. A decoration — a unit citation, a streamer for the colours — costs nothing in materiel and can lift a battered formation's spirit and the watching army's morale. But honours are political: the unit you single out is the unit you are seen to favour, and every formation passed over reads the omission. Decorate the wrong unit, or decorate at all amid heavy losses, and the gesture rings hollow or breeds resentment. Which formation will the president honour — and only a regular formation of the armed forces is eligible?",
@@ -7923,6 +7934,7 @@
   },
   {
     "id": "decorate_a_unit_rs",
+    "image": "event_front_visit.webp",
     "source_tier": "design_counterfactual",
     "title": "Decorate a Unit",
     "narrative": "Your staff lays out citations for VRS formations that have held or advanced at heavy cost. A decoration costs no materiel and can steady a tired army — but in Republika Srpska honours are watched closely. Single out a corps and you are seen to favour it; honour the wrong formation and you reward the wrong faction in the officer corps; decorate amid loss and the gesture can curdle. Eligibility is restricted to regular VRS formations — no irregular or volunteer paramilitary unit is on the list. Which regular formation will the president honour?",
@@ -8086,6 +8098,7 @@
   },
   {
     "id": "decorate_a_unit_hrhb",
+    "image": "event_front_visit.webp",
     "source_tier": "design_counterfactual",
     "title": "Decorate a Unit",
     "narrative": "Your staff brings citations for HVO formations that have held the divided geography of Herceg-Bosna at heavy cost. A decoration costs no materiel and can lift a stretched force — but honours carry weight between Herzegovina and the central-Bosnia pockets, and singling out one formation tells the others where they stand. Honour amid loss, or honour the wrong unit, and the gesture sours. Eligibility is restricted to regular HVO formations — no irregular or paramilitary unit is on the list. Which regular formation will the president honour?",
