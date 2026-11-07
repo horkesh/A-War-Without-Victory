@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from 'react';
+import { settingsRecord, type SettingsBridge } from '../preferences/nativeSettings.js';
 import {
     muteAudio,
     setEnabled,
@@ -113,4 +115,110 @@ export function applyAudioPreferences(preferences: AudioPreferences): AudioPrefe
     setMusicVolume(normalized.musicVolume ?? 0.5);
     setMusicPlaybackEnabled(normalized.musicEnabled === true);
     return normalized;
+}
+
+const listeners = new Set<(value: AudioPreferences) => void>();
+let nativeSession: {
+    current: AudioPreferences;
+    update: (patch: Partial<AudioPreferences>) => void;
+} | undefined;
+
+function publishAudioPreferences(value: AudioPreferences): void {
+    for (const listener of listeners) listener(value);
+}
+
+function hasBrowserPreferences(): boolean {
+    try {
+        const raw = getBrowserStorage()?.getItem(AUDIO_PREFERENCES_STORAGE_KEY);
+        return !!raw && settingsRecord(JSON.parse(raw));
+    } catch {
+        return false;
+    }
+}
+
+/** The root audio controller owns native hydration even when Settings is closed. */
+export function connectNativeAudioPreferences(bridge: SettingsBridge): () => void {
+    const browser = loadAudioPreferences();
+    const hasBrowser = hasBrowserPreferences();
+    let pending: Partial<AudioPreferences> = {};
+    let unsaved: Partial<AudioPreferences> = {};
+    let writeTail = Promise.resolve();
+    let hydrating = true;
+
+    const apply = () => {
+        saveAudioPreferences(session.current);
+        applyAudioPreferences(session.current);
+        publishAudioPreferences(session.current);
+    };
+    const persist = (patch: Partial<AudioPreferences>) => {
+        writeTail = writeTail.then(async () => {
+            unsaved = { ...unsaved, ...patch };
+            const result = await bridge.saveSettings({ audioPreferences: unsaved }, {
+                merge: true,
+                audioDefaults: { ...browser },
+            });
+            if (result.ok) unsaved = {};
+        }).catch(() => { /* Retry unsaved choices with the next edit. */ });
+    };
+    const session = {
+        current: browser,
+        update(patch: Partial<AudioPreferences>) {
+            session.current = normalizeAudioPreferences({ ...session.current, ...patch });
+            if (hydrating) {
+                pending = { ...pending, ...patch };
+                publishAudioPreferences(session.current);
+                return;
+            }
+            apply();
+            persist(patch);
+        },
+    };
+    nativeSession = session;
+
+    void (async () => {
+        let profile: Record<string, unknown> | undefined;
+        try {
+            const result = await bridge.getSettings();
+            if (result.ok && settingsRecord(result.settings)) profile = result.settings;
+        } catch { /* Use the browser copy if the profile cannot be read. */ }
+        if (nativeSession !== session) return;
+
+        const stored = settingsRecord(profile?.audioPreferences) ? profile.audioPreferences : null;
+        const edited = Object.keys(pending).length > 0;
+        session.current = normalizeAudioPreferences({ ...(stored ?? browser), ...pending });
+        hydrating = false;
+        if (stored || edited) saveAudioPreferences(session.current);
+        applyAudioPreferences(session.current);
+        publishAudioPreferences(session.current);
+        if (edited || (profile && !stored && hasBrowser)) persist(pending);
+    })();
+
+    return () => {
+        if (nativeSession === session) nativeSession = undefined;
+    };
+}
+
+export function useAudioPreferences() {
+    const [value, setValue] = useState(() => nativeSession?.current ?? loadAudioPreferences());
+    const latest = useRef(value);
+    useEffect(() => {
+        const receive = (next: AudioPreferences) => {
+            latest.current = next;
+            setValue(next);
+        };
+        listeners.add(receive);
+        if (nativeSession) receive(nativeSession.current);
+        return () => { listeners.delete(receive); };
+    }, []);
+
+    const update = (patch: Partial<AudioPreferences>) => {
+        if (nativeSession) {
+            nativeSession.update(patch);
+            return;
+        }
+        const next = saveAudioPreferences({ ...latest.current, ...patch });
+        applyAudioPreferences(next);
+        publishAudioPreferences(next);
+    };
+    return [value, update] as const;
 }

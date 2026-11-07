@@ -111,7 +111,7 @@ contextBridge.exposeInMainWorld('awwv', {
   getAiCommanderConfig: () => ipcRenderer.invoke('get-ai-commander-config'),
   getAdvisorRecommendation: (payload) => ipcRenderer.invoke('get-advisor-recommendation', payload),
   getSettings: () => ipcRenderer.invoke('get-settings'),
-  saveSettings: (settings) => ipcRenderer.invoke('save-settings', settings),
+  saveSettings: (settings, options) => ipcRenderer.invoke('save-settings', settings, options),
   resolvePeacePlan: (planId, response) => ipcRenderer.invoke('resolve-peace-plan', { planId, response }),
   submitCounterOffer: (payload) => ipcRenderer.invoke('submit-counter-offer', payload),
   resolveParamilitaryRequests: (decisions, options) => ipcRenderer.invoke('resolve-paramilitary-requests', {
