@@ -115,6 +115,12 @@ import { beginMapTransition } from './perf/mapTransitionTiming';
 import { createCampaignReplacementCoordinator } from './utils/campaignViewportLifecycle';
 import type { FieldOperationPlanTarget } from './utils/fieldInspectionTarget';
 import { normalizeFieldOperationPlanTarget } from './data/fieldOperationPlanFocus';
+import { CommandPaletteLauncher } from './command_palette/CommandPaletteLauncher';
+import { buildCommandIndex, type CommandEntry } from './command_palette/search';
+import { InterfaceScaleLayer } from './preferences/InterfaceScale';
+import { useInterfaceScale } from './preferences/interfaceScalePreference';
+import { getLocalizedFormationName } from './data/formationNameLocalizations';
+import { inspectOnField, openArmyHQBriefingForCorps } from './utils/shellNavigation';
 
 declare global {
   interface Window {
@@ -468,6 +474,7 @@ function WarroomNativeOverlay({
 
 function App() {
   const [locale] = useLocale();
+  const interfaceScale = useInterfaceScale();
   const ipc = useIPC();
   const devMode = useGameStore((s) => s.devMode);
 
@@ -501,6 +508,8 @@ function App() {
   const chronicleOpen = useGameStore((s) => s.chronicleOpen);
   const advanceTurnPending = useGameStore((s) => s.advanceTurnPending);
   const turnPauseStatus = useGameStore((s) => s.turnPauseStatus);
+  const paletteOrderMode = useGameStore((s) => s.orderModeForFormation);
+  const paletteAttackConfirmation = useGameStore((s) => s.pendingAttackConfirmation);
   const opsPlanningModalOpen = useGameStore((s) => s.opsPlanningModalOpen);
   const commanderSelectionContext = useGameStore((s) => s.commanderSelectionContext);
   const operationBriefingContext = useGameStore((s) => s.operationBriefingContext);
@@ -954,6 +963,19 @@ function App() {
     codexOpen,
     fullOverlayOpen: commandBriefingFullOverlayOpen,
   });
+  const paletteBlocked = !loadedGameState || appScreen === 'mainMenu' ||
+    onboardingBlockingOverlayActive ||
+    presidentialBlockingSurfaceActive || requiredPlayerEventDecisionPending || openingBriefPending ||
+    onboardingOverlayOpen || campaignStarting || turnAftermathOpen || advanceTurnPending || turnPauseStatus !== null ||
+    pauseOpen || settingsOpen || creditsOpen || opsPlanningModalOpen ||
+    commanderSelectionContext !== null || operationBriefingContext !== null ||
+    paletteOrderMode !== null || paletteAttackConfirmation !== null || loadedGameState.gameOver === true;
+  const paletteEntries = useMemo(() => buildCommandIndex({
+    playerFaction,
+    formations: (loadedGameState?.formations ?? []).map(formation => ({ ...formation, name: getLocalizedFormationName(formation, locale) })),
+    settlementNames: osidDisplayNames,
+    sections: ['desk','map','hq','records','chronicle','codex','settings'].map(id => ({id,label:t(`commandPalette.section.${id}` as Parameters<typeof t>[0])})),
+  }), [loadedGameState, playerFaction, osidDisplayNames, locale]);
 
   // v0.9 presidential design: auto-launch the EventDecisionModal for the first
   // blocking event decision when a new turn surfaces one. Memory:
@@ -1685,6 +1707,7 @@ function App() {
       style={{
         ['--awwv-toolbar-clearance' as string]: devMode ? '6.5rem' : '5.5rem',
         ['--awwv-bottom-bar-clearance' as string]: '2.5rem',
+        ['--interface-scale' as string]: interfaceScale / 100,
       }}
     >
       <AudioCueObserver />
@@ -1701,6 +1724,36 @@ function App() {
         operationPlanFocus={fieldOperationPlanFocus}
         onReturnToOperationDossier={returnToFieldOperationDossier}
       />
+      <InterfaceScaleLayer>
+      {appScreen !== 'mainMenu' && loadedGameState && <CommandPaletteLauncher
+        entries={paletteEntries}
+        blocked={paletteBlocked}
+        campaignKey={loadedGameState}
+        onActivate={(entry: CommandEntry) => {
+          const store = useGameStore.getState();
+          if (paletteBlocked || store.loadedGameState !== loadedGameState || store.advanceTurnPending || store.turnPauseStatus !== null ||
+            store.orderModeForFormation !== null || store.pendingAttackConfirmation !== null ||
+            store.opsPlanningModalOpen || store.commanderSelectionContext !== null || store.operationBriefingContext !== null) return;
+          if (entry.kind === 'settlement') {
+            clearTacticalInspectionOverlays();
+            inspectOnField(store, { kind: 'field-settlement', osid: entry.targetId });
+            leaveWarroomForGame();
+          } else if (entry.kind === 'brigade') {
+            clearTacticalInspectionOverlays();
+            inspectOnField(store, { kind: 'field-formation', formationId: entry.targetId });
+            leaveWarroomForGame();
+          } else if (entry.kind === 'corps') {
+            openArmyHQBriefingForCorps(store, entry.targetId);
+            leaveWarroomForGame();
+          } else if (entry.targetId === 'desk') openWarroomDeskFromField();
+          else if (entry.targetId === 'map') { clearTacticalInspectionOverlays(); applyShellHandoffCommand(store, {kind:'war-map'}); leaveWarroomForGame(); }
+          else if (entry.targetId === 'hq') { openArmyHQTab(store,'briefing'); leaveWarroomForGame(); }
+          else if (entry.targetId === 'records') { openArmyHQRecordsSubTab(store,'aftermath'); leaveWarroomForGame(); }
+          else if (entry.targetId === 'chronicle') { openChronicle(store); leaveWarroomForGame(); }
+          else if (entry.targetId === 'codex') { openCodex(store); leaveWarroomForGame(); }
+          else if (entry.targetId === 'settings') setSettingsOpen(true);
+        }}
+      />}
       {/* LANE-NIGHTSHIFT-V093-A11Y-LANE-B: semantic landmarks.
           - <main>: MapContainer (the primary tactical-map view; landmark
             authored inside MapContainer.tsx, also tutorial spotlight target).
@@ -2271,6 +2324,7 @@ function App() {
           {actionReceiptMessage}
         </div>
       )}
+      </InterfaceScaleLayer>
     </div>
   );
 }

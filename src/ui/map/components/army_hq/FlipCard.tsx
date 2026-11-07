@@ -30,7 +30,7 @@ export function FlipCard({ isFlipped, front, back, className }: FlipCardProps) {
                     className={isFlipped ? 'relative overflow-y-auto' : 'hidden'}
                     style={{
                         pointerEvents: isFlipped ? 'auto' : 'none',
-                        maxHeight: '70vh',
+                        maxHeight: 'calc(var(--interface-viewport-height,100vh)*0.7)',
                     }}
                     aria-hidden={!isFlipped}
                     hidden={!isFlipped}

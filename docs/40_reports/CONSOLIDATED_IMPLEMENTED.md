@@ -1,5 +1,7 @@
 # Consolidated: Implemented Work (40_reports)
 
+**Command palette and scalable UI (2026-11-07, verified local branch):** [Report](implemented/20261106_COMMAND_PALETTE_UI_SCALE.md) records friendly-name keyboard navigation, persistent 100/125/150% chrome, nine-case browser/required-decision proof, actual native reload/relaunch and strict save preservation, independent review and full qualification. Integration and global calibration/release gates remain separate.
+
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
 **Player experience and original soundscape (2026-11-05, isolated branch):** [Report](implemented/20261105_PLAYER_EXPERIENCE_COMPLETION.md) records reliable playback/preferences, default-off music, eight original effects and a haunting 90-second theme, accessible Settings and preserved original assets. Scoped renderer/build evidence is separate from human listening, sensitivity/design and packaged acceptance.

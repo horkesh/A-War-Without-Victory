@@ -179,7 +179,7 @@ export function TurnAftermathModal({
       initialFocusTestId={primaryAction?.severity === 'blocking' ? 'turn-aftermath-primary-action' : undefined}
       ariaLabelledBy="turn-aftermath-title"
       backdropClassName="bg-black/70 px-4"
-      panelClassName="w-full max-w-6xl max-h-[86vh] overflow-hidden border border-white/15 bg-[#101018] shadow-2xl"
+      panelClassName="w-full max-w-6xl max-h-[calc(var(--interface-viewport-height,100vh)*0.86)] overflow-hidden border border-white/15 bg-[#101018] shadow-2xl"
     >
       <>
         <div className="relative flex items-start justify-between gap-4 overflow-hidden border-b border-white/10 bg-black/30 px-5 py-4">
@@ -216,7 +216,7 @@ export function TurnAftermathModal({
           </button>
         </div>
 
-        <div className="grid max-h-[62vh] min-w-0 gap-4 overflow-y-auto overflow-x-hidden p-5 lg:grid-cols-[minmax(18rem,0.95fr)_minmax(0,1.35fr)]">
+        <div className="grid max-h-[calc(var(--interface-viewport-height,100vh)*0.62)] min-w-0 gap-4 overflow-y-auto overflow-x-hidden p-5 lg:grid-cols-[minmax(18rem,0.95fr)_minmax(0,1.35fr)]">
           <section className="min-w-0 space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <Metric

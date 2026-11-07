@@ -579,7 +579,7 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
             zIndex={Z.CRITICAL_MODAL}
             ariaLabelledBy="event-decision-title"
             backdropClassName="bg-black/70"
-            panelClassName="bg-panel-bg border border-panel-border rounded-lg max-w-[720px] w-[92%] max-h-[88vh] overflow-y-auto shadow-xl backdrop-blur-sm"
+            panelClassName="bg-panel-bg border border-panel-border rounded-lg max-w-[720px] w-[92%] max-h-[calc(var(--interface-viewport-height,100vh)*0.88)] overflow-y-auto shadow-xl backdrop-blur-sm"
         >
             <div
                 onKeyDownCapture={(event) => {

@@ -1,0 +1,260 @@
+{
+  "schema": "awwv.command-palette-ui-scale.local-verification.v1",
+  "status": "PASS_LOCAL_FEATURE_VERIFICATION",
+  "branch": "codex/command-palette-ui-scale",
+  "sourceCommit": "c51125157699a851ca14df69fae0b22e49dd1435",
+  "qualificationCommit": "931949742c79801d0a13d7ee7caf2d2de8ba96b2",
+  "base": "5aa687c800e0a7a2ec7d8af8675a400325d9bbd0",
+  "scope": "Renderer navigation and persistent local interface preference; no engine/AI/GameState/save-schema/IPC-channel/asset/catalog/calibration change",
+  "independentReview": "SOURCE GO after one targeted correction verification; R1/R2/R3 resolved at source/focused-proof scope; global acceptance pending",
+  "browser": {
+    "cases": 9,
+    "requiredGuards": 9,
+    "errors": 0,
+    "reuse": {
+      "path": "F:\\AWWV-worktrees\\command-palette-ui-scale\\.tmp_command_palette_ui_scale\\verification\\browser-matrix01",
+      "receiptSha256": "33c2e3987ad905c040970728ebc8d2d96e6c37de2c518f0dd859e2f8196fb4a6",
+      "limit": "Only completed source-identical case/required rows; failed run verdict remains failed",
+      "priorVerdict": "FAIL",
+      "priorError": "AssertionError [ERR_ASSERTION]: Trusted pointer did not reach map\n    at Object.surfaceCase (F:\\AWWV-worktrees\\command-palette-ui-scale\\.tmp_command_palette_ui_scale\\verification\\ui-driver.cjs:14:1819)\n    at async F:\\AWWV-worktrees\\command-palette-ui-scale\\.tmp_command_palette_ui_scale\\verification\\browser-proof.cjs:24:148"
+    },
+    "visualLimit": "Browser palette images catch entry animation; settled source-identical native150 capture supplies readable shared-component visual check. Browser geometry/keyboard/navigation proofs remain separate."
+  },
+  "native": {
+    "sizes": [
+      100,
+      125,
+      150
+    ],
+    "cases": 3,
+    "errors": 0,
+    "relaunch": {
+      "firstOrigin": "http://127.0.0.1:49220",
+      "secondOrigin": "http://127.0.0.1:60091",
+      "sameProfile": "F:\\AWWV-worktrees\\command-palette-ui-scale\\.tmp_command_palette_ui_scale\\verification\\native-proof02\\profile",
+      "scale": 150
+    },
+    "preservation": "Strict native DTO and canonical autosave bytes unchanged after legitimate tutorial dismissal settled; exact prior failure reconstruction retained.",
+    "reload": true,
+    "nativeZoom": 1,
+    "unknownSettingsPreserved": true
+  },
+  "fullSuite": {
+    "exit": 0,
+    "qualifyingAttempt": "02",
+    "priorAttempt": {
+      "path": ".tmp_command_palette_ui_scale/verification/full-suite01.log",
+      "exit": 1,
+      "failedFiles": 12,
+      "explanation": "Nine wrong-shell guard/CI files and three stale UI contract files; all failures diagnosed, cheaply corrected and independently verified before affected qualifier retry"
+    },
+    "runId": "run-20261106224633059-43720-0e20ff15-09a4-40b9-95fb-26b462cb6473",
+    "selectedUniqueFiles": 1509,
+    "finishedUniqueFiles": 1509,
+    "states": [
+      "pass",
+      "skip"
+    ],
+    "rawSummaries": [
+      " Test Files  1 failed (1)",
+      "      Tests  1 failed (1)",
+      " Test Files  1 passed (1)",
+      "      Tests  1 passed (1)",
+      " Test Files  1 failed (1)",
+      "      Tests  1 failed (1)",
+      " Test Files  1 skipped (1)",
+      "      Tests  1 skipped (1)",
+      " Test Files  1 failed (1)",
+      " Test Files  1 failed (1)",
+      "      Tests  1 failed (1)",
+      " Test Files  1 passed (1)",
+      "      Tests  1 passed (1)",
+      " Test Files  2 passed (2)",
+      "      Tests  2 passed (2)",
+      " Test Files   (1)",
+      " Test Files  1 passed (1)",
+      "      Tests  1 passed (1)",
+      " Test Files  355 passed | 2 skipped (357)",
+      "      Tests  3593 passed | 21 skipped (3614)",
+      " Test Files  356 passed (356)",
+      "      Tests  3643 passed | 2 skipped (3645)",
+      " Test Files  354 passed | 2 skipped (356)",
+      "      Tests  3527 passed | 6 skipped (3533)",
+      " Test Files  357 passed | 1 skipped (358)",
+      "      Tests  3640 passed | 10 skipped (3650)",
+      " Test Files  85 passed (85)",
+      "      Tests  1588 passed (1588)"
+    ]
+  },
+  "playerExperience": {
+    "exit": 0,
+    "command": "npm run qa:player-experience"
+  },
+  "evidence": [
+    {
+      "path": ".tmp_command_palette_ui_scale/independent-review.json",
+      "sha256": "6e47c702d9b2da8e16a1af3dfacab5860f72905a865643735bdc3a579355bac7",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/correction-handoff.md",
+      "sha256": "7ba5aed5f9bb8f8fde19b2d5e3e471b08863bc2ca50b81aa0eb6695fa188b6b9",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/correction-proof-05/receipt.json",
+      "sha256": "65d5c0cfeb929229ef2f2dd7f99fe5d271194c445e15e7fd1a3929891dec797c",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/browser-preflight05/receipt.json",
+      "sha256": "be75c41f62f4bf34aeba660bb45b93bf2d1e7c08a5e72317db8df9415f40792a",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/browser-matrix01/receipt.json",
+      "sha256": "33c2e3987ad905c040970728ebc8d2d96e6c37de2c518f0dd859e2f8196fb4a6",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/browser-matrix02/receipt.json",
+      "sha256": "b41d038e7735d32c72999d118c2a2ffef3a5acaf401133ae9dd3172044944c2b",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/native-proof02/receipt.json",
+      "sha256": "c4522c196127316d15b59b3d580746e8cba1133dcc45a42f854f90d9677f0679",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/native-continuation04/receipt.json",
+      "sha256": "8b82923e9d970b759727ec5e875878178dac87119d7cf8024501e1c4b7784561",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/native-remaining05/receipt.json",
+      "sha256": "65f64a427a79810e2d63e25847db2d6015a3395eb6e7712141d8cbf46f90a366",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/native-preservation-diagnosis01/receipt.json",
+      "sha256": "5fb56c00a56a2464f8143f716753454baff67085e66ef8c797b59e3a29677885",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/native-proof-handoff.md",
+      "sha256": "c5b0775b79ea56ea5dc4650e5f12e447ecbc3d44584f1567ccf4f31f3682f136",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/desktop-build01.log",
+      "sha256": "98d8ed9608a4679f38a9e578643b1ecd1229ac2bd24ffff42557f65c5707fa43",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/runtime-build01/inventory.json",
+      "sha256": "91498c437aca45d2f04eaec6732280bbd89ee18cd597958a33c8b01df0ca054f",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/proof-server-cleanup01.json",
+      "sha256": "eedf9549c958313093c61f192c3909e8b906b2b414532c45fdd6ade692e9feb9",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/player-gate-prerequisites01.json",
+      "sha256": "6fc9b659dc68d8296da92c93cb68ae80f7994f04070a7ac81952a8977896f9dc",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/full-suite01.log",
+      "sha256": "19b17403eb6093e9454b8e97796102a40827373992e16361c5033c8a13f11b0f",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/qualification-failure-diagnosis01.json",
+      "sha256": "4f3fc6c8c3e422e9feaae78590cabcf5e996aaa0eab701bf8614875f3bf7eee7",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/toolchain-correction01.log",
+      "sha256": "baaa928de3dd35dfa036169467f8432658ef07ef18e10c88dd5da158e1cad0b3",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/toolchain-correction01.stop.json",
+      "sha256": "a4a8e5c847ddda326faede4f753a991bc9644ae7980d71d1989a6f96624c5e02",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/guard-prerequisite03.log",
+      "sha256": "580ee9be24baf4ad1a99279e3973ee527273c1de590e59d4cdd77d410d41bd3a",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/guard-prerequisite03.argv.json",
+      "sha256": "b14a0ac4b224394b8934c755058a894c7bb6d296a1ed7c6fdfa383834cfe33f7",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/contract-correction-review.json",
+      "sha256": "6c7fa7a260d5a9d51f9c23f924accc6a4c6735393a47cab87e4d460b0a07dd80",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/post-qualifier-ui-contracts-final-green.log",
+      "sha256": "8432d170d964b98700fd4b4f459b04b170f52bf541bb7bee1ec3de349479de81",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/post-qualifier-ui-contracts-final-lint.log",
+      "sha256": "87e68f674be77635a7cfc3178b5b0858cba8097cc25e8fee6f889fa3c3e5a78f",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/post-qualifier-ui-contracts-provenance.json",
+      "sha256": "7cd279f44f367309684194f73e0553c4bafd87d43c5bdde5c1e44cc2ee9e10f2",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/full-suite02.log",
+      "sha256": "fea02efa68c3fe79fad46e0229c128403c14cc3c0bb5490ca61e8652858a55c3",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/player-experience01.log",
+      "sha256": "111de99762322145e1639c8e5d4de1e2b7574036e1e6b4f678d7ac4624293c1e",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_vitest_balanced_receipts/run-20261106224633059-43720-0e20ff15-09a4-40b9-95fb-26b462cb6473/manifest.json",
+      "sha256": "b6cb8ede246f2d3b3775796aeeac4e10f3a42f03cd7087ad4f9346dc8c88be43",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/final-doc-contracts01.log",
+      "sha256": "28cdd3226d7387e2f3420253f97e17d8475ad416c76b7296432001af4974b8d1",
+      "localOnly": true
+    },
+    {
+      "path": ".tmp_command_palette_ui_scale/verification/final-runtime-diagnostics01.json",
+      "sha256": "fcf42eae6a2a22044eb8f86724c6dc61243ea1fb3bf67a263b633d0dd5c82756",
+      "localOnly": true
+    }
+  ],
+  "boundaries": [
+    "Local commits only; no push/PR/merge/publication",
+    "No calibration or global release gate closed",
+    "Earlier failed receipts retain FAIL; only explicit completed positives reused",
+    "Source review advisory N1: unsupported pre-mounted modal visibility changes may not proactively close palette; action-time visibility checks still fail closed"
+  ],
+  "finalDocumentation": {
+    "contracts": {
+      "exit": 0,
+      "files": 4,
+      "tests": 73
+    },
+    "runtimePortListeners": 0,
+    "sourceAndTestsUnchangedSinceQualification": true
+  }
+}

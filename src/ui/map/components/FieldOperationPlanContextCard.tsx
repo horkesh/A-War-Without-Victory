@@ -1,4 +1,5 @@
 import type { FieldOperationPlanPresentation } from '../data/fieldOperationPlanFocus.js';
+import { createPortal } from 'react-dom';
 import { t } from '../i18n/index.js';
 import type { FieldOperationFocusReceipt } from '../map/fieldOperationFocusController.js';
 
@@ -13,7 +14,8 @@ export function FieldOperationPlanContextCard({
   onSelectObjective: (osid: string) => void;
   onReturn: () => void;
 }) {
-  return (
+  const portal = typeof document === 'undefined' ? null : document.querySelector('[data-interface-portal-root]');
+  const content = (
     <aside
       data-awwv-counter-occluder="true"
       data-testid="field-operation-plan-context"
@@ -94,4 +96,5 @@ export function FieldOperationPlanContextCard({
       </button>
     </aside>
   );
+  return portal ? createPortal(content, portal) : content;
 }

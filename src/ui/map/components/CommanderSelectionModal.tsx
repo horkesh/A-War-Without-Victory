@@ -130,7 +130,7 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
             zIndex={Z.CRITICAL_MODAL}
             ariaLabelledBy="commander-selection-title"
             backdropClassName="bg-black/60"
-            panelClassName="bg-panel-bg border-2 border-panel-border shadow-xl max-w-xl w-full max-h-[80vh] flex flex-col text-text-primary"
+            panelClassName="bg-panel-bg border-2 border-panel-border shadow-xl max-w-xl w-full max-h-[calc(var(--interface-viewport-height,100vh)*0.8)] flex flex-col text-text-primary"
         >
             <>
                 <div className="px-4 py-3 border-b-2 border-panel-border bg-panel-card/80">

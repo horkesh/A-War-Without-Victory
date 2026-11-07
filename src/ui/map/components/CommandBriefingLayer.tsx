@@ -125,7 +125,7 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves, onOpenPeac
   return (
     <div
       data-awwv-counter-occluder="true"
-      className={`fixed ${topOffset} left-1/2 w-[min(34rem,calc(100vw-48rem))] -translate-x-1/2 max-[1100px]:w-[min(34rem,calc(100vw-2rem))] z-20 pointer-events-none`}
+      className={`command-briefing-layer fixed ${topOffset} left-1/2 w-[min(34rem,calc(var(--interface-viewport-width,100vw)-48rem))] -translate-x-1/2 max-[1100px]:w-[min(34rem,calc(var(--interface-viewport-width,100vw)-2rem))] z-20 pointer-events-none`}
     >
       <div
         data-testid="command-briefing-banner"
@@ -168,7 +168,7 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves, onOpenPeac
         </div>
         {/* Item cards — taller, severity-colored */}
         {expanded && (
-        <div className="flex flex-col gap-2.5 max-h-[38vh] overflow-y-auto pr-1">
+        <div className="flex flex-col gap-2.5 max-h-[calc(var(--interface-viewport-height,100vh)*0.38)] overflow-y-auto pr-1">
           {visibleItems.map((item) => {
             const copy = resolveCommandBriefingItemCopy(item);
             return (
