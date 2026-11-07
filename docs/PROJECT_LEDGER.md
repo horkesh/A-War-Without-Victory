@@ -13769,3 +13769,11 @@ Codex delivered 17 opaque Q90 plates in #541-#544 under the art work order and t
 - #543 (B2-B8): approved, 58 rows. B2 meets the 2026-11-06 section 6 conditions and serves `un_resolution_819_srebrenica_1993` per that verdict; B5 has no civilian columns (Storm/Neretva flags).
 - #544 (B9-B14): all six approved, 50 rows. B10 `event_arms_pipeline_night` came back once (palms in the treeline); the revision (pine and broadleaf, e0c26c9ee) was approved and its 12 rows wired.
 Image keys only (231 rows now carry art); a wiring script verified no other field changed. Baseline regression on the combined state: all scenarios match (sim byte-identical). 126 event/art test files pass. The Heliodrom plate remains ungenerated (section 6 gated).
+
+## 2026-11-07 - Packaged game no longer looks for a dev server (DESKTOP, SECURITY)
+
+Found during the R7 offline audio run: `resolveMapServerBaseUrl` in `src/desktop/electron-main.cjs` probed `127.0.0.1:3002-3005` for a Vite dev server on every launch, packaged builds included, so a page on one of those ports would have replaced the game window and received the preload bridge.
+- Packaged builds now skip the probe and use their own bundled map server; development (`electron .`) keeps preferring a running Vite server.
+- New `tests/desktop_packaged_map_server_url.test.ts` runs the real function with a fake dev server answering on every port; red before the fix. The 39 other test files that read `electron-main.cjs` pass (468 tests); `tsc` clean.
+- Packaged proof on `b5018e63e`: a fresh `desktop:package:dir` build under the offline audio harness made 0 dev-server probes (8 before), used its built server, passed all four audio checks, and touched 0 remote URLs.
+- No simulation, state, scenario or calibration change.
