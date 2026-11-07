@@ -26,12 +26,7 @@ import { useDialogFocus } from '../../shared/Modal';
 import { OnboardingRestartButton } from './onboarding/OnboardingOverlay';
 import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
-import {
-    applyAudioPreferences,
-    loadAudioPreferences,
-    saveAudioPreferences,
-    type AudioPreferences,
-} from '../audio/audio_preferences';
+import { useAudioPreferences } from '../audio/audio_preferences';
 import { createCrashDiagnosticsQueue } from '../services/telemetry/telemetryQueue';
 import { CRASH_DIAGNOSTICS_APP_VERSION } from '../services/telemetry/crashCapture';
 import {
@@ -161,25 +156,17 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
         } catch { /* localStorage denied; attribute on <html> is still applied */ }
     }, [colorblindPreset]);
 
-    const [audioPreferences, setAudioPreferences] = useState<AudioPreferences>(() => loadAudioPreferences());
-
-    useEffect(() => {
-        const saved = saveAudioPreferences(audioPreferences);
-        applyAudioPreferences(saved);
-    }, [audioPreferences]);
+    const [audioPreferences, updateAudioPreferences] = useAudioPreferences();
 
     useEffect(() => { void playCue('ui_open_panel'); }, []);
 
     const setSoundscapeEnabled = (enabled: boolean) => {
-        setAudioPreferences((current) => ({ ...current, muted: !enabled }));
+        updateAudioPreferences({ muted: !enabled });
     };
 
     const setMasterVolumePercent = (value: string) => {
         const parsed = Number(value);
-        setAudioPreferences((current) => ({
-            ...current,
-            masterVolume: Number.isFinite(parsed) ? parsed / 100 : current.masterVolume,
-        }));
+        if (Number.isFinite(parsed)) updateAudioPreferences({ masterVolume: parsed / 100 });
     };
 
     const refreshCrashDiagnosticsStatus = () => {
@@ -318,7 +305,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                             >
                                 <BoundToggleSwitch
                                     checked={audioPreferences.musicEnabled === true}
-                                    onChange={(musicEnabled) => setAudioPreferences(current => ({ ...current, musicEnabled }))}
+                                    onChange={(musicEnabled) => updateAudioPreferences({ musicEnabled })}
                                     ariaLabel={t('settings.audio.music.ariaLabel')}
                                 />
                             </SettingRow>
@@ -326,7 +313,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                                 <input
                                     type="range" min="0" max="100" step="5"
                                     value={Math.round((audioPreferences.musicVolume ?? 0.5) * 100)}
-                                    onChange={event => setAudioPreferences(current => ({ ...current, musicVolume: Number(event.target.value) / 100 }))}
+                                    onChange={event => updateAudioPreferences({ musicVolume: Number(event.target.value) / 100 })}
                                     aria-label={t('settings.audio.musicVolume.ariaLabel')}
                                     className="w-28 accent-[#c4a35a]"
                                 />

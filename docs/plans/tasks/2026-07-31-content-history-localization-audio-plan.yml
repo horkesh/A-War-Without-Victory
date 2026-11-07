@@ -22,7 +22,9 @@ owning_plan: docs/plans/2026-07-31-content-history-localization-audio-plan.md
 # pending). That change touches no audio call; the scope above stands.
 # At e69b7d027, the audio API reference sweep still matches the thirteen listed files.
 # UI sizing adjusts presentation and preserves the pause-before-combat hide behavior.
-base_commit: e69b7d02722393504732db948ff29d49aa7f2d0f
+# At 2e6653bad, the audio API reference sweep still matches the thirteen listed files.
+# The desktop profile now owns audio persistence through the same preference consumers.
+base_commit: 2e6653badd4c8cc49b3b1657c99a9daf1f289075
 lane: R7
 gate: R7-AUDIO-CUE-WIRING
 

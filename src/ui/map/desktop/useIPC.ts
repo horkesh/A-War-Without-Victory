@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import type { SettingsSaveOptions } from '../preferences/nativeSettings';
 import type {
     GameStateUpdateMetadata,
     ListSaveRecordsResult,
@@ -222,7 +223,7 @@ interface WindowAwwv {
     getRecruitmentCatalog: () => Promise<{ brigades?: unknown[]; error?: string }>;
     applyRecruitment: (brigadeId: string, equipmentClass: string) => Promise<{ ok: boolean; newFormationId?: string; error?: string }>;
     getSettings: () => Promise<{ ok: boolean; settings?: unknown; error?: string }>;
-    saveSettings: (settings: unknown) => Promise<{ ok: boolean; error?: string }>;
+    saveSettings: (settings: unknown, options?: SettingsSaveOptions) => Promise<{ ok: boolean; error?: string }>;
     getAiCommanderConfig: () => Promise<{ mode: string; session_cost_estimate: number }>;
     setAiCommanderConfig: (payload: { mode: string; anthropic_api_key?: string }) => Promise<{ ok: boolean; error?: string }>;
     getAdvisorRecommendation: (payload: { faction?: string; context_type?: string }) => Promise<IpcAdvisorRecommendationResult>;
@@ -515,7 +516,7 @@ export function useIPC() {
                 : makeNoop<{ ok: boolean; settings?: unknown; error?: string }>(),
 
             saveSettings: awwv
-                ? (settings: unknown) => awwv.saveSettings(settings)
+                ? (settings: unknown, options?: SettingsSaveOptions) => awwv.saveSettings(settings, options)
                 : makeNoop<{ ok: boolean; error?: string }>(),
 
             getAiCommanderConfig: awwv

@@ -13750,6 +13750,10 @@ Owner asked to fix the two items raised after #540 merged.
 - Codex review on #547 (Tab escapes the palette): not reproduced. The shared Modal focus trap is a capture-phase handler (`onKeyDownCapture`, since 570cba46a), which runs before the palette's bubble-phase `stopPropagation()`. New `tests/ui/command_palette_tab_trap.test.ts` pins Tab/Shift+Tab cycling; it fails when the trap is made bubble-phase. No palette code change.
 - No simulation, state, scenario or calibration change.
 
+## 2026-11-07 — Desktop settings and packaged campaign resume
+
+Source 2e6653bad stores audio controls in the Electron profile and starts the state probe's bounded delivery wait after dispatch. The canonical packaged probe passed. A separate packaged relaunch switched ports and preserved both volume levels, mute and the music toggle, then resumed a byte-identical turn-zero autosave. The targeted tests and independent review passed. Determinism impact is limited to local preferences and probe timing. Simulation rules, canonical save format and calibration inputs are outside this change. See the [implementation report](40_reports/implemented/20261105_PLAYER_EXPERIENCE_COMPLETION.md#desktop-settings-and-campaign-resume-2026-11-07).
+
 ## 2026-11-07 - Event-art library accepted: 17 plates approved and wired (PRESENTATION, DATA IMAGE KEYS, BRANCHES #541-#544)
 
 Codex delivered 17 opaque Q90 plates in #541-#544 under the art work order and the Historian's event-art packet. Claude reviewed each file against A1-A8 at native size (3x crops where needed):
