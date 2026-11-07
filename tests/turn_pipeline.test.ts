@@ -119,10 +119,11 @@ describe('runTurn determinism', () => {
 
     expect(second).toEqual(first);
 
+    // 2026-11-07 (owner): "Dayton signed" no longer fires off the week-184 talks answer at
+    // week 185; it is recorded when Dayton is actually signed (below).
     expect(firedInOrder).toEqual([
       { id: 'ceasefire_1995', turn: 181 },
-      { id: 'dayton_talks_begin_1995', turn: 184 },
-      { id: 'dayton_signed_1995', turn: 185 }
+      { id: 'dayton_talks_begin_1995', turn: 184 }
     ]);
     expect(state.meta.game_over).not.toBe(true);
     expect(state.military.negotiation?.pending_dayton).toBeDefined();
@@ -130,6 +131,7 @@ describe('runTurn determinism', () => {
 
     resolveDaytonNegotiation(state, buildHistoricalDefaultDaytonProposal());
 
+    expect(state.military.fired_event_ids).toContain('dayton_signed_1995');
     expect(state.meta.game_over).toBe(true);
     expect(state.meta.outcome).toBe('dayton');
     expect(state.military.negotiation?.pending_dayton).toBeUndefined();
@@ -138,7 +140,7 @@ describe('runTurn determinism', () => {
     expect(state.meta.endgame_snapshot?.outcome).toBe('dayton');
   });
 
-  it('preserves the horizon negotiation when the player rejects the narrated talks', async () => {
+  it("treats the player's hard line at the talks as declining Dayton (owner, 2026-11-07)", async () => {
     const chainIds = new Set([
       'ceasefire_1995',
       'dayton_talks_begin_1995',
@@ -197,7 +199,17 @@ describe('runTurn determinism', () => {
     expect(firedAfterRejection).not.toContain('dayton_signed_1995');
     expect(state.military.event_flags?.dayton_signed).not.toBe(true);
     expect(state.meta.game_over).not.toBe(true);
-    expect(state.military.negotiation?.pending_dayton).toBeDefined();
+    // Previously the horizon menu still opened at 188. A player's hard line is now a
+    // decline: recorded at the end of the next resolution (185), menu never offered,
+    // settlement imposed four weeks later.
+    expect(state.military.negotiation?.dayton_decline).toEqual({ faction: 'RBiH', declined_turn: 185, imposition_turn: 189 });
+    expect(state.military.negotiation?.pending_dayton).toBeUndefined();
+    expect(state.military.event_flags?.dayton_declined_by).toBe('RBiH');
+
+    const imposed = await runTurn(state, { seed: 'dayton-hardline-chain', eventDefinitions, settlementEdges: [] });
+    expect(imposed.nextState.meta.turn).toBe(189);
+    expect(imposed.nextState.meta.game_over).toBe(true);
+    expect(imposed.nextState.military.negotiation?.dayton_result?.imposed?.by).toBe('united_states');
   });
 
 });
