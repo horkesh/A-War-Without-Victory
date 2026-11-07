@@ -1,0 +1,196 @@
+<title>Three Pins Studies</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400&display=swap">
+<style>
+/* Layout: one column of studies built from one pin glyph; each study shows both surfaces, lockups and small sizes. */
+:root {
+  --bg: #ece6d6; --fg: #1f241f; --dim: #4d534c; --rule: #c9bfa5;
+  --dark: #0d100f; --dark-ink: #e7e3d8; --dark-edge: #2a302d;
+  --paper: #e8e1cf; --paper-2: #ddd5c0; --paper-edge: #c9bfa5; --ink: #1f241f;
+  --cond: "IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
+  --mono: "IBM Plex Mono", Consolas, monospace;
+  --serif: "Source Serif 4", Georgia, serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0d100f; --fg: #e7e3d8; --dim: #a9a79c; --rule: #2a302d; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #0d100f; --fg: #e7e3d8; --dim: #a9a79c; --rule: #2a302d; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--serif); font-size: 1.05rem; line-height: 1.5;
+  padding-block: 2.5rem 4rem; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+main { max-width: 1120px; margin: 0 auto; display: grid; gap: 3.2rem; }
+h1, h2, h3 { font-family: var(--cond); font-weight: 600; line-height: 1.05; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(2rem, 4vw, 2.8rem); }
+h2 { font-size: 1.7rem; }
+p { margin: 0; max-width: 62ch; }
+.intro { display: grid; gap: 0.8rem; }
+.intro p { color: var(--dim); }
+.glyph { display: flex; align-items: center; gap: 1.6rem; flex-wrap: wrap; margin-top: 0.6rem; }
+.glyph figure { margin: 0; display: grid; gap: 0.3rem; justify-items: center; }
+.glyph figcaption { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+.sheet { display: grid; gap: 1.1rem; border-top: 1px solid var(--rule); padding-top: 1.6rem; }
+.sheet header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.6rem 1.2rem; }
+.sheet .note { color: var(--dim); font-size: 0.98rem; }
+.row { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
+.surface { padding: 1.6rem; display: flex; flex-direction: column; gap: 1.4rem; min-width: 0; }
+.surface.dark { background: var(--dark); color: var(--dark-ink); --m-ink: #e7e3d8; --m-bg: #0d100f; --m-tile: #141817; }
+.surface.paper { background: var(--paper); color: var(--ink); --m-ink: #1f241f; --m-bg: #e8e1cf; --m-tile: #ddd5c0; }
+.lockup { display: flex; align-items: center; gap: 1rem; min-width: 0; }
+.lockup svg { flex: 0 0 auto; }
+.word { display: grid; gap: 0.15rem; min-width: 0; }
+.word .t { font-family: var(--cond); font-weight: 600; font-size: 1.55rem; letter-spacing: 0.035em; text-transform: uppercase; line-height: 1; white-space: nowrap; }
+.word .s { font-family: var(--mono); font-weight: 600; font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.72; white-space: nowrap; }
+.stack { display: grid; justify-items: center; gap: 0.9rem; text-align: center; }
+.stack .t { font-size: 1.35rem; line-height: 1.08; white-space: normal; }
+.sizes { display: flex; align-items: flex-end; gap: 1.2rem; flex-wrap: wrap; }
+.sizes figure { margin: 0; display: grid; justify-items: center; gap: 0.4rem; }
+.sizes figcaption { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.1em; opacity: 0.6; }
+.tile { border-radius: 22%; display: block; }
+.tab { display: inline-flex; align-items: center; gap: 0.45rem; border: 1px solid var(--dark-edge); background: #202523; color: #d7d4c8; border-radius: 8px 8px 0 0; padding: 0.35rem 0.8rem; font: 0.8rem system-ui, sans-serif; }
+.surface.paper .tab { border-color: var(--paper-edge); background: #f3eee2; color: #333; }
+.tab svg { width: 16px; height: 16px; }
+.notice { position: relative; display: inline-grid; gap: 0.2rem; padding: 1.5rem 1.4rem 1rem; background: var(--m-notice); color: var(--m-notice-ink); transform: rotate(-0.6deg); box-shadow: 0 6px 14px rgb(0 0 0 / 0.25); }
+.surface.dark .notice { --m-notice: #e8e1cf; --m-notice-ink: #1f241f; }
+.surface.paper .notice { --m-notice: #f5f0e4; --m-notice-ink: #1f241f; }
+.notice svg { position: absolute; top: -10px; width: 22px; height: 44px; }
+.notice .t { font-family: var(--cond); font-weight: 600; font-size: 1.55rem; letter-spacing: 0.035em; text-transform: uppercase; line-height: 1; white-space: nowrap; }
+.notice .s { font-family: var(--mono); font-weight: 600; font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.72; }
+.reco { border-top: 1px solid var(--rule); padding-top: 1.6rem; display: grid; gap: 0.8rem; }
+.reco ul { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.4rem; color: var(--dim); max-width: 66ch; }
+@media (max-width: 560px) { .word .t, .notice .t { font-size: 1.25rem; } }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- The pin: side view, head 22 wide, collar, needle to a point at y=45. Origin at the top centre of the head. -->
+    <g id="pin">
+      <path d="M-11 3a3 3 0 0 1 3-3h16a3 3 0 0 1 3 3v6h-5l-2 11h-8l-2-11h-5z"/>
+      <path d="M-1.1 20h2.2v21.5L0 45l-1.1-3.5z"/>
+    </g>
+    <!-- The same pin with a halo in the board colour, so overlapping pins separate -->
+    <g id="pin-halo">
+      <use href="#pin" stroke="var(--m-bg)" stroke-width="5" stroke-linejoin="round" fill="var(--m-bg)"/>
+      <use href="#pin"/>
+    </g>
+
+    <!-- 1. Lineup -->
+    <symbol id="s1" viewBox="0 0 100 100">
+      <g fill="var(--m-ink)">
+        <use href="#pin" transform="translate(24 24)"/>
+        <use href="#pin" transform="translate(50 24)"/>
+        <use href="#pin" transform="translate(76 24)"/>
+      </g>
+    </symbol>
+
+    <!-- 2. Convergence: three needles meet at one hole -->
+    <symbol id="s2" viewBox="0 0 100 100">
+      <g fill="var(--m-ink)">
+        <use href="#pin" transform="translate(50 76) rotate(-26) translate(0 -45)"/>
+        <use href="#pin" transform="translate(50 76) rotate(26) translate(0 -45)"/>
+        <use href="#pin-halo" transform="translate(50 76) translate(0 -45)"/>
+      </g>
+    </symbol>
+
+    <!-- 3. Crowd: three pins re-stuck in the same place, overlapping -->
+    <symbol id="s3" viewBox="0 0 100 100">
+      <g fill="var(--m-ink)">
+        <use href="#pin-halo" transform="translate(44 78) rotate(-32) translate(0 -45)"/>
+        <use href="#pin-halo" transform="translate(58 77) rotate(22) translate(0 -45)"/>
+        <use href="#pin-halo" transform="translate(50 79) rotate(-4) translate(0 -45)"/>
+      </g>
+    </symbol>
+
+    <!-- 4. One pin, two holes -->
+    <symbol id="s4" viewBox="0 0 100 100">
+      <g fill="var(--m-ink)">
+        <use href="#pin" transform="translate(50 24)"/>
+        <ellipse cx="27" cy="66" rx="2.6" ry="1.9"/>
+        <ellipse cx="73" cy="66" rx="2.6" ry="1.9"/>
+      </g>
+    </symbol>
+
+    <!-- 5. Front: three pins on a line that bends -->
+    <symbol id="s5" viewBox="0 0 100 100">
+      <path d="M8 80 L30 70 L50 78 L72 60 L94 66" fill="none" stroke="var(--m-ink)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" opacity="0.55"/>
+      <g fill="var(--m-ink)">
+        <use href="#pin-halo" transform="translate(30 70) rotate(-10) translate(0 -45)"/>
+        <use href="#pin-halo" transform="translate(50 78) rotate(4) translate(0 -45)"/>
+        <use href="#pin-halo" transform="translate(72 60) rotate(12) translate(0 -45)"/>
+      </g>
+    </symbol>
+
+    <!-- 6. Triangle: three pins spaced as a triangle seen in perspective, the two rear ones smaller -->
+    <symbol id="s6" viewBox="0 0 100 100">
+      <g fill="var(--m-ink)">
+        <use href="#pin-halo" transform="translate(30 62) scale(0.82) translate(0 -45)"/>
+        <use href="#pin-halo" transform="translate(70 62) scale(0.82) translate(0 -45)"/>
+        <use href="#pin-halo" transform="translate(50 80) translate(0 -45)"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<main>
+  <section class="intro">
+    <h1>Three pins, worked up</h1>
+    <p>The pin itself is now a drawn object rather than three rectangles: a flat head with rounded shoulders, a collar, a needle that ends in a point. One glyph, reused in every study, so whichever composition wins, the drawing is already consistent. Everything stays in one ink; the only colour on the page is the board it sits on.</p>
+    <div class="glyph">
+      <figure><svg width="44" height="88" viewBox="-22 -2 44 50"><use href="#pin" fill="currentColor"/></svg><figcaption>the pin</figcaption></figure>
+      <figure><svg width="22" height="44" viewBox="-22 -2 44 50"><use href="#pin" fill="currentColor"/></svg><figcaption>half</figcaption></figure>
+      <figure><svg width="11" height="22" viewBox="-22 -2 44 50"><use href="#pin" fill="currentColor"/></svg><figcaption>quarter</figcaption></figure>
+    </div>
+  </section>
+
+  <div id="sheets"></div>
+
+  <section class="sheet" id="notice">
+    <header><h2>The lockup as a pinned notice</h2></header>
+    <p class="note">Independent of which composition wins: on the site header and the title screen, the wordmark can sit on a slip of paper held to the board by the three pins. The mark alone stays the three pins; the notice is only for the places where the title appears at full size.</p>
+    <div class="row">
+      <div class="surface dark"><div class="notice"><svg style="left:14px" viewBox="-11 0 22 45"><use href="#pin" fill="#1f241f"/></svg><svg style="left:50%;margin-left:-11px" viewBox="-11 0 22 45"><use href="#pin" fill="#1f241f"/></svg><svg style="right:14px" viewBox="-11 0 22 45"><use href="#pin" fill="#1f241f"/></svg><div class="t">A War Without Victory</div><div class="s">Bosnia-Herzegovina · 1992-1995</div></div></div>
+      <div class="surface paper"><div class="notice"><svg style="left:14px" viewBox="-11 0 22 45"><use href="#pin" fill="#1f241f"/></svg><svg style="left:50%;margin-left:-11px" viewBox="-11 0 22 45"><use href="#pin" fill="#1f241f"/></svg><svg style="right:14px" viewBox="-11 0 22 45"><use href="#pin" fill="#1f241f"/></svg><div class="t">A War Without Victory</div><div class="s">Bosnia-Herzegovina · 1992-1995</div></div></div>
+    </div>
+  </section>
+
+  <section class="reco">
+    <h2>Where I would take it</h2>
+    <ul>
+      <li>Study 2, convergence, is the one with an idea in it: three needles in one hole. It makes a closed triangular silhouette, which is what a mark needs at 16 pixels, and it is neutral about who the three are.</li>
+      <li>Study 3, the crowd, says the same thing with more mess, which suits the subject but costs legibility at small sizes.</li>
+      <li>Study 5 brings back the map through a front line instead of a border. Nobody's border, everybody's line. Worth keeping as a secondary device for section headers and posters even if it is not the mark.</li>
+      <li>Study 1 is the current afterthought with a better pin. Keep it as the fallback.</li>
+      <li>Whatever wins, the pins stay one ink. Colouring them would turn three pins into three flags.</li>
+    </ul>
+  </section>
+</main>
+
+<script>
+(function () {
+  var studies = [
+    { id: "s1", title: "1. Lineup", note: "The current composition with the real pin. Even spacing, heads on one line. Reads as three of a kind; says little beyond that." },
+    { id: "s2", title: "2. Convergence", note: "Three pins driven into the same hole from three directions. One point on the board, claimed three times. The silhouette closes into a triangle, which holds together at favicon size." },
+    { id: "s3", title: "3. Crowd", note: "Three pins stuck, pulled, and re-stuck in nearly the same place, overlapping as they would on a real board after a few weeks. The haloes keep them apart from each other." },
+    { id: "s4", title: "4. One pin, two holes", note: "One presidency's pin still in the board and the holes the other two left. The quietest of the set and the hardest to read cold, but the idea is the most like the game: what is left behind." },
+    { id: "s5", title: "5. The front", note: "Three pins along a line that bends. A front line instead of a border, so the map is back without anyone's territory being drawn. Needs the line, so it is weaker alone at 16 pixels." },
+    { id: "s6", title: "6. Triangle", note: "Three pins placed as a triangle on the board, the two rear ones smaller. Three positions facing each other across the same table. Calmer than 2, and the depth cue costs nothing at small sizes." }
+  ];
+  function surface(kind, id, tile) {
+    var mark = function (w, extra) { return '<svg width="' + w + '" height="' + w + '"' + (extra || "") + '><use href="#' + id + '"/></svg>'; };
+    var word = '<div class="word"><div class="t">A War Without Victory</div><div class="s">Bosnia-Herzegovina · 1992-1995</div></div>';
+    var wordStack = '<div class="word"><div class="t">A War<br>Without Victory</div><div class="s">Bosnia-Herzegovina · 1992-1995</div></div>';
+    return '<div class="surface ' + kind + '">' +
+      '<div class="lockup">' + mark(72) + word + '</div>' +
+      '<div class="stack">' + mark(96) + wordStack + '</div>' +
+      '<div class="sizes">' +
+        '<figure><span class="tab">' + mark(16) + 'A War Without Victory</span><figcaption>tab</figcaption></figure>' +
+        '<figure>' + mark(16) + '<figcaption>16</figcaption></figure>' +
+        '<figure>' + mark(32) + '<figcaption>32</figcaption></figure>' +
+        '<figure>' + mark(48) + '<figcaption>48</figcaption></figure>' +
+        '<figure><svg class="tile" width="96" height="96" viewBox="0 0 100 100"><rect width="100" height="100" fill="' + tile + '"/><use href="#' + id + '" x="6" y="6" width="88" height="88"/></svg><figcaption>app icon</figcaption></figure>' +
+      '</div></div>';
+  }
+  var html = studies.map(function (s) {
+    return '<section class="sheet" id="' + s.id + '"><header><h2>' + s.title + '</h2></header><p class="note">' + s.note + '</p>' +
+      '<div class="row">' + surface("dark", s.id, "#141817") + surface("paper", s.id, "#ddd5c0") + '</div></section>';
+  }).join("");
+  document.getElementById("sheets").innerHTML = html;
+})();
+</script>

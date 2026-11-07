@@ -8,6 +8,7 @@ import { AWWV_APP_VERSION } from '../utils/appVersion';
 import { playerFacingErrorCopy } from '../utils/errorCopy';
 import { turnToDateString } from '../utils/formatters';
 import { sidePickerFactionDescriptor, sidePickerFactionLabel } from '../utils/sidePickerLabels';
+import { BrandMark } from './icons/BrandMark';
 import { OpeningCinematicLayer } from './opening/OpeningCinematicLayer';
 import { OpeningSplash } from './opening/OpeningSplash';
 import openingMonitoringRoomNeutral from '../assets/opening/opening_monitoring_room_neutral.webp';
@@ -185,9 +186,12 @@ export function MainMenu({ hasSave, starting = false, errorMessage, onNewGame, o
 
             <header className="main-menu-opening__header">
                 <div className="main-menu-opening__identity">
-                    <div className="main-menu-opening__presents">{t('mainMenu.presents')}</div>
-                    <h1>{t('mainMenu.title')}</h1>
-                    <p>{t('mainMenu.theater')}</p>
+                    <BrandMark size={56} className="main-menu-opening__mark" />
+                    <div className="main-menu-opening__identity-text">
+                        <div className="main-menu-opening__presents">{t('mainMenu.presents')}</div>
+                        <h1>{t('mainMenu.title')}</h1>
+                        <p>{t('mainMenu.theater')}</p>
+                    </div>
                 </div>
                 <label className="main-menu-opening__locale">
                     <span>{t('settings.language.label')}</span>
