@@ -40,8 +40,29 @@ import { computePeaceDysfunctionBreakdown } from './peace_dysfunction.js';
 import { getPackageAreaPct, resolveOsidsForKeywords } from './package_area_resolver.js';
 import { applyPeaceSettlement, computeSettlementControllers } from './peace_settlement.js';
 
+import { loadEventDefinitions } from '../events/event_loader.js';
+import { fireEventDefinitionNow } from '../events/evaluate_events.js';
+import type { EventDefinition } from '../events/event_types.js';
+
 /** Territorial package id of the Brčko District (its outcome is brcko_status). */
 const BRCKO_DISTRICT_PACKAGE_ID = 'brcko_district';
+
+/** Set when Dayton is signed or imposed; dayton_signed_1995's trigger reads it. */
+export const DAYTON_SETTLEMENT_SIGNED_FLAG = 'dayton_settlement_signed';
+const DAYTON_SIGNED_EVENT_ID = 'dayton_signed_1995';
+let daytonSignedDef: EventDefinition | null | undefined;
+
+/** Fire the catalog's "Dayton signed" record (essay, codex, ticker) at the signature. */
+function fireDaytonSignedRecord(state: GameState): void {
+    if (daytonSignedDef === undefined) {
+        try {
+            daytonSignedDef = loadEventDefinitions(0).find((d) => d.id === DAYTON_SIGNED_EVENT_ID) ?? null;
+        } catch {
+            daytonSignedDef = null; // no event catalog on this path (e.g. a bare unit-test state)
+        }
+    }
+    if (daytonSignedDef) fireEventDefinitionNow(state, daytonSignedDef, state.meta.turn);
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -275,11 +296,76 @@ export function declineDaytonNegotiation(state: GameState): {
     if (neg.dayton_result) return { ok: false, error: 'already_resolved' };
     const faction = state.meta.player_faction;
     if (!faction) return { ok: false, error: 'no_player_faction' };
+    const impositionTurn = recordDaytonDecline(state, faction);
+    return { ok: true, imposition_turn: impositionTurn };
+}
+
+/** Flag recording who declined Dayton; gates the remaining acceptance events. */
+export const DAYTON_DECLINED_BY_FLAG = 'dayton_declined_by';
+
+/** Event flag a faction's own Dayton acceptance event writes ('accept' | 'hardline'). */
+const DAYTON_ACCEPTANCE_FLAG: Record<string, string> = {
+    RBiH: 'rbih_dayton_acceptance',
+    RS: 'rs_dayton_acceptance',
+    HRHB: 'hrhb_dayton_acceptance',
+};
+
+/**
+ * Record a decline: withdraw any pending menu, schedule the imposition four weeks out,
+ * and reopen the war (owner, 2026-11-07: "declining Dayton would reopen the war and the
+ * ops would continue"). Returns the imposition turn.
+ */
+function recordDaytonDecline(state: GameState, faction: string): number {
+    const neg = state.military.negotiation!;
     const declinedTurn = state.meta.turn;
     const impositionTurn = declinedTurn + DAYTON_DECLINE_GRACE_WEEKS;
     neg.dayton_decline = { faction, declined_turn: declinedTurn, imposition_turn: impositionTurn };
     delete neg.pending_dayton;
-    return { ok: true, imposition_turn: impositionTurn };
+    if (!state.military.event_flags) state.military.event_flags = {};
+    state.military.event_flags[DAYTON_DECLINED_BY_FLAG] = faction;
+    reopenWarAfterDaytonDecline(state);
+    return impositionTurn;
+}
+
+/**
+ * Lift the autumn-1995 brakes that froze the front: the launch suppression and the
+ * aggression cut written by us_halts_federation_advance_1995 (the Holbrooke halt).
+ * Operations already executing continue regardless; with the suppression gone, planned
+ * operations can launch again. Deterministic; touches only records tied to that event.
+ */
+export function reopenWarAfterDaytonDecline(state: GameState): void {
+    const HALT_EVENT = 'us_halts_federation_advance_1995';
+    const military = state.military;
+    if (military.offensive_ops_suppressions) {
+        military.offensive_ops_suppressions = military.offensive_ops_suppressions
+            .filter((s) => s.reason !== HALT_EVENT);
+    }
+    const haltTurn = military.event_last_fired_turn?.[HALT_EVENT];
+    if (typeof haltTurn === 'number' && military.event_aggression_modifiers) {
+        // The halt pushes RBiH and HRHB -0.2 for 12 turns (war_1995.json); those records
+        // carry no source field, so they are matched by faction, delta and expiry.
+        const haltExpiry = haltTurn + 12;
+        military.event_aggression_modifiers = military.event_aggression_modifiers.filter((m) =>
+            !((m.faction === 'RBiH' || m.faction === 'HRHB') && m.delta < 0 && m.expires_turn === haltExpiry));
+    }
+    if (!military.event_flags) military.event_flags = {};
+    military.event_flags.advance_halted = false;
+}
+
+/**
+ * A player's "hard line" answer to its own Dayton acceptance event (e.g. RBiH at
+ * dayton_talks_begin_1995) is a refusal of the settlement and takes the decline path.
+ * Bot answers stay narrative. Returns true when it recorded a decline this call.
+ */
+export function applyPlayerDaytonHardline(state: GameState): boolean {
+    const neg = state.military.negotiation;
+    const faction = state.meta.player_faction;
+    if (!neg || !faction || state.meta.game_over) return false;
+    if (neg.dayton_decline || neg.dayton_result) return false;
+    const flag = DAYTON_ACCEPTANCE_FLAG[faction];
+    if (!flag || state.military.event_flags?.[flag] !== 'hardline') return false;
+    recordDaytonDecline(state, faction);
+    return true;
 }
 
 /**
@@ -290,6 +376,7 @@ export function declineDaytonNegotiation(state: GameState): {
  * Returns the imposed result when it resolved this call, else null.
  */
 export function enforceDaytonImposition(state: GameState): DaytonResult | null {
+    applyPlayerDaytonHardline(state);
     const neg = state.military.negotiation;
     const decline = neg?.dayton_decline;
     if (!neg || !decline) return null;
@@ -554,6 +641,12 @@ export function resolveDaytonNegotiation(
     if (neg.pending_dayton) {
         delete neg.pending_dayton;
     }
+
+    // Owner, 2026-11-07: the "Dayton signed" record belongs to the signature, not to a
+    // turn's trigger scan (it used to fire at week 185, before the menu even opened).
+    if (!state.military.event_flags) state.military.event_flags = {};
+    state.military.event_flags[DAYTON_SETTLEMENT_SIGNED_FLAG] = true;
+    fireDaytonSignedRecord(state);
 
     // Owner, 2026-11-07: Dayton's consequence is its MAP. The settlement is the researched
     // Dayton map, with the packages this negotiation actually moved overriding it, and

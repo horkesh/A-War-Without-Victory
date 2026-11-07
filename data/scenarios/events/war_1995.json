@@ -2575,13 +2575,10 @@
       "turn_min": 184,
       "turn_max": 215,
       "phase": "war",
-      "requires_events": [
-        "dayton_talks_begin_1995"
-      ],
       "condition": {
         "type": "flag_equals",
-        "flag": "rbih_dayton_acceptance",
-        "value": "accept"
+        "flag": "dayton_settlement_signed",
+        "value": true
       }
     },
     "once": true,
@@ -2612,6 +2609,120 @@
     "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). UNSCR 1031 (1995). Dayton General Framework Agreement (1995)."
   },
   {
+    "id": "us_forces_dayton_rbih_1995",
+    "image": "event_nato_air_power.webp",
+    "title": "Washington Ends the Argument",
+    "narrative": "Four weeks after Sarajevo walked away from the Dayton text, Washington stops asking. American aircraft strike Army of the Republic of Bosnia and Herzegovina positions and depots, and the message to the Presidency is delivered in one sentence: sign the agreement as written, or fight on alone against everyone. The settlement is imposed on the terms the other parties accepted.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 184,
+      "turn_max": 240,
+      "phase": "war",
+      "condition": {
+        "type": "flag_equals",
+        "flag": "dayton_imposition_due",
+        "value": "RBiH"
+      }
+    },
+    "once": true,
+    "priority": 90,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "US air strikes force the Bosnian government to accept the Dayton settlement."
+    },
+    "effects": [
+      { "kind": "morale_change", "faction": "RBiH", "delta": -15 },
+      { "kind": "cohesion_change", "faction": "RBiH", "delta": -10 },
+      { "kind": "patron_pressure", "faction": "RBiH", "delta": 20 }
+    ],
+    "dimension_shifts": [
+      { "faction": "RBiH", "dimension": "patron_confidence", "delta": -30 },
+      { "faction": "RBiH", "dimension": "international_standing", "delta": -15 },
+      { "faction": "RBiH", "dimension": "negotiating_leverage", "delta": -20 }
+    ],
+    "sets_flags": { "dayton_imposed_by": "united_states" },
+    "historical_source": "Owner design (2026-11-07): a declined Dayton is imposed after four weeks. Historical anchor for US coercion at Dayton: Holbrooke, 'To End a War' (1998), on the closing days at Wright-Patterson; GFAP initialled 21 November 1995, signed Paris 14 December 1995.",
+    "source_tier": "design_counterfactual",
+    "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The Bosnian government accepted Dayton; the United States never bombed it. US pressure on Sarajevo at Dayton was diplomatic. The event fires only after the player declines the settlement."
+  },
+  {
+    "id": "belgrade_signs_dayton_for_rs_1995",
+    "image": "event_patron_relations_RS.webp",
+    "title": "Belgrade Signs for Pale",
+    "narrative": "Four weeks after Pale refused Dayton, Milošević uses the mandate the Bosnian Serb leadership itself gave him in August. Belgrade closes the Drina to everything but humanitarian traffic and puts its signature on the agreement in the name of the Bosnian Serb delegation. Pale is told the war is over, and that the alternative is to fight it without Serbia.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 184,
+      "turn_max": 240,
+      "phase": "war",
+      "condition": {
+        "type": "flag_equals",
+        "flag": "dayton_imposition_due",
+        "value": "RS"
+      }
+    },
+    "once": true,
+    "priority": 90,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Belgrade signs the Dayton settlement on behalf of the Bosnian Serbs."
+    },
+    "effects": [
+      { "kind": "morale_change", "faction": "RS", "delta": -10 },
+      { "kind": "supply_delta", "faction": "RS", "delta": -15 },
+      { "kind": "patron_pressure", "faction": "RS", "delta": 25 }
+    ],
+    "dimension_shifts": [
+      { "faction": "RS", "dimension": "patron_confidence", "delta": -30 },
+      { "faction": "RS", "dimension": "internal_cohesion", "delta": -15 },
+      { "faction": "RS", "dimension": "negotiating_leverage", "delta": -20 }
+    ],
+    "sets_flags": { "dayton_imposed_by": "belgrade" },
+    "historical_source": "Owner design (2026-11-07): a declined Dayton is imposed after four weeks. Historical anchor: the August 1995 Patriarch letter gave Milošević authority to negotiate for the Bosnian Serbs, and the Serbian delegation he led initialled Dayton on 21 November 1995 (Holbrooke, 'To End a War', 1998; Burg & Shoup, 'The War in Bosnia-Herzegovina', 1999).",
+    "source_tier": "design_counterfactual",
+    "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The Bosnian Serb leadership did not refuse Dayton; the event fires only after the player declines the settlement."
+  },
+  {
+    "id": "zagreb_signs_dayton_for_hrhb_1995",
+    "image": "event_patron_relations_HRHB.webp",
+    "title": "Zagreb Binds Mostar",
+    "narrative": "Four weeks after Mostar refused Dayton, Tuđman ends the argument from Zagreb. Croatia signs, the supply road through Herzegovina narrows, and the Herceg-Bosna leadership is told that the Federation is the only future on offer. The settlement is imposed on the terms the other parties accepted.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 184,
+      "turn_max": 240,
+      "phase": "war",
+      "condition": {
+        "type": "flag_equals",
+        "flag": "dayton_imposition_due",
+        "value": "HRHB"
+      }
+    },
+    "once": true,
+    "priority": 90,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Zagreb binds the Bosnian Croats to the Dayton settlement."
+    },
+    "effects": [
+      { "kind": "morale_change", "faction": "HRHB", "delta": -10 },
+      { "kind": "supply_delta", "faction": "HRHB", "delta": -15 },
+      { "kind": "patron_pressure", "faction": "HRHB", "delta": 25 }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "patron_confidence", "delta": -30 },
+      { "faction": "HRHB", "dimension": "internal_cohesion", "delta": -15 },
+      { "faction": "HRHB", "dimension": "negotiating_leverage", "delta": -20 }
+    ],
+    "sets_flags": { "dayton_imposed_by": "zagreb" },
+    "historical_source": "Owner design (2026-11-07): a declined Dayton is imposed after four weeks. Historical anchor: Tuđman negotiated for and bound the Bosnian Croats at Dayton, initialled 21 November 1995 (Holbrooke, 'To End a War', 1998).",
+    "source_tier": "design_counterfactual",
+    "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The Bosnian Croat leadership did not refuse Dayton; the event fires only after the player declines the settlement."
+  },
+  {
     "id": "rs_dayton_acceptance_1995",
     "image": "event_political_session.webp",
     "title": "Pale Ratifies the Patriarch Paper",
@@ -2628,22 +2739,28 @@
         "ceasefire_1995"
       ],
       "condition": {
-        "type": "or",
+        "type": "and",
         "conditions": [
+          { "type": "flag_not_set", "flag": "dayton_declined_by" },
           {
-            "type": "flag_equals",
-            "flag": "rs_strategic_goals",
-            "value": "all_six"
-          },
-          {
-            "type": "flag_equals",
-            "flag": "rs_strategic_goals",
-            "value": "selective"
-          },
-          {
-            "type": "flag_equals",
-            "flag": "rs_strategic_goals",
-            "value": "aggressive"
+            "type": "or",
+            "conditions": [
+              {
+                "type": "flag_equals",
+                "flag": "rs_strategic_goals",
+                "value": "all_six"
+              },
+              {
+                "type": "flag_equals",
+                "flag": "rs_strategic_goals",
+                "value": "selective"
+              },
+              {
+                "type": "flag_equals",
+                "flag": "rs_strategic_goals",
+                "value": "aggressive"
+              }
+            ]
           }
         ]
       }
@@ -2794,22 +2911,28 @@
         "ceasefire_1995"
       ],
       "condition": {
-        "type": "or",
+        "type": "and",
         "conditions": [
+          { "type": "flag_not_set", "flag": "dayton_declined_by" },
           {
-            "type": "flag_equals",
-            "flag": "hrhb_political_goal",
-            "value": "croat_republic"
-          },
-          {
-            "type": "flag_equals",
-            "flag": "hrhb_political_goal",
-            "value": "united_front"
-          },
-          {
-            "type": "flag_equals",
-            "flag": "hrhb_political_goal",
-            "value": "strategic_ambiguity"
+            "type": "or",
+            "conditions": [
+              {
+                "type": "flag_equals",
+                "flag": "hrhb_political_goal",
+                "value": "croat_republic"
+              },
+              {
+                "type": "flag_equals",
+                "flag": "hrhb_political_goal",
+                "value": "united_front"
+              },
+              {
+                "type": "flag_equals",
+                "flag": "hrhb_political_goal",
+                "value": "strategic_ambiguity"
+              }
+            ]
           }
         ]
       }
@@ -2922,119 +3045,5 @@
         }
       }
     }
-  },
-  {
-    "id": "us_forces_dayton_rbih_1995",
-    "image": "event_nato_air_power.webp",
-    "title": "Washington Ends the Argument",
-    "narrative": "Four weeks after Sarajevo walked away from the Dayton text, Washington stops asking. American aircraft strike Army of the Republic of Bosnia and Herzegovina positions and depots, and the message to the Presidency is delivered in one sentence: sign the agreement as written, or fight on alone against everyone. The settlement is imposed on the terms the other parties accepted.",
-    "category": "diplomatic",
-    "trigger": {
-      "turn_min": 190,
-      "turn_max": 240,
-      "phase": "war",
-      "condition": {
-        "type": "flag_equals",
-        "flag": "dayton_imposition_due",
-        "value": "RBiH"
-      }
-    },
-    "once": true,
-    "priority": 90,
-    "responding_faction": "RBiH",
-    "effect": {
-      "kind": "narrative",
-      "text": "US air strikes force the Bosnian government to accept the Dayton settlement."
-    },
-    "effects": [
-      { "kind": "morale_change", "faction": "RBiH", "delta": -15 },
-      { "kind": "cohesion_change", "faction": "RBiH", "delta": -10 },
-      { "kind": "patron_pressure", "faction": "RBiH", "delta": 20 }
-    ],
-    "dimension_shifts": [
-      { "faction": "RBiH", "dimension": "patron_confidence", "delta": -30 },
-      { "faction": "RBiH", "dimension": "international_standing", "delta": -15 },
-      { "faction": "RBiH", "dimension": "negotiating_leverage", "delta": -20 }
-    ],
-    "sets_flags": { "dayton_imposed_by": "united_states" },
-    "historical_source": "Owner design (2026-11-07): a declined Dayton is imposed after four weeks. Historical anchor for US coercion at Dayton: Holbrooke, 'To End a War' (1998), on the closing days at Wright-Patterson; GFAP initialled 21 November 1995, signed Paris 14 December 1995.",
-    "source_tier": "design_counterfactual",
-    "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The Bosnian government accepted Dayton; the United States never bombed it. US pressure on Sarajevo at Dayton was diplomatic. The event fires only after the player declines the settlement."
-  },
-  {
-    "id": "belgrade_signs_dayton_for_rs_1995",
-    "image": "event_patron_relations_RS.webp",
-    "title": "Belgrade Signs for Pale",
-    "narrative": "Four weeks after Pale refused Dayton, Milošević uses the mandate the Bosnian Serb leadership itself gave him in August. Belgrade closes the Drina to everything but humanitarian traffic and puts its signature on the agreement in the name of the Bosnian Serb delegation. Pale is told the war is over, and that the alternative is to fight it without Serbia.",
-    "category": "diplomatic",
-    "trigger": {
-      "turn_min": 190,
-      "turn_max": 240,
-      "phase": "war",
-      "condition": {
-        "type": "flag_equals",
-        "flag": "dayton_imposition_due",
-        "value": "RS"
-      }
-    },
-    "once": true,
-    "priority": 90,
-    "responding_faction": "RS",
-    "effect": {
-      "kind": "narrative",
-      "text": "Belgrade signs the Dayton settlement on behalf of the Bosnian Serbs."
-    },
-    "effects": [
-      { "kind": "morale_change", "faction": "RS", "delta": -10 },
-      { "kind": "supply_delta", "faction": "RS", "delta": -15 },
-      { "kind": "patron_pressure", "faction": "RS", "delta": 25 }
-    ],
-    "dimension_shifts": [
-      { "faction": "RS", "dimension": "patron_confidence", "delta": -30 },
-      { "faction": "RS", "dimension": "internal_cohesion", "delta": -15 },
-      { "faction": "RS", "dimension": "negotiating_leverage", "delta": -20 }
-    ],
-    "sets_flags": { "dayton_imposed_by": "belgrade" },
-    "historical_source": "Owner design (2026-11-07): a declined Dayton is imposed after four weeks. Historical anchor: the August 1995 Patriarch letter gave Milošević authority to negotiate for the Bosnian Serbs, and the Serbian delegation he led initialled Dayton on 21 November 1995 (Holbrooke, 'To End a War', 1998; Burg & Shoup, 'The War in Bosnia-Herzegovina', 1999).",
-    "source_tier": "design_counterfactual",
-    "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The Bosnian Serb leadership did not refuse Dayton; the event fires only after the player declines the settlement."
-  },
-  {
-    "id": "zagreb_signs_dayton_for_hrhb_1995",
-    "image": "event_patron_relations_HRHB.webp",
-    "title": "Zagreb Binds Mostar",
-    "narrative": "Four weeks after Mostar refused Dayton, Tuđman ends the argument from Zagreb. Croatia signs, the supply road through Herzegovina narrows, and the Herceg-Bosna leadership is told that the Federation is the only future on offer. The settlement is imposed on the terms the other parties accepted.",
-    "category": "diplomatic",
-    "trigger": {
-      "turn_min": 190,
-      "turn_max": 240,
-      "phase": "war",
-      "condition": {
-        "type": "flag_equals",
-        "flag": "dayton_imposition_due",
-        "value": "HRHB"
-      }
-    },
-    "once": true,
-    "priority": 90,
-    "responding_faction": "HRHB",
-    "effect": {
-      "kind": "narrative",
-      "text": "Zagreb binds the Bosnian Croats to the Dayton settlement."
-    },
-    "effects": [
-      { "kind": "morale_change", "faction": "HRHB", "delta": -10 },
-      { "kind": "supply_delta", "faction": "HRHB", "delta": -15 },
-      { "kind": "patron_pressure", "faction": "HRHB", "delta": 25 }
-    ],
-    "dimension_shifts": [
-      { "faction": "HRHB", "dimension": "patron_confidence", "delta": -30 },
-      { "faction": "HRHB", "dimension": "internal_cohesion", "delta": -15 },
-      { "faction": "HRHB", "dimension": "negotiating_leverage", "delta": -20 }
-    ],
-    "sets_flags": { "dayton_imposed_by": "zagreb" },
-    "historical_source": "Owner design (2026-11-07): a declined Dayton is imposed after four weeks. Historical anchor: Tuđman negotiated for and bound the Bosnian Croats at Dayton, initialled 21 November 1995 (Holbrooke, 'To End a War', 1998).",
-    "source_tier": "design_counterfactual",
-    "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The Bosnian Croat leadership did not refuse Dayton; the event fires only after the player declines the settlement."
   }
 ]

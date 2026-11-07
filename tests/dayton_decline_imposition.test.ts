@@ -14,6 +14,9 @@ import {
     DAYTON_COERCING_POWER,
     DAYTON_DECLINE_GRACE_WEEKS,
     DAYTON_IMPOSITION_DUE_FLAG,
+    DAYTON_DECLINED_BY_FLAG,
+    DAYTON_SETTLEMENT_SIGNED_FLAG,
+    applyPlayerDaytonHardline,
     declineDaytonNegotiation,
     enforceDaytonImposition,
     initiateDaytonNegotiation,
@@ -140,5 +143,82 @@ describe('coercion events', () => {
                 expect(evaluateCondition(defs.find((d) => d.id === id)!.trigger.condition!, state), `${faction} -> ${id}`).toBe(f === faction);
             }
         }
+    });
+});
+
+describe('declining reopens the war (owner, 2026-11-07)', () => {
+    it('lifts the Holbrooke-halt launch suppression and aggression cut, nothing else', () => {
+        const state = makeState('RBiH');
+        state.military.event_last_fired_turn = { us_halts_federation_advance_1995: 186 };
+        state.military.offensive_ops_suppressions = [
+            { faction: 'RBiH', expires_turn: 192, reason: 'us_halts_federation_advance_1995' },
+            { faction: 'RS', expires_turn: 195, reason: 'some_other_event' },
+        ];
+        state.military.event_aggression_modifiers = [
+            { faction: 'RBiH', delta: -0.2, expires_turn: 198 },
+            { faction: 'HRHB', delta: -0.2, expires_turn: 198 },
+            { faction: 'RBiH', delta: -0.1, expires_turn: 205 },
+        ];
+        declineDaytonNegotiation(state);
+        expect(state.military.offensive_ops_suppressions).toEqual([{ faction: 'RS', expires_turn: 195, reason: 'some_other_event' }]);
+        expect(state.military.event_aggression_modifiers).toEqual([{ faction: 'RBiH', delta: -0.1, expires_turn: 205 }]);
+        expect(state.military.event_flags?.advance_halted).toBe(false);
+        expect(state.military.event_flags?.[DAYTON_DECLINED_BY_FLAG]).toBe('RBiH');
+    });
+});
+
+describe("a player's hard line at its Dayton acceptance event takes the decline path", () => {
+    it('RBiH hard line at the week-184 talks: no menu at 188, imposed by the United States at 188', async () => {
+        const state = makeState('RBiH', 184);
+        delete state.military.negotiation!.pending_dayton;
+        state.military.event_flags = { rbih_dayton_acceptance: 'hardline' };
+        expect(applyPlayerDaytonHardline(state)).toBe(true);
+        expect(state.military.negotiation!.dayton_decline).toEqual({ faction: 'RBiH', declined_turn: 184, imposition_turn: 188 });
+        state.meta.turn = 188;
+        await runStep('evaluate-dayton-trigger', state);
+        expect(state.military.negotiation!.pending_dayton).toBeUndefined();
+        expect(enforceDaytonImposition(state)?.imposed?.by).toBe('united_states');
+    });
+
+    it('a bot hard line, or an accept, changes nothing', () => {
+        const bot = makeState('RS', 184);
+        bot.military.event_flags = { rbih_dayton_acceptance: 'hardline' };
+        expect(applyPlayerDaytonHardline(bot)).toBe(false);
+        const accept = makeState('RBiH', 184);
+        accept.military.event_flags = { rbih_dayton_acceptance: 'accept' };
+        expect(applyPlayerDaytonHardline(accept)).toBe(false);
+        expect(accept.military.negotiation!.dayton_decline).toBeUndefined();
+    });
+});
+
+describe('Dayton event records follow the real settlement', () => {
+    const defs = loadEventDefinitionsFromDir(0, resolve(process.cwd(), 'data/scenarios/events'));
+    const def = (id: string) => defs.find((d) => d.id === id)!;
+
+    it('"Dayton signed" no longer fires off the talks answer, only on the signature flag', () => {
+        const state = makeState('RBiH', 185);
+        state.military.event_flags = { rbih_dayton_acceptance: 'accept' };
+        expect(evaluateCondition(def('dayton_signed_1995').trigger.condition!, state)).toBe(false);
+        state.military.event_flags[DAYTON_SETTLEMENT_SIGNED_FLAG] = true;
+        expect(evaluateCondition(def('dayton_signed_1995').trigger.condition!, state)).toBe(true);
+    });
+
+    it('signing or imposing Dayton fires the "Dayton signed" record', () => {
+        const state = makeState('RBiH');
+        declineDaytonNegotiation(state);
+        state.meta.turn = 192;
+        enforceDaytonImposition(state);
+        expect(state.military.fired_event_ids).toContain('dayton_signed_1995');
+        expect(state.military.event_flags?.[DAYTON_SETTLEMENT_SIGNED_FLAG]).toBe(true);
+    });
+
+    it('the RS and HRHB acceptance events do not fire after a decline', () => {
+        const state = makeState('RBiH', 190);
+        state.military.event_flags = { rs_strategic_goals: 'all_six', hrhb_political_goal: 'croat_republic' };
+        expect(evaluateCondition(def('rs_dayton_acceptance_1995').trigger.condition!, state)).toBe(true);
+        expect(evaluateCondition(def('hrhb_dayton_acceptance_1995').trigger.condition!, state)).toBe(true);
+        state.military.event_flags[DAYTON_DECLINED_BY_FLAG] = 'RBiH';
+        expect(evaluateCondition(def('rs_dayton_acceptance_1995').trigger.condition!, state)).toBe(false);
+        expect(evaluateCondition(def('hrhb_dayton_acceptance_1995').trigger.condition!, state)).toBe(false);
     });
 });
