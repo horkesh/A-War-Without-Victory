@@ -509,8 +509,10 @@ describe('Dayton continuation operations (owner, 2026-11-07: "Resume halted 1995
         }
     });
 
-    it('Banja Luka and Kola stay out of every objective list (US red line, BB1 p.392)', () => {
-        const forbidden = ['op:banja_luka:banja_luka_2', 'op:banja_luka:kola'];
+    it('Banja Luka and Kola (US red line, BB1 p.392) and the Omarska camp cells stay out of every objective list', () => {
+        // Camp-site exclusion is enforced by test (SENSITIVE_HISTORY_DESIGN_GATE §1): op:prijedor:omarska_2
+        // and op:prijedor:kamicani are never authored objectives (R2 historian condition).
+        const forbidden = ['op:banja_luka:banja_luka_2', 'op:banja_luka:kola', 'op:prijedor:omarska_2', 'op:prijedor:kamicani'];
         const objectives = DAYTON_CONTINUATION_OPPORTUNITIES.flatMap((d) => d.axes.flatMap((a) => a.objectives));
         for (const f of forbidden) expect(objectives).not.toContain(f);
     });

@@ -6,7 +6,7 @@
  *  - up to an AREA BUDGET that grows with its override authority: nothing below 75, then
  *    0.5 + 0.15 × (override − 75) percent of BiH, capped at 4.25 (RS at 78.5 ≈ 1.0%, at 90
  *    ≈ 2.75%). The patron gives up the smallest pieces first.
- *  - never on PROTECTED ground: the client's heartland and lifelines. For RS: the Banja Luka
+ *  - never on PROTECTED ground: ground the client held throughout and that was never on the Dayton table. For RS: the Banja Luka
  *    region, Prijedor, Bosanski Novi, Doboj, Bijeljina and the Posavina corridor (Brčko then
  *    goes to arbitration, as at Dayton). For HRHB: Mostar and western Herzegovina. A client
  *    never concedes protected ground voluntarily either.
@@ -41,7 +41,7 @@ export const PROTECTED_MUNICIPALITIES: Readonly<Record<string, ReadonlySet<strin
     RS: new Set([
         // Banja Luka region
         'banja_luka', 'laktasi', 'celinac',
-        // Krajina and northern heartland
+        // Held by RS throughout the war; never on the Dayton table
         'prijedor', 'bosanski_novi', 'doboj', 'bijeljina',
         // Posavina corridor (Brčko resolves to arbitration)
         'brcko', 'bosanski_samac', 'modrica', 'derventa', 'bosanski_brod',

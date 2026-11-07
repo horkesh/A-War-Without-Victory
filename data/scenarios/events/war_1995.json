@@ -2610,9 +2610,9 @@
   },
   {
     "id": "us_forces_dayton_rbih_1995",
-    "image": "event_nato_air_power.webp",
+    "image": "event_diplomatic_negotiation.webp",
     "title": "Washington Ends the Argument",
-    "narrative": "Eight weeks after Sarajevo walked away from the Dayton text, Washington stops asking. American aircraft strike Army of the Republic of Bosnia and Herzegovina positions and depots, and the message to the Presidency is delivered in one sentence: return to the table and sign, or fight on alone against everyone. The delegation goes back. The Dayton map is the text on the table; ground taken since the walkout can be kept only by bargaining for it.",
+    "narrative": "In this campaign, eight weeks after Sarajevo walked away from the Dayton text, Washington stops asking. American aircraft strike Army of the Republic of Bosnia and Herzegovina positions and depots, and the message to the Presidency is delivered in one sentence: return to the table and sign, or fight on alone against everyone. The delegation goes back. The Dayton map is the text on the table; ground taken since the walkout can be kept only by bargaining for it.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 184,
@@ -2629,7 +2629,7 @@
     "responding_faction": "RBiH",
     "effect": {
       "kind": "narrative",
-      "text": "US air strikes force the Bosnian government to accept the Dayton settlement."
+      "text": "In this campaign, US air strikes force the Bosnian government back to the Dayton table."
     },
     "effects": [
       { "kind": "morale_change", "faction": "RBiH", "delta": -15 },
@@ -2650,7 +2650,7 @@
     "id": "belgrade_signs_dayton_for_rs_1995",
     "image": "event_patron_relations_RS.webp",
     "title": "Belgrade Signs for Pale",
-    "narrative": "Eight weeks after Pale refused Dayton, Milošević uses the mandate the Bosnian Serb leadership itself gave him in August. Belgrade closes the Drina to everything but humanitarian traffic and orders the Bosnian Serb delegation back to the table, with its own signature ready in their name. Pale is told the war is over, and that the alternative is to fight it without Serbia. The Dayton map is the text; ground taken since the refusal is only what can be bargained for.",
+    "narrative": "In this campaign, eight weeks after Pale refused Dayton, Milošević uses the mandate the Bosnian Serb leadership itself gave him in August. Belgrade closes the Drina to everything but humanitarian traffic and orders the Bosnian Serb delegation back to the table, with its own signature ready in their name. Pale is told the war is over, and that the alternative is to fight it without Serbia. The Dayton map is the text; ground taken since the refusal is only what can be bargained for.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 184,
@@ -2667,7 +2667,7 @@
     "responding_faction": "RS",
     "effect": {
       "kind": "narrative",
-      "text": "Belgrade signs the Dayton settlement on behalf of the Bosnian Serbs."
+      "text": "In this campaign, Belgrade forces the Bosnian Serb delegation back to the Dayton table."
     },
     "effects": [
       { "kind": "morale_change", "faction": "RS", "delta": -10 },
@@ -2688,7 +2688,7 @@
     "id": "zagreb_signs_dayton_for_hrhb_1995",
     "image": "event_patron_relations_HRHB.webp",
     "title": "Zagreb Binds Mostar",
-    "narrative": "Eight weeks after Mostar refused Dayton, Tuđman ends the argument from Zagreb. The supply road through Herzegovina narrows, the Herceg-Bosna delegation is sent back to the table, and its leadership is told that the Federation is the only future on offer. The Dayton map is the text; ground taken since the refusal is only what can be bargained for.",
+    "narrative": "In this campaign, eight weeks after Mostar refused Dayton, Tuđman ends the argument from Zagreb. The supply road through Herzegovina narrows, the Herceg-Bosna delegation is sent back to the table, and its leadership is told that the Federation is the only future on offer. The Dayton map is the text; ground taken since the refusal is only what can be bargained for.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 184,
@@ -2705,7 +2705,7 @@
     "responding_faction": "HRHB",
     "effect": {
       "kind": "narrative",
-      "text": "Zagreb binds the Bosnian Croats to the Dayton settlement."
+      "text": "In this campaign, Zagreb forces the Bosnian Croat delegation back to the Dayton table."
     },
     "effects": [
       { "kind": "morale_change", "faction": "HRHB", "delta": -10 },
