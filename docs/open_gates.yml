@@ -42,7 +42,8 @@ gates:
   - id: RD-PACKAGE-KEYWORD-MATCH
     lane: RD
     title: Fixed Dayton packages take only cells in their own municipalities
-    status: open
+    status: closed
+    closed: 2026-11-07
     kind: bug
     opened: 2026-11-07
     blocks: [R8]
@@ -50,13 +51,14 @@ gates:
       Token-level keyword matching in package_area_resolver.ts with a test listing each
       package's cells; Sarajevo Suburbs no longer includes op:kljuc:hadzici or
       op:sanski_most:ilidza_2, Central Bosnia no longer includes Novi Travnik.
-    evidence_path: null
+    evidence_path: tests/dayton_package_keywords.test.ts
     source: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
 
   - id: RD-CONTIGUITY-PROTECTION
     lane: RD
     title: The no-pocket pass never undoes won packages or absorbs enclaves
-    status: open
+    status: closed
+    closed: 2026-11-07
     kind: bug
     opened: 2026-11-07
     blocks: [R8]
@@ -64,20 +66,21 @@ gates:
       settlement_contiguity.ts continues past pieces it cannot fix, picks corridors by
       smallest area, and connects (never absorbs) pieces holding won-package or enclave
       cells; tests for each case.
-    evidence_path: null
+    evidence_path: tests/settlement_contiguity.test.ts
     source: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
 
   - id: RD-PATRON-OVERRIDE
     lane: RD
     title: Patron override as an area budget with a protected list (owner ruling)
-    status: open
+    status: closed
+    closed: 2026-11-07
     kind: acceptance
     opened: 2026-11-07
     blocks: [R8]
     evidence_required: >
       Owner rulings 1-3 of the RD plan implemented with tests; canon record in
       VICTORY_AND_PYRRHIC_SCORING.md; 188w baseline gate and a decline campaign measured.
-    evidence_path: null
+    evidence_path: tests/patron_leverage.test.ts
     source: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
 
   - id: RD-MAX-TERRITORY-REMEASURE
