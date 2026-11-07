@@ -1,6 +1,6 @@
 // Generates the A War Without Victory mark system: convergence pins, display + small cuts, tiles, favicon, lockups.
-// Run from the game repo with NODE_PATH=<repo>/node_modules. Output dir is argv[2].
-process.env.FONTCONFIG_FILE = __dirname + '/fonts.conf';
+// Run from the repository root with NODE_PATH=<repo>/node_modules. Output dir is argv[2]. Fonts come from assets/ui/fonts.
+const REPO_ROOT = require('path').resolve(__dirname, '..', '..', '..', '..', '..');
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
@@ -68,8 +68,8 @@ async function png(svg, size, file) {
   const SUB = 'BOSNIA-HERZEGOVINA · 1992-1995';
   const T_SIZE = 44, T_TRACK = 1.6, S_SIZE = 12.5, S_TRACK = 2.3;
 
-  const ttf = fs.readFileSync('F:/A-War-Without-Victory/assets/ui/fonts/IBMPlexSans_Condensed-SemiBold.ttf').toString('base64');
-  const mono = fs.readFileSync('F:/A-War-Without-Victory/assets/ui/fonts/IBMPlexMono-SemiBold-Latin1.woff2').toString('base64');
+  const ttf = fs.readFileSync(path.join(REPO_ROOT, 'assets/ui/fonts/IBMPlexSans_Condensed-SemiBold.ttf')).toString('base64');
+  const mono = fs.readFileSync(path.join(REPO_ROOT, 'assets/ui/fonts/IBMPlexMono-SemiBold-Latin1.woff2')).toString('base64');
   const fontStyle = `<style>@font-face{font-family:"IBM Plex Sans Condensed";font-weight:600;src:url(data:font/ttf;base64,${ttf}) format("truetype")}@font-face{font-family:"IBM Plex Mono";font-weight:600;src:url(data:font/woff2;base64,${mono}) format("woff2")}</style>`;
 
   // Measure the two lines in Chromium with the embedded fonts, so the lockup viewBox is exact.
