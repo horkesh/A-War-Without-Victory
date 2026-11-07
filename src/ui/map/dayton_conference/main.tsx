@@ -124,15 +124,38 @@ function App() {
         <h1 ref={roomHeading} tabIndex={-1}>Hope Hotel conference room</h1>
         <p aria-live="polite">{outcome ? 'Round closed' : offer.revision === 2 ? 'Round 1 · New counteroffer · Your delegation to respond' : 'Round 1 · Revised draft · Your delegation to respond'}</p>
       </header>
-      <div className="room-frame" data-bounds={bounds}>
-        <img src={room} alt="Conference table, delegation folder, draft papers, wall board and treaty binder" />
-        {labels.map(({ id, label, bounds: area }) => {
-          const style: CSSProperties = {
-            left: area.left * 100 + '%', top: area.top * 100 + '%',
-            width: (area.right - area.left) * 100 + '%', height: (area.bottom - area.top) * 100 + '%',
-          };
-          return <button key={id} type="button" className="hotspot" style={style} onClick={event => open(destination(id), event)}><span>{label}</span></button>;
-        })}
+      <div className="room-window">
+        <div className="room-frame" data-bounds={bounds}>
+          <img src={room} alt="Conference table, delegation folder, draft papers, wall board and treaty binder" />
+          {labels.map(({ id, label, center, outline }) => {
+            const xs = outline.map(([x]) => x);
+            const ys = outline.map(([, y]) => y);
+            const left = Math.min(...xs);
+            const top = Math.min(...ys);
+            const width = Math.max(...xs) - left;
+            const height = Math.max(...ys) - top;
+            const polygon = outline.map(([x, y]) => [((x - left) / width) * 100, ((y - top) / height) * 100]);
+            const style: CSSProperties = {
+              left: left / blocking.width * 100 + '%',
+              top: top / blocking.height * 100 + '%',
+              width: width / blocking.width * 100 + '%',
+              height: height / blocking.height * 100 + '%',
+              clipPath: 'polygon(' + polygon.map(([x, y]) => x + '% ' + y + '%').join(', ') + ')',
+            };
+            const labelPosition = {
+              left: (center[0] - left) / width * 100 + '%',
+              top: (center[1] - top) / height * 100 + '%',
+            };
+            return (
+              <button key={id} type="button" className="hotspot" style={style} onClick={event => open(destination(id), event)}>
+                <svg viewBox={`${left} ${top} ${width} ${height}`} aria-hidden="true">
+                  <polygon points={outline.map(point => point.join(',')).join(' ')} vectorEffect="non-scaling-stroke" />
+                </svg>
+                <span style={labelPosition}>{label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
       <nav aria-label="Conference objects">
         {labels.map(({ id, label }) => (

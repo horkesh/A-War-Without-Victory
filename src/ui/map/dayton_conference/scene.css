@@ -38,34 +38,70 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
   border: 1px solid var(--line);
 }
 .arrival button { margin: .45rem .45rem 0 0; }
-.conference { width: min(100%, 1160px); padding: 1rem; margin-inline: auto; }
-.room-frame {
+.conference {
+  height: 100svh;
+  min-height: 30rem;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+.conference > header {
+  padding: .65rem clamp(1rem, 3vw, 3rem) .55rem;
+  border-bottom: 1px solid #403828;
+}
+.conference > header h1 { margin-bottom: .2rem; }
+.conference > header p { margin-bottom: .2rem; }
+.room-window {
   position: relative;
-  isolation: isolate;
-  width: min(100%, max(26rem, calc((100svh - 12rem) * 1.777)));
-  margin-inline: auto;
+  overflow: hidden;
+  container-type: size;
+  background: radial-gradient(ellipse at center, #3c3023, #1c1b17 78%);
+}
+.room-frame {
+  position: absolute;
+  width: min(100cqw, 236cqh);
+  top: 50%;
+  left: 50%;
+  /* At wide ratios, give up more ceiling than table so every prop stays in view. */
+  transform: translate(-50%, calc(-50% - max(0px, (100% - 100cqh) * .15)));
 }
 .room-frame img { width: 100%; height: auto; display: block; }
 .hotspot {
   position: absolute;
   min-height: 0;
-  display: grid;
-  place-items: center;
   padding: 0;
-  border: 1px solid transparent;
+  border: 0;
   background: transparent;
 }
-.hotspot span {
-  display: block;
-  border-radius: 2px;
-  padding: .1rem .35rem;
-  background: #1b1916f2;
-  font-size: clamp(.65rem, 1.35vw, .9rem);
-  line-height: 1.15;
+.hotspot:hover, .hotspot:focus-visible { background: transparent; }
+.hotspot svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  fill: none;
+  stroke: none;
 }
-.hotspot:hover, .room-frame[data-bounds="true"] .hotspot {
-  background: #17140d30;
-  border-color: var(--gold);
+.hotspot:hover svg, .hotspot:focus-visible svg, .room-frame[data-bounds="true"] .hotspot svg {
+  fill: #e7ce8d19;
+  stroke: var(--gold);
+  stroke-width: 4px;
+}
+.hotspot span {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 2px;
+  padding: .15rem .4rem;
+  background: #1b1916f2;
+  font-size: clamp(.7rem, 1.05vw, 1rem);
+  line-height: 1.15;
+  white-space: nowrap;
+}
+.conference > nav {
+  justify-content: center;
+  padding: .55rem clamp(1rem, 3vw, 3rem);
+  margin-top: 0;
+  border-top: 1px solid #403828;
 }
 nav, .actions { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: .8rem; }
 dialog {
