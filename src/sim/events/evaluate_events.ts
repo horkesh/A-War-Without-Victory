@@ -13,12 +13,13 @@ import type { EventDefinition, DimensionShift, EventResponseOption, FiredEvent, 
 import { triggerMatches } from './event_types.js';
 import { isEventReady } from './pressure_system.js';
 import { pickBotResponseV1 } from './bot_response.js';
-import { applyAIDefaultResponse, hasAuthoredAIDefaultResponse } from './ai_default_response.js';
+import { applyAIDefaultResponse, hasAuthoredAIDefaultResponse, selectAIDefaultResponse } from './ai_default_response.js';
 import { emitEventNotifications } from './emit_notifications.js';
 import { applyDimensionShift, type DimensionStore } from './strategic_dimensions.js';
 import { getPoliticalPersonality, computePoliticalAssessment } from '../political/political_personality.js';
 import { pickPoliticalResponse } from '../political/political_event_decision.js';
 import { compareCausalityEntries, strictCompare } from '../../state/validateGameState.js';
+import { findAnswerAheadOfFiring, isAnswerAheadOfFiringDecision } from './answer_ahead_of_firing.js';
 
 /**
  * Maximum PLAYER-FACING DECISION events that can fire in a single turn.
@@ -419,6 +420,68 @@ const DEFAULT_BOT_COMMANDER = { aggressiveness: 3, competence: 3 };
  */
 const POLITICAL_LOGICS = new Set<string>(['strategic_weighted', 'capital_based', 'capital_weighted']);
 
+export interface BotEventResponseSelection {
+    chosen: EventResponseOption;
+    decisionSource: 'bot_political' | 'bot_v1' | 'bot_ai_default';
+}
+
+/**
+ * The response a bot gives to a decision event — selection only, nothing is applied.
+ * `evaluateEvents` applies the result in-turn; parity tooling (the desktop calibration
+ * harness) uses it to answer a player decision exactly as the bot would.
+ *
+ * `forceAuthoredDefault` is the Observer (Level 3) rule: prefer the authored historical
+ * default even under decision_mode 'emergent'.
+ */
+export function selectBotEventResponse(
+    state: GameState,
+    def: EventDefinition,
+    respondingFaction: FactionId | null,
+    forceAuthoredDefault: boolean,
+): BotEventResponseSelection {
+    const options = def.response_options ?? [];
+    // Free War Phase 0 de-railroad: in 'emergent' mode, bypass the
+    // historical-default railroad and fall through to the live
+    // political/v1 scorers. Unset follows the save-migration default
+    // ('historical') independently of notification delivery.
+    const emergent = state.meta.decision_mode === 'emergent';
+    const historical = !emergent;
+    // `forceAuthoredDefault` forces the AUTHORED HISTORICAL default even under
+    // decision_mode 'emergent': Observer exists to reproduce the historical line, and
+    // the desktop campaign sets 'emergent' by default, which would otherwise route the
+    // player's own decisions through the political scorer instead.
+    if ((historical || forceAuthoredDefault) && hasAuthoredAIDefaultResponse(def)) {
+        return { chosen: selectAIDefaultResponse(def), decisionSource: 'bot_ai_default' };
+    }
+    // Free War Phase 0.5: in EMERGENT mode, route EVERY faction-attributed
+    // event through the signal-driven political scorer — not just the
+    // POLITICAL_LOGICS subset. Most events carry bot_response_logic
+    // 'historical' (→ pickBotResponseV1, which hard-returns the historical
+    // default with no scoring); without this, emergent freedom is nominal.
+    // Historical/unset uses the political scorer only when no authored
+    // AI default exists and the event explicitly selects political logic.
+    if (
+        respondingFaction !== null &&
+        (emergent || POLITICAL_LOGICS.has(def.bot_response_logic ?? ''))
+    ) {
+        const personality = getPoliticalPersonality(respondingFaction);
+        const assessment = computePoliticalAssessment(state, respondingFaction, personality);
+        return {
+            chosen: pickPoliticalResponse(options, respondingFaction, assessment, personality),
+            decisionSource: 'bot_political',
+        };
+    }
+    return {
+        chosen: pickBotResponseV1(
+            options,
+            def.bot_response_logic,
+            DEFAULT_BOT_COMMANDER,
+            def.historical_default_response_id,
+        ),
+        decisionSource: 'bot_v1',
+    };
+}
+
 /** Firing, part 1: mechanical effects, definition-level shifts/flags and flag causality. */
 function applyFiringEffects(state: GameState, def: EventDefinition, currentTurn: number): void {
     // Collect all effects and apply mechanical ones (primary + additional)
@@ -596,7 +659,9 @@ export function evaluateEvents(
             // `requires_player_response` included. A decision with no authored default is left
             // pending rather than guessed at — the scorer's pick would not be "the historical
             // option", which is the only thing this mode is licensed to choose.
-            if (!def || !hasAuthoredAIDefaultResponse(def)) {
+            // A birth card for an opening event that has not fired yet is resolved when it fires
+            // (fire-time branch below), not here: applying it now would land its effects early.
+            if (!def || !hasAuthoredAIDefaultResponse(def) || isAnswerAheadOfFiringDecision(state, pending.event_id)) {
                 stillPending.push(pending);
                 continue;
             }
@@ -691,6 +756,9 @@ export function evaluateEvents(
 
     // Phase 3: Fire selected events through one shared effect/receipt writer.
     const fireEvent = (def: EventDefinition): void => {
+        // Read before this firing is receipted: an answer filed ahead of the event's first firing.
+        const answeredAheadResponseId = findAnswerAheadOfFiring(state, def.id);
+        const openingFirstFiring = isAnswerAheadOfFiringDecision(state, def.id);
         applyFiringEffects(state, def, currentTurn);
 
         const text = getNarrativeText(def);
@@ -759,7 +827,32 @@ export function evaluateEvents(
             // docs/plans/2026-08-31-s6-ring3-half-migration-packet.md is what fixes it.
             const observerAutoResolves = isPlayerRespondent && autonomyLevel >= 3;
             const mustShowPlayer = isPlayerRespondent && !observerAutoResolves;
-            if (mustShowPlayer) {
+            const answeredAhead = isPlayerRespondent && answeredAheadResponseId != null
+                ? def.response_options.find((option) => option.id === answeredAheadResponseId) ?? null
+                : null;
+            // The opening card, if still unanswered, was queued at campaign birth: never queue twice.
+            const birthCardPending = openingFirstFiring
+                && (state.military.pending_event_decisions ?? []).some((pending) => pending.event_id === def.id);
+            if (answeredAhead) {
+                // ANSWER AHEAD OF FIRING (answer_ahead_of_firing.ts): the player answered this
+                // opening decision at campaign birth and it was filed then. Apply it now, where and
+                // as a bot's answer is applied below; the decision is already in the log.
+                applyEventEffects(state, answeredAhead.effects ?? []);
+                applyDefinitionFlags(state, answeredAhead.sets_flags);
+                applyDefinitionDimensionShifts(state, answeredAhead.dimension_shifts);
+                applyResponseRuntimeCausality(state, def.id, answeredAhead.id, answeredAhead, currentTurn);
+                if (respondingFaction !== null) {
+                    emitEventNotifications(
+                        state,
+                        { event_id: def.id, notifications_to_other_factions: def.notifications_to_other_factions },
+                        answeredAhead.id,
+                        respondingFaction,
+                        currentTurn,
+                    );
+                }
+            } else if (mustShowPlayer && birthCardPending) {
+                // Unanswered birth card: it stays pending and resolves normally when answered.
+            } else if (mustShowPlayer) {
                 // Player faction (levels 0-2) OR high-stakes event at any level: queue as pending decision
                 if (!state.military.pending_event_decisions) {
                     state.military.pending_event_decisions = [];
@@ -798,54 +891,17 @@ export function evaluateEvents(
                 });
             } else {
                 // No player faction (headless/spectator) OR Observer (level 3) for non-required events: bot auto-responds.
-                // Political personality path for dimension-weighted logic types.
-                let chosen: EventResponseOption;
-                let decisionSource: 'bot_political' | 'bot_v1' | 'bot_ai_default';
-                // Free War Phase 0 de-railroad: in 'emergent' mode, bypass the
-                // historical-default railroad and fall through to the live
-                // political/v1 scorers. Unset follows the save-migration default
-                // ('historical') independently of notification delivery.
-                const emergent = state.meta.decision_mode === 'emergent';
-                const historical = !emergent;
-                // `observerAutoResolves` forces the AUTHORED HISTORICAL default even under
-                // decision_mode 'emergent': Observer exists to reproduce the historical line, and
-                // the desktop campaign sets 'emergent' by default, which would otherwise route the
-                // player's own decisions through the political scorer instead.
-                if ((historical || observerAutoResolves) && hasAuthoredAIDefaultResponse(def)) {
-                    chosen = applyAIDefaultResponse(state, def);
-                    decisionSource = 'bot_ai_default';
-                // Free War Phase 0.5: in EMERGENT mode, route EVERY faction-attributed
-                // event through the signal-driven political scorer — not just the
-                // POLITICAL_LOGICS subset. Most events carry bot_response_logic
-                // 'historical' (→ pickBotResponseV1, which hard-returns the historical
-                // default with no scoring); without this, emergent freedom is nominal.
-                // Historical/unset uses the political scorer only when no authored
-                // AI default exists and the event explicitly selects political logic.
-                } else if (
-                    respondingFaction !== null &&
-                    (emergent || POLITICAL_LOGICS.has(def.bot_response_logic ?? ''))
-                ) {
-                    const personality = getPoliticalPersonality(respondingFaction);
-                    const assessment = computePoliticalAssessment(state, respondingFaction, personality);
-                    chosen = pickPoliticalResponse(def.response_options, respondingFaction, assessment, personality);
-                    applyEventEffects(state, chosen.effects ?? []);
-                    // Apply flags and dimension shifts from the chosen response option
-                    applyDefinitionFlags(state, chosen.sets_flags);
-                    applyDefinitionDimensionShifts(state, chosen.dimension_shifts);
-                    decisionSource = 'bot_political';
-                } else {
-                    chosen = pickBotResponseV1(
-                        def.response_options,
-                        def.bot_response_logic,
-                        DEFAULT_BOT_COMMANDER,
-                        def.historical_default_response_id,
-                    );
-                    applyEventEffects(state, chosen.effects ?? []);
-                    // Apply flags and dimension shifts from the chosen response option
-                    applyDefinitionFlags(state, chosen.sets_flags);
-                    applyDefinitionDimensionShifts(state, chosen.dimension_shifts);
-                    decisionSource = 'bot_v1';
-                }
+                // Every selection route applies the chosen response the same way (effects, then
+                // flags, then dimension shifts), so the choice and its application are separate.
+                const { chosen, decisionSource } = selectBotEventResponse(
+                    state,
+                    def,
+                    respondingFaction,
+                    observerAutoResolves,
+                );
+                applyEventEffects(state, chosen.effects ?? []);
+                applyDefinitionFlags(state, chosen.sets_flags);
+                applyDefinitionDimensionShifts(state, chosen.dimension_shifts);
                 recordEventDecision(state, def.id, chosen.id, decisionSource, respondingFaction, currentTurn);
                 // Phase B Sub-slice B3: bot path response-level runtime causality
                 // (packet §3.3, §3.5). Mirror of player path in resolve_decision.ts
@@ -859,6 +915,12 @@ export function evaluateEvents(
                         respondingFaction,
                         currentTurn,
                     );
+                }
+                if (isPlayerRespondent && openingFirstFiring && state.military.pending_event_decisions) {
+                    // Observer resolved an opening event whose birth card was never answered:
+                    // drop that card, the decision is now made.
+                    state.military.pending_event_decisions = state.military.pending_event_decisions
+                        .filter((pending) => pending.event_id !== def.id);
                 }
             }
         }

@@ -217,7 +217,8 @@ describe('COHA operation pause', () => {
         expect(isVlasicCohaWindow(153)).toBe(false);
         expect(isVlasicCohaWindow(154)).toBe(false);
         expect(isVlasicCohaWindow(155)).toBe(true);
-        expect(isVlasicCohaWindow(156)).toBe(false);
+        expect(isVlasicCohaWindow(156)).toBe(true);
+        expect(isVlasicCohaWindow(157)).toBe(false);
     });
 
     it('accepts the exact eleven-ID authored roster and rejects active unrelated 330/327', () => {
@@ -313,7 +314,7 @@ describe('COHA operation pause', () => {
         }
     });
 
-    it('admits only the completed 20-26 March receipt through ordinary resolution', () => {
+    it('admits the completed 20 March-2 April receipts through ordinary resolution', () => {
         expect(turnToCompletedWeekRange(155)).toBe('20-26 Mar 1995');
         expect(isVlasicCohaWindow(155)).toBe(true);
         const state = makeVlasicState(155);
@@ -342,19 +343,19 @@ describe('COHA operation pause', () => {
         expect(report.battles[0]?.operation_id).toContain('arbih_3rd_corps:Operation Vlasic Ridge');
     });
 
-    it('pauses the lifecycle and consumes the Vlasic order again at receipt 156', () => {
-        expect(turnToCompletedWeekRange(156)).toBe('27 Mar-2 Apr 1995');
-        expect(isVlasicCohaWindow(156)).toBe(false);
-        const lifecycleState = makeVlasicState(156);
+    it('pauses the lifecycle and consumes the Vlasic order again at receipt 157', () => {
+        expect(turnToCompletedWeekRange(157)).toBe('3-9 Apr 1995');
+        expect(isVlasicCohaWindow(157)).toBe(false);
+        const lifecycleState = makeVlasicState(157);
         const lifecycleOperation = lifecycleState.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
         expect(isVlasicCohaExceptionOperation(lifecycleState, 'arbih_3rd_corps', lifecycleOperation)).toBe(false);
 
         advanceSectorOffensives(lifecycleState);
 
         expect(lifecycleOperation.phase).toBe('execution');
-        expect(lifecycleOperation.phase_started_turn).toBe(156);
+        expect(lifecycleOperation.phase_started_turn).toBe(157);
 
-        const orderState = makeVlasicState(156);
+        const orderState = makeVlasicState(157);
         const report = resolveAttackOrdersOsid(
             orderState,
             [],
@@ -466,7 +467,7 @@ describe('COHA operation pause', () => {
     });
 
     it('keeps the exception closed outside the window and for unrelated operations', () => {
-        const outside = makeVlasicState(156);
+        const outside = makeVlasicState(157);
         const outsideOp = outside.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
         expect(isVlasicCohaExceptionOperation(outside, 'arbih_3rd_corps', outsideOp)).toBe(false);
         const unrelated = makeState();

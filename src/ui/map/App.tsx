@@ -507,6 +507,7 @@ function App() {
   const codexOpen = useGameStore((s) => s.codexOpen);
   const chronicleOpen = useGameStore((s) => s.chronicleOpen);
   const advanceTurnPending = useGameStore((s) => s.advanceTurnPending);
+  const turnPauseStatus = useGameStore((s) => s.turnPauseStatus);
   const paletteOrderMode = useGameStore((s) => s.orderModeForFormation);
   const paletteAttackConfirmation = useGameStore((s) => s.pendingAttackConfirmation);
   const opsPlanningModalOpen = useGameStore((s) => s.opsPlanningModalOpen);
@@ -965,7 +966,7 @@ function App() {
   const paletteBlocked = !loadedGameState || appScreen === 'mainMenu' ||
     onboardingBlockingOverlayActive ||
     presidentialBlockingSurfaceActive || requiredPlayerEventDecisionPending || openingBriefPending ||
-    onboardingOverlayOpen || campaignStarting || turnAftermathOpen || advanceTurnPending ||
+    onboardingOverlayOpen || campaignStarting || turnAftermathOpen || advanceTurnPending || turnPauseStatus !== null ||
     pauseOpen || settingsOpen || creditsOpen || opsPlanningModalOpen ||
     commanderSelectionContext !== null || operationBriefingContext !== null ||
     paletteOrderMode !== null || paletteAttackConfirmation !== null || loadedGameState.gameOver === true;
@@ -1009,6 +1010,19 @@ function App() {
     recentlyAcceptedEventDecisionId,
     appScreen,
   ]);
+
+  // PAUSE BEFORE COMBAT: a paused turn waits on the player, so its decision must reach the
+  // screen even when one of the auto-launch gates above (opening brief, transition overlay,
+  // main menu) would hold it back — otherwise the turn would sit paused with nothing to
+  // answer or continue from.
+  useEffect(() => {
+    if (turnPauseStatus?.status !== 'paused') return;
+    if (activeEventDecisionId !== null) return;
+    const pausedDecision = (loadedGameState?.pendingEventDecisions ?? []).find((decision) => (
+      decision.faction === playerFaction && turnPauseStatus.eventIds.includes(decision.event_id)
+    ));
+    if (pausedDecision) setActiveEventDecisionId(pausedDecision.event_id);
+  }, [turnPauseStatus, activeEventDecisionId, loadedGameState?.pendingEventDecisions, playerFaction]);
 
   // Async presidential blockers own the full interaction surface. Preserve
   // map selection/camera state, but suspend every Warroom shell that could
@@ -1717,7 +1731,7 @@ function App() {
         campaignKey={loadedGameState}
         onActivate={(entry: CommandEntry) => {
           const store = useGameStore.getState();
-          if (paletteBlocked || store.loadedGameState !== loadedGameState || store.advanceTurnPending ||
+          if (paletteBlocked || store.loadedGameState !== loadedGameState || store.advanceTurnPending || store.turnPauseStatus !== null ||
             store.orderModeForFormation !== null || store.pendingAttackConfirmation !== null ||
             store.opsPlanningModalOpen || store.commanderSelectionContext !== null || store.operationBriefingContext !== null) return;
           if (entry.kind === 'settlement') {
@@ -1990,7 +2004,10 @@ function App() {
           (event_modal action handler routes here). The modal is non-dismissible;
           the only exit is to respond, which calls ipc.respondToEventDecision and
           the engine clears the entry from pending_event_decisions. */}
-      {activeEventDecisionId !== null && !turnAftermathOpen && (() => {
+      {/* PAUSE BEFORE COMBAT: while the turn is paused after its events the modal says so and
+          offers "Continue turn"; once the player continues, the rest of the turn runs and
+          any unanswered decision returns with the normal turn report flow. */}
+      {activeEventDecisionId !== null && !turnAftermathOpen && turnPauseStatus?.status !== 'resumed' && (() => {
         const decision = (loadedGameState?.pendingEventDecisions ?? [])
           .find((d) => d.event_id === activeEventDecisionId && d.faction === playerFaction);
         if (!decision) return null;
@@ -2002,6 +2019,18 @@ function App() {
             advisor={resolveEventDecisionAdvisor(decision, loadedGameState?.namedOfficerData, playerFaction)}
             errorMessage={loadError}
             onDismissError={dismissActiveEventDecisionError}
+            turnPause={turnPauseStatus?.status === 'paused' && ipc.isAvailable
+              ? {
+                onContinue: () => {
+                  void ipc.continuePausedTurn().then((result) => {
+                    // 'no_paused_turn': the turn already resumed (e.g. a double click).
+                    if (!result.ok && result.error !== 'no_paused_turn') {
+                      setLoadError(result.error ?? 'Failed to continue the turn.');
+                    }
+                  });
+                },
+              }
+              : undefined}
             onRespond={async (eventId, responseId) => {
               const responseLabel = decision.response_options
                 .find((option) => option.id === responseId)?.label ?? responseId;

@@ -160,7 +160,10 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<TurnR
     });
 
     for (const step of warPhases) {
-        await runNamedPhase(context, step, 'war', movementObserver, personnelObserver, poolFlowObserver);
+        const phaseStep = step.name === PLAYER_DECISION_PAUSE_STEP && input.onPlayerDecisionsPending
+            ? withPlayerDecisionPause(step, input.onPlayerDecisionsPending)
+            : step;
+        await runNamedPhase(context, phaseStep, 'war', movementObserver, personnelObserver, poolFlowObserver);
     }
 
     // Bottom-up formation mode: run militia/pool/formation steps in war context.
@@ -274,6 +277,31 @@ async function refreshFrontEdgeSnapshot(state: GameState, input: TurnInput): Pro
     const edges = await getEdgesForTurn(input);
     const derivedFrontEdges = computeFrontEdges(state, edges);
     state.military.front_edges = derivedFrontEdges;
+}
+
+/** The step after which a human answers this turn's decisions (see `TurnInput.onPlayerDecisionsPending`). */
+export const PLAYER_DECISION_PAUSE_STEP = 'evaluate-events';
+
+/**
+ * Wrap the decision step so the pause runs inside its phase boundary: the response effects
+ * are then attributed to `evaluate-events` by the phase observers, exactly as a bot's
+ * in-turn answer is.
+ */
+function withPlayerDecisionPause(
+    step: NamedPhase,
+    onPlayerDecisionsPending: NonNullable<TurnInput['onPlayerDecisionsPending']>,
+): NamedPhase {
+    return {
+        ...step,
+        run: async (context) => {
+            await step.run(context);
+            const turn = context.state.meta.turn;
+            const firedThisTurn = (context.state.military.pending_event_decisions ?? [])
+                .filter((decision) => decision.turn_fired === turn);
+            if (firedThisTurn.length === 0) return;
+            await onPlayerDecisionsPending(context.state, firedThisTurn);
+        },
+    };
 }
 
 function rejectRandomness(): never {

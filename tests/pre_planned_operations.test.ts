@@ -565,6 +565,8 @@ describe('pre-planned operations', () => {
         assert.equal(visoko.staging_osid, 'op:visoko:visoko_2');
         assert.equal(visoko.min_attack_outcome, 'victory');
         assert.equal(visoko.planning_duration, 8);
+        // Calibration assumption 2026-11-05: Vareš 147th/185th join and march from turn 4.
+        assert.equal(visoko.prestage_from, 4);
         assert.deepEqual(visoko.axes, [
             {
                 axis_id: 'visoko_breza_perimeter',
@@ -574,6 +576,8 @@ describe('pre-planned operations', () => {
                     'arbih_146th_light',
                     'arbih_164th_mountain',
                     'arbih_guards_brigade',
+                    'arbih_147th_light',
+                    'arbih_185th_light',
                 ],
                 objectives: ['op:visoko:gornja_vratnica_2'],
                 staging_osid: 'op:visoko:visoko_2',
@@ -704,7 +708,9 @@ describe('pre-planned operations', () => {
         assert.equal(local.army_hq_op_id, undefined);
         assert.equal(local.execution_attack_power_mult, undefined);
         assert.equal(local.enqueue_from, undefined);
-        assert.equal(local.prestage_from, undefined);
+        // Calibration assumption (apr1994 711): the 444th returns home to Jablanica
+        // from t58 so the queue head can build at t66 instead of blocking Neretva '93.
+        assert.equal(local.prestage_from, 58);
         assert.equal(local.axes.length, 1);
         assert.deepEqual(local.axes[0]?.brigades, ['arbih_444th_mountain']);
         assert.deepEqual(local.axes[0]?.objectives, ['op:jablanica:doljani_2']);
@@ -3281,6 +3287,7 @@ describe('pre-planned operations', () => {
             [
                 { id: 'kijevo_shoulder', objectives: ['op:trnovo:kijevo_2'] },
                 { id: 'praca_approach', objectives: ['op:pale:praca'] },
+                { id: 'ilijas_krivajevici', objectives: ['op:ilijas:krivajevici'] },
             ],
         );
         assert.deepEqual(
@@ -3291,7 +3298,12 @@ describe('pre-planned operations', () => {
                 {
                     id: 'cajnice_south',
                     staging: 'op:cajnice:cajnice_2',
-                    objectives: ['op:cajnice:batotici', 'op:foca:brusna_2', 'op:gorazde:kolovarice'],
+                    objectives: [
+                        'op:cajnice:batotici',
+                        'op:cajnice:miljeno_2',
+                        'op:foca:brusna_2',
+                        'op:gorazde:kolovarice',
+                    ],
                 },
             ],
         );
@@ -3511,7 +3523,12 @@ describe('pre-planned eligibility observer', () => {
             'rs_1st_romanija_infantry',
             'rs_2nd_sarajevo_light_infantry',
             'rs_4th_sarajevo_light_infantry',
-        ]) first.military.formations![brigadeId]!.personnel = 1;
+            'rs_ilijas_brigade',
+            'F_RS_0001',
+        ]) {
+            const formation = first.military.formations![brigadeId];
+            if (formation) formation.personnel = 1;
+        }
         const second = structuredClone(first);
         const firstLines: string[] = [];
         const log = vi.spyOn(console, 'log').mockImplementation((line) => { firstLines.push(String(line)); });
@@ -3553,7 +3570,9 @@ describe('Gorazde Local Counterattack (Model)', () => {
         assert.equal(operation.axes.length, 1);
         assert.equal(operation.axes[0]?.axis_id, 'gorazde_local_counterattack');
         assert.equal(operation.axes[0]?.name, 'Local Gorazde Counterattack');
-        assert.deepEqual(operation.axes[0]?.brigades, [brigadeId]);
+        // Calibration assumption (jan1993 711): the 802nd, adjacent at Čitluk, joins the
+        // 851st so the counterattack survives the 851st being bled under the attack floor.
+        assert.deepEqual(operation.axes[0]?.brigades, [brigadeId, 'arbih_802nd_light']);
         assert.deepEqual(operation.axes[0]?.objectives, ['op:gorazde:kamen']);
         assert.equal(operation.axes[0]?.staging_osid, 'op:gorazde:bacci');
         for (const excluded of [
@@ -3569,7 +3588,7 @@ describe('Gorazde Local Counterattack (Model)', () => {
         assert.equal(operation.axes[0]?.minimum_staged_brigades, undefined);
     });
 
-    it('stays unqueued and unmoved at turn 22, then injects the sole 851st axis at turn 23', () => {
+    it('stays unqueued and unmoved at turn 22, then injects the 851st/802nd axis at turn 23', () => {
         const state = makeMinimalState();
         state.meta.turn = 22;
         const command = state.military.corps_command!.arbih_1st_corps!;
@@ -3599,14 +3618,13 @@ describe('Gorazde Local Counterattack (Model)', () => {
         assert.equal(injectQueuedOperation(state, 'arbih_1st_corps'), true);
         const operation = command.active_operations.find((active) => active.name === name);
         assert.ok(operation);
-        assert.deepEqual(operation!.participating_brigades, [brigadeId]);
+        assert.deepEqual(operation!.participating_brigades, ['arbih_802nd_light', brigadeId]);
         assert.equal(operation!.axes?.length, 1);
-        assert.deepEqual(operation!.axes?.[0]?.assigned_brigades, [brigadeId]);
+        assert.deepEqual([...operation!.axes![0]!.assigned_brigades].sort(), ['arbih_802nd_light', brigadeId]);
         assert.deepEqual(operation!.axes?.[0]?.objectives, ['op:gorazde:kamen']);
         assert.equal(operation!.axes?.[0]?.staging_osid, 'op:gorazde:bacci');
         for (const circleBrigade of [
             'arbih_801st_light',
-            'arbih_802nd_light',
             'arbih_831st_drina_lineage',
         ]) {
             assert.ok(!operation!.participating_brigades.includes(circleBrigade));
@@ -3614,7 +3632,7 @@ describe('Gorazde Local Counterattack (Model)', () => {
         assert.equal(formation.location_osid, positionBeforeInjection);
     });
 
-    it('refuses a fresh turn-23 queue when the 851st is below the 500-man attack floor', () => {
+    it('refuses a fresh turn-23 queue when both rostered brigades are below the 500-man attack floor', () => {
         const state = makeMinimalState();
         state.meta.turn = 23;
         const command = state.military.corps_command!.arbih_1st_corps!;
@@ -3622,6 +3640,7 @@ describe('Gorazde Local Counterattack (Model)', () => {
         command.queued_operations = [name];
         const formation = state.military.formations![brigadeId]!;
         formation.personnel = 499;
+        state.military.formations!.arbih_802nd_light!.personnel = 499;
         formation.location_osid = 'op:gorazde:bacci';
         state.political.political_controllers!['op:gorazde:bacci'] = 'RBiH';
         state.political.political_controllers!['op:gorazde:kamen'] = 'RS';

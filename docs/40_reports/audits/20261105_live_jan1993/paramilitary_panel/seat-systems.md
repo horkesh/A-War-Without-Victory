@@ -1,0 +1,14 @@
+# Seat: systems programmer (blind; packet 6b7b444dd25f3bad)
+- S1: all packet code claims PROVEN.
+  - The pending gate is at `paramilitary_sweep.ts:449`. The offensive copy at :732 is unreachable (no caller).
+  - The bot auto-approves at :537. The bot's flag is written to `event_flags.rbih_paramilitary_policy` ('always_deny' in baseline saves) but nothing reads it.
+  - `standing_allow` can't bypass the gate, which reads `event_decision_log`.
+  - Headless `player_faction` is null in all 27 scenarios.
+  - No player political-directive setter exists.
+- Key caveat: making the bot obey after its t4 decision does NOT remove the t1-2 cells. Parity needs ONE rule for an undecided faction, bot or player, and that is a history question first.
+- S2:
+  - (i) bot obeys: moves headless 188w from t4, RBiH only. Low determinism risk; no schema change.
+  - (ii) removing the player pending gate: closes the gap only if pending means auto-approve. That conflicts with §6 and with `pre_first_advance_paramilitary_policy.test.ts`.
+  - (iii) harness bot-parity: needs a narrow test-only hook, since the gate is in src. Measurement aid only.
+  - (iv) political directive for a staff-controlled player: live only and inert headless. Uses an existing field; no schema bump.
+- S3 order: (iii), then (iv), then (i) after a historian ruling (measured 188w + panel), then (ii) last, if at all (§6 panel).

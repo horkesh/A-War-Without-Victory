@@ -13,7 +13,8 @@
 | Accessibility P0 static closeout | Implemented; browser/axe spot check optional | `docs/40_reports/implemented/20260517_ACCESSIBILITY_P0_CLOSEOUT.md` |
 | Diplomacy panel | Implemented as read-only route-openable panel | `docs/40_reports/implemented/20260517_DIPLOMACY_PANEL.md` |
 | Officer mini-bios | Implemented for first-pass opening commanders | `docs/40_reports/implemented/20260517_OFFICER_CHARACTER_MINI_BIOS.md` |
-| Soundscape | Stub/composer brief implemented; full audio assets not yet implemented | `docs/40_reports/implemented/20260517_SOUNDSCAPE_KICKOFF_AUDIO_STUB.md` |
+| Soundscape and original score | Implemented: UI cues, ambient beds (off by default), opt-in music with the 35 s opening cue, the calm menu theme and an eight-track campaign rotation (PR #539, merged 2026-11-06) | `docs/40_reports/implemented/20261105_PLAYER_EXPERIENCE_COMPLETION.md`; `docs/audio/AUDIO_ASSET_PROVENANCE.json` (first-party compositions, CC0 recorded samples) |
+| Showcase clips carry the score and the game's UI cues | Implemented; edited for pace with captions, every frame a build capture | showcase repo `production/PLAN.md`; `docs/50_launch/marketing/screenshot_plan.md` |
 | BCS localization | First-pass Settings substrate implemented; full BCS localization not launch-claimable | `docs/40_reports/implemented/20260517_BCS_LOCALIZATION_FIRST_PASS.md`; `docs/plans/2026-05-17-bcs-localization-plan.md` |
 | Opt-in telemetry/crash reporting | Default-off local crash diagnostics implemented; upload/aggregation not launch-claimable | `docs/40_reports/implemented/20260518_TELEMETRY_LOCAL_FIRST_CRASH_DIAGNOSTICS.md`; `docs/40_reports/implemented/20260523_LOCALIZED_CRASH_DIAGNOSTICS.md` |
 | Public showcase site (live) | Implemented and deployed | <https://horkesh.github.io/a-war-without-victory-showcase/>; repo `horkesh/a-war-without-victory-showcase`; EN + BS parity |
@@ -25,4 +26,4 @@
 
 ## Cut Or Future Claims
 
-Do not claim real audio playback, shipped BCS localization, online telemetry upload, multiplayer, or finished clean-VM release validation until their evidence reports exist.
+Do not claim shipped BCS localization, online telemetry upload, multiplayer, or finished clean-VM release validation until their evidence reports exist. Music is opt-in in the build; do not describe it as always on.

@@ -149,6 +149,13 @@ export interface EventDecisionModalProps {
     advisor?: { name: string | null | undefined; rank?: string };
     errorMessage?: string | null;
     onDismissError?: () => void;
+    /**
+     * PAUSE BEFORE COMBAT (owner decision 2026-11-05): set while the current turn is paused
+     * right after its events, before movement and combat. The modal then says so and offers
+     * "Continue turn" — the player may continue without answering (the decision stays
+     * pending and takes effect only from next week).
+     */
+    turnPause?: { onContinue: () => void };
 }
 
 /** Phase H Packet 3 — Maximum chars of source dossier excerpt rendered in
@@ -541,7 +548,7 @@ function DecisionContextSection({
     );
 }
 
-export function EventDecisionModal({ decision, onRespond, eventCatalog, state, advisor, errorMessage, onDismissError }: EventDecisionModalProps) {
+export function EventDecisionModal({ decision, onRespond, eventCatalog, state, advisor, errorMessage, onDismissError, turnPause }: EventDecisionModalProps) {
     const [locale] = useLocale();
     const localizedDecision = resolveLocalizedDecisionDossier(decision, eventCatalog, locale);
     const factionColor = FACTION_TEXT_CLASS[localizedDecision.faction ?? ''] ?? 'text-accent-gold';
@@ -592,6 +599,31 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                     accentClassName={section6Alt ? 'text-accent-gold' : factionColor}
                 />
                 <div className="p-6">
+
+                    {turnPause && (
+                        <div
+                            className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded border border-accent-gold/45 bg-accent-gold/10 px-4 py-3"
+                            data-testid="event-decision-turn-paused"
+                            role="status"
+                        >
+                            <div className="min-w-0 flex-1">
+                                <div className="text-xs font-bold uppercase tracking-[0.15em] text-accent-gold">
+                                    {t('eventDecision.turnPaused.title')}
+                                </div>
+                                <p className="mt-1 text-[12px] leading-relaxed text-text-secondary">
+                                    {t('eventDecision.turnPaused.body')}
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={turnPause.onContinue}
+                                data-testid="event-decision-continue-turn"
+                                className="shrink-0 border border-panel-border/70 bg-panel-bg/70 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-text-secondary transition-colors hover:border-accent-gold/60 hover:text-text-primary"
+                            >
+                                {t('eventDecision.turnPaused.continue')}
+                            </button>
+                        </div>
+                    )}
 
                     {/* Response options are first-class controls, not footnotes below
                         long dossier copy. Keeping them directly under the title

@@ -237,3 +237,27 @@ export function resolvePlayerEventDecisionWithOpeningPolicy(
     }
     return candidate;
 }
+
+/**
+ * Whether a player's opening foundational decision is pre-fired at campaign birth (turn 0)
+ * — shared by the Electron (`desktop_sim.ts`) and browser-fallback start adapters.
+ *
+ * BOT-EQUIVALENT TIMING. A bot answers a foundational event in its authored trigger window,
+ * so only an event eligible on the first turn (rs_strategic_goals, window t1-3) is
+ * pre-fired. One whose window opens later (hrhb_political_goal, t3-7) is left to
+ * evaluate-events: it fires the turn a bot's would and the player answers it in the pause
+ * before combat. Pre-firing hrhb_political_goal at t0 applied its one-shot effects to the
+ * t0 formation set (croat_republic: +5 HRHB morale), so the four HRHB brigades raised
+ * before the bot's fire turn (t4) kept a permanent -5 morale offset, the gated
+ * hrhb_1992_graz_cooperation_collapse fired a turn early, and by t65 the offset changed a
+ * Central Bosnia brigade's orders.
+ *
+ * rbih_state_identity (window t2-5) keeps its reviewed turn-0 receipt: the pre-first-Advance
+ * paramilitary policy lane above requires it (`receipt.turn !== 0` throws). Moving it is an
+ * owner call; its measured residual is a morale offset on two late-raised ARBiH brigades.
+ */
+export function preFiresOpeningDecisionAtBirth(def: EventDefinition, turn: number): boolean {
+    if (def.id === IDENTITY) return true;
+    const turnMin = def.trigger?.turn_min;
+    return turnMin == null || turnMin <= turn + 1;
+}

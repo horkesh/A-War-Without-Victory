@@ -197,6 +197,10 @@ function BlockerRow({
 export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBlocker }: AdvanceTurnModalProps) {
   const pending = useGameStore((s) => s.advanceTurnPending);
   const setPending = useGameStore((s) => s.setAdvanceTurnPending);
+  // PAUSE BEFORE COMBAT: while the in-flight turn waits on the player's decisions this modal
+  // steps aside (it stays mounted, so the advance it started keeps running) and the decision
+  // modal takes the screen.
+  const turnPausedForDecisions = useGameStore((s) => s.turnPauseStatus?.status === 'paused');
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const turnAftermath = useGameStore((s) => s.turnAftermath);
@@ -375,7 +379,7 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
 
   return (
     <Modal
-      isOpen={pending}
+      isOpen={pending && !turnPausedForDecisions}
       onClose={handleCancel}
       zIndex={Z.CRITICAL_MODAL}
       closeOnBackdropClick={false}
