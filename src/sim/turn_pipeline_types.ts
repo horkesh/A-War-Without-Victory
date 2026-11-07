@@ -150,6 +150,21 @@ export interface TurnInput {
      * historical detail — equivalent to the legacy behavior pre-D-CONTENT.
      */
     displacementEventStreamSink?: (events: import('../state/game_state.js').DisplacementEvent[]) => void;
+    /**
+     * PAUSE BEFORE COMBAT (owner decision, 2026-11-05). When set, `runTurn` calls this
+     * immediately after the `evaluate-events` step — still inside that step's boundary —
+     * if the step queued player decisions this turn (`turn_fired === state.meta.turn`).
+     * A bot answers its decisions in-turn, so its response lands before this turn's
+     * movement and combat; this hook lets a human do the same instead of answering one
+     * turn late. The callback receives the pipeline's WORKING state and may resolve
+     * decisions on it in place (it must mutate `state`, not replace it); the pipeline then
+     * continues with the next step. Called at most once per turn. Unset (scenario runner,
+     * headless, tests) ⇒ the pipeline is unchanged.
+     */
+    onPlayerDecisionsPending?: (
+        state: GameState,
+        decisions: import('./events/event_types.js').PendingEventDecision[],
+    ) => Promise<void> | void;
 }
 
 export interface TurnReport {

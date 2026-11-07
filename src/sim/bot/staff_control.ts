@@ -14,3 +14,17 @@ export function selectStaffControlledFactions(state: GameState): FactionId[] {
         )
         .sort(strictCompare);
 }
+
+/**
+ * The player faction only while it is manually controlled (autonomy 0); null when there is no
+ * player or its staff is in control. Player-only behaviour keys on this, so a staff-controlled
+ * player follows exactly the bot path.
+ */
+export function selectManualPlayerFaction(state: GameState): FactionId | null {
+    const playerFaction = state.meta?.headless_scenario_auto_control
+        ? null
+        : state.meta?.player_faction ?? null;
+    if (playerFaction == null) return null;
+    // Same staff-control threshold as selectStaffControlledFactions above.
+    return (state.meta?.autonomy_level ?? 0) >= 1 ? null : playerFaction;
+}

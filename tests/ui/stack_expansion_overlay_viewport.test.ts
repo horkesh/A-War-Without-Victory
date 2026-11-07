@@ -1,11 +1,16 @@
 // @vitest-environment jsdom
 
 import React, { createElement } from 'react';
+import { readFileSync } from 'node:fs';
+import { parse } from 'postcss';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { StackExpansionOverlay } from '../../src/ui/map/components/StackExpansionOverlay.js';
 import type { FormationView } from '../../src/ui/map/data/types.js';
+import { InterfaceScaleLayer } from '../../src/ui/map/preferences/InterfaceScale';
+import { setInterfaceScale } from '../../src/ui/map/preferences/interfaceScalePreference';
+import { withoutBlockComments } from '../helpers/sourceComments';
 
 function formations(): FormationView[] {
   return [
@@ -55,6 +60,7 @@ describe('StackExpansionOverlay viewport behavior', () => {
     vi.useRealTimers();
     vi.restoreAllMocks();
     cleanup();
+    setInterfaceScale(100);
   });
 
   it('is visible immediately without depending on a delayed mount timer', () => {
@@ -226,11 +232,13 @@ describe('StackExpansionOverlay viewport behavior', () => {
     expect(contact.querySelector('canvas')).toBeNull();
   });
 
-  it('keeps stacks larger than seven bounded while exposing every exact member', () => {
+  it.each([100, 125, 150])('keeps nine exact members scrollable in the logical viewport at %d%%', scale => {
     vi.useFakeTimers();
     const onSelect = vi.fn();
+    const view = render(createElement(InterfaceScaleLayer, {}));
+    act(() => setInterfaceScale(scale));
 
-    render(createElement(StackExpansionOverlay, {
+    view.rerender(createElement(InterfaceScaleLayer, {}, createElement(StackExpansionOverlay, {
       osid: 'op:stacked',
       anchorX: 300,
       anchorY: 300,
@@ -238,7 +246,7 @@ describe('StackExpansionOverlay viewport behavior', () => {
       playerFaction: 'RBiH',
       onClose: vi.fn(),
       onSelect,
-    }));
+    })));
 
     act(() => {
       vi.advanceTimersByTime(25);
@@ -246,12 +254,24 @@ describe('StackExpansionOverlay viewport behavior', () => {
 
     const memberList = document.querySelector('[data-stack-member-list="true"]');
     const pickerPanel = document.querySelector('[data-stack-picker-panel="true"]');
-    expect(memberList?.className).toContain('max-h-[min(70vh,36rem)]');
+    expect(memberList?.className).toContain('max-h-[min(calc(var(--interface-viewport-height,100vh)*0.7),36rem)]');
     expect(memberList?.className).toContain('overflow-y-auto');
     expect(memberList?.className).toContain('min-h-0');
     expect(memberList?.className).toContain('flex-1');
-    expect(pickerPanel?.className).toContain('max-h-[calc(100vh-2rem)]');
+    expect(pickerPanel?.className).toContain('max-h-[calc(var(--interface-viewport-height,100vh)-2rem)]');
     expect(pickerPanel?.className).toContain('overflow-hidden');
+    expect(document.querySelector('[data-interface-portal-root]')?.contains(pickerPanel)).toBe(true);
+    const origin = pickerPanel?.parentElement as HTMLElement;
+    expect(Number.parseFloat(origin.style.left)).toBeCloseTo(window.innerWidth / (scale / 100) / 2);
+    expect(Number.parseFloat(origin.style.top)).toBeCloseTo(window.innerHeight / (scale / 100) / 2);
+
+    const limits: Record<string, string> = {};
+    parse(withoutBlockComments(readFileSync('src/ui/map/styles/globals.css', 'utf8')))
+      .walkRules('.interface-scale-layer [data-stack-picker-panel]', rule => {
+        rule.walkDecls(declaration => { limits[declaration.prop] = declaration.value.replace(/\s+/g, ''); });
+      });
+    expect(limits['max-height']).toBe('calc(var(--interface-viewport-height)-2rem)');
+    expect(limits.width).toBe('min(32rem,calc(var(--interface-viewport-width)-2rem))');
     expect(screen.getAllByRole('button', { name: /Select Brigade/i })).toHaveLength(9);
     expect(document.querySelector('[data-stack-selection-id="brigade_9"]')).toBeTruthy();
 

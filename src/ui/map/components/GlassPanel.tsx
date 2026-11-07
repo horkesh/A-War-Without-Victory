@@ -74,10 +74,10 @@ export function GlassPanel({
                     aria-modal="true"
                     aria-label={title}
                     className={`relative bg-panel-bg/95 backdrop-blur-md border border-[rgba(180,160,130,0.15)] shadow-xl rounded-lg overflow-hidden animate-slideUp ${className}`}
-                    style={{ width, maxHeight: '84vh' }}
+                    style={{ width, maxHeight: 'calc(var(--interface-viewport-height,100vh)*0.84)' }}
                 >
                     <PanelHeader title={title} onClose={onClose} />
-                    <div className="overflow-y-auto px-2.5 py-2" style={{ maxHeight: 'calc(84vh - 38px)' }}>
+                    <div className="overflow-y-auto px-2.5 py-2" style={{ maxHeight: 'calc(calc(var(--interface-viewport-height,100vh)*0.84) - 38px)' }}>
                         {children}
                     </div>
                 </div>
@@ -90,10 +90,10 @@ export function GlassPanel({
             <div
                 ref={panelRef}
                 className={`${POSITION_CLASSES['bottom-tray']} bg-panel-bg/95 backdrop-blur-md border-t border-[rgba(180,160,130,0.15)] shadow-xl animate-slideUp ${className}`}
-                style={{ zIndex, maxHeight: '44vh' }}
+                style={{ zIndex, maxHeight: 'calc(var(--interface-viewport-height,100vh)*0.44)' }}
             >
                 <PanelHeader title={title} onClose={onClose} />
-                <div className="overflow-y-auto px-2.5 py-2" style={{ maxHeight: 'calc(44vh - 38px)' }}>
+                <div className="overflow-y-auto px-2.5 py-2" style={{ maxHeight: 'calc(calc(var(--interface-viewport-height,100vh)*0.44) - 38px)' }}>
                     {children}
                 </div>
             </div>

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import openingSplashNeutral from '../../assets/opening/opening_splash_neutral.webp';
+import { BrandMark } from '../icons/BrandMark';
 
 // Approved owner art (opening_splash_neutral_master, 2752x1536). Closes the splash art gate.
 export const OPENING_SPLASH_ART = openingSplashNeutral;
@@ -45,6 +46,7 @@ export function OpeningSplash({ title, version, actionLabel, onDismiss }: Openin
       />
       <div className="opening-splash__shade" aria-hidden="true" />
       <div className="opening-splash__ident">
+        <BrandMark size={72} className="opening-splash__mark" />
         <span className="opening-splash__eyebrow">Pyrrhic Games</span>
         <h1 id="opening-splash-title" className="opening-splash__title">{title}</h1>
         <p className="opening-splash__version">{version}</p>

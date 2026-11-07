@@ -602,7 +602,7 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                 className="absolute inset-0 bg-black/40 pointer-events-auto cursor-default"
                 onClick={onClose}
             />
-            <div className="relative panel-slide-in-right pointer-events-auto w-[22rem] max-h-[calc(100vh-4rem)] mt-12 mr-2 flex flex-col bg-panel-bg/97 backdrop-blur-sm border border-panel-border rounded-lg shadow-2xl overflow-hidden">
+            <div className="relative panel-slide-in-right pointer-events-auto w-[22rem] max-h-[calc(var(--interface-viewport-height,100vh)-4rem)] mt-12 mr-2 flex flex-col bg-panel-bg/97 backdrop-blur-sm border border-panel-border rounded-lg shadow-2xl overflow-hidden">
                 <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card border-b border-panel-border shrink-0">
                     <div>
                         <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">{t('aar.title')}</span>

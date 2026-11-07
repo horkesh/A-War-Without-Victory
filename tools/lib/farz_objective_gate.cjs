@@ -3,23 +3,41 @@
 const { classifyCombatCapture } = require('./capture_provenance.cjs');
 
 const FARZ_HQ_ID = /^ahq:RBiH:\d+:farz_95$/;
+// Uragan 95 is the 2nd Corps half of the same joint offensive (Delić judgment §§285,397-399;
+// BB1 printed 386), modelled as its own pre-planned 2nd Corps operation with no Farz ownership.
+// Owner ruling 2026-09-29 accepts a final capture by either corps; owner ruling 2026-11-07
+// counts a 2nd Corps capture owned by the authored Uragan 95 operation, inside the Farz window,
+// as a Farz receipt. Identified by its exact corps-qualified AAR id, never by name alone.
+const URAGAN_AAR_ID = /^arbih_2nd_corps:Operation Uragan 95:t\d+$/;
 
 function checkFarzObjectiveCaptures({ cells, at188, events, battleById, aars, corpsOf, windowStart }) {
   const authored = aars.filter((aar) => FARZ_HQ_ID.test(aar.army_hq_telemetry?.army_hq_op_id || ''));
   const aar = authored.length === 1 ? authored[0] : null;
-  const participants = aar?.participating_brigades || [];
+  const partners = aars.filter((a) => URAGAN_AAR_ID.test(a.operation_id || '') && a.started_turn >= windowStart);
+  const partner = aar && partners.length === 1 ? partners[0] : null;
+  const participants = [...(aar?.participating_brigades || []), ...(partner?.participating_brigades || [])];
   const secondCorpsParticipated = participants.some((id) => corpsOf(id) === 'arbih_2nd_corps');
-  const rows = cells.map(([name, osid]) => {
-    const captured = aar && Array.isArray(aar.objectives_logged_captured)
-      && aar.objectives_logged_captured.includes(osid);
-    const event = captured && events.find((e) => e.settlement_id === osid && e.to === 'RBiH'
+
+  // A logged, operation-owned combat capture by `owner`, made inside the Farz window.
+  const receipt = (owner, corps, osid) => (owner && Array.isArray(owner.objectives_logged_captured)
+    && owner.objectives_logged_captured.includes(osid)
+    && events.find((e) => e.settlement_id === osid && e.to === 'RBiH'
       && e.mechanism === 'combat' && e.turn >= Math.max(windowStart, aar.started_turn)
       && e.turn <= aar.ended_turn
-      && ['arbih_2nd_corps', 'arbih_3rd_corps'].includes(corpsOf(e.attacker_brigade))
-      && classifyCombatCapture(e, battleById.get(e.battle_id)).operation_ids?.includes(aar.operation_id));
-    return { name, osid, turn: event?.turn ?? null, ok: !!event && at188[osid] === 'RBiH' };
+      && corps.includes(corpsOf(e.attacker_brigade))
+      && classifyCombatCapture(e, battleById.get(e.battle_id)).operation_ids?.includes(owner.operation_id))) || null;
+
+  const rows = cells.map(([name, osid]) => {
+    const own = aar ? receipt(aar, ['arbih_2nd_corps', 'arbih_3rd_corps'], osid) : null;
+    const viaPartner = !own && aar ? receipt(partner, ['arbih_2nd_corps'], osid) : null;
+    const event = own || viaPartner;
+    return {
+      name, osid, turn: event?.turn ?? null,
+      via: own ? 'farz' : viaPartner ? 'uragan' : null,
+      ok: !!event && at188[osid] === 'RBiH',
+    };
   });
-  return { aar, authoredCount: authored.length, secondCorpsParticipated, rows,
+  return { aar, partner, authoredCount: authored.length, secondCorpsParticipated, rows,
     ok: !!aar && aar.started_turn >= windowStart && rows.every((row) => row.ok) };
 }
 

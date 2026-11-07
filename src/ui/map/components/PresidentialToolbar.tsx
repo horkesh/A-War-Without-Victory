@@ -529,6 +529,7 @@ export function PresidentialToolbar({
                     )}
                     <button
                         data-tutorial-step="advance-turn-button"
+                        aria-busy={advancing}
                         onClick={handleAdvanceTurn}
                         disabled={modalLocked || advancing || !loadedGameState || (!advanceBlocked && !ipc.isAvailable)}
                         title={advanceGateTitle}

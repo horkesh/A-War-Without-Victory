@@ -162,6 +162,11 @@ lanes:
         tokens: 7098
         fits_context: true
         tasks: null
+      - path: docs/plans/2026-11-06-command-palette-ui-scale-plan.md
+        exists: true
+        tokens: 3507
+        fits_context: true
+        tasks: null
       - path: docs/plans/2026-11-06-visual-polish-follow-ups-plan.md
         exists: true
         tokens: 1479

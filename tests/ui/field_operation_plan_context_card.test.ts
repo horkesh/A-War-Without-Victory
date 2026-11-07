@@ -7,6 +7,22 @@ import { FieldOperationPlanContextCard } from '../../src/ui/map/components/Field
 afterEach(cleanup);
 
 describe('field operation plan context card', () => {
+  it('uses the scaled UI portal while preserving its objective and return owners', () => {
+    const portal = document.createElement('div');
+    portal.setAttribute('data-interface-portal-root', '');
+    document.body.append(portal);
+    const onReturn = vi.fn();
+    const view = render(React.createElement(FieldOperationPlanContextCard, {
+      presentation: { objectives: [], staging: [], participants: [] },
+      onSelectObjective: vi.fn(),
+      onReturn,
+    }));
+    expect(portal.contains(screen.getByTestId('field-operation-plan-context'))).toBe(true);
+    fireEvent.click(screen.getByRole('button', { name: /return to dossier/i }));
+    expect(onReturn).toHaveBeenCalledTimes(1);
+    view.unmount();
+    portal.remove();
+  });
   it('selects exact objectives and returns to the owning dossier without exposing IDs', () => {
     const onSelectObjective = vi.fn();
     const onReturn = vi.fn();

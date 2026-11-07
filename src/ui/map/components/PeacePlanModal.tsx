@@ -133,7 +133,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
             zIndex={Z.CRITICAL_MODAL}
             ariaLabelledBy="peace-plan-title"
             backdropClassName="bg-black/70 backdrop-blur-sm"
-            panelClassName="w-[95%] max-w-[640px] max-h-[90vh] overflow-auto rounded-lg border-2 border-[#8a7a60]/60 shadow-2xl"
+            panelClassName="w-[95%] max-w-[640px] max-h-[calc(var(--interface-viewport-height,100vh)*0.9)] overflow-auto rounded-lg border-2 border-[#8a7a60]/60 shadow-2xl"
             panelStyle={{
                 background: 'linear-gradient(160deg, #f0e8d8 0%, #e0d8c0 50%, #d8ceb8 100%)',
                 fontFamily: 'var(--font-command)',

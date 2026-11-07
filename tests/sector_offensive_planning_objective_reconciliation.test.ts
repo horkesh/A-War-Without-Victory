@@ -119,7 +119,7 @@ describe('planning objective reconciliation', () => {
             .toEqual(new Set(['op:approach:current']));
     });
 
-    it('marks all four authored Sana fixed-route axes for sequence commitment', () => {
+    it('marks all five authored Sana fixed-route axes for sequence commitment', () => {
         const velikiBadicAxis = SANA_95_OPPORTUNITY.axes.find(axis => axis.axis_id === 'sana_veliki_badic_505th');
         const late503Axis = SANA_95_OPPORTUNITY.axes.find(axis => axis.axis_id === 'sana_veliki_badic_503rd_late');
         const sanskiAxis = SANA_95_OPPORTUNITY.axes.find(axis => axis.axis_id === 'sana_sanski_most_kljuc');
@@ -134,6 +134,7 @@ describe('planning objective reconciliation', () => {
                 'sana_veliki_badic_503rd_late',
                 'sana_west_sana_510th',
                 'sana_sanski_most_kljuc',
+                'sana_jelasinovci_517th',
             ]);
     });
 

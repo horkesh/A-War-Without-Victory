@@ -23,10 +23,22 @@ import {
     getStartupSnapshotPath,
 } from '../../src/scenario/startup_snapshot.js';
 import type { FactionId, GameState } from '../../src/state/game_state.js';
+import type { EventDefinition, PendingEventDecision } from '../../src/sim/events/event_types.js';
+import { loadEventDefinitionsFromDir } from '../../src/sim/events/event_loader.js';
+import { selectBotEventResponse } from '../../src/sim/events/evaluate_events.js';
 import { strictCompare } from '../../src/state/validateGameState.js';
 import { isHistoricalOperationAuthorizationReview } from '../../src/sim/combat/historical_operation_authorization.js';
+import { resolvePeacePlan } from '../../src/sim/negotiation/peace_plans.js';
+import { getPeacePlanById } from '../../src/sim/negotiation/peace_plan_data.js';
 
-type EventPolicy = 'defer' | 'historical_default' | 'staff_recommended';
+/**
+ * `bot_equivalent`: answer every player decision exactly as the bot would (the engine's own
+ * `selectBotEventResponse`) — the authored historical default where one exists, otherwise the
+ * bot's scorer. `historical_default` instead falls back to the FIRST option when no default
+ * is authored, which is a different answer from the bot's on scorer-routed events
+ * (address_to_nation_*, decorate_a_unit_*, ...). Peace plans are answered historically by both.
+ */
+type EventPolicy = 'defer' | 'historical_default' | 'staff_recommended' | 'bot_equivalent';
 type ParamilitaryPolicy = 'defer' | 'allow' | 'deny' | 'regular' | 'standing_allow';
 type HistoricalOperationPolicy = 'defer' | 'accept' | 'decline';
 
@@ -44,16 +56,26 @@ interface CliOptions {
     finalSaveDir?: string;
     /** Corps ids whose operation queue and live operations are recorded every turn (diagnostic only). */
     traceCorps?: string[];
+    /**
+     * ATTRIBUTION DIAGNOSTIC ONLY — never a calibration result (Pyrrhic panel 2026-11-05,
+     * docs/40_reports/audits/20261105_live_jan1993/paramilitary_panel/DECISION.md). Gives the
+     * player faction the bot's paramilitary behaviour (no pending-decision window, standing
+     * allow) so player-vs-no-player divergence can be attributed. Requires an `--out` path
+     * containing "attribution"; the output carries a top-level `diagnostic` label.
+     */
+    botParityParamilitaryDiagnostic?: boolean;
     electronLogPath?: string;
     electronAutosavePath?: string;
 }
 
 interface DecisionTranscriptRow {
     turn: number;
-    family: 'event' | 'historical_operation' | 'paramilitary_request';
+    family: 'event' | 'historical_operation' | 'paramilitary_request' | 'peace_plan';
     id: string;
     decision: string;
     value?: string;
+    /** 'paused_turn': answered inside the pause before combat (turn = the turn being run). */
+    stage?: 'paused_turn';
 }
 
 interface ElectronStateSummary {
@@ -211,13 +233,20 @@ function parseArgs(argv: string[]): CliOptions {
     if (Boolean(electronLogPath) !== Boolean(electronAutosavePath)) {
         throw new Error('--electron-log and --electron-autosave must be provided together');
     }
+    const botParityRaw = values.get('--diagnostic-bot-parity-paramilitary');
+    const botParityParamilitaryDiagnostic = botParityRaw === undefined
+        ? false
+        : parseEnum(botParityRaw, ['on'] as const, '--diagnostic-bot-parity-paramilitary') === 'on';
+    if (botParityParamilitaryDiagnostic && !(values.get('--out') ?? '').includes('attribution')) {
+        throw new Error('--diagnostic-bot-parity-paramilitary requires an --out path containing "attribution" (diagnostic output must never sit with calibration evidence)');
+    }
 
     return {
         turns,
         faction: parseEnum(values.get('--faction') ?? 'RS', ['HRHB', 'RBiH', 'RS'] as const, '--faction'),
         eventPolicy: parseEnum(
             values.get('--event-policy') ?? 'defer',
-            ['defer', 'historical_default', 'staff_recommended'] as const,
+            ['defer', 'historical_default', 'staff_recommended', 'bot_equivalent'] as const,
             '--event-policy',
         ),
         paramilitaryPolicy: parseEnum(
@@ -241,7 +270,42 @@ function parseArgs(argv: string[]): CliOptions {
         })(),
         ...(electronLogPath ? { electronLogPath } : {}),
         ...(electronAutosavePath ? { electronAutosavePath } : {}),
+        ...(botParityParamilitaryDiagnostic ? { botParityParamilitaryDiagnostic } : {}),
     };
+}
+
+/** Player paramilitary-policy events, mirroring `PLAYER_PARAMILITARY_POLICY_EVENT` in paramilitary_sweep.ts. */
+const PLAYER_PARAMILITARY_POLICY_EVENT_IDS: Partial<Record<FactionId, string>> = {
+    RS: 'rs_paramilitary_policy_1992',
+    RBiH: 'rbih_paramilitary_policy_1992',
+};
+
+/**
+ * ATTRIBUTION DIAGNOSTIC ONLY. Bot factions spawn paramilitaries from t1 and auto-approve
+ * regardless of their policy decision; the player faction waits while its policy event is
+ * pending and then follows its decision. This removes the player's policy event (so it is
+ * never pending) and sets a standing allow, matching the bot. It is applied to the player
+ * branch's own state only and never to the no-player branch.
+ */
+function applyBotParityParamilitaryDiagnostic(state: GameState, faction: FactionId): void {
+    const eventId = PLAYER_PARAMILITARY_POLICY_EVENT_IDS[faction];
+    if (eventId) {
+        state.military.enabled_event_ids = (state.military.enabled_event_ids ?? []).filter((id) => id !== eventId);
+        if (state.military.pending_event_decisions) {
+            state.military.pending_event_decisions = state.military.pending_event_decisions
+                .filter((decision) => decision.event_id !== eventId);
+        }
+    }
+    state.paramilitary_policy = 'always_allow';
+}
+
+/** Event catalog for `bot_equivalent` (loaded once per run, from the same files the desktop loads). */
+let botEquivalentCatalog: Map<string, EventDefinition> | null = null;
+
+function botEquivalentResponseId(state: GameState, decision: PendingEventDecision): string | undefined {
+    const def = botEquivalentCatalog?.get(decision.event_id);
+    if (!def || !def.response_options || def.response_options.length === 0) return undefined;
+    return selectBotEventResponse(state, def, decision.faction, false).chosen.id;
 }
 
 function applyEventPolicy(
@@ -249,23 +313,32 @@ function applyEventPolicy(
     faction: FactionId,
     policy: EventPolicy,
     transcript: DecisionTranscriptRow[],
+    pausedDecisions?: readonly PendingEventDecision[],
 ): void {
-    const pending = [...(state.military.pending_event_decisions ?? [])]
-        .filter((decision) => decision.faction === faction)
-        .sort((a, b) => strictCompare(a.event_id, b.event_id));
+    // In the pause before combat the decisions are answered in the order the turn fired them
+    // (the order a bot answers in-turn); between turns, by event id as before.
+    const pending = pausedDecisions
+        ? pausedDecisions.filter((decision) => decision.faction === faction)
+        : [...(state.military.pending_event_decisions ?? [])]
+            .filter((decision) => decision.faction === faction)
+            .sort((a, b) => strictCompare(a.event_id, b.event_id));
 
     for (const decision of pending) {
         const responseId = policy === 'historical_default'
             ? decision.historical_default_response_id ?? decision.response_options[0]?.id
             : policy === 'staff_recommended'
                 ? decision.staff_recommended_response_id ?? decision.historical_default_response_id
-                : undefined;
+                : policy === 'bot_equivalent'
+                    ? botEquivalentResponseId(state, decision)
+                    : undefined;
+        const stage = pausedDecisions ? { stage: 'paused_turn' as const } : {};
         if (!responseId) {
             transcript.push({
                 turn: state.meta.turn,
                 family: 'event',
                 id: decision.event_id,
                 decision: 'defer',
+                ...stage,
             });
             continue;
         }
@@ -276,6 +349,7 @@ function applyEventPolicy(
             id: decision.event_id,
             decision: policy,
             value: responseId,
+            ...stage,
         });
     }
 }
@@ -341,14 +415,47 @@ function applyParamilitaryPolicy(
     if (resolvedAny) resolvePlayerParamilitaryDecisions(state);
 }
 
+/**
+ * The player's answer to a pending peace plan (the PeacePlanModal / `resolve-peace-plan` IPC).
+ * With no player the scheduler resolves every faction on the offer turn; with a player the plan
+ * stays pending until answered, and a pending plan blocks every later plan. Under the
+ * historical_default policy the player gives its documented historical response.
+ */
+function applyPeacePlanPolicy(
+    state: GameState,
+    faction: FactionId,
+    policy: EventPolicy,
+    transcript: DecisionTranscriptRow[],
+): void {
+    const pending = state.military.negotiation?.pending_peace_plan;
+    if (!pending) return;
+    // RBiH answers Vance-Owen and Owen-Stoltenberg through its own event decisions (the
+    // Presidency -> Assembly sequence), which applyEventPolicy already resolves.
+    if (faction === 'RBiH' && (pending.plan_id === 'vance_owen' || pending.plan_id === 'owen_stoltenberg')) return;
+    const plan = getPeacePlanById(pending.plan_id);
+    const response = policy === 'historical_default' || policy === 'bot_equivalent'
+        ? plan?.historical_responses[faction]
+        : undefined;
+    if (!response) {
+        transcript.push({ turn: state.meta.turn, family: 'peace_plan', id: pending.plan_id, decision: 'defer' });
+        return;
+    }
+    resolvePeacePlan(state, pending.plan_id, response);
+    transcript.push({ turn: state.meta.turn, family: 'peace_plan', id: pending.plan_id, decision: policy, value: response });
+}
+
 function applyPlayerPolicy(
     state: GameState,
     options: CliOptions,
     transcript: DecisionTranscriptRow[],
 ): void {
     applyEventPolicy(state, options.faction, options.eventPolicy, transcript);
+    applyPeacePlanPolicy(state, options.faction, options.eventPolicy, transcript);
     applyHistoricalOperationPolicy(state, options.faction, options.historicalOperationPolicy, transcript);
     applyParamilitaryPolicy(state, options.faction, options.paramilitaryPolicy, transcript);
+    // Last: resolving an event (e.g. the opening state-identity decision) can re-enable the
+    // paramilitary policy event, which would reopen the pending window for this turn.
+    if (options.botParityParamilitaryDiagnostic) applyBotParityParamilitaryDiagnostic(state, options.faction);
 }
 
 function commandOption(command: string[], name: string): string | undefined {
@@ -709,9 +816,14 @@ async function runComparison(baseDir: string, options: CliOptions) {
     // backward compatibility with existing artifacts.
     if (options.autonomyLevel !== 'production') playerState.meta.autonomy_level = options.autonomyLevel;
     const playerAutonomyLevel = playerState.meta.autonomy_level;
-    playerState.meta.decision_mode = options.eventPolicy === 'historical_default'
+    playerState.meta.decision_mode = options.eventPolicy === 'historical_default' || options.eventPolicy === 'bot_equivalent'
         ? 'historical'
         : 'emergent';
+    if (options.eventPolicy === 'bot_equivalent') {
+        botEquivalentCatalog = new Map(
+            loadEventDefinitionsFromDir(0, resolve(baseDir, 'data/scenarios/events')).map((def) => [def.id, def]),
+        );
+    }
     if (options.paramilitaryPolicy === 'standing_allow') {
         playerState.paramilitary_policy = 'always_allow';
     }
@@ -724,7 +836,16 @@ async function runComparison(baseDir: string, options: CliOptions) {
     for (let index = 0; index < options.turns; index += 1) {
         applyPlayerPolicy(playerState, options, transcript);
         const headlessResult = await advanceTurn(headlessState, baseDir);
-        const playerResult = await advanceTurn(playerState, baseDir);
+        // PAUSE BEFORE COMBAT: the player answers decisions fired this turn inside the turn,
+        // right after evaluate-events, as the live desktop does — so its answer lands before
+        // this turn's movement and combat, exactly like a bot's. Anything still pending
+        // between turns (opening decisions, deferred ones, peace plans) is answered by
+        // applyPlayerPolicy above.
+        const playerResult = await advanceTurn(playerState, baseDir, {
+            onPlayerDecisionsPending: (workingState, decisions) => {
+                applyEventPolicy(workingState, options.faction, options.eventPolicy, transcript, decisions);
+            },
+        });
         if (headlessResult.error) throw new Error(`Headless advance failed: ${headlessResult.error}`);
         if (playerResult.error) throw new Error(`Player advance failed: ${playerResult.error}`);
         headlessState = headlessResult.state;
@@ -765,6 +886,13 @@ async function runComparison(baseDir: string, options: CliOptions) {
             const branchDir = resolve(baseDir, options.finalSaveDir, branch);
             await mkdir(branchDir, { recursive: true });
             await writeFile(resolve(branchDir, 'final_save.json'), serializeState(state), 'utf8');
+        }
+        if (options.botParityParamilitaryDiagnostic) {
+            await writeFile(
+                resolve(baseDir, options.finalSaveDir, 'DIAGNOSTIC_ONLY.txt'),
+                'decision_policy=bot_parity_paramilitary_diagnostic\nAttribution evidence only. NOT a calibration score; never cite these saves as calibration.\n',
+                'utf8',
+            );
         }
     }
 
@@ -813,6 +941,13 @@ async function runComparison(baseDir: string, options: CliOptions) {
                     : 'between_turns',
             paramilitary_target_scope: 'player_unrestricted_municipality_scope_undefended_only',
         },
+        ...(options.botParityParamilitaryDiagnostic ? {
+            diagnostic: {
+                decision_policy: 'bot_parity_paramilitary_diagnostic',
+                qualifies_calibration: false,
+                note: 'Player branch given bot paramilitary behaviour for attribution; not a matched historical-default policy.',
+            },
+        } : {}),
         decision_transcript: transcript,
         branches: {
             headless: {

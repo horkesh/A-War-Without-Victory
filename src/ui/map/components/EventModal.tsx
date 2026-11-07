@@ -128,7 +128,7 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
             ariaLabelledBy="event-modal-title"
             backdropClassName="bg-black/50 backdrop-blur-sm"
             panelClassName="relative flex flex-col bg-panel-bg/95 backdrop-blur-md border border-[rgba(180,160,130,0.15)] shadow-xl rounded-lg overflow-hidden animate-slideUp"
-            panelStyle={{ width: '520px', maxHeight: '84vh' }}
+            panelStyle={{ width: '520px', maxHeight: 'calc(var(--interface-viewport-height, 100vh) * 0.84)' }}
             testIdBackdrop="event-modal-backdrop"
             testIdPanel="event-modal-panel"
         >
