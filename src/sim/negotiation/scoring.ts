@@ -552,31 +552,35 @@ const RS_GRADE_ANCHORS: GradeAnchor[] = [
             cap.territory_controlled_pct > 55 &&
             cap.war_crimes_events <= 2, // proxy for international standing
     },
+    // RE-ANCHORED 2026-11-07 (owner): the grade reads the WARTIME control map, so the RS
+    // A anchor is the pre-Dayton ceasefire line (~46%: published accounts ~46%, painted
+    // October 1995 reference 47.4%), not the post-Dayton 49% (Annex 2). B/C/D moved down
+    // by the same 3 points so the band widths are unchanged. A+ is untouched.
     {
         grade: 'A',
-        description: '49% contiguous territory, entity intact, Belgrade relationship intact',
+        description: 'Held the ceasefire line (≥46% territory), entity intact, Belgrade relationship intact',
         test: (cap, state) => {
             const dimStore = state.military?.negotiation?.strategic_dimensions;
             const cohesion = dimStore?.RS?.internal_cohesion?.effective_value ?? 50;
-            return cap.territory_controlled_pct >= 49 && cohesion >= 30;
+            return cap.territory_controlled_pct >= 46 && cohesion >= 30;
         },
     },
     {
         grade: 'B',
-        description: '45-49% territory, some international concessions',
+        description: '42-46% territory, some international concessions',
         test: (cap) =>
-            cap.territory_controlled_pct >= 45,
+            cap.territory_controlled_pct >= 42,
     },
     {
         grade: 'C',
-        description: '<45% territory, international isolation',
+        description: '<42% territory, international isolation',
         test: (cap) =>
-            cap.territory_controlled_pct >= 40,
+            cap.territory_controlled_pct >= 37,
     },
     {
         grade: 'D',
-        description: '<40% territory, military collapse, patron abandonment',
-        test: (cap) => cap.territory_controlled_pct >= 30,
+        description: '<37% territory, military collapse, patron abandonment',
+        test: (cap) => cap.territory_controlled_pct >= 27,
     },
     {
         grade: 'F',

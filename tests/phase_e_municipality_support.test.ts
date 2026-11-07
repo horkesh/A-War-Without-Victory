@@ -74,7 +74,7 @@ describe('Phase E municipality support', () => {
                         faction: 'RS',
                         mun_id: 'MUN_X',
                         type: 'staff_priority',
-                        staged_turn: 5,
+                        staged_turn: 4, // staged on player turn 4; applies while turn 5 resolves
                     }
                 }
             }
@@ -97,7 +97,7 @@ describe('Phase E municipality support', () => {
                         faction: 'HRHB',
                         mun_id: 'MUN_X',
                         type: 'croatian_support_package',
-                        staged_turn: 5,
+                        staged_turn: 4, // staged on player turn 4; applies while turn 5 resolves
                     }
                 }
             }

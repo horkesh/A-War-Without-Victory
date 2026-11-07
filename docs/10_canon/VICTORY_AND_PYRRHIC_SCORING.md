@@ -134,11 +134,13 @@ Grades A+/A/B/C/D/F are assigned by faction-specific anchors (`scoring.ts:71-199
 | RS anchor | Condition |
 |---|---|
 | A+ | >55% territory AND ≤2 war crimes events |
-| A | ≥49% territory AND internal cohesion ≥30 |
-| B | ≥45% territory |
-| C | ≥40% territory |
-| D | ≥30% territory |
+| A | ≥46% territory AND internal cohesion ≥30 |
+| B | ≥42% territory |
+| C | ≥37% territory |
+| D | ≥27% territory |
 | F | fallback |
+
+**RS re-anchor (owner, 2026-11-07).** The grade reads the wartime control map at war end, so the RS A anchor is the pre-Dayton ceasefire line, not the post-Dayton 49% (Dayton Annex 2). Published accounts put RS at about 46% before Dayton; the painted October 1995 reference gives 47.4% (area-weighted, as the game measures). A moved from ≥49% to ≥46%; B, C and D moved down by the same 3 points (45→42, 40→37, 30→27) so the band widths are unchanged; A+ is unchanged. The genocide and authorized-cleansing condemnation caps (§3.4) are unaffected: a historical RS still ends at D through the Srebrenica condemnation, now from an earned A instead of an earned B. Record: [player max-territory sweep](../40_reports/20261107_PLAYER_MAX_TERRITORY_SWEEP.md).
 
 | HRHB anchor | Condition |
 |---|---|
