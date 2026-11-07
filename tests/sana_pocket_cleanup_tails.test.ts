@@ -361,16 +361,20 @@ describe('Operation Sana bounded pocket cleanup tails', () => {
             'op:bosanska_krupa:ivanjska_2',
             'op:bosanska_krupa:arapusa_2',
             donjiDubovik,
-            'op:bosanska_krupa:vranjska_2',
-            'op:bosanska_krupa:jasenica_2',
-            'op:bosanska_krupa:gornja_suvaja',
-            'op:bosanski_petrovac:krnjeusa',
             'op:bosanski_novi:krslje_2',
             matavazi,
         ]);
+        // Calibration 2026-11-06: the idle 505th continues Veliki Badic -> Gornja Suvaja ->
+        // Krnjeusa -> Jasenica -> Vranjska (each step adjacent).
         expect(velikiBadicCleanup).toMatchObject({
             brigades: [],
-            objectives: [velikiBadic],
+            objectives: [
+                velikiBadic,
+                'op:bosanska_krupa:gornja_suvaja',
+                'op:bosanski_petrovac:krnjeusa',
+                'op:bosanska_krupa:jasenica_2',
+                'op:bosanska_krupa:vranjska_2',
+            ],
             staging_osid: ivanjska,
             preserve_objective_sequence: true,
             phase_gate: {

@@ -1,8 +1,10 @@
 # AWWV GUI Master Reference
 
+**Command palette and scalable UI (2026-11-07, verified local branch):** [Report](implemented/20261106_COMMAND_PALETTE_UI_SCALE.md) records friendly-name keyboard navigation, persistent 100/125/150% chrome, nine-case browser/required-decision proof, actual native reload/relaunch and strict save preservation, independent review and full qualification. Integration and global calibration/release gates remain separate.
+
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-11-05 (visual polish and art-direction packet registered under R7; no code changed by the registration)
+**Updated:** 2026-11-07 (command palette and scalable UI locally verified; integration pending)
 
 **Visual polish and art-direction packet (2026-11-05, PLANNED):** a live inspection of the shipped art library and the running app found the art coherent and the chrome generic: the war map reads as GIS, the warroom overlays are flat panels, the turn-1 `EventDecisionModal` carries no image header although six sibling decision modals use `DecisionModalImageHeader`, and Army HQ/Chronicle/Codex are monospace dashboards. Findings with twelve screenshots: [working/20261105_VISUAL_INSPECTION_AND_ART_DIRECTION.md](working/20261105_VISUAL_INSPECTION_AND_ART_DIRECTION.md). Executable packet (Phases 0, A map, B warroom, C art wiring, D paper/type, E opening, F asset QA): [../plans/2026-11-05-visual-polish-art-direction-plan.md](../plans/2026-11-05-visual-polish-art-direction-plan.md). Presentation only; collision rules against the Codex audio/accessibility packet and the calibration worktree are in its §3.
 

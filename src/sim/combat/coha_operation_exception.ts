@@ -31,6 +31,11 @@ const VLASIC_AUTHORED_BRIGADES = new Set<FormationId>([
     'arbih_303rd_vitezka_mountain' as FormationId,
 ]);
 
+/**
+ * Receipt 155 only (20-26 Mar 1995), the Domet-1 opening week. A second week (156) was added
+ * on 2026-11-06 as an unsourced calibration assumption and removed on 2026-11-07: once headless
+ * kept its turn-1 event shifts, both ridge objectives fell by receipt 155 and 156 went unused.
+ */
 export function isVlasicCohaWindow(turn: number): boolean {
     return turn >= 155 && turn <= 155;
 }

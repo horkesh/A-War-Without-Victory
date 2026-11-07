@@ -26,6 +26,8 @@ import { getPlayerSafePoliticalFactionName, getPlayerSafeSettlementName } from '
 import { t } from '../../i18n';
 import { releaseMapWebGlContext, safeScalarMapPadding } from '../../map/mapContextLifecycle';
 import { UI_COMMAND_FONT_FAMILY } from '../../styles/typography';
+import { PhysicalRendererSurface } from '../../preferences/PhysicalRendererSurface';
+import { enableOpsMapTerrainIfAvailable } from './opsTerrain';
 
 // Faction-colored axis palettes
 const AXIS_PALETTES: Record<string, string[]> = {
@@ -413,8 +415,8 @@ export function OpsMap({
                     popup.setLngLat(event.lngLat).setHTML(html).addTo(map);
                 });
 
-                // Enable 3D terrain — source defined in style JSON, just activate extrusion
-                map.setTerrain({ source: 'terrain-dem', exaggeration: 2.5 });
+                // Terrain is optional in the shared style; its absence must not abort map readiness.
+                enableOpsMapTerrainIfAvailable(map);
 
                 setMapReady(true);
             } catch (e) {
@@ -508,11 +510,13 @@ export function OpsMap({
     // correctly when the MapLibre canvas beneath cannot steal clicks.
     return (
         <>
-            <div
-                ref={mapContainerRef}
-                className={`absolute inset-0 ${enabled ? '' : 'pointer-events-none'}`}
-                style={{ background: '#d6ccb7' }}
-            />
+            <PhysicalRendererSurface>
+                <div
+                    ref={mapContainerRef}
+                    className={`absolute inset-0 ${enabled ? '' : 'pointer-events-none'}`}
+                    style={{ position: 'absolute', inset: 0, background: '#d6ccb7' }}
+                />
+            </PhysicalRendererSurface>
             {/* WP4j: Compact map legend — Plan phase only */}
             {enabled && (
                 <div className="absolute bottom-4 left-4 z-20 pointer-events-auto

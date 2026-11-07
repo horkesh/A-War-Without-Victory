@@ -14,6 +14,7 @@ import {
     recordEventDecision,
 } from './evaluate_events.js';
 import { emitEventNotifications } from './emit_notifications.js';
+import { isAnswerAheadOfFiringDecision } from './answer_ahead_of_firing.js';
 
 const DECORATION_FACTION_BY_SUFFIX = {
     rbih: 'RBiH',
@@ -70,6 +71,14 @@ export function resolveEventDecisionCore(state: GameState, eventId: string, resp
     const chosen = decision.response_options.find(o => o.id === responseId);
     if (!chosen) {
         throw new Error(`No response option "${responseId}" for event "${eventId}"`);
+    }
+
+    if (isAnswerAheadOfFiringDecision(state, eventId)) {
+        // Opening decision answered before its event fires: file the choice now (Chronicle /
+        // records receipt), apply it when evaluate-events fires the event (answer_ahead_of_firing.ts).
+        recordEventDecision(state, eventId, chosen.id, 'player', decision.faction, state.meta.turn ?? decision.turn_fired);
+        pending.splice(idx, 1);
+        return;
     }
 
     const targetFormationId = validateDecorationTarget(state, eventId, decision.faction, chosen);

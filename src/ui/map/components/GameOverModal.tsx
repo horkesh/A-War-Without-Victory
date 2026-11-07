@@ -84,7 +84,7 @@ export function GameOverModal() {
             zIndex={Z.GAME_OVER}
             ariaLabelledBy="game-over-title"
             backdropClassName="bg-black/80 backdrop-blur-sm"
-            panelClassName="w-[560px] max-h-[85vh] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden"
+            panelClassName="w-[560px] max-h-[calc(var(--interface-viewport-height,100vh)*0.85)] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden"
         >
             <>
                 {/* Header */}

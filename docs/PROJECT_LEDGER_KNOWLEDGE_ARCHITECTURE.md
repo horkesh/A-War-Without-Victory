@@ -147,3 +147,6 @@ This document outlines the reorganization strategy for the AWWV Project Ledger t
 3. **Develop indexing tools** for cross-reference generation
 4. **Establish maintenance workflow** for ongoing synthesis
 5. **Document knowledge extraction methodology** for future use
+## 2026-11-07 — Scaled chrome and origin-independent local preference
+
+Keep geospatial renderers in physical coordinates while UI uses one inverse-sized logical viewport. Convert physical pointer/target measurements at the portal boundary; inverse-compensate nested renderers and scale generated HTML controls once. CSS positioning collisions and missing terrain sources can fail a nested map before geometry assertions are meaningful. Native random localhost origins make localStorage insufficient for durable preferences: use the existing profile-settings bridge with fresh-read merged writes and hydration race guards. Take native preservation baselines after legitimate tutorial persistence settles; retain exact before/after fields rather than ignoring differences. [Ledger](PROJECT_LEDGER.md#2026-11-07--command-palette-and-scalable-ui-verified-local-delivery).

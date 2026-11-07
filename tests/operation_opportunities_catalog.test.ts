@@ -998,7 +998,8 @@ describe('entry-specific: sana_95 family', () => {
             'arbih_505th_vitezka_mountain',
             'arbih_503rd_slavna_mountain',
         ]);
-        expect(krupa.objectives).toHaveLength(9);
+        // Calibration 2026-11-06: Vranjska, Jasenica, Gornja Suvaja and Krnjeusa moved to the 505th axis.
+        expect(krupa.objectives).toHaveLength(5);
         expect(SANA_95_OPPORTUNITY.planning_duration).toBe(5);
         expect(badic505).toMatchObject({
             brigades: [],
@@ -1106,12 +1107,13 @@ describe('entry-specific: sana_95 family', () => {
         ]);
         expect(westSana).toMatchObject({
             brigades: [],
+            // Calibration 2026-11-06: Ilidza before Kljevci (the 517th takes Kljevci).
             objectives: [
                 'op:kljuc:sanica_2',
-                'op:sanski_most:kljevci',
                 'op:sanski_most:ilidza_2',
-                'op:sanski_most:ostra_luka',
+                'op:sanski_most:kljevci',
                 'op:sanski_most:sanski_most_2',
+                'op:sanski_most:ostra_luka',
             ],
             staging_osid: 'op:bosanski_petrovac:jasenovac_2',
             preserve_objective_sequence: true,
@@ -1173,6 +1175,7 @@ describe('entry-specific: sana_95 family', () => {
                 assigned_brigades: approach!.brigades.filter(brigade => brigade !== 'hvo_101st_bihac'),
             },
             { axis_id: 'sana_sanski_most_kljuc', assigned_brigades: sanski.brigades },
+            { axis_id: 'sana_jelasinovci_517th', assigned_brigades: [] },
         ]);
     });
 
@@ -1187,15 +1190,17 @@ describe('entry-specific: sana_95 family', () => {
             'op:bosanska_krupa:ivanjska_2',
             'op:bosanska_krupa:arapusa_2',
             'op:bosanska_krupa:donji_dubovik_2',
-            'op:bosanska_krupa:vranjska_2',
-            'op:bosanska_krupa:jasenica_2',
-            'op:bosanska_krupa:gornja_suvaja',
-            'op:bosanski_petrovac:krnjeusa',
             'op:bosanski_novi:krslje_2',
             'op:bosanski_novi:matavazi_2',
         ]);
         expect(SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_veliki_badic_505th'))
-            .toMatchObject({ brigades: [], objectives: ['op:bosanska_krupa:veliki_badic'] });
+            .toMatchObject({ brigades: [], objectives: [
+                'op:bosanska_krupa:veliki_badic',
+                'op:bosanska_krupa:gornja_suvaja',
+                'op:bosanski_petrovac:krnjeusa',
+                'op:bosanska_krupa:jasenica_2',
+                'op:bosanska_krupa:vranjska_2',
+            ] });
         const bp = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_bihac_petrovac')!;
         expect(bp.brigades).toHaveLength(2);
         expect(bp.objectives).toHaveLength(10);
@@ -1225,7 +1230,7 @@ describe('entry-specific: sana_95 family', () => {
         // 2026-08-11: the Ključ interior was restored additively as a second,
         // faster path after the Petrovac axis proved saturated in the 188w trace.
         // Friendly-controlled objectives are filtered when the operation spawns.
-        expect(skParent.objectives).toHaveLength(15);
+        expect(skParent.objectives).toHaveLength(13);
         expect(skParent.objectives[0]).toBe('op:bosanska_krupa:ivanjska_2');
         expect(skParent.objectives[1]).toBe('op:bosanska_krupa:donji_dubovik_2');
         expect(skParent.objectives).toContain('op:kljuc:hadzici');

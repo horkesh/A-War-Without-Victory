@@ -325,15 +325,14 @@ if (neverLost.length > 0) {
   }
 }
 
-// PARKED (owner, 2026-11-04): calibration runs one checkpoint at a time (Jan 1993 -> Apr 1994
-// -> Apr 1995 -> Oct 1995). Farz/Uragan (Sep 1995) belongs to the October 1995 checkpoint, so
-// its guards print for information but do NOT breach unless `--farz-guard` is passed. Re-enable
-// (pass the flag, or make it the default) when October 1995 becomes the active checkpoint.
-// Open defect waiting there: docs/40_reports/audits/20261104_handover/FARZ-TG-ROOT-CAUSE.md.
-const FARZ_GUARD_ENFORCED = process.argv.includes('--farz-guard');
+// ENFORCED (2026-11-07). Parked from 2026-11-04 until the October 1995 checkpoint; that checkpoint
+// was signed off on 2026-11-06 and the self-blocking Army HQ cap behind the P-A failure is fixed
+// (docs/40_reports/audits/20261104_handover/FARZ-TG-ROOT-CAUSE.md). `--no-farz-guard` reports
+// the guard without breaching, for diagnosing older runs; `--farz-guard` is accepted and is a no-op.
+const FARZ_GUARD_ENFORCED = !process.argv.includes('--no-farz-guard');
 
 console.log('');
-console.log(`OPERATION FARZ / "Uragan 95" — the positive half; a fix that breaks this is the WRONG fix${FARZ_GUARD_ENFORCED ? '' : '  [PARKED until the October 1995 checkpoint: informational, not a breach; pass --farz-guard to enforce]'}`);
+console.log(`OPERATION FARZ / "Uragan 95" — the positive half; a fix that breaks this is the WRONG fix${FARZ_GUARD_ENFORCED ? '' : '  [--no-farz-guard: informational, not a breach]'}`);
 console.log('  P1 cells — all four Ozren cells must be RBiH by w188');
 let farzBroken = 0;
 for (const [name, osid] of FARZ_CELLS) {
@@ -377,7 +376,7 @@ const farz = checkFarzObjectiveCaptures({
 });
 console.log('  P-A authored Farz objective receipts — operation-owned combat in the late window');
 for (const row of farz.rows) {
-  console.log(`    ${row.name.padEnd(26)} ${row.ok ? `t${row.turn} ** CAPTURED **` : '*** MISSING OR UNATTRIBUTED ***'}`);
+  console.log(`    ${row.name.padEnd(26)} ${row.ok ? `t${row.turn} ** CAPTURED **${row.via === 'uragan' ? ' (2nd Corps, Uragan 95)' : ''}` : '*** MISSING OR UNATTRIBUTED ***'}`);
 }
 if (!farz.ok) {
   farzBroken++;
@@ -426,7 +425,7 @@ if (unwarranted.length > 0) {
 }
 
 if (farzBroken > 0 && FARZ_GUARD_ENFORCED) breached = true;
-else if (farzBroken > 0) console.log(`  Farz guard PARKED: ${farzBroken} Farz finding(s) above are informational until the October 1995 checkpoint.`);
+else if (farzBroken > 0) console.log(`  Farz guard NOT ENFORCED (--no-farz-guard): ${farzBroken} Farz finding(s) above are informational.`);
 // LIVENESS: say how much was compared, not merely that nothing tripped.
 console.log(`  compared: ${EASTERN_SURPLUS_MUNS.length} municipalities (negative) + ${FARZ_CELLS.length} cells (positive)`);
 if (guardCells !== 9) {

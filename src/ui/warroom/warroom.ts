@@ -45,6 +45,7 @@ interface DesktopBridge {
     }>;
     subscribeGameStateUpdated?: (cb: (stateJson: string, metadata?: GameStateUpdateMetadata) => void) => (() => void);
     subscribeTurnReportUpdated?: (cb: (report: unknown) => void) => (() => void);
+    subscribeTurnPausedForDecisions?: (cb: (status: unknown) => void) => (() => void);
     getCurrentGameState?: () => Promise<string | null>;
     getMapServerUrl?: () => Promise<string | null>;
     loadStateDialog?: () => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
@@ -76,6 +77,7 @@ class WarroomApp {
     private pendingEmbeddedGameStateMetadata: GameStateUpdateMetadata | undefined;
     private unsubscribeDesktopGameState: (() => void) | null = null;
     private unsubscribeDesktopTurnReport: (() => void) | null = null;
+    private unsubscribeDesktopTurnPaused: (() => void) | null = null;
     private pendingShellHandoff: ShellHandoffCommand | null = null;
     private pendingShowWarroom = false;
     private freshCampaignIntroPending = false;
@@ -158,6 +160,18 @@ class WarroomApp {
         if (this.desktopBridge?.subscribeTurnReportUpdated) {
             this.unsubscribeDesktopTurnReport = this.desktopBridge.subscribeTurnReportUpdated((report: unknown) => {
                 this.broadcastEmbeddedBridgeEvent('turn-report-updated', report);
+            });
+        }
+        // PAUSE BEFORE COMBAT: forward the in-flight turn's paused/resumed status into the
+        // embedded React map, which owns the decision modal and its Continue turn button.
+        // The pause happens INSIDE the embedded advanceTurn invoke, so the paused state the main
+        // process sent just before this status is still held back by the in-flight-invoke
+        // coalescing (applyAdmittedDesktopGameStateUpdate). Release it first: the paused turn
+        // waits on the player, and the React map can only open the decision from that state.
+        if (this.desktopBridge?.subscribeTurnPausedForDecisions) {
+            this.unsubscribeDesktopTurnPaused = this.desktopBridge.subscribeTurnPausedForDecisions((status: unknown) => {
+                this.flushPendingEmbeddedGameState();
+                this.broadcastEmbeddedBridgeEvent('turn-paused-for-decisions', status);
             });
         }
 
@@ -1000,7 +1014,11 @@ class WarroomApp {
         const data = event.data as { enabled?: boolean; eventName?: string } | null;
         const enabled = Boolean(data?.enabled);
         const eventName = data?.eventName;
-        if (eventName !== 'game-state-updated' && eventName !== 'turn-report-updated') return;
+        if (
+            eventName !== 'game-state-updated'
+            && eventName !== 'turn-report-updated'
+            && eventName !== 'turn-paused-for-decisions'
+        ) return;
         const origin = typeof event.origin === 'string' ? event.origin : '*';
         const existing = this.embeddedBridgeSubscribers.get(source as WindowProxy) ?? { origin, events: new Set<string>() };
         existing.origin = origin;

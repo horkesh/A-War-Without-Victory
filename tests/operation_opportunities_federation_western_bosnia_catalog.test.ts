@@ -90,12 +90,12 @@ const SOUTHERN_MOVE_BRIGADES = [
 
 const JAJCE_CONTINUATION_OBJECTIVES = [
     'op:jajce:bravnice',
-    'op:jajce:vinac_2',
     'op:jajce:jajce_3',
     'op:jajce:lupnica',
     'op:jajce:barevo_2',
     'op:jajce:jezero_2',
     'op:jajce:prisoje',
+    'op:jajce:vinac_2',
 ];
 
 const OCTOBER_PAINTED_CONTROL = JSON.parse(readFileSync(resolve(
@@ -747,14 +747,13 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
             ]);
     });
 
-    it('continues the admitted Sipovo axis from captured Pribeljci into the painted Jajce walk', () => {
+    it('continues the admitted Sipovo axis from captured Volari into the painted Jajce walk', () => {
         expect(JAJCE_CONTINUATION_OBJECTIVES.every(osid => OCTOBER_PAINTED_CONTROL[osid] === 'HRHB')).toBe(true);
-        const sipovoAndJajce = ['op:sipovo:pribeljci_2', ...JAJCE_CONTINUATION_OBJECTIVES];
-        expect(sipovoAndJajce.slice(0, -1).every((from, index) => {
-            const to = sipovoAndJajce[index + 1];
-            return OPERATIONAL_CONTACT_GRAPH.some(edge =>
-                (edge.a === from && edge.b === to) || (edge.a === to && edge.b === from));
-        })).toBe(true);
+        // Frontier walk: every objective touches Volari or an objective taken before it.
+        const sipovoAndJajce = ['op:sipovo:volari_2', ...JAJCE_CONTINUATION_OBJECTIVES, 'op:sipovo:pribeljci_2'];
+        expect(sipovoAndJajce.slice(1).every((to, index) => sipovoAndJajce.slice(0, index + 1).some(from =>
+            OPERATIONAL_CONTACT_GRAPH.some(edge =>
+                (edge.a === from && edge.b === to) || (edge.a === to && edge.b === from))))).toBe(true);
 
         const state = buildMistralState({ turn: 180 });
         const controllers = state.political!.political_controllers as Record<string, FactionId>;
@@ -778,8 +777,8 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
         expect(new Set(op.axes!.flatMap(axis => axis.assigned_brigades)).size)
             .toBe(op.axes!.flatMap(axis => axis.assigned_brigades).length);
 
-        controllers['op:sipovo:pribeljci_2'] = 'HRHB';
-        sipovoAxis.current_objective_index = sipovoAxis.objectives.indexOf('op:sipovo:pribeljci_2') + 1;
+        controllers['op:sipovo:volari_2'] = 'HRHB';
+        sipovoAxis.current_objective_index = sipovoAxis.objectives.indexOf('op:sipovo:volari_2') + 1;
         expect(getSectorOffensiveCurrentObjective(op, 'hvo_3rd_guard_jastrebovi'))
             .toBe('op:jajce:bravnice');
     });
@@ -802,7 +801,7 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
 
     it('blocks Southern Move before window, without Sipovo staging, or without enemy targets', () => {
         const cases = [
-            buildSouthernMoveState({ turn: 181 }),
+            buildSouthernMoveState({ turn: 179 }),
             buildSouthernMoveState({ turn: 189 }),
             buildSouthernMoveState({ turn: 182, stagingHeld: false }),
             buildSouthernMoveState({ turn: 182, objectivesHeldByRs: false }),
@@ -857,11 +856,11 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
             late_phase: {
                 phase: 'holding',
                 main_axis_id: 'southern_move_mrkonjic',
-                requires: ['op:mrkonjic_grad:podrasnica_2'],
+                requires: ['op:mrkonjic_grad:majdan_2'],
                 gated_objectives: [DONJI_VRBLJANI],
                 receipts: [],
                 handoff: {
-                    brigade_id: 'hvo_rama_brigade',
+                    brigade_id: 'hrhb_kralj_petar_kreimir_iv_brigade',
                     source_axis_id: 'southern_move_mrkonjic',
                 },
             },
@@ -885,7 +884,7 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
         expect(main.assigned_brigades).toContain('hvo_rama_brigade');
     });
 
-    it('hands Rama to Donji exactly once after the owned Podrasnica capture remains held', () => {
+    it('hands Kralj Petar Kresimir IV to Donji exactly once after the owned Majdan capture remains held', () => {
         const state = buildSouthernMoveState({ turn: 182 });
         runOpportunityEvaluationStep(state, 182);
         applyOpportunityDecision(state, 182, buildProposalId('southern_move_95', 182), 'approve');
@@ -894,14 +893,14 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
         const main = op.axes!.find(axis => axis.axis_id === 'southern_move_mrkonjic')!;
         const tail = op.axes!.find(axis => axis.axis_id === 'southern_move_bjelajce_baljvine')!;
         const donji = op.axes!.find(axis => axis.axis_id === 'southern_move_donji_vrbljani')!;
-        const podrasnica = 'op:mrkonjic_grad:podrasnica_2';
+        const podrasnica = 'op:mrkonjic_grad:majdan_2';
         const opId = operationInstanceId('hvo_tomislavgrad', op);
         (state.political!.political_controllers as Record<string, FactionId>)[podrasnica] = 'HRHB';
         donji.late_phase!.receipts = [{
             osid: podrasnica,
             turn: 183,
             battle_id: 'battle:podrasnica',
-            attacker_brigade: 'hvo_rama_brigade',
+            attacker_brigade: 'hrhb_kralj_petar_kreimir_iv_brigade',
             operation_id: opId,
             axis_id: 'southern_move_mrkonjic',
         }];
@@ -914,21 +913,21 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
         advanceLatePhaseGates(state, op, 'hvo_tomislavgrad', 'HRHB', 184);
 
         expect(donji.late_phase).toMatchObject({ phase: 'capture', activated_turn: 183 });
-        expect(donji.assigned_brigades).toEqual(['hvo_rama_brigade']);
-        expect(main.assigned_brigades).not.toContain('hvo_rama_brigade');
+        expect(donji.assigned_brigades).toEqual(['hrhb_kralj_petar_kreimir_iv_brigade']);
+        expect(main.assigned_brigades).not.toContain('hrhb_kralj_petar_kreimir_iv_brigade');
         expect(op.axes!.flatMap(axis => axis.assigned_brigades)
-            .filter(id => id === 'hvo_rama_brigade')).toHaveLength(1);
+            .filter(id => id === 'hrhb_kralj_petar_kreimir_iv_brigade')).toHaveLength(1);
         expect(op.axes).toEqual(afterFirst);
         expect(tail).toEqual(tailBefore);
         expect(op.participating_brigades).toEqual(participantsBefore);
         expect(op.commander_officer_id).toBe(officerBefore);
         expect((op as unknown as Record<string, unknown>).minimum_viable_participants).toBeUndefined();
         expect((op as unknown as Record<string, unknown>).minimum_assembled_participants).toBeUndefined();
-        expect(state.military.brigade_movement_state?.hvo_rama_brigade).toBeUndefined();
-        expect(state.military.brigade_attack_orders?.hvo_rama_brigade).toBeUndefined();
+        expect(state.military.brigade_movement_state?.hrhb_kralj_petar_kreimir_iv_brigade).toBeUndefined();
+        expect(state.military.brigade_attack_orders?.hrhb_kralj_petar_kreimir_iv_brigade).toBeUndefined();
     });
 
-    it('keeps Donji holding when Rama acquires a conflicting live commitment', () => {
+    it('keeps Donji holding when Kralj Petar Kresimir IV acquires a conflicting live commitment', () => {
         const state = buildSouthernMoveState({ turn: 182 });
         runOpportunityEvaluationStep(state, 182);
         applyOpportunityDecision(state, 182, buildProposalId('southern_move_95', 182), 'approve');
@@ -936,24 +935,24 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
         const op = command.active_operations.find(activeOp => activeOp.name === 'Operation Southern Move')!;
         const main = op.axes!.find(axis => axis.axis_id === 'southern_move_mrkonjic')!;
         const donji = op.axes!.find(axis => axis.axis_id === 'southern_move_donji_vrbljani')!;
-        const podrasnica = 'op:mrkonjic_grad:podrasnica_2';
+        const podrasnica = 'op:mrkonjic_grad:majdan_2';
         (state.political!.political_controllers as Record<string, FactionId>)[podrasnica] = 'HRHB';
         donji.late_phase!.receipts = [{
             osid: podrasnica, turn: 183, battle_id: 'battle:podrasnica',
-            attacker_brigade: 'hvo_rama_brigade',
+            attacker_brigade: 'hrhb_kralj_petar_kreimir_iv_brigade',
             operation_id: operationInstanceId('hvo_tomislavgrad', op),
             axis_id: 'southern_move_mrkonjic',
         }];
         command.active_operations.push({
             name: 'Conflicting Commitment', type: 'sector_attack', phase: 'planning',
             started_turn: 183, phase_started_turn: 183,
-            participating_brigades: ['hvo_rama_brigade'], objectives: ['op:test:conflict'],
+            participating_brigades: ['hrhb_kralj_petar_kreimir_iv_brigade'], objectives: ['op:test:conflict'],
         } as never);
 
         advanceLatePhaseGates(state, op, 'hvo_tomislavgrad', 'HRHB', 183);
 
         expect(donji.late_phase!.phase).toBe('holding');
         expect(donji.assigned_brigades).toEqual([]);
-        expect(main.assigned_brigades).toContain('hvo_rama_brigade');
+        expect(main.assigned_brigades).toContain('hrhb_kralj_petar_kreimir_iv_brigade');
     });
 });

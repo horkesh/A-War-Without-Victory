@@ -33,11 +33,14 @@ import { computeFrontWidthMetrics } from '../sim/combat/front_width_metrics.js';
 import { computeSectorCombatRatings } from '../sim/combat/sector_combat_rating.js';
 import { applyRecruitment, evaluateRecruitmentEligibility, initializeRecruitmentResources, recruitBrigade } from '../sim/recruitment_engine.js';
 import { buildRecruitmentContext } from '../sim/recruitment_context.js';
-import { assertTurnSuccess, runTurn } from '../sim/turn_pipeline.js';
+import { assertTurnSuccess, runTurn, type TurnInput } from '../sim/turn_pipeline.js';
 import { loadEventDefinitionsFromDir } from '../sim/events/event_loader.js';
 import { applyEventEffects } from '../sim/events/apply_effects.js';
 import { resolveEventDecision } from '../sim/events/resolve_decision.js';
-import { resolvePlayerEventDecisionWithOpeningPolicy } from '../sim/events/opening_policy_transition.js';
+import {
+    preFiresOpeningDecisionAtBirth,
+    resolvePlayerEventDecisionWithOpeningPolicy,
+} from '../sim/events/opening_policy_transition.js';
 import { initializeNegotiationState } from '../sim/negotiation/initialize_negotiation_state.js';
 import { deferUnauthorizedHistoricalOperationsForPlayer } from '../sim/combat/historical_operation_authorization.js';
 import {
@@ -262,12 +265,20 @@ function queueOpeningFoundationalDecision(
     }
 
     const turn = state.meta?.turn ?? 0;
+    state.military.pending_event_decisions ??= [];
+    // Bot-equivalent timing: an event whose authored window opens after the first turn is NOT
+    // fired at birth. Its card is still queued here, so the player answers it at the start; the
+    // answer is filed and applied when evaluate-events fires the event in its window
+    // (preFiresOpeningDecisionAtBirth, answer_ahead_of_firing.ts).
+    if (!preFiresOpeningDecisionAtBirth(def, turn)) {
+        state.military.pending_event_decisions.push(buildOpeningPendingDecision(def, playerFaction, turn));
+        return;
+    }
     applyEventEffects(state, collectEventDefinitionEffects(def));
     applyDefinitionDimensionShifts(state, def.dimension_shifts);
     applyDefinitionFlags(state, def.sets_flags);
     recordOpeningEventFiring(state, eventId, turn);
 
-    state.military.pending_event_decisions ??= [];
     state.military.pending_event_decisions.push(buildOpeningPendingDecision(def, playerFaction, turn));
 }
 
@@ -386,7 +397,22 @@ export async function loadStateFromPath(statePath: string, baseDir: string): Pro
  * Advance one war-phase turn via the war pipeline (`runTurn`).
  * Returns new state; does not mutate the argument.
  */
-export async function advanceTurn(state: GameState, baseDir: string): Promise<DesktopSimAdvanceResult> {
+export interface DesktopAdvanceTurnOptions {
+    /**
+     * PAUSE BEFORE COMBAT: forwarded to `runTurn` as `TurnInput.onPlayerDecisionsPending`.
+     * Called with the pipeline's working state right after `evaluate-events` when that step
+     * queued player decisions this turn; resolve them in place with
+     * `resolveDesktopEventDecisionInPlace` (or `resolveEventDecision`) and the rest of the
+     * turn (movement, combat, ...) runs on the answered state. Unset ⇒ unchanged behaviour.
+     */
+    onPlayerDecisionsPending?: TurnInput['onPlayerDecisionsPending'];
+}
+
+export async function advanceTurn(
+    state: GameState,
+    baseDir: string,
+    options: DesktopAdvanceTurnOptions = {},
+): Promise<DesktopSimAdvanceResult> {
     const phase = state.meta?.phase ?? 'war';
     const seed = state.meta?.seed ?? 'desktop-seed';
 
@@ -474,6 +500,9 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
                 historicalOobIdLookup: sharedTurnInputs.historicalOobIdLookup,
                 historicalEquipmentClassLookup: sharedTurnInputs.historicalEquipmentClassLookup,
                 eventDefinitions: loadDesktopEventDefinitions(baseDir),
+                ...(options.onPlayerDecisionsPending
+                    ? { onPlayerDecisionsPending: options.onPlayerDecisionsPending }
+                    : {}),
             });
             assertTurnSuccess(result);
             const { nextState, report } = result;
@@ -816,6 +845,38 @@ export function resolveDesktopEventDecision(
         eventId,
         responseId,
     );
+}
+
+/**
+ * The same resolution as `resolveDesktopEventDecision`, written back INTO `state`.
+ *
+ * The pause-before-combat callback holds the turn pipeline's working state object, which the
+ * pipeline keeps using after the callback returns, so a resolution there must mutate that
+ * object rather than return a new one. Top-level fields are replaced in their existing key
+ * order (fields the resolution removed are deleted; new ones are appended), so the result is
+ * the same object holding exactly the resolved state.
+ */
+export function resolveDesktopEventDecisionInPlace(
+    state: GameState,
+    eventId: string,
+    responseId: string,
+    baseDir: string,
+): void {
+    const resolved = resolveDesktopEventDecision(state, eventId, responseId, baseDir);
+    replaceGameStateContents(state, resolved);
+}
+
+function replaceGameStateContents(target: GameState, source: GameState): void {
+    for (const key of Object.keys(target)) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+            Reflect.set(target, key, Reflect.get(source, key));
+        } else {
+            Reflect.deleteProperty(target, key);
+        }
+    }
+    for (const key of Object.keys(source)) {
+        if (!Object.prototype.hasOwnProperty.call(target, key)) Reflect.set(target, key, Reflect.get(source, key));
+    }
 }
 
 /** Re-export for main process (serialize/deserialize state for IPC). */

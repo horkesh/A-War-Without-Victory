@@ -46,6 +46,7 @@ import {
     type ColorblindPreset,
 } from '../../shared/factionPalette';
 import { SUPPORTED_LOCALES, t, useLocale, type Locale } from '../i18n';
+import { InterfaceScaleSettings } from '../preferences/InterfaceScale';
 
 interface SettingsSection {
     id: string;
@@ -287,6 +288,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                 </div>
 
                 {/* Content */}
+                <InterfaceScaleSettings />
                 <div className="space-y-3 mb-6">
                     {activeSection === 'gameplay' && (
                         <>

@@ -274,7 +274,7 @@ export function DiplomacyPanel({ view, onClose }: DiplomacyPanelProps) {
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="diplomacy-panel-title"
-                className="absolute right-4 top-16 flex max-h-[calc(100vh-5rem)] w-[min(31rem,calc(100vw-2rem))] flex-col overflow-hidden rounded border border-amber-400/25 bg-[#101018]/95 shadow-2xl"
+                className="absolute right-4 top-16 flex max-h-[calc(var(--interface-viewport-height,100vh)-5rem)] w-[min(31rem,calc(var(--interface-viewport-width,100vw)-2rem))] flex-col overflow-hidden rounded border border-amber-400/25 bg-[#101018]/95 shadow-2xl"
             >
                 <header className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
                     <div>

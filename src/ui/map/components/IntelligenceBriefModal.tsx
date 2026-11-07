@@ -41,7 +41,7 @@ export function IntelligenceBriefModal({ notificationId, state, onClose }: Intel
       zIndex={Z.CRITICAL_MODAL}
       ariaLabelledBy="intelligence-brief-modal-title"
       backdropClassName="bg-black/75 backdrop-blur-sm"
-      panelClassName="w-[min(92vw,560px)] overflow-hidden rounded-lg border border-sky-400/35 bg-panel-bg text-text-primary shadow-2xl"
+      panelClassName="w-[min(calc(var(--interface-viewport-width,100vw)*0.92),560px)] overflow-hidden rounded-lg border border-sky-400/35 bg-panel-bg text-text-primary shadow-2xl"
     >
       {headerImage && (
         <DecisionModalImageHeader
