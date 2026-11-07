@@ -69,6 +69,9 @@ jobs:
             git checkout "origin/${base_ref}" -- .github/scripts/detect-full-suite-changes.sh
           fi
           bash .github/scripts/detect-full-suite-changes.sh
+          if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
+            git restore --source=HEAD -- .github/scripts/detect-full-suite-changes.sh
+          fi
 
   # The single gate that runs the COMPLETE vitest suite (`npm run test:vitest:balanced`
   # inventories ALL files discovered by vitest.config.ts), NOT a slice. Ordinary files

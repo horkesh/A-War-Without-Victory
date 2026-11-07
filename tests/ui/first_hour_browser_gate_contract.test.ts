@@ -548,36 +548,37 @@ describe('browser QA CI wiring contract', () => {
     expect(detector).toContain('"build/icon.png"');
   });
 
-  it('runs the self-scanning player-experience gate in the required full-suite job', () => {
-    const workflow = read('.github/workflows/full-suite-and-fingerprint.yml');
+  it('requires both parallel Vitest and self-scanning browser jobs through full-suite', () => {
+    const workflow = read('.github/workflows/full-suite-and-fingerprint.yml').replaceAll('\r\n', '\n');
 
-    const fullSuiteJobStart = workflow.indexOf('  full-suite:');
-    const structuralFingerprintStart = workflow.indexOf('  structural-fingerprint:');
-    const fullSuiteJob = workflow.slice(fullSuiteJobStart, structuralFingerprintStart);
-    expect(fullSuiteJob).not.toContain('lfs: true');
-    expect(read('.github/workflows/README.md')).toContain('does not eager-fetch Git LFS before path');
-    expect(fullSuiteJob).toContain('timeout-minutes: 75');
-    expect(fullSuiteJob).toContain('run: npm run test:vitest:balanced');
-    expect(workflow).toContain('name: Player experience gate');
-    expect(workflow).toContain('run: npm run qa:player-experience');
+    const job = (id: string) => {
+      const block = workflow.match(new RegExp(`^  ${id}:\\n(?:    .*\\n|\\n)*`, 'm'));
+      expect(block, `missing workflow job ${id}`).toBeTruthy();
+      return block![0];
+    };
+    const detector = job('detect-full-suite-changes');
+    const vitest = job('full-vitest');
+    const browser = job('player-experience');
+    const verdict = job('full-suite');
+    expect(detector + vitest + browser).not.toContain('lfs: true');
+    expect(read('.github/workflows/README.md')).toContain('detector checkout deliberately does not fetch Git LFS');
+    for (const worker of [vitest, browser]) {
+      expect(worker).toContain('needs: detect-full-suite-changes\n');
+      expect(worker).toContain("needs.detect-full-suite-changes.outputs.relevant == 'true'");
+      expect(worker).toContain('timeout-minutes: 75');
+    }
+    expect(vitest).toContain('run: npm run test:vitest:balanced');
+    expect(browser).toMatch(/run: npx puppeteer browsers install chrome[\s\S]*run: npm run qa:player-experience/);
+    expect(verdict).toContain('needs: [detect-full-suite-changes, full-vitest, player-experience]');
+    expect(verdict).toContain('if: ${{ always() }}');
+    expect(verdict).toContain('VITEST: ${{ needs.full-vitest.result }}');
+    expect(verdict).toContain('BROWSER: ${{ needs.player-experience.result }}');
+    expect(verdict).toContain('"$DETECTION" == success && "$RELEVANT" == true && "$VITEST" == success && "$BROWSER" == success');
+    expect(verdict).toContain('"$DETECTION" == success && "$RELEVANT" == false && "$VITEST" == skipped && "$BROWSER" == skipped');
+    expect(verdict.trimEnd().endsWith('exit 1')).toBe(true);
     expect(workflow).not.toContain('run: npm run qa:first-hour:browser');
     expect(workflow).not.toContain('run: npm run qa:live-surface:browser');
-    expect(workflow).toContain('name: Install Puppeteer Chrome for browser gates');
-    expect(workflow).toContain('run: npx puppeteer browsers install chrome');
     expect(read('tools/ui/browser_gate_pmtiles_env.cjs')).toContain('VITE_AWWV_DISABLE_PMTILES');
     expect(read('tools/ui/browser_gate_pmtiles_env.cjs')).toContain('version https://git-lfs.github.com/spec/v1');
-
-    const fullSuiteStart = workflow.indexOf('name: Full vitest suite');
-    const chromeInstallStart = workflow.indexOf('name: Install Puppeteer Chrome for browser gates');
-    const playerExperienceStart = workflow.indexOf('name: Player experience gate');
-    const skippedStart = workflow.indexOf('name: No relevant changes');
-    expect(chromeInstallStart).toBeGreaterThan(fullSuiteStart);
-    expect(playerExperienceStart).toBeGreaterThan(chromeInstallStart);
-    expect(skippedStart).toBeGreaterThan(playerExperienceStart);
-
-    const chromeInstallBlock = workflow.slice(chromeInstallStart, playerExperienceStart);
-    const playerExperienceBlock = workflow.slice(playerExperienceStart, skippedStart);
-    expect(chromeInstallBlock).toContain("if: steps.changes.outputs.relevant == 'true'");
-    expect(playerExperienceBlock).toContain("if: steps.changes.outputs.relevant == 'true'");
   });
 });
