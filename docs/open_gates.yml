@@ -98,15 +98,18 @@ gates:
 
   - id: RD-SETTLED-MAP-UI
     lane: RD
-    title: The settled map is visible in the game
-    status: open
+    title: The settled map reaches the renderer (rendering transferred to the conference lane)
+    status: closed
+    closed: 2026-11-07
     kind: acceptance
     opened: 2026-11-07
     blocks: [R8]
     evidence_required: >
-      Verdict side-by-side map and settled-map inspection mode (Dayton-table highlight
-      in the full feature), with Electron screenshots and a player-visible projection test.
-    evidence_path: null
+      The desktop projection carries negotiation.settlement and the adapter exposes the
+      settled map (deriveSettlementMap), each with a test. Owner rescope 2026-11-07: the
+      verdict comparison, inspection mode and Dayton-table highlight are rendered by the
+      Dayton conference lane (see the handoff).
+    evidence_path: tests/desktop_player_visible_state.test.ts
     source: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
 
   - id: RD-CANON-PROPAGATION

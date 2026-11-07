@@ -331,6 +331,18 @@ describe('captured ground is negotiable at Dayton (owner, 2026-11-07)', () => {
         expect(state.military.negotiation!.settlement?.map_overrides ?? {}).toEqual({});
     });
 
+    it('the renderer read model shows the settled map and the cells that change hands', async () => {
+        const { deriveSettlementMap } = await import('../src/ui/map/data/GameStateAdapter.js');
+        const state = withHeld();
+        expect(deriveSettlementMap(state)).toBeUndefined();
+        resolveDaytonNegotiation(state, proposal());
+        const map = deriveSettlementMap(state)!;
+        expect(map.planId).toBe('dayton');
+        expect(map.controllers[HELD]).toBe('RS');
+        expect(map.changedOsids).toEqual([HELD]); // RBiH-held at signature, RS on the map signed
+        expect(Object.keys(map.territoryPct).sort()).toEqual(['HRHB', 'RBiH', 'RS']);
+    });
+
     it('demanded and won at the forced table, the claimant keeps it', () => {
         const state = withHeld();
         declineDaytonNegotiation(state);

@@ -4,11 +4,13 @@
 **Roadmap row:** [MASTER_ROADMAP.md §5](MASTER_ROADMAP.md) `RD`. **Gates:** [open_gates.yml](../open_gates.yml) `RD-*`.
 **Panel record:** Pyrrhic team convened 2026-11-07 (historian, game designer, QA/systems, UI/UX + modern wargame, product/orchestrator seats). Owner rulings recorded below.
 
-## Scope
+## Scope (rescoped by the owner, 2026-11-07)
 
-The end of the war: peace plans settling on their maps and terms, the Dayton negotiation (fixed packages, captured-ground packages, patron pressure, the decline path and the forced table), the settlement map, and how the verdict reads it. Work already landed on `claude/loving-knuth-pmx3hi` (ledger entries 2026-11-07) is the starting point.
+**RD is the settlement and end-map lane:** peace plans settling on their maps and terms, the OSID-level Dayton map, settlement contiguity (no isolated pockets), the settled territory share and status caps the verdict reads, and the data path that lets the renderer draw the settled map.
 
-Out of scope here: packaged-campaign acceptance (R8), human audio listening (R7, runs in parallel).
+**The Dayton table belongs to the Dayton conference redesign** (next lane, Codex; plan on Dragon at `F:/AWWV-worktrees/.dayton-design/DAYTON_CONFERENCE_IMPLEMENTATION_PLAN.md`). RD's table changes stay in the engine as **interim rules** the redesign owns and may replace: the decline path and forced table, captured-ground packages, patron leverage (area budget, protected ground, post-decline protection), counter-offer retention. Handoff: [handoffs/20261107_dayton_end_map_to_conference.md](../../handoffs/20261107_dayton_end_map_to_conference.md).
+
+Out of scope here: the conference table and its UI, packaged-campaign acceptance (R8), human audio listening (R7, parallel).
 
 ## Owner rulings (2026-11-07)
 
@@ -25,14 +27,14 @@ Out of scope here: packaged-campaign acceptance (R8), human audio listening (R7,
 | 2 | Quick fixes: package keyword matching (token level), `agent_skill_import` PowerShell skip, `ongoing_mobilization` fixture, contiguity pass fixes (continue past unfixable pieces, smallest-area corridors, never absorb won-package or enclave cells), patron threshold constant | RD-PACKAGE-KEYWORD-MATCH, RD-CONTIGUITY-PROTECTION | 188w baseline gate |
 | 3 | Owner rulings 1–3 | RD-PATRON-OVERRIDE | 188w baseline gate + decline campaign |
 | 4 | Re-measure maximum territory per faction under the settlement rules; RS and HRHB decline campaigns | RD-MAX-TERRITORY-REMEASURE | live harness, one strategy set per faction |
-| 5 | Settled map in the game: verdict side-by-side, settled-map inspection mode, Dayton-table package highlight, plan-offer thumbnail | RD-SETTLED-MAP-UI | rendered evidence |
+| 5 | Settled map data path: project `negotiation.settlement` to the renderer; `deriveSettlementMap` read model. Rendering (verdict comparison, inspection mode, Dayton-table highlight, plan thumbnail) transferred to the Dayton conference lane | RD-SETTLED-MAP-UI | none (tests) |
 | 6 | Canon propagation (WAR_TERMINATION_SPEC, Systems Manual, Rulebook, Phase Specifications), independent review of the Dayton commits, sensitive-history check (coercion narratives, Prijedor/Kozarac objectives, RS grade re-anchor), scenario review of run artifacts | RD-CANON-PROPAGATION, RD-INDEPENDENT-REVIEW, RD-SENSITIVE-HISTORY-CHECK, RD-RUN-ARTIFACT-REVIEW | none |
-| 7 | Later, each its own decision and run: Zagreb override persistence fix (scripted patron deltas last one turn), Invincible as the September revision of Owen–Stoltenberg, EU Action Plan as an event, Washington as a precondition for the Contact Group plan, RBiH–HRHB alliance counterfactual (sensitive-history panel + unanimous panel; moves the Washington anchor) | — | per item |
+| 7 | Transferred to the Dayton conference lane (see handoff): Goražde package redraw, bot counter-demands, Zagreb override persistence fix, Invincible as the September revision of Owen–Stoltenberg, EU Action Plan as an event, Washington as a precondition for the Contact Group plan, RBiH–HRHB alliance counterfactual | — | owned there |
 
 ## Acceptance (RD-ACCEPTANCE-ALL-GREEN)
 
 - Every engine change leaves all 8 pinned 188w artifacts byte-identical, or carries an owner re-pin with the reason recorded; 712/711/712/710 and the guard intact.
 - Full suite green, environmental skips documented; typecheck clean.
-- Decline campaigns measured for all three factions; maximum-territory report refreshed.
-- Rendered desktop proof of the settled map.
+- Maximum territory re-measured for all three factions with the map as signed (no table demands), on-time and after a decline; report refreshed.
+- Settled-map data reaches the renderer (projection + adapter tests); rendering is the conference lane's.
 - Independent review GO recorded for each change; canon propagated in the same change set.

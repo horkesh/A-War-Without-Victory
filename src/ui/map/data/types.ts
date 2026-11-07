@@ -1608,6 +1608,19 @@ export interface LoadedGameState {
     /** Compact read-only diplomacy packet projected from negotiation, patron, and IVP state. */
     diplomacyView?: DiplomacyView;
 
+    /**
+     * The settled map of a signed peace (plan map at OSID level, sim-computed). Rendering is
+     * owned by the Dayton conference lane; see handoffs/20261107_dayton_end_map_to_conference.md.
+     */
+    settlementMap?: {
+        planId: string;
+        controllers: Record<string, string>;
+        specialOsids: string[];
+        territoryPct: Record<string, number>;
+        /** Cells whose holder differs between the front at signature and the map signed. */
+        changedOsids: string[];
+    };
+
     /** Pending Dayton negotiation — shown when shouldInitiateDayton fires. */
     pendingDayton?: {
         territorialPackages: Array<{

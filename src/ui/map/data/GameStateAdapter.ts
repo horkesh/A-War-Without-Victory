@@ -85,6 +85,7 @@ import {
 } from '../../../sim/combat/supply_condition.js';
 import { PEACE_PLANS } from '../../../sim/negotiation/peace_plan_data.js';
 import { frontPackagesForPlayer } from '../../../sim/negotiation/front_packages.js';
+import { settlementControllersFor } from '../../../sim/negotiation/peace_settlement.js';
 import war1992Events from '../../../../data/scenarios/events/war_1992.json';
 import war1993Events from '../../../../data/scenarios/events/war_1993.json';
 import war1994Events from '../../../../data/scenarios/events/war_1994.json';
@@ -2977,6 +2978,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         pendingPeacePlan: derivePendingPeacePlan(state),
         pendingCounterOffers: derivePendingCounterOffers(state),
         pendingDayton: derivePendingDayton(state),
+        settlementMap: deriveSettlementMap(state),
         pendingProposalReviews,
         strategicDimensions: deriveStrategicDimensions(state),
         negotiatingCapital: deriveNegotiatingCapital(state),
@@ -4131,6 +4133,35 @@ function derivePatronOverrideAuthority(state: any): LoadedGameState['patronOverr
         }
     }
     return Object.keys(out).length > 0 ? out : undefined;
+}
+
+/**
+ * The settled map of a signed peace (RD, 2026-11-07): the plan, the OSID-level settled
+ * controllers (recomputed by the sim's settlementControllersFor, never re-derived here), the
+ * shared/international cells, the settled territory share, and the cells whose holder
+ * changes from the front at signature to the map signed. Undefined without a settlement.
+ * Rendering (verdict comparison, inspection mode) belongs to the Dayton conference lane.
+ */
+export function deriveSettlementMap(state: any): LoadedGameState['settlementMap'] {
+    const settlement = state?.military?.negotiation?.settlement;
+    if (!settlement || typeof settlement.plan_id !== 'string') return undefined;
+    const controllers = settlementControllersFor(state as GameState);
+    if (!controllers) return undefined;
+    const wartime: Record<string, string | null | undefined> = state.political?.political_controllers ?? {};
+    const changedOsids = Object.keys(controllers)
+        .filter((osid) => wartime[osid] !== controllers[osid])
+        .sort(strictCompare);
+    const territoryPct: Record<string, number> = {};
+    for (const [faction, pct] of Object.entries(settlement.territory_pct ?? {}).sort((a, b) => strictCompare(a[0], b[0]))) {
+        territoryPct[faction] = Number(pct);
+    }
+    return {
+        planId: settlement.plan_id,
+        controllers,
+        specialOsids: Array.isArray(settlement.special_osids) ? [...settlement.special_osids].sort(strictCompare) : [],
+        territoryPct,
+        changedOsids,
+    };
 }
 
 /** Read persisted pending_dayton packet from state. Pipeline owns trigger; adapter only shapes. */
