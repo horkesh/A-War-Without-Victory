@@ -13760,3 +13760,12 @@ Owner asked to update the roadmap after the 2026-11-06 sign-off.
 - `MASTER_ROADMAP.md`: new current-state block (calibration closed at 712/711/712/710; live = headless, 0 cells, three player factions; Farz guard enforced on n63). The R8 status now says calibration no longer blocks it and names the packaged work left: three 24-turn shakedowns, three 188-turn campaigns with diaries, per-faction Save/load, same-input determinism, strict runtime/audio. Register row R8 and the program sequence updated to match.
 - The superseded 2026-10-27 hold and the October R6/R8 NO-GO paragraphs moved word for word to the status history archive (links rebased). `plan_index.yml` regenerated (R8 stays open).
 - No code, simulation, scenario or calibration change.
+
+## 2026-11-07 - R7: offline audio passes in the packaged app; two audio gates closed (DOCS, EVIDENCE)
+
+Owner asked to close what can be closed in R7 without the listening pass.
+- `R7-AUDIO-CUE-WIRING` closed on the 2026-11-05 disposition (six scoped triggers, four registry-only by decision); re-checked on main, exactly those six have non-test `playCue` call sites.
+- `R7-AUDIO-OFFLINE-RUNTIME` closed. Fresh `desktop:package:dir` build of `81ab0051c`, driven through the real UI with external HTTP(S) denied inside the app only (Codex's harness from CX-20261107-PACKAGED-AUDIO-QA, reused): opening, menu and campaign music, three UI cues, volume, mute/resume and the music switch observed; NetLog and renderer trace 0 remote URLs; a same-profile relaunch on a new port kept music on and both sliders at 45% (failed on `f64ddf748`, fixed by #551). Evidence: `logs/r7-english-readability/closeout-offline-audio-runtime.md`.
+- R7 now waits only on human listening/sensitivity and the roll-up gate. Roadmap R7 row and `plan_index.yml` updated.
+- Found in passing, not fixed here: the packaged app probes `127.0.0.1:3002-3005` for a Vite dev server on every launch (`resolveMapServerBaseUrl`, no `app.isPackaged` check).
+- No code, simulation, scenario or calibration change.
