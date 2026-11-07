@@ -1,6 +1,6 @@
 # A War Without Victory — Master Roadmap
 
-**Current scope boundary — 2026-10-27:** Calibration is HOLD while the execution-consistency candidate is repaired, independently reviewed and tested. No new calibration run, baseline adoption or target change is authorized during this hold. The owner retained accepted-n101 fatigue coefficients and authorized reconciliation of the manual; engagement timing remains a separate correctness repair. See the [consistency contract](../40_reports/audits/20261027_EXECUTION_CONSISTENCY_CONTRACT.md). Latest completed pre-pause January result is701/712 versus the original707/712, with health14>3; it does not measure the unqualified consistency candidate. Superseded dated status paragraphs and source evidence remain in the [status history archive](../_old/plans/superseded/2026-10-27-master-roadmap-status-history.md). Older status prose below is historical context; this boundary controls current work.
+**Current state — 2026-11-07:** Calibration is CLOSED. The owner signed off all four checkpoints under `live-equivalent-desktop-v1` on 2026-11-06 at **712/711/712/710** out of 712 (January 1993, April 1994, April 1995, October 1995) and closed the lane. At 188 turns the live game and headless differ in 0 cells with RBiH, RS or HRHB as player. The Farz P-A receipt defect is fixed and its guard is enforced (`__w188_n63`, strict health PASS); the baseline manifest is pinned on n63. Brka and Ilijaš Krivajevići stay open by owner direction and are not calibration levers. The 2026-10-27 calibration hold, and the R6/R8 candidates it governed, are superseded and preserved in the [status history archive](../_old/plans/superseded/2026-10-27-master-roadmap-status-history.md). See the [calibration master](../40_reports/CALIBRATION_MASTER.md). Older status prose below is historical context; this block controls current work.
 
 **Owner scope ruling — 2026-10-27:** Dynamic enemy garrison forecasts receive the existing confidence uncertainty once; actual resolution is unchanged. Historical harness benchmarks remain regression checks, while gameplay calibration requires live-equivalent execution and matched inputs/policies. No target/reference repaint or artificial overlays in desktop. Consistency review and final aggregate remain pending; calibration stays HOLD.
 
@@ -12,29 +12,9 @@ goal, acceptance criteria, canon/protected boundaries, material scope/cost
 tradeoffs or irreversible/external actions with concrete options and a
 recommendation. Required evidence, review panels and cost-control gates remain.
 
-**Current R6 — Toljenak validated; October remains globally NO-GO.** Retained n92 captures
-Toljenak at t135 and holds through188. After the owner's April Toljenak-only repaint it scores
-**707/707/706/706**, with zero formerly correct losses; HVO outcomes and all16 anchors remain.
-Historical n91/n92 metadata stays untouched, with exactly one approved scoring-reference difference.
-The complete suite records14,884 pass/2 documentation failures/33 skip; both corrected files
-pass50/50 and unaffected coverage is reused. Raw failed receipts remain preserved. Six October
-mismatches and inherited gates remain; no baseline adoption. See the
-[calibration authority](../40_reports/CALIBRATION_MASTER.md) and
-[portable provenance](../provenance/october-calibration-20261019/README.md).
-
-**Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
-is not adopted. The owner corrected the April and October 1995 painted reference
-for `op:trnovo:gornja_presjenica` to RS. Replaying the unchanged run now scores
-**707/707/704/669**; the April numeric floor is met through a reference
-correction, while Vidimlije still disagrees with RS paint. The owner reopened
-the Donja Mahala anomaly: a generic VRS operation captures this HRHB pocket
-cell at t119 in the simulation. No combat or timing edit has been authorized or
-run for it. Farz P-A §6 remains a no-merge gate. The [calibration master](../40_reports/CALIBRATION_MASTER.md)
-records the trace and historical boundary. October calibration waits.
-
 **Authority:** This file is the sole source of truth for unfinished product work.
 
-**Current R8 — player capability before divergence.** The sole graph-corrected n102 qualifier completed188 weeks but is NO-GO at705/704/703/686 versus707/707/706/706, with 2/3/3/20 formerly-correct losses, 10/16 final anchors and one missed final RS sector floor. Its no-retry allowance is consumed; no suite, package or native successor followed. The reviewed scenario caller candidate now preserves a successful public war turn unless real scenario control flips applied, while retaining applied-flip and legacy peace repair. Focused3/3, existing-contract6/6, TypeScript and independent verification pass, with the missing temporary RED/GREEN outputs explicitly retained as an unwaived evidence gap. No baseline, pin, reference or target changes are adopted. A bounded39 prefix is the cheapest proposed score gate before any required188, but this status update grants no campaign authority; player/bot parity remains **UNMET**. [Proof](../../logs/r8-native-calibration-parity-20261024/scenario-postturn-parity-20261025/MANIFEST.json)
+**Current R8 — packaged player campaigns.** The owner's 2026-10-24 parity priority (players reach the bots' calibration through ordinary play) is met at map level in the live-equivalent path: 0 cells differ for each player faction at 188 turns. Calibration no longer blocks R8. What remains is the packaged-Electron evidence in the [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md): three 24-turn shakedowns (RBiH, RS, HRHB) on one fresh package, then three full 188-turn campaigns with diaries, per-faction Save/load, same-input determinism and strict runtime/audio. The [player hard gates](2026-07-31-full-campaign-electron-validation-plan.md#player-campaign-acceptance-contract--owner-decision-2026-10-24) still apply. No packaged campaign has run on the current source.
 
 **Execution view:** [COMMAND_BOARD.md](COMMAND_BOARD.md) is a derived convenience view; this roadmap wins if they differ.
 
@@ -189,9 +169,8 @@ These are verification barriers and authority boundaries, not unresolved product
 
 ## 4. Program Sequence
 
-**Current sequence (2026-09-07):** R7 -> R8 behavior/cleanup and early R9 build preparation
-(§4.2) -> final calibration -> final R8 packaged acceptance -> R9 freeze/readiness.
-Diagnostic calibration stays open; D1 and BC04's current owner/panel conditions remain intact.
+**Current sequence (2026-11-07):** R7 -> final R8 packaged acceptance -> R9 freeze/readiness.
+Final calibration was signed off on 2026-11-06 and the owner closed the lane; D1 and BC04's current owner/panel conditions remain intact.
 
 ### 4.1 Finite behavior-closure register (2026-09-07)
 
@@ -204,7 +183,7 @@ BC09 Phase 1 locally implemented and reviewed (GO), final acceptance deferred. B
 FIX means planned repair **when scheduled**, not authority to implement. VERIFY/DISPOSITION means
 bounded evidence followed by an accepted fix, proof of no relevant effect, or evidenced release
 exclusion. D1 HOLD FOR R8 remains. R1–R5, the accepted R6 slice, RC and RE stay closed; calibration
-stays open. [Detailed acceptance and sources](2026-07-31-full-campaign-electron-validation-plan.md#behavior-closure-acceptance-detail-2026-09-07)
+closed on 2026-11-06. [Detailed acceptance and sources](2026-07-31-full-campaign-electron-validation-plan.md#behavior-closure-acceptance-detail-2026-09-07)
 live in the existing R8 plan; its previously proposed B10–B13/F1 are now registered, not scheduled.
 
 | ID / existing home | Owner | Impact / pre-freeze disposition |
@@ -260,7 +239,7 @@ on matching contracts/inputs. No baseline refresh, remote configuration change o
 | RC | Pressure → exhaustion → **COLLAPSE** pipeline | **PRE-1.0 NARROW SCOPE COMPLETE — CLOSED 2026-08-15.** Retained v3 selection plus reversible D-shape; deterministic and trajectory-flat, 31/31 anchors, 6/6 benchmarks, 7/7 health gates, full Section 6 pass. D-topology is explicitly post-1.0. Detail in [archive](MASTER_ROADMAP_ARCHIVE.md#closed-lane-detail-moved-2026-09-10). | [Scope](../40_reports/proposals/20260609_SCOPE_collapse_pipeline.md) · [build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) · [measurement plan](2026-08-15-collapse-d-selection-measurement-plan.md) · [D-shape design](2026-08-15-collapse-d-shape-design.md) · [Stage 0/2 panel record](../40_reports/20260813_RC_COLLAPSE_PANEL_FROZEN_ARTIFACT.md) | The default-OFF local collapse model measures historically discriminating combat pressure, recovers on quiet turns, reaches a bounded live writer, preserves Section 6, and leaves neighbour cascade to an explicit post-1.0 topology packet. |
 | RE | 1.0 engine integrity: seven outcomes, no general cleanup | **CLOSED — owner, 2026-09-01.** RE gates nothing: not calibration, not R7, not R8. P2B and the auxiliary prerequisite are retired history. Engine health remains sacrosanct as a principle, not as an RE gate. Detail in [archive](MASTER_ROADMAP_ARCHIVE.md#closed-lane-detail-moved-2026-09-10). | [1.0 contract](2026-08-26-engine-integrity-plan.md) · [recovery plan](2026-08-28-packaged-probe-recovery-plan.md) · [living audit](../40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md) | The unproven prerequisite config/test hypothesis was rolled back exactly and its receipt closed. P2B–P7 and final-pair/profile gates are retired historical acceptance, not unfinished current work; no successor proof route is active. |
 | R7 | Content, historical attribution, audio, accessibility, and opening experience | **ACTIVE — AUDIO AND BROADER ACCEPTANCE OPEN.** WR01 delivered in #517; stale-pin refresh landed in #518. Human listening/sensitivity, offline playback/controls and disposition of ten cue triggers remain open. Separate R8 opening/setup readability, two status contrasts and runtime/package failures remain. Human listening waits for owner inspection. The merged April candidate requires its own canon and 188-week acceptance; neither WR01 nor #518 accepts it. | [Content/history/audio plan](2026-07-31-content-history-localization-audio-plan.md) · [accepted functional opening plan](2026-08-23-opening-screens-implementation-plan.md) · [cinematic opening and typography amendment](2026-08-28-cinematic-opening-typography-implementation-plan.md) · [presentation and English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md) · [ARBiH names](2026-09-07-arbih-brigade-honorific-name-correction-plan.md) · [WR01 warroom presentation design](2026-09-10-warroom-whiteboard-date-and-corkboard-map-design.md) · [visual polish and art-direction packet](2026-11-05-visual-polish-art-direction-plan.md) (CLOSED 2026-11-06) / [visual polish follow-ups](2026-11-06-visual-polish-follow-ups-plan.md) · [command palette and scalable UI](2026-11-06-command-palette-ui-scale-plan.md) (VERIFIED LOCAL; integration pending) | Provenance and English presentation stay supported; audio/runtime and broader acceptance require their named receipts. |
-| R8 | Full-campaign packaged-Electron validation and diaries | **PLAYER/BOT CAPABILITY PARITY ACTIVE — GLOBAL NO-GO.** The authorized fatigue candidate39 is STOP_NO_RETRY at703/712 with four protected losses and health13>3. No further campaign follows. Historical reviews are complete with no supported amendment; exact July OOB, formal chain and settlement/control remain unresolved. Historical calibration under unchanged benchmarks/gates awaits owner clarification on the standing no-tuning boundary. | [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md) · [player criteria](2026-07-31-full-campaign-electron-validation-plan.md#player-campaign-acceptance-contract--owner-decision-2026-10-24) | Current188/full-suite/package/native proof, per-faction24/188, protected/canon, same-input determinism and strict runtime/audio remain open. No pin adoption, tuning or all-parity GO. |
+| R8 | Full-campaign packaged-Electron validation and diaries | **PACKAGED CAMPAIGNS NEXT — CALIBRATION BLOCKER CLEARED 2026-11-07.** Live-equivalent player/bot map parity holds at 712/711/712/710: 0 cells differ for each player faction at 188 turns. The October NO-GO candidates are superseded history. Packaged 24-turn shakedowns and 188-turn diaries for RBiH, RS and HRHB have not run on the current source. | [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md) · [player criteria](2026-07-31-full-campaign-electron-validation-plan.md#player-campaign-acceptance-contract--owner-decision-2026-10-24) | Per-faction packaged 24/188 runs with diaries, Save/load, same-input determinism, protected/canon and strict runtime/audio remain open. No tuning or pin adoption follows from R8 runs. |
 | R9 | Release candidate, gold, and publication | Build preparation passes (§4.2); freeze/readiness after R8 | [Release plan](2026-07-31-release-candidate-gold-publication-plan.md) | One immutable RC passes clean-machine/security/license/store proofs; artifacts are reproducible; publication remains separately authorized. |
 
 The linked plan is the task-level contract for each row. A workstream may not gain a second active plan; amend the linked plan and this register together.

@@ -69,6 +69,34 @@ The execution-branch paragraph below records the earlier January checkpoint.
 
 **Execution branch:** `codex/january-1993-operations-20260914`, from clean integration checkpoint `9ac9f11da` through the Jajce local occupation step. All 20 April calibration commits, approved canon amendments and coverage tests remain ancestors. The January operations implementation is measured at clean `ac3e5e152`: January meets its authorized 700/712 contract and every checkpoint improves on the preceding `8db305596` source, while overall calibration still fails the remaining conditions below. Two later bounded commits extend it: `772a67808` (the bounded isolated-position predicate reads the live RBiH–HRHB alliance; the head-queue roster reservation is bounded by `available_from`) and `41a148bf9` (Operation Jackal gains `op:stolac:pjesivac_kula_2`). On that clean source the independent run **n403** measures **701/712** at t39 = 4 January 1993 with 11 mismatches; later checkpoints are NOT REACHED. Local `main` remains `9588876bc`; promotion and baseline refresh are held.
 
+## Superseded by the 2026-11-07 calibration sign-off
+
+Archived 2026-11-07 from the roadmap preamble when the owner's 2026-11-06 sign-off (712/711/712/710) closed calibration. Paragraph wording is preserved; relative links are rebased.
+
+**Current scope boundary — 2026-10-27:** Calibration is HOLD while the execution-consistency candidate is repaired, independently reviewed and tested. No new calibration run, baseline adoption or target change is authorized during this hold. The owner retained accepted-n101 fatigue coefficients and authorized reconciliation of the manual; engagement timing remains a separate correctness repair. See the [consistency contract](../../../40_reports/audits/20261027_EXECUTION_CONSISTENCY_CONTRACT.md). Latest completed pre-pause January result is701/712 versus the original707/712, with health14>3; it does not measure the unqualified consistency candidate. Superseded dated status paragraphs and source evidence remain in the [status history archive](../../../_old/plans/superseded/2026-10-27-master-roadmap-status-history.md). Older status prose below is historical context; this boundary controls current work.
+
+**Current R6 — Toljenak validated; October remains globally NO-GO.** Retained n92 captures
+Toljenak at t135 and holds through188. After the owner's April Toljenak-only repaint it scores
+**707/707/706/706**, with zero formerly correct losses; HVO outcomes and all16 anchors remain.
+Historical n91/n92 metadata stays untouched, with exactly one approved scoring-reference difference.
+The complete suite records14,884 pass/2 documentation failures/33 skip; both corrected files
+pass50/50 and unaffected coverage is reused. Raw failed receipts remain preserved. Six October
+mismatches and inherited gates remain; no baseline adoption. See the
+[calibration authority](../../../40_reports/CALIBRATION_MASTER.md) and
+[portable provenance](../../../provenance/october-calibration-20261019/README.md).
+
+**Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
+is not adopted. The owner corrected the April and October 1995 painted reference
+for `op:trnovo:gornja_presjenica` to RS. Replaying the unchanged run now scores
+**707/707/704/669**; the April numeric floor is met through a reference
+correction, while Vidimlije still disagrees with RS paint. The owner reopened
+the Donja Mahala anomaly: a generic VRS operation captures this HRHB pocket
+cell at t119 in the simulation. No combat or timing edit has been authorized or
+run for it. Farz P-A §6 remains a no-merge gate. The [calibration master](../../../40_reports/CALIBRATION_MASTER.md)
+records the trace and historical boundary. October calibration waits.
+
+**Current R8 — player capability before divergence.** The sole graph-corrected n102 qualifier completed188 weeks but is NO-GO at705/704/703/686 versus707/707/706/706, with 2/3/3/20 formerly-correct losses, 10/16 final anchors and one missed final RS sector floor. Its no-retry allowance is consumed; no suite, package or native successor followed. The reviewed scenario caller candidate now preserves a successful public war turn unless real scenario control flips applied, while retaining applied-flip and legacy peace repair. Focused3/3, existing-contract6/6, TypeScript and independent verification pass, with the missing temporary RED/GREEN outputs explicitly retained as an unwaived evidence gap. No baseline, pin, reference or target changes are adopted. A bounded39 prefix is the cheapest proposed score gate before any required188, but this status update grants no campaign authority; player/bot parity remains **UNMET**. [Proof](../../../../logs/r8-native-calibration-parity-20261024/scenario-postturn-parity-20261025/MANIFEST.json)
+
 ## Superseded derived command-board status
 
 **Current scope boundary — 2026-10-26:** Krug's bounded normal-combat proof is complete at source675b6c7; global calibration remains rejected701/712, six losses, health14>3. July is separated in the source contract but not authored: production timing and the Izbišno/Jabuka aggregate/reference mismatch reject a truthful capture implementation. The existing joint-triggered machinery is suitable; its independently reproduced secondary-corps casualty/AAR lookup bug is repaired, focused66/66/TypeScript0/review GO, with no new campaign after that source change. No threshold, map/reference, baseline,188 or native waiver. [Evidence](../../../40_reports/implemented/20261026_CORRECTED_ENGINE_CALIBRATION_PACKET.md#historical-correction--krug-roster-2026-10-26).
