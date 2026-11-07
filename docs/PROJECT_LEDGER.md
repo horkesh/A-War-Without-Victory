@@ -13778,3 +13778,11 @@ Owner asked to close what can be closed in R7 without the listening pass.
 - R7 now waits only on human listening/sensitivity and the roll-up gate. Roadmap R7 row and `plan_index.yml` updated.
 - Found in passing, not fixed here: the packaged app probes `127.0.0.1:3002-3005` for a Vite dev server on every launch (`resolveMapServerBaseUrl`, no `app.isPackaged` check).
 - No code, simulation, scenario or calibration change.
+
+## 2026-11-08 - R7 listening round 1 recorded; ambient beds retired; library cues to be remade (DOCS, AUDIO DECISION)
+
+The owner listened to the 20 shipped sounds on headphones (2026-11-07) through the R7 review sheet.
+- Owner notes: `operation_complete`, `event_notification`, `game_over` "Too high"; `turn_complete` "I don't hear anything"; `ambient_field`/`ambient_archive` "just constant noise... should rely more on background music"; sensitivity marked Needs work with no note.
+- Measured: the nine Kenney cues peak near 0 dB and play 15-22 dB louder in game, centred at 2-4.8 kHz, against about 800 Hz for the eight made for AWWV; `turn_complete` is among the quietest. Record: `logs/r7-english-readability/closeout-human-audio-listen.md`.
+- Owner decisions: ambient beds retired for 1.0 (stay off, out of listening scope); nine library cues remade first-party and level/tone-matched; `turn_complete` louder. Work order to Codex `CL-20261108-043`. `R7-AUDIO-HUMAN-ACCEPTANCE` stays open with its scope narrowed to the 17 interface cues.
+- No code, simulation, scenario or calibration change.
