@@ -2983,8 +2983,8 @@ describe('COHA reserve admission invariant', () => {
         expect(guard.elite_loan_state!.on_loan).toBe(true);
     });
 
-    it('leaves auto-join unchanged outside the receipt 155-156 COHA window', () => {
-        const { state, vlasic, guard } = makeVlasicReserveState(157);
+    it('leaves auto-join unchanged outside the receipt-155 COHA window', () => {
+        const { state, vlasic, guard } = makeVlasicReserveState(156);
         expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(false);
 
         expect(deployEliteLoan(
@@ -2993,7 +2993,7 @@ describe('COHA reserve admission invariant', () => {
             'arbih_3rd_corps',
             'offensive_support',
             1,
-            157,
+            156,
         )).toBe(true);
 
         expect(vlasic.participating_brigades).toContain('arbih_guards_brigade');

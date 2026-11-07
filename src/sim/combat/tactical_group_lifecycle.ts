@@ -141,7 +141,9 @@ export function formTacticalGroup(
     // earliest in that stable order — the deterministic tie-break. Army HQ ops bypass nothing;
     // instead they REDUCE the faction cap while running (Pyrrhic cost), forcing other ops quiet.
     {
-        const capCheck = checkConcurrencyCaps(mil, anchor.faction, anchor.corps_id, params.current_turn);
+        const capCheck = checkConcurrencyCaps(
+            mil, anchor.faction, anchor.corps_id, params.current_turn, params.army_hq_op_id,
+        );
         if (capCheck != null) return { tg_id: null, rejection_reason: capCheck };
     }
 
@@ -541,6 +543,7 @@ function checkConcurrencyCaps(
     faction: string,
     corpsId: FormationId,
     currentTurn: number,
+    ownArmyHqOpId?: ArmyHqOpId,
 ): string | null {
     const tgs = mil.tactical_groups ?? {};
     const formations = mil.formations ?? {};
@@ -557,7 +560,7 @@ function checkConcurrencyCaps(
     if (corpsCount >= MAX_TGS_PER_CORPS) return 'corps_tg_cap_reached';
 
     let factionCap = MAX_CONCURRENT_TGS_PER_FACTION;
-    if (ENABLE_TG_ARMY_HQ_OPS && factionHasActiveArmyHqOp(mil, faction, currentTurn)) {
+    if (ENABLE_TG_ARMY_HQ_OPS && factionHasActiveArmyHqOp(mil, faction, currentTurn, ownArmyHqOpId)) {
         factionCap = Math.max(0, factionCap - ARMY_HQ_TG_CAP_REDUCTION);
     }
     if (factionCount >= factionCap) return 'faction_tg_cap_reached';
@@ -565,16 +568,23 @@ function checkConcurrencyCaps(
     return null;
 }
 
-/** True when any same-faction Army-HQ operation owns the live cap reduction. */
+/**
+ * True when any same-faction Army-HQ operation OTHER than `exceptId` owns the live cap
+ * reduction. The reduction quiets other ops during the major effort; it must not count against
+ * the Army-HQ op's own TG, or the op blocks itself whenever two other faction TGs are live
+ * (Farz 95, 2026-11-07: two Sana TGs, no Farz TG, no army_hq_telemetry on its AAR).
+ */
 function factionHasActiveArmyHqOp(
     mil: NonNullable<GameState['military']>,
     faction: string,
     currentTurn: number,
+    exceptId?: ArmyHqOpId,
 ): boolean {
     const ops = mil.army_hq_operations ?? {};
     for (const id of Object.keys(ops).sort(strictCompare)) {
         const op = ops[id];
         if (op.faction_id !== faction) continue;
+        if (exceptId != null && id === exceptId) continue;
         if (op.status === 'planning' || op.status === 'executing') return true;
         if (op.status !== 'recovering' && op.status !== 'completed') continue;
         const recoveryStart = op.recovery_started_turn;
