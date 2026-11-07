@@ -45,7 +45,7 @@ Known UI defects visible in the published media: `docs/40_reports/working/202609
 
 ## Asset Placeholders
 
-- logo/key art: wordmark + broken-laurel mark in use on the showcase; final key art pending.
+- logo/key art: the convergence mark (three pins, one hole) with the title wordmark, masters in `docs/50_launch/marketing/logo/convergence/`; final key art pending.
 - trailer: not claimed (the opening and tour clips are raw capture, not a cut trailer).
 - audio sample: not claimed until soundscape integration has real assets.
 

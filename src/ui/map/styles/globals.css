@@ -333,6 +333,8 @@ body {
   padding-left: clamp(1rem, 2.2vw, 2rem);
 }
 
+.opening-splash__mark { display: block; width: clamp(3rem, 5vw, 4.5rem); height: auto; margin: 0 0 1rem; color: #e7e3d8; }
+
 .opening-splash__eyebrow,
 .opening-splash__version,
 .command-eyebrow,
@@ -457,6 +459,8 @@ body {
   padding: 1.25rem 0 1rem;
 }
 
+.main-menu-opening__identity { display: flex; align-items: center; gap: 1.1rem; }
+.main-menu-opening__mark { flex: none; width: clamp(2.8rem, 4vw, 3.5rem); height: auto; color: #e1e4dd; }
 .main-menu-opening__identity h1 { margin: 0.18rem 0 0; font-size: clamp(1.3rem, 2.2vw, 2rem); font-weight: 600; letter-spacing: 0.015em; text-transform: uppercase; }
 .main-menu-opening__identity p { margin: 0.22rem 0 0; color: #a1aaa1; font-family: var(--font-data); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; }
 .main-menu-opening__presents { color: #8f9890; }
