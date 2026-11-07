@@ -27,6 +27,10 @@ import { strictCompare } from '../../state/validateGameState.js';
 // and the renderer bundles scoring.ts through GameStateAdapter.
 import osidAreasJson from '../../../data/derived/operational/osid_areas.json';
 import settlementShares from '../../../data/derived/peace/plan_settlement_shares.json';
+import contactGraphJson from '../../../data/derived/operational/operational_contact_graph.json';
+import { parseEdges } from '../../map/settlements_parse.js';
+import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
+import { enforceSettlementContiguity } from './settlement_contiguity.js';
 
 const OSID_AREAS: { total_area_km2: number; areas: Record<string, number> } = osidAreasJson;
 function getOsidAreas(): { total: number; areas: Record<string, number> } {
@@ -191,10 +195,28 @@ export function computeSettlementControllers(
     for (const [o, f] of Object.entries(overrides).sort(([a], [b]) => strictCompare(a, b))) {
         if (o in controllers) controllers[o] = f;
     }
+    // Owner, 2026-11-07: "There should be no isolated pockets on final Dayton map." The
+    // earlier plans drew enclaves on purpose (Vance–Owen provinces, the Contact Group's
+    // eastern enclaves), so only Dayton is made contiguous.
+    const final = planId === 'dayton'
+        ? enforceSettlementContiguity({
+            controllers,
+            adjacency: getSettlementAdjacency(),
+            areas,
+            isProtectedExclave: (side, cells) => side === 'FED' && cells.every((o) => POSAVINA_CANTON.has(munOf(o))),
+        }).controllers
+        : controllers;
     const sorted: Record<string, FactionId> = {};
-    for (const o of Object.keys(controllers).sort(strictCompare)) sorted[o] = controllers[o]!;
+    for (const o of Object.keys(final).sort(strictCompare)) sorted[o] = final[o]!;
     return { controllers: sorted, special: special.sort(strictCompare) };
 }
+
+/**
+ * Municipalities of the Federation's Posavina canton (Orašje, Domaljevac-Šamac from
+ * Bosanski Šamac, Odžak). They border Croatia and were held at Dayton without a land link
+ * to the rest of the Federation, so the contiguity pass keeps them.
+ */
+const POSAVINA_CANTON = new Set(['orasje', 'bosanski_samac', 'odzak']);
 
 /** Area-weighted share per faction, 0..100, over the given controller map. */
 export function settlementTerritoryPct(controllers: Record<string, FactionId>): Record<string, number> {
@@ -257,4 +279,11 @@ export function capGradeBySettlement(grade: string, settlement: PeaceSettlement 
     const mi = GRADE_ORDER.indexOf(max);
     if (gi === -1 || mi === -1) return grade;
     return gi >= mi ? grade : max;
+}
+
+let adjacencyCache: Map<string, string[]> | null = null;
+/** OSID contact adjacency (operational_contact_graph.json), shared by the settlement modules. */
+export function getSettlementAdjacency(): Map<string, string[]> {
+    if (!adjacencyCache) adjacencyCache = buildOsidAdjacency(parseEdges(contactGraphJson));
+    return adjacencyCache;
 }

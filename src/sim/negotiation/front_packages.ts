@@ -29,14 +29,11 @@
 import type { FactionId, GameState } from '../../state/game_state.js';
 import type { DaytonProposal, TerritorialPackage } from '../../state/negotiation_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { computeSettlementControllers } from './peace_settlement.js';
+import { computeSettlementControllers, getSettlementAdjacency } from './peace_settlement.js';
 import { TERRITORIAL_PACKAGES } from './territorial_packages.js';
 import { resolveOsidsForKeywords } from './package_area_resolver.js';
 import osidAreasJson from '../../../data/derived/operational/osid_areas.json';
 import munNamesJson from '../../../data/derived/mun1990_names.json';
-import contactGraphJson from '../../../data/derived/operational/operational_contact_graph.json';
-import { parseEdges } from '../../map/settlements_parse.js';
-import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
 
 /** Id prefix of a captured-ground package: `front:<municipality>:<claimant>:<assignee>`. */
 export const FRONT_PACKAGE_PREFIX = 'front:';
@@ -83,11 +80,6 @@ interface FrontGroup {
     km2: number;
 }
 
-let adjacencyCache: Map<string, string[]> | null = null;
-function getAdjacency(): Map<string, string[]> {
-    if (!adjacencyCache) adjacencyCache = buildOsidAdjacency(parseEdges(contactGraphJson));
-    return adjacencyCache;
-}
 
 let fixedPackageOsids: Set<string> | null = null;
 function osidsGovernedByFixedPackages(): Set<string> {
@@ -168,7 +160,7 @@ function attachEncircledPockets(
     fixed: Set<string>,
     groups: Map<string, FrontGroup>,
 ): void {
-    const adjacency = getAdjacency();
+    const adjacency = getSettlementAdjacency();
     const packageOf = new Map<string, string>();
     for (const id of [...groups.keys()].sort(strictCompare)) {
         for (const o of groups.get(id)!.osids) packageOf.set(o, id);
