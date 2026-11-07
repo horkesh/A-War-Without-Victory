@@ -13814,3 +13814,11 @@ Owner: "Any capture territories become negotiable pieces in Dayton negotiations.
 - **Measured, RBiH declines at 188 (v5, live harness)**: forced table signed on the map → settled RBiH 31.96 / RS 48.46 / HRHB 19.58. Demanding its holdings → 10 of 10 accepted (RS by patron override at 78.5; HRHB by acceptance), 22 cells override the map → RBiH 34.25 / RS 46.73 / HRHB 19.02.
 - **Verification**: typecheck clean; `test:baselines` "all scenarios match" (188w); full suite green except `agent_skill_import` (7) and `ongoing_mobilization` (1), which fail identically at 76c6174.
 - **Open for owner**: Belgrade's ≥ 75 override makes every demand against RS succeed late in the war.
+
+## 2026-11-07 - Encircled pockets travel with captured ground; Kozarac axis ends at Rasavci (NEGOTIATION, OPERATIONS)
+
+Owner (Rasavci, an RS village left inside RBiH ground on the settled map): "Both".
+- **Settlement** (`front_packages.ts`): a cluster of at most 6 cells one party holds, entirely surrounded by another party's cells, joins the surrounding party's adjacent captured-ground package (priced by area; changes hands only if that package is won). Excluded: pockets the Dayton map already gives the surrounder, pockets in a fixed package or already holding captured ground, RBiH–HRHB pockets. Cause: rear-pocket consolidation was retired from the pipeline on 2026-09-02 (control changes only by attack), so a bypassed village stays with its holder, and the claimant could not demand ground it never held.
+- **Operation** (`sana_continuation_95`): the Kozarac axis is Marićka → Kozarac → Rasavci.
+- **Measured, RBiH declines and demands its holdings (v6)**: Rasavci falls to the 5th Corps at t195; settled RBiH 34.41 / RS 46.57 / HRHB 19.02 (23 cells override the map). `test:baselines` "all scenarios match"; typecheck clean; 74 targeted tests pass.
+- **Remaining small exclaves on that settled map**: Posavina (Orašje, Odžak, Tišina) matches the real Federation Posavina exclave. Not historical: RS cells in Bosanska Krupa and Bosanski Petrovac, cut off because RBiH kept the ground around them. Velenići/Zavait (Foča), Prača (Pale) and Kneževo (Skender Vakuf) show as Federation islands, which needs a check of the Dayton map's connectivity at cell resolution. Owner decision pending.
