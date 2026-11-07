@@ -26,6 +26,11 @@ export interface PatronEvent {
     description: string;
     /** Effects applied to each faction's patron relationship. */
     effects: PatronEventEffect[];
+    /**
+     * Optional precondition. When set, the event fires at the first war week ≥ trigger_week
+     * at which it holds, instead of exactly at trigger_week.
+     */
+    requires?: (state: GameState) => boolean;
 }
 
 export interface PatronEventEffect {
@@ -71,6 +76,12 @@ export const CONTACT_GROUP_REJECTION: PatronEvent = {
 export const SREBRENICA_AFTERMATH: PatronEvent = {
     id: 'srebrenica_aftermath',
     trigger_week: 170,
+    // RD run review (2026-11-07): only if Srebrenica actually fell (the fall event fired, or
+    // RS holds the town); fires at the first week from 170 when that is true. In the
+    // historical campaign the town falls at week 162, so the event still fires at week 170.
+    requires: (state) =>
+        state.military.event_last_fired_turn?.srebrenica_falls_1995 !== undefined
+        || state.political?.political_controllers?.['op:srebrenica:srebrenica_2'] === 'RS',
     description: 'Srebrenica falls. International outrage peaks. All patrons increase pressure toward peace.',
     effects: [
         {
@@ -147,7 +158,11 @@ export function evaluatePatronEvents(state: GameState): void {
     const warWeek = state.meta.turn - warStartTurn;
 
     for (const event of ALL_PATRON_EVENTS) {
-        if (warWeek !== event.trigger_week) continue;
+        if (event.requires) {
+            if (warWeek < event.trigger_week || !event.requires(state)) continue;
+        } else if (warWeek !== event.trigger_week) {
+            continue;
+        }
 
         // Check if already fired (look in any affected faction's events)
         const alreadyFired = event.effects.some(eff => {
