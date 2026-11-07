@@ -1365,6 +1365,7 @@
   },
   {
     "id": "contact_group_plan_1994",
+    "image": "event_diplomatic_negotiation.webp",
     "source_tier": "agreement_text",
     "title": "Contact Group Plan Presented",
     "narrative": "The Contact Group — the US, Russia, UK, France, and Germany — presents a take-it-or-leave-it peace plan offering the Federation 51% and Republika Srpska 49% of Bosnian territory. The Bosnian government and Croats accept under pressure, but the Bosnian Serb leadership rejects the plan, further isolating Pale even from its Belgrade patron.",
@@ -1459,6 +1460,7 @@
   },
   {
     "id": "rs_contact_group_response_1994",
+    "image": "event_diplomatic_negotiation.webp",
     "title": "Contact Group 51/49 — Pale's Response",
     "narrative": "The Contact Group — the US, UK, France, Germany, and Russia — has presented the 51/49 territorial framework to all three Bosnian factions in early July 1994. The map cedes the corridor narrowly, divides the Drina valley, and leaves Sarajevo as a unified Federation capital. Milosevic has signaled Belgrade's willingness to accept; the Pale Assembly is convening at Bijeljina to record its posture. Your political files require a written response: reject the map and accept the patron rupture that follows, accept the framework and absorb the cost inside the Six Goals platform, or negotiate amendments to the territorial terms.",
     "category": "diplomatic",
@@ -1676,6 +1678,7 @@
   },
   {
     "id": "rbih_contact_group_response_1994",
+    "image": "event_diplomatic_negotiation.webp",
     "title": "Contact Group 51/49 — Sarajevo's Response",
     "narrative": "The Contact Group — the US, UK, France, Germany, and Russia — has presented the 51/49 territorial framework to all three Bosnian factions in early July 1994. The map secures Federation territory at 51 percent and recognizes RS at 49 percent, with Sarajevo as a unified capital and provision for the eastern enclaves under safe-area regime. The Presidency Assembly is convening to record its posture; US shuttle diplomacy (Christopher, Galbraith) presses for acceptance, with reservations on the eastern enclaves. Your political files require a written response: accept the framework under US pressure with reservations on the enclaves, reject the map and preserve the negotiating frame for full liberation, or sign on with public reservations to keep the diplomatic track open without binding the Assembly.",
     "category": "diplomatic",
@@ -1889,6 +1892,7 @@
   },
   {
     "id": "hrhb_contact_group_response_1994",
+    "image": "event_diplomatic_negotiation.webp",
     "title": "Contact Group 51/49 — Mostar's Response",
     "narrative": "The Contact Group — the US, UK, France, Germany, and Russia — has presented the 51/49 territorial framework to all three Bosnian factions in early July 1994. The map ratifies the Federation entity at 51 percent of Bosnian territory, with Croat constitutive-nation status preserved inside the Federation under the Washington Agreement of March 1994. Zagreb has signaled Tudjman's willingness to direct HZ HB acceptance. The HZ HB Presidency must record its posture: accept the framework as a natural follow-on to the Washington Agreement, reject the map and break with the Federation alliance, or condition acceptance on territorial amendments in central Bosnia.",
     "category": "diplomatic",
