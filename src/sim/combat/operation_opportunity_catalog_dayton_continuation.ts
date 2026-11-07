@@ -139,7 +139,8 @@ function evaluators(dateWindow: AxisPredicate): OperationOpportunityDef['evaluat
 // Takes over the live Operation Sana brigades (supersedes_live_operation). Oštra Luka first
 // (Sana stalls there on objective sequencing), staged on the 506th's cell; Prijedor town is
 // directly adjacent to Ljubija. Kozarac is reached through Marićka, adjacent to the same
-// staging cell, so the two Prijedor axes share no objective. The 501st stays at Krasulje.
+// staging cell, and the axis ends at Rasavci, the village the two axes enclose; the two
+// Prijedor axes share no objective. The 501st stays at Krasulje.
 const SANA_CONTINUATION: OperationOpportunityDef = {
     opportunity_id: 'sana_continuation_95',
     name: 'Sana Continuation: Prijedor and Novi Grad',
@@ -166,7 +167,10 @@ const SANA_CONTINUATION: OperationOpportunityDef = {
             name: 'Kozarac',
             corps: 'arbih_5th_corps',
             brigades: ['arbih_510th_bosnian_liberation', 'arbih_502nd_vitezka_mountain'],
-            objectives: ['op:prijedor:maricka_2', 'op:prijedor:kozarac_2'],
+            // Rasavci closes the axis (owner, 2026-11-07): once Kozarac, Ljubija, Marićka,
+            // Prijedor town and Oštra Luka fall it is an encircled RS village, and without
+            // rear-pocket consolidation only an attack can take it. Adjacent to kozarac_2.
+            objectives: ['op:prijedor:maricka_2', 'op:prijedor:kozarac_2', 'op:prijedor:rasavci_2'],
             staging_osid: 'op:sanski_most:ilidza_2',
             preserve_objective_sequence: true,
         },

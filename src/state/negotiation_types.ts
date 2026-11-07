@@ -240,6 +240,8 @@ export interface TerritorialPackage {
     area_pct?: number;
     /** Municipality (mun1990 id) the package lies in. */
     municipality?: string;
+    /** Encircled cells the claimant's ground surrounds, carried with the package (also in osids). */
+    encircled_osids?: string[];
 }
 
 /** An institutional negotiation point at Dayton. */

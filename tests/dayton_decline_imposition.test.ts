@@ -383,6 +383,47 @@ describe('captured ground is negotiable at Dayton (owner, 2026-11-07)', () => {
     });
 });
 
+describe('encircled pockets travel with the surrounding captured ground (owner, 2026-11-07: Rasavci)', () => {
+    const RASAVCI = 'op:prijedor:rasavci_2';
+    const RING = ['op:prijedor:kozarac_2', 'op:prijedor:ljubija_2', 'op:prijedor:maricka_2', 'op:prijedor:prijedor_2', 'op:sanski_most:ostra_luka'];
+    const ID = 'front:prijedor:RBiH:RS';
+    const encircled = (pocketHolder: 'RS' | 'HRHB' = 'RS', ringOverride: Record<string, string> = {}) => {
+        const state = makeState('RBiH');
+        const controllers: Record<string, string> = { [RASAVCI]: pocketHolder };
+        for (const o of RING) controllers[o] = 'RBiH';
+        state.political.political_controllers = { ...controllers, ...ringOverride } as never;
+        return state;
+    };
+    const proposal = (demands: string[] = []) => ({ territorial_demands: demands, territorial_concessions: [], institutional_choices: {} });
+
+    it('an RS village RBiH ground surrounds joins the Prijedor package and its price', () => {
+        const pkg = buildFrontPackages(encircled()).find((p) => p.id === ID)!;
+        expect(pkg.encircled_osids).toEqual([RASAVCI]);
+        expect(pkg.osids).toContain(RASAVCI);
+        const noPocket = encircled();
+        delete (noPocket.political.political_controllers as Record<string, string>)[RASAVCI];
+        const without = buildFrontPackages(noPocket).find((p) => p.id === ID)!;
+        expect(pkg.area_pct).toBeGreaterThan(without.area_pct!);
+        expect(pkg.capital_cost_to_demand).toBeGreaterThan(without.capital_cost_to_demand);
+    });
+
+    it('it changes hands only if the package is won', () => {
+        const unraised = encircled();
+        resolveDaytonNegotiation(unraised, proposal());
+        expect(settlementControllersFor(unraised)?.[RASAVCI]).toBe('RS');
+        const won = encircled();
+        resolveDaytonNegotiation(won, proposal([ID]));
+        expect(settlementControllersFor(won)?.[RASAVCI]).toBe('RBiH');
+    });
+
+    it('a pocket with an open side, or between the Federation parties, is left alone', () => {
+        const open = buildFrontPackages(encircled('RS', { 'op:prijedor:ljubija_2': 'RS' })).find((p) => p.id === ID);
+        expect(open?.encircled_osids).toBeUndefined();
+        const federation = buildFrontPackages(encircled('HRHB')).find((p) => p.id === ID);
+        expect(federation?.encircled_osids).toBeUndefined();
+    });
+});
+
 describe('Dayton continuation operations (owner, 2026-11-07: "Resume halted 1995 pushes")', () => {
     const ids = DAYTON_CONTINUATION_OPPORTUNITIES.map((d) => d.opportunity_id).sort();
 
@@ -438,7 +479,7 @@ describe('Dayton continuation operations (owner, 2026-11-07: "Resume halted 1995
         const sana = byIdC('sana_continuation_95');
         const axis = (id: string) => sana.axes.find((a) => a.axis_id === id)!;
         expect(axis('ljubija').objectives).toEqual(['op:sanski_most:ostra_luka', 'op:prijedor:ljubija_2', 'op:prijedor:prijedor_2']);
-        expect(axis('kozarac').objectives).toEqual(['op:prijedor:maricka_2', 'op:prijedor:kozarac_2']);
+        expect(axis('kozarac').objectives).toEqual(['op:prijedor:maricka_2', 'op:prijedor:kozarac_2', 'op:prijedor:rasavci_2']);
         expect(sana.axes.flatMap((a) => a.brigades)).not.toContain('arbih_501st_slavna_mountain'); // holds Krasulje
     });
 
