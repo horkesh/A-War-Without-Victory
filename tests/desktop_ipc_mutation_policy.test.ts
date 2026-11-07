@@ -266,6 +266,29 @@ describe('paused-turn controller — the main process side of the pause', () => 
     expect(statuses.at(-1)).toBeNull();
   });
 
+  it('re-announces the pause after each intermediate answer, listing only what is still open', async () => {
+    // Codex #540: the embedded Warroom route holds state updates while the advanceTurn invoke
+    // is in flight and only releases them on a status event. With no status after the first
+    // answer, App reopened the already-answered decision and its next submission was refused.
+    const { controller, sentStates, statuses } = harness();
+    const state = working();
+    const turn = controller.pause(state, [{ event_id: 'a' }, { event_id: 'b' }]);
+
+    controller.respond('a', 'x');
+    expect(statuses).toEqual([
+      { status: 'paused', turn: 7, eventIds: ['a', 'b'] },
+      { status: 'paused', turn: 7, eventIds: ['b'] },
+    ]);
+    // The state goes out before the status that releases it.
+    expect(sentStates).toHaveLength(2);
+    expect(JSON.parse(sentStates[1]!).military.pending_event_decisions.map((d: { event_id: string }) => d.event_id))
+      .toEqual(['older', 'b']);
+
+    controller.respond('b', 'y');
+    await turn;
+    expect(statuses.slice(2)).toEqual([{ status: 'resumed', turn: 7 }]);
+  });
+
   it('lets the player continue without answering; the decisions stay pending', async () => {
     const { controller, statuses } = harness();
     const state = working();

@@ -375,6 +375,7 @@
   },
   {
     "id": "csq_northwest_rs_consolidation_1995",
+    "image": "event_highland_offensive.webp",
     "title": "Northwest Front Freed",
     "narrative": "With Bihac eliminated as an open wound, the VRS 2nd Krajina Corps redeploys. Fifteen to twenty brigades that had been tied down for two years walk out of the Bihac perimeter and onto trucks for central Bosnia. The strategic picture shifts faster than any single operation could ever shift it. The RS political leadership smells the end of the war — on its terms.",
     "category": "military",
@@ -648,6 +649,7 @@
   },
   {
     "id": "csq_early_nato_threshold_1994",
+    "image": "event_nato_air_power.webp",
     "title": "NATO Will Not Wait for Markale",
     "narrative": "Cumulative ICTY evidence and the documented shelling of civilian infrastructure drag the NATO threshold forward by more than a year. Allied Force commanders receive strike authorisations that in the historical record waited until August 1995. The VRS loses the freedom of movement it had relied on through 1994; front-line commanders begin to plan their operations around coverage windows of the no-fly zone rather than around the enemy. The war's endgame window has closed on Republika Srpska earlier than Mladic's staff had projected.",
     "category": "military",
@@ -1269,6 +1271,7 @@
   },
   {
     "id": "csq_territorial_friction_1993",
+    "image": "event_central_bosnia_front.webp",
     "title": "Who Administers Central Bosnia",
     "narrative": "The alliance does not end; the arguments begin. In Travnik, Zenica, Bugojno, Vitez, Gornji Vakuf — the towns that make up central Bosnia — HVO commanders and ARBiH commanders coexist in practice and negotiate in committee. Committees sit longer. By summer the question of which civilian administration signs requisitions, which police collect taxes, which schools open in which language, and whose flag flies over which building has produced a paper trail that the soldiers quietly curse. None of it is fighting. All of it is tension the alliance has to absorb.",
     "category": "political",
@@ -1389,6 +1392,7 @@
   },
   {
     "id": "csq_joint_offensive_1994",
+    "image": "event_highland_offensive.webp",
     "title": "The Combined Spring",
     "narrative": "With the federation structure in place and Zagreb no longer attempting to fight a parallel war, HVO and ARBiH commands coordinate the offensive planning of spring 1994 as a single operational matter. Combined staffs assemble at Zenica and Mostar; supply and evacuation are run from a shared rear. The operations that the historical record fragmented across competing axes — the Kupres-Grahovo direction, the central Bosnia corridor, the pressure on the Posavina bulge — are now pursued together. The VRS's intelligence cells, which had relied on the Croat-Bosniak rupture to predict where force would land, lose that predictor.",
     "category": "military",
@@ -1803,6 +1807,7 @@
   },
   {
     "id": "csq_force_quality_inversion",
+    "image": "event_staff_planning_room.webp",
     "title": "The Inverted Roster",
     "narrative": "The officer rolls tell the story the front line had begun to suspect. The veteran cadre on the historically dominant side has thinned past the inflection point — not from any single battle, but from accumulation: postings refused, replacements thinned, the senior class retiring into silence. On the other side, new commanders cycle through hard schools and come out the other end. The predictor's confidence in the old assumptions takes a small but real haircut.",
     "category": "military",
@@ -1850,6 +1855,7 @@
   },
   {
     "id": "csq_alliance_drift_silent_w20",
+    "image": "event_central_bosnia_front.webp",
     "title": "The Silent Drift",
     "narrative": "No declaration, no incident — the alliance simply thins. Joint patrols stop coordinating. Liaison officers are reassigned without replacements. The press communiqués grow shorter. By any measurable count the partnership still exists; in the practice of it the trust has gone elsewhere. Capitals on both sides note the change and adjust their expectations downward.",
     "category": "diplomatic",
@@ -1910,6 +1916,7 @@
   },
   {
     "id": "csq_joint_command_collapse",
+    "image": "event_central_bosnia_front.webp",
     "title": "The Joint Command Comes Apart",
     "narrative": "What had been signed on paper at Sarajevo and reaffirmed in Mostar is now, at the working level, a fiction. Shared objectives are dropped from operational orders. Liaison teams pack their files. The supply ledgers — once cross-credited between corps — are returned to single accounts. The collapse is administrative before it is military, but the military follows.",
     "category": "diplomatic",
@@ -2723,6 +2730,7 @@
   },
   {
     "id": "csq_demobilization_pressure_wave",
+    "image": "event_recruitment_office_empty.webp",
     "title": "Demobilization Pressure Wave",
     "narrative": "After a quiet quarter the families return to the streets and the patron capitals add their voice. The mobilization order is not formally rescinded; it is, in practice, walked back. Recruitment offices reduce quotas. Aggressive doctrine is shelved in favor of holding. The war does not end; it slows.",
     "category": "political",
@@ -2785,6 +2793,7 @@
   },
   {
     "id": "csq_grain_corridor_reopened",
+    "image": "event_arms_pipeline_night.webp",
     "title": "Grain Corridor Reopened",
     "narrative": "A long-disused supply lane reopens — quietly, through municipal-level arrangements that the formal war has not abolished. Convoys move under flag-of-grain, and the receiving towns count the difference in markets that begin to function again. The international observers note the change with cautious approval.",
     "category": "economic",
@@ -2911,6 +2920,7 @@
   },
   {
     "id": "csq_weapons_embargo_partial_lift",
+    "image": "event_arms_pipeline_night.webp",
     "title": "Weapons Embargo Partially Lifted",
     "narrative": "Pressure from Washington and the Contact Group cracks the UN arms embargo. Channels that had been informal — Iranian flights through Croatia, Saudi cash, the Pakistani pipeline — are tacitly normalized. Trainers arrive. Equipment that was previously smuggled now arrives by manifest. The embargo on paper survives; the embargo in fact does not.",
     "category": "diplomatic",
@@ -3223,6 +3233,7 @@
   },
   {
     "id": "csq_patron_equipment_delivery_confirmed",
+    "image": "event_arms_pipeline_night.webp",
     "title": "The Delivery Manifest",
     "narrative": "The shipment that had been delayed in customs and renamed in cables finally arrives. Crates marked humanitarian unload as artillery; rifles arrive in numbers the embargo paperwork does not acknowledge. The patron's investment in the war becomes, briefly, a measurable thing. Combat units rotate through the depot and emerge measurably better-armed.",
     "category": "diplomatic",
@@ -3349,6 +3360,7 @@
   },
   {
     "id": "csq_black_market_supply_route",
+    "image": "event_arms_pipeline_night.webp",
     "title": "The Quiet Channel",
     "narrative": "The official supply lanes are constrained; the unofficial ones are not. A municipal-level network — drivers, brokers, customs officers willing to look elsewhere — moves what the formal logistics cannot. The general supply reserve climbs noticeably for a quarter. The cost is a small but measurable cohesion drain: the political truth of the war is that the rear is becoming a market, not a state.",
     "category": "economic",
@@ -3786,6 +3798,7 @@
   },
   {
     "id": "csq_captured_equipment_windfall",
+    "image": "event_jna_barracks_seized.webp",
     "title": "The Captured Stockpile",
     "narrative": "A successful operation closes around a depot that had been counted in the other faction's order of battle for two years. Crates marked in foreign cyrillic, vehicles still in factory paint, ammunition in calibers the receiving side had been rationing — all of it inventoried by the captors and rotated out within the month. The combat-power uplift is short, but it is real. The losing side's manifests register the gap.",
     "category": "military",
@@ -3850,6 +3863,7 @@
   },
   {
     "id": "csq_post_dayton_arms_normalization",
+    "image": "event_arms_pipeline_night.webp",
     "title": "The Manifests Run Clean",
     "narrative": "After the agreement the arms paperwork that had been laundered through humanitarian cover or quietly looked-past begins running through proper customs. The headline numbers do not change much; the reliability does. Spare parts arrive on schedule. Calibres that had been rationed appear in adequate quantities. The change is bureaucratic, not heroic, but the depots register it and the front follows by the second quarter.",
     "category": "diplomatic",
@@ -4110,6 +4124,7 @@
   },
   {
     "id": "csq_doctrine_reform_initiated",
+    "image": "event_staff_planning_room.webp",
     "title": "The Doctrine Reform",
     "narrative": "The corps that had been improvising for two years initiates a formal doctrine review. Manuals are translated, training cycles formalized, NCO certification standards drafted. The reform is partial — the war has not stopped — but the institution upgrades visibly. Recruitment offices report an uplift in volunteer quality; the existing ranks register the improvement in cohesion within a quarter.",
     "category": "command",
@@ -4179,6 +4194,7 @@
   },
   {
     "id": "csq_corps_reorganization_attempted",
+    "image": "event_staff_planning_room.webp",
     "title": "The Corps Is Re-Drawn",
     "narrative": "Corps boundaries that had been improvised in 1992 are formally re-drawn. Brigades are renumbered; subordination chains shifted; sectors re-allocated. The reorganization is doctrinally correct and operationally disruptive. For one quarter the cohesion column thins as units adjust to new commanders. For the quarter after, the recruitment column ticks up as the new structure absorbs replacements more cleanly.",
     "category": "command",
@@ -4251,6 +4267,7 @@
   },
   {
     "id": "csq_war_exhaustion_high_streak",
+    "image": "event_recruitment_office_empty.webp",
     "title": "The Year That Would Not End",
     "narrative": "The exhaustion column has been pinned at the upper end of its scale for two consecutive quarters. Recruitment offices report an attenuated stream — the cohort that volunteered in the first wave is gone, the cohort that was conscripted in the second has rotated through the casualty lists, and the third cohort understands what it is being asked to do. Quotas are cut. The general staff acknowledges the new constraint. The war continues; the manpower budget contracts.",
     "category": "humanitarian",
@@ -4461,6 +4478,7 @@
   },
   {
     "id": "csq_mobilization_demographics_strained",
+    "image": "event_recruitment_office_empty.webp",
     "title": "The Lists Run Thin",
     "narrative": "The conscription officers no longer ask the question they had been asking for two years — when can the cohort be mobilized? They ask which cohort is left. The age-class registers are running thin past the standard pool: too young, too old, too sick, already mobilized, already lost. The recruitment offices push the boundaries; the volunteers slow; the press does not lead with the numbers. The political class, watching the demographic data, registers what every army watching its own pool eventually registers.",
     "category": "humanitarian",
@@ -4683,6 +4701,7 @@
   },
   {
     "id": "csq_war_exhaustion_high_streak_RS",
+    "image": "event_recruitment_office_empty.webp",
     "title": "The Pale Quotas",
     "narrative": "The recruitment officers in the eastern theatre stop posting the standard quota numbers and start posting a smaller, quieter set. The first wave volunteered in 1992 with the parishes intact; the second was conscripted with the parishes already attriting; the third looks at the casualty lists and at the front lines and at the political class's communiqués and registers what the political class will not say in public. The general staff acknowledges the new constraint. The war continues; the manpower budget contracts.",
     "category": "humanitarian",
@@ -4890,6 +4909,7 @@
   },
   {
     "id": "csq_post_cease_fire_recruitment_decline",
+    "image": "event_recruitment_office_empty.webp",
     "title": "The Demobilization Drift",
     "narrative": "A general cease-fire — formal or de facto — holds for long enough that the political class begins to demobilize the rhetoric. The newspapers shift their lead. The recruitment offices, which had been running on patriotic urgency, find the urgency no longer compounds. Volunteers slow; conscription quotas are quietly relaxed. The front lines remain active; the manpower behind them does not refill at the same rate. The cease-fire is not peace, but the recruitment narrative does not know how to call the war by both names at once.",
     "category": "political",
@@ -4951,6 +4971,7 @@
   },
   {
     "id": "csq_third_party_arms_channel",
+    "image": "event_arms_pipeline_night.webp",
     "title": "The Other Pipeline",
     "narrative": "The principal patron's pipeline has been registering pressure for two quarters. A third-party channel — never quite acknowledged, never quite formalized — begins running parallel. The aircraft land at night; the manifests describe humanitarian cargo; the depots register a different inventory the next morning. The combat units that had been substituting around the principal-pipeline gaps find the substitutes more reliable. The combat-power column registers the shift. The mediator capitals know about the channel and pretend not to.",
     "category": "diplomatic",
@@ -5014,6 +5035,7 @@
   },
   {
     "id": "csq_arbih_resistance_revival",
+    "image": "event_enclave_valley_town.webp",
     "title": "The Enclave Holds",
     "narrative": "The enclave has been losing ground for three quarters. The territorial trend line is unmistakable; the casualty lists are long; the political class has begun preparing the public for the worst. Then the line stops moving. Not because the attacker stopped — because the defender stopped retreating. The recruitment offices in the enclave register a surge that the political mobilizers had not engineered. The morale column ticks up first, then the recruitment column. The institutional explanation is existential pressure; the front-line explanation is shorter.",
     "category": "military",
@@ -5150,6 +5172,7 @@
   },
   {
     "id": "csq_post_dayton_train_and_equip_RBiH",
+    "image": "event_arms_pipeline_night.webp",
     "title": "Train and Equip",
     "narrative": "The post-Dayton settlement does not arrive without a back end. The train-and-equip program comes wrapped in conditions, accountants, and instructors. The crates that show up at the depots are not the embargo-era catch-as-catch-can; they are stamped, manifested, and matched to schedules. The brigades cycling through the new training cadre return to their formations recognizable but different. The combat-power column registers the change two quarters in.",
     "category": "diplomatic",
@@ -5217,6 +5240,7 @@
   },
   {
     "id": "csq_arbih_doctrine_modernization",
+    "image": "event_staff_planning_room.webp",
     "title": "Officer Quality Inflection",
     "narrative": "The officer rolls have absorbed two years of attrition and replacement. The replacements that came up through the war — not through the pre-war academies — have been reorganizing the books in their off-hours. A new manual circulates without a stamp. The brigades that adopt it first are recognizable a quarter later. The combat-power column registers the inflection. The political mobilizers do not understand it; the front-line officers do not explain it.",
     "category": "military",
@@ -5421,6 +5445,7 @@
   },
   {
     "id": "csq_doctrine_drift",
+    "image": "event_staff_planning_room.webp",
     "title": "The Manual on the Shelf",
     "narrative": "The doctrine reform that was initiated two years earlier has drifted off the agenda. The new manual sits on the shelf in the corps headquarters; the cadre that knew it has rotated; the cadre that replaced them never read it. The brigades that had been training to it have stopped. The combat-power column does not register a cliff — it registers a slow droop. The institutional memory of the reform survives in the older officers, who do not all survive. The political class explains the drift away as 'consolidation.'",
     "category": "military",
@@ -5639,6 +5664,7 @@
   },
   {
     "id": "csq_doctrine_drift_HRHB",
+    "image": "event_staff_planning_room.webp",
     "title": "The Manual on the Lasva Shelf",
     "narrative": "The corps reorganization that was attempted two years earlier has drifted off the agenda. The new chain-of-command tables sit on the shelf in the corps headquarters; the cadre that knew the new structure has rotated; the cadre that replaced them never adopted it. The brigades that had been training to it have stopped. The combat-power column does not register a cliff — it registers a slow droop. The institutional memory of the reform survives in the older officers, who do not all survive. The political class explains the drift away as 'consolidation.'",
     "category": "military",
@@ -5711,6 +5737,7 @@
   },
   {
     "id": "csq_post_dayton_train_and_equip_HRHB",
+    "image": "event_arms_pipeline_night.webp",
     "title": "Train and Equip — Federation Side",
     "narrative": "The Federation framework brings a parallel train-and-equip pipeline to the HVO formations that opted into the joint structure. The crates that show up at the Croatia-border depots are stamped, manifested, and matched to schedules — a different rhythm from the embargo-era catch-as-catch-can. The brigades cycling through the new training cadre return to their formations recognizable but different. The combat-power column registers the change two quarters in. The political class in West Mostar treats the pipeline as evidence of the framework's seriousness.",
     "category": "diplomatic",
@@ -5841,6 +5868,7 @@
   },
   {
     "id": "csq_arbih_resistance_revival_HRHB",
+    "image": "event_central_bosnia_front.webp",
     "title": "The Lasva Valley Holds",
     "narrative": "The HVO formations in the Lasva Valley have been losing ground for three quarters. The territorial trend line is unmistakable; the casualty lists are long; the political class has begun preparing the public for the worst. Then the line stops moving. Not because the attacker stopped — because the defender stopped retreating. The recruitment offices in the surviving Croat-majority municipalities register a surge that the political mobilizers had not engineered. The morale column ticks up first, then the recruitment column. The institutional explanation is existential pressure; the front-line explanation is shorter.",
     "category": "military",
@@ -5909,6 +5937,7 @@
   },
   {
     "id": "csq_war_exhaustion_high_streak_HRHB",
+    "image": "event_recruitment_office_empty.webp",
     "title": "The West Mostar Quotas",
     "narrative": "The recruitment offices in West Mostar and the Lasva Valley stop posting the standard quota numbers and start posting a smaller, quieter set. The first wave that volunteered through the Croat Defence Council in 1992 has aged through the casualty lists. The second cohort, conscripted under emergency mobilization in 1993, has rotated through the same lists. The third cohort looks at the front-line casualty registers and at the political class's communiqués and registers what the political class will not say. The general staff acknowledges the new constraint. The war continues; the manpower budget contracts.",
     "category": "humanitarian",
@@ -6044,6 +6073,7 @@
   },
   {
     "id": "csq_mobilization_demographics_strained_HRHB",
+    "image": "event_recruitment_office_empty.webp",
     "title": "The Croat Lists Run Thin",
     "narrative": "The conscription officers in the Croat-majority municipalities no longer ask the question they had been asking for two years — when can the cohort be mobilized? They ask which cohort is left. The age-class registers are running thin past the standard pool: too young, too old, too sick, already mobilized, already lost. The departure rolls to Croatia and to the Federation territories thin the pool further. The recruitment offices push the boundaries; the volunteers slow; the press does not lead with the numbers. The political class, watching the demographic data, registers what every army watching its own pool eventually registers.",
     "category": "humanitarian",
@@ -6116,6 +6146,7 @@
   },
   {
     "id": "csq_arbih_doctrine_modernization_HRHB",
+    "image": "event_staff_planning_room.webp",
     "title": "The Lasva Manual Ages Up",
     "narrative": "The HVO officer rolls have absorbed two years of attrition and replacement. The replacements that came up through the Lasva Valley combat — not through the pre-war JNA academies or the HV cadre exchange — have been reorganizing the books in their off-hours. A new manual circulates without a stamp. The brigades that adopt it first are recognizable a quarter later. The combat-power column registers the inflection. The political mobilizers in West Mostar do not understand it; the front-line officers do not explain it.",
     "category": "military",
@@ -6184,6 +6215,7 @@
   },
   {
     "id": "csq_post_cease_fire_recruitment_decline_HRHB",
+    "image": "event_recruitment_office_empty.webp",
     "title": "The Federation Demobilization Drift",
     "narrative": "A general cease-fire — formal or de facto — holds for long enough that the political class in West Mostar begins to demobilize the rhetoric. The newspapers shift their lead. The recruitment offices, which had been running on Croat-Defence-Council patriotic urgency, find the urgency no longer compounds. Volunteers slow; conscription quotas are quietly relaxed. The front lines remain active; the manpower behind them does not refill at the same rate. The cease-fire is not peace, but the recruitment narrative does not know how to call the war by both names at once.",
     "category": "political",
@@ -6320,6 +6352,7 @@
   },
   {
     "id": "csq_post_cease_fire_recruitment_decline_RS",
+    "image": "event_recruitment_office_empty.webp",
     "title": "The Pale Quiet",
     "narrative": "A long stretch of cease-fire — formal in the Sarajevo TEZ, de facto along most of the Posavina line — runs longer than the political class in Pale expected. The recruitment offices still open. The volunteers slow. The conscription officers, who had been operating on Republika Srpska existential urgency, find the urgency no longer compounds. The front lines remain active; the cohorts behind them no longer surge in. The general staff acknowledges the new constraint. The war continues; the manpower budget contracts.",
     "category": "political",
@@ -6450,6 +6483,7 @@
   },
   {
     "id": "csq_mobilization_demographics_strained_RS",
+    "image": "event_recruitment_office_empty.webp",
     "title": "The Krajina Lists Run Thin",
     "narrative": "The conscription offices in Banja Luka, Pale, and the rear-area Posavina towns no longer post the rolls outside the door. The age-class registers are running thin past the standard pool: too young, too old, too sick, already mobilized, already lost. The departure rolls to Belgrade and to Krajina Serbia thin the pool further. The recruitment offices push the boundaries; the volunteers slow; the press does not lead with the numbers. The political class in Pale, watching the demographic data, registers what every army watching its own pool eventually registers.",
     "category": "humanitarian",
@@ -7092,6 +7126,7 @@
   },
   {
     "id": "csq_demobilization_pressure_wave_RBiH",
+    "image": "event_recruitment_office_empty.webp",
     "title": "Demobilization Pressure Wave (RBiH)",
     "narrative": "After a quiet quarter the Federation families return to the streets and Washington adds its voice. The general mobilization order is not formally rescinded; it is, in practice, walked back. Recruitment offices in Sarajevo and Tuzla reduce quotas. Aggressive doctrine is shelved in favor of holding the lines won. The war does not end; it slows.",
     "category": "political",
@@ -7158,6 +7193,7 @@
   },
   {
     "id": "csq_demobilization_pressure_wave_HRHB",
+    "image": "event_recruitment_office_empty.webp",
     "title": "Demobilization Pressure Wave (HRHB)",
     "narrative": "After a quiet quarter the West Mostar and Posusje families return to the streets and Zagreb adds its voice. The general mobilization order is not formally rescinded; it is, in practice, walked back. Recruitment offices reduce quotas. Aggressive doctrine is shelved in favor of holding the lines won. The war does not end; it slows.",
     "category": "political",
@@ -7833,6 +7869,7 @@
   },
   {
     "id": "csq_equipment_quality_recovery_streak_RBiH",
+    "image": "event_staff_planning_room.webp",
     "title": "The Cadre Catches Up (RBiH)",
     "narrative": "The equipment-quality column, which had drifted downward through two quarters of pipeline attenuation, steadies. The patron's confidence stays in the constructive register. The training cycles, which had been compressed to combat-replacement pace, lengthen enough that the new cadre actually rotates onto the new manuals before deploying. The brigade staffs note the inflection in the maintenance-availability column, not in the formal communique. The combat-power readout drifts upward by a small but measurable amount.",
     "category": "military",
@@ -7973,6 +8010,7 @@
   },
   {
     "id": "csq_equipment_quality_recovery_streak_RS",
+    "image": "event_staff_planning_room.webp",
     "title": "The Cadre Catches Up (RS)",
     "narrative": "The equipment-quality column, which had drifted downward through two quarters of pipeline attenuation, steadies. Belgrade's confidence stays in the constructive register. The training cycles, which had been compressed to combat-replacement pace, lengthen enough that the new cadre actually rotates onto the new manuals before deploying. The corps staffs note the inflection in the maintenance-availability column, not in the formal communique. The combat-power readout drifts upward by a small but measurable amount.",
     "category": "military",
@@ -8041,6 +8079,7 @@
   },
   {
     "id": "csq_equipment_quality_recovery_streak_HRHB",
+    "image": "event_staff_planning_room.webp",
     "title": "The Cadre Catches Up (HRHB)",
     "narrative": "The equipment-quality column, which had drifted downward through two quarters of pipeline attenuation, steadies. Zagreb's confidence stays in the constructive register. The HV-cadre training cycles, which had been compressed to combat-replacement pace, lengthen enough that the new HVO instructors actually rotate onto the new manuals before deploying. The brigade staffs note the inflection in the maintenance-availability column, not in the formal communique. The combat-power readout drifts upward by a small but measurable amount.",
     "category": "military",
@@ -8109,6 +8148,7 @@
   },
   {
     "id": "csq_grain_corridor_reopened_RS",
+    "image": "event_arms_pipeline_night.webp",
     "title": "Grain Corridor Reopened (RS)",
     "narrative": "A long-disused supply lane through Posavina reopens — quietly, through municipal-level arrangements that the formal war has not abolished. Convoys move under flag-of-grain through the agricultural belt, and the receiving towns count the difference in markets that begin to function again. The international observers note the change with cautious approval; Belgrade does not object.",
     "category": "economic",
@@ -8382,6 +8422,7 @@
   },
   {
     "id": "csq_captured_equipment_windfall_RS",
+    "image": "event_jna_barracks_seized.webp",
     "title": "The Captured Stockpile (RS)",
     "narrative": "A successful VRS operation closes around an ARBiH or HVO depot that had been counted in the other faction's order of battle for two years. Crates marked in foreign latin script, vehicles still in factory paint, ammunition in calibers the receiving side had been rationing — all of it inventoried by the captors and rotated out within the month. The combat-power uplift is short, but it is real. The losing side's manifests register the gap.",
     "category": "military",
@@ -8450,6 +8491,7 @@
   },
   {
     "id": "csq_third_party_arms_channel_HRHB",
+    "image": "event_arms_pipeline_night.webp",
     "title": "The Croatia Side Channel",
     "narrative": "The principal Croatia-side pipeline has been registering pressure for two quarters. A parallel channel begins running through private brokers, municipal depots, and units whose paperwork no longer matches the cargo. The crates are not formally acknowledged, but the HVO depots in western Herzegovina and Central Bosnia register the difference. The combat-power column ticks upward for a season. The mediator capitals know enough to watch the manifests and not enough to stop them outright.",
     "category": "diplomatic",
@@ -8513,6 +8555,7 @@
   },
   {
     "id": "csq_captured_equipment_windfall_HRHB",
+    "image": "event_jna_barracks_seized.webp",
     "title": "The Captured Stockpile (HRHB)",
     "narrative": "A successful HVO operation closes around an ARBiH depot that had been counted in the other faction's order of battle for two years. Crates, vehicles, and ammunition that had been missing from the HVO manifests are inventoried by the captors and rotated out within the month. The combat-power uplift is short, but it is real. The losing side's manifests register the gap.",
     "category": "military",
@@ -8653,6 +8696,7 @@
   },
   {
     "id": "csq_doctrine_drift_RS",
+    "image": "event_staff_planning_room.webp",
     "title": "The Manual in Pale",
     "narrative": "The reorganization that had promised cleaner corps-level command has drifted off the agenda. The new tables sit in the headquarters binders while the officers who knew them rotate, fall, or return to local political obligations. Brigades that had been training to the new pattern return to older habits. The combat-power column does not register a cliff. It registers a slow institutional drag.",
     "category": "military",
@@ -8764,6 +8808,7 @@
   },
   {
     "id": "csq_corridor_blocked_audit",
+    "image": "event_posavina_lowland_front.webp",
     "title": "The Posavina Throat Stays Shut",
     "narrative": "Past the operational window for the northern breakthrough, the audit records the corridor still severed: no link reopened across the Posavina, and the breakthrough operation never closed its objective. The convoys still take the long road. The map's narrow throat remains a chokepoint, not a highway.",
     "category": "military",

@@ -152,6 +152,7 @@
   },
   {
     "id": "nato_ultimatum_sarajevo_1994",
+    "image": "event_nato_air_power.webp",
     "source_tier": "agreement_text",
     "title": "NATO Issues Ultimatum on Sarajevo",
     "narrative": "In the aftermath of Markale, NATO issues an ultimatum demanding the withdrawal of all VRS heavy weapons from a 20-kilometer exclusion zone around Sarajevo within ten days, or face air strikes. The ultimatum marks NATO's first credible threat of force and fundamentally changes the calculation for the VRS around the capital. This is a pivotal moment — compliance eases international pressure, defiance risks becoming the first belligerent to face NATO bombing.",
@@ -504,6 +505,7 @@
   },
   {
     "id": "nato_shoots_down_planes_1994",
+    "image": "event_nato_air_power.webp",
     "title": "NATO Shoots Down Serb Aircraft",
     "narrative": "NATO F-16 fighters intercept six VRS aircraft violating the no-fly zone over central Bosnia, shooting down four. The incident — NATO's first combat action in its forty-five-year history — signals a shift from passive observation to active enforcement. The VRS command begins to factor NATO air power into its operational calculations.",
     "category": "military",
@@ -1140,6 +1142,7 @@
   },
   {
     "id": "gorazde_crisis_1994",
+    "image": "event_enclave_valley_town.webp",
     "title": "Gorazde Crisis",
     "narrative": "The VRS launches a major offensive against the Gorazde safe area, overrunning UN observation posts and pushing into the outskirts of the town. Limited NATO air strikes prove insufficient to halt the advance. The crisis exposes the hollow nature of safe area protection and the mismatch between UN mandates and military reality.",
     "category": "military",
@@ -2100,6 +2103,7 @@
   },
   {
     "id": "rbih_federation_army_integration_1994",
+    "image": "event_staff_planning_room.webp",
     "title": "Federation Army — How Much to Merge?",
     "narrative": "The Washington Agreement (1 + 18 March 1994) established the Federation of Bosnia and Herzegovina on paper, with a Federation Army (HVOBiH / VFBiH) charged to integrate ARBiH and HVO into a unified Federation military structure. Six months on, the institutional reality lags the paper architecture. ICRC and UNPROFOR field reports record persistent dual command structures: ARBiH brigades and HVO brigades share the same Federation table-of-organization slot but answer to separate national chains, hold separate logistics depots, and run separate communications nets. US Defense Department liaison and the embassy's defense attaché are pressing the Sarajevo Presidency for a written posture on Federation Army integration depth before the Vienna-track follow-on to Washington. The Bosniak nationalist current in the Assembly resists full integration as a dilution of ARBiH operational independence; the civic-Federation current presses for full integration as the institutional capstone of the Washington framework; Šilajdžić-track skepticism splits the difference. Your political files require a written response: full integration, selective integration, parallel commands (the documented historical posture), or refuse integration.",
     "category": "command",
@@ -2342,6 +2346,7 @@
   },
   {
     "id": "hrhb_federation_army_integration_1994",
+    "image": "event_staff_planning_room.webp",
     "title": "Federation Army — How Far Does Zagreb Let Go?",
     "narrative": "The Washington Agreement (1 + 18 March 1994) created the Federation of Bosnia and Herzegovina with a Federation Army (HVOBiH / VFBiH) charged to absorb HVO and ARBiH formations into a unified Federation military structure. Six months on, the paper architecture has not bitten. HVO brigades in Central Bosnia, Mostar, and Western Herzegovina hold Federation Army table-of-organization slots on paper but answer through the Mostar Defence Department and the Zagreb-Susak channel, not through the Federation general staff. ICRC and UNPROFOR field reports record persistent dual command structures; US Defense Department liaison presses the Mostar Presidency for a written posture on HVO command-integration depth ahead of the Vienna-track follow-on. The Croat-nationalist current around the late Boban's successors resists full integration as a dilution of HVO operational independence and a forfeit of the Zagreb patron channel; the civic-Federation current presses for full integration as the institutional capstone of the Washington framework; Zubak-track caution splits the difference. Your political files require a written response: full integration, selective integration, parallel commands (the documented historical posture), or refuse integration.",
     "category": "command",
@@ -2834,6 +2839,7 @@
   },
   {
     "id": "bihac_5th_corps_offensive_1994",
+    "image": "event_highland_offensive.webp",
     "title": "5th Corps Breaks Out of Bihac",
     "narrative": "Sarajevo Presidency files, autumn 1994. General Atif Dudakovic and the 5th Corps in Bihac are the principal armed expression of the Sarajevo line against the Fikret Abdic / APWB split declared at Velika Kladusa on 27 September 1993. Dudakovic has presented an offensive plan: push from the pocket into Grabez and toward Bosanska Krupa against the VRS, while overrunning APWB-held Velika Kladusa to the north. The political record is in your hands. Press the offensive, hold the perimeter, seek negotiation with APWB and indirect channels to RS/RSK, or accept ceasefire terms that would functionally recognize the APWB split.",
     "category": "military",
@@ -3141,6 +3147,7 @@
   },
   {
     "id": "operation_cincar_1994",
+    "image": "event_highland_offensive.webp",
     "title": "Operation Cincar — Kupres Falls to HVO",
     "narrative": "The HVO, reinforced by Croatian Army units, launches Operation Cincar against VRS positions around Kupres. After fierce fighting in mountainous terrain, Kupres falls on November 3. The operation captures a strategically vital junction that threatens VRS supply routes to Donji Vakuf. The Washington Agreement's military dividend is becoming apparent.",
     "category": "military",
@@ -3195,6 +3202,7 @@
   },
   {
     "id": "bihac_crisis_1994",
+    "image": "event_highland_offensive.webp",
     "title": "Bihac Crisis Deepens",
     "narrative": "The VRS, supported by forces from the Republic of Serbian Krajina and Abdic's APWB militia, launches a major counteroffensive against the Bihac pocket. The 5th Corps is pushed back toward the town itself, and the crisis threatens the complete fall of the enclave. NATO air strikes against VRS airfields prove too limited to change the situation.",
     "category": "military",
@@ -3231,6 +3239,7 @@
   },
   {
     "id": "embargo_lifted_non_enforcement_1994",
+    "image": "event_security_council_chamber.webp",
     "title": "UN Arms Embargo Enforcement Ebbs",
     "narrative": "The UN General Assembly approves a nonbinding resolution calling for the Bosnian arms embargo to be lifted if the Bosnian Serbs reject the Contact Group plan. The embargo remains on paper, but Washington's enforcement posture has changed; Bosnian government supply channels begin to widen.",
     "category": "diplomatic",

@@ -309,6 +309,7 @@
   },
   {
     "id": "gornji_vakuf_clashes_1993",
+    "image": "event_central_bosnia_front.webp",
     "title": "HVO-ARBiH Fighting Erupts at Gornji Vakuf",
     "narrative": "Heavy fighting breaks out between HVO and ARBiH forces in Gornji Vakuf as the HVO attempts to establish control over the town in line with the proposed Vance-Owen provincial boundaries. The clashes — involving tanks, artillery, and infantry — mark a significant escalation beyond the sporadic incidents of late 1992.",
     "category": "military",
@@ -492,6 +493,7 @@
   },
   {
     "id": "croat_bosniak_war_begins_1993",
+    "image": "event_central_bosnia_front.webp",
     "title": "HVO-ARBiH Alliance Fractures",
     "narrative": "After the October 1992 Prozor battle and January 1993 fighting at Gornji Vakuf and Busovača, the HVO-ARBiH alliance fractures amid local clashes and competing territorial claims. The wider central-Bosnia offensive follows in April. Later ICTY judgments attribute the Herceg-Bosna/HVO campaign and discrete ARBiH crimes to specific actors under different legal findings.",
     "category": "military",
@@ -661,6 +663,7 @@
   },
   {
     "id": "un_resolution_808_tribunal_1993",
+    "image": "event_security_council_chamber.webp",
     "title": "UN Resolution 808 — International Tribunal Announced",
     "narrative": "The UN Security Council passes Resolution 808, deciding that an international tribunal shall be established for the prosecution of serious violations of international humanitarian law in the former Yugoslavia. The resolution signals growing judicial attention to wartime atrocities and serves as the direct precursor to the ICTY's formal establishment in May.",
     "category": "diplomatic",
@@ -709,6 +712,7 @@
   },
   {
     "id": "central_bosnia_fighting_1993",
+    "image": "event_central_bosnia_front.webp",
     "title": "Central Bosnia Fronts Harden",
     "narrative": "VRS, HVO, and ARBiH forces occupy overlapping fronts in central Bosnia as local HVO-ARBiH fighting and tensions continue. Travnik, Vitez, and Busovača face pressure from different directions before the wider April offensive. The conflict creates severe tactical strain and civilian suffering.",
     "source_note": "Existing event/essay/project sources ground the row's institutional and operational context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
@@ -1199,6 +1203,7 @@
   },
   {
     "id": "un_nfz_enforcement_1993",
+    "image": "event_nato_air_power.webp",
     "title": "UN Resolution 816 — No-Fly Zone Enforcement",
     "narrative": "The UN Security Council passes Resolution 816, authorizing member states to enforce the no-fly zone over Bosnia-Herzegovina that had been violated over 500 times since its establishment in October 1992. On April 12 NATO commences Operation Deny Flight with combat air patrols, marking a shift from passive monitoring to active military involvement.",
     "category": "diplomatic",
@@ -1247,6 +1252,7 @@
   },
   {
     "id": "hrhb_central_bosnia_defense_1993",
+    "image": "event_central_bosnia_front.webp",
     "title": "Central Bosnia Pocket: HZ HB Records Its Defense Posture",
     "narrative": "The ARBiH-HVO war that erupted from the Gornji Vakuf clashes (Jan 1993, H2) has now boiled over across central Bosnia. The HVO holds three encircled pockets — the Vitez/Busovaca/Kiseljak triangle in the Lasva Valley, the Žepče exclave further north, and Mostar (west bank) — surrounded by ARBiH 3rd and 7th Corps formations whose strength dwarfs the local HVO Operative Zone Central Bosnia. The triangle is operationally indefensible long-term: only a tenuous Croatia-routed airbridge through Tudjman's Susak channel sustains ammunition, fuel, and officer rotation into the pocket. Tihofil Blaškić commands the Operative Zone from Kiseljak; Dario Kordić leads HVO political affairs in central Bosnia. Mate Boban must record HZ HB's posture: defend the pocket (the documented historical posture — hold the triangle and Žepče through the airbridge until a diplomatic resolution arrives); evacuate to Herzegovina (cede the Croat heartland, withdraw forces along the corridor); attempt a breakout offensive (high casualty cost, near-certain failure against 3rd/7th Corps encirclement); or pursue early federation with RBiH (parallel to but distinct from the Feb 1994 Zagreb-ordered ceasefire — an April 1993 Croat-Bosniak federation overture against Tudjman's directive).",
     "category": "military",
@@ -1702,6 +1708,7 @@
   },
   {
     "id": "un_resolution_819_srebrenica_1993",
+    "image": "event_security_council_chamber.webp",
     "source_tier": "icty_icj_un",
     "title": "UN Resolution 819 — Srebrenica Safe Area",
     "narrative": "The UN Security Council passes Resolution 819, declaring Srebrenica a 'safe area' free from armed attack or any hostile act, and demanding an immediate VRS ceasefire and unimpeded humanitarian access. The declaration creates a promise of protection without committing the military means to enforce it.",
@@ -1750,6 +1757,7 @@
   },
   {
     "id": "un_resolution_820_sanctions_1993",
+    "image": "event_security_council_chamber.webp",
     "title": "UN Resolution 820 — Tightened Sanctions on Serbia",
     "narrative": "The Security Council passes Resolution 820, substantially reinforcing the sanctions regime against Serbia and Montenegro. Following the Bosnian Serb assembly's rejection of the Vance-Owen plan on April 26, all commodity transport across Serbian borders is prohibited except medical supplies and foodstuffs, further strangling the RS supply chain through its patron.",
     "category": "diplomatic",
@@ -2070,6 +2078,7 @@
   },
   {
     "id": "vitez_kiseljak_pockets_1993",
+    "image": "event_central_bosnia_front.webp",
     "title": "Vitez-Kiseljak Pockets Isolated",
     "narrative": "As the Croat-Bosniak war intensifies, HVO garrisons in the Vitez-Busovaca pocket and the Kiseljak enclave become increasingly cut off from resupply by HVO main forces in western Herzegovina. The pockets must survive on local resources and intermittent VRS cooperation, while the ARBiH weighs the cost of an assault against the benefits of encirclement.",
     "category": "military",
@@ -2380,6 +2389,7 @@
   },
   {
     "id": "icty_established_1993",
+    "image": "event_security_council_chamber.webp",
     "title": "ICTY Formally Established — Resolution 827",
     "narrative": "The UN Security Council unanimously passes Resolution 827, formally establishing the International Criminal Tribunal for the former Yugoslavia — the first war crimes court created by the UN since Nuremberg and Tokyo. The tribunal has jurisdiction over genocide, crimes against humanity, and violations of the laws of war committed in the former Yugoslavia since 1991. While indictments are years away, the era of impunity may be ending.",
     "category": "diplomatic",
@@ -2433,6 +2443,7 @@
   },
   {
     "id": "battle_of_travnik_1993",
+    "image": "event_central_bosnia_front.webp",
     "title": "Battle of Travnik — HVO Position Falls",
     "narrative": "The ARBiH 3rd Corps attacks HVO positions around Travnik in early June. A local HVO position falls after fighting while ARBiH retains the town it already held. The HVO's position in central Bosnia weakens.",
     "category": "military",
@@ -2489,6 +2500,7 @@
   },
   {
     "id": "un_resolution_836_force_1993",
+    "image": "event_security_council_chamber.webp",
     "title": "UN Resolution 836 — Use of Force Authorized",
     "narrative": "The Security Council passes Resolution 836, authorizing UNPROFOR to use force in reply to bombardments against safe areas and permitting member states to use 'all necessary measures through the use of air power' in and around them. This is the legal foundation for future NATO air strikes — though the dual-key arrangement between the UN and NATO means the authorization exists largely on paper.",
     "category": "diplomatic",
@@ -2640,6 +2652,7 @@
   },
   {
     "id": "sarajevo_tunnel_completed_1993",
+    "image": "event_sarajevo_tunnel.webp",
     "title": "Sarajevo Tunnel Completed",
     "narrative": "After four months of secret construction under the codename 'Objekt BD,' the 800-meter tunnel connecting besieged Dobrinja to free territory at Butmir — passing under the UN-controlled airport runway — is completed. The tunnel carries up to 20 tonnes of supplies daily: food, weapons, ammunition, and communications equipment. It transforms Sarajevo's siege from a total blockade into a strangled but survivable containment.",
     "category": "military",
@@ -2693,6 +2706,7 @@
   },
   {
     "id": "maglaj_enclave_blockade_1993",
+    "image": "event_enclave_valley_town.webp",
     "title": "Maglaj Enclave Under Joint HVO-VRS Blockade",
     "narrative": "Following the collapse of the ARBiH-HVO alliance, the HVO joins the VRS in imposing a complete blockade on the Bosniak-held pocket around Maglaj, trapping approximately 100,000 people. The town endures relentless bombardment and near-total isolation for nine months, surviving partly on US airdrop supplies. The joint siege exemplifies the impossible tactical situation the ARBiH now faces — encircled from two directions simultaneously.",
     "category": "humanitarian",
@@ -3016,6 +3030,7 @@
   },
   {
     "id": "battle_of_bugojno_1993",
+    "image": "event_central_bosnia_front.webp",
     "title": "Battle of Bugojno",
     "narrative": "The ARBiH 307th Brigade attacks HVO positions in Bugojno in central Bosnia, where the defending Eugen Kvaternik Brigade can muster only 200-400 effective troops. After ten days of street fighting the ARBiH secures control of the town and captures significant military equipment, including tanks and artillery, consolidating control over the Vrbas River valley.",
     "category": "military",
@@ -3191,6 +3206,7 @@
   },
   {
     "id": "nato_air_strike_threat_1993",
+    "image": "event_nato_air_power.webp",
     "source_tier": "agreement_text",
     "title": "NATO Threatens Air Strikes — Sarajevo Ultimatum",
     "narrative": "NATO formally agrees to launch air strikes against Bosnian Serb positions if the strangulation of Sarajevo or attacks on other safe areas continue. The decision marks the first time the Alliance has authorized potential force in its 44-year history. The dual-key arrangement between UN and NATO commands means execution remains politically constrained; the Council notice does not itself establish the VRS disposition on Mount Igman.",
@@ -3508,6 +3524,7 @@
   },
   {
     "id": "rbih_arms_embargo_lift_advocacy_1993",
+    "image": "event_security_council_chamber.webp",
     "title": "Sarajevo Records Its Arms-Embargo Lift Advocacy Posture",
     "narrative": "The Sarajevo Presidency must record its diplomatic posture toward the UNSCR 713 arms embargo applied to all of former-Yugoslavia in September 1991. Throughout 1993, Izetbegović has addressed the UN General Assembly and the US Congress directly arguing the embargo asymmetrically privileges the JNA-armed VRS and HVO over the under-armed ARBiH; Prime Minister Silajdžić has run a shuttle-diplomacy circuit (Washington, London, Bonn, Riyadh) lobbying for embargo lift and NATO air strikes against VRS positions. The US Senate is preparing a lift-and-strike resolution (passed by 70-30 in August 1993; vetoed by Clinton). In parallel, the covert Iran arms channel via Croatia transshipment is operating, alongside Mujahideen-brigade volunteer flow. The Presidency must declare its public posture: lobby openly for lift-and-strike (the documented historical posture across 1993-1995); pursue clandestine arms acquisition through Iran/Croatia (parallel-track operational but politically exposing if surfaced); abandon embargo advocacy as a lost cause and focus on diplomatic settlement under existing constraints; or accept the embargo as binding international law and rule-following discipline.",
     "category": "diplomatic",
@@ -4659,6 +4676,7 @@
   },
   {
     "id": "operation_neretva_93_1993",
+    "image": "event_highland_offensive.webp",
     "title": "Operation Neretva '93",
     "narrative": "On 14 September 1993, ARBiH forces mount a sizable offensive east of Prozor during the Neretva fighting. The advance continues south from Jablanica and Dreznica, with combat around Vrdi and a separate 17 September attack from East Mostar. The recorded gains remain limited and do not establish a decisive breakthrough.",
     "category": "military",
@@ -5466,6 +5484,7 @@
   },
   {
     "id": "strategic_posture_review_rbih",
+    "image": "event_staff_planning_room.webp",
     "title": "Strategic Posture Review",
     "narrative": "The war enters another grinding phase. Your army holds — barely. The international community offers sympathy but not intervention. Your commanders request more men, more guns, more time. The corridors are strained, the enclaves are fragile, and the political situation in Sarajevo grows more tense with each week of siege. What is your posture for the months ahead?",
     "category": "political",
@@ -5726,6 +5745,7 @@
   },
   {
     "id": "strategic_posture_review_rs",
+    "image": "event_staff_planning_room.webp",
     "title": "Strategic Posture Review",
     "narrative": "The international community grows increasingly hostile. Belgrade's patience with Pale is wearing thin. Your generals report that the lines are solid — but the sanctions bite deeper each month, and the VRS cannot sustain current operational tempo indefinitely. The question before you is not whether you can win, but what victory means in a war the world wants to end.",
     "category": "political",
@@ -5990,6 +6010,7 @@
   },
   {
     "id": "strategic_posture_review_hrhb",
+    "image": "event_staff_planning_room.webp",
     "source_tier": "balkan_battlegrounds",
     "title": "Strategic Posture Review",
     "narrative": "Zagreb's expectations grow heavier with each passing month. The HVO holds territory across Herzegovina, but central Bosnia slips away and the war with the Bosniaks bleeds both sides white. Tudjman watches the map. Your assembly watches Tudjman. What direction will Herceg-Bosna take in the months ahead?",
@@ -6258,6 +6279,7 @@
   },
   {
     "id": "visit_to_front_rbih",
+    "image": "event_front_visit.webp",
     "source_tier": "design_counterfactual",
     "title": "Visit to the Front",
     "narrative": "Your chief of staff suggests a presidential visit to the front. The troops have been fighting for months without seeing their president. A visit would lift spirits — but it also means time away from Sarajevo, exposure to risk, and a political signal about which theater you prioritize. Sarajevo, Tuzla, and Bihac each carry different command and diplomatic costs. Where will you go?",
@@ -6549,6 +6571,7 @@
   },
   {
     "id": "visit_to_front_rs",
+    "image": "event_front_visit.webp",
     "source_tier": "design_counterfactual",
     "title": "Visit to the Front",
     "narrative": "Your generals suggest a presidential tour of the front. The VRS soldier is loyal — but loyalty is a currency spent by long campaigns and poor rations. The Posavina corridor is under constant pressure. Sarajevo draws international scrutiny. The Drina Corps holds the east. Where will Republika Srpska's president be seen today?",
@@ -6825,6 +6848,7 @@
   },
   {
     "id": "visit_to_front_hrhb",
+    "image": "event_front_visit.webp",
     "source_tier": "design_counterfactual",
     "title": "Visit to the Front",
     "narrative": "Your defence minister suggests a presidential tour of HVO positions. HVO soldiers have endured a long campaign and expect visible political attention. Central Bosnia is under pressure. Herzegovina holds. The Neretva front shapes Herceg-Bosna's southern position. Where will the president of the Croatian Community be seen?",
@@ -7101,6 +7125,7 @@
   },
   {
     "id": "address_to_nation_rbih",
+    "image": "event_wartime_broadcast.webp",
     "source_tier": "design_counterfactual",
     "title": "Address the Nation",
     "narrative": "Your chief of staff lays a draft speech on the desk. RTV BiH can carry your voice into every cellar and shelter still holding a working radio. An address can steady a frightened, exhausted population and signal resolve abroad — but every word is a promise the war may not let you keep. Defiance hardens the lines and raises expectations that later curdle into disillusion; a sober call for endurance spends political credit; an appeal to the world invites the patron's irritation at being lectured. What does the president say to a people in the fourth year of siege?",
@@ -7325,6 +7350,7 @@
   },
   {
     "id": "address_to_nation_rs",
+    "image": "event_wartime_broadcast.webp",
     "source_tier": "design_counterfactual",
     "title": "Address the Nation",
     "narrative": "Pale radio is ready to carry your words to every Serb household from Banja Luka to the Drina. An address can bind a tired people to the project and steady the assembly — but defiance commits Republika Srpska to a course its sponsors may not fund, and any line you draw tonight you will have to defend or disown. A measured speech spends credit you are short of; a hard one invites the patron's displeasure at being committed without consultation. What does the president tell his nation?",
@@ -7548,6 +7574,7 @@
   },
   {
     "id": "address_to_nation_hrhb",
+    "image": "event_wartime_broadcast.webp",
     "source_tier": "design_counterfactual",
     "title": "Address the Nation",
     "narrative": "Herceg-Bosna's airwaves wait for the president. An address can steady a Croat community stretched between Herzegovina and the central-Bosnia pockets, and reassure Zagreb that the project is in steady hands — but a defiant line commits the HVO publicly and tightens the noose around any reconciliation with Sarajevo, while a conciliatory one risks the hardliners and Zagreb's patrons reading weakness. What does the president of the Croatian Community tell his people?",
@@ -7766,6 +7793,7 @@
   },
   {
     "id": "decorate_a_unit_rbih",
+    "image": "event_front_visit.webp",
     "source_tier": "design_counterfactual",
     "title": "Decorate a Unit",
     "narrative": "Your staff brings forward citations for units that have held the line under impossible conditions. A decoration — a unit citation, a streamer for the colours — costs nothing in materiel and can lift a battered formation's spirit and the watching army's morale. But honours are political: the unit you single out is the unit you are seen to favour, and every formation passed over reads the omission. Decorate the wrong unit, or decorate at all amid heavy losses, and the gesture rings hollow or breeds resentment. Which formation will the president honour — and only a regular formation of the armed forces is eligible?",
@@ -7929,6 +7957,7 @@
   },
   {
     "id": "decorate_a_unit_rs",
+    "image": "event_front_visit.webp",
     "source_tier": "design_counterfactual",
     "title": "Decorate a Unit",
     "narrative": "Your staff lays out citations for VRS formations that have held or advanced at heavy cost. A decoration costs no materiel and can steady a tired army — but in Republika Srpska honours are watched closely. Single out a corps and you are seen to favour it; honour the wrong formation and you reward the wrong faction in the officer corps; decorate amid loss and the gesture can curdle. Eligibility is restricted to regular VRS formations — no irregular or volunteer paramilitary unit is on the list. Which regular formation will the president honour?",
@@ -8092,6 +8121,7 @@
   },
   {
     "id": "decorate_a_unit_hrhb",
+    "image": "event_front_visit.webp",
     "source_tier": "design_counterfactual",
     "title": "Decorate a Unit",
     "narrative": "Your staff brings citations for HVO formations that have held the divided geography of Herceg-Bosna at heavy cost. A decoration costs no materiel and can lift a stretched force — but honours carry weight between Herzegovina and the central-Bosnia pockets, and singling out one formation tells the others where they stand. Honour amid loss, or honour the wrong unit, and the gesture sours. Eligibility is restricted to regular HVO formations — no irregular or paramilitary unit is on the list. Which regular formation will the president honour?",

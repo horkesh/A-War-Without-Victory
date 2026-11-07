@@ -13744,11 +13744,17 @@ Owner asked to fix the two items raised after #540 merged.
 - `tactical_group_lifecycle.ts`: `checkConcurrencyCaps`/`factionHasActiveArmyHqOp` skip the forming TG's own Army HQ receipt, so the reduction quiets other ops but not the op itself (root cause: `docs/40_reports/audits/20261104_handover/FARZ-TG-ROOT-CAUSE.md`). New test in `army_hq_op_lifecycle.test.ts`, red before the fix. ADR-0005 Pyrrhic cost #1 updated. `__w188_n63` 712/711/712/710, 0 matched-cell changes from n62; strict health PASS; live = headless (0 cells, three player factions). Manifest re-pinned; fingerprint unchanged.
 - Owner ruling: a 2nd Corps capture owned by the authored Uragan 95 op inside the Farz window counts as a Farz receipt (`farz_objective_gate.cjs`, tests added). `verify_checkpoints.cjs` enforces the Farz guard by default (`--no-farz-guard` to report only). n63 passes 4/4; n60/n62 fail as expected.
 
-## 2026-11-07 - Event-art library accepted: 16 of 17 plates approved and wired; B10 returned (PRESENTATION, DATA IMAGE KEYS, BRANCHES #541-#544)
+## 2026-11-07 - Codex review follow-ups: multi-decision pause re-announces; palette Tab trap pinned (DESKTOP IPC, TEST)
+
+- `src/desktop/ipc_mutation_policy.cjs`: `createPausedTurnController.respond()` now re-sends the paused status after each intermediate answer, listing only the decisions still open (Codex review on #540). The embedded Warroom route holds state while the advanceTurn invoke is in flight and releases it only on a status event, so App reopened the answered decision and its resubmission was refused. New controller test, red before the fix.
+- Codex review on #547 (Tab escapes the palette): not reproduced. The shared Modal focus trap is a capture-phase handler (`onKeyDownCapture`, since 570cba46a), which runs before the palette's bubble-phase `stopPropagation()`. New `tests/ui/command_palette_tab_trap.test.ts` pins Tab/Shift+Tab cycling; it fails when the trap is made bubble-phase. No palette code change.
+- No simulation, state, scenario or calibration change.
+
+## 2026-11-07 - Event-art library accepted: 17 plates approved and wired (PRESENTATION, DATA IMAGE KEYS, BRANCHES #541-#544)
 
 Codex delivered 17 opaque Q90 plates in #541-#544 under the art work order and the Historian's event-art packet. Claude reviewed each file against A1-A8 at native size (3x crops where needed):
 - #541 (B1 negotiation room, B1b Washington): approved. Terrain sheets carry no country, coast or partition outline. B1 wired to its 18 packet rows; Washington also takes the two rows held for its regeneration.
 - #542 (economic and territorial decision headers): approved; `EVENT_CATEGORY_HEADERS` no longer borrows the intelligence and military plates (new test).
 - #543 (B2-B8): approved, 58 rows. B2 meets the 2026-11-06 section 6 conditions and serves `un_resolution_819_srebrenica_1993` per that verdict; B5 has no civilian columns (Storm/Neretva flags).
-- #544 (B9-B14): five approved, 38 rows. B10 `event_arms_pipeline_night` returned: its background treeline is palms. Its 12 rows stay unwired; #544 merges after the revision.
-Image keys only (219 rows now carry art); a wiring script verified no other field changed. Baseline regression on the combined state: all scenarios match (sim byte-identical). 126 event/art test files pass. The Heliodrom plate remains ungenerated (section 6 gated).
+- #544 (B9-B14): all six approved, 50 rows. B10 `event_arms_pipeline_night` came back once (palms in the treeline); the revision (pine and broadleaf, e0c26c9ee) was approved and its 12 rows wired.
+Image keys only (231 rows now carry art); a wiring script verified no other field changed. Baseline regression on the combined state: all scenarios match (sim byte-identical). 126 event/art test files pass. The Heliodrom plate remains ungenerated (section 6 gated).
