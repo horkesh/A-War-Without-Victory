@@ -2,11 +2,13 @@ import presidentialDeskBackground from '../../warroom/assets/hq_presidential_des
 
 import decisionHeaderCounterOffer from '../assets/presidential_desk/decision_headers/decision_header_counter_offer.webp';
 import decisionHeaderDiplomacy from '../assets/presidential_desk/decision_headers/decision_header_diplomacy.webp';
+import decisionHeaderEconomic from '../assets/presidential_desk/decision_headers/decision_header_economic.webp';
 import decisionHeaderHumanitarianConvoy from '../assets/presidential_desk/decision_headers/decision_header_humanitarian_convoy.webp';
 import decisionHeaderIntelligence from '../assets/presidential_desk/decision_headers/decision_header_intelligence.webp';
 import decisionHeaderMilitaryStaff from '../assets/presidential_desk/decision_headers/decision_header_military_staff.webp';
 import decisionHeaderParamilitary from '../assets/presidential_desk/decision_headers/decision_header_paramilitary.webp';
 import decisionHeaderPersonnel from '../assets/presidential_desk/decision_headers/decision_header_personnel.webp';
+import decisionHeaderTerritorial from '../assets/presidential_desk/decision_headers/decision_header_territorial.webp';
 
 import consequenceHumanitarianAccess from '../assets/presidential_desk/consequence_stills/consequence_humanitarian_access.webp';
 import consequenceNegotiatedSettlement from '../assets/presidential_desk/consequence_stills/consequence_negotiated_settlement.webp';
@@ -62,11 +64,11 @@ const PACKET_THUMBNAILS: Partial<Record<InboxItemType, string>> = {
 const EVENT_CATEGORY_HEADERS: Readonly<Record<string, string>> = Object.freeze({
   command: decisionHeaderPersonnel,
   diplomatic: decisionHeaderDiplomacy,
-  economic: decisionHeaderIntelligence,
+  economic: decisionHeaderEconomic,
   humanitarian: decisionHeaderHumanitarianConvoy,
   military: decisionHeaderMilitaryStaff,
   political: decisionHeaderDiplomacy,
-  territorial: decisionHeaderMilitaryStaff,
+  territorial: decisionHeaderTerritorial,
 });
 
 export function getDecisionHeaderForEventCategory(category: string | null | undefined): string {
