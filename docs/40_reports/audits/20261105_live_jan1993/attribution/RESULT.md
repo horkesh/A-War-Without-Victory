@@ -335,3 +335,8 @@ Merging main into PR #540 brought in the camps rebalance (#538). Its only simula
 - An RS triggered "Corridor Restore" counterattack for Brčko: never launched (six ARBiH defenders, power ≈1844 against 236). It became unnecessary: with the engine fix RS keeps its 1992 cohesion, the 1994 2nd Corps attack fails as in the signed-off run, and Skakava Donja and Pelagićevo hold.
 
 **Result, final source (`__w188_n60`):** **712 / 711 / 712 / 710**, 0 cells different from the signed-off `__w188_n42` at every checkpoint. Strict health PASS; enclave guard intact. Live = headless: 0 cells differ at 188 turns for RBiH, RS and HRHB as player (`bot_equivalent`, production autonomy), all 710/712. Open cells unchanged: Brka (owner: ignore) and Ilijaš Krivajevići (paint question above). The Farz P-A receipt defect is still open.
+
+## Follow-up 2026-11-07: Vlašić second week removed, Farz fixed
+
+- **Vlašić:** the 156 week in the COHA exception is gone (receipt 155 only). It was an assumption, not sourced, and on the fixed engine it was unused: both ridge objectives fall by t155. `__w188_n62` scores 712/711/712/710 with 0 matched-cell changes; live = headless for all three player factions.
+- **Farz:** an Army HQ op's own TG no longer counts against its own cap reduction. Farz now forms its TG and its AAR carries `army_hq_telemetry`. Vozuća is taken at t180 by the 2nd Corps Uragan 95 op; by owner ruling that counts as a Farz receipt. `__w188_n63` scores 712/711/712/710 (0 matched-cell changes), strict health PASS, live = headless, and the now-enforced Farz guard passes 4/4.

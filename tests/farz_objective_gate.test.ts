@@ -82,6 +82,52 @@ describe('Farz objective gate', () => {
         }).ok).toBe(false);
     });
 
+    describe('2nd Corps Uragan 95 partner receipts (owner ruling 2026-11-07)', () => {
+        const uraganId = 'arbih_2nd_corps:Operation Uragan 95:t162';
+        const uragan = {
+            operation_id: uraganId,
+            started_turn: 162,
+            ended_turn: 164,
+            objectives_logged_captured: [cells[0][1]],
+            participating_brigades: ['second_corps_brigade'],
+        };
+        const farzWithoutVozuca = { ...aar, objectives_logged_captured: [cells[1][1]] };
+        const uraganEvent = { ...events[0], attacker_brigade: 'second_corps_brigade' };
+        const uraganBattles = new Map(battles);
+        uraganBattles.set(uraganEvent.battle_id, { ...battles.get(uraganEvent.battle_id)!,
+            attacker_brigade: 'second_corps_brigade', operation_id: uraganId });
+        const partnerInput = { ...input, aars: [farzWithoutVozuca, uragan],
+            events: [uraganEvent, events[1]], battleById: uraganBattles };
+
+        it('counts an Uragan-owned 2nd Corps capture inside the Farz window', () => {
+            const result = checkFarzObjectiveCaptures(partnerInput);
+            expect(result.ok).toBe(true);
+            expect(result.rows[0]).toMatchObject({ via: 'uragan', turn: 163, ok: true });
+            expect(result.rows[1]).toMatchObject({ via: 'farz', ok: true });
+            expect(result.secondCorpsParticipated).toBe(true);
+        });
+
+        it('fails closed for a non-2nd-Corps attacker, a capture outside the Farz window, a renamed or duplicated partner, or no Farz AAR', () => {
+            const thirdBattles = new Map(uraganBattles);
+            thirdBattles.set(uraganEvent.battle_id, { ...uraganBattles.get(uraganEvent.battle_id)!,
+                attacker_brigade: 'third_corps_brigade' });
+            expect(checkFarzObjectiveCaptures({ ...partnerInput,
+                events: [{ ...uraganEvent, attacker_brigade: 'third_corps_brigade' }, events[1]],
+                battleById: thirdBattles,
+            }).ok).toBe(false);
+            expect(checkFarzObjectiveCaptures({ ...partnerInput,
+                events: [{ ...uraganEvent, turn: 170 }, events[1]],
+            }).ok).toBe(false);
+            expect(checkFarzObjectiveCaptures({ ...partnerInput,
+                aars: [farzWithoutVozuca, { ...uragan, operation_id: 'arbih_1st_corps:Operation Uragan 95:t162' }],
+            }).ok).toBe(false);
+            expect(checkFarzObjectiveCaptures({ ...partnerInput,
+                aars: [farzWithoutVozuca, uragan, { ...uragan, operation_id: 'arbih_2nd_corps:Operation Uragan 95:t163' }],
+            }).ok).toBe(false);
+            expect(checkFarzObjectiveCaptures({ ...partnerInput, aars: [uragan] }).ok).toBe(false);
+        });
+    });
+
     it('rejects an early, operationless, or contradictory combat receipt', () => {
         expect(checkFarzObjectiveCaptures({ ...input, events: [{ ...events[0], turn: 150 }, events[1]] }).ok).toBe(false);
         const wrongOperation = new Map(battles);
