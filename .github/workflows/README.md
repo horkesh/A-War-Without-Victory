@@ -6,7 +6,7 @@ This directory contains the GitHub Actions workflow definitions for A War Withou
 
 | Workflow | File | Trigger | Purpose |
 |---|---|---|---|
-| Full Suite + Structural Fingerprint | `full-suite-and-fingerprint.yml` | push to `main`, PR to `main` | Required full-suite gate: complete `test:vitest:balanced`, then the self-scanning `qa:player-experience` gate on relevant code-contract changes; separate structural fingerprint job compares the fresh canonical-188w-at-40-weeks platform-stable fingerprint. |
+| Full Suite + Structural Fingerprint | `full-suite-and-fingerprint.yml` | push to `main`, PR to `main` | Required full-suite gate: complete `test:vitest:balanced` and the self-scanning `qa:player-experience` gate in parallel on relevant code-contract changes; separate structural fingerprint job compares the fresh canonical-188w-at-40-weeks platform-stable fingerprint. |
 | Baseline Regression | `baseline-regression.yml` | push to `main`, PR to `main` | Multi-job broad gate: typecheck, focused scenario anchor tests, `test:vitest:fast` (137 fast suites, includes the event-system tests via auto-discovery), `test:vitest:scenario`. The `test`/`scenarios` heavy steps are path-filtered (CODE set) and `scenario-anchors`/`scenarios` (SIM set) via the always-report shim — see "Always-report path-filter shim" below. |
 | Desktop Release Guard | `desktop-release-guard.yml` | push to `main`, PR to `main` | Builds + smoke-tests the Linux AppImage and Windows NSIS desktop packages; uploads the artifacts on every run. The packaging/probe heavy steps are path-filtered (DESKTOP set) via the always-report shim — see below. |
 | Release | `release.yml` | (see file) | Tagged-release publication pipeline. |
@@ -26,10 +26,11 @@ checks short-circuit their HEAVY steps to a fast success on doc-only PRs while S
 ALWAYS reporting their check name. It generalizes the proven full-suite shim
 (`detect-full-suite-changes.sh`, task #76).
 
-Why a step-level gate, not a workflow `paths:` filter: a `paths:` filter on a REQUIRED
+Why detection runs inside the workflow: a workflow `paths:` filter on a REQUIRED
 check NEVER reports on a non-matching PR, so GitHub blocks that PR forever on a
 "pending" required check (the "required + path-filtered" gotcha). The shim instead lets
-the workflow ALWAYS trigger and each job ALWAYS report — only the heavy steps are gated.
+the workflow always trigger and the required checks always report. It gates the
+expensive steps or, in the full-suite workflow, the worker jobs.
 
 **Integrity (task #346):** the skip decision runs a TRUSTED copy of the detection
 logic, NOT the PR's working copy. On `pull_request` each detect step first
@@ -44,32 +45,29 @@ for `pull_request` (not `pull_request_target`) workflows.
 | Job | Required? | `PATH_SET` | Heavy steps gated |
 |---|---|---|---|
 | `test` (Baseline Regression) | yes | `code` | `npm ci` + `test:vitest:fast` |
-| `full-suite` (Full Suite + Structural Fingerprint) | yes | full-suite set | `npm ci` + startup snapshot rebuild + `test:vitest:balanced` + `qa:player-experience` |
+| `full-suite` (Full Suite + Structural Fingerprint) | yes | full-suite set | Requires the parallel `full-vitest` and `player-experience` job results |
 | `structural-fingerprint` (Full Suite + Structural Fingerprint) | yes | full-suite set | `npm ci` + startup snapshot rebuild + fresh canonical-188w-at-40-weeks structural-fingerprint compare |
 | `scenario-anchors` (Baseline Regression) | yes | `sim` | `npm ci` + `test:vitest:scenario:anchors` |
-| `scenarios` (Baseline Regression) | no | `sim` | `npm ci` + `test:vitest:scenario` |
-| `desktop-release-check` (Desktop Release Guard) | no | `desktop` | Linux AppImage package + smoke |
+| `scenarios` (Baseline Regression) | yes | `sim` | `npm ci` + `test:vitest:scenario` |
+| `desktop-release-check` (Desktop Release Guard) | yes | `desktop` | Linux AppImage package + smoke |
 | `desktop-packaged-runtime-probe` (Desktop Release Guard) | yes | `desktop` | Windows NSIS package + runtime probe |
 | `baseline-pins` (Baseline Pins) | **no — advisory** | none (always runs) | `npm ci` + byte-baseline compare |
 
-“Required” describes the intended merge-gate contract above. The Phase 2 read-only
-GitHub inspection reported main unprotected (HTTP 404) and no rulesets. No protection
-setting was changed; the surviving gate names and reporting behavior are retained.
+The table covers the checks with path detection. GitHub branch protection is the
+source of truth for the complete list of required checks on `main`.
 
 `typecheck` is intentionally left ALWAYS-RUN (fast, broad type signal) and is the
 `needs:` parent that keeps the gated Baseline jobs reporting. `full-suite` and
 `structural-fingerprint` use the sibling `detect-full-suite-changes.sh` shim.
-The player-experience gate is intentionally inside the already-required `full-suite`
-job so first-hour, live-surface, shipped-build, warning-signature, and Electron
-runtime regressions block relevant PRs immediately instead of depending on a
-separate branch-protection update. The job installs Puppeteer's Chrome binary
-explicitly before that gate because GitHub-hosted runners do not populate
+On relevant changes, `full-vitest` and `player-experience` run on separate
+runners after shared trusted path detection. The required `full-suite` check
+passes only after both succeed, or after the detector explicitly reports an
+irrelevant change and both jobs skip. The browser job explicitly installs
+Puppeteer's Chrome binary because GitHub-hosted runners do not populate
 `/home/runner/.cache/puppeteer` from dependency installation alone. The
-`full-suite` checkout deliberately does not eager-fetch Git LFS before path
-detection, so the required always-report check can still reach its skip decision
-when repository LFS bandwidth is exhausted. The player-experience gate remains
-inside `full-suite` for relevant code-contract changes. If checkout provides LFS
-pointer stubs instead of PMTiles binaries, the browser-gate launcher sets
+detector checkout deliberately does not fetch Git LFS, so it can still reach
+its skip decision when repository LFS bandwidth is exhausted. If checkout
+provides LFS pointer stubs instead of PMTiles binaries, the browser-gate launcher sets
 `VITE_AWWV_DISABLE_PMTILES=1` for that proof run only; the tactical map then
 boots without PMTiles basemap sources while preserving the player-flow, routing,
 console-error, and surface-polish assertions.

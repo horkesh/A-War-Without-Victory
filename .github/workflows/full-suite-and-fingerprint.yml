@@ -11,10 +11,8 @@ name: Full Suite + Structural Fingerprint
 # blocks that PR forever on a "pending" required check (the classic
 # "required + path-filtered" gotcha). So we do NOT filter at the workflow level.
 # Instead the workflow ALWAYS triggers on PRs to main (and the existing main pushes),
-# each job ALWAYS reports its check name, and a per-job changed-files detection step
-# short-circuits the HEAVY steps to a fast no-op (success in seconds) when the PR
-# touches no calibration/code-contract paths. Result: green-fast on doc-only PRs,
-# full-run on code PRs — safe to mark both checks REQUIRED without jamming doc PRs.
+# both required checks report by name. Trusted changed-files detection skips the
+# expensive validation on irrelevant changes and leaves the checks reportable.
 #
 # The detected path set below is IDENTICAL to the old workflow-level `paths:` filter
 # (src, tools, tests, data/scenarios, data/calibration, scripts, package.json,
@@ -49,6 +47,29 @@ on:
     branches: [main]
 
 jobs:
+  detect-full-suite-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant: ${{ steps.changes.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      # PRs use the base branch's detector so they cannot alter their own skip decision.
+      - name: Detect calibration/code-contract changes
+        id: changes
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
+            base_ref="${GITHUB_BASE_REF:-main}"
+            git fetch --no-tags origin "${base_ref}:refs/remotes/origin/${base_ref}" >/dev/null 2>&1 || \
+              git fetch --no-tags origin "${base_ref}" >/dev/null 2>&1 || true
+            # Restore the trusted (base-branch) skip-decision script over the PR copy.
+            git checkout "origin/${base_ref}" -- .github/scripts/detect-full-suite-changes.sh
+          fi
+          bash .github/scripts/detect-full-suite-changes.sh
+
   # The single gate that runs the COMPLETE vitest suite (`npm run test:vitest:balanced`
   # inventories ALL files discovered by vitest.config.ts), NOT a slice. Ordinary files
   # are deterministically balanced across isolated processes; tests that write tracked
@@ -62,9 +83,10 @@ jobs:
   # job runs everything the config discovers, so full-suite-only pins
   # (strict_null_inventory_progress, war_phase_step_order, consequence/substrate
   # inventory) can NO LONGER reach main green. fetch-depth: 0 because the suite includes
-  # release_notes_generator.test.ts (HEAD~5..HEAD git range) AND the changed-files
-  # detection step needs the base commit in history.
-  full-suite:
+  # release_notes_generator.test.ts (HEAD~5..HEAD git range).
+  full-vitest:
+    needs: detect-full-suite-changes
+    if: ${{ needs.detect-full-suite-changes.outputs.relevant == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 75
     steps:
@@ -72,60 +94,68 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Always-report shim: decide whether the heavy step runs. The job itself always
-      # completes (and reports the `full-suite` check) regardless of this output.
-      #
-      # INTEGRITY (task #346): the skip decision must run a TRUSTED copy of the
-      # detection logic, NOT the PR's working-copy script — otherwise a PR could edit
-      # detect-full-suite-changes.sh to always emit relevant=false and BYPASS this
-      # REQUIRED gate. On pull_request we therefore restore the script from the base
-      # branch (origin/$GITHUB_BASE_REF) before running it, so a PR-controlled edit to
-      # the script has NO effect on whether the required heavy steps run. (On push to
-      # main the checked-out copy already IS the trusted base, so no restore needed.)
-      - name: Detect calibration/code-contract changes
-        id: changes
-        run: |
-          set -euo pipefail
-          if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
-            base_ref="${GITHUB_BASE_REF:-main}"
-            git fetch --no-tags origin "${base_ref}:refs/remotes/origin/${base_ref}" >/dev/null 2>&1 || \
-              git fetch --no-tags origin "${base_ref}" >/dev/null 2>&1 || true
-            # Restore the trusted (base-branch) skip-decision script over the PR copy.
-            git checkout "origin/${base_ref}" -- .github/scripts/detect-full-suite-changes.sh
-          fi
-          bash .github/scripts/detect-full-suite-changes.sh
-          if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
-            git restore --source=HEAD -- .github/scripts/detect-full-suite-changes.sh
-          fi
-
       - uses: actions/setup-node@v5
-        if: steps.changes.outputs.relevant == 'true'
         with:
           node-version: 22
           cache: npm
 
       - run: npm ci --legacy-peer-deps
-        if: steps.changes.outputs.relevant == 'true'
 
       - name: Rebuild startup snapshot for this platform
-        if: steps.changes.outputs.relevant == 'true'
         run: npm run desktop:startup-snapshot:build
 
       - name: Full vitest suite (balanced; all files — no stale pin can hide)
-        if: steps.changes.outputs.relevant == 'true'
         run: npm run test:vitest:balanced
 
+  player-experience:
+    needs: detect-full-suite-changes
+    if: ${{ needs.detect-full-suite-changes.outputs.relevant == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci --legacy-peer-deps
+
+      - name: Rebuild startup snapshot for this platform
+        run: npm run desktop:startup-snapshot:build
+
       - name: Install Puppeteer Chrome for browser gates
-        if: steps.changes.outputs.relevant == 'true'
         run: npx puppeteer browsers install chrome
 
       - name: Player experience gate
-        if: steps.changes.outputs.relevant == 'true'
         run: npm run qa:player-experience
 
-      - name: No relevant changes — full suite skipped (green-fast)
-        if: steps.changes.outputs.relevant != 'true'
-        run: echo "No src/tools/tests/scenario/calibration/scripts/config changes — full vitest suite skipped. Job reports success so branch protection stays unblocked."
+  # A skipped required check may appear green. Always report an explicit verdict.
+  full-suite:
+    needs: [detect-full-suite-changes, full-vitest, player-experience]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require both validation jobs
+        env:
+          DETECTION: ${{ needs.detect-full-suite-changes.result }}
+          RELEVANT: ${{ needs.detect-full-suite-changes.outputs.relevant }}
+          VITEST: ${{ needs.full-vitest.result }}
+          BROWSER: ${{ needs.player-experience.result }}
+        run: |
+          echo "Detection=$DETECTION relevant=$RELEVANT Vitest=$VITEST browser=$BROWSER"
+          if [[ "$DETECTION" == success && "$RELEVANT" == true && "$VITEST" == success && "$BROWSER" == success ]]; then
+            exit 0
+          fi
+          if [[ "$DETECTION" == success && "$RELEVANT" == false && "$VITEST" == skipped && "$BROWSER" == skipped ]]; then
+            exit 0
+          fi
+          echo "::error::Expected both validation jobs to pass, or both to skip after an explicit irrelevant change verdict."
+          exit 1
 
   # Platform-stable structural fingerprint — the determinism regression signal that
   # replaces the removed byte-hash baselines job. Fingerprints only MEANINGFUL,
