@@ -3292,6 +3292,7 @@
   },
   {
     "id": "battle_of_the_barracks_visoko",
+    "image": "event_jna_barracks_seized.webp",
     "title": "Battle of the Barracks — Visoko",
     "narrative": "The small JNA depot at Visoko is overrun by local TDF. A handful of armored vehicles and mortar tubes are captured. The symbolic victory boosts morale among defenders of the Sarajevo approaches.",
     "source_note": "Existing barracks/JNA-withdrawal sources ground the row's military-provenance context. This note adds no casualty figures, equipment quantities, causal claims, prohibited player choices, or alternate-outcome framing.",
@@ -3562,6 +3563,7 @@
   },
   {
     "id": "battle_of_the_barracks_sarajevo",
+    "image": "event_jna_barracks_seized.webp",
     "title": "Battle of the Barracks — Sarajevo",
     "narrative": "TDF units and Green Berets storm JNA barracks across Sarajevo. The Maršal Tito barracks and Viktor Bubanj complex are seized after fierce fighting. Tanks, APCs, and artillery pieces are captured — the first heavy weapons in ARBiH hands. JNA soldiers are taken prisoner. Belgrade vows retaliation.",
     "source_note": "Existing barracks/JNA-withdrawal sources ground the row's military-provenance context. This note adds no casualty figures, equipment quantities, causal claims, prohibited player choices, or alternate-outcome framing.",
@@ -3690,6 +3692,7 @@
   },
   {
     "id": "jna_withdrawal_1992",
+    "image": "event_jna_barracks_seized.webp",
     "title": "JNA Forces Begin Withdrawal from Bosnia",
     "narrative": "The Yugoslav People's Army formally announces its withdrawal from Bosnia-Herzegovina. In practice, Bosnian Serb personnel simply change insignia, and massive quantities of heavy weapons, ammunition depots, and military infrastructure are transferred directly to the newly formed VRS.",
     "category": "military",
@@ -4009,6 +4012,7 @@
   },
   {
     "id": "battle_of_the_barracks_zenica",
+    "image": "event_jna_barracks_seized.webp",
     "title": "Battle of the Barracks — Zenica",
     "narrative": "ARBiH forces seize the JNA barracks in Zenica, capturing artillery pieces and ammunition stores. The Zenica garrison, weakened by Bosniak desertions, offers limited resistance. The captured equipment is distributed to 3rd Corps formations defending central Bosnia.",
     "source_note": "Existing barracks/JNA-withdrawal sources ground the row's military-provenance context. This note adds no casualty figures, equipment quantities, causal claims, prohibited player choices, or alternate-outcome framing.",
@@ -4277,6 +4281,7 @@
   },
   {
     "id": "operation_corridor_1992",
+    "image": "event_posavina_lowland_front.webp",
     "title": "Operation Corridor — VRS Breaks Through at Brcko",
     "narrative": "The VRS launches Operation Corridor to link the Krajina region with Serbia proper through the narrow Posavina corridor near Brcko. Fierce fighting against HVO and ARBiH forces gradually widens the corridor, establishing a critical supply and communication link that sustains the western Bosnian Serb entity.",
     "source_note": "Existing event/essay/project sources ground the row's institutional and operational context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
@@ -5007,6 +5012,7 @@
   },
   {
     "id": "gorazde_pocket_consolidation_1992",
+    "image": "event_enclave_valley_town.webp",
     "title": "The Gorazde Pocket Holds",
     "narrative": "ARBiH forces counterattack around Gorazde in August 1992 and consolidate a defensible pocket. The enclave remains under pressure and siege, but endures through the war.",
     "category": "military",
@@ -5283,6 +5289,7 @@
   },
   {
     "id": "hvo_arbih_tensions_rise_1992",
+    "image": "event_central_bosnia_front.webp",
     "title": "HVO-ARBiH Clash at Prozor",
     "narrative": "The fragile alliance between the HVO and ARBiH fractures openly at Prozor in central Bosnia. HVO forces attack Bosniak civilians and ARBiH positions in a calculated bid to assert Croat control over the town. Further clashes erupt near Novi Travnik. The incidents mark the first serious military confrontation between the two nominal allies.",
     "source_note": "Existing event/essay/project sources ground the row's institutional and operational context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
@@ -5350,6 +5357,7 @@
   },
   {
     "id": "jajce_falls_1992",
+    "image": "event_highland_offensive.webp",
     "title": "Jajce Falls to VRS Forces",
     "narrative": "The strategic town of Jajce in central Bosnia falls to the VRS after a prolonged siege. The loss is a major blow to both the ARBiH and HVO, who blame each other for failing to coordinate the defense. Tens of thousands of civilians flee westward, and recriminations between the two forces deepen the growing rift.",
     "source_note": "Existing Jajce essay and project sources ground the row's institutional and operational context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",

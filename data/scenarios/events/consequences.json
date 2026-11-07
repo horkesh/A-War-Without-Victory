@@ -375,6 +375,7 @@
   },
   {
     "id": "csq_northwest_rs_consolidation_1995",
+    "image": "event_highland_offensive.webp",
     "title": "Northwest Front Freed",
     "narrative": "With Bihac eliminated as an open wound, the VRS 2nd Krajina Corps redeploys. Fifteen to twenty brigades that had been tied down for two years walk out of the Bihac perimeter and onto trucks for central Bosnia. The strategic picture shifts faster than any single operation could ever shift it. The RS political leadership smells the end of the war — on its terms.",
     "category": "military",
@@ -648,6 +649,7 @@
   },
   {
     "id": "csq_early_nato_threshold_1994",
+    "image": "event_nato_air_power.webp",
     "title": "NATO Will Not Wait for Markale",
     "narrative": "Cumulative ICTY evidence and the documented shelling of civilian infrastructure drag the NATO threshold forward by more than a year. Allied Force commanders receive strike authorisations that in the historical record waited until August 1995. The VRS loses the freedom of movement it had relied on through 1994; front-line commanders begin to plan their operations around coverage windows of the no-fly zone rather than around the enemy. The war's endgame window has closed on Republika Srpska earlier than Mladic's staff had projected.",
     "category": "military",
@@ -1268,6 +1270,7 @@
   },
   {
     "id": "csq_territorial_friction_1993",
+    "image": "event_central_bosnia_front.webp",
     "title": "Who Administers Central Bosnia",
     "narrative": "The alliance does not end; the arguments begin. In Travnik, Zenica, Bugojno, Vitez, Gornji Vakuf — the towns that make up central Bosnia — HVO commanders and ARBiH commanders coexist in practice and negotiate in committee. Committees sit longer. By summer the question of which civilian administration signs requisitions, which police collect taxes, which schools open in which language, and whose flag flies over which building has produced a paper trail that the soldiers quietly curse. None of it is fighting. All of it is tension the alliance has to absorb.",
     "category": "political",
@@ -1387,6 +1390,7 @@
   },
   {
     "id": "csq_joint_offensive_1994",
+    "image": "event_highland_offensive.webp",
     "title": "The Combined Spring",
     "narrative": "With the federation structure in place and Zagreb no longer attempting to fight a parallel war, HVO and ARBiH commands coordinate the offensive planning of spring 1994 as a single operational matter. Combined staffs assemble at Zenica and Mostar; supply and evacuation are run from a shared rear. The operations that the historical record fragmented across competing axes — the Kupres-Grahovo direction, the central Bosnia corridor, the pressure on the Posavina bulge — are now pursued together. The VRS's intelligence cells, which had relied on the Croat-Bosniak rupture to predict where force would land, lose that predictor.",
     "category": "military",
@@ -1847,6 +1851,7 @@
   },
   {
     "id": "csq_alliance_drift_silent_w20",
+    "image": "event_central_bosnia_front.webp",
     "title": "The Silent Drift",
     "narrative": "No declaration, no incident — the alliance simply thins. Joint patrols stop coordinating. Liaison officers are reassigned without replacements. The press communiqués grow shorter. By any measurable count the partnership still exists; in the practice of it the trust has gone elsewhere. Capitals on both sides note the change and adjust their expectations downward.",
     "category": "diplomatic",
@@ -1907,6 +1912,7 @@
   },
   {
     "id": "csq_joint_command_collapse",
+    "image": "event_central_bosnia_front.webp",
     "title": "The Joint Command Comes Apart",
     "narrative": "What had been signed on paper at Sarajevo and reaffirmed in Mostar is now, at the working level, a fiction. Shared objectives are dropped from operational orders. Liaison teams pack their files. The supply ledgers — once cross-credited between corps — are returned to single accounts. The collapse is administrative before it is military, but the military follows.",
     "category": "diplomatic",
@@ -3781,6 +3787,7 @@
   },
   {
     "id": "csq_captured_equipment_windfall",
+    "image": "event_jna_barracks_seized.webp",
     "title": "The Captured Stockpile",
     "narrative": "A successful operation closes around a depot that had been counted in the other faction's order of battle for two years. Crates marked in foreign cyrillic, vehicles still in factory paint, ammunition in calibers the receiving side had been rationing — all of it inventoried by the captors and rotated out within the month. The combat-power uplift is short, but it is real. The losing side's manifests register the gap.",
     "category": "military",
@@ -5008,6 +5015,7 @@
   },
   {
     "id": "csq_arbih_resistance_revival",
+    "image": "event_enclave_valley_town.webp",
     "title": "The Enclave Holds",
     "narrative": "The enclave has been losing ground for three quarters. The territorial trend line is unmistakable; the casualty lists are long; the political class has begun preparing the public for the worst. Then the line stops moving. Not because the attacker stopped — because the defender stopped retreating. The recruitment offices in the enclave register a surge that the political mobilizers had not engineered. The morale column ticks up first, then the recruitment column. The institutional explanation is existential pressure; the front-line explanation is shorter.",
     "category": "military",
@@ -5835,6 +5843,7 @@
   },
   {
     "id": "csq_arbih_resistance_revival_HRHB",
+    "image": "event_central_bosnia_front.webp",
     "title": "The Lasva Valley Holds",
     "narrative": "The HVO formations in the Lasva Valley have been losing ground for three quarters. The territorial trend line is unmistakable; the casualty lists are long; the political class has begun preparing the public for the worst. Then the line stops moving. Not because the attacker stopped — because the defender stopped retreating. The recruitment offices in the surviving Croat-majority municipalities register a surge that the political mobilizers had not engineered. The morale column ticks up first, then the recruitment column. The institutional explanation is existential pressure; the front-line explanation is shorter.",
     "category": "military",
@@ -8373,6 +8382,7 @@
   },
   {
     "id": "csq_captured_equipment_windfall_RS",
+    "image": "event_jna_barracks_seized.webp",
     "title": "The Captured Stockpile (RS)",
     "narrative": "A successful VRS operation closes around an ARBiH or HVO depot that had been counted in the other faction's order of battle for two years. Crates marked in foreign latin script, vehicles still in factory paint, ammunition in calibers the receiving side had been rationing — all of it inventoried by the captors and rotated out within the month. The combat-power uplift is short, but it is real. The losing side's manifests register the gap.",
     "category": "military",
@@ -8504,6 +8514,7 @@
   },
   {
     "id": "csq_captured_equipment_windfall_HRHB",
+    "image": "event_jna_barracks_seized.webp",
     "title": "The Captured Stockpile (HRHB)",
     "narrative": "A successful HVO operation closes around an ARBiH depot that had been counted in the other faction's order of battle for two years. Crates, vehicles, and ammunition that had been missing from the HVO manifests are inventoried by the captors and rotated out within the month. The combat-power uplift is short, but it is real. The losing side's manifests register the gap.",
     "category": "military",
@@ -8755,6 +8766,7 @@
   },
   {
     "id": "csq_corridor_blocked_audit",
+    "image": "event_posavina_lowland_front.webp",
     "title": "The Posavina Throat Stays Shut",
     "narrative": "Past the operational window for the northern breakthrough, the audit records the corridor still severed: no link reopened across the Posavina, and the breakthrough operation never closed its objective. The convoys still take the long road. The map's narrow throat remains a chokepoint, not a highway.",
     "category": "military",
