@@ -1,0 +1,11 @@
+
+Debugger listening on ws://127.0.0.1:55145/d87c0e46-0e31-4c48-8131-8802c8f5d9d8
+For help, see: https://nodejs.org/en/docs/inspector
+Debugger attached.
+
+DevTools listening on ws://127.0.0.1:55147/devtools/browser/8e4ee5e5-a542-446f-bc27-6d2a6a7e1b53
+Tactical map server: http://127.0.0.1:55149
+[AWWV] Map: using built server at http://127.0.0.1:55149/
+[AWWV] Map: using built server at http://127.0.0.1:55149/
+Debugger ending on ws://127.0.0.1:55145/d87c0e46-0e31-4c48-8131-8802c8f5d9d8
+For help, see: https://nodejs.org/en/docs/inspector

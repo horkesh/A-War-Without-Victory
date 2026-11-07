@@ -1,0 +1,31 @@
+{
+  "expected": {
+    "muted": false,
+    "masterVolume": 0.45,
+    "musicEnabled": true,
+    "musicVolume": 0.45
+  },
+  "previousOrigin": "http://127.0.0.1:60482",
+  "deniedProxy": [],
+  "proxyPort": 55144,
+  "pid": 3816,
+  "firstScript": "",
+  "isolation": {
+    "userData": "F:\\AWWV-worktrees\\queue-pollution\\.tmp_r7_offline_audio\\runtime01\\profile",
+    "sessionData": "F:\\AWWV-worktrees\\queue-pollution\\.tmp_r7_offline_audio\\runtime01\\profile",
+    "packaged": true
+  },
+  "newOrigin": "http://127.0.0.1:55149",
+  "observed": {
+    "musicEnabled": true,
+    "masterVolume": 0.45,
+    "musicVolume": 0.45
+  },
+  "storageAtNewOrigin": "{\"muted\":false,\"masterVolume\":0.45,\"musicEnabled\":true,\"musicVolume\":0.45}",
+  "pass": true,
+  "exit": {
+    "code": 0,
+    "signal": null
+  },
+  "savePreserved": true
+}

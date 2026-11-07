@@ -32,7 +32,7 @@
 #   npm run gates                           prints the currently-open rows
 
 version: 1
-updated: 2026-09-27
+updated: 2026-11-07
 
 lanes: [R1, R2, R3, R4, R5, R6, R7, R8, R9, RC, RE, REPO]
 
@@ -60,36 +60,48 @@ gates:
   - id: R7-AUDIO-OFFLINE-RUNTIME
     lane: R7
     title: Scoped offline-audio runtime acceptance
-    status: open
+    status: closed
     kind: acceptance
     opened: 2026-09-09
+    closed: 2026-11-07
     blocks: [R8]
     evidence_required: >
       Runtime observations of audio playback and controls, plus a request trace showing
       zero remote audio requests from the packaged app.
-    evidence_path: null
+    evidence_path: logs/r7-english-readability/closeout-offline-audio-runtime.md
     source: docs/plans/2026-07-31-content-history-localization-audio-plan.md
     notes: >
-      logs/r9-build-preparation/phase3-runtime-probe.json establishes 20 packaged OGGs
-      matching source and a runtime launch at its recorded identity, but records no
-      playback/control observations and no request trace. Reuse it as partial evidence only.
+      Packaged Windows build of 81ab0051c (exe and app.asar hashes in the receipt), driven
+      through the real UI with external HTTP(S) denied inside the app only: opening, menu
+      and campaign music, three UI cues, master/music volume, mute/resume and the music
+      switch all observed; NetLog and the renderer trace show zero remote URLs. A same-
+      profile relaunch on a new port kept music on and both sliders at 45%. Harness reused
+      from Codex's 2026-11-07 qualification. Not covered here: the plan's wider QA row
+      (other surfaces, placeholder silence, distinct QA sign-off) and human listening.
+      Earlier note: logs/r9-build-preparation/phase3-runtime-probe.json had OGG identity only.
 
   - id: R7-AUDIO-CUE-WIRING
     lane: R7
     title: Runtime-hook state of ten supplied audio cues
-    status: open
+    status: closed
     kind: acceptance
     opened: 2026-09-09
+    closed: 2026-11-07
     blocks: [R8]
     evidence_required: >
       For each of the ten cues with no located non-registry call site, either a demonstrated
       runtime trigger or an explicit recorded disposition that the cue is registry-only.
-    evidence_path: null
+    evidence_path: docs/40_reports/implemented/20261105_PLAYER_EXPERIENCE_COMPLETION.md
     source: docs/plans/2026-07-31-content-history-localization-audio-plan.md
     notes: >
-      A bounded static search located product call sites for ten of the twenty supplied cues
-      and not for the other ten. That is not exhaustive absence and does not authorize a
-      wiring change; it leaves the state unproven.
+      The 2026-11-05 report's "Formerly unproven cue disposition" table covers all ten. Six
+      have scoped product triggers, checked by its browser runs: ui_click, ui_open_panel and
+      ui_close_panel (Settings), turn_advance (confirmed Advance), game_over (terminal modal),
+      tutorial_objective_complete (onboarding). Four are registry-only by recorded decision:
+      ui_hover (avoids continuous hover noise), battle_catastrophic and event_critical (no
+      invented severity classes), operation_launched (staging is not execution). Re-checked
+      on main 2026-11-07: exactly those six have non-test playCue call sites and the four have
+      none. Earlier note: a 2026-09-09 static search had left the ten unproven.
 
   - id: R7-BASELINE-SIX-PIN
     lane: R7
