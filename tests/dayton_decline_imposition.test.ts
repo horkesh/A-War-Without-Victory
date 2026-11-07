@@ -255,6 +255,50 @@ describe('Dayton event records follow the real settlement', () => {
         expect(evaluateCondition(def('rs_dayton_acceptance_1995').trigger.condition!, state)).toBe(false);
         expect(evaluateCondition(def('hrhb_dayton_acceptance_1995').trigger.condition!, state)).toBe(false);
     });
+
+    // PR #557 review: the bundled desktop sim cannot reach the source-relative events
+    // directory, so the signing paths must fire the record from the catalog they are given.
+    it('the "Dayton signed" record comes from the catalog the caller passes', () => {
+        const withCatalog = makeState('RBiH');
+        resolveDaytonNegotiation(withCatalog, { territorial_demands: [], territorial_concessions: [], institutional_choices: {} }, defs);
+        expect(withCatalog.military.fired_event_ids).toContain('dayton_signed_1995');
+
+        // An empty catalog is used as given (no fallback to the source-tree loader).
+        const emptyCatalog = makeState('RBiH');
+        resolveDaytonNegotiation(emptyCatalog, { territorial_demands: [], territorial_concessions: [], institutional_choices: {} }, []);
+        expect(emptyCatalog.military.fired_event_ids ?? []).not.toContain('dayton_signed_1995');
+        expect(emptyCatalog.military.event_flags?.[DAYTON_SETTLEMENT_SIGNED_FLAG]).toBe(true);
+    });
+
+    it('the imposition step and the pipeline step pass the catalog through', () => {
+        const state = makeState('RBiH');
+        declineDaytonNegotiation(state);
+        state.meta.turn = 196;
+        enforceDaytonImposition(state, []);
+        state.meta.turn = 197;
+        enforceDaytonImposition(state, []);
+        expect(state.military.negotiation?.dayton_result).toBeDefined();
+        expect(state.military.fired_event_ids ?? []).not.toContain('dayton_signed_1995');
+
+        const step = warPhaseNegotiationSteps.find((s) => s.name === 'enforce-dayton-imposition')!;
+        const piped = makeState('RBiH');
+        declineDaytonNegotiation(piped);
+        piped.meta.phase = 'war';
+        for (const turn of [196, 197]) {
+            piped.meta.turn = turn;
+            step.run({ state: piped, input: { eventDefinitions: defs } } as never);
+        }
+        expect(piped.military.fired_event_ids).toContain('dayton_signed_1995');
+    });
+
+    it('the desktop sim and IPC handlers sign Dayton with the base-directory catalog', () => {
+        const desktopSim = readFileSync(resolve(process.cwd(), 'src/desktop/desktop_sim.ts'), 'utf8');
+        expect(desktopSim).toMatch(/baseDir \? loadDesktopEventDefinitions\(baseDir\) : undefined/);
+        const main = readFileSync(resolve(process.cwd(), 'src/desktop/electron-main.cjs'), 'utf8');
+        const calls = main.match(/sim\.resolveDaytonNegotiation\([\s\S]*?\);/g) ?? [];
+        expect(calls.length).toBe(2);
+        for (const call of calls) expect(call).toContain('getBaseDir()');
+    });
 });
 
 describe('captured ground is negotiable at Dayton (owner, 2026-11-07)', () => {

@@ -3648,7 +3648,7 @@ app.whenReady().then(() => {
         territorial_demands: territorial_demands || [],
         territorial_concessions: territorial_concessions || [],
         institutional_choices: institutional_choices || {},
-      });
+      }, getBaseDir());
       writeCanonicalCurrentState(sim, state);
       return { ok: true, result };
     } catch (e) {
@@ -3706,7 +3706,7 @@ app.whenReady().then(() => {
       }
       // Resolve on the clone to surface the authoritative readouts (mutates the
       // clone only — the clone is then garbage-collected; nothing is written back).
-      const result = sim.resolveDaytonNegotiation(clone, proposal);
+      const result = sim.resolveDaytonNegotiation(clone, proposal, getBaseDir());
       return { ok: true, result, botResponses, playerFaction };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };

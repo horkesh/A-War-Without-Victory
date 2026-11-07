@@ -55,8 +55,20 @@ export const DAYTON_SETTLEMENT_SIGNED_FLAG = 'dayton_settlement_signed';
 const DAYTON_SIGNED_EVENT_ID = 'dayton_signed_1995';
 let daytonSignedDef: EventDefinition | null | undefined;
 
-/** Fire the catalog's "Dayton signed" record (essay, codex, ticker) at the signature. */
-function fireDaytonSignedRecord(state: GameState): void {
+/**
+ * Fire the catalog's "Dayton signed" record (essay, codex, ticker) at the signature.
+ * Callers that hold the catalog pass it: the bundled desktop sim cannot resolve the
+ * source-relative events directory (`event_loader.ts` EVENTS_DIR sits outside the
+ * packaged data root), so it passes `loadDesktopEventDefinitions(baseDir)`, and the turn
+ * pipeline passes `input.eventDefinitions`. Without a catalog, the source-tree loader
+ * is the fallback (headless runner, tests).
+ */
+function fireDaytonSignedRecord(state: GameState, eventDefinitions?: readonly EventDefinition[]): void {
+    if (eventDefinitions) {
+        const def = eventDefinitions.find((d) => d.id === DAYTON_SIGNED_EVENT_ID);
+        if (def) fireEventDefinitionNow(state, def, state.meta.turn);
+        return;
+    }
     if (daytonSignedDef === undefined) {
         try {
             daytonSignedDef = loadEventDefinitions(0).find((d) => d.id === DAYTON_SIGNED_EVENT_ID) ?? null;
@@ -406,7 +418,10 @@ export function applyPlayerDaytonHardline(state: GameState): boolean {
  *    Dayton map (the bot / headless fallback). Unraised captures follow the map.
  * Returns the imposed result when it resolved this call, else null.
  */
-export function enforceDaytonImposition(state: GameState): DaytonResult | null {
+export function enforceDaytonImposition(
+    state: GameState,
+    eventDefinitions?: readonly EventDefinition[],
+): DaytonResult | null {
     applyPlayerDaytonHardline(state);
     const neg = state.military.negotiation;
     const decline = neg?.dayton_decline;
@@ -420,7 +435,7 @@ export function enforceDaytonImposition(state: GameState): DaytonResult | null {
     if (turn < decline.imposition_turn) return null;
     const forced = neg.pending_dayton?.forced;
     if (forced && turn > forced.opened_turn) {
-        return resolveDaytonNegotiation(state, buildHistoricalDefaultDaytonProposal());
+        return resolveDaytonNegotiation(state, buildHistoricalDefaultDaytonProposal(), eventDefinitions);
     }
     if (!neg.pending_dayton) {
         neg.pending_dayton = {
@@ -461,6 +476,7 @@ export function enforceDaytonImposition(state: GameState): DaytonResult | null {
 export function resolveDaytonNegotiation(
     state: GameState,
     playerProposal: DaytonProposal,
+    eventDefinitions?: readonly EventDefinition[],
 ): DaytonResult {
     ensureNegotiationState(state);
 
@@ -745,7 +761,7 @@ export function resolveDaytonNegotiation(
     // turn's trigger scan (it used to fire at week 185, before the menu even opened).
     if (!state.military.event_flags) state.military.event_flags = {};
     state.military.event_flags[DAYTON_SETTLEMENT_SIGNED_FLAG] = true;
-    fireDaytonSignedRecord(state);
+    fireDaytonSignedRecord(state, eventDefinitions);
 
     // LANE-NIGHTSHIFT-N3 (D#2, 2026-05-03): freeze endgame snapshot so
     // verdict / cost ledger / historical comparison are preserved across

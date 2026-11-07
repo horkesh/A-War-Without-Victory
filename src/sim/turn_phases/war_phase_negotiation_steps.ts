@@ -87,7 +87,7 @@ export const warPhaseNegotiationSteps: NamedPhase[] = [
         name: 'enforce-dayton-imposition',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            enforceDaytonImposition(context.state);
+            enforceDaytonImposition(context.state, context.input.eventDefinitions);
         }
     },
 ];

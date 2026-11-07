@@ -13877,3 +13877,9 @@ Owner: "Do it" — re-pin, add the player-agency principle to the handoff, close
 - **Player-agency principle** (owner, quoted in the handoff): ahistorical outcomes earned through the mechanics are the point. First DC items: an enclave held at signature is handed to RS by the Dayton map; protected ground is absolute; declining is strictly worse for RS.
 - **Gates:** every `RD-*` gate closed with evidence (`docs/40_reports/20261107_RD_CLOSEOUT.md`, `WAR_TERMINATION_SPEC.md`); Phase Specifications carry no endgame content. New lane `DC` with `DC-CONFERENCE-REDESIGN` (blocks R8, source = handoff; Codex's plan lives on Dragon).
 - **Lane:** `.claude/current-lane.txt` names DC (owner's call). Roadmap: RD row CLOSED, DC row ACTIVE, sequence DC → R8 → R9; command board row; `derive_plan_index.cjs` admits DC; `plan_index.yml` regenerated.
+
+## 2026-11-07 - Dayton signed record fires in the packaged desktop (NEGOTIATION, DESKTOP; PR #557 review)
+
+Codex review on #557: `fireDaytonSignedRecord` loaded the event catalog from `event_loader.ts` EVENTS_DIR, which the bundled desktop sim resolves outside the packaged data root; the load error was swallowed, so signing Dayton in desktop play never recorded `dayton_signed_1995`. Reproduced against `dist/desktop/desktop_sim.cjs` (record missing without a base dir, present with one).
+- `resolveDaytonNegotiation` and `enforceDaytonImposition` take an optional event catalog; the `enforce-dayton-imposition` step passes `input.eventDefinitions`; `desktop_sim.resolveDaytonNegotiation(state, proposal, baseDir)` passes `loadDesktopEventDefinitions(baseDir)`; the `resolve-dayton` and `preview-dayton` IPC handlers pass `getBaseDir()`. Without a catalog the source-tree loader remains the fallback (headless runner, tests).
+- Tests in `tests/dayton_decline_imposition.test.ts`. `test:baselines` all scenarios match; typecheck clean.
