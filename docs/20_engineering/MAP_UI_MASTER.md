@@ -18,7 +18,7 @@
 
 ---
 
-The live Warroom extends the aspect-fit plate with a two-panel panoramic WebP for each faction and year. These decorative panels share the plate height and use logical viewport dimensions for interface scaling. The existing room image owns the clickable regions, map, date board, and toolbar coordinate frame. Opening previews still use the standard scene plate.
+The live Warroom extends the aspect-fit plate with a two-panel panoramic WebP for each faction and year. Each faction uses one fixed side-art master across its five years. Annual grading matches the original center lighting and dressing. Review the ceiling, wall, and floor joins at native scale, and compare permanent openings across the five-year sequence. These decorative panels share the plate height and use logical viewport dimensions for interface scaling. The existing room image owns the clickable regions, map, date board, and toolbar coordinate frame. Opening previews still use the standard scene plate.
 
 ## 1. Directory Layout
 

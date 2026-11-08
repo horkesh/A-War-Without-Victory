@@ -3,7 +3,8 @@
   position: absolute;
   inset-block: 0;
   /* The atlas contains two 774 px wings for the 2292 px reference center. */
-  width: calc(max(calc((var(--interface-viewport-width, 100vw) - 100%) / 2), calc(100% * 774 / 2292)) + 1px);
+  --wing-overlap: 1px;
+  width: calc(max(calc((var(--interface-viewport-width, 100vw) - 100%) / 2), calc(100% * 774 / 2292)) + var(--wing-overlap));
   background-size: 200% 100%;
   background-repeat: no-repeat;
   pointer-events: none;
@@ -16,10 +17,20 @@
 }
 
 .warroom-scene-wing--right {
-  left: calc(100% - 1px);
+  left: calc(100% - var(--wing-overlap));
   background-position: right center;
 }
 
 @media (min-aspect-ratio: 43/24) {
   .warroom-scene-wing { display: block; }
+
+  /* The RBiH source has a bright edge across the clipped switch plate.
+     Fade just that decorative edge over its prepared seven-pixel overlap. */
+  [data-soften-right-join="true"] > .warroom-scene-wing--right {
+    --wing-overlap: 0.3%;
+  }
+
+  [data-soften-right-join="true"] > img {
+    mask-image: linear-gradient(to right, #000 99.7%, transparent 99.94%);
+  }
 }
