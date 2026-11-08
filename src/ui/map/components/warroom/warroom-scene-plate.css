@@ -12,7 +12,7 @@
 
 .warroom-scene-wing--left {
   /* Cover fractional-pixel joins behind the original plate. */
-  right: calc(100% - 1px);
+  right: calc(100% - var(--wing-overlap));
   background-position: left center;
 }
 
@@ -23,6 +23,16 @@
 
 @media (min-aspect-ratio: 43/24) {
   .warroom-scene-wing { display: block; }
+
+  /* The original RS crop shows a sliver of a curtain at the boundary.
+     The wide atlas carries solid paneling up to that contour. */
+  [data-cover-left-curtain="true"] > .warroom-scene-wing--left {
+    --wing-overlap: 2.5742%;
+  }
+
+  [data-cover-left-curtain="true"] > img {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 1.3525% 100%, 1.4834% 97.6563%, 2.007% 96.0938%, 2.1379% 93.75%, 1.8761% 89.8438%, 1.4834% 85.9375%, 1.3089% 82.0313%, 1.2653% 78.125%, 1.178% 70.3125%, 1.178% 62.5%, 1.1344% 54.6875%, 1.0471% 46.875%, 0.9162% 39.0625%, 0.7853% 31.25%, 0.5672% 23.4375%, 0.349% 15.625%, 0.1745% 11.7188%, 0% 8.9844%);
+  }
 
   /* The RBiH source has a bright edge across the clipped switch plate.
      Fade just that decorative edge over its prepared seven-pixel overlap. */

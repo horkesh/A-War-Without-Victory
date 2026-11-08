@@ -9,6 +9,7 @@ export interface WarroomScenePlateProps {
   src: string;
   wideSrc?: string;
   softenRightJoin?: boolean;
+  coverLeftCurtain?: boolean;
   state?: 'current' | 'incoming';
   transformOrigin?: string;
   className?: string;
@@ -23,6 +24,7 @@ export function WarroomScenePlate({
   src,
   wideSrc,
   softenRightJoin,
+  coverLeftCurtain,
   state = 'current',
   transformOrigin,
   className,
@@ -38,6 +40,7 @@ export function WarroomScenePlate({
       data-testid="warroom-scene-plate"
       data-scene-state={state}
       data-soften-right-join={wideSrc && softenRightJoin ? true : undefined}
+      data-cover-left-curtain={wideSrc && coverLeftCurtain ? true : undefined}
       style={{
         position: 'absolute',
         left: '50%',
