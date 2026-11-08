@@ -64,6 +64,7 @@ export function packageAreaPct(pkg: TerritorialPackage): number {
 
 /** True when `holder` would never give this package up (any cell on its protected ground). */
 export function isProtectedFor(pkg: TerritorialPackage, holder: string): boolean {
+    if (pkg.protected_for?.includes(holder)) return true;
     const muns = PROTECTED_MUNICIPALITIES[holder];
     if (!muns) return false;
     return packageOsids(pkg).some((o) => muns.has(o.split(':')[1] ?? ''));

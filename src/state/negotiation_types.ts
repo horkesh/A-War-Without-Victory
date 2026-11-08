@@ -284,6 +284,11 @@ export interface TerritorialPackage {
     capital_cost_to_concede: number;
     /** OSID keyword fragments for map matching. */
     osid_keywords: string[];
+    /**
+     * Parties for whom this whole package is protected ground (patron_leverage.ts), on top
+     * of the municipality list: never conceded voluntarily, never forced by a patron.
+     */
+    protected_for?: string[];
     // ── Captured-ground packages (front_packages.ts), derived per state, never persisted.
     //    For these, default_holder is the Dayton-map assignee (who gets it if unraised).
     /** Explicit OSIDs, used instead of osid_keywords. */

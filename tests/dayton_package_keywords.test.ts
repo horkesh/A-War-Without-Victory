@@ -15,7 +15,8 @@ describe('fixed Dayton package cells', () => {
     it('each package covers exactly its intended municipalities', () => {
         const byId = Object.fromEntries(TERRITORIAL_PACKAGES.map((p) => [p.id, munsOf(p.osid_keywords)]));
         expect(byId).toEqual({
-            gorazde_corridor: ['foca', 'gorazde', 'visegrad'],
+            // The nine corridor cells of the IEBL audit (owner, 2026-11-08).
+            gorazde_corridor: ['foca', 'pale', 'trnovo'],
             brcko_district: ['brcko'],
             posavina_pocket: ['bosanski_samac', 'modrica', 'odzak', 'orasje'],
             sarajevo_suburbs: ['hadzici', 'ilidza', 'ilijas', 'vogosca'],

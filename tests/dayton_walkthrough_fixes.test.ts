@@ -102,8 +102,21 @@ describe('2. the validator refuses what the room does not offer', () => {
     it('refuses a Federation partner\'s ground, demanding one\'s own, and conceding another\'s', () => {
         expect(() => parseDaytonProposal({ ...E, territorial_demands: ['central_bosnia'] }, makeState('HRHB'))).toThrow(/territorial_demands/);
         expect(() => parseDaytonProposal({ ...E, territorial_demands: ['central_bosnia'] }, makeState('RBiH'))).toThrow(/territorial_demands/);
+        expect(() => parseDaytonProposal({ ...E, territorial_concessions: ['sarajevo_suburbs'] }, makeState('RBiH'))).toThrow(/territorial_concessions/);
+        expect(parseDaytonProposal({ ...E, territorial_demands: ['sarajevo_suburbs'] }, makeState('RBiH')).territorial_demands).toEqual(['sarajevo_suburbs']);
+    });
+
+    it('the Goražde corridor is Federation ground in the draft: RS may demand it, RBiH may not give it up', () => {
+        expect(getTerritorialPackageById('gorazde_corridor')!.default_holder).toBe('RBiH');
+        expect(() => parseDaytonProposal({ ...E, territorial_demands: ['gorazde_corridor'] }, makeState('RBiH'))).toThrow(/territorial_demands/);
         expect(() => parseDaytonProposal({ ...E, territorial_concessions: ['gorazde_corridor'] }, makeState('RBiH'))).toThrow(/territorial_concessions/);
-        expect(parseDaytonProposal({ ...E, territorial_demands: ['gorazde_corridor'] }, makeState('RBiH')).territorial_demands).toEqual(['gorazde_corridor']);
+        expect(parseDaytonProposal({ ...E, territorial_demands: ['gorazde_corridor'] }, makeState('RS')).territorial_demands).toEqual(['gorazde_corridor']);
+        // RBiH's delegation refuses (protected ground) and no patron can force it: the corridor survives signing.
+        const state = makeState('RS', 80, 100);
+        const result = resolveDaytonNegotiation(state, parseDaytonProposal({ ...E, territorial_demands: ['gorazde_corridor'] }, state));
+        expect(result.territorial_packages_accepted).not.toContain('gorazde_corridor');
+        const map = settlementControllersFor(state)!;
+        for (const o of resolveOsidsForKeywords(getTerritorialPackageById('gorazde_corridor')!.osid_keywords)) expect(map[o]).not.toBe('RS');
     });
 });
 
@@ -132,9 +145,9 @@ describe('3. one autonomy measure', () => {
 
 describe('4. the mediator\'s deadline', () => {
     it('a demand just beyond a delegation\'s limit in round 1 is accepted by round 3', () => {
-        // RS concedes the Goražde corridor at cost 10; capital 15 → limit 9.0 in round 1, 10.5 by round 3.
-        const state = makeState('RBiH', 15, 0);
-        const draft = { ...E, territorial_demands: ['gorazde_corridor'] };
+        // RS concedes the Sarajevo suburbs at cost 12; capital 18 → limit 10.8 in round 1, 12.6 by round 3.
+        const state = makeState('RBiH', 18, 0);
+        const draft = { ...E, territorial_demands: ['sarajevo_suburbs'] };
         const r1 = tableDaytonRound(state, draft, evaluateBotResponse);
         tableDaytonRound(state, draft, evaluateBotResponse);
         const r3 = tableDaytonRound(state, draft, evaluateBotResponse);

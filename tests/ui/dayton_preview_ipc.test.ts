@@ -66,7 +66,8 @@ function makeState(): GameState {
 }
 
 const DEMAND_PROPOSAL: DaytonProposal = {
-    territorial_demands: ['gorazde_corridor', 'brcko_district'],
+    // RS-held packages (the Goražde corridor is Federation ground in the draft since 2026-11-08).
+    territorial_demands: ['sarajevo_suburbs', 'brcko_district'],
     territorial_concessions: [],
     institutional_choices: { military: 'centralized' },
 };

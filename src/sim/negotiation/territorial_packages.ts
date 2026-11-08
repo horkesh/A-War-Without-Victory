@@ -22,12 +22,20 @@ export const TERRITORIAL_PACKAGES: readonly TerritorialPackage[] = [
         id: 'gorazde_corridor',
         name: 'Goražde Corridor',
         description:
-            'Land corridor connecting the Goražde enclave to Federation territory. ' +
-            'Historically, RBiH demanded and received this at Dayton despite RS holding surrounding territory.',
-        default_holder: 'RS',
+            'Land corridor joining Goražde to the Sarajevo canton: Trnovo (Treskavica side), Foča-Ustikolina ' +
+            'and the Prača valley. Milošević conceded it at Dayton, so the mediator\'s draft gives it to the ' +
+            'Federation; RS can demand it back, which would leave Goražde cut off, and RBiH can give it up.',
+        // Redrawn (owner, 2026-11-08) from all of Foča, Goražde and Višegrad (4.2 % of BiH)
+        // to the nine corridor cells of the IEBL audit (docs/40_reports/20261108_DAYTON_IEBL_CELL_AUDIT.md §4),
+        // all on the Federation side of the audited map, so the holder is the Federation.
+        default_holder: 'RBiH',
         capital_cost_to_demand: 15,
         capital_cost_to_concede: 10,
-        osid_keywords: ['gorazde', 'foca', 'ustikolina', 'visegrad'],
+        osid_keywords: ['tusila', 'delijas', 'gornja_presjenica', 'donje_zesce', 'mazlina', 'ustikolina', 'praca', 'vrazalice', 'bulozi'],
+        // Sarajevo would not sign without Goražde's land link: RBiH's delegation never gives
+        // it up and Washington cannot force it (walkthrough 2026-11-08: RBiH had accepted
+        // an RS demand at the authored price, leaving Goražde cut off).
+        protected_for: ['RBiH'],
     },
     {
         id: 'brcko_district',
