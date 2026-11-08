@@ -3,7 +3,7 @@ import type { CSSProperties, MouseEvent } from 'react';
 import { createRoot } from 'react-dom/client';
 import blocking from './room-blocking.json';
 import arrival from './dayton-arrival-v1.png';
-import room from './dayton-conference-room-v1.png';
+import room from './dayton-conference-room-4k.webp';
 import './scene.css';
 
 type View = 'folder' | 'draft' | 'map' | 'binder' | 'review' | 'result' | 'verdict';
