@@ -13899,3 +13899,11 @@ Found during the R7 offline audio run: `resolveMapServerBaseUrl` in `src/desktop
 - New `tests/desktop_packaged_map_server_url.test.ts` runs the real function with a fake dev server answering on every port; red before the fix. The 39 other test files that read `electron-main.cjs` pass (468 tests); `tsc` clean.
 - Packaged proof on `b5018e63e`: a fresh `desktop:package:dir` build under the offline audio harness made 0 dev-server probes (8 before), used its built server, passed all four audio checks, and touched 0 remote URLs.
 - No simulation, state, scenario or calibration change.
+
+## 2026-11-08 - R7 closed: listening round 2 accepted; listening and roll-up gates closed (DOCS, ROADMAP)
+
+Owner: "Yeah, they're fine" (round 2) and "Close the listening gate and R7".
+- Round 2: the ten cues remade in #558 (`91ef2af42`) accepted; Claude's re-measurement matched Codex's table and all ten decode cleanly. Round 1 clarifications recorded: the 13 unmarked cues are fine and sensitivity is accepted. Record: `logs/r7-english-readability/closeout-human-audio-listen-round2.md`.
+- `R7-AUDIO-HUMAN-ACCEPTANCE` and `R7-ACCEPTANCE-ALL-GREEN` closed; every R7 gate is now closed. The five in-game audio checks are waived to R8 packaged play by the owner.
+- Roadmap: R7 row CLOSED; lane-order, sequence and audit lines updated; Army HQ paper further slices added to the post-1.0 backlog. R7 audio plan and visual-polish follow-ups plan marked CLOSED. `plan_index.yml` regenerated.
+- No code, simulation, scenario or calibration change.

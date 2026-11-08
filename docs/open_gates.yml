@@ -32,7 +32,7 @@
 #   npm run gates                           prints the currently-open rows
 
 version: 1
-updated: 2026-11-07
+updated: 2026-11-08
 
 lanes: [R1, R2, R3, R4, R5, R6, R7, R8, R9, RC, RD, DC, RE, REPO]
 
@@ -231,25 +231,24 @@ gates:
   - id: R7-AUDIO-HUMAN-ACCEPTANCE
     lane: R7
     title: Human audio listening and sensitivity acceptance
-    status: open
+    status: closed
     kind: acceptance
     opened: 2026-09-09
+    closed: 2026-11-08
     blocks: [R8]
     evidence_required: >
       A named human listening and sensitivity acceptance receipt covering the 17 interface
       cues the game ships, recorded by the review roles named in the parent plan's
       checklist. The three ambient beds are out of scope: the owner retired them for 1.0 on
       2026-11-08 and they stay switched off.
-    evidence_path: null
+    evidence_path: logs/r7-english-readability/closeout-human-audio-listen-round2.md
     source: docs/plans/2026-07-31-content-history-localization-audio-plan.md
     notes: >
-      Round 1 (owner, 2026-11-07, headphones) is recorded in
-      logs/r7-english-readability/closeout-human-audio-listen.md. It found the nine Kenney
-      library cues far louder and brighter than the eight made for AWWV and turn_complete
-      too faint; those ten are being remade (work order CL-20261108-043). Round 2 covers the
-      changed sounds. The sensitivity answer and the 13 unmarked cues await the owner's
-      clarification. Earlier note: the 2026-09-09 audit found no receipt, and automated
-      lineage/wiring checks do not stand in for human acceptance.
+      The owner accepted all 17 interface cues: seven in round 1 (2026-11-07, headphones)
+      and the ten remade in #558 in round 2 (2026-11-08). Sensitivity is accepted. The five
+      in-game checks were waived to R8 packaged play by the owner ("We can always debug
+      those"); mute, volume and restart persistence already passed in the packaged app.
+      Round 1: logs/r7-english-readability/closeout-human-audio-listen.md.
 
   - id: R7-AUDIO-OFFLINE-RUNTIME
     lane: R7
@@ -321,19 +320,21 @@ gates:
   - id: R7-ACCEPTANCE-ALL-GREEN
     lane: R7
     title: Broader R7 all-green acceptance gate
-    status: blocked
+    status: closed
     kind: acceptance
     opened: 2026-09-09
+    closed: 2026-11-08
     blocks: [R8]
     evidence_required: >
       Every other R7 gate closed, then the parent plan's all-green acceptance box ticked
       with its evidence enumerated.
-    evidence_path: null
+    evidence_path: logs/r7-english-readability/closeout-human-audio-listen-round2.md
     source: docs/plans/2026-07-31-content-history-localization-audio-plan.md
     notes: >
-      This is the roll-up gate. It cannot close before R7-AUDIO-HUMAN-ACCEPTANCE,
-      R7-AUDIO-OFFLINE-RUNTIME, R7-AUDIO-CUE-WIRING, R7-BASELINE-SIX-PIN and
-      R7-WARROOM-PRESENTATION.
+      Roll-up gate. Closed on the owner's direction ("Close the listening gate and R7",
+      2026-11-08) once R7-AUDIO-HUMAN-ACCEPTANCE, R7-AUDIO-OFFLINE-RUNTIME,
+      R7-AUDIO-CUE-WIRING, R7-BASELINE-SIX-PIN and R7-WARROOM-PRESENTATION were all
+      closed. The evidence file enumerates each gate and where unfinished R7 work went.
 
   - id: R7-WARROOM-PRESENTATION
     lane: R7
