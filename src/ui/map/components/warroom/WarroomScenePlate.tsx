@@ -8,6 +8,7 @@ export const WARROOM_SCENE_ASPECT = WARROOM_SCENE_WIDTH / WARROOM_SCENE_HEIGHT;
 export interface WarroomScenePlateProps {
   src: string;
   wideSrc?: string;
+  softenRightJoin?: boolean;
   state?: 'current' | 'incoming';
   transformOrigin?: string;
   className?: string;
@@ -21,6 +22,7 @@ export interface WarroomScenePlateProps {
 export function WarroomScenePlate({
   src,
   wideSrc,
+  softenRightJoin,
   state = 'current',
   transformOrigin,
   className,
@@ -35,6 +37,7 @@ export function WarroomScenePlate({
       className={className}
       data-testid="warroom-scene-plate"
       data-scene-state={state}
+      data-soften-right-join={wideSrc && softenRightJoin ? true : undefined}
       style={{
         position: 'absolute',
         left: '50%',

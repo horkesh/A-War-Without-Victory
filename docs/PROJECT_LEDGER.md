@@ -13906,3 +13906,11 @@ All 15 faction/year Warroom scenes have decorative side atlases derived from 384
 
 - Verification: all 15 assets resolve and bundle; all 12 live-selectable rooms pass relative hotspot, map, and date-board registration at 1280 × 720 and 3426 × 1186. The 150% interface-scale and seam follow-up also passed. Focused tests 111/111, typecheck, production map build, chunk cycle check, and board-luminance check pass.
 - Presentation only. No simulation, state, save, scenario, or calibration effect. Local evidence is under F:/AWWV-worktrees/.warroom-ultrawide.
+
+## 2026-11-08 — Fix Warroom panorama architectural continuity (UI, ART)
+
+Rebuilt all 15 extensions using one fixed side-art master per faction. RBiH uses the 1992 plaster-and-rail master, RS the 1991 wood-paneled master, and HRHB the 1992 plaster-and-tile master. Lighting is matched per year to the original center and the original year-specific props remain visible. The transitions follow the neighboring perspective. RBiH has a small ultrawide-only edge overlap to finish its cropped switch plate.
+
+- Compared five-year sequences and inspected 30 joins. The normal and ultrawide browser matrix verified 12 live rooms, each with ten registered targets and overlays, and direct scene previews covered all three 1991 entries.
+- Focused Warroom tests 111/111, followed by 23/23 after the RBiH join change. Typecheck, production map build, all 15 packaged map atlases, chunk cycle check, and board-luminance check passed. No simulation, state, save, scenario, or calibration changes.
+- Evidence is under F:/AWWV-worktrees/.warroom-ultrawide/continuity-fix. No native Electron package or hosted CI run in this slice.

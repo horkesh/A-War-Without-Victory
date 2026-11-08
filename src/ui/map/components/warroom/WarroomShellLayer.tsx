@@ -1120,7 +1120,10 @@ export function WarroomShellLayer({ onNavigate, onOpenSidePicker, statusDock }: 
         overflow: 'hidden',
       }}
     >
-      <WarroomScenePlate src={scenePlateUrl} wideSrc={warroomWideSceneUrl(playerFaction, year)}>
+      <WarroomScenePlate src={scenePlateUrl}
+        wideSrc={warroomWideSceneUrl(playerFaction, year)}
+        softenRightJoin={playerFaction === 'RBiH'}
+      >
         <WarroomToolbar onNavigate={onNavigate} />
         {statusDock}
         {deskMapRegion ? (
