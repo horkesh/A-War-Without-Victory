@@ -19,7 +19,10 @@
  *     total area that joins it to its entity's main territory goes to its main party.
  *  4. A component holding a protected cell (`isProtectedCell`: ground a package won at the
  *     table, or an enclave such as Goražde or Srebrenica) is never absorbed, whatever its
- *     size; it gets a corridor (RD-CONTIGUITY-PROTECTION, Pyrrhic panel 2026-11-07).
+ *     size; it gets a corridor (RD-CONTIGUITY-PROTECTION, Pyrrhic panel 2026-11-07),
+ *  5. unless that corridor would cut more than POCKET_MAX_CELLS cells off the other
+ *     entity's main territory (DC A6 panel 2026-11-08). Then the component stays where it
+ *     is, held but detached: a held Srebrenica or Žepa remains a Federation exclave.
  * Exempt: a component `isProtectedExclave` names (the Federation's Posavina canton, which
  * borders Croatia and was held at Dayton without a land link).
  * A component that can be neither absorbed nor joined is left as it is and the pass moves
@@ -129,6 +132,36 @@ function cheapestCorridor(
     return null;
 }
 
+/**
+ * True when handing `path` to `owner` would split more than POCKET_MAX_CELLS cells off the
+ * other entity's main territory (all pieces but the largest count as cut off).
+ */
+function cutsOtherEntity(
+    path: string[],
+    owner: FactionId,
+    otherMain: Component,
+    ctl: Record<string, FactionId>,
+    adjacency: Map<string, string[]>,
+): boolean {
+    const taken = new Set(path.filter((o) => sideOf(owner) !== sideOf(ctl[o]!)));
+    const remaining = otherMain.cells.filter((o) => !taken.has(o));
+    const members = new Set(remaining);
+    const seen = new Set<string>();
+    let largest = 0;
+    for (const start of remaining) {
+        if (seen.has(start)) continue;
+        seen.add(start);
+        const queue = [start];
+        for (let i = 0; i < queue.length; i++) {
+            for (const n of adjacency.get(queue[i]!) ?? []) {
+                if (members.has(n) && !seen.has(n)) { seen.add(n); queue.push(n); }
+            }
+        }
+        largest = Math.max(largest, queue.length);
+    }
+    return remaining.length - largest > POCKET_MAX_CELLS;
+}
+
 export function enforceSettlementContiguity(input: ContiguityInput): ContiguityResult {
     const ctl: Record<string, FactionId> = { ...input.controllers };
     const changes: Record<string, FactionId> = {};
@@ -172,6 +205,12 @@ export function enforceSettlementContiguity(input: ContiguityInput): ContiguityR
             const path = cheapestCorridor(comp.cells, target, comp.side, ctl, input.adjacency, input.areas, isProtectedCell);
             if (!path || path.length === 0) continue; // cannot be joined; leave it and move on
             const owner = majorityFaction(comp.cells, ctl);
+            // A corridor must not cut the other entity in two (DC A6, 2026-11-08: a held
+            // Srebrenica joined through Vlasenica severed eastern RS, and RS's reconnecting
+            // corridor then ran through Tuzla). A cut-off of a few cells is absorbed later;
+            // anything larger means this component stays where it is, held but detached.
+            const otherMain = main.get(comp.side === 'FED' ? 'RS' : 'FED');
+            if (otherMain && cutsOtherEntity(path, owner, otherMain, ctl, input.adjacency)) continue;
             for (const o of path) { assign(o, owner); corridorCells.add(o); }
             changed = true;
             break;

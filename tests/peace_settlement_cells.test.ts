@@ -50,10 +50,10 @@ const SAPNA = 'op:zvornik:sapna';
 const TEOCAK = 'op:ugljevik:teocak_krstac_2';
 
 describe('quota pass without a cell table (the recorded defect)', () => {
-    it('sends Sapna and Teočak to RS by sorted-order quota exhaustion', () => {
+    it('sends Sapna to RS by sorted-order quota exhaustion (Teočak is now held by the enclave rule, DC A6)', () => {
         const { controllers } = computeSettlementControllersWith(fixtureState(), 'dayton', {}, {});
         expect(controllers[SAPNA]).toBe('RS');
-        expect(controllers[TEOCAK]).toBe('RS');
+        expect(controllers[TEOCAK]).toBe('RBiH');
     });
 });
 

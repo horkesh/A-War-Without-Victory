@@ -132,7 +132,7 @@ export function resolveDesktopDaytonAgreement(
     const wartimeControllers = { ...state.political.political_controllers };
     // Captured-ground names and the mediator's draft are read before the signature.
     const frontPackages = frontPackagesForProposal(state, proposal);
-    const player = (state.meta.player_faction ?? 'RBiH') as FactionId;
+    const player: FactionId = state.meta.player_faction ?? 'RBiH';
     const result = resolveDaytonNegotiation(state, proposal, baseDir);
     const agreement = projectDaytonAgreement(state, wartimeControllers);
     // The treaty against the mediator's draft (owner, 2026-11-08): shown in final review and

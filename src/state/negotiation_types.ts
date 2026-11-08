@@ -286,7 +286,8 @@ export interface TerritorialPackage {
     osid_keywords: string[];
     /**
      * Parties for whom this whole package is protected ground (patron_leverage.ts), on top
-     * of the municipality list: never conceded voluntarily, never forced by a patron.
+     * of the municipality list: a price class (DC A6), carried only by the holder's own
+     * willingness and never forced by a patron; HRHB's stays off the table.
      */
     protected_for?: string[];
     // ── Captured-ground packages (front_packages.ts), derived per state, never persisted.
@@ -362,7 +363,7 @@ export interface DaytonBotResponse {
      * terms, accepted because its patron pressed it, close (a counter that asks for a
      * little), far (a counter that rewrites most of the draft), or refused outright.
      */
-    reason_code?: 'accept' | 'accept_patron' | 'counter_close' | 'counter_far' | 'reject';
+    reason_code?: 'accept' | 'accept_patron' | 'counter_close' | 'counter_far' | 'counter_protected' | 'reject';
     /** Total capital cost of the proposal to this bot faction. */
     proposal_cost: number;
     /** Bot's available capital. */

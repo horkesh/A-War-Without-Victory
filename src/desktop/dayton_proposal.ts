@@ -9,7 +9,7 @@ import { frontPackagesForPlayer, isFrontPackageId } from '../sim/negotiation/fro
 import { getAllInstitutionalPackages } from '../sim/negotiation/institutional_packages.js';
 import { reconcileProposalPowers } from '../sim/negotiation/power_overlap.js';
 import { getAllTerritorialPackages, getTerritorialPackageById } from '../sim/negotiation/territorial_packages.js';
-import { playerMayConcede } from '../sim/negotiation/patron_leverage.js';
+import { isOnTheTable, playerMayConcede } from '../sim/negotiation/patron_leverage.js';
 
 const PROPOSAL_FIELDS = new Set<keyof DaytonProposal>([
     'territorial_demands', 'territorial_concessions', 'institutional_choices',
@@ -84,7 +84,7 @@ export function parseDaytonProposal(payload: unknown, state: GameState): DaytonP
                     frontIds = new Set(frontPackages.map(pkg => pkg.id));
                 }
                 if (!frontIds.has(id)) invalid(field);
-                holder = frontPackages!.find(pkg => pkg.id === id)?.default_holder;
+                holder = frontPackages?.find(pkg => pkg.id === id)?.default_holder;
             } else {
                 holder = TERRITORY_HOLDER.get(id);
                 // Dayton drew the inter-entity line only: a Federation party cannot raise
@@ -96,6 +96,11 @@ export function parseDaytonProposal(payload: unknown, state: GameState): DaytonP
             // Concede only on ground it gives the player.
             if (field === 'territorial_demands' && holder === playerFaction) invalid(field);
             if (field === 'territorial_concessions' && holder !== playerFaction) invalid(field);
+            // Ground never on the table (Mostar and western Herzegovina, DC A6 panel).
+            if (field === 'territorial_demands') {
+                const pkg = TERRITORY_IDS.has(id) ? getTerritorialPackageById(id) : frontPackages?.find(p => p.id === id);
+                if (pkg && !isOnTheTable(pkg)) invalid(field);
+            }
             // A player never gives up its own protected ground (Brčko excepted, D1).
             if (field === 'territorial_concessions' && TERRITORY_IDS.has(id)) {
                 const pkg = getTerritorialPackageById(id);

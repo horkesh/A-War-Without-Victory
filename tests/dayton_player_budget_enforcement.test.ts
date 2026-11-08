@@ -134,7 +134,7 @@ describe('clampPlayerProposalToBudget', () => {
     });
 
     it('drops the DEAREST items first until the spend fits the budget', () => {
-        // RBiH demands srebrenica(25) + brcko(20) + Sarajevo suburbs(15) = 60; budget 30.
+        // RBiH demands srebrenica(25) + Brčko(20, RS protected ground: x3 = 60, DC A6) + Sarajevo suburbs(15) = 100; budget 30.
         const proposal: DaytonProposal = {
             territorial_demands: ['sarajevo_suburbs', 'brcko_district', 'srebrenica_area'],
             territorial_concessions: [],
@@ -142,8 +142,8 @@ describe('clampPlayerProposalToBudget', () => {
         };
         const res = clampPlayerProposalToBudget(proposal, 'RBiH', 30);
         expect(res.clamped).toBe(true);
-        // Drops srebrenica(25) → 35, still > 30, drops brcko(20) → 15 ≤ 30. Stop.
-        expect(res.dropped).toEqual(['demand:srebrenica_area', 'demand:brcko_district']);
+        // Drops Brčko(60) → 40, still > 30, drops srebrenica(25) → 15 ≤ 30. Stop.
+        expect(res.dropped).toEqual(['demand:brcko_district', 'demand:srebrenica_area']);
         expect(res.proposal.territorial_demands).toEqual(['sarajevo_suburbs']);
         expect(res.finalSpend).toBeLessThanOrEqual(30);
         expect(res.finalSpend).toBe(15);

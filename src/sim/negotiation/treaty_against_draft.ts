@@ -43,8 +43,10 @@ export function buildTreatyAgainstDraft(
         const want = proposal.competency_allocation?.[comp.id];
         if (want && want !== comp.default_owner) asked.push({ kind: 'competency', id: comp.id, asked: want, signed: String(signedComp[comp.id] ?? comp.default_owner) });
     }
-    for (const id of Object.keys(proposal.constitutional_choices ?? {}).sort(strictCompare)) {
-        const want = proposal.constitutional_choices![id]!;
+    const choices = proposal.constitutional_choices ?? {};
+    for (const id of Object.keys(choices).sort(strictCompare)) {
+        const want = choices[id];
+        if (!want) continue;
         const def = getConstitutionalChoiceById(id)?.options.find(o => o.is_default)?.id;
         if (want === def) continue;
         asked.push({ kind: 'constitutional', id, asked: want, signed: String(agreement.terms.constitutional_choices?.[id] ?? def ?? '') });

@@ -111,10 +111,13 @@ describe('2. the validator refuses what the room does not offer', () => {
         expect(() => parseDaytonProposal({ ...E, territorial_demands: ['gorazde_corridor'] }, makeState('RBiH'))).toThrow(/territorial_demands/);
         expect(() => parseDaytonProposal({ ...E, territorial_concessions: ['gorazde_corridor'] }, makeState('RBiH'))).toThrow(/territorial_concessions/);
         expect(parseDaytonProposal({ ...E, territorial_demands: ['gorazde_corridor'] }, makeState('RS')).territorial_demands).toEqual(['gorazde_corridor']);
-        // RBiH's delegation refuses (protected ground) and no patron can force it: the corridor survives signing.
-        const state = makeState('RS', 80, 100);
+        // Protected ground is a price class (DC A6): RBiH's own willingness alone can carry it,
+        // and no patron forces it. At composite 50 RBiH can give at most 30 < 40: the corridor
+        // survives signing even with Washington at full authority.
+        const state = makeState('RS', 50, 100);
         const result = resolveDaytonNegotiation(state, parseDaytonProposal({ ...E, territorial_demands: ['gorazde_corridor'] }, state));
         expect(result.territorial_packages_accepted).not.toContain('gorazde_corridor');
+        expect(result.patron_overrides_applied).not.toContain('territorial:gorazde_corridor:RBiH');
         const map = settlementControllersFor(state)!;
         for (const o of resolveOsidsForKeywords(getTerritorialPackageById('gorazde_corridor')!.osid_keywords)) expect(map[o]).not.toBe('RS');
     });

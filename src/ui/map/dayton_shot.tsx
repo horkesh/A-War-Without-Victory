@@ -64,9 +64,9 @@ if (params.get('locale') === 'bcs') {
 // Same realistic packet the unit test exercises (Brčko tri-state present).
 const PENDING: NonNullable<LoadedGameState['pendingDayton']> = {
     territorialPackages: [
-        { id: 'gorazde_corridor', name: 'Goražde Corridor', defaultHolder: 'RS', demandCost: 12, concedeCost: 8 },
-        { id: 'brcko_district', name: 'Brčko District', defaultHolder: 'RS', demandCost: 20, concedeCost: 15 },
-        { id: 'sarajevo_suburbs', name: 'Sarajevo Suburbs', defaultHolder: 'RBiH', demandCost: 10, concedeCost: 6 },
+        { id: 'gorazde_corridor', name: 'Goražde Corridor', defaultHolder: 'RBiH', demandCost: 0, concedeCost: 10, protectedCore: true },
+        { id: 'brcko_district', name: 'Brčko District', defaultHolder: 'RS', demandCost: 60, concedeCost: 18, theirCore: true },
+        { id: 'sarajevo_suburbs', name: 'Sarajevo Suburbs', defaultHolder: 'RS', demandCost: 15, concedeCost: 12 },
     ],
     institutionalPackages: [
         { id: 'military', name: 'Military Structure', centralizedCost: 15, decentralizedCost: 10 },

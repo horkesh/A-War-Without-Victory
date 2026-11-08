@@ -85,7 +85,7 @@ import {
 } from '../../../sim/combat/supply_condition.js';
 import { PEACE_PLANS } from '../../../sim/negotiation/peace_plan_data.js';
 import { frontPackagesForPlayer } from '../../../sim/negotiation/front_packages.js';
-import { packageOsids, playerMayConcede } from '../../../sim/negotiation/patron_leverage.js';
+import { demandPrice, isHolderProtected, isOnTheTable, packageOsids, playerMayConcede } from '../../../sim/negotiation/patron_leverage.js';
 import { settlementControllersFor } from '../../../sim/negotiation/peace_settlement.js';
 import { getTerritorialPackageById } from '../../../sim/negotiation/territorial_packages.js';
 import war1992Events from '../../../../data/scenarios/events/war_1992.json';
@@ -4208,7 +4208,7 @@ export function derivePendingDayton(state: any): LoadedGameState['pendingDayton'
             id: p.id,
             name: p.name,
             defaultHolder: p.default_holder,
-            demandCost: p.capital_cost_to_demand,
+            demandCost: demandPrice(p, playerFaction),
             concedeCost: p.capital_cost_to_concede,
             claimant: p.claimant,
             areaPct: p.area_pct,
@@ -4226,11 +4226,16 @@ export function derivePendingDayton(state: any): LoadedGameState['pendingDayton'
                 id,
                 name: String(p.name ?? ''),
                 defaultHolder: String(p.default_holder ?? ''),
-                demandCost: Number(p.demand_cost ?? 0),
+                // Engine price when the package is known (protected premium, DC A6); else the packet's.
+                demandCost: knownPackage && playerFaction ? demandPrice(knownPackage, playerFaction) : Number(p.demand_cost ?? 0),
                 concedeCost: Number(p.concede_cost ?? 0),
                 osids: knownPackage ? packageOsids(knownPackage) : [],
                 // The player's own protected ground cannot be conceded (Brčko excepted).
                 ...(knownPackage && playerFaction && !playerMayConcede(knownPackage, playerFaction) ? { protectedCore: true } : {}),
+                // The other side's protected ground: a price class, never pressed by a patron (DC A6).
+                ...(knownPackage && playerFaction && knownPackage.default_holder !== playerFaction && isHolderProtected(knownPackage) && isOnTheTable(knownPackage) ? { theirCore: true } : {}),
+                // Never on the table for anyone (Mostar and western Herzegovina): no Demand offered.
+                ...(knownPackage && playerFaction && knownPackage.default_holder !== playerFaction && !isOnTheTable(knownPackage) ? { offTable: true } : {}),
             };
         }),
         frontPackages,

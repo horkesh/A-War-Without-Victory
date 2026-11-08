@@ -52,7 +52,7 @@ import { computePeaceDysfunctionBreakdown } from './peace_dysfunction.js';
 import { getPackageAreaPct, resolveOsidsForKeywords } from './package_area_resolver.js';
 import { applyPeaceSettlement, computeSettlementControllers, settlementControllersFor } from './peace_settlement.js';
 import { frontPackagesForProposal, frontPackageVisibleToPlayer, sameEntitySide } from './front_packages.js';
-import { packageOsids, selectPatronForced } from './patron_leverage.js';
+import { demandPrice, packageOsids, selectPatronForced } from './patron_leverage.js';
 import type { TerritorialPackage } from '../../state/negotiation_types.js';
 
 import { loadEventDefinitions } from '../events/event_loader.js';
@@ -257,7 +257,8 @@ export function initiateDaytonNegotiation(state: GameState): {
             id: pkg.id,
             name: pkg.name,
             default_holder: pkg.default_holder,
-            demand_cost: pkg.capital_cost_to_demand,
+            // Price for any side that does not hold it (protected ground at its premium, DC A6).
+            demand_cost: demandPrice(pkg, ''),
             concede_cost: pkg.capital_cost_to_concede,
         })),
         institutional_packages: getAllInstitutionalPackages().map(pkg => ({

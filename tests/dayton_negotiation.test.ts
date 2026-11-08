@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type { GameState, FactionId } from '../src/state/game_state.js';
 import type { DaytonProposal, NegotiationBreakdown, PatronRelationship } from '../src/state/negotiation_types.js';
 import { createEmptyCapital, createDefaultPatronRelationship } from '../src/state/negotiation_types.js';
-import { evaluateBotResponse, getCompositeCapital, computeProposalCostToFaction, PROTECTED_GROUND_REFUSAL_COST } from '../src/sim/negotiation/bot_negotiation.js';
+import { evaluateBotResponse, getCompositeCapital, computeProposalCostToFaction } from '../src/sim/negotiation/bot_negotiation.js';
 import { initializeStrategicDimensions } from '../src/sim/events/strategic_dimensions.js';
 import type { DimensionStore } from '../src/sim/events/strategic_dimensions.js';
 import { shouldInitiateDayton, initiateDaytonNegotiation, resolveDaytonNegotiation, DAYTON_TRIGGER_WEEK } from '../src/sim/negotiation/dayton_negotiation.js';
@@ -380,9 +380,9 @@ describe('Proposal Cost', () => {
         };
 
         // Cost to RS: Sarajevo suburbs (12 concede) + Brčko, which is protected ground (owner
-        // ruling 2026-11-07, patron_leverage.ts): RS never concedes it, so it costs the refusal cost.
+        // ruling 2026-11-07, patron_leverage.ts), priced as a class (DC A6): max(40, 3 x 18) = 54.
         const costToRS = computeProposalCostToFaction(proposal, 'RS');
-        expect(costToRS).toBe(12 + PROTECTED_GROUND_REFUSAL_COST);
+        expect(costToRS).toBe(12 + 54);
 
         // Cost to RBiH: 0 (RS holds both)
         const costToRBiH = computeProposalCostToFaction(proposal, 'RBiH');

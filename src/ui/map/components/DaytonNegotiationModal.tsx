@@ -553,13 +553,19 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
                                 {isPartnerHeld && (
                                     <span className="text-xs text-[#6a5a40] italic">{t('dayton.federationPartner')}</span>
                                 )}
-                                {!isPlayerHeld && !isPartnerHeld && (
+                                {!isPlayerHeld && !isPartnerHeld && 'offTable' in pkg && pkg.offTable && (
+                                    <span className="text-xs text-[#6a5a40] italic">{t('dayton.offTable')}</span>
+                                )}
+                                {!isPlayerHeld && !isPartnerHeld && !('offTable' in pkg && pkg.offTable) && (
                                     <button type="button" onClick={() => toggleDemand(pkg.id)} aria-label={actionName(t('dayton.demandPlain'), pkg)} aria-pressed={conference ? isDemand : undefined}
                                         className={`text-xs px-2 py-1 rounded border font-bold uppercase ${
                                             isDemand ? 'bg-[#2a6a2a] text-white border-[#2a6a2a]' : 'text-[#2a6a2a] border-[#2a6a2a]/40 hover:bg-[#d0e8d0]'
                                         }`} style={{ fontFamily: 'var(--font-command)' }}>
                                         {demandLabel(pkg)}
                                     </button>
+                                )}
+                                {!isPlayerHeld && !isPartnerHeld && 'theirCore' in pkg && pkg.theirCore && (
+                                    <span className="text-xs text-[#6a5a40] italic">{t('dayton.theirCore')}</span>
                                 )}
                                 {isPlayerHeld && 'protectedCore' in pkg && pkg.protectedCore && (
                                     <span className="text-xs text-[#6a5a40] italic">{t('dayton.protectedCore')}</span>

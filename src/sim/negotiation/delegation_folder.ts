@@ -54,7 +54,7 @@ function turnCosts(state: GameState): TurnCost[] {
 /** Build the folder for the player's faction, or undefined when there is no player faction. */
 export function buildDelegationFolder(state: GameState): DelegationFolder | undefined {
     const faction = state.meta?.player_faction;
-    if (!faction || !FACTIONS.includes(faction as FactionId)) return undefined;
+    if (!faction || !FACTIONS.includes(faction)) return undefined;
     const turn = state.meta.turn;
     const controllers = state.political?.political_controllers ?? {};
     const cells = Object.keys(controllers).sort(strictCompare);
@@ -93,7 +93,7 @@ export function buildDelegationFolder(state: GameState): DelegationFolder | unde
             return {
                 plan_id: row.plan_id,
                 turn_offered: row.turn_offered,
-                proposed_split: { RBiH: plan!.proposed_split.RBiH ?? 0, RS: plan!.proposed_split.RS ?? 0, HRHB: plan!.proposed_split.HRHB ?? 0 },
+                proposed_split: { RBiH: plan?.proposed_split.RBiH ?? 0, RS: plan?.proposed_split.RS ?? 0, HRHB: plan?.proposed_split.HRHB ?? 0 },
                 refused_by: refusedBy,
                 player_answer: (row.responses?.[faction] ?? 'pending') as 'accepted' | 'rejected' | 'pending',
                 weeks_since: Math.max(0, turn - since),

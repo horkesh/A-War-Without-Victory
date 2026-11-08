@@ -163,7 +163,7 @@ export interface IpcDaytonBotResponse {
     decision: 'accept' | 'reject' | 'counter';
     reason: string;
     /** Plain-language category for the room (DC A2); absent on responses from older builds. */
-    reason_code?: 'accept' | 'accept_patron' | 'counter_close' | 'counter_far' | 'reject';
+    reason_code?: 'accept' | 'accept_patron' | 'counter_close' | 'counter_far' | 'counter_protected' | 'reject';
     proposal_cost: number;
     available_capital: number;
     counter_proposal?: {

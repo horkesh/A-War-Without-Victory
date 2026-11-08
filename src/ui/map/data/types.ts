@@ -1635,6 +1635,10 @@ export interface LoadedGameState {
             osids?: string[];
             /** The player's own protected ground: offered no Concede (Brčko excepted). */
             protectedCore?: boolean;
+            /** The other side's protected ground: very costly, no patron presses it (DC A6). */
+            theirCore?: boolean;
+            /** Never on the table for anyone: the room offers no Demand (DC A6 panel). */
+            offTable?: boolean;
         }>;
         /**
          * Captured-ground packages: ground one party holds that the Dayton map gives to

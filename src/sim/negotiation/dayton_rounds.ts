@@ -82,7 +82,8 @@ export function tableDaytonRound(
     if (roundNumber === null) return { ok: false, error: 'rounds_spent' };
     const player = state.meta.player_faction;
     const responses: DaytonRound['responses'] = {};
-    for (const faction of (['HRHB', 'RBiH', 'RS'] as FactionId[])) {
+    const parties: readonly FactionId[] = ['HRHB', 'RBiH', 'RS'];
+    for (const faction of parties) {
         if (faction === player) continue;
         responses[faction] = evaluate(state, faction, proposal);
     }

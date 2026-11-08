@@ -264,6 +264,7 @@ export function computeSettlementControllersWith(
     for (const [o, f] of Object.entries(overrides).sort(([a], [b]) => strictCompare(a, b))) {
         if (o in controllers) controllers[o] = f;
     }
+    if (planId === 'dayton') keepHeldEnclaves(controllers, wartime);
     // Owner, 2026-11-07: "There should be no isolated pockets on final Dayton map." The
     // earlier plans drew enclaves on purpose (Vance–Owen provinces, the Contact Group's
     // eastern enclaves), so only Dayton is made contiguous.
@@ -296,6 +297,44 @@ export function computeSettlementControllersWith(
  * to the rest of the Federation, so the contiguity pass keeps them.
  */
 const POSAVINA_CANTON = new Set(['orasje', 'bosanski_samac', 'odzak']);
+
+/**
+ * DC A6, enclave held at signature (Goražde precedent). Dayton left Goražde with the
+ * Federation because the Federation held it, and drew a corridor to it. The same rule for
+ * every enclave with an explicit cell list: when its own entity holds the enclave's capital
+ * at signature, each enclave cell that entity holds stays with its wartime holder, even
+ * where the municipality quota or the audit gives it to the other entity. The contiguity
+ * pass then protects it and draws the corridor. A fallen enclave (capital lost) follows the
+ * map. No table package, fixed or captured-ground, hands a held enclave cell to the besieging
+ * entity either (sensitive-history seat, DC A6 panel): it reverts to its holder. Only cells across
+ * the inter-entity line move; the Federation parties' split is left to the map.
+ *
+ * Counterfactual, not Dayton history (historian seat, DC A6 panel 2026-11-08): Srebrenica
+ * and Žepa fell in July 1995, so Dayton never kept them. A held Srebrenica or Žepa stays a
+ * detached Federation exclave, on the 1994 Contact Group plan's precedent (eastern enclaves
+ * left as islands). No source supports a corridor through the Drina valley (Zvornik,
+ * Bratunac, Vlasenica); the contiguity pass refuses any corridor that cuts the other entity
+ * in two (`settlement_contiguity.ts`), and that guard must not be loosened "for history".
+ * The Goražde corridor itself was a negotiated concession, which the audit and the
+ * `gorazde_corridor` package carry; holding the town does not grant it here.
+ */
+function keepHeldEnclaves(
+    controllers: Record<string, FactionId>,
+    wartime: Record<string, string | null | undefined>,
+): void {
+    const side = (f: string | null | undefined) => (f === 'RS' ? 'RS' : f === 'RBiH' || f === 'HRHB' ? 'FED' : null);
+    for (const enclave of [...ENCLAVE_DEFINITIONS].sort((a, b) => strictCompare(a.id, b.id))) {
+        if (!enclave.osid_list || !enclave.capital_osid) continue;
+        const own = side(enclave.faction);
+        if (side(wartime[enclave.capital_osid]) !== own) continue;
+        for (const o of [...enclave.osid_list].sort(strictCompare)) {
+            const w = wartime[o];
+            if (!isFactionKey(w) || side(w) !== own) continue;
+            const c = controllers[o];
+            if (c && side(c) !== own) controllers[o] = w;
+        }
+    }
+}
 
 /**
  * Enclave cells the contiguity pass must not absorb: enclaves with an explicit cell list or
