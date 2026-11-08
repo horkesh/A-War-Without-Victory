@@ -13899,3 +13899,10 @@ Found during the R7 offline audio run: `resolveMapServerBaseUrl` in `src/desktop
 - New `tests/desktop_packaged_map_server_url.test.ts` runs the real function with a fake dev server answering on every port; red before the fix. The 39 other test files that read `electron-main.cjs` pass (468 tests); `tsc` clean.
 - Packaged proof on `b5018e63e`: a fresh `desktop:package:dir` build under the offline audio harness made 0 dev-server probes (8 before), used its built server, passed all four audio checks, and touched 0 remote URLs.
 - No simulation, state, scenario or calibration change.
+
+## 2026-11-08 — Match the R7 interface cues and restore turn-completion playback (AUDIO)
+
+Work order CL-20261108-043 replaces the nine Kenney runtime cues with original deterministic synthesis. The replacements measure −37.7 to −34.0 dB mean at game cue gain, with lower spectral centres. The turn completion cue measures 6.2 dB above the round 1 mix. A packaged reproduction showed the original OGG failed to play because its tail packet lacked a timestamp. The new export uses 100 ms Ogg pages and plays through in Electron. Prior Kenney and first-party files are retained with their provenance.
+
+- 124 focused tests, five Python generator and timestamp checks, typecheck, builds and independent review passed. The corrected offline Windows run verified all 30 bundled OGGs, complete playback of all ten changed files, and a byte-identical isolated turn-zero save.
+- Round 2 awaits human listening and sensitivity acceptance. See [the listening record](../logs/r7-english-readability/closeout-human-audio-listen.md).

@@ -134,7 +134,7 @@ export function getAllMusicIds(): string[] {
     return [...musicRegistry.keys()].sort();
 }
 
-// Priority-1 UI feedback set — binaries PROVIDED (CC0 Kenney Interface Sounds).
+// Priority-1 UI feedback set with first-party runtime binaries.
 // Real playback resolves via audioAssets.ts (Rollup URL-import map); the `src`
 // stems are cosmetic and now point at the committed `.ogg` files. Each cue's
 // current and previous provenance is logged in docs/audio/LICENSES/<cue_id>.md.
@@ -143,18 +143,18 @@ registerSFX({ id: 'ui_hover', src: 'audio/designed/ui_hover.ogg', volume: 0.3, a
 registerSFX({ id: 'ui_open_panel', src: 'audio/designed/ui_open_panel.ogg', volume: 0.4, assetStatus: 'provided' });
 registerSFX({ id: 'ui_close_panel', src: 'audio/designed/ui_close_panel.ogg', volume: 0.4, assetStatus: 'provided' });
 registerSFX({ id: 'turn_advance', src: 'audio/designed/turn_advance.ogg', volume: 0.6, assetStatus: 'provided' });
-registerSFX({ id: 'turn_complete', src: 'audio/designed/turn_complete.ogg', volume: 0.6, assetStatus: 'provided' });
+registerSFX({ id: 'turn_complete', src: 'audio/designed/turn_complete.ogg', volume: 0.95, assetStatus: 'provided' });
 registerSFX({ id: 'turn_review_open', src: 'audio/designed/turn_review_open.ogg', volume: 0.35, assetStatus: 'provided' });
-registerSFX({ id: 'battle_notification', src: 'audio/ui/battle.ogg', volume: 0.5, assetStatus: 'provided' });
-registerSFX({ id: 'battle_decisive', src: 'audio/ui/battle_decisive.ogg', volume: 0.7, assetStatus: 'provided' });
-registerSFX({ id: 'battle_catastrophic', src: 'audio/ui/battle_catastrophic.ogg', volume: 0.7, assetStatus: 'provided' });
-registerSFX({ id: 'operation_launched', src: 'audio/ui/op_launch.ogg', volume: 0.5, assetStatus: 'provided' });
-registerSFX({ id: 'operation_complete', src: 'audio/ui/op_complete.ogg', volume: 0.5, assetStatus: 'provided' });
-registerSFX({ id: 'event_notification', src: 'audio/ui/event.ogg', volume: 0.5, assetStatus: 'provided' });
-registerSFX({ id: 'event_critical', src: 'audio/ui/event_critical.ogg', volume: 0.7, assetStatus: 'provided' });
+registerSFX({ id: 'battle_notification', src: 'audio/designed/battle_notification.ogg', volume: 0.5, assetStatus: 'provided' });
+registerSFX({ id: 'battle_decisive', src: 'audio/designed/battle_decisive.ogg', volume: 0.7, assetStatus: 'provided' });
+registerSFX({ id: 'battle_catastrophic', src: 'audio/designed/battle_catastrophic.ogg', volume: 0.7, assetStatus: 'provided' });
+registerSFX({ id: 'operation_launched', src: 'audio/designed/operation_launched.ogg', volume: 0.5, assetStatus: 'provided' });
+registerSFX({ id: 'operation_complete', src: 'audio/designed/operation_complete.ogg', volume: 0.5, assetStatus: 'provided' });
+registerSFX({ id: 'event_notification', src: 'audio/designed/event_notification.ogg', volume: 0.5, assetStatus: 'provided' });
+registerSFX({ id: 'event_critical', src: 'audio/designed/event_critical.ogg', volume: 0.7, assetStatus: 'provided' });
 registerSFX({ id: 'peace_plan_offered', src: 'audio/designed/peace_plan_offered.ogg', volume: 0.6, assetStatus: 'provided' });
-registerSFX({ id: 'game_over', src: 'audio/compat/game_over.ogg', volume: 0.8, assetStatus: 'provided' });
-registerSFX({ id: 'tutorial_objective_complete', src: 'audio/ui/tutorial_complete.ogg', volume: 0.5, assetStatus: 'provided' });
+registerSFX({ id: 'game_over', src: 'audio/designed/game_over.ogg', volume: 0.8, assetStatus: 'provided' });
+registerSFX({ id: 'tutorial_objective_complete', src: 'audio/designed/tutorial_objective_complete.ogg', volume: 0.5, assetStatus: 'provided' });
 
 registerCue({ id: 'ambient_peace_spring', category: 'ambient', defaultVolume: 0.2, filePath: 'audio/ambient/peace_spring.mp3', loop: true });
 registerCue({ id: 'ambient_war_winter', category: 'ambient', defaultVolume: 0.18, filePath: 'audio/ambient/war_winter.mp3', loop: true });
