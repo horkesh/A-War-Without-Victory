@@ -85,7 +85,9 @@ import {
 } from '../../../sim/combat/supply_condition.js';
 import { PEACE_PLANS } from '../../../sim/negotiation/peace_plan_data.js';
 import { frontPackagesForPlayer } from '../../../sim/negotiation/front_packages.js';
+import { packageOsids } from '../../../sim/negotiation/patron_leverage.js';
 import { settlementControllersFor } from '../../../sim/negotiation/peace_settlement.js';
+import { getTerritorialPackageById } from '../../../sim/negotiation/territorial_packages.js';
 import war1992Events from '../../../../data/scenarios/events/war_1992.json';
 import war1993Events from '../../../../data/scenarios/events/war_1993.json';
 import war1994Events from '../../../../data/scenarios/events/war_1994.json';
@@ -4210,19 +4212,25 @@ export function derivePendingDayton(state: any): LoadedGameState['pendingDayton'
             concedeCost: p.capital_cost_to_concede,
             claimant: p.claimant,
             areaPct: p.area_pct,
+            osids: packageOsids(p),
         }))
         : [];
     const forced = pd.forced && typeof pd.forced === 'object'
         ? { onFaction: String(pd.forced.on_faction ?? ''), by: String(pd.forced.by ?? '') }
         : undefined;
     return {
-        territorialPackages: (pd.territorial_packages ?? []).map((p: any) => ({
-            id: String(p.id ?? ''),
-            name: String(p.name ?? ''),
-            defaultHolder: String(p.default_holder ?? ''),
-            demandCost: Number(p.demand_cost ?? 0),
-            concedeCost: Number(p.concede_cost ?? 0),
-        })),
+        territorialPackages: (pd.territorial_packages ?? []).map((p: any) => {
+            const id = String(p.id ?? '');
+            const knownPackage = getTerritorialPackageById(id);
+            return {
+                id,
+                name: String(p.name ?? ''),
+                defaultHolder: String(p.default_holder ?? ''),
+                demandCost: Number(p.demand_cost ?? 0),
+                concedeCost: Number(p.concede_cost ?? 0),
+                osids: knownPackage ? packageOsids(knownPackage) : [],
+            };
+        }),
         frontPackages,
         ...(forced ? { forced } : {}),
         institutionalPackages: (pd.institutional_packages ?? []).map((p: any) => ({

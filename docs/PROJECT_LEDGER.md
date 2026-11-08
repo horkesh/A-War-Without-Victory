@@ -13927,3 +13927,11 @@ Pending Dayton now opens the Hope Hotel arrival and conference room. Four regist
 - The standard and ultrawide layouts passed at five viewport sizes. The prototype shape check passed at four sizes. The final 85 UI checks, 80 backend preservation checks, typecheck, independent review with targeted corrections, map chunk check and Windows package passed.
 - Packaged Electron signed a seeded pending RS save with Monitoring Only for the OHR. Relaunch through Field Records on another loopback port preserved the exact save bytes and authoritative record. The draft, signed and reloaded views matched on 744 map paths and 30 institution rows. The record contains 712 assignments and 16 competencies.
 - Renderer-only change. Determinism, negotiation rules, canonical save structure and headless resolution remain unchanged. Evidence is under F:/AWWV-worktrees/.dayton-design/live-conference.
+
+## 2026-11-08 — Link Dayton counteroffers to clauses and review the treaty before signing (UI, DESKTOP)
+
+The live conference presents each responding delegation's proposal as changed clauses. Territorial links highlight the canonical package membership and show the recorded holders. Institutional links focus the term and distinguish the offer from the resolver's projected outcome. Back restores the originating clause. Adopting the offer edits the shared draft, and signing requires a successful preview of the current revision in Final review. The live legacy institutional prices use the resolver's faction-specific costs.
+
+- Three seeded pending-Dayton campaigns demonstrated RBiH receiving an RS counter, HRHB receiving an RBiH counter, and RS receiving an HRHB counter. Chromium and the same Windows Electron package passed the walkthroughs at 1280 × 720, 1920 × 1080 and 3426 × 1186. Preview and inspection preserved the pending saves.
+- The RS signature stored exactly the reviewed agreement. Packaged relaunch on another loopback port preserved all 712 assignments, 16 competencies, 744 rendered paths, 30 displayed institution rows and the signed save bytes.
+- Focused adapter, backend and UI suites, final typecheck, independent review corrections, the Windows package and native proof passed. The change reuses existing negotiation and save authority, with no simulation or determinism impact. Evidence is under F:/AWWV-worktrees/.dayton-design/clause-review.

@@ -1631,6 +1631,8 @@ export interface LoadedGameState {
             defaultHolder: string;
             demandCost: number;
             concedeCost: number;
+            /** Canonical territory covered by this clause. */
+            osids?: string[];
         }>;
         /**
          * Captured-ground packages: ground one party holds that the Dayton map gives to
@@ -1644,6 +1646,7 @@ export interface LoadedGameState {
             concedeCost: number;
             claimant?: string;
             areaPct?: number;
+            osids?: string[];
         }>;
         /** Set on the table reopened after a declined Dayton: no decline option. */
         forced?: { onFaction: string; by: string };

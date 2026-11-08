@@ -432,6 +432,9 @@ describe('save/load mid-negotiation: pending_dayton survives a round-trip', () =
         const view = derivePendingDayton(roundTripped);
         expect(view).toBeDefined();
         expect(view!.territorialPackages.map((p) => p.id).sort()).toEqual(['brcko_district', 'gorazde_corridor']);
+        const brcko = view!.territorialPackages.find(p => p.id === 'brcko_district');
+        expect(brcko?.osids?.length).toBeGreaterThan(0);
+        expect(brcko?.osids?.every(id => id.startsWith('op:brcko:'))).toBe(true);
         expect(view!.factionCapital.RBiH).toBe(80);
     });
 

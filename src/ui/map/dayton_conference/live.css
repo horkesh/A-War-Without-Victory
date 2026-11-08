@@ -141,6 +141,31 @@
   overflow: auto;
   overscroll-behavior: contain;
 }
+.dayton-live-panel[data-dayton-panel="review"] {
+  width: min(67rem, calc(100% - 1.7rem));
+}
+.dayton-clause-link {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .2rem .75rem;
+  width: 100%;
+  min-height: 2.25rem;
+  padding: .35rem .5rem;
+  border: 1px solid #a78e5c;
+  border-radius: 3px;
+  background: #f3e9d6;
+  text-align: start;
+}
+.dayton-clause-link:hover {
+  background: #ead6a9;
+}
+.dayton-clause-link > strong {
+  text-decoration: underline;
+}
+@media (min-width: 980px) {
+  .dayton-review-columns { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
+}
 @container interface-viewport (max-width: 820px) {
   .dayton-live-panel { width: calc(100% - 1.7rem); }
 }

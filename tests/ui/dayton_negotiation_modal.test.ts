@@ -4,6 +4,7 @@ import { act, cleanup, render, screen, fireEvent, waitFor, within } from '@testi
 import { createElement } from 'react';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
+import * as dataLoader from '../../src/ui/map/data/DataLoader';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 
 // @ts-expect-error TS1378: Vitest supports top-level await in ESM tests.
@@ -224,6 +225,132 @@ describe('DaytonNegotiationModal — Phase-4 player-agency surface', () => {
 describe('DaytonNegotiationModal — live conference room', () => {
     beforeEach(seedStore);
 
+    const agreement = (owner: 'shared' | 'entity' = 'shared', holder = 'RBiH') => ({
+        version: 1,
+        terms: { brcko_status: 'arbitration', institutional_choices: {}, competency_allocation: { comp_foreign_policy: owner, comp_defense: 'entity' } },
+        map: { wartimeControllers: { included: 'RS', unrelated: 'RS' }, controllers: { included: holder, unrelated: 'HRHB' }, specialOsids: [], territoryPct: {} },
+    });
+
+    function openDraft(dayton = PENDING) {
+        render(createElement(DaytonNegotiationModal, { dayton, conference: true }));
+        fireEvent.click(screen.getByRole('button', { name: 'Skip arrival' }));
+        fireEvent.click(within(screen.getByRole('navigation', { name: 'Conference objects' })).getByRole('button', { name: 'Current draft' }));
+    }
+
+    it('prices a centralized military term at the live RBiH engine cost', () => {
+        openDraft({ ...PENDING, factionCapital: { ...PENDING.factionCapital, RBiH: 10 } });
+        const close = () => fireEvent.click(screen.getByRole('button', { name: 'Return to conference room' }));
+        const nav = within(screen.getByRole('navigation', { name: 'Conference objects' }));
+        close();
+        fireEvent.click(nav.getByRole('button', { name: 'Treaty binder' }));
+        const militaryRow = screen.getByText('Military Structure').parentElement!;
+        fireEvent.click(within(militaryRow).getByRole('button', { name: 'Central (0)' }));
+        close();
+        fireEvent.click(nav.getByRole('button', { name: 'Current draft' }));
+        expect(screen.getByRole<HTMLButtonElement>('button', { name: 'Review agreement' }).disabled).toBe(false);
+    });
+
+    it('reviews a revised draft while an older preview is pending and signs only the newer proposal', async () => {
+        let finishOld: (response: unknown) => void = () => {};
+        const previewDayton = vi.fn()
+            .mockImplementationOnce(() => new Promise(resolve => { finishOld = resolve; }))
+            .mockResolvedValueOnce({ ok: true, agreement: agreement() });
+        const resolveDayton = vi.fn().mockResolvedValue({ ok: true });
+        (window as unknown as { awwv: Record<string, unknown> }).awwv = { previewDayton, resolveDayton };
+        openDraft();
+        fireEvent.click(screen.getByRole('button', { name: 'Review agreement' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Return to current draft' }));
+        fireEvent.click(screen.getByText('Demand (12)'));
+        fireEvent.click(screen.getByRole('button', { name: 'Review agreement' }));
+        expect(previewDayton).toHaveBeenCalledTimes(2);
+        await screen.findByRole('region', { name: 'Institutions and powers' });
+        await act(async () => finishOld({ ok: false }));
+        expect(screen.queryByRole('alert')).toBeNull();
+        fireEvent.click(screen.getByRole('button', { name: 'Sign agreement' }));
+        expect(resolveDayton.mock.calls[0]![0]).toEqual(previewDayton.mock.calls[1]![0]);
+    });
+
+    it('keeps signing behind review of a successful preview of the current draft', async () => {
+        const previewDayton = vi.fn().mockResolvedValueOnce({ ok: false }).mockResolvedValue({ ok: true, agreement: agreement() });
+        const resolveDayton = vi.fn().mockResolvedValue({ ok: true });
+        (window as unknown as { awwv: Record<string, unknown> }).awwv = { previewDayton, resolveDayton };
+        openDraft();
+        expect(screen.queryByRole('button', { name: 'Submit Proposal' })).toBeNull();
+        fireEvent.click(screen.getByRole('button', { name: 'Review agreement' }));
+        const sign = screen.getByRole<HTMLButtonElement>('button', { name: 'Sign agreement' });
+        await screen.findByRole('alert');
+        expect(sign.disabled).toBe(true);
+        fireEvent.click(sign);
+        expect(resolveDayton).not.toHaveBeenCalled();
+        const retry = screen.getByRole('button', { name: 'Probe Positions' });
+        retry.focus();
+        fireEvent.click(retry);
+        await screen.findByRole('region', { name: 'Institutions and powers' });
+        expect(document.activeElement).toBe(screen.getByRole('heading', { name: 'Changes from the opening draft' }));
+        expect(screen.getByRole('region', { name: 'Settlement territory' })).toBeTruthy();
+        fireEvent.click(screen.getByRole('button', { name: 'Return to current draft' }));
+        fireEvent.click(screen.getByText('Demand (12)'));
+        fireEvent.click(screen.getByRole('button', { name: 'Review agreement' }));
+        await waitFor(() => expect(previewDayton).toHaveBeenCalledTimes(3));
+        await screen.findByRole('region', { name: 'Institutions and powers' });
+        fireEvent.click(screen.getByRole('button', { name: 'Sign agreement' }));
+        expect(resolveDayton.mock.calls[0]![0]).toEqual(previewDayton.mock.calls[2]![0]);
+    });
+
+    it('follows a counter clause to its exact map members and binder row, then adopts the same proposal for review', async () => {
+        const geometry = vi.spyOn(dataLoader, 'loadOperationalSettlements').mockResolvedValue({
+            type: 'FeatureCollection',
+            features: ['included', 'unrelated'].map(osid => ({ type: 'Feature', properties: { osid }, geometry: { type: 'Polygon', coordinates: [[[17, 44], [18, 44], [18, 45], [17, 44]]] } })),
+        });
+        const counter = {
+            territorial_demands: [], territorial_concessions: [], institutional_choices: {},
+            entity_autonomy: 'federalized', competency_allocation: { comp_foreign_policy: 'entity', comp_defense: 'state' },
+        };
+        const previewDayton = vi.fn()
+            .mockResolvedValueOnce({ ok: true, agreement: agreement(), botResponses: {
+                RS: { decision: 'counter', reason: 'Opening terms exceed available capital.', counter_proposal: counter },
+            } })
+            .mockResolvedValueOnce({ ok: false })
+            .mockResolvedValue({ ok: true, agreement: agreement('entity', 'RS') });
+        (window as unknown as { awwv: Record<string, unknown> }).awwv = { previewDayton };
+        const corridor = { ...PENDING.territorialPackages[0]!, osids: ['included', 'missing'] };
+        openDraft({ ...PENDING, territorialPackages: [corridor, ...PENDING.territorialPackages.slice(1)] });
+        fireEvent.click(screen.getByText('Demand (12)'));
+        fireEvent.click(screen.getByRole('button', { name: 'Probe Positions' }));
+        expect(await screen.findByText('Opening terms exceed available capital.')).toBeTruthy();
+        fireEvent.click(screen.getByRole('button', { name: /Goražde Corridor.*Demand.*Unraised/ }));
+        const retry = await screen.findByRole('button', { name: 'Retry clause preview' });
+        retry.focus();
+        fireEvent.click(retry);
+        expect(document.activeElement).toBe(screen.getByRole('heading', { name: 'Settlement map' }));
+        const map = await screen.findByRole('img', { name: 'Settlement territory' });
+        expect([...map.querySelectorAll('[data-dayton-highlighted]')].map(path => path.getAttribute('data-dayton-osid'))).toEqual(['included']);
+        expect(screen.getByText(/RS → RS/)).toBeTruthy();
+        expect(screen.getByText(/Missing.*Geometry unavailable/i)).toBeTruthy();
+        fireEvent.click(screen.getByRole('button', { name: 'Return to current draft' }));
+        expect(document.activeElement).toBe(screen.getByRole('button', { name: /Goražde Corridor.*Demand.*Unraised/ }));
+        fireEvent.click(screen.getByRole('button', { name: /Foreign Policy.*State.*Entity/i }));
+        const term = await screen.findByText('Foreign Policy', { selector: 'dt' });
+        expect(document.activeElement).toBe(term.parentElement);
+        fireEvent.keyDown(term.parentElement!, { key: 'Escape' });
+        expect(document.activeElement).toBe(screen.getByRole('button', { name: /Foreign Policy.*State.*Entity/i }));
+        fireEvent.click(screen.getByRole('button', { name: /Defense.*Entity.*State/i }));
+        const defense = (await screen.findByText('Defense', { selector: 'dt' })).parentElement!;
+        expect(defense.textContent).toMatch(/Projected settlement termEntity/);
+        expect(defense.textContent).toMatch(/Counter-offer terms · Entity → State/);
+        fireEvent.click(screen.getByRole('button', { name: 'Return to current draft' }));
+        const adopt = screen.getByRole('button', { name: 'Adopt counter-offer' });
+        adopt.focus();
+        fireEvent.click(adopt);
+        expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Review agreement' }));
+        expect(screen.queryByText('Opening terms exceed available capital.')).toBeNull();
+        fireEvent.click(screen.getByRole('button', { name: 'Review agreement' }));
+        await screen.findByRole('region', { name: 'Institutions and powers' });
+        expect(screen.getByRole('button', { name: /Foreign Policy.*Shared.*Entity/i })).toBeTruthy();
+        expect(previewDayton.mock.lastCall?.[0]).toEqual(counter);
+        geometry.mockRestore();
+    });
+
     it('opens the room objects and keeps one editable draft and authoritative preview between them', async () => {
         const previewDayton = vi.fn().mockResolvedValue({
             ok: true,
@@ -271,14 +398,15 @@ describe('DaytonNegotiationModal — live conference room', () => {
         close();
 
         fireEvent.click(draft);
-        fireEvent.click(screen.getByRole('button', { name: 'Submit Proposal' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Review agreement' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Sign agreement' }));
         await waitFor(() => expect(resolveDayton.mock.calls[0]![0]).toEqual(previewDayton.mock.calls[0]![0]));
     });
 
     it('shows preview failures in the conference and clears them on retry', async () => {
         const previewDayton = vi.fn()
             .mockResolvedValueOnce({ ok: false, error: 'preview rejected' })
-            .mockResolvedValueOnce({ ok: true });
+            .mockResolvedValueOnce({ ok: true, agreement: agreement() });
         (window as unknown as { awwv: Record<string, unknown> }).awwv = { previewDayton };
         render(createElement(DaytonNegotiationModal, { dayton: PENDING, conference: true }));
 
@@ -306,20 +434,23 @@ describe('DaytonNegotiationModal — live conference room', () => {
     });
 
     it('retries a failed or rejected signature with the same proposal', async () => {
+        const previewDayton = vi.fn().mockResolvedValue({ ok: true, agreement: agreement() });
         const resolveDayton = vi.fn()
             .mockResolvedValueOnce({ ok: false, error: 'signature rejected' })
             .mockRejectedValueOnce(new Error('signature transport failed'))
             .mockResolvedValueOnce({ ok: true });
-        (window as unknown as { awwv: Record<string, unknown> }).awwv = { resolveDayton };
+        (window as unknown as { awwv: Record<string, unknown> }).awwv = { previewDayton, resolveDayton };
         render(createElement(DaytonNegotiationModal, { dayton: PENDING, conference: true }));
 
         fireEvent.click(screen.getByRole('button', { name: 'Skip arrival' }));
         const nav = within(screen.getByRole('navigation', { name: 'Conference objects' }));
         fireEvent.click(nav.getByRole('button', { name: 'Current draft' }));
         fireEvent.click(screen.getByText('Demand (12)'));
+        fireEvent.click(screen.getByRole('button', { name: 'Review agreement' }));
+        await screen.findByRole('region', { name: 'Settlement territory' });
 
         for (let attempt = 0; attempt < 2; attempt++) {
-            const submit = screen.getByRole<HTMLButtonElement>('button', { name: 'Submit Proposal' });
+            const submit = screen.getByRole<HTMLButtonElement>('button', { name: 'Sign agreement' });
             submit.focus();
             fireEvent.click(submit);
             expect(submit.disabled).toBe(false);
@@ -331,7 +462,7 @@ describe('DaytonNegotiationModal — live conference room', () => {
             expect(document.activeElement).toBe(submit);
         }
         expect(useGameStore.getState().loadError).toBeNull();
-        fireEvent.click(screen.getByRole('button', { name: 'Submit Proposal' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Sign agreement' }));
         expect(screen.queryByRole('alert')).toBeNull();
         expect(resolveDayton).toHaveBeenCalledTimes(3);
         expect(resolveDayton.mock.calls.map(([proposal]) => proposal.territorial_demands))
@@ -374,9 +505,9 @@ describe('DaytonNegotiationModal — live conference room', () => {
         const nav = within(screen.getByRole('navigation', { name: 'Conference objects' }));
         fireEvent.click(nav.getByRole('button', { name: 'Current draft' }));
         expect(screen.queryByRole('button', { name: 'Decline Settlement' })).toBeNull();
-        expect(screen.getByRole('button', { name: 'Submit Proposal' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Review agreement' })).toBeTruthy();
         fireEvent.keyDown(document.activeElement!, { key: 'Escape' });
         expect(screen.getByRole('heading', { name: 'Hope Hotel conference room' })).toBeTruthy();
-        expect(screen.queryByRole('button', { name: 'Submit Proposal' })).toBeNull();
+        expect(screen.queryByRole('button', { name: 'Review agreement' })).toBeNull();
     });
 });

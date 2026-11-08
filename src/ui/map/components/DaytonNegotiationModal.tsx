@@ -45,10 +45,12 @@
  * and is interpreted at the IPC layer as the player refusing to negotiate
  * meaningfully.
  */
-import { useEffect, useMemo, useRef, useState } from 'react';
-import type { DaytonAgreementRecord } from '../../../state/negotiation_types.js';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { DaytonAgreementRecord, DaytonProposal } from '../../../state/negotiation_types.js';
+import { getInstitutionalCost, getInstitutionalPackageById } from '../../../sim/negotiation/institutional_packages.js';
 import { DaytonSettlementViewer } from './DaytonSettlementViewer';
-import { DaytonConferenceRoom } from '../dayton_conference/DaytonConferenceRoom';
+import { DaytonConferenceRoom, type DaytonConferencePanel } from '../dayton_conference/DaytonConferenceRoom';
+import { counterClauses, reviewClauses, type DaytonClause } from '../dayton_conference/clauses';
 import type { LoadedGameState } from '../data/types';
 import { useIPC, type IpcDaytonBotResponse } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
@@ -75,6 +77,23 @@ import {
 } from './DaytonInstitutionalDimensions';
 
 type DaytonData = NonNullable<LoadedGameState['pendingDayton']>;
+type CounterProposal = NonNullable<IpcDaytonBotResponse['counter_proposal']>;
+type ClauseInspection = {
+    clause: DaytonClause;
+    origin: 'draft' | 'review';
+    counter?: { faction: string; proposal: CounterProposal };
+    agreement?: DaytonAgreementRecord;
+    failed?: boolean;
+};
+
+function counterSelections(counter: CounterProposal): InstitutionalSelections {
+    return {
+        dial: counter.entity_autonomy ?? 'dayton-historical',
+        competency: { ...counter.competency_allocation } as InstitutionalSelections['competency'],
+        constitutional: { ...counter.constitutional_choices },
+        returnJustice: { ...counter.return_justice },
+    };
+}
 
 /** The Federation parties; ground between them is not negotiable at Dayton. */
 const FEDERATION = new Set(['RBiH', 'HRHB']);
@@ -121,21 +140,45 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
     const [conferenceError, setConferenceError] = useState<'preview' | 'submit' | 'decline' | null>(null);
     const [confirmDecline, setConfirmDecline] = useState(false);
     const [probing, setProbing] = useState(false);
-    const [agreement, setAgreement] = useState<DaytonAgreementRecord | null>(null);
+    const [panel, setPanel] = useState<DaytonConferencePanel | null>(null);
+    const [inspection, setInspection] = useState<ClauseInspection | null>(null);
+    const [returnFocus, setReturnFocus] = useState<{ clause: string; faction?: string } | undefined>();
+    const [openingAgreement, setOpeningAgreement] = useState<DaytonAgreementRecord | null>(null);
+    const [adopted, setAdopted] = useState(false);
+    const [preview, setPreview] = useState<{
+        revision: number;
+        proposal: DaytonProposal;
+        agreement?: DaytonAgreementRecord;
+        botResponses?: Record<string, IpcDaytonBotResponse>;
+    } | null>(null);
+    const agreement = preview?.agreement;
+    const botResponses = preview?.botResponses;
     const draftRevision = useRef(0);
-    useEffect(() => () => { draftRevision.current++; }, []);
-    const [botResponses, setBotResponses] = useState<Record<string, IpcDaytonBotResponse> | null>(null);
-    /** The demand set that was probed — retained so the counter-offer diff is real. */
-    const [probedDemands, setProbedDemands] = useState<Set<string>>(new Set());
+    const inspectionRevision = useRef(0);
+    const probeInFlight = useRef<number | null>(null);
+    const mutationInFlight = useRef(false);
+    const reviewButton = useRef<HTMLButtonElement>(null);
+    const reviewChangesHeading = useRef<HTMLHeadingElement>(null);
+    useEffect(() => () => { draftRevision.current++; inspectionRevision.current++; }, []);
+    useLayoutEffect(() => {
+        if (panel === 'review' && agreement && document.activeElement === document.body) reviewChangesHeading.current?.focus();
+    }, [panel, agreement]);
 
     // ── Capital budget ────────────────────────────────────────────────────────
     const frontPackages = dayton.frontPackages ?? [];
+    const territoryPackages = [...dayton.territorialPackages, ...frontPackages];
+    const institutionalPackages = dayton.institutionalPackages.map(pkg => {
+        if (!conference || !playerFaction) return pkg;
+        const definition = getInstitutionalPackageById(pkg.id);
+        return definition ? { ...pkg, centralizedCost: getInstitutionalCost(definition, 'centralized', playerFaction),
+            decentralizedCost: getInstitutionalCost(definition, 'decentralized', playerFaction) } : pkg;
+    });
     let capitalSpent = 0;
-    for (const pkg of [...dayton.territorialPackages, ...frontPackages]) {
+    for (const pkg of territoryPackages) {
         if (demands.has(pkg.id)) capitalSpent += pkg.demandCost;
         if (concessions.has(pkg.id)) capitalSpent += pkg.concedeCost;
     }
-    for (const pkg of dayton.institutionalPackages) {
+    for (const pkg of institutionalPackages) {
         const choice = institutions[pkg.id];
         if (choice === 'centralized') capitalSpent += pkg.centralizedCost;
         else if (choice === 'decentralized') capitalSpent += pkg.decentralizedCost;
@@ -170,9 +213,9 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
     // ── Mutators (clear stale probe whenever the proposal changes) ─────────────
     const clearProbe = () => {
         draftRevision.current++;
-        setAgreement(null);
-        setBotResponses(null);
-        setProbedDemands(new Set());
+        setPreview(null);
+        setAdopted(false);
+        setProbing(false);
     };
 
     const toggleDemand = (id: string) => {
@@ -203,7 +246,7 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
         setInstArch(next);
     };
 
-    const buildProposal = () => ({
+    const buildProposal = (): DaytonProposal => ({
         territorial_demands: [...demands],
         territorial_concessions: [...concessions],
         institutional_choices: institutions,
@@ -214,18 +257,22 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
 
     // ── Probe Positions — read-only counter-offer preview (no mutation) ────────
     const handleProbe = async () => {
-        if (!ipc.isAvailable || probing || submitting || overBudget || !playerFaction) return;
-        if (conference) setConferenceError(null);
-        setProbing(true);
-        const snapshot = new Set(demands);
         const revision = draftRevision.current;
+        if (!ipc.isAvailable || probeInFlight.current === revision || mutationInFlight.current || submitting || overBudget || !playerFaction) return;
+        if (conference) {
+            setConferenceError(null);
+            setPreview(null);
+        }
+        probeInFlight.current = revision;
+        setProbing(true);
+        const proposal = buildProposal();
         try {
-            const res = await ipc.previewDayton(buildProposal());
+            const res = await ipc.previewDayton(proposal);
             if (revision !== draftRevision.current) return;
-            if (res.ok) {
-                setAgreement(res.agreement ?? null);
-                setProbedDemands(snapshot);
-                setBotResponses(res.botResponses ?? null);
+            if (res.ok && (!conference || res.agreement)) {
+                setPreview({ revision, proposal, agreement: res.agreement, botResponses: res.botResponses });
+                const resolved = res.agreement;
+                if (conference && resolved) setOpeningAgreement(opening => opening ?? resolved);
             } else {
                 if (conference) setConferenceError('preview');
                 else setLoadError(res.error ?? 'Failed to probe Dayton positions.');
@@ -236,7 +283,44 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
                 else setLoadError(error instanceof Error ? error.message : 'Failed to probe Dayton positions.');
             }
         } finally {
-            setProbing(false);
+            if (probeInFlight.current === revision) {
+                probeInFlight.current = null;
+                if (revision === draftRevision.current) setProbing(false);
+            }
+        }
+    };
+
+    const openPanel = (next: DaytonConferencePanel | null) => {
+        if (mutationInFlight.current) return;
+        inspectionRevision.current++;
+        setReturnFocus(inspection && next === inspection.origin ? { clause: inspection.clause.id, faction: inspection.counter?.faction } : undefined);
+        setInspection(null);
+        setPanel(next);
+    };
+
+    const review = () => {
+        if (overBudget || submitting) return;
+        openPanel('review');
+        if (!agreement) void handleProbe();
+    };
+
+    const inspectClause = async (clause: DaytonClause, origin: ClauseInspection['origin'], counter?: ClauseInspection['counter']) => {
+        if (mutationInFlight.current) return;
+        const revision = ++inspectionRevision.current;
+        const next = { clause, origin, counter };
+        setReturnFocus(undefined);
+        setPanel(clause.kind);
+        setInspection(next);
+        if (!counter) return;
+        try {
+            const { territorial_demands, territorial_concessions, institutional_choices } = counter.proposal;
+            const proposal = { territorial_demands, territorial_concessions, institutional_choices, ...buildInstitutionalProposalFields(counterSelections(counter.proposal)) };
+            const result = await ipc.previewDayton(proposal);
+            if (revision === inspectionRevision.current) {
+                setInspection(result.ok && result.agreement ? { ...next, agreement: result.agreement } : { ...next, failed: true });
+            }
+        } catch {
+            if (revision === inspectionRevision.current) setInspection({ ...next, failed: true });
         }
     };
 
@@ -248,22 +332,19 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
      *  made "Adopt counter-offer" a no-op for any institutional-only counter (#297). */
     const adoptCounter = (resp: IpcDaytonBotResponse) => {
         const counter = resp.counter_proposal;
-        if (!counter) return;
+        if (!counter || probeInFlight.current === draftRevision.current || mutationInFlight.current || preview?.revision !== draftRevision.current) return;
+        reviewButton.current?.focus();
         clearProbe();
         setDemands(new Set(counter.territorial_demands ?? []));
         setConcessions(new Set(counter.territorial_concessions ?? []));
         setInstitutions({ ...(counter.institutional_choices ?? {}) });
-        const nextInstArch: InstitutionalSelections = {
-            ...defaultInstitutionalSelections(),
-            dial: counter.entity_autonomy ?? 'dayton-historical',
-            competency: { ...(counter.competency_allocation ?? {}) } as InstitutionalSelections['competency'],
-            constitutional: { ...(counter.constitutional_choices ?? {}) },
-            returnJustice: { ...(counter.return_justice ?? {}) },
-        };
-        setInstArch(nextInstArch);
+        setInstArch(counterSelections(counter));
+        setAdopted(true);
     };
 
     const runConferenceMutation = async (action: 'submit' | 'decline', request: () => Promise<{ ok: boolean }>) => {
+        if (mutationInFlight.current) return;
+        mutationInFlight.current = true;
         setConferenceError(null);
         setSubmitting(true);
         let succeeded = false;
@@ -274,6 +355,7 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
         } finally {
             // Successful mutations close the conference through the existing state push.
             if (!succeeded) {
+                mutationInFlight.current = false;
                 setConferenceError(action);
                 setSubmitting(false);
             }
@@ -283,7 +365,9 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
     const handleSubmit = async () => {
         if (!ipc.isAvailable || overBudget || !playerFaction) return;
         if (conference) {
-            if (!submitting) await runConferenceMutation('submit', () => ipc.resolveDayton(buildProposal()));
+            if (panel === 'review' && !submitting && probeInFlight.current !== draftRevision.current && preview?.agreement && preview.revision === draftRevision.current) {
+                await runConferenceMutation('submit', () => ipc.resolveDayton(preview.proposal));
+            }
             return;
         }
         setSubmitting(true);
@@ -533,7 +617,7 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
                     {t('dayton.institutionalArchitecture')}
                 </div>
                 <div className="space-y-2">
-                    {dayton.institutionalPackages.map(pkg => {
+                    {institutionalPackages.map(pkg => {
                         const choice = institutions[pkg.id];
                         return (
                             <div key={pkg.id} className="flex items-center justify-between p-2.5 rounded border border-[#c8b898]/50 bg-[#e8dcc4]/30">
@@ -601,7 +685,8 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
             {!botResponses && (
                 <div className="text-xs text-[#6a5a40] italic">{t('dayton.probeHint')}</div>
             )}
-            {botResponses && (
+            {conference && adopted && <p className="mb-2 text-xs font-bold" role="status">{t('dayton.conference.adopted')}</p>}
+            {botResponses && preview && (
                 <div className="space-y-2">
                     {Object.keys(botResponses).sort().map((faction) => {
                         const resp = botResponses[faction];
@@ -611,8 +696,12 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
                                 key={faction}
                                 faction={faction}
                                 resp={resp}
-                                probedDemands={probedDemands}
+                                probedDemands={preview.proposal.territorial_demands}
                                 packageNames={packageNameLookup(dayton)}
+                                clauses={conference && resp.counter_proposal ? counterClauses(preview.proposal, resp.counter_proposal, territoryPackages) : undefined}
+                                onClause={clause => {
+                                    if (resp.counter_proposal) void inspectClause(clause, 'draft', { faction, proposal: resp.counter_proposal });
+                                }}
                                 onAdopt={() => adoptCounter(resp)}
                             />
                         );
@@ -627,7 +716,8 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
             <div className="flex flex-row items-center gap-3">
                 <button
                     type="button"
-                    onClick={() => void handleSubmit()}
+                    ref={conference ? reviewButton : undefined}
+                    onClick={conference ? review : () => void handleSubmit()}
                     disabled={overBudget || (!conference && submitting)}
                     aria-disabled={conference && submitting ? true : undefined}
                     className={`px-8 py-3 rounded border-2 font-bold text-[14px] uppercase tracking-wider transition-colors ${
@@ -639,7 +729,7 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
                     }`}
                     style={{ fontFamily: 'var(--font-command)' }}
                 >
-                    {submitting ? 'Negotiating...' : overBudget ? 'Over Budget' : 'Submit Proposal'}
+                    {submitting ? 'Negotiating...' : overBudget ? 'Over Budget' : conference ? t('dayton.conference.reviewAction') : 'Submit Proposal'}
                 </button>
                 {!dayton.forced && (
                     <button
@@ -674,14 +764,37 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
                 </div>
             )}
             <div className="text-xs text-[#6a5a40] mt-1" style={{ fontFamily: 'var(--font-command)' }}>
-                {dayton.forced
-                    ? t('dayton.forcedFooter')
+                {dayton.forced ? t('dayton.forcedFooter') : conference ? t('dayton.conference.reviewHint')
                     : 'Submit a proposal to negotiate, or Decline Talks to refuse meaningful negotiation.'}
             </div>
         </div>
     );
 
     if (conference) {
+        const displayedAgreement = inspection?.counter ? inspection.agreement : agreement;
+        const inspectionPanel = inspection && (
+            <div className="space-y-3 px-5 py-4">
+                {inspection.counter && <p className="font-bold">{t('dayton.conference.counterProjection', { faction: FACTION_DISPLAY[inspection.counter.faction] ?? inspection.counter.faction })}</p>}
+                {displayedAgreement ? (
+                    <DaytonSettlementViewer agreement={displayedAgreement} mode="draft"
+                        view={inspection.clause.kind === 'map' ? 'territory' : 'institutions'} clause={inspection.clause}
+                        counterProjection={Boolean(inspection.counter)}
+                        openingMap={inspection.origin === 'review' ? openingAgreement?.map : undefined} />
+                ) : inspection.failed ? (
+                    <>
+                        <p role="alert">{t('dayton.conference.error.clause')}</p>
+                        <button type="button" className="dayton-clause-link" onClick={event => {
+                            event.currentTarget.closest('[data-dayton-panel]')?.querySelector('h2')?.focus();
+                            void inspectClause(inspection.clause, inspection.origin, inspection.counter);
+                        }}>
+                            {t('dayton.conference.retryClause')}
+                        </button>
+                    </>
+                ) : <p role="status">{t('dayton.probing')}</p>}
+            </div>
+        );
+        const changes = openingAgreement && agreement && openingAgreement !== agreement
+            ? reviewClauses(openingAgreement, agreement, territoryPackages) : [];
         const savedDate = loadedGameState?.metadata?.date?.trim();
         const date = savedDate && savedDate !== 'UNKNOWN'
             ? savedDate
@@ -702,6 +815,10 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
                     error={conferenceError ? t(`dayton.conference.error.${conferenceError}`) : undefined}
                     forced={Boolean(dayton.forced)}
                     previewReady={Boolean(agreement)}
+                    panel={panel}
+                    backTo={inspection?.origin ?? (panel === 'review' ? 'draft' : undefined)}
+                    returnFocus={returnFocus}
+                    onPanelChange={openPanel}
                     panels={{
                         folder: (
                             <>
@@ -720,14 +837,14 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
                                 {submission}
                             </>
                         ),
-                        map: (
+                        map: inspectionPanel ?? (
                             <div className="space-y-3 px-5 py-4">
                                 {!agreement && <p>{t('dayton.conference.previewHint')}</p>}
                                 {probeButton}
                                 {agreement && <DaytonSettlementViewer agreement={agreement} mode="draft" view="territory" />}
                             </div>
                         ),
-                        binder: (
+                        binder: inspectionPanel ?? (
                             <>
                                 {budget}
                                 {agreement && (
@@ -741,6 +858,32 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
                                     {probeButton}
                                 </div>
                             </>
+                        ),
+                        review: (
+                            <div className="space-y-3 px-5 py-4">
+                                {agreement ? (
+                                    <>
+                                        <section aria-label={t('dayton.conference.changes')}>
+                                            <h3 className="font-bold" ref={reviewChangesHeading} tabIndex={-1}>{t('dayton.conference.changes')}</h3>
+                                            {changes.length ? <ClauseLinks clauses={changes} onClause={clause => void inspectClause(clause, 'review')} />
+                                                : <p>{t('dayton.conference.noChanges')}</p>}
+                                        </section>
+                                        <DaytonSettlementViewer agreement={agreement} mode="draft" view="both" />
+                                    </>
+                                ) : (
+                                    <>
+                                        <p>{t('dayton.conference.previewHint')}</p>
+                                        {probeButton}
+                                    </>
+                                )}
+                                <div className="border-t border-[#a78e5c] pt-3">
+                                    <button type="button" className="dayton-live-button dayton-live-primary disabled:opacity-50"
+                                        onClick={() => void handleSubmit()} disabled={!agreement || overBudget || probing}
+                                        aria-disabled={submitting || undefined}>
+                                        {t('dayton.conference.sign')}
+                                    </button>
+                                </div>
+                            </div>
                         ),
                     }}
                 />
@@ -805,6 +948,20 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
     );
 }
 
+function ClauseLinks({ clauses, onClause }: { clauses: readonly DaytonClause[]; onClause: (clause: DaytonClause) => void }) {
+    return (
+        <ul className="mt-2 space-y-1 text-xs">
+            {clauses.map(clause => (
+                <li key={clause.id}>
+                    <button type="button" className="dayton-clause-link" data-dayton-clause={clause.id} onClick={() => onClause(clause)}>
+                        <strong>{clause.label}</strong><span>{clause.before} → {clause.after}</span>
+                    </button>
+                </li>
+            ))}
+        </ul>
+    );
+}
+
 /** A labelled 0-100 readout bar. */
 function ReadoutBar({ label, value, color, hint }: { label: string; value: number; color: string; hint: string }) {
     const pct = Math.max(0, Math.min(100, value));
@@ -839,12 +996,16 @@ function BotResponseRow({
     resp,
     probedDemands,
     packageNames,
+    clauses,
+    onClause,
     onAdopt,
 }: {
     faction: string;
     resp: IpcDaytonBotResponse;
-    probedDemands: ReadonlySet<string>;
+    probedDemands: readonly string[];
     packageNames: Record<string, string>;
+    clauses?: DaytonClause[];
+    onClause: (clause: DaytonClause) => void;
     onAdopt: () => void;
 }) {
     const display = FACTION_DISPLAY[faction] ?? faction;
@@ -868,7 +1029,7 @@ function BotResponseRow({
         : [];
 
     return (
-        <div className="p-2.5 rounded border border-[#c8b898]/50 bg-[#e8dcc4]/30">
+        <div className="p-2.5 rounded border border-[#c8b898]/50 bg-[#e8dcc4]/30" data-dayton-counter={resp.decision === 'counter' ? faction : undefined}>
             <div className="flex items-center justify-between">
                 <span className="text-xs font-bold" style={{ color }}>{display}</span>
                 <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded" style={{
@@ -877,12 +1038,14 @@ function BotResponseRow({
                     {decisionLabel}
                 </span>
             </div>
+            {resp.reason && <p className="mt-1 text-xs">{resp.reason}</p>}
             {counter && resp.decision === 'counter' && (
                 <div className="mt-2 text-xs text-[#5a4a30]">
-                    {droppedDemands.length > 0 && (
+                    {clauses && <ClauseLinks clauses={clauses} onClause={onClause} />}
+                    {!clauses && droppedDemands.length > 0 && (
                         <div>{t('dayton.counterDropsDemands', { items: droppedDemands.map(id => packageNames[id] ?? id).join(', ') })}</div>
                     )}
-                    {droppedDemands.length === 0 && (
+                    {(clauses ? clauses.length === 0 : droppedDemands.length === 0) && (
                         <div className="italic">{t('dayton.counterNoChange')}</div>
                     )}
                     <button

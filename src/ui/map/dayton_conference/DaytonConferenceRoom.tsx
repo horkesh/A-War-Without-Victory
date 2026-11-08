@@ -5,39 +5,53 @@ import { DaytonRoomBackdrop, roomObjects, type DaytonRoomObject } from './Dayton
 import arrival from './dayton-arrival-ultrawide.webp';
 import './live.css';
 
+export type DaytonConferencePanel = DaytonRoomObject | 'review';
+
 interface DaytonConferenceRoomProps {
     date?: string;
     error?: string;
     forced: boolean;
     previewReady: boolean;
-    panels: Record<DaytonRoomObject, ReactNode>;
+    panel: DaytonConferencePanel | null;
+    backTo?: 'draft' | 'review';
+    returnFocus?: { clause: string; faction?: string };
+    onPanelChange: (panel: DaytonConferencePanel | null) => void;
+    panels: Record<DaytonConferencePanel, ReactNode>;
 }
 
-export function DaytonConferenceRoom({ date, error, forced, previewReady, panels }: DaytonConferenceRoomProps) {
+export function DaytonConferenceRoom({ date, error, forced, previewReady, panel, backTo, returnFocus, onPanelChange, panels }: DaytonConferenceRoomProps) {
     const [arrived, setArrived] = useState(false);
-    const [panel, setPanel] = useState<DaytonRoomObject | null>(null);
     const opener = useRef<HTMLButtonElement | null>(null);
     const room = useRef<HTMLDivElement>(null);
     const roomHeading = useRef<HTMLHeadingElement>(null);
     const panelHeading = useRef<HTMLHeadingElement>(null);
+    const panelBody = useRef<HTMLDivElement>(null);
     const labels = {
         folder: t('dayton.conference.folder'),
         draft: t('dayton.conference.draft'),
         map: t('dayton.conference.map'),
         binder: t('dayton.conference.binder'),
+        review: t('dayton.conference.review'),
     };
 
     useLayoutEffect(() => {
         if (!arrived || !room.current) return;
         room.current.toggleAttribute('inert', panel !== null);
-        if (panel) panelHeading.current?.focus();
+        if (panel) {
+            const restored = returnFocus && Array.from(panelBody.current?.querySelectorAll<HTMLButtonElement>('[data-dayton-clause]') ?? []).find(button =>
+                button.dataset.daytonClause === returnFocus.clause
+                && button.closest<HTMLElement>('[data-dayton-counter]')?.dataset.daytonCounter === returnFocus.faction);
+            const target = restored ?? panelBody.current?.querySelector<HTMLElement>('[data-dayton-autofocus]');
+            if (target) target.focus();
+            else panelHeading.current?.focus();
+        }
         else if (opener.current?.isConnected) opener.current.focus();
         else roomHeading.current?.focus();
-    }, [arrived, panel]);
+    }, [arrived, panel, returnFocus]);
 
     function open(id: DaytonRoomObject, event: MouseEvent<HTMLButtonElement>) {
         opener.current = event.currentTarget;
-        setPanel(id);
+        onPanelChange(id);
     }
 
     const alert = error && <p className="dayton-live-error" role="alert">{error}</p>;
@@ -49,7 +63,7 @@ export function DaytonConferenceRoom({ date, error, forced, previewReady, panels
             event.stopPropagation();
             if (event.key === 'Escape' && panel) {
                 event.preventDefault();
-                setPanel(null);
+                onPanelChange(backTo ?? null);
             }
         }}>
             {!arrived ? (
@@ -94,12 +108,12 @@ export function DaytonConferenceRoom({ date, error, forced, previewReady, panels
                                     <p className="dayton-live-kicker">{t('dayton.conference.room')}</p>
                                     <h2 ref={panelHeading} tabIndex={-1} id="dayton-conference-panel-title">{labels[panel]}</h2>
                                 </div>
-                                <button type="button" className="dayton-live-button" onClick={() => setPanel(null)}>
-                                    {t('dayton.conference.back')}
+                                <button type="button" className="dayton-live-button" onClick={() => onPanelChange(backTo ?? null)}>
+                                    {t(backTo === 'draft' ? 'dayton.conference.backDraft' : backTo === 'review' ? 'dayton.conference.backReview' : 'dayton.conference.back')}
                                 </button>
                             </header>
                             {alert}
-                            <div className="dayton-live-panel-body">
+                            <div className="dayton-live-panel-body" ref={panelBody} key={panel}>
                                 {panels[panel]}
                             </div>
                         </section>

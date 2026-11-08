@@ -459,7 +459,7 @@ describe('captured ground is negotiable at Dayton (owner, 2026-11-07)', () => {
     it('the UI menu carries the captured ground and the forced flag', async () => {
         const { derivePendingDayton } = await import('../src/ui/map/data/GameStateAdapter.js');
         const onTime = withHeld();
-        expect(derivePendingDayton(onTime)?.frontPackages?.map((p) => p.id)).toEqual([ID]);
+        expect(derivePendingDayton(onTime)?.frontPackages).toMatchObject([{ id: ID, osids: [HELD] }]);
         expect(derivePendingDayton(onTime)?.forced).toBeUndefined();
         const state = withHeld();
         declineDaytonNegotiation(state);
