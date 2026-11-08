@@ -1988,9 +1988,12 @@ function installIpcMutationSerialization() {
 }
 
 async function resolveMapServerBaseUrl() {
-  // Prefer Vite dev map when running. Vite may use 3003, 3004... if 3002 is in use.
-  // Skip the port our built server uses so we never mistake it for dev.
-  const portsToTry = [3002, 3003, 3004, 3005];
+  // The packaged game always serves its own bundled map. Probing for a dev server
+  // there would let any page on 127.0.0.1:3002-3005 replace the game window and
+  // receive the preload bridge.
+  const portsToTry = app.isPackaged ? [] : [3002, 3003, 3004, 3005];
+  // Development: prefer the Vite dev map when running. Vite may use 3003, 3004...
+  // if 3002 is in use. Skip the port our built server uses so we never mistake it for dev.
   for (const port of portsToTry) {
     if (port === mapServerPort) continue; // built server is on this port
     const devMapBase = `http://127.0.0.1:${port}`;

@@ -13786,3 +13786,11 @@ The owner listened to the 20 shipped sounds on headphones (2026-11-07) through t
 - Measured: the nine Kenney cues peak near 0 dB and play 15-22 dB louder in game, centred at 2-4.8 kHz, against about 800 Hz for the eight made for AWWV; `turn_complete` is among the quietest. Record: `logs/r7-english-readability/closeout-human-audio-listen.md`.
 - Owner decisions: ambient beds retired for 1.0 (stay off, out of listening scope); nine library cues remade first-party and level/tone-matched; `turn_complete` louder. Work order to Codex `CL-20261108-043`. `R7-AUDIO-HUMAN-ACCEPTANCE` stays open with its scope narrowed to the 17 interface cues.
 - No code, simulation, scenario or calibration change.
+
+## 2026-11-07 - Packaged game no longer looks for a dev server (DESKTOP, SECURITY)
+
+Found during the R7 offline audio run: `resolveMapServerBaseUrl` in `src/desktop/electron-main.cjs` probed `127.0.0.1:3002-3005` for a Vite dev server on every launch, packaged builds included, so a page on one of those ports would have replaced the game window and received the preload bridge.
+- Packaged builds now skip the probe and use their own bundled map server; development (`electron .`) keeps preferring a running Vite server.
+- New `tests/desktop_packaged_map_server_url.test.ts` runs the real function with a fake dev server answering on every port; red before the fix. The 39 other test files that read `electron-main.cjs` pass (468 tests); `tsc` clean.
+- Packaged proof on `b5018e63e`: a fresh `desktop:package:dir` build under the offline audio harness made 0 dev-server probes (8 before), used its built server, passed all four audio checks, and touched 0 remote URLs.
+- No simulation, state, scenario or calibration change.
