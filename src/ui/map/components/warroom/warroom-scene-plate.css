@@ -41,6 +41,7 @@
   }
 
   [data-soften-right-join="true"] > img {
-    mask-image: linear-gradient(to right, #000 99.7%, transparent 99.94%);
+    /* Start the fade inside the overlap so its antialiased edge stays opaque. */
+    mask-image: linear-gradient(to right, #000 99.77%, transparent 99.94%);
   }
 }
