@@ -223,6 +223,21 @@ export interface PendingDaytonPacket {
      * for the player's faction only. Older saves without it show the folder unavailable.
      */
     delegation_folder?: DelegationFolder;
+    /**
+     * Tabled rounds (DC amendment A2; sim/negotiation/dayton_rounds.ts), at most three.
+     * Absent until the player tables a draft; absent in headless resolutions.
+     */
+    rounds?: DaytonRound[];
+}
+
+/** One tabled round: the player's draft and every other delegation's answer. */
+export interface DaytonRound {
+    round: number;
+    turn: number;
+    /** Patron authority added by earlier rounds when this round was answered. */
+    pressure: number;
+    proposal: DaytonProposal;
+    responses: Record<string, DaytonBotResponse>;
 }
 
 /** Built once when the Dayton table opens; see sim/negotiation/delegation_folder.ts. */
@@ -335,8 +350,14 @@ export interface DaytonBotResponse {
     decision: 'accept' | 'reject' | 'counter';
     /** If counter, the bot's counter-proposal. */
     counter_proposal?: DaytonProposal;
-    /** Reason for the decision (for UI display). */
+    /** Reason for the decision (diagnostic text; carries cost figures, never shown in the room). */
     reason: string;
+    /**
+     * Plain-language category of the answer for the room (DC A2): accepted on its own
+     * terms, accepted because its patron pressed it, close (a counter that asks for a
+     * little), far (a counter that rewrites most of the draft), or refused outright.
+     */
+    reason_code?: 'accept' | 'accept_patron' | 'counter_close' | 'counter_far' | 'reject';
     /** Total capital cost of the proposal to this bot faction. */
     proposal_cost: number;
     /** Bot's available capital. */

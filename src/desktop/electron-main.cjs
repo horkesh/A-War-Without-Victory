@@ -3684,6 +3684,26 @@ app.whenReady().then(() => {
     }
   });
 
+  // Table a Dayton round (DC A2): the player's draft goes to the table, every other
+  // delegation answers under the current round pressure, and the round is recorded on
+  // the pending packet and saved. At most three rounds; afterwards only sign or decline.
+  // Refused (no write) when there is no open table, Dayton is signed, or rounds are spent.
+  ipcMain.handle('table-dayton-round', async (_event, payload) => {
+    if (!currentGameStateJson) {
+      return { ok: false, error: 'No game loaded' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = readCanonicalCurrentState(sim);
+      const result = sim.tableDesktopDaytonRound(state, payload);
+      if (!result.ok) return { ok: false, error: result.error };
+      writeCanonicalCurrentState(sim, state);
+      return { ok: true, round: result.round };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   // Read-only Dayton PREVIEW (Dayton Phase-4): runs the real resolver + bot
   // evaluation on a THROWAWAY deserialized clone so the negotiation modal can show
   // the authoritative peace_dysfunction_index / entity_autonomy_index / Brčko

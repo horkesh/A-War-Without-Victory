@@ -114,6 +114,39 @@
   color: #2a2016;
   box-shadow: 0 12px 36px #000a;
 }
+/* Room to bargain (DC A2): the budget without figures. */
+.dayton-room-meter {
+  position: relative;
+  height: .55rem;
+  border-radius: 2px;
+  background: #cbbd9e;
+  overflow: hidden;
+}
+.dayton-room-meter span { position: absolute; inset-block: 0; inset-inline-start: 0; background: #4f6b48; }
+.dayton-room-meter span[data-band="little"] { background: #9a6a2a; }
+.dayton-room-meter span[data-band="over"] { background: #8a2a22; }
+
+/* Bounded rounds (DC A2): three marks for the three rounds the mediator allows. */
+.dayton-round-track {
+  display: flex;
+  gap: .3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dayton-round-track li {
+  padding: .1rem .5rem;
+  border: 1px solid #a78e5c;
+  border-radius: 2px;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.dayton-round-track li[data-state="done"] { background: #2a2016; border-color: #2a2016; color: #efe6cf; }
+.dayton-round-track li[data-state="next"] { background: #e3c983; border-color: #6f5432; color: #2a2016; }
+.dayton-round-track li[data-state="later"] { color: #7a6a52; }
+
 /* Delegation folder (DC A1): a dossier on the folder's own leather and paper. */
 .dayton-folder {
   display: grid;

@@ -133,6 +133,8 @@ interface DimensionsProps {
     playerFaction: string | null;
     /** The player's total earned capital — gates reachability. */
     capitalAvailable: number;
+    /** Conference (DC A2): hide cost figures on options; reachability locks still apply. */
+    hideCosts?: boolean;
 }
 
 export function DaytonInstitutionalDimensions({
@@ -140,6 +142,7 @@ export function DaytonInstitutionalDimensions({
     onChange,
     playerFaction,
     capitalAvailable,
+    hideCosts = false,
 }: DimensionsProps) {
     const faction = playerFaction ?? '';
     const dial = selections.dial;
@@ -202,7 +205,7 @@ export function DaytonInstitutionalDimensions({
                             >
                                 <span className={locked ? 'block line-through' : 'block'}>
                                     {t(DIAL_LABEL_KEY[setting])}
-                                    {declCost > 0 && <span className="block text-xs opacity-80 mt-0.5">−{declCost}</span>}
+                                    {declCost > 0 && !hideCosts && <span className="block text-xs opacity-80 mt-0.5">−{declCost}</span>}
                                 </span>
                                 {locked && (
                                     <span className="mt-1 block text-xs font-normal normal-case">
@@ -255,7 +258,7 @@ export function DaytonInstitutionalDimensions({
                                                 title={locked ? t('dayton.optionLocked') : isDefault ? t('dayton.historicalDefault') : undefined}
                                             >
                                                 {t(OWNER_LABEL_KEY[owner])}
-                                                {cost > 0 && <span className="ml-0.5 opacity-80">{cost}</span>}
+                                                {cost > 0 && !hideCosts && <span className="ml-0.5 opacity-80">{cost}</span>}
                                             </button>
                                         );
                                     })}
@@ -276,6 +279,7 @@ export function DaytonInstitutionalDimensions({
                 faction={faction}
                 dial={dial}
                 capitalAvailable={capitalAvailable}
+                hideCosts={hideCosts}
                 onPick={setConstitutional}
             />
 
@@ -289,6 +293,7 @@ export function DaytonInstitutionalDimensions({
                 faction={faction}
                 dial={dial}
                 capitalAvailable={capitalAvailable}
+                hideCosts={hideCosts}
                 onPick={setReturnJustice}
             />
         </>
@@ -305,6 +310,7 @@ function ChoiceSection({
     faction,
     dial,
     capitalAvailable,
+    hideCosts = false,
     onPick,
 }: {
     title: string;
@@ -315,6 +321,7 @@ function ChoiceSection({
     faction: string;
     dial: EntityAutonomySetting;
     capitalAvailable: number;
+    hideCosts?: boolean;
     onPick: (choiceId: string, optionId: string, isDefault: boolean) => void;
 }) {
     const costFn = dimension === 'constitutional' ? finalConstitutionalCost : finalReturnJusticeCost;
@@ -353,7 +360,7 @@ function ChoiceSection({
                                             title={locked ? t('dayton.optionLocked') : opt.is_default ? t('dayton.historicalDefault') : undefined}
                                         >
                                             {opt.label}
-                                            {cost > 0 && <span className="ml-1 opacity-80">−{cost}</span>}
+                                            {cost > 0 && !hideCosts && <span className="ml-1 opacity-80">−{cost}</span>}
                                         </button>
                                     );
                                 })}

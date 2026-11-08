@@ -1660,6 +1660,8 @@ export interface LoadedGameState {
         patronOverride: Record<string, number>;
         /** The player delegation's folder (DC A1); absent on saves from before it existed. */
         delegationFolder?: import('../../../state/negotiation_types.js').DelegationFolder;
+        /** Tabled rounds so far (DC A2), oldest first; empty before the first draft is tabled. */
+        rounds?: import('../../../state/negotiation_types.js').DaytonRound[];
     };
 
     /** Pending peace plan awaiting player response. */

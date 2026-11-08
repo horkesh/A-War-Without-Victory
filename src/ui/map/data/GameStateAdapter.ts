@@ -4242,6 +4242,9 @@ export function derivePendingDayton(state: any): LoadedGameState['pendingDayton'
         factionCapital: pd.faction_capital ?? {},
         patronOverride: pd.patron_override ?? {},
         ...(isDelegationFolder(pd.delegation_folder, playerFaction) ? { delegationFolder: pd.delegation_folder } : {}),
+        rounds: Array.isArray(pd.rounds)
+            ? pd.rounds.filter((r: any) => r && Number.isFinite(r.round) && r.proposal && r.responses && typeof r.responses === 'object')
+            : [],
     };
 }
 

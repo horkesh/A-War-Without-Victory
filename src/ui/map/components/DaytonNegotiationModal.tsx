@@ -51,6 +51,7 @@ import { getInstitutionalCost, getInstitutionalPackageById } from '../../../sim/
 import { DaytonSettlementViewer } from './DaytonSettlementViewer';
 import { DaytonConferenceRoom, type DaytonConferencePanel } from '../dayton_conference/DaytonConferenceRoom';
 import { counterClauses, reviewClauses, type DaytonClause } from '../dayton_conference/clauses';
+import { DAYTON_MAX_ROUNDS } from '../../../sim/negotiation/dayton_rounds.js';
 import type { LoadedGameState } from '../data/types';
 import { useIPC, type IpcDaytonBotResponse } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
@@ -335,7 +336,9 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
      *  made "Adopt counter-offer" a no-op for any institutional-only counter (#297). */
     const adoptCounter = (resp: IpcDaytonBotResponse) => {
         const counter = resp.counter_proposal;
-        if (!counter || probeInFlight.current === draftRevision.current || mutationInFlight.current || preview?.revision !== draftRevision.current) return;
+        if (!counter || mutationInFlight.current) return;
+        // Conference answers come from a tabled round (saved), not a live probe.
+        if (!conference && (probeInFlight.current === draftRevision.current || preview?.revision !== draftRevision.current)) return;
         reviewButton.current?.focus();
         clearProbe();
         setDemands(new Set(counter.territorial_demands ?? []));
@@ -343,6 +346,28 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
         setInstitutions({ ...(counter.institutional_choices ?? {}) });
         setInstArch(counterSelections(counter));
         setAdopted(true);
+    };
+
+    // ── Bounded rounds (DC A2) ─────────────────────────────────────────────────
+    const rounds = dayton.rounds ?? [];
+    const lastRound = rounds.length > 0 ? rounds[rounds.length - 1] : undefined;
+    const nextRound = rounds.length >= DAYTON_MAX_ROUNDS ? null : rounds.length + 1;
+    const [tabling, setTabling] = useState(false);
+    const [tableError, setTableError] = useState(false);
+    const handleTable = async () => {
+        if (!ipc.isAvailable || nextRound === null || overBudget || tabling || mutationInFlight.current || !playerFaction) return;
+        setTabling(true);
+        setTableError(false);
+        setAdopted(false);
+        try {
+            const res = await ipc.tableDaytonRound(buildProposal());
+            if (!res.ok) setTableError(true);
+            // The answers arrive with the saved state push (pendingDayton.rounds).
+        } catch {
+            setTableError(true);
+        } finally {
+            setTabling(false);
+        }
     };
 
     const runConferenceMutation = async (action: 'submit' | 'decline', request: () => Promise<{ ok: boolean }>) => {
@@ -425,7 +450,29 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
         )
     );
 
-    const budget = (
+    // Conference (DC A2): no cost figures. The budget reads as room left to bargain.
+    const roomShare = capitalAvailable > 0 ? Math.min(1, capitalSpent / capitalAvailable) : (capitalSpent > 0 ? 1 : 0);
+    const roomBand = overBudget ? 'over' : roomShare >= 0.85 ? 'little' : roomShare >= 0.5 ? 'some' : 'plenty';
+    const demandLabel = (pkg: { demandCost: number }) => conference ? t('dayton.demandPlain') : t('dayton.demand', { cost: pkg.demandCost });
+    const concedeLabel = (pkg: { concedeCost: number }) => conference ? t('dayton.concedePlain') : t('dayton.concede', { cost: pkg.concedeCost });
+    const actionName = (label: string, pkg: { name: string }) => conference ? `${label}: ${pkg.name}` : undefined;
+
+    const budget = conference ? (
+        <div className="px-8 py-3 border-b border-[#c8b898]/40 grid gap-1.5">
+            <div className="flex flex-wrap items-baseline justify-between gap-2 text-xs">
+                <span className="font-bold text-[#2a2016]">{t('dayton.room.title')}</span>
+                <span className={overBudget ? 'font-bold text-[#651e18]' : 'text-[#4a3a26]'}>{t(`dayton.room.${roomBand}` as 'dayton.room.plenty')}</span>
+            </div>
+            <div className="dayton-room-meter" role="meter" aria-label={t('dayton.room.title')}
+                aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(100 * (1 - roomShare))}
+                aria-valuetext={t(`dayton.room.${roomBand}` as 'dayton.room.plenty')}>
+                <span style={{ width: `${100 * (1 - roomShare)}%` }} data-band={roomBand} />
+            </div>
+            {patronOverride >= 75 && (
+                <p className="text-xs font-bold text-[#651e18]">{t('dayton.room.patronHolds')}</p>
+            )}
+        </div>
+    ) : (
         <div className="px-8 py-3 border-b border-[#c8b898]/40 flex items-center justify-between">
             <div className="text-xs text-[#6a5a40]" style={{ fontFamily: 'var(--font-data)' }}>
                 <span className="font-bold text-[#2a2016]">{t('peace.negotiationCapital')}</span>{' '}
@@ -505,19 +552,19 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
                                     <span className="text-xs text-[#6a5a40] italic">{t('dayton.federationPartner')}</span>
                                 )}
                                 {!isPlayerHeld && !isPartnerHeld && (
-                                    <button type="button" onClick={() => toggleDemand(pkg.id)}
+                                    <button type="button" onClick={() => toggleDemand(pkg.id)} aria-label={actionName(t('dayton.demandPlain'), pkg)} aria-pressed={conference ? isDemand : undefined}
                                         className={`text-xs px-2 py-1 rounded border font-bold uppercase ${
                                             isDemand ? 'bg-[#2a6a2a] text-white border-[#2a6a2a]' : 'text-[#2a6a2a] border-[#2a6a2a]/40 hover:bg-[#d0e8d0]'
                                         }`} style={{ fontFamily: 'var(--font-command)' }}>
-                                        {t('dayton.demand', { cost: pkg.demandCost })}
+                                        {demandLabel(pkg)}
                                     </button>
                                 )}
                                 {isPlayerHeld && (
-                                    <button type="button" onClick={() => toggleConcession(pkg.id)}
+                                    <button type="button" onClick={() => toggleConcession(pkg.id)} aria-label={actionName(t('dayton.concedePlain'), pkg)} aria-pressed={conference ? isConcession : undefined}
                                         className={`text-xs px-2 py-1 rounded border font-bold uppercase ${
                                             isConcession ? 'bg-[#8a2a2a] text-white border-[#8a2a2a]' : 'text-[#8a2a2a] border-[#8a2a2a]/40 hover:bg-[#e8d0d0]'
                                         }`} style={{ fontFamily: 'var(--font-command)' }}>
-                                        {t('dayton.concede', { cost: pkg.concedeCost })}
+                                        {concedeLabel(pkg)}
                                     </button>
                                 )}
                             </div>
@@ -563,19 +610,19 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
                                     </div>
                                     <div className="flex gap-2 mt-2">
                                         {!mapGivesPlayer && (
-                                            <button type="button" onClick={() => toggleDemand(pkg.id)}
+                                            <button type="button" onClick={() => toggleDemand(pkg.id)} aria-label={actionName(t('dayton.demandPlain'), pkg)} aria-pressed={conference ? isDemand : undefined}
                                                 className={`text-xs px-2 py-1 rounded border font-bold uppercase ${
                                                     isDemand ? 'bg-[#2a6a2a] text-white border-[#2a6a2a]' : 'text-[#2a6a2a] border-[#2a6a2a]/40 hover:bg-[#d0e8d0]'
                                                 }`} style={{ fontFamily: 'var(--font-command)' }}>
-                                                {t('dayton.demand', { cost: pkg.demandCost })}
+                                                {demandLabel(pkg)}
                                             </button>
                                         )}
                                         {mapGivesPlayer && (
-                                            <button type="button" onClick={() => toggleConcession(pkg.id)}
+                                            <button type="button" onClick={() => toggleConcession(pkg.id)} aria-label={actionName(t('dayton.concedePlain'), pkg)} aria-pressed={conference ? isConcession : undefined}
                                                 className={`text-xs px-2 py-1 rounded border font-bold uppercase ${
                                                     isConcession ? 'bg-[#8a2a2a] text-white border-[#8a2a2a]' : 'text-[#8a2a2a] border-[#8a2a2a]/40 hover:bg-[#e8d0d0]'
                                                 }`} style={{ fontFamily: 'var(--font-command)' }}>
-                                                {t('dayton.concede', { cost: pkg.concedeCost })}
+                                                {concedeLabel(pkg)}
                                             </button>
                                         )}
                                     </div>
@@ -627,6 +674,7 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
                 onChange={setInstArchAndClear}
                 playerFaction={playerFaction}
                 capitalAvailable={capitalAvailable}
+                hideCosts={conference}
             />
         </>
     );
@@ -648,7 +696,68 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
         </button>
     );
 
-    const responses = (
+    // Conference: answers come only from tabled rounds (DC A2). No free probing.
+    const roundResponses = conference && (
+        <section className="px-8 py-4 border-b border-[#c8b898]/40 dayton-rounds" aria-labelledby="dayton-rounds-title">
+            <div className="flex flex-wrap items-baseline justify-between gap-2 mb-2">
+                <h3 id="dayton-rounds-title" className="text-xs uppercase tracking-widest text-[#8a7a60] font-bold">
+                    {lastRound ? t('dayton.rounds.answersTitle', { round: lastRound.round }) : t('dayton.rounds.title')}
+                </h3>
+                <ol className="dayton-round-track" aria-label={t('dayton.rounds.trackLabel')}>
+                    {Array.from({ length: DAYTON_MAX_ROUNDS }, (_, i) => i + 1).map(n => (
+                        <li key={n} data-state={n <= rounds.length ? 'done' : n === nextRound ? 'next' : 'later'}>
+                            {t('dayton.rounds.trackItem', { round: n })}
+                        </li>
+                    ))}
+                </ol>
+            </div>
+            {!lastRound && <p className="text-xs text-[#4a3a26]">{t('dayton.rounds.intro', { max: DAYTON_MAX_ROUNDS })}</p>}
+            {adopted && <p className="mb-2 text-xs font-bold" role="status">{t('dayton.conference.adopted')}</p>}
+            {lastRound && (
+                <div className="space-y-2">
+                    {Object.keys(lastRound.responses).sort().map((faction) => {
+                        const resp = lastRound.responses[faction] as IpcDaytonBotResponse | undefined;
+                        if (!resp) return null;
+                        return (
+                            <BotResponseRow
+                                key={faction}
+                                faction={faction}
+                                resp={resp}
+                                reasonText={plainReply(faction, resp)}
+                                probedDemands={lastRound.proposal.territorial_demands}
+                                packageNames={packageNameLookup(dayton)}
+                                clauses={resp.counter_proposal ? counterClauses(lastRound.proposal, resp.counter_proposal, territoryPackages) : undefined}
+                                onClause={clause => {
+                                    if (resp.counter_proposal) void inspectClause(clause, 'draft', { faction, proposal: resp.counter_proposal });
+                                }}
+                                onAdopt={() => adoptCounter(resp)}
+                            />
+                        );
+                    })}
+                </div>
+            )}
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+                {nextRound !== null ? (
+                    <button
+                        type="button"
+                        onClick={() => void handleTable()}
+                        disabled={overBudget}
+                        aria-disabled={tabling || submitting ? true : undefined}
+                        className="dayton-live-button dayton-live-primary"
+                    >
+                        {tabling ? t('dayton.rounds.tabling') : t('dayton.rounds.table', { round: nextRound, max: DAYTON_MAX_ROUNDS })}
+                    </button>
+                ) : (
+                    <p className="text-xs font-bold text-[#5a1a1a]" role="status">{t('dayton.rounds.spent')}</p>
+                )}
+                {nextRound === DAYTON_MAX_ROUNDS && <p className="text-xs font-bold text-[#5a1a1a]">{t('dayton.rounds.lastWarning')}</p>}
+                {nextRound !== null && rounds.length > 0 && <p className="text-xs text-[#4a3a26]">{t('dayton.rounds.pressure')}</p>}
+            </div>
+            {tableError && <p className="mt-2 text-xs font-bold text-[#651e18]" role="alert">{t('dayton.rounds.error')}</p>}
+        </section>
+    );
+
+    const responses = conference ? roundResponses : (
         <div className="px-8 py-4 border-b border-[#c8b898]/40">
             <div className="flex items-center justify-between mb-2">
                 <div className="text-xs uppercase tracking-widest text-[#8a7a60] font-bold">
@@ -737,7 +846,8 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
             )}
             {overBudget && (
                 <div className="text-xs text-red-700 font-bold">
-                    Reduce demands — capital spent ({capitalSpent}) exceeds available ({Math.round(capitalAvailable)})
+                    {conference ? t('dayton.room.overHint')
+                        : `Reduce demands — capital spent (${capitalSpent}) exceeds available (${Math.round(capitalAvailable)})`}
                 </div>
             )}
             <div className="text-xs text-[#6a5a40] mt-1" style={{ fontFamily: 'var(--font-command)' }}>
@@ -789,6 +899,9 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
             >
                 <DaytonConferenceRoom
                     date={date}
+                    status={nextRound === null
+                        ? t('dayton.conference.roundsSpent')
+                        : t('dayton.conference.roundStatus', { round: nextRound, max: DAYTON_MAX_ROUNDS })}
                     error={conferenceError ? t(`dayton.conference.error.${conferenceError}`) : undefined}
                     forced={Boolean(dayton.forced)}
                     previewReady={Boolean(agreement)}
@@ -969,9 +1082,22 @@ function packageNameLookup(dayton: DaytonData): Record<string, string> {
 }
 
 /** One bot delegation's response, with counter-offer detail + adopt action. */
+/**
+ * The room's plain-language reading of a delegation's answer (DC A2). The engine's
+ * `reason` carries cost figures and is never shown in the conference.
+ */
+function plainReply(faction: string, resp: IpcDaytonBotResponse): string {
+    const who = t(`dayton.folder.faction.${faction}` as 'dayton.folder.faction.RS');
+    const patron = t(`dayton.folder.patron.${faction}` as 'dayton.folder.patron.RS');
+    const code = resp.reason_code
+        ?? (resp.decision === 'accept' ? 'accept' : resp.decision === 'counter' ? 'counter_close' : 'reject');
+    return t(`dayton.reply.${code}` as 'dayton.reply.accept', { faction: who, patron });
+}
+
 function BotResponseRow({
     faction,
     resp,
+    reasonText,
     probedDemands,
     packageNames,
     clauses,
@@ -980,6 +1106,8 @@ function BotResponseRow({
 }: {
     faction: string;
     resp: IpcDaytonBotResponse;
+    /** Plain-language reply shown instead of the engine's diagnostic reason (conference). */
+    reasonText?: string;
     probedDemands: readonly string[];
     packageNames: Record<string, string>;
     clauses?: DaytonClause[];
@@ -1016,7 +1144,7 @@ function BotResponseRow({
                     {decisionLabel}
                 </span>
             </div>
-            {resp.reason && <p className="mt-1 text-xs">{resp.reason}</p>}
+            {(reasonText ?? resp.reason) && <p className="mt-1 text-xs">{reasonText ?? resp.reason}</p>}
             {counter && resp.decision === 'counter' && (
                 <div className="mt-2 text-xs text-[#5a4a30]">
                     {clauses && <ClauseLinks clauses={clauses} onClause={onClause} />}

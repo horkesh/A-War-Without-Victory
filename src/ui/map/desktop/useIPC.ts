@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { DaytonAgreementRecord, DaytonProposal } from '../../../state/negotiation_types';
+import type { DaytonAgreementRecord, DaytonProposal, DaytonRound } from '../../../state/negotiation_types';
 import type { SettingsSaveOptions } from '../preferences/nativeSettings';
 import type {
     GameStateUpdateMetadata,
@@ -162,6 +162,8 @@ interface IpcBattleEventsResult {
 export interface IpcDaytonBotResponse {
     decision: 'accept' | 'reject' | 'counter';
     reason: string;
+    /** Plain-language category for the room (DC A2); absent on responses from older builds. */
+    reason_code?: 'accept' | 'accept_patron' | 'counter_close' | 'counter_far' | 'reject';
     proposal_cost: number;
     available_capital: number;
     counter_proposal?: {
@@ -301,6 +303,8 @@ interface WindowAwwv {
     declineDayton: () => Promise<{ ok: boolean; imposition_turn?: number; error?: string }>;
     /** Read-only Dayton preview (Dayton Phase-4): bot responses + authoritative readouts, no state mutation. */
     previewDayton: (proposal: DaytonProposal) => Promise<IpcDaytonPreviewResult>;
+    /** Table a Dayton round (DC A2): every other delegation answers; the round is saved. */
+    tableDaytonRound: (proposal: DaytonProposal) => Promise<{ ok: boolean; round?: DaytonRound; error?: string }>;
     /** Level 2: Presidential acknowledgement of a warlord friction event. Sets resolved: true, reducing command strain. */
     acknowledgeFrictionEvent: (payload: { corpsId: string; officerId: string; eventTurn: number; eventType: string }) => Promise<{ ok: boolean; error?: string }>;
     /** Level 2: Resolve ALL unresolved friction events for a corps at once. Costs CA (10 if strained, 15 if compromised). 3-turn cooldown. */
@@ -750,6 +754,10 @@ export function useIPC() {
             previewDayton: awwv
                 ? (proposal: DaytonProposal) => awwv.previewDayton(proposal)
                 : makeNoop<IpcDaytonPreviewResult>(),
+
+            tableDaytonRound: awwv?.tableDaytonRound
+                ? (proposal: DaytonProposal) => awwv.tableDaytonRound(proposal)
+                : makeNoop<{ ok: boolean; round?: DaytonRound; error?: string }>(),
 
             acknowledgeFrictionEvent: awwv
                 ? (payload: { corpsId: string; officerId: string; eventTurn: number; eventType: string }) => awwv.acknowledgeFrictionEvent(payload)

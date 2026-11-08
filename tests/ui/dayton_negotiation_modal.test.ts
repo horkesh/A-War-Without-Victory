@@ -240,6 +240,9 @@ describe('DaytonNegotiationModal — live conference room', () => {
         fireEvent.click(within(screen.getByRole('navigation', { name: 'Conference objects' })).getByRole('button', { name: 'Current draft' }));
     }
 
+    /** The conference shows no cost figures (DC A2); each Demand button is named by its package. */
+    const demandCorridor = () => screen.getByRole('button', { name: 'Demand: Goražde Corridor' });
+
     it('prices a state-level defense term at the live RBiH engine cost', () => {
         openDraft({ ...PENDING, factionCapital: { ...PENDING.factionCapital, RBiH: 10 } });
         const close = () => fireEvent.click(screen.getByRole('button', { name: 'Return to conference room' }));
@@ -266,7 +269,7 @@ describe('DaytonNegotiationModal — live conference room', () => {
         openDraft();
         fireEvent.click(screen.getByRole('button', { name: 'Review agreement' }));
         fireEvent.click(screen.getByRole('button', { name: 'Return to current draft' }));
-        fireEvent.click(screen.getByText('Demand (12)'));
+        fireEvent.click(demandCorridor());
         fireEvent.click(screen.getByRole('button', { name: 'Review agreement' }));
         expect(previewDayton).toHaveBeenCalledTimes(2);
         await screen.findByRole('region', { name: 'Institutions and powers' });
@@ -295,7 +298,7 @@ describe('DaytonNegotiationModal — live conference room', () => {
         expect(document.activeElement).toBe(screen.getByRole('heading', { name: 'Changes from the opening draft' }));
         expect(screen.getByRole('region', { name: 'Settlement territory' })).toBeTruthy();
         fireEvent.click(screen.getByRole('button', { name: 'Return to current draft' }));
-        fireEvent.click(screen.getByText('Demand (12)'));
+        fireEvent.click(demandCorridor());
         fireEvent.click(screen.getByRole('button', { name: 'Review agreement' }));
         await waitFor(() => expect(previewDayton).toHaveBeenCalledTimes(3));
         await screen.findByRole('region', { name: 'Institutions and powers' });
@@ -312,18 +315,28 @@ describe('DaytonNegotiationModal — live conference room', () => {
             territorial_demands: [], territorial_concessions: [], institutional_choices: {},
             entity_autonomy: 'federalized', competency_allocation: { comp_foreign_policy: 'entity', comp_defense: 'state' },
         };
+        // The counter comes from a tabled round saved on the packet (DC A2), not a probe.
         const previewDayton = vi.fn()
-            .mockResolvedValueOnce({ ok: true, agreement: agreement(), botResponses: {
-                RS: { decision: 'counter', reason: 'Opening terms exceed available capital.', counter_proposal: counter },
-            } })
+            .mockResolvedValueOnce({ ok: true, agreement: agreement() })
             .mockResolvedValueOnce({ ok: false })
             .mockResolvedValue({ ok: true, agreement: agreement('entity', 'RS') });
         (window as unknown as { awwv: Record<string, unknown> }).awwv = { previewDayton };
         const corridor = { ...PENDING.territorialPackages[0]!, osids: ['included', 'missing'] };
-        openDraft({ ...PENDING, territorialPackages: [corridor, ...PENDING.territorialPackages.slice(1)] });
-        fireEvent.click(screen.getByText('Demand (12)'));
-        fireEvent.click(screen.getByRole('button', { name: 'Probe Positions' }));
-        expect(await screen.findByText('Opening terms exceed available capital.')).toBeTruthy();
+        const round = {
+            round: 1, turn: 187, pressure: 0,
+            proposal: { territorial_demands: ['gorazde_corridor'], territorial_concessions: [], institutional_choices: {} },
+            responses: { RS: { decision: 'counter' as const, reason: 'Proposal cost (40) exceeds acceptable range (12).', reason_code: 'counter_far' as const,
+                proposal_cost: 40, available_capital: 20, counter_proposal: counter } },
+        };
+        openDraft({ ...PENDING, territorialPackages: [corridor, ...PENDING.territorialPackages.slice(1)], rounds: [round] as never });
+        // The first reviewed preview is the opening treaty that Final review compares against.
+        fireEvent.click(screen.getByRole('button', { name: 'Review agreement' }));
+        await screen.findByRole('region', { name: 'Institutions and powers' });
+        fireEvent.click(screen.getByRole('button', { name: 'Return to current draft' }));
+        fireEvent.click(demandCorridor());
+        expect(screen.getByText('Republika Srpska rejects most of the draft and answers with its own terms.')).toBeTruthy();
+        // The engine's diagnostic reason, with its cost figures, never reaches the room.
+        expect(screen.queryByText(/Proposal cost/)).toBeNull();
         fireEvent.click(screen.getByRole('button', { name: /Goražde Corridor.*Demand.*Unraised/ }));
         const retry = await screen.findByRole('button', { name: 'Retry clause preview' });
         retry.focus();
@@ -349,12 +362,44 @@ describe('DaytonNegotiationModal — live conference room', () => {
         adopt.focus();
         fireEvent.click(adopt);
         expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Review agreement' }));
-        expect(screen.queryByText('Opening terms exceed available capital.')).toBeNull();
+        expect(screen.getByText('Counter-offer copied into your editable draft.')).toBeTruthy();
         fireEvent.click(screen.getByRole('button', { name: 'Review agreement' }));
         await screen.findByRole('region', { name: 'Institutions and powers' });
         expect(screen.getByRole('button', { name: /Foreign Policy.*Shared.*Entity/i })).toBeTruthy();
         expect(previewDayton.mock.lastCall?.[0]).toEqual(counter);
         geometry.mockRestore();
+    });
+
+    it('tables the current draft as the next round and shows the round track and deadline (DC A2)', async () => {
+        const tableDaytonRound = vi.fn().mockResolvedValue({ ok: true, round: {} });
+        (window as unknown as { awwv: Record<string, unknown> }).awwv = { tableDaytonRound, previewDayton: vi.fn() };
+        openDraft();
+        const delegations = within(screen.getByRole('region', { name: 'Delegations' }));
+        expect(screen.getByText(/Round 1 of 3 · Wright-Patterson/)).toBeTruthy();
+        expect(delegations.getByText(/The mediator allows 3 rounds/)).toBeTruthy();
+        fireEvent.click(demandCorridor());
+        fireEvent.click(delegations.getByRole('button', { name: 'Table this draft (round 1 of 3)' }));
+        await waitFor(() => expect(tableDaytonRound).toHaveBeenCalledTimes(1));
+        expect(tableDaytonRound.mock.calls[0]![0].territorial_demands).toEqual(['gorazde_corridor']);
+        // No cost figures anywhere in the draft panel.
+        expect(screen.queryByText(/\(\d+\)/)).toBeNull();
+        expect(screen.getByRole('meter', { name: 'Room to bargain' })).toBeTruthy();
+    });
+
+    it('warns on the last round and offers only sign or walk away once the rounds are spent', () => {
+        const proposal = { territorial_demands: [], territorial_concessions: [], institutional_choices: {} };
+        const accept = { decision: 'accept' as const, reason: '', reason_code: 'accept_patron' as const, proposal_cost: 0, available_capital: 50 };
+        const round = (n: number) => ({ round: n, turn: 187, pressure: 10 * Math.min(2, n - 1), proposal, responses: { RS: accept, HRHB: accept } });
+        openDraft({ ...PENDING, rounds: [round(1), round(2)] as never });
+        expect(screen.getByText('This is the last round.')).toBeTruthy();
+        expect(screen.getByText('Answers to round 2')).toBeTruthy();
+        expect(screen.getByText('Republika Srpska accepts the draft. Belgrade pressed it to.')).toBeTruthy();
+        cleanup();
+        openDraft({ ...PENDING, rounds: [round(1), round(2), round(3)] as never });
+        expect(screen.queryByRole('button', { name: /Table this draft/ })).toBeNull();
+        expect(screen.getByText('The mediator has taken the last draft. You sign or walk away.')).toBeTruthy();
+        expect(screen.getByText(/Final round over · Wright-Patterson/)).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Review agreement' })).toBeTruthy();
     });
 
     it('opens a delegation brief that states the ground, the record, the patron and the refused plans', () => {
@@ -426,11 +471,14 @@ describe('DaytonNegotiationModal — live conference room', () => {
 
         const draft = nav.getByRole('button', { name: 'Current draft' });
         fireEvent.click(draft);
-        fireEvent.click(screen.getByText('Demand (12)'));
-        fireEvent.click(screen.getByRole('button', { name: 'Probe Positions' }));
-        await screen.findByText('Draft settlement ready');
+        fireEvent.click(demandCorridor());
+        // No free probing in the conference (DC A2): the draft has no Probe button.
+        expect(within(screen.getByRole('region', { name: 'Delegations' })).queryByRole('button', { name: 'Probe Positions' })).toBeNull();
+        fireEvent.click(screen.getByRole('button', { name: 'Review agreement' }));
+        await screen.findByRole('region', { name: 'Institutions and powers' });
         expect(previewDayton.mock.calls[0]![0].territorial_demands).toEqual(['gorazde_corridor']);
         expect(resolveDayton).not.toHaveBeenCalled();
+        fireEvent.click(screen.getByRole('button', { name: 'Return to current draft' }));
         close();
         expect(document.activeElement).toBe(draft);
 
@@ -490,7 +538,7 @@ describe('DaytonNegotiationModal — live conference room', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Skip arrival' }));
         const nav = within(screen.getByRole('navigation', { name: 'Conference objects' }));
         fireEvent.click(nav.getByRole('button', { name: 'Current draft' }));
-        fireEvent.click(screen.getByText('Demand (12)'));
+        fireEvent.click(demandCorridor());
         fireEvent.click(screen.getByRole('button', { name: 'Review agreement' }));
         await screen.findByRole('region', { name: 'Settlement territory' });
 

@@ -9,6 +9,8 @@ export type DaytonConferencePanel = DaytonRoomObject | 'review';
 
 interface DaytonConferenceRoomProps {
     date?: string;
+    /** Room status line (round of rounds and location, DC A2); falls back to the location. */
+    status?: string;
     error?: string;
     forced: boolean;
     previewReady: boolean;
@@ -19,7 +21,7 @@ interface DaytonConferenceRoomProps {
     panels: Record<DaytonConferencePanel, ReactNode>;
 }
 
-export function DaytonConferenceRoom({ date, error, forced, previewReady, panel, backTo, returnFocus, onPanelChange, panels }: DaytonConferenceRoomProps) {
+export function DaytonConferenceRoom({ date, status, error, forced, previewReady, panel, backTo, returnFocus, onPanelChange, panels }: DaytonConferenceRoomProps) {
     const [arrived, setArrived] = useState(false);
     const opener = useRef<HTMLButtonElement | null>(null);
     const room = useRef<HTMLDivElement>(null);
@@ -86,7 +88,7 @@ export function DaytonConferenceRoom({ date, error, forced, previewReady, panel,
                 <>
                     <div ref={room} className="dayton-live-room">
                         <header className="dayton-live-heading">
-                            <p className="dayton-live-kicker">{t('dayton.location')}</p>
+                            <p className="dayton-live-kicker">{status ?? t('dayton.location')}</p>
                             <h2 tabIndex={-1} ref={roomHeading}>{t('dayton.conference.room')}</h2>
                             <p role="status">{t(forced ? 'dayton.forcedTitle' : 'dayton.conference.action')}</p>
                             {previewReady && !panel && <p>{t('dayton.conference.previewReady')}</p>}

@@ -19,7 +19,7 @@ import { useGameStore } from './store/gameStore';
 import { setLocale } from './i18n';
 import { makeMockLoadedGameState } from './__mocks__/loadedGameState';
 import type { LoadedGameState } from './data/types';
-import type { DelegationFolder } from '../../state/negotiation_types.js';
+import type { DaytonRound, DelegationFolder } from '../../state/negotiation_types.js';
 import rbihFolder from './__mocks__/dayton_delegation_folder.rbih.json';
 
 const params = new URLSearchParams(window.location.search);
@@ -86,7 +86,21 @@ useGameStore.setState({
 // ?conference=1 mounts the live Hope Hotel room; the delegation folder is the one
 // buildDelegationFolder produced from the retained RBiH pending fixture (real numbers).
 const conference = params.get('conference') === '1';
-const dayton = conference ? { ...PENDING, delegationFolder: rbihFolder as DelegationFolder } : PENDING;
+// ?rounds=N seeds N tabled rounds (DC A2): RS counters, HRHB accepts once its patron presses.
+const seededRounds: DaytonRound[] = Array.from({ length: Math.min(3, Number(params.get('rounds') ?? 0) || 0) }, (_, i) => ({
+    round: i + 1,
+    turn: 187,
+    pressure: 10 * Math.min(2, i),
+    proposal: { territorial_demands: ['gorazde_corridor', 'brcko_district'], territorial_concessions: [], institutional_choices: {} },
+    responses: {
+        RS: {
+            decision: 'counter', reason: '', reason_code: i === 0 ? 'counter_far' : 'counter_close', proposal_cost: 0, available_capital: 0,
+            counter_proposal: { territorial_demands: ['gorazde_corridor'], territorial_concessions: [], institutional_choices: {} },
+        },
+        HRHB: { decision: 'accept', reason: '', reason_code: i === 0 ? 'accept' : 'accept_patron', proposal_cost: 0, available_capital: 0 },
+    },
+}));
+const dayton = conference ? { ...PENDING, delegationFolder: rbihFolder as DelegationFolder, rounds: seededRounds } : PENDING;
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     createElement(DaytonNegotiationModal, { dayton, conference }),

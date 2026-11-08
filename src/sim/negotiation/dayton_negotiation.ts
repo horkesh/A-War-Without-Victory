@@ -28,6 +28,7 @@ import {
 } from './dayton_dial_cost.js';
 import { reconcileProposalPowers, reconcileResolvedPowers } from './power_overlap.js';
 import { buildDelegationFolder } from './delegation_folder.js';
+import { effectiveDaytonOverride } from './dayton_rounds.js';
 import type { DelegationFolder } from '../../state/negotiation_types.js';
 import {
     adjustedCost,
@@ -655,7 +656,7 @@ export function resolveDaytonNegotiation(
         postDeclineCells.size > 0 && packageOsids(p).some((o) => postDeclineCells.has(o));
     for (const holder of [...refusedByHolder.keys()].sort(strictCompare)) {
         const refused = refusedByHolder.get(holder)!;
-        const override = neg.patron_relationships[holder]?.override_authority ?? 0;
+        const override = effectiveDaytonOverride(neg, holder);
         const forced = new Set(selectPatronForced(refused, holder, override, isPostDeclineGround));
         for (const p of [...refused].sort((a, b) => strictCompare(a.id, b.id))) {
             if (forced.has(p.id)) {
@@ -699,7 +700,7 @@ export function resolveDaytonNegotiation(
 
                     // Check patron override
                     const botPatron = neg.patron_relationships[botFaction];
-                    if (botPatron && botPatron.override_authority >= PATRON_OVERRIDE_THRESHOLD) {
+                    if (botPatron && effectiveDaytonOverride(neg, botFaction) >= PATRON_OVERRIDE_THRESHOLD) {
                         objected = false;
                         patronOverrides.push(`institutional:${pkgId}:${botFaction}`);
                     }
@@ -1143,7 +1144,7 @@ function resolveInstitutionalDimensions(
             ? getCompositeCapital(neg.capital[faction], faction, neg.strategic_dimensions)
             : 0;
     const patronForces = (faction: string): boolean =>
-        (neg.patron_relationships[faction]?.override_authority ?? 0) >= PATRON_OVERRIDE_THRESHOLD;
+        effectiveDaytonOverride(neg, faction) >= PATRON_OVERRIDE_THRESHOLD;
 
     // Returns true if the sub-choice survives (no un-overridden objection). Records a
     // patron override when an objection is forced through.

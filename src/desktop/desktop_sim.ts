@@ -50,6 +50,9 @@ import {
 import { writeOwedRecordsAtTermination } from '../sim/endgame/owed_termination_records.js';
 import { projectDaytonAgreement, resolveDaytonNegotiation as resolveDaytonNegotiationInEngine } from '../sim/negotiation/dayton_negotiation.js';
 import type { DaytonAgreementRecord, DaytonProposal, DaytonResult } from '../state/negotiation_types.js';
+import { tableDaytonRound, type TableDaytonRoundResult } from '../sim/negotiation/dayton_rounds.js';
+import { evaluateBotResponse as evaluateBotResponseInEngine } from '../sim/negotiation/bot_negotiation.js';
+import { parseDaytonProposal } from './dayton_proposal.js';
 import type { EventDefinition, EventEffect, PendingEventDecision } from '../sim/events/event_types.js';
 import {
     queryMovementPath as computeMovementPathQuery,
@@ -92,6 +95,12 @@ export { resolvePeacePlan } from '../sim/negotiation/peace_plans.js';
 export { submitPlayerCounterOffer } from '../sim/negotiation/counter_offer_generator.js';
 export { declineDaytonNegotiation } from '../sim/negotiation/dayton_negotiation.js';
 export { parseDaytonProposal } from './dayton_proposal.js';
+
+/** Table a draft for the next Dayton round (DC A2): every other delegation answers; the round is recorded. */
+export function tableDesktopDaytonRound(state: GameState, payload: unknown): TableDaytonRoundResult {
+    const proposal = parseDaytonProposal(payload, state);
+    return tableDaytonRound(state, proposal, evaluateBotResponseInEngine);
+}
 
 /**
  * Sign Dayton from the desktop. The bundled sim cannot resolve the source-relative

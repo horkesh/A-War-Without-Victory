@@ -22,6 +22,7 @@ import { frontPackagesForProposal } from './front_packages.js';
 import { isProtectedFor } from './patron_leverage.js';
 import { getInstitutionalPackageById, getInstitutionalCost } from './institutional_packages.js';
 import { reconcileProposalPowers } from './power_overlap.js';
+import { effectiveDaytonOverride } from './dayton_rounds.js';
 import {
     finalCompetencyCost,
     finalConstitutionalCost,
@@ -453,7 +454,8 @@ export function evaluateBotResponse(
 
     const compositeCapital = getCompositeCapital(capital, faction, neg.strategic_dimensions);
     const proposalCost = computeProposalCostToFaction(proposal, faction, extra);
-    const overrideAuthority = patronRel?.override_authority ?? 0;
+    // Round pressure (DC A2): each tabled round raises the patron's hold; 0 with no rounds.
+    const overrideAuthority = patronRel ? effectiveDaytonOverride(neg, faction) : 0;
 
     // Determine spending willingness based on patron pressure
     let willingnessFraction = BASE_SPENDING_WILLINGNESS;
@@ -476,6 +478,7 @@ export function evaluateBotResponse(
         return {
             decision: 'accept',
             reason,
+            reason_code: overrideAuthority >= PATRON_STRONG_PRESSURE_THRESHOLD ? 'accept_patron' : 'accept',
             proposal_cost: proposalCost,
             available_capital: compositeCapital,
         };
@@ -489,6 +492,8 @@ export function evaluateBotResponse(
             decision: 'counter',
             counter_proposal: countered.counter,
             reason: `Proposal cost (${proposalCost}) exceeds acceptable range (${Math.floor(maxAcceptableCost)}). Counter-proposal offered. ${countered.citation}`,
+            // Close: the draft asks under twice what this delegation can give.
+            reason_code: proposalCost < 2 * maxAcceptableCost ? 'counter_close' : 'counter_far',
             proposal_cost: proposalCost,
             available_capital: compositeCapital,
         };
@@ -497,6 +502,7 @@ export function evaluateBotResponse(
     return {
         decision: 'reject',
         reason: `Proposal cost (${proposalCost}) exceeds available capital (${Math.floor(compositeCapital)}). No viable counter-proposal.`,
+        reason_code: 'reject',
         proposal_cost: proposalCost,
         available_capital: compositeCapital,
     };
