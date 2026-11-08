@@ -39,30 +39,41 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 }
 .arrival button { margin: .45rem .45rem 0 0; }
 .conference {
+  position: relative;
   height: 100svh;
   min-height: 30rem;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  isolation: isolate;
 }
 .conference > header {
-  padding: .65rem clamp(1rem, 3vw, 3rem) .55rem;
-  border-bottom: 1px solid #403828;
+  position: absolute;
+  z-index: 1;
+  top: clamp(.65rem, 2vh, 1.35rem);
+  left: clamp(.75rem, 2vw, 2rem);
+  padding: .65rem .85rem;
+  max-width: calc(100% - 1.5rem);
+  border-inline-start: 2px solid var(--line);
+  background: #171611df;
 }
-.conference > header h1 { margin-bottom: .2rem; }
-.conference > header p { margin-bottom: .2rem; }
+.conference > header h1 { margin-bottom: .2rem; font-size: clamp(1.25rem, 2.2vw, 2rem); }
+.conference > header p { margin-bottom: .15rem; }
 .room-window {
-  position: relative;
+  position: absolute;
+  inset: 0;
   overflow: hidden;
   container-type: size;
-  background: radial-gradient(ellipse at center, #3c3023, #1c1b17 78%);
+  background: #1c1b17;
 }
 .room-frame {
   position: absolute;
-  width: min(100cqw, 236cqh);
+  width: min(max(100cqw, 177.778cqh), 140cqw);
   top: 50%;
   left: 50%;
-  /* At wide ratios, give up more ceiling than table so every prop stays in view. */
-  transform: translate(-50%, calc(-50% - max(0px, (100% - 100cqh) * .15)));
+  /* Keep the table in view on displays wider than the standard scene. */
+  transform: translate(-50%, calc(-50% - max(0px, (100% - 100cqh) * .17)));
+}
+.room-window[data-wide="true"] .room-frame {
+  width: max(100cqw, 300cqh);
+  transform: translate(-50%, -50%);
 }
 .room-frame img { width: 100%; height: auto; display: block; }
 .hotspot {
@@ -98,10 +109,35 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
   white-space: nowrap;
 }
 .conference > nav {
+  position: absolute;
+  z-index: 1;
+  bottom: .65rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 1.3rem);
   justify-content: center;
-  padding: .55rem clamp(1rem, 3vw, 3rem);
+  gap: .3rem;
+  padding: .3rem;
   margin-top: 0;
-  border-top: 1px solid #403828;
+  background: #171611db;
+  border: 1px solid #685c44;
+  border-radius: 4px;
+}
+.conference > nav button { min-height: 2rem; padding-block: .2rem; font-size: .9rem; }
+@media (max-aspect-ratio: 1/1) {
+  .conference {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+  .conference > header, .conference > nav, .room-window {
+    position: relative;
+    inset: auto;
+    transform: none;
+    margin: .5rem;
+  }
+  .conference > nav { justify-self: center; }
+  .room-frame { width: 100cqw; }
 }
 nav, .actions { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: .8rem; }
 dialog {
