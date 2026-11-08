@@ -1,0 +1,1249 @@
+{
+  "schema_version": 1,
+  "source": "data/source/peace_plans/dayton_cell_assignments.json",
+  "rules": [
+    "a listed cell is fixed to its side before the municipality quota pass and charged against that side's quota",
+    "faction null on a Federation cell -> the wartime Federation holder, else the Federation party with the larger remaining quota",
+    "special = shared or international administration; listed as special and left with its wartime holder",
+    "unresolved rows are not written; those cells fall to the quota pass"
+  ],
+  "plans": {
+    "dayton": {
+      "op:bosanska_krupa:arapusa_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:bosanska_krupa:donji_dubovik_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bosanska_krupa:gornja_suvaja": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bosanska_krupa:ivanjska_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:bosanska_krupa:jasenica_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bosanska_krupa:jezerski_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bosanska_krupa:otoka_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bosanska_krupa:veliki_badic": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bosanska_krupa:vranjska_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bosanski_petrovac:bosanski_petrovac_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bosanski_petrovac:dobro_selo_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bosanski_petrovac:jasenovac_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:bosanski_petrovac:kolonic_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bosanski_petrovac:krnjeusa": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bosanski_petrovac:prkosi": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bosanski_petrovac:vodjenica": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bosanski_petrovac:vrtoce": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bosanski_samac:crkvina_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bosanski_samac:domaljevac_2": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:bosanski_samac:novo_selo_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bosanski_samac:samac_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bosanski_samac:tisina": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bratunac:bratunac_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bratunac:glogova": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bratunac:jezestica_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bratunac:pobudje_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bratunac:polom": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bratunac:slapasnica": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bratunac:vranesevici": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:bratunac:zapolje_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:brcko:bijela_2": {
+        "faction": null,
+        "special": true,
+        "confidence": "verified"
+      },
+      "op:brcko:boce_2": {
+        "faction": null,
+        "special": true,
+        "confidence": "verified"
+      },
+      "op:brcko:brcko": {
+        "faction": null,
+        "special": true,
+        "confidence": "verified"
+      },
+      "op:brcko:brezovo_polje_selo_2": {
+        "faction": null,
+        "special": true,
+        "confidence": "verified"
+      },
+      "op:brcko:brka_2": {
+        "faction": null,
+        "special": true,
+        "confidence": "verified"
+      },
+      "op:brcko:bukvik_gornji_2": {
+        "faction": null,
+        "special": true,
+        "confidence": "verified"
+      },
+      "op:brcko:donji_rahic": {
+        "faction": null,
+        "special": true,
+        "confidence": "verified"
+      },
+      "op:brcko:gornji_rahic_2": {
+        "faction": null,
+        "special": true,
+        "confidence": "verified"
+      },
+      "op:brcko:krepsic": {
+        "faction": null,
+        "special": true,
+        "confidence": "verified"
+      },
+      "op:brcko:maoca_2": {
+        "faction": null,
+        "special": true,
+        "confidence": "verified"
+      },
+      "op:brcko:palanka": {
+        "faction": null,
+        "special": true,
+        "confidence": "verified"
+      },
+      "op:brcko:potocari_2": {
+        "faction": null,
+        "special": true,
+        "confidence": "verified"
+      },
+      "op:brcko:skakava_donja": {
+        "faction": null,
+        "special": true,
+        "confidence": "verified"
+      },
+      "op:cajnice:batotici": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:cajnice:cajnice_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:cajnice:miljeno_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:cajnice:todorovici": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:cajnice:zaborak": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:doboj:boljanic_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:doboj:brijesnica_velika": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:doboj:bukovica_velika_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:doboj:cerovica_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:doboj:civcije_bukovicke": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:doboj:grapska_gornja_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:doboj:klokotnica_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:doboj:kotorsko_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:doboj:kozuhe_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:doboj:makljenovac": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:doboj:matuzici_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:doboj:stanari_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:doboj:zelinja_gornja_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:foca:brod_3": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:foca:brusna_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:foca:donje_zesce": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:foca:foca_3": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:foca:izbisno": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:foca:kosman": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:foca:mazlina": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:foca:miljevina_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:foca:patkovina": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:foca:prevrac": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:foca:tjentiste_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:foca:ustikolina": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:foca:velenici_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:foca:zavait_3": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:gorazde:bacci": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:gorazde:citluk_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:gorazde:faocici_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:gorazde:glamoc": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:gorazde:gorazde_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:gorazde:hrancici": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:gorazde:kamen": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:gorazde:kola": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:gorazde:kolovarice": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:gorazde:mravinjac_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:gorazde:osjecani_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:gorazde:podkozara_donja_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:gorazde:semihova_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:gorazde:slatina_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:gorazde:sopotnica": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:gorazde:ustipraca_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:gorazde:zorovici": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:gracanica:dzakule": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:gracanica:gracanica_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:gracanica:malesici": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:gracanica:miricina_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:gracanica:petrovo_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:gradacac:donja_tramosnica_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:gradacac:gradacac_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:gradacac:jelovce_selo": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:gradacac:mionica": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:gradacac:pelagicevo": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:gradacac:zelinja_donja_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:ilidza:kasindo": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:ilidza:rakovica_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:ilidza:rudnik_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:ilidza:sarajevo_dio_ilidza_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:ilidza:sarajevo_dio_novi_grad_sarajevo": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:jajce:barevo_2": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:jajce:bravnice": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:jajce:divicani_2": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:jajce:grdovo": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:jajce:jajce_3": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:jajce:jezero_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:jajce:kruscica": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:jajce:lupnica": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:jajce:prisoje": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:jajce:vinac_2": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:kalesija:gojcin_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:kalesija:kalesija_grad_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:kalesija:kalesija_selo": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:kalesija:kikaci": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:kalesija:seher_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:kalesija:tojsici_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:kljuc:cadjavica": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:kljuc:donje_ratkovo_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:kljuc:donji_vrbljani_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:kljuc:hadzici": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:kljuc:kljuc_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:kljuc:krasulje_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:kljuc:sanica_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:kupres:bucovaca": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:kupres:donji_malovan": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:kupres:goravci": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:kupres:kupres_2": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:kupres:novo_selo_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:lopare:celic_3": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:lopare:humci_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:lopare:jablanica_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:lopare:koraj_4": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:lopare:lopare_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:lopare:lopare_selo_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:lopare:mrtvica_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:lopare:nahvioci": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:lopare:priboj_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:mostar:blagaj_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:mostar:gornja_dreznica": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:mostar:hodbina_2": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:mostar:jasenica": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:mostar:kruzanj_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:mostar:mostar_istok_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:mostar:mostar_zapad_2": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:mostar:potoci": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:mostar:vranjevici_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:novo_sarajevo:lukavica": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:novo_sarajevo:sarajevo_dio_novo_sarajevo": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:odzak:donja_dubica": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:odzak:gornji_svilaj": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:odzak:potocani_2": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:orasje:donja_mahala": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:orasje:orasje": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:pale:bulozi": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:pale:gornje_pale": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:pale:hotocina": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:pale:mokro": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:pale:pale": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:pale:podgrab": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:pale:praca": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:pale:vrazalice": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:rogatica:brcigovo": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:rogatica:kovanj": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:rogatica:kramer_selo_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:rogatica:pljesevica": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:rogatica:rogatica_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:rogatica:stara_gora": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:rogatica:varosiste_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:rogatica:zepa_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:sanski_most:budimlic_japra_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:sanski_most:donja_kozica": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:sanski_most:ilidza_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:sanski_most:jelasinovci": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:sanski_most:kljevci": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:sanski_most:lusci_palanka_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:sanski_most:ostra_luka": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:sanski_most:sanski_most_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:sanski_most:skucani_vakuf_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:skender_vakuf:donji_koricani": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:skender_vakuf:imljani_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:skender_vakuf:javorani_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:skender_vakuf:knezevo_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:srebrenica:bostahovine_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:srebrenica:brezovice_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:srebrenica:donji_potocari_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:srebrenica:ljeskovik_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:srebrenica:luka_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:srebrenica:mala_daljegosta_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:srebrenica:milacevici": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:srebrenica:obadi": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:srebrenica:osmace_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:srebrenica:radovcici": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:srebrenica:srebrenica_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:srebrenica:suceska": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:srebrenica:sulice_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:stari_grad_sarajevo:faletici": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:stolac:hatelji_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:stolac:pjesivac_kula_2": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:stolac:prenj": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:stolac:rotimlja_2": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:stolac:stolac_2": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:titov_drvar:drvar_2": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:titov_drvar:prekaja_2": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:titov_drvar:sipovljani_2": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:trebinje:bihovo_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:trebinje:hum": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:trebinje:ivanica": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:trebinje:trebimlja_2": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:trebinje:trebinje_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:trebinje:zakovo_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:trnovo:delijas": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:trnovo:gornja_presjenica": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:trnovo:kijevo_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:trnovo:tusila": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:ugljevik:donja_trnova_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:ugljevik:jasikovac": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:ugljevik:srednja_trnova_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:ugljevik:teocak_krstac_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:ugljevik:ugljevik_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:ugljevik:zabrdje_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:visegrad:donji_dobrun_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:visegrad:drinsko": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:visegrad:kamenica_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:visegrad:medjedja_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:visegrad:okrugla": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:visegrad:prelovo_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:visegrad:velji_lug": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:visegrad:visegrad_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:visegrad:zlijeb": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:zvornik:djulici": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:zvornik:donja_kamenica": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:zvornik:gornji_sepak_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:zvornik:kozluk_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:zvornik:krizevici": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:zvornik:novo_selo": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      },
+      "op:zvornik:rastosnica_2": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:zvornik:sapna": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:zvornik:zvornik": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "verified"
+      }
+    }
+  }
+}

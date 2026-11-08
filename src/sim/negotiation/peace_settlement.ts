@@ -27,6 +27,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 // and the renderer bundles scoring.ts through GameStateAdapter.
 import osidAreasJson from '../../../data/derived/operational/osid_areas.json';
 import settlementShares from '../../../data/derived/peace/plan_settlement_shares.json';
+import cellAssignmentsJson from '../../../data/derived/peace/plan_cell_assignments.json';
 import contactGraphJson from '../../../data/derived/operational/operational_contact_graph.json';
 import { parseEdges } from '../../map/settlements_parse.js';
 import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
@@ -127,6 +128,31 @@ interface SharesFile {
 }
 const SHARES: SharesFile = settlementShares;
 
+/**
+ * An audited opening assignment for one cell (DC plan stage 1; built by
+ * tools/peace/build_peace_settlement_maps.cjs from data/source/peace_plans/
+ * dayton_cell_assignments.json). The quota pass fills shares in sorted cell order, so
+ * inside a split municipality the alphabet decides which cell falls to the other
+ * entity; audited cells are fixed before that pass and charged against the quota.
+ */
+export interface SettlementCellAssignment {
+    /** The party the cell opens with. null on a Federation cell whose party is taken from wartime control, and on special land. */
+    faction: FactionId | null;
+    /** Shared or international administration: listed as special and left with its wartime holder. */
+    special: boolean;
+    confidence: 'verified' | 'approximate';
+}
+export type SettlementCellTable = Record<string, SettlementCellAssignment>;
+interface CellsFile {
+    plans: Record<string, SettlementCellTable>;
+}
+const CELLS: CellsFile = cellAssignmentsJson as CellsFile;
+
+/** The audited cell table for a plan (empty when the plan has none). */
+export function planCellAssignments(planId: SettlementPlanId): SettlementCellTable {
+    return CELLS.plans[planId] ?? {};
+}
+
 export function isSettlementPlan(planId: string): planId is SettlementPlanId {
     return planId === 'vance_owen' || planId === 'owen_stoltenberg' || planId === 'contact_group' || planId === 'dayton';
 }
@@ -143,6 +169,21 @@ export function computeSettlementControllers(
     state: GameState,
     planId: SettlementPlanId,
     overrides: Record<string, FactionId> = {},
+): { controllers: Record<string, FactionId>; special: string[] } {
+    return computeSettlementControllersWith(state, planId, overrides, planCellAssignments(planId));
+}
+
+/**
+ * computeSettlementControllers with an explicit cell table (tests inject one; the
+ * engine passes the plan's audited table). An empty table reproduces the pure quota
+ * pass exactly.
+ */
+export function computeSettlementControllersWith(
+    state: GameState,
+    planId: SettlementPlanId,
+    overrides: Record<string, FactionId>,
+    cells: SettlementCellTable,
+    options: { /** Diagnostics and tests: skip the Dayton contiguity pass to see the opening line as assigned. */ contiguity?: boolean } = {},
 ): { controllers: Record<string, FactionId>; special: string[] } {
     const wartime = state.political?.political_controllers ?? {};
     const areas = getOsidAreas().areas;
@@ -166,8 +207,34 @@ export function computeSettlementControllers(
         const munArea = osids.reduce((s, o) => s + (areas[o] ?? 0), 0);
         const quota: Record<ShareKey, number> = { RBiH: 0, RS: 0, HRHB: 0, special: 0 };
         for (const k of SHARE_KEYS) quota[k] = ((shares[k] ?? 0) / 100) * munArea;
-        const unassigned: string[] = [];
+        // Audited cells first (sorted with the municipality): fixed to their side and
+        // charged against that side's quota, so the quota pass below fills only the rest.
+        const remaining: string[] = [];
         for (const o of osids) {
+            const cell = cells[o];
+            if (!cell) { remaining.push(o); continue; }
+            const a = areas[o] ?? 0;
+            if (cell.special) {
+                special.push(o);
+                const w = wartime[o];
+                if (w) controllers[o] = w;
+                quota.special -= a;
+                continue;
+            }
+            let party: 'RBiH' | 'RS' | 'HRHB';
+            if (isFactionKey(cell.faction)) {
+                party = cell.faction;
+            } else {
+                // A Federation cell with no named party: its wartime Federation holder,
+                // else the Federation party with the larger remaining quota.
+                const w = wartime[o];
+                party = w === 'RBiH' || w === 'HRHB' ? w : quota.HRHB > quota.RBiH ? 'HRHB' : 'RBiH';
+            }
+            controllers[o] = party;
+            quota[party] -= a;
+        }
+        const unassigned: string[] = [];
+        for (const o of remaining) {
             const holder = wartime[o];
             const a = areas[o] ?? 0;
             if (isFactionKey(holder) && quota[holder] >= a / 2 && quota[holder] > 0) {
@@ -199,14 +266,17 @@ export function computeSettlementControllers(
     // Owner, 2026-11-07: "There should be no isolated pockets on final Dayton map." The
     // earlier plans drew enclaves on purpose (Vance–Owen provinces, the Contact Group's
     // eastern enclaves), so only Dayton is made contiguous.
-    const final = planId === 'dayton'
+    const final = planId === 'dayton' && options.contiguity !== false
         ? enforceSettlementContiguity({
             controllers,
             adjacency: getSettlementAdjacency(),
             areas,
             isProtectedExclave: (side, cells) => side === 'FED' && cells.every((o) => POSAVINA_CANTON.has(munOf(o))),
-            // Never absorb ground a package won at the table, or an enclave held by its own side.
-            isProtectedCell: (o, f) => overrides[o] === f || isEnclaveCellOfSide(o, f),
+            // Never absorb ground a package won at the table, an enclave held by its own
+            // side, or a cell the audit places on this side with verified evidence (the
+            // smallest-area corridor must not run through Istočno Sarajevo).
+            isProtectedCell: (o, f) => overrides[o] === f || isEnclaveCellOfSide(o, f)
+                || (cells[o]?.confidence === 'verified' && cells[o]?.faction === f),
         }).controllers
         : controllers;
     const sorted: Record<string, FactionId> = {};
