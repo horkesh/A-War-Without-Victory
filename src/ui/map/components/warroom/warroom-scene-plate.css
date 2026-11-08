@@ -1,0 +1,25 @@
+.warroom-scene-wing {
+  display: none;
+  position: absolute;
+  inset-block: 0;
+  /* The atlas contains two 774 px wings for the 2292 px reference center. */
+  width: calc(max(calc((var(--interface-viewport-width, 100vw) - 100%) / 2), calc(100% * 774 / 2292)) + 1px);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.warroom-scene-wing--left {
+  /* Cover fractional-pixel joins behind the original plate. */
+  right: calc(100% - 1px);
+  background-position: left center;
+}
+
+.warroom-scene-wing--right {
+  left: calc(100% - 1px);
+  background-position: right center;
+}
+
+@media (min-aspect-ratio: 43/24) {
+  .warroom-scene-wing { display: block; }
+}

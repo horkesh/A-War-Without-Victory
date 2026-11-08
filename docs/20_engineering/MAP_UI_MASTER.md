@@ -18,6 +18,8 @@
 
 ---
 
+The live Warroom extends the aspect-fit plate with a two-panel panoramic WebP for each faction and year. These decorative panels share the plate height and use logical viewport dimensions for interface scaling. The existing room image owns the clickable regions, map, date board, and toolbar coordinate frame. Opening previews still use the standard scene plate.
+
 ## 1. Directory Layout
 
 ```

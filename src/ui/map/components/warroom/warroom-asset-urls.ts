@@ -56,3 +56,13 @@ export const WARROOM_1992_SCENE_URLS = {
   RS: WARROOM_SCENE_URLS.RS[1992],
   HRHB: WARROOM_SCENE_URLS.HRHB[1992],
 } satisfies Record<PlayerFacingFaction, string>;
+
+const wideSceneUrls = import.meta.glob<string>('../../../warroom/assets/ultrawide/*-wings.webp', {
+  eager: true,
+  import: 'default',
+  query: '?url',
+});
+
+export function warroomWideSceneUrl(faction: PlayerFacingFaction, year: WarroomSceneYear): string | undefined {
+  return wideSceneUrls[`../../../warroom/assets/ultrawide/hq_${faction.toLowerCase()}_${year}-wings.webp`];
+}
