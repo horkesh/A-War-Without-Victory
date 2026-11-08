@@ -1,0 +1,8 @@
+{
+  "name": "martial_RS",
+  "faction": "RS",
+  "events": {
+    "default": "martial"
+  },
+  "peace_plans": "reject"
+}

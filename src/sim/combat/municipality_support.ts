@@ -18,6 +18,21 @@ const FACTION_MUNICIPALITY_SUPPORT: Record<'RBiH' | 'RS' | 'HRHB', {
     HRHB: { label: 'Croatian support package', type: 'croatian_support_package' },
 };
 
+/**
+ * The order staged during player turn N (`staged_turn = N`, the turn shown in the UI) is
+ * the one that applies while turn N is RESOLVED. The turn pipeline advances `meta.turn`
+ * to N+1 before any phase runs (turn_pipeline.ts), so the consumers below see
+ * `currentTurn = N+1`. Matching `staged_turn === currentTurn` (the pre-2026-11-07 check)
+ * therefore never matched in a real turn and the lever was a silent no-op. An order
+ * applies to exactly one resolution: the one immediately after it was staged.
+ */
+export function isMunicipalitySupportOrderActiveForResolution(
+    order: Pick<MunicipalitySupportOrder, 'staged_turn'>,
+    resolvingTurn: number
+): boolean {
+    return order.staged_turn + 1 === resolvingTurn;
+}
+
 export function getActiveMunicipalitySupport(
     state: GameState,
     faction: FactionId,
@@ -29,7 +44,7 @@ export function getActiveMunicipalitySupport(
     if (!order) return null;
     if (order.faction !== faction) return null;
     if (order.mun_id !== munId) return null;
-    if (order.staged_turn !== currentTurn) return null;
+    if (!isMunicipalitySupportOrderActiveForResolution(order, currentTurn)) return null;
     return order;
 }
 

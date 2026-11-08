@@ -42,22 +42,31 @@ const TOTAL_AREA_KM2: number = (() => {
     return sum > 0 ? sum : 1;
 })();
 
+/** Municipality segments of the OSID keys (`op:<municipality>:<settlement>`). */
+const MUNICIPALITY_SEGMENTS: ReadonlySet<string> = new Set(ALL_OSID_KEYS.map((k) => k.split(':')[1] ?? ''));
+
 /**
- * Resolve the set of OSID keys whose key contains any of the given keywords.
- * Deterministic, sorted, deduplicated.
+ * Resolve the OSID keys matched by the given keywords, token by token (2026-11-07, RD):
+ *  - a keyword that names a municipality matches every OSID in that municipality, and only
+ *    those (so `travnik` no longer takes Novi Travnik);
+ *  - any other keyword matches an OSID whose settlement segment, `_N` suffix stripped,
+ *    equals it (e.g. `ustikolina`, `zepa` in Rogatica).
+ * Substring matching used to let `ilidza` and `hadzici` (Sarajevo suburbs) take villages
+ * of those names in Sanski Most and Ključ. Deterministic, sorted, deduplicated.
  */
 export function resolveOsidsForKeywords(keywords: readonly string[]): string[] {
-    const matched = new Set<string>();
-    const sortedKeywords = [...keywords].sort(strictCompare);
-    for (const key of ALL_OSID_KEYS) {
-        for (const kw of sortedKeywords) {
-            if (kw && key.includes(kw)) {
-                matched.add(key);
-                break;
-            }
-        }
+    const munKeywords = new Set<string>();
+    const settlementKeywords = new Set<string>();
+    for (const kw of keywords) {
+        if (!kw) continue;
+        (MUNICIPALITY_SEGMENTS.has(kw) ? munKeywords : settlementKeywords).add(kw);
     }
-    return [...matched].sort(strictCompare);
+    const matched: string[] = [];
+    for (const key of ALL_OSID_KEYS) {
+        const [, mun = '', settlement = ''] = key.split(':');
+        if (munKeywords.has(mun) || settlementKeywords.has(settlement.replace(/_\d+$/, ''))) matched.push(key);
+    }
+    return matched; // ALL_OSID_KEYS is already sorted
 }
 
 /** Sum of km² across the OSIDs matched by the given keywords. */

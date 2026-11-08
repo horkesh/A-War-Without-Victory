@@ -322,6 +322,23 @@ describe('desktop player-visible state projection', () => {
     expect(projected.meta.autonomy_level_pending).toBe(1);
   });
 
+  it('projects the signed peace settlement so the renderer can draw the settled map', () => {
+    const state = makeState();
+    const settlement = {
+      plan_id: 'dayton',
+      turn: 188,
+      territory_pct: { RBiH: 32, RS: 48.4, HRHB: 19.6 },
+      special_osids: [],
+      status: {},
+      map_overrides: { 'op:sipovo:pribeljci_2': 'RBiH' },
+    };
+    (state.military.negotiation as unknown as { settlement: unknown }).settlement = settlement;
+
+    const projected = loadProjector().projectPlayerVisibleState(state);
+
+    expect(projected.military.negotiation.settlement).toEqual(settlement);
+  });
+
   it('keeps pending peace-plan terms visible while redacting precomputed bot responses', () => {
     const state = makeState();
     const negotiation = state.military.negotiation as typeof state.military.negotiation & {

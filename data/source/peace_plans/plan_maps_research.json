@@ -1,0 +1,5027 @@
+{
+ "meta": {
+  "version": 2,
+  "generated_by": "historian seat research pass v2, 2026-11-07 (scratchpad; not canon)",
+  "week0": "1992-04-06",
+  "area_weighting": "Per-OSID areas from data/derived/operational/osid_areas.json (as src/sim/osid_areas.ts); municipality area = sum of its OSIDs; total 51,337 km2",
+  "assignment_enum": [
+   "RBiH",
+   "RS",
+   "HRHB",
+   "shared",
+   "split",
+   "special"
+  ],
+  "confidence_enum": {
+   "documented": "read from a primary map/text cited in source (UN S-documents, UN DPI maps) or stated by ICTY/UN/BB",
+   "inferred": "derived by a stated rule, or a map reading whose minority share may be measurement noise",
+   "unknown": "no source; best guess only"
+  },
+  "method_notes": {
+   "vance_owen": "Province membership read from the signed 25 Mar 1993 revised map in S/25479 (municipality names printed, province borders thick). Provinces 1,5,9 -> RBiH; 2,4,6 -> RS; 3,8,10 -> HRHB; 7 -> special. These leads are confirmed by the S/25479 rule (governor = most numerous people, 1991 census): computed governors are Bosniak in 1,5,7,9; Serb in 2,4,6; Croat in 3,8,10. Split fractions = flood-fill pixel areas on the scan.",
+   "owen_stoltenberg": "20 Aug 1993 Geneva map (S/26337 App. I) georeferenced and intersected with OSID polygons; shares per municipality in map_share_pct. Sketch-map accuracy +-5 km, so minority shares below ~15% may be artefacts. Invincible (20 Sep) changes are textual only (S/26486) and not drawn.",
+   "contact_group": "UN map 4128 georeferenced (2nd order, residual <= ~6 px = ~1 km) and classified by grey shade per OSID; threshold chosen where the totals reproduce the published 51/49 (Federation 48.2 + neutral 2.9 vs RS 48.9). Faction layer inside the Federation inferred.",
+   "dayton": "Unchanged from v1: entity per municipality from the post-1995 municipal structure (documented)."
+  },
+  "sources": {
+   "BB1-218": "Balkan Battlegrounds I, KB page BB1_p0218 (Ch.34 \"Searching for Peace: The Vance-Owen and Invincible Plans\")",
+   "BB1-44": "Balkan Battlegrounds I chronology, KB page BB1_p0044",
+   "BB1-47": "Balkan Battlegrounds I chronology, KB page BB1_p0047",
+   "BB1-48": "Balkan Battlegrounds I chronology, KB pages BB1_p0048-p0049 (HMS Invincible, 20 Sep 1993)",
+   "BB2-452": "Balkan Battlegrounds II, KB page BB2_p0452 (Konjic/Jablanica to Croat-majority canton under VOPP)",
+   "KLIX": "klix.ba, \"Sta je podrazumijevao Vance-Owenov plan\" (2023): province capitals Bihac/Tuzla/Zenica (Bosniak), Banja Luka/Bijeljina/Nevesinje (Serb), Bosanski Brod/Mostar/Travnik (Croat)",
+   "VOPP-TEXT": "VOPP documents, S/25479 annex (26 Mar 1993) incl. Agreement on Interim Arrangements + provisional provincial map (Appendix A); military annex: Serb forces to Provinces 2,4,6, HVO to 3, ARBiH to 1, ARBiH+HVO by agreement in 5,8,9,10; \"Sarajevo will remain within the enlarged Sarajevo Province\"",
+   "KORDIC-TJ": "ICTY Kordic & Cerkez Trial Judgement (IT-95-14/2-T, 26 Feb 2001), Part III ch.IV: Province 10 = Travnik, Novi Travnik, Vitez, Busovaca, Fojnica, Gornji Vakuf, part of Kiseljak",
+   "BLASKIC-TJ": "ICTY Blaskic Trial Judgement (IT-95-14-T, 3 Mar 2000): Lasva valley mostly Province 10; southern Kiseljak to Province 7; Province 8 from the Croatian border north to Prozor and Konjic; Croats main responsibility in 8 and 10, Muslims in 7",
+   "PRLIC-TJ": "ICTY Prlic et al. Trial Judgement (IT-04-74-T, 29 May 2013) Vol.1: Provinces 3, 8 and 10 attributed to the BiH Croats under VOPP",
+   "A/54/549": "UN SG report \"The fall of Srebrenica\" A/54/549 (15 Nov 1999): Province 5 Bosniac-majority, included Srebrenica and Zepa and most of the areas of eastern Bosnia recently ethnically cleansed",
+   "IZIZ": "Univ. of Sarajevo Institute for Research of Crimes against Humanity, \"Srebrenica 1992-1995\" (secondary): VOPP province including Foca, Visegrad, Srebrenica, Gorazde and Zvornik unacceptable to Serb representatives",
+   "MEARSHEIMER-PAPE": "Mearsheimer & Pape, \"The Answer\", New Republic 14 Jun 1993: Gorazde and Tuzla among Muslim areas from which Serbs would have to withdraw under VOPP",
+   "POSAVINA-ORG": "posavina.org (secondary, local): VOPP Province 3 = Derventa, Bosanski Brod, Odzak, Modrica, Bosanski Samac, Brcko, Orasje plus parts of Gradacac and Doboj",
+   "OS-TEXT": "Agreement relating to BiH / Constitutional Agreement of the Union of Republics of BiH (Owen-Stoltenberg, \"Invincible\" package, text dated 16 Sep 1993; S/26337/Add.1 and S/26486 annex) via peaceagreements.org: Muslim-majority republic not less than 30% of Union territory; Gorazde-Zepa road part of Muslim republic; access to Sava (rail line across Brcko to the Sava bridge) and to the sea at Neum / Ploce",
+   "BB1-50": "Balkan Battlegrounds I chronology KB BB1_p0050: Abdic APWB recognized by Serbs \"on the basis of the Geneva plan\"",
+   "CG-SEC": "Contact Group map (Geneva, 6 Jul 1994): UN Digital Library map record 705480 (\"Bosnian Serb Republic, Muslim-Croat Federation and neutral zone\"); Australian Parliament JFADT Bosnia report ch.4; secondary summaries: Serbs to cede ~22% of the territory they held, Srebrenica, Zepa and Gorazde assigned to the Federation, Gorazde linked by corridor, Brcko demilitarised",
+   "GFAP-A2": "GFAP Annex 2 (IEBL) as implemented; repo data/source/municipality_post1995_to_mun1990.json (BHAS post-1995 municipal codes: 1xxxx=FBiH, 2xxxx=RS, 3xxxx=Brcko District); split shares from data/derived/municipality_borders.geojson areas",
+   "GFAP-A2-V": "GFAP Annex 2 Article V (Brcko arbitration within one year); Final Award 5 Mar 1999 -> Brcko District (8 Mar 2000)",
+   "BB1-1995": "Balkan Battlegrounds I, KB pages BB1_p0402-p0427 (1995 western offensives: Grahovo/Glamoc 28 Jul; Donji Vakuf 10-14 Sep; Drvar, Petrovac, Kljuc Sep; Sanski Most / Mrkonjic Grad Oct 1995)",
+   "OHR-1996": "OHR Chronology 1996: inter-entity transfers at D+45 (3 Feb 1996) around Sarajevo and \"the anvil\" around Mrkonjic Grad; Sarajevo suburbs (Vogosca 24 Feb ... Grbavica 18-19 Mar 1996) to Federation",
+   "RULE-VOPP-MAJ": "INFERENCE: VOPP provinces were \"largely determined by ethnicity\" (BB1-42 chronology); assigned by 1991 majority + contiguity with the documented province capital",
+   "RULE-OS-FRONT": "INFERENCE: the Aug-Sep 1993 Owen-Stoltenberg map was a \"thinly veiled partition\" (BB1-219) that largely followed the summer-1993 front line; assigned to the party holding the municipality in Aug 1993",
+   "RULE-CG-HELD": "INFERENCE: the Contact Group map only took territory from the Serbs (Federation 51% vs ~30% held); Federation-held municipalities assumed Federation; RS-held core areas far from the documented cessions assumed RS",
+   "RULE-FED-LAYER": "INFERENCE (faction layer only): Federation land assigned to RBiH or HRHB by the party administering it at war end / Washington-Agreement canton (Croat-majority cantons 2, 8, 10; HDZ-run municipalities in mixed cantons 6, 7). Dayton itself does not divide the Federation between Bosniaks and Croats.",
+   "S/25479-MAP": "UN S/25479 (26 Mar 1993) Annex I Appendix A / Annex III: revised provisional provincial map signed 25 Mar 1993 by Izetbegovic and Boban, witnessed Vance and Owen (municipality-labelled map with province borders; read visually from the scanned page, digitallibrary.un.org/record/164852)",
+   "S/25479-TEXT": "UN S/25479 para 10 (Sarajevo province enlarged: most of Kiseljak and Kresevo as in original map + whole opstinas Visoko, Breza, Vares + small border area of Kakanj); Annex I sec. C (capital city = built-up parts of Novi Grad, Centar, Novo Sarajevo, Stari Grad), sec. D (governor = most numerous constituent people of the province, 1991 census), sec. E (withdrawal of forces), App. D (Access Authority throughways: Han Pijesak-Sekovici and Sekovici-Zvornik pass through Tuzla Province; Pale-Kalinovik passes through Sarajevo Province; Foca-Sarajevo passes through East Herzegovina Province; Zvornik is the Tuzla Province border crossing)",
+   "UN-4129": "UN DPI Map No. 4129 (Nov 1999) \"Vance-Owen Peace Plan as presented January 1993\" (digitallibrary.un.org/record/705482)",
+   "S/26337-MAP": "UN S/26337 (20 Aug 1993) Appendix I map \"Union of Republics of Bosnia and Herzegovina\" (digitallibrary.un.org/record/173639), georeferenced on 9 town dots (affine, residual ~3-9 km) and intersected with repo OSID polygons",
+   "S/26337-TEXT": "UN S/26337 paras 5-6: Sarajevo under UN administration up to two years, Mostar under EC administration; detailed Brcko demarcation (appendix III); Serb side agreed a Gorazde-Zepa road as Muslim-republic territory",
+   "S/26260": "UN S/26260 (6 Aug 1993): Constitutional Agreement of the Union of Republics (text), annex A part II (Neum + southern Stolac, Brcko railway to the Sava, Union buildings in Sarajevo vested in the Union), paras 30-41 (30% floor; Serbs call it an ~18% roll-back; Brcko access line; Gorazde link; Zepa-Srebrenica enlarged 100%; Bihac pocket; Lasva boundary proposal; Sarajevo positions)",
+   "S/26486": "UN S/26486 (23 Sep 1993): HMS Invincible agreements of 20 Sep 1993 (Neum throughway Poplat-Neum, land on Kosa/Klek, Neretva port Visici-Celjevo, Muslim southern border moved from Recice to above Visici, Ploce 99-year lease, extra Muslim land on the Drina between Gorazde and Visegrad, future Prevlaka/Dubrovnik exchange)",
+   "S/1994/173": "UN S/1994/173 (14 Feb 1994): Serb map offering the Muslim-majority republic 33.56%; Presidency target 33.3%; Croats asked recognition of 17.5%; Mostar to EU, Sarajevo to UN; disputed areas to arbitration",
+   "UN-4128": "UN DPI Map No. 4128 (Nov 1999) \"Contact Group July 1994 Proposal\" (Bosnian Serb Republic / Muslim-Croat Federation / Neutral zone), digitallibrary.un.org/record/705480; georeferenced on 12 town circles (2nd-order fit, residual <=1-2 km) and classified per OSID by map shade (threshold calibrated so that totals reproduce 51/49)"
+  },
+  "summary": {
+   "vance_owen": {
+    "confidence_counts": {
+     "documented": 101,
+     "inferred": 9
+    },
+    "assignment_counts": {
+     "RS": 33,
+     "RBiH": 26,
+     "HRHB": 30,
+     "split": 8,
+     "special": 13
+    },
+    "area_share_pct_osid_weighted": {
+     "RS": 43.02,
+     "RBiH": 26.52,
+     "HRHB": 25.33,
+     "special(Sarajevo P7)": 4.85,
+     "special(corridor)": 0.28
+    }
+   },
+   "owen_stoltenberg": {
+    "confidence_counts": {
+     "documented": 98,
+     "inferred": 12
+    },
+    "assignment_counts": {
+     "RS": 39,
+     "RBiH": 27,
+     "split": 20,
+     "HRHB": 14,
+     "special": 10
+    },
+    "area_share_pct_osid_weighted": {
+     "RS": 52.3,
+     "RBiH": 28.72,
+     "HRHB": 15.95,
+     "special(Sarajevo UN district)": 2.91,
+     "special": 0.12
+    }
+   },
+   "contact_group": {
+    "confidence_counts": {
+     "documented": 96,
+     "inferred": 14
+    },
+    "assignment_counts": {
+     "RS": 37,
+     "RBiH": 27,
+     "split": 17,
+     "HRHB": 21,
+     "special": 8
+    },
+    "area_share_pct_osid_weighted": {
+     "RS": 48.94,
+     "Federation/RBiH": 30.49,
+     "Federation/HRHB": 14.32,
+     "Federation/mixed": 3.47,
+     "neutral(Sarajevo)": 2.77
+    }
+   },
+   "dayton": {
+    "confidence_counts": {
+     "documented": 110
+    },
+    "assignment_counts": {
+     "RS": 33,
+     "RBiH": 29,
+     "split": 30,
+     "HRHB": 17,
+     "special": 1
+    },
+    "area_share_pct_osid_weighted": {
+     "RS": 48.28,
+     "Federation/RBiH": 28.97,
+     "Federation/HRHB": 18.49,
+     "Federation/mixed": 3.31,
+     "Brcko District": 0.95
+    }
+   }
+  },
+  "vopp_provinces": {
+   "1": {
+    "area_km2": 3906.9,
+    "area_pct": 7.61,
+    "pop1991": 362580,
+    "shares": {
+     "bosniak": 65.9,
+     "serb": 25.7,
+     "croat": 3.5,
+     "other": 4.9
+    },
+    "governor_people": "bosniak",
+    "vice_governor_people": "serb"
+   },
+   "10": {
+    "area_km2": 5558.4,
+    "area_pct": 10.83,
+    "pop1991": 390618,
+    "shares": {
+     "bosniak": 38.0,
+     "serb": 12.8,
+     "croat": 43.8,
+     "other": 5.4
+    },
+    "governor_people": "croat",
+    "vice_governor_people": "bosniak"
+   },
+   "2": {
+    "area_km2": 12847.4,
+    "area_pct": 25.03,
+    "pop1991": 784280,
+    "shares": {
+     "bosniak": 21.5,
+     "serb": 60.3,
+     "croat": 9.7,
+     "other": 8.5
+    },
+    "governor_people": "serb",
+    "vice_governor_people": "bosniak"
+   },
+   "3": {
+    "area_km2": 1900.9,
+    "area_pct": 3.7,
+    "pop1991": 245418,
+    "shares": {
+     "bosniak": 19.5,
+     "serb": 31.2,
+     "croat": 41.7,
+     "other": 7.6
+    },
+    "governor_people": "croat",
+    "vice_governor_people": "serb"
+   },
+   "4": {
+    "area_km2": 1737.1,
+    "area_pct": 3.38,
+    "pop1991": 216666,
+    "shares": {
+     "bosniak": 36.7,
+     "serb": 47.5,
+     "croat": 8.0,
+     "other": 7.8
+    },
+    "governor_people": "serb",
+    "vice_governor_people": "bosniak"
+   },
+   "5": {
+    "area_km2": 7093.1,
+    "area_pct": 13.82,
+    "pop1991": 803855,
+    "shares": {
+     "bosniak": 62.8,
+     "serb": 24.8,
+     "croat": 5.1,
+     "other": 7.3
+    },
+    "governor_people": "bosniak",
+    "vice_governor_people": "serb"
+   },
+   "6": {
+    "area_km2": 7498.4,
+    "area_pct": 14.61,
+    "pop1991": 160405,
+    "shares": {
+     "bosniak": 26.4,
+     "serb": 68.6,
+     "croat": 1.1,
+     "other": 3.9
+    },
+    "governor_people": "serb",
+    "vice_governor_people": "bosniak"
+   },
+   "7": {
+    "area_km2": 2490.1,
+    "area_pct": 4.85,
+    "pop1991": 625958,
+    "shares": {
+     "bosniak": 51.2,
+     "serb": 25.6,
+     "croat": 10.0,
+     "other": 13.3
+    },
+    "governor_people": "bosniak",
+    "vice_governor_people": "serb"
+   },
+   "8": {
+    "area_km2": 5545.2,
+    "area_pct": 10.8,
+    "pop1991": 358808,
+    "shares": {
+     "bosniak": 28.6,
+     "serb": 10.9,
+     "croat": 54.4,
+     "other": 6.2
+    },
+    "governor_people": "croat",
+    "vice_governor_people": "bosniak"
+   },
+   "9": {
+    "area_km2": 2614.3,
+    "area_pct": 5.09,
+    "pop1991": 385210,
+    "shares": {
+     "bosniak": 57.4,
+     "serb": 14.7,
+     "croat": 19.5,
+     "other": 8.5
+    },
+    "governor_people": "bosniak",
+    "vice_governor_people": "croat"
+   },
+   "corridor": {
+    "area_km2": 145.7,
+    "area_pct": 0.28,
+    "pop1991": 26288,
+    "shares": {
+     "bosniak": 44.1,
+     "serb": 20.7,
+     "croat": 25.4,
+     "other": 9.8
+    },
+    "governor_people": "bosniak",
+    "vice_governor_people": "croat"
+   }
+  }
+ },
+ "vance_owen": {
+  "banja_luka": {
+   "assignment": "RS",
+   "province": 2,
+   "province_name": "Banja Luka",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "banovici": {
+   "assignment": "RBiH",
+   "province": 5,
+   "province_name": "Tuzla",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "bihac": {
+   "assignment": "RBiH",
+   "province": 1,
+   "province_name": "Bihac",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "bijeljina": {
+   "assignment": "RS",
+   "province": 4,
+   "province_name": "Bijeljina",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "bileca": {
+   "assignment": "RS",
+   "province": 6,
+   "province_name": "East Herzegovina (Nevesinje)",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "bosanska_dubica": {
+   "assignment": "RS",
+   "province": 2,
+   "province_name": "Banja Luka",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "bosanska_gradiska": {
+   "assignment": "RS",
+   "province": 2,
+   "province_name": "Banja Luka",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "bosanska_kostajnica": {
+   "assignment": "RS",
+   "province": 2,
+   "province_name": "Banja Luka",
+   "confidence": "inferred",
+   "source": "S/25479-MAP;S/25479-TEXT",
+   "note": "Unlabelled small polygon between Dubica and Bosanski Novi, north of the Province 1 border"
+  },
+  "bosanska_krupa": {
+   "assignment": "RBiH",
+   "province": 1,
+   "province_name": "Bihac",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "bosanski_brod": {
+   "assignment": "HRHB",
+   "province": 3,
+   "province_name": "Posavina (Bosanski Brod)",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "bosanski_novi": {
+   "assignment": "RBiH",
+   "province": 1,
+   "province_name": "Bihac",
+   "confidence": "documented",
+   "source": "S/25479-MAP",
+   "note": "Inside Province 1 (thick border runs along its boundary with Kostajnica/Dubica/Prijedor) although 59% Serb in 1991"
+  },
+  "bosanski_petrovac": {
+   "assignment": "RS",
+   "province": 2,
+   "province_name": "Banja Luka",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "bosanski_samac": {
+   "assignment": "HRHB",
+   "province": 3,
+   "province_name": "Posavina (Bosanski Brod)",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "bosansko_grahovo": {
+   "assignment": "RS",
+   "province": 2,
+   "province_name": "Banja Luka",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "bratunac": {
+   "assignment": "RBiH",
+   "province": 5,
+   "province_name": "Tuzla",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "brcko": {
+   "assignment": "split",
+   "province": 4,
+   "province_name": "Bijeljina",
+   "split_parts_pct_of_area": {
+    "RS/P4": 70,
+    "corridor(unnumbered)": 30
+   },
+   "confidence": "documented",
+   "source": "S/25479-MAP",
+   "note": "Brcko (town and east, ~70% of drawn area) in Province 4 with Bijeljina. A separately-outlined narrow strip (~30%) runs from the Sava between Orasje and Brcko south toward Srebrenik; it is not numbered on the map. Most likely the Tuzla-Orasje access corridor (App. D lists the Tuzla-Orasje and Tuzla-Brcko roads through Posavina and Bijeljina provinces as Access Authority throughways). Status unlabelled. Split percentages = flood-filled pixel areas on the scanned map (approximate)."
+  },
+  "breza": {
+   "assignment": "special",
+   "province": 7,
+   "province_name": "Sarajevo",
+   "confidence": "documented",
+   "source": "S/25479-MAP;S/25479-TEXT",
+   "note": "Added to Sarajevo Province on 25 Mar 1993 (S/25479 para 10); in the Jan 1993 original it lay outside Province 7 (UN map 4129)"
+  },
+  "bugojno": {
+   "assignment": "HRHB",
+   "province": 10,
+   "province_name": "Travnik",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "busovaca": {
+   "assignment": "HRHB",
+   "province": 10,
+   "province_name": "Travnik",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "cajnice": {
+   "assignment": "RS",
+   "province": 6,
+   "province_name": "East Herzegovina (Nevesinje)",
+   "confidence": "documented",
+   "source": "S/25479-MAP",
+   "note": "Province 6 (Rudo circled \"6\"); joined to the Gacko part of 6 via eastern Foca"
+  },
+  "capljina": {
+   "assignment": "HRHB",
+   "province": 8,
+   "province_name": "Mostar",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "cazin": {
+   "assignment": "RBiH",
+   "province": 1,
+   "province_name": "Bihac",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "celinac": {
+   "assignment": "RS",
+   "province": 2,
+   "province_name": "Banja Luka",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "centar_sarajevo": {
+   "assignment": "special",
+   "province": 7,
+   "province_name": "Sarajevo",
+   "confidence": "documented",
+   "source": "S/25479-MAP;S/25479-TEXT",
+   "note": "Capital city district (S/25479 Annex I C)"
+  },
+  "citluk": {
+   "assignment": "HRHB",
+   "province": 8,
+   "province_name": "Mostar",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "derventa": {
+   "assignment": "HRHB",
+   "province": 3,
+   "province_name": "Posavina (Bosanski Brod)",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "doboj": {
+   "assignment": "split",
+   "province": 5,
+   "province_name": "Tuzla",
+   "split_parts_pct_of_area": {
+    "RBiH/P5": 55,
+    "RS/P2": 45
+   },
+   "confidence": "documented",
+   "source": "S/25479-MAP",
+   "note": "Doboj town and the east (~55%) with Gracanica in Province 5; the western part (~45%) with Prnjavor/Teslic in Province 2. A small unlabelled piece between Modrica and Doboj may be in 5 or 3 (a secondary source puts part of Doboj in Province 3). Split percentages = flood-filled pixel areas on the scanned map (approximate).",
+   "confidence_of_split_fraction": "inferred"
+  },
+  "donji_vakuf": {
+   "assignment": "HRHB",
+   "province": 10,
+   "province_name": "Travnik",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "duvno": {
+   "assignment": "HRHB",
+   "province": 10,
+   "province_name": "Travnik",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "foca": {
+   "assignment": "split",
+   "province": 5,
+   "province_name": "Tuzla",
+   "split_parts_pct_of_area": {
+    "RBiH/P5": 66,
+    "RS/P6": 34
+   },
+   "confidence": "documented",
+   "source": "S/25479-MAP",
+   "note": "Western Foca with the town (~66%) joins Gorazde in Province 5; the eastern/southern part (~34%) along the Montenegro border links Cajnice/Rudo to Gacko in Province 6. Split percentages = flood-filled pixel areas on the scanned map (approximate)."
+  },
+  "fojnica": {
+   "assignment": "HRHB",
+   "province": 10,
+   "province_name": "Travnik",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "gacko": {
+   "assignment": "RS",
+   "province": 6,
+   "province_name": "East Herzegovina (Nevesinje)",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "glamoc": {
+   "assignment": "RS",
+   "province": 2,
+   "province_name": "Banja Luka",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "gorazde": {
+   "assignment": "RBiH",
+   "province": 5,
+   "province_name": "Tuzla",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "gornji_vakuf": {
+   "assignment": "HRHB",
+   "province": 10,
+   "province_name": "Travnik",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "gracanica": {
+   "assignment": "RBiH",
+   "province": 5,
+   "province_name": "Tuzla",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "gradacac": {
+   "assignment": "split",
+   "province": 5,
+   "province_name": "Tuzla",
+   "split_parts_pct_of_area": {
+    "HRHB/P3": 47,
+    "RBiH/P5": 53
+   },
+   "confidence": "documented",
+   "source": "S/25479-MAP",
+   "note": "Northern part (with the label, ~47%) in Province 3; southern part (~53%) south of the thick line, with Srebrenik, in Province 5. Split percentages = flood-filled pixel areas on the scanned map (approximate)."
+  },
+  "grude": {
+   "assignment": "HRHB",
+   "province": 8,
+   "province_name": "Mostar",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "hadzici": {
+   "assignment": "special",
+   "province": 7,
+   "province_name": "Sarajevo",
+   "confidence": "inferred",
+   "source": "S/25479-MAP;S/25479-TEXT",
+   "note": "Inside the single SARAJEVO polygon"
+  },
+  "hanpijesak": {
+   "assignment": "RS",
+   "province": 6,
+   "province_name": "East Herzegovina (Nevesinje)",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "ilidza": {
+   "assignment": "special",
+   "province": 7,
+   "province_name": "Sarajevo",
+   "confidence": "inferred",
+   "source": "S/25479-MAP;S/25479-TEXT",
+   "note": "Inside the single SARAJEVO polygon (city municipalities not individually drawn)"
+  },
+  "ilijas": {
+   "assignment": "special",
+   "province": 7,
+   "province_name": "Sarajevo",
+   "confidence": "inferred",
+   "source": "S/25479-MAP;S/25479-TEXT",
+   "note": "Inside the single SARAJEVO polygon"
+  },
+  "jablanica": {
+   "assignment": "HRHB",
+   "province": 8,
+   "province_name": "Mostar",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "jajce": {
+   "assignment": "HRHB",
+   "province": 10,
+   "province_name": "Travnik",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "kakanj": {
+   "assignment": "split",
+   "province": 9,
+   "province_name": "Zenica",
+   "split_parts_pct_of_area": {
+    "RBiH/P9": 95,
+    "special/P7": 5
+   },
+   "confidence": "documented",
+   "source": "S/25479-MAP;S/25479-TEXT",
+   "note": "Province 9, except \"a small border area of Kakanj\" added to Sarajevo Province 7 on 25 Mar 1993 (S/25479 para 10); size not drawn separately (assumed ~5%). Split percentages = flood-filled pixel areas on the scanned map (approximate).",
+   "confidence_of_split_fraction": "inferred"
+  },
+  "kalesija": {
+   "assignment": "RBiH",
+   "province": 5,
+   "province_name": "Tuzla",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "kalinovik": {
+   "assignment": "RS",
+   "province": 6,
+   "province_name": "East Herzegovina (Nevesinje)",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "kiseljak": {
+   "assignment": "split",
+   "province": 7,
+   "province_name": "Sarajevo",
+   "split_parts_pct_of_area": {
+    "special/P7": 83,
+    "HRHB/P10": 17
+   },
+   "confidence": "documented",
+   "source": "S/25479-MAP;S/25479-TEXT",
+   "note": "Most of Kiseljak (~83%) in Sarajevo Province 7 (S/25479 para 10); a small north-western piece (~17%) next to Busovaca/Fojnica in Province 10 (map; Kordic TJ \"part of Kiseljak\"). Split percentages = flood-filled pixel areas on the scanned map (approximate)."
+  },
+  "kladanj": {
+   "assignment": "RBiH",
+   "province": 5,
+   "province_name": "Tuzla",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "kljuc": {
+   "assignment": "RS",
+   "province": 2,
+   "province_name": "Banja Luka",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "konjic": {
+   "assignment": "HRHB",
+   "province": 8,
+   "province_name": "Mostar",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "kotor_varos": {
+   "assignment": "RS",
+   "province": 2,
+   "province_name": "Banja Luka",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "kresevo": {
+   "assignment": "special",
+   "province": 7,
+   "province_name": "Sarajevo",
+   "confidence": "documented",
+   "source": "S/25479-MAP;S/25479-TEXT",
+   "note": "Added to Sarajevo Province on 25 Mar 1993 (S/25479 para 10); Kresevo already in the original Jan map"
+  },
+  "kupres": {
+   "assignment": "HRHB",
+   "province": 10,
+   "province_name": "Travnik",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "laktasi": {
+   "assignment": "RS",
+   "province": 2,
+   "province_name": "Banja Luka",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "listica": {
+   "assignment": "HRHB",
+   "province": 8,
+   "province_name": "Mostar",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "livno": {
+   "assignment": "HRHB",
+   "province": 10,
+   "province_name": "Travnik",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "ljubinje": {
+   "assignment": "RS",
+   "province": 6,
+   "province_name": "East Herzegovina (Nevesinje)",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "ljubuski": {
+   "assignment": "HRHB",
+   "province": 8,
+   "province_name": "Mostar",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "lopare": {
+   "assignment": "RS",
+   "province": 4,
+   "province_name": "Bijeljina",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "lukavac": {
+   "assignment": "RBiH",
+   "province": 5,
+   "province_name": "Tuzla",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "maglaj": {
+   "assignment": "RBiH",
+   "province": 9,
+   "province_name": "Zenica",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "modrica": {
+   "assignment": "HRHB",
+   "province": 3,
+   "province_name": "Posavina (Bosanski Brod)",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "mostar": {
+   "assignment": "HRHB",
+   "province": 8,
+   "province_name": "Mostar",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "mrkonjic_grad": {
+   "assignment": "RS",
+   "province": 2,
+   "province_name": "Banja Luka",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "neum": {
+   "assignment": "HRHB",
+   "province": 8,
+   "province_name": "Mostar",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "nevesinje": {
+   "assignment": "RS",
+   "province": 6,
+   "province_name": "East Herzegovina (Nevesinje)",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "novi_grad_sarajevo": {
+   "assignment": "special",
+   "province": 7,
+   "province_name": "Sarajevo",
+   "confidence": "inferred",
+   "source": "S/25479-MAP;S/25479-TEXT",
+   "note": "Inside the SARAJEVO polygon; capital city district = built-up parts of Novi Grad, Centar, Novo Sarajevo, Stari Grad (S/25479 Annex I C)"
+  },
+  "novi_travnik": {
+   "assignment": "HRHB",
+   "province": 10,
+   "province_name": "Travnik",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "novo_sarajevo": {
+   "assignment": "special",
+   "province": 7,
+   "province_name": "Sarajevo",
+   "confidence": "documented",
+   "source": "S/25479-MAP;S/25479-TEXT",
+   "note": "Capital city district (S/25479 Annex I C)"
+  },
+  "odzak": {
+   "assignment": "HRHB",
+   "province": 3,
+   "province_name": "Posavina (Bosanski Brod)",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "olovo": {
+   "assignment": "RBiH",
+   "province": 9,
+   "province_name": "Zenica",
+   "confidence": "inferred",
+   "source": "S/25479-MAP;S/25479-TEXT",
+   "note": "Thick province lines on its Kladanj (5), Vares (7), Han Pijesak and Sokolac (6) sides; thin line to Zavidovici (9) through its NW lobe => Province 9"
+  },
+  "orasje": {
+   "assignment": "HRHB",
+   "province": 3,
+   "province_name": "Posavina (Bosanski Brod)",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "pale": {
+   "assignment": "RS",
+   "province": 6,
+   "province_name": "East Herzegovina (Nevesinje)",
+   "confidence": "inferred",
+   "source": "S/25479-MAP;S/25479-TEXT",
+   "note": "Unlabelled polygon east of the Sarajevo province border, contiguous with Sokolac (6); S/25479 App. D says the Pale-Kalinovik road passes THROUGH Sarajevo Province, i.e. Pale itself is outside it"
+  },
+  "posusje": {
+   "assignment": "HRHB",
+   "province": 8,
+   "province_name": "Mostar",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "prijedor": {
+   "assignment": "split",
+   "province": 1,
+   "province_name": "Bihac",
+   "split_parts_pct_of_area": {
+    "RBiH/P1": 61,
+    "RS/P2": 39
+   },
+   "confidence": "documented",
+   "source": "S/25479-MAP",
+   "note": "Province 1 takes the southern/western polygon (~61% of drawn area); northern polygon (label) and an eastern sliver stay in Province 2. Identity of the sub-polygons as parts of Prijedor is inferred from the drawing; the Jan 1993 UN map 4129 also runs the 1/2 border through Prijedor town. Split percentages = flood-filled pixel areas on the scanned map (approximate).",
+   "confidence_of_split_fraction": "inferred"
+  },
+  "prnjavor": {
+   "assignment": "RS",
+   "province": 2,
+   "province_name": "Banja Luka",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "prozor": {
+   "assignment": "HRHB",
+   "province": 8,
+   "province_name": "Mostar",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "rogatica": {
+   "assignment": "RBiH",
+   "province": 5,
+   "province_name": "Tuzla",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "rudo": {
+   "assignment": "RS",
+   "province": 6,
+   "province_name": "East Herzegovina (Nevesinje)",
+   "confidence": "documented",
+   "source": "S/25479-MAP",
+   "note": "Province 6 (Rudo circled \"6\"); joined to the Gacko part of 6 via eastern Foca"
+  },
+  "sanski_most": {
+   "assignment": "split",
+   "province": 2,
+   "province_name": "Banja Luka",
+   "split_parts_pct_of_area": {
+    "RS/P2": 53,
+    "RBiH/P1": 47
+   },
+   "confidence": "documented",
+   "source": "S/25479-MAP",
+   "note": "Province 2 keeps the labelled southern polygon (~53%); an unlabelled polygon north of it (~47%) lies inside Province 1 and is read as northern Sanski Most (inferred). Jan 1993 UN map 4129 runs the 1/2 border through Sanski Most town. Split percentages = flood-filled pixel areas on the scanned map (approximate).",
+   "confidence_of_split_fraction": "inferred"
+  },
+  "sekovici": {
+   "assignment": "RS",
+   "province": 6,
+   "province_name": "East Herzegovina (Nevesinje)",
+   "confidence": "documented",
+   "source": "S/25479-MAP",
+   "note": "Province 6 exclave (circled \"6\" inside a thick border) surrounded by Province 5"
+  },
+  "sipovo": {
+   "assignment": "RS",
+   "province": 2,
+   "province_name": "Banja Luka",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "skender_vakuf": {
+   "assignment": "RS",
+   "province": 2,
+   "province_name": "Banja Luka",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "sokolac": {
+   "assignment": "RS",
+   "province": 6,
+   "province_name": "East Herzegovina (Nevesinje)",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "srbac": {
+   "assignment": "RS",
+   "province": 2,
+   "province_name": "Banja Luka",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "srebrenica": {
+   "assignment": "RBiH",
+   "province": 5,
+   "province_name": "Tuzla",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "srebrenik": {
+   "assignment": "RBiH",
+   "province": 5,
+   "province_name": "Tuzla",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "stari_grad_sarajevo": {
+   "assignment": "special",
+   "province": 7,
+   "province_name": "Sarajevo",
+   "confidence": "documented",
+   "source": "S/25479-MAP;S/25479-TEXT",
+   "note": "Capital city district (S/25479 Annex I C)"
+  },
+  "stolac": {
+   "assignment": "HRHB",
+   "province": 8,
+   "province_name": "Mostar",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "tesanj": {
+   "assignment": "RBiH",
+   "province": 9,
+   "province_name": "Zenica",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "teslic": {
+   "assignment": "RS",
+   "province": 2,
+   "province_name": "Banja Luka",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "titov_drvar": {
+   "assignment": "RS",
+   "province": 2,
+   "province_name": "Banja Luka",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "travnik": {
+   "assignment": "HRHB",
+   "province": 10,
+   "province_name": "Travnik",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "trebinje": {
+   "assignment": "RS",
+   "province": 6,
+   "province_name": "East Herzegovina (Nevesinje)",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "trnovo": {
+   "assignment": "special",
+   "province": 7,
+   "province_name": "Sarajevo",
+   "confidence": "inferred",
+   "source": "S/25479-MAP;S/25479-TEXT",
+   "note": "Unlabelled; inside the Sarajevo province outline; App. D Pale-Kalinovik road passes through Sarajevo Province"
+  },
+  "tuzla": {
+   "assignment": "RBiH",
+   "province": 5,
+   "province_name": "Tuzla",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "ugljevik": {
+   "assignment": "RS",
+   "province": 4,
+   "province_name": "Bijeljina",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "vares": {
+   "assignment": "special",
+   "province": 7,
+   "province_name": "Sarajevo",
+   "confidence": "documented",
+   "source": "S/25479-MAP;S/25479-TEXT",
+   "note": "Added to Sarajevo Province on 25 Mar 1993 (S/25479 para 10); in the Jan 1993 original it lay outside Province 7 (UN map 4129)"
+  },
+  "velika_kladusa": {
+   "assignment": "RBiH",
+   "province": 1,
+   "province_name": "Bihac",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "visegrad": {
+   "assignment": "RBiH",
+   "province": 5,
+   "province_name": "Tuzla",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "visoko": {
+   "assignment": "special",
+   "province": 7,
+   "province_name": "Sarajevo",
+   "confidence": "documented",
+   "source": "S/25479-MAP;S/25479-TEXT",
+   "note": "Added to Sarajevo Province on 25 Mar 1993 (S/25479 para 10); in the Jan 1993 original it lay outside Province 7 (UN map 4129)"
+  },
+  "vitez": {
+   "assignment": "HRHB",
+   "province": 10,
+   "province_name": "Travnik",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "vlasenica": {
+   "assignment": "RBiH",
+   "province": 5,
+   "province_name": "Tuzla",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "vogosca": {
+   "assignment": "special",
+   "province": 7,
+   "province_name": "Sarajevo",
+   "confidence": "inferred",
+   "source": "S/25479-MAP;S/25479-TEXT",
+   "note": "Inside the single SARAJEVO polygon"
+  },
+  "zavidovici": {
+   "assignment": "RBiH",
+   "province": 9,
+   "province_name": "Zenica",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "zenica": {
+   "assignment": "RBiH",
+   "province": 9,
+   "province_name": "Zenica",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "zepce": {
+   "assignment": "RBiH",
+   "province": 9,
+   "province_name": "Zenica",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "zivinice": {
+   "assignment": "RBiH",
+   "province": 5,
+   "province_name": "Tuzla",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  },
+  "zvornik": {
+   "assignment": "RBiH",
+   "province": 5,
+   "province_name": "Tuzla",
+   "confidence": "documented",
+   "source": "S/25479-MAP"
+  }
+ },
+ "owen_stoltenberg": {
+  "banja_luka": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "banovici": {
+   "map_share_pct": {
+    "RBiH": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "bihac": {
+   "map_share_pct": {
+    "RBiH": 67.4,
+    "RS": 32.6
+   },
+   "source": "S/26337-MAP",
+   "assignment": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "RBiH": 67.4,
+    "RS": 32.6
+   },
+   "note": "Split on the 20 Aug 1993 map (shares from georeferenced sketch, +-5 km)"
+  },
+  "bijeljina": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "bileca": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "bosanska_dubica": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "bosanska_gradiska": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "bosanska_kostajnica": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "bosanska_krupa": {
+   "map_share_pct": {
+    "RS": 55.6,
+    "RBiH": 44.4
+   },
+   "source": "S/26337-MAP",
+   "assignment": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "RS": 55.6,
+    "RBiH": 44.4
+   },
+   "note": "Split on the 20 Aug 1993 map (shares from georeferenced sketch, +-5 km)"
+  },
+  "bosanski_brod": {
+   "map_share_pct": {
+    "HRHB": 67.4,
+    "RS": 32.6
+   },
+   "source": "S/26337-MAP",
+   "assignment": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "HRHB": 67.4,
+    "RS": 32.6
+   },
+   "note": "Split on the 20 Aug 1993 map (shares from georeferenced sketch, +-5 km); Separate pocket on the Sava drawn as its own region (Brod-Odzak); assigned to the Croat republic by inference (only Croat/Serb republics border it; S/26260 para 36 says the Serb-Croat Posavina line was still being negotiated)"
+  },
+  "bosanski_novi": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "bosanski_petrovac": {
+   "map_share_pct": {
+    "RS": 90.5,
+    "RBiH": 9.5
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "bosanski_samac": {
+   "map_share_pct": {
+    "RS": 75.5,
+    "HRHB": 24.5
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "inferred",
+   "note": "Minor share(s) may be a real split or georeferencing error (+-5 km on a sketch map)",
+   "split_parts_pct_of_area": {
+    "RS": 75.5,
+    "HRHB": 24.5
+   }
+  },
+  "bosansko_grahovo": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "bratunac": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "brcko": {
+   "map_share_pct": {
+    "RBiH": 61.6,
+    "RS": 38.4
+   },
+   "source": "S/26260;S/26337-TEXT;S/26337-MAP",
+   "assignment": "split",
+   "confidence": "documented",
+   "note": "Detailed Brcko demarcation: the Muslim republic gets the western outskirts (fly-over at the Tuzla road/railway crossing), land north of the Tuzla-Brcko railway, and a strip to the Sava east of Grbavica along the Brka river; the railway to the Sava bridge is vested in the Union (S/26260 para 33 and annex A II.2; S/26337 appendix III)",
+   "split_parts_pct_of_area": {
+    "RBiH": 61.6,
+    "RS": 38.4
+   }
+  },
+  "breza": {
+   "map_share_pct": {
+    "RBiH": 85.1,
+    "special": 14.9
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "bugojno": {
+   "map_share_pct": {
+    "HRHB": 52.5,
+    "RBiH": 47.5
+   },
+   "source": "S/26337-MAP",
+   "assignment": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "HRHB": 52.5,
+    "RBiH": 47.5
+   },
+   "note": "Split on the 20 Aug 1993 map (shares from georeferenced sketch, +-5 km)"
+  },
+  "busovaca": {
+   "map_share_pct": {
+    "HRHB": 55.9,
+    "RBiH": 44.1
+   },
+   "source": "S/26337-MAP",
+   "assignment": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "HRHB": 55.9,
+    "RBiH": 44.1
+   },
+   "note": "Split on the 20 Aug 1993 map (shares from georeferenced sketch, +-5 km)"
+  },
+  "cajnice": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "capljina": {
+   "map_share_pct": {
+    "HRHB": 85.5,
+    "RBiH": 14.5
+   },
+   "source": "S/26337-MAP",
+   "assignment": "HRHB",
+   "confidence": "documented"
+  },
+  "cazin": {
+   "map_share_pct": {
+    "RBiH": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "celinac": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "centar_sarajevo": {
+   "map_share_pct": {
+    "special": 100.0
+   },
+   "source": "S/26337-MAP;S/26337-TEXT",
+   "assignment": "special",
+   "confidence": "documented",
+   "note": "Sarajevo district: UN administration for up to two years (S/26337 para 6; BB1 KB p.47-49). On 6 Aug the Serbs had claimed Ilidza, Ilijas, Rajlovac (and Butmir/Hrasnica) for the Serb republic, with Vogosca to the Muslims (S/26260 paras 39-41); the 20 Aug map instead draws one district"
+  },
+  "citluk": {
+   "map_share_pct": {
+    "HRHB": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "HRHB",
+   "confidence": "documented"
+  },
+  "derventa": {
+   "map_share_pct": {
+    "RS": 85.7,
+    "HRHB": 14.3
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "doboj": {
+   "map_share_pct": {
+    "RS": 79.5,
+    "RBiH": 20.5
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "inferred",
+   "note": "Minor share(s) may be a real split or georeferencing error (+-5 km on a sketch map)",
+   "split_parts_pct_of_area": {
+    "RS": 79.5,
+    "RBiH": 20.5
+   }
+  },
+  "donji_vakuf": {
+   "map_share_pct": {
+    "HRHB": 58.2,
+    "RBiH": 41.8
+   },
+   "source": "S/26337-MAP",
+   "assignment": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "HRHB": 58.2,
+    "RBiH": 41.8
+   },
+   "note": "Split on the 20 Aug 1993 map (shares from georeferenced sketch, +-5 km)"
+  },
+  "duvno": {
+   "map_share_pct": {
+    "HRHB": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "HRHB",
+   "confidence": "documented"
+  },
+  "foca": {
+   "map_share_pct": {
+    "RS": 93.9,
+    "RBiH": 6.1
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "fojnica": {
+   "map_share_pct": {
+    "RBiH": 86.1,
+    "HRHB": 13.9
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "gacko": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "glamoc": {
+   "map_share_pct": {
+    "RS": 69.2,
+    "HRHB": 30.8
+   },
+   "source": "S/26337-MAP",
+   "assignment": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "RS": 69.2,
+    "HRHB": 30.8
+   },
+   "note": "Split on the 20 Aug 1993 map (shares from georeferenced sketch, +-5 km)"
+  },
+  "gorazde": {
+   "map_share_pct": {
+    "RBiH": 73.0,
+    "RS": 27.0
+   },
+   "source": "S/26337-MAP;S/26260;S/26486",
+   "assignment": "RBiH",
+   "confidence": "documented",
+   "note": "Muslim republic, linked to the central area; Access Authority throughway Sarajevo-Trnovo-Cajnice (S/26260 para 34); Invincible added land on the Drina between Gorazde and Visegrad (S/26486 para 13b)"
+  },
+  "gornji_vakuf": {
+   "map_share_pct": {
+    "HRHB": 67.7,
+    "RBiH": 32.3
+   },
+   "source": "S/26337-MAP",
+   "assignment": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "HRHB": 67.7,
+    "RBiH": 32.3
+   },
+   "note": "Split on the 20 Aug 1993 map (shares from georeferenced sketch, +-5 km)"
+  },
+  "gracanica": {
+   "map_share_pct": {
+    "RBiH": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "gradacac": {
+   "map_share_pct": {
+    "RBiH": 75.3,
+    "RS": 24.7
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "inferred",
+   "note": "Minor share(s) may be a real split or georeferencing error (+-5 km on a sketch map)",
+   "split_parts_pct_of_area": {
+    "RBiH": 75.3,
+    "RS": 24.7
+   }
+  },
+  "grude": {
+   "map_share_pct": {
+    "HRHB": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "HRHB",
+   "confidence": "documented"
+  },
+  "hadzici": {
+   "map_share_pct": {
+    "special": 100.0
+   },
+   "source": "S/26337-MAP;S/26337-TEXT",
+   "assignment": "special",
+   "confidence": "documented",
+   "note": "Sarajevo district: UN administration for up to two years (S/26337 para 6; BB1 KB p.47-49). On 6 Aug the Serbs had claimed Ilidza, Ilijas, Rajlovac (and Butmir/Hrasnica) for the Serb republic, with Vogosca to the Muslims (S/26260 paras 39-41); the 20 Aug map instead draws one district"
+  },
+  "hanpijesak": {
+   "map_share_pct": {
+    "RS": 78.2,
+    "RBiH": 21.8
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "inferred",
+   "note": "Minor share(s) may be a real split or georeferencing error (+-5 km on a sketch map)",
+   "split_parts_pct_of_area": {
+    "RS": 78.2,
+    "RBiH": 21.8
+   }
+  },
+  "ilidza": {
+   "map_share_pct": {
+    "special": 100.0
+   },
+   "source": "S/26337-MAP;S/26337-TEXT",
+   "assignment": "special",
+   "confidence": "documented",
+   "note": "Sarajevo district: UN administration for up to two years (S/26337 para 6; BB1 KB p.47-49). On 6 Aug the Serbs had claimed Ilidza, Ilijas, Rajlovac (and Butmir/Hrasnica) for the Serb republic, with Vogosca to the Muslims (S/26260 paras 39-41); the 20 Aug map instead draws one district"
+  },
+  "ilijas": {
+   "map_share_pct": {
+    "special": 100.0
+   },
+   "source": "S/26337-MAP;S/26337-TEXT",
+   "assignment": "special",
+   "confidence": "documented",
+   "note": "Sarajevo district: UN administration for up to two years (S/26337 para 6; BB1 KB p.47-49). On 6 Aug the Serbs had claimed Ilidza, Ilijas, Rajlovac (and Butmir/Hrasnica) for the Serb republic, with Vogosca to the Muslims (S/26260 paras 39-41); the 20 Aug map instead draws one district"
+  },
+  "jablanica": {
+   "map_share_pct": {
+    "RBiH": 50.7,
+    "HRHB": 49.3
+   },
+   "source": "S/26337-MAP",
+   "assignment": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "RBiH": 50.7,
+    "HRHB": 49.3
+   },
+   "note": "Split on the 20 Aug 1993 map (shares from georeferenced sketch, +-5 km)"
+  },
+  "jajce": {
+   "map_share_pct": {
+    "HRHB": 45.6,
+    "RS": 32.0,
+    "RBiH": 22.4
+   },
+   "source": "S/26337-MAP",
+   "assignment": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "HRHB": 45.6,
+    "RS": 32.0,
+    "RBiH": 22.4
+   },
+   "note": "Split on the 20 Aug 1993 map (shares from georeferenced sketch, +-5 km)"
+  },
+  "kakanj": {
+   "map_share_pct": {
+    "RBiH": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "kalesija": {
+   "map_share_pct": {
+    "RBiH": 90.4,
+    "RS": 9.6
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "kalinovik": {
+   "map_share_pct": {
+    "RS": 71.1,
+    "RBiH": 28.9
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "inferred",
+   "note": "Minor share(s) may be a real split or georeferencing error (+-5 km on a sketch map)",
+   "split_parts_pct_of_area": {
+    "RS": 71.1,
+    "RBiH": 28.9
+   }
+  },
+  "kiseljak": {
+   "map_share_pct": {
+    "RBiH": 92.6,
+    "special": 7.4
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "kladanj": {
+   "map_share_pct": {
+    "RBiH": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "kljuc": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "konjic": {
+   "map_share_pct": {
+    "RBiH": 97.6,
+    "special": 2.4
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "kotor_varos": {
+   "map_share_pct": {
+    "RS": 79.7,
+    "RBiH": 20.3
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "inferred",
+   "note": "Minor share(s) may be a real split or georeferencing error (+-5 km on a sketch map)",
+   "split_parts_pct_of_area": {
+    "RS": 79.7,
+    "RBiH": 20.3
+   }
+  },
+  "kresevo": {
+   "map_share_pct": {
+    "RBiH": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "kupres": {
+   "map_share_pct": {
+    "HRHB": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "HRHB",
+   "confidence": "documented"
+  },
+  "laktasi": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "listica": {
+   "map_share_pct": {
+    "HRHB": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "HRHB",
+   "confidence": "documented"
+  },
+  "livno": {
+   "map_share_pct": {
+    "HRHB": 90.1,
+    "RS": 9.9
+   },
+   "source": "S/26337-MAP",
+   "assignment": "HRHB",
+   "confidence": "documented"
+  },
+  "ljubinje": {
+   "map_share_pct": {
+    "RS": 83.8,
+    "RBiH": 10.8,
+    "HRHB": 5.4
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "inferred",
+   "note": "Minor share(s) may be a real split or georeferencing error (+-5 km on a sketch map)",
+   "split_parts_pct_of_area": {
+    "RS": 83.8,
+    "RBiH": 10.8,
+    "HRHB": 5.4
+   }
+  },
+  "ljubuski": {
+   "map_share_pct": {
+    "HRHB": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "HRHB",
+   "confidence": "documented"
+  },
+  "lopare": {
+   "map_share_pct": {
+    "RS": 64.7,
+    "RBiH": 35.3
+   },
+   "source": "S/26337-MAP",
+   "assignment": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "RS": 64.7,
+    "RBiH": 35.3
+   },
+   "note": "Split on the 20 Aug 1993 map (shares from georeferenced sketch, +-5 km)"
+  },
+  "lukavac": {
+   "map_share_pct": {
+    "RBiH": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "maglaj": {
+   "map_share_pct": {
+    "RBiH": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "modrica": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "mostar": {
+   "map_share_pct": {
+    "RBiH": 57.1,
+    "HRHB": 42.9
+   },
+   "source": "S/26337-TEXT;S/26337-MAP",
+   "assignment": "special",
+   "confidence": "documented",
+   "note": "Mostar city under EC/EU administration for up to two years (S/26337 para 6). Map: west/south of the city in the Croat republic, east in the Muslim republic; the EU zone is drawn as a small circle around the town"
+  },
+  "mrkonjic_grad": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "neum": {
+   "map_share_pct": {
+    "HRHB": 100.0
+   },
+   "source": "S/26260;S/26486",
+   "assignment": "HRHB",
+   "confidence": "documented",
+   "note": "Croat republic territory, but the opstina of Neum (plus southern Stolac) is vested in the Union to give access to the sea (S/26260 annex A part II.1). Invincible (20 Sep): Muslim throughway Poplat-Neum and a tract on Kosa/Klek (S/26486)"
+  },
+  "nevesinje": {
+   "map_share_pct": {
+    "RS": 62.6,
+    "RBiH": 37.4
+   },
+   "source": "S/26337-MAP",
+   "assignment": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "RS": 62.6,
+    "RBiH": 37.4
+   },
+   "note": "Split on the 20 Aug 1993 map (shares from georeferenced sketch, +-5 km)"
+  },
+  "novi_grad_sarajevo": {
+   "map_share_pct": {
+    "special": 100.0
+   },
+   "source": "S/26337-MAP;S/26337-TEXT",
+   "assignment": "special",
+   "confidence": "documented",
+   "note": "Sarajevo district: UN administration for up to two years (S/26337 para 6; BB1 KB p.47-49). On 6 Aug the Serbs had claimed Ilidza, Ilijas, Rajlovac (and Butmir/Hrasnica) for the Serb republic, with Vogosca to the Muslims (S/26260 paras 39-41); the 20 Aug map instead draws one district"
+  },
+  "novi_travnik": {
+   "map_share_pct": {
+    "HRHB": 93.3,
+    "RBiH": 6.7
+   },
+   "source": "S/26337-MAP",
+   "assignment": "HRHB",
+   "confidence": "documented"
+  },
+  "novo_sarajevo": {
+   "map_share_pct": {
+    "special": 100.0
+   },
+   "source": "S/26337-MAP;S/26337-TEXT",
+   "assignment": "special",
+   "confidence": "documented",
+   "note": "Sarajevo district: UN administration for up to two years (S/26337 para 6; BB1 KB p.47-49). On 6 Aug the Serbs had claimed Ilidza, Ilijas, Rajlovac (and Butmir/Hrasnica) for the Serb republic, with Vogosca to the Muslims (S/26260 paras 39-41); the 20 Aug map instead draws one district"
+  },
+  "odzak": {
+   "map_share_pct": {
+    "HRHB": 80.8,
+    "RS": 19.2
+   },
+   "source": "S/26337-MAP",
+   "assignment": "HRHB",
+   "confidence": "inferred",
+   "note": "Minor share(s) may be a real split or georeferencing error (+-5 km on a sketch map); Separate pocket on the Sava drawn as its own region (Brod-Odzak); assigned to the Croat republic by inference (only Croat/Serb republics border it; S/26260 para 36 says the Serb-Croat Posavina line was still being negotiated)",
+   "split_parts_pct_of_area": {
+    "HRHB": 80.8,
+    "RS": 19.2
+   }
+  },
+  "olovo": {
+   "map_share_pct": {
+    "RBiH": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "orasje": {
+   "map_share_pct": {
+    "HRHB": 60.0,
+    "RS": 40.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "HRHB": 60.0,
+    "RS": 40.0
+   },
+   "note": "Split on the 20 Aug 1993 map (shares from georeferenced sketch, +-5 km)"
+  },
+  "pale": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "posusje": {
+   "map_share_pct": {
+    "HRHB": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "HRHB",
+   "confidence": "documented"
+  },
+  "prijedor": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "prnjavor": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "prozor": {
+   "map_share_pct": {
+    "HRHB": 87.5,
+    "RBiH": 12.5
+   },
+   "source": "S/26337-MAP",
+   "assignment": "HRHB",
+   "confidence": "documented"
+  },
+  "rogatica": {
+   "map_share_pct": {
+    "RS": 82.0,
+    "RBiH": 18.0
+   },
+   "source": "S/26337-MAP;S/26337-TEXT",
+   "assignment": "split",
+   "confidence": "documented",
+   "note": "Zepa enclave (Muslim) plus the Zepa-Gorazde link road (part of the Muslim republic, S/26337 para 6); rest Serb",
+   "split_parts_pct_of_area": {
+    "RS": 82.0,
+    "RBiH": 18.0
+   }
+  },
+  "rudo": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "sanski_most": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "sekovici": {
+   "map_share_pct": {
+    "RS": 68.0,
+    "RBiH": 32.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "RS": 68.0,
+    "RBiH": 32.0
+   },
+   "note": "Split on the 20 Aug 1993 map (shares from georeferenced sketch, +-5 km)"
+  },
+  "sipovo": {
+   "map_share_pct": {
+    "RS": 63.1,
+    "HRHB": 36.9
+   },
+   "source": "S/26337-MAP",
+   "assignment": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "RS": 63.1,
+    "HRHB": 36.9
+   },
+   "note": "Split on the 20 Aug 1993 map (shares from georeferenced sketch, +-5 km)"
+  },
+  "skender_vakuf": {
+   "map_share_pct": {
+    "RS": 81.3,
+    "HRHB": 16.5,
+    "RBiH": 2.2
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "inferred",
+   "note": "Minor share(s) may be a real split or georeferencing error (+-5 km on a sketch map)",
+   "split_parts_pct_of_area": {
+    "RS": 81.3,
+    "HRHB": 16.5,
+    "RBiH": 2.2
+   }
+  },
+  "sokolac": {
+   "map_share_pct": {
+    "RS": 69.5,
+    "RBiH": 30.5
+   },
+   "source": "S/26337-MAP",
+   "assignment": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "RS": 69.5,
+    "RBiH": 30.5
+   },
+   "note": "Split on the 20 Aug 1993 map (shares from georeferenced sketch, +-5 km)"
+  },
+  "srbac": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "srebrenica": {
+   "map_share_pct": {
+    "RBiH": 63.7,
+    "RS": 36.3
+   },
+   "source": "S/26337-MAP;S/26260",
+   "assignment": "split",
+   "confidence": "documented",
+   "note": "Srebrenica enclave (Muslim) enlarged; Zepa and Srebrenica linked and enlarged 100% (S/26260 para 34); rest of the municipality Serb",
+   "split_parts_pct_of_area": {
+    "RBiH": 63.7,
+    "RS": 36.3
+   }
+  },
+  "srebrenik": {
+   "map_share_pct": {
+    "RBiH": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "stari_grad_sarajevo": {
+   "map_share_pct": {
+    "special": 100.0
+   },
+   "source": "S/26337-MAP;S/26337-TEXT",
+   "assignment": "special",
+   "confidence": "documented",
+   "note": "Sarajevo district: UN administration for up to two years (S/26337 para 6; BB1 KB p.47-49). On 6 Aug the Serbs had claimed Ilidza, Ilijas, Rajlovac (and Butmir/Hrasnica) for the Serb republic, with Vogosca to the Muslims (S/26260 paras 39-41); the 20 Aug map instead draws one district"
+  },
+  "stolac": {
+   "map_share_pct": {
+    "RBiH": 51.7,
+    "RS": 34.2,
+    "HRHB": 14.1
+   },
+   "source": "S/26337-MAP;S/26260;S/26486",
+   "assignment": "split",
+   "confidence": "documented",
+   "note": "Map splits Stolac three ways; the part south of the Muslim-republic border is vested in the Union (S/26260 annex A II.1); Invincible moved the Muslim southern border from Recice to just above Visici (S/26486 para 11b/13a)",
+   "split_parts_pct_of_area": {
+    "RBiH": 51.7,
+    "RS": 34.2,
+    "HRHB": 14.1
+   }
+  },
+  "tesanj": {
+   "map_share_pct": {
+    "RBiH": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "teslic": {
+   "map_share_pct": {
+    "RS": 75.4,
+    "RBiH": 24.6
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "inferred",
+   "note": "Minor share(s) may be a real split or georeferencing error (+-5 km on a sketch map)",
+   "split_parts_pct_of_area": {
+    "RS": 75.4,
+    "RBiH": 24.6
+   }
+  },
+  "titov_drvar": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "travnik": {
+   "map_share_pct": {
+    "RBiH": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "trebinje": {
+   "map_share_pct": {
+    "RS": 88.2,
+    "HRHB": 11.8
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "trnovo": {
+   "map_share_pct": {
+    "special": 100.0
+   },
+   "source": "S/26337-MAP;S/26337-TEXT",
+   "assignment": "special",
+   "confidence": "documented",
+   "note": "Sarajevo district: UN administration for up to two years (S/26337 para 6; BB1 KB p.47-49). On 6 Aug the Serbs had claimed Ilidza, Ilijas, Rajlovac (and Butmir/Hrasnica) for the Serb republic, with Vogosca to the Muslims (S/26260 paras 39-41); the 20 Aug map instead draws one district"
+  },
+  "tuzla": {
+   "map_share_pct": {
+    "RBiH": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "ugljevik": {
+   "map_share_pct": {
+    "RS": 87.3,
+    "RBiH": 12.7
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "vares": {
+   "map_share_pct": {
+    "RBiH": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "velika_kladusa": {
+   "map_share_pct": {
+    "RBiH": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "visegrad": {
+   "map_share_pct": {
+    "RS": 96.7,
+    "RBiH": 3.3
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "visoko": {
+   "map_share_pct": {
+    "RBiH": 95.2,
+    "special": 4.8
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "vitez": {
+   "map_share_pct": {
+    "HRHB": 76.1,
+    "RBiH": 23.9
+   },
+   "source": "S/26337-MAP",
+   "assignment": "HRHB",
+   "confidence": "inferred",
+   "note": "Minor share(s) may be a real split or georeferencing error (+-5 km on a sketch map)",
+   "split_parts_pct_of_area": {
+    "HRHB": 76.1,
+    "RBiH": 23.9
+   }
+  },
+  "vlasenica": {
+   "map_share_pct": {
+    "RS": 92.0,
+    "RBiH": 8.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "documented"
+  },
+  "vogosca": {
+   "map_share_pct": {
+    "special": 100.0
+   },
+   "source": "S/26337-MAP;S/26337-TEXT",
+   "assignment": "special",
+   "confidence": "documented",
+   "note": "Sarajevo district: UN administration for up to two years (S/26337 para 6; BB1 KB p.47-49). On 6 Aug the Serbs had claimed Ilidza, Ilijas, Rajlovac (and Butmir/Hrasnica) for the Serb republic, with Vogosca to the Muslims (S/26260 paras 39-41); the 20 Aug map instead draws one district"
+  },
+  "zavidovici": {
+   "map_share_pct": {
+    "RBiH": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "zenica": {
+   "map_share_pct": {
+    "RBiH": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "zepce": {
+   "map_share_pct": {
+    "RBiH": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "zivinice": {
+   "map_share_pct": {
+    "RBiH": 100.0
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RBiH",
+   "confidence": "documented"
+  },
+  "zvornik": {
+   "map_share_pct": {
+    "RS": 76.3,
+    "RBiH": 23.7
+   },
+   "source": "S/26337-MAP",
+   "assignment": "RS",
+   "confidence": "inferred",
+   "note": "Minor share(s) may be a real split or georeferencing error (+-5 km on a sketch map)",
+   "split_parts_pct_of_area": {
+    "RS": 76.3,
+    "RBiH": 23.7
+   }
+  }
+ },
+ "contact_group": {
+  "banja_luka": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "banovici": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "bihac": {
+   "map_share_pct": {
+    "FED": 69.0,
+    "RS": 31.0
+   },
+   "source": "UN-4128",
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "Federation/RBiH": 69.0,
+    "RS": 31.0
+   },
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "bijeljina": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "bileca": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "bosanska_dubica": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "bosanska_gradiska": {
+   "map_share_pct": {
+    "FED": 8.3,
+    "RS": 91.7
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "bosanska_kostajnica": {
+   "map_share_pct": {
+    "FED": 8.9,
+    "RS": 91.1
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "bosanska_krupa": {
+   "map_share_pct": {
+    "FED": 81.8,
+    "RS": 18.2
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "inferred",
+   "split_parts_pct_of_area": {
+    "FED": 81.8,
+    "RS": 18.2
+   },
+   "note": "Minority share may be a real split or shade-classification noise near the line",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "bosanski_brod": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "bosanski_novi": {
+   "map_share_pct": {
+    "FED": 20.5,
+    "RS": 79.5
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "inferred",
+   "split_parts_pct_of_area": {
+    "FED": 20.5,
+    "RS": 79.5
+   },
+   "note": "Minority share may be a real split or shade-classification noise near the line"
+  },
+  "bosanski_petrovac": {
+   "map_share_pct": {
+    "FED": 4.2,
+    "RS": 95.8
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "bosanski_samac": {
+   "map_share_pct": {
+    "FED": 71.6,
+    "RS": 28.4
+   },
+   "source": "UN-4128",
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "inferred",
+   "split_parts_pct_of_area": {
+    "FED": 71.6,
+    "RS": 28.4
+   },
+   "note": "Minority share may be a real split or shade-classification noise near the line",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "bosansko_grahovo": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "bratunac": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "brcko": {
+   "map_share_pct": {
+    "FED": 54.5,
+    "RS": 45.5
+   },
+   "source": "UN-4128",
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "Federation/RBiH": 54.5,
+    "RS": 45.5
+   },
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "breza": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "bugojno": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "busovaca": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "cajnice": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "capljina": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "cazin": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "celinac": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "centar_sarajevo": {
+   "map_share_pct": {
+    "FED": 30.2,
+    "NEUTRAL": 69.8
+   },
+   "source": "UN-4128",
+   "assignment": "special",
+   "entity": "neutral zone",
+   "confidence": "documented",
+   "note": "White \"neutral zone\" around Sarajevo on UN map 4128 (Sarajevo district; sources differ on whether it was to be UN-administered for an interim period or reunified within the Federation). Counted with the Federation in the 51%"
+  },
+  "citluk": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "derventa": {
+   "map_share_pct": {
+    "FED": 52.7,
+    "RS": 47.3
+   },
+   "source": "UN-4128",
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "Federation/HRHB": 52.7,
+    "RS": 47.3
+   },
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "doboj": {
+   "map_share_pct": {
+    "FED": 49.5,
+    "RS": 50.5
+   },
+   "source": "UN-4128",
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "Federation/RBiH": 49.5,
+    "RS": 50.5
+   },
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "donji_vakuf": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "duvno": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "foca": {
+   "map_share_pct": {
+    "FED": 21.7,
+    "RS": 78.3
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "inferred",
+   "split_parts_pct_of_area": {
+    "FED": 21.7,
+    "RS": 78.3
+   },
+   "note": "Minority share may be a real split or shade-classification noise near the line"
+  },
+  "fojnica": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "gacko": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "glamoc": {
+   "map_share_pct": {
+    "FED": 27.9,
+    "RS": 72.1
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "inferred",
+   "split_parts_pct_of_area": {
+    "FED": 27.9,
+    "RS": 72.1
+   },
+   "note": "Minority share may be a real split or shade-classification noise near the line"
+  },
+  "gorazde": {
+   "map_share_pct": {
+    "FED": 60.3,
+    "RS": 39.7
+   },
+   "source": "UN-4128",
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "Federation/RBiH": 60.3,
+    "RS": 39.7
+   },
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "gornji_vakuf": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "split",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "gracanica": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "gradacac": {
+   "map_share_pct": {
+    "FED": 72.8,
+    "RS": 27.2
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "inferred",
+   "split_parts_pct_of_area": {
+    "FED": 72.8,
+    "RS": 27.2
+   },
+   "note": "Minority share may be a real split or shade-classification noise near the line",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "grude": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "hadzici": {
+   "map_share_pct": {
+    "NEUTRAL": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "special",
+   "entity": "neutral zone",
+   "confidence": "documented",
+   "note": "White \"neutral zone\" around Sarajevo on UN map 4128 (Sarajevo district; sources differ on whether it was to be UN-administered for an interim period or reunified within the Federation). Counted with the Federation in the 51%"
+  },
+  "hanpijesak": {
+   "map_share_pct": {
+    "FED": 37.1,
+    "RS": 62.9
+   },
+   "source": "UN-4128",
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "Federation/RBiH": 37.1,
+    "RS": 62.9
+   },
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "ilidza": {
+   "map_share_pct": {
+    "NEUTRAL": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "special",
+   "entity": "neutral zone",
+   "confidence": "documented",
+   "note": "White \"neutral zone\" around Sarajevo on UN map 4128 (Sarajevo district; sources differ on whether it was to be UN-administered for an interim period or reunified within the Federation). Counted with the Federation in the 51%"
+  },
+  "ilijas": {
+   "map_share_pct": {
+    "NEUTRAL": 100.0,
+    "RS": 0.0
+   },
+   "source": "UN-4128",
+   "assignment": "special",
+   "entity": "neutral zone",
+   "confidence": "documented",
+   "note": "White \"neutral zone\" around Sarajevo on UN map 4128 (Sarajevo district; sources differ on whether it was to be UN-administered for an interim period or reunified within the Federation). Counted with the Federation in the 51%"
+  },
+  "jablanica": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "jajce": {
+   "map_share_pct": {
+    "FED": 83.4,
+    "RS": 16.6
+   },
+   "source": "UN-4128",
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "inferred",
+   "split_parts_pct_of_area": {
+    "FED": 83.4,
+    "RS": 16.6
+   },
+   "note": "Minority share may be a real split or shade-classification noise near the line",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "kakanj": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "kalesija": {
+   "map_share_pct": {
+    "FED": 77.6,
+    "RS": 22.4
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "inferred",
+   "split_parts_pct_of_area": {
+    "FED": 77.6,
+    "RS": 22.4
+   },
+   "note": "Minority share may be a real split or shade-classification noise near the line",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "kalinovik": {
+   "map_share_pct": {
+    "FED": 8.7,
+    "RS": 91.3
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "kiseljak": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "kladanj": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "kljuc": {
+   "map_share_pct": {
+    "FED": 11.6,
+    "RS": 88.4
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "konjic": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "kotor_varos": {
+   "map_share_pct": {
+    "FED": 36.2,
+    "RS": 63.8
+   },
+   "source": "UN-4128",
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "Federation/RBiH": 36.2,
+    "RS": 63.8
+   },
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "kresevo": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "kupres": {
+   "map_share_pct": {
+    "FED": 86.7,
+    "RS": 13.3
+   },
+   "source": "UN-4128",
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "laktasi": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "listica": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "livno": {
+   "map_share_pct": {
+    "FED": 88.6,
+    "RS": 11.4
+   },
+   "source": "UN-4128",
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "ljubinje": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "ljubuski": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "lopare": {
+   "map_share_pct": {
+    "FED": 15.6,
+    "RS": 84.4
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "inferred",
+   "split_parts_pct_of_area": {
+    "FED": 15.6,
+    "RS": 84.4
+   },
+   "note": "Minority share may be a real split or shade-classification noise near the line"
+  },
+  "lukavac": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "maglaj": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "modrica": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "mostar": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "split",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)",
+   "note": "Federation; EU Administration of Mostar from 23 Jul 1994 (BB1 KB p.59)"
+  },
+  "mrkonjic_grad": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "neum": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "nevesinje": {
+   "map_share_pct": {
+    "FED": 19.0,
+    "RS": 81.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "inferred",
+   "split_parts_pct_of_area": {
+    "FED": 19.0,
+    "RS": 81.0
+   },
+   "note": "Minority share may be a real split or shade-classification noise near the line"
+  },
+  "novi_grad_sarajevo": {
+   "map_share_pct": {
+    "FED": 53.9,
+    "NEUTRAL": 46.1
+   },
+   "source": "UN-4128",
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "Federation/RBiH": 53.9,
+    "NEUTRAL": 46.1
+   },
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "novi_travnik": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "split",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "novo_sarajevo": {
+   "map_share_pct": {
+    "FED": 26.2,
+    "NEUTRAL": 73.8
+   },
+   "source": "UN-4128",
+   "assignment": "special",
+   "entity": "neutral zone",
+   "confidence": "documented",
+   "note": "White \"neutral zone\" around Sarajevo on UN map 4128 (Sarajevo district; sources differ on whether it was to be UN-administered for an interim period or reunified within the Federation). Counted with the Federation in the 51%"
+  },
+  "odzak": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "olovo": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "orasje": {
+   "map_share_pct": {
+    "FED": 50.4,
+    "RS": 49.6
+   },
+   "source": "UN-4128",
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "Federation/HRHB": 50.4,
+    "RS": 49.6
+   },
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "pale": {
+   "map_share_pct": {
+    "FED": 18.0,
+    "RS": 82.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "inferred",
+   "split_parts_pct_of_area": {
+    "FED": 18.0,
+    "RS": 82.0
+   },
+   "note": "Minority share may be a real split or shade-classification noise near the line"
+  },
+  "posusje": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "prijedor": {
+   "map_share_pct": {
+    "FED": 9.6,
+    "RS": 90.4
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "prnjavor": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "prozor": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "rogatica": {
+   "map_share_pct": {
+    "FED": 66.6,
+    "RS": 33.4
+   },
+   "source": "UN-4128",
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "Federation/RBiH": 66.6,
+    "RS": 33.4
+   },
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "rudo": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "sanski_most": {
+   "map_share_pct": {
+    "FED": 57.7,
+    "RS": 42.3
+   },
+   "source": "UN-4128",
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "Federation/RBiH": 57.7,
+    "RS": 42.3
+   },
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "sekovici": {
+   "map_share_pct": {
+    "FED": 40.1,
+    "RS": 59.9
+   },
+   "source": "UN-4128",
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "Federation/RBiH": 40.1,
+    "RS": 59.9
+   },
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "sipovo": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "skender_vakuf": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "sokolac": {
+   "map_share_pct": {
+    "FED": 29.7,
+    "RS": 70.3
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "inferred",
+   "split_parts_pct_of_area": {
+    "FED": 29.7,
+    "RS": 70.3
+   },
+   "note": "Minority share may be a real split or shade-classification noise near the line"
+  },
+  "srbac": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "srebrenica": {
+   "map_share_pct": {
+    "FED": 63.5,
+    "RS": 36.5
+   },
+   "source": "UN-4128",
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "Federation/RBiH": 63.5,
+    "RS": 36.5
+   },
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "srebrenik": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "stari_grad_sarajevo": {
+   "map_share_pct": {
+    "FED": 14.8,
+    "NEUTRAL": 85.2
+   },
+   "source": "UN-4128",
+   "assignment": "special",
+   "entity": "neutral zone",
+   "confidence": "documented",
+   "note": "White \"neutral zone\" around Sarajevo on UN map 4128 (Sarajevo district; sources differ on whether it was to be UN-administered for an interim period or reunified within the Federation). Counted with the Federation in the 51%"
+  },
+  "stolac": {
+   "map_share_pct": {
+    "FED": 75.9,
+    "RS": 24.1
+   },
+   "source": "UN-4128",
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "inferred",
+   "split_parts_pct_of_area": {
+    "FED": 75.9,
+    "RS": 24.1
+   },
+   "note": "Minority share may be a real split or shade-classification noise near the line",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "tesanj": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "teslic": {
+   "map_share_pct": {
+    "FED": 37.5,
+    "RS": 62.5
+   },
+   "source": "UN-4128",
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "split_parts_pct_of_area": {
+    "Federation/RBiH": 37.5,
+    "RS": 62.5
+   },
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "titov_drvar": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "travnik": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "trebinje": {
+   "map_share_pct": {
+    "FED": 11.0,
+    "RS": 89.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "trnovo": {
+   "map_share_pct": {
+    "NEUTRAL": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "special",
+   "entity": "neutral zone",
+   "confidence": "documented",
+   "note": "White \"neutral zone\" around Sarajevo on UN map 4128 (Sarajevo district; sources differ on whether it was to be UN-administered for an interim period or reunified within the Federation). Counted with the Federation in the 51%"
+  },
+  "tuzla": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "ugljevik": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "vares": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "velika_kladusa": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "visegrad": {
+   "map_share_pct": {
+    "FED": 7.9,
+    "RS": 92.1
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "visoko": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "vitez": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "vlasenica": {
+   "map_share_pct": {
+    "RS": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented"
+  },
+  "vogosca": {
+   "map_share_pct": {
+    "FED": 12.8,
+    "NEUTRAL": 87.2
+   },
+   "source": "UN-4128",
+   "assignment": "special",
+   "entity": "neutral zone",
+   "confidence": "documented",
+   "note": "White \"neutral zone\" around Sarajevo on UN map 4128 (Sarajevo district; sources differ on whether it was to be UN-administered for an interim period or reunified within the Federation). Counted with the Federation in the 51%"
+  },
+  "zavidovici": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "zenica": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "zepce": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "zivinice": {
+   "map_share_pct": {
+    "FED": 100.0
+   },
+   "source": "UN-4128",
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "faction_layer_confidence": "inferred",
+   "faction_layer_rule": "RULE-FED-LAYER (HVO-held or Croat-claimed mid-1994 -> HRHB)"
+  },
+  "zvornik": {
+   "map_share_pct": {
+    "FED": 26.3,
+    "RS": 73.7
+   },
+   "source": "UN-4128",
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "inferred",
+   "split_parts_pct_of_area": {
+    "FED": 26.3,
+    "RS": 73.7
+   },
+   "note": "Minority share may be a real split or shade-classification noise near the line"
+  }
+ },
+ "dayton": {
+  "banja_luka": {
+   "post1995_municipalities": "Banja Luka (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "banovici": {
+   "post1995_municipalities": "Banovići (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "bihac": {
+   "post1995_municipalities": "Bihać (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "bijeljina": {
+   "post1995_municipalities": "Bijeljina (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "bileca": {
+   "post1995_municipalities": "Bileća (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "bosanska_dubica": {
+   "post1995_municipalities": "Kozarska Dubica (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "bosanska_gradiska": {
+   "post1995_municipalities": "Gradiška (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "bosanska_kostajnica": {
+   "post1995_municipalities": "Kostajnica (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "bosanska_krupa": {
+   "post1995_municipalities": "Bosanska Krupa (FBiH), Krupa na Uni (RS)",
+   "entity_area_share_pct": {
+    "Federation": 86.1,
+    "RS": 13.9
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/RBiH": 86.1,
+    "RS": 13.9
+   },
+   "majority_entity": "Federation",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "Federation; RS keeps Krupa na Uni",
+    "confidence": "documented",
+    "source": "GFAP-A2"
+   }
+  },
+  "bosanski_brod": {
+   "post1995_municipalities": "Brod (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "bosanski_novi": {
+   "post1995_municipalities": "Novi Grad (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "bosanski_petrovac": {
+   "post1995_municipalities": "Bosanski Petrovac (FBiH), Petrovac (RS)",
+   "entity_area_share_pct": {
+    "Federation": 83.4,
+    "RS": 16.6
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/RBiH": 83.4,
+    "RS": 16.6
+   },
+   "majority_entity": "Federation",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "Taken by ARBiH 5th Corps Sept 1995 (BB1 p0419); Federation except Petrovac/Drinic (RS)",
+    "confidence": "documented",
+    "source": "GFAP-A2;BB1-1995"
+   }
+  },
+  "bosanski_samac": {
+   "post1995_municipalities": "Domaljevac-Šamac (FBiH), Šamac (RS)",
+   "entity_area_share_pct": {
+    "Federation": 17.6,
+    "RS": 82.4
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/HRHB": 17.6,
+    "RS": 82.4
+   },
+   "majority_entity": "RS",
+   "faction_layer_confidence": "inferred"
+  },
+  "bosansko_grahovo": {
+   "post1995_municipalities": "Bosansko Grahovo (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "HV-held after 28 Jul 1995 (BB1 p0403); Federation",
+    "confidence": "documented",
+    "source": "GFAP-A2;BB1-1995"
+   }
+  },
+  "bratunac": {
+   "post1995_municipalities": "Bratunac (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "brcko": {
+   "post1995_municipalities": "Brčko (Brcko D.)",
+   "entity_area_share_pct": {
+    "Brcko District": 100.0
+   },
+   "assignment": "special",
+   "entity": "Brcko District",
+   "confidence": "documented",
+   "source": "GFAP-A2-V",
+   "note": "Annex 2 Art. V: Brcko area left to binding arbitration within one year; Final Award 5 Mar 1999 made the whole pre-war municipality the Brcko District (condominium of both entities), est. 8 Mar 2000",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "VRS-held town at the narrowest point of the Posavina corridor; status left to arbitration (Annex 2 Art V); Brcko District 2000",
+    "confidence": "documented",
+    "source": "GFAP-A2-V"
+   }
+  },
+  "breza": {
+   "post1995_municipalities": "Breza (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "bugojno": {
+   "post1995_municipalities": "Bugojno (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "busovaca": {
+   "post1995_municipalities": "Busovača (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "cajnice": {
+   "post1995_municipalities": "Čajniče (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "capljina": {
+   "post1995_municipalities": "Čapljina (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "cazin": {
+   "post1995_municipalities": "Cazin (FBiH), Bužim (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "celinac": {
+   "post1995_municipalities": "Čelinac (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "centar_sarajevo": {
+   "post1995_municipalities": "Centar Sarajevo (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "Unified Sarajevo inside the Federation",
+    "confidence": "documented",
+    "source": "GFAP-A2"
+   }
+  },
+  "citluk": {
+   "post1995_municipalities": "Čitluk (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "derventa": {
+   "post1995_municipalities": "Derventa (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "doboj": {
+   "post1995_municipalities": "Doboj-Istok (FBiH), Doboj-Jug (FBiH), Doboj (RS)",
+   "entity_area_share_pct": {
+    "Federation": 5.8,
+    "RS": 94.2
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/RBiH": 5.8,
+    "RS": 94.2
+   },
+   "majority_entity": "RS",
+   "faction_layer_confidence": "inferred"
+  },
+  "donji_vakuf": {
+   "post1995_municipalities": "Donji Vakuf (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "Taken by ARBiH 7th Corps 10-14 Sept 1995 (BB1 p0419); Federation",
+    "confidence": "documented",
+    "source": "GFAP-A2;BB1-1995"
+   }
+  },
+  "duvno": {
+   "post1995_municipalities": "Tomislavgrad (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "foca": {
+   "post1995_municipalities": "Foča (FBiH), Foča (RS)",
+   "entity_area_share_pct": {
+    "Federation": 12.7,
+    "RS": 87.3
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/RBiH": 12.7,
+    "RS": 87.3
+   },
+   "majority_entity": "RS",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "Ustikolina area on the Gorazde corridor to the Federation (Foca-Ustikolina); town Foca (Srbinje) RS",
+    "confidence": "documented",
+    "source": "GFAP-A2"
+   }
+  },
+  "fojnica": {
+   "post1995_municipalities": "Fojnica (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "gacko": {
+   "post1995_municipalities": "Gacko (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "glamoc": {
+   "post1995_municipalities": "Glamoč (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "HV/HVO-held after 28 Jul 1995 (BB1 p0403); Federation",
+    "confidence": "documented",
+    "source": "GFAP-A2;BB1-1995"
+   }
+  },
+  "gorazde": {
+   "post1995_municipalities": "Novo Goražde (FBiH), Novo Goražde (RS)",
+   "entity_area_share_pct": {
+    "Federation": 67.3,
+    "RS": 32.7
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/RBiH": 67.3,
+    "RS": 32.7
+   },
+   "majority_entity": "Federation",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "Enclave joined to the Federation by a land corridor (RS-held land ceded); RS keeps Kopaci side (Novo Gorazde). NOTE repo xlsx names both parts \"Novo Gorazde\" - the 1xxxx part is Gorazde (FBiH)",
+    "confidence": "documented",
+    "source": "GFAP-A2"
+   }
+  },
+  "gornji_vakuf": {
+   "post1995_municipalities": "Gornji Vakuf-Uskoplje (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "split",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred",
+   "note": "Croat- and Bosniak-run parts (Gornji Vakuf-Uskoplje)"
+  },
+  "gracanica": {
+   "post1995_municipalities": "Gračanica (FBiH), Petrovo (RS)",
+   "entity_area_share_pct": {
+    "Federation": 66.2,
+    "RS": 33.8
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/RBiH": 66.2,
+    "RS": 33.8
+   },
+   "majority_entity": "Federation",
+   "faction_layer_confidence": "inferred"
+  },
+  "gradacac": {
+   "post1995_municipalities": "Gradačac (FBiH), Pelagićevo (RS)",
+   "entity_area_share_pct": {
+    "Federation": 65.2,
+    "RS": 34.8
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/RBiH": 65.2,
+    "RS": 34.8
+   },
+   "majority_entity": "Federation",
+   "faction_layer_confidence": "inferred"
+  },
+  "grude": {
+   "post1995_municipalities": "Grude (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "hadzici": {
+   "post1995_municipalities": "Hadžići (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "RS-held town/central part transferred to the Federation (ARBiH already held Pazaric side)",
+    "confidence": "documented",
+    "source": "OHR-1996"
+   }
+  },
+  "hanpijesak": {
+   "post1995_municipalities": "Han Pijesak (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "ilidza": {
+   "post1995_municipalities": "Ilidža (FBiH), Istočna Ilidža (RS)",
+   "entity_area_share_pct": {
+    "Federation": 82.4,
+    "RS": 17.6
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/RBiH": 82.4,
+    "RS": 17.6
+   },
+   "majority_entity": "Federation",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "RS-held suburb (Ilidza, Rajlovac area) transferred to the Federation; RS keeps Istocna Ilidza (Lukavica/Kasindo side)",
+    "confidence": "documented",
+    "source": "OHR-1996"
+   }
+  },
+  "ilijas": {
+   "post1995_municipalities": "Ilijaš (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "RS-held; transferred to the Federation",
+    "confidence": "documented",
+    "source": "OHR-1996"
+   }
+  },
+  "jablanica": {
+   "post1995_municipalities": "Jablanica (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "jajce": {
+   "post1995_municipalities": "Jajce (FBiH), Jezero (RS)",
+   "entity_area_share_pct": {
+    "Federation": 84.5,
+    "RS": 15.5
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/HRHB": 84.5,
+    "RS": 15.5
+   },
+   "majority_entity": "Federation",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "Croat/Federation-held since Sept 1995; RS receives the Jezero part (south toward Mrkonjic/Sipovo)",
+    "confidence": "documented",
+    "source": "GFAP-A2"
+   }
+  },
+  "kakanj": {
+   "post1995_municipalities": "Kakanj (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "kalesija": {
+   "post1995_municipalities": "Kalesija (FBiH), Osmaci (RS)",
+   "entity_area_share_pct": {
+    "Federation": 71.2,
+    "RS": 28.8
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/RBiH": 71.2,
+    "RS": 28.8
+   },
+   "majority_entity": "Federation",
+   "faction_layer_confidence": "inferred"
+  },
+  "kalinovik": {
+   "post1995_municipalities": "Kalinovik (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "kiseljak": {
+   "post1995_municipalities": "Kiseljak (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "kladanj": {
+   "post1995_municipalities": "Kladanj (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "kljuc": {
+   "post1995_municipalities": "Ključ (FBiH), Ribnik (RS)",
+   "entity_area_share_pct": {
+    "Federation": 40.2,
+    "RS": 59.8
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/RBiH": 40.2,
+    "RS": 59.8
+   },
+   "majority_entity": "RS",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "Taken by ARBiH Sept 1995 (BB1 p0419); Federation keeps Kljuc town, RS keeps Ribnik (larger area)",
+    "confidence": "documented",
+    "source": "GFAP-A2;BB1-1995"
+   }
+  },
+  "konjic": {
+   "post1995_municipalities": "Konjic (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "kotor_varos": {
+   "post1995_municipalities": "Kotor Varoš (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "kresevo": {
+   "post1995_municipalities": "Kreševo (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "kupres": {
+   "post1995_municipalities": "Kupres (FBiH), Kupres (RS)",
+   "entity_area_share_pct": {
+    "Federation": 92.8,
+    "RS": 7.2
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/HRHB": 92.8,
+    "RS": 7.2
+   },
+   "majority_entity": "Federation",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "Federation (HV/HVO-held since Nov 1994); small RS Kupres",
+    "confidence": "documented",
+    "source": "GFAP-A2"
+   }
+  },
+  "laktasi": {
+   "post1995_municipalities": "Laktaši (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "listica": {
+   "post1995_municipalities": "Široki Brijeg (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "livno": {
+   "post1995_municipalities": "Livno (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "ljubinje": {
+   "post1995_municipalities": "Ljubinje (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "ljubuski": {
+   "post1995_municipalities": "Ljubuški (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "lopare": {
+   "post1995_municipalities": "Čelić (FBiH), Lopare (RS)",
+   "entity_area_share_pct": {
+    "Federation": 31.5,
+    "RS": 68.5
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/RBiH": 31.5,
+    "RS": 68.5
+   },
+   "majority_entity": "RS",
+   "faction_layer_confidence": "inferred"
+  },
+  "lukavac": {
+   "post1995_municipalities": "Lukavac (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "maglaj": {
+   "post1995_municipalities": "Maglaj (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "modrica": {
+   "post1995_municipalities": "Modriča (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "mostar": {
+   "post1995_municipalities": "Grad Mostar (FBiH), Grad Mostar (RS)",
+   "entity_area_share_pct": {
+    "Federation": 92.9,
+    "RS": 7.1
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/split": 92.9,
+    "RS": 7.1
+   },
+   "majority_entity": "Federation",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "Federation city (EU administration continued to Jul 1996); RS keeps eastern rural fringe (Istocni Mostar)",
+    "confidence": "documented",
+    "source": "GFAP-A2"
+   }
+  },
+  "mrkonjic_grad": {
+   "post1995_municipalities": "Mrkonjić Grad (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "Taken by HV/HVO Oct 1995 (Juzni potez; BB1 p0427); handed back to RS (\"the anvil\") at D+45",
+    "confidence": "documented",
+    "source": "OHR-1996;BB1-1995"
+   }
+  },
+  "neum": {
+   "post1995_municipalities": "Neum (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "nevesinje": {
+   "post1995_municipalities": "Nevesinje (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "novi_grad_sarajevo": {
+   "post1995_municipalities": "Novi Grad Sarajevo (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "RS-held fringes (e.g. Nedzarici/Rajlovac edge) to the Federation; whole municipality Federation",
+    "confidence": "inferred",
+    "source": "OHR-1996"
+   }
+  },
+  "novi_travnik": {
+   "post1995_municipalities": "Novi Travnik (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "split",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred",
+   "note": "Croat- and Bosniak-run parts"
+  },
+  "novo_sarajevo": {
+   "post1995_municipalities": "Novo Sarajevo (FBiH), Istočno Novo Sarajevo (RS)",
+   "entity_area_share_pct": {
+    "Federation": 19.6,
+    "RS": 80.4
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/RBiH": 19.6,
+    "RS": 80.4
+   },
+   "majority_entity": "RS",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "Grbavica (RS-held) transferred to the Federation (18-19 Mar 1996); RS keeps Istocno Novo Sarajevo (Lukavica)",
+    "confidence": "documented",
+    "source": "OHR-1996"
+   }
+  },
+  "odzak": {
+   "post1995_municipalities": "Odžak (FBiH), Vukosavlje (RS)",
+   "entity_area_share_pct": {
+    "Federation": 70.0,
+    "RS": 30.0
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/HRHB": 70.0,
+    "RS": 30.0
+   },
+   "majority_entity": "Federation",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "VRS-held since July 1992 (war-control fact from general knowledge, not BB-checked); most of the municipality to the Federation (Croat-run Posavina canton); RS keeps Vukosavlje",
+    "confidence": "inferred",
+    "source": "GFAP-A2"
+   }
+  },
+  "olovo": {
+   "post1995_municipalities": "Olovo (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "orasje": {
+   "post1995_municipalities": "Orašje (FBiH), Donji Žabar (RS)",
+   "entity_area_share_pct": {
+    "Federation": 75.5,
+    "RS": 24.5
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/HRHB": 75.5,
+    "RS": 24.5
+   },
+   "majority_entity": "Federation",
+   "faction_layer_confidence": "inferred"
+  },
+  "pale": {
+   "post1995_municipalities": "Pale (FBiH), Pale (RS)",
+   "entity_area_share_pct": {
+    "Federation": 15.1,
+    "RS": 84.9
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/RBiH": 15.1,
+    "RS": 84.9
+   },
+   "majority_entity": "RS",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "Praca area on the Gorazde approach to the Federation (Pale-Praca); town Pale RS",
+    "confidence": "documented",
+    "source": "GFAP-A2"
+   }
+  },
+  "posusje": {
+   "post1995_municipalities": "Posušje (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "prijedor": {
+   "post1995_municipalities": "Prijedor (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "prnjavor": {
+   "post1995_municipalities": "Prnjavor (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "prozor": {
+   "post1995_municipalities": "Prozor-Rama (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "rogatica": {
+   "post1995_municipalities": "Rogatica (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "rudo": {
+   "post1995_municipalities": "Rudo (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "sanski_most": {
+   "post1995_municipalities": "Sanski Most (FBiH), Oštra Luka (RS)",
+   "entity_area_share_pct": {
+    "Federation": 78.8,
+    "RS": 21.2
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/RBiH": 78.8,
+    "RS": 21.2
+   },
+   "majority_entity": "Federation",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "Taken by ARBiH Oct 1995 (BB1 p0420); Federation, RS keeps Ostra Luka",
+    "confidence": "documented",
+    "source": "GFAP-A2;BB1-1995"
+   }
+  },
+  "sekovici": {
+   "post1995_municipalities": "Šekovići (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "sipovo": {
+   "post1995_municipalities": "Šipovo (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "Taken by HV/HVO Sept 1995 (Maestral; date from general knowledge); assigned to RS",
+    "confidence": "inferred",
+    "source": "GFAP-A2;BB1-1995"
+   }
+  },
+  "skender_vakuf": {
+   "post1995_municipalities": "Dobretići (FBiH), Kneževo (RS)",
+   "entity_area_share_pct": {
+    "Federation": 16.3,
+    "RS": 83.7
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/HRHB": 16.3,
+    "RS": 83.7
+   },
+   "majority_entity": "RS",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "RS (Knezevo); HVO-held Dobretici to the Federation",
+    "confidence": "documented",
+    "source": "GFAP-A2"
+   }
+  },
+  "sokolac": {
+   "post1995_municipalities": "Sokolac (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "srbac": {
+   "post1995_municipalities": "Srbac (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "srebrenica": {
+   "post1995_municipalities": "Srebrenica (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "srebrenik": {
+   "post1995_municipalities": "Srebrenik (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "stari_grad_sarajevo": {
+   "post1995_municipalities": "Stari Grad Sarajevo (FBiH), Istočni Stari Grad (RS)",
+   "entity_area_share_pct": {
+    "Federation": 36.7,
+    "RS": 63.3
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/RBiH": 36.7,
+    "RS": 63.3
+   },
+   "majority_entity": "RS",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "Line roughly as held; RS keeps rural east (Istocni Stari Grad)",
+    "confidence": "inferred",
+    "source": "GFAP-A2"
+   }
+  },
+  "stolac": {
+   "post1995_municipalities": "Stolac (FBiH), Berkovići (RS)",
+   "entity_area_share_pct": {
+    "Federation": 51.5,
+    "RS": 48.5
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/HRHB": 51.5,
+    "RS": 48.5
+   },
+   "majority_entity": "Federation",
+   "faction_layer_confidence": "inferred"
+  },
+  "tesanj": {
+   "post1995_municipalities": "Tešanj (FBiH), Usora (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "teslic": {
+   "post1995_municipalities": "Teslić (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "titov_drvar": {
+   "post1995_municipalities": "Drvar (FBiH), Istočni Drvar (RS)",
+   "entity_area_share_pct": {
+    "Federation": 88.0,
+    "RS": 12.0
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/HRHB": 88.0,
+    "RS": 12.0
+   },
+   "majority_entity": "Federation",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "Taken by HV Sept 1995 (BB1 p0417); Federation except Istocni Drvar (RS)",
+    "confidence": "documented",
+    "source": "GFAP-A2;BB1-1995"
+   }
+  },
+  "travnik": {
+   "post1995_municipalities": "Travnik (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "trebinje": {
+   "post1995_municipalities": "Ravno (FBiH), Trebinje (RS)",
+   "entity_area_share_pct": {
+    "Federation": 26.3,
+    "RS": 73.7
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/HRHB": 26.3,
+    "RS": 73.7
+   },
+   "majority_entity": "RS",
+   "faction_layer_confidence": "inferred"
+  },
+  "trnovo": {
+   "post1995_municipalities": "Trnovo (FBiH), Trnovo (RS)",
+   "entity_area_share_pct": {
+    "Federation": 75.9,
+    "RS": 24.1
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/RBiH": 75.9,
+    "RS": 24.1
+   },
+   "majority_entity": "Federation",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "RS-held town of Trnovo to the Federation; RS keeps eastern part (Trnovo RS)",
+    "confidence": "inferred",
+    "source": "GFAP-A2"
+   }
+  },
+  "tuzla": {
+   "post1995_municipalities": "Tuzla (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "ugljevik": {
+   "post1995_municipalities": "Teočak (FBiH), Ugljevik (RS)",
+   "entity_area_share_pct": {
+    "Federation": 15.3,
+    "RS": 84.7
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/RBiH": 15.3,
+    "RS": 84.7
+   },
+   "majority_entity": "RS",
+   "faction_layer_confidence": "inferred"
+  },
+  "vares": {
+   "post1995_municipalities": "Vareš (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "velika_kladusa": {
+   "post1995_municipalities": "Velika Kladuša (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "visegrad": {
+   "post1995_municipalities": "Višegrad (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "visoko": {
+   "post1995_municipalities": "Visoko (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "vitez": {
+   "post1995_municipalities": "Vitez (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "vlasenica": {
+   "post1995_municipalities": "Vlasenica (RS), Milici (RS)",
+   "entity_area_share_pct": {
+    "RS": 100.0
+   },
+   "assignment": "RS",
+   "entity": "RS",
+   "confidence": "documented",
+   "source": "GFAP-A2"
+  },
+  "vogosca": {
+   "post1995_municipalities": "Vogosca (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred",
+   "change_vs_12oct1995_ceasefire": {
+    "note": "RS-held; whole pre-war municipality transferred to the Federation (handover 24 Feb 1996)",
+    "confidence": "documented",
+    "source": "OHR-1996"
+   }
+  },
+  "zavidovici": {
+   "post1995_municipalities": "Zavidovići (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "zenica": {
+   "post1995_municipalities": "Zenica (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "zepce": {
+   "post1995_municipalities": "Žepče (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "HRHB",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "zivinice": {
+   "post1995_municipalities": "Živinice (FBiH)",
+   "entity_area_share_pct": {
+    "Federation": 100.0
+   },
+   "assignment": "RBiH",
+   "entity": "Federation",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "faction_layer_confidence": "inferred"
+  },
+  "zvornik": {
+   "post1995_municipalities": "Sapna (FBiH), Zvornik (RS)",
+   "entity_area_share_pct": {
+    "Federation": 24.7,
+    "RS": 75.3
+   },
+   "assignment": "split",
+   "entity": "split",
+   "confidence": "documented",
+   "source": "GFAP-A2;RULE-FED-LAYER",
+   "split_parts": {
+    "Federation/RBiH": 24.7,
+    "RS": 75.3
+   },
+   "majority_entity": "RS",
+   "faction_layer_confidence": "inferred"
+  }
+ }
+}

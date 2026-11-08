@@ -312,10 +312,14 @@ describe('Event timeline historical integrity', () => {
         }
     });
 
-    it('total event count is 158 after retiring the Lukavac political event', () => {
+    it('total event count is 161 after adding the three Dayton coercion events', () => {
         // Briefly 161 on 2026-09-17 while three Donji Vakuf takeover rows existed. Those rows
-        // were withdrawn as unauthorized event-driven ownership transfer, so the pin returns to
+        // were withdrawn as unauthorized event-driven ownership transfer, so the pin returned to
         // 158. See tests/donji_vakuf_no_authored_takeover.test.ts for the standing guard.
-        expect(allEvents.length).toBe(158);
+        // 158 -> 161 on 2026-11-07 (owner): us_forces_dayton_rbih_1995,
+        // belgrade_signs_dayton_for_rs_1995 and zagreb_signs_dayton_for_hrhb_1995 fire only
+        // after a player declines Dayton (tests/dayton_decline_imposition.test.ts). They carry
+        // no control_change.
+        expect(allEvents.length).toBe(161);
     });
 });

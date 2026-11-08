@@ -37,7 +37,47 @@ import type { CompetencyOwnerChoice, EntityAutonomySetting } from '../../state/n
 import { strictCompare } from '../../state/validateGameState.js';
 import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';
 import { computePeaceDysfunctionBreakdown } from './peace_dysfunction.js';
-import { getPackageAreaPct } from './package_area_resolver.js';
+import { getPackageAreaPct, resolveOsidsForKeywords } from './package_area_resolver.js';
+import { applyPeaceSettlement, computeSettlementControllers } from './peace_settlement.js';
+import { frontPackagesForProposal, frontPackageVisibleToPlayer, sameEntitySide } from './front_packages.js';
+import { packageOsids, selectPatronForced } from './patron_leverage.js';
+import type { TerritorialPackage } from '../../state/negotiation_types.js';
+
+import { loadEventDefinitions } from '../events/event_loader.js';
+import { fireEventDefinitionNow } from '../events/evaluate_events.js';
+import type { EventDefinition } from '../events/event_types.js';
+
+/** Territorial package id of the Brčko District (its outcome is brcko_status). */
+const BRCKO_DISTRICT_PACKAGE_ID = 'brcko_district';
+
+/** Set when Dayton is signed or imposed; dayton_signed_1995's trigger reads it. */
+export const DAYTON_SETTLEMENT_SIGNED_FLAG = 'dayton_settlement_signed';
+const DAYTON_SIGNED_EVENT_ID = 'dayton_signed_1995';
+let daytonSignedDef: EventDefinition | null | undefined;
+
+/**
+ * Fire the catalog's "Dayton signed" record (essay, codex, ticker) at the signature.
+ * Callers that hold the catalog pass it: the bundled desktop sim cannot resolve the
+ * source-relative events directory (`event_loader.ts` EVENTS_DIR sits outside the
+ * packaged data root), so it passes `loadDesktopEventDefinitions(baseDir)`, and the turn
+ * pipeline passes `input.eventDefinitions`. Without a catalog, the source-tree loader
+ * is the fallback (headless runner, tests).
+ */
+function fireDaytonSignedRecord(state: GameState, eventDefinitions?: readonly EventDefinition[]): void {
+    if (eventDefinitions) {
+        const def = eventDefinitions.find((d) => d.id === DAYTON_SIGNED_EVENT_ID);
+        if (def) fireEventDefinitionNow(state, def, state.meta.turn);
+        return;
+    }
+    if (daytonSignedDef === undefined) {
+        try {
+            daytonSignedDef = loadEventDefinitions(0).find((d) => d.id === DAYTON_SIGNED_EVENT_ID) ?? null;
+        } catch {
+            daytonSignedDef = null; // no event catalog on this path (e.g. a bare unit-test state)
+        }
+    }
+    if (daytonSignedDef) fireEventDefinitionNow(state, daytonSignedDef, state.meta.turn);
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -75,6 +115,9 @@ export function effectiveDaytonTriggerWeek(state: GameState): number {
 
 /** Patron override level at which Dayton is forced even before the trigger week. */
 const FORCED_DAYTON_OVERRIDE_THRESHOLD = 95;
+
+/** Patron override at which a patron can force its client to accept a Dayton term. */
+const PATRON_OVERRIDE_THRESHOLD = 75;
 
 /** Historical territory split baseline: Federation 51%, RS 49%. */
 const HISTORICAL_FEDERATION_PCT = 51;
@@ -232,6 +275,182 @@ export function resolvePendingDaytonCloseOut(state: GameState): DaytonResult | n
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Decline and imposition (owner, 2026-11-07)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Weeks of war the player gets after declining Dayton before the settlement is
+ * imposed. Owner direction first set 4 ("he should get 4 more weeks and then an
+ * event"); raised to 8 on 2026-11-07 so the reopened war leaves room for the
+ * continuation operations to plan, attack and draw counterattacks.
+ */
+export const DAYTON_DECLINE_GRACE_WEEKS = 8;
+
+/** Flag the imposition step raises the turn before imposition; the coercion events trigger on it. */
+export const DAYTON_IMPOSITION_DUE_FLAG = 'dayton_imposition_due';
+
+/** Who forces the settlement on a declining faction. Historically all three signed. */
+export const DAYTON_COERCING_POWER: Record<string, 'united_states' | 'belgrade' | 'zagreb'> = {
+    // Counterfactual: Washington's real coercion of Sarajevo was diplomatic.
+    RBiH: 'united_states',
+    // Milošević held the Bosnian Serb mandate at Dayton (Patriarch letter, Aug 1995).
+    RS: 'belgrade',
+    // Tuđman negotiated for and bound the Bosnian Croats at Dayton.
+    HRHB: 'zagreb',
+};
+
+/**
+ * The player faction declines Dayton. The menu is withdrawn; the war continues for
+ * DAYTON_DECLINE_GRACE_WEEKS more resolutions, then the faction's coercion event fires
+ * and the table reopens as a forced menu that cannot be declined
+ * (enforceDaytonImposition). Deterministic; no RNG.
+ */
+export function declineDaytonNegotiation(state: GameState): {
+    ok: boolean;
+    error?: string;
+    imposition_turn?: number;
+} {
+    const neg = state.military.negotiation;
+    if (state.meta.game_over) return { ok: false, error: 'game_over' };
+    if (!neg?.pending_dayton) return { ok: false, error: 'no_pending_dayton' };
+    if (neg.dayton_result) return { ok: false, error: 'already_resolved' };
+    if (neg.pending_dayton.forced || neg.dayton_decline) return { ok: false, error: 'forced_settlement' };
+    const faction = state.meta.player_faction;
+    if (!faction) return { ok: false, error: 'no_player_faction' };
+    const impositionTurn = recordDaytonDecline(state, faction);
+    return { ok: true, imposition_turn: impositionTurn };
+}
+
+/** Flag recording who declined Dayton; gates the remaining acceptance events. */
+export const DAYTON_DECLINED_BY_FLAG = 'dayton_declined_by';
+
+/** Event flag a faction's own Dayton acceptance event writes ('accept' | 'hardline'). */
+const DAYTON_ACCEPTANCE_FLAG: Record<string, string> = {
+    RBiH: 'rbih_dayton_acceptance',
+    RS: 'rs_dayton_acceptance',
+    HRHB: 'hrhb_dayton_acceptance',
+};
+
+/**
+ * Record a decline: withdraw any pending menu, schedule the imposition DAYTON_DECLINE_GRACE_WEEKS out,
+ * and reopen the war (owner, 2026-11-07: "declining Dayton would reopen the war and the
+ * ops would continue"). Returns the imposition turn.
+ */
+function recordDaytonDecline(state: GameState, faction: string): number {
+    const neg = state.military.negotiation!;
+    const declinedTurn = state.meta.turn;
+    const impositionTurn = declinedTurn + DAYTON_DECLINE_GRACE_WEEKS;
+    neg.dayton_decline = { faction, declined_turn: declinedTurn, imposition_turn: impositionTurn };
+    delete neg.pending_dayton;
+    if (!state.military.event_flags) state.military.event_flags = {};
+    state.military.event_flags[DAYTON_DECLINED_BY_FLAG] = faction;
+    reopenWarAfterDaytonDecline(state);
+    return impositionTurn;
+}
+
+/**
+ * Lift the autumn-1995 brakes that froze the front: the launch suppression and the
+ * aggression cut written by us_halts_federation_advance_1995 (the Holbrooke halt).
+ * Operations already executing continue regardless; with the suppression gone, planned
+ * operations can launch again. Deterministic; touches only records tied to that event.
+ */
+export function reopenWarAfterDaytonDecline(state: GameState): void {
+    const HALT_EVENT = 'us_halts_federation_advance_1995';
+    const military = state.military;
+    if (military.offensive_ops_suppressions) {
+        military.offensive_ops_suppressions = military.offensive_ops_suppressions
+            .filter((s) => s.reason !== HALT_EVENT);
+    }
+    const haltTurn = military.event_last_fired_turn?.[HALT_EVENT];
+    if (typeof haltTurn === 'number' && military.event_aggression_modifiers) {
+        // The halt pushes RBiH and HRHB -0.2 for 12 turns (war_1995.json); those records
+        // carry no source field, so they are matched by faction, delta and expiry.
+        const haltExpiry = haltTurn + 12;
+        military.event_aggression_modifiers = military.event_aggression_modifiers.filter((m) =>
+            !((m.faction === 'RBiH' || m.faction === 'HRHB') && m.delta < 0 && m.expires_turn === haltExpiry));
+    }
+    if (!military.event_flags) military.event_flags = {};
+    military.event_flags.advance_halted = false;
+}
+
+/**
+ * Cells that changed hands after the player declined Dayton (control-event log). Empty when
+ * Dayton was not declined. Used so no patron is forced to hand over post-decline ground.
+ */
+export function postDeclineChangedCells(state: GameState): Set<string> {
+    const declinedTurn = state.military.negotiation?.dayton_decline?.declined_turn;
+    const out = new Set<string>();
+    if (typeof declinedTurn !== 'number') return out;
+    for (const ev of state.political?.control_events ?? []) {
+        if (typeof ev.turn === 'number' && ev.turn > declinedTurn && typeof ev.settlement_id === 'string') {
+            out.add(ev.settlement_id);
+        }
+    }
+    return out;
+}
+
+/**
+ * A player's "hard line" answer to its own Dayton acceptance event (e.g. RBiH at
+ * dayton_talks_begin_1995) is a refusal of the settlement and takes the decline path.
+ * Bot answers stay narrative. Returns true when it recorded a decline this call.
+ */
+export function applyPlayerDaytonHardline(state: GameState): boolean {
+    const neg = state.military.negotiation;
+    const faction = state.meta.player_faction;
+    if (!neg || !faction || state.meta.game_over) return false;
+    if (neg.dayton_decline || neg.dayton_result) return false;
+    // An open menu means the talks answer predates this rule (older saves): do not convert it.
+    if (neg.pending_dayton) return false;
+    const flag = DAYTON_ACCEPTANCE_FLAG[faction];
+    if (!flag || state.military.event_flags?.[flag] !== 'hardline') return false;
+    recordDaytonDecline(state, faction);
+    return true;
+}
+
+/**
+ * War-phase step: enforce a declined Dayton.
+ *  - One turn before `imposition_turn` it raises DAYTON_IMPOSITION_DUE_FLAG (= the
+ *    declining faction) so that faction's coercion event fires early in the imposition turn.
+ *  - At the end of the imposition turn it reopens the table as a FORCED menu (owner,
+ *    2026-11-07: "Re-open the table, no decline"): ground taken since the decline is on it
+ *    as captured-ground packages, the player must submit, and nothing can be declined.
+ *  - A forced menu still unanswered at a later turn's step is signed on the historical
+ *    Dayton map (the bot / headless fallback). Unraised captures follow the map.
+ * Returns the imposed result when it resolved this call, else null.
+ */
+export function enforceDaytonImposition(
+    state: GameState,
+    eventDefinitions?: readonly EventDefinition[],
+): DaytonResult | null {
+    applyPlayerDaytonHardline(state);
+    const neg = state.military.negotiation;
+    const decline = neg?.dayton_decline;
+    if (!neg || !decline) return null;
+    if (state.meta.game_over || neg.dayton_result) return null;
+    const turn = state.meta.turn;
+    if (turn >= decline.imposition_turn - 1) {
+        if (!state.military.event_flags) state.military.event_flags = {};
+        state.military.event_flags[DAYTON_IMPOSITION_DUE_FLAG] = decline.faction;
+    }
+    if (turn < decline.imposition_turn) return null;
+    const forced = neg.pending_dayton?.forced;
+    if (forced && turn > forced.opened_turn) {
+        return resolveDaytonNegotiation(state, buildHistoricalDefaultDaytonProposal(), eventDefinitions);
+    }
+    if (!neg.pending_dayton) {
+        neg.pending_dayton = {
+            ...initiateDaytonNegotiation(state),
+            forced: {
+                on_faction: decline.faction,
+                by: DAYTON_COERCING_POWER[decline.faction] ?? 'united_states',
+                opened_turn: turn,
+            },
+        };
+    }
+    return null;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Resolution
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -256,7 +475,8 @@ export function resolvePendingDaytonCloseOut(state: GameState): DaytonResult | n
  */
 export function resolveDaytonNegotiation(
     state: GameState,
-    playerProposal: DaytonProposal
+    playerProposal: DaytonProposal,
+    eventDefinitions?: readonly EventDefinition[],
 ): DaytonResult {
     ensureNegotiationState(state);
 
@@ -283,12 +503,15 @@ export function resolveDaytonNegotiation(
     const playerCapital = neg.capital[playerFaction]
         ? getCompositeCapital(neg.capital[playerFaction], playerFaction, neg.strategic_dimensions)
         : 0;
-    const proposal = clampPlayerProposalToBudget(playerProposal, playerFaction, playerCapital).proposal;
+    // Captured-ground packages (front_packages.ts) as the front stands at signature. Only
+    // the ones the proposal raises enter the result; unraised ones follow the Dayton map.
+    const frontPackages = frontPackagesForProposal(state, playerProposal);
+    const proposal = clampPlayerProposalToBudget(playerProposal, playerFaction, playerCapital, frontPackages).proposal;
 
     // Collect bot responses
     const botResponses: Record<string, DaytonBotResponse> = {};
     for (const faction of botFactions) {
-        botResponses[faction] = evaluateBotResponse(state, faction, proposal);
+        botResponses[faction] = evaluateBotResponse(state, faction, proposal, frontPackages);
     }
 
     // Build the final agreement by resolving each package
@@ -297,7 +520,13 @@ export function resolveDaytonNegotiation(
     const patronOverrides: string[] = [];
 
     // Process territorial demands
-    const allTerritorialIds = getAllTerritorialPackages().map(p => p.id).sort(strictCompare);
+    // Only captured ground the player can act on (the menu's list) is negotiable.
+    const raisedFront = frontPackages
+        .filter(p => frontPackageVisibleToPlayer(p, playerFaction))
+        .map(p => p.id)
+        .filter(id => proposal.territorial_demands.includes(id) || proposal.territorial_concessions.includes(id));
+    const allTerritorialIds = [...getAllTerritorialPackages().map(p => p.id), ...raisedFront].sort(strictCompare);
+    const refusedByHolder = new Map<string, TerritorialPackage[]>();
 
     for (const pkgId of allTerritorialIds) {
         const isDemanded = proposal.territorial_demands.includes(pkgId);
@@ -309,21 +538,27 @@ export function resolveDaytonNegotiation(
             continue;
         }
 
-        if (isConceded) {
-            // Player conceded this — accepted by definition
-            acceptedTerritorial.push(pkgId);
-            continue;
-        }
-
-        // Player demanded this — check if bots accept
-        const pkg = getTerritorialPackageById(pkgId);
+        const pkg = getTerritorialPackageById(pkgId, frontPackages);
         if (!pkg) {
             rejectedTerritorial.push(pkgId);
             continue;
         }
-
         // The faction that holds this package must accept the demand
         const holderFaction = pkg.default_holder;
+
+        // Owner ruling 2026-11-07: Dayton drew the inter-entity line only. Ground a Federation
+        // partner holds is not negotiable between RBiH and HRHB (independent review F1).
+        if (holderFaction !== playerFaction && sameEntitySide(holderFaction, playerFaction)) {
+            rejectedTerritorial.push(pkgId);
+            continue;
+        }
+
+        if (isConceded) {
+            // Only the holder can concede; conceding someone else's ground moves nothing.
+            if (holderFaction === playerFaction) acceptedTerritorial.push(pkgId);
+            else rejectedTerritorial.push(pkgId);
+            continue;
+        }
 
         if (holderFaction === playerFaction) {
             // Player already holds it — auto-accepted
@@ -332,18 +567,36 @@ export function resolveDaytonNegotiation(
         }
 
         const holderResponse = botResponses[holderFaction];
+        // A counter-offer that still grants this demand carries it (owner, 2026-11-07:
+        // "the other side can accept or counter").
+        const keptInCounter = holderResponse?.decision === 'counter'
+            && (holderResponse.counter_proposal?.territorial_demands ?? []).includes(pkgId);
 
-        if (holderResponse && holderResponse.decision === 'accept') {
+        if ((holderResponse && holderResponse.decision === 'accept') || keptInCounter) {
             acceptedTerritorial.push(pkgId);
         } else {
-            // Check patron override for the holding faction
-            const holderPatron = neg.patron_relationships[holderFaction];
-            if (holderPatron && holderPatron.override_authority >= 75) {
-                // Patron forces acceptance of this specific demand
-                acceptedTerritorial.push(pkgId);
-                patronOverrides.push(`territorial:${pkgId}:${holderFaction}`);
+            const list = refusedByHolder.get(holderFaction) ?? [];
+            list.push(pkg);
+            refusedByHolder.set(holderFaction, list);
+        }
+    }
+
+    // Owner ruling 2026-11-07 (patron_leverage.ts): a patron forces refused demands only up
+    // to its area budget, smallest first, never on protected ground, and never on ground
+    // taken after the player declined Dayton.
+    const postDeclineCells = postDeclineChangedCells(state);
+    const isPostDeclineGround = (p: TerritorialPackage) =>
+        postDeclineCells.size > 0 && packageOsids(p).some((o) => postDeclineCells.has(o));
+    for (const holder of [...refusedByHolder.keys()].sort(strictCompare)) {
+        const refused = refusedByHolder.get(holder)!;
+        const override = neg.patron_relationships[holder]?.override_authority ?? 0;
+        const forced = new Set(selectPatronForced(refused, holder, override, isPostDeclineGround));
+        for (const p of [...refused].sort((a, b) => strictCompare(a.id, b.id))) {
+            if (forced.has(p.id)) {
+                acceptedTerritorial.push(p.id);
+                patronOverrides.push(`territorial:${p.id}:${holder}`);
             } else {
-                rejectedTerritorial.push(pkgId);
+                rejectedTerritorial.push(p.id);
             }
         }
     }
@@ -380,7 +633,7 @@ export function resolveDaytonNegotiation(
 
                     // Check patron override
                     const botPatron = neg.patron_relationships[botFaction];
-                    if (botPatron && botPatron.override_authority >= 75) {
+                    if (botPatron && botPatron.override_authority >= PATRON_OVERRIDE_THRESHOLD) {
                         objected = false;
                         patronOverrides.push(`institutional:${pkgId}:${botFaction}`);
                     }
@@ -444,8 +697,35 @@ export function resolveDaytonNegotiation(
         ...finalDimensions,
     };
 
+    // A declined Dayton signed at the reopened table (or by its fallback) was imposed.
+    const decline = neg.dayton_decline;
+    if (decline) {
+        result.imposed = {
+            on_faction: decline.faction,
+            by: DAYTON_COERCING_POWER[decline.faction] ?? 'united_states',
+            turn: state.meta.turn,
+        };
+    }
+
     // Store result on state
     neg.dayton_result = result;
+
+    // Owner, 2026-11-07: Dayton's consequence is its MAP. The settlement is the researched
+    // Dayton map, with the packages this negotiation actually moved overriding it, and RS
+    // recognised by name with the Posavina corridor. The displayed final split and the
+    // dysfunction index read the settled share, the same number the grade reads (review F2);
+    // computeTerritorySplit remains only as the fallback when no settlement is recorded.
+    const settlement = applyPeaceSettlement(state, 'dayton', daytonPackageOverrides(state, result, proposal, playerFaction, frontPackages));
+    // Only a map covering (almost) all of BiH — every real campaign — replaces the split;
+    // a partial fixture map keeps the package-shift estimate.
+    const coveredPct = CANONICAL_FACTIONS.reduce((s, f) => s + (settlement.territory_pct[f] ?? 0), 0);
+    if (coveredPct >= 90) {
+        const settledSplit: Record<string, number> = {};
+        for (const faction of CANONICAL_FACTIONS) {
+            settledSplit[faction] = Math.round(((settlement.territory_pct[faction] ?? 0) / coveredPct) * 100 * 10) / 10;
+        }
+        result.final_territory_split = settledSplit;
+    }
 
     // Comprehensive Dayton D3 (2026-06-07): compute the peace_dysfunction_index +
     // breakdown from the just-signed settlement and stamp it onto the result for
@@ -477,12 +757,79 @@ export function resolveDaytonNegotiation(
         delete neg.pending_dayton;
     }
 
+    // Owner, 2026-11-07: the "Dayton signed" record belongs to the signature, not to a
+    // turn's trigger scan (it used to fire at week 185, before the menu even opened).
+    if (!state.military.event_flags) state.military.event_flags = {};
+    state.military.event_flags[DAYTON_SETTLEMENT_SIGNED_FLAG] = true;
+    fireDaytonSignedRecord(state, eventDefinitions);
+
     // LANE-NIGHTSHIFT-N3 (D#2, 2026-05-03): freeze endgame snapshot so
     // verdict / cost ledger / historical comparison are preserved across
     // save/load round-trip even if post-Dayton bot drift mutates state.
     freezeEndgameSnapshot(state);
 
     return result;
+}
+
+/**
+ * OSIDs whose Dayton package outcome departs from the historical Dayton map.
+ *  - A package the player DEMANDED from another party and won goes to the player.
+ *    (Demanding a package one already holds costs nothing and moves nothing.)
+ *  - A package the player CONCEDED goes to the other side: to RS when the player is a
+ *    Federation party; when the player is RS, to the Federation party the base map
+ *    already names for that OSID, else RBiH.
+ *  - Brčko follows brcko_status: 'rs' or 'federation' assign the Brčko OSIDs; the
+ *    default 'arbitration' keeps the base map's arbitration district.
+ *  - A captured-ground package (front_packages.ts) won by demand stays with its claimant
+ *    when the claimant is on the player's side (the player itself, or its Federation
+ *    partner), else goes to the player; one the map assignee concedes goes to the claimant.
+ * Unraised packages follow the historical Dayton map.
+ */
+function daytonPackageOverrides(
+    state: GameState,
+    result: DaytonResult,
+    proposal: DaytonProposal,
+    playerFaction: string,
+    frontPackages: readonly TerritorialPackage[],
+): Record<string, FactionId> {
+    const overrides: Record<string, FactionId> = {};
+    const base = computeSettlementControllers(state, 'dayton').controllers;
+    const accepted = new Set(result.territorial_packages_accepted);
+    for (const pkgId of [...accepted].sort(strictCompare)) {
+        if (pkgId === BRCKO_DISTRICT_PACKAGE_ID) continue;
+        const pkg = getTerritorialPackageById(pkgId, frontPackages);
+        if (!pkg) continue;
+        if (pkg.osids && pkg.claimant) {
+            let gainer: string | null = null;
+            if (proposal.territorial_demands.includes(pkgId) && pkg.default_holder !== playerFaction) {
+                gainer = sameEntitySide(pkg.claimant, playerFaction) ? pkg.claimant : playerFaction;
+            } else if (proposal.territorial_concessions.includes(pkgId) && pkg.default_holder === playerFaction) {
+                gainer = pkg.claimant;
+            }
+            if (gainer) for (const o of pkg.osids) overrides[o] = gainer;
+            continue;
+        }
+        const osids = resolveOsidsForKeywords(pkg.osid_keywords ?? []);
+        if (proposal.territorial_demands.includes(pkgId) && pkg.default_holder !== playerFaction) {
+            for (const o of osids) overrides[o] = playerFaction;
+        } else if (proposal.territorial_concessions.includes(pkgId)) {
+            for (const o of osids) {
+                if (playerFaction === 'RS') {
+                    const b = base[o];
+                    overrides[o] = b === 'RBiH' || b === 'HRHB' ? b : 'RBiH';
+                } else {
+                    overrides[o] = 'RS';
+                }
+            }
+        }
+    }
+    if (result.brcko_status === 'rs' || result.brcko_status === 'federation') {
+        const brcko = getTerritorialPackageById(BRCKO_DISTRICT_PACKAGE_ID);
+        for (const o of resolveOsidsForKeywords(brcko?.osid_keywords ?? [])) {
+            overrides[o] = result.brcko_status === 'rs' ? 'RS' : 'RBiH';
+        }
+    }
+    return overrides;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -688,8 +1035,6 @@ interface ResolvedDimensions {
     return_justice?: Record<string, string>;
 }
 
-/** Patron-override threshold (mirrors the territorial/institutional ≥75 rule). */
-const PATRON_OVERRIDE_THRESHOLD = 75;
 
 /**
  * Resolve + persist the Phase-2 institutional dimensions (Dim 2 dial, Dim 3

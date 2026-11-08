@@ -473,6 +473,8 @@ Acceptance is computed, not guaranteed. The acceptance breakdown is deterministi
 
 Different end states reflect different balances of exhaustion, control, and external pressure. No total victory exists.
 
+A peace ends on the agreed map, not on the front line: when every party accepts a plan, or Dayton is signed or imposed, the settlement follows that plan's map and gives each party the status the plan granted it (for example, only Dayton recognises Republika Srpska by name with the Posavina corridor). The final Dayton map leaves no isolated pockets except the Federation's Posavina canton. Details: Systems Manual §20.2, `WAR_TERMINATION_SPEC.md`, `VICTORY_AND_PYRRHIC_SCORING.md`.
+
 ## 16. Player Agency and Limitations
 
 ### 16.1 Command friction

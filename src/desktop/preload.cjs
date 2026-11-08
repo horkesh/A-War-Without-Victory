@@ -119,6 +119,7 @@ contextBridge.exposeInMainWorld('awwv', {
     policy: options?.policy,
   }),
   resolveDayton: (proposal) => ipcRenderer.invoke('resolve-dayton', proposal),
+  declineDayton: () => ipcRenderer.invoke('decline-dayton'),
   // Read-only Dayton preview (Dayton Phase-4): bot responses + authoritative readouts, no mutation.
   previewDayton: (proposal) => ipcRenderer.invoke('preview-dayton', proposal),
   acknowledgeFrictionEvent: (payload) => ipcRenderer.invoke('acknowledge-friction-event', payload),

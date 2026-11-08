@@ -1,0 +1,8 @@
+{
+  "name": "emergent_RS",
+  "faction": "RS",
+  "decision_mode": "emergent",
+  "events": {
+    "default": "bot"
+  }
+}

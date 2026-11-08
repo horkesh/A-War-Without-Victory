@@ -188,7 +188,10 @@ describe('event condition evaluation', () => {
         expect(evaluateCondition(event!.trigger!.condition!, active)).toBe(false);
     });
 
-    it('narrates Dayton signing only after RBiH accepts the talks', () => {
+    it('narrates Dayton signing only when Dayton is actually signed (owner, 2026-11-07)', () => {
+        // Previously the row fired off the week-184 talks answer (rbih_dayton_acceptance =
+        // 'accept'), at week 185, before the Dayton menu even opened. It now reads the flag
+        // resolveDaytonNegotiation sets at the signature (or imposition).
         const catalog = JSON.parse(readFileSync(
             join(process.cwd(), 'data', 'scenarios', 'events', 'war_1995.json'),
             'utf8',
@@ -197,15 +200,15 @@ describe('event condition evaluation', () => {
 
         expect(event?.trigger?.condition).toEqual({
             type: 'flag_equals',
-            flag: 'rbih_dayton_acceptance',
-            value: 'accept',
+            flag: 'dayton_settlement_signed',
+            value: true,
         });
 
         const absent = makeState({ military: { event_flags: {} } });
-        const accepted = makeState({ military: { event_flags: { rbih_dayton_acceptance: 'accept' } } });
-        const hardline = makeState({ military: { event_flags: { rbih_dayton_acceptance: 'hardline' } } });
+        const talksAccepted = makeState({ military: { event_flags: { rbih_dayton_acceptance: 'accept' } } });
+        const signed = makeState({ military: { event_flags: { dayton_settlement_signed: true } } });
         expect(evaluateCondition(event!.trigger!.condition!, absent)).toBe(false);
-        expect(evaluateCondition(event!.trigger!.condition!, accepted)).toBe(true);
-        expect(evaluateCondition(event!.trigger!.condition!, hardline)).toBe(false);
+        expect(evaluateCondition(event!.trigger!.condition!, talksAccepted)).toBe(false);
+        expect(evaluateCondition(event!.trigger!.condition!, signed)).toBe(true);
     });
 });

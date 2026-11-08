@@ -1,0 +1,7 @@
+{
+  "name": "baseline_RBiH",
+  "faction": "RBiH",
+  "events": {
+    "default": "bot"
+  }
+}

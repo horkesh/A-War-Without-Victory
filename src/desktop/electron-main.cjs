@@ -3651,9 +3651,29 @@ app.whenReady().then(() => {
         territorial_demands: territorial_demands || [],
         territorial_concessions: territorial_concessions || [],
         institutional_choices: institutional_choices || {},
-      });
+      }, getBaseDir());
       writeCanonicalCurrentState(sim, state);
       return { ok: true, result };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  // Decline Dayton (owner, 2026-11-07): the player refuses the settlement. The menu is
+  // withdrawn, the war continues DAYTON_DECLINE_GRACE_WEEKS more weeks, then the
+  // faction's coercion event fires and the settlement is imposed (engine step
+  // enforce-dayton-imposition). Returns only the imposition turn, never state.
+  ipcMain.handle('decline-dayton', async () => {
+    if (!currentGameStateJson) {
+      return { ok: false, error: 'No game loaded' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = readCanonicalCurrentState(sim);
+      const result = sim.declineDaytonNegotiation(state);
+      if (!result.ok) return { ok: false, error: result.error };
+      writeCanonicalCurrentState(sim, state);
+      return { ok: true, imposition_turn: result.imposition_turn };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
     }
@@ -3689,7 +3709,7 @@ app.whenReady().then(() => {
       }
       // Resolve on the clone to surface the authoritative readouts (mutates the
       // clone only — the clone is then garbage-collected; nothing is written back).
-      const result = sim.resolveDaytonNegotiation(clone, proposal);
+      const result = sim.resolveDaytonNegotiation(clone, proposal, getBaseDir());
       return { ok: true, result, botResponses, playerFaction };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };

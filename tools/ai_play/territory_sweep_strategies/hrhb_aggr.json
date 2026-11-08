@@ -1,0 +1,11 @@
+{
+  "name": "hrhb_aggr",
+  "faction": "HRHB",
+  "events": {
+    "default": "bot",
+    "overrides": {
+      "hrhb_territorial_scope_1993": "expansive_conquest",
+      "hrhb_central_bosnia_defense_1993": "breakout_offensive"
+    }
+  }
+}

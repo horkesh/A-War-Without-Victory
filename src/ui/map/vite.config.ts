@@ -18,6 +18,10 @@ function tacticalMapManualChunks(id: string): string | undefined {
   if (normalized.endsWith('/data/source/oob_brigades.json')) return 'oob-brigades';
   if (normalized.endsWith('/data/source/oob_brigade_designations.json')) return 'oob-brigade-designations';
   if (normalized.endsWith('/data/derived/operational/osid_areas.json')) return 'operational-osid-areas';
+  // Settlement map read model (peace_settlement.ts, front_packages.ts): static leaves.
+  if (normalized.endsWith('/data/derived/operational/operational_contact_graph.json')) return 'operational-contact-graph';
+  if (normalized.endsWith('/data/derived/peace/plan_settlement_shares.json')) return 'peace-settlement-shares';
+  if (normalized.endsWith('/data/derived/mun1990_names.json')) return 'mun1990-names';
 
   if (normalized.includes('/node_modules/')) {
     if (normalized.includes('/react/') || normalized.includes('/react-dom/') || normalized.includes('/scheduler/')) {

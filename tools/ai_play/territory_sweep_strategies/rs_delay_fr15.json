@@ -1,0 +1,14 @@
+{
+  "name": "rs_delay_fr15",
+  "faction": "RS",
+  "events": {
+    "default": "bot"
+  },
+  "request_ops": {
+    "enabled": true,
+    "max_queries_per_turn": 12,
+    "prefer_consolidation": true,
+    "accept_delay": true,
+    "min_force_ratio": 1.5
+  }
+}

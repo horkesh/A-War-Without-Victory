@@ -1,0 +1,8 @@
+{
+  "name": "martial_HRHB",
+  "faction": "HRHB",
+  "events": {
+    "default": "martial"
+  },
+  "peace_plans": "reject"
+}

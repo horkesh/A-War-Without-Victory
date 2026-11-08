@@ -69,7 +69,7 @@ function makeDimStore(perFaction: Record<string, Record<string, number>> = {}): 
 
 describe('Grade anchors use internal_cohesion dimension', () => {
     describe('RS grade A requires internal_cohesion >= 30', () => {
-        it('grants A when territory >= 49% and cohesion >= 30', () => {
+        it('grants A when territory >= 46% and cohesion >= 30', () => {
             const dimStore = makeDimStore({ RS: { internal_cohesion: 50 } });
             const state = makeState({
                 military: {
@@ -82,7 +82,7 @@ describe('Grade anchors use internal_cohesion dimension', () => {
             expect(result.grade).toBe('A');
         });
 
-        it('denies A when territory >= 49% but cohesion < 30 (falls to B at >= 45%)', () => {
+        it('denies A when territory >= 46% but cohesion < 30 (falls to B at >= 42%)', () => {
             const dimStore = makeDimStore({ RS: { internal_cohesion: 10 } });
             const state = makeState({
                 military: {
@@ -92,8 +92,28 @@ describe('Grade anchors use internal_cohesion dimension', () => {
             });
             const bd = makeBreakdown({ territory_controlled_pct: 50 });
             const result = computeFactionGrade(bd, 'RS', state);
-            // Should fall through to B (territory >= 45) since A cohesion check fails
+            // Should fall through to B (territory >= 42) since A cohesion check fails
             expect(result.grade).toBe('B');
+        });
+
+        it('re-anchored 2026-11-07: A at the 46% ceasefire line, B 42-46, C 37-42', () => {
+            const dimStore = makeDimStore({ RS: { internal_cohesion: 50 } });
+            const state = makeState({
+                military: {
+                    formations: {},
+                    negotiation: { capital: {}, patron_relationships: {}, peace_plan_history: [], strategic_dimensions: dimStore },
+                } as any,
+            });
+            const gradeAt = (pct: number) => computeFactionGrade(makeBreakdown({ territory_controlled_pct: pct }), 'RS', state).grade;
+            expect(gradeAt(47.4)).toBe('A'); // painted October 1995 reference
+            expect(gradeAt(46)).toBe('A');
+            expect(gradeAt(45.9)).toBe('B');
+            expect(gradeAt(42)).toBe('B');
+            expect(gradeAt(41.9)).toBe('C');
+            expect(gradeAt(37)).toBe('C');
+            expect(gradeAt(36.9)).toBe('D');
+            expect(gradeAt(27)).toBe('D');
+            expect(gradeAt(26.9)).toBe('F');
         });
     });
 

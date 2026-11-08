@@ -281,12 +281,16 @@ function computeEnclaveData(state: GameState, faction: FactionId): {
 
     if (!KNOWN_ENCLAVES) return { held: [], lost: [] };
 
+    // RD run review (2026-11-07): `military.enclave_state` has no writer, so every enclave
+    // used to read as held even after Srebrenica and Žepa fell. An enclave is lost when its
+    // capital OSID is held by another faction (or when a legacy enclave_state says fallen).
     const enclaveState = state.military.enclave_state;
-    if (!enclaveState) return { held: KNOWN_ENCLAVES, lost: [] };
-
+    const controllers = state.political?.political_controllers ?? {};
     for (const eid of KNOWN_ENCLAVES) {
-        const e = enclaveState[eid];
-        if (e?.fallen) {
+        const capital = ENCLAVE_CAPITAL_OSID[eid];
+        const holder = capital ? controllers[capital] : undefined;
+        const fallenByControl = typeof holder === 'string' && holder !== faction;
+        if (enclaveState?.[eid]?.fallen || fallenByControl) {
             lost.push(eid);
         } else {
             held.push(eid);
@@ -295,6 +299,18 @@ function computeEnclaveData(state: GameState, faction: FactionId): {
 
     return { held, lost };
 }
+
+/** Capital OSID of each tracked enclave (enclave_resilience.ts ENCLAVE_DEFINITIONS; Bihać town for the pocket). */
+const ENCLAVE_CAPITAL_OSID: Readonly<Record<string, string>> = {
+    sarajevo: 'op:centar_sarajevo:centar_sarajevo',
+    srebrenica: 'op:srebrenica:srebrenica_2',
+    zepa: 'op:rogatica:zepa_2',
+    gorazde: 'op:gorazde:gorazde_2',
+    bihac: 'op:bihac:bihac_2',
+    kiseljak: 'op:kiseljak:kiseljak_2',
+    lasva_valley: 'op:vitez:vitez_2',
+    zepce: 'op:zepce:zepce_2',
+};
 
 function clamp(value: number, min: number, max: number): number {
     return Math.max(min, Math.min(max, value));

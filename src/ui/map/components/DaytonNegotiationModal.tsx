@@ -24,11 +24,16 @@
  * Migrated to the shared `<Modal>` wrapper in
  * LANE-V094-MODAL-DISMISSIBLE-EXTENSION. Must-submit modal:
  * `dismissible={false}` (no ESC, no click-outside) — the only valid close
- * paths are (a) `handleSubmit` (Submit Proposal) and (b) `handleDeclineTalks`
- * (Decline Talks — submit empty proposal). Both route through IPC
- * `resolveDayton` and a game-state push that clears `pendingDayton` so the
- * parent stops rendering this modal. No `onClose` prop exists; the bespoke
- * action buttons stay on the inner panel content, NOT on Modal props.
+ * paths are (a) `handleSubmit` (Submit Proposal, IPC `resolveDayton`) and (b)
+ * `handleDeclineTalks` (Decline Settlement, two-step confirm, IPC `declineDayton`).
+ * Both end in a game-state push that clears `pendingDayton` so the parent stops
+ * rendering this modal. No `onClose` prop exists; the bespoke action buttons stay
+ * on the inner panel content, NOT on Modal props.
+ *
+ * 2026-11-07 (owner): Decline is now a real refusal. Previously it signed an empty
+ * proposal (ending the war). Now the engine withdraws the menu, the war continues
+ * eight more weeks, and then the faction's coercion event fires and the table reopens with no decline
+ * (dayton_negotiation.ts declineDaytonNegotiation / enforceDaytonImposition).
  *
  * 2026-05-16 (decline-talks escape valve): added `handleDeclineTalks` to fix
  * a UX deadlock surfaced during external audit playtest. If the player's
@@ -67,6 +72,16 @@ import {
 
 type DaytonData = NonNullable<LoadedGameState['pendingDayton']>;
 
+/** The Federation parties; ground between them is not negotiable at Dayton. */
+const FEDERATION = new Set(['RBiH', 'HRHB']);
+
+/** Banner text for the imposed table, by the power that forced it. */
+const FORCED_MESSAGE: Record<string, Parameters<typeof t>[0]> = {
+    united_states: 'dayton.forced.united_states',
+    belgrade: 'dayton.forced.belgrade',
+    zagreb: 'dayton.forced.zagreb',
+};
+
 const HOLDER_COLORS: Record<string, string> = {
     RBiH: '#4a7a4a',
     RS: '#4a5a8a',
@@ -97,14 +112,16 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
     // (autonomy dial + competencies + constitutional + return/justice).
     const [instArch, setInstArch] = useState<InstitutionalSelections>(defaultInstitutionalSelections());
     const [submitting, setSubmitting] = useState(false);
+    const [confirmDecline, setConfirmDecline] = useState(false);
     const [probing, setProbing] = useState(false);
     const [botResponses, setBotResponses] = useState<Record<string, IpcDaytonBotResponse> | null>(null);
     /** The demand set that was probed — retained so the counter-offer diff is real. */
     const [probedDemands, setProbedDemands] = useState<Set<string>>(new Set());
 
     // ── Capital budget ────────────────────────────────────────────────────────
+    const frontPackages = dayton.frontPackages ?? [];
     let capitalSpent = 0;
-    for (const pkg of dayton.territorialPackages) {
+    for (const pkg of [...dayton.territorialPackages, ...frontPackages]) {
         if (demands.has(pkg.id)) capitalSpent += pkg.demandCost;
         if (concessions.has(pkg.id)) capitalSpent += pkg.concedeCost;
     }
@@ -239,16 +256,20 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
      */
     const handleDeclineTalks = async () => {
         if (!ipc.isAvailable || submitting || !playerFaction) return;
+        // 2026-11-07 (owner): Decline is a real refusal, not an empty signature. First
+        // click shows the consequence; the second confirms. The engine withdraws the
+        // menu, the war continues eight weeks, then the table reopens with no decline.
+        if (!confirmDecline) {
+            setConfirmDecline(true);
+            return;
+        }
         setSubmitting(true);
-        const result = await ipc.resolveDayton({
-            territorial_demands: [],
-            territorial_concessions: [],
-            institutional_choices: {},
-        });
+        const result = await ipc.declineDayton();
         if (!result.ok) {
             setLoadError(result.error ?? 'Failed to decline Dayton negotiation.');
             setSubmitting(false);
         }
+        // On success the state push clears pendingDayton and the parent unmounts this modal.
     };
 
     const patronOverride = playerFaction ? (dayton.patronOverride[playerFaction] ?? 0) : 0;
@@ -291,6 +312,18 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                         {t('dayton.location')}
                     </div>
                 </div>
+
+                {/* Imposed table (a declined Dayton, reopened): no decline option */}
+                {dayton.forced && (
+                    <div className="px-8 py-3 border-b border-[#8a2a2a]/40 bg-[#e8d0d0]/60" role="status">
+                        <div className="text-xs uppercase tracking-widest text-[#5a1a1a] font-bold">
+                            {t('dayton.forcedTitle')}
+                        </div>
+                        <div className="text-xs text-[#5a1a1a] mt-0.5">
+                            {t(FORCED_MESSAGE[dayton.forced.by] ?? 'dayton.forced.united_states')}
+                        </div>
+                    </div>
+                )}
 
                 {/* Capital budget */}
                 <div className="px-8 py-3 border-b border-[#c8b898]/40 flex items-center justify-between">
@@ -347,6 +380,9 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                             const isDemand = demands.has(pkg.id);
                             const isConcession = concessions.has(pkg.id);
                             const isPlayerHeld = playerFaction != null && pkg.defaultHolder === playerFaction;
+                            // Dayton drew the inter-entity line only: Federation-partner ground is not negotiable.
+                            const isPartnerHeld = playerFaction != null && !isPlayerHeld
+                                && FEDERATION.has(pkg.defaultHolder) && FEDERATION.has(playerFaction);
                             return (
                                 <div key={pkg.id} className={`p-3 rounded border transition-colors ${
                                     isDemand ? 'border-[#2a6a2a] bg-[#d0e8d0]/60' :
@@ -363,7 +399,10 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                                         </span>
                                     </div>
                                     <div className="flex gap-2 mt-2">
-                                        {!isPlayerHeld && (
+                                        {isPartnerHeld && (
+                                            <span className="text-xs text-[#6a5a40] italic">{t('dayton.federationPartner')}</span>
+                                        )}
+                                        {!isPlayerHeld && !isPartnerHeld && (
                                             <button type="button" onClick={() => toggleDemand(pkg.id)}
                                                 className={`text-xs px-2 py-1 rounded border font-bold uppercase ${
                                                     isDemand ? 'bg-[#2a6a2a] text-white border-[#2a6a2a]' : 'text-[#2a6a2a] border-[#2a6a2a]/40 hover:bg-[#d0e8d0]'
@@ -384,6 +423,66 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                             );
                         })}
                     </div>
+
+                    {/* Captured ground: where the front departs from the Dayton map */}
+                    {frontPackages.length > 0 && (
+                        <div className="mt-4">
+                            <div className="text-xs uppercase tracking-widest text-[#8a7a60] font-bold mb-1">
+                                {t('dayton.frontPackagesTitle')}
+                            </div>
+                            <div className="text-xs text-[#6a5a40] italic mb-2">{t('dayton.frontPackagesHint')}</div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {frontPackages.map(pkg => {
+                                    const isDemand = demands.has(pkg.id);
+                                    const isConcession = concessions.has(pkg.id);
+                                    const mapGivesPlayer = playerFaction != null && pkg.defaultHolder === playerFaction;
+                                    const holder = pkg.claimant ?? '';
+                                    return (
+                                        <div key={pkg.id} className={`p-3 rounded border transition-colors ${
+                                            isDemand ? 'border-[#2a6a2a] bg-[#d0e8d0]/60' :
+                                            isConcession ? 'border-[#8a2a2a] bg-[#e8d0d0]/60' :
+                                            'border-[#c8b898]/50 bg-[#e8dcc4]/30'
+                                        }`}>
+                                            <div className="flex items-center justify-between mb-1">
+                                                <span className="text-[12px] font-bold text-[#2a2016]">{pkg.name}</span>
+                                                <span className="text-xs px-1.5 py-0.5 rounded font-bold" style={{
+                                                    backgroundColor: (HOLDER_COLORS[holder] ?? '#888') + '20',
+                                                    color: HOLDER_COLORS[holder] ?? '#888',
+                                                }}>
+                                                    {holder}
+                                                </span>
+                                            </div>
+                                            <div className="text-xs text-[#6a5a40]" style={{ fontFamily: 'var(--font-data)' }}>
+                                                {t('dayton.frontHeld', {
+                                                    holder,
+                                                    assignee: pkg.defaultHolder,
+                                                    pct: (pkg.areaPct ?? 0).toFixed(2),
+                                                })}
+                                            </div>
+                                            <div className="flex gap-2 mt-2">
+                                                {!mapGivesPlayer && (
+                                                    <button type="button" onClick={() => toggleDemand(pkg.id)}
+                                                        className={`text-xs px-2 py-1 rounded border font-bold uppercase ${
+                                                            isDemand ? 'bg-[#2a6a2a] text-white border-[#2a6a2a]' : 'text-[#2a6a2a] border-[#2a6a2a]/40 hover:bg-[#d0e8d0]'
+                                                        }`} style={{ fontFamily: 'var(--font-command)' }}>
+                                                        {t('dayton.demand', { cost: pkg.demandCost })}
+                                                    </button>
+                                                )}
+                                                {mapGivesPlayer && (
+                                                    <button type="button" onClick={() => toggleConcession(pkg.id)}
+                                                        className={`text-xs px-2 py-1 rounded border font-bold uppercase ${
+                                                            isConcession ? 'bg-[#8a2a2a] text-white border-[#8a2a2a]' : 'text-[#8a2a2a] border-[#8a2a2a]/40 hover:bg-[#e8d0d0]'
+                                                        }`} style={{ fontFamily: 'var(--font-command)' }}>
+                                                        {t('dayton.concede', { cost: pkg.concedeCost })}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Brčko — the Annex-2 condominium-district outcome */}
                     {hasBrckoPackage && (
@@ -513,28 +612,41 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                         >
                             {submitting ? 'Negotiating...' : overBudget ? 'Over Budget' : 'Submit Proposal'}
                         </button>
-                        <button
-                            type="button"
-                            onClick={() => void handleDeclineTalks()}
-                            disabled={submitting}
-                            title={t('peace.declineTalksTitle')}
-                            className={`px-6 py-3 rounded border-2 font-bold text-[12px] uppercase tracking-wider transition-colors ${
-                                submitting
-                                    ? 'border-[#8a7a60]/30 bg-[#d8d0c4] text-[#6a5a40] cursor-wait'
-                                    : 'border-[#8a2a2a]/50 bg-[#e8d0d0] text-[#5a1a1a] hover:bg-[#d8b8b8]'
-                            }`}
-                            style={{ fontFamily: 'var(--font-command)' }}
-                        >
-                            Decline Talks
-                        </button>
+                        {!dayton.forced && (
+                            <button
+                                type="button"
+                                onClick={() => void handleDeclineTalks()}
+                                disabled={submitting}
+                                title={t('peace.declineTalksTitle')}
+                                className={`px-6 py-3 rounded border-2 font-bold text-[12px] uppercase tracking-wider transition-colors ${
+                                    submitting
+                                        ? 'border-[#8a7a60]/30 bg-[#d8d0c4] text-[#6a5a40] cursor-wait'
+                                        : 'border-[#8a2a2a]/50 bg-[#e8d0d0] text-[#5a1a1a] hover:bg-[#d8b8b8]'
+                                }`}
+                                style={{ fontFamily: 'var(--font-command)' }}
+                            >
+                                {confirmDecline ? t('dayton.declineConfirm') : t('dayton.declineSettlement')}
+                            </button>
+                        )}
                     </div>
+                    {confirmDecline && !dayton.forced && (
+                        <div className="text-xs text-[#5a1a1a] font-bold" role="alert">
+                            {t(playerFaction === 'RS'
+                                ? 'dayton.declineWarningRS'
+                                : playerFaction === 'HRHB'
+                                    ? 'dayton.declineWarningHRHB'
+                                    : 'dayton.declineWarningRBiH')}
+                        </div>
+                    )}
                     {overBudget && (
                         <div className="text-xs text-red-700 font-bold">
                             Reduce demands — capital spent ({capitalSpent}) exceeds available ({Math.round(capitalAvailable)})
                         </div>
                     )}
                     <div className="text-xs text-[#6a5a40] mt-1" style={{ fontFamily: 'var(--font-command)' }}>
-                        Submit a proposal to negotiate, or Decline Talks to refuse meaningful negotiation.
+                        {dayton.forced
+                            ? t('dayton.forcedFooter')
+                            : 'Submit a proposal to negotiate, or Decline Talks to refuse meaningful negotiation.'}
                     </div>
                 </div>
             </>
@@ -565,6 +677,7 @@ function ReadoutBar({ label, value, color, hint }: { label: string; value: numbe
 function packageNameLookup(dayton: DaytonData): Record<string, string> {
     const map: Record<string, string> = {};
     for (const p of dayton.territorialPackages) map[p.id] = p.name;
+    for (const p of dayton.frontPackages ?? []) map[p.id] = p.name;
     for (const p of dayton.institutionalPackages) map[p.id] = p.name;
     return map;
 }
