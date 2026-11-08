@@ -13899,3 +13899,10 @@ Found during the R7 offline audio run: `resolveMapServerBaseUrl` in `src/desktop
 - New `tests/desktop_packaged_map_server_url.test.ts` runs the real function with a fake dev server answering on every port; red before the fix. The 39 other test files that read `electron-main.cjs` pass (468 tests); `tsc` clean.
 - Packaged proof on `b5018e63e`: a fresh `desktop:package:dir` build under the offline audio harness made 0 dev-server probes (8 before), used its built server, passed all four audio checks, and touched 0 remote URLs.
 - No simulation, state, scenario or calibration change.
+
+## 2026-11-08 — Warroom panoramas preserve interactive alignment (UI, ART)
+
+All 15 faction/year Warroom scenes have decorative side atlases derived from 3840 × 1280 Images API outpaints and registered against their original plates. A few duplicated props in generated side art were replaced with clean extensions from the same faction's room and matched to the scene lighting. The original art, hotspot coordinates, map and date-board anchors, and opening camera path remain authoritative. The existing live year selector maps 1991 to 1992.
+
+- Verification: all 15 assets resolve and bundle; all 12 live-selectable rooms pass relative hotspot, map, and date-board registration at 1280 × 720 and 3426 × 1186. The 150% interface-scale and seam follow-up also passed. Focused tests 111/111, typecheck, production map build, chunk cycle check, and board-luminance check pass.
+- Presentation only. No simulation, state, save, scenario, or calibration effect. Local evidence is under F:/AWWV-worktrees/.warroom-ultrawide.

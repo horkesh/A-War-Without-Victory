@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   WARROOM_1992_SCENE_URLS,
   WARROOM_SCENE_URLS,
+  warroomWideSceneUrl,
 } from '../../src/ui/map/components/warroom/warroom-asset-urls';
 import { WarroomScenePlate } from '../../src/ui/map/components/warroom/WarroomScenePlate';
 import {
@@ -27,6 +28,14 @@ describe('Warroom scene continuity', () => {
     expect(WARROOM_1992_SCENE_URLS.RBiH).toContain('hq_rbih_1992');
     expect(WARROOM_1992_SCENE_URLS.RS).toContain('hq_rs_1992');
     expect(WARROOM_1992_SCENE_URLS.HRHB).toContain('hq_hrhb_1992');
+  });
+
+  it('resolves a panoramic atlas for every faction and year in the scene library', () => {
+    for (const faction of ['RBiH', 'RS', 'HRHB'] as const) {
+      for (const year of [1991, 1992, 1993, 1994, 1995] as const) {
+        expect(warroomWideSceneUrl(faction, year)).toContain(`hq_${faction.toLowerCase()}_${year}-wings.webp`);
+      }
+    }
   });
 
   it('derives each opening camera origin from its canonical map bounds', () => {
@@ -70,6 +79,24 @@ describe('Warroom scene continuity', () => {
     expect(image.getAttribute('draggable')).toBe('false');
     expect(image.style.pointerEvents).toBe('none');
     expect(screen.getByRole('button', { name: 'Hotspot' })).toBeTruthy();
+  });
+
+  it('keeps both panoramic extensions and the interactive children in the original coordinate frame', () => {
+    render(createElement(
+      WarroomScenePlate,
+      { src: '/room.webp', wideSrc: '/wings.webp' },
+      createElement('button', { type: 'button' }, 'Hotspot'),
+    ));
+    const plate = screen.getByTestId('warroom-scene-plate');
+    const wings = screen.getAllByTestId('warroom-scene-wing');
+    expect(wings).toHaveLength(2);
+    for (const wing of wings) {
+      expect(wing.parentElement).toBe(plate);
+      expect(wing.getAttribute('aria-hidden')).toBe('true');
+      expect(wing.style.backgroundImage).toContain('/wings.webp');
+    }
+    expect(screen.getByRole('presentation').getAttribute('src')).toBe('/room.webp');
+    expect(screen.getByRole('button', { name: 'Hotspot' }).parentElement).toBe(plate);
   });
 
   it('composes the playable overlays as children of the same scene plate', () => {
