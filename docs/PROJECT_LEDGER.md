@@ -13778,3 +13778,7 @@ Owner asked to close what can be closed in R7 without the listening pass.
 - R7 now waits only on human listening/sensitivity and the roll-up gate. Roadmap R7 row and `plan_index.yml` updated.
 - Found in passing, not fixed here: the packaged app probes `127.0.0.1:3002-3005` for a Vite dev server on every launch (`resolveMapServerBaseUrl`, no `app.isPackaged` check).
 - No code, simulation, scenario or calibration change.
+
+## 2026-11-08 — Require ultrawide composition for new Dayton visuals (PLAN, ART)
+
+The owner set ultrawide as the production format for all new Dayton visuals. The active Dayton implementation plan at F:/AWWV-worktrees/.dayton-design/DAYTON_CONFERENCE_IMPLEMENTATION_PLAN.md specifies a native 3840 × 1280 target for full-frame art, registered standard-screen framing, and visual acceptance at five viewport sizes. New prop and interface art must register or reflow in both formats. The v1 concepts remain blocking references. Documentation and production criteria only.
