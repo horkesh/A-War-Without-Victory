@@ -1,6 +1,6 @@
 import { COMPETENCY_PACKAGES } from '../../../sim/negotiation/competency_packages.js';
 import { CONSTITUTIONAL_CHOICES, RETURN_JUSTICE_CHOICES } from '../../../sim/negotiation/constitutional_packages.js';
-import { getAllInstitutionalPackages } from '../../../sim/negotiation/institutional_packages.js';
+import { effectiveOperativePowers } from '../../../sim/negotiation/power_overlap.js';
 import type { DaytonAgreementRecord, DaytonProposal } from '../../../state/negotiation_types.js';
 import type { LoadedGameState } from '../data/types';
 import { t } from '../i18n';
@@ -27,19 +27,24 @@ function brckoLabel(status: DaytonAgreementRecord['terms']['brcko_status']) {
     return status ? t(brckoKeys[status]) : t('dayton.conference.termUnavailable');
 }
 
+/**
+ * One row per power. The six legacy toggles are not listed: each is carried by its
+ * competency or constitutional row (power_overlap.ts), and a legacy-only term is
+ * shown through that row's effective value, so the binder never prints two answers
+ * for police, defense, education, the courts, taxation or the presidency.
+ */
 export function institutionalRows(terms: Omit<Proposal, 'territorial_demands' | 'territorial_concessions'>, defaults = false) {
     const dial = terms.entity_autonomy ?? (defaults ? 'dayton-historical' : undefined);
-    const legacy = terms.institutional_choices;
-    const competencies = terms.competency_allocation ?? {};
-    const policy = { ...terms.constitutional_choices, ...terms.return_justice };
+    const effective = effectiveOperativePowers({
+        institutional_choices: terms.institutional_choices,
+        competency_allocation: terms.competency_allocation as Record<string, 'state' | 'entity' | 'shared'> | undefined,
+        constitutional_choices: terms.constitutional_choices,
+    });
+    const competencies = effective.competency;
+    const policy = { ...effective.constitutional, ...terms.return_justice };
     const options = [...CONSTITUTIONAL_CHOICES, ...RETURN_JUSTICE_CHOICES];
-    const packages = getAllInstitutionalPackages();
     return [
         ...(dial ? [{ id: 'autonomy', label: t('dayton.dialTitle'), value: t(dialKeys[dial]) }] : []),
-        ...(defaults ? packages.map(pkg => pkg.id).sort() : Object.keys(legacy).sort()).map(id => ({
-            id, label: packages.find(pkg => pkg.id === id)?.name ?? id,
-            value: legacy[id] ? t(`verdict.dayton.institutionValue.${legacy[id]}`) : t('dayton.conference.unraised'),
-        })),
         ...(defaults ? COMPETENCY_PACKAGES.map(pkg => pkg.id).sort() : Object.keys(competencies).sort()).map(id => {
             const pkg = COMPETENCY_PACKAGES.find(item => item.id === id);
             const owner = competencies[id] ?? pkg?.default_owner;

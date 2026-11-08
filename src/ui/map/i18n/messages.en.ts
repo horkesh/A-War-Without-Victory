@@ -2540,11 +2540,8 @@ export const enMessages = {
     'dayton.headerAlt': 'Diplomatic negotiation header',
     'dayton.patronOverrideActive': 'Patron Override Active ({pct}%) — forced concessions likely at a final settlement',
     'dayton.territorialPackages': 'Territorial Packages',
-    'dayton.institutionalArchitecture': 'Institutional Architecture',
     'dayton.demand': 'Demand ({cost})',
     'dayton.concede': 'Concede ({cost})',
-    'dayton.central': 'Central ({cost})',
-    'dayton.decentral': 'Decentral ({cost})',
     'dayton.leaveOpen': 'Leave to arbitration',
     // Brčko condominium outcome (Annex 2)
     'dayton.brckoTitle': 'Brčko Corridor (Annex 2)',

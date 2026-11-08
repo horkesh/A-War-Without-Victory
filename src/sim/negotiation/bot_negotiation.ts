@@ -21,6 +21,7 @@ import type { ExtraPackages } from './territorial_packages.js';
 import { frontPackagesForProposal } from './front_packages.js';
 import { isProtectedFor } from './patron_leverage.js';
 import { getInstitutionalPackageById, getInstitutionalCost } from './institutional_packages.js';
+import { reconcileProposalPowers } from './power_overlap.js';
 import {
     finalCompetencyCost,
     finalConstitutionalCost,
@@ -105,6 +106,7 @@ export function computeProposalCostToFaction(
     faction: string,
     extra?: ExtraPackages,
 ): number {
+    proposal = reconcileProposalPowers(proposal);
     let totalCost = 0;
 
     // Territorial demands against this faction: if the proposer demands a package
@@ -205,6 +207,7 @@ export function computePlayerProposalSpend(
     playerFaction: string,
     extra?: ExtraPackages,
 ): number {
+    proposal = reconcileProposalPowers(proposal);
     let spend = 0;
 
     // Territorial: the player pays to DEMAND territory they do not hold and to
@@ -268,6 +271,7 @@ interface PlayerSpendItem {
  * UI's "reduce demands" guidance. Deterministic.
  */
 function playerSpendItems(proposal: DaytonProposal, playerFaction: string, extra?: ExtraPackages): PlayerSpendItem[] {
+    proposal = reconcileProposalPowers(proposal);
     const items: PlayerSpendItem[] = [];
     for (const pkgId of [...proposal.territorial_demands].sort(strictCompare)) {
         const pkg = getTerritorialPackageById(pkgId, extra);
@@ -423,6 +427,7 @@ export function evaluateBotResponse(
     proposal: DaytonProposal,
     extraPackages?: ExtraPackages,
 ): DaytonBotResponse {
+    proposal = reconcileProposalPowers(proposal);
     // Captured-ground packages are derived from state; build them when the caller did not.
     const extra = extraPackages ?? frontPackagesForProposal(state, proposal);
     const neg = state.military.negotiation;
@@ -530,6 +535,7 @@ function generateCounterProposal(
     willingnessFraction: number,
     extra?: ExtraPackages,
 ): { counter: DaytonProposal; citation: string } | undefined {
+    originalProposal = reconcileProposalPowers(originalProposal);
     const maxCost = availableCapital * willingnessFraction;
     const dial = proposalDial(originalProposal);
 

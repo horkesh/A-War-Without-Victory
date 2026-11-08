@@ -2446,11 +2446,8 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'dayton.headerAlt': 'Zaglavlje diplomatskih pregovora',
     'dayton.patronOverrideActive': 'Pritisak pokrovitelja aktivan ({pct}%)',
     'dayton.territorialPackages': 'Teritorijalni paketi',
-    'dayton.institutionalArchitecture': 'Institucionalna arhitektura',
     'dayton.demand': 'Zahtijevaj ({cost})',
     'dayton.concede': 'Ustupi ({cost})',
-    'dayton.central': 'Centralno ({cost})',
-    'dayton.decentral': 'Decentralno ({cost})',
     'dayton.leaveOpen': 'Prepusti arbitraži',
     // Brčko kondominijum (Aneks 2)
     'dayton.brckoTitle': 'Brčanski koridor (Aneks 2)',

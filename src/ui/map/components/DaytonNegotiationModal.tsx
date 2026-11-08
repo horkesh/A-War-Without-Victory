@@ -75,6 +75,7 @@ import {
     defaultInstitutionalSelections,
     type InstitutionalSelections,
 } from './DaytonInstitutionalDimensions';
+import { legacyProjection } from '../../../sim/negotiation/power_overlap.js';
 
 type DaytonData = NonNullable<LoadedGameState['pendingDayton']>;
 type CounterProposal = NonNullable<IpcDaytonBotResponse['counter_proposal']>;
@@ -193,7 +194,13 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
     const hasBrckoPackage = dayton.territorialPackages.some((p) => p.id === BRCKO_PACKAGE_ID);
 
     // ── Live readouts (client-side mirrors of the shipped read-models) ─────────
-    const autonomyIndex = useMemo(() => computeAutonomyPreview(institutions), [institutions]);
+    // The readouts take the six legacy toggles; project the operative slots onto them
+    // so the bar reads the same treaty the binder shows (power_overlap.ts).
+    const projectedInstitutions = useMemo(
+        () => legacyProjection({ institutional_choices: institutions, ...buildInstitutionalProposalFields(instArch) }),
+        [institutions, instArch],
+    );
+    const autonomyIndex = useMemo(() => computeAutonomyPreview(projectedInstitutions), [projectedInstitutions]);
     const brckoOutcome: BrckoOutcome = agreement?.terms.brcko_status
         ?? previewBrckoOutcome(playerFaction, demands, concessions);
     // Live split estimate the player is shaping: start from the historical 51:49 and
@@ -206,8 +213,8 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
         return { RBiH: Math.round(fed * 0.7), RS: rs, HRHB: Math.round(fed * 0.3) };
     }, [playerFaction]);
     const dysfunction = useMemo(
-        () => computeDysfunctionPreview(institutions, liveSplit, brckoOutcome),
-        [institutions, liveSplit, brckoOutcome],
+        () => computeDysfunctionPreview(projectedInstitutions, liveSplit, brckoOutcome),
+        [projectedInstitutions, liveSplit, brckoOutcome],
     );
 
     // ── Mutators (clear stale probe whenever the proposal changes) ─────────────
@@ -234,11 +241,6 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
             if (next.has(id)) { next.delete(id); } else { next.add(id); demands.delete(id); setDemands(new Set(demands)); }
             return next;
         });
-    };
-
-    const setInstitution = (id: string, choice: InstitutionChoice) => {
-        clearProbe();
-        setInstitutions(prev => ({ ...prev, [id]: choice }));
     };
 
     const setInstArchAndClear = (next: InstitutionalSelections) => {
@@ -612,36 +614,10 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
 
     const institutionalTerms = (
         <>
-            <div className="px-8 py-4 border-b border-[#c8b898]/40">
-                <div className="text-xs uppercase tracking-widest text-[#8a7a60] font-bold mb-3">
-                    {t('dayton.institutionalArchitecture')}
-                </div>
-                <div className="space-y-2">
-                    {institutionalPackages.map(pkg => {
-                        const choice = institutions[pkg.id];
-                        return (
-                            <div key={pkg.id} className="flex items-center justify-between p-2.5 rounded border border-[#c8b898]/50 bg-[#e8dcc4]/30">
-                                <span className="text-[12px] font-bold text-[#2a2016]">{pkg.name}</span>
-                                <div className="flex gap-1.5">
-                                    <button type="button" onClick={() => setInstitution(pkg.id, 'centralized')}
-                                        className={`text-xs px-2 py-1 rounded border font-bold ${
-                                            choice === 'centralized' ? 'bg-[#4a5a8a] text-white border-[#4a5a8a]' : 'text-[#4a5a8a] border-[#4a5a8a]/40 hover:bg-[#d0d8e8]'
-                                        }`} style={{ fontFamily: 'var(--font-command)' }}>
-                                        {t('dayton.central', { cost: pkg.centralizedCost })}
-                                    </button>
-                                    <button type="button" onClick={() => setInstitution(pkg.id, 'decentralized')}
-                                        className={`text-xs px-2 py-1 rounded border font-bold ${
-                                            choice === 'decentralized' ? 'bg-[#8a6a3a] text-white border-[#8a6a3a]' : 'text-[#8a6a3a] border-[#8a6a3a]/40 hover:bg-[#e8dcc4]'
-                                        }`} style={{ fontFamily: 'var(--font-command)' }}>
-                                        {t('dayton.decentral', { cost: pkg.decentralizedCost })}
-                                    </button>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-
+            {/* The six legacy centralized/decentralized toggles are no longer offered: each
+                power is set once, through the competency matrix and constitutional
+                choices below (power_overlap.ts). A bot counter may still carry legacy
+                toggles; adopting it keeps them in `institutions` for their cost. */}
             {/* Institutional-architecture expansion (Phase 3): the 4 structural
                 dimensions the player authors — autonomy dial, competency matrix,
                 constitutional architecture, return & justice. */}

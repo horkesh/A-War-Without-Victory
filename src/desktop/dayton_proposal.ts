@@ -7,6 +7,7 @@ import { getAllCompetencyPackages } from '../sim/negotiation/competency_packages
 import { getAllConstitutionalChoices, getAllReturnJusticeChoices } from '../sim/negotiation/constitutional_packages.js';
 import { frontPackagesForPlayer, isFrontPackageId } from '../sim/negotiation/front_packages.js';
 import { getAllInstitutionalPackages } from '../sim/negotiation/institutional_packages.js';
+import { reconcileProposalPowers } from '../sim/negotiation/power_overlap.js';
 import { getAllTerritorialPackages } from '../sim/negotiation/territorial_packages.js';
 
 const PROPOSAL_FIELDS = new Set<keyof DaytonProposal>([
@@ -112,8 +113,11 @@ export function parseDaytonProposal(payload: unknown, state: GameState): DaytonP
         ? negotiation.capital[playerFaction]
         : CANONICAL_FACTIONS.includes(playerFaction) ? createEmptyCapital() : undefined;
     const available = capital ? getCompositeCapital(capital, playerFaction, negotiation?.strategic_dimensions) : 0;
-    if (computePlayerProposalSpend(proposal, playerFaction, frontPackages) > available) {
+    // One operative assignment per power: an explicit competency or constitutional slot
+    // wins over a contradicting legacy toggle (power_overlap.ts) before the budget check.
+    const reconciled = reconcileProposalPowers(proposal);
+    if (computePlayerProposalSpend(reconciled, playerFaction, frontPackages) > available) {
         throw new Error('Dayton proposal exceeds the available negotiation budget');
     }
-    return proposal;
+    return reconciled;
 }

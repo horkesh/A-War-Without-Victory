@@ -26,6 +26,7 @@ import {
     finalReturnJusticeCost,
     getDialDeclarationCost,
 } from './dayton_dial_cost.js';
+import { reconcileProposalPowers, reconcileResolvedPowers } from './power_overlap.js';
 import {
     adjustedCost,
     dialPrefDelta,
@@ -561,8 +562,11 @@ export function resolveDaytonNegotiation(
         : 0;
     // Captured-ground packages (front_packages.ts) as the front stands at signature. Only
     // the ones the proposal raises enter the result; unraised ones follow the Dayton map.
-    const frontPackages = frontPackagesForProposal(state, playerProposal);
-    const proposal = clampPlayerProposalToBudget(playerProposal, playerFaction, playerCapital, frontPackages).proposal;
+    // One operative assignment per power (power_overlap.ts): an explicit competency or
+    // constitutional slot wins over a contradicting legacy toggle before anything is priced.
+    const reconciledProposal = reconcileProposalPowers(playerProposal);
+    const frontPackages = frontPackagesForProposal(state, reconciledProposal);
+    const proposal = clampPlayerProposalToBudget(reconciledProposal, playerFaction, playerCapital, frontPackages).proposal;
 
     // Collect bot responses
     const botResponses: Record<string, DaytonBotResponse> = {};
@@ -734,6 +738,10 @@ export function resolveDaytonNegotiation(
     //    an empty competency map leaves the autonomy reading on the legacy D2 index,
     //    empty constitutional choices read as the historical maximal-gridlock=100.
     const finalDimensions = resolveInstitutionalDimensions(neg, proposal, botFactions, patronOverrides);
+    // Reconcile the two vocabularies on the record (power_overlap.ts): a resolved
+    // operative slot writes its legacy toggle; a raised legacy toggle with no slot writes
+    // the slot. The autonomy index below then reads the same treaty the binder shows.
+    Object.assign(finalDimensions, reconcileResolvedPowers(finalInstitutional, finalDimensions, Object.keys(proposal.institutional_choices)));
 
     const result: DaytonResult = {
         territorial_packages_accepted: acceptedTerritorial.sort(strictCompare),

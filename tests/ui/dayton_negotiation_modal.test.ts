@@ -47,7 +47,10 @@ describe('DaytonNegotiationModal — Phase-4 player-agency surface', () => {
         expect(screen.getByText('Entity Autonomy')).toBeTruthy();
         expect(screen.getByText('Dysfunction (floor)')).toBeTruthy();
         expect(screen.getByText('Territorial Packages')).toBeTruthy();
-        expect(screen.getByText('Institutional Architecture')).toBeTruthy();
+        // One control per power: the six legacy centralized/decentralized toggles are
+        // gone; the competency matrix is the single institutional control.
+        expect(screen.queryByText('Institutional Architecture')).toBeNull();
+        expect(screen.getByText('State Competencies (Annex 4)')).toBeTruthy();
         const rbihHolder = screen.getByText('RBiH');
         expect(rbihHolder.className).not.toContain('uppercase');
     });
@@ -237,14 +240,17 @@ describe('DaytonNegotiationModal — live conference room', () => {
         fireEvent.click(within(screen.getByRole('navigation', { name: 'Conference objects' })).getByRole('button', { name: 'Current draft' }));
     }
 
-    it('prices a centralized military term at the live RBiH engine cost', () => {
+    it('prices a state-level defense term at the live RBiH engine cost', () => {
         openDraft({ ...PENDING, factionCapital: { ...PENDING.factionCapital, RBiH: 10 } });
         const close = () => fireEvent.click(screen.getByRole('button', { name: 'Return to conference room' }));
         const nav = within(screen.getByRole('navigation', { name: 'Conference objects' }));
         close();
         fireEvent.click(nav.getByRole('button', { name: 'Treaty binder' }));
-        const militaryRow = screen.getByText('Military Structure').parentElement!;
-        fireEvent.click(within(militaryRow).getByRole('button', { name: 'Central (0)' }));
+        // Defense is set once, on the competency row (the legacy "Military Structure"
+        // toggle no longer exists). Pulling it to the state costs RS, not RBiH.
+        expect(screen.queryByText('Military Structure')).toBeNull();
+        const defenseRow = screen.getByText('Defense').parentElement!;
+        fireEvent.click(within(defenseRow).getByRole('button', { name: 'State' }));
         close();
         fireEvent.click(nav.getByRole('button', { name: 'Current draft' }));
         expect(screen.getByRole<HTMLButtonElement>('button', { name: 'Review agreement' }).disabled).toBe(false);
