@@ -236,15 +236,20 @@ gates:
     opened: 2026-09-09
     blocks: [R8]
     evidence_required: >
-      A named human listening and sensitivity acceptance receipt covering all 20 supplied
-      cue assets (17 neutral CC0 UI cues, 3 first-party ambient beds), recorded by the
-      review roles named in the parent plan's checklist.
+      A named human listening and sensitivity acceptance receipt covering the 17 interface
+      cues the game ships, recorded by the review roles named in the parent plan's
+      checklist. The three ambient beds are out of scope: the owner retired them for 1.0 on
+      2026-11-08 and they stay switched off.
     evidence_path: null
     source: docs/plans/2026-07-31-content-history-localization-audio-plan.md
     notes: >
-      The 2026-09-09 closeout audit searched the retained evidence and did not locate such
-      a receipt. Automated lineage/wiring checks and packaged byte identity do not stand in
-      for human acceptance.
+      Round 1 (owner, 2026-11-07, headphones) is recorded in
+      logs/r7-english-readability/closeout-human-audio-listen.md. It found the nine Kenney
+      library cues far louder and brighter than the eight made for AWWV and turn_complete
+      too faint; those ten are being remade (work order CL-20261108-043). Round 2 covers the
+      changed sounds. The sensitivity answer and the 13 unmarked cues await the owner's
+      clarification. Earlier note: the 2026-09-09 audit found no receipt, and automated
+      lineage/wiring checks do not stand in for human acceptance.
 
   - id: R7-AUDIO-OFFLINE-RUNTIME
     lane: R7

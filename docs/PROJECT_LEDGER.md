@@ -13883,3 +13883,19 @@ Owner: "Do it" — re-pin, add the player-agency principle to the handoff, close
 Codex review on #557: `fireDaytonSignedRecord` loaded the event catalog from `event_loader.ts` EVENTS_DIR, which the bundled desktop sim resolves outside the packaged data root; the load error was swallowed, so signing Dayton in desktop play never recorded `dayton_signed_1995`. Reproduced against `dist/desktop/desktop_sim.cjs` (record missing without a base dir, present with one).
 - `resolveDaytonNegotiation` and `enforceDaytonImposition` take an optional event catalog; the `enforce-dayton-imposition` step passes `input.eventDefinitions`; `desktop_sim.resolveDaytonNegotiation(state, proposal, baseDir)` passes `loadDesktopEventDefinitions(baseDir)`; the `resolve-dayton` and `preview-dayton` IPC handlers pass `getBaseDir()`. Without a catalog the source-tree loader remains the fallback (headless runner, tests).
 - Tests in `tests/dayton_decline_imposition.test.ts`. `test:baselines` all scenarios match; typecheck clean.
+
+## 2026-11-08 - R7 listening round 1 recorded; ambient beds retired; library cues to be remade (DOCS, AUDIO DECISION)
+
+The owner listened to the 20 shipped sounds on headphones (2026-11-07) through the R7 review sheet.
+- Owner notes: `operation_complete`, `event_notification`, `game_over` "Too high"; `turn_complete` "I don't hear anything"; `ambient_field`/`ambient_archive` "just constant noise... should rely more on background music"; sensitivity marked Needs work with no note.
+- Measured: the nine Kenney cues peak near 0 dB and play 15-22 dB louder in game, centred at 2-4.8 kHz, against about 800 Hz for the eight made for AWWV; `turn_complete` is among the quietest. Record: `logs/r7-english-readability/closeout-human-audio-listen.md`.
+- Owner decisions: ambient beds retired for 1.0 (stay off, out of listening scope); nine library cues remade first-party and level/tone-matched; `turn_complete` louder. Work order to Codex `CL-20261108-043`. `R7-AUDIO-HUMAN-ACCEPTANCE` stays open with its scope narrowed to the 17 interface cues.
+- No code, simulation, scenario or calibration change.
+
+## 2026-11-07 - Packaged game no longer looks for a dev server (DESKTOP, SECURITY)
+
+Found during the R7 offline audio run: `resolveMapServerBaseUrl` in `src/desktop/electron-main.cjs` probed `127.0.0.1:3002-3005` for a Vite dev server on every launch, packaged builds included, so a page on one of those ports would have replaced the game window and received the preload bridge.
+- Packaged builds now skip the probe and use their own bundled map server; development (`electron .`) keeps preferring a running Vite server.
+- New `tests/desktop_packaged_map_server_url.test.ts` runs the real function with a fake dev server answering on every port; red before the fix. The 39 other test files that read `electron-main.cjs` pass (468 tests); `tsc` clean.
+- Packaged proof on `b5018e63e`: a fresh `desktop:package:dir` build under the offline audio harness made 0 dev-server probes (8 before), used its built server, passed all four audio checks, and touched 0 remote URLs.
+- No simulation, state, scenario or calibration change.
