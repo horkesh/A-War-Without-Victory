@@ -14126,3 +14126,10 @@ Rebuilt all 15 extensions using one fixed side-art master per faction. RBiH uses
 - Compared five-year sequences and inspected 30 joins. The normal and ultrawide browser matrix verified 12 live rooms, each with ten registered targets and overlays, and direct scene previews covered all three 1991 entries.
 - Focused Warroom tests 111/111, followed by 23/23 after the RBiH join change. Typecheck, production map build, all 15 packaged map atlases, chunk cycle check, and board-luminance check passed. No simulation, state, save, scenario, or calibration changes.
 - Evidence is under F:/AWWV-worktrees/.warroom-ultrawide/continuity-fix. No native Electron package or hosted CI run in this slice.
+
+## 2026-11-08 — Correct RS and RBiH panorama joins (UI, ART)
+
+Reviewed both joins in all 15 scenes after player feedback. The five RS left wings carry wood paneling across the old curtain fragment. A contour applied to the center art only on wide screens clears the fragment while preserving the adjacent coat-rack hotspot. The five RBiH right wings extend the original switch with a blank face and one bezel.
+
+- Chromium verified eight hittable objects, the live map, the date board, and edge coverage in all 12 playable rooms at 1280 × 720 and 3426 × 1186. Direct previews covered all three 1991 plates at both sizes.
+- All 30 focused tests, typecheck, the production map build, the chunk cycle check, and the inventory of 15 bundled atlases passed. Evidence is under F:/AWWV-worktrees/.warroom-ultrawide/continuity-detail.

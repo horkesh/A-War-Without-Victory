@@ -84,11 +84,12 @@ describe('Warroom scene continuity', () => {
   it('keeps both panoramic extensions and the interactive children in the original coordinate frame', () => {
     render(createElement(
       WarroomScenePlate,
-      { src: '/room.webp', wideSrc: '/wings.webp', softenRightJoin: true },
+      { src: '/room.webp', wideSrc: '/wings.webp', softenRightJoin: true, coverLeftCurtain: true },
       createElement('button', { type: 'button' }, 'Hotspot'),
     ));
     const plate = screen.getByTestId('warroom-scene-plate');
     expect(plate.getAttribute('data-soften-right-join')).toBe('true');
+    expect(plate.getAttribute('data-cover-left-curtain')).toBe('true');
     const wings = screen.getAllByTestId('warroom-scene-wing');
     expect(wings).toHaveLength(2);
     for (const wing of wings) {
