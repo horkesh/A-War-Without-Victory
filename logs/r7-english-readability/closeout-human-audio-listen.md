@@ -68,3 +68,31 @@ On the owner's go-ahead ("Yes, go ahead"):
 ### Files heard in round 1 (SHA-256)
 
 See `closeout-human-audio-listen-round1.sha256` beside this file.
+
+## Round 2 candidate — technical handoff, 2026-11-08
+
+The nine replacements use original fixed-seed synthesis. The ten changed files, including turn completion, are the round 2 listening set. Original music, the ambient playback policy and the cue triggers retain their established roles. Retained OGGs and source versions are indexed in `docs/audio/AUDIO_ASSET_PROVENANCE.json`.
+
+The original `turn_complete` OGG and the first louder export both failed to play in packaged Electron because the last packet had no timestamp. The adopted export uses 100 ms Ogg pages and keeps the same refreshed PCM master. The corrected file measures 6.2 dB louder than round 1 at the game's cue gains.
+
+The table uses FFmpeg 8.1.2 on the decoded OGGs. Game mean applies the per-cue gain with master and category gains at unity. Change compares with the round 1 game mean. The corrected Windows package served all 30 runtime OGGs byte-identically and played each of the ten changed files to completion in an isolated offline test. The original round 1 response and the pending human listening and sensitivity gate still apply.
+
+| Cue | Peak dBFS | Mean dBFS | Spectral centre Hz | Game mean dBFS | Change dB |
+|---|---:|---:|---:|---:|---:|
+| `ui_click` | -10.2 | -26.2 | 878 | -32.2 | 0.0 |
+| `ui_hover` | -13.9 | -27.0 | 920 | -37.5 | 0.0 |
+| `ui_open_panel` | -10.3 | -29.5 | 783 | -37.5 | 0.0 |
+| `ui_close_panel` | -11.1 | -29.9 | 894 | -37.9 | 0.0 |
+| `turn_advance` | -9.8 | -32.8 | 761 | -37.2 | 0.0 |
+| `turn_complete` | -8.8 | -31.6 | 770 | -32.0 | +6.2 |
+| `turn_review_open` | -11.6 | -31.4 | 890 | -40.5 | 0.0 |
+| `battle_notification` | -14.3 | -29.4 | 432 | -35.4 | -15.4 |
+| `battle_decisive` | -14.2 | -30.9 | 399 | -34.0 | -14.7 |
+| `battle_catastrophic` | -15.7 | -33.0 | 274 | -36.1 | -13.0 |
+| `operation_launched` | -16.3 | -30.9 | 401 | -36.9 | -13.6 |
+| `operation_complete` | -12.1 | -30.2 | 404 | -36.2 | -15.0 |
+| `event_notification` | -12.6 | -31.4 | 470 | -37.4 | -21.4 |
+| `event_critical` | -16.9 | -32.9 | 281 | -36.0 | -16.5 |
+| `peace_plan_offered` | -10.7 | -33.3 | 846 | -37.7 | 0.0 |
+| `game_over` | -18.7 | -34.5 | 310 | -36.4 | -20.9 |
+| `tutorial_objective_complete` | -15.0 | -31.7 | 426 | -37.7 | -13.0 |

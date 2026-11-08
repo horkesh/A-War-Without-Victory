@@ -1,8 +1,9 @@
 import unittest
 import hashlib
 import json
+import subprocess
 import numpy as np
-from generate_original_soundscape import SR, ROOT, music, effect, pcm24, EFFECTS
+from generate_original_soundscape import SR, ROOT, music, effect, pcm24, EFFECTS, R7_CONTACTS, r7_effect
 
 
 class OriginalSoundscapeTest(unittest.TestCase):
@@ -30,7 +31,10 @@ class OriginalSoundscapeTest(unittest.TestCase):
         self.assertGreater(np.sqrt(np.mean(mix**2)), .01)
         self.assertTrue(np.all(mix[0] == 0))
         self.assertTrue(np.all(mix[-1] == 0))
-        self.assertEqual(hashlib.sha256(pcm24(mix)).hexdigest(), self.provenance()['menu_theme']['original_sha256'])
+        menu = self.provenance()['menu_theme']
+        original = next(version for version in [menu, *menu.get('previous_versions', [])]
+                        if version['file'].endswith('/menu_original.ogg'))
+        self.assertEqual(hashlib.sha256(pcm24(mix)).hexdigest(), original['original_sha256'])
 
     @staticmethod
     def provenance():
@@ -38,7 +42,7 @@ class OriginalSoundscapeTest(unittest.TestCase):
 
     def test_published_files_and_preserved_sources_match_recorded_hashes(self):
         records = self.provenance()
-        for cue in [*EFFECTS, 'menu_theme']:
+        for cue in [*EFFECTS, *R7_CONTACTS, 'menu_theme']:
             record = records[cue]
             for version in [record, *record.get('previous_versions', [])]:
                 data = (ROOT / version['file']).read_bytes()
@@ -46,6 +50,31 @@ class OriginalSoundscapeTest(unittest.TestCase):
                 self.assertEqual(hashlib.sha256(data).hexdigest(), version['processed_sha256'])
                 self.assertTrue((ROOT / version['license_note']).exists())
             self.assertGreater(record['loudness_lufs'], -69)
+
+    def test_r7_interface_masters_match_provenance(self):
+        records = self.provenance()
+        self.assertEqual([version['license'] for version in records['turn_complete']['previous_versions']],
+                         ['FIRST_PARTY', 'CC0-1.0'])
+        hashes = set()
+        for cue in R7_CONTACTS:
+            samples = r7_effect(cue)
+            digest = hashlib.sha256(pcm24(samples)).hexdigest()
+            self.assertEqual(samples[0], 0, cue)
+            self.assertEqual(samples[-1], 0, cue)
+            self.assertEqual(digest, records[cue]['original_sha256'], cue)
+            self.assertEqual(records[cue]['license'], 'FIRST_PARTY', cue)
+            self.assertTrue(any(version['license'] == 'CC0-1.0' for version in records[cue]['previous_versions']), cue)
+            hashes.add(digest)
+        self.assertEqual(len(hashes), len(R7_CONTACTS))
+
+    def test_turn_complete_has_packet_timestamps_through_the_tail(self):
+        path = ROOT / self.provenance()['turn_complete']['file']
+        packets = json.loads(subprocess.check_output([
+            'ffprobe', '-v', 'error', '-select_streams', 'a:0',
+            '-show_entries', 'packet=pts', '-of', 'json', str(path),
+        ], timeout=15))['packets']
+        self.assertTrue(packets)
+        self.assertTrue(all(isinstance(packet.get('pts'), int) for packet in packets))
 
 
 if __name__ == '__main__':
