@@ -14133,3 +14133,10 @@ Reviewed both joins in all 15 scenes after player feedback. The five RS left win
 
 - Chromium verified eight hittable objects, the live map, the date board, and edge coverage in all 12 playable rooms at 1280 × 720 and 3426 × 1186. Direct previews covered all three 1991 plates at both sizes.
 - All 30 focused tests, typecheck, the production map build, the chunk cycle check, and the inventory of 15 bundled atlases passed. Evidence is under F:/AWWV-worktrees/.warroom-ultrawide/continuity-detail.
+
+## 2026-11-08 — Restore the perspective of Warroom skirting and floors (UI, ART)
+
+The ten RS and RBiH atlases now carry the original baseboard perspective through both lower joins and out of frame. Each faction uses fixed geometry across its five years. The RBiH right mask starts inside the decorative overlap so browser antialiasing cannot expose the background at the start of the fade.
+
+- The browser matrix passed for all 12 playable rooms at 1280 × 720 and 3426 × 1186. The three 1991 scene previews passed at both sizes. RS and RBiH 1994 also passed at 3440 × 1440. All 30 focused tests, the production map build, the inventory of 15 atlases and the chunk-cycle check passed.
+- Presentation only. No simulation or determinism effect. Before-and-after captures and validation logs are under F:/AWWV-worktrees/.warroom-ultrawide/baseboard-fix.

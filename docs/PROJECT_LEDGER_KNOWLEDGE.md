@@ -6317,3 +6317,7 @@ A shared OOB lookup that keeps id/name/corps but drops `default_equipment_class`
 ## 2026-11-03 - Recovery state must not shadow a live operation
 
 A recovery-phase operation is a lifecycle tail, not a live commitment. When a brigade appears in both an earlier recovery operation and a later planning/execution operation, reader priority must select the live match; among live matches preserve local-array and state-wide strictCompare corps order rather than ranking execution above planning. A corps-local recovery fast path must not hide a foreign-corps live mission, but a corps-local live match stays authoritative. Recovery-only behavior remains defend and the 0.6 operations multiplier. Keep malformed/empty guards, manual/admission/objective/COHA/multiplier/force data unchanged. See [dated repair](PROJECT_LEDGER.md#2026-11-03---operation-recovery-shadowing-reader-repair).
+
+## 2026-11-08 - Warroom panorama joins
+
+**Trace structural lines before blending an art extension.** At the room edge, extend the original perspective of baseboards and floor boundaries before matching color and texture. A reflected image border can send a floor line back into the frame. Start a soft CSS fade inside the already opaque overlap so the browser's subpixel edge cannot expose the backdrop. Inspect native-resolution crops at the floor and wall in addition to testing overlay registration. Applied in the 2026-11-08 project ledger entry for restoring Warroom skirting and floor perspective.
