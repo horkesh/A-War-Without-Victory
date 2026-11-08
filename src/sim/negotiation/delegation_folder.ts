@@ -17,6 +17,9 @@
  *
  * Visibility: built for the player's faction only. Other factions appear only in
  * public facts (who answered a plan how, the plan's offered shares, all-sides totals).
+ * The all-sides soldier dead are deliberately shown here, before the Verdict (owner
+ * ruling 2026-11-08: "Keep all-sides"); during the war the projection still scopes the
+ * casualty ledger to the player's own side.
  * Sources: political_controllers, turn_summaries (every turn is kept), negotiation
  * capital and patron relationships, peace_plan_history, the verdict's condemnation
  * collector. Deterministic: sorted iteration, integer counts, no clock or RNG.
