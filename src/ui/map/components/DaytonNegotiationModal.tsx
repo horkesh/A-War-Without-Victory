@@ -202,7 +202,8 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
         () => legacyProjection({ institutional_choices: institutions, ...buildInstitutionalProposalFields(instArch) }),
         [institutions, instArch],
     );
-    const autonomyIndex = useMemo(() => computeAutonomyPreview(projectedInstitutions), [projectedInstitutions]);
+    const draftCompetencies = buildInstitutionalProposalFields(instArch).competency_allocation;
+    const autonomyIndex = useMemo(() => computeAutonomyPreview(projectedInstitutions, draftCompetencies), [projectedInstitutions, draftCompetencies]);
     const brckoOutcome: BrckoOutcome = agreement?.terms.brcko_status
         ?? previewBrckoOutcome(playerFaction, demands, concessions);
     // Live split estimate the player is shaping: start from the historical 51:49 and
@@ -215,8 +216,8 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
         return { RBiH: Math.round(fed * 0.7), RS: rs, HRHB: Math.round(fed * 0.3) };
     }, [playerFaction]);
     const dysfunction = useMemo(
-        () => computeDysfunctionPreview(projectedInstitutions, liveSplit, brckoOutcome),
-        [projectedInstitutions, liveSplit, brckoOutcome],
+        () => computeDysfunctionPreview(projectedInstitutions, liveSplit, brckoOutcome, draftCompetencies),
+        [projectedInstitutions, liveSplit, brckoOutcome, draftCompetencies],
     );
 
     // ── Mutators (clear stale probe whenever the proposal changes) ─────────────
@@ -559,7 +560,10 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
                                         {demandLabel(pkg)}
                                     </button>
                                 )}
-                                {isPlayerHeld && (
+                                {isPlayerHeld && 'protectedCore' in pkg && pkg.protectedCore && (
+                                    <span className="text-xs text-[#6a5a40] italic">{t('dayton.protectedCore')}</span>
+                                )}
+                                {isPlayerHeld && !('protectedCore' in pkg && pkg.protectedCore) && (
                                     <button type="button" onClick={() => toggleConcession(pkg.id)} aria-label={actionName(t('dayton.concedePlain'), pkg)} aria-pressed={conference ? isConcession : undefined}
                                         className={`text-xs px-2 py-1 rounded border font-bold uppercase ${
                                             isConcession ? 'bg-[#8a2a2a] text-white border-[#8a2a2a]' : 'text-[#8a2a2a] border-[#8a2a2a]/40 hover:bg-[#e8d0d0]'

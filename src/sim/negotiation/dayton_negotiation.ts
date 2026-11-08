@@ -18,7 +18,7 @@ import type {
 } from '../../state/negotiation_types.js';
 import { createEmptyCapital, createDefaultPatronRelationship } from '../../state/negotiation_types.js';
 import { getAllTerritorialPackages, getTerritorialPackageById } from './territorial_packages.js';
-import { ENTITY_AUTONOMY_DEFAULT, getAllInstitutionalPackages, computeEntityAutonomyIndex } from './institutional_packages.js';
+import { ENTITY_AUTONOMY_DEFAULT, getAllInstitutionalPackages, computeTreatyAutonomyIndex } from './institutional_packages.js';
 import { evaluateBotResponse, getCompositeCapital, computeProposalCostToFaction, clampPlayerProposalToBudget } from './bot_negotiation.js';
 import {
     finalCompetencyCost,
@@ -28,7 +28,7 @@ import {
 } from './dayton_dial_cost.js';
 import { reconcileProposalPowers, reconcileResolvedPowers } from './power_overlap.js';
 import { buildDelegationFolder } from './delegation_folder.js';
-import { effectiveDaytonOverride } from './dayton_rounds.js';
+import { daytonRoundWillingness, effectiveDaytonOverride } from './dayton_rounds.js';
 import type { DelegationFolder } from '../../state/negotiation_types.js';
 import {
     adjustedCost,
@@ -695,7 +695,7 @@ export function resolveDaytonNegotiation(
                     ? getCompositeCapital(neg.capital[botFaction], botFaction, neg.strategic_dimensions)
                     : 0;
 
-                if (costToBotFaction > botCapital * 0.3) {
+                if (costToBotFaction > botCapital * (0.3 + daytonRoundWillingness(neg))) {
                     objected = true;
 
                     // Check patron override
@@ -758,11 +758,14 @@ export function resolveDaytonNegotiation(
         patron_overrides_applied: patronOverrides.sort(strictCompare),
         brcko_status: brckoStatus,
         brcko_arbitration: brckoStatus === 'arbitration',
-        // D2 (owner ruling Opt B): derived, read-only entity-autonomy index — the
-        // weighted mean of the FINAL (post-resolution) institutional choices, where
-        // decentralized = high autonomy. Feeds the peace_dysfunction index below and
-        // the verdict. Default (all-decentralized) = the historical Dayton settlement.
-        entity_autonomy_index: computeEntityAutonomyIndex(finalInstitutional),
+        // D2 (owner ruling Opt B): derived, read-only entity-autonomy index of the FINAL
+        // treaty. Since the DC walkthrough (2026-11-08) it is the single treaty autonomy
+        // measure (competencies counted once, historical Dayton = 100), the same number
+        // peace_dysfunction reads; the historical default still reads 100.
+        entity_autonomy_index: computeTreatyAutonomyIndex({
+            institutional_choices: finalInstitutional,
+            competency_allocation: finalDimensions.competency_allocation,
+        }),
         // Phase 2 verdict feed — the signed Dim-2/3/4/5 dimensions (omitted entirely
         // at the historical default to keep the result shape byte-identical).
         ...finalDimensions,
@@ -880,17 +883,23 @@ function daytonPackageOverrides(
             if (gainer) for (const o of pkg.osids) overrides[o] = gainer;
             continue;
         }
+        // A fixed package names a whole area (e.g. every Mostar cell), but a deal at the
+        // table only moves ground across the inter-entity line, and only the parties'
+        // own ground (walkthrough 2026-11-08: an HRHB concession of Mostar had handed
+        // east Mostar, which the map gives RBiH, to RS). A won demand takes only the cells
+        // the settlement map puts on the other entity's side; a concession gives up only
+        // the conceding party's own cells. Lines inside the Federation follow the map
+        // (owner ruling 2026-11-07: Dayton drew the inter-entity line only).
         const osids = resolveOsidsForKeywords(pkg.osid_keywords ?? []);
         if (proposal.territorial_demands.includes(pkgId) && pkg.default_holder !== playerFaction) {
-            for (const o of osids) overrides[o] = playerFaction;
+            for (const o of osids) {
+                const b = base[o];
+                if (b && !sameEntitySide(b, playerFaction)) overrides[o] = playerFaction;
+            }
         } else if (proposal.territorial_concessions.includes(pkgId)) {
             for (const o of osids) {
-                if (playerFaction === 'RS') {
-                    const b = base[o];
-                    overrides[o] = b === 'RBiH' || b === 'HRHB' ? b : 'RBiH';
-                } else {
-                    overrides[o] = 'RS';
-                }
+                if (base[o] !== playerFaction) continue;
+                overrides[o] = playerFaction === 'RS' ? 'RBiH' : 'RS';
             }
         }
     }
@@ -1153,7 +1162,7 @@ function resolveInstitutionalDimensions(
         for (const bot of [...botFactions].sort(strictCompare)) {
             const c = cost(bot);
             if (c <= 0) continue;
-            if (c > capitalOf(bot) * 0.3) {
+            if (c > capitalOf(bot) * (0.3 + daytonRoundWillingness(neg))) {
                 if (patronForces(bot)) {
                     patronOverrides.push(overrideKey(bot));
                 } else {

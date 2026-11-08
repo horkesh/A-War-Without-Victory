@@ -22,7 +22,7 @@ import { frontPackagesForProposal } from './front_packages.js';
 import { isProtectedFor } from './patron_leverage.js';
 import { getInstitutionalPackageById, getInstitutionalCost } from './institutional_packages.js';
 import { reconcileProposalPowers } from './power_overlap.js';
-import { effectiveDaytonOverride } from './dayton_rounds.js';
+import { daytonRoundWillingness, effectiveDaytonOverride } from './dayton_rounds.js';
 import {
     finalCompetencyCost,
     finalConstitutionalCost,
@@ -466,6 +466,9 @@ export function evaluateBotResponse(
     } else if (overrideAuthority >= PATRON_MODERATE_PRESSURE_THRESHOLD) {
         willingnessFraction = 0.70;
     }
+    // The mediator's deadline (DC A2): each tabled round widens what a delegation will
+    // give, two steps at most; 0 with no tabled round.
+    willingnessFraction = Math.min(0.95, willingnessFraction + daytonRoundWillingness(neg));
 
     const maxAcceptableCost = compositeCapital * willingnessFraction;
 

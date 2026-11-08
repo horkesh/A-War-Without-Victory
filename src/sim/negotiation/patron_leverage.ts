@@ -70,6 +70,16 @@ export function isProtectedFor(pkg: TerritorialPackage, holder: string): boolean
 }
 
 /**
+ * Can the player concede this package of its own? Not when it is the player's protected
+ * ground ("a client never concedes protected ground voluntarily"), with one exception:
+ * Brčko, whose concession has its own owner-ruled outcome (D1: the other side takes it
+ * cleanly). Walkthrough 2026-11-08: HRHB conceding Mostar handed the city to RS.
+ */
+export function playerMayConcede(pkg: TerritorialPackage, player: string): boolean {
+    return pkg.id === 'brcko_district' || !isProtectedFor(pkg, player);
+}
+
+/**
  * Which refused demands a holder's patron forces through, given its budget. Candidates are
  * the refused, forceable demands (not protected, not post-decline ground); the smallest are
  * forced first while the running area stays within budget. Returns the forced ids, sorted.

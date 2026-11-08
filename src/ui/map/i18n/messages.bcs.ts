@@ -2477,6 +2477,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'dayton.conference.folder': 'Mapa delegacije',
     'dayton.conference.roundStatus': 'Runda {round} od {max} · Wright-Patterson AFB, Ohio',
     'dayton.conference.roundsSpent': 'Posljednja runda završena · Wright-Patterson AFB, Ohio',
+    'dayton.protectedCore': 'Ključna teritorija: vaša delegacija je neće ustupiti',
     'dayton.demandPlain': 'Zahtijevaj',
     'dayton.concedePlain': 'Ustupi',
     'dayton.room.title': 'Prostor za pregovore',

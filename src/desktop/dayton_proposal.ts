@@ -8,13 +8,16 @@ import { getAllConstitutionalChoices, getAllReturnJusticeChoices } from '../sim/
 import { frontPackagesForPlayer, isFrontPackageId } from '../sim/negotiation/front_packages.js';
 import { getAllInstitutionalPackages } from '../sim/negotiation/institutional_packages.js';
 import { reconcileProposalPowers } from '../sim/negotiation/power_overlap.js';
-import { getAllTerritorialPackages } from '../sim/negotiation/territorial_packages.js';
+import { getAllTerritorialPackages, getTerritorialPackageById } from '../sim/negotiation/territorial_packages.js';
+import { playerMayConcede } from '../sim/negotiation/patron_leverage.js';
 
 const PROPOSAL_FIELDS = new Set<keyof DaytonProposal>([
     'territorial_demands', 'territorial_concessions', 'institutional_choices',
     'entity_autonomy', 'competency_allocation', 'constitutional_choices', 'return_justice',
 ]);
 const TERRITORY_IDS = new Set(getAllTerritorialPackages().map(pkg => pkg.id));
+const TERRITORY_HOLDER = new Map(getAllTerritorialPackages().map(pkg => [pkg.id, pkg.default_holder]));
+const FEDERATION = new Set(['RBiH', 'HRHB']);
 const INSTITUTIONS = new Map(getAllInstitutionalPackages().map(pkg => [pkg.id, ['centralized', 'decentralized'] as const]));
 const COMPETENCIES = new Map(getAllCompetencyPackages().map(pkg => [pkg.id, ['state', 'entity', 'shared'] as const]));
 const CONSTITUTION = new Map(getAllConstitutionalChoices().map(choice => [choice.id, choice.options.map(option => option.id)]));
@@ -73,6 +76,7 @@ export function parseDaytonProposal(payload: unknown, state: GameState): DaytonP
         const ids: string[] = [];
         for (const id of entries) {
             if (typeof id !== 'string' || seenTerritory.has(id)) invalid(field);
+            let holder: string | undefined;
             if (!TERRITORY_IDS.has(id)) {
                 if (!isFrontPackageId(id)) invalid(field);
                 if (!frontIds) {
@@ -80,6 +84,22 @@ export function parseDaytonProposal(payload: unknown, state: GameState): DaytonP
                     frontIds = new Set(frontPackages.map(pkg => pkg.id));
                 }
                 if (!frontIds.has(id)) invalid(field);
+                holder = frontPackages!.find(pkg => pkg.id === id)?.default_holder;
+            } else {
+                holder = TERRITORY_HOLDER.get(id);
+                // Dayton drew the inter-entity line only: a Federation party cannot raise
+                // its partner's ground (the room hides these; the bridge refuses them too).
+                if (field === 'territorial_demands' && holder !== playerFaction
+                    && FEDERATION.has(holder ?? '') && FEDERATION.has(playerFaction)) invalid(field);
+            }
+            // The room offers Demand only on ground the map gives someone else, and
+            // Concede only on ground it gives the player.
+            if (field === 'territorial_demands' && holder === playerFaction) invalid(field);
+            if (field === 'territorial_concessions' && holder !== playerFaction) invalid(field);
+            // A player never gives up its own protected ground (Brčko excepted, D1).
+            if (field === 'territorial_concessions' && TERRITORY_IDS.has(id)) {
+                const pkg = getTerritorialPackageById(id);
+                if (pkg && !playerMayConcede(pkg, playerFaction)) invalid(field);
             }
             seenTerritory.add(id);
             ids.push(id);

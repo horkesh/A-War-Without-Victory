@@ -1633,6 +1633,8 @@ export interface LoadedGameState {
             concedeCost: number;
             /** Canonical territory covered by this clause. */
             osids?: string[];
+            /** The player's own protected ground: offered no Concede (Brčko excepted). */
+            protectedCore?: boolean;
         }>;
         /**
          * Captured-ground packages: ground one party holds that the Dayton map gives to

@@ -33,6 +33,7 @@ import { parseEdges } from '../../map/settlements_parse.js';
 import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
 import { enforceSettlementContiguity } from './settlement_contiguity.js';
 import { ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from '../combat/enclave_resilience.js';
+import { PROTECTED_MUNICIPALITIES } from './patron_leverage.js';
 
 const OSID_AREAS: { total_area_km2: number; areas: Record<string, number> } = osidAreasJson;
 function getOsidAreas(): { total: number; areas: Record<string, number> } {
@@ -273,10 +274,15 @@ export function computeSettlementControllersWith(
             areas,
             isProtectedExclave: (side, cells) => side === 'FED' && cells.every((o) => POSAVINA_CANTON.has(munOf(o))),
             // Never absorb ground a package won at the table, an enclave held by its own
-            // side, or a cell the audit places on this side with verified evidence (the
-            // smallest-area corridor must not run through Istočno Sarajevo).
+            // side, or a cell the audit assigns to this party (the smallest-area corridor
+            // must not run through Istočno Sarajevo, and a concession by one party must
+            // not let the pass absorb its partner's ground, e.g. Vranjevići in Mostar).
             isProtectedCell: (o, f) => overrides[o] === f || isEnclaveCellOfSide(o, f)
-                || (cells[o]?.confidence === 'verified' && cells[o]?.faction === f),
+                || cells[o]?.faction === f
+                // A party's protected heartland (patron_leverage.ts) is never cut by a
+                // corridor or absorbed: walkthrough 2026-11-08, an RS gain in western Bosnia
+                // drew the Federation's reconnecting corridor through Banja Luka.
+                || PROTECTED_MUNICIPALITIES[f]?.has(munOf(o)) === true,
         }).controllers
         : controllers;
     const sorted: Record<string, FactionId> = {};

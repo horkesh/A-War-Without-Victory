@@ -85,7 +85,7 @@ import {
 } from '../../../sim/combat/supply_condition.js';
 import { PEACE_PLANS } from '../../../sim/negotiation/peace_plan_data.js';
 import { frontPackagesForPlayer } from '../../../sim/negotiation/front_packages.js';
-import { packageOsids } from '../../../sim/negotiation/patron_leverage.js';
+import { packageOsids, playerMayConcede } from '../../../sim/negotiation/patron_leverage.js';
 import { settlementControllersFor } from '../../../sim/negotiation/peace_settlement.js';
 import { getTerritorialPackageById } from '../../../sim/negotiation/territorial_packages.js';
 import war1992Events from '../../../../data/scenarios/events/war_1992.json';
@@ -4229,6 +4229,8 @@ export function derivePendingDayton(state: any): LoadedGameState['pendingDayton'
                 demandCost: Number(p.demand_cost ?? 0),
                 concedeCost: Number(p.concede_cost ?? 0),
                 osids: knownPackage ? packageOsids(knownPackage) : [],
+                // The player's own protected ground cannot be conceded (Brčko excepted).
+                ...(knownPackage && playerFaction && !playerMayConcede(knownPackage, playerFaction) ? { protectedCore: true } : {}),
             };
         }),
         frontPackages,

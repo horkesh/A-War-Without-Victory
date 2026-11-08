@@ -2571,6 +2571,7 @@ export const enMessages = {
     'dayton.conference.folder': 'Delegation folder',
     'dayton.conference.roundStatus': 'Round {round} of {max} · Wright-Patterson AFB, Ohio',
     'dayton.conference.roundsSpent': 'Final round over · Wright-Patterson AFB, Ohio',
+    'dayton.protectedCore': 'Core ground: your delegation will not give it up',
     'dayton.demandPlain': 'Demand',
     'dayton.concedePlain': 'Concede',
     'dayton.room.title': 'Room to bargain',

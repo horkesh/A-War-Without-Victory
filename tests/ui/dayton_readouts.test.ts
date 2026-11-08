@@ -15,7 +15,8 @@ import {
     BRCKO_PACKAGE_ID,
     type InstitutionChoice,
 } from '../../src/ui/map/data/daytonReadouts';
-import { computeEntityAutonomyIndex } from '../../src/sim/negotiation/institutional_packages';
+import { computeTreatyAutonomyIndex } from '../../src/sim/negotiation/institutional_packages';
+import { COMPETENCY_PACKAGES } from '../../src/sim/negotiation/competency_packages';
 import { PEACE_DYSFUNCTION_CAP_THRESHOLD } from '../../src/sim/negotiation/peace_dysfunction';
 
 const ALL_DECENTRAL: Record<string, InstitutionChoice> = {
@@ -31,19 +32,32 @@ describe('computeAutonomyPreview mirrors the engine', () => {
     it('all-decentralized → 100 (historical Dayton default)', () => {
         expect(computeAutonomyPreview(ALL_DECENTRAL)).toBe(100);
     });
-    it('all-centralized → 0 (unitary state)', () => {
-        expect(computeAutonomyPreview(ALL_CENTRAL)).toBe(0);
+    // One treaty measure since the DC walkthrough (2026-11-08): each power counted once
+    // through its competency row; the legacy toggles cover five of the sixteen rows,
+    // so "all six centralized" is far below history but not a unitary state.
+    it('all six legacy toggles centralized → well below history, above 0', () => {
+        const v = computeAutonomyPreview(ALL_CENTRAL);
+        expect(v).toBeGreaterThan(0);
+        expect(v).toBeLessThan(40);
     });
-    it('empty map → 100 (unset dims default decentralized)', () => {
+    it('every competency at the state → 0 (unitary state)', () => {
+        const allState = Object.fromEntries(COMPETENCY_PACKAGES.map(c => [c.id, 'state']));
+        expect(computeAutonomyPreview({}, allState)).toBe(0);
+    });
+    it('empty map → 100 (the historical Dayton division of powers)', () => {
         expect(computeAutonomyPreview({})).toBe(100);
     });
-    it('matches computeEntityAutonomyIndex for the same choices', () => {
+    it('naming a competency at its historical owner changes nothing', () => {
+        expect(computeAutonomyPreview(ALL_DECENTRAL, { comp_education: 'entity', comp_customs: 'state' })).toBe(100);
+    });
+    it('matches the engine treaty index for the same terms', () => {
         const mixed: Record<string, InstitutionChoice> = {
             military: 'centralized', economy: 'decentralized', police: 'centralized',
             judiciary: 'decentralized', presidency: 'centralized', education: 'decentralized',
         };
-        expect(computeAutonomyPreview(mixed)).toBe(computeEntityAutonomyIndex(mixed));
-        expect(computeAutonomyPreview(ALL_CENTRAL)).toBe(computeEntityAutonomyIndex(ALL_CENTRAL));
+        expect(computeAutonomyPreview(mixed)).toBe(computeTreatyAutonomyIndex({ institutional_choices: mixed }));
+        expect(computeAutonomyPreview(mixed, { comp_monetary: 'entity' }))
+            .toBe(computeTreatyAutonomyIndex({ institutional_choices: mixed, competency_allocation: { comp_monetary: 'entity' } }));
     });
 });
 

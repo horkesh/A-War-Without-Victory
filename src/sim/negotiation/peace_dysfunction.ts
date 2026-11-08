@@ -35,7 +35,7 @@ import type { GameState } from '../../state/game_state.js';
 import type { DaytonResult, PeaceDysfunctionBreakdown } from '../../state/negotiation_types.js';
 import type { CompetencyOwner } from './competency_packages.js';
 import { collectCondemnationFlags } from './rupture_consequences.js';
-import { computeEntityAutonomyIndex, computeExtendedEntityAutonomyIndex } from './institutional_packages.js';
+import { computeTreatyAutonomyIndex } from './institutional_packages.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 const CANONICAL_FACTIONS = ['RBiH', 'RS', 'HRHB'] as const;
@@ -124,17 +124,19 @@ function round1(v: number): number {
  * = high dysfunction, measured as the distance above the functional floor.
  */
 function autonomyComponent(result: DaytonResult): number {
-    // DIMENSION 3 (2026-06-07): when the settlement carries a competency allocation
-    // (a deviation from the historical Annex-4 default), fold the 16 competencies
-    // into the autonomy reading via the extended index. With NO competency
-    // allocation we keep reading the stored D2 entity_autonomy_index (=100 at the
-    // historical default) so the historical-default autonomy component is unchanged.
-    const comp = result.competency_allocation as Record<string, CompetencyOwner> | undefined;
-    const autonomy = comp && Object.keys(comp).length > 0
-        ? computeExtendedEntityAutonomyIndex(result.institutional_choices ?? {}, comp)
-        : (typeof result.entity_autonomy_index === 'number'
-            ? result.entity_autonomy_index
-            : computeEntityAutonomyIndex(result.institutional_choices ?? {}));
+    // One measure (DC walkthrough 2026-11-08): the treaty autonomy index, historical
+    // Dayton = 100. It replaces the switch between the six-toggle index and the
+    // extended index, which disagreed about the historical default (100 against 58.6)
+    // and moved the reading when a competency was merely named at its default. At the
+    // historical default it equals the old D2 index, so that reading is unchanged.
+    // A signed result stores the index it was resolved with (the resolver now writes
+    // this same measure); older saves keep the reading they were graded with.
+    const autonomy = typeof result.entity_autonomy_index === 'number'
+        ? result.entity_autonomy_index
+        : computeTreatyAutonomyIndex({
+            institutional_choices: result.institutional_choices ?? {},
+            competency_allocation: result.competency_allocation as Record<string, CompetencyOwner> | undefined,
+        });
     if (autonomy <= AUTONOMY_FUNCTIONAL_FLOOR) return 0;
     const span = 100 - AUTONOMY_FUNCTIONAL_FLOOR;
     return clamp0to100(((autonomy - AUTONOMY_FUNCTIONAL_FLOOR) / span) * 100);

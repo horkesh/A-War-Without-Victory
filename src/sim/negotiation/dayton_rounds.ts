@@ -35,6 +35,19 @@ export function daytonRoundPressure(neg: Pick<NegotiationState, 'pending_dayton'
     return ROUND_PRESSURE_STEP * Math.min(MAX_PRESSURE_STEPS, daytonRoundsTabled(neg));
 }
 
+/**
+ * The mediator's deadline (walkthrough 2026-11-08): patron authority alone rarely sits
+ * near a threshold, so +20 authority changed no answer on the retained saves. Each
+ * tabled round also widens what every delegation is willing to give by this fraction
+ * of its capital, two steps at most, in the bot's answer and in the signing checks.
+ */
+export const ROUND_WILLINGNESS_STEP = 0.05;
+
+/** Added willingness (fraction of capital) from the rounds tabled so far; 0 with none. */
+export function daytonRoundWillingness(neg: Pick<NegotiationState, 'pending_dayton'> | undefined): number {
+    return ROUND_WILLINGNESS_STEP * Math.min(MAX_PRESSURE_STEPS, daytonRoundsTabled(neg));
+}
+
 /** A patron's authority over `faction` at the table, including round pressure (0..100). */
 export function effectiveDaytonOverride(neg: NegotiationState | undefined, faction: string): number {
     const base = neg?.patron_relationships?.[faction]?.override_authority ?? 0;
