@@ -1,11 +1,9 @@
 import { useLayoutEffect, useRef, useState } from 'react';
-import type { CSSProperties, MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
 import { createRoot } from 'react-dom/client';
 import standardBlocking from './room-blocking.json';
-import wideBlocking from './room-blocking-ultrawide.json';
 import arrival from './dayton-arrival-ultrawide.webp';
-import standardRoom from './dayton-conference-room-4k.webp';
-import wideRoom from './dayton-conference-room-ultrawide.webp';
+import { DaytonRoomBackdrop, type DaytonRoomObject } from './DaytonRoomBackdrop';
 import './scene.css';
 
 type View = 'folder' | 'draft' | 'map' | 'binder' | 'review' | 'result' | 'verdict';
@@ -47,10 +45,7 @@ function Powers({ offer, onSelect, selected }: { offer: Offer; onSelect: () => v
   );
 }
 
-const wideRoomQuery = '(min-aspect-ratio: 11/5)';
-
 function App() {
-  const [wide, setWide] = useState(() => window.matchMedia(wideRoomQuery).matches);
   const [arrived, setArrived] = useState(false);
   const [view, setView] = useState<View | null>(null);
   const [offer, setOffer] = useState(counteroffer);
@@ -62,14 +57,6 @@ function App() {
   const heading = useRef<HTMLHeadingElement>(null);
   const roomHeading = useRef<HTMLHeadingElement>(null);
   const bounds = new URLSearchParams(window.location.search).has('showBounds');
-
-  useLayoutEffect(() => {
-    const media = window.matchMedia(wideRoomQuery);
-    const update = () => setWide(media.matches);
-    update();
-    media.addEventListener('change', update);
-    return () => media.removeEventListener('change', update);
-  }, []);
 
   useLayoutEffect(() => {
     const panel = dialog.current;
@@ -127,9 +114,8 @@ function App() {
     review: 'Review fixture agreement', result: outcome?.status === 'signed' ? 'Agreement signed' : 'Declined offer', verdict: 'Signed agreement',
   };
   const current = outcome ? outcome.status === 'signed' ? 'verdict' : 'result' : 'draft';
-  const blocking = wide ? wideBlocking : standardBlocking;
-  const room = wide ? wideRoom : standardRoom;
-  const labels = blocking.hotspots;
+  const labels = standardBlocking.hotspots;
+  const roomLabels = Object.fromEntries(labels.map(({ id, label }) => [id, label])) as Record<DaytonRoomObject, string>;
   const destination = (id: string) => id === 'draft' ? current : id as 'folder' | 'map' | 'binder';
 
   return (
@@ -139,39 +125,7 @@ function App() {
         <h1 ref={roomHeading} tabIndex={-1}>Hope Hotel conference room</h1>
         <p aria-live="polite">{outcome ? 'Round closed' : offer.revision === 2 ? 'Round 1 · New counteroffer · Your delegation to respond' : 'Round 1 · Revised draft · Your delegation to respond'}</p>
       </header>
-      <div className="room-window" data-wide={wide}>
-        <div className="room-frame" data-bounds={bounds}>
-          <img src={room} alt="Conference table, delegation folder, draft papers, wall board and treaty binder" />
-          {labels.map(({ id, label, center, outline }) => {
-            const xs = outline.map(([x]) => x);
-            const ys = outline.map(([, y]) => y);
-            const left = Math.min(...xs);
-            const top = Math.min(...ys);
-            const width = Math.max(...xs) - left;
-            const height = Math.max(...ys) - top;
-            const polygon = outline.map(([x, y]) => [((x - left) / width) * 100, ((y - top) / height) * 100]);
-            const style: CSSProperties = {
-              left: left / blocking.width * 100 + '%',
-              top: top / blocking.height * 100 + '%',
-              width: width / blocking.width * 100 + '%',
-              height: height / blocking.height * 100 + '%',
-              clipPath: 'polygon(' + polygon.map(([x, y]) => x + '% ' + y + '%').join(', ') + ')',
-            };
-            const labelPosition = {
-              left: (center[0] - left) / width * 100 + '%',
-              top: (center[1] - top) / height * 100 + '%',
-            };
-            return (
-              <button key={id} type="button" className="hotspot" style={style} onClick={event => open(destination(id), event)}>
-                <svg viewBox={`${left} ${top} ${width} ${height}`} aria-hidden="true">
-                  <polygon points={outline.map(point => point.join(',')).join(' ')} vectorEffect="non-scaling-stroke" />
-                </svg>
-                <span style={labelPosition}>{label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <DaytonRoomBackdrop labels={roomLabels} showBounds={bounds} onOpen={(id, event) => open(destination(id), event)} />
       <nav aria-label="Conference objects">
         {labels.map(({ id, label }) => (
           <button key={id} type="button" onClick={event => open(destination(id), event)}>

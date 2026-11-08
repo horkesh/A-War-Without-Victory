@@ -2106,7 +2106,7 @@ function App() {
           save sitting at the Dayton step must not cover the boot Main Menu with
           this non-dismissible modal. Shows once the player is past the menu. */}
       {appScreen !== 'mainMenu' && loadedGameState?.pendingDayton && !loadedGameState?.gameOver && (
-        <DaytonNegotiationModal key={campaignViewportEpoch} dayton={loadedGameState.pendingDayton} />
+        <DaytonNegotiationModal key={campaignViewportEpoch} dayton={loadedGameState.pendingDayton} conference />
       )}
       <PeaceWarTransitionOverlay />
       <VerdictScreen onLoadSaveState={handleMainMenuLoadGame} onLoadSaveError={setLoadError} />

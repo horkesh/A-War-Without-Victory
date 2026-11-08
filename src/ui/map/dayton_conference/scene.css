@@ -56,58 +56,6 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 }
 .conference > header h1 { margin-bottom: .2rem; font-size: clamp(1.25rem, 2.2vw, 2rem); }
 .conference > header p { margin-bottom: .15rem; }
-.room-window {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  container-type: size;
-  background: #1c1b17;
-}
-.room-frame {
-  position: absolute;
-  width: min(max(100cqw, 177.778cqh), 140cqw);
-  top: 50%;
-  left: 50%;
-  /* Keep the table in view on displays wider than the standard scene. */
-  transform: translate(-50%, calc(-50% - max(0px, (100% - 100cqh) * .17)));
-}
-.room-window[data-wide="true"] .room-frame {
-  width: max(100cqw, 300cqh);
-  transform: translate(-50%, -50%);
-}
-.room-frame img { width: 100%; height: auto; display: block; }
-.hotspot {
-  position: absolute;
-  min-height: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-.hotspot:hover, .hotspot:focus-visible { background: transparent; }
-.hotspot svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  fill: none;
-  stroke: none;
-}
-.hotspot:hover svg, .hotspot:focus-visible svg, .room-frame[data-bounds="true"] .hotspot svg {
-  fill: #e7ce8d19;
-  stroke: var(--gold);
-  stroke-width: 4px;
-}
-.hotspot span {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  border-radius: 2px;
-  padding: .15rem .4rem;
-  background: #1b1916f2;
-  font-size: clamp(.7rem, 1.05vw, 1rem);
-  line-height: 1.15;
-  white-space: nowrap;
-}
 .conference > nav {
   position: absolute;
   z-index: 1;
@@ -130,14 +78,14 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
   }
-  .conference > header, .conference > nav, .room-window {
+  .conference > header, .conference > nav, .dayton-room-window {
     position: relative;
     inset: auto;
     transform: none;
     margin: .5rem;
   }
   .conference > nav { justify-self: center; }
-  .room-frame { width: 100cqw; }
+  .dayton-room-frame { width: 100cqw; }
 }
 nav, .actions { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: .8rem; }
 dialog {

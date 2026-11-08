@@ -48,6 +48,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { DaytonAgreementRecord } from '../../../state/negotiation_types.js';
 import { DaytonSettlementViewer } from './DaytonSettlementViewer';
+import { DaytonConferenceRoom } from '../dayton_conference/DaytonConferenceRoom';
 import type { LoadedGameState } from '../data/types';
 import { useIPC, type IpcDaytonBotResponse } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
@@ -55,6 +56,7 @@ import { getPlayerFacingFaction } from '../../shared/playerFacingLabels';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { t } from '../i18n';
+import { turnToDateString } from '../utils/formatters';
 import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
 import {
     computeAutonomyPreview,
@@ -99,13 +101,15 @@ const FACTION_DISPLAY: Record<string, string> = {
 
 interface DaytonNegotiationModalProps {
     dayton: DaytonData;
+    conference?: boolean;
 }
 
-export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) {
+export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNegotiationModalProps) {
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
-    const playerFaction = getPlayerFacingFaction(useGameStore((s) => s.loadedGameState));
-    const headerImage = getDecisionHeaderForFamily('dayton_negotiation');
+    const loadedGameState = useGameStore((s) => s.loadedGameState);
+    const playerFaction = getPlayerFacingFaction(loadedGameState);
+    const headerImage = !conference && getDecisionHeaderForFamily('dayton_negotiation');
 
     const [demands, setDemands] = useState<Set<string>>(new Set());
     const [concessions, setConcessions] = useState<Set<string>>(new Set());
@@ -114,6 +118,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
     // (autonomy dial + competencies + constitutional + return/justice).
     const [instArch, setInstArch] = useState<InstitutionalSelections>(defaultInstitutionalSelections());
     const [submitting, setSubmitting] = useState(false);
+    const [conferenceError, setConferenceError] = useState<'preview' | 'submit' | 'decline' | null>(null);
     const [confirmDecline, setConfirmDecline] = useState(false);
     const [probing, setProbing] = useState(false);
     const [agreement, setAgreement] = useState<DaytonAgreementRecord | null>(null);
@@ -210,6 +215,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
     // ── Probe Positions — read-only counter-offer preview (no mutation) ────────
     const handleProbe = async () => {
         if (!ipc.isAvailable || probing || submitting || overBudget || !playerFaction) return;
+        if (conference) setConferenceError(null);
         setProbing(true);
         const snapshot = new Set(demands);
         const revision = draftRevision.current;
@@ -221,11 +227,13 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                 setProbedDemands(snapshot);
                 setBotResponses(res.botResponses ?? null);
             } else {
-                setLoadError(res.error ?? 'Failed to probe Dayton positions.');
+                if (conference) setConferenceError('preview');
+                else setLoadError(res.error ?? 'Failed to probe Dayton positions.');
             }
         } catch (error) {
             if (revision === draftRevision.current) {
-                setLoadError(error instanceof Error ? error.message : 'Failed to probe Dayton positions.');
+                if (conference) setConferenceError('preview');
+                else setLoadError(error instanceof Error ? error.message : 'Failed to probe Dayton positions.');
             }
         } finally {
             setProbing(false);
@@ -255,8 +263,29 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
         setInstArch(nextInstArch);
     };
 
+    const runConferenceMutation = async (action: 'submit' | 'decline', request: () => Promise<{ ok: boolean }>) => {
+        setConferenceError(null);
+        setSubmitting(true);
+        let succeeded = false;
+        try {
+            succeeded = (await request()).ok;
+        } catch {
+            // A rejected bridge call follows the same retry path as a failed response.
+        } finally {
+            // Successful mutations close the conference through the existing state push.
+            if (!succeeded) {
+                setConferenceError(action);
+                setSubmitting(false);
+            }
+        }
+    };
+
     const handleSubmit = async () => {
         if (!ipc.isAvailable || overBudget || !playerFaction) return;
+        if (conference) {
+            if (!submitting) await runConferenceMutation('submit', () => ipc.resolveDayton(buildProposal()));
+            return;
+        }
         setSubmitting(true);
         const result = await ipc.resolveDayton(buildProposal());
         if (!result.ok) {
@@ -281,6 +310,10 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
             setConfirmDecline(true);
             return;
         }
+        if (conference) {
+            await runConferenceMutation('decline', () => ipc.declineDayton());
+            return;
+        }
         setSubmitting(true);
         const result = await ipc.declineDayton();
         if (!result.ok) {
@@ -291,6 +324,429 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
     };
 
     const patronOverride = playerFaction ? (dayton.patronOverride[playerFaction] ?? 0) : 0;
+
+    const forcedBanner = (
+        dayton.forced && (
+            <div className="px-8 py-3 border-b border-[#8a2a2a]/40 bg-[#e8d0d0]/60" role="status">
+                <div className="text-xs uppercase tracking-widest text-[#5a1a1a] font-bold">
+                    {t('dayton.forcedTitle')}
+                </div>
+                <div className="text-xs text-[#5a1a1a] mt-0.5">
+                    {t(FORCED_MESSAGE[dayton.forced.by] ?? 'dayton.forced.united_states')}
+                </div>
+            </div>
+        )
+    );
+
+    const budget = (
+        <div className="px-8 py-3 border-b border-[#c8b898]/40 flex items-center justify-between">
+            <div className="text-xs text-[#6a5a40]" style={{ fontFamily: 'var(--font-data)' }}>
+                <span className="font-bold text-[#2a2016]">{t('peace.negotiationCapital')}</span>{' '}
+                <span className={overBudget ? 'text-red-700 font-bold' : 'text-[#2a6a2a]'}>
+                    {capitalSpent}
+                </span>
+                {' / '}{Math.round(capitalAvailable)}
+            </div>
+            {patronOverride >= 75 && (
+                <div className="text-xs uppercase tracking-wider text-red-700 font-bold px-2 py-0.5 bg-red-100 border border-red-300 rounded">
+                    {t('dayton.patronOverrideActive', { pct: Math.round(patronOverride) })}
+                </div>
+            )}
+        </div>
+    );
+
+    const readouts = (
+        <div className="px-8 py-4 border-b border-[#c8b898]/40">
+            <div className="text-xs uppercase tracking-widest text-[#8a7a60] font-bold mb-3">
+                {t('dayton.readoutsTitle')}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <ReadoutBar
+                    label={t('dayton.entityAutonomy')}
+                    value={autonomyIndex}
+                    color="#8a6a3a"
+                    hint={t('dayton.entityAutonomyHint')}
+                />
+                <ReadoutBar
+                    label={t('dayton.peaceDysfunctionFloor')}
+                    value={dysfunction.indexFloor}
+                    color={dysfunction.capsCleanWin ? '#8a2a2a' : '#6a6a3a'}
+                    hint={t('dayton.peaceDysfunctionHint')}
+                />
+            </div>
+            {dysfunction.capsCleanWin && (
+                <div className="mt-3 text-xs text-[#5a1a1a] bg-[#e8d0d0]/60 border border-[#8a2a2a]/40 rounded px-3 py-2">
+                    <span className="font-bold uppercase tracking-wider text-xs block mb-0.5">
+                        {t('dayton.capActive')}
+                    </span>
+                    {t('dayton.capWarning')}
+                </div>
+            )}
+        </div>
+    );
+
+    const territory = (
+        <div className="px-8 py-4 border-b border-[#c8b898]/40">
+            <div className="text-xs uppercase tracking-widest text-[#8a7a60] font-bold mb-3">
+                {t('dayton.territorialPackages')}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {dayton.territorialPackages.map(pkg => {
+                    const isDemand = demands.has(pkg.id);
+                    const isConcession = concessions.has(pkg.id);
+                    const isPlayerHeld = playerFaction != null && pkg.defaultHolder === playerFaction;
+                    // Dayton drew the inter-entity line only: Federation-partner ground is not negotiable.
+                    const isPartnerHeld = playerFaction != null && !isPlayerHeld
+                        && FEDERATION.has(pkg.defaultHolder) && FEDERATION.has(playerFaction);
+                    return (
+                        <div key={pkg.id} className={`p-3 rounded border transition-colors ${
+                            isDemand ? 'border-[#2a6a2a] bg-[#d0e8d0]/60' :
+                            isConcession ? 'border-[#8a2a2a] bg-[#e8d0d0]/60' :
+                            'border-[#c8b898]/50 bg-[#e8dcc4]/30'
+                        }`}>
+                            <div className="flex items-center justify-between mb-1">
+                                <span className="text-[12px] font-bold text-[#2a2016]">{pkg.name}</span>
+                                <span className="text-xs px-1.5 py-0.5 rounded font-bold" style={{
+                                    backgroundColor: (HOLDER_COLORS[pkg.defaultHolder] ?? '#888') + '20',
+                                    color: HOLDER_COLORS[pkg.defaultHolder] ?? '#888',
+                                }}>
+                                    {pkg.defaultHolder}
+                                </span>
+                            </div>
+                            <div className="flex gap-2 mt-2">
+                                {isPartnerHeld && (
+                                    <span className="text-xs text-[#6a5a40] italic">{t('dayton.federationPartner')}</span>
+                                )}
+                                {!isPlayerHeld && !isPartnerHeld && (
+                                    <button type="button" onClick={() => toggleDemand(pkg.id)}
+                                        className={`text-xs px-2 py-1 rounded border font-bold uppercase ${
+                                            isDemand ? 'bg-[#2a6a2a] text-white border-[#2a6a2a]' : 'text-[#2a6a2a] border-[#2a6a2a]/40 hover:bg-[#d0e8d0]'
+                                        }`} style={{ fontFamily: 'var(--font-command)' }}>
+                                        {t('dayton.demand', { cost: pkg.demandCost })}
+                                    </button>
+                                )}
+                                {isPlayerHeld && (
+                                    <button type="button" onClick={() => toggleConcession(pkg.id)}
+                                        className={`text-xs px-2 py-1 rounded border font-bold uppercase ${
+                                            isConcession ? 'bg-[#8a2a2a] text-white border-[#8a2a2a]' : 'text-[#8a2a2a] border-[#8a2a2a]/40 hover:bg-[#e8d0d0]'
+                                        }`} style={{ fontFamily: 'var(--font-command)' }}>
+                                        {t('dayton.concede', { cost: pkg.concedeCost })}
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+
+            {/* Captured ground: where the front departs from the Dayton map */}
+            {frontPackages.length > 0 && (
+                <div className="mt-4">
+                    <div className="text-xs uppercase tracking-widest text-[#8a7a60] font-bold mb-1">
+                        {t('dayton.frontPackagesTitle')}
+                    </div>
+                    <div className="text-xs text-[#6a5a40] italic mb-2">{t('dayton.frontPackagesHint')}</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {frontPackages.map(pkg => {
+                            const isDemand = demands.has(pkg.id);
+                            const isConcession = concessions.has(pkg.id);
+                            const mapGivesPlayer = playerFaction != null && pkg.defaultHolder === playerFaction;
+                            const holder = pkg.claimant ?? '';
+                            return (
+                                <div key={pkg.id} className={`p-3 rounded border transition-colors ${
+                                    isDemand ? 'border-[#2a6a2a] bg-[#d0e8d0]/60' :
+                                    isConcession ? 'border-[#8a2a2a] bg-[#e8d0d0]/60' :
+                                    'border-[#c8b898]/50 bg-[#e8dcc4]/30'
+                                }`}>
+                                    <div className="flex items-center justify-between mb-1">
+                                        <span className="text-[12px] font-bold text-[#2a2016]">{pkg.name}</span>
+                                        <span className="text-xs px-1.5 py-0.5 rounded font-bold" style={{
+                                            backgroundColor: (HOLDER_COLORS[holder] ?? '#888') + '20',
+                                            color: HOLDER_COLORS[holder] ?? '#888',
+                                        }}>
+                                            {holder}
+                                        </span>
+                                    </div>
+                                    <div className="text-xs text-[#6a5a40]" style={{ fontFamily: 'var(--font-data)' }}>
+                                        {t('dayton.frontHeld', {
+                                            holder,
+                                            assignee: pkg.defaultHolder,
+                                            pct: (pkg.areaPct ?? 0).toFixed(2),
+                                        })}
+                                    </div>
+                                    <div className="flex gap-2 mt-2">
+                                        {!mapGivesPlayer && (
+                                            <button type="button" onClick={() => toggleDemand(pkg.id)}
+                                                className={`text-xs px-2 py-1 rounded border font-bold uppercase ${
+                                                    isDemand ? 'bg-[#2a6a2a] text-white border-[#2a6a2a]' : 'text-[#2a6a2a] border-[#2a6a2a]/40 hover:bg-[#d0e8d0]'
+                                                }`} style={{ fontFamily: 'var(--font-command)' }}>
+                                                {t('dayton.demand', { cost: pkg.demandCost })}
+                                            </button>
+                                        )}
+                                        {mapGivesPlayer && (
+                                            <button type="button" onClick={() => toggleConcession(pkg.id)}
+                                                className={`text-xs px-2 py-1 rounded border font-bold uppercase ${
+                                                    isConcession ? 'bg-[#8a2a2a] text-white border-[#8a2a2a]' : 'text-[#8a2a2a] border-[#8a2a2a]/40 hover:bg-[#e8d0d0]'
+                                                }`} style={{ fontFamily: 'var(--font-command)' }}>
+                                                {t('dayton.concede', { cost: pkg.concedeCost })}
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {/* Brčko — the Annex-2 condominium-district outcome */}
+            {hasBrckoPackage && (
+                <div className="mt-3 p-3 rounded border border-[#8a7a60]/40 bg-[#e8dcc4]/40">
+                    <div className="flex items-center justify-between mb-1">
+                        <span className="text-[12px] font-bold text-[#2a2016]">{t('dayton.brckoTitle')}</span>
+                        <span className={`text-xs px-1.5 py-0.5 rounded font-bold uppercase ${
+                            brckoOutcome === 'arbitration'
+                                ? 'bg-[#8a7a60]/25 text-[#6a5a40]'
+                                : 'bg-[#4a5a8a]/15 text-[#3a4a7a]'
+                        }`}>
+                            {brckoOutcome === 'arbitration'
+                                ? t('dayton.brckoArbitration')
+                                : brckoOutcome === 'rs'
+                                    ? t('dayton.brckoRs')
+                                    : t('dayton.brckoFederation')}
+                        </span>
+                    </div>
+                    {brckoOutcome === 'arbitration' && (
+                        <div className="text-xs text-[#6a5a40] italic mt-1">
+                            {t('dayton.brckoArbitrationNote')}
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+
+    const institutionalTerms = (
+        <>
+            <div className="px-8 py-4 border-b border-[#c8b898]/40">
+                <div className="text-xs uppercase tracking-widest text-[#8a7a60] font-bold mb-3">
+                    {t('dayton.institutionalArchitecture')}
+                </div>
+                <div className="space-y-2">
+                    {dayton.institutionalPackages.map(pkg => {
+                        const choice = institutions[pkg.id];
+                        return (
+                            <div key={pkg.id} className="flex items-center justify-between p-2.5 rounded border border-[#c8b898]/50 bg-[#e8dcc4]/30">
+                                <span className="text-[12px] font-bold text-[#2a2016]">{pkg.name}</span>
+                                <div className="flex gap-1.5">
+                                    <button type="button" onClick={() => setInstitution(pkg.id, 'centralized')}
+                                        className={`text-xs px-2 py-1 rounded border font-bold ${
+                                            choice === 'centralized' ? 'bg-[#4a5a8a] text-white border-[#4a5a8a]' : 'text-[#4a5a8a] border-[#4a5a8a]/40 hover:bg-[#d0d8e8]'
+                                        }`} style={{ fontFamily: 'var(--font-command)' }}>
+                                        {t('dayton.central', { cost: pkg.centralizedCost })}
+                                    </button>
+                                    <button type="button" onClick={() => setInstitution(pkg.id, 'decentralized')}
+                                        className={`text-xs px-2 py-1 rounded border font-bold ${
+                                            choice === 'decentralized' ? 'bg-[#8a6a3a] text-white border-[#8a6a3a]' : 'text-[#8a6a3a] border-[#8a6a3a]/40 hover:bg-[#e8dcc4]'
+                                        }`} style={{ fontFamily: 'var(--font-command)' }}>
+                                        {t('dayton.decentral', { cost: pkg.decentralizedCost })}
+                                    </button>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* Institutional-architecture expansion (Phase 3): the 4 structural
+                dimensions the player authors — autonomy dial, competency matrix,
+                constitutional architecture, return & justice. */}
+            <DaytonInstitutionalDimensions
+                selections={instArch}
+                onChange={setInstArchAndClear}
+                playerFaction={playerFaction}
+                capitalAvailable={capitalAvailable}
+            />
+        </>
+    );
+
+    const probeButton = (
+        <button
+            type="button"
+            onClick={() => void handleProbe()}
+            disabled={overBudget || (!conference && (probing || submitting))}
+            aria-disabled={conference && (probing || submitting) ? true : undefined}
+            className={`text-xs px-3 py-1.5 rounded border font-bold uppercase tracking-wider ${
+                probing || (conference && submitting)
+                    ? 'border-[#8a7a60]/30 bg-[#d8d0c4] text-[#6a5a40] cursor-wait'
+                    : 'border-[#4a5a8a]/50 bg-[#d0d8e8] text-[#2a3a6a] enabled:hover:bg-[#b8c8e0] disabled:cursor-not-allowed disabled:opacity-50'
+            }`}
+            style={{ fontFamily: 'var(--font-command)' }}
+        >
+            {probing ? t('dayton.probing') : t('dayton.probePositions')}
+        </button>
+    );
+
+    const responses = (
+        <div className="px-8 py-4 border-b border-[#c8b898]/40">
+            <div className="flex items-center justify-between mb-2">
+                <div className="text-xs uppercase tracking-widest text-[#8a7a60] font-bold">
+                    {t('dayton.botResponsesTitle')}
+                </div>
+                {probeButton}
+            </div>
+            {conference && agreement && (
+                <p className="mb-2 text-xs font-bold" role="status">{t('dayton.conference.previewReady')}</p>
+            )}
+            {!botResponses && (
+                <div className="text-xs text-[#6a5a40] italic">{t('dayton.probeHint')}</div>
+            )}
+            {botResponses && (
+                <div className="space-y-2">
+                    {Object.keys(botResponses).sort().map((faction) => {
+                        const resp = botResponses[faction];
+                        if (!resp) return null;
+                        return (
+                            <BotResponseRow
+                                key={faction}
+                                faction={faction}
+                                resp={resp}
+                                probedDemands={probedDemands}
+                                packageNames={packageNameLookup(dayton)}
+                                onAdopt={() => adoptCounter(resp)}
+                            />
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+
+    const submission = (
+        <div className="px-8 py-5 flex flex-col items-center gap-2">
+            <div className="flex flex-row items-center gap-3">
+                <button
+                    type="button"
+                    onClick={() => void handleSubmit()}
+                    disabled={overBudget || (!conference && submitting)}
+                    aria-disabled={conference && submitting ? true : undefined}
+                    className={`px-8 py-3 rounded border-2 font-bold text-[14px] uppercase tracking-wider transition-colors ${
+                        overBudget
+                            ? 'border-[#8a7a60]/30 bg-[#d8d0c4] text-[#8a7a60] cursor-not-allowed'
+                            : submitting
+                                ? 'border-[#8a7a60]/30 bg-[#d8d0c4] text-[#6a5a40] cursor-wait'
+                                : 'border-[#2a6a2a]/50 bg-[#d0e8d0] text-[#1a4a1a] hover:bg-[#b8d8b8]'
+                    }`}
+                    style={{ fontFamily: 'var(--font-command)' }}
+                >
+                    {submitting ? 'Negotiating...' : overBudget ? 'Over Budget' : 'Submit Proposal'}
+                </button>
+                {!dayton.forced && (
+                    <button
+                        type="button"
+                        onClick={() => void handleDeclineTalks()}
+                        disabled={!conference && submitting}
+                        aria-disabled={conference && submitting ? true : undefined}
+                        title={t('peace.declineTalksTitle')}
+                        className={`px-6 py-3 rounded border-2 font-bold text-[12px] uppercase tracking-wider transition-colors ${
+                            submitting
+                                ? 'border-[#8a7a60]/30 bg-[#d8d0c4] text-[#6a5a40] cursor-wait'
+                                : 'border-[#8a2a2a]/50 bg-[#e8d0d0] text-[#5a1a1a] hover:bg-[#d8b8b8]'
+                        }`}
+                        style={{ fontFamily: 'var(--font-command)' }}
+                    >
+                        {confirmDecline ? t('dayton.declineConfirm') : t('dayton.declineSettlement')}
+                    </button>
+                )}
+            </div>
+            {confirmDecline && !dayton.forced && (
+                <div className="text-xs text-[#5a1a1a] font-bold" role="alert">
+                    {t(playerFaction === 'RS'
+                        ? 'dayton.declineWarningRS'
+                        : playerFaction === 'HRHB'
+                            ? 'dayton.declineWarningHRHB'
+                            : 'dayton.declineWarningRBiH')}
+                </div>
+            )}
+            {overBudget && (
+                <div className="text-xs text-red-700 font-bold">
+                    Reduce demands — capital spent ({capitalSpent}) exceeds available ({Math.round(capitalAvailable)})
+                </div>
+            )}
+            <div className="text-xs text-[#6a5a40] mt-1" style={{ fontFamily: 'var(--font-command)' }}>
+                {dayton.forced
+                    ? t('dayton.forcedFooter')
+                    : 'Submit a proposal to negotiate, or Decline Talks to refuse meaningful negotiation.'}
+            </div>
+        </div>
+    );
+
+    if (conference) {
+        const savedDate = loadedGameState?.metadata?.date?.trim();
+        const date = savedDate && savedDate !== 'UNKNOWN'
+            ? savedDate
+            : loadedGameState && Number.isFinite(loadedGameState.turn)
+                ? turnToDateString(loadedGameState.turn)
+                : undefined;
+        return (
+            <Modal
+                isOpen={true}
+                dismissible={false}
+                zIndex={Z.CRITICAL_MODAL}
+                ariaLabel={t('dayton.title')}
+                backdropClassName="bg-[#1c1b17]"
+                panelClassName="h-full w-full overflow-hidden"
+            >
+                <DaytonConferenceRoom
+                    date={date}
+                    error={conferenceError ? t(`dayton.conference.error.${conferenceError}`) : undefined}
+                    forced={Boolean(dayton.forced)}
+                    previewReady={Boolean(agreement)}
+                    panels={{
+                        folder: (
+                            <>
+                                {forcedBanner}
+                                <p className="px-8 pt-4 font-bold">{playerFaction && FACTION_DISPLAY[playerFaction]}</p>
+                                {budget}
+                                {readouts}
+                            </>
+                        ),
+                        draft: (
+                            <>
+                                {forcedBanner}
+                                {budget}
+                                {territory}
+                                {responses}
+                                {submission}
+                            </>
+                        ),
+                        map: (
+                            <div className="space-y-3 px-5 py-4">
+                                {!agreement && <p>{t('dayton.conference.previewHint')}</p>}
+                                {probeButton}
+                                {agreement && <DaytonSettlementViewer agreement={agreement} mode="draft" view="territory" />}
+                            </div>
+                        ),
+                        binder: (
+                            <>
+                                {budget}
+                                {agreement && (
+                                    <div className="px-5 py-4">
+                                        <DaytonSettlementViewer agreement={agreement} mode="draft" view="institutions" />
+                                    </div>
+                                )}
+                                {institutionalTerms}
+                                <div className="space-y-3 px-5 py-4">
+                                    {!agreement && <p>{t('dayton.conference.previewHint')}</p>}
+                                    {probeButton}
+                                </div>
+                            </>
+                        ),
+                    }}
+                />
+            </Modal>
+        );
+    }
 
     return (
         <Modal
@@ -331,348 +787,19 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                     </div>
                 </div>
 
-                {/* Imposed table (a declined Dayton, reopened): no decline option */}
-                {dayton.forced && (
-                    <div className="px-8 py-3 border-b border-[#8a2a2a]/40 bg-[#e8d0d0]/60" role="status">
-                        <div className="text-xs uppercase tracking-widest text-[#5a1a1a] font-bold">
-                            {t('dayton.forcedTitle')}
-                        </div>
-                        <div className="text-xs text-[#5a1a1a] mt-0.5">
-                            {t(FORCED_MESSAGE[dayton.forced.by] ?? 'dayton.forced.united_states')}
-                        </div>
-                    </div>
-                )}
-
-                {/* Capital budget */}
-                <div className="px-8 py-3 border-b border-[#c8b898]/40 flex items-center justify-between">
-                    <div className="text-xs text-[#6a5a40]" style={{ fontFamily: 'var(--font-data)' }}>
-                        <span className="font-bold text-[#2a2016]">{t('peace.negotiationCapital')}</span>{' '}
-                        <span className={overBudget ? 'text-red-700 font-bold' : 'text-[#2a6a2a]'}>
-                            {capitalSpent}
-                        </span>
-                        {' / '}{Math.round(capitalAvailable)}
-                    </div>
-                    {patronOverride >= 75 && (
-                        <div className="text-xs uppercase tracking-wider text-red-700 font-bold px-2 py-0.5 bg-red-100 border border-red-300 rounded">
-                            {t('dayton.patronOverrideActive', { pct: Math.round(patronOverride) })}
-                        </div>
-                    )}
-                </div>
-
-                {/* Live Settlement Readouts */}
-                <div className="px-8 py-4 border-b border-[#c8b898]/40">
-                    <div className="text-xs uppercase tracking-widest text-[#8a7a60] font-bold mb-3">
-                        {t('dayton.readoutsTitle')}
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <ReadoutBar
-                            label={t('dayton.entityAutonomy')}
-                            value={autonomyIndex}
-                            color="#8a6a3a"
-                            hint={t('dayton.entityAutonomyHint')}
-                        />
-                        <ReadoutBar
-                            label={t('dayton.peaceDysfunctionFloor')}
-                            value={dysfunction.indexFloor}
-                            color={dysfunction.capsCleanWin ? '#8a2a2a' : '#6a6a3a'}
-                            hint={t('dayton.peaceDysfunctionHint')}
-                        />
-                    </div>
-                    {dysfunction.capsCleanWin && (
-                        <div className="mt-3 text-xs text-[#5a1a1a] bg-[#e8d0d0]/60 border border-[#8a2a2a]/40 rounded px-3 py-2">
-                            <span className="font-bold uppercase tracking-wider text-xs block mb-0.5">
-                                {t('dayton.capActive')}
-                            </span>
-                            {t('dayton.capWarning')}
-                        </div>
-                    )}
-                </div>
-
-                {/* Territorial Packages */}
-                <div className="px-8 py-4 border-b border-[#c8b898]/40">
-                    <div className="text-xs uppercase tracking-widest text-[#8a7a60] font-bold mb-3">
-                        {t('dayton.territorialPackages')}
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {dayton.territorialPackages.map(pkg => {
-                            const isDemand = demands.has(pkg.id);
-                            const isConcession = concessions.has(pkg.id);
-                            const isPlayerHeld = playerFaction != null && pkg.defaultHolder === playerFaction;
-                            // Dayton drew the inter-entity line only: Federation-partner ground is not negotiable.
-                            const isPartnerHeld = playerFaction != null && !isPlayerHeld
-                                && FEDERATION.has(pkg.defaultHolder) && FEDERATION.has(playerFaction);
-                            return (
-                                <div key={pkg.id} className={`p-3 rounded border transition-colors ${
-                                    isDemand ? 'border-[#2a6a2a] bg-[#d0e8d0]/60' :
-                                    isConcession ? 'border-[#8a2a2a] bg-[#e8d0d0]/60' :
-                                    'border-[#c8b898]/50 bg-[#e8dcc4]/30'
-                                }`}>
-                                    <div className="flex items-center justify-between mb-1">
-                                        <span className="text-[12px] font-bold text-[#2a2016]">{pkg.name}</span>
-                                        <span className="text-xs px-1.5 py-0.5 rounded font-bold" style={{
-                                            backgroundColor: (HOLDER_COLORS[pkg.defaultHolder] ?? '#888') + '20',
-                                            color: HOLDER_COLORS[pkg.defaultHolder] ?? '#888',
-                                        }}>
-                                            {pkg.defaultHolder}
-                                        </span>
-                                    </div>
-                                    <div className="flex gap-2 mt-2">
-                                        {isPartnerHeld && (
-                                            <span className="text-xs text-[#6a5a40] italic">{t('dayton.federationPartner')}</span>
-                                        )}
-                                        {!isPlayerHeld && !isPartnerHeld && (
-                                            <button type="button" onClick={() => toggleDemand(pkg.id)}
-                                                className={`text-xs px-2 py-1 rounded border font-bold uppercase ${
-                                                    isDemand ? 'bg-[#2a6a2a] text-white border-[#2a6a2a]' : 'text-[#2a6a2a] border-[#2a6a2a]/40 hover:bg-[#d0e8d0]'
-                                                }`} style={{ fontFamily: 'var(--font-command)' }}>
-                                                {t('dayton.demand', { cost: pkg.demandCost })}
-                                            </button>
-                                        )}
-                                        {isPlayerHeld && (
-                                            <button type="button" onClick={() => toggleConcession(pkg.id)}
-                                                className={`text-xs px-2 py-1 rounded border font-bold uppercase ${
-                                                    isConcession ? 'bg-[#8a2a2a] text-white border-[#8a2a2a]' : 'text-[#8a2a2a] border-[#8a2a2a]/40 hover:bg-[#e8d0d0]'
-                                                }`} style={{ fontFamily: 'var(--font-command)' }}>
-                                                {t('dayton.concede', { cost: pkg.concedeCost })}
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-
-                    {/* Captured ground: where the front departs from the Dayton map */}
-                    {frontPackages.length > 0 && (
-                        <div className="mt-4">
-                            <div className="text-xs uppercase tracking-widest text-[#8a7a60] font-bold mb-1">
-                                {t('dayton.frontPackagesTitle')}
-                            </div>
-                            <div className="text-xs text-[#6a5a40] italic mb-2">{t('dayton.frontPackagesHint')}</div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                {frontPackages.map(pkg => {
-                                    const isDemand = demands.has(pkg.id);
-                                    const isConcession = concessions.has(pkg.id);
-                                    const mapGivesPlayer = playerFaction != null && pkg.defaultHolder === playerFaction;
-                                    const holder = pkg.claimant ?? '';
-                                    return (
-                                        <div key={pkg.id} className={`p-3 rounded border transition-colors ${
-                                            isDemand ? 'border-[#2a6a2a] bg-[#d0e8d0]/60' :
-                                            isConcession ? 'border-[#8a2a2a] bg-[#e8d0d0]/60' :
-                                            'border-[#c8b898]/50 bg-[#e8dcc4]/30'
-                                        }`}>
-                                            <div className="flex items-center justify-between mb-1">
-                                                <span className="text-[12px] font-bold text-[#2a2016]">{pkg.name}</span>
-                                                <span className="text-xs px-1.5 py-0.5 rounded font-bold" style={{
-                                                    backgroundColor: (HOLDER_COLORS[holder] ?? '#888') + '20',
-                                                    color: HOLDER_COLORS[holder] ?? '#888',
-                                                }}>
-                                                    {holder}
-                                                </span>
-                                            </div>
-                                            <div className="text-xs text-[#6a5a40]" style={{ fontFamily: 'var(--font-data)' }}>
-                                                {t('dayton.frontHeld', {
-                                                    holder,
-                                                    assignee: pkg.defaultHolder,
-                                                    pct: (pkg.areaPct ?? 0).toFixed(2),
-                                                })}
-                                            </div>
-                                            <div className="flex gap-2 mt-2">
-                                                {!mapGivesPlayer && (
-                                                    <button type="button" onClick={() => toggleDemand(pkg.id)}
-                                                        className={`text-xs px-2 py-1 rounded border font-bold uppercase ${
-                                                            isDemand ? 'bg-[#2a6a2a] text-white border-[#2a6a2a]' : 'text-[#2a6a2a] border-[#2a6a2a]/40 hover:bg-[#d0e8d0]'
-                                                        }`} style={{ fontFamily: 'var(--font-command)' }}>
-                                                        {t('dayton.demand', { cost: pkg.demandCost })}
-                                                    </button>
-                                                )}
-                                                {mapGivesPlayer && (
-                                                    <button type="button" onClick={() => toggleConcession(pkg.id)}
-                                                        className={`text-xs px-2 py-1 rounded border font-bold uppercase ${
-                                                            isConcession ? 'bg-[#8a2a2a] text-white border-[#8a2a2a]' : 'text-[#8a2a2a] border-[#8a2a2a]/40 hover:bg-[#e8d0d0]'
-                                                        }`} style={{ fontFamily: 'var(--font-command)' }}>
-                                                        {t('dayton.concede', { cost: pkg.concedeCost })}
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Brčko — the Annex-2 condominium-district outcome */}
-                    {hasBrckoPackage && (
-                        <div className="mt-3 p-3 rounded border border-[#8a7a60]/40 bg-[#e8dcc4]/40">
-                            <div className="flex items-center justify-between mb-1">
-                                <span className="text-[12px] font-bold text-[#2a2016]">{t('dayton.brckoTitle')}</span>
-                                <span className={`text-xs px-1.5 py-0.5 rounded font-bold uppercase ${
-                                    brckoOutcome === 'arbitration'
-                                        ? 'bg-[#8a7a60]/25 text-[#6a5a40]'
-                                        : 'bg-[#4a5a8a]/15 text-[#3a4a7a]'
-                                }`}>
-                                    {brckoOutcome === 'arbitration'
-                                        ? t('dayton.brckoArbitration')
-                                        : brckoOutcome === 'rs'
-                                            ? t('dayton.brckoRs')
-                                            : t('dayton.brckoFederation')}
-                                </span>
-                            </div>
-                            {brckoOutcome === 'arbitration' && (
-                                <div className="text-xs text-[#6a5a40] italic mt-1">
-                                    {t('dayton.brckoArbitrationNote')}
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </div>
-
-                {/* Institutional Choices */}
-                <div className="px-8 py-4 border-b border-[#c8b898]/40">
-                    <div className="text-xs uppercase tracking-widest text-[#8a7a60] font-bold mb-3">
-                        {t('dayton.institutionalArchitecture')}
-                    </div>
-                    <div className="space-y-2">
-                        {dayton.institutionalPackages.map(pkg => {
-                            const choice = institutions[pkg.id];
-                            return (
-                                <div key={pkg.id} className="flex items-center justify-between p-2.5 rounded border border-[#c8b898]/50 bg-[#e8dcc4]/30">
-                                    <span className="text-[12px] font-bold text-[#2a2016]">{pkg.name}</span>
-                                    <div className="flex gap-1.5">
-                                        <button type="button" onClick={() => setInstitution(pkg.id, 'centralized')}
-                                            className={`text-xs px-2 py-1 rounded border font-bold ${
-                                                choice === 'centralized' ? 'bg-[#4a5a8a] text-white border-[#4a5a8a]' : 'text-[#4a5a8a] border-[#4a5a8a]/40 hover:bg-[#d0d8e8]'
-                                            }`} style={{ fontFamily: 'var(--font-command)' }}>
-                                            {t('dayton.central', { cost: pkg.centralizedCost })}
-                                        </button>
-                                        <button type="button" onClick={() => setInstitution(pkg.id, 'decentralized')}
-                                            className={`text-xs px-2 py-1 rounded border font-bold ${
-                                                choice === 'decentralized' ? 'bg-[#8a6a3a] text-white border-[#8a6a3a]' : 'text-[#8a6a3a] border-[#8a6a3a]/40 hover:bg-[#e8dcc4]'
-                                            }`} style={{ fontFamily: 'var(--font-command)' }}>
-                                            {t('dayton.decentral', { cost: pkg.decentralizedCost })}
-                                        </button>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* Institutional-architecture expansion (Phase 3): the 4 structural
-                    dimensions the player authors — autonomy dial, competency matrix,
-                    constitutional architecture, return & justice. */}
-                <DaytonInstitutionalDimensions
-                    selections={instArch}
-                    onChange={setInstArchAndClear}
-                    playerFaction={playerFaction}
-                    capitalAvailable={capitalAvailable}
-                />
-
+                {forcedBanner}
+                {budget}
+                {readouts}
+                {territory}
+                {institutionalTerms}
                 {agreement && (
                     <div className="px-8 py-4">
                         <DaytonSettlementViewer agreement={agreement} mode="draft" />
                     </div>
                 )}
 
-                {/* Probe Positions — bot counter-offer preview */}
-                <div className="px-8 py-4 border-b border-[#c8b898]/40">
-                    <div className="flex items-center justify-between mb-2">
-                        <div className="text-xs uppercase tracking-widest text-[#8a7a60] font-bold">
-                            {t('dayton.botResponsesTitle')}
-                        </div>
-                        <button
-                            type="button"
-                            onClick={() => void handleProbe()}
-                            disabled={probing || submitting || overBudget}
-                            className={`text-xs px-3 py-1.5 rounded border font-bold uppercase tracking-wider ${
-                                probing
-                                    ? 'border-[#8a7a60]/30 bg-[#d8d0c4] text-[#6a5a40] cursor-wait'
-                                    : 'border-[#4a5a8a]/50 bg-[#d0d8e8] text-[#2a3a6a] enabled:hover:bg-[#b8c8e0] disabled:cursor-not-allowed disabled:opacity-50'
-                            }`}
-                            style={{ fontFamily: 'var(--font-command)' }}
-                        >
-                            {probing ? t('dayton.probing') : t('dayton.probePositions')}
-                        </button>
-                    </div>
-                    {!botResponses && (
-                        <div className="text-xs text-[#6a5a40] italic">{t('dayton.probeHint')}</div>
-                    )}
-                    {botResponses && (
-                        <div className="space-y-2">
-                            {Object.keys(botResponses).sort().map((faction) => {
-                                const resp = botResponses[faction];
-                                if (!resp) return null;
-                                return (
-                                    <BotResponseRow
-                                        key={faction}
-                                        faction={faction}
-                                        resp={resp}
-                                        probedDemands={probedDemands}
-                                        packageNames={packageNameLookup(dayton)}
-                                        onAdopt={() => adoptCounter(resp)}
-                                    />
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
-
-                {/* Submit */}
-                <div className="px-8 py-5 flex flex-col items-center gap-2">
-                    <div className="flex flex-row items-center gap-3">
-                        <button
-                            type="button"
-                            onClick={() => void handleSubmit()}
-                            disabled={submitting || overBudget}
-                            className={`px-8 py-3 rounded border-2 font-bold text-[14px] uppercase tracking-wider transition-colors ${
-                                overBudget
-                                    ? 'border-[#8a7a60]/30 bg-[#d8d0c4] text-[#8a7a60] cursor-not-allowed'
-                                    : submitting
-                                        ? 'border-[#8a7a60]/30 bg-[#d8d0c4] text-[#6a5a40] cursor-wait'
-                                        : 'border-[#2a6a2a]/50 bg-[#d0e8d0] text-[#1a4a1a] hover:bg-[#b8d8b8]'
-                            }`}
-                            style={{ fontFamily: 'var(--font-command)' }}
-                        >
-                            {submitting ? 'Negotiating...' : overBudget ? 'Over Budget' : 'Submit Proposal'}
-                        </button>
-                        {!dayton.forced && (
-                            <button
-                                type="button"
-                                onClick={() => void handleDeclineTalks()}
-                                disabled={submitting}
-                                title={t('peace.declineTalksTitle')}
-                                className={`px-6 py-3 rounded border-2 font-bold text-[12px] uppercase tracking-wider transition-colors ${
-                                    submitting
-                                        ? 'border-[#8a7a60]/30 bg-[#d8d0c4] text-[#6a5a40] cursor-wait'
-                                        : 'border-[#8a2a2a]/50 bg-[#e8d0d0] text-[#5a1a1a] hover:bg-[#d8b8b8]'
-                                }`}
-                                style={{ fontFamily: 'var(--font-command)' }}
-                            >
-                                {confirmDecline ? t('dayton.declineConfirm') : t('dayton.declineSettlement')}
-                            </button>
-                        )}
-                    </div>
-                    {confirmDecline && !dayton.forced && (
-                        <div className="text-xs text-[#5a1a1a] font-bold" role="alert">
-                            {t(playerFaction === 'RS'
-                                ? 'dayton.declineWarningRS'
-                                : playerFaction === 'HRHB'
-                                    ? 'dayton.declineWarningHRHB'
-                                    : 'dayton.declineWarningRBiH')}
-                        </div>
-                    )}
-                    {overBudget && (
-                        <div className="text-xs text-red-700 font-bold">
-                            Reduce demands — capital spent ({capitalSpent}) exceeds available ({Math.round(capitalAvailable)})
-                        </div>
-                    )}
-                    <div className="text-xs text-[#6a5a40] mt-1" style={{ fontFamily: 'var(--font-command)' }}>
-                        {dayton.forced
-                            ? t('dayton.forcedFooter')
-                            : 'Submit a proposal to negotiate, or Decline Talks to refuse meaningful negotiation.'}
-                    </div>
-                </div>
+                {responses}
+                {submission}
             </>
         </Modal>
     );

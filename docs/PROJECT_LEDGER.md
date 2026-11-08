@@ -13919,3 +13919,11 @@ The existing Dayton preview and explicit desktop signing paths produce one versi
 - Canonical disk save/reload and browser proofs passed. The browser compared 744 polygon paths and identical institution rows from the draft and reloaded Verdict at 1280 × 720 and 3426 × 1186. The saved fixture contains 712 explicit assignments and 16 resolved competencies.
 - The final focused IPC and renderer tests passed 28 checks. Backend regressions, headless parity, typecheck, desktop sim and map builds, and independent review passed. Evidence is under F:/AWWV-worktrees/.dayton-design/settlement-record.
 - The record is additive on explicit desktop signing. Wartime control, settlement calculations, bargaining rules, and headless save output are preserved. No native package run in this slice.
+
+## 2026-11-08 — Open the Hope Hotel at the live Dayton decision (UI, DESKTOP)
+
+Pending Dayton now opens the Hope Hotel arrival and conference room. Four registered objects and their labeled controls share one proposal. The map and binder render the authoritative preview. Signing keeps the existing save transaction, and the Verdict reads the frozen treaty after reload. Conference-local failures preserve the proposal for retry and keep keyboard focus in the conference.
+
+- The standard and ultrawide layouts passed at five viewport sizes. The prototype shape check passed at four sizes. The final 85 UI checks, 80 backend preservation checks, typecheck, independent review with targeted corrections, map chunk check and Windows package passed.
+- Packaged Electron signed a seeded pending RS save with Monitoring Only for the OHR. Relaunch through Field Records on another loopback port preserved the exact save bytes and authoritative record. The draft, signed and reloaded views matched on 744 map paths and 30 institution rows. The record contains 712 assignments and 16 competencies.
+- Renderer-only change. Determinism, negotiation rules, canonical save structure and headless resolution remain unchanged. Evidence is under F:/AWWV-worktrees/.dayton-design/live-conference.

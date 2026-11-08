@@ -1,0 +1,52 @@
+.dayton-room-window {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  container-type: size;
+  background: #1c1b17;
+}
+.dayton-room-frame {
+  position: absolute;
+  width: min(max(100cqw, 177.778cqh), 140cqw);
+  top: 50%;
+  left: 50%;
+  /* Keep the table in view on displays wider than the standard scene. */
+  transform: translate(-50%, calc(-50% - max(0px, (100% - 100cqh) * .17)));
+}
+.dayton-room-window[data-wide="true"] .dayton-room-frame {
+  width: max(100cqw, 300cqh);
+  transform: translate(-50%, -50%);
+}
+.dayton-room-frame img { width: 100%; height: auto; display: block; }
+.dayton-room-hotspot {
+  position: absolute;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.dayton-room-hotspot:hover, .dayton-room-hotspot:focus-visible { background: transparent; }
+.dayton-room-hotspot svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  fill: none;
+  stroke: none;
+}
+.dayton-room-hotspot:hover svg, .dayton-room-hotspot:focus-visible svg, .dayton-room-frame[data-bounds="true"] .dayton-room-hotspot svg {
+  fill: #e7ce8d19;
+  stroke: #e7ce8d;
+  stroke-width: 4px;
+}
+.dayton-room-hotspot span {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 2px;
+  padding: .15rem .4rem;
+  background: #1b1916f2;
+  font-size: clamp(.7rem, 1.05vw, 1rem);
+  line-height: 1.15;
+  white-space: nowrap;
+}

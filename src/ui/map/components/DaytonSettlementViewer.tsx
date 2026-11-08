@@ -148,16 +148,23 @@ function Institutions({ terms }: { terms: DaytonAgreementRecord['terms'] }) {
     );
 }
 
-export function DaytonSettlementViewer({ agreement, mode }: { agreement: DaytonAgreementRecord; mode: 'draft' | 'signed' }) {
+export function DaytonSettlementViewer({ agreement, mode, view }: {
+    agreement: DaytonAgreementRecord;
+    mode: 'draft' | 'signed';
+    view?: 'territory' | 'institutions';
+}) {
     const [open, setOpen] = useState(false);
     const panelId = useId();
+    const title = t(`dayton.agreement.${mode}`);
     return (
         <section className={`rounded border border-current/25 p-3 ${mode === 'draft' ? 'text-[#352b20]' : 'text-text-primary'}`}>
-            <button type="button" className="font-bold underline" aria-expanded={open} aria-controls={panelId} onClick={() => setOpen(!open)}>{t(`dayton.agreement.${mode}`)}</button>
-            {open && (
-                <div id={panelId} className="mt-3 grid gap-5 text-sm lg:grid-cols-2">
-                    <Territory map={agreement.map} brcko={agreement.terms.brcko_status} />
-                    <Institutions terms={agreement.terms} />
+            {view
+                ? <h3 className="font-bold">{title}</h3>
+                : <button type="button" className="font-bold underline" aria-expanded={open} aria-controls={panelId} onClick={() => setOpen(!open)}>{title}</button>}
+            {(view || open) && (
+                <div id={panelId} className={`mt-3 grid gap-5 text-sm ${view ? '' : 'lg:grid-cols-2'}`}>
+                    {view !== 'institutions' && <Territory map={agreement.map} brcko={agreement.terms.brcko_status} />}
+                    {view !== 'territory' && <Institutions terms={agreement.terms} />}
                 </div>
             )}
         </section>

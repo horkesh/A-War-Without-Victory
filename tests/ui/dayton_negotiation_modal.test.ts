@@ -25,7 +25,7 @@ const PENDING: NonNullable<LoadedGameState['pendingDayton']> = {
 
 function seedStore() {
     useGameStore.setState({
-        loadedGameState: { player_faction: 'RBiH' } as unknown as LoadedGameState,
+        loadedGameState: { player_faction: 'RBiH', turn: 187, metadata: { turn: 187, date: '6 Nov 1995' } } as unknown as LoadedGameState,
         loadError: null,
     });
 }
@@ -218,5 +218,165 @@ describe('DaytonNegotiationModal — Phase-4 player-agency surface', () => {
         expect(screen.getByRole('status').textContent).toMatch(/Declining is no longer possible/);
         expect(screen.queryByText('Decline Settlement')).toBeNull();
         expect(screen.getByText('Submit Proposal')).toBeTruthy();
+    });
+});
+
+describe('DaytonNegotiationModal — live conference room', () => {
+    beforeEach(seedStore);
+
+    it('opens the room objects and keeps one editable draft and authoritative preview between them', async () => {
+        const previewDayton = vi.fn().mockResolvedValue({
+            ok: true,
+            agreement: {
+                version: 1,
+                terms: {
+                    brcko_status: 'arbitration',
+                    competency_allocation: { comp_foreign_policy: 'shared' },
+                    institutional_choices: {},
+                },
+                map: { controllers: {}, wartimeControllers: {}, specialOsids: [], territoryPct: {} },
+            },
+        });
+        const resolveDayton = vi.fn().mockResolvedValue({ ok: true });
+        (window as unknown as { awwv: Record<string, unknown> }).awwv = { previewDayton, resolveDayton };
+        render(createElement(DaytonNegotiationModal, { dayton: PENDING, conference: true }));
+
+        expect(screen.getByText(/6 Nov 1995/)).toBeTruthy();
+        fireEvent.click(screen.getByRole('button', { name: 'Enter conference room' }));
+        expect(document.activeElement).toBe(screen.getByRole('heading', { name: 'Hope Hotel conference room' }));
+        const nav = within(screen.getByRole('navigation', { name: 'Conference objects' }));
+        const close = () => fireEvent.click(screen.getByRole('button', { name: 'Return to conference room' }));
+        const folderHotspot = screen.getByTestId('dayton-hotspot-folder');
+        fireEvent.click(folderHotspot);
+        expect(screen.getByText('Negotiation Capital:')).toBeTruthy();
+        close();
+        expect(document.activeElement).toBe(folderHotspot);
+
+        const draft = nav.getByRole('button', { name: 'Current draft' });
+        fireEvent.click(draft);
+        fireEvent.click(screen.getByText('Demand (12)'));
+        fireEvent.click(screen.getByRole('button', { name: 'Probe Positions' }));
+        await screen.findByText('Draft settlement ready');
+        expect(previewDayton.mock.calls[0]![0].territorial_demands).toEqual(['gorazde_corridor']);
+        expect(resolveDayton).not.toHaveBeenCalled();
+        close();
+        expect(document.activeElement).toBe(draft);
+
+        fireEvent.click(nav.getByRole('button', { name: 'Settlement map' }));
+        expect(screen.getByRole('region', { name: 'Settlement territory' })).toBeTruthy();
+        close();
+        fireEvent.click(nav.getByRole('button', { name: 'Treaty binder' }));
+        const terms = within(screen.getByRole('region', { name: 'Institutions and powers' }));
+        expect(terms.getByText('Foreign Policy').nextElementSibling?.textContent).toMatch(/shared/i);
+        close();
+
+        fireEvent.click(draft);
+        fireEvent.click(screen.getByRole('button', { name: 'Submit Proposal' }));
+        await waitFor(() => expect(resolveDayton.mock.calls[0]![0]).toEqual(previewDayton.mock.calls[0]![0]));
+    });
+
+    it('shows preview failures in the conference and clears them on retry', async () => {
+        const previewDayton = vi.fn()
+            .mockResolvedValueOnce({ ok: false, error: 'preview rejected' })
+            .mockResolvedValueOnce({ ok: true });
+        (window as unknown as { awwv: Record<string, unknown> }).awwv = { previewDayton };
+        render(createElement(DaytonNegotiationModal, { dayton: PENDING, conference: true }));
+
+        fireEvent.click(screen.getByRole('button', { name: 'Skip arrival' }));
+        const nav = within(screen.getByRole('navigation', { name: 'Conference objects' }));
+        fireEvent.click(nav.getByRole('button', { name: 'Settlement map' }));
+        const probe = screen.getByRole<HTMLButtonElement>('button', { name: 'Probe Positions' });
+        probe.focus();
+        fireEvent.click(probe);
+        expect(probe.disabled).toBe(false);
+        expect(probe.getAttribute('aria-disabled')).toBe('true');
+        fireEvent.click(probe);
+        expect(previewDayton).toHaveBeenCalledTimes(1);
+        expect((await screen.findByRole('alert')).textContent).toMatch(/Could not preview/);
+        expect(document.activeElement).toBe(probe);
+        expect(useGameStore.getState().loadError).toBeNull();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Return to conference room' }));
+        expect(screen.getByRole('alert').textContent).toMatch(/Could not preview/);
+        fireEvent.click(nav.getByRole('button', { name: 'Settlement map' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Probe Positions' }));
+        expect(screen.queryByRole('alert')).toBeNull();
+        await waitFor(() => expect(screen.getByRole('button', { name: 'Probe Positions' })).toBeTruthy());
+        expect(previewDayton).toHaveBeenCalledTimes(2);
+    });
+
+    it('retries a failed or rejected signature with the same proposal', async () => {
+        const resolveDayton = vi.fn()
+            .mockResolvedValueOnce({ ok: false, error: 'signature rejected' })
+            .mockRejectedValueOnce(new Error('signature transport failed'))
+            .mockResolvedValueOnce({ ok: true });
+        (window as unknown as { awwv: Record<string, unknown> }).awwv = { resolveDayton };
+        render(createElement(DaytonNegotiationModal, { dayton: PENDING, conference: true }));
+
+        fireEvent.click(screen.getByRole('button', { name: 'Skip arrival' }));
+        const nav = within(screen.getByRole('navigation', { name: 'Conference objects' }));
+        fireEvent.click(nav.getByRole('button', { name: 'Current draft' }));
+        fireEvent.click(screen.getByText('Demand (12)'));
+
+        for (let attempt = 0; attempt < 2; attempt++) {
+            const submit = screen.getByRole<HTMLButtonElement>('button', { name: 'Submit Proposal' });
+            submit.focus();
+            fireEvent.click(submit);
+            expect(submit.disabled).toBe(false);
+            expect(submit.getAttribute('aria-disabled')).toBe('true');
+            fireEvent.click(submit);
+            expect(resolveDayton).toHaveBeenCalledTimes(attempt + 1);
+            expect(screen.queryByRole('alert')).toBeNull();
+            expect((await screen.findByRole('alert')).textContent).toMatch(/Could not submit/);
+            expect(document.activeElement).toBe(submit);
+        }
+        expect(useGameStore.getState().loadError).toBeNull();
+        fireEvent.click(screen.getByRole('button', { name: 'Submit Proposal' }));
+        expect(screen.queryByRole('alert')).toBeNull();
+        expect(resolveDayton).toHaveBeenCalledTimes(3);
+        expect(resolveDayton.mock.calls.map(([proposal]) => proposal.territorial_demands))
+            .toEqual(Array.from({ length: 3 }, () => ['gorazde_corridor']));
+    });
+
+    it('contains campaign keyboard shortcuts without canceling room control defaults', () => {
+        const shellKeyDown = vi.fn();
+        window.addEventListener('keydown', shellKeyDown);
+        try {
+            render(createElement(DaytonNegotiationModal, { dayton: PENDING, conference: true }));
+            fireEvent.click(screen.getByRole('button', { name: 'Enter conference room' }));
+            const heading = screen.getByRole('heading', { name: 'Hope Hotel conference room' });
+            expect(document.activeElement).toBe(heading);
+
+            for (const key of [' ', 's', '1', 'Escape']) {
+                expect(fireEvent.keyDown(heading, { key })).toBe(true);
+            }
+            expect(shellKeyDown).not.toHaveBeenCalled();
+
+            fireEvent.keyDown(heading, { key: 'Tab' });
+            const folder = screen.getByTestId('dayton-hotspot-folder');
+            expect(document.activeElement).toBe(folder);
+            expect(fireEvent.keyDown(folder, { key: ' ' })).toBe(true);
+            fireEvent.click(folder);
+            fireEvent.keyDown(document.activeElement!, { key: 'Escape' });
+            expect(document.activeElement).toBe(folder);
+            expect(shellKeyDown).not.toHaveBeenCalled();
+        } finally {
+            window.removeEventListener('keydown', shellKeyDown);
+        }
+    });
+
+    it('keeps the forced conference open and only offers submission', () => {
+        render(createElement(DaytonNegotiationModal, {
+            conference: true,
+            dayton: { ...PENDING, forced: { onFaction: 'RBiH', by: 'united_states' } },
+        }));
+        fireEvent.click(screen.getByRole('button', { name: 'Skip arrival' }));
+        const nav = within(screen.getByRole('navigation', { name: 'Conference objects' }));
+        fireEvent.click(nav.getByRole('button', { name: 'Current draft' }));
+        expect(screen.queryByRole('button', { name: 'Decline Settlement' })).toBeNull();
+        expect(screen.getByRole('button', { name: 'Submit Proposal' })).toBeTruthy();
+        fireEvent.keyDown(document.activeElement!, { key: 'Escape' });
+        expect(screen.getByRole('heading', { name: 'Hope Hotel conference room' })).toBeTruthy();
+        expect(screen.queryByRole('button', { name: 'Submit Proposal' })).toBeNull();
     });
 });

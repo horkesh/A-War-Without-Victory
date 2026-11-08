@@ -1,0 +1,146 @@
+.dayton-live {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: #1c1b17;
+  color: #eee9dc;
+  font-family: var(--font-command), system-ui, sans-serif;
+}
+.dayton-live-arrival,
+.dayton-live-room {
+  position: absolute;
+  inset: 0;
+}
+.dayton-live-arrival {
+  display: flex;
+  align-items: flex-start;
+  overflow: auto;
+  padding: clamp(1rem, 5%, 5rem);
+  background-size: cover;
+  background-position: center;
+}
+.dayton-live-intro,
+.dayton-live-heading {
+  border-inline-start: 2px solid #b09b70;
+  background: #171611ed;
+  box-shadow: 0 8px 24px #0005;
+}
+.dayton-live-intro {
+  max-width: 29rem;
+  padding: 1.35rem;
+}
+.dayton-live-heading {
+  position: absolute;
+  z-index: 1;
+  inset-block-start: .85rem;
+  inset-inline-start: .85rem;
+  max-width: calc(100% - 1.7rem);
+  padding: .6rem .85rem;
+  pointer-events: none;
+}
+.dayton-live h2 {
+  font-family: Georgia, serif;
+  font-size: clamp(1.3rem, 2.2vw, 2rem);
+  line-height: 1.12;
+}
+.dayton-live-intro > p,
+.dayton-live-heading > p {
+  margin-block: .3rem;
+}
+.dayton-live-kicker {
+  font-size: .78rem;
+  font-weight: 650;
+  letter-spacing: .09em;
+}
+.dayton-live-intro .dayton-live-kicker,
+.dayton-live-heading .dayton-live-kicker {
+  color: #e7ce8d;
+}
+.dayton-live-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+}
+.dayton-live-intro .dayton-live-actions {
+  margin-top: 1rem;
+}
+.dayton-live-button {
+  min-height: 2.5rem;
+  border: 1px solid #a78e5c;
+  border-radius: 3px;
+  padding: .35rem .65rem;
+  background: #292720;
+  color: #eee9dc;
+  font-size: .9rem;
+  font-weight: 600;
+}
+.dayton-live-button:hover {
+  background: #413925;
+}
+.dayton-live-primary {
+  background: #4a3b24;
+}
+.dayton-live :focus-visible {
+  outline: 2px solid #a37c24;
+  outline-offset: 2px;
+}
+.dayton-live-nav {
+  position: absolute;
+  z-index: 1;
+  bottom: .65rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 1.3rem);
+  justify-content: center;
+  padding: .35rem;
+  background: #171611ed;
+  border: 1px solid #685c44;
+  border-radius: 4px;
+}
+.dayton-live-panel {
+  position: absolute;
+  z-index: 2;
+  inset-block: .85rem;
+  inset-inline-end: .85rem;
+  width: min(44rem, 72%, calc(100% - 1.7rem));
+  display: flex;
+  flex-direction: column;
+  border: 2px solid #a78e5c;
+  border-radius: .35rem;
+  background: linear-gradient(160deg, #f0e8d8, #e0d8c0 65%, #d8ceb8);
+  color: #2a2016;
+  box-shadow: 0 12px 36px #000a;
+}
+.dayton-live-panel-heading {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: .65rem 1rem;
+  border-bottom: 1px solid #a78e5c;
+}
+.dayton-live-error {
+  flex: none;
+  padding: .45rem .65rem;
+  border-inline-start: 3px solid #ab4941;
+  background: #f0d4cf;
+  color: #651e18;
+  font-size: .9rem;
+  font-weight: 650;
+}
+.dayton-live-panel > .dayton-live-error {
+  margin: .65rem 1rem 0;
+}
+.dayton-live-panel-body {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+@container interface-viewport (max-width: 820px) {
+  .dayton-live-panel { width: calc(100% - 1.7rem); }
+}
