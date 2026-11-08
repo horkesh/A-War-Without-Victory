@@ -13911,3 +13911,11 @@ The preview and signing handlers share the existing Dayton proposal type and a v
 - The isolated conference fixture uses a 2172 × 724 panoramic arrival proof with a centered standard-screen crop. Arrival and all four room hotspots passed at the five plan viewports. The fixture sign and decline walkthroughs passed.
 - Independent review and its focused UI follow-up passed. Final targeted suites passed 69 tests. Typecheck, the desktop sim bundle and production map build passed. The fixture is absent from production output. No change to engine rules, save schema or live conference activation.
 - Geometry preflight found mapped cells for all eight fixed packages and no inter-package overlap. Goražde's current 40-cell footprint remains a design question. Evidence is under F:/AWWV-worktrees/.dayton-design/next-slice.
+
+## 2026-11-08 — Freeze the desktop Dayton agreement for draft and signed viewers (IPC, SAVE, UI)
+
+The existing Dayton preview and explicit desktop signing paths produce one versioned agreement shape from the resolver. Signing stores the resolved institutions, settled OSID assignments, pre-signature controllers and special areas in the existing save transaction. Both views render the same record. The app clears a preview when the draft or campaign changes. Signed retries reuse the saved agreement. Legacy results continue to show their recorded terms.
+
+- Canonical disk save/reload and browser proofs passed. The browser compared 744 polygon paths and identical institution rows from the draft and reloaded Verdict at 1280 × 720 and 3426 × 1186. The saved fixture contains 712 explicit assignments and 16 resolved competencies.
+- The final focused IPC and renderer tests passed 28 checks. Backend regressions, headless parity, typecheck, desktop sim and map builds, and independent review passed. Evidence is under F:/AWWV-worktrees/.dayton-design/settlement-record.
+- The record is additive on explicit desktop signing. Wartime control, settlement calculations, bargaining rules, and headless save output are preserved. No native package run in this slice.

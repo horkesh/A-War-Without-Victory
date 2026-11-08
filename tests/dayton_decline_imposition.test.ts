@@ -294,8 +294,9 @@ describe('Dayton event records follow the real settlement', () => {
     it('the desktop sim and IPC handlers sign Dayton with the base-directory catalog', () => {
         const desktopSim = readFileSync(resolve(process.cwd(), 'src/desktop/desktop_sim.ts'), 'utf8');
         expect(desktopSim).toMatch(/baseDir \? loadDesktopEventDefinitions\(baseDir\) : undefined/);
+        expect(desktopSim).toContain('resolveDaytonNegotiation(state, proposal, baseDir)');
         const main = readFileSync(resolve(process.cwd(), 'src/desktop/electron-main.cjs'), 'utf8');
-        const calls = main.match(/sim\.resolveDaytonNegotiation\([\s\S]*?\);/g) ?? [];
+        const calls = main.match(/sim\.resolveDesktopDaytonAgreement\([\s\S]*?\);/g) ?? [];
         expect(calls.length).toBe(2);
         for (const call of calls) expect(call).toContain('getBaseDir()');
     });

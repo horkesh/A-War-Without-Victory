@@ -45,7 +45,7 @@ describe('desktop persistence contract', () => {
       'dismissEventNotification',
       'resolvePeacePlan',
       'submitPlayerCounterOffer',
-      'resolveDaytonNegotiation',
+      'resolveDesktopDaytonAgreement',
       'evaluateBotResponse',
       'createAiClient',
       'getAdvisorRecommendation',

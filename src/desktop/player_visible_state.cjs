@@ -351,6 +351,8 @@ function projectNegotiation(negotiation, playerFaction) {
     // The signed peace settlement (plan map + status) is a public treaty, derived from
     // political_controllers which is already projected in full (RD, 2026-11-07).
     'settlement',
+    // Frozen public treaty. The surrounding negotiation state still follows player scope.
+    'dayton_agreement',
   ]);
   if (isRecord(projected.pending_peace_plan)) {
     projected.pending_peace_plan.bot_responses = {};

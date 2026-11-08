@@ -17,6 +17,7 @@ import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
 import type { FactionVerdict, DimensionGrade, GameVerdict } from '../../../state/negotiation_types.js';
 import { WarCostSummary } from './WarCostSummary';
+import { DaytonSettlementViewer } from './DaytonSettlementViewer';
 import type { CostLedger } from '../../../sim/endgame/cost_ledger.js';
 import type { ComparisonResult, MilestoneComparison, MilestoneComparisonStatus } from '../../../sim/endgame/endgame_comparison.js';
 import { getPeacePlanById } from '../../../sim/negotiation/peace_plan_data.js';
@@ -529,7 +530,7 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                 zIndex={Z.GAME_OVER}
                 ariaLabel={t('gameOver.title')}
                 backdropClassName="bg-black/90 backdrop-blur-sm"
-                panelClassName="w-[min(980px,calc(var(--interface-viewport-width,100vw)-24px))] max-h-[calc(var(--interface-viewport-height,100vh)*0.92)] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden"
+                panelClassName={`${loadedGameState.daytonAgreement?.version === 1 ? 'w-[min(1440px,calc(var(--interface-viewport-width,100vw)-24px))]' : 'w-[min(980px,calc(var(--interface-viewport-width,100vw)-24px))]'} max-h-[calc(var(--interface-viewport-height,100vh)*0.92)] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden`}
             >
                 <CinematicVerdict
                     verdict={verdict}
@@ -615,6 +616,12 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                         );
                     })}
                 </div>
+
+                {loadedGameState.daytonAgreement?.version === 1 ? (
+                    <DaytonSettlementViewer agreement={loadedGameState.daytonAgreement} mode="signed" />
+                ) : verdict.dayton_result ? (
+                    <p className="text-sm text-text-secondary">{t('dayton.agreement.legacy')}</p>
+                ) : null}
 
                 {/* Selected Faction Report */}
                 <div>

@@ -166,6 +166,8 @@ export interface NegotiationState {
     pyrrhic_scores?: Record<string, number>;
     /** Result of the Dayton negotiation (set when Dayton resolves). */
     dayton_result?: DaytonResult;
+    /** Frozen public treaty from an explicit desktop signature. Absent on older saves and automatic close-outs. */
+    dayton_agreement?: DaytonAgreementRecord;
     /** Pending Dayton negotiation menu, persisted by pipeline when trigger fires.
      *  UI adapter reads this; it derives only the captured-ground packages (front_packages.ts) from state. Cleared implicitly when dayton_result is set. */
     pending_dayton?: PendingDaytonPacket;
@@ -366,6 +368,21 @@ export interface DaytonResult {
     constitutional_choices?: Record<string, string>;
     /** DIMENSION 5: final return/justice choice id -> option id. */
     return_justice?: Record<string, string>;
+}
+
+/** Authoritative presentation record for a Dayton offer or signature. */
+export interface DaytonAgreementRecord {
+    version: 1;
+    terms: DaytonResult;
+    map: {
+        /** OSID assignments under the treaty. */
+        controllers: Record<string, FactionId>;
+        /** Political controllers immediately before the signature. */
+        wartimeControllers: Record<string, FactionId | null>;
+        specialOsids: string[];
+        /** Area-weighted shares against the same denominator as the engine settlement. */
+        territoryPct: Record<string, number>;
+    };
 }
 
 /**

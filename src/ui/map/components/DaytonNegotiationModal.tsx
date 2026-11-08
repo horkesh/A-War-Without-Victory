@@ -45,7 +45,9 @@
  * and is interpreted at the IPC layer as the player refusing to negotiate
  * meaningfully.
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { DaytonAgreementRecord } from '../../../state/negotiation_types.js';
+import { DaytonSettlementViewer } from './DaytonSettlementViewer';
 import type { LoadedGameState } from '../data/types';
 import { useIPC, type IpcDaytonBotResponse } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
@@ -114,6 +116,9 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
     const [submitting, setSubmitting] = useState(false);
     const [confirmDecline, setConfirmDecline] = useState(false);
     const [probing, setProbing] = useState(false);
+    const [agreement, setAgreement] = useState<DaytonAgreementRecord | null>(null);
+    const draftRevision = useRef(0);
+    useEffect(() => () => { draftRevision.current++; }, []);
     const [botResponses, setBotResponses] = useState<Record<string, IpcDaytonBotResponse> | null>(null);
     /** The demand set that was probed — retained so the counter-offer diff is real. */
     const [probedDemands, setProbedDemands] = useState<Set<string>>(new Set());
@@ -141,10 +146,8 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
 
     // ── Live readouts (client-side mirrors of the shipped read-models) ─────────
     const autonomyIndex = useMemo(() => computeAutonomyPreview(institutions), [institutions]);
-    const brckoOutcome: BrckoOutcome = useMemo(
-        () => previewBrckoOutcome(playerFaction, demands, concessions),
-        [playerFaction, demands, concessions],
-    );
+    const brckoOutcome: BrckoOutcome = agreement?.terms.brcko_status
+        ?? previewBrckoOutcome(playerFaction, demands, concessions);
     // Live split estimate the player is shaping: start from the historical 51:49 and
     // nudge it by demands/concessions on the player's side. Display-only — bounded
     // input into the fragmentation term; the authoritative split comes from the engine.
@@ -160,7 +163,12 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
     );
 
     // ── Mutators (clear stale probe whenever the proposal changes) ─────────────
-    const clearProbe = () => { setBotResponses(null); setProbedDemands(new Set()); };
+    const clearProbe = () => {
+        draftRevision.current++;
+        setAgreement(null);
+        setBotResponses(null);
+        setProbedDemands(new Set());
+    };
 
     const toggleDemand = (id: string) => {
         clearProbe();
@@ -204,14 +212,24 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
         if (!ipc.isAvailable || probing || submitting || overBudget || !playerFaction) return;
         setProbing(true);
         const snapshot = new Set(demands);
-        const res = await ipc.previewDayton(buildProposal());
-        if (res.ok && res.botResponses) {
-            setProbedDemands(snapshot);
-            setBotResponses(res.botResponses);
-        } else if (!res.ok) {
-            setLoadError(res.error ?? 'Failed to probe Dayton positions.');
+        const revision = draftRevision.current;
+        try {
+            const res = await ipc.previewDayton(buildProposal());
+            if (revision !== draftRevision.current) return;
+            if (res.ok) {
+                setAgreement(res.agreement ?? null);
+                setProbedDemands(snapshot);
+                setBotResponses(res.botResponses ?? null);
+            } else {
+                setLoadError(res.error ?? 'Failed to probe Dayton positions.');
+            }
+        } catch (error) {
+            if (revision === draftRevision.current) {
+                setLoadError(error instanceof Error ? error.message : 'Failed to probe Dayton positions.');
+            }
+        } finally {
+            setProbing(false);
         }
-        setProbing(false);
     };
 
     /** Adopt a bot's counter-offer: fold its terms back into the player's proposal.
@@ -550,6 +568,12 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                     playerFaction={playerFaction}
                     capitalAvailable={capitalAvailable}
                 />
+
+                {agreement && (
+                    <div className="px-8 py-4">
+                        <DaytonSettlementViewer agreement={agreement} mode="draft" />
+                    </div>
+                )}
 
                 {/* Probe Positions — bot counter-offer preview */}
                 <div className="px-8 py-4 border-b border-[#c8b898]/40">

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { act, cleanup, render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { createElement } from 'react';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
@@ -117,6 +117,44 @@ describe('DaytonNegotiationModal — Phase-4 player-agency surface', () => {
         });
         // The RS counter dropped the gorazde demand → diff names it explicitly.
         expect(screen.getByText('Drops your demands on: Goražde Corridor')).toBeTruthy();
+    });
+
+    it('shows authoritative institutions after a preview and clears them when the draft changes', async () => {
+        const previewDayton = vi.fn().mockResolvedValue({
+            ok: true,
+            botResponses: {},
+            agreement: {
+                version: 1,
+                terms: {
+                    brcko_status: 'arbitration',
+                    competency_allocation: { comp_foreign_policy: 'shared' },
+                    institutional_choices: {},
+                },
+                map: { controllers: {}, wartimeControllers: {}, specialOsids: [], territoryPct: {} },
+            },
+        });
+        (window as unknown as { awwv: Record<string, unknown> }).awwv = { previewDayton };
+        render(createElement(DaytonNegotiationModal, { dayton: PENDING }));
+        fireEvent.click(screen.getByRole('button', { name: 'Probe Positions' }));
+        fireEvent.click(await screen.findByText('Draft settlement'));
+        expect(screen.getAllByText(/International Arbitration District/)).toHaveLength(2);
+        const terms = within(screen.getByRole('region', { name: 'Institutions and powers' }));
+        expect(terms.getByText('Foreign Policy').nextElementSibling?.textContent).toMatch(/shared/i);
+        fireEvent.click(screen.getByText('Demand (12)'));
+        expect(screen.queryByText('Draft settlement')).toBeNull();
+    });
+
+    it('discards an authoritative preview that returns after a draft edit', async () => {
+        let complete: (response: unknown) => void = () => {};
+        const previewDayton = vi.fn(() => new Promise(resolve => { complete = resolve; }));
+        (window as unknown as { awwv: Record<string, unknown> }).awwv = { previewDayton };
+        render(createElement(DaytonNegotiationModal, { dayton: PENDING }));
+        fireEvent.click(screen.getByRole('button', { name: 'Probe Positions' }));
+        fireEvent.click(screen.getByText('Demand (12)'));
+        await act(async () => complete({ ok: true, agreement: { version: 1 } }));
+
+        expect(screen.queryByText('Draft settlement')).toBeNull();
+        expect(screen.getByRole<HTMLButtonElement>('button', { name: 'Probe Positions' }).disabled).toBe(false);
     });
 
     it('prevents probing over-budget proposals and re-enables it after revision', () => {

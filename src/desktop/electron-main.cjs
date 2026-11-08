@@ -3647,12 +3647,18 @@ app.whenReady().then(() => {
       const sim = getDesktopSim();
       const state = readCanonicalCurrentState(sim);
       // A retry after signing returns the recorded agreement without a second transaction.
-      const signed = state.military.negotiation?.dayton_result;
-      if (signed) return { ok: true, result: signed };
+      const signed = state.military.negotiation;
+      if (signed?.dayton_result) {
+        return {
+          ok: true, result: signed.dayton_result,
+          ...(signed.dayton_agreement && { agreement: signed.dayton_agreement }),
+        };
+      }
       const proposal = sim.parseDaytonProposal(payload, state);
-      const result = sim.resolveDaytonNegotiation(state, proposal, getBaseDir());
+      const { result, agreement } = sim.resolveDesktopDaytonAgreement(state, proposal, getBaseDir());
+      state.military.negotiation.dayton_agreement = agreement;
       writeCanonicalCurrentState(sim, state);
-      return { ok: true, result };
+      return { ok: true, result, agreement };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
     }
@@ -3693,6 +3699,13 @@ app.whenReady().then(() => {
       const sim = getDesktopSim();
       // Fresh clone from the canonical JSON — the resolver mutates this clone only.
       const clone = sim.deserializeState(currentGameStateJson);
+      const signed = clone.military.negotiation;
+      if (signed?.dayton_result) {
+        return {
+          ok: true, result: signed.dayton_result,
+          ...(signed.dayton_agreement && { agreement: signed.dayton_agreement }),
+        };
+      }
       const proposal = sim.parseDaytonProposal(payload, clone);
       const playerFaction = (clone.meta && clone.meta.player_faction) || 'RBiH';
       const canonical = ['HRHB', 'RBiH', 'RS'];
@@ -3703,8 +3716,8 @@ app.whenReady().then(() => {
       }
       // Resolve on the clone to surface the authoritative readouts (mutates the
       // clone only — the clone is then garbage-collected; nothing is written back).
-      const result = sim.resolveDaytonNegotiation(clone, proposal, getBaseDir());
-      return { ok: true, result, botResponses, playerFaction };
+      const { result, agreement } = sim.resolveDesktopDaytonAgreement(clone, proposal, getBaseDir());
+      return { ok: true, result, agreement, botResponses, playerFaction };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
     }

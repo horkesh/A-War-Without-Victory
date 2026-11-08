@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { DaytonProposal } from '../../../state/negotiation_types';
+import type { DaytonAgreementRecord, DaytonProposal } from '../../../state/negotiation_types';
 import type { SettingsSaveOptions } from '../preferences/nativeSettings';
 import type {
     GameStateUpdateMetadata,
@@ -190,6 +190,7 @@ export interface IpcDaytonBotResponse {
  */
 export interface IpcDaytonPreviewResult {
     ok: boolean;
+    agreement?: DaytonAgreementRecord;
     result?: Record<string, unknown>;
     botResponses?: Record<string, IpcDaytonBotResponse>;
     playerFaction?: string;
@@ -295,7 +296,7 @@ interface WindowAwwv {
         rider?: string;
     }) => Promise<{ ok: boolean; counter_offer_id?: string; error?: string }>;
     resolveParamilitaryRequests: (decisions: Array<{ target_osid: string; decision: 'allow' | 'deny' }>, options?: ParamilitaryReviewOptions) => Promise<{ ok: boolean; report?: unknown; error?: string }>;
-    resolveDayton: (proposal: DaytonProposal) => Promise<{ ok: boolean; result?: Record<string, unknown>; error?: string }>;
+    resolveDayton: (proposal: DaytonProposal) => Promise<{ ok: boolean; result?: Record<string, unknown>; agreement?: DaytonAgreementRecord; error?: string }>;
     /** Decline Dayton: war continues 8 weeks, then the table reopens with no decline. */
     declineDayton: () => Promise<{ ok: boolean; imposition_turn?: number; error?: string }>;
     /** Read-only Dayton preview (Dayton Phase-4): bot responses + authoritative readouts, no state mutation. */
@@ -740,7 +741,7 @@ export function useIPC() {
 
             resolveDayton: awwv
                 ? (proposal: DaytonProposal) => awwv.resolveDayton(proposal)
-                : makeNoop<{ ok: boolean; result?: Record<string, unknown>; error?: string }>(),
+                : makeNoop<{ ok: boolean; result?: Record<string, unknown>; agreement?: DaytonAgreementRecord; error?: string }>(),
 
             declineDayton: awwv
                 ? () => awwv.declineDayton()

@@ -2978,6 +2978,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         pendingPeacePlan: derivePendingPeacePlan(state),
         pendingCounterOffers: derivePendingCounterOffers(state),
         pendingDayton: derivePendingDayton(state),
+        daytonAgreement: readDaytonAgreement(state.military?.negotiation?.dayton_agreement),
         settlementMap: deriveSettlementMap(state),
         pendingProposalReviews,
         strategicDimensions: deriveStrategicDimensions(state),
@@ -4135,6 +4136,24 @@ function derivePatronOverrideAuthority(state: any): LoadedGameState['patronOverr
     return Object.keys(out).length > 0 ? out : undefined;
 }
 
+function readDaytonAgreement(value: unknown): LoadedGameState['daytonAgreement'] {
+    const agreement = value as LoadedGameState['daytonAgreement'];
+    if (agreement?.version !== 1) return undefined;
+    const isRecord = (item: unknown): item is Record<string, unknown> =>
+        item !== null && typeof item === 'object' && !Array.isArray(item);
+    const { map, terms } = agreement;
+    if (!map || !terms
+        || !isRecord(map.controllers) || !isRecord(map.wartimeControllers)
+        || !Array.isArray(map.specialOsids) || !map.specialOsids.every(id => typeof id === 'string')
+        || !isRecord(map.territoryPct) || !Object.values(map.territoryPct).every(Number.isFinite)
+        || !isRecord(terms.institutional_choices)
+        || ![terms.competency_allocation, terms.constitutional_choices, terms.return_justice]
+            .every(item => item === undefined || isRecord(item))) {
+        return undefined;
+    }
+    return agreement;
+}
+
 /**
  * The settled map of a signed peace (RD, 2026-11-07): the plan, the OSID-level settled
  * controllers (recomputed by the sim's settlementControllersFor, never re-derived here), the
@@ -4143,6 +4162,14 @@ function derivePatronOverrideAuthority(state: any): LoadedGameState['patronOverr
  * Rendering (verdict comparison, inspection mode) belongs to the Dayton conference lane.
  */
 export function deriveSettlementMap(state: any): LoadedGameState['settlementMap'] {
+    const frozen = readDaytonAgreement(state?.military?.negotiation?.dayton_agreement);
+    if (frozen?.version === 1) {
+        const { controllers, wartimeControllers, specialOsids, territoryPct } = frozen.map;
+        return {
+            planId: 'dayton', controllers, specialOsids, territoryPct,
+            changedOsids: Object.keys(controllers).filter(id => wartimeControllers[id] !== controllers[id]).sort(strictCompare),
+        };
+    }
     const settlement = state?.military?.negotiation?.settlement;
     if (!settlement || typeof settlement.plan_id !== 'string') return undefined;
     const controllers = settlementControllersFor(state as GameState);

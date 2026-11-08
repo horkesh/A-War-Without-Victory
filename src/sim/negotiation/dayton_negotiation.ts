@@ -10,6 +10,7 @@
 
 import type { GameState, FactionId } from '../../state/game_state.js';
 import type {
+    DaytonAgreementRecord,
     DaytonProposal,
     DaytonResult,
     DaytonBotResponse,
@@ -17,7 +18,7 @@ import type {
 } from '../../state/negotiation_types.js';
 import { createEmptyCapital, createDefaultPatronRelationship } from '../../state/negotiation_types.js';
 import { getAllTerritorialPackages, getTerritorialPackageById } from './territorial_packages.js';
-import { getAllInstitutionalPackages, computeEntityAutonomyIndex } from './institutional_packages.js';
+import { ENTITY_AUTONOMY_DEFAULT, getAllInstitutionalPackages, computeEntityAutonomyIndex } from './institutional_packages.js';
 import { evaluateBotResponse, getCompositeCapital, computeProposalCostToFaction, clampPlayerProposalToBudget } from './bot_negotiation.js';
 import {
     finalCompetencyCost,
@@ -31,14 +32,21 @@ import {
     competencyPrefDelta,
     constitutionalPrefDelta,
 } from './bot_preferences.js';
-import { getConstitutionalChoiceById } from './constitutional_packages.js';
+import {
+    getAllConstitutionalChoices,
+    getAllReturnJusticeChoices,
+    getConstitutionalChoiceById,
+    getDefaultOptionId,
+    type ConstitutionalChoice,
+} from './constitutional_packages.js';
+import { getAllCompetencyPackages } from './competency_packages.js';
 import type { CompetencyOwner } from './competency_packages.js';
 import type { CompetencyOwnerChoice, EntityAutonomySetting } from '../../state/negotiation_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';
 import { computePeaceDysfunctionBreakdown } from './peace_dysfunction.js';
 import { getPackageAreaPct, resolveOsidsForKeywords } from './package_area_resolver.js';
-import { applyPeaceSettlement, computeSettlementControllers } from './peace_settlement.js';
+import { applyPeaceSettlement, computeSettlementControllers, settlementControllersFor } from './peace_settlement.js';
 import { frontPackagesForProposal, frontPackageVisibleToPlayer, sameEntitySide } from './front_packages.js';
 import { packageOsids, selectPatronForced } from './patron_leverage.js';
 import type { TerritorialPackage } from '../../state/negotiation_types.js';
@@ -49,6 +57,54 @@ import type { EventDefinition } from '../events/event_types.js';
 
 /** Territorial package id of the Brčko District (its outcome is brcko_status). */
 const BRCKO_DISTRICT_PACKAGE_ID = 'brcko_district';
+
+function freezeInstitutionalChoices(
+    choices: readonly ConstitutionalChoice[],
+    resolved?: Record<string, string>,
+): Record<string, string> {
+    return Object.fromEntries(choices.map(({ id }) => {
+        const option = resolved?.[id] ?? getDefaultOptionId(id);
+        if (option === undefined) throw new Error(`No default Dayton option for ${id}`);
+        return [id, option];
+    }));
+}
+
+/** Capture the public treaty immediately after resolution, while the settlement inputs are current. */
+export function projectDaytonAgreement(
+    state: GameState,
+    wartimeControllers: Record<string, FactionId | null>,
+): DaytonAgreementRecord {
+    const negotiation = state.military.negotiation;
+    const result = negotiation?.dayton_result;
+    const settlement = negotiation?.settlement;
+    if (!result || settlement?.plan_id !== 'dayton') {
+        throw new Error('Dayton resolution did not record a settlement');
+    }
+    const controllers = settlementControllersFor({
+        ...state,
+        political: { ...state.political, political_controllers: wartimeControllers },
+    })!;
+
+    return {
+        version: 1,
+        terms: {
+            ...structuredClone(result),
+            entity_autonomy: result.entity_autonomy ?? ENTITY_AUTONOMY_DEFAULT,
+            competency_allocation: Object.fromEntries(getAllCompetencyPackages().map(({ id, default_owner }) =>
+                [id, result.competency_allocation?.[id] ?? default_owner])),
+            constitutional_choices: freezeInstitutionalChoices(getAllConstitutionalChoices(), result.constitutional_choices),
+            return_justice: freezeInstitutionalChoices(getAllReturnJusticeChoices(), result.return_justice),
+        },
+        map: {
+            controllers,
+            wartimeControllers: Object.fromEntries(Object.entries(wartimeControllers)
+                .sort(([a], [b]) => strictCompare(a, b))),
+            // An explicit assignment supersedes the baseline map's special status.
+            specialOsids: settlement.special_osids.filter(osid => !settlement.map_overrides?.[osid]),
+            territoryPct: { ...settlement.territory_pct },
+        },
+    };
+}
 
 /** Set when Dayton is signed or imposed; dayton_signed_1995's trigger reads it. */
 export const DAYTON_SETTLEMENT_SIGNED_FLAG = 'dayton_settlement_signed';
