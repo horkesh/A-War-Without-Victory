@@ -357,6 +357,42 @@ describe('DaytonNegotiationModal — live conference room', () => {
         geometry.mockRestore();
     });
 
+    it('opens a delegation brief that states the ground, the record, the patron and the refused plans', () => {
+        const folder = {
+            faction: 'RBiH', turn: 187,
+            settlements: { held: 250, total: 712, peak: 319, peak_turn: 0 },
+            enclaves: { held: ['gorazde'], lost: ['srebrenica', 'zepa'] },
+            condemnation: [],
+            patron: { override_authority: 80, force_threshold: 75, can_force: true },
+            refused_plans: [{
+                plan_id: 'owen_stoltenberg', turn_offered: 70, proposed_split: { RBiH: 30, RS: 52.5, HRHB: 17.5 },
+                refused_by: ['RBiH'], player_answer: 'rejected' as const, weeks_since: 117,
+                dead_since: { military: 41000, civilian: 12000 }, displaced_since: 400000,
+            }],
+            war: { weeks: 187, dead: { military: 88000, civilian: 31000 }, displaced: 1300000 },
+        };
+        render(createElement(DaytonNegotiationModal, { dayton: { ...PENDING, delegationFolder: folder }, conference: true }));
+        fireEvent.click(screen.getByRole('button', { name: 'Enter conference room' }));
+        fireEvent.click(screen.getByTestId('dayton-hotspot-folder'));
+        const brief = screen.getByRole('article', { name: 'Delegation folder' });
+        expect(within(brief).getByText('Republic of Bosnia and Herzegovina')).toBeTruthy();
+        expect(within(brief).getByText('250 of 712 settlements')).toBeTruthy();
+        expect(within(brief).getByText(/At your height, on 6 Apr 1992, you held 319/)).toBeTruthy();
+        expect(within(brief).getByText('Srebrenica, Žepa')).toBeTruthy();
+        expect(within(brief).getByText(/No international condemnation/)).toBeTruthy();
+        expect(within(brief).getByText(/Washington can sign concessions over your head/)).toBeTruthy();
+        expect(within(brief).getByText('Owen-Stoltenberg Plan')).toBeTruthy();
+        expect(within(brief).getByText('Your delegation refused it.')).toBeTruthy();
+        expect(within(brief).getByText(/In the 117 weeks since, 41,000 soldiers and 12,000 civilians were killed on all sides, and 400,000 civilians were displaced/)).toBeTruthy();
+        const total = within(brief).getByText('The war so far, all sides').closest('footer')!;
+        expect(within(total as HTMLElement).getByText('88,000')).toBeTruthy();
+        expect(within(total as HTMLElement).getByText('soldiers killed')).toBeTruthy();
+        expect(within(total as HTMLElement).getByText('31,000')).toBeTruthy();
+        expect(within(total as HTMLElement).getByText('1,300,000')).toBeTruthy();
+        // No bargaining cost figures in the brief (A2).
+        expect(within(brief).queryByText(/Negotiation Capital/)).toBeNull();
+    });
+
     it('opens the room objects and keeps one editable draft and authoritative preview between them', async () => {
         const previewDayton = vi.fn().mockResolvedValue({
             ok: true,
@@ -381,7 +417,10 @@ describe('DaytonNegotiationModal — live conference room', () => {
         const close = () => fireEvent.click(screen.getByRole('button', { name: 'Return to conference room' }));
         const folderHotspot = screen.getByTestId('dayton-hotspot-folder');
         fireEvent.click(folderHotspot);
-        expect(screen.getByText('Negotiation Capital:')).toBeTruthy();
+        // The folder is the campaign's receipt (DC A1); the budget moved to the draft.
+        // PENDING predates the brief, so the folder says so plainly.
+        expect(screen.getByText(/saved before delegation briefs existed/)).toBeTruthy();
+        expect(screen.queryByText('Negotiation Capital:')).toBeNull();
         close();
         expect(document.activeElement).toBe(folderHotspot);
 

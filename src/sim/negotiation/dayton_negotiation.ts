@@ -27,6 +27,8 @@ import {
     getDialDeclarationCost,
 } from './dayton_dial_cost.js';
 import { reconcileProposalPowers, reconcileResolvedPowers } from './power_overlap.js';
+import { buildDelegationFolder } from './delegation_folder.js';
+import type { DelegationFolder } from '../../state/negotiation_types.js';
 import {
     adjustedCost,
     dialPrefDelta,
@@ -231,6 +233,7 @@ export function initiateDaytonNegotiation(state: GameState): {
     institutional_packages: Array<{ id: string; name: string; centralized_cost: number; decentralized_cost: number }>;
     faction_capital: Record<string, number>;
     patron_override: Record<string, number>;
+    delegation_folder?: DelegationFolder;
 } {
     ensureNegotiationState(state);
 
@@ -245,6 +248,8 @@ export function initiateDaytonNegotiation(state: GameState): {
         factionCapital[faction] = cap ? getCompositeCapital(cap, faction, neg.strategic_dimensions) : 50;
         patronOverride[faction] = neg.patron_relationships[faction]?.override_authority ?? 0;
     }
+    // The player's delegation folder (DC A1). Read-only over state.
+    const folder = buildDelegationFolder(state);
 
     return {
         territorial_packages: getAllTerritorialPackages().map(pkg => ({
@@ -262,6 +267,7 @@ export function initiateDaytonNegotiation(state: GameState): {
         })),
         faction_capital: factionCapital,
         patron_override: patronOverride,
+        ...(folder ? { delegation_folder: folder } : {}),
     };
 }
 

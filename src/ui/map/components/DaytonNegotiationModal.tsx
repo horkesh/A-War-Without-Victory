@@ -76,6 +76,7 @@ import {
     type InstitutionalSelections,
 } from './DaytonInstitutionalDimensions';
 import { legacyProjection } from '../../../sim/negotiation/power_overlap.js';
+import { DelegationFolder } from '../dayton_conference/DelegationFolder';
 
 type DaytonData = NonNullable<LoadedGameState['pendingDayton']>;
 type CounterProposal = NonNullable<IpcDaytonBotResponse['counter_proposal']>;
@@ -796,18 +797,19 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
                     returnFocus={returnFocus}
                     onPanelChange={openPanel}
                     panels={{
+                        // The folder is the campaign's receipt (DC A1); the bargaining readouts
+                        // and the budget belong with the draft the player is shaping.
                         folder: (
                             <>
                                 {forcedBanner}
-                                <p className="px-8 pt-4 font-bold">{playerFaction && FACTION_DISPLAY[playerFaction]}</p>
-                                {budget}
-                                {readouts}
+                                <DelegationFolder folder={dayton.delegationFolder} />
                             </>
                         ),
                         draft: (
                             <>
                                 {forcedBanner}
                                 {budget}
+                                {readouts}
                                 {territory}
                                 {responses}
                                 {submission}

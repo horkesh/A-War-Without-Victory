@@ -101,6 +101,10 @@ export interface PeacePlanResponse {
     turn_offered: number;
     responses: Record<string, 'accepted' | 'rejected' | 'pending'>;
     resolved: boolean;
+    /** Turn the answers were recorded (DC A1). Absent on older saves. */
+    resolved_turn?: number;
+    /** The war's dead, all sides, when the answers were recorded (sim/negotiation/war_dead.ts). Absent on older saves. */
+    dead_at_resolution?: { military: number; civilian: number };
 }
 
 export type CounterOfferFaction = 'RBiH' | 'RS' | 'HRHB';
@@ -213,6 +217,39 @@ export interface PendingDaytonPacket {
      * into the next turn is signed on the historical Dayton map.
      */
     forced?: { on_faction: string; by: 'united_states' | 'belgrade' | 'zagreb'; opened_turn: number };
+    /**
+     * The player delegation's folder (DC amendment A1): the campaign's receipt at the
+     * moment the table opens. Optional; built by sim/negotiation/delegation_folder.ts
+     * for the player's faction only. Older saves without it show the folder unavailable.
+     */
+    delegation_folder?: DelegationFolder;
+}
+
+/** Built once when the Dayton table opens; see sim/negotiation/delegation_folder.ts. */
+export interface DelegationFolder {
+    faction: string;
+    turn: number;
+    /** Settlement counts (one measure for now and peak). */
+    settlements: { held: number; total: number; peak: number; peak_turn: number };
+    enclaves: { held: string[]; lost: string[] };
+    /** Condemnation flags the verdict would apply if the war ended now. */
+    condemnation: string[];
+    patron: { override_authority: number; force_threshold: number; can_force: boolean };
+    refused_plans: Array<{
+        plan_id: string;
+        turn_offered: number;
+        proposed_split: { RBiH: number; RS: number; HRHB: number };
+        refused_by: string[];
+        player_answer: 'accepted' | 'rejected' | 'pending';
+        /** Weeks since the answers were recorded (the offer turn on older saves). */
+        weeks_since: number;
+        /** The dead on all sides since the answers (Verdict sources); null when the save predates the stamp. */
+        dead_since: { military: number; civilian: number } | null;
+        /** Civilians displaced in turns after the answers. */
+        displaced_since: number;
+    }>;
+    /** All-sides totals over the whole war so far; the dead come from the Verdict's sources. */
+    war: { weeks: number; dead: { military: number; civilian: number }; displaced: number };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

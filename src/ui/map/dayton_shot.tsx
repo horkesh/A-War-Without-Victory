@@ -19,6 +19,8 @@ import { useGameStore } from './store/gameStore';
 import { setLocale } from './i18n';
 import { makeMockLoadedGameState } from './__mocks__/loadedGameState';
 import type { LoadedGameState } from './data/types';
+import type { DelegationFolder } from '../../state/negotiation_types.js';
+import rbihFolder from './__mocks__/dayton_delegation_folder.rbih.json';
 
 const params = new URLSearchParams(window.location.search);
 
@@ -81,6 +83,11 @@ useGameStore.setState({
     loadError: null,
 });
 
+// ?conference=1 mounts the live Hope Hotel room; the delegation folder is the one
+// buildDelegationFolder produced from the retained RBiH pending fixture (real numbers).
+const conference = params.get('conference') === '1';
+const dayton = conference ? { ...PENDING, delegationFolder: rbihFolder as DelegationFolder } : PENDING;
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
-    createElement(DaytonNegotiationModal, { dayton: PENDING }),
+    createElement(DaytonNegotiationModal, { dayton, conference }),
 );

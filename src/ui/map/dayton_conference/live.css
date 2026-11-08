@@ -114,6 +114,118 @@
   color: #2a2016;
   box-shadow: 0 12px 36px #000a;
 }
+/* Delegation folder (DC A1): a dossier on the folder's own leather and paper. */
+.dayton-folder {
+  display: grid;
+  gap: 1.1rem;
+  padding: 1rem 1.15rem 1.3rem;
+}
+.dayton-folder-cover {
+  padding: .9rem 1rem;
+  border-radius: 3px;
+  background: linear-gradient(160deg, #2f3b2c, #232c21);
+  color: #efe6cf;
+  box-shadow: inset 0 0 0 1px #4b5a45;
+}
+.dayton-folder-cover h3 { margin: .2rem 0 .1rem; font-size: 1.35rem; line-height: 1.2; }
+.dayton-folder-cover p { margin: 0; color: #cdbf9c; font-size: .9rem; }
+.dayton-folder-stamp {
+  display: inline-block;
+  padding: .1rem .45rem;
+  border: 1px solid #b89a5a;
+  color: #e3c983 !important;
+  font-size: .72rem !important;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.dayton-folder-section { display: grid; gap: .45rem; }
+.dayton-folder-section h4,
+.dayton-folder-total h4 {
+  margin: 0;
+  padding-bottom: .25rem;
+  border-bottom: 1px solid #b8a27a;
+  color: #5d4d36;
+  font-size: .78rem;
+  font-weight: 750;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.dayton-folder-section p { margin: 0; line-height: 1.45; }
+.dayton-folder-figure { font-size: 1.5rem; font-weight: 700; line-height: 1.15; }
+.dayton-folder-meter {
+  position: relative;
+  height: .7rem;
+  border-radius: 2px;
+  background: #cbbd9e;
+  overflow: visible;
+}
+.dayton-folder-meter-fill { position: absolute; inset-block: 0; inset-inline-start: 0; border-radius: 2px; }
+.dayton-folder-meter-pen { background: #6f5432; }
+.dayton-folder-meter-peak {
+  position: absolute;
+  inset-block: -.25rem;
+  width: 2px;
+  margin-inline-start: -1px;
+  background: #2a2016;
+}
+.dayton-folder-pairs { display: grid; grid-template-columns: max-content 1fr; gap: .2rem .8rem; margin: .2rem 0 0; }
+.dayton-folder-pairs dt { font-weight: 650; }
+.dayton-folder-pairs dd { margin: 0; }
+.dayton-folder-condemned {
+  padding: .45rem .6rem;
+  border-inline-start: 3px solid #8a2a22;
+  background: #ead0c8;
+  color: #4d1510;
+  font-weight: 650;
+}
+.dayton-folder-plans { display: grid; gap: .65rem; margin: 0; padding: 0; list-style: none; }
+.dayton-folder-plan {
+  display: grid;
+  gap: .35rem;
+  padding: .6rem .7rem;
+  border: 1px solid #b8a27a;
+  border-radius: 3px;
+  background: #f3ebda;
+}
+.dayton-folder-plan-yours { border-color: #6f5432; box-shadow: inset 3px 0 0 #6f5432; }
+.dayton-folder-plan-name { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .2rem .8rem; }
+.dayton-folder-plan-name span { color: #5d4d36; font-size: .9rem; }
+.dayton-folder-split { display: flex; height: 1.15rem; border-radius: 2px; overflow: hidden; }
+.dayton-folder-split span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: .72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.dayton-folder-since { color: #4a3a26; }
+.dayton-folder-total {
+  display: grid;
+  gap: .55rem;
+  padding: .8rem .9rem .9rem;
+  border-radius: 3px;
+  background: #2a2016;
+  color: #efe6cf;
+}
+.dayton-folder-total h4 { color: #cdbf9c; border-bottom-color: #5d4d36; }
+.dayton-folder-figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: .7rem 1rem;
+  margin: 0;
+}
+.dayton-folder-figures > div { display: flex; flex-direction: column-reverse; gap: .1rem; }
+.dayton-folder-figures dt { color: #cdbf9c; font-size: .8rem; line-height: 1.25; }
+.dayton-folder-figures dd {
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.dayton-folder-empty { padding: 1rem 1.15rem; }
 .dayton-live-panel-heading {
   flex: none;
   display: flex;

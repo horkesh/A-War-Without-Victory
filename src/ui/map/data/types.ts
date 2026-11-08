@@ -1658,6 +1658,8 @@ export interface LoadedGameState {
         }>;
         factionCapital: Record<string, number>;
         patronOverride: Record<string, number>;
+        /** The player delegation's folder (DC A1); absent on saves from before it existed. */
+        delegationFolder?: import('../../../state/negotiation_types.js').DelegationFolder;
     };
 
     /** Pending peace plan awaiting player response. */

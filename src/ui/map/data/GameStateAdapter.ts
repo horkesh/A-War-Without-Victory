@@ -4241,7 +4241,16 @@ export function derivePendingDayton(state: any): LoadedGameState['pendingDayton'
         })),
         factionCapital: pd.faction_capital ?? {},
         patronOverride: pd.patron_override ?? {},
+        ...(isDelegationFolder(pd.delegation_folder, playerFaction) ? { delegationFolder: pd.delegation_folder } : {}),
     };
+}
+
+/** Accept a stored delegation folder only when it is well formed and belongs to the player. */
+function isDelegationFolder(value: any, playerFaction: string | null): boolean {
+    return Boolean(value && typeof value === 'object' && value.faction === playerFaction
+        && value.settlements && Number.isFinite(value.settlements.held) && Number.isFinite(value.settlements.total)
+        && value.enclaves && Array.isArray(value.enclaves.held) && Array.isArray(value.enclaves.lost)
+        && Array.isArray(value.condemnation) && value.patron && Array.isArray(value.refused_plans) && value.war);
 }
 
 function derivePendingPeacePlan(state: any): LoadedGameState['pendingPeacePlan'] {
