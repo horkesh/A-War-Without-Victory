@@ -48,6 +48,8 @@ import {
     applyDefinitionFlags,
 } from '../sim/events/evaluate_events.js';
 import { writeOwedRecordsAtTermination } from '../sim/endgame/owed_termination_records.js';
+import { resolveDaytonNegotiation as resolveDaytonNegotiationInEngine } from '../sim/negotiation/dayton_negotiation.js';
+import type { DaytonProposal, DaytonResult } from '../state/negotiation_types.js';
 import type { EventDefinition, EventEffect, PendingEventDecision } from '../sim/events/event_types.js';
 import {
     queryMovementPath as computeMovementPathQuery,
@@ -88,7 +90,25 @@ export { overrideInterpretation } from '../sim/combat/order_interpretation.js';
 export { dismissEventNotification } from '../sim/events/dismiss_notifications.js';
 export { resolvePeacePlan } from '../sim/negotiation/peace_plans.js';
 export { submitPlayerCounterOffer } from '../sim/negotiation/counter_offer_generator.js';
-export { resolveDaytonNegotiation } from '../sim/negotiation/dayton_negotiation.js';
+export { declineDaytonNegotiation } from '../sim/negotiation/dayton_negotiation.js';
+
+/**
+ * Sign Dayton from the desktop. The bundled sim cannot resolve the source-relative
+ * events directory, so the "Dayton signed" record is fired from the base-directory
+ * catalog (`loadDesktopEventDefinitions`); without a base dir the engine falls back to
+ * the source-tree loader.
+ */
+export function resolveDaytonNegotiation(
+    state: GameState,
+    proposal: DaytonProposal,
+    baseDir?: string,
+): DaytonResult {
+    return resolveDaytonNegotiationInEngine(
+        state,
+        proposal,
+        baseDir ? loadDesktopEventDefinitions(baseDir) : undefined,
+    );
+}
 export { evaluateBotResponse } from '../sim/negotiation/bot_negotiation.js';
 export { createAiClient } from '../sim/ai_commander/ai_client.js';
 export { getAdvisorRecommendation } from '../sim/ai_commander/player_advisor.js';

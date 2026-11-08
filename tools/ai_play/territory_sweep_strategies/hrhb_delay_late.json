@@ -1,0 +1,14 @@
+{
+  "name": "hrhb_delay_late",
+  "faction": "HRHB",
+  "events": {
+    "default": "bot"
+  },
+  "request_ops": {
+    "enabled": true,
+    "max_queries_per_turn": 12,
+    "prefer_consolidation": true,
+    "accept_delay": true,
+    "from_turn": 100
+  }
+}

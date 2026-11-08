@@ -1,0 +1,8 @@
+{
+  "name": "para_allow_HRHB",
+  "faction": "HRHB",
+  "events": {
+    "default": "bot"
+  },
+  "paramilitary": "allow"
+}

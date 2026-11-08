@@ -125,11 +125,11 @@ lanes:
   - lane: R7
     title: "Content, historical attribution, audio, accessibility, and opening experience"
     lane_open: true
-    status: "ACTIVE — AUDIO AND BROADER ACCEPTANCE OPEN. WR01 delivered in #517; stale-pin refresh landed in #518. Human listening/sensitivity remains open. Offline playback"
+    status: "ACTIVE — AUDIO AND BROADER ACCEPTANCE OPEN. WR01 delivered in #517; stale-pin refresh landed in #518. Human listening/sensitivity remains open: round 1 (2026-11"
     plans:
       - path: docs/plans/2026-07-31-content-history-localization-audio-plan.md
         exists: true
-        tokens: 13585
+        tokens: 13703
         fits_context: true
         tasks: docs/plans/tasks/2026-07-31-content-history-localization-audio-plan.yml
       - path: docs/plans/2026-08-23-opening-screens-implementation-plan.md
@@ -172,6 +172,21 @@ lanes:
         tokens: 1479
         fits_context: true
         tasks: null
+  - lane: RD
+    title: "Dayton settlement and end map"
+    lane_open: false
+    status: "CLOSED — owner, 2026-11-07. Peace plans settle on their maps; the OSID-level Dayton map has no isolated pockets outside the Posavina canton; the verdict reads t"
+    plans:
+      - path: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
+        exists: true
+        tokens: 1240
+        fits_context: true
+        tasks: null
+  - lane: DC
+    title: "Dayton conference redesign"
+    lane_open: true
+    status: "ACTIVE — owner, 2026-11-07. Owned by Codex. Reworks the Dayton table (conference room, live bargaining, data contract) on top of RD's end-map contract. First it"
+    plans: []
   - lane: R8
     title: "Full-campaign packaged-Electron validation and diaries"
     lane_open: true

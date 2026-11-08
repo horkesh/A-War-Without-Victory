@@ -348,6 +348,9 @@ function projectNegotiation(negotiation, playerFaction) {
     'pending_peace_plan',
     'pending_dayton',
     'dayton_history',
+    // The signed peace settlement (plan map + status) is a public treaty, derived from
+    // political_controllers which is already projected in full (RD, 2026-11-07).
+    'settlement',
   ]);
   if (isRecord(projected.pending_peace_plan)) {
     projected.pending_peace_plan.bot_responses = {};

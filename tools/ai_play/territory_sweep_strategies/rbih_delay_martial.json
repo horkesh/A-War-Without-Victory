@@ -1,0 +1,13 @@
+{
+  "name": "rbih_delay_martial",
+  "faction": "RBiH",
+  "events": {
+    "default": "martial"
+  },
+  "request_ops": {
+    "enabled": true,
+    "max_queries_per_turn": 12,
+    "prefer_consolidation": true,
+    "accept_delay": true
+  }
+}

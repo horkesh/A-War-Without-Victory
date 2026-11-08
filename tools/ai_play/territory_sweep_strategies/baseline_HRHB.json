@@ -1,0 +1,7 @@
+{
+  "name": "baseline_HRHB",
+  "faction": "HRHB",
+  "events": {
+    "default": "bot"
+  }
+}

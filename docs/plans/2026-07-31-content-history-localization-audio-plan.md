@@ -18,6 +18,8 @@ calibration candidate has separate canon/full-horizon gates in the [master roadm
 **Date:** 2026-07-31
 **Status:** ACTIVE CURRENT LANE — audio implementation landed at `2d106e5e0`; the owner's date-on-whiteboard correction is verified and locally committed at `ea33b23a5` with nine-case image review and complete UI/hook checks. Other recorded English checks retain their original scope. Human listening waits for owner inspection; audio/sensitivity, scoped packaged-offline proof, baseline acceptance and final closeout remain open. Phase 3 localization is deferred post-1.0.
 
+**Owner audio decision, 2026-11-08:** after the first listening round ([record](../../logs/r7-english-readability/closeout-human-audio-listen.md)), the three ambient beds are retired for 1.0. They stay switched off and leave the listening scope; atmosphere comes from the music. The nine Kenney library cues are remade as first-party sounds matched in level and tone to the eight made for AWWV, and `turn_complete` is made louder. Round 2 covers only the changed sounds.
+
 **Owner sequencing, 2026-09-09:** Human listening will occur when the owner inspects the game
 after it is acceptably good. Retain the listening checklist as pending inspection, not the next
 engineering task. The owner has scheduled the R8 B7/B5/B8/B1 usability repairs and subsequent

@@ -1,0 +1,25 @@
+{
+  "name": "srebrenica1992_RS",
+  "faction": "RS",
+  "events": {
+    "default": "bot"
+  },
+  "priority_targets": [
+    {
+      "osid": "op:srebrenica:srebrenica_2",
+      "from_turn": 0,
+      "to_turn": 20
+    }
+  ],
+  "request_ops": {
+    "enabled": true,
+    "max_queries_per_turn": 12,
+    "prefer_consolidation": true
+  },
+  "local_support": {
+    "enabled": true
+  },
+  "elite_deploy": {
+    "enabled": true
+  }
+}

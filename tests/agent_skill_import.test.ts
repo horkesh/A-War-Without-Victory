@@ -26,6 +26,17 @@ function childEnv(): NodeJS.ProcessEnv {
     ].join(';'),
   };
 }
+/**
+ * The installer is a PowerShell script. Hosts without PowerShell (e.g. a Linux cloud container
+ * with no `pwsh`) skip the suite instead of failing it. A spawn error never counts as a result:
+ * `status` would be null, and `null !== 0` used to satisfy every "must refuse" assertion.
+ */
+const POWERSHELL = process.platform === 'win32' ? 'powershell.exe' : 'pwsh';
+const HAS_POWERSHELL = spawnSync(POWERSHELL, ['-NoProfile', '-Command', 'exit 0'], { timeout: 15_000 }).error === undefined;
+function mustHaveRun<T extends { error?: Error }>(result: T): T {
+  if (result.error) throw result.error;
+  return result;
+}
 function fixture(existing = false) {
   const root = mkdtempSync(join(tmpdir(), 'awwv-skill-import-'));
   fixtures.push(root);
@@ -51,18 +62,18 @@ function fixture(existing = false) {
   cpSync(source, join(root, '.agent/superpowers-repo/skills'), { recursive: true });
   mkdirSync(join(root, '.claude'));
   cpSync(target, join(root, '.claude/skills'), { recursive: true });
-  const run = (...args: string[]) => spawnSync(process.platform === 'win32' ? 'powershell.exe' : 'pwsh', [
+  const run = (...args: string[]) => mustHaveRun(spawnSync(POWERSHELL, [
     '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', join(root, 'tools/install_superpowers.ps1'),
     ...[['-Name', 'sample'], ['-SourceRoot', source], ['-DestinationRoot', target], ['-ReviewPath', review]]
       .filter(([key]) => !args.includes(key)).flat(), ...args,
-  ], { cwd: root, encoding: 'utf8', timeout: 15_000, env: childEnv() });
+  ], { cwd: root, encoding: 'utf8', timeout: 15_000, env: childEnv() }));
   return { root, source, target, review, backup, run };
 }
 afterEach(() => {
   for (const root of fixtures.splice(0)) rmSync(root, { recursive: true, force: true });
 });
 
-describe('explicit skill import in disposable paths', () => {
+describe.skipIf(!HAS_POWERSHELL)('explicit skill import in disposable paths', () => {
   it('previews a named import without writing any destination', () => {
     const f = fixture();
     const result = f.run();

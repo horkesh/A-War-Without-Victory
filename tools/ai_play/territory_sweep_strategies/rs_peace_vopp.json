@@ -1,0 +1,10 @@
+{
+  "name": "rs_peace_vopp",
+  "faction": "RS",
+  "events": {
+    "default": "bot"
+  },
+  "peace_plans": {
+    "vance_owen": "accept"
+  }
+}

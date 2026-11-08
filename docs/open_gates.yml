@@ -34,9 +34,198 @@
 version: 1
 updated: 2026-11-07
 
-lanes: [R1, R2, R3, R4, R5, R6, R7, R8, R9, RC, RE, REPO]
+lanes: [R1, R2, R3, R4, R5, R6, R7, R8, R9, RC, RD, DC, RE, REPO]
 
 gates:
+  # ── RD — Dayton settlement and end map (closed, owner 2026-11-07) ───────────────────
+
+  - id: RD-PACKAGE-KEYWORD-MATCH
+    lane: RD
+    title: Fixed Dayton packages take only cells in their own municipalities
+    status: closed
+    closed: 2026-11-07
+    kind: bug
+    opened: 2026-11-07
+    blocks: [R8]
+    evidence_required: >
+      Token-level keyword matching in package_area_resolver.ts with a test listing each
+      package's cells; Sarajevo Suburbs no longer includes op:kljuc:hadzici or
+      op:sanski_most:ilidza_2, Central Bosnia no longer includes Novi Travnik.
+    evidence_path: tests/dayton_package_keywords.test.ts
+    source: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
+
+  - id: RD-CONTIGUITY-PROTECTION
+    lane: RD
+    title: The no-pocket pass never undoes won packages or absorbs enclaves
+    status: closed
+    closed: 2026-11-07
+    kind: bug
+    opened: 2026-11-07
+    blocks: [R8]
+    evidence_required: >
+      settlement_contiguity.ts continues past pieces it cannot fix, picks corridors by
+      smallest area, and connects (never absorbs) pieces holding won-package or enclave
+      cells; tests for each case.
+    evidence_path: tests/settlement_contiguity.test.ts
+    source: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
+
+  - id: RD-PATRON-OVERRIDE
+    lane: RD
+    title: Patron override as an area budget with a protected list (owner ruling)
+    status: closed
+    closed: 2026-11-07
+    kind: acceptance
+    opened: 2026-11-07
+    blocks: [R8]
+    evidence_required: >
+      Owner rulings 1-3 of the RD plan implemented with tests; canon record in
+      VICTORY_AND_PYRRHIC_SCORING.md; 188w baseline gate and a decline campaign measured.
+    evidence_path: tests/patron_leverage.test.ts
+    source: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
+
+  - id: RD-MAX-TERRITORY-REMEASURE
+    lane: RD
+    title: Maximum territory per faction re-measured under the settlement rules
+    status: closed
+    closed: 2026-11-07
+    kind: acceptance
+    opened: 2026-11-07
+    blocks: [R8]
+    evidence_required: >
+      Refreshed player maximum-territory report with RBiH, RS and HRHB decline campaigns
+      on the live harness, settled shares per faction.
+    evidence_path: docs/40_reports/20261107_RD_CLOSEOUT.md
+    notes: Closeout §1, measured at HEAD 34d1f51, map signed, on time and after a decline.
+    source: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
+
+  - id: RD-SETTLED-MAP-UI
+    lane: RD
+    title: The settled map reaches the renderer (rendering transferred to the conference lane)
+    status: closed
+    closed: 2026-11-07
+    kind: acceptance
+    opened: 2026-11-07
+    blocks: [R8]
+    evidence_required: >
+      The desktop projection carries negotiation.settlement and the adapter exposes the
+      settled map (deriveSettlementMap), each with a test. Owner rescope 2026-11-07: the
+      verdict comparison, inspection mode and Dayton-table highlight are rendered by the
+      Dayton conference lane (see the handoff).
+    evidence_path: tests/desktop_player_visible_state.test.ts
+    source: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
+
+  - id: RD-CANON-PROPAGATION
+    lane: RD
+    title: War termination spec and manuals describe the shipped Dayton behaviour
+    status: closed
+    closed: 2026-11-07
+    kind: propagation
+    opened: 2026-11-07
+    blocks: [R8]
+    evidence_required: >
+      WAR_TERMINATION_SPEC.md, Systems Manual, Rulebook and Phase Specifications updated for
+      the forced table, captured-ground packages, the 8-week window, patron budget and
+      settlement contiguity.
+    evidence_path: docs/10_canon/WAR_TERMINATION_SPEC.md
+    notes: >
+      Also Systems Manual §20.2, Rulebook §15.7 and VICTORY_AND_PYRRHIC_SCORING.md.
+      Phase Specifications carry no endgame or negotiation content (single War phase), so
+      nothing there needed changing.
+    source: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
+
+  - id: RD-INDEPENDENT-REVIEW
+    lane: RD
+    title: Independent review GO on the Dayton commits
+    status: closed
+    closed: 2026-11-07
+    kind: acceptance
+    opened: 2026-11-07
+    blocks: [R8]
+    evidence_required: >
+      A recorded independent code/canon review verdict covering the 2026-11-07 Dayton
+      commits on claude/loving-knuth-pmx3hi.
+    evidence_path: docs/40_reports/20261107_RD_CLOSEOUT.md
+    notes: >
+      Closeout §2: GO-WITH-FIXES; F1, F2, F3, F4, F5, F6, F8, F9 fixed
+      (tests/dayton_review_fixes.test.ts); F7, F10 recorded as known limitations in the
+      handoff.
+    source: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
+
+  - id: RD-SENSITIVE-HISTORY-CHECK
+    lane: RD
+    title: Sensitive-history gate check for the Dayton changes
+    status: closed
+    closed: 2026-11-07
+    kind: acceptance
+    opened: 2026-11-07
+    blocks: [R8]
+    evidence_required: >
+      SENSITIVE_HISTORY_DESIGN_GATE check of the counterfactual coercion narratives (EN/BCS),
+      the Prijedor/Kozarac continuation objectives and the RS grade re-anchor, with
+      counterfactual labelling; panels convened where the gate requires them.
+    evidence_path: docs/40_reports/20261107_RD_CLOSEOUT.md
+    notes: >
+      Closeout §2: coercion events and continuation operations PASS-WITH-CONDITIONS
+      (conditions applied; camp-site exclusion enforced by test), RS re-anchor PASS, no
+      panel required. US air strikes replaced by Equip-and-Train suspension and corridor
+      closure (owner, 2026-11-07).
+    source: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
+
+  - id: RD-RUN-ARTIFACT-REVIEW
+    lane: RD
+    title: Scenario seat review of the Dayton decline and calibration runs
+    status: closed
+    closed: 2026-11-07
+    kind: acceptance
+    opened: 2026-11-07
+    blocks: [R8]
+    evidence_required: >
+      scenario-creator-runner-tester review of the decline campaigns (v4-v7) and the 188w
+      runs, findings recorded.
+    evidence_path: docs/40_reports/20261107_RD_CLOSEOUT.md
+    notes: >
+      Closeout §3: PASS-WITH-NOTES. Enclave-loss tracking and the Srebrenica-aftermath
+      gate fixed (owner); held-enclave handover and VRS passivity after a decline
+      transferred to the conference lane.
+    source: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
+
+  - id: RD-ACCEPTANCE-ALL-GREEN
+    lane: RD
+    title: RD all-green acceptance
+    status: closed
+    closed: 2026-11-07
+    kind: acceptance
+    opened: 2026-11-07
+    blocks: [R8]
+    evidence_required: >
+      Every other RD gate closed and the RD plan's acceptance list ticked with evidence.
+    evidence_path: docs/40_reports/20261107_RD_CLOSEOUT.md
+    source: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
+    notes: >
+      Roll-up gate; enforced by validate_open_gates.cjs like the R7 roll-up. Closed with
+      the owner's lane close (2026-11-07): every RD gate closed, baseline re-pinned with the
+      reason recorded (closeout §4), full suite and typecheck run at the closing commit.
+
+  # ── DC — Dayton conference redesign (active lane, owner 2026-11-07; Codex) ──────────
+
+  - id: DC-CONFERENCE-REDESIGN
+    lane: DC
+    title: Dayton conference redesign lands on the RD end-map contract
+    status: open
+    kind: acceptance
+    opened: 2026-11-07
+    blocks: [R8]
+    evidence_required: >
+      The conference plan's slices landed with their tests; signed terms reach the end map
+      through applyPeaceSettlement; the player-agency items in the RD handoff (held enclave,
+      protected ground, the decliner's eight weeks) decided with their panels; 188w pins
+      intact or owner re-pinned.
+    evidence_path: null
+    source: handoffs/20261107_dayton_end_map_to_conference.md
+    notes: >
+      Codex owns the plan (Dragon: F:/AWWV-worktrees/.dayton-design/DAYTON_CONFERENCE_IMPLEMENTATION_PLAN.md).
+      Codex should split this into the plan's own gates when the plan lands in the repo.
+
   # ── R7 — content, historical attribution, audio, accessibility, opening ──────────
 
   - id: R7-AUDIO-HUMAN-ACCEPTANCE
@@ -47,15 +236,20 @@ gates:
     opened: 2026-09-09
     blocks: [R8]
     evidence_required: >
-      A named human listening and sensitivity acceptance receipt covering all 20 supplied
-      cue assets (17 neutral CC0 UI cues, 3 first-party ambient beds), recorded by the
-      review roles named in the parent plan's checklist.
+      A named human listening and sensitivity acceptance receipt covering the 17 interface
+      cues the game ships, recorded by the review roles named in the parent plan's
+      checklist. The three ambient beds are out of scope: the owner retired them for 1.0 on
+      2026-11-08 and they stay switched off.
     evidence_path: null
     source: docs/plans/2026-07-31-content-history-localization-audio-plan.md
     notes: >
-      The 2026-09-09 closeout audit searched the retained evidence and did not locate such
-      a receipt. Automated lineage/wiring checks and packaged byte identity do not stand in
-      for human acceptance.
+      Round 1 (owner, 2026-11-07, headphones) is recorded in
+      logs/r7-english-readability/closeout-human-audio-listen.md. It found the nine Kenney
+      library cues far louder and brighter than the eight made for AWWV and turn_complete
+      too faint; those ten are being remade (work order CL-20261108-043). Round 2 covers the
+      changed sounds. The sensitivity answer and the 13 unmarked cues await the owner's
+      clarification. Earlier note: the 2026-09-09 audit found no receipt, and automated
+      lineage/wiring checks do not stand in for human acceptance.
 
   - id: R7-AUDIO-OFFLINE-RUNTIME
     lane: R7

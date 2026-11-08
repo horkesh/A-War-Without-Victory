@@ -1,5 +1,5 @@
 import { applyWarTermination, checkWarTermination } from '../war_termination.js';
-import { initiateDaytonNegotiation, shouldInitiateDayton } from '../negotiation/dayton_negotiation.js';
+import { enforceDaytonImposition, initiateDaytonNegotiation, shouldInitiateDayton } from '../negotiation/dayton_negotiation.js';
 import { computeNegotiationBreakdown } from '../negotiation/compute_capital.js';
 import { evaluatePeacePlans } from '../negotiation/peace_plans.js';
 import { resolveCounterOffers } from '../negotiation/counter_offer_generator.js';
@@ -71,11 +71,23 @@ export const warPhaseNegotiationSteps: NamedPhase[] = [
             const neg = context.state.military.negotiation;
             if (neg?.dayton_result) return;
             if (neg?.pending_dayton) return;
+            // A declined Dayton is not re-offered; enforce-dayton-imposition owns it.
+            if (neg?.dayton_decline) return;
             if (shouldInitiateDayton(context.state)) {
                 const menu = initiateDaytonNegotiation(context.state);
                 const negotiation = context.state.military.negotiation;
                 if (negotiation) negotiation.pending_dayton = menu;
             }
+        }
+    },
+    {
+        // Owner, 2026-11-07: a player who declines Dayton gets DAYTON_DECLINE_GRACE_WEEKS
+        // more weeks, then the coercion event fires and the settlement is imposed.
+        // No-op unless `negotiation.dayton_decline` exists (never in headless runs).
+        name: 'enforce-dayton-imposition',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            enforceDaytonImposition(context.state, context.input.eventDefinitions);
         }
     },
 ];

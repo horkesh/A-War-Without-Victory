@@ -1,0 +1,10 @@
+{
+  "name": "hrhb_serb",
+  "faction": "HRHB",
+  "events": {
+    "default": "bot",
+    "overrides": {
+      "hrhb_territorial_scope_1993": "maximalist_with_serb_alliance"
+    }
+  }
+}

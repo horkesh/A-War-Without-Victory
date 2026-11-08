@@ -1,4 +1,5 @@
 import type { CounterOfferFaction, CounterOfferResponse } from '../../state/negotiation_types.js';
+import { getPeacePlanById } from './peace_plan_data.js';
 
 export interface HistoricalCounterOfferFactionEnvelope {
     response: CounterOfferResponse;
@@ -15,9 +16,16 @@ export interface HistoricalCounterOfferEnvelope {
     delta_bounds_per_faction: Record<CounterOfferFaction, HistoricalCounterOfferFactionEnvelope>;
 }
 
-const EXACT_OS_SPLIT: Record<CounterOfferFaction, number> = { RBiH: 33, RS: 52, HRHB: 15 };
-const EXACT_CONTACT_GROUP_SPLIT: Record<CounterOfferFaction, number> = { RBiH: 33, RS: 49, HRHB: 18 };
-const EXACT_VANCE_OWEN_SPLIT: Record<CounterOfferFaction, number> = { RBiH: 39, RS: 43, HRHB: 18 };
+// Single owner: the plan definitions (peace_plan_data.ts, corrected 2026-11-07 against the
+// UN maps; docs/40_reports/20261107_PEACE_PLANS_RESEARCH.md). Previously duplicated here.
+function planSplit(planId: string): Record<CounterOfferFaction, number> {
+    const split = getPeacePlanById(planId)?.proposed_split;
+    if (!split) throw new Error(`historical_envelopes: no proposed_split for ${planId}`);
+    return { RBiH: split.RBiH, RS: split.RS, HRHB: split.HRHB };
+}
+const EXACT_OS_SPLIT = planSplit('owen_stoltenberg');
+const EXACT_CONTACT_GROUP_SPLIT = planSplit('contact_group');
+const EXACT_VANCE_OWEN_SPLIT = planSplit('vance_owen');
 
 export const HISTORICAL_COUNTER_OFFER_ENVELOPES: readonly HistoricalCounterOfferEnvelope[] = [
     {
@@ -49,7 +57,7 @@ export const HISTORICAL_COUNTER_OFFER_ENVELOPES: readonly HistoricalCounterOffer
     },
     {
         plan_id: 'owen_stoltenberg',
-        source_citation: 'BB1 p.45; BB1 p.49',
+        source_citation: 'BB1 p.47; BB1 p.49',
         delta_bounds_per_faction: {
             HRHB: {
                 response: 'conditional_accept',
@@ -72,7 +80,7 @@ export const HISTORICAL_COUNTER_OFFER_ENVELOPES: readonly HistoricalCounterOffer
                 counter_legal: false,
                 proposed_split: EXACT_OS_SPLIT,
                 institutional_model: 'union_3_republics',
-                source_citation: 'BB1 p.45',
+                source_citation: 'BB1 p.47', // RS Assembly accepted unconditionally, 28 Aug 1993 (p.45 is the 19 Jun proposal)
             },
         },
     },

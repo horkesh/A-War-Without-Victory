@@ -154,15 +154,18 @@ function validateRegister(register, options = {}) {
     }
   }
 
-  // Roll-up gates must not claim to be closable while something they depend on is open.
-  const rollUp = gates.find((gate) => gate && gate.id === 'R7-ACCEPTANCE-ALL-GREEN');
-  if (rollUp && rollUp.status === 'closed') {
+  // Roll-up gates (`<LANE>-ACCEPTANCE-ALL-GREEN`) must not claim to be closable while any
+  // other gate in their lane is open.
+  const rollUps = gates.filter((gate) => gate && typeof gate.id === 'string'
+    && gate.id === `${gate.lane}-ACCEPTANCE-ALL-GREEN`);
+  for (const rollUp of rollUps) {
+    if (rollUp.status !== 'closed') continue;
     const stillOpen = gates
-      .filter((gate) => gate && gate.lane === 'R7' && gate.id !== rollUp.id && gate.status !== 'closed')
+      .filter((gate) => gate && gate.lane === rollUp.lane && gate.id !== rollUp.id && gate.status !== 'closed')
       .map((gate) => gate.id)
       .sort();
     if (stillOpen.length > 0) {
-      push(`R7-ACCEPTANCE-ALL-GREEN is closed while these R7 gates are not: ${stillOpen.join(', ')}`);
+      push(`${rollUp.id} is closed while these ${rollUp.lane} gates are not: ${stillOpen.join(', ')}`);
     }
   }
 

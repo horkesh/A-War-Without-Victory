@@ -281,6 +281,8 @@ describe('war-phase step ordering', () => {
         // +1 from ensure-negotiation-state (2026-11-06, live = headless): creates the
         //        negotiation/strategic-dimension store before update-event-readiness when a
         //        headless start has none, so turn-1 event dimension shifts are not dropped.
-        expect(stepNames.length).toBe(192);
+        // +1 from enforce-dayton-imposition (2026-11-07, owner: a declined Dayton is imposed
+        //        after 4 weeks); no-op unless negotiation.dayton_decline exists.
+        expect(stepNames.length).toBe(193);
     });
 });

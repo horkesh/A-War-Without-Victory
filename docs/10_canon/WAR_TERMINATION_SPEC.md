@@ -24,7 +24,7 @@ Current reference implementation: `src/sim/war_termination.ts:35-91`. First matc
 2. **Negotiated peace**
    - Trigger string: `negotiated_peace:{plan_id}` or `negotiated_peace:negotiated`.
    - Code reference: `src/sim/war_termination.ts:61-71` checks `state.military.event_flags.war_ended_early === true`.
-   - Preconditions: a peace-plan or Dayton resolver sets `war_ended_early`; `peace_plans.ts:239-256` sets `war_ended_early` and freezes the snapshot on accepted early peace; Dayton resolution freezes the snapshot in `dayton_negotiation.ts:280`.
+   - Preconditions: a peace-plan or Dayton resolver sets `war_ended_early`; `peace_plans.ts:239-256` sets `war_ended_early` and freezes the snapshot on accepted early peace; Dayton resolution freezes the snapshot in `resolveDaytonNegotiation` (`dayton_negotiation.ts`).
    - Design status: this is the canonical Dayton-style negotiated end path.
 
 3. **Faction collapse**
@@ -59,10 +59,10 @@ The canonical roster is the existing data in `src/sim/negotiation/peace_plan_dat
 | Plan id | Historical initiative | Code trigger week | Proposed split | Institutional model | Acceptance effect | Citation anchor |
 |---|---|---:|---|---|---|---|
 | `cutileiro` | Cutileiro / Lisbon, March 1992 | 0 | RBiH 44, RS 44, HRHB 12 | `cantonization` | Accepted early peace sets `war_ended_early`. | Historian notes Section 5. |
-| `vance_owen` | Vance-Owen, January 1993 | 40 | RBiH 39, RS 43, HRHB 18 | `10_provinces` | Accepted early peace sets `war_ended_early`. | Historian notes Section 5. |
-| `owen_stoltenberg` | Owen-Stoltenberg, August 1993 | 70 | RBiH 33, RS 52, HRHB 15 | `union_3_republics` | Accepted early peace sets `war_ended_early`. | Historian notes Section 5. |
-| `contact_group` | Contact Group Plan, July 1994 | 118 | RBiH 33, RS 49, HRHB 18 | `51_49_entities` | Accepted early peace sets `war_ended_early`. | Historian notes Section 5. |
-| `dayton` | Dayton Peace Agreement, November 1995 | 185 in plan data; 188 in Dayton trigger | RBiH 33, RS 49, HRHB 18 | `two_entities` | Dayton resolver stores result and freezes endgame snapshot. | Historian notes Section 5. |
+| `vance_owen` | Vance-Owen, January 1993 | 40 | RBiH 32, RS 43, HRHB 25 | `10_provinces` | Accepted early peace sets `war_ended_early` and settles on the plan map (RS status cap C). | Historian notes Section 5. |
+| `owen_stoltenberg` | Owen-Stoltenberg, August 1993 | 70 | RBiH 30, RS 52.5, HRHB 17.5 | `union_3_republics` | Accepted early peace sets `war_ended_early` and settles on the plan map (RS and RBiH caps B). | Historian notes Section 5. |
+| `contact_group` | Contact Group Plan, July 1994 | 118 | RBiH 35, RS 49, HRHB 16 | `51_49_entities` | Accepted early peace sets `war_ended_early` and settles on the plan map (RS cap B). | Historian notes Section 5. |
+| `dayton` | Dayton Peace Agreement, November 1995 | 185 in plan data; 188 in Dayton trigger | RBiH 32, RS 49, HRHB 19 | `two_entities` | Dayton resolver stores result, settles on the contiguous Dayton map and freezes the endgame snapshot. | Historian notes Section 5. |
 
 Recurring-initiative rule: historical plans fire from code-backed trigger checks. Success remains low until precondition levers in Section 5 are sufficiently satisfied. Early acceptance is mechanically possible but historically rare; late Dayton acceptance is the design target. Thresholds are TBD and belong to a follow-on calibration pass.
 
@@ -70,7 +70,11 @@ Historical-default resolution rule (2026-07-17): when no player owns the decisio
 
 The War pipeline increments the turn before evaluating negotiation. A one-time Cutileiro catch-up therefore evaluates on the first War turn while preserving offer turn `0`; it must not be silently skipped by the clock transition or offered more than once.
 
-Dayton escape valve: `dayton_negotiation.ts:32-72` sets `DAYTON_TRIGGER_WEEK = 188` and can force Dayton before that only when all canonical factions have patron override authority at or above `FORCED_DAYTON_OVERRIDE_THRESHOLD = 95`.
+Dayton escape valve: `dayton_negotiation.ts` (`shouldInitiateDayton`) sets `DAYTON_TRIGGER_WEEK = 188` and can force Dayton before that only when all canonical factions have patron override authority at or above `FORCED_DAYTON_OVERRIDE_THRESHOLD = 95`.
+
+**Settlement on the plan map (owner, 2026-11-07; RD lane).** A peace accepted by every party, or a signed/imposed Dayton, ends the war on the plan's map and terms, not on the front line. `applyPeaceSettlement` (`src/sim/negotiation/peace_settlement.ts`) records `negotiation.settlement` from the researched plan maps (`data/derived/peace/plan_settlement_shares.json`; [research](../40_reports/20261107_PEACE_PLANS_RESEARCH.md)); `political_controllers` is never rewritten. The Dayton map is made contiguous (`settlement_contiguity.ts`: each entity one piece, small islands absorbed, larger pieces given a smallest-area corridor, won package ground and enclaves never absorbed, the Posavina canton kept). Grading reads the settled share and plan status caps — see `VICTORY_AND_PYRRHIC_SCORING.md`.
+
+**Dayton decline and forced table — interim rules (2026-11-07).** A player may decline Dayton; the war continues for 8 weeks (`DAYTON_DECLINE_GRACE_WEEKS`), the decliner's coercion event fires (counterfactual: US for RBiH, Belgrade for RS, Zagreb for HRHB), and the table reopens with no decline option; left unanswered it is signed on the Dayton map. Captured ground, patron leverage and the table itself are interim engine rules owned by the Dayton conference redesign (handoff: `handoffs/20261107_dayton_end_map_to_conference.md`), which may replace them.
 
 **Known code-data nuance:** `peace_plan_data.ts` lists Dayton `trigger_week: 185`, while `dayton_negotiation.ts` uses `DAYTON_TRIGGER_WEEK = 188`. This spec treats the Dayton resolver constant as authoritative for forced final negotiation timing and logs the data constant mismatch as follow-on cleanup.
 

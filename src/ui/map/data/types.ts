@@ -1608,6 +1608,19 @@ export interface LoadedGameState {
     /** Compact read-only diplomacy packet projected from negotiation, patron, and IVP state. */
     diplomacyView?: DiplomacyView;
 
+    /**
+     * The settled map of a signed peace (plan map at OSID level, sim-computed). Rendering is
+     * owned by the Dayton conference lane; see handoffs/20261107_dayton_end_map_to_conference.md.
+     */
+    settlementMap?: {
+        planId: string;
+        controllers: Record<string, string>;
+        specialOsids: string[];
+        territoryPct: Record<string, number>;
+        /** Cells whose holder differs between the front at signature and the map signed. */
+        changedOsids: string[];
+    };
+
     /** Pending Dayton negotiation — shown when shouldInitiateDayton fires. */
     pendingDayton?: {
         territorialPackages: Array<{
@@ -1617,6 +1630,21 @@ export interface LoadedGameState {
             demandCost: number;
             concedeCost: number;
         }>;
+        /**
+         * Captured-ground packages: ground one party holds that the Dayton map gives to
+         * another (defaultHolder = the map assignee). Unraised, they follow the map.
+         */
+        frontPackages?: Array<{
+            id: string;
+            name: string;
+            defaultHolder: string;
+            demandCost: number;
+            concedeCost: number;
+            claimant?: string;
+            areaPct?: number;
+        }>;
+        /** Set on the table reopened after a declined Dayton: no decline option. */
+        forced?: { onFaction: string; by: string };
         institutionalPackages: Array<{
             id: string;
             name: string;
