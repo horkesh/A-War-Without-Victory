@@ -189,7 +189,7 @@ lanes:
     plans:
       - path: docs/plans/2026-11-08-dc-dayton-conference-plan.md
         exists: true
-        tokens: 7608
+        tokens: 7860
         fits_context: true
         tasks: null
   - lane: R8

@@ -18,6 +18,7 @@ import { useIPC } from '../desktop/useIPC';
 import type { FactionVerdict, DimensionGrade, GameVerdict } from '../../../state/negotiation_types.js';
 import { WarCostSummary } from './WarCostSummary';
 import { DaytonSettlementViewer } from './DaytonSettlementViewer';
+import { TreatyLedger } from '../dayton_conference/TreatyLedger';
 import type { CostLedger } from '../../../sim/endgame/cost_ledger.js';
 import type { ComparisonResult, MilestoneComparison, MilestoneComparisonStatus } from '../../../sim/endgame/endgame_comparison.js';
 import { getPeacePlanById } from '../../../sim/negotiation/peace_plan_data.js';
@@ -618,7 +619,11 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                 </div>
 
                 {loadedGameState.daytonAgreement?.version === 1 ? (
-                    <DaytonSettlementViewer agreement={loadedGameState.daytonAgreement} mode="signed" />
+                    <>
+                        {/* The grade judges the war; this shows what the table changed (owner, 2026-11-08). */}
+                        <TreatyLedger treaty={loadedGameState.daytonAgreement.treaty} signed />
+                        <DaytonSettlementViewer agreement={loadedGameState.daytonAgreement} mode="signed" />
+                    </>
                 ) : verdict.dayton_result ? (
                     <p className="text-sm text-text-secondary">{t('dayton.agreement.legacy')}</p>
                 ) : null}

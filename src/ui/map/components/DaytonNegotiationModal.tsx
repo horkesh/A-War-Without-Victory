@@ -78,6 +78,7 @@ import {
 } from './DaytonInstitutionalDimensions';
 import { legacyProjection } from '../../../sim/negotiation/power_overlap.js';
 import { DelegationFolder } from '../dayton_conference/DelegationFolder';
+import { TreatyLedger } from '../dayton_conference/TreatyLedger';
 
 type DaytonData = NonNullable<LoadedGameState['pendingDayton']>;
 type CounterProposal = NonNullable<IpcDaytonBotResponse['counter_proposal']>;
@@ -963,6 +964,7 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
                                             {changes.length ? <ClauseLinks clauses={changes} onClause={clause => void inspectClause(clause, 'review')} />
                                                 : <p>{t('dayton.conference.noChanges')}</p>}
                                         </section>
+                                        <TreatyLedger treaty={agreement.treaty} signed={false} />
                                         <DaytonSettlementViewer agreement={agreement} mode="draft" view="both" />
                                     </>
                                 ) : (

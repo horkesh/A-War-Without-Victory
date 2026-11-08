@@ -446,6 +446,22 @@ export interface DaytonAgreementRecord {
         /** Area-weighted shares against the same denominator as the engine settlement. */
         territoryPct: Record<string, number>;
     };
+    /** What the table changed against the mediator's draft (sim/negotiation/treaty_against_draft.ts). Absent on older records. */
+    treaty?: TreatyAgainstDraft;
+}
+
+/** The treaty against the mediator's draft: shares, ground and powers won, given up and refused. */
+export interface TreatyAgainstDraft {
+    faction: string;
+    /** Shares under the mediator's draft (no clause raised). */
+    draft_share: Record<string, number>;
+    /** Shares under the signed map. */
+    signed_share: Record<string, number>;
+    land_won: Array<{ id: string; name: string }>;
+    land_given: Array<{ id: string; name: string }>;
+    land_refused: Array<{ id: string; name: string }>;
+    powers_won: Array<{ kind: 'competency' | 'constitutional' | 'dial'; id: string; asked: string; signed: string }>;
+    powers_refused: Array<{ kind: 'competency' | 'constitutional' | 'dial'; id: string; asked: string; signed: string }>;
 }
 
 /**
