@@ -13903,3 +13903,11 @@ Found during the R7 offline audio run: `resolveMapServerBaseUrl` in `src/desktop
 ## 2026-11-08 — Require ultrawide composition for new Dayton visuals (PLAN, ART)
 
 The owner set ultrawide as the production format for all new Dayton visuals. The active Dayton implementation plan at F:/AWWV-worktrees/.dayton-design/DAYTON_CONFERENCE_IMPLEMENTATION_PLAN.md specifies a native 3840 × 1280 target for full-frame art, registered standard-screen framing, and visual acceptance at five viewport sizes. New prop and interface art must register or reflow in both formats. The v1 concepts remain blocking references. Documentation and production criteria only.
+
+## 2026-11-08 — Preserve Dayton proposals at the desktop boundary (IPC, UI, ART)
+
+The preview and signing handlers share the existing Dayton proposal type and a validator backed by the current package catalogs and engine budget. Non-default institutional terms now reach both paths. Preview resolves a discarded clone. Signing keeps the existing save transaction and returns the recorded agreement on retry without another write. Probe Positions is disabled when the draft is over budget.
+
+- The isolated conference fixture uses a 2172 × 724 panoramic arrival proof with a centered standard-screen crop. Arrival and all four room hotspots passed at the five plan viewports. The fixture sign and decline walkthroughs passed.
+- Independent review and its focused UI follow-up passed. Final targeted suites passed 69 tests. Typecheck, the desktop sim bundle and production map build passed. The fixture is absent from production output. No change to engine rules, save schema or live conference activation.
+- Geometry preflight found mapped cells for all eight fixed packages and no inter-package overlap. Goražde's current 40-cell footprint remains a design question. Evidence is under F:/AWWV-worktrees/.dayton-design/next-slice.

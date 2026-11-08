@@ -91,6 +91,7 @@ export { dismissEventNotification } from '../sim/events/dismiss_notifications.js
 export { resolvePeacePlan } from '../sim/negotiation/peace_plans.js';
 export { submitPlayerCounterOffer } from '../sim/negotiation/counter_offer_generator.js';
 export { declineDaytonNegotiation } from '../sim/negotiation/dayton_negotiation.js';
+export { parseDaytonProposal } from './dayton_proposal.js';
 
 /**
  * Sign Dayton from the desktop. The bundled sim cannot resolve the source-relative

@@ -3,7 +3,7 @@ import type { CSSProperties, MouseEvent } from 'react';
 import { createRoot } from 'react-dom/client';
 import standardBlocking from './room-blocking.json';
 import wideBlocking from './room-blocking-ultrawide.json';
-import arrival from './dayton-arrival-v1.png';
+import arrival from './dayton-arrival-ultrawide.webp';
 import standardRoom from './dayton-conference-room-4k.webp';
 import wideRoom from './dayton-conference-room-ultrawide.webp';
 import './scene.css';

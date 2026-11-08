@@ -3640,18 +3640,17 @@ app.whenReady().then(() => {
   }
 
   ipcMain.handle('resolve-dayton', async (_event, payload) => {
-    const { territorial_demands, territorial_concessions, institutional_choices } = payload || {};
     if (!currentGameStateJson) {
       return { ok: false, error: 'No game loaded' };
     }
     try {
       const sim = getDesktopSim();
       const state = readCanonicalCurrentState(sim);
-      const result = sim.resolveDaytonNegotiation(state, {
-        territorial_demands: territorial_demands || [],
-        territorial_concessions: territorial_concessions || [],
-        institutional_choices: institutional_choices || {},
-      }, getBaseDir());
+      // A retry after signing returns the recorded agreement without a second transaction.
+      const signed = state.military.negotiation?.dayton_result;
+      if (signed) return { ok: true, result: signed };
+      const proposal = sim.parseDaytonProposal(payload, state);
+      const result = sim.resolveDaytonNegotiation(state, proposal, getBaseDir());
       writeCanonicalCurrentState(sim, state);
       return { ok: true, result };
     } catch (e) {
@@ -3687,7 +3686,6 @@ app.whenReady().then(() => {
   // renderer → zero state mutation. Surfaces the already-built counter-offer
   // generator + dysfunction read-models that are otherwise only seen post-resolution.
   ipcMain.handle('preview-dayton', async (_event, payload) => {
-    const { territorial_demands, territorial_concessions, institutional_choices } = payload || {};
     if (!currentGameStateJson) {
       return { ok: false, error: 'No game loaded' };
     }
@@ -3695,11 +3693,7 @@ app.whenReady().then(() => {
       const sim = getDesktopSim();
       // Fresh clone from the canonical JSON — the resolver mutates this clone only.
       const clone = sim.deserializeState(currentGameStateJson);
-      const proposal = {
-        territorial_demands: territorial_demands || [],
-        territorial_concessions: territorial_concessions || [],
-        institutional_choices: institutional_choices || {},
-      };
+      const proposal = sim.parseDaytonProposal(payload, clone);
       const playerFaction = (clone.meta && clone.meta.player_faction) || 'RBiH';
       const canonical = ['HRHB', 'RBiH', 'RS'];
       const botResponses = {};

@@ -201,7 +201,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
 
     // ── Probe Positions — read-only counter-offer preview (no mutation) ────────
     const handleProbe = async () => {
-        if (!ipc.isAvailable || probing || !playerFaction) return;
+        if (!ipc.isAvailable || probing || submitting || overBudget || !playerFaction) return;
         setProbing(true);
         const snapshot = new Set(demands);
         const res = await ipc.previewDayton(buildProposal());
@@ -560,11 +560,11 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                         <button
                             type="button"
                             onClick={() => void handleProbe()}
-                            disabled={probing || submitting}
+                            disabled={probing || submitting || overBudget}
                             className={`text-xs px-3 py-1.5 rounded border font-bold uppercase tracking-wider ${
                                 probing
                                     ? 'border-[#8a7a60]/30 bg-[#d8d0c4] text-[#6a5a40] cursor-wait'
-                                    : 'border-[#4a5a8a]/50 bg-[#d0d8e8] text-[#2a3a6a] hover:bg-[#b8c8e0]'
+                                    : 'border-[#4a5a8a]/50 bg-[#d0d8e8] text-[#2a3a6a] enabled:hover:bg-[#b8c8e0] disabled:cursor-not-allowed disabled:opacity-50'
                             }`}
                             style={{ fontFamily: 'var(--font-command)' }}
                         >

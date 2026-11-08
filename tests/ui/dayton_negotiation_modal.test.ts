@@ -119,6 +119,25 @@ describe('DaytonNegotiationModal — Phase-4 player-agency surface', () => {
         expect(screen.getByText('Drops your demands on: Goražde Corridor')).toBeTruthy();
     });
 
+    it('prevents probing over-budget proposals and re-enables it after revision', () => {
+        const previewDayton = vi.fn().mockResolvedValue({ ok: true });
+        (window as unknown as { awwv: Record<string, unknown> }).awwv = { previewDayton };
+        render(createElement(DaytonNegotiationModal, {
+            dayton: { ...PENDING, factionCapital: { ...PENDING.factionCapital, RBiH: 11 } },
+        }));
+        const probe = screen.getByRole<HTMLButtonElement>('button', { name: 'Probe Positions' });
+        const demand = screen.getByText('Demand (12)');
+
+        expect(probe.disabled).toBe(false);
+        fireEvent.click(demand);
+        expect(screen.getByText('Over Budget')).toBeTruthy();
+        expect(probe.disabled).toBe(true);
+        fireEvent.click(probe);
+        expect(previewDayton).not.toHaveBeenCalled();
+        fireEvent.click(demand);
+        expect(probe.disabled).toBe(false);
+    });
+
     it('declines in two steps through declineDayton, never by signing an empty proposal', async () => {
         const declineDayton = vi.fn().mockResolvedValue({ ok: true, imposition_turn: 192 });
         const resolveDayton = vi.fn().mockResolvedValue({ ok: true });

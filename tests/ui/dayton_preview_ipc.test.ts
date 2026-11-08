@@ -1,17 +1,16 @@
 /**
- * Dayton Phase-4 — preview IPC contract + save/load-mid-negotiation tests.
+ * Dayton IPC proposal, preview, signing, and save/load-mid-negotiation tests.
  *
  * The `preview-dayton` IPC handler (electron-main.cjs) runs the real
  * evaluateBotResponse + resolveDaytonNegotiation on a THROWAWAY deserialized
  * clone and discards it — surfacing the authoritative readouts + bot counter-offers
- * WITHOUT mutating game state. These tests pin that contract at the sim level:
- *   1. running the resolver on a clone leaves the ORIGINAL state's pending_dayton
- *      and dayton_result untouched (no-mutation guarantee the handler relies on);
- *   2. evaluateBotResponse returns a counter-offer the modal can surface;
- *   3. a pending_dayton packet survives a JSON save/load round-trip (the player can
- *      save mid-negotiation, reload, and the Dayton menu is still pending).
+ * WITHOUT mutating game state. The handler tests also exercise the shared proposal
+ * contract and signing transaction; the sim tests cover the readouts, counters and
+ * pending_dayton round trip used to resume a negotiation after loading a save.
  */
-import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { runInNewContext } from 'node:vm';
+import { describe, it, expect, vi } from 'vitest';
 import type { GameState } from '../../src/state/game_state.js';
 import type { DaytonProposal, NegotiationBreakdown, PatronRelationship, PendingDaytonPacket } from '../../src/state/negotiation_types.js';
 import { createEmptyCapital, createDefaultPatronRelationship } from '../../src/state/negotiation_types.js';
@@ -19,6 +18,7 @@ import { resolveDaytonNegotiation } from '../../src/sim/negotiation/dayton_negot
 import { evaluateBotResponse } from '../../src/sim/negotiation/bot_negotiation.js';
 import { initializeStrategicDimensions } from '../../src/sim/events/strategic_dimensions.js';
 import { derivePendingDayton } from '../../src/ui/map/data/GameStateAdapter.js';
+import * as desktopSim from '../../src/desktop/desktop_sim.js';
 
 const PENDING: PendingDaytonPacket = {
     territorial_packages: [
@@ -63,6 +63,189 @@ const DEMAND_PROPOSAL: DaytonProposal = {
     territorial_concessions: [],
     institutional_choices: { military: 'centralized' },
 };
+
+const STRUCTURAL_PROPOSAL: DaytonProposal = {
+    territorial_demands: [],
+    territorial_concessions: [],
+    institutional_choices: {},
+    entity_autonomy: 'federalized',
+    competency_allocation: { comp_foreign_policy: 'shared', comp_defense: 'state' },
+    constitutional_choices: { arch_ohr_authority: 'monitoring_only' },
+    return_justice: { rj_refugee_return: 'full_right_of_return' },
+};
+
+const DAYTON_CHANNELS = ['preview-dayton', 'resolve-dayton'] as const;
+type DaytonChannel = (typeof DAYTON_CHANNELS)[number];
+type DaytonHandler = (_event: object, payload: unknown) => Promise<{
+    ok: boolean; result?: unknown; botResponses?: unknown; playerFaction?: string; error?: string;
+}>;
+
+// Electron exits if required in Node. Execute the actual registrations and
+// canonical transaction code; only replace the process/IO boundaries and use
+// JSON for the intentionally sparse simulation fixture.
+function loadDaytonHandlers(state = makeState()) {
+    const source = readFileSync('src/desktop/electron-main.cjs', 'utf8');
+    const canonical = source.slice(
+        source.indexOf('function readCanonicalCurrentState('),
+        source.indexOf('async function loadStatePathIntoDesktop('),
+    );
+    const dayton = source.slice(
+        source.indexOf("ipcMain.handle('resolve-dayton'"),
+        source.indexOf('// --- Read-only query handlers (UI previews; no state mutation) ---'),
+    );
+    const handlers = new Map<string, DaytonHandler>();
+    const deserializeState = vi.fn((json: string): GameState => JSON.parse(json));
+    const sim = {
+        ...desktopSim,
+        deserializeState,
+        serializeRuntimeState: JSON.stringify,
+        serializeState: JSON.stringify,
+        resolveDaytonNegotiation: vi.fn(desktopSim.resolveDaytonNegotiation),
+        evaluateBotResponse: vi.fn(desktopSim.evaluateBotResponse),
+        writeOwedTerminationRecords: vi.fn(),
+    };
+    const context = {
+        currentGameStateJson: JSON.stringify(state),
+        currentCanonicalSaveJson: JSON.stringify(state),
+        getDesktopSim: () => sim,
+        getBaseDir: () => process.cwd(),
+        ipcMain: { handle: (channel: string, handler: DaytonHandler) => handlers.set(channel, handler) },
+        autoSave: vi.fn(),
+        sendGameStateToRenderer: vi.fn(),
+    };
+    runInNewContext(`${canonical}\n${dayton}`, context);
+    return { invoke: (channel: DaytonChannel, payload: unknown) => handlers.get(channel)!({}, payload), sim, context };
+}
+
+describe('desktop Dayton proposal IPC', () => {
+    it('previews and signs all institutional fields, keeping preview read-only', async () => {
+        const { invoke, sim, context } = loadDaytonHandlers();
+        const before = context.currentGameStateJson;
+        const expected = desktopSim.resolveDaytonNegotiation(makeState(), STRUCTURAL_PROPOSAL, process.cwd());
+        const preview = await invoke('preview-dayton', STRUCTURAL_PROPOSAL);
+
+        expect(preview).toMatchObject({ ok: true, result: expected, playerFaction: 'RBiH' });
+        expect(sim.resolveDaytonNegotiation.mock.calls[0][1]).toEqual(STRUCTURAL_PROPOSAL);
+        expect(Object.keys(sim.resolveDaytonNegotiation.mock.calls[0][1].competency_allocation!))
+            .toEqual(['comp_defense', 'comp_foreign_policy']);
+        expect(preview.botResponses).toEqual({
+            HRHB: desktopSim.evaluateBotResponse(makeState(), 'HRHB', STRUCTURAL_PROPOSAL),
+            RS: desktopSim.evaluateBotResponse(makeState(), 'RS', STRUCTURAL_PROPOSAL),
+        });
+        expect(sim.resolveDaytonNegotiation.mock.calls[0][0].meta.game_over).toBe(true);
+        expect(context.currentGameStateJson).toBe(before);
+        expect(context.currentCanonicalSaveJson).toBe(before);
+        expect(context.autoSave).not.toHaveBeenCalled();
+        expect(context.sendGameStateToRenderer).not.toHaveBeenCalled();
+
+        expect(await invoke('resolve-dayton', STRUCTURAL_PROPOSAL)).toEqual({ ok: true, result: preview.result });
+        expect(sim.resolveDaytonNegotiation.mock.calls[1][1]).toEqual(STRUCTURAL_PROPOSAL);
+        expect(context.autoSave).toHaveBeenCalledOnce();
+        expect(context.sendGameStateToRenderer).toHaveBeenCalledOnce();
+        expect(JSON.parse(context.currentCanonicalSaveJson).military.negotiation.dayton_result).toEqual(expected);
+    });
+
+    it.each(DAYTON_CHANNELS)('%s rejects malformed proposals before resolution or write', async (channel) => {
+        const { invoke, sim, context } = loadDaytonHandlers();
+        const before = context.currentGameStateJson;
+        const invalidPayloads = [
+            [],
+            { territorial_demands: 'gorazde_corridor' },
+            { territorial_demands: ['not_a_package'] },
+            { territorial_demands: ['front:missing'] },
+            { territorial_demands: ['gorazde_corridor', 'gorazde_corridor'] },
+            { territorial_demands: ['brcko_district'], territorial_concessions: ['brcko_district'] },
+            { territorial_demands: Array(128).fill('gorazde_corridor') },
+            { institutional_choices: { military: 'unknown' } },
+            { institutional_choices: { unknown: 'centralized' } },
+            { entity_autonomy: 'unknown' },
+            { competency_allocation: { comp_defense: 'unknown' } },
+            { competency_allocation: { unknown: 'state' } },
+            { constitutional_choices: { arch_presidency: 'monitoring_only' } },
+            { constitutional_choices: { rj_icty_cooperation: 'full' } },
+            { return_justice: { rj_refugee_return: 'full' } },
+            { return_justice: { arch_presidency: 'single_elected' } },
+            { return_justice: [] },
+            { arbitrary: true },
+        ];
+        for (const payload of invalidPayloads) {
+            expect(await invoke(channel, payload)).toMatchObject({ ok: false, error: expect.stringContaining('Invalid Dayton proposal') });
+        }
+        expect(sim.resolveDaytonNegotiation).not.toHaveBeenCalled();
+        expect(sim.evaluateBotResponse).not.toHaveBeenCalled();
+        expect(context.currentGameStateJson).toBe(before);
+        expect(context.currentCanonicalSaveJson).toBe(before);
+        expect(context.autoSave).not.toHaveBeenCalled();
+        expect(context.sendGameStateToRenderer).not.toHaveBeenCalled();
+    });
+
+    it.each(DAYTON_CHANNELS)('%s rejects over-budget input without changing the forced table', async (channel) => {
+        const state = makeState();
+        const neg = state.military.negotiation!;
+        neg.pending_dayton = { ...PENDING, forced: { on_faction: 'RBiH', by: 'united_states', opened_turn: 190 } };
+        for (const dim of Object.keys(neg.strategic_dimensions!.RBiH)) {
+            neg.strategic_dimensions!.RBiH[dim].effective_value = 0;
+        }
+        const { invoke, sim, context } = loadDaytonHandlers(state);
+        const before = context.currentGameStateJson;
+
+        for (const payload of [DEMAND_PROPOSAL, { competency_allocation: { comp_foreign_policy: 'entity' } }]) {
+            expect(await invoke(channel, payload)).toMatchObject({ ok: false, error: expect.stringContaining('budget') });
+        }
+        expect(sim.resolveDaytonNegotiation).not.toHaveBeenCalled();
+        expect(sim.evaluateBotResponse).not.toHaveBeenCalled();
+        expect(context.currentGameStateJson).toBe(before);
+        expect(context.currentCanonicalSaveJson).toBe(before);
+        expect(context.autoSave).not.toHaveBeenCalled();
+        expect(context.sendGameStateToRenderer).not.toHaveBeenCalled();
+    });
+
+    it('still accepts an omitted legacy proposal at an ordinary or forced table', async () => {
+        for (const forced of [undefined, { on_faction: 'RBiH', by: 'united_states', opened_turn: 190 }] as const) {
+            const state = makeState();
+            state.military.negotiation!.pending_dayton = { ...PENDING, forced };
+            const { invoke, context } = loadDaytonHandlers(state);
+            const expected = desktopSim.resolveDaytonNegotiation(state, {
+                territorial_demands: [], territorial_concessions: [], institutional_choices: {},
+            }, process.cwd());
+            expect(await invoke('preview-dayton', {})).toMatchObject({ ok: true, result: expected });
+            expect(await invoke('resolve-dayton', undefined)).toEqual({ ok: true, result: expected });
+            expect(context.autoSave).toHaveBeenCalledOnce();
+        }
+    });
+
+    it('accepts captured-ground IDs from the current table', async () => {
+        const state = makeState();
+        state.political.political_controllers = { 'op:sipovo:pribeljci_2': 'RBiH' };
+        const proposal: DaytonProposal = {
+            territorial_demands: ['front:sipovo:RBiH:RS'], territorial_concessions: [], institutional_choices: {},
+        };
+        const { invoke } = loadDaytonHandlers(state);
+        const expected = desktopSim.resolveDaytonNegotiation(state, proposal, process.cwd());
+        expect([...expected.territorial_packages_accepted, ...expected.territorial_packages_rejected])
+            .toContain('front:sipovo:RBiH:RS');
+        expect(await invoke('preview-dayton', proposal)).toMatchObject({ ok: true, result: expected });
+        expect(await invoke('resolve-dayton', proposal)).toEqual({ ok: true, result: expected });
+    });
+
+    it('returns the first signed agreement on retry without another write', async () => {
+        const state = makeState();
+        for (const dim of Object.keys(state.military.negotiation!.strategic_dimensions!.RBiH)) {
+            state.military.negotiation!.strategic_dimensions!.RBiH[dim].effective_value = 0;
+        }
+        const { invoke, context } = loadDaytonHandlers(state);
+        const first = await invoke('resolve-dayton', undefined);
+        expect(first.ok).toBe(true);
+        const signed = context.currentGameStateJson;
+        const signedSave = context.currentCanonicalSaveJson;
+
+        expect(await invoke('resolve-dayton', DEMAND_PROPOSAL)).toEqual(first);
+        expect(context.currentGameStateJson).toBe(signed);
+        expect(context.currentCanonicalSaveJson).toBe(signedSave);
+        expect(context.autoSave).toHaveBeenCalledOnce();
+        expect(context.sendGameStateToRenderer).toHaveBeenCalledOnce();
+    });
+});
 
 describe('preview-dayton: no-mutation guarantee (run on a clone)', () => {
     it('resolving on a deserialized clone leaves the original state pending + unresolved', () => {
