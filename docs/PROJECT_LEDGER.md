@@ -14140,3 +14140,11 @@ The ten RS and RBiH atlases now carry the original baseboard perspective through
 
 - The browser matrix passed for all 12 playable rooms at 1280 × 720 and 3426 × 1186. The three 1991 scene previews passed at both sizes. RS and RBiH 1994 also passed at 3440 × 1440. All 30 focused tests, the production map build, the inventory of 15 atlases and the chunk-cycle check passed.
 - Presentation only. No simulation or determinism effect. Before-and-after captures and validation logs are under F:/AWWV-worktrees/.warroom-ultrawide/baseboard-fix.
+
+## 2026-11-08 — Audit Warroom interiors and correct uniform insignia and newspaper art (UI, ART)
+
+Reviewed all fifteen Warroom interiors at standard and ultrawide sizes. The HVO jacket now uses the existing HVO reference patch in 1992–1995. RBiH uses the early lilies shield in the opening-year plate and the full Army mark in 1993–1995. Removed the later HVO and ARBiH sleeve badges from the 1991 art previews. RS uses Глас in the 1991 and opening-year 1992 art and Глас српски in 1993–1995. The corrected newspaper strapline is typeset in Cyrillic.
+
+- The repaired center plates retain their original dimensions. Regenerated the board luminance table from the re-exported art. All 66 focused tests and the production map build passed. SHA-256 confirmed the bundle contains all 15 original-size center plates and all 15 wing atlases.
+- Chromium verified the eight clickable objects, live map and date board in all 12 playable rooms at 1280 × 720 and 3426 × 1186. Direct previews covered the three 1991 plates. HRHB 1994 also passed at 3440 × 1440. Independent crop review found no material blocker.
+- Presentation only. No simulation, state or determinism effect. Sources, captures and retained logs are under F:/AWWV-worktrees/.warroom-ultrawide/room-art-audit.
