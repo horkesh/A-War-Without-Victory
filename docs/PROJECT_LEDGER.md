@@ -13907,3 +13907,10 @@ Owner: "Yeah, they're fine" (round 2) and "Close the listening gate and R7".
 - `R7-AUDIO-HUMAN-ACCEPTANCE` and `R7-ACCEPTANCE-ALL-GREEN` closed; every R7 gate is now closed. The five in-game audio checks are waived to R8 packaged play by the owner.
 - Roadmap: R7 row CLOSED; lane-order, sequence and audit lines updated; Army HQ paper further slices added to the post-1.0 backlog. R7 audio plan and visual-polish follow-ups plan marked CLOSED. `plan_index.yml` regenerated.
 - No code, simulation, scenario or calibration change.
+
+## 2026-11-08 - R6 closed (DOCS, ROADMAP)
+
+Owner: "Yes, close R6." The roadmap R6 row still read "GLOBAL NO-GO" from October although the owner signed off all four checkpoints on 2026-11-06 (712/711/712/710, live = headless for all three player factions, strict health PASS, Farz guard enforced on `__w188_n63`) and closed the calibration lane.
+- `R6-CALIBRATION-INTEGRATION` closed with `CALIBRATION_MASTER.md` as evidence; its history stays in the notes.
+- Roadmap and command-board R6 rows CLOSED; R6 plan status CLOSED; `plan_index.test.ts` now expects R6 closed; `plan_index.yml` regenerated.
+- Brka and Ilijaš Krivajevići remain open cells by owner direction. No code, simulation, scenario or calibration change.

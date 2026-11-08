@@ -160,13 +160,12 @@ describe('lane status is read from the status head, not from its prose', () => {
     expect(prose.diagnostics.length).toBeGreaterThan(0);
   });
 
-  it('the real register reads R6 open and the genuinely finished lanes closed', () => {
+  it('the real register reads R8/R9 open and the genuinely finished lanes closed', () => {
     const byLane = new Map(parseRegister().map((row) => [row.lane, row]));
-    expect(byLane.get('R6')?.closed, 'R6 is an open calibration lane').toBe(false);
     expect(byLane.get('R8')?.closed).toBe(false);
     expect(byLane.get('R9')?.closed).toBe(false);
-    // R7 closed on the owner's direction, 2026-11-08.
-    for (const lane of ['R1', 'R2', 'R3', 'R4', 'R5', 'R7', 'RC', 'RE']) {
+    // R6 and R7 closed on the owner's direction, 2026-11-08.
+    for (const lane of ['R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'RC', 'RE']) {
       expect(byLane.get(lane)?.closed, `${lane} is closed history`).toBe(true);
     }
   });

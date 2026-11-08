@@ -360,19 +360,25 @@ gates:
   - id: R6-CALIBRATION-INTEGRATION
     lane: R6
     title: April calibration integrated-source regressions and full-horizon acceptance
-    status: blocked
+    status: closed
     kind: acceptance
     opened: 2026-09-12
+    closed: 2026-11-08
     blocks: [R8, R9]
     evidence_required: >
       Resolve Engine Invariants 14.8b and 16.2 against the candidate, pass the full suite,
       then obtain two clean identical 188-week runs on the combined source with unchanged
       floors, protected anchors, health, historical attribution and independent review.
       Any baseline replacement requires its recorded authority.
-    evidence_path: null
+    evidence_path: docs/40_reports/CALIBRATION_MASTER.md
     source: docs/40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md
     notes: >
-      2026-10-24 baseline-only maintenance is owner-authorized: clean n94 validates
+      Closed 2026-11-08 on the owner's direction ("Yes, close R6") after the owner signed off
+      all four checkpoints on 2026-11-06 under live-equivalent-desktop-v1 and closed the
+      calibration lane: 712/711/712/710, live = headless (0 cells) for RBiH, RS and HRHB as
+      player, strict health PASS, the Farz guard enforced and passing on __w188_n63, baseline
+      manifest and fingerprint pinned on n63 (CALIBRATION_MASTER top entries). Open cells by
+      owner direction: Brka and Ilijas Krivajevici. Earlier: 2026-10-24 baseline-only maintenance is owner-authorized: clean n94 validates
       707/707/706/706 and the default producer reproduces all eight adopted CI hashes;
       independent historical/scenario/engine reviews approve. This does not close
       this global integration gate, native R8, or the six remaining October mismatches.
