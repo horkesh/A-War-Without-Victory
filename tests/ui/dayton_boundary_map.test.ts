@@ -62,7 +62,8 @@ describe('stage logic', () => {
         expect(Object.keys(vo).length).toBeLessThan(Object.keys(painted).length);
         const flipped = Object.fromEntries(Object.keys(painted).map(o => [o, 'RBiH']));
         expect(refusedPlanControllers('vance_owen', flipped)).toEqual(vo);
-        expect(refusedPlanControllers('contact_group', painted)).not.toEqual(refusedPlanControllers('contact_group', flipped));
+        // The Contact Group is read off its own map too (2026-11-09): no plan depends on the front.
+        expect(refusedPlanControllers('contact_group', painted)).toEqual(refusedPlanControllers('contact_group', flipped));
         expect(refusedPlanControllers('dayton', painted)).toBeNull();
         expect(refusedPlanControllers('cutileiro', painted)).toBeNull();
     });

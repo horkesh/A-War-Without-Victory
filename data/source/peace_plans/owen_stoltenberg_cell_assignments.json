@@ -26,8 +26,8 @@
       "iou": 0.7236
     },
     "counts": {
-      "verified": 590,
-      "approximate": 122,
+      "verified": 592,
+      "approximate": 120,
       "unresolved": 0
     }
   },
@@ -4135,67 +4135,67 @@
       "evidence": "Owen–Stoltenberg map proposal, Geneva 1993 (Wikimedia Commons scan); https://upload.wikimedia.org/wikipedia/commons/5/57/BiH_by_OvenStoltemberg.jpg; sha256 97551bd850635af8a3e71bfb677ed032d6c62434d14fafbdf000b41b41ffebde"
     },
     "op:tesanj:kalosevic_2": {
-      "entity": "RS",
-      "faction": "RS",
+      "entity": "FED",
+      "faction": "RBiH",
       "confidence": "verified",
-      "rule": "PLAN-MAP 100.0% blue (Serb republic) (32/35 samples classified)",
-      "evidence": "Owen–Stoltenberg map proposal, Geneva 1993 (Wikimedia Commons scan); https://upload.wikimedia.org/wikipedia/commons/5/57/BiH_by_OvenStoltemberg.jpg; sha256 97551bd850635af8a3e71bfb677ed032d6c62434d14fafbdf000b41b41ffebde"
+      "rule": "OVERRIDE RBiH; map read PLAN-MAP 100.0% blue (Serb republic) (32/35 samples classified)",
+      "evidence": "S/26337 App. I (20 August 1993 map), research report §2: Tešanj 100 % Muslim republic; owner ruling 2026-11-09; Owen–Stoltenberg map proposal, Geneva 1993 (Wikimedia Commons scan); https://upload.wikimedia.org/wikipedia/commons/5/57/BiH_by_OvenStoltemberg.jpg; sha256 97551bd850635af8a3e71bfb677ed032d6c62434d14fafbdf000b41b41ffebde"
     },
     "op:tesanj:lepenica": {
       "entity": "FED",
       "faction": "RBiH",
-      "confidence": "approximate",
-      "rule": "PLAN-MAP 60.0% green (Muslim republic) (15/36 samples classified)",
-      "evidence": "Owen–Stoltenberg map proposal, Geneva 1993 (Wikimedia Commons scan); https://upload.wikimedia.org/wikipedia/commons/5/57/BiH_by_OvenStoltemberg.jpg; sha256 97551bd850635af8a3e71bfb677ed032d6c62434d14fafbdf000b41b41ffebde"
+      "confidence": "verified",
+      "rule": "OVERRIDE RBiH; map read PLAN-MAP 60.0% green (Muslim republic) (15/36 samples classified)",
+      "evidence": "S/26337 App. I (20 August 1993 map), research report §2: Tešanj 100 % Muslim republic; owner ruling 2026-11-09; Owen–Stoltenberg map proposal, Geneva 1993 (Wikimedia Commons scan); https://upload.wikimedia.org/wikipedia/commons/5/57/BiH_by_OvenStoltemberg.jpg; sha256 97551bd850635af8a3e71bfb677ed032d6c62434d14fafbdf000b41b41ffebde"
     },
     "op:tesanj:novi_miljanovci_2": {
-      "entity": "RS",
-      "faction": "RS",
+      "entity": "FED",
+      "faction": "RBiH",
       "confidence": "verified",
-      "rule": "PLAN-MAP 100.0% blue (Serb republic) (13/17 samples classified)",
-      "evidence": "Owen–Stoltenberg map proposal, Geneva 1993 (Wikimedia Commons scan); https://upload.wikimedia.org/wikipedia/commons/5/57/BiH_by_OvenStoltemberg.jpg; sha256 97551bd850635af8a3e71bfb677ed032d6c62434d14fafbdf000b41b41ffebde"
+      "rule": "OVERRIDE RBiH; map read PLAN-MAP 100.0% blue (Serb republic) (13/17 samples classified)",
+      "evidence": "S/26337 App. I (20 August 1993 map), research report §2: Tešanj 100 % Muslim republic; owner ruling 2026-11-09; Owen–Stoltenberg map proposal, Geneva 1993 (Wikimedia Commons scan); https://upload.wikimedia.org/wikipedia/commons/5/57/BiH_by_OvenStoltemberg.jpg; sha256 97551bd850635af8a3e71bfb677ed032d6c62434d14fafbdf000b41b41ffebde"
     },
     "op:tesanj:novo_selo": {
       "entity": "FED",
       "faction": "RBiH",
       "confidence": "verified",
-      "rule": "PLAN-MAP 100.0% green (Muslim republic) (23/29 samples classified)",
-      "evidence": "Owen–Stoltenberg map proposal, Geneva 1993 (Wikimedia Commons scan); https://upload.wikimedia.org/wikipedia/commons/5/57/BiH_by_OvenStoltemberg.jpg; sha256 97551bd850635af8a3e71bfb677ed032d6c62434d14fafbdf000b41b41ffebde"
+      "rule": "OVERRIDE RBiH; map read PLAN-MAP 100.0% green (Muslim republic) (23/29 samples classified)",
+      "evidence": "S/26337 App. I (20 August 1993 map), research report §2: Tešanj 100 % Muslim republic; owner ruling 2026-11-09; Owen–Stoltenberg map proposal, Geneva 1993 (Wikimedia Commons scan); https://upload.wikimedia.org/wikipedia/commons/5/57/BiH_by_OvenStoltemberg.jpg; sha256 97551bd850635af8a3e71bfb677ed032d6c62434d14fafbdf000b41b41ffebde"
     },
     "op:tesanj:piljuzici_2": {
-      "entity": "RS",
-      "faction": "RS",
+      "entity": "FED",
+      "faction": "RBiH",
       "confidence": "verified",
-      "rule": "PLAN-MAP 100.0% blue (Serb republic) (10/18 samples classified)",
-      "evidence": "Owen–Stoltenberg map proposal, Geneva 1993 (Wikimedia Commons scan); https://upload.wikimedia.org/wikipedia/commons/5/57/BiH_by_OvenStoltemberg.jpg; sha256 97551bd850635af8a3e71bfb677ed032d6c62434d14fafbdf000b41b41ffebde"
+      "rule": "OVERRIDE RBiH; map read PLAN-MAP 100.0% blue (Serb republic) (10/18 samples classified)",
+      "evidence": "S/26337 App. I (20 August 1993 map), research report §2: Tešanj 100 % Muslim republic; owner ruling 2026-11-09; Owen–Stoltenberg map proposal, Geneva 1993 (Wikimedia Commons scan); https://upload.wikimedia.org/wikipedia/commons/5/57/BiH_by_OvenStoltemberg.jpg; sha256 97551bd850635af8a3e71bfb677ed032d6c62434d14fafbdf000b41b41ffebde"
     },
     "op:tesanj:radusa_2": {
-      "entity": "RS",
-      "faction": "RS",
-      "confidence": "approximate",
-      "rule": "PLAN-MAP 50.0% blue (Serb republic) (4/15 samples classified)",
-      "evidence": "Owen–Stoltenberg map proposal, Geneva 1993 (Wikimedia Commons scan); https://upload.wikimedia.org/wikipedia/commons/5/57/BiH_by_OvenStoltemberg.jpg; sha256 97551bd850635af8a3e71bfb677ed032d6c62434d14fafbdf000b41b41ffebde"
+      "entity": "FED",
+      "faction": "RBiH",
+      "confidence": "verified",
+      "rule": "OVERRIDE RBiH; map read PLAN-MAP 50.0% blue (Serb republic) (4/15 samples classified)",
+      "evidence": "S/26337 App. I (20 August 1993 map), research report §2: Tešanj 100 % Muslim republic; owner ruling 2026-11-09; Owen–Stoltenberg map proposal, Geneva 1993 (Wikimedia Commons scan); https://upload.wikimedia.org/wikipedia/commons/5/57/BiH_by_OvenStoltemberg.jpg; sha256 97551bd850635af8a3e71bfb677ed032d6c62434d14fafbdf000b41b41ffebde"
     },
     "op:tesanj:sije_2": {
       "entity": "FED",
       "faction": "RBiH",
       "confidence": "verified",
-      "rule": "PLAN-MAP 100.0% green (Muslim republic) (26/41 samples classified)",
-      "evidence": "Owen–Stoltenberg map proposal, Geneva 1993 (Wikimedia Commons scan); https://upload.wikimedia.org/wikipedia/commons/5/57/BiH_by_OvenStoltemberg.jpg; sha256 97551bd850635af8a3e71bfb677ed032d6c62434d14fafbdf000b41b41ffebde"
+      "rule": "OVERRIDE RBiH; map read PLAN-MAP 100.0% green (Muslim republic) (26/41 samples classified)",
+      "evidence": "S/26337 App. I (20 August 1993 map), research report §2: Tešanj 100 % Muslim republic; owner ruling 2026-11-09; Owen–Stoltenberg map proposal, Geneva 1993 (Wikimedia Commons scan); https://upload.wikimedia.org/wikipedia/commons/5/57/BiH_by_OvenStoltemberg.jpg; sha256 97551bd850635af8a3e71bfb677ed032d6c62434d14fafbdf000b41b41ffebde"
     },
     "op:tesanj:tesanj_2": {
       "entity": "FED",
       "faction": "RBiH",
       "confidence": "verified",
-      "rule": "PLAN-MAP 100.0% green (Muslim republic) (7/17 samples classified)",
-      "evidence": "Owen–Stoltenberg map proposal, Geneva 1993 (Wikimedia Commons scan); https://upload.wikimedia.org/wikipedia/commons/5/57/BiH_by_OvenStoltemberg.jpg; sha256 97551bd850635af8a3e71bfb677ed032d6c62434d14fafbdf000b41b41ffebde"
+      "rule": "OVERRIDE RBiH; map read PLAN-MAP 100.0% green (Muslim republic) (7/17 samples classified)",
+      "evidence": "S/26337 App. I (20 August 1993 map), research report §2: Tešanj 100 % Muslim republic; owner ruling 2026-11-09; Owen–Stoltenberg map proposal, Geneva 1993 (Wikimedia Commons scan); https://upload.wikimedia.org/wikipedia/commons/5/57/BiH_by_OvenStoltemberg.jpg; sha256 97551bd850635af8a3e71bfb677ed032d6c62434d14fafbdf000b41b41ffebde"
     },
     "op:tesanj:ularice_2": {
-      "entity": "RS",
-      "faction": "RS",
+      "entity": "FED",
+      "faction": "RBiH",
       "confidence": "verified",
-      "rule": "PLAN-MAP 91.7% blue (Serb republic) (12/31 samples classified)",
-      "evidence": "Owen–Stoltenberg map proposal, Geneva 1993 (Wikimedia Commons scan); https://upload.wikimedia.org/wikipedia/commons/5/57/BiH_by_OvenStoltemberg.jpg; sha256 97551bd850635af8a3e71bfb677ed032d6c62434d14fafbdf000b41b41ffebde"
+      "rule": "OVERRIDE RBiH; map read PLAN-MAP 91.7% blue (Serb republic) (12/31 samples classified)",
+      "evidence": "S/26337 App. I (20 August 1993 map), research report §2: Tešanj 100 % Muslim republic; owner ruling 2026-11-09; Owen–Stoltenberg map proposal, Geneva 1993 (Wikimedia Commons scan); https://upload.wikimedia.org/wikipedia/commons/5/57/BiH_by_OvenStoltemberg.jpg; sha256 97551bd850635af8a3e71bfb677ed032d6c62434d14fafbdf000b41b41ffebde"
     },
     "op:teslic:blatnica_2": {
       "entity": "RS",

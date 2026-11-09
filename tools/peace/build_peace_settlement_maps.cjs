@@ -122,7 +122,7 @@ console.log(`wrote ${path.relative(ROOT, OUT)}: ${PLANS.map((p) => `${p}=${Objec
 // Vance–Owen and Owen–Stoltenberg cell tables are read from each plan's own map
 // (tools/peace/plan_map_digitize.cjs, owner 2026-11-09): every simulated settlement is listed,
 // so the quota pass no longer places those plans' lines inside municipalities.
-const CELL_SOURCES = ['dayton', 'vance_owen', 'owen_stoltenberg']
+const CELL_SOURCES = ['dayton', 'vance_owen', 'owen_stoltenberg', 'contact_group']
     .map((plan) => path.join(ROOT, `data/source/peace_plans/${plan}_cell_assignments.json`));
 const CELLS_OUT = path.join(ROOT, 'data/derived/peace/plan_cell_assignments.json');
 const AREAS = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/derived/operational/osid_areas.json'), 'utf8')).areas;

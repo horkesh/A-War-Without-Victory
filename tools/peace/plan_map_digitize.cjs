@@ -60,7 +60,14 @@ const PLANS = {
         // The legend's colour swatches (bottom right) are not land.
         ignore: [[0.75, 0.82, 1, 1]],
         // Reading errors corrected by the historian seat (2026-11-09 review, plan-maps/COMPARISON.md).
+        // Owner ruling 2026-11-09 ("whatever you suggest"): the 20 August UN map (S/26337 App. I)
+        // governs where the research documents it and the ground can be placed; elsewhere the scan
+        // stands. Tešanj: documented wholly in the Muslim republic; the scan draws the line through
+        // the town. (Šipovo's documented 37 % Croat share cannot be placed cell by cell without the
+        // UN map image, and Teslić's share was only inferred, so both keep the scan.)
         overrides: {
+            municipalities: { tesanj: 'RBiH' },
+            evidence: 'S/26337 App. I (20 August 1993 map), research report §2: Tešanj 100 % Muslim republic; owner ruling 2026-11-09',
             cells: {
                 // The scan's small pink Mostar circle is lost to the reading; the city was the EU district.
                 'op:mostar:mostar_istok_2': { side: 'special', evidence: 'S/26337 para 6: Mostar under EU administration' },
@@ -72,6 +79,37 @@ const PLANS = {
                 // A 50 % tie on the scan's fold; the S/26337 App. I map gives the town to the Muslim republic.
                 'op:gradacac:gradacac_2': { side: 'RBiH', evidence: 'S/26337 App. I (research: Gradačac 75 % Muslim republic); scan tie on the fold' },
             },
+        },
+    },
+};
+
+PLANS.contact_group = {
+    url: 'https://substack-post-media.s3.amazonaws.com/public/images/d85a870a-a628-4586-8b22-d8bb118caaf9_737x700.jpeg',
+    title: 'Contact Group plan map, July 1994 (owner-supplied reference image)',
+    // The map divides by entity only: the Federation is one striped class (green and navy),
+    // with no Bosniak/Croat split, so its cells carry no party (the settlement pass gives a
+    // Federation cell with no named party to its wartime Federation holder).
+    palette: [
+        { name: 'red (Serb entity, 49 %)', rgb: [158, 21, 29], entity: 'RS', faction: 'RS' },
+        { name: 'navy stripe (Federation, 51 %)', rgb: [1, 56, 97], entity: 'FED', faction: null },
+        { name: 'green stripe (Federation, 51 %)', rgb: [8, 120, 64], entity: 'FED', faction: null },
+        { name: 'yellow (Sarajevo under UN administration)', rgb: [253, 242, 0], entity: 'special', faction: null },
+    ],
+    maxDistance: 60,
+    // The legend's colour swatches (bottom left) are not land.
+    ignore: [[0.13, 0.67, 0.47, 0.83]],
+    // Historian seat (2026-11-09): the Posavina corridor is narrower than a settlement on this
+    // small redraw and its white edge lines hide most samples, so the reading broke the Serb band
+    // from Derventa through Modriča to Brčko. Restored from UN DPI map 4128 (July 1994, research
+    // report §5.3: Modriča 100 % RS, documented) and the image's own unbroken band.
+    overrides: {
+        cells: {
+            ...Object.fromEntries(['op:modrica:modrica', 'op:modrica:vranjak_2', 'op:modrica:garevac_2', 'op:modrica:skugric_gornji_2', 'op:gradacac:pelagicevo']
+                .map((osid) => [osid, { side: 'RS', evidence: 'UN DPI map 4128 (July 1994), research report §5.3: the Posavina corridor to the Serb entity (Modriča 100 % RS, documented; Pelagićevo its southern lip); BB1 KB pp.182, 217' }])),
+            // With Modriča restored, the corridor still broke between Doboj and Modriča; Zelinja
+            // Gornja is the only low-confidence cell (72.6 % Federation) that closes it in one step
+            // (Kožuhe, the other, reads 92.6 % Federation). Judgment call, recorded in the DC plan.
+            'op:doboj:zelinja_gornja_2': { side: 'RS', evidence: 'Corridor continuity on the source image and UN DPI map 4128 (historian seat rule, 2026-11-09); Doboj 50.5 % RS documented (research §5.3); approximate map reading' },
         },
     },
 };
@@ -95,7 +133,7 @@ const TOWNS = [
 function parseArgs() {
     const [plan, image, ...rest] = process.argv.slice(2);
     if (!PLANS[plan] || !image) {
-        console.error('usage: plan_map_digitize.cjs <vance_owen|owen_stoltenberg> <image> [--qa <dir>]');
+        console.error('usage: plan_map_digitize.cjs <vance_owen|owen_stoltenberg|contact_group> <image> [--qa <dir>]');
         process.exit(2);
     }
     const qaIndex = rest.indexOf('--qa');
@@ -248,8 +286,16 @@ async function main() {
         const mun = cell.id.split(':')[1];
         const cellOverride = cfg.overrides && cfg.overrides.cells && cfg.overrides.cells[cell.id];
         const override = cellOverride ? cellOverride.side : cfg.overrides && cfg.overrides.municipalities && cfg.overrides.municipalities[mun];
-        let k = votes.indexOf(Math.max(...votes));
-        const share = classified ? votes[k] / classified : 0;
+        // Votes are pooled by side, so a striped class (two colours, one side) counts once.
+        const sideKey = (i) => `${cfg.palette[i].entity}|${cfg.palette[i].faction}`;
+        const sideVotes = new Map();
+        votes.forEach((n, i) => sideVotes.set(sideKey(i), (sideVotes.get(sideKey(i)) || 0) + n));
+        let k = 0;
+        for (let i = 1; i < votes.length; i++) {
+            const a = sideVotes.get(sideKey(i)), b = sideVotes.get(sideKey(k));
+            if (a > b || (a === b && votes[i] > votes[k])) k = i;
+        }
+        const share = classified ? sideVotes.get(sideKey(k)) / classified : 0;
         let confidence = classified === 0 ? 'unresolved' : share >= 0.9 ? 'verified' : 'approximate';
         let rule = classified ? `PLAN-MAP ${(share * 100).toFixed(1)}% ${cfg.palette[k].name} (${classified}/${pts.length} samples classified)` : `PLAN-MAP no classified samples (${pts.length})`;
         let evidence = `${cfg.title}; ${cfg.url}; sha256 ${sha256}`;

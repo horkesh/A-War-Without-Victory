@@ -2598,7 +2598,7 @@ export const enMessages = {
     'dayton.boundary.noChanges': 'Nothing changed hands at this step.',
     'dayton.boundary.changeSummary': '{count} settlements change hands; {across} of them cross the line between the entities.',
     'dayton.boundary.ghostsTitle': 'Plans refused earlier',
-    'dayton.boundary.ghostsHint': 'Each line is the plan\'s own map. The Contact Group plan, known only by its municipal shares, is laid on today\'s front.',
+    'dayton.boundary.ghostsHint': 'Each line is the Serb side of that plan, as its own map drew it.',
     'dayton.boundary.credit': 'Rivers and relief:',
     'dayton.conference.boardEmpty': 'The board is blank until the mediator\'s line is pinned up.',
     'dayton.treaty.shareUp': '{delta} points more of the country: {pct} % against {draft} % in the mediator\'s draft.',
