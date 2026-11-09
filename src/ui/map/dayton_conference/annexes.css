@@ -1,0 +1,16 @@
+/* DC A4: the binder as treaty annexes. Uses the surrounding text colour (parchment panel). */
+.dayton-annexes { display: grid; gap: 1rem; }
+.dayton-annexes-intro { margin: 0; font-size: .9rem; }
+.dayton-annex { display: grid; gap: .4rem; padding-top: .6rem; border-top: 1px solid color-mix(in srgb, currentColor 30%, transparent); }
+.dayton-annex h3 { margin: 0; font-family: Georgia, serif; font-size: 1.05rem; font-weight: 700; }
+.dayton-annex dl { display: grid; gap: .55rem; margin: 0; }
+.dayton-annex-clause { display: grid; grid-template-columns: minmax(9rem, 14rem) 1fr; gap: .1rem .9rem; }
+.dayton-annex-clause dt { font-weight: 650; }
+.dayton-annex-clause dd { margin: 0; }
+.dayton-annex-value { font-weight: 600; }
+.dayton-annex-means { grid-column: 2; font-size: .88rem; line-height: 1.4; }
+.dayton-annex-means span { font-weight: 650; font-style: italic; }
+@container interface-viewport (max-width: 640px) {
+  .dayton-annex-clause { grid-template-columns: 1fr; }
+  .dayton-annex-means { grid-column: 1; }
+}

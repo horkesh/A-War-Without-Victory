@@ -80,6 +80,7 @@ import { legacyProjection } from '../../../sim/negotiation/power_overlap.js';
 import { DelegationFolder } from '../dayton_conference/DelegationFolder';
 import { TreatyLedger } from '../dayton_conference/TreatyLedger';
 import { ForcedUltimatum } from '../dayton_conference/ForcedUltimatum';
+import { TreatyAnnexes } from '../dayton_conference/TreatyAnnexes';
 import { BoardLine, BoundaryMap } from '../dayton_conference/BoundaryMap';
 import type { BoundaryStage } from '../dayton_conference/boundary_stages';
 import type { MessageKey } from '../i18n';
@@ -994,7 +995,8 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
                                 {budget}
                                 {agreement && (
                                     <div className="px-5 py-4">
-                                        <DaytonSettlementViewer agreement={agreement} mode="draft" view="institutions" />
+                                        {/* DC A4: the binder reads as the treaty's annexes. */}
+                                        <TreatyAnnexes agreement={agreement} faction={playerFaction} onOpenMap={() => openPanel('map')} />
                                     </div>
                                 )}
                                 {institutionalTerms}

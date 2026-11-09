@@ -21,7 +21,7 @@ Read this section first; the checkpoints under each amendment hold the detail. B
 
 **Next, in order**
 1. ~~A5~~ done 2026-11-09.
-2. **A4 binder as annexes** (boundary Annex 2, constitution Annex 4, return Annex 7, military Annex 1A, Brčko), each clause with a plain "what this means for you" line.
+2. ~~A4 binder as annexes~~ done 2026-11-09 (the rest of this item stays as the record) (boundary Annex 2, constitution Annex 4, return Annex 7, military Annex 1A, Brčko), each clause with a plain "what this means for you" line.
 3. **Stage 3 constitution depth** (police, education, defense deep; the rest shallow).
 4. **Packaged-Electron proof** (owner gate for every slice): three rounds per faction, imposition by refusal, sign and reload; the Boundary Map and board in the packaged app.
 5. Push the branch and open a PR when the owner asks.
@@ -183,6 +183,8 @@ Exit: three rounds reachable for each faction in packaged Electron; no numeric c
 ### A4. The treaty reads as a treaty (modifies stage 3 and the binder)
 
 The binder is organised as annexes: boundary (Annex 2), constitution (Annex 4), return (Annex 7), military (Annex 1A), Brčko. Each clause carries a plain "what this means for you" line. The three first subjects (police, education, defense) are deep; the rest shallow with their authority data. **The toggle-versus-competency contradictions visible in the packaged proof are the first fix of the lane**: one operative assignment per power, shown once.
+
+**Checkpoint 2026-11-09 (Claude).** Built (`annexes.ts`, `TreatyAnnexes.tsx`, the binder panel). Order: Annex 1A (separation of forces, defense), Annex 2 (entity shares, link to the map), Annex 2 Art V (Brčko), Annex 4 (division of powers, the four constitutional slots, the other competencies, Tribunal cooperation under Art II(8)), Annex 7 (return), Annex 10 (the High Representative). Each clause: value and a "what this means for you" line for the player's entity. One row per power through `effectiveOperativePowers`. Power, choice and option names now translated. Independent review with a historian lens applied (Constitutional Court, Annex 10 and Bonn, Brčko arbitration, three armies, return with compensation, Tribunal breach). Gates: typecheck, focused tests, full suite exit 0; renderer only. Depth for the three first subjects is stage 3.
 
 ### A5. The signature lands (adds to stage 4 "Agreement")
 

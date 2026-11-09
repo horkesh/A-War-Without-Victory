@@ -493,8 +493,10 @@ describe('DaytonNegotiationModal — live conference room', () => {
         expect(boundary.getByRole('radio', { name: /Your current draft/ }).getAttribute('aria-checked')).toBe('true');
         close();
         fireEvent.click(nav.getByRole('button', { name: 'Treaty binder' }));
-        const terms = within(screen.getByRole('region', { name: 'Institutions and powers' }));
-        expect(terms.getByText('Foreign Policy').nextElementSibling?.textContent).toMatch(/shared/i);
+        // DC A4: the binder reads as the treaty's annexes.
+        const terms = within(screen.getByRole('region', { name: 'Annex 4: the Constitution' }));
+        expect(terms.getByText('Foreign policy').nextElementSibling?.textContent).toMatch(/shared/i);
+        expect(screen.getByRole('region', { name: 'Annex 2: the Inter-Entity Boundary Line' })).toBeTruthy();
         close();
 
         fireEvent.click(draft);
