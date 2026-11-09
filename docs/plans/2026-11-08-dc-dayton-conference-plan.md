@@ -4,7 +4,7 @@
 
 ## Resume point (2026-11-09, Claude)
 
-Read this section first; the checkpoints under each amendment hold the detail. Branch `claude/dayton-conference` in worktree `F:/AWWV-worktrees/dayton-conference`, local only (not pushed, no PR). Full suite green, typecheck clean, 188-week run `__w188_n5` at 712 / 711 / 712 / 710 with Farz P-A and P-B and the enclave guard passing. Nothing has been checked in the packaged game.
+Read this section first; the checkpoints under each amendment hold the detail. Branch `claude/dayton-conference` in worktree `F:/AWWV-worktrees/dayton-conference`, local only (not pushed, no PR). Full suite green, typecheck clean, 188-week run `__w188_n5` at 712 / 711 / 712 / 710 with Farz P-A and P-B and the enclave guard passing. Packaged proof passed 2026-11-09 for A2 to A5 and stage 3 (six native runs; limits in its RESULT.md).
 
 **Done, in commit order**
 - `b01393a5b` One operative assignment per power (`power_overlap.ts`): the six legacy toggles are a projection of the competency and constitutional rows; the room no longer offers them (A4's "first fix").
@@ -17,13 +17,13 @@ Read this section first; the checkpoints under each amendment hold the detail. B
 - `56437d163`, `cd8e4e4a9`, `52b9a4410` A6: held enclaves keep their cells; no corridor that cuts the other entity in two (a held Srebrenica/Žepa stays a Federation island, owner ruling); protected ground is a price class, HRHB's off the table; Pyrrhic panel conditions applied.
 - `306d114bf` A3: Codex's board plate is the day room with the live line on it; full-width Boundary Map on Codex's survey plate with stage scrub, change list by reason, refused-plan ghosts, OSM credit (`BoundaryMap.tsx`, `boundary_stages.ts`, `settlement_geometry.ts`).
 - `05b25ba10`, `101671a97`, `f08d23513` Vance–Owen, Owen–Stoltenberg and the Contact Group read settlement by settlement off their own maps (`tools/peace/plan_map_digitize.cjs`; reference images and QA in `F:/AWWV-worktrees/.dayton-design/plan-maps/`, not committed); used for in-game plan settlements and the ghosts; historian-reviewed corrections in the tool.
-- A5 signing beat and forced table (see the A5 checkpoint; commit "DC A5").
+- `45687c0fc` A5 signing beat and forced table; `b644f79d1` A4 binder as treaty annexes; `f9a2f4aa2` stage 3 decision paths for police, education and defense; packaged proof (evidence only).
 
 **Next, in order**
 1. ~~A5~~ done 2026-11-09.
 2. ~~A4 binder as annexes~~ done 2026-11-09 (the rest of this item stays as the record) (boundary Annex 2, constitution Annex 4, return Annex 7, military Annex 1A, Brčko), each clause with a plain "what this means for you" line.
 3. ~~Stage 3 constitution depth~~ first three subjects done 2026-11-09 (inspection by place still open).
-4. **Packaged-Electron proof** (owner gate for every slice): three rounds per faction, imposition by refusal, sign and reload; the Boundary Map and board in the packaged app.
+4. ~~Packaged-Electron proof~~ done 2026-11-09 (`F:/AWWV-worktrees/.dayton-design/packaged-proof/RESULT.md`): three rounds per faction, sign, signing table, Verdict, RS relaunch, RS decline after three rounds, a forced table from an engine-derived save; the board line in the packaged room. Not exercised in the app: the eight weeks of war after a decline (engine-tested), viewports above this host's 2293 × 960 screen (browser preview), the full-width Boundary Map panel.
 5. Push the branch and open a PR when the owner asks.
 
 **Open for the owner (none blocks)**
