@@ -1,4 +1,12 @@
-# Audio provenance: `battle_catastrophic`
+# Original audio provenance for `battle_catastrophic`
+
+- **Active file.** `src/ui/map/assets/audio/designed/battle_catastrophic.ogg`
+- **Cue role.** Dark, muted contact with a long decay.
+- **Author and license.** A War Without Victory project, FIRST_PARTY. Fixed-seed procedural synthesis from damped modes and filtered noise.
+- **Recipe.** `python tools/audio/generate_original_soundscape.py --interface-refresh --publish`
+- **Masters.** 48 kHz mono PCM24 WAV in `logs/r7-english-readability/interface-cue-refresh/`. The PCM and runtime OGG hashes are in `docs/audio/AUDIO_ASSET_PROVENANCE.json`.
+
+## Replaced Kenney source retained in the repository
 
 - **File committed:** `src/ui/map/assets/audio/ui/battle_catastrophic.ogg`
 - **Cue role:** Catastrophic outcome — dull low tone; marks gravity, never triumph.
