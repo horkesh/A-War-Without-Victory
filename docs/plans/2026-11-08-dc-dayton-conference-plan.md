@@ -2,6 +2,44 @@
 
 **Status.** Active plan, amended 2026-11-08 (owner: "Adopt all, start"). Implementation base is `efa394894` on `codex/dayton-conference-prototype`; implementation continues on `claude/dayton-conference` in `F:/AWWV-worktrees/dayton-conference`. **Claude owns implementation; Codex owns visual assets** (room plates, drawn base map, signing beat, props) and reviews them against the art asks below. This plan defines the delivery order and review gates. Canonical copy: `docs/plans/2026-11-08-dc-dayton-conference-plan.md` on the implementation branch; this file mirrors it. Record authorization and the test budget for each implementation stage in its evidence directory.
 
+## Resume point (2026-11-09, Claude)
+
+Read this section first; the checkpoints under each amendment hold the detail. Branch `claude/dayton-conference` in worktree `F:/AWWV-worktrees/dayton-conference`, local only (not pushed, no PR). Last commit `f08d23513`. Full suite green, typecheck clean, 188-week run `__w188_n4` at 712 / 711 / 712 / 710 with Farz P-A and P-B and the enclave guard passing. Nothing has been checked in the packaged game.
+
+**Done, in commit order**
+- `b01393a5b` One operative assignment per power (`power_overlap.ts`): the six legacy toggles are a projection of the competency and constitutional rows; the room no longer offers them (A4's "first fix").
+- `f0b59cefd` Stage 1: audited per-cell opening line (`data/source/peace_plans/dayton_cell_assignments.json`, 252 cells; report `docs/40_reports/20261108_DAYTON_IEBL_CELL_AUDIT.md`).
+- `8ca673b8e`, `79bfd11ac` A1 delegation folder (`delegation_folder.ts`, `DelegationFolder.tsx`); owner: all-sides dead.
+- `7d751a228` A2 three bounded rounds (`dayton_rounds.ts`, `table-dayton-round` IPC); no cost figures in the room.
+- `ed3f79c60` Walkthrough fixes (package outcomes, validator, one autonomy measure, deadline willingness).
+- `001a214d8` Goražde corridor package = the nine audited corridor cells, protected for RBiH.
+- `31cb97696` Treaty against the mediator's draft (`treaty_against_draft.ts`, `TreatyLedger.tsx`) in final review and the Verdict; grade bands unchanged (owner).
+- `56437d163`, `cd8e4e4a9`, `52b9a4410` A6: held enclaves keep their cells; no corridor that cuts the other entity in two (a held Srebrenica/Žepa stays a Federation island, owner ruling); protected ground is a price class, HRHB's off the table; Pyrrhic panel conditions applied.
+- `306d114bf` A3: Codex's board plate is the day room with the live line on it; full-width Boundary Map on Codex's survey plate with stage scrub, change list by reason, refused-plan ghosts, OSM credit (`BoundaryMap.tsx`, `boundary_stages.ts`, `settlement_geometry.ts`).
+- `05b25ba10`, `101671a97`, `f08d23513` Vance–Owen, Owen–Stoltenberg and the Contact Group read settlement by settlement off their own maps (`tools/peace/plan_map_digitize.cjs`; reference images and QA in `F:/AWWV-worktrees/.dayton-design/plan-maps/`, not committed); used for in-game plan settlements and the ghosts; historian-reviewed corrections in the tool.
+
+**Next, in order**
+1. **A5 signing beat and forced table.** Codex's plates are delivered and hash-verified (CL-20261109-049): `F:/AWWV-worktrees/.dayton-design/assets/dayton-signing-table-v1/` (hotspots `map_thumb`, `sig_rbih`, `sig_hrhb`, `sig_rs`, `date`, `cost`) and `hope-hotel-forced-table-v1/` (same camera and hotspots as the board room; paper rect identical; use it for the room after a decline). The signing beat sits between final review and the Verdict: final map (reuse `BoardLine`/`BoundaryMap` geometry), three signatures, the date ("initialled at Wright-Patterson, 21 November 1995"), the war's cost line from the folder; the treaty ledger belongs there too. The forced table must read differently (the mediator's ultimatum, what declining cost). No text in the images; all copy EN and BCS.
+2. **A4 binder as annexes** (boundary Annex 2, constitution Annex 4, return Annex 7, military Annex 1A, Brčko), each clause with a plain "what this means for you" line.
+3. **Stage 3 constitution depth** (police, education, defense deep; the rest shallow).
+4. **Packaged-Electron proof** (owner gate for every slice): three rounds per faction, imposition by refusal, sign and reload; the Boundary Map and board in the packaged app.
+5. Push the branch and open a PR when the owner asks.
+
+**Open for the owner (none blocks)**
+- Five unresolved Dayton audit cells, left to the quota pass: Ostra Luka (Orašje), Stari Majdan (Sanski Most), Veličani (Trebinje), Tošići and Trnovo town (Trnovo).
+- Peace-plan borders still read as the image shows: Contact Group Derventa town, Donja Tramošnica, Čelić, Ostra Luka; Owen–Stoltenberg Šipovo and Teslić; Vance–Owen southern Bihać and two Visoko cells.
+- Pyrrhic panel, undecided: RBiH A+ blocked by any war-crimes event (others only by condemnation); RBiH A band text "30–33 %" against an open band.
+- Follow-ups recorded under A6: early-capture §6 probe (an RS capture of Srebrenica before turn 160 and condemnation); a non-cutting corridor search in the contiguity pass.
+
+**Traps for the next session**
+- Project hooks block `node`/`python` scripts and heredocs that write repo files: edit with the editor tools; plain `cat >>` appends to docs work.
+- `npm run sim:scenario:run:188w` overwrites `data/derived/latest_run_final_save.json`; restore it (`git checkout -- data/derived/latest_run_final_save.json`) before the full suite or a commit, or the Foča front-edge test fails.
+- The full suite runs balanced shards and prints deliberate fixture failures (`tests/fixtures/vitest_balanced/*`); judge by the `full exit` code and real `FAIL` lines. Git Bash must be on PATH.
+- Guards that catch new code: the strict-null inventory (no new `as FactionId`, `as unknown`, `x!.`/`x![`), the provenance input scan (register any new `data/` file a sim module imports or names in metadata), the determinism scan.
+- After a plan edit: `node tools/derive_plan_index.cjs` then `npm run plans:check`; mirror this file to `F:/AWWV-worktrees/.dayton-design/DAYTON_CONFERENCE_IMPLEMENTATION_PLAN.md`.
+- `.claude/launch.json` in the worktree has an uncommitted `dayton-conference-map` preview entry (port 3011); the dev harness is `src/ui/map/dayton_shot.html?conference=1&mock=1` (mock preview returns a real Dayton map from the painted October 1995 front).
+- Codex coordination: `F:/AWWV-coordination/CODEX_CLAUDE_HANDOFF.md` (last Claude entry CL-20261109-049). Commit trailer: `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
+
 ## Player outcome
 
 The Hope Hotel wall map opens a **Boundary Map** that explains who gets each place and why. The treaty binder opens a **Constitution Board** that shows who makes rules, who pays, who carries them out, and who can block or review a decision. The delegation folder explains the mandate and the table draft shows the exchange on offer. All four surfaces refer to the same draft revision. Final review shows the resulting map and constitution together. Verdict reopens the treaty as signed.
