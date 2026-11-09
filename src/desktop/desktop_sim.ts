@@ -48,11 +48,9 @@ import {
     applyDefinitionFlags,
 } from '../sim/events/evaluate_events.js';
 import { writeOwedRecordsAtTermination } from '../sim/endgame/owed_termination_records.js';
-import { projectDaytonAgreement, resolveDaytonNegotiation as resolveDaytonNegotiationInEngine } from '../sim/negotiation/dayton_negotiation.js';
+import { resolveDaytonWithRecord, resolveDaytonNegotiation as resolveDaytonNegotiationInEngine } from '../sim/negotiation/dayton_negotiation.js';
 import type { DaytonAgreementRecord, DaytonProposal, DaytonResult } from '../state/negotiation_types.js';
 import { tableDaytonRound, type TableDaytonRoundResult } from '../sim/negotiation/dayton_rounds.js';
-import { buildTreatyAgainstDraft } from '../sim/negotiation/treaty_against_draft.js';
-import { frontPackagesForProposal } from '../sim/negotiation/front_packages.js';
 import { evaluateBotResponse as evaluateBotResponseInEngine } from '../sim/negotiation/bot_negotiation.js';
 import { parseDaytonProposal } from './dayton_proposal.js';
 import type { EventDefinition, EventEffect, PendingEventDecision } from '../sim/events/event_types.js';
@@ -71,7 +69,7 @@ import {
     type CorridorDerivationReport,
     type SupplyStateDerivationReport
 } from '../state/supply_state_derivation.js';
-import type { FactionId, GameState } from '../state/game_state.js';
+import type { GameState } from '../state/game_state.js';
 import type { EquipmentClass } from '../state/recruitment_types.js';
 import { isValidEquipmentClass } from '../state/recruitment_types.js';
 import { deserializeState, serializeRuntimeState, serializeState } from '../state/serialize.js';
@@ -129,17 +127,8 @@ export function resolveDesktopDaytonAgreement(
     baseDir: string,
 ): { result: DaytonResult; agreement: DaytonAgreementRecord } {
     if (state.military.negotiation?.dayton_result) throw new Error('Dayton already resolved');
-    const wartimeControllers = { ...state.political.political_controllers };
-    // Captured-ground names and the mediator's draft are read before the signature.
-    const frontPackages = frontPackagesForProposal(state, proposal);
-    const player: FactionId = state.meta.player_faction ?? 'RBiH';
-    const result = resolveDaytonNegotiation(state, proposal, baseDir);
-    const agreement = projectDaytonAgreement(state, wartimeControllers);
-    // The treaty against the mediator's draft (owner, 2026-11-08): shown in final review and
-    // the Verdict. The draft map reads only the wartime controllers, captured above.
-    const wartimeState = { ...state, political: { ...state.political, political_controllers: wartimeControllers } } as GameState;
-    agreement.treaty = buildTreatyAgainstDraft(wartimeState, player, proposal, result, agreement, frontPackages);
-    return { result, agreement };
+    // One owner for a recorded signature (terms, map, treaty against the draft, signing beat).
+    return resolveDaytonWithRecord(state, proposal, loadDesktopEventDefinitions(baseDir));
 }
 
 export { evaluateBotResponse } from '../sim/negotiation/bot_negotiation.js';

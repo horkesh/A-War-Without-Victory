@@ -25,7 +25,7 @@
  * collector. Deterministic: sorted iteration, integer counts, no clock or RNG.
  */
 import type { FactionId, GameState } from '../../state/game_state.js';
-import type { DelegationFolder } from '../../state/negotiation_types.js';
+import type { DelegationFolder, WarCostLine } from '../../state/negotiation_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getPeacePlanById } from './peace_plan_data.js';
 import { PATRON_FORCE_THRESHOLD } from './patron_leverage.js';
@@ -104,6 +104,22 @@ export function buildDelegationFolder(state: GameState): DelegationFolder | unde
             };
         });
 
+    // What declining cost (DC A5): only on the table reopened after this faction declined.
+    const decline = neg?.dayton_decline;
+    const declined = decline && decline.faction === faction ? {
+        declined_turn: decline.declined_turn,
+        weeks_since: Math.max(0, turn - decline.declined_turn),
+        dead_since: decline.dead_at_decline
+            ? {
+                military: Math.max(0, deadNow.military - decline.dead_at_decline.military),
+                civilian: Math.max(0, deadNow.civilian - decline.dead_at_decline.civilian),
+            }
+            : null,
+        displaced_since: displacedSince(decline.declined_turn),
+        held_then: decline.held_at_decline ?? null,
+        held_now: held,
+    } : undefined;
+
     return {
         faction,
         turn,
@@ -119,10 +135,29 @@ export function buildDelegationFolder(state: GameState): DelegationFolder | unde
             can_force: override >= PATRON_FORCE_THRESHOLD,
         },
         refused_plans: refused,
-        war: {
-            weeks: costs.length,
-            dead: deadNow,
-            displaced: costs.reduce((sum, c) => sum + c.displaced, 0),
-        },
+        war: warCostLine(state),
+        ...(declined ? { declined } : {}),
+    };
+}
+
+/**
+ * The war's cost line (the folder's `war`), for the signing beat (DC A5). Same sources as the
+ * folder: every kept turn summary for weeks and displacement, war_dead.ts for the dead.
+ */
+export function warCostLine(state: GameState): WarCostLine {
+    const costs = turnCosts(state);
+    return {
+        weeks: costs.length,
+        dead: warDeadTotals(state),
+        displaced: costs.reduce((sum, c) => sum + c.displaced, 0),
+    };
+}
+
+/** Stamp taken when a faction declines Dayton, so the forced table can say what declining cost (DC A5). */
+export function declineStamp(state: GameState, faction: string): { dead_at_decline: { military: number; civilian: number }; held_at_decline: number } {
+    const controllers = state.political?.political_controllers ?? {};
+    return {
+        dead_at_decline: warDeadTotals(state),
+        held_at_decline: Object.keys(controllers).filter(o => controllers[o] === faction).length,
     };
 }

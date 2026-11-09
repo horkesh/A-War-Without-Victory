@@ -6,6 +6,8 @@ import { setLocale } from '../../src/ui/map/i18n/index.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import * as dataLoader from '../../src/ui/map/data/DataLoader';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
+import type { DelegationFolder } from '../../src/state/negotiation_types.js';
+import rbihFolder from '../../src/ui/map/__mocks__/dayton_delegation_folder.rbih.json';
 
 // @ts-expect-error TS1378: Vitest supports top-level await in ESM tests.
 const { DaytonNegotiationModal } = await import('../../src/ui/map/components/DaytonNegotiationModal');
@@ -603,7 +605,41 @@ describe('DaytonNegotiationModal — live conference room', () => {
         expect(screen.queryByRole('button', { name: 'Decline Settlement' })).toBeNull();
         expect(screen.getByRole('button', { name: 'Review agreement' })).toBeTruthy();
         fireEvent.keyDown(document.activeElement!, { key: 'Escape' });
-        expect(screen.getByRole('heading', { name: 'Hope Hotel conference room' })).toBeTruthy();
+        expect(screen.getByRole('heading', { name: 'Hope Hotel conference room, after midnight' })).toBeTruthy();
         expect(screen.queryByRole('button', { name: 'Review agreement' })).toBeNull();
+    });
+
+    it('reads the forced table as a harder table: night plate, ultimatum and what declining cost (DC A5)', () => {
+        const declined = {
+            declined_turn: 180, weeks_since: 8, dead_since: { military: 1460, civilian: 390 },
+            displaced_since: 21400, held_then: 248, held_now: 239,
+        };
+        render(createElement(DaytonNegotiationModal, {
+            conference: true,
+            dayton: {
+                ...PENDING,
+                forced: { onFaction: 'RBiH', by: 'united_states' },
+                delegationFolder: { ...(rbihFolder as DelegationFolder), declined },
+            },
+        }));
+        fireEvent.click(screen.getByRole('button', { name: 'Skip arrival' }));
+        // The night plate keeps the day room's four hotspots and the live board.
+        expect(screen.getByTestId('dayton-room-plate').getAttribute('src')).toMatch(/room-forced-/);
+        for (const id of ['folder', 'draft', 'map', 'binder']) expect(screen.getByTestId(`dayton-hotspot-${id}`)).toBeTruthy();
+        const ultimatum = screen.getByTestId('dayton-ultimatum');
+        expect(ultimatum.textContent).toContain('There is no decline this time.');
+        expect(ultimatum.textContent).toContain('In the 8 weeks since you declined, 1,460 soldiers and 390 civilians were killed on all sides');
+        expect(ultimatum.textContent).toContain('You held 248 settlements when you declined. You hold 239 now.');
+        // The folder opens on the full ultimatum.
+        fireEvent.click(within(screen.getByRole('navigation', { name: 'Conference objects' })).getByRole('button', { name: 'Delegation folder' }));
+        expect(screen.getByRole('heading', { name: "The mediator's ultimatum" })).toBeTruthy();
+        expect(screen.getByRole('heading', { name: 'What declining cost' })).toBeTruthy();
+    });
+
+    it('keeps the day plate at the free table', () => {
+        render(createElement(DaytonNegotiationModal, { conference: true, dayton: PENDING }));
+        fireEvent.click(screen.getByRole('button', { name: 'Skip arrival' }));
+        expect(screen.getByTestId('dayton-room-plate').getAttribute('src')).toMatch(/room-board-/);
+        expect(screen.queryByTestId('dayton-ultimatum')).toBeNull();
     });
 });

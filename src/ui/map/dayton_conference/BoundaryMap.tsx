@@ -71,12 +71,13 @@ function HatchPattern({ id, scale }: { id: string; scale: number }) {
 }
 
 /** The live line on the wall board: entity fills only, multiplied onto the pinned paper. */
-export function BoardLine({ controllers }: { controllers: Controllers | undefined }) {
+/** `fit` keeps the map's proportions inside a box of another shape (the signing document, DC A5). */
+export function BoardLine({ controllers, fit }: { controllers: Controllers | undefined; fit?: boolean }) {
     const { geometry } = useSettlementGeometry();
     const patternId = `${useId().replace(/:/g, '')}-hatch`;
     if (!geometry || !controllers) return null;
     return (
-        <svg className="dayton-board-line" viewBox={geometry.viewBox} preserveAspectRatio="none" aria-hidden="true" data-testid="dayton-board-line">
+        <svg className="dayton-board-line" viewBox={geometry.viewBox} preserveAspectRatio={fit ? 'xMidYMid meet' : 'none'} aria-hidden="true" data-testid="dayton-board-line">
             <defs><HatchPattern id={patternId} scale={0.035} /></defs>
             {geometry.paths.map(({ id, d }) => (
                 <path key={id} d={d} fill={fillFor(controllers[id], false, patternId)} fillRule="evenodd" />

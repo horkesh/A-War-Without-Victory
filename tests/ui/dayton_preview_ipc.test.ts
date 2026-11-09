@@ -24,6 +24,7 @@ import { getAllConstitutionalChoices, getAllReturnJusticeChoices } from '../../s
 import { initializeStrategicDimensions } from '../../src/sim/events/strategic_dimensions.js';
 import { derivePendingDayton, deriveSettlementMap } from '../../src/ui/map/data/GameStateAdapter.js';
 import * as desktopSim from '../../src/desktop/desktop_sim.js';
+import { warCostLine } from '../../src/sim/negotiation/delegation_folder.js';
 
 const { projectPlayerVisibleStateJson } = createRequire(import.meta.url)('../../src/desktop/player_visible_state.cjs');
 
@@ -142,6 +143,8 @@ describe('desktop Dayton proposal IPC', () => {
             RS: desktopSim.evaluateBotResponse(makeState(), 'RS', STRUCTURAL_PROPOSAL),
         });
         expect(sim.resolveDesktopDaytonAgreement.mock.calls[0][0].meta.game_over).toBe(true);
+        // DC A5: the signed record carries the turn and the war's cost line for the signing beat.
+        expect(preview.agreement?.signing).toEqual({ turn: makeState().meta.turn, war: warCostLine(makeState()) });
         expect(context.currentGameStateJson).toBe(before);
         expect(context.currentCanonicalSaveJson).toBe(before);
         expect(context.autoSave).not.toHaveBeenCalled();

@@ -15,11 +15,12 @@ import ReactDOM from 'react-dom/client';
 import { createElement } from 'react';
 import './styles/globals.css';
 import { DaytonNegotiationModal } from './components/DaytonNegotiationModal';
+import { DaytonSigningBeat } from './dayton_conference/DaytonSigningBeat';
 import { useGameStore } from './store/gameStore';
 import { setLocale } from './i18n';
 import { makeMockLoadedGameState } from './__mocks__/loadedGameState';
 import type { LoadedGameState } from './data/types';
-import type { DaytonRound, DelegationFolder } from '../../state/negotiation_types.js';
+import type { DaytonRound, DelegationFolder, DaytonAgreementRecord } from '../../state/negotiation_types.js';
 import rbihFolder from './__mocks__/dayton_delegation_folder.rbih.json';
 import paintedOct1995 from '../../../data/source/calibration/painted_control_oct1995.json';
 import { computeSettlementControllersFromFront, planCellAssignments, settlementTerritoryPct } from '../../sim/negotiation/peace_settlement.js';
@@ -123,8 +124,41 @@ const seededRounds: DaytonRound[] = Array.from({ length: Math.min(3, Number(para
         HRHB: { decision: 'accept', reason: '', reason_code: i === 0 ? 'accept' : 'accept_patron', proposal_cost: 0, available_capital: 0 },
     },
 }));
-const dayton = conference ? { ...PENDING, delegationFolder: rbihFolder as DelegationFolder, rounds: seededRounds } : PENDING;
+// ?forced=united_states|belgrade|zagreb (DC A5): the table reopened after a decline, with the
+// folder's decline line (fixture folder, eight weeks after a decline at turn 179).
+const forcedBy = params.get('forced') as 'united_states' | 'belgrade' | 'zagreb' | null;
+const folder = rbihFolder as DelegationFolder;
+const forcedFolder: DelegationFolder = forcedBy ? {
+    ...folder,
+    declined: {
+        declined_turn: folder.turn - 8, weeks_since: 8,
+        dead_since: { military: 1460, civilian: 390 }, displaced_since: 21400,
+        held_then: folder.settlements.held + 9, held_now: folder.settlements.held,
+    },
+} : folder;
+const dayton = conference
+    ? { ...PENDING, delegationFolder: forcedFolder, rounds: forcedBy ? [] : seededRounds,
+        ...(forcedBy ? { forced: { onFaction: 'RBiH', by: forcedBy } } : {}) }
+    : PENDING;
+
+// ?signing=1 (DC A5): the initialling beat on the harness's Dayton map; add &imposed=1 for the forced signature.
+const signing = params.get('signing') === '1';
+const signedAgreement = {
+    ...mockAgreement(['gorazde_corridor']),
+    terms: { brcko_status: 'arbitration', institutional_choices: {}, territorial_packages_accepted: ['gorazde_corridor'],
+        territorial_packages_rejected: ['brcko_district'], final_territory_split: {}, patron_overrides_applied: [],
+        ...(params.get('imposed') === '1' ? { imposed: { on_faction: 'RBiH', by: 'united_states', turn: folder.turn } } : {}) },
+    treaty: {
+        faction: 'RBiH', draft_share: { RBiH: 32.1, RS: 48.4, HRHB: 19.5 }, signed_share: { RBiH: 33.0, RS: 47.3, HRHB: 19.7 },
+        land_won: [{ id: 'gorazde_corridor', name: 'Goražde Corridor' }], land_given: [], land_refused: [{ id: 'brcko_district', name: 'Brčko District' }],
+        powers_won: [], powers_refused: [],
+    },
+    signing: { turn: folder.turn, war: folder.war },
+} as DaytonAgreementRecord;
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-    createElement(DaytonNegotiationModal, { dayton, conference }),
+    signing
+        ? createElement('div', { style: { position: 'fixed', inset: 0 } },
+            createElement(DaytonSigningBeat, { agreement: signedAgreement, fallbackDate: '', onContinue: () => window.location.assign('?conference=1&mock=1') }))
+        : createElement(DaytonNegotiationModal, { dayton, conference }),
 );

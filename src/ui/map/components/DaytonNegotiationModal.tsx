@@ -79,6 +79,7 @@ import {
 import { legacyProjection } from '../../../sim/negotiation/power_overlap.js';
 import { DelegationFolder } from '../dayton_conference/DelegationFolder';
 import { TreatyLedger } from '../dayton_conference/TreatyLedger';
+import { ForcedUltimatum } from '../dayton_conference/ForcedUltimatum';
 import { BoardLine, BoundaryMap } from '../dayton_conference/BoundaryMap';
 import type { BoundaryStage } from '../dayton_conference/boundary_stages';
 import type { MessageKey } from '../i18n';
@@ -926,6 +927,10 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
             id: plan.plan_id,
             label: t(REFUSED_PLAN_KEYS[plan.plan_id] ?? 'dayton.boundary.ghostsTitle'),
         }));
+        // DC A5: the forced table reads as a harder table (the ultimatum and what declining cost).
+        const conferenceUltimatum = (compact = false) => dayton.forced
+            ? <ForcedUltimatum by={dayton.forced.by} declined={dayton.delegationFolder?.declined} compact={compact} />
+            : null;
         const savedDate = loadedGameState?.metadata?.date?.trim();
         const date = savedDate && savedDate !== 'UNKNOWN'
             ? savedDate
@@ -948,6 +953,7 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
                         : t('dayton.conference.roundStatus', { round: nextRound, max: DAYTON_MAX_ROUNDS })}
                     error={conferenceError ? t(`dayton.conference.error.${conferenceError}`) : undefined}
                     forced={Boolean(dayton.forced)}
+                    ultimatum={conferenceUltimatum(true)}
                     previewReady={Boolean(agreement)}
                     panel={panel}
                     backTo={inspection?.origin ?? (panel === 'review' ? 'draft' : undefined)}
@@ -959,13 +965,13 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
                         // and the budget belong with the draft the player is shaping.
                         folder: (
                             <>
-                                {forcedBanner}
+                                {conferenceUltimatum()}
                                 <DelegationFolder folder={dayton.delegationFolder} />
                             </>
                         ),
                         draft: (
                             <>
-                                {forcedBanner}
+                                {conferenceUltimatum()}
                                 {budget}
                                 {readouts}
                                 {territory}

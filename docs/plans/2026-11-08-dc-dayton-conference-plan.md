@@ -4,7 +4,7 @@
 
 ## Resume point (2026-11-09, Claude)
 
-Read this section first; the checkpoints under each amendment hold the detail. Branch `claude/dayton-conference` in worktree `F:/AWWV-worktrees/dayton-conference`, local only (not pushed, no PR). Last commit `f08d23513`. Full suite green, typecheck clean, 188-week run `__w188_n4` at 712 / 711 / 712 / 710 with Farz P-A and P-B and the enclave guard passing. Nothing has been checked in the packaged game.
+Read this section first; the checkpoints under each amendment hold the detail. Branch `claude/dayton-conference` in worktree `F:/AWWV-worktrees/dayton-conference`, local only (not pushed, no PR). Full suite green, typecheck clean, 188-week run `__w188_n5` at 712 / 711 / 712 / 710 with Farz P-A and P-B and the enclave guard passing. Nothing has been checked in the packaged game.
 
 **Done, in commit order**
 - `b01393a5b` One operative assignment per power (`power_overlap.ts`): the six legacy toggles are a projection of the competency and constitutional rows; the room no longer offers them (A4's "first fix").
@@ -17,9 +17,10 @@ Read this section first; the checkpoints under each amendment hold the detail. B
 - `56437d163`, `cd8e4e4a9`, `52b9a4410` A6: held enclaves keep their cells; no corridor that cuts the other entity in two (a held Srebrenica/Žepa stays a Federation island, owner ruling); protected ground is a price class, HRHB's off the table; Pyrrhic panel conditions applied.
 - `306d114bf` A3: Codex's board plate is the day room with the live line on it; full-width Boundary Map on Codex's survey plate with stage scrub, change list by reason, refused-plan ghosts, OSM credit (`BoundaryMap.tsx`, `boundary_stages.ts`, `settlement_geometry.ts`).
 - `05b25ba10`, `101671a97`, `f08d23513` Vance–Owen, Owen–Stoltenberg and the Contact Group read settlement by settlement off their own maps (`tools/peace/plan_map_digitize.cjs`; reference images and QA in `F:/AWWV-worktrees/.dayton-design/plan-maps/`, not committed); used for in-game plan settlements and the ghosts; historian-reviewed corrections in the tool.
+- A5 signing beat and forced table (see the A5 checkpoint; commit "DC A5").
 
 **Next, in order**
-1. **A5 signing beat and forced table.** Codex's plates are delivered and hash-verified (CL-20261109-049): `F:/AWWV-worktrees/.dayton-design/assets/dayton-signing-table-v1/` (hotspots `map_thumb`, `sig_rbih`, `sig_hrhb`, `sig_rs`, `date`, `cost`) and `hope-hotel-forced-table-v1/` (same camera and hotspots as the board room; paper rect identical; use it for the room after a decline). The signing beat sits between final review and the Verdict: final map (reuse `BoardLine`/`BoundaryMap` geometry), three signatures, the date ("initialled at Wright-Patterson, 21 November 1995"), the war's cost line from the folder; the treaty ledger belongs there too. The forced table must read differently (the mediator's ultimatum, what declining cost). No text in the images; all copy EN and BCS.
+1. ~~A5~~ done 2026-11-09.
 2. **A4 binder as annexes** (boundary Annex 2, constitution Annex 4, return Annex 7, military Annex 1A, Brčko), each clause with a plain "what this means for you" line.
 3. **Stage 3 constitution depth** (police, education, defense deep; the rest shallow).
 4. **Packaged-Electron proof** (owner gate for every slice): three rounds per faction, imposition by refusal, sign and reload; the Boundary Map and board in the packaged app.
@@ -29,6 +30,7 @@ Read this section first; the checkpoints under each amendment hold the detail. B
 - Five unresolved Dayton audit cells, left to the quota pass: Ostra Luka (Orašje), Stari Majdan (Sanski Most), Veličani (Trebinje), Tošići and Trnovo town (Trnovo).
 - Peace-plan borders still read as the image shows: Contact Group Derventa town, Donja Tramošnica, Čelić, Ostra Luka; Owen–Stoltenberg Šipovo and Teslić; Vance–Owen southern Bihać and two Visoko cells.
 - Pyrrhic panel, undecided: RBiH A+ blocked by any war-crimes event (others only by condemnation); RBiH A band text "30–33 %" against an open band.
+- A5 signing table: the Croat signature reads "For Herzeg-Bosnia" after the faction; historically the Federation initialled. Say if it should read "For the Federation of Bosnia and Herzegovina".
 - Follow-ups recorded under A6: early-capture §6 probe (an RS capture of Srebrenica before turn 160 and condemnation); a non-cutting corridor search in the contiguity pass.
 
 **Traps for the next session**
@@ -185,6 +187,13 @@ The binder is organised as annexes: boundary (Annex 2), constitution (Annex 4), 
 ### A5. The signature lands (adds to stage 4 "Agreement")
 
 One signing beat between final review and the Verdict: the final map, the three signatures, the date, the cost line from the folder. The forced table after a decline looks and reads differently from the free table (the mediator's ultimatum; what declining cost). Art ask (Codex): the signing plate.
+
+**Checkpoint 2026-11-09 (Claude).** Built on Codex's `dayton-signing-table-v1` and `hope-hotel-forced-table-v1` (hashes verified).
+- *Signing beat* (`DaytonSigningBeat.tsx`, mounted first in `VerdictScreen` for a version-1 record). Over the blank document: the signed map (fit, not stretched), "Initialled at Wright-Patterson Air Force Base, Dayton, Ohio, {date}", the war's cost line, three pen initials labelled by delegation (no personal names) with "Initialled under pressure from {patron}" on an imposed signature, and the treaty ledger beside it. The map box opens the signed Boundary Map; the document is inert while it is open. Continue goes to the Verdict.
+- *Forced table.* The night plate (shared blocking and paper, so the four hotspots and the live board work unchanged), the heading "after midnight", and `ForcedUltimatum`: who forced the return, no decline, an unanswered table is signed next week, and what declining cost (weeks, the dead on all sides and civilians displaced since the decline, settlements then and now). Stated as a sequence, not a cause.
+- *State* (all optional): `dayton_decline.dead_at_decline`, `held_at_decline`; folder `declined`; agreement `signing: { turn, war }`. `resolveDaytonWithRecord` owns every recorded signature; the forced table's unanswered fallback now writes the record too (it had signed with none, so the Verdict skipped the treaty).
+- Independent review applied (focus trap, fallback record, wording, BCS week counts, adapter guard, non-Dayton test). Evidence `F:/AWWV-worktrees/.dayton-design/signing-beat/` (1280 × 720 to 3426 × 1186, EN and BCS). Gates: typecheck, focused tests, full suite exit 0, 188-week run `__w188_n5` 712 / 711 / 712 / 710 with Farz P-A, P-B and the enclave guard passing. Not yet: packaged-Electron proof.
+- **Open for the owner:** the Croat signature reads "For Herzeg-Bosnia" after the faction; historically the Federation of Bosnia and Herzegovina initialled.
 
 ### A6. Roadmap first items (adds to stages 1, 2 and 4)
 

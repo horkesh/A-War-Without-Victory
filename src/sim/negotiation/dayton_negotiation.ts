@@ -27,7 +27,8 @@ import {
     getDialDeclarationCost,
 } from './dayton_dial_cost.js';
 import { reconcileProposalPowers, reconcileResolvedPowers } from './power_overlap.js';
-import { buildDelegationFolder } from './delegation_folder.js';
+import { buildDelegationFolder, declineStamp, warCostLine } from './delegation_folder.js';
+import { buildTreatyAgainstDraft } from './treaty_against_draft.js';
 import { daytonRoundWillingness, effectiveDaytonOverride } from './dayton_rounds.js';
 import type { DelegationFolder } from '../../state/negotiation_types.js';
 import {
@@ -108,6 +109,31 @@ export function projectDaytonAgreement(
             territoryPct: { ...settlement.territory_pct },
         },
     };
+}
+
+/**
+ * Sign a proposal and snapshot the public treaty: the terms, the map, the treaty against
+ * the mediator's draft, and the signing beat's turn and cost line (DC A5). The one owner
+ * for a recorded signature, used by the desktop signature and by the forced table's
+ * unanswered fallback, so a treaty signed for the player still lands on the signing table.
+ */
+export function resolveDaytonWithRecord(
+    state: GameState,
+    proposal: DaytonProposal,
+    eventDefinitions?: readonly EventDefinition[],
+): { result: DaytonResult; agreement: DaytonAgreementRecord } {
+    const wartimeControllers = { ...state.political.political_controllers };
+    // Captured-ground names and the mediator's draft are read before the signature.
+    const frontPackages = frontPackagesForProposal(state, proposal);
+    const player: FactionId = state.meta.player_faction ?? 'RBiH';
+    const result = resolveDaytonNegotiation(state, proposal, eventDefinitions);
+    const agreement = projectDaytonAgreement(state, wartimeControllers);
+    // The treaty against the mediator's draft (owner, 2026-11-08). The draft map reads only
+    // the wartime controllers, captured above.
+    const wartimeState = { ...state, political: { ...state.political, political_controllers: wartimeControllers } } as GameState;
+    agreement.treaty = buildTreatyAgainstDraft(wartimeState, player, proposal, result, agreement, frontPackages);
+    agreement.signing = { turn: state.meta.turn, war: warCostLine(state) };
+    return { result, agreement };
 }
 
 /** Set when Dayton is signed or imposed; dayton_signed_1995's trigger reads it. */
@@ -405,7 +431,7 @@ function recordDaytonDecline(state: GameState, faction: string): number {
     const neg = state.military.negotiation!;
     const declinedTurn = state.meta.turn;
     const impositionTurn = declinedTurn + DAYTON_DECLINE_GRACE_WEEKS;
-    neg.dayton_decline = { faction, declined_turn: declinedTurn, imposition_turn: impositionTurn };
+    neg.dayton_decline = { faction, declined_turn: declinedTurn, imposition_turn: impositionTurn, ...declineStamp(state, faction) };
     delete neg.pending_dayton;
     if (!state.military.event_flags) state.military.event_flags = {};
     state.military.event_flags[DAYTON_DECLINED_BY_FLAG] = faction;
@@ -500,7 +526,11 @@ export function enforceDaytonImposition(
     if (turn < decline.imposition_turn) return null;
     const forced = neg.pending_dayton?.forced;
     if (forced && turn > forced.opened_turn) {
-        return resolveDaytonNegotiation(state, buildHistoricalDefaultDaytonProposal(), eventDefinitions);
+        // DC A5: the treaty signed for the player is recorded like a signature, so the
+        // Verdict opens on the signing table (the ultimatum promised it).
+        const { result, agreement } = resolveDaytonWithRecord(state, buildHistoricalDefaultDaytonProposal(), eventDefinitions);
+        neg.dayton_agreement = agreement;
+        return result;
     }
     if (!neg.pending_dayton) {
         neg.pending_dayton = {

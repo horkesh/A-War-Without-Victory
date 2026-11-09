@@ -6,6 +6,10 @@ import standardBoard from './art/board-registration-4k.json';
 import wideBoard from './art/board-registration-ultrawide.json';
 import standardRoom from './art/room-board-4k.webp';
 import wideRoom from './art/room-board-ultrawide.webp';
+// DC A5: the late-night table after a decline. Same camera, hotspots and paper rectangle
+// as the day room (Codex, hope-hotel-forced-table-v1), so the blocking JSON is shared.
+import standardForced from './art/room-forced-4k.webp';
+import wideForced from './art/room-forced-ultrawide.webp';
 import './room.css';
 import './boundary.css';
 
@@ -20,10 +24,12 @@ interface DaytonRoomBackdropProps {
     showBounds?: boolean;
     /** Drawn onto the board paper at its registered rectangle (DC A3: the live line). */
     board?: ReactNode;
+    /** The forced table after a decline (DC A5): the night plate. */
+    night?: boolean;
 }
 
-/** The photograph framing and the registered hit areas use the same coordinate space. */
-export function DaytonRoomBackdrop({ labels, onOpen, showBounds, board }: DaytonRoomBackdropProps) {
+/** True when the window is wide enough for the 3:1 plate framing (shared by the room and the signing table). */
+export function useWideFraming(): boolean {
     const [wide, setWide] = useState(() => window.matchMedia?.(wideRoomQuery).matches ?? false);
     useLayoutEffect(() => {
         const media = window.matchMedia?.(wideRoomQuery);
@@ -33,13 +39,19 @@ export function DaytonRoomBackdrop({ labels, onOpen, showBounds, board }: Dayton
         media.addEventListener('change', update);
         return () => media.removeEventListener('change', update);
     }, []);
+    return wide;
+}
 
+/** The photograph framing and the registered hit areas use the same coordinate space. */
+export function DaytonRoomBackdrop({ labels, onOpen, showBounds, board, night }: DaytonRoomBackdropProps) {
+    const wide = useWideFraming();
     const blocking = wide ? wideBlocking : standardBlocking;
     const paper = (wide ? wideBoard : standardBoard).imagePixels;
+    const plate = night ? (wide ? wideForced : standardForced) : (wide ? wideRoom : standardRoom);
     return (
-        <div className="dayton-room-window room-window" data-wide={wide}>
+        <div className="dayton-room-window room-window" data-wide={wide} data-night={night || undefined}>
             <div className="dayton-room-frame room-frame" data-bounds={showBounds}>
-                <img src={wide ? wideRoom : standardRoom} alt="" />
+                <img src={plate} alt="" data-testid="dayton-room-plate" />
                 {board && (
                     <div className="dayton-room-board" data-testid="dayton-room-board" style={{
                         left: paper.x / blocking.width * 100 + '%',

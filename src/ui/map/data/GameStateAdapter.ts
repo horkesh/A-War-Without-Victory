@@ -4138,7 +4138,7 @@ function derivePatronOverrideAuthority(state: any): LoadedGameState['patronOverr
     return Object.keys(out).length > 0 ? out : undefined;
 }
 
-function readDaytonAgreement(value: unknown): LoadedGameState['daytonAgreement'] {
+export function readDaytonAgreement(value: unknown): LoadedGameState['daytonAgreement'] {
     const agreement = value as LoadedGameState['daytonAgreement'];
     if (agreement?.version !== 1) return undefined;
     const isRecord = (item: unknown): item is Record<string, unknown> =>
@@ -4152,6 +4152,14 @@ function readDaytonAgreement(value: unknown): LoadedGameState['daytonAgreement']
         || ![terms.competency_allocation, terms.constitutional_choices, terms.return_justice]
             .every(item => item === undefined || isRecord(item))) {
         return undefined;
+    }
+    // DC A5: the signing beat reads `signing`; a malformed one is dropped, never rendered.
+    const signing = agreement.signing;
+    if (signing !== undefined && !(Number.isFinite(signing?.turn) && Number.isFinite(signing?.war?.weeks)
+        && Number.isFinite(signing?.war?.dead?.military) && Number.isFinite(signing?.war?.dead?.civilian)
+        && Number.isFinite(signing?.war?.displaced))) {
+        const { signing: _dropped, ...rest } = agreement;
+        return rest;
     }
     return agreement;
 }

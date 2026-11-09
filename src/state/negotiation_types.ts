@@ -180,7 +180,15 @@ export interface NegotiationState {
      * withdrawn; the war continues until `imposition_turn`, when the faction's coercion
      * event fires and the table reopens as a forced menu (`pending_dayton.forced`).
      */
-    dayton_decline?: { faction: string; declined_turn: number; imposition_turn: number };
+    dayton_decline?: {
+        faction: string;
+        declined_turn: number;
+        imposition_turn: number;
+        /** The war's dead (Verdict sources) when the decline was recorded (DC A5); absent on older saves. */
+        dead_at_decline?: { military: number; civilian: number };
+        /** Settlements the declining faction held when it declined (DC A5); absent on older saves. */
+        held_at_decline?: number;
+    };
     /**
      * The peace settlement (owner, 2026-11-07): set when a plan is accepted by every
      * party or Dayton is signed/imposed. Holds the plan's map at OSID level, the settled
@@ -264,8 +272,23 @@ export interface DelegationFolder {
         displaced_since: number;
     }>;
     /** All-sides totals over the whole war so far; the dead come from the Verdict's sources. */
-    war: { weeks: number; dead: { military: number; civilian: number }; displaced: number };
+    war: WarCostLine;
+    /**
+     * What declining Dayton cost (DC A5): set on the forced table's folder when the player's
+     * faction declined. `dead_since` and `held_then` are null on saves from before the stamp.
+     */
+    declined?: {
+        declined_turn: number;
+        weeks_since: number;
+        dead_since: { military: number; civilian: number } | null;
+        displaced_since: number;
+        held_then: number | null;
+        held_now: number;
+    };
 }
+
+/** The war's cost line: weeks of war, the dead on all sides (Verdict sources), civilians displaced. */
+export interface WarCostLine { weeks: number; dead: { military: number; civilian: number }; displaced: number }
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Dayton Negotiation
@@ -449,6 +472,8 @@ export interface DaytonAgreementRecord {
     };
     /** What the table changed against the mediator's draft (sim/negotiation/treaty_against_draft.ts). Absent on older records. */
     treaty?: TreatyAgainstDraft;
+    /** The signing beat (DC A5): the turn signed and the war's cost line at that moment. Absent on older records. */
+    signing?: { turn: number; war: WarCostLine };
 }
 
 /** The treaty against the mediator's draft: shares, ground and powers won, given up and refused. */

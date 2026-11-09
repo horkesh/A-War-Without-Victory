@@ -13,6 +13,8 @@ interface DaytonConferenceRoomProps {
     status?: string;
     error?: string;
     forced: boolean;
+    /** The mediator's ultimatum, shown in the room header at the forced table (DC A5). */
+    ultimatum?: ReactNode;
     previewReady: boolean;
     panel: DaytonConferencePanel | null;
     backTo?: 'draft' | 'review';
@@ -23,7 +25,7 @@ interface DaytonConferenceRoomProps {
     board?: ReactNode;
 }
 
-export function DaytonConferenceRoom({ date, status, error, forced, previewReady, panel, backTo, returnFocus, onPanelChange, panels, board }: DaytonConferenceRoomProps) {
+export function DaytonConferenceRoom({ date, status, error, forced, ultimatum, previewReady, panel, backTo, returnFocus, onPanelChange, panels, board }: DaytonConferenceRoomProps) {
     const [arrived, setArrived] = useState(false);
     const opener = useRef<HTMLButtonElement | null>(null);
     const room = useRef<HTMLDivElement>(null);
@@ -91,12 +93,13 @@ export function DaytonConferenceRoom({ date, status, error, forced, previewReady
                     <div ref={room} className="dayton-live-room">
                         <header className="dayton-live-heading">
                             <p className="dayton-live-kicker">{status ?? t('dayton.location')}</p>
-                            <h2 tabIndex={-1} ref={roomHeading}>{t('dayton.conference.room')}</h2>
+                            <h2 tabIndex={-1} ref={roomHeading}>{t(forced ? 'dayton.ultimatum.room' : 'dayton.conference.room')}</h2>
                             <p role="status">{t(forced ? 'dayton.forcedTitle' : 'dayton.conference.action')}</p>
+                            {forced && !panel && ultimatum}
                             {previewReady && !panel && <p>{t('dayton.conference.previewReady')}</p>}
                             {!panel && alert}
                         </header>
-                        <DaytonRoomBackdrop labels={labels} onOpen={open} board={board} />
+                        <DaytonRoomBackdrop labels={labels} onOpen={open} board={board} night={forced} />
                         <nav className="dayton-live-nav dayton-live-actions" aria-label={t('dayton.conference.objects')}>
                             {roomObjects.map(id => (
                                 <button type="button" key={id} className="dayton-live-button" onClick={event => open(id, event)}>
