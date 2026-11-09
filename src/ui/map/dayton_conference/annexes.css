@@ -14,3 +14,20 @@
   .dayton-annex-clause { grid-template-columns: 1fr; }
   .dayton-annex-means { grid-column: 1; }
 }
+/* Stage 3: the decision path for police, education and defense. */
+.dayton-annex-path { grid-column: 1 / -1; }
+.dayton-path summary { cursor: pointer; font-weight: 650; text-decoration: underline; }
+.dayton-path[open] { padding: .5rem .7rem; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); border-radius: 3px; }
+.dayton-path-roles { display: grid; gap: .25rem; margin: .5rem 0; }
+.dayton-path-roles > div { display: grid; grid-template-columns: minmax(8rem, 11rem) 1fr; gap: .6rem; }
+.dayton-path-roles dt { font-weight: 650; }
+.dayton-path-roles dd { margin: 0; }
+.dayton-path h4 { margin: .4rem 0 .2rem; font-weight: 700; }
+.dayton-path-case { margin: 0; padding-inline-start: 1.2rem; display: grid; gap: .2rem; }
+.dayton-path-asked { margin: .4rem 0; font-weight: 650; color: #6b1f1a; }
+.dayton-path-source { margin: .4rem 0 0; font-size: .78rem; opacity: .8; }
+@container interface-viewport (max-width: 640px) {
+  .dayton-annex-path { grid-column: 1; }
+  .dayton-path-roles > div { grid-template-columns: 1fr; }
+}
+.dayton-path summary:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }

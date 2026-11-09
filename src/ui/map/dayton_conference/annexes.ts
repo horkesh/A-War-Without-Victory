@@ -18,7 +18,10 @@ export interface AnnexClause {
     label: string;
     value: string;
     means: string;
+    /** Stage 3: the operative owner of a deep subject (police, education, defense), for its decision path. */
+    owner?: Owner;
 }
+
 
 export interface Annex {
     id: AnnexId;
@@ -27,7 +30,7 @@ export interface Annex {
 }
 
 type Entity = 'federation' | 'rs';
-type Owner = 'state' | 'entity' | 'shared';
+export type Owner = 'state' | 'entity' | 'shared';
 
 const DIAL_KEYS: Record<string, MessageKey> = {
     confederation: 'dayton.dial.confederation',
@@ -51,7 +54,9 @@ function powerClause(id: string, owner: Owner, entity: Entity): AnnexClause {
         label: power,
         value: t(`dayton.owner.${owner}`),
         means: t(key(`dayton.annex.owner.${owner}`), { power, entity: t(key(`dayton.annex.entity.${entity}`)) }),
+        owner,
     };
+
 }
 
 function choiceClause(id: string, option: string): AnnexClause {

@@ -22,7 +22,7 @@ Read this section first; the checkpoints under each amendment hold the detail. B
 **Next, in order**
 1. ~~A5~~ done 2026-11-09.
 2. ~~A4 binder as annexes~~ done 2026-11-09 (the rest of this item stays as the record) (boundary Annex 2, constitution Annex 4, return Annex 7, military Annex 1A, Brčko), each clause with a plain "what this means for you" line.
-3. **Stage 3 constitution depth** (police, education, defense deep; the rest shallow).
+3. ~~Stage 3 constitution depth~~ first three subjects done 2026-11-09 (inspection by place still open).
 4. **Packaged-Electron proof** (owner gate for every slice): three rounds per faction, imposition by refusal, sign and reload; the Boundary Map and board in the packaged app.
 5. Push the branch and open a PR when the owner asks.
 
@@ -116,6 +116,8 @@ Give each power a stable clause ID, scope, rule maker, operator, funding authori
 After these three subjects pass, expand to revenue and reconstruction, courts and rights, representation and voting, and return, justice and oversight. Map all existing competencies and legacy choices to named powers. Display legacy agreements with the authority data they actually contain and indicate where details are unavailable.
 
 **Surfaces.** `negotiation_types.ts`, the institutional, constitutional and competency catalogs, the resolver and the binder viewer. The resolver owns the effective division of powers.
+
+**Checkpoint 2026-11-09 (Claude), first three subjects.** Built: in the treaty annexes, police, education and defense each open a decision path (rules, operates, pays, must agree, disputes, in force) and the subject's case, the player's entity first where the Federation and RS differ (`power_authority.ts`, `DecisionPath.tsx`). The 1995 rows cite Annex 4, the Federation Constitution Part III, Annex 1A, Annex 6 and Annex 11; state and shared rows are labelled game alternatives, later reforms dated. A note shows when the delegation asked for one owner and the treaty projects another. Historian-lens review applied. Not yet: inspection by place (a place card naming its jurisdictions) and the expansion beyond the first three subjects (post-1.0 per A7).
 
 **Exit.** Each of the first three subjects can be inspected by power and place. The three decision cases follow the agreement's roles. If a delegation asks for one outcome and the resolver projects another, the board shows both.
 

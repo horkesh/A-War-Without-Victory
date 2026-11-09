@@ -996,7 +996,8 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
                                 {agreement && (
                                     <div className="px-5 py-4">
                                         {/* DC A4: the binder reads as the treaty's annexes. */}
-                                        <TreatyAnnexes agreement={agreement} faction={playerFaction} onOpenMap={() => openPanel('map')} />
+                                        <TreatyAnnexes agreement={agreement} faction={playerFaction} onOpenMap={() => openPanel('map')}
+                                            asked={draftCompetencies} />
                                     </div>
                                 )}
                                 {institutionalTerms}
