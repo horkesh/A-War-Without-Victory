@@ -474,16 +474,21 @@ describe('DaytonNegotiationModal — live conference room', () => {
         fireEvent.click(demandCorridor());
         // No free probing in the conference (DC A2): the draft has no Probe button.
         expect(within(screen.getByRole('region', { name: 'Delegations' })).queryByRole('button', { name: 'Probe Positions' })).toBeNull();
+        // The room previewed the mediator's untouched draft on entry: that is the opening line (DC A3).
+        expect(previewDayton.mock.calls[0]![0].territorial_demands).toEqual([]);
         fireEvent.click(screen.getByRole('button', { name: 'Review agreement' }));
         await screen.findByRole('region', { name: 'Institutions and powers' });
-        expect(previewDayton.mock.calls[0]![0].territorial_demands).toEqual(['gorazde_corridor']);
+        expect(previewDayton.mock.calls.at(-1)![0].territorial_demands).toEqual(['gorazde_corridor']);
         expect(resolveDayton).not.toHaveBeenCalled();
         fireEvent.click(screen.getByRole('button', { name: 'Return to current draft' }));
         close();
         expect(document.activeElement).toBe(draft);
 
         fireEvent.click(nav.getByRole('button', { name: 'Settlement map' }));
-        expect(screen.getByRole('region', { name: 'Settlement territory' })).toBeTruthy();
+        const boundary = within(screen.getByRole('region', { name: 'Boundary Map' }));
+        expect(boundary.getByRole('radio', { name: /Wartime front/ })).toBeTruthy();
+        expect(boundary.getByRole('radio', { name: /Mediator's opening line/ })).toBeTruthy();
+        expect(boundary.getByRole('radio', { name: /Your current draft/ }).getAttribute('aria-checked')).toBe('true');
         close();
         fireEvent.click(nav.getByRole('button', { name: 'Treaty binder' }));
         const terms = within(screen.getByRole('region', { name: 'Institutions and powers' }));
@@ -493,7 +498,7 @@ describe('DaytonNegotiationModal — live conference room', () => {
         fireEvent.click(draft);
         fireEvent.click(screen.getByRole('button', { name: 'Review agreement' }));
         fireEvent.click(screen.getByRole('button', { name: 'Sign agreement' }));
-        await waitFor(() => expect(resolveDayton.mock.calls[0]![0]).toEqual(previewDayton.mock.calls[0]![0]));
+        await waitFor(() => expect(resolveDayton.mock.calls[0]![0]).toEqual(previewDayton.mock.calls.at(-1)![0]));
     });
 
     it('shows preview failures in the conference and clears them on retry', async () => {
@@ -502,27 +507,25 @@ describe('DaytonNegotiationModal — live conference room', () => {
             .mockResolvedValueOnce({ ok: true, agreement: agreement() });
         (window as unknown as { awwv: Record<string, unknown> }).awwv = { previewDayton };
         render(createElement(DaytonNegotiationModal, { dayton: PENDING, conference: true }));
+        // The room previews the mediator's draft on entry (DC A3); here that first attempt fails.
+        await waitFor(() => expect(previewDayton).toHaveBeenCalledTimes(1));
 
         fireEvent.click(screen.getByRole('button', { name: 'Skip arrival' }));
+        expect((await screen.findByRole('alert')).textContent).toMatch(/Could not preview/);
+        expect(useGameStore.getState().loadError).toBeNull();
         const nav = within(screen.getByRole('navigation', { name: 'Conference objects' }));
         fireEvent.click(nav.getByRole('button', { name: 'Settlement map' }));
+        expect(screen.getByRole('alert').textContent).toMatch(/Could not preview/);
+        expect(screen.getByText(/The board is blank until the mediator's line is pinned up/)).toBeTruthy();
         const probe = screen.getByRole<HTMLButtonElement>('button', { name: 'Probe Positions' });
         probe.focus();
         fireEvent.click(probe);
         expect(probe.disabled).toBe(false);
         expect(probe.getAttribute('aria-disabled')).toBe('true');
         fireEvent.click(probe);
-        expect(previewDayton).toHaveBeenCalledTimes(1);
-        expect((await screen.findByRole('alert')).textContent).toMatch(/Could not preview/);
-        expect(document.activeElement).toBe(probe);
-        expect(useGameStore.getState().loadError).toBeNull();
-
-        fireEvent.click(screen.getByRole('button', { name: 'Return to conference room' }));
-        expect(screen.getByRole('alert').textContent).toMatch(/Could not preview/);
-        fireEvent.click(nav.getByRole('button', { name: 'Settlement map' }));
-        fireEvent.click(screen.getByRole('button', { name: 'Probe Positions' }));
+        expect(previewDayton).toHaveBeenCalledTimes(2);
         expect(screen.queryByRole('alert')).toBeNull();
-        await waitFor(() => expect(screen.getByRole('button', { name: 'Probe Positions' })).toBeTruthy());
+        expect(await screen.findByRole('region', { name: 'Boundary Map' })).toBeTruthy();
         expect(previewDayton).toHaveBeenCalledTimes(2);
     });
 

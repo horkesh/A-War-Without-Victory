@@ -79,6 +79,9 @@ import {
 import { legacyProjection } from '../../../sim/negotiation/power_overlap.js';
 import { DelegationFolder } from '../dayton_conference/DelegationFolder';
 import { TreatyLedger } from '../dayton_conference/TreatyLedger';
+import { BoardLine, BoundaryMap } from '../dayton_conference/BoundaryMap';
+import type { BoundaryStage } from '../dayton_conference/boundary_stages';
+import type { MessageKey } from '../i18n';
 
 type DaytonData = NonNullable<LoadedGameState['pendingDayton']>;
 type CounterProposal = NonNullable<IpcDaytonBotResponse['counter_proposal']>;
@@ -116,6 +119,13 @@ const HOLDER_COLORS: Record<string, string> = {
 };
 
 /** Canonical faction display labels (matches VerdictScreen). */
+/** Refused catalog plans, named as in the delegation folder (DC A1/A3). */
+const REFUSED_PLAN_KEYS: Record<string, MessageKey> = {
+    vance_owen: 'dayton.folder.plan.vanceOwen',
+    owen_stoltenberg: 'dayton.folder.plan.owenStoltenberg',
+    contact_group: 'dayton.folder.plan.contactGroup',
+};
+
 const FACTION_DISPLAY: Record<string, string> = {
     RBiH: 'Republic of Bosnia and Herzegovina',
     RS: 'Republika Srpska',
@@ -295,6 +305,17 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
             }
         }
     };
+
+    // DC A3: the wall board is never blank. On entering the room, preview the mediator's
+    // draft as it stands (the untouched proposal); that read-only preview is the opening line.
+    const openingRequested = useRef(false);
+    useEffect(() => {
+        if (!conference || openingRequested.current || !ipc.isAvailable || !playerFaction) return;
+        openingRequested.current = true;
+        void handleProbe();
+        // Runs once per room; handleProbe reads the current draft, which is the mediator's here.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [conference, ipc.isAvailable, playerFaction]);
 
     const openPanel = (next: DaytonConferencePanel | null) => {
         if (mutationInFlight.current) return;
@@ -893,6 +914,18 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
         );
         const changes = openingAgreement && agreement && openingAgreement !== agreement
             ? reviewClauses(openingAgreement, agreement, territoryPackages) : [];
+        // DC A3: the line by stage, front → the mediator's opening → the current draft.
+        const lineSource = agreement ?? openingAgreement;
+        const boundaryStages: BoundaryStage[] = lineSource ? [
+            { id: 'front', controllers: lineSource.map.wartimeControllers },
+            ...(openingAgreement ? [{ id: 'opening' as const, controllers: openingAgreement.map.controllers }] : []),
+            // A draft stage once the player has edited the mediator's draft (revision 0 is the opening preview).
+            ...(agreement && preview && preview.revision > 0 ? [{ id: 'draft' as const, controllers: agreement.map.controllers }] : []),
+        ] : [];
+        const refusedPlans = (dayton.delegationFolder?.refused_plans ?? []).map(plan => ({
+            id: plan.plan_id,
+            label: t(REFUSED_PLAN_KEYS[plan.plan_id] ?? 'dayton.boundary.ghostsTitle'),
+        }));
         const savedDate = loadedGameState?.metadata?.date?.trim();
         const date = savedDate && savedDate !== 'UNKNOWN'
             ? savedDate
@@ -920,6 +953,7 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
                     backTo={inspection?.origin ?? (panel === 'review' ? 'draft' : undefined)}
                     returnFocus={returnFocus}
                     onPanelChange={openPanel}
+                    board={lineSource ? <BoardLine controllers={lineSource.map.controllers} /> : undefined}
                     panels={{
                         // The folder is the campaign's receipt (DC A1); the bargaining readouts
                         // and the budget belong with the draft the player is shaping.
@@ -941,9 +975,12 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
                         ),
                         map: inspectionPanel ?? (
                             <div className="space-y-3 px-5 py-4">
-                                {!agreement && <p>{t('dayton.conference.previewHint')}</p>}
+                                {!lineSource && <p>{t('dayton.conference.boardEmpty')}</p>}
                                 {probeButton}
-                                {agreement && <DaytonSettlementViewer agreement={agreement} mode="draft" view="territory" />}
+                                {lineSource && (
+                                    <BoundaryMap stages={boundaryStages} packages={territoryPackages} refusedPlans={refusedPlans}
+                                        special={lineSource.map.specialOsids} />
+                                )}
                             </div>
                         ),
                         binder: inspectionPanel ?? (

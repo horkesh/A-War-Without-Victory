@@ -1,10 +1,13 @@
 import { useLayoutEffect, useState } from 'react';
-import type { MouseEvent } from 'react';
+import type { MouseEvent, ReactNode } from 'react';
 import standardBlocking from './room-blocking.json';
 import wideBlocking from './room-blocking-ultrawide.json';
-import standardRoom from './dayton-conference-room-4k.webp';
-import wideRoom from './dayton-conference-room-ultrawide.webp';
+import standardBoard from './art/board-registration-4k.json';
+import wideBoard from './art/board-registration-ultrawide.json';
+import standardRoom from './art/room-board-4k.webp';
+import wideRoom from './art/room-board-ultrawide.webp';
 import './room.css';
+import './boundary.css';
 
 export const roomObjects = ['folder', 'draft', 'map', 'binder'] as const;
 export type DaytonRoomObject = typeof roomObjects[number];
@@ -15,10 +18,12 @@ interface DaytonRoomBackdropProps {
     labels: Record<DaytonRoomObject, string>;
     onOpen: (id: DaytonRoomObject, event: MouseEvent<HTMLButtonElement>) => void;
     showBounds?: boolean;
+    /** Drawn onto the board paper at its registered rectangle (DC A3: the live line). */
+    board?: ReactNode;
 }
 
 /** The photograph framing and the registered hit areas use the same coordinate space. */
-export function DaytonRoomBackdrop({ labels, onOpen, showBounds }: DaytonRoomBackdropProps) {
+export function DaytonRoomBackdrop({ labels, onOpen, showBounds, board }: DaytonRoomBackdropProps) {
     const [wide, setWide] = useState(() => window.matchMedia?.(wideRoomQuery).matches ?? false);
     useLayoutEffect(() => {
         const media = window.matchMedia?.(wideRoomQuery);
@@ -30,10 +35,19 @@ export function DaytonRoomBackdrop({ labels, onOpen, showBounds }: DaytonRoomBac
     }, []);
 
     const blocking = wide ? wideBlocking : standardBlocking;
+    const paper = (wide ? wideBoard : standardBoard).imagePixels;
     return (
         <div className="dayton-room-window room-window" data-wide={wide}>
             <div className="dayton-room-frame room-frame" data-bounds={showBounds}>
                 <img src={wide ? wideRoom : standardRoom} alt="" />
+                {board && (
+                    <div className="dayton-room-board" data-testid="dayton-room-board" style={{
+                        left: paper.x / blocking.width * 100 + '%',
+                        top: paper.y / blocking.height * 100 + '%',
+                        width: paper.width / blocking.width * 100 + '%',
+                        height: paper.height / blocking.height * 100 + '%',
+                    }}>{board}</div>
+                )}
                 {roomObjects.map(id => {
                     const { center, outline } = blocking.hotspots.find(hotspot => hotspot.id === id)!;
                     const xs = outline.map(([x]) => x);

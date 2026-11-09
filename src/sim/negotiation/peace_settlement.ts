@@ -186,7 +186,20 @@ export function computeSettlementControllersWith(
     cells: SettlementCellTable,
     options: { /** Diagnostics and tests: skip the Dayton contiguity pass to see the opening line as assigned. */ contiguity?: boolean } = {},
 ): { controllers: Record<string, FactionId>; special: string[] } {
-    const wartime = state.political?.political_controllers ?? {};
+    return computeSettlementControllersFromFront(state.political?.political_controllers ?? {}, planId, overrides, cells, options);
+}
+
+/**
+ * The same map from a wartime front alone (the renderer's Boundary Map draws refused plans
+ * from the front it already holds, DC A3). Reads nothing else from state.
+ */
+export function computeSettlementControllersFromFront(
+    wartime: Readonly<Record<string, FactionId | null | undefined>>,
+    planId: SettlementPlanId,
+    overrides: Record<string, FactionId>,
+    cells: SettlementCellTable,
+    options: { contiguity?: boolean } = {},
+): { controllers: Record<string, FactionId>; special: string[] } {
     const areas = getOsidAreas().areas;
     const plan = SHARES.plans[planId] ?? {};
     const byMun = new Map<string, string[]>();
@@ -320,7 +333,7 @@ const POSAVINA_CANTON = new Set(['orasje', 'bosanski_samac', 'odzak']);
  */
 function keepHeldEnclaves(
     controllers: Record<string, FactionId>,
-    wartime: Record<string, string | null | undefined>,
+    wartime: Readonly<Record<string, string | null | undefined>>,
 ): void {
     const side = (f: string | null | undefined) => (f === 'RS' ? 'RS' : f === 'RBiH' || f === 'HRHB' ? 'FED' : null);
     for (const enclave of [...ENCLAVE_DEFINITIONS].sort((a, b) => strictCompare(a.id, b.id))) {

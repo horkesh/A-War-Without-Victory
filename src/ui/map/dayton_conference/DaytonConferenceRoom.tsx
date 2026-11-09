@@ -19,9 +19,11 @@ interface DaytonConferenceRoomProps {
     returnFocus?: { clause: string; faction?: string };
     onPanelChange: (panel: DaytonConferencePanel | null) => void;
     panels: Record<DaytonConferencePanel, ReactNode>;
+    /** The live line pinned to the wall board (DC A3). */
+    board?: ReactNode;
 }
 
-export function DaytonConferenceRoom({ date, status, error, forced, previewReady, panel, backTo, returnFocus, onPanelChange, panels }: DaytonConferenceRoomProps) {
+export function DaytonConferenceRoom({ date, status, error, forced, previewReady, panel, backTo, returnFocus, onPanelChange, panels, board }: DaytonConferenceRoomProps) {
     const [arrived, setArrived] = useState(false);
     const opener = useRef<HTMLButtonElement | null>(null);
     const room = useRef<HTMLDivElement>(null);
@@ -94,7 +96,7 @@ export function DaytonConferenceRoom({ date, status, error, forced, previewReady
                             {previewReady && !panel && <p>{t('dayton.conference.previewReady')}</p>}
                             {!panel && alert}
                         </header>
-                        <DaytonRoomBackdrop labels={labels} onOpen={open} />
+                        <DaytonRoomBackdrop labels={labels} onOpen={open} board={board} />
                         <nav className="dayton-live-nav dayton-live-actions" aria-label={t('dayton.conference.objects')}>
                             {roomObjects.map(id => (
                                 <button type="button" key={id} className="dayton-live-button" onClick={event => open(id, event)}>

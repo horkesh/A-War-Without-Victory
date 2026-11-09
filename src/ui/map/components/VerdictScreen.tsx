@@ -19,6 +19,7 @@ import type { FactionVerdict, DimensionGrade, GameVerdict } from '../../../state
 import { WarCostSummary } from './WarCostSummary';
 import { DaytonSettlementViewer } from './DaytonSettlementViewer';
 import { TreatyLedger } from '../dayton_conference/TreatyLedger';
+import { BoundaryMap } from '../dayton_conference/BoundaryMap';
 import type { CostLedger } from '../../../sim/endgame/cost_ledger.js';
 import type { ComparisonResult, MilestoneComparison, MilestoneComparisonStatus } from '../../../sim/endgame/endgame_comparison.js';
 import { getPeacePlanById } from '../../../sim/negotiation/peace_plan_data.js';
@@ -622,6 +623,13 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                     <>
                         {/* The grade judges the war; this shows what the table changed (owner, 2026-11-08). */}
                         <TreatyLedger treaty={loadedGameState.daytonAgreement.treaty} signed />
+                        {/* DC A3: the signed line against the front it ended. */}
+                        <div className="rounded border border-[#a78e5c] bg-[#efe5cf] p-3">
+                            <BoundaryMap special={loadedGameState.daytonAgreement.map.specialOsids} stages={[
+                                { id: 'front', controllers: loadedGameState.daytonAgreement.map.wartimeControllers },
+                                { id: 'signed', controllers: loadedGameState.daytonAgreement.map.controllers },
+                            ]} />
+                        </div>
                         <DaytonSettlementViewer agreement={loadedGameState.daytonAgreement} mode="signed" />
                     </>
                 ) : verdict.dayton_result ? (

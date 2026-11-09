@@ -21,8 +21,30 @@ import { makeMockLoadedGameState } from './__mocks__/loadedGameState';
 import type { LoadedGameState } from './data/types';
 import type { DaytonRound, DelegationFolder } from '../../state/negotiation_types.js';
 import rbihFolder from './__mocks__/dayton_delegation_folder.rbih.json';
+import paintedOct1995 from '../../../data/source/calibration/painted_control_oct1995.json';
+import { computeSettlementControllersFromFront, planCellAssignments, settlementTerritoryPct } from '../../sim/negotiation/peace_settlement.js';
+import { getTerritorialPackageById } from '../../sim/negotiation/territorial_packages.js';
+import { resolveOsidsForKeywords } from '../../sim/negotiation/package_area_resolver.js';
 
 const params = new URLSearchParams(window.location.search);
+
+/**
+ * DC A3 harness: a real Dayton map from the painted October 1995 front (the engine's own
+ * settlement pass), with each demanded fixed package handed to RBiH for the draft stage.
+ */
+function mockAgreement(demands: string[]) {
+    const front = paintedOct1995.by_settlement_id as Record<string, string>;
+    const controllers: Record<string, string> = { ...computeSettlementControllersFromFront(front, 'dayton', {}, planCellAssignments('dayton')).controllers };
+    for (const id of demands) {
+        const pkg = getTerritorialPackageById(id);
+        if (pkg) for (const o of resolveOsidsForKeywords(pkg.osid_keywords ?? [])) if (o in controllers) controllers[o] = 'RBiH';
+    }
+    return {
+        version: 1,
+        terms: { brcko_status: 'arbitration', institutional_choices: {} },
+        map: { controllers, wartimeControllers: front, specialOsids: [], territoryPct: settlementTerritoryPct(controllers) },
+    };
+}
 
 // ── Deterministic bot counter-offer stub (mirrors the unit test) ───────────────
 if (params.get('mock') === '1') {
@@ -31,9 +53,10 @@ if (params.get('mock') === '1') {
     // mirrors the established warroom.ts idiom and stays out of the strict-null
     // type-escape inventory.
     (window as Window & { awwv?: Record<string, unknown> }).awwv = {
-        previewDayton: async () => ({
+        previewDayton: async (proposal: { territorial_demands?: string[] }) => ({
             ok: true,
             playerFaction: 'RBiH',
+            agreement: mockAgreement(proposal.territorial_demands ?? []),
             botResponses: {
                 RS: {
                     decision: 'counter',

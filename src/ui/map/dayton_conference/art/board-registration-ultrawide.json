@@ -1,0 +1,42 @@
+{
+  "imagePixels": {
+    "x": 1747,
+    "y": 305,
+    "width": 354,
+    "height": 343
+  },
+  "cornerOrder": [
+    "top-left",
+    "top-right",
+    "bottom-right",
+    "bottom-left"
+  ],
+  "corners": [
+    [
+      1747,
+      305
+    ],
+    [
+      2101,
+      305
+    ],
+    [
+      2101,
+      648
+    ],
+    [
+      1747,
+      648
+    ]
+  ],
+  "coordinateConvention": "Pixel edges in the plate coordinate space",
+  "light": "board-light-ultrawide.png",
+  "lightNeutral": 128,
+  "lightGain": "sample / 128; clamp the resulting display RGB",
+  "patch": {
+    "left": 1564,
+    "top": 301,
+    "right": 2284,
+    "bottom": 653
+  }
+}

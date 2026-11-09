@@ -1,58 +1,20 @@
-import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
-import type { FeatureCollection, Position } from 'geojson';
+import { useId, useLayoutEffect, useRef, useState } from 'react';
 import type { DaytonAgreementRecord } from '../../../state/negotiation_types.js';
-import { loadOperationalSettlements } from '../data/DataLoader';
 import { t } from '../i18n';
 import { brckoKeys, institutionalRows, recordedHolder, type DaytonClause } from '../dayton_conference/clauses';
-import { buildOsidDisplayNameMap, getOsidDisplayName } from '../utils/osidDisplayName';
+import { getOsidDisplayName } from '../utils/osidDisplayName';
+import { useSettlementGeometry } from '../dayton_conference/settlement_geometry';
 
 const colors: Record<string, string> = { RBiH: '#558463', HRHB: '#547ca7', RS: '#b35e53' };
-
-function mapPaths(collection: FeatureCollection) {
-    let west = Infinity, north = -Infinity, east = -Infinity, south = Infinity;
-    // A local equirectangular projection keeps the country in proportion at this scale.
-    const longitudeScale = Math.cos(44 * Math.PI / 180);
-    function point([lon, lat]: Position): string {
-        const x = lon * longitudeScale;
-        west = Math.min(west, x);
-        east = Math.max(east, x);
-        north = Math.max(north, lat);
-        south = Math.min(south, lat);
-        return x.toFixed(5) + ' ' + (-lat).toFixed(5);
-    }
-    const paths = collection.features.flatMap(feature => {
-        const geometry = feature.geometry;
-        const id = feature.properties?.osid;
-        if (typeof id !== 'string' || !geometry) return [];
-        const polygons = geometry.type === 'Polygon' ? [geometry.coordinates]
-            : geometry.type === 'MultiPolygon' ? geometry.coordinates : [];
-        if (!polygons.length) return [];
-        const d = polygons.flatMap(polygon => polygon.filter(ring => ring.length > 2)
-            .map(ring => 'M' + ring.map(point).join('L') + 'Z')).join('');
-        return d ? [{ id, d }] : [];
-    });
-    if (!paths.length) throw new Error('No settlement polygons');
-    return { paths, ids: new Set(paths.map(path => path.id)), names: buildOsidDisplayNameMap(collection), viewBox: [west - .04, -north - .04, east - west + .08, north - south + .08].join(' ') };
-}
 
 function Territory({ map, brcko, clause, openingMap, counterProjection }: {
     map: DaytonAgreementRecord['map']; brcko: DaytonAgreementRecord['terms']['brcko_status'];
     clause?: Extract<DaytonClause, { kind: 'map' }>; openingMap?: DaytonAgreementRecord['map']; counterProjection: boolean;
 }) {
-    const [geometry, setGeometry] = useState<ReturnType<typeof mapPaths> | null>(null);
-    const [failed, setFailed] = useState(false);
+    const { geometry, failed } = useSettlementGeometry();
     const [wartime, setWartime] = useState(false);
     const clauseHeading = useRef<HTMLHeadingElement>(null);
     useLayoutEffect(() => { clauseHeading.current?.focus(); }, [clause?.id]);
-    useEffect(() => {
-        let active = true;
-        void loadOperationalSettlements().then(mapPaths).then(data => {
-            if (active) setGeometry(data);
-        }).catch(() => {
-            if (active) setFailed(true);
-        });
-        return () => { active = false; };
-    }, []);
 
     const changed = Object.keys(map.controllers).filter(id => map.wartimeControllers[id] !== map.controllers[id]).sort();
     const special = new Set(map.specialOsids);
