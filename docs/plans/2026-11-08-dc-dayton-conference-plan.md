@@ -17,13 +17,13 @@ Read this section first; the checkpoints under each amendment hold the detail. B
 - `56437d163`, `cd8e4e4a9`, `52b9a4410` A6: held enclaves keep their cells; no corridor that cuts the other entity in two (a held Srebrenica/Žepa stays a Federation island, owner ruling); protected ground is a price class, HRHB's off the table; Pyrrhic panel conditions applied.
 - `306d114bf` A3: Codex's board plate is the day room with the live line on it; full-width Boundary Map on Codex's survey plate with stage scrub, change list by reason, refused-plan ghosts, OSM credit (`BoundaryMap.tsx`, `boundary_stages.ts`, `settlement_geometry.ts`).
 - `05b25ba10`, `101671a97`, `f08d23513` Vance–Owen, Owen–Stoltenberg and the Contact Group read settlement by settlement off their own maps (`tools/peace/plan_map_digitize.cjs`; reference images and QA in `F:/AWWV-worktrees/.dayton-design/plan-maps/`, not committed); used for in-game plan settlements and the ghosts; historian-reviewed corrections in the tool.
-- `45687c0fc` A5 signing beat and forced table; `b644f79d1` A4 binder as treaty annexes; `f9a2f4aa2` stage 3 decision paths for police, education and defense; packaged proof (evidence only).
+- `45687c0fc` A5 signing beat and forced table; `b644f79d1` A4 binder as treaty annexes; `f9a2f4aa2` stage 3 decision paths for police, education and defense; packaged proof (evidence only); `efa820785` signing table follows the General Framework Agreement's parties; `c430a6790` stage 3 inspection by place (Federation cantons for the 712 cells); packaged proof re-run native-10.
 
 **Next, in order**
 1. ~~A5~~ done 2026-11-09.
 2. ~~A4 binder as annexes~~ done 2026-11-09 (the rest of this item stays as the record) (boundary Annex 2, constitution Annex 4, return Annex 7, military Annex 1A, Brčko), each clause with a plain "what this means for you" line.
 3. ~~Stage 3 constitution depth~~ done 2026-11-09: the first three subjects by power and by place.
-4. ~~Packaged-Electron proof~~ done 2026-11-09 (`F:/AWWV-worktrees/.dayton-design/packaged-proof/RESULT.md`): three rounds per faction, sign, signing table, Verdict, RS relaunch, RS decline after three rounds, a forced table from an engine-derived save; the board line in the packaged room. Not exercised in the app: the eight weeks of war after a decline (engine-tested), viewports above this host's 2293 × 960 screen (browser preview), the full-width Boundary Map panel.
+4. ~~Packaged-Electron proof~~ done 2026-11-09, re-run as native-10 after the signatory wording and inspection by place (`F:/AWWV-worktrees/.dayton-design/packaged-proof/RESULT.md`): three rounds per faction, sign, signing table, Verdict, RS relaunch, RS decline after three rounds, a forced table from an engine-derived save; the board line in the packaged room. Not exercised in the app: the eight weeks of war after a decline (engine-tested), viewports above this host's 2293 × 960 screen (browser preview), the full-width Boundary Map panel.
 5. Push the branch and open a PR when the owner asks.
 
 **Open for the owner (none blocks)**
