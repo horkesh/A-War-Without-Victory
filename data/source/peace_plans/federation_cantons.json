@@ -1,0 +1,16 @@
+{
+  "schema": "federation_cantons/v1",
+  "note": "The Federation of Bosnia and Herzegovina's ten cantons by post-1995 municipality (BHAS codes as in data/source/bih_census_1991.json). Cantons are named in the Federation Constitution, Article I(2) (1994), and their municipalities were set by the Law on Federal Units (Zakon o federalnim jedinicama, Sluzbene novine FBiH 9/96, June 1996), after Dayton. Display data for the Dayton place card (DC plan stage 3); nothing in the simulation reads it. tools/peace/derive_osid_cantons.cjs joins it to the cells.",
+  "cantons": {
+    "una_sana": ["10049", "10227", "11118", "11240", "11428", "11436", "11509", "11541"],
+    "posavina": ["11282", "11525", "11533"],
+    "tuzla": ["10014", "10391", "10499", "10600", "10987", "11088", "11215", "11231", "11258", "11312", "11339", "11479", "11495"],
+    "zenica_doboj": ["10189", "10448", "10634", "10715", "11045", "11100", "11126", "11177", "11185", "11207", "11266", "11622"],
+    "bosnian_podrinje": ["11444", "11452", "11576"],
+    "central_bosnia": ["10197", "10219", "10294", "10324", "10375", "10472", "10545", "10774", "11061", "11142", "11274", "11487"],
+    "herzegovina_neretva": ["10243", "10260", "10421", "10529", "10685", "10766", "11304", "11410", "11606"],
+    "west_herzegovina": ["10405", "10570", "10626", "10731"],
+    "sarajevo": ["10839", "10847", "10863", "10871", "10928", "11550", "11568", "11584", "11592"],
+    "canton_10": ["10146", "10308", "10359", "10588", "11517", "11614"]
+  }
+}

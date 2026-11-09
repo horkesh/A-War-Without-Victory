@@ -3,6 +3,10 @@ import type { KeyboardEvent } from 'react';
 import { t, type MessageKey } from '../i18n';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { useSettlementGeometry } from './settlement_geometry';
+import type { AuthorityOwner, AuthorityPower } from '../../../sim/negotiation/power_authority.js';
+import { strictCompare } from '../../../state/validateGameState.js';
+import { placeCard, scoredOsid } from './place_authority';
+import { PlaceCard } from './PlaceCard';
 import {
     entityOf,
     entityShares,
@@ -92,9 +96,11 @@ export interface BoundaryMapProps {
     packages?: readonly ReasonPackage[];
     refusedPlans?: ReadonlyArray<{ id: string; label: string }>;
     special?: readonly string[];
+    /** Who owns police, education and defense under the terms shown (stage 3 place card); absent before a preview. */
+    owners?: Readonly<Record<AuthorityPower, AuthorityOwner>>;
 }
 
-export function BoundaryMap({ stages, initial, packages = [], refusedPlans = [], special = [] }: BoundaryMapProps) {
+export function BoundaryMap({ stages, initial, packages = [], refusedPlans = [], special = [], owners }: BoundaryMapProps) {
     const { geometry, failed } = useSettlementGeometry();
     const uid = useId().replace(/:/g, '');
     const patternId = `${uid}-hatch`;
@@ -119,7 +125,18 @@ export function BoundaryMap({ stages, initial, packages = [], refusedPlans = [],
         const map = front ? refusedPlanControllers(id, front) : null;
         return map ? [{ id, map }] : [];
     }), [ghosts, front]);
+    const [place, setPlace] = useState<string | null>(null);
+    const placeOptions = useMemo(() => {
+        if (!geometry) return [];
+        const seen = new Set<string>();
+        return geometry.paths.filter(({ id }) => scoredOsid(id) === id)
+            .map(({ id }) => ({ id, label: getOsidDisplayName(id, geometry.names) }))
+            .sort((a, b) => strictCompare(a.label, b.label) || strictCompare(a.id, b.id))
+            .filter(o => !seen.has(o.label) && Boolean(seen.add(o.label)));
+    }, [geometry]);
     if (!current) return null;
+    const card = place ? placeCard({ osid: place, stage: current.id, controllers: current.controllers, front, special: specialSet, owners }) : null;
+    const placePath = place ? geometry?.paths.find(p => p.id === place) : undefined;
 
     const onKey = (event: KeyboardEvent<HTMLDivElement>) => {
         if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
@@ -160,7 +177,8 @@ export function BoundaryMap({ stages, initial, packages = [], refusedPlans = [],
                             <defs><HatchPattern id={patternId} scale={0.022} /></defs>
                             {geometry.paths.map(({ id, d }) => (
                                 <path key={id} d={d} fill={fillFor(current.controllers[id], current.id !== 'front' && specialSet.has(id), patternId)}
-                                    fillRule="evenodd" data-dayton-osid={id} data-dayton-changed={changed.has(id) || undefined}>
+                                    fillRule="evenodd" data-dayton-osid={id} data-dayton-changed={changed.has(id) || undefined}
+                                    onClick={() => setPlace(scoredOsid(id))}>
                                     <title>{getOsidDisplayName(id, geometry.names)} · {holderName(current.controllers[id] ?? null)}</title>
                                 </path>
                             ))}
@@ -184,6 +202,9 @@ export function BoundaryMap({ stages, initial, packages = [], refusedPlans = [],
                                     {geometry.paths.filter(p => map[p.id] === 'RS').map(({ id: osid, d }) => <path key={osid} d={d} fill="#000" />)}
                                 </g>
                             ))}
+                            {placePath && (
+                                <path d={placePath.d} className="dayton-boundary-selected" fillRule="evenodd" vectorEffect="non-scaling-stroke" />
+                            )}
                         </svg>
                     </>
                 ) : <p className="dayton-boundary-loading" role="status">{t(failed ? 'dayton.agreement.geometryUnavailable' : 'dayton.agreement.loading')}</p>}
@@ -197,6 +218,23 @@ export function BoundaryMap({ stages, initial, packages = [], refusedPlans = [],
                 {special.length > 0 && <li><span className="swatch" data-swatch="special" />{t('dayton.boundary.special')}</li>}
                 <li><span className="swatch" data-swatch="changed" />{t('dayton.boundary.changedLegend')}</li>
             </ul>
+            {geometry && (
+                <div className="dayton-place-find">
+                    <label htmlFor={`${uid}-find`}>{t('dayton.place.find')}</label>
+                    <input id={`${uid}-find`} list={`${uid}-places`} data-dayton-place-find placeholder={t('dayton.place.findHint')}
+                        onChange={event => {
+                            const hit = placeOptions.find(o => o.label === event.target.value);
+                            if (hit) setPlace(hit.id);
+                        }} />
+                    <datalist id={`${uid}-places`}>
+                        {placeOptions.map(o => <option key={o.id} value={o.label} />)}
+                    </datalist>
+                </div>
+            )}
+            {card && (
+                <PlaceCard card={card} name={getOsidDisplayName(card.osid, geometry?.names ?? null)} titleId={`${uid}-place`}
+                    onTreatyLine={current.id !== 'front'} hasTerms={Boolean(owners)} onClose={() => setPlace(null)} />
+            )}
             {refusedPlans.length > 0 && front && (
                 <fieldset className="dayton-boundary-ghosts">
                     <legend>{t('dayton.boundary.ghostsTitle')}</legend>
@@ -222,7 +260,10 @@ export function BoundaryMap({ stages, initial, packages = [], refusedPlans = [],
                                     <ul>
                                         {items.map(c => (
                                             <li key={c.osid} data-dayton-change={c.osid}>
-                                                {getOsidDisplayName(c.osid, geometry?.names ?? null)} · {holderName(c.from)} → {holderName(c.to)}
+                                                <button type="button" className="dayton-boundary-change" onClick={() => setPlace(c.osid)}
+                                                    aria-pressed={place === c.osid}>
+                                                    {getOsidDisplayName(c.osid, geometry?.names ?? null)} · {holderName(c.from)} → {holderName(c.to)}
+                                                </button>
                                             </li>
                                         ))}
                                     </ul>

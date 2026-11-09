@@ -5,6 +5,7 @@ import { t, type MessageKey } from '../i18n';
 import { formatCount, turnToDateString } from '../utils/formatters';
 import { BoardLine, BoundaryMap } from './BoundaryMap';
 import { TreatyLedger } from './TreatyLedger';
+import { operativeOwners } from './annexes';
 import { useWideFraming } from './DaytonRoomBackdrop';
 import standardBlocking from './art/signing-blocking-4k.json';
 import wideBlocking from './art/signing-blocking-ultrawide.json';
@@ -169,7 +170,7 @@ export function DaytonSigningBeat({ agreement, fallbackDate, onContinue }: Dayto
                         </button>
                     </header>
                     <div className="dayton-live-panel-body px-5 py-4">
-                        <BoundaryMap special={agreement.map.specialOsids} stages={[
+                        <BoundaryMap special={agreement.map.specialOsids} owners={operativeOwners(agreement.terms)} stages={[
                             { id: 'front', controllers: agreement.map.wartimeControllers },
                             { id: 'signed', controllers: agreement.map.controllers },
                         ]} />

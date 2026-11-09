@@ -20,6 +20,7 @@ import { WarCostSummary } from './WarCostSummary';
 import { DaytonSettlementViewer } from './DaytonSettlementViewer';
 import { TreatyLedger } from '../dayton_conference/TreatyLedger';
 import { BoundaryMap } from '../dayton_conference/BoundaryMap';
+import { operativeOwners } from '../dayton_conference/annexes';
 import { DaytonSigningBeat } from '../dayton_conference/DaytonSigningBeat';
 import type { CostLedger } from '../../../sim/endgame/cost_ledger.js';
 import type { ComparisonResult, MilestoneComparison, MilestoneComparisonStatus } from '../../../sim/endgame/endgame_comparison.js';
@@ -648,7 +649,8 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                         <TreatyLedger treaty={loadedGameState.daytonAgreement.treaty} signed />
                         {/* DC A3: the signed line against the front it ended. */}
                         <div className="rounded border border-[#a78e5c] bg-[#efe5cf] p-3">
-                            <BoundaryMap special={loadedGameState.daytonAgreement.map.specialOsids} stages={[
+                            <BoundaryMap special={loadedGameState.daytonAgreement.map.specialOsids}
+                                owners={operativeOwners(loadedGameState.daytonAgreement.terms)} stages={[
                                 { id: 'front', controllers: loadedGameState.daytonAgreement.map.wartimeControllers },
                                 { id: 'signed', controllers: loadedGameState.daytonAgreement.map.controllers },
                             ]} />

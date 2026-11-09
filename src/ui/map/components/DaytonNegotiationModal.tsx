@@ -81,6 +81,7 @@ import { DelegationFolder } from '../dayton_conference/DelegationFolder';
 import { TreatyLedger } from '../dayton_conference/TreatyLedger';
 import { ForcedUltimatum } from '../dayton_conference/ForcedUltimatum';
 import { TreatyAnnexes } from '../dayton_conference/TreatyAnnexes';
+import { operativeOwners } from '../dayton_conference/annexes';
 import { BoardLine, BoundaryMap } from '../dayton_conference/BoundaryMap';
 import type { BoundaryStage } from '../dayton_conference/boundary_stages';
 import type { MessageKey } from '../i18n';
@@ -986,7 +987,7 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
                                 {probeButton}
                                 {lineSource && (
                                     <BoundaryMap stages={boundaryStages} packages={territoryPackages} refusedPlans={refusedPlans}
-                                        special={lineSource.map.specialOsids} />
+                                        special={lineSource.map.specialOsids} owners={operativeOwners(lineSource.terms)} />
                                 )}
                             </div>
                         ),

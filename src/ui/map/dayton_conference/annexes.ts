@@ -1,6 +1,7 @@
 import { COMPETENCY_PACKAGES } from '../../../sim/negotiation/competency_packages.js';
 import { CONSTITUTIONAL_CHOICES, RETURN_JUSTICE_CHOICES } from '../../../sim/negotiation/constitutional_packages.js';
 import { effectiveOperativePowers } from '../../../sim/negotiation/power_overlap.js';
+import type { AuthorityPower } from '../../../sim/negotiation/power_authority.js';
 import type { DaytonAgreementRecord } from '../../../state/negotiation_types.js';
 import { t, type MessageKey } from '../i18n';
 
@@ -74,15 +75,26 @@ const DEFAULT_OPTION = (id: string) =>
 /** Constitutional slots in Annex 4 (article order). ICTY cooperation is Annex 4, Article II(8); the High Representative is Annex 10. */
 const ANNEX_4_CHOICES = ['arch_presidency', 'arch_veto_regime', 'arch_constituent_model', 'arch_const_court'];
 
-export function treatyAnnexes(agreement: DaytonAgreementRecord, faction: string | null | undefined, signed: boolean): Annex[] {
-    const { terms, map } = agreement;
-    const entity = entityOf(faction);
+function operative(terms: DaytonAgreementRecord['terms']) {
     const effective = effectiveOperativePowers({
         institutional_choices: terms.institutional_choices,
         competency_allocation: terms.competency_allocation,
         constitutional_choices: terms.constitutional_choices,
     });
     const owner = (id: string): Owner => (effective.competency[id] ?? COMPETENCY_PACKAGES.find(p => p.id === id)?.default_owner ?? 'entity') as Owner;
+    return { effective, owner };
+}
+
+/** The operative owner of each deep subject under these terms: the binder's own projection, for the place card. */
+export function operativeOwners(terms: DaytonAgreementRecord['terms']): Record<AuthorityPower, Owner> {
+    const { owner } = operative(terms);
+    return { comp_police: owner('comp_police'), comp_education: owner('comp_education'), comp_defense: owner('comp_defense') };
+}
+
+export function treatyAnnexes(agreement: DaytonAgreementRecord, faction: string | null | undefined, signed: boolean): Annex[] {
+    const { terms, map } = agreement;
+    const entity = entityOf(faction);
+    const { effective, owner } = operative(terms);
     const policy = { ...effective.constitutional, ...(terms.return_justice ?? {}) };
     const option = (id: string) => policy[id] ?? DEFAULT_OPTION(id);
 
