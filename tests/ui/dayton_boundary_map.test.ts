@@ -55,12 +55,16 @@ describe('stage logic', () => {
         expect(shares.RS).toBeGreaterThan(40);
     });
 
-    it('draws a refused plan from the front alone, and nothing for Dayton or an unknown plan', () => {
+    it('draws a map-read plan exactly as its own map, whatever the front; nothing for Dayton or an unknown plan', () => {
         const vo = refusedPlanControllers('vance_owen', painted)!;
-        expect(Object.keys(vo).length).toBe(Object.keys(painted).length);
+        // Every settlement except the shared Sarajevo province, which belongs to no side.
+        expect(Object.keys(vo).length).toBeGreaterThan(600);
+        expect(Object.keys(vo).length).toBeLessThan(Object.keys(painted).length);
+        const flipped = Object.fromEntries(Object.keys(painted).map(o => [o, 'RBiH']));
+        expect(refusedPlanControllers('vance_owen', flipped)).toEqual(vo);
+        expect(refusedPlanControllers('contact_group', painted)).not.toEqual(refusedPlanControllers('contact_group', flipped));
         expect(refusedPlanControllers('dayton', painted)).toBeNull();
         expect(refusedPlanControllers('cutileiro', painted)).toBeNull();
-        expect(refusedPlanControllers('vance_owen', painted)).toEqual(vo);
     });
 });
 

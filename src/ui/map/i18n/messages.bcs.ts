@@ -2504,7 +2504,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'dayton.boundary.noChanges': 'U ovoj fazi ništa nije promijenilo kontrolu.',
     'dayton.boundary.changeSummary': '{count} naselja mijenja kontrolu; {across} od njih prelazi liniju između entiteta.',
     'dayton.boundary.ghostsTitle': 'Ranije odbijeni planovi',
-    'dayton.boundary.ghostsHint': 'Svaka linija je nacrtana onako kako bi karta tog plana pala na današnji front.',
+    'dayton.boundary.ghostsHint': 'Svaka linija je karta samog plana. Plan Kontakt grupe, poznat samo po udjelima općina, položen je na današnji front.',
     'dayton.boundary.credit': 'Rijeke i reljef:',
     'dayton.conference.boardEmpty': 'Tabla je prazna dok posrednik ne zakači svoju liniju.',
     'dayton.treaty.shareUp': '{delta} procentnih poena više teritorije: {pct} % prema {draft} % u nacrtu posrednika.',

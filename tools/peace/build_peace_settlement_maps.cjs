@@ -119,7 +119,11 @@ console.log(`wrote ${path.relative(ROOT, OUT)}: ${PLANS.map((p) => `${p}=${Objec
 // Validation: every row names a real map cell in a municipality the plan researched;
 // entity RS carries faction RS; entity FED carries RBiH, HRHB or null; entity special
 // carries no faction; unresolved rows are dropped (they fall to the quota pass).
-const CELLS_SRC = path.join(ROOT, 'data/source/peace_plans/dayton_cell_assignments.json');
+// Vance–Owen and Owen–Stoltenberg cell tables are read from each plan's own map
+// (tools/peace/plan_map_digitize.cjs, owner 2026-11-09): every simulated settlement is listed,
+// so the quota pass no longer places those plans' lines inside municipalities.
+const CELL_SOURCES = ['dayton', 'vance_owen', 'owen_stoltenberg']
+    .map((plan) => path.join(ROOT, `data/source/peace_plans/${plan}_cell_assignments.json`));
 const CELLS_OUT = path.join(ROOT, 'data/derived/peace/plan_cell_assignments.json');
 const AREAS = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/derived/operational/osid_areas.json'), 'utf8')).areas;
 const CONFIDENCE = ['verified', 'approximate', 'unresolved'];
@@ -127,7 +131,8 @@ const CONFIDENCE = ['verified', 'approximate', 'unresolved'];
 function buildCellTable() {
     const cellPlans = {};
     const summary = [];
-    if (fs.existsSync(CELLS_SRC)) {
+    for (const CELLS_SRC of CELL_SOURCES) {
+        if (!fs.existsSync(CELLS_SRC)) continue;
         const src = JSON.parse(fs.readFileSync(CELLS_SRC, 'utf8'));
         const plan = src.plan ?? 'dayton';
         if (!PLANS.includes(plan)) throw new Error(`cells: unknown plan ${plan}`);
@@ -162,7 +167,7 @@ function buildCellTable() {
     }
     const out = {
         schema_version: 1,
-        source: path.relative(ROOT, CELLS_SRC).split(path.sep).join('/'),
+        source: CELL_SOURCES.filter((f) => fs.existsSync(f)).map((f) => path.relative(ROOT, f).split(path.sep).join('/')),
         rules: [
             'a listed cell is fixed to its side before the municipality quota pass and charged against that side\'s quota',
             'faction null on a Federation cell -> the wartime Federation holder, else the Federation party with the larger remaining quota',

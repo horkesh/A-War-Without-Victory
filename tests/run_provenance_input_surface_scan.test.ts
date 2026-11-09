@@ -236,6 +236,16 @@ const EXCLUSION_REGISTER: readonly Exclusion[] = [
         reason: 'No code reads it. The scanner reaches it only because plan_cell_assignments.json names it in its `source` metadata field; tools/peace/build_peace_settlement_maps.cjs (build time) derives the cell table from it.',
     },
     {
+        path: 'data/source/peace_plans/vance_owen_cell_assignments.json',
+        kind: 'not_an_input',
+        reason: 'No code reads it. Named only in plan_cell_assignments.json `source` metadata; read off the plan\'s own map by tools/peace/plan_map_digitize.cjs and built into the cell table at build time.',
+    },
+    {
+        path: 'data/source/peace_plans/owen_stoltenberg_cell_assignments.json',
+        kind: 'not_an_input',
+        reason: 'No code reads it. Named only in plan_cell_assignments.json `source` metadata; read off the plan\'s own map by tools/peace/plan_map_digitize.cjs and built into the cell table at build time.',
+    },
+    {
         path: 'data/derived/mun1990_names.json',
         kind: 'not_an_input',
         reason: 'Display names only (2026-11-07): negotiation/front_packages.ts labels captured-ground Dayton packages with municipality names. Package ids, costs and outcomes come from control, the Dayton map and osid_areas.json; the names never reach game state or a score.',
@@ -380,7 +390,8 @@ describe('★ input-surface scan: every data read on the headless path is stampe
         // 1 -> 2 (2026-11-07): plan_maps_research.json, named only in metadata, read by no code.
         // 2 -> 3 (2026-11-07): mun1990_names.json, display labels for captured-ground packages.
         // 3 -> 4 (2026-11-08): dayton_cell_assignments.json, named only in metadata, read by no code.
-        expect(EXCLUSION_REGISTER.filter(e => e.kind === 'not_an_input')).toHaveLength(4);
+        // 4 -> 6 (2026-11-09): vance_owen and owen_stoltenberg cell sources, metadata only.
+        expect(EXCLUSION_REGISTER.filter(e => e.kind === 'not_an_input')).toHaveLength(6);
     });
 
     /**

@@ -90,12 +90,23 @@ export function entityShares(controllers: Controllers): Record<Entity, number> {
 }
 
 /**
- * A refused plan's line, drawn the way its map would fall on today's front (the plan maps are
- * municipal shares filled from wartime control, peace_settlement.ts). Null for a plan without
- * a researched map.
+ * A refused plan's line. Vance–Owen and Owen–Stoltenberg are read cell by cell off their own
+ * maps (tools/peace/plan_map_digitize.cjs), so they are drawn exactly as the plan drew them;
+ * shared-administration land (Sarajevo, Mostar) is left out of every side. A plan known only
+ * by municipal shares (the Contact Group) is laid on today's front. Null for a plan without a
+ * researched map.
  */
 export function refusedPlanControllers(planId: string, wartime: Controllers): Record<string, FactionId> | null {
     if (!isSettlementPlan(planId) || planId === 'dayton') return null;
+    const cells = planCellAssignments(planId);
+    if (Object.keys(cells).length >= Object.keys(wartime).length && Object.keys(wartime).length > 0) {
+        const drawn: Record<string, FactionId> = {};
+        for (const o of Object.keys(cells).sort(strictCompare)) {
+            const row = cells[o];
+            if (row && !row.special) drawn[o] = row.faction ?? 'RBiH';
+        }
+        return drawn;
+    }
     const front: Record<string, FactionId> = {};
     for (const o of Object.keys(wartime).sort(strictCompare)) {
         const f = wartime[o];
