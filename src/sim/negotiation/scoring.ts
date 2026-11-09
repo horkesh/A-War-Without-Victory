@@ -23,7 +23,8 @@ import { computePeaceDysfunctionBreakdown, computePeaceDysfunctionIndex, capOutc
 import { DIMENSION_WEIGHTS, computeNegotiatingCapital } from '../events/strategic_dimensions.js';
 import type { DimensionStore } from '../events/strategic_dimensions.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { capGradeBySettlement } from './peace_settlement.js';
+import { capGradeBySettlement, settlementControllersFor } from './peace_settlement.js';
+import { creditedTerritoryPct, overrunEnclaveCells } from './enclave_credit.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 
@@ -812,10 +813,24 @@ export function computeFactionVerdict(
     // imposed, the grade reads the SETTLED territory (the plan's map), not the front line.
     // Absent on every campaign without a settlement, which keeps those verdicts unchanged.
     const settlement = neg?.settlement;
-    const settledTerritory = settlement?.territory_pct?.[faction];
+    // No territory credit for an overrun enclave (DC A6 follow-up 1, Pyrrhic panel 2026-11-09):
+    // the end map (settled or front) keeps the cells; the grade leaves them out. Unchanged
+    // (the same objects) whenever no enclave was overrun.
+    const rawSettled = settlement?.territory_pct?.[faction];
+    const front = state.political?.political_controllers ?? {};
+    // The settled map is rebuilt only when this faction overran an enclave on the front.
+    const overran = overrunEnclaveCells(front, front, faction).length > 0;
+    const settledMap = overran && typeof rawSettled === 'number' ? settlementControllersFor(state) : null;
+    const settledTerritory = typeof rawSettled === 'number'
+        ? creditedTerritoryPct(rawSettled, front, settledMap ?? front, faction)
+        : undefined;
+    const frontCredited = creditedTerritoryPct(capital.territory_controlled_pct, front, front, faction);
+    const creditedCapital = frontCredited !== capital.territory_controlled_pct
+        ? { ...capital, territory_controlled_pct: frontCredited }
+        : capital;
     const gradedCapital = typeof settledTerritory === 'number'
         ? { ...capital, territory_controlled_pct: settledTerritory }
-        : capital;
+        : creditedCapital;
 
     const pyrrhicScore = computePyrrhicScore(capital, faction, dimStore);
     const earned = computeFactionGrade(gradedCapital, faction, state);
@@ -847,7 +862,7 @@ export function computeFactionVerdict(
     // byte-identical (the term is emergent-only by construction).
     const displayBreakdown = typeof settledTerritory === 'number'
         ? { ...freshenBreakdownForDisplay(state, faction, capital), territory_controlled_pct: settledTerritory }
-        : freshenBreakdownForDisplay(state, faction, capital);
+        : freshenBreakdownForDisplay(state, faction, creditedCapital);
 
     const condemnationFlags = condemnationFlagsWith(state, faction, displayBreakdown);
     // §6 bright-line LETTER-grade cap (Pyrrhic scoring panel, red-team L1, 2026-08-10):

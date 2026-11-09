@@ -274,6 +274,11 @@ export interface DelegationFolder {
     /** All-sides totals over the whole war so far; the dead come from the Verdict's sources. */
     war: WarCostLine;
     /**
+     * Settlements this faction holds in an enclave it overran, which its grade does not credit
+     * (DC A6 follow-up 1, `enclave_credit.ts`). Absent when none, and on older saves.
+     */
+    overrun_uncredited?: number;
+    /**
      * What declining Dayton cost (DC A5): set on the forced table's folder when the player's
      * faction declined. `dead_since` and `held_then` are null on saves from before the stamp.
      */

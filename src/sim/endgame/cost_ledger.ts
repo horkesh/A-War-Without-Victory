@@ -180,6 +180,11 @@ export interface CostLedgerEntry {
     military_wounded: number;
     civilian_casualties_caused: number;
     refugees_created: number;
+    /**
+     * The wartime front share (the map), compared with history in the endgame comparison. Not
+     * the graded share: the verdict leaves out an enclave this faction overran (DC A6
+     * follow-up 1, `enclave_credit.ts`; VICTORY_AND_PYRRHIC_SCORING §3.2).
+     */
     territory_controlled_pct: number;
     enclaves_held: string[];
     enclaves_lost: string[];

@@ -31,6 +31,7 @@ import { getPeacePlanById } from './peace_plan_data.js';
 import { PATRON_FORCE_THRESHOLD } from './patron_leverage.js';
 import { currentCondemnationFlags } from './scoring.js';
 import { warDeadTotals } from './war_dead.js';
+import { overrunEnclaveCells } from './enclave_credit.js';
 
 const FACTIONS: readonly FactionId[] = ['RBiH', 'RS', 'HRHB'];
 
@@ -129,6 +130,10 @@ export function buildDelegationFolder(state: GameState): DelegationFolder | unde
             lost: [...(capital?.enclaves_lost ?? [])].sort(strictCompare),
         },
         condemnation: currentCondemnationFlags(state, faction),
+        ...(() => {
+            const overrun = overrunEnclaveCells(controllers, controllers, faction).length;
+            return overrun > 0 ? { overrun_uncredited: overrun } : {};
+        })(),
         patron: {
             override_authority: override,
             force_threshold: PATRON_FORCE_THRESHOLD,

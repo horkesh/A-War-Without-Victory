@@ -192,6 +192,8 @@ export interface GhostEntryStateView {
             rupture_consequences?: RuptureConsequenceView[];
         };
     };
+    /** Read-only: current controllers, for the enclave_defended capital check. */
+    political?: { political_controllers?: Readonly<Record<string, string | null | undefined>> };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -452,15 +454,23 @@ function predCleansingRefused(
 // — Ghost 3: enclave_defended (AUDIT-ONLY) —
 //   Observable campaign state: `enclave_held_through_turn` flag is set when
 //   the upstream observation system records that ARBiH retains control of
-//   op:srebrenica:srebrenica_2 AND op:zepa:zepa_2 AND op:gorazde:gorazde_2 at
+//   op:srebrenica:srebrenica_2 AND op:rogatica:zepa_2 AND op:gorazde:gorazde_2 at
 //   the recorded turn N. This is a present-state audit signal — NOT a
 //   forecast, and NOT a claim about Srebrenica 1995 outcomes. The
 //   surrounding ghost-entry body (data/codex/ghost_entries/enclave_defended.md)
 //   carries the strict audit register; this predicate only gates emission.
 function predEnclaveDefended(state: GhostEntryStateView, currentTurn: number): GhostPredicateMatch | null {
     const operand = flagOperand(state, 'enclave_held_through_turn', true);
+    // DC A6 follow-up 1 (Pyrrhic panel 2026-11-09, sensitive-history seat): the flag records a
+    // past turn; an enclave overrun after it must not read as defended. Where the view carries
+    // the controllers, every enclave capital must be held by RBiH now.
+    const controllers = state.political?.political_controllers;
+    if (controllers && DEFENDED_ENCLAVE_CAPITALS.some((osid) => controllers[osid] !== 'RBiH')) return null;
     return operand ? matchGhost([operand], [operand], currentTurn) : null;
 }
+
+/** The capitals the enclave_defended audit names (enclave_resilience.ts capital_osid). */
+const DEFENDED_ENCLAVE_CAPITALS = ['op:gorazde:gorazde_2', 'op:rogatica:zepa_2', 'op:srebrenica:srebrenica_2'] as const;
 
 // — Ghost 4: patron_resisted —
 //   count of patron_pressure_refused increments ≥ 3.

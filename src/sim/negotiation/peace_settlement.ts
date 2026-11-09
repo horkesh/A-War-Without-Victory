@@ -179,12 +179,15 @@ export function computeSettlementControllers(
  * engine passes the plan's audited table). An empty table reproduces the pure quota
  * pass exactly.
  */
+/** Diagnostics and tests: `contiguity: false` skips the Dayton contiguity pass (the opening line as assigned); `searchAlternatives: false` refuses a cutting corridor without seeking another. */
+export interface SettlementMapOptions { contiguity?: boolean; searchAlternatives?: boolean }
+
 export function computeSettlementControllersWith(
     state: GameState,
     planId: SettlementPlanId,
     overrides: Record<string, FactionId>,
     cells: SettlementCellTable,
-    options: { /** Diagnostics and tests: skip the Dayton contiguity pass to see the opening line as assigned. */ contiguity?: boolean } = {},
+    options: SettlementMapOptions = {},
 ): { controllers: Record<string, FactionId>; special: string[] } {
     return computeSettlementControllersFromFront(state.political?.political_controllers ?? {}, planId, overrides, cells, options);
 }
@@ -198,7 +201,7 @@ export function computeSettlementControllersFromFront(
     planId: SettlementPlanId,
     overrides: Record<string, FactionId>,
     cells: SettlementCellTable,
-    options: { contiguity?: boolean } = {},
+    options: SettlementMapOptions = {},
 ): { controllers: Record<string, FactionId>; special: string[] } {
     const areas = getOsidAreas().areas;
     const plan = SHARES.plans[planId] ?? {};
@@ -286,6 +289,7 @@ export function computeSettlementControllersFromFront(
             controllers,
             adjacency: getSettlementAdjacency(),
             areas,
+            searchAlternatives: options.searchAlternatives,
             isProtectedExclave: (side, cells) => side === 'FED' && cells.every((o) => POSAVINA_CANTON.has(munOf(o))),
             // Never absorb ground a package won at the table, an enclave held by its own
             // side, or a cell the audit assigns to this party (the smallest-area corridor

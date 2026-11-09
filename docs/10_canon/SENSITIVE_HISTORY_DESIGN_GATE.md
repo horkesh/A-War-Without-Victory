@@ -82,7 +82,7 @@ A historical event becomes eligible for rupture status **only if it meets all fo
 
 | Rupture ID | Event | Criteria check |
 |---|---|---|
-| `srebrenica_genocide_1995` | Fall of Srebrenica safe area, July 1995 | 8,000+ killed ✓; Krstić genocide conviction, Karadžić, Mladić, ICJ 2007 ✓; RS controls `op:srebrenica:srebrenica_2` + enclave formed + event-owned fall-receipt window turn ≥160 ✓; locked ✓ |
+| `srebrenica_genocide_1995` | Fall of Srebrenica safe area, July 1995 | 8,000+ killed ✓; Krstić genocide conviction, Karadžić, Mladić, ICJ 2007 ✓; RS controls `op:srebrenica:srebrenica_2` + enclave formed + event-owned fall-receipt window turn ≥160 ✓; locked ✓; also checked once more when the war ends, before the verdict is frozen (DC A6 follow-up 1, 2026-11-09: a final-turn capture at turn ≥160 was otherwise lost) |
 
 ### Events that are **not** ruptures (and why)
 
@@ -220,6 +220,7 @@ Changes that touch sensitive history require explicit multi-party review. No exc
 | New essay touching atrocity | `/historian` + `/narrative-designer` |
 | Change to enclave mechanics | `/gameplay-programmer` + `/historian` (for Srebrenica/Žepa specifically) |
 | Any change that could produce a "reward for atrocity" effect | Pyrrhic §6-panel sign-off (Historian + scenario-tester/calibration + Engine/systems + Red-team), unanimous GO required. This is a values bright line, not merely a gate: the atrocity-is-never-rewarded principle, if ever in question, surfaces to the owner. |
+| *Record (DC A6 follow-up 1, 2026-11-09)* | A6 let an enclave capture pay at the table. The panel (historian, sensitive-history, canon, game-design seats, then engine/systems and calibration seats) adopted a **territory-credit rule, not a condemnation**: no faction is credited at the verdict with the cells of an eastern safe area it overran (`VICTORY_AND_PYRRHIC_SCORING.md` §3.2). An overrun before the genocide window carries no condemnation of its own (§2 criterion 3); the Ring 1 civilian-harm lever is post-1.0. |
 
 ### Evidence required for each sign-off
 

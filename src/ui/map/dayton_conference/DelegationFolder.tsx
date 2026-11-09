@@ -81,6 +81,12 @@ export function DelegationFolder({ folder }: { folder: FolderData | undefined })
                         {enclaves.lost.length > 0 && <><dt>{t('dayton.folder.enclavesLost')}</dt><dd>{list(enclaves.lost.map(enclave))}</dd></>}
                     </dl>
                 )}
+                {/* DC A6 follow-up 1: the grade never credits an overrun enclave, whatever the map gives. */}
+                {(folder.overrun_uncredited ?? 0) > 0 && (
+                    <p className="dayton-folder-note" data-dayton-overrun-uncredited>
+                        {t('dayton.folder.overrunUncredited', { count: formatCount(folder.overrun_uncredited ?? 0) })}
+                    </p>
+                )}
             </section>
 
             <section className="dayton-folder-section" aria-labelledby="dayton-folder-record">
