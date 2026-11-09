@@ -14,25 +14,32 @@ import './room.css';
 import './boundary.css';
 import './signing.css';
 
-/** Signature blocks on the plate, left to right (Codex, dayton-signing-table-v1). */
+/**
+ * Signature blocks on the plate, left to right (Codex, dayton-signing-table-v1). The General
+ * Framework Agreement initialled at Dayton has three parties, all states: the Republic of
+ * Bosnia and Herzegovina, the Republic of Croatia and the Federal Republic of Yugoslavia
+ * (OHR text). The entities sign the annexes; Croatia and the FRY endorse them. `party` is the
+ * wartime faction whose fate each signature carries: Croatia's for Herzeg-Bosnia, the FRY's
+ * for Republika Srpska under the 29 August 1995 mandate the preamble cites.
+ */
 const SIGNATORIES = [
-    { id: 'sig_rbih', faction: 'RBiH' },
-    { id: 'sig_hrhb', faction: 'HRHB' },
-    { id: 'sig_rs', faction: 'RS' },
+    { id: 'sig_rbih', state: 'rbih', party: 'RBiH' },
+    { id: 'sig_hrhb', state: 'croatia', party: 'HRHB' },
+    { id: 'sig_rs', state: 'fry', party: 'RS' },
 ] as const;
 
 /** A pen stroke per delegation: initials are runtime marks, never names of real people. */
 const STROKES: Record<string, string> = {
-    RBiH: 'M4 30 C14 6 22 6 24 24 S34 40 42 18 C46 8 54 10 52 26 C50 36 62 34 70 20 C76 12 84 16 96 22',
-    HRHB: 'M4 26 C10 10 20 34 28 14 C32 6 40 30 48 22 C56 14 58 32 68 26 C76 20 84 10 96 18',
-    RS: 'M4 22 C16 34 22 8 32 18 C40 26 44 36 54 20 C60 10 70 32 78 22 C84 14 90 20 96 16',
+    rbih: 'M4 30 C14 6 22 6 24 24 S34 40 42 18 C46 8 54 10 52 26 C50 36 62 34 70 20 C76 12 84 16 96 22',
+    croatia: 'M4 26 C10 10 20 34 28 14 C32 6 40 30 48 22 C56 14 58 32 68 26 C76 20 84 10 96 18',
+    fry: 'M4 22 C16 34 22 8 32 18 C40 26 44 36 54 20 C60 10 70 32 78 22 C84 14 90 20 96 16',
 };
 
-const PATRON_KEYS: Record<string, MessageKey> = {
-    united_states: 'dayton.folder.patron.RBiH',
-    belgrade: 'dayton.folder.patron.RS',
-    zagreb: 'dayton.folder.patron.HRHB',
-};
+/** The note under a block: an imposed signature names who pressed it; the FRY's always names its mandate. */
+function blockNote(state: 'rbih' | 'croatia' | 'fry', party: string, imposedOn: string | undefined): MessageKey | null {
+    if (imposedOn === party) return `dayton.signing.imposed.${party}` as MessageKey;
+    return state === 'fry' ? 'dayton.signing.fryMandate' : null;
+}
 
 type Hotspot = { id: string; outline: number[][] };
 
@@ -117,20 +124,17 @@ export function DaytonSigningBeat({ agreement, fallbackDate, onContinue }: Dayto
                             })
                             : t('dayton.signing.costUnavailable')}
                     </p>
-                    {SIGNATORIES.map(({ id, faction }) => {
-                        const coerced = imposed?.on_faction === faction;
+                    {SIGNATORIES.map(({ id, state, party }) => {
+                        const coerced = imposed?.on_faction === party;
+                        const note = blockNote(state, party, imposed?.on_faction);
                         return (
                             <div key={id} className="dayton-signing-signature" style={box(blocking, id)}
-                                data-testid={`dayton-signing-${faction}`} data-imposed={coerced || undefined}>
+                                data-testid={`dayton-signing-${state}`} data-imposed={coerced || undefined}>
                                 <svg viewBox="0 0 100 40" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
-                                    <path d={STROKES[faction]} />
+                                    <path d={STROKES[state]} />
                                 </svg>
-                                <span>{t(`dayton.signing.for.${faction}` as 'dayton.signing.for.RBiH')}</span>
-                                {coerced && imposed && (
-                                    <span className="dayton-signing-imposed">
-                                        {t('dayton.signing.imposed', { patron: t(PATRON_KEYS[imposed.by] ?? 'dayton.folder.patron.RBiH') })}
-                                    </span>
-                                )}
+                                <span>{t(`dayton.signing.for.${state}` as MessageKey)}</span>
+                                {note && <span className={coerced ? 'dayton-signing-note dayton-signing-imposed' : 'dayton-signing-note'}>{t(note)}</span>}
                             </div>
                         );
                     })}
@@ -141,6 +145,7 @@ export function DaytonSigningBeat({ agreement, fallbackDate, onContinue }: Dayto
                 <h2 id="dayton-signing-title" ref={heading} tabIndex={-1}>
                     {t(imposed ? 'dayton.signing.titleImposed' : 'dayton.signing.title')}
                 </h2>
+                <p className="dayton-signing-annexes">{t('dayton.signing.annexes')}</p>
                 <TreatyLedger treaty={agreement.treaty} signed />
                 <div className="dayton-live-actions">
                     <button type="button" className="dayton-live-button" onClick={() => setMapOpen(true)}>

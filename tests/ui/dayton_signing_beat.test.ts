@@ -53,9 +53,12 @@ describe('DC A5 signing beat', () => {
         expect(screen.getByTestId('dayton-signing-date').textContent).toMatch(/^Initialled at Wright-Patterson Air Force Base, Dayton, Ohio, /);
         expect(screen.getByTestId('dayton-signing-cost').textContent)
             .toBe('188 weeks of war. 22,974 soldiers and 31,781 civilians killed on all sides, 1,202,697 civilians displaced.');
-        expect(screen.getByTestId('dayton-signing-RBiH').textContent).toBe('For the Republic of Bosnia and Herzegovina');
-        expect(screen.getByTestId('dayton-signing-HRHB').textContent).toBe('For Herzeg-Bosnia');
-        expect(screen.getByTestId('dayton-signing-RS').textContent).toBe('For Republika Srpska');
+        // The General Framework Agreement's three parties are states; the FRY signs for RS under the August 1995 mandate.
+        expect(screen.getByTestId('dayton-signing-rbih').textContent).toBe('For the Republic of Bosnia and Herzegovina');
+        expect(screen.getByTestId('dayton-signing-croatia').textContent).toBe('For the Republic of Croatia');
+        expect(screen.getByTestId('dayton-signing-fry').textContent)
+            .toBe('For the Federal Republic of YugoslaviaAlso for Republika Srpska, under the mandate of 29 August 1995');
+        expect(document.body.textContent).toContain('The annexes are signed for the Republic of Bosnia and Herzegovina, the Federation of Bosnia and Herzegovina and Republika Srpska');
         expect(screen.getByRole('heading', { name: 'The agreement is initialled' })).toBeTruthy();
         expect(screen.getByRole('heading', { name: 'Your treaty against the mediator\'s draft' })).toBeTruthy();
         fireEvent.click(screen.getByTestId('dayton-signing-continue'));
@@ -67,10 +70,23 @@ describe('DC A5 signing beat', () => {
         delete (imposed as { signing?: unknown }).signing;
         render(createElement(DaytonSigningBeat, { agreement: imposed, fallbackDate: '9 Nov 1995', onContinue: () => {} }));
         expect(screen.getByRole('heading', { name: 'The agreement is initialled at the forced table' })).toBeTruthy();
-        expect(screen.getByTestId('dayton-signing-RS').textContent).toContain('Initialled under pressure from Belgrade');
-        expect(screen.getByTestId('dayton-signing-RBiH').dataset.imposed).toBeUndefined();
+        const fry = screen.getByTestId('dayton-signing-fry');
+        expect(fry.textContent).toBe('For the Federal Republic of YugoslaviaInitialled for Republika Srpska under pressure from Belgrade');
+        expect(fry.dataset.imposed).toBe('true');
+        expect(screen.getByTestId('dayton-signing-rbih').dataset.imposed).toBeUndefined();
         expect(screen.getByTestId('dayton-signing-date').textContent).toContain('9 Nov 1995');
         expect(screen.getByTestId('dayton-signing-cost').textContent).toBe("This record kept no count of the war's cost at signing.");
+    });
+
+    it('puts an imposed signature on the block that carried that party', () => {
+        const zagreb = { ...agreement, terms: { ...agreement.terms, imposed: { on_faction: 'HRHB', by: 'zagreb' as const, turn: 196 } } };
+        const { unmount } = render(createElement(DaytonSigningBeat, { agreement: zagreb, fallbackDate: '', onContinue: () => {} }));
+        expect(screen.getByTestId('dayton-signing-croatia').textContent).toContain('Initialled for Herzeg-Bosnia under pressure from Zagreb');
+        expect(screen.getByTestId('dayton-signing-fry').textContent).toContain('under the mandate of 29 August 1995');
+        unmount();
+        const washington = { ...agreement, terms: { ...agreement.terms, imposed: { on_faction: 'RBiH', by: 'united_states' as const, turn: 196 } } };
+        render(createElement(DaytonSigningBeat, { agreement: washington, fallbackDate: '', onContinue: () => {} }));
+        expect(screen.getByTestId('dayton-signing-rbih').textContent).toContain('Initialled under pressure from Washington');
     });
 
     it('opens the signed map from the document and returns to it on Escape', () => {
@@ -87,7 +103,7 @@ describe('DC A5 signing beat', () => {
         setLocale('bcs');
         render(createElement(DaytonSigningBeat, { agreement, fallbackDate: '', onContinue: () => {} }));
         expect(screen.getByRole('heading', { name: 'Sporazum je parafiran' })).toBeTruthy();
-        expect(screen.getByTestId('dayton-signing-RS').textContent).toBe('Za Republiku Srpsku');
+        expect(screen.getByTestId('dayton-signing-fry').textContent).toBe('Za Saveznu Republiku JugoslavijuI za Republiku Srpsku, po ovlaštenju od 29. augusta 1995.');
         expect(screen.getByRole('button', { name: 'Nastavi na presudu' })).toBeTruthy();
     });
 

@@ -47,7 +47,9 @@
 }
 .dayton-signing-signature span { font-family: Georgia, serif; font-size: .64cqw; line-height: 1.15; text-align: center; white-space: nowrap; }
 .dayton-room-window[data-wide="true"] .dayton-signing-signature span { font-size: .48cqw; }
-.dayton-signing-signature .dayton-signing-imposed { position: absolute; top: 100%; margin-top: .3em; color: #6b1f1a; font-style: italic; }
+.dayton-signing-signature .dayton-signing-note { position: absolute; top: 100%; margin-top: .3em; font-style: italic; }
+.dayton-signing-signature .dayton-signing-imposed { color: #6b1f1a; }
+.dayton-signing-annexes { margin: 0; font-size: .85rem; line-height: 1.4; opacity: .85; }
 @media (prefers-reduced-motion: no-preference) {
   .dayton-signing-signature path { stroke-dasharray: 260; stroke-dashoffset: 260; animation: dayton-ink 1.1s ease-out forwards; }
   [data-testid="dayton-signing-HRHB"] path { animation-delay: .5s; }

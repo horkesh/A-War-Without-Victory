@@ -30,7 +30,6 @@ Read this section first; the checkpoints under each amendment hold the detail. B
 - Five unresolved Dayton audit cells, left to the quota pass: Ostra Luka (Orašje), Stari Majdan (Sanski Most), Veličani (Trebinje), Tošići and Trnovo town (Trnovo).
 - Peace-plan borders still read as the image shows: Contact Group Derventa town, Donja Tramošnica, Čelić, Ostra Luka; Owen–Stoltenberg Šipovo and Teslić; Vance–Owen southern Bihać and two Visoko cells.
 - Pyrrhic panel, undecided: RBiH A+ blocked by any war-crimes event (others only by condemnation); RBiH A band text "30–33 %" against an open band.
-- A5 signing table: the Croat signature reads "For Herzeg-Bosnia" after the faction; historically the Federation initialled. Say if it should read "For the Federation of Bosnia and Herzegovina".
 - Follow-ups recorded under A6: early-capture §6 probe (an RS capture of Srebrenica before turn 160 and condemnation); a non-cutting corridor search in the contiguity pass.
 
 **Traps for the next session**
@@ -197,7 +196,7 @@ One signing beat between final review and the Verdict: the final map, the three 
 - *Forced table.* The night plate (shared blocking and paper, so the four hotspots and the live board work unchanged), the heading "after midnight", and `ForcedUltimatum`: who forced the return, no decline, an unanswered table is signed next week, and what declining cost (weeks, the dead on all sides and civilians displaced since the decline, settlements then and now). Stated as a sequence, not a cause.
 - *State* (all optional): `dayton_decline.dead_at_decline`, `held_at_decline`; folder `declined`; agreement `signing: { turn, war }`. `resolveDaytonWithRecord` owns every recorded signature; the forced table's unanswered fallback now writes the record too (it had signed with none, so the Verdict skipped the treaty).
 - Independent review applied (focus trap, fallback record, wording, BCS week counts, adapter guard, non-Dayton test). Evidence `F:/AWWV-worktrees/.dayton-design/signing-beat/` (1280 × 720 to 3426 × 1186, EN and BCS). Gates: typecheck, focused tests, full suite exit 0, 188-week run `__w188_n5` 712 / 711 / 712 / 710 with Farz P-A, P-B and the enclave guard passing. Not yet: packaged-Electron proof.
-- **Open for the owner:** the Croat signature reads "For Herzeg-Bosnia" after the faction; historically the Federation of Bosnia and Herzegovina initialled.
+- **Resolved 2026-11-09 (owner asked; checked against OHR texts):** the three blocks are the General Framework Agreement's parties, the Republic of Bosnia and Herzegovina, the Republic of Croatia and the Federal Republic of Yugoslavia (the FRY also for Republika Srpska under the 29 August 1995 mandate); a line names the annexes' signatories (the Republic, the Federation, Republika Srpska) and endorsers (Croatia, the FRY). An imposed signature is noted on the block that carried that party.
 
 ### A6. Roadmap first items (adds to stages 1, 2 and 4)
 
