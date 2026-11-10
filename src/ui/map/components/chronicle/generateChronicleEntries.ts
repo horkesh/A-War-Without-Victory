@@ -59,6 +59,7 @@ import type { GameState } from '../../../../state/game_state.js';
 import { turnToDateString } from '../../utils/formatters.js';
 import { playerFactionMatch } from '../../data/playerFactionMatch.js';
 import { getOsidDisplayName } from '../../utils/osidDisplayName.js';
+import { SREBRENICA_OVERRUN_NOTE } from '../../../../sim/endgame/endgame_comparison.js';
 
 import {
     getPlayerSafeDisplacementGroupLabel,
@@ -259,9 +260,12 @@ function buildEndgameComparisonEntries(state: any): ChronicleEntry[] {
     }
 
     const entries: ChronicleEntry[] = [];
-    const nonGhostNotes = rawNotes.filter((note) => note !== 'Srebrenica enclave survived');
-    const ghostSrebrenica = !ruptureDivergence.has('srebrenica_genocide_1995');
-    const visibleComparisons = nonGhostNotes.length + (ghostSrebrenica ? 1 : 0);
+    // DC A6 follow-up 1: an enclave overrun with no rupture recorded is said plainly (localized),
+    // and the "never arrived" ghost appears only when the enclave really survived.
+    const overrun = rawNotes.includes(SREBRENICA_OVERRUN_NOTE);
+    const nonGhostNotes = rawNotes.filter((note) => note !== 'Srebrenica enclave survived' && note !== SREBRENICA_OVERRUN_NOTE);
+    const ghostSrebrenica = !ruptureDivergence.has('srebrenica_genocide_1995') && !overrun;
+    const visibleComparisons = nonGhostNotes.length + (ghostSrebrenica || overrun ? 1 : 0);
 
     entries.push({
         turn,
@@ -285,6 +289,16 @@ function buildEndgameComparisonEntries(state: any): ChronicleEntry[] {
             headline: false,
             title: t('chronicle.generated.endgame.divergenceTitle'),
             detail: note,
+        });
+    }
+
+    if (overrun) {
+        entries.push({
+            turn,
+            type: 'narrative',
+            headline: false,
+            title: t('chronicle.generated.endgame.divergenceTitle'),
+            detail: t('chronicle.generated.endgame.srebrenicaOverrunDetail'),
         });
     }
 

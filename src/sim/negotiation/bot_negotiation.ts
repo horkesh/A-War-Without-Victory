@@ -16,11 +16,13 @@ import type {
 } from '../../state/negotiation_types.js';
 import { computeNegotiatingCapital } from '../events/strategic_dimensions.js';
 import type { DimensionStore } from '../events/strategic_dimensions.js';
-import { getTerritorialPackageById, getDemandCost, getConcessionCost } from './territorial_packages.js';
+import { getTerritorialPackageById, getConcessionCost } from './territorial_packages.js';
 import type { ExtraPackages } from './territorial_packages.js';
 import { frontPackagesForProposal } from './front_packages.js';
-import { isProtectedFor } from './patron_leverage.js';
+import { demandPrice, holderConcessionPrice, isProtectedFor } from './patron_leverage.js';
 import { getInstitutionalPackageById, getInstitutionalCost } from './institutional_packages.js';
+import { reconcileProposalPowers } from './power_overlap.js';
+import { daytonRoundWillingness, effectiveDaytonOverride } from './dayton_rounds.js';
 import {
     finalCompetencyCost,
     finalConstitutionalCost,
@@ -84,12 +86,22 @@ export function getCompositeCapital(_breakdown: NegotiationBreakdown, faction: s
 
 /**
  * Cost to a holder of conceding a demanded package. Protected ground (patron_leverage.ts:
- * RS heartland and corridor, Mostar and western Herzegovina) is never conceded voluntarily:
- * it costs more than any capital, so the holder refuses and its counter-offer drops it first.
+ * RS heartland and corridor, Mostar and western Herzegovina, the Goražde corridor) is a
+ * price class (DC A6): weighed at a heavy multiple, so the counter-offer drops it first,
+ * and carried only by the holder's own willingness, never by its patron.
  */
-export const PROTECTED_GROUND_REFUSAL_COST = 1000;
 function concedeCostToHolder(pkg: import('../../state/negotiation_types.js').TerritorialPackage, holder: string): number {
-    return isProtectedFor(pkg, holder) ? PROTECTED_GROUND_REFUSAL_COST : pkg.capital_cost_to_concede;
+    return holderConcessionPrice(pkg, holder);
+}
+
+/** The part of a proposal's cost to `holder` that is its own protected ground. */
+function protectedCostToHolder(proposal: DaytonProposal, holder: string, extra?: ExtraPackages): number {
+    let cost = 0;
+    for (const pkgId of [...proposal.territorial_demands].sort(strictCompare)) {
+        const pkg = getTerritorialPackageById(pkgId, extra);
+        if (pkg && pkg.default_holder === holder && isProtectedFor(pkg, holder)) cost += holderConcessionPrice(pkg, holder);
+    }
+    return cost;
 }
 
 /**
@@ -105,6 +117,7 @@ export function computeProposalCostToFaction(
     faction: string,
     extra?: ExtraPackages,
 ): number {
+    proposal = reconcileProposalPowers(proposal);
     let totalCost = 0;
 
     // Territorial demands against this faction: if the proposer demands a package
@@ -205,6 +218,7 @@ export function computePlayerProposalSpend(
     playerFaction: string,
     extra?: ExtraPackages,
 ): number {
+    proposal = reconcileProposalPowers(proposal);
     let spend = 0;
 
     // Territorial: the player pays to DEMAND territory they do not hold and to
@@ -212,7 +226,7 @@ export function computePlayerProposalSpend(
     // faction-conditioned — 0 for the holder's own demand / a non-holder's concession).
     for (const pkgId of [...proposal.territorial_demands].sort(strictCompare)) {
         const pkg = getTerritorialPackageById(pkgId, extra);
-        if (pkg) spend += getDemandCost(pkg, playerFaction);
+        if (pkg) spend += demandPrice(pkg, playerFaction);
     }
     for (const pkgId of [...proposal.territorial_concessions].sort(strictCompare)) {
         const pkg = getTerritorialPackageById(pkgId, extra);
@@ -268,11 +282,12 @@ interface PlayerSpendItem {
  * UI's "reduce demands" guidance. Deterministic.
  */
 function playerSpendItems(proposal: DaytonProposal, playerFaction: string, extra?: ExtraPackages): PlayerSpendItem[] {
+    proposal = reconcileProposalPowers(proposal);
     const items: PlayerSpendItem[] = [];
     for (const pkgId of [...proposal.territorial_demands].sort(strictCompare)) {
         const pkg = getTerritorialPackageById(pkgId, extra);
         if (!pkg) continue;
-        const cost = getDemandCost(pkg, playerFaction);
+        const cost = demandPrice(pkg, playerFaction);
         if (cost > 0) items.push({ kind: 'demand', id: pkgId, cost });
     }
     for (const pkgId of [...proposal.territorial_concessions].sort(strictCompare)) {
@@ -423,6 +438,7 @@ export function evaluateBotResponse(
     proposal: DaytonProposal,
     extraPackages?: ExtraPackages,
 ): DaytonBotResponse {
+    proposal = reconcileProposalPowers(proposal);
     // Captured-ground packages are derived from state; build them when the caller did not.
     const extra = extraPackages ?? frontPackagesForProposal(state, proposal);
     const neg = state.military.negotiation;
@@ -448,7 +464,8 @@ export function evaluateBotResponse(
 
     const compositeCapital = getCompositeCapital(capital, faction, neg.strategic_dimensions);
     const proposalCost = computeProposalCostToFaction(proposal, faction, extra);
-    const overrideAuthority = patronRel?.override_authority ?? 0;
+    // Round pressure (DC A2): each tabled round raises the patron's hold; 0 with no rounds.
+    const overrideAuthority = patronRel ? effectiveDaytonOverride(neg, faction) : 0;
 
     // Determine spending willingness based on patron pressure
     let willingnessFraction = BASE_SPENDING_WILLINGNESS;
@@ -459,11 +476,18 @@ export function evaluateBotResponse(
     } else if (overrideAuthority >= PATRON_MODERATE_PRESSURE_THRESHOLD) {
         willingnessFraction = 0.70;
     }
+    // The mediator's deadline (DC A2): each tabled round widens what a delegation will
+    // give, two steps at most; 0 with no tabled round.
+    willingnessFraction = Math.min(0.95, willingnessFraction + daytonRoundWillingness(neg));
 
     const maxAcceptableCost = compositeCapital * willingnessFraction;
+    // Protected ground (DC A6) is carried only by the delegation's own willingness, the
+    // base share plus the mediator's deadline; patron pressure never presses it.
+    const ownMaxCost = compositeCapital * Math.min(0.95, BASE_SPENDING_WILLINGNESS + daytonRoundWillingness(neg));
+    const protectedCost = protectedCostToHolder(proposal, faction, extra);
 
     // Accept if cost is within acceptable range
-    if (proposalCost <= maxAcceptableCost) {
+    if (proposalCost <= maxAcceptableCost && protectedCost <= ownMaxCost) {
         const reason = overrideAuthority >= PATRON_STRONG_PRESSURE_THRESHOLD
             ? `Accepted under patron pressure (override: ${overrideAuthority}).`
             : `Proposal cost (${proposalCost}) within acceptable range (${Math.floor(maxAcceptableCost)}).`;
@@ -471,19 +495,26 @@ export function evaluateBotResponse(
         return {
             decision: 'accept',
             reason,
+            reason_code: overrideAuthority >= PATRON_STRONG_PRESSURE_THRESHOLD ? 'accept_patron' : 'accept',
             proposal_cost: proposalCost,
             available_capital: compositeCapital,
         };
     }
 
     // Reject — generate counter-proposal
-    const countered = generateCounterProposal(proposal, faction, compositeCapital, willingnessFraction, extra);
+    const countered = generateCounterProposal(proposal, faction, compositeCapital, willingnessFraction, extra, ownMaxCost);
 
+    // Refused only for protected ground (DC A6 panel): say so, not "over the range".
+    const protectedOnly = proposalCost <= maxAcceptableCost;
     if (countered) {
         return {
             decision: 'counter',
             counter_proposal: countered.counter,
-            reason: `Proposal cost (${proposalCost}) exceeds acceptable range (${Math.floor(maxAcceptableCost)}). Counter-proposal offered. ${countered.citation}`,
+            reason: protectedOnly
+                ? `Protected ground (${protectedCost}) exceeds what this delegation gives of its own will (${Math.floor(ownMaxCost)}). Counter-proposal offered. ${countered.citation}`
+                : `Proposal cost (${proposalCost}) exceeds acceptable range (${Math.floor(maxAcceptableCost)}). Counter-proposal offered. ${countered.citation}`,
+            // Close: the draft asks under twice what this delegation can give.
+            reason_code: protectedOnly ? 'counter_protected' : proposalCost < 2 * maxAcceptableCost ? 'counter_close' : 'counter_far',
             proposal_cost: proposalCost,
             available_capital: compositeCapital,
         };
@@ -492,6 +523,7 @@ export function evaluateBotResponse(
     return {
         decision: 'reject',
         reason: `Proposal cost (${proposalCost}) exceeds available capital (${Math.floor(compositeCapital)}). No viable counter-proposal.`,
+        reason_code: 'reject',
         proposal_cost: proposalCost,
         available_capital: compositeCapital,
     };
@@ -529,7 +561,10 @@ function generateCounterProposal(
     availableCapital: number,
     willingnessFraction: number,
     extra?: ExtraPackages,
+    /** The delegation's own willingness in capital; only it carries protected ground (DC A6). */
+    ownMaxCost: number = Infinity,
 ): { counter: DaytonProposal; citation: string } | undefined {
+    originalProposal = reconcileProposalPowers(originalProposal);
     const maxCost = availableCapital * willingnessFraction;
     const dial = proposalDial(originalProposal);
 
@@ -604,8 +639,21 @@ function generateCounterProposal(
     // the original proposal cost and the cost with the counter-dial applied.
     const counterDial = counterDialTowardIdeal(faction, dial);
 
+    // Protected ground beyond the delegation's own willingness goes first, dearest first.
+    let protectedCost = protectedCostToHolder(originalProposal, faction, extra);
+    for (const item of costItems) {
+        if (protectedCost <= ownMaxCost) break;
+        if (item.type !== 'territorial') continue;
+        const pkg = getTerritorialPackageById(item.id, extra);
+        if (!pkg || !isProtectedFor(pkg, faction)) continue;
+        protectedCost -= item.cost;
+        currentCost -= item.cost;
+        removedTerritorial.add(item.id);
+    }
+
     for (const item of costItems) {
         if (currentCost <= maxCost) break;
+        if (item.type === 'territorial' && removedTerritorial.has(item.id)) continue;
         currentCost -= item.cost;
         switch (item.type) {
             case 'territorial': removedTerritorial.add(item.id); break;

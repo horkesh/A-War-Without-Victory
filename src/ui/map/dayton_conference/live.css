@@ -1,0 +1,316 @@
+.dayton-live {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: #1c1b17;
+  color: #eee9dc;
+  font-family: var(--font-command), system-ui, sans-serif;
+}
+.dayton-live-arrival,
+.dayton-live-room {
+  position: absolute;
+  inset: 0;
+}
+.dayton-live-arrival {
+  display: flex;
+  align-items: flex-start;
+  overflow: auto;
+  padding: clamp(1rem, 5%, 5rem);
+  background-size: cover;
+  background-position: center;
+}
+.dayton-live-intro,
+.dayton-live-heading {
+  border-inline-start: 2px solid #b09b70;
+  background: #171611ed;
+  box-shadow: 0 8px 24px #0005;
+}
+.dayton-live-intro {
+  max-width: 29rem;
+  padding: 1.35rem;
+}
+.dayton-live-heading {
+  position: absolute;
+  z-index: 1;
+  inset-block-start: .85rem;
+  inset-inline-start: .85rem;
+  max-width: calc(100% - 1.7rem);
+  padding: .6rem .85rem;
+  pointer-events: none;
+}
+.dayton-live h2 {
+  font-family: Georgia, serif;
+  font-size: clamp(1.3rem, 2.2vw, 2rem);
+  line-height: 1.12;
+}
+.dayton-live-intro > p,
+.dayton-live-heading > p {
+  margin-block: .3rem;
+}
+.dayton-live-kicker {
+  font-size: .78rem;
+  font-weight: 650;
+  letter-spacing: .09em;
+}
+.dayton-live-intro .dayton-live-kicker,
+.dayton-live-heading .dayton-live-kicker {
+  color: #e7ce8d;
+}
+.dayton-live-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+}
+.dayton-live-intro .dayton-live-actions {
+  margin-top: 1rem;
+}
+.dayton-live-button {
+  min-height: 2.5rem;
+  border: 1px solid #a78e5c;
+  border-radius: 3px;
+  padding: .35rem .65rem;
+  background: #292720;
+  color: #eee9dc;
+  font-size: .9rem;
+  font-weight: 600;
+}
+.dayton-live-button:hover {
+  background: #413925;
+}
+.dayton-live-primary {
+  background: #4a3b24;
+}
+.dayton-live :focus-visible {
+  outline: 2px solid #a37c24;
+  outline-offset: 2px;
+}
+.dayton-live-nav {
+  position: absolute;
+  z-index: 1;
+  bottom: .65rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 1.3rem);
+  justify-content: center;
+  padding: .35rem;
+  background: #171611ed;
+  border: 1px solid #685c44;
+  border-radius: 4px;
+}
+.dayton-live-panel {
+  position: absolute;
+  z-index: 2;
+  inset-block: .85rem;
+  inset-inline-end: .85rem;
+  width: min(44rem, 72%, calc(100% - 1.7rem));
+  display: flex;
+  flex-direction: column;
+  border: 2px solid #a78e5c;
+  border-radius: .35rem;
+  background: linear-gradient(160deg, #f0e8d8, #e0d8c0 65%, #d8ceb8);
+  color: #2a2016;
+  box-shadow: 0 12px 36px #000a;
+}
+/* Room to bargain (DC A2): the budget without figures. */
+.dayton-room-meter {
+  position: relative;
+  height: .55rem;
+  border-radius: 2px;
+  background: #cbbd9e;
+  overflow: hidden;
+}
+.dayton-room-meter span { position: absolute; inset-block: 0; inset-inline-start: 0; background: #4f6b48; }
+.dayton-room-meter span[data-band="little"] { background: #9a6a2a; }
+.dayton-room-meter span[data-band="over"] { background: #8a2a22; }
+
+/* Bounded rounds (DC A2): three marks for the three rounds the mediator allows. */
+.dayton-round-track {
+  display: flex;
+  gap: .3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dayton-round-track li {
+  padding: .1rem .5rem;
+  border: 1px solid #a78e5c;
+  border-radius: 2px;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.dayton-round-track li[data-state="done"] { background: #2a2016; border-color: #2a2016; color: #efe6cf; }
+.dayton-round-track li[data-state="next"] { background: #e3c983; border-color: #6f5432; color: #2a2016; }
+.dayton-round-track li[data-state="later"] { color: #7a6a52; }
+
+/* Delegation folder (DC A1): a dossier on the folder's own leather and paper. */
+.dayton-folder {
+  display: grid;
+  gap: 1.1rem;
+  padding: 1rem 1.15rem 1.3rem;
+}
+.dayton-folder-cover {
+  padding: .9rem 1rem;
+  border-radius: 3px;
+  background: linear-gradient(160deg, #2f3b2c, #232c21);
+  color: #efe6cf;
+  box-shadow: inset 0 0 0 1px #4b5a45;
+}
+.dayton-folder-cover h3 { margin: .2rem 0 .1rem; font-size: 1.35rem; line-height: 1.2; }
+.dayton-folder-cover p { margin: 0; color: #cdbf9c; font-size: .9rem; }
+.dayton-folder-stamp {
+  display: inline-block;
+  padding: .1rem .45rem;
+  border: 1px solid #b89a5a;
+  color: #e3c983 !important;
+  font-size: .72rem !important;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.dayton-folder-section { display: grid; gap: .45rem; }
+.dayton-folder-section h4,
+.dayton-folder-total h4 {
+  margin: 0;
+  padding-bottom: .25rem;
+  border-bottom: 1px solid #b8a27a;
+  color: #5d4d36;
+  font-size: .78rem;
+  font-weight: 750;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.dayton-folder-section p { margin: 0; line-height: 1.45; }
+.dayton-folder-figure { font-size: 1.5rem; font-weight: 700; line-height: 1.15; }
+.dayton-folder-meter {
+  position: relative;
+  height: .7rem;
+  border-radius: 2px;
+  background: #cbbd9e;
+  overflow: visible;
+}
+.dayton-folder-meter-fill { position: absolute; inset-block: 0; inset-inline-start: 0; border-radius: 2px; }
+.dayton-folder-meter-pen { background: #6f5432; }
+.dayton-folder-meter-peak {
+  position: absolute;
+  inset-block: -.25rem;
+  width: 2px;
+  margin-inline-start: -1px;
+  background: #2a2016;
+}
+.dayton-folder-pairs { display: grid; grid-template-columns: max-content 1fr; gap: .2rem .8rem; margin: .2rem 0 0; }
+.dayton-folder-pairs dt { font-weight: 650; }
+.dayton-folder-pairs dd { margin: 0; }
+.dayton-folder-condemned {
+  padding: .45rem .6rem;
+  border-inline-start: 3px solid #8a2a22;
+  background: #ead0c8;
+  color: #4d1510;
+  font-weight: 650;
+}
+.dayton-folder-plans { display: grid; gap: .65rem; margin: 0; padding: 0; list-style: none; }
+.dayton-folder-plan {
+  display: grid;
+  gap: .35rem;
+  padding: .6rem .7rem;
+  border: 1px solid #b8a27a;
+  border-radius: 3px;
+  background: #f3ebda;
+}
+.dayton-folder-plan-yours { border-color: #6f5432; box-shadow: inset 3px 0 0 #6f5432; }
+.dayton-folder-plan-name { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .2rem .8rem; }
+.dayton-folder-plan-name span { color: #5d4d36; font-size: .9rem; }
+.dayton-folder-split { display: flex; height: 1.15rem; border-radius: 2px; overflow: hidden; }
+.dayton-folder-split span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: .72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.dayton-folder-since { color: #4a3a26; }
+.dayton-folder-total {
+  display: grid;
+  gap: .55rem;
+  padding: .8rem .9rem .9rem;
+  border-radius: 3px;
+  background: #2a2016;
+  color: #efe6cf;
+}
+.dayton-folder-total h4 { color: #cdbf9c; border-bottom-color: #5d4d36; }
+.dayton-folder-figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: .7rem 1rem;
+  margin: 0;
+}
+.dayton-folder-figures > div { display: flex; flex-direction: column-reverse; gap: .1rem; }
+.dayton-folder-figures dt { color: #cdbf9c; font-size: .8rem; line-height: 1.25; }
+.dayton-folder-figures dd {
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.dayton-folder-empty { padding: 1rem 1.15rem; }
+.dayton-live-panel-heading {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: .65rem 1rem;
+  border-bottom: 1px solid #a78e5c;
+}
+.dayton-live-error {
+  flex: none;
+  padding: .45rem .65rem;
+  border-inline-start: 3px solid #ab4941;
+  background: #f0d4cf;
+  color: #651e18;
+  font-size: .9rem;
+  font-weight: 650;
+}
+.dayton-live-panel > .dayton-live-error {
+  margin: .65rem 1rem 0;
+}
+.dayton-live-panel-body {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.dayton-live-panel[data-dayton-panel="review"] {
+  width: min(67rem, calc(100% - 1.7rem));
+}
+.dayton-clause-link {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .2rem .75rem;
+  width: 100%;
+  min-height: 2.25rem;
+  padding: .35rem .5rem;
+  border: 1px solid #a78e5c;
+  border-radius: 3px;
+  background: #f3e9d6;
+  text-align: start;
+}
+.dayton-clause-link:hover {
+  background: #ead6a9;
+}
+.dayton-clause-link > strong {
+  text-decoration: underline;
+}
+@media (min-width: 980px) {
+  .dayton-review-columns { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
+}
+@container interface-viewport (max-width: 820px) {
+  .dayton-live-panel { width: calc(100% - 1.7rem); }
+}

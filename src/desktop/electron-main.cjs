@@ -3640,20 +3640,25 @@ app.whenReady().then(() => {
   }
 
   ipcMain.handle('resolve-dayton', async (_event, payload) => {
-    const { territorial_demands, territorial_concessions, institutional_choices } = payload || {};
     if (!currentGameStateJson) {
       return { ok: false, error: 'No game loaded' };
     }
     try {
       const sim = getDesktopSim();
       const state = readCanonicalCurrentState(sim);
-      const result = sim.resolveDaytonNegotiation(state, {
-        territorial_demands: territorial_demands || [],
-        territorial_concessions: territorial_concessions || [],
-        institutional_choices: institutional_choices || {},
-      }, getBaseDir());
+      // A retry after signing returns the recorded agreement without a second transaction.
+      const signed = state.military.negotiation;
+      if (signed?.dayton_result) {
+        return {
+          ok: true, result: signed.dayton_result,
+          ...(signed.dayton_agreement && { agreement: signed.dayton_agreement }),
+        };
+      }
+      const proposal = sim.parseDaytonProposal(payload, state);
+      const { result, agreement } = sim.resolveDesktopDaytonAgreement(state, proposal, getBaseDir());
+      state.military.negotiation.dayton_agreement = agreement;
       writeCanonicalCurrentState(sim, state);
-      return { ok: true, result };
+      return { ok: true, result, agreement };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
     }
@@ -3679,6 +3684,26 @@ app.whenReady().then(() => {
     }
   });
 
+  // Table a Dayton round (DC A2): the player's draft goes to the table, every other
+  // delegation answers under the current round pressure, and the round is recorded on
+  // the pending packet and saved. At most three rounds; afterwards only sign or decline.
+  // Refused (no write) when there is no open table, Dayton is signed, or rounds are spent.
+  ipcMain.handle('table-dayton-round', async (_event, payload) => {
+    if (!currentGameStateJson) {
+      return { ok: false, error: 'No game loaded' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = readCanonicalCurrentState(sim);
+      const result = sim.tableDesktopDaytonRound(state, payload);
+      if (!result.ok) return { ok: false, error: result.error };
+      writeCanonicalCurrentState(sim, state);
+      return { ok: true, round: result.round };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   // Read-only Dayton PREVIEW (Dayton Phase-4): runs the real resolver + bot
   // evaluation on a THROWAWAY deserialized clone so the negotiation modal can show
   // the authoritative peace_dysfunction_index / entity_autonomy_index / Brčko
@@ -3687,7 +3712,6 @@ app.whenReady().then(() => {
   // renderer → zero state mutation. Surfaces the already-built counter-offer
   // generator + dysfunction read-models that are otherwise only seen post-resolution.
   ipcMain.handle('preview-dayton', async (_event, payload) => {
-    const { territorial_demands, territorial_concessions, institutional_choices } = payload || {};
     if (!currentGameStateJson) {
       return { ok: false, error: 'No game loaded' };
     }
@@ -3695,11 +3719,14 @@ app.whenReady().then(() => {
       const sim = getDesktopSim();
       // Fresh clone from the canonical JSON — the resolver mutates this clone only.
       const clone = sim.deserializeState(currentGameStateJson);
-      const proposal = {
-        territorial_demands: territorial_demands || [],
-        territorial_concessions: territorial_concessions || [],
-        institutional_choices: institutional_choices || {},
-      };
+      const signed = clone.military.negotiation;
+      if (signed?.dayton_result) {
+        return {
+          ok: true, result: signed.dayton_result,
+          ...(signed.dayton_agreement && { agreement: signed.dayton_agreement }),
+        };
+      }
+      const proposal = sim.parseDaytonProposal(payload, clone);
       const playerFaction = (clone.meta && clone.meta.player_faction) || 'RBiH';
       const canonical = ['HRHB', 'RBiH', 'RS'];
       const botResponses = {};
@@ -3709,8 +3736,8 @@ app.whenReady().then(() => {
       }
       // Resolve on the clone to surface the authoritative readouts (mutates the
       // clone only — the clone is then garbage-collected; nothing is written back).
-      const result = sim.resolveDaytonNegotiation(clone, proposal, getBaseDir());
-      return { ok: true, result, botResponses, playerFaction };
+      const { result, agreement } = sim.resolveDesktopDaytonAgreement(clone, proposal, getBaseDir());
+      return { ok: true, result, agreement, botResponses, playerFaction };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
     }

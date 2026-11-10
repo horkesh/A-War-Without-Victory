@@ -19,7 +19,12 @@
  *     total area that joins it to its entity's main territory goes to its main party.
  *  4. A component holding a protected cell (`isProtectedCell`: ground a package won at the
  *     table, or an enclave such as Goražde or Srebrenica) is never absorbed, whatever its
- *     size; it gets a corridor (RD-CONTIGUITY-PROTECTION, Pyrrhic panel 2026-11-07).
+ *     size; it gets a corridor (RD-CONTIGUITY-PROTECTION, Pyrrhic panel 2026-11-07),
+ *  5. unless that corridor would cut more than POCKET_MAX_CELLS cells off the other
+ *     entity's main territory (DC A6 panel 2026-11-08). Then the next-cheapest route around
+ *     the cut is sought (A6 follow-up 2, up to MAX_CORRIDOR_ALTERNATIVES), and failing that
+ *     the component stays where it is, held but detached: a held Srebrenica or Žepa remains
+ *     a Federation exclave (measured 2026-11-09: no route around exists on any fixture).
  * Exempt: a component `isProtectedExclave` names (the Federation's Posavina canton, which
  * borders Croatia and was held at Dayton without a land link).
  * A component that can be neither absorbed nor joined is left as it is and the pass moves
@@ -45,6 +50,8 @@ export interface ContiguityInput {
     isProtectedExclave: (side: Side, cells: string[]) => boolean;
     /** True for a cell that must not be absorbed (won package ground, enclave). */
     isProtectedCell?: (osid: string, faction: FactionId) => boolean;
+    /** Diagnostics: false keeps the pre-follow-up behaviour (refuse a cutting corridor without a search). */
+    searchAlternatives?: boolean;
 }
 
 export interface ContiguityResult {
@@ -129,6 +136,78 @@ function cheapestCorridor(
     return null;
 }
 
+/**
+ * The pieces `otherMain` falls into once `path` is handed to `owner`, largest first. More than
+ * POCKET_MAX_CELLS cells outside the largest piece means the corridor cuts the other entity.
+ */
+function piecesAfter(
+    path: string[],
+    owner: FactionId,
+    otherMain: Component,
+    ctl: Record<string, FactionId>,
+    adjacency: Map<string, string[]>,
+): string[][] {
+    const taken = new Set(path.filter((o) => sideOf(owner) !== sideOf(ctl[o]!)));
+    const remaining = otherMain.cells.filter((o) => !taken.has(o));
+    const members = new Set(remaining);
+    const seen = new Set<string>();
+    const pieces: string[][] = [];
+    for (const start of remaining) {
+        if (seen.has(start)) continue;
+        seen.add(start);
+        const queue = [start];
+        for (let i = 0; i < queue.length; i++) {
+            for (const n of adjacency.get(queue[i]!) ?? []) {
+                if (members.has(n) && !seen.has(n)) { seen.add(n); queue.push(n); }
+            }
+        }
+        pieces.push(queue);
+    }
+    return pieces.sort((a, b) => (b.length - a.length) || strictCompare(a[0]!, b[0]!));
+}
+
+function cutOffCount(pieces: string[][]): number {
+    return pieces.slice(1).reduce((s, p) => s + p.length, 0);
+}
+
+/** Alternatives tried after the cheapest corridor cuts the other entity (DC A6 follow-up 2). */
+export const MAX_CORRIDOR_ALTERNATIVES = 12;
+
+/**
+ * The cheapest corridor that does not cut the other entity in two (DC A6 follow-up 2, canon
+ * seat: the guard refused the cheapest corridor without looking for another). Each time the
+ * cheapest route cuts, the route cells bordering the cut-off pieces are barred, and the
+ * search runs again around them. Null when every route within MAX_CORRIDOR_ALTERNATIVES
+ * still cuts: the component then stays where it is, held but detached, as before.
+ */
+function nonCuttingCorridor(
+    comp: Component,
+    target: Set<string>,
+    owner: FactionId,
+    otherMain: Component | undefined,
+    ctl: Record<string, FactionId>,
+    adjacency: Map<string, string[]>,
+    areas: Record<string, number>,
+    isProtectedCell: (osid: string, faction: FactionId) => boolean,
+    searchAlternatives: boolean,
+): string[] | null {
+    const barred = new Set<string>();
+    const blocked = (o: string, f: FactionId) => barred.has(o) || isProtectedCell(o, f);
+    const attempts = searchAlternatives ? 1 + MAX_CORRIDOR_ALTERNATIVES : 1;
+    for (let attempt = 0; attempt < attempts; attempt++) {
+        const path = cheapestCorridor(comp.cells, target, comp.side, ctl, adjacency, areas, blocked);
+        if (!path || path.length === 0) return path;
+        if (!otherMain) return path;
+        const pieces = piecesAfter(path, owner, otherMain, ctl, adjacency);
+        if (cutOffCount(pieces) <= POCKET_MAX_CELLS) return path;
+        const cutOff = new Set(pieces.slice(1).flat());
+        const wall = path.filter((o) => (adjacency.get(o) ?? []).some((n) => cutOff.has(n)));
+        if (wall.length === 0) return null;
+        for (const o of wall) barred.add(o);
+    }
+    return null;
+}
+
 export function enforceSettlementContiguity(input: ContiguityInput): ContiguityResult {
     const ctl: Record<string, FactionId> = { ...input.controllers };
     const changes: Record<string, FactionId> = {};
@@ -169,9 +248,16 @@ export function enforceSettlementContiguity(input: ContiguityInput): ContiguityR
                 break;
             }
             const target = new Set(main.get(comp.side)?.cells ?? []);
-            const path = cheapestCorridor(comp.cells, target, comp.side, ctl, input.adjacency, input.areas, isProtectedCell);
-            if (!path || path.length === 0) continue; // cannot be joined; leave it and move on
             const owner = majorityFaction(comp.cells, ctl);
+            // A corridor must not cut the other entity in two (DC A6, 2026-11-08: a held
+            // Srebrenica joined through Vlasenica severed eastern RS, and RS's reconnecting
+            // corridor then ran through Tuzla). A cut-off of a few cells is absorbed later;
+            // anything larger means a route around it is sought, and failing that this
+            // component stays where it is, held but detached.
+            const otherMain = main.get(comp.side === 'FED' ? 'RS' : 'FED');
+            const path = nonCuttingCorridor(comp, target, owner, otherMain, ctl, input.adjacency, input.areas,
+                isProtectedCell, input.searchAlternatives !== false);
+            if (!path || path.length === 0) continue; // cannot be joined; leave it and move on
             for (const o of path) { assign(o, owner); corridorCells.add(o); }
             changed = true;
             break;

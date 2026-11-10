@@ -10,6 +10,7 @@
 
 import type { GameState, FactionId } from '../../state/game_state.js';
 import type {
+    DaytonAgreementRecord,
     DaytonProposal,
     DaytonResult,
     DaytonBotResponse,
@@ -17,7 +18,7 @@ import type {
 } from '../../state/negotiation_types.js';
 import { createEmptyCapital, createDefaultPatronRelationship } from '../../state/negotiation_types.js';
 import { getAllTerritorialPackages, getTerritorialPackageById } from './territorial_packages.js';
-import { getAllInstitutionalPackages, computeEntityAutonomyIndex } from './institutional_packages.js';
+import { ENTITY_AUTONOMY_DEFAULT, getAllInstitutionalPackages, computeTreatyAutonomyIndex } from './institutional_packages.js';
 import { evaluateBotResponse, getCompositeCapital, computeProposalCostToFaction, clampPlayerProposalToBudget } from './bot_negotiation.js';
 import {
     finalCompetencyCost,
@@ -25,22 +26,34 @@ import {
     finalReturnJusticeCost,
     getDialDeclarationCost,
 } from './dayton_dial_cost.js';
+import { reconcileProposalPowers, reconcileResolvedPowers } from './power_overlap.js';
+import { buildDelegationFolder, declineStamp, warCostLine } from './delegation_folder.js';
+import { buildTreatyAgainstDraft } from './treaty_against_draft.js';
+import { daytonRoundWillingness, effectiveDaytonOverride } from './dayton_rounds.js';
+import type { DelegationFolder } from '../../state/negotiation_types.js';
 import {
     adjustedCost,
     dialPrefDelta,
     competencyPrefDelta,
     constitutionalPrefDelta,
 } from './bot_preferences.js';
-import { getConstitutionalChoiceById } from './constitutional_packages.js';
+import {
+    getAllConstitutionalChoices,
+    getAllReturnJusticeChoices,
+    getConstitutionalChoiceById,
+    getDefaultOptionId,
+    type ConstitutionalChoice,
+} from './constitutional_packages.js';
+import { getAllCompetencyPackages } from './competency_packages.js';
 import type { CompetencyOwner } from './competency_packages.js';
 import type { CompetencyOwnerChoice, EntityAutonomySetting } from '../../state/negotiation_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';
 import { computePeaceDysfunctionBreakdown } from './peace_dysfunction.js';
 import { getPackageAreaPct, resolveOsidsForKeywords } from './package_area_resolver.js';
-import { applyPeaceSettlement, computeSettlementControllers } from './peace_settlement.js';
+import { applyPeaceSettlement, computeSettlementControllers, settlementControllersFor } from './peace_settlement.js';
 import { frontPackagesForProposal, frontPackageVisibleToPlayer, sameEntitySide } from './front_packages.js';
-import { packageOsids, selectPatronForced } from './patron_leverage.js';
+import { demandPrice, packageOsids, selectPatronForced } from './patron_leverage.js';
 import type { TerritorialPackage } from '../../state/negotiation_types.js';
 
 import { loadEventDefinitions } from '../events/event_loader.js';
@@ -49,6 +62,79 @@ import type { EventDefinition } from '../events/event_types.js';
 
 /** Territorial package id of the Brčko District (its outcome is brcko_status). */
 const BRCKO_DISTRICT_PACKAGE_ID = 'brcko_district';
+
+function freezeInstitutionalChoices(
+    choices: readonly ConstitutionalChoice[],
+    resolved?: Record<string, string>,
+): Record<string, string> {
+    return Object.fromEntries(choices.map(({ id }) => {
+        const option = resolved?.[id] ?? getDefaultOptionId(id);
+        if (option === undefined) throw new Error(`No default Dayton option for ${id}`);
+        return [id, option];
+    }));
+}
+
+/** Capture the public treaty immediately after resolution, while the settlement inputs are current. */
+export function projectDaytonAgreement(
+    state: GameState,
+    wartimeControllers: Record<string, FactionId | null>,
+): DaytonAgreementRecord {
+    const negotiation = state.military.negotiation;
+    const result = negotiation?.dayton_result;
+    const settlement = negotiation?.settlement;
+    if (!result || settlement?.plan_id !== 'dayton') {
+        throw new Error('Dayton resolution did not record a settlement');
+    }
+    const controllers = settlementControllersFor({
+        ...state,
+        political: { ...state.political, political_controllers: wartimeControllers },
+    })!;
+
+    return {
+        version: 1,
+        terms: {
+            ...structuredClone(result),
+            entity_autonomy: result.entity_autonomy ?? ENTITY_AUTONOMY_DEFAULT,
+            competency_allocation: Object.fromEntries(getAllCompetencyPackages().map(({ id, default_owner }) =>
+                [id, result.competency_allocation?.[id] ?? default_owner])),
+            constitutional_choices: freezeInstitutionalChoices(getAllConstitutionalChoices(), result.constitutional_choices),
+            return_justice: freezeInstitutionalChoices(getAllReturnJusticeChoices(), result.return_justice),
+        },
+        map: {
+            controllers,
+            wartimeControllers: Object.fromEntries(Object.entries(wartimeControllers)
+                .sort(([a], [b]) => strictCompare(a, b))),
+            // An explicit assignment supersedes the baseline map's special status.
+            specialOsids: settlement.special_osids.filter(osid => !settlement.map_overrides?.[osid]),
+            territoryPct: { ...settlement.territory_pct },
+        },
+    };
+}
+
+/**
+ * Sign a proposal and snapshot the public treaty: the terms, the map, the treaty against
+ * the mediator's draft, and the signing beat's turn and cost line (DC A5). The one owner
+ * for a recorded signature, used by the desktop signature and by the forced table's
+ * unanswered fallback, so a treaty signed for the player still lands on the signing table.
+ */
+export function resolveDaytonWithRecord(
+    state: GameState,
+    proposal: DaytonProposal,
+    eventDefinitions?: readonly EventDefinition[],
+): { result: DaytonResult; agreement: DaytonAgreementRecord } {
+    const wartimeControllers = { ...state.political.political_controllers };
+    // Captured-ground names and the mediator's draft are read before the signature.
+    const frontPackages = frontPackagesForProposal(state, proposal);
+    const player: FactionId = state.meta.player_faction ?? 'RBiH';
+    const result = resolveDaytonNegotiation(state, proposal, eventDefinitions);
+    const agreement = projectDaytonAgreement(state, wartimeControllers);
+    // The treaty against the mediator's draft (owner, 2026-11-08). The draft map reads only
+    // the wartime controllers, captured above.
+    const wartimeState = { ...state, political: { ...state.political, political_controllers: wartimeControllers } } as GameState;
+    agreement.treaty = buildTreatyAgainstDraft(wartimeState, player, proposal, result, agreement, frontPackages);
+    agreement.signing = { turn: state.meta.turn, war: warCostLine(state) };
+    return { result, agreement };
+}
 
 /** Set when Dayton is signed or imposed; dayton_signed_1995's trigger reads it. */
 export const DAYTON_SETTLEMENT_SIGNED_FLAG = 'dayton_settlement_signed';
@@ -174,6 +260,7 @@ export function initiateDaytonNegotiation(state: GameState): {
     institutional_packages: Array<{ id: string; name: string; centralized_cost: number; decentralized_cost: number }>;
     faction_capital: Record<string, number>;
     patron_override: Record<string, number>;
+    delegation_folder?: DelegationFolder;
 } {
     ensureNegotiationState(state);
 
@@ -188,13 +275,16 @@ export function initiateDaytonNegotiation(state: GameState): {
         factionCapital[faction] = cap ? getCompositeCapital(cap, faction, neg.strategic_dimensions) : 50;
         patronOverride[faction] = neg.patron_relationships[faction]?.override_authority ?? 0;
     }
+    // The player's delegation folder (DC A1). Read-only over state.
+    const folder = buildDelegationFolder(state);
 
     return {
         territorial_packages: getAllTerritorialPackages().map(pkg => ({
             id: pkg.id,
             name: pkg.name,
             default_holder: pkg.default_holder,
-            demand_cost: pkg.capital_cost_to_demand,
+            // Price for any side that does not hold it (protected ground at its premium, DC A6).
+            demand_cost: demandPrice(pkg, ''),
             concede_cost: pkg.capital_cost_to_concede,
         })),
         institutional_packages: getAllInstitutionalPackages().map(pkg => ({
@@ -205,6 +295,7 @@ export function initiateDaytonNegotiation(state: GameState): {
         })),
         faction_capital: factionCapital,
         patron_override: patronOverride,
+        ...(folder ? { delegation_folder: folder } : {}),
     };
 }
 
@@ -340,7 +431,7 @@ function recordDaytonDecline(state: GameState, faction: string): number {
     const neg = state.military.negotiation!;
     const declinedTurn = state.meta.turn;
     const impositionTurn = declinedTurn + DAYTON_DECLINE_GRACE_WEEKS;
-    neg.dayton_decline = { faction, declined_turn: declinedTurn, imposition_turn: impositionTurn };
+    neg.dayton_decline = { faction, declined_turn: declinedTurn, imposition_turn: impositionTurn, ...declineStamp(state, faction) };
     delete neg.pending_dayton;
     if (!state.military.event_flags) state.military.event_flags = {};
     state.military.event_flags[DAYTON_DECLINED_BY_FLAG] = faction;
@@ -435,7 +526,11 @@ export function enforceDaytonImposition(
     if (turn < decline.imposition_turn) return null;
     const forced = neg.pending_dayton?.forced;
     if (forced && turn > forced.opened_turn) {
-        return resolveDaytonNegotiation(state, buildHistoricalDefaultDaytonProposal(), eventDefinitions);
+        // DC A5: the treaty signed for the player is recorded like a signature, so the
+        // Verdict opens on the signing table (the ultimatum promised it).
+        const { result, agreement } = resolveDaytonWithRecord(state, buildHistoricalDefaultDaytonProposal(), eventDefinitions);
+        neg.dayton_agreement = agreement;
+        return result;
     }
     if (!neg.pending_dayton) {
         neg.pending_dayton = {
@@ -505,8 +600,11 @@ export function resolveDaytonNegotiation(
         : 0;
     // Captured-ground packages (front_packages.ts) as the front stands at signature. Only
     // the ones the proposal raises enter the result; unraised ones follow the Dayton map.
-    const frontPackages = frontPackagesForProposal(state, playerProposal);
-    const proposal = clampPlayerProposalToBudget(playerProposal, playerFaction, playerCapital, frontPackages).proposal;
+    // One operative assignment per power (power_overlap.ts): an explicit competency or
+    // constitutional slot wins over a contradicting legacy toggle before anything is priced.
+    const reconciledProposal = reconcileProposalPowers(playerProposal);
+    const frontPackages = frontPackagesForProposal(state, reconciledProposal);
+    const proposal = clampPlayerProposalToBudget(reconciledProposal, playerFaction, playerCapital, frontPackages).proposal;
 
     // Collect bot responses
     const botResponses: Record<string, DaytonBotResponse> = {};
@@ -589,7 +687,7 @@ export function resolveDaytonNegotiation(
         postDeclineCells.size > 0 && packageOsids(p).some((o) => postDeclineCells.has(o));
     for (const holder of [...refusedByHolder.keys()].sort(strictCompare)) {
         const refused = refusedByHolder.get(holder)!;
-        const override = neg.patron_relationships[holder]?.override_authority ?? 0;
+        const override = effectiveDaytonOverride(neg, holder);
         const forced = new Set(selectPatronForced(refused, holder, override, isPostDeclineGround));
         for (const p of [...refused].sort((a, b) => strictCompare(a.id, b.id))) {
             if (forced.has(p.id)) {
@@ -628,12 +726,12 @@ export function resolveDaytonNegotiation(
                     ? getCompositeCapital(neg.capital[botFaction], botFaction, neg.strategic_dimensions)
                     : 0;
 
-                if (costToBotFaction > botCapital * 0.3) {
+                if (costToBotFaction > botCapital * (0.3 + daytonRoundWillingness(neg))) {
                     objected = true;
 
                     // Check patron override
                     const botPatron = neg.patron_relationships[botFaction];
-                    if (botPatron && botPatron.override_authority >= PATRON_OVERRIDE_THRESHOLD) {
+                    if (botPatron && effectiveDaytonOverride(neg, botFaction) >= PATRON_OVERRIDE_THRESHOLD) {
                         objected = false;
                         patronOverrides.push(`institutional:${pkgId}:${botFaction}`);
                     }
@@ -678,6 +776,10 @@ export function resolveDaytonNegotiation(
     //    an empty competency map leaves the autonomy reading on the legacy D2 index,
     //    empty constitutional choices read as the historical maximal-gridlock=100.
     const finalDimensions = resolveInstitutionalDimensions(neg, proposal, botFactions, patronOverrides);
+    // Reconcile the two vocabularies on the record (power_overlap.ts): a resolved
+    // operative slot writes its legacy toggle; a raised legacy toggle with no slot writes
+    // the slot. The autonomy index below then reads the same treaty the binder shows.
+    Object.assign(finalDimensions, reconcileResolvedPowers(finalInstitutional, finalDimensions, Object.keys(proposal.institutional_choices)));
 
     const result: DaytonResult = {
         territorial_packages_accepted: acceptedTerritorial.sort(strictCompare),
@@ -687,11 +789,14 @@ export function resolveDaytonNegotiation(
         patron_overrides_applied: patronOverrides.sort(strictCompare),
         brcko_status: brckoStatus,
         brcko_arbitration: brckoStatus === 'arbitration',
-        // D2 (owner ruling Opt B): derived, read-only entity-autonomy index — the
-        // weighted mean of the FINAL (post-resolution) institutional choices, where
-        // decentralized = high autonomy. Feeds the peace_dysfunction index below and
-        // the verdict. Default (all-decentralized) = the historical Dayton settlement.
-        entity_autonomy_index: computeEntityAutonomyIndex(finalInstitutional),
+        // D2 (owner ruling Opt B): derived, read-only entity-autonomy index of the FINAL
+        // treaty. Since the DC walkthrough (2026-11-08) it is the single treaty autonomy
+        // measure (competencies counted once, historical Dayton = 100), the same number
+        // peace_dysfunction reads; the historical default still reads 100.
+        entity_autonomy_index: computeTreatyAutonomyIndex({
+            institutional_choices: finalInstitutional,
+            competency_allocation: finalDimensions.competency_allocation,
+        }),
         // Phase 2 verdict feed — the signed Dim-2/3/4/5 dimensions (omitted entirely
         // at the historical default to keep the result shape byte-identical).
         ...finalDimensions,
@@ -809,17 +914,23 @@ function daytonPackageOverrides(
             if (gainer) for (const o of pkg.osids) overrides[o] = gainer;
             continue;
         }
+        // A fixed package names a whole area (e.g. every Mostar cell), but a deal at the
+        // table only moves ground across the inter-entity line, and only the parties'
+        // own ground (walkthrough 2026-11-08: an HRHB concession of Mostar had handed
+        // east Mostar, which the map gives RBiH, to RS). A won demand takes only the cells
+        // the settlement map puts on the other entity's side; a concession gives up only
+        // the conceding party's own cells. Lines inside the Federation follow the map
+        // (owner ruling 2026-11-07: Dayton drew the inter-entity line only).
         const osids = resolveOsidsForKeywords(pkg.osid_keywords ?? []);
         if (proposal.territorial_demands.includes(pkgId) && pkg.default_holder !== playerFaction) {
-            for (const o of osids) overrides[o] = playerFaction;
+            for (const o of osids) {
+                const b = base[o];
+                if (b && !sameEntitySide(b, playerFaction)) overrides[o] = playerFaction;
+            }
         } else if (proposal.territorial_concessions.includes(pkgId)) {
             for (const o of osids) {
-                if (playerFaction === 'RS') {
-                    const b = base[o];
-                    overrides[o] = b === 'RBiH' || b === 'HRHB' ? b : 'RBiH';
-                } else {
-                    overrides[o] = 'RS';
-                }
+                if (base[o] !== playerFaction) continue;
+                overrides[o] = playerFaction === 'RS' ? 'RBiH' : 'RS';
             }
         }
     }
@@ -1073,7 +1184,7 @@ function resolveInstitutionalDimensions(
             ? getCompositeCapital(neg.capital[faction], faction, neg.strategic_dimensions)
             : 0;
     const patronForces = (faction: string): boolean =>
-        (neg.patron_relationships[faction]?.override_authority ?? 0) >= PATRON_OVERRIDE_THRESHOLD;
+        effectiveDaytonOverride(neg, faction) >= PATRON_OVERRIDE_THRESHOLD;
 
     // Returns true if the sub-choice survives (no un-overridden objection). Records a
     // patron override when an objection is forced through.
@@ -1082,7 +1193,7 @@ function resolveInstitutionalDimensions(
         for (const bot of [...botFactions].sort(strictCompare)) {
             const c = cost(bot);
             if (c <= 0) continue;
-            if (c > capitalOf(bot) * 0.3) {
+            if (c > capitalOf(bot) * (0.3 + daytonRoundWillingness(neg))) {
                 if (patronForces(bot)) {
                     patronOverrides.push(overrideKey(bot));
                 } else {

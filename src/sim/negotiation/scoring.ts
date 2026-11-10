@@ -23,7 +23,8 @@ import { computePeaceDysfunctionBreakdown, computePeaceDysfunctionIndex, capOutc
 import { DIMENSION_WEIGHTS, computeNegotiatingCapital } from '../events/strategic_dimensions.js';
 import type { DimensionStore } from '../events/strategic_dimensions.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { capGradeBySettlement } from './peace_settlement.js';
+import { capGradeBySettlement, settlementControllersFor } from './peace_settlement.js';
+import { creditedTerritoryPct, overrunEnclaveCells } from './enclave_credit.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 
@@ -304,6 +305,42 @@ function computeAtrocitySubScore(state: GameState, faction: string): number {
  * is already fresh on capital (recordWarCrime increments it in place), so it is
  * left as-is. Pure & deterministic; never lowers a displayed value (max only).
  */
+/**
+ * A faction's condemnation flags exactly as the verdict collects them: the Ring 2
+ * rupture flags plus the EMERGENT-ONLY non-genocide authorized_cleansing_condemnation
+ * (§3.4 tier — see AUTHORIZED_CLEANSING_WAR_CRIMES_MIN / CATASTROPHIC_CIVILIAN_HARM_MIN):
+ * significant cleansing that isn't the adjudicated Srebrenica genocide still taints the
+ * outcome to hollow_victory. UNION of two calendar-clean emergent signals — ≥1 authorized
+ * paramilitary sweep OR catastrophic siege/encirclement civilian harm. Skipped when
+ * genocide is already flagged. Historical/unset mode untouched (emergent-gated).
+ *
+ * `displayBreakdown` must be the FRESHENED breakdown (max(capital, fresh displacement
+ * harm)), not the raw capital snapshot: on a terminal turn capital can be frozen one step
+ * before the fresh displacement copy lands (red-team staleness condition, §6-panel v2).
+ */
+function condemnationFlagsWith(state: GameState, faction: string, displayBreakdown: NegotiationBreakdown | undefined): string[] {
+    const condemnationFlags = collectCondemnationFlags(state, faction);
+    const atrocityCapital = state.military?.negotiation?.capital?.[faction];
+    const emergentWarCrimes = atrocityCapital?.war_crimes_events_emergent ?? 0;
+    const civilianHarmCaused = displayBreakdown?.civilian_casualties_caused
+        ?? (atrocityCapital?.civilian_casualties_caused ?? 0);
+    if (state.meta?.decision_mode === 'emergent'
+        && !condemnationFlags.includes('genocide_condemnation')
+        && !condemnationFlags.includes('authorized_cleansing_condemnation')
+        && (emergentWarCrimes >= AUTHORIZED_CLEANSING_WAR_CRIMES_MIN
+            || civilianHarmCaused >= CATASTROPHIC_CIVILIAN_HARM_MIN)) {
+        condemnationFlags.push('authorized_cleansing_condemnation');
+        condemnationFlags.sort();
+    }
+    return condemnationFlags;
+}
+
+/** The condemnation flags the verdict will apply to `faction` if the war ended now (read-only). */
+export function currentCondemnationFlags(state: GameState, faction: string): string[] {
+    const capital = state.military?.negotiation?.capital?.[faction];
+    return condemnationFlagsWith(state, faction, capital ? freshenBreakdownForDisplay(state, faction, capital) : undefined);
+}
+
 function freshenBreakdownForDisplay(
     state: GameState,
     faction: string,
@@ -509,11 +546,13 @@ const RBIH_GRADE_ANCHORS: GradeAnchor[] = [
         test: (cap) =>
             cap.territory_controlled_pct > 33 &&
             cap.enclaves_lost.length === 0 &&
-            cap.war_crimes_events === 0,
+            // Owner, 2026-11-10: only war crimes RBiH authorized in play block A+; scripted
+            // historical records (the shared counter) no longer put A+ out of reach.
+            (cap.war_crimes_events_emergent ?? 0) === 0,
     },
     {
         grade: 'A',
-        description: 'Roughly historical outcome — 30-33% territory, Sarajevo held, enclaves mostly defended',
+        description: 'Roughly historical outcome — 30% or more territory, Sarajevo held, enclaves mostly defended',
         test: (cap) =>
             cap.territory_controlled_pct >= 30 &&
             cap.enclaves_lost.length <= 1 &&
@@ -776,10 +815,24 @@ export function computeFactionVerdict(
     // imposed, the grade reads the SETTLED territory (the plan's map), not the front line.
     // Absent on every campaign without a settlement, which keeps those verdicts unchanged.
     const settlement = neg?.settlement;
-    const settledTerritory = settlement?.territory_pct?.[faction];
+    // No territory credit for an overrun enclave (DC A6 follow-up 1, Pyrrhic panel 2026-11-09):
+    // the end map (settled or front) keeps the cells; the grade leaves them out. Unchanged
+    // (the same objects) whenever no enclave was overrun.
+    const rawSettled = settlement?.territory_pct?.[faction];
+    const front = state.political?.political_controllers ?? {};
+    // The settled map is rebuilt only when this faction overran an enclave on the front.
+    const overran = overrunEnclaveCells(front, front, faction).length > 0;
+    const settledMap = overran && typeof rawSettled === 'number' ? settlementControllersFor(state) : null;
+    const settledTerritory = typeof rawSettled === 'number'
+        ? creditedTerritoryPct(rawSettled, front, settledMap ?? front, faction)
+        : undefined;
+    const frontCredited = creditedTerritoryPct(capital.territory_controlled_pct, front, front, faction);
+    const creditedCapital = frontCredited !== capital.territory_controlled_pct
+        ? { ...capital, territory_controlled_pct: frontCredited }
+        : capital;
     const gradedCapital = typeof settledTerritory === 'number'
         ? { ...capital, territory_controlled_pct: settledTerritory }
-        : capital;
+        : creditedCapital;
 
     const pyrrhicScore = computePyrrhicScore(capital, faction, dimStore);
     const earned = computeFactionGrade(gradedCapital, faction, state);
@@ -811,35 +864,9 @@ export function computeFactionVerdict(
     // byte-identical (the term is emergent-only by construction).
     const displayBreakdown = typeof settledTerritory === 'number'
         ? { ...freshenBreakdownForDisplay(state, faction, capital), territory_controlled_pct: settledTerritory }
-        : freshenBreakdownForDisplay(state, faction, capital);
+        : freshenBreakdownForDisplay(state, faction, creditedCapital);
 
-    // Collect condemnation flags from rupture consequences (Ring 2)
-    const condemnationFlags = collectCondemnationFlags(state, faction);
-    // EMERGENT-ONLY non-genocide authorized_cleansing_condemnation (§3.4 tier — see the
-    // AUTHORIZED_CLEANSING_WAR_CRIMES_MIN / CATASTROPHIC_CIVILIAN_HARM_MIN block above):
-    // significant cleansing that isn't the adjudicated Srebrenica genocide still taints the
-    // outcome to hollow_victory, making atrocity grade-DECISIVE where the additive cost term
-    // is inert. UNION of two calendar-clean emergent signals — ≥1 authorized paramilitary
-    // sweep OR catastrophic siege/encirclement civilian harm. Skipped when genocide is already
-    // flagged (that forces the worse `failure`). Historical/unset mode untouched
-    // (emergent-gated), keeping the baseline verdict byte-identical.
-    const atrocityCapital = state.military?.negotiation?.capital?.[faction];
-    const emergentWarCrimes = atrocityCapital?.war_crimes_events_emergent ?? 0;
-    // Use the FRESHENED displacement aggregate (displayBreakdown already applies
-    // max(capital, freshDisplacementHarm) above), NOT the raw capital snapshot: on a
-    // TERMINAL turn capital can be frozen one step before the fresh displacement copy
-    // lands, which would let a catastrophic siege crossing the threshold on the final
-    // turn escape the flag (red-team staleness condition, §6-panel v2).
-    const civilianHarmCaused = displayBreakdown.civilian_casualties_caused
-        ?? (atrocityCapital?.civilian_casualties_caused ?? 0);
-    if (state.meta?.decision_mode === 'emergent'
-        && !condemnationFlags.includes('genocide_condemnation')
-        && !condemnationFlags.includes('authorized_cleansing_condemnation')
-        && (emergentWarCrimes >= AUTHORIZED_CLEANSING_WAR_CRIMES_MIN
-            || civilianHarmCaused >= CATASTROPHIC_CIVILIAN_HARM_MIN)) {
-        condemnationFlags.push('authorized_cleansing_condemnation');
-        condemnationFlags.sort();
-    }
+    const condemnationFlags = condemnationFlagsWith(state, faction, displayBreakdown);
     // §6 bright-line LETTER-grade cap (Pyrrhic scoring panel, red-team L1, 2026-08-10):
     // a condemnation caps the letter grade INDEPENDENT of the cost index, so atrocity can
     // never reach A even once scoring de-saturates. Worst-of cost-cap and condemnation-cap.

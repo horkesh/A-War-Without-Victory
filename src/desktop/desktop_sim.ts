@@ -48,8 +48,11 @@ import {
     applyDefinitionFlags,
 } from '../sim/events/evaluate_events.js';
 import { writeOwedRecordsAtTermination } from '../sim/endgame/owed_termination_records.js';
-import { resolveDaytonNegotiation as resolveDaytonNegotiationInEngine } from '../sim/negotiation/dayton_negotiation.js';
-import type { DaytonProposal, DaytonResult } from '../state/negotiation_types.js';
+import { resolveDaytonWithRecord, resolveDaytonNegotiation as resolveDaytonNegotiationInEngine } from '../sim/negotiation/dayton_negotiation.js';
+import type { DaytonAgreementRecord, DaytonProposal, DaytonResult } from '../state/negotiation_types.js';
+import { tableDaytonRound, type TableDaytonRoundResult } from '../sim/negotiation/dayton_rounds.js';
+import { evaluateBotResponse as evaluateBotResponseInEngine } from '../sim/negotiation/bot_negotiation.js';
+import { parseDaytonProposal } from './dayton_proposal.js';
 import type { EventDefinition, EventEffect, PendingEventDecision } from '../sim/events/event_types.js';
 import {
     queryMovementPath as computeMovementPathQuery,
@@ -66,7 +69,7 @@ import {
     type CorridorDerivationReport,
     type SupplyStateDerivationReport
 } from '../state/supply_state_derivation.js';
-import type { FactionId, GameState } from '../state/game_state.js';
+import type { GameState } from '../state/game_state.js';
 import type { EquipmentClass } from '../state/recruitment_types.js';
 import { isValidEquipmentClass } from '../state/recruitment_types.js';
 import { deserializeState, serializeRuntimeState, serializeState } from '../state/serialize.js';
@@ -91,6 +94,13 @@ export { dismissEventNotification } from '../sim/events/dismiss_notifications.js
 export { resolvePeacePlan } from '../sim/negotiation/peace_plans.js';
 export { submitPlayerCounterOffer } from '../sim/negotiation/counter_offer_generator.js';
 export { declineDaytonNegotiation } from '../sim/negotiation/dayton_negotiation.js';
+export { parseDaytonProposal } from './dayton_proposal.js';
+
+/** Table a draft for the next Dayton round (DC A2): every other delegation answers; the round is recorded. */
+export function tableDesktopDaytonRound(state: GameState, payload: unknown): TableDaytonRoundResult {
+    const proposal = parseDaytonProposal(payload, state);
+    return tableDaytonRound(state, proposal, evaluateBotResponseInEngine);
+}
 
 /**
  * Sign Dayton from the desktop. The bundled sim cannot resolve the source-relative
@@ -109,6 +119,18 @@ export function resolveDaytonNegotiation(
         baseDir ? loadDesktopEventDefinitions(baseDir) : undefined,
     );
 }
+
+/** Resolve a new desktop offer and snapshot its terms and map for the caller. */
+export function resolveDesktopDaytonAgreement(
+    state: GameState,
+    proposal: DaytonProposal,
+    baseDir: string,
+): { result: DaytonResult; agreement: DaytonAgreementRecord } {
+    if (state.military.negotiation?.dayton_result) throw new Error('Dayton already resolved');
+    // One owner for a recorded signature (terms, map, treaty against the draft, signing beat).
+    return resolveDaytonWithRecord(state, proposal, loadDesktopEventDefinitions(baseDir));
+}
+
 export { evaluateBotResponse } from '../sim/negotiation/bot_negotiation.js';
 export { createAiClient } from '../sim/ai_commander/ai_client.js';
 export { getAdvisorRecommendation } from '../sim/ai_commander/player_advisor.js';

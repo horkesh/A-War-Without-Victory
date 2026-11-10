@@ -18,6 +18,7 @@ import { computePoliticalPeacePlanResponse } from '../political/political_peace_
 import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';
 import { resolveEventDecisionCore } from '../events/resolve_decision_core.js';
 import { applyPeaceSettlement, isSettlementPlan } from './peace_settlement.js';
+import { warDeadTotals } from './war_dead.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 const DAYTON_PLAN_ID = 'dayton';
@@ -480,6 +481,10 @@ export function resolvePeacePlan(
         turn_offered: neg.pending_peace_plan.turn_offered,
         responses: allResponses,
         resolved: true,
+        // DC A1: stamp the toll at the moment of the answer, so the Dayton delegation
+        // folder can state the dead since each refusal from the Verdict's own sources.
+        resolved_turn: state.meta.turn,
+        dead_at_resolution: warDeadTotals(state),
     };
     neg.peace_plan_history.push(historyEntry);
 

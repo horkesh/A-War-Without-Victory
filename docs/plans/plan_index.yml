@@ -185,8 +185,13 @@ lanes:
   - lane: DC
     title: "Dayton conference redesign"
     lane_open: true
-    status: "ACTIVE — owner, 2026-11-07. Owned by Codex. Reworks the Dayton table (conference room, live bargaining, data contract) on top of RD's end-map contract. First it"
-    plans: []
+    status: "ACTIVE — owner, 2026-11-07; Claude implements, Codex supplies art (owner, 2026-11-08). Reworks the Dayton table (conference room, live bargaining, data contract"
+    plans:
+      - path: docs/plans/2026-11-08-dc-dayton-conference-plan.md
+        exists: true
+        tokens: 13624
+        fits_context: true
+        tasks: null
   - lane: R8
     title: "Full-campaign packaged-Electron validation and diaries"
     lane_open: true

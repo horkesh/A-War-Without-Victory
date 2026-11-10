@@ -1608,6 +1608,8 @@ export interface LoadedGameState {
     /** Compact read-only diplomacy packet projected from negotiation, patron, and IVP state. */
     diplomacyView?: DiplomacyView;
 
+    daytonAgreement?: import('../../../state/negotiation_types.js').DaytonAgreementRecord;
+
     /**
      * The settled map of a signed peace (plan map at OSID level, sim-computed). Rendering is
      * owned by the Dayton conference lane; see handoffs/20261107_dayton_end_map_to_conference.md.
@@ -1629,6 +1631,14 @@ export interface LoadedGameState {
             defaultHolder: string;
             demandCost: number;
             concedeCost: number;
+            /** Canonical territory covered by this clause. */
+            osids?: string[];
+            /** The player's own protected ground: offered no Concede (Brčko excepted). */
+            protectedCore?: boolean;
+            /** The other side's protected ground: very costly, no patron presses it (DC A6). */
+            theirCore?: boolean;
+            /** Never on the table for anyone: the room offers no Demand (DC A6 panel). */
+            offTable?: boolean;
         }>;
         /**
          * Captured-ground packages: ground one party holds that the Dayton map gives to
@@ -1642,6 +1652,9 @@ export interface LoadedGameState {
             concedeCost: number;
             claimant?: string;
             areaPct?: number;
+            osids?: string[];
+            /** The player's own protected ground: no Concede (patron_leverage.playerMayConcede). */
+            protectedCore?: boolean;
         }>;
         /** Set on the table reopened after a declined Dayton: no decline option. */
         forced?: { onFaction: string; by: string };
@@ -1653,6 +1666,10 @@ export interface LoadedGameState {
         }>;
         factionCapital: Record<string, number>;
         patronOverride: Record<string, number>;
+        /** The player delegation's folder (DC A1); absent on saves from before it existed. */
+        delegationFolder?: import('../../../state/negotiation_types.js').DelegationFolder;
+        /** Tabled rounds so far (DC A2), oldest first; empty before the first draft is tabled. */
+        rounds?: import('../../../state/negotiation_types.js').DaytonRound[];
     };
 
     /** Pending peace plan awaiting player response. */

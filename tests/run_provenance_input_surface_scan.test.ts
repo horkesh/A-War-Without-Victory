@@ -226,6 +226,31 @@ const EXCLUSION_REGISTER: readonly Exclusion[] = [
         reason: 'No code reads it. The scanner reaches it only because plan_settlement_shares.json names it in its `source` metadata field; tools/peace/build_peace_settlement_maps.cjs (a build-time tool, not on the run path) derives the shares file from it.',
     },
     {
+        path: 'data/derived/peace/plan_cell_assignments.json',
+        kind: 'deferred_stamp',
+        reason: 'Read by negotiation/peace_settlement.ts (DC stage 1, 2026-11-08); the audited per-cell Dayton opening line, fixed before the quota pass. Like plan_settlement_shares.json it reaches the verdict only when Dayton resolves, which calibration runs never do.',
+    },
+    {
+        path: 'data/source/peace_plans/dayton_cell_assignments.json',
+        kind: 'not_an_input',
+        reason: 'No code reads it. The scanner reaches it only because plan_cell_assignments.json names it in its `source` metadata field; tools/peace/build_peace_settlement_maps.cjs (build time) derives the cell table from it.',
+    },
+    {
+        path: 'data/source/peace_plans/vance_owen_cell_assignments.json',
+        kind: 'not_an_input',
+        reason: 'No code reads it. Named only in plan_cell_assignments.json `source` metadata; read off the plan\'s own map by tools/peace/plan_map_digitize.cjs and built into the cell table at build time.',
+    },
+    {
+        path: 'data/source/peace_plans/owen_stoltenberg_cell_assignments.json',
+        kind: 'not_an_input',
+        reason: 'No code reads it. Named only in plan_cell_assignments.json `source` metadata; read off the plan\'s own map by tools/peace/plan_map_digitize.cjs and built into the cell table at build time.',
+    },
+    {
+        path: 'data/source/peace_plans/contact_group_cell_assignments.json',
+        kind: 'not_an_input',
+        reason: 'No code reads it. Named only in plan_cell_assignments.json `source` metadata; read off the plan\'s own map by tools/peace/plan_map_digitize.cjs and built into the cell table at build time.',
+    },
+    {
         path: 'data/derived/mun1990_names.json',
         kind: 'not_an_input',
         reason: 'Display names only (2026-11-07): negotiation/front_packages.ts labels captured-ground Dayton packages with municipality names. Package ids, costs and outcomes come from control, the Dayton map and osid_areas.json; the names never reach game state or a score.',
@@ -365,10 +390,13 @@ describe('★ input-surface scan: every data read on the headless path is stampe
             `${deferred.length} real run inputs are read but NOT hashed:\n  ${deferred.join('\n  ')}\n`
             + 'Stamping any of them changes consumed_inputs.digest and moves the row count, which '
             + 'is why it is a deliberate follow-up rather than a silent fix.'
-        ).toBe(16); // 15 -> 16 (2026-11-07): plan_settlement_shares.json, a verdict input when a settlement occurs.
+        ).toBe(17); // 15 -> 16 (2026-11-07): plan_settlement_shares.json, a verdict input when a settlement occurs.
+        // 16 -> 17 (2026-11-08): plan_cell_assignments.json, the audited Dayton cell table (DC stage 1).
         // 1 -> 2 (2026-11-07): plan_maps_research.json, named only in metadata, read by no code.
         // 2 -> 3 (2026-11-07): mun1990_names.json, display labels for captured-ground packages.
-        expect(EXCLUSION_REGISTER.filter(e => e.kind === 'not_an_input')).toHaveLength(3);
+        // 3 -> 4 (2026-11-08): dayton_cell_assignments.json, named only in metadata, read by no code.
+        // 4 -> 7 (2026-11-09): vance_owen, owen_stoltenberg and contact_group cell sources, metadata only.
+        expect(EXCLUSION_REGISTER.filter(e => e.kind === 'not_an_input')).toHaveLength(7);
     });
 
     /**

@@ -110,3 +110,73 @@ const output = {
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, JSON.stringify(output, null, 2) + '\n');
 console.log(`wrote ${path.relative(ROOT, OUT)}: ${PLANS.map((p) => `${p}=${Object.keys(plans[p]).length}`).join(' ')}`);
+
+// ── Per-cell opening assignments (DC plan stage 1) ──────────────────────────────
+// data/source/peace_plans/dayton_cell_assignments.json holds the historian's audited
+// cell rows for split municipalities, enclaves and corridors. The quota pass in
+// peace_settlement.ts fixes these cells before filling the municipality shares, so a
+// percentage no longer decides which cell of a split municipality crosses the line.
+// Validation: every row names a real map cell in a municipality the plan researched;
+// entity RS carries faction RS; entity FED carries RBiH, HRHB or null; entity special
+// carries no faction; unresolved rows are dropped (they fall to the quota pass).
+// Vance–Owen and Owen–Stoltenberg cell tables are read from each plan's own map
+// (tools/peace/plan_map_digitize.cjs, owner 2026-11-09): every simulated settlement is listed,
+// so the quota pass no longer places those plans' lines inside municipalities.
+const CELL_SOURCES = ['dayton', 'vance_owen', 'owen_stoltenberg', 'contact_group']
+    .map((plan) => path.join(ROOT, `data/source/peace_plans/${plan}_cell_assignments.json`));
+const CELLS_OUT = path.join(ROOT, 'data/derived/peace/plan_cell_assignments.json');
+const AREAS = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/derived/operational/osid_areas.json'), 'utf8')).areas;
+const CONFIDENCE = ['verified', 'approximate', 'unresolved'];
+
+function buildCellTable() {
+    const cellPlans = {};
+    const summary = [];
+    for (const CELLS_SRC of CELL_SOURCES) {
+        if (!fs.existsSync(CELLS_SRC)) continue;
+        const src = JSON.parse(fs.readFileSync(CELLS_SRC, 'utf8'));
+        const plan = src.plan ?? 'dayton';
+        if (!PLANS.includes(plan)) throw new Error(`cells: unknown plan ${plan}`);
+        const rows = {};
+        const counts = { verified: 0, approximate: 0, unresolved: 0 };
+        for (const osid of Object.keys(src.cells ?? {}).sort(cmp)) {
+            const row = src.cells[osid];
+            if (!(osid in AREAS)) throw new Error(`cells/${osid}: not a map cell`);
+            if (!CONFIDENCE.includes(row.confidence)) throw new Error(`cells/${osid}: confidence ${row.confidence}`);
+            counts[row.confidence] += 1;
+            if (row.confidence === 'unresolved') continue;
+            const mun = osid.split(':')[1];
+            if (!research[plan]?.[mun]) throw new Error(`cells/${osid}: municipality ${mun} has no ${plan} research entry`);
+            let faction = null;
+            let special = false;
+            if (row.entity === 'RS') {
+                if (row.faction && row.faction !== 'RS') throw new Error(`cells/${osid}: RS cell with faction ${row.faction}`);
+                faction = 'RS';
+            } else if (row.entity === 'FED') {
+                if (row.faction && row.faction !== 'RBiH' && row.faction !== 'HRHB') throw new Error(`cells/${osid}: FED cell with faction ${row.faction}`);
+                faction = row.faction ?? null;
+            } else if (row.entity === 'special') {
+                if (row.faction) throw new Error(`cells/${osid}: special cell with faction ${row.faction}`);
+                special = true;
+            } else {
+                throw new Error(`cells/${osid}: entity ${row.entity}`);
+            }
+            rows[osid] = { faction, special, confidence: row.confidence };
+        }
+        cellPlans[plan] = rows;
+        summary.push(`${plan}: ${Object.keys(rows).length} fixed (${counts.verified} verified, ${counts.approximate} approximate; ${counts.unresolved} unresolved dropped)`);
+    }
+    const out = {
+        schema_version: 1,
+        source: CELL_SOURCES.filter((f) => fs.existsSync(f)).map((f) => path.relative(ROOT, f).split(path.sep).join('/')),
+        rules: [
+            'a listed cell is fixed to its side before the municipality quota pass and charged against that side\'s quota',
+            'faction null on a Federation cell -> the wartime Federation holder, else the Federation party with the larger remaining quota',
+            'special = shared or international administration; listed as special and left with its wartime holder',
+            'unresolved rows are not written; those cells fall to the quota pass',
+        ],
+        plans: cellPlans,
+    };
+    fs.writeFileSync(CELLS_OUT, JSON.stringify(out, null, 2) + '\n');
+    console.log(`wrote ${path.relative(ROOT, CELLS_OUT)}: ${summary.join(' ') || 'no cell source'}`);
+}
+buildCellTable();

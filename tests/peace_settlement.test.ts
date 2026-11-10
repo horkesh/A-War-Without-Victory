@@ -15,6 +15,8 @@ import {
     applyPeaceSettlement,
     capGradeBySettlement,
     computeSettlementControllers,
+    planCellAssignments,
+    getSettlementAdjacency,
     settlementTerritoryPct,
     settlementControllersFor,
 } from '../src/sim/negotiation/peace_settlement.js';
@@ -66,6 +68,46 @@ function mapTotals(plan: string): Record<string, number> {
     return out;
 }
 
+/** Shares of BiH by side in a plan's cell table (all cells listed for the map-read plans). */
+function cellTotals(plan: 'vance_owen' | 'owen_stoltenberg' | 'contact_group'): Record<string, number> {
+    const cells = planCellAssignments(plan);
+    const total = Object.values(areas).reduce((s, a) => s + a, 0);
+    const out: Record<string, number> = { RBiH: 0, RS: 0, HRHB: 0, special: 0 };
+    for (const [o, row] of Object.entries(cells)) out[row.special ? 'special' : row.faction ?? 'RBiH'] += areas[o] ?? 0;
+    for (const k of Object.keys(out)) out[k] = (100 * out[k]!) / total;
+    return out;
+}
+
+describe('plans read off their own maps (2026-11-09)', () => {
+    it('list every simulated settlement and reproduce the plans\' published Serb shares', () => {
+        for (const plan of ['vance_owen', 'owen_stoltenberg', 'contact_group'] as const) {
+            expect(Object.keys(planCellAssignments(plan)).sort()).toEqual(Object.keys(areas).sort());
+        }
+        // Vance–Owen, January 1993 map: Serb-led provinces about 43 % (research §1.2).
+        expect(cellTotals('vance_owen').RS).toBeCloseTo(43.7, 0);
+        // Owen–Stoltenberg, Geneva scan: the published 52.5 % plus the scan's own reading.
+        expect(cellTotals('owen_stoltenberg').RS).toBeGreaterThan(51);
+        expect(cellTotals('owen_stoltenberg').RS).toBeLessThan(57);
+        // Contact Group, July 1994 map: the 49 % Serb entity (the Federation is one undivided class).
+        expect(cellTotals('contact_group').RS).toBeGreaterThan(46);
+        expect(cellTotals('contact_group').RS).toBeLessThan(50);
+    });
+
+    it('keeps the Contact Group\'s Posavina corridor unbroken (historian seat, 2026-11-09)', () => {
+        // The Serb entity runs continuously from Banja Luka through Derventa and Modriča to Brčko
+        // town and Bijeljina; a reading that breaks the chain is a reading failure.
+        const cells = planCellAssignments('contact_group');
+        const rs = new Set(Object.keys(cells).filter(o => cells[o]!.faction === 'RS' && !cells[o]!.special));
+        const adjacency = getSettlementAdjacency();
+        const reach = new Set(['op:banja_luka:banja_luka_2']);
+        const queue = ['op:banja_luka:banja_luka_2'];
+        for (let i = 0; i < queue.length; i++) {
+            for (const n of adjacency.get(queue[i]!) ?? []) if (rs.has(n) && !reach.has(n)) { reach.add(n); queue.push(n); }
+        }
+        for (const o of ['op:modrica:modrica', 'op:brcko:brcko', 'op:bijeljina:bijeljina_2']) expect(reach.has(o), o).toBe(true);
+    });
+});
+
 describe('researched plan maps', () => {
     it('reproduce the published Serb shares', () => {
         expect(mapTotals('vance_owen').RS).toBeCloseTo(43.0, 0);
@@ -92,7 +134,15 @@ describe('computeSettlementControllers', () => {
             const b = computeSettlementControllers(makeState(), plan);
             expect(JSON.stringify(a)).toBe(JSON.stringify(b));
             const pct = settlementTerritoryPct(a.controllers);
-            expect(Math.abs(pct.RS! - mapTotals(plan).RS!), plan).toBeLessThanOrEqual(2.5);
+            if (plan !== 'dayton') {
+                // Read cell by cell off the plan's own map (2026-11-09): RS gets exactly its cells,
+                // plus whatever special (shared administration) land it holds at the time.
+                const t = cellTotals(plan);
+                expect(pct.RS!, plan).toBeGreaterThanOrEqual(t.RS! - 0.01);
+                expect(pct.RS!, plan).toBeLessThanOrEqual(t.RS! + t.special! + 0.01);
+            } else {
+                expect(Math.abs(pct.RS! - mapTotals(plan).RS!), plan).toBeLessThanOrEqual(2.5);
+            }
         }
     });
 
@@ -117,7 +167,9 @@ describe('accepted peace plans settle on the map and its terms', () => {
         const settlement = state.military.negotiation!.settlement!;
         expect(settlement.plan_id).toBe('vance_owen');
         expect(settlement.territory_pct.RS).toBeGreaterThan(41);
-        expect(settlement.territory_pct.RS).toBeLessThan(46);
+        // Read off the January 1993 map (2026-11-09): 43.7 % Serb-led provinces, plus the
+        // Sarajevo-province land RS holds, which a special province leaves with its holder.
+        expect(settlement.territory_pct.RS).toBeLessThan(48);
         expect(settlement.status.RS!.named).toBe(false);
         expect(JSON.stringify(state.political.political_controllers)).toBe(wartimeBefore);
         const rs = computeFactionVerdict(state, 'RS');

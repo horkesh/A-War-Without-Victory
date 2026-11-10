@@ -1,0 +1,68 @@
+{
+  "faction": "RBiH",
+  "turn": 80,
+  "settlements": {
+    "held": 239,
+    "total": 712,
+    "peak": 319,
+    "peak_turn": 0
+  },
+  "enclaves": {
+    "held": [
+      "bihac",
+      "gorazde",
+      "sarajevo",
+      "srebrenica",
+      "zepa"
+    ],
+    "lost": []
+  },
+  "condemnation": [],
+  "patron": {
+    "override_authority": 0,
+    "force_threshold": 75,
+    "can_force": false
+  },
+  "refused_plans": [
+    {
+      "plan_id": "vance_owen",
+      "turn_offered": 39,
+      "proposed_split": {
+        "RBiH": 32,
+        "RS": 43,
+        "HRHB": 25
+      },
+      "refused_by": [
+        "RS"
+      ],
+      "player_answer": "accepted",
+      "weeks_since": 41,
+      "dead_since": null,
+      "displaced_since": 115679
+    },
+    {
+      "plan_id": "owen_stoltenberg",
+      "turn_offered": 70,
+      "proposed_split": {
+        "RBiH": 30,
+        "RS": 52.5,
+        "HRHB": 17.5
+      },
+      "refused_by": [
+        "RBiH"
+      ],
+      "player_answer": "rejected",
+      "weeks_since": 10,
+      "dead_since": null,
+      "displaced_since": 16088
+    }
+  ],
+  "war": {
+    "weeks": 80,
+    "dead": {
+      "military": 22974,
+      "civilian": 31781
+    },
+    "displaced": 1202697
+  }
+}

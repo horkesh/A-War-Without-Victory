@@ -70,8 +70,47 @@ describe('declineDaytonNegotiation', () => {
         expect(DAYTON_DECLINE_GRACE_WEEKS).toBe(8);
         expect(r).toEqual({ ok: true, imposition_turn: 196 });
         expect(state.military.negotiation!.pending_dayton).toBeUndefined();
-        expect(state.military.negotiation!.dayton_decline).toEqual({ faction: 'RBiH', declined_turn: 188, imposition_turn: 196 });
+        expect(state.military.negotiation!.dayton_decline).toMatchObject({ faction: 'RBiH', declined_turn: 188, imposition_turn: 196 });
         expect(state.meta.game_over).toBe(false);
+    });
+
+    it('stamps the dead and the ground at the decline; the forced table folder states what declining cost (DC A5)', () => {
+        const state = makeState('RBiH');
+        state.political.political_controllers = { a: 'RBiH', b: 'RBiH', c: 'RS' } as never;
+        (state.military as { casualty_ledger?: unknown }).casualty_ledger = { RBiH: { killed: 100 }, RS: { killed: 50 } };
+        declineDaytonNegotiation(state);
+        expect(state.military.negotiation!.dayton_decline).toMatchObject({
+            dead_at_decline: { military: 150, civilian: 0 },
+            held_at_decline: 2,
+        });
+        // Eight weeks of war: one cell lost, more dead, displacement in later turns only.
+        state.political.political_controllers = { a: 'RBiH', b: 'RS', c: 'RS' } as never;
+        (state.military as { casualty_ledger?: unknown }).casualty_ledger = { RBiH: { killed: 180 }, RS: { killed: 90 } };
+        (state as { turn_summaries?: unknown }).turn_summaries = [
+            { turn: 188, displacement_total: 500 },
+            { turn: 190, displacement_total: 300 },
+            { turn: 195, displacement_total: 200 },
+        ];
+        state.meta.turn = 196;
+        enforceDaytonImposition(state);
+        const forced = state.military.negotiation!.pending_dayton!;
+        expect(forced.forced).toMatchObject({ on_faction: 'RBiH', by: 'united_states' });
+        expect(forced.delegation_folder?.declined).toEqual({
+            declined_turn: 188, weeks_since: 8,
+            dead_since: { military: 120, civilian: 0 },
+            displaced_since: 500, held_then: 2, held_now: 1,
+        });
+    });
+
+    it('a decline recorded before the stamp shows no count of the dead', () => {
+        const state = makeState('RBiH');
+        declineDaytonNegotiation(state);
+        const decline = state.military.negotiation!.dayton_decline!;
+        delete decline.dead_at_decline;
+        delete decline.held_at_decline;
+        state.meta.turn = 196;
+        enforceDaytonImposition(state);
+        expect(state.military.negotiation!.pending_dayton!.delegation_folder?.declined).toMatchObject({ dead_since: null, held_then: null });
     });
 
     it('refuses when there is nothing to decline', () => {
@@ -121,6 +160,11 @@ describe('enforceDaytonImposition', () => {
             expect(state.military.negotiation!.pending_dayton).toBeUndefined();
             expect(state.meta.game_over).toBe(true);
             expect(state.meta.outcome).toBe('dayton');
+            // DC A5: the treaty signed for the player is recorded, so the Verdict opens on the signing table.
+            const record = state.military.negotiation!.dayton_agreement;
+            expect(record?.version).toBe(1);
+            expect(record?.terms.imposed?.on_faction).toBe(faction);
+            expect(record?.signing).toEqual({ turn: 197, war: { weeks: 0, dead: { military: 0, civilian: 0 }, displaced: 0 } });
         });
     }
 
@@ -200,7 +244,7 @@ describe("a player's hard line at its Dayton acceptance event takes the decline 
         delete state.military.negotiation!.pending_dayton;
         state.military.event_flags = { rbih_dayton_acceptance: 'hardline' };
         expect(applyPlayerDaytonHardline(state)).toBe(true);
-        expect(state.military.negotiation!.dayton_decline).toEqual({ faction: 'RBiH', declined_turn: 184, imposition_turn: 192 });
+        expect(state.military.negotiation!.dayton_decline).toMatchObject({ faction: 'RBiH', declined_turn: 184, imposition_turn: 192 });
         state.meta.turn = 192;
         await runStep('evaluate-dayton-trigger', state);
         expect(state.military.negotiation!.pending_dayton).toBeUndefined();
@@ -294,8 +338,9 @@ describe('Dayton event records follow the real settlement', () => {
     it('the desktop sim and IPC handlers sign Dayton with the base-directory catalog', () => {
         const desktopSim = readFileSync(resolve(process.cwd(), 'src/desktop/desktop_sim.ts'), 'utf8');
         expect(desktopSim).toMatch(/baseDir \? loadDesktopEventDefinitions\(baseDir\) : undefined/);
+        expect(desktopSim).toContain('resolveDaytonWithRecord(state, proposal, loadDesktopEventDefinitions(baseDir))');
         const main = readFileSync(resolve(process.cwd(), 'src/desktop/electron-main.cjs'), 'utf8');
-        const calls = main.match(/sim\.resolveDaytonNegotiation\([\s\S]*?\);/g) ?? [];
+        const calls = main.match(/sim\.resolveDesktopDaytonAgreement\([\s\S]*?\);/g) ?? [];
         expect(calls.length).toBe(2);
         for (const call of calls) expect(call).toContain('getBaseDir()');
     });
@@ -458,7 +503,7 @@ describe('captured ground is negotiable at Dayton (owner, 2026-11-07)', () => {
     it('the UI menu carries the captured ground and the forced flag', async () => {
         const { derivePendingDayton } = await import('../src/ui/map/data/GameStateAdapter.js');
         const onTime = withHeld();
-        expect(derivePendingDayton(onTime)?.frontPackages?.map((p) => p.id)).toEqual([ID]);
+        expect(derivePendingDayton(onTime)?.frontPackages).toMatchObject([{ id: ID, osids: [HELD] }]);
         expect(derivePendingDayton(onTime)?.forced).toBeUndefined();
         const state = withHeld();
         declineDaytonNegotiation(state);

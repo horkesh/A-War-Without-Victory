@@ -120,6 +120,53 @@ describe('enforceSettlementContiguity', () => {
         expect(result.changes['c:1:1']).toBe('RBiH');
         expect(result.controllers['c:8:1']).toBe('RBiH');
     });
+
+    // DC A6 follow-up 2 (canon seat): the guard refused the cheapest corridor when it cut the
+    // other entity, without looking for another. A protected 9-cell Federation block (x 9..11,
+    // y 3..5) on the east edge; every straight run west cuts RS in two, a run along the top
+    // edge does not.
+    const walled = () => grid(12, 9, (x, y) => (x <= 2 || (x >= 9 && y >= 3 && y <= 5) ? 'RBiH' : 'RS'));
+    const pieces = (ctl: Record<string, FactionId>, adjacency: Map<string, string[]>, side: 'FED' | 'RS') => {
+        const cells = Object.keys(ctl).filter((o) => (ctl[o] === 'RS') === (side === 'RS'));
+        const left = new Set(cells);
+        const out: number[] = [];
+        for (const start of cells) {
+            if (!left.has(start)) continue;
+            left.delete(start);
+            const queue = [start];
+            for (let i = 0; i < queue.length; i++) {
+                for (const n of adjacency.get(queue[i]!) ?? []) if (left.delete(n)) queue.push(n);
+            }
+            out.push(queue.length);
+        }
+        return out.sort((a, b) => b - a);
+    };
+    const enclave = (o: string) => /^c:(9|10|11):[345]$/.test(o);
+
+    it('without the search, a corridor that cuts the other entity leaves the block detached', () => {
+        const g = walled();
+        const { changes } = enforceSettlementContiguity({ ...g, isProtectedCell: enclave, searchAlternatives: false });
+        expect(changes).toEqual({});
+    });
+
+    it('finds a corridor around the other entity rather than through it (A6 follow-up 2)', () => {
+        const g = walled();
+        const { controllers, changes } = enforceSettlementContiguity({ ...g, isProtectedCell: enclave });
+        expect(Object.keys(changes).length).toBeGreaterThan(6); // longer than any straight cut
+        expect(pieces(controllers, g.adjacency, 'FED')).toHaveLength(1);
+        const rs = pieces(controllers, g.adjacency, 'RS');
+        expect(rs.slice(1).reduce((s, n) => s + n, 0)).toBeLessThanOrEqual(POCKET_MAX_CELLS);
+        // Deterministic.
+        expect(enforceSettlementContiguity({ ...walled(), isProtectedCell: enclave }).changes).toEqual(changes);
+    });
+
+    it('still keeps a block detached when every route cuts the other entity (held Srebrenica, owner 2026-11-09)', () => {
+        // The same block, with the top and bottom edge rows protected RS ground: no way around.
+        const g = walled();
+        const edge = (o: string) => /^c:\d+:(0|8)$/.test(o);
+        const { changes } = enforceSettlementContiguity({ ...g, isProtectedCell: (o, f) => enclave(o) || (f === 'RS' && edge(o)) });
+        expect(changes).toEqual({});
+    });
 });
 
 describe('the Dayton settlement map has no isolated pockets', () => {

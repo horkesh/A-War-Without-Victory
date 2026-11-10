@@ -27,11 +27,13 @@ import { strictCompare } from '../../state/validateGameState.js';
 // and the renderer bundles scoring.ts through GameStateAdapter.
 import osidAreasJson from '../../../data/derived/operational/osid_areas.json';
 import settlementShares from '../../../data/derived/peace/plan_settlement_shares.json';
+import cellAssignmentsJson from '../../../data/derived/peace/plan_cell_assignments.json';
 import contactGraphJson from '../../../data/derived/operational/operational_contact_graph.json';
 import { parseEdges } from '../../map/settlements_parse.js';
 import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
 import { enforceSettlementContiguity } from './settlement_contiguity.js';
 import { ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from '../combat/enclave_resilience.js';
+import { PROTECTED_MUNICIPALITIES } from './patron_leverage.js';
 
 const OSID_AREAS: { total_area_km2: number; areas: Record<string, number> } = osidAreasJson;
 function getOsidAreas(): { total: number; areas: Record<string, number> } {
@@ -127,6 +129,31 @@ interface SharesFile {
 }
 const SHARES: SharesFile = settlementShares;
 
+/**
+ * An audited opening assignment for one cell (DC plan stage 1; built by
+ * tools/peace/build_peace_settlement_maps.cjs from data/source/peace_plans/
+ * dayton_cell_assignments.json). The quota pass fills shares in sorted cell order, so
+ * inside a split municipality the alphabet decides which cell falls to the other
+ * entity; audited cells are fixed before that pass and charged against the quota.
+ */
+export interface SettlementCellAssignment {
+    /** The party the cell opens with. null on a Federation cell whose party is taken from wartime control, and on special land. */
+    faction: FactionId | null;
+    /** Shared or international administration: listed as special and left with its wartime holder. */
+    special: boolean;
+    confidence: 'verified' | 'approximate';
+}
+export type SettlementCellTable = Record<string, SettlementCellAssignment>;
+interface CellsFile {
+    plans: Record<string, SettlementCellTable>;
+}
+const CELLS: CellsFile = cellAssignmentsJson as CellsFile;
+
+/** The audited cell table for a plan (empty when the plan has none). */
+export function planCellAssignments(planId: SettlementPlanId): SettlementCellTable {
+    return CELLS.plans[planId] ?? {};
+}
+
 export function isSettlementPlan(planId: string): planId is SettlementPlanId {
     return planId === 'vance_owen' || planId === 'owen_stoltenberg' || planId === 'contact_group' || planId === 'dayton';
 }
@@ -144,7 +171,38 @@ export function computeSettlementControllers(
     planId: SettlementPlanId,
     overrides: Record<string, FactionId> = {},
 ): { controllers: Record<string, FactionId>; special: string[] } {
-    const wartime = state.political?.political_controllers ?? {};
+    return computeSettlementControllersWith(state, planId, overrides, planCellAssignments(planId));
+}
+
+/**
+ * computeSettlementControllers with an explicit cell table (tests inject one; the
+ * engine passes the plan's audited table). An empty table reproduces the pure quota
+ * pass exactly.
+ */
+/** Diagnostics and tests: `contiguity: false` skips the Dayton contiguity pass (the opening line as assigned); `searchAlternatives: false` refuses a cutting corridor without seeking another. */
+export interface SettlementMapOptions { contiguity?: boolean; searchAlternatives?: boolean }
+
+export function computeSettlementControllersWith(
+    state: GameState,
+    planId: SettlementPlanId,
+    overrides: Record<string, FactionId>,
+    cells: SettlementCellTable,
+    options: SettlementMapOptions = {},
+): { controllers: Record<string, FactionId>; special: string[] } {
+    return computeSettlementControllersFromFront(state.political?.political_controllers ?? {}, planId, overrides, cells, options);
+}
+
+/**
+ * The same map from a wartime front alone (the renderer's Boundary Map draws refused plans
+ * from the front it already holds, DC A3). Reads nothing else from state.
+ */
+export function computeSettlementControllersFromFront(
+    wartime: Readonly<Record<string, FactionId | null | undefined>>,
+    planId: SettlementPlanId,
+    overrides: Record<string, FactionId>,
+    cells: SettlementCellTable,
+    options: SettlementMapOptions = {},
+): { controllers: Record<string, FactionId>; special: string[] } {
     const areas = getOsidAreas().areas;
     const plan = SHARES.plans[planId] ?? {};
     const byMun = new Map<string, string[]>();
@@ -166,8 +224,34 @@ export function computeSettlementControllers(
         const munArea = osids.reduce((s, o) => s + (areas[o] ?? 0), 0);
         const quota: Record<ShareKey, number> = { RBiH: 0, RS: 0, HRHB: 0, special: 0 };
         for (const k of SHARE_KEYS) quota[k] = ((shares[k] ?? 0) / 100) * munArea;
-        const unassigned: string[] = [];
+        // Audited cells first (sorted with the municipality): fixed to their side and
+        // charged against that side's quota, so the quota pass below fills only the rest.
+        const remaining: string[] = [];
         for (const o of osids) {
+            const cell = cells[o];
+            if (!cell) { remaining.push(o); continue; }
+            const a = areas[o] ?? 0;
+            if (cell.special) {
+                special.push(o);
+                const w = wartime[o];
+                if (w) controllers[o] = w;
+                quota.special -= a;
+                continue;
+            }
+            let party: 'RBiH' | 'RS' | 'HRHB';
+            if (isFactionKey(cell.faction)) {
+                party = cell.faction;
+            } else {
+                // A Federation cell with no named party: its wartime Federation holder,
+                // else the Federation party with the larger remaining quota.
+                const w = wartime[o];
+                party = w === 'RBiH' || w === 'HRHB' ? w : quota.HRHB > quota.RBiH ? 'HRHB' : 'RBiH';
+            }
+            controllers[o] = party;
+            quota[party] -= a;
+        }
+        const unassigned: string[] = [];
+        for (const o of remaining) {
             const holder = wartime[o];
             const a = areas[o] ?? 0;
             if (isFactionKey(holder) && quota[holder] >= a / 2 && quota[holder] > 0) {
@@ -196,17 +280,27 @@ export function computeSettlementControllers(
     for (const [o, f] of Object.entries(overrides).sort(([a], [b]) => strictCompare(a, b))) {
         if (o in controllers) controllers[o] = f;
     }
+    if (planId === 'dayton') keepHeldEnclaves(controllers, wartime);
     // Owner, 2026-11-07: "There should be no isolated pockets on final Dayton map." The
     // earlier plans drew enclaves on purpose (Vance–Owen provinces, the Contact Group's
     // eastern enclaves), so only Dayton is made contiguous.
-    const final = planId === 'dayton'
+    const final = planId === 'dayton' && options.contiguity !== false
         ? enforceSettlementContiguity({
             controllers,
             adjacency: getSettlementAdjacency(),
             areas,
+            searchAlternatives: options.searchAlternatives,
             isProtectedExclave: (side, cells) => side === 'FED' && cells.every((o) => POSAVINA_CANTON.has(munOf(o))),
-            // Never absorb ground a package won at the table, or an enclave held by its own side.
-            isProtectedCell: (o, f) => overrides[o] === f || isEnclaveCellOfSide(o, f),
+            // Never absorb ground a package won at the table, an enclave held by its own
+            // side, or a cell the audit assigns to this party (the smallest-area corridor
+            // must not run through Istočno Sarajevo, and a concession by one party must
+            // not let the pass absorb its partner's ground, e.g. Vranjevići in Mostar).
+            isProtectedCell: (o, f) => overrides[o] === f || isEnclaveCellOfSide(o, f)
+                || cells[o]?.faction === f
+                // A party's protected heartland (patron_leverage.ts) is never cut by a
+                // corridor or absorbed: walkthrough 2026-11-08, an RS gain in western Bosnia
+                // drew the Federation's reconnecting corridor through Banja Luka.
+                || PROTECTED_MUNICIPALITIES[f]?.has(munOf(o)) === true,
         }).controllers
         : controllers;
     const sorted: Record<string, FactionId> = {};
@@ -220,6 +314,44 @@ export function computeSettlementControllers(
  * to the rest of the Federation, so the contiguity pass keeps them.
  */
 const POSAVINA_CANTON = new Set(['orasje', 'bosanski_samac', 'odzak']);
+
+/**
+ * DC A6, enclave held at signature (Goražde precedent). Dayton left Goražde with the
+ * Federation because the Federation held it, and drew a corridor to it. The same rule for
+ * every enclave with an explicit cell list: when its own entity holds the enclave's capital
+ * at signature, each enclave cell that entity holds stays with its wartime holder, even
+ * where the municipality quota or the audit gives it to the other entity. The contiguity
+ * pass then protects it and draws the corridor. A fallen enclave (capital lost) follows the
+ * map. No table package, fixed or captured-ground, hands a held enclave cell to the besieging
+ * entity either (sensitive-history seat, DC A6 panel): it reverts to its holder. Only cells across
+ * the inter-entity line move; the Federation parties' split is left to the map.
+ *
+ * Counterfactual, not Dayton history (historian seat, DC A6 panel 2026-11-08): Srebrenica
+ * and Žepa fell in July 1995, so Dayton never kept them. A held Srebrenica or Žepa stays a
+ * detached Federation exclave, on the 1994 Contact Group plan's precedent (eastern enclaves
+ * left as islands). No source supports a corridor through the Drina valley (Zvornik,
+ * Bratunac, Vlasenica); the contiguity pass refuses any corridor that cuts the other entity
+ * in two (`settlement_contiguity.ts`), and that guard must not be loosened "for history".
+ * The Goražde corridor itself was a negotiated concession, which the audit and the
+ * `gorazde_corridor` package carry; holding the town does not grant it here.
+ */
+function keepHeldEnclaves(
+    controllers: Record<string, FactionId>,
+    wartime: Readonly<Record<string, string | null | undefined>>,
+): void {
+    const side = (f: string | null | undefined) => (f === 'RS' ? 'RS' : f === 'RBiH' || f === 'HRHB' ? 'FED' : null);
+    for (const enclave of [...ENCLAVE_DEFINITIONS].sort((a, b) => strictCompare(a.id, b.id))) {
+        if (!enclave.osid_list || !enclave.capital_osid) continue;
+        const own = side(enclave.faction);
+        if (side(wartime[enclave.capital_osid]) !== own) continue;
+        for (const o of [...enclave.osid_list].sort(strictCompare)) {
+            const w = wartime[o];
+            if (!isFactionKey(w) || side(w) !== own) continue;
+            const c = controllers[o];
+            if (c && side(c) !== own) controllers[o] = w;
+        }
+    }
+}
 
 /**
  * Enclave cells the contiguity pass must not absorb: enclaves with an explicit cell list or

@@ -1,0 +1,615 @@
+
+## op:bosanska_krupa:arapusa_2  area=34.377 centroid=[16.2534, 44.8655] shares={'FED': 78.9, 'RS': 21.1} pop_shares={'FED': 92.9, 'RS': 7.1}
+   Veliki Dubovik               area=  12.61 pop=392 -> [['11428', 'Bosanska Krupa', 305], ['20290', 'Krupa na Uni', 87]] SPLIT
+   Zalin                        area=   11.4 pop=444 -> [['11428', 'Bosanska Krupa', 444]]
+   Arapuša                      area=   5.77 pop=525 -> [['11428', 'Bosanska Krupa', 525]]
+   Srednji Petrovići            area=   4.44 pop=11 -> [['20290', 'Krupa na Uni', 11]]
+
+## op:bosanska_krupa:ivanjska_2  area=98.66 centroid=[16.2466, 44.9709] shares={'FED': 53.0, 'RS': 47.0} pop_shares={'FED': 42.0, 'RS': 58.0}
+   Ivanjska                     area=  34.61 pop=633 -> [['11428', 'Bosanska Krupa', 633]]
+   Srednji Bušević              area=  18.67 pop=470 -> [['11428', 'Bosanska Krupa', 13], ['20290', 'Krupa na Uni', 457]] SPLIT
+   Osredak                      area=  17.82 pop=267 -> [['20290', 'Krupa na Uni', 267]]
+   Glavica                      area=  15.32 pop=119 -> [['11428', 'Bosanska Krupa', 119]]
+   Gornji Bušević               area=   11.8 pop=493 -> [['11428', 'Bosanska Krupa', 67], ['20290', 'Krupa na Uni', 426]] SPLIT
+
+## op:bosanska_krupa:jasenica_2  area=123.308 centroid=[16.28, 44.7779] shares={'FED': 87.0, 'RS': 13.0} pop_shares={'FED': 82.0, 'RS': 18.0}
+   Vojevac                      area=  25.55 pop=399 -> [['11428', 'Bosanska Krupa', 399]]
+   Benakovac                    area=  21.65 pop=229 -> [['11428', 'Bosanska Krupa', 229]]
+   Gorinja                      area=  19.72 pop=226 -> [['11428', 'Bosanska Krupa', 226]]
+   Hašani                       area=  16.25 pop=414 -> [['11428', 'Bosanska Krupa', 31], ['20290', 'Krupa na Uni', 383]] SPLIT
+   Velika Jasenica              area=  13.65 pop=107 -> [['11428', 'Bosanska Krupa', 107]]
+   Potkalinje                   area=   13.3 pop=284 -> [['11428', 'Bosanska Krupa', 263], ['20290', 'Krupa na Uni', 21]] SPLIT
+   Jasenica                     area=  12.65 pop=584 -> [['11428', 'Bosanska Krupa', 584]]
+
+## op:bosanski_petrovac:jasenovac_2  area=264.034 centroid=[16.5769, 44.5116] shares={'FED': 74.2, 'RS': 25.8} pop_shares={'FED': 77.3, 'RS': 22.7}
+   Bunara                       area=  78.63 pop=106 -> [['11436', 'Bosanski Petrovac', 96], ['20460', 'Petrovac', 10]] SPLIT
+   Klenovac                     area=  57.59 pop=229 -> [['11436', 'Bosanski Petrovac', 207], ['20460', 'Petrovac', 22]] SPLIT
+   Drinić                       area=  55.81 pop=363 -> [['11436', 'Bosanski Petrovac', 6], ['20460', 'Petrovac', 357]] SPLIT
+   Bravski Vaganac              area=  27.17 pop=98 -> [['11436', 'Bosanski Petrovac', 98], ['20460', 'Petrovac', 0]] SPLIT
+   Janjila                      area=  23.42 pop=354 -> [['11436', 'Bosanski Petrovac', 354]]
+   Jasenovac                    area=  13.72 pop=430 -> [['11436', 'Bosanski Petrovac', 430]]
+   Podsrnetica                  area=   6.55 pop=131 -> [['11436', 'Bosanski Petrovac', 131], ['20460', 'Petrovac', 0]] SPLIT
+
+## op:bosanski_samac:domaljevac_2  area=75.325 centroid=[18.5923, 45.0226] shares={'FED': 41.6, 'RS': 58.4} pop_shares={'FED': 53.8, 'RS': 46.2}
+   Batkuša                      area=  20.09 pop=924 -> [['20656', 'Šamac', 924]]
+   Obudovac                     area=  16.31 pop=3199 -> [['20656', 'Šamac', 3199]]
+   Domaljevac                   area=  14.88 pop=4152 -> [['11282', 'Domaljevac-Šamac', 4152]]
+   Grebnice                     area=    9.6 pop=2210 -> [['11282', 'Domaljevac-Šamac', 1452], ['20656', 'Šamac', 758]] SPLIT
+   Bazik                        area=   9.09 pop=539 -> [['11282', 'Domaljevac-Šamac', 539]]
+   Brvnik                       area=    5.0 pop=609 -> [['11282', 'Domaljevac-Šamac', 111], ['20656', 'Šamac', 498]] SPLIT
+
+## op:doboj:klokotnica_2  area=23.643 centroid=[18.1367, 44.7681] shares={'FED': 89.8, 'RS': 10.2} pop_shares={'FED': 84.4, 'RS': 15.6}
+   Lukavica Rijeka              area=  11.22 pop=983 -> [['11258', 'Doboj-Istok', 983], ['20141', 'Doboj', 0]] SPLIT
+   Klokotnica                   area=   8.17 pop=3989 -> [['11258', 'Doboj-Istok', 3989]]
+   Stanić Rijeka                area=   4.15 pop=1823 -> [['11258', 'Doboj-Istok', 765], ['20141', 'Doboj', 1058]] SPLIT
+
+## op:foca:izbisno  area=140.971 centroid=[18.6349, 43.5581] shares={'FED': 20.5, 'RS': 79.5} pop_shares={'FED': 30.2, 'RS': 69.8}
+   Kratine                      area=  19.25 pop=291 -> [['20613', 'Foča', 291]]
+   Anđelije                     area=  14.49 pop=106 -> [['20613', 'Foča', 106]]
+   Izbišno                      area=   13.6 pop=475 -> [['20613', 'Foča', 475]]
+   Kolun                        area=   12.7 pop=178 -> [['11444', 'Foča', 0], ['20613', 'Foča', 178]] SPLIT
+   Rodijelj                     area=  11.75 pop=258 -> [['11444', 'Foča', 72], ['20613', 'Foča', 186]] SPLIT
+   Derolovi                     area=   9.34 pop=156 -> [['20613', 'Foča', 156]]
+   Marevo                       area=   8.98 pop=209 -> [['11444', 'Foča', 0], ['20613', 'Foča', 209]] SPLIT
+   Bujakovina                   area=   7.52 pop=129 -> [['11444', 'Foča', 0], ['20613', 'Foča', 129]] SPLIT
+   Lokve                        area=   7.48 pop=258 -> [['11444', 'Foča', 258]]
+   Glušca                       area=   6.74 pop=34 -> [['11444', 'Foča', 0], ['20613', 'Foča', 34]] SPLIT
+   Slavičići                    area=   6.65 pop=85 -> [['11444', 'Foča', 85]]
+   Jabuka                       area=   6.52 pop=286 -> [['11444', 'Foča', 286]]
+   Jasenovo                     area=   5.43 pop=96 -> [['20613', 'Foča', 96]]
+   Borovinići                   area=   4.97 pop=56 -> [['11444', 'Foča', 0], ['20613', 'Foča', 56]] SPLIT
+   Zabor                        area=   4.91 pop=127 -> [['11444', 'Foča', 127]]
+
+## op:foca:patkovina  area=89.205 centroid=[18.7692, 43.5009] shares={'FED': 9.7, 'RS': 90.3} pop_shares={'FED': 8.7, 'RS': 91.3}
+   Kozja Luka                   area=  13.62 pop=448 -> [['20613', 'Foča', 448]]
+   Štović                       area=  13.21 pop=458 -> [['20613', 'Foča', 458]]
+   Brajići                      area=    8.0 pop=122 -> [['11444', 'Foča', 33], ['20613', 'Foča', 89]] SPLIT
+   Patkovina                    area=    7.2 pop=600 -> [['20613', 'Foča', 600]]
+   Daničići                     area=   6.55 pop=163 -> [['20613', 'Foča', 163]]
+   Mirjanovići                  area=   6.05 pop=69 -> [['20613', 'Foča', 69]]
+   Gradac                       area=   5.74 pop=404 -> [['20613', 'Foča', 404]]
+   Susješno                     area=   4.72 pop=361 -> [['20613', 'Foča', 361]]
+   Željevo                      area=   4.63 pop=185 -> [['20613', 'Foča', 185]]
+   Prisoje                      area=   4.48 pop=179 -> [['11444', 'Foča', 154], ['20613', 'Foča', 25]] SPLIT
+   Filipovići                   area=   4.35 pop=262 -> [['11444', 'Foča', 155], ['20613', 'Foča', 107]] SPLIT
+   Zubovići                     area=   4.01 pop=494 -> [['20613', 'Foča', 494]]
+   Vranjevići                   area=    3.5 pop=86 -> [['20613', 'Foča', 86]]
+   Radojevići                   area=   2.74 pop=83 -> [['20613', 'Foča', 83]]
+
+## op:foca:ustikolina  area=46.036 centroid=[18.8496, 43.5833] shares={'FED': 77.3, 'RS': 22.7} pop_shares={'FED': 89.5, 'RS': 10.5}
+   Petojevići                   area=  15.24 pop=81 -> [['11444', 'Foča', 81]]
+   Sorlaci                      area=   6.55 pop=150 -> [['11444', 'Foča', 0], ['20613', 'Foča', 150]] SPLIT
+   Zebina Šuma                  area=   5.97 pop=430 -> [['11444', 'Foča', 430]]
+   Gostičaj                     area=   5.77 pop=172 -> [['11444', 'Foča', 67], ['20613', 'Foča', 105]] SPLIT
+   Bavčići                      area=   3.85 pop=194 -> [['11444', 'Foča', 194]]
+   Ustikolina                   area=   3.16 pop=1418 -> [['11444', 'Foča', 1418]]
+   Njuhe                        area=   3.07 pop=221 -> [['11444', 'Foča', 221]]
+   Cvilin                       area=   2.23 pop=559 -> [['11444', 'Foča', 476], ['20613', 'Foča', 83]] SPLIT
+
+## op:gorazde:glamoc  area=14.532 centroid=[18.9649, 43.6884] shares={'FED': 81.8, 'RS': 18.2} pop_shares={'FED': 86.4, 'RS': 13.6}
+   Ostružno                     area=   2.79 pop=68 -> [['11452', 'Novo Goražde', 68]]
+   Vučetići                     area=   2.19 pop=87 -> [['11452', 'Novo Goražde', 87]]
+   Odžak                        area=   1.99 pop=71 -> [['11452', 'Novo Goražde', 0], ['20419', 'Novo Goražde', 71]] SPLIT
+   Ušanovići                    area=   1.54 pop=45 -> [['11452', 'Novo Goražde', 45]]
+   Konjbaba                     area=   1.21 pop=40 -> [['11452', 'Novo Goražde', 40]]
+   Mravi                        area=   1.18 pop=39 -> [['11452', 'Novo Goražde', 39]]
+   Glamoč                       area=    1.1 pop=246 -> [['11452', 'Novo Goražde', 246]]
+   Pijevac                      area=   1.09 pop=14 -> [['11452', 'Novo Goražde', 14]]
+   Oručevac                     area=   0.74 pop=63 -> [['11452', 'Novo Goražde', 63]]
+   Hrid                         area=   0.65 pop=24 -> [['20419', 'Novo Goražde', 24]]
+
+## op:gorazde:gorazde_2  area=19.835 centroid=[19.0006, 43.6674] shares={'FED': 53.3, 'RS': 46.7} pop_shares={'FED': 96.4, 'RS': 3.6}
+   Zidine                       area=   3.01 pop=276 -> [['20419', 'Novo Goražde', 276]]
+   Radijevići                   area=    2.5 pop=57 -> [['11452', 'Novo Goražde', 16], ['20419', 'Novo Goražde', 41]] SPLIT
+   Kazagići                     area=   1.78 pop=230 -> [['11452', 'Novo Goražde', 230]]
+   Milanovići                   area=   1.77 pop=48 -> [['11452', 'Novo Goražde', 48], ['20419', 'Novo Goražde', 0]] SPLIT
+   Bučje                        area=   1.66 pop=90 -> [['11452', 'Novo Goražde', 0], ['20419', 'Novo Goražde', 90]] SPLIT
+   Prisoje                      area=   1.65 pop=131 -> [['11452', 'Novo Goražde', 131]]
+   Žuželo                       area=    1.5 pop=127 -> [['11452', 'Novo Goražde', 13], ['20419', 'Novo Goražde', 114]] SPLIT
+   Gaj                          area=   1.43 pop=42 -> [['11452', 'Novo Goražde', 42]]
+   Hubjeri                      area=   1.43 pop=221 -> [['11452', 'Novo Goražde', 141], ['20419', 'Novo Goražde', 80]] SPLIT
+   Vranpotok                    area=   1.36 pop=93 -> [['11452', 'Novo Goražde', 93]]
+   Živojevići                   area=   0.89 pop=34 -> [['20419', 'Novo Goražde', 34]]
+   Goražde                      area=   0.78 pop=16273 -> [['11452', 'Novo Goražde', 16273]]
+
+## op:gorazde:kolovarice  area=41.684 centroid=[18.9288, 43.5829] shares={'FED': 45.8, 'RS': 54.2} pop_shares={'FED': 69.8, 'RS': 30.2}
+   Krašići                      area=   4.24 pop=91 -> [['20419', 'Novo Goražde', 91]]
+   Nevorići                     area=   4.19 pop=107 -> [['20419', 'Novo Goražde', 107]]
+   Žigovi                       area=   2.89 pop=53 -> [['11452', 'Novo Goražde', 24], ['20419', 'Novo Goražde', 29]] SPLIT
+   Karovići                     area=   2.87 pop=176 -> [['11452', 'Novo Goražde', 62], ['20419', 'Novo Goražde', 114]] SPLIT
+   Uhotići                      area=   2.61 pop=32 -> [['11452', 'Novo Goražde', 27], ['20419', 'Novo Goražde', 5]] SPLIT
+   Dragolji                     area=    2.3 pop=37 -> [['11452', 'Novo Goražde', 37], ['20419', 'Novo Goražde', 0]] SPLIT
+   Dragovići                    area=   2.17 pop=55 -> [['20419', 'Novo Goražde', 55]]
+   Kučine                       area=   2.11 pop=177 -> [['11452', 'Novo Goražde', 177]]
+   Ljeskovik                    area=    1.9 pop=20 -> [['20419', 'Novo Goražde', 20]]
+   Hajradinovići                area=   1.75 pop=13 -> [['20419', 'Novo Goražde', 13]]
+   Donje Selo                   area=    1.7 pop=65 -> [['11452', 'Novo Goražde', 47], ['20419', 'Novo Goražde', 18]] SPLIT
+   Kolovarice                   area=   1.48 pop=274 -> [['11452', 'Novo Goražde', 274]]
+   Kodžaga Polje                area=   1.43 pop=71 -> [['11452', 'Novo Goražde', 71]]
+   Šućurići                     area=   1.37 pop=89 -> [['11452', 'Novo Goražde', 89], ['20419', 'Novo Goražde', 0]] SPLIT
+   Bošanje                      area=   1.33 pop=25 -> [['20419', 'Novo Goražde', 25]]
+   Karauzovići                  area=   1.31 pop=52 -> [['11452', 'Novo Goražde', 20], ['20419', 'Novo Goražde', 32]] SPLIT
+   Ahmovići                     area=   1.25 pop=42 -> [['11452', 'Novo Goražde', 42]]
+   Podmeljine                   area=   1.24 pop=30 -> [['20419', 'Novo Goražde', 30]]
+   Gunjevići                    area=   1.19 pop=109 -> [['11452', 'Novo Goražde', 109]]
+   Džindići                     area=   1.05 pop=126 -> [['11452', 'Novo Goražde', 126]]
+   Zubovići u Oglečevi          area=   0.58 pop=236 -> [['11452', 'Novo Goražde', 236]]
+   Radmilovići                  area=   0.53 pop=42 -> [['20419', 'Novo Goražde', 42]]
+
+## op:gorazde:podkozara_donja_2  area=29.317 centroid=[19.0101, 43.6188] shares={'FED': 14.8, 'RS': 85.2} pop_shares={'FED': 32.6, 'RS': 67.4}
+   Podkozara Gornja             area=    5.5 pop=136 -> [['20419', 'Novo Goražde', 136]]
+   Vlahovići                    area=   4.55 pop=76 -> [['20419', 'Novo Goražde', 76]]
+   Zakalje                      area=   4.39 pop=64 -> [['20419', 'Novo Goražde', 64]]
+   Pribjenovići                 area=   4.11 pop=34 -> [['20419', 'Novo Goražde', 34]]
+   Biljin                       area=   3.33 pop=113 -> [['11452', 'Novo Goražde', 113]]
+   Rusanj                       area=   2.72 pop=36 -> [['20419', 'Novo Goražde', 36]]
+   Podhomara                    area=   1.92 pop=63 -> [['11452', 'Novo Goražde', 7], ['20419', 'Novo Goražde', 56]] SPLIT
+   Podkozara Donja              area=   1.66 pop=488 -> [['11452', 'Novo Goražde', 232], ['20419', 'Novo Goražde', 256]] SPLIT
+   Bašabulići                   area=   1.02 pop=70 -> [['20419', 'Novo Goražde', 70]]
+
+## op:gorazde:sopotnica  area=9.961 centroid=[18.9982, 43.7096] shares={'FED': 12.3, 'RS': 87.7} pop_shares={'FED': 14.4, 'RS': 85.6}
+   Kanlići                      area=    2.4 pop=20 -> [['20419', 'Novo Goražde', 20]]
+   Žitovo                       area=   2.04 pop=15 -> [['20419', 'Novo Goražde', 15]]
+   Sopotnica                    area=   1.32 pop=287 -> [['11452', 'Novo Goražde', 19], ['20419', 'Novo Goražde', 268]] SPLIT
+   Jabuka                       area=    1.2 pop=20 -> [['20419', 'Novo Goražde', 20]]
+   Radići                       area=   1.14 pop=57 -> [['11452', 'Novo Goražde', 57], ['20419', 'Novo Goražde', 0]] SPLIT
+   Pršeši                       area=   1.07 pop=48 -> [['20419', 'Novo Goražde', 26], ['20419', 'Novo Goražde', 22]]
+   Šovšići                      area=   0.45 pop=14 -> [['20419', 'Novo Goražde', 14]]
+   Bogdanići                    area=    0.3 pop=65 -> [['20419', 'Novo Goražde', 65]]
+
+## op:gracanica:gracanica_2  area=58.174 centroid=[18.2435, 44.6894] shares={'FED': 76.4, 'RS': 23.6} pop_shares={'FED': 86.8, 'RS': 13.2}
+   Orahovica Donja              area=  12.25 pop=4304 -> [['11479', 'Gračanica', 4304]]
+   Kakmuž                       area=   11.0 pop=2398 -> [['20478', 'Petrovo', 2398]]
+   Karanovac                    area=  10.32 pop=4525 -> [['20478', 'Petrovo', 1178], ['11479', 'Gračanica', 3347]] SPLIT
+   Gračanica                    area=   8.08 pop=12712 -> [['11479', 'Gračanica', 12712]]
+   Donja Lohinja                area=   6.31 pop=1091 -> [['11479', 'Gračanica', 1091]]
+   Pribava                      area=    6.2 pop=1682 -> [['11479', 'Gračanica', 1682]]
+   Lendići                      area=   3.77 pop=318 -> [['11479', 'Gračanica', 318]]
+
+## op:gradacac:donja_tramosnica_2  area=26.007 centroid=[18.4992, 44.8758] shares={'FED': 14.6, 'RS': 85.4} pop_shares={'FED': 15.7, 'RS': 84.3}
+   Donja Tramošnica             area=   9.94 pop=1753 -> [['10391', 'Gradačac', 42], ['20451', 'Pelagićevo', 1711]] SPLIT
+   Gornja Tramošnica            area=   8.42 pop=1463 -> [['10391', 'Gradačac', 190], ['20451', 'Pelagićevo', 1273]] SPLIT
+   Turić                        area=   7.54 pop=1610 -> [['10391', 'Gradačac', 525], ['20451', 'Pelagićevo', 1085]] SPLIT
+
+## op:gradacac:mionica  area=56.694 centroid=[18.54, 44.8132] shares={'FED': 73.9, 'RS': 26.1} pop_shares={'FED': 84.6, 'RS': 15.4}
+   Mionica                      area=  15.76 pop=5485 -> [['10391', 'Gradačac', 5485]]
+   Avramovina                   area=   13.4 pop=249 -> [['10391', 'Gradačac', 249]]
+   Blaževac                     area=   8.85 pop=1166 -> [['10391', 'Gradačac', 10], ['20451', 'Pelagićevo', 1156]] SPLIT
+   Porebrice                    area=   6.82 pop=798 -> [['10391', 'Gradačac', 104], ['20451', 'Pelagićevo', 694]] SPLIT
+   Srnice Donje                 area=   4.89 pop=989 -> [['10391', 'Gradačac', 989]]
+   Hrgovi Donji                 area=    4.6 pop=671 -> [['10391', 'Gradačac', 671]]
+   Vučkovci                     area=   2.11 pop=2657 -> [['10391', 'Gradačac', 2657]]
+
+## op:gradacac:pelagicevo  area=83.075 centroid=[18.5466, 44.9241] shares={'FED': 12.3, 'RS': 87.7} pop_shares={'FED': 0.9, 'RS': 99.1}
+   Pelagićevo                   area=  21.65 pop=3069 -> [['20451', 'Pelagićevo', 3069]]
+   Orlovo Polje                 area=   21.5 pop=619 -> [['20451', 'Pelagićevo', 619]]
+   Njivak                       area=  15.67 pop=388 -> [['20451', 'Pelagićevo', 388]]
+   Samarevac                    area=  14.53 pop=290 -> [['10391', 'Gradačac', 16], ['20451', 'Pelagićevo', 274]] SPLIT
+   Gajevi                       area=   9.34 pop=25 -> [['10391', 'Gradačac', 25]]
+
+## op:ilidza:kasindo  area=41.876 centroid=[18.366, 43.7507] shares={'FED': 28.5, 'RS': 71.5} pop_shares={'FED': 2.9, 'RS': 97.1}
+   Gornje Mladice               area=  13.82 pop=198 -> [['20176', 'Istočna Ilidža', 198]]
+   Jasen                        area=  11.65 pop=26 -> [['11550', 'Ilidža', 26]]
+   Kasindo                      area=  11.45 pop=911 -> [['20176', 'Istočna Ilidža', 911]]
+   Krupac                       area=   4.78 pop=326 -> [['11550', 'Ilidža', 17], ['20176', 'Istočna Ilidža', 309]] SPLIT
+
+## op:ilidza:sarajevo_dio_ilidza_2  area=70.786 centroid=[18.2816, 43.7865] shares={'FED': 95.7, 'RS': 4.3} pop_shares={'FED': 93.1, 'RS': 6.9}
+   Sarajevo Dio - Ilidža        area=  44.31 pop=63719 -> [['11550', 'Ilidža', 59344], ['20176', 'Istočna Ilidža', 4375]] SPLIT
+   Vlakovo                      area=  13.97 pop=2 -> [['11550', 'Ilidža', 2]]
+   Zoranovići                   area=   12.2 pop=9 -> [['11550', 'Ilidža', 9]]
+
+## op:jajce:jezero_2  area=22.284 centroid=[17.181, 44.3154] shares={'FED': 20.3, 'RS': 79.7} pop_shares={'FED': 4.7, 'RS': 95.3}
+   Ljoljići                     area=   7.48 pop=205 -> [['20222', 'Jezero', 205]]
+   Čerkazovići                  area=   5.74 pop=220 -> [['20222', 'Jezero', 220]]
+   Jezero                       area=   4.54 pop=834 -> [['11487', 'Jajce', 16], ['20222', 'Jezero', 818]] SPLIT
+   Žaovine                      area=   4.42 pop=45 -> [['11487', 'Jajce', 45]]
+
+## op:jajce:prisoje  area=43.006 centroid=[17.1561, 44.3618] shares={'FED': 8.6, 'RS': 91.4} pop_shares={'FED': 16.7, 'RS': 83.3}
+   Borci                        area=  17.27 pop=227 -> [['11487', 'Jajce', 28], ['20222', 'Jezero', 199]] SPLIT
+   Perućica                     area=   8.98 pop=95 -> [['20222', 'Jezero', 95]]
+   Kovačevac                    area=   7.59 pop=131 -> [['20222', 'Jezero', 131]]
+   Prisoje                      area=   5.06 pop=456 -> [['11487', 'Jajce', 139], ['20222', 'Jezero', 317]] SPLIT
+   Đumezlije                    area=   3.92 pop=92 -> [['20222', 'Jezero', 92]]
+
+## op:kalesija:gojcin_2  area=51.089 centroid=[18.8479, 44.3832] shares={'FED': 37.0, 'RS': 63.0} pop_shares={'FED': 45.2, 'RS': 54.8}
+   Gojčin                       area=  11.23 pop=1067 -> [['11495', 'Kalesija', 776], ['20427', 'Osmaci', 291]] SPLIT
+   Sajtovići                    area=  10.78 pop=353 -> [['20427', 'Osmaci', 353]]
+   Osmaci                       area=   8.72 pop=844 -> [['11495', 'Kalesija', 0], ['20427', 'Osmaci', 844]] SPLIT
+   Jelovo Brdo                  area=    8.3 pop=607 -> [['11495', 'Kalesija', 607]]
+   Rakino Brdo                  area=    7.0 pop=239 -> [['20427', 'Osmaci', 239]]
+   Zelina                       area=   4.82 pop=652 -> [['11495', 'Kalesija', 318], ['20427', 'Osmaci', 334]] SPLIT
+
+## op:kalesija:seher_2  area=61.433 centroid=[18.9659, 44.3703] shares={'FED': 17.5, 'RS': 82.5} pop_shares={'FED': 11.3, 'RS': 88.7}
+   Šeher                        area=   9.28 pop=1187 -> [['20427', 'Osmaci', 1187]]
+   Hajvazi                      area=   7.45 pop=569 -> [['20427', 'Osmaci', 569]]
+   Bulatovci                    area=   6.67 pop=380 -> [['11495', 'Kalesija', 380], ['20427', 'Osmaci', 0]] SPLIT
+   Kosovača                     area=    6.5 pop=138 -> [['20427', 'Osmaci', 138]]
+   Caparde                      area=   4.81 pop=855 -> [['20427', 'Osmaci', 855]]
+   Viličevići                   area=   4.64 pop=555 -> [['20427', 'Osmaci', 555]]
+   Kulina                       area=   4.62 pop=174 -> [['20427', 'Osmaci', 174]]
+   Mahala                       area=   4.62 pop=626 -> [['20427', 'Osmaci', 626]]
+   Borogovo                     area=   4.41 pop=276 -> [['20427', 'Osmaci', 276]]
+   Staro Selo                   area=   4.03 pop=290 -> [['11495', 'Kalesija', 290]]
+   Kusonje                      area=    2.1 pop=413 -> [['20427', 'Osmaci', 413]]
+   Matkovac                     area=   2.03 pop=491 -> [['20427', 'Osmaci', 491]]
+
+## op:kljuc:donje_ratkovo_2  area=178.306 centroid=[16.9206, 44.541] shares={'FED': 14.5, 'RS': 85.5} pop_shares={'FED': 21.4, 'RS': 78.6}
+   Busije                       area=  40.77 pop=202 -> [['20508', 'Ribnik', 202]]
+   Gornje Sokolovo              area=  34.39 pop=161 -> [['11509', 'Ključ', 0], ['20508', 'Ribnik', 161]] SPLIT
+   Donje Sokolovo               area=  22.47 pop=498 -> [['11509', 'Ključ', 498], ['20508', 'Ribnik', 0]] SPLIT
+   Gornje Ratkovo               area=  16.54 pop=502 -> [['11509', 'Ključ', 0], ['20508', 'Ribnik', 502]] SPLIT
+   Sitnica                      area=  15.89 pop=245 -> [['20508', 'Ribnik', 245]]
+   Stražice                     area=   12.5 pop=306 -> [['20508', 'Ribnik', 306]]
+   Donje Ratkovo                area=   8.07 pop=1068 -> [['11509', 'Ključ', 340], ['20508', 'Ribnik', 728]] SPLIT
+   Dragoraj                     area=   7.93 pop=214 -> [['20508', 'Ribnik', 214]]
+   Zableće                      area=   7.82 pop=481 -> [['20508', 'Ribnik', 481]]
+   Ljubine                      area=   5.77 pop=153 -> [['11509', 'Ključ', 18], ['20508', 'Ribnik', 135]] SPLIT
+   Gornja Previja               area=   5.35 pop=163 -> [['20508', 'Ribnik', 163]]
+
+## op:kupres:novo_selo_2  area=83.531 centroid=[17.1273, 44.0749] shares={'FED': 22.5, 'RS': 77.5} pop_shares={'FED': 33.3, 'RS': 66.7}
+   Mrđanovci                    area=  34.64 pop=281 -> [['11517', 'Kupres', 41], ['20303', 'Kupres', 240]] SPLIT
+   Novo Selo                    area=  18.82 pop=320 -> [['11517', 'Kupres', 0], ['20303', 'Kupres', 320]] SPLIT
+   Šemenovci                    area=   17.8 pop=247 -> [['11517', 'Kupres', 25], ['20303', 'Kupres', 222]] SPLIT
+   Blagaj                       area=   8.21 pop=209 -> [['11517', 'Kupres', 209]]
+   Bajramovci                   area=   3.67 pop=115 -> [['11517', 'Kupres', 115]]
+
+## op:lopare:celic_3  area=20.531 centroid=[18.8033, 44.7352] shares={'FED': 75.3, 'RS': 24.7} pop_shares={'FED': 94.0, 'RS': 6.0}
+   Ratkovići                    area=   7.92 pop=1176 -> [['11231', 'Čelić', 1169], ['20320', 'Lopare', 7]] SPLIT
+   Čelić                        area=   7.19 pop=3215 -> [['11231', 'Čelić', 3171], ['20320', 'Lopare', 44]] SPLIT
+   Pukiš                        area=   5.33 pop=249 -> [['11231', 'Čelić', 20], ['20320', 'Lopare', 229]] SPLIT
+
+## op:lopare:jablanica_2  area=24.727 centroid=[18.7311, 44.609] shares={'FED': 35.9, 'RS': 64.1} pop_shares={'FED': 8.7, 'RS': 91.3}
+   Jablanica                    area=   8.66 pop=1119 -> [['11231', 'Čelić', 0], ['20320', 'Lopare', 1119]] SPLIT
+   Visori                       area=   8.43 pop=146 -> [['11231', 'Čelić', 146], ['20320', 'Lopare', 0]] SPLIT
+   Piperi                       area=   7.53 pop=1113 -> [['11231', 'Čelić', 61], ['20320', 'Lopare', 1052]] SPLIT
+
+## op:lopare:nahvioci  area=48.554 centroid=[18.7154, 44.6527] shares={'FED': 96.9, 'RS': 3.1} pop_shares={'FED': 95.3, 'RS': 4.7}
+   Drijenča                     area=  10.56 pop=990 -> [['11231', 'Čelić', 990]]
+   Šibošnica                    area=   8.79 pop=294 -> [['11231', 'Čelić', 294]]
+   Nahvioci                     area=   7.22 pop=834 -> [['11231', 'Čelić', 826], ['20320', 'Lopare', 8]] SPLIT
+   Brnjik                       area=    6.5 pop=469 -> [['11231', 'Čelić', 469]]
+   Lukavica                     area=   5.87 pop=687 -> [['11231', 'Čelić', 517], ['20320', 'Lopare', 170]] SPLIT
+   Bučje                        area=   5.81 pop=214 -> [['11231', 'Čelić', 214]]
+   Miladići                     area=   3.59 pop=302 -> [['11231', 'Čelić', 302]]
+
+## op:mostar:kruzanj_2  area=207.432 centroid=[17.997, 43.411] shares={'FED': 67.0, 'RS': 33.0} pop_shares={'FED': 93.0, 'RS': 7.0}
+   Zijemlje                     area=   74.4 pop=153 -> [['11410', 'Grad Mostar', 13], ['20192', 'Grad Mostar', 140]] SPLIT
+   Hrušta                       area=  39.43 pop=0 -> [['11410', 'Grad Mostar', 0]]
+   Podvelež                     area=  35.84 pop=692 -> [['11410', 'Grad Mostar', 692]]
+   Banjdol                      area=  33.11 pop=317 -> [['11410', 'Grad Mostar', 317]]
+   Kružanj                      area=  23.71 pop=840 -> [['11410', 'Grad Mostar', 840]]
+
+## op:mostar:vranjevici_2  area=76.479 centroid=[17.9454, 43.2544] shares={'FED': 85.6, 'RS': 14.4} pop_shares={'FED': 83.9, 'RS': 16.1}
+   Kokorina                     area=  23.16 pop=648 -> [['11410', 'Grad Mostar', 605], ['20192', 'Grad Mostar', 43]] SPLIT
+   Vranjevići                   area=  20.01 pop=796 -> [['11410', 'Grad Mostar', 796]]
+   Rabina                       area=  12.37 pop=209 -> [['11410', 'Grad Mostar', 209]]
+   Kamena                       area=  11.27 pop=399 -> [['11410', 'Grad Mostar', 64], ['20192', 'Grad Mostar', 335]] SPLIT
+   Žulja                        area=   9.33 pop=293 -> [['11410', 'Grad Mostar', 293]]
+
+## op:odzak:donja_dubica  area=117.07400000000001 centroid=[18.3411, 45.036] shares={'FED': 74.3, 'RS': 25.7} pop_shares={'FED': 76.0, 'RS': 24.0}
+   Donja Dubica                 area=  26.09 pop=3254 -> [['11525', 'Odžak', 3254]]
+   Ada                          area=  22.22 pop=638 -> [['11525', 'Odžak', 366], ['20109', 'Vukosavlje', 272]] SPLIT
+   Gornja Dubica                area=   17.0 pop=1596 -> [['11525', 'Odžak', 1596]]
+   Odžak                        area=  12.31 pop=8987 -> [['11525', 'Odžak', 8987]]
+   Pećnik                       area=  11.99 pop=1487 -> [['20109', 'Vukosavlje', 1487]]
+   Novo Selo                    area=   9.31 pop=2669 -> [['11525', 'Odžak', 2669], ['20109', 'Vukosavlje', 0]] SPLIT
+   Prud                         area=   8.95 pop=1293 -> [['11525', 'Odžak', 1293]]
+   Modrički Lug                 area=   7.21 pop=1432 -> [['20109', 'Vukosavlje', 1033], ['20109', 'Vukosavlje', 399]]
+   Vukosavlje                   area=   1.21 pop=2546 -> [['20109', 'Vukosavlje', 852], ['20109', 'Vukosavlje', 1694]]
+
+## op:odzak:gornji_svilaj  area=45.405 centroid=[18.2164, 45.07] shares={'FED': 48.1, 'RS': 51.9} pop_shares={'FED': 65.3, 'RS': 34.7}
+   Gnionica                     area=   13.8 pop=918 -> [['20109', 'Vukosavlje', 918]]
+   Gornji Svilaj                area=  11.99 pop=1810 -> [['11525', 'Odžak', 1810]]
+   Brusnica Mala                area=   9.74 pop=394 -> [['11525', 'Odžak', 394]]
+   Jošavica                     area=   9.67 pop=252 -> [['20109', 'Vukosavlje', 252]]
+
+## op:odzak:potocani_2  area=57.37 centroid=[18.2901, 45.0966] shares={'FED': 84.3, 'RS': 15.7} pop_shares={'FED': 86.0, 'RS': 14.0}
+   Donji Svilaj                 area=  16.69 pop=1576 -> [['11525', 'Odžak', 1576]]
+   Novi Grad                    area=  10.67 pop=1907 -> [['11525', 'Odžak', 1907]]
+   Posavska Mahala              area=   9.66 pop=1199 -> [['11525', 'Odžak', 1199]]
+   Srnava                       area=   7.77 pop=880 -> [['20109', 'Vukosavlje', 880]]
+   Vrbovac                      area=   6.65 pop=1721 -> [['11525', 'Odžak', 1695], ['20109', 'Vukosavlje', 26]] SPLIT
+   Potočani                     area=   5.68 pop=2250 -> [['11525', 'Odžak', 1822], ['20109', 'Vukosavlje', 428]] SPLIT
+
+## op:orasje:orasje  area=36.32 centroid=[18.7453, 44.9849] shares={'FED': 81.2, 'RS': 18.8} pop_shares={'FED': 96.1, 'RS': 3.9}
+   Kopanice                     area=  14.04 pop=1317 -> [['11533', 'Orašje', 1317]]
+   Vidovice                     area=   7.53 pop=2273 -> [['11533', 'Orašje', 2273]]
+   Jenjić                       area=   5.65 pop=290 -> [['11533', 'Orašje', 56], ['20150', 'Donji Žabar', 234]] SPLIT
+   Orašje                       area=    4.9 pop=3907 -> [['11533', 'Orašje', 3907]]
+   Lepnica                      area=   4.04 pop=140 -> [['11533', 'Orašje', 62], ['20150', 'Donji Žabar', 78]] SPLIT
+
+## op:orasje:ostra_luka  area=77.032 centroid=[18.6395, 44.9686] shares={'FED': 36.3, 'RS': 63.7} pop_shares={'FED': 50.6, 'RS': 49.4}
+   Donji Žabar                  area=  25.43 pop=1420 -> [['20150', 'Donji Žabar', 1420]]
+   Oštra Luka                   area=  13.38 pop=3041 -> [['11533', 'Orašje', 1915], ['20150', 'Donji Žabar', 1126]] SPLIT
+   Bok                          area=  13.14 pop=1705 -> [['11533', 'Orašje', 1705]]
+   Čović Polje                  area=   9.25 pop=796 -> [['11533', 'Orašje', 0], ['20150', 'Donji Žabar', 796]] SPLIT
+   Lončari                      area=   9.23 pop=484 -> [['20150', 'Donji Žabar', 484]]
+   Bukova Greda                 area=   6.27 pop=306 -> [['11533', 'Orašje', 306]]
+
+## op:pale:podgrab  area=87.921 centroid=[18.7783, 43.7054] shares={'FED': 51.3, 'RS': 48.7} pop_shares={'FED': 43.6, 'RS': 56.4}
+   Podgrab                      area=  21.02 pop=722 -> [['20443', 'Pale', 722]]
+   Kamenica                     area=  15.16 pop=83 -> [['11576', 'Pale', 18], ['20443', 'Pale', 65]] SPLIT
+   Brdarići                     area=  13.31 pop=88 -> [['11576', 'Pale', 88], ['20443', 'Pale', 0]] SPLIT
+   Datelji                      area=  10.61 pop=174 -> [['11576', 'Pale', 174]]
+   Srednje                      area=    9.7 pop=30 -> [['11576', 'Pale', 0], ['20443', 'Pale', 30]] SPLIT
+   Čeljadinići                  area=   6.23 pop=86 -> [['11576', 'Pale', 86]]
+   Brojnići                     area=   5.87 pop=78 -> [['11576', 'Pale', 78]]
+   Čemernica                    area=    4.1 pop=79 -> [['11576', 'Pale', 79]]
+   Komrani                      area=   1.54 pop=109 -> [['11576', 'Pale', 109]]
+
+## op:pale:praca  area=44.851 centroid=[18.8091, 43.7601] shares={'FED': 48.8, 'RS': 51.2} pop_shares={'FED': 70.6, 'RS': 29.4}
+   Modrik                       area=  13.95 pop=88 -> [['20443', 'Pale', 88]]
+   Prača                        area=  11.74 pop=1024 -> [['11576', 'Pale', 710], ['20443', 'Pale', 314]] SPLIT
+   Šainovići                    area=   5.79 pop=200 -> [['11576', 'Pale', 200]]
+   Turkovići                    area=   3.94 pop=249 -> [['11576', 'Pale', 249]]
+   Renovica                     area=   3.94 pop=84 -> [['11576', 'Pale', 84]]
+   Donja Vinča                  area=    3.1 pop=35 -> [['11576', 'Pale', 0], ['20443', 'Pale', 35]] SPLIT
+   Petovići                     area=   1.16 pop=51 -> [['20443', 'Pale', 51]]
+   Strane                       area=   1.03 pop=29 -> [['20443', 'Pale', 29]]
+
+## op:sanski_most:budimlic_japra_2  area=94.697 centroid=[16.4414, 44.8641] shares={'FED': 29.9, 'RS': 70.1} pop_shares={'FED': 35.9, 'RS': 64.1}
+   Marini                       area=  19.31 pop=105 -> [['20435', 'Oštra Luka', 105]]
+   Budimlić Japra               area=  14.34 pop=463 -> [['20435', 'Oštra Luka', 463]]
+   Halilovci                    area=  10.71 pop=169 -> [['20435', 'Oštra Luka', 169]]
+   Slatina                      area=   9.44 pop=96 -> [['11541', 'Sanski Most', 37], ['20435', 'Oštra Luka', 59]] SPLIT
+   Kozin                        area=   7.94 pop=92 -> [['11541', 'Sanski Most', 92]]
+   Donji Lipnik                 area=   7.86 pop=293 -> [['11541', 'Sanski Most', 293]]
+   Mrkalji                      area=   7.05 pop=81 -> [['11541', 'Sanski Most', 0], ['20435', 'Oštra Luka', 81]] SPLIT
+   Hadrovci                     area=   5.94 pop=76 -> [['11541', 'Sanski Most', 0], ['20435', 'Oštra Luka', 76]] SPLIT
+   Đurići                       area=   5.77 pop=96 -> [['11541', 'Sanski Most', 96]]
+   Bjeline                      area=    3.0 pop=48 -> [['11541', 'Sanski Most', 48]]
+   Duge Njive                   area=   2.91 pop=57 -> [['20435', 'Oštra Luka', 57]]
+
+## op:sanski_most:donja_kozica  area=77.057 centroid=[16.8682, 44.6739] shares={'FED': 25.0, 'RS': 75.0} pop_shares={'FED': 37.0, 'RS': 63.0}
+   Gornja Tramošnja             area=  36.26 pop=494 -> [['11541', 'Sanski Most', 117], ['20435', 'Oštra Luka', 377]] SPLIT
+   Hazići                       area=  12.33 pop=99 -> [['20435', 'Oštra Luka', 99]]
+   Gornja Kozica                area=   11.0 pop=145 -> [['11541', 'Sanski Most', 48], ['20435', 'Oštra Luka', 97]] SPLIT
+   Donja Kozica                 area=   10.7 pop=606 -> [['11541', 'Sanski Most', 51], ['20435', 'Oštra Luka', 555]] SPLIT
+   Donja Tramošnja              area=   5.28 pop=173 -> [['11541', 'Sanski Most', 160], ['20435', 'Oštra Luka', 13]] SPLIT
+   Podovi                       area=   1.15 pop=294 -> [['11541', 'Sanski Most', 294]]
+
+## op:sanski_most:stari_majdan  area=91.717 centroid=[16.6058, 44.8612] shares={'FED': 26.4, 'RS': 73.6} pop_shares={'FED': 54.6, 'RS': 45.4}
+   Garevica                     area=  29.43 pop=139 -> [['20435', 'Oštra Luka', 139]]
+   Stari Majdan                 area=  19.41 pop=1212 -> [['11541', 'Sanski Most', 1212]]
+   Stara Rijeka                 area=  16.97 pop=674 -> [['11541', 'Sanski Most', 121], ['20435', 'Oštra Luka', 553]] SPLIT
+   Batkovci                     area=  13.62 pop=213 -> [['11541', 'Sanski Most', 25], ['20435', 'Oštra Luka', 188]] SPLIT
+   Ovanjska                     area=  11.87 pop=247 -> [['20435', 'Oštra Luka', 247]]
+
+## op:skender_vakuf:donji_koricani  area=170.833 centroid=[17.4624, 44.3862] shares={'FED': 57.5, 'RS': 42.5} pop_shares={'FED': 86.1, 'RS': 13.9}
+   Gornji Korićani              area=  46.83 pop=222 -> [['20257', 'Kneževo', 222]]
+   Donji Korićani               area=  25.44 pop=554 -> [['20257', 'Kneževo', 554]]
+   Vukovići                     area=  19.64 pop=405 -> [['11274', 'Dobretići', 405]]
+   Vitovlje Malo                area=  13.45 pop=203 -> [['11274', 'Dobretići', 203]]
+   Milaševci                    area=  10.94 pop=278 -> [['11274', 'Dobretići', 278]]
+   Melina                       area=   9.76 pop=490 -> [['11274', 'Dobretići', 490]]
+   Zapeće                       area=    6.8 pop=250 -> [['11274', 'Dobretići', 250]]
+   Kričići-Jejići               area=   6.09 pop=391 -> [['11274', 'Dobretići', 391]]
+   Gornji Orašac                area=   4.62 pop=175 -> [['11274', 'Dobretići', 175]]
+   Bunar                        area=   4.44 pop=386 -> [['11274', 'Dobretići', 386]]
+   Prisika                      area=   4.03 pop=160 -> [['11274', 'Dobretići', 160]]
+   Davidovići                   area=    3.3 pop=185 -> [['11274', 'Dobretići', 185]]
+   Donji Orašac                 area=   2.81 pop=89 -> [['11274', 'Dobretići', 89]]
+   Dobretići                    area=   2.67 pop=336 -> [['11274', 'Dobretići', 336]]
+   Zubovići                     area=   2.48 pop=375 -> [['11274', 'Dobretići', 375]]
+   Pavlovići                    area=   1.69 pop=141 -> [['11274', 'Dobretići', 141]]
+   Slipčevići                   area=   1.58 pop=110 -> [['11274', 'Dobretići', 110]]
+   Mijatovići                   area=   1.35 pop=250 -> [['11274', 'Dobretići', 250]]
+   Zasavica                     area=   1.18 pop=270 -> [['11274', 'Dobretići', 270]]
+   Brnjići                      area=   0.99 pop=296 -> [['11274', 'Dobretići', 296]]
+
+## op:stolac:pjesivac_kula_2  area=110.764 centroid=[17.9904, 43.1398] shares={'FED': 41.5, 'RS': 58.5} pop_shares={'FED': 80.8, 'RS': 19.2}
+   Dabrica                      area=  40.79 pop=478 -> [['20028', 'Berkovići', 478]]
+   Ljubljenica                  area=   23.7 pop=132 -> [['11606', 'Stolac', 0], ['20028', 'Berkovići', 132]] SPLIT
+   Pješivac-Kula                area=  13.41 pop=823 -> [['11606', 'Stolac', 823]]
+   Pješivac-Greda               area=   8.79 pop=512 -> [['11606', 'Stolac', 512]]
+   Barane                       area=   8.78 pop=167 -> [['11606', 'Stolac', 167], ['20028', 'Berkovići', 0]] SPLIT
+   Poprati                      area=   8.61 pop=340 -> [['11606', 'Stolac', 340]]
+   Borojevići                   area=   6.19 pop=717 -> [['11606', 'Stolac', 717]]
+
+## op:stolac:rotimlja_2  area=91.144 centroid=[17.9033, 43.177] shares={'FED': 70.5, 'RS': 29.5} pop_shares={'FED': 88.3, 'RS': 11.7}
+   Šćepan Krst                  area=  16.08 pop=191 -> [['20028', 'Berkovići', 191]]
+   Trijebanj                    area=  15.79 pop=352 -> [['11606', 'Stolac', 352]]
+   Hodovo                       area=  11.94 pop=418 -> [['11606', 'Stolac', 410], ['20028', 'Berkovići', 8]] SPLIT
+   Rotimlja                     area=  10.45 pop=718 -> [['11606', 'Stolac', 718]]
+   Brštanik                     area=  10.44 pop=186 -> [['11606', 'Stolac', 0], ['20028', 'Berkovići', 186]] SPLIT
+   Kozice                       area=   9.24 pop=126 -> [['11606', 'Stolac', 126]]
+   Crnići-Kula                  area=    8.6 pop=628 -> [['11606', 'Stolac', 628]]
+   Crnići-Greda                 area=   8.19 pop=658 -> [['11606', 'Stolac', 658]]
+
+## op:stolac:stolac_2  area=66.774 centroid=[18.0173, 43.0497] shares={'FED': 55.6, 'RS': 44.4} pop_shares={'FED': 92.7, 'RS': 7.3}
+   Žegulja                      area=  26.49 pop=287 -> [['11606', 'Stolac', 54], ['20028', 'Berkovići', 233]] SPLIT
+   Poplat                       area=  14.09 pop=457 -> [['11606', 'Stolac', 457], ['20028', 'Berkovići', 0]] SPLIT
+   Bitunja                      area=   8.01 pop=335 -> [['20028', 'Berkovići', 335]]
+   Ošanjići                     area=   6.46 pop=1102 -> [['11606', 'Stolac', 1102]]
+   Stolac                       area=   5.77 pop=5530 -> [['11606', 'Stolac', 5530]]
+   Komanje Brdo                 area=   5.66 pop=43 -> [['11606', 'Stolac', 43]]
+
+## op:titov_drvar:prekaja_2  area=275.159 centroid=[16.6069, 44.3423] shares={'FED': 65.0, 'RS': 35.0} pop_shares={'FED': 96.0, 'RS': 4.0}
+   Potoci                       area=  50.87 pop=27 -> [['11614', 'Drvar', 0], ['20184', 'Istočni Drvar', 27]] SPLIT
+   Poljice                      area=  35.49 pop=182 -> [['11614', 'Drvar', 182]]
+   Uvala                        area=  28.34 pop=33 -> [['20184', 'Istočni Drvar', 33]]
+   Mrđe                         area=  25.13 pop=311 -> [['11614', 'Drvar', 311]]
+   Bunčevac                     area=  25.01 pop=82 -> [['11614', 'Drvar', 82]]
+   Podić                        area=   17.2 pop=96 -> [['11614', 'Drvar', 96]]
+   Srnetica                     area=   16.7 pop=1 -> [['20184', 'Istočni Drvar', 1]]
+   Prekaja                      area=  14.92 pop=430 -> [['11614', 'Drvar', 430]]
+   Ljeskovica                   area=  14.69 pop=79 -> [['11614', 'Drvar', 79]]
+   Motike                       area=  13.82 pop=64 -> [['11614', 'Drvar', 64]]
+   Šajinovac                    area=  13.36 pop=20 -> [['11614', 'Drvar', 20]]
+   Brda                         area=   9.33 pop=45 -> [['11614', 'Drvar', 45]]
+   Župa                         area=   5.17 pop=81 -> [['11614', 'Drvar', 81]]
+   Župica                       area=   3.88 pop=62 -> [['11614', 'Drvar', 62]]
+
+## op:trebinje:bihovo_2  area=104.48 centroid=[18.2817, 42.6713] shares={'FED': 25.9, 'RS': 74.1} pop_shares={'FED': 8.7, 'RS': 91.3}
+   Glavska                      area=   10.5 pop=44 -> [['11304', 'Ravno', 44]]
+   Kremeni Do                   area=   8.28 pop=42 -> [['20583', 'Trebinje', 42]]
+   Zagradinje                   area=   8.12 pop=24 -> [['11304', 'Ravno', 24]]
+   Lapja                        area=   7.64 pop=34 -> [['20583', 'Trebinje', 34]]
+   Poljice Čičevo               area=   7.35 pop=32 -> [['11304', 'Ravno', 0], ['20583', 'Trebinje', 32]] SPLIT
+   Duži                         area=   5.67 pop=24 -> [['20583', 'Trebinje', 24]]
+   Slivnica Površ               area=   5.63 pop=21 -> [['11304', 'Ravno', 21], ['20583', 'Trebinje', 0]] SPLIT
+   Ljubovo                      area=   5.14 pop=54 -> [['20583', 'Trebinje', 54]]
+   Ljekova                      area=   4.57 pop=26 -> [['20583', 'Trebinje', 26]]
+   Gola Glavica                 area=   4.56 pop=20 -> [['11304', 'Ravno', 0], ['20583', 'Trebinje', 20]] SPLIT
+   Bihovo                       area=   4.32 pop=658 -> [['20583', 'Trebinje', 658]]
+   Volujac                      area=   4.09 pop=102 -> [['20583', 'Trebinje', 102]]
+   Tvrdoš                       area=    4.0 pop=24 -> [['20583', 'Trebinje', 24]]
+   Marić Međine                 area=   3.62 pop=8 -> [['20583', 'Trebinje', 8]]
+   Dražin Do                    area=   3.55 pop=46 -> [['20583', 'Trebinje', 46]]
+   Bijelač                      area=   3.37 pop=14 -> [['20583', 'Trebinje', 14]]
+   Orašje Površ                 area=   3.26 pop=20 -> [['20583', 'Trebinje', 20]]
+   Bijograd                     area=   3.25 pop=37 -> [['20583', 'Trebinje', 37]]
+   Baonine                      area=   3.12 pop=6 -> [['11304', 'Ravno', 0], ['20583', 'Trebinje', 6]] SPLIT
+   Sparožići                    area=   2.72 pop=22 -> [['11304', 'Ravno', 22]]
+   Mrnjići                      area=   1.26 pop=22 -> [['11304', 'Ravno', 0], ['20583', 'Trebinje', 22]] SPLIT
+
+## op:trebinje:ivanica  area=137.244 centroid=[18.1235, 42.7203] shares={'FED': 92.3, 'RS': 7.7} pop_shares={'FED': 96.6, 'RS': 3.4}
+   Šćenica Bobani               area=  14.08 pop=33 -> [['11304', 'Ravno', 33]]
+   Kalađurđevići                area=  11.47 pop=7 -> [['11304', 'Ravno', 7]]
+   Čopice                       area=  10.77 pop=58 -> [['11304', 'Ravno', 58]]
+   Vlaka                        area=    9.7 pop=7 -> [['11304', 'Ravno', 7]]
+   Grebci                       area=   9.54 pop=15 -> [['11304', 'Ravno', 15]]
+   Ivanica                      area=   9.06 pop=168 -> [['11304', 'Ravno', 168]]
+   Slivnica Bobani              area=   8.89 pop=44 -> [['11304', 'Ravno', 44]]
+   Bobovišta                    area=   8.16 pop=38 -> [['11304', 'Ravno', 38]]
+   Uskoplje                     area=   7.12 pop=25 -> [['11304', 'Ravno', 25]]
+   Rupni Do                     area=   6.89 pop=20 -> [['11304', 'Ravno', 20]]
+   Orah                         area=   5.68 pop=36 -> [['11304', 'Ravno', 36]]
+   Vukovići                     area=   5.61 pop=6 -> [['11304', 'Ravno', 6]]
+   Slavogostići                 area=   5.56 pop=16 -> [['11304', 'Ravno', 16]]
+   Cerovac                      area=   5.35 pop=7 -> [['11304', 'Ravno', 0], ['20583', 'Trebinje', 7]] SPLIT
+   Začula                       area=   5.25 pop=23 -> [['11304', 'Ravno', 23]]
+   Klikovići                    area=   5.22 pop=11 -> [['11304', 'Ravno', 0], ['20583', 'Trebinje', 11]] SPLIT
+   Zaplanik                     area=    4.4 pop=3 -> [['11304', 'Ravno', 3]]
+   Nenovići                     area=   3.87 pop=8 -> [['11304', 'Ravno', 8]]
+
+## op:trebinje:velicani  area=96.455 centroid=[18.0218, 42.9006] shares={'FED': 37.6, 'RS': 62.4} pop_shares={'FED': 52.8, 'RS': 47.2}
+   Dubljani                     area=  10.66 pop=29 -> [['20583', 'Trebinje', 29]]
+   Čvaljina                     area=  10.32 pop=97 -> [['11304', 'Ravno', 97]]
+   Grmljani                     area=    9.2 pop=84 -> [['11304', 'Ravno', 0], ['20583', 'Trebinje', 84]] SPLIT
+   Veličani                     area=   8.84 pop=118 -> [['11304', 'Ravno', 0], ['20583', 'Trebinje', 118]] SPLIT
+   Do                           area=   8.57 pop=74 -> [['20583', 'Trebinje', 74]]
+   Ravno                        area=   7.28 pop=198 -> [['11304', 'Ravno', 198]]
+   Zavala                       area=   7.08 pop=105 -> [['11304', 'Ravno', 105]]
+   Strujići                     area=   6.54 pop=50 -> [['11304', 'Ravno', 0], ['20583', 'Trebinje', 50]] SPLIT
+   Kotezi                       area=   5.18 pop=22 -> [['11304', 'Ravno', 0], ['20583', 'Trebinje', 22]] SPLIT
+   Čavaš                        area=   5.14 pop=44 -> [['11304', 'Ravno', 44]]
+   Dvrsnica                     area=   3.84 pop=28 -> [['11304', 'Ravno', 28]]
+   Korlati                      area=   3.67 pop=0 -> [['20583', 'Trebinje', 0]]
+   Orašje Popovo                area=   3.35 pop=72 -> [['11304', 'Ravno', 52], ['20583', 'Trebinje', 20]] SPLIT
+   Prhinje                      area=   3.29 pop=35 -> [['20583', 'Trebinje', 35]]
+   Dodanovići                   area=   3.07 pop=36 -> [['20583', 'Trebinje', 36]]
+
+## op:trebinje:zakovo_2  area=111.077 centroid=[18.1166, 42.8113] shares={'FED': 18.7, 'RS': 81.3} pop_shares={'FED': 8.5, 'RS': 91.5}
+   Poljice Popovo               area=   9.44 pop=71 -> [['20583', 'Trebinje', 71]]
+   Drijenjani                   area=   7.42 pop=27 -> [['20583', 'Trebinje', 27]]
+   Žakovo                       area=   7.28 pop=84 -> [['20583', 'Trebinje', 84]]
+   Sedlari                      area=   6.77 pop=26 -> [['11304', 'Ravno', 0], ['20583', 'Trebinje', 26]] SPLIT
+   Grbići                       area=   6.35 pop=13 -> [['20583', 'Trebinje', 13]]
+   Diklići                      area=   6.22 pop=13 -> [['11304', 'Ravno', 0], ['20583', 'Trebinje', 13]] SPLIT
+   Dobromani                    area=   5.81 pop=17 -> [['20583', 'Trebinje', 17]]
+   Mrkonjići                    area=   5.62 pop=51 -> [['20583', 'Trebinje', 51]]
+   Rapti Bobani                 area=   5.41 pop=24 -> [['11304', 'Ravno', 2], ['20583', 'Trebinje', 22]] SPLIT
+   Gorogaše                     area=    5.2 pop=5 -> [['11304', 'Ravno', 5]]
+   Baljivac                     area=   4.87 pop=11 -> [['11304', 'Ravno', 11]]
+   Jasenica Lug                 area=   4.25 pop=19 -> [['20583', 'Trebinje', 19]]
+   Lušnica                      area=   4.24 pop=10 -> [['11304', 'Ravno', 0], ['20583', 'Trebinje', 10]] SPLIT
+   Nevada                       area=   4.06 pop=7 -> [['11304', 'Ravno', 7]]
+   Turica                       area=    4.0 pop=2 -> [['20583', 'Trebinje', 2]]
+   Krajkovići                   area=   3.88 pop=23 -> [['11304', 'Ravno', 0], ['20583', 'Trebinje', 23]] SPLIT
+   Tulje                        area=   3.81 pop=55 -> [['20583', 'Trebinje', 55]]
+   Prosjek                      area=    3.8 pop=4 -> [['11304', 'Ravno', 4]]
+   Arbanaška                    area=   3.64 pop=2 -> [['20583', 'Trebinje', 2]]
+   Gojšina                      area=   3.46 pop=14 -> [['20583', 'Trebinje', 14]]
+   Dračevo                      area=   2.73 pop=68 -> [['20583', 'Trebinje', 68]]
+   Kutina                       area=   2.34 pop=19 -> [['11304', 'Ravno', 19]]
+
+## op:trnovo:delijas  area=125.228 centroid=[18.5324, 43.6812] shares={'FED': 84.0, 'RS': 16.0} pop_shares={'FED': 95.1, 'RS': 4.9}
+   Zabojska                     area=  19.92 pop=36 -> [['11592', 'Trnovo', 0], ['20591', 'Trnovo', 36]] SPLIT
+   Divčići                      area=  18.39 pop=3 -> [['11592', 'Trnovo', 3], ['20591', 'Trnovo', 0]] SPLIT
+   Hamzići                      area=  15.18 pop=102 -> [['11592', 'Trnovo', 102]]
+   Zagor                        area=  12.47 pop=25 -> [['11592', 'Trnovo', 25]]
+   Slavljevići                  area=   9.79 pop=37 -> [['11592', 'Trnovo', 37], ['20591', 'Trnovo', 0]] SPLIT
+   Govedovići                   area=   6.44 pop=58 -> [['11592', 'Trnovo', 58], ['20591', 'Trnovo', 0]] SPLIT
+   Sjeverovići                  area=   6.37 pop=43 -> [['11592', 'Trnovo', 43]]
+   Boljanovići                  area=   6.36 pop=24 -> [['11592', 'Trnovo', 24], ['20591', 'Trnovo', 0]] SPLIT
+   Čunčići                      area=   5.81 pop=9 -> [['11592', 'Trnovo', 9]]
+   Karovići                     area=   5.79 pop=84 -> [['11592', 'Trnovo', 84]]
+   Delijaš                      area=    4.0 pop=175 -> [['11592', 'Trnovo', 175]]
+   Pomenovići                   area=   3.62 pop=70 -> [['11592', 'Trnovo', 70]]
+   Jelačići                     area=   3.51 pop=27 -> [['11592', 'Trnovo', 27]]
+   Durakovići                   area=   3.32 pop=33 -> [['11592', 'Trnovo', 33]]
+   Krsmanići                    area=   2.64 pop=12 -> [['11592', 'Trnovo', 12]]
+   Balbašići                    area=   1.07 pop=2 -> [['11592', 'Trnovo', 2]]
+
+## op:trnovo:kijevo_2  area=49.801 centroid=[18.3874, 43.7372] shares={'FED': 17.3, 'RS': 82.7} pop_shares={'FED': 9.9, 'RS': 90.1}
+   Podivič                      area=  12.44 pop=0 -> [['20591', 'Trnovo', 0]]
+   Donja Presjenica             area=   9.49 pop=141 -> [['11592', 'Trnovo', 127], ['20591', 'Trnovo', 14]] SPLIT
+   Ulobići                      area=   7.77 pop=0 -> [['20591', 'Trnovo', 0]]
+   Jablanica                    area=   6.53 pop=435 -> [['20591', 'Trnovo', 435]]
+   Klanac                       area=   6.49 pop=174 -> [['20591', 'Trnovo', 174]]
+   Kijevo                       area=   3.44 pop=452 -> [['20591', 'Trnovo', 452]]
+   Bogatići                     area=    3.4 pop=77 -> [['11592', 'Trnovo', 0], ['20591', 'Trnovo', 77]] SPLIT
+
+## op:trnovo:tosici  area=86.669 centroid=[18.4207, 43.6344] shares={'FED': 64.5, 'RS': 35.5} pop_shares={'FED': 40.8, 'RS': 59.2}
+   Tošići                       area=   20.5 pop=391 -> [['20591', 'Trnovo', 391]]
+   Bašci                        area=  14.94 pop=99 -> [['11592', 'Trnovo', 99], ['20591', 'Trnovo', 0]] SPLIT
+   Rajski Do                    area=   9.28 pop=12 -> [['20591', 'Trnovo', 12]]
+   Češina Strana                area=   8.38 pop=6 -> [['11592', 'Trnovo', 6]]
+   Bistročaj                    area=   7.45 pop=25 -> [['11592', 'Trnovo', 25], ['20591', 'Trnovo', 0]] SPLIT
+   Grab                         area=   5.83 pop=7 -> [['11592', 'Trnovo', 6], ['20591', 'Trnovo', 1]] SPLIT
+   Mađari                       area=   4.56 pop=14 -> [['11592', 'Trnovo', 14]]
+   Šišići                       area=   4.03 pop=40 -> [['11592', 'Trnovo', 40]]
+   Ilovice                      area=    3.9 pop=24 -> [['11592', 'Trnovo', 24], ['20591', 'Trnovo', 0]] SPLIT
+   Vrbovnik                     area=   3.52 pop=53 -> [['11592', 'Trnovo', 53], ['20591', 'Trnovo', 0]] SPLIT
+   Rijeka                       area=   2.91 pop=5 -> [['11592', 'Trnovo', 5]]
+   Lisovići                     area=   1.01 pop=6 -> [['11592', 'Trnovo', 6]]
+
+## op:trnovo:trnovo  area=70.591 centroid=[18.3462, 43.6384] shares={'FED': 79.2, 'RS': 20.8} pop_shares={'FED': 34.5, 'RS': 65.5}
+   Ledići                       area=   7.48 pop=36 -> [['11592', 'Trnovo', 36]]
+   Kozija Luka                  area=   6.89 pop=0 -> [['11592', 'Trnovo', 0], ['20591', 'Trnovo', 0]] SPLIT
+   Trnovo                       area=   6.09 pop=2099 -> [['11592', 'Trnovo', 114], ['20591', 'Trnovo', 1985]] SPLIT
+   Dujmovići                    area=   6.04 pop=163 -> [['11592', 'Trnovo', 163]]
+   Turovi                       area=   5.72 pop=309 -> [['20591', 'Trnovo', 309]]
+   Milje                        area=   4.65 pop=18 -> [['11592', 'Trnovo', 12], ['20591', 'Trnovo', 6]] SPLIT
+   Dejčići                      area=   4.61 pop=217 -> [['11592', 'Trnovo', 217]]
+   Ostojići                     area=   4.55 pop=48 -> [['11592', 'Trnovo', 48]]
+   Šabanci                      area=   3.93 pop=18 -> [['11592', 'Trnovo', 18]]
+   Trebečaj                     area=   3.86 pop=167 -> [['11592', 'Trnovo', 167]]
+   Čeružići                     area=   3.74 pop=0 -> [['11592', 'Trnovo', 0]]
+   Mijanovići                   area=   3.69 pop=49 -> [['11592', 'Trnovo', 49]]
+   Godinja                      area=   3.27 pop=99 -> [['11592', 'Trnovo', 99], ['20591', 'Trnovo', 0]] SPLIT
+   Brutusi                      area=   2.53 pop=31 -> [['11592', 'Trnovo', 31]]
+   Gračanica                    area=   2.44 pop=138 -> [['11592', 'Trnovo', 129], ['20591', 'Trnovo', 9]] SPLIT
+   Pendičići                    area=   0.79 pop=135 -> [['11592', 'Trnovo', 135]]
+
+## op:ugljevik:jasikovac  area=22.382 centroid=[18.9757, 44.631] shares={'FED': 95.5, 'RS': 4.5} pop_shares={'FED': 94.7, 'RS': 5.3}
+   Jasikovac                    area=   8.51 pop=1118 -> [['11339', 'Teočak', 987], ['20605', 'Ugljevik', 131]] SPLIT
+   Jasenje                      area=   7.08 pop=401 -> [['11339', 'Teočak', 401], ['20605', 'Ugljevik', 0]] SPLIT
+   Bilalići                     area=   6.68 pop=962 -> [['11339', 'Teočak', 962], ['20605', 'Ugljevik', 0]] SPLIT
+
+## op:ugljevik:srednja_trnova_2  area=25.516 centroid=[19.037, 44.6651] shares={'FED': 27.9, 'RS': 72.1} pop_shares={'FED': 8.8, 'RS': 91.2}
+   Glinje                       area=   8.66 pop=648 -> [['20605', 'Ugljevik', 648]]
+   Tursunovo Brdo               area=   7.09 pop=225 -> [['11339', 'Teočak', 225], ['20605', 'Ugljevik', 0]] SPLIT
+   Atmačići                     area=   5.26 pop=566 -> [['20605', 'Ugljevik', 566]]
+   Ravno Polje                  area=   2.74 pop=466 -> [['20605', 'Ugljevik', 466]]
+   Janjari                      area=   1.66 pop=651 -> [['20605', 'Ugljevik', 651]]
+
+## op:zvornik:rastosnica_2  area=83.476 centroid=[18.9475, 44.5292] shares={'FED': 51.2, 'RS': 48.8} pop_shares={'FED': 72.6, 'RS': 27.4}
+   Kiseljak                     area=  26.59 pop=580 -> [['11312', 'Sapna', 8], ['20168', 'Zvornik', 572]] SPLIT
+   Gornji Lokanj                area=  14.35 pop=901 -> [['11312', 'Sapna', 0], ['20168', 'Zvornik', 901]] SPLIT
+   Rastošnica                   area=  13.72 pop=2335 -> [['11312', 'Sapna', 2335]]
+   Goduš                        area=  12.54 pop=1150 -> [['11312', 'Sapna', 1150]]
+   Rožanj                       area=  11.98 pop=401 -> [['11312', 'Sapna', 401]]
+   Podgora                      area=   3.91 pop=0 -> [['11312', 'Sapna', 0]]
+
+## op:zvornik:sapna  area=48.07 centroid=[18.9684, 44.45] shares={'FED': 81.8, 'RS': 18.2} pop_shares={'FED': 92.5, 'RS': 7.5}
+   Vitinica                     area=   9.76 pop=3116 -> [['11312', 'Sapna', 3107], ['20168', 'Zvornik', 9]] SPLIT
+   Sapna                        area=   7.96 pop=1807 -> [['11312', 'Sapna', 1807]]
+   Zaseok                       area=   7.49 pop=1445 -> [['11312', 'Sapna', 1445]]
+   Kraljevići                   area=    5.9 pop=1288 -> [['11312', 'Sapna', 1288]]
+   Nezuk                        area=   4.35 pop=989 -> [['11312', 'Sapna', 989]]
+   Potočani                     area=   4.25 pop=344 -> [['20168', 'Zvornik', 344]]
+   Dugi Dio                     area=   3.89 pop=342 -> [['20168', 'Zvornik', 342]]
+   Baljkovica                   area=    2.5 pop=595 -> [['11312', 'Sapna', 470], ['20168', 'Zvornik', 125]] SPLIT
+   Međeđa                       area=   1.76 pop=1078 -> [['11312', 'Sapna', 1078]]

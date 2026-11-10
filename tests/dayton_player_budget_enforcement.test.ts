@@ -73,9 +73,9 @@ function makeState(playerFaction: FactionId, composite: number): GameState {
 
 describe('computePlayerProposalSpend (player budget model)', () => {
     it('charges the player to DEMAND territory they do not hold', () => {
-        // RBiH demands gorazde_corridor (held by RS) → demand cost 15.
+        // RBiH demands sarajevo_suburbs (held by RS) → demand cost 15.
         const proposal: DaytonProposal = {
-            territorial_demands: ['gorazde_corridor'],
+            territorial_demands: ['sarajevo_suburbs'],
             territorial_concessions: [],
             institutional_choices: {},
         };
@@ -109,7 +109,7 @@ describe('computePlayerProposalSpend (player budget model)', () => {
 
     it('is deterministic — same inputs, same spend', () => {
         const proposal: DaytonProposal = {
-            territorial_demands: ['gorazde_corridor', 'brcko_district'],
+            territorial_demands: ['sarajevo_suburbs', 'brcko_district'],
             territorial_concessions: ['central_bosnia'],
             institutional_choices: { presidency: 'decentralized' },
         };
@@ -123,7 +123,7 @@ describe('computePlayerProposalSpend (player budget model)', () => {
 describe('clampPlayerProposalToBudget', () => {
     it('returns a within-budget proposal UNCHANGED (no clamp)', () => {
         const proposal: DaytonProposal = {
-            territorial_demands: ['gorazde_corridor'], // 15
+            territorial_demands: ['sarajevo_suburbs'], // 15
             territorial_concessions: [],
             institutional_choices: {},
         };
@@ -134,24 +134,24 @@ describe('clampPlayerProposalToBudget', () => {
     });
 
     it('drops the DEAREST items first until the spend fits the budget', () => {
-        // RBiH demands srebrenica(25) + brcko(20) + gorazde(15) = 60; budget 30.
+        // RBiH demands srebrenica(25) + Brčko(20, RS protected ground: x3 = 60, DC A6) + Sarajevo suburbs(15) = 100; budget 30.
         const proposal: DaytonProposal = {
-            territorial_demands: ['gorazde_corridor', 'brcko_district', 'srebrenica_area'],
+            territorial_demands: ['sarajevo_suburbs', 'brcko_district', 'srebrenica_area'],
             territorial_concessions: [],
             institutional_choices: {},
         };
         const res = clampPlayerProposalToBudget(proposal, 'RBiH', 30);
         expect(res.clamped).toBe(true);
-        // Drops srebrenica(25) → 35, still > 30, drops brcko(20) → 15 ≤ 30. Stop.
-        expect(res.dropped).toEqual(['demand:srebrenica_area', 'demand:brcko_district']);
-        expect(res.proposal.territorial_demands).toEqual(['gorazde_corridor']);
+        // Drops Brčko(60) → 40, still > 30, drops srebrenica(25) → 15 ≤ 30. Stop.
+        expect(res.dropped).toEqual(['demand:brcko_district', 'demand:srebrenica_area']);
+        expect(res.proposal.territorial_demands).toEqual(['sarajevo_suburbs']);
         expect(res.finalSpend).toBeLessThanOrEqual(30);
         expect(res.finalSpend).toBe(15);
     });
 
     it('treats a negative/zero budget as 0 (clamps everything chargeable)', () => {
         const proposal: DaytonProposal = {
-            territorial_demands: ['gorazde_corridor'],
+            territorial_demands: ['sarajevo_suburbs'],
             territorial_concessions: [],
             institutional_choices: {},
         };
@@ -163,7 +163,7 @@ describe('clampPlayerProposalToBudget', () => {
 
     it('is deterministic — identical inputs yield identical clamps', () => {
         const proposal: DaytonProposal = {
-            territorial_demands: ['gorazde_corridor', 'brcko_district', 'srebrenica_area'],
+            territorial_demands: ['sarajevo_suburbs', 'brcko_district', 'srebrenica_area'],
             territorial_concessions: [],
             institutional_choices: {},
         };
@@ -182,7 +182,7 @@ describe('resolveDaytonNegotiation enforces the player budget at the sim boundar
         // would mark "Over Budget" but a non-UI caller could still submit.
         const state = makeState('RBiH', 30);
         const proposal: DaytonProposal = {
-            territorial_demands: ['gorazde_corridor', 'brcko_district', 'srebrenica_area'], // 60 > 30
+            territorial_demands: ['sarajevo_suburbs', 'brcko_district', 'srebrenica_area'], // 60 > 30
             territorial_concessions: [],
             institutional_choices: {},
         };
@@ -204,7 +204,7 @@ describe('resolveDaytonNegotiation enforces the player budget at the sim boundar
 
     it('a within-budget proposal resolves identically to the unclamped input', () => {
         const within: DaytonProposal = {
-            territorial_demands: ['gorazde_corridor'], // 15 ≤ 50
+            territorial_demands: ['sarajevo_suburbs'], // 15 ≤ 50
             territorial_concessions: [],
             institutional_choices: { presidency: 'decentralized' }, // RBiH cost 5 → 20 total
         };
@@ -213,17 +213,17 @@ describe('resolveDaytonNegotiation enforces the player budget at the sim boundar
         expect(a.territorial_packages_accepted).toEqual(b.territorial_packages_accepted);
         expect(a.territorial_packages_rejected).toEqual(b.territorial_packages_rejected);
         expect(a.patron_overrides_applied).toEqual(b.patron_overrides_applied);
-        // gorazde was affordable → it survives the (no-op) clamp and is processed.
+        // The suburbs were affordable → it survives the (no-op) clamp and is processed.
         const seen = new Set([
             ...a.territorial_packages_accepted,
             ...a.territorial_packages_rejected,
         ]);
-        expect(seen.has('gorazde_corridor')).toBe(true);
+        expect(seen.has('sarajevo_suburbs')).toBe(true);
     });
 
     it('is deterministic end-to-end for an over-budget proposal', () => {
         const proposal: DaytonProposal = {
-            territorial_demands: ['gorazde_corridor', 'brcko_district', 'srebrenica_area'],
+            territorial_demands: ['sarajevo_suburbs', 'brcko_district', 'srebrenica_area'],
             territorial_concessions: [],
             institutional_choices: {},
         };

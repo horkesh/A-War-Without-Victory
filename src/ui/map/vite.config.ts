@@ -22,6 +22,10 @@ function tacticalMapManualChunks(id: string): string | undefined {
   if (normalized.endsWith('/data/derived/operational/operational_contact_graph.json')) return 'operational-contact-graph';
   if (normalized.endsWith('/data/derived/peace/plan_settlement_shares.json')) return 'peace-settlement-shares';
   if (normalized.endsWith('/data/derived/mun1990_names.json')) return 'mun1990-names';
+  // Dayton conference read model (plan maps, cantons, oct-1995 reference): static leaves.
+  if (normalized.endsWith('/data/derived/peace/plan_cell_assignments.json')) return 'peace-plan-cells';
+  if (normalized.endsWith('/data/derived/peace/osid_cantons.json')) return 'peace-osid-cantons';
+  if (normalized.endsWith('/data/source/calibration/painted_control_oct1995.json')) return 'painted-control-oct1995';
 
   if (normalized.includes('/node_modules/')) {
     if (normalized.includes('/react/') || normalized.includes('/react-dom/') || normalized.includes('/scheduler/')) {

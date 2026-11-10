@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type { GameState, FactionId } from '../src/state/game_state.js';
 import type { DaytonProposal, NegotiationBreakdown, PatronRelationship } from '../src/state/negotiation_types.js';
 import { createEmptyCapital, createDefaultPatronRelationship } from '../src/state/negotiation_types.js';
-import { evaluateBotResponse, getCompositeCapital, computeProposalCostToFaction, PROTECTED_GROUND_REFUSAL_COST } from '../src/sim/negotiation/bot_negotiation.js';
+import { evaluateBotResponse, getCompositeCapital, computeProposalCostToFaction } from '../src/sim/negotiation/bot_negotiation.js';
 import { initializeStrategicDimensions } from '../src/sim/events/strategic_dimensions.js';
 import type { DimensionStore } from '../src/sim/events/strategic_dimensions.js';
 import { shouldInitiateDayton, initiateDaytonNegotiation, resolveDaytonNegotiation, DAYTON_TRIGGER_WEEK } from '../src/sim/negotiation/dayton_negotiation.js';
@@ -116,7 +116,8 @@ function lowDimStore(): DimensionStore {
 
 function makeSimpleProposal(): DaytonProposal {
     return {
-        territorial_demands: ['gorazde_corridor'],
+        // An RS-held package (the Goražde corridor is Federation ground in the draft since 2026-11-08).
+        territorial_demands: ['sarajevo_suburbs'],
         territorial_concessions: [],
         institutional_choices: {
             military: 'centralized',
@@ -373,15 +374,15 @@ describe('Bot Negotiation', () => {
 describe('Proposal Cost', () => {
     it('computes territorial concession costs correctly', () => {
         const proposal: DaytonProposal = {
-            territorial_demands: ['gorazde_corridor', 'brcko_district'],
+            territorial_demands: ['sarajevo_suburbs', 'brcko_district'],
             territorial_concessions: [],
             institutional_choices: {},
         };
 
-        // Cost to RS: gorazde (10 concede) + Brčko, which is protected ground (owner ruling
-        // 2026-11-07, patron_leverage.ts): RS never concedes it, so it costs the refusal cost.
+        // Cost to RS: Sarajevo suburbs (12 concede) + Brčko, which is protected ground (owner
+        // ruling 2026-11-07, patron_leverage.ts), priced as a class (DC A6): max(40, 3 x 18) = 54.
         const costToRS = computeProposalCostToFaction(proposal, 'RS');
-        expect(costToRS).toBe(10 + PROTECTED_GROUND_REFUSAL_COST);
+        expect(costToRS).toBe(12 + 54);
 
         // Cost to RBiH: 0 (RS holds both)
         const costToRBiH = computeProposalCostToFaction(proposal, 'RBiH');

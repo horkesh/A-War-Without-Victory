@@ -8,8 +8,13 @@
  *    ≈ 2.75%). The patron gives up the smallest pieces first.
  *  - never on PROTECTED ground: ground the client held throughout and that was never on the Dayton table. For RS: the Banja Luka
  *    region, Prijedor, Bosanski Novi, Doboj, Bijeljina and the Posavina corridor (Brčko then
- *    goes to arbitration, as at Dayton). For HRHB: Mostar and western Herzegovina. A client
- *    never concedes protected ground voluntarily either.
+ *    goes to arbitration, as at Dayton). For HRHB: Mostar and western Herzegovina. For RBiH:
+ *    the Goražde corridor. Since DC A6 (2026-11-08) protected ground is a PRICE CLASS: the
+ *    demander pays three times, and only the holder's own willingness can give it up (at
+ *    very high composite capital, e.g. RS gives Brčko only at 90 or more, and then Brčko
+ *    settles cleanly instead of going to arbitration). HRHB's stays off the table entirely.
+ *    A player still never concedes its own protected ground (Brčko excepted, D1). Captured
+ *    ground inside a protected municipality is priced the same way.
  *  - never on ground taken after the player declined Dayton: at the forced table the United
  *    States is the coercing power, so Belgrade or Zagreb cannot be made to hand it over.
  *
@@ -62,11 +67,65 @@ export function packageAreaPct(pkg: TerritorialPackage): number {
     return pkg.area_pct ?? getPackageAreaPct(pkg.id);
 }
 
-/** True when `holder` would never give this package up (any cell on its protected ground). */
+/** True when this package is `holder`'s protected ground (any cell on it): a price class, DC A6. */
 export function isProtectedFor(pkg: TerritorialPackage, holder: string): boolean {
+    if (pkg.protected_for?.includes(holder)) return true;
     const muns = PROTECTED_MUNICIPALITIES[holder];
     if (!muns) return false;
     return packageOsids(pkg).some((o) => muns.has(o.split(':')[1] ?? ''));
+}
+
+/**
+ * Can the player concede this package of its own? Not when it is the player's protected
+ * ground ("a client never concedes protected ground voluntarily"), with one exception:
+ * Brčko, whose concession has its own owner-ruled outcome (D1: the other side takes it
+ * cleanly). Walkthrough 2026-11-08: HRHB conceding Mostar handed the city to RS.
+ */
+export function playerMayConcede(pkg: TerritorialPackage, player: string): boolean {
+    return pkg.id === 'brcko_district' || !isProtectedFor(pkg, player);
+}
+
+/**
+ * Protected ground is a price class (DC A6, owner 2026-11-08): very expensive rather than
+ * impossible. The demander pays PROTECTED_PRICE_MULTIPLIER times the demand price; the
+ * holder weighs the loss at that multiple of its concession price, never below
+ * PROTECTED_CONCESSION_FLOOR. Only the holder's own willingness can carry it: no patron
+ * presses a client to give up its heartland (bot_negotiation.ts, selectPatronForced).
+ */
+export const PROTECTED_PRICE_MULTIPLIER = 3;
+export const PROTECTED_CONCESSION_FLOOR = 40;
+
+/** True when the package is protected ground of its Dayton-map holder. */
+export function isHolderProtected(pkg: TerritorialPackage): boolean {
+    return isProtectedFor(pkg, pkg.default_holder);
+}
+
+/** What demanding this package costs `demander` (0 for its own ground). */
+export function demandPrice(pkg: TerritorialPackage, demander: string): number {
+    if (pkg.default_holder === demander) return 0;
+    return isHolderProtected(pkg) ? pkg.capital_cost_to_demand * PROTECTED_PRICE_MULTIPLIER : pkg.capital_cost_to_demand;
+}
+
+/**
+ * Protected ground that stays outside the price class (historian seat, DC A6 panel
+ * 2026-11-08): Mostar and western Herzegovina were never on the table between HRHB and RS.
+ * Mostar was a dispute inside the Federation (Washington Agreement, March 1994; EU
+ * administration from July 1994), and RBiH cannot raise its partner's ground at Dayton.
+ * No side may demand it; the holder weighs it at the refusal cost.
+ */
+const OUTSIDE_PRICE_CLASS: ReadonlySet<string> = new Set(['HRHB']);
+export const NEVER_ON_THE_TABLE_COST = 1000;
+
+/** False when this ground is never on the table for anyone (see OUTSIDE_PRICE_CLASS). */
+export function isOnTheTable(pkg: TerritorialPackage): boolean {
+    return !(OUTSIDE_PRICE_CLASS.has(pkg.default_holder) && isHolderProtected(pkg));
+}
+
+/** How heavily `holder` weighs giving this package up when another side demands it. */
+export function holderConcessionPrice(pkg: TerritorialPackage, holder: string): number {
+    if (!isProtectedFor(pkg, holder)) return pkg.capital_cost_to_concede;
+    if (OUTSIDE_PRICE_CLASS.has(holder)) return NEVER_ON_THE_TABLE_COST;
+    return Math.max(PROTECTED_CONCESSION_FLOOR, pkg.capital_cost_to_concede * PROTECTED_PRICE_MULTIPLIER);
 }
 
 /**

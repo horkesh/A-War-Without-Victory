@@ -168,11 +168,11 @@ describe('final territory split (D1 area + attribution)', () => {
             political_controllers: controllers,
             patron: { RS: { override_authority: 95 } }, // force RS to accept the demand
         });
-        // HRHB demands gorazde_corridor (RS-held). With the fix, the gained area
+        // HRHB demands the Sarajevo suburbs (RS-held). With the fix, the gained area
         // must accrue to HRHB. The OLD code credited RBiH unconditionally.
-        const proposal: DaytonProposal = { territorial_demands: ['gorazde_corridor'], territorial_concessions: [], institutional_choices: {} };
+        const proposal: DaytonProposal = { territorial_demands: ['sarajevo_suburbs'], territorial_concessions: [], institutional_choices: {} };
         const result = resolveDaytonNegotiation(state, proposal);
-        expect(result.territorial_packages_accepted).toContain('gorazde_corridor');
+        expect(result.territorial_packages_accepted).toContain('sarajevo_suburbs');
 
         // Baseline (no demand) split for comparison.
         const baseState = makeState({ player_faction: 'HRHB', political_controllers: controllers });

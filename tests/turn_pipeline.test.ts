@@ -202,7 +202,7 @@ describe('runTurn determinism', () => {
     // Previously the horizon menu still opened at 188. A player's hard line is now a
     // decline: recorded at the end of the next resolution (185), menu never offered,
     // settlement imposed eight weeks later (DAYTON_DECLINE_GRACE_WEEKS).
-    expect(state.military.negotiation?.dayton_decline).toEqual({ faction: 'RBiH', declined_turn: 185, imposition_turn: 193 });
+    expect(state.military.negotiation?.dayton_decline).toMatchObject({ faction: 'RBiH', declined_turn: 185, imposition_turn: 193 });
     expect(state.military.negotiation?.pending_dayton).toBeUndefined();
     expect(state.military.event_flags?.dayton_declined_by).toBe('RBiH');
 

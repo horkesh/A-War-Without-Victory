@@ -120,6 +120,8 @@ contextBridge.exposeInMainWorld('awwv', {
   }),
   resolveDayton: (proposal) => ipcRenderer.invoke('resolve-dayton', proposal),
   declineDayton: () => ipcRenderer.invoke('decline-dayton'),
+  // Table a Dayton round (DC A2): every other delegation answers; the round is saved.
+  tableDaytonRound: (proposal) => ipcRenderer.invoke('table-dayton-round', proposal),
   // Read-only Dayton preview (Dayton Phase-4): bot responses + authoritative readouts, no mutation.
   previewDayton: (proposal) => ipcRenderer.invoke('preview-dayton', proposal),
   acknowledgeFrictionEvent: (payload) => ipcRenderer.invoke('acknowledge-friction-event', payload),
