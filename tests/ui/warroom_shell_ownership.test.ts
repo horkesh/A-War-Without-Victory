@@ -228,7 +228,7 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         // One Command Surface hosts the Decision Room (owner redesign 2026-11-10).
         const host = read('src/ui/map/components/command_surface/CommandSurface.tsx');
         expect(host).toContain("aria-label={t('commandSurface.aria')}");
-        expect(host).toContain("{t('commandSurface.eyebrow').toUpperCase()}");
+        expect(host).toContain("eyebrow={t('commandSurface.eyebrow')}");
         expect(host).toContain("aria-label={t('commandSurface.closeAria')}");
         expect(host).toContain("{t('commandSurface.close')}");
         expect(host).not.toContain('aria-label="Warroom Decision Room"');

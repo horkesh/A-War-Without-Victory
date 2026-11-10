@@ -42,6 +42,26 @@ import { turnToDateString } from '../../utils/formatters';
 import { t, type MessageKey } from '../../i18n';
 import { DirectiveCard, type DirectiveReceipt } from '../army_hq/DirectiveCard';
 import type { FieldOperationPlanTarget } from '../../utils/fieldInspectionTarget';
+import {
+  SurfaceBanner,
+  SurfaceCloseButton,
+  SurfaceColumns,
+  SurfaceContent,
+  SurfaceDetail,
+  SurfaceDetailBody,
+  SurfaceDetailFooter,
+  SurfaceEmpty,
+  SurfaceFrame,
+  SurfaceHeader,
+  SurfaceMatterCard,
+  SurfaceMeter,
+  SurfaceRail,
+  SurfaceRailItem,
+  SurfaceReceipt,
+  SurfaceSection,
+  SurfaceSections,
+  SURFACE_TONE,
+} from '../surface/Surface';
 
 type NavigateTarget = (target: PresidentialDecisionRoomNavigationTarget) => boolean | void;
 type MatterGroup = 'needs' | 'review' | 'actions' | 'watch' | 'record';
@@ -94,17 +114,17 @@ function categoryLabel(category: PresidentialDecisionRoomCard['category']): stri
 }
 
 function chipFor(card: PresidentialDecisionRoomCard, group: MatterGroup): { label: string; className: string } {
-  if (group === 'needs') return { label: t('commandSurface.chip.needs'), className: 'border-red-400/50 text-red-200' };
+  if (group === 'needs') return { label: t('commandSurface.chip.needs'), className: SURFACE_TONE.danger };
   if (group === 'actions') {
     const cost = card.directive?.cost ?? 0;
     return {
       label: cost === 0 ? t('commandSurface.chip.free') : t('commandSurface.chip.cost', { cost }),
-      className: 'border-amber-400/40 text-amber-200',
+      className: SURFACE_TONE.warn,
     };
   }
-  if (group === 'review') return { label: t('commandSurface.chip.review'), className: 'border-amber-400/45 text-amber-200' };
-  if (group === 'watch') return { label: t('commandSurface.chip.watch'), className: 'border-sky-400/40 text-sky-200' };
-  return { label: t('commandSurface.chip.record'), className: 'border-panel-border text-text-secondary' };
+  if (group === 'review') return { label: t('commandSurface.chip.review'), className: SURFACE_TONE.warn };
+  if (group === 'watch') return { label: t('commandSurface.chip.watch'), className: SURFACE_TONE.info };
+  return { label: t('commandSurface.chip.record'), className: SURFACE_TONE.neutral };
 }
 
 function isHistoricalOperationAuthorizationCard(card: PresidentialDecisionRoomCard | undefined): boolean {
@@ -294,176 +314,112 @@ export function CommandSurface({ initialCategoryId = null, onClose, onNavigateTa
   }
 
   return (
-    <div
+    <SurfaceFrame
       ref={rootRef}
-      role="dialog"
       aria-modal="false"
       aria-label={t('commandSurface.aria')}
-      tabIndex={-1}
       onKeyDown={handleKeyDown}
       data-testid="warroom-decision-room-host"
-      className="pointer-events-auto absolute bottom-6 left-1/2 top-[4.5rem] z-[7] flex w-[min(110rem,calc(100%-3rem))] -translate-x-1/2 flex-col overflow-hidden rounded-lg border border-accent-gold/35 bg-[#11141b] text-text-primary shadow-[0_30px_90px_rgba(0,0,0,0.65)] outline-none"
     >
-      <header className="flex shrink-0 flex-wrap items-center gap-x-10 gap-y-3 border-b border-[#262b35] bg-[#141821] px-7 py-4">
-        <div className="flex min-w-0 flex-col gap-1">
-          <span className="font-mono text-[13px] font-semibold tracking-[0.2em] text-[#e0c27a]">{t('commandSurface.eyebrow').toUpperCase()}</span>
-          <h2 className="m-0 text-[26px] font-semibold leading-tight text-[#f1e6c8]">
-            {turnToDateString(turn)}
-          </h2>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-[16px] text-[#b9ad94]">{t('commandSurface.authority')}</span>
-          <div
-            role="meter"
-            aria-label={t('commandSurface.authority')}
-            aria-valuemin={0}
-            aria-valuemax={authorityMax}
-            aria-valuenow={authority}
-            className="h-2.5 w-56 overflow-hidden rounded-full bg-[#262b35]"
+      <SurfaceHeader
+        eyebrow={t('commandSurface.eyebrow')}
+        title={turnToDateString(turn)}
+        close={(
+          <SurfaceCloseButton
+            onClick={onClose}
+            aria-label={t('commandSurface.closeAria')}
+            data-testid="warroom-decision-room-close"
           >
-            <div className="h-full bg-[#c9a75c]" style={{ width: `${Math.max(0, Math.min(100, (authority / authorityMax) * 100))}%` }} />
+            {t('commandSurface.close')}
+          </SurfaceCloseButton>
+        )}
+        trailing={(
+          <div data-testid="command-surface-advance-status" className={`rounded border px-4 py-2 text-[16px] ${readinessClass}`}>
+            {readiness.headline}
           </div>
-          <span className="font-mono text-[16px] font-semibold tabular-nums text-[#f1e6c8]">{authority} / {authorityMax}</span>
-        </div>
-        <div className="flex-grow" />
-        <div data-testid="command-surface-advance-status" className={`rounded border px-4 py-2 text-[16px] ${readinessClass}`}>
-          {readiness.headline}
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={t('commandSurface.closeAria')}
-          data-testid="warroom-decision-room-close"
-          className="h-11 rounded border border-[#3a4150] bg-[#1b2029] px-5 text-[16px] font-semibold text-[#e8dcbc] transition hover:border-accent-gold/60 hover:text-accent-gold"
-        >
-          {t('commandSurface.close')}
-        </button>
-      </header>
+        )}
+      >
+        <SurfaceMeter label={t('commandSurface.authority')} value={authority} max={authorityMax} />
+      </SurfaceHeader>
 
-      <div
+      <SurfaceColumns
+        layout="rail-content-detail"
         data-testid="presidential-decision-room"
         data-command-category-id={activeArea.id}
         data-tutorial-step="decision-room"
         data-coachmark-id="decision-room"
-        className="grid min-h-0 flex-1 grid-cols-[clamp(17rem,calc(var(--interface-viewport-width,100vw)*0.19),21rem)_minmax(0,1fr)_clamp(21rem,calc(var(--interface-viewport-width,100vw)*0.31),35rem)]"
       >
-        <nav
+        <SurfaceRail
           aria-label={t('commandSurface.areasLabel')}
           data-testid="command-card-strip"
-          className="flex min-h-0 flex-col gap-2 overflow-y-auto border-r border-[#262b35] bg-[#0f1218] px-4 py-5"
+          heading={t('commandSurface.thisWeek')}
+          footer={<p className="m-0 px-2 pt-2 text-[14px] leading-snug text-[#9c917b]">{t('commandSurface.keysHint')}</p>}
         >
-          <span className="px-2 pb-1 font-mono text-[13px] font-semibold tracking-[0.16em] text-[#b9ad94]">{t('commandSurface.thisWeek').toUpperCase()}</span>
           {areas.map((area, index) => {
-            const selected = area.id === activeArea.id;
-            const art = resolveCommandCardArt(area.id, playerFaction);
             const parts: string[] = [];
             if (area.counts.needs) parts.push(t('commandSurface.status.needs', { count: area.counts.needs }));
             if (area.counts.review) parts.push(t('commandSurface.status.review', { count: area.counts.review }));
             if (area.counts.actions) parts.push(t(area.counts.actions === 1 ? 'commandSurface.status.actionOne' : 'commandSurface.status.actionMany', { count: area.counts.actions }));
             if (area.counts.watch) parts.push(t('commandSurface.status.watch', { count: area.counts.watch }));
             if (area.counts.record) parts.push(t('commandSurface.status.record', { count: area.counts.record }));
-            const badge = area.counts.needs || area.counts.review;
             return (
-              <button
+              <SurfaceRailItem
                 key={area.id}
-                type="button"
                 data-testid={`command-card-${area.id}`}
-                aria-pressed={selected}
                 aria-keyshortcuts={String(index + 1)}
+                selected={area.id === activeArea.id}
                 onClick={() => selectArea(area.id)}
-                className={`grid w-full grid-cols-[clamp(3rem,calc(var(--interface-viewport-width,100vw)*0.028),4rem)_minmax(0,1fr)_auto] items-center gap-3 rounded-md border p-2.5 text-left transition ${selected
-                  ? 'border-[#c9a75c] bg-[#232936]'
-                  : 'border-transparent hover:border-[#3a4150] hover:bg-[#171b23]'}`}
-              >
-                {art
-                  ? <img src={art} alt="" className="aspect-square w-full rounded object-cover" />
-                  : <span aria-hidden="true" className="aspect-square w-full rounded bg-[#232936]" />}
-                <span className="flex min-w-0 flex-col gap-1">
-                  <span className="text-[18px] font-semibold leading-tight text-[#f1e6c8]">{t(AREA_COPY[area.id].title)}</span>
-                  <span className="text-[15px] leading-snug text-[#b9ad94]">{parts.length ? parts.join(' · ') : t('commandSurface.status.nothing')}</span>
-                </span>
-                {badge > 0 && (
-                  <span className={`inline-flex h-7 min-w-7 items-center justify-center rounded-full px-2 font-mono text-[14px] font-semibold text-[#15120b] ${area.counts.needs ? 'bg-red-300' : 'bg-[#e0b45a]'}`}>
-                    {badge}
-                  </span>
-                )}
-              </button>
+                art={resolveCommandCardArt(area.id, playerFaction)}
+                title={t(AREA_COPY[area.id].title)}
+                status={parts.length ? parts.join(' · ') : t('commandSurface.status.nothing')}
+                badge={area.counts.needs || area.counts.review}
+                badgeTone={area.counts.needs ? 'danger' : 'gold'}
+              />
             );
           })}
-          <div className="flex-grow" />
-          <p className="m-0 px-2 pt-2 text-[14px] leading-snug text-[#9c917b]">{t('commandSurface.keysHint')}</p>
-        </nav>
+        </SurfaceRail>
 
-        <div className="flex min-h-0 flex-col overflow-y-auto">
-          <div className="relative h-44 shrink-0">
-            {bannerArt && <img src={bannerArt} alt="" className="absolute inset-0 h-full w-full object-cover" />}
-            <div className="absolute inset-0 bg-[#0a0c10]/70" />
-            <div className="absolute inset-x-8 bottom-6 flex flex-col gap-1.5">
-              <h3 className="m-0 text-[34px] font-semibold leading-tight text-[#f6ecd2]">{t(AREA_COPY[activeArea.id].title)}</h3>
-              <p className="m-0 text-[18px] text-[#e2d6b8]">{t(AREA_COPY[activeArea.id].blurb)}</p>
-            </div>
-          </div>
+        <SurfaceContent>
+          <SurfaceBanner art={bannerArt} title={t(AREA_COPY[activeArea.id].title)} blurb={t(AREA_COPY[activeArea.id].blurb)} />
           {groups.length === 0 ? (
-            <div className="flex flex-col items-start gap-3 px-8 py-10">
-              <p className="m-0 text-[22px] font-semibold text-[#f1e6c8]">{t('commandSurface.empty.title')}</p>
-              <p className="m-0 max-w-[40rem] text-[17px] leading-relaxed text-[#c2b69c]">{t(AREA_COPY[activeArea.id].empty)}</p>
-            </div>
+            <SurfaceEmpty title={t('commandSurface.empty.title')} body={t(AREA_COPY[activeArea.id].empty)} />
           ) : (
-            <div className="flex flex-col gap-7 px-8 pb-8 pt-6">
+            <SurfaceSections>
               {groups.map(({ group, cards }) => (
-                <section key={group} className="flex flex-col gap-2.5" aria-label={t(GROUP_HEADING[group])}>
-                  <div className="flex items-center justify-between gap-3">
-                    <h4 className="m-0 font-mono text-[13px] font-semibold tracking-[0.16em] text-[#e0c27a]">{t(GROUP_HEADING[group]).toUpperCase()}</h4>
-                    {group === 'needs' && historicalNeeds.length > 1 && (
-                      <AuthorizeAllButton cards={historicalNeeds} onReceipt={setReceipt} />
-                    )}
-                  </div>
+                <SurfaceSection
+                  key={group}
+                  label={t(GROUP_HEADING[group])}
+                  action={group === 'needs' && historicalNeeds.length > 1
+                    ? <AuthorizeAllButton cards={historicalNeeds} onReceipt={setReceipt} />
+                    : undefined}
+                >
                   {cards.map((card) => {
-                    const selected = card.id === selectedCardId;
-                    const chip = chipFor(card, group);
                     return (
-                      <button
+                      <SurfaceMatterCard
                         key={card.id}
-                        type="button"
                         data-testid={`decision-room-priority-card-${card.id}`}
-                        aria-pressed={selected}
+                        selected={card.id === selectedCardId}
                         onClick={() => setCardId(card.id)}
-                        className={`grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-6 rounded-md border px-5 py-4 text-left transition ${selected
-                          ? 'border-[#c9a75c] bg-[#232936]'
-                          : 'border-[#2a303c] bg-[#161a22] hover:border-[#4a4436]'}`}
-                      >
-                        <span className="flex min-w-0 flex-col gap-1.5">
-                          <span className="text-[19px] font-semibold leading-snug text-[#f1e6c8]">{card.title}</span>
-                          <span className="line-clamp-2 text-[16px] leading-relaxed text-[#c2b69c]">{card.explanation}</span>
-                        </span>
-                        <span className={`whitespace-nowrap rounded border px-3 py-1.5 font-mono text-[14px] font-semibold ${chip.className}`}>{chip.label}</span>
-                      </button>
+                        title={card.title}
+                        explanation={card.explanation}
+                        chip={chipFor(card, group)}
+                      />
                     );
                   })}
-                </section>
+                </SurfaceSection>
               ))}
-            </div>
+            </SurfaceSections>
           )}
-        </div>
+        </SurfaceContent>
 
-        <aside
-          aria-label={t('decisionRoom.priorityDossier')}
-          className="flex min-h-0 flex-col border-l border-[#262b35] bg-[#0f1218]"
-        >
+        <SurfaceDetail aria-label={t('decisionRoom.priorityDossier')}>
           {receipt && (
-            <div
+            <SurfaceReceipt
               data-testid="decision-room-action-receipt"
-              className={`flex shrink-0 items-start justify-between gap-3 border-b px-6 py-3 text-[15px] ${receipt.kind === 'error'
-                ? 'border-red-500/45 bg-red-500/10 text-red-100'
-                : receipt.kind === 'cancelled'
-                  ? 'border-[#262b35] bg-[#141821] text-text-secondary'
-                  : 'border-emerald-400/40 bg-emerald-400/10 text-emerald-50'}`}
-            >
-              <span role="status" aria-live="polite">{receipt.message}</span>
-              <button type="button" onClick={() => setReceipt(null)} className="shrink-0 text-[14px] font-semibold underline-offset-2 hover:underline">
-                {t('common.close')}
-              </button>
-            </div>
+              kind={receipt.kind}
+              message={receipt.message}
+              onDismiss={() => setReceipt(null)}
+            />
           )}
           {dossier ? (
             <section
@@ -471,28 +427,17 @@ export function CommandSurface({ initialCategoryId = null, onClose, onNavigateTa
               data-card-id={dossier.cardId}
               className="flex min-h-0 flex-1 flex-col"
             >
-              <div ref={detailScrollRef} data-testid="decision-room-dossier-scroll" className="min-h-0 flex-1 overflow-y-auto">
-                {detailArt && <img src={detailArt} alt="" className="block h-52 w-full object-cover" />}
-                <div className="flex flex-col gap-4 px-7 py-6">
-                  <span className="font-mono text-[13px] font-semibold tracking-[0.16em] text-[#e0c27a]">{categoryLabel(dossier.category).toUpperCase()}</span>
-                  <h3 className="m-0 text-[28px] font-semibold leading-tight text-[#f6ecd2]">{dossier.title}</h3>
-                  <p className="m-0 text-[18px] leading-relaxed text-[#ddd1b3]">{dossier.explanation}</p>
-                  {dossier.evidence.length > 0 && (
-                    <div className="flex flex-col gap-2 pt-1">
-                      <span className="font-mono text-[13px] font-semibold tracking-[0.16em] text-[#b9ad94]">{t('commandSurface.whatToKnow').toUpperCase()}</span>
-                      <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
-                        {dossier.evidence.map((entry) => (
-                          <li key={entry} className="grid grid-cols-[0.875rem_minmax(0,1fr)] gap-2.5 text-[17px] leading-relaxed text-[#ddd1b3]">
-                            <span aria-hidden="true" className="text-[#c9a75c]">•</span>
-                            <span>{entry}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="flex shrink-0 flex-col gap-3 border-t border-[#262b35] bg-[#12161e] px-7 pb-6 pt-5">
+              <SurfaceDetailBody
+                ref={detailScrollRef}
+                data-testid="decision-room-dossier-scroll"
+                art={detailArt}
+                eyebrow={categoryLabel(dossier.category)}
+                title={dossier.title}
+                explanation={dossier.explanation}
+                facts={dossier.evidence}
+                factsLabel={t('commandSurface.whatToKnow')}
+              />
+              <SurfaceDetailFooter>
                 {dossier.directive && state && (
                   <DirectiveCard directive={dossier.directive} gameState={state} onReceipt={setReceipt} />
                 )}
@@ -524,16 +469,13 @@ export function CommandSurface({ initialCategoryId = null, onClose, onNavigateTa
                   </div>
                 )}
                 <span className={`text-[15px] ${dossier.advanceSensitive ? 'text-amber-200' : 'text-[#9c917b]'}`}>{dossier.advanceLabel}</span>
-              </div>
+              </SurfaceDetailFooter>
             </section>
           ) : (
-            <div className="flex flex-1 flex-col justify-center gap-2.5 p-10">
-              <p className="m-0 text-[22px] font-semibold text-[#f1e6c8]">{t('commandSurface.detail.chooseTitle')}</p>
-              <p className="m-0 text-[17px] leading-relaxed text-[#c2b69c]">{t('commandSurface.detail.chooseBody')}</p>
-            </div>
+            <SurfaceEmpty centered title={t('commandSurface.detail.chooseTitle')} body={t('commandSurface.detail.chooseBody')} />
           )}
-        </aside>
-      </div>
-    </div>
+        </SurfaceDetail>
+      </SurfaceColumns>
+    </SurfaceFrame>
   );
 }

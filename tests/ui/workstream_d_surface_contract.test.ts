@@ -36,14 +36,24 @@ describe('Workstream D surface ownership', () => {
     // Owner redesign 2026-11-10: a full-height surface; the header never scrolls, the
     // area rail, the matters and the detail each own their vertical scroll, and the
     // detail's action footer stays in view below its scrolling body.
-    expect(decisionRoomSource).toMatch(/data-testid="warroom-decision-room-host"[\s\S]{0,300}overflow-hidden/);
-    expect(decisionRoomSource).toMatch(/<header className="flex shrink-0/);
-    expect(decisionRoomSource).toContain('grid min-h-0 flex-1');
+    // The frame, header, columns and detail live in the shared surface parts.
+    const sharedSurfaceSource = readFileSync('src/ui/map/components/surface/Surface.tsx', 'utf8');
+    expect(decisionRoomSource).toMatch(/<SurfaceFrame[\s\S]{0,300}data-testid="warroom-decision-room-host"/);
+    expect(sharedSurfaceSource).toMatch(/const frameClass = cx\(\s*'[^']*flex-col overflow-hidden/);
+    expect(decisionRoomSource).toContain('<SurfaceHeader');
+    expect(sharedSurfaceSource).toMatch(/<header className="flex shrink-0/);
+    expect(decisionRoomSource).toContain('<SurfaceColumns');
+    expect(sharedSurfaceSource).toContain("'grid min-h-0 flex-1'");
     expect(decisionRoomSource).toContain('data-testid="command-card-strip"');
-    expect(decisionRoomSource).toMatch(/flex min-h-0 flex-col overflow-y-auto">/);
-    expect(decisionRoomSource).toMatch(/data-testid="decision-room-dossier-scroll" className="min-h-0 flex-1 overflow-y-auto"/);
-    expect(decisionRoomSource).toMatch(/flex shrink-0 flex-col gap-3 border-t/);
+    expect(sharedSurfaceSource).toContain("'flex min-h-0 flex-col gap-2 overflow-y-auto");
+    expect(decisionRoomSource).toContain('<SurfaceContent>');
+    expect(sharedSurfaceSource).toContain("'flex min-h-0 flex-col overflow-y-auto'");
+    expect(decisionRoomSource).toMatch(/<SurfaceDetailBody[\s\S]{0,80}data-testid="decision-room-dossier-scroll"/);
+    expect(sharedSurfaceSource).toContain("'min-h-0 flex-1 overflow-y-auto'");
+    expect(decisionRoomSource).toContain('<SurfaceDetailFooter>');
+    expect(sharedSurfaceSource).toMatch(/'flex shrink-0 flex-col gap-3 border-t/);
     expect(decisionRoomSource).not.toContain('sticky bottom-0');
+    expect(sharedSurfaceSource).not.toContain('sticky bottom-0');
   });
 
   it('keeps Warroom essential copy readable and metadata at least 10px', () => {

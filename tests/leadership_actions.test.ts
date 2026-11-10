@@ -56,7 +56,10 @@ describe('leadership action desktop wiring', () => {
     expect(card).toContain('onClick={handleConfirm}');
     expect(card).not.toContain('data-testid="directive-card-header-art"');
     expect(surface).toContain('resolveDirectiveActArt(selectedCard.directive.lever, playerFaction)');
-    expect(surface.indexOf('{detailArt && <img')).toBeLessThan(surface.indexOf('<DirectiveCard directive={dossier.directive}'));
+    // The art renders at the top of the shared detail body; the directive sits in the footer.
+    expect(surface.indexOf('art={detailArt}')).toBeGreaterThan(-1);
+    expect(surface.indexOf('art={detailArt}')).toBeLessThan(surface.indexOf('<DirectiveCard directive={dossier.directive}'));
+    expect(surface.indexOf('<SurfaceDetailFooter>')).toBeLessThan(surface.indexOf('<DirectiveCard directive={dossier.directive}'));
   });
 });
 
