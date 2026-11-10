@@ -1013,6 +1013,21 @@ export function MapContainer({
     };
   }, []);
 
+  // Dev-only read access for the live counter audit (tools/ui/counter_visibility_probe.cjs).
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const win = window as Window & { __awwvCounterAuditSources?: unknown };
+    win.__awwvCounterAuditSources = {
+      map: () => mapRef.current,
+      deckOverlay: () => deckOverlayRef.current,
+      formations: () => lastFormationsGeoJsonRef.current,
+      viewportClip: () => buildFormationCounterViewportClip(mapRef.current),
+    };
+    return () => {
+      delete win.__awwvCounterAuditSources;
+    };
+  }, []);
+
   useEffect(() => {
     if (!inputActive) return undefined;
     const handleDocumentContextMenu = (event: MouseEvent) => {
