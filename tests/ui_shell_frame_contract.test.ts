@@ -69,11 +69,13 @@ describe('tactical shell frame contract', () => {
   it('keeps the advance-turn confirmation in the dark command-shell palette', () => {
     const advanceTurnModal = read('src/ui/map/components/warroom/AdvanceTurnModal.tsx');
 
-    expect(advanceTurnModal).toContain('bg-panel-bg/97');
-    expect(advanceTurnModal).toContain('bg-panel-card/70');
-    expect(advanceTurnModal).toContain('border-panel-border');
-    expect(advanceTurnModal).toContain('text-text-primary');
-    expect(advanceTurnModal).toContain('bg-accent-gold');
+    // Surface redesign 2026-11-10: the confirmation is a shared surface panel (opaque,
+    // gold border, gold primary button).
+    const surface = read('src/ui/map/components/surface/Surface.tsx');
+    expect(advanceTurnModal).toContain('panelClassName={SURFACE_MODAL_PANEL_MEDIUM}');
+    expect(advanceTurnModal).toContain('className={SURFACE_PRIMARY_BUTTON}');
+    expect(surface).toMatch(/SURFACE_MODAL_PANEL_MEDIUM =\s*'[^']*bg-\[#11141b\] text-text-primary/);
+    expect(surface).toMatch(/SURFACE_PRIMARY_BUTTON =\s*'[^']*bg-\[#c9a75c\]/);
     expect(advanceTurnModal).not.toMatch(/bg-(?:white|neutral-50|neutral-100|neutral-200|amber-100|green-600)/);
     expect(advanceTurnModal).not.toMatch(/text-(?:neutral-900|neutral-950|neutral-800|neutral-700|amber-800)/);
     expect(advanceTurnModal).not.toMatch(/border-(?:neutral-300|neutral-400)/);

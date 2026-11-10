@@ -342,7 +342,7 @@ export function ArmyCoPushbackPanel(props: ArmyCoPushbackPanelProps): JSX.Elemen
             aria-label="Army HQ pushback"
             className="space-y-2 border border-neutral-300 bg-neutral-50 px-3 py-2"
         >
-            <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-neutral-500">
+            <div className="text-[13px] font-bold uppercase tracking-[0.16em] text-neutral-500">
                 Army HQ Pushback
             </div>
 
@@ -354,7 +354,7 @@ export function ArmyCoPushbackPanel(props: ArmyCoPushbackPanelProps): JSX.Elemen
                     open
                     className="border border-red-400 bg-red-50 px-2 py-1.5"
                 >
-                    <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-[0.12em] text-red-700">
+                    <summary className="cursor-pointer text-[14px] font-bold uppercase tracking-[0.12em] text-red-700">
                         Autonomous-launch warning ({warnings.length})
                     </summary>
                     <ul className="mt-1.5 space-y-1.5">
@@ -364,16 +364,16 @@ export function ArmyCoPushbackPanel(props: ArmyCoPushbackPanelProps): JSX.Elemen
                                 data-testid={`army-co-pushback-warning-${w.officerId}`}
                                 className="border border-red-300 bg-white px-2 py-1"
                             >
-                                <div className="text-[11px] font-bold text-red-800">
+                                <div className="text-[15px] font-bold text-red-800">
                                     WARNING: {w.officerName} ({w.faction}) is preparing an autonomous operation despite political directive.
                                 </div>
-                                <div className="mt-0.5 text-[9px] uppercase tracking-[0.1em] text-red-600">
+                                <div className="mt-0.5 text-[13px] uppercase tracking-[0.1em] text-red-600">
                                     Stubbornness {w.stubbornness} / threshold {STUBBORNNESS_AUTONOMOUS_THRESHOLD}
                                     {' · '}Override cost: {ARMY_OVERRIDE_POLITICAL_CAPITAL_COST} command authority
                                     {' · '}Review pause {commandCycleLabel(AUTONOMOUS_LAUNCH_COOLDOWN_TURNS)}
                                 </div>
                                 {typeof w.sourceTurn === 'number' && (
-                                    <div className="mt-0.5 text-[9px] uppercase tracking-[0.1em] text-neutral-500">
+                                    <div className="mt-0.5 text-[13px] uppercase tracking-[0.1em] text-neutral-500">
                                         Source: {w.source === 'pending_event' ? 'proposal date' : 'last launch'} {turnToDateString(w.sourceTurn)}
                                     </div>
                                 )}
@@ -391,7 +391,7 @@ export function ArmyCoPushbackPanel(props: ArmyCoPushbackPanelProps): JSX.Elemen
                     open
                     className="border border-amber-400 bg-amber-50 px-2 py-1.5"
                 >
-                    <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-[0.12em] text-amber-700">
+                    <summary className="cursor-pointer text-[14px] font-bold uppercase tracking-[0.12em] text-amber-700">
                         Army CO objections ({objections.length})
                     </summary>
                     <ul className="mt-1.5 space-y-1.5">
@@ -401,13 +401,13 @@ export function ArmyCoPushbackPanel(props: ArmyCoPushbackPanelProps): JSX.Elemen
                                 data-testid={`army-co-pushback-objection-${o.faction}`}
                                 className="border border-amber-300 bg-white px-2 py-1"
                             >
-                                <div className="text-[11px] font-bold text-amber-900">
+                                <div className="text-[15px] font-bold text-amber-900">
                                     {o.faction} Main Staff ({o.officerName}): pushed back on directive — {o.campaignRole}.
                                 </div>
-                                <div className="mt-0.5 line-clamp-3 text-[10px] leading-snug text-amber-800">
+                                <div className="mt-0.5 line-clamp-3 text-[14px] leading-snug text-amber-800">
                                     {o.rationale}
                                 </div>
-                                <div className="mt-0.5 text-[9px] uppercase tracking-[0.1em] text-amber-600">
+                                <div className="mt-0.5 text-[13px] uppercase tracking-[0.1em] text-amber-600">
                                     {turnToDateString(o.turn)}
                                 </div>
                             </li>
@@ -423,7 +423,7 @@ export function ArmyCoPushbackPanel(props: ArmyCoPushbackPanelProps): JSX.Elemen
                     aria-label={SECTION_LABELS.overrides}
                     className="border border-neutral-300 bg-white px-2 py-1.5"
                 >
-                    <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-[0.12em] text-neutral-700">
+                    <summary className="cursor-pointer text-[14px] font-bold uppercase tracking-[0.12em] text-neutral-700">
                         Override history ({overrideRows.length})
                     </summary>
                     <ul className="mt-1.5 space-y-1">
@@ -433,17 +433,17 @@ export function ArmyCoPushbackPanel(props: ArmyCoPushbackPanelProps): JSX.Elemen
                                 data-testid={`army-co-pushback-override-${row.officerId}`}
                                 className="flex items-center justify-between border border-neutral-200 bg-neutral-50 px-2 py-1"
                             >
-                                <span className="text-[11px] text-neutral-800">
+                                <span className="text-[15px] text-neutral-800">
                                     {row.officerName} ({row.faction})
                                 </span>
                                 <span className="flex items-center gap-1.5">
-                                    <span className="text-[10px] tabular-nums text-neutral-600">
+                                    <span className="text-[14px] tabular-nums text-neutral-600">
                                         {row.count} / last {commandCycleLabel(OVERRIDE_HISTORY_WINDOW)}
                                     </span>
                                     {row.atReliefThreshold && (
                                         <span
                                             data-testid={`army-co-pushback-relief-${row.officerId}`}
-                                            className="border border-red-500 bg-red-100 px-1 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-red-700"
+                                            className="border border-red-500 bg-red-100 px-1 py-0.5 text-[13px] font-bold uppercase tracking-[0.1em] text-red-700"
                                         >
                                             At relief threshold
                                         </span>

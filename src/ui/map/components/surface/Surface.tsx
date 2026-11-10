@@ -57,6 +57,17 @@ export const SURFACE_STATUS_TONE = {
   neutral: 'border-[#3a4150] bg-[#171b23] text-[#e2d6b8]',
 } as const;
 
+/**
+ * For surfaces that keep the shared `<Modal>` wrapper (focus trap, Esc, z-index): the
+ * panel and backdrop classes that make the Modal panel a surface frame. Children then
+ * use `SurfaceHeader`, `SurfaceColumns` and the rest as usual.
+ */
+export const SURFACE_MODAL_BACKDROP = 'bg-[#05070a]/80 px-6';
+export const SURFACE_MODAL_PANEL_FULL =
+  'flex h-[calc(var(--interface-viewport-height,100vh)-6rem)] w-[min(110rem,calc(var(--interface-viewport-width,100vw)-3rem))] flex-col overflow-hidden rounded-lg border border-accent-gold/35 bg-[#11141b] text-text-primary shadow-[0_30px_90px_rgba(0,0,0,0.65)] outline-none';
+export const SURFACE_MODAL_PANEL_MEDIUM =
+  'flex h-[min(52rem,calc(var(--interface-viewport-height,100vh)-6rem))] w-[min(76rem,calc(var(--interface-viewport-width,100vw)-3rem))] flex-col overflow-hidden rounded-lg border border-accent-gold/35 bg-[#11141b] text-text-primary shadow-[0_30px_90px_rgba(0,0,0,0.65)] outline-none';
+
 /** Column templates. Widths follow the interface viewport so ultrawide gets room and 1280 still fits. */
 const RAIL_WIDTH = 'clamp(17rem,calc(var(--interface-viewport-width,100vw)*0.19),21rem)';
 const DETAIL_WIDTH = 'clamp(21rem,calc(var(--interface-viewport-width,100vw)*0.31),35rem)';
@@ -141,7 +152,7 @@ export function SurfaceHeader({ eyebrow, title, children, trailing, close, title
   return (
     <header className="flex shrink-0 flex-wrap items-center gap-x-10 gap-y-3 border-b border-[#262b35] bg-[#141821] px-7 py-4">
       <div className="flex min-w-0 flex-col gap-1">
-        <span className="font-mono text-[13px] font-semibold tracking-[0.2em] text-[#e0c27a]">{eyebrow.toUpperCase()}</span>
+        <span className="font-mono text-[13px] font-semibold uppercase tracking-[0.2em] text-[#e0c27a]">{eyebrow}</span>
         <h2 id={titleId} className="m-0 text-[26px] font-semibold leading-tight text-[#f1e6c8]">{title}</h2>
       </div>
       {children}
@@ -207,7 +218,7 @@ export function SurfaceRail({ as = 'nav', heading, footer, className, children, 
   const Tag = as;
   return (
     <Tag className={cx('flex min-h-0 flex-col gap-2 overflow-y-auto border-r border-[#262b35] bg-[#0f1218] px-4 py-5', className)} {...rest}>
-      {heading && <span className={cx('px-2 pb-1', SURFACE_LABEL_MUTED)}>{heading.toUpperCase()}</span>}
+      {heading && <span className={cx('px-2 pb-1', SURFACE_LABEL_MUTED)}>{heading}</span>}
       {children}
       {footer !== undefined && (
         <>
@@ -308,7 +319,7 @@ export function SurfaceSection({ label, action, className, children, ...rest }: 
   return (
     <section className={cx('flex flex-col gap-2.5', className)} aria-label={label} {...rest}>
       <div className="flex items-center justify-between gap-3">
-        <h4 className={cx('m-0', SURFACE_LABEL)}>{label.toUpperCase()}</h4>
+        <h4 className={cx('m-0', SURFACE_LABEL)}>{label}</h4>
         {action}
       </div>
       {children}
@@ -387,7 +398,7 @@ export const SurfaceDetailBody = forwardRef<HTMLDivElement, SurfaceDetailBodyPro
     <div ref={ref} className={cx('min-h-0 flex-1 overflow-y-auto', className)} {...rest}>
       {art && <img src={art} alt="" className="block h-52 w-full object-cover" />}
       <div className="flex flex-col gap-4 px-7 py-6">
-        {eyebrow && <span className={SURFACE_LABEL}>{eyebrow.toUpperCase()}</span>}
+        {eyebrow && <span className={SURFACE_LABEL}>{eyebrow}</span>}
         {title && <h3 className="m-0 text-[28px] font-semibold leading-tight text-[#f6ecd2]">{title}</h3>}
         {explanation && <p className="m-0 text-[18px] leading-relaxed text-[#ddd1b3]">{explanation}</p>}
         {facts && facts.length > 0 && <SurfaceFacts label={factsLabel ?? t('commandSurface.whatToKnow')} facts={facts} />}
@@ -401,7 +412,7 @@ export const SurfaceDetailBody = forwardRef<HTMLDivElement, SurfaceDetailBodyPro
 export function SurfaceFacts({ label, facts }: { label: string; facts: readonly ReactNode[] }) {
   return (
     <div className="flex flex-col gap-2 pt-1">
-      <span className={SURFACE_LABEL_MUTED}>{label.toUpperCase()}</span>
+      <span className={SURFACE_LABEL_MUTED}>{label}</span>
       <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
         {facts.map((entry, index) => (
           <li key={typeof entry === 'string' ? entry : index} className="grid grid-cols-[0.875rem_minmax(0,1fr)] gap-2.5 text-[17px] leading-relaxed text-[#ddd1b3]">
